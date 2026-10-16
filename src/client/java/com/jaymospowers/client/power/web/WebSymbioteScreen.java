@@ -185,6 +185,10 @@ final class WebSymbioteScreen extends Screen {
 				String need = Integer.toString(WebSymbiote.UNLOCK_BOND[i]);
 				graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF8070A0);
 			}
+			if (com.jaymospowers.power.web.WebSymbioteBond.dormant(player)) {
+				// still settling in after the first bond: nothing answers yet
+				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xB0000000);
+			}
 			if (on) {
 				// a toggle that's on: a lit strip along the bottom
 				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
@@ -234,6 +238,11 @@ final class WebSymbioteScreen extends Screen {
 
 	/** One dim line on the pick: ready, on, cooling, too hungry, or the bond it takes; with nothing picked, how to pick. */
 	private Component status(final LocalPlayer player, final WebSymbioteState state, final WebSymbioteState.Cooldowns cooldowns, final long now) {
+		if (com.jaymospowers.power.web.WebSymbioteBond.dormant(player)) {
+			// dormant after the first bond: how long it has left settling in (minutes, rounded up)
+			int ticks = com.jaymospowers.power.web.WebSymbioteBond.dormantTicks(player);
+			return Component.translatable("gui.jaymospowers.web_symbiote.dormant", (ticks + 1199) / 1200);
+		}
 		if (selected < 0) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.hint");
 		}

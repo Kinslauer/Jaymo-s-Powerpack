@@ -49,6 +49,14 @@ public final class WebSuitGrowth {
 	static final float[] PEEL_START = {0.45F, 0.2F, 0.25F, 0.0F, 0.6F, 0.6F};
 	static final float[] PEEL_MAX = {0.6F, 0.85F, 0.85F, 1.0F, 0.35F, 0.35F};
 	static final float PEEL_SPAN = 0.45F, TUG_WOBBLE = 0.09F, TUG_SPEED = 0.85F;
+	/**
+	 * It fights you for the suit as you take it off ({@link com.jaymospowers.power.web.WebSymbioteBond#FIGHT}): the
+	 * tear-off ({@link WebSuitTear}) is held at {@code FIGHT_TEAR_MIN} of the way through (clawing at your chest) and
+	 * driven up to {@code FIGHT_TEAR_MAX} (the mask off your face, the arms wrenching) by the struggle bar, back and forth
+	 * as it tugs. Won, only the face is bare ({@code WebSymbioteBond.FACE}): the suit's head is gone, and when the time's
+	 * up it flows back up over the face over {@code FACE_FLOW_TICKS}.
+	 */
+	static final float FIGHT_TEAR_MIN = 0.06F, FIGHT_TEAR_MAX = 0.3F, FACE_FLOW_TICKS = 16.0F;
 
 	/** What each of the suit layer's models is. */
 	enum Role {
@@ -70,12 +78,17 @@ public final class WebSuitGrowth {
 	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
 	/** On a player's render state while they fight a takeover's hold: how far out of it they've torn (0-1, tugging), else null. */
 	public static final RenderStateDataKey<Float> PULL = RenderStateDataKey.create(() -> "jaymospowers:web_suit_pull");
+	/** On a player's render state while only their face is bare (or the suit flowing back over it): how bare (0-1), else null. */
+	public static final RenderStateDataKey<Float> FACE = RenderStateDataKey.create(() -> "jaymospowers:web_suit_face");
 
 	/** The suit layer's own models (only these are grown), and what each one is. */
 	private static final Map<Model<?>, Role> MODELS = new WeakHashMap<>();
 
 	/** entity id → {shown level, level before the change, tick it changed, 1 if a takeover put it on (quicker)}. */
 	private static final Map<Integer, long[]> CHANGES = new HashMap<>();
+	/** Players whose face was bare last time we looked; and when each one's face began to be covered again. */
+	private static final Set<Integer> FACE_ON = new java.util.HashSet<>();
+	private static final Map<Integer, Long> FACE_GONE = new HashMap<>();
 
 	private WebSuitGrowth() {
 	}
@@ -106,6 +119,7 @@ public final class WebSuitGrowth {
 			CHANGES.put(player.getId(), new long[] {now, now, tick - 1000, 0});
 			state.setData(KEY, null);
 			state.setData(PULL, null);
+			state.setData(FACE, null);
 			return;
 		}
 		boolean seized = WebSymbioteClient.seized(player);
@@ -137,9 +151,43 @@ public final class WebSuitGrowth {
 			state.setData(PULL, null);
 		}
 		state.setData(KEY, t < 1.0F && change[1] != change[0] ? new Growth((int)change[1], (int)change[0], Math.max(0.0F, t), tear) : null);
+		if (now == 1 && com.jaymospowers.power.web.WebSymbioteBond.fighting(player)) {
+			// it fights you for it: the tear-off, driven back and forth by the struggle bar (see FIGHT_TEAR_MIN)
+			Float pull = state.getData(PULL);
+			state.setData(KEY, new Growth(1, 0, Mth.lerp(pull == null ? 0.0F : pull, FIGHT_TEAR_MIN, FIGHT_TEAR_MAX), true));
+		}
+		state.setData(FACE, face(player, now, tick, partialTicks));
 		if (CHANGES.size() > 256) {
 			CHANGES.keySet().removeIf(id -> Minecraft.getInstance().level == null || Minecraft.getInstance().level.getEntity(id) == null);
 		}
+	}
+
+	/** How bare this player's face is (1 bare, falling as the suit flows back over it), or null (see {@link #FACE}). */
+	private static @org.jspecify.annotations.Nullable Float face(Player player, int level, long tick, float partialTicks) {
+		int id = player.getId();
+		if (level != 1) {
+			FACE_ON.remove(id);
+			FACE_GONE.remove(id);
+			return null;
+		}
+		if (com.jaymospowers.power.web.WebSymbioteBond.faceBare(player)) {
+			FACE_ON.add(id);
+			FACE_GONE.remove(id);
+			return 1.0F;
+		}
+		if (FACE_ON.remove(id)) {
+			FACE_GONE.put(id, tick);
+		}
+		Long gone = FACE_GONE.get(id);
+		if (gone == null) {
+			return null;
+		}
+		float left = 1.0F - (tick - gone + partialTicks) / FACE_FLOW_TICKS;
+		if (left <= 0.0F) {
+			FACE_GONE.remove(id);
+			return null;
+		}
+		return left;
 	}
 
 	/**
@@ -165,7 +213,11 @@ public final class WebSuitGrowth {
 			// the wearer's own body: the skin's outer layer (hat, jacket, sleeves, trousers) sits further out than the
 			// suit, and would poke through it in patches, so it goes under the suit while the suit covers it all
 			if (covered(avatar)) {
-				player.hat.visible = false;
+				// (the face bare: its outer layer shows with it)
+				Float face = avatar.getData(FACE);
+				if (face == null || face < 0.5F) {
+					player.hat.visible = false;
+				}
 				player.jacket.visible = false;
 				player.leftSleeve.visible = false;
 				player.rightSleeve.visible = false;
@@ -279,6 +331,16 @@ public final class WebSuitGrowth {
 				part.yScale = 1.0F;
 				part.zScale = 1.0F;
 				part.visible = true;
+			}
+			Float face = avatar.getData(FACE);
+			if (face != null && role != Role.HULK) {
+				// only the face bare: the head drawn down into the neck (and flowing back up over it)
+				float cover = 1.0F - ease(face);
+				float ripple = cover > 0.0F && cover < 1.0F ? Mth.sin(cover * Mth.PI * 2.0F + avatar.ageInTicks * 0.8F) * 0.05F : 0.0F;
+				player.head.yScale = cover;
+				player.head.xScale = Mth.lerp(cover, 0.9F, 1.0F) + ripple;
+				player.head.zScale = Mth.lerp(cover, 0.9F, 1.0F) + ripple;
+				player.head.visible = cover > 0.02F;
 			}
 			return;
 		}

@@ -5,6 +5,43 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## The symbiote's removal fight, dormancy, and tendrils on every line (`WebSymbioteBond`)
+Andy: "symbiote's removal is different, its activation is added to the radial menu, the first few removals at low
+bond animate like a fight or struggle, requiring the same takeover inputs to regain control, eventually showing just
+the face, for a short variable duration until mastery increases. Upon first acquisition the suit lay dormant, doesn't
+allow you use any of its abilities (it will still takeover to survive) for up to two days, whispering to you and
+conforming itself to its new home. Every message should pulse with tendrils along the vignette drawn on screen,
+intensifying with glow and intensity to a maximum at low health takeover alerts." Built on the tear-off (`WebSuitTear`).
+- **Removal (the radial menu's mask, the same suit-off toggle):** under `FIGHT_BOND` 70, the first `FIGHTS` 3 times
+  with each new bond (`FOUGHT`, saved), taking the suit off is a fight: your keys are swallowed and every press is a
+  heave against it, as against a takeover (the same struggle packet, the same `STRUGGLE` bar and its fade; a bar at
+  the bottom of the screen; `FIGHT_PRESSES_MAX` 30 at no bond down to `FIGHT_PRESSES_MIN` 16). Everyone sees the
+  tear-off driven back and forth by the bar (`WebSuitGrowth.FIGHT_TEAR_MIN` 0.06 to `FIGHT_TEAR_MAX` 0.3 of the way
+  through: clawing at the chest, the mask sliding off the face and back as it tugs); past `FIGHT_SHOVE_FROM` of the
+  bar it heaves back now and then (`FIGHT_SHOVE` of the bar, a shake). Win: only the face comes free (`FACE`, synced),
+  for a random `FACE_MIN_*`-`FACE_MAX_*` ticks (3-8 s at no bond up to 20-80 s at a whole one), the skin's hat layer
+  showing; then the suit flows back up over the face (`FACE_FLOW_TICKS`). Lose (`FIGHT_TICKS` 20 s up): it keeps you
+  covered. A takeover, the roar or the big body ends the fight or the bare face. Past the fights, or at bond 70+, the
+  toggle is the plain tear-off. The symbiote isn't a secret identity, so nothing changes in `SecretIdentity`.
+- **Dormancy:** the first time a player ever bonds (`MET`, saved through death; never in creative) it lies dormant for
+  a random `DORMANT_MIN_SHARE` 35%-100% of up to `DORMANT_MAX_TICKS` 48000 (two days; at a whole starting bond the cap
+  is `DORMANT_FULL_BOND_SHARE` a quarter of that), counted while online and saved (`DORMANT`, synced to the owner). No
+  radial pick answers (a whisper why; the menu shades every tile and says how many minutes are left), no reach/pull/Zip
+  bonus, no hunger, no hunting, instinct, curiosity, tours, neglect, climate walks or gifts, and the suit withdraws
+  after its debut. It still saves itself near death (the roar, the run, the desperate lashing). It whispers every
+  `DORMANT_WHISPER_MIN`-`MAX` ticks (10 lines), ripples up your body in a slow black spiral every
+  `DORMANT_RIPPLE_TICKS`, and wakes with a heartbeat. `/powerdebug web symbiote dormant <ticks>` sets it (0 wakes it).
+- **Tendrils on every line (`WebSymbioteDread`):** every whisper sends `WebNet.Dread` an urgency
+  (`WebSymbiote.urgency`: a plain line 0.2, moods, gifts and unlocks 0.4, struggles, lockouts and the fight 0.55,
+  takeovers, frights, the climate's last warning 0.75, hardening 0.9, the near-death panic 1.0). The client draws that
+  many tendrils (`TENDRILS_MIN` 6 to `MAX` 26) pulsing in from the screen's edges, reaching further, wider, faster and
+  with a brighter violet glow the more urgent; at the top a glowing rim lights the whole edge. They stay at full while
+  it runs for its life, and up while it fights you for the suit, then fade. Plain dread with no line (feeding, the
+  roar) has none.
+- **Check first in game:** a fresh bond's dormancy (whispers, ripples, refusals, a defend roar still firing at low
+  health); the fight (the tear pose back and forth for you and others, the bar, winning to a bare face and it flowing
+  back); a takeover starting mid-fight; the tendrils at each urgency, and the panic at full.
+
 ## Braided webs, a true rope, web shooters (0.12.3)
 Andy, on the swinging video: "I like the web design, and web shooter idea", and earlier "remake as much as possible,
 while retaining our tethers, it should NOT attach to the air". That mod is someone else's: these are our own code and

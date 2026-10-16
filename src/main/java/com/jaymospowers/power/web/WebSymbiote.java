@@ -289,6 +289,14 @@ public final class WebSymbiote {
 	/** Its voice takes over your screen: each whisper for {@code WHISPER_FX_TICKS}; a feeding keeps it up, refreshed every {@code FEED_FX_EVERY}. */
 	public static final int WHISPER_FX_TICKS = 60, FEED_FX_EVERY = 40, FEED_FX_TICKS = 60;
 	/**
+	 * Every line it speaks sends tendrils pulsing in along your screen's edges (the client's WebSymbioteDread), as
+	 * urgent as the line: a plain whisper {@code URGENCY_WHISPER}, a mood or a gift {@code URGENCY_MOOD}, a struggle's
+	 * turn {@code URGENCY_STRUGGLE}, a takeover or a fright {@code URGENCY_WARNING}, hardening {@code URGENCY_HARDEN},
+	 * and the near-death alert (it takes over to save itself) {@code URGENCY_MAX}, the brightest and most.
+	 */
+	public static final float URGENCY_WHISPER = 0.2F, URGENCY_MOOD = 0.4F, URGENCY_STRUGGLE = 0.55F, URGENCY_WARNING = 0.75F,
+		URGENCY_HARDEN = 0.9F, URGENCY_MAX = 1.0F;
+	/**
 	 * The screen's dread is as strong as the bond is weak, but at full strength only for these lines (a weak bond's own:
 	 * ignored, neglected, at the edge, leaving you) and for every takeover.
 	 */
@@ -874,7 +882,12 @@ public final class WebSymbiote {
 		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register(WebSymbiote::flint);
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.SymbioteUse.TYPE, (payload, ctx) -> use(ctx.player(), payload.ability()));
 		// fighting its hold during a takeover
-		ServerPlayNetworking.registerGlobalReceiver(WebNet.Struggle.TYPE, (payload, ctx) -> struggle(ctx.player()));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Struggle.TYPE, (payload, ctx) -> {
+			// (or against it fighting you for the suit: WebSymbioteBond)
+			if (!WebSymbioteBond.struggle(ctx.player())) {
+				struggle(ctx.player());
+			}
+		});
 		// it never dies with you: it pours out of your body and stays near it, looking for someone new
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
@@ -988,7 +1001,7 @@ public final class WebSymbiote {
 	}
 
 	public static double reachScale(Player player) {
-		return isBonded(player) ? REACH_SCALE : 1.0;
+		return isBonded(player) && !WebSymbioteBond.dormant(player) ? REACH_SCALE : 1.0;
 	}
 
 	/**
@@ -1003,11 +1016,11 @@ public final class WebSymbiote {
 	public static final double TENDRIL_SWING_SCALE = 0.3;
 
 	public static double pullScale(Player player) {
-		return isBonded(player) ? PULL_SCALE : 1.0;
+		return isBonded(player) && !WebSymbioteBond.dormant(player) ? PULL_SCALE : 1.0;
 	}
 
 	public static int zipCooldown(Player player) {
-		return isBonded(player) ? (int)Math.round(WebPower.ZIP_COOLDOWN * ZIP_COOLDOWN_SCALE) : WebPower.ZIP_COOLDOWN;
+		return isBonded(player) && !WebSymbioteBond.dormant(player) ? (int)Math.round(WebPower.ZIP_COOLDOWN * ZIP_COOLDOWN_SCALE) : WebPower.ZIP_COOLDOWN;
 	}
 
 	/** Wall Crawl is on: the server lets them hang on walls and ceilings without the flying kick. */
@@ -1047,12 +1060,34 @@ public final class WebSymbiote {
 	public static void whisper(ServerPlayer player, String key) {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
 			.withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-		dread(player, WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith));
+		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
 			// one voice at a time: its running commentary waits a moment after anything it says
 			live.narrateAt = Math.max(live.narrateAt, player.level().getGameTime() + WHISPER_FX_TICKS);
 		}
+	}
+
+	/** How urgent a line is, for the tendrils on your screen (see {@link #URGENCY_WHISPER}). */
+	static float urgency(String key) {
+		if (key.startsWith("panic.")) {
+			return URGENCY_MAX;
+		}
+		if (key.startsWith("harden")) {
+			return URGENCY_HARDEN;
+		}
+		if (key.equals("takeover") || key.equals("hunt") || key.startsWith("neglect.") || key.startsWith("surge.") || key.contains(".warn.")
+			|| key.startsWith("alarm_") || key.equals("edge") || key.equals("reject") || key.equals("rip")) {
+			return URGENCY_WARNING;
+		}
+		if (key.startsWith("fight") || key.startsWith("lockout.") || key.startsWith("locked_out.") || key.startsWith("resist")
+			|| key.equals("break_free") || key.equals("curious") || key.equals("dormant_wake")) {
+			return URGENCY_STRUGGLE;
+		}
+		if (key.startsWith("gift.") || key.startsWith("stress_") || key.startsWith("unlock_") || key.equals("bond") || key.startsWith("climate.")) {
+			return URGENCY_MOOD;
+		}
+		return URGENCY_WHISPER;
 	}
 
 	/**
@@ -1109,7 +1144,8 @@ public final class WebSymbiote {
 
 	/** {@code full}: at its strongest (see {@link #LOW_BOND_LINES}); otherwise as strong as the bond is weak. */
 	static void dread(ServerPlayer player, int ticks, boolean growl, boolean full) {
-		ServerPlayNetworking.send(player, new WebNet.Dread(ticks, growl, full));
+		// (no line spoken: the dark only, no tendrils)
+		ServerPlayNetworking.send(player, new WebNet.Dread(ticks, growl, full, 0.0F));
 	}
 
 	/** Whispers {@code key} the first time {@code hint} comes up. Returns the state with the hint recorded. */
@@ -1153,13 +1189,17 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
+		WebSymbioteBond.tick(player, now);
+		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
 		boolean armor = state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK);
 		boolean bulk = state.has(WebSymbioteState.BULK);
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
-		if (!player.isCreative() && player.tickCount % drainTicks == 0 && next.satiety() > 0 && now >= live.satedUntil) {
+		// (dormant, it doesn't hunger)
+		if (!player.isCreative() && !dormant && player.tickCount % drainTicks == 0 && next.satiety() > 0 && now >= live.satedUntil) {
 			next = next.withSatiety(next.satiety() - 1);
 		}
 		boolean starving = next.satiety() <= STARVING;
@@ -1297,7 +1337,7 @@ public final class WebSymbiote {
 		// once it has started it isn't satisfied until it has actually eaten
 		boolean hungry = next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging;
 		boolean huntCheck = (hungry || next.satiety() < HUNGRY_HUNT_BELOW) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
-			&& live.roarAt <= 0L && live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0;
+			&& live.roarAt <= 0L && live.feedStage == FEED_NONE && !sulking(player) && !dormant && player.tickCount % SELF_FEED_EVERY == 0;
 		// hungry, it now and then takes the wheel to hunt (starving, it always does)
 		boolean hunt = live.gorging || !player.isCreative() && next.satiety() < HUNGRY_HUNT_BELOW && now >= live.takeoverReadyAt
 			&& player.getRandom().nextFloat() < HUNGRY_HUNT_CHANCE;
@@ -1347,7 +1387,7 @@ public final class WebSymbiote {
 			whisper(player, "stress_" + band);
 		}
 		live.stressBand = band;
-		if (live.takeoverTicks <= 0 && live.bondTicks <= 0 && !player.isCreative() && player.tickCount % INSTINCT_CHECK_TICKS == 0) {
+		if (live.takeoverTicks <= 0 && live.bondTicks <= 0 && !player.isCreative() && !dormant && player.tickCount % INSTINCT_CHECK_TICKS == 0) {
 			next = instinct(player, live, next, now);
 		}
 
@@ -1383,7 +1423,8 @@ public final class WebSymbiote {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
 		} else if (live.feedStage == FEED_NONE && live.roarAt <= 0L && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0
-			&& !player.isCreative()) {
+			&& !player.isCreative() && !dormant) {
+			// (dormant, it only ever takes the wheel to save itself: see DEFEND_HEALTH below)
 			// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
 			float neglect = next.bond() >= NEGLECT_BOND || sulking(player) || live.gorging ? 0.0F
 				: NEGLECT_CHANCE * (1.0F - next.bond() / (float)NEGLECT_BOND);
@@ -1413,7 +1454,8 @@ public final class WebSymbiote {
 			tickClimate(player, live, now);
 		}
 		// it talks: what it makes of where you are
-		if (live.takeoverTicks <= 0 && live.feedStage == FEED_NONE && live.roarAt <= 0L) {
+		// (dormant, it only whispers of settling in: WebSymbioteBond)
+		if (live.takeoverTicks <= 0 && live.feedStage == FEED_NONE && live.roarAt <= 0L && !dormant) {
 			remark(player, live, now);
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
@@ -1455,7 +1497,7 @@ public final class WebSymbiote {
 		// a takeover just ended (not by the lockout, nor into another): now and then it leaves you its Living Armor
 		if (live.giftPending) {
 			live.giftPending = false;
-			if (live.takeoverTicks <= 0 && live.roarAt <= 0L && !live.fleeing && !sulking(player) && player.isAlive()
+			if (live.takeoverTicks <= 0 && live.roarAt <= 0L && !live.fleeing && !sulking(player) && player.isAlive() && !dormant
 				&& player.getRandom().nextFloat() < TAKEOVER_GIFT_CHANCE) {
 				live.giftUntil = now + TAKEOVER_GIFT_TICKS;
 				// (its own now: not the armour it swelled into only to eat, put away after the meal)
@@ -1482,7 +1524,8 @@ public final class WebSymbiote {
 			next = next.withFlag(WebSymbioteState.SUIT, live.suitBeforeTakeover);
 		}
 		// the suit shows itself on bonding, then withdraws until it trusts you with it (see SUIT_ABILITIES)
-		if (next.has(WebSymbioteState.SUIT) && !suitAllowed(player) && !live.engulfed && !live.feedingArmor && live.bondTicks <= 0
+		// (dormant, it withdraws whatever the bond: it isn't yours to wear yet)
+		if (next.has(WebSymbioteState.SUIT) && (!suitAllowed(player) || dormant) && !live.engulfed && !live.feedingArmor && live.bondTicks <= 0
 			&& now >= live.suitDebutUntil) {
 			next = next.withFlag(WebSymbioteState.SUIT, false);
 			torn(player);
@@ -1619,6 +1662,8 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y, from.z, 30, 0.4, 0.2, 0.4, 0.08);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y, from.z, 10, 0.4, 0.2, 0.4, 0.02);
+		// the first ever lies dormant a while; every new one fights its first removals
+		WebSymbioteBond.onBond(player, state(player).bond());
 		whisper(player, "bond");
 	}
 
@@ -1642,6 +1687,7 @@ public final class WebSymbiote {
 		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints(), 0));
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
+		WebSymbioteBond.clear(player);
 		torn(player);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.45, 0.9, 0.45, 0.12);
@@ -1684,6 +1730,7 @@ public final class WebSymbiote {
 		torn(player);
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
+		WebSymbioteBond.clear(player);
 		WebSymbioteBlob.release(player.level(), player.position());
 	}
 
@@ -1735,6 +1782,7 @@ public final class WebSymbiote {
 			}
 		}
 		removeArmor(player);
+		WebSymbioteBond.clear(player);
 		player.removeAttached(STATE);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(LIVE);
@@ -2199,7 +2247,7 @@ public final class WebSymbiote {
 
 	/** Every {@link #CLIMATE_CHECK} ticks: the heat or the cold wears on it, until it takes you out of it. */
 	private static void tickClimate(ServerPlayer player, Live live, long now) {
-		if (player.isCreative() || live.bondTicks > 0) {
+		if (player.isCreative() || live.bondTicks > 0 || WebSymbioteBond.dormant(player)) {
 			live.climateTicks = 0;
 			live.climateWarned = 0;
 			return;
@@ -2676,6 +2724,11 @@ public final class WebSymbiote {
 
 	/** A radial-menu pick. Server-authoritative: bond, cooldown and satiety are all checked here. */
 	static void use(ServerPlayer player, int ability) {
+		if (isBonded(player) && WebSymbioteBond.dormant(player)) {
+			// still settling in: nothing it has answers yet
+			WebSymbioteBond.refuse(player);
+			return;
+		}
 		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && lockedOut(player)) {
 			// you tore yourself out of it: it won't cover you again yet
 			whisper(player, "locked_out." + (1 + player.getRandom().nextInt(LOCKED_OUT_LINES)));
@@ -2697,6 +2750,13 @@ public final class WebSymbiote {
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
 				return;
 			}
+			// taking it off at a weak bond, the first few times: it fights you for it, and lets go of your face at most
+			// (WebSymbioteBond); otherwise it's torn off (WebSuitTear)
+			if (!on && WebSymbioteBond.resistRemoval(player)) {
+				return;
+			}
+			// (put on again: the face is covered too)
+			player.removeAttached(WebSymbioteBond.FACE);
 			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
 			// (the tendrils stay out: they work over any suit, or none)
 			set(player, next);

@@ -265,6 +265,9 @@ public final class WebSymbioteClient {
 	private static final boolean[] powerKeysWere = new boolean[8];
 	private static int takeoverTicks;
 	private static int takeoverTarget = -1;
+	/** It's fighting you for the suit as you take it off (WebNet.Peel): ticks left, and the presses that win it. */
+	private static int peelTicks;
+	private static int peelNeeded;
 	/** Running from {@code takeoverTarget}, not at it. */
 	private static boolean takeoverFlee;
 	/** The server's way for the takeover (see WebNet.TakeoverPath): the mode, the waypoints (feet, centred), the next one, and the block being torn out. */
@@ -296,6 +299,11 @@ public final class WebSymbioteClient {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			// worked out once a tick, not once per entity per frame
 			LocalPlayer self = minecraft.player;
+			if (peelTicks > 0 && takeoverTicks <= 0 && !minecraft.isPaused()) {
+				// fighting it for the suit: the bar drains as against a takeover (the server ends it; this only stops it hanging)
+				peelTicks--;
+				struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
+			}
 			sensing = self != null && WebPowerClient.isActive(self) && Fate.isAscended(self);
 			while (menuKey.consumeClick()) {
 				LocalPlayer player = minecraft.player;
@@ -345,6 +353,16 @@ public final class WebSymbioteClient {
 				struggleMeter = 0.0F;
 			}
 			if (takeoverTicks > 0 && context.client().gui.screen() instanceof WebSymbioteScreen) {
+				context.client().gui.setScreen(null);
+			}
+		});
+		// it fights you for the suit (WebSymbioteBond): every key a heave against it, as against a takeover
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Peel.TYPE, (payload, context) -> {
+			peelNeeded = payload.needed();
+			peelTicks = payload.needed() > 0 ? payload.ticks() : 0;
+			// (a fresh bar either way: a takeover that cut the fight short starts its own from nothing too)
+			struggleMeter = 0.0F;
+			if (peelTicks > 0 && context.client().gui.screen() instanceof WebSymbioteScreen) {
 				context.client().gui.setScreen(null);
 			}
 		});
@@ -418,6 +436,7 @@ public final class WebSymbioteClient {
 		struggleMeter = 0.0F;
 		takeoverTicks = 0;
 		takeoverTarget = -1;
+		peelTicks = 0;
 		escapeCoil = -1;
 		clearPath();
 		THREATS.clear();
@@ -756,7 +775,22 @@ public final class WebSymbioteClient {
 
 	/** A takeover has you: no key you press does what it would (each is a struggle against its hold instead). */
 	public static boolean inputLocked() {
-		return takeoverTicks > 0;
+		return takeoverTicks > 0 || peelTicks > 0;
+	}
+
+	/** It's fighting you for the suit (not a takeover): see {@link com.jaymospowers.power.web.WebSymbioteBond}. */
+	public static boolean peelFight() {
+		return peelTicks > 0 && takeoverTicks <= 0;
+	}
+
+	/** It has the wheel to save itself, running for its life: the screen's tendrils stay at their strongest. */
+	static boolean fleeing() {
+		return takeoverTicks > 0 && takeoverFlee;
+	}
+
+	/** Presses that break the hold now: a takeover's, the fight for the suit's, or -1. */
+	private static int neededNow(Player player) {
+		return takeoverTicks > 0 ? WebSymbiote.breakFreeNeeded(player) : peelTicks > 0 ? peelNeeded : -1;
 	}
 
 	/** Each struggle press shakes your view this much (degrees), and this much more with the bar full. */
@@ -772,8 +806,8 @@ public final class WebSymbioteClient {
 	 * press at once), anyone else's as the server syncs it.
 	 */
 	public static float struggleShare(Player player) {
-		if (player == Minecraft.getInstance().player && takeoverTicks > 0) {
-			int needed = WebSymbiote.breakFreeNeeded(player);
+		if (player == Minecraft.getInstance().player && (takeoverTicks > 0 || peelTicks > 0)) {
+			int needed = neededNow(player);
 			return needed > 0 ? Mth.clamp(struggleMeter / needed, 0.0F, 1.0F) : 0.0F;
 		}
 		Float share = player.getAttached(WebSymbiote.STRUGGLE);
@@ -809,7 +843,7 @@ public final class WebSymbioteClient {
 			return;
 		}
 		struggleTick = player.tickCount;
-		if (WebSymbiote.breakFreeNeeded(player) > 0) {
+		if (neededNow(player) > 0) {
 			struggleMeter += 1.0F;
 			// every heave against it jolts your view, harder the further out of it you've torn
 			com.jaymospowers.client.ScreenShake.add(STRUGGLE_SHAKE + STRUGGLE_SHAKE_PER * struggleShare(player));
@@ -1545,6 +1579,15 @@ public final class WebSymbioteClient {
 
 	/** A takeover darkens the edges of the screen, pulsing like a heartbeat. */
 	static void renderHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
+		if (peelFight()) {
+			// fighting it for the suit: the same bar (the edges are the dread's: WebSymbioteDread)
+			int barWidth = 120;
+			int bx = (graphics.guiWidth() - barWidth) / 2;
+			int by = graphics.guiHeight() - 66;
+			graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
+			graphics.fill(bx, by, bx + Math.round(barWidth * struggleShare(player)), by + 3, 0xFFB050E0);
+			return;
+		}
 		if (takeoverTicks <= 0) {
 			return;
 		}

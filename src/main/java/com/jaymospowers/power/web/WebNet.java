@@ -241,18 +241,38 @@ public final class WebNet {
 	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
 	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
 	 * kept up through a whole feeding. It's as strong as the bond is weak; {@code full}: at its strongest, kept for a
-	 * weak bond's own lines (and every takeover).
+	 * weak bond's own lines (and every takeover). {@code urgency} (0-1): when it speaks, tendrils pulse in along the
+	 * screen's edges, as many and as bright as the line is urgent (a whisper faint, the near-death alert at 1); 0 for
+	 * none (no line, only the dark).
 	 */
-	public record Dread(int ticks, boolean growl, boolean full) implements CustomPacketPayload {
+	public record Dread(int ticks, boolean growl, boolean full, float urgency) implements CustomPacketPayload {
 		public static final Type<Dread> TYPE = new Type<>(JaymosPowers.id("web_symbiote_dread"));
 		public static final StreamCodec<ByteBuf, Dread> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Dread::ticks,
 			ByteBufCodecs.BOOL, Dread::growl,
 			ByteBufCodecs.BOOL, Dread::full,
+			ByteBufCodecs.FLOAT, Dread::urgency,
 			Dread::new);
 
 		@Override
 		public Type<Dread> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * Server → client: the symbiote fights you for the suit as you take it off (WebSymbioteBond): your keys are
+	 * struggles, {@code needed} of them to win, for at most {@code ticks}; needed 0: the fight's over.
+	 */
+	public record Peel(int needed, int ticks) implements CustomPacketPayload {
+		public static final Type<Peel> TYPE = new Type<>(JaymosPowers.id("web_symbiote_peel"));
+		public static final StreamCodec<ByteBuf, Peel> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Peel::needed,
+			ByteBufCodecs.VAR_INT, Peel::ticks,
+			Peel::new);
+
+		@Override
+		public Type<Peel> type() {
 			return TYPE;
 		}
 	}
@@ -279,6 +299,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Shove.TYPE, Shove.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Peel.TYPE, Peel.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(WingsBrake.TYPE, WingsBrake.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
