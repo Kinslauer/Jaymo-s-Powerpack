@@ -64,6 +64,17 @@ public final class SecretIdentity {
 		return String.format(Locale.ROOT, "%016x", h);
 	}
 
+	/** (0.11.82) The identity behind a Rig Helm: a stable hash of "rig|" and the Helm's name (case aside). */
+	public static String rigKey(String helmName) {
+		String canon = "rig|" + helmName.toLowerCase(Locale.ROOT);
+		long h = 0xcbf29ce484222325L;
+		for (int i = 0; i < canon.length(); i++) {
+			h ^= canon.charAt(i);
+			h *= 0x100000001b3L;
+		}
+		return String.format(Locale.ROOT, "%016x", h);
+	}
+
 	/** The name shown for a masked wearer of {@code d}: the costume's own, or a stranger's. */
 	public static Component shownName(CostumeDesign d) {
 		return d.name().isEmpty() ? Component.translatable("costume.jaymospowers.identity.unnamed") : Component.literal(d.name());
@@ -72,7 +83,8 @@ public final class SecretIdentity {
 	/** The name to show over {@code player}'s head, or null if their face shows (either side). */
 	public static @Nullable Component maskedName(Player player) {
 		CostumeDesign worn = Costume.worn(player);
-		return worn != null && worn.mask().hidesFace ? shownName(worn) : null;
+		// (0.11.82) a Rig Helm hides the face when the costume doesn't: its name (or "a Rig pilot") is shown
+		return worn != null && worn.mask().hidesFace ? shownName(worn) : com.jaymospowers.rig.Rig.helmIdentity(player);
 	}
 
 	/** Brings {@code player}'s tags in line with what they wear. */
@@ -83,6 +95,17 @@ public final class SecretIdentity {
 			want.add(MASKED + key(worn));
 			if (!worn.name().isEmpty()) {
 				want.add(NAME + worn.name());
+			}
+		} else {
+			Component helm = com.jaymospowers.rig.Rig.helmIdentity(player);
+			if (helm != null) {
+				// (0.11.82) behind a Rig Helm: an identity of its own, keyed by the Helm's name
+				String name = helm.getString();
+				want.add(MASKED + rigKey(name));
+				if (com.jaymospowers.rig.Rig.wears(player, com.jaymospowers.rig.Rig.Piece.HELM)
+					&& player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).getCustomName() != null) {
+					want.add(NAME + name);
+				}
 			}
 		}
 		boolean changed = false;
