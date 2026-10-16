@@ -3276,3 +3276,19 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 - With Jaymo's Powers loaded, `PowersCover` asks its `BodyCover` (by reflection) what a costume or the symbiote's suit
   covers: under a face mask or the suit no heritage look, Emberborn marks or vampire face at all; under a hood no
   antennae or Tideborn head fins; under any costume no Tideborn arm fins poking through the sleeves.
+
+## 0.7.82: world tiers (pack 0.12.9)
+- Andy: "world tiers are just what i need" (Apotheosis). Our own take on the idea, `WorldTiers`: no code, art or text
+  from Apotheosis. Five tiers, Hearth (the plain game), Borderlands, Wildlands, Dread, Legend. Each player picks any
+  tier open to them on the World Tier screen (`client/TierScreen`, a button on the skill screen K, or its own key,
+  unbound at first); a minute between changes, none in creative. Ops: `/kingdom tier set|unlock|get`.
+- Every second, hostiles within 40 blocks of a player (monsters that aren't a player's thrall, werewolf beast or pet;
+  barbarian-style folk, orcs, goblins, assassins) take that player's tier if it's higher than theirs (`MOB_TIER`,
+  saved): more health (15/35/60/100%), damage (10/25/40/60%), armour (+2/4/7/10), toughness (+0/2/4/6) and speed
+  (0/5/8/12%), keeping how hurt they are. On a server the toughest tier of anyone who comes near wins.
+- The player gets luck (+1/2/3/5), extra experience from tiered foes (15/30/50/75%), and a chance for each stack of a
+  tiered foe's drops, or of a chest they open, to come doubled (10/20/35/50%).
+- Tiers open by feats (`WorldTiers.Progress`, saved, synced to its player): great foes slain (anything with a boss
+  bar, a monster of legend, the Wither, the Ender Dragon, an elder guardian, a warden; everyone within 64 blocks
+  shares the kill, 160 for the dragon). Borderlands 1; Wildlands 5 and a trip to the Nether; Dread 12 and the Wither;
+  Legend 25 and the Ender Dragon. Numbers are the constants at the top of `WorldTiers`.

@@ -138,6 +138,9 @@ final class SkillScreen extends Screen {
 		int fy = top() + PANEL_H - FOOTER + 3;
 		int right = left() + panelW() - 6;
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
+		// (0.7.82) the world tiers, beside Done
+		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
+			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
 		if (stats || !twoPages()) {
 			page = 0;
 		} else {
