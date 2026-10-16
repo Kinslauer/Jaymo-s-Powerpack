@@ -38,7 +38,10 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 - **Jaymo's Kitchen: 97 of 98** (the quiver keeps its own art, Andy's call) (`kitchen.py`, `carts.py`). Soups use vanilla's stew bowl, pies vanilla's pumpkin pie,
   carrot cake vanilla's cake, meats vanilla's cooked meats; carts, wagons and plows are drawn once and painted in each
   wood's vanilla planks colours. Fried egg and hot chocolate are in `paint_batch.py`.
-- Kingdoms: ronin and gladiator chestplates. WeaponMod: iron katana (`paint_batch.py`).
+- **Jaymo's Kingdoms: all 48** (`kingdoms.py`). The four armour sets are vanilla's iron armour in each set's colours
+  (ronin lacquer and red cord, gladiator bronze, paladin steel with a blue tabard, warlord leather and fur); saddles,
+  barding, books and oats start from their vanilla icons; scrolls, documents, staves and tack are drawn.
+- WeaponMod: iron katana (`paint_batch.py`).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
-`python -I tools/vanilla_style/kitchen.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
+`python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.

@@ -106,19 +106,7 @@ paint(KATANA, 'iron', WOOD).save(item('weaponmod', 'katana.iron'))
 
 # (vegetable soup moved to kitchen.py with the other soups)
 
-# Ronin chestplate: vanilla's chestplate silhouette in black lacquer, laced with red cord
-cp = Image.open(f'{VAN}/iron_chestplate.png').convert('RGBA'); px = cp.load()
-lac = {hx('191919'): hx('0d0b0e'), hx('2d2d2d'): hx('1a161c'), hx('6b6b6b'): hx('2b2530'),
-       hx('969696'): hx('3a3240'), hx('c6c6c6'): hx('4d4454'), hx('d8d8d8'): hx('615669'), hx('ffffff'): hx('7d7086')}
-for y in range(16):
-    for x in range(16):
-        c = px[x, y]
-        if c[3] and c[:3] in lac:
-            n = lac[c[:3]]
-            if y in (6, 9, 12) and c[:3] not in (hx('191919'),):   # lacing rows
-                n = hx('a32424') if (x + y) % 2 else hx('6e1414')
-            px[x, y] = n + (255,)
-cp.save(item('jaymoskingdoms', 'ronin_chestplate'))
+# (Kingdoms' chestplates moved to kingdoms.py with the rest of its armour)
 
 def grid(rows, pal, out):
     rows = [r for r in rows.strip('\n').split('\n')]
@@ -168,19 +156,3 @@ grid('''
 ....vvvvvvv.....
 ................
 ................''', MUG, item('jaymoskitchen', 'hot_chocolate'))
-
-def chest_recolor(ramp, out, mark=None):
-    cp = Image.open(f'{VAN}/iron_chestplate.png').convert('RGBA'); px = cp.load()
-    lv = {hx(c): i for i, c in enumerate(['191919', '2d2d2d', '6b6b6b', '969696', 'c6c6c6', 'd8d8d8', 'ffffff'])}
-    for y in range(16):
-        for x in range(16):
-            c = px[x, y]
-            if c[3]:
-                n = ramp[lv[c[:3]]]
-                if mark: n = mark(x, y, lv[c[:3]]) or n
-                px[x, y] = n + (255,)
-    cp.save(out)
-STRAP = (hx('4a2d14'), hx('6b4423'), hx('8a5a30'))
-BRONZE = [hx(c) for c in ('3d2410', '6a3f17', '9c5f22', 'b97a2e', 'd69a45', 'e9b860', 'f6dc9a')]
-chest_recolor(BRONZE, item('jaymoskingdoms', 'gladiator_chestplate'),
-              lambda x, y, l: (STRAP[0] if l <= 1 else STRAP[2] if (x - y) == -2 else STRAP[1]) if 0 <= (x - y) + 2 <= 1 and 4 <= y <= 12 and l > 0 else None)
