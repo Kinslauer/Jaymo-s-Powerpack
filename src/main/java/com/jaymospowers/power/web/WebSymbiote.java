@@ -2031,12 +2031,15 @@ public final class WebSymbiote {
 		ServerPlayNetworking.send(player, new WebNet.Takeover(player.getId(), live.takeoverTicks, false));
 	}
 
-	/** Moves you along the takeover's way (see {@link WebTakeoverPath}). */
+	/**
+	 * Moves you along the takeover's way (see {@link WebTakeoverPath}); running, or walking you somewhere (a sightseeing
+	 * or climate walk), it zips along it too (the client leaps it: see {@code WebSymbioteClient}).
+	 */
 	private static void drive(ServerPlayer player, Live live, Entity target, boolean flee, long now) {
 		if (live.route == null) {
 			live.route = new WebTakeoverPath.Route();
 		}
-		WebTakeoverPath.tick(player, live.route, target, flee, live.curious ? TAKEOVER_REACH + 1.0 : TAKEOVER_REACH, now);
+		WebTakeoverPath.tick(player, live.route, target, flee, flee || live.touring, live.curious ? TAKEOVER_REACH + 1.0 : TAKEOVER_REACH, now);
 	}
 
 	/**

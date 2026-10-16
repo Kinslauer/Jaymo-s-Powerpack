@@ -1146,6 +1146,16 @@ public final class WebPower implements Power {
 			fwip(player);
 			return;
 		}
+		pullToBlock(player, hit);
+		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
+		thwip(player);
+		Vec3 anchor = hit.getLocation();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6F, 1.5F);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 6, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	/** Web Zip's pull: the line stuck where {@code hit} landed, and you reeled in to stand on it (or hang below, or perch on a ledge). */
+	private static void pullToBlock(ServerPlayer player, BlockHitResult hit) {
 		Vec3 anchor = hit.getLocation();
 		Direction face = hit.getDirection();
 		Vec3 target;
@@ -1163,10 +1173,27 @@ public final class WebPower implements Power {
 			maxTicks = Math.min(maxTicks, GLIDE_ZIP_TICKS);
 		}
 		startPull(player, new WebNet.Pull(anchor, target, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
-		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
-		thwip(player);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6F, 1.5F);
-		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 6, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	/**
+	 * A takeover's zip (see {@link WebTakeoverPath#ZIP_EVERY}): the symbiote fires it, not you, so no cooldown and no
+	 * shooters (its own cord: drawn as the suit's tendril line while the suit shows, a web otherwise), but the same
+	 * pull and line as Web Zip.
+	 */
+	static void takeoverZip(ServerPlayer player, BlockHitResult hit) {
+		pullToBlock(player, hit);
+		ServerLevel level = player.level();
+		Vec3 anchor = hit.getLocation();
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 0.7F, 0.7F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6F, 1.3F);
+		net.minecraft.core.particles.ParticleOptions puff = WebSymbiote.suitShown(player) ? WebSymbiote.dust(1.0F) : ParticleTypes.ITEM_COBWEB;
+		level.sendParticles(puff, anchor.x, anchor.y, anchor.z, 6, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	/** A zip (or yank-to) is reeling this player in right now. */
+	static boolean pulling(ServerPlayer player) {
+		State state = player.getAttached(STATE);
+		return state != null && state.pullTicks > 0;
 	}
 
 	/** The entity under the crosshair within {@code range} (not behind a block), or null. */

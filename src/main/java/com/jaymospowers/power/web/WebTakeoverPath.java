@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -125,6 +126,34 @@ final class WebTakeoverPath {
 	static final int RIP_FX_EVERY = 40, RIP_FX_TICKS = 60;
 	/** Debris puff from a block while it's worked at (1 is a normal puff). */
 	static final float RIP_DEBRIS = 0.3F;
+	// ===== zipping ===================================================================================================
+	/**
+	 * Getting away (running for its life, a sightseeing walk, the climate's walk out) it fires a cord (Web Zip's pull
+	 * and line, see {@link WebPower#takeoverZip}) at a block on the way ahead every {@code ZIP_EVERY} ticks, the first
+	 * {@code ZIP_FIRST} into the takeover; with nothing worth it, it looks again {@code ZIP_RETRY} later. Any takeover
+	 * zips up a rise of {@code ZIP_CLIMB_RISE}+ blocks on its way (out of a pit, up a cliff).
+	 */
+	static final int ZIP_EVERY = 50, ZIP_FIRST = 20, ZIP_RETRY = 10;
+	static final int ZIP_CLIMB_RISE = 3;
+	/** A zip's spot: this far off at least and at most (blocks), never more than this below your feet. */
+	static final double ZIP_MIN_RANGE = 5.0, ZIP_MAX_RANGE = 18.0, ZIP_MAX_FALL = 0.5;
+	/** Scoring a spot: one per waypoint it skips, plus this per block up (running, or climbing: high ground first). */
+	static final double ZIP_HIGH_WEIGHT = 1.5;
+	/**
+	 * Running, it also looks off the path for high ground to zip up onto: {@code ZIP_FAN_YAWS} ways round the line
+	 * away from the threat (spread over {@code ZIP_FAN_SPREAD} degrees each side), at these pitches up (degrees), for a
+	 * top it can stand on {@code ZIP_FAN_MIN_RISE}+ blocks up that puts it {@code ZIP_FAN_GAIN} further from the threat.
+	 */
+	static final int ZIP_FAN_YAWS = 5;
+	static final float ZIP_FAN_SPREAD = 60.0F;
+	static final float[] ZIP_FAN_PITCHES = {15.0F, 30.0F, 45.0F, 60.0F};
+	static final int ZIP_FAN_MIN_RISE = 2;
+	static final double ZIP_FAN_GAIN = 2.0;
+	/** A zip counts as done once your feet are this close to its spot (blocks), whatever the line's time says. */
+	static final double ZIP_ARRIVED = 1.5;
+	/** Each zip yanks your view along the cord (degrees of shake) and pulses the dark over your screen (ticks). */
+	static final float ZIP_SHAKE = 0.6F;
+	static final int ZIP_DREAD = 25;
 	// =================================================================================================================
 
 	private static final int PASSABLE = 1, FLOOR = 2, DANGER = 4, WATER = 8, LOW = 16, UNLOADED = 32;
@@ -158,6 +187,9 @@ final class WebTakeoverPath {
 		Vec3 ripToward = Vec3.ZERO;
 		int ripped;
 		boolean whispered;
+		/** Zips: when it may fire the next (0: not yet set), and where the one reeling you in now ends (null: none). */
+		long zipReadyAt;
+		@Nullable Vec3 zipTo;
 	}
 
 	/** A torn clump in a tendril: its id, which tendril, when it was torn, when it was held (-1 not yet). */
@@ -177,12 +209,27 @@ final class WebTakeoverPath {
 	/**
 	 * A takeover tick: keeps the way to {@code target} fresh (or, {@code flee}ing, away from it), notices when you're
 	 * stuck, and rips through when there's no way. {@code reach} is how close counts as there (no need to move).
+	 * {@code away}: it's getting you away somewhere (running, a sightseeing or climate walk), so it zips along the way.
 	 */
-	static void tick(ServerPlayer player, Route route, Entity target, boolean flee, double reach, long now) {
+	static void tick(ServerPlayer player, Route route, Entity target, boolean flee, boolean away, double reach, long now) {
 		ServerLevel level = player.level();
 		tickFlings(player, route, now);
 		if (route.ripping != null) {
 			tickRip(player, route, now);
+			return;
+		}
+		if (route.zipTo != null) {
+			if (WebPower.pulling(player) && player.position().distanceTo(route.zipTo) > ZIP_ARRIVED) {
+				// reeled in on its cord: that's progress, and the way is looked for again once it's there
+				route.progressPos = player.position();
+				route.progressAt = now;
+				return;
+			}
+			route.zipTo = null;
+			route.stuck = 0;
+			route.pathAt = Long.MIN_VALUE;
+		}
+		if (route.mode == WebNet.TakeoverPath.PATH && now >= route.zipReadyAt && zip(player, route, target, flee, away, now)) {
 			return;
 		}
 		// progress: moved, or close enough to the prey to fight it
@@ -331,6 +378,179 @@ final class WebTakeoverPath {
 	private static double flat(BlockPos a, BlockPos b) {
 		double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
 		return Math.sqrt(dx * dx + dz * dz);
+	}
+
+	// ---- zipping along -----------------------------------------------------------------------------------------------
+
+	/**
+	 * Fires a cord at a spot on the way ahead (see {@link #ZIP_EVERY}): the waypoint furthest along (and, running or
+	 * climbing, highest) that's in range, not below you, in clear sight and with a clear line for the whole body;
+	 * running, high ground off the path too. True if it fired.
+	 */
+	private static boolean zip(ServerPlayer player, Route route, Entity target, boolean flee, boolean away, long now) {
+		if (route.zipReadyAt == 0L) {
+			route.zipReadyAt = now + ZIP_FIRST;
+			return false;
+		}
+		if (!player.onGround() || player.isInWater() || player.isInLava() || player.isPassenger() || player.getAbilities().flying
+			|| player.getAttached(WebPower.CHARGING) != null || WebPower.pulling(player) || route.nodes.isEmpty()) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Map<Long, Integer> cache = new HashMap<>();
+		List<BlockPos> nodes = route.nodes;
+		// (the path starts where it last saw you: pick up from the nearest of the first few)
+		int from = 0;
+		double near = Double.MAX_VALUE;
+		for (int i = 0; i < Math.min(6, nodes.size()); i++) {
+			double d = Vec3.atBottomCenterOf(nodes.get(i)).distanceToSqr(player.position());
+			if (d < near) {
+				near = d;
+				from = i;
+			}
+		}
+		BlockHitResult best = null;
+		double bestScore = 0.0;
+		// (only as far along as the client was sent)
+		for (int j = from + 1; j < Math.min(nodes.size(), PATH_SEND_MAX); j++) {
+			BlockPos node = nodes.get(j);
+			double rise = node.getY() - player.getY();
+			boolean climb = rise >= ZIP_CLIMB_RISE;
+			if (!away && !climb || rise < -ZIP_MAX_FALL || (kind(level, cache, node) & WATER) != 0) {
+				continue;
+			}
+			double score = (j - from) + (flee || climb ? Math.max(0.0, rise) * ZIP_HIGH_WEIGHT : 0.0);
+			if (score <= bestScore) {
+				continue;
+			}
+			BlockHitResult hit = zipHit(player, level, cache, node);
+			if (hit != null) {
+				best = hit;
+				bestScore = score;
+			}
+		}
+		if (flee) {
+			// running: high ground off the path too, further from the threat
+			Vec3 awayDir = player.position().subtract(target.position()).horizontal();
+			awayDir = awayDir.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : awayDir.normalize();
+			double gap = player.distanceTo(target);
+			Vec3 eye = player.getEyePosition();
+			for (int i = 0; i < ZIP_FAN_YAWS; i++) {
+				float yaw = ZIP_FAN_YAWS == 1 ? 0.0F : -ZIP_FAN_SPREAD + 2.0F * ZIP_FAN_SPREAD * i / (ZIP_FAN_YAWS - 1);
+				Vec3 flat = awayDir.yRot(yaw * Mth.DEG_TO_RAD);
+				for (float pitch : ZIP_FAN_PITCHES) {
+					double p = pitch * Mth.DEG_TO_RAD;
+					Vec3 ray = flat.scale(Math.cos(p)).add(0.0, Math.sin(p), 0.0);
+					BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(ray.scale(ZIP_MAX_RANGE)), ClipContext.Block.COLLIDER,
+						ClipContext.Fluid.ANY, player));
+					if (hit.getType() != HitResult.Type.BLOCK) {
+						continue;
+					}
+					// a top it hit, or the top of the face it hit (a ledge a block or two above the hit point)
+					BlockPos feet = null;
+					if (hit.getDirection() == Direction.UP) {
+						feet = hit.getBlockPos().above();
+					} else if (hit.getDirection().getAxis().isHorizontal()) {
+						for (int k = 1; k <= 2 && feet == null; k++) {
+							if (standable(level, cache, hit.getBlockPos().above(k))) {
+								feet = hit.getBlockPos().above(k);
+							}
+						}
+					}
+					if (feet == null || (kind(level, cache, feet) & WATER) != 0) {
+						continue;
+					}
+					double rise = feet.getY() - player.getY();
+					Vec3 spot = Vec3.atBottomCenterOf(feet);
+					if (rise < ZIP_FAN_MIN_RISE || spot.distanceTo(target.position()) < gap + ZIP_FAN_GAIN) {
+						continue;
+					}
+					// (scored as a waypoint as far off as it is)
+					double score = spot.distanceTo(player.position()) + rise * ZIP_HIGH_WEIGHT;
+					if (score <= bestScore) {
+						continue;
+					}
+					BlockHitResult top = zipHit(player, level, cache, feet);
+					if (top != null) {
+						best = top;
+						bestScore = score;
+					}
+				}
+			}
+		}
+		if (best == null) {
+			route.zipReadyAt = now + ZIP_RETRY;
+			return false;
+		}
+		Vec3 spot = best.getLocation();
+		WebPower.takeoverZip(player, best);
+		route.zipTo = spot;
+		route.zipReadyAt = now + ZIP_EVERY;
+		route.progressPos = player.position();
+		route.progressAt = now;
+		// your view's yanked along the cord, and the dark pulses under it
+		Vec3 pull = spot.subtract(player.position());
+		Vec3 behind = player.position().subtract(pull.lengthSqr() < 1.0E-4 ? Vec3.ZERO : pull.normalize());
+		com.jaymospowers.core.Shakes.send(player, ZIP_SHAKE, behind);
+		WebSymbiote.dread(player, ZIP_DREAD, false);
+		return true;
+	}
+
+	/**
+	 * Where a zip would stick to get you onto {@code feet} (a spot it could stand): the floor's top, in clear sight from
+	 * the eyes (the ray meets that very top), or, for a ledge above your eyes, its face toward you just under the edge
+	 * (Web Zip hangs you there and perches you up onto it). In range, nothing that burns there, and a clear line for the
+	 * feet and the head the whole way (no water or lava on it either). Null if not.
+	 */
+	private static @Nullable BlockHitResult zipHit(ServerPlayer player, ServerLevel level, Map<Long, Integer> cache, BlockPos feet) {
+		double d = Vec3.atBottomCenterOf(feet).distanceTo(player.position());
+		if (d < ZIP_MIN_RANGE || d > ZIP_MAX_RANGE || !standable(level, cache, feet) || (kind(level, cache, feet.below()) & DANGER) != 0) {
+			return null;
+		}
+		// the floor's top: the slab or carpet in the feet block, else the block under it
+		BlockPos floor = (kind(level, cache, feet) & PASSABLE) == 0 ? feet : feet.below();
+		VoxelShape shape = level.getBlockState(floor).getCollisionShape(level, floor);
+		if (shape.isEmpty()) {
+			return null;
+		}
+		Vec3 spot = new Vec3(feet.getX() + 0.5, floor.getY() + shape.max(Direction.Axis.Y), feet.getZ() + 0.5);
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = zipRay(player, level, eye, spot);
+		Vec3 end;
+		if (hit != null && hit.getDirection() == Direction.UP && hit.getLocation().distanceToSqr(spot) <= 0.6 * 0.6) {
+			end = hit.getLocation().add(0.0, 0.05, 0.0);
+		} else {
+			// a ledge over your head: its near face, just under the edge
+			Vec3 back = eye.subtract(spot).horizontal();
+			if (back.lengthSqr() < 1.0E-4) {
+				return null;
+			}
+			Vec3 edge = spot.add(back.normalize().scale(0.45)).add(0.0, -0.3, 0.0);
+			hit = zipRay(player, level, eye, edge);
+			if (hit == null || !hit.getBlockPos().equals(floor) || !hit.getDirection().getAxis().isHorizontal()
+				|| hit.getLocation().distanceToSqr(edge) > 0.8 * 0.8) {
+				return null;
+			}
+			end = hit.getLocation().add(hit.getDirection().getUnitVec3().scale(player.getBbWidth() * 0.5 + 0.2)).add(0.0, -1.3, 0.0);
+		}
+		// the body's way there (where Web Zip's pull takes the feet): feet and head, clear of blocks and fluids
+		for (double up : new double[] {0.3, player.getBbHeight() - 0.2}) {
+			Vec3 a = player.position().add(0.0, up, 0.0), b = end.add(0.0, up, 0.0);
+			if (level.clip(new ClipContext(a, b, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player)).getType() != HitResult.Type.MISS) {
+				return null;
+			}
+		}
+		return hit;
+	}
+
+	/** The block a ray from {@code eye} at {@code at} (and a little past) meets first, or null. */
+	private static @Nullable BlockHitResult zipRay(ServerPlayer player, ServerLevel level, Vec3 eye, Vec3 at) {
+		Vec3 ray = at.subtract(eye);
+		if (ray.lengthSqr() < 1.0E-4) {
+			return null;
+		}
+		BlockHitResult hit = level.clip(new ClipContext(eye, at.add(ray.normalize().scale(0.3)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.BLOCK ? hit : null;
 	}
 
 	// ---- the block grid ----------------------------------------------------------------------------------------------
