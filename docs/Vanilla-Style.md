@@ -6,7 +6,8 @@ Workflow adapted from the game-assets-enhancer skill (audit, style guide, one an
 fal.ai image generation and parallax parts don't apply to 16px item icons, so the art is painted as pixel grids.
 
 ## Style rules (what the audit measures)
-- **16x16**, one frame per icon. 32px icons come down to 16.
+- **16x16**, one frame per icon. 32px icons come down to 16, except textures on models drawn at double size
+  (armory claymores, glaives, lances; Tinkers' `large/` parts), whose pixels already match vanilla's size on screen.
 - **No black outlines.** The outline is the darkest shade of the colour it wraps, one step lighter on the lit side.
 - **Light from the top-left.** Lit outline and a glint just inside the upper-left edge; darkest outline and a shade
   band on the lower-right.
@@ -25,8 +26,8 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 |---|---|---|
 | Jaymo's Kitchen | 98 | Flat fills, black outlines: **redraw by hand** |
 | Jaymo's Kingdoms | 48 | Flat stripes on armour and gear: **redraw by hand** |
-| Jaymo's Powers (root) | 42 | Mostly close; 15 are 32px: **redraw those** |
-| Powers armory (Age of Weapons) | 116 | 33 are 32px: **bring to 16px** |
+| Jaymo's Powers (root) | 42 | Mostly close; 15 are 32px on normal-size models: **redrawn at 16px** |
+| Powers armory (Age of Weapons) | 116 | 33 are 32px on models scaled ×2 in hand, which is vanilla's pixel density: **keep 32px** |
 | Powers tinkering (Tinkers' parts) | 1,001 | Layered part sprites, already pixel-vanilla: leave |
 | Pantry for Blockheads | 87 | Thick dark-brown outlines on every food. Art is all rights reserved, so no edits of its pixels (`vanillaize.py` is for our own and MIT art): **paint fresh** |
 | Naturalist | 186 | Close to vanilla: leave |
@@ -41,7 +42,11 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 - **Jaymo's Kingdoms: all 48** (`kingdoms.py`). The four armour sets are vanilla's iron armour in each set's colours
   (ronin lacquer and red cord, gladiator bronze, paladin steel with a blue tabard, warlord leather and fur); saddles,
   barding, books and oats start from their vanilla icons; scrolls, documents, staves and tack are drawn.
+- **Jaymo's Powers: the 15 big icons** (`powers.py`). The straight relics (Caladbolg, Durandal, Hrunting,
+  Tidebreaker, Voidreaver, Gram) are vanilla's sword pixel for pixel, each part in its relic's colours; Echo
+  Cleaver, Soul Saber, Laevateinn and Sunfang keep their shapes; the Frost Lance is vanilla's spear in ice; the
+  Void Flintlock, Grand Shield and Void Crown are drawn fresh in their own palettes.
 - WeaponMod: iron katana (`paint_batch.py`).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
-`python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
+`python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
