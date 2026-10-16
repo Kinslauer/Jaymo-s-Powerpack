@@ -25,9 +25,10 @@ import net.minecraft.world.phys.Vec3;
  * (0.11.87) Suit calling (Mind level 3). The call key (no power: C; with one: the Rig key's Suit) <b>parks</b> the worn
  * Rig: the pieces blast off (everyone sees them go) and wait wherever the Mind keeps them, remembered on the player
  * ({@link #PARKED}, kept through death: the suit wasn't on you). Pressed again it <b>calls</b> them: sparks stream in from
- * above and the pieces lock on one by one, boots first, each with a clank and a jolt on the wearer's screen. Only Rig
- * pieces park, and only with the Core worn at level 3 (the Mind flies them). Armour already in a slot when its piece
- * comes back goes to the inventory (or drops, if that's full).
+ * above and the pieces lock on one by one ((0.11.99) the Core first, the Helm last; client RigSuit builds each one on
+ * plate by plate), each with a clank and a jolt on the wearer's screen. Only Rig pieces park, and only with the Core
+ * worn at level 3 (the Mind flies them). Armour already in a slot when its piece comes back goes to the inventory (or
+ * drops, if that's full).
  */
 public final class RigCall {
 	/** The pieces parked: one stack per {@link Rig.Piece}, in order (empty where none is). */
@@ -35,16 +36,22 @@ public final class RigCall {
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath()
 			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
-	/** The streak of sparks coming in before the first piece lands (ticks), then one piece every {@link #PIECE_EVERY}. */
-	static final int INBOUND_TICKS = 16, PIECE_EVERY = 5;
+	/** The streak of sparks coming in before the first piece lands (ticks). */
+	static final int INBOUND_TICKS = 12;
+	/**
+	 * (0.11.99) When each piece of {@link #ORDER} lands, in ticks after the first: the Core's spine unit has to land and
+	 * unfold, and its plates swing in, before the Arms' frame closes on it; the Helm locks on last (client RigSuit builds
+	 * each piece on as it lands, so these follow its build times).
+	 */
+	static final int[] LAND_AT = {0, 14, 22, 30};
 	/** Where the sparks come from: this far up and behind. */
 	static final double FROM_UP = 10.0, FROM_BACK = 6.0;
 
 	/** Players whose suit is flying in: ticks since the call. */
 	private static final Map<UUID, int[]> CALLING = new HashMap<>();
 
-	/** The order the pieces lock on. */
-	private static final Rig.Piece[] ORDER = {Rig.Piece.THRUSTERS, Rig.Piece.ARMS, Rig.Piece.CORE, Rig.Piece.HELM};
+	/** The order the pieces lock on: (0.11.99) the Core's big spine unit first, the Helm last. */
+	private static final Rig.Piece[] ORDER = {Rig.Piece.CORE, Rig.Piece.ARMS, Rig.Piece.THRUSTERS, Rig.Piece.HELM};
 
 	private RigCall() {
 	}
@@ -132,7 +139,8 @@ public final class RigCall {
 		Vec3 back = new Vec3(Math.sin(yaw), 0.0, -Math.cos(yaw)).scale(FROM_BACK);
 		Vec3 source = player.position().add(back).add(0.0, FROM_UP, 0.0);
 		Vec3 body = player.position().add(0.0, 1.0, 0.0);
-		if (t < INBOUND_TICKS + PIECE_EVERY * ORDER.length) {
+		int last = INBOUND_TICKS + LAND_AT[LAND_AT.length - 1];
+		if (t < last) {
 			// the streak: sparks along the line in from the sky, closing on the body
 			double share = Math.min(1.0, (t + 1) / (double)INBOUND_TICKS);
 			Vec3 head = source.lerp(body, share);
@@ -142,14 +150,19 @@ public final class RigCall {
 			}
 			level.sendParticles(ParticleTypes.FLAME, head.x, head.y, head.z, 2, 0.05, 0.05, 0.05, 0.01);
 		}
-		if (t < INBOUND_TICKS || (t - INBOUND_TICKS) % PIECE_EVERY != 0) {
-			return;
-		}
-		int index = (t - INBOUND_TICKS) / PIECE_EVERY;
-		if (index >= ORDER.length) {
+		if (t > last) {
 			CALLING.remove(player.getUUID());
 			player.removeAttached(PARKED);
 			RigMind.sayAlways(player, "call", 1.2F);
+			return;
+		}
+		int index = -1;
+		for (int i = 0; i < LAND_AT.length; i++) {
+			if (t == INBOUND_TICKS + LAND_AT[i]) {
+				index = i;
+			}
+		}
+		if (index < 0) {
 			return;
 		}
 		Rig.Piece piece = ORDER[index];
