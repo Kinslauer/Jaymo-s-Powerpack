@@ -345,12 +345,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	}
 
 	/**
-	 * Hung off a wall: where each tethered tendril has to point to reach its spot (yaw and pitch against the body, as a
-	 * strike's aim is measured) and how far (blocks; growing out over {@link #TETHER_REACH_TICKS}, one after another).
-	 * The roots are placed roughly: the body upright, turned as it faces.
+	 * Hung off a wall by Tendril Grab, drawn the way Wall Crawl's walkers are: each tethered tendril a jointed limb from
+	 * its root to its bite (the chord, model space, blocks; reaching out one after another over
+	 * {@link #TETHER_REACH_TICKS}), its knee jutting out from the wall. As {@link WebTendrilWalk#legs} lays them out, for
+	 * {@link #bend}; the hold itself (the elastic pull back to the bites) is the server's, as before.
 	 */
-	static float[] tethers(net.minecraft.world.entity.player.Player player, WebSymbiote.Wall wall, float partial) {
-		float[] out = new float[ROOTS.length * 3];
+	static float[] tetherLegs(net.minecraft.world.entity.player.Player player, WebSymbiote.Wall wall, float partial) {
+		float[] out = new float[ROOTS.length * 6];
 		float scale = player.getScale();
 		float bodyYaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
 		net.minecraft.world.phys.Vec3 feet = player.getPosition(partial);
@@ -358,21 +359,23 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		net.minecraft.world.phys.Vec3 ahead = new net.minecraft.world.phys.Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
 		net.minecraft.world.phys.Vec3 left = new net.minecraft.world.phys.Vec3(ahead.z, 0.0, -ahead.x);
 		float age = player.level().getGameTime() - wall.landed() + partial;
-		// the bites slide a little after you as you sway on them (along the wall only)
 		net.minecraft.world.phys.Vec3 normal = net.minecraft.core.Direction.from3DDataValue(wall.face()).getUnitVec3();
 		net.minecraft.world.phys.Vec3 drift = feet.subtract(wall.rest());
 		drift = drift.subtract(normal.scale(drift.dot(normal))).scale(WebSymbiote.TETHER_FOLLOW);
-		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < ROOTS.length; i++) {
+		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < FIRST_SPARE; i++) {
 			int t = i + FIRST_TETHER;
 			float[] r = ROOTS[t];
-			// model space: +X the wearer's left, +Y down from the neck (24 pixels over the feet), +Z back
 			net.minecraft.world.phys.Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0)
 				.subtract(ahead.scale(r[2] / 16.0F * scale));
-			net.minecraft.world.phys.Vec3 to = wall.points().get(i).add(drift).subtract(root);
-			float aim = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
-			out[t * 3] = Mth.wrapDegrees(aim - bodyYaw) * Mth.DEG_TO_RAD;
-			out[t * 3 + 1] = (float)Mth.atan2(to.y, to.horizontalDistance());
-			out[t * 3 + 2] = (float)to.length() / scale * Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
+			float reach = Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
+			// reaching out: from just off the back toward the bite
+			net.minecraft.world.phys.Vec3 chord = wall.points().get(i).add(drift).subtract(root).scale(Math.max(0.05F, reach));
+			out[t * 6] = (float)chord.dot(left);
+			out[t * 6 + 1] = (float)-chord.y;
+			out[t * 6 + 2] = (float)-chord.dot(ahead);
+			out[t * 6 + 3] = (float)normal.dot(left);
+			out[t * 6 + 4] = (float)-normal.y;
+			out[t * 6 + 5] = (float)-normal.dot(ahead);
 		}
 		return out;
 	}
