@@ -1058,11 +1058,10 @@ public final class ZFighterPower implements Power {
 			? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		// lineages: a Verdant's long arms and Giant forms; the Great Ape
+		// lineages: a Verdant's Giant forms (his long arm is the stretch punch, RaceMoves); the Great Ape
 		int lineage = ZFighterLineage.of(player);
 		boolean ape = ZFighterLineage.ape(player);
-		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, ape ? ZFighterLineage.apeReach(player)
-			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, ape ? ZFighterLineage.apeReach(player) : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		double scale = live.apeSize > 0.0F ? ZFighterLineage.apeScale(live.apeSize)
 			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
 		set(player, Attributes.SCALE, SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);

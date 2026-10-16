@@ -178,7 +178,7 @@ public final class Captives {
 			return null;
 		}
 		v.snapTo(pos.x, pos.y, pos.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		// (0.7.75) set up as a fresh spawn would be: it's here MCA rolls their genes and skin (built bare, they had none)
+		// (0.7.76) set up as a fresh spawn would be: it's here MCA rolls their genes and skin (built bare, they had none)
 		v.finalizeSpawn(level, level.getCurrentDifficultyAt(at), net.minecraft.world.entity.EntitySpawnReason.EVENT, null);
 		Faction home = nearestSettlement(level.getServer(), at);
 		v.setAttached(CAPTIVE, new Captive(home == null ? -1 : home.id(), Optional.empty(), level.getGameTime()));

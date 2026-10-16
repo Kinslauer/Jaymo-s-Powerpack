@@ -3734,7 +3734,7 @@ public final class WebSymbiote {
 	}
 
 	/**
-	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and (0.11.101, Andy) it
+	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and (0.11.103, Andy) it
 	 * bleeds as a blade's blow does ({@link com.jaymospowers.core.BladeBlood}), bursting if that killed it.
 	 */
 	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living, float dealt) {

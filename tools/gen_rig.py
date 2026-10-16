@@ -9,7 +9,7 @@ and arms: the Arms piece is worn in the legs slot, so the arm plating is drawn w
 boots, the legs' lower boxes); the `humanoid_leggings` layer is the Arms piece's frame: a hip harness and thigh struts.
 Gunmetal plates, darker seams, cyan glow (the visor, the Core's reactor, the thruster vents).
 
-(0.11.101) On players the suit is drawn as a layered model of its own (client `rig/RigSuit`), not the vanilla armour
+(0.11.103) On players the suit is drawn as a layered model of its own (client `rig/RigSuit`), not the vanilla armour
 layers (those stay for armour stands and mobs): an under-suit with glowing seams, main plates, raised trim, vents,
 pistons at the elbows and knees, the spine unit on the back and a lit chest core. `suit()` writes its texture
 (`textures/entity/rig/suit.png`), the glow pass (`suit_glow.png`: only the lit pixels) and the generated
@@ -446,7 +446,7 @@ def data():
     write(path, {"values": [v for v in old["values"] if v not in blocks_] + blocks_})
 
 
-# ---- the worn suit (0.11.101): a layered model of its own (client rig/RigSuit) -------------------------------------
+# ---- the worn suit (0.11.103): a layered model of its own (client rig/RigSuit) -------------------------------------
 
 SUIT_W, SUIT_H = 128, 64
 SUIT_JAVA = os.path.join(ROOT, "src", "client", "java", "com", "jaymospowers", "client", "rig", "RigSuitMesh.java")

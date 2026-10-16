@@ -75,8 +75,10 @@ public final class Dismember {
 	public static final int[] PARTS = {HEAD, RIGHT_ARM, LEFT_ARM, RIGHT_LEG, LEFT_LEG};
 	/** Chances per blow: any blade against a humanoid mob, the katana slash, any blow against a player. */
 	public static final float BLADE_CHANCE = 0.05F, KATANA_CHANCE = 0.20F, PLAYER_CHANCE = 0.05F;
-	/** Skeletons (dry bones, brittle joints) lose parts this many times as often: 15% to any blade, 60% to the katana. */
+	/** Skeletons (dry bones, brittle joints) lose parts this many times as often (before {@link #RATE}). */
 	public static final float SKELETON_CHANCE_SCALE = 3.0F;
+	/** (0.11.101) Every chance to sever, times this (Andy: "way too many dismemberments and decapitations ... 50%"). */
+	public static final float RATE = 0.5F;
 	/** A blow has to land at least this hard (after armour) to sever anything: no taking heads with a tap. */
 	public static final float MIN_DAMAGE = 3.0F;
 	/** Share of the body from the top that's the head, and from the feet up that's the legs. */
@@ -267,7 +269,7 @@ public final class Dismember {
 		if (!canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return false;
 		}
-		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, mobChance);
+		float chance = (target instanceof Player ? PLAYER_CHANCE : mobChance(target, mobChance)) * RATE;
 		if (target.getRandom().nextFloat() >= chance) {
 			return false;
 		}
@@ -286,7 +288,7 @@ public final class Dismember {
 		if (target instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return;
 		}
-		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, BLADE_CHANCE);
+		float chance = (target instanceof Player ? PLAYER_CHANCE : mobChance(target, BLADE_CHANCE)) * RATE;
 		if (target.getRandom().nextFloat() < chance) {
 			sever(target, aimedPart(attacker, target), attacker);
 		}

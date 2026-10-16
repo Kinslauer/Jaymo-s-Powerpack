@@ -39,7 +39,7 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.11.101) The worn Rig, drawn as a layered model of its own over the player (Andy: "it clips a bit currently with fresh
+ * (0.11.103) The worn Rig, drawn as a layered model of its own over the player (Andy: "it clips a bit currently with fresh
  * anims, and it should materialize on the user, peice by peice, one large component unfolding and mechanically
  * interlocking onto the user. also make a more layered rig, add depth and detail"):
  * <ul>

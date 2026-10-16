@@ -8,6 +8,7 @@ import java.util.Locale;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -25,6 +26,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -45,13 +47,20 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Tideborn:</b> long breath, swims and mines well under water; hungrier out of the wet.</li>
  * <li><b>Sylvan:</b> lands soft, sneaks unseen; hits lighter.</li>
  * <li><b>Verdant:</b> green skin and antennae ({@link Verdants}), hunger drains slow in the sun; burns longer.</li>
- * <li><b>Emberborn:</b> burns briefly, thrives in the heat; starves in the cold. Embers glow under the skin of their
- * hands and in their eyes, and small flames rise off their hands (client EmberLook).</li>
+ * <li><b>Emberborn:</b> (0.7.75) fire, lava and burning never hurt them, and they thrive in the heat; the cold (cold lands,
+ * snow and freezing) saps their strength and speed and starves them. Embers glow under the skin of
+ * their hands and in their eyes, and small flames rise off their hands (0.7.76, client EmberLook).</li>
  * <li><b>Frostborn:</b> never freezes, thrives in the cold; starves in the heat.</li>
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
  * <li><b>Warrior-born:</b> starts far weaker than anyone (lighter blows, fewer hearts), and grows out of it as their
  * character level climbs; hits harder the worse they're hurt; always hungry.</li>
+ * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; no gift of the
+ * blood beyond that.</li>
  * </ul>
+ * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
+ * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
+ * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
+ * away or lets it out.
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
  */
@@ -66,8 +75,12 @@ public final class Heritage {
 	/** Verdant: hunger in the sun, as a factor, and how much longer fire burns (a share). */
 	static final float VERDANT_SUN_HUNGER = 0.65F;
 	static final double VERDANT_BURN = 0.5;
-	/** Emberborn: how much shorter fire burns (a share). Both Emberborn and Frostborn: hunger where they thrive and where they don't. */
-	static final double EMBER_BURN = 0.5;
+	/**
+	 * Emberborn: fire never hurts them and never stays lit on them. In the cold their blows and their walking speed drop
+	 * by these shares; freezing (powder snow) takes the bigger ones. Both Emberborn and Frostborn: hunger where they
+	 * thrive and where they don't.
+	 */
+	static final double EMBER_COLD_WEAK = 0.15, EMBER_COLD_SLOW = 0.10, EMBER_FREEZING_WEAK = 0.30, EMBER_FREEZING_SLOW = 0.20;
 	static final float THRIVE_HUNGER = 0.8F, WILT_HUNGER = 1.25F;
 	/** A biome this hot (base temperature) or hotter is hot; this cold or colder is cold. */
 	static final float HOT = 1.0F, COLD = 0.2F;
@@ -78,6 +91,10 @@ public final class Heritage {
 	static final float WARRIOR_WOUNDED = 0.5F;
 	static final double WARRIOR_FURY = 0.15;
 	static final float WARRIOR_HUNGER = 1.2F;
+	/** Earthling: skill experience, as a factor. */
+	static final float EARTHLING_XP = 1.25F;
+	/** The tag Jaymo's Powers reads to wrap a Warrior-born's tail away or let it out (it takes the tag off). */
+	static final String TAIL_TOGGLE_TAG = "jaymoskingdoms_tail_toggle";
 	/**
 	 * Warrior-born start far weaker, to balance their potential: blows this much lighter (a share) and this much less
 	 * max health, both shrinking evenly to nothing by character level {@link #WARRIOR_GROWN_LEVEL}.
@@ -99,7 +116,8 @@ public final class Heritage {
 		EMBERBORN(0, Items.BLAZE_POWDER, Stats.Stat.MIGHT, Stats.Stat.MIGHT),
 		FROSTBORN(0, Items.SNOWBALL, Stats.Stat.GRIT, Stats.Stat.MIGHT),
 		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS),
-		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE);
+		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
+		EARTHLING(0, Items.BOOK, Stats.Stat.WITS, Stats.Stat.ENDURANCE);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -193,6 +211,9 @@ public final class Heritage {
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind()));
 		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
+		// Emberborn: fire, lava, hot floors and burning never hurt
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
+			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
 	}
 
 	public static @Nullable Kind of(Player player) {
@@ -292,7 +313,11 @@ public final class Heritage {
 		Skills.modifier(player, Attributes.SAFE_FALL_DISTANCE, "heritage_soft", kind == Kind.SYLVAN ? SYLVAN_SAFE_FALL : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_weak", kind == Kind.SYLVAN ? -SYLVAN_WEAK : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		Skills.modifier(player, Attributes.BURNING_TIME, "heritage_burn",
-			kind == Kind.VERDANT ? VERDANT_BURN : kind == Kind.EMBERBORN ? -EMBER_BURN : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			kind == Kind.VERDANT ? VERDANT_BURN : kind == Kind.EMBERBORN ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		if (kind != Kind.EMBERBORN) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_chill", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_chill", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
 		if (kind != Kind.NIGHTBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -325,6 +350,21 @@ public final class Heritage {
 				boolean wounded = player.getHealth() < player.getMaxHealth() * WARRIOR_WOUNDED;
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", wounded ? WARRIOR_FURY : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 				green(player, kind);
+			} else if (kind == Kind.EMBERBORN) {
+				// flame won't take on them; the cold saps them, freezing worst of all
+				if (player.isOnFire()) {
+					player.clearFire();
+				}
+				double weak = 0.0, slow = 0.0;
+				if (player.getTicksFrozen() > 0) {
+					weak = EMBER_FREEZING_WEAK;
+					slow = EMBER_FREEZING_SLOW;
+				} else if (chilled(player)) {
+					weak = EMBER_COLD_WEAK;
+					slow = EMBER_COLD_SLOW;
+				}
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_chill", -weak, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_chill", -slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
 				player.setTicksFrozen(0);
 			}
@@ -371,7 +411,7 @@ public final class Heritage {
 		return switch (kind) {
 			case TIDEBORN -> player.isInWaterOrRain() ? 1.0F : TIDE_DRY_HUNGER;
 			case VERDANT -> inSun(player) ? VERDANT_SUN_HUNGER : 1.0F;
-			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : cold(player) ? WILT_HUNGER : 1.0F;
+			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : chilled(player) ? WILT_HUNGER : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
 			default -> 1.0F;
@@ -388,6 +428,23 @@ public final class Heritage {
 
 	static boolean cold(ServerPlayer player) {
 		return temperature(player) <= COLD;
+	}
+
+	/** In the cold, for an Emberborn: a cold land (snow, ice, the frozen peaks), or freezing. The pack has no seasons, so this is its winter. */
+	static boolean chilled(ServerPlayer player) {
+		return cold(player) || player.getTicksFrozen() > 0;
+	}
+
+	/** Earthling: the factor on skill experience. */
+	static float xpFactor(Player player) {
+		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
+	}
+
+	/** The heritage key: a Warrior-born's tail (a Frostborn's ice prison is their left mouse held, through Jaymo's Powers). */
+	static void gift(ServerPlayer player) {
+		if (of(player) == Kind.WARRIORBORN) {
+			player.addTag(TAIL_TOGGLE_TAG);
+		}
 	}
 
 	/** Sylvan: the share off how far sneaking is seen. */

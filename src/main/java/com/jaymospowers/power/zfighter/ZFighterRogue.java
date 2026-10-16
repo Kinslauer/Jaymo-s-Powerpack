@@ -19,6 +19,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -34,6 +35,9 @@ import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -53,8 +57,13 @@ public class ZFighterRogue extends Monster {
 	// ---- tuning ----
 	static final double CHAMPION_HEALTH = 80.0;
 	static final double TYRANT_HEALTH = 600.0;
-	static final double CHAMPION_DAMAGE = 7.0;
-	static final double TYRANT_DAMAGE = 14.0;
+	/** Bare-hand damage; the weapon he's given adds its own (iron sword +5, iron axe +8). */
+	static final double CHAMPION_DAMAGE = 3.0;
+	static final double TYRANT_DAMAGE = 7.0;
+	/** Base armour; the armour he wears adds the rest. */
+	static final double CHAMPION_ARMOR = 2.0, TYRANT_ARMOR = 6.0;
+	/** A champion's armour pieces: each is iron this often, else chainmail, else leather. */
+	static final float CHAMPION_IRON = 0.5F, CHAMPION_CHAIN = 0.35F;
 	static final float CHAMPION_BLAST = 6.0F;
 	static final float TYRANT_BLAST = 14.0F;
 	static final int BLAST_EVERY = 70;
@@ -87,7 +96,7 @@ public class ZFighterRogue extends Monster {
 			.add(Attributes.ATTACK_DAMAGE, CHAMPION_DAMAGE)
 			.add(Attributes.MOVEMENT_SPEED, 0.33)
 			.add(Attributes.FOLLOW_RANGE, 48.0)
-			.add(Attributes.ARMOR, 8.0)
+			.add(Attributes.ARMOR, CHAMPION_ARMOR)
 			.add(Attributes.KNOCKBACK_RESISTANCE, 0.6);
 	}
 
@@ -131,12 +140,35 @@ public class ZFighterRogue extends Monster {
 		boolean tyrant = kind == TYRANT;
 		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(tyrant ? TYRANT_HEALTH : CHAMPION_HEALTH);
 		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(tyrant ? TYRANT_DAMAGE : CHAMPION_DAMAGE);
-		this.getAttribute(Attributes.ARMOR).setBaseValue(tyrant ? 16.0 : 8.0);
+		this.getAttribute(Attributes.ARMOR).setBaseValue(tyrant ? TYRANT_ARMOR : CHAMPION_ARMOR);
+		arm(tyrant);
 		this.setHealth(this.getMaxHealth());
 		this.entityData.set(DATA_FORM, tyrant ? 1 : 0);
 		this.setCustomName(name);
 		this.setCustomNameVisible(true);
 		this.setPersistenceRequired();
+	}
+
+	/**
+	 * Armour and a weapon, never dropped: a tyrant in full iron with an iron axe, a champion in a mix of leather,
+	 * chainmail and iron with an iron or stone sword.
+	 */
+	private void arm(boolean tyrant) {
+		Item[][] sets = {
+			{Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS},
+			{Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS},
+			{Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS},
+		};
+		EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+		for (int i = 0; i < slots.length; i++) {
+			float roll = this.random.nextFloat();
+			int set = tyrant || roll < CHAMPION_IRON ? 2 : roll < CHAMPION_IRON + CHAMPION_CHAIN ? 1 : 0;
+			this.setItemSlot(slots[i], new ItemStack(sets[set][i]));
+			this.setDropChance(slots[i], 0.0F);
+		}
+		Item weapon = tyrant ? Items.IRON_AXE : this.random.nextBoolean() ? Items.IRON_SWORD : Items.STONE_SWORD;
+		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapon));
+		this.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 	}
 
 	@Override
