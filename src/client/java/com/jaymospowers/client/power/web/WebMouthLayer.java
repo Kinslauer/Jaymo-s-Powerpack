@@ -34,6 +34,15 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final float SWELL = 0.45F, LUNGE = 3.0F;
 	/** How many ticks before a bite the maw starts to gape, and how wide a chew opens it. */
 	private static final float GAPE_TICKS = 8.0F, CHEW_OPEN = 0.18F;
+	/**
+	 * Its tongue (the big body's, {@link WebHulk#tongue}): {@code TONGUE_LEAD} ticks before the last bite it lashes out
+	 * at the meal, all the way out by {@code TONGUE_OUT} of that and drawn back in from {@code TONGUE_IN}, gone into the
+	 * mouth as the jaws snap shut. It also tastes the air as the maw first swells out ({@code TASTE} of its length).
+	 */
+	private static final float TONGUE_LEAD = 7.0F, TONGUE_OUT = 0.35F, TONGUE_IN = 0.7F, TASTE = 0.5F;
+	/** The maw's tongue: pieces, each one's length (pixels), its width and thickness at the root, drooping each piece. */
+	private static final int TONGUE_PIECES = 14;
+	private static final float TONGUE_PIECE = 1.8F, TONGUE_WIDTH = 2.2F, TONGUE_THICK = 0.7F, TONGUE_DROOP = 0.04F;
 
 	private final MouthModel model;
 
@@ -74,6 +83,55 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		this.getParentModel().head.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
+		Float eating = state.getData(WebSymbioteClient.EATING);
+		if (eating != null) {
+			tongue(poseStack, collector, state, eating);
+		}
+		poseStack.popPose();
+	}
+
+	/**
+	 * The tongue, off the maw's jaw (the pose stack at the head): a flick tasting the air as the maw swells out, then
+	 * lashed out at the meal just before the last bite and drawn back into the mouth as the jaws close on it.
+	 */
+	private void tongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float t) {
+		boolean big = Boolean.TRUE.equals(state.getData(WebSymbioteClient.MEAL_BIG));
+		Integer reachData = state.getData(WebSymbioteClient.MEAL_REACH);
+		int reach = reachData == null ? WebSymbiote.EAT_REACH : reachData;
+		float before = WebSymbiote.biteAt(big ? 1 : 0, reach) - t;
+		float out;
+		float whip;
+		if (before >= 0.0F && before < TONGUE_LEAD) {
+			// lashed out at the meal, then reeled back in under the falling jaw
+			float f = 1.0F - before / TONGUE_LEAD;
+			out = f < TONGUE_OUT ? f / TONGUE_OUT : f > TONGUE_IN ? (1.0F - f) / (1.0F - TONGUE_IN) : 1.0F;
+			out = Mth.clamp(out, 0.0F, 1.0F);
+			out = out * out * (3.0F - 2.0F * out);
+			whip = Mth.sin(f * Mth.PI);
+		} else if (t < WebHulk.FLICK_TICKS) {
+			// a taste of the air as it swells out of the head
+			float f = t / WebHulk.FLICK_TICKS;
+			out = WebHulk.flickOut(f) * TASTE;
+			whip = Mth.sin(f * Mth.PI);
+		} else {
+			return;
+		}
+		if (out <= 0.02F) {
+			return;
+		}
+		// the maw's pose now (the renderer poses it again the same way when it draws it)
+		this.model.setupAnim(state);
+		float jawAngle = this.model.jaw.xRot;
+		float age = state.ageInTicks;
+		float drawn = out;
+		int light = state.lightCoords;
+		poseStack.pushPose();
+		this.model.root.translateAndRotate(poseStack);
+		this.model.jaw.translateAndRotate(poseStack);
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
+			// from the floor of the mouth, aimed level out of the dropped jaw
+			WebHulk.tongue(buffer, pose, new net.minecraft.world.phys.Vec3(0.0, -0.5, -2.0), -0.05F - jawAngle * 0.5F, TONGUE_PIECES,
+				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, drawn, whip, TONGUE_DROOP, light));
 		poseStack.popPose();
 	}
 

@@ -46,8 +46,13 @@ final class WebSymbioteDread {
 	private static final float AMBIENT_MAX = 0.3F, BLINK_MAX = 0.3F;
 	/** Blinks: how long each is (ticks), and how long between them, from just under {@code AMBIENT_BOND} to no bond. */
 	private static final int BLINK_TICKS = 5, BLINK_GAP_MAX = 240, BLINK_GAP_MIN = 40;
-	/** A takeover's dread swells in and fades out over this long. */
+	/** A takeover's dread swells in and fades out over this long (swelling in {@code SELF_TAKEOVER_SPEED} times quicker: it seizes you). */
 	private static final float TAKEOVER_FADE = 10.0F;
+	/**
+	 * Fighting its hold: with the struggle bar full the takeover's dread gives way by {@code STRUGGLE_CLEAR}, flickering
+	 * by up to {@code STRUGGLE_FLICKER} as the bar swings, and pours back as it drains.
+	 */
+	private static final float STRUGGLE_CLEAR = 0.55F, STRUGGLE_FLICKER = 0.3F;
 
 	private static long clock;
 	private static long start = -1L;
@@ -80,7 +85,8 @@ final class WebSymbioteDread {
 
 	static void tick() {
 		clock++;
-		takeover = Mth.clamp(takeover + (WebSymbioteClient.inputLocked() || WebSymbioteClient.escaping() ? 1.0F : -1.0F) / TAKEOVER_FADE, 0.0F, 1.0F);
+		takeover = Mth.clamp(takeover + (WebSymbioteClient.inputLocked() || WebSymbioteClient.escaping()
+			? com.jaymospowers.power.web.WebSymbiote.SELF_TAKEOVER_SPEED : -1.0F) / TAKEOVER_FADE, 0.0F, 1.0F);
 		float low = weakness();
 		if (low <= 0.0F) {
 			nextBlink = 0L;
@@ -124,6 +130,17 @@ final class WebSymbioteDread {
 		return Mth.lerp(bond, EPISODE_MAX, EPISODE_MIN);
 	}
 
+	/** How much of a takeover's dread is left as you fight it (1: all of it). */
+	private static float struggling(float now) {
+		var player = Minecraft.getInstance().player;
+		float share = player == null ? 0.0F : WebSymbioteClient.struggleShare(player);
+		if (share <= 0.0F) {
+			return 1.0F;
+		}
+		float flicker = Mth.sin(now * 2.3F) * Mth.sin(now * 0.71F + 2.0F) * STRUGGLE_FLICKER * share;
+		return Mth.clamp(1.0F - STRUGGLE_CLEAR * share + flicker, 0.2F, 1.0F);
+	}
+
 	/** The HUD element. */
 	static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		float now = clock + delta.getGameTimeDeltaPartialTick(false);
@@ -133,8 +150,8 @@ final class WebSymbioteDread {
 			float out = 1.0F - Mth.clamp((now - until) / FADE_OUT, 0.0F, 1.0F);
 			strength = in * out * (full ? 1.0F : episodeStrength());
 		}
-		// a takeover: all the way, as long as it has you
-		strength = Math.max(strength, takeover);
+		// a takeover: all the way, as long as it has you (giving way, flickering, as you fight your way out of it)
+		strength = Math.max(strength, takeover * struggling(now));
 		// (the lingering vignette never darkens the whole screen)
 		float shade = strength;
 		float low = weakness();

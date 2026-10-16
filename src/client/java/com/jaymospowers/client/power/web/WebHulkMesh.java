@@ -15,7 +15,9 @@ final class WebHulkMesh {
 	static final int TEX_W = 128, TEX_H = 128;
 	/** The jaw's hinge in the head's space (pixels). */
 	static final float JAW_X = 0F, JAW_Y = 0.5F, JAW_Z = 2F;
-	/** Each muscle part (its parent part, its name) and when the suit lays it on (0 first, to {@link #LAST_ORDER}). */
+	/** The elbows' and knees' hinges in the arm's and leg's space (pixels): the forearms and shins hang off them. */
+	static final float ELBOW_Y = 8.5F, ELBOW_Z = 2F, KNEE_Y = 5.5F, KNEE_Z = -2.5F;
+	/** Each muscle part (its path of parts from the root, its name last) and when the suit lays it on (0 first, to {@link #LAST_ORDER}). */
 	static final String[][] PARTS = {
 		{"body", "core"},
 		{"body", "hips"},
@@ -27,32 +29,32 @@ final class WebHulkMesh {
 		{"body", "traps"},
 		{"right_arm", "shoulder"},
 		{"right_arm", "upper"},
-		{"right_arm", "fore"},
-		{"right_arm", "fist"},
-		{"right_arm", "knuckles"},
-		{"right_arm", "spur0"},
-		{"right_arm", "spur1"},
-		{"right_arm", "spur2"},
+		{"right_arm", "elbow", "fore"},
+		{"right_arm", "elbow", "fist"},
+		{"right_arm", "elbow", "knuckles"},
+		{"right_arm", "elbow", "spur0"},
+		{"right_arm", "elbow", "spur1"},
+		{"right_arm", "elbow", "spur2"},
 		{"left_arm", "shoulder"},
 		{"left_arm", "upper"},
-		{"left_arm", "fore"},
-		{"left_arm", "fist"},
-		{"left_arm", "knuckles"},
-		{"left_arm", "spur0"},
-		{"left_arm", "spur1"},
-		{"left_arm", "spur2"},
+		{"left_arm", "elbow", "fore"},
+		{"left_arm", "elbow", "fist"},
+		{"left_arm", "elbow", "knuckles"},
+		{"left_arm", "elbow", "spur0"},
+		{"left_arm", "elbow", "spur1"},
+		{"left_arm", "elbow", "spur2"},
 		{"right_leg", "thigh"},
-		{"right_leg", "calf"},
-		{"right_leg", "foot"},
-		{"right_leg", "toe0"},
-		{"right_leg", "toe1"},
-		{"right_leg", "toe2"},
+		{"right_leg", "knee", "calf"},
+		{"right_leg", "knee", "foot"},
+		{"right_leg", "knee", "toe0"},
+		{"right_leg", "knee", "toe1"},
+		{"right_leg", "knee", "toe2"},
 		{"left_leg", "thigh"},
-		{"left_leg", "calf"},
-		{"left_leg", "foot"},
-		{"left_leg", "toe0"},
-		{"left_leg", "toe1"},
-		{"left_leg", "toe2"},
+		{"left_leg", "knee", "calf"},
+		{"left_leg", "knee", "foot"},
+		{"left_leg", "knee", "toe0"},
+		{"left_leg", "knee", "toe1"},
+		{"left_leg", "knee", "toe2"},
 		{"head", "skull"},
 		{"head", "muzzle"},
 		{"head", "fangs"},
@@ -82,6 +84,10 @@ final class WebHulkMesh {
 		rightleg.addOrReplaceChild("right_pants", CubeListBuilder.create(), PartPose.ZERO);
 		PartDefinition leftleg = root.addOrReplaceChild("left_leg", CubeListBuilder.create(), PartPose.offset(1.9F, 12F, 0F));
 		leftleg.addOrReplaceChild("left_pants", CubeListBuilder.create(), PartPose.ZERO);
+		PartDefinition rightarmelbow = rightarm.addOrReplaceChild("elbow", CubeListBuilder.create(), PartPose.offset(0F, 8.5F, 2F));
+		PartDefinition leftarmelbow = leftarm.addOrReplaceChild("elbow", CubeListBuilder.create(), PartPose.offset(0F, 8.5F, 2F));
+		PartDefinition rightlegknee = rightleg.addOrReplaceChild("knee", CubeListBuilder.create(), PartPose.offset(0F, 5.5F, -2.5F));
+		PartDefinition leftlegknee = leftleg.addOrReplaceChild("knee", CubeListBuilder.create(), PartPose.offset(0F, 5.5F, -2.5F));
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create(), PartPose.offset(0F, 0.5F, 2F));
 		body.addOrReplaceChild("core", CubeListBuilder.create().texOffs(0, 0).addBox(-7F, 0F, -3.5F, 14, 12, 7), PartPose.offset(0F, 0F, 0F));
 		body.addOrReplaceChild("hips", CubeListBuilder.create().texOffs(34, 82).addBox(-6F, -1F, -3F, 12, 2, 6), PartPose.offset(0F, 12F, 0F));
@@ -93,32 +99,32 @@ final class WebHulkMesh {
 		body.addOrReplaceChild("traps", CubeListBuilder.create().texOffs(0, 82).addBox(-6F, -4.5F, -1.5F, 12, 4, 5), PartPose.offset(0F, 1F, 1F));
 		rightarm.addOrReplaceChild("shoulder", CubeListBuilder.create().texOffs(78, 0).addBox(-4.5F, -3.5F, -4F, 8, 7, 8), PartPose.offset(0F, -1F, 0F));
 		rightarm.addOrReplaceChild("upper", CubeListBuilder.create().texOffs(30, 34).addBox(-4F, 0F, -3.5F, 7, 7, 7), PartPose.offset(0F, 2F, 0F));
-		rightarm.addOrReplaceChild("fore", CubeListBuilder.create().texOffs(0, 19).addBox(-4.5F, 0F, -4F, 8, 7, 8), PartPose.offset(0F, 8F, 0F));
-		rightarm.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(0, 60).addBox(-4F, 0F, -3.5F, 7, 5, 7), PartPose.offset(0F, 15F, 0F));
-		rightarm.addOrReplaceChild("knuckles", CubeListBuilder.create().texOffs(112, 91).addBox(-4F, -0.5F, -0.5F, 7, 3, 1), PartPose.offset(0F, 16F, -4F));
-		rightarm.addOrReplaceChild("spur0", CubeListBuilder.create().texOffs(52, 99).addBox(-1.5F, -2F, -1.5F, 1, 2, 1), PartPose.offset(-4F, 11F, 0F));
-		rightarm.addOrReplaceChild("spur1", CubeListBuilder.create().texOffs(56, 99).addBox(-1.5F, 0.5F, 0F, 1, 2, 1), PartPose.offset(-4F, 11F, 0F));
-		rightarm.addOrReplaceChild("spur2", CubeListBuilder.create().texOffs(68, 99).addBox(-1.5F, 2.5F, -1F, 1, 1, 1), PartPose.offset(-4F, 11F, 0F));
+		rightarmelbow.addOrReplaceChild("fore", CubeListBuilder.create().texOffs(0, 19).addBox(-4.5F, 0F, -4F, 8, 7, 8), PartPose.offset(0F, -0.5F, -2F));
+		rightarmelbow.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(0, 60).addBox(-4F, 0F, -3.5F, 7, 5, 7), PartPose.offset(0F, 6.5F, -2F));
+		rightarmelbow.addOrReplaceChild("knuckles", CubeListBuilder.create().texOffs(112, 91).addBox(-4F, -0.5F, -0.5F, 7, 3, 1), PartPose.offset(0F, 7.5F, -6F));
+		rightarmelbow.addOrReplaceChild("spur0", CubeListBuilder.create().texOffs(52, 99).addBox(-1.5F, -2F, -1.5F, 1, 2, 1), PartPose.offset(-4F, 2.5F, -2F));
+		rightarmelbow.addOrReplaceChild("spur1", CubeListBuilder.create().texOffs(56, 99).addBox(-1.5F, 0.5F, 0F, 1, 2, 1), PartPose.offset(-4F, 2.5F, -2F));
+		rightarmelbow.addOrReplaceChild("spur2", CubeListBuilder.create().texOffs(68, 99).addBox(-1.5F, 2.5F, -1F, 1, 1, 1), PartPose.offset(-4F, 2.5F, -2F));
 		leftarm.addOrReplaceChild("shoulder", CubeListBuilder.create().texOffs(32, 19).addBox(-3.5F, -3.5F, -4F, 8, 7, 8), PartPose.offset(0F, -1F, 0F));
 		leftarm.addOrReplaceChild("upper", CubeListBuilder.create().texOffs(58, 34).addBox(-3F, 0F, -3.5F, 7, 7, 7), PartPose.offset(0F, 2F, 0F));
-		leftarm.addOrReplaceChild("fore", CubeListBuilder.create().texOffs(64, 19).addBox(-3.5F, 0F, -4F, 8, 7, 8), PartPose.offset(0F, 8F, 0F));
-		leftarm.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(28, 60).addBox(-3F, 0F, -3.5F, 7, 5, 7), PartPose.offset(0F, 15F, 0F));
-		leftarm.addOrReplaceChild("knuckles", CubeListBuilder.create().texOffs(0, 99).addBox(-3F, -0.5F, -0.5F, 7, 3, 1), PartPose.offset(0F, 16F, -4F));
-		leftarm.addOrReplaceChild("spur0", CubeListBuilder.create().texOffs(60, 99).addBox(0.5F, -2F, -1.5F, 1, 2, 1), PartPose.offset(4F, 11F, 0F));
-		leftarm.addOrReplaceChild("spur1", CubeListBuilder.create().texOffs(64, 99).addBox(0.5F, 0.5F, 0F, 1, 2, 1), PartPose.offset(4F, 11F, 0F));
-		leftarm.addOrReplaceChild("spur2", CubeListBuilder.create().texOffs(72, 99).addBox(0.5F, 2.5F, -1F, 1, 1, 1), PartPose.offset(4F, 11F, 0F));
+		leftarmelbow.addOrReplaceChild("fore", CubeListBuilder.create().texOffs(64, 19).addBox(-3.5F, 0F, -4F, 8, 7, 8), PartPose.offset(0F, -0.5F, -2F));
+		leftarmelbow.addOrReplaceChild("fist", CubeListBuilder.create().texOffs(28, 60).addBox(-3F, 0F, -3.5F, 7, 5, 7), PartPose.offset(0F, 6.5F, -2F));
+		leftarmelbow.addOrReplaceChild("knuckles", CubeListBuilder.create().texOffs(0, 99).addBox(-3F, -0.5F, -0.5F, 7, 3, 1), PartPose.offset(0F, 7.5F, -6F));
+		leftarmelbow.addOrReplaceChild("spur0", CubeListBuilder.create().texOffs(60, 99).addBox(0.5F, -2F, -1.5F, 1, 2, 1), PartPose.offset(4F, 2.5F, -2F));
+		leftarmelbow.addOrReplaceChild("spur1", CubeListBuilder.create().texOffs(64, 99).addBox(0.5F, 0.5F, 0F, 1, 2, 1), PartPose.offset(4F, 2.5F, -2F));
+		leftarmelbow.addOrReplaceChild("spur2", CubeListBuilder.create().texOffs(72, 99).addBox(0.5F, 2.5F, -1F, 1, 1, 1), PartPose.offset(4F, 2.5F, -2F));
 		rightleg.addOrReplaceChild("thigh", CubeListBuilder.create().texOffs(96, 19).addBox(-4F, -1F, -3.5F, 8, 7, 7), PartPose.offset(0F, 0F, 0F));
-		rightleg.addOrReplaceChild("calf", CubeListBuilder.create().texOffs(56, 60).addBox(-3.5F, 0F, -3F, 7, 5, 6), PartPose.offset(0F, 6F, 0F));
-		rightleg.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(34, 72).addBox(-4F, -1F, -4F, 8, 2, 8), PartPose.offset(0F, 11F, -1F));
-		rightleg.addOrReplaceChild("toe0", CubeListBuilder.create().texOffs(16, 99).addBox(-3F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
-		rightleg.addOrReplaceChild("toe1", CubeListBuilder.create().texOffs(22, 99).addBox(-0.5F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
-		rightleg.addOrReplaceChild("toe2", CubeListBuilder.create().texOffs(28, 99).addBox(2F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
+		rightlegknee.addOrReplaceChild("calf", CubeListBuilder.create().texOffs(56, 60).addBox(-3.5F, 0F, -3F, 7, 5, 6), PartPose.offset(0F, 0.5F, 2.5F));
+		rightlegknee.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(34, 72).addBox(-4F, -1F, -4F, 8, 2, 8), PartPose.offset(0F, 5.5F, 1.5F));
+		rightlegknee.addOrReplaceChild("toe0", CubeListBuilder.create().texOffs(16, 99).addBox(-3F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
+		rightlegknee.addOrReplaceChild("toe1", CubeListBuilder.create().texOffs(22, 99).addBox(-0.5F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
+		rightlegknee.addOrReplaceChild("toe2", CubeListBuilder.create().texOffs(28, 99).addBox(2F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
 		leftleg.addOrReplaceChild("thigh", CubeListBuilder.create().texOffs(0, 34).addBox(-4F, -1F, -3.5F, 8, 7, 7), PartPose.offset(0F, 0F, 0F));
-		leftleg.addOrReplaceChild("calf", CubeListBuilder.create().texOffs(82, 60).addBox(-3.5F, 0F, -3F, 7, 5, 6), PartPose.offset(0F, 6F, 0F));
-		leftleg.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(66, 72).addBox(-4F, -1F, -4F, 8, 2, 8), PartPose.offset(0F, 11F, -1F));
-		leftleg.addOrReplaceChild("toe0", CubeListBuilder.create().texOffs(34, 99).addBox(2F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
-		leftleg.addOrReplaceChild("toe1", CubeListBuilder.create().texOffs(40, 99).addBox(-0.5F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
-		leftleg.addOrReplaceChild("toe2", CubeListBuilder.create().texOffs(46, 99).addBox(-3F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 11F, -5F));
+		leftlegknee.addOrReplaceChild("calf", CubeListBuilder.create().texOffs(82, 60).addBox(-3.5F, 0F, -3F, 7, 5, 6), PartPose.offset(0F, 0.5F, 2.5F));
+		leftlegknee.addOrReplaceChild("foot", CubeListBuilder.create().texOffs(66, 72).addBox(-4F, -1F, -4F, 8, 2, 8), PartPose.offset(0F, 5.5F, 1.5F));
+		leftlegknee.addOrReplaceChild("toe0", CubeListBuilder.create().texOffs(34, 99).addBox(2F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
+		leftlegknee.addOrReplaceChild("toe1", CubeListBuilder.create().texOffs(40, 99).addBox(-0.5F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
+		leftlegknee.addOrReplaceChild("toe2", CubeListBuilder.create().texOffs(46, 99).addBox(-3F, 0F, -1.5F, 1, 1, 2), PartPose.offset(0F, 5.5F, -2.5F));
 		head.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(42, 0).addBox(-4.5F, -6F, -4.5F, 9, 6, 9), PartPose.offset(0F, -2F, 0F));
 		head.addOrReplaceChild("muzzle", CubeListBuilder.create().texOffs(46, 48).addBox(-4.5F, -1F, -5.5F, 9, 2, 10), PartPose.offset(0F, -1F, 0F));
 		head.addOrReplaceChild("fangs", CubeListBuilder.create().texOffs(56, 91).addBox(-4.5F, 0F, -0.5F, 9, 3, 1), PartPose.offset(0F, 0F, -5F));

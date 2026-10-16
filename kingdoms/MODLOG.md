@@ -3235,3 +3235,10 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 - Andy: "prisoner npcs are not skinned either". Captives (`Captives.take`) were built bare with MCA's
   `VillagerFactory.build`, which skips `finalizeSpawn`, where MCA rolls genes and skin; they're now finalized as a fresh
   spawn before they go in.
+
+## 0.7.78: mimics keep Lootr chests' loot (pack 0.11.106)
+- Andy: "are our lootr chests dropping correctly?". Lootr's chest is a `ChestBlockEntity` that still carries its loot
+  table, so 6% of opened structure chests (`MIMIC_CHANCE`) woke as mimics, but `unpackLootTable` does nothing on a
+  Lootr chest (each player's share lives in Lootr's own data): the mimic held nothing and the chest was gone for
+  everyone. `Monsters.mimic` now rolls the chest's loot table itself for the player who opened it (luck counts), so a
+  mimic always drops that player's share. Vanilla loot chests behave as before.

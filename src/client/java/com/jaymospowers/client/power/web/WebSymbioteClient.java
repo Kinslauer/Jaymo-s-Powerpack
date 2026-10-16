@@ -681,7 +681,7 @@ public final class WebSymbioteClient {
 			tickEscape(player);
 		} else if (takeoverTicks > 0) {
 			tickTakeover(player);
-			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.STRUGGLE_FADE);
+			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
 		} else {
 			tickCrawl(player, swing);
 		}
@@ -758,6 +758,27 @@ public final class WebSymbioteClient {
 		return takeoverTicks > 0;
 	}
 
+	/** Each struggle press shakes your view this much (degrees), and this much more with the bar full. */
+	private static final float STRUGGLE_SHAKE = 0.25F, STRUGGLE_SHAKE_PER = 0.6F;
+
+	/** A takeover has this player (yours from the takeover packet; anyone's from the synced {@link WebSymbiote#STRUGGLE}). */
+	public static boolean seized(Player player) {
+		return player == Minecraft.getInstance().player && takeoverTicks > 0 || player.getAttached(WebSymbiote.STRUGGLE) != null;
+	}
+
+	/**
+	 * How far this player has fought out of a takeover's hold (0-1): your own from the local tally (it answers each
+	 * press at once), anyone else's as the server syncs it.
+	 */
+	public static float struggleShare(Player player) {
+		if (player == Minecraft.getInstance().player && takeoverTicks > 0) {
+			int needed = WebSymbiote.breakFreeNeeded(player);
+			return needed > 0 ? Mth.clamp(struggleMeter / needed, 0.0F, 1.0F) : 0.0F;
+		}
+		Float share = player.getAttached(WebSymbiote.STRUGGLE);
+		return share == null ? 0.0F : Mth.clamp(share, 0.0F, 1.0F);
+	}
+
 	/** The movement keys during a takeover: each new press is a struggle. */
 	public static void struggleKeys(Input keys) {
 		boolean pressed = keys.forward() && !heldKeys.forward() || keys.backward() && !heldKeys.backward() || keys.left() && !heldKeys.left()
@@ -789,6 +810,8 @@ public final class WebSymbioteClient {
 		struggleTick = player.tickCount;
 		if (WebSymbiote.breakFreeNeeded(player) > 0) {
 			struggleMeter += 1.0F;
+			// every heave against it jolts your view, harder the further out of it you've torn
+			com.jaymospowers.client.ScreenShake.add(STRUGGLE_SHAKE + STRUGGLE_SHAKE_PER * struggleShare(player));
 		}
 		if (ClientPlayNetworking.canSend(WebNet.Struggle.TYPE)) {
 			ClientPlayNetworking.send(new WebNet.Struggle());
@@ -1516,6 +1539,9 @@ public final class WebSymbioteClient {
 
 	// ---- HUD ---------------------------------------------------------------------------------------------------------
 
+	/** How much of the takeover's dark edge gives way with the bar full, and how hard it flickers as the bar swings. */
+	private static final float HUD_CLEAR = 0.6F, HUD_FLICKER = 0.45F;
+
 	/** A takeover darkens the edges of the screen, pulsing like a heartbeat. */
 	static void renderHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
 		if (takeoverTicks <= 0) {
@@ -1526,14 +1552,21 @@ public final class WebSymbioteClient {
 		float pulse = 0.55F + 0.45F * Mth.sin(player.tickCount * 0.6F);
 		// fighting its hold: a thin bar filling as you struggle (only once you're able to break free)
 		int needed = WebSymbiote.breakFreeNeeded(player);
+		float share = struggleShare(player);
 		if (needed > 0 && struggleMeter > 0.0F) {
 			int barWidth = 120;
-			int filled = Math.round(barWidth * Math.min(1.0F, struggleMeter / needed));
+			int filled = Math.round(barWidth * share);
 			int bx = (width - barWidth) / 2;
 			int by = height - 66;
 			graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
 			graphics.fill(bx, by, bx + filled, by + 3, 0xFFB050E0);
+			// halfway: get past it twice and you tear yourself out of it (WebSymbiote.LOCKOUT_SURGE)
+			int half = bx + Math.round(barWidth * WebSymbiote.LOCKOUT_SURGE);
+			graphics.fill(half, by - 2, half + 1, by + 5, 0xFFE8D8F0);
 		}
+		// the further out of it you've torn, the more the dark gives way, flickering as the two of you fight for it
+		float flicker = share <= 0.0F ? 0.0F : Mth.sin(player.tickCount * 1.9F) * Mth.sin(player.tickCount * 0.53F + 1.0F) * HUD_FLICKER * share;
+		pulse *= Mth.clamp(1.0F - HUD_CLEAR * share + flicker, 0.15F, 1.0F);
 		for (int band = 0; band < 6; band++) {
 			int alpha = (int)((150 - band * 24) * pulse);
 			int color = alpha << 24 | 0x0E0614;

@@ -32,9 +32,13 @@ import net.minecraft.world.phys.Vec3;
  * {@link #FROST_TAG} tag). A Z Fighter's hold combo keeps anything within plain reach.
  */
 public final class RaceMoves {
-	/** How far the arm stretches (blocks), how long one punch takes out and back, and how soon the next can go (ticks). */
+	/**
+	 * How far the arm stretches (blocks), how long one punch takes out and back, and how often a held button asks
+	 * again (ticks). {@code STRETCH_COOLDOWN}: the cooldown after each stretch (ticks; 2 s), so a Z Fighter's hold
+	 * combo, which the stretch is part of, can't spam it.
+	 */
 	public static final double STRETCH_RANGE = 6.0;
-	public static final int STRETCH_TICKS = 6, STRETCH_EVERY = 10;
+	public static final int STRETCH_TICKS = 6, STRETCH_EVERY = 10, STRETCH_COOLDOWN = 40;
 	/** Kingdoms reads this off a Frost-born who held left mouse at something, and locks it in ice (it takes the tag off). */
 	public static final String FROST_TAG = "jaymoskingdoms_frost_prison";
 
@@ -83,7 +87,8 @@ public final class RaceMoves {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Stretch last = player.getAttached(STRETCH);
-		if (last != null && now - last.start() < STRETCH_EVERY && now >= last.start()) {
+		if (last != null && now - last.start() < STRETCH_COOLDOWN && now >= last.start()) {
+			// still on its cooldown
 			return;
 		}
 		Vec3 eye = player.getEyePosition();

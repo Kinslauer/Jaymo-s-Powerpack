@@ -467,8 +467,8 @@ public final class WebSwing {
 			if (chargeTicks > 0 || chargeSent) {
 				endCharge();
 			}
-		} else if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
-			// the suit has no wings: Jump is a charged leap instead
+		} else if (com.jaymospowers.power.web.WebSymbiote.leapBody(player)) {
+			// the suit (or the big body) has no wings: Jump is a charged leap instead
 			foldWings();
 			tickChargeJump(player);
 		} else {
@@ -894,7 +894,7 @@ public final class WebSwing {
 	/** True while Jump is being held to charge a leap on the ground (the plain jump is held back; see the mixin). */
 	public static boolean holdingCharge(LocalPlayer player) {
 		// (not while a takeover has the legs: its steps are plain hops, its leaps its own)
-		return com.jaymospowers.power.web.WebSymbiote.suitShown(player) && WebPowerClient.isActive(player)
+		return com.jaymospowers.power.web.WebSymbiote.leapBody(player) && WebPowerClient.isActive(player)
 			&& Minecraft.getInstance().options.keyJump.isDown() && !WebSymbioteClient.driving();
 	}
 
