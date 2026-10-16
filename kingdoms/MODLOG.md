@@ -3306,3 +3306,9 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   in a puff. Not near player-placed blocks (trading halls stay), nor asleep, leashed, carried or downed. Frightened
   villagers now run for ground about their own height, not the roof over it, and a new MCA hire turns up on open
   ground by the seat rather than at it.
+
+## 0.7.87: the tallest size is the Verdant's (pack 0.13.5)
+- Andy: "max height should only be accessible to verdant". The top of MCA's Size slider is a Verdant's alone: anyone
+  of another heritage is held to `Heritage.MCA_SIZE_CAP` 0.75 of it whenever their MCA look is saved
+  (`McaPlayerSizeMixin`), when they pick a heritage, and every 10 s (`SIZE_CHECK_EVERY`, for players who were
+  already tall). Players with no heritage yet aren't held, since MCA's editor comes before the heritage screen.

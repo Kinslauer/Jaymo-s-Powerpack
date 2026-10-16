@@ -11,12 +11,16 @@ import net.conczin.mca.entity.ai.relationship.EntityRelationship;
 import net.conczin.mca.entity.ai.relationship.Gender;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
+import net.conczin.mca.network.Network;
+import net.conczin.mca.network.s2c.PlayerDataMessage;
 import net.conczin.mca.server.world.data.PlayerSaveData;
+import net.conczin.mca.util.NbtHelper;
 import net.conczin.mca.server.world.data.VillageManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -151,6 +155,38 @@ final class McaBridge {
 	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
+	}
+
+	// ---- player size (0.7.87) ------------------------------------------------------------------------------------------
+
+	/** MCA's Size gene, as a player's look stores it (under {@code MCAData}, or at the top). */
+	private static final String SIZE_GENE = "GeneSize";
+
+	/** Holds the Size gene in a player's MCA look at {@code cap} or under; whether it changed. */
+	static boolean capSize(CompoundTag data, float cap) {
+		CompoundTag mca = NbtHelper.getCompoundOrSelf(data, "MCAData");
+		float size = mca.getFloat(SIZE_GENE).orElse(0.5F);
+		if (size <= cap) {
+			return false;
+		}
+		mca.putFloat(SIZE_GENE, cap);
+		return true;
+	}
+
+	/** Holds {@code player}'s MCA Size at {@code cap} or under, re-saving their look and showing it to everyone. */
+	static void capSize(ServerPlayer player, float cap) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.isEntityDataSet()) {
+			return;
+		}
+		CompoundTag data = save.getEntityData();
+		if (!capSize(data, cap)) {
+			return;
+		}
+		save.setEntityData(data);
+		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), data), other);
+		}
 	}
 
 	// ---- workers (0.5.21) -------------------------------------------------------------------------------------------

@@ -59,6 +59,16 @@ public final class McaCompat {
 	private McaCompat() {
 	}
 
+	/**
+	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): its Size is held under the top of the
+	 * slider unless they're Verdant ({@link Heritage#MCA_SIZE_CAP}).
+	 */
+	public static void capSaved(ServerPlayer player, net.minecraft.nbt.CompoundTag data) {
+		if (Heritage.sizeCapped(player)) {
+			McaBridge.capSize(data, Heritage.MCA_SIZE_CAP);
+		}
+	}
+
 	/** The reputation {@code player}'s hearts with the people round {@code factionId}'s seat add (0 without MCA). */
 	static int heartsReputation(ServerPlayer player, int factionId) {
 		if (!LOADED) {
