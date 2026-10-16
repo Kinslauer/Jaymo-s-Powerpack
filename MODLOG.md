@@ -1493,7 +1493,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   effect to every bladed weapon kill and impact", "on every weapon not just symbiote". The barrage's stabs now come
   from the outermost pair, left and right by turns (walking: the outer spares; `WebTendrilLayer.BARRAGE_FREE`). Every
   blow from a blade (`Dismember.blade`: swords, axes, anything named like a blade, held or thrown, any mod's) sprays
-  blood, more the harder it lands, and a kill bursts with gore and a squelch (`core/BladeBlood`); so do the powers'
+  blood, more the harder it lands (`core/BladeBlood`); so do the powers'
   own cuts (`Dismember.cut`: Darktide's katana, the symbiote's scythe), the symbiote's spear, whip-blade, hook claw
-  (and its bleed), the barrage, and now Spike Burst and the roar's spikes (Andy: "add that too"). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
+  (and its bleed), the barrage, and now Spike Burst and the roar's spikes (Andy: "add that too").
+  Only a creature crushed to death bursts with gore and a squelch (Andy: "burst should only be for if an enemy is killed
+  by a crush, like with gravity's modes and meteor impact. Or killed by a great ape stomp"): any death by Gravity's
+  weight (a fall after Lift or Crush, the slam, Collapse, Skyfall, the Singularity, a meteor), one slammed into a wall
+  by Push, and the Great Ape's stomps and footfalls (`BladeBlood.crushed`). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
   constants at the top of `BladeBlood`.
