@@ -57,7 +57,7 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * Wishes: power (5000 TP for a Z Fighter; the Z Fighter power for someone with none; else 30 levels), revive (everyone
  * who died in the last hour comes back to your side with what they dropped), riches, awakening (the way to Super opens),
- * rebirth (choose your lineage again) and a blessing on everyone.
+ * rebirth (the lineage goes back to what your heritage gives) and a blessing on everyone.
  */
 public final class ZFighterWishes {
 	public static final int POWER = 0;
@@ -462,11 +462,7 @@ public final class ZFighterWishes {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_cannot").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
-		ZFighterLineage.endApe(player, ZFighterPower.live(player));
-		player.removeAttached(ZFighterLineage.LINEAGE);
-		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_lineage_reset").withStyle(ChatFormatting.GOLD));
-		return true;
+		return ZFighterLineage.reborn(player);
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {

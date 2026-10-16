@@ -335,8 +335,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 	 */
 	private static void course(VertexConsumer buffer, PoseStack.Pose pose, Vec3 from, Vec3 to, float f, float after, int seed, int light) {
 		Vec3 along = to.subtract(from);
-		Vec3 across = along.cross(new Vec3(0.0, 0.0, 1.0));
-		across = across.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : across.normalize();
+		Vec3 cross = along.cross(new Vec3(0.0, 0.0, 1.0));
+		Vec3 across = cross.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : cross.normalize();
 		java.util.function.DoubleFunction<Vec3> at = u -> from.add(along.scale(u)).add(across.scale(Mth.sin((float)u * 9.0F + seed * 1.7F) * 0.6));
 		float vein = VEIN * (1.0F - Mth.clamp(after, 0.0F, 1.0F));
 		if (vein > 0.02F) {
