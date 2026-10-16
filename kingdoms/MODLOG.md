@@ -3201,7 +3201,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   them (`THROW_SPEED`) and sneak + right-click sets them down. Any death is a real one (wars, quests, crimes), with no
   corpse and no loot.
 
-## 0.7.75: Emberborn fireproof, sapped by the cold; Frostborn ice prison; heritage cards scroll (pack 0.11.101)
+## 0.7.75: Emberborn fireproof, sapped by the cold; Frostborn ice prison; heritage cards scroll (pack 0.11.102)
 - Andy: "emberborn should be immune to fire and weaker in the cold / winter". Fire, lava, hot floors and burning
   never hurt an Emberborn (`DamageTypeTags.IS_FIRE` cancelled), and flame never stays lit on them (burn time -100%,
   put out each second).
