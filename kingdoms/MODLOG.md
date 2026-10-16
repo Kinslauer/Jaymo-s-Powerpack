@@ -3200,3 +3200,12 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   sneak + right-click carries one over your shoulder (a passenger, placed by `DownedMixin`), then right-click throws
   them (`THROW_SPEED`) and sneak + right-click sets them down. Any death is a real one (wars, quests, crimes), with no
   corpse and no loot.
+
+## 0.7.75: Emberborn fireproof, sapped by the cold (pack 0.11.99)
+- Andy: "emberborn should be immune to fire and weaker in the cold / winter". Fire, lava, hot floors and burning
+  never hurt an Emberborn (`DamageTypeTags.IS_FIRE` cancelled), and flame never stays lit on them (burn time -100%,
+  put out each second).
+- In the cold (biome base temperature 0.2 or less: snowy and frozen lands) their blows are 15% weaker and they walk
+  10% slower (`EMBER_COLD_WEAK`, `EMBER_COLD_SLOW`); freezing in powder snow doubles both (`EMBER_FREEZING_*`).
+  The old 25% hunger in the cold stays, and now counts freezing too. The pack has no seasons mod, so cold lands are
+  its winter.
