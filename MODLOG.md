@@ -1467,7 +1467,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   hits them they bleed out 2 minutes after the last hit, and the 10th hit kills. Mobs, fire and falls can kill them
   too, and sneak + right-click carries one over your shoulder (right-click throws, sneak + right-click sets down).
 - **0.11.91, symbiote ceilings, held weapon arm, bladed barrage:** Andy: "Wall crawl should operate the same way for ceilings, also the left click for symbiote weapons should be a click and hold, starting the symbiote tendrils coursing and bulging through the suit before collecting into the arm and forming into the blade/mace. The stabbing while holding a mob should animate the spears like this" (Venom image, hooked blade tips). Sneak under a ceiling slams the tendrils up into it like a wall; the weapon arm gathers while left click is held (lumps over the suit, down the arm, the weapon grows out of the hand) and strikes on release; barrage stabs wear spear and hooked blade tips. See docs/web.md.
-- **0.11.99, the Rig drawn as a layered suit that builds itself on:** Andy: "the rig looks good, it just clips a bit
+- **0.11.99, Wall Crawl tendrils stay out:** Andy: "holding space while in wall climb makes the tendrils un animate and not appear... make it so the tendrils only go away when deactivated or on cooldown". The tendrils are now drawn whenever Wall Crawl is on.
+  Also Andy: "allow me to charge jump while using wall crawl": in the suit, holding Jump on the walking tendrils coils a charged leap (instead of climbing) and letting go flings you.
+- **0.11.101, the Rig drawn as a layered suit that builds itself on:** Andy: "the rig looks good, it just clips a bit
   currently with fresh anims, and it should materialize on the user, peice by peice, one large component unfolding and
   mechanically interlocking onto the user. also make a more layered rig, add depth and detail". On players the Rig is
   now its own model (`client/rig/RigSuit`, `RigSuitMesh` generated with its textures by `tools/gen_rig.py`; the
@@ -1484,3 +1486,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   comes apart backwards, 1.6x quicker. A suit call now lands the Core first, then Arms, Thrusters, Helm (`LAND_AT`).
   Hidden pieces, costumes and Xeno forms still hide it; a backpack hangs clear of the spine unit. Tuning: the
   constants at the top of `RigSuit`; plate timings and approaches in `gen_rig.py`'s `plate(...)` calls.
+- **0.11.101, blood on every blade, and the barrage from the outer tendrils:** Andy: "the Shift + R living tendril LMB
+  hold attack should animate from the left and right most tendrils, not the center like it does now. add the blood
+  effect to every bladed weapon kill and impact", "on every weapon not just symbiote". The barrage's stabs now come
+  from the outermost pair, left and right by turns (walking: the outer spares; `WebTendrilLayer.BARRAGE_FREE`). Every
+  blow from a blade (`Dismember.blade`: swords, axes, anything named like a blade, held or thrown, any mod's) sprays
+  blood, more the harder it lands, and a kill bursts with gore and a squelch (`core/BladeBlood`); so do the powers'
+  own cuts (`Dismember.cut`: Darktide's katana, the symbiote's scythe), the symbiote's spear, whip-blade, hook claw
+  (and its bleed) and the barrage. Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
+  constants at the top of `BladeBlood`.

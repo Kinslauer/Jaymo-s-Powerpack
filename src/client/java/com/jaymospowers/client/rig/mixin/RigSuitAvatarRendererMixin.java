@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.11.99) The worn Rig goes on the player's render state after hidden armour, costumes and forms (this priority over
+ * (0.11.101) The worn Rig goes on the player's render state after hidden armour, costumes and forms (this priority over
  * their 2100) have taken what they hide off it; its pieces come off the state there and are drawn as the suit (RigSuit).
  */
 @Mixin(value = AvatarRenderer.class, priority = 2200)

@@ -119,6 +119,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   `CHARGE_MAX_TICKS` 600). One strike per press now. Drawn by `WebMorphLayer.submitGather`.
 - **Bladed barrage (0.11.91):** stabbing in a barrage, each tendril's tip is a blade: a barbed spear point or a
   hooked claw blade, turn about (`WebTendrilLayer.blades`, sizes `BLADE_*`).
+- **Tendrils stay out (0.11.99):** with Wall Crawl on, the tendrils are drawn the whole time (`WebSymbioteClient.extract`), not only while they hold you; holding Jump (a coiled leap, nothing to grab) used to make them vanish. They go only when Wall Crawl is switched off.
+- **Charged leap on Wall Crawl (0.11.99):** in the suit, holding Jump while the tendrils carry you coils them (you sink to `WebSymbioteClient.STRIDE_COIL` 0.55 of the stride height) instead of climbing; let go and they fling you with the charged leap, as from the ground (`launchable`), letting you fly for `LEAP_GRACE_TICKS` 8 before they grab again. On a wall or ceiling Jump still climbs. Without the suit, Jump still climbs the stride.
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.

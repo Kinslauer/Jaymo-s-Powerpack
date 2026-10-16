@@ -78,7 +78,7 @@ public final class RigClient {
 			takeoverThreat = payload.threat();
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(RigClient::tick);
-		// (0.11.99) the worn suit, drawn and assembled
+		// (0.11.101) the worn suit, drawn and assembled
 		RigSuit.init();
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("rig_hud"), RigHud::render);
 	}

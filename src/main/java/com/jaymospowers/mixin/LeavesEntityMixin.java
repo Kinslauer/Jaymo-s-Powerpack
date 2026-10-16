@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.Unique;
 abstract class LeavesEntityMixin implements Leaves.Dragged {
 	@Unique
 	private int jaymospowers$leafTick = Integer.MIN_VALUE;
+	@Unique
+	private boolean jaymospowers$leafCrash;
 
 	@Override
 	public int jaymospowers$leafTick() {
@@ -19,5 +21,15 @@ abstract class LeavesEntityMixin implements Leaves.Dragged {
 	@Override
 	public void jaymospowers$leafTick(int tick) {
 		this.jaymospowers$leafTick = tick;
+	}
+
+	@Override
+	public boolean jaymospowers$leafCrash() {
+		return this.jaymospowers$leafCrash;
+	}
+
+	@Override
+	public void jaymospowers$leafCrash(boolean crash) {
+		this.jaymospowers$leafCrash = crash;
 	}
 }

@@ -28,7 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.11.99) In the Thunderhead (both wind modes at once) the eyes go white and glow, storm-lit: an emissive pass over
+ * (0.11.101) In the Thunderhead (both wind modes at once) the eyes go white and glow, storm-lit: an emissive pass over
  * the player's own skin, the white laid where that skin's own eyes are ({@link #findEyes}, worked out once per skin;
  * the stock spots, the default skins' eyes, while a skin downloads or when no eyes can be told apart). The crackling
  * lightning while flying is {@link WindAura}.
