@@ -32,8 +32,26 @@ import net.minecraft.world.phys.Vec3;
  */
 final class WebHulk {
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_hulk.png");
-	/** How far the arms sit out, the legs apart, and the head sinks (negative: rises) and juts forward on the big body (pixels). */
-	static final float ARM_OUT = 5.0F, LEG_OUT = 2.2F, HEAD_DOWN = -0.5F, HEAD_FORWARD = 2.0F;
+	/**
+	 * How far the arms sit out, the legs apart, and the head sinks (negative: rises) and juts forward on the big body
+	 * (pixels). The head's offset is in the torso's own frame (it rides the hunch, the breathing and the lean, Andy: "the
+	 * head clips and animates separately it looks like"), forward of the traps, between the shoulders. The frame itself
+	 * (the hips {@code WebHulkMesh.LEG_LIFT} up, the neck {@code WebHulkMesh.BODY_LIFT} up along the torso, Andy: "he
+	 * looks short and stocky like a gremlin rather than a behemoth") is the mesh's.
+	 */
+	static final float ARM_OUT = 5.0F, LEG_OUT = 2.2F, HEAD_DOWN = -1.5F, HEAD_FORWARD = 4.0F;
+	/**
+	 * The head on its neck: turned at most {@code HEAD_YAW_MAX} either way and rolled {@code HEAD_ROLL_MAX} (radians);
+	 * tipped back from the torso at most {@code HEAD_BACK_MAX} (further, the back of the skull sinks into the traps; in
+	 * the gallop it looks down along the charge) and forward {@code HEAD_FORWARD_MAX}; it takes {@code HEAD_FOLLOW} of the
+	 * torso's own pitch (its breathing and lean).
+	 */
+	static final float HEAD_YAW_MAX = 0.45F, HEAD_ROLL_MAX = 0.12F, HEAD_BACK_MAX = 0.4F, HEAD_FORWARD_MAX = 0.5F, HEAD_FOLLOW = 0.3F;
+	/**
+	 * The suit and the goo under the big body (as it's built or peeled) stretch to its frame: the torso by
+	 * {@code TORSO / 12}, the legs by {@code LEG / 12} (the player model's are 12 long).
+	 */
+	static final float TORSO_STRETCH = WebHulkMesh.TORSO / 12.0F, LEG_STRETCH = WebHulkMesh.LEG / 12.0F;
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
 	/** The tongue: pieces, each one's length (pixels), its width and thickness at the root (tapering to the tip). */
@@ -48,13 +66,12 @@ final class WebHulk {
 	 */
 	static final float TONGUE_EVERY = 140.0F, FLICK_TICKS = 12.0F, FLICK_OUT = 0.3F, FLICK_BACK = 0.6F, JAW_FLICK = 0.18F;
 	/**
-	 * Put on by hand (the suit from the menu, or Living Armor; {@link com.jaymospowers.power.web.WebSymbiote#DONNED}), it
+	 * Put on by hand (Living Armor from the menu; {@link com.jaymospowers.power.web.WebSymbiote#DONNED}), the big body
 	 * lashes its tongue once {@code DON_LASH_AT} ticks after, as the head finishes forming, the lash taking
-	 * {@code DON_LASH_TICKS}. On the plain suit it comes out of the suit's own mouth ({@code SUIT_MOUTH}, model pixels
-	 * from the neck), {@code SUIT_TONGUE_SCALE} the size.
+	 * {@code DON_LASH_TICKS}. The plain suit has no tongue (Andy: "I'd also like the tounge to be kept to the large
+	 * suit"); only Consume's maw shows one on it, while it eats.
 	 */
-	static final float DON_LASH_AT = 20.0F, DON_LASH_TICKS = 22.0F, SUIT_TONGUE_SCALE = 0.6F;
-	static final Vec3 SUIT_MOUTH = new Vec3(0.0, -1.6, -4.1);
+	static final float DON_LASH_AT = 20.0F, DON_LASH_TICKS = 22.0F;
 	/**
 	 * The elbows: bent {@code ELBOW_REST} hanging, up to {@code ELBOW_SWING} more as the arm comes forward in a full stride
 	 * (the forearm trailing the swing by {@code ELBOW_LAG} of the cycle), breathing {@code ELBOW_IDLE} standing; an arm
@@ -257,24 +274,6 @@ final class WebHulk {
 		return since >= 0.0F && since < DON_LASH_TICKS ? since / DON_LASH_TICKS : -1.0F;
 	}
 
-	/** The plain suit's tongue: only the lash when it's put on by hand, out of the suit's mouth. */
-	static void submitSuitTongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent) {
-		float flick = donLash(state);
-		float out = flickOut(flick);
-		if (out <= 0.02F) {
-			return;
-		}
-		float age = state.ageInTicks;
-		float whip = Mth.sin(flick * Mth.PI);
-		poseStack.pushPose();
-		parent.root().translateAndRotate(poseStack);
-		parent.head.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
-			tongue(buffer, pose, SUIT_MOUTH.add(0.0, 0.0, (1.0F - out) * 2.0), 0.2F, TONGUE_PIECES, TONGUE_PIECE * SUIT_TONGUE_SCALE,
-				TONGUE_WIDTH * SUIT_TONGUE_SCALE, TONGUE_THICK * SUIT_TONGUE_SCALE, age, out, whip, TONGUE_DROOP, state.lightCoords));
-		poseStack.popPose();
-	}
-
 	/** How far out the tongue is in a flick {@code f} through (0-1): shot out fast, held a moment, drawn back in. */
 	static float flickOut(float f) {
 		if (f < 0.0F) {
@@ -288,16 +287,76 @@ final class WebHulk {
 	/** What the big body's pieces were last moved to (so moving them twice in one frame moves them once). */
 	private static final Map<ModelPart, float[]> MOVED = new WeakHashMap<>();
 
-	/** Spreads a model out to the big body's frame, {@code k} of the way (0 none). Safe to call more than once a frame. */
+	/**
+	 * Spreads a model out to the big body's frame, {@code k} of the way (0 none): the hips up {@code LEG_LIFT} and apart,
+	 * the neck up along the torso (however it's bent) so the torso is {@code TORSO} long, the shoulders out with it, and
+	 * the head forward of the traps in the torso's frame, its turn held in on the neck ({@link #neck}). Safe to call more
+	 * than once a frame.
+	 */
 	static void shift(HumanoidModel<?> h, float k) {
 		if (k <= 0.0F) {
 			return;
 		}
-		move(h.rightArm, -ARM_OUT * k, 0.0F, 0.0F);
-		move(h.leftArm, ARM_OUT * k, 0.0F, 0.0F);
-		move(h.rightLeg, -LEG_OUT * k, 0.0F, 0.0F);
-		move(h.leftLeg, LEG_OUT * k, 0.0F, 0.0F);
-		move(h.head, 0.0F, HEAD_DOWN * k, -HEAD_FORWARD * k);
+		// the torso's frame: lifting the neck along it keeps the shoulders and head on a bent torso
+		org.joml.Quaternionf torso = new org.joml.Quaternionf().rotationZYX(h.body.zRot, h.body.yRot, h.body.xRot);
+		org.joml.Vector3f along = torso.transform(new org.joml.Vector3f(0.0F, -(WebHulkMesh.BODY_LIFT - WebHulkMesh.LEG_LIFT), 0.0F));
+		float nx = along.x * k, ny = (along.y - WebHulkMesh.LEG_LIFT) * k, nz = along.z * k;
+		org.joml.Vector3f out = torso.transform(new org.joml.Vector3f(ARM_OUT, 0.0F, 0.0F));
+		org.joml.Vector3f head = torso.transform(new org.joml.Vector3f(0.0F, HEAD_DOWN, -HEAD_FORWARD));
+		move(h.body, nx, ny, nz);
+		move(h.rightArm, nx - out.x * k, ny - out.y * k, nz - out.z * k);
+		move(h.leftArm, nx + out.x * k, ny + out.y * k, nz + out.z * k);
+		move(h.rightLeg, -LEG_OUT * k, -WebHulkMesh.LEG_LIFT * k, 0.0F);
+		move(h.leftLeg, LEG_OUT * k, -WebHulkMesh.LEG_LIFT * k, 0.0F);
+		move(h.head, nx + head.x * k, ny + head.y * k, nz + head.z * k);
+		neck(h.head, h.body, k);
+	}
+
+	/** What the heads were last turned to (so turning one twice in a frame turns it once). */
+	private static final Map<ModelPart, float[]> NECKED = new WeakHashMap<>();
+
+	/**
+	 * The head held on its neck, {@code k} of the way: its turn and roll limited, its pitch following the torso's a
+	 * little and kept within {@code HEAD_BACK_MAX} back and {@code HEAD_FORWARD_MAX} forward of it, so the big skull can't
+	 * swing into the shoulders or sink into the traps.
+	 */
+	private static void neck(ModelPart head, ModelPart body, float k) {
+		float[] was = NECKED.get(head);
+		if (was != null && was[0] == head.xRot && was[1] == head.yRot && was[2] == head.zRot) {
+			return;
+		}
+		float yaw = Mth.lerp(k, Mth.PI, HEAD_YAW_MAX), roll = Mth.lerp(k, Mth.PI, HEAD_ROLL_MAX);
+		head.yRot = Mth.clamp(head.yRot, -yaw, yaw);
+		head.zRot = Mth.clamp(head.zRot, -roll, roll);
+		float pitch = head.xRot + HEAD_FOLLOW * k * body.xRot;
+		head.xRot = Mth.clamp(pitch, body.xRot - Mth.lerp(k, Mth.PI, HEAD_BACK_MAX), body.xRot + Mth.lerp(k, Mth.PI, HEAD_FORWARD_MAX));
+		NECKED.put(head, new float[] {head.xRot, head.yRot, head.zRot});
+	}
+
+	/** What the suit's parts were last stretched to, and on which frame (so stretching one twice in a frame stretches it once). */
+	private static final Map<ModelPart, float[]> STRETCHED = new WeakHashMap<>();
+
+	/**
+	 * Stretches a model laid under the big body (the suit, the goo) to its longer torso and legs, {@code k} of the way,
+	 * after it's been laid (its scales set). Not the big body itself (its mesh is built long), nor the wearer's own
+	 * (hidden inside it; its parts carry the layers drawn off them).
+	 */
+	static void stretch(HumanoidModel<?> h, float k, float frame) {
+		if (k <= 0.0F || h instanceof WebHulk.Model) {
+			return;
+		}
+		stretch(h.body, Mth.lerp(k, 1.0F, TORSO_STRETCH), frame);
+		stretch(h.rightLeg, Mth.lerp(k, 1.0F, LEG_STRETCH), frame);
+		stretch(h.leftLeg, Mth.lerp(k, 1.0F, LEG_STRETCH), frame);
+	}
+
+	private static void stretch(ModelPart part, float by, float frame) {
+		float[] was = STRETCHED.get(part);
+		if (was != null && was[0] == frame && was[1] == part.yScale) {
+			return;
+		}
+		part.yScale *= by;
+		STRETCHED.put(part, new float[] {frame, part.yScale});
 	}
 
 	private static void move(ModelPart part, float dx, float dy, float dz) {

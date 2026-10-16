@@ -38,8 +38,14 @@ public final class WebSymbioteBond {
 	// ===== the fought removal ========================================================================================
 	/** It fights you for the suit while the bond is under this, the first {@code FIGHTS} times. */
 	public static final int FIGHT_BOND = 70, FIGHTS = 3;
-	/** Presses to win (the same fade as a takeover's bar): {@code FIGHT_PRESSES_MAX} at no bond, {@code FIGHT_PRESSES_MIN} at {@code FIGHT_BOND}. */
-	public static final int FIGHT_PRESSES_MAX = 30, FIGHT_PRESSES_MIN = 16;
+	/** Presses to win: {@code FIGHT_PRESSES_MAX} at no bond, down to {@code FIGHT_PRESSES_MIN} at {@code FIGHT_BOND}. */
+	public static final int FIGHT_PRESSES_MAX = 30, FIGHT_PRESSES_MIN = 12;
+	/**
+	 * Andy: "maybe make it slightly easier as bond increases". The bar fades as a takeover's does at no bond, and only
+	 * {@code FIGHT_FADE_AT_BOND} as fast at {@code FIGHT_BOND}; its heaves back come {@code FIGHT_SHOVE_AT_BOND} as often
+	 * and as hard there (both eased in between).
+	 */
+	public static final float FIGHT_FADE_AT_BOND = 0.55F, FIGHT_SHOVE_AT_BOND = 0.5F;
 	/** How long you have to win before it gives up the fight and keeps you covered. */
 	public static final int FIGHT_TICKS = 400;
 	/** Past {@code FIGHT_SHOVE_FROM} of the bar it shoves back, {@code FIGHT_SHOVE_CHANCE} a tick, by {@code FIGHT_SHOVE} of the bar. */
@@ -124,6 +130,17 @@ public final class WebSymbioteBond {
 	public static boolean faceBare(Player player) {
 		Long until = player.getAttached(FACE);
 		return until != null && player.level().getGameTime() < until;
+	}
+
+	/** How far the fight's bar falls back each tick at this bond (both sides: the owner's own bar runs it too). */
+	public static float fightFade(int bond) {
+		return WebSymbiote.TAKEOVER_STRUGGLE_FADE * Mth.lerp(ease(bond), 1.0F, FIGHT_FADE_AT_BOND);
+	}
+
+	/** The bond's share of {@link #FIGHT_BOND} (0-1), eased. */
+	private static float ease(int bond) {
+		float b = Mth.clamp(bond / (float)FIGHT_BOND, 0.0F, 1.0F);
+		return b * b * (3.0F - 2.0F * b);
 	}
 
 	/** It's fighting this player for the suit (either side). */
@@ -256,10 +273,12 @@ public final class WebSymbioteBond {
 			WebSymbiote.whisper(player, "fight_lost." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
 			return;
 		}
-		live.struggle = Math.max(0.0F, live.struggle - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
-		if (live.struggle >= live.needed * FIGHT_SHOVE_FROM && player.getRandom().nextFloat() < FIGHT_SHOVE_CHANCE) {
+		int bond = WebSymbiote.state(player).bond();
+		live.struggle = Math.max(0.0F, live.struggle - fightFade(bond));
+		float shove = Mth.lerp(ease(bond), 1.0F, FIGHT_SHOVE_AT_BOND);
+		if (live.struggle >= live.needed * FIGHT_SHOVE_FROM && player.getRandom().nextFloat() < FIGHT_SHOVE_CHANCE * shove) {
 			// it heaves back over you: the mask slides back over your face
-			live.struggle = Math.max(0.0F, live.struggle - live.needed * FIGHT_SHOVE);
+			live.struggle = Math.max(0.0F, live.struggle - live.needed * FIGHT_SHOVE * shove);
 			com.jaymospowers.core.Shakes.send(player, FIGHT_SHOVE_SHAKE, null);
 			WebSymbiote.dread(player, 20, false, true);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.5F);

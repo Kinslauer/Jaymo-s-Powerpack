@@ -1,17 +1,23 @@
 """The symbiote's big body (the hulk): an original box model built over the player's skeleton (head, body, arms and legs
 keep the player model's pivots, so every pose still drives it), and its texture, drawn here pixel by pixel (no art is
 copied). Built like a towering green-giant hero, upright, but all symbiote: a broad chest over deep lats, huge shoulders,
-thick arms ending in big fists with bone spurs breaking out of the forearms, legs like tree trunks with clawed toes,
+tapering to a narrow waist, thick arms ending in big fists with bone spurs breaking out of the forearms, long powerful
+legs (thickest at the thigh) with clawed toes,
 and the head up on the traps with big angular eyes, a hinged lower jaw and rows of fangs (cut out of the texture). Every muscle is its own
 part, so the equip animation can lay them on one at a time (client WebSuitGrowth).
 
 Also draws web_symbiote_flesh.png: four swatches (wet black, black with its sheen, bone, the tongue's red) for the
 lengths drawn in code (the tongue, the weapon arm, the tendrils that wrap the body; client WebTubes).
 
+Also Consume's maw (client WebMouthLayer) in the same style: the big body's head grown huge, hinged to gape and snap
+(it replaced tools/gen_web_maw.py's plain black box).
+
 Writes:
   src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_hulk.png
   src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_flesh.png
+  src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_mouth.png
   src/client/java/com/jaymospowers/client/power/web/WebHulkMesh.java  (generated: don't edit by hand)
+  src/client/java/com/jaymospowers/client/power/web/WebMawMesh.java  (generated: don't edit by hand)
 Run from the project root:  python -I tools/gen_web_hulk.py
 """
 import math
@@ -48,26 +54,37 @@ def box(part, name, frm, size, paint, pivot, order):
     BOXES.append(dict(part=part, name=name, frm=frm, size=size, paint=paint, pivot=pivot, order=order))
 
 
-# ---- the torso (pivot at the neck): a giant's, upright, a broad chest over a deep V of lats ----
-box("body", "core", (-7, 0, -3.5), (14, 12, 7), "muscle", (0, 0, 0), 0)
-box("body", "hips", (-6, 11, -3), (12, 2, 6), "muscle", (0, 12, 0), 1)
-box("body", "back", (-6, 1, 3.5), (12, 10, 2), "back", (0, 3, 3), 1)
-box("body", "lats", (-9, 1.5, -2.5), (18, 7, 5), "muscle", (0, 4, 0), 2)
-box("body", "pec_r", (-7, 0.5, -5.5), (7, 6, 2), "pec", (-3, 3, -3), 3)
-box("body", "pec_l", (0, 0.5, -5.5), (7, 6, 2), "pec", (3, 3, -3), 3)
-box("body", "abs", (-4, 6.5, -5), (8, 5, 2), "abs", (0, 9, -3), 4)
-box("body", "traps", (-6, -3.5, -0.5), (12, 4, 5), "muscle", (0, 1, 1), 5)
+# ---- the frame: a tall behemoth, not a squat gremlin (Andy: "increase the size of his torso/ abdomen ... he needs a
+# thinner waist and legs that extend out to the current upper body bulk"). On the big body (client WebHulk.shift) the
+# hips sit LEG_LIFT higher than the player's, so the legs run 12 + LEG_LIFT down to the ground, and the neck BODY_LIFT
+# higher, so the torso runs TORSO from the neck to the hips. Everything keeps the player model's joints.
+BODY_LIFT, LEG_LIFT = 6, 4
+TORSO = 12 - LEG_LIFT + BODY_LIFT
+LEG = 12 + LEG_LIFT
+
+# ---- the torso (pivot at the neck): upright, a broad chest over a deep V of lats, tapering to a narrow waist, then
+# the pelvis round the hip joints ----
+box("body", "core", (-6.5, 0, -3.5), (13, 9, 7), "muscle", (0, 0, 0), 0)
+box("body", "waist", (-4.5, 8.5, -3), (9, 4, 6), "muscle", (0, 10, 0), 0)
+box("body", "hips", (-5.5, TORSO - 1.5, -3), (11, 3, 6), "muscle", (0, TORSO, 0), 1)
+box("body", "back", (-6, 1, 3.5), (12, 9, 2), "back", (0, 3, 3), 1)
+box("body", "lats", (-9, 1.5, -2.5), (18, 6, 5), "muscle", (0, 4, 0), 2)
+box("body", "lats_low", (-7.5, 7.5, -2.5), (15, 2, 5), "muscle", (0, 8, 0), 2)
+box("body", "pec_r", (-7, 2, -5.5), (7, 6, 2), "pec", (-3, 4, -3), 3)
+box("body", "pec_l", (0, 2, -5.5), (7, 6, 2), "pec", (3, 4, -3), 3)
+box("body", "abs", (-3.5, 8, -4.5), (7, 6, 2), "abs", (0, 11, -3), 4)
+box("body", "traps", (-6, -3, 1), (12, 4, 5), "muscle", (0, 1, 2), 5)
 
 # ---- the arms (right: pivot at the shoulder; the left is the mirror): huge shoulders, thick arms, big fists ----
 ARM = [
     ("shoulder", (-4.5, -4.5, -4), (8, 7, 8), "muscle", (0, -1, 0), 2),
-    ("upper", (-4, 2, -3.5), (7, 7, 7), "muscle", (0, 2, 0), 3),
-    ("fore", (-4.5, 8, -4), (8, 7, 8), "fore", (0, 8, 0), 4),
-    ("fist", (-4, 15, -3.5), (7, 5, 7), "muscle", (0, 15, 0), 5),
-    ("knuckles", (-4, 15.5, -4.5), (7, 3, 1), "knuckle", (0, 16, -4), 6),
+    ("upper", (-4, 2, -3.5), (7, 8, 7), "muscle", (0, 2, 0), 3),
+    ("fore", (-4.5, 9, -4), (8, 7, 8), "fore", (0, 9, 0), 4),
+    ("fist", (-4, 16, -3.5), (7, 5, 7), "muscle", (0, 16, 0), 5),
+    ("knuckles", (-4, 16.5, -4.5), (7, 3, 1), "knuckle", (0, 17, -4), 6),
 ]
 # the symbiote's own touch: bone spurs breaking out along the outside of each forearm
-SPURS = [((-5.5, 9, -1.5), (1, 2, 1)), ((-5.5, 11.5, 0), (1, 2, 1)), ((-5.5, 13.5, -1), (1, 1, 1))]
+SPURS = [((-5.5, 10, -1.5), (1, 2, 1)), ((-5.5, 12.5, 0), (1, 2, 1)), ((-5.5, 14.5, -1), (1, 1, 1))]
 
 
 def mirror(frm, size):
@@ -84,27 +101,30 @@ for side, part in (("r", "right_arm"), ("l", "left_arm")):
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
         box(part, name, frm, size, paint, pivot, order)
     for i, (frm, size) in enumerate(SPURS):
-        pivot = (-4, 11, 0)
+        pivot = (-4, 12, 0)
         if side == "l":
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
         box(part, "spur%d" % i, frm, size, "bone", pivot, 6)
 
-# ---- the legs (pivot at the hip): thick as tree trunks, clawed toes ----
-LEG = [
-    ("thigh", (-4, -1, -3.5), (8, 7, 7), "muscle", (0, 0, 0), 1),
-    ("calf", (-3.5, 6, -3), (7, 5, 6), "muscle", (0, 6, 0), 2),
-    ("foot", (-4, 10, -5), (8, 2, 8), "foot", (0, 11, -1), 3),
+# ---- the legs (pivot at the hip, LEG long): long and powerful, thighs thickest at the top to carry the upper body's
+# bulk, a heavy calf, a slimmer shin to the ankle, clawed toes ----
+LEGS = [
+    ("thigh", (-4.5, -1.5, -4), (9, 7, 8), "muscle", (0, 0, 0), 1),
+    ("thigh_low", (-3.5, 5, -3.5), (7, 4, 7), "muscle", (0, 6, 0), 1),
+    ("calf", (-3.5, 8.5, -2.5), (7, 4, 6), "muscle", (0, 9, 0), 2),
+    ("shin", (-2.5, 12, -2.5), (5, 3, 5), "muscle", (0, 13, 0), 2),
+    ("foot", (-4, LEG - 2, -5), (8, 2, 8), "foot", (0, LEG - 1, -1), 3),
 ]
 for side, part in (("r", "right_leg"), ("l", "left_leg")):
-    for name, frm, size, paint, pivot, order in LEG:
+    for name, frm, size, paint, pivot, order in LEGS:
         if side == "l":
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
         box(part, name, frm, size, paint, pivot, order)
     for i, x in enumerate((-3, -0.5, 2)):
-        frm = (x, 11, -6.5)
+        frm = (x, LEG - 1, -6.5)
         if side == "l":
             frm = mirror(frm, (1, 1, 2))
-        box(part, "toe%d" % i, frm, (1, 1, 2), "bone", (0, 11, -5), 4)
+        box(part, "toe%d" % i, frm, (1, 1, 2), "bone", (0, LEG - 1, -5), 4)
 
 # ---- the head (pivot at the neck): a small skull, a heavy muzzle, a hinged jaw, fangs, a red throat ----
 box("head", "skull", (-4.5, -8, -4.5), (9, 6, 9), "skull", (0, -2, 0), 7)
@@ -128,10 +148,10 @@ PART_PIVOTS = {
 # the elbows and knees: the forearm (with its fist, knuckles and spurs) and the shin (calf, foot, toes) hang off a
 # hinge of their own so they bend (client WebHulk.Model.limbs). Each hinge sits a little to the side the joint opens
 # on (the elbow toward the back, the knee toward the front) so no gap shows as it bends.
-ELBOW = (0, 8.5, 2)
-KNEE = (0, 5.5, -2.5)
+ELBOW = (0, 9.5, 2)
+KNEE = (0, 8.5, -2.5)
 HINGES = {"right_arm": ("elbow", ELBOW), "left_arm": ("elbow", ELBOW), "right_leg": ("knee", KNEE), "left_leg": ("knee", KNEE)}
-LOWER = {"fore", "fist", "knuckles", "spur0", "spur1", "spur2", "calf", "foot", "toe0", "toe1", "toe2"}
+LOWER = {"fore", "fist", "knuckles", "spur0", "spur1", "spur2", "calf", "shin", "foot", "toe0", "toe1", "toe2"}
 
 
 def hinge(b):
@@ -150,18 +170,19 @@ def footprint(size):
     return 2 * d + 2 * w, d + h
 
 
-def pack():
+def pack(boxes=None, tex_w=TEX_W, tex_h=TEX_H):
     """Shelf-packs every box's UV net into the texture (biggest first)."""
-    order = sorted(range(len(BOXES)), key=lambda i: -footprint(BOXES[i]["size"])[1] * 1000 - footprint(BOXES[i]["size"])[0])
+    boxes = BOXES if boxes is None else boxes
+    order = sorted(range(len(boxes)), key=lambda i: -footprint(boxes[i]["size"])[1] * 1000 - footprint(boxes[i]["size"])[0])
     x = y = shelf = 0
     for i in order:
-        fw, fh = footprint(BOXES[i]["size"])
-        if x + fw > TEX_W:
+        fw, fh = footprint(boxes[i]["size"])
+        if x + fw > tex_w:
             x, y, shelf = 0, y + shelf, 0
-        BOXES[i]["uv"] = (x, y)
+        boxes[i]["uv"] = (x, y)
         x += fw
         shelf = max(shelf, fh)
-    assert y + shelf <= TEX_H, ("texture too small", y + shelf)
+    assert y + shelf <= tex_h, ("texture too small", y + shelf)
 
 
 def lerp(a, b, t):
@@ -193,8 +214,9 @@ def faces(b):
     }
 
 
-def paint(img, rnd):
-    for b in BOXES:
+def paint(img, rnd, boxes=None):
+    boxes = BOXES if boxes is None else boxes
+    for b in boxes:
         f = faces(b)
         kind = b["paint"]
         for name, (x0, y0, w, h) in f.items():
@@ -228,7 +250,7 @@ def paint(img, rnd):
                         c = lerp(BONE, BONE_SHADE, v * 0.8 + rnd.random() * 0.1)
                     if kind == "red":
                         c = lerp(RED_DEEP, RED, rnd.random() * 0.6)
-                    if kind == "muzzle" and name == "bottom" or kind == "chin" and name == "top":
+                    if kind in ("muzzle", "maw_skull") and name == "bottom" or kind == "chin" and name == "top" or kind == "maw_muzzle" and name in ("bottom", "back"):
                         # the roof of the mouth and its floor
                         c = lerp(RED_DEEP, RED, 0.3 + rnd.random() * 0.5)
                         if (xx + yy) % 4 == 0:
@@ -243,8 +265,9 @@ def paint(img, rnd):
                         elif row < length:
                             a = 255
                             c = lerp(BONE, BONE_SHADE, row / 3.0 + rnd.random() * 0.15)
-                    if kind == "skull" and name == "front":
-                        ch = EYES[yy][xx] if yy < len(EYES) and xx < len(EYES[yy]) else "."
+                    if kind in ("skull", "maw_skull") and name == "front":
+                        eyes = EYES if kind == "skull" else MAW_EYES
+                        ch = eyes[yy][xx] if yy < len(eyes) and xx < len(eyes[yy]) else "."
                         if ch == "W":
                             c = EYE_WHITE
                         elif ch == "e":
@@ -253,8 +276,8 @@ def paint(img, rnd):
                             c = (2, 2, 4)
                     img.putpixel((x0 + xx, y0 + yy), c + (a,))
     # veins: a few dark threads wandering over the bigger faces
-    for b in BOXES:
-        if b["paint"] not in ("muscle", "fore", "back", "pec"):
+    for b in boxes:
+        if b["paint"] not in ("muscle", "fore", "back", "pec", "maw_skull", "chin"):
             continue
         for name, (x0, y0, w, h) in faces(b).items():
             if w < 4 or h < 4 or rnd.random() < 0.4:
@@ -322,6 +345,11 @@ def java():
     lines.append("\tstatic final float JAW_X = %s, JAW_Y = %s, JAW_Z = %s;" % tuple(fmt(v) for v in JAW_PIVOT))
     lines.append("\t/** The elbows' and knees' hinges in the arm's and leg's space (pixels): the forearms and shins hang off them. */")
     lines.append("\tstatic final float ELBOW_Y = %s, ELBOW_Z = %s, KNEE_Y = %s, KNEE_Z = %s;" % (fmt(ELBOW[1]), fmt(ELBOW[2]), fmt(KNEE[1]), fmt(KNEE[2])))
+    lines.append("\t/**")
+    lines.append("\t * The frame (pixels): on the big body the hips sit {@code LEG_LIFT} higher than the player's and the neck {@code BODY_LIFT}")
+    lines.append("\t * higher (WebHulk.shift), so the legs run {@code LEG} to the ground and the torso {@code TORSO} from the neck to the hips.")
+    lines.append("\t */")
+    lines.append("\tstatic final float BODY_LIFT = %s, LEG_LIFT = %s, TORSO = %s, LEG = %s;" % (fmt(BODY_LIFT), fmt(LEG_LIFT), fmt(TORSO), fmt(LEG)))
     names = []
     for b in BOXES:
         if b["part"] != "jaw":
@@ -377,6 +405,90 @@ def java():
     JAVA.write_text("\n".join(lines) + "\n")
 
 
+# ---- Consume's maw (client WebMouthLayer; Andy: "fix the old large head eating animation to be more like the new
+# style"): the big body's head grown huge over the wearer's own, in the same wet black hide, veins and teal rims, its
+# big white eyes, a heavy muzzle over a red palate, and rows of cut-out fangs; a hinged skull and jaw that gape wide
+# and snap shut. Parts (all hinged at the back of the head, MAW_HINGE in the head's space): the throat (a red wall
+# closing off the face behind it), the skull and the jaw. Boxes are relative to that hinge. ----
+MAW_TEX_W, MAW_TEX_H = 128, 64
+MAW_HINGE = (0, -3, 5)
+MAW_BOXES = []
+
+
+def maw_box(part, name, frm, size, paint):
+    MAW_BOXES.append(dict(part=part, name=name, frm=frm, size=size, paint=paint))
+
+
+maw_box("throat", "wall", (-5, -6, -5), (10, 6, 1), "red")
+maw_box("skull", "cranium", (-5.5, -9, -10.5), (11, 6, 11), "maw_skull")
+maw_box("skull", "brow", (-5, -9.5, -11), (10, 1, 3), "muscle")
+maw_box("skull", "snout", (-5.5, -3, -11.5), (11, 3, 11), "maw_muzzle")
+maw_box("skull", "fangs", (-5.5, 0, -11.5), (11, 3, 1), "fangs_down")
+maw_box("skull", "fangs_r", (-5.5, 0, -10.5), (1, 3, 9), "fangs_down")
+maw_box("skull", "fangs_l", (4.5, 0, -10.5), (1, 3, 9), "fangs_down")
+maw_box("jaw", "chin", (-5.5, 0, -11), (11, 3, 11), "chin")
+maw_box("jaw", "jaw_fangs", (-5, -3, -10.5), (10, 3, 1), "fangs_up")
+maw_box("jaw", "jaw_fangs_r", (-5.5, -3, -9.5), (1, 3, 8), "fangs_up")
+maw_box("jaw", "jaw_fangs_l", (4.5, -3, -9.5), (1, 3, 8), "fangs_up")
+
+# the maw's eyes: 11 wide, angled in to meet over the snout
+MAW_EYES = [
+    "...........",
+    "eWWWk.kWWWe",
+    ".eWWWkWWWe.",
+    "..eWWkWWe..",
+    "...eWkWe...",
+    "....k.k....",
+]
+
+MAW_JAVA = JAVA.with_name("WebMawMesh.java")
+
+
+def maw_java():
+    lines = []
+    lines.append("package com.jaymospowers.client.power.web;")
+    lines.append("")
+    lines.append("import net.minecraft.client.model.geom.PartPose;")
+    lines.append("import net.minecraft.client.model.geom.builders.CubeListBuilder;")
+    lines.append("import net.minecraft.client.model.geom.builders.LayerDefinition;")
+    lines.append("import net.minecraft.client.model.geom.builders.MeshDefinition;")
+    lines.append("import net.minecraft.client.model.geom.builders.PartDefinition;")
+    lines.append("")
+    lines.append("/**")
+    lines.append(" * GENERATED by {@code tools/gen_web_hulk.py}: don't edit by hand. Consume's maw (WebMouthLayer) in the big body's style:")
+    lines.append(" * a throat, a skull and a jaw, all hinged at the back of the head, UV-mapped onto {@code web_symbiote_mouth.png}.")
+    lines.append(" */")
+    lines.append("final class WebMawMesh {")
+    lines.append("\tstatic final int TEX_W = %d, TEX_H = %d;" % (MAW_TEX_W, MAW_TEX_H))
+    lines.append("")
+    lines.append("\tprivate WebMawMesh() {")
+    lines.append("\t}")
+    lines.append("")
+    lines.append("\tstatic LayerDefinition create() {")
+    lines.append("\t\tMeshDefinition mesh = new MeshDefinition();")
+    lines.append("\t\tPartDefinition root = mesh.getRoot();")
+    hx, hy, hz = MAW_HINGE
+    lines.append("\t\tPartDefinition throat = root.addOrReplaceChild(\"throat\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));" % (fmt(hx), fmt(hy), fmt(hz)))
+    lines.append("\t\tPartDefinition skull = root.addOrReplaceChild(\"skull\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));" % (fmt(hx), fmt(hy), fmt(hz)))
+    lines.append("\t\tPartDefinition jaw = root.addOrReplaceChild(\"jaw\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));" % (fmt(hx), fmt(hy), fmt(hz)))
+    for b in MAW_BOXES:
+        ox, oy, oz = b["frm"]
+        lines.append("\t\t%s.addOrReplaceChild(\"%s\", CubeListBuilder.create().texOffs(%d, %d).addBox(%s, %s, %s, %d, %d, %d), PartPose.ZERO);"
+                     % (b["part"], b["name"], b["uv"][0], b["uv"][1], fmt(ox), fmt(oy), fmt(oz), *(math.ceil(v) for v in b["size"])))
+    lines.append("\t\treturn LayerDefinition.create(mesh, TEX_W, TEX_H);")
+    lines.append("\t}")
+    lines.append("}")
+    MAW_JAVA.write_text("\n".join(lines) + "\n")
+
+
+def maw():
+    pack(MAW_BOXES, MAW_TEX_W, MAW_TEX_H)
+    img = Image.new("RGBA", (MAW_TEX_W, MAW_TEX_H), (0, 0, 0, 0))
+    paint(img, random.Random(4343), MAW_BOXES)
+    img.save(TEXTURES / "web_symbiote_mouth.png")
+    maw_java()
+
+
 def main():
     pack()
     rnd = random.Random(4242)
@@ -386,7 +498,8 @@ def main():
     img.save(TEXTURES / "web_symbiote_hulk.png")
     flesh().save(TEXTURES / "web_symbiote_flesh.png")
     java()
-    print("boxes:", len(BOXES))
+    maw()
+    print("boxes:", len(BOXES), "maw boxes:", len(MAW_BOXES))
 
 
 if __name__ == "__main__":

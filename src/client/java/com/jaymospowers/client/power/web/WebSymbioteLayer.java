@@ -77,9 +77,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, GOO, poseStack, collector, lightCoords, state, -1, 1);
 			}
 			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-			if (high < 2 && !state.isInvisible && !WebSymbioteClient.ownFirstPerson(state)) {
-				WebHulk.submitSuitTongue(poseStack, collector, state, this.getParentModel());
-			}
+			// (no tongue on the plain suit: only the big body has one, Andy)
 			if (high == 2) {
 				coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
@@ -102,10 +100,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		}
 		PlayerModel suit = slim ? this.suitSlim : this.suitWide;
 		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-		if (!state.isInvisible && !WebSymbioteClient.ownFirstPerson(state)) {
-			// put on by hand: it shows its tongue (Andy)
-			WebHulk.submitSuitTongue(poseStack, collector, state, this.getParentModel());
-		}
+		// (the plain suit has no tongue: Andy, "I'd also like the tounge to be kept to the large suit"; Consume's maw
+		// still has its own while it eats, WebMouthLayer)
 		Float feral = state.getData(WebSymbioteClient.FERAL);
 		if (feral != null && feral > 1.0F - VEIN_BOND / (float)com.jaymospowers.power.web.WebSymbiote.BOND_MAX) {
 			// still feral: its veins show through the suit

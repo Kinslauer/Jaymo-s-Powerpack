@@ -5,11 +5,6 @@ import com.jaymospowers.power.web.WebSymbiote;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -21,25 +16,37 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * The symbiote's maw, while it eats (Consume): the whole head morphs into it. A skull and a jaw, bigger than the head
- * and closing right over it, rimmed with fangs, hinged at the back of the head. It swells out as the tendril brings
- * the meal up, gapes to its widest and snaps shut on each bite (one, or two for something cow-sized), chews a while,
- * and sinks back (timings in {@link WebSymbiote#EAT_REACH} and on). Everyone sees it. Texture: {@code tools/gen_web_maw.py}.
+ * The symbiote's maw, while it eats (Consume): the whole head morphs into it. Since Andy's "fix the old large head
+ * eating animation to be more like the new style" it's the big body's head grown huge ({@link WebMawMesh} and its
+ * texture, from {@code tools/gen_web_hulk.py}): the same wet black hide with its veins and teal rims, the big white
+ * eyes, a heavy snout over a red palate, rows of fangs; a skull and a jaw bigger than the head and closing right over
+ * it, hinged at the back of the head. It swells out as the tendril brings the meal up, breathing with its jaws a
+ * little open, then gapes as wide as it goes over the meal (quivering), lashes its tongue out at it, and snaps shut on
+ * each bite in {@code SNAP_TICKS} (one, or two for something cow-sized), the skull jolting down on it; chews a while,
+ * and sinks back (timings in {@link WebSymbiote#EAT_REACH} and on). Everyone sees it. The maw keeps its tongue on the
+ * plain suit too (the one tongue the plain suit has: it's eating).
  */
 final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_mouth.png");
 	/** How far the skull lifts and the jaw drops at the widest (radians). */
-	private static final float SKULL_GAPE = 0.95F, JAW_GAPE = 0.8F;
+	private static final float SKULL_GAPE = 0.8F, JAW_GAPE = 1.15F;
 	/** At the very widest, the maw is this much bigger, and this far forward (pixels). */
 	private static final float SWELL = 0.45F, LUNGE = 3.0F;
-	/** How many ticks before a bite the maw starts to gape, and how wide a chew opens it. */
-	private static final float GAPE_TICKS = 8.0F, CHEW_OPEN = 0.18F;
 	/**
-	 * Its tongue (the big body's, {@link WebHulk#tongue}): {@code TONGUE_LEAD} ticks before the last bite it lashes out
-	 * at the meal, all the way out by {@code TONGUE_OUT} of that and drawn back in from {@code TONGUE_IN}, gone into the
-	 * mouth as the jaws snap shut. It also tastes the air as the maw first swells out ({@code TASTE} of its length).
+	 * Eating: the jaws hang {@code REST_OPEN} open, breathing {@code REST_BREATH}, as the meal comes up; {@code GAPE_TICKS}
+	 * before a bite's snap they gape to the widest, quivering {@code GAPE_QUIVER}; then they snap shut in {@code SNAP_TICKS},
+	 * landing on the bite, and the skull jolts down {@code SNAP_JOLT} (radians) over {@code JOLT_TICKS}. A chew opens it
+	 * {@code CHEW_OPEN}.
 	 */
-	private static final float TONGUE_LEAD = 7.0F, TONGUE_OUT = 0.35F, TONGUE_IN = 0.7F, TASTE = 0.5F;
+	private static final float REST_OPEN = 0.14F, REST_BREATH = 0.05F, GAPE_TICKS = 10.0F, GAPE_QUIVER = 0.05F, SNAP_TICKS = 1.5F,
+		SNAP_JOLT = 0.12F, JOLT_TICKS = 3.0F, CHEW_OPEN = 0.18F;
+	/**
+	 * Its tongue (the big body's, {@link WebHulk#tongue}): {@code TONGUE_LEAD} ticks before each bite it lashes out at the
+	 * meal from the gaping jaws, all the way out by {@code TONGUE_OUT} of that and drawn back in from {@code TONGUE_IN},
+	 * gone into the mouth as the jaws snap shut. It also tastes the air as the maw first swells out ({@code TASTE} of its
+	 * length).
+	 */
+	private static final float TONGUE_LEAD = 8.0F, TONGUE_OUT = 0.35F, TONGUE_IN = 0.72F, TASTE = 0.5F;
 	/** The maw's tongue: pieces, each one's length (pixels), its width and thickness at the root, drooping each piece. */
 	private static final int TONGUE_PIECES = 14;
 	private static final float TONGUE_PIECE = 1.8F, TONGUE_WIDTH = 2.2F, TONGUE_THICK = 0.7F, TONGUE_DROOP = 0.04F;
@@ -48,27 +55,9 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	WebMouthLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition root = mesh.getRoot();
-		// the throat, closing off the face behind it
-		root.addOrReplaceChild("throat", CubeListBuilder.create().texOffs(32, 40).addBox(-5.0F, -5.5F, -5.0F, 10.0F, 5.0F, 0.5F), PartPose.ZERO);
-		// the skull over the head: fangs down along its rim, a red palate inside
-		root.addOrReplaceChild("skull", CubeListBuilder.create()
-				.texOffs(0, 0).addBox(-5.5F, -8.5F, -10.5F, 11.0F, 8.5F, 11.0F)
-				.texOffs(32, 40).addBox(-4.5F, -0.6F, -10.0F, 9.0F, 0.5F, 7.0F)
-				.texOffs(0, 40).addBox(-5.0F, 0.0F, -10.3F, 10.0F, 3.0F, 1.0F)
-				.texOffs(0, 40).addBox(-5.0F, 0.0F, -9.3F, 1.0F, 3.0F, 8.0F)
-				.texOffs(0, 40).addBox(4.0F, 0.0F, -9.3F, 1.0F, 3.0F, 8.0F),
-			PartPose.offset(0.0F, -3.0F, 5.0F));
-		// the jaw under it: fangs up, a tongue
-		root.addOrReplaceChild("jaw", CubeListBuilder.create()
-				.texOffs(0, 20).addBox(-5.5F, 0.0F, -10.5F, 11.0F, 3.5F, 11.0F)
-				.texOffs(32, 40).addBox(-4.5F, -0.4F, -10.0F, 9.0F, 0.5F, 7.0F)
-				.texOffs(0, 52).addBox(-5.0F, -3.0F, -10.3F, 10.0F, 3.0F, 1.0F)
-				.texOffs(0, 52).addBox(-5.0F, -3.0F, -9.3F, 1.0F, 3.0F, 8.0F)
-				.texOffs(0, 52).addBox(4.0F, -3.0F, -9.3F, 1.0F, 3.0F, 8.0F),
-			PartPose.offset(0.0F, -3.0F, 5.0F));
-		this.model = new MouthModel(LayerDefinition.create(mesh, 64, 64).bakeRoot());
+		// the big body's head grown huge: the throat closing off the face behind it, the skull (eyes, snout, red palate,
+		// fangs down) and the jaw (fangs up), hinged at the back of the head
+		this.model = new MouthModel(WebMawMesh.create().bakeRoot());
 	}
 
 	@Override
@@ -98,10 +87,18 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		boolean big = Boolean.TRUE.equals(state.getData(WebSymbioteClient.MEAL_BIG));
 		Integer reachData = state.getData(WebSymbioteClient.MEAL_REACH);
 		int reach = reachData == null ? WebSymbiote.EAT_REACH : reachData;
-		float before = WebSymbiote.biteAt(big ? 1 : 0, reach) - t;
+		// the next bite's lash (each bite has one)
+		float before = -1.0F;
+		for (int n = 0; n <= (big ? 1 : 0); n++) {
+			float b = WebSymbiote.biteAt(n, reach) - t;
+			if (b >= 0.0F && b < TONGUE_LEAD) {
+				before = b;
+				break;
+			}
+		}
 		float out;
 		float whip;
-		if (before >= 0.0F && before < TONGUE_LEAD) {
+		if (before >= 0.0F) {
 			// lashed out at the meal, then reeled back in under the falling jaw
 			float f = 1.0F - before / TONGUE_LEAD;
 			out = f < TONGUE_OUT ? f / TONGUE_OUT : f > TONGUE_IN ? (1.0F - f) / (1.0F - TONGUE_IN) : 1.0F;
@@ -209,20 +206,32 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			int reach = reachData == null ? WebSymbiote.EAT_REACH : reachData;
 			int last = WebSymbiote.biteAt(big ? 1 : 0, reach);
 			int end = WebSymbiote.mealTicks(big, reach);
-			// gaping wide toward each bite, snapping shut on it
-			float open = 0.0F;
+			// hanging a little open and breathing as the meal comes up; gaping as wide as it goes over it, quivering,
+			// and snapping shut on each bite, the skull jolting down on it
+			float open = t < last ? REST_OPEN + REST_BREATH * Mth.sin(state.ageInTicks * 0.3F) : 0.0F;
+			float jolt = 0.0F;
 			for (int n = 0; n <= (big ? 1 : 0); n++) {
 				float before = WebSymbiote.biteAt(n, reach) - t;
-				if (before >= 0.0F && before < GAPE_TICKS) {
-					float g = 1.0F - before / GAPE_TICKS;
-					open = Math.max(open, g * g * (3.0F - 2.0F * g));
+				if (before >= 0.0F && before < GAPE_TICKS + SNAP_TICKS) {
+					if (before > SNAP_TICKS) {
+						float g = 1.0F - (before - SNAP_TICKS) / GAPE_TICKS;
+						float wide = g * g * (3.0F - 2.0F * g);
+						open = Math.max(open, wide + Mth.sin(state.ageInTicks * 2.3F) * GAPE_QUIVER * wide);
+					} else {
+						// the snap: slammed shut, fastest at the end
+						float s = before / SNAP_TICKS;
+						open = s * s;
+					}
+				} else if (before < 0.0F && before > -JOLT_TICKS) {
+					open = 0.0F;
+					jolt = Math.max(jolt, Mth.sin(-before / JOLT_TICKS * Mth.PI));
 				}
 			}
 			// then chewing
-			if (t > last && t < end - WebSymbiote.EAT_SHRINK) {
+			if (t > last + JOLT_TICKS && t < end - WebSymbiote.EAT_SHRINK) {
 				open = Math.max(open, CHEW_OPEN * Math.abs(Mth.sin((t - last) * 0.45F)));
 			}
-			this.skull.xRot = -open * SKULL_GAPE;
+			this.skull.xRot = -open * SKULL_GAPE + jolt * SNAP_JOLT;
 			this.jaw.xRot = open * JAW_GAPE;
 			// it grows out of the head as the meal comes up, swells with every gape, and sinks back at the end
 			float morph = Mth.clamp(Math.min(t / reach, (end - t) / WebSymbiote.EAT_SHRINK), 0.0F, 1.0F);

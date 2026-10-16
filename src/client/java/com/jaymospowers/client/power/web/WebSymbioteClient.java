@@ -302,7 +302,9 @@ public final class WebSymbioteClient {
 			if (peelTicks > 0 && takeoverTicks <= 0 && !minecraft.isPaused()) {
 				// fighting it for the suit: the bar drains as against a takeover (the server ends it; this only stops it hanging)
 				peelTicks--;
-				struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
+				// (slower the better the bond, as the server's: WebSymbioteBond.fightFade)
+				float fade = self == null ? WebSymbiote.TAKEOVER_STRUGGLE_FADE : com.jaymospowers.power.web.WebSymbioteBond.fightFade(WebSymbiote.state(self).bond());
+				struggleMeter = Math.max(0.0F, struggleMeter - fade);
 			}
 			sensing = self != null && WebPowerClient.isActive(self) && Fate.isAscended(self);
 			while (menuKey.consumeClick()) {

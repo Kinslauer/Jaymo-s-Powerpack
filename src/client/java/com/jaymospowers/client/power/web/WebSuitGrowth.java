@@ -57,6 +57,11 @@ public final class WebSuitGrowth {
 	 * up it flows back up over the face over {@code FACE_FLOW_TICKS}.
 	 */
 	static final float FIGHT_TEAR_MIN = 0.06F, FIGHT_TEAR_MAX = 0.3F, FACE_FLOW_TICKS = 16.0F;
+	/**
+	 * When the fight ends with the suit still on (won to a bare face, or lost), the tear-off it was held at settles back
+	 * over {@code FIGHT_SETTLE_TICKS} (the suit flowing back over the chest and arms) instead of popping back.
+	 */
+	static final float FIGHT_SETTLE_TICKS = 10.0F;
 
 	/** What each of the suit layer's models is. */
 	enum Role {
@@ -89,6 +94,13 @@ public final class WebSuitGrowth {
 	/** Players whose face was bare last time we looked; and when each one's face began to be covered again. */
 	private static final Set<Integer> FACE_ON = new java.util.HashSet<>();
 	private static final Map<Integer, Long> FACE_GONE = new HashMap<>();
+	/** Players fighting it for the suit (or settling after): how far the tear-off was, and when the fight ended (-1: still on). */
+	private static final Map<Integer, Settle> FIGHTS = new HashMap<>();
+
+	private static final class Settle {
+		float t;
+		long ended = -1L;
+	}
 
 	private WebSuitGrowth() {
 	}
@@ -154,11 +166,32 @@ public final class WebSuitGrowth {
 		if (now == 1 && com.jaymospowers.power.web.WebSymbioteBond.fighting(player)) {
 			// it fights you for it: the tear-off, driven back and forth by the struggle bar (see FIGHT_TEAR_MIN)
 			Float pull = state.getData(PULL);
-			state.setData(KEY, new Growth(1, 0, Mth.lerp(pull == null ? 0.0F : pull, FIGHT_TEAR_MIN, FIGHT_TEAR_MAX), true));
+			Settle fight = FIGHTS.computeIfAbsent(player.getId(), id -> new Settle());
+			fight.t = Mth.lerp(pull == null ? 0.0F : pull, FIGHT_TEAR_MIN, FIGHT_TEAR_MAX);
+			fight.ended = -1L;
+			state.setData(KEY, new Growth(1, 0, fight.t, true));
+		} else {
+			Settle fight = FIGHTS.get(player.getId());
+			if (fight != null) {
+				if (fight.ended < 0L) {
+					fight.ended = tick;
+				}
+				float left = 1.0F - (tick - fight.ended + partialTicks) / FIGHT_SETTLE_TICKS;
+				if (now != 1 || state.getData(KEY) != null || left <= 0.0F) {
+					// settled (or a real change has it now: the tear-off, a takeover's big body)
+					FIGHTS.remove(player.getId());
+				} else {
+					// the fight's over and the suit stays: it flows back over the chest and arms, no pop
+					state.setData(KEY, new Growth(1, 0, fight.t * ease(left), true));
+				}
+			}
 		}
 		state.setData(FACE, face(player, now, tick, partialTicks));
 		if (CHANGES.size() > 256) {
 			CHANGES.keySet().removeIf(id -> Minecraft.getInstance().level == null || Minecraft.getInstance().level.getEntity(id) == null);
+		}
+		if (FIGHTS.size() > 64) {
+			FIGHTS.clear();
 		}
 	}
 
@@ -199,11 +232,15 @@ public final class WebSuitGrowth {
 			return;
 		}
 		if (model.getClass().getName().startsWith(MCA_MODELS)) {
-			mcaUnder(model, covered(avatar));
+			// (MCA's body goes under the suit whole, so it must come back whenever the suit doesn't cover it all: torn at,
+			// fought, peeled in a takeover's hold. That was the missing body under the fight: Andy's pack draws players
+			// with MCA's model, and all of it was hidden while the suit was being torn off it.)
+			mcaUnder(model, covered(avatar) && !bared(avatar));
 			return;
 		}
+		float k = hulkness(avatar);
 		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
-			WebHulk.shift(humanoid, hulkness(avatar));
+			WebHulk.shift(humanoid, k);
 		}
 		if (!(model instanceof PlayerModel player)) {
 			return;
@@ -218,7 +255,10 @@ public final class WebSuitGrowth {
 				if (face == null || face < 0.5F) {
 					player.hat.visible = false;
 				}
-				player.jacket.visible = false;
+				if (!bared(avatar)) {
+					// (torn at or peeled, the chest shows, its jacket with it)
+					player.jacket.visible = false;
+				}
 				player.leftSleeve.visible = false;
 				player.rightSleeve.visible = false;
 				player.leftPants.visible = false;
@@ -234,6 +274,8 @@ public final class WebSuitGrowth {
 			hulk.limbs(avatar);
 		} else {
 			lay(player, avatar, role);
+			// (laid under the big body as it's built or peeled: stretched to its longer frame)
+			WebHulk.stretch(player, k, avatar.ageInTicks);
 		}
 		if (WebSymbioteClient.ownFirstPerson(avatar)) {
 			player.head.visible = false;
@@ -304,6 +346,8 @@ public final class WebSuitGrowth {
 
 	/** The suit (or the goo under it) laid over each part from its joint out, as far as it's got. */
 	private static void lay(PlayerModel player, AvatarRenderState avatar, Role role) {
+		// (the tear-off hides the goo whole; it's back for the next time the suit goes on over bare skin)
+		player.root().visible = true;
 		Growth growth = avatar.getData(KEY);
 		if (growth != null && growth.tear()) {
 			// torn off: WebSuitTear lays it (after the poses)
@@ -355,6 +399,15 @@ public final class WebSuitGrowth {
 			part.zScale = Mth.lerp(cover, 0.9F, 1.0F) + ripple;
 			part.visible = cover > 0.02F;
 		}
+	}
+
+	/**
+	 * The suit doesn't cover the body right now though it's on: it's being torn off (or fought over, or settling back
+	 * after the fight), or you're tearing out of a takeover's hold. The body under it must show.
+	 */
+	private static boolean bared(AvatarRenderState avatar) {
+		Growth growth = avatar.getData(KEY);
+		return growth != null && growth.tear() || avatar.getData(PULL) != null;
 	}
 
 	/** The suit (or Living Armor's bulk) is all over them, not growing or drawing back. */
