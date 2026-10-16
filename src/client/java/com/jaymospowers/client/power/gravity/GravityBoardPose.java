@@ -178,9 +178,11 @@ public final class GravityBoardPose {
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		h.body.zRot = 0.0F;
-		// the head turns back round to look where they're going (and where the player's looking), eyes up past the hinge
+		// the head turns back round to look where they're going (and where the player's looking), eyes up past the hinge;
+		// from where they're looking (the render state), never the head as it stands, since MCA's skin, clothes and hair
+		// models arrive already posed and a second turn would twist their heads round again (two heads, one each way)
 		Quaternionf look = new Quaternionf().rotationX(-pitch * HEAD_LEVEL).rotateY(-STANCE * Mth.DEG_TO_RAD * side)
-			.rotateY(h.head.yRot).rotateX(h.head.xRot);
+			.rotateY(living.yRot * Mth.DEG_TO_RAD).rotateX(living.xRot * Mth.DEG_TO_RAD);
 		Vector3f euler = look.getEulerAnglesZYX(new Vector3f());
 		set(h.head, euler.x, euler.y, euler.z);
 	}
