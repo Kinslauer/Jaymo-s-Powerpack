@@ -214,6 +214,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		if (client != null && !minecraft.isPaused()) {
 			client.tick(minecraft, player);
 		}
+		// (0.11.87) the Rig's hover and full flight, before the roll too
+		com.jaymospowers.client.rig.RigClient.motion(minecraft, player);
 		if (!minecraft.isPaused()) {
 			// after the flight has set this tick's velocity: a barrel roll slides on top of it
 			FlightRolls.tick(minecraft, player);

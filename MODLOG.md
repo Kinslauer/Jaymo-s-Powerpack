@@ -1424,3 +1424,29 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   kingdom made a fiefdom now has its king step down to lord in place (circlet, diamond, purple bar, lord's title) and
   its folk take the overlord's arms; lords keep a smaller escort (4); a fiefdom's audience names its overlord. See
   kingdoms/MODLOG.md.
+- **0.11.87, the Rig (stage 2): the Mind grows up.** Mind levels 1-5 on the Core (`rig_xp`; `Rig.LEVEL_XP` 0/100/300/
+  700/1400; creative counts as 5), learned while the Core is worn (`RigLevels`): kills (hostile 5, player 25, anything
+  with 150+ max health 120), wrecks salvaged (40), time worn (1 a minute) and danger warnings proved right (8: still
+  alive 10 s after an urgent or low-health warning; dying clears it). Each level the Mind remarks on in its own voice
+  (Loyal/Dry/Grim) and names what it unlocked; the Helm's HUD shows "Lv" and a thin progress strip, the Core's tooltip
+  the XP. Level 2, **lock-on**: hold the Rig key (J) on a creature (the one nearest the crosshair within 32 blocks, in
+  sight); held on nothing it lets go. The lock glows hot pink through walls on the wearer's screen only, with brackets
+  round it and a LOCK row on the HUD; palm blasts bend to it when it's within ~37 degrees of the look, missiles home on
+  it; it breaks past 48 blocks, on death or without the Helm. Level 3, **scans** (Helm + Core; no power: hold B, the
+  tap still reports; with one: Scan in the J cycle; 80 charge, 10 s cooldown): hostiles (red) and players (gold) glow
+  on your screen for 10 s, chests and ores within 12 blocks are marked on the HUD through walls, and the Mind sums up
+  in chat and names the target's (the lock, else the nearest hostile) weakness by vanilla tags (Smite, Bane, Impaling,
+  freezing, water for endermen...). Level 3, **suit calling** (`RigCall`): no power: C (the ultimate key, idle without
+  a power); with one: Suit in the J cycle, or J with nothing worn. It parks the worn Rig (the pieces blast off; kept on
+  the player in the `rig_parked` attachment, through death: the suit wasn't on you) and calls it back: sparks stream
+  in from the sky behind you, then the pieces lock on boots first, a clank and a jolt on screen each; armour in the way
+  goes to the inventory. Level 4, **takeover save** (`RigTakeover`, whole set): a hit that leaves you under 3 hearts
+  with 150 charge and the save ready: the screen flashes a red frame, your view snaps to the threat, the thrusters
+  throw you away from it (the last attacker, else the nearest hostile or projectile), absorption II for 15 s, and the
+  hover catches you after 14 ticks; then 5 minutes' cooldown (kept on the Core, `rig_takeover`; the HUD's Save cell
+  counts down). Level 5, **full flight** (whole set): double-tap Jump while hovering (again: back to hover); fly where
+  you look (0.85 b/t, Sprint 1.1), Jump/Sneak climb and dive, strafe on A/D; 9 charge every 5 ticks, a little hunger,
+  and a sudden stop against a wall hurts by the speed lost squared. The barrel roll works on the Rig's thrusters too
+  (`FlightRoll.flying`), and the Rig won't hover while a power's flight is on (`FlightRoll.powerFlying`). The H screen
+  lists the Rig's keys after the power's while a piece is worn or the suit is parked; each line appears only once the
+  Mind's level unlocks it (Andy: nothing shows until you find it).

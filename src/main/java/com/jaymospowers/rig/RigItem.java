@@ -31,6 +31,13 @@ public class RigItem extends Item {
 			builder.accept(mind == null ? Component.translatable("tooltip.jaymospowers.rig.mind_asleep").withStyle(ChatFormatting.DARK_GRAY)
 				: Component.translatable("tooltip.jaymospowers.rig.mind", Component.translatable("rig.jaymospowers.personality." + mind))
 					.withStyle(ChatFormatting.AQUA));
+			if (mind != null) {
+				// (0.11.87) the Mind's level
+				int level = Rig.level(stack);
+				int xp = stack.getOrDefault(Rig.XP, 0);
+				builder.accept(level >= Rig.MAX_LEVEL ? Component.translatable("tooltip.jaymospowers.rig.level_max", level).withStyle(ChatFormatting.AQUA)
+					: Component.translatable("tooltip.jaymospowers.rig.level", level, xp, Rig.LEVEL_XP[level]).withStyle(ChatFormatting.AQUA));
+			}
 		}
 		if (this.piece == Rig.Piece.ARMS) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.rig.arms.slot").withStyle(ChatFormatting.DARK_GRAY));

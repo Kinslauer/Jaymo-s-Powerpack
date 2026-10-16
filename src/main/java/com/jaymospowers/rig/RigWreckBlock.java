@@ -63,5 +63,7 @@ public class RigWreckBlock extends Block {
 		int n = Math.floorMod((int)(pos.asLong() ^ pos.asLong() >>> 32), this.fallen ? FALLEN_LORE : DEAD_LORE);
 		String key = (this.fallen ? "rig.jaymospowers.fallen.lore." : "rig.jaymospowers.dead.lore.") + n;
 		player.sendSystemMessage(Component.translatable(key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		// (0.11.87) the dead suit teaches the worn one's Mind
+		RigLevels.salvaged(player);
 	}
 }
