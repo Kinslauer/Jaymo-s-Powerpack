@@ -32,7 +32,7 @@ abstract class LeavesStateMixin {
 	private void jaymospowers$leafDrag(Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise,
 		CallbackInfo ci) {
 		if (Leaves.is((BlockState)(Object)this)) {
-			Leaves.inside(entity);
+			Leaves.inside(level, pos, entity);
 		}
 	}
 }

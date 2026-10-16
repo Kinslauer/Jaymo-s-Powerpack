@@ -33,6 +33,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
 		com.jaymospowers.core.Impacts.init();
+		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();

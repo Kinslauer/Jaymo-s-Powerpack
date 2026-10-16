@@ -92,7 +92,7 @@ public final class CarryPose {
 		Carry.Carrying carrying = entity.getAttached(Carry.CARRYING);
 		Entity target = carrying == null ? null : entity.level().getEntity(carrying.target());
 		state.setData(CARRIER_KEY, carrying == null ? null
-			: new Holding(carrying.hold(), !(target instanceof Player), entity.tickCount + partialTicks, target == null ? 0.6F : target.getBbWidth()));
+			: new Holding(carrying.hold(), !Carry.person(target), entity.tickCount + partialTicks, target == null ? 0.6F : target.getBbWidth()));
 		Long thrown = entity.getAttached(Carry.THROWN);
 		float since = thrown == null ? -1.0F : entity.level().getGameTime() - thrown + partialTicks;
 		state.setData(THROWN_KEY, since >= 0.0F && since < Carry.THROWN_TICKS ? since : null);
@@ -103,7 +103,7 @@ public final class CarryPose {
 			return;
 		}
 		float[] sway = CarryClient.swayOf(entity, partialTicks);
-		state.setData(HELD_KEY, new Held(hold.hold(), !(entity instanceof Player), carrier.getId(), partialTicks, sway[0], sway[1], sway[2],
+		state.setData(HELD_KEY, new Held(hold.hold(), !Carry.person(entity), carrier.getId(), partialTicks, sway[0], sway[1], sway[2],
 			entity.tickCount + partialTicks, entity.getBbWidth(), entity.getBbHeight()));
 		// turned to the carrier's facing, limp: no walking, crouching, swimming or anything else's pose
 		state.bodyRot = Mth.rotLerp(partialTicks, carrier.yBodyRotO, carrier.yBodyRot);
