@@ -67,7 +67,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Counter animations (`WebCounterPose`):** all 18 counters (9 web, 9 symbiote) have their own body animation,
   driven by the synced `WebCounter.ACTIVE`; the side is picked from game time so server and client agree.
 - **Hulking big body (`WebHulk`, mesh from `tools/gen_web_hulk.py` → `WebHulkMesh` + `web_symbiote_hulk.png`):**
-  since 0.11.98 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
+  since 0.11.99 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
   All Rights Reserved) but all symbiote: 46 boxes, upright, a broad chest over deep lats, huge shoulders, thick arms
   ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
   (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
