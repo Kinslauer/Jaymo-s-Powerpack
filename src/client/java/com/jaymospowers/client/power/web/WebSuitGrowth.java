@@ -82,6 +82,14 @@ public final class WebSuitGrowth {
 
 	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
 	/** On a player's render state while they fight a takeover's hold: how far out of it they've torn (0-1, tugging), else null. */
+	/**
+	 * (0.13.4) How far the goo has pooled up the legs from the feet (0-1) while it braces for a deadly landing
+	 * ({@link com.jaymospowers.power.web.WebSymbioteCushion}), or null. Only drawn bare of the suit (the suit takes no
+	 * fall damage).
+	 */
+	public static final RenderStateDataKey<Float> CUSHION = RenderStateDataKey.create(() -> "jaymospowers:web_suit_cushion");
+	/** How much wider than the leg the goo pools at the foot, and how hard its surface ripples. */
+	static final float CUSHION_SPREAD = 0.22F, CUSHION_RIPPLE = 0.06F;
 	public static final RenderStateDataKey<Float> PULL = RenderStateDataKey.create(() -> "jaymospowers:web_suit_pull");
 	/** On a player's render state while only their face is bare (or the suit flowing back over it): how bare (0-1), else null. */
 	public static final RenderStateDataKey<Float> FACE = RenderStateDataKey.create(() -> "jaymospowers:web_suit_face");
@@ -122,6 +130,7 @@ public final class WebSuitGrowth {
 	/** While extracting a player's render state: notes a change, and puts the one under way on the state. */
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
 		int now = level(player);
+		state.setData(CUSHION, cushion(player, partialTicks));
 		long[] change = CHANGES.get(player.getId());
 		// game time, not the player's own age: a respawned player's age starts over, which would hold a change
 		// (the suit falling away at death) part-done until it caught up
@@ -195,6 +204,19 @@ public final class WebSuitGrowth {
 		}
 	}
 
+	/** How far the goo has pooled up the legs (see {@link #CUSHION}): up over the pool, back down as it drains. */
+	private static @org.jspecify.annotations.Nullable Float cushion(Player player, float partialTicks) {
+		Long mark = player.getAttached(com.jaymospowers.power.web.WebSymbioteCushion.CUSHION);
+		if (mark == null || level(player) != 0) {
+			return null;
+		}
+		float age = player.level().getGameTime() + partialTicks;
+		float cover = mark > 0L
+			? ease((age - mark) / com.jaymospowers.power.web.WebSymbioteCushion.POOL_TICKS)
+			: 1.0F - ease((age + mark) / com.jaymospowers.power.web.WebSymbioteCushion.DRAIN_TICKS);
+		return cover > 0.01F ? cover : null;
+	}
+
 	/** How bare this player's face is (1 bare, falling as the suit flows back over it), or null (see {@link #FACE}). */
 	private static @org.jspecify.annotations.Nullable Float face(Player player, int level, long tick, float partialTicks) {
 		int id = player.getId();
@@ -247,6 +269,12 @@ public final class WebSuitGrowth {
 		}
 		Role role = MODELS.get(model);
 		if (role == null) {
+			Float pooled = avatar.getData(CUSHION);
+			if (pooled != null && pooled > 0.3F) {
+				// (the trousers' outer layer would poke through the goo pooled over the legs)
+				player.leftPants.visible = false;
+				player.rightPants.visible = false;
+			}
 			// the wearer's own body: the skin's outer layer (hat, jacket, sleeves, trousers) sits further out than the
 			// suit, and would poke through it in patches, so it goes under the suit while the suit covers it all
 			if (covered(avatar)) {
@@ -354,6 +382,25 @@ public final class WebSuitGrowth {
 			return;
 		}
 		ModelPart[] parts = {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg};
+		Float pooled = avatar.getData(CUSHION);
+		if (growth == null && pooled != null && role == Role.GOO) {
+			// (0.13.4) bracing for a landing: only the legs, the goo welling up them from the feet (anchored at the foot,
+			// so it rises toward the hip), wider at the bottom, its surface rippling as it climbs
+			for (ModelPart part : parts) {
+				part.visible = false;
+			}
+			for (int i = 4; i <= 5; i++) {
+				ModelPart leg = parts[i];
+				float ripple = Mth.sin(avatar.ageInTicks * 0.9F + i * 1.7F) * CUSHION_RIPPLE * (1.0F - pooled * 0.5F);
+				leg.visible = pooled > 0.02F;
+				leg.yScale = pooled;
+				// (a leg hangs 12 pixels from its hip: drop the pivot so the scaled part still ends at the foot)
+				leg.y += 12.0F * (1.0F - pooled);
+				leg.xScale = 1.0F + CUSHION_SPREAD * (1.0F - pooled) + ripple;
+				leg.zScale = 1.0F + CUSHION_SPREAD * (1.0F - pooled) + ripple;
+			}
+			return;
+		}
 		Float pull = avatar.getData(PULL);
 		if (growth == null && pull != null && role == Role.SUIT) {
 			// fighting its hold: each part torn partway out of it (back toward its joint), the edge rippling as it heaves

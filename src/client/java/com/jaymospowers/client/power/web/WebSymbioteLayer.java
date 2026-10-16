@@ -99,6 +99,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
+			if (state.getData(WebSuitGrowth.CUSHION) != null && !state.isInvisible) {
+				// (0.13.4) bare of the suit, bracing for a deadly landing: the goo pools up the legs (WebSuitGrowth.lay)
+				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
+			}
 			return;
 		}
 		PlayerModel suit = slim ? this.suitSlim : this.suitWide;

@@ -900,6 +900,8 @@ public final class WebSymbiote {
 				struggle(ctx.player());
 			}
 		});
+		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
+		WebSymbioteCushion.register();
 		// it never dies with you: it pours out of your body and stays near it, looking for someone new
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
@@ -1218,6 +1220,7 @@ public final class WebSymbiote {
 		long now = level.getGameTime();
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
+		WebSymbioteCushion.tick(player, now);
 		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
 		boolean armor = state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK);
