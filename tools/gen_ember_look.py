@@ -15,10 +15,9 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "kingdoms", "src", "main", "
 os.makedirs(OUT, exist_ok=True)
 
 # vanilla's fire ramp (campfire flames), hottest first; additive, so these are how much light each adds
-HOT = (249, 235, 171, 255)
 GOLD = (233, 189, 57, 255)
 ORANGE = (201, 108, 3, 255)
-RED = (140, 40, 0, 255)
+RED = (120, 34, 0, 255)
 EYE = (255, 180, 60, 255)
 rng = random.Random(2675)
 
@@ -34,18 +33,18 @@ def marks():
     for x0, x1, y0 in ARMS:
         hand = y0 + 12
         for x in range(x0, x1):
-            # the hand smoulders: the bottom row hot, the one above gold, then orange
-            img.putpixel((x, hand - 1), HOT if rng.random() < 0.7 else GOLD)
-            img.putpixel((x, hand - 2), GOLD if rng.random() < 0.6 else ORANGE)
-            if rng.random() < 0.7:
-                img.putpixel((x, hand - 3), ORANGE)
+            # the hand smoulders: the bottom row gold, the one above orange, then red
+            img.putpixel((x, hand - 1), GOLD if rng.random() < 0.6 else ORANGE)
+            img.putpixel((x, hand - 2), ORANGE if rng.random() < 0.6 else RED)
+            if rng.random() < 0.6:
+                img.putpixel((x, hand - 3), RED)
         # cracks of fire climbing toward the elbow, fading as they go
         for _ in range(9):
             x, y = rng.randrange(x0, x1), hand - 3
             length = rng.randrange(3, 8)
             for i in range(length):
                 t = i / length
-                img.putpixel((x, y), GOLD if t < 0.3 else ORANGE if t < 0.7 else RED)
+                img.putpixel((x, y), ORANGE if t < 0.4 else RED)
                 y -= 1
                 if rng.random() < 0.4:
                     x = min(x1 - 1, max(x0, x + rng.choice((-1, 1))))
@@ -55,7 +54,7 @@ def marks():
     for x0, y0, x1, y1 in HANDS:
         for x in range(x0, x1):
             for y in range(y0, y1):
-                img.putpixel((x, y), HOT if rng.random() < 0.5 else GOLD)
+                img.putpixel((x, y), GOLD if rng.random() < 0.5 else ORANGE)
     img.save(os.path.join(OUT, "marks.png"))
 
 
