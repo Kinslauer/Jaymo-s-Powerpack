@@ -93,7 +93,7 @@ final class KeyGuide {
 	/**
 	 * (0.11.83) The Rig's keys, after the power's, while a piece is worn or the suit is parked: lang
 	 * {@code rig.jaymospowers.key.<line>} (and {@code .name}), with the same key arguments plus the Rig key (%8$s).
-	 * Lines the Mind's level hasn't reached show dimmed with the level they need.
+	 * A line only shows once the Mind's level has reached it (Andy: nothing shows until you find it).
 	 */
 	private static void rig(List<Line> lines, Player player) {
 		if (!com.jaymospowers.rig.Rig.wearsAny(player) && !com.jaymospowers.rig.RigCall.parked(player)) {
@@ -124,9 +124,7 @@ final class KeyGuide {
 	private static void rigLine(List<Line> lines, String id, Component key, Object[] args, int needs, int level) {
 		String base = "rig.jaymospowers.key." + id;
 		Component name = shortName(base);
-		if (level < needs) {
-			lines.add(new Line(key, name, Component.translatable("rig.jaymospowers.key.needs_level", needs), COLOR_DIM, true));
-		} else {
+		if (level >= needs) {
 			lines.add(new Line(key, name, Component.translatable(base, args), COLOR_RIG, false));
 		}
 	}

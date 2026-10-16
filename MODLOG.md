@@ -1444,5 +1444,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   you look (0.85 b/t, Sprint 1.1), Jump/Sneak climb and dive, strafe on A/D; 9 charge every 5 ticks, a little hunger,
   and a sudden stop against a wall hurts by the speed lost squared. The barrel roll works on the Rig's thrusters too
   (`FlightRoll.flying`), and the Rig won't hover while a power's flight is on (`FlightRoll.powerFlying`). The H screen
-  lists the Rig's keys after the power's while a piece is worn or the suit is parked, dimmed until the Mind's level has
-  them.
+  lists the Rig's keys after the power's while a piece is worn or the suit is parked; each line appears only once the
+  Mind's level unlocks it (Andy: nothing shows until you find it).
