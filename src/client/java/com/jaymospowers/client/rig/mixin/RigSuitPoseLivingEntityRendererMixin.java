@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.11.103) Just before the render layers, when Entity Model Features has animated the body for them (Fresh Animations):
+ * (0.11.104) Just before the render layers, when Entity Model Features has animated the body for them (Fresh Animations):
  * its pose is kept for the Rig drawn over it (RigSuit), which otherwise stayed in the vanilla pose and clipped.
  */
 @Mixin(LivingEntityRenderer.class)

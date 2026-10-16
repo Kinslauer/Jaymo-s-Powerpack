@@ -36,6 +36,9 @@ public final class DarktidePose {
 	static final float STANCE_BLEND_TICKS = 4.0F;
 	/** A risen shadow's tint (ARGB). */
 	public static final int RISEN_TINT = 0xFF262C3C;
+	/** (0.11.103) A villager raised as itself and back at its life: not black, just ashen and a little wrong (ARGB). */
+	public static final int HOLLOW_TINT = 0xFF8C919E;
+	public static final RenderStateDataKey<Boolean> HOLLOW = RenderStateDataKey.create(() -> "jaymospowers:darktide_hollow");
 
 	/** entity id → {last kamae, the one before, game time it changed}. */
 	private static final Map<Integer, long[]> STANCES = new HashMap<>();
@@ -103,6 +106,7 @@ public final class DarktidePose {
 		extractCrawl(entity, state, partialTicks);
 		// risen shadows and a user walking as their own shade are drawn the same dark
 		state.setData(RISEN, entity.getAttached(DarktideState.RISEN) != null || entity.getAttached(DarktideState.SHADE) != null ? Boolean.TRUE : null);
+		state.setData(HOLLOW, entity.getAttached(DarktideState.HOLLOW) != null ? Boolean.TRUE : null);
 		DarktideState.Move move = entity.getAttached(DarktideState.MOVE);
 		boolean guarding = entity.getAttached(DarktideState.GUARD) != null;
 		if (move == null && !guarding) {
@@ -387,7 +391,7 @@ public final class DarktidePose {
 
 	/** A risen shadow (or a shade) is drawn dark. */
 	public static int tint(LivingEntityRenderState state, int tint) {
-		return state.getData(RISEN) != null ? RISEN_TINT : tint;
+		return state.getData(RISEN) != null ? RISEN_TINT : state.getData(HOLLOW) != null ? HOLLOW_TINT : tint;
 	}
 
 	private static float seg(float p, float a, float b) {

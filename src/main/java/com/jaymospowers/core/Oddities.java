@@ -27,6 +27,8 @@ public final class Oddities {
 	public static final String SYMBIOTE = "symbiote";
 	/** A Darktide user walking as their shadow. */
 	public static final String SHADE = "shade";
+	/** (0.11.103) A villager raised by Darktide's Necromancy as itself, back at its life (saved: it stays marked). */
+	public static final String RISEN = "risen";
 	/** A player who just used their power: {@code power/<power id path>}, e.g. {@code power/wind}. */
 	public static final String POWER = "power/";
 

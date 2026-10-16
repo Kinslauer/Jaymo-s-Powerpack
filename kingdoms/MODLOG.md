@@ -3224,7 +3224,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 - Andy: the ice prison "should be frostborns left mouse hold": Jaymo's Powers' race hold (left mouse held bare-handed,
   not at a block) tags the player `jaymoskingdoms_frost_prison` and `FrostPrison.tick` casts it. `;` is only the
   Warrior-born tail now. Verdant card mentions the stretch punch (Powers' `RaceMoves`).
-## 0.7.76: the Emberborn glow, captives skinned (pack 0.11.103)
+## 0.7.77: the Emberborn glow, captives skinned (pack 0.11.104)
 - Andy: "add some of the fire effects to ember born as well, they should glow in the dark". An Emberborn player
   (client `EmberLook`) has embers under the skin of the hands and forearms (a glowing hand, cracks of fire climbing
   toward the elbow) and eyes of ember gold, both drawn emissive over their own skin so they shine in the dark; the

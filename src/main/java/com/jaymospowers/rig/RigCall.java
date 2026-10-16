@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * (0.11.87) Suit calling (Mind level 3). The call key (no power: C; with one: the Rig key's Suit) <b>parks</b> the worn
  * Rig: the pieces blast off (everyone sees them go) and wait wherever the Mind keeps them, remembered on the player
  * ({@link #PARKED}, kept through death: the suit wasn't on you). Pressed again it <b>calls</b> them: sparks stream in from
- * above and the pieces lock on one by one ((0.11.103) the Core first, the Helm last; client RigSuit builds each one on
+ * above and the pieces lock on one by one ((0.11.104) the Core first, the Helm last; client RigSuit builds each one on
  * plate by plate), each with a clank and a jolt on the wearer's screen. Only Rig pieces park, and only with the Core
  * worn at level 3 (the Mind flies them). Armour already in a slot when its piece comes back goes to the inventory (or
  * drops, if that's full).
@@ -39,7 +39,7 @@ public final class RigCall {
 	/** The streak of sparks coming in before the first piece lands (ticks). */
 	static final int INBOUND_TICKS = 12;
 	/**
-	 * (0.11.103) When each piece of {@link #ORDER} lands, in ticks after the first: the Core's spine unit has to land and
+	 * (0.11.104) When each piece of {@link #ORDER} lands, in ticks after the first: the Core's spine unit has to land and
 	 * unfold, and its plates swing in, before the Arms' frame closes on it; the Helm locks on last (client RigSuit builds
 	 * each piece on as it lands, so these follow its build times).
 	 */
@@ -50,7 +50,7 @@ public final class RigCall {
 	/** Players whose suit is flying in: ticks since the call. */
 	private static final Map<UUID, int[]> CALLING = new HashMap<>();
 
-	/** The order the pieces lock on: (0.11.103) the Core's big spine unit first, the Helm last. */
+	/** The order the pieces lock on: (0.11.104) the Core's big spine unit first, the Helm last. */
 	private static final Rig.Piece[] ORDER = {Rig.Piece.CORE, Rig.Piece.ARMS, Rig.Piece.THRUSTERS, Rig.Piece.HELM};
 
 	private RigCall() {

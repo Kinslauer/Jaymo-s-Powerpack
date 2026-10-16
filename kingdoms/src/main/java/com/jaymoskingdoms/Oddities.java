@@ -41,7 +41,9 @@ import org.jspecify.annotations.Nullable;
  * <li>a player in the symbiote's suit, walking as a shade, or changed into an alien: a monster, unless they saw the
  * change ({@link Aliens});</li>
  * <li>a strange moon: those out at night remark on it ({@link Moons});</li>
- * <li>a changed player they know (they saw the change): now and then someone remarks on it, unafraid.</li>
+ * <li>a changed player they know (they saw the change): now and then someone remarks on it, unafraid;</li>
+ * <li>(0.7.76) a neighbour back from the dead (Darktide's Necromancy raised them as themselves): they go about their day
+ * as if nothing happened, but now and then someone sees it, says so, and may panic and run, and the rest with them.</li>
  * </ul>
  * And it gets talked about: for days after, a villager's gossip may be of the star that fell to the north, or of the
  * traveller who called the wind down on the square ({@link #gossip}).
@@ -50,6 +52,8 @@ final class Oddities {
 	/** Powers' tag prefix, and the kinds it marks. */
 	static final String PREFIX = "jaymospowers_odd:";
 	static final String METEOR = "meteor", STAR = "star", SYMBIOTE = "symbiote", SHADE = "shade", POWER = "power/";
+	/** (0.7.76) A villager raised by Darktide as itself, back at its life. */
+	static final String RISEN = "risen";
 	/** The symbiote without a host (an entity type, not a tag). */
 	static final String BLOB = "jaymospowers:web_symbiote_blob";
 	/** The powers with lines of their own; any other gets the plain ones. */
@@ -89,6 +93,17 @@ final class Oddities {
 			}
 		}
 	}
+
+	/**
+	 * (0.7.76) The risen are seen this far off (blocks, in sight). Each person near one notices something wrong with this
+	 * chance per look; one who does panics (cries out and runs) with this chance, and those this near who can see run too,
+	 * each with this chance. Any one risen is remarked on at most this often (ticks); now and then it talks to itself.
+	 */
+	static final double RISEN_SEEN = 16.0, PANIC_SPREAD = 12.0;
+	static final float RISEN_NOTICE = 0.015F, RISEN_PANIC = 0.3F, PANIC_FOLLOW = 0.6F, RISEN_SELF_TALK = 0.004F;
+	static final int RISEN_TALK_GAP = 900;
+	/** What the risen say to themselves is said flat and grey. */
+	static final int RISEN_VOICE = 0xA9AEB8;
 
 	/** Under a strange moon, each person out at night remarks on it with this chance per look. */
 	static final float MOON_TALK = 0.002F;
@@ -175,7 +190,8 @@ final class Oddities {
 			return false;
 		}
 		if (e instanceof Villager) {
-			return true;
+			// (0.7.76) the risen don't notice the strange: they are it
+			return !has(e, RISEN);
 		}
 		if (e instanceof Folk folk) {
 			Faction f = Factions.get(server, folk.factionId());
@@ -195,7 +211,11 @@ final class Oddities {
 		NEWS.removeIf(n -> now - n.time() > NEWS_TICKS);
 		SPOKE.values().removeIf(t -> t < now);
 		REMARKED.values().removeIf(t -> t < now);
-		sky(server, level, now);
+		List<Villager> risen = new ArrayList<>();
+		sky(server, level, now, risen);
+		for (Villager r : risen) {
+			risenSeen(server, level, r, now);
+		}
 		for (ServerPlayer player : level.players()) {
 			String power = power(player);
 			if (power != null && !player.isSpectator()) {
@@ -209,8 +229,12 @@ final class Oddities {
 	}
 
 	/** The rocks in the sky: stared at while they fall, run from where they land. */
-	private static void sky(MinecraftServer server, ServerLevel level, long now) {
+	private static void sky(MinecraftServer server, ServerLevel level, long now, List<Villager> risen) {
 		for (Entity e : level.getAllEntities()) {
+			if (e instanceof Villager v && v.isAlive() && has(e, RISEN)) {
+				risen.add(v);
+				continue;
+			}
 			String kind = has(e, METEOR) ? METEOR : has(e, STAR) ? STAR : null;
 			if (kind != null && e.isAlive()) {
 				Rock rock = ROCKS.computeIfAbsent(e.getUUID(), id -> new Rock(kind, e.position()));
@@ -277,6 +301,45 @@ final class Oddities {
 		String line = talker.isBaby() ? "child" : POWERS.contains(power) ? "power." + power : "power";
 		say(level, talker, line, Speech.WHITE, now);
 		news(new News(POWER + power, player.blockPosition(), now, Identities.shownName(player)));
+	}
+
+	/**
+	 * (0.7.76) A neighbour back from the dead, going about their day: now and then someone sees something is wrong and
+	 * says so; some panic, cry out and run, and the people around who see it run with them. It's talked about for days.
+	 */
+	private static void risenSeen(MinecraftServer server, ServerLevel level, Villager risen, long now) {
+		RandomSource random = level.getRandom();
+		if (!REMARKED.containsKey(risen.getUUID())) {
+			for (LivingEntity p : level.getEntitiesOfClass(LivingEntity.class, risen.getBoundingBox().inflate(RISEN_SEEN),
+				e -> e != risen && person(server, e) && e.hasLineOfSight(risen))) {
+				if (random.nextFloat() >= RISEN_NOTICE || !free(p, now)) {
+					continue;
+				}
+				REMARKED.put(risen.getUUID(), now + RISEN_TALK_GAP);
+				lookAt(p, risen);
+				Component name = risen.getDisplayName();
+				if (p.isBaby()) {
+					sayOf(level, p, "risen.child", name, Speech.WHITE, now);
+				} else if (p instanceof Villager v && random.nextFloat() < RISEN_PANIC) {
+					sayOf(level, p, "fear.risen", name, Speech.RED, now);
+					Frights.scare(level, v, risen.position());
+					for (Villager other : level.getEntitiesOfClass(Villager.class, p.getBoundingBox().inflate(PANIC_SPREAD),
+						o -> o != v && o != risen && person(server, o) && o.hasLineOfSight(risen))) {
+						if (random.nextFloat() < PANIC_FOLLOW) {
+							Frights.scare(level, other, risen.position());
+						}
+					}
+				} else {
+					sayOf(level, p, "risen", name, Speech.WHITE, now);
+				}
+				news(new News(RISEN, risen.blockPosition(), now, name));
+				return;
+			}
+		}
+		if (!risen.isSleeping() && random.nextFloat() < RISEN_SELF_TALK && free(risen, now)) {
+			// it doesn't know, or won't say
+			say(level, risen, "risen.self", RISEN_VOICE, now);
+		}
 	}
 
 	/** Under a strange moon, those out at night remark on it now and then. */
@@ -380,6 +443,12 @@ final class Oddities {
 	private static void say(ServerLevel level, LivingEntity p, String what, int color, long now) {
 		SPOKE.put(p.getUUID(), now + TALK_GAP);
 		Speech.say(level, p, Component.translatable(line("talk.jaymoskingdoms.odd." + what, level.getRandom())), color, 32.0);
+	}
+
+	/** A line about {@code who} (their name in it). */
+	private static void sayOf(ServerLevel level, LivingEntity p, String what, Component who, int color, long now) {
+		SPOKE.put(p.getUUID(), now + TALK_GAP);
+		Speech.say(level, p, Component.translatable(line("talk.jaymoskingdoms.odd." + what, level.getRandom()), who), color, 32.0);
 	}
 
 	/**
