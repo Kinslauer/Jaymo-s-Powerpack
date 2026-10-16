@@ -68,6 +68,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		boolean slim = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
+		// (watching for the end of a meal in any form, so it licks its chops after)
+		WebHulk.noteMeal(state);
 		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
 		if (growth != null) {
 			// it's being built over them (or taken apart): see WebSuitGrowth
@@ -101,7 +103,11 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		PlayerModel suit = slim ? this.suitSlim : this.suitWide;
 		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 		// (the plain suit has no tongue: Andy, "I'd also like the tounge to be kept to the large suit"; Consume's maw
-		// still has its own while it eats, WebMouthLayer)
+		// still has its own while it eats, WebMouthLayer, and it licks its chops a few times just after)
+		if (!state.isInvisible && !WebSymbioteClient.ownFirstPerson(state) && state.getData(WebSymbioteClient.EATING) == null
+			&& state.getData(WebSymbioteClient.COUNTER_MAW) == null) {
+			WebHulk.submitSuitTongue(poseStack, collector, state, this.getParentModel());
+		}
 		Float feral = state.getData(WebSymbioteClient.FERAL);
 		if (feral != null && feral > 1.0F - VEIN_BOND / (float)com.jaymospowers.power.web.WebSymbiote.BOND_MAX) {
 			// still feral: its veins show through the suit
@@ -111,8 +117,6 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	/** The big body's tongue, flicking out of its jaws now and then (it comes in with the head, the last thing built). */
 	private void tongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float built) {
-		// (watching for the end of a meal, so it licks its chops after)
-		WebHulk.noteMeal(state);
 		if (state.isInvisible || WebSymbioteClient.ownFirstPerson(state) || state.getData(WebSymbioteClient.EATING) != null
 			|| state.getData(WebSymbioteClient.COUNTER_MAW) != null || state.getData(WebSymbioteClient.ROAR) != null) {
 			// (the maw has the head)

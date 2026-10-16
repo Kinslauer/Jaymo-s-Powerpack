@@ -1563,3 +1563,19 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.12.9, world tiers:** Andy asked for Apotheosis's world tiers (its code is MIT, its art and text all rights
   reserved; its only builds are NeoForge 26.1). Packs Jaymo's Kingdoms 0.7.82, which has our own world tiers (see
   `kingdoms/MODLOG.md`). No Powers code changed.
+- **0.12.10, symbiote fix list + heartier meals:** Andy's list.
+  - **Sneak+R/G tear-out:** the chunk only tears loose if the key is still held when the struggle ends (checked on the
+    server against `PowerInput` every tick, not only on the release packet). Let go within 10 ticks of it tearing loose
+    and it's dropped, not thrown (`TORN_DROP_TICKS`). A tendril-torn chunk is kept (`BlockCluster.keep`): it lies where
+    it falls until something moves or breaks it (no crumbling, no max age). Still not saved across an unload.
+  - **Wall Crawl tendrils need Living Armor:** `WebSymbiote.crawlTendrils` (Crawl on and armoured). Wall Crawl without
+    Living Armor is the plain Web wall climb/cling.
+  - **Suit key in the big body at full bond** sheds only the big body: Living Armor's tendrils stay out over the suit
+    (`Live.armorSlim`, until the armour comes off); the next press brings that down as before.
+  - **Tongue after a meal:** meals are tracked in every form, and it licks its chops 3 times after the maw lets go
+    (`WebHulk.MEAL_FLICK*`), on the big body or (only then) on the plain suit (`submitSuitTongue`).
+  - **Low health is a share of max health:** `DEFEND_HEALTH` 0.3, `DESPERATE_HEALTH` 0.5, `INSTINCT_LOW_HEALTH` 0.4
+    (`WebSymbiote.lowHealth`), so Warrior-born or unfed bodies with few hearts aren't always "near death".
+  - **Takeover camera:** your view is dragged to the way you're carried (`VIEW_DRAG` 0.2/tick); look more than 40
+    degrees away and it tears it back with a jolt (`WebSymbioteClient.wrenchView`).
+  - Packs Jaymo's Kitchen 0.4.46 (heartier meals, see `kitchen/MODLOG.md`).
