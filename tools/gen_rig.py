@@ -511,6 +511,9 @@ plate("right_arm", "pauldron_r", "core", 19, 6, (-1, -2, 0), [
     ((-2.5, -3.8, -1), (2, 1, 2), "ridge", 0.0)], came=(0, -5, 4, -0.9, 0, 0, 0.7), heavy=True, mirror=True)
 plate("right_arm", "bicep_r", "core", 23, 5, (-1, 1, 0), [((-3, 1.5, -2), (4, 3, 4), "plate2", 0.6)],
       came=(0, -4, 0, 0, 0, 0, 0.8), mirror=True)
+# (0.11.107) the shoulder launcher's pods: flush on the back of each pauldron, raised when it fires (RigSuit)
+plate("right_arm", "pod_r", "core", 25, 3, (-2, -3.2, 3), [((-3.5, -4.2, 1), (3, 1, 2), "pod", 0.0)],
+      came=(0, -2, 0, 0, 0, 0, 0.0), mirror=True)
 plate("body", "collar", "core", 26, 4, (0, 0, 0), [((-3.5, 0, -2.5), (7, 1, 5), "trim", 0.2)], came=(0, -3, 0, 0, 0, 0, 0.5))
 
 # -- the Arms (the frame): the hip harness closes from both sides and its buckle locks, the under-suit runs down the
@@ -531,6 +534,9 @@ plate("right_arm", "gauntlet_r", "arms", 9, 6, (-1, 10, 0), [
 plate("right_arm", "elbow_r", "arms", 13, 4, (-1, 4, 0), [
     ((-2, 3.5, 2.2), (2, 2, 1), "cap", 0.0),
     ((-4.5, 2, -0.5), (1, 6, 1), "piston", -0.2)], came=(0, 0, 0, 0, 0, 0, 0.0), heavy=True, mirror=True)
+# (0.11.107) the palm repulsors: a lit disc at the end of each gauntlet, out last
+plate("right_arm", "repulsor_r", "arms", 15, 3, (-1, 10, 0), [((-2.5, 10.4, -1.5), (3, 1, 3), "repulsor", -0.25)],
+      came=(0, 0, 0, 0, 0, 0, 0.0), heavy=True, mirror=True)
 plate("right_leg", "knee_r", "arms", 15, 4, (0, 6, -2), [
     ((-1.5, 5, -3), (3, 2, 1), "cap", 0.1),
     ((-3.2, 3, -0.5), (1, 6, 1), "piston", -0.2)], came=(0, 0, 0, 0, 0, 0, 0.0), heavy=True, mirror=True)
@@ -544,6 +550,9 @@ plate("right_leg", "boot_r", "thrusters", 4, 6, (0, 12, 0), [
     ((-2, 11, -3), (4, 1, 1), "trim", 0.15),
     ((-1.5, 10.5, 2.2), (3, 2, 1), "nozzle", 0.0),
     ((-3.1, 10.2, -1), (1, 1, 2), "vent", 0.0)], came=(0, 3, 0, 0, 0, 0, 0.5), heavy=True, mirror=True)
+# (0.11.107) the boot soles' jets, lit under each boot
+plate("right_leg", "sole_r", "thrusters", 10, 3, (0, 12, 0), [((-1.5, 12.2, -1.5), (3, 1, 3), "sole", -0.3)],
+      came=(0, 0, 0, 0, 0, 0, 0.0), mirror=True)
 
 # -- the Helm, last: the back shell rises up the neck, the ear pods close in, the faceplate swings down over the face
 #    (its visor lit), the crest on top
@@ -715,6 +724,24 @@ def suit_pixel(kind, face, x, y, w, h, rng):
         if side and (x in (0, w - 1) or y in (0, h - 1)):
             return PLATE, False
         return PLATE_LO, False
+    if kind in ("repulsor", "sole"):
+        # (0.11.107) a jet's disc: lit underneath, white-hot in the middle, a dark rim round it
+        if face == "bottom":
+            if x in (0, w - 1) and y in (0, h - 1):
+                return GLOW_DIM, True
+            return (WHITE_HOT if (x, y) == (w // 2, h // 2) else GLOW), True
+        if face == "top":
+            return PLATE_LO, False
+        return (GLOW_DIM, True) if kind == "repulsor" else (SEAM, False)
+    if kind == "pod":
+        # (0.11.107) the launcher's pod: two lit tubes on its front, slats on top
+        if face == "front":
+            if y == 0 and x in (0, w - 1):
+                return GLOW, True
+            return SEAM, False
+        if face == "top":
+            return (PLATE_HI if x % 2 == 0 else PLATE_LO), False
+        return jitter(PLATE, rng, 3)[:3], False
     raise ValueError(kind)
 
 

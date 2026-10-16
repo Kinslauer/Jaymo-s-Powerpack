@@ -227,6 +227,10 @@ public final class WindPose {
 		if (com.jaymospowers.client.power.smoke.SmokeFlightPose.cruising(player)) {
 			return true;
 		}
+		// (0.11.107) and a Rig pilot in full flight (the arms lie back along the sides: RigPose)
+		if (com.jaymospowers.client.rig.RigPose.cruising(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.INSTANCE.flight().state().fast() && WindPowerClient.isActive(minecraft.player);
 		}
@@ -562,7 +566,8 @@ public final class WindPose {
 		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null
 			// Pyre flies on its hands too: they stay back as jets (XenoformFlightPose)
 			&& !com.jaymospowers.client.power.xenoform.XenoformFlightPose.handsAsJets(avatar)
-			&& !com.jaymospowers.client.power.zfighter.ZFighterFlightPose.ownsArms(avatar);
+			&& !com.jaymospowers.client.power.zfighter.ZFighterFlightPose.ownsArms(avatar)
+			&& !com.jaymospowers.client.rig.RigPose.ownsArms(avatar);
 		// head up to look along the flight
 		pose(humanoid.head, -1.15F, 0.0F, 0.0F, amount);
 		ModelPart lead = avatar.mainArm == HumanoidArm.LEFT ? humanoid.leftArm : humanoid.rightArm;

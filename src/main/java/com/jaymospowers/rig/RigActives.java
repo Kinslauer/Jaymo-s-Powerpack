@@ -71,6 +71,8 @@ public final class RigActives {
 	static final float FLIGHT_EXHAUSTION = 0.02F;
 	/** Full flight into a wall: a sudden loss of more than this much speed (b/t) hurts, by the speed lost squared. */
 	static final double CRASH_DROP = 0.35, CRASH_DAMAGE = 14.0;
+	/** (0.11.107) The jets: how far out the boot soles and (hovering) the palms are from the middle (blocks). */
+	static final double BOOT_SPREAD = 0.13, PALM_SPREAD = 0.5;
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
 	private static final List<Missile> MISSILES_IN_FLIGHT = new ArrayList<>();
@@ -95,6 +97,9 @@ public final class RigActives {
 		/** Full flight's last position and horizontal speed (b/t), for crashes. */
 		@Nullable Vec3 lastPos;
 		double lastSpeed;
+		/** (0.11.107) Ticks into the Unibeam (-1: none), and its cooldown. */
+		int unibeam = -1;
+		int unibeamCooldown;
 	}
 
 	private record Missile(ServerLevel level, ServerPlayer owner, Vec3[] at, Vec3[] velocity, int[] age, @Nullable Entity target) {
@@ -181,6 +186,7 @@ public final class RigActives {
 			case RigNet.PALM -> palm(player, state);
 			case RigNet.LAUNCHER -> launch(player, state);
 			case RigNet.FLIGHT -> toggleFlight(player, state);
+			case RigNet.UNIBEAM -> RigUnibeam.use(player, state);
 			default -> {
 			}
 		}
@@ -309,9 +315,29 @@ public final class RigActives {
 		// a held, slow descent at most: no fall damage builds up
 		player.resetFallDistance();
 		if (state.hoverTicks % 2 == 0 && player.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() - 0.1, player.getZ(), state.flying ? 4 : 2, 0.12, 0.02, 0.12, 0.01);
-			level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() - 0.3, player.getZ(), 1, 0.1, 0.05, 0.1, 0.01);
+			jets(level, player, state.flying);
 		}
+	}
+
+	/**
+	 * (0.11.107) The jets: a flame under each boot sole, and while hovering a repulsor wash under each palm too (the
+	 * hands held down and out to steady it, client RigPose); in full flight the palms are swept back, and so is their wash.
+	 */
+	private static void jets(ServerLevel level, ServerPlayer player, boolean flying) {
+		double yaw = Math.toRadians(player.yBodyRot);
+		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+		Vec3 back = new Vec3(Math.sin(yaw), 0.0, -Math.cos(yaw));
+		Vec3 feet = player.position();
+		for (int side = -1; side <= 1; side += 2) {
+			Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
+			level.sendParticles(ParticleTypes.FLAME, boot.x, boot.y, boot.z, flying ? 2 : 1, 0.03, 0.02, 0.03, 0.01);
+			level.sendParticles(ParticleTypes.SMALL_FLAME, boot.x, boot.y - 0.15, boot.z, 1, 0.04, 0.05, 0.04, 0.01);
+			Vec3 palm = flying ? feet.add(right.scale(side * 0.35)).add(back.scale(0.3)).add(0.0, 0.75, 0.0)
+				: feet.add(right.scale(side * PALM_SPREAD)).add(0.0, 0.7, 0.0);
+			Vec3 wash = flying ? back.scale(0.12) : new Vec3(0.0, -0.12, 0.0);
+			level.sendParticles(ParticleTypes.END_ROD, palm.x, palm.y, palm.z, 0, wash.x, wash.y, wash.z, 1.0);
+		}
+		level.sendParticles(ParticleTypes.SMOKE, feet.x, feet.y - 0.3, feet.z, 1, 0.1, 0.05, 0.1, 0.01);
 	}
 
 	/** Full flight's own costs: hunger, and a crash when a wall stops you short. */
@@ -343,6 +369,7 @@ public final class RigActives {
 			return;
 		}
 		state.palmCooldown = PALM_COOLDOWN;
+		RigMoves.start(player, RigMoves.PALM);
 		ServerLevel level = player.level();
 		Rig.Augment augment = Rig.augment(player);
 		double range = PALM_RANGE * (augment == Rig.Augment.XENOFORM ? XENO_RANGE : 1.0);
@@ -403,6 +430,7 @@ public final class RigActives {
 			return;
 		}
 		state.launcherCooldown = LAUNCHER_COOLDOWN;
+		RigMoves.start(player, RigMoves.LAUNCHER);
 		ServerLevel level = player.level();
 		int count = MISSILES + (Rig.augment(player) == Rig.Augment.ARSENAL ? 1 : 0);
 		Vec3 look = player.getLookAngle();
@@ -480,6 +508,10 @@ public final class RigActives {
 		if (state.scanCooldown > 0) {
 			state.scanCooldown--;
 		}
+		if (state.unibeamCooldown > 0) {
+			state.unibeamCooldown--;
+		}
+		RigUnibeam.tick(player, state);
 		tickLock(player, state);
 		if (state.hoverAt != 0 && player.level().getGameTime() >= state.hoverAt) {
 			state.hoverAt = 0;
@@ -503,9 +535,11 @@ public final class RigActives {
 			state.hovering = false;
 			state.flying = false;
 			state.lock = -1;
+			state.unibeam = -1;
 			sendStatus(player, state);
 		}
 		state.wasWearing = wearing;
+		RigMoves.tick(player, !wearing || !state.hovering ? RigMoves.THRUST_NONE : state.flying ? RigMoves.THRUST_FLIGHT : RigMoves.THRUST_HOVER);
 	}
 
 	static void sendStatus(ServerPlayer player, State state) {
@@ -513,7 +547,7 @@ public final class RigActives {
 		state.sentFlying = state.flying;
 		state.sentLock = state.lock;
 		ServerPlayNetworking.send(player, new RigNet.Status(state.hovering, state.hovering && state.flying, RigMind.warnings(player), state.palmCooldown,
-			state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player)));
+			state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player), state.unibeamCooldown));
 	}
 
 	static State stateOf(ServerPlayer player) {

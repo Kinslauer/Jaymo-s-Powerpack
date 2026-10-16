@@ -58,5 +58,6 @@ public final class ModelPoses {
 		XenoformSlap.applyModel(model, state);
 		ZFighterPowerClient.applyModel(model, state);
 		com.jaymospowers.client.power.smoke.SmokeMovePose.applyModel(model, state);
+		com.jaymospowers.client.rig.RigPose.applyModel(model, state);
 	}
 }

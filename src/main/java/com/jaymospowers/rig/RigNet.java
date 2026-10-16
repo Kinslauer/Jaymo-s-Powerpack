@@ -19,8 +19,10 @@ public final class RigNet {
 	public static final int HOVER = 0, PALM = 1, LAUNCHER = 2, REPORT = 3;
 	/** (0.11.87) Scan (level 3), call or park the suit (level 3), toggle full flight while hovering (level 5). */
 	public static final int SCAN = 4, CALL = 5, FLIGHT = 6;
+	/** (0.11.107) The Unibeam (level 4; no power: Sneak + G). */
+	public static final int UNIBEAM = 7;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
-	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, SCAN, CALL};
+	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL};
 	/** The first three of {@link #CYCLE} need no level. */
 	public static final int ACTIVES = 3;
 
@@ -55,11 +57,11 @@ public final class RigNet {
 
 	/**
 	 * Server → client: hovering (and in full flight), the Mind's current warnings, the actives' cooldowns (ticks), the
-	 * locked target's entity id (-1: none), and the takeover save's cooldown (seconds; 0 ready).
+	 * locked target's entity id (-1: none), and the takeover save's cooldown (seconds; 0 ready) and (0.11.107) the Unibeam's (ticks).
 	 */
 	public record Status(boolean hovering, boolean flying, int warnings, int palmCooldown, int launcherCooldown, int scanCooldown, int lock,
-		int takeoverSeconds) implements CustomPacketPayload {
-		public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0);
+		int takeoverSeconds, int unibeamCooldown) implements CustomPacketPayload {
+		public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0);
 		public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
 		public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
 			buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0));
@@ -69,11 +71,12 @@ public final class RigNet {
 			ByteBufCodecs.VAR_INT.encode(buf, s.scanCooldown);
 			ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
 			ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
+			ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
 		}, buf -> {
 			int flags = buf.readByte();
 			return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf) - 1,
-				ByteBufCodecs.VAR_INT.decode(buf));
+				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
 		});
 
 		@Override

@@ -81,6 +81,8 @@ public final class Rig {
 	public static final int[] LEVEL_XP = {0, 100, 300, 700, 1400};
 	/** (0.11.87) The level each stage-2 feature needs. */
 	public static final int LOCK_LEVEL = 2, SCAN_LEVEL = 3, CALL_LEVEL = 3, TAKEOVER_LEVEL = 4, FLIGHT_LEVEL = 5;
+	/** (0.11.107) The Unibeam ({@link RigUnibeam}) comes with the takeover save. */
+	public static final int UNIBEAM_LEVEL = 4;
 
 	public static Item HELM, CORE, ARMS, THRUSTERS, SALVAGE, SCRAP;
 	public static Block FORGE, DEAD_RIG, FALLEN_RIG;

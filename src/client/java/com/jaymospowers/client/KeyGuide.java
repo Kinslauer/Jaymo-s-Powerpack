@@ -109,6 +109,7 @@ final class KeyGuide {
 			rigLine(lines, "hover", (Component)names[0], args, 1, level);
 			rigLine(lines, "palm", (Component)names[1], args, 1, level);
 			rigLine(lines, "launcher", (Component)names[2], args, 1, level);
+			rigLine(lines, "unibeam", Component.translatable("rig.jaymospowers.key.sneak", names[1]), args, com.jaymospowers.rig.Rig.UNIBEAM_LEVEL, level);
 			rigLine(lines, "report", (Component)names[3], args, 1, level);
 			rigLine(lines, "scan_hold", Component.translatable("rig.jaymospowers.key.hold", names[3]), args, com.jaymospowers.rig.Rig.SCAN_LEVEL, level);
 			rigLine(lines, "call", (Component)names[5], args, com.jaymospowers.rig.Rig.CALL_LEVEL, level);

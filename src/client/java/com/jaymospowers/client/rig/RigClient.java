@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Rig on the client. Keys: with no power, R hover, G palm blast, V shoulder launcher, B the Mind's report (held: a
+ * The Rig on the client. Keys: with no power, R hover, G palm blast (Sneak + G: the Unibeam, level 4), V shoulder launcher, B the Mind's report (held: a
  * scan, level 3), C park / call the suit (level 3) (the power keys are free then). With a power those stay the power's,
  * and the Rig key (J by default) uses the selected active; Sneak + J picks the next (Scan and Suit join the cycle at
  * level 3). Holding the Rig key locks on to what's under the crosshair (level 2; held with nothing there, it lets go).
@@ -111,6 +111,7 @@ public final class RigClient {
 		return switch (active) {
 			case RigNet.SCAN -> level >= Rig.SCAN_LEVEL;
 			case RigNet.CALL -> level >= Rig.CALL_LEVEL;
+			case RigNet.UNIBEAM -> level >= Rig.UNIBEAM_LEVEL;
 			default -> true;
 		};
 	}
@@ -137,7 +138,8 @@ public final class RigClient {
 		for (PowerKey key : PowerKey.values()) {
 			boolean down = free && powerless && JaymosPowersClient.keyMapping(key).isDown();
 			if (down && !powerKeysDown[key.ordinal()]) {
-				send(key.ordinal());
+				// (0.11.107) Sneak + G: the Unibeam
+				send(key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && level >= Rig.UNIBEAM_LEVEL ? RigNet.UNIBEAM : key.ordinal());
 			}
 			powerKeysDown[key.ordinal()] = down;
 		}

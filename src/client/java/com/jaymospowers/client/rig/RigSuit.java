@@ -86,6 +86,10 @@ public final class RigSuit {
 	static final RenderStateDataKey<PartPose[]> BODY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_body");
 	/** The model the player renderer drew this player with (MCA swaps it per player). */
 	static final RenderStateDataKey<PlayerModel> PARENT = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_parent");
+	/** (0.11.107) How far the shoulder launcher's pods are raised (0-1; firing, {@link RigPose#pods}). */
+	static final RenderStateDataKey<Float> POD = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_pod");
+	/** The pods: how far they rise (pixels) and tip back (radians) when raised. */
+	static final float POD_RISE = 1.4F, POD_TIP = 0.5F;
 	/** The glow pass's colour (its lights coming up). */
 	static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_glow");
 
@@ -265,6 +269,7 @@ public final class RigSuit {
 			}
 		}
 		state.setData(AGES, ages);
+		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
 		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
 	}
 
@@ -361,6 +366,8 @@ public final class RigSuit {
 		private final boolean slim;
 		private final ModelPart[] plates;
 		private final boolean[] arm;
+		/** (0.11.107) Which plates are the launcher's pods. */
+		private final boolean[] pod;
 
 		Suit(boolean slim, Supplier<PlayerModel> wearer) {
 			super(RigSuitMesh.create(slim).bakeRoot(), slim);
@@ -368,7 +375,9 @@ public final class RigSuit {
 			this.slim = slim;
 			this.plates = new ModelPart[RigSuitMesh.PLATES.length];
 			this.arm = new boolean[this.plates.length];
+			this.pod = new boolean[this.plates.length];
 			for (int i = 0; i < this.plates.length; i++) {
+				this.pod[i] = RigSuitMesh.PLATES[i][1].startsWith("pod_");
 				this.plates[i] = root().getChild(RigSuitMesh.PLATES[i][0]).getChild(RigSuitMesh.PLATES[i][1]);
 				this.arm[i] = RigSuitMesh.PLATES[i][0].endsWith("_arm");
 			}
@@ -399,6 +408,15 @@ public final class RigSuit {
 			}
 			hideSkinLayers();
 			assemble(state.getData(AGES));
+			Float pod = state.getData(POD);
+			if (pod != null && pod > 0.0F) {
+				for (int i = 0; i < this.plates.length; i++) {
+					if (this.pod[i] && this.plates[i].visible) {
+						this.plates[i].y -= POD_RISE * pod;
+						this.plates[i].xRot += POD_TIP * pod;
+					}
+				}
+			}
 		}
 
 		/** Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. */

@@ -20,5 +20,7 @@ abstract class RigSuitAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$rigSuit(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		RigSuit.extract(entity, state, partialTicks);
+		// (0.11.107) and how the pilot moves (RigPose)
+		com.jaymospowers.client.rig.RigPose.extract(entity, state, partialTicks);
 	}
 }

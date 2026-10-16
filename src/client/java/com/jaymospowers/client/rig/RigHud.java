@@ -40,7 +40,7 @@ final class RigHud {
 	static final double TARGET_RANGE = 32.0;
 	static final int ACCENT = 0xFF5FE6FF, LOW = 0xFFFF5A4A, DIM = 0x60FFFFFF, PANEL = 0x90081018;
 	/** The actives' cooldowns' full lengths (ticks), for shading (the server's {@code RigActives} values). */
-	static final int PALM_COOLDOWN = 15, LAUNCHER_COOLDOWN = 60;
+	static final int PALM_COOLDOWN = 15, LAUNCHER_COOLDOWN = 60, UNIBEAM_COOLDOWN = 200;
 	/** The takeover frame: its strongest alpha (0-255), depth (share of the smaller side), soft steps. */
 	static final int TAKEOVER_ALPHA = 170, TAKEOVER_STEPS = 8;
 	static final float TAKEOVER_DEPTH = 0.2F;
@@ -111,7 +111,17 @@ final class RigHud {
 		if (!Rig.fullSet(player)) {
 			graphics.text(font, Component.translatable("rig.jaymospowers.hud.incomplete"), x + 3, row, DIM, false);
 		} else {
-			int cell = (WIDTH - 6) / 3;
+			// (0.11.107) the Unibeam joins them at level 4
+			boolean uni = level >= Rig.UNIBEAM_LEVEL;
+			int cell = (WIDTH - 6) / (uni ? 4 : 3);
+			if (uni) {
+				int cx = x + 3 + 3 * cell;
+				boolean picked = !powerless && RigClient.selected == RigNet.UNIBEAM;
+				String key = powerless ? "S" + keyName(JaymosPowersClient.keyMapping(PowerKey.ABILITY_2).getTranslatedKeyMessage())
+					: picked ? keyName(RigClient.rigKey().getTranslatedKeyMessage()) : "";
+				cell(graphics, font, cx, row, cell, key, Component.translatable("rig.jaymospowers.hud.unibeam").getString(), false, picked,
+					status.unibeamCooldown(), UNIBEAM_COOLDOWN);
+			}
 			for (int i = 0; i < 3; i++) {
 				int cx = x + 3 + i * cell;
 				int cooldown = i == RigNet.PALM ? status.palmCooldown() : i == RigNet.LAUNCHER ? status.launcherCooldown() : 0;
