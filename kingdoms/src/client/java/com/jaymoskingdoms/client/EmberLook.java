@@ -37,8 +37,8 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 	/** On a player's render state: present for an Emberborn. */
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:emberborn");
 
-	private static final Identifier MARKS = JaymosKingdoms.id("textures/entity/ember/marks.png");
-	private static final Identifier EYES = JaymosKingdoms.id("textures/entity/ember/eyes.png");
+	static final Identifier MARKS = JaymosKingdoms.id("textures/entity/ember/marks.png");
+	static final Identifier EYES = JaymosKingdoms.id("textures/entity/ember/eyes.png");
 	/** The eyes' ember gold (opaque ARGB). */
 	static final int EYE_GLOW = 0xFFFFB43C;
 	/** One flame off a hand in this many ticks, and a wisp of smoke with one in this many of those. */

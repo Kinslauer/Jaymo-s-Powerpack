@@ -203,8 +203,12 @@ public final class ZFighterLineage {
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!blocked && entity instanceof ServerPlayer player && ape(player)) {
 				hurt(player, source, damageTaken);
+			} else if (!blocked && VillagerApe.raging(entity)) {
+				VillagerApe.hurt((net.minecraft.world.entity.Mob)entity, source, damageTaken);
 			}
 		});
+		// a Warrior-born villager with its tail wrapped may still turn under the full moon
+		VillagerApe.init();
 		RaceMoves.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -239,7 +243,7 @@ public final class ZFighterLineage {
 	}
 
 	/** The Great Ape lies crippled. */
-	public static boolean crippled(Player player) {
+	public static boolean crippled(net.minecraft.world.entity.Entity player) {
 		return Boolean.TRUE.equals(player.getAttached(CRIPPLED));
 	}
 
@@ -318,8 +322,11 @@ public final class ZFighterLineage {
 		return any || !FabricLoader.getInstance().isModLoaded("jaymoskingdoms") ? EARTHLING : NONE;
 	}
 
-	/** The race {@code player}'s heritage gives anyone (no Z Fighter power needed): one of the four, or {@link #NONE}. */
-	public static int race(Player player) {
+	/**
+	 * The race {@code player}'s heritage gives anyone (no Z Fighter power needed): one of the four, or {@link #NONE}. Any
+	 * entity Kingdoms tags with a heritage reads the same (its villagers are born to them too, {@link VillagerApe}).
+	 */
+	public static int race(net.minecraft.world.entity.Entity player) {
 		for (String tag : player.entityTags()) {
 			if (tag.startsWith(HERITAGE_TAG)) {
 				String key = tag.substring(HERITAGE_TAG.length());
@@ -592,13 +599,13 @@ public final class ZFighterLineage {
 	}
 
 	/** One of the Great Ape's steps: the foot (left, then right) comes down like a stomp, shaking the ground and flinging what's near. */
-	private static void footfall(ServerPlayer player, ZFighterPower.Live live, ServerLevel level) {
+	static void footfall(LivingEntity player, ZFighterPower.Live live, ServerLevel level) {
 		live.apeLeftFoot = !live.apeLeftFoot;
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
 		double side = (live.apeLeftFoot ? 1.0 : -1.0) * player.getBbWidth() * 0.25;
 		Vec3 foot = player.position().add(Math.cos(yaw) * side, 0.0, Math.sin(yaw) * side);
 		double reach = APE_FOOT_REACH * live.apeSize;
-		com.jaymospowers.core.Shakes.heavy(player, foot, APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
+		shake(player, foot, APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
 		level.playSound(null, foot.x, foot.y, foot.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.6F, 0.45F);
 		level.playSound(null, foot.x, foot.y, foot.z, SoundEvents.RAVAGER_STEP, SoundSource.PLAYERS, 3.0F, 0.4F);
 		net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(BlockPos.containing(foot).below());
@@ -609,7 +616,7 @@ public final class ZFighterLineage {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(foot, foot).inflate(reach, 2.0, reach),
 			e -> e != player && e.isAlive() && trodden(player, e))) {
-			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_FOOT_DAMAGE)) {
+			if (victim.hurtServer(level, blow(level, player), APE_FOOT_DAMAGE)) {
 				com.jaymospowers.core.BladeBlood.crushed(victim);
 				Vec3 away = victim.position().subtract(foot).multiply(1.0, 0.0, 1.0).normalize();
 				victim.push(away.x * 0.6, 0.5, away.z * 0.6);
@@ -618,13 +625,13 @@ public final class ZFighterLineage {
 	}
 
 	/** The Great Ape treads on his enemies: monsters, and anything that's after him, under his feet. */
-	private static void stomp(ServerPlayer player, ServerLevel level) {
+	static void stomp(LivingEntity player, ServerLevel level) {
 		AABB box = player.getBoundingBox();
 		AABB feet = new AABB(box.minX, box.minY - 0.5, box.minZ, box.maxX, box.minY + APE_STOMP_DEPTH, box.maxZ);
 		boolean hit = false;
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, feet, e -> e != player && e.isAlive()
 			&& trodden(player, e))) {
-			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_STOMP)) {
+			if (victim.hurtServer(level, blow(level, player), APE_STOMP)) {
 				// trodden flat: it bursts
 				com.jaymospowers.core.BladeBlood.crushed(victim);
 				hit = true;
@@ -635,7 +642,21 @@ public final class ZFighterLineage {
 		}
 		if (hit) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
-			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE);
+			shake(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE);
+		}
+	}
+
+	/** The Great Ape's blow: a player's attack, or (a villager's wild ape, {@link VillagerApe}) a mob's. */
+	static DamageSource blow(ServerLevel level, LivingEntity ape) {
+		return ape instanceof Player player ? level.damageSources().playerAttack(player) : level.damageSources().mobAttack(ape);
+	}
+
+	/** The ground shakes under the Great Ape: a player's own body feels it hardest; round a villager's, everyone near. */
+	static void shake(LivingEntity ape, Vec3 at, double range, float strength) {
+		if (ape instanceof ServerPlayer player) {
+			com.jaymospowers.core.Shakes.heavy(player, at, range, strength);
+		} else if (ape.level() instanceof ServerLevel level) {
+			com.jaymospowers.core.Shakes.around(level, at, range, strength);
 		}
 	}
 
@@ -700,7 +721,7 @@ public final class ZFighterLineage {
 	// ---------------------------------------------------------------- the Great Ape: crippled, wild, berserk (0.12.3)
 
 	/** What the Great Ape's feet crush: monsters and anything after him; everything alive, when he's berserk. */
-	private static boolean trodden(ServerPlayer player, LivingEntity e) {
+	private static boolean trodden(LivingEntity player, LivingEntity e) {
 		if (player.hasAttached(BERSERK)) {
 			return !(e instanceof Player other) || !other.isCreative() && !other.isSpectator();
 		}
@@ -852,14 +873,14 @@ public final class ZFighterLineage {
 	}
 
 	/** Its fists reach {@link #BERSERK_REACH} past its bulk, across the ground and from its feet up to its shoulders. */
-	private static boolean inReach(ServerPlayer player, ZFighterPower.Live live, LivingEntity target) {
+	static boolean inReach(LivingEntity player, ZFighterPower.Live live, LivingEntity target) {
 		double reach = BERSERK_REACH * Math.max(0.25F, live.apeSize);
 		AABB body = player.getBoundingBox();
 		return body.inflate(reach, 0.0, reach).expandTowards(0.0, -reach, 0.0).intersects(target.getBoundingBox());
 	}
 
 	/** Nothing to go for: it wanders off somewhere new every so often, or once it gets there. */
-	private static void roam(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+	static void roam(LivingEntity player, ZFighterPower.Live live, ServerLevel level, long now) {
 		BlockPos goal = player.getAttached(WILD_GOAL);
 		if (goal != null && now < live.roamAt && !near(player, goal)) {
 			return;
@@ -871,7 +892,7 @@ public final class ZFighterLineage {
 	}
 
 	/** Hurt: the wild ape turns tail from the blow and runs a way off, unless it only just stopped running. */
-	private static void flee(ServerPlayer player, ZFighterPower.Live live, DamageSource source, long now) {
+	static void flee(LivingEntity player, ZFighterPower.Live live, DamageSource source, long now) {
 		if (live.fleeUntil >= 0L || now < live.fleeRestUntil || live.apeSize < 0.5F) {
 			return;
 		}
@@ -885,7 +906,7 @@ public final class ZFighterLineage {
 		live.fleeUntil = now + FLEE_TICKS;
 		live.berserkTarget = -1;
 		player.setAttached(BERSERK, -1);
-		player.setAttached(WILD_GOAL, groundAt(player.level(), player.getX() + away.x, player.getZ() + away.z));
+		player.setAttached(WILD_GOAL, groundAt((ServerLevel)player.level(), player.getX() + away.x, player.getZ() + away.z));
 		player.setAttached(WILD_FLEE, true);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.PLAYERS, 4.0F, 0.4F);
 	}
@@ -896,7 +917,7 @@ public final class ZFighterLineage {
 	}
 
 	/** He's stood about at {@code goal} (across the ground, within his own bulk). */
-	private static boolean near(ServerPlayer player, @org.jspecify.annotations.Nullable BlockPos goal) {
+	static boolean near(LivingEntity player, @org.jspecify.annotations.Nullable BlockPos goal) {
 		if (goal == null) {
 			return true;
 		}
@@ -909,7 +930,7 @@ public final class ZFighterLineage {
 	 * Who the berserk ape goes for: anything alive but himself, armour stands, and players in creative or spectating, that
 	 * he can see, that isn't far above or below him or under water, and that he hasn't just given up on.
 	 */
-	private static boolean quarry(ServerPlayer player, ZFighterPower.Live live, LivingEntity e, long now) {
+	static boolean quarry(LivingEntity player, ZFighterPower.Live live, LivingEntity e, long now) {
 		return e != player && e.isAlive() && !(e instanceof ArmorStand) && !e.isInvisible()
 			&& !(e instanceof Player other && (other.isCreative() || other.isSpectator()))
 			&& !(e.getId() == live.berserkIgnore && now < live.berserkIgnoreUntil)

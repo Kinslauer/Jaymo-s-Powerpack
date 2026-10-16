@@ -418,6 +418,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		Outfits.dress(this, faction, climate);
 		KnightsCompat.dress(this, faction, climate);
 		this.outfit = Outfits.VERSION;
+		// townsfolk are born to a heritage (VillagerHeritage)
+		VillagerHeritage.folkSetup(this);
 		this.setHealth(this.getMaxHealth());
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);

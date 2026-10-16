@@ -192,6 +192,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.23: the Verdant World's villagers are Verdants (green skin, antennae; and its attachment)
 		LOGGER.debug("verdant attachment: {}", Verdants.SHADE);
 		Verdants.register();
+		// villagers born into heritages (MCA's and the settlements' own folk), a Warrior-born's tail wrapped or cut
+		VillagerHeritage.register();
 		Quests.register();
 		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
 		Journal.register();

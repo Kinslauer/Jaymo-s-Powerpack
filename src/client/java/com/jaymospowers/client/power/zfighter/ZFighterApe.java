@@ -16,6 +16,8 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -35,7 +37,7 @@ public final class ZFighterApe {
 	public static final RenderStateDataKey<Boolean> CRIPPLED = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_crippled");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape.png");
 
-	private static Model model;
+	private static Model<AvatarRenderState> model;
 
 	private ZFighterApe() {
 	}
@@ -69,15 +71,80 @@ public final class ZFighterApe {
 		state.stingerCount = 0;
 	}
 
-	static Model model() {
+	static Model<AvatarRenderState> model() {
 		if (model == null) {
-			model = new Model();
+			model = new Model<>();
 		}
 		return model;
 	}
 
-	/** The ape: a humanoid model, so it walks, swings and looks round as he does. */
-	static final class Model extends HumanoidModel<AvatarRenderState> {
+	/**
+	 * A villager raging as the wild Great Ape (Jaymo's Kingdoms' Warrior-born villagers, {@code VillagerApe}): the same
+	 * ape in its place, its own body, clothes and gear hidden.
+	 */
+	public static void extractMob(LivingEntity entity, HumanoidRenderState state) {
+		boolean ape = !(entity instanceof Player) && Boolean.TRUE.equals(entity.getAttached(ZFighterLineage.GREAT_APE)) && !entity.isInvisible();
+		state.setData(KEY, ape ? Boolean.TRUE : null);
+		if (!ape) {
+			return;
+		}
+		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
+		state.isInvisible = true;
+		state.isInvisibleToPlayer = true;
+		state.headEquipment = ItemStack.EMPTY;
+		state.chestEquipment = ItemStack.EMPTY;
+		state.legsEquipment = ItemStack.EMPTY;
+		state.feetEquipment = ItemStack.EMPTY;
+		state.headItem.clear();
+		state.wornHeadType = null;
+		state.wornHeadProfile = null;
+		state.rightHandItemState.clear();
+		state.leftHandItemState.clear();
+		state.rightHandItemStack = ItemStack.EMPTY;
+		state.leftHandItemStack = ItemStack.EMPTY;
+	}
+
+	private static Model<HumanoidRenderState> mobModel;
+
+	static Model<HumanoidRenderState> mobModel() {
+		if (mobModel == null) {
+			mobModel = new Model<>();
+		}
+		return mobModel;
+	}
+
+	/** Draws the ape over a hidden villager (any humanoid mob's renderer). */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static MobLayer<?> mobLayer(RenderLayerParent<?, ?> renderer) {
+		return new MobLayer((RenderLayerParent) renderer);
+	}
+
+	static final class MobLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
+		MobLayer(RenderLayerParent<S, HumanoidModel<S>> renderer) {
+			super(renderer);
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
+			if (!Boolean.TRUE.equals(state.getData(KEY))) {
+				return;
+			}
+			boolean down = Boolean.TRUE.equals(state.getData(CRIPPLED));
+			if (down) {
+				poseStack.pushPose();
+				poseStack.translate(0.0F, 1.5F, 0.0F);
+				poseStack.rotateDegrees(com.mojang.math.Axis.XP, -90.0F);
+				poseStack.translate(0.0F, -1.5F, -0.25F);
+			}
+			renderColoredCutoutModel(mobModel(), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (down) {
+				poseStack.popPose();
+			}
+		}
+	}
+
+	/** The ape: a humanoid model, so it walks, swings and looks round as he does (or a raging villager does). */
+	static final class Model<S extends HumanoidRenderState> extends HumanoidModel<S> {
 		private final ModelPart tail;
 
 		Model() {
@@ -112,7 +179,7 @@ public final class ZFighterApe {
 		}
 
 		@Override
-		public void setupAnim(AvatarRenderState state) {
+		public void setupAnim(S state) {
 			super.setupAnim(state);
 			float time = state.ageInTicks;
 			float walk = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
