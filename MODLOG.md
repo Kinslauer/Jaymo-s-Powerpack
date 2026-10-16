@@ -1560,3 +1560,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Behemoth** (`tools/gen_web_hulk.py`): about 3.7 blocks tall (was 3.05), longer torso, 9-wide waist, longer legs with thick thighs; elbow/knee hinges moved. Its head is placed on the neck in the torso's frame (`WebHulk.neck`), turns at most 0.45 rad, and no longer swings into the shoulders.
   - **Maw** (`WebMawMesh`, from the same tool; `gen_web_maw.py` removed): the behemoth's head grown huge, gaping wide, lashing its tongue and snapping shut on every bite.
   - **Takeover bounds and zips:** getting you away (flee, tour, climate walk) it crouches and bounds up to 12 blocks along the path every 30 ticks (safe landing, no fall damage), and zips a cord 5–18 blocks ahead every 50 ticks (`WebTakeoverPath.ZIP_*`, high ground when fleeing). Any takeover leaps gaps and water, zips out of pits and up cliffs, and jumps when stuck. Each shakes your view; a zip darkens the screen.
+- **0.12.9, world tiers:** Andy asked for Apotheosis's world tiers (its code is MIT, its art and text all rights
+  reserved; its only builds are NeoForge 26.1). Packs Jaymo's Kingdoms 0.7.82, which has our own world tiers (see
+  `kingdoms/MODLOG.md`). No Powers code changed.
+- **0.12.10, symbiote fix list + heartier meals:** Andy's list.
+  - **Sneak+R/G tear-out:** the chunk only tears loose if the key is still held when the struggle ends (checked on the
+    server against `PowerInput` every tick, not only on the release packet). Let go any time before that and the line
+    just drops, the terrain whole (Andy: "it only breaks if you follow through"). A tendril-torn chunk is kept (`BlockCluster.keep`): it lies where
+    it falls until something moves or breaks it (no crumbling, no max age). Still not saved across an unload.
+  - **Wall Crawl tendrils need Living Armor:** `WebSymbiote.crawlTendrils` (Crawl on and armoured). Wall Crawl without
+    Living Armor is the plain Web wall climb/cling.
+  - **Suit key in the big body at full bond** sheds only the big body: Living Armor's tendrils stay out over the suit
+    (`Live.armorSlim`, until the armour comes off); the next press brings that down as before.
+  - **Tongue after a meal:** meals are tracked in every form, and it licks its chops 3 times after the maw lets go
+    (`WebHulk.MEAL_FLICK*`), on the big body or (only then) on the plain suit (`submitSuitTongue`).
+  - **Low health is a share of max health:** `DEFEND_HEALTH` 0.3, `DESPERATE_HEALTH` 0.5, `INSTINCT_LOW_HEALTH` 0.4
+    (`WebSymbiote.lowHealth`), so Warrior-born or unfed bodies with few hearts aren't always "near death".
+  - **Takeover camera:** your view is dragged to the way you're carried (`VIEW_DRAG` 0.2/tick); look more than 40
+    degrees away and it tears it back with a jolt (`WebSymbioteClient.wrenchView`).
+  - Packs Jaymo's Kitchen 0.4.46 (heartier meals, see `kitchen/MODLOG.md`).

@@ -66,6 +66,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.6.0: the class screen (on first joining, and after a Writ of Rebirth)
 		ClassScreen.register();
 		HeritageScreen.register();
+		// 0.7.82: the world tier screen (from the skill screen, or its own key)
+		TierScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
 		WerewolfKey.register();

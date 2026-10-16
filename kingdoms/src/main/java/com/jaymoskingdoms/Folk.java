@@ -724,6 +724,15 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 	}
 
+	/**
+	 * (0.7.83) What a shot is fired from: the held weapon, or a bow if the hand is empty (disarmed, or the bow put away
+	 * in the saddle). An arrow fired from an empty hand throws, and that crashed the server.
+	 */
+	static ItemStack firingWeapon(Folk folk) {
+		ItemStack held = folk.getMainHandItem();
+		return held.isEmpty() ? new ItemStack(Items.BOW) : held;
+	}
+
 	/** An archer's shot (as a skeleton looses one); a caster's spell. */
 	@Override
 	public void performRangedAttack(LivingEntity target, float power) {
@@ -731,7 +740,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			Sorcery.cast(this, target);
 			return;
 		}
-		ItemStack bow = this.getMainHandItem();
+		ItemStack bow = firingWeapon(this);
 		ItemStack arrowStack = new ItemStack(Items.ARROW);
 		net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow = net.minecraft.world.entity.projectile.ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
 		double xd = target.getX() - this.getX();
