@@ -17,6 +17,7 @@ abstract class MobSwingModelFeatureRendererMixin {
 	private void jaymoskingdoms$swing(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		PullerPose.apply(submit.model(), submit.state());
 		PickpocketPose.apply(submit.model(), submit.state());
+		com.jaymoskingdoms.client.DownedPose.apply(submit.model(), submit.state());
 		MobAnimations.apply(submit.model(), submit.state());
 	}
 }

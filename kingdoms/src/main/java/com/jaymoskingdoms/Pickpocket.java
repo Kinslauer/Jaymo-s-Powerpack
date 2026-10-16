@@ -178,7 +178,7 @@ public final class Pickpocket {
 
 	/** Has pockets worth picking: a grown villager, or a settlement's folk short of its ruler. */
 	private static boolean markable(LivingEntity e) {
-		if (!e.isAlive() || e.isBaby()) {
+		if (!e.isAlive() || e.isBaby() || Downed.isDowned(e)) {
 			return false;
 		}
 		return e instanceof Villager || e instanceof Folk folk && !folk.leader();

@@ -1460,3 +1460,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   in reach of a block-breaking explosion of power 6+ (`STRONG_BLAST`: charged creeper, end crystal), spilling the
   contents and 3 leather. Sneak-right-click with an empty hand picks it up onto your back. Dying with one on sets it
   down where you fell (kept on with keepInventory). Textures from `tools/gen_backpack.py`.
+- **0.11.90 / Kingdoms 0.7.73, downed guards:** Andy: "guards, when killed dont drop as a corpse, instead they get downed,
+  and either crawl or otherwise fall into a downed animation, they can be disarmed but not looted". Kingdoms only
+  (`Downed`): a killing blow downs a realm's guard or archer instead; they crawl away or lie on their backs, can be
+  disarmed by right-click, and leave no corpse and no drops. Left alone they get back up after a minute; once a player
+  hits them they bleed out 2 minutes after the last hit, and the 10th hit kills. Mobs, fire and falls can kill them
+  too, and sneak + right-click carries one over your shoulder (right-click throws, sneak + right-click sets down).

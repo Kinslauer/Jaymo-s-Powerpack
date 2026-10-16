@@ -3185,3 +3185,18 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 - A lord walks his round with at most 4 guards (`Royals.LORD_ESCORT_MOST`; a king up to 8).
 - A fiefdom's audience says whose land it is: "X is a fiefdom: its lord holds it for Y and pays him tribute."
 - The "Vassal of X" title (read as if he served his own fiefdom) is now "Count of X" for new lords.
+## 0.7.73: guards are downed, not killed
+- Andy: "guards, when killed dont drop as a corpse, instead they get downed, and either crawl or otherwise fall into a
+  downed animation, they can be disarmed but not looted" (`Downed`, with Jaymo's Powers 0.11.90). The blow that would
+  kill a realm's guard or archer (Folk, a villager in its service, or any villager in MCA's guard/archer job) downs
+  them instead (saved, synced `downed` attachment): half crawl face down away from whoever felled them, the rest lie
+  on their backs (client `DownedPose`). Their AI stops (`DownedMobMixin`) and they drop
+  nothing (`DownedMixin`), and they can't be pickpocketed; right-click takes the weapons from their hands. Andy: "they
+  should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10 times":
+  left alone, they get up after 1 minute (`RECOVER_TICKS`) with 30% health; a player's hit is a wound (saved
+  `downed_wounds`), after which they never get up and bleed out 2 minutes after the last hit (`BLEED_OUT_TICKS`), and
+  the 10th hit kills (`MAX_WOUNDS`). Andy: "Mobs fire and falls can kill them too and you can throw them": downed,
+  they have 6 health (`DOWNED_HEALTH`) that mobs (who can target them again), fire, falls and the void take as usual;
+  sneak + right-click carries one over your shoulder (a passenger, placed by `DownedMixin`), then right-click throws
+  them (`THROW_SPEED`) and sneak + right-click sets them down. Any death is a real one (wars, quests, crimes), with no
+  corpse and no loot.
