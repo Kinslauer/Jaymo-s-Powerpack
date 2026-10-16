@@ -269,6 +269,18 @@ public final class ZFighterPower implements Power {
 		boolean apeLeftFoot;
 		/** The highest he's been since his feet last touched down: a long drop ends in a stomp. */
 		double apePeak;
+		/**
+		 * (0.12.3) The Great Ape's legs: blows taken to them, until when it lies crippled (-1: it isn't), until when its
+		 * legs can't be taken again. The wild ape (a Warrior-born who's no Z Fighter): when it turned (-1: it isn't), when
+		 * the moon was last rolled for, its quarry (entity id, -1: none) and when it may swing again.
+		 */
+		int legHits;
+		long crippledUntil = -1L;
+		long crippleSafeUntil;
+		long wildFrom = -1L;
+		long wildRolledAt = Long.MIN_VALUE / 2;
+		int berserkTarget = -1;
+		long berserkSwingAt;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;

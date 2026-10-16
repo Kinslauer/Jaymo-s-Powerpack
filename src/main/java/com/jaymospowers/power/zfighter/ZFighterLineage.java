@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -105,6 +106,27 @@ public final class ZFighterLineage {
 	static final double APE_LANDING = 5.0;
 	/** How far across the ground his fists reach (blocks), measured out from his body rather than his eyes up high. */
 	static final double APE_REACH = 20.0;
+	// ---- the Great Ape crippled, and the wild ape (0.12.3) ----
+	/** A Warrior-born who's no Z Fighter may still turn under a full moon (tail out): this often, rolled once a night. */
+	static final float WILD_CHANCE = 0.5F;
+	/** A night's roll stands this long (ticks) before the moon is rolled for again. */
+	static final long WILD_ROLL_EVERY = 12000L;
+	/** The wild ape is a little smaller than a Z Fighter's (scale added to 1), and lasts at most this long (5 min). */
+	static final double WILD_SCALE = 13.0;
+	static final long WILD_MAX_TICKS = 6000L;
+	/** Berserk, the wild ape goes for anything alive this near (blocks), swinging every this many ticks once in reach. */
+	static final double BERSERK_RANGE = 40.0;
+	static final int BERSERK_SWING_EVERY = 16, BERSERK_PICK_EVERY = 20;
+	/** How far past its own bulk its fists reach while berserk (blocks, at full size). */
+	static final double BERSERK_REACH = 4.0;
+	/** Blows to the legs (landing from below this share of its height) cripple a Great Ape: this many, or one this hard. */
+	static final double LEG_SHARE = 0.4;
+	static final int CRIPPLE_HITS = 25, WILD_CRIPPLE_HITS = 15;
+	static final float CRIPPLE_BLOW = 30.0F, WILD_CRIPPLE_BLOW = 20.0F;
+	/** Crippled, it lies flat this long (ticks; a Z Fighter's, the wild ape's), then can't be crippled again for this long. */
+	static final int CRIPPLED_TICKS = 120, WILD_CRIPPLED_TICKS = 160, CRIPPLE_SAFE_TICKS = 200;
+	/** A tail cut off (a blade, while the ape lies crippled) grows back after this long (3 days). */
+	static final long TAIL_REGROW_TICKS = 72000L;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
@@ -136,6 +158,16 @@ public final class ZFighterLineage {
 	public static final AttachmentType<Boolean> GREAT_APE = AttachmentRegistry.create(JaymosPowers.id("zfighter_great_ape"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/** (0.12.3) The Great Ape lies crippled: it can't move. Seen by all, not saved. */
+	public static final AttachmentType<Boolean> CRIPPLED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_crippled"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** (0.12.3) A Warrior-born's tail was cut off: the game time it grows back. Saved, kept through death, seen by all. */
+	public static final AttachmentType<Long> TAIL_CUT = AttachmentRegistry.create(JaymosPowers.id("zfighter_tail_cut"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath().syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.12.3) The wild ape's quarry (entity id): its own player's client walks him at it. Not saved. */
+	public static final AttachmentType<Integer> BERSERK = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_berserk"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+
 	/** Jaymo's Kingdoms' heritage tag (then the heritage's key), and the heritages that make a lineage of their own. */
 	private static final String HERITAGE_TAG = "jaymoskingdoms_heritage_";
 	private static final String[][] HERITAGE_LINEAGES = {{"earthling", "earthling"}, {"warriorborn", "warrior"}, {"frostborn", "frost"}, {"verdant", "verdant"}};
@@ -151,6 +183,12 @@ public final class ZFighterLineage {
 
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterLineage::everyone);
+		// (0.12.3) blows on the Great Ape's legs cripple him; a blade while he's down cuts his tail off
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (!blocked && entity instanceof ServerPlayer player && ape(player)) {
+				hurt(player, source, damageTaken);
+			}
+		});
 		RaceMoves.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -175,7 +213,23 @@ public final class ZFighterLineage {
 	}
 
 	public static boolean tailOut(Player player) {
-		return of(player) == WARRIOR && !Boolean.TRUE.equals(player.getAttached(TAIL_WRAPPED));
+		return of(player) == WARRIOR && !Boolean.TRUE.equals(player.getAttached(TAIL_WRAPPED)) && !tailCut(player);
+	}
+
+	/** His tail's been cut off and hasn't grown back yet. */
+	public static boolean tailCut(Player player) {
+		Long back = player.getAttached(TAIL_CUT);
+		return back != null && player.level().getGameTime() < back;
+	}
+
+	/** The Great Ape lies crippled. */
+	public static boolean crippled(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(CRIPPLED));
+	}
+
+	/** A Warrior-born with no Z Fighter power: his Great Ape is the wild one (berserk, never his to steer). */
+	static boolean wild(Player player) {
+		return !Powers.has(player, ZFighterPower.INSTANCE);
 	}
 
 	/** The reach to add so his fists land {@link #APE_REACH} out along the ground, from eyes that far up. */
@@ -297,6 +351,15 @@ public final class ZFighterLineage {
 			if (lineage == VERDANT) {
 				mend(player, player.level().getGameTime());
 			}
+			ZFighterPower.Live live = ZFighterPower.live(player);
+			if (lineage == WARRIOR) {
+				ape(player, live, player.level(), player.level().getGameTime());
+			} else if (ape(player)) {
+				endApe(player, live);
+			}
+			if (live.apeSize > 0.0F || ape(player)) {
+				grow(player, live, player.level());
+			}
 		}
 	}
 
@@ -349,7 +412,7 @@ public final class ZFighterLineage {
 
 	/** Sneak+Z on the ground (or the heritage key): a Warrior-born wraps his tail away or lets it out. */
 	static void toggleTail(ServerPlayer player) {
-		if (of(player) != WARRIOR || ape(player)) {
+		if (of(player) != WARRIOR || ape(player) || tailCut(player)) {
 			return;
 		}
 		boolean wrapped = !Boolean.TRUE.equals(player.getAttached(TAIL_WRAPPED));
@@ -416,7 +479,7 @@ public final class ZFighterLineage {
 			return;
 		}
 		live.apeSize = ape ? Math.min(1.0F, live.apeSize + 1.0F / APE_GROW_TICKS) : Math.max(0.0F, live.apeSize - 1.0F / APE_SHRINK_TICKS);
-		ZFighterPower.refresh(player, live);
+		attributes(player, live);
 		if (ape) {
 			double width = player.getBbWidth();
 			level.sendParticles(new DustParticleOptions(0x6B3A1E, 3.0F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
@@ -443,19 +506,45 @@ public final class ZFighterLineage {
 	}
 
 	private static void ape(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+		Long back = player.getAttached(TAIL_CUT);
+		if (back != null && now >= back) {
+			// the tail's grown back
+			player.removeAttached(TAIL_CUT);
+		}
+		boolean wild = wild(player);
 		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
 			live.apePeak = player.getY();
-			if (moonlit && player.isAlive()) {
-				becomeApe(player, live);
+			if (moonlit && player.isAlive() && live.apeSize <= 0.0F) {
+				if (!wild) {
+					becomeApe(player, live);
+				} else if (now - live.wildRolledAt >= WILD_ROLL_EVERY) {
+					// no Z Fighter: the moon may or may not take him, once a night
+					live.wildRolledAt = now;
+					if (player.getRandom().nextFloat() < WILD_CHANCE) {
+						becomeApe(player, live);
+					}
+				}
 			}
 			return;
 		}
 		live.moonless = moonlit ? 0 : live.moonless + 1;
-		if (live.moonless >= APE_MOONLESS || !tailOut(player) || level.isBrightOutside()) {
+		if (live.moonless >= APE_MOONLESS || !tailOut(player) || level.isBrightOutside() || wild && now - live.wildFrom >= WILD_MAX_TICKS) {
 			endApe(player, live);
 			return;
+		}
+		if (crippled(player)) {
+			// down on his back until his legs come back to him
+			if (now >= live.crippledUntil) {
+				player.removeAttached(CRIPPLED);
+				live.crippledUntil = -1L;
+				attributes(player, live);
+			}
+			return;
+		}
+		if (wild) {
+			berserk(player, live, level, now);
 		}
 		if (now % 3 == 0) {
 			level.sendParticles(new DustParticleOptions(0xC03020, 2.5F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
@@ -503,7 +592,7 @@ public final class ZFighterLineage {
 		}
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(foot, foot).inflate(reach, 2.0, reach),
-			e -> e != player && e.isAlive() && (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
+			e -> e != player && e.isAlive() && trodden(player, e))) {
 			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_FOOT_DAMAGE)) {
 				com.jaymospowers.core.BladeBlood.crushed(victim);
 				Vec3 away = victim.position().subtract(foot).multiply(1.0, 0.0, 1.0).normalize();
@@ -518,7 +607,7 @@ public final class ZFighterLineage {
 		AABB feet = new AABB(box.minX, box.minY - 0.5, box.minZ, box.maxX, box.minY + APE_STOMP_DEPTH, box.maxZ);
 		boolean hit = false;
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, feet, e -> e != player && e.isAlive()
-			&& (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
+			&& trodden(player, e))) {
 			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_STOMP)) {
 				// trodden flat: it bursts
 				com.jaymospowers.core.BladeBlood.crushed(victim);
@@ -535,26 +624,34 @@ public final class ZFighterLineage {
 	}
 
 	private static void becomeApe(ServerPlayer player, ZFighterPower.Live live) {
-		if (live.flying) {
-			ZFighterPower.endFlight(player, live);
+		boolean wild = wild(player);
+		if (!wild) {
+			if (live.flying) {
+				ZFighterPower.endFlight(player, live);
+			}
+			if (live.superOn()) {
+				ZFighterPower.endSuper(player, live);
+			}
+			ZFighterPower.endLimit(player, live);
+			ZFighterTechniques.cancel(player, live);
 		}
-		if (live.superOn()) {
-			ZFighterPower.endSuper(player, live);
-		}
-		ZFighterPower.endLimit(player, live);
-		ZFighterTechniques.cancel(player, live);
 		live.waveFrom = -1L;
 		live.barrageFrom = -1L;
 		live.charging = false;
 		live.moonless = 0;
+		live.legHits = 0;
+		live.crippledUntil = -1L;
+		live.wildFrom = wild ? player.level().getGameTime() : -1L;
+		live.berserkTarget = -1;
 		player.setAttached(GREAT_APE, true);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 3.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_ape").withStyle(ChatFormatting.RED));
-		ZFighterPower.refresh(player, live);
+		player.sendSystemMessage(Component.translatable(wild ? "message.jaymospowers.zfighter_ape_wild" : "message.jaymospowers.zfighter_ape")
+			.withStyle(ChatFormatting.RED));
+		attributes(player, live);
 		player.setHealth(player.getMaxHealth());
 	}
 
@@ -563,12 +660,145 @@ public final class ZFighterLineage {
 			return;
 		}
 		player.removeAttached(GREAT_APE);
+		player.removeAttached(CRIPPLED);
+		player.removeAttached(BERSERK);
+		live.crippledUntil = -1L;
+		live.wildFrom = -1L;
+		live.berserkTarget = -1;
+		live.legHits = 0;
 		player.level().sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 1.0, player.getZ(), 30, 1.0, 1.5, 1.0, 0.05);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_ape_end").withStyle(ChatFormatting.GRAY));
-		ZFighterPower.refresh(player, live);
+		attributes(player, live);
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
 		}
+	}
+
+	// ---------------------------------------------------------------- the Great Ape: crippled, wild, berserk (0.12.3)
+
+	/** What the Great Ape's feet crush: monsters and anything after him; everything alive, when he's berserk. */
+	private static boolean trodden(ServerPlayer player, LivingEntity e) {
+		if (player.hasAttached(BERSERK)) {
+			return !(e instanceof Player other) || !other.isCreative() && !other.isSpectator();
+		}
+		return e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player;
+	}
+
+	private static final Identifier WILD_SCALE_ID = JaymosPowers.id("zfighter_wild_ape_scale");
+	private static final Identifier WILD_FIST_ID = JaymosPowers.id("zfighter_wild_ape_fists");
+	private static final Identifier WILD_HEALTH_ID = JaymosPowers.id("zfighter_wild_ape_health");
+	private static final Identifier WILD_SPEED_ID = JaymosPowers.id("zfighter_wild_ape_speed");
+	private static final Identifier WILD_JUMP_ID = JaymosPowers.id("zfighter_wild_ape_jump");
+	private static final Identifier WILD_GRAVITY_ID = JaymosPowers.id("zfighter_wild_ape_gravity");
+	private static final Identifier WILD_FALL_ID = JaymosPowers.id("zfighter_wild_ape_fall");
+	private static final Identifier WILD_REACH_ID = JaymosPowers.id("zfighter_wild_ape_reach");
+	private static final Identifier CRIPPLE_SPEED_ID = JaymosPowers.id("zfighter_ape_crippled_speed");
+	private static final Identifier CRIPPLE_JUMP_ID = JaymosPowers.id("zfighter_ape_crippled_jump");
+
+	/** The Great Ape's body as it stands: a Z Fighter's through his power, the wild ape's here; and crippled legs. */
+	private static void attributes(ServerPlayer player, ZFighterPower.Live live) {
+		boolean wild = wild(player);
+		if (!wild) {
+			ZFighterPower.refresh(player, live);
+		}
+		boolean ape = wild && ape(player);
+		float t = Mth.clamp(live.apeSize, 0.0F, 1.0F);
+		double scale = wild ? WILD_SCALE * t * t * (3.0F - 2.0F * t) : 0.0;
+		ZFighterPower.set(player, Attributes.SCALE, WILD_SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		ZFighterPower.set(player, Attributes.ATTACK_DAMAGE, WILD_FIST_ID, ape ? APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterPower.set(player, Attributes.MAX_HEALTH, WILD_HEALTH_ID, ape ? APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, WILD_SPEED_ID, ape ? APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterPower.set(player, Attributes.JUMP_STRENGTH, WILD_JUMP_ID, ape ? APE_JUMP : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		ZFighterPower.set(player, Attributes.GRAVITY, WILD_GRAVITY_ID, ape ? -APE_LIGHT : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterPower.set(player, Attributes.FALL_DAMAGE_MULTIPLIER, WILD_FALL_ID, ape ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterPower.set(player, Attributes.ENTITY_INTERACTION_RANGE, WILD_REACH_ID, ape ? apeReach(player) : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		boolean down = ape(player) && crippled(player);
+		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, CRIPPLE_SPEED_ID, down ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterPower.set(player, Attributes.JUMP_STRENGTH, CRIPPLE_JUMP_ID, down ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		if (player.getHealth() > player.getMaxHealth()) {
+			player.setHealth(player.getMaxHealth());
+		}
+	}
+
+	/**
+	 * A blow on the Great Ape: low ones are on his legs, and enough of them (or one hard enough) bring him down; while he
+	 * lies there, a blade cuts his tail off and he shrinks back.
+	 */
+	static void hurt(ServerPlayer player, DamageSource source, float taken) {
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (crippled(player)) {
+			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by
+				&& com.jaymospowers.core.Dismember.blade(by.getMainHandItem())) {
+				cutTail(player, live, level, now);
+			}
+			return;
+		}
+		Vec3 from = source.getSourcePosition();
+		if (now < live.crippleSafeUntil || from == null || from.y > player.getY() + player.getBbHeight() * LEG_SHARE || live.apeSize < 0.5F) {
+			return;
+		}
+		boolean wild = wild(player);
+		live.legHits++;
+		if (taken >= (wild ? WILD_CRIPPLE_BLOW : CRIPPLE_BLOW) || live.legHits >= (wild ? WILD_CRIPPLE_HITS : CRIPPLE_HITS)) {
+			live.legHits = 0;
+			live.crippledUntil = now + (wild ? WILD_CRIPPLED_TICKS : CRIPPLED_TICKS);
+			live.crippleSafeUntil = live.crippledUntil + CRIPPLE_SAFE_TICKS;
+			player.setAttached(CRIPPLED, true);
+			attributes(player, live);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.PLAYERS, 4.0F, 0.4F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
+			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ape_crippled").withStyle(ChatFormatting.RED));
+		}
+	}
+
+	/** The tail's cut off: he shrinks back, and it takes {@link #TAIL_REGROW_TICKS} to grow again. */
+	private static void cutTail(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+		player.setAttached(TAIL_CUT, now + TAIL_REGROW_TICKS);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 3.0F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.PLAYERS, 4.0F, 0.4F);
+		level.sendParticles(new DustParticleOptions(0x8A0A0A, 3.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40,
+			player.getBbWidth() * 0.4, 0.5, player.getBbWidth() * 0.4, 0.0);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tail_cut").withStyle(ChatFormatting.RED));
+		endApe(player, live);
+	}
+
+	/** The wild ape is berserk: it picks the nearest living thing, its player's client walks him at it, and he swings when it's in reach. */
+	private static void berserk(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+		net.minecraft.world.entity.Entity known = live.berserkTarget >= 0 ? level.getEntity(live.berserkTarget) : null;
+		LivingEntity target = known instanceof LivingEntity living && living.isAlive() && living.distanceTo(player) <= BERSERK_RANGE * 1.5 ? living : null;
+		if (target == null || now % BERSERK_PICK_EVERY == 0) {
+			LivingEntity nearest = null;
+			double best = BERSERK_RANGE * BERSERK_RANGE;
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BERSERK_RANGE), e -> quarry(player, e))) {
+				double d = e.distanceToSqr(player);
+				if (d < best) {
+					best = d;
+					nearest = e;
+				}
+			}
+			target = nearest;
+		}
+		int id = target == null ? -1 : target.getId();
+		if (id != live.berserkTarget || !player.hasAttached(BERSERK)) {
+			live.berserkTarget = id;
+			player.setAttached(BERSERK, id);
+		}
+		if (target != null && now >= live.berserkSwingAt
+			&& player.getBoundingBox().inflate(BERSERK_REACH * Math.max(0.25F, live.apeSize)).intersects(target.getBoundingBox())) {
+			live.berserkSwingAt = now + BERSERK_SWING_EVERY;
+			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			player.attack(target);
+			player.resetAttackStrengthTicker();
+		}
+	}
+
+	/** Who the berserk ape goes for: anything alive but himself, armour stands, and players in creative or spectating. */
+	private static boolean quarry(ServerPlayer player, LivingEntity e) {
+		return e != player && e.isAlive() && !(e instanceof ArmorStand) && !e.isInvisible()
+			&& !(e instanceof Player other && (other.isCreative() || other.isSpectator()));
 	}
 
 	// ---------------------------------------------------------------- Verdant: healing
