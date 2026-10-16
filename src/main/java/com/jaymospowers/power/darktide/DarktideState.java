@@ -27,6 +27,8 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * <li>{@link #VEIL}: the veil is up and hides the name tag (synced to everyone);</li>
  * <li>{@link #CURED}: the corruption is cured for now (synced to everyone, for the name and the HUD);</li>
  * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark;</li>
+ * <li>{@link #HOLLOW}: (0.11.102) a harvested villager raised as itself, back at its own life: saved, synced to everyone so
+ * it's drawn ashen;</li>
  * <li>{@link #SHADE}: a user walking as their own shadow after dying at night (until the next nightfall), synced to everyone so they're drawn dark.</li>
  * </ul>
  */
@@ -39,7 +41,7 @@ public final class DarktideState {
 	public static final int ARMS_BARE = 0, ARMS_DAGGERS = 1, ARMS_KATANA = 2;
 
 	/**
-	 * Saved: katana parries counted toward ascension, stored shadows (entity type ids), Tide Arms' stored items and slot,
+	 * Saved: katana parries counted toward ascension, stored shadows (entity type ids; a villager's is its whole saved data, so it rises as itself), Tide Arms' stored items and slot,
 	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), and the overworld clock time a shade
 	 * (died at night and came back as their shadow, {@link DarktideShade}) is flesh again (0: not a shade).
 	 */
@@ -144,6 +146,9 @@ public final class DarktideState {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Integer> RISEN = AttachmentRegistry.create(JaymosPowers.id("darktide_risen"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	public static final AttachmentType<Boolean> HOLLOW = AttachmentRegistry.create(JaymosPowers.id("darktide_hollow"),
+		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	public static final AttachmentType<Boolean> SHADE = AttachmentRegistry.create(JaymosPowers.id("darktide_shade"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));

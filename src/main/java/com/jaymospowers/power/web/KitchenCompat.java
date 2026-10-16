@@ -88,6 +88,14 @@ public final class KitchenCompat {
 		return LOADED && !Kitchen.playerCorpse(entity) && !Kitchen.carried(entity) ? Kitchen.sourceType(entity) : null;
 	}
 
+	/**
+	 * (0.11.102) For Darktide's Necromancy: the corpse's look, the dead creature's whole saved data (its name, its face,
+	 * its family, what it still wears), so a harvested villager can rise as itself. Null if it isn't a corpse.
+	 */
+	public static @Nullable String lookOf(Entity entity) {
+		return LOADED ? Kitchen.look(entity) : null;
+	}
+
 	/** A corpse's limbs jerk violently (a hard jolt), if it is one. */
 	static void jolt(Entity entity) {
 		if (LOADED) {
@@ -160,6 +168,10 @@ public final class KitchenCompat {
 
 		static boolean leavesCorpse(net.minecraft.world.entity.LivingEntity entity) {
 			return com.jaymoskitchen.corpse.Corpses.leavesCorpse(entity);
+		}
+
+		static @Nullable String look(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && !corpse.isPlayerCorpse() ? corpse.look() : null;
 		}
 
 		static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity entity) {
