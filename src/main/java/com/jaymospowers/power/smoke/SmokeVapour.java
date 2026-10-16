@@ -1,8 +1,11 @@
 package com.jaymospowers.power.smoke;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.backpack.Backpack;
+import com.jaymospowers.compat.ToolBeltCompat;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.costume.Costume;
 import com.jaymospowers.power.wind.WindFlight;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -29,10 +32,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * R, Vapour Form: a mode you switch on and off ({@link #ARMED}). While it's on, breaking into a sprint turns everything
@@ -45,9 +50,11 @@ import net.minecraft.world.phys.Vec3;
  * the {@link SmokeField}; arrows and other shots pass through it (blows, fire and blasts still land). Everyone sees the
  * smoke legs ({@link #FORM}).
  * <p>
- * Smoke can't put armour on in Vapour Form; what you already wear stays on until you take it off (the inventory,
- * right-click and dispenser routes are refused in {@code SmokeArmourMixin}/{@code SmokeEquipMixin}, and anything that
- * still lands in an empty armour slot, like the creative inventory, is handed straight back).
+ * Going up in smoke drops everything you wear where you turned (Andy, 2026-10-16): armour, a costume and a tool belt
+ * fall to the ground and a worn backpack is set down as its block, contents kept ({@link #shed}). Nothing goes back on in Vapour Form: the
+ * inventory, right-click and dispenser routes are refused in {@code SmokeArmourMixin}/{@code SmokeEquipMixin}, the
+ * backpack in {@code BackpackItem}/{@code BackpackBlock}, and anything that still lands in an armour slot, like the
+ * creative inventory, is handed straight back.
  */
 public final class SmokeVapour {
 	/** Smoke a tick your legs pour out (a block's worth is 1); a fresh awakening's (only this ability) is thinner. */
@@ -62,6 +69,8 @@ public final class SmokeVapour {
 	static final int TAKEOFF_GRACE = 10;
 	/** Smoke spilled round the feet on a hard landing (before the doubling every move gets). */
 	static final float LANDING_SMOKE = 2.5F;
+	/** Ticks before gear shed on going up in smoke can be picked up (so the take-off doesn't scoop it straight back). */
+	static final int SHED_PICKUP_DELAY = 60;
 
 	/** On a player in Vapour Form: synced to everyone, who draw the smoke legs. */
 	public static final AttachmentType<Boolean> FORM = AttachmentRegistry.create(JaymosPowers.id("smoke_vapour"),
@@ -210,6 +219,7 @@ public final class SmokeVapour {
 		player.resetFallDistance();
 		LAST.put(player.getUUID(), player.position());
 		GROUNDED.remove(player.getUUID());
+		shed(player);
 		WORN.put(player.getUUID(), worn(player));
 		// the legs go up in a gout of smoke
 		Vec3 at = player.position().add(0.0, 0.4, 0.0);
@@ -258,6 +268,41 @@ public final class SmokeVapour {
 			level.playSound(null, now.x, now.y, now.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.25F,
 				0.4F + level.getRandom().nextFloat() * 0.2F);
 		}
+	}
+
+	/**
+	 * Everything worn falls through the smoke where you stand: armour, a costume and a tool belt to the ground, the
+	 * backpack set down as its block.
+	 */
+	private static void shed(ServerPlayer player) {
+		ServerLevel level = player.level();
+		boolean dropped = false;
+		for (EquipmentSlot slot : ARMOUR) {
+			ItemStack stack = player.getItemBySlot(slot);
+			if (!stack.isEmpty()) {
+				player.setItemSlot(slot, ItemStack.EMPTY);
+				dropped |= fall(level, player, stack);
+			}
+		}
+		dropped |= fall(level, player, Costume.strip(player));
+		dropped |= fall(level, player, ToolBeltCompat.takeWorn(player));
+		dropped |= Backpack.dropWorn(player);
+		if (dropped) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_shed").withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	/** Drops {@code stack} at the player's feet, out of reach for a moment. False if there was nothing to drop. */
+	private static boolean fall(ServerLevel level, ServerPlayer player, @Nullable ItemStack stack) {
+		if (stack == null || stack.isEmpty()) {
+			return false;
+		}
+		ItemEntity item = new ItemEntity(level, player.getX(), player.getY() + 0.3, player.getZ(), stack,
+			(level.getRandom().nextDouble() - 0.5) * 0.15, 0.1, (level.getRandom().nextDouble() - 0.5) * 0.15);
+		item.setPickUpDelay(SHED_PICKUP_DELAY);
+		level.addFreshEntity(item);
+		return true;
 	}
 
 	private static EnumSet<EquipmentSlot> worn(Player player) {
