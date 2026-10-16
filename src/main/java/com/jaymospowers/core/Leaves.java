@@ -2,6 +2,7 @@ package com.jaymospowers.core;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -17,6 +18,10 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
  * instead of standing on them, and they drag on you while you're inside, so you sink slowly through a canopy, wade
  * through hedges, and a fall into a tree is cushioned. Hold Jump inside leaves to climb up through them. Arrows and
  * other projectiles still hit leaves, and falling sand and gravel still land on them.
+ *
+ * <p>Mobs (villagers, animals, monsters) stand on leaves as in vanilla. Their pathfinder treats leaves as solid
+ * ground and as a wall, so a villager that walked onto a hedge or under a low canopy sank in, found every node
+ * around it blocked, never pressed Jump, and stood stuck in the leaves for good.
  *
  * <p>Both sides run the same rules (the collision shape and the drag), so movement stays in step; the rustle and the
  * shaken-loose leaves are drawn on each client ({@code client/LeafRustle}).
@@ -63,7 +68,7 @@ public final class Leaves {
 	}
 
 	public static boolean passesThrough(Entity entity) {
-		return !(entity instanceof Projectile) && !(entity instanceof FallingBlockEntity) && !entity.noPhysics;
+		return !(entity instanceof Projectile) && !(entity instanceof FallingBlockEntity) && !(entity instanceof Mob) && !entity.noPhysics;
 	}
 
 	/** An entity is inside a leaves block this tick: drag on it once, cushion its fall, and let it climb if it jumps. */
