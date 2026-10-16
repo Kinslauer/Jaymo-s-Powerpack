@@ -109,7 +109,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		}
 		// the hold combo: left mouse held, bare-handed, not at a block (that's digging)
 		boolean attack = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
-			&& player.getMainHandItem().isEmpty() && !guard;
+			&& player.getMainHandItem().isEmpty() && !guard && !RaceHoldClient.holding();
 		attackHeld = attack ? attackHeld + 1 : 0;
 		boolean combo = comboOn ? attack
 			: attackHeld >= COMBO_HOLD_TICKS && (minecraft.hitResult == null || minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK);
@@ -151,6 +151,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterMark.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
+		RaceHoldClient.extract(entity, state, partialTicks);
 	}
 
 	/** Right after a humanoid model animates. */
@@ -161,6 +162,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterDancePose.applyModel(model, state);
 		ZFighterComboPose.applyModel(model, state);
 		ZFighterSpiritPose.applyModel(model, state);
+		RaceHoldClient.applyModel(model, state);
 	}
 
 	@Override

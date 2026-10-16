@@ -57,8 +57,8 @@ import java.util.Set;
  * Each has its own aura colour.
  * <p>(0.11.101) The lineages are races anyone can be born to, Z Fighter or not: the heritage screen (Kingdoms) has all
  * four (Earthling, Warrior-born, Frostborn, Verdant). Without the Z Fighter power a Warrior-born still has the tail
- * (wrapped or let out with the heritage key, {@link #TOGGLE_TAG}) and the villagers' fear of it, and a Verdant still
- * mends, regrows limbs, reaches further and is green. What runs on ki (forms, techniques, the Great Ape, healing others,
+ * (wrapped or let out with the heritage key, {@link #TOGGLE_TAG}) and the villagers' fear of it, a Verdant still mends,
+ * regrows limbs, is green and has the stretch punch, and a Frost-born the ice prison ({@link RaceMoves}: left mouse held). What runs on ki (forms, techniques, the Great Ape, healing others,
  * the Earthling's TP) stays the Z Fighter's.
  */
 public final class ZFighterLineage {
@@ -110,7 +110,6 @@ public final class ZFighterLineage {
 	static final float REGEN = 1.0F;
 	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
 	static final int REGROW_EVERY = 600;
-	static final double REACH = 1.5;
 	/** Giant forms grow him by this much (scale added, by form). */
 	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3};
 	static final float HEAL_KI = 20.0F;
@@ -142,7 +141,7 @@ public final class ZFighterLineage {
 	private static final String[][] HERITAGE_LINEAGES = {{"earthling", "earthling"}, {"warriorborn", "warrior"}, {"frostborn", "frost"}, {"verdant", "verdant"}};
 	/** Kingdoms puts this tag on a player who pressed the heritage key as a Warrior-born: the tail is wrapped or let out. */
 	public static final String TOGGLE_TAG = "jaymoskingdoms_tail_toggle";
-	/** A Verdant's long arms when he's no Z Fighter (the power sets its own). */
+	/** (the old passive reach of a Verdant who's no Z Fighter: taken off; the stretch punch is the long arm now) */
 	private static final Identifier RACE_REACH_ID = JaymosPowers.id("race_reach");
 
 	private static final Identifier WRIT = Identifier.fromNamespaceAndPath("jaymoskingdoms", "writ_of_rebirth");
@@ -152,6 +151,7 @@ public final class ZFighterLineage {
 
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterLineage::everyone);
+		RaceMoves.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -293,8 +293,7 @@ public final class ZFighterLineage {
 			}
 			int lineage = of(player);
 			tailTags(player, lineage == WARRIOR, tailOut(player));
-			ZFighterPower.set(player, Attributes.ENTITY_INTERACTION_RANGE, RACE_REACH_ID, lineage == VERDANT ? REACH : 0.0,
-				AttributeModifier.Operation.ADD_VALUE);
+			ZFighterPower.set(player, Attributes.ENTITY_INTERACTION_RANGE, RACE_REACH_ID, 0.0, AttributeModifier.Operation.ADD_VALUE);
 			if (lineage == VERDANT) {
 				mend(player, player.level().getGameTime());
 			}

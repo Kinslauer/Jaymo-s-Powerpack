@@ -3221,3 +3221,6 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   Warrior-born, Frostborn and Verdant all four lineages are heritages. Jaymo's Powers now gives anyone of that blood its
   race (see the pack MODLOG). The `;` key is now the heritage gift: a Frostborn's ice prison, a Warrior-born's tail
   (`Heritage.gift`, tag `jaymoskingdoms_tail_toggle`). Heritage list rows 19 high so ten fit.
+- Andy: the ice prison "should be frostborns left mouse hold": Jaymo's Powers' race hold (left mouse held bare-handed,
+  not at a block) tags the player `jaymoskingdoms_frost_prison` and `FrostPrison.tick` casts it. `;` is only the
+  Warrior-born tail now. Verdant card mentions the stretch punch (Powers' `RaceMoves`).

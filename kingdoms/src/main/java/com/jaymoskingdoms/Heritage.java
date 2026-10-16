@@ -57,8 +57,9 @@ import org.jspecify.annotations.Nullable;
  * blood beyond that.</li>
  * </ul>
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
- * that blood its race (a Warrior-born's tail, a Verdant's mending), Z Fighter or not. The heritage key ({@code ;})
- * is a Frostborn's ice prison ({@link FrostPrison}) and a Warrior-born's tail, wrapped away or let out.
+ * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
+ * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
+ * away or lets it out.
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
  */
@@ -435,12 +436,9 @@ public final class Heritage {
 		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
 	}
 
-	/** The heritage key: a Frostborn's ice prison, a Warrior-born's tail. */
+	/** The heritage key: a Warrior-born's tail (a Frostborn's ice prison is their left mouse held, through Jaymo's Powers). */
 	static void gift(ServerPlayer player) {
-		Kind kind = of(player);
-		if (kind == Kind.FROSTBORN) {
-			FrostPrison.cast(player);
-		} else if (kind == Kind.WARRIORBORN) {
+		if (of(player) == Kind.WARRIORBORN) {
 			player.addTag(TAIL_TOGGLE_TAG);
 		}
 	}

@@ -28,7 +28,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.75) A Frostborn's gift of the day: the key ({@code ;} by default) locks the living thing they look at in a block
+ * (0.7.75) A Frostborn's gift of the day: holding left mouse bare-handed (Jaymo's Powers sends it as the tag
+ * {@link #ASK_TAG}; the Frost-born race) locks the living thing they look at in a block
  * of packed ice for a while: a shell of ice round it, frozen through (held still, can't strike out, the cold biting), then
  * the ice falls away. Once a day (a Minecraft day of game time); the ice can be broken out early.
  */
@@ -59,6 +60,8 @@ public final class FrostPrison {
 	}
 
 	private static final List<Prison> PRISONS = new ArrayList<>();
+	/** Jaymo's Powers puts this on a Frostborn who held left mouse at something (its RaceMoves); taken off here. */
+	static final String ASK_TAG = "jaymoskingdoms_frost_prison";
 
 	private FrostPrison() {
 	}
@@ -136,6 +139,12 @@ public final class FrostPrison {
 	}
 
 	private static void tick(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.entityTags().contains(ASK_TAG)) {
+				player.removeTag(ASK_TAG);
+				cast(player);
+			}
+		}
 		for (Iterator<Prison> it = PRISONS.iterator(); it.hasNext(); ) {
 			Prison prison = it.next();
 			if (!prison.target.isAlive() || prison.target.level() != prison.level || prison.level.getGameTime() >= prison.until) {
