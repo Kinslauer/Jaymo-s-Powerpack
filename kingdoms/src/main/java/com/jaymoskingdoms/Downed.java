@@ -29,14 +29,17 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.70) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers (its
  * {@link Folk}, or a villager in its service or in a guard's or archer's job) puts them down instead. Downed, they're
- * out of the fight (nothing counts them as a foe, they go for no one): some drag themselves away from whoever felled
- * them, the rest lie where they dropped. A player can take the weapons out of their hands (right-click), but nothing
- * else: no pockets to pick, no corpse to search. Left alone, they get back up after {@link #RECOVER_TICKS} (Andy: "they
+ * out of the fight (they go for no one): some drag themselves away from whoever felled them, the rest lie where they
+ * dropped. A player can take the weapons out of their hands (right-click), but nothing else: no pockets to pick, no
+ * corpse to search. Sneak + right-click picks one up over your shoulder; then right-click throws them, sneak +
+ * right-click sets them down. Mobs, fire and falls (a throw's too) still hurt them, out of {@link #DOWNED_HEALTH},
+ * and can kill them (Andy). Left alone, they get back up after {@link #RECOVER_TICKS} (Andy: "they
  * should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10
  * times"): once a player has hit them they won't, and they bleed out {@link #BLEED_OUT_TICKS} after the last hit, or
  * at the {@link #MAX_WOUNDS}th. Then they're gone, leaving nothing behind (their death counts then, for wars, quests
@@ -44,6 +47,10 @@ import org.jspecify.annotations.Nullable;
  * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
  */
 public final class Downed {
+	/** A downed guard's health: what mobs, fire and falls have left to take. */
+	static final float DOWNED_HEALTH = 6.0F;
+	/** A throw: how hard (blocks a tick) along your look, and the lift on top. */
+	static final double THROW_SPEED = 0.9, THROW_LIFT = 0.25;
 	/** How long a downed guard no player has hit lies there before getting back up (ticks), and the health it gets up with (share of its most). */
 	static final int RECOVER_TICKS = 1200;
 	static final float RECOVER_HEALTH = 0.3F;
@@ -80,9 +87,9 @@ public final class Downed {
 				return true;
 			}
 			if (isDowned(entity)) {
-				// (the void, /kill: it goes, but leaves nothing)
-				entity.addTag(NO_CORPSE_TAG);
-				return true;
+				// (a mob, fire, a fall, the void: it goes, but leaves nothing)
+				finish(level, entity, source);
+				return false;
 			}
 			if (!isGuard(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				return true;
@@ -91,11 +98,12 @@ public final class Downed {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)) {
+				// (mobs, fire, falls: real harm, out of what it has left)
 				return true;
 			}
-			// only a player's blow (or arrow) touches them now: a wound (they won't get up again), the tenth kills
-			if (source.getEntity() instanceof Player && entity.level() instanceof ServerLevel level) {
+			// a player's blow (or arrow): a wound (they won't get up again), the tenth kills
+			if (entity.level() instanceof ServerLevel level) {
 				wound(level, entity, source);
 			}
 			return false;
@@ -106,7 +114,17 @@ public final class Downed {
 			}
 			// (taken here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
 			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND) {
-				disarm(player, body);
+				if (body.getVehicle() == player) {
+					if (player.isShiftKeyDown()) {
+						setDown(player, body);
+					} else {
+						toss(player, body);
+					}
+				} else if (player.isShiftKeyDown()) {
+					pickUp(player, body);
+				} else {
+					disarm(player, body);
+				}
 			}
 			return InteractionResult.SUCCESS;
 		});
@@ -142,7 +160,7 @@ public final class Downed {
 
 	private static void goDown(ServerLevel level, LivingEntity entity, DamageSource source) {
 		boolean crawler = level.getRandom().nextFloat() < CRAWLER_CHANCE;
-		entity.setHealth(1.0F);
+		entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
 		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
 		FELLED_BY.put(entity, source);
 		entity.stopUsingItem();
@@ -184,6 +202,14 @@ public final class Downed {
 		mob.setJumping(false);
 		mob.setXxa(0.0F);
 		mob.setSpeed(0.0F);
+		if (mob.getVehicle() instanceof Player carrier) {
+			// over the shoulder, across it
+			float across = carrier.getYRot() + 90.0F;
+			mob.setYRot(across);
+			mob.setYHeadRot(across);
+			mob.yBodyRot = across;
+			return;
+		}
 		DamageSource source = FELLED_BY.get(mob);
 		Entity from = source == null ? null : source.getEntity();
 		if (crawls(mob) && from != null && from.isAlive() && from.level() == level && mob.distanceToSqr(from) < CRAWL_FROM * CRAWL_FROM) {
@@ -209,9 +235,48 @@ public final class Downed {
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.NEUTRAL, 0.7F, 0.8F);
 	}
 
+	/** {@code player} heaves a downed guard up over their shoulder (one at a time). */
+	private static void pickUp(Player player, LivingEntity body) {
+		if (!player.getPassengers().isEmpty() || body.isPassenger()) {
+			return;
+		}
+		body.ejectPassengers();
+		if (body.startRiding(player, true, true)) {
+			body.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.9F, 0.7F);
+		}
+	}
+
+	/** Set down at your feet. */
+	private static void setDown(Player player, LivingEntity body) {
+		body.stopRiding();
+		Vec3 ahead = player.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().scale(0.8);
+		body.snapTo(player.getX() + ahead.x, player.getY(), player.getZ() + ahead.z, body.getYRot(), 0.0F);
+		body.setDeltaMovement(Vec3.ZERO);
+		body.resetFallDistance();
+	}
+
+	/** Thrown where you're looking: it lands as anything does (falls hurt). */
+	private static void toss(Player player, LivingEntity body) {
+		body.stopRiding();
+		Vec3 look = player.getLookAngle();
+		body.snapTo(player.getX() + look.x * 0.6, player.getEyeY() - 0.4, player.getZ() + look.z * 0.6, body.getYRot(), 0.0F);
+		body.resetFallDistance();
+		body.setDeltaMovement(look.scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0));
+		body.needsSync = true;
+		body.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.6F);
+		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+	}
+
+	/** Where a carried guard sits on its carrier: over the shoulder, a little ahead. */
+	public static Vec3 carriedAt(LivingEntity carrier) {
+		Vec3 ahead = Vec3.directionFromRotation(0.0F, carrier.getYRot()).scale(0.25);
+		return carrier.position().add(ahead.x, carrier.getBbHeight() * 0.72, ahead.z);
+	}
+
 	/** Left alone long enough: it gets back on its feet, hurt, and back to its post (its AI takes up again). */
 	private static void getUp(ServerLevel level, Mob mob) {
 		FELLED_BY.remove(mob);
+		mob.stopRiding();
 		mob.removeAttached(DOWNED);
 		mob.removeAttached(WOUNDS);
 		mob.setHealth(Math.max(1.0F, mob.getMaxHealth() * RECOVER_HEALTH));
@@ -224,6 +289,7 @@ public final class Downed {
 			return;
 		}
 		FELLED_BY.remove(entity);
+		entity.stopRiding();
 		entity.addTag(NO_CORPSE_TAG);
 		entity.setHealth(0.0F);
 		entity.die(source);
