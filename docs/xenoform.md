@@ -83,7 +83,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
   every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
   `python tools/gen_xenoform.py preview.png` also writes a front-view contact sheet of all nine.
-- Pyre is living flame (since 0.11.97, an original look in the spirit of a flame-bodied hero): vanilla's fire colours,
+- Pyre is living flame (since 0.11.98, an original look in the spirit of a flame-bodied hero): vanilla's fire colours,
   hair of fire streaming back with speed, and a second skin (`xenoform_pyre_glow`) drawn again additive and fullbright
   (`RenderTypes.eyes`) in third and first person, so it shines in the dark. Small flames rise off its body
   (`XenoformFlightPose.bodyFlame`, not in water or rain, not round your own first-person camera).
