@@ -16,6 +16,7 @@
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LeavesJumperMixin",
+		"LeavesPathMixin",
 		"LeavesStateMixin",
 		"MobGoalsAccessor",
 		"ServerGamePacketListenerImplMixin"
