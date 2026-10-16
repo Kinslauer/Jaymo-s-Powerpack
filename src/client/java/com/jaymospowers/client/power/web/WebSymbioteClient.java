@@ -600,10 +600,16 @@ public final class WebSymbioteClient {
 					growth = Math.max(growth, Math.min(1.0F, (now - since + partialTick) / ROAR_GROW_TICKS));
 				}
 			}
-			// hung off a wall: each lower tendril on its own tether
-			float[] tethers = wall != null && wall.landed() >= 0L && !wall.points().isEmpty() ? WebTendrilLayer.tethers(player, wall, partialTick) : null;
-			// climbing: four of them walk you along the wall
-			float[] legs = tethers == null && wall == null ? WebTendrilLayer.walk(player, partialTick) : null;
+			// hung off a wall by Tendril Grab: each lower tendril bitten in like Wall Crawl's walkers (jointed, knees out
+			// from the wall), still holding you to the spot elastically (the server's pull)
+			boolean hung = wall != null && wall.landed() >= 0L && !wall.points().isEmpty();
+			float[] tethers = null;
+			float[] legs = hung ? WebTendrilLayer.tetherLegs(player, wall, partialTick)
+				: wall == null ? WebTendrilLayer.walk(player, partialTick) : null;
+			if (hung) {
+				// drawn as climbing, not as the old straight cords fanned back into the wall
+				wallMode = 0;
+			}
 			state.setData(RETRACT, null);
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
 				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo, rear, hit,

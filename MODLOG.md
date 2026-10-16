@@ -1501,3 +1501,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   weight (a fall after Lift or Crush, the slam, Collapse, Skyfall, the Singularity, a meteor), one slammed into a wall
   by Push, and the Great Ape's stomps and footfalls (`BladeBlood.crushed`). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
   constants at the top of `BladeBlood`.
+- **0.11.105, Tendril Grab drawn like Wall Crawl:** Andy: "the tendril grab should attach you to the wall the exact same way visually that the wall crawl does, but it should still hold you where you attach and rubberband you back and forth like before." The tethered tendrils are now jointed limbs bitten into the wall, as Wall Crawl's walkers; the elastic hold is unchanged.
