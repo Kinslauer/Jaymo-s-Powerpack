@@ -17,7 +17,8 @@ import net.minecraft.world.phys.Vec3;
  * the body, coiling round the torso, then down the arms, up round the head and down the legs, each from its joint out,
  * writhing as they go. Then, as the suit folds over each part along them, they sink into it, and the suit's leading edge
  * rolls down the part as a thick band of tendril. Building the big body, thicker tendrils lash round the body's new,
- * bigger frame first. Everyone sees it; taking the suit off runs it backward.
+ * bigger frame first. Everyone sees it; taking the suit off runs it backward. When the tendrils themselves draw back in
+ * (Wall Crawl or Living Armor ending), they go the same way: over the body, then back into the chest.
  */
 final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/** Strands round each part, and how many times each coils round it from end to end. */
@@ -56,8 +57,16 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		if (state.isInvisible) {
+			return;
+		}
 		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
-		if (growth == null || state.isInvisible) {
+		Float retract = state.getData(WebSymbioteClient.RETRACT);
+		if (growth == null && retract != null) {
+			retract(poseStack, collector, state, retract);
+			return;
+		}
+		if (growth == null) {
 			return;
 		}
 		boolean hulk = Math.min(growth.from(), growth.to()) >= 1;
@@ -92,6 +101,45 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 				}
 				if (edge > 0.0F && edge < 1.0F) {
 					ring(buffer, pose, box, edge, time, state.lightCoords);
+				}
+			});
+			poseStack.popPose();
+		}
+	}
+
+	/**
+	 * The tendrils drawing back in, the suit's way: as they shrink into the back they pour over the body, coiling round
+	 * each part from its joint out (the body first, the legs last), then unwind back the way they came and sink into the
+	 * chest. {@code RETRACT_WRAP} of the way through they're all wrapped.
+	 */
+	private static final float RETRACT_WRAP = 0.45F, RETRACT_THICK = 0.7F;
+
+	private void retract(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float t) {
+		// how far the wrap has got (as putting the suit on reads it): up to all of it, then back to nothing
+		float built = t < RETRACT_WRAP ? t / RETRACT_WRAP * 0.55F : 0.55F * (1.0F - (t - RETRACT_WRAP) / (1.0F - RETRACT_WRAP));
+		boolean big = WebSuitGrowth.hulkness(state) > 0.5F;
+		PlayerModel parent = this.getParentModel();
+		WebSuitGrowth.shift(parent, state);
+		ModelPart[] parts = {parent.body, parent.rightArm, parent.leftArm, parent.head, parent.rightLeg, parent.leftLeg};
+		float time = state.ageInTicks;
+		boolean ownView = WebSymbioteClient.ownFirstPerson(state);
+		for (int i = 0; i < parts.length; i++) {
+			if (ownView && i == 3) {
+				continue;
+			}
+			float wrap = WebSuitGrowth.wrapped(built, i);
+			if (wrap <= 0.0F) {
+				continue;
+			}
+			float[] box = big ? HULK_BOXES[i] : BOXES[i];
+			float thick = (big ? HULK_THICK : THICK) * RETRACT_THICK * Math.min(1.0F, wrap * 2.0F);
+			int part = i;
+			poseStack.pushPose();
+			parent.root().translateAndRotate(poseStack);
+			parts[i].translateAndRotate(poseStack);
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+				for (int k = 0; k < STRANDS * (big ? 2 : 1); k++) {
+					strand(buffer, pose, box, part, k, wrap, thick, time, big, state.lightCoords);
 				}
 			});
 			poseStack.popPose();

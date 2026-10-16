@@ -536,6 +536,18 @@ public final class WebSymbiote {
 	/** Hungry (satiety under {@code SELF_FEED_BELOW}), Living Armor eats a corpse in reach on its own, looking every {@code SELF_FEED_EVERY}. */
 	public static final int SELF_FEED_BELOW = 30, SELF_FEED_EVERY = 20;
 	/**
+	 * Hungry (satiety under {@code HUNGRY_HUNT_BELOW}), it takes the wheel to hunt: each feeding check has
+	 * {@code HUNGRY_HUNT_CHANCE} that it goes after the nearest creature, kills it, eats, and lets you go: strictly to
+	 * feed (never a player). In a low mood (stress at {@code LOW_MOOD_STRESS} or more) it doesn't stop there: it kills
+	 * for fun, one creature after the next, until you wrest yourself free (always possible on a spree:
+	 * {@code SPREE_BREAK_FREE} presses if you couldn't otherwise yet) or there's nothing left near.
+	 */
+	public static final int HUNGRY_HUNT_BELOW = 45, LOW_MOOD_STRESS = 60, SPREE_BREAK_FREE = 80;
+	public static final float HUNGRY_HUNT_CHANCE = 0.08F;
+	/** On a killing spree (synced: your client lets you fight it even before you could break a takeover's hold). */
+	public static final AttachmentType<Boolean> SPREE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_spree"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
 	 * Let your own hunger run out and it turns on you: the suit comes off and it won't come back for a while. The
 	 * stronger the bond, the shorter: {@code SULK_TICKS}, × (1 + {@code SULK_PER_REJECTION} per time it has rejected you
 	 * before), × (0.5 + its stress).
@@ -725,6 +737,8 @@ public final class WebSymbiote {
 		long feedFxAt;
 		/** The feeding is on a takeover's kill; when it leaps clear after it (0: it won't). */
 		boolean takeoverMeal;
+		/** This hunt's a killing spree (a low mood): it won't stop at one. */
+		boolean spree;
 		long escapeAt;
 		/** A weak bond's takeover on a whim; when it may next speak; the struggle against its hold (presses, fading), the last press, and whether it answered it. */
 		boolean feral;
@@ -846,7 +860,11 @@ public final class WebSymbiote {
 	/** Presses it takes to break a takeover's hold now, or -1 if you can't yet (too few of its abilities earned). */
 	public static int breakFreeNeeded(Player player) {
 		int earned = unlockedCount(player);
-		return earned < BREAK_FREE_ABILITIES ? -1 : BREAK_FREE_BASE - BREAK_FREE_PER_ABILITY * earned;
+		if (earned < BREAK_FREE_ABILITIES) {
+			// a killing spree you can always fight
+			return Boolean.TRUE.equals(player.getAttached(SPREE)) ? SPREE_BREAK_FREE : -1;
+		}
+		return BREAK_FREE_BASE - BREAK_FREE_PER_ABILITY * earned;
 	}
 
 	public static boolean isToggled(Player player, int flag) {
@@ -1133,9 +1151,13 @@ public final class WebSymbiote {
 
 		// hungry, it feeds itself: a corpse, or something it kills first (swelling into the armour for it, if it wasn't);
 		// once it has started it isn't satisfied until it has actually eaten
-		if ((next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
-			&& live.roarAt <= 0L
-			&& live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player, live, now, live.gorging)) {
+		boolean hungry = next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging;
+		boolean huntCheck = (hungry || next.satiety() < HUNGRY_HUNT_BELOW) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
+			&& live.roarAt <= 0L && live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0;
+		// hungry, it now and then takes the wheel to hunt (starving, it always does)
+		boolean hunt = live.gorging || !player.isCreative() && next.satiety() < HUNGRY_HUNT_BELOW && now >= live.takeoverReadyAt
+			&& player.getRandom().nextFloat() < HUNGRY_HUNT_CHANCE;
+		if (huntCheck && (hungry || hunt) && selfFeed(player, live, now, hunt, hungry)) {
 			live.craving = true;
 			if (!armor) {
 				live.feedingArmor = true;
@@ -1738,6 +1760,8 @@ public final class WebSymbiote {
 		live.fleeing = false;
 		live.hunting = false;
 		live.feral = false;
+		live.spree = false;
+		player.removeAttached(SPREE);
 		live.struggle = 0.0F;
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
@@ -2120,7 +2144,8 @@ public final class WebSymbiote {
 		}
 		if (target == player) {
 			// its kill carried off: it holds you still through the grab, the carry and the meal, and lets go after
-			if (live.feedStage == FEED_NONE) {
+			// (on a spree, it's off after the next)
+			if (live.feedStage == FEED_NONE && !spreeOn(player, live)) {
 				endTakeover(player, live);
 			} else {
 				renewHold(player, live);
@@ -2148,6 +2173,9 @@ public final class WebSymbiote {
 				live.feral = false;
 				live.hunting = true;
 				holdForMeal(player, live);
+				return;
+			}
+			if (dead && spreeOn(player, live)) {
 				return;
 			}
 			endTakeover(player, live);
@@ -2815,8 +2843,8 @@ public final class WebSymbiote {
 	 * when it's starving ({@code hunt}), it takes over to hunt the nearest creature there and kill it first. Returns
 	 * true if a feeding began.
 	 */
-	private static boolean selfFeed(ServerPlayer player, Live live, long now, boolean hunt) {
-		Entity carried = KitchenCompat.carriedCorpse(player);
+	private static boolean selfFeed(ServerPlayer player, Live live, long now, boolean hunt, boolean corpses) {
+		Entity carried = corpses ? KitchenCompat.carriedCorpse(player) : null;
 		if (carried != null) {
 			// already in your arms: straight to the meal (one it won't touch, and it waits)
 			if (!edible(carried)) {
@@ -2828,7 +2856,8 @@ public final class WebSymbiote {
 		}
 		Entity corpse = null;
 		double best = SELF_FEED_RANGE * SELF_FEED_RANGE;
-		for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE), e -> freeCorpse(e))) {
+		for (Entity e : !corpses ? java.util.List.<Entity>of()
+			: player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE), e -> freeCorpse(e))) {
 			double d = e.distanceToSqr(player);
 			if (d < best) {
 				best = d;
@@ -2855,7 +2884,32 @@ public final class WebSymbiote {
 		if (prey == null) {
 			return false;
 		}
+		// in a low mood, this hunt won't stop at the one
+		live.spree = state(player).stress() >= LOW_MOOD_STRESS;
 		startKill(player, live, now, prey, false);
+		if (live.spree && live.takeoverTicks > 0) {
+			player.setAttached(SPREE, true);
+			whisper(player, "spree");
+		}
+		return true;
+	}
+
+	/** A spree goes on: the next creature near (never a player). False when it isn't one, or there's nothing left. */
+	private static boolean spreeOn(ServerPlayer player, Live live) {
+		if (!live.spree) {
+			return false;
+		}
+		LivingEntity next = prey(player, false);
+		if (next == null) {
+			return false;
+		}
+		live.hunting = false;
+		live.curious = false;
+		live.rampage = false;
+		live.takeoverTarget = next.getId();
+		live.takeoverTicks = TAKEOVER_LIMIT;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks, false));
+		narrate(player, "kill");
 		return true;
 	}
 

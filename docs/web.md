@@ -57,7 +57,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
 ## Weapon arm, counter animations, hulking big body (0.11.62)
-- **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click morphs the arm into a
+- **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click (held since 0.11.91, see below) morphs the arm into a
   random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6:
   - Mace (blunt): `DAMAGE` 10, `hurtArmor` x`ARMOR_WEAR` 4, breaks a bone `MACE_BREAK` 35% (shatters skeletons), slams back.
   - Scythe (slashing): 8, severs a limb `SCYTHE_SEVER` 45% (`Dismember.cut`), sweeps others within 2.5 for 60% at half the chance.
@@ -88,6 +88,33 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   `STRIDE_STEP_FAR` 1.1. Jump climbs (needs `STRIDE_RISE_ANCHORS` 4 ways to grab), Sneak lowers, Sneak on the ground
   stands you on your feet; nothing to grab within reach and you fall. Walls and ceilings still climb as before. While the
   four walk, four spare tendrils (`WebTendrilLayer.FIRST_SPARE`) grow, so strikes, grabs and the barrage keep theirs.
+- **Ceilings and withdrawing (0.11.83):** striding with a ceiling within `STRIDE_REACH` overhead, the front pair
+  (`WebTendrilWalk.CEILING_DIRS`) bite the ceiling and walk along it while the back pair walk the ground; you still only
+  walk. When the tendrils draw back in (Wall Crawl or Living Armor ending), they go the suit's way: strands pour over the
+  body and coil round each part, then unwind into the chest (`WebSuitWrapLayer.retract`, `RETRACT_WRAP` 0.45, over
+  `WebSymbioteClient.WITHDRAW_TICKS` 40).
+- **Hunger takeovers (0.11.83):** hungry (satiety under `WebSymbiote.HUNGRY_HUNT_BELOW` 45), each feeding check (every
+  `SELF_FEED_EVERY` 20 ticks, off the takeover cooldown) has `HUNGRY_HUNT_CHANCE` 8% that it takes the wheel, hunts the
+  nearest creature, eats it and lets go: strictly to feed, never a player. In a low mood (stress at `LOW_MOOD_STRESS` 60+)
+  it's a spree instead: after eating it keeps killing creature after creature (`spreeOn`) until you break free or nothing
+  is left near. A spree can always be fought (`SPREE_BREAK_FREE` 80 presses if you couldn't break a hold yet; synced
+  `SPREE` attachment).
+- **Slam latch (0.11.83):** with Wall Crawl on, pressing Sneak against a wall slams both tendrils into it at once (no
+  reach first; the wall cracks at both bites), throws you at it (`WebSymbioteClient.LATCH_SLAM` 0.35, lifted
+  `LATCH_LIFT` 0.3 off the ground) and pins you for `LATCH_HOLD_TICKS` 8. Once a tendril has bitten the wall, the
+  tendrils are fully out at once.
+- **Ceilings like walls (0.11.91):** pressing Sneak with a ceiling within `CEILING_LATCH_REACH` 1.8 over your head
+  (`CEILING_LATCH_GROUND` 0.9 standing; by a wall only when looking up past `CEILING_LATCH_LOOK` 30°) slams both
+  tendrils up into it (cracking it at both bites), yanks you up at `LATCH_SLAM` + `CEILING_SLAM_EXTRA` and pins you
+  `LATCH_HOLD_TICKS`; then the keys drag you along it upside down as before. Another Sneak press drops you (holding
+  Sneak no longer does). Jump against a ceiling still sticks you too.
+- **Hold-to-form weapon arm (0.11.91):** left click now gathers while held (`WebMorph.Gather`, synced `CHARGE`):
+  lumps course over the suit, front and back, to the striking shoulder (`COURSE_TICKS` 8), run down the arm and swell
+  the forearm (`COLLECT_TICKS` 13), and the weapon grows out of the hand (`FORMED_TICKS` 18). Letting go strikes
+  (`WebMorph.Strike`), at once if formed, else as soon as it forms; held, the weapon stays ready (dropped after
+  `CHARGE_MAX_TICKS` 600). One strike per press now. Drawn by `WebMorphLayer.submitGather`.
+- **Bladed barrage (0.11.91):** stabbing in a barrage, each tendril's tip is a blade: a barbed spear point or a
+  hooked claw blade, turn about (`WebTendrilLayer.blades`, sizes `BLADE_*`).
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
@@ -509,7 +536,7 @@ action bar, each heard once.
 |---|---|---|---|---|
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
-| 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
+| 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump or a Sneak press slams you up into it, you move with the movement keys, and another Sneak press drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
 | 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`, no blood). The roar throws the same spikes. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |

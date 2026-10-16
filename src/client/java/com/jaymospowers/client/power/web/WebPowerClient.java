@@ -38,6 +38,9 @@ public final class WebPowerClient implements PowerClient {
 	/** The barrage (by its start) we've already told the server we let go of. */
 	private static long barrageReleased = Long.MIN_VALUE;
 
+	/** The weapon arm's left click is held down (the symbiote gathering into the arm). */
+	private static boolean morphHeld;
+
 	private WebPowerClient() {
 	}
 
@@ -81,16 +84,32 @@ public final class WebPowerClient implements PowerClient {
 				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
 				boolean block = hit != null && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
 					&& (aimed == null || hit.getLocation().distanceToSqr(player.getEyePosition()) < aimed.distanceToSqr(player.getEyePosition()));
-				if (!block && (clicks > 0 || aimed != null)) {
-					ClientPlayNetworking.send(new com.jaymospowers.power.web.WebMorph.Strike(aimed == null ? -1 : aimed.getId()));
-					player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+				if (!block && clicks > 0 && !morphHeld) {
+					// pressed: it gathers into the arm while held, and strikes when let go (see below)
+					morphHeld = true;
+					ClientPlayNetworking.send(new com.jaymospowers.power.web.WebMorph.Gather());
 					return true;
 				}
-				if (!block) {
+				if (!block || morphHeld) {
 					return true;
 				}
 			}
 			return false;
+		});
+		// the weapon arm: let go of the attack key and it strikes at whatever's under the crosshair then
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (!morphHeld) {
+				return;
+			}
+			if (player == null) {
+				morphHeld = false;
+			} else if (!minecraft.options.keyAttack.isDown()) {
+				morphHeld = false;
+				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebMorph.Strike(aimed == null ? -1 : aimed.getId()));
+				player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+			}
 		});
 		// a barrage lasts while the attack key is held: let go, and it stops
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
