@@ -1470,10 +1470,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.99, Wall Crawl tendrils stay out:** Andy: "holding space while in wall climb makes the tendrils un animate and not appear... make it so the tendrils only go away when deactivated or on cooldown". The tendrils are now drawn whenever Wall Crawl is on.
   Also Andy: "allow me to charge jump while using wall crawl": in the suit, holding Jump on the walking tendrils coils a charged leap (instead of climbing) and letting go flings you.
 
-## 0.11.101: Z Fighter lineages are races anyone can be born to
-- Andy: "add all zfighter lineages to the heritage screen and remove it from the zfighter's x ... so anyone can be any
-  of those races". The X screen has had no lineage pick since 0.11.76; the lineage is the heritage. Now
-  `ZFighterLineage.everyone` gives players who aren't Z Fighters their race from the heritage too: a Warrior-born has
-  the tail (and the villagers' fear of it; wrapped or let out with Kingdoms' `;`, tag `TOGGLE_TAG`), a Verdant is
-  green, mends (health, bones, limbs) and reaches 1.5 further (`race_reach`). Ki things stay with the power: forms,
-  techniques, the Great Ape, healing others, Earthling TP. New Earthling heritage maps to the Earthling lineage.
+- **0.11.101, Z Fighter lineages are races anyone can be born to:** Andy: "add all zfighter lineages to the heritage screen and remove it from the zfighter's x ... so anyone can be any of those races". The X screen has had no lineage pick since 0.11.76; the lineage is the heritage. `ZFighterLineage.everyone` now gives players who aren't Z Fighters their race from the heritage too: a Warrior-born has the tail (and the villagers' fear of it; wrapped or let out with Kingdoms' `;`, tag `TOGGLE_TAG`), a Verdant is green, mends (health, bones, limbs) and reaches 1.5 further (`race_reach`). Ki things stay with the power: forms, techniques, the Great Ape, healing others, Earthling TP. New Earthling heritage (Kingdoms) maps to the Earthling lineage. Same release: Emberborn fireproof and sapped by the cold, Frostborn ice prison on `;`, heritage cards scroll (Kingdoms 0.7.75).
