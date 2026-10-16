@@ -1493,5 +1493,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   blow from a blade (`Dismember.blade`: swords, axes, anything named like a blade, held or thrown, any mod's) sprays
   blood, more the harder it lands, and a kill bursts with gore and a squelch (`core/BladeBlood`); so do the powers'
   own cuts (`Dismember.cut`: Darktide's katana, the symbiote's scythe), the symbiote's spear, whip-blade, hook claw
-  (and its bleed) and the barrage. Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
+  (and its bleed), the barrage, and now Spike Burst and the roar's spikes (Andy: "add that too"). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
   constants at the top of `BladeBlood`.

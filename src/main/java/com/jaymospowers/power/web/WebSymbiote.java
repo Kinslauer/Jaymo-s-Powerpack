@@ -3631,8 +3631,9 @@ public final class WebSymbiote {
 			if (to.length() > ROAR_RADIUS + living.getBbWidth() * 0.5) {
 				continue;
 			}
+			float before = living.getHealth();
 			living.hurtServer(level, level.damageSources().playerAttack(player), ROAR_DAMAGE);
-			spikeHit(level, center, living);
+			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			// the nearer, the harder it throws them
@@ -3710,8 +3711,9 @@ public final class WebSymbiote {
 			if (to.length() > SPIKE_RADIUS + living.getBbWidth() * 0.5) {
 				continue;
 			}
+			float before = living.getHealth();
 			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
-			spikeHit(level, center, living);
+			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			Vec3 push = flat.scale(SPIKE_KNOCKBACK).add(0.0, 0.45, 0.0);
@@ -3732,15 +3734,17 @@ public final class WebSymbiote {
 	}
 
 	/**
-	 * A spike runs a creature through: a white flash where it strikes (the side facing you). No blood (Andy).
+	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and (0.11.101, Andy) it
+	 * bleeds as a blade's blow does ({@link com.jaymospowers.core.BladeBlood}), bursting if that killed it.
 	 */
-	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living) {
+	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living, float dealt) {
 		Vec3 mid = living.getBoundingBox().getCenter();
 		Vec3 dir = mid.subtract(center);
 		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : dir.normalize();
 		Vec3 hit = mid.subtract(dir.scale(living.getBbWidth() * 0.5));
 		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
+		com.jaymospowers.core.BladeBlood.splash(living, dealt);
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */

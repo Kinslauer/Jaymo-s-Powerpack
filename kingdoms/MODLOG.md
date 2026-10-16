@@ -3209,3 +3209,6 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`FLAME_EVERY` 12 ticks) a small flame, sometimes with smoke, rises off a hand; not in water or rain, not round your
   own first-person camera. Textures from `tools/gen_ember_look.py` (vanilla's fire colours, nothing copied).
 - The heritage attachment now syncs to everyone (was its own player only), so other players see the glow.
+- Andy: "prisoner npcs are not skinned either". Captives (`Captives.take`) were built bare with MCA's
+  `VillagerFactory.build`, which skips `finalizeSpawn`, where MCA rolls genes and skin; they're now finalized as a fresh
+  spawn before they go in.
