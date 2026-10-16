@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Player;
  * {@link #cruising}) while his arms keep the pose he picked with the scroll wheel:
  * <ol>
  * <li>rising: arms straight down at his sides, fists closed;</li>
- * <li>swept back: arms down and back;</li>
+ * <li>hands behind the back: clasped at the small of the back, the only pose he also holds hovering upright;</li>
  * <li>one fist up: the leading fist overhead (out ahead at speed), the other at his side;</li>
  * <li>both fists up, either side of the head;</li>
  * <li>diving: both arms overhead, hands together.</li>
@@ -43,6 +43,10 @@ public final class ZFighterFlightPose {
 	/** How fast flight and the arms ease from one pose to the next, per tick. */
 	static final float EASE = 0.2F;
 	static final float ARM_EASE = 0.25F;
+	/** The hands-behind-the-back pose: arms back this far, and turned in this far so the hands meet behind him. */
+	static final int HANDS_BEHIND = 2;
+	static final float HANDS_BEHIND_X = 0.5F;
+	static final float HANDS_BEHIND_Z = 0.45F;
 
 	/**
 	 * The arms per pose (index 1-5): lead arm x y z, other arm x y z (the lead is the main hand's; z outward for the
@@ -51,7 +55,7 @@ public final class ZFighterFlightPose {
 	private static final float[][] ARMS = {
 		{0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F},
 		{0.05F, 0.0F, 0.12F, 0.05F, 0.0F, 0.12F},
-		{0.6F, 0.0F, 0.3F, 0.6F, 0.0F, 0.3F},
+		{HANDS_BEHIND_X, 0.0F, -HANDS_BEHIND_Z, HANDS_BEHIND_X, 0.0F, -HANDS_BEHIND_Z},
 		{-Mth.PI + 0.15F, 0.0F, -0.08F, 0.15F, 0.0F, 0.15F},
 		{-Mth.PI + 0.35F, 0.0F, 0.35F, -Mth.PI + 0.35F, 0.0F, 0.35F},
 		{-Mth.PI + 0.1F, 0.0F, -0.18F, -Mth.PI + 0.1F, 0.0F, -0.18F},
@@ -108,8 +112,10 @@ public final class ZFighterFlightPose {
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			watchCruise(player);
-			// the arms only take their pose while he's laid out flat (flying fast)
-			int pose = cruising(player) ? ZFighterPower.flightPose(player) : 0;
+			// the arms only take their pose while he's laid out flat (flying fast), save hands behind the back, which he
+			// also holds hovering upright
+			int picked = ZFighterPower.flightPose(player);
+			int pose = cruising(player) || picked == HANDS_BEHIND ? picked : 0;
 			float[] s = STATE.get(player.getId());
 			if (s == null) {
 				if (pose <= 0) {
@@ -159,11 +165,13 @@ public final class ZFighterFlightPose {
 		float a = smooth(pose.amount());
 		float[] arms = pose.arms();
 		float sway = Mth.sin(pose.time() * 0.12F) * 0.04F;
+		// clasped hands drift together
+		float otherSway = arms[2] < 0.0F && arms[5] < 0.0F ? sway : -sway;
 		ModelPart lead = avatar.mainArm == HumanoidArm.LEFT ? h.leftArm : h.rightArm;
 		ModelPart other = lead == h.rightArm ? h.leftArm : h.rightArm;
 		float leadOut = lead == h.rightArm ? 1.0F : -1.0F;
 		pose(lead, arms[0] + sway, arms[1] * leadOut, arms[2] * leadOut, a);
-		pose(other, arms[3] - sway, arms[4] * -leadOut, arms[5] * -leadOut, a);
+		pose(other, arms[3] + otherSway, arms[4] * -leadOut, arms[5] * -leadOut, a);
 		Float cruise = avatar.getData(com.jaymospowers.client.power.wind.WindPose.KEY);
 		float hover = a * (1.0F - (cruise == null ? 0.0F : cruise));
 		if (hover > 0.001F) {
