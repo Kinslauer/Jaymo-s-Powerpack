@@ -204,7 +204,7 @@ final class ZFighterMasters {
 		ZFighterTraining.Data data = ZFighterTraining.of(player);
 		for (int technique : dark ? DARK_ORDER : GOOD_ORDER) {
 			if (!data.knows(technique)) {
-				player.setAttached(ZFighterTraining.DATA, data.withTechnique(technique));
+				ZFighterTraining.learn(player, data, technique);
 				return Component.translatable(ZFighterLineage.techniqueKey(player, technique));
 			}
 		}

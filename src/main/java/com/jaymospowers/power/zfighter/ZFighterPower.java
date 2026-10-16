@@ -358,10 +358,18 @@ public final class ZFighterPower implements Power {
 	/**
 	 * A charged technique bought with TP (the Ki Bomb) works on sneak+V before V has unlocked: it was paid for. The Ki
 	 * Wave, which every fighter starts with, still waits for V. Letting go of V always counts, so a gathered one fires.
+	 * Likewise a learned quick technique (the Ki Disc and the rest) works on G before G unlocks; the Ki Blast waits.
 	 */
 	@Override
 	public boolean usableEarly(Player player, PowerKey key) {
-		if (key != PowerKey.ABILITY_3 || ZFighterLineage.ape(player)) {
+		if (ZFighterLineage.ape(player)) {
+			return false;
+		}
+		if (key == PowerKey.ABILITY_2) {
+			int quick = ZFighterTraining.of(player).quick();
+			return quick != ZFighterTraining.KI_BLAST && ZFighterTraining.of(player).knows(quick);
+		}
+		if (key != PowerKey.ABILITY_3) {
 			return false;
 		}
 		int charged = ZFighterTraining.of(player).charged();

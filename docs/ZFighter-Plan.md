@@ -5,8 +5,8 @@ Everything below is our own code, art and names, built from DragonMineZ's ideas 
 ## Stage 1: the fighter himself (Powers, Z Fighter only)
 - **Rage.** Before he has ever gone Super, at 25% health or less in a fight, a rage meter fills. When it's full he bursts into Rage: fists 40% harder and 25% tougher, no ki cost, 15 s. Every Rage adds hardship.
 - **Spirit Bomb, past Super 3.** Learned on the training screen once Super 3 is 25% mastered (20000 TP). In Super 3, hold C and raise your hands: the sphere above you grows from every living thing within 48 blocks (animals, villagers and willing players, each of whom gets a prompt) and from your own ki. Let go and it falls where you aim, its size and damage set by what it gathered. It only hurts what you're fighting (monsters, and players and creatures that attacked you); everything else is shoved aside. Huge crater with mob griefing on. 3 minute cooldown.
-- **Technique loadout.** New techniques bought with TP, picked on the training screen for G (quick) and V (charged):
-  - G slot: Ki Blast, Ki Disc (a cutting disc that passes through), Homing Volley (5 small bolts that seek), Solar Flash (blinds everything facing you), Ki Barrier (a dome for 3 s that stops projectiles).
+- **Technique loadout.** New techniques bought with TP, picked on the training screen for G (quick) and V (charged); a newly learned one (bought, or taught by a master) goes on its key at once, and works there even before that key unlocks:
+  - G slot: Ki Blast, Ki Disc (a cutting disc that passes through creatures and blocks for 60 blocks, stopped only by obsidian-hard, unbreakable or block-entity blocks), Homing Volley (5 small bolts that seek), Solar Flash (blinds everything facing you), Ki Barrier (a dome for 3 s that stops projectiles).
   - V slot: Ki Wave, or Ki Bomb (a big slow ball that bursts).
 - **Hermit Beans.** A rare crop (seeds from the Tower in stage 5; until then a rare find in jungle chests). One bean fully heals, fills hunger and ki, and clears bad effects. Grows slowly.
 - **Training Weights.** Wristbands and boots you wear: you're slower and jump less, and you earn TP 1.5x (2x for heavy weights).
