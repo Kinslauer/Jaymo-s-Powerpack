@@ -20,7 +20,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.11.101) The races' left-mouse holds ({@link RaceMoves}): bare-handed, not at a block. A Verdant's stretch punch goes
- * off after {@link #STRETCH_HOLD} ticks and again every {@link RaceMoves#STRETCH_EVERY} while held; a Frost-born's ice
+ * off after {@link #STRETCH_HOLD} ticks, asked for again every {@link RaceMoves#STRETCH_EVERY} while held (the server
+ * lets one through per {@link RaceMoves#STRETCH_COOLDOWN}); a Frost-born's ice
  * prison once a hold, after {@link #FROST_HOLD}. A Z Fighter keeps his hold combo for anything within plain reach: the
  * race move only takes the hold when nothing is. Also the stretching arm itself, on everyone.
  */
