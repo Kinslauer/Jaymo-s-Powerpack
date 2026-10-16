@@ -58,7 +58,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 
 ## Weapon arm, counter animations, hulking big body (0.11.62)
 - **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click (held since 0.11.91, see below) morphs the arm into a
-  random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6:
+  random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6 (with Living
+  Armor up it forms on a tendril instead, and there are three more weapons: see "Weapon tendrils" below):
   - Mace (blunt): `DAMAGE` 10, `hurtArmor` x`ARMOR_WEAR` 4, breaks a bone `MACE_BREAK` 35% (shatters skeletons), slams back.
   - Scythe (slashing): 8, severs a limb `SCYTHE_SEVER` 45% (`Dismember.cut`), sweeps others within 2.5 for 60% at half the chance.
   - Spear (piercing): 9, `SPEAR_PIERCE` 35% of it ignores armour, armour wear x4, drives straight back.
@@ -118,6 +119,30 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
+
+## Weapon tendrils, and three more weapons (after 0.11.98)
+Andy: "the weapon on left click should be adapted to the living armor tendrils ... with 3 more variants."
+- **On a tendril:** while Living Armor is up (`WebSymbiote.armored`: its tendrils out, or the big body), the held left
+  click forms the weapon on a tendril instead of the arm (`WebMorph.onTendril`; synced as `tendril` on `CHARGE` and
+  `MORPH`). Living Armor without the suit now counts too. Gathering, the striking side's shoulder tendril (0 right,
+  1 left) rears into a coil out to its side and shudders, its tip swelling into the weapon head; the mace and the
+  hammer-fist are two tendrils braided (with 2 or 3, just inside). Let go and it winds up its own way (mace reared over
+  the head, hammer-fist dropped low, scythe drawn wide, spear coiled short like a spring, whip-blade thrown far back,
+  hook claw raised), lashes out root first with the tip trailing, a ripple runs back up it at the impact (the hook reels
+  in), and it eases back to rest. The arm stays put (no swing). Same timing, reach, damage and effects as the arm; the
+  server doesn't care which. Drawn by `WebTendrilLayer` (`TendrilModel.morph`, `heads`; tuning `MORPH_*` at the top),
+  with the heads from `WebMorphLayer.weapon`. Outside Living Armor the plain suit keeps the arm weapon unchanged.
+- **Whip-blade** (`WHIP`): reaches `WHIP_REACH` 9, cuts up to `WHIP_HITS` 3 along the line through the target (within
+  `WHIP_WIDTH` 0.9; each after the first `WHIP_FALLOFF` x0.8 of the one before, from 7), flicks the near ones aside and
+  drags the last toward you (`WHIP_PULL` 1.1). A lash of barbed links to a thin blade; the arm swings back low, then
+  up over the shoulder and cracks it out, the cord bowing and waving (`WebMorphLayer.WHIP_LAG`, `WHIP_WAVE`).
+- **Hammer-fist** (`HAMMER`): 9, thrown up `HAMMER_LIFT` 1.15 (back 0.45), stunned `HAMMER_STUN_TICKS` 30 (Slowness IV,
+  Weakness II), the block under it bursts into dust. A knuckled block of a club; an uppercut from low and back.
+- **Hook claw** (`HOOK`): reaches `HOOK_REACH` 8, 6 damage, reels the target in to just short of you (`HOOK_YANK`,
+  at most 1.6 b/t), then it bleeds `BLEED_DAMAGE` 1.5 (through armour) every `BLEED_EVERY` 10 ticks, `BLEED_HITS` 4
+  times, dripping red. Three curved bone hooks, a grapple; the arm raised, flung out, yanked back as it bites.
+- Never the same weapon twice running still holds (six now). The client aims with the forming weapon's reach
+  (`WebMorph.reachNow`, from the synced charge); the server checks it against `reach(weapon)`.
 
 ## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the

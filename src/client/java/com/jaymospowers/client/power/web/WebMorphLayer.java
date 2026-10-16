@@ -26,17 +26,23 @@ import net.minecraft.world.phys.Vec3;
  * weapon as it does, then whips through at the target while the arm stretches out as a tendril to reach it, and
  * draws back in. Before it, held, the gathering: lumps course over the suit to the shoulder and down the arm, the
  * forearm swells and the weapon grows out of the hand ({@link #submitGather}). Mace: a spiked ball. Scythe: a long curved blade across the end, its edge pale. Spear: a long barbed
- * point. The arm itself is posed by {@link #applyModel}; this layer draws the cord and the weapon off the hand.
+ * point. Whip-blade: a lash of barbed links ending in a thin blade. Hammer-fist: a great knuckled block of a club. Hook
+ * claw: three curved bone hooks, a grapple. The arm itself is posed by {@link #applyModel}; this layer draws the cord and
+ * the weapon off the hand. On a Living Armor tendril ({@code tendril}) the arm is left alone: {@link WebTendrilLayer}
+ * poses the tendril and draws the same heads ({@link #weapon}) at its tip.
  */
 public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
-	/** The strike under way: weapon, arm (1 right, -1 left), ticks in, the aim against the body (radians), and how far (blocks). */
-	record Strike(int weapon, int side, float age, float aimYaw, float aimPitch, float reach) {
+	/**
+	 * The strike under way: weapon, arm (1 right, -1 left), ticks in, the aim against the body (radians), how far
+	 * (blocks), and whether it's on a tendril.
+	 */
+	record Strike(int weapon, int side, float age, float aimYaw, float aimPitch, float reach, boolean tendril) {
 	}
 
 	static final RenderStateDataKey<Strike> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_morph");
 
-	/** The gathering before it, held ({@link WebMorph.Charge}): weapon, arm, ticks in. */
-	record Gather(int weapon, int side, float age) {
+	/** The gathering before it, held ({@link WebMorph.Charge}): weapon, arm, ticks in, on a tendril. */
+	record Gather(int weapon, int side, float age, boolean tendril) {
 	}
 
 	static final RenderStateDataKey<Gather> GATHER = RenderStateDataKey.create(() -> "jaymospowers:web_morph_gather");
@@ -64,8 +70,14 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 	private static final float CORD_ROOT = 1.5F, CORD_TIP = 1.0F, CORD_LAG = 0.22F;
 	/** The cord is drawn in this many pieces. */
 	private static final int PIECES = 10;
-	/** How far an arm with nothing to hit reaches (blocks). */
-	private static final float AIR_REACH = 4.5F;
+	/** How far an arm with nothing to hit reaches (blocks; the whip-blade and the hook claw this share of their reach). */
+	private static final float AIR_REACH = 4.5F, AIR_REACH_LONG = 0.75F;
+	/** The whip-blade's lash: how much further its cord bows behind the swing, and the wave rolling down it (pixels). */
+	private static final float WHIP_LAG = 1.8F, WHIP_WAVE = 0.9F;
+	/** The hook claw: the arm yanks back over this many ticks after it bites. */
+	private static final float HOOK_REEL_TICKS = 4.0F;
+	/** The whip-blade's links, and the hook claw's prongs. */
+	private static final int WHIP_LINKS = 6, HOOK_PRONGS = 3;
 	/** The hand, in the arm's own space (pixels; the big body's arms are longer). */
 	private static final float HAND_Y = 10.0F, HULK_HAND_Y = 17.0F;
 
@@ -78,7 +90,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		WebMorph.Charge charge = entity instanceof Player p ? p.getAttached(WebMorph.CHARGE) : null;
 		if (charge != null) {
 			float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-			state.setData(GATHER, new Gather(charge.weapon(), charge.side(), Math.max(0.0F, charge.age(entity.level().getGameTime() + partial))));
+			state.setData(GATHER, new Gather(charge.weapon(), charge.side(), Math.max(0.0F, charge.age(entity.level().getGameTime() + partial)),
+				charge.tendril()));
 		} else {
 			state.setData(GATHER, null);
 		}
@@ -97,13 +110,14 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float bodyYaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
 		Vec3 shoulder = player.getPosition(partial).add(0.0, player.getBbHeight() * 0.78, 0.0);
 		Entity target = morph.target() < 0 ? null : player.level().getEntity(morph.target());
+		float air = morph.weapon() == WebMorph.WHIP || morph.weapon() == WebMorph.HOOK ? (float)WebMorph.reach(morph.weapon()) * AIR_REACH_LONG : AIR_REACH;
 		Vec3 to = target != null ? target.getBoundingBox().getCenter().subtract(shoulder)
-			: player.getViewVector(partial).scale(AIR_REACH);
+			: player.getViewVector(partial).scale(air);
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float aimYaw = Mth.wrapDegrees(yaw - bodyYaw) * Mth.DEG_TO_RAD;
 		float aimPitch = (float)-Mth.atan2(to.y, to.horizontalDistance());
 		float reach = (float)to.length() / Math.max(0.3F, player.getScale());
-		state.setData(KEY, new Strike(morph.weapon(), morph.side(), age, aimYaw, aimPitch, reach));
+		state.setData(KEY, new Strike(morph.weapon(), morph.side(), age, aimYaw, aimPitch, reach, morph.tendril()));
 	}
 
 	private static float ease(float x) {
@@ -121,8 +135,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		return ease((WebMorph.TICKS - age) / 3.0F);
 	}
 
-	/** Gathering: how much of the weapon has grown out of the hand (it pulses a little once whole, held). */
-	private static float grown(Gather g) {
+	/** Gathering: how much of the weapon has grown out of the hand (or the tendril's tip; it pulses a little once whole, held). */
+	static float grown(Gather g) {
 		float f = ease((g.age() - WebMorph.COLLECT_TICKS) / (WebMorph.FORMED_TICKS - WebMorph.COLLECT_TICKS));
 		return g.age() < WebMorph.FORMED_TICKS ? f : 1.0F + 0.04F * Mth.sin(g.age() * 0.5F);
 	}
@@ -163,6 +177,24 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 				x = aimX - 0.15F;
 				y = Mth.lerp(sw, aimY + s.side() * 1.7F, aimY - s.side() * 0.6F);
 			}
+			case WebMorph.WHIP -> {
+				// drawn back low behind, then brought up over the shoulder and cracked out at it
+				x = Mth.lerp(sw, 0.8F, aimX + 0.15F) - Mth.sin(sw * Mth.PI) * 1.6F;
+				y = Mth.lerp(sw, aimY + s.side() * 0.9F, aimY);
+			}
+			case WebMorph.HAMMER -> {
+				// dropped low and back, then an uppercut up through it
+				x = Mth.lerp(sw, 0.7F, aimX - 0.3F);
+				y = aimY * sw;
+			}
+			case WebMorph.HOOK -> {
+				// raised high, flung out at it, then yanked back as it bites
+				x = Mth.lerp(sw, -2.2F, aimX);
+				y = aimY * sw + s.side() * 0.2F * (1.0F - sw);
+				if (s.age() > WebMorph.HIT) {
+					x = Mth.lerp(ease((s.age() - WebMorph.HIT) / HOOK_REEL_TICKS), aimX, 0.4F);
+				}
+			}
 			default -> {
 				// cocked back at the shoulder, then driven straight at it
 				x = Mth.lerp(sw, 0.55F, aimX);
@@ -182,6 +214,14 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 		Strike s = living.getData(KEY);
 		Gather g = living.getData(GATHER);
+		if (s != null && s.tendril() || s == null && g != null && g.tendril()) {
+			// on a tendril: the arm is left be; the body only braces into it a little
+			int side = s != null ? s.side() : g.side();
+			float on = s != null ? Math.min(ease(s.age() / 2.0F), ease((WebMorph.TICKS - s.age()) / 3.0F)) : ease(g.age() / 4.0F);
+			float lean = s != null ? swing(s.age()) - 0.5F : -0.3F;
+			h.body.yRot += -side * 0.12F * on * lean;
+			return;
+		}
 		if (s == null && g != null) {
 			// gathering: the arm drawn back a little and out from the side, shuddering as the lumps pour in
 			ModelPart arm = g.side() > 0 ? h.rightArm : h.leftArm;
@@ -206,6 +246,9 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		h.body.yRot += s.side() * 0.25F * on * (swing(s.age()) - 0.5F);
 		if (s.weapon() == WebMorph.MACE) {
 			h.head.xRot = Mth.lerp(on * 0.5F, h.head.xRot, 0.3F * swing(s.age()));
+		} else if (s.weapon() == WebMorph.HAMMER) {
+			// following the uppercut up
+			h.head.xRot = Mth.lerp(on * 0.5F, h.head.xRot, -0.35F * swing(s.age()));
 		}
 	}
 
@@ -213,11 +256,12 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		Strike s = state.getData(KEY);
 		Gather g = state.getData(GATHER);
-		if (s == null && g != null && !state.isInvisible) {
+		if (s == null && g != null && !state.isInvisible && !g.tendril()) {
 			submitGather(poseStack, collector, state, g);
 			return;
 		}
-		if (s == null || state.isInvisible) {
+		if (s == null || state.isInvisible || s.tendril()) {
+			// on a tendril: WebTendrilLayer draws it
 			return;
 		}
 		PlayerModel parent = this.getParentModel();
@@ -232,7 +276,12 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float sw = swing(s.age());
 		// a swing whips the cord out behind the hand (the scythe sideways, the mace and spear back along the arm's arc)
 		float lag = (s.age() < WebMorph.HIT ? 1.0F - sw : 0.0F) * CORD_LAG * length;
-		Vec3 bow = s.weapon() == WebMorph.SCYTHE ? new Vec3(s.side() * lag, 0.0, 0.0) : new Vec3(0.0, 0.0, s.weapon() == WebMorph.MACE ? -lag : 0.0);
+		Vec3 bow = s.weapon() == WebMorph.SCYTHE ? new Vec3(s.side() * lag, 0.0, 0.0)
+			: s.weapon() == WebMorph.WHIP ? new Vec3(s.side() * lag * WHIP_LAG * 0.5, 0.0, -lag * WHIP_LAG)
+			: new Vec3(0.0, 0.0, s.weapon() == WebMorph.MACE || s.weapon() == WebMorph.HAMMER ? -lag : 0.0);
+		// the whip-blade's lash: a wave rolling out along it, cracking at the hit and dying away
+		float whipWave = s.weapon() != WebMorph.WHIP ? 0.0F : WHIP_WAVE * (s.age() < WebMorph.HIT + 3.0F ? 1.0F : 0.3F);
+		float age = s.age();
 		float time = state.ageInTicks;
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
@@ -243,7 +292,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			for (int i = 1; i <= PIECES; i++) {
 				float f = i / (float)PIECES;
 				// writhing a little along it
-				double wx = Mth.sin(time * 1.3F + f * 6.0F) * 0.35 * f, wz = Mth.cos(time * 1.1F + f * 5.0F) * 0.35 * f;
+				double wx = Mth.sin(time * 1.3F + f * 6.0F) * 0.35 * f + Mth.sin(f * 9.0F - age * 2.2F) * whipWave * f * 3.0F,
+					wz = Mth.cos(time * 1.1F + f * 5.0F) * 0.35 * f;
 				Vec3 p = hand.add(0.0, length * f, 0.0).add(bow.scale(Mth.sin(f * Mth.PI))).add(wx, 0.0, wz);
 				double r0 = Mth.lerp(f - 1.0F / PIECES, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow);
 				double r1 = Mth.lerp(f, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow);
@@ -324,7 +374,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			}
 			// the weapon grows out of the hand, hanging down along the arm
 			Vec3 hand = new Vec3(handX, handY, 0.0);
-			weapon(buffer, pose, new Strike(g.weapon(), g.side(), 0.0F, 0.0F, 0.0F, 0.0F), hand, new Vec3(0.0, 1.0, 0.0), grow, light);
+			weapon(buffer, pose, new Strike(g.weapon(), g.side(), 0.0F, 0.0F, 0.0F, 0.0F, false), hand, new Vec3(0.0, 1.0, 0.0), grow, light);
 		});
 		poseStack.popPose();
 	}
@@ -362,8 +412,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		return v.scale(1.0 / 16.0);
 	}
 
-	/** The weapon at the end of the cord, {@code at}, pointing along {@code dir} (pixels), {@code grow} of its size. */
-	private static void weapon(VertexConsumer buffer, PoseStack.Pose pose, Strike s, Vec3 at, Vec3 dir, float grow, int light) {
+	/** The weapon at the end of the cord (or a tendril), {@code at}, pointing along {@code dir} (pixels), {@code grow} of its size. */
+	static void weapon(VertexConsumer buffer, PoseStack.Pose pose, Strike s, Vec3 at, Vec3 dir, float grow, int light) {
 		if (grow < 0.05F) {
 			return;
 		}
@@ -410,6 +460,64 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 					prev = p;
 				}
 			}
+			case WebMorph.WHIP -> {
+				// a lash of barbed links, each with a pale barb hooked back off alternate sides, out to a long thin blade
+				Vec3 p = at;
+				for (int i = 0; i < WHIP_LINKS; i++) {
+					Vec3 n = p.add(dir.scale(2.2 * g)).add(across.scale(Mth.sin(i * 1.3F) * 0.4 * g));
+					WebTubes.prism(buffer, pose, px(p), px(n), across, 0.9 * g / 16.0, 0.6 * g / 16.0, 0.7 * g / 16.0, 0.5 * g / 16.0,
+						i % 2 == 0 ? WebTubes.SHEEN : WebTubes.BLACK, light);
+					int way = i % 2 == 0 ? 1 : -1;
+					Vec3 root = n.add(dir.scale(-0.8 * g));
+					WebTubes.cord(buffer, pose, px(root), px(root.add(across.scale(way * 1.8 * g)).add(dir.scale(-1.4 * g))), 0.45 * g / 16.0, 0.05 / 16.0,
+						WebTubes.BONE, light);
+					p = n;
+				}
+				Vec3 tip = p.add(dir.scale(6.0 * g));
+				WebTubes.prism(buffer, pose, px(p), px(tip), across, 1.6 * g / 16.0, 0.35 * g / 16.0, 0.05 / 16.0, 0.05 / 16.0, WebTubes.SHEEN, light);
+				for (int side = -1; side <= 1; side += 2) {
+					WebTubes.prism(buffer, pose, px(p.add(across.scale(side * 1.4 * g))), px(tip), across, 0.3 * g / 16.0, 0.3 * g / 16.0, 0.05 / 16.0,
+						0.05 / 16.0, WebTubes.BONE, light);
+				}
+			}
+			case WebMorph.HAMMER -> {
+				// a thick neck, then a great flaring block of a fist, banded round its middle, four pale knuckles on its face
+				Vec3 neck = at.add(dir.scale(2.5 * g));
+				WebTubes.cord(buffer, pose, px(at), px(neck), 1.5 * g / 16.0, 2.6 * g / 16.0, WebTubes.BLACK, light);
+				Vec3 face = neck.add(dir.scale(7.0 * g));
+				WebTubes.prism(buffer, pose, px(neck), px(face), across, 4.0 * g / 16.0, 4.0 * g / 16.0, 4.6 * g / 16.0, 4.6 * g / 16.0, WebTubes.SHEEN,
+					light);
+				WebTubes.prism(buffer, pose, px(neck.add(dir.scale(2.0 * g))), px(neck.add(dir.scale(4.5 * g))), across, 4.9 * g / 16.0, 4.9 * g / 16.0,
+					4.9 * g / 16.0, 4.9 * g / 16.0, WebTubes.BLACK, light);
+				for (int a = -1; a <= 1; a += 2) {
+					for (int b = -1; b <= 1; b += 2) {
+						Vec3 k = face.add(across.scale(a * 2.3 * g)).add(sideways.scale(b * 2.3 * g));
+						WebTubes.cord(buffer, pose, px(k.add(dir.scale(-0.5 * g))), px(k.add(dir.scale(1.6 * g))), 1.1 * g / 16.0, 0.5 * g / 16.0,
+							WebTubes.BONE, light);
+					}
+				}
+			}
+			case WebMorph.HOOK -> {
+				// a knob of a palm, and three hooks out of it curving forward, out and back like a grapple, bone at the points
+				Vec3 base = at.add(dir.scale(2.5 * g));
+				WebTubes.cord(buffer, pose, px(at), px(base), 1.1 * g / 16.0, 1.6 * g / 16.0, WebTubes.BLACK, light);
+				Vec3 hub = base.add(dir.scale(1.5 * g));
+				WebTubes.prism(buffer, pose, px(base), px(hub.add(dir.scale(0.6 * g))), across, 1.9 * g / 16.0, 1.9 * g / 16.0, 1.3 * g / 16.0,
+					1.3 * g / 16.0, WebTubes.SHEEN, light);
+				for (int i = 0; i < HOOK_PRONGS; i++) {
+					float angle = i * Mth.TWO_PI / HOOK_PRONGS + 0.3F;
+					Vec3 radial = across.scale(Mth.cos(angle)).add(sideways.scale(Mth.sin(angle)));
+					Vec3 prev = hub;
+					int pieces = 6;
+					for (int j = 1; j <= pieces; j++) {
+						double f = j / (double)pieces;
+						Vec3 p = hub.add(dir.scale((10.0 * f - 7.0 * f * f) * g)).add(radial.scale((5.0 * f * f + 0.8 * f) * g));
+						double r0 = (1.2 - 1.1 * (f - 1.0 / pieces)) * g, r1 = (1.2 - 1.1 * f) * g + 0.03;
+						WebTubes.cord(buffer, pose, px(prev), px(p), r0 / 16.0, r1 / 16.0, j > pieces / 2 ? WebTubes.BONE : WebTubes.SHEEN, light);
+						prev = p;
+					}
+				}
+			}
 			default -> {
 				// a long leaf of a point, two barbs swept back from its base
 				Vec3 base = at.add(dir.scale(2.0 * g));
@@ -431,8 +539,11 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 	}
 
-	/** True while a weapon arm is out (nothing else should take that arm). */
+	/** True while a weapon arm is out (nothing else should take that arm; a tendril's leaves the arms free). */
 	static boolean striking(LivingEntityRenderState state) {
-		return state.getData(KEY) != null || state.getData(GATHER) != null;
+		Strike s = state.getData(KEY);
+		Gather g = state.getData(GATHER);
+		return s != null && !s.tendril() || s == null && g != null && !g.tendril();
 	}
+
 }
