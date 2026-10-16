@@ -1501,3 +1501,31 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   weight (a fall after Lift or Crush, the slam, Collapse, Skyfall, the Singularity, a meteor), one slammed into a wall
   by Push, and the Great Ape's stomps and footfalls (`BladeBlood.crushed`). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
   constants at the top of `BladeBlood`.
+- **0.11.105, the symbiote's giant moves, eats by size, and fights you for control:**
+  - Andy: "symbiote consume large head should use the animated tongue we made recently, so it appears before the final
+    chomp and retracts". The Consume maw now draws the big body's animated tongue (`WebHulk.tongue`, shared): it tastes
+    the air as the maw swells out, lashes at the meal `TONGUE_LEAD` 7 ticks before the last bite and is back in the
+    mouth as the jaws snap shut.
+  - "it should animate swinging at the elbows and knees ... the tounge should only lash out periodically": the giant
+    has real elbows and knees (`elbow`/`knee` parts from `tools/gen_web_hulk.py`, `WebHulk.Model.limbs`): forearms
+    trail each swing, knees fold through the stride and tuck under in the hunch, coil and sitting, the arms sway
+    standing. Its tongue stays in and flicks out every `TONGUE_EVERY` 140 ticks and once after a meal.
+  - "verdant stretch should go on cooldown for 2s after use": `RaceMoves.STRETCH_COOLDOWN` 40.
+  - "Consumes should also give you varying hunger shanks and therefore hearts dependent on the size of the kill": meals
+    go by the creature's standing size (`WebSymbiote.mealSize`): 1-16 food (a chicken 3, a cow 7, a ravager 16), what
+    won't fit a full bar heals you (`MEAL_OVERFLOW_HEAL`).
+  - "large suit charge jump doesnt seem to work": the charged leap only checked the suit flag, which the big body from
+    Living Armor doesn't set; `WebSymbiote.leapBody` now gates it (client and server).
+  - "Spending too long in hot or cold climates will make the suit takeover and pathfind until he finds a new one":
+    after `CLIMATE_TICKS` 2400 in a hot (base temperature >= 1.5) or cold (<= 0.15) biome, with a whisper at half and a
+    dread 20 s before, it takes over and walks you, leg by leg, to the nearest temperate land biome, then lets go.
+  - "getting over halfway twice in a takeover comeback disables the suit for a minute with a scathing remark ... it
+    should animate you ripping out of the suit as the bar fills ... the tongue should also animate upon the suit
+    equipping manually. it should be a lot (x2) quicker when the symbiote takes over itself. it also has a small chance
+    to give you control over the living armor suit after a takeover with a snide remark": pushing the struggle bar past
+    half twice (`LOCKOUT_SURGE`, re-armed under `LOCKOUT_REARM`) tears you free and locks the suit out for
+    `SUIT_LOCKOUT_TICKS` 1200 with a jab (`lockout.*`). As the bar fills (synced `STRUGGLE`) the big body comes apart
+    from the head down and the suit peels off face, arms and chest with tendrils clawing back, the view jolting with
+    each heave. Takeovers engulf you twice as fast (`SELF_TAKEOVER_SPEED`). After a takeover, `TAKEOVER_GIFT_CHANCE`
+    10% it leaves you its Living Armor big body for a minute (`gift.*`). Put on by hand (`DONNED`), the suit or big
+    body lashes its tongue once (`WebHulk.DON_LASH_AT`).

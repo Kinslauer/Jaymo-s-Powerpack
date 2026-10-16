@@ -73,7 +73,20 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
   (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
   (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
-  snarls (`JAW_REST` 0.22); a red tongue (12 pieces) lolls and lashes every `LASH_EVERY` 70 ticks. No emblem (earlier ruling).
+  snarls (`JAW_REST` 0.22); a red tongue (12 pieces; it used to loll out and lash every 70 ticks, but Andy: "the tounge
+  should only lash out periodically") stays in the mouth and flicks out quickly every `TONGUE_EVERY` 140 ticks (7 s,
+  `FLICK_TICKS` 12, the jaw opening `JAW_FLICK` wider), and once just after a meal ends (`WebHulk.noteMeal`). No emblem (earlier ruling).
+  - **Elbows and knees (Andy: "it should animate swinging at the elbows and knees"):** the mesh hangs each forearm (fist,
+    knuckles, spurs) off an `elbow` part (`ELBOW` (0, 8.5, 2), toward the back) and each shin (calf, foot, toes) off a
+    `knee` (`KNEE` (0, 5.5, -2.5), toward the front), so no gap opens as they bend. `WebHulk.Model.limbs` (after the
+    poses, from `WebSuitGrowth.applyModel`) bends them: elbows `ELBOW_REST` 0.25 plus up to `ELBOW_SWING` 0.75 trailing
+    the arm's swing by `ELBOW_LAG` 0.6; knees `KNEE_WALK` 0.15 plus up to `KNEE_SWING` 1.1 as each leg swings through
+    (walk and gallop); a raised thigh folds its shin back `KNEE_CROUCH` 2x (feet stay under the hips in the hunch, the
+    leap's coil, the slam's drawn-up knees), sitting `KNEE_SIT` 1x. Standing, the elbows breathe (`ELBOW_IDLE`) and the
+    arms rock (`IDLE_SWAY`). A hand holding something, punching or forming a weapon keeps `ELBOW_HOLDING` 25% of the bend.
+  - **The maw's tongue (Consume, `WebMouthLayer.tongue`, Andy: "consume large head should use the animated tongue"):**
+    the same tongue (`WebHulk.tongue`, 14 pieces, wider) tastes the air as the maw swells out (half length), then
+    `TONGUE_LEAD` 7 ticks before the last bite lashes out at the meal and is reeled back into the mouth as the jaws snap shut.
   The behemoth (zombie-player host) still uses the old inflated body.
 - **Equip animation (`WebSuitGrowth` + `WebSuitWrapLayer`):** tendrils leech out and coil round the body, arms, head,
   then legs from each joint (`WRAP_SPAN` 0.3); raw goo folds over each part (`GOO_AFTER` 0.28, `LAYER_SPAN` 0.26), then
@@ -121,6 +134,27 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   hooked claw blade, turn about (`WebTendrilLayer.blades`, sizes `BLADE_*`).
 - **Tendrils stay out (0.11.99):** with Wall Crawl on, the tendrils are drawn the whole time (`WebSymbioteClient.extract`), not only while they hold you; holding Jump (a coiled leap, nothing to grab) used to make them vanish. They go only when Wall Crawl is switched off.
 - **Charged leap on Wall Crawl (0.11.99):** in the suit, holding Jump while the tendrils carry you coils them (you sink to `WebSymbioteClient.STRIDE_COIL` 0.55 of the stride height) instead of climbing; let go and they fling you with the charged leap, as from the ground (`launchable`), letting you fly for `LEAP_GRACE_TICKS` 8 before they grab again. On a wall or ceiling Jump still climbs. Without the suit, Jump still climbs the stride.
+- **The big body's charged leap (fix):** "large suit charge jump doesnt seem to work". The charged jump was only for
+  `suitShown` (the suit flag), and Living Armor at a whole bond wears the big body without that flag, so Jump was a
+  plain hop. `WebSymbiote.leapBody` (suit or big body) now gates it (`WebSwing.holdingCharge`/`tick`, the server's
+  `ChargeHold`). In the big body, Jump held on the ground coils the leap; held in the air it's still the slam.
+- **Meals by size:** Consume's meal goes by what the corpse was in life, standing (`WebSymbiote.mealSize`:
+  sqrt(width² × height / `MEAL_FULL_VOLUME` 8) of its type; the corpse's own box is low and narrow, so a chicken and a
+  ravager used to be almost the same meal). Your hunger: `MEAL_FOOD_MIN` 1 to `MEAL_FOOD_MAX` 16 points (chicken 3,
+  cow 7, horse 10, ravager 16) at saturation 0.3-0.8; what a full bar can't take heals you, `MEAL_OVERFLOW_HEAL` 1
+  health a point, on top of `CORPSE_HEAL_MIN` 2 to `CORPSE_HEAL_MAX` 10. The symbiote: 30-80 satiety, as before.
+- **Climate takeover:** "Spending too long in hot or cold climates will make the suit takeover and pathfind until he
+  finds a new one." In a biome with base temperature at least `CLIMATE_HOT` 1.5 (desert, savanna, badlands, the
+  Nether) or at most `CLIMATE_COLD` 0.15 (snowy and frozen biomes, peaks), time adds up (`CLIMATE_TICKS` 2400, 2 min;
+  it drains twice as fast anywhere temperate). At half it complains (`climate.<hot|cold>.uneasy.*`), 20 s before
+  (`CLIMATE_WARN_TICKS` 400) it warns you with a full dread, a shake and a heartbeat (`.warn.*`), then it takes the
+  wheel (`startMigrate`: dread, shake, `.go.*`). It finds the nearest temperate land biome (not sea or river) within
+  `MIGRATE_SEARCH` 640 at your ground's height (`findClosestBiome3d`) and walks you there as a sightseeing tour
+  (`tourSight` "climate"), in legs of up to `MIGRATE_LEG` 20 blocks (a `TOUR_TAG` marker each, veering round water and
+  never onto lava), each allowed `MIGRATE_LEG_TICKS` 600. Once your feet are in a temperate biome it lets go
+  (`.there.*`). Stuck on a leg, past `MIGRATE_MAX_LEGS` 48, or nowhere to go (the Nether: `.lost`), it gives up and
+  tries again after `MIGRATE_RETRY` 1200. Not in creative; struggling breaks it as any takeover (then the usual
+  takeover cooldown).
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
@@ -567,7 +601,7 @@ action bar, each heard once.
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump or a Sneak press slams you up into it, you move with the movement keys, and another Sneak press drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
-| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
+| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. By the creature's size (see **Meals by size**): your hunger 1-16 points, heals 2-10 (more past a full bar), feeds it 30-80. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`) and bleeds (`BladeBlood`). The roar throws the same spikes. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |
 
@@ -787,8 +821,31 @@ whisper, so the vignette, dark screen and growl play each time.
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
 earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 80 - 6 per ability presses (44 with all six, since 0.10.10; the
-count fades by `STRUGGLE_FADE` 0.25 per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
-the HUD.
+count fades by `TAKEOVER_STRUGGLE_FADE` 0.25 per tick) break its hold, which
+adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at half).
+
+**Struggle lockout, ripping out, quicker takeovers, the gift.**
+- *Self takeovers are 2x quicker* (`SELF_TAKEOVER_SPEED` 2.0; every takeover is one it starts itself): the suit and big
+  body engulf you in half the time (`WebSuitGrowth`, a change made while `WebSymbioteClient.seized`), the dread swells in
+  twice as fast (the struggle bar drains as before; doubled it was unwinnable). Put on by hand (`DONNED`), the suit
+  or big body lashes its tongue once as the head forms (`WebHulk.DON_LASH_AT`, `submitSuitTongue` on the plain suit).
+- *Lockout:* push the bar past `LOCKOUT_SURGE` 0.5 twice in one takeover (it must fall back under `LOCKOUT_REARM` 0.25
+  between: "it surges back over you", shake `SURGE_BACK_SHAKE` 0.8, full dread, a `surge.1-3` taunt) and you win: the
+  takeover ends and the suit is disabled for `SUIT_LOCKOUT_TICKS` 1200 (`LOCKOUT` attachment, saved; counts as
+  `sulking()`, so no suit, Living Armor, big body, hunts, defence roar or takeovers), with a `lockout.1-4` remark;
+  asking for the suit or Living Armor answers `locked_out.1-3`; it ends with `lockout_over`.
+- *Ripping out:* the server syncs the bar to everyone (`STRUGGLE`, 0-1 in steps of `STRUGGLE_SYNC_STEP` 0.02, present
+  for the whole takeover; your own client uses its local tally). `WebSuitGrowth.PULL` (the share plus a back-and-forth
+  tug, `TUG_WOBBLE`) takes the big body apart from its last-built pieces (head and jaws, claws, hands: `HULK_PEEL`
+  0.55 at a full bar; the tongue draws in with it), shows the suit under it, and peels the suit back off each part toward
+  its joint (`PEEL_START`/`PEEL_MAX`: the face first, then arms, chest, barely the legs), with `WebSuitWrapLayer`'s
+  tendrils clinging to the bared parts. Each press shakes your view (`STRUGGLE_SHAKE` 0.25 + 0.6 × bar); the takeover
+  vignette and dread give way as the bar fills (`HUD_CLEAR` 0.6, `STRUGGLE_CLEAR` 0.55) and flicker.
+- *The gift:* any takeover ending (but the lockout) has `TAKEOVER_GIFT_CHANCE` 10% to leave you its Living Armor, big
+  body and all, yours to drive for `TAKEOVER_GIFT_TICKS` 1200 whatever the bond (no idle withdraw; you can always put it
+  away), with a `gift.1-3` remark; then `gift_over` and it takes it back (at a whole bond it's yours anyway).
+- *Manual equip signal:* `WebSymbiote.DONNED` (synced to all, game time) is set when the suit or Living Armor is put on
+  from the radial menu, never by a takeover: for the manual-equip tongue animation.
 
 **Takeover combat:** the tendrils do the fighting: `FRENZY_TICKS` 18 strikes every `FRENZY_EVERY` 4 ticks for
 `FRENZY_DAMAGE` 9, with a `FRENZY_SNATCH` 18% chance to snatch and hurl the prey. Its own punches slowed to
