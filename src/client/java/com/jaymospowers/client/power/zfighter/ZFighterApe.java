@@ -31,6 +31,8 @@ import net.minecraft.world.item.ItemStack;
 public final class ZFighterApe {
 	/** Whether this player is the Great Ape, on his render state. */
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_great_ape");
+	/** (0.12.3) Whether the Great Ape lies crippled (flat on his back), on his render state. */
+	public static final RenderStateDataKey<Boolean> CRIPPLED = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_crippled");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape.png");
 
 	private static Model model;
@@ -45,6 +47,7 @@ public final class ZFighterApe {
 		if (!ape) {
 			return;
 		}
+		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
@@ -133,8 +136,19 @@ public final class ZFighterApe {
 			if (!Boolean.TRUE.equals(state.getData(KEY))) {
 				return;
 			}
+			boolean down = Boolean.TRUE.equals(state.getData(CRIPPLED));
+			if (down) {
+				// crippled: laid flat on his back, about his feet (model space: y down, the feet 1.5 below the origin)
+				poseStack.pushPose();
+				poseStack.translate(0.0F, 1.5F, 0.0F);
+				poseStack.rotateDegrees(com.mojang.math.Axis.XP, -90.0F);
+				poseStack.translate(0.0F, -1.5F, -0.25F);
+			}
 			// not the "copy layer" call: that skips invisible states, and the body was made invisible
 			renderColoredCutoutModel(model(), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (down) {
+				poseStack.popPose();
+			}
 			// let his shadow fall (the renderer skips it for invisible states, after the layers)
 			state.isInvisible = false;
 		}

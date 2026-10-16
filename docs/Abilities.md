@@ -195,13 +195,13 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 190 | Any | passive | Ascension | The power ascends once all 8 aliens are scanned and the power is fully mastered. C then works as an alien. | |
 | 191 | Any | C (ascended) | Ultimate | As an alien: become its Ultimate form for the rest of the timer. C again is the Ultimate's own move where it has one. | |
 | 192 | Bulwark | C | Titan | 2x size, +12 armour, +20 health; the Ground Clap smashes walls up to 3 blocks thick ahead of you. | |
-| 193 | Pyre | C | Sunheart | The Flame Jet flies half again as fast; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
+| 193 | Pyre | C | Sunheart | The Flame Jet flies 45% faster; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
 | 194 | Blur | C | Afterimage | A glowing ghost of you bolts away for 10 s and everything hunting you hunts it. C again: another, every 10 s. | |
 | 195 | Prism | C | Geode | Everything within 6 blocks is cased in crystal for 4 s (held, can't strike); projectiles shatter; you get Resistance III. Every 20 s. | |
 | 196 | Wisp | C | Revenant | Possess the mob you look at (8 blocks) for 10 s: it goes where you look; nothing hunts you. C again lets go. | |
 | 197 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |
 | 198 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
-| 199 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust half again as wide. | |
+| 199 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust reaches 50% farther. | |
 | 200 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
 | 201 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band, in rounds that never end: two pairs of conflicting yes/no questions (each wants a yes; 6 pairs, changing by round), then a deed each (odd rounds: 3 changes without a blow, 12 lives as an alien; even rounds: 3 changes ended by hand, 2 knockouts taken). Then Nadir may be slammed once; when that change ends, the next round begins. | |
 | 202 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |

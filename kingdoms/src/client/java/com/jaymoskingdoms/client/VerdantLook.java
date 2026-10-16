@@ -115,7 +115,7 @@ public final class VerdantLook {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
 			Look look = state.getData(KEY);
-			if (look == null || state.isInvisible || !this.getParentModel().head.visible) {
+			if (look == null || state.isInvisible || !this.getParentModel().head.visible || PowersCover.head(state)) {
 				return;
 			}
 			poseStack.pushPose();

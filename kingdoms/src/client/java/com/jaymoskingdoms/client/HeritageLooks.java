@@ -46,10 +46,12 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Stoneborn:</b> stone over the hands, amethyst glowing in its cracks; violet eyes that glow by day only;
  * amethyst glints.</li>
- * <li><b>Tideborn:</b> fishmen: gills on the cheeks and the sides of the head, fins (model parts) on the head and the
+ * <li><b>Tideborn:</b> (0.7.80: the glow, eyes and fin edges lit under water, or at night while still wet; drips only while
+ * wet) fishmen: gills on the cheeks and the sides of the head, fins (model parts) on the head and the
  * forearms in one of three sets (by UUID: crest and cheek gills; ear fins; crest, ear fins and long arm fins), sea-green
  * scales and rows of deep-sea lights on the forearms; cyan eyes; bubbles under water, drips on land.</li>
- * <li><b>Sylvan:</b> a thick glowing vine winding round each arm, its own way on each player (by UUID, four); pale
+ * <li><b>Sylvan:</b> (0.7.80: sneaking dims the glow and stops the fireflies; a Thief's, or one with a Stealth perk, goes
+ * out) a thick glowing vine winding round each arm, its own way on each player (by UUID, four); pale
  * green eyes; fireflies.</li>
  * <li><b>Verdant:</b> only the pink forearm patches, glowing in the dark (the green skin and antennae are
  * {@link VerdantLook}'s).</li>
@@ -109,9 +111,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 	}
 
-	/** On a player's render state: their heritage's look, which drawing, and whether their eyes glow now. */
-	record Look(Kind kind, int variant, boolean eyesLit) {
+	/**
+	 * On a player's render state: their heritage's look, which drawing, whether their eyes glow now, and the glow's tint
+	 * (opaque ARGB, -1 full; 0 none: a dry Tideborn, a Sylvan who sneaks unseen).
+	 */
+	record Look(Kind kind, int variant, boolean eyesLit, int glow) {
 	}
+
+	/** (0.7.80) A sneaking Sylvan's glow, dimmed to this (opaque ARGB tint; out entirely for a Thief or with a Stealth perk). */
+	static final int SYLVAN_SNEAK_GLOW = 0xFF4A4A4A;
 
 	public static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:heritage_look");
 
@@ -153,7 +161,19 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			case DAY -> entity.level().isBrightOutside();
 			case NEVER -> false;
 		};
-		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit));
+		int glow = -1;
+		int flags = entity.getAttachedOrElse(Heritage.LOOK, 0);
+		if (kind == Kind.TIDEBORN) {
+			// (0.7.80) a Tideborn glows under water, and at night while still wet; dry, not at all
+			boolean on = entity.isUnderWater() || (flags & Heritage.LOOK_WET) != 0 && entity.level().isDarkOutside();
+			glow = on ? -1 : 0;
+			lit &= on;
+		} else if (kind == Kind.SYLVAN && entity.isCrouching()) {
+			// sneaking, a Sylvan's glow dims; a thief's goes out
+			glow = (flags & Heritage.LOOK_UNSEEN) != 0 ? 0 : SYLVAN_SNEAK_GLOW;
+			lit &= glow != 0;
+		}
+		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow));
 	}
 
 	static int variant(UUID id, int drawings) {
@@ -163,52 +183,63 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		Look look = state.getData(KEY);
-		if (look == null || state.isInvisible) {
+		if (look == null || state.isInvisible || PowersCover.face(state)) {
+			// (0.7.81) a mask or the symbiote's suit over it all (a costume always covers the body too)
 			return;
 		}
+		// under a hood no head fins, under a costume's sleeves no arm fins
+		headFinsCovered = PowersCover.head(state);
+		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
 		Kind kind = look.kind();
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
 			OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
-		collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
-			OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+		if (look.glow() != 0) {
+			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
+				OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
+		}
 		if (look.eyesLit() && kind.stockEyes != null) {
 			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
 				kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin);
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}
 		if (kind == Kind.TIDEBORN) {
-			fins(poseStack, collector, lightCoords, model, look.variant());
+			fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0);
 		}
 	}
 
+	/** (0.7.81) What Jaymo's Powers covers on the player being drawn (set in submit, read by fins). */
+	private static boolean headFinsCovered, armFinsCovered;
+
 	/** A Tideborn's fins: on the head (crest, ear fins) and the backs of the forearms. */
-	private static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, PlayerModel model, int set) {
-		if (model.head.visible) {
+	private static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, PlayerModel model, int set, boolean glow) {
+		if (model.head.visible && !headFinsCovered) {
 			poseStack.pushPose();
 			model.head.translateAndRotate(poseStack);
-			fin(poseStack, collector, lightCoords, headFins(set));
+			fin(poseStack, collector, lightCoords, glow, headFins(set));
 			poseStack.popPose();
 		}
 		bakeArmFins();
-		if (model.rightArm.visible) {
+		if (model.rightArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.rightArm.translateAndRotate(poseStack);
-			fin(poseStack, collector, lightCoords, LONG_ARMS[set] ? rightArmFinLong : rightArmFin);
+			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? rightArmFinLong : rightArmFin);
 			poseStack.popPose();
 		}
-		if (model.leftArm.visible) {
+		if (model.leftArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
-			fin(poseStack, collector, lightCoords, LONG_ARMS[set] ? leftArmFinLong : leftArmFin);
+			fin(poseStack, collector, lightCoords, glow, LONG_ARMS[set] ? leftArmFinLong : leftArmFin);
 			poseStack.popPose();
 		}
 	}
 
-	private static void fin(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, ModelPart part) {
+	private static void fin(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, boolean glow, ModelPart part) {
 		collector.order(1).submitModelPart(part, poseStack, RenderTypes.entityCutout(FINS), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
-		collector.order(2).submitModelPart(part, poseStack, RenderTypes.eyes(FINS_GLOW), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+		if (glow) {
+			collector.order(2).submitModelPart(part, poseStack, RenderTypes.eyes(FINS_GLOW), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+		}
 	}
 
 	/** Fin set {@code set}'s head fins, made the first time they're drawn (head space: the top of the head at y -8). */
@@ -271,12 +302,19 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			switch (kind) {
 				case STONEBORN -> level.addParticle(AMETHYST, x, y, z, 0.0, 0.01, 0.0);
 				case TIDEBORN -> {
-					boolean wet = player.isUnderWater();
-					ParticleOptions drop = wet ? ParticleTypes.BUBBLE : ParticleTypes.DRIPPING_WATER;
-					level.addParticle(drop, x, y, z, 0.0, wet ? 0.08 : 0.0, 0.0);
+					// bubbles under water; on land, drips only while still wet (0.7.80)
+					boolean under = player.isUnderWater();
+					if (under || (player.getAttachedOrElse(Heritage.LOOK, 0) & Heritage.LOOK_WET) != 0) {
+						ParticleOptions drop = under ? ParticleTypes.BUBBLE : ParticleTypes.DRIPPING_WATER;
+						level.addParticle(drop, x, y, z, 0.0, under ? 0.08 : 0.0, 0.0);
+					}
 				}
-				case SYLVAN -> level.addParticle(ParticleTypes.FIREFLY, player.getX() + (random.nextDouble() - 0.5) * 2.0,
+				case SYLVAN -> {
+					if (!player.isCrouching()) {
+						level.addParticle(ParticleTypes.FIREFLY, player.getX() + (random.nextDouble() - 0.5) * 2.0,
 					player.getY() + random.nextDouble() * 2.0, player.getZ() + (random.nextDouble() - 0.5) * 2.0, 0.0, 0.0, 0.0);
+					}
+				}
 				case FROSTBORN -> level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
 				case NIGHTBORN -> {
 					if (level.isDarkOutside()) {

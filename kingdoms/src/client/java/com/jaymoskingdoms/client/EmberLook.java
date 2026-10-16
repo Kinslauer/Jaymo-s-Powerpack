@@ -66,7 +66,8 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		if (state.getData(KEY) == null || state.isInvisible) {
+		if (state.getData(KEY) == null || state.isInvisible || PowersCover.face(state)) {
+			// (0.7.81) under a mask or the symbiote's suit
 			return;
 		}
 		PlayerModel model = this.getParentModel();

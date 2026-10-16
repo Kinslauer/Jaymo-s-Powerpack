@@ -80,7 +80,8 @@ public final class ZFighterTail {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 			Integer tail = state.getData(KEY);
-			if (tail == null || tail == 0 || state.isInvisible) {
+			if (tail == null || tail == 0 || state.isInvisible || com.jaymospowers.client.BodyCover.body(state)) {
+				// (0.12.5) a costume or the symbiote's suit covers it
 				return;
 			}
 			poseStack.pushPose();
