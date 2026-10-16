@@ -175,6 +175,13 @@ public final class WebSymbioteClient {
 	static final double CEILING_LATCH_REACH = 1.8, CEILING_LATCH_GROUND = 0.9, CEILING_SLAM_EXTRA = 0.15;
 	static final float CEILING_LATCH_LOOK = 30.0F;
 	static final int STRIDE_RISE_ANCHORS = 4;
+	/**
+	 * Wall Crawl and the suit's charged leap: holding Jump while the tendrils carry you coils them, sinking you to
+	 * {@code STRIDE_COIL} of your stride height; let go and they fling you (the charged leap), leaving you to fly for
+	 * {@code LEAP_GRACE_TICKS} before they take hold again.
+	 */
+	static final double STRIDE_COIL = 0.55;
+	static final int LEAP_GRACE_TICKS = 8;
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
 	static final double LEDGE_HOP = 0.35;
 	static final double LEDGE_FORWARD = 0.18;
@@ -238,6 +245,18 @@ public final class WebSymbioteClient {
 	private static boolean climbSent;
 	/** Sneak last tick (to catch the press), and how many more ticks a slammed-in latch pins you. */
 	private static boolean sneakWas;
+	/** Ticks left after a charged leap off the walking tendrils before Wall Crawl takes hold again. */
+	private static int leapGrace;
+
+	/** Wall Crawl's tendrils are holding you up (so a charged leap can be let go from them, as from the ground). */
+	static boolean launchable(LocalPlayer player) {
+		return WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) && !wallClinging && !ceilingClinging && WebTendrilWalk.striding(player);
+	}
+
+	/** A charged leap just went off: the tendrils let go for a moment. */
+	static void leapt() {
+		leapGrace = LEAP_GRACE_TICKS;
+	}
 	private static int latchHold;
 	/** Keys pressed against a takeover's hold: last tick's movement keys (for presses), the last tick one was sent, and a local tally for the meter. */
 	private static Input heldKeys = Input.EMPTY;
@@ -1154,6 +1173,14 @@ public final class WebSymbioteClient {
 	 * hauls you onto it.
 	 */
 	private static void tickCrawl(LocalPlayer player, WebSwing swing) {
+		if (leapGrace > 0) {
+			// just leapt off the tendrils: they let you fly
+			leapGrace--;
+			wallClinging = false;
+			ceilingClinging = false;
+			letGoOfWall();
+			return;
+		}
 		if (!WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) || player.getAbilities().flying || player.isPassenger() || player.isInWater()
 			|| player.isInLava() || swing.attached() || swing.pull != null || swing.wingsTicks > 0 || player.isFallFlying()) {
 			wallClinging = false;
@@ -1253,7 +1280,10 @@ public final class WebSymbioteClient {
 		double scale = player.getScale();
 		double ground = WebTendrilWalk.groundBelow(player, WebTendrilWalk.STRIDE_GROUND * scale);
 		double vy;
-		if (input.jump()) {
+		if (WebSwing.holdingCharge(player)) {
+			// coiling a charged leap: they sink you low on bent legs, ready to fling you (let go to leap)
+			vy = ground >= 0.0 ? Mth.clamp((STRIDE_HEIGHT * STRIDE_COIL * scale - ground) * STRIDE_LIFT, -STRIDE_CLIMB, STRIDE_CLIMB) : 0.0;
+		} else if (input.jump()) {
 			vy = anchors >= STRIDE_RISE_ANCHORS ? STRIDE_CLIMB : 0.0;
 		} else if (input.shift()) {
 			vy = -STRIDE_CLIMB;
