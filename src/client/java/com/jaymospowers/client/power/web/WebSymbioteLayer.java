@@ -15,7 +15,8 @@ import net.minecraft.resources.Identifier;
  * The texture ({@code textures/entity/web_symbiote_suit.png}) is drawn by {@code tools/gen_web.py}: the clean black
  * suit. Its veins show only while it's feral (a bond under {@code VEIN_BOND}). The big body is its own hulking model
  * ({@link WebHulk}, veins in its texture) with a flicking tongue. While either is being put on (see WebSuitGrowth) a
- * layer of raw goo goes on under the suit first.
+ * layer of raw goo goes on under the suit first. The white and red strains wear their own twins of every texture
+ * ({@link WebStrainLook}).
  */
 final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
@@ -76,12 +77,12 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			int high = Math.max(growth.from(), growth.to()), low = Math.min(growth.from(), growth.to());
 			if (low == 0) {
 				// bare skin: the goo goes on first, the suit over it
-				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, GOO, poseStack, collector, lightCoords, state, -1, 1);
+				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
-			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 			// (no tongue on the plain suit: only the big body has one, Andy)
 			if (high == 2) {
-				coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+				coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
 			}
 			return;
@@ -90,10 +91,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		if (tendrils != null && tendrils.armor()) {
 			if (state.getData(WebSuitGrowth.PULL) != null) {
 				// fighting its hold: as the big body comes apart you show through it, tearing out of the suit beneath
-				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			// the big body, whether or not the suit was showing
-			coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 			tongue(poseStack, collector, state, WebSuitGrowth.peeledHulk(state));
 			return;
 		}
@@ -101,7 +102,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			return;
 		}
 		PlayerModel suit = slim ? this.suitSlim : this.suitWide;
-		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+		coloredCutoutModelCopyLayerRender(suit, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 		// (the plain suit has no tongue: Andy, "I'd also like the tounge to be kept to the large suit"; Consume's maw
 		// still has its own while it eats, WebMouthLayer, and it licks its chops a few times just after)
 		if (!state.isInvisible && !WebSymbioteClient.ownFirstPerson(state) && state.getData(WebSymbioteClient.EATING) == null
@@ -129,6 +130,6 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	/** The veins' frame now: cycling, so they pulse and writhe. */
 	private static Identifier veins(AvatarRenderState state) {
-		return VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length];
+		return WebStrainLook.texture(VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length], state);
 	}
 }

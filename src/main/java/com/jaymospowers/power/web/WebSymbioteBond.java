@@ -174,6 +174,7 @@ public final class WebSymbioteBond {
 		player.removeAttached(FIGHT);
 		player.removeAttached(FACE);
 		player.removeAttached(DORMANT);
+		player.removeAttached(WebSymbioteStrains.ASLEEP);
 	}
 
 	// ---- every tick (bonded, alive; from WebSymbiote.tick) ----------------------------------------------------------
@@ -193,7 +194,7 @@ public final class WebSymbioteBond {
 				if (!taken) {
 					ServerLevel level = player.level();
 					level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 0.6F);
-					level.sendParticles(WebSymbiote.dust(1.0F), player.getX(), player.getEyeY(), player.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
+					level.sendParticles(WebSymbioteStrains.dust(player, 1.0F), player.getX(), player.getEyeY(), player.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
 					WebSymbiote.whisper(player, "face_back." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
 				}
 			}
@@ -334,7 +335,9 @@ public final class WebSymbioteBond {
 	/** A radial pick while dormant: it doesn't answer, and tells you why. */
 	static void refuse(ServerPlayer player) {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
-		WebSymbiote.whisper(player, "dormant_refuse." + (1 + player.getRandom().nextInt(DORMANT_REFUSE_LINES)));
+		// (the white one asleep from healing has its own lines: WebSymbioteStrains.sleep)
+		boolean asleep = WebSymbioteStrains.asleep(player);
+		WebSymbiote.whisper(player, (asleep ? "white.asleep_refuse." : "dormant_refuse.") + (1 + player.getRandom().nextInt(DORMANT_REFUSE_LINES)));
 	}
 
 	private static void tickDormant(ServerPlayer player, Live live, long now, int left) {
@@ -342,12 +345,14 @@ public final class WebSymbioteBond {
 		if (player.tickCount % DORMANT_STEP == 0) {
 			left -= DORMANT_STEP;
 			if (left <= 0) {
-				// awake: it has made itself at home
+				// awake: it has made itself at home (or the white one has slept off its healing)
+				boolean asleep = WebSymbioteStrains.asleep(player);
 				player.removeAttached(DORMANT);
+				player.removeAttached(WebSymbioteStrains.ASLEEP);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 0.7F);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 1.0F, 0.6F);
-				level.sendParticles(WebSymbiote.dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.35, 0.8, 0.35, 0.0);
-				WebSymbiote.whisper(player, "dormant_wake");
+				level.sendParticles(WebSymbioteStrains.dust(player, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.35, 0.8, 0.35, 0.0);
+				WebSymbiote.whisper(player, asleep ? "white.wake" : "dormant_wake");
 				return;
 			}
 			player.setAttached(DORMANT, left);
@@ -358,7 +363,7 @@ public final class WebSymbioteBond {
 			float t = phase / (float)DORMANT_RIPPLE_STEPS;
 			double a = t * Math.PI * 4.0;
 			double r = 0.38;
-			level.sendParticles(WebSymbiote.dust(0.7F), player.getX() + Math.cos(a) * r, player.getY() + t * player.getBbHeight(),
+			level.sendParticles(WebSymbioteStrains.dust(player, 0.7F), player.getX() + Math.cos(a) * r, player.getY() + t * player.getBbHeight(),
 				player.getZ() + Math.sin(a) * r, 1, 0.02, 0.03, 0.02, 0.0);
 			if (phase == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.25F, 0.5F);
@@ -372,7 +377,8 @@ public final class WebSymbioteBond {
 			int line = player.getRandom().nextInt(DORMANT_LINES - 1);
 			live.lastLine = line >= live.lastLine && live.lastLine >= 0 ? line + 1 : line;
 			level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.6, 0.3, 0.01);
-			WebSymbiote.whisper(player, "dormant." + (1 + live.lastLine));
+			WebSymbiote.whisper(player, WebSymbioteStrains.asleep(player) ? "white.asleep." + (1 + live.lastLine % WebSymbiote.SAY_LINES)
+				: "dormant." + (1 + live.lastLine));
 		}
 	}
 

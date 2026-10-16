@@ -52,10 +52,18 @@ import org.jspecify.annotations.Nullable;
  * tendril instead of the arm ({@link Morph#tendril}): a shoulder tendril (two braided, for the heavy ones) coils back,
  * its tip swells into the weapon head, and the strike lashes through the tendril. Same reach, damage and effects; only
  * the client draws it differently ({@code WebTendrilLayer}).
+ *
+ * <p>Strains ({@link WebSymbioteStrain}) pick from their own set: the white one only forms blunt shapes (the mace and a
+ * flat <b>palm</b> shove: no blades, no severing); the red one only blades (scythe, spear and a heavy <b>axe</b>), harder
+ * ({@link WebSymbioteStrains#RED_BLADE_DAMAGE}) and severing more often ({@link WebSymbioteStrains#RED_SEVER}).
  */
 public final class WebMorph {
 	/** The weapons. */
-	public static final int MACE = 0, SCYTHE = 1, SPEAR = 2, WHIP = 3, HAMMER = 4, HOOK = 5, WEAPONS = 6;
+	public static final int MACE = 0, SCYTHE = 1, SPEAR = 2, WHIP = 3, HAMMER = 4, HOOK = 5, PALM = 6, AXE = 7, WEAPONS = 8;
+	/** What each strain forms: black every weapon but the palm and the axe; white blunt only; red blades only. */
+	static final int[] BLACK_WEAPONS = {MACE, SCYTHE, SPEAR, WHIP, HAMMER, HOOK};
+	static final int[] WHITE_WEAPONS = {MACE, PALM};
+	static final int[] RED_WEAPONS = {SCYTHE, SPEAR, AXE};
 	/** How far the arm reaches (blocks from the eyes), and the slack the server allows on the client's pick. */
 	public static final double REACH = 6.0, REACH_SLACK = 1.5;
 	/** The whip-blade and the hook claw reach further than the rest (blocks from the eyes). */
@@ -70,8 +78,8 @@ public final class WebMorph {
 	public static final int COURSE_TICKS = 8, COLLECT_TICKS = 13, FORMED_TICKS = 18, CHARGE_MAX_TICKS = 600;
 	/** Ticks after a strike starts before the next one (a little past {@link #HIT}, so they chain arm over arm). */
 	public static final int COOLDOWN = 12;
-	/** Damage by weapon: mace, scythe, spear, whip-blade, hammer-fist, hook claw. */
-	static final float[] DAMAGE = {10.0F, 8.0F, 9.0F, 7.0F, 9.0F, 6.0F};
+	/** Damage by weapon: mace, scythe, spear, whip-blade, hammer-fist, hook claw, palm, axe. */
+	static final float[] DAMAGE = {10.0F, 8.0F, 9.0F, 7.0F, 9.0F, 6.0F, 5.0F, 11.0F};
 	/** Mace and spear wear armour this many times harder than the blow alone would. */
 	static final float ARMOR_WEAR = 4.0F;
 	/** The spear goes through armour: this share of its damage is dealt again ignoring armour. */
@@ -83,6 +91,11 @@ public final class WebMorph {
 	/** The scythe sweeps through everything this close to its target, in front of you, for this share of its damage. */
 	static final double SCYTHE_SWEEP = 2.5;
 	static final float SCYTHE_SWEEP_SHARE = 0.6F;
+	/** The palm (white): a flat open-hand shove, this hard (b/t) and this far up; it breaks nothing. */
+	static final double PALM_SHOVE = 1.8, PALM_LIFT = 0.4;
+	/** The axe (red): a heavy chop, this chance to take off the limb it lands on (before the red x1.5), this knockback. */
+	static final float AXE_SEVER = 0.35F;
+	static final double AXE_KNOCK = 0.8;
 	/** Knockback: mace (and up), scythe (sideways along the sweep), spear (straight back). */
 	static final double MACE_KNOCK = 0.9, MACE_LIFT = 0.45, SCYTHE_KNOCK = 0.7, SPEAR_KNOCK = 1.3;
 
@@ -290,10 +303,15 @@ public final class WebMorph {
 		if (now < live.readyAt) {
 			return;
 		}
+		int[] pool = switch (WebSymbioteStrains.of(player)) {
+			case WHITE -> WHITE_WEAPONS;
+			case RED -> RED_WEAPONS;
+			default -> BLACK_WEAPONS;
+		};
 		int weapon;
 		do {
-			weapon = player.getRandom().nextInt(WEAPONS);
-		} while (weapon == live.lastWeapon);
+			weapon = pool[player.getRandom().nextInt(pool.length)];
+		} while (weapon == live.lastWeapon && pool.length > 1);
 		live.lastWeapon = weapon;
 		live.side = -live.side;
 		live.pending = NONE;
@@ -412,7 +430,7 @@ public final class WebMorph {
 			// the arm swells and splits into its shape
 			sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.7F + 0.15F * charge.weapon());
 		} else if (t == FORMED_TICKS) {
-			boolean heavy = charge.weapon() == MACE || charge.weapon() == HAMMER;
+			boolean heavy = charge.weapon() == MACE || charge.weapon() == HAMMER || charge.weapon() == AXE;
 			sound(level, player, heavy ? SoundEvents.ANVIL_PLACE : SoundEvents.TRIDENT_RETURN, 0.5F, heavy ? (charge.weapon() == HAMMER ? 0.4F : 0.5F) : 0.8F);
 			if (charge.weapon() == WHIP || charge.weapon() == HOOK) {
 				sound(level, player, SoundEvents.CHAIN_PLACE, 0.6F, charge.weapon() == WHIP ? 1.2F : 0.8F);
@@ -427,7 +445,9 @@ public final class WebMorph {
 	/** It lands: each weapon its own way. */
 	private static void land(ServerPlayer player, ServerLevel level, Morph morph, LivingEntity target) {
 		int weapon = morph.weapon();
-		float damage = DAMAGE[weapon];
+		boolean red = WebSymbioteStrains.of(player) == WebSymbioteStrain.RED;
+		float damage = DAMAGE[Mth.clamp(weapon, 0, DAMAGE.length - 1)] * (red ? WebSymbioteStrains.RED_BLADE_DAMAGE : 1.0F);
+		float sever = red ? WebSymbioteStrains.RED_SEVER : 1.0F;
 		Vec3 away = away(player, target);
 		Vec3 at = target.getBoundingBox().getCenter();
 		DamageSource source = level.damageSources().playerAttack(player);
@@ -446,13 +466,13 @@ public final class WebMorph {
 			}
 			case SCYTHE -> {
 				Vec3 right = new Vec3(-away.z, 0.0, away.x).scale(morph.side());
-				Dismember.cut(player, target, part, SCYTHE_SEVER, () -> blow(target, level, source, damage));
+				Dismember.cut(player, target, part, SCYTHE_SEVER * sever, () -> blow(target, level, source, damage));
 				push(target, right.scale(-SCYTHE_KNOCK).add(away.scale(0.3)).add(0.0, 0.25, 0.0));
 				// the sweep carries on through what's beside it
 				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(SCYTHE_SWEEP),
 					e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof Player p && p.isCreative())
 						&& e.position().subtract(player.position()).horizontal().dot(player.getLookAngle().horizontal()) > 0.0)) {
-					Dismember.cut(player, other, Dismember.aimedPart(player, other), SCYTHE_SEVER * 0.5F,
+					Dismember.cut(player, other, Dismember.aimedPart(player, other), SCYTHE_SEVER * 0.5F * sever,
 						() -> blow(other, level, source, damage * SCYTHE_SWEEP_SHARE));
 					push(other, right.scale(-SCYTHE_KNOCK * 0.6).add(0.0, 0.2, 0.0));
 				}
@@ -464,6 +484,28 @@ public final class WebMorph {
 			case WHIP -> whip(player, level, target, damage, source);
 			case HAMMER -> hammer(player, level, target, damage, source, away);
 			case HOOK -> hook(player, level, target, damage, source);
+			case PALM -> {
+				// flat and open: a shove that sends it reeling, nothing broken
+				blow(target, level, source, damage);
+				push(target, away.scale(PALM_SHOVE).add(0.0, PALM_LIFT, 0.0));
+				level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 10, 0.25, 0.25, 0.25, 0.08);
+				level.sendParticles(WebSymbiote.dust(1.4F), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.05);
+				sound(level, target, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.1F, 0.7F);
+				sound(level, target, SoundEvents.SLIME_SQUISH, 0.8F, 0.6F);
+				com.jaymospowers.core.Shakes.send(player, 0.6F, at);
+			}
+			case AXE -> {
+				// a heavy chop: through armour's edge, and it takes limbs
+				target.hurtArmor(source, damage * ARMOR_WEAR * 0.5F);
+				Dismember.cut(player, target, part, AXE_SEVER * sever, () -> slash(target, level, source, damage));
+				push(target, away.scale(AXE_KNOCK).add(0.0, 0.2, 0.0));
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.2, 0.3, 0.2, 0.3);
+				level.sendParticles(WebSymbiote.dust(1.3F), at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.05);
+				sound(level, target, SoundEvents.PLAYER_ATTACK_STRONG, 1.1F, 0.6F);
+				sound(level, target, SoundEvents.ANVIL_LAND, 0.3F, 1.3F);
+				com.jaymospowers.core.Shakes.send(player, 0.8F, at);
+			}
 			default -> {
 				float before = target.getHealth();
 				blow(target, level, source, damage * (1.0F - SPEAR_PIERCE));
@@ -589,6 +631,16 @@ public final class WebMorph {
 		sound(level, target, SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 0.6F);
 		sound(level, target, SoundEvents.CHAIN_BREAK, 0.6F, 0.8F);
 		com.jaymospowers.core.Shakes.send(player, 0.5F, at);
+	}
+
+	/** {@code target} bleeds {@code hits} drops, as from the hook claw (the red strain's blade burst). */
+	static void bleed(ServerPlayer player, LivingEntity target, int hits) {
+		if (!target.isAlive() || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return;
+		}
+		Live live = live(player);
+		live.bleeds.removeIf(b -> b[0] == target.getId());
+		live.bleeds.add(new long[] {target.getId(), player.level().getGameTime() + BLEED_EVERY, hits});
 	}
 
 	/** The hook claw's wounds: a drop of damage now and then, dripping red, until they've bled out (or it died). */

@@ -71,6 +71,8 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 	@Override
 	public void extractRenderState(WebSymbioteBlob blob, State state, float partialTicks) {
 		super.extractRenderState(blob, state, partialTicks);
+		// its strain's colours (WebBehemothClient.extract puts this on every entity too; a blob always needs it)
+		WebStrainLook.extract(blob, state);
 		Vec3 body = blob.getPosition(partialTicks);
 		// how far it actually moved this tick (a mob's velocity isn't kept on clients)
 		Vec3 motion = new Vec3(blob.getX() - blob.xo, 0.0, blob.getZ() - blob.zo);
@@ -144,7 +146,7 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 		// it leans and bulges the way it's hauling itself
 		Vec3 lean = state.moving ? state.heading.scale(0.08) : Vec3.ZERO;
 		Vec3 center = new Vec3(lean.x, BODY_HEIGHT * 0.95, lean.z);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebLineRenderer.TENDRIL_TEXTURE), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebLineRenderer.TENDRIL_TEXTURE, state)), (pose, buffer) -> {
 			body(buffer, pose, center, time, state.moving ? 1.6F : 1.0F, light);
 			for (int i = 0; i < LEGS; i++) {
 				Vec3 tip = state.feet[i];

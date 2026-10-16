@@ -193,10 +193,12 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		// rooted to the torso, so they lean with a crouch (or the hunch)
 		WebFeral.applyModel(this.getParentModel(), state);
 		this.getParentModel().body.translateAndRotate(poseStack);
-		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
-			state.outlineColor);
-		if (tendrils.combo() == WebTendrilCombos.BARRAGE) {
-			blades(this.model, state, poseStack, collector, state.lightCoords);
+		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
+			OverlayTexture.NO_OVERLAY, state.outlineColor);
+		// (the red strain's tendrils always end in hooked blades)
+		boolean red = WebStrainLook.of(state) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
+		if (tendrils.combo() == WebTendrilCombos.BARRAGE || red) {
+			blades(this.model, state, poseStack, collector, state.lightCoords, red);
 		}
 		heads(this.model, state, poseStack, collector, state.lightCoords);
 		poseStack.popPose();
@@ -229,7 +231,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		net.minecraft.world.phys.Vec3 way = new net.minecraft.world.phys.Vec3(dir.x, dir.y, dir.z);
 		WebMorphLayer.Strike s = model.weaponStrike;
 		float grow = model.weaponGrow * MORPH_HEAD_SCALE;
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE),
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)),
 			(pose, buffer) -> WebMorphLayer.weapon(buffer, pose, s, at, way, grow, light));
 	}
 
@@ -237,12 +239,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	 * Barrage: each stabbing tendril's tip hardens into a blade (the pose stack in body space). Turn about, a long spear
 	 * point with barbs swept back, or a hooked blade curving over like a claw, its inner edge pale.
 	 */
-	private static void blades(TendrilModel model, AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light) {
+	private static void blades(TendrilModel model, AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light,
+		boolean always) {
 		model.setupAnim(state);
 		java.util.List<net.minecraft.world.phys.Vec3[]> tips = new java.util.ArrayList<>();
 		java.util.List<Integer> kinds = new java.util.ArrayList<>();
 		for (int t = 0; t < ROOTS.length; t++) {
-			if (!model.stabbing[t] || !model.parts[t][0].visible) {
+			if (!model.stabbing[t] && !always || !model.parts[t][0].visible) {
 				continue;
 			}
 			// walk the chain to its tip (in body space, blocks): where it ends, the way it points, and its "up"
@@ -257,12 +260,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			org.joml.Vector3f up = m.transformDirection(new org.joml.Vector3f(0.0F, -1.0F, 0.0F)).normalize();
 			tips.add(new net.minecraft.world.phys.Vec3[] {new net.minecraft.world.phys.Vec3(end.x, end.y, end.z) .scale(16.0),
 				new net.minecraft.world.phys.Vec3(dir.x, dir.y, dir.z), new net.minecraft.world.phys.Vec3(up.x, up.y, up.z)});
-			kinds.add(t % 2);
+			// (the red strain's, out all the time, are hooked: a spear point only while stabbing)
+			kinds.add(always && !model.stabbing[t] ? 1 : t % 2);
 		}
 		if (tips.isEmpty()) {
 			return;
 		}
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 			for (int i = 0; i < tips.size(); i++) {
 				net.minecraft.world.phys.Vec3[] tip = tips.get(i);
 				blade(buffer, pose, tip[0], tip[1], tip[2], kinds.get(i), light);
@@ -337,11 +341,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		own.setData(WebMorphLayer.KEY, strike == null ? null : new WebMorphLayer.Strike(strike.weapon(), strike.side(), strike.age(),
 			strike.aimYaw() - avatar.yRot * Mth.DEG_TO_RAD, strike.aimPitch() - avatar.xRot * Mth.DEG_TO_RAD, strike.reach(), strike.tendril()));
 		own.setData(WebMorphLayer.GATHER, avatar.getData(WebMorphLayer.GATHER));
+		own.setData(WebStrainLook.STRAIN, avatar.getData(WebStrainLook.STRAIN));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
 		poseStack.scale(-FP_SCALE, -FP_SCALE, FP_SCALE);
-		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), avatar.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, avatar)), avatar.lightCoords,
+			OverlayTexture.NO_OVERLAY, 0);
 		heads(firstPersonModel, own, poseStack, collector, avatar.lightCoords);
 		poseStack.popPose();
 	}
@@ -363,10 +369,12 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		own.ageInTicks = state.ageInTicks;
 		own.walkAnimationPos = state.walkAnimationPos;
 		own.walkAnimationSpeed = state.walkAnimationSpeed;
+		own.setData(WebStrainLook.STRAIN, state.getData(WebStrainLook.STRAIN));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, rootY / 16.0F, rootZ / 16.0F);
 		poseStack.scale(size, size, size);
-		collector.submitModel(mobModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, state.outlineColor);
+		collector.submitModel(mobModel, own, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), light, OverlayTexture.NO_OVERLAY,
+			state.outlineColor);
 		poseStack.popPose();
 	}
 
@@ -585,7 +593,9 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.tethers() == null) {
 					// stabbing, over and over: the free tendrils take turns, one stab a beat, cocked back then driven
 					// straight into it; the rest wait poised, half drawn back
-					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE;
+					// (the red strain stabs faster)
+					float beat = state.ageInTicks / (WebStrainLook.of(state) == com.jaymospowers.power.web.WebSymbioteStrain.RED
+						? com.jaymospowers.power.web.WebSymbioteStrains.RED_BARRAGE_EVERY : WebTendrilCombos.BARRAGE_CYCLE);
 					int[] free = legs == null ? BARRAGE_FREE : BARRAGE_FREE_WALKING;
 					boolean turn = t == free[Math.floorMod(Mth.floor(beat), free.length)];
 					float p = beat - Mth.floor(beat);
@@ -801,7 +811,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				float wy = ay, wp = ap, wc = 0.0F, wcy = 0.0F, wl = length;
 				float iy = ay, ip = ap, ic = 0.0F, icy = 0.0F, il = reach;
 				switch (weapon) {
-					case WebMorph.MACE -> {
+					case WebMorph.MACE, WebMorph.AXE -> {
 						wp = SLAM_HIGH;
 						wc = CURL_REARED;
 						ip = ap - SLAM_DIP;
@@ -880,7 +890,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					curlY = icy;
 					len = il;
 					switch (weapon) {
-						case WebMorph.MACE -> pitch -= 0.2F * follow;
+						case WebMorph.MACE, WebMorph.AXE -> pitch -= 0.2F * follow;
 						case WebMorph.WHIP -> pitch -= 0.25F * follow;
 						case WebMorph.HAMMER -> pitch += 0.35F * follow;
 						case WebMorph.SCYTHE -> yaw -= side * 0.5F * follow;

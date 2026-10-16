@@ -1420,3 +1420,49 @@ derivatives) and has no public source, so nothing was ported: these are our own 
   protection and Kingdoms' crime rules apply; `RIP_COOLDOWN` 1 s).
 - **Burns:** a swing web or Yank lead running through fire, lava or a lit campfire, or stuck to a burning creature,
   burns through and lets go (checked every `BURN_EVERY` 5 ticks).
+
+## Symbiote strains (0.13.0)
+Track A of `docs/Strains-Plan.md`: two more symbiotes besides the black one. All our own code and art (the textures
+come from `tools/gen_web_strains.py`, run with `python3 -I`); no names from anyone else's comics in game text.
+- **The strain (`WebSymbioteStrain`, not `WebStrain`):** BLACK 0, WHITE 1, RED 2, saved as `strain` in
+  `WebSymbioteState` (saved and synced; an old save with no field loads as black). A roaming blob's or a host mob's
+  strain is the `WebSymbioteStrains.KIND` attachment (saved, synced to everyone), carried from blob to host to blob as it
+  moves. Its lines live under `say.<strain>.<act>.1-3` and `see.<strain>.<topic>.1-3` (`WebSymbioteStrain.lines()`).
+  The whispers take the strain's colour (`WebSymbioteStrains.voice`).
+- **Purification (black to white):** only during a takeover. A Wind user's Zephyr's Breath on the taken-over slinger
+  fills the wind half of its purity (`PURITY_ZEPHYR` 25); each heal tick of a Chrono user's Time Bloom fills the time
+  half (`PURITY_BLOOM` 5). Each half holds `PURITY_HALF` 50 and fades `PURITY_DECAY` 1 every `PURITY_DECAY_TICKS` 200.
+  Both full: the takeover ends, the black boils off in pale flakes, it's white for good, and both healers are told
+  ("Something in it went quiet."). Healing outside a takeover does nothing; the red one mid-takeover only gets angrier
+  (`RED_ANGER_STRESS` 4 stress). Hooks: one line each in `WindPower` (Zephyr loop) and `ChronoPower.bloomHealNearby`.
+  Purity isn't saved (it fades anyway).
+- **White:** blunt weapons (mace, open palm: `WebMorph.WHITE_WEAPONS`, `PALM_SHOVE` 1.8, `PALM_LIFT` 0.4). V fires a
+  Mending Shot instead of a Web Shot (`WebBall.mending()`: heals `MEND_SHOT_HEAL` 4 and clears Poison and Wither, no
+  harm, no cobweb). Spike Burst becomes Recoil: `RECOIL_SHARE` 0.5 of the damage, and players in range are healed
+  `RECOIL_HEAL` 4; the spikes are blunt nubs. It never hunts or goes on a spree (only monsters, and corpses when gorging),
+  and never rampages from neglect. Its takeovers mend: with someone within `MEND_RANGE` 16 under `MEND_BELOW` 80% health
+  (`MEND_CHANCE` 0.3 a check) it walks you over and fires Mending Shots (first after `MEND_FIRST_SHOT` 20 ticks, then
+  every `MEND_SHOT_EVERY` 30, from `MEND_SHOT_RANGE` 10). Each heart it heals costs `HEAL_SATIETY_COST` 1.5 satiety; at
+  none it lets go and sleeps for `DORMANT_TICKS` 6000 (the `ASLEEP` flag on top of the bond's dormancy; the menu says
+  so) unless you feed it a corpse with Consume.
+- **Red:** blades (scythe, spear and a new axe: `RED_WEAPONS`, damage x`RED_BLADE_DAMAGE` 1.25, severing
+  x`RED_SEVER` 1.5, `AXE_SEVER` 0.35), its tendrils always bladed, Barrage every `RED_BARRAGE_EVERY` 6 ticks, and
+  Spike Burst leaves everything bleeding (`RED_BURST_BLEED_HITS` 8). Takeover checks twice as often
+  (`RED_CHECK_DIVISOR` 2); each has `RED_HUNT_CHANCE` 0.1 to go for anything living, fed or not, and after a kill
+  `RED_CHAIN` 0.5 to stay in for the next. It rampages from neglect under `RED_NEGLECT_BOND` 40. It never feeds on
+  anything living either: kill, grab, carry, then feed.
+- **Red craters:** their own placed feature `web_red_crater` (rarity `RED_CRATER_RARITY` 1500), carved like the black
+  ones (`WebCraterFeature.carve` with a goo block) and lined with Red Ooze (`web_symbiote_red_goo`), which bonds you
+  to the red one. Loose, the red blob is aggressive: it goes for anything living within `RED_AGGRO_RANGE` 10, players
+  included, and takes any host it can (`RED_TAKE_CHANCE` 0.3); a red host mob fights like a hostile one.
+- **Rivals:** a red symbiote and a black or white one (bonded, loose or in a host) within `RIVAL_RANGE` 16 go for each
+  other: a bonded one takes the wheel to fight it (past its cooldown), blobs and hosts attack each other, and only a
+  rival's blows truly hurt a blob.
+- **Looks (client, `WebStrainLook`):** every symbiote texture has `_white` and `_red` twins (suit, hulk, flesh, mouth,
+  goo, tendril, veins); the strain goes on each entity's render state as it's extracted, and every layer and the web
+  lines (sheen, ropes, splats, wings, drips) pick its colours (`WHITE_LINE`, `RED_LINE`, `*_ROPE`).
+- **Debug:** `/powerdebug web symbiote strain <0-2>`, `symbiote blob <0-2>`, `crater red`.
+- **Files:** `WebSymbioteStrain`, `WebSymbioteStrains`, `WebRedCraterFeature` (new), with changes in `WebSymbiote`,
+  `WebSymbioteState`, `WebSymbioteBond`, `WebSymbioteBlob`, `WebInhabit`, `WebBehemoth`, `WebMorph`, `WebBall`,
+  `WebTendrilCombos`, `WebPower`, `WebSymbioteGooBlock`, `WebCraterFeature`, `WebDebugCommand`; client `WebStrainLook`
+  (new) and the symbiote layers, `WebLineRenderer`, `WebTendrilBundle`, `WebBlobRenderer`, `WebSymbioteScreen`.

@@ -10,6 +10,8 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web swung <blocks>}
  * and {@code /powerdebug web crater} (a crater, goo and all, right where you stand).
+ * Strains: {@code /powerdebug web symbiote strain <0-2>} (black, white, red), {@code /powerdebug web symbiote blob <0-2>}
+ * (a roaming one of that strain at your feet) and {@code /powerdebug web crater red}.
  */
 final class WebDebugCommand {
 	private WebDebugCommand() {
@@ -46,6 +48,22 @@ final class WebDebugCommand {
 								WebSymbioteBond.setDormant(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "ticks"));
 								return 1;
 							})))
+						// its strain: 0 black, 1 white, 2 red (WebSymbioteStrain)
+						.then(Commands.literal("strain")
+							.then(Commands.argument("strain", IntegerArgumentType.integer(0, WebSymbioteStrain.values().length - 1)).executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								WebSymbiote.setStrain(player, WebSymbioteStrain.of(IntegerArgumentType.getInteger(c, "strain")));
+								c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
+								return 1;
+							})))
+						// a roaming one of that strain, right here
+						.then(Commands.literal("blob")
+							.then(Commands.argument("strain", IntegerArgumentType.integer(0, WebSymbioteStrain.values().length - 1)).executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								WebSymbioteStrains.mark(WebSymbioteBlob.release(player.level(), player.position()),
+									WebSymbioteStrain.of(IntegerArgumentType.getInteger(c, "strain")));
+								return 1;
+							})))
 						.then(Commands.literal("reject").executes(c -> {
 							WebSymbiote.reject(c.getSource().getPlayerOrException());
 							return 1;
@@ -76,11 +94,19 @@ final class WebDebugCommand {
 								total, WebAscension.ASCEND_DISTANCE)), false);
 							return 1;
 						}))
-					.then(Commands.literal("crater").executes(c -> {
-						ServerPlayer player = c.getSource().getPlayerOrException();
-						boolean placed = WebCraterFeature.carve(player.level(), player.getRandom(), player.blockPosition().below(), false);
-						c.getSource().sendSuccess(() -> Component.literal(placed ? "crater placed" : "no crater"), false);
-						return placed ? 1 : 0;
-					})))));
+					.then(Commands.literal("crater")
+						.then(Commands.literal("red").executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							boolean placed = WebPower.RED_GOO != null
+								&& WebCraterFeature.carve(player.level(), player.getRandom(), player.blockPosition().below(), false, WebPower.RED_GOO);
+							c.getSource().sendSuccess(() -> Component.literal(placed ? "red crater placed" : "no crater"), false);
+							return placed ? 1 : 0;
+						}))
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							boolean placed = WebCraterFeature.carve(player.level(), player.getRandom(), player.blockPosition().below(), false);
+							c.getSource().sendSuccess(() -> Component.literal(placed ? "crater placed" : "no crater"), false);
+							return placed ? 1 : 0;
+						})))));
 	}
 }

@@ -418,7 +418,7 @@ final class WebHulk {
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
 		parent.head.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) ->
 			// out from between the jaws, riding down with the lower one (sliding back into the mouth as it's drawn in)
 			tongue(buffer, pose, new Vec3(0.0, 0.9 + Mth.sin(jawAngle) * 2.0, -3.0 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
 				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));

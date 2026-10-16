@@ -514,7 +514,8 @@ public final class WebTendrilCombos {
 			player.removeAttached(WebTendrils.COMBO);
 			return;
 		}
-		if (t == 0 || t % BARRAGE_EVERY != 0) {
+		int every = barrageEvery(player);
+		if (t == 0 || t % every != 0) {
 			return;
 		}
 		float ramp = Math.min(1.0F, t / (float)BARRAGE_RAMP_TICKS);
@@ -527,13 +528,18 @@ public final class WebTendrilCombos {
 			victim.getBbWidth() * 0.4, victim.getBbHeight() * 0.3, victim.getBbWidth() * 0.4, 0.0);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 0.7F + level.getRandom().nextFloat() * 0.4F);
-		if (t % (BARRAGE_EVERY * 2) == 0) {
+		if (t % (every * 2) == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.5F + ramp * 0.3F);
 		}
 		com.jaymospowers.core.Shakes.send(player, BARRAGE_SHAKE * (1.0F + ramp), at);
 		if (victim instanceof ServerPlayer struck) {
 			com.jaymospowers.core.Shakes.send(struck, TARGET_SHAKE * 0.5F, player.position());
 		}
+	}
+
+	/** Ticks between a barrage's stabs: the red strain stabs faster ({@link WebSymbioteStrains#RED_BARRAGE_EVERY}). */
+	public static int barrageEvery(net.minecraft.world.entity.player.Player player) {
+		return WebSymbioteStrains.of(player) == WebSymbioteStrain.RED ? WebSymbioteStrains.RED_BARRAGE_EVERY : BARRAGE_EVERY;
 	}
 
 	/** Which tendril holds this (-1: none). */

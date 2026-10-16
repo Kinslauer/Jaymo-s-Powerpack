@@ -170,12 +170,14 @@ final class WebTendrilBundle {
 		}
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		Vec3 camera = context.levelState().cameraRenderState.pos;
-		List<Draw> draws = new ArrayList<>();
+		// (grouped by strain: each draws in its own flesh, WebStrainLook)
+		java.util.Map<com.jaymospowers.power.web.WebSymbioteStrain, List<Draw>> byStrain = new java.util.EnumMap<>(com.jaymospowers.power.web.WebSymbioteStrain.class);
 		for (LivingEntity living : DRAWN) {
 			if (living.isRemoved() || living.level() != level || living.isInvisible()
 				|| living.getPosition(partial).distanceToSqr(camera) > 80.0 * 80.0) {
 				continue;
 			}
+			List<Draw> draws = byStrain.computeIfAbsent(com.jaymospowers.power.web.WebSymbioteStrains.of(living), k -> new ArrayList<>());
 			int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(living, partial);
 			if (living instanceof Player player) {
 				counter(draws, minecraft, level, player, partial, light);
@@ -185,14 +187,18 @@ final class WebTendrilBundle {
 				mob(draws, level, living, partial, light);
 			}
 		}
-		if (draws.isEmpty()) {
-			return;
-		}
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
-			for (Draw draw : draws) {
-				draw.run(buffer, pose, camera);
+		for (java.util.Map.Entry<com.jaymospowers.power.web.WebSymbioteStrain, List<Draw>> entry : byStrain.entrySet()) {
+			List<Draw> draws = entry.getValue();
+			if (draws.isEmpty()) {
+				continue;
 			}
-		});
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(),
+				RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, entry.getKey())), (pose, buffer) -> {
+					for (Draw draw : draws) {
+						draw.run(buffer, pose, camera);
+					}
+				});
+		}
 	}
 
 	@FunctionalInterface

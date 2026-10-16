@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
@@ -18,8 +19,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.SwingAnimation;
@@ -28,27 +32,38 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The hold combo (left mouse held, bare-handed): a run of punches and kicks thrown one after another on their own,
- * ending in a finisher that sends the foe flying. It grows with him ({@link #tier}): a fresh fighter throws three punches
- * and a palm strike; a seasoned one adds kicks, knees and spinning kicks, throws them faster and hits harder, up to a
- * ten-blow string ending in a flying double kick. Holding on, he starts again after a breath.
+ * The hold combo (left mouse held, bare-handed): a run of martial-arts blows thrown one after another on their own,
+ * ending in a finisher that sends the foe flying. It grows with him ({@link #tier}): a fresh fighter steps in with a jab,
+ * a reverse punch, an elbow and a chi palm; a seasoned one adds knees, sweeps, crescent, axe and spinning kicks, throws
+ * them faster and hits harder, up to a ten-blow string ending in the rising dragon fist. Holding on, he starts again
+ * after a breath.
  * <p>
- * Each blow is a real punch (the fists' damage, ki per punch, TP, mastery); between blows the foe is held reeling so the
- * string lands. Everyone sees the moves ({@link #MOVE}); the client draws them ({@code ZFighterComboPose}).
+ * Every blow is stepped into ({@link #STEP_IN}): a small real step toward the foe (or ahead, at nothing), never over a
+ * ledge; a foe a little out of reach gets a proper lunge. Each blow is a real punch (the fists' damage, ki per punch, TP,
+ * mastery); between blows the foe is held reeling so the string lands. The leg sweep trips it, the double palm shoves it
+ * back, knees pop it up. Everyone sees the moves ({@link #MOVE}); the client draws them ({@code ZFighterComboPose}), and
+ * shadowboxing ({@code Shadowbox}) practises the same set.
  */
 public final class ZFighterCombo {
-	/** The moves, in the order the client's pose table lists them. */
-	public static final int JAB = 0, CROSS = 1, HOOK = 2, UPPERCUT = 3, KNEE = 4, FRONT_KICK = 5, ROUNDHOUSE = 6, SPIN_KICK = 7,
-		AXE_KICK = 8, PALM = 9, DRAGON_KICK = 10;
-	public static final int MOVES = 11;
+	/**
+	 * The moves (the martial-arts set the client's pose table and shadowboxing share): the lead jab (a step in), the reverse
+	 * punch (hip turned through), the rear elbow, the chi palm (open-hand thrust, a puff of light), the rising knee, the
+	 * front snap kick, the roundhouse, the leg sweep (trips the foe), the crescent kick, the axe kick, the spinning back
+	 * kick, the spinning hook kick, the double palm (a heavy shove), the flying knee, the flying double kick and the rising
+	 * dragon fist (a jumping uppercut that lifts the foe high).
+	 */
+	public static final int JAB = 0, REVERSE_PUNCH = 1, ELBOW = 2, CHI_PALM = 3, RISING_KNEE = 4, FRONT_KICK = 5, ROUNDHOUSE = 6,
+		LEG_SWEEP = 7, CRESCENT_KICK = 8, AXE_KICK = 9, SPIN_BACK_KICK = 10, SPIN_HOOK_KICK = 11, DOUBLE_PALM = 12, FLYING_KNEE = 13,
+		FLYING_DOUBLE_KICK = 14, DRAGON_FIST = 15;
+	public static final int MOVES = 16;
 
 	/** Each tier's string, the last move its finisher. */
 	static final int[][] STRINGS = {
-		{JAB, CROSS, HOOK, PALM},
-		{JAB, CROSS, FRONT_KICK, ROUNDHOUSE, PALM},
-		{JAB, CROSS, KNEE, ROUNDHOUSE, AXE_KICK, SPIN_KICK},
-		{JAB, CROSS, HOOK, FRONT_KICK, ROUNDHOUSE, KNEE, UPPERCUT, SPIN_KICK},
-		{JAB, CROSS, HOOK, KNEE, FRONT_KICK, ROUNDHOUSE, AXE_KICK, UPPERCUT, SPIN_KICK, DRAGON_KICK},
+		{JAB, REVERSE_PUNCH, ELBOW, CHI_PALM},
+		{JAB, REVERSE_PUNCH, FRONT_KICK, ROUNDHOUSE, DOUBLE_PALM},
+		{JAB, REVERSE_PUNCH, RISING_KNEE, LEG_SWEEP, AXE_KICK, SPIN_BACK_KICK},
+		{JAB, REVERSE_PUNCH, ELBOW, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, CHI_PALM, SPIN_HOOK_KICK},
+		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, FLYING_DOUBLE_KICK, DRAGON_FIST},
 	};
 	/** Ticks a blow takes, by tier (the finisher takes {@link #FINISHER_LENGTH} times as long). */
 	static final int[] STEP_TICKS = {8, 7, 6, 5, 4};
@@ -60,19 +75,45 @@ public final class ZFighterCombo {
 	 * 1.5 fists a second at the start, 1.7 at the top, before kicks)...
 	 */
 	static final float[] HIT_SHARE = {0.6F, 0.52F, 0.45F, 0.4F, 0.34F};
-	/** ...times the move's own weight (punches 1, kicks harder). */
-	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.2F, 1.15F, 1.25F, 1.3F, 1.4F, 1.35F, 1.0F, 1.0F};
+	/** ...times the move's own weight (punches 1, kicks harder), in move order. */
+	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.0F, 1.15F, 1.25F, 1.3F, 1.15F, 1.25F, 1.35F, 1.4F, 1.4F, 1.1F, 1.3F, 1.35F, 1.2F};
 	/** The finisher hits for this many fists, by tier, and throws the foe this far (horizontal, up). */
 	static final float[] FINISHER_SHARE = {1.4F, 1.5F, 1.6F, 1.8F, 2.0F};
 	static final double[] FINISHER_PUSH = {1.4, 1.6, 1.9, 2.2, 2.7};
 	static final double[] FINISHER_LIFT = {0.4, 0.45, 0.5, 0.55, 0.7};
-	/** An uppercut pops the foe up this much. */
-	static final double UPPERCUT_LIFT = 0.42;
+	/** The rising dragon fist (a finisher) throws the foe mostly up: this far along, this high (about 5 blocks). */
+	static final double DRAGON_PUSH = 0.5;
+	static final double DRAGON_LIFT = 1.0;
+	/** Knees pop the foe up this much (the rising knee, the flying knee). */
+	static final double KNEE_LIFT = 0.3;
+	static final double FLYING_KNEE_LIFT = 0.25;
+	/** The leg sweep trips it: off its feet (popped up this much, its sliding stopped) and slowed hard this long. */
+	static final double SWEEP_POP = 0.22;
+	static final int SWEEP_TICKS = 20;
+	static final int SWEEP_SLOW = 4;
+	/** The double palm (mid-string) shoves the foe back this far and up; the next blow chases it. */
+	static final double PALM_SHOVE = 0.7;
+	static final double PALM_SHOVE_LIFT = 0.15;
 	/** Reach past his own interaction range, and how far he steps in after a foe a little out of reach. */
 	static final double REACH_BONUS = 0.3;
 	static final double LUNGE_RANGE = 2.5;
 	static final double LUNGE_SPEED = 0.28;
 	static final double LUNGE_PER_TIER = 0.05;
+	/**
+	 * The step into every blow, by move (blocks a tick added to his motion; on the ground that carries him about
+	 * {@link #STEP_PROBE} times as far: a fifth to a quarter of a block). Flying moves go further, through the air.
+	 */
+	static final double[] STEP_IN = {0.1, 0.08, 0.09, 0.1, 0.07, 0.06, 0.06, 0.04, 0.06, 0.07, 0.04, 0.05, 0.12, 0.08, 0.08, 0.1};
+	/** Closer than this (centre to the foe's edge) he doesn't step any more: the step is all in the hips. */
+	static final double STEP_MIN_GAP = 0.9;
+	/** A hop up into the flying knee and the flying double kick, and the dragon fist's jump (about 3/4 of a block). */
+	static final double HOP_FLYING = 0.25;
+	static final double HOP_DRAGON = 0.34;
+	/** How far ahead he looks for ground before a step (times the step), on the ground and for a hop. */
+	static final double STEP_PROBE = 2.5;
+	static final double HOP_PROBE = 5.0;
+	/** A step is only taken if there's ground ahead no more than this many blocks down. */
+	static final int LEDGE_DROP = 1;
 	/** How much of a struck foe's sliding is left between blows (it reels on the spot). */
 	static final double REEL = 0.15;
 	/** Food each blow costs. */
@@ -107,8 +148,13 @@ public final class ZFighterCombo {
 		return packed >>> 16;
 	}
 
+	/** Thrown with a leg (no hand swings in first person; a heavier sound). */
 	public static boolean kick(int move) {
-		return move == KNEE || move == FRONT_KICK || move == ROUNDHOUSE || move == SPIN_KICK || move == AXE_KICK || move == DRAGON_KICK;
+		return switch (move) {
+			case RISING_KNEE, FRONT_KICK, ROUNDHOUSE, LEG_SWEEP, CRESCENT_KICK, AXE_KICK, SPIN_BACK_KICK, SPIN_HOOK_KICK, FLYING_KNEE,
+				FLYING_DOUBLE_KICK -> true;
+			default -> false;
+		};
 	}
 
 	/** A string in progress. */
@@ -228,27 +274,65 @@ public final class ZFighterCombo {
 		run.serial = run.serial + 1 & 0x7FFF;
 		int move = string[step];
 		player.setAttached(MOVE, run.serial << 16 | Math.min(255, run.length) << 8 | move);
-		// the punching hand swings in first person too (kicks don't)
+		// the striking hand swings in first person too (kicks don't): the lead jab is the left
 		if (!kick(move)) {
-			InteractionHand hand = move == JAB || move == HOOK ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+			InteractionHand hand = move == JAB ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
 			player.swing(hand, SwingAnimation.DEFAULT, true);
 		}
-		// a step in after a foe just out of reach
+		travel(player, run, move);
+	}
+
+	/**
+	 * Every blow is stepped into: a little real travel toward the foe (or straight ahead, at nothing), a proper lunge
+	 * after a foe a little out of reach, a hop for the flying moves. Never over a ledge; in the air only the lunge.
+	 */
+	private static void travel(ServerPlayer player, Run run, int move) {
 		LivingEntity target = target(player, run);
+		boolean grounded = player.onGround();
+		double speed = grounded ? STEP_IN[move] : 0.0;
+		Vec3 dir;
 		if (target != null) {
+			Vec3 to = target.position().subtract(player.position());
+			dir = new Vec3(to.x, 0.0, to.z);
 			double reach = player.entityInteractionRange();
 			double gap = player.position().distanceTo(target.position()) - target.getBbWidth() * 0.5;
 			if (gap > reach * 0.6) {
-				Vec3 dir = target.position().subtract(player.position());
-				dir = new Vec3(dir.x, 0.0, dir.z);
-				if (dir.lengthSqr() > 1.0E-4) {
-					double speed = LUNGE_SPEED + LUNGE_PER_TIER * run.tier + (move == DRAGON_KICK ? 0.4 : 0.0);
-					dir = dir.normalize().scale(speed);
-					player.setDeltaMovement(player.getDeltaMovement().add(dir.x, move == DRAGON_KICK ? 0.15 : 0.0, dir.z));
-					player.syncVelocity = true;
-				}
+				speed = Math.max(speed, LUNGE_SPEED + LUNGE_PER_TIER * run.tier);
+			} else if (gap < STEP_MIN_GAP) {
+				speed = 0.0;
+			}
+		} else {
+			dir = Vec3.directionFromRotation(0.0F, player.getYRot());
+			dir = new Vec3(dir.x, 0.0, dir.z);
+		}
+		double hop = !grounded ? 0.0 : move == DRAGON_FIST ? HOP_DRAGON : move == FLYING_KNEE || move == FLYING_DOUBLE_KICK ? HOP_FLYING : 0.0;
+		if (dir.lengthSqr() < 1.0E-4) {
+			speed = 0.0;
+		} else {
+			dir = dir.normalize();
+		}
+		if (speed > 0.0 && grounded && !footing(player, dir, speed * (hop > 0.0 ? HOP_PROBE : STEP_PROBE) + player.getBbWidth() * 0.5)) {
+			speed = 0.0;
+		}
+		if (speed <= 0.0 && hop <= 0.0) {
+			return;
+		}
+		player.setDeltaMovement(player.getDeltaMovement().add(dir.x * speed, hop, dir.z * speed));
+		player.syncVelocity = true;
+	}
+
+	/** Ground to land on {@code ahead} blocks along {@code dir}: something solid underfoot there, at most a step down. */
+	private static boolean footing(ServerPlayer player, Vec3 dir, double ahead) {
+		ServerLevel level = player.level();
+		double x = player.getX() + dir.x * ahead;
+		double z = player.getZ() + dir.z * ahead;
+		for (int down = 0; down <= LEDGE_DROP; down++) {
+			BlockPos pos = BlockPos.containing(x, player.getY() - 0.5 - down, z);
+			if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) {
+				return true;
 			}
 		}
+		return false;
 	}
 
 	/** The blow lands (or whiffs) halfway through the move. */
@@ -278,8 +362,20 @@ public final class ZFighterCombo {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.8F, 1.0F);
 			return;
 		}
+		if (move == CHI_PALM) {
+			chi(level, live, at, look, finisher);
+		}
 		if (finisher) {
-			ZFighterKi.push(target, look, FINISHER_PUSH[run.tier], FINISHER_LIFT[run.tier]);
+			if (move == DRAGON_FIST) {
+				// up off the rising fist: its sliding stopped, then thrown high
+				Vec3 motion = target.getDeltaMovement();
+				target.setDeltaMovement(motion.x * REEL, Math.max(0.0, motion.y), motion.z * REEL);
+				ZFighterKi.push(target, look, DRAGON_PUSH, DRAGON_LIFT);
+				level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y + 0.8, at.z, 20, 0.15, 1.0, 0.15, 0.05);
+				level.sendParticles(ParticleTypes.CLOUD, true, false, player.getX(), player.getY() + 0.1, player.getZ(), 8, 0.4, 0.05, 0.4, 0.05);
+			} else {
+				ZFighterKi.push(target, look, FINISHER_PUSH[run.tier], FINISHER_LIFT[run.tier]);
+			}
 			level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y, at.z, 16 + 4 * run.tier, 0.3, 0.3, 0.3, 0.2);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
@@ -288,9 +384,26 @@ public final class ZFighterCombo {
 			run.target = null;
 			return;
 		}
-		// it reels where it stands, so the next blow lands; an uppercut pops it up
 		Vec3 motion = target.getDeltaMovement();
-		target.setDeltaMovement(motion.x * REEL, move == UPPERCUT ? UPPERCUT_LIFT : Math.min(motion.y, 0.1), motion.z * REEL);
+		if (move == LEG_SWEEP) {
+			// tripped: swept off its feet, its sliding stopped, slowed hard while it gets up
+			target.setDeltaMovement(motion.x * REEL, SWEEP_POP, motion.z * REEL);
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SWEEP_TICKS, SWEEP_SLOW, false, false), player);
+			if (target instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+			level.sendParticles(ParticleTypes.SWEEP_ATTACK, true, false, target.getX(), target.getY() + 0.2, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.8F);
+		} else if (move == DOUBLE_PALM) {
+			// a heavy shove: back it goes, and the next blow chases it
+			target.setDeltaMovement(motion.x * REEL, Math.min(motion.y, 0.1), motion.z * REEL);
+			ZFighterKi.push(target, look, PALM_SHOVE, PALM_SHOVE_LIFT);
+			level.sendParticles(ParticleTypes.CLOUD, true, false, at.x, at.y, at.z, 6, 0.2, 0.2, 0.2, 0.08);
+		} else {
+			// it reels where it stands, so the next blow lands; a knee pops it up
+			double lift = move == RISING_KNEE ? KNEE_LIFT : move == FLYING_KNEE ? FLYING_KNEE_LIFT : Math.min(motion.y, 0.1);
+			target.setDeltaMovement(motion.x * REEL, lift, motion.z * REEL);
+		}
 		target.syncVelocity = true;
 		level.sendParticles(ParticleTypes.CRIT, true, false, at.x, at.y, at.z, 4 + run.tier, 0.2, 0.2, 0.2, 0.25);
 		if (run.tier >= 3) {
@@ -299,6 +412,14 @@ public final class ZFighterCombo {
 		level.playSound(null, at.x, at.y, at.z, kick(move) ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS,
 			0.8F, 0.9F + 0.08F * run.tier + level.getRandom().nextFloat() * 0.15F);
 		Shakes.send(player, HIT_SHAKE + HIT_SHAKE_PER_TIER * run.tier, at);
+	}
+
+	/** The chi palm's puff of light off the open hand (bigger as a finisher). */
+	private static void chi(ServerLevel level, ZFighterPower.Live live, Vec3 at, Vec3 look, boolean finisher) {
+		Vec3 puff = at.subtract(look.scale(0.4));
+		level.sendParticles(ParticleTypes.END_ROD, true, false, puff.x, puff.y, puff.z, finisher ? 14 : 6, 0.15, 0.15, 0.15, 0.06);
+		level.sendParticles(ZFighterPower.dust(live), true, false, puff.x, puff.y, puff.z, finisher ? 10 : 5, 0.2, 0.2, 0.2, 0.02);
+		level.playSound(null, puff.x, puff.y, puff.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, finisher ? 1.0F : 0.6F, 1.6F);
 	}
 
 	/** Who he's hitting: the foe he's been on if it's still in reach, else whatever is nearest in front of him. */

@@ -1,12 +1,15 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.power.zfighter.ZFighterCombo;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 /**
  * What a shadowboxer throws, and when (shared by the server's swishes and every client's pose, MeditatePose). He runs
- * through combos one after another with a breath between. The basic one is jab, cross, jab and a kick that alternates:
- * a high kick tipped at the hip, then a side kick. Six more unlock as he unlocks abilities ({@link #COMBOS_AT}).
+ * through combos one after another with a breath between. The basic one is a step-in jab, a reverse punch, a jab and a
+ * kick that alternates: a high kick tipped at the hip, then a side kick. Six more unlock as he unlocks abilities
+ * ({@link #COMBOS_AT}), drawn from the Z Fighter's martial-arts set ({@link ZFighterCombo}), so practice looks like the
+ * fight: those blows ({@link Step#art}) are drawn by ZFighterComboPose over MeditatePose.
  */
 public final class Shadowbox {
 	/** Ticks a beat: a punch takes one, a kick two. */
@@ -33,27 +36,51 @@ public final class Shadowbox {
 		}
 	}
 
+	/**
+	 * One blow of a combo: a shadowboxing move of its own ({@code art} -1), or a move of the martial-arts set
+	 * ({@code art}, a {@link ZFighterCombo} move) with a plain stand-in {@code move} for the swish and MeditatePose's
+	 * underlay (a jab for a hand, a knee for a leg: neither turns or tips the body).
+	 */
+	private record Beat(Move move, int art) {
+		int ticks() {
+			return art < 0 ? move.ticks() : artTicks(art);
+		}
+	}
+
+	private static Beat own(Move move) {
+		return new Beat(move, -1);
+	}
+
+	private static Beat art(int art) {
+		return new Beat(ZFighterCombo.kick(art) ? Move.REAR_KNEE : Move.JAB, art);
+	}
+
+	/** A martial-arts move's beats: kicks and the two heavy hand moves take two. */
+	private static int artTicks(int art) {
+		return ZFighterCombo.kick(art) || art == ZFighterCombo.DOUBLE_PALM || art == ZFighterCombo.DRAGON_FIST ? BEAT * 2 : BEAT;
+	}
+
 	/** The two basics: the kick alternates between them. */
-	private static final Move[] BASIC_HIP = {Move.JAB, Move.CROSS, Move.JAB, Move.HIP_KICK};
-	private static final Move[] BASIC_SIDE = {Move.JAB, Move.CROSS, Move.JAB, Move.SIDE_KICK};
-	/** The six that unlock, in order. */
-	private static final Move[][] UNLOCKS = {
-		{Move.JAB, Move.CROSS, Move.LEAD_HOOK, Move.LOW_KICK},
-		{Move.JAB, Move.JAB, Move.CROSS, Move.TEEP},
-		{Move.LEAD_HOOK, Move.REAR_UPPERCUT, Move.REAR_ELBOW, Move.REAR_KNEE},
-		{Move.CROSS, Move.LEAD_HOOK, Move.SPIN_BACK_KICK},
-		{Move.LEAD_UPPERCUT, Move.REAR_UPPERCUT, Move.LEAD_HIP_KICK, Move.AXE_KICK},
-		{Move.JAB, Move.LEAD_SIDE_KICK, Move.CROSS, Move.REAR_HOOK, Move.HIP_KICK},
+	private static final Beat[] BASIC_HIP = {art(ZFighterCombo.JAB), art(ZFighterCombo.REVERSE_PUNCH), art(ZFighterCombo.JAB), own(Move.HIP_KICK)};
+	private static final Beat[] BASIC_SIDE = {art(ZFighterCombo.JAB), art(ZFighterCombo.REVERSE_PUNCH), art(ZFighterCombo.JAB), own(Move.SIDE_KICK)};
+	/** The six that unlock, in order: the hold combo's strings in pieces. */
+	private static final Beat[][] UNLOCKS = {
+		{art(ZFighterCombo.JAB), art(ZFighterCombo.REVERSE_PUNCH), art(ZFighterCombo.ELBOW), art(ZFighterCombo.CHI_PALM)},
+		{art(ZFighterCombo.JAB), art(ZFighterCombo.REVERSE_PUNCH), art(ZFighterCombo.FRONT_KICK), art(ZFighterCombo.ROUNDHOUSE)},
+		{art(ZFighterCombo.RISING_KNEE), art(ZFighterCombo.LEG_SWEEP), art(ZFighterCombo.AXE_KICK)},
+		{art(ZFighterCombo.REVERSE_PUNCH), art(ZFighterCombo.ELBOW), art(ZFighterCombo.SPIN_BACK_KICK)},
+		{art(ZFighterCombo.CRESCENT_KICK), art(ZFighterCombo.SPIN_HOOK_KICK), art(ZFighterCombo.DOUBLE_PALM)},
+		{art(ZFighterCombo.JAB), art(ZFighterCombo.FLYING_KNEE), art(ZFighterCombo.FLYING_DOUBLE_KICK), art(ZFighterCombo.DRAGON_FIST)},
 	};
 
 	/** Playlists by combos unlocked (0-6): the hip-kick basic, half the unlocked, the side-kick basic, the rest. */
-	private static final Move[][][] PLAYLISTS = new Move[UNLOCKS.length + 1][][];
+	private static final Beat[][][] PLAYLISTS = new Beat[UNLOCKS.length + 1][][];
 	private static final int[] LENGTHS = new int[UNLOCKS.length + 1];
 
 	static {
 		for (int n = 0; n <= UNLOCKS.length; n++) {
 			int half = (n + 1) / 2;
-			Move[][] list = new Move[n + 2][];
+			Beat[][] list = new Beat[n + 2][];
 			int i = 0;
 			list[i++] = BASIC_HIP;
 			for (int c = 0; c < half; c++) {
@@ -65,18 +92,21 @@ public final class Shadowbox {
 			}
 			PLAYLISTS[n] = list;
 			int length = 0;
-			for (Move[] combo : list) {
+			for (Beat[] combo : list) {
 				length += BEAT;
-				for (Move move : combo) {
-					length += move.ticks();
+				for (Beat beat : combo) {
+					length += beat.ticks();
 				}
 			}
 			LENGTHS[n] = length;
 		}
 	}
 
-	/** The move being thrown, {@code into} ticks in out of {@code length}; a null move is the breath between combos. */
-	public record Step(@Nullable Move move, int into, int length) {
+	/**
+	 * The move being thrown, {@code into} ticks in out of {@code length}; a null move is the breath between combos.
+	 * {@code art} is the martial-arts move it really is ({@link ZFighterCombo}'s numbering), or -1 for a move of its own.
+	 */
+	public record Step(@Nullable Move move, int into, int length, int art) {
 		public float progress(float partialTicks) {
 			return Mth.clamp((into + partialTicks) / (float)length, 0.0F, 1.0F);
 		}
@@ -94,18 +124,18 @@ public final class Shadowbox {
 	public static Step step(long ticks, int combos) {
 		int n = Mth.clamp(combos, 0, UNLOCKS.length);
 		int t = (int)Math.floorMod(ticks, (long)LENGTHS[n]);
-		for (Move[] combo : PLAYLISTS[n]) {
+		for (Beat[] combo : PLAYLISTS[n]) {
 			if (t < BEAT) {
-				return new Step(null, t, BEAT);
+				return new Step(null, t, BEAT, -1);
 			}
 			t -= BEAT;
-			for (Move move : combo) {
-				if (t < move.ticks()) {
-					return new Step(move, t, move.ticks());
+			for (Beat beat : combo) {
+				if (t < beat.ticks()) {
+					return new Step(beat.move(), t, beat.ticks(), beat.art());
 				}
-				t -= move.ticks();
+				t -= beat.ticks();
 			}
 		}
-		return new Step(null, 0, BEAT);
+		return new Step(null, 0, BEAT, -1);
 	}
 }
