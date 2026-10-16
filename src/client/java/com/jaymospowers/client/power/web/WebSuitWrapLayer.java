@@ -103,7 +103,7 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			poseStack.pushPose();
 			parent.root().translateAndRotate(poseStack);
 			parts[i].translateAndRotate(poseStack);
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 				if (thick > 0.05F) {
 					for (int k = 0; k < STRANDS * (hulk ? 2 : 1); k++) {
 						strand(buffer, pose, box, part, k, wrap, thick, time, hulk, state.lightCoords);
@@ -147,7 +147,7 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			poseStack.pushPose();
 			parent.root().translateAndRotate(poseStack);
 			parts[i].translateAndRotate(poseStack);
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 				for (int k = 0; k < STRANDS * (big ? 2 : 1); k++) {
 					strand(buffer, pose, box, part, k, wrap, thick, time, big, state.lightCoords);
 				}
@@ -181,7 +181,7 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			poseStack.pushPose();
 			parent.root().translateAndRotate(poseStack);
 			parts[i].translateAndRotate(poseStack);
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 				// the strands reach from the joint past the torn edge, over the bare part (as far as it's bared)
 				float wrap = Mth.clamp(cover + peel * 0.8F, 0.0F, 1.0F);
 				for (int k = 0; k < STRANDS; k++) {

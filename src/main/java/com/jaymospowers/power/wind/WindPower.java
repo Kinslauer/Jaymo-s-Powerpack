@@ -797,6 +797,8 @@ public final class WindPower implements Power {
 					target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, fall, 0), player);
 					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regen, regenAmp), player);
 					com.jaymospowers.core.Fractures.startMend(target, com.jaymospowers.core.Fractures.ZEPHYR_MEND);
+					// a symbiote mid-takeover feels the breath (WebSymbioteStrains: purifying)
+					com.jaymospowers.power.web.WebSymbioteStrains.purifyHeal(player, target, com.jaymospowers.power.web.WebSymbioteStrains.Half.WIND);
 					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + 1.0, target.getZ(), 10, 0.4, 0.6, 0.4, 0.0);
 					level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.2, target.getZ(), 8, 0.4, 0.1, 0.4, 0.03);
 				}

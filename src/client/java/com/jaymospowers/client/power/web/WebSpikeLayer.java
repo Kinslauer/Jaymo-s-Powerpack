@@ -27,6 +27,9 @@ import org.jspecify.annotations.Nullable;
  * both legs), each straight out from where it roots, a sea urchin of them, held a moment and then sucked back in. The
  * roar throws the same burst out as it lands. Each body part's spikes ride that part, so they follow the braced pose.
  * Everyone sees them; your own head's aren't drawn from your own eyes.
+ * <p>
+ * The white strain's Recoil throws out the same burst as short, thick, rounded white nubs ({@link #NUB_LENGTH},
+ * {@link #NUB_THICK}); the red strain's are red ({@link WebStrainLook}).
  */
 final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
@@ -56,6 +59,8 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final float SHOOT_TICKS = 2.0F, STAGGER = 1.5F, RETRACT_AT = 8.0F;
 	/** Held out, they thrum this much (thickness). */
 	private static final float THRUM = 0.08F;
+	/** Recoil's nubs (the white strain): this share of a spike's length, this many times as thick. */
+	private static final float NUB_LENGTH = 0.16F, NUB_THICK = 1.7F;
 
 	private final SpikeModel[] models = new SpikeModel[COUNTS.length];
 
@@ -151,8 +156,8 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			}
 			poseStack.pushPose();
 			parts[part].translateAndRotate(poseStack);
-			collector.submitModel(this.models[part], state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
-				state.outlineColor);
+			collector.submitModel(this.models[part], state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
+				OverlayTexture.NO_OVERLAY, state.outlineColor);
 			poseStack.popPose();
 		}
 	}
@@ -189,6 +194,9 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			}
 			// the whole spike, at length 1, is this long (blocks): stretched along itself to reach
 			float chain = ((TAPER.length - 1) * (SECTION - 0.2F) + SECTION) / 16.0F;
+			// (the white strain's Recoil: short, thick nubs instead)
+			boolean nubs = WebStrainLook.of(state) == com.jaymospowers.power.web.WebSymbioteStrain.WHITE;
+			float length = nubs ? NUB_LENGTH : 1.0F, girth = nubs ? NUB_THICK : 1.0F;
 			for (int i = 0; i < this.spikes.length; i++) {
 				float age = at - this.delay[i];
 				// out like a shot, held (thrumming), then drawn back in smoothly
@@ -198,10 +206,10 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				spike.visible = out > 0.01F;
 				// a touch of overshoot as it lands full length
 				float kick = age > SHOOT_TICKS && age < SHOOT_TICKS + 2.0F ? 0.06F * Mth.sin((age - SHOOT_TICKS) / 2.0F * Mth.PI) : 0.0F;
-				spike.zScale = Math.max(0.02F, out * (1.0F + kick) * REACH * this.reach[i] / chain);
+				spike.zScale = Math.max(0.02F, out * (1.0F + kick) * REACH * this.reach[i] / chain * length);
 				float thick = (0.6F + 0.4F * out) * (1.0F + THRUM * Mth.sin(state.ageInTicks * 2.7F + i * 1.3F) * (age < RETRACT_AT ? 1.0F : 0.0F));
-				spike.xScale = thick;
-				spike.yScale = thick;
+				spike.xScale = thick * girth;
+				spike.yScale = thick * girth;
 			}
 		}
 	}

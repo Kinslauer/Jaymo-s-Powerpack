@@ -53,6 +53,8 @@ public final class WebSymbioteHand {
 		ModelPart sleeve = arm == source.rightArm ? suit.rightArm : suit.leftArm;
 		sleeve.loadPose(arm.storePose());
 		sleeve.visible = true;
-		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+		// (in its strain's colours: WebStrainLook)
+		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, com.jaymospowers.power.web.WebSymbioteStrains.of(player))),
+			light, OverlayTexture.NO_OVERLAY, null);
 	}
 }

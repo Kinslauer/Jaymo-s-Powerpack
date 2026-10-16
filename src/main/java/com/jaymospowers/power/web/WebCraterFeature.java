@@ -50,6 +50,11 @@ public record WebCraterFeature() implements Feature {
 	 * heightmaps); otherwise (the debug command) it's carved where it's asked, into natural ground only.
 	 */
 	public static boolean carve(WorldGenLevel level, RandomSource random, BlockPos origin, boolean worldgen) {
+		return carve(level, random, origin, worldgen, WebPower.GOO);
+	}
+
+	/** The same, with {@code goo} in the middle (the red symbiote's craters: {@link WebRedCraterFeature}). */
+	public static boolean carve(WorldGenLevel level, RandomSource random, BlockPos origin, boolean worldgen, Block goo) {
 		double radius = MIN_RADIUS + random.nextDouble() * (MAX_RADIUS - MIN_RADIUS);
 		int cx = origin.getX();
 		int cz = origin.getZ();
@@ -143,7 +148,7 @@ public record WebCraterFeature() implements Feature {
 			}
 		}
 		p.set(cx, centerFloor + 1, cz);
-		level.setBlock(p, WebPower.GOO.defaultBlockState(), flags);
+		level.setBlock(p, goo.defaultBlockState(), flags);
 		return true;
 	}
 

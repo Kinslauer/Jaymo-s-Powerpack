@@ -79,12 +79,14 @@ public final class WebBehemothClient {
 
 	/** From EntityRenderer.extractRenderState: marks a behemoth or a ridden mob for its suit layer, with its back tendrils. */
 	public static void extract(Entity entity, EntityRenderState state) {
+		// (every entity's symbiote strain, players' too: WebStrainLook)
+		WebStrainLook.extract(entity, state);
 		boolean behemoth = entity.hasAttached(WebBehemoth.HOST);
 		boolean inhabited = com.jaymospowers.power.web.WebInhabit.isHost(entity);
 		state.setData(HOST, behemoth ? Boolean.TRUE : null);
 		state.setData(INHABITED, inhabited ? Boolean.TRUE : null);
 		if ((behemoth || inhabited) && entity instanceof LivingEntity host && host.isAlive()) {
-			state.setData(MOB_TENDRILS, tendrils(host, behemoth || host instanceof net.minecraft.world.entity.monster.Enemy));
+			state.setData(MOB_TENDRILS, tendrils(host, behemoth || com.jaymospowers.power.web.WebInhabit.lashing(host)));
 		} else {
 			FIRST_SEEN.remove(entity);
 			state.setData(MOB_TENDRILS, null);
@@ -160,7 +162,7 @@ public final class WebBehemothClient {
 				return;
 			}
 			if (state.getData(INHABITED) != null) {
-				renderColoredCutoutModel(this.getParentModel(), GOO, poseStack, collector, lightCoords, state, -1, 1);
+				renderColoredCutoutModel(this.getParentModel(), WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			WebSymbioteClient.Tendrils tendrils = state.getData(MOB_TENDRILS);
 			if (tendrils != null) {
@@ -207,8 +209,8 @@ public final class WebBehemothClient {
 			if (state.getData(HOST) == null) {
 				return;
 			}
-			coloredCutoutModelCopyLayerRender(this.bulk, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-			Identifier frame = VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length];
+			coloredCutoutModelCopyLayerRender(this.bulk, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+			Identifier frame = WebStrainLook.texture(VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length], state);
 			coloredCutoutModelCopyLayerRender(this.veins, frame, poseStack, collector, lightCoords, state, -1, 1);
 		}
 	}

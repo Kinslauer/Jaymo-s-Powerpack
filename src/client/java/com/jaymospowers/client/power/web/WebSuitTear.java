@@ -260,7 +260,7 @@ public final class WebSuitTear {
 		long seed = state.id * 92821L;
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 			Vec3 across = at(body, 1.0F, 0.0F, 0.0F).subtract(at(body, 0.0F, 0.0F, 0.0F));
 			double width = STRIP_WIDTH * 8.0 / COLUMNS / 16.0 * 1.9 * (1.0 - gone), thick = STRIP_THICK / 16.0 * (1.0 - gone);
 			if (width > 1.0E-4) {
