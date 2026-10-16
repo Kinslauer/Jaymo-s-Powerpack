@@ -35,6 +35,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>V</b>: a gate is fixed where you aim (up to {@link #PLACE_RANGE} blocks), up to {@link #MAX_GATES}; another
  * replaces the oldest. Hold V ({@link #CLOSE_HOLD} ticks) aimed at one of your gates (within {@link #CLOSE_RADIUS}
  * blocks) and it closes.</li>
+ * <li><b>Sneak + V looking down</b>: your pocket's rift opens in front of you, as with Z; a gate fixed inside your
+ * pocket room is where it lets you in.</li>
  * <li><b>Sneak + V</b>: you step through to the gate you're aiming toward, from any distance and through anything in
  * between (the gate nearest your aim, in this dimension).</li>
  * <li><b>Hold Sneak + V with no gates</b>: a gate is cast out ahead of you, drifting forward (a body-sized outline shows
@@ -50,6 +52,8 @@ public final class ArsenalGates {
 	/** Holding V this long, aimed this close to one of your gates, closes it. */
 	static final double CLOSE_RADIUS = 1.5;
 	static final int CLOSE_HOLD = 12;
+	/** Sneak + V looking at least this far down opens the pocket's rift instead. */
+	static final float POCKET_PITCH = 70.0F;
 	/** The cast-out gate: blocks a tick, and the farthest it goes. */
 	static final double PROJECT_SPEED = 0.8, PROJECT_MAX = 32.0;
 	/** Between two steps through. */
@@ -114,6 +118,11 @@ public final class ArsenalGates {
 		}
 		ServerLevel level = player.level();
 		if (level.getGameTime() < READY_AT.getOrDefault(player.getUUID(), 0L)) {
+			return;
+		}
+		if (player.getXRot() >= POCKET_PITCH && ArsenalPower.INSTANCE.slotUnlocked(player, "mode")) {
+			// looking down into your pocket: its rift opens in front of you (onto your pocket gate, if you've fixed one there)
+			ArsenalPocket.toggle(player);
 			return;
 		}
 		Gate aimed = aimed(player);
@@ -228,7 +237,7 @@ public final class ArsenalGates {
 	}
 
 	/** The nearest spot at {@code at} the player fits: there, a little above, or a little below. */
-	private static @Nullable Vec3 fit(ServerPlayer player, ServerLevel level, Vec3 at) {
+	static @Nullable Vec3 fit(ServerPlayer player, ServerLevel level, Vec3 at) {
 		for (double dy : new double[] {0.0, 0.5, 1.0, 1.5, 2.0, 3.0, -0.5, -1.0, -2.0}) {
 			Vec3 spot = at.add(0.0, dy, 0.0);
 			AABB box = player.getDimensions(player.getPose()).makeBoundingBox(spot);

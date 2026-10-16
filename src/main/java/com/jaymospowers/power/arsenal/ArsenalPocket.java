@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.EnderChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Pocket Dimension (the idea of MavLeague's Pocket Dimension datapack, remade for Arsenal): every Arsenal user owns one
@@ -99,17 +100,21 @@ public final class ArsenalPocket {
 		final UUID owner;
 		final int room;
 		final boolean out;
+		/** Where it lets you into the room: the opener's void gate in there, or null for the usual spot by the door. */
+		final @Nullable Vec3 arrive;
 		final boolean voidRift;
 		final long opened;
 		long until;
 
-		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, boolean voidRift, long opened, long until) {
+		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, @Nullable Vec3 arrive, boolean voidRift,
+			long opened, long until) {
 			this.dimension = dimension;
 			this.pos = pos;
 			this.yaw = yaw;
 			this.owner = owner;
 			this.room = room;
 			this.out = out;
+			this.arrive = arrive;
 			this.voidRift = voidRift;
 			this.opened = opened;
 			this.until = until;
@@ -212,7 +217,8 @@ public final class ArsenalPocket {
 		boolean out = level.dimension() == POCKET;
 		int room = out ? roomAt(player.blockPosition()) : room(player);
 		Vec3 at = riftSpot(player);
-		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, ArsenalVoid.isVoid(player), level.getGameTime(),
+		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, out ? null : pocketGate(player, room),
+			ArsenalVoid.isVoid(player), level.getGameTime(),
 			level.getGameTime() + RIFT_TICKS));
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
@@ -244,7 +250,17 @@ public final class ArsenalPocket {
 		return room;
 	}
 
-	private static void enter(ServerPlayer player, int room) {
+	/** One of the player's void gates fixed inside their own room, if any. */
+	private static @Nullable Vec3 pocketGate(ServerPlayer player, int room) {
+		for (ArsenalGates.Gate gate : ArsenalGates.gates(player)) {
+			if (gate.dimension() == POCKET && roomAt(BlockPos.containing(gate.pos())) == room) {
+				return gate.pos();
+			}
+		}
+		return null;
+	}
+
+	private static void enter(ServerPlayer player, int room, @Nullable Vec3 arrive) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel pocket = server.getLevel(POCKET);
 		if (pocket == null) {
@@ -261,6 +277,10 @@ public final class ArsenalPocket {
 		build(pocket, room);
 		BlockPos centre = centre(room);
 		Vec3 at = new Vec3(centre.getX() + 0.5, FLOOR, centre.getZ() + HALF - 1.5);
+		Vec3 gate = arrive == null ? null : ArsenalGates.fit(player, pocket, arrive);
+		if (gate != null) {
+			at = gate;
+		}
 		LAST_PASS.put(player.getUUID(), server.getTickCount() + 0L);
 		player.teleportTo(pocket, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
 		burst(pocket, at);
@@ -331,7 +351,7 @@ public final class ArsenalPocket {
 				if (rift.out) {
 					leave(other);
 				} else {
-					enter(other, rift.room);
+					enter(other, rift.room, rift.arrive);
 				}
 				if (other.getUUID().equals(rift.owner)) {
 					// the owner's gone through: the rift holds a while longer for anyone following
@@ -363,7 +383,7 @@ public final class ArsenalPocket {
 			if (pad == null) {
 				Vec3 at = Vec3.atBottomCenterOf(exitPad(room).above());
 				// faces into the room
-				RIFTS.add(pad = new Rift(POCKET, at, 180.0F, PAD, room, true, false, now, now));
+				RIFTS.add(pad = new Rift(POCKET, at, 180.0F, PAD, room, true, null, false, now, now));
 			}
 			pad.until = now + PAD_LINGER;
 		}
