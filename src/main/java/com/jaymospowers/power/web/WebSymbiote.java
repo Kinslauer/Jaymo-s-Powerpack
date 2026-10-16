@@ -2743,6 +2743,21 @@ public final class WebSymbiote {
 		}
 		if (ability == SUIT_TOGGLE && isBonded(player)) {
 			WebSymbioteState state = state(player);
+			if (armored(player) && !driving(player) && !roaring(player) && (state.has(WebSymbioteState.SUIT) || suitAllowed(player))) {
+				// Living Armor (or the big body) comes down to the plain suit first, one form a press (Andy: "activating
+				// the suit while wearing the living armor brings you back to the suit, then back to your skin ... that way
+				// you can access whatever at whatever bond level"); with Living Armor put away the bond doesn't swell it
+				// back into the big body. The next press takes the suit off (WebSymbioteBond's fight, or the tear-off).
+				player.removeAttached(WebSymbioteBond.FACE);
+				set(player, state.withFlag(WebSymbioteState.SUIT, true).withFlag(WebSymbioteState.ARMOR, false));
+				long at = player.level().getGameTime();
+				WebSymbioteState.Cooldowns cooldowns = player.getAttached(COOLDOWNS);
+				player.setAttached(COOLDOWNS, (cooldowns == null ? WebSymbioteState.Cooldowns.NONE : cooldowns).with(ARMOR, at + COOLDOWN[ARMOR], ABILITIES));
+				ServerLevel level = player.level();
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+				level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
+				return;
+			}
 			boolean on = !state.has(WebSymbioteState.SUIT);
 			if (on && !suitAllowed(player)) {
 				// it showed you once; it won't cover you again until it trusts you more

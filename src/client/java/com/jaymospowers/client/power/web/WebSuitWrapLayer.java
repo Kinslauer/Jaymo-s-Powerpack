@@ -43,12 +43,12 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		{-2.0F, 0.0F, -2.0F, 2.0F, 12.0F, 2.0F},
 	};
 	private static final float[][] HULK_BOXES = {
-		{-8.0F, -3.0F, -4.5F, 8.0F, 13.0F, 5.0F},
-		{-5.5F, -4.0F, -3.5F, 1.5F, 17.0F, 3.5F},
-		{-1.5F, -4.0F, -3.5F, 5.5F, 17.0F, 3.5F},
+		{-7.5F, -3.0F, -4.5F, 7.5F, 15.0F, 5.0F},
+		{-4.5F, -4.0F, -4.0F, 3.5F, 21.0F, 4.0F},
+		{-3.5F, -4.0F, -4.0F, 4.5F, 21.0F, 4.0F},
 		{-4.5F, 2.5F, -5.5F, 4.5F, -8.0F, 4.5F},
-		{-3.0F, -1.0F, -5.0F, 3.0F, 12.0F, 3.0F},
-		{-3.0F, -1.0F, -5.0F, 3.0F, 12.0F, 3.0F},
+		{-4.0F, -1.0F, -5.0F, 4.0F, 16.0F, 3.5F},
+		{-4.0F, -1.0F, -5.0F, 4.0F, 16.0F, 3.5F},
 	};
 
 	WebSuitWrapLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {

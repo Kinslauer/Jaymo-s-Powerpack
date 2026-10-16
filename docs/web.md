@@ -80,6 +80,68 @@ a host that isnt a web user."
   the lead; walk a cow and a zombie up a staircase of full blocks and up a 2-3 block ledge; hold a friend on it while
   you climb a hill; roll five times and see a counter refused at 0; a zombie and a cow taken by the blob.
 
+## One form a press, the body under the fight, a taller behemoth, the new maw (suit-peel)
+Andy, after the removal-fight test jar: "the struggle looks good, maybe make it slightly easier as bond increases.
+however the body isnt drawn underneath the struggle animation, also it should animate down to the regular black suit,
+then take that off as well. right now its just invisible and the suit pops up ... I'd also like the tounge to be kept
+to the large suit, and maybe increase the size of his torso/ abdomen? rightnow he looks short and stocky like a
+gremlin rather than a behemoth. he needs a thinner waist and legs that extend out to the current upper body bulk."
+Then: "activating the suit while wearing the living armor brings you back to the suit, THEn back to your skin ... that
+way you can acess whatever at whatever bond level", "fix the old large head eating animation to be more like the new
+style" and "the head clips and animates seperately it looks like".
+- **One form a press (`WebSymbiote.use`, the suit toggle):** in Living Armor or the big body (`armored`, and not in a
+  takeover or roar), the mask takes you down to the plain black suit and stops there: Living Armor is put away (its
+  usual `COOLDOWN[ARMOR]` starts) and the suit flag set, so the big body shrinks back the way it was built
+  (`WebSuitGrowth`, 2 → 1: the muscle peeled off from the head and claws down to the core, the frame drawing back in,
+  the whole suit under it) and Living Armor's tendrils draw back in. With Living Armor away the bond doesn't swell you
+  back into the big body, so any form can be worn at any bond. The next press takes the suit off (the fight under
+  `FIGHT_BOND`, else the tear-off). Living Armor from the menu goes back up as before.
+- **Easier with the bond (`WebSymbioteBond`):** presses to win now `FIGHT_PRESSES_MAX` 30 at no bond down to
+  `FIGHT_PRESSES_MIN` 12 (was 16) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
+  (`fightFade`, the owner's own bar too), and it heaves back `FIGHT_SHOVE_AT_BOND` half as often and half as hard
+  (all eased by the bond's share of `FIGHT_BOND`).
+- **The body under the fight (the cause):** players drawn with MCA's model (Andy's pack) have all of MCA's body hidden
+  while the suit covers them (`WebSuitGrowth.mcaUnder`), and "covered" counted the tear-off and the fight, so as the
+  suit was torn at nothing was underneath. Now the body comes back whenever the suit is torn at, fought over or peeled
+  in a takeover's hold (`bared`), and on the vanilla model the jacket layer shows with the bared chest. The suit's torso
+  stays whole until the first strip starts to come away (`WebSuitTear.strips`, past `CLAW_END`). The raw goo's model
+  was left hidden after any tear-off (its root); it's shown again for the next time the suit goes on.
+- **No pop after the fight:** when the fight ends with the suit still on (won to a bare face, or lost), the tear-off
+  settles back over `FIGHT_SETTLE_TICKS` 10 (the suit flowing back over the chest and arms) instead of snapping back;
+  a bare face stays bare through it.
+- **Tongue only on the big body:** the plain suit's manual-equip tongue lash is gone (`WebHulk.submitSuitTongue`,
+  `SUIT_MOUTH`, `SUIT_TONGUE_SCALE` removed; both its calls in `WebSymbioteLayer`, the growing suit and the worn one).
+  The big body keeps its flicks, its lash when Living Armor is put on by hand, and its after-meal lick; Consume's maw
+  keeps its tongue on any body (it's eating).
+- **A taller behemoth (`tools/gen_web_hulk.py` → `WebHulkMesh`, `web_symbiote_hulk.png`; 52 boxes):** the hips sit
+  `LEG_LIFT` 4 higher and the neck `BODY_LIFT` 6 higher (along the torso, however it's bent; `WebHulk.shift`), so the
+  torso runs `TORSO` 14 from neck to hips (was 12) and the legs `LEG` 16 (were 12): about 3.6 blocks tall (was 3.05;
+  the hitbox is unchanged). The chest (`core` 13 wide) and lats (18, then `lats_low` 15) taper to a `waist` 9 wide over
+  the pelvis; the abs are longer. Legs: a thick `thigh` (9 wide at the top) over a narrower `thigh_low`, the `knee`
+  hinge at (0, 8.5, -2.5), a heavy `calf`, a slimmer `shin`, the foot. Arms are a pixel longer (`ELBOW` at y 9.5).
+  The suit and goo laid under the big body as it's built or peeled stretch to the frame (`WebHulk.stretch`,
+  `TORSO_STRETCH`, `LEG_STRETCH`). The world-space tendril roots follow the frame (`WebFeral.bodyPoint`), and the
+  wrapping tendrils use its new boxes (`WebSuitWrapLayer.HULK_BOXES`).
+- **The head on its neck (`WebHulk.neck`):** it used to turn with the full head yaw and swing its own twitches while
+  the torso hunched, breathed and galloped under it, and its offset (`HEAD_FORWARD` 2) wasn't along the torso, so the
+  big skull swung into the traps and shoulders. Now its place is in the torso's frame (`HEAD_FORWARD` 4 ahead of the
+  traps, `HEAD_DOWN` -1.5), it turns at most `HEAD_YAW_MAX` 0.45 and rolls `HEAD_ROLL_MAX` 0.12, takes `HEAD_FOLLOW`
+  0.3 of the torso's pitch (its breathing and lean) and is held within `HEAD_BACK_MAX` 0.4 back and `HEAD_FORWARD_MAX`
+  0.5 forward of the torso (galloping it looks down along the charge). Its twitch and tilt are smaller
+  (`WebFeral.HEAD_TWITCH` 0.1, `HEAD_TILT` 0.04; were 0.25 and 0.12).
+- **The maw in the new style (`WebMouthLayer`, `WebMawMesh` + `web_symbiote_mouth.png` from `tools/gen_web_hulk.py`;
+  `tools/gen_web_maw.py` is gone):** the big body's head grown huge: its wet black hide, veins and teal rims, the big
+  white eyes, a brow, a heavy snout over a red palate, rows of cut-out fangs above and below, a red throat. It hangs a
+  little open and breathes (`REST_OPEN`, `REST_BREATH`) as the meal comes up, gapes as wide as it goes (`SKULL_GAPE`
+  0.8, `JAW_GAPE` 1.15) over `GAPE_TICKS` 10, quivering, lashes its tongue at the meal before every bite
+  (`TONGUE_LEAD` 8), snaps shut in `SNAP_TICKS` 1.5 and the skull jolts down on the bite (`SNAP_JOLT`, `JOLT_TICKS`),
+  then chews. The meal is still carried in by Living Armor's grab, drawn with the bundled tendrils.
+- **Check first in game:** the mask in Living Armor and in the big body at a whole bond (shrinks to the suit, stays;
+  the next press tears it off or fights); the fight with an MCA skin and a vanilla one (the body under the tear, no
+  pop after); no tongue on the plain suit; the big body standing, walking, galloping, hunched over a meal and in a
+  takeover's peel (the head between the shoulders, never through them; the suit under the peel lined up); the maw
+  eating something small and something cow-sized.
+
 ## The symbiote's removal fight, dormancy, and tendrils on every line (`WebSymbioteBond`)
 Andy: "symbiote's removal is different, its activation is added to the radial menu, the first few removals at low
 bond animate like a fight or struggle, requiring the same takeover inputs to regain control, eventually showing just
@@ -90,7 +152,7 @@ intensifying with glow and intensity to a maximum at low health takeover alerts.
 - **Removal (the radial menu's mask, the same suit-off toggle):** under `FIGHT_BOND` 70, the first `FIGHTS` 3 times
   with each new bond (`FOUGHT`, saved), taking the suit off is a fight: your keys are swallowed and every press is a
   heave against it, as against a takeover (the same struggle packet, the same `STRUGGLE` bar and its fade; a bar at
-  the bottom of the screen; `FIGHT_PRESSES_MAX` 30 at no bond down to `FIGHT_PRESSES_MIN` 16). Everyone sees the
+  the bottom of the screen; `FIGHT_PRESSES_MAX` 30 at no bond down to `FIGHT_PRESSES_MIN` 12, see above). Everyone sees the
   tear-off driven back and forth by the bar (`WebSuitGrowth.FIGHT_TEAR_MIN` 0.06 to `FIGHT_TEAR_MAX` 0.3 of the way
   through: clawing at the chest, the mask sliding off the face and back as it tugs); past `FIGHT_SHOVE_FROM` of the
   bar it heaves back now and then (`FIGHT_SHOVE` of the bar, a shake). Win: only the face comes free (`FACE`, synced),
@@ -307,7 +369,7 @@ living armor tendrils, and it helps them attack". No blood anywhere in it.
   since 0.11.99 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
   All Rights Reserved) but all symbiote: 46 boxes, upright, a broad chest over deep lats, huge shoulders, thick arms
   ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
-  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
+  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2; since suit-peel taller, see the top), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
   (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
   snarls (`JAW_REST` 0.22); a red tongue (12 pieces; it used to loll out and lash every 70 ticks, but Andy: "the tounge
   should only lash out periodically") stays in the mouth and flicks out quickly every `TONGUE_EVERY` 140 ticks (7 s,
@@ -1064,8 +1126,8 @@ adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at hal
 **Struggle lockout, ripping out, quicker takeovers, the gift.**
 - *Self takeovers are 2x quicker* (`SELF_TAKEOVER_SPEED` 2.0; every takeover is one it starts itself): the suit and big
   body engulf you in half the time (`WebSuitGrowth`, a change made while `WebSymbioteClient.seized`), the dread swells in
-  twice as fast (the struggle bar drains as before; doubled it was unwinnable). Put on by hand (`DONNED`), the suit
-  or big body lashes its tongue once as the head forms (`WebHulk.DON_LASH_AT`, `submitSuitTongue` on the plain suit).
+  twice as fast (the struggle bar drains as before; doubled it was unwinnable). Put on by hand (`DONNED`), the big
+  body lashes its tongue once as the head forms (`WebHulk.DON_LASH_AT`; the plain suit's lash is gone, see the top).
 - *Lockout:* push the bar past `LOCKOUT_SURGE` 0.5 twice in one takeover (it must fall back under `LOCKOUT_REARM` 0.25
   between: "it surges back over you", shake `SURGE_BACK_SHAKE` 0.8, full dread, a `surge.1-3` taunt) and you win: the
   takeover ends and the suit is disabled for `SUIT_LOCKOUT_TICKS` 1200 (`LOCKOUT` attachment, saved; counts as
