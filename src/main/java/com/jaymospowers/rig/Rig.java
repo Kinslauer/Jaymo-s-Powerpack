@@ -171,7 +171,8 @@ public final class Rig {
 		defense.put(ArmorType.LEGGINGS, ARMS_ARMOR);
 		defense.put(ArmorType.BOOTS, THRUSTERS_ARMOR);
 		defense.put(ArmorType.BODY, CORE_ARMOR);
-		ArmorMaterial material = new ArmorMaterial(DURABILITY, defense, 0, SoundEvents.ARMOR_EQUIP_NETHERITE, TOUGHNESS, 0.0F, SALVAGE_TAG, ASSET);
+		// (0.11.94) enchantability must be at least 1 (0 throws when the items register, and the server never starts)
+		ArmorMaterial material = new ArmorMaterial(DURABILITY, defense, 1, SoundEvents.ARMOR_EQUIP_NETHERITE, TOUGHNESS, 0.0F, SALVAGE_TAG, ASSET);
 		HELM = item("rig_helm", p -> new RigItem(Piece.HELM, p.humanoidArmor(material, ArmorType.HELMET).rarity(Rarity.UNCOMMON)));
 		CORE = item("rig_core", p -> new RigItem(Piece.CORE, p.humanoidArmor(material, ArmorType.CHESTPLATE).rarity(Rarity.UNCOMMON)
 			.component(CHARGE, NEW_CORE_CHARGE)));
