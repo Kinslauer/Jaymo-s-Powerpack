@@ -68,7 +68,7 @@ final class WebParkourClient {
 		boolean free = player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.getAbilities().flying && !player.isFallFlying()
 			&& !player.isInWater() && !player.isInLava() && !player.onClimbable() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0
 			&& !wallRun.running() && !WebSymbioteClient.driving() && !WebPower.ragdolled(player)
-			&& !WebSymbiote.isToggled(player, WebSymbioteState.CRAWL);
+			&& !WebSymbiote.crawlTendrils(player);
 		if (!free) {
 			if (kind == WebParkour.CLING || kind == WebParkour.SLIDE) {
 				stop();

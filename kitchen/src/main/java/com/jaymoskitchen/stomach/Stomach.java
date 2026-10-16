@@ -74,13 +74,27 @@ public final class Stomach {
 	/** A drink in its slot makes every food count this much more. */
 	static final float DRINK_BONUS = 0.1F;
 	/** Most health meals can add (an extra bar of hearts), and how much more each extra slot allows. */
-	static final float MAX_FOOD_HEALTH = 34.0F;
+	static final float MAX_FOOD_HEALTH = 40.0F;
 	static final float MAX_PER_EXTRA_SLOT = 8.0F;
 	/** Walking speed with every food slot full. */
 	static final double FULL_SPEED = 0.1;
 	/** A Kitchen dish against plain food (health, regeneration and time), and a Perfect one on top of that. */
-	static final float DISH_BONUS = 1.25F;
-	static final float PERFECT_BONUS = 1.2F;
+	static final float DISH_BONUS = 1.35F;
+	static final float PERFECT_BONUS = 1.25F;
+	/**
+	 * Every meal's health is worth {@code HEALTH_SCALE} of its nutrition, and a rich one (more than {@code RICH_FROM}
+	 * nutrition) adds {@code RICH_HEALTH} more for each point past that, so better meals count for much more.
+	 */
+	static final float HEALTH_SCALE = 1.15F, RICH_HEALTH = 0.4F;
+	static final int RICH_FROM = 5;
+	/**
+	 * The hunger bar from a meal, on top of what the food itself gives: saturation {@code SATURATION_BUMP} more for
+	 * anything, {@code DISH_SATURATION} more for a Kitchen dish and {@code PERFECT_SATURATION} more for a Perfect one,
+	 * plus {@code RICH_SATURATION} per rich point; and a dish fills {@code DISH_HUNGER} more hunger (a Perfect one
+	 * {@code PERFECT_HUNGER}).
+	 */
+	static final float SATURATION_BUMP = 0.15F, DISH_SATURATION = 0.35F, PERFECT_SATURATION = 0.25F, RICH_SATURATION = 0.3F;
+	static final int DISH_HUNGER = 1, PERFECT_HUNGER = 2;
 	/** Golden apples: always a big meal. */
 	static final int GOLDEN_NUTRITION = 10;
 	static final float GOLDEN_REGEN = 1.5F;
@@ -189,7 +203,7 @@ public final class Stomach {
 				bonus *= PERFECT_BONUS;
 			}
 		}
-		float health = Math.max(nutrition, 2) * bonus;
+		float health = (Math.max(nutrition, 2) * HEALTH_SCALE + Math.max(0, nutrition - RICH_FROM) * RICH_HEALTH) * bonus;
 		float regen = Mth.clamp(nutrition * REGEN_PER_NUTRITION * regenMod, 0.25F, 2.0F) * bonus;
 		int ticks = Mth.clamp(Math.round(SECONDS_PER_NUTRITION * 20 * nutrition * bonus), MIN_TICKS, MAX_TICKS);
 		return new Meal(stack.getItem(), health, regen, ticks, ticks, drink);
@@ -266,6 +280,24 @@ public final class Stomach {
 		}
 		player.setAttached(MEALS, List.copyOf(meals));
 		apply(player, meals);
+		feed(player, stack);
+	}
+
+	/** The hunger bar's share of a better meal (see {@link #SATURATION_BUMP}): on top of what the food gave. */
+	private static void feed(ServerPlayer player, ItemStack stack) {
+		FoodProperties food = stack.get(DataComponents.FOOD);
+		if (food == null) {
+			return;
+		}
+		boolean dish = isDish(stack);
+		boolean perfect = dish && Quality.of(stack) == Quality.PERFECT;
+		float share = SATURATION_BUMP + (dish ? DISH_SATURATION : 0.0F) + (perfect ? PERFECT_SATURATION : 0.0F);
+		float saturation = food.saturation() * share + Math.max(0, food.nutrition() - RICH_FROM) * RICH_SATURATION;
+		int hunger = perfect ? PERFECT_HUNGER : dish ? DISH_HUNGER : 0;
+		net.minecraft.world.food.FoodData data = player.getFoodData();
+		data.setFoodLevel(Math.min(20, data.getFoodLevel() + hunger));
+		// (saturation never above the hunger bar, as in vanilla)
+		data.setSaturation(Math.min(data.getFoodLevel(), data.getSaturationLevel() + saturation));
 	}
 
 	// ---- every tick ----

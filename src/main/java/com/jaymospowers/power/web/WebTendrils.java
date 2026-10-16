@@ -124,6 +124,11 @@ public final class WebTendrils {
 	 * digs into (aimed at, or in the crater) is wrecked when the chunk tears out: broken, as if mined.
 	 */
 	static final int TUG_MIN = 10, TUG_MAX = 10, TUG_RANDOM = 0;
+	/*
+	 * Let go at any point before it tears loose and the line just drops: the wall stays whole (Andy: "it only breaks if
+	 * you follow through"). A torn-out chunk lies where it falls until something moves it ({@link
+	 * com.jaymospowers.core.BlockCluster#keep}).
+	 */
 	static final float TUG_PER_HARDNESS = 0.0F;
 	/**
 	 * A chunk swung with a click is a heavy cross, not a jab: hauled back behind that shoulder over {@code CROSS_WINDUP}
@@ -370,6 +375,11 @@ public final class WebTendrils {
 		}
 	}
 
+	/** That tendril's key (R for the right, G for the left) is still held down: a tug only tears loose held through to the end. */
+	private static boolean tugKeyHeld(ServerPlayer player, int hand) {
+		return com.jaymospowers.core.PowerInput.isDown(player, hand == WebNet.OFF ? com.jaymospowers.api.PowerKey.ABILITY_2 : com.jaymospowers.api.PowerKey.ABILITY_1);
+	}
+
 	private static int tugCrack(ServerPlayer player, int hand, int i) {
 		return player.getId() * 47 + 4000 + hand * 16 + i;
 	}
@@ -386,8 +396,9 @@ public final class WebTendrils {
 			if (tug == null) {
 				continue;
 			}
-			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.tendrilKeys(player)
+			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.tendrilKeys(player) || !tugKeyHeld(player, hand)
 				|| tug.hit().getLocation().distanceTo(player.getEyePosition()) > GRAB_RANGE + 3.0) {
+				// (its key let go before it tore loose, however that news reached us: nothing comes, the wall stays whole)
 				cancelTug(player, hand);
 				continue;
 			}
@@ -433,6 +444,7 @@ public final class WebTendrils {
 			com.jaymospowers.core.BlockCluster chunk = com.jaymospowers.core.BlockCluster.of(level, loose,
 				tug.hit().getDirection().getUnitVec3().scale(0.9), player);
 			if (chunk != null) {
+				chunk.keep();
 				grab(player, hand, chunk, -1L, true);
 				com.jaymospowers.core.Shakes.send(player, 0.9F, null);
 			}
@@ -571,7 +583,7 @@ public final class WebTendrils {
 		int hand = payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN;
 		Latch latch = player.getAttachedOrElse(CLIMB, Latch.NONE);
 		Latch next;
-		if (payload.on() && WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) && player.isAlive() && !WebSymbiote.driving(player)
+		if (payload.on() && WebSymbiote.crawlTendrils(player) && player.isAlive() && !WebSymbiote.driving(player)
 			&& payload.at().distanceTo(player.getEyePosition()) <= CLIMB_LATCH_REACH) {
 			next = latch.with(hand, payload.at());
 			ServerLevel level = player.level();
@@ -765,7 +777,7 @@ public final class WebTendrils {
 		long gameTime = player.level().getGameTime();
 		tickTugs(player, gameTime);
 		tickCross(player, gameTime);
-		if (player.getAttached(CLIMB) != null && (!WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) || !player.isAlive())) {
+		if (player.getAttached(CLIMB) != null && (!WebSymbiote.crawlTendrils(player) || !player.isAlive())) {
 			player.removeAttached(CLIMB);
 		}
 		Grips grips = player.getAttached(GRIPS);

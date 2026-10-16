@@ -196,6 +196,15 @@ public final class WebSymbioteClient {
 	/** Running: this much faster than the chase, and the view swings round this hard. */
 	static final double FLEE_SPEED_SCALE = 1.2;
 	static final float FLEE_TURN = 0.5F;
+	/**
+	 * However it's steering, your view is dragged round to the way you're being carried (moving faster than
+	 * {@code VIEW_MIN_SPEED} b/t): {@code VIEW_DRAG} of the gap a tick. You can still fight it with the mouse, but look
+	 * more than {@code VIEW_TEAR_ANGLE} degrees away and it tears the view back ({@code VIEW_TEAR} of the gap, with a
+	 * jolt, at most once every {@code VIEW_TEAR_EVERY} ticks).
+	 */
+	static final double VIEW_MIN_SPEED = 0.06;
+	static final float VIEW_DRAG = 0.2F, VIEW_TEAR_ANGLE = 40.0F, VIEW_TEAR = 0.75F, VIEW_TEAR_SHAKE = 1.2F;
+	static final int VIEW_TEAR_EVERY = 12;
 	/** A waypoint counts as reached this close (blocks, horizontally; tighter at a corner) and this close in height. */
 	static final double WAYPOINT_REACH = 0.7, CORNER_REACH = 0.45, WAYPOINT_REACH_Y = 1.2;
 	/** It skips ahead to a later waypoint (up to this many) if you're already that close to it. */
@@ -277,7 +286,7 @@ public final class WebSymbioteClient {
 
 	/** Wall Crawl's tendrils are holding you up (so a charged leap can be let go from them, as from the ground). */
 	static boolean launchable(LocalPlayer player) {
-		return WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) && !wallClinging && !ceilingClinging && WebTendrilWalk.striding(player);
+		return WebSymbiote.crawlTendrils(player) && !wallClinging && !ceilingClinging && WebTendrilWalk.striding(player);
 	}
 
 	/** A charged leap just went off: the tendrils let go for a moment. */
@@ -556,7 +565,7 @@ public final class WebSymbioteClient {
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
 		// Wall Crawl on: they stay out the whole time (holding Jump, coiling a leap, between grabs), not only while they hold you
 		boolean climbing = entity instanceof Player p && WebSymbiote.isBonded(p)
-			&& (WebTendrilWalk.climbing(p) || WebSymbiote.isToggled(p, WebSymbioteState.CRAWL));
+			&& (WebTendrilWalk.climbing(p) || WebSymbiote.crawlTendrils(p));
 		if (entity instanceof Player player && (armored || out >= 0 || climbing)) {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
@@ -746,6 +755,9 @@ public final class WebSymbioteClient {
 			tickEscape(player);
 		} else if (takeoverTicks > 0) {
 			tickTakeover(player, swing);
+			if (takeoverTicks > 0) {
+				wrenchView(player);
+			}
 			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
 		} else {
 			tickCrawl(player, swing);
@@ -1352,6 +1364,28 @@ public final class WebSymbioteClient {
 		player.setDeltaMovement(v.x * RIP_HOLD, v.y, v.z * RIP_HOLD);
 	}
 
+	/** When the view was last torn back from you (player tick count). */
+	private static int viewTornAt = -1000;
+
+	/** The takeover drags your view round to the way you're carried; fight it too far and it tears it back. */
+	private static void wrenchView(LocalPlayer player) {
+		Vec3 v = player.getDeltaMovement();
+		double speed = v.horizontalDistance();
+		if (speed < VIEW_MIN_SPEED) {
+			return;
+		}
+		float yaw = (float)(Mth.atan2(v.z, v.x) * Mth.RAD_TO_DEG) - 90.0F;
+		float off = Mth.wrapDegrees(yaw - player.getYRot());
+		float share = VIEW_DRAG;
+		if (Math.abs(off) > VIEW_TEAR_ANGLE && player.tickCount - viewTornAt >= VIEW_TEAR_EVERY) {
+			// you looked away: it wrenches you back round
+			share = VIEW_TEAR;
+			viewTornAt = player.tickCount;
+			com.jaymospowers.client.ScreenShake.add(VIEW_TEAR_SHAKE);
+		}
+		player.setYRot(player.getYRot() + off * share);
+	}
+
 	/** Turns the view toward {@code to} (a share of the way each tick); {@code pitch}: up and down too, else levels out. */
 	private static void turnToward(LocalPlayer player, Vec3 to, float share, boolean pitch) {
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
@@ -1628,7 +1662,7 @@ public final class WebSymbioteClient {
 			letGoOfWall();
 			return;
 		}
-		if (!WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) || player.getAbilities().flying || player.isPassenger() || player.isInWater()
+		if (!WebSymbiote.crawlTendrils(player) || player.getAbilities().flying || player.isPassenger() || player.isInWater()
 			|| player.isInLava() || swing.attached() || swing.pull != null || swing.wingsTicks > 0 || player.isFallFlying()) {
 			wallClinging = false;
 			ceilingClinging = false;

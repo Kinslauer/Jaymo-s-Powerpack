@@ -66,6 +66,16 @@ final class WebHulk {
 	 */
 	static final float TONGUE_EVERY = 140.0F, FLICK_TICKS = 12.0F, FLICK_OUT = 0.3F, FLICK_BACK = 0.6F, JAW_FLICK = 0.18F;
 	/**
+	 * After a meal (a corpse eaten, in the big body or the plain suit) it licks its chops: {@code MEAL_FLICKS} flicks,
+	 * one every {@code MEAL_FLICK_GAP} ticks, starting {@code MEAL_FLICK_DELAY} ticks after the maw lets go (so the maw
+	 * has sunk back first and the flicks are seen).
+	 */
+	static final int MEAL_FLICKS = 3;
+	static final float MEAL_FLICK_DELAY = 10.0F, MEAL_FLICK_GAP = 16.0F;
+	/** The plain suit's tongue (only after a meal): smaller, from the mouth at the front of the head. */
+	static final int SUIT_TONGUE_PIECES = 9;
+	static final float SUIT_TONGUE_PIECE = 1.3F, SUIT_TONGUE_WIDTH = 1.2F, SUIT_TONGUE_THICK = 0.4F;
+	/**
 	 * Put on by hand (Living Armor from the menu; {@link com.jaymospowers.power.web.WebSymbiote#DONNED}), the big body
 	 * lashes its tongue once {@code DON_LASH_AT} ticks after, as the head finishes forming, the lash taking
 	 * {@code DON_LASH_TICKS}. The plain suit has no tongue (Andy: "I'd also like the tounge to be kept to the large
@@ -235,7 +245,7 @@ final class WebHulk {
 			if (meal[0] > 0.0F) {
 				meal[0] = 0.0F;
 				meal[1] = state.ageInTicks;
-			} else if (state.ageInTicks - meal[1] > FLICK_TICKS || state.ageInTicks < meal[1]) {
+			} else if (state.ageInTicks - meal[1] > MEAL_FLICK_DELAY + MEAL_FLICKS * MEAL_FLICK_GAP || state.ageInTicks < meal[1]) {
 				MEALS.remove(state.id);
 			}
 		}
@@ -251,13 +261,33 @@ final class WebHulk {
 		if (don >= 0.0F) {
 			return don;
 		}
-		float[] meal = MEALS.get(state.id);
-		if (meal != null && meal[0] == 0.0F && age >= meal[1] && age - meal[1] < FLICK_TICKS) {
-			// licking its chops, just after a meal
-			return (age - meal[1]) / FLICK_TICKS;
+		float meal = mealFlick(state);
+		if (meal != -2.0F) {
+			// licking its chops, just after a meal (and no idle flick over it)
+			return meal;
 		}
 		float cycle = (age + (state.id & 0xFFFF) * 37.0F) % TONGUE_EVERY;
 		return cycle < FLICK_TICKS ? cycle / FLICK_TICKS : -1.0F;
+	}
+
+	/**
+	 * How far through one of the flicks just after a meal it is (0-1), -1 between them, or -2 when no meal was just
+	 * eaten.
+	 */
+	static float mealFlick(AvatarRenderState state) {
+		float[] meal = MEALS.get(state.id);
+		if (meal == null || meal[0] != 0.0F) {
+			return -2.0F;
+		}
+		float since = state.ageInTicks - meal[1] - MEAL_FLICK_DELAY;
+		if (since < 0.0F) {
+			return -1.0F;
+		}
+		if (since >= MEAL_FLICKS * MEAL_FLICK_GAP) {
+			return -2.0F;
+		}
+		float in = since % MEAL_FLICK_GAP;
+		return in < FLICK_TICKS ? in / FLICK_TICKS : -1.0F;
 	}
 
 	/** How far through the lash it gives when put on by hand (0-1), or -1 if not now. */
@@ -392,6 +422,28 @@ final class WebHulk {
 			// out from between the jaws, riding down with the lower one (sliding back into the mouth as it's drawn in)
 			tongue(buffer, pose, new Vec3(0.0, 0.9 + Mth.sin(jawAngle) * 2.0, -3.0 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
 				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));
+		poseStack.popPose();
+	}
+
+	/**
+	 * The plain suit's tongue: it has none, except just after a meal, when it flicks out of the mouth a few times
+	 * ({@link #mealFlick}) as the big body's does. Drawn off the head ({@code head}, already posed).
+	 */
+	static void submitSuitTongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent) {
+		float flick = mealFlick(state);
+		float out = flickOut(flick);
+		if (out <= 0.02F) {
+			return;
+		}
+		float age = state.ageInTicks;
+		float whip = Mth.sin(flick * Mth.PI);
+		poseStack.pushPose();
+		parent.root().translateAndRotate(poseStack);
+		parent.head.translateAndRotate(poseStack);
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
+			// out of the mouth at the front of the head, sliding back in as it's drawn in
+			tongue(buffer, pose, new Vec3(0.0, -1.6, -3.4 + (1.0F - out) * 1.5), 0.2F, SUIT_TONGUE_PIECES, SUIT_TONGUE_PIECE,
+				SUIT_TONGUE_WIDTH, SUIT_TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));
 		poseStack.popPose();
 	}
 
