@@ -422,6 +422,8 @@ public final class Moons {
 	private static void rise(ServerLevel level, Mob mob) {
 		Rising r = new Rising(mob, level.getBlockState(mob.blockPosition().below()));
 		RISING.put(mob.getUUID(), r);
+		// (0.7.88) the risen dead leave Nightborn vampires be (NightbornBlood.spares)
+		mob.addTag(NightbornBlood.RISEN_TAG);
 		mob.setNoAi(true);
 		mob.setNoGravity(true);
 		mob.noPhysics = true;

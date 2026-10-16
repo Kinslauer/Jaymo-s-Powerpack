@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.NightbornBlood;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +58,8 @@ import org.jspecify.annotations.Nullable;
  * {@link VerdantLook}'s).</li>
  * <li><b>Frostborn:</b> the Verdant's pink patches too, and rime on the fingers; ice-white eyes; snowflakes.</li>
  * <li><b>Nightborn:</b> shadow soaking the hands with stars in it; moon-silver eyes that glow by day only; dark wisps
- * at night only.</li>
+ * at night only. (0.7.88) A Nightborn vampire's ({@link NightbornBlood#starlit}): the shadow deep red, the eyes red-silver
+ * at night (moon-silver by day, as ever; its own red eyes give way to them), and blood mist for the wisps.</li>
  * <li><b>Earthling:</b> training wraps and a ki glow round the fists; no eye glow, no particles.</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
@@ -115,8 +117,16 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	 * On a player's render state: their heritage's look, which drawing, whether their eyes glow now, and the glow's tint
 	 * (opaque ARGB, -1 full; 0 none: a dry Tideborn, a Sylvan who sneaks unseen).
 	 */
-	record Look(Kind kind, int variant, boolean eyesLit, int glow) {
+	record Look(Kind kind, int variant, boolean eyesLit, int glow, boolean blood) {
 	}
+
+	/** (0.7.88) A Nightborn vampire's look: its marks, its red-silver eyes at night, its blood mist. */
+	private static final Identifier BLOOD_SKIN = JaymosKingdoms.id("textures/entity/heritage/nightborn_blood_skin.png");
+	private static final Identifier BLOOD_GLOW = JaymosKingdoms.id("textures/entity/heritage/nightborn_blood_glow.png");
+	private static final Identifier BLOOD_EYES = JaymosKingdoms.id("textures/entity/heritage/nightborn_blood_eyes.png");
+	static final int BLOOD_EYE_COLOR = 0xFFFFB8C0;
+	private static final Map<Identifier, Identifier> BLOOD_EYES_BY_SKIN = new HashMap<>();
+	private static final DustParticleOptions BLOOD_MIST = new DustParticleOptions(0x7A0A12, 0.9F);
 
 	/** (0.7.80) A sneaking Sylvan's glow, dimmed to this (opaque ARGB tint; out entirely for a Thief or with a Stealth perk). */
 	static final int SYLVAN_SNEAK_GLOW = 0xFF4A4A4A;
@@ -156,7 +166,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			state.setData(KEY, null);
 			return;
 		}
-		boolean lit = switch (kind.eyes) {
+		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
+		boolean lit = blood || switch (kind.eyes) {
 			case ALWAYS -> true;
 			case DAY -> entity.level().isBrightOutside();
 			case NEVER -> false;
@@ -173,7 +184,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			glow = (flags & Heritage.LOOK_UNSEEN) != 0 ? 0 : SYLVAN_SNEAK_GLOW;
 			lit &= glow != 0;
 		}
-		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow));
+		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
 	}
 
 	static int variant(UUID id, int drawings) {
@@ -192,14 +203,17 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
 		Kind kind = look.kind();
-		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
+		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(look.blood() ? BLOOD_SKIN : kind.skin[look.variant()]), lightCoords,
 			OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 		if (look.glow() != 0) {
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
+			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(look.blood() ? BLOOD_GLOW : kind.glow[look.variant()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 		}
 		if (look.eyesLit() && kind.stockEyes != null) {
-			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
+			Integer vampire = state.getData(VampireLooks.LOOK);
+			boolean redSilver = look.blood() && vampire != null && vampire == 2;
+			Identifier eyes = redSilver ? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/",
+				BLOOD_EYES_BY_SKIN) : VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
 				kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin);
 			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
@@ -318,7 +332,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				case FROSTBORN -> level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
 				case NIGHTBORN -> {
 					if (level.isDarkOutside()) {
-						level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.02, 0.0);
+						// (0.7.88) a Nightborn vampire's wisps are blood mist
+						level.addParticle(NightbornBlood.starlit(player) ? BLOOD_MIST : ParticleTypes.SMOKE, x, y, z, 0.0, 0.02, 0.0);
 					}
 				}
 				default -> {

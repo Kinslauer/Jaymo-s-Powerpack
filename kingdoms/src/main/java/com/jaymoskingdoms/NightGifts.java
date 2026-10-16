@@ -176,12 +176,18 @@ public final class NightGifts {
 		}
 	}
 
-	/** Server → player, every second: the nearest kin (world bearing in degrees, as yaw; distance in blocks), and how many there are. */
-	public record Sense(List<Integer> bearings, List<Integer> distances, int count) implements CustomPacketPayload {
+	/**
+	 * Server → player, every second: the nearest kin (world bearing in degrees, as yaw; distance in blocks), and how many
+	 * there are; (0.7.88) and what's felt only faintly, the same way (a vampire's unturned Nightborn, a cured Nightborn's
+	 * nearest vampire: {@link NightbornBlood}), distances rough.
+	 */
+	public record Sense(List<Integer> bearings, List<Integer> distances, int count, List<Integer> faintBearings, List<Integer> faintDistances)
+		implements CustomPacketPayload {
 		public static final Type<Sense> TYPE = new Type<>(JaymosKingdoms.id("night_sense"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Sense> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(8)), Sense::bearings, ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(8)), Sense::distances,
-			ByteBufCodecs.VAR_INT, Sense::count, Sense::new);
+			ByteBufCodecs.VAR_INT, Sense::count, ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(8)), Sense::faintBearings,
+			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(8)), Sense::faintDistances, Sense::new);
 
 		@Override
 		public Type<Sense> type() {
@@ -387,7 +393,7 @@ public final class NightGifts {
 		if (now == null) {
 			if (old != null) {
 				player.removeAttached(GIFT);
-				ServerPlayNetworking.send(player, new Sense(List.of(), List.of(), 0));
+				ServerPlayNetworking.send(player, new Sense(List.of(), List.of(), 0, List.of(), List.of()));
 			}
 			falls(player, NONE, false);
 			return;
@@ -466,7 +472,12 @@ public final class NightGifts {
 			bearings.add(Math.round((float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F));
 			distances.add((int) Math.round(Math.sqrt(dx * dx + dz * dz)));
 		}
-		ServerPlayNetworking.send(player, new Sense(bearings, distances, kin.size()));
+		List<Integer> faintBearings = new ArrayList<>(), faintDistances = new ArrayList<>();
+		if (gift.blood()) {
+			// (0.7.88) and, faintly, the Nightborn not yet turned
+			NightbornBlood.faint(player, faintBearings, faintDistances);
+		}
+		ServerPlayNetworking.send(player, new Sense(bearings, distances, kin.size(), faintBearings, faintDistances));
 	}
 
 	// ---- the moves -----------------------------------------------------------------------------------------------------
@@ -512,11 +523,13 @@ public final class NightGifts {
 			return false;
 		}
 		Vec3 look = player.getLookAngle();
+		// (0.7.88) night-deep: a Nightborn in the dark goes further
+		double deep = NightbornBlood.deep(player) ? NightbornBlood.DEEP_DASH : 1.0;
 		Vec3 v;
 		if (player.getXRot() < LOOK_UP) {
-			v = new Vec3(look.x * DASH_LEAP_ALONG, DASH_LEAP_UP, look.z * DASH_LEAP_ALONG);
+			v = new Vec3(look.x * DASH_LEAP_ALONG * deep, DASH_LEAP_UP, look.z * DASH_LEAP_ALONG * deep);
 		} else {
-			v = look.scale(DASH_SPEED);
+			v = look.scale(DASH_SPEED * deep);
 			if (!air) {
 				v = new Vec3(v.x, Math.max(v.y, 0.25), v.z);
 			}
@@ -554,16 +567,20 @@ public final class NightGifts {
 		GRACE.put(player.getUUID(), level.getGameTime() + POUND_GRACE);
 		player.fallDistance = 0.0;
 		AIRBORNE.remove(player.getUUID());
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(POUND_RADIUS), e -> e != player && e.isAlive()
+		// (0.7.88) night-deep: a Nightborn in the dark throws wider and harder, and sees further
+		boolean deep = NightbornBlood.deep(player);
+		double radius = deep ? POUND_RADIUS * NightbornBlood.DEEP_POUND_RADIUS : POUND_RADIUS;
+		double push = deep ? POUND_PUSH * NightbornBlood.DEEP_POUND_PUSH : POUND_PUSH;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e != player && e.isAlive()
 			&& !(e instanceof ArmorStand) && !(e instanceof Player p && (p.isCreative() || p.isSpectator())))) {
 			double dx = e.getX() - player.getX(), dz = e.getZ() - player.getZ();
 			double d = Math.sqrt(dx * dx + dz * dz);
-			if (d > POUND_RADIUS) {
+			if (d > radius) {
 				continue;
 			}
-			double share = 1.0 - d / (POUND_RADIUS + 1.0);
+			double share = 1.0 - d / (radius + 1.0);
 			e.hurtServer(level, level.damageSources().playerAttack(player), (float) (POUND_DAMAGE * share));
-			e.knockback(POUND_PUSH * share, -dx, -dz, level.damageSources().playerAttack(player), 0.0F);
+			e.knockback(push * share, -dx, -dz, level.damageSources().playerAttack(player), 0.0F);
 			e.setDeltaMovement(e.getDeltaMovement().add(0.0, 0.35 * share, 0.0));
 			e.needsSync = true;
 		}
@@ -573,10 +590,10 @@ public final class NightGifts {
 			level.sendParticles(ParticleTypes.CLOUD, player.getX() + Math.cos(a) * 1.5, player.getY() + 0.1, player.getZ() + Math.sin(a) * 1.5, 0,
 				Math.cos(a), 0.05, Math.sin(a), 0.35);
 		}
-		level.sendParticles(new DustParticleOptions(0x8A0303, 1.6F), player.getX(), player.getY() + 0.2, player.getZ(), 40, POUND_RADIUS * 0.4, 0.1,
-			POUND_RADIUS * 0.4, 0.0);
-		level.playSound(null, player.blockPosition(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.7F);
-		reveal(level, player);
+		level.sendParticles(new DustParticleOptions(0x8A0303, 1.6F), player.getX(), player.getY() + 0.2, player.getZ(), deep ? 64 : 40, radius * 0.4, 0.1,
+			radius * 0.4, 0.0);
+		level.playSound(null, player.blockPosition(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, deep ? 0.55F : 0.7F);
+		reveal(level, player, deep ? REVEAL_RANGE * NightbornBlood.DEEP_REVEAL : REVEAL_RANGE);
 	}
 
 	/** {@code O}, a werewolf: Leap. */
@@ -621,7 +638,7 @@ public final class NightGifts {
 				}
 			}
 		}
-		reveal(level, player);
+		reveal(level, player, REVEAL_RANGE);
 		// (every other werewolf hears it, and where it came from)
 		for (ServerPlayer other : level.players()) {
 			Gift g = other.getAttached(GIFT);
@@ -635,10 +652,10 @@ public final class NightGifts {
 	}
 
 	/** Every person near shows through walls, for this player only. */
-	private static void reveal(ServerLevel level, ServerPlayer player) {
+	private static void reveal(ServerLevel level, ServerPlayer player, double range) {
 		List<Integer> ids = new ArrayList<>();
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REVEAL_RANGE), e -> e != player && human(e))) {
-			if (e.distanceToSqr(player) <= REVEAL_RANGE * REVEAL_RANGE && ids.size() < 512) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), e -> e != player && human(e))) {
+			if (e.distanceToSqr(player) <= range * range && ids.size() < 512) {
 				ids.add(e.getId());
 			}
 		}

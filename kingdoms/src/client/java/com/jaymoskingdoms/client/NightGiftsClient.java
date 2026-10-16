@@ -48,13 +48,15 @@ public final class NightGiftsClient {
 	static final int REVEAL_BLOOD = 0xFFFF3B30, REVEAL_WOLF = 0xFFFFB020;
 	/** The compass's colours and how long it holds without word from the server (ticks). */
 	static final int TEXT_BLOOD = 0xFFD43A3A, TEXT_WOLF = 0xFFE8A33A, TEXT_DIM = 0xFF9A9A9A;
+	/** (0.7.88) What's felt only faintly (a vampire's unturned Nightborn, a cured Nightborn's nearest vampire). */
+	static final int TEXT_FAINT = 0xFF8C6670;
 	static final int SENSE_STALE = 60;
 	private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
 
 	private static KeyMapping dash, pound;
 	/** Shown people: entity id → game time the glow ends. */
 	private static final Map<Integer, Long> REVEALED = new HashMap<>();
-	private static List<Integer> bearings = List.of(), distances = List.of();
+	private static List<Integer> bearings = List.of(), distances = List.of(), faintBearings = List.of(), faintDistances = List.of();
 	private static int kinCount;
 	private static long senseAt = Long.MIN_VALUE;
 
@@ -81,6 +83,8 @@ public final class NightGiftsClient {
 			bearings = payload.bearings();
 			distances = payload.distances();
 			kinCount = payload.count();
+			faintBearings = payload.faintBearings();
+			faintDistances = payload.faintDistances();
 			senseAt = context.client().level == null ? 0L : context.client().level.getGameTime();
 		});
 		ClientPlayNetworking.registerGlobalReceiver(NightGifts.Reveal.TYPE, (payload, context) -> {
@@ -95,6 +99,7 @@ public final class NightGiftsClient {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			REVEALED.clear();
 			bearings = List.of();
+			faintBearings = List.of();
 			kinCount = 0;
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKingdoms.id("kin_sense"), NightGiftsClient::compass);
@@ -140,11 +145,40 @@ public final class NightGiftsClient {
 			return;
 		}
 		NightGifts.Gift g = NightGifts.gift(player);
-		if (g == null || minecraft.level.getGameTime() - senseAt > SENSE_STALE) {
+		if (minecraft.level.getGameTime() - senseAt > SENSE_STALE) {
 			return;
 		}
 		Font font = minecraft.font;
+		if (g == null) {
+			// (0.7.88) a cured Nightborn's trace: only the faint line
+			if (!faintBearings.isEmpty()) {
+				graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")), 4, 4,
+					TEXT_FAINT, true);
+			}
+			return;
+		}
 		int color = g.wolf() ? TEXT_WOLF : TEXT_BLOOD;
+		String line = line(player, bearings, distances, "");
+		Component label = Component.translatable(g.wolf() ? "hud.jaymoskingdoms.night.pack" : "hud.jaymoskingdoms.night.kin");
+		Component text = kinCount == 0 ? Component.translatable("hud.jaymoskingdoms.night.none", label)
+			: Component.translatable("hud.jaymoskingdoms.night.sense", label, line,
+				kinCount > bearings.size() ? Component.translatable("hud.jaymoskingdoms.night.more", kinCount - bearings.size()) : Component.empty());
+		graphics.text(font, text, 4, 4, kinCount == 0 ? TEXT_DIM : color, true);
+		int y = 15;
+		if (!faintBearings.isEmpty()) {
+			graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.faint", line(player, faintBearings, faintDistances, "~")), 4, y,
+				TEXT_FAINT, true);
+			y += 11;
+		}
+		if (g.blood() && g.wings() < NightGifts.WINGS_MAX) {
+			// (the wings' strength, under the compass, while they're worn down)
+			graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.wings", Math.round(100.0F * g.wings() / NightGifts.WINGS_MAX)), 4, y,
+				TEXT_DIM, true);
+		}
+	}
+
+	/** An arrow and distance for each one sensed ({@code about} before rough distances). */
+	private static String line(LocalPlayer player, List<Integer> bearings, List<Integer> distances, String about) {
 		StringBuilder line = new StringBuilder();
 		for (int i = 0; i < bearings.size() && i < distances.size(); i++) {
 			float rel = Mth.wrapDegrees(bearings.get(i) - player.getYRot());
@@ -152,18 +186,9 @@ public final class NightGiftsClient {
 			if (!line.isEmpty()) {
 				line.append("   ");
 			}
-			line.append(arrow).append(' ').append(distances.get(i)).append(" m");
+			line.append(arrow).append(' ').append(about).append(distances.get(i)).append(" m");
 		}
-		Component label = Component.translatable(g.wolf() ? "hud.jaymoskingdoms.night.pack" : "hud.jaymoskingdoms.night.kin");
-		Component text = kinCount == 0 ? Component.translatable("hud.jaymoskingdoms.night.none", label)
-			: Component.translatable("hud.jaymoskingdoms.night.sense", label, line.toString(),
-				kinCount > bearings.size() ? Component.translatable("hud.jaymoskingdoms.night.more", kinCount - bearings.size()) : Component.empty());
-		graphics.text(font, text, 4, 4, kinCount == 0 ? TEXT_DIM : color, true);
-		if (g.blood() && g.wings() < NightGifts.WINGS_MAX) {
-			// (the wings' strength, under the compass, while they're worn down)
-			graphics.text(font, Component.translatable("hud.jaymoskingdoms.night.wings", Math.round(100.0F * g.wings() / NightGifts.WINGS_MAX)), 4, 15,
-				TEXT_DIM, true);
-		}
+		return line.toString();
 	}
 
 	/** A vampire's bat wings: the elytra's shape in leather, spread only while it glides with no elytra on. */

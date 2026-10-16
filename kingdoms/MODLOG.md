@@ -3312,3 +3312,36 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   of another heritage is held to `Heritage.MCA_SIZE_CAP` 0.75 of it whenever their MCA look is saved
   (`McaPlayerSizeMixin`), when they pick a heritage, and every 10 s (`SIZE_CHECK_EVERY`, for players who were
   already tall). Players with no heritage yet aren't held, since MCA's editor comes before the heritage screen.
+
+## 0.7.88: Nightborn blood (pack 0.13.6)
+- Andy picked these from a list of Nightborn and vampire synergies (not the gentler sun: the sun's rules are unchanged).
+  All in `NightbornBlood` (tuning at the top), hooked into `Vampires`, `VampirePlayers`, `NightGifts`, `Heritage`,
+  `Moons`, `Cures` and the client looks.
+  - **Old Blood:** a Nightborn bitten at night turns `OLD_BLOOD_TICKS` 600 (30 s) after the bite instead of at the next
+    nightfall (bitten by day: at that dusk, as before): a heartbeat every second, reeling (Nausea) the last 5 s. No
+    vampire's bite takes an unturned Nightborn below `OLD_BLOOD_FLOOR` 2 health (a feeder that gets there has had its
+    fill and lets go), and they wake at full health, the bite's Weakness and Hunger gone. Still time for a golden apple.
+  - **Long thirst:** a Nightborn vampire starves after `STARVE_NIGHTS` 3 nights without blood (others 2); blood vision
+    follows.
+  - **Kin-sense both ways:** a vampire's (or dhampir's) kin-sense shows, under the kin line, a faint pull toward the
+    2 nearest unturned Nightborn players within 96 blocks (`FAINT_*`, distances to the nearest 10). The Elder never
+    hunts an unturned, unbitten, uncursed Nightborn: at night, with no prey, he walks to the nearest within 48 blocks,
+    and within 3.5 (in sight) whispers an offer with two chat choices, `[Bare your neck]` / `[Turn away]`
+    (`/kingdom nightkin yes|no`), their screen darkening a moment. He waits 30 s, watching. Yes: a gentle bite (2),
+    they're bitten (so Old Blood turns them 30 s later), and he's fed and rests. No, 30 s without an answer, or going
+    14 blocks off: he leaves them be for `LEAVE_BE_TICKS` 3 days. Anyone who hurts him is still fought.
+  - **Starlit blood** (client `HeritageLooks`, `VampireLooks`; textures `nightborn_blood_*` from
+    `tools/gen_heritage_looks.py`, the same shadow redrawn): a Nightborn vampire's starry shadow on the hands is deep
+    red with blood-bright stars; their eyes glow moon-silver by day and red-silver at night (in place of the vampire's
+    red eyes); the night wisps are blood mist.
+  - **Night-deep gifts:** while a Nightborn's dark bonus is on (`Heritage.dark`), Blood Dash goes 1.3x as far (and the
+    great leap 1.3x as far along), and Groundpound throws 1.4x as wide (7 blocks), 1.3x as hard, and shows people
+    1.5x as far (48 blocks) (`DEEP_*`).
+  - **Born dhampir:** a Nightborn dhampir (the golden apple) gets the vampire's night Strength too, still with no
+    weaknesses.
+  - **What the cure leaves:** the rite on a Nightborn who was turned leaves one trace for good, picked at random then
+    and saved (`nightborn_trace`): night vision whenever they're in the dark, or a faint kin-sense (the nearest vampire
+    within 64 blocks, roughly). Told by a line at the rite.
+  - **Blood Moon kin:** a Nightborn vampire's dark bonus is doubled under a Blood Moon (+20% blows, +10% speed) and
+    tripled under a Super Blood Moon; the dead risen out of the ground (tagged `jaymoskingdoms_risen`) won't target
+    them while it lasts (`ThrallTargetMixin`, `NightbornBlood.spares`).
