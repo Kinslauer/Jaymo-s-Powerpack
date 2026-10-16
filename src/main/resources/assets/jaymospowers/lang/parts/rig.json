@@ -221,5 +221,8 @@
  "gui.jaymospowers.rig_menu.ready": "Ready: picks it for J and uses it now",
  "rig.jaymospowers.mind.loyal.night_on": "Night vision on. I'll be your eyes.",
  "rig.jaymospowers.mind.dry.night_on": "Night vision. Now you can see what's about to eat you.",
- "rig.jaymospowers.mind.grim.night_on": "Darkness hides nothing now."
+ "rig.jaymospowers.mind.grim.night_on": "Darkness hides nothing now.",
+ "message.jaymospowers.rig_forge.recolour_none": "Wear the Rig pieces you want recoloured, then use a dye on the Forge",
+ "message.jaymospowers.rig_forge.recoloured": "Recoloured %s Rig pieces",
+ "message.jaymospowers.rig_forge.washed": "Washed %s Rig pieces back to bare metal"
 }
