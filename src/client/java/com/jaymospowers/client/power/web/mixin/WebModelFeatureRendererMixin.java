@@ -21,6 +21,7 @@ abstract class WebModelFeatureRendererMixin {
 		WebRagdoll.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebBodyPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebCounterPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.power.web.WebSuitTear.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebMorphLayer.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebWallRunPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebParkourPose.applyModel(submit.model(), submit.state());

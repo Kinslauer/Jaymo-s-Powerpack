@@ -3,8 +3,8 @@ package com.jaymospowers.client.power.web;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.web.WebBehemoth;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -17,8 +17,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -35,15 +33,19 @@ public final class WebBehemothClient {
 	/** The big body over the zombie: as the player's (WebSymbioteLayer.BULK), veins just above it. */
 	private static final float BULK = 0.7F, VEIN_GAP = 0.04F;
 	private static final int VEIN_TICKS = 4;
-	/** Back tendrils: how many, how long (times its scale), how thick at the root and tip. */
-	private static final int TENDRILS = WebBehemoth.TENDRILS;
-	/** The thrashing: how fast and how wide (share of the length), and the sudden jerks on top. */
-	private static final double THRASH_SPEED = 0.45, THRASH_WIDE = 0.9, JERK = 0.8;
-	private static final double LENGTH = 1.7, ROOT_RADIUS = 0.11, TIP_RADIUS = 0.03;
-	private static final int PIECES = 10;
-	/** A lash: reared until this share of it, lands at {@code WebBehemoth.STRIKE_HIT}, how high it rears. */
-	private static final float REAR_SHARE = 0.35F;
-	private static final double REAR_UP = 1.6;
+	/**
+	 * Back tendrils (Andy: "enemies mobs affected by the symbiote should also get the living armor tendrils"): Living
+	 * Armor's own (WebTendrilLayer), out of the back of every mob the symbiote rides. Rooted this share of the mob's
+	 * height up (upright), or on top of its back for a four-legged one ({@code QUADRUPED_ROOT}, when it's wider than
+	 * {@code QUADRUPED_WIDE} of its height); this much of its width behind its middle. As big as a player's on a mob
+	 * {@code SIZE_HEIGHT} tall (between {@code SIZE_MIN} and {@code SIZE_MAX}); a behemoth's sit out on its big body.
+	 */
+	private static final float UPRIGHT_ROOT = 0.77F, QUADRUPED_ROOT = 0.95F, QUADRUPED_WIDE = 0.75F, BACK_DEPTH = 0.25F;
+	private static final float SIZE_HEIGHT = 1.95F, SIZE_MIN = 0.35F, SIZE_MAX = 2.0F, BEHEMOTH_DEPTH = 1.0F;
+	/** They grow out over this long (ticks) once a mob's taken; a hostile host's (and a behemoth's) are wild, a peaceful one's half so. */
+	private static final float GROW_TICKS = 30.0F, FERAL_HOSTILE = 1.0F, FERAL_PEACEFUL = 0.5F;
+	/** A lash swings the tendrils on its side (reared until this share of it); a slam swings them all, stretched long. */
+	private static final float LASH_REAR = 0.25F;
 
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
 	private static final Identifier[] VEINS = {
@@ -58,8 +60,11 @@ public final class WebBehemothClient {
 	/** The suit over any mob's own model: black goo with veins, a texture that reads the same on any UV layout. */
 	private static final Identifier GOO = JaymosPowers.id("textures/entity/web_symbiote_goo.png");
 
-	/** Behemoths (and hostile mobs a symbiote is in) seen lately (entity ids), for their tendrils. */
-	private static final Set<Integer> SEEN = new HashSet<>();
+	/** On a ridden mob's render state: its back tendrils (WebTendrilLayer.submitOnMob). */
+	public static final RenderStateDataKey<WebSymbioteClient.Tendrils> MOB_TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_mob_tendrils");
+
+	/** When each ridden mob was first seen ridden (its age, ticks): its tendrils grow out from then. */
+	private static final Map<Entity, Float> FIRST_SEEN = new WeakHashMap<>();
 
 	private WebBehemothClient() {
 	}
@@ -72,101 +77,69 @@ public final class WebBehemothClient {
 		}
 	}
 
-	/** From EntityRenderer.extractRenderState: marks a behemoth for its suit layer, and remembers it for its tendrils. */
+	/** From EntityRenderer.extractRenderState: marks a behemoth or a ridden mob for its suit layer, with its back tendrils. */
 	public static void extract(Entity entity, EntityRenderState state) {
-		if (entity.hasAttached(WebBehemoth.HOST)) {
-			state.setData(HOST, Boolean.TRUE);
-			SEEN.add(entity.getId());
-		} else if (state.getData(HOST) != null) {
-			state.setData(HOST, null);
-		}
-		if (com.jaymospowers.power.web.WebInhabit.isHost(entity)) {
-			state.setData(INHABITED, Boolean.TRUE);
-			if (com.jaymospowers.power.web.WebInhabit.lashing(entity)) {
-				SEEN.add(entity.getId());
-			}
-		} else if (state.getData(INHABITED) != null) {
-			state.setData(INHABITED, null);
+		boolean behemoth = entity.hasAttached(WebBehemoth.HOST);
+		boolean inhabited = com.jaymospowers.power.web.WebInhabit.isHost(entity);
+		state.setData(HOST, behemoth ? Boolean.TRUE : null);
+		state.setData(INHABITED, inhabited ? Boolean.TRUE : null);
+		if ((behemoth || inhabited) && entity instanceof LivingEntity host && host.isAlive()) {
+			state.setData(MOB_TENDRILS, tendrils(host, behemoth || host instanceof net.minecraft.world.entity.monster.Enemy));
+		} else {
+			FIRST_SEEN.remove(entity);
+			state.setData(MOB_TENDRILS, null);
 		}
 	}
 
-	/** Every behemoth's back tendrils (from WebLineRenderer, in the level pass). */
+	/** Every behemoth's back tendrils used to be drawn here (from WebLineRenderer); they're WebTendrilLayer's now, on the mob's own model. */
 	static void render(LevelRenderContext context, ClientLevel level, Vec3 camera, float partialTick) {
-		if (SEEN.isEmpty()) {
-			return;
-		}
-		SEEN.removeIf(id -> !(level.getEntity(id) instanceof LivingEntity host)
-			|| !host.hasAttached(WebBehemoth.HOST) && !com.jaymospowers.power.web.WebInhabit.lashing(host) || !host.isAlive());
-		for (int id : SEEN) {
-			LivingEntity host = (LivingEntity)level.getEntity(id);
-			if (host == null || host.getPosition(partialTick).distanceToSqr(camera) > 64.0 * 64.0) {
-				continue;
-			}
-			tendrils(context, level, host, camera, partialTick);
-		}
 	}
 
-	private static void tendrils(LevelRenderContext context, ClientLevel level, LivingEntity host, Vec3 camera, float partialTick) {
-		float scale = host.getScale();
-		float time = host.tickCount + partialTick;
-		float yaw = Mth.lerp(partialTick, host.yBodyRotO, host.yBodyRot) * Mth.DEG_TO_RAD;
-		Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
-		Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
-		Vec3 up = new Vec3(0.0, 1.0, 0.0);
-		Vec3 back = host.getPosition(partialTick).add(0.0, host.getBbHeight() * 0.74, 0.0).subtract(forward.scale(0.2 * scale));
-		// each tendril's lash: which target, and how far through
-		Entity[] targets = new Entity[TENDRILS];
-		float[] swings = new float[TENDRILS];
-		java.util.Arrays.fill(swings, -1.0F);
-		for (WebBehemoth.Strike strike : host.getAttachedOrElse(WebBehemoth.STRIKE, java.util.List.<WebBehemoth.Strike>of())) {
-			if (strike.tendril() >= 0 && strike.tendril() < TENDRILS) {
-				targets[strike.tendril()] = level.getEntity(strike.target());
-				swings[strike.tendril()] = Mth.clamp((level.getGameTime() - strike.start() + partialTick) / WebBehemoth.STRIKE_TICKS, 0.0F, 1.0F);
-			}
+	/**
+	 * A ridden mob's back tendrils, as a wearer's are worked out (WebSymbioteClient): grown since it was first seen
+	 * ridden; swinging with its newest lash (the tendrils on the target's side rear and whip at it) or, over all of
+	 * them, its tendril slam (reared as the bundle snatches, crashing down with the prey).
+	 */
+	private static WebSymbioteClient.Tendrils tendrils(LivingEntity host, boolean hostile) {
+		float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float age = host.tickCount + partial;
+		float first = FIRST_SEEN.computeIfAbsent(host, h -> age);
+		float growth = Mth.clamp((age - first) / GROW_TICKS, 0.0F, 1.0F);
+		long now = host.level().getGameTime();
+		float strike = -1.0F, rear = LASH_REAR, hit = WebBehemoth.STRIKE_HIT / (float)WebBehemoth.STRIKE_TICKS;
+		boolean heavy = false;
+		Entity target = null;
+		WebBehemoth.Slam slam = host.getAttached(WebBehemoth.SLAM);
+		if (slam != null && now - slam.start() < WebBehemoth.SLAM_TICKS) {
+			target = host.level().getEntity(slam.target());
+			strike = Mth.clamp((now - slam.start() + partial) / WebBehemoth.SLAM_TICKS, 0.0F, 1.0F);
+			rear = WebBehemoth.SLAM_REACHED / (float)WebBehemoth.SLAM_TICKS;
+			hit = WebBehemoth.SLAM_HIT / (float)WebBehemoth.SLAM_TICKS;
+			heavy = true;
 		}
-		int light = net.minecraft.util.LightCoordsUtil.getLightCoords(level, BlockPos.containing(back));
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(WebLineRenderer.TENDRIL_TEXTURE), (pose, buffer) -> {
-			for (int t = 0; t < TENDRILS; t++) {
-				double side = (t % 2 == 0 ? 1.0 : -1.0) * (0.6 + 0.4 * (t / 2));
-				Vec3 root = back.add(right.scale(side * 0.12 * scale)).add(0.0, (0.15 - 0.12 * (t / 2)) * scale, 0.0);
-				double length = LENGTH * scale * (1.0 - 0.12 * (t / 2));
-				// thrashing wildly, never still: fast, wide, and jerking out at nothing now and then
-				double a = time * THRASH_SPEED;
-				double jerk = Math.pow(Math.max(0.0, Math.sin(a * 0.7 + t * 2.3) * Math.sin(a * 0.31 + t * 1.3)), 6.0) * JERK;
-				double sway = (Math.sin(a + t * 1.7) * 0.6 + Math.sin(a * 2.3 + t * 2.9) * 0.3) * THRASH_WIDE;
-				Vec3 bend = right.scale(side * (0.55 + jerk) + sway).add(up.scale(0.5 + 0.5 * Math.cos(a * 1.3 + t)))
-					.add(forward.scale(-0.3 + 0.7 * Math.sin(a * 0.9 + t * 0.7) + jerk));
-				Vec3 tip = root.add(bend.normalize().scale(length * (1.0 + 0.3 * jerk)));
-				Vec3 mid = root.add(up.scale(length * 0.45)).add(right.scale(side * length * 0.2))
-					.add(right.scale(Math.sin(a * 1.7 + t) * length * 0.25)).add(forward.scale(Math.cos(a * 1.5 + t * 2.0) * length * 0.2));
-				Entity target = targets[t];
-				float swing = swings[t];
-				if (target != null && swing >= 0.0F) {
-					// it rears up and whips down onto whatever it's after, then draws back
-					Vec3 aim = target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.5, 0.0);
-					Vec3 reared = root.add(up.scale(REAR_UP * scale)).add(right.scale(side * 0.4 * scale)).subtract(forward.scale(0.3 * scale));
-					float hit = WebBehemoth.STRIKE_HIT / (float)WebBehemoth.STRIKE_TICKS;
-					if (swing < REAR_SHARE) {
-						tip = tip.lerp(reared, smooth(swing / REAR_SHARE));
-					} else if (swing < hit) {
-						float k = (swing - REAR_SHARE) / (hit - REAR_SHARE);
-						tip = reared.lerp(aim, k * k);
-					} else {
-						tip = aim.lerp(tip, smooth((swing - hit) / (1.0F - hit)));
-					}
-					mid = root.lerp(tip, 0.5).add(up.scale(0.6 * scale));
-				}
-				Vec3 prev = root.subtract(camera);
-				for (int k = 1; k <= PIECES; k++) {
-					double s = k / (double)PIECES;
-					Vec3 p = root.lerp(mid, s).lerp(mid.lerp(tip, s), s).subtract(camera);
-					double r0 = Mth.lerp((k - 1) / (double)PIECES, ROOT_RADIUS, TIP_RADIUS) * scale;
-					double r1 = Mth.lerp(s, ROOT_RADIUS, TIP_RADIUS) * scale;
-					WebLineRenderer.tube(buffer, pose, prev, p, r0, r1, k + t, light);
-					prev = p;
+		if (target == null) {
+			WebBehemoth.Strike newest = null;
+			for (WebBehemoth.Strike s : host.getAttachedOrElse(WebBehemoth.STRIKE, java.util.List.<WebBehemoth.Strike>of())) {
+				if (now - s.start() < WebBehemoth.STRIKE_TICKS && (newest == null || s.start() > newest.start())) {
+					newest = s;
 				}
 			}
-		});
+			target = newest == null ? null : host.level().getEntity(newest.target());
+			strike = target == null ? -1.0F : Mth.clamp((now - newest.start() + partial) / WebBehemoth.STRIKE_TICKS, 0.0F, 1.0F);
+			rear = LASH_REAR;
+			hit = WebBehemoth.STRIKE_HIT / (float)WebBehemoth.STRIKE_TICKS;
+			heavy = false;
+		}
+		float aimYaw = 0.0F, aimPitch = 0.0F, side = 1.0F;
+		if (target != null) {
+			Vec3 to = target.getBoundingBox().getCenter().subtract(host.getEyePosition(partial));
+			float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
+			aimYaw = Mth.wrapDegrees(yaw - host.yBodyRot) * Mth.DEG_TO_RAD;
+			aimPitch = (float)Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
+			side = aimYaw >= 0.0F ? -1.0F : 1.0F;
+		}
+		return new WebSymbioteClient.Tendrils(growth, age, strike, aimYaw, aimPitch, side, 0.0F, 0, true, 0, 0.0F, 0.0F, heavy,
+			com.jaymospowers.power.web.WebSymbiote.STRIKE_SLAM, false, -1, rear, hit, hostile ? FERAL_HOSTILE : FERAL_PEACEFUL, -1.0F, null, null);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -183,16 +156,25 @@ public final class WebBehemothClient {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			if (state.getData(INHABITED) == null || state.isInvisible) {
+			if (state.isInvisible) {
 				return;
 			}
-			renderColoredCutoutModel(this.getParentModel(), GOO, poseStack, collector, lightCoords, state, -1, 1);
+			if (state.getData(INHABITED) != null) {
+				renderColoredCutoutModel(this.getParentModel(), GOO, poseStack, collector, lightCoords, state, -1, 1);
+			}
+			WebSymbioteClient.Tendrils tendrils = state.getData(MOB_TENDRILS);
+			if (tendrils != null) {
+				// sized to the mob's own model: its box, without its scale (the pose stack has that already)
+				float scale = state.scale > 0.0F ? state.scale : 1.0F;
+				float height = state.boundingBoxHeight / scale, width = state.boundingBoxWidth / scale;
+				boolean fourLegs = width > QUADRUPED_WIDE * height;
+				float rootY = 24.0F - (fourLegs ? QUADRUPED_ROOT : UPRIGHT_ROOT) * height * 16.0F;
+				float size = Mth.clamp(height / SIZE_HEIGHT, SIZE_MIN, SIZE_MAX);
+				float rootZ = fourLegs ? 0.0F : Math.max(0.0F, width * 16.0F * BACK_DEPTH - 2.0F * size)
+					+ (state.getData(HOST) != null ? BEHEMOTH_DEPTH : 0.0F);
+				WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, rootY, rootZ, size);
+			}
 		}
-	}
-
-	private static float smooth(float x) {
-		x = Mth.clamp(x, 0.0F, 1.0F);
-		return x * x * (3.0F - 2.0F * x);
 	}
 
 	/** Only touched when Jaymo's Kitchen is loaded: the big body layered over its zombie player. */
