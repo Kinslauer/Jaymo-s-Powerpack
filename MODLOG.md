@@ -1467,3 +1467,20 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   hits them they bleed out 2 minutes after the last hit, and the 10th hit kills. Mobs, fire and falls can kill them
   too, and sneak + right-click carries one over your shoulder (right-click throws, sneak + right-click sets down).
 - **0.11.91, symbiote ceilings, held weapon arm, bladed barrage:** Andy: "Wall crawl should operate the same way for ceilings, also the left click for symbiote weapons should be a click and hold, starting the symbiote tendrils coursing and bulging through the suit before collecting into the arm and forming into the blade/mace. The stabbing while holding a mob should animate the spears like this" (Venom image, hooked blade tips). Sneak under a ceiling slams the tendrils up into it like a wall; the weapon arm gathers while left click is held (lumps over the suit, down the arm, the weapon grows out of the hand) and strikes on release; barrage stabs wear spear and hooked blade tips. See docs/web.md.
+- **0.11.99, the Rig drawn as a layered suit that builds itself on:** Andy: "the rig looks good, it just clips a bit
+  currently with fresh anims, and it should materialize on the user, peice by peice, one large component unfolding and
+  mechanically interlocking onto the user. also make a more layered rig, add depth and detail". On players the Rig is
+  now its own model (`client/rig/RigSuit`, `RigSuitMesh` generated with its textures by `tools/gen_rig.py`; the
+  vanilla armour layers stay for armour stands and mobs): an under-suit with glowing seams, main plates, raised trim,
+  vents, the spine unit on the back (lit cells, side pistons, exhaust ports, wings), pistons and caps at the elbows
+  and knees, a lit chest reactor, visor, buckle, palm rings and heel nozzles, with a glow pass. It copies the wearer's
+  pose each frame and, under Fresh Animations, the pose EMF gave the body (`RigSuitPoseLivingEntityRendererMixin`, as
+  the costume does), so it no longer clips. Each piece builds on plate by plate when it's put on (by hand or a call),
+  each plate swinging or sliding in, overshooting and locking with a clunk and an iron clank (a piston thump on the
+  heavy ones): the Core's spine unit lands and unfolds its wings, the under-suit spreads from it, the chest halves swing
+  round from the back and meet, the reactor slots in and the lights flicker up, then abdomen, shoulders, upper arms,
+  collar; the Arms close the hip harness and lock the buckle, then thighs, gauntlets, elbow and knee joints; the
+  Thrusters raise the shins and clamp the boots; the Helm comes last, its faceplate swinging down. Off (or parked) it
+  comes apart backwards, 1.6x quicker. A suit call now lands the Core first, then Arms, Thrusters, Helm (`LAND_AT`).
+  Hidden pieces, costumes and Xeno forms still hide it; a backpack hangs clear of the spine unit. Tuning: the
+  constants at the top of `RigSuit`; plate timings and approaches in `gen_rig.py`'s `plate(...)` calls.
