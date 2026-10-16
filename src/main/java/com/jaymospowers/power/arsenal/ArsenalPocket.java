@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -332,11 +331,16 @@ public final class ArsenalPocket {
 			return;
 		}
 		long tick = server.getTickCount();
-		for (Iterator<Rift> it = RIFTS.iterator(); it.hasNext(); ) {
-			Rift rift = it.next();
+		RIFTS.removeIf(rift -> {
 			ServerLevel level = server.getLevel(rift.dimension);
-			if (level == null || level.getGameTime() > rift.until) {
-				it.remove();
+			return level == null || level.getGameTime() > rift.until;
+		});
+		// (0.11.96) over a copy: going through a rift (leave, enter) closes rifts, and changing the list mid-loop
+		// crashed the server
+		for (Rift rift : List.copyOf(RIFTS)) {
+			ServerLevel level = server.getLevel(rift.dimension);
+			// closed earlier this tick by someone going through another rift
+			if (level == null || !RIFTS.contains(rift)) {
 				continue;
 			}
 			Vec3 p = rift.pos;
@@ -345,7 +349,7 @@ public final class ArsenalPocket {
 			}
 			AABB box = new AABB(p.x - RIFT_RADIUS, p.y - 0.5, p.z - RIFT_RADIUS, p.x + RIFT_RADIUS, p.y + 2.0, p.z + RIFT_RADIUS);
 			for (ServerPlayer other : level.getEntitiesOfClass(ServerPlayer.class, box)) {
-				if (other.isSpectator() || !other.isAlive() || tick - LAST_PASS.getOrDefault(other.getUUID(), -1000L) <= PASS_COOLDOWN) {
+				if (!RIFTS.contains(rift) || other.isSpectator() || !other.isAlive() || tick - LAST_PASS.getOrDefault(other.getUUID(), -1000L) <= PASS_COOLDOWN) {
 					continue;
 				}
 				if (rift.out) {
