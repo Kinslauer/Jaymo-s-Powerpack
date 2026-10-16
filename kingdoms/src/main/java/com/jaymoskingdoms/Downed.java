@@ -44,14 +44,13 @@ import org.jspecify.annotations.Nullable;
  * and can kill them (Andy). Left alone, they get back up after {@link #RECOVER_TICKS} (Andy: "they
  * should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10
  * times"): once a player has hit them they won't, and they bleed out {@link #BLEED_OUT_TICKS} after the last hit, or
- * at the {@link #MAX_WOUNDS}th. Then they're gone, leaving nothing behind (their death counts then, for wars, quests
- * and crimes).
+ * at the {@link #MAX_WOUNDS}th. Then they die (their death counts then, for wars, quests and crimes).
  * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
  * <p>
  * (0.7.84) Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
  * decapitated". Every villager (MCA's too, children too) and the settlements' own folk (not their rulers) go down
- * now, not only guards; a blow that takes the head off still kills outright. A townsperson who isn't a guard leaves
- * their body and belongings when they do die at last, as anyone would. And the folk about look after their own: a
+ * now, not only guards; a blow that takes the head off still kills outright. When they do die at last they leave their
+ * body and belongings as anyone would, guards too (Andy: "guards should have corpses too"). And the folk about look after their own: a
  * grown villager near a downed one, not afraid or fighting, comes over, kneels and tends them, and after
  * {@link #TEND_TICKS} at their side has them back on their feet (a player's hit while they tend starts it over).
  */
@@ -76,8 +75,6 @@ public final class Downed {
 	static final float HELP_SPEED = 0.8F;
 	/** (0.7.84) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
 	static final String DECAPITATION = "jaymospowers:decapitation", HEADLESS_TAG = "jaymoskitchen.missing.head";
-	/** Kitchen's tag for a body that leaves no corpse (matched by name: Kitchen is optional). */
-	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 
 	/**
 	 * A downed guard: the game time it went down, shifted up one bit, the low bit set for a crawler. Saved (it stays
@@ -121,14 +118,9 @@ public final class Downed {
 				return true;
 			}
 			if (isDowned(entity)) {
-				if (!isGuard(entity)) {
-					// (0.7.84) a townsperson dies as anyone would, body and all
-					forget(entity);
-					return true;
-				}
-				// (a mob, fire, a fall, the void: it goes, but leaves nothing)
-				finish(level, entity, source);
-				return false;
+				// (a mob, fire, a fall, the void: 0.7.84, they die as anyone would, body and all)
+				forget(entity);
+				return true;
 			}
 			if (!downable(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || beheaded(entity, source)) {
 				return true;
@@ -444,31 +436,23 @@ public final class Downed {
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
 	}
 
-	/** Its death, at last: no corpse, no loot (see {@code DownedMixin}); the body is simply gone. */
+	/**
+	 * Its death, at last. (0.7.84) Andy: "guards should have corpses too": everyone, guards included, dies as anyone
+	 * would, their body (Kitchen's corpse) and what they had left behind.
+	 */
 	private static void finish(ServerLevel level, LivingEntity entity, DamageSource source) {
 		if (entity.isRemoved() || entity.isDeadOrDying()) {
 			return;
 		}
 		entity.stopRiding();
-		if (!isGuard(entity)) {
-			// (0.7.84) anyone else dies as anyone would: their body and what they had are left behind
-			forget(entity);
-			FINISHING.add(entity);
-			try {
-				entity.setInvulnerableTime(0);
-				entity.hurtServer(level, source, Float.MAX_VALUE);
-			} finally {
-				FINISHING.remove(entity);
-			}
-			return;
+		forget(entity);
+		FINISHING.add(entity);
+		try {
+			entity.setInvulnerableTime(0);
+			entity.hurtServer(level, source, Float.MAX_VALUE);
+		} finally {
+			FINISHING.remove(entity);
 		}
-		FELLED_BY.remove(entity);
-		untend(entity);
-		entity.addTag(NO_CORPSE_TAG);
-		entity.setHealth(0.0F);
-		entity.die(source);
-		level.broadcastEntityEvent(entity, (byte) 60);
-		entity.remove(Entity.RemovalReason.KILLED);
 	}
 
 	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.73) A downed guard ({@link Downed}) dies with nothing to loot, and is carried over the shoulder. */
+/** (0.7.73) A downed guard ({@link Downed}) is carried over the shoulder (and, from 0.7.84, is no longer downed when it dies, so leaves its corpse and loot). */
 @Mixin(LivingEntity.class)
 abstract class DownedMixin {
 	/** A downed guard carried by a player sits over their shoulder, not on their head. */

@@ -3296,8 +3296,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 ## 0.7.84: every villager can be downed, villagers tend the downed, shut-in villagers get out
 - **Downed** (Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
   decapitated"): every villager (MCA's, children too) and a settlement's own folk (not rulers, orcs, raiders or
-  barbarians) go down instead of dying; a beheading still kills. Guards still leave nothing when they die at last;
-  everyone else leaves their body and belongings as anyone would.
+  barbarians) go down instead of dying; a beheading still kills. When they die at last they leave their body and
+  belongings as anyone would, guards too (Andy: "guards should have corpses too").
 - **Tending**: the nearest grown villager within 24 blocks who isn't afraid, fighting or asleep walks over, kneels and
   tends a downed one (hearts, a hand at work); `TEND_TICKS` (10 s) at their side gets them up. A player's hit starts
   it over. Helpers are kept from routines and work while they tend.
