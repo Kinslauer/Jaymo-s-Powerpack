@@ -15,6 +15,7 @@
 		"DismemberMobMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
+		"LedgePacketListenerMixin",
 		"LeavesJumperMixin",
 		"LeavesPathMixin",
 		"LeavesStateMixin",

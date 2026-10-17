@@ -133,3 +133,49 @@ Each pickup rolls a hold (synced in the carrier's `jaymospowers:carry_carrying` 
 - The hold geometry and the first-person arm offsets are computed, not seen: tune `CarryPose` constants in game.
 - Injection order: the carry's render hooks run at priority 2000 so they come last; another mod's pose code that runs
   later could still move a carried body's limbs.
+
+# Ledge grab and climb-over (0.13.17, everyone)
+
+Everyone's own movement, alongside carrying and crawling: catch the edge of a wall about two blocks high and pull
+yourself over it. Server: `core/Ledge` (rules, packets, the synced `ledge_hold`, all the numbers at the top). Client:
+`client/LedgeClient` (finding the edge, the hang, the climb's path), `client/LedgePose` (the pose, the first-person
+hands), `LedgePlayerMixin` (the hold moves the local player in place of `Player.travel`, and Jump there never opens an
+elytra), `LedgePacketListenerMixin` (never kicked for floating while hanging, or for `RELEASE_GRACE_TICKS` 20 after).
+
+| Input | What happens |
+|---|---|
+| Hold **forward + Jump** at a wall | Rising (or at the top of the jump, falling no faster than 0.2 b/t), once your eyes are within 0.1 of its top edge (and the edge at least 1.1 above your feet, the wall within 0.35 of your body, facing it within 40 degrees): you catch the edge and hang there, feet 1.85 below it. Your fall is reset. |
+| **Jump** (pressed again) while hanging | Pull up and over: 16 ticks, straight up beside the wall for the first 60%, then across onto the top (0.4 past the edge). 0.6 exhaustion. |
+| **Sneak**, **Back**, or look more than 100 degrees away | Let go (pushed 0.06 off the wall). The grip also gives out after 20 s (`HANG_MAX_TICKS` 400). 10 ticks before another grab. |
+
+- **Where:** the edge needs room to stand on it and nothing over your head: the whole climb (straight up from the hang
+  to standing height above the edge, then across) must be clear. The top must be solid enough (`MIN_TOP_AREA` 0.45 of
+  a block's area: slabs, stairs and full blocks yes, fence posts and panes no) and not in `jaymospowers:ledge_no_grab`
+  (fences, walls, fence gates, cactus, magma, iron bars, barriers; datapacks can add more). Three-block walls are out
+  of reach without Jump Boost (the edge is above your eyes at the top of a jump); one-block steps are just jumped.
+- **Not** in creative flight, an elytra, water, lava, on a ladder or vine, asleep, riding (or ridden), carried,
+  carrying anything (a player, an animal, a block, a Kitchen corpse), crawling, meditating, or in a power's own
+  movement: Wind, Z Fighter, Xenoform, Smoke and Rig flights, web lines, wings and parkour moves, Wall Crawl, a web
+  ragdoll or hold, a web wall run, Darktide's moves, stun and cripple, Gravity's Weightless, rock flight, wall walk,
+  forward fall, Lift and the held stun, Chrono's wall run and Time Flow's stun.
+  The server also refuses a grab while the player's power says it keeps them floating or skips the movement check.
+  The pack has no weight system yet beyond carrying, so nothing else blocks it (and Gravity users carry no weight).
+- **Hands full:** attack and use clicks are swallowed while on a ledge (vanilla's and Better Combat's swings start
+  from them). Mobs never use it.
+- **Multiplayer:** the hang and climb are client-authoritative like crawling and carrying: the client moves itself
+  along a collision-free path with `move()`, so the server's own collision move agrees (no "moved wrongly" rubber band).
+  Everyone sees the pose from `ledge_hold` (the wall's side, the start time, hanging or climbing); the climbing
+  player's own pose and first-person hands run off the client's copy so they show at once.
+- **Poses:** `LedgePose` is listed in `PoseTakeover.posed` (Fresh Animations steps aside) and `ModelPoses` (render
+  layers see the pose).
+
+## Testing (ledge)
+1. Build a 2-high wall. Hold W + Space into it: you catch the edge near the top of the jump and hang, arms up, legs
+   swinging; in first person both hands grip the top of the view. A 1-high block is just jumped onto; a 3-high wall
+   can't be caught.
+2. Tap Space: you pull up and over smoothly and stand on top; the camera rises without a snap; a little hunger goes.
+3. Hang, then Sneak / S / turn round: you drop. Hang 20 s: you drop.
+4. Fences, walls, glass panes, cactus: never caught. A wall with a block over your head, or no room on top: never caught.
+5. On a dedicated server, a second client watches: the hang and climb poses show, nobody is kicked ("flying",
+   "moved too quickly") or rubber-banded, even hanging the full 20 s. Letting go hurts no more than the drop from the hang.
+6. Creative flight, elytra, swimming, riding, carrying or being carried, Wind flight, a web swing: no grabs.

@@ -95,6 +95,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		LedgeClient.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();
 		com.jaymospowers.client.costume.CostumeClient.init();
