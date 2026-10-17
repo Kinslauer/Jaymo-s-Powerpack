@@ -410,7 +410,8 @@ public final class WindPower implements Power {
 	private static void blowShieldAway(ServerPlayer player, ServerLevel level) {
 		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
 			net.minecraft.world.item.ItemStack held = player.getItemInHand(hand);
-			if (held.isEmpty() || !held.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS)) {
+			// (0.13.32) a quarterstaff blocks too now, but it's a staff, not a shield: the wind leaves it be
+			if (held.isEmpty() || !held.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS) || WindStaff.isStaff(held)) {
 				continue;
 			}
 			net.minecraft.world.item.ItemStack shield = held.copy();
