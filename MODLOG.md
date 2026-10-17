@@ -1674,3 +1674,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   button worked. Now each one checks and spends its TP on the server, creative too, and the client greys out Learn and
   "+" when you can't afford it. Creative still skips a form's mastery and hardship (not its TP); levels a stat's own
   training raises stay free. For creative testing, `/powerdebug zfighter tp <n>`.
+- **0.13.22, the Ki Disc is thrown overhead:** Andy: "Ki disc should animate like a disc that you throw from above
+  your head, and thrown" (the Destructo Disc). G now winds up first (`ZFighterDisc`): the throwing arm goes straight up
+  and a flat, thin disc of ki forms over the palm, lying level and turning, growing from a sliver to its full 1.2 blocks
+  across over 0.8 s (16 ticks), with motes drawn in round its edge and a rising whine (beacon hum climbing in pitch,
+  amethyst resonance over it, a chime when it's full). You're slowed as when charging. Then the overhand throw: the arm
+  comes over and down in 4 ticks, the body leaning into it and the shoulders turning through, the other arm flung back;
+  2 ticks in, the disc leaves the hand from above your head, aimed at what's under your crosshair, and the arm holds
+  low for 5 ticks before easing out. Everyone sees the pose (`zfighter_disc_throw`, synced; `client/ZFighterDiscPose`)
+  and the disc: a ki orb flagged `Orb.DISC`, drawn by `ZFighterOrbs.disc` as a level disc (white-hot heart, see-through
+  blade fading to the edge, a bright rim and saw teeth) spinning slowly in the hand and fast in flight, with a high
+  whir as it flies. The cutting is unchanged (60 blocks; stops at obsidian-hard, unbreakable, block-entity or
+  forbidden blocks). The 12 ki is paid when the wind-up starts; dying, losing the power, being silenced or turning
+  into the Great Ape mid-wind-up lets it fizzle. G's cooldown covers the wind-up (18 ticks + the old 20). Numbers at
+  the top of `ZFighterDisc` and `ZFighterDiscPose`.

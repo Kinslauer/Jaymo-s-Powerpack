@@ -312,6 +312,7 @@ public final class ZFighterPower implements Power {
 		Powers.register(INSTANCE);
 		com.jaymospowers.power.web.KitchenCompat.extraStomachSlots(player -> Powers.has(player, INSTANCE) ? EXTRA_STOMACH : 0);
 		ZFighterKi.init();
+		ZFighterDisc.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();
 		ZFighterDrills.init();
@@ -331,11 +332,13 @@ public final class ZFighterPower implements Power {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LIVE.remove(handler.player.getUUID());
 			ZFighterGrowth.forget(handler.player);
+			ZFighterDisc.forget(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			LIVE.clear();
 			ZFighterGrowth.clear();
 			ZFighterKi.clear();
+			ZFighterDisc.clear();
 		});
 	}
 
@@ -451,6 +454,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
+		ZFighterDisc.forget(player);
 		ZFighterCorruption.clear(player);
 		ZFighterLineage.tailTags(player, false, false);
 		player.removeAttached(FORM);
@@ -657,8 +661,9 @@ public final class ZFighterPower implements Power {
 	private static void quick(ServerPlayer player, Live live) {
 		switch (ZFighterTraining.of(player).quick()) {
 			case ZFighterTraining.KI_DISC -> {
-				if (ZFighterKi.disc(player, live)) {
-					cooldown(player, ZFighterState.BLAST, ZFighterKi.DISC_COOLDOWN);
+				// the arm goes up and the disc forms; it's thrown after the wind-up (ZFighterDisc)
+				if (ZFighterDisc.start(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterDisc.WINDUP_TICKS + ZFighterDisc.RELEASE_TICK + ZFighterKi.DISC_COOLDOWN);
 				}
 			}
 			case ZFighterTraining.HOMING_VOLLEY -> {
@@ -1092,7 +1097,7 @@ public final class ZFighterPower implements Power {
 			AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, HUNGRY_ID, hungry ? -HUNGRY_WEAKNESS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.barrageFrom >= 0 || live.spiritFrom >= 0
-			? -CHARGE_SLOW : 0.0,
+			|| ZFighterDisc.throwing(player) ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// lineages: a Verdant's Giant forms (his long arm is the stretch punch, RaceMoves); the Great Ape

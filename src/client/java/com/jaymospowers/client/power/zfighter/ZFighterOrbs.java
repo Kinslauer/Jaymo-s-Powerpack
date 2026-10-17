@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -12,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,6 +30,16 @@ public final class ZFighterOrbs {
 	static final int WATER_RIM_ALPHA = 140, WATER_HEART_ALPHA = 110;
 	/** Ki orbs: the heart's share of the radius, how much the ball breathes, how fast its energy streams. */
 	static final float ORB_HEART = 0.55F, ORB_PULSE = 0.04F, ORB_FLOW = 0.05F;
+	/**
+	 * Ki Discs: how fast they spin (radians a tick) forming in the hand and once thrown (moving faster than
+	 * {@link #DISC_FLYING} blocks a tick), how thick they are (a share of the radius), the white heart's share of the
+	 * radius, and the saw teeth round the edge (how many, how far they stick out) that show the spin.
+	 */
+	static final float DISC_HELD_SPIN = 0.55F, DISC_FLIGHT_SPIN = 1.6F;
+	static final double DISC_FLYING = 0.3;
+	static final float DISC_THICKNESS = 0.07F, DISC_HEART = 0.45F;
+	static final int DISC_SEGMENTS = 24, DISC_TEETH = 8;
+	static final float DISC_TOOTH = 0.16F;
 
 	private static final class Live {
 		Vec3 prev;
@@ -36,6 +48,9 @@ public final class ZFighterOrbs {
 		float size;
 		int color;
 		boolean water;
+		boolean disc;
+		float spin;
+		float prevSpin;
 		int quiet;
 		int age;
 	}
@@ -62,6 +77,7 @@ public final class ZFighterOrbs {
 				live.size = orb.size();
 				live.color = orb.color() & 0xFFFFFF;
 				live.water = (orb.color() & ZFighterNet.Orb.WATER) != 0;
+				live.disc = (orb.color() & ZFighterNet.Orb.DISC) != 0;
 				live.quiet = 0;
 			}
 		});
@@ -76,6 +92,11 @@ public final class ZFighterOrbs {
 			ORBS.values().removeIf(live -> ++live.quiet > STALE);
 			for (Live live : ORBS.values()) {
 				live.age++;
+				live.prevSpin = live.spin;
+				if (live.disc) {
+					// a lazy turn while it forms over the palm, a blur once it's thrown
+					live.spin += live.at.distanceToSqr(live.prev) > DISC_FLYING * DISC_FLYING ? DISC_FLIGHT_SPIN : DISC_HELD_SPIN;
+				}
 			}
 		});
 		LevelRenderEvents.COLLECT_SUBMITS.register(ZFighterOrbs::render);
@@ -93,7 +114,9 @@ public final class ZFighterOrbs {
 			// each orb starts its spin somewhere of its own, so a barrage doesn't turn in step
 			float time = live.age + partial + (entry.getKey() & 63) * 7.0F;
 			float size = Mth.lerp(partial, live.prevSize, live.size);
-			if (live.water) {
+			if (live.disc) {
+				disc(context.submitNodeCollector(), context.poseStack(), at, size, live.color, Mth.lerp(partial, live.prevSpin, live.spin), time);
+			} else if (live.water) {
 				waterOrb(context.submitNodeCollector(), context.poseStack(), at, size, live.color, time);
 			} else {
 				orb(context.submitNodeCollector(), context.poseStack(), at, size, live.color, time, 1.0F);
@@ -152,6 +175,104 @@ public final class ZFighterOrbs {
 		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
 			(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, Vec3.ZERO, r, rim, flow, -flow * 0.7F));
 		poseStack.popPose();
+	}
+
+	/**
+	 * A Ki Disc {@code size} blocks across at {@code at} (camera-relative), lying level and turned {@code spin} radians:
+	 * a thin white-hot heart, a see-through blade of the ki's colour fading to its edge, a bright rim, and saw teeth round
+	 * it so the spin shows.
+	 */
+	static void disc(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float size, int color, float spin, float time) {
+		if (size <= 0.01F) {
+			return;
+		}
+		float r = size * 0.5F;
+		float half = Math.max(0.012F, r * DISC_THICKNESS);
+		int heart = 0xFF000000 | whiten(color, 0.8F);
+		int blade = 0xC0 << 24 | whiten(color, 0.25F);
+		int edge = 0x50 << 24 | lighten(color);
+		int rim = 0xE0 << 24 | whiten(color, 0.55F);
+		float flow = time * ORB_FLOW;
+		float x = (float)at.x, y = (float)at.y, z = (float)at.z;
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false), (pose, buffer) -> {
+			ring(buffer, pose, x, y + half * 0.5F, z, 0.0F, r * DISC_HEART, heart, heart, spin, flow);
+			ring(buffer, pose, x, y - half * 0.5F, z, 0.0F, r * DISC_HEART, heart, heart, spin, flow);
+		});
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true), (pose, buffer) -> {
+			ring(buffer, pose, x, y + half, z, r * DISC_HEART * 0.6F, r, blade, edge, spin, -flow);
+			ring(buffer, pose, x, y - half, z, r * DISC_HEART * 0.6F, r, blade, edge, spin, -flow);
+			band(buffer, pose, x, y, z, r, half, rim, spin, flow);
+			teeth(buffer, pose, x, y, z, r, rim & 0xFFFFFF | 0x90 << 24, spin);
+		});
+	}
+
+	/** A flat ring (or a full disc, {@code inner} 0) at height {@code y}, seen from above and below. */
+	private static void ring(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, float inner, float outer, int in, int out,
+		float spin, float flow) {
+		for (int i = 0; i < DISC_SEGMENTS; i++) {
+			float a0 = spin + Mth.TWO_PI * i / DISC_SEGMENTS;
+			float a1 = spin + Mth.TWO_PI * (i + 1) / DISC_SEGMENTS;
+			float u0 = i / (float)DISC_SEGMENTS * 2.0F, u1 = (i + 1) / (float)DISC_SEGMENTS * 2.0F;
+			float c0 = Mth.cos(a0), s0 = Mth.sin(a0), c1 = Mth.cos(a1), s1 = Mth.sin(a1);
+			quad(buffer, pose,
+				x + c0 * inner, y, z + s0 * inner, in, u0, flow,
+				x + c0 * outer, y, z + s0 * outer, out, u0, flow + 1.0F,
+				x + c1 * outer, y, z + s1 * outer, out, u1, flow + 1.0F,
+				x + c1 * inner, y, z + s1 * inner, in, u1, flow);
+		}
+	}
+
+	/** The disc's edge: a thin upright band round it. */
+	private static void band(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, float r, float half, int color, float spin,
+		float flow) {
+		for (int i = 0; i < DISC_SEGMENTS; i++) {
+			float a0 = spin + Mth.TWO_PI * i / DISC_SEGMENTS;
+			float a1 = spin + Mth.TWO_PI * (i + 1) / DISC_SEGMENTS;
+			float u0 = i / (float)DISC_SEGMENTS * 4.0F, u1 = (i + 1) / (float)DISC_SEGMENTS * 4.0F;
+			float c0 = Mth.cos(a0) * r, s0 = Mth.sin(a0) * r, c1 = Mth.cos(a1) * r, s1 = Mth.sin(a1) * r;
+			quad(buffer, pose,
+				x + c0, y - half, z + s0, color, u0, flow,
+				x + c0, y + half, z + s0, color, u0, flow + 0.2F,
+				x + c1, y + half, z + s1, color, u1, flow + 0.2F,
+				x + c1, y - half, z + s1, color, u1, flow);
+		}
+	}
+
+	/** Saw teeth swept back from the edge, flat in the disc's plane: they turn with it, so the spin reads at a glance. */
+	private static void teeth(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, float r, int color, float spin) {
+		float out = r * (1.0F + DISC_TOOTH);
+		for (int i = 0; i < DISC_TEETH; i++) {
+			float a0 = spin + Mth.TWO_PI * i / DISC_TEETH;
+			float a1 = a0 + Mth.TWO_PI / DISC_TEETH * 0.6F;
+			float c0 = Mth.cos(a0), s0 = Mth.sin(a0), c1 = Mth.cos(a1), s1 = Mth.sin(a1);
+			// a triangle: two corners on the edge, the point out past the leading one
+			quad(buffer, pose,
+				x + c0 * r, y, z + s0 * r, color, 0.0F, 0.0F,
+				x + c1 * out, y, z + s1 * out, color & 0xFFFFFF, 0.5F, 1.0F,
+				x + c1 * r, y, z + s1 * r, color, 1.0F, 0.0F,
+				x + c1 * r, y, z + s1 * r, color, 1.0F, 0.0F);
+		}
+	}
+
+	/** One quad, drawn both ways round so it shows from either side. */
+	private static void quad(VertexConsumer buffer, PoseStack.Pose pose,
+		float x0, float y0, float z0, int k0, float u0, float v0,
+		float x1, float y1, float z1, int k1, float u1, float v1,
+		float x2, float y2, float z2, int k2, float u2, float v2,
+		float x3, float y3, float z3, int k3, float u3, float v3) {
+		vertex(buffer, pose, x0, y0, z0, k0, u0, v0);
+		vertex(buffer, pose, x1, y1, z1, k1, u1, v1);
+		vertex(buffer, pose, x2, y2, z2, k2, u2, v2);
+		vertex(buffer, pose, x3, y3, z3, k3, u3, v3);
+		vertex(buffer, pose, x3, y3, z3, k3, u3, v3);
+		vertex(buffer, pose, x2, y2, z2, k2, u2, v2);
+		vertex(buffer, pose, x1, y1, z1, k1, u1, v1);
+		vertex(buffer, pose, x0, y0, z0, k0, u0, v0);
+	}
+
+	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z, int color, float u, float v) {
+		buffer.addVertex(pose, x, y, z).setColor(color).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(15728880)
+			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	/** {@code rgb} halfway to white, for the glass. */

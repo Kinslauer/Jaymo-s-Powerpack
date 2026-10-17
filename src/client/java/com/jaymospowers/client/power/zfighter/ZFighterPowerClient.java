@@ -76,6 +76,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterSpiritPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterDancePose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterComboPose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(ZFighterDiscPose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
@@ -151,6 +152,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterGuardPose.extract(entity, state);
 		ZFighterDancePose.extract(entity, state, partialTicks);
 		ZFighterComboPose.extract(entity, state, partialTicks);
+		ZFighterDiscPose.extract(entity, state, partialTicks);
 		ZFighterMark.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
@@ -165,6 +167,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterDancePose.applyModel(model, state);
 		ZFighterComboPose.applyModel(model, state);
 		ZFighterSpiritPose.applyModel(model, state);
+		ZFighterDiscPose.applyModel(model, state);
 		RaceHoldClient.applyModel(model, state);
 	}
 
