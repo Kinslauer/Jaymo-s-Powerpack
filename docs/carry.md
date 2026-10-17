@@ -134,7 +134,7 @@ Each pickup rolls a hold (synced in the carrier's `jaymospowers:carry_carrying` 
 - Injection order: the carry's render hooks run at priority 2000 so they come last; another mod's pose code that runs
   later could still move a carried body's limbs.
 
-# Ledge grab and climb-over (0.13.17, everyone)
+# Ledge grab and climb-over (0.13.18, everyone)
 
 Everyone's own movement, alongside carrying and crawling: catch the edge of a wall about two blocks high and pull
 yourself over it. Server: `core/Ledge` (rules, packets, the synced `ledge_hold`, all the numbers at the top). Client:

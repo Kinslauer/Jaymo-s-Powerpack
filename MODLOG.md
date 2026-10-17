@@ -1629,7 +1629,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   legs, then a blade while it lies there), its tail is cut for good and it never turns again; its lines change to
   match. A villager cut at birth never turns. The ape body hides the villager's (`ZFighterHumanoidMobRendererMixin`), and
   `ZFighterLineage.race(...)` now reads any entity's heritage.
-- **0.13.17, ledge grab and climb-over, for everyone** (no power needed): "if they can see over it with a jump they can
+- **0.13.18, ledge grab and climb-over, for everyone** (no power needed): "if they can see over it with a jump they can
   grab it, with an animation hanging from the edge, then jump over." Hold forward and Jump at a wall about two blocks
   high: as your eyes come level with its top (the edge at most 0.1 above your eyes, at least 1.1 above your feet,
   within 0.35 of your body, facing it within 40 degrees, rising or at the top of the jump) you catch it and hang,
