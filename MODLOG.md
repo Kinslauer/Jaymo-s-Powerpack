@@ -1722,3 +1722,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     suit"): under the suit fight's bond (70), taking the mask off starts the same struggle bar as taking the suit off,
     every time; win and it comes off until you put it back. Sulking, locked out or still settling in, it won't let go
     at all. Putting it back on is never fought (`WebSymbioteBond.resistMask`).
+- **0.13.25, ledge hands in first person fixed:** Andy's clip: hanging from a ledge, the view was full of huge grey arm
+  faces, and after the pull-up both arms stood up from the screen's bottom corners, shoulder-end on. The first-person
+  arms were turned on top of vanilla's own arm placement, and the hang's tilt went the wrong way, swinging them back
+  through the camera. Now vanilla's placement is undone and the arms are placed straight in the view (`LedgePose`
+  `FP_*`, numbers at its top): hanging, they rise from below the view to the hands on the edge near its top, shifting
+  their grip; climbing, the edge sinks through the view and the hands go down with it, out of sight before you stand.
+  Third person is unchanged.

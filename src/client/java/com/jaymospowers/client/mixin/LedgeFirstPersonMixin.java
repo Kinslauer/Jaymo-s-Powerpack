@@ -35,7 +35,7 @@ abstract class LedgeFirstPersonMixin {
 		int light = player.avatarRenderState.lightCoords;
 		for (HumanoidArm arm : HumanoidArm.values()) {
 			poseStack.pushPose();
-			if (LedgePose.firstPersonArm(poseStack, climb, time, arm == HumanoidArm.RIGHT)) {
+			if (LedgePose.firstPersonArm(poseStack, climb, time, arm == HumanoidArm.RIGHT, CarryPose.FIRST_PERSON_EQUIP)) {
 				((CarryArmInvoker)this).jaymospowers$renderPlayerArm(poseStack, collector, light, CarryPose.FIRST_PERSON_EQUIP, 0.0F, arm, player);
 			}
 			poseStack.popPose();
