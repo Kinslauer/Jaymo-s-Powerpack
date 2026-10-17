@@ -200,6 +200,12 @@ public final class ZFighterTraining {
 		Data withCharged(int index) {
 			return new Data(tp, stats, form, mastery, limit, techniques, quick, index);
 		}
+
+		/** Learned and put on its key at once (G or V; the Spirit Bomb has C to itself). */
+		Data withLearned(int index) {
+			Data learned = withTechnique(index);
+			return index >= SPIRIT_BOMB ? learned : ZFighterTraining.charged(index) ? learned.withCharged(index) : learned.withQuick(index);
+		}
 	}
 
 	public static final AttachmentType<Data> DATA = AttachmentRegistry.create(JaymosPowers.id("zfighter_training"),
@@ -439,11 +445,25 @@ public final class ZFighterTraining {
 			return;
 		}
 		Data data = of(player);
-		player.setAttached(DATA, data.withTechnique(index).withTp(player.isCreative() ? data.tp() : data.tp() - TECHNIQUE_TP[index]));
+		learn(player, data.withTp(player.isCreative() ? data.tp() : data.tp() - TECHNIQUE_TP[index]), index);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_learned",
 			Component.translatable(ZFighterLineage.techniqueKey(player, index))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
 			1.4F);
+	}
+
+	/**
+	 * Learns technique {@code index} (on top of {@code data}) and puts it on its key at once, saying so (a learned
+	 * technique used to sit unused until "Use" was pressed on the Techniques page, so G kept firing a Ki Blast and
+	 * sneak+V a Ki Wave (and, before V unlocked, sneak+V said it was locked)).
+	 */
+	static void learn(ServerPlayer player, Data data, int index) {
+		player.setAttached(DATA, data.withLearned(index));
+		if (index < SPIRIT_BOMB) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_on_key",
+				Component.translatable(ZFighterLineage.techniqueKey(player, index)),
+				Component.keybind(charged(index) ? "key.jaymospowers.ability_3" : "key.jaymospowers.ability_2")).withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	/** Puts a learned technique on its key: G for the quick ones, V for the charged ones. */

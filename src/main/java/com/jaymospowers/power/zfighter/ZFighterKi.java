@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -70,12 +72,21 @@ public final class ZFighterKi {
 	static final int BLAST_LIFE = 40;
 	static final float BLAST_EXHAUSTION = 0.5F;
 
-	// ---- Ki Disc: a spinning blade of ki that cuts through everything in its path ----
+	// ---- Ki Disc: a flat spinning blade of ki that cuts through every creature and block in its path ----
 	static final float DISC_KI = 12.0F;
 	static final int DISC_COOLDOWN = 20;
 	static final float DISC_DAMAGE = 7.0F;
 	static final double DISC_SPEED = 1.3;
-	static final int DISC_LIFE = 30;
+	/** How far it flies (blocks) unless something stops it. */
+	static final double DISC_RANGE = 60.0;
+	/** Half its width (blocks): it cuts creatures this near its path and a flat slice of blocks this far to either side. */
+	static final double DISC_HALF_WIDTH = 0.6;
+	/** How finely its path is walked for blocks (blocks between samples, along it and across it). */
+	static final double DISC_CUT_STEP = 0.25;
+	/** It stops on a block this hard or harder (obsidian's destroy time), an unbreakable one, or one holding a block entity. */
+	static final float DISC_STOP_HARDNESS = 50.0F;
+	/** At most this many blocks cut in one tick (a guard; at its speed and width it cuts far fewer). */
+	static final int DISC_MAX_CUTS = 24;
 
 	// ---- Homing Volley: small bolts that seek out foes ----
 	static final float VOLLEY_KI = 20.0F;
@@ -229,8 +240,10 @@ public final class ZFighterKi {
 		double orbSize;
 		/** SPIRIT: ticks it has been grinding into the ground (0 while it flies). */
 		int sinking;
-		/** DISC: who it has already cut (it passes through). */
+		/** DISC: who it has already cut (it passes through), which way is across it (flat, level), how far it's flown. */
 		final Set<Integer> struck = new HashSet<>();
+		Vec3 side = Vec3.ZERO;
+		double flown;
 		int age;
 
 		Bolt(ServerLevel level, UUID owner, Vec3 pos, Vec3 velocity, float damage, int color, int kind, int life) {
@@ -479,6 +492,9 @@ public final class ZFighterKi {
 	/** One tick of a bolt's flight. False when it's spent. */
 	private static boolean flyBolt(ServerPlayer owner, Bolt bolt) {
 		ServerLevel level = bolt.level;
+		if (bolt.kind == DISC) {
+			return flyDisc(owner, bolt);
+		}
 		if (bolt.kind == HOMING) {
 			seek(owner, bolt);
 		}
@@ -517,10 +533,7 @@ public final class ZFighterKi {
 			target.hurtServer(level, source(owner), bolt.damage);
 			push(target, bolt.velocity, 0.6, 0.2);
 			pop(level, hit.getLocation(), dust);
-			if (bolt.kind != DISC) {
-				return false;
-			}
-			bolt.struck.add(target.getId());
+			return false;
 		}
 		if (block.getType() != HitResult.Type.MISS) {
 			if (bolt.kind == SPIRIT) {
@@ -559,6 +572,107 @@ public final class ZFighterKi {
 		return true;
 	}
 
+	/**
+	 * One tick of a Ki Disc: it cuts every creature it passes and every block in a flat slice along its path (they break
+	 * and drop), and stops only at a block it can't cut ({@link #discCuts}) or once it has flown {@link #DISC_RANGE}.
+	 * Fluids don't stop it.
+	 */
+	private static boolean flyDisc(ServerPlayer owner, Bolt bolt) {
+		ServerLevel level = bolt.level;
+		double speed = bolt.velocity.length();
+		if (speed < 1.0E-6) {
+			return false;
+		}
+		Vec3 dir = bolt.velocity.scale(1.0 / speed);
+		Vec3 from = bolt.pos;
+		double step = Math.min(speed, DISC_RANGE - bolt.flown);
+		// the blocks in its slice, nearest first: the first it can't cut stops it there
+		double reach = step;
+		boolean stopped = false;
+		List<BlockPos> cuts = new ArrayList<>();
+		Set<BlockPos> seen = new HashSet<>();
+		int along = Math.max(1, Mth.ceil(step / DISC_CUT_STEP));
+		int across = Math.max(1, Mth.ceil(DISC_HALF_WIDTH / DISC_CUT_STEP));
+		scan:
+		for (int i = 0; i <= along; i++) {
+			double d = step * i / along;
+			Vec3 middle = from.add(dir.scale(d));
+			for (int j = -across; j <= across; j++) {
+				BlockPos pos = BlockPos.containing(middle.add(bolt.side.scale(DISC_HALF_WIDTH * j / across)));
+				if (!seen.add(pos)) {
+					continue;
+				}
+				if (!level.isLoaded(pos)) {
+					reach = d;
+					stopped = true;
+					break scan;
+				}
+				BlockState state = level.getBlockState(pos);
+				if (state.isAir() || state.liquid() || state.is(Blocks.BUBBLE_COLUMN)) {
+					continue;
+				}
+				if (!discCuts(owner, level, pos, state)) {
+					reach = d;
+					stopped = true;
+					break scan;
+				}
+				if (cuts.size() >= DISC_MAX_CUTS) {
+					// enough for one tick: it goes on from here next tick
+					reach = d;
+					break scan;
+				}
+				cuts.add(pos.immutable());
+			}
+		}
+		for (BlockPos pos : cuts) {
+			BlockState state = level.getBlockState(pos);
+			// breaks it as the fighter would: the break's particles and sound, and what it drops
+			level.destroyBlock(pos, true, owner);
+			PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, owner, pos, state, null);
+		}
+		if (!cuts.isEmpty()) {
+			level.playSound(null, from.x, from.y, from.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.8F);
+		}
+		Vec3 end = from.add(dir.scale(reach));
+		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color, 1.8F);
+		// every creature its edge passes through, once each
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(DISC_HALF_WIDTH + 1.0),
+			e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner && !bolt.struck.contains(e.getId()))) {
+			AABB box = target.getBoundingBox().inflate(DISC_HALF_WIDTH, DISC_CUT_STEP, DISC_HALF_WIDTH);
+			java.util.Optional<Vec3> at = box.clip(from, end);
+			if (at.isEmpty() && !box.contains(from)) {
+				continue;
+			}
+			bolt.struck.add(target.getId());
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, source(owner), bolt.damage);
+			push(target, bolt.velocity, 0.6, 0.2);
+			pop(level, at.orElse(from), dust);
+		}
+		if (stopped) {
+			// a block it can't cut: it shatters on it
+			pop(level, end, dust);
+			level.playSound(null, end.x, end.y, end.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4F, 1.8F);
+			return false;
+		}
+		draw(level, bolt, from, dust);
+		bolt.pos = end;
+		bolt.flown += reach;
+		bolt.age++;
+		return bolt.flown < DISC_RANGE - 1.0E-6;
+	}
+
+	/**
+	 * Whether the disc cuts through this block: not as hard as obsidian, not unbreakable, holding no block entity (chests,
+	 * furnaces), and the fighter may break it here (his game mode, spawn protection, claims through Fabric's break event).
+	 */
+	private static boolean discCuts(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
+		float hardness = state.getDestroySpeed(level, pos);
+		return hardness >= 0.0F && hardness < DISC_STOP_HARDNESS && !state.hasBlockEntity() && player.mayBuild() && player.mayInteract(level, pos)
+			&& !player.blockActionRestricted(level, pos, player.gameMode())
+			&& PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, null);
+	}
+
 	private static void draw(ServerLevel level, Bolt bolt, Vec3 from, DustParticleOptions dust) {
 		Vec3 to = from.add(bolt.velocity);
 		int orbColor = bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color;
@@ -569,7 +683,8 @@ public final class ZFighterKi {
 				double spin = bolt.age * 0.9;
 				for (int i = 0; i < 2; i++) {
 					double a = spin + i * Math.PI;
-					level.sendParticles(dust, true, false, to.x + Math.cos(a) * 0.55, to.y, to.z + Math.sin(a) * 0.55, 1, 0.0, 0.0, 0.0, 0.0);
+					level.sendParticles(dust, true, false, to.x + Math.cos(a) * DISC_HALF_WIDTH, to.y, to.z + Math.sin(a) * DISC_HALF_WIDTH, 1, 0.0, 0.0,
+						0.0, 0.0);
 				}
 			}
 			case BOMB -> {
@@ -801,8 +916,11 @@ public final class ZFighterKi {
 		}
 		ServerLevel level = player.level();
 		Vec3 look = player.getViewVector(1.0F);
-		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), look.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
-			formColor(live), DISC, DISC_LIFE));
+		Bolt bolt = new Bolt(level, player.getUUID(), palm(player, look), look.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
+			formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
+		// flat and level: across it is his right, whichever way he looks (straight down too)
+		bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
+		BOLTS.add(bolt);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		exhaust(player, BLAST_EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
