@@ -187,11 +187,18 @@ public final class WebSymbioteClient {
 	static final double LEDGE_FORWARD = 0.18;
 	// ===== takeover ================================================================================================
 	/**
-	 * How fast it drags you (blocks/tick): sprinting whenever it can, chasing, hunting or running; walking on tight
-	 * corners, step-ups and edges, mid-leap, in water, or when you're too hungry to sprint. And how hard it wrenches
-	 * your view around (0..1 per tick).
+	 * How fast it drags you (blocks/tick): flat out, sprinting, chasing, hunting or running, hungry or not (0.13.23: it
+	 * never ambles); only a touch slower ({@code WALK_SPEED}, still past a sprint) round tight corners, up steps and at
+	 * edges. And how hard it wrenches your view around (0..1 per tick).
 	 */
-	static final double TAKEOVER_SPEED = 0.38, WALK_SPEED = 0.24;
+	static final double TAKEOVER_SPEED = 0.38, WALK_SPEED = 0.3;
+	/**
+	 * (0.13.23) Its target not on your client yet (a sightseeing marker only just placed) or for a moment out of sight:
+	 * it keeps driving along the way it has for up to {@code TAKEOVER_LOST_GRACE} ticks rather than letting you go (and
+	 * standing there). Chasing something more than {@code BOUND_CHASE_RANGE} blocks off, it bounds along the way at it.
+	 */
+	static final int TAKEOVER_LOST_GRACE = 40;
+	static final double BOUND_CHASE_RANGE = 8.0;
 	static final float TAKEOVER_TURN = 0.35F;
 	/** Running: this much faster than the chase, and the view swings round this hard. */
 	static final double FLEE_SPEED_SCALE = 1.2;
@@ -401,6 +408,7 @@ public final class WebSymbioteClient {
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTarget = payload.entityId();
 			takeoverTicks = payload.entityId() < 0 ? 0 : payload.ticks();
+			targetLost = 0;
 			takeoverFlee = payload.flee();
 			if (takeoverTicks <= 0) {
 				clearPath();
@@ -974,9 +982,9 @@ public final class WebSymbioteClient {
 		return takeoverTicks > 0 && sprintHeld;
 	}
 
-	/** Food enough (or flight) to sprint, and not swimming. */
+	/** Not swimming: a takeover sprints you whatever your hunger (it isn't your legs it's tiring; see WebSprintMixin). */
 	private static boolean canSprint(LocalPlayer player) {
-		return (player.getFoodData().hasEnoughFood() || player.getAbilities().mayfly) && !player.isInWater();
+		return !player.isInWater();
 	}
 
 	private static void sprint(LocalPlayer player, boolean on) {
@@ -1012,10 +1020,9 @@ public final class WebSymbioteClient {
 			|| boundFlight >= 0) {
 			return false;
 		}
-		if (!stuck && !takeoverFlee && !player.getFoodData().hasEnoughFood() && !player.getAbilities().mayfly) {
-			// too hungry to sprint, too hungry to bound (but never too hungry to run for its life)
-			return false;
-		}
+		// (0.13.23) never too hungry to bound: it drives you as hard as it can, fed or not
+		Entity chased = away ? null : player.level().getEntity(takeoverTarget);
+		boolean far = chased != null && chased.position().subtract(player.position()).horizontalDistance() > BOUND_CHASE_RANGE;
 		Bound plan = null;
 		int n = pathNodes.size();
 		if (pathMode == WebNet.TakeoverPath.PATH && pathIndex < n) {
@@ -1037,7 +1044,11 @@ public final class WebSymbioteClient {
 			for (int j = n - 1; j >= pathIndex && plan == null; j--) {
 				Vec3 at = pathNodes.get(j);
 				double d = at.subtract(player.position()).horizontalDistance();
-				if (d < min || d > BOUND_MAX_RANGE || !away && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
+				if (d < min || d > BOUND_MAX_RANGE || !away && !far && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
+					continue;
+				}
+				if (far && chased.position().distanceTo(at) < TAKEOVER_STOP) {
+					// (not right on top of it: it lands short and closes the last steps)
 					continue;
 				}
 				net.minecraft.core.BlockPos block = net.minecraft.core.BlockPos.containing(at.x, at.y + 0.1, at.z);
@@ -1290,11 +1301,22 @@ public final class WebSymbioteClient {
 	private static void tickTakeover(LocalPlayer player, WebSwing swing) {
 		Entity target = player.level().getEntity(takeoverTarget);
 		// (the symbiote gone, a power swapped away: it can't be driving any more)
-		if (target == null || !target.isAlive() || --takeoverTicks <= 0 || !WebSymbiote.isBonded(player)) {
+		if (--takeoverTicks <= 0 || !WebSymbiote.isBonded(player)) {
 			takeoverTicks = 0;
 			clearPath();
 			return;
 		}
+		if (target == null || !target.isAlive()) {
+			// not here (yet): on along the way it has, flat out, till it turns up or the server says what's next
+			if (++targetLost > TAKEOVER_LOST_GRACE) {
+				takeoverTicks = 0;
+				clearPath();
+				return;
+			}
+			pressOn(player);
+			return;
+		}
+		targetLost = 0;
 		leapTouched = false;
 		if (swing.pull != null) {
 			// its cord has you (a zip it fired, see WebTakeoverPath#ZIP_EVERY): reeled in, eyes along the way
@@ -1353,6 +1375,33 @@ public final class WebSymbioteClient {
 		if (!leapTouched && leapCoil >= 0) {
 			endLeap();
 		}
+	}
+
+	/** Ticks its target has been missing on this client (see {@link #TAKEOVER_LOST_GRACE}). */
+	private static int targetLost;
+
+	/** Its target missing for a moment: flat out along the next waypoint, eyes along the way. */
+	private static void pressOn(LocalPlayer player) {
+		if (pathMode != WebNet.TakeoverPath.PATH || pathIndex >= pathNodes.size()) {
+			sprint(player, false);
+			return;
+		}
+		Vec3 node = pathNodes.get(pathIndex);
+		Vec3 flat = new Vec3(node.x - player.getX(), 0.0, node.z - player.getZ());
+		double dh = flat.length();
+		if (dh <= WAYPOINT_REACH) {
+			pathIndex++;
+			return;
+		}
+		Vec3 dir = flat.scale(1.0 / dh);
+		turnToward(player, dir, TAKEOVER_TURN, false);
+		sprint(player, canSprint(player));
+		Vec3 move = dir.scale(Math.min(TAKEOVER_SPEED, dh));
+		double up = player.getDeltaMovement().y;
+		if (player.onGround() && (node.y > player.getY() + STEP_JUMP || player.horizontalCollision)) {
+			up = JUMP_SPEED;
+		}
+		player.setDeltaMovement(move.x, up, move.z);
 	}
 
 	/** The tendrils are tearing a way through: it stands its ground and stares at the block. */
@@ -1445,9 +1494,9 @@ public final class WebSymbioteClient {
 		boolean step = node.y > pos.y + STEP_JUMP && dh < STEP_JUMP_RANGE;
 		boolean corner = pathIndex + 1 < n && dh < CORNER_SLOW_RANGE && corner(pathIndex);
 		boolean edge = player.onGround() && node.y >= pos.y - 0.5 && !groundAhead(player, dir.scale(sprintSpeed));
-		boolean sprinting = canSprint(player) && !step && !corner && !edge && !ledge;
-		sprint(player, sprinting);
-		double speed = sprinting ? sprintSpeed : WALK_SPEED;
+		boolean careful = step || corner || edge || ledge;
+		sprint(player, canSprint(player) && !ledge);
+		double speed = canSprint(player) && !careful ? sprintSpeed : WALK_SPEED;
 		// never faster than it takes to land on the waypoint
 		Vec3 move = dir.scale(Math.min(speed, Math.max(dh, speed * 0.5)));
 		Vec3 v = player.getDeltaMovement();
@@ -1583,9 +1632,8 @@ public final class WebSymbioteClient {
 			} else if (player.onGround() && (hop || player.horizontalCollision)) {
 				up = JUMP_SPEED;
 			}
-			boolean sprinting = canSprint(player) && !hop;
-			sprint(player, sprinting);
-			Vec3 move = way.scale(sprinting ? TAKEOVER_SPEED : WALK_SPEED);
+			sprint(player, canSprint(player));
+			Vec3 move = way.scale(canSprint(player) && !hop ? TAKEOVER_SPEED : WALK_SPEED);
 			player.setDeltaMovement(move.x, up, move.z);
 		}
 	}
@@ -1641,9 +1689,8 @@ public final class WebSymbioteClient {
 			// against a wall: the tendrils dig in and climb it (the server rips through if there's no way up)
 			up = Math.max(up, FLEE_CLIMB);
 		}
-		boolean sprinting = canSprint(player) && !hop;
-		sprint(player, sprinting);
-		Vec3 move = best.scale((sprinting ? TAKEOVER_SPEED : WALK_SPEED) * FLEE_SPEED_SCALE);
+		sprint(player, canSprint(player));
+		Vec3 move = best.scale((canSprint(player) && !hop ? TAKEOVER_SPEED : WALK_SPEED) * FLEE_SPEED_SCALE);
 		player.setDeltaMovement(move.x, up, move.z);
 	}
 

@@ -211,6 +211,29 @@ public final class ZFighterPower implements Power {
 	/** The form he's in (1-3), for everyone's client (the hair); absent in base form. */
 	public static final AttachmentType<Integer> FORM = AttachmentRegistry.create(JaymosPowers.id("zfighter_form"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.13.27) Andy: "every zfighter should spawn with a random ki color". The ki colour each Z Fighter is born with,
+	 * drawn from {@link #KI_PALETTE} when the power comes (or the first time it's missing): his blasts, disc, waves, bomb,
+	 * barrier and aura in base form (a form's own colour takes over in it). Saved, kept through death, synced to everyone.
+	 */
+	public static final AttachmentType<Integer> KI_COLOR = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_color"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** The ki colours one is born with: bright, clean hues that read well as glowing ki. */
+	static final int[] KI_PALETTE = {
+		0x8FD3FF, // sky blue
+		0x4A7BFF, // deep blue
+		0xE8F4FF, // white
+		0xFFC85A, // gold
+		0xFF8C1A, // orange
+		0xFF4A3A, // red
+		0xFF70D8, // pink
+		0xB050FF, // purple
+		0x7A5CFF, // violet
+		0x5AFF8C, // green
+		0xE8FF70, // lime
+		0x40F0E0, // cyan
+	};
+
 	/** Hardship lived through (the road to Super). Saved, kept through death. */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -260,6 +283,8 @@ public final class ZFighterPower implements Power {
 		int rageCooldown;
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
+		/** (0.13.27) His ki colour ({@link #KI_COLOR}), kept fresh each tick; -1 before the first. */
+		int kiColor = -1;
 		int moonless;
 		/** How far grown into the Great Ape (0-1): eases up over {@link ZFighterLineage#APE_GROW_TICKS} and back down. */
 		float apeSize;
@@ -423,6 +448,8 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, ZFighterState.NONE);
+		// (0.13.27) born with a ki colour of his own
+		rollKiColor(player);
 		// the lineage isn't chosen: it's in the blood (the heritage)
 		ZFighterLineage.inherit(player);
 	}
@@ -1160,6 +1187,19 @@ public final class ZFighterPower implements Power {
 	}
 
 	// ---------------------------------------------------------------- state
+
+	/** (0.13.27) {@code player}'s ki colour (RGB), rolled now if he has none yet. */
+	public static int kiColor(ServerPlayer player) {
+		Integer color = player.getAttached(KI_COLOR);
+		return color != null ? color : rollKiColor(player);
+	}
+
+	/** (0.13.27) A new ki colour for {@code player}, from {@link #KI_PALETTE}; returns it. */
+	public static int rollKiColor(ServerPlayer player) {
+		int color = KI_PALETTE[player.getRandom().nextInt(KI_PALETTE.length)];
+		player.setAttached(KI_COLOR, color);
+		return color;
+	}
 
 	static Live live(ServerPlayer player) {
 		return LIVE.computeIfAbsent(player.getUUID(), id -> new Live());

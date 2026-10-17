@@ -1024,12 +1024,12 @@ public final class ZFighterKi {
 			// one finger, pointed: the ki gathers at its tip
 			hands = player.getEyePosition().add(look.scale(0.9)).add(0.0, -0.25, 0.0);
 		}
-		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : sig.color(),
+		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : baseColor(live, sig.color()),
 			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
 		// the ki gathers as an orb between the hands, growing with the charge; now and then a mote drawn in
 		boolean needle = sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB;
 		orb(level, -(player.getId() * 4 + 3), hands, needle ? 0.12 + 0.18 * charge : 0.25 + 0.75 * charge,
-			live.superOn() ? formColor(live) : sig.color());
+			live.superOn() ? formColor(live) : baseColor(live, sig.color()));
 		if (random.nextInt(2) == 0) {
 			double ox = (random.nextDouble() - 0.5) * 1.6;
 			double oy = (random.nextDouble() - 0.5) * 1.6;
@@ -1073,7 +1073,7 @@ public final class ZFighterKi {
 		Vec3 from = player.getEyePosition().add(look.scale(1.0 + size)).add(0.0, -0.2, 0.0);
 		Bolt bolt = new Bolt(level, player.getUUID(), from, look.scale(BOMB_SPEED),
 			Mth.lerp(charge, BOMB_DAMAGE_MIN, BOMB_DAMAGE_MAX) * ZFighterPower.kiPower(player, live),
-			live.superOn() ? formColor(live) : WAVE_COLOR, BOMB, BOMB_LIFE);
+			live.superOn() ? formColor(live) : baseColor(live, WAVE_COLOR), BOMB, BOMB_LIFE);
 		bolt.size = size;
 		bolt.radius = 2.0 + size * 1.5;
 		bolt.burst = Mth.lerp(charge, BOMB_BLAST_MIN, BOMB_BLAST_MAX) * (live.superOn() ? 1.3F : 1.0F);
@@ -1114,7 +1114,7 @@ public final class ZFighterKi {
 		};
 		ZFighterWaveBeam.fire(player, from, look, new ZFighterWaveBeam.Spec(sig.range(), sig.speed(), radius, damage,
 			(0.8 + charge * 1.2) * (sig.style() == NEEDLE ? 0.3 : 1.0), sig.chill(), sig.pierces(), power, interaction, false,
-			super_ ? formColor(live) : sig.color(), sig.style(), ZFighterWaveBeam.strength(charge, kiPower), false, pitch));
+			super_ ? formColor(live) : baseColor(live, sig.color()), sig.style(), ZFighterWaveBeam.strength(charge, kiPower), false, pitch));
 		switch (sig.style()) {
 			case NEEDLE -> {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 1.8F);
@@ -1143,7 +1143,13 @@ public final class ZFighterKi {
 
 	/** A bolt's or beam's colour: the base blast's, or the form's in his lineage's hue. */
 	private static int formColor(ZFighterPower.Live live) {
-		return live.form == 0 ? ZFighterPower.FORM_COLOR[0] : ZFighterLineage.color(live.lineage, live.form);
+		// (0.13.27) in base form, his own ki colour
+		return live.form == 0 ? live.kiColor >= 0 ? live.kiColor : ZFighterPower.FORM_COLOR[0] : ZFighterLineage.color(live.lineage, live.form);
+	}
+
+	/** (0.13.27) A base-form colour that was the lineage's or the wave's: his own ki colour now, when he has one. */
+	static int baseColor(ZFighterPower.Live live, int fallback) {
+		return live.kiColor >= 0 ? live.kiColor : fallback;
 	}
 
 	/** V as the Great Ape: a beam from the mouth. No ki, no charge: it's the moon's strength. */
