@@ -264,6 +264,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.92: an Earthling near death: the ki round the fists flares, with a buff (its attachment)
 		LOGGER.debug("earthling surge attachment: {}", EarthlingSurge.UNTIL);
 		EarthlingSurge.register();
+		// 0.7.95: a Warrior-born back from the brink: an attribute point (its attachments)
+		LOGGER.debug("warrior zenkai attachments: {} {}", WarriorZenkai.POINTS, WarriorZenkai.NEXT);
+		WarriorZenkai.register();
 		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
 		com.jaymoskingdoms.sailing.Sailing.register();
 		// 0.7.42: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,

@@ -3388,3 +3388,9 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   standing up, looking away, stepping out of reach or someone lifting them empties it. A quick sneak-tap still picks
   them up over your shoulder, now when you let go (within 0.4 s) rather than on the click; carried bodies, disarming
   and throwing are unchanged.
+- **0.7.95, a Warrior-born comes back stronger:** Andy: "warrior borns that get damaged to low health and survive get
+  an attribute point. this effect resets every 5m." Hit down to a quarter of their health or less, a Warrior-born is on
+  the brink; once they're through it (10 seconds without a hit, or healed back over half), they win an attribute
+  point to spend on the K screen, with a roar and a level-up chime. Dying on the brink wins nothing. After a point, the
+  next can't be won for 5 minutes. The points are kept for good, through death and respecs (`WarriorZenkai`, numbers at
+  its top; counted in `Stats.earned`).
