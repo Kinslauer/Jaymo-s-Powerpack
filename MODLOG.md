@@ -1764,3 +1764,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     code is untouched (their 4-argument `Beam` still works).
   - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
     `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
+- **0.13.29, Super 2 and 3 within reach:** Andy: "super 2 and 3 dont seem to be possible to acquire". The slower growth
+  of 0.13.19 cut TP to a quarter (about 180 an hour from time alone, half a point a hit), but Super 2 and 3 still cost
+  4000 and 12000 TP: some 22 and 67 hours. They now cost 1500 and 4500 (`ZFighterTraining.FORM_TP`), still slower than
+  before 0.13.19; the mastery and hardship they need are unchanged. And creative players earn TP now (and share it
+  with friends nearby), since buying costs TP there too since 0.13.21: creative testers were stuck at 0.
