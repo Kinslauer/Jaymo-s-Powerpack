@@ -1729,3 +1729,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `FP_*`, numbers at its top): hanging, they rise from below the view to the hands on the edge near its top, shifting
   their grip; climbing, the edge sinks through the view and the hands go down with it, out of sight before you stand.
   Third person is unchanged.
+- **0.13.26, costumes no longer flicker on MCA bodies:** Andy's clip: a black costume with the MCA clothes flickering
+  through it. With MCA a player's clothes are drawn on their own body copy at 0.0625, their outer layer (jacket,
+  sleeves, pants) at 0.3125 and its hat layer at 0.5625; the costume's suit sat at 0.3 and its mask at 0.55, a hair under
+  each, so they fought. The suit now stands at 0.35 (over the clothes, still under MCA's hair at 0.375, so long hair
+  falls over it) and masks at 0.62 (over the clothing hat and the hair) (`CostumeModels`, numbers at its top). Without
+  MCA it's the same costume, a breath looser.
