@@ -27,10 +27,17 @@ import org.jspecify.annotations.Nullable;
  * goes and where the secondary goes, which never overlap.
  */
 final class CostumeModels {
-	/** How far the suit stands off the skin: over its outer layer (0.25), under where armour would be. */
-	static final float SUIT_GROW = 0.3F;
-	/** Masks sit over the skin's hat layer (0.5); the hood looser, the helmet loosest. */
-	static final float MASK_GROW = 0.55F, HOOD_GROW = 0.8F, HELMET_GROW = 1.0F;
+	/**
+	 * How far the suit stands off the skin: over its outer layer (0.25), under where armour would be. (0.13.26) And clear
+	 * of MCA's clothes, whose outer layer sits at 0.3125 (its clothing body 0.0625 plus the 0.25): at 0.3 the two fought
+	 * and the clothes flickered through; still under MCA's hair (0.375), so long hair falls over the suit.
+	 */
+	static final float SUIT_GROW = 0.35F;
+	/**
+	 * Masks sit over the skin's hat layer (0.5); the hood looser, the helmet loosest. (0.13.26) And over MCA's clothing
+	 * hat layer (0.5625: hoods, caps) and its hair (0.425).
+	 */
+	static final float MASK_GROW = 0.62F, HOOD_GROW = 0.8F, HELMET_GROW = 1.0F;
 	/** The cape hangs this far (pixels) behind where the vanilla cape would, clear of the suit's back. */
 	static final float CAPE_GAP = 0.45F;
 	/** The cape's length in pixels, per kind (the vanilla cape is 16). */

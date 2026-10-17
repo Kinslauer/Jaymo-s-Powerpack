@@ -1,19 +1,27 @@
 package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -30,6 +38,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -53,6 +62,12 @@ import org.jspecify.annotations.Nullable;
  * body and belongings as anyone would, guards too (Andy: "guards should have corpses too"). And the folk about look after their own: a
  * grown villager near a downed one, not afraid or fighting, comes over, kneels and tends them, and after
  * {@link #TEND_TICKS} at their side has them back on their feet (a player's hit while they tend starts it over).
+ * <p>
+ * (0.7.93) Andy: "shift click holding a downed npc raises a meter to revive them, it takes one piece of food from your
+ * inventory". Sneak and hold use on one: a quick tap still picks them up (on letting go), held past {@link #TAP_TICKS}
+ * it's a revive. Kneeling there for {@link #REVIVE_TICKS} (a bar over the hotbar), with something to eat on you, gets
+ * them up as their own recovery does; it costs the least filling food you carry. Let go, stand up, look away or step
+ * off and the bar empties.
  */
 public final class Downed {
 	/** A downed guard's health: what mobs, fire and falls have left to take. */
@@ -75,6 +90,15 @@ public final class Downed {
 	static final float HELP_SPEED = 0.8F;
 	/** (0.7.84) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
 	static final String DECAPITATION = "jaymospowers:decapitation", HEADLESS_TAG = "jaymoskitchen.missing.head";
+	/** (0.7.93) A player's revive: how long sneak + use is held to get them up (ticks), and what makes it a hold, not a tap (a pick-up). */
+	static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
+	/** Holding use repeats every 4 ticks: no repeat for this long and you've let go. */
+	static final int REVIVE_GRACE = 8;
+	/** How far past your reach you may lean while reviving, and how often your hands work at it (a swing, a sound). */
+	static final double REVIVE_SLACK = 0.5;
+	static final int REVIVE_WORK_TICKS = 15;
+	/** The revive bar's length. */
+	static final int REVIVE_BAR = 12;
 
 	/**
 	 * A downed guard: the game time it went down, shifted up one bit, the low bit set for a crawler. Saved (it stays
@@ -105,6 +129,24 @@ public final class Downed {
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
 	/** (0.7.84) Townsfolk being finished off (their death let through as it comes). */
 	private static final java.util.Set<LivingEntity> FINISHING = java.util.Collections.newSetFromMap(new WeakHashMap<>());
+
+	/** (0.7.93) A player's sneak + use held on a downed one: since when, when use last came, how full the bar is, and whether it's over (use still swallowed till let go). */
+	private static final class Revive {
+		final LivingEntity body;
+		final long start;
+		long held;
+		int ticks;
+		boolean begun, over;
+
+		Revive(LivingEntity body, long start) {
+			this.body = body;
+			this.start = start;
+			this.held = start;
+		}
+	}
+
+	/** Player → their revive. Not saved. */
+	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
 
 	private Downed() {
 	}
@@ -145,6 +187,12 @@ public final class Downed {
 			return false;
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			Revive held = world.isClientSide() || hand != InteractionHand.MAIN_HAND ? null : REVIVING.get(player.getUUID());
+			if (held != null && held.body == entity) {
+				// (0.7.93) still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
+				held.held = world.getGameTime();
+				return InteractionResult.SUCCESS;
+			}
 			if (!(entity instanceof LivingEntity body) || !isDowned(body) || player.isSpectator()) {
 				return InteractionResult.PASS;
 			}
@@ -157,13 +205,16 @@ public final class Downed {
 						toss(player, body);
 					}
 				} else if (player.isShiftKeyDown()) {
-					pickUp(player, body);
+					// (0.7.93) a tap picks them up once let go; held, it's a revive
+					REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime()));
 				} else {
 					disarm(player, body);
 				}
 			}
 			return InteractionResult.SUCCESS;
 		});
+		ServerTickEvents.END_SERVER_TICK.register(Downed::revives);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> REVIVING.clear());
 	}
 
 	/** One of a realm's guards or archers: its folk, a villager in its service, or a villager in that job. */
@@ -453,6 +504,99 @@ public final class Downed {
 		} finally {
 			FINISHING.remove(entity);
 		}
+	}
+
+	/** (0.7.93) Each player's sneak + use on a downed one: a tap picks them up, a hold fills the bar and gets them up. */
+	private static void revives(MinecraftServer server) {
+		if (REVIVING.isEmpty()) {
+			return;
+		}
+		for (Iterator<Map.Entry<UUID, Revive>> it = REVIVING.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Revive r = e.getValue();
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			LivingEntity body = r.body;
+			if (player == null || !(player.level() instanceof ServerLevel level) || !player.isAlive() || !body.isAlive() || body.isRemoved()
+				|| body.level() != level) {
+				it.remove();
+				continue;
+			}
+			if (!isDowned(body)) {
+				// (up already, by someone else's hand)
+				r.over = true;
+			}
+			long now = level.getGameTime();
+			if (now - r.held > REVIVE_GRACE) {
+				// let go
+				it.remove();
+				if (r.held - r.start < TAP_TICKS && isDowned(body) && player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+					pickUp(player, body);
+				} else if (r.begun && !r.over) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				}
+				continue;
+			}
+			if (r.over || r.held - r.start < TAP_TICKS) {
+				continue;
+			}
+			if (!r.begun) {
+				r.begun = true;
+				if (!(body instanceof Mob) || food(player) < 0) {
+					r.over = true;
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.no_food", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+					continue;
+				}
+			}
+			if (!player.isShiftKeyDown() || body.isPassenger() || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+				r.over = true;
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				continue;
+			}
+			if (++r.ticks % REVIVE_WORK_TICKS == 0) {
+				// kneeling at their side, hands at work
+				player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
+					0.8F + level.getRandom().nextFloat() * 0.4F);
+				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
+			}
+			if (r.ticks < REVIVE_TICKS) {
+				if (r.ticks % 2 == 0) {
+					int filled = Math.round(REVIVE_BAR * r.ticks / (float) REVIVE_TICKS);
+					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
+				}
+				continue;
+			}
+			r.over = true;
+			int slot = food(player);
+			if (slot < 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.no_food", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				continue;
+			}
+			ItemStack stack = player.getInventory().getItem(slot);
+			Component eaten = stack.getHoverName();
+			stack.consume(1, player);
+			player.getInventory().setChanged();
+			getUp(level, (Mob) body);
+			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
+			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
+		}
+	}
+
+	/** (0.7.93) The inventory slot of the least filling thing {@code player} has to eat (the first of equals), or -1. */
+	private static int food(Player player) {
+		int best = -1;
+		FoodProperties least = null;
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			FoodProperties food = player.getInventory().getItem(slot).get(DataComponents.FOOD);
+			if (food != null && (least == null || food.nutrition() < least.nutrition()
+				|| food.nutrition() == least.nutrition() && food.saturation() < least.saturation())) {
+				best = slot;
+				least = food;
+			}
+		}
+		return best;
 	}
 
 	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */

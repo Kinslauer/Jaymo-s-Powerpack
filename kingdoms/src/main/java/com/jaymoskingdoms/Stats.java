@@ -112,10 +112,10 @@ public final class Stats {
 		return n;
 	}
 
-	/** Every attribute point earned: from your character level, and your heritage's free ones. */
+	/** Every attribute point earned: from your character level, your heritage's free ones, and a Warrior-born's from the brink. */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
-		return characterLevel(p) / LEVELS_PER_POINT + (kind == null ? 0 : kind.freePoints);
+		return characterLevel(p) / LEVELS_PER_POINT + (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player);
 	}
 
 	/** Points left to spend. */
