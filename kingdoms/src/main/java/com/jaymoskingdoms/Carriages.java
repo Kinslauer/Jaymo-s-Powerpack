@@ -9,6 +9,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -42,6 +46,15 @@ final class Carriages {
 	static final double SEATED_REACH = 4.5;
 	/** The coachman keeps this close to the gate while it waits. */
 	static final int PARKED_RADIUS = 3;
+	/**
+	 * (0.7.90) Where a carriage can go: open ground (sky overhead, so no hall, porch or tree canopy), firm and level
+	 * ({@code OPEN} blocks round the spot rising or falling at most a block, no fences or walls), looked for this far
+	 * round a stop ({@code OPEN_SEARCH}, every {@code OPEN_STEP} blocks). Two of his stops are out on the town's
+	 * outskirts, {@code OUTSKIRTS} from the seat.
+	 */
+	static final int OPEN = 3, OPEN_SEARCH = 14, OPEN_STEP = 2;
+	static final int OUTSKIRT_STOPS = 2;
+	static final double OUTSKIRTS_MIN = 40.0, OUTSKIRTS_MAX = 60.0;
 	/** A task for its coachman (not a caravan's). */
 	static final String TASK = "coach";
 
@@ -60,6 +73,59 @@ final class Carriages {
 				tick(server, level);
 			}
 		});
+	}
+
+	/** (0.7.90) The nearest open ground to {@code near} a carriage can stand on (see {@link #OPEN}), or null. */
+	static @Nullable BlockPos open(ServerLevel level, BlockPos near) {
+		BlockPos best = null;
+		double bestDistance = Double.MAX_VALUE;
+		for (int dx = -OPEN_SEARCH; dx <= OPEN_SEARCH; dx += OPEN_STEP) {
+			for (int dz = -OPEN_SEARCH; dz <= OPEN_SEARCH; dz += OPEN_STEP) {
+				int x = near.getX() + dx, z = near.getZ() + dz;
+				BlockPos at = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z), z);
+				double distance = at.distSqr(near);
+				if (distance < bestDistance && roomy(level, at)) {
+					bestDistance = distance;
+					best = at;
+				}
+			}
+		}
+		return best;
+	}
+
+	/** Open sky over every block round {@code at} ({@code OPEN} out), the ground firm, dry and level, nothing built in it. */
+	private static boolean roomy(ServerLevel level, BlockPos at) {
+		for (int dx = -OPEN; dx <= OPEN; dx++) {
+			for (int dz = -OPEN; dz <= OPEN; dz++) {
+				int x = at.getX() + dx, z = at.getZ() + dz;
+				int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+				if (Math.abs(top - at.getY()) > 1) {
+					return false;
+				}
+				BlockPos ground = new BlockPos(x, top - 1, z);
+				BlockState state = level.getBlockState(ground);
+				if (!state.getFluidState().isEmpty() || state.is(BlockTags.FENCES) || state.is(BlockTags.WALLS) || state.is(BlockTags.FENCE_GATES)
+					|| state.is(BlockTags.LEAVES) || !state.isFaceSturdy(level, ground, Direction.UP)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/** (0.7.90) Open ground out on the town's outskirts ({@link #OUTSKIRTS_MIN} to {@link #OUTSKIRTS_MAX} from the seat), or null. */
+	static @Nullable BlockPos outskirts(ServerLevel level, BlockPos seat) {
+		var random = level.getRandom();
+		for (int tries = 0; tries < 6; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double distance = OUTSKIRTS_MIN + random.nextDouble() * (OUTSKIRTS_MAX - OUTSKIRTS_MIN);
+			BlockPos rough = seat.offset((int)Math.round(Math.cos(angle) * distance), 0, (int)Math.round(Math.sin(angle) * distance));
+			BlockPos spot = open(level, rough);
+			if (spot != null) {
+				return spot;
+			}
+		}
+		return null;
 	}
 
 	/** {@code f}'s carriage, if it's about. */

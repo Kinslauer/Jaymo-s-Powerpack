@@ -27,8 +27,11 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
  * <li>a hearth: whatever catches (planks, logs, wool, hay, leaves...) within {@link #HEARTH} blocks of it, and in the
  * floor within {@link #APRON}, becomes stone brick of the same shape (stairs stay stairs, slabs stay slabs); carpets
  * near it are taken up;</li>
- * <li>if there's a roof over it, a chimney: a stone brick hood from two blocks above the fire up through the roof
- * (floors and roof over the fire turned to stone), standing {@link #STACK} blocks proud of the roof, open at the top.</li>
+ * <li>if there's a roof over it, a chimney: a stone brick hood from two blocks above the fire up through the roof,
+ * standing {@link #STACK} blocks proud of the roof, open at the top.</li>
+ * <li>(0.7.90) a clear flue: everything straight over the fire (a ceiling, floors, the roof) is cut away, so its smoke
+ * (Advanced Chimneys' poisons whoever breathes it) rises out instead of filling the house. A fire too deep under a
+ * building for a chimney still gets {@link #FLUE_LEAST} blocks cut clear over it.</li>
  * </ul>
  * Beds, doors, chests and anything else with a block entity or two halves are left alone. Run from
  * {@code StructureStartMixin} after a chunk's pieces are placed; since a fire near a chunk edge needs blocks in the
@@ -40,6 +43,8 @@ public final class Hearths {
 	static final int HEARTH = 1, APRON = 2, ROOF_REACH = 20;
 	/** How many blocks a chimney stands above the roof. */
 	static final int STACK = 2;
+	/** (0.7.90) With no chimney, at least this much is cut clear straight over the fire. */
+	static final int FLUE_LEAST = 2;
 
 	private Hearths() {
 	}
@@ -93,7 +98,8 @@ public final class Hearths {
 			for (int dz = -APRON; dz <= APRON; dz++) {
 				boolean close = Math.abs(dx) <= HEARTH && Math.abs(dz) <= HEARTH;
 				for (int dy = -1; dy <= 1; dy++) {
-					if (dx == 0 && dz == 0 && dy == 0) {
+					if (dx == 0 && dz == 0 && dy >= 0) {
+						// (the fire, and the flue over it: see below)
 						continue;
 					}
 					BlockPos at = fire.offset(dx, dy, dz);
@@ -112,8 +118,20 @@ public final class Hearths {
 				}
 			}
 		}
-		// the chimney: only for a fire with a roof over it (a chimney-top campfire has open sky)
+		// (0.7.90) the flue: straight up from the fire through the roof (or FLUE_LEAST blocks, with no chimney), cut clear
 		int top = roofTop(level, fire);
+		int flueTop = top < 0 ? fire.getY() + FLUE_LEAST : top + STACK;
+		for (int y = fire.getY() + 1; y <= flueTop; y++) {
+			BlockPos at = new BlockPos(fire.getX(), y, fire.getZ());
+			if (!level.hasChunkAt(at)) {
+				continue;
+			}
+			BlockState state = level.getBlockState(at);
+			if (!state.isAir() && plain(state) && !isFire(state) && state.getFluidState().isEmpty()) {
+				level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+		// the chimney: only for a fire with a roof over it (a chimney-top campfire has open sky)
 		if (top < 0) {
 			return;
 		}
@@ -128,10 +146,8 @@ public final class Hearths {
 					BlockState state = level.getBlockState(at);
 					boolean open = state.isAir() || state.canBeReplaced() && state.getFluidState().isEmpty();
 					if (dx == 0 && dz == 0) {
-						// the flue: what catches over the fire (a floor, the roof) becomes stone; open above the roof
-						if (y <= top && !open && state.ignitedByLava() && plain(state)) {
-							level.setBlock(at, brick, Block.UPDATE_CLIENTS);
-						}
+						// (the flue, cut clear above)
+						continue;
 					} else if (open || y <= top && state.ignitedByLava() && plain(state)) {
 						// the hood up to the roof (in the air of the room, and through the wood), then the stack
 						level.setBlock(at, brick, Block.UPDATE_CLIENTS);

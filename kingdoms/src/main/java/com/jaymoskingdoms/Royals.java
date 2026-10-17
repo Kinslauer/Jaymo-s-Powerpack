@@ -201,6 +201,25 @@ public final class Royals {
 				this.stops.add(v.blockPosition());
 			}
 			this.stops.add(faction.seat());
+			if (Carriages.of(level, faction) != null) {
+				// (0.7.90) driven in his carriage: only where it can go, open courts and the outskirts (it stuck fast in
+				// alleys, yards and porches); a stop with no open ground near it is passed by
+				List<BlockPos> open = new ArrayList<>();
+				for (BlockPos stop : this.stops) {
+					BlockPos spot = Carriages.open(level, stop);
+					if (spot != null) {
+						open.add(spot);
+					}
+				}
+				for (int i = 0; i < Carriages.OUTSKIRT_STOPS; i++) {
+					BlockPos spot = Carriages.outskirts(level, faction.seat());
+					if (spot != null) {
+						open.add(spot);
+					}
+				}
+				this.stops.clear();
+				this.stops.addAll(open);
+			}
 			// (nearest first after the gate, so he doesn't cross the town back and forth)
 			BlockPos from = keep.gate();
 			List<BlockPos> ordered = new ArrayList<>();
