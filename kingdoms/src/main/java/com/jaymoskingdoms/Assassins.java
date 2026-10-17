@@ -394,7 +394,7 @@ final class Assassins {
 					}
 					line = Component.translatable("assassin.jaymoskingdoms.whisper." + c.motive() + "." + random.nextInt(2), ruler(level, f));
 				} else if (player.getUUID().equals(c.player()) && here != null) {
-					line = Component.translatable("assassin.jaymoskingdoms.whisper.you." + random.nextInt(3), player.getName());
+					line = Component.translatable("assassin.jaymoskingdoms.whisper.you." + random.nextInt(3), Identities.shownName(player));
 				} else {
 					continue;
 				}
@@ -833,7 +833,7 @@ final class Assassins {
 				}
 			}
 		}
-		Speech.say(level, ruler, Component.translatable("assassin.jaymoskingdoms.cured.says", player.getName()), Speech.GOLD, WITNESS_RANGE);
+		Speech.say(level, ruler, Component.translatable("assassin.jaymoskingdoms.cured.says", Identities.shownName(player)), Speech.GOLD, WITNESS_RANGE);
 		witnesses(level, ruler, Component.translatable("assassin.jaymoskingdoms.cured", player.getDisplayName(), ruler.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		settle(level, p);
 	}
@@ -902,7 +902,7 @@ final class Assassins {
 
 	private static Component playerName(MinecraftServer server, @Nullable UUID id) {
 		ServerPlayer p = id == null ? null : server.getPlayerList().getPlayer(id);
-		return p == null ? Component.literal("?") : p.getName();
+		return p == null ? Component.literal("?") : Identities.shownName(p);
 	}
 
 	/**

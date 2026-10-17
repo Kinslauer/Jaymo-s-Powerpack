@@ -1664,6 +1664,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     of the TP price). Each method tires through the day (halving every 12 points, floor 5%), so mixing is fastest.
     Bars on the training screen; `/powerdebug zfighter train <method> <points>|newday`.
   - Existing characters keep their bought levels; their bonuses shrink to the new per-level numbers.
+- **0.13.20, villagers' heritage looks fixed:** packs Jaymo's Kingdoms 0.7.92 (the racial marks no longer z-fight MCA
+  villagers' skins; an Earthling's fist glow lights only near death, with a random 5-minute buff; villagers call you by your
+  MCA creator name or costume name, never your username; see
+  `kingdoms/MODLOG.md`). No Powers code changed.
 - **0.13.21, Training Points are spent again:** Andy: "right now you can purchase any skill with 0 tp, you should still
   require it as a resource for techniques." Every buy on the training screen (stat levels, Super 2/3, Limit Break tiers,
   techniques) skipped its TP price in creative, where TP is never earned, so the counter sat at 0 while every Learn
