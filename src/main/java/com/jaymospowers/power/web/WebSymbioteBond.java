@@ -91,6 +91,8 @@ public final class WebSymbioteBond {
 	private static final class Live {
 		/** The fight: presses (fading), how many win it, when it gives up, the last tick a press counted. */
 		boolean fighting;
+		/** (0.13.23) The fight is over the mask alone ({@link #resistMask}), not the whole suit. */
+		boolean forMask;
 		float struggle;
 		int needed;
 		long fightUntil;
@@ -212,6 +214,10 @@ public final class WebSymbioteBond {
 	 * for it instead (returns true: the suit stays on for now). Otherwise false: the plain tear-off goes ahead.
 	 */
 	static boolean resistRemoval(ServerPlayer player) {
+		return resistRemoval(player, false);
+	}
+
+	private static boolean resistRemoval(ServerPlayer player, boolean mask) {
 		Live live = live(player);
 		if (live.fighting) {
 			// already at it
@@ -219,12 +225,13 @@ public final class WebSymbioteBond {
 		}
 		int bond = WebSymbiote.state(player).bond();
 		int fought = player.getAttachedOrElse(FOUGHT, 0);
-		if (player.isCreative() || bond >= FIGHT_BOND || fought >= FIGHTS || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
+		if (player.isCreative() || bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
 			|| WebSymbiote.bulked(player)) {
 			return false;
 		}
 		long now = player.level().getGameTime();
 		live.fighting = true;
+		live.forMask = mask;
 		live.struggle = 0.0F;
 		live.struggleAt = -1L;
 		live.needed = Math.round(Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_PRESSES_MAX, FIGHT_PRESSES_MIN));
@@ -239,6 +246,15 @@ public final class WebSymbioteBond {
 		com.jaymospowers.core.Shakes.send(player, WebSymbiote.SURGE_BACK_SHAKE, null);
 		WebSymbiote.whisper(player, "fight." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
 		return true;
+	}
+
+	/**
+	 * (0.13.23) Andy: "it should still be a struggle at low bond like the rest of the suit". The Mask slot is taking the
+	 * suit's head off: under {@link #FIGHT_BOND} it fights you for it every time (returns true: the mask stays on for
+	 * now); win and the mask comes off ({@link WebSymbiote#UNMASKED}). Otherwise false: it comes off as asked.
+	 */
+	static boolean resistMask(ServerPlayer player) {
+		return resistRemoval(player, true);
 	}
 
 	/** A key pressed against it (the same packet as against a takeover). Returns true if a fight took it. */
@@ -300,6 +316,7 @@ public final class WebSymbioteBond {
 	/** The fight's over (either way): your keys are your own again. */
 	private static void endFight(ServerPlayer player, Live live) {
 		live.fighting = false;
+		live.forMask = false;
 		live.struggle = 0.0F;
 		player.removeAttached(FIGHT);
 		if (!WebSymbiote.driving(player)) {
@@ -311,9 +328,15 @@ public final class WebSymbioteBond {
 
 	/** You tore its face off yours: only the face, and only for a while (longer the better the bond). */
 	private static void win(ServerPlayer player, Live live, long now) {
+		boolean mask = live.forMask;
 		endFight(player, live);
-		player.setAttached(FOUGHT, player.getAttachedOrElse(FOUGHT, 0) + 1);
-		bareFace(player, now);
+		if (mask) {
+			// (0.13.23) the mask fight: it comes off for good, until you put it back
+			player.setAttached(WebSymbiote.UNMASKED, true);
+		} else {
+			player.setAttached(FOUGHT, player.getAttachedOrElse(FOUGHT, 0) + 1);
+			bareFace(player, now);
+		}
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 0.6F, 1.5F);

@@ -717,6 +717,21 @@ public final class WebSymbiote {
 			return;
 		}
 		boolean off = !Boolean.TRUE.equals(player.getAttached(UNMASKED));
+		if (off && WebSymbioteBond.dormant(player)) {
+			// (0.13.23) still settling in: it doesn't answer
+			WebSymbioteBond.refuse(player);
+			return;
+		}
+		if (off && (lockedOut(player) || sulking(player))) {
+			// (0.13.23) still angry with you: it won't let go of your face
+			whisper(player, "sulking");
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
+			return;
+		}
+		if (off && WebSymbioteBond.resistMask(player)) {
+			// (0.13.23) a weak bond: it fights you for your face, like for the suit (WebSymbioteBond)
+			return;
+		}
 		if (off) {
 			player.setAttached(UNMASKED, true);
 		} else {

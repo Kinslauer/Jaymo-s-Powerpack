@@ -1718,3 +1718,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     key (') flips it too when you wear no costume mask. The suit was never a secret identity (`SecretIdentity` only
     reads costumes and Rig Helms), so nothing changes there. The suit toggle's little mask in the middle moved under
     the bond line, where it no longer hides behind the text.
+  - **The Mask fights you at a weak bond** (Andy: "it should still be a struggle at low bond like the rest of the
+    suit"): under the suit fight's bond (70), taking the mask off starts the same struggle bar as taking the suit off,
+    every time; win and it comes off until you put it back. Sulking, locked out or still settling in, it won't let go
+    at all. Putting it back on is never fought (`WebSymbioteBond.resistMask`).
