@@ -462,7 +462,7 @@ public final class VillagerHeritage {
 		}
 		String base = "talk.jaymoskingdoms.neighbours.";
 		if (rare.isEmpty()) {
-			return Component.translatable(base + "plain." + (1 + random.nextInt(NEIGHBOURS_PLAIN_LINES)), player.getName());
+			return Component.translatable(base + "plain." + (1 + random.nextInt(NEIGHBOURS_PLAIN_LINES)), Identities.shownName(player));
 		}
 		List<Heritage.Kind> kinds = new ArrayList<>(rare.keySet());
 		Heritage.Kind kind = kinds.get(random.nextInt(kinds.size()));
@@ -470,12 +470,12 @@ public final class VillagerHeritage {
 		int count = rare.get(kind);
 		if (kinds.size() >= 2 && random.nextBoolean()) {
 			Heritage.Kind second = kinds.get((kinds.indexOf(kind) + 1) % kinds.size());
-			return Component.translatable(base + "mixed." + (1 + random.nextInt(NEIGHBOURS_MIXED_LINES)), player.getName(), name,
+			return Component.translatable(base + "mixed." + (1 + random.nextInt(NEIGHBOURS_MIXED_LINES)), Identities.shownName(player), name,
 				Component.translatable("heritage.jaymoskingdoms." + second.key()));
 		}
 		return count == 1
-			? Component.translatable(base + "one." + (1 + random.nextInt(NEIGHBOURS_ONE_LINES)), player.getName(), name)
-			: Component.translatable(base + "many." + (1 + random.nextInt(NEIGHBOURS_MANY_LINES)), player.getName(), name, count);
+			? Component.translatable(base + "one." + (1 + random.nextInt(NEIGHBOURS_ONE_LINES)), Identities.shownName(player), name)
+			: Component.translatable(base + "many." + (1 + random.nextInt(NEIGHBOURS_MANY_LINES)), Identities.shownName(player), name, count);
 	}
 
 	/** (Coming over to gossip) now and then they talk of their own blood instead; null if not this time. */
@@ -493,6 +493,6 @@ public final class VillagerHeritage {
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);
-		return Component.translatable("dialogue.chat.jaymoskingdoms.blood_" + which + "/" + Math.min(n, lines), player.getName());
+		return Component.translatable("dialogue.chat.jaymoskingdoms.blood_" + which + "/" + Math.min(n, lines), Identities.shownName(player));
 	}
 }

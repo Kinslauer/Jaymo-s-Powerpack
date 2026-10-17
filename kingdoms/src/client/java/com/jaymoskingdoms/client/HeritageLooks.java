@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.NightbornBlood;
@@ -60,7 +61,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Nightborn:</b> shadow soaking the hands with stars in it; moon-silver eyes that glow by day only; dark wisps
  * at night only. (0.7.88) A Nightborn vampire's ({@link NightbornBlood#starlit}): the shadow deep red, the eyes red-silver
  * at night (moon-silver by day, as ever; its own red eyes give way to them), and blood mist for the wisps.</li>
- * <li><b>Earthling:</b> training wraps and a ki glow round the fists; no eye glow, no particles.</li>
+ * <li><b>Earthling:</b> training wraps round the fists, and a ki glow over them only while near death has made it flare
+ * ({@code EarthlingSurge}); no eye glow, no particles.</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
@@ -192,6 +194,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			// sneaking, a Sylvan's glow dims; a thief's goes out
 			glow = (flags & Heritage.LOOK_UNSEEN) != 0 ? 0 : SYLVAN_SNEAK_GLOW;
 			lit &= glow != 0;
+		} else if (kind == Kind.EARTHLING) {
+			glow = EarthlingSurge.surging(entity) ? -1 : 0;
 		}
 		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
 	}

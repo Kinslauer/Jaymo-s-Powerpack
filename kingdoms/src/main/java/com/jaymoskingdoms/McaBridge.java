@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.conczin.mca.Config;
 import net.conczin.mca.entity.VillagerEntityMCA;
+import net.conczin.mca.entity.ai.Messenger;
 import net.conczin.mca.entity.ai.Pregnancy;
 import net.conczin.mca.entity.ai.relationship.AgeState;
 import net.conczin.mca.entity.ai.relationship.EntityRelationship;
@@ -51,6 +52,11 @@ final class McaBridge {
 	/** {@code player}'s reputation (summed hearts) with the MCA village round {@code seat}, or null if there's none. */
 	static @Nullable Integer villageHearts(ServerLevel level, BlockPos seat, ServerPlayer player) {
 		return VillageManager.get(level).findNearestVillage(seat, SEAT_MARGIN).map(v -> v.getReputation(player)).orElse(null);
+	}
+
+	/** (0.7.92) The name {@code player} gave themselves in MCA's creator (its family tree), or their username if none. */
+	static String name(ServerPlayer player) {
+		return Messenger.getName(player);
 	}
 
 	static boolean isMca(Villager villager) {

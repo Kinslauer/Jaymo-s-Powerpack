@@ -55,8 +55,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
  * <li><b>Warrior-born:</b> starts far weaker than anyone (lighter blows, fewer hearts), and grows out of it as their
  * character level climbs; hits harder the worse they're hurt; always hungry.</li>
- * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; no gift of the
- * blood beyond that.</li>
+ * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; (0.7.92) near death
+ * their ki flares with a random buff for a while ({@link EarthlingSurge}).</li>
  * </ul>
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison

@@ -178,8 +178,8 @@ public class ZFighterTrainingScreen extends Screen {
 		}
 		Component detail = switch (page) {
 			case FORMS_PAGE -> forms(graphics, player, data, creative, x, w, mouseX, mouseY);
-			case TECHNIQUES_PAGE -> techniques(graphics, player, data, creative, x, w, mouseX, mouseY);
-			default -> stats(graphics, player, data, creative, x, w, mouseX, mouseY);
+			case TECHNIQUES_PAGE -> techniques(graphics, player, data, x, w, mouseX, mouseY);
+			default -> stats(graphics, player, data, x, w, mouseX, mouseY);
 		};
 		int dy = detailY();
 		graphics.fill(x + 6, dy - 3, x + w - 6, dy - 2, COLOR_ROW);
@@ -187,8 +187,7 @@ public class ZFighterTrainingScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
-	private Component stats(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w, int mouseX,
-		int mouseY) {
+	private Component stats(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, int x, int w, int mouseX, int mouseY) {
 		int cost = ZFighterTraining.statCost(player);
 		line(graphics, Component.translatable("screen.jaymospowers.zfighter.stats", cost), x + 8, contentY(), w - 16, COLOR_GOLD);
 		ZFighterGrowth.Data growth = ZFighterGrowth.of(player);
@@ -206,7 +205,7 @@ public class ZFighterTrainingScreen extends Screen {
 			int barW = w - 10 - 32;
 			graphics.fill(x + 10, ry + 9, x + 10 + barW, ry + 10, 0xFF303030);
 			graphics.fill(x + 10, ry + 9, x + 10 + Math.round(barW * fill), ry + 10, COLOR_ACCENT);
-			statButtons.get(i).active = level < ZFighterTraining.STAT_CAP && (creative || data.tp() >= cost);
+			statButtons.get(i).active = level < ZFighterTraining.STAT_CAP && data.tp() >= cost;
 			if (over(mouseX, mouseY, x + 6, ry - 4, w - 38, ROW - 1)) {
 				detail = growthDetail(player, growth, i, level, fill);
 			}
@@ -263,7 +262,8 @@ public class ZFighterTrainingScreen extends Screen {
 			if (form >= 2) {
 				Button button = formButtons.get(form - 2);
 				button.visible = form > open;
-				button.active = form == open + 1 && (ZFighterTraining.formBlocker(player, form) == null || creative && open >= 1);
+				button.active = form == open + 1 && data.tp() >= ZFighterTraining.FORM_TP[form]
+					&& (ZFighterTraining.formBlocker(player, form) == null || creative && open >= 1);
 			}
 		}
 
@@ -278,7 +278,7 @@ public class ZFighterTrainingScreen extends Screen {
 				x + 10, ly + 10, textW, COLOR_DIM);
 		}
 		limitButton.visible = more;
-		limitButton.active = more && (creative || data.tp() >= ZFighterTraining.limitCost(player, limit + 1));
+		limitButton.active = more && data.tp() >= ZFighterTraining.limitCost(player, limit + 1);
 		if (over(mouseX, mouseY, x + 6, ly - 4, w - 12, 24)) {
 			detail = Component.translatable("screen.jaymospowers.zfighter.limit_how", ZFighterInputClient.keyLabel(this.minecraft));
 		}
@@ -286,8 +286,8 @@ public class ZFighterTrainingScreen extends Screen {
 	}
 
 	/** The techniques page: each one, its key, its price or where it is; hover one for what it does. */
-	private Component techniques(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w,
-		int mouseX, int mouseY) {
+	private Component techniques(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, int x, int w, int mouseX,
+		int mouseY) {
 		Component detail = Component.translatable("screen.jaymospowers.zfighter.techniques_hint");
 		int statusX = x + 136;
 		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
@@ -314,7 +314,7 @@ public class ZFighterTrainingScreen extends Screen {
 			if (!known) {
 				blocker = ZFighterTraining.techniqueBlocker(player, i);
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.learn"));
-				button.active = blocker == null || creative && "screen.jaymospowers.zfighter.need_tp".equals(blocker);
+				button.active = blocker == null;
 			} else {
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.equip"));
 				button.visible = !spirit && !equipped;

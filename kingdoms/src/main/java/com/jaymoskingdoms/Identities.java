@@ -205,14 +205,22 @@ public final class Identities {
 		return name.isEmpty() ? Component.translatable("identity.jaymoskingdoms.unnamed") : Component.literal(name);
 	}
 
-	/** What {@code player} goes by to anyone looking: the costume's name while masked, theirs otherwise. */
+	/**
+	 * (0.7.92) {@code player}'s own name, as the folk know it: the one they picked in MCA's creator, never their username
+	 * (unless that's all there is).
+	 */
+	static Component trueName(ServerPlayer player) {
+		return McaCompat.LOADED ? Component.literal(McaBridge.name(player)) : player.getName();
+	}
+
+	/** What {@code player} goes by to anyone looking: the costume's name while masked, theirs ({@link #trueName}) otherwise. */
 	static Component shownName(ServerPlayer player) {
-		return key(player) != null ? nameOf(tagName(player)) : player.getName();
+		return key(player) != null ? nameOf(tagName(player)) : trueName(player);
 	}
 
 	/** What {@code faction}'s people call {@code player}: their own name, unless they're a stranger in a mask there. */
 	static Component nameTo(ServerPlayer player, int faction) {
-		return persona(player, faction) != null ? nameOf(tagName(player)) : player.getName();
+		return persona(player, faction) != null ? nameOf(tagName(player)) : trueName(player);
 	}
 
 	/**
@@ -439,7 +447,7 @@ public final class Identities {
 			.withStyle(how.equals("word") ? ChatFormatting.GRAY : ChatFormatting.GOLD, ChatFormatting.ITALIC));
 		if (witness != null) {
 			Speech.tell(level, witness, player, Component.translatable("talk.jaymoskingdoms.identity." + how + "." + level.getRandom().nextInt(LINES),
-				name, player.getName()), Speech.YELLOW);
+				name, trueName(player)), Speech.YELLOW);
 		}
 		JaymosKingdoms.LOGGER.debug("{} knows {} is {} ({})", f.name(), player.getName().getString(), name.getString(), how);
 		if (exiles(server, f)) {
@@ -576,7 +584,7 @@ public final class Identities {
 			for (Map.Entry<Faction, LivingEntity> e : seen.entrySet()) {
 				if (e.getKey().id() == here.id()) {
 					Speech.say(level, e.getValue(), Component.translatable("talk.jaymoskingdoms.identity.exiled." + level.getRandom().nextInt(LINES),
-						player.getName()), Speech.RED, 24.0);
+						trueName(player)), Speech.RED, 24.0);
 				}
 			}
 			if (Tempers.of(here) != null) {
