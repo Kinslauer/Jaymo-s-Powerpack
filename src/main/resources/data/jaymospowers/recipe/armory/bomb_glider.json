@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": "minecraft:phantom_membrane",
+    "R": "minecraft:redstone_block",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "M M",
+    "MRM",
+    "III"
+  ],
+  "result": {
+    "id": "jaymospowers:bomb_glider"
+  }
+}

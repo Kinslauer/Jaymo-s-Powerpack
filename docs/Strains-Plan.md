@@ -73,7 +73,22 @@ travel forward, never a blow thrown from standing still. The **hold combo** (Abi
 
 ## C. Bomb glider (Armory)
 
-**Paused (Andy, 2026-10-16):** a half-written draft is saved in the project files under `glider-wip/` (not in the mod).
+**Built in Powers 0.13.7** (from Andy's paused draft, finished): `armory/BombGlider` (+ `BombGliderItem`, `BombGliderMenu`,
+`BombGliderNet`, `BombGliderCompat`), client `client/armory/BombGlider*` and the `BombGlider*Mixin`s; art from
+`tools/gen_bomb_glider.py`; recipe `recipe/armory/bomb_glider.json` (4 phantom membrane, 3 iron, a redstone block:
+`M M / MRM / III`). Not yet playtested. What it does, as built:
+- Set down from its item on a block (facing your way). Right-click to step on; sneak-right-click (or the inventory key
+  on board) opens its hold: a fuel slot with a burn gauge and a 16-stick rack. Fuel or dynamite in hand loads straight in.
+- W faster, S slower, A/D turn (banking), Jump climbs, Sneak dives (in the air it's sent as the dive, so it doesn't
+  dismount); landed, Sneak steps off; Sneak+Jump bails out mid-air. The server flies it from the rider's keys and it
+  has no controlling passenger, so nobody is kicked for flying.
+- Left click or R drops a stick with the glider's speed (R doesn't reach your power while riding). TNT gets a 40-tick
+  fuse, WeaponMod's dynamite keeps its own; either is stretched to last the fall plus half a second, so it never
+  bursts in the air.
+- Hard landings (sinking faster than 0.5 b/t, past 3 blocks) hurt the rider like a fall; flying into a wall hurts by
+  the speed lost, squared. The rider stands on the deck.
+
+The spec as asked:
 
 Andy: "make it just dynamite it drops." An original flying wing you stand on (a bat-winged board, our own model).
 - **Item:** crafted from iron, phantom membrane and a redstone block; placed like a boat, ridden standing.

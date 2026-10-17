@@ -275,6 +275,22 @@ def main(aow):
         "humanoid": [{"texture": f"{NS}:caveman"}], "humanoid_leggings": [{"texture": f"{NS}:caveman"}]}})
     lang["entity.jaymospowers.thrown_weapon"] = "Thrown Weapon"
     lang["item.jaymospowers.lance.charge"] = "Couched on horseback, hits harder the faster you ride"
+    # (0.13.7) the bomb glider (its art: tools/gen_bomb_glider.py; recipe and model are hand-written)
+    lang["item.jaymospowers.bomb_glider"] = "Bomb Glider"
+    lang["item.jaymospowers.bomb_glider.hint"] = "Set it down on a block, then right-click to step on. Drops dynamite with left click or R"
+    lang["item.jaymospowers.bomb_glider.fuel"] = "Burns blaze rods or lava buckets; out of fuel it only glides down"
+    lang["entity.jaymospowers.bomb_glider"] = "Bomb Glider"
+    lang["container.jaymospowers.bomb_glider"] = "Bomb Glider"
+    lang["gui.jaymospowers.bomb_glider.fuel"] = "Fuel"
+    lang["gui.jaymospowers.bomb_glider.rack"] = "Dynamite"
+    lang["gui.jaymospowers.bomb_glider.count"] = "%s / %s"
+    lang["gui.jaymospowers.bomb_glider.seconds"] = "%ss"
+    lang["message.jaymospowers.bomb_glider.hud"] = "Burner %ss | Dynamite %s"
+    lang["message.jaymospowers.bomb_glider.gliding"] = "No fuel: gliding | Dynamite %s"
+    lang["message.jaymospowers.bomb_glider.keys"] = "W/S speed, A/D turn, Jump climb, Sneak dive (or step off when landed), Sneak+Jump bail out"
+    lang["message.jaymospowers.bomb_glider.out_of_fuel"] = "The burner sputters out: gliding down"
+    lang["message.jaymospowers.bomb_glider.empty"] = "The dynamite rack is empty"
+    lang["message.jaymospowers.bomb_glider.full"] = "No room for that in the glider"
     for tag, values in tags.items():
         write(os.path.join(MC_DATA, "tags", "item", tag + ".json"), {"values": values})
     write(os.path.join(MC_DATA, "tags", "item", "enchantable", "bow.json"), {"values": [f"{NS}:recurve_bow"]})
