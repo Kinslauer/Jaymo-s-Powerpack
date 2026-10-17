@@ -29,6 +29,14 @@ public final class LedgePose {
 	static final float ARM_PRESS = -0.45F, KNEE_UP = -1.5F;
 	/** The hands' height over the feet while hanging (blocks): the sway turns about them. */
 	static final float HANDS = 2.05F;
+	/**
+	 * (0.13.25) First person, placed straight in the view (vanilla's own arm placement undone): the shoulder's
+	 * {x, y, z} (blocks, x toward the arm's side) and how far the arm tips away from you and out to its side (degrees),
+	 * hanging and at the end of the press. Hanging, the arms rise from below the view to the hands on the edge at its
+	 * top; climbing, the edge sinks through the view and the hands with it, gone under it by {@link #FP_GONE_AT}.
+	 */
+	static final float[] FP_HANG = {-0.05F, -0.55F, -0.45F, 12.0F, 10.0F}, FP_PRESS = {-0.05F, -0.95F, -0.5F, 35.0F, 8.0F};
+	static final float FP_PRESS_END = 0.55F, FP_GONE_FROM = 0.5F, FP_GONE_AT = 1.0F, FP_GONE_DROP = 0.6F;
 
 	/** {@code climb}: 0-1 through the climb, or -1 while hanging; {@code time}: ticks, for the sway. */
 	public record State(float climb, float time) {
@@ -126,26 +134,40 @@ public final class LedgePose {
 
 	/**
 	 * First person on a ledge: how one arm sits ({@code right}: the right arm), or false to leave it out. Hanging, both
-	 * wrists reach up over the top of the view onto the edge, wide apart, taking the weight in turn; climbing
-	 * ({@code climb} 0-1), they come down in front to press on the top, then drop out of sight as you stand.
+	 * hands reach up to the edge at the top of the view, taking the weight in turn; climbing ({@code climb} 0-1), the
+	 * edge sinks through the view and the hands go down with it, out of sight before you stand. {@code equip} is the
+	 * arm height vanilla's renderPlayerArm is then called with: its placement is undone here, so the arm sits exactly
+	 * where this puts it.
 	 */
-	public static boolean firstPersonArm(PoseStack poseStack, float climb, float time, boolean right) {
+	public static boolean firstPersonArm(PoseStack poseStack, float climb, float time, boolean right, float equip) {
 		float side = right ? 1.0F : -1.0F;
 		float hang = climb < 0.0F ? 1.0F : 0.0F;
-		float press = climb < 0.0F ? 0.0F : smooth(climb / 0.55F);
-		float gone = climb < 0.0F ? 0.0F : smooth((climb - 0.8F) / 0.2F);
+		float press = climb < 0.0F ? 0.0F : smooth(climb / FP_PRESS_END);
+		float gone = climb < 0.0F ? 0.0F : smooth((climb - FP_GONE_FROM) / (FP_GONE_AT - FP_GONE_FROM));
 		if (gone >= 1.0F) {
 			return false;
 		}
 		// hanging, the hands shift their grip a little, one then the other
 		float shift = hang * Mth.sin(time * SWAY_SPEED * 1.3F + (right ? 0.0F : Mth.PI)) * 0.02F;
-		float x = side * Mth.lerp(press, 0.2F, 0.24F);
-		float y = Mth.lerp(press, 0.48F, -0.02F) + shift - gone * 0.7F;
-		float z = Mth.lerp(press, 0.12F, -0.12F);
-		poseStack.translate(x, y, z);
-		poseStack.rotateDegrees(Axis.XP, Mth.lerp(press, -62.0F, 12.0F));
-		poseStack.rotateDegrees(Axis.ZP, side * Mth.lerp(press, 10.0F, 4.0F));
+		poseStack.translate(side * Mth.lerp(press, FP_HANG[0], FP_PRESS[0]), Mth.lerp(press, FP_HANG[1], FP_PRESS[1]) + shift - gone * FP_GONE_DROP,
+			Mth.lerp(press, FP_HANG[2], FP_PRESS[2]));
+		poseStack.rotateDegrees(Axis.XP, -Mth.lerp(press, FP_HANG[3], FP_PRESS[3]));
+		// (model space faces the other way: the arm's own side is -x there)
+		poseStack.rotateDegrees(Axis.YP, 180.0F);
+		poseStack.rotateDegrees(Axis.ZP, -side * Mth.lerp(press, FP_HANG[4], FP_PRESS[4]));
+		undoVanillaArm(poseStack, side, equip);
 		return true;
+	}
+
+	/** The inverse of vanilla's first-person arm placement (FirstPersonHandsAndItemsRenderer#renderPlayerArm, no swing). */
+	private static void undoVanillaArm(PoseStack poseStack, float side, float equip) {
+		poseStack.translate(-side * 5.6F, 0.0F, 0.0F);
+		poseStack.rotateDegrees(Axis.YP, side * 135.0F);
+		poseStack.rotateDegrees(Axis.XP, -200.0F);
+		poseStack.rotateDegrees(Axis.ZP, -side * 120.0F);
+		poseStack.translate(side * 1.0F, -3.6F, -3.5F);
+		poseStack.rotateDegrees(Axis.YP, -side * 45.0F);
+		poseStack.translate(-side * 0.64000005F, 0.6F + equip * 0.6F, 0.71999997F);
 	}
 
 	private static float smooth(float t) {

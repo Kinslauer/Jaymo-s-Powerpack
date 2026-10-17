@@ -1688,3 +1688,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   forbidden blocks). The 12 ki is paid when the wind-up starts; dying, losing the power, being silenced or turning
   into the Great Ape mid-wind-up lets it fizzle. G's cooldown covers the wind-up (18 ticks + the old 20). Numbers at
   the top of `ZFighterDisc` and `ZFighterDiscPose`.
+- **0.13.25, ledge hands in first person fixed:** Andy's clip: hanging from a ledge, the view was full of huge grey arm
+  faces, and after the pull-up both arms stood up from the screen's bottom corners, shoulder-end on. The first-person
+  arms were turned on top of vanilla's own arm placement, and the hang's tilt went the wrong way, swinging them back
+  through the camera. Now vanilla's placement is undone and the arms are placed straight in the view (`LedgePose`
+  `FP_*`, numbers at its top): hanging, they rise from below the view to the hands on the edge near its top, shifting
+  their grip; climbing, the edge sinks through the view and the hands go down with it, out of sight before you stand.
+  Third person is unchanged.
