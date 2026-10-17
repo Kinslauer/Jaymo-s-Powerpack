@@ -1580,3 +1580,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     degrees away and it tears it back with a jolt (`WebSymbioteClient.wrenchView`).
   - Packs Jaymo's Kitchen 0.4.46 (heartier meals, see `kitchen/MODLOG.md`).
 - **0.13.5, the tallest size is the Verdant's:** packs Jaymo's Kingdoms 0.7.87 (only a Verdant can take MCA's Size slider to the top; see `kingdoms/MODLOG.md`). No Powers code changed.
+- **0.13.6, Nightborn blood:** packs Jaymo's Kingdoms 0.7.88 (Nightborn and vampires lean together: Old Blood turning, a long thirst, the Elder's offer, starlit looks, night-deep gifts, born dhampirs, the cure's trace, Blood Moon kin; see `kingdoms/MODLOG.md`). No Powers code changed.

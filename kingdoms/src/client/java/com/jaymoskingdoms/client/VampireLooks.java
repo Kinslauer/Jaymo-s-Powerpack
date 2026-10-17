@@ -81,8 +81,12 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 		if (look == 2) {
 			collector.order(2).submitModel(model, state, poseStack, RenderTypes.entityCutout(FANGS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyesFor(state.skin.body().texturePath())), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
-				state.outlineColor);
+			HeritageLooks.Look heritage = state.getData(HeritageLooks.KEY);
+			if (heritage == null || !heritage.blood()) {
+				// (0.7.88) a Nightborn's red-silver eyes take the place of these (HeritageLooks)
+				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyesFor(state.skin.body().texturePath())), lightCoords,
+					OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+			}
 		}
 	}
 

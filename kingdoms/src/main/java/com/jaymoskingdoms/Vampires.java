@@ -409,6 +409,11 @@ public final class Vampires {
 			hunt = null;
 			prey = null;
 		}
+		if (prey == null && kind == Kind.ELDER && NightbornBlood.court(level, mob, now)) {
+			// (0.7.88) one of the Nightborn near: he'd sooner have them as kin
+			speed(mob, false);
+			return;
+		}
 		if (prey == null && hungry(v, kind, nightNo, now)) {
 			prey = findPrey(level, mob, kind);
 			if (prey != null) {
@@ -461,7 +466,7 @@ public final class Vampires {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
-			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e)))) {
+			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e) && !(kind == Kind.ELDER && NightbornBlood.kin(e))))) {
 			double d = e.distanceToSqr(mob);
 			if (d < bestD) {
 				bestD = d;
@@ -492,7 +497,12 @@ public final class Vampires {
 		if (prey.isSleeping()) {
 			prey.stopSleeping();
 		}
-		float bite = elder ? ELDER_BITE : BITE;
+		float bite = NightbornBlood.bite(prey, elder ? ELDER_BITE : BITE);
+		if (bite <= 0.0F) {
+			// (0.7.88) Old Blood: a Nightborn's blood won't let it take them; it's had its fill
+			fed(mob, v, nightNo, now);
+			return;
+		}
 		prey.hurtServer(level, source, bite);
 		prey.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HOLD_TICKS, elder ? ELDER_HOLD : HOLD, false, false, false));
 		mob.heal(bite * HEAL_SHARE);
@@ -532,6 +542,14 @@ public final class Vampires {
 		release(mob);
 	}
 
+	/** (0.7.88) The Elder drank from someone who offered: he's fed, and rests. */
+	static void fedElder(PathfinderMob elder, long clock, long now) {
+		Vampire v = elder.getAttached(VAMPIRE);
+		if (v != null) {
+			fed(elder, v, nightIndex(clock), now);
+		}
+	}
+
 	static void expose(LivingEntity mob, long nightNo) {
 		EXPOSED.put(mob.getUUID(), nightNo);
 	}
@@ -546,7 +564,7 @@ public final class Vampires {
 		level.sendParticles(eye, at.x - side.x, at.y, at.z - side.z, 1, 0.0, 0.0, 0.0, 0.0);
 	}
 
-	private static void chase(PathfinderMob mob, LivingEntity prey) {
+	static void chase(PathfinderMob mob, LivingEntity prey) {
 		if (mob instanceof Villager v) {
 			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(prey, true), VILLAGER_HUNT_SPEED, 1);
 		} else {
@@ -567,7 +585,7 @@ public final class Vampires {
 		}
 	}
 
-	private static void release(PathfinderMob mob) {
+	static void release(PathfinderMob mob) {
 		if (mob instanceof Villager v) {
 			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 		} else if (mob instanceof Folk folk) {

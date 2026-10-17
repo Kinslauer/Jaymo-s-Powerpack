@@ -86,8 +86,13 @@ public final class Cures {
 		if (!q.template().startsWith("cure.")) {
 			return;
 		}
+		boolean vampire = Vampires.isVampire(player);
 		player.removeAttached(Vampires.VAMPIRE);
 		player.removeAttached(Vampires.BITTEN);
+		if (vampire) {
+			// (0.7.88) a Nightborn keeps a trace of it
+			NightbornBlood.cured(player);
+		}
 		if (Lycans.cursed(player)) {
 			WerewolfPlayers.cure(player);
 		}

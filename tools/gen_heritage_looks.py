@@ -5,6 +5,7 @@ mockups in the art overhaul project (art-overhaul/lineages/).
 <key>_skin.png - marks lit like skin (stone, scales, gills, bark, patches, rime, shadow, wraps)
 <key>_glow.png - marks drawn emissive over them, so they shine in the dark
 <key>_eyes.png - the stock eye spots in the heritage's eye colour (the fallback; each skin gets its own eyes in code)
+nightborn_blood_* (0.7.88) - a Nightborn vampire's: the shadow deep red, the eyes red-silver at night
 Sylvan's vine winds its own way on each player (4 drawings, sylvan_<n>), Tideborn's gills come in 3 sets with their
 fins (tideborn_<n>); fins.png and fins_glow.png are the Tideborn fins' model texture (client HeritageLooks).
 Nothing is copied; colours are vanilla's own ramps. Run from the project root:  python -I tools/gen_heritage_looks.py
@@ -153,9 +154,12 @@ def frostborn(rng, solid, glow):
     hands(hand)
 
 
-def nightborn(rng, solid, glow):
+def nightborn(rng, solid, glow, blood=False):
     INK = [(18, 14, 28, 255), (34, 26, 50, 255), (52, 42, 72, 255)]
     STAR = [(240, 242, 255, 255), (170, 176, 230, 255)]
+    if blood:  # (0.7.88) a Nightborn vampire's: the same shadow gone deep red, its stars blood-bright
+        INK = [(30, 4, 8, 255), (58, 8, 14, 255), (86, 16, 22, 255)]
+        STAR = [(255, 196, 196, 255), (222, 64, 64, 255)]
 
     def shadow(x, y, r, x0, x1):  # shadow soaks up from the fingers, thinning toward the elbow; stars in it
         if r < 4 or (r < 9 and rng.random() < 1.0 - (r - 3) * 0.17):
@@ -185,16 +189,16 @@ def earthling(rng, solid, glow):
     hands(hand)
 
 
-def write(name, fn, *args):
+def write(name, fn, *args, seed=None):
     solid, glow = blank(), blank()
-    fn(random.Random(sum(map(ord, name)) * 31), solid, glow, *args)
+    fn(random.Random(sum(map(ord, seed or name)) * 31), solid, glow, *args)
     solid.save(os.path.join(OUT, name + "_skin.png"))
     glow.save(os.path.join(OUT, name + "_glow.png"))
 
 
 # eye colours (the stock spots; client HeritageLooks has the same colours for each skin's own eyes)
 EYE_COLOURS = {"stoneborn": (214, 170, 255), "tideborn": (110, 250, 235), "sylvan": (214, 245, 150),
-               "frostborn": (200, 236, 255), "nightborn": (236, 238, 255)}
+               "frostborn": (200, 236, 255), "nightborn": (236, 238, 255), "nightborn_blood": (255, 184, 192)}
 
 write("stoneborn", stoneborn)
 for v in range(3):
@@ -204,6 +208,7 @@ for v in range(4):
 write("verdant", verdant)
 write("frostborn", frostborn)
 write("nightborn", nightborn)
+write("nightborn_blood", nightborn, True, seed="nightborn")  # the same shadow, so the stars stay put
 write("earthling", earthling)
 for key, c in EYE_COLOURS.items():
     img = blank()

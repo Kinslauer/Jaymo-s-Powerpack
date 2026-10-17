@@ -85,10 +85,11 @@ public final class VampirePlayers {
 		return Vampires.isVampire(player);
 	}
 
-	/** Gone {@link #STARVE_NIGHTS} nights without blood (also read on the client, for blood vision). */
+	/** Gone {@link #STARVE_NIGHTS} nights without blood (a Nightborn: {@link NightbornBlood#STARVE_NIGHTS}; also read on the client, for blood vision). */
 	public static boolean starving(Player player) {
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
-		return v != null && v.type() != Vampires.Kind.DHAMPIR && Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= STARVE_NIGHTS;
+		return v != null && v.type() != Vampires.Kind.DHAMPIR
+			&& Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= NightbornBlood.starveNights(player);
 	}
 
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
@@ -108,8 +109,10 @@ public final class VampirePlayers {
 				continue;
 			}
 			Long bitten = player.getAttached(Vampires.BITTEN);
-			if (bitten != null && night && nightIndex(bitten) < nightNo) {
+			if (bitten != null && night && (nightIndex(bitten) < nightNo || NightbornBlood.oldBlood(player, bitten, clock))) {
 				turn(player, nightNo);
+			} else if (bitten != null && night) {
+				NightbornBlood.fever(player, bitten, clock);
 			}
 			Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 			if (v == null || player.isCreative()) {
@@ -118,6 +121,10 @@ public final class VampirePlayers {
 			if (v.type() == Vampires.Kind.DHAMPIR) {
 				if (night) {
 					player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
+					if (NightbornBlood.nightborn(player)) {
+						// (0.7.88) born dhampir: the night's strength too
+						player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, NIGHT_STRENGTH, true, false, true));
+					}
 				}
 				continue;
 			}
@@ -132,7 +139,7 @@ public final class VampirePlayers {
 					player.igniteForSeconds(BURN_SECONDS);
 				}
 			}
-			if (nightNo - v.fedNight() >= STARVE_NIGHTS) {
+			if (nightNo - v.fedNight() >= NightbornBlood.starveNights(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 40, 0, true, false, true));
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
 			}
@@ -157,6 +164,7 @@ public final class VampirePlayers {
 		player.sendSystemMessage(Component.translatable(half ? "message.jaymoskingdoms.vampire.turned_half" : "message.jaymoskingdoms.vampire.turned")
 			.withStyle(ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.6F, 0.5F);
+		NightbornBlood.woke(player, half);
 		if (!player.isPassenger() && Lairs.crypt(player.level(), player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
 		}

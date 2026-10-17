@@ -376,8 +376,10 @@ public final class Heritage {
 				// stronger and quicker in the dark, weaker under the open sun
 				double damage = 0.0, speed = 0.0;
 				if (dark(player)) {
-					damage = NIGHT_DAMAGE;
-					speed = NIGHT_SPEED;
+					// (0.7.88) a Nightborn vampire's grows under a Blood Moon
+					double bonus = NightbornBlood.darkBonus(player);
+					damage = NIGHT_DAMAGE * bonus;
+					speed = NIGHT_SPEED * bonus;
 				} else if (inSun(player)) {
 					damage = -SUN_WEAK;
 				}
