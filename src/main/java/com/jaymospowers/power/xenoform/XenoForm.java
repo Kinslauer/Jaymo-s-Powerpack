@@ -110,7 +110,7 @@ public abstract class XenoForm {
 		return false;
 	}
 
-	/** C again while already the Ultimate (Swarm swaps bodies, Afterimage sends another decoy, ...). */
+	/** C again while already the Ultimate (Swarm swaps bodies, Standstill starts again, ...). */
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 	}
 
@@ -182,7 +182,7 @@ public abstract class XenoForm {
 		return mob;
 	}
 
-	/** Removes every minion in {@code ids} (Swarm's gremlins, Afterimage's decoys) with a puff. */
+	/** Removes every minion in {@code ids} (Swarm's gremlins) with a puff. */
 	protected static void dismiss(ServerLevel level, List<Integer> ids) {
 		for (int id : ids) {
 			Entity e = level.getEntity(id);

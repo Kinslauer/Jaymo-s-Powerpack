@@ -45,7 +45,7 @@ public final class XenoFormModels {
 		if (MODELS.isEmpty()) {
 			MODELS.put("bulwark", new Bulwark());
 			MODELS.put("pyre", new Pyre());
-			MODELS.put("blur", new Blur());
+			MODELS.put("blur", new Velox());
 			MODELS.put("prism", new Prism());
 			MODELS.put("wisp", new Wisp());
 			MODELS.put("gremlin", new Gremlin());
@@ -184,31 +184,40 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Blur: slight, a fin along the skull, pricked ears, and a long tail that swings as it runs. */
-	static final class Blur extends FormModel {
-		private final ModelPart tail, tailTip;
+	/**
+	 * Velox: slight, a swept-back crest, a visor that drops over the eyes at speed, a short snout, ball-like feet and a
+	 * long tail that swings as it runs.
+	 */
+	static final class Velox extends FormModel {
+		private final ModelPart tail, tailTip, visor;
 
-		Blur() {
+		Velox() {
 			super(bake(mesh()), "blur");
 			this.tail = this.body.getChild("tail");
 			this.tailTip = this.tail.getChild("tip");
+			this.visor = this.head.getChild("visor");
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.15F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -12.0F, -4.0F, 2.0F, 4.0F, 9.0F), PartPose.ZERO);
-			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(22, 64).addBox(-2.0F, -4.0F, -7.0F, 4.0F, 3.0F, 3.0F), PartPose.ZERO);
-			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(36, 64).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
-				PartPose.offsetAndRotation(-3.0F, -8.0F, 1.0F, 0.0F, 0.0F, -0.35F));
-			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(36, 64).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
-				PartPose.offsetAndRotation(3.0F, -8.0F, 1.0F, 0.0F, 0.0F, 0.35F));
+			// the crest rises off the brow and sweeps back along the skull
+			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 3.0F, 5.0F), PartPose.offset(0.0F, -8.0F, 0.0F));
+			head.addOrReplaceChild("crest_sweep", CubeListBuilder.create().texOffs(14, 64).addBox(-1.0F, -1.5F, 0.0F, 2.0F, 3.0F, 8.0F),
+				PartPose.offsetAndRotation(0.0F, -9.0F, 1.0F, -0.25F, 0.0F, 0.0F));
+			head.addOrReplaceChild("visor", CubeListBuilder.create().texOffs(34, 64).addBox(-4.5F, 0.0F, -0.5F, 9.0F, 3.0F, 1.0F), PartPose.offset(0.0F, -9.0F, -4.5F));
+			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(34, 68).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 2.0F, 3.0F), PartPose.ZERO);
+			// ball feet at the bottom of each leg
+			root.getChild("right_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(0, 76).addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.6F)),
+				PartPose.ZERO);
+			root.getChild("left_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(16, 76).addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.6F)),
+				PartPose.ZERO);
 			PartDefinition body = root.getChild("body");
-			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 78).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 8.0F),
+			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 84).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 10.0F),
 				PartPose.offsetAndRotation(0.0F, 10.5F, 1.5F, 0.5F, 0.0F, 0.0F));
-			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(22, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
-				PartPose.offsetAndRotation(0.0F, 0.0F, 7.5F, 0.3F, 0.0F, 0.0F));
+			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(26, 84).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 10.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, 0.3F, 0.0F, 0.0F));
 			return mesh;
 		}
 
@@ -217,6 +226,11 @@ public final class XenoFormModels {
 			super.setupAnim(state);
 			float run = state.walkAnimationSpeed;
 			XenoMotion.Read m = XenoMotion.read(state);
+			// the visor slides down over the eyes as it picks up speed and rides up on the brow when it slows
+			float down = Mth.clamp((run - 0.35F) / 0.4F, 0.0F, 1.0F);
+			down = down * down * (3.0F - 2.0F * down);
+			this.visor.y = Mth.lerp(down, -9.0F, -5.9F);
+			this.visor.xRot = Mth.lerp(down, -0.45F, 0.0F);
 			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.4F * run + Mth.sin(state.ageInTicks * 0.1F) * 0.08F;
 			float lift = tailLift(m);
 			this.tail.yRot = sway - m.trail() * 0.6F;

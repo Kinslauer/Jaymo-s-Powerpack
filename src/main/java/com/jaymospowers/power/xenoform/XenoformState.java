@@ -30,7 +30,7 @@ public final class XenoformState {
 	 * guards): {@link #TAG} while any alien, and {@link #TAG}{@code :<alien id>}. Off again the moment they turn back.
 	 */
 	public static final String TAG = "jaymospowers_xenoform";
-	/** The tag on anything a form summons (Swarm's gremlins, Afterimage's decoys): ours to clean up, never loot. */
+	/** The tag on anything a form summons (Swarm's gremlins): ours to clean up, never loot. */
 	public static final String MINION_TAG = "jaymospowers_xenoform_minion";
 
 	/** The band: the aliens unlocked (form ids, in the order they came) and the one dialled (an index into them). */

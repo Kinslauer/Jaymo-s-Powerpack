@@ -525,75 +525,77 @@ def _retired_pyre_noise():
     clear_hat(img)
 
 
+def chevrons(img, face, color, step=3, skip=0):
+    """Pale chevrons (V shapes, point down) stacked down a face."""
+    x0, y0, x1, y1 = face
+    mid = (x0 + x1 - 1) / 2.0
+    for top in range(y0 + 1 + skip, y1 - 1, step):
+        for x in range(x0, x1):
+            y = top + int(abs(x - mid))
+            if y0 <= y < y1 - 1:
+                img.putpixel((x, y), color)
+
+
 def blur():
-    """Sleek blue hide, a pale throat and belly, dark stripes, hooves, and the insignia on the breast."""
+    """Velox: a dark blue-black hide with pale chevron stripes down the back, arms and legs, a pale cyan glass visor,
+    glossy near-black ball feet, a swept crest, and the insignia on the breast."""
     img = new_skin()
-    hide = (66, 128, 172)
-    belly = (160, 206, 226)
-    stripe = shade(hide, 0.55)
-    parts(img, hide, 0.18)
-    # a darker spine down the back, pale belly and inner limbs
-    for name, (x0, y0, x1, y1) in faces(*BODY).items():
-        if name == "back":
-            rect(img, (x0 + 3, y0, x0 + 5, y1), shade(hide, 0.75))
-        if name == "front":
-            vgrad(img, (x0 + 1, y0 + 1, x1 - 1, y1), belly, shade(belly, 0.92), 0.1)
-    for part in ARMS:
-        f = faces(*part)
-        inner = f["left"] if part is RARM else f["right"]
-        noise_fill(img, shade(belly, 0.9), 0.1, (inner[0] + 1, inner[1] + 1, inner[2] - 1, inner[3] - 2))
-    # stripes: slanted dark bands over the shoulders, back, flanks and thighs
-    for part in BASE_PARTS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
+    hide = (28, 40, 72)
+    pale = (222, 234, 250)
+    glass = (150, 226, 242)
+    parts(img, hide, 0.16)
+    # the chevrons, lit like the face they're on
+    for part in (BODY, RARM, LARM, RLEG, LLEG):
+        for name, b in faces(*part).items():
             if name in ("top", "bottom") or (part is BODY and name == "front"):
                 continue
-            step = 4 if part is BODY or part is HEAD else 3
-            for y in range(y0 + 1, y1 - 3, step):
-                for x in range(x0, x1):
-                    yy = y + (x - x0) // 2
-                    if y0 <= yy < y1 - 3:
-                        img.putpixel((x, yy), stripe)
-    # hooves and dark hands
-    claws(img, (30, 36, 50, 255), rows=2)
-    for part in LEGS:
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name != "top":
-                rect(img, (x0, y1 - 2, x1, y1 - 1), (60, 70, 90, 255))
-    # head: pale muzzle and chin, a dark blaze between the eyes, amber eyes with slit pupils
+            step = 4 if part is BODY else 3
+            chevrons(img, b, shade(pale, LIGHT[name]), step, 1 if name == "front" else 0)
+    # a pale line down the throat and belly
+    bx0, by0, bx1, by1 = front(BODY)
+    rect(img, (bx0 + 3, by0, bx0 + 5, by0 + 3), shade(pale, 0.9))
+    # head: a pale blaze, and cool cyan eyes for when the visor is up
     hx0, hy0, hx1, hy1 = front(HEAD)
-    noise_fill(img, belly, 0.1, (hx0 + 2, hy1 - 3, hx1 - 2, hy1))
-    rect(img, (11, 8, 13, 11), shade(hide, 0.7))
-    eyes(img, (255, 236, 110, 255), 11, wide=True, pupil=(30, 20, 20, 255))
-    rect(img, (9, 10, 11, 11), stripe)
-    rect(img, (13, 10, 15, 11), stripe)
-    chest_insignia(img, rim=(24, 60, 90, 255))
-    # extras: fin 2x4x9 at (0,64); snout 4x3x3 at (22,64); tail 3x3x8 at (0,78); tip 2x2x8 at (22,78); ears 1x3x2 at (36,64)
-    fin = (0, 64, 2, 4, 9)
-    for name, (x0, y0, x1, y1) in faces(*fin).items():
-        vgrad(img, (x0, y0, x1, y1), (170, 236, 255), shade(hide, 0.85), 0.15)
-        if name in ("left", "right"):
-            for x in range(x0, x1, 2):
-                rect(img, (x, y0, x + 1, y0 + 1), CLEAR)
-    snout = (22, 64, 4, 3, 3)
-    box(img, snout, shade(hide, 0.9), 0.15)
+    rect(img, (hx0 + 3, hy0, hx0 + 5, hy0 + 2), shade(pale, 0.85))
+    eyes(img, (190, 250, 255, 255), 11, wide=True, pupil=(20, 28, 50, 255))
+    # dark hands
+    claws(img, (14, 18, 34, 255), ARMS, rows=2)
+    chest_insignia(img, rim=(10, 16, 36, 255))
+    # extras: crest 2x3x5 at (0,64); sweep 2x3x8 at (14,64); visor 9x3x1 at (34,64); snout 4x2x3 at (34,68);
+    # feet 4x3x4 at (0,76) and (16,76); tail 3x3x10 at (0,84); tip 2x2x10 at (26,84)
+    for part in ((0, 64, 2, 3, 5), (14, 64, 2, 3, 8)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), shade(pale, 0.95), shade(hide, 1.1), 0.12)
+            if name in ("left", "right"):
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y0, x + 1, y0 + 1), CLEAR)
+    visor = (34, 64, 9, 3, 1)
+    box(img, visor, glass, 0.06, edge=0.7)
+    vx0, vy0, vx1, vy1 = front(visor)
+    for i in range(3):
+        img.putpixel((vx0 + 2 + i * 2, vy1 - 1 - i % 2 - (1 if i == 0 else 0)), (240, 255, 255, 255))
+    rect(img, (vx0 + 1, vy0, vx0 + 4, vy0 + 1), (240, 255, 255, 255))
+    snout = (34, 68, 4, 2, 3)
+    box(img, snout, shade(hide, 1.15), 0.12)
     sx0, sy0, sx1, sy1 = front(snout)
-    noise_fill(img, belly, 0.1, (sx0, sy1 - 1, sx1, sy1))
-    img.putpixel((sx0, sy0), (30, 36, 50, 255))
-    img.putpixel((sx1 - 1, sy0), (30, 36, 50, 255))
-    for part in ((0, 78, 3, 3, 8), (22, 78, 2, 2, 8)):
-        box(img, part, hide, 0.18)
+    img.putpixel((sx0, sy0), (8, 10, 20, 255))
+    img.putpixel((sx1 - 1, sy0), (8, 10, 20, 255))
+    # glossy near-black ball feet: a lighter rim and a highlight
+    for foot in ((0, 76, 4, 3, 4), (16, 76, 4, 3, 4)):
+        box(img, foot, (16, 18, 28), 0.08, edge=1.9)
+        fx0, fy0, fx1, fy1 = front(foot)
+        img.putpixel((fx0 + 1, fy0 + 1), (120, 140, 190, 255))
+        tx0, ty0, tx1, ty1 = faces(*foot)["top"]
+        img.putpixel((tx0 + 1, ty0 + 1), (150, 170, 215, 255))
+    for part in ((0, 84, 3, 3, 10), (26, 84, 2, 2, 10)):
+        box(img, part, hide, 0.16)
         for name, (x0, y0, x1, y1) in faces(*part).items():
             if name in ("top", "bottom"):
                 continue
-            for x in range(x0 + 1, x1, 3):
-                rect(img, (x, y0, x + 1, y1), stripe)
-            if name == "bottom":
-                pass
-    # the tail's underside pale, its tip bright
-    rect(img, (14, 78, 22, 81), shade(belly, 0.9))
-    rect(img, (40, 78, 42, 88), (170, 236, 255, 255))
-    box(img, (36, 64, 1, 3, 2), hide, 0.15)
-    rect(img, (38, 66, 39, 69), (220, 170, 170, 255))
+            for y in range(y0 + 1, y1, 3):
+                rect(img, (x0, y, x1, y + 1), shade(pale, LIGHT[name]))
+    # the tail's tip is bright
+    rect(img, (26 + 20, 84 + 2, 26 + 22, 84 + 12), (190, 250, 255, 255))
     clear_hat(img)
     save(img, "entity/xenoform_blur.png")
 
@@ -1045,7 +1047,7 @@ FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm",
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
     "pyre": (((12, 78, 5, 5, 1), (10, 10)),),
-    "blur": (((22, 64, 4, 3, 3), (10, 4)),),
+    "blur": (((34, 68, 4, 2, 3), (10, 6)), ((34, 64, 9, 3, 1), (7, 3)), ((0, 76, 4, 3, 4), (8, 29)), ((16, 76, 4, 3, 4), (12, 29))),
     "wisp": (((0, 64, 10, 10, 10), (7, 0)), ((0, 86, 8, 7, 4), (8, 20))),
     "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
     "knell": (((8, 64, 10, 8, 2), (7, 9)), ((0, 76, 12, 3, 5), (6, 6))),

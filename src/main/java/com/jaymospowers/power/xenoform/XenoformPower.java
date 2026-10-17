@@ -115,17 +115,25 @@ public final class XenoformPower implements Power {
 		public int combo;
 		public long comboNext;
 		public int grabbed = -1;
-		/** Bulwark: in a leap, and ticks since it started. Blur: ticks left of a dash's speed. */
+		/** Bulwark: in a leap, and ticks since it started. */
 		public boolean leaping;
 		public int leapTicks;
-		public int dashTicks;
 		/** Pyre: ticks left of the magma trail; the jet is held. */
 		public int trailTicks;
 		public boolean jet;
-		/** Blur: ticks spent on the wall this run; the chain strike's targets and its clock. */
+		/** Velox: the speed burst is on, and its ticks so far; ticks spent on the wall this run; the chain strike's targets and its clock. */
+		public boolean bursting;
+		public int burstTicks;
 		public int wallRun;
 		public final List<Integer> chain = new ArrayList<>();
 		public int chainTick;
+		/** Velox: rapid punches left, whom they hit (entity id) and ticks to the next; ticks left of the cyclone. */
+		public int punches, punchTick;
+		public int punchTarget = -1;
+		public int cyclone;
+		/** Velox's Standstill: ticks left, and each projectile held still (entity id to its velocity when caught and whether it flew without gravity). */
+		public int standstill;
+		public final Map<Integer, double[]> held = new HashMap<>();
 		/** Prism: in the reflect stance; the wall's blocks and when it falls. */
 		public boolean reflecting;
 		public final List<net.minecraft.core.BlockPos> wall = new ArrayList<>();
@@ -147,7 +155,7 @@ public final class XenoformPower implements Power {
 		public long ultimateNext;
 		/** The band is corrupted right now: each alien's moves carry their twist. Refreshed every tick. */
 		public boolean corrupted;
-		/** What the Ultimate summoned (entity ids): Swarm's gremlins, Afterimage's decoys. Dismissed when it ends. */
+		/** What the Ultimate summoned (entity ids): Swarm's gremlins. Dismissed when it ends. */
 		public final List<Integer> minions = new ArrayList<>();
 		/** Revenant: the creature possessed (entity id, -1 none). Sunheart: the beam is held. */
 		public int possessed = -1;
@@ -157,7 +165,7 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
-		/** Corrupted Wyrm: ticks the wings are out; corrupted Blur: ticks of a dash that won't stop. */
+		/** Corrupted Wyrm: ticks the wings are out; corrupted Velox: ticks of a run that won't stop. */
 		public int wingStall, runaway;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
@@ -175,12 +183,18 @@ public final class XenoformPower implements Power {
 			grabbed = -1;
 			leaping = false;
 			leapTicks = 0;
-			dashTicks = 0;
 			trailTicks = 0;
 			jet = false;
+			bursting = false;
+			burstTicks = 0;
 			wallRun = 0;
 			chain.clear();
 			chainTick = 0;
+			punches = punchTick = 0;
+			punchTarget = -1;
+			cyclone = 0;
+			standstill = 0;
+			held.clear();
 			reflecting = false;
 			wall.clear();
 			shroud = glide = false;

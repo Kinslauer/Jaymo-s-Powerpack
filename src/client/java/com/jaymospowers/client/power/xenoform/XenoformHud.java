@@ -38,7 +38,7 @@ final class XenoformHud {
 	private static final Map<String, Item[]> ICONS = Map.of(
 		"bulwark", new Item[] {Items.IRON_INGOT, Items.HEAVY_CORE, Items.LEAD, Items.ANVIL},
 		"pyre", new Item[] {Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.MAGMA_BLOCK},
-		"blur", new Item[] {Items.FEATHER, Items.LADDER, Items.WIND_CHARGE, Items.ENDER_PEARL},
+		"blur", new Item[] {Items.SUGAR, Items.PISTON, Items.WIND_CHARGE, Items.ENDER_PEARL},
 		"prism", new Item[] {Items.AMETHYST_SHARD, Items.AMETHYST_BLOCK, Items.SHIELD, Items.POINTED_DRIPSTONE},
 		"wisp", new Item[] {Items.PHANTOM_MEMBRANE, Items.GLASS, Items.SCULK_SHRIEKER, Items.ELYTRA},
 		"gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE},
