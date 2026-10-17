@@ -17,6 +17,17 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Container;
@@ -48,15 +59,15 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Carrying a block (anyone): sneak + right-click a block a player placed, with empty hands, to lift it out of the
- * world and carry it in both arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}): right-click sets it
- * down ahead of you, sneak + right-click throws it. It lands as a falling block and settles where it comes down (or
- * breaks into its item if it can't stand there, spilling whatever was in it).
+ * Carrying a block (anyone): sneak + right-click one with empty hands to lift it out of the world and carry it in both
+ * arms, the same as a body ({@link Carry}, hold {@link Carry#BLOCK}). (0.13.11) Right-click puts it straight into the
+ * free spot you're looking at, within {@link #PLACE_REACH} (turned to face you, as if placed); with no room there you
+ * keep hold of it. Sneak + right-click throws it (never a chest): it lands as a falling block and settles where it
+ * comes down (or breaks into its item if it can't stand there).
  * <p>
- * Only blocks players placed ({@link #PLACED}, kept per chunk; natural terrain never counts). Chests, furnaces and the
- * like come along with everything in them. Not liftable: two-part blocks (doors, beds, tall flowers, a double chest),
- * liquids, unbreakable blocks, anything you could walk through, and protected spots (spawn, adventure mode, claims
- * that hook block breaking).
+ * (0.13.11) Only crafting tables, anvils and single chests can be lifted ({@link #carriable}); dirt, stone and every
+ * other block stay where they are. A chest comes along with everything in it. Never from protected spots (spawn,
+ * adventure mode, claims that hook block breaking). {@link #PLACED} still notes which blocks players placed.
  * <p>
  * The carried block is a display riding at the carrier's feet (a block display, or an item display for blocks drawn
  * by a block entity renderer, like chests, which a block display shows as nothing); each client draws it in their
@@ -69,6 +80,8 @@ public final class CarryBlock {
 	static final float HOLD_UP = 0.62F, HOLD_AHEAD = 0.28F;
 	/** Set down or thrown, it leaves the arms this far ahead and this high (blocks), or to a side if that's blocked. */
 	static final double RELEASE_AHEAD = 1.25, RELEASE_UP = 0.6;
+	/** (0.13.11) How far off a carried block can be set into place (blocks, from the eyes). */
+	static final double PLACE_REACH = 3.0;
 	/** Marks a carried block's display, so a stray one is found again after a reload. */
 	static final String TAG = "jaymospowers.carried_block";
 
@@ -129,7 +142,7 @@ public final class CarryBlock {
 		if (state != null) {
 			return state;
 		}
-		return entity instanceof Display.BlockDisplay display ? display.getBlockState() : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+		return entity instanceof Display.BlockDisplay display ? display.getBlockState() : Blocks.AIR.defaultBlockState();
 	}
 
 	// ---- which blocks players placed
@@ -171,10 +184,23 @@ public final class CarryBlock {
 		}
 		if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) || state.hasProperty(BlockStateProperties.BED_PART)
 			|| state.hasProperty(BlockStateProperties.EXTENDED) && state.getValue(BlockStateProperties.EXTENDED)
-			|| state.hasProperty(BlockStateProperties.CHEST_TYPE) && state.getValue(BlockStateProperties.CHEST_TYPE) != net.minecraft.world.level.block.state.properties.ChestType.SINGLE) {
+			|| state.hasProperty(BlockStateProperties.CHEST_TYPE) && state.getValue(BlockStateProperties.CHEST_TYPE) != ChestType.SINGLE) {
 			return false;
 		}
-		return state.getDestroySpeed(level, pos) >= 0.0F;
+		return state.getDestroySpeed(level, pos) >= 0.0F && carriable(state);
+	}
+
+	/**
+	 * (0.13.11) The only blocks that can be carried: a crafting table, an anvil, a single chest (Minecraft's own: other
+	 * mods' chests, like Lootr's, keep each player's loot in them and stay put).
+	 */
+	public static boolean carriable(BlockState state) {
+		if (state.is(Blocks.CRAFTING_TABLE) || state.is(BlockTags.ANVIL)) {
+			return true;
+		}
+		return state.getBlock() instanceof ChestBlock
+			&& BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace().equals("minecraft")
+			&& state.getValue(BlockStateProperties.CHEST_TYPE) == ChestType.SINGLE;
 	}
 
 	private static InteractionResult onUseBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
@@ -188,7 +214,7 @@ public final class CarryBlock {
 		BlockPos pos = hit.getBlockPos();
 		BlockState state = level.getBlockState(pos);
 		// (only the server knows who placed what: the client lets the click through, and the server decides)
-		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer carrier) || !liftable(level, pos, state) || !placed(level, pos)) {
+		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer carrier) || !liftable(level, pos, state)) {
 			return InteractionResult.PASS;
 		}
 		if (!carrier.mayInteract(server, pos) || carrier.blockActionRestricted(server, pos, carrier.gameMode())
@@ -289,6 +315,62 @@ public final class CarryBlock {
 		falling.blockData = contents;
 		FALLING.put(falling, contents == null ? new CompoundTag() : contents);
 		return spot;
+	}
+
+	/**
+	 * (0.13.11) Where a carried block would go if set down now: the free spot the carrier is looking at within
+	 * {@link #PLACE_REACH} (the block looked at if it's something like grass, else the space against the face looked
+	 * at), where it can stand, nobody's in the way, and they may build. Null if there's none.
+	 */
+	static @Nullable BlockPos placeSpot(ServerPlayer carrier, Entity display) {
+		ServerLevel level = carrier.level();
+		BlockState state = facing(stateOf(display), carrier);
+		Vec3 eye = carrier.getEyePosition();
+		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(carrier.getLookAngle().scale(PLACE_REACH)), ClipContext.Block.OUTLINE,
+			ClipContext.Fluid.NONE, carrier));
+		if (hit.getType() == HitResult.Type.MISS) {
+			return null;
+		}
+		BlockPos pos = level.getBlockState(hit.getBlockPos()).canBeReplaced() ? hit.getBlockPos() : hit.getBlockPos().relative(hit.getDirection());
+		if (!level.getBlockState(pos).canBeReplaced() || !state.canSurvive(level, pos)
+			|| !level.isUnobstructed(state, pos, CollisionContext.empty())
+			|| !carrier.mayInteract(level, pos) || carrier.blockActionRestricted(level, pos, carrier.gameMode())) {
+			return null;
+		}
+		return pos;
+	}
+
+	/** (0.13.11) Puts the carried block into the world at {@code pos} (from {@link #placeSpot}), with whatever was in it. */
+	static Vec3 place(ServerLevel level, Entity display, ServerPlayer carrier, BlockPos pos) {
+		BlockState state = facing(stateOf(display), carrier);
+		CompoundTag contents = display.getAttached(CONTENTS);
+		display.discard();
+		if (state.isAir()) {
+			return Vec3.atBottomCenterOf(pos);
+		}
+		if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+			state = state.setValue(BlockStateProperties.WATERLOGGED, level.getFluidState(pos).is(Fluids.WATER));
+		}
+		level.setBlock(pos, state, Block.UPDATE_ALL);
+		if (contents != null) {
+			BlockEntity loaded = BlockEntity.loadStatic(pos, state, contents, level.registryAccess());
+			if (loaded != null) {
+				level.setBlockEntity(loaded);
+			}
+		}
+		markPlaced(level, pos);
+		level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 0.8F);
+		return Vec3.atBottomCenterOf(pos);
+	}
+
+	/** Turned as if the carrier had just placed it: a chest facing them, an anvil lying across their view. */
+	private static BlockState facing(BlockState state, ServerPlayer carrier) {
+		if (!state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+			return state;
+		}
+		Direction toward = carrier.getDirection();
+		return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
+			state.getBlock() instanceof AnvilBlock ? toward.getClockWise() : toward.getOpposite());
 	}
 
 	/** Carried blocks that came down this tick: where each settled counts as placed; one that broke spills its contents. */

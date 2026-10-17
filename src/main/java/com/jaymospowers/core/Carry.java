@@ -201,6 +201,8 @@ public final class Carry {
 	private enum Let {
 		/** Set down where it is, no push (the carrier is gone, or they came apart). */
 		SET_DOWN,
+		/** (0.13.11) A carried block put into the spot the carrier is looking at ({@link Entry#placeAt}). */
+		PLACE,
 		DROP,
 		THROW,
 		ESCAPE
@@ -214,6 +216,8 @@ public final class Carry {
 		Vec3 lastCarrierPos;
 		/** Only a Gravity user could pick this up: if they stop being one, it's dropped. */
 		final boolean gravityOnly;
+		/** (0.13.11) Where a carried block is being put ({@link Let#PLACE}). */
+		net.minecraft.core.@Nullable BlockPos placeAt;
 		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
 		final boolean windOnly;
 
@@ -455,10 +459,22 @@ public final class Carry {
 
 	private static void release(ServerPlayer carrier, boolean toss) {
 		Entry entry = CARRIES.get(carrier.getUUID());
-		if (entry != null) {
-			// a chest, furnace and the like is only ever set down, never thrown
-			end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
+		if (entry == null) {
+			return;
 		}
+		if (!toss && CarryBlock.is(entry.carried)) {
+			// (0.13.11) a block goes straight into the free spot looked at; with no room there, it stays in your arms
+			net.minecraft.core.BlockPos spot = CarryBlock.placeSpot(carrier, entry.carried);
+			if (spot == null) {
+				carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.no_room").withStyle(net.minecraft.ChatFormatting.GRAY));
+				return;
+			}
+			entry.placeAt = spot;
+			end(carrier, entry, Let.PLACE);
+			return;
+		}
+		// a chest is only ever set down, never thrown
+		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
 	}
 
 	private static void struggle(ServerPlayer player) {
@@ -555,8 +571,10 @@ public final class Carry {
 		}
 		carried.resetFallDistance();
 		if (CarryBlock.is(carried)) {
-			// it goes back into the world as a falling block, ahead of the carrier
-			at = CarryBlock.land(level, carried, carrier != null && carrier.level() == level && how != Let.SET_DOWN ? carrier : null, velocity);
+			// it goes back into the world: into the spot looked at, or as a falling block ahead of the carrier
+			at = how == Let.PLACE && entry.placeAt != null && carrier != null
+				? CarryBlock.place(level, carried, carrier, entry.placeAt)
+				: CarryBlock.land(level, carried, carrier != null && carrier.level() == level && how != Let.SET_DOWN ? carrier : null, velocity);
 		} else if (carried instanceof ServerPlayer player) {
 			GRACE.put(player.getUUID(), now + RELEASE_GRACE_TICKS);
 			ServerPlayNetworking.send(player, new Self(-1));
