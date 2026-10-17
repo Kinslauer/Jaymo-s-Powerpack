@@ -3,6 +3,7 @@ package com.jaymoskingdoms;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -39,8 +40,8 @@ import org.jspecify.annotations.Nullable;
  * {@code Genetics.combine}, {@code mixin/mca/McaGeneticsMixin}; a baby carried as an item keeps it in its saved data,
  * {@code mixin/mca/McaHeritageMixin}).
  * <ul>
- * <li><b>Weights</b> ({@code W_*}): plain Heartlanders most of all, the rarer bloods rare, the Verdant and the Warrior-born
- * rarest. The land leans them ({@link #LEAN}): Frostborn in the cold, Emberborn in the heat (and each shuns the other's,
+ * <li><b>Weights</b> ({@code W_*}): (0.7.91) {@link #COMMON_SHARE} of folk are plain Heartlanders or Earthlings (between
+ * them by their weights); the other bloods share the rest, the Verdant and the Warrior-born rarest. The land leans them ({@link #LEAN}): Frostborn in the cold, Emberborn in the heat (and each shuns the other's,
  * {@link #SHUN}), Tideborn by the sea and the rivers, Sylvan in the forests, Stoneborn in the mountains and badlands,
  * Verdant in the jungle. Everyone born in the Verdant World is Verdant.</li>
  * <li><b>Looks:</b> a Verdant gets the green ({@link Verdants#SHADE}: MCA's skin, antennae); the rest wear their marks
@@ -51,7 +52,8 @@ import org.jspecify.annotations.Nullable;
  * if their tail is cut off in the rampage, swaps the wrapped tag for the cut one and adds {@link #APE_CUT}.</li>
  * <li><b>Talk:</b> asked about their blood (MCA's menu, {@link #ANSWER}), chatted with now and then ({@link #CHAT_CHANCE};
  * a Warrior-born more often), and in gossip when they come over to you ({@link #GOSSIP_CHANCE}), they say what they
- * are, a Warrior-born why there's no tail to see.</li>
+ * are, a Warrior-born why there's no tail to see. (0.7.91) In gossip they also talk of the bloods living round them
+ * ({@link #neighbours}): far more often when one of the rare ones lives there.</li>
  * <li><b>Gifts and flaws</b> that work on a villager ({@link #fit}, {@link #tick}): an Emberborn never burns and is sapped
  * in the cold, a Frostborn never freezes, a Tideborn holds its breath long and swims well, a Stoneborn walks a little
  * slow, a Sylvan lands soft (and a fighting one hits lighter), a Verdant burns longer, a Nightborn is quicker in the dark,
@@ -63,6 +65,15 @@ public final class VillagerHeritage {
 	/** How likely each heritage is, before the land leans it (out of their sum). */
 	static final int W_HEARTLANDER = 560, W_STONEBORN = 60, W_TIDEBORN = 50, W_SYLVAN = 50, W_VERDANT = 15, W_EMBERBORN = 35,
 		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70;
+	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
+	static final float COMMON_SHARE = 0.9F;
+	/**
+	 * (0.7.91) Gossip about the neighbours: who counts (folk this close), and how often they bring it up, with one of the
+	 * rarer bloods living there and without.
+	 */
+	static final double NEIGHBOURS_RANGE = 64.0;
+	static final float NEIGHBOURS_RARE_CHANCE = 0.3F, NEIGHBOURS_PLAIN_CHANCE = 0.06F;
+	static final int NEIGHBOURS_ONE_LINES = 4, NEIGHBOURS_MANY_LINES = 3, NEIGHBOURS_MIXED_LINES = 3, NEIGHBOURS_PLAIN_LINES = 3;
 	/** A heritage whose land it is counts this many times over; one that shuns the land (ember in the cold, frost in the heat) this share. */
 	static final int LEAN = 5;
 	static final float SHUN = 0.2F;
@@ -149,7 +160,12 @@ public final class VillagerHeritage {
 		Heritage.Kind[] kinds = Heritage.Kind.values();
 		float[] weights = new float[kinds.length];
 		float total = 0.0F;
+		// (0.7.91) most are plain folk; the rest roll among the rarer bloods only
+		boolean common = random.nextFloat() < COMMON_SHARE;
 		for (int i = 0; i < kinds.length; i++) {
+			if (common(kinds[i]) != common) {
+				continue;
+			}
 			float w = switch (kinds[i]) {
 				case HEARTLANDER -> W_HEARTLANDER;
 				case STONEBORN -> W_STONEBORN * (stone ? LEAN : 1);
@@ -173,6 +189,11 @@ public final class VillagerHeritage {
 			}
 		}
 		return Heritage.Kind.HEARTLANDER;
+	}
+
+	/** (0.7.91) Plain folk: a Heartlander or an Earthling (not one of the rarer bloods). */
+	public static boolean common(Heritage.Kind kind) {
+		return kind == Heritage.Kind.HEARTLANDER || kind == Heritage.Kind.EARTHLING;
 	}
 
 	/**
@@ -418,6 +439,43 @@ public final class VillagerHeritage {
 	/** Whether "Ask about their blood" shows in their menu: they have one worth telling of. */
 	public static boolean hasTale(Entity villager) {
 		return talkKey(villager) != null;
+	}
+
+	/**
+	 * (0.7.91) (Coming over to gossip) what they make of the bloods living round them ({@link #NEIGHBOURS_RANGE}): one of
+	 * the rarer ones among them (one of a kind, or several), a mix of them, or none at all. Mostly when there are some
+	 * ({@link #NEIGHBOURS_RARE_CHANCE}); only now and then when they're all plain folk. Never of themselves (that's
+	 * {@link #gossip}). Null if not this time.
+	 */
+	static @Nullable Component neighbours(ServerLevel level, Entity villager, ServerPlayer player) {
+		java.util.Map<Heritage.Kind, Integer> rare = new java.util.EnumMap<>(Heritage.Kind.class);
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, villager.getBoundingBox().inflate(NEIGHBOURS_RANGE),
+			e -> e != villager && e.isAlive() && eligible(e))) {
+			Heritage.Kind kind = of(other);
+			if (kind != null && !common(kind)) {
+				rare.merge(kind, 1, Integer::sum);
+			}
+		}
+		var random = level.getRandom();
+		if (random.nextFloat() >= (rare.isEmpty() ? NEIGHBOURS_PLAIN_CHANCE : NEIGHBOURS_RARE_CHANCE)) {
+			return null;
+		}
+		String base = "talk.jaymoskingdoms.neighbours.";
+		if (rare.isEmpty()) {
+			return Component.translatable(base + "plain." + (1 + random.nextInt(NEIGHBOURS_PLAIN_LINES)), player.getName());
+		}
+		List<Heritage.Kind> kinds = new ArrayList<>(rare.keySet());
+		Heritage.Kind kind = kinds.get(random.nextInt(kinds.size()));
+		Component name = Component.translatable("heritage.jaymoskingdoms." + kind.key());
+		int count = rare.get(kind);
+		if (kinds.size() >= 2 && random.nextBoolean()) {
+			Heritage.Kind second = kinds.get((kinds.indexOf(kind) + 1) % kinds.size());
+			return Component.translatable(base + "mixed." + (1 + random.nextInt(NEIGHBOURS_MIXED_LINES)), player.getName(), name,
+				Component.translatable("heritage.jaymoskingdoms." + second.key()));
+		}
+		return count == 1
+			? Component.translatable(base + "one." + (1 + random.nextInt(NEIGHBOURS_ONE_LINES)), player.getName(), name)
+			: Component.translatable(base + "many." + (1 + random.nextInt(NEIGHBOURS_MANY_LINES)), player.getName(), name, count);
 	}
 
 	/** (Coming over to gossip) now and then they talk of their own blood instead; null if not this time. */

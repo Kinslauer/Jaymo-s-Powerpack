@@ -843,6 +843,10 @@ public final class Approaches {
 					said = VillagerHeritage.gossip(level, a.mob, player);
 				}
 				if (said == null) {
+					// (0.7.91) or the bloods living round them
+					said = VillagerHeritage.neighbours(level, a.mob, player);
+				}
+				if (said == null) {
 					said = Oddities.gossip(level, a.mob);
 				}
 				if (said == null) {
