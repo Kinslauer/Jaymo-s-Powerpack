@@ -122,6 +122,24 @@ final class WebTendrilWalk {
 			&& !player.isSpectator() && anchors(player, STRIDE_REACH * player.getScale()) >= 2;
 	}
 
+	/**
+	 * (0.13.23) Hung from the tendrils rather than walking a wall: off the ground and carried between them, or on a
+	 * ceiling, with nothing under the feet. The legs dangle then (WebHangPose) instead of walking the air. A wall
+	 * climb (the latch on a wall, a wall cling) isn't hanging.
+	 */
+	static boolean hanging(Player player) {
+		if (player.onGround() || player.isPassenger() || player.isInWater() || player.isFallFlying() || !climbing(player)) {
+			return false;
+		}
+		Vec3 normal = surface(player);
+		if (normal != null && normal.y < -0.5) {
+			// on a ceiling
+			return true;
+		}
+		// no wall against you (hung off a latch, or carried in the open), or carried along beside one
+		return normal == null || player.getAttached(WebTendrils.CLIMB) == null && !clinging(player) && striding(player);
+	}
+
 	/** How many ways out from your middle there's something to grab within {@code reach}. */
 	static int anchors(Player player, double reach) {
 		Vec3 middle = player.getBoundingBox().getCenter();

@@ -26,15 +26,15 @@ import net.minecraft.world.item.Items;
  * the game. Six segments clockwise from the top, each with its icon and cooldown; the middle shows the pick's name and
  * how fed the symbiote is. (0.11.0) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
  * its bar, and a small panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim)
- * where a tooltip would be.
+ * where a tooltip would be. (0.13.23) A seventh slot, the Mask, takes the suit's head off and puts it back.
  */
 final class WebSymbioteScreen extends Screen {
 	/** Ring radius, segment tile size, and the dead zone in the middle (no pick). */
 	private static final int RADIUS = 58;
 	private static final int TILE = 26;
 	private static final int DEAD_ZONE = 24;
-	/** The suit toggle: a little mask under the satiety bar (offset from the centre, and size). */
-	private static final int MASK_Y = 11;
+	/** The suit toggle: a little mask under the bond line (offset from the centre, and size). */
+	private static final int MASK_Y = 22;
 	private static final int MASK_W = 14;
 	private static final int MASK_H = 10;
 	private static final int ACCENT = 0xFF8A5AB0;
@@ -46,6 +46,13 @@ final class WebSymbioteScreen extends Screen {
 	private static final Item[] ICONS = {Items.TRIPWIRE_HOOK, Items.NETHERITE_CHESTPLATE, Items.SPIDER_EYE, Items.ROTTEN_FLESH,
 		Items.POINTED_DRIPSTONE, Items.INK_SAC};
 	private static final String[] NAMES = {"tendril", "armor", "crawl", "consume", "spikes", "shroud"};
+	/**
+	 * (0.13.23) The ring's slots: the six abilities, then the Mask (the suit's head off or on, {@link WebSymbiote#MASK_TOGGLE}),
+	 * {@code SLOT_DEGREES} apart clockwise from the top.
+	 */
+	private static final int SLOTS = WebSymbiote.ABILITIES + 1, MASK_SLOT = WebSymbiote.ABILITIES;
+	private static final double SLOT_DEGREES = 360.0 / SLOTS;
+	private static final Item MASK_ICON = Items.PLAYER_HEAD;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -122,7 +129,8 @@ final class WebSymbioteScreen extends Screen {
 			selected = -1;
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
-			selected = Math.floorMod((int)Math.round(angle / 60.0), WebSymbiote.ABILITIES);
+			int slot = Math.floorMod((int)Math.round(angle / SLOT_DEGREES), SLOTS);
+			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot;
 		}
 		if (selected != before && selected >= 0) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
@@ -143,7 +151,7 @@ final class WebSymbioteScreen extends Screen {
 			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
 		}
 		// pointer: dots from the middle toward the mouse
-		if (selected >= 0 && selected < WebSymbiote.ABILITIES) {
+		if (selected >= 0 && selected != WebSymbiote.SUIT_TOGGLE) {
 			double t = Math.atan2(dy, dx);
 			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
 				int x = cx + (int)Math.round(Math.cos(t) * r);
@@ -159,7 +167,7 @@ final class WebSymbioteScreen extends Screen {
 		}
 		long now = player.level().getGameTime();
 		for (int i = 0; i < WebSymbiote.ABILITIES; i++) {
-			double t = Math.toRadians(i * 60.0 - 90.0);
+			double t = Math.toRadians(i * SLOT_DEGREES - 90.0);
 			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
 			long left = cooldowns.end(i) - now;
@@ -195,11 +203,31 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 
+		{
+			// (0.13.23) the Mask: the suit's head off (your face shows) or back on; lit while it's off
+			double t = Math.toRadians(MASK_SLOT * SLOT_DEGREES - 90.0);
+			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
+			boolean picked = selected == WebSymbiote.MASK_TOGGLE;
+			boolean usable = WebSymbiote.suitShown(player) && !WebSymbiote.bulked(player);
+			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
+			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW_ALT);
+			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(MASK_ICON), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+			if (!usable) {
+				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
+			}
+			if (WebSymbiote.unmasked(player)) {
+				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
+			}
+		}
+
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
 		if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
-			String key = selected >= NAMES.length ? "suit" : selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
+			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected >= NAMES.length ? "suit"
+				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
 			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
 			UiStyle.lineCentred(graphics, font, name, cx, cy - 10, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
 		}
@@ -249,6 +277,12 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected < 0) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.hint");
+		}
+		if (selected == WebSymbiote.MASK_TOGGLE) {
+			if (!WebSymbiote.suitShown(player) || WebSymbiote.bulked(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.mask_no_suit");
+			}
+			return Component.translatable(WebSymbiote.unmasked(player) ? "gui.jaymospowers.web_symbiote.mask_off" : "gui.jaymospowers.web_symbiote.mask_on");
 		}
 		if (selected == WebSymbiote.SUIT_TOGGLE) {
 			if (state.has(WebSymbioteState.SUIT)) {

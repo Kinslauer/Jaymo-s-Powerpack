@@ -3380,3 +3380,11 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   use the name you picked in MCA's creator (its family tree; your username only if you never set one), and the
   costume's name while you're masked to them. MCA's own dialogue already used the creator name and the costume swap
   (`Identities.trueName`, `McaBridge.name`).
+- **0.7.93, bring the downed round with food:** Andy: "shift click holding a downed npc raises a meter to revive them,
+  it takes one piece of food from your inventory". Sneak and hold use on a downed villager or folk: a bar fills over the
+  hotbar (`Downed.REVIVE_TICKS` 60, 3 s), your hand at work with hearts and a rustle; full, they get up as their own
+  recovery does (30% health, the wounds forgotten) and it costs the least filling food you carry (lowest nutrition,
+  then saturation; the first of equals; none in creative). With nothing edible on you, a hint and no bar. Letting go,
+  standing up, looking away, stepping out of reach or someone lifting them empties it. A quick sneak-tap still picks
+  them up over your shoulder, now when you let go (within 0.4 s) rather than on the click; carried bodies, disarming
+  and throwing are unchanged.
