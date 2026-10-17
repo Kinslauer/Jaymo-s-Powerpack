@@ -99,7 +99,7 @@ public final class ZFighterPower implements Power {
 	// ---- fists (added to the player's attack damage) ----
 	static final double FIST_DAMAGE = 3.0;
 	static final double FIST_PER_ABILITY = 0.75;
-	static final double FIST_PER_DEFEAT = 0.25;
+	static final double FIST_PER_DEFEAT = 0.1;
 	static final double ASCENDED_FIST = 1.0;
 
 	// ---- movement ----
@@ -115,10 +115,10 @@ public final class ZFighterPower implements Power {
 	static final int FLIGHT_UNLOCK = 2;
 
 	// ---- forms (index: 0 base, 1 Super, 2 Super 2, 3 Super 3) ----
-	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). */
-	static final double[] FORM_FIST = {0.0, 0.6, 1.0, 1.6};
-	static final float[] FORM_KI = {1.0F, 1.5F, 1.8F, 2.2F};
-	static final double[] FORM_SPEED = {0.0, 0.25, 0.35, 0.45};
+	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). A third of their bonus before the training slowdown. */
+	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53};
+	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F};
+	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15};
 	/** Top cruise speed in flight (blocks a tick; Wind's is 2.5 in a plain rainy sky). */
 	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2};
 	/** Ki per tick to hold the form (1.5, 3, 6 a second), and times the base appetite. */
@@ -128,7 +128,7 @@ public final class ZFighterPower implements Power {
 	static final int[] FORM_ENTER_KI = {0, 30, 50, 80};
 	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020};
 	/** Fully mastered, a form is this much stronger (scaled by mastery) and drains this much less. */
-	static final float MASTERY_POWER = 0.15F;
+	static final float MASTERY_POWER = 0.05F;
 	static final float MASTERY_EASE = 0.25F;
 	/** After dropping back to base, this long before going up again. */
 	static final int SUPER_COOLDOWN = 200;
@@ -138,8 +138,8 @@ public final class ZFighterPower implements Power {
 	static final double SUPER_SHAKE_RANGE = 24.0;
 
 	// ---- Limit Break (index: tier 1-3) ----
-	static final double[] LIMIT_FIST = {0.0, 0.3, 0.6, 1.0};
-	static final double[] LIMIT_SPEED = {0.0, 0.1, 0.2, 0.3};
+	static final double[] LIMIT_FIST = {0.0, 0.1, 0.2, 0.33};
+	static final double[] LIMIT_SPEED = {0.0, 0.03, 0.07, 0.1};
 	/** Health it burns per tick (0.4, 1, 2 a second); it ends before it would take the last heart. */
 	static final float[] LIMIT_HEALTH = {0.0F, 0.02F, 0.05F, 0.1F};
 	/** Stacked on a form, that form's ki drain is multiplied by this. */
@@ -327,9 +327,14 @@ public final class ZFighterPower implements Power {
 		ZFighterBattle.init();
 		ZFighterCombo.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LIVE.remove(handler.player.getUUID()));
+		ZFighterGrowth.init();
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			LIVE.remove(handler.player.getUUID());
+			ZFighterGrowth.forget(handler.player);
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			LIVE.clear();
+			ZFighterGrowth.clear();
 			ZFighterKi.clear();
 		});
 	}
@@ -452,6 +457,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
 		player.removeAttached(ZFighterTraining.DATA);
+		player.removeAttached(ZFighterGrowth.DATA);
 		player.removeAttached(HARDSHIP);
 	}
 
@@ -580,6 +586,7 @@ public final class ZFighterPower implements Power {
 
 		ZFighterCombo.tick(player, live);
 		live.ki = Mth.clamp(live.ki, 0.0F, max);
+		ZFighterGrowth.tick(player, live);
 		ZFighterBattle.tick(player, live);
 		if (now % 10 == 0) {
 			refresh(player, live);

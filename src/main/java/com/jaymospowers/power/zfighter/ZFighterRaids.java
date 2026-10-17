@@ -43,8 +43,8 @@ public final class ZFighterRaids {
 	static final long RAID_DAYS = 20L;
 	static final long RAID_SPREAD = 240000L;
 	static final double NEAR = 160.0;
-	static final int RAID_TP = 6000;
-	static final int MIN_TP = 500;
+	static final int RAID_TP = 1500;
+	static final int MIN_TP = 125;
 	static final int RAID_EMERALDS = 48;
 	static final int RAID_XP = 30;
 	static final double LAND_AT = 24.0;

@@ -19,6 +19,8 @@ import net.minecraft.server.level.ServerPlayer;
  * {@code foes clear} forgets them;</li>
  * <li>{@code /powerdebug zfighter tp <n>}: sets your Training Points;</li>
  * <li>{@code /powerdebug zfighter mastery <form> <percent>}: sets a form's mastery (1-3);</li>
+ * <li>{@code /powerdebug zfighter train <method> <points>}: trains by one of {@link ZFighterGrowth}'s methods (0-17, as if
+ * earned: tired by today's use; survival only); {@code train newday}: every method fresh again;</li>
  * <li>{@code /powerdebug zfighter raid}: a tyrant lands near you; {@code tournament}: a tournament opens near you,
  * {@code tournament start} ends its sign-up.</li>
  * </ul>
@@ -68,6 +70,28 @@ final class ZFighterDebugCommand {
 									+ ZFighterTraining.of(player).mastery(form) / 100 + "%"), false);
 								return 1;
 							}))))
+				.then(Commands.literal("train")
+					.then(Commands.argument("method", IntegerArgumentType.integer(0, ZFighterGrowth.METHODS - 1))
+						.then(Commands.argument("points", IntegerArgumentType.integer(1, 100000))
+							.executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								int method = IntegerArgumentType.getInteger(c, "method");
+								ZFighterGrowth.train(player, method, IntegerArgumentType.getInteger(c, "points"));
+								int stat = ZFighterGrowth.METHOD_STAT[method];
+								c.getSource().sendSuccess(() -> Component.literal(ZFighterGrowth.METHOD_KEYS[method] + " -> " + ZFighterTraining.STAT_KEYS[stat]
+									+ " level " + ZFighterTraining.of(player).stat(stat) + ", bar " + Math.round(ZFighterGrowth.of(player).progress(stat)) + "/"
+									+ Math.round(ZFighterGrowth.bar(ZFighterTraining.of(player).stat(stat))) + ", today x"
+									+ ZFighterGrowth.of(player).factor(method, ZFighterGrowth.day(player)) + " (survival only)"), false);
+								return 1;
+							})))
+					.then(Commands.literal("newday")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							ZFighterGrowth.Data data = ZFighterGrowth.of(player);
+							player.setAttached(ZFighterGrowth.DATA, new ZFighterGrowth.Data(data.progress(), data.trained(), data.day(), List.of()));
+							c.getSource().sendSuccess(() -> Component.literal("Every training method is fresh again."), false);
+							return 1;
+						})))
 				.then(Commands.literal("raid")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();

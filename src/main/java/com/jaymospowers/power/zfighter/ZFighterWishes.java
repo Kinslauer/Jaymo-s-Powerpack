@@ -69,7 +69,7 @@ public final class ZFighterWishes {
 	public static final int WISHES = 6;
 	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing"};
 
-	static final int WISH_TP = 5000;
+	static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
 	static final int RICHES_STACKS = 3;
 	/** Deaths this recent (ticks) are undone by the revive wish. */

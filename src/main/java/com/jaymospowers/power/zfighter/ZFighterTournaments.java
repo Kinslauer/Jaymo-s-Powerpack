@@ -59,9 +59,9 @@ final class ZFighterTournaments {
 	/** Champions get this much more health and punch for each round past the first. */
 	static final double ROUND_HEALTH = 0.5;
 	static final double ROUND_DAMAGE = 0.3;
-	static final int BOUT_TP = 400;
+	static final int BOUT_TP = 100;
 	static final int BOUT_EMERALDS = 4;
-	static final int WIN_TP = 3000;
+	static final int WIN_TP = 750;
 	static final int WIN_EMERALDS = 24;
 	static final long DAY = 24000L;
 	static final String[] CHAMPIONS = {"krell", "toma", "shin", "bora", "yarro", "pashi", "namu", "gula"};

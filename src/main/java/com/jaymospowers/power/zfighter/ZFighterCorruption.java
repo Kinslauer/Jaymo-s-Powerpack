@@ -50,7 +50,7 @@ public final class ZFighterCorruption {
 	/** A dark lesson fills this much of the meter (three corrupt). */
 	static final int LESSON_CORRUPTION = Fate.MAX_CORRUPTION / 3 + 1;
 	/** Corrupted, in every form: fists and ki power this much stronger. */
-	static final double POWER = 0.15;
+	static final double POWER = 0.05;
 	/** Corrupted mode: health lost a second, the share of damage dealt healed back, and when it gives out. */
 	static final float DRAIN = 1.0F;
 	static final float LIFE_STEAL = 0.35F;

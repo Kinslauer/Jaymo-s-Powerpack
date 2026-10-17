@@ -78,7 +78,7 @@ public final class ZFighterCombo {
 	/** ...times the move's own weight (punches 1, kicks harder), in move order. */
 	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.0F, 1.15F, 1.25F, 1.3F, 1.15F, 1.25F, 1.35F, 1.4F, 1.4F, 1.1F, 1.3F, 1.35F, 1.2F};
 	/** The finisher hits for this many fists, by tier, and throws the foe this far (horizontal, up). */
-	static final float[] FINISHER_SHARE = {1.4F, 1.5F, 1.6F, 1.8F, 2.0F};
+	static final float[] FINISHER_SHARE = {1.4F, 1.45F, 1.5F, 1.55F, 1.6F};
 	static final double[] FINISHER_PUSH = {1.4, 1.6, 1.9, 2.2, 2.7};
 	static final double[] FINISHER_LIFT = {0.4, 0.45, 0.5, 0.55, 0.7};
 	/** The rising dragon fist (a finisher) throws the foe mostly up: this far along, this high (about 5 blocks). */
