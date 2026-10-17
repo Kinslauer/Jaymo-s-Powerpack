@@ -98,11 +98,21 @@ public final class VillagerLooks {
 				return;
 			}
 			HumanoidModel<S> model = this.getParentModel();
+			// on an MCA villager, its own skin body just over the skin (and for the glow, over the face), so the looks
+			// don't fight MCA's skin for the same depth (McaLookModels); anyone else's, the model as it is
+			HumanoidModel<S> marks = model, glowing = model;
+			if (McaCompat.LOADED) {
+				HumanoidModel<S> mcaMarks = mcaMarks(model), mcaGlow = mcaGlow(model);
+				if (mcaMarks != null && mcaGlow != null) {
+					marks = mcaMarks;
+					glowing = mcaGlow;
+				}
+			}
 			if (look.heritage() == Heritage.Kind.EMBERBORN) {
-				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(EmberLook.MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(EmberLook.MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 					state.outlineColor);
 				Identifier eyes = eyes(state, EmberLook.EYE_GLOW, EmberLook.EYES);
-				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 					state.outlineColor);
 				return;
 			}
@@ -110,20 +120,30 @@ public final class VillagerLooks {
 			if (kind == null) {
 				return;
 			}
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			if (look.glow() != 0) {
-				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
 					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 			}
 			if (look.eyesLit() && kind.stockEyes != null) {
-				collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes(state, kind.eyeColor, kind.stockEyes)), lightCoords,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes(state, kind.eyeColor, kind.stockEyes)), lightCoords,
 					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 			}
 			if (kind == HeritageLooks.Kind.TIDEBORN) {
 				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, false, false);
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <S extends HumanoidRenderState> @Nullable HumanoidModel<S> mcaMarks(HumanoidModel<S> parent) {
+		return (HumanoidModel<S>) McaLookModels.marks(parent);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <S extends HumanoidRenderState> @Nullable HumanoidModel<S> mcaGlow(HumanoidModel<S> parent) {
+		return (HumanoidModel<S>) McaLookModels.glow(parent);
 	}
 
 	/** Glowing eyes: an MCA villager's own ({@link McaEyes}), anyone else's the stock spots. */

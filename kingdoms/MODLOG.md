@@ -3365,3 +3365,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
     quicker in the dark and weaker in the sun, Warrior-born hit harder badly hurt. Player-only ones (attribute points,
     character level, hunger, skill experience, mining) are skipped.
   - The wrapped ones' full-moon ape is Jaymo's Powers' (0.13.10).
+- **0.7.92, heritage looks no longer flicker on MCA villagers:** MCA doesn't skin the animated model; it draws the skin,
+  face, clothes and hair each on its own copy of its body, inflated a little more each time (0, 0.01, 0.0625, 0.125).
+  The heritage marks were drawn on the bare animated model at the skin's own depth and z-fought it. On MCA villagers
+  they're now drawn on MCA's body just over the skin (0.005), and the glow (glowing marks and eyes) just over the face
+  (0.02), both under the clothes, posed like MCA's own layers (`McaLookModels`, numbers at its top). Folk are unchanged.
