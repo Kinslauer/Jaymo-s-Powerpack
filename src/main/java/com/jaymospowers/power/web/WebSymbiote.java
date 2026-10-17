@@ -65,6 +65,13 @@ public final class WebSymbiote {
 	public static final int ABILITIES = 6;
 	/** Not an ability: the little mask in the middle of the menu shows or hides the suit (the powers keep working). */
 	public static final int SUIT_TOGGLE = 6;
+	/**
+	 * (0.13.23) Not an ability either: the menu's Mask slot (or the costume mask key with no costume mask to flip) takes
+	 * the suit's head off, so your own face (an MCA villager's, with MCA) shows, the rest of the suit staying on; picked
+	 * again it flows back over the face ({@link #UNMASKED}). At most once every {@code MASK_TOGGLE_GAP} ticks.
+	 */
+	public static final int MASK_TOGGLE = 7;
+	public static final int MASK_TOGGLE_GAP = 10;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -252,6 +259,21 @@ public final class WebSymbiote {
 	 */
 	public static final float DEFEND_HEALTH = 0.3F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
+	/**
+	 * (0.13.23) It always fights for you: at or under {@code PROTECT_HEALTH} of your max health with something on you
+	 * (it hurt you lately, or a hostile has you as its target, within {@link #THREAT_RANGE}), it takes the wheel at once,
+	 * whatever its hunger, its bond or its mood, and goes for the attacker; when that one's down it turns on the next,
+	 * until nothing's after you for {@code PROTECT_CALM_TICKS}. Seizing you, it hardens a shell over you
+	 * ({@code PROTECT_SHIELD} absorption, at most once every {@code PROTECT_SHIELD_COOLDOWN}). Wrestle it off and it only
+	 * holds back {@code PROTECT_SUPPRESS_TICKS} (5 s) while you're still under attack. Hopeless (at or under
+	 * {@code PROTECT_HOPELESS_HEALTH}, or {@code PROTECT_HOPELESS_CROWD} or more after you) it runs instead: the roar and
+	 * the Shroud's run when the roar's ready ({@link #DEFEND_COOLDOWN}), else straight into the run. A target further
+	 * than {@code PROTECT_LEASH} is let go for whatever's nearer.
+	 */
+	public static final float PROTECT_HEALTH = 0.3F, PROTECT_HOPELESS_HEALTH = 0.12F, PROTECT_SHIELD = 8.0F, PROTECT_SHAKE = 0.9F;
+	public static final int PROTECT_CALM_TICKS = 40, PROTECT_SUPPRESS_TICKS = 100, PROTECT_SHIELD_COOLDOWN = 600, PROTECT_HOPELESS_CROWD = 4,
+		PROTECT_LINES = 3, PROTECT_VIGNETTE = 0x8A0A14;
+	public static final double PROTECT_LEASH = 24.0;
 	/**
 	 * It will stop at nothing to live. At or under {@code DESPERATE_HEALTH} of your max health with a threat about, every
 	 * {@code DESPERATE_EVERY} it throws everything it has: a Spike Burst whenever it's ready, its tendrils lashing
@@ -663,6 +685,50 @@ public final class WebSymbiote {
 	public static final AttachmentType<BlockPos> RIPPING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_ripping"),
 		builder -> builder.syncWith(BlockPos.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.13.23) The suit's mask is off (see {@link #MASK_TOGGLE}): saved, and synced to everyone, who see the bare head.
+	 * It only counts while the plain suit shows (the big body keeps its own head).
+	 */
+	public static final AttachmentType<Boolean> UNMASKED = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_unmasked"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL,
+			AttachmentSyncPredicate.all()));
+
+	/** The suit's mask is off and the suit shows (either side): the face is yours to see. */
+	public static boolean unmasked(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(UNMASKED)) && suitShown(player) && !bulked(player);
+	}
+
+	/** (server) When each player last flipped the suit's mask (game time). */
+	private static final java.util.Map<java.util.UUID, Long> LAST_MASK = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** The Mask slot: the suit's head comes off (your face shows) or flows back over it. */
+	public static void toggleMask(ServerPlayer player) {
+		if (!isBonded(player) || player.isSpectator()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		Long last = LAST_MASK.get(player.getUUID());
+		if (last != null && now - last >= 0 && now - last < MASK_TOGGLE_GAP) {
+			return;
+		}
+		LAST_MASK.put(player.getUUID(), now);
+		if (!suitShown(player) || bulked(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote.mask_no_suit"));
+			return;
+		}
+		boolean off = !Boolean.TRUE.equals(player.getAttached(UNMASKED));
+		if (off) {
+			player.setAttached(UNMASKED, true);
+		} else {
+			player.removeAttached(UNMASKED);
+		}
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), off ? SoundEvents.SLIME_SQUISH_SMALL : SoundEvents.SLIME_BLOCK_PLACE,
+			SoundSource.PLAYERS, 0.7F, off ? 1.2F : 0.8F);
+		level.sendParticles(dust(0.9F), player.getX(), player.getEyeY(), player.getZ(), 8, 0.2, 0.2, 0.2, 0.0);
+		whisper(player, off ? "mask_off" : "mask_on");
+	}
+
 	/** The tendrils are out on their own (not the armour's): until when, else -1. */
 	public static long tendrilsOut(Player player) {
 		Long until = player.getAttached(TENDRILS_OUT);
@@ -875,6 +941,12 @@ public final class WebSymbiote {
 		long mendShotAt;
 		boolean bloodlust;
 		boolean rivalry;
+		/** Fighting for you (see {@link #PROTECT_HEALTH}): when something was last after you, when it may seize you again, when it may harden again, and whether this one is a retake. */
+		boolean protecting;
+		long protectThreatAt;
+		long protectSuppressUntil;
+		long protectShieldAt;
+		boolean protectRetake;
 	}
 
 	private WebSymbiote() {
@@ -1102,6 +1174,10 @@ public final class WebSymbiote {
 			return URGENCY_MAX;
 		}
 		if (key.startsWith("harden")) {
+			return URGENCY_HARDEN;
+		}
+		if (key.startsWith("protect.") && !key.equals("protect.calm")) {
+			// (0.13.23) it's fighting for you
 			return URGENCY_HARDEN;
 		}
 		if (key.equals("takeover") || key.equals("hunt") || key.startsWith("neglect.") || key.startsWith("surge.") || key.contains(".warn.")
@@ -1518,29 +1594,15 @@ public final class WebSymbiote {
 			remark(player, live, now);
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
-		LivingEntity threat = sulking(player) ? null : threat(player);
-		if (threat != null && lowHealth(player, DEFEND_HEALTH) && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)
-			&& !(live.roarAt > 0L && live.roarDefend)) {
-			live.defendReadyAt = now + DEFEND_COOLDOWN;
-			abortFeeding(player, live);
-			if (live.takeoverTicks > 0) {
-				endTakeover(player, live);
-			}
-			live.rampage = false;
-			live.curious = false;
-			live.fleeing = true;
-			live.fleeHits = 0;
-			live.fleeStartAt = now;
-			live.emergencyUsed = false;
-			// a different scream every time
-			int line = player.getRandom().nextInt(PANIC_LINES - 1);
-			live.lastPanic = line >= live.lastPanic && live.lastPanic >= 0 ? line + 1 : line;
-			whisper(player, "panic." + (1 + live.lastPanic));
-			// first it roars, the armour piecing itself together over you, and the roar clears them off;
-			// then into the Shroud and away (see endRoar)
-			startRoar(player, live, now, true, threat);
+		// (0.13.23) and low with something on you, it always fights for you: no hunger, bond, mood or chance about it
+		LivingEntity threat = threat(player);
+		if (tickProtect(player, live, now, threat)) {
 			next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
-		} else if (threat != null && lowHealth(player, DESPERATE_HEALTH) && !live.fleeing && now >= live.desperateAt) {
+		}
+		if (sulking(player) && !live.protecting) {
+			threat = null;
+		}
+		if (threat != null && lowHealth(player, DESPERATE_HEALTH) && !live.fleeing && now >= live.desperateAt) {
 			live.desperateAt = now + DESPERATE_EVERY;
 			desperate(player, live, now, threat);
 		}
@@ -1989,7 +2051,10 @@ public final class WebSymbiote {
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
 		if (!live.fleeing) {
 			String lines = state(player).kind().lines();
-			if (live.mending) {
+			if (live.protecting) {
+				// (0.13.23) fighting for you: back at it after you wrestled it off, or seizing you fresh
+				whisper(player, live.protectRetake ? "protect.again" : "protect." + (1 + player.getRandom().nextInt(PROTECT_LINES)));
+			} else if (live.mending) {
 				whisper(player, "white.mending." + (1 + player.getRandom().nextInt(SAY_LINES)));
 			} else if (live.rivalry) {
 				whisper(player, lines + "rival." + (1 + player.getRandom().nextInt(SAY_LINES)));
@@ -2023,6 +2088,142 @@ public final class WebSymbiote {
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * Fighting for you (see {@link #PROTECT_HEALTH}), a tick at a time: low and under attack, it seizes you and goes for
+	 * whatever's on you (or, hopeless, runs); seized, it keeps at it until nothing's after you. True when it has just
+	 * roared to save you (the bond's stress takes it).
+	 */
+	private static boolean tickProtect(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable LivingEntity threat) {
+		if (live.protecting && live.takeoverTicks <= 0 && !(live.roarAt > 0L && live.roarDefend)) {
+			// (its hold went some other way)
+			live.protecting = false;
+		}
+		if (threat != null) {
+			live.protectThreatAt = now;
+		}
+		if (live.protecting) {
+			if (threat == null) {
+				if (now - live.protectThreatAt > PROTECT_CALM_TICKS && live.takeoverTicks > 0) {
+					// nothing after you any more: it lets go
+					endTakeover(player, live);
+					whisper(player, "protect.calm");
+				}
+				return false;
+			}
+			if (!live.fleeing && live.takeoverTicks > 0 && hopeless(player, threat)) {
+				return protectRun(player, live, now, threat);
+			}
+			return false;
+		}
+		if (threat == null || !lowHealth(player, PROTECT_HEALTH) || player.isCreative() || live.bondTicks > 0
+			|| live.roarAt > 0L && live.roarDefend || now < live.protectSuppressUntil) {
+			return false;
+		}
+		// it has you, whatever it was doing
+		boolean retake = live.protectRetake;
+		live.protectRetake = false;
+		abortFeeding(player, live);
+		if (live.takeoverTicks > 0) {
+			endTakeover(player, live);
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.feral = false;
+		live.hunting = false;
+		if (hopeless(player, threat)) {
+			return protectRun(player, live, now, threat);
+		}
+		live.fleeing = false;
+		live.protecting = true;
+		live.protectRetake = retake;
+		startTakeover(player, live, now, threat);
+		live.protectRetake = false;
+		if (live.takeoverTicks <= 0) {
+			live.protecting = false;
+			return false;
+		}
+		protectFx(player, now);
+		return false;
+	}
+
+	/** Too low, or too many on you, to win: better to run. */
+	private static boolean hopeless(ServerPlayer player, LivingEntity threat) {
+		if (lowHealth(player, PROTECT_HOPELESS_HEALTH)) {
+			return true;
+		}
+		int on = player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(THREAT_RANGE),
+			m -> m.isAlive() && (m.getTarget() == player || m == threat)).size();
+		return on >= PROTECT_HOPELESS_CROWD;
+	}
+
+	/** Hopeless: it roars them back and runs with you in the Shroud (the roar ready), or straight into the run. True if it roared. */
+	private static boolean protectRun(ServerPlayer player, Live live, long now, LivingEntity threat) {
+		if (live.takeoverTicks > 0) {
+			endTakeover(player, live);
+		}
+		abortFeeding(player, live);
+		live.rampage = false;
+		live.curious = false;
+		live.fleeing = true;
+		live.protecting = true;
+		live.fleeHits = 0;
+		live.fleeStartAt = now;
+		live.emergencyUsed = false;
+		// a different scream every time
+		int line = player.getRandom().nextInt(PANIC_LINES - 1);
+		live.lastPanic = line >= live.lastPanic && live.lastPanic >= 0 ? line + 1 : line;
+		whisper(player, "panic." + (1 + live.lastPanic));
+		vignette(player, PROTECT_VIGNETTE);
+		if (now >= live.defendReadyAt) {
+			live.defendReadyAt = now + DEFEND_COOLDOWN;
+			// first it roars, the armour piecing itself together over you, and the roar clears them off;
+			// then into the Shroud and away (see endRoar)
+			startRoar(player, live, now, true, threat);
+			return true;
+		}
+		// no roar left in it: into the Shroud and away at once
+		shroud(player);
+		startTakeover(player, live, now, threat);
+		live.takeoverTicks = RUN_TICKS;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), RUN_TICKS, true));
+		Vec3 away = player.position().subtract(threat.position()).horizontal();
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : away;
+		ServerPlayNetworking.send(player, new WebNet.Nudge(away.normalize().scale(LEAP_SPEED).add(0.0, LEAP_UP, 0.0)));
+		return false;
+	}
+
+	/** Seizing you to fight: your screen reddens and lurches, and (if it can) it hardens a shell over you. */
+	private static void protectFx(ServerPlayer player, long now) {
+		Live live = live(player);
+		vignette(player, PROTECT_VIGNETTE);
+		com.jaymospowers.core.Shakes.send(player, PROTECT_SHAKE, null);
+		if (now - live.protectShieldAt >= PROTECT_SHIELD_COOLDOWN || live.protectShieldAt == 0L) {
+			live.protectShieldAt = now;
+			player.setAbsorptionAmount(Math.max(player.getAbsorptionAmount(), PROTECT_SHIELD));
+			ServerLevel level = player.level();
+			level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.8, 0.45, 0.06);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
+		}
+	}
+
+	/** It's fighting for you right now (see {@link #PROTECT_HEALTH}). */
+	static boolean protecting(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		return live != null && live.protecting;
+	}
+
+	/** Fighting for you, it turns on {@code next} (its last target down, gone or too far). */
+	private static void retarget(ServerPlayer player, Live live, LivingEntity next) {
+		live.takeoverTarget = next.getId();
+		live.takeoverTicks = Math.max(live.takeoverTicks, TAKEOVER_LIMIT);
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks, live.fleeing));
+		// your screen darkens as it wheels you round onto the next
+		dread(player, PROTECT_CALM_TICKS, true);
+		narrate(player, "strike");
 	}
 
 	/** Last ditch, still hurt or cornered: it hardens into a shell of absorption, once per escape. */
@@ -2078,6 +2279,7 @@ public final class WebSymbiote {
 		live.mending = false;
 		live.bloodlust = false;
 		live.rivalry = false;
+		live.protecting = false;
 		player.removeAttached(SPREE);
 		live.struggle = 0.0F;
 		live.surges = 0;
@@ -2200,6 +2402,13 @@ public final class WebSymbiote {
 	 * won it outright (see {@link #LOCKOUT_SURGE}), and it won't cover you again for {@link #SUIT_LOCKOUT_TICKS}.
 	 */
 	private static void breakFree(ServerPlayer player, Live live, long now, boolean lockout) {
+		// (0.13.23) fighting for you, it's only held off a moment while you're under attack, never locked out
+		boolean protect = live.protecting;
+		if (protect) {
+			lockout = false;
+			live.protectSuppressUntil = now + PROTECT_SUPPRESS_TICKS;
+			live.protectRetake = true;
+		}
 		if (live.hunting) {
 			abortFeeding(player, live);
 		}
@@ -2215,7 +2424,7 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.05);
 		if (!lockout) {
 			com.jaymospowers.core.Shakes.send(player, 1.2F, null);
-			whisper(player, "break_free");
+			whisper(player, protect ? "protect.release" : "break_free");
 			return;
 		}
 		// torn clean out of it: no gift, no suit, no taking you back, for a minute
@@ -2744,6 +2953,17 @@ public final class WebSymbiote {
 			tickMending(player, live, now, target);
 			return;
 		}
+		if (live.protecting && (!(target instanceof LivingEntity guarded) || !guarded.isAlive() || target.distanceTo(player) > PROTECT_LEASH)) {
+			// fighting for you: that one's down (or gone), on to whatever else is after you; nothing, and it lets go
+			LivingEntity next = threat(player);
+			if (next == null) {
+				endTakeover(player, live);
+				whisper(player, "protect.calm");
+				return;
+			}
+			retarget(player, live, next);
+			target = next;
+		}
 		if (target == player) {
 			// its kill carried off: it holds you still through the grab, the carry and the meal, and lets go after
 			// (on a spree, it's off after the next)
@@ -2927,6 +3147,10 @@ public final class WebSymbiote {
 
 	/** A radial-menu pick. Server-authoritative: bond, cooldown and satiety are all checked here. */
 	static void use(ServerPlayer player, int ability) {
+		if (ability == MASK_TOGGLE) {
+			toggleMask(player);
+			return;
+		}
 		if (isBonded(player) && WebSymbioteBond.dormant(player) && !(ability == CONSUME && WebSymbioteStrains.asleep(player))) {
 			// still settling in (or the white one asleep): nothing it has answers yet
 			// (asleep, a corpse fed to it wakes it: Consume still answers)
@@ -4477,7 +4701,7 @@ public final class WebSymbiote {
 		}
 		LivingEntity threat = player.level().getEntity(live.roarThreat) instanceof LivingEntity living && living.isAlive() ? living : threat(player);
 		live.roarThreat = -1;
-		if (threat == null || sulking(player)) {
+		if (threat == null || sulking(player) && !live.protecting) {
 			// nothing left to run from
 			live.fleeing = false;
 			return;

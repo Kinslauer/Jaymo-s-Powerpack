@@ -83,6 +83,7 @@ public final class PoseTakeover {
 	/** One of the flights or glides: the body is in the air on purpose. */
 	static boolean flying(AvatarRenderState s) {
 		return s.getData(WindPose.KEY) != null || s.getData(WindHoverSway.KEY) != null || s.getData(FreefallPose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.web.WebHangPose.KEY) != null
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(XenoformFlightPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.rig.RigPose.KEY) != null && (s.getData(com.jaymospowers.client.rig.RigPose.KEY).hover() > 0.001F
@@ -107,6 +108,7 @@ public final class PoseTakeover {
 			|| s.getData(DarktidePose.KEY) != null || s.getData(DarktidePose.CRAWL) != null
 			|| s.getData(WebWallRunPose.KEY) != null || s.getData(WebParkourPose.KEY) != null
 			|| s.getData(WebBodyPose.KEY) != null || s.getData(WebArms.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.web.WebHangPose.KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(WebSymbioteClient.SLAM) != null || s.getData(WebSymbioteClient.CHARGE) != null
 			|| s.getData(WebSymbioteClient.ROAR) != null || s.getData(WebSymbioteClient.EATING) != null
 			// the symbiote's suit and Living Armor are models of their own over the body, posed the vanilla way (and Living

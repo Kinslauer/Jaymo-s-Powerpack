@@ -225,7 +225,8 @@ public final class WebSuitGrowth {
 			FACE_GONE.remove(id);
 			return null;
 		}
-		if (com.jaymospowers.power.web.WebSymbioteBond.faceBare(player)) {
+		// (0.13.23) or its mask taken off from the menu (WebSymbiote.UNMASKED): the face shows till it's put back
+		if (com.jaymospowers.power.web.WebSymbioteBond.faceBare(player) || WebSymbiote.unmasked(player)) {
 			FACE_ON.add(id);
 			FACE_GONE.remove(id);
 			return 1.0F;
@@ -257,7 +258,7 @@ public final class WebSuitGrowth {
 			// (MCA's body goes under the suit whole, so it must come back whenever the suit doesn't cover it all: torn at,
 			// fought, peeled in a takeover's hold. That was the missing body under the fight: Andy's pack draws players
 			// with MCA's model, and all of it was hidden while the suit was being torn off it.)
-			mcaUnder(model, covered(avatar) && !bared(avatar));
+			mcaUnder(model, covered(avatar) && !bared(avatar), faceShown(avatar));
 			return;
 		}
 		float k = hulkness(avatar);
@@ -483,15 +484,26 @@ public final class WebSuitGrowth {
 	private static final String MCA_MODELS = "net.conczin.mca.client.model.";
 	private static final Map<Model<?>, java.util.List<ModelPart>> MCA_HIDDEN = new WeakHashMap<>();
 
-	private static void mcaUnder(Model<?> model, boolean covered) {
+	private static void mcaUnder(Model<?> model, boolean covered, boolean face) {
 		java.util.List<ModelPart> hidden = MCA_HIDDEN.get(model);
 		if (covered) {
 			if (hidden == null) {
 				hidden = new java.util.ArrayList<>();
 				MCA_HIDDEN.put(model, hidden);
 			}
+			// (0.13.23) the mask off: the villager's own head (skin, face, hair) stays out from under the suit
+			Set<ModelPart> head = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+			if (face && model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
+				head.addAll(humanoid.head.getAllParts());
+			}
+			for (ModelPart part : hidden) {
+				if (head.contains(part)) {
+					part.visible = true;
+				}
+			}
+			hidden.removeIf(head::contains);
 			for (ModelPart part : model.allParts()) {
-				if (part.visible) {
+				if (part.visible && !head.contains(part)) {
 					part.visible = false;
 					hidden.add(part);
 				}
@@ -502,6 +514,12 @@ public final class WebSuitGrowth {
 			}
 			MCA_HIDDEN.remove(model);
 		}
+	}
+
+	/** (0.13.23) The face shows through the suit now: its mask off, or bared in a fight (at least half bare). */
+	public static boolean faceShown(AvatarRenderState avatar) {
+		Float face = avatar.getData(FACE);
+		return face != null && face >= 0.5F;
 	}
 
 	/** How far through putting the suit on (0-1) the skin's outer layer goes under it. */

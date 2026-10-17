@@ -33,6 +33,7 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebCounterPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebWallRunPose.extract(entity, state, partialTicks);
