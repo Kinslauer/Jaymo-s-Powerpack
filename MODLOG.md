@@ -1688,3 +1688,50 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   forbidden blocks). The 12 ki is paid when the wind-up starts; dying, losing the power, being silenced or turning
   into the Great Ape mid-wind-up lets it fizzle. G's cooldown covers the wind-up (18 ticks + the old 20). Numbers at
   the top of `ZFighterDisc` and `ZFighterDiscPose`.
+- **0.13.23, the symbiote hangs, hurries and protects:** three of Andy's symbiote requests, plus its Mask.
+  - **Hanging, not walking the air** ("symbiote walks in midair while using wall crawl tendrils, he should just hang
+    there, legs swaying"): carried on Wall Crawl's tendrils the vanilla walk cycle kept stepping under the body, since
+    nothing posed the legs off a wall. Now whenever the tendrils hold you with nothing under your feet (carried between
+    them in the open, on a ceiling, hung off a latch with no wall beside you; `WebTendrilWalk.hanging`) the walk stops and
+    `WebHangPose` dangles the legs: a slow pendulum (`HANG_SWAY_RATE`), the left leg `HANG_PHASE_GAP` behind the right,
+    swinging harder and trailing back for a few seconds after you were moving (`HANG_SWAY_MOVING`, `HANG_SETTLE`).
+    Climbing a wall keeps its walk. Everyone sees it.
+  - **Takeovers go flat out** ("too many times it is just walking away"): its target not yet on your client (a
+    sightseeing marker placed the same tick the takeover was sent) made the client drop the takeover outright; now it
+    keeps driving along its path for up to `TAKEOVER_LOST_GRACE` ticks. It never slows for your hunger any more (it
+    sprints and bounds you hungry or not); corners and steps only ease it to `WALK_SPEED` 0.3 (still past a sprint),
+    the sprint held. Chasing something more than `BOUND_CHASE_RANGE` (8) off it bounds along the way at it, and past
+    `ZIP_CHASE_RANGE` (12, `WebTakeoverPath`) it zips at it too, as it already did when running or sightseeing.
+  - **It always fights for you** ("it should ALWAYS fight back if you are low health"): at or under `PROTECT_HEALTH`
+    (30%) with something on you (it hurt you lately, or a hostile has you as its target, within 16 blocks) it seizes you
+    at once, whatever its hunger, bond, mood, dormancy or a lockout, and goes for the attacker, hardening a shell over
+    you (`PROTECT_SHIELD` absorption, at most every `PROTECT_SHIELD_COOLDOWN`) with your screen reddening and lurching;
+    each one down, it turns on the next, and lets go once nothing has been after you for `PROTECT_CALM_TICKS`. The old
+    near-death defence (roar, Shroud, run) is now its answer when the fight is hopeless (`PROTECT_HOPELESS_HEALTH` 12%,
+    or `PROTECT_HOPELESS_CROWD` 4 after you), straight into the run when the roar's on cooldown. Wrestling it off still
+    works, but under attack it only holds back `PROTECT_SUPPRESS_TICKS` (5 s) before it seizes you again (never a
+    lockout). New lines `web_symbiote.protect.*`.
+  - **The Mask** ("asked for a Mask option before"): the radial menu has a seventh slot (a head icon) that takes the
+    suit's head off so your own face shows (your MCA villager's head, skin, face and hair, with MCA), the rest of the
+    suit staying on; picked again it flows back. Synced to everyone and saved (`WebSymbiote.UNMASKED`). Unmasked, the
+    suit no longer covers the head or face (`BodyCover`), so Kingdoms' heritage looks and eyes show. The costume mask
+    key (') flips it too when you wear no costume mask. The suit was never a secret identity (`SecretIdentity` only
+    reads costumes and Rig Helms), so nothing changes there. The suit toggle's little mask in the middle moved under
+    the bond line, where it no longer hides behind the text.
+  - **The Mask fights you at a weak bond** (Andy: "it should still be a struggle at low bond like the rest of the
+    suit"): under the suit fight's bond (70), taking the mask off starts the same struggle bar as taking the suit off,
+    every time; win and it comes off until you put it back. Sulking, locked out or still settling in, it won't let go
+    at all. Putting it back on is never fought (`WebSymbioteBond.resistMask`).
+- **0.13.25, ledge hands in first person fixed:** Andy's clip: hanging from a ledge, the view was full of huge grey arm
+  faces, and after the pull-up both arms stood up from the screen's bottom corners, shoulder-end on. The first-person
+  arms were turned on top of vanilla's own arm placement, and the hang's tilt went the wrong way, swinging them back
+  through the camera. Now vanilla's placement is undone and the arms are placed straight in the view (`LedgePose`
+  `FP_*`, numbers at its top): hanging, they rise from below the view to the hands on the edge near its top, shifting
+  their grip; climbing, the edge sinks through the view and the hands go down with it, out of sight before you stand.
+  Third person is unchanged.
+- **0.13.26, costumes no longer flicker on MCA bodies:** Andy's clip: a black costume with the MCA clothes flickering
+  through it. With MCA a player's clothes are drawn on their own body copy at 0.0625, their outer layer (jacket,
+  sleeves, pants) at 0.3125 and its hat layer at 0.5625; the costume's suit sat at 0.3 and its mask at 0.55, a hair under
+  each, so they fought. The suit now stands at 0.35 (over the clothes, still under MCA's hair at 0.375, so long hair
+  falls over it) and masks at 0.62 (over the clothing hat and the hair) (`CostumeModels`, numbers at its top). Without
+  MCA it's the same costume, a breath looser.

@@ -149,6 +149,11 @@ public final class Costume {
 				com.jaymospowers.rig.RigHelm.toggleFace(player);
 				return;
 			}
+			if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
+				// (0.13.23) the symbiote's suit: its mask comes off (or flows back over the face)
+				com.jaymospowers.power.web.WebSymbiote.toggleMask(player);
+				return;
+			}
 			player.sendOverlayMessage(Component.translatable(worn == null ? "message.jaymospowers.costume.none" : "message.jaymospowers.costume.no_mask"));
 			return;
 		}

@@ -43,6 +43,7 @@ public final class ModelPoses {
 		WebFeral.applyModel(model, state);
 		WebSuitGrowth.applyModel(model, state);
 		WebRagdoll.applyModel(model, state);
+		com.jaymospowers.client.power.web.WebHangPose.applyModel(model, state);
 		WebBodyPose.applyModel(model, state);
 		com.jaymospowers.client.power.web.WebCounterPose.applyModel(model, state);
 		com.jaymospowers.client.power.web.WebSuitTear.applyModel(model, state);

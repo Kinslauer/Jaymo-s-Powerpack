@@ -135,6 +135,8 @@ final class WebTakeoverPath {
 	 */
 	static final int ZIP_EVERY = 50, ZIP_FIRST = 20, ZIP_RETRY = 10;
 	static final int ZIP_CLIMB_RISE = 3;
+	/** (0.13.23) Chasing something further off than this (blocks), it zips along the way at it too: no ambling after prey. */
+	static final double ZIP_CHASE_RANGE = 12.0;
 	/** A zip's spot: this far off at least and at most (blocks), never more than this below your feet. */
 	static final double ZIP_MIN_RANGE = 5.0, ZIP_MAX_RANGE = 18.0, ZIP_MAX_FALL = 0.5;
 	/** Scoring a spot: one per waypoint it skips, plus this per block up (running, or climbing: high ground first). */
@@ -411,12 +413,13 @@ final class WebTakeoverPath {
 		}
 		BlockHitResult best = null;
 		double bestScore = 0.0;
+		boolean chase = !flee && !away && player.distanceTo(target) > ZIP_CHASE_RANGE;
 		// (only as far along as the client was sent)
 		for (int j = from + 1; j < Math.min(nodes.size(), PATH_SEND_MAX); j++) {
 			BlockPos node = nodes.get(j);
 			double rise = node.getY() - player.getY();
 			boolean climb = rise >= ZIP_CLIMB_RISE;
-			if (!away && !climb || rise < -ZIP_MAX_FALL || (kind(level, cache, node) & WATER) != 0) {
+			if (!away && !climb && !chase || rise < -ZIP_MAX_FALL || (kind(level, cache, node) & WATER) != 0) {
 				continue;
 			}
 			double score = (j - from) + (flee || climb ? Math.max(0.0, rise) * ZIP_HIGH_WEIGHT : 0.0);

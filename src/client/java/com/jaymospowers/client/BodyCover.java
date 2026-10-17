@@ -36,6 +36,9 @@ public final class BodyCover {
 		static final Cover ALL = new Cover(true, true, true, true);
 	}
 
+	/** (0.13.23) The symbiote's suit with its mask off: the body covered, the head and face bare. */
+	private static final Cover FACE_BARE = new Cover(false, false, false, true);
+
 	public static final RenderStateDataKey<Cover> KEY = RenderStateDataKey.create(() -> "jaymospowers:body_cover");
 
 	private BodyCover() {
@@ -63,8 +66,8 @@ public final class BodyCover {
 			return Cover.NONE;
 		}
 		if (WebSuitGrowth.covered(state)) {
-			// the symbiote's suit (or its big body), or most of the way to it
-			return Cover.ALL;
+			// the symbiote's suit (or its big body), or most of the way to it; (0.13.23) its mask off, the head and face show
+			return WebSuitGrowth.faceShown(state) ? FACE_BARE : Cover.ALL;
 		}
 		CostumeDesign design = state.getData(CostumeClient.KEY);
 		if (design == null || CostumeClient.covered(state)) {
