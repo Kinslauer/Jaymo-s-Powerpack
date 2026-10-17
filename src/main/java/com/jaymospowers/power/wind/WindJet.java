@@ -74,7 +74,9 @@ public final class WindJet {
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> {
-			if (payload.down()) {
+			if (com.jaymospowers.core.BeamClash.input(ctx.player(), payload.down())) {
+				// locked in a beam clash: taps and let-gos are the clash's
+			} else if (payload.down()) {
 				start(ctx.player());
 			} else {
 				stop(ctx.player());
@@ -82,6 +84,9 @@ public final class WindJet {
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> stop(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> ACTIVE.clear());
+		// meeting another held stream head-on, it locks into a beam clash
+		com.jaymospowers.core.BeamClash.register(new com.jaymospowers.core.BeamClash.Beam(p -> com.jaymospowers.core.BeamClash.KIND_WIND,
+			p -> ACTIVE.contains(p.getUUID()), RANGE, WindJet::stop));
 	}
 
 	public static boolean isActive(Player player) {
@@ -89,7 +94,8 @@ public final class WindJet {
 	}
 
 	static void start(ServerPlayer player) {
-		if (!Powers.has(player, WindPower.INSTANCE) || !player.isAlive() || player.isSpectator() || winded(player)) {
+		if (!Powers.has(player, WindPower.INSTANCE) || !player.isAlive() || player.isSpectator() || winded(player)
+			|| com.jaymospowers.core.BeamClash.resting(player)) {
 			return;
 		}
 		ACTIVE.add(player.getUUID());
@@ -124,7 +130,8 @@ public final class WindJet {
 		ServerLevel level = player.level();
 		Vec3 look = player.getLookAngle();
 		Vec3 from = player.getEyePosition().add(look.scale(0.6));
-		double reach = reach(level, player, from, look, RANGE);
+		// in a beam clash it ends at the knot: it doesn't blow the other stream away
+		double reach = com.jaymospowers.core.BeamClash.clamp(player, from, reach(level, player, from, look, RANGE));
 		Vec3 to = from.add(look.scale(reach));
 		// the smoke in its way is blown on and thinned; the fire in its way goes out
 		boolean douse = player.tickCount % DOUSE_EVERY == 0;

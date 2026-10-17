@@ -120,7 +120,13 @@ final class WindCycloneClient {
 		boolean down = mapping.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
 		switch (phase) {
 			case IDLE -> {
-				if (down && player.isShiftKeyDown()) {
+				boolean clashing = com.jaymospowers.client.BeamClashClient.isClashing(player);
+				if (clashing && pressed && !down && minecraft.gui.screen() == null) {
+					// a tap quicker than a tick, mashing in a beam clash
+					ClientPlayNetworking.send(new WindJet.Hold(true));
+					ClientPlayNetworking.send(new WindJet.Hold(false));
+				} else if (down && (player.isShiftKeyDown() || clashing)) {
+					// (in a beam clash, each press back down is a tap, sneaking or not)
 					ClientPlayNetworking.send(new WindJet.Hold(true));
 					phase = Phase.STREAM;
 				} else if (pressed && player.isShiftKeyDown()) {

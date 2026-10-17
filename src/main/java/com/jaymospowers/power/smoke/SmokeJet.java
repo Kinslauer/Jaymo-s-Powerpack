@@ -78,7 +78,9 @@ public final class SmokeJet {
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> {
-			if (payload.down() && ctx.player().isShiftKeyDown()) {
+			if (com.jaymospowers.core.BeamClash.input(ctx.player(), payload.down())) {
+				// locked in a beam clash: taps and let-gos are the clash's
+			} else if (payload.down() && ctx.player().isShiftKeyDown()) {
 				// Sneak + X steps into one of your clouds instead
 				SmokeStep.step(ctx.player());
 			} else if (payload.down()) {
@@ -87,6 +89,10 @@ public final class SmokeJet {
 				stop(ctx.player());
 			}
 		});
+		// meeting another held stream head-on, it locks into a beam clash (Soot Jet when corrupted)
+		com.jaymospowers.core.BeamClash.register(new com.jaymospowers.core.BeamClash.Beam(
+			p -> com.jaymospowers.core.Fate.isCorrupted(p) ? com.jaymospowers.core.BeamClash.KIND_SOOT : com.jaymospowers.core.BeamClash.KIND_SMOKE,
+			p -> ACTIVE.contains(p.getUUID()), RANGE, SmokeJet::stop));
 	}
 
 	public static boolean isActive(Player player) {
@@ -94,7 +100,8 @@ public final class SmokeJet {
 	}
 
 	static void start(ServerPlayer player) {
-		if (!Powers.has(player, SmokePower.INSTANCE) || !player.isAlive() || player.isSpectator() || spent(player) || SmokeVapour.wholly(player)) {
+		if (!Powers.has(player, SmokePower.INSTANCE) || !player.isAlive() || player.isSpectator() || spent(player) || SmokeVapour.wholly(player)
+			|| com.jaymospowers.core.BeamClash.resting(player)) {
 			return;
 		}
 		ACTIVE.add(player.getUUID());
@@ -135,6 +142,8 @@ public final class SmokeJet {
 		Vec3 from = player.getEyePosition().add(look.scale(0.6));
 		HitResult hit = level.clip(new ClipContext(from, from.add(look.scale(RANGE)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		double reach = hit.getType() == HitResult.Type.MISS ? RANGE : hit.getLocation().distanceTo(from);
+		// in a beam clash it ends at the knot
+		reach = com.jaymospowers.core.BeamClash.clamp(player, from, reach);
 		// laid along the way, more of it the further it gets (where the jet slows and billows); what's there is driven on
 		int n = Math.max(1, (int)Math.ceil(reach / STEP));
 		float weights = n * (n + 1) / 2.0F;

@@ -182,3 +182,13 @@ does now, only faster. right now people can escape the volume of smoke he can pr
   40-unit gout. A puff first fills everything in reach (up to 2400 blocks) to 1.0, thick enough to hide in, and only
   then thickens toward the cap of 3, so clouds billow out about three times as wide at once. When more than 6000
   blocks of smoke are near a player, the nearest are sent.
+
+## Beam clash: Smoke/Soot Jet against another stream (`core/BeamClash`)
+Two held streams meeting head-on (Smoke Jet vs Wind Whistle, or jet vs jet) lock into a beam battle instead of passing
+through: the full rules, numbers and HUD are in `docs/wind.md` ("Beam clash"). Smoke's part: the jet ends at the knot
+(`BeamClash.clamp` in `SmokeJet.tick`, so it hurts nobody past it) and churns 0.1 of real smoke into the knot a tick;
+the **Soot Jet**'s knot blinds anything within 3 blocks of it, and the other user whenever the knot is within 5 blocks
+of them (30 ticks, refreshed every 10). Overwhelming with smoke engulfs the loser: 14 of smoke on them, blinded 2 s
+(Soot: 4 s), their air knocked out (the bubbles empty and refill), 6 damage, thrown back. In a clash, X down/up are
+the clash's taps (sneaking or not, so Smoke Step can't fire mid-clash); the client also sends a tap that's quicker
+than a tick.

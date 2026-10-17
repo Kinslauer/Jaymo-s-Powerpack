@@ -86,5 +86,12 @@
 	"message.jaymospowers.fracture.left_arm": "Your left arm is broken: it can't hold anything until it knits",
 	"message.jaymospowers.fracture.right_leg": "Your right leg is broken: you're limping",
 	"message.jaymospowers.fracture.left_leg": "Your left leg is broken: you're limping",
-	"message.jaymospowers.fracture.priest": "%s sets your broken bones"
+	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
+	"message.jaymospowers.beam_clash.locked": "Beam clash! Mash your power key to push",
+	"message.jaymospowers.beam_clash.won": "You overpower them!",
+	"message.jaymospowers.beam_clash.overwhelmed": "Overwhelmed!",
+	"message.jaymospowers.beam_clash.detonated": "The clash bursts!",
+	"message.jaymospowers.beam_clash.resting": "You haven't got your breath back from the clash",
+	"hud.jaymospowers.beam_clash.title": "Clash",
+	"hud.jaymospowers.beam_clash.mash": "Mash %s"
 }

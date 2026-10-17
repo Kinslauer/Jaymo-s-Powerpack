@@ -70,11 +70,17 @@ final class SmokeJetClient {
 			holding = false;
 			return;
 		}
+		boolean clicked = false;
 		while (mapping.consumeClick()) {
-			// taken: held is all that counts
+			// taken: held is all that counts (but for a beam clash's quick taps)
+			clicked = true;
 		}
 		boolean down = mapping.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
-		if (down != holding) {
+		if (clicked && !down && !holding && minecraft.gui.screen() == null && com.jaymospowers.client.BeamClashClient.isClashing(player)) {
+			// a tap quicker than a tick, mashing in a beam clash
+			ClientPlayNetworking.send(new SmokeJet.Hold(true));
+			ClientPlayNetworking.send(new SmokeJet.Hold(false));
+		} else if (down != holding) {
 			holding = down;
 			ClientPlayNetworking.send(new SmokeJet.Hold(down));
 		}
@@ -87,7 +93,8 @@ final class SmokeJetClient {
 		}
 		RandomSource random = level.getRandom();
 		for (Player player : level.players()) {
-			if (!SmokeJet.isActive(player)) {
+			if (!SmokeJet.isActive(player) || com.jaymospowers.client.BeamClashClient.isClashing(player)) {
+				// (a clashing jet is drawn as a beam into the knot, by BeamClashClient)
 				continue;
 			}
 			Vec3 look = player.getLookAngle();

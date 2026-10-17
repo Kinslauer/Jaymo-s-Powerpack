@@ -32,7 +32,8 @@ final class WindJetClient {
 		}
 		RandomSource random = level.getRandom();
 		for (Player player : level.players()) {
-			if (!WindJet.isActive(player)) {
+			if (!WindJet.isActive(player) || com.jaymospowers.client.BeamClashClient.isClashing(player)) {
+				// (a clashing stream is drawn as a beam into the knot, by BeamClashClient)
 				continue;
 			}
 			Vec3 look = player.getLookAngle();

@@ -600,3 +600,35 @@ cutting a 5.5-block cone ahead (0.65x attack damage, no hurt cooldown between sl
 slash and throwing what it hits, then a burst throws everything within 5 blocks out and up. 400-tick (20 s) cooldown
 (cold-stretched); it stops if you put the dagger away. The Tempest mode and the ascension make every gale and the
 Flurry 1.3x. Tuning at the top of `WindDagger`. Not playtested.
+
+## Beam clash: Wind Whistle against another stream (`core/BeamClash`)
+
+The user: "the wind and smoke X abilities should clash with an effect upon meeting, for a beam battle." Shared with the
+Smoke Jet (`docs/smoke.md`), in one class, `core/BeamClash`; each beam registers itself (`BeamClash.register(Beam)` in
+`WindJet.init` / `SmokeJet.init`), so another beam (Z Fighter ki) can join the same way. Server-authoritative; the
+client half is `client/BeamClashClient`.
+
+- **Meeting.** Two held streams (Whistle vs Smoke/Soot Jet, and also Whistle vs Whistle, Jet vs Jet) lock when the
+  users face each other (each look within ~37 degrees of the other, `FACING_COS` 0.8), are 3+ blocks apart and within
+  both reaches, and the two stream segments pass within 1.5 blocks (`MEET_DISTANCE`). The knot starts in the middle of
+  where the streams overlap (never nearer an end than 20%).
+- **While locked.** Each stream ends at the knot (`BeamClash.clamp` in `WindJet.tick`): the Whistle no longer blows the
+  jet away, it grinds against it. Both users are rooted (-90% speed, no jump, held in place client-side; the losing
+  one's feet slide back) and pay 0.05 hunger a tick on top of the stream's own. Everyone near sees both streams as
+  straight beams into a churning knot (each side's wind/smoke spiralling in, sparks, a flash and a ring pulsing out,
+  faster the harder they push) and hears a roar and grind there. Light shakes every 8 ticks, harder for whoever is losing.
+  Anyone else in the knot (1.6 blocks) is hurt (1) and thrown out every 10 ticks.
+- **The struggle.** A balance from -1 to 1 moves the knot along the line between the users. Each side pushes a steady
+  0.005 a tick, +60% ascended, +10% per mastered ability, plus a surge from **tapping X** while holding it (release and
+  press again inside 6 ticks, `GRACE_TICKS`; +0.006 a tap, fading x0.85 a tick, at most 0.03; taps under 2 ticks
+  apart count once). Mashing hard (8 taps a second) beats a steady hold from the middle in about 3.5 s. HUD: a "Clash" panel bottom-right above the chip
+  row: the balance bar (your colour from the left, theirs from the right, the knot between), both pushes under it,
+  and the time left along its top.
+- **Endings.** Knot reaches a user: **overwhelmed**, 6 damage, thrown 1.8 back and 0.55 up; beaten by wind they also
+  spin (40 degrees a tick, slowing over 24 ticks); their stream stops and rests 3 s; the winner's stream rolls on.
+  **Letting go** (a release over 6 ticks, looking 60+ degrees off, running out of food): the other's stream rolls
+  straight through (2 damage, thrown 0.9). **Stalemate** past 160 ticks (8 s): the knot **detonates** (explosion,
+  gusts and smoke, 4 damage and a throw for both, bystanders within 6 thrown), both streams stop and rest 5 s.
+- Input: the wind client's IDLE phase sends `WindJet.Hold(true)` without sneaking while clashing, and a press-release
+  inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
+- Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
