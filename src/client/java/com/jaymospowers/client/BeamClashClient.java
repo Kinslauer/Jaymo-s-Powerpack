@@ -55,16 +55,16 @@ public final class BeamClashClient {
 	/** The HUD panel: size; the push that fills a push meter. */
 	private static final int PANEL_W = 96, PANEL_H = 25, CHIP = 20;
 	private static final float PUSH_FULL = BeamClash.BASE_PUSH * 2.0F + BeamClash.SURGE_MAX;
-	/** Colours by kind: wind, smoke, soot. */
-	private static final int[] COLORS = {0xBFF4EA, 0x9A9A9A, 0x3A3030};
-	/** The power skill key (registered in {@code WebSymbioteClient}). */
-	private static final String KEY_NAME = "key.jaymospowers.web_symbiote";
+	/** Colours by kind: wind, smoke, soot, ki. */
+	private static final int[] COLORS = {0xBFF4EA, 0x9A9A9A, 0x3A3030, 0xFFE070};
+	/** The power skill key (registered in {@code WebSymbioteClient}); a ki beam is pushed with V (ability 3). */
+	private static final String KEY_NAME = "key.jaymospowers.web_symbiote", KI_KEY_NAME = "key.jaymospowers.ability_3";
 
 	/** Lead player's entity id → the knot's roar and grind. */
 	private static final Map<Integer, KnotSound[]> SOUNDS = new HashMap<>();
 	private static float spin;
 	private static int spinTicks, spinTotal;
-	private static @Nullable KeyMapping key;
+	private static final Map<String, KeyMapping> KEYS = new HashMap<>();
 
 	private BeamClashClient() {
 	}
@@ -142,6 +142,15 @@ public final class BeamClashClient {
 
 	/** A straight beam from the mouth (or hands) into the knot, swelling with the push behind it. */
 	private static void beam(Minecraft minecraft, ClientLevel level, RandomSource random, Player player, BeamClash.State state) {
+		if (state.kind() == BeamClash.KIND_KI) {
+			// a ki beam draws itself to the knot (ZFighterBeams): only sparks along it here
+			if (random.nextInt(2) == 0) {
+				Vec3 from = mouth(minecraft, player);
+				Vec3 p = from.lerp(state.knot(), random.nextDouble());
+				level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1);
+			}
+			return;
+		}
 		Vec3 from = mouth(minecraft, player);
 		Vec3 line = state.knot().subtract(from);
 		double length = line.length();
@@ -189,6 +198,7 @@ public final class BeamClashClient {
 				// round and in, toward the heart of it
 				Vec3 vel = tangent.scale(0.18).add(radial.scale(-0.08)).add(u.scale(-toward * 0.05));
 				ParticleOptions particle = kind == BeamClash.KIND_WIND ? (i % 3 == 0 ? ParticleTypes.CLOUD : ParticleTypes.WHITE_SMOKE)
+					: kind == BeamClash.KIND_KI ? (i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK)
 					: kind == BeamClash.KIND_SOOT ? (i % 3 == 0 ? ParticleTypes.SQUID_INK : ParticleTypes.LARGE_SMOKE)
 					: (i % 2 == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE);
 				if (particle == ParticleTypes.CAMPFIRE_COSY_SMOKE && random.nextInt(3) != 0) {
@@ -211,7 +221,8 @@ public final class BeamClashClient {
 		int every = Math.max(RING_EVERY_MIN, Math.round(Mth.lerp(pushing, RING_EVERY, RING_EVERY_MIN)));
 		if (state.age() % every == 0) {
 			level.addParticle(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), k.x, k.y, k.z, 0.0, 0.0, 0.0);
-			boolean smoky = state.kind() != BeamClash.KIND_WIND && state.theirKind() != BeamClash.KIND_WIND;
+			boolean smoky = state.kind() != BeamClash.KIND_WIND && state.theirKind() != BeamClash.KIND_WIND
+				&& (state.kind() != BeamClash.KIND_KI || state.theirKind() != BeamClash.KIND_KI);
 			for (int i = 0; i < RING_PUFFS; i++) {
 				double a = i * Mth.TWO_PI / RING_PUFFS;
 				Vec3 out = v.scale(Math.cos(a)).add(w.scale(Math.sin(a)));
@@ -225,16 +236,18 @@ public final class BeamClashClient {
 		}
 	}
 
-	private static @Nullable KeyMapping key(Minecraft minecraft) {
-		if (key == null) {
+	private static @Nullable KeyMapping key(Minecraft minecraft, String name) {
+		KeyMapping found = KEYS.get(name);
+		if (found == null) {
 			for (KeyMapping mapping : minecraft.options.keyMappings) {
-				if (KEY_NAME.equals(mapping.getName())) {
-					key = mapping;
+				if (name.equals(mapping.getName())) {
+					found = mapping;
+					KEYS.put(name, mapping);
 					break;
 				}
 			}
 		}
-		return key;
+		return found;
 	}
 
 	/** Bottom right, above the chip row: who's winning, the time left, and both pushes. */
@@ -256,16 +269,17 @@ public final class BeamClashClient {
 			chipY = height - 22 - 30 - CHIP;
 		}
 		int y = chipY - 17 - PANEL_H;
-		int mine = COLORS[Math.clamp(state.kind(), 0, 2)];
-		int theirs = COLORS[Math.clamp(state.theirKind(), 0, 2)];
+		int mine = COLORS[Math.clamp(state.kind(), 0, COLORS.length - 1)];
+		int theirs = COLORS[Math.clamp(state.theirKind(), 0, COLORS.length - 1)];
 		float time = state.age() + delta.getGameTimeDeltaPartialTick(false);
 		boolean losing = state.balance() < -0.5F;
 		int rim = losing ? pulse(0xFF5050, 0xFFFFFF, time * 0.5F) : 0xFFFFFF;
 		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, 0x90000000);
 		graphics.outline(x, y, PANEL_W, PANEL_H, 0xC0000000 | rim);
 		// the title, and the key to mash
-		KeyMapping mapping = key(minecraft);
-		String keyLabel = mapping == null ? "X" : mapping.getTranslatedKeyMessage().getString();
+		boolean ki = state.kind() == BeamClash.KIND_KI;
+		KeyMapping mapping = key(minecraft, ki ? KI_KEY_NAME : KEY_NAME);
+		String keyLabel = mapping == null ? (ki ? "V" : "X") : mapping.getTranslatedKeyMessage().getString();
 		graphics.text(font, Component.translatable("hud.jaymospowers.beam_clash.title"), x + 3, y + 3, 0xFFFFFFFF);
 		Component mash = Component.translatable("hud.jaymospowers.beam_clash.mash", keyLabel);
 		int mashColor = (int)(time * 0.5F) % 2 == 0 ? 0xFFFFE070 : 0xFFFFFFFF;

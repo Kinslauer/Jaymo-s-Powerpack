@@ -50,6 +50,8 @@ import org.jspecify.annotations.Nullable;
  * tap, not a let-go). Both are rooted, slowed and hungry while it lasts. The knot reaching a user overwhelms them; a
  * user letting go has the other's stream roll through; a stalemate past {@link #MAX_TICKS} detonates the knot.
  * Server-authoritative: the clients only send their held X (the beams' own Hold packets, routed here by {@link #input}).
+ * A fired beam (one with a {@link Shape}: the Z Fighters' ki waves) travels on its own once let go: it meets others
+ * where its head has got to, every press of its key is a tap, and only looking away lets it go; winning, it travels on.
  * Everyone near sees it through the synced {@link #CLASH} (the client draws it: {@code client/BeamClashClient}).
  */
 public final class BeamClash {
@@ -128,13 +130,48 @@ public final class BeamClash {
 	public static final int FX_TICKS = 30;
 
 	/** What a stream is, for its look and for what it does to whoever it overwhelms. */
-	public static final int KIND_WIND = 0, KIND_SMOKE = 1, KIND_SOOT = 2;
+	public static final int KIND_WIND = 0, KIND_SMOKE = 1, KIND_SOOT = 2, KIND_KI = 3;
+	// ---- ki ----
+	/** Ki overwhelms: the loser is also burned this much more and set alight this long (ticks). */
+	public static final float KI_OVERWHELM_DAMAGE = 4.0F;
+	public static final int KI_BURN_TICKS = 40;
 
 	/**
 	 * A beam that can clash: its kind for this user, whether it's running, how far it reaches and how to stop it.
 	 * Wind Whistle and Smoke Jet register themselves; another beam (Z Fighter ki) can join the same way.
 	 */
-	public record Beam(ToIntFunction<ServerPlayer> kind, Predicate<ServerPlayer> active, double range, Consumer<ServerPlayer> stop) {
+	public record Beam(ToIntFunction<ServerPlayer> kind, Predicate<ServerPlayer> active, double range, Consumer<ServerPlayer> stop,
+		@Nullable Shape shape) {
+		/** A held stream: it runs from the eyes the way the user looks, as far as the blocks let it. */
+		public Beam(ToIntFunction<ServerPlayer> kind, Predicate<ServerPlayer> active, double range, Consumer<ServerPlayer> stop) {
+			this(kind, active, range, stop, null);
+		}
+
+		boolean fired() {
+			return this.shape != null;
+		}
+	}
+
+	/**
+	 * A fired beam's own line while it's {@code active}: where it leaves, which way it runs, how far its head has got
+	 * (blocks), how hard it pushes (times the steady push), and the key that pushes it (a key mapping's name, for the
+	 * lock message).
+	 */
+	public interface Shape {
+		Vec3 from(ServerPlayer player);
+
+		Vec3 dir(ServerPlayer player);
+
+		double reach(ServerPlayer player);
+
+		float strength(ServerPlayer player);
+
+		String pushKey();
+	}
+
+	/** Smoke or Soot: real gas churned into the knot. */
+	static boolean smoky(int kind) {
+		return kind == KIND_SMOKE || kind == KIND_SOOT;
 	}
 
 	/**
@@ -266,22 +303,33 @@ public final class BeamClash {
 		}
 		Side side = clash.side(player.getUUID());
 		long now = player.level().getGameTime();
+		if (side.beam.fired()) {
+			// a fired beam runs on by itself: every press is a tap
+			if (down) {
+				tap(player, clash, side, now);
+			}
+			return true;
+		}
 		if (!down) {
 			side.releasedAt = now;
 			return true;
 		}
 		if (side.releasedAt >= 0) {
 			side.releasedAt = -1;
-			if (now - side.lastTap >= TAP_MIN_TICKS) {
-				side.lastTap = now;
-				side.surge = Math.min(SURGE_MAX, side.surge + TAP_PUSH);
-				// each shove of the knot bangs
-				ServerLevel level = player.level();
-				level.playSound(null, clash.knot.x, clash.knot.y, clash.knot.z, SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.5F,
-					0.7F + level.getRandom().nextFloat() * 0.5F);
-			}
+			tap(player, clash, side, now);
 		}
 		return true;
+	}
+
+	private static void tap(ServerPlayer player, Clash clash, Side side, long now) {
+		if (now - side.lastTap >= TAP_MIN_TICKS) {
+			side.lastTap = now;
+			side.surge = Math.min(SURGE_MAX, side.surge + TAP_PUSH);
+			// each shove of the knot bangs
+			ServerLevel level = player.level();
+			level.playSound(null, clash.knot.x, clash.knot.y, clash.knot.z, SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.5F,
+				0.7F + level.getRandom().nextFloat() * 0.5F);
+		}
 	}
 
 	/** A stream's reach, cut short at the knot while it clashes (from the beam's own tick). */
@@ -318,10 +366,19 @@ public final class BeamClash {
 				if (beam == null) {
 					continue;
 				}
-				Vec3 look = player.getLookAngle();
-				Vec3 from = player.getEyePosition().add(look.scale(0.6));
-				HitResult hit = level.clip(new ClipContext(from, from.add(look.scale(beam.range())), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-				double reach = hit.getType() == HitResult.Type.MISS ? beam.range() : hit.getLocation().distanceTo(from);
+				Vec3 look, from;
+				double reach;
+				if (beam.shape() != null) {
+					// a fired beam meets others where its head has got to
+					look = beam.shape().dir(player);
+					from = beam.shape().from(player);
+					reach = beam.shape().reach(player);
+				} else {
+					look = player.getLookAngle();
+					from = player.getEyePosition().add(look.scale(0.6));
+					HitResult hit = level.clip(new ClipContext(from, from.add(look.scale(beam.range())), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+					reach = hit.getType() == HitResult.Type.MISS ? beam.range() : hit.getLocation().distanceTo(from);
+				}
 				if (streams == null) {
 					streams = new ArrayList<>();
 				}
@@ -419,8 +476,13 @@ public final class BeamClash {
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, k.x, k.y, k.z, 1, 0.0, 0.0, 0.0, 0.0);
 		Shakes.send(s.player, LOCK_SHAKE, k);
 		Shakes.send(t.player, LOCK_SHAKE, k);
-		s.player.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.locked"));
-		t.player.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.locked"));
+		s.player.sendOverlayMessage(lockedMessage(s.beam));
+		t.player.sendOverlayMessage(lockedMessage(t.beam));
+	}
+
+	private static Component lockedMessage(Beam beam) {
+		return beam.shape() == null ? Component.translatable("message.jaymospowers.beam_clash.locked")
+			: Component.translatable("message.jaymospowers.beam_clash.locked_key", Component.keybind(beam.shape().pushKey()));
 	}
 
 	/** One tick of a clash; false once it has ended. */
@@ -434,9 +496,9 @@ public final class BeamClash {
 		}
 		ServerLevel level = a.level();
 		long now = level.getGameTime();
-		// a release that outlasts the grace is letting go
-		aOn &= clash.a.releasedAt < 0 || now - clash.a.releasedAt <= GRACE_TICKS;
-		bOn &= clash.b.releasedAt < 0 || now - clash.b.releasedAt <= GRACE_TICKS;
+		// a release that outlasts the grace is letting go (a fired beam isn't held)
+		aOn &= clash.a.beam.fired() || clash.a.releasedAt < 0 || now - clash.a.releasedAt <= GRACE_TICKS;
+		bOn &= clash.b.beam.fired() || clash.b.releasedAt < 0 || now - clash.b.releasedAt <= GRACE_TICKS;
 		Vec3 ea = a.getEyePosition(), eb = b.getEyePosition();
 		Vec3 ab = eb.subtract(ea);
 		double apart = ab.length();
@@ -495,9 +557,10 @@ public final class BeamClash {
 		return player != null && player.isAlive() && !player.isSpectator() && side.beam.active().test(player);
 	}
 
-	/** This tick's push: the steady base (ascension, mastery), the surge from taps, and a waver. */
+	/** This tick's push: the steady base (ascension, mastery, a fired beam's own strength), the surge from taps, and a waver. */
 	private static float push(ServerPlayer player, Side side) {
-		float base = BASE_PUSH * (1.0F + (Fate.isAscended(player) ? ASCENDED_BONUS : 0.0F) + MASTERY_BONUS * Mastery.unlocked(player));
+		float base = BASE_PUSH * (1.0F + (Fate.isAscended(player) ? ASCENDED_BONUS : 0.0F) + MASTERY_BONUS * Mastery.unlocked(player))
+			* (side.beam.shape() == null ? 1.0F : Math.max(0.0F, side.beam.shape().strength(player)));
 		side.surge *= SURGE_DECAY;
 		return base + side.surge + (player.getRandom().nextFloat() - 0.5F) * JITTER;
 	}
@@ -508,7 +571,7 @@ public final class BeamClash {
 		for (Side side : new Side[] {clash.a, clash.b}) {
 			ServerPlayer owner = side == clash.a ? a : b;
 			ServerPlayer other = side == clash.a ? b : a;
-			if (side.kind != KIND_WIND) {
+			if (smoky(side.kind)) {
 				com.jaymospowers.power.smoke.SmokeField.puff(level, k, KNOT_SMOKE, owner);
 			}
 			if (side.kind == KIND_SOOT && clash.age % 10 == 0) {
@@ -560,6 +623,16 @@ public final class BeamClash {
 			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 30, 0.6, 0.8, 0.6, 0.15);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
 			screen(loser, 0xE8F4FF);
+		} else if (win.kind == KIND_KI) {
+			// the ki rolls over them and bursts: burned and set alight
+			loser.hurtServer(level, winner.damageSources().playerAttack(winner), KI_OVERWHELM_DAMAGE);
+			loser.igniteForTicks(KI_BURN_TICKS);
+			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 3, 0.6, 0.6, 0.6, 0.0);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 40, 0.6, 0.8, 0.6, 0.5);
+			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.5, 0.7, 0.5, 0.2);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4F, 1.2F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 1.5F);
+			screen(loser, 0xFFF2C0);
 		} else {
 			// engulfed: smoke all round, blinded, out of breath
 			boolean soot = win.kind == KIND_SOOT;
@@ -599,9 +672,11 @@ public final class BeamClash {
 		int n = Math.max(1, (int)(dir.length() / 0.6));
 		for (int i = 0; i <= n; i++) {
 			Vec3 p = from.add(dir.scale(i / (double)n));
-			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : ParticleTypes.LARGE_SMOKE, p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.02);
+			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : hold.kind == KIND_KI ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.LARGE_SMOKE,
+				p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.02);
 		}
-		level.playSound(null, to.x, to.y, to.z, hold.kind == KIND_WIND ? SoundEvents.BREEZE_SHOOT : SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.playSound(null, to.x, to.y, to.z, hold.kind == KIND_WIND ? SoundEvents.BREEZE_SHOOT : hold.kind == KIND_KI ? SoundEvents.BEACON_DEACTIVATE
+			: SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
 		Shakes.send(quitter, ROLL_SHAKE, from);
 		end(clash, holder, quitter);
 	}
@@ -617,8 +692,8 @@ public final class BeamClash {
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, k.x, k.y, k.z, 40, 0.6, 0.6, 0.6, 0.6);
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
-		if (clash.a.kind != KIND_WIND || clash.b.kind != KIND_WIND) {
-			com.jaymospowers.power.smoke.SmokeField.puff(level, k, DETONATE_SMOKE, clash.a.kind != KIND_WIND ? a : b);
+		if (smoky(clash.a.kind) || smoky(clash.b.kind)) {
+			com.jaymospowers.power.smoke.SmokeField.puff(level, k, DETONATE_SMOKE, smoky(clash.a.kind) ? a : b);
 		}
 		for (Entity e : level.getEntities((Entity)null, new AABB(k, k).inflate(DETONATE_RADIUS),
 			e -> e != a && e != b && e.isAlive() && !e.isSpectator() && !e.noPhysics)) {

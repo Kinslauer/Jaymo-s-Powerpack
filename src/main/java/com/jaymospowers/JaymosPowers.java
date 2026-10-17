@@ -83,7 +83,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState",
-			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterDisc",
+			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack",
