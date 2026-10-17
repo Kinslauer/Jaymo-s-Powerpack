@@ -125,7 +125,8 @@ public final class LedgeClient {
 
 	private static void tickClimb(LocalPlayer player) {
 		ticks++;
-		if (!player.isAlive() || player.isPassenger() || com.jaymospowers.core.Carry.isCarried(player)) {
+		if (!player.isAlive() || player.isPassenger() || com.jaymospowers.core.Carry.isCarried(player)
+			|| com.jaymospowers.core.Carry.isThrown(player)) {
 			letGo(player);
 			return;
 		}
@@ -190,7 +191,12 @@ public final class LedgeClient {
 		cooldown = Ledge.REGRAB_COOLDOWN_TICKS;
 		if (at != null) {
 			Direction face = at.face();
-			player.setDeltaMovement(-face.getStepX() * Ledge.LET_GO_PUSH, 0.0, -face.getStepZ() * Ledge.LET_GO_PUSH);
+			if (com.jaymospowers.core.Carry.isThrown(player)) {
+				// knocked off by a hit: thrown clear of the wall, limp
+				player.setDeltaMovement(-face.getStepX() * Ledge.KNOCKED_PUSH, Ledge.KNOCKED_LIFT, -face.getStepZ() * Ledge.KNOCKED_PUSH);
+			} else {
+				player.setDeltaMovement(-face.getStepX() * Ledge.LET_GO_PUSH, 0.0, -face.getStepZ() * Ledge.LET_GO_PUSH);
+			}
 		}
 		if (ClientPlayNetworking.canSend(Ledge.Act.TYPE)) {
 			ClientPlayNetworking.send(new Ledge.Act(false));

@@ -1647,3 +1647,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   travel) along a collision-free path, so the server sees ordinary movement, and `LedgePacketListenerMixin` keeps it
   from kicking a hanging player for floating (and for 1 s after). Clicks are swallowed on the ledge, so Better Combat
   doesn't swing. Mobs don't use it. Numbers at the top of `core/Ledge` and `client/LedgePose`; see `docs/carry.md`.
+  - **A hit knocks you off:** hit while hanging or climbing (a creature, a projectile or a blast) and you ragdoll and
+    fall, thrown clear of the wall (`Ledge.knockedOff`, the carry ragdoll `Carry.THROWN`).

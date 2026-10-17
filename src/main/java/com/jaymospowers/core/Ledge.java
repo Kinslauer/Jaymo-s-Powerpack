@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -25,6 +26,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -97,6 +99,8 @@ public final class Ledge {
 	public static final int RELEASE_GRACE_TICKS = 20;
 	/** Server: a climb that hasn't been reported finished is ended this long after it should have (ticks). */
 	public static final int CLIMB_SLACK_TICKS = 10;
+	/** A hit while hanging or climbing knocks you off: you ragdoll ({@link Carry#THROWN}) and fall, pushed this far off the wall (b/t) and up. */
+	public static final double KNOCKED_PUSH = 0.35, KNOCKED_LIFT = 0.12;
 	// ================================================================================================================
 
 	/**
@@ -169,6 +173,12 @@ public final class Ledge {
 		ServerPlayNetworking.registerGlobalReceiver(Grab.TYPE, (payload, ctx) -> grab(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (payload, ctx) -> act(ctx.player(), payload.climb()));
 		ServerTickEvents.END_SERVER_TICK.register(Ledge::tick);
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && damageTaken > 0.0F && !blocked && HOLDING.containsKey(player.getUUID())
+				&& (source.getEntity() != null || source.getDirectEntity() != null || source.is(DamageTypeTags.IS_EXPLOSION))) {
+				knockedOff(player);
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> clear());
 	}
 
@@ -378,6 +388,15 @@ public final class Ledge {
 		player.causeFoodExhaustion(CLIMB_EXHAUSTION);
 		player.resetFallDistance();
 		sound(level, player, pos, 0.8F, 0.7F);
+	}
+
+	/** A hit takes you off the ledge: the grip goes and you ragdoll as you fall (the hold drops on its next tick, see canHang). */
+	private static void knockedOff(ServerPlayer player) {
+		player.setAttached(Carry.THROWN, player.level().getGameTime());
+		BlockPos pos = HOLDING.get(player.getUUID());
+		if (pos != null) {
+			sound(player.level(), player, pos, 0.7F, 0.6F);
+		}
 	}
 
 	private static void end(ServerPlayer player) {

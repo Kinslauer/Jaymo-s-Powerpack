@@ -147,6 +147,7 @@ elytra), `LedgePacketListenerMixin` (never kicked for floating while hanging, or
 | Hold **forward + Jump** at a wall | Rising (or at the top of the jump, falling no faster than 0.2 b/t), once your eyes are within 0.1 of its top edge (and the edge at least 1.1 above your feet, the wall within 0.35 of your body, facing it within 40 degrees): you catch the edge and hang there, feet 1.85 below it. Your fall is reset. |
 | **Jump** (pressed again) while hanging | Pull up and over: 16 ticks, straight up beside the wall for the first 60%, then across onto the top (0.4 past the edge). 0.6 exhaustion. |
 | **Sneak**, **Back**, or look more than 100 degrees away | Let go (pushed 0.06 off the wall). The grip also gives out after 20 s (`HANG_MAX_TICKS` 400). 10 ticks before another grab. |
+| **Hit** while hanging or climbing (by a creature, a projectile or a blast) | Knocked off: you ragdoll (`Carry.THROWN`, as a thrown body does) and fall, pushed 0.35 off the wall and 0.12 up (`KNOCKED_PUSH`, `KNOCKED_LIFT`). No grabbing while the ragdoll lasts. |
 
 - **Where:** the edge needs room to stand on it and nothing over your head: the whole climb (straight up from the hang
   to standing height above the edge, then across) must be clear. The top must be solid enough (`MIN_TOP_AREA` 0.45 of
