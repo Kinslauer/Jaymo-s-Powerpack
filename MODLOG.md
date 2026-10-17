@@ -1797,3 +1797,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     tendrils' combos, Web Cut, Chrono Flow's strike) aren't holds and are unchanged; a symbiote takeover still has the
     hands. Numbers at the top of
     `ZFighterStretchCombo` and `ZFighterStretchPose`.
+- **0.13.31, canoes (Kingdoms 0.7.96):** Andy linked Canoe Boats (by CanineGray, CC BY-NC 4.0, made for 26.3): every
+  boat is drawn as a canoe, through Entity Model Features and Entity Texture Features, which the pack already has. It
+  joins `packResourcePacks` (CurseForge 1086847, file 8944107) and `PackResourcePacks` switches it on once per install,
+  fetching it from Modrinth's CDN (the same file, SHA-1 checked) if the import skipped it. Build Modpack's own download
+  of a resource pack now encodes spaces in file names as %20 (this is the first with spaces). Kingdoms 0.7.96:
+  Survivalist hearts grow with level, and a Warrior-born's low-health fury scales and shows (kingdoms/MODLOG.md).

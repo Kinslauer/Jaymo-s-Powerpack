@@ -54,6 +54,9 @@ public final class ClassPerks {
 	// Survivalist
 	static final float SURVIVALIST_EXHAUSTION = 0.7F;
 	static final double SURVIVALIST_OXYGEN = 1.0, SURVIVALIST_HEALTH = 2.0, SURVIVALIST_FALL = -0.3, SURVIVALIST_MOVE = 0.05;
+	/** (0.7.96) A Survivalist's hearts grow with them: a heart more (2 health) every this many character levels, up to this much in all. */
+	static final int SURVIVALIST_LEVELS_PER_HEART = 10;
+	static final double SURVIVALIST_HEALTH_MAX = 10.0;
 	// Brute
 	static final double BRUTE_DAMAGE = 0.3, BRUTE_HEALTH = 4.0, BRUTE_MOVE = -0.08, BRUTE_WEIGHT = 2.0;
 	/** Brute: the share of damage a raised shield still stops when it would otherwise get past; how long a knocked-aside shield stays down (ticks, vanilla 100). */
@@ -107,7 +110,11 @@ public final class ClassPerks {
 			case RIDER -> RIDER_FOOT_MOVE;
 			default -> 0.0;
 		};
-		lines.add(line("hearts", String.valueOf((int) ((20.0 + health) / 2.0))));
+		String hearts = String.valueOf((int) ((20.0 + health) / 2.0));
+		if (cls == PlayerClass.SURVIVALIST) {
+			hearts += "-" + (int) ((20.0 + SURVIVALIST_HEALTH_MAX) / 2.0);
+		}
+		lines.add(line("hearts", hearts));
 		lines.add(line("speed", pct(move)));
 		switch (cls) {
 			case THIEF -> {
@@ -193,6 +200,12 @@ public final class ClassPerks {
 		};
 	}
 
+	/** A Survivalist's extra health: {@link #SURVIVALIST_HEALTH}, and a heart more every {@link #SURVIVALIST_LEVELS_PER_HEART} levels. */
+	static double survivalistHealth(ServerPlayer player) {
+		int grown = Stats.characterLevel(Skills.of(player)) / SURVIVALIST_LEVELS_PER_HEART;
+		return Math.min(SURVIVALIST_HEALTH_MAX, SURVIVALIST_HEALTH + 2.0 * grown);
+	}
+
 	/** Everything a class does through attributes, from the class, the held weapon and the armour worn now. */
 	static void attributes(ServerPlayer player) {
 		PlayerClass cls = Classes.classOf(player);
@@ -226,7 +239,7 @@ public final class ClassPerks {
 				case ARCHER -> move = ARCHER_MOVE;
 				case SURVIVALIST -> {
 					oxygen = SURVIVALIST_OXYGEN;
-					health = SURVIVALIST_HEALTH;
+					health = survivalistHealth(player);
 					fall = SURVIVALIST_FALL;
 					move = SURVIVALIST_MOVE;
 				}

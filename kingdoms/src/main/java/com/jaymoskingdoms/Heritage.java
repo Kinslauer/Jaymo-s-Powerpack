@@ -27,6 +27,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -98,9 +99,13 @@ public final class Heritage {
 	/** Nightborn: blows and speed in the dark (shares), blows in the sun (a share off). Dark: night, or light this low. */
 	static final double NIGHT_DAMAGE = 0.1, NIGHT_SPEED = 0.05, SUN_WEAK = 0.1;
 	static final int DARK_LIGHT = 7;
-	/** Warrior-born: below this share of their health their blows land this much harder (a share); hunger, as a factor. */
-	static final float WARRIOR_WOUNDED = 0.5F;
-	static final double WARRIOR_FURY = 0.15;
+	/**
+	 * Warrior-born: below {@code WOUNDED} of their health their blows land harder, from {@code FURY} there up to
+	 * {@code FURY_MAX} at {@code DESPERATE} of their health (shares), and they're knocked back less, up to
+	 * {@code FURY_KNOCKBACK}; hunger, as a factor.
+	 */
+	public static final float WARRIOR_WOUNDED = 0.5F, WARRIOR_DESPERATE = 0.15F;
+	static final double WARRIOR_FURY = 0.10, WARRIOR_FURY_MAX = 0.35, WARRIOR_FURY_KNOCKBACK = 0.3;
 	static final float WARRIOR_HUNGER = 1.2F;
 	/** Earthling: skill experience, as a factor. */
 	static final float EARTHLING_XP = 1.25F;
@@ -356,6 +361,7 @@ public final class Heritage {
 		}
 		if (kind != Kind.WARRIORBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_fury", 0.0, AttributeModifier.Operation.ADD_VALUE);
 		}
 		if (kind != Kind.TIDEBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -389,8 +395,9 @@ public final class Heritage {
 				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.WARRIORBORN) {
 				// the worse they're hurt, the harder they fight
-				boolean wounded = player.getHealth() < player.getMaxHealth() * WARRIOR_WOUNDED;
-				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", wounded ? WARRIOR_FURY : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				float rage = rage(player);
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", fury(rage), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "heritage_fury", WARRIOR_FURY_KNOCKBACK * rage, AttributeModifier.Operation.ADD_VALUE);
 				green(player, kind);
 			} else if (kind == Kind.EMBERBORN) {
 				// flame won't take on them; the cold saps them, freezing worst of all
@@ -524,6 +531,20 @@ public final class Heritage {
 	/** In the cold, for an Emberborn: a cold land (snow, ice, the frozen peaks), or freezing. The pack has no seasons, so this is its winter. */
 	static boolean chilled(ServerPlayer player) {
 		return cold(player) || player.getTicksFrozen() > 0;
+	}
+
+	/**
+	 * (0.7.96) How furious a wounded Warrior-born (or anyone, on the client's side: health is synced) is: 0 above
+	 * {@link #WARRIOR_WOUNDED} of their health, rising to 1 at {@link #WARRIOR_DESPERATE}.
+	 */
+	public static float rage(LivingEntity entity) {
+		float share = entity.getHealth() / Math.max(1.0F, entity.getMaxHealth());
+		return share >= WARRIOR_WOUNDED ? 0.0F : Math.clamp((WARRIOR_WOUNDED - share) / (WARRIOR_WOUNDED - WARRIOR_DESPERATE), 0.0F, 1.0F);
+	}
+
+	/** The extra blow (a share) at {@code rage}: none at 0, {@link #WARRIOR_FURY} as it starts, {@link #WARRIOR_FURY_MAX} at 1. */
+	static double fury(float rage) {
+		return rage <= 0.0F ? 0.0 : WARRIOR_FURY + (WARRIOR_FURY_MAX - WARRIOR_FURY) * rage;
 	}
 
 	/** Earthling: the factor on skill experience. */

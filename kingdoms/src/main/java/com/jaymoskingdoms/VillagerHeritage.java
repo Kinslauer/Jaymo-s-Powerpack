@@ -363,8 +363,7 @@ public final class VillagerHeritage {
 					modifier(villager, Attributes.MOVEMENT_SPEED, "villager_heritage_place", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 				}
 				case WARRIORBORN -> {
-					boolean wounded = villager.getHealth() < villager.getMaxHealth() * Heritage.WARRIOR_WOUNDED;
-					modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", wounded ? Heritage.WARRIOR_FURY : 0.0,
+					modifier(villager, Attributes.ATTACK_DAMAGE, "villager_heritage_fury", Heritage.fury(Heritage.rage(villager)),
 						AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 				}
 				default -> {

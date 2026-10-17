@@ -74,6 +74,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
 		BloodVision.register();
+		WarriorFury.register();
 		VampireLooks.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
