@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.SkinTones;
 import com.jaymoskingdoms.Tails;
+import com.jaymoskingdoms.VillagerHeritage;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.resources.Dialogues;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.5.62) A floating island's hermit ({@link Hermits}) mostly talks of why they live up there.
  * (0.7.10) "Explain your tail" ({@link Tails}): the villager understands the Z Fighter is no monster.
  * (0.7.20) A foreigner ({@link Languages}) gets a shrug for anything that takes words ({@link Languages#simpleDialogue}).
+ * "Ask about their blood" ({@link VillagerHeritage#ANSWER}), and now and then in a chat: what blood they are, and a
+ * Warrior-born why there's no tail to see.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -40,8 +43,28 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && VillagerHeritage.ANSWER.equals(answer)) {
+			// asked about their blood: what they are (a Warrior-born: why there's no tail to see)
+			String blood = VillagerHeritage.talkKey(villager);
+			if (blood != null) {
+				villager.sendChatMessage(player, blood);
+			}
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if (!"chat.topic".equals(question)) {
 			return;
+		}
+		if (villager.getRandom().nextFloat() < VillagerHeritage.chatChance(villager)) {
+			// now and then they talk of their blood
+			String blood = VillagerHeritage.talkKey(villager);
+			if (blood != null) {
+				villager.sendChatMessage(player, blood);
+				villager.getInteractions().stopInteracting();
+				ci.cancel();
+				return;
+			}
 		}
 		if (Hermits.is(villager) && villager.getRandom().nextFloat() < Hermits.CHAT_CHANCE) {
 			// (0.5.62) a floating island's hermit talks of why they're up there

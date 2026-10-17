@@ -3345,3 +3345,23 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   - **Blood Moon kin:** a Nightborn vampire's dark bonus is doubled under a Blood Moon (+20% blows, +10% speed) and
     tripled under a Super Blood Moon; the dead risen out of the ground (tagged `jaymoskingdoms_risen`) won't target
     them while it lasts (`ThrallTargetMixin`, `NightbornBlood.spares`).
+- **0.7.89, villagers have bloodlines:** MCA villagers and the settlements' own human folk (guards, archers, rulers,
+  builders, farmers, miners, woodcutters, carters, stable hands; not orcs, goblins, illagers, pirates, barbarians,
+  casters or plain vanilla villagers) are born into a heritage the first time they're in the world, saved and carried as
+  the same `jaymoskingdoms_heritage_<key>` tag players have (`VillagerHeritage`, weights at the top).
+  - **Odds:** Heartlander ~60%, then Earthling, Stoneborn, Tideborn, Sylvan, Emberborn, Frostborn, Nightborn,
+    Warrior-born (~1 in 37) and Verdant (~1.6%). A heritage that suits the land counts 5x (Frostborn in the cold,
+    Emberborn in the heat, Tideborn by water, Sylvan in forests, Stoneborn in mountains or deep down, Verdant in
+    jungle); Emberborn and Frostborn are rare in the wrong climate; all born in the Verdant World are Verdant.
+    Children take one parent's heritage (MCA pregnancies and baby items, a player parent too).
+  - **Looks** on MCA villagers (`VillagerLooks`, `McaEyes`): Verdant skin and antennae, each heritage's glowing marks,
+    eyes lined up with MCA's own, Tideborn fins, embers, particles. Folk get the eyes, marks (mirrored on the left)
+    and antennae, but no Verdant green (their skins are painted).
+  - **Warrior-born never show a tail:** 60% keep it wrapped round the waist, 40% had it cut (a stump that never
+    regrows). They say why: a new MCA option, "Ask about their blood", plus now and then in chat and gossip; other
+    bloods have lines of their own.
+  - **Gifts that suit a villager:** Emberborn fireproof (weaker in the cold), Frostborn never freeze, Tideborn breath
+    and swimming, Stoneborn a little slower, Sylvan soft landings and lighter blows, Verdant burn longer, Nightborn
+    quicker in the dark and weaker in the sun, Warrior-born hit harder badly hurt. Player-only ones (attribute points,
+    character level, hunger, skill experience, mining) are skipped.
+  - The wrapped ones' full-moon ape is Jaymo's Powers' (0.13.10).

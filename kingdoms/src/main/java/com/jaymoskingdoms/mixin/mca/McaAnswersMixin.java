@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Tails;
+import com.jaymoskingdoms.VillagerHeritage;
 import java.util.List;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.resources.data.dialogue.Question;
@@ -23,6 +24,10 @@ abstract class McaAnswersMixin {
 		String name = ((Question)(Object)this).getName();
 		if ("main".equals(name) && !Tails.canExplain(player, villager)) {
 			cir.getReturnValue().remove(Tails.ANSWER);
+		}
+		if ("main".equals(name) && !VillagerHeritage.hasTale(villager)) {
+			// a plain Heartlander has no blood to tell of
+			cir.getReturnValue().remove(VillagerHeritage.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

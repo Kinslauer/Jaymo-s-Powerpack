@@ -839,6 +839,10 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
+					// now and then, their own blood (VillagerHeritage)
+					said = VillagerHeritage.gossip(level, a.mob, player);
+				}
+				if (said == null) {
 					said = Oddities.gossip(level, a.mob);
 				}
 				if (said == null) {

@@ -84,6 +84,9 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterMark.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
+			} else if (renderer.getModel() instanceof net.minecraft.client.model.HumanoidModel<?>) {
+				// a Warrior-born villager raging as the wild Great Ape (VillagerApe)
+				helper.register(ZFighterApe.mobLayer(renderer));
 			}
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {

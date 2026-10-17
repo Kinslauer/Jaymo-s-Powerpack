@@ -66,6 +66,8 @@ import org.jspecify.annotations.Nullable;
  * the hands and forearms that glow in the dark, glowing eyes for most, a Tideborn's gills and fins (client HeritageLooks).
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
+ * Villagers are born to a heritage too, MCA's and the settlements' own folk, with the same attachment and tag
+ * ({@link VillagerHeritage}: the weights, their looks, a Warrior-born villager's tail wrapped or cut, their talk).
  */
 public final class Heritage {
 	/** Stoneborn: block break speed (a share), and walking speed lost (a share). */

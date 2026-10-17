@@ -103,6 +103,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			this.particleEvery = particleEvery;
 		}
 
+		static @Nullable Kind of(Heritage.@Nullable Kind heritage) {
+			for (Kind kind : values()) {
+				if (kind.heritage == heritage) {
+					return kind;
+				}
+			}
+			return null;
+		}
+
 		static @Nullable Kind of(Player player) {
 			for (Kind kind : values()) {
 				if (Heritage.is(player, kind.heritage)) {
@@ -227,7 +236,14 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	private static boolean headFinsCovered, armFinsCovered;
 
 	/** A Tideborn's fins: on the head (crest, ear fins) and the backs of the forearms. */
-	private static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, PlayerModel model, int set, boolean glow) {
+	static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, net.minecraft.client.model.HumanoidModel<?> model, int set,
+		boolean glow, boolean headCovered, boolean armsCovered) {
+		headFinsCovered = headCovered;
+		armFinsCovered = armsCovered;
+		fins(poseStack, collector, lightCoords, model, set, glow);
+	}
+
+	private static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, net.minecraft.client.model.HumanoidModel<?> model, int set, boolean glow) {
 		if (model.head.visible && !headFinsCovered) {
 			poseStack.pushPose();
 			model.head.translateAndRotate(poseStack);
@@ -308,6 +324,13 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				|| player == minecraft.getCameraEntity() && minecraft.options.getCameraType().isFirstPerson()) {
 				continue;
 			}
+			particle(level, player, kind, random, (player.getAttachedOrElse(Heritage.LOOK, 0) & Heritage.LOOK_WET) != 0);
+		}
+	}
+
+	/** One of {@code kind}'s particles off {@code player}'s hand (a villager's too, {@link VillagerLooks}); {@code wet}: a Tideborn still wet. */
+	static void particle(ClientLevel level, LivingEntity player, Kind kind, RandomSource random, boolean wet) {
+		{
 			// a hand hangs at the side, a little below the waist
 			float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
 			double side = (random.nextBoolean() ? 1.0 : -1.0) * player.getBbWidth() * 0.6;
@@ -318,7 +341,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				case TIDEBORN -> {
 					// bubbles under water; on land, drips only while still wet (0.7.80)
 					boolean under = player.isUnderWater();
-					if (under || (player.getAttachedOrElse(Heritage.LOOK, 0) & Heritage.LOOK_WET) != 0) {
+					if (under || wet) {
 						ParticleOptions drop = under ? ParticleTypes.BUBBLE : ParticleTypes.DRIPPING_WATER;
 						level.addParticle(drop, x, y, z, 0.0, under ? 0.08 : 0.0, 0.0);
 					}
