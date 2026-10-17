@@ -39,8 +39,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * hurt him shares {@link #RAID_TP} TP by how much (a Z Fighter; anyone else, emeralds and experience).
  */
 public final class ZFighterRaids {
-	static final long RAID_DAYS = 5L;
-	static final long RAID_SPREAD = 48000L;
+	/** (0.13.16) Much rarer: every 20 to 30 days (was 5 to 7). */
+	static final long RAID_DAYS = 20L;
+	static final long RAID_SPREAD = 240000L;
 	static final double NEAR = 160.0;
 	static final int RAID_TP = 6000;
 	static final int MIN_TP = 500;
