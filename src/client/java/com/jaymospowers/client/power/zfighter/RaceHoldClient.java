@@ -26,9 +26,11 @@ import org.jspecify.annotations.Nullable;
  * reach: the race move only takes the hold when nothing is. A Verdant Z Fighter's whole hold is his hold combo, which
  * stretches (0.13.30, {@code ZFighterStretchCombo}). Also the stretching arm itself, on everyone.
  * <p>
- * (0.13.30) The race comes first: whatever power he holds, a Verdant's or Frost-born's bare-handed left click (not at
- * a block) is the race's ({@link #first}), and other powers' left-click holds stand aside. Only when such a power
- * wants the click too ({@link #powerWants}), sneaking hands it to the power and the race stands aside.
+ * (0.13.30) Andy: "Swap the lineage click hold ability to secondary when you have a power or any other click hold, for
+ * example, stretch should be the shift click instead". With no power, the race's move is the plain left hold. With a
+ * power (other than the Z Fighter's, whose hold combo the race is part of), or another left-click hold wanting the
+ * click ({@link #powerWants}), the plain left hold is the power's and the race's move is sneak + left hold
+ * ({@link #secondary}, {@link #yielded}).
  */
 public final class RaceHoldClient {
 	static final int STRETCH_HOLD = 4, FROST_HOLD = 12;
@@ -91,10 +93,16 @@ public final class RaceHoldClient {
 		POWER_WANTS.add(wants);
 	}
 
-	/** Sneaking while another power wants the click: the race stands aside for it. */
-	public static boolean yielded(Player player) {
-		if (!player.isShiftKeyDown()) {
+	/**
+	 * The race's move is secondary for {@code player} (sneak + left hold): he has a power other than the Z Fighter's, or
+	 * another power's left-click hold wants the click.
+	 */
+	public static boolean secondary(Player player) {
+		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			return false;
+		}
+		if (Powers.of(player) != null) {
+			return true;
 		}
 		for (java.util.function.Predicate<Player> wants : POWER_WANTS) {
 			if (wants.test(player)) {
@@ -104,10 +112,15 @@ public final class RaceHoldClient {
 		return false;
 	}
 
+	/** The race stands aside for this click: its move is secondary ({@link #secondary}) and he isn't sneaking. */
+	public static boolean yielded(Player player) {
+		return secondary(player) && !player.isShiftKeyDown();
+	}
+
 	/**
-	 * Whether the race has first call on the left click right now (other powers' left-click holds stand aside): a
-	 * Verdant or Frost-born, bare-handed, not at a block, not handing it to a power by sneaking ({@link #yielded}). A
-	 * Verdant Z Fighter's hold combo counts as his race's (it stretches).
+	 * Whether the race has the left click right now (other powers' left-click holds stand aside): a Verdant or
+	 * Frost-born, bare-handed, not at a block, and either with no other power or sneaking ({@link #yielded}). A Verdant Z
+	 * Fighter's hold combo counts as his race's (it stretches).
 	 */
 	public static boolean first(Minecraft minecraft, Player player) {
 		if (minecraft.gui.screen() != null || player.isSpectator() || !player.getMainHandItem().isEmpty() || ZFighterLineage.ape(player)) {

@@ -1764,7 +1764,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     code is untouched (their 4-argument `Beam` still works).
   - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
     `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
-- **0.13.30, a Verdant's hold combo stretches, and the race comes first on left click:** Andy: "verdant zfighter should
+- **0.13.30, a Verdant's hold combo stretches, and the race move goes on sneak beside a power:** Andy: "verdant zfighter should
   do the hold combo on left click, using stretches throughout to extend range", then "verdant swing stretch is over
   ridden by symbiote click hold and other powers". Before, a Verdant Z Fighter's left hold was split: at a creature in
   plain reach it was the hold combo, at anything else (air, a foe further off) the race's stretch punch (one every 2 s).
@@ -1781,12 +1781,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`zfighter_combo_stretch`, synced; `client/ZFighterStretchPose`): over the combo's own move the striking limb swings
   onto the line to the foe and is drawn out long (its `yScale`, as the stretch punch's arm), then snaps home. Other
   lineages' combos are unchanged. A Verdant who isn't a Z Fighter keeps the stretch punch as it was.
-  - The rule for left click (`RaceHoldClient.first`): a Verdant or Frost-born, bare-handed and not aiming at a block,
-    gets left click (press and hold) before any power's left-click hold, whatever power they hold. So the symbiote's
-    weapon arm (`WebMorph`, which gathered on the press and struck on release, swallowing the stretch and the ice
-    prison) no longer forms for them. Only when a power wants the click too (registered with
-    `RaceHoldClient.powerWants`; today the weapon arm), sneaking hands it to the power: sneak + left hold forms the
-    weapon arm, and the stretch punch, the ice prison and a Verdant's hold combo stand aside. Sneaking with nothing else
-    wanting it changes nothing. Single-click power actions (Gravity's throw, the tendrils' combos, Web Cut, Chrono Flow's
-    strike) aren't holds and are unchanged; a symbiote takeover still has the hands. Numbers at the top of
+  - The rule for left click (Andy: "Swap the lineage click hold ability to secondary when you have a power or any
+    other click hold, for example, stretch should be the shift click instead"; `RaceHoldClient.secondary`): with no
+    power, a Verdant's or Frost-born's bare-handed left hold (not at a block) is the race's, as before. With a power
+    (other than the Z Fighter's, whose hold combo the race belongs to), or another power's left-click hold wanting the
+    click (`RaceHoldClient.powerWants`; today the symbiote's weapon arm), the plain left hold is the power's and the
+    race's move is sneak + left hold: the stretch punch and the ice prison. So the symbiote's weapon arm (`WebMorph`,
+    which had swallowed them) keeps the plain hold. A Verdant Z Fighter's whole hold is his stretching combo and a
+    Frost-born Z Fighter's ice prison keeps its place in his. Single-click power actions (Gravity's throw, the
+    tendrils' combos, Web Cut, Chrono Flow's strike) aren't holds and are unchanged; a symbiote takeover still has the
+    hands. Numbers at the top of
     `ZFighterStretchCombo` and `ZFighterStretchPose`.
