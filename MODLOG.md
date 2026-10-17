@@ -1688,3 +1688,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   forbidden blocks). The 12 ki is paid when the wind-up starts; dying, losing the power, being silenced or turning
   into the Great Ape mid-wind-up lets it fizzle. G's cooldown covers the wind-up (18 ticks + the old 20). Numbers at
   the top of `ZFighterDisc` and `ZFighterDiscPose`.
+- **0.13.26, costumes no longer flicker on MCA bodies:** Andy's clip: a black costume with the MCA clothes flickering
+  through it. With MCA a player's clothes are drawn on their own body copy at 0.0625, their outer layer (jacket,
+  sleeves, pants) at 0.3125 and its hat layer at 0.5625; the costume's suit sat at 0.3 and its mask at 0.55, a hair under
+  each, so they fought. The suit now stands at 0.35 (over the clothes, still under MCA's hair at 0.375, so long hair
+  falls over it) and masks at 0.62 (over the clothing hat and the hair) (`CostumeModels`, numbers at its top). Without
+  MCA it's the same costume, a breath looser.
