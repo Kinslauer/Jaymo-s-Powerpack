@@ -19,9 +19,10 @@ import net.minecraft.world.entity.LivingEntity;
  * <b>lazy</b> vault (side-on over one hand, the legs scissoring over one after the other), a <b>monkey flip</b> (a tucked
  * front flip over it) or a <b>thief</b> vault (leaning back, the lead leg kicked high over it, a hand brushing the
  * top).</li>
- * <li><b>Cling</b> (webbed fists): a crouched spider perch, feet splayed wide on the wall, one hand high and the other
- * flat beside you; shimmying or climbing, it crawls hand over hand, the legs stepping in turn. In the suit the
- * tendrils hold the wall instead ({@code WebTendrilWalk}): the body hangs off them, arms and legs loose and ready.</li>
+ * <li><b>Cling</b> (webbed fists): (0.13.17) climbed like a vine or a ladder: upright against the wall, both hands up on
+ * it going hand over hand and the feet stepping up in turn as you rise (the hands keep their place while you hang).
+ * In the suit the tendrils hold the wall instead ({@code WebTendrilWalk}): the body hangs off them, arms and legs
+ * loose and ready.</li>
  * <li><b>Wall jump:</b> arched back off the wall, arms flung up and out, legs driving off it, then tucking.</li>
  * <li><b>Slide</b>, one of four at random: a <b>baseball</b> slide (feet first, lead leg out, the other cocked aside, a hand trailing on the
  * ground, the other up), a <b>knee</b> slide (upright on the knees, arms flung wide, head back), a <b>hip</b> slide
@@ -44,8 +45,13 @@ public final class WebParkourPose {
 	static final float BASEBALL_LEAN = 62.0F, HIP_LEAN = 70.0F, HIP_ROLL = 55.0F, DIVE_PITCH = 78.0F;
 	/** How far each slide drops the body toward the ground (blocks): baseball, knee, hip, dive. */
 	static final float[] SLIDE_DROP = {0.12F, 0.5F, 0.2F, 0.05F};
-	/** How far the body leans into the wall while clinging (degrees). */
-	static final float CLING_LEAN = 10.0F;
+	/** How far the body leans into the wall while clinging (degrees): (0.13.17) upright, as on a ladder. */
+	static final float CLING_LEAN = 0.0F;
+	/**
+	 * (0.13.17) Climbing hand over hand: the hands' and feet's cycle follows height (radians a block), the arms reach
+	 * this high on the wall and swing this far apart, the feet lift this far.
+	 */
+	static final float CLIMB_RATE = 2.4F, CLIMB_REACH = -2.35F, CLIMB_ARM_SWING = 0.4F, CLIMB_LEG_LIFT = 0.55F;
 	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
 	static final float TENDRIL_HANG = 8.0F;
 	/** Crawling on the wall: how fast the limbs cycle (radians a tick), and the speed (blocks/tick) that's a full crawl. */
@@ -55,7 +61,7 @@ public final class WebParkourPose {
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebParkour} move; {@code p}: how far through it (0-1, timed moves); {@code in}: settled into it (0-1). */
-	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl) {
+	public record Pose(int kind, int variant, float p, float in, float time, boolean tendrils, float crawl, float height) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_parkour");
@@ -94,7 +100,8 @@ public final class WebParkourPose {
 		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));
 		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
 		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
-		state.setData(KEY, new Pose(kind, WebParkour.variant(move), p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2]));
+		state.setData(KEY, new Pose(kind, WebParkour.variant(move), p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2],
+			(float)Mth.lerp(partialTicks, entity.yo, entity.getY())));
 	}
 
 	/** After the body faces its way: tip over in a vault, lie back in a slide, lean into the wall in a cling. */
@@ -147,7 +154,12 @@ public final class WebParkourPose {
 					default -> poseStack.rotateDegrees(Axis.XP, -DIVE_PITCH * in);
 				}
 			}
-			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
+			case WebParkour.CLING -> {
+				// (0.13.17) with Not Enough Animations its ladder climb has the body (WallClimbs)
+				if (!com.jaymospowers.client.WallClimbs.NEA) {
+					poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
+				}
+			}
 			case WebParkour.WALL_JUMP -> poseStack.rotateDegrees(Axis.XP, 18.0F * pose.in());
 			default -> {
 			}
@@ -205,6 +217,10 @@ public final class WebParkourPose {
 				}
 			}
 			case WebParkour.CLING -> {
+				if (com.jaymospowers.client.WallClimbs.NEA) {
+					// (0.13.17) Not Enough Animations climbs it (its ladder animation; WallClimbs)
+					break;
+				}
 				float sway = Mth.sin(pose.time() * 0.12F) * 0.05F;
 				if (pose.tendrils()) {
 					// held off the wall by the tendrils: arms loose and a little out, ready; legs drawn up a touch, swaying
@@ -214,16 +230,15 @@ public final class WebParkourPose {
 					set(h.leftLeg, -0.2F + sway, 0.0F, -0.12F, e);
 					break;
 				}
-				// the perch: one hand high, the other flat on the wall beside you, feet splayed wide on it. Crawling, the
-				// hands go over each other and the legs step in turn (opposite arm and leg together)
-				float c = pose.crawl();
-				float step = Mth.sin(pose.time() * CRAWL_RATE);
-				float reachR = Mth.lerp(c, 1.0F, 0.5F + 0.5F * step), reachL = Mth.lerp(c, 0.0F, 0.5F - 0.5F * step);
-				set(h.rightArm, Mth.lerp(reachR, -1.7F, -2.8F) + sway, -0.1F, Mth.lerp(reachR, 0.65F, 0.2F), e);
-				set(h.leftArm, Mth.lerp(reachL, -1.7F, -2.8F) - sway, 0.1F, Mth.lerp(reachL, -0.65F, -0.2F), e);
-				set(h.rightLeg, -0.85F - 0.35F * c * step, 0.0F, 0.55F, e);
-				set(h.leftLeg, -0.85F + 0.35F * c * step + sway, 0.0F, -0.55F, e);
-				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, -0.25F));
+				// (0.13.17) as on a vine or a ladder: both hands up on the wall going hand over hand, the feet stepping up
+				// in turn (the opposite foot with each hand), all of it moving with the height climbed, so it holds still
+				// while you hang
+				float s = Mth.sin(pose.height() * CLIMB_RATE);
+				set(h.rightArm, CLIMB_REACH - CLIMB_ARM_SWING * s, 0.0F, 0.1F, e);
+				set(h.leftArm, CLIMB_REACH + CLIMB_ARM_SWING * s, 0.0F, -0.1F, e);
+				set(h.rightLeg, -CLIMB_LEG_LIFT * (0.5F - 0.5F * s), 0.0F, 0.05F, e);
+				set(h.leftLeg, -CLIMB_LEG_LIFT * (0.5F + 0.5F * s), 0.0F, -0.05F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, -0.2F));
 			}
 			case WebParkour.WALL_JUMP -> {
 				// pushed off: arms up and out, legs driving down off the wall, tucking as it flies

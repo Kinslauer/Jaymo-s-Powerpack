@@ -1630,7 +1630,7 @@ public final class WebSymbiote {
 	}
 
 	/** Wall or ceiling right next to the player (cheap: one box check). */
-	static boolean touchingWall(Player player) {
+	public static boolean touchingWall(Player player) {
 		AABB box = player.getBoundingBox();
 		return !player.level().noCollision(player, box.inflate(0.12, -0.1, 0.12))
 			|| !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));

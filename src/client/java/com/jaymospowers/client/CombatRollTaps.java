@@ -20,6 +20,13 @@ final class CombatRollTaps {
 	private static int sinceLastTap = Integer.MAX_VALUE;
 	/** True while we're the ones holding the roll key down (so a player's own binding is never released by us). */
 	private static boolean pressing;
+	/**
+	 * (0.13.17) Clinging to a wall is held on Sneak, so climbing taps it again and again: no roll from it while clinging,
+	 * nor until {@code CLING_SETTLE} ticks after landing from one (it rolled you as you dropped off the wall).
+	 */
+	private static final int CLING_SETTLE = 10;
+	private static boolean afterCling;
+	private static int groundedAfterCling;
 
 	private CombatRollTaps() {
 	}
@@ -56,6 +63,18 @@ final class CombatRollTaps {
 		boolean sneak = minecraft.options.keyShift.isDown();
 		if (sinceLastTap < Integer.MAX_VALUE) {
 			sinceLastTap++;
+		}
+		Integer move = minecraft.player.getAttached(com.jaymospowers.power.web.WebParkour.MOVE);
+		if (move != null && com.jaymospowers.power.web.WebParkour.kind(move) == com.jaymospowers.power.web.WebParkour.CLING) {
+			afterCling = true;
+			groundedAfterCling = 0;
+		} else if (afterCling && (minecraft.player.onGround() || minecraft.player.isInWater()) && ++groundedAfterCling >= CLING_SETTLE) {
+			afterCling = false;
+		}
+		if (afterCling) {
+			sinceLastTap = Integer.MAX_VALUE;
+			sneakWasDown = sneak;
+			return;
 		}
 		// double Sneak with two webs on small things is Web's yank, not a roll
 		if (minecraft.player.tickCount - com.jaymospowers.client.power.web.WebSwing.reelReadyTick <= 1) {

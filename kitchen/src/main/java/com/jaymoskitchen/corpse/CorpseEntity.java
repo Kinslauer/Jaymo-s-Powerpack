@@ -96,13 +96,15 @@ public class CorpseEntity extends Entity {
 	private static final EntityDataAccessor<Long> SLUNG_AT = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.LONG);
 	/**
-	 * (0.4.48) Slinging a body over a horse: only up to a sheep's size ({@code SLING_WIDTH} by {@code SLING_HEIGHT},
-	 * standing; no person), {@code SLUNG_MAX} to a horse. It's thrown up in an arc {@code SLING_ARC} high over
+	 * (0.4.48) Slinging a body over a horse: up to a sheep's size ({@code SLING_WIDTH} by {@code SLING_HEIGHT},
+	 * standing), or (0.4.49) a person's (a player, a villager, a zombie: no wider than {@code PERSON_WIDTH}, no taller
+	 * than {@code PERSON_HEIGHT}); never a cow or anything bigger. (0.4.49) One to a horse ({@code SLUNG_MAX}).
+	 * Over the back it hangs limp as a carried body does, its limbs swinging with the horse's stride. It's thrown up in an arc {@code SLING_ARC} high over
 	 * {@code SLING_TICKS}, and lies across the back {@code SLUNG_BACK} behind the middle (the next {@code SLUNG_SPACING}
 	 * further back), {@code SLUNG_HEIGHT} of the horse's height up.
 	 */
-	public static final float SLING_WIDTH = 0.95F, SLING_HEIGHT = 1.35F;
-	public static final int SLUNG_MAX = 2, SLING_TICKS = 10;
+	public static final float SLING_WIDTH = 0.95F, SLING_HEIGHT = 1.35F, PERSON_WIDTH = 0.7F, PERSON_HEIGHT = 2.0F;
+	public static final int SLUNG_MAX = 1, SLING_TICKS = 10;
 	static final double SLING_ARC = 0.9, SLUNG_BACK = 0.35, SLUNG_SPACING = 0.4, SLUNG_HEIGHT = 0.8;
 	/** Where the arc started (each side notes it as it sees the throw), and the horse to find again after a reload. */
 	private @Nullable Vec3 slingFrom;
@@ -1567,17 +1569,26 @@ public class CorpseEntity extends Entity {
 		return id < 0 ? null : level().getEntity(id);
 	}
 
-	/** Small enough to sling over a horse: up to a sheep's size, and never a person or anything too heavy to lift. */
+	/** Small enough to sling over a horse: up to a sheep's size, or a person's; never a cow, nor anything too heavy to lift. */
 	public boolean slingable() {
-		if (isPlayerCorpse() || isHeavy()) {
+		if (isHeavy()) {
 			return false;
+		}
+		if (isPlayerCorpse()) {
+			return true;
 		}
 		EntityType<?> type = sourceType();
 		if (type == null) {
 			return false;
 		}
 		EntityDimensions standing = type.getDimensions();
-		return standing.width() <= SLING_WIDTH && standing.height() <= SLING_HEIGHT;
+		return standing.width() <= SLING_WIDTH && standing.height() <= SLING_HEIGHT
+			|| standing.width() <= PERSON_WIDTH && standing.height() <= PERSON_HEIGHT;
+	}
+
+	/** (0.4.49) The place on the horse's back it lies in. */
+	public int slungSlot() {
+		return this.entityData.get(SLUNG_SLOT);
 	}
 
 	/**
@@ -1643,7 +1654,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/** Where a body lies across {@code horse}'s back in place {@code slot}: behind the saddle, across it. */
-	static Vec3 slungPosition(Entity horse, int slot) {
+	public static Vec3 slungPosition(Entity horse, int slot) {
 		float yaw = (horse instanceof LivingEntity living ? living.yBodyRot : horse.getYRot()) * Mth.DEG_TO_RAD;
 		double back = SLUNG_BACK + slot * SLUNG_SPACING;
 		return new Vec3(horse.getX() + Mth.sin(yaw) * back, horse.getY() + horse.getBbHeight() * SLUNG_HEIGHT, horse.getZ() - Mth.cos(yaw) * back);
@@ -1692,6 +1703,10 @@ public class CorpseEntity extends Entity {
 		setPos(at.x, at.y, at.z);
 		setYRot((horse instanceof LivingEntity living ? living.yBodyRot : horse.getYRot()) + 90.0F);
 		setDeltaMovement(Vec3.ZERO);
+		if (level().isClientSide()) {
+			// (0.4.49) limp over the back: its limbs swing with the horse's stride, as a carried body's do
+			swingLimbs(horse);
+		}
 		if (level() instanceof ServerLevel level) {
 			serverTick(level);
 		}

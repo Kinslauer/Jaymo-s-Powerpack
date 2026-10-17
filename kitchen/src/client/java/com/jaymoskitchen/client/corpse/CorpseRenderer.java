@@ -152,6 +152,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			state.z = at.z;
 			state.carryYaw = yaw;
 		}
+		Entity horse = carrier == null ? corpse.slungOn() : null;
+		if (horse != null) {
+			// (0.4.49) slung over a horse: limp across its back as if carried, swinging with its stride, turned with it
+			state.carried = true;
+			state.tumbling = false;
+			yaw = horse instanceof net.minecraft.world.entity.LivingEntity living
+				? Mth.rotLerp(partialTicks, living.yBodyRotO, living.yBodyRot) : horse.getYRot(partialTicks);
+			state.carryYaw = yaw;
+		}
 		// (0.4.44) a dead player is drawn as the villager MCA draws them as (their genes, hair and clothes), lying like any
 		// other villager's body; without one, in their player skin
 		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
