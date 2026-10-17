@@ -3375,3 +3375,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   a beacon hum, and one random buff for 5 minutes (Strength, Speed II, Resistance, Regeneration, Haste II, Jump Boost
   II or Absorption II). The glow stays lit for as long. It can't come again for 5 minutes after (`EarthlingSurge`,
   numbers at its top).
+- **0.7.92, the folk call you by your chosen name:** villagers and folk no longer use your Minecraft username. Their
+  own lines (greetings, deeds and gossip, heritage talk, accents, assassins' whispers, identity reveals, exiles) now
+  use the name you picked in MCA's creator (its family tree; your username only if you never set one), and the
+  costume's name while you're masked to them. MCA's own dialogue already used the creator name and the costume swap
+  (`Identities.trueName`, `McaBridge.name`).

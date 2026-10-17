@@ -445,7 +445,7 @@ public final class Languages {
 		int now = level.getServer().getTickCount();
 		Component line;
 		if (after >= NATIVE && before < NATIVE) {
-			line = Component.translatable("language.jaymoskingdoms.accent.native." + level.getRandom().nextInt(NATIVE_LINES), player.getName());
+			line = Component.translatable("language.jaymoskingdoms.accent.native." + level.getRandom().nextInt(NATIVE_LINES), Identities.shownName(player));
 		} else {
 			Integer last = REMARKED.get(player.getUUID());
 			if (after < ACCENT_FROM || after >= NATIVE || (last != null && now - last < ACCENT_GAP) || level.getRandom().nextFloat() > ACCENT_CHANCE) {
@@ -455,7 +455,7 @@ public final class Languages {
 			while (tier + 1 < ACCENT_TIERS.length && after >= ACCENT_TIERS[tier + 1]) {
 				tier++;
 			}
-			line = Component.translatable("language.jaymoskingdoms.accent." + ACCENTS[tier] + "." + level.getRandom().nextInt(ACCENT_LINES), player.getName());
+			line = Component.translatable("language.jaymoskingdoms.accent." + ACCENTS[tier] + "." + level.getRandom().nextInt(ACCENT_LINES), Identities.shownName(player));
 		}
 		REMARKED.put(player.getUUID(), now);
 		// (said slowly and simply, to you: you follow it even before you speak the tongue)

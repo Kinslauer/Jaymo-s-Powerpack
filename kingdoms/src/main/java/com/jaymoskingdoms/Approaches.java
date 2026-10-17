@@ -816,7 +816,7 @@ public final class Approaches {
 	private static void arrive(ServerLevel level, Approach a, ServerPlayer player) {
 		Faction f = Factions.get(level.getServer(), a.faction);
 		String realm = f == null ? "?" : f.name();
-		Component name = player.getName();
+		Component name = Identities.nameTo(player, a.faction);
 		// (the line's key and its arguments; "<key>.more" is what they'd add if asked)
 		String line = key(a) + "." + (guardsOwn(a.topic) ? TEMPERS[a.variant] : a.variant), more = line + ".more";
 		Object[] args = switch (a.topic) {
@@ -1194,7 +1194,7 @@ public final class Approaches {
 			Identities.lifted(level, player, f);
 			Identities.challenged(player, f, now, true);
 			boolean trouble = Reputation.get(player, f.id()) <= Reputation.HOSTILE || Theft.wanted(player, f.id());
-			reply(level, a, k + (trouble ? "lift_trouble" : "lift"), trouble ? Speech.RED : Speech.WHITE, player.getName());
+			reply(level, a, k + (trouble ? "lift_trouble" : "lift"), trouble ? Speech.RED : Speech.WHITE, Identities.trueName(player));
 			if (trouble) {
 				a.mob.setTarget(player);
 			}

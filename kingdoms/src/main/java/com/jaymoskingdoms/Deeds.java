@@ -286,7 +286,7 @@ public final class Deeds {
 	/** {@code who} turns to {@code player}, thanks them in a line of {@code family}, and warms to them by {@code hearts}. */
 	private static void thank(ServerLevel level, LivingEntity who, ServerPlayer player, String family, int hearts) {
 		lookAt(who, player);
-		Speech.tell(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), player.getName()), Speech.GOLD);
+		Speech.tell(level, who, player, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.GOLD);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, who.getX(), who.getY() + who.getBbHeight() + 0.3, who.getZ(), 8, 0.4, 0.3, 0.4, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, who.isBaby() ? 1.5F : 1.0F);
 		warm(who, player, hearts);
@@ -404,9 +404,9 @@ public final class Deeds {
 		Faction from = d.heardFrom() >= 0 ? Factions.get(level.getServer(), d.heardFrom()) : null;
 		String family = what.equals("gossip") ? "talk.jaymoskingdoms.gossip.deed." + kind.key() : "talk.jaymoskingdoms.deed." + kind.key() + ".greet";
 		if (from != null) {
-			return Component.translatable(Oddities.line(family + ".heard", level.getRandom()), player.getName(), from.name());
+			return Component.translatable(Oddities.line(family + ".heard", level.getRandom()), Identities.shownName(player), from.name());
 		}
-		return Component.translatable(Oddities.line(family, level.getRandom()), player.getName());
+		return Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player));
 	}
 
 	/** (Approaches) A gossip of {@code f}'s talk about what {@code player} did, or null if they know of nothing (or don't feel like it). */
