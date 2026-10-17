@@ -29,7 +29,8 @@ import net.minecraft.world.phys.Vec3;
  * (0.11.101) The races' own left-mouse holds, for anyone of that blood (Z Fighter or not), bare-handed and not at a
  * block: a Verdant's <b>stretch punch</b>, the arm shooting out up to {@link #STRETCH_RANGE} blocks to strike what it
  * meets or snatch an item back; a Frost-born's <b>ice prison</b> (Jaymo's Kingdoms' FrostPrison, asked for through the
- * {@link #FROST_TAG} tag). A Z Fighter's hold combo keeps anything within plain reach.
+ * {@link #FROST_TAG} tag). A Z Fighter's hold combo keeps anything within plain reach; a Verdant Z Fighter's whole hold
+ * is his combo, which stretches ({@link ZFighterStretchCombo}).
  */
 public final class RaceMoves {
 	/**
@@ -76,7 +77,10 @@ public final class RaceMoves {
 		}
 		int lineage = ZFighterLineage.of(player);
 		if (lineage == ZFighterLineage.VERDANT) {
-			stretch(player);
+			// (a Verdant Z Fighter's hold is his combo, which stretches: ZFighterStretchCombo)
+			if (!com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE)) {
+				stretch(player);
+			}
 		} else if (lineage == ZFighterLineage.FROST) {
 			player.addTag(FROST_TAG);
 		}

@@ -1764,3 +1764,29 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     code is untouched (their 4-argument `Beam` still works).
   - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
     `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
+- **0.13.30, a Verdant's hold combo stretches, and the race comes first on left click:** Andy: "verdant zfighter should
+  do the hold combo on left click, using stretches throughout to extend range", then "verdant swing stretch is over
+  ridden by symbiote click hold and other powers". Before, a Verdant Z Fighter's left hold was split: at a creature in
+  plain reach it was the hold combo, at anything else (air, a foe further off) the race's stretch punch (one every 2 s).
+  Now his whole hold is the hold combo (`ZFighterStretchCombo`, hooked into `ZFighterCombo`), and it stretches: a blow at
+  a foe out of plain reach shoots the arm (the right leg for kicks, the left arm for the jab) out to it, up to 7 blocks
+  (`STRETCH_RANGE`), and 30% of the other blows (never the opener) stretch anyway for show (`FLAIR_CHANCE`). A
+  stretched blow takes 1.2 to 1.5 times as long (a different amount each time), winds up with a small slime jump, lands
+  at half for 85% of the same blow's damage with the same knockback (thrown along the line from him), strings slime
+  along the limb and splats at the far hand, and snaps back with a high slime squish and a bobber reel-in. The finisher
+  is always a double-arm stretch slam (both arms raised overhead and brought down onto the foe, full finisher damage,
+  a heavy slime thud, a cloud and a shake); the tier 4 dragon fist stays one arm, stretched up. The foe stays locked as
+  far as the arms reach (lunges after nothing past 7 blocks), and a Verdant lunges at 35% (`LUNGE_SHARE`) and only leans
+  into a stretched blow (`STEP_SHARE`); plain blows reach no further than anyone's. Everyone sees it
+  (`zfighter_combo_stretch`, synced; `client/ZFighterStretchPose`): over the combo's own move the striking limb swings
+  onto the line to the foe and is drawn out long (its `yScale`, as the stretch punch's arm), then snaps home. Other
+  lineages' combos are unchanged. A Verdant who isn't a Z Fighter keeps the stretch punch as it was.
+  - The rule for left click (`RaceHoldClient.first`): a Verdant or Frost-born, bare-handed and not aiming at a block,
+    gets left click (press and hold) before any power's left-click hold, whatever power they hold. So the symbiote's
+    weapon arm (`WebMorph`, which gathered on the press and struck on release, swallowing the stretch and the ice
+    prison) no longer forms for them. Only when a power wants the click too (registered with
+    `RaceHoldClient.powerWants`; today the weapon arm), sneaking hands it to the power: sneak + left hold forms the
+    weapon arm, and the stretch punch, the ice prison and a Verdant's hold combo stand aside. Sneaking with nothing else
+    wanting it changes nothing. Single-click power actions (Gravity's throw, the tendrils' combos, Web Cut, Chrono Flow's
+    strike) aren't holds and are unchanged; a symbiote takeover still has the hands. Numbers at the top of
+    `ZFighterStretchCombo` and `ZFighterStretchPose`.
