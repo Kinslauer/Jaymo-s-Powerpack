@@ -474,6 +474,7 @@ public final class ZFighterLineage {
 			inherit(player);
 		}
 		live.lineage = of(player);
+		live.kiColor = ZFighterPower.kiColor(player);
 		tailTags(player, live.lineage == WARRIOR, tailOut(player));
 		ServerLevel level = player.level();
 		long now = level.getGameTime();

@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.core.Powers;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -41,6 +42,32 @@ final class ZFighterDebugCommand {
 						c.getSource().sendSuccess(() -> Component.literal("Z Fighter cooldowns cleared, ki full."), false);
 						return 1;
 					}))
+				.then(Commands.literal("kicolor")
+					.executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						int color = ZFighterPower.kiColor(player);
+						c.getSource().sendSuccess(() -> Component.literal(String.format("Ki colour: #%06X", color)).withColor(color), false);
+						return 1;
+					})
+					.then(Commands.literal("reroll").executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						int color = ZFighterPower.rollKiColor(player);
+						c.getSource().sendSuccess(() -> Component.literal(String.format("Ki colour rerolled: #%06X", color)).withColor(color), false);
+						return 1;
+					}))
+					.then(Commands.argument("hex", StringArgumentType.word()).executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						int color;
+						try {
+							color = Integer.parseInt(StringArgumentType.getString(c, "hex").replace("#", ""), 16) & 0xFFFFFF;
+						} catch (NumberFormatException e) {
+							c.getSource().sendFailure(Component.literal("Not a hex colour, e.g. 8FD3FF"));
+							return 0;
+						}
+						player.setAttached(ZFighterPower.KI_COLOR, color);
+						c.getSource().sendSuccess(() -> Component.literal(String.format("Ki colour set: #%06X", color)).withColor(color), false);
+						return 1;
+					})))
 				.then(Commands.literal("hardship")
 					.then(Commands.argument("n", IntegerArgumentType.integer(0, 1000))
 						.executes(c -> {

@@ -1688,3 +1688,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   forbidden blocks). The 12 ki is paid when the wind-up starts; dying, losing the power, being silenced or turning
   into the Great Ape mid-wind-up lets it fizzle. G's cooldown covers the wind-up (18 ticks + the old 20). Numbers at
   the top of `ZFighterDisc` and `ZFighterDiscPose`.
+- **0.13.27, every Z Fighter has a ki colour of their own:** Andy: "every zfighter should spawn with a random ki color".
+  Gaining the power rolls one from twelve bright hues (sky blue, deep blue, white, gold, orange, red, pink, purple,
+  violet, green, lime, cyan); Z Fighters from before get theirs the first time they're about. In base form it colours
+  their ki blasts, Homing Volley, Ki Disc, Ki Wave (and the lineages' signature beams), Ki Bomb, Ki Barrier, the charge
+  orb and aura, and the wave's charge bar; a form's own colour (Super's gold and the rest) still takes over in it, and
+  the Spirit Bomb keeps its own. Saved, kept through death, synced to everyone (`ZFighterPower.KI_COLOR`,
+  `KI_PALETTE`). `/powerdebug zfighter kicolor [reroll|<hex>]` shows, rerolls or sets it.
