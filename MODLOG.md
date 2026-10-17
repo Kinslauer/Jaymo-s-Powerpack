@@ -1629,3 +1629,23 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   legs, then a blade while it lies there), its tail is cut for good and it never turns again; its lines change to
   match. A villager cut at birth never turns. The ape body hides the villager's (`ZFighterHumanoidMobRendererMixin`), and
   `ZFighterLineage.race(...)` now reads any entity's heritage.
+- **0.13.18, ledge grab and climb-over, for everyone** (no power needed): "if they can see over it with a jump they can
+  grab it, with an animation hanging from the edge, then jump over." Hold forward and Jump at a wall about two blocks
+  high: as your eyes come level with its top (the edge at most 0.1 above your eyes, at least 1.1 above your feet,
+  within 0.35 of your body, facing it within 40 degrees, rising or at the top of the jump) you catch it and hang,
+  square to the wall, both arms up on the edge, legs dangling, swaying a little from the hands. A fresh press of Jump
+  pulls you up and over in 0.8 s (pull up, right knee then left onto the edge, stand), for 0.6 exhaustion. Sneak,
+  Back, looking more than 100 degrees away, or 20 s hanging lets go. The top needs room to stand (the whole climb path
+  clear, straight up from the hang then across) and a solid enough top (0.45 of a block's area; never fences, walls,
+  gates, cactus, magma, bars: the `jaymospowers:ledge_no_grab` tag). Not in creative flight, an elytra, water, lava, on
+  a ladder, riding, carried or carrying (players, animals, blocks, Kitchen corpses), crawling, meditating, or in a
+  power's own movement (Wind/Z Fighter/Xenoform/Smoke/Rig flight, web lines and wings, parkour moves, wall runs, Wall Crawl, Darktide moves and stuns, Time Flow's stun,
+  Gravity's Weightless/rock flight/wall walk/forward fall, held or lifted, Chrono's wall run; the server also refuses
+  while the power keeps you floating or skips the movement check). Grabbing resets your fall. Everyone sees the pose
+  (`ledge_hold`, synced); the hands grip the top of your first-person view and press down through the climb, the
+  camera rising with the body. The client moves itself (`client/LedgeClient`, `LedgePlayerMixin` in place of the
+  travel) along a collision-free path, so the server sees ordinary movement, and `LedgePacketListenerMixin` keeps it
+  from kicking a hanging player for floating (and for 1 s after). Clicks are swallowed on the ledge, so Better Combat
+  doesn't swing. Mobs don't use it. Numbers at the top of `core/Ledge` and `client/LedgePose`; see `docs/carry.md`.
+  - **A hit knocks you off:** hit while hanging or climbing (a creature, a projectile or a blast) and you ragdoll and
+    fall, thrown clear of the wall (`Ledge.knockedOff`, the carry ragdoll `Carry.THROWN`).
