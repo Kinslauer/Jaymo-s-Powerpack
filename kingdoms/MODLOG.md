@@ -3370,3 +3370,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   The heritage marks were drawn on the bare animated model at the skin's own depth and z-fought it. On MCA villagers
   they're now drawn on MCA's body just over the skin (0.005), and the glow (glowing marks and eyes) just over the face
   (0.02), both under the clothes, posed like MCA's own layers (`McaLookModels`, numbers at its top). Folk are unchanged.
+- **0.7.92, the Earthling's last stand:** an Earthling's ki glow round the fists (the training wraps stay) now lights
+  only when they're nearly dead. Brought to 25% health or less, players and villagers alike, their ki flares: a flash,
+  a beacon hum, and one random buff for 5 minutes (Strength, Speed II, Resistance, Regeneration, Haste II, Jump Boost
+  II or Absorption II). The glow stays lit for as long. It can't come again for 5 minutes after (`EarthlingSurge`,
+  numbers at its top).
