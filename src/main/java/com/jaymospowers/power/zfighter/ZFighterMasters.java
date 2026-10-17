@@ -41,7 +41,7 @@ final class ZFighterMasters {
 	static final int GOOD_REPUTATION = 100;
 	static final int DARK_DEFEATS = 3;
 	static final long ELDER_DAYS = 8L;
-	static final int LESSON_TP = 300;
+	static final int LESSON_TP = 75;
 	static final int LESSON_MASTERY = 1000;
 	static final int DARK_HARDSHIP = 6;
 	static final float DARK_PRICE = 6.0F;

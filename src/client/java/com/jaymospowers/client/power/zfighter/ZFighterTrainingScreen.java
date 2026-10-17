@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.power.zfighter.ZFighterGrowth;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterPower;
@@ -178,7 +179,7 @@ public class ZFighterTrainingScreen extends Screen {
 		Component detail = switch (page) {
 			case FORMS_PAGE -> forms(graphics, player, data, creative, x, w, mouseX, mouseY);
 			case TECHNIQUES_PAGE -> techniques(graphics, player, data, creative, x, w, mouseX, mouseY);
-			default -> stats(graphics, data, creative, x, w);
+			default -> stats(graphics, player, data, creative, x, w, mouseX, mouseY);
 		};
 		int dy = detailY();
 		graphics.fill(x + 6, dy - 3, x + w - 6, dy - 2, COLOR_ROW);
@@ -186,9 +187,12 @@ public class ZFighterTrainingScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
-	private Component stats(GuiGraphicsExtractor graphics, ZFighterTraining.Data data, boolean creative, int x, int w) {
-		int cost = ZFighterTraining.statCost(data);
+	private Component stats(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w, int mouseX,
+		int mouseY) {
+		int cost = ZFighterTraining.statCost(player);
 		line(graphics, Component.translatable("screen.jaymospowers.zfighter.stats", cost), x + 8, contentY(), w - 16, COLOR_GOLD);
+		ZFighterGrowth.Data growth = ZFighterGrowth.of(player);
+		Component detail = Component.translatable("screen.jaymospowers.zfighter.earn");
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int level = data.stat(i);
 			int ry = contentY() + 12 + i * ROW;
@@ -197,9 +201,35 @@ public class ZFighterTrainingScreen extends Screen {
 			graphics.text(this.font, level + "/" + ZFighterTraining.STAT_CAP, x + 80, ry, COLOR_DIM);
 			line(graphics, Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[i] + ".effect", effect(i, level)), x + 118, ry, w - 118 - 32,
 				COLOR_DIM);
+			// the stat's own training bar: a thin line under the row
+			float fill = level >= ZFighterTraining.STAT_CAP ? 1.0F : Math.min(1.0F, growth.progress(i) / ZFighterGrowth.bar(level));
+			int barW = w - 10 - 32;
+			graphics.fill(x + 10, ry + 9, x + 10 + barW, ry + 10, 0xFF303030);
+			graphics.fill(x + 10, ry + 9, x + 10 + Math.round(barW * fill), ry + 10, COLOR_ACCENT);
 			statButtons.get(i).active = level < ZFighterTraining.STAT_CAP && (creative || data.tp() >= cost);
+			if (over(mouseX, mouseY, x + 6, ry - 4, w - 38, ROW - 1)) {
+				detail = growthDetail(player, growth, i, level, fill);
+			}
 		}
-		return Component.translatable("screen.jaymospowers.zfighter.earn");
+		return detail;
+	}
+
+	/** A stat's own training: how far its bar is, and how fresh each of its methods still is today. */
+	private static Component growthDetail(LocalPlayer player, ZFighterGrowth.Data growth, int stat, int level, float fill) {
+		Component name = Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[stat]);
+		var text = level >= ZFighterTraining.STAT_CAP ? Component.translatable("screen.jaymospowers.zfighter.growth_max", name).copy()
+			: Component.translatable("screen.jaymospowers.zfighter.growth", name, String.format(Locale.ROOT, "%.1f", fill * 100.0F)).copy();
+		long day = ZFighterGrowth.day(player);
+		boolean first = true;
+		for (int m = 0; m < ZFighterGrowth.METHODS; m++) {
+			if (ZFighterGrowth.METHOD_STAT[m] != stat) {
+				continue;
+			}
+			text.append(first ? " " : ", ").append(Component.translatable("screen.jaymospowers.zfighter.growth_method",
+				Component.translatable("training.jaymospowers.zfighter." + ZFighterGrowth.METHOD_KEYS[m]), Math.round(growth.factor(m, day) * 100.0F)));
+			first = false;
+		}
+		return text;
 	}
 
 	private Component forms(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w, int mouseX,

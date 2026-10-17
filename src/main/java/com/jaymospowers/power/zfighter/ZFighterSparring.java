@@ -60,8 +60,8 @@ final class ZFighterSparring {
 	/** It has this many times his health. */
 	static final float HEALTH_SHARE = 1.5F;
 	/** Beating it: this much TP, plus this much for each form he's learned. */
-	static final int WIN_TP = 60;
-	static final int WIN_TP_PER_FORM = 30;
+	static final int WIN_TP = 15;
+	static final int WIN_TP_PER_FORM = 8;
 	static final String TAG = "jaymospowers_sparring";
 
 	private static final class Bout {

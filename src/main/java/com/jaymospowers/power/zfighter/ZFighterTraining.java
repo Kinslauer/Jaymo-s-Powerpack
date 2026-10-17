@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
  * <ul>
  * <li>five <b>stats</b> ({@link #STRENGTH} fists, {@link #TOUGHNESS} less damage taken, {@link #VITALITY} health,
  * {@link #KI_POWER} ki techniques, {@link #ENERGY} more ki), each up to {@link #STAT_CAP}; every level bought makes the
- * next one dearer;</li>
+ * next one dearer; each also trains itself through its own kind of training ({@link ZFighterGrowth});</li>
  * <li>the <b>forms</b> past Super: Super 2 and Super 3, each needing TP, a quarter of the form below mastered, and
  * hardship lived through;</li>
  * <li>the tiers of <b>Limit Break</b>, the form that stacks on top of the others and burns your health.</li>
@@ -45,15 +45,22 @@ public final class ZFighterTraining {
 	public static final int ENERGY = 4;
 	public static final int STATS = 5;
 	public static final int STAT_CAP = 50;
-	/** A stat level costs this, plus {@link #STAT_COST_STEP} for every level already bought (any stat). */
-	public static final int STAT_BASE_COST = 20;
-	public static final int STAT_COST_STEP = 10;
-	/** What one level gives: fist damage, share of damage taken away, max health, ki technique power, max ki. */
-	public static final double STRENGTH_PER_LEVEL = 0.2;
-	public static final float TOUGHNESS_PER_LEVEL = 0.006F;
-	public static final double VITALITY_PER_LEVEL = 0.4;
-	public static final float KI_POWER_PER_LEVEL = 0.015F;
-	public static final int ENERGY_PER_LEVEL = 3;
+	public static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy"};
+	/**
+	 * A stat level costs this, plus {@link #STAT_COST_STEP} for every level already bought (any stat; levels his own
+	 * training raised, {@link ZFighterGrowth}, don't count).
+	 */
+	public static final int STAT_BASE_COST = 30;
+	public static final int STAT_COST_STEP = 15;
+	/**
+	 * What one level gives: fist damage, share of damage taken away, max health, ki technique power, max ki. At 50: +3.35
+	 * fists, -10% damage taken, +6.7 health, +25% ki techniques, +50 ki (a third of what they were before the training slowdown).
+	 */
+	public static final double STRENGTH_PER_LEVEL = 0.067;
+	public static final float TOUGHNESS_PER_LEVEL = 0.002F;
+	public static final double VITALITY_PER_LEVEL = 0.134;
+	public static final float KI_POWER_PER_LEVEL = 0.005F;
+	public static final int ENERGY_PER_LEVEL = 1;
 
 	/** Forms: 1 Super (the breakthrough), 2 Super 2, 3 Super 3. Index 0 is base. */
 	public static final int FORMS = 3;
@@ -64,10 +71,10 @@ public final class ZFighterTraining {
 	public static final int MASTERY_MAX = 10000;
 	public static final int NEXT_FORM_MASTERY = 2500;
 	public static final int FREE_ENTRY_MASTERY = 5000;
-	/** Mastery per blow landed in a form (0.25%); a heavy blow (a fifth of the target's health or more) counts four times. */
-	public static final int MASTERY_PER_HIT = 25;
-	/** Mastery for every 5 s spent in a form (0.04%). */
-	public static final int MASTERY_PER_TIME = 4;
+	/** Mastery per blow landed in a form (0.12%); a heavy blow (a fifth of the target's health or more) counts four times. */
+	public static final int MASTERY_PER_HIT = 12;
+	/** Mastery for every 5 s spent in a form (0.02%). */
+	public static final int MASTERY_PER_TIME = 2;
 
 	// ---- techniques: G (quick) and V (charged) each hold one; the Spirit Bomb is C in Super 3 ----
 	public static final int KI_BLAST = 0;
@@ -91,21 +98,23 @@ public final class ZFighterTraining {
 	/** Limit Break's tiers: TP each (index by tier, 1-3). */
 	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000};
 
-	// ---- earning TP ----
-	public static final int TP_PER_HIT = 2;
-	/** A kill: this, plus a quarter of the victim's max health. */
-	public static final int TP_PER_KILL = 2;
-	public static final int TP_PASSIVE_TICKS = 100;
-	public static final double TP_TRAVEL_BLOCKS = 20.0;
+	// ---- earning TP (a quarter of what it was before the training slowdown) ----
+	public static final float TP_PER_HIT = 0.5F;
+	/** A kill: this, plus {@link #TP_KILL_HEALTH} of the victim's max health. */
+	public static final float TP_PER_KILL = 0.5F;
+	public static final float TP_KILL_HEALTH = 0.0625F;
+	/** 1 TP every this many ticks with the power, and every this many blocks walked. */
+	public static final int TP_PASSIVE_TICKS = 400;
+	public static final double TP_TRAVEL_BLOCKS = 80.0;
 	/**
 	 * Shadowboxing (his meditation, the Meditate key; see {@link com.jaymospowers.core.Meditate}): once settled, every
 	 * second this much TP, this much ki, form mastery while in a form, and a little hunger. Under heavy gravity (an
 	 * Immense Field, Gravity's weight) it's how he trains: the TP and mastery count {@link #SHADOWBOX_HEAVY} times over
 	 * (on top of heavy gravity's own {@link #HEAVY_GRAVITY_RATE}).
 	 */
-	public static final float SHADOWBOX_TP = 1.0F;
+	public static final float SHADOWBOX_TP = 0.25F;
 	public static final float SHADOWBOX_KI = 2.0F;
-	public static final int SHADOWBOX_MASTERY = 4;
+	public static final int SHADOWBOX_MASTERY = 2;
 	public static final float SHADOWBOX_HEAVY = 3.0F;
 	public static final float SHADOWBOX_EXHAUSTION = 0.2F;
 	/** Hungry, a fighter trains at half the rate. */
@@ -219,9 +228,14 @@ public final class ZFighterTraining {
 		return data == null ? Data.NONE : data;
 	}
 
-	/** The cost of the next level of any stat. */
-	public static int statCost(Data data) {
-		return STAT_BASE_COST + STAT_COST_STEP * data.totalLevels();
+	/** The cost of the next level of any stat: by the levels bought (the ones his training raised are free of it). */
+	public static int statCost(Player player) {
+		return STAT_BASE_COST + STAT_COST_STEP * bought(player);
+	}
+
+	/** Stat levels bought with TP (all of them, less the ones {@link ZFighterGrowth} raised). */
+	public static int bought(Player player) {
+		return Math.max(0, of(player).totalLevels() - ZFighterGrowth.of(player).totalTrained());
 	}
 
 	/**
@@ -374,7 +388,7 @@ public final class ZFighterTraining {
 	}
 
 	static void killed(ServerPlayer player, float victimMaxHealth) {
-		earn(player, TP_PER_KILL + victimMaxHealth * 0.25F);
+		earn(player, TP_PER_KILL + victimMaxHealth * TP_KILL_HEALTH);
 	}
 
 	// ---------------------------------------------------------------- server: spending (from the training screen)
@@ -384,7 +398,7 @@ public final class ZFighterTraining {
 		if (index < 0 || index >= STATS || data.stat(index) >= STAT_CAP) {
 			return;
 		}
-		int cost = statCost(data);
+		int cost = statCost(player);
 		if (data.tp() < cost && !player.isCreative()) {
 			return;
 		}

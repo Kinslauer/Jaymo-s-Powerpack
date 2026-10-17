@@ -95,6 +95,7 @@ public final class ZFighterGuard {
 		long now = level.getGameTime();
 		if (now - live.guardStart <= PARRY_TICKS && now >= live.parryReadyAt) {
 			parry(player, live, melee ? (LivingEntity)direct : null);
+			ZFighterGrowth.guarded(player, true);
 			return 0.0F;
 		}
 		float blocked = damage * BLOCK_SHARE;
@@ -109,6 +110,7 @@ public final class ZFighterGuard {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.8F, 1.3F);
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6));
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y - 0.4, at.z, 6, 0.2, 0.2, 0.2, 0.05);
+		ZFighterGrowth.guarded(player, false);
 		return damage - blocked;
 	}
 

@@ -75,7 +75,7 @@ public final class ZFighterKi {
 	// ---- Ki Disc: a flat spinning blade of ki that cuts through every creature and block in its path ----
 	static final float DISC_KI = 12.0F;
 	static final int DISC_COOLDOWN = 20;
-	static final float DISC_DAMAGE = 7.0F;
+	static final float DISC_DAMAGE = 6.0F;
 	static final double DISC_SPEED = 1.3;
 	/** How far it flies (blocks) unless something stops it. */
 	static final double DISC_RANGE = 60.0;
@@ -103,7 +103,7 @@ public final class ZFighterKi {
 	static final float BOMB_MIN_KI = 30.0F;
 	static final float BOMB_MAX_KI = 70.0F;
 	static final float BOMB_DAMAGE_MIN = 10.0F;
-	static final float BOMB_DAMAGE_MAX = 28.0F;
+	static final float BOMB_DAMAGE_MAX = 20.0F;
 	static final double BOMB_SIZE_MIN = 0.6;
 	static final double BOMB_SIZE_MAX = 1.6;
 	static final float BOMB_BLAST_MIN = 1.5F;
@@ -117,7 +117,7 @@ public final class ZFighterKi {
 	static final int WAVE_FULL = 60;
 	static final int WAVE_COOLDOWN = 100;
 	static final float WAVE_DAMAGE_MIN = 8.0F;
-	static final float WAVE_DAMAGE_MAX = 24.0F;
+	static final float WAVE_DAMAGE_MAX = 18.0F;
 	static final double WAVE_RANGE = 40.0;
 	static final double WAVE_RADIUS_MIN = 0.8;
 	static final double WAVE_RADIUS_MAX = 1.8;
@@ -624,11 +624,16 @@ public final class ZFighterKi {
 				cuts.add(pos.immutable());
 			}
 		}
-		for (BlockPos pos : cuts) {
-			BlockState state = level.getBlockState(pos);
-			// breaks it as the fighter would: the break's particles and sound, and what it drops
-			level.destroyBlock(pos, true, owner);
-			PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, owner, pos, state, null);
+		ZFighterGrowth.cutting = true;
+		try {
+			for (BlockPos pos : cuts) {
+				BlockState state = level.getBlockState(pos);
+				// breaks it as the fighter would: the break's particles and sound, and what it drops
+				level.destroyBlock(pos, true, owner);
+				PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, owner, pos, state, null);
+			}
+		} finally {
+			ZFighterGrowth.cutting = false;
 		}
 		if (!cuts.isEmpty()) {
 			level.playSound(null, from.x, from.y, from.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.8F);

@@ -1649,3 +1649,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   doesn't swing. Mobs don't use it. Numbers at the top of `core/Ledge` and `client/LedgePose`; see `docs/carry.md`.
   - **A hit knocks you off:** hit while hanging or climbing (a creature, a projectile or a blast) and you ragdoll and
     fall, thrown clear of the wall (`Ledge.knockedOff`, the carry ragdoll `Carry.THROWN`).
+- **0.13.19, Z Fighters grow slower and hit softer:** Andy: scaling down across the board, taking longer, more training
+  and more varied. A fully trained Z Fighter is about a third as strong; getting there takes about 4x as long.
+  - **Per level:** Strength 0.067 fists (was 0.2), Toughness 0.2% (0.6%), Vitality 0.134 health (0.4), Ki Power 0.5%
+    (1.5%), Energy 1 ki (3). Forms keep about a third of their bonus (Super 3: +53% fists, ki x1.4, +15% speed); Limit
+    Break, rage, corruption and the per-defeat bonus cut likewise; one punch tops out at 9; ki techniques at full about
+    x1.9 (was x4.34): Ki Wave ~34, Ki Bomb ~38, Ki Disc ~11, Spirit Bomb ~228. A fresh fighter is unchanged.
+  - **TP earns a quarter** from every source (hits, kills, time, travel, shadowboxing, posts, sparring, tournaments,
+    raids, wishes, blessings); stats cost 30 + 15 per level bought (was 20 + 10). Form mastery gain halved.
+  - **Stats train themselves** (`ZFighterGrowth`): each stat has a bar filled by fitting training (Strength: heavy
+    gravity, heavy blows, hard blocks, carrying, heavy shadowboxing; Toughness: hits taken while healthy, guarding and
+    parries, heat and cold; Vitality: sprinting, swimming, climbing, walking; Ki Power: ki hits, holding beams,
+    shadowboxing; Energy: charging, draining and refilling ki, ki flight). A full bar is a level (same cap of 50; free
+    of the TP price). Each method tires through the day (halving every 12 points, floor 5%), so mixing is fastest.
+    Bars on the training screen; `/powerdebug zfighter train <method> <points>|newday`.
+  - Existing characters keep their bought levels; their bonuses shrink to the new per-level numbers.

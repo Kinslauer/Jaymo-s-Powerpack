@@ -62,7 +62,7 @@ final class ZFighterBattle {
 	 * life, rising to {@link #PUNCH_MAX_CAP} only with every Z Fighter stat and Kingdoms attribute maxed (the rise follows
 	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). Not the Great Ape.
 	 */
-	static final float PUNCH_SOFT_CAP = 8.0F, PUNCH_MAX_CAP = 11.0F;
+	static final float PUNCH_SOFT_CAP = 7.0F, PUNCH_MAX_CAP = 9.0F;
 	static final double PUNCH_CAP_CURVE = 3.0;
 
 	// ---- hardship ----
@@ -96,7 +96,7 @@ final class ZFighterBattle {
 	/** After Rage, this long before it can fill again. */
 	static final int RAGE_COOLDOWN = 1200;
 	/** In Rage: fists this much harder (on top), this much less damage taken, and techniques cost no ki. */
-	static final double RAGE_FIST = 0.4;
+	static final double RAGE_FIST = 0.25;
 	static final float RAGE_TOUGHNESS = 0.25F;
 	static final int RAGE_HARDSHIP = 2;
 	static final int RAGE_COLOR = 0xFF2A1A;
@@ -111,11 +111,15 @@ final class ZFighterBattle {
 				&& Powers.has(hurt, ZFighterPower.INSTANCE)) {
 				ZFighterTechniques.hurtBy(hurt, attacker);
 			}
+			if (entity instanceof ServerPlayer hurt && Powers.has(hurt, ZFighterPower.INSTANCE)) {
+				ZFighterGrowth.took(hurt, source, damageTaken);
+			}
 			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
 				return;
 			}
 			ZFighterTraining.landed(player, ZFighterPower.live(player), damageTaken, entity.getMaxHealth());
+			ZFighterGrowth.dealt(player, entity, source, damageTaken);
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
 				punched(player, entity);
 			}

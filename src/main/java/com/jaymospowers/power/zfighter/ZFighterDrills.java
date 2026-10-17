@@ -34,7 +34,7 @@ public final class ZFighterDrills {
 	public static final int DRILLS = 4;
 	public static final String[] KEYS = {"rhythm", "ki_control", "shadow_boxing", "precision"};
 	public static final int MAX_SCORE = 100;
-	static final float TP_PER_POINT = 2.0F;
+	static final float TP_PER_POINT = 0.5F;
 	/** Each drill pays once in this long (ticks). */
 	public static final int REST = 2400;
 	static final int POST_RANGE = 4;

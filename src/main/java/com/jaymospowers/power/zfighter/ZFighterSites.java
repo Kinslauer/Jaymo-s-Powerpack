@@ -96,7 +96,7 @@ public final class ZFighterSites {
 	static final int CHAMBER_FLOOR = 4;
 	// ---- the Keeper ----
 	static final int BLESSING_TICKS = 6000;
-	static final int BLESSING_TP = 300;
+	static final int BLESSING_TP = 75;
 	static final long DAY = 24000L;
 
 	static final String KEEPER_TAG = "jaymospowers_keeper";

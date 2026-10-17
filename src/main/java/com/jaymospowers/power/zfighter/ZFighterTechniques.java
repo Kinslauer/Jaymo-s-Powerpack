@@ -69,8 +69,8 @@ final class ZFighterTechniques {
 	/** A lending player's own appetite pays a little (exhaustion a second). */
 	static final float SPIRIT_LEND_EXHAUSTION = 0.5F;
 	static final float SPIRIT_MIN_THROW = 10.0F;
-	static final float SPIRIT_BASE_DAMAGE = 30.0F;
-	static final float SPIRIT_DAMAGE_PER_ENERGY = 0.5F;
+	static final float SPIRIT_BASE_DAMAGE = 20.0F;
+	static final float SPIRIT_DAMAGE_PER_ENERGY = 0.25F;
 	static final double SPIRIT_SPEED = 0.7;
 	/** The sphere's radius at full: 15, so 30 blocks across. */
 	static final double SPIRIT_MAX_SIZE = 15.0;
