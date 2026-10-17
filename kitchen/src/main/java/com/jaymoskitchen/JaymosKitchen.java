@@ -126,10 +126,28 @@ public class JaymosKitchen implements ModInitializer {
 			return InteractionResult.PASS;
 		});
 
+		// (0.4.48) carrying a body, right-click a horse (a donkey, mule, llama, camel): it's slung over its back
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (hand != InteractionHand.MAIN_HAND || player.isSpectator()
+				|| !(entity instanceof net.minecraft.world.entity.animal.equine.AbstractHorse horse)) {
+				return InteractionResult.PASS;
+			}
+			CorpseEntity carried = CorpseEntity.carriedBy(player);
+			if (carried == null) {
+				return InteractionResult.PASS;
+			}
+			if (!level.isClientSide()) {
+				carried.slingOnto(player, horse);
+			}
+			return InteractionResult.SUCCESS;
+		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.DropCarried.TYPE, (payload, ctx) -> {
 			CorpseEntity carried = CorpseEntity.carriedBy(ctx.player());
 			if (carried != null) {
-				if (payload.toss()) {
+				if (!payload.toss() && ctx.player().getVehicle() instanceof net.minecraft.world.entity.animal.equine.AbstractHorse horse) {
+					// (0.4.48) in the saddle: thrown up over your horse's back behind you (or, too big, it stays in your arms)
+					carried.slingOnto(ctx.player(), horse);
+				} else if (payload.toss()) {
 					carried.toss(ctx.player());
 				} else {
 					carried.drop(ctx.player());

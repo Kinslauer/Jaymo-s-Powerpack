@@ -54,6 +54,8 @@
 	"item.jaymoskitchen.joint.clean": "Joint",
 	"item.jaymoskitchen.joint.torn": "Torn Joint",
 	"message.jaymoskitchen.corpse.carrying": "Carrying it. Set it on a Butcher Block to butcher it.",
+	"message.jaymoskitchen.corpse.sling_too_big": "Too big to sling over a horse.",
+	"message.jaymoskitchen.corpse.sling_full": "There's no room left on its back.",
 	"message.jaymoskitchen.corpse.one_at_a_time": "You can only carry one at a time.",
 	"message.jaymoskitchen.corpse.too_heavy": "Solid iron: far too heavy to lift.",
 	"message.jaymoskitchen.corpse.no_butchering": "Solid iron: there's nothing to butcher.",

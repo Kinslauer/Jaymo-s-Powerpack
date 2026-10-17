@@ -85,6 +85,28 @@ public class CorpseEntity extends Entity {
 	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
 	private static final EntityDataAccessor<Long> BORN = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.LONG);
+	/**
+	 * (0.4.48) Slung over a horse's back ({@link #slingOnto}): the horse's id (-1 for none), which place on its back
+	 * (0 just behind the saddle, 1 further back), and when it was thrown up there (game time, for the arc).
+	 */
+	private static final EntityDataAccessor<Integer> SLUNG = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> SLUNG_SLOT = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Long> SLUNG_AT = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.LONG);
+	/**
+	 * (0.4.48) Slinging a body over a horse: only up to a sheep's size ({@code SLING_WIDTH} by {@code SLING_HEIGHT},
+	 * standing; no person), {@code SLUNG_MAX} to a horse. It's thrown up in an arc {@code SLING_ARC} high over
+	 * {@code SLING_TICKS}, and lies across the back {@code SLUNG_BACK} behind the middle (the next {@code SLUNG_SPACING}
+	 * further back), {@code SLUNG_HEIGHT} of the horse's height up.
+	 */
+	public static final float SLING_WIDTH = 0.95F, SLING_HEIGHT = 1.35F;
+	public static final int SLUNG_MAX = 2, SLING_TICKS = 10;
+	static final double SLING_ARC = 0.9, SLUNG_BACK = 0.35, SLUNG_SPACING = 0.4, SLUNG_HEIGHT = 0.8;
+	/** Where the arc started (each side notes it as it sees the throw), and the horse to find again after a reload. */
+	private @Nullable Vec3 slingFrom;
+	private java.util.@Nullable UUID slungHorse;
 
 	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
@@ -100,11 +122,13 @@ public class CorpseEntity extends Entity {
 	/** Everything else rots away (to rotten flesh) after 10 minutes. */
 	private static final int ROT_TICKS = 12000;
 	/**
-	 * Hostile mobs take twice as long to rot (zombies and skeletons get up first, creepers never do); now and then their
-	 * loot survives.
+	 * Hostile mobs take twice as long to rot (zombies and skeletons get up first); now and then their loot survives.
+	 * (0.4.48) Spiders and creepers rot as quickly as anything else ({@code ROT_TICKS}), a creeper into gunpowder
+	 * ({@code CREEPER_POWDER_MIN} to {@code CREEPER_POWDER_MAX}) instead of flesh.
 	 */
 	private static final int HOSTILE_ROT_TICKS = 24000;
 	private static final float HOSTILE_LOOT_CHANCE = 0.1F;
+	private static final int CREEPER_POWDER_MIN = 1, CREEPER_POWDER_MAX = 2;
 	/** Ticks of burning to reduce a corpse to ash. */
 	private static final int BURN_TICKS = 300;
 	/** A burning ghast corpse wails (its hurt sound) every this many ticks, this loud (1 is normal). */
@@ -439,6 +463,9 @@ public class CorpseEntity extends Entity {
 		builder.define(CRUMBLING, false);
 		builder.define(MISSING, 0);
 		builder.define(BORN, 0L);
+		builder.define(SLUNG, -1);
+		builder.define(SLUNG_SLOT, 0);
+		builder.define(SLUNG_AT, 0L);
 	}
 
 	/** (0.4.39) Server: it has just died, this tick (see {@link #sinceDeath}). */
@@ -459,6 +486,10 @@ public class CorpseEntity extends Entity {
 			this.body = null;
 			this.typeKnown = false;
 			refreshDimensions();
+		}
+		if (SLUNG.equals(accessor)) {
+			// (the arc starts from wherever it is as the throw is seen)
+			this.slingFrom = this.entityData.get(SLUNG) >= 0 ? position() : null;
 		}
 	}
 
@@ -636,6 +667,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (grabCooldown > 0 && !level().isClientSide()) {
 			grabCooldown--;
+		}
+		if (tickSlung()) {
+			return;
 		}
 		if (isPassenger()) {
 			// lying in a cart: the cart moves it
@@ -893,10 +927,13 @@ public class CorpseEntity extends Entity {
 			if (age >= ROT_TICKS) {
 				startCrumbling(level);
 			}
-		} else if (!isCreeper() && age >= (isHostile() ? HOSTILE_ROT_TICKS : ROT_TICKS)) {
+		} else if (age >= (isHostile() && !rotsQuickly() ? HOSTILE_ROT_TICKS : ROT_TICKS)) {
 			level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.2, getZ(), 15, 0.4, 0.1, 0.4, 0.01);
 			play(level, SoundEvents.SLIME_SQUISH, 0.8F);
-			if (isHostile() && random.nextFloat() < HOSTILE_LOOT_CHANCE) {
+			if (isCreeper()) {
+				// (0.4.48) what made it a creeper is all that's left of it
+				spawnAtLocation(level, new ItemStack(Items.GUNPOWDER, CREEPER_POWDER_MIN + random.nextInt(CREEPER_POWDER_MAX - CREEPER_POWDER_MIN + 1)), 0.2F);
+			} else if (isHostile() && random.nextFloat() < HOSTILE_LOOT_CHANCE) {
 				// once in a while what it had survives the rot
 				dropLoot(level);
 			} else {
@@ -1431,6 +1468,12 @@ public class CorpseEntity extends Entity {
 		return sourceType() == EntityTypes.CREEPER;
 	}
 
+	/** (0.4.48) A hostile body that rots as fast as any other: a spider, a cave spider, a creeper. */
+	private boolean rotsQuickly() {
+		EntityType<?> type = sourceType();
+		return type == EntityTypes.SPIDER || type == EntityTypes.CAVE_SPIDER || type == EntityTypes.CREEPER;
+	}
+
 	private boolean isChargedCreeper() {
 		CompoundTag tag = parse(look());
 		return tag != null && tag.getBooleanOr("powered", false);
@@ -1507,9 +1550,152 @@ public class CorpseEntity extends Entity {
 			// lifted out of a cart
 			stopRiding();
 		}
+		if (carrier != null && this.entityData.get(SLUNG) >= 0) {
+			// (0.4.48) lifted off a horse's back
+			unsling(false);
+		}
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		setNoGravity(carrier != null);
 		this.noPhysics = carrier != null;
+	}
+
+	// ---- (0.4.48) slung over a horse --------------------------------------------------------------------------------
+
+	/** The horse it's slung over, if any (either side). */
+	public @Nullable Entity slungOn() {
+		int id = this.entityData.get(SLUNG);
+		return id < 0 ? null : level().getEntity(id);
+	}
+
+	/** Small enough to sling over a horse: up to a sheep's size, and never a person or anything too heavy to lift. */
+	public boolean slingable() {
+		if (isPlayerCorpse() || isHeavy()) {
+			return false;
+		}
+		EntityType<?> type = sourceType();
+		if (type == null) {
+			return false;
+		}
+		EntityDimensions standing = type.getDimensions();
+		return standing.width() <= SLING_WIDTH && standing.height() <= SLING_HEIGHT;
+	}
+
+	/**
+	 * Server: {@code player} throws the body they're carrying up over {@code horse}'s back (a free place on it), where it
+	 * stays as the horse goes. False (with word why) if it's too big or the horse is loaded already.
+	 */
+	public boolean slingOnto(Player player, net.minecraft.world.entity.animal.equine.AbstractHorse horse) {
+		if (!(level() instanceof ServerLevel level) || carrier() != player || !horse.isAlive()) {
+			return false;
+		}
+		if (!slingable()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.sling_too_big"));
+			return false;
+		}
+		boolean[] taken = new boolean[SLUNG_MAX];
+		for (CorpseEntity other : level.getEntitiesOfClass(CorpseEntity.class, horse.getBoundingBox().inflate(3.0),
+			c -> c != this && c.entityData.get(SLUNG) == horse.getId())) {
+			int slot = other.entityData.get(SLUNG_SLOT);
+			if (slot >= 0 && slot < SLUNG_MAX) {
+				taken[slot] = true;
+			}
+		}
+		int slot = -1;
+		for (int i = 0; i < SLUNG_MAX; i++) {
+			if (!taken[i]) {
+				slot = i;
+				break;
+			}
+		}
+		if (slot < 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.sling_full"));
+			return false;
+		}
+		setCarrier(null);
+		this.entityData.set(TUMBLING, false);
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(SLUNG_SLOT, slot);
+		this.entityData.set(SLUNG_AT, level.getGameTime());
+		this.entityData.set(SLUNG, horse.getId());
+		this.slungHorse = horse.getUUID();
+		this.slingFrom = position();
+		setNoGravity(true);
+		this.noPhysics = true;
+		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F);
+		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.7F);
+		return true;
+	}
+
+	/** Off the horse's back: lifted off (into someone's arms), or sliding off as it falls (the horse gone or dead). */
+	private void unsling(boolean fall) {
+		this.entityData.set(SLUNG, -1);
+		this.slungHorse = null;
+		this.slingFrom = null;
+		setNoGravity(false);
+		this.noPhysics = false;
+		if (fall) {
+			grabCooldown = GRAB_COOLDOWN;
+			setOnGround(false);
+			this.entityData.set(TUMBLING, true);
+			setDeltaMovement(0.0, 0.1, 0.0);
+		}
+	}
+
+	/** Where a body lies across {@code horse}'s back in place {@code slot}: behind the saddle, across it. */
+	static Vec3 slungPosition(Entity horse, int slot) {
+		float yaw = (horse instanceof LivingEntity living ? living.yBodyRot : horse.getYRot()) * Mth.DEG_TO_RAD;
+		double back = SLUNG_BACK + slot * SLUNG_SPACING;
+		return new Vec3(horse.getX() + Mth.sin(yaw) * back, horse.getY() + horse.getBbHeight() * SLUNG_HEIGHT, horse.getZ() - Mth.cos(yaw) * back);
+	}
+
+	/**
+	 * Each tick while slung: thrown up in an arc onto the back, then carried there as the horse goes (both sides, so it
+	 * moves smoothly). Slides off if the horse dies or goes. True if it's slung (the rest of the tick is skipped).
+	 */
+	private boolean tickSlung() {
+		if (this.entityData.get(SLUNG) < 0) {
+			if (this.slungHorse != null && level() instanceof ServerLevel level) {
+				// after a reload: find the horse again (ids change), or slide off once it's clearly not coming
+				Entity horse = level.getEntity(this.slungHorse);
+				if (horse instanceof net.minecraft.world.entity.animal.equine.AbstractHorse && horse.isAlive()) {
+					this.entityData.set(SLUNG_AT, 0L);
+					this.entityData.set(SLUNG, horse.getId());
+					setNoGravity(true);
+					this.noPhysics = true;
+				} else if (tickCount > 100) {
+					unsling(true);
+				} else {
+					setDeltaMovement(Vec3.ZERO);
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+		Entity horse = slungOn();
+		if (horse == null || !horse.isAlive() || horse.level() != level()) {
+			if (level() instanceof ServerLevel) {
+				unsling(true);
+				return false;
+			}
+			// (the client waits for the server's word)
+			return true;
+		}
+		Vec3 rest = slungPosition(horse, this.entityData.get(SLUNG_SLOT));
+		float t = Mth.clamp((level().getGameTime() - this.entityData.get(SLUNG_AT)) / (float)SLING_TICKS, 0.0F, 1.0F);
+		Vec3 at = rest;
+		if (t < 1.0F && this.slingFrom != null) {
+			float eased = t * t * (3.0F - 2.0F * t);
+			at = this.slingFrom.lerp(rest, eased).add(0.0, SLING_ARC * Mth.sin(t * Mth.PI), 0.0);
+		}
+		setPos(at.x, at.y, at.z);
+		setYRot((horse instanceof LivingEntity living ? living.yBodyRot : horse.getYRot()) + 90.0F);
+		setDeltaMovement(Vec3.ZERO);
+		if (level() instanceof ServerLevel level) {
+			serverTick(level);
+		}
+		return true;
 	}
 
 	/** Where a carried corpse sits for a carrier at the given position and facing. */
@@ -1583,7 +1769,7 @@ public class CorpseEntity extends Entity {
 
 	/** In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down). */
 	public boolean falling() {
-		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity();
+		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity() && this.entityData.get(SLUNG) < 0;
 	}
 
 	/** Ticks after being let go before it can be grabbed again. */
@@ -1712,6 +1898,17 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(MISSING, input.getIntOr("Missing", 0));
 		// whatever held it up (a gravity power) is gone after a reload
 		setNoGravity(false);
+		// (0.4.48) slung over a horse: found again by the horse's id once it's about (tickSlung)
+		this.slungHorse = input.getString("SlungOn").map(s -> {
+			try {
+				return java.util.UUID.fromString(s);
+			} catch (IllegalArgumentException e) {
+				return null;
+			}
+		}).orElse(null);
+		if (this.slungHorse != null) {
+			setNoGravity(true);
+		}
 		refreshDimensions();
 	}
 
@@ -1734,5 +1931,8 @@ public class CorpseEntity extends Entity {
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
 		output.putInt("Missing", missing());
+		if (this.slungHorse != null) {
+			output.putString("SlungOn", this.slungHorse.toString());
+		}
 	}
 }

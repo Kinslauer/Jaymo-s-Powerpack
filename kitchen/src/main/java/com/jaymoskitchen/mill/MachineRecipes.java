@@ -33,6 +33,8 @@ public final class MachineRecipes {
 		Map.entry(Items.STONE, new Out(Items.GRAVEL, 1)),
 		Map.entry(Items.COBBLESTONE, new Out(Items.GRAVEL, 1)),
 		Map.entry(Items.GRAVEL, new Out(Items.SAND, 1)),
+		// (0.4.48) sand ground down to flint
+		Map.entry(Items.SAND, new Out(Items.FLINT, 1)),
 		Map.entry(Items.BEETROOT, new Out(Items.DYE.pick(DyeColor.RED), 1)),
 		Map.entry(Items.POPPY, new Out(Items.DYE.pick(DyeColor.RED), 1)),
 		Map.entry(Items.RED_TULIP, new Out(Items.DYE.pick(DyeColor.RED), 1)),

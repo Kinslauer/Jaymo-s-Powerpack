@@ -44,6 +44,10 @@ abstract class MinecraftUseMixin {
 		if (!toss && hitResult instanceof EntityHitResult entity && Butchers.isButcher(entity.getEntity())) {
 			return;
 		}
+		// (0.4.48) and one on a horse slings it over the horse's back
+		if (!toss && hitResult instanceof EntityHitResult entity && entity.getEntity() instanceof net.minecraft.world.entity.animal.equine.AbstractHorse) {
+			return;
+		}
 		// sneaking throws it a little way ahead (onto the ground, or into a cart); otherwise it just drops
 		ClientPlayNetworking.send(new Payloads.DropCarried(toss));
 		ci.cancel();
