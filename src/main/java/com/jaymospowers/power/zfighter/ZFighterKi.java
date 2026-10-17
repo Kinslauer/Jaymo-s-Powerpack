@@ -87,6 +87,9 @@ public final class ZFighterKi {
 	static final float DISC_STOP_HARDNESS = 50.0F;
 	/** At most this many blocks cut in one tick (a guard; at its speed and width it cuts far fewer). */
 	static final int DISC_MAX_CUTS = 24;
+	/** In flight it whirs: a high hum every this many ticks. (The wind-up and throw are {@code ZFighterDisc}.) */
+	static final int DISC_WHIR_EVERY = 8;
+	static final float DISC_WHIR_PITCH = 2.0F;
 
 	// ---- Homing Volley: small bolts that seek out foes ----
 	static final float VOLLEY_KI = 20.0F;
@@ -683,8 +686,11 @@ public final class ZFighterKi {
 		int orbColor = bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color;
 		switch (bolt.kind) {
 			case DISC -> {
-				// the orb with a spinning edge round it, flat to the way it flies
-				orb(level, bolt.orbId, to, bolt.orbSize > 0 ? bolt.orbSize : 0.55, orbColor);
+				// drawn by the clients as a flat disc spinning level (ZFighterOrbs), its cutting width across, sparks off its edge
+				discOrb(level, bolt.orbId, to, DISC_HALF_WIDTH * 2.0, orbColor);
+				if (bolt.age % DISC_WHIR_EVERY == 0) {
+					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.4F, DISC_WHIR_PITCH);
+				}
 				double spin = bolt.age * 0.9;
 				for (int i = 0; i < 2; i++) {
 					double a = spin + i * Math.PI;
@@ -915,22 +921,33 @@ public final class ZFighterKi {
 		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(left ? -0.3 : 0.3)).add(0.0, -0.25, 0.0);
 	}
 
-	static boolean disc(ServerPlayer player, ZFighterPower.Live live) {
-		if (!ZFighterPower.spend(player, live, DISC_KI)) {
-			return false;
-		}
+	/**
+	 * The Ki Disc leaves his hand at {@code from}, flying along {@code dir} (the ki was paid when the wind-up began,
+	 * {@code ZFighterDisc}).
+	 */
+	static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir) {
 		ServerLevel level = player.level();
-		Vec3 look = player.getViewVector(1.0F);
-		Bolt bolt = new Bolt(level, player.getUUID(), palm(player, look), look.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
+		Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
 			formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
 		// flat and level: across it is his right, whichever way he looks (straight down too)
 		bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
 		BOLTS.add(bolt);
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		exhaust(player, BLAST_EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
-		return true;
+		level.playSound(null, from.x, from.y, from.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 2.0F);
+	}
+
+	/** A Ki Disc {@code size} blocks across at {@code at} this tick, drawn flat and spinning (in the hand or in flight). */
+	static void discOrb(ServerLevel level, int id, Vec3 at, double size, int color) {
+		ORBS.computeIfAbsent(level, l -> new ArrayList<>()).add(new ZFighterNet.Orb(id, at.x, at.y, at.z, (float)size,
+			color & 0xFFFFFF | ZFighterNet.Orb.DISC));
+	}
+
+	/** The disc's colour: the blast's gold in base form, the form's hue otherwise. */
+	static int discColor(ZFighterPower.Live live) {
+		int color = formColor(live);
+		return color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color;
 	}
 
 	static boolean volley(ServerPlayer player, ZFighterPower.Live live) {

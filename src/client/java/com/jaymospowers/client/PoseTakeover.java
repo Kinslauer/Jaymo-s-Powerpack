@@ -123,6 +123,7 @@ public final class PoseTakeover {
 			|| Boolean.TRUE.equals(s.getData(ZFighterGuardPose.KEY))
 			|| s.getData(com.jaymospowers.client.power.zfighter.RaceHoldClient.STRETCH) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterComboPose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterDiscPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null;
 	}
 }
