@@ -3365,3 +3365,18 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
     quicker in the dark and weaker in the sun, Warrior-born hit harder badly hurt. Player-only ones (attribute points,
     character level, hunger, skill experience, mining) are skipped.
   - The wrapped ones' full-moon ape is Jaymo's Powers' (0.13.10).
+- **0.7.92, heritage looks no longer flicker on MCA villagers:** MCA doesn't skin the animated model; it draws the skin,
+  face, clothes and hair each on its own copy of its body, inflated a little more each time (0, 0.01, 0.0625, 0.125).
+  The heritage marks were drawn on the bare animated model at the skin's own depth and z-fought it. On MCA villagers
+  they're now drawn on MCA's body just over the skin (0.005), and the glow (glowing marks and eyes) just over the face
+  (0.02), both under the clothes, posed like MCA's own layers (`McaLookModels`, numbers at its top). Folk are unchanged.
+- **0.7.92, the Earthling's last stand:** an Earthling's ki glow round the fists (the training wraps stay) now lights
+  only when they're nearly dead. Brought to 25% health or less, players and villagers alike, their ki flares: a flash,
+  a beacon hum, and one random buff for 5 minutes (Strength, Speed II, Resistance, Regeneration, Haste II, Jump Boost
+  II or Absorption II). The glow stays lit for as long. It can't come again for 5 minutes after (`EarthlingSurge`,
+  numbers at its top).
+- **0.7.92, the folk call you by your chosen name:** villagers and folk no longer use your Minecraft username. Their
+  own lines (greetings, deeds and gossip, heritage talk, accents, assassins' whispers, identity reveals, exiles) now
+  use the name you picked in MCA's creator (its family tree; your username only if you never set one), and the
+  costume's name while you're masked to them. MCA's own dialogue already used the creator name and the costume swap
+  (`Identities.trueName`, `McaBridge.name`).
