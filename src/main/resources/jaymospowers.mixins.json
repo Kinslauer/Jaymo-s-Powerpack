@@ -19,6 +19,7 @@
 		"LeavesPathMixin",
 		"LeavesStateMixin",
 		"MobGoalsAccessor",
+		"MobWeaponDropMixin",
 		"ServerGamePacketListenerImplMixin",
 		"WorldGenReadMixin"
 	],
