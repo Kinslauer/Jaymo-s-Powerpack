@@ -168,13 +168,13 @@ final class ZFighterTechniques {
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(BARRIER_RADIUS),
 			p -> p.getOwner() != player)) {
 			Vec3 at = projectile.position();
-			level.sendParticles(new DustParticleOptions(BARRIER_COLOR, 1.5F), true, false, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.05);
+			level.sendParticles(new DustParticleOptions(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.5F), true, false, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.05);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 0.7F, 1.5F);
 			projectile.discard();
 		}
 		if (live.barrierTicks % 2 == 0) {
 			RandomSource random = level.getRandom();
-			DustParticleOptions dust = new DustParticleOptions(BARRIER_COLOR, 1.0F);
+			DustParticleOptions dust = new DustParticleOptions(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.0F);
 			for (int i = 0; i < 14; i++) {
 				Vec3 dir = new Vec3(random.nextGaussian(), Math.abs(random.nextGaussian()), random.nextGaussian()).normalize();
 				Vec3 at = centre.add(dir.scale(BARRIER_RADIUS * 0.8));

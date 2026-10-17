@@ -1735,3 +1735,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   each, so they fought. The suit now stands at 0.35 (over the clothes, still under MCA's hair at 0.375, so long hair
   falls over it) and masks at 0.62 (over the clothing hat and the hair) (`CostumeModels`, numbers at its top). Without
   MCA it's the same costume, a breath looser.
+- **0.13.27, every Z Fighter has a ki colour of their own:** Andy: "every zfighter should spawn with a random ki color".
+  Gaining the power rolls one from twelve bright hues (sky blue, deep blue, white, gold, orange, red, pink, purple,
+  violet, green, lime, cyan); Z Fighters from before get theirs the first time they're about. In base form it colours
+  their ki blasts, Homing Volley, Ki Disc, Ki Wave (and the lineages' signature beams), Ki Bomb, Ki Barrier, the charge
+  orb and aura, and the wave's charge bar; a form's own colour (Super's gold and the rest) still takes over in it, and
+  the Spirit Bomb keeps its own. Saved, kept through death, synced to everyone (`ZFighterPower.KI_COLOR`,
+  `KI_PALETTE`). `/powerdebug zfighter kicolor [reroll|<hex>]` shows, rerolls or sets it.

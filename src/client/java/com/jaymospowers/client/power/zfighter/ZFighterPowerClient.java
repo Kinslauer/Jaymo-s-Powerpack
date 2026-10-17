@@ -216,7 +216,9 @@ public final class ZFighterPowerClient implements PowerClient {
 			return;
 		}
 		float fill = Mth.clamp((now - state.waveFrom()) / (float)WAVE_FULL, 0.0F, 1.0F);
-		int color = state.has(ZFighterState.SUPER) ? SUPER_COLOR : WAVE_COLOR;
+		// (0.13.27) his own ki colour in base form
+		Integer ki = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getAttached(ZFighterPower.KI_COLOR);
+		int color = state.has(ZFighterState.SUPER) ? SUPER_COLOR : ki != null ? ki : WAVE_COLOR;
 		int cx = graphics.guiWidth() / 2;
 		int cy = graphics.guiHeight() / 2;
 		int width = 52;
