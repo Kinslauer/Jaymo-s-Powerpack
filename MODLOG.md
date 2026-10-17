@@ -1664,3 +1664,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     of the TP price). Each method tires through the day (halving every 12 points, floor 5%), so mixing is fastest.
     Bars on the training screen; `/powerdebug zfighter train <method> <points>|newday`.
   - Existing characters keep their bought levels; their bonuses shrink to the new per-level numbers.
+- **0.13.21, Training Points are spent again:** Andy: "right now you can purchase any skill with 0 tp, you should still
+  require it as a resource for techniques." Every buy on the training screen (stat levels, Super 2/3, Limit Break tiers,
+  techniques) skipped its TP price in creative, where TP is never earned, so the counter sat at 0 while every Learn
+  button worked. Now each one checks and spends its TP on the server, creative too, and the client greys out Learn and
+  "+" when you can't afford it. Creative still skips a form's mastery and hardship (not its TP); levels a stat's own
+  training raises stay free. For creative testing, `/powerdebug zfighter tp <n>`.

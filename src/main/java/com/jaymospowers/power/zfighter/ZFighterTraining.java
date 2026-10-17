@@ -392,6 +392,7 @@ public final class ZFighterTraining {
 	}
 
 	// ---------------------------------------------------------------- server: spending (from the training screen)
+	// Everything with a TP price checks and spends it, creative too (creative earns none: /powerdebug zfighter tp <n>).
 
 	static void buyStat(ServerPlayer player, int index) {
 		Data data = of(player);
@@ -399,20 +400,22 @@ public final class ZFighterTraining {
 			return;
 		}
 		int cost = statCost(player);
-		if (data.tp() < cost && !player.isCreative()) {
+		if (data.tp() < cost) {
 			return;
 		}
-		player.setAttached(DATA, data.withStat(index, data.stat(index) + 1).withTp(player.isCreative() ? data.tp() : data.tp() - cost));
+		player.setAttached(DATA, data.withStat(index, data.stat(index) + 1).withTp(data.tp() - cost));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
 		ZFighterPower.refresh(player, ZFighterPower.live(player));
 	}
 
+	/** Creative skips a form's mastery and hardship, never its TP. */
 	static void buyForm(ServerPlayer player, int form) {
-		if (formBlocker(player, form) != null && !(player.isCreative() && form == formsOpen(player) + 1 && form <= FORMS && Fate.isAscended(player))) {
+		Data data = of(player);
+		boolean creativeSkip = player.isCreative() && form == formsOpen(player) + 1 && form <= FORMS && Fate.isAscended(player);
+		if (formBlocker(player, form) != null && !creativeSkip || form < 2 || form > FORMS || data.tp() < FORM_TP[form]) {
 			return;
 		}
-		Data data = of(player);
-		player.setAttached(DATA, data.withForm(form).withTp(player.isCreative() ? data.tp() : data.tp() - FORM_TP[form]));
+		player.setAttached(DATA, data.withForm(form).withTp(data.tp() - FORM_TP[form]));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_form_learned",
 			Component.translatable(ZFighterLineage.formKey(player, form))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
@@ -426,10 +429,10 @@ public final class ZFighterTraining {
 			return;
 		}
 		int cost = limitCost(player, tier);
-		if (data.tp() < cost && !player.isCreative()) {
+		if (data.tp() < cost) {
 			return;
 		}
-		player.setAttached(DATA, data.withLimit(tier).withTp(player.isCreative() ? data.tp() : data.tp() - cost));
+		player.setAttached(DATA, data.withLimit(tier).withTp(data.tp() - cost));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.8F);
 	}
 
@@ -454,12 +457,11 @@ public final class ZFighterTraining {
 	}
 
 	static void buyTechnique(ServerPlayer player, int index) {
-		String blocker = techniqueBlocker(player, index);
-		if (blocker != null && !(player.isCreative() && "screen.jaymospowers.zfighter.need_tp".equals(blocker))) {
+		if (techniqueBlocker(player, index) != null) {
 			return;
 		}
 		Data data = of(player);
-		learn(player, data.withTp(player.isCreative() ? data.tp() : data.tp() - TECHNIQUE_TP[index]), index);
+		learn(player, data.withTp(data.tp() - TECHNIQUE_TP[index]), index);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_learned",
 			Component.translatable(ZFighterLineage.techniqueKey(player, index))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
