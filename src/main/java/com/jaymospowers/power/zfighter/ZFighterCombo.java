@@ -168,6 +168,9 @@ public final class ZFighterCombo {
 		long recoverUntil = -1L;
 		@Nullable UUID target;
 		int serial;
+		/** A Verdant's blow stretching (the limb, {@link ZFighterStretchCombo}; -1: a plain blow), and whether it's snapped back. */
+		int limb = -1;
+		boolean snapped;
 
 		Run(int tier) {
 			this.tier = tier;
@@ -254,6 +257,10 @@ public final class ZFighterCombo {
 			run.struck = true;
 			strike(player, live, run);
 		}
+		if (run.limb >= 0 && !run.snapped && age >= run.length * ZFighterStretchCombo.SNAP_AT) {
+			run.snapped = true;
+			ZFighterStretchCombo.snap(player);
+		}
 		if (age >= run.length) {
 			int[] string = STRINGS[run.tier];
 			if (run.step >= string.length - 1) {
@@ -270,24 +277,34 @@ public final class ZFighterCombo {
 		run.step = step;
 		run.stepAt = now;
 		run.struck = false;
+		run.snapped = false;
 		run.length = Math.round(STEP_TICKS[run.tier] * (finisher ? FINISHER_LENGTH : 1.0F));
 		run.serial = run.serial + 1 & 0x7FFF;
 		int move = string[step];
+		LivingEntity target = target(player, run);
+		// a Verdant's blow may stretch out to the foe (a little slower, and different each time)
+		run.limb = ZFighterStretchCombo.limb(player, target, move, step, finisher, REACH_BONUS);
+		if (run.limb >= 0) {
+			run.length = ZFighterStretchCombo.length(player, run.length);
+			ZFighterStretchCombo.begin(player, run.limb, run.length, target);
+		} else {
+			ZFighterStretchCombo.clear(player);
+		}
 		player.setAttached(MOVE, run.serial << 16 | Math.min(255, run.length) << 8 | move);
 		// the striking hand swings in first person too (kicks don't): the lead jab is the left
 		if (!kick(move)) {
 			InteractionHand hand = move == JAB ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
 			player.swing(hand, SwingAnimation.DEFAULT, true);
 		}
-		travel(player, run, move);
+		travel(player, run, move, target);
 	}
 
 	/**
 	 * Every blow is stepped into: a little real travel toward the foe (or straight ahead, at nothing), a proper lunge
 	 * after a foe a little out of reach, a hop for the flying moves. Never over a ledge; in the air only the lunge.
 	 */
-	private static void travel(ServerPlayer player, Run run, int move) {
-		LivingEntity target = target(player, run);
+	private static void travel(ServerPlayer player, Run run, int move, @Nullable LivingEntity target) {
+		boolean verdant = ZFighterStretchCombo.verdant(player);
 		boolean grounded = player.onGround();
 		double speed = grounded ? STEP_IN[move] : 0.0;
 		Vec3 dir;
@@ -296,8 +313,11 @@ public final class ZFighterCombo {
 			dir = new Vec3(to.x, 0.0, to.z);
 			double reach = player.entityInteractionRange();
 			double gap = player.position().distanceTo(target.position()) - target.getBbWidth() * 0.5;
-			if (gap > reach * 0.6) {
-				speed = Math.max(speed, LUNGE_SPEED + LUNGE_PER_TIER * run.tier);
+			if (run.limb >= 0) {
+				// the arm does the reaching: only a lean into it
+				speed = gap < STEP_MIN_GAP ? 0.0 : speed * ZFighterStretchCombo.STEP_SHARE;
+			} else if (gap > reach * 0.6) {
+				speed = Math.max(speed, (LUNGE_SPEED + LUNGE_PER_TIER * run.tier) * (verdant ? ZFighterStretchCombo.LUNGE_SHARE : 1.0));
 			} else if (gap < STEP_MIN_GAP) {
 				speed = 0.0;
 			}
@@ -345,7 +365,19 @@ public final class ZFighterCombo {
 			player.causeFoodExhaustion(EXHAUSTION);
 		}
 		LivingEntity target = target(player, run);
+		boolean stretched = run.limb >= 0;
+		if (stretched && target != null && !ZFighterStretchCombo.reaches(player, target)) {
+			target = null;
+		} else if (!stretched && target != null && ZFighterStretchCombo.verdant(player)
+			&& !player.isWithinEntityInteractionRange(target, REACH_BONUS + LUNGE_RANGE)) {
+			// (a plain blow reaches no further than anyone's, however far he keeps hold of the foe)
+			target = null;
+		}
 		if (target == null) {
+			ZFighterStretchCombo.Reach reach = player.getAttached(ZFighterStretchCombo.REACH);
+			if (stretched && reach != null) {
+				ZFighterStretchCombo.whiff(player, reach);
+			}
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.6F,
 				kick(move) ? 0.8F : 1.3F);
 			return;
@@ -353,8 +385,18 @@ public final class ZFighterCombo {
 		run.target = target.getUUID();
 		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float damage = (float)fists * (finisher ? FINISHER_SHARE[run.tier] : HIT_SHARE[run.tier] * MOVE_WEIGHT[move]);
+		if (stretched && !finisher) {
+			damage *= ZFighterStretchCombo.STRETCH_DAMAGE;
+		}
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 at = target.getBoundingBox().getCenter();
+		if (stretched) {
+			// struck from afar: thrown along the line from him, not along wherever he's looking
+			Vec3 line = at.subtract(player.getEyePosition());
+			if (line.lengthSqr() > 1.0E-4) {
+				look = line.normalize();
+			}
+		}
 		target.setInvulnerableTime(0);
 		boolean hurt = target.hurtServer(level, player.damageSources().playerAttack(player), damage);
 		Mastery.used(player);
@@ -364,6 +406,9 @@ public final class ZFighterCombo {
 		}
 		if (move == CHI_PALM) {
 			chi(level, live, at, look, finisher);
+		}
+		if (stretched) {
+			ZFighterStretchCombo.impact(player, run.limb, at, finisher);
 		}
 		if (finisher) {
 			if (move == DRAGON_FIST) {
@@ -425,13 +470,19 @@ public final class ZFighterCombo {
 	/** Who he's hitting: the foe he's been on if it's still in reach, else whatever is nearest in front of him. */
 	private static @Nullable LivingEntity target(ServerPlayer player, Run run) {
 		double reach = player.entityInteractionRange() + REACH_BONUS;
+		double keep = REACH_BONUS + LUNGE_RANGE;
+		double far = reach + LUNGE_RANGE;
+		if (ZFighterStretchCombo.verdant(player)) {
+			// a Verdant keeps hold of a foe as far as his arms stretch
+			keep = Math.max(keep, ZFighterStretchCombo.lockBonus(player));
+			far = Math.max(far, ZFighterStretchCombo.STRETCH_RANGE);
+		}
 		if (run.target != null && player.level().getEntity(run.target) instanceof LivingEntity last && valid(player, last)
-			&& player.isWithinEntityInteractionRange(last, REACH_BONUS + LUNGE_RANGE)) {
+			&& player.isWithinEntityInteractionRange(last, keep)) {
 			return last;
 		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
-		double far = reach + LUNGE_RANGE;
 		LivingEntity best = null;
 		double bestScore = Double.MAX_VALUE;
 		for (Entity entity : player.level().getEntities(player, new AABB(eye, eye).inflate(far))) {
@@ -467,6 +518,7 @@ public final class ZFighterCombo {
 	static void stop(ServerPlayer player) {
 		RUNS.remove(player.getUUID());
 		player.removeAttached(MOVE);
+		ZFighterStretchCombo.clear(player);
 	}
 
 	/** The power went, or he died. */

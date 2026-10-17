@@ -47,6 +47,8 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		// a Verdant or Frost-born with the suit: the plain left click is the weapon arm's, sneak + left hold the race's
+		com.jaymospowers.client.power.zfighter.RaceHoldClient.powerWants(com.jaymospowers.power.web.WebMorph::usable);
 		// Combat Roll's charges, for the Spider-Sense counters
 		WebRollsClient.init();
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
@@ -80,7 +82,9 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
 				return true;
 			}
-			if (com.jaymospowers.power.web.WebMorph.usable(player) && (grips == null || grips.get(WebNet.MAIN) < 0 && grips.get(WebNet.OFF) < 0)) {
+			// (a Verdant's or Frost-born's race move is sneak + left hold here: RaceHoldClient.secondary)
+			if (com.jaymospowers.power.web.WebMorph.usable(player) && !com.jaymospowers.client.power.zfighter.RaceHoldClient.first(minecraft, player)
+				&& (grips == null || grips.get(WebNet.MAIN) < 0 && grips.get(WebNet.OFF) < 0)) {
 				// the suit, an empty hand: the arm goes out as a weapon (a block under the crosshair is still mined)
 				net.minecraft.world.phys.HitResult hit = minecraft.hitResult;
 				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
