@@ -106,6 +106,37 @@ public final class ZFighterNet {
 		}
 	}
 
+	/**
+	 * Server → client, every tick a fired beam travels ({@code ZFighterWaveBeam}): its id (the firer's entity id), from
+	 * the hands to its head, how thick, its colour and style; {@code fade} 0 while it travels, else it has stopped and
+	 * fades over that many ticks.
+	 */
+	public record BeamHead(int id, double fx, double fy, double fz, double hx, double hy, double hz, float radius, int color, int style, int fade)
+		implements CustomPacketPayload {
+		public static final Type<BeamHead> TYPE = new Type<>(JaymosPowers.id("zfighter_beam_head"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, BeamHead> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.id);
+				buf.writeDouble(p.fx);
+				buf.writeDouble(p.fy);
+				buf.writeDouble(p.fz);
+				buf.writeDouble(p.hx);
+				buf.writeDouble(p.hy);
+				buf.writeDouble(p.hz);
+				buf.writeFloat(p.radius);
+				buf.writeInt(p.color);
+				buf.writeVarInt(p.style);
+				buf.writeVarInt(p.fade);
+			},
+			buf -> new BeamHead(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
+				buf.readDouble(), buf.readFloat(), buf.readInt(), buf.readVarInt(), Math.min(buf.readVarInt(), 100)));
+
+		@Override
+		public Type<BeamHead> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: a Spirit Bomb (by its thrower's entity id) is here and this big; drawn while it keeps coming. */
 	public record SpiritFx(int id, double x, double y, double z, float size, float glow) implements CustomPacketPayload {
 		public static final Type<SpiritFx> TYPE = new Type<>(JaymosPowers.id("zfighter_spirit"));
@@ -194,6 +225,7 @@ public final class ZFighterNet {
 		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));
 		PayloadTypeRegistry.clientboundPlay().register(BeamFx.TYPE, BeamFx.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(BeamHead.TYPE, BeamHead.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SpiritFx.TYPE, SpiritFx.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Guard.TYPE, (payload, ctx) -> {

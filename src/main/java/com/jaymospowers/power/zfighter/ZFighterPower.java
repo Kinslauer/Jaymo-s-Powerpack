@@ -337,6 +337,7 @@ public final class ZFighterPower implements Power {
 		Powers.register(INSTANCE);
 		com.jaymospowers.power.web.KitchenCompat.extraStomachSlots(player -> Powers.has(player, INSTANCE) ? EXTRA_STOMACH : 0);
 		ZFighterKi.init();
+		ZFighterWaveBeam.init();
 		ZFighterDisc.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();
@@ -363,6 +364,7 @@ public final class ZFighterPower implements Power {
 			LIVE.clear();
 			ZFighterGrowth.clear();
 			ZFighterKi.clear();
+			ZFighterWaveBeam.clear();
 			ZFighterDisc.clear();
 		});
 	}
@@ -474,6 +476,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
+		player.removeAttached(ZFighterWaveBeam.FIRING);
 		ZFighterCombo.drop(player);
 		player.removeAttached(ZFighterLineage.LINEAGE);
 		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
@@ -628,6 +631,11 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
+		if (key == PowerKey.ABILITY_3 && ZFighterWaveBeam.out(player)) {
+			// his beam is out: V only pushes it, if it has locked in a clash
+			com.jaymospowers.core.BeamClash.input(player, down);
+			return;
+		}
 		if (ZFighterLineage.ape(player) && key != PowerKey.ABILITY_1) {
 			// the Great Ape has no techniques: only his fists, and the beam from his mouth on V
 			if (key == PowerKey.ABILITY_3 && down && ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
@@ -1124,7 +1132,7 @@ public final class ZFighterPower implements Power {
 			AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, HUNGRY_ID, hungry ? -HUNGRY_WEAKNESS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.barrageFrom >= 0 || live.spiritFrom >= 0
-			|| ZFighterDisc.throwing(player) ? -CHARGE_SLOW : 0.0,
+			|| ZFighterDisc.throwing(player) || ZFighterWaveBeam.out(player) ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// lineages: a Verdant's Giant forms (his long arm is the stretch punch, RaceMoves); the Great Ape

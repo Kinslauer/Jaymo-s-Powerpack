@@ -150,6 +150,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterSpiritPose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
+		ZFighterFiringPose.extract(entity, state);
 		ZFighterDancePose.extract(entity, state, partialTicks);
 		ZFighterComboPose.extract(entity, state, partialTicks);
 		ZFighterDiscPose.extract(entity, state, partialTicks);
@@ -164,6 +165,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterFlightPose.applyModel(model, state);
 		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
+		ZFighterFiringPose.applyModel(model, state);
 		ZFighterDancePose.applyModel(model, state);
 		ZFighterComboPose.applyModel(model, state);
 		ZFighterSpiritPose.applyModel(model, state);

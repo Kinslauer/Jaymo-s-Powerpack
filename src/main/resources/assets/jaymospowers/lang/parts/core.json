@@ -89,6 +89,7 @@
 	"message.jaymospowers.fracture.left_leg": "Your left leg is broken: you're limping",
 	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
 	"message.jaymospowers.beam_clash.locked": "Beam clash! Mash your power key to push",
+	"message.jaymospowers.beam_clash.locked_key": "Beam clash! Mash %s to push",
 	"message.jaymospowers.beam_clash.won": "You overpower them!",
 	"message.jaymospowers.beam_clash.overwhelmed": "Overwhelmed!",
 	"message.jaymospowers.beam_clash.detonated": "The clash bursts!",

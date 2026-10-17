@@ -1742,3 +1742,25 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   orb and aura, and the wave's charge bar; a form's own colour (Super's gold and the rest) still takes over in it, and
   the Spirit Bomb keeps its own. Saved, kept through death, synced to everyone (`ZFighterPower.KI_COLOR`,
   `KI_PALETTE`). `/powerdebug zfighter kicolor [reroll|<hex>]` shows, rerolls or sets it.
+- **0.13.28, ki beams travel and clash:** Andy: "the crimson cannon works, just make it travel slower and beam battle
+  clash with every other one", then "make all the lineage beams work with this". Every lineage's Ki Wave (Earthling and
+  plain: the Ki Wave; Warrior-born: the Crimson Cannon; Verdant: the Spiral Lance; Frost-born: the Frost Needle) and the
+  Great Ape's mouth beam are no longer instant (`ZFighterWaveBeam`): let go, the head shoots out from the hands (the
+  Ape's mouth) at its own speed, a new `speed` on each `Signature` (Ki Wave 2.5 blocks a tick, Crimson Cannon 1.2, slow
+  and heavy enough to see coming, Spiral Lance 2.0, Frost Needle 4.5; the Ape's 1.8). It's drawn from the hands to the
+  head all the way, smoothed between ticks, with a ki orb on the head and a hum following it (`ZFighterNet.BeamHead`,
+  `ZFighterBeams`); what the head reaches is hurt, pushed and chilled once, and it bursts where it stops (its reach, a
+  block unless it's the Spiral Lance, or a clash), then fades as before. Damage, ki costs, Super colours, blasts and
+  griefing rules are unchanged. While it's out the fighter holds both arms out along it (`zfighter_wave_firing`, synced;
+  `client/ZFighterFiringPose`), slowed as when charging, and V does nothing else.
+  - On its way it's a beam in `BeamClash`, so it locks head-on with Wind's and Smoke/Soot's streams and with any other
+    fighter's beam (any lineage, the Great Ape's too). `BeamClash.Beam` takes an optional `Shape` for such fired beams:
+    they meet where their head has got to, every V press is a push tap (no hold-and-release), only looking away lets go,
+    and their strength multiplies the steady push: 0.6 to 1.2 by charge, 30% of the fighter's ki power on top, and 0.7
+    to 1.2 by the ki left (clashing drains 0.3 ki a tick; the Great Ape pushes at 1.3). The head sits on the knot while
+    they grind. The existing outcomes apply: the loser's beam bursts at the knot (shaking the ground only), a winning ki
+    beam travels on past the knot, and a stalemate detonates both. Ki overwhelming someone burns them for 4 more and sets
+    them alight; the knot churns sparks and end rods for a ki side, and the HUD says "Mash V". Wind's and Smoke's own
+    code is untouched (their 4-argument `Beam` still works).
+  - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
+    `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
