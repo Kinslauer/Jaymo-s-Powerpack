@@ -66,7 +66,8 @@ public final class ZFighterTraining {
 	public static final int FORMS = 3;
 	/** TP and hardship to buy Super 2 and Super 3 (index by form); each also needs {@link #NEXT_FORM_MASTERY} of the one below. */
 	// (0.13.29) Andy: "super 2 and 3 dont seem to be possible to acquire": brought down with the slower TP of 0.13.19
-	public static final int[] FORM_TP = {0, 0, 1500, 4500};
+	// (0.13.33) Andy: Super 2 at 5000, Super 3 at 15000
+	public static final int[] FORM_TP = {0, 0, 5000, 15000};
 	public static final int[] FORM_HARDSHIP = {0, 0, 80, 150};
 	/** Mastery, in hundredths of a percent (10000 = 100%). */
 	public static final int MASTERY_MAX = 10000;
