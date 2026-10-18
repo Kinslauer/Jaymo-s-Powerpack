@@ -1764,3 +1764,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     code is untouched (their 4-argument `Beam` still works).
   - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
     `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
+- **0.13.31, move names match the move:** Andy: "Not every move name is consistent across zfighters, for instance the V
+  overlay says ki wave always." The V charge bar's label was the fixed "Ki Wave"; it now names whatever is on V: the
+  lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb (`ZFighterLineage.techniqueKey`, as
+  the training screen already did). The V key's description in the powers menu names the lineage waves too, and the
+  Crimson Cannon's description no longer calls it violet (it takes your ki colour since 0.13.27).
