@@ -20,3 +20,7 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   autonomous symbiote action affects the player's screen.
 - Big patches run as parallel agent tracks, one per power, so they don't edit the same files; 2 at a time, since
   4 at once hit usage limits.
+- Workflows: read-only scan stages use the `scanner` agent (Haiku 5.5); edit stages use the `editor` agent
+  (Sonnet 5.5), each in its own worktree.
+- Every finding gets an independent verifier agent before it's reported. A fix loop stops after two rounds
+  with no progress.

@@ -65,7 +65,9 @@ public final class ZFighterTraining {
 	/** Forms: 1 Super (the breakthrough), 2 Super 2, 3 Super 3. Index 0 is base. */
 	public static final int FORMS = 3;
 	/** TP and hardship to buy Super 2 and Super 3 (index by form); each also needs {@link #NEXT_FORM_MASTERY} of the one below. */
-	public static final int[] FORM_TP = {0, 0, 4000, 12000};
+	// (0.13.29) Andy: "super 2 and 3 dont seem to be possible to acquire": brought down with the slower TP of 0.13.19
+	// (0.13.33) Andy: Super 2 at 5000, Super 3 at 15000
+	public static final int[] FORM_TP = {0, 0, 5000, 15000};
 	public static final int[] FORM_HARDSHIP = {0, 0, 80, 150};
 	/** Mastery, in hundredths of a percent (10000 = 100%). */
 	public static final int MASTERY_MAX = 10000;
@@ -267,7 +269,8 @@ public final class ZFighterTraining {
 	// ---------------------------------------------------------------- server: earning
 
 	static void earn(ServerPlayer player, float amount) {
-		if (amount <= 0.0F || player.isCreative()) {
+		// (0.13.29) creative earns too: purchases cost TP there since 0.13.21
+		if (amount <= 0.0F) {
 			return;
 		}
 		if (player.getFoodData().getFoodLevel() <= ZFighterPower.HUNGRY_FOOD) {
@@ -277,7 +280,7 @@ public final class ZFighterTraining {
 		add(player, amount);
 		// training together: friends who are Z Fighters nearby learn from watching
 		for (ServerPlayer friend : player.level().players()) {
-			if (friend != player && friend.isAlive() && !friend.isCreative() && friend.distanceToSqr(player) <= SHARE_RANGE * SHARE_RANGE
+			if (friend != player && friend.isAlive() && friend.distanceToSqr(player) <= SHARE_RANGE * SHARE_RANGE
 				&& Powers.has(friend, ZFighterPower.INSTANCE)) {
 				add(friend, amount * SHARE_TP);
 			}
