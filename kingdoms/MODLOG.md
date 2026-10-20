@@ -3448,3 +3448,9 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
   `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
   pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).
+- **0.7.102, Emberborn too hot to hug:** Andy: "hugging emberborn villagers and players is impossible without fire
+  resistance". Hugging an Emberborn (villager or player) without being Emberborn, fireproof or under Fire Resistance
+  burns you (3 s fire, 2 damage) and throws you back; no hug, no hearts. MCA's hug menu works both ways (an Emberborn
+  player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
+  mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
+  mood change. Numbers at the top of `EmberHugs`.

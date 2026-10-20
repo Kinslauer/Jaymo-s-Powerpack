@@ -106,7 +106,7 @@ final class Assassins {
 	static final long NIGHT_FROM = 13000L, NIGHT_TO = 23000L;
 	/**
 	 * The assassin: his health, his blows (his blade adds to them), his speed; his walk while he stalks and his reach for
-	 * the stab. (0.7.101) His hidden blade adds 3 where the old iron sword added 5, so drawn, his blows gain
+	 * the stab. (0.7.102) His hidden blade adds 3 where the old iron sword added 5, so drawn, his blows gain
 	 * {@link #BLADE_MAKEUP}: 7 as before.
 	 */
 	static final double BLADE_MAKEUP = 2.0;
