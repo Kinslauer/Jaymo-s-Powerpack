@@ -3,11 +3,9 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -83,6 +81,8 @@ public final class HiddenBlade {
 	static final double LEAP_MIN_FALL = 4.0;
 	/** How far below the feet a falling player's box reaches for a target (blocks), and how near a landing must be. */
 	static final double LEAP_REACH = 0.6, LAND_REACH = 0.4;
+	/** After a leap, a landing no further than this below the target's feet is the leap's own (no fall damage). */
+	static final double LEAP_LAND_SLACK = 1.0;
 	/** Crippled: this long at least (ticks), this much more for each {@link #CRIPPLE_STEP} blocks fallen past the least, at most this long. */
 	static final int CRIPPLE_BASE_TICKS = 120, CRIPPLE_STEP_TICKS = 20, CRIPPLE_MAX_TICKS = 400;
 	static final double CRIPPLE_STEP = 2.0;
@@ -107,8 +107,11 @@ public final class HiddenBlade {
 	private static final Map<UUID, Long> JAMMED = new HashMap<>();
 	/** Player → {target entity id, game time} of their last 10x stab (a re-hurt of the same blow, e.g. a backstab, isn't stabbed again). */
 	private static final Map<UUID, long[]> STABBED = new HashMap<>();
-	/** Players who leapt on something this fall, till they land: whatever they drop on through it after hurts them no more. */
-	private static final Set<UUID> LEAPT = new HashSet<>();
+	/**
+	 * Players who leapt on something this fall, till they land → the height of the target's feet: landing there (the rest
+	 * of the drop, down through it) hurts them no more; falling on past it, off a ledge or a flying thing, hurts as ever.
+	 */
+	private static final Map<UUID, Double> LEAPT = new HashMap<>();
 
 	private HiddenBlade() {
 	}
@@ -208,8 +211,11 @@ public final class HiddenBlade {
 	 * takes it instead.
 	 */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		if (entity instanceof ServerPlayer leapt && source.is(DamageTypeTags.IS_FALL) && LEAPT.remove(leapt.getUUID())) {
-			return false;
+		if (entity instanceof ServerPlayer leapt && source.is(DamageTypeTags.IS_FALL)) {
+			Double feet = LEAPT.remove(leapt.getUUID());
+			if (feet != null && leapt.getY() >= feet - LEAP_LAND_SLACK) {
+				return false;
+			}
 		}
 		if (!(entity instanceof ServerPlayer player) || !source.is(DamageTypeTags.IS_FALL) || player.fallDistance < LEAP_MIN_FALL
 			|| !(player.level() instanceof ServerLevel level) || player.isSpectator() || !armed(player)) {
@@ -275,7 +281,7 @@ public final class HiddenBlade {
 		LivingEntity target = target(level, player, box, top);
 		if (target != null) {
 			leap(level, player, target, fallDamage(player), player.fallDistance);
-			LEAPT.add(player.getUUID());
+			LEAPT.put(player.getUUID(), target.getY());
 		}
 	}
 

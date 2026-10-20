@@ -120,6 +120,10 @@ public final class SecretIdentity {
 		}
 		if (worn != null && Costume.hooded(player)) {
 			want.add(HOODED + key(worn));
+			// (the hood's name, for Kingdoms' "hooded figure", unless a Rig Helm's identity already gives one)
+			if (!worn.name().isEmpty() && want.stream().noneMatch(t -> t.startsWith(NAME))) {
+				want.add(NAME + worn.name());
+			}
 		}
 		boolean changed = false;
 		for (String tag : new ArrayList<>(player.entityTags())) {

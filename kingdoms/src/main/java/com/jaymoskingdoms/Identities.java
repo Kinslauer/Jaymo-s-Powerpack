@@ -155,10 +155,8 @@ public final class Identities {
 	static final AttachmentType<String> MASKED_AS = AttachmentRegistry.create(JaymosKingdoms.id("masked_as"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
-	/** Player → the identity they were last seen in ("" bare-faced). */
-	private static final Map<UUID, String> WAS = new HashMap<>();
-	/** (0.7.98) Players last seen in a hood (not a mask): taking it off is lowering it. */
-	private static final Set<UUID> WAS_HOODED = new HashSet<>();
+	/** Player → the identity they were last seen fully masked as, and (0.7.98) hooded as with no mask ("" none). */
+	private static final Map<UUID, String> WAS_MASK = new HashMap<>(), WAS_HOOD = new HashMap<>();
 	/** Player/power → when a use of it last counted. */
 	private static final Map<String, Long> LAST_SIGHTING = new HashMap<>();
 	/** Player/faction → when its guards last stopped them masked (or let them through). */
@@ -175,14 +173,14 @@ public final class Identities {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Identities::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			WAS.remove(handler.player.getUUID());
-			WAS_HOODED.remove(handler.player.getUUID());
+			WAS_MASK.remove(handler.player.getUUID());
+			WAS_HOOD.remove(handler.player.getUUID());
 			SENT_OFF.remove(handler.player.getUUID());
 			EXILED_IN.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			WAS.clear();
-			WAS_HOODED.clear();
+			WAS_MASK.clear();
+			WAS_HOOD.clear();
 			LAST_SIGHTING.clear();
 			CHALLENGED.clear();
 			SENT_OFF.clear();
@@ -621,10 +619,12 @@ public final class Identities {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			String cur = key(player);
 			String mask = maskKey(player);
-			String was = WAS.put(player.getUUID(), cur == null ? "" : cur);
-			boolean wasHooded = cur != null && mask == null ? !WAS_HOODED.add(player.getUUID()) : WAS_HOODED.remove(player.getUUID());
-			if (mask != null) {
-				noteName(server, mask, tagName(player));
+			// (0.7.98: a hood worn under no mask)
+			String hood = mask == null ? hoodKey(player) : null;
+			String wasMask = WAS_MASK.put(player.getUUID(), mask == null ? "" : mask);
+			String wasHood = WAS_HOOD.put(player.getUUID(), hood == null ? "" : hood);
+			if (cur != null) {
+				noteName(server, cur, tagName(player));
 			}
 			// (0.7.98: MCA's villagers forget you only behind a full mask, not a hood)
 			if (!java.util.Objects.equals(mask, player.getAttached(MASKED_AS))) {
@@ -637,14 +637,19 @@ public final class Identities {
 			if (player.level() != level || !player.isAlive() || player.isSpectator()) {
 				continue;
 			}
-			if (was != null) {
-				if (!was.isEmpty() && cur == null) {
-					// (0.7.98: a hood lowered in view gives you away like a mask taken off)
-					revealed(level, player, was, wasHooded ? "lowered" : "unmasked");
-				} else if (was.isEmpty() && mask != null) {
-					// (0.7.98: pulling a hood up in view gives nothing away; lowering it does)
-					revealed(level, player, cur, "masked");
+			// (0.7.98) masks and hoods each on their own, so going from one to the other in view still gives a mask away
+			if (wasMask != null) {
+				if (!wasMask.isEmpty() && !wasMask.equals(mask)) {
+					revealed(level, player, wasMask, "unmasked");
 				}
+				if (mask != null && !mask.equals(wasMask)) {
+					revealed(level, player, mask, "masked");
+				}
+			}
+			// a hood lowered in view gives you away like a mask taken off; pulling one up gives nothing away (nor does
+			// a mask going on over it: the face is hidden)
+			if (wasHood != null && !wasHood.isEmpty() && !wasHood.equals(hood) && mask == null) {
+				revealed(level, player, wasHood, "lowered");
 			}
 			powers(level, player, cur, now);
 			sentOff(level, player, now);
