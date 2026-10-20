@@ -47,6 +47,8 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -337,10 +339,39 @@ public final class ArsenalStanding {
 			&& level.getFluidState(floor).isEmpty();
 	}
 
-	/** Whether someone fits where things come out of {@code end}. */
+	/**
+	 * Whether someone can safely come out of {@code end}: room to stand, a solid floor under the exit, and no fluid, fire or
+	 * magma in the way or underfoot. Checked when a pair opens and again at every pass, since blocks change.
+	 */
 	private static boolean roomAhead(ServerLevel level, End end) {
 		Vec3 at = end.pos().add(end.normal().scale(EXIT_DISTANCE));
-		return level.noCollision(new AABB(at.x - 0.3, at.y + 0.05, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3));
+		AABB box = new AABB(at.x - 0.3, at.y + 0.05, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3);
+		if (!level.noCollision(box)) {
+			return false;
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			if (!level.getFluidState(pos).isEmpty() || hot(level.getBlockState(pos))) {
+				return false;
+			}
+		}
+		// the floor: solid under the middle, nothing deadly under any corner
+		BlockPos floor = BlockPos.containing(at.x, at.y - 0.5, at.z);
+		if (!level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP)) {
+			return false;
+		}
+		for (int sx = -1; sx <= 1; sx += 2) {
+			for (int sz = -1; sz <= 1; sz += 2) {
+				BlockPos under = BlockPos.containing(at.x + sx * 0.3, at.y - 0.5, at.z + sz * 0.3);
+				if (!level.getFluidState(under).isEmpty() || hot(level.getBlockState(under))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private static boolean hot(BlockState state) {
+		return state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE) || state.is(Blocks.MAGMA_BLOCK);
 	}
 
 	// ---------------------------------------------------------------- standing
@@ -402,9 +433,17 @@ public final class ArsenalStanding {
 		if (tick % HUM_EVERY == 0) {
 			level.playSound(null, p.x, p.y + 1.1, p.z, SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.3F, 1.5F);
 		}
+		// the far side may have changed since the pair opened: nothing goes through into a wall, a drop or lava
+		Boolean exitOk = null;
 		AABB box = new AABB(p.x - CATCH_RADIUS, p.y - CATCH_BOTTOM, p.z - CATCH_RADIUS, p.x + CATCH_RADIUS, p.y + CATCH_HEIGHT, p.z + CATCH_RADIUS);
 		for (Entity entity : level.getEntitiesOfClass(Entity.class, box)) {
 			if (passable(entity) && tick - LAST_PASS.getOrDefault(entity.getUUID(), -1000L) > PASS_COOLDOWN) {
+				if (exitOk == null) {
+					exitOk = roomAhead(to, other);
+				}
+				if (!exitOk) {
+					return;
+				}
 				LAST_PASS.put(entity.getUUID(), tick);
 				pass(entity, end, other, to);
 			}
