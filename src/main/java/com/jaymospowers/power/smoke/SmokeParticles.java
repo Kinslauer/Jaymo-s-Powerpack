@@ -13,19 +13,24 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The particles a Smoke user's smoke throws off. Plain and ascended smoke use vanilla's geyser steam (the thick plume
- * over potent sulfur on lava): {@code geyser_poof} for puffs, bursts and trails, {@code geyser_plume} for a gout going
- * up (Vapour Form). A corrupted (not ascended) user's smoke keeps the campfire smoke it had. The gas itself
+ * over potent sulfur on lava): {@code geyser_poof} for trails ({@link #puff}) and bursts ({@link #burst}),
+ * {@code geyser_plume} for a gout going up (Vapour Form). A poof flies off at a random angle at its burst impulse plus
+ * the velocity it's given, always upward (it never sinks), and slows fast; a plume ignores velocity and climbs straight
+ * up 5 blocks a water block. A corrupted (not ascended) user's smoke keeps the campfire smoke it had. The gas itself
  * ({@link SmokeField}) is drawn the same for everyone.
  */
 public final class SmokeParticles {
 	/** The water blocks the geyser particles are sized for (vanilla's 1-4: bigger, faster and taller with more). */
 	static final int SIZE = 1;
-	/** The poof's burst impulse (vanilla scales it by the water blocks). */
-	static final float BURST = 0.5F;
+	/** A trail poof's own burst impulse: none, so it keeps close to where it's thrown (plus vanilla's 0.25 a water block). */
+	static final float TRAIL = 0.0F;
+	/** A burst poof's impulse (vanilla's eruption uses 2.0 for its poofs, 1.5 for its base). */
+	static final float BURST = 1.5F;
 	/** Plumes in a gout (Vapour Form's legs going up). */
 	static final int PLUMES = 3;
 
-	private static ParticleOptions poof;
+	private static ParticleOptions trail;
+	private static ParticleOptions burst;
 	private static ParticleOptions plume;
 
 	private SmokeParticles() {
@@ -36,16 +41,30 @@ public final class SmokeParticles {
 		return owner != null && Fate.isCorrupted(owner) && !Fate.isAscended(owner);
 	}
 
-	/** A puff, burst or trail of {@code owner}'s smoke: geyser steam, or {@code old} for a corrupted user. */
+	/** A puff of a trail of {@code owner}'s smoke (jet, tail): geyser steam, or {@code old} for a corrupted user. */
 	public static ParticleOptions puff(Player owner, ParticleOptions old) {
 		if (old(owner)) {
 			return old;
 		}
-		if (poof == null) {
-			poof = type("geyser_poof") instanceof ParticleType<?> type
-				? new GeyserBaseParticleOptions(cast(type), SIZE, BURST) : null;
+		if (trail == null) {
+			trail = poof(TRAIL);
 		}
-		return poof != null ? poof : old;
+		return trail != null ? trail : old;
+	}
+
+	/** A burst of {@code owner}'s smoke (bomb, step, landing): geyser steam flung wide, or {@code old} for a corrupted user. */
+	public static ParticleOptions burst(Player owner, ParticleOptions old) {
+		if (old(owner)) {
+			return old;
+		}
+		if (burst == null) {
+			burst = poof(BURST);
+		}
+		return burst != null ? burst : old;
+	}
+
+	private static ParticleOptions poof(float impulse) {
+		return type("geyser_poof") instanceof ParticleType<?> type ? new GeyserBaseParticleOptions(cast(type), SIZE, impulse) : null;
 	}
 
 	/** A gout of {@code owner}'s smoke going up from {@code at}: a few geyser plumes (nothing for a corrupted user). */

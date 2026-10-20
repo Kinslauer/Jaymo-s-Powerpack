@@ -42,9 +42,11 @@ Every ability pours more: Smokescreen 2.0 a tick (was 0.9), Smoke Bomb 130 / 190
 ## Geyser steam (0.13.36)
 Andy (2026-10-20): plain and ascended smoke should use "the geyser particle effect" (potent sulfur over lava), "far
 thicker"; the gas stays for both, and corrupted smoke keeps its particles. `SmokeParticles.puff` swaps the campfire
-smoke of Smoke Jet, Vapour Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb for vanilla's
-`geyser_poof` (`SIZE` water blocks, `BURST` impulse), and Vapour Form's start adds `PLUMES` `geyser_plume`s
-(`SmokeParticles.gout`). A corrupted (not ascended) user gets the old particles. Left as they were: the gas
+smoke of Smoke Jet and Vapour Form's tail and spill for vanilla's `geyser_poof` with no burst of its own (`TRAIL`),
+and `SmokeParticles.burst` does the same for Vapour Form's landing, hits and start, Smoke Step and Smoke Bomb with a
+wide one (`BURST` 1.5; vanilla's eruption uses 2.0). Vapour Form's start adds `PLUMES` `geyser_plume`s
+(`SmokeParticles.gout`). Poofs are white, live about a second, always drift up and slow fast; plumes ignore velocity
+and climb 5 blocks. A corrupted (not ascended) user gets the old particles. Left as they were: the gas
 (`SmokeFieldClient`), Ash Storm, Harness the Sky's clouds and soot rain, Smog and Pyroclasm.
 
 ## Vapour Form flight (0.10.81)
