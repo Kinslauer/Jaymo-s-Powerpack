@@ -4,6 +4,9 @@ import com.jaymoskitchen.JaymosKitchen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import com.jaymoskitchen.ragdoll.RagdollBody;
+import com.jaymoskitchen.ragdoll.RagdollRig;
+import com.jaymoskitchen.ragdoll.RagdollShapes;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -20,6 +23,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -85,6 +90,7 @@ public final class Corpses {
 			EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
 				.sized(1.0F, 0.4F)
 				.clientTrackingRange(8)
+				.updateInterval(1)
 				.noSummon()
 				.build(corpseKey));
 
@@ -186,7 +192,50 @@ public final class Corpses {
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
 		}
 		corpse.markJustDied();
+		corpse.startRagdoll(deathBody(mob));
 		level.addFreshEntity(corpse);
+	}
+
+	/** (0.5.0) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
+	private static final double TOPPLE_MIN = 0.08, TOPPLE_MAX = 0.14;
+	private static final float TOPPLE_SHARE = 0.3F;
+
+	/**
+	 * (0.5.0) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
+	 * with a push at the head along its death knockback (any way if it had none). One lying or swimming starts lying.
+	 */
+	public static RagdollBody deathBody(LivingEntity mob) {
+		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
+		RagdollRig rig = RagdollShapes.rig(mob.getType(), size.width(), size.height());
+		net.minecraft.util.RandomSource random = mob.getRandom();
+		Pose pose = mob.getPose();
+		boolean down = pose == Pose.SWIMMING || pose == Pose.SLEEPING || pose == Pose.FALL_FLYING;
+		Vec3 v = mob.getDeltaMovement();
+		RagdollBody body;
+		if (down) {
+			body = RagdollBody.lying(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, random.nextBoolean(), random.nextLong());
+		} else {
+			body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
+		}
+		body.setSpeed(v.x, v.y, v.z);
+		if (!down) {
+			double dx = v.x, dz = v.z;
+			double length = Math.sqrt(dx * dx + dz * dz);
+			if (length < 0.01) {
+				double angle = random.nextDouble() * Math.PI * 2.0;
+				dx = Math.cos(angle);
+				dz = Math.sin(angle);
+				length = 1.0;
+			}
+			double push = TOPPLE_MIN + random.nextDouble() * (TOPPLE_MAX - TOPPLE_MIN);
+			int head = switch (rig.shape) {
+				case HUMANOID -> RagdollRig.HEAD;
+				case QUADRUPED -> RagdollRig.SNOUT;
+				case BOX -> RagdollRig.TOP_RIGHT;
+			};
+			body.hit(body.x[head], body.y[head], body.z[head], dx / length * push, 0.0, dz / length * push, TOPPLE_SHARE);
+		}
+		return body;
 	}
 
 	/** The mob's saved data, trimmed, with its type id: enough for clients to draw it and for a zombie to rise. */

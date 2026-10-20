@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Mobs that leave corpses: their death loot is caught (see {@code EntityMixin}) instead of scattered, and when the
- * death animation ends, the mob is swapped for its corpse instead of vanishing in a puff of smoke.
+ * mob starts to die, it is swapped for its corpse (a ragdoll) instead of vanishing in a puff of smoke.
  */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin implements CorpseCapture {
@@ -102,12 +102,16 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		jaymoskitchen$keptOn = null;
 	}
 
-	@Inject(
-		method = "tickDeath",
-		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"),
-		cancellable = true)
+	/**
+	 * (0.5.0) The body appears on the first tick of dying, not after the death animation: it falls and crumples as a
+	 * ragdoll from the start, so the mob is swapped for it at once (no puff).
+	 */
+	@Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)
 	private void jaymoskitchen$leaveCorpse(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
+		if (self.deathTime != 0) {
+			return;
+		}
 		if (self.entityTags().contains(Corpses.NO_CORPSE_TAG)) {
 			// (marked by another mod: a body that leaves nothing behind, like a Darktide shade)
 			return;

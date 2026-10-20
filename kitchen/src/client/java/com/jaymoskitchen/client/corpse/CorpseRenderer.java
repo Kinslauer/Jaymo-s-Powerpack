@@ -1,5 +1,7 @@
 package com.jaymoskitchen.client.corpse;
 
+import com.jaymoskitchen.client.ragdoll.ClientRagdolls;
+import com.jaymoskitchen.client.ragdoll.RagdollPose;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -69,6 +71,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		boolean ragdolled;
 		/** How far the body's own renderer turns it over as it dies (spiders roll right onto their backs). */
 		float flip;
+		/** (0.5.0) Drawn by physics: where the ragdoll's points put the body this frame (null when carried, slung, in a cart). */
+		@Nullable RagdollPose pose;
 	}
 
 	/**
@@ -105,6 +109,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	 */
 	@Override
 	protected boolean affectedByCulling(CorpseEntity corpse) {
+		ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
+		if (track != null && !track.asleep() && corpse.carrier() == null) {
+			// (0.5.0) a ragdoll on the move reaches well outside the corpse's small box
+			return false;
+		}
 		return !(corpse.isTumbling() || corpse.falling()) && super.affectedByCulling(corpse);
 	}
 
@@ -129,6 +138,14 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.age = corpse.tickCount + partialTicks;
 		float yaw = corpse.getYRot();
 		Entity carrier = corpse.carrier();
+		state.pose = null;
+		if (carrier == null && !corpse.isPassenger() && corpse.slungOn() == null) {
+			ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
+			if (track != null) {
+				extractPhysical(corpse, state, track, partialTicks);
+				return;
+			}
+		}
 		// dropped and still falling: drawn limp as if carried, turning over as it goes, until it lands
 		boolean tumbling = carrier == null && corpse.isTumbling() && !corpse.isPassenger();
 		state.carried = carrier != null || tumbling;
@@ -270,6 +287,66 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	}
 
 	/**
+	 * (0.5.0) A body lying free: drawn where its ragdoll's points are this frame. The model is drawn standing at the
+	 * corpse's own spot, then moved onto the ragdoll by {@link RagdollPose#body}; the limbs follow the physics.
+	 */
+	private void extractPhysical(CorpseEntity corpse, State state, ClientRagdolls.Track track, float partialTicks) {
+		state.carried = false;
+		state.tumbling = false;
+		state.sprawled = false;
+		state.ragdolled = false;
+		state.tall = false;
+		state.player = false;
+		state.body = null;
+		state.bodyRenderer = null;
+		state.anchorX = state.anchorY = state.anchorZ = 0.0F;
+		state.tilt.identity();
+		state.turn.identity();
+		state.move.set(0.0F, 0.0F, 0.0F);
+		state.lift[0] = 0.0F;
+		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z);
+		state.pose = pose;
+		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		if (corpse.isPlayerCorpse() && look == null) {
+			extractPlayer(corpse, state, null, 0.0F, partialTicks);
+			AvatarRenderState avatar = state.avatar;
+			avatar.setData(Ragdoll.KEY, null);
+			avatar.setData(Flop.KEY, null);
+			avatar.setData(RagdollPose.KEY, pose);
+			avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			return;
+		}
+		Entity body = look != null ? look : corpse.clientBody(0.0F);
+		if (body == null) {
+			return;
+		}
+		if (look != null) {
+			corpse.placeBody(look, 0.0F);
+		}
+		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
+		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
+		if (bodyState instanceof LivingEntityRenderState living) {
+			// standing, facing front, nothing flinching: the physics does all the posing
+			living.hasRedOverlay = false;
+			living.deathTime = 0.0F;
+			living.bodyRot = 0.0F;
+			living.yRot = 0.0F;
+			living.xRot = 0.0F;
+			living.walkAnimationPos = 0.0F;
+			living.walkAnimationSpeed = 0.0F;
+		}
+		bodyState.displayFireAnimation = false;
+		if (look != null) {
+			bodyState.lightCoords = state.lightCoords;
+		}
+		bodyState.nameTag = null;
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		bodyState.setData(RagdollPose.KEY, pose);
+		state.body = bodyState;
+		state.bodyRenderer = renderer;
+	}
+
+	/**
 	 * (0.4.39) Runs the body's ragdoll physics (see Flop) and hands this frame's result to the drawing: where the body
 	 * is placed now (relative to the corpse's spot) is what it swings from the next time it changes pose.
 	 */
@@ -364,8 +441,17 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			poseStack.translate(Mth.sin(state.age * 2.7F) * shake, -0.35F * c * c, Mth.cos(state.age * 3.1F) * shake);
 			poseStack.scale(1.0F + 0.15F * c, 1.0F - 0.6F * c * c, 1.0F + 0.15F * c);
 		}
-		place(state, poseStack);
+		if (state.pose != null) {
+			// (0.5.0) onto the ragdoll
+			poseStack.mulPose(state.pose.body);
+		} else {
+			place(state, poseStack);
+		}
 		if (state.player) {
+			if (state.pose != null) {
+				// as the player renderer turns a standing model (bodyRot 0)
+				poseStack.rotate(Axis.YP.rotationDegrees(180.0F));
+			}
 			// as players are drawn
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
