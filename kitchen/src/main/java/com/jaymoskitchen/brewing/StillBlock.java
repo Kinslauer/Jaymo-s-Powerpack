@@ -70,7 +70,7 @@ public class StillBlock extends BaseEntityBlock {
 		BlockHitResult hit) {
 		if (level.getBlockEntity(pos) instanceof StillEntity entity) {
 			InteractionResult result = entity.use(player, hand, held);
-			return result == InteractionResult.PASS ? InteractionResult.TRY_WITH_EMPTY_HAND : result;
+			return result == InteractionResult.PASS ? (held.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS) : result;
 		}
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
