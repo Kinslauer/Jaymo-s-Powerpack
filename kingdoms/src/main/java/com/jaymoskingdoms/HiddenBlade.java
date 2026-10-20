@@ -3,9 +3,11 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -105,6 +107,8 @@ public final class HiddenBlade {
 	private static final Map<UUID, Long> JAMMED = new HashMap<>();
 	/** Player → {target entity id, game time} of their last 10x stab (a re-hurt of the same blow, e.g. a backstab, isn't stabbed again). */
 	private static final Map<UUID, long[]> STABBED = new HashMap<>();
+	/** Players who leapt on something this fall, till they land: whatever they drop on through it after hurts them no more. */
+	private static final Set<UUID> LEAPT = new HashSet<>();
 
 	private HiddenBlade() {
 	}
@@ -126,12 +130,14 @@ public final class HiddenBlade {
 			LAST_Y.remove(handler.player.getUUID());
 			JAMMED.remove(handler.player.getUUID());
 			STABBED.remove(handler.player.getUUID());
+			LEAPT.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			TRACKED.clear();
 			LAST_Y.clear();
 			JAMMED.clear();
 			STABBED.clear();
+			LEAPT.clear();
 		});
 	}
 
@@ -196,8 +202,15 @@ public final class HiddenBlade {
 
 	// ---- the leap ------------------------------------------------------------------------------------------------------
 
-	/** Fall damage on landing: if a skilled leap came down on (or right beside) a living thing it missed in the air, it takes it instead. */
+	/**
+	 * Fall damage on landing: after a leap that struck in the air, none (the rest of the drop, down through the target, is
+	 * part of the leap); else, if a skilled leap came down on (or right beside) a living thing it missed in the air, it
+	 * takes it instead.
+	 */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
+		if (entity instanceof ServerPlayer leapt && source.is(DamageTypeTags.IS_FALL) && LEAPT.remove(leapt.getUUID())) {
+			return false;
+		}
 		if (!(entity instanceof ServerPlayer player) || !source.is(DamageTypeTags.IS_FALL) || player.fallDistance < LEAP_MIN_FALL
 			|| !(player.level() instanceof ServerLevel level) || player.isSpectator() || !armed(player)) {
 			return true;
@@ -262,6 +275,7 @@ public final class HiddenBlade {
 		LivingEntity target = target(level, player, box, top);
 		if (target != null) {
 			leap(level, player, target, fallDamage(player), player.fallDistance);
+			LEAPT.add(player.getUUID());
 		}
 	}
 
@@ -333,9 +347,18 @@ public final class HiddenBlade {
 	// ---- the tick ------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
+		boolean second = server.getTickCount() % 20 == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Double lastY = LAST_Y.put(player.getUUID(), player.getY());
+			if (player.onGround() || player.isInWater()) {
+				// (landed: the leap's fall is over, its landing already let off)
+				LEAPT.remove(player.getUUID());
+			}
 			falling(player, lastY == null ? player.getY() : lastY);
+			if (second && !TRACKED.contains(player)) {
+				// (a player back from a log-out or a respawn, in case nothing loaded them as an entity)
+				loaded(player);
+			}
 		}
 		for (Iterator<LivingEntity> it = TRACKED.iterator(); it.hasNext(); ) {
 			LivingEntity e = it.next();
