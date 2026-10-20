@@ -622,7 +622,8 @@ public final class Approaches {
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f);
-			if (!sworn) {
+			// (0.7.100) nor of one their settlement owes for bringing one of its own home
+			if (!sworn && Captives.owed(player, f.id()) <= 0) {
 				w[SEARCH] = SEARCH_W[tv];
 				w[TOLL] = TOLL_W[tv];
 			}

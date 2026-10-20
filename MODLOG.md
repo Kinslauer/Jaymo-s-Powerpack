@@ -1818,6 +1818,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.36, Web Whip on Sneak; one pair of hands in first person:** Andy: "Web swing grab attacks should be activated by
+  holding shift while two lines are attached" and "all the counters and moves should be better animated in first person.
+  Right now there are doubled hands". With both swing webs within 3 blocks of each other on one creature or on terrain,
+  Sneak starts the whip, or pries the terrain loose while held (let go early: cracks stay, the attack ends); Sneak + R
+  or G no longer does. Small catches still reel in and far-apart webs still slingshot. In first person with
+  First-person Model, the vanilla hands (and the extra carry/ledge arms) aren't drawn while a move poses your body's
+  arms, and First-person Model's hiding of an item-holding body arm is undone for the move. See docs/web.md.
 - **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
   stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
   (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
