@@ -271,7 +271,7 @@ public final class SmokeField {
 
 	/** Like {@link #puff}, but pure white cloud (soot 0) whatever the heat. */
 	static void puffCloud(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
-		add(level, at, owner instanceof ServerPlayer ? amount * MOVE_SMOKE : amount, owner, 0.0F);
+		add(level, at, owner instanceof ServerPlayer ? amount * MOVE_SMOKE : amount, owner, 0.0F, false);
 	}
 
 	/** Marks {@code owner}'s smoke as smog until game time {@code until} (refreshed every tick while they're corrupted). */
@@ -332,10 +332,15 @@ public final class SmokeField {
 				soot = 0.0F;
 			}
 		}
-		add(level, at, amount, owner, soot);
+		add(level, at, amount, owner, soot, false);
 	}
 
-	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot) {
+	/**
+	 * {@code keepOthers}: (0.14.0) never take a block from another owner (an Emberborn's flame smoke and a flashover's
+	 * ash, so a flashover only ever burns its maker's own cloud).
+	 */
+	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot,
+		boolean keepOthers) {
 		if (amount <= 0.0F) {
 			return;
 		}
@@ -361,7 +366,7 @@ public final class SmokeField {
 		while (left > 0.0F && !queue.isEmpty()) {
 			long key = queue.dequeueLong();
 			filled.add(key);
-			left = fill(field, key, BILLOW, left, ownerId, soot);
+			left = fill(field, key, BILLOW, left, ownerId, soot, keepOthers);
 			for (Direction direction : Direction.values()) {
 				long next = BlockPos.offset(key, direction);
 				if (seen.size() < PUFF_REACH && seen.add(next) && leak(level, BlockPos.of(next)) > 0.0F) {
@@ -370,12 +375,12 @@ public final class SmokeField {
 			}
 		}
 		for (int i = 0; i < filled.size() && left > 0.0F; i++) {
-			left = fill(field, filled.getLong(i), CAP, left, ownerId, soot);
+			left = fill(field, filled.getLong(i), CAP, left, ownerId, soot, keepOthers);
 		}
 	}
 
 	/** Fills the block {@code key} up to {@code upTo} from {@code left}; returns what's left. */
-	private static float fill(Field field, long key, float upTo, float left, int ownerId, float soot) {
+	private static float fill(Field field, long key, float upTo, float left, int ownerId, float soot, boolean keepOthers) {
 		float now = field.density.get(key);
 		float room = upTo - now;
 		if (room <= 0.0F) {
@@ -384,7 +389,10 @@ public final class SmokeField {
 		float put = Math.min(room, left);
 		field.density.put(key, now + put);
 		field.soot.put(key, (field.soot.get(key) * now + soot * put) / (now + put));
-		if (ownerId != 0 || now < put) {
+		int had = field.owner.get(key);
+		if (keepOthers && had != 0 && had != ownerId) {
+			// (0.14.0) someone else's smoke stays theirs
+		} else if (ownerId != 0 || now < put) {
 			field.owner.put(key, ownerId);
 		}
 		return left - put;
@@ -1035,5 +1043,47 @@ public final class SmokeField {
 
 	static void forget(ServerPlayer player) {
 		SENT.remove(player.getUUID());
+	}
+
+	// ---- Emberborn flashover (Track A) ----
+
+	/**
+	 * (0.14.0) How thick {@code owner}'s (an entity id) smoke is in the block {@code key} ({@link BlockPos#asLong}): 0
+	 * when there's none or it's someone else's. An Emberborn's flame sets their own smoke alight (power.ember.EmberFlashover).
+	 */
+	public static float ownedDensity(Level level, long key, int owner) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null || owner == 0 || field.owner.get(key) != owner) {
+			return 0.0F;
+		}
+		return field.density.get(key);
+	}
+
+	/** (0.14.0) Burns the smoke in the block {@code key} away (a flashover): returns how much there was. */
+	public static float burnAway(Level level, long key) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null) {
+			return 0.0F;
+		}
+		float was = field.density.remove(key);
+		field.owner.remove(key);
+		field.soot.remove(key);
+		return was;
+	}
+
+	/**
+	 * (0.14.0) Like {@link #puff}, but at least {@code leastSoot} sooty (0-1): an Emberborn's flame leaves sooty smoke,
+	 * and a flashover's ash goes up black. With no {@code owner}, {@code amount} is taken as it is.
+	 */
+	public static void puffSooty(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float leastSoot) {
+		float soot = leastSoot;
+		if (owner instanceof ServerPlayer player) {
+			amount *= SmokeHeat.boost(player) * MOVE_SMOKE;
+			soot = Math.max(soot, SmokeHeat.soot(player));
+			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+				soot = Math.max(soot, SMOG_SOOT);
+			}
+		}
+		add(level, at, amount, owner, Math.min(1.0F, soot), true);
 	}
 }

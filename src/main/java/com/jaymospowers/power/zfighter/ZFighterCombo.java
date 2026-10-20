@@ -65,11 +65,24 @@ public final class ZFighterCombo {
 		{JAB, REVERSE_PUNCH, ELBOW, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, CHI_PALM, SPIN_HOOK_KICK},
 		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, FLYING_DOUBLE_KICK, DRAGON_FIST},
 	};
-	/** Ticks a blow takes, by tier (the finisher takes {@link #FINISHER_LENGTH} times as long). */
-	static final int[] STEP_TICKS = {8, 7, 6, 5, 4};
+	/**
+	 * Ticks a blow takes, by tier (the finisher takes {@link #FINISHER_LENGTH} times as long). (0.13.34) Twice as slow
+	 * as they were: the blows ran into each other and the animations stumbled over one another. Finesse speeds them
+	 * back up ({@link #speed}).
+	 */
+	static final int[] STEP_TICKS = {16, 14, 12, 10, 8};
 	static final float FINISHER_LENGTH = 1.6F;
 	/** Ticks to catch his breath after a finisher before the string starts over, by tier. */
-	static final int[] RECOVER_TICKS = {14, 12, 10, 9, 8};
+	static final int[] RECOVER_TICKS = {24, 22, 20, 18, 16};
+	/**
+	 * (0.13.34) Finesse (Jaymo's Kingdoms' attribute, read off its attack-speed share: 2.5% a point, 10 at most)
+	 * quickens the string: this much faster per share of attack speed it gives (6 makes each point 15% faster, 10
+	 * points two and a half times as fast, past the old speed). A blow never takes fewer than {@code MIN_STEP_TICKS}.
+	 */
+	static final double FINESSE_SPEED = 6.0;
+	static final int MIN_STEP_TICKS = 3;
+	private static final net.minecraft.resources.Identifier FINESSE_MODIFIER =
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskingdoms", "stat_finesse");
 	/**
 	 * A blow hits for this share of his fists, by tier: less each tier, since the strings get longer and faster (about
 	 * 1.5 fists a second at the start, 1.7 at the top, before kicks)...
@@ -203,6 +216,13 @@ public final class ZFighterCombo {
 		return unlocked >= TIER2_UNLOCKED ? 2 : unlocked >= TIER1_UNLOCKED ? 1 : 0;
 	}
 
+	/** (0.13.34) How much faster than {@link #STEP_TICKS} his string runs: 1, plus his Finesse ({@link #FINESSE_SPEED}). */
+	static double speed(Player player) {
+		var speed = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED);
+		var finesse = speed == null ? null : speed.getModifier(FINESSE_MODIFIER);
+		return 1.0 + Math.max(0.0, finesse == null ? 0.0 : finesse.amount()) * FINESSE_SPEED;
+	}
+
 	/** Whether a string is going (the old five-punch finisher stands aside). */
 	static boolean running(ServerPlayer player) {
 		return RUNS.containsKey(player.getUUID());
@@ -264,7 +284,7 @@ public final class ZFighterCombo {
 		if (age >= run.length) {
 			int[] string = STRINGS[run.tier];
 			if (run.step >= string.length - 1) {
-				run.recoverUntil = now + RECOVER_TICKS[run.tier];
+				run.recoverUntil = now + Math.max(MIN_STEP_TICKS, Math.round(RECOVER_TICKS[run.tier] / speed(player)));
 			} else {
 				begin(player, run, run.step + 1, now);
 			}
@@ -278,7 +298,7 @@ public final class ZFighterCombo {
 		run.stepAt = now;
 		run.struck = false;
 		run.snapped = false;
-		run.length = Math.round(STEP_TICKS[run.tier] * (finisher ? FINISHER_LENGTH : 1.0F));
+		run.length = Math.max(MIN_STEP_TICKS, (int)Math.round(STEP_TICKS[run.tier] * (finisher ? FINISHER_LENGTH : 1.0F) / speed(player)));
 		run.serial = run.serial + 1 & 0x7FFF;
 		int move = string[step];
 		LivingEntity target = target(player, run);

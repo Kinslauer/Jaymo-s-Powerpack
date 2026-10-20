@@ -1764,6 +1764,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     code is untouched (their 4-argument `Beam` still works).
   - Rogue fighters' blasts are still instant (BeamClash is for players). Numbers at the top of `ZFighterWaveBeam`,
     `ZFighterKi` (speeds) and `BeamClash` (the ki outcome).
+- **0.13.31, move names match the move:** Andy: "Not every move name is consistent across zfighters, for instance the V
+  overlay says ki wave always." The V charge bar's label was the fixed "Ki Wave"; it now names whatever is on V: the
+  lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb (`ZFighterLineage.techniqueKey`, as
+  the training screen already did). The V key's description in the powers menu names the lineage waves too, and the
+  Crimson Cannon's description no longer calls it violet (it takes your ki colour since 0.13.27).
 - **0.13.29, Super 2 and 3 within reach:** Andy: "super 2 and 3 dont seem to be possible to acquire". The slower growth
   of 0.13.19 cut TP to a quarter (about 180 an hour from time alone, half a point a hit), but Super 2 and 3 still cost
   4000 and 12000 TP: some 22 and 67 hours. They now cost 1500 and 4500 (`ZFighterTraining.FORM_TP`), still slower than
@@ -1813,3 +1818,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.14.0, Emberborn Kindle (Kingdoms 0.7.97):** Andy: "expand on emberborn, with a left click hold ability, and
+  synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
+  from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
+  candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
+  at full heat throws a fireball (2.5-block burst, no block damage, 5 s cooldown). Cold halves it, rain only hisses.
+  With the Smoke power: their body is a heat source for their smoke, the flame leaves soot, and flame meeting their own
+  smoke sets off a flashover that races through the cloud. Plain left hold for Smoke users, sneak + hold with other
+  powers (`RaceHoldClient`). All in `power/ember` and `docs/Ember-Ice-Plan.md`. Smoke puffs marked keep-others never
+  take another owner's block (`SmokeField.add`).
