@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>R (hold), Speed Burst: while held, up to {@link #BURST_MAX_TICKS}, you are far faster, step up whole blocks and
  * run straight up any wall you meet (up to {@link #WALL_RUN_TICKS}).</li>
  * <li>G, Rapid Punches: {@link #PUNCH_HITS} blows on whoever you aim at, one every {@link #PUNCH_SPACING} ticks.</li>
- * <li>V, Cyclone: run a tight circle that sweeps everything within {@link #CYCLONE_RADIUS} round you and lifts it.</li>
+ * <li>V, Cyclone: sweeps everything within {@link #CYCLONE_RADIUS} round you in a tight circle and lifts it.</li>
  * <li>B, Chain Strike: flicker between up to {@link #CHAIN_TARGETS} foes within {@link #CHAIN_RANGE}, striking each.</li>
  * <li>C (ascended), Standstill: for {@link #STANDSTILL_TICKS} everything living within {@link #STANDSTILL_RADIUS} crawls
  * and every projectile hangs in the air; C again every {@link #STANDSTILL_COOLDOWN}.</li>
@@ -99,7 +99,7 @@ public final class Velox extends XenoForm {
 			fall.removeModifier(SAFE_FALL_ID);
 		}
 		burstModifiers(player, false);
-		releaseAll(player.level(), live);
+		releaseAll(live);
 		live.bursting = false;
 		live.standstill = 0;
 	}
@@ -405,24 +405,25 @@ public final class Velox extends XenoForm {
 		// projectiles caught in it hang almost still
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(STANDSTILL_RADIUS),
 			p -> p.isAlive() && p.getOwner() != player && p.distanceToSqr(player) <= r2)) {
-			double[] caught = live.held.get(projectile.getId());
-			if (caught == null) {
+			XenoformPower.Held held = live.held.get(projectile.getId());
+			if (held == null) {
 				Vec3 v = projectile.getDeltaMovement();
-				caught = new double[] {v.x, v.y, v.z, projectile.isNoGravity() ? 1.0 : 0.0};
-				live.held.put(projectile.getId(), caught);
+				held = new XenoformPower.Held(projectile, new double[] {v.x, v.y, v.z, projectile.isNoGravity() ? 1.0 : 0.0});
+				live.held.put(projectile.getId(), held);
 				projectile.setNoGravity(true);
 			}
+			double[] caught = held.caught();
 			projectile.setDeltaMovement(caught[0] * STANDSTILL_PROJECTILE, caught[1] * STANDSTILL_PROJECTILE, caught[2] * STANDSTILL_PROJECTILE);
 			projectile.syncVelocity = true;
 		}
 		// the ones that got out of range, or ended, are let go
-		live.held.keySet().removeIf(id -> {
-			Entity e = level.getEntity(id);
-			if (!(e instanceof Projectile projectile) || !projectile.isAlive()) {
+		live.held.values().removeIf(held -> {
+			Projectile projectile = held.projectile();
+			if (!projectile.isAlive()) {
 				return true;
 			}
-			if (projectile.distanceToSqr(player) > r2) {
-				release(projectile, live.held.get(id));
+			if (projectile.level() != level || projectile.distanceToSqr(player) > r2) {
+				release(projectile, held.caught());
 				return true;
 			}
 			return false;
@@ -447,6 +448,8 @@ public final class Velox extends XenoForm {
 		ServerLevel level = player.level();
 		live.standstill = STANDSTILL_TICKS;
 		ultimateCooldown(player, live, STANDSTILL_COOLDOWN);
+		MobEffectInstance had = player.getEffect(MobEffects.SPEED);
+		live.savedSpeed = had == null ? null : new MobEffectInstance(had);
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, STANDSTILL_TICKS, 1, false, false));
 		ring(level, ParticleTypes.END_ROD, player.position(), 4.0, 24);
 		sound(player, SoundEvents.BELL_RESONATE, 1.4F, 0.5F);
@@ -456,10 +459,17 @@ public final class Velox extends XenoForm {
 	/** Time moves again: the projectiles fly on from where they hang, with their gravity back. */
 	private static void endStandstill(ServerPlayer player, XenoformPower.Live live, boolean fx) {
 		boolean was = live.standstill > 0;
+		int elapsed = STANDSTILL_TICKS - live.standstill;
 		live.standstill = 0;
-		releaseAll(player.level(), live);
+		releaseAll(live);
 		if (was) {
 			player.removeEffect(MobEffects.SPEED);
+			// the beacon or potion Speed it replaced comes back, with the time it ran down meanwhile
+			MobEffectInstance had = live.savedSpeed;
+			if (had != null && (had.isInfiniteDuration() || had.getDuration() > elapsed)) {
+				player.addEffect(had.isInfiniteDuration() ? had : new MobEffectInstance(had.getEffect(), had.getDuration() - elapsed,
+					had.getAmplifier(), had.isAmbient(), had.isVisible(), had.showIcon()));
+			}
 			if (fx) {
 				ring(player.level(), ParticleTypes.END_ROD, player.position(), 4.0, 24);
 				sound(player, SoundEvents.BELL_RESONATE, 1.4F, 0.4F);
@@ -469,13 +479,14 @@ public final class Velox extends XenoForm {
 	}
 
 	/** Lets go of every projectile Standstill holds. */
-	private static void releaseAll(ServerLevel level, XenoformPower.Live live) {
-		for (var entry : live.held.entrySet()) {
-			if (level.getEntity(entry.getKey()) instanceof Projectile projectile) {
-				release(projectile, entry.getValue());
+	private static void releaseAll(XenoformPower.Live live) {
+		for (XenoformPower.Held held : live.held.values()) {
+			if (held.projectile().isAlive()) {
+				release(held.projectile(), held.caught());
 			}
 		}
 		live.held.clear();
+		live.savedSpeed = null;
 	}
 
 	private static void release(Projectile projectile, double[] caught) {

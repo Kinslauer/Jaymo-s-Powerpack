@@ -156,7 +156,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 |---|---|---|---|---|---|
 | 152 | Getting it | | Falling star | On a clear night a star may fall near you (40–100 blocks off, once a day per world at most). Mine the Fallen Star in its crater with an iron pickaxe: 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Right-click the band on (powerless survival players get the power at once). | |
 | 153 | Band | Z | Dial / Slam | Hold: the wrist comes up; scroll to turn the dial through the aliens the band holds. Let go: the band slams and you become the dialled alien. As an alien, hold 0.5 s to turn back. A form lasts a random 1–5 min until fully mastered, then 5; beeps through the last 10 s. At zero health you're knocked back into yourself; the band recharges 1 min (2 after a knockout). Fists only while changed. | |
-| 154 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Blur, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm. | |
+| 154 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Velox, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm. | |
 | 155 | Bulwark | R | Fist Combo | 3 blows at 4 ticks, 5 damage each, the last one shoves. 2 s. | |
 | 156 | Bulwark | G | Ground Clap | 6 damage and a shove to all within 5 blocks, debris ring. 8 s. | |
 | 157 | Bulwark | V | Grab and Throw | Lift the creature you look at overhead; V again hurls it at 1.5 blocks/tick. Looking at the ground rips a 4-block chunk out and throws it. 1 s. | |
@@ -166,10 +166,10 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 161 | Pyre | V | Fire Nova | 6 damage and 5 s of fire to all within 5 blocks. 10 s. | |
 | 162 | Pyre | B | Magma Trail | Fire under your feet for 6 s. 15 s. | |
 | 163 | Pyre | passive | Living magma | Fire and lava can't hurt it; water and rain do 1 hp/s. | |
-| 164 | Blur | R | Dash | 1.5 blocks/tick for 8 ticks. 2 s. | |
-| 165 | Blur | G (hold) | Wall Run | Against a wall, run straight up it for up to 2 s. | |
-| 166 | Blur | V | Whirlwind | Pulls everything within 5 blocks in and hits it for 4. 8 s. | |
-| 167 | Blur | B | Chain Strike | Up to 5 foes within 8 blocks: every 3 ticks you flicker behind one and hit it for 5. 12 s. | |
+| 164 | Velox | R (hold) | Speed Burst | +120% speed, steps up whole blocks, climbs walls on contact, up to 6 s. 3 s. | |
+| 165 | Velox | G | Rapid Punches | 6 double hits on the creature you aim at within 3.5 blocks, one every 2 ticks; the last shoves. 5 s. | |
+| 166 | Velox | V | Cyclone | 1.5 s: sweeps everything within 6 blocks round you and lifts it, 3 damage once. 10 s. | |
+| 167 | Velox | B | Chain Strike | Up to 5 foes within 8 blocks: every 3 ticks you flicker behind one and hit it for 5. 12 s. | |
 | 168 | Band | passive | Corruption | Each knockout adds 25 corruption (4 corrupt the band). Corrupted: 1 slam in 4 gives the wrong alien, and about every 6 minutes as a human the band changes you on its own. Always shown on screen. | |
 | 169 | Prism | R | Crystal Shards | Three shards fan out 16 blocks, 4 damage each. 1.5 s. | |
 | 170 | Prism | G | Crystal Wall | A 5x3 amethyst wall 3 blocks ahead for 10 s. 12 s. | |
@@ -196,7 +196,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 191 | Any | C (ascended) | Ultimate | As an alien: become its Ultimate form for the rest of the timer. C again is the Ultimate's own move where it has one. | |
 | 192 | Bulwark | C | Titan | 2x size, +12 armour, +20 health; the Ground Clap smashes walls up to 3 blocks thick ahead of you. | |
 | 193 | Pyre | C | Sunheart | The Flame Jet flies 45% faster; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
-| 194 | Blur | C | Afterimage | A glowing ghost of you bolts away for 10 s and everything hunting you hunts it. C again: another, every 10 s. | |
+| 194 | Velox | C | Standstill | 6 s: everything living within 24 blocks is nearly frozen, projectiles hang, you get Speed II. C again every 30 s. | |
 | 195 | Prism | C | Geode | Everything within 6 blocks is cased in crystal for 4 s (held, can't strike); projectiles shatter; you get Resistance III. Every 20 s. | |
 | 196 | Wisp | C | Revenant | Possess the mob you look at (8 blocks) for 10 s: it goes where you look; nothing hunts you. C again lets go. | |
 | 197 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |

@@ -94,6 +94,9 @@ public final class XenoformPower implements Power {
 	private static final Identifier STEP_ID = JaymosPowers.id("xenoform_step");
 
 	/** Server-side bookkeeping for one player (not saved: a relog turns them back first). */
+	/** A projectile Standstill holds (kept by reference, so it is let go in whichever dimension it is in) and its caught state. */
+	public record Held(net.minecraft.world.entity.projectile.Projectile projectile, double[] caught) {}
+
 	public static final class Live {
 		@Nullable XenoForm form;
 		int ticksLeft, total;
@@ -133,7 +136,9 @@ public final class XenoformPower implements Power {
 		public int cyclone;
 		/** Velox's Standstill: ticks left, and each projectile held still (entity id to its velocity when caught and whether it flew without gravity). */
 		public int standstill;
-		public final Map<Integer, double[]> held = new HashMap<>();
+		public final Map<Integer, Held> held = new HashMap<>();
+		/** The Speed effect Standstill replaced (null: none), put back when it ends. */
+		public net.minecraft.world.effect.MobEffectInstance savedSpeed;
 		/** Prism: in the reflect stance; the wall's blocks and when it falls. */
 		public boolean reflecting;
 		public final List<net.minecraft.core.BlockPos> wall = new ArrayList<>();
@@ -195,6 +200,7 @@ public final class XenoformPower implements Power {
 			cyclone = 0;
 			standstill = 0;
 			held.clear();
+			savedSpeed = null;
 			reflecting = false;
 			wall.clear();
 			shroud = glide = false;

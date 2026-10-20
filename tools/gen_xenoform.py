@@ -595,7 +595,7 @@ def blur():
             for y in range(y0 + 1, y1, 3):
                 rect(img, (x0, y, x1, y + 1), shade(pale, LIGHT[name]))
     # the tail's tip is bright
-    rect(img, (26 + 20, 84 + 2, 26 + 22, 84 + 12), (190, 250, 255, 255))
+    rect(img, (46, 94, 48, 96), (190, 250, 255, 255))
     clear_hat(img)
     save(img, "entity/xenoform_blur.png")
 

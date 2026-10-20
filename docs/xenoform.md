@@ -65,7 +65,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Gremlin** | silverfish | 0.3x, 10 hp, fists 2, 20% faster, no fall damage; fits 1x1 gaps | Spring: 1.1 up, 0.6 out (1.5 s) | Sabotage: within 16 blocks, levers and buttons are pulled, doors/trapdoors/gates toggled, wire/repeaters/comparators/torches popped off (5 s) | Bite: 3 damage within 2.5; players lose 4 food, mobs get Hunger II + Weakness; you heal 2 and eat 2 (3 s) | Climb (hold): up any wall at 0.18/tick |
 | **Knell** | Warden | 1.3x, 50 hp, fists 8, slower, 90% knockback resist, steps up a block | Sonic Boom: 15-block line through walls, 10 sonic damage + 2.5 knockback (8 s) | Tremor Sense (hold): Glowing on everything within 24 | Shriek: 4 damage, Darkness 6 s, Slowness II to all within 12 (15 s) | Burrow: 1 s digging (immune, Slowness X), teleport to the surface where you look up to 16 blocks, 1 s emerging (12 s) |
 | **Wyrm** | Ender Dragon (any part) | 1.2x, 36 hp, fists 5, 40% knockback resist; water and rain 1 hp/s; its own breath can't hurt it | Dragon's Breath: an `AreaEffectCloud` 5 blocks ahead on the ground, radius 3, 5 s, Instant Damage II (10 s) | Wings (hold): fly toward where you look at 0.9/tick, free; slow falling on release | Wing Gust: 3 damage, shove 1.6 out to all within 6, you recoil (6 s) | Rift: teleport up to 12 blocks where you look (4 s) |
-| **Blur** | horse (any) | 0.9x, 20 hp, fists 4, 60% faster, 4 blocks of extra safe fall | Dash: 1.5 blocks/tick for 8 ticks (2 s) | Wall Run (hold): against a wall, climb at 0.32/tick for up to 2 s | Whirlwind: pulls everything within 5 in, 4 damage (8 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
+| **Velox** | horse (any) | 0.9x, 20 hp, fists 4, 80% faster, 4 blocks of extra safe fall; runs on water while sprinting | Speed Burst (hold): +120% speed, steps up whole blocks, climbs walls on contact, up to 6 s (3 s) | Rapid Punches: 6 double hits, one every 2 ticks, on the creature you aim at within 3.5; the last shoves (5 s) | Cyclone: 1.5 s, sweeps everything within 6 round you and lifts it up to 3.5 blocks, 3 damage once (10 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
 
 ## Rendering [client/power/xenoform]
 
@@ -75,9 +75,9 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   `isInvisible` again so the shadow still falls.
 - `XenoFormModels`: each alien is a `HumanoidModel` built from `HumanoidModel.createMesh` with a different inflation and
   extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crown and hair of fire,
-  shoulder plumes, forearm flames and core; Blur's
-  fin, snout and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
-  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Blur's
+  shoulder plumes, forearm flames and core; Velox's
+  crest, visor, snout, ball feet and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
+  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Velox's
   ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
   64x128: the vanilla layout in the top 64 rows, every extra in the rows below (nothing shares texels with a limb);
   `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
@@ -126,7 +126,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 |---|---|---|
 | Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
 | Pyre | Sunheart | The jet flies at 0.8/tick; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
-| Blur | Afterimage | An invisible, glowing horse of your DNA bolts away for 10 s; mobs hunting you within 20 blocks retarget to it. C again every 10 s. |
+| Velox | Standstill | Everything living within 24 blocks gets Slowness VII and its speed cut for 6 s; projectiles hang at 5% speed, then fly on; you get Speed II. C again every 30 s. |
 | Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
 | Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |
 | Gremlin | Swarm | 3 glowing silverfish follow you, bite what you bite and never attack players. C again swaps places with the farthest (nearest, sneaking), every second. |
@@ -135,7 +135,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 
 - **The corruption, per alien** (`live.corrupted`, refreshed every tick; the line `xenoform.jaymospowers.<id>.corrupt`
   is sent in chat when you change while corrupted): Bulwark's fists +2 and the slam costs you 3; Pyre's nova and trail
-  light the ground round you and water bites double; Blur's dash runs until a wall or a creature (up to 3 s, 4 damage
+  light the ground round you and water bites double; Velox's burst ending starts a run-away dash until a wall or a creature (up to 3 s, 4 damage
   to what it hits); Prism's reflect lets 1 arrow in 4 through; Wisp's shroud shows you 10 ticks in every 60 and 1 phase
   in 4 bites (3 in-wall damage, nausea); Gremlin's bite catches everyone within 2.5 of its mark and each sabotage also
   throws a random lever/button within 6; Knell's boom gives you darkness and its shriek fires every sculk shrieker
