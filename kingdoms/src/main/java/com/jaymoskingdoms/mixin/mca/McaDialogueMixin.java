@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.20) A foreigner ({@link Languages}) gets a shrug for anything that takes words ({@link Languages#simpleDialogue}).
  * "Ask about their blood" ({@link VillagerHeritage#ANSWER}), and now and then in a chat: what blood they are, and a
  * Warrior-born why there's no tail to see.
- * (0.7.99) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
+ * (0.7.101) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
  * safe is burned and pulls away, and the villager says so.
  */
 @Mixin(Dialogues.class)
@@ -39,7 +39,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && "hug".equals(answer)) {
-			// (0.7.99) an Emberborn is too hot to hold without fire resistance (either of you)
+			// (0.7.101) an Emberborn is too hot to hold without fire resistance (either of you)
 			LivingEntity burned = EmberHugs.burned(player, villager);
 			if (burned != null) {
 				EmberHugs.burn((ServerLevel) villager.level(), burned == player ? villager : player, burned);

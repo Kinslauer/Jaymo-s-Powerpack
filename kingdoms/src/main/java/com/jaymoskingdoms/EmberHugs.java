@@ -11,7 +11,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.99) Nobody hugs an Emberborn ({@link Heritage.Kind#EMBERBORN}, a villager's or a player's blood) without fire
+ * (0.7.101) Nobody hugs an Emberborn ({@link Heritage.Kind#EMBERBORN}, a villager's or a player's blood) without fire
  * resistance: their skin is too hot to hold. Whoever isn't safe from fire (not Emberborn themselves, not fireproof, no
  * Fire Resistance) is burned and pulls away, and the hug never happens. It goes for a player hugging a villager through
  * MCA's menu (either way round: an Emberborn player burns a villager they hug, {@code mixin/mca/McaDialogueMixin}) and
