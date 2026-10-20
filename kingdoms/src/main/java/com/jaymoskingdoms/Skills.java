@@ -144,7 +144,9 @@ public final class Skills {
 		// (0.7.29) Survival's second root: the meditate key (Jaymo's Powers' Meditate). Rank 1 opens it, more ranks quicken it
 		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0),
 		// (0.7.30) Strength's second root: every weapon's full Better Combat combo (WeaponForms); without it, one or two plain swings
-		WEAPON_FORMS(Pillar.STRENGTH, 1, 1, 2, 0, 0);
+		WEAPON_FORMS(Pillar.STRENGTH, 1, 1, 2, 0, 0),
+		// (0.7.98) any crossbow takes anything from the off hand (OmniCrossbow's Omni, as a Survival skill for every class)
+		MAKE_DO(Pillar.SURVIVAL, 1, 2, 5, 1, 1, FORAGER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -216,6 +218,9 @@ public final class Skills {
 		public @Nullable String blocked(Perk perk) {
 			if (!perk.pillar.open) {
 				return "gui.jaymoskingdoms.skills.blocked.later";
+			}
+			if (perk == Perk.MAKE_DO && !OmniCrossbows.LOADED) {
+				return "gui.jaymoskingdoms.skills.blocked.omni";
 			}
 			if (rank(perk) >= perk.maxRank) {
 				return "gui.jaymoskingdoms.skills.blocked.max";

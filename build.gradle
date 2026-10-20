@@ -206,6 +206,14 @@ def packModsOverride = [
 	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
 	// Fabric port stops at 1.21.1. Beta. Needs Forge Config API Port (packMods) and Player Animation Library 1.2.7+.
 	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
+	// OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; github.com/ThePotatoArchivist/OmniCrossbow; shipped as the untouched
+	// jar with credit): load almost any item into a crossbow from the off hand, each flying its own way (data-driven).
+	// Jaymo's Kingdoms makes it a skill (Survival's Make Do perk, any class) and the Omni enchantment does nothing for a
+	// player without it (OmniCrossbows). Client and server; needs Fabric Language Kotlin (packMods) and carries its own
+	// Kaleido Config.
+	// TODO(home PC): the cloud couldn't reach Modrinth, so this is the 26.3 version number from the mod's source (1.1.4,
+	// 2026-09-30), not a version id; pin the id, and move it to packMods if it has a CurseForge file.
+	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }

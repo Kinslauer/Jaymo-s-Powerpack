@@ -3412,3 +3412,11 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
+- **0.7.98, Make Do (OmniCrossbow as a skill):** Andy: "Marksman class should get acess to this
+  (modrinth.com/mod/omnicrossbow)", then "It should be a node in the skill tree under survival, unlocks a utility across
+  classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.13.36,
+  `packModsOverride`). A new Survival perk, **Make Do** (level 5, 2 points, under Forager, tier 1 middle), lets any
+  class's crossbow load anything from the off hand, enchanted or not; without it the mod's Omni enchantment does
+  nothing in a player's hands (mobs keep theirs). `OmniCrossbows` decides, through `mixin/omni/PlayerProjectileMixin`
+  (priority 1500, after the mod's own mixin on `Player.getProjectile`), applied only when the mod is loaded; without
+  the mod the perk can't be learned. Nothing of the mod's is compiled against.

@@ -1818,3 +1818,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.36, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
+  untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
+  Kingdoms 0.7.98 makes it Survival's Make Do perk, for every class.
