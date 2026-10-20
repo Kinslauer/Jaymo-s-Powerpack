@@ -52,6 +52,10 @@ public final class Wounds {
 			.syncWith(ByteBufCodecs.FLOAT.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
 	/** Creatures whose wounds are killing them just now: our own lethal blow doesn't route again. */
+	/** The max health the stored fractions were taken against (server side only), so a raised max is not read as a loss. */
+	public static final AttachmentType<Float> PARTS_MAX = AttachmentRegistry.create(JaymosPowers.id("wounds_max"),
+		builder -> builder.persistent(Codec.FLOAT));
+
 	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	private static int tickCounter;
 
@@ -140,6 +144,7 @@ public final class Wounds {
 	public static void healAll(LivingEntity entity) {
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
+		entity.removeAttached(PARTS_MAX);
 	}
 
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */
@@ -148,7 +153,8 @@ public final class Wounds {
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return;
 		}
-		if (entity.getAttached(PARTS) == null && entity.getHealth() >= entity.getMaxHealth()) {
+		Float known = entity.getAttached(PARTS_MAX);
+		if (entity.getAttached(PARTS) == null && entity.getHealth() >= entity.getMaxHealth() && (known == null || known >= entity.getMaxHealth())) {
 			return;
 		}
 		float[] points = load(entity, plan);
@@ -228,11 +234,14 @@ public final class Wounds {
 	/** The parts in health points. A creature with no attachment is whole. */
 	static float[] load(LivingEntity entity, BodyPlan plan) {
 		float max = entity.getMaxHealth();
+		// a raised max is added capacity, not a loss: the fractions still mean their old max
+		Float known = entity.getAttached(PARTS_MAX);
+		float base = known != null && known > 0.0F && known < max ? known : max;
 		List<Float> fractions = entity.getAttached(PARTS);
 		float[] points = new float[plan.size()];
 		for (int i = 0; i < points.length; i++) {
 			float fraction = fractions != null && fractions.size() == points.length ? Mth.clamp(fractions.get(i), 0.0F, 1.0F) : 1.0F;
-			points[i] = fraction * plan.share(i) * max;
+			points[i] = fraction * plan.share(i) * base;
 		}
 		return points;
 	}
@@ -250,6 +259,10 @@ public final class Wounds {
 			float fraction = cap <= 0.0F ? 1.0F : Mth.clamp(points[i] / cap, 0.0F, 1.0F);
 			whole &= fraction >= WHOLE;
 			fractions.add(fraction);
+		}
+		Float knownMax = entity.getAttached(PARTS_MAX);
+		if (knownMax == null || knownMax != max) {
+			entity.setAttached(PARTS_MAX, max);
 		}
 		List<Float> old = entity.getAttached(PARTS);
 		if (whole) {
@@ -316,6 +329,14 @@ public final class Wounds {
 					}
 					float floor = part.vital() ? MIN_VITAL_UNROUTED * plan.share(i) * max : 0.0F;
 					float take = Math.min(loss, Math.max(0.0F, points[i] - floor));
+					points[i] -= take;
+					loss -= take;
+				}
+			}
+			// health below the floors: the parts still have to add up (this never kills, only hits and wounds do)
+			for (int i = 0; i < points.length && loss > EPS; i++) {
+				if (plan.part(i).vital()) {
+					float take = Math.min(loss, points[i]);
 					points[i] -= take;
 					loss -= take;
 				}
