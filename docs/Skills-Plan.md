@@ -11,7 +11,7 @@ every player whatever their power: it never touches a power's abilities or maste
 
 ## How every pillar works
 - Each pillar has its own XP, earned by doing what it's about, and levels 0-15 (level l → l+1 takes 30 + 15·l XP);
-  Strength and (Kingdoms 0.7.98) Stealth go on to 25 for their second pages.
+  Strength and (Kingdoms 0.7.101) Stealth go on to 25 for their second pages.
 - **Practice:** each level improves the pillar's core thing a little by itself (Stealth: marks feel your hand 3%
   less per level).
 - **Points:** each level is one point for that pillar's perks. The tree has 15 points of perks, so a master of a
@@ -37,7 +37,7 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
 - Slip Away: half the time a mark turns on you, they can't tell who: no crime.
 - Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
-### Hoods (Kingdoms 0.7.98, with Powers 0.13.36)
+### Hoods (Kingdoms 0.7.101, with Powers 0.14.3)
 Andy: "id like any hooded costumes to add to stealth, while not completely concealing identity like it does now".
 Powers tags a player whose costume mask is a Hood or a Peaked Hood (head piece on, face showing) with
 `jaymospowers_hooded:<key>`; Kingdoms reads only the tag (`Identities.hoodKey`, `hooded`, `hoodSight`).
@@ -55,7 +55,7 @@ Powers tags a player whose costume mask is a Hood or a Peaked Hood (head piece o
   pulling it up gives nothing away. A paranoid king's guards stop hooded strangers too ("lower that hood").
 - MCA's villagers still know a hooded friend: only a full mask hides you from their memories (`MASKED_AS`).
 
-### Hidden blade (Kingdoms 0.7.98)
+### Hidden blade (Kingdoms 0.7.101)
 Andy: "They also need a hidden blade weapon, craftable at all times but usable only by those with sufficient stealth
 skill. It enables jumping from height and converting your fall damage into damage dealt to the enemy, leaving them
 crippled for the duration, and hidden blade stabs deal 10x damage when attacking crippled enemies."
@@ -77,7 +77,7 @@ crippled for the duration, and hidden blade stabs deal 10x damage when attacking
   10x (`CRIPPLED_STAB`), after the class perks and the Combat Arts.
 - The assassin who comes for rulers now draws a hidden blade (his blows and stab unchanged).
 
-## Freerunning (Stealth's second page, Kingdoms 0.7.98, with Powers 0.13.36)
+## Freerunning (Stealth's second page, Kingdoms 0.7.101, with Powers 0.14.3)
 Andy picked "Full freerunning" (2026-10-20). Stealth now goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still
 counts only to 15, and the pocket practice only the first 15 levels). Kingdoms owns the perks (`Skills.Perk`, appended
 last) and the page ("Freerunning >" in the tree); the moves are Powers' (`freerun/Freerun`, client

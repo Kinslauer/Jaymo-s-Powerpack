@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * The local player on a ledge (or, 0.13.36, hanging from a bar): the hold moves them instead of their own travel (no
+ * The local player on a ledge (or, 0.14.3, hanging from a bar): the hold moves them instead of their own travel (no
  * gravity, no steering), and a Jump press there climbs (or swings off) instead of opening an elytra.
  */
 @Mixin(Player.class)
@@ -22,7 +22,7 @@ abstract class LedgePlayerMixin {
 			LedgeClient.travel(Minecraft.getInstance().player);
 			ci.cancel();
 		} else if (com.jaymospowers.client.freerun.FreerunClient.hanging() && (Object)this == Minecraft.getInstance().player) {
-			// (0.13.36) hanging from a bar (Bar Swing): held under it the same way
+			// (0.14.3) hanging from a bar (Bar Swing): held under it the same way
 			com.jaymospowers.client.freerun.FreerunClient.travel(Minecraft.getInstance().player);
 			ci.cancel();
 		}

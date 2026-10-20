@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.13.36) Sure Footing as everyone sees it ({@link Freerun#balancing}): on a narrow top, both arms held out to the
+ * (0.14.3) Sure Footing as everyone sees it ({@link Freerun#balancing}): on a narrow top, both arms held out to the
  * sides for balance, seesawing a little, the body swaying about the feet and the head held level against it. Worked
  * out from the synced ranks and where the player stands, so it shows on every player in view. Laid on early (after
  * the free fall), so any power's own pose wins over it.

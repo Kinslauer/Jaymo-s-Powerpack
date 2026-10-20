@@ -26,7 +26,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Carry.init();
 		com.jaymospowers.core.Crawl.init();
 		com.jaymospowers.core.Ledge.init();
-		// (0.13.36) freerunning, Kingdoms' Stealth tree's second page
+		// (0.14.3) freerunning, Kingdoms' Stealth tree's second page
 		com.jaymospowers.freerun.Freerun.init();
 		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.FlightRoll.init();

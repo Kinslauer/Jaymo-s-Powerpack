@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.13.36) The local player's freerunning (see {@link Freerun} for the moves, the rules and the numbers), from the
+ * (0.14.3) The local player's freerunning (see {@link Freerun} for the moves, the rules and the numbers), from the
  * ranks Kingdoms gives them ({@link Freerun#PERKS}). Ticks after the powers (so a web slinger's own parkour and wall run
  * go first and this stands aside while one is on) and after the ledge grab (a ledge in reach is the ledge's).
  * <ul>

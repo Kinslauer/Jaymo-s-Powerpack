@@ -44,7 +44,7 @@ public final class FreefallPose {
 		}
 		float falling = (float)(player.yo - player.getY());
 		float strength = Mth.clamp((falling - START) / (FULL - START), 0.0F, 1.0F);
-		// (0.13.36) and a freerunner with Leap of Faith, falling looking down
+		// (0.14.3) and a freerunner with Leap of Faith, falling looking down
 		boolean dive = com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.wind.WindPower.INSTANCE)
 			|| com.jaymospowers.freerun.Freerun.dives(player);
 		float tip = Mth.clamp((falling - START) / (DIVE_FULL - START), 0.0F, 1.0F);

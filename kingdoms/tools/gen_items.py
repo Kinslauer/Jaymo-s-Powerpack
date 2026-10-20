@@ -1,7 +1,7 @@
 """Draws Jaymo's Kingdoms' item sprites (original art). Run from kingdoms/: python -I tools/gen_items.py
 
 plot_stake: a pointed wooden stake with a little red pennant tied on near the top.
-hidden_blade (0.7.98): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
+hidden_blade (0.7.101): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
 top-right, no black outlines, light from the top-left, vanilla's own iron ramp).
 """
 import os

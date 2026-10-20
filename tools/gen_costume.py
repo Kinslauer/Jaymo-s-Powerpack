@@ -440,7 +440,7 @@ def carapace(part, face, x, y, w, h, rng):
 
 
 def assassin(part, face, x, y, w, h, rng):
-    """Assassin (0.13.36): a fitted robe crossed at the chest with a trimmed lapel, a sash and buckle at the waist,
+    """Assassin (0.14.3): a fitted robe crossed at the chest with a trimmed lapel, a sash and buckle at the waist,
     leather-dark forearms under the bracers, boots; the coat tails, bracers and mantle are separate boxes (ASSASSIN_BOXES)."""
     if is_arm(part):
         if face == "top":
@@ -508,7 +508,7 @@ def assassin_pad(part, face, x, y, w, h, rng):
     return (S, -60) if (face not in ("top", "bottom") and y == h - 1) else (S, -10)
 
 
-# (0.13.36) the assassin's extra boxes: (name, texture u, v, w, h, d, pattern), per slim; CostumeModels.assassin
+# (0.14.3) the assassin's extra boxes: (name, texture u, v, w, h, d, pattern), per slim; CostumeModels.assassin
 def assassin_boxes(slim):
     aw = 3 if slim else 4
     return [("pad", 32, 0, 5, 3, 5, assassin_pad), ("mantle", 32, 8, 5, 2, 5, assassin_pad),
@@ -651,7 +651,7 @@ def headband(face, x, y):
 
 
 def peaked_hood(face, x, y):
-    """Assassin (0.13.36): a deep hood, the face left open but shaded under the peak; lined at the cheeks."""
+    """Assassin (0.14.3): a deep hood, the face left open but shaded under the peak; lined at the cheeks."""
     if face == "bottom":
         return None
     if face == "front":

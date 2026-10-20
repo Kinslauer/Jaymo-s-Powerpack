@@ -44,7 +44,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		BODYSUIT, ARMOURED, ROBES, COAT, RAGGED,
 		WEBBED("web"), WINDSWEPT("wind"), DENSE("gravity"), CLOCKWORK("chrono"), BANDOLIER("arsenal"), RESONANT("resonance"),
 		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform"),
-		// (0.13.36) anyone's: the assassin's robe
+		// (0.14.3) anyone's: the assassin's robe
 		ASSASSIN;
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
@@ -72,14 +72,14 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		NONE(false), HALF_MASK(false), FULL_MASK(true), HOOD(false), HELMET(true), GOGGLES(false),
 		// (0.11.78) power sets
 		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter"),
-		// (0.13.36) anyone's: a deep hood with a peak over the brow; like the plain hood it leaves the face showing
+		// (0.14.3) anyone's: a deep hood with a peak over the brow; like the plain hood it leaves the face showing
 		PEAKED_HOOD(false);
 
 		public static final Codec<Mask> CODEC = StringRepresentable.fromEnum(Mask::values);
 		public static final StreamCodec<ByteBuf, Mask> STREAM_CODEC = CostumeDesign.byOrdinal(values());
 
 		/**
-		 * (0.13.36) Whether it is a hood ({@link #HOOD}, {@link #PEAKED_HOOD}): the face shows, but a hooded player is
+		 * (0.14.3) Whether it is a hood ({@link #HOOD}, {@link #PEAKED_HOOD}): the face shows, but a hooded player is
 		 * harder to pick out at a distance ({@code SecretIdentity#HOODED}, the name tag's range) and Kingdoms' stealth
 		 * reads it.
 		 */

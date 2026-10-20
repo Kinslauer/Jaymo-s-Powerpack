@@ -48,11 +48,11 @@ import org.jspecify.annotations.Nullable;
  * vanilla) takes the costume's head piece off and puts it back ({@code Costume.toggleMask}); with it off
  * ({@code Costume.UNMASKED}) the head piece isn't drawn and the face shows.
  * <p>
- * (0.13.36) A hood up ({@code Costume.hooded}) leaves the face and the real name showing, but someone else's name tag
+ * (0.14.3) A hood up ({@code Costume.hooded}) leaves the face and the real name showing, but someone else's name tag
  * only within {@link #HOOD_NAME_RANGE}.
  */
 public final class CostumeClient {
-	/** (0.13.36) A hooded player's name tag is shown only to viewers within this many blocks. */
+	/** (0.14.3) A hooded player's name tag is shown only to viewers within this many blocks. */
 	public static final double HOOD_NAME_RANGE = 8.0;
 	/** The costume to draw on this player, or null. */
 	public static final RenderStateDataKey<CostumeDesign> KEY = RenderStateDataKey.create(() -> "jaymospowers:costume");
@@ -135,7 +135,7 @@ public final class CostumeClient {
 				state.nameTag = masked;
 				state.scoreText = null;
 			} else if (player != Minecraft.getInstance().player && Costume.hooded(player)) {
-				// (0.13.36) a hood up: their real name, but only when you are close (never your own)
+				// (0.14.3) a hood up: their real name, but only when you are close (never your own)
 				LocalPlayer me = Minecraft.getInstance().player;
 				if (me == null || me.distanceToSqr(player) > HOOD_NAME_RANGE * HOOD_NAME_RANGE) {
 					state.nameTag = null;

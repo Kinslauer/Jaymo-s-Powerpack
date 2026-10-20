@@ -18,7 +18,7 @@ abstract class LedgeAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$ledgeState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		LedgePose.extract(entity, state, partialTicks);
-		// (0.13.36) hanging from a bar (Bar Swing)
+		// (0.14.3) hanging from a bar (Bar Swing)
 		com.jaymospowers.client.freerun.BarHangPose.extract(entity, state, partialTicks);
 	}
 

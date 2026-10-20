@@ -130,7 +130,7 @@ public final class Costume {
 	}
 
 	/**
-	 * (0.13.36) Whether this player has a hood up: the worn costume's head piece is a hood ({@link CostumeDesign.Mask#isHood})
+	 * (0.14.3) Whether this player has a hood up: the worn costume's head piece is a hood ({@link CostumeDesign.Mask#isHood})
 	 * and on, with the face not hidden (either side).
 	 */
 	public static boolean hooded(Player player) {

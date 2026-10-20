@@ -3412,7 +3412,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
-- **0.7.98, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
+- **0.7.101, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
   costumes to add to stealth, while not completely concealing identity like it does now ... They also need a hidden
   blade weapon, craftable at all times but usable only by those with sufficient stealth skill." Powers tags a hooded
   player (`jaymospowers_hooded:<key>`, a Hood or Peaked Hood with the face showing). Witnesses see a hooded player at
@@ -3428,7 +3428,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
   full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
   rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
-- **0.7.98, freerunning (the Stealth tree's second page, with Powers 0.13.36):** Andy picked "Full freerunning".
+- **0.7.101, freerunning (the Stealth tree's second page, with Powers 0.14.3):** Andy picked "Full freerunning".
   Stealth goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still counts to 15, pocket practice only the first
   15 levels) and gets a second page, "Freerunning" (12 points): Climber (lvl 3, 3 ranks), Freerunner (lvl 3, 2),
   Sure Footing (lvl 8, needs Climber), Leap of Faith (lvl 8, 2 pts, needs Freerunner), Bar Swing (lvl 12, 2 pts, needs

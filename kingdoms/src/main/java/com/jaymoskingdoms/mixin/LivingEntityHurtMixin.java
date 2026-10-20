@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
  * (0.6.0) What a class's weapons do to whatever they hit ({@link ClassPerks#dealt}): an Archer's arrows hit harder. (0.6.5) Then
- * the Combat Arts' Momentum and Executioner ({@link CombatArts#dealt}). (0.7.98) Last, the hidden blade: it jams in unskilled
+ * the Combat Arts' Momentum and Executioner ({@link CombatArts#dealt}). (0.7.101) Last, the hidden blade: it jams in unskilled
  * hands, and stabs a Crippled foe for ten times the blow ({@link HiddenBlade#dealt}).
  */
 @Mixin(LivingEntity.class)

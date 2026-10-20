@@ -164,7 +164,7 @@ public final class CombatArts {
 		return SWING_TICK.getOrDefault(sp.getUUID(), -1L) == now && SWING_CHARGE.getOrDefault(sp.getUUID(), 0.0F) >= FULL_STRENGTH;
 	}
 
-	/** (0.7.98) Whether a blow under way is one of ours (a cleave, a bleed, a leap: {@link #strike}), not a swing. */
+	/** (0.7.101) Whether a blow under way is one of ours (a cleave, a bleed, a leap: {@link #strike}), not a swing. */
 	static boolean striking() {
 		return striking;
 	}

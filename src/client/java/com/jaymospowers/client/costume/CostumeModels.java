@@ -45,7 +45,7 @@ final class CostumeModels {
 	/** (0.11.78) Wind's gale cloak (its tails reach past the knees) and Darktide's tide cape. */
 	static final int GALE_CAPE = 22, TIDE_CAPE = 20;
 	/**
-	 * (0.13.36) The assassin's robe: its coat tails hang from the waist (pixels) this far down, one pixel thick, standing
+	 * (0.14.3) The assassin's robe: its coat tails hang from the waist (pixels) this far down, one pixel thick, standing
 	 * this far (pixels) clear of the suit's front and back, and swing out with the legs (this much of the leg's swing);
 	 * and how far the bracers, mantle, the peaked hood's brim and its cowl are grown.
 	 */
@@ -77,7 +77,7 @@ final class CostumeModels {
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
 		private final @Nullable ModelPart bust, emblem;
-		/** (0.13.36) The assassin's coat tails, when this model has them. */
+		/** (0.14.3) The assassin's coat tails, when this model has them. */
 		private final @Nullable ModelPart tailFront, tailBack;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
@@ -127,7 +127,7 @@ final class CostumeModels {
 			bust(parent);
 			hideSkinLayers();
 			if (this.tailFront != null && this.tailBack != null) {
-				// (0.13.36) the coat tails swing out ahead of a leg going forward and behind one going back
+				// (0.14.3) the coat tails swing out ahead of a leg going forward and behind one going back
 				float forward = Math.min(0.0F, Math.min(this.rightLeg.xRot, this.leftLeg.xRot));
 				float back = Math.max(0.0F, Math.max(this.rightLeg.xRot, this.leftLeg.xRot));
 				this.tailFront.xRot = forward * TAIL_SWAY;
@@ -261,7 +261,7 @@ final class CostumeModels {
 	}
 
 	/**
-	 * (0.13.36) The assassin's robe over the suit: a layered shoulder mantle (the armoured cut's pad and a lower layer,
+	 * (0.14.3) The assassin's robe over the suit: a layered shoulder mantle (the armoured cut's pad and a lower layer,
 	 * textured from the unused hat region), leather bracers on the forearms (the sleeve regions), and long coat tails
 	 * hanging from the waist in front and behind (the jacket and pants regions). Painted by tools/gen_costume.py.
 	 */
@@ -308,7 +308,7 @@ final class CostumeModels {
 			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(32, 0).addBox(-0.5F, -11.0F, -4.5F, 1.0F, 2.0F, 9.0F), PartPose.ZERO);
 		}
 		if (mask == CostumeDesign.Mask.PEAKED_HOOD) {
-			// (0.13.36) the peak: a brim standing out over the brow, shading the upper face; and a cowl falling onto the shoulders
+			// (0.14.3) the peak: a brim standing out over the brow, shading the upper face; and a cowl falling onto the shoulders
 			head.addOrReplaceChild("brim", CubeListBuilder.create().texOffs(0, 16)
 				.addBox(-4.0F, -8.0F, -7.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(HOOD_BRIM_GROW)), PartPose.ZERO);
 			head.addOrReplaceChild("cowl", CubeListBuilder.create().texOffs(24, 16)

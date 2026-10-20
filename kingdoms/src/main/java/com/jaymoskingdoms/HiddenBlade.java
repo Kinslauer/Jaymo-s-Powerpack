@@ -50,7 +50,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.98) The hidden blade: a leather bracer with a spring blade ({@code jaymoskingdoms:hidden_blade}), the Stealth
+ * (0.7.101) The hidden blade: a leather bracer with a spring blade ({@code jaymoskingdoms:hidden_blade}), the Stealth
  * tree's own weapon. Anyone can craft it, but only a player at Stealth level {@link #BLADE_LEVEL} can work it: in lesser
  * hands the spring jams and its blows do {@link #UNSKILLED_DAMAGE}.
  * <ul>

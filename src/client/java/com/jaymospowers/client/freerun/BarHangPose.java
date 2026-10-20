@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.13.36) Bar Swing as everyone sees it ({@link Freerun#HANG}): hanging from the bar by both hands, arms straight
+ * (0.14.3) Bar Swing as everyone sees it ({@link Freerun#HANG}): hanging from the bar by both hands, arms straight
  * up, the body swinging under it like a pendulum from the hands, the legs together and trailing the swing a little.
  * Read and turned the way {@code LedgePose} is (the {@code Ledge...Mixin}s), squared to the way the player faced when
  * they caught it, the head free to look about. Your own hang doesn't show in first person.

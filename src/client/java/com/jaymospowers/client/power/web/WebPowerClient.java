@@ -218,7 +218,7 @@ public final class WebPowerClient implements PowerClient {
 	}
 
 	/**
-	 * (0.13.36) The local web slinger is swinging, being pulled, on the wings, in a parkour move or running along a wall:
+	 * (0.14.3) The local web slinger is swinging, being pulled, on the wings, in a parkour move or running along a wall:
 	 * freerunning ({@code FreerunClient}) stands aside.
 	 */
 	public static boolean parkourBusy() {

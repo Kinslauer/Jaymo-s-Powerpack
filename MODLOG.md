@@ -1818,7 +1818,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
-- **0.13.36, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
+- **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
   stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
   (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
   cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
@@ -1831,7 +1831,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
   costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
   bracers, mantle and cowl's growth).
-- **0.13.36, freerunning (Kingdoms 0.7.98's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
+- **0.14.3, freerunning (Kingdoms 0.7.101's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
   (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
   Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
   synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip

@@ -32,7 +32,7 @@ public final class LedgeClient {
 	private static boolean confirmed;
 	/** Jump was let go since the grab: the next press climbs. */
 	private static boolean jumpReleased;
-	/** (0.13.36) Caught at the top of a freerun climb ({@link #catchFromClimb}): holding forward pulls up and over, no Jump needed. */
+	/** (0.14.3) Caught at the top of a freerun climb ({@link #catchFromClimb}): holding forward pulls up and over, no Jump needed. */
 	private static boolean autoClimb;
 
 	private LedgeClient() {
@@ -55,7 +55,7 @@ public final class LedgeClient {
 
 	/** Both hands are on the edge: no swings, no item use (vanilla's and Better Combat's both start from these clicks). */
 	private static void swallowClicks(Minecraft minecraft) {
-		// (0.13.36) and while both hands hold a wall or a bar (freerunning)
+		// (0.14.3) and while both hands hold a wall or a bar (freerunning)
 		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()) {
 			return;
 		}
@@ -97,7 +97,7 @@ public final class LedgeClient {
 	}
 
 	/**
-	 * (0.13.36) A freerunner's climb (Climber, {@code FreerunClient}) reached the top of its wall: the edge is caught
+	 * (0.14.3) A freerunner's climb (Climber, {@code FreerunClient}) reached the top of its wall: the edge is caught
 	 * there, and (forward still held) they pull up and over once the hang settles. The cling has already ended.
 	 */
 	public static void catchFromClimb(LocalPlayer player, Ledge.Spot found) {

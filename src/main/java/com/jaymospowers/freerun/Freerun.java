@@ -57,7 +57,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.13.36) Freerunning, the moves of Jaymo's Kingdoms' Stealth tree, second page (its perks live there; we read the
+ * (0.14.3) Freerunning, the moves of Jaymo's Kingdoms' Stealth tree, second page (its perks live there; we read the
  * player's ranks by reflection on {@code com.jaymoskingdoms.Skills.rank(Player, String)}, as {@code Meditate} does, so
  * without Kingdoms nobody has them). Open to everyone whatever their power; a web slinger keeps their own web parkour
  * ({@code WebParkour}, {@code WebWallRun}) and these stand aside while one of those moves is on.

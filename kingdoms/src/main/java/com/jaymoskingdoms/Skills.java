@@ -60,14 +60,14 @@ import org.jspecify.annotations.Nullable;
 public final class Skills {
 	/**
 	 * A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level (Strength
-	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts, and (0.7.98) Stealth, {@link #STEALTH_MAX_LEVEL},
+	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts, and (0.7.101) Stealth, {@link #STEALTH_MAX_LEVEL},
 	 * for freerunning).
 	 */
 	public static final int XP_BASE = 30, XP_STEP = 15, MAX_LEVEL = 15;
 	/** (0.6.5) Strength's highest level: the levels past {@link #MAX_LEVEL} pay for the Combat Arts ({@link CombatArts}). */
 	public static final int STRENGTH_MAX_LEVEL = 25;
 	/**
-	 * (0.7.98) Stealth's highest level: its second page, freerunning (Climber to Wall Runner; the moves are Jaymo's
+	 * (0.7.101) Stealth's highest level: its second page, freerunning (Climber to Wall Runner; the moves are Jaymo's
 	 * Powers' {@code Freerun}, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
 	 */
 	public static final int STEALTH_MAX_LEVEL = 25;
@@ -78,13 +78,13 @@ public final class Skills {
 	/** Unseen thefts give experience at most this often (ticks), so a chest can't be farmed one item at a time. */
 	static final long THEFT_XP_TICKS = 600L;
 	/**
-	 * (0.7.98) Stealth experience for freerunning: a move (a vault, a cling, a kick, a wall run, a bar caught, a leap of
+	 * (0.7.101) Stealth experience for freerunning: a move (a vault, a cling, a kick, a wall run, a bar caught, a leap of
 	 * faith), at most every {@link #FREERUN_XP_TICKS} (20 s); a hidden blade leap that lands on its mark
 	 * ({@link HiddenBlade}).
 	 */
 	static final int XP_FREERUN = 1, XP_BLADE_LEAP = 6;
 	static final long FREERUN_XP_TICKS = 400L;
-	/** (0.7.98) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
+	/** (0.7.101) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
 	static final String FREERUN_TAG = "jaymospowers_freerun";
 	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
 	static final float PRACTICE_PER_LEVEL = 0.03F;
@@ -161,7 +161,7 @@ public final class Skills {
 		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0),
 		// (0.7.30) Strength's second root: every weapon's full Better Combat combo (WeaponForms); without it, one or two plain swings
 		WEAPON_FORMS(Pillar.STRENGTH, 1, 1, 2, 0, 0),
-		// (0.7.98) Stealth's second page, freerunning (the moves are Jaymo's Powers' Freerun); last, so no ordinal moves
+		// (0.7.101) Stealth's second page, freerunning (the moves are Jaymo's Powers' Freerun); last, so no ordinal moves
 		CLIMBER(Pillar.STEALTH, 3, 1, 3, 4, 0),
 		FREERUNNER(Pillar.STEALTH, 2, 1, 3, 4, 2),
 		SURE_FOOTING(Pillar.STEALTH, 1, 1, 8, 5, 0, CLIMBER),
@@ -276,7 +276,7 @@ public final class Skills {
 
 	/** Player → game time an unseen theft next gives experience. */
 	private static final Map<UUID, Long> NEXT_THEFT_XP = new HashMap<>();
-	/** (0.7.98) Player → game time a freerun move next gives experience. */
+	/** (0.7.101) Player → game time a freerun move next gives experience. */
 	private static final Map<UUID, Long> NEXT_FREERUN_XP = new HashMap<>();
 
 	private Skills() {
@@ -293,7 +293,7 @@ public final class Skills {
 			NEXT_FREERUN_XP.clear();
 			RESPEC_OFFERS.clear();
 		});
-		// (0.7.98) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
+		// (0.7.101) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 10 != 0) {
 				return;
@@ -548,7 +548,7 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_THEFT);
 	}
 
-	/** (0.7.98) A freerun move: a little experience, at most every {@link #FREERUN_XP_TICKS}. */
+	/** (0.7.101) A freerun move: a little experience, at most every {@link #FREERUN_XP_TICKS}. */
 	static void freerun(ServerPlayer player, long now) {
 		if (NEXT_FREERUN_XP.getOrDefault(player.getUUID(), 0L) > now) {
 			return;
@@ -560,7 +560,7 @@ public final class Skills {
 	/** How long {@code player}'s hand must stay in a pocket, from {@code ticks}: shorter with practice and Light Fingers. */
 	static float holdTicks(Player player, float ticks) {
 		Progress p = of(player);
-		// (0.7.98) practice counts the first page's 15 levels only: the levels past it pay for freerunning
+		// (0.7.101) practice counts the first page's 15 levels only: the levels past it pay for freerunning
 		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
 	}
 

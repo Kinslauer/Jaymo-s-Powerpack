@@ -1,4 +1,4 @@
-"""Draws the assassin costume (0.13.36) on a default player silhouette, from the generated textures.
+"""Draws the assassin costume (0.14.3) on a default player silhouette, from the generated textures.
 
     python -I tools/costume_preview.py [output.png]
 

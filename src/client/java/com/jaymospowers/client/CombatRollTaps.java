@@ -66,7 +66,7 @@ final class CombatRollTaps {
 		}
 		Integer move = minecraft.player.getAttached(com.jaymospowers.power.web.WebParkour.MOVE);
 		if (move != null && com.jaymospowers.power.web.WebParkour.kind(move) == com.jaymospowers.power.web.WebParkour.CLING
-			// (0.13.36) a freerunner's cling or bar hang lets go on Sneak too
+			// (0.14.3) a freerunner's cling or bar hang lets go on Sneak too
 			|| com.jaymospowers.client.freerun.FreerunClient.holding()) {
 			afterCling = true;
 			groundedAfterCling = 0;

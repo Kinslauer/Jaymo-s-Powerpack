@@ -29,7 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
  * (rolled onto one side on a planted forearm, the legs stacked ahead) or a <b>head-first</b> dive (flat on the chest,
  * arms reaching ahead).</li>
  * </ul>
- * Your own moves don't show in first person. (0.13.36) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
+ * Your own moves don't show in first person. (0.14.3) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
  * are drawn the same way.
  */
 public final class WebParkourPose {
@@ -77,7 +77,7 @@ public final class WebParkourPose {
 		Integer move = entity.getAttached(WebParkour.MOVE);
 		boolean web = move != null;
 		if (move == null) {
-			// (0.13.36) a freerunner's vault, cling or wall kick (Freerun) looks the same
+			// (0.14.3) a freerunner's vault, cling or wall kick (Freerun) looks the same
 			move = entity.getAttached(com.jaymospowers.freerun.Freerun.MOVE);
 		}
 		Minecraft minecraft = Minecraft.getInstance();
