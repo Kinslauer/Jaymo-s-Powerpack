@@ -160,3 +160,51 @@ Place a gravitite ore under open sky (it should rise and stop under the first ce
 (and sneak in one); fall onto a cold one from 20 blocks; put icestone beside a water source and a lava pool; use a
 shard on aether grass; mine zanite ore with a wooden pickaxe (no drop, no XP) and a stone one; bone-meal a skyroot
 sapling and a golden oak sapling (the trees are `jaymospowers:skyroot_tree` and `golden_oak_tree`).
+
+## Passive animals (track C) [aether.mob]
+
+The Aether's five passive animals, ours from behaviour notes (`mobs.md`): own classes in `com.jaymospowers.aether.mob`,
+models and renderers in `client/aether/mob`, skins painted by `tools/gen_aether_mobs.py` (it reads each model's
+`part(...)` lines for the texture layout, so rerun it after editing a model; run `gen_aether.py` first when running both:
+that one rewrites `lang/parts/aether.json` and this one adds its block back at the end). Spawn eggs and the three moa
+eggs sit in the "The Aether" creative tab. All spawn through Fabric `BiomeModifications.addSpawn` into
+`jaymospowers:skyroot_meadow`, `skyroot_forest`, `skyroot_grove`, `skyroot_woodland` (by key; the biome files are not
+touched), as the creature category, on the `animals_spawnable_on` tag (aether grass is in it), in daylight. The biomes'
+own `creature_spawn_probability` (the Aether uses 0.25) decides how many are there when a chunk is first made.
+
+| Animal | Spawn weight, group | HP | Notes |
+|---|---|---|---|
+| Phyg | 10, 3-4 | 10 | breeds on blue berries; saddle and ride |
+| Sheepuff | 12, 3-4 | 8 | breeds on wheat |
+| Flying cow | 12, 2-5 | 10 | breeds on wheat; milk with a bucket; saddle and ride |
+| Aerbunny | 11, 3 | 6 | no breeding |
+| Moa | 8, 1-3 | 35 | blue 100 / white 50 / black 25 by weight; lays eggs |
+
+- **Riding** [RideableAnimal]: right-click a saddled one (not sneaking) to mount; steer with the movement keys, jump
+  with the jump key. A ride is simulated on the rider's own client, like any mount, so it needs no packet; the jump key
+  is read through `AetherMobs.jumpHeld`, which the client sets. Mounts shrug off any fall (`SAFE_FALL_DISTANCE` plus
+  `causeFallDamage`), and a saddle comes off whole when one dies.
+  - **Phyg and flying cow** [WingedAnimal]: a high jump from the ground (0.62), one flap more in mid-air (0.55), and
+    holding jump while falling glides (falls at most 0.1 a tick; 0.5 otherwise). The cow carries a rider at 0.75 speed.
+    The wings are folded on the ground and spread and beat in the air.
+  - **Moa** [Moa]: jumps in mid-air 3 (blue), 4 (white), 8 (black), one per press with a 10-tick cooldown; they come back
+    on the ground. Falls at most 0.1 a tick loose or gliding, 0.5 ridden. A wild moa can't be saddled: use a moa egg
+    (laid by a moa every 5 to 10 minutes while grown and unridden, or from the creative tab) on the ground to hatch a
+    chick that you raised; feed it blue berries to hurry the 20 minutes it takes to grow up, then saddle it. It heals
+    1 HP every 45 seconds. (Not in: Nature Staff sit/follow, tamed moas hunting swets, the Aether's incubator: the egg
+    hatches the moment it is used.)
+- **Sheepuff** [Sheepuff]: grazes the aether grass under it (it turns to aether dirt); after 2 patches it puffs up: falls
+  at most 0.05 a tick, no fall damage, jump strength 0.9 (a normal sheep's is 0.42). Shearing a puffed one lets the air
+  out and gives 2-4 wool (it keeps its wool); a plain shearing gives 1-3 and leaves it bare until it grazes again. Colour
+  on spawn: 5% light blue, 5% cyan, 5% lime, 3% pink, 1 in 500 purple, else white. Drops mutton and its wool unless bare.
+- **Aerbunny** [Aerbunny, AerbunnyRide]: right-click with an empty hand to carry it on your head (sneak to put it down).
+  Carried: your fall is capped at 0.25 a tick (no fall damage for a drop that gentle, within the "descents under 0.5 b/t"
+  rule), and once you have fallen more than 1.1 blocks jump hops you up (0.55) and puffs the bunny; at most 2 hops per time in the air (refilled on the ground), so it
+  can't chain into flight. This runs on your client (movement is yours), so other players see the bunny but
+  the hop is yours. Hit by a player it flees for 100-149 ticks (and can't be picked up while it does).
+- Drops (`data/jaymospowers/loot_table/entities`): phyg porkchop 1-3 + feather 0-1; flying cow leather 0-2 + beef 1-3;
+  sheepuff mutton 1-2 (+ wool from the entity); aerbunny string 0-2; moa feather 2-3. All with Looting.
+- Tuning is in `static final` constants at the top of each class (`AetherMobs` has the spawn weights).
+
+To check first in game: spawn each from its egg; saddle a phyg (jump, flap, glide), a flying cow and a hatched moa;
+let a sheepuff graze twice and shear it puffed and plain; pick up an aerbunny and jump off a cliff.

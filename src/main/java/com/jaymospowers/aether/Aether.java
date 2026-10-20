@@ -28,6 +28,8 @@ public final class Aether {
 		FloatingBlockEntity.register();
 		AercloudBlock.register();
 		QuicksoilSpeed.register();
+		// the passive animals: moa, phyg, flying cow, sheepuff, aerbunny
+		com.jaymospowers.aether.mob.AetherMobs.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();
