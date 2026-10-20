@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -27,6 +28,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import org.jspecify.annotations.Nullable;
 
@@ -77,6 +79,15 @@ public final class Wounds {
 
 	/** Creatures whose wounds are killing them just now (or {@link Downed}'s finishing off): our own lethal blow doesn't route again. */
 	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
+
+	/** (0.14.2) A killing blow as its death was let through: the blow, its amount, the parts before it, and the game time. */
+	private record Killing(DamageSource source, float amount, float[] points, long time) {
+	}
+
+	/** (0.14.2) Killing blows waiting for their death to go through (looked at in the after-death event, then dropped). */
+	private static final Map<LivingEntity, Killing> KILLING = new WeakHashMap<>();
+	/** (0.14.2) The killing blow is noted last of all, after {@link Downed}'s late phase: only deaths nothing saves. */
+	private static final Identifier KILLING_PHASE = JaymosPowers.id("wounds_killing_blow");
 	private static int tickCounter;
 
 	private Wounds() {
@@ -100,6 +111,18 @@ public final class Wounds {
 		Downed.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
+		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
+		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(KILLING_PHASE, (entity, source, amount) -> {
+			noteKilling(entity, source, amount);
+			return true;
+		});
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			Killing blow = KILLING.remove(entity);
+			if (blow != null && !FINISHING.contains(entity) && entity.level().getGameTime() == blow.time()) {
+				killingBlow(entity, blow);
+			}
+		});
 	}
 
 	// ---- public API -------------------------------------------------------------------------------------------------------
@@ -259,20 +282,18 @@ public final class Wounds {
 	}
 
 	/**
-	 * (0.14.2) A blow that killed outright: where it landed is worked out on a copy of the parts (the dead keep theirs as
-	 * they were), and a blade's overkill may still take that part off, onto the corpse.
+	 * (0.14.2) A blow that killed outright ({@link #KILLING}, noted as the death was let through): where it landed is
+	 * worked out on the parts as they were before it (the dead keep theirs), and a blade's overkill may still take that
+	 * part off, onto the corpse. Fabric's after-damage event never sees a killing blow, so this runs after the death.
 	 */
-	private static void killingBlow(LivingEntity victim, DamageSource source, float taken, boolean blocked) {
+	private static void killingBlow(LivingEntity victim, Killing blow) {
 		BodyPlan plan = BodyPlan.of(victim);
-		if (blocked || plan == null || plan == BodyPlan.SIMPLE || victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
+		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return;
 		}
-		float max = victim.getMaxHealth();
-		float health = Math.max(0.0F, victim.getHealth());
-		float[] points = load(victim, plan);
-		reconcile(points, plan, max, Math.min(max, health + taken), Breaks.caps(victim, plan));
-		float[] was = points.clone();
-		float loss = sum(points) - health;
+		float[] points = blow.points().clone();
+		float[] was = blow.points().clone();
+		float loss = blow.amount();
 		if (loss <= EPS) {
 			return;
 		}
@@ -282,9 +303,19 @@ public final class Wounds {
 			HitRouting.damage(points, plan, aimed, loss);
 			landed = aimed;
 		} else {
-			landed = HitRouting.route(victim, plan, source, points, max, loss);
+			landed = HitRouting.route(victim, plan, blow.source(), points, victim.getMaxHealth(), loss);
 		}
-		sever(victim, plan, source, landed, was, points, loss, max, taken);
+		sever(victim, plan, blow.source(), landed, was, points, loss, victim.getMaxHealth(), loss);
+	}
+
+	/** (0.14.2) Notes a death about to go through: the blow, how hard, and the parts as they were, when (game time). */
+	private static void noteKilling(LivingEntity victim, DamageSource source, float amount) {
+		BodyPlan plan = BodyPlan.of(victim);
+		if (FINISHING.contains(victim) || amount <= 0.0F || source.is(Dismember.DECAPITATION) || source.is(WOUNDS_DAMAGE) || plan == null || plan == BodyPlan.SIMPLE || !(victim.level() instanceof ServerLevel level)
+			|| victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
+			return;
+		}
+		KILLING.put(victim, new Killing(source, amount, load(victim, plan), level.getGameTime()));
 	}
 
 	/** Full health, every part whole. */
@@ -337,11 +368,6 @@ public final class Wounds {
 	// ---- hits -------------------------------------------------------------------------------------------------------------
 
 	private static void onDamage(LivingEntity victim, DamageSource source, float base, float taken, boolean blocked) {
-		if (taken > 0.0F && !FINISHING.contains(victim) && victim.level() instanceof ServerLevel && (!victim.isAlive() || victim.getHealth() <= 0.0F)) {
-			// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
-			killingBlow(victim, source, taken, blocked);
-			return;
-		}
 		if (taken <= 0.0F || FINISHING.contains(victim) || !(victim.level() instanceof ServerLevel level) || !victim.isAlive()
 			|| victim.getHealth() <= 0.0F) {
 			return;

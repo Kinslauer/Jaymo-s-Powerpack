@@ -141,7 +141,7 @@ public final class Downed {
 	/** Revive and the downed's empty hands run before every other mod's right-click on them (trades, quests, pockets, carrying). */
 	private static final Identifier FIRST = JaymosPowers.id("downed_first");
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
-	private static final Identifier LAST = JaymosPowers.id("downed_last");
+	static final Identifier LAST = JaymosPowers.id("downed_last");
 
 	/**
 	 * What a tamed animal is brought round with, by its type's name: its own taming and breeding food. Anything tamed not

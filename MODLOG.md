@@ -1902,8 +1902,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Sever on overkill** (`Dismember.severOnOverkill`, called by Wounds): a blade's blow on a limb already broken, or
     one that takes the head past zero, for more than `SEVER_OVERKILL` (half) of that part, cuts it off at
     `min(1, SEVER_BASE (0.6) * scale)`; the old chances are the scale (`RATE` times the blade's chance over a plain
-    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone; a killing blow is still tested (worked out on a copy of the parts), so heads and
-    limbs still come off onto the corpse. A power's own cut
+    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone; a killing blow is still tested, so heads and limbs still come off onto the corpse
+    (Fabric's after-damage event never sees a killing blow, so the blow and the parts before it are noted in a last
+    `ALLOW_DEATH` phase after Downed's, and tested in `AFTER_DEATH` once the death has gone through). A power's own cut
     (`Dismember.cut`) lands its blow on the part it aimed at. A severed limb stays at zero and broken; regrowth sets it.
     A headless zombie or skeleton now dies only when its body gives out.
   - **Cripplings rerouted:** Darktide's leg strikes (G Crescent low, Ink Cross, Fang Barrage, any low Darktide hit) wound
