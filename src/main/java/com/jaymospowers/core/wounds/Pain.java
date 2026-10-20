@@ -183,6 +183,10 @@ public final class Pain {
 			}
 			player.setAttached(ADDICTION, left);
 			if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
+				// (no shakes out of survival)
+				if (player.hasAttached(WITHDRAWAL)) {
+					player.removeAttached(WITHDRAWAL);
+				}
 				continue;
 			}
 			long now = player.level().getGameTime();

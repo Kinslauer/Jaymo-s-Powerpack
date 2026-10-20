@@ -472,7 +472,11 @@ public final class Downed {
 		if ((knocked & 1L) != 0L) {
 			wake(entity, false);
 		} else {
+			// (a knock-out from standing is no rest cure: they get up as hurt as they went down)
+			float health = entity.getHealth();
 			getUp(level, entity);
+			entity.setHealth(health);
+			Wounds.reconcile(entity);
 		}
 		return true;
 	}

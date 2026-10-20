@@ -3429,7 +3429,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds
   while your bones are broken still has them set (Powers' `Fractures`). **Taverns and festivals sell drink:** a grown
   villager standing in (or at the door of) one of a realm's standing taverns, or raising a toast at its festival, sells
-  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once they've left, the drink comes off their trades
+  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once offered, the drink stays on their trades (so walking out and back in never restocks it)
   (`Remedies`, prices at its top). The wares go on when a player right-clicks the villager, just before the trading
   screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
   **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside

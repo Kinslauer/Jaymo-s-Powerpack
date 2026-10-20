@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * they don't.
  * <p>
  * Kingdoms never compiles against Powers or Kitchen: their items are looked up by id each time, and a ware whose mod
- * isn't loaded is simply not sold. The wares are added (or taken off) when a player right-clicks the villager, just
+ * isn't loaded is simply not sold. The wares are added when a player right-clicks the villager, just
  * before the trading screen opens, so no villager's trades are touched unless someone comes to trade.
  */
 final class Remedies {
@@ -73,7 +73,7 @@ final class Remedies {
 		});
 	}
 
-	/** {@code v}'s wares by what they are and where they stand: added if they should sell them, taken off if no longer. */
+	/** {@code v}'s wares by what they are and where they stand: added the first time they should sell them, and kept after. */
 	static void stock(ServerLevel level, Villager v) {
 		boolean surgeon = v.getVillagerData().profession().is(VillagerProfession.CLERIC);
 		boolean drink = Festivals.toasting(v) || inTavern(level, v);
@@ -114,9 +114,8 @@ final class Remedies {
 			if (w != null && !sold) {
 				offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, w.emeralds()), new ItemStack(item, w.count()), w.uses(),
 					surgeon ? SURGEON_XP : DRINK_XP, PRICE_MULTIPLIER));
-			} else if (w == null && sold) {
-				offers.removeIf(offer -> ours(offer, item));
 			}
+			// (an offer, once made, stays: taking it away and adding it back would restock it for free)
 		}
 	}
 
