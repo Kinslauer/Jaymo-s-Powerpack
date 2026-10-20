@@ -2,7 +2,10 @@ package com.jaymospowers.client.power.xenoform;
 
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
+import com.jaymospowers.power.xenoform.XenoForm;
+import com.jaymospowers.power.xenoform.XenoForms;
 import com.jaymospowers.power.xenoform.XenoNet;
+import com.jaymospowers.power.xenoform.XenoVoices;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -135,12 +138,18 @@ public final class XenoformPowerClient implements PowerClient {
 		float now = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		if (down) {
 			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
-		} else if (player.getAttached(XenoformState.FORM) == null && XenoformState.hud(player).recharge() > 0) {
-			// a band still recharging refuses the change: the arms drop away, no strike, kick or burst for nothing
+		} else if (player.getAttached(XenoformState.FORM) == null && refused(player)) {
+			// a band still recharging, or Nadir dialled before the voices are content, refuses the change: the arms drop away, no strike, kick or burst for nothing
 			XenoformSlap.drop(now);
 		} else {
 			XenoformSlap.release(now);
 		}
+	}
+
+	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
+	private static boolean refused(LocalPlayer player) {
+		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
+		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
 	}
 
 	@Override

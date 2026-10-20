@@ -50,6 +50,8 @@ public final class XenoformSlap {
 	static final float OTHERS_RAISE_TICKS = 2.0F;
 	/** Someone else's hand drops over this long (yours is the faster {@link #STRIKE_TICKS}). */
 	static final float OTHERS_STRIKE_TICKS = 3.0F;
+	/** A dropped (refused-looking) release still strikes if the form changes this soon after: the HUD's recharge can lag the server. */
+	static final float DROP_GRACE_TICKS = 6.0F;
 	/** A hold older than this when the change comes isn't what caused it (a timed-out form, a glitch). */
 	static final float HOLD_STALE_TICKS = 40.0F;
 	/** The band's wrist, raised across the chest (radians, left arm). */
@@ -63,7 +65,7 @@ public final class XenoformSlap {
 	static final float HEAD_DOWN = 0.4F;
 
 	// yourself
-	private static float holdAt = -1.0F, releaseAt = -1.0F, slamAt = -1.0F;
+	private static float holdAt = -1.0F, releaseAt = -1.0F, slamAt = -1.0F, dropAt = -1.0F;
 	/** The hold began as yourself: letting go is the slam (the hand comes down then), not a hold timer. */
 	private static boolean slamOnRelease;
 	/** The first-person burst and kick of this slam have gone off (once a slam). */
@@ -107,13 +109,24 @@ public final class XenoformSlap {
 	public static void drop(float now) {
 		if (holdAt >= 0.0F && releaseAt < 0.0F) {
 			releaseAt = now;
+			dropAt = now;
 		}
 	}
 
 	/** Your shape changed: if Z was the cause, the hand lands (unless the release already brought it down). */
 	public static void changed(float now) {
 		boolean striking = selfStrike && slamAt >= 0.0F && now - slamAt <= HOLD_STALE_TICKS;
-		if (slamOnRelease && holdAt >= 0.0F && releaseAt < 0.0F && !striking) {
+		if (dropAt >= 0.0F && now - dropAt <= DROP_GRACE_TICKS && !striking) {
+			// the drop was a guess from a lagging HUD: the band did change, so the hand comes down after all
+			slamAt = now - OTHERS_RAISE_TICKS;
+			selfStrike = true;
+			landed = false;
+			earlyFrom = -1.0F;
+			holdAt = releaseAt = dropAt = -1.0F;
+			return;
+		}
+		dropAt = -1.0F;
+		if (slamOnRelease && holdAt >= 0.0F && releaseAt < 0.0F && !striking && now - holdAt <= HOLD_STALE_TICKS) {
 			// Z is still down as a human (a glitch changed the shape): the hand stays poised and the release slams, no jump
 			return;
 		}
@@ -138,7 +151,7 @@ public final class XenoformSlap {
 	}
 
 	public static void clear() {
-		holdAt = releaseAt = slamAt = earlyFrom = -1.0F;
+		holdAt = releaseAt = slamAt = earlyFrom = dropAt = -1.0F;
 		selfStrike = slamOnRelease = landed = false;
 		FORMS.clear();
 		SLAMS.clear();
@@ -148,7 +161,7 @@ public final class XenoformSlap {
 	public static @Nullable Pose extract(Avatar entity, @Nullable String form, float partialTicks) {
 		float now = entity.tickCount + partialTicks;
 		if (entity == Minecraft.getInstance().player) {
-			Pose pose = pose(now, holdAt, releaseAt, slamAt, !selfStrike, slamOnRelease);
+			Pose pose = pose(now, holdAt, releaseAt, slamAt, !selfStrike, slamOnRelease, selfStrike ? STRIKE_TICKS : OTHERS_STRIKE_TICKS);
 			if (pose == null) {
 				slamAt = -1.0F;
 				selfStrike = false;
@@ -171,14 +184,14 @@ public final class XenoformSlap {
 		if (slam == null) {
 			return null;
 		}
-		Pose pose = pose(now, -1.0F, -1.0F, slam, false, false);
+		Pose pose = pose(now, -1.0F, -1.0F, slam, false, false, OTHERS_STRIKE_TICKS);
 		if (pose == null) {
 			SLAMS.remove(id);
 		}
 		return pose;
 	}
 
-	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld) {
+	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld, float strikeTicks) {
 		if (slam >= 0.0F) {
 			float dt = now - slam;
 			if (fromHold && dt < 0.0F && earlyFrom >= 0.0F) {
@@ -189,10 +202,10 @@ public final class XenoformSlap {
 				if (dt < OTHERS_RAISE_TICKS) {
 					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F);
 				}
-				if (dt < OTHERS_RAISE_TICKS + OTHERS_STRIKE_TICKS) {
-					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / OTHERS_STRIKE_TICKS, -1.0F, 0.0F);
+				if (dt < OTHERS_RAISE_TICKS + strikeTicks) {
+					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / strikeTicks, -1.0F, 0.0F);
 				}
-				dt -= OTHERS_RAISE_TICKS + OTHERS_STRIKE_TICKS;
+				dt -= OTHERS_RAISE_TICKS + strikeTicks;
 			}
 			// dt: the ticks since the hand landed
 			if (dt < REST_TICKS) {
