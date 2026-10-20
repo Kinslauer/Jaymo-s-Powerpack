@@ -1818,3 +1818,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.35, Velox replaces Blur, and a new first-person band slam:** Andy asked whether Alien Evolution (KonaDolomite,
+  All Rights Reserved, Palladium 1.20.1) could improve the Xenoform, "primarily add XLR8 in place of Blur", and to use
+  its first-person slam. Nothing of it is copied: an original speedster and our own slam. Blur is now **Velox**
+  (`forms/Velox.java`; the id stays `blur`, so bands keep it): 80% faster, runs on water while sprinting
+  (`ChronoWaterRunMixin` asks `Velox.runsOnWater`); R held is a Speed Burst (+120% speed, whole-block steps, climbs
+  walls on contact, up to 6 s); G Rapid Punches (6 hits of 2 on what you aim at); V Cyclone (everything within 6 swept
+  round you and lifted); B Chain Strike as before; the Ultimate is Standstill (6 s: everything living within 24 nearly
+  frozen, projectiles hang at 5% speed and fly on after, you get Speed II; again every 30 s). Corrupted, a burst that
+  ends runs on until a wall or a creature. A new body and skin: crest, a visor that drops over the eyes at speed, snout,
+  ball feet, longer tail, dark blue with white chevrons. Every Xenoform area or aimed move now spares your own pets and
+  scoreboard teammates (`XenoForm.spared`). The first-person slam is rebuilt (`XenoformSlamView`): forearm up across
+  the view with the band face up, the dial pops as a glowing cap, the palm drops onto it, a dip, a view kick and a
+  green burst. Compile-checked against the 26.3 jars only; not yet run in game.

@@ -77,8 +77,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crown and hair of fire,
   shoulder plumes, forearm flames and core; Velox's
   crest, visor, snout, ball feet and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
-  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Velox's
-  ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
+  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
   64x128: the vanilla layout in the top 64 rows, every extra in the rows below (nothing shares texels with a limb);
   `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
   every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
@@ -98,6 +97,12 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
   (the alien appears mid-slap). The pose is read onto the render state in `extract`, laid over any humanoid model
   after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
+- The first-person slam (`XenoformSlamView`, since 0.13.35; its numbers were tuned against offline pictures, see its
+  javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
+  at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) and the
+  right hand waits above and to the right; the hand comes straight down over 2 ticks and covers the dial; on contact
+  the forearm dips and springs back, the view kicks once (`ScreenShake`) and a green burst blooms (`XenoformHud`);
+  then both arms drop away.
 - Flight (`XenoformFlightPose`, client): the server syncs how an alien is flying (`XenoformState.FLIGHT`, from
   `XenoForm.flight`). Pyre's jet, Wyrm's wings and Nadir's flight make `WindPose` treat the alien as cruising once it
   moves at 0.25/tick, so it takes Wind's lean, banking and stretched-out limbs (Pyre keeps its arms swept back as jets). Wyrm's wings beat deep while flying and
