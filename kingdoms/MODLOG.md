@@ -3406,7 +3406,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   Heritages/ unlockable classes", then "these are great. go for it." (`Heritage`, ideas in
   `heritages/new-heritages-brainstorm.md`). Two can be picked at the start and three are earned:
   - **Stormborn** (Agility, Finesse): faster under open sky, slower deep underground, immune to lightning; in a
-    thunderstorm under open sky their hits arc a spark to the nearest enemy. Villagers lean Stormborn up high.
+    thunderstorm under open sky their hits arc a spark to the nearest enemy, and their eyes glow
+    electric blue in any thunderstorm (Andy: "The stormborn eyes should glow during storms along with the sparks."). Villagers lean Stormborn up high.
   - **Dawnborn** (Might, Grit): heal slowly in sunlight, hit undead 20% harder, weaker and hungrier in the dark.
     Villagers lean Dawnborn in savannas.
   - **Endborn** (Wits, Finesse), earned near a dying Ender Dragon: endermen ignore their stare, a hit can blink them

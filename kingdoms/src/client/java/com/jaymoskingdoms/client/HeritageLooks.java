@@ -77,7 +77,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/** How a heritage's eyes glow. (0.7.97) {@code NIGHT}: in the dark of night only. */
-	enum Eyes { ALWAYS, DAY, NIGHT, NEVER }
+	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
 	/** One heritage's look: its texture name, how many drawings to pick from (by UUID), eyes, and particle rate (0: none). */
 	enum Kind {
@@ -88,7 +88,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		FROSTBORN(Heritage.Kind.FROSTBORN, "frostborn", 1, 0xFFC8ECFF, Eyes.ALWAYS, 16),
 		NIGHTBORN(Heritage.Kind.NIGHTBORN, "nightborn", 1, 0xFFECEEFF, Eyes.DAY, 12),
 		EARTHLING(Heritage.Kind.EARTHLING, "earthling", 1, 0, Eyes.NEVER, 0),
-		STORMBORN(Heritage.Kind.STORMBORN, "stormborn", 1, 0, Eyes.NEVER, 20),
+		STORMBORN(Heritage.Kind.STORMBORN, "stormborn", 1, 0xFFC4E4FF, Eyes.STORM, 20),
 		DAWNBORN(Heritage.Kind.DAWNBORN, "dawnborn", 1, 0xFFFFD27A, Eyes.DAY, 0),
 		ENDBORN(Heritage.Kind.ENDBORN, "endborn", 1, 0xFFD69CFF, Eyes.ALWAYS, 10),
 		DRAGONBLOOD(Heritage.Kind.DRAGONBLOOD, "dragonblood", 1, 0xFFFFB040, Eyes.NIGHT, 0),
@@ -223,6 +223,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			case ALWAYS -> true;
 			case DAY -> entity.level().isBrightOutside();
 			case NIGHT -> entity.level().isDarkOutside();
+			case STORM -> entity.level().isThundering();
 			case NEVER -> false;
 		};
 	}

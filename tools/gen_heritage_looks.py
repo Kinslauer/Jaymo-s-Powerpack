@@ -300,7 +300,7 @@ def write(name, fn, *args, seed=None):
 EYE_COLOURS = {"stoneborn": (214, 170, 255), "tideborn": (110, 250, 235), "sylvan": (214, 245, 150),
                "frostborn": (200, 236, 255), "nightborn": (236, 238, 255), "nightborn_blood": (255, 184, 192),
                "dawnborn": (255, 210, 122), "endborn": (214, 156, 255), "dragonblood": (255, 176, 64),
-               "deepborn": (184, 244, 236)}
+               "deepborn": (184, 244, 236), "stormborn": (196, 228, 255)}
 
 write("stoneborn", stoneborn)
 for v in range(3):
