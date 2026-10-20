@@ -1,4 +1,6 @@
 {
   "type": "minecraft:simple_block",
-  "to_place": "jaymospowers:purple_flower"
+  "to_place": {
+    "id": "jaymospowers:purple_flower"
+  }
 }

@@ -1,4 +1,6 @@
 {
   "type": "minecraft:simple_block",
-  "to_place": "jaymospowers:berry_bush"
+  "to_place": {
+    "id": "jaymospowers:berry_bush"
+  }
 }
