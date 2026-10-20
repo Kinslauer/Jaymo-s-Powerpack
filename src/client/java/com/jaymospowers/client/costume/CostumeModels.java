@@ -131,7 +131,9 @@ final class CostumeModels {
 				float forward = Math.min(0.0F, Math.min(this.rightLeg.xRot, this.leftLeg.xRot));
 				float back = Math.max(0.0F, Math.max(this.rightLeg.xRot, this.leftLeg.xRot));
 				this.tailFront.xRot = forward * TAIL_SWAY;
-				this.tailBack.xRot = back * TAIL_SWAY;
+				// (under a cape the back tail hangs still, or it would swing through the cape)
+				CostumeDesign worn = state.getData(CostumeClient.KEY);
+				this.tailBack.xRot = worn != null && worn.cape() != CostumeDesign.Cape.NONE ? 0.0F : back * TAIL_SWAY;
 			}
 			if (this.cape != null) {
 				// as the vanilla cape (PlayerCapeModel)
@@ -277,11 +279,11 @@ final class CostumeModels {
 		}
 		PartDefinition body = root.getChild("body");
 		float front = -2.0F - SUIT_GROW - TAIL_GAP - 1.0F, back = 2.0F + SUIT_GROW + TAIL_GAP;
-		// hinged at the waist, so they can swing (Worn.setupAnim)
+		// hinged on their own top edge at the waist, so they swing clear of the robe (Worn.setupAnim)
 		body.addOrReplaceChild("tail_front", CubeListBuilder.create().texOffs(0, 32)
-			.addBox(-4.0F, 0.0F, front, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, 0.0F));
+			.addBox(-4.0F, 0.0F, -1.0F, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, front + 1.0F));
 		body.addOrReplaceChild("tail_back", CubeListBuilder.create().texOffs(20, 32)
-			.addBox(-4.0F, 0.0F, back, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, 0.0F));
+			.addBox(-4.0F, 0.0F, 0.0F, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, back));
 	}
 
 	/** The bones only, for pieces that hang off one of them. */
