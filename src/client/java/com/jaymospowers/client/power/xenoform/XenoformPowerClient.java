@@ -131,10 +131,12 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Z: the wrist comes up while it's held (the wheel turns the dial), the hand lands as the band slams on letting go. */
 	@Override
 	public void onMode(LocalPlayer player, boolean down) {
+		// the same fractional clock the slap pose reads (tick + partial), so the release doesn't quantise to a tick
+		float now = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		if (down) {
-			XenoformSlap.holdStart(player.tickCount, player.getAttached(XenoformState.FORM) == null);
+			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
 		} else {
-			XenoformSlap.release(player.tickCount);
+			XenoformSlap.release(now);
 		}
 	}
 

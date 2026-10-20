@@ -88,8 +88,8 @@ public final class XenoformSlap {
 	public static void release(float now) {
 		if (holdAt >= 0.0F && releaseAt < 0.0F) {
 			if (slamOnRelease) {
-				// the wrist carries on up from where the hold had it, then the strike: no snap on a short tap
-				float r = ease(Math.min(1.0F, Math.max(0.0F, now - holdAt) / RAISE_TICKS));
+				// the wrist carries on up from where the hold had it (the same linear clock), then the strike: no snap on a short tap
+				float r = Math.min(1.0F, Math.max(0.0F, now - holdAt) / RAISE_TICKS);
 				slamAt = now - OTHERS_RAISE_TICKS * r;
 				selfStrike = true;
 				landed = false;
@@ -178,7 +178,8 @@ public final class XenoformSlap {
 			}
 			// dt: the ticks since the hand landed
 			if (dt < REST_TICKS) {
-				return new Pose(1.0F, 1.0F, dt, 0.0F);
+				// a cut-short alien hold may still be mid-rise as the hand lands: carry the rise on
+				return new Pose(fromHold && earlyFrom >= 0.0F ? Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS) : 1.0F, 1.0F, dt, 0.0F);
 			}
 			if (dt < REST_TICKS + DROP_TICKS) {
 				return new Pose(1.0F, 1.0F, dt, (dt - REST_TICKS) / DROP_TICKS);
