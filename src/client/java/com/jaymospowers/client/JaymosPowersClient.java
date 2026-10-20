@@ -8,7 +8,6 @@ import com.jaymospowers.client.power.chrono.ChronoPowerClient;
 import com.jaymospowers.client.power.gravity.GravityPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
-import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
@@ -216,7 +215,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				client.onMode(player, mode);
 			}
 		}
-		boolean ultimate = power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player))
+		boolean ultimate = power != null && power.ultimateAnswers(player)
 			&& !seized && minecraft.gui.screen() == null && ultimateKey.isDown();
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;

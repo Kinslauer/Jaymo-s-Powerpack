@@ -5,6 +5,8 @@ import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.util.ArrayList;
@@ -18,16 +20,23 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,6 +60,12 @@ import net.minecraft.world.phys.Vec3;
  * ({@link #blocksSight}). Each player is sent the smoke near them ({@link SmokeNet.Field}); the client draws it as soft
  * volume and greys out your view when your head is in it (not your own smoke: a Smoke user sees through that).
  * Not saved: smoke is gone after a restart.
+ * <p>(0.14.0) <b>Freezing fog.</b> Cryokinesis' cold (Frost Breath, Ice Shards, Flash Freeze, the Blizzard) turns any
+ * smoke it touches, anyone's, into freezing fog ({@link #freeze}): it stops rising, spreading and drifting and just hangs,
+ * glittering pale blue on the client; whatever stands in it is slowed and freezes, and frost (snow layers) settles on the
+ * ground beneath. It thaws back into plain smoke after {@link #FROZEN_TICKS}, or at once when fire reaches it (a fire,
+ * lava or a lit campfire in or under the cell, a burning creature in it, or {@link #thaw} from a flame). Andy: the Ice
+ * power's synergy is "with smoke instead of fire".
  */
 public final class SmokeField {
 	// ---- tuning ----
@@ -124,6 +139,25 @@ public final class SmokeField {
 	/** A Wind user scatters smoke within this many blocks when flying faster than {@link #SCATTER_SPEED} blocks a tick. */
 	static final double SCATTER_RADIUS = 2.5;
 	static final double SCATTER_SPEED = 0.6;
+	/** (0.14.0) Freezing fog: how long a cell stays frozen once the cold touches it (20 s), and the share it loses a step. */
+	static final int FROZEN_TICKS = 400;
+	static final float FROZEN_FADE = 0.0008F;
+	/** Ticks between thawing frozen cells that fire has reached, chilling what stands in the fog, and frost settling. */
+	static final int THAW_EVERY = 5;
+	static final int FOG_EVERY = 10;
+	static final int FROST_EVERY = 20;
+	/**
+	 * What the fog does to those standing in it, every {@link #FOG_EVERY} ticks: Slowness II this long, and this much
+	 * freezing (up to this far past frozen through).
+	 */
+	static final int FOG_SLOW_TICKS = 30;
+	static final int FOG_FREEZE = 30;
+	static final int FOG_FREEZE_OVER = 60;
+	/** Frost: how many frozen cells try to drop a snow layer every {@link #FROST_EVERY} ticks, and how far it falls. */
+	static final int FROST_TRIES = 6;
+	static final int FROST_DROP = 4;
+	/** A burning creature thaws the fog this far round it (blocks). */
+	static final double BURNING_THAW = 1.5;
 
 	/** One dimension's smoke: density and who made it (a player's entity id; 0 for nobody), and the wind. */
 	static final class Field {
@@ -131,6 +165,8 @@ public final class SmokeField {
 		Long2IntOpenHashMap owner = new Long2IntOpenHashMap();
 		/** How sooty each block's smoke is, 0 (pale grey) to 1 (black), from what made it and what it passed through. */
 		Long2FloatOpenHashMap soot = new Long2FloatOpenHashMap();
+		/** (0.14.0) Freezing fog: until when (game time) each frozen block stays frozen. */
+		Long2LongOpenHashMap frozen = new Long2LongOpenHashMap();
 		double windAngle = Math.random() * Math.PI * 2.0;
 		double wind = 0.3;
 		boolean crowded;
@@ -366,8 +402,8 @@ public final class SmokeField {
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
 			long key = pos.asLong();
 			float d = field.density.get(key);
-			if (d <= 0.0F || Vec3.atCenterOf(pos).distanceToSqr(at) > radius * radius) {
-				continue;
+			if (d <= 0.0F || Vec3.atCenterOf(pos).distanceToSqr(at) > radius * radius || field.frozen.containsKey(key)) {
+				continue; // (freezing fog doesn't blow away)
 			}
 			BlockPos to = BlockPos.containing(Vec3.atCenterOf(pos).add(push));
 			if (!to.equals(pos) && leak(level, to) > 0.0F) {
@@ -487,6 +523,9 @@ public final class SmokeField {
 			if (time % SIGHT_EVERY == 0 && !field.density.isEmpty()) {
 				loseSight(level);
 			}
+			if (!field.frozen.isEmpty()) {
+				fog(level, field, time);
+			}
 		}
 		FIELDS.values().removeIf(field -> field.density.isEmpty());
 		if (time % SYNC == 0) {
@@ -538,6 +577,11 @@ public final class SmokeField {
 			// how far (blocks) the way out is; -1 when there's none near: sealed in, it lingers
 			int out = vent.get(key);
 			int owner = field.owner.get(key);
+			// freezing fog hangs where it is: no rising, spreading, drifting or draught, and it barely fades until it thaws
+			if (!field.frozen.isEmpty() && field.frozen.get(key) >= now) {
+				add(next, owners, sootMass, key, d * (1.0F - FROZEN_FADE), owner, field.soot.get(key));
+				continue;
+			}
 			// a banked cloud (mastered Smokescreen) fades slower and the wind leaves it be
 			boolean banked = owner != 0 && !BANKED.isEmpty() && BANKED.containsKey(owner);
 			// smog clings: slower to fade, and the rain only thins it
@@ -650,6 +694,8 @@ public final class SmokeField {
 			}
 		}
 		owners.keySet().retainAll(next.keySet());
+		// frozen cells whose time is up, or whose smoke is gone, are frozen no more
+		field.frozen.long2LongEntrySet().removeIf(e -> e.getLongValue() < now || !next.containsKey(e.getLongKey()));
 		field.density = next;
 		field.owner = owners;
 		field.soot = soots;
@@ -776,6 +822,171 @@ public final class SmokeField {
 		}
 	}
 
+	// ---------------------------------------------------------------- freezing fog (0.14.0)
+
+	/**
+	 * Turns the smoke within {@code radius} of {@code at} (anyone's) into freezing fog for {@link #FROZEN_TICKS} (a cell
+	 * already frozen starts its time again). Returns how many blocks of smoke froze. For Cryokinesis' cold.
+	 */
+	public static int freeze(ServerLevel level, Vec3 at, double radius) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null || field.density.isEmpty()) {
+			return 0;
+		}
+		long until = level.getGameTime() + FROZEN_TICKS;
+		double r2 = radius * radius;
+		int r = Mth.ceil(radius);
+		long cube = (2L * r + 1L) * (2L * r + 1L) * (2L * r + 1L);
+		int count = 0;
+		if (cube < field.density.size()) {
+			BlockPos center = BlockPos.containing(at);
+			for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
+				long key = pos.asLong();
+				if (field.density.get(key) >= MIN && Vec3.atCenterOf(pos).distanceToSqr(at) <= r2) {
+					field.frozen.put(key, until);
+					count++;
+				}
+			}
+		} else {
+			for (Long2FloatMap.Entry entry : field.density.long2FloatEntrySet()) {
+				long key = entry.getLongKey();
+				if (entry.getFloatValue() >= MIN && Vec3.atCenterOf(BlockPos.of(key)).distanceToSqr(at) <= r2) {
+					field.frozen.put(key, until);
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * Thaws the freezing fog within {@code radius} of {@code at} back into plain smoke at once (fire reached it: a flame,
+	 * a fireball). Public for the other powers' and heritages' fire.
+	 */
+	public static void thaw(ServerLevel level, Vec3 at, double radius) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null || field.frozen.isEmpty()) {
+			return;
+		}
+		double r2 = radius * radius;
+		int before = field.frozen.size();
+		field.frozen.long2LongEntrySet().removeIf(e -> Vec3.atCenterOf(BlockPos.of(e.getLongKey())).distanceToSqr(at) <= r2);
+		if (field.frozen.size() < before) {
+			hiss(level, at);
+		}
+	}
+
+	/** Whether the smoke in the block at {@code pos} is freezing fog. */
+	public static boolean frozen(Level level, BlockPos pos) {
+		Field field = FIELDS.get(level.dimension());
+		return field != null && field.frozen.containsKey(pos.asLong());
+	}
+
+	/** The fog's own work: fire thaws it, it chills what stands in it, and frost settles under it. */
+	private static void fog(ServerLevel level, Field field, long time) {
+		if (time % THAW_EVERY == 0) {
+			thawByFire(level, field);
+		}
+		if (time % FOG_EVERY == 0 && !field.frozen.isEmpty()) {
+			chill(level, field);
+		}
+		if (time % FROST_EVERY == 0 && !field.frozen.isEmpty()) {
+			frost(level, field);
+		}
+	}
+
+	/** A fire, lava or a lit campfire in (or right under) a frozen cell, or a burning creature in one, thaws it. */
+	private static void thawByFire(ServerLevel level, Field field) {
+		LongArrayList hot = new LongArrayList();
+		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+		for (long key : field.frozen.keySet()) {
+			cursor.set(key);
+			if (!level.isLoaded(cursor)) {
+				continue;
+			}
+			if (SmokeHeat.hot(level.getBlockState(cursor)) || SmokeHeat.hot(level.getBlockState(cursor.move(Direction.DOWN)))) {
+				hot.add(key);
+			}
+		}
+		for (int i = 0; i < hot.size(); i++) {
+			long key = hot.getLong(i);
+			if (field.frozen.containsKey(key)) {
+				field.frozen.remove(key);
+				hiss(level, Vec3.atCenterOf(BlockPos.of(key)));
+			}
+		}
+		if (field.frozen.isEmpty()) {
+			return;
+		}
+		for (Entity entity : level.getAllEntities()) {
+			if (entity.isOnFire() && entity.isAlive() && (field.frozen.containsKey(entity.blockPosition().asLong())
+				|| field.frozen.containsKey(BlockPos.containing(entity.getEyePosition()).asLong()))) {
+				thaw(level, entity.getBoundingBox().getCenter(), BURNING_THAW);
+			}
+		}
+	}
+
+	/**
+	 * Everything standing in freezing fog (feet or eyes) is slowed and freezes, but whoever made that smoke, any
+	 * Cryokinesis user, creative players and spectators.
+	 */
+	private static void chill(ServerLevel level, Field field) {
+		var cryo = Powers.byName("cryo");
+		for (Entity entity : level.getAllEntities()) {
+			if (!(entity instanceof LivingEntity living) || !living.isAlive() || living.isSpectator()) {
+				continue;
+			}
+			long feet = living.blockPosition().asLong();
+			long eye = BlockPos.containing(living.getEyePosition()).asLong();
+			long key = field.frozen.containsKey(feet) ? feet : field.frozen.containsKey(eye) ? eye : Long.MIN_VALUE;
+			if (key == Long.MIN_VALUE || field.owner.get(key) == living.getId()) {
+				continue;
+			}
+			if (living instanceof Player player && (player.isCreative() || cryo != null && Powers.has(player, cryo))) {
+				continue;
+			}
+			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FOG_SLOW_TICKS, 1));
+			if (living.canFreeze()) {
+				living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FOG_FREEZE_OVER, living.getTicksFrozen() + FOG_FREEZE));
+			}
+			if (level.getRandom().nextInt(3) == 0) {
+				level.sendParticles(ParticleTypes.SNOWFLAKE, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 3, 0.3,
+					0.4, 0.3, 0.01);
+			}
+		}
+	}
+
+	/**
+	 * Frost settles: a few frozen cells drop a snow layer onto the first ground below them (at most {@link #FROST_DROP}
+	 * blocks down), only into air and onto a full top face. Nothing is broken or replaced.
+	 */
+	private static void frost(ServerLevel level, Field field) {
+		long[] keys = field.frozen.keySet().toLongArray();
+		if (keys.length == 0) {
+			return;
+		}
+		BlockState snow = Blocks.SNOW.defaultBlockState();
+		for (int i = 0; i < FROST_TRIES; i++) {
+			BlockPos pos = BlockPos.of(keys[level.getRandom().nextInt(keys.length)]);
+			if (!level.isLoaded(pos) || !level.getBlockState(pos).isAir()) {
+				continue;
+			}
+			for (int drop = 0; drop < FROST_DROP && level.getBlockState(pos.below()).isAir(); drop++) {
+				pos = pos.below();
+			}
+			BlockPos floor = pos.below();
+			if (level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP) && snow.canSurvive(level, pos)) {
+				level.setBlockAndUpdate(pos, snow);
+			}
+		}
+	}
+
+	/** Fog thawing: a hiss and a breath of steam. */
+	private static void hiss(ServerLevel level, Vec3 at) {
+		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 4, 0.4, 0.3, 0.4, 0.01);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.3F, 1.6F);
+	}
+
 	// ---------------------------------------------------------------- sending it
 
 	/** Sends {@code player} the smoke within {@link #SYNC_RANGE} of them (an empty field once when there's none). */
@@ -817,7 +1028,7 @@ public final class SmokeField {
 			data[i++] = (byte)Mth.clamp(Math.round(field.density.get(key) / CAP * 255.0F), 1, 255);
 			int soot = Math.round(Mth.clamp(field.soot.get(key), 0.0F, 1.0F) * 127.0F);
 			data[i++] = (byte)(soot << 1 | (field.owner.get(key) == self ? SmokeNet.Field.YOURS : 0));
-			data[i++] = (byte)(smog(field.owner.get(key)) ? SmokeNet.Field.SMOG : 0);
+			data[i++] = (byte)((smog(field.owner.get(key)) ? SmokeNet.Field.SMOG : 0) | (field.frozen.containsKey(key) ? SmokeNet.Field.FROZEN : 0));
 		}
 		SmokeNet.send(player, new SmokeNet.Field(origin.asLong(), data));
 	}
