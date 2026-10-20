@@ -632,3 +632,25 @@ client half is `client/BeamClashClient`.
 - Input: the wind client's IDLE phase sends `WindJet.Hold(true)` without sneaking while clashing, and a press-release
   inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
 - Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
+
+## 0.13.35: the way into the Aether (`power/wind/aether/WindAether.java`)
+
+Wind is the power that gets you to the Aether, the way Chrono's Fast Forward gets you to the future. Lore: the Aether
+scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths and the four Giants).
+
+- **The dimension** `jaymospowers:aether` is pure datapack: `dimension/aether.json`, `dimension_type/aether.json`
+  (bright, skylight, no ceiling, min_y 0, height 256, clouds at 40, beds set spawn), `worldgen/noise_settings/aether.json`
+  and four biomes `aether_highfields` (green and sky blue), `aether_magnetic` (violet-grey), `aether_arctic` (pale ice,
+  snow, temperature 0) and `aether_irradiated` (lime-yellow). Vanilla placed features only; passive animals only; no carvers.
+  The noise settings are vanilla `floating_islands` with `temperature` and `vegetation` wired to the vanilla climate noises
+  (scale 3, so a highland spans roughly 250 blocks); vanilla's own router leaves both at 0.0, which would give a single
+  biome. The four biomes are the temperature/humidity quadrants of the multi_noise source.
+- **Up.** A Wind user in flight in the Overworld who climbs to within `ASCEND_MARGIN` (4) blocks of the top build height,
+  with ability 4 (B) unlocked (`Mastery.isUnlocked`), rises with every player within `COMPANION_RADIUS` (4). Arrival: same
+  x/z on the top of the island; none there, so a square spiral out in 16-block steps to `SEARCH_RADIUS` (96); none at all,
+  the open air at y 128 with Slow Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The first
+  visit tells the lore (`VISITED`). No Return is stored: the way home is the fall.
+- **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (4) in the Aether lands in the Overworld at the same x/z,
+  `ARRIVE_BELOW_TOP` (8) under the top, with Slow Falling for `SLOW_FALL_TICKS` (600). Fall damage still applies once it
+  ends. Dying takes you to your own spawn as usual.
+- Tuning: constants at the top of `WindAether`. Not playtested; the dimension needs a fresh world or a datapack reload to exist.
