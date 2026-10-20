@@ -671,6 +671,6 @@ public final class Treatment {
 				Pain.poppy(level, body);
 			}
 		}
-		player.sendOverlayMessage(done.withStyle(ChatFormatting.GREEN));
+		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
 	}
 }
