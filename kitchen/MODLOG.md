@@ -774,6 +774,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   (`HEALTH_SCALE`, `RICH_HEALTH`, `RICH_FROM`); dishes 1.35x (was 1.25), Perfect 1.25x on top (was 1.2); the food
   health cap is 40 (was 34). On eating (`feed`), saturation +15% for anything, +35% more for a dish, +25% more for a
   Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.
+- **0.4.50:** a corpse keeps its mob's size: the scale attribute stays in the saved look (Kingdoms' half-size spiders,
+  grown apes), the rest of the attributes are still left out (`Corpses.look`).
 
 ## 0.5.0: brewing
 Andy, for the Wounds plan's medieval medicine: "add a brewing system and block to kitchen". Strong spirits (aqua vitae)
