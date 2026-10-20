@@ -39,6 +39,14 @@ heat sources, changes with what it passes through, and rides its chimneys (`Chim
 Every ability pours more: Smokescreen 2.0 a tick (was 0.9), Smoke Bomb 130 / 190 mastered (was 60 / 90), Smother
 1.1 a tick on the target (was 0.5), Smoke Jet 1.5 a tick (was 0.6), and the gas fades a little slower.
 
+## Geyser steam (0.13.36)
+Andy (2026-10-20): plain and ascended smoke should use "the geyser particle effect" (potent sulfur over lava), "far
+thicker"; the gas stays for both, and corrupted smoke keeps its particles. `SmokeParticles.puff` swaps the campfire
+smoke of Smoke Jet, Vapour Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb for vanilla's
+`geyser_poof` (`SIZE` water blocks, `BURST` impulse), and Vapour Form's start adds `PLUMES` `geyser_plume`s
+(`SmokeParticles.gout`). A corrupted (not ascended) user gets the old particles. Left as they were: the gas
+(`SmokeFieldClient`), Ash Storm, Harness the Sky's clouds and soot rain, Smog and Pyroclasm.
+
 ## Vapour Form flight (0.10.81)
 Andy: "smoke's G vapour form should turn everything below your waist into smoke, giving you a powerful flight mode
 similar to wind's", and it moved from G to R so it's the first ability (Smokescreen moved to G). R toggles

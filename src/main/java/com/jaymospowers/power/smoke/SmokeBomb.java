@@ -98,7 +98,7 @@ final class SmokeBomb {
 		}
 		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(bomb.owner);
 		SmokeField.puff(level, at, bomb.amount, owner);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.08);
+		level.sendParticles(SmokeParticles.puff(owner, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.08);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, at, 10.0, 0.4F);
