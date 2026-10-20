@@ -32,12 +32,25 @@ public class AercloudBlock extends TransparentBlock {
 	public static final double FAST_FALL = 2.5;
 	/** Falling speed kept each tick while inside (the notes: damped by 0.005). */
 	public static final double FALL_KEPT = 0.005;
+	/** Brightness of faces next to a cloud (the notes: shade 0.25). */
+	public static final float SHADE = 0.25F;
 
 	private static final VoxelShape PLATE = Block.box(0.0, 0.0, 0.0, 16.0, 0.01, 16.0);
 	private static final VoxelShape FALLING_BOX = Shapes.box(0.0, 0.0, 0.0, 1.0, 0.9, 1.0);
 
 	public AercloudBlock(BlockBehaviour.Properties properties) {
 		super(properties);
+	}
+
+	/** Skylight does not pass down through a cloud. */
+	@Override
+	protected boolean propagatesSkylightDown(BlockState state) {
+		return false;
+	}
+
+	@Override
+	protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+		return SHADE;
 	}
 
 	/** The plate (a blue cloud gives another). */
