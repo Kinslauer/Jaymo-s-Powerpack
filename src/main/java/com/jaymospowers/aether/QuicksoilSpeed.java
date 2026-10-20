@@ -1,5 +1,8 @@
 package com.jaymospowers.aether;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -30,11 +33,15 @@ public final class QuicksoilSpeed {
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerLevel level : server.getAllLevels()) {
+				// One set per level so an entity near several players is capped once.
+				Set<Entity> near = new HashSet<>();
 				for (ServerPlayer player : level.players()) {
-					for (Entity entity : level.getEntities(player, player.getBoundingBox().inflate(SERVER_RANGE))) {
-						if (!(entity instanceof Player)) {
-							cap(entity);
-						}
+					near.addAll(level.getEntities(player, player.getBoundingBox().inflate(SERVER_RANGE)));
+				}
+				for (Entity entity : near) {
+					// Players, and vehicles that carry one, cap themselves on the client.
+					if (!(entity instanceof Player) && entity.getPassengers().stream().noneMatch(p -> p instanceof Player)) {
+						cap(entity);
 					}
 				}
 			}

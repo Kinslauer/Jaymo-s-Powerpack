@@ -31,6 +31,9 @@ public class IcestoneBlock extends Block {
 	@Override
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
 		if (!oldState.is(this)) {
+			if (level instanceof ServerLevel server) {
+				freeze(server, pos);
+			}
 			level.scheduleTick(pos, this, LOOK_EVERY);
 		}
 	}
