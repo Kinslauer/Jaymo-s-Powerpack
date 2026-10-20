@@ -51,11 +51,11 @@ public final class Wounds {
 		builder -> builder.persistent(Codec.FLOAT.listOf())
 			.syncWith(ByteBufCodecs.FLOAT.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
-	/** Creatures whose wounds are killing them just now: our own lethal blow doesn't route again. */
 	/** The max health the stored fractions were taken against (server side only), so a raised max is not read as a loss. */
 	public static final AttachmentType<Float> PARTS_MAX = AttachmentRegistry.create(JaymosPowers.id("wounds_max"),
 		builder -> builder.persistent(Codec.FLOAT));
 
+	/** Creatures whose wounds are killing them just now: our own lethal blow doesn't route again. */
 	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	private static int tickCounter;
 
@@ -154,7 +154,9 @@ public final class Wounds {
 			return;
 		}
 		Float known = entity.getAttached(PARTS_MAX);
-		if (entity.getAttached(PARTS) == null && entity.getHealth() >= entity.getMaxHealth() && (known == null || known >= entity.getMaxHealth())) {
+		if (entity.getAttached(PARTS) == null && (entity.getHealth() < entity.getMaxHealth()
+			|| known == null || known >= entity.getMaxHealth())) {
+			// no parts saved: a gap below the max (e.g. after a raised max) is no unrouted loss, so no phantom wounds
 			return;
 		}
 		float[] points = load(entity, plan);
