@@ -211,8 +211,8 @@ def packModsOverride = [
 	// Jaymo's Kingdoms makes it a skill (Survival's Make Do perk, any class) and takes its Omni enchantment out of the game
 	// (OmniCrossbows). Client and server; needs Fabric Language Kotlin 2.4.20+ (packMods has 1.14.2+kotlin.2.4.21) and
 	// carries its own Kaleido Config.
-	// TODO(home PC): the cloud couldn't reach Modrinth, so this is the 26.3 version number from the mod's source (1.1.4,
-	// 2026-09-30), not a version id; pin the id, and move it to packMods if it has a CurseForge file.
+	// Pinned by its Modrinth version number (modrinth.com/mod/omnicrossbow/version/1.1.4+mc26.3, project TxqFWfQR), as
+	// Cloth Config and Balm are. TODO(home PC): move it to packMods if it has a CurseForge file.
 	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
