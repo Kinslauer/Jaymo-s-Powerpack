@@ -159,8 +159,14 @@ public final class CombatArts {
 		}
 	}
 
-	private static boolean fullStrength(ServerPlayer sp, long now) {
+	/** Whether {@code sp}'s blow landing at {@code now} is a full-strength one (its swing that tick charged at least {@link #FULL_STRENGTH}). */
+	static boolean fullStrength(ServerPlayer sp, long now) {
 		return SWING_TICK.getOrDefault(sp.getUUID(), -1L) == now && SWING_CHARGE.getOrDefault(sp.getUUID(), 0.0F) >= FULL_STRENGTH;
+	}
+
+	/** (0.7.102) Whether a blow under way is one of ours (a cleave, a bleed, a leap: {@link #strike}), not a swing. */
+	static boolean striking() {
+		return striking;
 	}
 
 	/** A player's own melee blow (not one of ours), or null. */

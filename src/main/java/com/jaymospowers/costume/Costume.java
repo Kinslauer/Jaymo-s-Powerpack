@@ -130,6 +130,15 @@ public final class Costume {
 	}
 
 	/**
+	 * (0.14.3) Whether this player has a hood up: the worn costume's head piece is a hood ({@link CostumeDesign.Mask#isHood})
+	 * and on, with the face not hidden (either side).
+	 */
+	public static boolean hooded(Player player) {
+		CostumeDesign worn = worn(player);
+		return worn != null && worn.mask().isHood() && !unmasked(player) && !faceHidden(player);
+	}
+
+	/**
 	 * (0.12.3) The mask key (server): the worn costume's head piece comes off, or goes back on. A costume without one,
 	 * or none at all, with a Rig Helm on: the Helm's faceplate flips instead.
 	 */

@@ -139,7 +139,7 @@ final class Neighbours {
 		int aHits, bHits;
 		/** (0.7.21) An ambush: the opener lands every blow. */
 		boolean ambush;
-		/** (0.7.101) A hug that burned one of them ({@link EmberHugs}): it ends there and comes to nothing (no regard, no mood). */
+		/** (0.7.102) A hug that burned one of them ({@link EmberHugs}): it ends there and comes to nothing (no regard, no mood). */
 		boolean burned;
 
 		Meeting(Villager a, Villager b, int faction, Kind kind, long now) {
@@ -313,7 +313,7 @@ final class Neighbours {
 		}
 		Kind kind = deck.get(random.nextInt(deck.size()));
 		if ((kind == Kind.HUG || kind == Kind.AFFECTION) && EmberHugs.burned(a, b) != null && random.nextFloat() >= EmberHugs.TRY_ANYWAY) {
-			// (0.7.101) one of them is Emberborn and the other can't take the heat: they mostly know better than to try
+			// (0.7.102) one of them is Emberborn and the other can't take the heat: they mostly know better than to try
 			kind = Kind.CHAT;
 		}
 		return kind;
@@ -385,7 +385,7 @@ final class Neighbours {
 		}
 		beat(level, m, now);
 		if (m.burned) {
-			// (0.7.101) a hug that burned: they let go at once, so the burned one is free to pull away
+			// (0.7.102) a hug that burned: they let go at once, so the burned one is free to pull away
 			return false;
 		}
 		m.beat++;
@@ -471,7 +471,7 @@ final class Neighbours {
 			case HUG, AFFECTION -> {
 				LivingEntity burned = opener ? null : EmberHugs.burned(m.a, m.b);
 				if (burned != null) {
-					// (0.7.101) an Emberborn is too hot to hold: the other is burned and pulls away, and that's the end of it
+					// (0.7.102) an Emberborn is too hot to hold: the other is burned and pulls away, and that's the end of it
 					EmberHugs.burn(level, burned == m.a ? m.b : m.a, burned);
 					say(level, burned, "ember_hug", Speech.YELLOW, burned == m.a ? m.b : m.a);
 					m.burned = true;

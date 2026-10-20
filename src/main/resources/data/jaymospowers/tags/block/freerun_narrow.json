@@ -1,0 +1,113 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:fences",
+		"#minecraft:walls",
+		"#minecraft:fence_gates",
+		"minecraft:glass_pane",
+		{
+			"id": "#c:glass_panes",
+			"required": false
+		},
+		"minecraft:iron_bars",
+		{
+			"id": "minecraft:copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:exposed_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:weathered_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:oxidized_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_exposed_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_weathered_copper_bars",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_oxidized_copper_bars",
+			"required": false
+		},
+		"minecraft:iron_chain",
+		{
+			"id": "minecraft:chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:exposed_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:weathered_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:oxidized_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_exposed_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_weathered_copper_chain",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_oxidized_copper_chain",
+			"required": false
+		},
+		"minecraft:end_rod",
+		"minecraft:lightning_rod",
+		{
+			"id": "minecraft:exposed_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:weathered_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:oxidized_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_exposed_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_weathered_lightning_rod",
+			"required": false
+		},
+		{
+			"id": "minecraft:waxed_oxidized_lightning_rod",
+			"required": false
+		}
+	]
+}

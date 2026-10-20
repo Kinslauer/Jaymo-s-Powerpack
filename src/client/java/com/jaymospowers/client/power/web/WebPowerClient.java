@@ -223,6 +223,15 @@ public final class WebPowerClient implements PowerClient {
 		});
 	}
 
+	/**
+	 * (0.14.3) The local web slinger is swinging, being pulled, on the wings, in a parkour move or running along a wall:
+	 * freerunning ({@code FreerunClient}) stands aside.
+	 */
+	public static boolean parkourBusy() {
+		return INSTANCE.parkour.active() || INSTANCE.wallRun.running() || INSTANCE.swing.attached() || INSTANCE.swing.pull != null
+			|| INSTANCE.swing.wingsTicks != 0;
+	}
+
 	static boolean isActive(@Nullable LocalPlayer player) {
 		return player != null && Powers.has(player, WebPower.INSTANCE);
 	}
