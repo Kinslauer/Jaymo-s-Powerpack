@@ -129,6 +129,10 @@ public class CaskEntity extends BlockEntity {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			if (held.isEmpty() && player.isSecondaryUseActive() && base != null && baseCount > 0) {
+				if (base.baseItem() == Items.HONEY_BOTTLE && !takeGlassBottle(player)) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cask.need_bottle"));
+					return InteractionResult.SUCCESS_SERVER;
+				}
 				give(player, new ItemStack(base.baseItem()));
 				baseCount--;
 				if (baseCount == 0) {
@@ -186,6 +190,21 @@ public class CaskEntity extends BlockEntity {
 		return Component.translatable("item.jaymoskitchen." + brew.id);
 	}
 
+	/** Takes one glass bottle from the player (none needed in creative), reversing the refund for adding honey. */
+	private static boolean takeGlassBottle(Player player) {
+		if (player.getAbilities().instabuild) {
+			return true;
+		}
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack stack = player.getInventory().getItem(i);
+			if (stack.is(Items.GLASS_BOTTLE)) {
+				stack.shrink(1);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static void give(Player player, ItemStack stack) {
 		if (!player.getInventory().add(stack)) {
 			player.drop(stack, false, Prediction.SERVER_ONLY);
@@ -221,6 +240,13 @@ public class CaskEntity extends BlockEntity {
 	/** The cask's going: the base and the drinks in it spill. */
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		if (level instanceof ServerLevel server && water > 0) {
+			if (water >= CAPACITY) {
+				Block.popResource(server, pos, new ItemStack(Items.WATER_BUCKET));
+			} else {
+				Block.popResource(server, pos, PotionContents.createItemStack(Items.POTION, Potions.WATER).copyWithCount(water));
+			}
+		}
 		if (level instanceof ServerLevel server && base != null) {
 			if (baseCount > 0) {
 				Block.popResource(server, pos, new ItemStack(base.baseItem(), baseCount));

@@ -34,6 +34,10 @@ public final class DrunkSway {
 		LocalPlayer player = minecraft.player;
 		int level = player == null ? 0 : Drunk.level(player);
 		if (player == null || level <= 0 || !player.isAlive()) {
+			if (player != null) {
+				player.setYRot(player.getYRot() - lastYaw);
+				player.setXRot(Mth.clamp(player.getXRot() - lastPitch, -90.0F, 90.0F));
+			}
 			time = 0.0F;
 			lastYaw = 0.0F;
 			lastPitch = 0.0F;

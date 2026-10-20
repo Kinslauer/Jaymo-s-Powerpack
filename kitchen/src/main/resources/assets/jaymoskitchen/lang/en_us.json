@@ -451,6 +451,7 @@
 	"message.jaymoskitchen.cask.water": "Water %s/%s. Now add three of a base: wheat, apples, honey or berries",
 	"message.jaymoskitchen.cask.filling": "Water %s/%s, %s/%s %s base",
 	"message.jaymoskitchen.cask.mixed": "The cask already holds a different base",
+	"message.jaymoskitchen.cask.need_bottle": "You need a glass bottle to take the honey back",
 	"message.jaymoskitchen.cask.base_full": "The cask has all the base it needs",
 	"message.jaymoskitchen.cask.sealed": "Sealed. It will ferment for half a day",
 	"message.jaymoskitchen.cask.fermenting": "Fermenting: %s%%",
