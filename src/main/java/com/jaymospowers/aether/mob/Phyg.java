@@ -74,21 +74,21 @@ public class Phyg extends WingedAnimal {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.PIG_AMBIENT;
+		return MobSounds.get("entity.pig.ambient");
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.PIG_HURT;
+		return MobSounds.get("entity.pig.hurt");
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.PIG_DEATH;
+		return MobSounds.get("entity.pig.death");
 	}
 
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
-		this.playSound(SoundEvents.PIG_STEP, 0.15F, 1.0F);
+		this.playSound(SoundEvents.PIG_STEP.value(), 0.15F, 1.0F);
 	}
 }

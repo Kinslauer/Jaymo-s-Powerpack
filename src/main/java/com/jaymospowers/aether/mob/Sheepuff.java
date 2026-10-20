@@ -187,7 +187,7 @@ public class Sheepuff extends Animal {
 	}
 
 	/** It has eaten a patch of grass: wool grows back, and a second patch puffs it up. */
-	private void ate() {
+	private void grazedPatch() {
 		this.setSheared(false);
 		if (!this.isPuffed() && ++this.grazed >= GRASS_TO_PUFF) {
 			this.grazed = 0;
@@ -301,7 +301,7 @@ public class Sheepuff extends Animal {
 
 		private boolean grassBelow() {
 			Block block = Sheepuff.this.level().getBlockState(Sheepuff.this.blockPosition().below()).getBlock();
-			return block == AetherBlocks.AETHER_GRASS_BLOCK || block == AetherBlocks.ENCHANTED_AETHER_GRASS_BLOCK;
+			return block == AetherBlocks.AETHER_GRASS_BLOCK;
 		}
 
 		@Override
@@ -336,7 +336,7 @@ public class Sheepuff extends Animal {
 				BlockPos pos = Sheepuff.this.blockPosition().below();
 				level.levelEvent(2001, pos, Block.getId(level.getBlockState(pos)));
 				level.setBlockAndUpdate(pos, AetherBlocks.AETHER_DIRT.defaultBlockState());
-				Sheepuff.this.ate();
+				Sheepuff.this.grazedPatch();
 			}
 		}
 	}

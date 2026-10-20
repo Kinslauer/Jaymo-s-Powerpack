@@ -96,7 +96,7 @@ public abstract class RideableAnimal extends Animal {
 			if (!this.level().isClientSide()) {
 				this.setItemSlot(EquipmentSlot.SADDLE, held.copyWithCount(1));
 				held.consume(1, player);
-				this.playSound(SoundEvents.PIG_SADDLE, 0.5F, 1.0F);
+				this.playSound(SoundEvents.PIG_SADDLE.value(), 0.5F, 1.0F);
 			}
 			return InteractionResult.SUCCESS;
 		}

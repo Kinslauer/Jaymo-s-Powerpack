@@ -94,21 +94,21 @@ public class FlyingCow extends WingedAnimal {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.COW_AMBIENT;
+		return MobSounds.get("entity.cow.ambient");
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.COW_HURT;
+		return MobSounds.get("entity.cow.hurt");
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.COW_DEATH;
+		return MobSounds.get("entity.cow.death");
 	}
 
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
-		this.playSound(SoundEvents.COW_STEP, 0.15F, 1.0F);
+		this.playSound(MobSounds.get("entity.cow.step"), 0.15F, 1.0F);
 	}
 }

@@ -110,6 +110,7 @@ eggs sit in the "The Aether" creative tab. All spawn through Fabric `BiomeModifi
 `jaymospowers:skyroot_meadow`, `skyroot_forest`, `skyroot_grove`, `skyroot_woodland` (by key; the biome files are not
 touched), as the creature category, on the `animals_spawnable_on` tag (aether grass is in it), in daylight. The biomes'
 own `creature_spawn_probability` (the Aether uses 0.25) decides how many are there when a chunk is first made.
+Those biomes come from the worldgen track (A2): until it is merged here nothing spawns.
 
 | Animal | Spawn weight, group | HP | Notes |
 |---|---|---|---|
@@ -138,8 +139,8 @@ own `creature_spawn_probability` (the Aether uses 0.25) decides how many are the
   on spawn: 5% light blue, 5% cyan, 5% lime, 3% pink, 1 in 500 purple, else white. Drops mutton and its wool unless bare.
 - **Aerbunny** [Aerbunny, AerbunnyRide]: right-click with an empty hand to carry it on your head (sneak to put it down).
   Carried: your fall is capped at 0.25 a tick (no fall damage for a drop that gentle, within the "descents under 0.5 b/t"
-  rule), and once you have fallen more than 1.1 blocks jump hops you up (0.55) and puffs the bunny; each hop resets the
-  fall, so it can't chain into flight. This runs on your client (movement is yours), so other players see the bunny but
+  rule), and once you have fallen more than 1.1 blocks jump hops you up (0.55) and puffs the bunny; at most 2 hops per time in the air (refilled on the ground), so it
+  can't chain into flight. This runs on your client (movement is yours), so other players see the bunny but
   the hop is yours. Hit by a player it flees for 100-149 ticks (and can't be picked up while it does).
 - Drops (`data/jaymospowers/loot_table/entities`): phyg porkchop 1-3 + feather 0-1; flying cow leather 0-2 + beef 1-3;
   sheepuff mutton 1-2 (+ wool from the entity); aerbunny string 0-2; moa feather 2-3. All with Looting.

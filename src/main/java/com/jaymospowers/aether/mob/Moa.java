@@ -252,21 +252,21 @@ public class Moa extends RideableAnimal {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.CHICKEN_AMBIENT;
+		return MobSounds.get("entity.chicken.ambient");
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.CHICKEN_HURT;
+		return MobSounds.get("entity.chicken.hurt");
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.CHICKEN_DEATH;
+		return MobSounds.get("entity.chicken.death");
 	}
 
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
-		this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 0.8F);
+		this.playSound(SoundEvents.CHICKEN_STEP.value(), 0.15F, 0.8F);
 	}
 }
