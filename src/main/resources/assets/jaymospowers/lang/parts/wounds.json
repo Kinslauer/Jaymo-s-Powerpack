@@ -26,5 +26,12 @@
 	"message.jaymospowers.downed.no_food": "You've nothing to eat to bring %s round with.",
 	"message.jaymospowers.downed.no_treat": "You've nothing %s would take to bring them round.",
 	"message.jaymospowers.downed.revive_stopped": "You leave %s where they lie.",
-	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them)."
+	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them).",
+	"message.jaymospowers.wounds.broken": "%s broken: it won't heal right until it's set",
+	"message.jaymospowers.wounds.sprained": "%s sprained: it won't heal right until it's set",
+	"message.jaymospowers.wounds.set": "Your broken bones are set: they can heal now",
+	"message.jaymospowers.wounds.knit": "A broken bone has knit",
+	"commands.jaymospowers.wounds.broke": "Broke: %s",
+	"commands.jaymospowers.wounds.mend": "Set every broken part",
+	"commands.jaymospowers.wounds.mend_none": "Nothing broken to set"
 }

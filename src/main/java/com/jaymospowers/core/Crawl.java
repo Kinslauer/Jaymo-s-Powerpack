@@ -126,6 +126,10 @@ public final class Crawl {
 			// (0.14.1) the downed state holds the crawl: Jump or the key don't stand them up
 			return;
 		}
+		if (!down && com.jaymospowers.core.wounds.Breaks.crawlOnly(player)) {
+			// (0.14.2) two broken legs don't stand: crawling is all that's left
+			return;
+		}
 		if (down && canCrawl(player)) {
 			player.setAttached(CRAWLING, true);
 		} else {

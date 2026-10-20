@@ -10,7 +10,6 @@ import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -69,6 +68,12 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * A player's lost limbs never grow back by themselves: only when they respawn, eat a Hermit Bean, or are Verdant
  * ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
+ * <p>
+ * (0.14.2) Wounds phase 3: no more flat random sever. A part comes off on <b>overkill</b> ({@link #severOnOverkill},
+ * called by {@code Wounds}): a blade's blow on a limb that's already broken, or one that takes the head past zero, for more
+ * than {@link #SEVER_OVERKILL} of that part's health, at {@code min(1, SEVER_BASE * scale)}. The old chances are the
+ * scale: {@link #RATE} times the blade's chance over a plain blade's ({@link #BLADE_CHANCE}; the katana's is four
+ * times), skeletons {@link #SKELETON_CHANCE_SCALE} times. A severed limb stays at zero and broken in Wounds.
  */
 public final class Dismember {
 	public static final int HEAD = 1, RIGHT_ARM = 2, LEFT_ARM = 4, RIGHT_LEG = 8, LEFT_LEG = 16;
@@ -94,6 +99,10 @@ public final class Dismember {
 	public static final float BLIND_SPREAD = 28.0F;
 	/** Blood from a fresh stump: how long (ticks) and how often. */
 	public static final int BLEED_TICKS = 200, BLEED_EVERY = 6;
+	/** (0.14.2) Overkill: a blow past this share of a part's health (on a broken limb, or past the head's zero) can sever it. */
+	public static final float SEVER_OVERKILL = 0.5F;
+	/** (0.14.2) Overkill's chance to sever, times the blade's scale ({@link #scale}). */
+	public static final float SEVER_BASE = 0.6F;
 
 	/** The parts this creature has lost (a {@link #HEAD}... bitmask). Saved, synced to everyone, not kept through death. */
 	public static final AttachmentType<Integer> MISSING = AttachmentRegistry.create(JaymosPowers.id("missing_parts"),
@@ -119,8 +128,26 @@ public final class Dismember {
 	private static final Map<LivingEntity, Long> BLEEDING = new HashMap<>();
 	/** Players missing an arm (their hand is kept empty). */
 	private static final List<ServerPlayer> ONE_ARMED = new ArrayList<>();
-	/** Set while a power rolls its own severing for a blow, so the blade roll doesn't roll it again. */
+	/** Set while a power deals its own cut ({@link #cut}), so the held weapon's roll doesn't roll it again. */
 	private static boolean rolling;
+
+	/** (0.14.2) A power's own cut in progress: whom it's aimed at, where, by whom, its scale, and whether it took the part. */
+	private static final class Cut {
+		final LivingEntity target;
+		final LivingEntity attacker;
+		final int part;
+		final float scale;
+		boolean severed;
+
+		Cut(LivingEntity target, LivingEntity attacker, int part, float scale) {
+			this.target = target;
+			this.attacker = attacker;
+			this.part = part;
+			this.scale = scale;
+		}
+	}
+
+	private static @Nullable Cut cutting;
 
 	private Dismember() {
 	}
@@ -129,7 +156,7 @@ public final class Dismember {
 		SeveredPart.register();
 		Fractures.init();
 		BladeBlood.init();
-		ServerLivingEntityEvents.AFTER_DAMAGE.register(Dismember::afterDamage);
+		// (0.14.2) no blade roll of its own any more: Wounds calls severOnOverkill
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Projectile projectile) {
 				blindShot(projectile);
@@ -253,45 +280,76 @@ public final class Dismember {
 	}
 
 	/**
-	 * A power's own cut ({@code mobChance} against a humanoid mob; a player always at {@link #PLAYER_CHANCE}): rolls,
-	 * and takes {@code part} off if it comes up. The blow itself is dealt by the caller inside {@code blow}, which is
-	 * kept from rolling a second time as an ordinary blade hit.
+	 * A power's own cut: the blow is dealt by the caller inside {@code blow}, landing on {@code part} (Wounds routes it
+	 * there), and it takes the part off on overkill ({@link #severOnOverkill}) at this cut's own scale: {@code mobChance}
+	 * against a humanoid mob as against {@link #BLADE_CHANCE} (a player always as {@link #PLAYER_CHANCE}). (0.14.2) Before,
+	 * a flat roll after the blow. True if the part came off.
 	 */
 	public static boolean cut(LivingEntity attacker, LivingEntity target, int part, float mobChance, Runnable blow) {
 		float before = target.getHealth();
+		Cut cut = new Cut(target, attacker, part, scale(target, mobChance));
+		Cut outer = cutting;
+		cutting = cut;
+		boolean was = rolling;
 		rolling = true;
 		try {
 			blow.run();
 		} finally {
-			rolling = false;
+			rolling = was;
+			cutting = outer;
 		}
 		BladeBlood.splash(target, before - target.getHealth());
-		if (!canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
-			return false;
-		}
-		float chance = (target instanceof Player ? PLAYER_CHANCE : mobChance(target, mobChance)) * RATE;
-		if (target.getRandom().nextFloat() >= chance) {
-			return false;
-		}
-		return sever(target, part, attacker);
+		return cut.severed;
 	}
 
-	/** Any blade's blow: {@link #BLADE_CHANCE} against a humanoid mob, {@link #PLAYER_CHANCE} against a player. */
-	private static void afterDamage(LivingEntity target, DamageSource source, float baseDamage, float damage, boolean blocked) {
-		if (rolling || blocked || damage < MIN_DAMAGE || !(target.level() instanceof ServerLevel)) {
-			return;
+	/** (0.14.2) Where a power's cut on {@code victim} is aimed (Wounds lands the blow there), or null if none is. */
+	public static com.jaymospowers.core.wounds.@Nullable BodyPart cutAim(LivingEntity victim) {
+		Cut cut = cutting;
+		return cut != null && cut.target == victim ? com.jaymospowers.core.wounds.Breaks.part(cut.part) : null;
+	}
+
+	/**
+	 * (0.14.2) Overkill on {@code part} of {@code target} (Wounds has checked the blow: a broken limb, or the head past
+	 * zero, by more than {@link #SEVER_OVERKILL}). A power's cut ({@link #cut}) rolls at its own scale; any other blow only
+	 * with a blade in the striking hand, at a plain blade's. Rolls {@code min(1, SEVER_BASE * scale)} and cuts it off.
+	 * True if it came off.
+	 */
+	public static boolean severOnOverkill(LivingEntity target, int part, DamageSource source) {
+		if (!(target.level() instanceof ServerLevel) || !canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())
+			|| (missing(target) & part) != 0) {
+			return false;
 		}
-		if (!(source.getDirectEntity() instanceof LivingEntity attacker) || source.getEntity() != attacker || attacker == target
-			|| !blade(attacker.getMainHandItem()) || !canLoseParts(target)) {
-			return;
+		Cut cut = cutting;
+		LivingEntity attacker;
+		float scale;
+		if (cut != null && cut.target == target) {
+			attacker = cut.attacker;
+			scale = cut.scale;
+		} else {
+			if (rolling || !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker || striker == target
+				|| !blade(striker.getMainHandItem())) {
+				return false;
+			}
+			attacker = striker;
+			scale = scale(target, BLADE_CHANCE);
 		}
-		if (target instanceof Player p && (p.isCreative() || p.isSpectator())) {
-			return;
+		if (target.getRandom().nextFloat() >= Math.min(1.0F, SEVER_BASE * scale)) {
+			return false;
 		}
-		float chance = (target instanceof Player ? PLAYER_CHANCE : mobChance(target, BLADE_CHANCE)) * RATE;
-		if (target.getRandom().nextFloat() < chance) {
-			sever(target, aimedPart(attacker, target), attacker);
+		boolean severed = sever(target, part, attacker);
+		if (severed && cut != null && cut.target == target) {
+			cut.severed = true;
 		}
+		return severed;
+	}
+
+	/**
+	 * (0.14.2) A blow's scale on overkill's chance: the old chance it had ({@code base} against a humanoid mob, raised for
+	 * skeletons; {@link #PLAYER_CHANCE} against a player) over a plain blade's, times {@link #RATE}.
+	 */
+	static float scale(LivingEntity target, float base) {
+		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, base);
+		return RATE * chance / BLADE_CHANCE;
 	}
 
 	/** A humanoid mob's chance to lose a part to a blow ({@code base}), raised for skeletons. */
@@ -335,6 +393,13 @@ public final class Dismember {
 			BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
 		}
 		track(target);
+		if (part != HEAD) {
+			// (0.14.2) the part is gone from Wounds too: at zero, broken, never healing until it grows back
+			com.jaymospowers.core.wounds.BodyPart lost = com.jaymospowers.core.wounds.Breaks.part(part);
+			if (lost != null) {
+				com.jaymospowers.core.wounds.Wounds.breakPart(target, lost, by);
+			}
+		}
 		switch (part) {
 			case HEAD -> {
 				ItemStack helmet = target.getItemBySlot(EquipmentSlot.HEAD);
@@ -359,6 +424,7 @@ public final class Dismember {
 		if (mask == 0) {
 			return false;
 		}
+		int before = mask;
 		for (int part : PARTS) {
 			if ((mask & part) != 0) {
 				mask &= ~part;
@@ -374,6 +440,8 @@ public final class Dismember {
 			target.setAttached(MISSING, mask);
 		}
 		legs(target, mask);
+		// (0.14.2) what grew back heals from where it is
+		com.jaymospowers.core.wounds.Breaks.regrown(target, before & ~mask);
 		if (target.level() instanceof ServerLevel level) {
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 14,
 				0.35, 0.5, 0.35, 0.0);
@@ -413,8 +481,8 @@ public final class Dismember {
 		target.hurtServer(level, source, Float.MAX_VALUE);
 	}
 
-	/** Whatever the lost arm's hand held falls. */
-	static void emptyHand(ServerLevel level, LivingEntity target, int part) {
+	/** Whatever the lost (or broken) arm's hand held falls. */
+	public static void emptyHand(ServerLevel level, LivingEntity target, int part) {
 		InteractionHand hand = hand(target, part);
 		ItemStack held = target.getItemInHand(hand);
 		if (!held.isEmpty()) {
@@ -424,7 +492,7 @@ public final class Dismember {
 	}
 
 	/** The hand on the side of {@code part} (an arm). */
-	static InteractionHand hand(LivingEntity target, int part) {
+	public static InteractionHand hand(LivingEntity target, int part) {
 		HumanoidArm side = part == RIGHT_ARM ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 	}

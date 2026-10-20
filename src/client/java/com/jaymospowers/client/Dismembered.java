@@ -1,8 +1,8 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.core.Dismember;
-import com.jaymospowers.core.Fractures;
 import com.jaymospowers.core.SeveredPart;
+import com.jaymospowers.core.wounds.Wounds;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,8 @@ public final class Dismembered {
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int mask = Dismember.missing(entity);
 		state.setData(MISSING, mask == 0 ? null : mask);
-		int broken = Fractures.broken(entity);
+		// (0.14.2) Wounds' broken arms and legs (synced to everyone)
+		int broken = Wounds.brokenLimbs(entity);
 		state.setData(BROKEN, broken == 0 ? null : broken);
 	}
 
@@ -124,7 +125,7 @@ public final class Dismembered {
 		}
 	}
 
-	/** Broken limbs ({@link Fractures}) hang limp: an arm dangles at the side, a leg drags straight, neither swings. */
+	/** Broken limbs (Wounds' broken parts, (0.14.2); before, Fractures') hang limp: an arm dangles at the side, a leg drags straight, neither swings. */
 	private static void limp(ModelPart root, int broken) {
 		for (int part : new int[] {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG}) {
 			if ((broken & part) == 0) {

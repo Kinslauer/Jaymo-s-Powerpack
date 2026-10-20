@@ -1873,3 +1873,34 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     `Wounds.UNDEAD_FIGHT_ON` (60%) it fights on (tag `jaymospowers_fights_on`); then only its head kills it.
   - **Pose** (`client/wounds/DownedPose`, from Kingdoms): people lie on their backs or crawl face down as before; any
     other body (a wolf, a horse) lies on its side. Downed players keep `Crawl`'s pose.
+- **0.14.2, Wounds phase 3 (cripplings):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings".
+  Broken limbs, sever on overkill, and the old cripplings rerouted into Wounds (spec `docs/Wounds-Phase3.md`; numbers at
+  the top of `core/wounds/Breaks` and `Dismember`). Written without a compiler: build it before anything else.
+  - **Broken parts** (`core/wounds/Breaks`): a limb a routed hit takes to zero is broken (arm, leg), sprained (foot) or
+    grounded (wing): the `jaymospowers:wounds_broken` bitmask (a bit per `BodyPart`; saved, synced to all, not kept
+    through death) and the scoreboard tag `jaymoskitchen.broken.<part>` for Kitchen's corpses. Effects are transient
+    modifiers refreshed every `REFRESH_TICKS` (20), ids `jaymospowers:wounds_*`: an arm -30% attack damage, -25% attack
+    speed, -30% digging per arm, no shield or bow from its hand, `ARM_DROP_CHANCE` (25%) the hand drops what it held as
+    it breaks; both arms (or one broken and one gone): a player can't swing or use anything. A leg -30% speed, -40% jump,
+    no sprinting; a player's two legs: crawl only (`Crawl`, the key and Jump don't stand them up); a mob's every leg:
+    -70% speed, no jump. A foot -10% speed each. Wings: the flyer is pulled down and loses its flying speed. A severed
+    part takes Dismember's own effects instead, never both.
+  - **Healing:** an unset break never heals past `BROKEN_CAP` (25%) and a severed part not at all; the surplus goes to
+    other parts, and health nothing can hold is refused (vanilla health is held to the parts' total). A break is set by
+    a priest (Fractures' 2 emeralds), a respawn, a Hermit Bean, Verdant's healing, Chrono's Bloom or Wind's Zephyr's
+    Breath (`Wounds.mendAll`); then it heals normally and the break clears above the cap. No more knitting by itself
+    (phase 4 brings the splint). `/wounds break <part> [target]` and `/wounds mend [target]`.
+  - **Fractures folds in:** a blunt blow's break is `Wounds.breakPart` (the limb's health gone, marked broken). Its own
+    `broken_bones`, `bones_mending` and `bones_mended_by` attachments, limp and empty-hand are gone (the old saved limp
+    modifier is taken off on load); the head daze and the skeleton shatter stay. `Fractures.heal`, `startMend`, `broken`
+    and `breakBone` still work, delegating. The client's hanging arms and legs read Wounds' broken parts.
+  - **Sever on overkill** (`Dismember.severOnOverkill`, called by Wounds): a blade's blow on a limb already broken, or
+    one that takes the head past zero, for more than `SEVER_OVERKILL` (half) of that part, cuts it off at
+    `min(1, SEVER_BASE (0.6) * scale)`; the old chances are the scale (`RATE` times the blade's chance over a plain
+    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone. A power's own cut
+    (`Dismember.cut`) lands its blow on the part it aimed at. A severed limb stays at zero and broken; regrowth sets it.
+    A headless zombie or skeleton now dies only when its body gives out.
+  - **Cripplings rerouted:** Darktide's leg strikes (G Crescent low, Ink Cross, Fang Barrage, any low Darktide hit) wound
+    the struck leg by `DarktideStatus.LEG_WOUND` (half of it) through `Wounds.hurtPart` instead of the 5 s crawl, so two
+    strikes break it; Pounce's three stabs count a broken leg as crippled. The timed crawl stays for bodies Wounds
+    doesn't part. The Great Ape's leg-crippling (a timed knock-down of a transformation) and trips and stuns stay as they were.

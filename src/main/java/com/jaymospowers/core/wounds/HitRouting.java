@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Where a hit lands, and how a part's overflow spills on. Works in health points on a creature's parts
@@ -31,8 +32,12 @@ final class HitRouting {
 	private HitRouting() {
 	}
 
-	/** Takes {@code loss} from {@code points} the way {@code source} would land it. */
-	static void route(LivingEntity victim, BodyPlan plan, DamageSource source, float[] points, float max, float loss) {
+	/**
+	 * Takes {@code loss} from {@code points} the way {@code source} would land it. (0.14.2) Returns the part a blow, an
+	 * arrow or a thrown thing landed on (as the plan has it), or null for what spreads or has no point (falls,
+	 * explosions, drowning, fire, magic).
+	 */
+	static @Nullable BodyPart route(LivingEntity victim, BodyPlan plan, DamageSource source, float[] points, float max, float loss) {
 		if (source.is(DamageTypeTags.IS_FALL)) {
 			BodyPart[] feet = plan.fallParts();
 			for (BodyPart part : feet) {
@@ -48,10 +53,13 @@ final class HitRouting {
 			|| source.is(DamageTypes.LIGHTNING_BOLT)) {
 			damage(points, plan, BodyPart.BODY, loss);
 		} else if (source.getDirectEntity() != null || source.getEntity() != null) {
-			damage(points, plan, landed(victim, plan, source), loss);
+			BodyPart landed = plan.resolve(landed(victim, plan, source));
+			damage(points, plan, landed, loss);
+			return landed;
 		} else {
 			damage(points, plan, BodyPart.BODY, loss);
 		}
+		return null;
 	}
 
 	/** Takes {@code amount} from {@code first}; what it can't give spills to {@link BodyPart#overflow}, and on until spent or nothing is left. */

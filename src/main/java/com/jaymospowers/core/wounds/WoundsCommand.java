@@ -19,6 +19,8 @@ import net.minecraft.world.entity.LivingEntity;
  * <li>{@code /wounds show [target]}: every part's health in hearts;</li>
  * <li>{@code /wounds part <part> <amount> [target]}: wounds a part by that many health points;</li>
  * <li>{@code /wounds heal [target]}: full health, every part whole.</li>
+ * <li>(0.14.2) {@code /wounds break <part> [target]}: breaks a limb (its health gone, its effects on);</li>
+ * <li>(0.14.2) {@code /wounds mend [target]}: sets every break, as a priest would (they heal from there).</li>
  * </ul>
  * Without a target, you.
  */
@@ -40,6 +42,17 @@ final class WoundsCommand {
 				.executes(c -> heal(c.getSource(), c.getSource().getPlayerOrException()))
 				.then(Commands.argument("target", EntityArgument.entity())
 					.executes(c -> heal(c.getSource(), EntityArgument.getEntity(c, "target")))))
+			.then(Commands.literal("mend")
+				.executes(c -> mend(c.getSource(), c.getSource().getPlayerOrException()))
+				.then(Commands.argument("target", EntityArgument.entity())
+					.executes(c -> mend(c.getSource(), EntityArgument.getEntity(c, "target")))))
+			.then(Commands.literal("break")
+				.then(Commands.argument("part", StringArgumentType.word())
+					.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(BodyPart.values())
+						.filter(p -> !p.vital()).map(p -> p.name().toLowerCase(Locale.ROOT)), b))
+					.executes(c -> breakPart(c.getSource(), c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "part")))
+					.then(Commands.argument("target", EntityArgument.entity())
+						.executes(c -> breakPart(c.getSource(), EntityArgument.getEntity(c, "target"), StringArgumentType.getString(c, "part"))))))
 			.then(Commands.literal("part")
 				.then(Commands.argument("part", StringArgumentType.word())
 					.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(BodyPart.values())
@@ -71,8 +84,8 @@ final class WoundsCommand {
 		return plan.size();
 	}
 
-	private static int hurt(CommandSourceStack source, Entity entity, String name, float amount) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-		LivingEntity living = living(entity);
+	/** The part called {@code name} that {@code living} has. */
+	private static BodyPart part(LivingEntity living, String name) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
 		BodyPart part = null;
 		for (BodyPart candidate : BodyPart.values()) {
 			if (candidate.name().toLowerCase(Locale.ROOT).equals(name)) {
@@ -80,9 +93,35 @@ final class WoundsCommand {
 			}
 		}
 		BodyPlan plan = Wounds.plan(living);
-		if (part == null || plan.index(part) < 0) {
+		if (part == null || plan == null || plan.index(part) < 0) {
 			throw UNKNOWN_PART.create();
 		}
+		return part;
+	}
+
+	/** (0.14.2) */
+	private static int breakPart(CommandSourceStack source, Entity entity, String name) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		LivingEntity living = living(entity);
+		BodyPart part = part(living, name);
+		if (part.vital()) {
+			throw UNKNOWN_PART.create();
+		}
+		Wounds.breakPart(living, part, source.getEntity());
+		source.sendSuccess(() -> Component.translatable("commands.jaymospowers.wounds.broke", part.displayName()), true);
+		return 1;
+	}
+
+	/** (0.14.2) */
+	private static int mend(CommandSourceStack source, Entity entity) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		LivingEntity living = living(entity);
+		boolean any = Wounds.mendAll(living);
+		source.sendSuccess(() -> Component.translatable(any ? "commands.jaymospowers.wounds.mend" : "commands.jaymospowers.wounds.mend_none"), true);
+		return any ? 1 : 0;
+	}
+
+	private static int hurt(CommandSourceStack source, Entity entity, String name, float amount) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		LivingEntity living = living(entity);
+		BodyPart part = part(living, name);
 		Wounds.hurtPart(living, part, amount, source.getEntity());
 		BodyPart hurt = part;
 		source.sendSuccess(() -> Component.translatable("commands.jaymospowers.wounds.hurt", hurt.displayName(), String.format(Locale.ROOT, "%.1f", amount)), true);

@@ -1,6 +1,7 @@
 package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Dismember;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +40,12 @@ import org.jspecify.annotations.Nullable;
  * and tamed animals go down instead). While someone is down, Wounds leaves their parts to follow their health: only
  * their health running out ends them. Zombies and skeletons whose body gives out fight on ({@link #UNDEAD_FIGHT_ON});
  * then only the head kills them.
+ * <p>
+ * (0.14.2) Phase 3: a limb that a routed hit takes to zero is broken ({@link Breaks}: an arm or a leg; a foot sprained, a
+ * wing grounded) and, until it is set, never heals past {@link Breaks#BROKEN_CAP}; a severed one never heals at all.
+ * Health that the capped parts can't hold is refused (vanilla health is held to the parts' total). A hit with a blade on
+ * an already broken limb, or one that takes the head past zero, for more than {@link Dismember#SEVER_OVERKILL} of that
+ * part cuts it off ({@link Dismember#severOnOverkill}).
  */
 public final class Wounds {
 	/** Smaller than this many health points is nothing. */
@@ -89,6 +96,8 @@ public final class Wounds {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
 		// (0.14.1) phase 2: the downed
 		Downed.register();
+		// (0.14.2) phase 3: broken limbs
+		Breaks.register();
 	}
 
 	// ---- public API -------------------------------------------------------------------------------------------------------
@@ -113,7 +122,7 @@ public final class Wounds {
 		}
 		float max = entity.getMaxHealth();
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, entity.getHealth());
+		reconcile(points, plan, max, entity.getHealth(), Breaks.caps(entity, plan));
 		float cap = plan.share(index) * max;
 		return cap <= 0.0F ? 1.0F : Mth.clamp(points[index] / cap, 0.0F, 1.0F);
 	}
@@ -141,20 +150,89 @@ public final class Wounds {
 		float max = entity.getMaxHealth();
 		float health = entity.getHealth();
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, health);
+		reconcile(points, plan, max, health, Breaks.caps(entity, plan));
+		// (0.14.2) health the broken parts couldn't hold isn't there to lose
+		health = Math.min(health, sum(points));
+		float[] was = points.clone();
 		float before = sum(points);
 		HitRouting.damage(points, plan, part, amount);
 		float removed = before - sum(points);
 		// (not to zero: a dead creature has to die through its events)
 		entity.setHealth(Math.max(0.01F, health - removed));
 		store(entity, plan, points);
+		// (0.14.2) a limb this took to zero breaks
+		markBreaks(entity, plan, was, points, by);
 		if (lethal(entity, points, plan)) {
 			finish(level, entity, plan, by);
 		}
 	}
 
+	/**
+	 * (0.14.2) Breaks {@code part} (an arm, leg, foot or wing; Fractures' blunt blow, a power's leg strike): what it has
+	 * left is lost (health and all), and it is marked broken ({@link Breaks}). True if it wasn't broken already.
+	 */
+	public static boolean breakPart(LivingEntity entity, BodyPart part, @Nullable Entity by) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE || part.vital() || !(entity.level() instanceof ServerLevel) || !entity.isAlive()) {
+			return false;
+		}
+		int index = plan.index(part);
+		if (index < 0) {
+			return false;
+		}
+		if (!Downed.isDowned(entity)) {
+			float max = entity.getMaxHealth();
+			float health = entity.getHealth();
+			float[] points = load(entity, plan);
+			reconcile(points, plan, max, health, Breaks.caps(entity, plan));
+			health = Math.min(health, sum(points));
+			float lost = points[index];
+			points[index] = 0.0F;
+			// (a limb alone never kills: what's left is the rest of the parts)
+			entity.setHealth(Math.max(0.01F, health - lost));
+			store(entity, plan, points);
+		}
+		return Breaks.mark(entity, part, by);
+	}
+
+	/** (0.14.2) Sets {@code part}'s break: it heals normally from now on, and the break goes once it's above {@link Breaks#BROKEN_CAP}. True if it needed setting. */
+	public static boolean setPart(LivingEntity entity, BodyPart part) {
+		return Breaks.setPart(entity, part);
+	}
+
+	/** (0.14.2) Sets every break (a priest, a respawn, a Hermit Bean, Verdant's healing, Bloom, Zephyr's Breath). True if any needed setting. */
+	public static boolean mendAll(LivingEntity entity) {
+		return Breaks.mendAll(entity);
+	}
+
+	/** (0.14.2) The broken parts, a bit per {@link BodyPart#ordinal()} (both sides). */
+	public static int broken(Entity entity) {
+		return Breaks.broken(entity);
+	}
+
+	public static boolean isBroken(Entity entity, BodyPart part) {
+		return Breaks.isBroken(entity, part);
+	}
+
+	/** (0.14.2) The broken arms and legs as {@link Dismember} bits (both sides: drawn hanging limp). */
+	public static int brokenLimbs(Entity entity) {
+		return Breaks.limbs(entity);
+	}
+
+	/** (0.14.2) Every limb that went from something to zero between {@code was} and {@code now} is broken. */
+	private static void markBreaks(LivingEntity entity, BodyPlan plan, float[] was, float[] now, @Nullable Entity by) {
+		for (int i = 0; i < now.length; i++) {
+			BodyPart part = plan.part(i);
+			if (!part.vital() && was[i] > EPS && now[i] <= EPS) {
+				Breaks.mark(entity, part, by);
+			}
+		}
+	}
+
 	/** Full health, every part whole. */
 	public static void healAll(LivingEntity entity) {
+		// (0.14.2) and every break gone with it
+		Breaks.clearAll(entity);
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);
@@ -174,8 +252,12 @@ public final class Wounds {
 			return;
 		}
 		float[] points = load(entity, plan);
-		reconcile(points, plan, entity.getMaxHealth(), entity.getHealth());
+		float refused = reconcile(points, plan, entity.getMaxHealth(), entity.getHealth(), Breaks.caps(entity, plan));
 		store(entity, plan, points);
+		if (refused > EPS && entity.isAlive()) {
+			// (0.14.2) healing the broken and severed parts can't take: health stays what the parts hold
+			entity.setHealth(Math.max(0.01F, sum(points)));
+		}
 	}
 
 	/**
@@ -189,7 +271,7 @@ public final class Wounds {
 		}
 		float max = entity.getMaxHealth();
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, entity.getHealth());
+		reconcile(points, plan, max, entity.getHealth(), Breaks.caps(entity, plan));
 		ensureVital(points, plan, max);
 		store(entity, plan, points);
 	}
@@ -208,24 +290,56 @@ public final class Wounds {
 		float max = victim.getMaxHealth();
 		float health = victim.getHealth();
 		float[] points = load(victim, plan);
+		float[] caps = Breaks.caps(victim, plan);
 		if (Downed.isDowned(victim)) {
 			// (0.14.1) down: the parts only follow the health (head and body kept), so only the health running out ends them
-			reconcile(points, plan, max, health);
+			reconcile(points, plan, max, health, caps);
 			ensureVital(points, plan, max);
 			store(victim, plan, points);
 			return;
 		}
 		// what the parts held before the hit, then the real loss (armour, absorption and other mods' changes already in it)
-		reconcile(points, plan, max, Math.min(max, health + taken));
+		reconcile(points, plan, max, Math.min(max, health + taken), caps);
+		float[] was = points.clone();
 		float loss = sum(points) - health;
+		BodyPart landed = null;
 		if (loss > EPS) {
-			HitRouting.route(victim, plan, source, points, max, loss);
+			// (0.14.2) a power's own cut (Dismember.cut) lands where it was aimed
+			BodyPart aimed = Dismember.cutAim(victim);
+			if (aimed != null && plan.index(aimed) >= 0) {
+				HitRouting.damage(points, plan, aimed, loss);
+				landed = aimed;
+			} else {
+				landed = HitRouting.route(victim, plan, source, points, max, loss);
+			}
 		} else {
-			reconcile(points, plan, max, health);
+			reconcile(points, plan, max, health, caps);
 		}
 		store(victim, plan, points);
-		if (lethal(victim, points, plan)) {
-			finish(level, victim, plan, source.getEntity());
+		if (sum(points) < health - EPS && caps != null) {
+			// (0.14.2) health the broken and severed parts couldn't hold (healed in since the last look) is refused
+			victim.setHealth(Math.max(0.01F, sum(points)));
+		}
+		Entity by = source.getEntity();
+		// (0.14.2) overkill: a blade on a limb already broken, or past the head's zero, may cut it off
+		if (landed != null && !blocked) {
+			int index = plan.index(landed);
+			boolean overkill = landed == BodyPart.HEAD
+				? was[index] > EPS && points[index] <= EPS && loss - was[index] > Dismember.SEVER_OVERKILL * plan.share(index) * max
+				: !landed.vital() && Breaks.isBroken(victim, landed) && loss > Dismember.SEVER_OVERKILL * plan.share(index) * max;
+			int limb = Breaks.limb(landed);
+			if (overkill && limb != 0 && landed != BodyPart.LEFT_FOOT && landed != BodyPart.RIGHT_FOOT && taken >= Dismember.MIN_DAMAGE
+				&& Dismember.severOnOverkill(victim, limb, source)) {
+				if (landed == BodyPart.HEAD || !victim.isAlive()) {
+					// (a severed head is Dismember's to end: death, a blind stagger, or an undead fighting on)
+					return;
+				}
+			}
+		}
+		// (0.14.2) a limb this hit took to zero breaks
+		markBreaks(victim, plan, was, points, by);
+		if (victim.isAlive() && lethal(victim, points, plan)) {
+			finish(level, victim, plan, by);
 		}
 	}
 
@@ -246,7 +360,7 @@ public final class Wounds {
 			// something cancelled the death: the parts follow the health, and head and body get a little back
 			float max = victim.getMaxHealth();
 			float[] points = load(victim, plan);
-			reconcile(points, plan, max, victim.getHealth());
+			reconcile(points, plan, max, victim.getHealth(), Breaks.caps(victim, plan));
 			ensureVital(points, plan, max);
 			store(victim, plan, points);
 		}
@@ -314,6 +428,11 @@ public final class Wounds {
 			return false;
 		}
 		int head = plan.index(BodyPart.HEAD);
+		if (head >= 0 && Dismember.headless(entity) && entity.getType().builtInRegistryHolder().is(Dismember.HEADLESS_UNDEAD)) {
+			// (0.14.2) it never needed its head (Dismember): only its body counts
+			int body = plan.index(BodyPart.BODY);
+			return body >= 0 && points[body] <= EPS;
+		}
 		if (head < 0 || points[head] <= EPS || !(entity instanceof Zombie || entity.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS))) {
 			return true;
 		}
@@ -340,8 +459,10 @@ public final class Wounds {
 	/**
 	 * Makes the parts add up to {@code health}: a gain goes to the most hurt part first, filling it before the next;
 	 * a loss nobody routed comes off the limbs, then the body, then the head, and never takes head or body to zero.
+	 * (0.14.2) A gain fills each part only up to its fraction in {@code caps} ({@link Breaks#caps}: a broken part to
+	 * {@link Breaks#BROKEN_CAP}, a severed one not at all; null: no caps). Returns the gain nothing could take.
 	 */
-	static void reconcile(float[] points, BodyPlan plan, float max, float health) {
+	static float reconcile(float[] points, BodyPlan plan, float max, float health, float @Nullable [] caps) {
 		float diff = Mth.clamp(health, 0.0F, max) - sum(points);
 		if (diff > EPS) {
 			float gain = diff;
@@ -350,15 +471,17 @@ public final class Wounds {
 				float lowest = Float.MAX_VALUE;
 				for (int i = 0; i < points.length; i++) {
 					float cap = plan.share(i) * max;
-					if (cap > 0.0F && points[i] < cap - EPS && points[i] / cap < lowest) {
+					float most = caps == null ? cap : cap * caps[i];
+					if (cap > 0.0F && points[i] < most - EPS && points[i] / cap < lowest) {
 						lowest = points[i] / cap;
 						worst = i;
 					}
 				}
 				if (worst < 0) {
-					return;
+					return gain;
 				}
-				float add = Math.min(gain, plan.share(worst) * max - points[worst]);
+				float most = plan.share(worst) * max * (caps == null ? 1.0F : caps[worst]);
+				float add = Math.min(gain, most - points[worst]);
 				points[worst] += add;
 				gain -= add;
 			}
@@ -387,6 +510,7 @@ public final class Wounds {
 				}
 			}
 		}
+		return 0.0F;
 	}
 
 	/** Head and body hold at least {@link #MIN_VITAL_AFTER_SAVE} of themselves, the rest taken from the other parts (the largest first). */
