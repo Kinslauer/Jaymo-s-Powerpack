@@ -144,8 +144,9 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
 1. **Core. Built in 0.14.0 (written without a compiler; not yet built or tested on the Deck).** `BodyPlan`, the `Wounds` attachment, damage routing (hits, falls, fire, explosions), overflow, natural
    healing, a debug command (`/wounds part <part> <amount>`, `/wounds show`), and the HUD silhouette. No debuffs or
    downed yet.
-2. **Downed.** Move Downed from Kingdoms into Powers, universal. Kingdoms reads the shared tag (tending, food revive,
-   guards). Bleed out, give up, carry.
+2. **Downed. Built in 0.14.1 with Kingdoms 0.7.98 (written without a compiler; not yet built or tested on the Deck;
+   spec `docs/Wounds-Phase2.md`).** Move Downed from Kingdoms into Powers, universal. Kingdoms reads the shared tag
+   (tending, food revive, guards). Bleed out, give up, carry.
 3. **Cripplings.** Broken arm, leg, foot and wing debuffs. Existing cripplings rerouted. Sever on overkill (Dismember).
    Corpses show the breaks.
 4. **Medicine.** The medieval kit, treatment channel, body screen, poppy addiction, smelling salts, needle, cautery,

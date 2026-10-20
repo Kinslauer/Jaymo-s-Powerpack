@@ -3412,3 +3412,14 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
+- **0.7.98, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.14.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.

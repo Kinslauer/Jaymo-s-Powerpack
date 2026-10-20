@@ -96,6 +96,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		com.jaymospowers.client.wounds.WoundsHud.init();
+		com.jaymospowers.client.wounds.DownedHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();

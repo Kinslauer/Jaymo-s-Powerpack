@@ -1842,3 +1842,34 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     cancelled the vital part gets `MIN_VITAL_AFTER_SAVE` (0.1) back.
   - **`/wounds show|part <part> <health> [target]|heal [target]`** (gamemasters), and a body silhouette bottom-right
     (`client/wounds/WoundsHud`: parts coloured by fraction, white flash for 8 ticks on a loss, fades 3 s after all whole).
+- **0.14.1, Wounds phase 2 (downed, for everyone):** Andy (2026-10-19): "remove our downed system for a universal one".
+  Kingdoms' downed guards (its 0.7.73-0.7.93) move here as `core/wounds/Downed` (spec `docs/Wounds-Phase2.md`; numbers
+  at its top). Written without a compiler: build it before anything else.
+  - **Who goes down** instead of dying: players (not creative or spectator), villagers, anything Kingdoms marks with the
+    scoreboard tag `jaymospowers_downable` (its folk), and tamed animals (a tame `TamableAnimal`, a tamed horse, donkey,
+    llama or camel). Monsters, wild animals and bosses die; so does anything beheaded (or already headless), anything
+    killed by what ignores invulnerability (the void, `/kill`), and anyone with a totem in hand (the totem goes first).
+    Every other mod's death save (Darktide's shade, Xenoform, sparring, Kingdoms' Last Stand) runs before it.
+  - **Down:** `DOWNED_HEALTH` (6), head and body given a little back (`Wounds.settle`). The `jaymospowers:downed`
+    attachment (game time, crawler bit; saved, synced to all) and the tag `jaymospowers_downed`, which Kingdoms reads.
+    Mobs lose their AI (`DownedMobMixin`); half (`CRAWLER_CHANCE`) drag themselves from whoever felled them. Players
+    are held in a slow crawl (`Crawl`, `PLAYER_CRAWL_SLOW` -50%, Jump doesn't stand them up), drop whatever they
+    carry, and can't attack, use, build, break, pick anyone up or press a power key; their screen greys
+    (`client/wounds/DownedHud`).
+  - **While down:** fire, falls and mobs hurt out of what's left and can kill (that death counts; while down, Wounds
+    leaves the parts to follow the health). A player's blow is a wound instead, the `MAX_WOUNDS`th (10) kills. A mob
+    or tamed animal no player has hit gets up after `RECOVER_TICKS` (1 min) at `RECOVER_HEALTH` (30%); once a player
+    has hit it, it bleeds out `BLEED_OUT_TICKS` (2 min) after the last hit.
+  - **Players don't bleed out into a respawn** (Andy: "Lie until roused or give up"): after `BLEED_OUT_TICKS` they pass
+    out (`jaymospowers:downed_out`; they lie still, the screen darker, a slow heartbeat) until brought round, or they
+    hold sneak for `GIVE_UP_TICKS` (5 s; a bar over the hotbar) to give up: a death of their wounds credited to whoever
+    felled them. Logging out keeps it; respawning, `/kill` and the void clear it.
+  - **Bringing one round:** sneak + hold use on a downed one (Kingdoms' 0.7.93 revive, for everyone): a tap picks them
+    up (`Carry.pickUpDowned`; anyone downed is carryable, a carried one can't struggle free), held for `REVIVE_TICKS`
+    (3 s) it gets them up for the least filling food you carry; a tamed animal takes one of its own treats instead
+    (`Downed.TREATS`: a wolf bone or meat, a cat fish, a horse golden carrot, apple or hay...). Kingdoms' villagers still
+    tend the downed: they set the tag `jaymospowers_revive` and the body gets up on its next tick.
+  - **Zombies and skeletons fight on:** when Wounds' lethal rule fires on one because its body (not its head) gave out,
+    `Wounds.UNDEAD_FIGHT_ON` (60%) it fights on (tag `jaymospowers_fights_on`); then only its head kills it.
+  - **Pose** (`client/wounds/DownedPose`, from Kingdoms): people lie on their backs or crawl face down as before; any
+    other body (a wolf, a horse) lies on its side. Downed players keep `Crawl`'s pose.

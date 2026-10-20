@@ -109,8 +109,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Stalkers.register();
 		Theft.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
-		LOGGER.debug("downed attachment: {}", Downed.DOWNED);
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
+		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();

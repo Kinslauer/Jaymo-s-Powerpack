@@ -122,6 +122,10 @@ public final class Crawl {
 	}
 
 	private static void set(ServerPlayer player, boolean down) {
+		if (com.jaymospowers.core.wounds.Downed.isDowned(player)) {
+			// (0.14.1) the downed state holds the crawl: Jump or the key don't stand them up
+			return;
+		}
 		if (down && canCrawl(player)) {
 			player.setAttached(CRAWLING, true);
 		} else {
@@ -134,7 +138,7 @@ public final class Crawl {
 		long now = level.getGameTime();
 		Rolling last = player.getAttached(ROLLING);
 		// a held key chains rolls back to back, so allow a couple of ticks of network jitter
-		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || last != null && now - last.start() < ROLL_TICKS - 2) {
+		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || com.jaymospowers.core.wounds.Downed.passedOut(player) || last != null && now - last.start() < ROLL_TICKS - 2) {
 			return;
 		}
 		Rolling next = nextRoll(last, now, right);

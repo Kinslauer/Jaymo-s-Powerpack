@@ -21,7 +21,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.ResourceKey;
 import org.jspecify.annotations.Nullable;
@@ -31,12 +33,17 @@ import org.jspecify.annotations.Nullable;
  * (vanilla {@code getHealth()} is the truth); the {@link #PARTS} attachment is how it is distributed, as each part's
  * fraction (0-1) of its own share of the most health. A hit takes its loss from the part it lands on
  * ({@link HitRouting}), spilling into the next when a part runs out; head or body at zero kills. Healing of any kind
- * fills the most hurt part first. No debuffs and no downed state yet.
+ * fills the most hurt part first. No debuffs yet.
+ * <p>
+ * (0.14.1) Phase 2: the death head or body brings is where {@link Downed} steps in (players, villagers, Kingdoms' folk
+ * and tamed animals go down instead). While someone is down, Wounds leaves their parts to follow their health: only
+ * their health running out ends them. Zombies and skeletons whose body gives out fight on ({@link #UNDEAD_FIGHT_ON});
+ * then only the head kills them.
  */
 public final class Wounds {
 	/** Smaller than this many health points is nothing. */
 	static final float EPS = 1.0E-4F;
-	/** A death something cancelled (Kingdoms downs its folk, Xenoform reverts): head and body get at least this fraction back. */
+	/** A death something cancelled ({@link Downed}, Xenoform reverts): head and body get at least this fraction back. */
 	public static final float MIN_VITAL_AFTER_SAVE = 0.1F;
 	/** A health drop nobody routed (some other mod's setHealth) never takes head or body below this fraction: it never kills. */
 	public static final float MIN_VITAL_UNROUTED = 0.05F;
@@ -44,6 +51,10 @@ public final class Wounds {
 	public static final int PLAYER_RECONCILE_TICKS = 10;
 	/** A fraction this full counts as whole. */
 	private static final float WHOLE = 0.999F;
+	/** (0.14.1) A zombie's or skeleton's chance, when its body (not its head) gives out, to fight on: then only the head kills it. */
+	public static final float UNDEAD_FIGHT_ON = 0.6F;
+	/** (0.14.1) The scoreboard tag on an undead fighting on with its body gone. */
+	public static final String FIGHTS_ON_TAG = "jaymospowers_fights_on";
 	public static final ResourceKey<DamageType> WOUNDS_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("wounds"));
 
 	/** Each part's fraction of its share of the most health, in the order of the creature's {@link BodyPlan}. Saved, synced to the creature itself; absent when every part is whole. Not kept through death. */
@@ -55,8 +66,8 @@ public final class Wounds {
 	public static final AttachmentType<Float> PARTS_MAX = AttachmentRegistry.create(JaymosPowers.id("wounds_max"),
 		builder -> builder.persistent(Codec.FLOAT));
 
-	/** Creatures whose wounds are killing them just now: our own lethal blow doesn't route again. */
-	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
+	/** Creatures whose wounds are killing them just now (or {@link Downed}'s finishing off): our own lethal blow doesn't route again. */
+	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	private static int tickCounter;
 
 	private Wounds() {
@@ -76,6 +87,8 @@ public final class Wounds {
 			}
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
+		// (0.14.1) phase 2: the downed
+		Downed.register();
 	}
 
 	// ---- public API -------------------------------------------------------------------------------------------------------
@@ -122,7 +135,7 @@ public final class Wounds {
 	 */
 	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by) {
 		BodyPlan plan = BodyPlan.of(entity);
-		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || kingdomsDowned(entity)) {
+		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
 			return;
 		}
 		float max = entity.getMaxHealth();
@@ -135,7 +148,7 @@ public final class Wounds {
 		// (not to zero: a dead creature has to die through its events)
 		entity.setHealth(Math.max(0.01F, health - removed));
 		store(entity, plan, points);
-		if (vitalGone(points, plan)) {
+		if (lethal(entity, points, plan)) {
 			finish(level, entity, plan, by);
 		}
 	}
@@ -145,6 +158,7 @@ public final class Wounds {
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);
+		entity.removeTag(FIGHTS_ON_TAG);
 	}
 
 	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */
@@ -164,20 +178,20 @@ public final class Wounds {
 		store(entity, plan, points);
 	}
 
-	private static boolean downedLooked;
-	private static @Nullable AttachmentType<?> kingdomsDowned;
-
-	/** Kingdoms' downed guards bleed out on their own health: Wounds leaves them alone (looked up by name; Kingdoms is optional). */
-	private static boolean kingdomsDowned(LivingEntity entity) {
-		if (!downedLooked) {
-			downedLooked = true;
-			try {
-				kingdomsDowned = (AttachmentType<?>) Class.forName("com.jaymoskingdoms.Downed").getField("DOWNED").get(null);
-			} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
-				kingdomsDowned = null;
-			}
+	/**
+	 * (0.14.1) After a death was cancelled ({@link Downed}): the parts follow the health, and head and body hold on to at
+	 * least {@link #MIN_VITAL_AFTER_SAVE} of themselves.
+	 */
+	public static void settle(LivingEntity entity) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE) {
+			return;
 		}
-		return kingdomsDowned != null && entity.getAttached(kingdomsDowned) != null;
+		float max = entity.getMaxHealth();
+		float[] points = load(entity, plan);
+		reconcile(points, plan, max, entity.getHealth());
+		ensureVital(points, plan, max);
+		store(entity, plan, points);
 	}
 
 	// ---- hits -------------------------------------------------------------------------------------------------------------
@@ -194,6 +208,13 @@ public final class Wounds {
 		float max = victim.getMaxHealth();
 		float health = victim.getHealth();
 		float[] points = load(victim, plan);
+		if (Downed.isDowned(victim)) {
+			// (0.14.1) down: the parts only follow the health (head and body kept), so only the health running out ends them
+			reconcile(points, plan, max, health);
+			ensureVital(points, plan, max);
+			store(victim, plan, points);
+			return;
+		}
 		// what the parts held before the hit, then the real loss (armour, absorption and other mods' changes already in it)
 		reconcile(points, plan, max, Math.min(max, health + taken));
 		float loss = sum(points) - health;
@@ -203,12 +224,12 @@ public final class Wounds {
 			reconcile(points, plan, max, health);
 		}
 		store(victim, plan, points);
-		if (vitalGone(points, plan)) {
+		if (lethal(victim, points, plan)) {
 			finish(level, victim, plan, source.getEntity());
 		}
 	}
 
-	/** Head or body is gone: the creature dies of its wounds, through its death events (so Kingdoms still downs its folk). */
+	/** Head or body is gone: the creature dies of its wounds, through its death events (so {@link Downed} can down them instead). */
 	private static void finish(ServerLevel level, LivingEntity victim, BodyPlan plan, @Nullable Entity by) {
 		if (FINISHING.contains(victim)) {
 			return;
@@ -282,6 +303,28 @@ public final class Wounds {
 			total += point;
 		}
 		return total;
+	}
+
+	/**
+	 * (0.14.1) Whether these parts kill: head or body at zero, except a zombie or skeleton whose body gave out and that
+	 * fights on ({@link #UNDEAD_FIGHT_ON}, rolled once; then only its head counts).
+	 */
+	static boolean lethal(LivingEntity entity, float[] points, BodyPlan plan) {
+		if (!vitalGone(points, plan)) {
+			return false;
+		}
+		int head = plan.index(BodyPart.HEAD);
+		if (head < 0 || points[head] <= EPS || !(entity instanceof Zombie || entity.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS))) {
+			return true;
+		}
+		if (entity.entityTags().contains(FIGHTS_ON_TAG)) {
+			return false;
+		}
+		if (entity.getRandom().nextFloat() < UNDEAD_FIGHT_ON) {
+			entity.addTag(FIGHTS_ON_TAG);
+			return false;
+		}
+		return true;
 	}
 
 	/** Head or body at zero. */

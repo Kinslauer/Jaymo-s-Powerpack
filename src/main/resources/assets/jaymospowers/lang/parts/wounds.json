@@ -17,5 +17,14 @@
 	"commands.jaymospowers.wounds.not_living": "That has no body parts",
 	"commands.jaymospowers.wounds.unknown_part": "That creature has no such part",
 	"death.attack.jaymospowers.wounds": "%1$s died of their wounds",
-	"death.attack.jaymospowers.wounds.player": "%1$s died of wounds dealt by %2$s"
+	"death.attack.jaymospowers.wounds.player": "%1$s died of wounds dealt by %2$s",
+	"message.jaymospowers.downed.down": "You're down. Crawl to safety, or wait for someone to bring you round.",
+	"message.jaymospowers.downed.give_up": "You're down. Hold sneak to give up [%s]",
+	"message.jaymospowers.downed.give_up_out": "You've passed out. Hold sneak to give up [%s]",
+	"message.jaymospowers.downed.up": "You're back on your feet.",
+	"message.jaymospowers.downed.reviving": "Bringing %s round... [%s] keep holding",
+	"message.jaymospowers.downed.no_food": "You've nothing to eat to bring %s round with.",
+	"message.jaymospowers.downed.no_treat": "You've nothing %s would take to bring them round.",
+	"message.jaymospowers.downed.revive_stopped": "You leave %s where they lie.",
+	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them)."
 }

@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["LivingEntityHurtMixin", "MeleeAttackGoalMixin", "PlayerAttackMixin", "PlayerBlockingMixin", "PlayerExhaustionMixin", "ThrallTargetMixin", "DownedMixin", "DownedMobMixin"],
+	"mixins": ["LivingEntityHurtMixin", "MeleeAttackGoalMixin", "PlayerAttackMixin", "PlayerBlockingMixin", "PlayerExhaustionMixin", "ThrallTargetMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
