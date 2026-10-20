@@ -3402,3 +3402,21 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
   red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
   faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).
+- **0.7.97, five new heritages and the Blood Rite:** Andy: "Can you brainstorm 5 more heritages" / "Additional
+  Heritages/ unlockable classes", then "these are great. go for it." (`Heritage`, ideas in
+  `heritages/new-heritages-brainstorm.md`). Two can be picked at the start and three are earned:
+  - **Stormborn** (Agility, Finesse): faster under open sky, slower deep underground, immune to lightning; in a
+    thunderstorm under open sky their hits arc a spark to the nearest enemy. Villagers lean Stormborn up high.
+  - **Dawnborn** (Might, Grit): heal slowly in sunlight, hit undead 20% harder, weaker and hungrier in the dark.
+    Villagers lean Dawnborn in savannas.
+  - **Endborn** (Wits, Finesse), earned near a dying Ender Dragon: endermen ignore their stare, a hit can blink them
+    away, water and rain burn them.
+  - **Dragonblood** (Might, Endurance), earned near a dying Ender Dragon or a tamed dragon: half fire and dragon
+    breath damage, stronger with a hoard of gold and gems in their pack, weaker when poor.
+  - **Deepborn** (Endurance, Wits), earned near a Warden digging away: silent to sculk, sense living things nearby
+    while sneaking, explosions stun them, weaker in sunlight.
+  Waking an earned heritage gives a **Blood Rite** (`jaymoskingdoms:blood_rite`); drinking it reopens the heritage
+  menu to switch to one you've woken. The menu shows earned heritages as "???" with a hint until woken, and fits on
+  small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
+  Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
+  pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
