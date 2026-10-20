@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.SkinTones;
@@ -7,7 +8,9 @@ import com.jaymoskingdoms.Tails;
 import com.jaymoskingdoms.VillagerHeritage;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.resources.Dialogues;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.20) A foreigner ({@link Languages}) gets a shrug for anything that takes words ({@link Languages#simpleDialogue}).
  * "Ask about their blood" ({@link VillagerHeritage#ANSWER}), and now and then in a chat: what blood they are, and a
  * Warrior-born why there's no tail to see.
+ * (0.7.99) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
+ * safe is burned and pulls away, and the villager says so.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -32,6 +37,17 @@ abstract class McaDialogueMixin {
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
+		}
+		if ("main".equals(question) && "hug".equals(answer)) {
+			// (0.7.99) an Emberborn is too hot to hold without fire resistance (either of you)
+			LivingEntity burned = EmberHugs.burned(player, villager);
+			if (burned != null) {
+				EmberHugs.burn((ServerLevel) villager.level(), burned == player ? villager : player, burned);
+				villager.sendChatMessage(player, burned == player ? "dialogue.chat.jaymoskingdoms.ember_hug_you" : "dialogue.chat.jaymoskingdoms.ember_hug_me");
+				villager.getInteractions().stopInteracting();
+				ci.cancel();
+				return;
+			}
 		}
 		if ("main".equals(question) && Tails.ANSWER.equals(answer)) {
 			// (0.7.10) a Z Fighter tells them about the tail: they understand, and fear it no more
