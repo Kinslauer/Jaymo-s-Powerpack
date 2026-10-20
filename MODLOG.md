@@ -1802,3 +1802,19 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     tendrils' combos, Web Cut, Chrono Flow's strike) aren't holds and are unchanged; a symbiote takeover still has the
     hands. Numbers at the top of
     `ZFighterStretchCombo` and `ZFighterStretchPose`.
+- **0.13.31, canoes (Kingdoms 0.7.96):** Andy linked Canoe Boats (by CanineGray, CC BY-NC 4.0, made for 26.3): every
+  boat is drawn as a canoe, through Entity Model Features and Entity Texture Features, which the pack already has. It
+  joins `packResourcePacks` (CurseForge 1086847, file 8944107) and `PackResourcePacks` switches it on once per install,
+  fetching it from Modrinth's CDN (the same file, SHA-1 checked) if the import skipped it. Build Modpack's own download
+  of a resource pack now encodes spaces in file names as %20 (this is the first with spaces). Kingdoms 0.7.96:
+  Survivalist hearts grow with level, and a Warrior-born's low-health fury scales and shows (kingdoms/MODLOG.md).
+- **0.13.32, Better Weapons' moves on our forged weapons:** Andy wanted JMB's Better Weapons (MIT, Fabric 1.20.1)
+  "compatible with our tinkers". The pack already forges seven of its eight weapons at the Tool Station (the Armory's
+  dagger, longsword, glaive, flanged mace and cudgels, WeaponMod's halberd and battleaxe, our quarterstaff, vanilla's
+  spear), so what came across is what they do, in our own code (`armory/ArmoryHits`, numbers at its top): cudgels
+  (20%) and flanged maces (25%) now and then stun what they hit for 1.5 s (Darktide's stun, now public: a mob stops
+  thinking, a player loses their movement keys), with a clang and stars; glaives and WeaponMod's halberds now and then
+  hook a rider off its mount (30%), slowed a second; a quarterstaff held up (right mouse) blocks from the front like a
+  shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
+  power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
+  so they do it too.

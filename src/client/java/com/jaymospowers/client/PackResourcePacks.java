@@ -52,7 +52,12 @@ final class PackResourcePacks {
 		// needed) and supports every format up to 26.3. Our own poses pause it while they play (EmfCompat).
 		new Pack("Fresh Animations' player", "jaymospowers-fa-player-v1", "FA+Player", "FA+Player-v1.1.zip",
 			"https://mediafilez.forgecdn.net/files/8245/230/FA%2BPlayer-v1.1.zip",
-			"122e397af111e3dc5fb6b60004aad9464980f13a", false));
+			"122e397af111e3dc5fb6b60004aad9464980f13a", false),
+		// (0.13.31) "Canoe Boats" (by CanineGray, CC BY-NC 4.0; CurseForge 1086847, file 8944107, the same file as
+		// Modrinth's 26.3 version, fetched from there): every boat a canoe, through Entity Model Features.
+		new Pack("canoe boats", "jaymospowers-canoe-boats-v1", "Canoe boats", "Canoe boats 26.3.zip",
+			"https://cdn.modrinth.com/data/5NzqnXzh/versions/ZGZQqb3K/Canoe%20boats%2026.3.zip",
+			"b324c1097659ecf79a0d29fe057ed363f4914823", false));
 
 	private PackResourcePacks() {
 	}

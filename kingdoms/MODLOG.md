@@ -3394,3 +3394,11 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   point to spend on the K screen, with a roar and a level-up chime. Dying on the brink wins nothing. After a point, the
   next can't be won for 5 minutes. The points are kept for good, through death and respecs (`WarriorZenkai`, numbers at
   its top; counted in `Stats.earned`).
+- **0.7.96, Survivalist hearts and Warrior-born fury:** Andy: "Survivalist increasing base hearts" and
+  "Warrior-born low health visual indication/boost". A Survivalist still starts with a heart more, and gains another
+  every 10 character levels, up to 5 more at level 40 (`ClassPerks.SURVIVALIST_LEVELS_PER_HEART`, `_HEALTH_MAX`;
+  the class card shows 11-15 hearts). A Warrior-born's fury now grows the more they bleed: below half health their
+  blows land 10% harder, rising to 35% at 3 hearts (15% of their health), and they're knocked back up to 30% less
+  (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
+  red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
+  faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).

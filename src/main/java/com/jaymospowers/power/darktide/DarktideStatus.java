@@ -63,7 +63,7 @@ public final class DarktideStatus {
 	}
 
 	/** Stuns {@code target} for {@code ticks} (or keeps a longer stun). */
-	static void stun(LivingEntity target, int ticks) {
+	public static void stun(LivingEntity target, int ticks) {
 		long until = target.level().getGameTime() + ticks;
 		Long now = target.getAttached(DarktideState.STUN);
 		if (now != null && now >= until) {

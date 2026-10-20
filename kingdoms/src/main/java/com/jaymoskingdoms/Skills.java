@@ -321,6 +321,8 @@ public final class Skills {
 		StrengthSkill.attributes(player);
 		Stats.attributes(player);
 		Heritage.attributes(player);
+		// (0.7.96) a Survivalist's hearts grow with their level
+		ClassPerks.attributes(player);
 		Renown.update(player);
 	}
 

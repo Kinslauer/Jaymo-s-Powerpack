@@ -154,8 +154,8 @@ public final class Armory {
 		item("wooden_cudgel", Item::new, p -> p.sword(ToolMaterial.WOOD, 3.0F, -2.8F));
 		item("stone_cudgel", Item::new, p -> p.sword(ToolMaterial.STONE, 3.0F, -2.8F));
 		throwing("throwing_stick", p -> p.sword(ToolMaterial.WOOD, 0.5F, -2.0F), 3.0F, true);
-		item("wooden_quarterstaff", Item::new, p -> p.sword(ToolMaterial.WOOD, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE));
-		item("iron_quarterstaff", Item::new, p -> p.sword(ToolMaterial.IRON, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE));
+		item("wooden_quarterstaff", Item::new, p -> staffBlock(p.sword(ToolMaterial.WOOD, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE)));
+		item("iron_quarterstaff", Item::new, p -> staffBlock(p.sword(ToolMaterial.IRON, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE)));
 		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
 		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
 		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
@@ -181,6 +181,7 @@ public final class Armory {
 			.build());
 		CreativeModeTabEvents.modifyOutputEvent(tab).register(output -> ITEMS.values().forEach(output::accept));
 
+		ArmoryHits.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
 				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem())) {
@@ -223,6 +224,15 @@ public final class Armory {
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), (int) (6 + 10 * share),
 			0.3, 0.3, 0.3, 0.2);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	/** (0.13.32) A quarterstaff held up blocks like a shield, from the front only ({@link ArmoryHits}). */
+	private static Item.Properties staffBlock(Item.Properties p) {
+		return p.delayedComponent(DataComponents.BLOCKS_ATTACKS, context -> new BlocksAttacks(ArmoryHits.STAFF_RAISE, 1.0F,
+			List.of(new BlocksAttacks.DamageReduction(ArmoryHits.STAFF_ARC, Optional.empty(), 0.0F, 1.0F)),
+			new BlocksAttacks.ItemDamageFunction(3.0F, 1.0F, 1.0F),
+			Optional.of(context.getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
+			Optional.of(SoundEvents.SHIELD_BLOCK), Optional.empty()));
 	}
 
 	private static Item tiered(Weapon weapon, Tier tier) {

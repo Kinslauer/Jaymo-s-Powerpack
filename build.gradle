@@ -241,6 +241,9 @@ def packResourcePacks = [
 	// Fresh Animations: Player Extension (by FreshLX; modpacks may include it, never redistribute it): livelier player
 	// animations through Entity Model Features. Stands alone, no base Fresh Animations needed; supports up to 26.3.
 	[cf: [1281029, 8245230], file: "FA+Player-v1.1.zip"],
+	// Canoe Boats (by CanineGray; CC BY-NC 4.0, shipped unchanged, credit to its author): every boat becomes a canoe,
+	// through Entity Model Features and Entity Texture Features (both already in the pack). Made for 26.3.
+	[cf: [1086847, 8944107], file: "Canoe boats 26.3.zip"],
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
@@ -422,7 +425,7 @@ tasks.register("profileMods") {
 			def target = new File(profilePacks, p.file)
 			if (!target.exists()) {
 				def id = p.cf[1] as String
-				def url = "https://mediafilez.forgecdn.net/files/${id.substring(0, 4)}/${id.substring(4).replaceFirst(/^0+(?=.)/, "")}/${URLEncoder.encode(p.file, "UTF-8")}"
+				def url = "https://mediafilez.forgecdn.net/files/${id.substring(0, 4)}/${id.substring(4).replaceFirst(/^0+(?=.)/, "")}/${URLEncoder.encode(p.file, "UTF-8").replace("+", "%20")}"
 				try {
 					profilePacks.mkdirs()
 					URI.create(url).toURL().withInputStream { java.nio.file.Files.copy(it, target.toPath()) }
