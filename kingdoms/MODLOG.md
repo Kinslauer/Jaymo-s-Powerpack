@@ -3412,9 +3412,51 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
-- **0.7.98, Make Do (OmniCrossbow as a skill):** Andy: "Marksman class should get acess to this
+- **0.7.100, bigger rewards for returned captives:** Andy: "villagers should reward you more for returning a captured
+  prisoner". Each captive is now someone at home: one of its folk, one of its guards (20%), or kin of its ruler (10%,
+  only where there's a ruler); freeing them says which. Brought home, their family pay 6-12 emeralds (guard 8-16, kin
+  12-24) and the settlement adds a reward from its treasury: 8/16/40 plus 2%/4%/8% of its worth, up to 30/60/150,
+  never leaving it under 20 (a rich realm pays far more for its own). A guard hands you a sword, shield, crossbow or
+  helmet; the ruler's kin a golden apple and 1-3 diamonds. Reputation 60/90/150 (was 40), the one brought home's hearts
+  50/60/80, witnesses' 5, and two of their family (real MCA kin first, else the nearest neighbours) come to thank you
+  for 20 hearts each. Members gain 10/25/60 standing. The settlement then owes you a favour (2 for kin, up to 3): while
+  it does, its guards neither toll nor search you, and the next time they'd arrest you they let it go (spends one).
+  A realm at war with you, or one that doesn't know you (masked), pays no treasury reward and owes no favour.
+  Numbers at the top of `Captives`.
+- **0.7.101, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
+  costumes to add to stealth, while not completely concealing identity like it does now ... They also need a hidden
+  blade weapon, craftable at all times but usable only by those with sufficient stealth skill." Powers tags a hooded
+  player (`jaymospowers_hooded:<key>`, a Hood or Peaked Hood with the face showing). Witnesses see a hooded player at
+  0.75 the range (thefts, trespass, deeds; on top of sneaking), and a hood is a fragile mask: a stranger in it is "a
+  hooded figure" with its own name and crimes, unless a witness within 6 blocks, facing them, in the light, sees the
+  face when a crime is seen: then that settlement knows who it is ("recognised") and the crime is theirs. Lowering
+  the hood in view gives it away like a mask; paranoid guards ask hooded strangers to lower it; MCA villagers still
+  know a hooded friend (`Identities`, `Theft`, `Pickpocket`, `Trespass`, `Deeds`, `Approaches`). The hidden blade
+  (`HiddenBlade`, numbers at its top): a leather bracer with a spring blade, always craftable (` I `/`LNL`/` S `),
+  a dagger (4 damage, 2.2 a second, iron durability, Better Combat dagger moves, a light blade), worked only from
+  Stealth 5 (below: 1 damage a blow, "the spring jams"). Fall 4+ blocks onto a living thing with it in either hand
+  and the fall damage is theirs, not yours, as your own blow, and they're Crippled (an attachment, saved: 70% slower,
+  no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
+  full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
+  rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
+- **0.7.101, freerunning (the Stealth tree's second page, with Powers 0.14.3):** Andy picked "Full freerunning".
+  Stealth goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still counts to 15, pocket practice only the first
+  15 levels) and gets a second page, "Freerunning" (12 points): Climber (lvl 3, 3 ranks), Freerunner (lvl 3, 2),
+  Sure Footing (lvl 8, needs Climber), Leap of Faith (lvl 8, 2 pts, needs Freerunner), Bar Swing (lvl 12, 2 pts, needs
+  Sure Footing), Wall Runner (lvl 12, 2 ranks, needs Leap of Faith); appended to `Skills.Perk`, so no ordinal moves.
+  The moves are Jaymo's Powers' (`Freerun`), reading the ranks through `Skills.rank(Player, String)`. Stealth
+  experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
+  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
+  pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).
+- **0.7.102, Emberborn too hot to hug:** Andy: "hugging emberborn villagers and players is impossible without fire
+  resistance". Hugging an Emberborn (villager or player) without being Emberborn, fireproof or under Fire Resistance
+  burns you (3 s fire, 2 damage) and throws you back; no hug, no hearts. MCA's hug menu works both ways (an Emberborn
+  player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
+  mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
+  mood change. Numbers at the top of `EmberHugs`.
+- **0.7.103, Make Do (OmniCrossbow as a skill):** Andy: "Marksman class should get acess to this
   (modrinth.com/mod/omnicrossbow)", then "It should be a node in the skill tree under survival, unlocks a utility across
-  classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.13.36,
+  classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.14.5,
   `packModsOverride`). A new Survival perk, **Make Do** (level 5, 2 points, under Forager, tier 1 middle), lets any
   class's crossbow load anything from the off hand. Then "No omni enchant at all": the mod's Omni enchantment is
   stripped from every loot table's drops (`LootTableEvents.MODIFY_DROPS`; an Omni-only book becomes a plain book) and

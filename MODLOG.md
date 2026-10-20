@@ -1818,6 +1818,41 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
-- **0.13.36, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
+- **0.13.36, Web Whip on Sneak; one pair of hands in first person:** Andy: "Web swing grab attacks should be activated by
+  holding shift while two lines are attached" and "all the counters and moves should be better animated in first person.
+  Right now there are doubled hands". With both swing webs within 3 blocks of each other on one creature or on terrain,
+  Sneak starts the whip, or pries the terrain loose while held (let go early: cracks stay, the attack ends); Sneak + R
+  or G no longer does. Small catches still reel in and far-apart webs still slingshot. In first person with
+  First-person Model, the vanilla hands (and the extra carry/ledge arms) aren't drawn while a move poses your body's
+  arms, and First-person Model's hiding of an item-holding body arm is undone for the move. See docs/web.md.
+- **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
+  stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
+  (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
+  cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
+  bracers on the forearms and long coat tails split front and back, hanging from the waist to the knees) and the
+  **Peaked Hood** (a deep hood with a pointed peak over the brow, its underside in shadow, and a cowl over the
+  shoulders). Our own design, drawn by `tools/gen_costume.py`; `tools/costume_preview.py` draws it on a player, front,
+  side and back, in white/red and black/grey (`art-overhaul/assassin/`). A hood (the plain one or the peaked one) that
+  is up leaves the face and the real name showing, but someone else's name tag is only drawn within 8 blocks
+  (`CostumeClient.HOOD_NAME_RANGE`), and the wearer carries the entity tag `jaymospowers_hooded:<key>` (the same
+  identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
+  costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
+  bracers, mantle and cowl's growth).
+- **0.14.3, freerunning (Kingdoms 0.7.101's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
+  (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
+  Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
+  synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
+  3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
+  jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
+  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
+  slower there, Andy's call), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
+  (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
+  (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
+  hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags
+  the player `jaymospowers_freerun` for Kingdoms' Stealth experience. Web slingers keep their own parkour: the two
+  stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
+  wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
+  Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
+- **0.14.5, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
   untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
-  Kingdoms 0.7.98 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.
+  Kingdoms 0.7.103 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.

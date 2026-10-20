@@ -41,7 +41,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
 		McaCompat.register();
-		// (0.7.98) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
+		// (0.7.103) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
@@ -52,6 +52,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Camps.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
+		HiddenBlade.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));

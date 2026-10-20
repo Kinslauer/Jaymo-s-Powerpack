@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -59,17 +60,32 @@ import org.jspecify.annotations.Nullable;
 public final class Skills {
 	/**
 	 * A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level (Strength
-	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts).
+	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts, and (0.7.102) Stealth, {@link #STEALTH_MAX_LEVEL},
+	 * for freerunning).
 	 */
 	public static final int XP_BASE = 30, XP_STEP = 15, MAX_LEVEL = 15;
 	/** (0.6.5) Strength's highest level: the levels past {@link #MAX_LEVEL} pay for the Combat Arts ({@link CombatArts}). */
 	public static final int STRENGTH_MAX_LEVEL = 25;
+	/**
+	 * (0.7.102) Stealth's highest level: its second page, freerunning (Climber to Wall Runner; the moves are Jaymo's
+	 * Powers' {@code Freerun}, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
+	 */
+	public static final int STEALTH_MAX_LEVEL = 25;
 	/** Stealth experience: a pocket picked clean with something in it, an empty one, a theft nobody saw. */
 	static final int XP_LIFT = 10, XP_EMPTY = 2, XP_THEFT = 4;
 	/** A guard's pocket counts this many times over; a sleeper's this share. */
 	static final float XP_GUARD = 2.0F, XP_ASLEEP = 0.5F;
 	/** Unseen thefts give experience at most this often (ticks), so a chest can't be farmed one item at a time. */
 	static final long THEFT_XP_TICKS = 600L;
+	/**
+	 * (0.7.102) Stealth experience for freerunning: a move (a vault, a cling, a kick, a wall run, a bar caught, a leap of
+	 * faith), at most every {@link #FREERUN_XP_TICKS} (20 s); a hidden blade leap that lands on its mark
+	 * ({@link HiddenBlade}).
+	 */
+	static final int XP_FREERUN = 1, XP_BLADE_LEAP = 6;
+	static final long FREERUN_XP_TICKS = 400L;
+	/** (0.7.102) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
+	static final String FREERUN_TAG = "jaymospowers_freerun";
 	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
 	static final float PRACTICE_PER_LEVEL = 0.03F;
 	/** Light Fingers: this share off the hold per rank. */
@@ -91,7 +107,7 @@ public final class Skills {
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
-		SURVIVAL(true, MAX_LEVEL), STEALTH(true, MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
+		SURVIVAL(true, MAX_LEVEL), STEALTH(true, STEALTH_MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
 
 		public final boolean open;
 		/** The pillar's highest level. */
@@ -145,7 +161,14 @@ public final class Skills {
 		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0),
 		// (0.7.30) Strength's second root: every weapon's full Better Combat combo (WeaponForms); without it, one or two plain swings
 		WEAPON_FORMS(Pillar.STRENGTH, 1, 1, 2, 0, 0),
-		// (0.7.98) any crossbow takes anything from the off hand (OmniCrossbow's Omni, as a Survival skill for every class)
+		// (0.7.102) Stealth's second page, freerunning (the moves are Jaymo's Powers' Freerun); last, so no ordinal moves
+		CLIMBER(Pillar.STEALTH, 3, 1, 3, 4, 0),
+		FREERUNNER(Pillar.STEALTH, 2, 1, 3, 4, 2),
+		SURE_FOOTING(Pillar.STEALTH, 1, 1, 8, 5, 0, CLIMBER),
+		LEAP_OF_FAITH(Pillar.STEALTH, 1, 2, 8, 5, 2, FREERUNNER),
+		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 6, 0, SURE_FOOTING),
+		WALL_RUNNER(Pillar.STEALTH, 2, 1, 12, 6, 2, LEAP_OF_FAITH),
+		// (0.7.103) any crossbow takes anything from the off hand (OmniCrossbow's Omni, as a Survival skill for every class)
 		MAKE_DO(Pillar.SURVIVAL, 1, 2, 5, 1, 1, FORAGER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
@@ -258,6 +281,8 @@ public final class Skills {
 
 	/** Player → game time an unseen theft next gives experience. */
 	private static final Map<UUID, Long> NEXT_THEFT_XP = new HashMap<>();
+	/** (0.7.102) Player → game time a freerun move next gives experience. */
+	private static final Map<UUID, Long> NEXT_FREERUN_XP = new HashMap<>();
 
 	private Skills() {
 	}
@@ -270,7 +295,20 @@ public final class Skills {
 		ServerPlayNetworking.registerGlobalReceiver(Spend.TYPE, (payload, context) -> spend(context.player(), payload.perk()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			NEXT_THEFT_XP.clear();
+			NEXT_FREERUN_XP.clear();
 			RESPEC_OFFERS.clear();
+		});
+		// (0.7.102) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % 10 != 0) {
+				return;
+			}
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				if (player.entityTags().contains(FREERUN_TAG)) {
+					player.removeTag(FREERUN_TAG);
+					freerun(player, player.level().getGameTime());
+				}
+			}
 		});
 		// (perks that work through attributes are put back on a player whenever they come into the world)
 		ServerPlayerEvents.JOIN.register(Skills::refresh);
@@ -515,10 +553,20 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_THEFT);
 	}
 
+	/** (0.7.102) A freerun move: a little experience, at most every {@link #FREERUN_XP_TICKS}. */
+	static void freerun(ServerPlayer player, long now) {
+		if (NEXT_FREERUN_XP.getOrDefault(player.getUUID(), 0L) > now) {
+			return;
+		}
+		NEXT_FREERUN_XP.put(player.getUUID(), now + FREERUN_XP_TICKS);
+		grant(player, Pillar.STEALTH, XP_FREERUN);
+	}
+
 	/** How long {@code player}'s hand must stay in a pocket, from {@code ticks}: shorter with practice and Light Fingers. */
 	static float holdTicks(Player player, float ticks) {
 		Progress p = of(player);
-		return ticks * (1.0F - PRACTICE_PER_LEVEL * p.level(Pillar.STEALTH)) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
+		// (0.7.102) practice counts the first page's 15 levels only: the levels past it pay for freerunning
+		return ticks * (1.0F - PRACTICE_PER_LEVEL * Math.min(MAX_LEVEL, p.level(Pillar.STEALTH))) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
 	}
 
 	/** Ghost: a guard takes no longer to rob than anyone else, and a theft nobody saw is never missed. */

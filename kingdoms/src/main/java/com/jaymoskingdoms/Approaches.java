@@ -597,7 +597,8 @@ public final class Approaches {
 		boolean masked = Identities.hidden(player, f.id());
 		boolean sworn = !masked && f.member(player.getUUID()) != null;
 		boolean suspected = suspected(player, f.id(), now);
-		int hearts = masked ? 0 : hearts(mob, player);
+		// (0.7.101: a hood hides your name from the guards, but MCA's villagers still know your face)
+		int hearts = masked && Identities.masked(player) ? 0 : hearts(mob, player);
 		boolean friend = McaCompat.isMca(mob) ? hearts >= GIFT_HEARTS : rep >= GIFT_REP;
 		boolean known = McaCompat.isMca(mob) ? hearts >= GREET_HEARTS : rep >= GREET_REP;
 		int[] w = new int[TOPICS.length];
@@ -621,7 +622,8 @@ public final class Approaches {
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f);
-			if (!sworn) {
+			// (0.7.100) nor of one their settlement owes for bringing one of its own home
+			if (!sworn && Captives.owed(player, f.id()) <= 0) {
 				w[SEARCH] = SEARCH_W[tv];
 				w[TOLL] = TOLL_W[tv];
 			}

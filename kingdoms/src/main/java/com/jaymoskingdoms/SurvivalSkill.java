@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.NetherWartBlock;
  * <p>Perks: Forager (an extra harvest), Second Wind (healing when you're low), Weathered (fire and frost bite less),
  * Iron Stomach (food's Hunger never takes hold), Hardy Landing (falls hurt less, never not at all; it only scales the
  * fall damage vanilla deals, so a power that cancels fall damage still cancels it) and Last Stand (once a day, a
- * killing blow leaves you on half a heart). Its second root is Meditation (the Meditate key), and (0.7.98) Make Do, under
+ * killing blow leaves you on half a heart). Its second root is Meditation (the Meditate key), and (0.7.103) Make Do, under
  * Forager, lets any crossbow take anything from the off hand ({@link OmniCrossbows}).
  */
 public final class SurvivalSkill {

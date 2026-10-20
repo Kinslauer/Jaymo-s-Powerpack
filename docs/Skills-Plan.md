@@ -10,7 +10,8 @@ every player whatever their power: it never touches a power's abilities or maste
 (Powers keeps R/G/V/B, C, Z, H; Equestrian has N and J).
 
 ## How every pillar works
-- Each pillar has its own XP, earned by doing what it's about, and levels 0-15 (level l → l+1 takes 30 + 15·l XP).
+- Each pillar has its own XP, earned by doing what it's about, and levels 0-15 (level l → l+1 takes 30 + 15·l XP);
+  Strength and (Kingdoms 0.7.101) Stealth go on to 25 for their second pages.
 - **Practice:** each level improves the pillar's core thing a little by itself (Stealth: marks feel your hand 3%
   less per level).
 - **Points:** each level is one point for that pillar's perks. The tree has 15 points of perks, so a master of a
@@ -36,6 +37,90 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
 - Slip Away: half the time a mark turns on you, they can't tell who: no crime.
 - Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
+### Hoods (Kingdoms 0.7.101, with Powers 0.14.3)
+Andy: "id like any hooded costumes to add to stealth, while not completely concealing identity like it does now".
+Powers tags a player whose costume mask is a Hood or a Peaked Hood (head piece on, face showing) with
+`jaymospowers_hooded:<key>`; Kingdoms reads only the tag (`Identities.hoodKey`, `hooded`, `hoodSight`).
+- Seen less far: witnesses see a hooded player at 0.75 of the usual range (`Identities.HOOD_SIGHT`), on top of
+  sneaking and Soft Step: a crime's witnesses (`Theft.witnesses`, 16 blocks: 12 hooded, 6 hooded and sneaking), house trespass
+  (`Trespass.SEE_RANGE` 12: 9) and good deeds (`Deeds.WITNESS_RANGE` 16: 12).
+- A fragile mask: to a settlement that doesn't know the hood, a hooded player is the hood's own identity, "a hooded
+  figure" (its reputation, crimes and wanted time, like a mask). Unless recognised: when a crime is seen (anything put
+  through `Theft.commit`: thefts, pickpocketing, assault, murder, arson, trespass...), a witness within 6 blocks
+  (`Identities.HOOD_KNOWN_RANGE`), facing the player (the same 0.2 gaze as a mask coming off) and not in the dark
+  (`Heritage.dark`: night outdoors, or light 7 or less) sees the face under the hood. The settlement then knows who
+  wears it, and the crime is the player's. Seen from further, from behind or in the dark, it stays on the hooded
+  figure. A pickpocket's mark that turns on them counts as facing them. Golems don't recognise anyone.
+- Lowering the hood where a settlement's people see it gives it away like taking off a mask (once per settlement);
+  pulling it up gives nothing away. A paranoid king's guards stop hooded strangers too ("lower that hood").
+- MCA's villagers still know a hooded friend: only a full mask hides you from their memories (`MASKED_AS`).
+
+### Hidden blade (Kingdoms 0.7.101)
+Andy: "They also need a hidden blade weapon, craftable at all times but usable only by those with sufficient stealth
+skill. It enables jumping from height and converting your fall damage into damage dealt to the enemy, leaving them
+crippled for the duration, and hidden blade stabs deal 10x damage when attacking crippled enemies."
+`HiddenBlade`, numbers at its top.
+- The item (`jaymoskingdoms:hidden_blade`): a leather bracer with a spring blade. Iron durability (250), 4 attack
+  damage, 2.2 attacks a second (a dagger; Better Combat dagger moves, in `light_blades`). Crafted any time:
+  ` I ` / `LNL` / ` S ` (iron ingot, leather, iron nugget, string).
+- Needs Stealth level 5 (`BLADE_LEVEL`). Below it the spring jams: its blows do 1 damage and there is no leap.
+- Leap: falling at least 4 blocks (`LEAP_MIN_FALL`) onto a living thing with the blade in either hand, you take no
+  fall damage; what you would have taken (vanilla's: blocks fallen less safe fall, times the fall damage
+  multiplier, rounded up) is dealt to it as your blow (crimes, witnesses and kill credit as usual), and it is
+  Crippled for 6 s, a second more for every 2 blocks past 4, at most 20 s (`CRIPPLE_BASE_TICKS` 120,
+  `CRIPPLE_STEP_TICKS` 20, `CRIPPLE_MAX_TICKS` 400). A miss is an ordinary fall. Caught in the air each tick (the
+  fall swept from last tick's feet to 0.6 below), and again on landing (anything standing where you land).
+- Crippled: 70% slower, no jumping, a player can't sprint (`CRIPPLE_SLOW`, `CRIPPLE_JUMP`); it limps with little
+  marks of pain and a crippled player sees how long is left. Kept with the creature (saved), so an unloaded chunk
+  doesn't cure it.
+- The stab: every full-strength blow (a swing charged 90%) with the blade in the main hand at a Crippled foe deals
+  10x (`CRIPPLED_STAB`), after the class perks and the Combat Arts.
+- The assassin who comes for rulers now draws a hidden blade (his blows and stab unchanged).
+
+## Freerunning (Stealth's second page, Kingdoms 0.7.101, with Powers 0.14.3)
+Andy picked "Full freerunning" (2026-10-20). Stealth now goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still
+counts only to 15, and the pocket practice only the first 15 levels). Kingdoms owns the perks (`Skills.Perk`, appended
+last) and the page ("Freerunning >" in the tree); the moves are Powers' (`freerun/Freerun`, client
+`client/freerun/FreerunClient`, numbers at the top of `Freerun`), which reads the ranks by reflection on
+`Skills.rank(Player, String)` (none without Kingdoms) and syncs them to every client for the poses. The server checks
+every move (the rank, the wall or bar or obstacle really there). Ledge grab and mantle stay open to everyone. Every
+move costs hunger (0.3 exhaustion; holding on 0.008 a tick, climbing 0.3 a block) and keeps your speed; a cling, a hang
+and a wall run stop a fall counting (a vault or a kick doesn't). None of it while flying, gliding, swimming, riding,
+carrying or carried, crawling, meditating, on a ledge, or in a web slinger's own parkour (web users keep theirs).
+
+```
+     Climber (lvl 3, 3)            Freerunner (lvl 3, 2)
+            |                              |
+   Sure Footing (lvl 8)          Leap of Faith (lvl 8, 2 pts)
+            |                              |
+   Bar Swing (lvl 12, 2 pts)     Wall Runner (lvl 12, 2)
+```
+12 points in all; with page 1's 15 and 25 levels you can't have everything.
+- **Climber** (3 ranks): jump at a tall wall holding forward and Jump (any solid wall but ice, glass, leaves and
+  `jaymospowers:freerun_no_climb`; one whose top you could catch with a jump is the ledge grab's) to cling. Forward
+  climbs 0.05/0.07/0.09 blocks a tick, strafe shimmies (0.06), Sneak lets go. The grip lasts 3/6/10 s
+  (`GRIP_TICKS`), then you slip down (0.07 a tick) for 3 s and fall off. Reaching the top, the ledge grab catches the
+  edge and pulls you up and over while you hold forward.
+- **Freerunner** (2 ranks): 1, a sprinting jump at something waist-high (up to 1.5 blocks: fence, wall, block, with
+  room over it) vaults it at full speed (one of the web vaults' four looks). 2, wall kick: in the air beside or
+  facing a wall, a fresh Jump kicks off it (up 0.5, out 0.45, half your speed along it kept), each wall face once until
+  you land; also off a cling or a wall run.
+- **Sure Footing**: on narrow tops (`jaymospowers:freerun_narrow`: fences, walls, gates, panes, bars, chains, end and
+  lightning rods) you walk and sprint at full speed with your arms out to balance, and take 75% less knockback.
+  Without it (only with Kingdoms loaded) a narrow top is walked: no sprinting, 30% slower (`UNSTEADY_SLOW`, Andy's call).
+- **Leap of Faith** (2 pts): from any height, landing in a hay bale, water or leaves (`freerun_soft_landing`) takes
+  no fall damage: Andy's accepted exception to "fall damage always applies". Falling (fast) looking at least 50° down,
+  you dive head first (the wind's dive pose).
+- **Bar Swing** (2 pts): jump (Jump held) under a fence, iron bar or horizontal chain whose underside is at most 0.9
+  above your head (`freerun_bars`) to catch it and hang, swinging (10 s at most). Jump lets go forward the way you
+  look (0.9 forward, 0.5 up); Sneak drops.
+- **Wall Runner** (2 ranks): a sprinting jump alongside a wall runs along it for 1.5/2.5 s, light on gravity (the web
+  run's speeds), once per wall face till you land; then you drop, or kick off it with Freerunner 2.
+- XP: a freerun move gives Stealth +1, at most every 20 s (Powers tags the player `jaymospowers_freerun`; Kingdoms
+  takes it off and pays, `Skills.freerun`). A hidden blade leap that lands on its mark gives +6.
+- Poses: the web's vault, cling (hand over hand, or Not Enough Animations' ladder climb), wall kick and wall run poses;
+  a new arms-out balance (`BalancePose`) and a bar hang, swinging from the hands (`BarHangPose`).
+
 ## Survival (built, Kingdoms 0.5.52)
 XP: a ripe crop harvested (+1), every 2 hunger points eaten back (+1), a night lived through (+15), taking damage and
 living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per level.
@@ -47,7 +132,7 @@ living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per leve
 - Hardy Landing (lvl 5): falls hurt 30% less, never not at all. It scales vanilla fall damage only, so powers that
   cancel fall damage (Gravity's Weightless and descents, Wind, Web) work exactly as before.
 - Last Stand (lvl 10, 2 pts): once a day, a killing blow leaves you on half a heart.
-- Make Do (lvl 5, 2 pts, under Forager; Kingdoms 0.7.98): any crossbow loads anything from the off hand, through
+- Make Do (lvl 5, 2 pts, under Forager; Kingdoms 0.7.103): any crossbow loads anything from the off hand, through
   OmniCrossbow (LGPL-3.0, shipped unchanged): snowballs freeze, slime balls bounce, TNT flies lit, a fishing rod
   grapples. Every class can learn it. The mod's Omni enchantment is gone: stripped from all loot (an Omni book comes out
   a plain book) and from the raid's last pillager, and a /give'n one does nothing. Andy, 2026-10-20: "Marksman class

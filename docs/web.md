@@ -276,8 +276,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Taut lines:** a line with no more than `WebRopeSim.TAUT_SLACK` 0.3 blocks of slack is drawn dead straight, easing
   into a free hang by `LOOSE_SLACK` 2.0; a line stuck to something moving (a whip's catch) keeps its growth, so whips
   and the midair lasso draw to both hands through the spin.
-- **Web Whip (Sneak + R or G, no web out):** aimed within `WebWhip.RANGE` 16 (× symbiote reach) at a creature, a corpse
-  (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
+- **Web Whip (Sneak with both swing webs on one thing, since 0.13.36; was Sneak + R or G):** see "Web Whip on Sneak"
+  below for how it starts now. A creature, a corpse (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
   catches it and you whip it about, one of three ways at random: **overhead** (up over your head, down in front),
   **seesaw** (down in front, then back over into the ground behind) or **lasso** (round you once, then overhead and
   down). Each slam hits for `DAMAGE` 9 (5 to anything else where it lands) and breaks a crater under it, bigger for
@@ -1466,3 +1466,24 @@ come from `tools/gen_web_strains.py`, run with `python3 -I`); no names from anyo
   `WebSymbioteState`, `WebSymbioteBond`, `WebSymbioteBlob`, `WebInhabit`, `WebBehemoth`, `WebMorph`, `WebBall`,
   `WebTendrilCombos`, `WebPower`, `WebSymbioteGooBlock`, `WebCraterFeature`, `WebDebugCommand`; client `WebStrainLook`
   (new) and the symbiote layers, `WebLineRenderer`, `WebTendrilBundle`, `WebBlobRenderer`, `WebSymbioteScreen`.
+
+## Web Whip on Sneak, and moves seen in first person (0.13.36)
+Andy: "Web swing grab attacks should be activated by holding shift while two lines are attached... whenever you have two
+lines attached near each other on terrain or on a mob, pressing shift starts the attack, or starts breaking the terrain
+for the debris attack. Letting go of shift early leaves the cracks but if stopped before they break then the attack
+ends." And: "all the counters and moves should be better animated in first person. Right now there are doubled hands
+and other drawings in first person."
+- **Starting the whip:** both swing webs out, their ends within `WebWhip.NEAR` 3 blocks of each other, on the same
+  creature or on terrain: press Sneak (`WebWhip.Hold`). On a creature or corpse the whip starts at once. On terrain you
+  pry the chunk between the two ends loose for as long as you hold Sneak (`PRY_TICKS` 30, cracks spreading); it breaks
+  out and the whip starts. Let go of Sneak before it breaks and the attack ends: the cracks stay where they got to
+  (`WebCracks`), the webs let go. Your swing webs hand over to the whip (`WebPower.handOverSwings`, client
+  `WebSwing.handedOver`), so you don't swing or slingshot off them. Everything after it starts is unchanged.
+- **What Sneak still does with two webs:** both webs on something small (an item, a mob up to `REEL_MAX_SIZE`) still
+  reels it in; webs further apart than 3 blocks still brace the slingshot. Sneak + R or G no longer starts a whip.
+- **First person (`WebFirstPerson`):** with First-person Model drawing your body, while a move poses your arms (swing
+  webs out, a counter, a body pose or hang, the weapon arm forming or striking, a slam, feeding, a roar, a tendril
+  strike or combo, carrying, a ledge climb), the game's usual first-person hands aren't drawn
+  (`WebFirstPersonHandsMixin`), nor the suit sleeve or web shooter on them, nor the extra carry and ledge arms; the
+  body's posed arms are the only pair. First-person Model's own hiding of a body arm that holds an item is undone for
+  the move (`FirstPersonCompat.showArms`), so the arm still shows. Without First-person Model nothing changes.

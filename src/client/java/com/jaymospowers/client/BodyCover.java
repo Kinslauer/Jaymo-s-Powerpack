@@ -74,7 +74,7 @@ public final class BodyCover {
 			return Cover.NONE;
 		}
 		CostumeDesign.Mask mask = design.mask();
-		boolean head = mask.hidesFace || mask == CostumeDesign.Mask.HOOD;
+		boolean head = mask.hidesFace || mask.isHood();
 		return new Cover(mask != CostumeDesign.Mask.NONE, head, mask.hidesFace, true);
 	}
 
