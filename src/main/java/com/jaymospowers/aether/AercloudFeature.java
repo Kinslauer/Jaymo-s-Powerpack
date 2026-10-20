@@ -53,6 +53,10 @@ public record AercloudFeature(String cloud, int bounds, int spread, int thicknes
 		int z = origin.getZ();
 		boolean placed = false;
 		for (int step = 0; step < this.bounds; step++) {
+			// the walk ends once its centre leaves the region this step may write
+			if (!level.ensureCanWrite(new BlockPos(x, y, z))) {
+				break;
+			}
 			int rx = 1 + random.nextInt(this.spread);
 			int rz = 1 + random.nextInt(this.spread);
 			// an ellipsoid of cloud, thin in y

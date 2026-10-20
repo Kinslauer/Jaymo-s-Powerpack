@@ -91,11 +91,11 @@ numbers are in the JSON named below or are `static final` constants at the top o
 - Islands only between y 14 and 128 of a 256-high world (min_y 0); holystone is the default block, sea level is -64 (no
   ocean), no aquifers, ore veins or carvers. Surface (`worldgen/material_rule/aether.json`): aether grass on the top
   layer, aether dirt under it for the surface depth, holystone below.
-- The density is -0.15 + A x (-0.1 + B x (0.12 + n)): `n` is vanilla's old blended noise (the End's recipe: factors
-  80/160, smear 8, scale 0.5 across and 0.7 up, so islands are tens of blocks wide and flat-ish), A ramps 0 to 1 over
+- The density is -0.15 + A x (-0.1 + B x (0.12 + n)): `n` is vanilla's old blended noise (factors 80/160, smear 8, scale 0.25
+  across and up, as The Aether's skylands use, so islands are tens of blocks wide and flat-ish), A ramps 0 to 1 over
   y 14 to 46 (thin undersides) and B ramps 1 to 0 over y 64 to 128 (thin tops, nothing above 128). A column is solid
-  where the result is above 0. In practice: about 14% of the volume is solid, most of the mass between y 32 and 95,
-  and the highest peaks near y 115.
+  where the result is above 0. In practice: about 9% of the volume is solid (preview slice) and most of the mass lies between y 32 and 79;
+  the offsets are not yet retuned for the 0.25 scales, so raise the 0.12 if the islands come out too sparse.
 - `tools/preview_aether_terrain.py [z] [seed] [out.png]` draws a 256x128 side view from the shipped JSON (numpy and
   Pillow; the noise is a stand-in for the game's, so shapes and densities match, not a given seed) and prints the share of
   the mass per 16 blocks of height. Re-tune the constants in the JSON and run it again.
