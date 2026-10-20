@@ -316,7 +316,7 @@ public final class Deeds {
 	/** Grown villagers (and a settlement's folk) near {@code player} who can see them, but not {@code besides}, captives or rioters. */
 	private static List<LivingEntity> witnesses(ServerLevel level, ServerPlayer player, @Nullable LivingEntity besides) {
 		List<LivingEntity> out = new ArrayList<>();
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE),
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE * Identities.hoodSight(player)),
 			e -> e.isAlive() && e != besides && friendly(e))) {
 			if (e.isSleeping() || e.isBaby() || e instanceof Mob m && m.isNoAi() || Theft.rioting(e) || !e.hasLineOfSight(player)) {
 				continue;
