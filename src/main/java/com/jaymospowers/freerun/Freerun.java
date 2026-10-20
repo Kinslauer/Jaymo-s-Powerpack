@@ -115,8 +115,11 @@ public final class Freerun {
 
 	/** Sure Footing: knockback taken away on a narrow top (0.75 = 75% less). */
 	public static final double FOOTING_KNOCKBACK = 0.75;
-	/** Without Sure Footing (and only with Kingdoms loaded): on a narrow top you're this much slower and can't sprint. */
-	public static final double UNSTEADY_SLOW = 0.3;
+	/**
+	 * Without Sure Footing (and only with Kingdoms loaded): on a narrow top you're this much slower and can't sprint.
+	 * Off (0) until Andy says otherwise: it would slow everyone who walks a fence or wall top.
+	 */
+	public static final double UNSTEADY_SLOW = 0.0;
 	/** Narrow tops: balancing on these. */
 	public static final TagKey<Block> NARROW = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_narrow"));
 
