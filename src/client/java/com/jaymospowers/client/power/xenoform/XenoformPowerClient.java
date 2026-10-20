@@ -110,7 +110,7 @@ public final class XenoformPowerClient implements PowerClient {
 		String form = player.getAttached(XenoformState.FORM);
 		if (!java.util.Objects.equals(form, formWas)) {
 			formWas = form;
-			XenoformSlap.changed(player.tickCount);
+			XenoformSlap.changed(player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 			var shape = XenoformState.form(player);
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
@@ -135,6 +135,9 @@ public final class XenoformPowerClient implements PowerClient {
 		float now = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		if (down) {
 			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
+		} else if (player.getAttached(XenoformState.FORM) == null && XenoformState.hud(player).recharge() > 0) {
+			// a band still recharging refuses the change: the arms drop away, no strike, kick or burst for nothing
+			XenoformSlap.drop(now);
 		} else {
 			XenoformSlap.release(now);
 		}

@@ -48,6 +48,8 @@ public final class XenoformSlap {
 	static final float RAISE_TICKS = 5.5F, STRIKE_TICKS = 2.0F, REST_TICKS = 4.0F, DROP_TICKS = 6.0F;
 	/** Someone else's slap starts with the wrist already on its way: this long before the hand drops. */
 	static final float OTHERS_RAISE_TICKS = 2.0F;
+	/** Someone else's hand drops over this long (yours is the faster {@link #STRIKE_TICKS}). */
+	static final float OTHERS_STRIKE_TICKS = 3.0F;
 	/** A hold older than this when the change comes isn't what caused it (a timed-out form, a glitch). */
 	static final float HOLD_STALE_TICKS = 40.0F;
 	/** The band's wrist, raised across the chest (radians, left arm). */
@@ -88,7 +90,7 @@ public final class XenoformSlap {
 	public static void release(float now) {
 		if (holdAt >= 0.0F && releaseAt < 0.0F) {
 			if (slamOnRelease) {
-				// the wrist carries on up from where the hold had it (the same linear clock), then the strike: no snap on a short tap
+				// the wrist keeps the place the hold had it, then finishes its rise at the faster others' rate before the strike: no snap on a short tap
 				float r = Math.min(1.0F, Math.max(0.0F, now - holdAt) / RAISE_TICKS);
 				slamAt = now - OTHERS_RAISE_TICKS * r;
 				selfStrike = true;
@@ -101,10 +103,22 @@ public final class XenoformSlap {
 		}
 	}
 
+	/** Z came up but nothing will change (the band is recharging): the arms just drop away. */
+	public static void drop(float now) {
+		if (holdAt >= 0.0F && releaseAt < 0.0F) {
+			releaseAt = now;
+		}
+	}
+
 	/** Your shape changed: if Z was the cause, the hand lands (unless the release already brought it down). */
 	public static void changed(float now) {
 		boolean striking = selfStrike && slamAt >= 0.0F && now - slamAt <= HOLD_STALE_TICKS;
-		if (!striking && holdAt >= 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
+		if (slamOnRelease && holdAt >= 0.0F && releaseAt < 0.0F && !striking) {
+			// Z is still down as a human (a glitch changed the shape): the hand stays poised and the release slams, no jump
+			return;
+		}
+		// a hold that was already let go (releaseAt) isn't what caused this change
+		if (!striking && holdAt >= 0.0F && releaseAt < 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
 			// an alien's hand has already come down by the hold's own clock: carry on from there, so the landing isn't played twice
 			float held = now - holdAt;
 			if (!slamOnRelease && held < XenoformPower.HOLD_TICKS) {
@@ -140,6 +154,10 @@ public final class XenoformSlap {
 				selfStrike = false;
 				landed = false;
 				earlyFrom = -1.0F;
+				// a Z held down through the drop starts its rise over from the lowered arm
+				if (holdAt >= 0.0F) {
+					holdAt = now;
+				}
 			}
 			return pose;
 		}
@@ -171,10 +189,10 @@ public final class XenoformSlap {
 				if (dt < OTHERS_RAISE_TICKS) {
 					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F);
 				}
-				if (dt < OTHERS_RAISE_TICKS + STRIKE_TICKS) {
-					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / STRIKE_TICKS, -1.0F, 0.0F);
+				if (dt < OTHERS_RAISE_TICKS + OTHERS_STRIKE_TICKS) {
+					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / OTHERS_STRIKE_TICKS, -1.0F, 0.0F);
 				}
-				dt -= OTHERS_RAISE_TICKS + STRIKE_TICKS;
+				dt -= OTHERS_RAISE_TICKS + OTHERS_STRIKE_TICKS;
 			}
 			// dt: the ticks since the hand landed
 			if (dt < REST_TICKS) {
