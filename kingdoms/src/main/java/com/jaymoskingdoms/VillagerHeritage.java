@@ -151,6 +151,13 @@ public final class VillagerHeritage {
 		if (level.dimension().identifier().equals(Verdants.WORLD)) {
 			return Heritage.Kind.VERDANT;
 		}
+		if (level instanceof ServerLevel server) {
+			// (0.7.98) on a purist king's land, most are born to his blood
+			Heritage.Kind proud = Purists.lean(server, pos, random);
+			if (proud != null) {
+				return proud;
+			}
+		}
 		Holder<Biome> biome = level.getBiome(pos);
 		float heat = biome.value().getBaseTemperature();
 		boolean hot = heat >= Heritage.HOT, cold = heat <= Heritage.COLD;
@@ -286,7 +293,11 @@ public final class VillagerHeritage {
 			}
 			return;
 		}
-		if (of(folk) == null) {
+		// (0.7.98) a purist realm's own folk are all of its ruler's blood
+		Heritage.Kind proud = folk.factionId() >= 0 ? Purists.folk(level.getServer(), folk.factionId()) : null;
+		if (proud != null && of(folk) != proud) {
+			born(folk, proud, null);
+		} else if (of(folk) == null) {
 			born(folk, roll(level, folk.blockPosition(), folk.getRandom()), null);
 		}
 	}

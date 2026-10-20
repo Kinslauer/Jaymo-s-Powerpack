@@ -81,8 +81,8 @@ final class Assassins {
 
 	/** Each day, the chance of a contract on a realm's ruler, before his temper and his feuds. */
 	static final float REALM_CHANCE = 0.015F;
-	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER): how many enemies he makes. */
-	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F};
+	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST): how many enemies he makes. */
+	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F, 2.0F};
 	/** A realm with a rival or an enemy at war: this many times as likely. */
 	static final float FEUD_CHANCE = 2.0F;
 	/** Of a feuding realm's contracts, the share its rivals pay for (the rest are his own people's, an heir's, or no one knows). */
@@ -326,7 +326,8 @@ final class Assassins {
 			if (!feuds.isEmpty() && random.nextFloat() < RIVAL_SHARE) {
 				hirer = feuds.get(random.nextInt(feuds.size())).id();
 				motive = "rival";
-			} else if (temper == Tempers.Temper.TYRANT && random.nextBoolean()) {
+			} else if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.PURIST) && random.nextBoolean()) {
+				// (0.7.98) a purist's own people not of his blood have had enough of him too
 				motive = "people";
 			} else {
 				motive = random.nextBoolean() ? "heir" : "guild";

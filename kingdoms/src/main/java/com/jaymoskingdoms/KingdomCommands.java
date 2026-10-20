@@ -155,7 +155,7 @@ final class KingdomCommands {
 		// (0.5.12) its ruler's temper
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper != null) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper)).withStyle(ChatFormatting.GRAY), false);
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY), false);
 		}
 		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);

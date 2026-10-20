@@ -94,22 +94,25 @@ public final class Approaches {
 	static final long HALT_TICKS = 72000L;
 	static final int GUARD_GAP = 20 * 60 * 8;
 	/**
-	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; last, a place with
-	 * no ruler): how keen they are to search you, ask a toll, offer a bout, test your loyalty.
+	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; (0.7.98) PURIST to a
+	 * stranger not of his blood, then to one of it; last, a place with no ruler): how keen they are to search you, ask a
+	 * toll, offer a bout, test your loyalty.
 	 */
-	static final int[] SEARCH_W = {3, 1, 1, 4, 1, 1}, TOLL_W = {4, 1, 2, 2, 2, 1}, BOUT_W = {1, 1, 4, 1, 3, 1}, LOYALTY_W = {3, 1, 1, 4, 1, 0};
+	static final int[] SEARCH_W = {3, 1, 1, 4, 1, 4, 0, 1}, TOLL_W = {4, 1, 2, 2, 2, 4, 1, 1}, BOUT_W = {1, 1, 4, 1, 3, 2, 2, 1},
+		LOYALTY_W = {3, 1, 1, 4, 1, 2, 2, 0};
 	/** The toll (emeralds, to the treasury), by temper; the bribe a search can be waved off with; a bout's wager. */
-	static final int[] TOLLS = {3, 1, 2, 2, 1, 1};
+	static final int[] TOLLS = {3, 1, 2, 2, 1, 4, 1, 1};
 	static final int BRIBE = 2, WAGER = 2;
 	/** How long defying a guard who arrests you keeps you wanted (ticks). */
 	static final long ARREST_TICKS = 1200L;
 	/** Good name, by temper: a clean search, refusing one, refusing a toll, winning a bout, praising the king, keeping quiet, speaking ill. */
-	static final int[] SEARCH_CLEAN_REP = {1, 3, 3, 2, 2, 2}, SEARCH_REFUSE_REP = {-6, -2, -4, -6, 0, -2}, TOLL_REFUSE_REP = {-6, -1, -3, -5, 0, -2},
-		BOUT_WON_REP = {2, 2, 5, 1, 3, 2}, PRAISE_REP = {3, 1, 2, 2, 2, 1}, SILENT_REP = {-1, 0, 0, -2, 0, 0}, ILL_REP = {-8, -2, -6, -8, -1, -2};
+	static final int[] SEARCH_CLEAN_REP = {1, 3, 3, 2, 2, 1, 3, 2}, SEARCH_REFUSE_REP = {-6, -2, -4, -6, 0, -4, -1, -2},
+		TOLL_REFUSE_REP = {-6, -1, -3, -5, 0, -4, -1, -2}, BOUT_WON_REP = {2, 2, 5, 1, 3, 1, 4, 2}, PRAISE_REP = {3, 1, 2, 2, 2, 1, 4, 1},
+		SILENT_REP = {-1, 0, 0, -2, 0, -2, -1, 0}, ILL_REP = {-8, -2, -6, -8, -1, -6, -6, -2};
 	/** Stolen goods found on a search; a bribe a guard won't take; paying a toll; insulting a guard; haggling and failing. */
 	static final int SEARCH_FOUND_REP = -4, BRIBE_REFUSED_REP = -6, TOLL_PAID_REP = 1, REVELER_TOLL_REP = 3, INSULT_REP = -4, HAGGLE_FAILED_REP = -2;
 	/** Haggling a toll down to half: the chance, by temper. */
-	static final float[] HAGGLE_CHANCE = {0.25F, 0.6F, 0.4F, 0.4F, 0.75F, 0.5F};
+	static final float[] HAGGLE_CHANCE = {0.25F, 0.6F, 0.4F, 0.4F, 0.75F, 0.1F, 0.6F, 0.5F};
 	/** A bout: the chance to win (base, per armour point, per point of attack damage, never under or over). */
 	static final float BOUT_BASE = 0.3F, BOUT_ARMOUR = 0.015F, BOUT_ATTACK = 0.03F, BOUT_MIN = 0.15F, BOUT_MAX = 0.85F;
 	/** A guard's slap (only above this health). */
@@ -164,9 +167,12 @@ public final class Approaches {
 		"greet", "child", "warn", "search", "toll", "bout", "loyalty", "unmask"};
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}); 0 for the guards' own, one per temper. */
 	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0, 3};
-	/** (0.6.2) Temper keys, in {@link Tempers.Temper} order, then a place with no ruler of its own. */
-	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "plain"};
-	static final int TYRANT = 0, NOBLE = 1, WARLORD = 2, PARANOID = 3, REVELER = 4, PLAIN = 5;
+	/**
+	 * (0.6.2) Temper keys, in {@link Tempers.Temper} order ((0.7.98) a purist's guards to one of his own blood after his),
+	 * then a place with no ruler of its own.
+	 */
+	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "purist", "purist_kin", "plain"};
+	static final int TYRANT = 0, NOBLE = 1, WARLORD = 2, PARANOID = 3, REVELER = 4, PURIST = 5, PURIST_KIN = 6, PLAIN = 7;
 	/** (0.5.52) Lines a gossip has about a player whose alignment they've heard of, per pillar. */
 	static final int GOSSIP_ABOUT_YOU = 3;
 	/** Stranger's questions (each with a warm, a plain and a rude answer, and a reply to each). */
@@ -620,7 +626,7 @@ public final class Approaches {
 				w[HALT] = 2;
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
-			int tv = temper(server, f);
+			int tv = temper(server, f, player);
 			if (!sworn) {
 				w[SEARCH] = SEARCH_W[tv];
 				w[TOLL] = TOLL_W[tv];
@@ -727,13 +733,26 @@ public final class Approaches {
 			|| (topic == BARGAIN && mob instanceof Villager v && DEALS.containsKey(profession(v)));
 	}
 
-	/** (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}. */
-	private static int temper(MinecraftServer server, Faction f) {
-		Tempers.Temper t = Tempers.of(f);
-		if (t == null) {
-			t = Tempers.of(Wars.top(server, f));
+	/**
+	 * (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}; (0.7.98) a purist's
+	 * by whether {@code player} is of his blood.
+	 */
+	private static int temper(MinecraftServer server, Faction f, ServerPlayer player) {
+		Faction ruler = ruler(server, f);
+		Tempers.Temper t = Tempers.of(ruler);
+		if (t == Tempers.Temper.PURIST) {
+			return Purists.kin(ruler, player) ? PURIST_KIN : PURIST;
 		}
 		return t == null ? PLAIN : t.ordinal();
+	}
+
+	/** (0.7.98) Whose temper {@code f}'s people go by: its own ruler's, or its liege's for a fief (or itself, with neither). */
+	private static Faction ruler(MinecraftServer server, Faction f) {
+		if (Tempers.of(f) != null) {
+			return f;
+		}
+		Faction top = Wars.top(server, f);
+		return top != null && Tempers.of(top) != null ? top : f;
 	}
 
 	private static int hearts(Mob mob, ServerPlayer player) {
@@ -794,7 +813,7 @@ public final class Approaches {
 			}
 			case SEARCH, TOLL, BOUT, LOYALTY -> {
 				// (0.6.2) one way of putting it per temper
-				a.variant = temper(level.getServer(), f);
+				a.variant = temper(level.getServer(), f, player);
 				a.price = a.topic == SEARCH ? BRIBE : a.topic == TOLL ? TOLLS[a.variant] : WAGER;
 			}
 			default -> a.variant = OPENINGS[a.topic] > 0 ? random.nextInt(OPENINGS[a.topic]) : 0;
@@ -819,8 +838,10 @@ public final class Approaches {
 		Component name = Identities.nameTo(player, a.faction);
 		// (the line's key and its arguments; "<key>.more" is what they'd add if asked)
 		String line = key(a) + "." + (guardsOwn(a.topic) ? TEMPERS[a.variant] : a.variant), more = line + ".more";
+		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
-			case SEARCH, TOLL, BOUT -> new Object[] {a.price};
+			// (0.7.98) and the blood: yours, then the purist king's
+			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.price, Purists.name(Heritage.of(player)), ruler == null ? "?" : Purists.bloodName(ruler)};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
 			case WAR -> new Object[] {a.enemy};
 			case HALT, UNMASK -> new Object[] {realm};
@@ -838,6 +859,10 @@ public final class Approaches {
 				// (0.7.61) what you did for them (or elsewhere, as they've heard); (0.6.11) something strange seen lately;
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
+				if (said == null) {
+					// (0.7.98) a purist realm's pride in its blood (or a grumble from one not of it)
+					said = Purists.gossip(level, a.mob, player, ruler);
+				}
 				if (said == null) {
 					// now and then, their own blood (VillagerHeritage)
 					said = VillagerHeritage.gossip(level, a.mob, player);
@@ -1254,11 +1279,14 @@ public final class Approaches {
 					}
 				} else if (option == 1) {
 					Reputation.change(player, f, SEARCH_REFUSE_REP[tv]);
-					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID || tv == WARLORD ? Speech.RED : Speech.WHITE);
+					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID || tv == WARLORD || tv == PURIST ? Speech.RED : Speech.WHITE);
 					if (tv == TYRANT || tv == PARANOID) {
 						Theft.arrest(player, level, f, ARREST_TICKS);
+					} else if (tv == PURIST) {
+						// (0.7.98) shoved out of his way: he'll not lower himself to more
+						Purists.shoulder(level, a.mob, player);
 					}
-				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN) {
+				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
 					// (a bribe they'll take: whatever you carry, they never saw it)
 					take(player, Items.EMERALD, a.price);
 					clearSuspicion(player, f.id());
@@ -1296,13 +1324,19 @@ public final class Approaches {
 						reply(level, a, k + "haggle_failed." + temper, Speech.RED);
 					} else {
 						Reputation.change(player, f, HAGGLE_FAILED_REP);
-						reply(level, a, k + "haggle_failed." + temper, Speech.YELLOW);
+						reply(level, a, k + "haggle_failed." + temper, tv == PURIST ? Speech.RED : Speech.YELLOW);
+						if (tv == PURIST) {
+							// (0.7.98) haggling with his betters
+							Purists.shoulder(level, a.mob, player);
+						}
 					}
 				} else {
 					Reputation.change(player, f, TOLL_REFUSE_REP[tv]);
-					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID ? Speech.RED : Speech.WHITE);
+					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID || tv == PURIST ? Speech.RED : Speech.WHITE);
 					if (tv == TYRANT) {
 						Theft.arrest(player, level, f, ARREST_TICKS);
+					} else if (tv == PURIST) {
+						Purists.shoulder(level, a.mob, player);
 					}
 				}
 			}
@@ -1330,9 +1364,9 @@ public final class Approaches {
 					}
 					reply(level, a, k + "decline." + temper, Speech.WHITE);
 				} else {
-					Reputation.change(player, f, tv == TYRANT || tv == WARLORD || tv == PARANOID ? INSULT_REP : tv == REVELER ? -1 : -3);
+					Reputation.change(player, f, tv == TYRANT || tv == WARLORD || tv == PARANOID || tv == PURIST ? INSULT_REP : tv == REVELER ? -1 : -3);
 					reply(level, a, k + "insult." + temper, tv == REVELER || tv == NOBLE ? Speech.WHITE : Speech.RED);
-					if (tv == TYRANT || tv == WARLORD || tv == PARANOID) {
+					if (tv == TYRANT || tv == WARLORD || tv == PARANOID || tv == PURIST) {
 						// (he draws on you: just him, and only till one of you yields)
 						a.mob.setTarget(player);
 					}
@@ -1352,11 +1386,11 @@ public final class Approaches {
 					}
 				} else if (option == 1) {
 					Reputation.change(player, f, SILENT_REP[tv]);
-					reply(level, a, k + "silent." + temper, tv == PARANOID ? Speech.YELLOW : Speech.WHITE);
+					reply(level, a, k + "silent." + temper, tv == PARANOID || tv == PURIST ? Speech.YELLOW : Speech.WHITE);
 				} else {
 					Reputation.change(player, f, ILL_REP[tv]);
 					reply(level, a, k + "ill." + temper, tv == REVELER || tv == NOBLE ? Speech.WHITE : Speech.RED);
-					if (tv == TYRANT) {
+					if (tv == TYRANT || tv == PURIST || tv == PURIST_KIN) {
 						slap(level, a.mob, player);
 					}
 					if (tv == TYRANT || tv == PARANOID) {

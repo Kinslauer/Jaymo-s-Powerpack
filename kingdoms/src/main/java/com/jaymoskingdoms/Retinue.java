@@ -46,6 +46,9 @@ import org.jspecify.annotations.Nullable;
  * politely, to give him room; at worst a gentle push. Never thrown out.</li>
  * <li><b>Reveler</b>: a gift and a cheer once a day. Pester him and his guards toss you off, laughing, and that's the
  * end of it. Never thrown out.</li>
+ * <li><b>Purist</b>: (0.7.98) his own blood ({@link Purists}) is welcome: a proud word and good name once a day. Anyone
+ * else near him is beneath him: his guards sneer at them and shove them out of his path, then throw them out of his
+ * city if they keep hanging about.</li>
  * </ul>
  * None of it is a fight: the guards never draw on you. Only an actual attack (hitting the king or a guard) makes them
  * hostile, as anywhere. His realm's own people and his sworn wardens ({@link Wardens}) are no strangers.
@@ -65,13 +68,14 @@ final class Retinue {
 	record Rules(int close, int linger, int handle, int wary, int driveOut, double shove) {
 	}
 
-	/** By temper: TYRANT, NOBLE, WARLORD, PARANOID, REVELER. */
+	/** By temper: TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST (a purist's only for those not of his blood). */
 	static final Rules[] RULES = {
 		new Rules(2, 0, 15, 20, 50, 0.8),
 		new Rules(1, 0, 6, 20, NEVER, 0.4),
 		new Rules(3, 1, 8, 15, 50, 0.8),
 		new Rules(3, 1, 10, 25, 60, 0.8),
-		new Rules(0, 0, 8, 20, NEVER, 1.0)};
+		new Rules(0, 0, 8, 20, NEVER, 1.0),
+		new Rules(2, 1, 12, 20, 60, 0.9)};
 
 	/** The ban (ticks: 5 minutes), and how far from the seat the city reaches. */
 	static final int BAN_TICKS = 6000;
@@ -96,6 +100,8 @@ final class Retinue {
 	static final int NOBLE_BREAD = 2, NOBLE_FRIEND = 20;
 	/** The reveler's toss: up, and out. */
 	static final double TOSS_UP = 0.7, TOSS_OUT = 1.0;
+	/** (0.7.98) The purist gives one of his own blood this much bread with his daily word. */
+	static final int PURIST_BREAD = 2;
 
 	private static final class Watch {
 		int heat;
@@ -162,10 +168,12 @@ final class Retinue {
 	}
 
 	/** Whether what {@code p} is doing near him counts against them at all. */
-	private static boolean heats(Tempers.Temper t, ServerPlayer p) {
+	private static boolean heats(Tempers.Temper t, Faction f, ServerPlayer p) {
 		return switch (t) {
 			case TYRANT -> !kneeling(p);
 			case WARLORD -> armed(p);
+			// (0.7.98) only those not of his blood
+			case PURIST -> !Purists.kin(f, p);
 			default -> true;
 		};
 	}
@@ -201,13 +209,18 @@ final class Retinue {
 			return InteractionResult.PASS;
 		}
 		long now = level.getGameTime();
+		if (t == Tempers.Temper.PURIST && Purists.kin(f, p)) {
+			// (0.7.98) one of his own blood may clasp his hand
+			Speech.say(level, king, Component.translatable(speech(t, "kin_hands"), Purists.bloodName(f)), Speech.GOLD, SPEECH_RANGE);
+			return InteractionResult.PASS;
+		}
 		Watch w = WATCHED.computeIfAbsent(key(f.id(), p.getUUID()), k -> new Watch());
 		w.heat = Math.min(cap(t), w.heat + rules(t).handle());
 		w.touched = now;
 		Folk guard = nearestGuard(level, f, p, SPACE * 2);
-		Speech.say(level, guard != null ? guard : king, Component.translatable(speech(t, "hands")), t == Tempers.Temper.NOBLE
-			|| t == Tempers.Temper.REVELER ? Speech.GOLD : Speech.RED, SPEECH_RANGE);
-		if (t == Tempers.Temper.PARANOID || t == Tempers.Temper.TYRANT) {
+		Speech.say(level, guard != null ? guard : king, Component.translatable(speech(t, "hands"), Purists.name(Heritage.of(p)), Purists.bloodName(f)),
+			t == Tempers.Temper.NOBLE || t == Tempers.Temper.REVELER ? Speech.GOLD : Speech.RED, SPEECH_RANGE);
+		if (t == Tempers.Temper.PARANOID || t == Tempers.Temper.TYRANT || t == Tempers.Temper.PURIST) {
 			shove(level, guard, p, p.position().subtract(king.position()), rules(t).shove(), 0.25);
 		}
 		return InteractionResult.PASS;
@@ -282,7 +295,7 @@ final class Retinue {
 		}
 		String k = key(f.id(), p.getUUID());
 		Watch w = WATCHED.get(k);
-		int gain = heats(t, p) ? (d <= SPACE ? r.close() : r.linger()) : 0;
+		int gain = heats(t, f, p) ? (d <= SPACE ? r.close() : r.linger()) : 0;
 		if (gain > 0) {
 			if (w == null) {
 				w = new Watch();
@@ -292,7 +305,7 @@ final class Retinue {
 			w.heat = Math.min(cap(t), w.heat + gain);
 			w.touched = now;
 			if (before < r.wary() && w.heat >= r.wary() && !w.banned(now)) {
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".wary", king.getDisplayName())
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".wary", king.getDisplayName(), Purists.bloodName(f))
 					.withStyle(t == Tempers.Temper.NOBLE || t == Tempers.Temper.REVELER ? ChatFormatting.YELLOW : ChatFormatting.RED));
 			}
 		} else if (w != null && t == Tempers.Temper.TYRANT && kneeling(p) && d <= FAVOUR_RANGE) {
@@ -300,7 +313,8 @@ final class Retinue {
 			w.touched = now;
 		}
 		// on the spot: too close
-		if (d <= SPACE && (t == Tempers.Temper.PARANOID || t == Tempers.Temper.WARLORD && armed(p) || t == Tempers.Temper.TYRANT && !kneeling(p))) {
+		if (d <= SPACE && (t == Tempers.Temper.PARANOID || t == Tempers.Temper.WARLORD && armed(p) || t == Tempers.Temper.TYRANT && !kneeling(p)
+			|| t == Tempers.Temper.PURIST && !Purists.kin(f, p))) {
 			Watch ww = w != null ? w : WATCHED.computeIfAbsent(k, x -> new Watch());
 			Folk guard = nearestGuard(level, f, p, SPACE);
 			if (t != Tempers.Temper.TYRANT) {
@@ -308,10 +322,11 @@ final class Retinue {
 			}
 			if (now - ww.warned >= WARN_TICKS) {
 				ww.warned = now;
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".close", king.getDisplayName())
-					.withStyle(ChatFormatting.RED));
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".close", king.getDisplayName(),
+					Purists.name(Heritage.of(p))).withStyle(ChatFormatting.RED));
 				if (guard != null && t != Tempers.Temper.PARANOID) {
-					Speech.say(level, guard, Component.translatable(speech(t, "close")), Speech.RED, SPEECH_RANGE);
+					Speech.say(level, guard, Component.translatable(speech(t, "close"), Purists.name(Heritage.of(p)), Purists.bloodName(f)), Speech.RED,
+						SPEECH_RANGE);
 				}
 			}
 		}
@@ -361,6 +376,13 @@ final class Retinue {
 				Speech.say(level, by, Component.translatable(speech(t, "watch" + level.getRandom().nextInt(4))), Speech.GOLD, SPEECH_RANGE);
 				w.heat = 0;
 			}
+			case PURIST -> {
+				// (0.7.98) a sneer, and shoved out of his path
+				shove(level, guard, p, away, r.shove(), 0.2);
+				Speech.say(level, by, Component.translatable(speech(t, "watch" + level.getRandom().nextInt(4)), Purists.name(Heritage.of(p)),
+					Purists.bloodName(f)), Speech.RED, SPEECH_RANGE);
+				level.sendParticles(ParticleTypes.ANGRY_VILLAGER, by.getX(), by.getY() + 2.1, by.getZ(), 1, 0.2, 0.1, 0.2, 0.0);
+			}
 			default -> {
 			}
 		}
@@ -373,6 +395,7 @@ final class Retinue {
 			case WARLORD -> !armed(p) && p.getArmorValue() >= SALUTE_ARMOUR;
 			case NOBLE, REVELER -> true;
 			case PARANOID -> false;
+			case PURIST -> Purists.kin(f, p);
 		};
 		String k = key(f.id(), p.getUUID());
 		long day = Production.day(level.getServer());
@@ -381,9 +404,14 @@ final class Retinue {
 		}
 		FAVOURED.put(k, day);
 		king.getLookControl().setLookAt(p, 30.0F, 30.0F);
-		Speech.say(level, king, Component.translatable(speech(t, "favour")), t == Tempers.Temper.TYRANT ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
+		Speech.say(level, king, Component.translatable(speech(t, "favour"), Purists.bloodName(f), Identities.shownName(p)),
+			t == Tempers.Temper.TYRANT ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
 		switch (t) {
 			case TYRANT, WARLORD -> Reputation.change(p, f, FAVOUR);
+			case PURIST -> {
+				Reputation.change(p, f, FAVOUR);
+				give(p, new ItemStack(Items.BREAD, PURIST_BREAD));
+			}
 			case NOBLE -> {
 				if (Reputation.get(p, f.id()) >= NOBLE_FRIEND) {
 					give(p, new ItemStack(Items.BREAD, NOBLE_BREAD));
@@ -433,7 +461,8 @@ final class Retinue {
 	private static void banish(ServerLevel level, Faction f, Tempers.Temper t, Folk king, ServerPlayer p, Watch w, long now) {
 		w.bannedUntil = now + BAN_TICKS;
 		w.threatened = now;
-		p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".banished", king.getDisplayName(), f.name(), BAN_TICKS / 1200)
+		p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".banished", king.getDisplayName(), f.name(), BAN_TICKS / 1200,
+			Purists.name(Heritage.of(p)))
 			.withStyle(ChatFormatting.DARK_RED));
 		Speech.say(level, king, Component.translatable(speech(t, "seize")), Speech.RED, SPEECH_RANGE);
 		level.playSound(null, king.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.8F);

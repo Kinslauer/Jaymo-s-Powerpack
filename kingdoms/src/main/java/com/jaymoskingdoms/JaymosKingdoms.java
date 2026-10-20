@@ -91,6 +91,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// 0.7.98: the purist ruler's townsfolk mind a stranger's blood
+		Purists.register();
 		Frights.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();

@@ -49,7 +49,7 @@ final class QuestBoard {
 	 * (0.5.29) How often a king's decree is a rival king's death, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER):
 	 * never a noble's; seldom a warlord's, who'd rather send you at the head of his war party ({@link #WARBAND_CHANCE}).
 	 */
-	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F};
+	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F, 0.3F};
 	static final float WARBAND_CHANCE = 0.5F;
 	/** (0.7.42) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
 	static final float ESCORT_CHANCE = 0.2F;

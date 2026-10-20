@@ -216,7 +216,7 @@ final class McaBridge {
 		if (job == null) {
 			return null;
 		}
-		VillagerEntityMCA villager = chosen != null ? chosen : candidate(level, f);
+		VillagerEntityMCA villager = chosen != null ? chosen : candidate(level, f, role);
 		if (villager == null) {
 			// nobody to spare: someone new moves in to take the work
 			// (0.7.84) on open ground by {@code at}, not shut in wherever it is (a seat can be indoors)
@@ -243,11 +243,18 @@ final class McaBridge {
 	/**
 	 * The villager {@code f} promotes: a grown one of its own who isn't its ruler, a guard or anything else MCA counts
 	 * important, nor already at work; one without a trade first, then one who hasn't started theirs, then anyone.
+	 * (0.7.98) A purist ruler's guards are drafted from his own blood ({@link Purists}) while any are to be had.
 	 */
-	private static @Nullable VillagerEntityMCA candidate(ServerLevel level, Faction f) {
+	private static @Nullable VillagerEntityMCA candidate(ServerLevel level, Faction f, int role) {
 		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0 && !v.isProfessionImportant()
 				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
+		if (role == Folk.GUARD && Purists.is(f)) {
+			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();
+			if (!kin.isEmpty()) {
+				all = kin;
+			}
+		}
 		for (int tier = 0; tier < 3; tier++) {
 			List<VillagerEntityMCA> pick = new ArrayList<>();
 			for (VillagerEntityMCA v : all) {

@@ -64,6 +64,8 @@ public final class Reputation {
 		}
 		// (0.5.12) as its ruler's temper takes it
 		by = Tempers.reputation(kingdom, by);
+		// (0.7.98) and a purist ruler's, by your blood
+		by = Purists.reputation(kingdom, player, by);
 		String persona = Identities.persona(player, kingdom.id());
 		if (persona != null) {
 			// (0.7.62) done in a mask they don't see through: it's the costume's name that's made (or ruined)
