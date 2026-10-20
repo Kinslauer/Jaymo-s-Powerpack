@@ -13,7 +13,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 
 /**
- * (0.14.3) Wounds phase 4 on your own screen: a warm haze under poppy ({@link Pain#poppied}), a white flash as smelling
+ * (0.14.4) Wounds phase 4 on your own screen: a warm haze under poppy ({@link Pain#poppied}), a white flash as smelling
  * salts go under your nose ({@link Pain#JOLT}), a feverish shimmer while a part festers ({@link Bleeding#FESTERING}), and
  * the shakes in withdrawal ({@link Pain#WITHDRAWAL}: the view trembles, as Kitchen's drunk sway moves it). Also opens the
  * body screen when the server says ({@link BodyScreen}).

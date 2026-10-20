@@ -28,7 +28,7 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
 
 /**
- * Wounds, phase 4 (0.14.3): the medieval kit (Andy, 2026-10-20: "I dont want any modern medicine"), in its own creative
+ * Wounds, phase 4 (0.14.4): the medieval kit (Andy, 2026-10-20: "I dont want any modern medicine"), in its own creative
  * tab. Bandages, rags, splints, needle and thread, smelling salts and leeches are used through {@link Treatment} (use:
  * the body screen; sneak + use: the worst part); willow-bark tea and poppy syrup are drunk ({@link Pain}), and poppy can
  * be spooned into someone else (use it on them).
@@ -43,7 +43,7 @@ public final class MedicineItems {
 	public static Item WILLOW_BARK_TEA;
 	public static Item POPPY_SYRUP;
 
-	/** (0.14.3) Smelling salts' uses, and needle and thread's. */
+	/** (0.14.4) Smelling salts' uses, and needle and thread's. */
 	public static final int SALTS_USES = 4, NEEDLE_USES = 8;
 
 	private static final List<Item> ALL = new ArrayList<>();

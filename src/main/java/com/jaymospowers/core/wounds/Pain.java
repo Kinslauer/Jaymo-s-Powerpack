@@ -20,7 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * Wounds, phase 4 (0.14.3): pain and what dulls it. While {@link #numb}, the slowness and weakness of broken limbs
+ * Wounds, phase 4 (0.14.4): pain and what dulls it. While {@link #numb}, the slowness and weakness of broken limbs
  * ({@link Breaks}) are suspended (the bones are no less broken).
  * <ul>
  * <li><b>Willow-bark tea:</b> after {@link #TEA_DELAY}, numb for {@link #TEA_TICKS}.</li>
@@ -35,40 +35,40 @@ import net.minecraft.world.entity.player.Player;
  * </ul>
  */
 public final class Pain {
-	/** (0.14.3) Willow-bark tea: how long before it works, and how long it lasts (ticks). */
+	/** (0.14.4) Willow-bark tea: how long before it works, and how long it lasts (ticks). */
 	public static final int TEA_DELAY = 200, TEA_TICKS = 3600;
-	/** (0.14.3) Leeches: how long the pain stays dull (ticks). */
+	/** (0.14.4) Leeches: how long the pain stays dull (ticks). */
 	public static final int LEECH_TICKS = 4800;
-	/** (0.14.3) Poppy syrup: how long it lasts, how soon a second dose is too much, and how long that knocks you out (ticks). */
+	/** (0.14.4) Poppy syrup: how long it lasts, how soon a second dose is too much, and how long that knocks you out (ticks). */
 	public static final int POPPY_TICKS = 7200, OVERDOSE_TICKS = 1200, KNOCKOUT_TICKS = 1200;
-	/** (0.14.3) Drunk at least this much (Kitchen's points), the pain is dulled. */
+	/** (0.14.4) Drunk at least this much (Kitchen's points), the pain is dulled. */
 	public static final int DRUNK_NUMB = 4;
-	/** (0.14.3) Addiction: added per dose, the most, worn off per second, and where craving begins. */
+	/** (0.14.4) Addiction: added per dose, the most, worn off per second, and where craving begins. */
 	public static final float POPPY_ADDICTION = 20.0F, MAX_ADDICTION = 100.0F, ADDICTION_DECAY = 0.02F, CRAVING_FROM = 40.0F;
-	/** (0.14.3) An addict this long without a dose is in withdrawal (ticks). */
+	/** (0.14.4) An addict this long without a dose is in withdrawal (ticks). */
 	public static final int WITHDRAWAL_TICKS = 6000;
-	/** (0.14.3) In withdrawal: a wave of Nausea this often (seconds) for this long (ticks), and the craving's reminder (seconds). */
+	/** (0.14.4) In withdrawal: a wave of Nausea this often (seconds) for this long (ticks), and the craving's reminder (seconds). */
 	public static final int NAUSEA_EVERY = 30, NAUSEA_TICKS = 140, CRAVING_EVERY = 15;
 
-	/** (0.14.3) When the pain starts being dulled (game time). Saved, server side. */
+	/** (0.14.4) When the pain starts being dulled (game time). Saved, server side. */
 	public static final AttachmentType<Long> NUMB_FROM = AttachmentRegistry.create(JaymosPowers.id("wounds_numb_from"),
 		builder -> builder.persistent(Codec.LONG));
-	/** (0.14.3) When it stops. Saved, server side. */
+	/** (0.14.4) When it stops. Saved, server side. */
 	public static final AttachmentType<Long> NUMB_UNTIL = AttachmentRegistry.create(JaymosPowers.id("wounds_numb_until"),
 		builder -> builder.persistent(Codec.LONG));
-	/** (0.14.3) Under poppy until (game time): the haze. Saved, synced to its owner. */
+	/** (0.14.4) Under poppy until (game time): the haze. Saved, synced to its owner. */
 	public static final AttachmentType<Long> POPPY_UNTIL = AttachmentRegistry.create(JaymosPowers.id("wounds_poppy_until"),
 		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
-	/** (0.14.3) The last dose of poppy (game time). Saved, kept through death. */
+	/** (0.14.4) The last dose of poppy (game time). Saved, kept through death. */
 	public static final AttachmentType<Long> LAST_POPPY = AttachmentRegistry.create(JaymosPowers.id("wounds_last_poppy"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
-	/** (0.14.3) The hidden addiction (0 to {@link #MAX_ADDICTION}). Saved, kept through death, never synced. */
+	/** (0.14.4) The hidden addiction (0 to {@link #MAX_ADDICTION}). Saved, kept through death, never synced. */
 	public static final AttachmentType<Float> ADDICTION = AttachmentRegistry.create(JaymosPowers.id("wounds_addiction"),
 		builder -> builder.persistent(Codec.FLOAT).copyOnDeath());
-	/** (0.14.3) In withdrawal (the shakes on the client). Synced to its owner, not saved (worked out again each second). */
+	/** (0.14.4) In withdrawal (the shakes on the client). Synced to its owner, not saved (worked out again each second). */
 	public static final AttachmentType<Boolean> WITHDRAWAL = AttachmentRegistry.create(JaymosPowers.id("wounds_withdrawal"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
-	/** (0.14.3) Smelling salts just went under the nose (game time): the white flash. Synced to its owner, not saved. */
+	/** (0.14.4) Smelling salts just went under the nose (game time): the white flash. Synced to its owner, not saved. */
 	public static final AttachmentType<Long> JOLT = AttachmentRegistry.create(JaymosPowers.id("wounds_jolt"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
 
@@ -81,7 +81,7 @@ public final class Pain {
 
 	// ---- queries ----------------------------------------------------------------------------------------------------------
 
-	/** (0.14.3) Whether {@code entity}'s pain is dulled now (server side): tea, poppy, leeches or drink. */
+	/** (0.14.4) Whether {@code entity}'s pain is dulled now (server side): tea, poppy, leeches or drink. */
 	public static boolean numb(LivingEntity entity) {
 		long now = entity.level().getGameTime();
 		Long from = entity.getAttached(NUMB_FROM);
@@ -92,7 +92,7 @@ public final class Pain {
 		return entity instanceof Player player && KitchenCompat.drunk(player) >= DRUNK_NUMB;
 	}
 
-	/** (0.14.3) Under poppy (both sides, for its owner: the haze). */
+	/** (0.14.4) Under poppy (both sides, for its owner: the haze). */
 	public static boolean poppied(Entity entity) {
 		Long until = entity.getAttached(POPPY_UNTIL);
 		return until != null && entity.level().getGameTime() < until;
@@ -113,7 +113,7 @@ public final class Pain {
 		entity.setAttached(NUMB_UNTIL, until);
 	}
 
-	/** (0.14.3) A cup of willow-bark tea: the pain fades after a while. */
+	/** (0.14.4) A cup of willow-bark tea: the pain fades after a while. */
 	static void tea(LivingEntity entity) {
 		long now = entity.level().getGameTime();
 		dull(entity, now + TEA_DELAY, now + TEA_DELAY + TEA_TICKS);
@@ -122,13 +122,13 @@ public final class Pain {
 		}
 	}
 
-	/** (0.14.3) Leeches: the pain dulled at once, and for longer. */
+	/** (0.14.4) Leeches: the pain dulled at once, and for longer. */
 	static void leeches(LivingEntity entity) {
 		long now = entity.level().getGameTime();
 		dull(entity, now, now + LEECH_TICKS);
 	}
 
-	/** (0.14.3) A dose of poppy syrup: see the class comment. */
+	/** (0.14.4) A dose of poppy syrup: see the class comment. */
 	static void poppy(ServerLevel level, LivingEntity entity) {
 		long now = level.getGameTime();
 		Long last = entity.getAttached(LAST_POPPY);
@@ -153,7 +153,7 @@ public final class Pain {
 		}
 	}
 
-	/** (0.14.3) Smelling salts under the nose: the owner's screen flashes white. */
+	/** (0.14.4) Smelling salts under the nose: the owner's screen flashes white. */
 	static void jolt(LivingEntity entity) {
 		entity.setAttached(JOLT, entity.level().getGameTime());
 	}

@@ -50,6 +50,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Camps.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
+		HiddenBlade.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
@@ -112,7 +114,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
-		// 0.7.99: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
+		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
 		// the villager screens open, so the trades are there when they do)
 		Remedies.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground

@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.99) Medieval medicine, Kingdoms' side of Jaymo's Powers' Wounds phase 4 (Andy, 2026-10-20: "I dont want any
+ * (0.7.102) Medieval medicine, Kingdoms' side of Jaymo's Powers' Wounds phase 4 (Andy, 2026-10-20: "I dont want any
  * modern medicine"). <b>Clerics are barber-surgeons</b>: a grown cleric sells linen bandages, splints, smelling salts and
  * leeches (Powers') and strong spirits (Kitchen's) for emeralds, beside their usual wares; setting your bones for
  * emeralds is still Powers' ({@code Fractures}). <b>Taverns and festivals sell drink</b>: a grown villager standing in one
@@ -40,14 +40,14 @@ final class Remedies {
 	record Ware(String id, int emeralds, int count, int uses) {
 	}
 
-	/** (0.7.99) What a barber-surgeon (a cleric) sells. */
+	/** (0.7.102) What a barber-surgeon (a cleric) sells. */
 	static final List<Ware> SURGEON = List.of(
 		new Ware("jaymospowers:linen_bandage", 2, 3, 12),
 		new Ware("jaymospowers:splint", 3, 1, 8),
 		new Ware("jaymospowers:smelling_salts", 6, 1, 4),
 		new Ware("jaymospowers:leeches", 4, 1, 6),
 		new Ware("jaymoskitchen:strong_spirits", 4, 1, 8));
-	/** (0.7.99) What a tavern's keeper or a festival's toaster sells. */
+	/** (0.7.102) What a tavern's keeper or a festival's toaster sells. */
 	static final List<Ware> DRINK = List.of(
 		new Ware("jaymoskitchen:ale", 1, 2, 16),
 		new Ware("jaymoskitchen:strong_spirits", 3, 1, 8));

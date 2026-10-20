@@ -111,7 +111,7 @@ public final class Wounds {
 		Downed.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
-		// (0.14.3) phase 4: cuts and festering, the medieval kit, pain and the poppy
+		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
 		MedicineItems.register();
 		Treatment.register();
@@ -176,7 +176,7 @@ public final class Wounds {
 		hurtPart(entity, part, amount, by, null);
 	}
 
-	/** (0.14.3) As above; if it kills, it's by {@code type} (null: {@link #WOUNDS_DAMAGE}; bleeding's own, {@link Bleeding#BLEEDING_DAMAGE}). */
+	/** (0.14.4) As above; if it kills, it's by {@code type} (null: {@link #WOUNDS_DAMAGE}; bleeding's own, {@link Bleeding#BLEEDING_DAMAGE}). */
 	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by, @Nullable ResourceKey<DamageType> type) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
@@ -203,7 +203,7 @@ public final class Wounds {
 	}
 
 	/**
-	 * (0.14.3) Heals {@code part} itself by up to {@code amount} (a dressing): its health and the creature's go up together,
+	 * (0.14.4) Heals {@code part} itself by up to {@code amount} (a dressing): its health and the creature's go up together,
 	 * no further than the part may heal ({@link Breaks#caps}). Returns what it took.
 	 */
 	public static float healPart(LivingEntity entity, BodyPart part, float amount) {
@@ -366,7 +366,7 @@ public final class Wounds {
 	public static void healAll(LivingEntity entity) {
 		// (0.14.2) and every break gone with it
 		Breaks.clearAll(entity);
-		// (0.14.3) and every cut and fever
+		// (0.14.4) and every cut and fever
 		Bleeding.clearAll(entity);
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
@@ -464,7 +464,7 @@ public final class Wounds {
 		}
 		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
 		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
-		// (0.14.3) a blade, a shot or claws that cut deep enough opens a bleeding cut
+		// (0.14.4) a blade, a shot or claws that cut deep enough opens a bleeding cut
 		if (!blocked && victim.isAlive()) {
 			Bleeding.onHit(victim, plan, source, landed, was, points);
 		}

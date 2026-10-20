@@ -26,6 +26,11 @@ abstract class LedgeFirstPersonMixin {
 		if (!LedgeClient.active() || minecraft.player == null || player.avatarRenderState == null || hands.isScoping) {
 			return;
 		}
+		if (com.jaymospowers.client.power.web.FirstPersonCompat.bodyShown()) {
+			// First-person Model draws your body, its arms already holding on: no second pair
+			ci.cancel();
+			return;
+		}
 		float climb = LedgeClient.localProgress(partialTicks);
 		float time = minecraft.player.tickCount + partialTicks;
 		poseStack.pushPose();

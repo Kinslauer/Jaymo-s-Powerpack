@@ -38,6 +38,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -75,6 +76,8 @@ import org.jspecify.annotations.Nullable;
 public final class Identities {
 	/** Powers' tags on a masked player: the identity's key; its name. Powers' tag for a power just used. */
 	static final String MASKED = "jaymospowers_masked:", NAME = "jaymospowers_mask_name:", POWER = Oddities.PREFIX + Oddities.POWER;
+	/** (0.7.101) Powers' tag on a player in a hood (a costume hood or peaked hood, head piece on, face showing): the design's key. */
+	static final String HOODED = "jaymospowers_hooded:";
 
 	// ---- tuning ----
 	/** How often players are looked at (ticks). */
@@ -105,6 +108,10 @@ public final class Identities {
 	static final long EXILE_BAN_TICKS = 24000L * 3, EXILE_GRACE = 20L * 60, EXILE_ARREST_TICKS = 2400L;
 	/** (0.7.67) What MCA villagers call a masked player whose costume has no name. */
 	static final String UNNAMED = "Masked Stranger";
+	/** (0.7.101) A hooded player is seen this share as far (witnesses, trespass, deeds). */
+	static final double HOOD_SIGHT = 0.75;
+	/** (0.7.101) A hood is a fragile mask: a witness this close (blocks), facing you, in the light, sees the face under it. */
+	static final double HOOD_KNOWN_RANGE = 6.0;
 
 	/** One costume's own name in the world: its name, its reputation, wanted time and who each settlement knows wears it (faction id keys). */
 	record Identity(String name, Map<String, Integer> rep, Map<String, Long> wanted, Map<String, String> links) {
@@ -148,8 +155,8 @@ public final class Identities {
 	static final AttachmentType<String> MASKED_AS = AttachmentRegistry.create(JaymosKingdoms.id("masked_as"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
-	/** Player → the identity they were last seen in ("" bare-faced). */
-	private static final Map<UUID, String> WAS = new HashMap<>();
+	/** Player → the identity they were last seen fully masked as, and (0.7.101) hooded as with no mask ("" none). */
+	private static final Map<UUID, String> WAS_MASK = new HashMap<>(), WAS_HOOD = new HashMap<>();
 	/** Player/power → when a use of it last counted. */
 	private static final Map<String, Long> LAST_SIGHTING = new HashMap<>();
 	/** Player/faction → when its guards last stopped them masked (or let them through). */
@@ -166,12 +173,14 @@ public final class Identities {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Identities::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			WAS.remove(handler.player.getUUID());
+			WAS_MASK.remove(handler.player.getUUID());
+			WAS_HOOD.remove(handler.player.getUUID());
 			SENT_OFF.remove(handler.player.getUUID());
 			EXILED_IN.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			WAS.clear();
+			WAS_MASK.clear();
+			WAS_HOOD.clear();
 			LAST_SIGHTING.clear();
 			CHALLENGED.clear();
 			SENT_OFF.clear();
@@ -182,14 +191,48 @@ public final class Identities {
 
 	// ---- who is under the mask ---------------------------------------------------------------------------------------
 
-	/** The identity {@code e} is masked as right now (Powers' tag), or null if their face shows. */
+	/**
+	 * The identity {@code e} goes by right now, or null if their face shows: the costume's they are masked as (Powers'
+	 * tag), else (0.7.101) the hood's they are hooded as.
+	 */
 	static @Nullable String key(Entity e) {
+		String mask = maskKey(e);
+		return mask != null ? mask : hoodKey(e);
+	}
+
+	/** (0.7.101) The identity {@code e} is fully masked as (Powers' tag), or null. */
+	static @Nullable String maskKey(Entity e) {
 		for (String tag : e.entityTags()) {
 			if (tag.startsWith(MASKED)) {
 				return tag.substring(MASKED.length());
 			}
 		}
 		return null;
+	}
+
+	/** (0.7.101) The identity {@code e} is hooded as (Powers' tag), or null. */
+	static @Nullable String hoodKey(Entity e) {
+		for (String tag : e.entityTags()) {
+			if (tag.startsWith(HOODED)) {
+				return tag.substring(HOODED.length());
+			}
+		}
+		return null;
+	}
+
+	/** (0.7.101) {@code e} wears a hood and no full mask. */
+	static boolean hooded(Entity e) {
+		return maskKey(e) == null && hoodKey(e) != null;
+	}
+
+	/** (0.7.101) {@code e} wears a full mask (a hood doesn't count: MCA's folk still know a hooded friend). */
+	static boolean masked(Entity e) {
+		return maskKey(e) != null;
+	}
+
+	/** (0.7.101) How far {@code e} is seen, as a share of the usual: {@link #HOOD_SIGHT} under a hood, 1 otherwise. */
+	static double hoodSight(Entity e) {
+		return hooded(e) ? HOOD_SIGHT : 1.0;
 	}
 
 	private static String tagName(Entity e) {
@@ -205,6 +248,12 @@ public final class Identities {
 		return name.isEmpty() ? Component.translatable("identity.jaymoskingdoms.unnamed") : Component.literal(name);
 	}
 
+	/** (0.7.101) What {@code e} goes by under {@link #key}: the costume's name, "a hooded figure" for a nameless hood. */
+	private static Component nameFor(Entity e) {
+		String name = tagName(e);
+		return name.isEmpty() && hooded(e) ? Component.translatable("identity.jaymoskingdoms.hooded") : nameOf(name);
+	}
+
 	/**
 	 * (0.7.92) {@code player}'s own name, as the folk know it: the one they picked in MCA's creator, never their username
 	 * (unless that's all there is).
@@ -215,12 +264,12 @@ public final class Identities {
 
 	/** What {@code player} goes by to anyone looking: the costume's name while masked, theirs ({@link #trueName}) otherwise. */
 	static Component shownName(ServerPlayer player) {
-		return key(player) != null ? nameOf(tagName(player)) : trueName(player);
+		return key(player) != null ? nameFor(player) : trueName(player);
 	}
 
 	/** What {@code faction}'s people call {@code player}: their own name, unless they're a stranger in a mask there. */
 	static Component nameTo(ServerPlayer player, int faction) {
-		return persona(player, faction) != null ? nameOf(tagName(player)) : trueName(player);
+		return persona(player, faction) != null ? nameFor(player) : trueName(player);
 	}
 
 	/**
@@ -241,9 +290,12 @@ public final class Identities {
 		return persona(player, faction) != null;
 	}
 
-	/** {@code player} is a masked stranger to {@code who} (whose settlement is where they live, or none: then anyone masked is). */
+	/**
+	 * {@code player} is a masked stranger to {@code who} (whose settlement is where they live, or none: then anyone masked is).
+	 * (0.7.101) Only a full mask: a hood doesn't make MCA's villagers forget you.
+	 */
 	static boolean hiddenFrom(ServerPlayer player, LivingEntity who) {
-		if (key(player) == null) {
+		if (!masked(player)) {
 			return false;
 		}
 		Faction f = Aliens.factionOf(player.level().getServer(), who);
@@ -265,7 +317,7 @@ public final class Identities {
 	 * e.g. MCA's name for them) put back to the costume's. The same component if nothing changed, or they aren't masked.
 	 */
 	public static Component withoutName(ServerPlayer player, Component text, String... names) {
-		if (key(player) == null) {
+		if (!masked(player)) {
 			return text;
 		}
 		String mask = tagName(player).isEmpty() ? UNNAMED : tagName(player);
@@ -382,7 +434,7 @@ public final class Identities {
 		Map<String, Integer> rep = new HashMap<>(id.rep());
 		rep.put(fid, after);
 		put(server, key, id.withRep(rep));
-		Component name = nameOf(tagName(player));
+		Component name = nameFor(player);
 		if (before > Reputation.HOSTILE && after <= Reputation.HOSTILE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.identity.hostile", f.name(), name).withStyle(ChatFormatting.RED));
 		} else if (before <= Reputation.HOSTILE && after > Reputation.HOSTILE) {
@@ -442,7 +494,7 @@ public final class Identities {
 			wanted.merge(fid, until, Math::max);
 			player.setAttached(Theft.WANTED, Map.copyOf(wanted));
 		}
-		Component name = id.name().isEmpty() ? nameOf(tagName(player)) : nameOf(id.name());
+		Component name = id.name().isEmpty() ? nameFor(player) : nameOf(id.name());
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.identity.known." + how, f.name(), name)
 			.withStyle(how.equals("word") ? ChatFormatting.GRAY : ChatFormatting.GOLD, ChatFormatting.ITALIC));
 		if (witness != null) {
@@ -456,6 +508,32 @@ public final class Identities {
 			EXILED_IN.remove(player.getUUID());
 		}
 		return true;
+	}
+
+	/**
+	 * (0.7.101) A hood is a fragile mask. A crime of {@code player}'s was seen by {@code seen} (nearest first): if one of
+	 * {@code f}'s people is within {@link #HOOD_KNOWN_RANGE}, facing them (the {@link #REVEAL_VIEW_COS} gaze), and they
+	 * are not in the dark, that witness sees the face under the hood and the settlement knows who it was ({@link #link},
+	 * "recognised") before the crime is put to anyone's name. Seen from further, from behind or in the dark, it stays
+	 * on the hooded figure. {@code turned}, if any, is a witness who has just turned on them (a pickpocket's mark): it
+	 * counts as facing them. Golems can't tell a face, let alone say whose.
+	 */
+	static void recognise(ServerLevel level, ServerPlayer player, Faction f, List<LivingEntity> seen, @Nullable LivingEntity turned) {
+		String key = hoodKey(player);
+		if (key == null || masked(player) || seen.isEmpty() || persona(player, f.id()) == null || Heritage.dark(player)) {
+			return;
+		}
+		for (LivingEntity e : seen) {
+			if (e instanceof IronGolem || e.distanceTo(player) > HOOD_KNOWN_RANGE) {
+				continue;
+			}
+			Vec3 look = e.getViewVector(1.0F);
+			Vec3 to = player.getEyePosition().subtract(e.getEyePosition()).normalize();
+			if (e == turned || look.dot(to) >= REVEAL_VIEW_COS) {
+				link(level, player, key, f, e, "recognised");
+				return;
+			}
+		}
 	}
 
 	/** {@code faction}'s people know {@code player} wears identity {@code key}. */
@@ -540,26 +618,38 @@ public final class Identities {
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			String cur = key(player);
-			String was = WAS.put(player.getUUID(), cur == null ? "" : cur);
+			String mask = maskKey(player);
+			// (0.7.101: a hood worn under no mask)
+			String hood = mask == null ? hoodKey(player) : null;
+			String wasMask = WAS_MASK.put(player.getUUID(), mask == null ? "" : mask);
+			String wasHood = WAS_HOOD.put(player.getUUID(), hood == null ? "" : hood);
 			if (cur != null) {
 				noteName(server, cur, tagName(player));
 			}
-			if (!java.util.Objects.equals(cur, player.getAttached(MASKED_AS))) {
-				if (cur == null) {
+			// (0.7.101: MCA's villagers forget you only behind a full mask, not a hood)
+			if (!java.util.Objects.equals(mask, player.getAttached(MASKED_AS))) {
+				if (mask == null) {
 					player.removeAttached(MASKED_AS);
 				} else {
-					player.setAttached(MASKED_AS, cur);
+					player.setAttached(MASKED_AS, mask);
 				}
 			}
 			if (player.level() != level || !player.isAlive() || player.isSpectator()) {
 				continue;
 			}
-			if (was != null) {
-				if (!was.isEmpty() && cur == null) {
-					revealed(level, player, was, "unmasked");
-				} else if (was.isEmpty() && cur != null) {
-					revealed(level, player, cur, "masked");
+			// (0.7.101) masks and hoods each on their own, so going from one to the other in view still gives a mask away
+			if (wasMask != null) {
+				if (!wasMask.isEmpty() && !wasMask.equals(mask)) {
+					revealed(level, player, wasMask, "unmasked");
 				}
+				if (mask != null && !mask.equals(wasMask)) {
+					revealed(level, player, mask, "masked");
+				}
+			}
+			// a hood lowered in view gives you away like a mask taken off; pulling one up gives nothing away (nor does
+			// a mask going on over it: the face is hidden)
+			if (wasHood != null && !wasHood.isEmpty() && !wasHood.equals(hood) && mask == null) {
+				revealed(level, player, wasHood, "lowered");
 			}
 			powers(level, player, cur, now);
 			sentOff(level, player, now);

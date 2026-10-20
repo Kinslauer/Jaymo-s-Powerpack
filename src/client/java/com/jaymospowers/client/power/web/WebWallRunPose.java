@@ -45,6 +45,10 @@ public final class WebWallRunPose {
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		Integer face = entity.getAttached(WebWallRun.WALL);
+		if (face == null) {
+			// (0.14.3) a freerunner's wall run (Wall Runner) looks the same
+			face = entity.getAttached(com.jaymospowers.freerun.Freerun.WALL);
+		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 		if (face == null || face < 0 || face >= Direction.values().length || ownView || entity.isPassenger()) {

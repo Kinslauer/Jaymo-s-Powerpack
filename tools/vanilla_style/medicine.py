@@ -1,4 +1,4 @@
-"""Jaymo's Powers 0.14.3 medicine icons (Wounds phase 4): the medieval kit, 16x16 item textures.
+"""Jaymo's Powers 0.14.4 medicine icons (Wounds phase 4): the medieval kit, 16x16 item textures.
 
 Run from the repository root:  python3 -I tools/vanilla_style/medicine.py
 Writes into src/main/resources/assets/jaymospowers/textures/item.

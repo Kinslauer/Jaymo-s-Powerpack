@@ -47,7 +47,7 @@ import net.minecraft.world.item.ItemStack;
  * {@code ShutIn}, {@code Routines}, {@code Workers}) its folk leaving the downed alone. Without Powers, its folk simply
  * die.
  * <p>
- * (0.7.99) Andy (2026-10-20): "I dont want any modern medicine". The tending is a bandaging now: when it's done the body
+ * (0.7.102) Andy (2026-10-20): "I dont want any modern medicine". The tending is a bandaging now: when it's done the body
  * is tagged {@link #BANDAGED_TAG} as well, and Powers stops its bleeding and gives it a bandage's heal.
  */
 public final class Downed {
@@ -61,7 +61,7 @@ public final class Downed {
 	/** (0.7.98) Jaymo's Powers' scoreboard tags: on the downed; on what may go down; on a tended one to get up. */
 	public static final String DOWNED_TAG = "jaymospowers_downed", DOWNABLE_TAG = "jaymospowers_downable", REVIVE_TAG = "jaymospowers_revive";
 	/**
-	 * (0.7.99) Jaymo's Powers' tag on a body a villager has bandaged: Powers takes it off, stops that body's bleeding and
+	 * (0.7.102) Jaymo's Powers' tag on a body a villager has bandaged: Powers takes it off, stops that body's bleeding and
 	 * gives it a linen bandage's heal (Wounds phase 4).
 	 */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
@@ -184,7 +184,7 @@ public final class Downed {
 					continue;
 				}
 				if (tend(level, body, e.getValue())) {
-					// (Powers gets them up on their next tick; (0.7.99) and sees to the bandaging: their bleeding stops)
+					// (Powers gets them up on their next tick; (0.7.102) and sees to the bandaging: their bleeding stops)
 					body.addTag(REVIVE_TAG);
 					body.addTag(BANDAGED_TAG);
 					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);

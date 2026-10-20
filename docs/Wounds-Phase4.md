@@ -1,4 +1,4 @@
-# Wounds phase 4: medieval medicine (Powers 0.14.3, Kingdoms patch)
+# Wounds phase 4: medieval medicine (Powers 0.14.4, Kingdoms 0.7.102; renumbered after a merge)
 
 Built on phases 1-3 (`core/wounds`: Wounds, BodyPart, BodyPlan, HitRouting, Downed, Breaks, WoundsCommand). Plan:
 `docs/Wounds-Plan.md`, "Healing" (the medieval kit, all of it; Andy 2026-10-20: "I dont want any modern medicine").
@@ -6,7 +6,7 @@ Kitchen 0.5.0 (a required dependency of Powers) already has `Brewing.STRONG_SPIR
 
 Two tracks, run side by side, touching different files:
 
-## Track A: Powers (`core/wounds/` + client), version 0.14.3
+## Track A: Powers (`core/wounds/` + client), version 0.14.4
 
 ### Bleeding (new, needed by the kit)
 - A part can **bleed**: a hit from a blade or a projectile that takes at least `BLEED_FROM` (2) points from a part
@@ -73,7 +73,7 @@ and treating a part: stops all bleeding on it at once (the only way to stop a st
 - Poppy haze (a warm tint while under poppy), smelling-salt jolt (white flash for a few frames), fever shimmer.
 
 ### Release
-Powers 0.14.3, MODLOG entry, mark phase 4 in `docs/Wounds-Plan.md`, lang in `lang/parts/wounds.json`.
+Powers 0.14.4, MODLOG entry, mark phase 4 in `docs/Wounds-Plan.md`, lang in `lang/parts/wounds.json`.
 
 ## Track B: Kingdoms (kingdoms/ only), next patch version
 

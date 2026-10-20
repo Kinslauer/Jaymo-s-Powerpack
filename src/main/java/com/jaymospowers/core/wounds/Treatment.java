@@ -59,7 +59,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Wounds, phase 4 (0.14.3): treating a body, all medieval. Andy (2026-10-20): "I dont want any modern medicine".
+ * Wounds, phase 4 (0.14.4): treating a body, all medieval. Andy (2026-10-20): "I dont want any modern medicine".
  * <ul>
  * <li><b>Using it:</b> use a medicine item ({@link MedicineItems}) in the air for your own body, or on another creature,
  * and the body screen ({@link OpenBody}) opens to pick the part; sneak + use treats the worst part it can help, with no
@@ -74,30 +74,30 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Treatment {
-	/** (0.14.3) A linen bandage heals its part this much (health points) over this long (ticks); a rag half as much. */
+	/** (0.14.4) A linen bandage heals its part this much (health points) over this long (ticks); a rag half as much. */
 	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 1.5F;
 	public static final int BANDAGE_TICKS = 200;
-	/** (0.14.3) A stitch hurts its part this much; cautery burns it this much. */
+	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
 	public static final float NEEDLE_HURT = 1.0F, CAUTERY_BURN = 2.0F;
-	/** (0.14.3) Leeches' cost (health off the body). */
+	/** (0.14.4) Leeches' cost (health off the body). */
 	public static final float LEECH_COST = 1.0F;
-	/** (0.14.3) Smelling salts: up with this much health (half a heart in head and body), Speed I this long, then dazed (Nausea) this long. */
+	/** (0.14.4) Smelling salts: up with this much health (half a heart in head and body), Speed I this long, then dazed (Nausea) this long. */
 	public static final float SALTS_HEALTH = 2.0F;
 	public static final int SALTS_SPEED_TICKS = 100, SALTS_DAZE_TICKS = 160;
-	/** (0.14.3) Smelling salts on a player who has passed out: the chance they come to (the whole vial goes either way). */
+	/** (0.14.4) Smelling salts on a player who has passed out: the chance they come to (the whole vial goes either way). */
 	public static final float ROUSE_CHANCE = 0.4F;
-	/** (0.14.3) How long a blade stays red-hot from the fire (ticks). */
+	/** (0.14.4) How long a blade stays red-hot from the fire (ticks). */
 	public static final int HEAT_TICKS = 600;
-	/** (0.14.3) Looking at least this far down (degrees), sneak + use with spirits, honey or a hot blade is on yourself. */
+	/** (0.14.4) Looking at least this far down (degrees), sneak + use with spirits, honey or a hot blade is on yourself. */
 	public static final float SELF_PITCH = 60.0F;
-	/** (0.14.3) Either of you moving this far (blocks) spoils the treatment; how far past reach you may lean. */
+	/** (0.14.4) Either of you moving this far (blocks) spoils the treatment; how far past reach you may lean. */
 	public static final double MOVE_LIMIT = 0.5, REACH_SLACK = 0.5;
-	/** (0.14.3) How often your hands are seen at work (ticks), and the bar's length. */
+	/** (0.14.4) How often your hands are seen at work (ticks), and the bar's length. */
 	static final int WORK_TICKS = 15, BAR = 12;
-	/** (0.14.3) The custom-data key a red-hot blade carries (the game time it was heated). */
+	/** (0.14.4) The custom-data key a red-hot blade carries (the game time it was heated). */
 	public static final String HEATED_KEY = "jaymospowers:heated";
 
-	/** (0.14.3) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
+	/** (0.14.4) What a medicine does, and how long it takes (ticks); {@code part}: to one part (else the whole body). */
 	public enum Remedy {
 		BANDAGE(40, true), RAG(40, true), SPLINT(60, true), NEEDLE(60, true), CAUTERY(20, true), SPIRITS(20, true), HONEY(20, true),
 		SALTS(20, false), LEECHES(40, false), POPPY(40, false);
@@ -124,7 +124,7 @@ public final class Treatment {
 	public static final int BROKEN = 1, BLEEDING = 2, FESTERING = 4, SPLINTED = 8, BANDAGED = 16, MISSING = 32, HELPS = 64;
 
 	/**
-	 * (0.14.3) Server → client: open the body screen on {@code entity} (its name), its {@code parts} (by
+	 * (0.14.4) Server → client: open the body screen on {@code entity} (its name), its {@code parts} (by
 	 * {@link BodyPart#ordinal()}) with their {@code fractions} and {@code states} ({@link #BROKEN}...), and {@code plan}
 	 * ({@link BodyPlan#ordinal()}).
 	 */
@@ -146,7 +146,7 @@ public final class Treatment {
 		}
 	}
 
-	/** (0.14.3) Client → server: treat {@code part} (ordinal) of {@code entity} with the medicine in hand. */
+	/** (0.14.4) Client → server: treat {@code part} (ordinal) of {@code entity} with the medicine in hand. */
 	public record Treat(int entity, int part) implements CustomPacketPayload {
 		public static final Type<Treat> TYPE = new Type<>(JaymosPowers.id("wounds_treat"));
 		public static final StreamCodec<ByteBuf, Treat> CODEC = StreamCodec.composite(
@@ -221,7 +221,7 @@ public final class Treatment {
 
 	// ---- what's in hand ---------------------------------------------------------------------------------------------------
 
-	/** (0.14.3) The remedy {@code stack} is, or null: our kit, Kitchen's strong spirits, a honey bottle, or a red-hot blade. */
+	/** (0.14.4) The remedy {@code stack} is, or null: our kit, Kitchen's strong spirits, a honey bottle, or a red-hot blade. */
 	public static @Nullable Remedy remedy(ItemStack stack, Level level) {
 		if (stack.isEmpty()) {
 			return null;
@@ -241,7 +241,7 @@ public final class Treatment {
 		return hot(stack, level) ? Remedy.CAUTERY : null;
 	}
 
-	/** (0.14.3) A blade hot enough to sear: heated in a fire within {@link #HEAT_TICKS}, or with Fire Aspect on it. */
+	/** (0.14.4) A blade hot enough to sear: heated in a fire within {@link #HEAT_TICKS}, or with Fire Aspect on it. */
 	public static boolean hot(ItemStack stack, Level level) {
 		if (!Dismember.blade(stack)) {
 			return false;
@@ -340,7 +340,7 @@ public final class Treatment {
 		return best;
 	}
 
-	/** (0.14.3) Downed's revive steps aside: sneak + use with a remedy that can help this downed one (server side). */
+	/** (0.14.4) Downed's revive steps aside: sneak + use with a remedy that can help this downed one (server side). */
 	static boolean claimsDowned(Player player, InteractionHand hand, Entity entity) {
 		if (!player.isShiftKeyDown() || !(entity instanceof LivingEntity body)) {
 			return false;

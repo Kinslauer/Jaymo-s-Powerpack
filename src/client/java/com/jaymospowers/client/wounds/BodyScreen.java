@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 /**
- * (0.14.3) The body screen (Wounds phase 4): the creature being treated, its parts each a button (greyed where the
+ * (0.14.4) The body screen (Wounds phase 4): the creature being treated, its parts each a button (greyed where the
  * medicine in hand can't help), a person's drawn large as the HUD's silhouette beside them. Hovering a part or its
  * button shows its state in the box at the bottom. Picking one sends only the part ({@link Treatment.Treat}); the server
  * checks it again and runs the treatment (hold still).

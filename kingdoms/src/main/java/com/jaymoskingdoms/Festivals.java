@@ -142,7 +142,7 @@ final class Festivals {
 		return GOING.containsKey(v.getUUID());
 	}
 
-	/** (0.7.99) {@code v} is raising a toast at a festival just now (and sells drink: {@link Remedies}). */
+	/** (0.7.102) {@code v} is raising a toast at a festival just now (and sells drink: {@link Remedies}). */
 	static boolean toasting(Villager v) {
 		Going g = GOING.get(v.getUUID());
 		return g != null && g.part == Part.TOAST;

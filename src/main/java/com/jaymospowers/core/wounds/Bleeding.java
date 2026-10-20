@@ -38,7 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Wounds, phase 4 (0.14.3): open cuts, and the festering that comes of dirty ones. Andy (2026-10-20): "I dont want any
+ * Wounds, phase 4 (0.14.4): open cuts, and the festering that comes of dirty ones. Andy (2026-10-20): "I dont want any
  * modern medicine".
  * <ul>
  * <li><b>Bleeding</b> ({@link #BLEEDING}): a blade's blow, a shot or a zombie's claws that takes at least
@@ -58,44 +58,44 @@ import org.jspecify.annotations.Nullable;
  * and gives it a bandage's heal.
  */
 public final class Bleeding {
-	/** (0.14.3) A cut opens on a part that a blade, a shot or claws took at least this much from (health points). */
+	/** (0.14.4) A cut opens on a part that a blade, a shot or claws took at least this much from (health points). */
 	public static final float BLEED_FROM = 2.0F;
-	/** (0.14.3) A cut's loss every {@link #BLEED_TICKS}, and a severed stump's. */
+	/** (0.14.4) A cut's loss every {@link #BLEED_TICKS}, and a severed stump's. */
 	public static final float BLEED_DAMAGE = 0.5F, STUMP_BLEED = 1.0F;
-	/** (0.14.3) How often the bleeding bleeds (ticks), and how long a cut stays open by itself. */
+	/** (0.14.4) How often the bleeding bleeds (ticks), and how long a cut stays open by itself. */
 	public static final int BLEED_TICKS = 80, BLEED_STOP_TICKS = 600;
-	/** (0.14.3) An open cut's part heals no further than this fraction (stitching or a bandage closes it). */
+	/** (0.14.4) An open cut's part heals no further than this fraction (stitching or a bandage closes it). */
 	public static final float CUT_CAP = 0.5F;
-	/** (0.14.3) A dirty cut's chance to fester, each bleed tick. */
+	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
 	public static final float FESTER_CHANCE = 0.05F;
-	/** (0.14.3) A fever: this often (ticks), this much off the body. */
+	/** (0.14.4) A fever: this often (ticks), this much off the body. */
 	public static final int FEVER_TICKS = 400;
 	public static final float FEVER_DAMAGE = 1.0F;
-	/** (0.14.3) A limb festering this long (a Minecraft day) is lost to save the body. */
+	/** (0.14.4) A limb festering this long (a Minecraft day) is lost to save the body. */
 	public static final int FESTER_LIMB_TICKS = 24000;
-	/** (0.14.3) A part cleaned with spirits or honey can't turn dirty for this long (ticks). */
+	/** (0.14.4) A part cleaned with spirits or honey can't turn dirty for this long (ticks). */
 	public static final int CLEAN_TICKS = 6000;
-	/** (0.14.3) Dressings heal this often (ticks). */
+	/** (0.14.4) Dressings heal this often (ticks). */
 	static final int DRESS_STEP = 20;
-	/** (0.14.3) The blood's colour. */
+	/** (0.14.4) The blood's colour. */
 	static final int BLOOD = 0x7A0000;
-	/** (0.14.3) Put on a body by Kingdoms' tending villagers: its bleeding stops, with a bandage's heal. */
+	/** (0.14.4) Put on a body by Kingdoms' tending villagers: its bleeding stops, with a bandage's heal. */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
 	public static final ResourceKey<DamageType> BLEEDING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("bleeding"));
 
-	/** (0.14.3) The bleeding parts (a bit per {@link BodyPart#ordinal()}; one that's severed is a stump). Saved, synced to its owner, not kept through death. */
+	/** (0.14.4) The bleeding parts (a bit per {@link BodyPart#ordinal()}; one that's severed is a stump). Saved, synced to its owner, not kept through death. */
 	public static final AttachmentType<Integer> BLEEDING = AttachmentRegistry.create(JaymosPowers.id("wounds_bleeding"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
-	/** (0.14.3) The festering parts. Saved, synced to the owner (the fever's shimmer). */
+	/** (0.14.4) The festering parts. Saved, synced to the owner (the fever's shimmer). */
 	public static final AttachmentType<Integer> FESTERING = AttachmentRegistry.create(JaymosPowers.id("wounds_festering"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
-	/** (0.14.3) When each part began to fester (game time, by {@link BodyPart#ordinal()}; 0: not). Saved, server side. */
+	/** (0.14.4) When each part began to fester (game time, by {@link BodyPart#ordinal()}; 0: not). Saved, server side. */
 	public static final AttachmentType<List<Long>> FESTER_SINCE = AttachmentRegistry.create(JaymosPowers.id("wounds_fester_since"),
 		builder -> builder.persistent(Codec.LONG.listOf()));
-	/** (0.14.3) Dirty cuts (a zombie's, a rag's dressing): they may fester. Saved, server side. */
+	/** (0.14.4) Dirty cuts (a zombie's, a rag's dressing): they may fester. Saved, server side. */
 	public static final AttachmentType<Integer> DIRTY = AttachmentRegistry.create(JaymosPowers.id("wounds_dirty"),
 		builder -> builder.persistent(Codec.INT));
-	/** (0.14.3) Parts with a dressing on (healing). Saved, server side. */
+	/** (0.14.4) Parts with a dressing on (healing). Saved, server side. */
 	public static final AttachmentType<Integer> BANDAGED = AttachmentRegistry.create(JaymosPowers.id("wounds_bandaged"),
 		builder -> builder.persistent(Codec.INT));
 
@@ -181,7 +181,7 @@ public final class Bleeding {
 
 	// ---- opening and closing ----------------------------------------------------------------------------------------------
 
-	/** (0.14.3) A routed hit ({@link Wounds}): a blade's, a shot's or a zombie's claws that took enough from the part it landed on opens a cut there. */
+	/** (0.14.4) A routed hit ({@link Wounds}): a blade's, a shot's or a zombie's claws that took enough from the part it landed on opens a cut there. */
 	static void onHit(LivingEntity victim, BodyPlan plan, DamageSource source, @Nullable BodyPart landed, float[] was, float[] now) {
 		if (landed == null || plan == BodyPlan.SIMPLE) {
 			return;
@@ -201,7 +201,7 @@ public final class Bleeding {
 		open(victim, landed, by instanceof Zombie);
 	}
 
-	/** (0.14.3) Opens a cut on {@code part} ({@code dirty}: it may fester). A severed part bleeds as a stump ({@link #stump}) instead. */
+	/** (0.14.4) Opens a cut on {@code part} ({@code dirty}: it may fester). A severed part bleeds as a stump ({@link #stump}) instead. */
 	public static void open(LivingEntity entity, BodyPart part, boolean dirty) {
 		if (!bleeds(entity) || !(entity.level() instanceof ServerLevel level) || BodyPlan.of(entity).index(part) < 0 || Breaks.missing(entity, part)) {
 			return;
@@ -223,7 +223,7 @@ public final class Bleeding {
 		}
 	}
 
-	/** (0.14.3) A part just severed ({@link Dismember}): its stump bleeds until it's cauterised. Not the head (that's death). */
+	/** (0.14.4) A part just severed ({@link Dismember}): its stump bleeds until it's cauterised. Not the head (that's death). */
 	public static void stump(LivingEntity entity, BodyPart part) {
 		if (part.vital() || !bleeds(entity) || BodyPlan.of(entity).index(part) < 0) {
 			return;
@@ -257,7 +257,7 @@ public final class Bleeding {
 	}
 
 	/**
-	 * (0.14.3) A dressing on {@code part}: {@code heal} health points over {@code ticks}, the part dressed ({@link #BANDAGED})
+	 * (0.14.4) A dressing on {@code part}: {@code heal} health points over {@code ticks}, the part dressed ({@link #BANDAGED})
 	 * till then; {@code dirty} (a rag): it may fester while it's on.
 	 */
 	static void dress(LivingEntity entity, BodyPart part, float heal, int ticks, boolean dirty) {
@@ -286,7 +286,7 @@ public final class Bleeding {
 	}
 
 	/**
-	 * (0.14.3) Spirits or honey poured on {@code part}: festering cured, the dirt washed out, and clean for
+	 * (0.14.4) Spirits or honey poured on {@code part}: festering cured, the dirt washed out, and clean for
 	 * {@link #CLEAN_TICKS}. True if there was festering or dirt to clean.
 	 */
 	static boolean clean(LivingEntity entity, BodyPart part) {
@@ -331,7 +331,7 @@ public final class Bleeding {
 		}
 	}
 
-	/** (0.14.3) Parts grown back (Dismember's regrowth, as {@code mask} bits): no stump, nothing festering there. */
+	/** (0.14.4) Parts grown back (Dismember's regrowth, as {@code mask} bits): no stump, nothing festering there. */
 	static void regrown(LivingEntity entity, int mask) {
 		set(entity, BLEEDING, bleeding(entity) & ~mask);
 		for (BodyPart part : BodyPart.values()) {
@@ -352,7 +352,7 @@ public final class Bleeding {
 		DRESSING.remove(entity);
 	}
 
-	/** (0.14.3) Kingdoms' villagers bandaged this body ({@link #BANDAGED_TAG}): its bleeding stops (stumps bound tight too) and the worst part gets a bandage's heal. */
+	/** (0.14.4) Kingdoms' villagers bandaged this body ({@link #BANDAGED_TAG}): its bleeding stops (stumps bound tight too) and the worst part gets a bandage's heal. */
 	static void tended(LivingEntity entity) {
 		if (!entity.entityTags().contains(BANDAGED_TAG)) {
 			return;
@@ -541,7 +541,7 @@ public final class Bleeding {
 		}
 	}
 
-	/** (0.14.3) A limb festered too long: it's lost to save the body (a person's comes off; any other creature's is broken for good). */
+	/** (0.14.4) A limb festered too long: it's lost to save the body (a person's comes off; any other creature's is broken for good). */
 	private static void rot(LivingEntity body, BodyPart part) {
 		unfester(body, part);
 		int limb = Breaks.limb(part);
