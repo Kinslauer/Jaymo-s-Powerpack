@@ -555,6 +555,10 @@ public final class Theft {
 		if (Wars.enemy(player, f)) {
 			return;
 		}
+		if (Captives.pardon(player, f)) {
+			// (0.7.100) they owe you for one you brought home: this once, they let it go
+			return;
+		}
 		markWanted(player, f.id(), level.getGameTime() + ticks);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.guard.arrest", f.name(), ticks / 20).withStyle(ChatFormatting.RED));
 		pursue(level, f, player);

@@ -3412,3 +3412,14 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
+- **0.7.100, bigger rewards for returned captives:** Andy: "villagers should reward you more for returning a captured
+  prisoner". Each captive is now someone at home: one of its folk, one of its guards (20%), or kin of its ruler (10%,
+  only where there's a ruler); freeing them says which. Brought home, their family pay 6-12 emeralds (guard 8-16, kin
+  12-24) and the settlement adds a reward from its treasury: 8/16/40 plus 2%/4%/8% of its worth, up to 30/60/150,
+  never leaving it under 20 (a rich realm pays far more for its own). A guard hands you a sword, shield, crossbow or
+  helmet; the ruler's kin a golden apple and 1-3 diamonds. Reputation 60/90/150 (was 40), the one brought home's hearts
+  50/60/80, witnesses' 5, and two of their family (real MCA kin first, else the nearest neighbours) come to thank you
+  for 20 hearts each. Members gain 10/25/60 standing. The settlement then owes you a favour (2 for kin, up to 3): while
+  it does, its guards neither toll nor search you, and the next time they'd arrest you they let it go (spends one).
+  A realm at war with you, or one that doesn't know you (masked), pays no treasury reward and owes no favour.
+  Numbers at the top of `Captives`.
