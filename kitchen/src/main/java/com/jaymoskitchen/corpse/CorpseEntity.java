@@ -769,6 +769,10 @@ public class CorpseEntity extends Entity {
 			}
 			return;
 		}
+		if (this.entityData.get(CARRIER) >= 0 && !level().isClientSide()) {
+			// the carrier is gone from this level (logged out, changed dimension, unloaded): it drops
+			setCarrier(null);
+		}
 		if (grabCooldown > 0 && !level().isClientSide()) {
 			grabCooldown--;
 		}

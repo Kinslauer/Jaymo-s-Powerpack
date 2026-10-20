@@ -182,7 +182,8 @@ public final class LimpController {
 		} else {
 			Vec3 run = runOver(player, end);
 			if (run != null) {
-				begin(minecraft, player, run);
+				// run over while walking: their own way and the vehicle's both
+				begin(minecraft, player, run.add(end));
 			}
 		}
 	}
@@ -226,9 +227,8 @@ public final class LimpController {
 		} else {
 			made = RagdollBody.standing(rig, player.getX(), player.getY(), player.getZ(), player.yBodyRot);
 		}
-		Vec3 now = player.getDeltaMovement();
-		made.setSpeed(now.x, now.y, now.z);
-		made.shove(fling.x, fling.y, fling.z);
+		// the fling is the whole of their momentum (it already holds what the player was doing), not extra to it
+		made.setSpeed(fling.x, fling.y, fling.z);
 		// a blow to the head along the impact: it topples that way
 		int head = RagdollRig.HEAD;
 		made.hit(made.x[head], made.y[head], made.z[head], fling.x * TOPPLE, 0.0, fling.z * TOPPLE, TOPPLE_SHARE);
