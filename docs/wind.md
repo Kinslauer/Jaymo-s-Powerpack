@@ -651,6 +651,6 @@ scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths an
   the open air at y 128 with Slow Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The first
   visit tells the lore (`VISITED`). No Return is stored: the way home is the fall.
 - **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (4) in the Aether lands in the Overworld at the same x/z,
-  `ARRIVE_BELOW_TOP` (8) under the top, with Slow Falling for `SLOW_FALL_TICKS` (600). Fall damage still applies once it
-  ends. Dying takes you to your own spawn as usual.
+  `ARRIVE_ABOVE_GROUND` (48) above the ground (capped `ARRIVE_BELOW_TOP` (8) under the top), with Slow Falling for
+  `SLOW_FALL_TICKS` (600), plenty to land. Fall damage still applies once it ends. Dying takes you to your own spawn as usual.
 - Tuning: constants at the top of `WindAether`. Not playtested; the dimension needs a fresh world or a datapack reload to exist.

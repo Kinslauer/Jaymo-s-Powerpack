@@ -1818,3 +1818,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.35, Wind into the Aether, Emberborn rifts into the Nether:** Andy tied the Aether into the pack's lore (Kingdoms
+  0.7.97's monoliths and Giants are its last remnants) and wanted Wind to be the way there, as Chrono's Fast Forward is
+  to the future. A Wind user with B unlocked who flies to the top of the Overworld rises into our own Aether
+  (`power/wind/aether/WindAether`, a datapack dimension of floating islands with four highlands: Highfields, Magnetic,
+  Arctic, Irradiated), with everyone within 4 blocks. Falling out of the Aether drops anyone home at the same x/z, 48
+  blocks above the ground on Slow Falling. Emberborn Arsenal users' rifts now and then (30%) tear into the Nether instead
+  of the pocket (`power/arsenal/ArsenalEmber`): fire and a blaze's roar, and they're stranded there until they find
+  their own way back to the Overworld; after that first escape, Sneak+Z toggles their rifts between the pocket and the
+  Nether. Not yet compiled or playtested.

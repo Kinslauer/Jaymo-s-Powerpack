@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>They arrive at the same x/z on the top of an island there, or the nearest island within {@link #SEARCH_RADIUS}
  * blocks, or (no island anywhere near) in the open air at {@link #EMPTY_ARRIVAL_Y} with Slow Falling.</li>
  * <li>The way home is the old Aether's: anyone (Wind or not) who falls below {@link #FALL_OUT_Y} lands back in the
- * Overworld, {@link #ARRIVE_BELOW_TOP} blocks under the top of the world, floating down on Slow Falling.</li>
+ * Overworld, {@link #ARRIVE_ABOVE_GROUND} blocks above the ground at the same x/z, floating down on Slow Falling.</li>
  * </ul>
  * Dying takes you home as usual (your own spawn).
  */
@@ -59,8 +59,9 @@ public final class WindAether {
 	static final int EMPTY_ARRIVAL_Y = 128, EMPTY_SLOW_FALL_TICKS = 400;
 	/** Falling below this height in the Aether takes you home. */
 	static final int FALL_OUT_Y = 4;
-	/** Home: this many blocks under the Overworld's top, floating down for this many ticks (fall damage applies once it ends). */
-	static final int ARRIVE_BELOW_TOP = 8, SLOW_FALL_TICKS = 600;
+	/** Home: this many blocks above the ground (never closer than ARRIVE_BELOW_TOP to the world's top), floating down for
+	 * this many ticks, long enough to land (fall damage applies again once it ends). */
+	static final int ARRIVE_ABOVE_GROUND = 48, ARRIVE_BELOW_TOP = 8, SLOW_FALL_TICKS = 600;
 
 	/** Has this player been told what the Aether is? */
 	public static final AttachmentType<Boolean> VISITED = AttachmentRegistry.create(JaymosPowers.id("aether_visited"),
@@ -188,13 +189,14 @@ public final class WindAether {
 
 	// ---------------------------------------------------------------- down
 
-	/** Fell out of the Aether: back to the Overworld, same x/z, near the top, floating down. */
+	/** Fell out of the Aether: back to the Overworld, same x/z, high above the ground, floating down. */
 	private static void fallHome(ServerPlayer player, MinecraftServer server) {
 		ServerLevel overworld = server.overworld();
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
-		Vec3 at = new Vec3(player.getX(), overworld.getMaxY() - ARRIVE_BELOW_TOP, player.getZ());
+		int ground = topAt(overworld, player.getBlockX(), player.getBlockZ());
+		Vec3 at = new Vec3(player.getX(), Math.min(ground + ARRIVE_ABOVE_GROUND, overworld.getMaxY() - ARRIVE_BELOW_TOP), player.getZ());
 		burst(player.level(), player.position());
 		player.teleportTo(overworld, at.x, at.y, at.z, Set.of(), player.getYRot(), player.getXRot(), true);
 		player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SLOW_FALL_TICKS, 0, false, false));
