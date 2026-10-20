@@ -70,6 +70,8 @@ public final class LimpController {
 	private static @Nullable CameraType restoreCamera;
 	/** The velocity at the start of this tick, and at the end of the last. */
 	private static Vec3 startVelocity = Vec3.ZERO, lastEndVelocity = Vec3.ZERO;
+	/** The player object seen last tick (a new one after joining, respawning or a portal). */
+	private static @Nullable LocalPlayer lastPlayer;
 	private static boolean startOnGround;
 	/** A shove seen at the start of this tick, and a knock the server sent. */
 	private static @Nullable Vec3 kick, knock;
@@ -82,7 +84,10 @@ public final class LimpController {
 		ClientTickEvents.END_CLIENT_TICK.register(LimpController::endTick);
 		ClientPlayNetworking.registerGlobalReceiver(RagdollNet.Knock.TYPE,
 			(payload, ctx) -> knock = new Vec3(payload.vx(), payload.vy(), payload.vz()));
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> reset(client, false));
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			reset(client, false);
+			lastPlayer = null;
+		});
 		LivingRagdolls.setLocal(LimpController::isLocalLimp);
 	}
 
@@ -104,6 +109,11 @@ public final class LimpController {
 		}
 		startVelocity = player.getDeltaMovement();
 		startOnGround = player.onGround();
+		if (player != lastPlayer) {
+			// joined, respawned or changed level: last tick's speed was another player object's, not a shove
+			lastPlayer = player;
+			lastEndVelocity = startVelocity;
+		}
 		Vec3 jump = startVelocity.subtract(lastEndVelocity);
 		kick = jump.length() >= KICK_SPEED ? jump : null;
 		if (body != null && kick != null && player == owner) {
