@@ -17,11 +17,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion) shows only to the players who've hit it: by hand, with an
+ * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion, (0.7.97) an Aether Giant) shows only to the players who've hit it: by hand, with an
  * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
  */
-final class BossBars {
+public final class BossBars {
 	/** How near a player who's hit the boss must stay to keep its bar. */
 	static final double RANGE = 48.0;
 
@@ -46,11 +46,12 @@ final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity);
+		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity)
+			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity);
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
-	static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
+	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
 		Set<UUID> hitters = HITTERS.get(boss.getUUID());
 		double r2 = RANGE * RANGE;
 		if (hitters != null) {

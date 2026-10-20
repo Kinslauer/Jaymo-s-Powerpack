@@ -3402,3 +3402,15 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
   red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
   faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).
+- **0.7.97, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
+  throughout the overworld, the last surviving puzzle pieces being the monoliths and their respective Giants, The
+  Highfield Giant, Magnetic, Arctic, and Irradiated all spawn near one and increase world tier when the first is
+  killed." Neither Ancient Remnants nor the Aether II runs on Fabric 26.3, so Andy chose a remake (`docs/remnants.md`).
+  Monoliths of our own (a broken banded pillar of its element's stone, a glowing core floating over it) rise now and
+  then out in the wild near a player, never within 1200 blocks of another, their element by the biome. Coming near one
+  wakes its Giant: four new bosses (320 health, a ground stamp, boss bars in their colours) with their element's power:
+  the Highfield gust, the Magnetic pull, the Arctic freeze, the Irradiated sickness. The first Giant slain in a world
+  raises the world's floor tier to Borderlands for everyone (`WorldTiers.raiseFloor`); each counts as a great foe.
+  Ancient Remnants' own monoliths count too if it's ever loaded (`AncientRemnantsCompat`). Ops: `/kingdom monolith
+  raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Built; not yet
+  compiled or seen in game.

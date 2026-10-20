@@ -60,6 +60,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  * with stacks doubled. Tiers unlock by feats: great foes slain (anything with a boss bar, a monster of legend, a
  * vanilla boss), a trip to the Nether, the Wither, the Ender Dragon. Everyone near a great foe when it falls shares the
  * kill. A player can go back down at any time, a minute after their last change.
+ * <p>
+ * (0.7.97) The world itself has a tier too, its floor: no one plays below it. It starts at Hearth; the first of the
+ * Aether's Giants to fall ({@code remnants/Monoliths}) raises it to Borderlands, lifting everyone (and everyone who joins
+ * later) up to it.
  */
 public final class WorldTiers {
 	/** How near a player a hostile has to come to take their tier (blocks), and how often that's looked for (ticks). */
@@ -195,6 +199,8 @@ public final class WorldTiers {
 		builder -> builder.persistent(Progress.CODEC).copyOnDeath().syncWith(Progress.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** When a player last changed tier (game time). Not saved. */
 	static final AttachmentType<Long> CHANGED = AttachmentRegistry.create(JaymosKingdoms.id("world_tier_changed"));
+	/** (0.7.97) The world's floor tier (its ordinal), on the Overworld: no player's tier is below it. */
+	static final AttachmentType<Integer> FLOOR = AttachmentRegistry.create(JaymosKingdoms.id("world_tier_floor"), builder -> builder.persistent(Codec.INT));
 	/** The tier a hostile has taken (its ordinal). Saved with it. */
 	static final AttachmentType<Integer> MOB_TIER = AttachmentRegistry.create(JaymosKingdoms.id("mob_world_tier"), builder -> builder.persistent(Codec.INT));
 
@@ -221,7 +227,10 @@ public final class WorldTiers {
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.tier()));
 		ServerTickEvents.END_SERVER_TICK.register(WorldTiers::tick);
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> luck(handler.player));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			lift(handler.player);
+			luck(handler.player);
+		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> luck(newPlayer));
 		ServerLivingEntityEvents.AFTER_DEATH.register(WorldTiers::died);
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
@@ -277,6 +286,12 @@ public final class WorldTiers {
 		if (tier == of(player) || !open(player, tier)) {
 			return;
 		}
+		Tier floor = Tier.byOrdinal(floor(player.level().getServer()));
+		if (tier.ordinal() < floor.ordinal()) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.below_floor", floor.title().copy().withColor(floor.color))
+				.withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		long left = waitLeft(player);
 		if (left > 0L) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.wait", (left + 19) / 20).withStyle(ChatFormatting.GRAY));
@@ -296,6 +311,44 @@ public final class WorldTiers {
 			SoundSource.PLAYERS, 0.8F, up ? 0.8F + 0.1F * tier.ordinal() : 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tier.entered", tier.title().copy().withColor(tier.color))
 			.withStyle(ChatFormatting.GOLD));
+	}
+
+	// ---- the world's floor (0.7.97) -------------------------------------------------------------------------------------
+
+	/** The world's floor tier (its ordinal): Hearth until the first of the Aether's Giants falls. */
+	public static int floor(MinecraftServer server) {
+		return Factions.level(server).getAttachedOrElse(FLOOR, 0);
+	}
+
+	/** Raises the world's floor to {@code tier} (never lowers it) and lifts every player up to it. */
+	public static void raiseFloor(MinecraftServer server, int tier) {
+		if (tier <= floor(server)) {
+			return;
+		}
+		setFloor(server, tier);
+	}
+
+	/** Sets the world's floor to {@code tier} and lifts every player up to it. */
+	static void setFloor(MinecraftServer server, int tier) {
+		Factions.level(server).setAttached(FLOOR, Math.clamp(tier, 0, Tier.values().length - 1));
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			lift(player);
+		}
+	}
+
+	/** Lifts {@code player} to the world's floor: the tier opened to them, and entered if they're below it. */
+	static void lift(ServerPlayer player) {
+		int floor = floor(player.level().getServer());
+		if (floor <= 0) {
+			return;
+		}
+		Progress p = progress(player);
+		if (p.unlocked() < floor) {
+			update(player, new Progress(p.foes(), p.feats(), floor));
+		}
+		if (of(player).ordinal() < floor) {
+			set(player, Tier.byOrdinal(floor));
+		}
 	}
 
 	/** The player's luck for their tier (a modifier that isn't saved, so it's put back on joining and respawning). */
@@ -456,8 +509,17 @@ public final class WorldTiers {
 				return n;
 			}));
 		}
+		var floor = Commands.literal("floor");
+		for (Tier tier : Tier.values()) {
+			floor.then(Commands.literal(tier.key()).executes(c -> {
+				setFloor(c.getSource().getServer(), tier.ordinal());
+				c.getSource().sendSuccess(() -> Component.translatable("command.jaymoskingdoms.tier.floor", tier.title()), true);
+				return 1;
+			}));
+		}
 		return Commands.literal("tier").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("set").then(set))
+			.then(floor)
 			.then(Commands.literal("unlock").then(unlock))
 			.then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
 				ServerPlayer p = EntityArgument.getPlayer(c, "player");

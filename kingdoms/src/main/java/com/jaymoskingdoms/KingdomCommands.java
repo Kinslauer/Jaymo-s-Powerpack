@@ -75,6 +75,7 @@ final class KingdomCommands {
 			.then(Classes.command())
 			.then(Heritage.command())
 			.then(WorldTiers.command())
+			.then(com.jaymoskingdoms.remnants.Monoliths.command())
 			.then(SkillCommands.command())
 			.then(Captives.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))

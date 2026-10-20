@@ -50,6 +50,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		// (0.7.97) the Aether's Giants
+		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket
