@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.web.mixin;
 
+import com.jaymospowers.client.power.web.WebFirstPerson;
 import com.jaymospowers.client.power.web.WebSymbioteClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
@@ -11,9 +12,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** First person without First-person Model: Living Armor's tendrils drawn by the hands (see WebTendrilLayer.submitFirstPerson). */
+/**
+ * First person without First-person Model: Living Armor's tendrils drawn by the hands (see WebTendrilLayer.submitFirstPerson).
+ * With it, while one of your moves poses your body's arms, they're the only hands drawn (see WebFirstPerson).
+ */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class WebFirstPersonHandsMixin {
+	@Inject(method = "submitHandsWithItems", at = @At("HEAD"), cancellable = true)
+	private void jaymospowers$bodyArmsOnly(float partialTicks, PoseStack poseStack, SubmitNodeCollector collector, PlayerRenderState player,
+		FirstPersonHandsAndItemsRenderState hands, CallbackInfo ci) {
+		if (!hands.isScoping && WebFirstPerson.posing(player.avatarRenderState)) {
+			ci.cancel();
+		}
+	}
+
 	@Inject(method = "submitHandsWithItems", at = @At("TAIL"))
 	private void jaymospowers$tendrils(float partialTicks, PoseStack poseStack, SubmitNodeCollector collector, PlayerRenderState player,
 		FirstPersonHandsAndItemsRenderState hands, CallbackInfo ci) {
