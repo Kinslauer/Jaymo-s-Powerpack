@@ -3428,3 +3428,11 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
   full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
   rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
+- **0.7.98, freerunning (the Stealth tree's second page, with Powers 0.13.36):** Andy picked "Full freerunning".
+  Stealth goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still counts to 15, pocket practice only the first
+  15 levels) and gets a second page, "Freerunning" (12 points): Climber (lvl 3, 3 ranks), Freerunner (lvl 3, 2),
+  Sure Footing (lvl 8, needs Climber), Leap of Faith (lvl 8, 2 pts, needs Freerunner), Bar Swing (lvl 12, 2 pts, needs
+  Sure Footing), Wall Runner (lvl 12, 2 ranks, needs Leap of Faith); appended to `Skills.Perk`, so no ordinal moves.
+  The moves are Jaymo's Powers' (`Freerun`), reading the ranks through `Skills.rank(Player, String)`. Stealth
+  experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
+  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`).

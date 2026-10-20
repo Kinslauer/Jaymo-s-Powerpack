@@ -1831,3 +1831,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
   costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
   bracers, mantle and cowl's growth).
+- **0.13.36, freerunning (Kingdoms 0.7.98's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
+  (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
+  Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
+  synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
+  3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
+  jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
+  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
+  slower there), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
+  (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
+  (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
+  hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags
+  the player `jaymospowers_freerun` for Kingdoms' Stealth experience. Web slingers keep their own parkour: the two
+  stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
+  wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
+  Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.

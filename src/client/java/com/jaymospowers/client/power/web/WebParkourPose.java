@@ -29,7 +29,8 @@ import net.minecraft.world.entity.LivingEntity;
  * (rolled onto one side on a planted forearm, the legs stacked ahead) or a <b>head-first</b> dive (flat on the chest,
  * arms reaching ahead).</li>
  * </ul>
- * Your own moves don't show in first person.
+ * Your own moves don't show in first person. (0.13.36) A freerunner's vault, cling and wall kick ({@code Freerun#MOVE})
+ * are drawn the same way.
  */
 public final class WebParkourPose {
 	// ===== the look: knobs to tweak ==================================================================================
@@ -74,6 +75,11 @@ public final class WebParkourPose {
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		Integer move = entity.getAttached(WebParkour.MOVE);
+		boolean web = move != null;
+		if (move == null) {
+			// (0.13.36) a freerunner's vault, cling or wall kick (Freerun) looks the same
+			move = entity.getAttached(com.jaymospowers.freerun.Freerun.MOVE);
+		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 		if (move == null || ownView || entity.isPassenger()) {
@@ -94,7 +100,7 @@ public final class WebParkourPose {
 		float length = kind == WebParkour.VAULT ? WebParkour.VAULT_TICKS : kind == WebParkour.WALL_JUMP ? WebParkour.WALL_JUMP_TICKS : 0.0F;
 		float p = length > 0.0F ? Mth.clamp(age / length, 0.0F, 1.0F) : 0.0F;
 		float in = length > 0.0F ? Mth.sin(Mth.PI * p) : smooth(Mth.clamp(age / EASE_IN, 0.0F, 1.0F));
-		boolean tendrils = kind == WebParkour.CLING && entity instanceof net.minecraft.world.entity.player.Player player
+		boolean tendrils = web && kind == WebParkour.CLING && entity instanceof net.minecraft.world.entity.player.Player player
 			&& com.jaymospowers.power.web.WebSymbiote.suitShown(player);
 		// moving on the wall (shimmy or climb): how much it's crawling, eased so the limbs settle when it stops
 		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));

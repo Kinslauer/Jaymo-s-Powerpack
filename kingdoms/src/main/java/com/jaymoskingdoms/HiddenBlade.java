@@ -260,6 +260,8 @@ public final class HiddenBlade {
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.9F, 0.8F);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 0.6F, 1.2F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.leap").withStyle(ChatFormatting.DARK_RED));
+		// (a leap that lands on its mark is Stealth's to learn from)
+		Skills.grant(player, Skills.Pillar.STEALTH, Skills.XP_BLADE_LEAP);
 	}
 
 	/** A skilled, falling player: does this tick's fall (swept from last tick's feet to {@link #LEAP_REACH} below now) come down on something? */

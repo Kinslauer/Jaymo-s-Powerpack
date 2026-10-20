@@ -19,6 +19,7 @@ abstract class WebLivingEntityRendererMixin {
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.freerun.BalancePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebCounterPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebSuitTear.rotate(state, poseStack, entityScale);
@@ -33,6 +34,7 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.freerun.BalancePose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebCounterPose.extract(entity, state, partialTicks);
