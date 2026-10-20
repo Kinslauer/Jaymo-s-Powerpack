@@ -19,6 +19,7 @@ public final class AetherClient {
 	public static void init() {
 		EntityRendererRegistry.register(FloatingBlockEntity.TYPE, FloatingBlockRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(AetherClient::tick);
+		com.jaymospowers.client.aether.mob.AetherMobsClient.init();
 	}
 
 	private static void tick(Minecraft minecraft) {

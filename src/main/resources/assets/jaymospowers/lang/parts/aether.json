@@ -41,5 +41,18 @@
   "item.jaymospowers.golden_amber": "Golden Amber",
   "item.jaymospowers.blue_berry": "Blue Berry",
   "item.jaymospowers.white_apple": "White Apple",
-  "entity.jaymospowers.floating_block": "Floating Gravitite"
+  "entity.jaymospowers.floating_block": "Floating Gravitite",
+  "entity.jaymospowers.phyg": "Phyg",
+  "entity.jaymospowers.flying_cow": "Flying Cow",
+  "entity.jaymospowers.sheepuff": "Sheepuff",
+  "entity.jaymospowers.aerbunny": "Aerbunny",
+  "entity.jaymospowers.moa": "Moa",
+  "item.jaymospowers.phyg_spawn_egg": "Phyg Spawn Egg",
+  "item.jaymospowers.flying_cow_spawn_egg": "Flying Cow Spawn Egg",
+  "item.jaymospowers.sheepuff_spawn_egg": "Sheepuff Spawn Egg",
+  "item.jaymospowers.aerbunny_spawn_egg": "Aerbunny Spawn Egg",
+  "item.jaymospowers.moa_spawn_egg": "Moa Spawn Egg",
+  "item.jaymospowers.blue_moa_egg": "Blue Moa Egg",
+  "item.jaymospowers.white_moa_egg": "White Moa Egg",
+  "item.jaymospowers.black_moa_egg": "Black Moa Egg"
 }
