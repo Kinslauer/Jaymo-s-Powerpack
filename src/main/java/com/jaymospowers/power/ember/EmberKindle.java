@@ -93,6 +93,9 @@ public final class EmberKindle {
 	/** The flame sets off a flashover in the user's own smoke at least this thick, and no nearer than this to the palm. */
 	static final float FLASH_LEAST = 1.0F;
 	static final double FLASH_NEAR = 1.5;
+	/** (0.14.0) How often (ticks) the flame thaws freezing fog along it, every how far, and how wide (plus a little a block). */
+	static final int THAW_EVERY = 5;
+	static final double THAW_STEP = 1.0, THAW_RADIUS = 0.8;
 	/** How often (ticks) the heritage is read off the Kingdoms tag. */
 	static final int READ_EVERY = 20;
 	/** Jaymo's Kingdoms' tag for the Emberborn heritage. */
@@ -294,6 +297,12 @@ public final class EmberKindle {
 		}
 		boolean white = live.heat >= 1.0F;
 		particles(level, from, look, reach, white);
+		if ((now - live.since) % THAW_EVERY == 0) {
+			// (0.14.0) the flame thaws freezing fog (Cryokinesis' cold on smoke) all along it
+			for (double t = 0.5; t <= reach; t += THAW_STEP) {
+				SmokeField.thaw(level, from.add(look.scale(t)), THAW_RADIUS + t * 0.15);
+			}
+		}
 		if ((now - live.since) % 20 == 0) {
 			level.playSound(null, from.x, from.y, from.z, SoundEvents.BLAZE_BURN, SoundSource.PLAYERS, 0.9F, white ? 1.3F : 0.8F);
 			level.playSound(null, from.x, from.y, from.z, SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 1.2F, 0.6F);

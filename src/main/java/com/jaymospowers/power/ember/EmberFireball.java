@@ -161,6 +161,8 @@ public final class EmberFireball {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.5F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.2F, 0.5F);
 		Flames.area(level, at, RADIUS, BURN_SECONDS, owner, e -> true);
+		// (0.14.0) freezing fog in the burst thaws at once
+		SmokeField.thaw(level, at, RADIUS + 0.5);
 		double r2 = RADIUS * RADIUS;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(RADIUS),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && e.getBoundingBox().distanceToSqr(at) <= r2)) {
