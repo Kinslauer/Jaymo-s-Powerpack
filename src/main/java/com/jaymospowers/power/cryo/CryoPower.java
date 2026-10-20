@@ -60,9 +60,9 @@ public final class CryoPower implements Power {
 	static final int MODE_AT = 2;
 	static final int WALL_AT = 3;
 
-	/** The owner's HUD state (cooldowns, what's running). Not saved: a relog clears cooldowns. */
+	/** The owner's HUD state (cooldowns, what's running). Not saved: a relog clears cooldowns; death keeps them. */
 	public static final AttachmentType<CryoState> STATE = AttachmentRegistry.create(JaymosPowers.id("cryo_state"),
-		builder -> builder.syncWith(CryoState.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.copyOnDeath().syncWith(CryoState.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** Snow mode (Z) is on: saved, synced to the user (the HUD). */
 	public static final AttachmentType<Boolean> SNOW = AttachmentRegistry.create(JaymosPowers.id("cryo_snow"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));

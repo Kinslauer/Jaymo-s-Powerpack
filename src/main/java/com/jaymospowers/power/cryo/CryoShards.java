@@ -128,7 +128,9 @@ public final class CryoShards {
 			Vec3 pos = shard.ball.position();
 			Vec3 next = pos.add(shard.ball.getDeltaMovement());
 			shard.last = pos;
-			SmokeField.freeze(level, pos, FOG_RADIUS);
+			if (!shard.snow) {
+				SmokeField.freeze(level, pos, FOG_RADIUS);
+			}
 			// the path ahead: a creature on it is hit before the snowball would only bump it
 			for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, next).inflate(HIT_SLACK + 0.5),
 				e -> e != shard.owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {

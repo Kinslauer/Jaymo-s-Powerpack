@@ -87,7 +87,8 @@ public final class CryoFlashFreeze {
 		for (BlockPos pos : BlockPos.betweenClosed(lo.offset(-1, -1, -1), hi.offset(1, 1, 1))) {
 			boolean inside = pos.getX() >= lo.getX() && pos.getX() <= hi.getX() && pos.getY() >= lo.getY() && pos.getY() <= hi.getY()
 				&& pos.getZ() >= lo.getZ() && pos.getZ() <= hi.getZ();
-			if (!inside && CryoIce.place(level, pos.immutable(), Blocks.PACKED_ICE.defaultBlockState(), hold, CryoIce.Mode.AIR)) {
+			if (!inside && level.getEntitiesOfClass(LivingEntity.class, new AABB(pos), e -> !e.isSpectator()).isEmpty()
+				&& CryoIce.place(level, pos.immutable(), Blocks.PACKED_ICE.defaultBlockState(), hold, CryoIce.Mode.AIR)) {
 				ice.add(pos.immutable());
 			}
 		}
@@ -131,7 +132,7 @@ public final class CryoFlashFreeze {
 			Shell shell = it.next();
 			if (!shell.target.isAlive() || shell.target.level() != shell.level) {
 				// the ice falls away with nobody in it
-				CryoIce.meltNow(shell.level, shell.ice);
+				CryoIce.meltNow(shell.level, shell.ice, shell.until);
 				it.remove();
 				continue;
 			}

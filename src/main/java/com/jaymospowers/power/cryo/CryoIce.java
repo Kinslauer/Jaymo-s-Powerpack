@@ -108,15 +108,19 @@ public final class CryoIce {
 		return true;
 	}
 
-	/** Melts the given blocks of ours now (a prison whose prisoner died). */
-	public static void meltNow(ServerLevel level, List<BlockPos> blocks) {
+	/**
+	 * Melts the given blocks of ours now (a prison whose prisoner died). A block another shell or wall has since made
+	 * last longer than {@code until} is theirs too, and stays.
+	 */
+	public static void meltNow(ServerLevel level, List<BlockPos> blocks, long until) {
 		Map<Long, Placed> here = PLACED.get(level);
 		if (here == null) {
 			return;
 		}
 		for (BlockPos pos : blocks) {
-			Placed placed = here.remove(pos.asLong());
-			if (placed != null) {
+			Placed placed = here.get(pos.asLong());
+			if (placed != null && placed.until <= until) {
+				here.remove(pos.asLong());
 				melt(level, pos, placed, true);
 			}
 		}
@@ -139,6 +143,12 @@ public final class CryoIce {
 			List<Long> done = new ArrayList<>();
 			for (Map.Entry<Long, Placed> entry : level.getValue().entrySet()) {
 				Placed placed = entry.getValue();
+				BlockPos at = BlockPos.of(entry.getKey());
+				if (world.isLoaded(at) && !world.getBlockState(at).is(placed.ice)) {
+					// broken, blown up or built over: no longer ours, so forget it without touching what's there
+					done.add(entry.getKey());
+					continue;
+				}
 				if (placed.until > now) {
 					continue;
 				}

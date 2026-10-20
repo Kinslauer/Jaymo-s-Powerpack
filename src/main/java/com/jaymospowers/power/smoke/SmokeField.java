@@ -976,7 +976,7 @@ public final class SmokeField {
 		BlockState snow = Blocks.SNOW.defaultBlockState();
 		for (int i = 0; i < FROST_TRIES; i++) {
 			BlockPos pos = BlockPos.of(keys[level.getRandom().nextInt(keys.length)]);
-			if (!level.isLoaded(pos) || !level.getBlockState(pos).isAir()) {
+			if (!level.isLoaded(pos) || !level.getBlockState(pos).isAir() || !level.canSeeSky(pos)) {
 				continue;
 			}
 			for (int drop = 0; drop < FROST_DROP && level.getBlockState(pos.below()).isAir(); drop++) {

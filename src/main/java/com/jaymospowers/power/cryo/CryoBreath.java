@@ -137,7 +137,9 @@ public final class CryoBreath {
 			for (double t = 1.0; t <= reach + 0.5; t += 1.0) {
 				Vec3 p = from3.add(look.scale(Math.min(t, reach)));
 				double w = MOUTH + t * SPREAD;
-				SmokeField.freeze(level, p, w + 0.5);
+				if (!snow) {
+					SmokeField.freeze(level, p, w + 0.5);
+				}
 				if (!snow) {
 					BlockPos at = BlockPos.containing(p);
 					for (int down = 0; down <= 2; down++) {
