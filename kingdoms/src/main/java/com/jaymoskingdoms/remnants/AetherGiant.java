@@ -444,6 +444,10 @@ public class AetherGiant extends Monster {
 		super.readAdditionalSaveData(input);
 		long packed = input.getLongOr("monolith", Long.MIN_VALUE);
 		this.monolith = packed == Long.MIN_VALUE ? null : BlockPos.of(packed);
+		if (this.monolith != null) {
+			// it keeps to its monolith after a reload too
+			this.setHomeTo(this.monolith, Monoliths.HOME_RADIUS);
+		}
 		this.raging = input.getBooleanOr("raging", false);
 	}
 }

@@ -34,6 +34,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -61,7 +62,7 @@ public final class Monoliths {
 	static final double WAKE_RANGE = 40.0;
 	/** How far round its monolith a Giant is looked for (blocks), and how far it roams from it. */
 	static final double GIANT_SEARCH = 96.0;
-	static final int HOME_RADIUS = 28;
+	public static final int HOME_RADIUS = 28;
 	/** Where a Giant rises: this far from its monolith (blocks). */
 	static final int RISE_NEAREST = 9, RISE_FURTHEST = 14;
 	/** Raising one: how often players in the wild are weighed (ticks), the chance each time, how far off it rises, how far apart they are. */
@@ -194,7 +195,8 @@ public final class Monoliths {
 	/** Each awake monolith a player has come near, whose Giant isn't about: its Giant rises. */
 	private static void wake(ServerLevel level) {
 		List<Monolith> all = all(level);
-		if (all.isEmpty()) {
+		// on Peaceful a Giant would vanish as it rose, and rise again
+		if (all.isEmpty() || level.getDifficulty() == Difficulty.PEACEFUL) {
 			return;
 		}
 		for (Monolith m : all) {
