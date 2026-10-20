@@ -1,5 +1,9 @@
 {
   "values": [
-    "jaymospowers:grout"
+    "jaymospowers:grout",
+    "jaymospowers:aether_dirt",
+    "jaymospowers:aether_grass_block",
+    "jaymospowers:enchanted_aether_grass_block",
+    "jaymospowers:quicksoil"
   ]
 }

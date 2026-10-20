@@ -9,13 +9,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TorchBlock;
@@ -47,8 +45,8 @@ public final class AetherBlocks {
 	public static final float GOLDEN_LEAF_PARTICLES = 0.1F, CRYSTAL_LEAF_PARTICLES = 0.03F;
 	/** Particle colours of the drifting leaves. */
 	public static final int GOLDEN_LEAF_COLOR = 0xFFD54A, CRYSTAL_LEAF_COLOR = 0xBFF4F8;
-	/** Suspicious stew: white flower, purple flower (effect, seconds): slow falling 4 s, nausea 12 s. */
-	public static final float WHITE_FLOWER_STEW_SECONDS = 4.0F, PURPLE_FLOWER_STEW_SECONDS = 12.0F;
+	/** Experience (min, max) the ores give: ambrosium 0-2, zanite 3-5. */
+	public static final int AMBROSIUM_XP_MIN = 0, AMBROSIUM_XP_MAX = 2, ZANITE_XP_MIN = 3, ZANITE_XP_MAX = 5;
 
 	public static Block HOLYSTONE, MOSSY_HOLYSTONE, HOLYSTONE_BRICKS;
 	public static Block AETHER_DIRT, AETHER_GRASS_BLOCK, ENCHANTED_AETHER_GRASS_BLOCK, QUICKSOIL, QUICKSOIL_GLASS, ICESTONE;
@@ -102,10 +100,10 @@ public final class AetherBlocks {
 
 		AETHER_DIRT = block("aether_dirt", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_CYAN)
 			.strength(SOIL_HARDNESS).sound(SoundType.GRAVEL));
-		AETHER_GRASS_BLOCK = block("aether_grass_block", AetherGrassBlock::new, BlockBehaviour.Properties.of()
+		AETHER_GRASS_BLOCK = block("aether_grass_block", p -> new AetherGrassBlock(true, p), BlockBehaviour.Properties.of()
 			.mapColor(MapColor.WARPED_WART_BLOCK).strength(SOIL_HARDNESS).sound(SoundType.GRASS).randomTicks());
-		ENCHANTED_AETHER_GRASS_BLOCK = block("enchanted_aether_grass_block", Block::new, BlockBehaviour.Properties.of()
-			.mapColor(MapColor.GOLD).strength(SOIL_HARDNESS).sound(SoundType.GRASS));
+		ENCHANTED_AETHER_GRASS_BLOCK = block("enchanted_aether_grass_block", p -> new AetherGrassBlock(false, p), BlockBehaviour.Properties.of()
+			.mapColor(MapColor.GOLD).strength(SOIL_HARDNESS).sound(SoundType.GRASS).randomTicks());
 		QUICKSOIL = block("quicksoil", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
 			.strength(QUICKSOIL_HARDNESS).sound(SoundType.SAND).friction(QUICKSOIL_FRICTION));
 		QUICKSOIL_GLASS = block("quicksoil_glass", TransparentBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
@@ -114,8 +112,8 @@ public final class AetherBlocks {
 		ICESTONE = block("icestone", IcestoneBlock::new, stone(MapColor.ICE, HOLYSTONE_HARDNESS, HOLYSTONE_BLAST)
 			.sound(SoundType.AMETHYST).randomTicks());
 
-		AMBROSIUM_ORE = block("ambrosium_ore", Block::new, stone(MapColor.WOOL, ORE_HARDNESS, ORE_BLAST));
-		ZANITE_ORE = block("zanite_ore", Block::new, stone(MapColor.WOOL, ORE_HARDNESS, ORE_BLAST));
+		AMBROSIUM_ORE = block("ambrosium_ore", p -> new AetherOreBlock(AMBROSIUM_XP_MIN, AMBROSIUM_XP_MAX, p), stone(MapColor.WOOL, ORE_HARDNESS, ORE_BLAST));
+		ZANITE_ORE = block("zanite_ore", p -> new AetherOreBlock(ZANITE_XP_MIN, ZANITE_XP_MAX, p), stone(MapColor.WOOL, ORE_HARDNESS, ORE_BLAST));
 		GRAVITITE_ORE = block("gravitite_ore", p -> new FloatingBlock(p, false), stone(MapColor.WOOL, ORE_HARDNESS, ORE_BLAST));
 		ENCHANTED_GRAVITITE = block("enchanted_gravitite", p -> new FloatingBlock(p, true),
 			stone(MapColor.COLOR_PINK, METAL_HARDNESS, METAL_BLAST).sound(SoundType.METAL));
@@ -149,8 +147,8 @@ public final class AetherBlocks {
 			.noCollision().sound(SoundType.GRASS).pushReaction(PushReaction.POPPED));
 		BERRY_BUSH_STEM = block("berry_bush_stem", BerryBushStemBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(SOIL_HARDNESS)
 			.noCollision().randomTicks().sound(SoundType.GRASS).pushReaction(PushReaction.POPPED));
-		WHITE_FLOWER = block("white_flower", p -> new FlowerBlock(MobEffects.SLOW_FALLING, WHITE_FLOWER_STEW_SECONDS, p), plant(SoundType.GRASS));
-		PURPLE_FLOWER = block("purple_flower", p -> new FlowerBlock(MobEffects.NAUSEA, PURPLE_FLOWER_STEW_SECONDS, p), plant(SoundType.GRASS));
+		WHITE_FLOWER = block("white_flower", AetherFlowerBlock::new, plant(SoundType.GRASS));
+		PURPLE_FLOWER = block("purple_flower", AetherFlowerBlock::new, plant(SoundType.GRASS));
 
 		// the torch: a vanilla torch with smoke where the flame was; the wall one gives no item of its own
 		ResourceKey<Block> torchKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("ambrosium_torch"));

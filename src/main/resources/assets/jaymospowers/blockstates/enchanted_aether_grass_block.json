@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/aether/enchanted_aether_grass_block"
+      },
+      {
+        "model": "jaymospowers:block/aether/enchanted_aether_grass_block",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/aether/enchanted_aether_grass_block",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/aether/enchanted_aether_grass_block",
+        "y": 270
+      }
+    ]
+  }
+}

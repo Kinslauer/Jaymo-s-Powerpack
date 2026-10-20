@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Aether grass: spreads onto aether dirt like vanilla grass onto dirt (needs light above the dirt), and turns back to
  * aether dirt when something solid covers it. The enchanted kind ({@link AetherBlocks#ENCHANTED_AETHER_GRASS_BLOCK})
- * does neither.
+ * also turns back when covered, but never spreads.
  */
 public class AetherGrassBlock extends Block {
 	// ---- tuning ----
@@ -20,8 +20,11 @@ public class AetherGrassBlock extends Block {
 	/** Spread attempts per random tick, and how far around (x and z) and below/above (y) they reach. */
 	public static final int SPREAD_TRIES = 4, SPREAD_RADIUS = 1, SPREAD_DOWN = 3, SPREAD_UP = 1;
 
-	public AetherGrassBlock(BlockBehaviour.Properties properties) {
+	private final boolean spreads;
+
+	public AetherGrassBlock(boolean spreads, BlockBehaviour.Properties properties) {
 		super(properties);
+		this.spreads = spreads;
 	}
 
 	/** Something solid sits on this block's top (the grass can't live there). */
@@ -36,7 +39,7 @@ public class AetherGrassBlock extends Block {
 			level.setBlockAndUpdate(pos, AetherBlocks.AETHER_DIRT.defaultBlockState());
 			return;
 		}
-		if (level.getMaxLocalRawBrightness(pos.above()) < SPREAD_LIGHT) {
+		if (!this.spreads || level.getMaxLocalRawBrightness(pos.above()) < SPREAD_LIGHT) {
 			return;
 		}
 		for (int i = 0; i < SPREAD_TRIES; i++) {

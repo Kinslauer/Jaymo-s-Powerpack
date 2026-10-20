@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:golden_oak_log"
+  },
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:golden_oak_wood",
+    "count": 3
+  },
+  "group": "bark"
+}
