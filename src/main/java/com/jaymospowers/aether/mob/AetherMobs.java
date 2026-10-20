@@ -59,7 +59,7 @@ public final class AetherMobs {
 		FLYING_COW = type("flying_cow", EntityType.Builder.of(FlyingCow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10));
 		SHEEPUFF = type("sheepuff", EntityType.Builder.of(Sheepuff::new, MobCategory.CREATURE).sized(0.9F, 1.3F).clientTrackingRange(10));
 		AERBUNNY = type("aerbunny", EntityType.Builder.of(Aerbunny::new, MobCategory.CREATURE).sized(0.6F, 0.5F).clientTrackingRange(8));
-		MOA = type("moa", EntityType.Builder.of(Moa::new, MobCategory.CREATURE).sized(0.9F, 2.0F).clientTrackingRange(10));
+		MOA = type("moa", EntityType.Builder.of(Moa::new, MobCategory.CREATURE).sized(0.9F, 2.15F).clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(PHYG, Phyg.createAttributes());
 		FabricDefaultAttributeRegistry.register(FLYING_COW, FlyingCow.createAttributes());
 		FabricDefaultAttributeRegistry.register(SHEEPUFF, Sheepuff.createAttributes());

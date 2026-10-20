@@ -59,7 +59,7 @@ public class Moa extends RideableAnimal {
 	}
 
 	// ---- tuning ----
-	public static final double HEALTH = 35.0, SPEED = 0.18, FOLLOW_RANGE = 16.0;
+	public static final double HEALTH = 35.0, SPEED = 0.155, FOLLOW_RANGE = 16.0;
 	/** Jump speeds (blocks a tick): from the ground, and in mid-air. */
 	public static final double GROUND_JUMP = 0.55, AIR_JUMP = 0.5;
 	/** Its rider sits this high above its feet (blocks), and it moves at this share of its speed under one. */
