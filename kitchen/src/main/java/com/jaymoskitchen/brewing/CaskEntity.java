@@ -47,6 +47,8 @@ public class CaskEntity extends BlockEntity {
 	private int water;
 	private @Nullable Brew base;
 	private int baseCount;
+	/** How many of {@link #baseCount} are glow berries (Berry Wine takes either kind of berry). */
+	private int glowCount;
 	/** Ticks fermented so far (only counts while sealed). */
 	private int progress;
 	/** Drinks waiting (of {@link #base}); 0 unless the batch is done. */
@@ -121,6 +123,9 @@ public class CaskEntity extends BlockEntity {
 					} else if (!player.getAbilities().instabuild) {
 						held.shrink(1);
 					}
+					if (held.is(Items.GLOW_BERRIES) && brew == Brew.BERRY_WINE) {
+						glowCount++;
+					}
 					base = brew;
 					baseCount++;
 					play(SoundEvents.ITEM_PICKUP, 0.8F);
@@ -133,10 +138,16 @@ public class CaskEntity extends BlockEntity {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cask.need_bottle"));
 					return InteractionResult.SUCCESS_SERVER;
 				}
-				give(player, new ItemStack(base.baseItem()));
+				if (glowCount > 0) {
+					give(player, new ItemStack(Items.GLOW_BERRIES));
+					glowCount--;
+				} else {
+					give(player, new ItemStack(base.baseItem()));
+				}
 				baseCount--;
 				if (baseCount == 0) {
 					base = null;
+					glowCount = 0;
 				}
 				play(SoundEvents.ITEM_PICKUP, 0.8F);
 				markUpdated();
@@ -232,6 +243,7 @@ public class CaskEntity extends BlockEntity {
 		left = DRINKS_PER_BATCH;
 		water = 0;
 		baseCount = 0;
+		glowCount = 0;
 		progress = 0;
 		play(SoundEvents.BREWING_STAND_BREW, 1.0F);
 		markUpdated();
@@ -249,7 +261,12 @@ public class CaskEntity extends BlockEntity {
 		}
 		if (level instanceof ServerLevel server && base != null) {
 			if (baseCount > 0) {
-				Block.popResource(server, pos, new ItemStack(base.baseItem(), baseCount));
+				if (glowCount > 0) {
+					Block.popResource(server, pos, new ItemStack(Items.GLOW_BERRIES, glowCount));
+				}
+				if (baseCount - glowCount > 0) {
+					Block.popResource(server, pos, new ItemStack(base.baseItem(), baseCount - glowCount));
+				}
 			}
 			if (left > 0) {
 				Block.popResource(server, pos, new ItemStack(Brewing.drink(base), left));
@@ -278,6 +295,7 @@ public class CaskEntity extends BlockEntity {
 		water = input.getIntOr("Water", 0);
 		base = Brew.byName(input.getStringOr("Base", ""));
 		baseCount = input.getIntOr("BaseCount", 0);
+		glowCount = Math.min(baseCount, input.getIntOr("GlowCount", 0));
 		progress = input.getIntOr("Progress", 0);
 		left = input.getIntOr("Left", 0);
 	}
@@ -292,6 +310,7 @@ public class CaskEntity extends BlockEntity {
 		output.putInt("Water", water);
 		output.putString("Base", base == null ? "" : base.name());
 		output.putInt("BaseCount", baseCount);
+		output.putInt("GlowCount", glowCount);
 		output.putInt("Progress", progress);
 		output.putInt("Left", left);
 	}

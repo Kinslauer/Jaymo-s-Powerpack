@@ -6,6 +6,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,11 +51,15 @@ public final class Drunk {
 	private static final AttachmentType<Integer> PEAK = AttachmentRegistry.create(JaymosKitchen.id("drunk_peak"),
 		builder -> builder.persistent(Codec.INT));
 
+	/** Game tick at which each drunk player loses their next point (server side only, cleared on disconnect). */
+	private static final Map<UUID, Long> NEXT_DECAY = new HashMap<>();
+
 	private Drunk() {
 	}
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Drunk::tick);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> NEXT_DECAY.remove(handler.player.getUUID()));
 	}
 
 	/** How drunk a player is, 0 (sober) to {@link #MAX_DRUNK}. Works on the client too, for the player themselves. */
@@ -64,7 +72,11 @@ public final class Drunk {
 		if (points <= 0) {
 			return;
 		}
-		int next = Math.min(MAX_DRUNK, level(player) + points);
+		int before = level(player);
+		if (before <= 0) {
+			NEXT_DECAY.put(player.getUUID(), player.level().getGameTime() + DECAY_TICKS);
+		}
+		int next = Math.min(MAX_DRUNK, before + points);
 		player.setAttached(POINTS, next);
 		if (next > player.getAttachedOrElse(PEAK, 0)) {
 			player.setAttached(PEAK, next);
@@ -93,8 +105,10 @@ public final class Drunk {
 			if (points <= 0) {
 				continue;
 			}
-			if (now % DECAY_TICKS == 0L) {
+			long nextDecay = NEXT_DECAY.computeIfAbsent(player.getUUID(), id -> now + DECAY_TICKS);
+			if (now >= nextDecay) {
 				points--;
+				NEXT_DECAY.put(player.getUUID(), nextDecay + DECAY_TICKS);
 				if (points <= 0) {
 					sober(player);
 					continue;
@@ -110,6 +124,7 @@ public final class Drunk {
 		int peak = player.getAttachedOrElse(PEAK, 0);
 		player.removeAttached(POINTS);
 		player.removeAttached(PEAK);
+		NEXT_DECAY.remove(player.getUUID());
 		if (peak >= HANGOVER_FROM) {
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, HANGOVER_TICKS, 0, false, false, true));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, HANGOVER_TICKS, 0, false, false, true));
