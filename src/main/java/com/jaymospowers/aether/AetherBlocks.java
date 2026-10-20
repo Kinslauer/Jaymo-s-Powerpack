@@ -20,9 +20,10 @@ import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
@@ -59,8 +60,8 @@ public final class AetherBlocks {
 	public static Block AMBROSIUM_TORCH, AMBROSIUM_WALL_TORCH;
 
 	/** The tree features the saplings grow (written by the dimension's worldgen, not here). */
-	public static final ResourceKey<ConfiguredFeature<?, ?>> SKYROOT_TREE = ResourceKey.create(Registries.CONFIGURED_FEATURE, JaymosPowers.id("skyroot_tree"));
-	public static final ResourceKey<ConfiguredFeature<?, ?>> GOLDEN_OAK_TREE = ResourceKey.create(Registries.CONFIGURED_FEATURE, JaymosPowers.id("golden_oak_tree"));
+	public static final ResourceKey<Feature> SKYROOT_TREE = ResourceKey.create(Registries.FEATURE, JaymosPowers.id("skyroot_tree"));
+	public static final ResourceKey<Feature> GOLDEN_OAK_TREE = ResourceKey.create(Registries.FEATURE, JaymosPowers.id("golden_oak_tree"));
 
 	private AetherBlocks() {
 	}
@@ -129,19 +130,19 @@ public final class AetherBlocks {
 		STRIPPED_SKYROOT_LOG = block("stripped_skyroot_log", RotatedPillarBlock::new, wood(MapColor.COLOR_LIGHT_GREEN));
 		STRIPPED_SKYROOT_WOOD = block("stripped_skyroot_wood", RotatedPillarBlock::new, wood(MapColor.COLOR_LIGHT_GREEN));
 		SKYROOT_PLANKS = block("skyroot_planks", Block::new, wood(MapColor.COLOR_LIGHT_GREEN).strength(2.0F, 3.0F));
-		SKYROOT_LEAVES = block("skyroot_leaves", p -> new UntintedParticleLeavesBlock(0.0F, ParticleTypes.SMOKE, p), leaves(MapColor.GRASS));
+		SKYROOT_LEAVES = block("skyroot_leaves", p -> new UntintedParticleLeavesBlock(0.0F, ParticleTypes.SMOKE, AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leaves(MapColor.GRASS));
 		SKYROOT_SAPLING = block("skyroot_sapling", p -> new AetherSaplingBlock(SKYROOT_TREE, p), sapling());
 
 		GOLDEN_OAK_LOG = block("golden_oak_log", RotatedPillarBlock::new, wood(MapColor.GOLD));
 		GOLDEN_OAK_WOOD = block("golden_oak_wood", RotatedPillarBlock::new, wood(MapColor.GOLD));
 		GOLDEN_OAK_LEAVES = block("golden_oak_leaves", p -> new UntintedParticleLeavesBlock(GOLDEN_LEAF_PARTICLES,
-			new DustParticleOptions(GOLDEN_LEAF_COLOR, 1.0F), p), leaves(MapColor.GOLD));
+			new DustParticleOptions(GOLDEN_LEAF_COLOR, 1.0F), AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leaves(MapColor.GOLD));
 		GOLDEN_OAK_SAPLING = block("golden_oak_sapling", p -> new AetherSaplingBlock(GOLDEN_OAK_TREE, p), sapling());
 
 		CRYSTAL_LEAVES = block("crystal_leaves", p -> new UntintedParticleLeavesBlock(CRYSTAL_LEAF_PARTICLES,
-			new DustParticleOptions(CRYSTAL_LEAF_COLOR, 1.0F), p), leaves(MapColor.DIAMOND));
+			new DustParticleOptions(CRYSTAL_LEAF_COLOR, 1.0F), AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leaves(MapColor.DIAMOND));
 		CRYSTAL_FRUIT_LEAVES = block("crystal_fruit_leaves", p -> new UntintedParticleLeavesBlock(CRYSTAL_LEAF_PARTICLES,
-			new DustParticleOptions(CRYSTAL_LEAF_COLOR, 1.0F), p), leaves(MapColor.DIAMOND));
+			new DustParticleOptions(CRYSTAL_LEAF_COLOR, 1.0F), AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), leaves(MapColor.DIAMOND));
 
 		BERRY_BUSH = block("berry_bush", BerryBushBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(SOIL_HARDNESS)
 			.noCollision().sound(SoundType.GRASS).pushReaction(PushReaction.POPPED));

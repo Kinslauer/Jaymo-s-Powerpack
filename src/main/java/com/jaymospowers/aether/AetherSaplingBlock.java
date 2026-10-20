@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
  * A sapling that grows one of our own tree features (a configured feature in the data, {@code jaymospowers:skyroot_tree}
@@ -18,9 +18,9 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
  * light, random growth and bone meal are all the vanilla sapling's; only the tree is ours.
  */
 public class AetherSaplingBlock extends SaplingBlock {
-	private final ResourceKey<ConfiguredFeature<?, ?>> tree;
+	private final ResourceKey<Feature> tree;
 
-	public AetherSaplingBlock(ResourceKey<ConfiguredFeature<?, ?>> tree, BlockBehaviour.Properties properties) {
+	public AetherSaplingBlock(ResourceKey<Feature> tree, BlockBehaviour.Properties properties) {
 		// (the grower is never asked: advanceTree is replaced below)
 		super(TreeGrower.OAK, properties);
 		this.tree = tree;
@@ -32,7 +32,7 @@ public class AetherSaplingBlock extends SaplingBlock {
 			level.setBlock(pos, state.cycle(STAGE), Block.UPDATE_CLIENTS);
 			return;
 		}
-		level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.tree).ifPresent(holder -> {
+		level.registryAccess().lookupOrThrow(Registries.FEATURE).get(this.tree).ifPresent(holder -> {
 			level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 			if (!holder.value().place(level, level.getChunkSource().getGenerator(), random, pos)) {
 				level.setBlock(pos, state, Block.UPDATE_CLIENTS);

@@ -38,7 +38,7 @@ public final class Aether {
 			}
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
 				server.setBlockAndUpdate(pos, stripped.defaultBlockState().setValue(RotatedPillarBlock.AXIS, state.getValue(RotatedPillarBlock.AXIS)));
-				server.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+				server.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 				held.hurtAndBreak(1, sp, hand);
 			}
 			return InteractionResult.SUCCESS;
