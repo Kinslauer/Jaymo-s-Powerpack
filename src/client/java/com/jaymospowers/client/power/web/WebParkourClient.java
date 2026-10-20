@@ -68,7 +68,9 @@ final class WebParkourClient {
 		boolean free = player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.getAbilities().flying && !player.isFallFlying()
 			&& !player.isInWater() && !player.isInLava() && !player.onClimbable() && !swing.attached() && swing.pull == null && swing.wingsTicks == 0
 			&& !wallRun.running() && !WebSymbioteClient.driving() && !WebPower.ragdolled(player)
-			&& !WebSymbiote.crawlTendrils(player);
+			&& !WebSymbiote.crawlTendrils(player)
+			// (0.13.36) nor while freerunning on a wall or a bar (Freerun)
+			&& !com.jaymospowers.client.freerun.FreerunClient.active();
 		if (!free) {
 			if (kind == WebParkour.CLING || kind == WebParkour.SLIDE) {
 				stop();
