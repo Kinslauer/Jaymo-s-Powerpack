@@ -776,3 +776,20 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.
 - **0.4.50:** a corpse keeps its mob's size: the scale attribute stays in the saved look (Kingdoms' half-size spiders,
   grown apes), the rest of the attributes are still left out (`Corpses.look`).
+- **0.5.0, ragdolls:** Andy: "I need these implemented in place of our corpses" (Sable: Ragdolls, Sable: Ragdoll Corpse,
+  Ragdoll Reactions; all three All Rights Reserved and built on NeoForge's Sable engine, so this is our own physics from
+  how they behave, nothing taken from them), and living players too. See `docs/ragdolls.md`.
+  - Engine (`ragdoll/`): Verlet point-mass skeletons (`RagdollRig`: humanoid, four-legged or a rigid box, by the
+    `ragdoll_humanoid` / `_quadruped` / `_box` entity tags or guessed from size), rigid torso, limbs held in cones,
+    pushed out of block collision boxes with friction and a little bounce, sub-stepped so nothing tunnels, floating in
+    water, kicked by walkers and vehicles, asleep once still (`RagdollBody`). `tools/ragdoll_sim` checks it without the
+    game (falls, walls, ledges, stairs, water, giants, kicks).
+  - Corpses: a mob crumples on its first tick of dying (no keel-over); the server simulates the body
+    (`corpse/CorpseRagdoll`), saves it, and sends its points to watchers every tick it moves. Hits, blasts (weaker than
+    12 damage now fling instead of shredding), rummaging, chopping, bites, Lift and tendrils all move it. Carried,
+    slung and carted bodies hang limp as before and become ragdolls again when let go. A dead player's own model is
+    hidden while their corpse is by.
+  - Living players go limp on a crash at speed, a hard landing, a big blast or shove, or being run over by a cart, boat
+    or charging rider; their own client simulates the ragdoll (`client/ragdoll/LimpController`), the server relays it
+    (`LivingRagdolls`); third-person camera, no moving or using, back up once still (1.5 to 7 s). Dying limp leaves
+    that exact body. Jaymo's Powers keeps you from going limp while a power holds you.

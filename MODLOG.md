@@ -1818,3 +1818,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.36 (Kitchen 0.5.0), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
+  Kitchen does the physics (see `kitchen/MODLOG.md`, `docs/ragdolls.md`); Powers only ties in, by reflection so it
+  still builds against the old Kitchen jar: `KitchenCompat.isLimp`, no struggling free of a carry or catching a ledge
+  while limp, no going limp while carried, Lifted, Gravity-held or webbed (`KitchenCompat.registerRagdollVetoes`), the
+  limp pose counts in `PoseTakeover.posed`, and the symbiote looks for a fresh corpse within 5 blocks (was 3), since
+  ragdolls tumble.

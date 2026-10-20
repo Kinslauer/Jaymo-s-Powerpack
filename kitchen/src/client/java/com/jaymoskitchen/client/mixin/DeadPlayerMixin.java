@@ -24,7 +24,9 @@ abstract class DeadPlayerMixin {
 		if (entity instanceof Player player && player.isDeadOrDying()
 			&& !player.level().getEntitiesOfClass(CorpseEntity.class, player.getBoundingBox().inflate(4.0),
 				corpse -> corpse.owner().filter(player.getUUID()::equals).isPresent()).isEmpty()) {
+			// both, or the viewer sees a see-through ghost of them
 			state.isInvisible = true;
+			state.isInvisibleToPlayer = true;
 		}
 	}
 }

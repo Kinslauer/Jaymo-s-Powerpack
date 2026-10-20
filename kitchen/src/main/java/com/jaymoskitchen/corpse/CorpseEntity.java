@@ -318,9 +318,9 @@ public class CorpseEntity extends Entity {
 	private RagdollRig rig() {
 		if (rigCache == null) {
 			if (rigShape < 0 || rigWidth <= 0.0F || rigHeight <= 0.0F) {
-				EntityType<?> type = isPlayerCorpse() ? EntityType.PLAYER : sourceType();
+				EntityType<?> type = isPlayerCorpse() ? EntityTypes.PLAYER : sourceType();
 				float width = 0.6F, height = 1.8F;
-				if (type != null && type != EntityType.PLAYER) {
+				if (type != null && type != EntityTypes.PLAYER) {
 					EntityDimensions standing = type.getDimensions();
 					width = standing.width();
 					height = standing.height();

@@ -18,9 +18,11 @@ abstract class MinecraftLimpMixin {
 		}
 	}
 
-	@Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
+	// (not used elsewhere in the pack yet, so optional: if 26.3 named it differently the game still starts)
+	@Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true, require = 0)
 	private void jaymoskitchen$limpNoMining(boolean down, CallbackInfo ci) {
-		if (LimpController.active()) {
+		// only while the button's held: letting go still runs, so a half-dug block is let go of
+		if (down && LimpController.active()) {
 			ci.cancel();
 		}
 	}

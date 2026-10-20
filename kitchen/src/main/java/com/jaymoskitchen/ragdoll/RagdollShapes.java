@@ -4,6 +4,7 @@ import com.jaymoskitchen.JaymosKitchen;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 /**
  * (0.5.0) Which ragdoll a body gets. Tags first (data packs can add modded mobs), then a guess from its standing size
@@ -22,7 +23,7 @@ public final class RagdollShapes {
 	}
 
 	public static RagdollRig.Shape of(EntityType<?> type, float width, float height) {
-		if (type == EntityType.PLAYER || type.builtInRegistryHolder().is(HUMANOID)) {
+		if (type == EntityTypes.PLAYER || type.builtInRegistryHolder().is(HUMANOID)) {
 			return RagdollRig.Shape.HUMANOID;
 		}
 		if (type.builtInRegistryHolder().is(QUADRUPED)) {
