@@ -1820,4 +1820,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   so they do it too.
 - **0.13.36, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
   untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
-  Kingdoms 0.7.98 makes it Survival's Make Do perk, for every class.
+  Kingdoms 0.7.98 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.

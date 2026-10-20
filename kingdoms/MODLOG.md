@@ -3416,7 +3416,9 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (modrinth.com/mod/omnicrossbow)", then "It should be a node in the skill tree under survival, unlocks a utility across
   classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.13.36,
   `packModsOverride`). A new Survival perk, **Make Do** (level 5, 2 points, under Forager, tier 1 middle), lets any
-  class's crossbow load anything from the off hand, enchanted or not; without it the mod's Omni enchantment does
-  nothing in a player's hands (mobs keep theirs). `OmniCrossbows` decides, through `mixin/omni/PlayerProjectileMixin`
-  (priority 1500, after the mod's own mixin on `Player.getProjectile`), applied only when the mod is loaded; without
-  the mod the perk can't be learned. Nothing of the mod's is compiled against.
+  class's crossbow load anything from the off hand. Then "No omni enchant at all": the mod's Omni enchantment is
+  stripped from every loot table's drops (`LootTableEvents.MODIFY_DROPS`; an Omni-only book becomes a plain book) and
+  from mobs' gear as they join the world (the raid's last pillager), and one that turns up anyway (`/give`) does
+  nothing in a player's hands. `OmniCrossbows` decides, through `mixin/omni/PlayerProjectileMixin` (priority 1500,
+  after the mod's own mixin on `Player.getProjectile`), applied only when the mod is loaded; without the mod the perk
+  can't be learned. Nothing of the mod's is compiled against.
