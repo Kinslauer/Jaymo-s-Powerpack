@@ -46,10 +46,12 @@ final class CostumeModels {
 	static final int GALE_CAPE = 22, TIDE_CAPE = 20;
 	/**
 	 * (0.13.36) The assassin's robe: its coat tails hang from the waist (pixels) this far down, one pixel thick, standing
-	 * this far (pixels) clear of the suit's front and back; and the peaked hood's brim and cowl.
+	 * this far (pixels) clear of the suit's front and back, and swing out with the legs (this much of the leg's swing);
+	 * and how far the bracers, mantle, the peaked hood's brim and its cowl are grown.
 	 */
 	static final int TAIL_TOP = 9, TAIL_LENGTH = 11;
-	static final float TAIL_GAP = 0.05F, BRACER_GROW = 0.15F, MANTLE_GROW = 0.2F, HOOD_BRIM_GROW = 0.4F, COWL_GROW = 0.6F;
+	static final float TAIL_GAP = 0.05F, TAIL_SWAY = 0.6F;
+	static final float BRACER_GROW = 0.15F, MANTLE_GROW = 0.2F, HOOD_BRIM_GROW = 0.4F, COWL_GROW = 0.6F;
 	/** The emblem patch on the chest: its size (pixels) and the gap in front of the suit's chest. */
 	static final float EMBLEM_SIZE = 6.0F, EMBLEM_TOP = 1.5F, EMBLEM_GAP = 0.05F;
 	/**
@@ -75,6 +77,8 @@ final class CostumeModels {
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
 		private final @Nullable ModelPart bust, emblem;
+		/** (0.13.36) The assassin's coat tails, when this model has them. */
+		private final @Nullable ModelPart tailFront, tailBack;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
 			super(root, slim);
@@ -82,6 +86,8 @@ final class CostumeModels {
 			this.cape = this.body.hasChild("cape") ? this.body.getChild("cape") : null;
 			this.bust = this.body.hasChild(CostumeBody.BUST) ? this.body.getChild(CostumeBody.BUST) : null;
 			this.emblem = this.body.hasChild("emblem") ? this.body.getChild("emblem") : null;
+			this.tailFront = this.body.hasChild("tail_front") ? this.body.getChild("tail_front") : null;
+			this.tailBack = this.body.hasChild("tail_back") ? this.body.getChild("tail_back") : null;
 			hideSkinLayers();
 		}
 
@@ -120,6 +126,13 @@ final class CostumeModels {
 			}
 			bust(parent);
 			hideSkinLayers();
+			if (this.tailFront != null && this.tailBack != null) {
+				// (0.13.36) the coat tails swing out ahead of a leg going forward and behind one going back
+				float forward = Math.min(0.0F, Math.min(this.rightLeg.xRot, this.leftLeg.xRot));
+				float back = Math.max(0.0F, Math.max(this.rightLeg.xRot, this.leftLeg.xRot));
+				this.tailFront.xRot = forward * TAIL_SWAY;
+				this.tailBack.xRot = back * TAIL_SWAY;
+			}
 			if (this.cape != null) {
 				// as the vanilla cape (PlayerCapeModel)
 				this.cape.rotateBy(new Quaternionf()
@@ -264,10 +277,11 @@ final class CostumeModels {
 		}
 		PartDefinition body = root.getChild("body");
 		float front = -2.0F - SUIT_GROW - TAIL_GAP - 1.0F, back = 2.0F + SUIT_GROW + TAIL_GAP;
+		// hinged at the waist, so they can swing (Worn.setupAnim)
 		body.addOrReplaceChild("tail_front", CubeListBuilder.create().texOffs(0, 32)
-			.addBox(-4.0F, TAIL_TOP, front, 8.0F, TAIL_LENGTH, 1.0F), PartPose.ZERO);
+			.addBox(-4.0F, 0.0F, front, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, 0.0F));
 		body.addOrReplaceChild("tail_back", CubeListBuilder.create().texOffs(20, 32)
-			.addBox(-4.0F, TAIL_TOP, back, 8.0F, TAIL_LENGTH, 1.0F), PartPose.ZERO);
+			.addBox(-4.0F, 0.0F, back, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, 0.0F));
 	}
 
 	/** The bones only, for pieces that hang off one of them. */

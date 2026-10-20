@@ -47,12 +47,15 @@ import org.jspecify.annotations.Nullable;
  * (0.12.3) The mask key ({@link #maskKey}, apostrophe by default: every letter is taken by Powers, Kingdoms or
  * vanilla) takes the costume's head piece off and puts it back ({@code Costume.toggleMask}); with it off
  * ({@code Costume.UNMASKED}) the head piece isn't drawn and the face shows.
+ * <p>
+ * (0.13.36) A hood up ({@code Costume.hooded}) leaves the face and the real name showing, but someone else's name tag
+ * only within {@link #HOOD_NAME_RANGE}.
  */
 public final class CostumeClient {
-	/** The costume to draw on this player, or null. */
 	/** (0.13.36) A hooded player's name tag is shown only to viewers within this many blocks. */
 	public static final double HOOD_NAME_RANGE = 8.0;
-	public static final RenderStateDataKey<CostumeDesign> KEY =RenderStateDataKey.create(() -> "jaymospowers:costume");
+	/** The costume to draw on this player, or null. */
+	public static final RenderStateDataKey<CostumeDesign> KEY = RenderStateDataKey.create(() -> "jaymospowers:costume");
 
 	/** While the designer draws its preview: the design shown on the local player in place of what they wear. */
 	private static @Nullable CostumeDesign preview;

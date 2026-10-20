@@ -131,19 +131,21 @@ def render(boxes, view):
         x0, x1 = box.x0 - g, box.x0 + box.w + g
         y0, y1 = box.y0 - g, box.y0 + box.h + g
         z0, z1 = box.z0 - g, box.z0 + box.d + g
+        # flip: the model's axis runs right to left on screen; from_far: the face's texture starts at the far end
         if view == "front":
-            face, depth, ax0, ax1, flip, span = "front", z0, x0, x1, False, box.w
+            face, depth, ax0, ax1, flip, from_far, span = "front", z0, x0, x1, False, False, box.w
         elif view == "back":
-            face, depth, ax0, ax1, flip, span = "back", -z1, x0, x1, True, box.w
-        else:
-            face, depth, ax0, ax1, flip, span = "left", -x1, z0, z1, False, box.d
+            face, depth, ax0, ax1, flip, from_far, span = "back", -z1, x0, x1, True, True, box.w
+        else:  # from the wearer's left (+x): their front (-z) on the right, the left face's first column at the front
+            face, depth, ax0, ax1, flip, from_far, span = "left", -x1, z0, z1, True, False, box.d
         shade = {"front": 1.0, "back": 0.86, "left": 0.8}[face]
+        lo, hi = (cx - ax1, cx - ax0) if flip else (cx + ax0, cx + ax1)
         for sy in range(int((top + y0) * SCALE), int((top + y1) * SCALE)):
             ty = int((sy / SCALE - top - y0) / (y1 - y0) * box.h)
-            for sx in range(int((cx + ax0) * SCALE) if not flip else int((cx - ax1) * SCALE),
-                            int((cx + ax1) * SCALE) if not flip else int((cx - ax0) * SCALE)):
-                t = (sx / SCALE - (cx + ax0)) / (ax1 - ax0) if not flip else (ax1 - cx + sx / SCALE) / (ax1 - ax0)
-                tx = int(t * span)
+            for sx in range(int(lo * SCALE), int(hi * SCALE)):
+                a = cx - sx / SCALE if flip else sx / SCALE - cx
+                t = (ax1 - a) / (ax1 - ax0) if from_far else (a - ax0) / (ax1 - ax0)
+                tx = min(span - 1, int(t * span))
                 colour = box.sample(face, tx, ty)
                 if colour is None or not (0 <= sx < img.width and 0 <= sy < img.height):
                     continue

@@ -21,6 +21,7 @@
   "tooltip.jaymospowers.costume.mask": "Mask: %s",
   "tooltip.jaymospowers.costume.cape": "Cape: %s",
   "tooltip.jaymospowers.costume.emblem": "With an emblem on the chest",
+  "tooltip.jaymospowers.costume.hooded": "Hooded: your face shows, but your name can't be read from afar",
   "tooltip.jaymospowers.costume.use": "Use to put it on",
   "message.jaymospowers.costume.worn": "You put on %s",
   "message.jaymospowers.costume.taken_off": "You take your costume off",
