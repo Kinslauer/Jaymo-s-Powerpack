@@ -1818,3 +1818,27 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.14.0, Wounds phase 1 (core):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings, remove our
+  downed system for a universal one written like this https://modrinth.com/mod/first-aid-new". The first of five phases
+  (`docs/Wounds-Plan.md`); no debuffs and no downed state yet, and Kingdoms' `Downed` is untouched. Written without a
+  compiler: build it before anything else.
+  - **Body parts:** `core/wounds/BodyPlan` gives each living thing parts that share its max health: humanoid (head, body,
+    two arms, two legs, two feet), quadruped (head, body, front and hind legs), arthropod, flyer and simple (body only,
+    left to vanilla health). The plan comes from the new entity type tags `jaymospowers:body/humanoid`, `quadruped`,
+    `arthropod`, `flyer`, `simple`, else from the shape (taller than 1.3 times its width is a person). Bosses (`c:bosses`,
+    the Ender Dragon, the Wither) and armor stands keep plain health.
+  - **Health stays real:** the `jaymospowers:wounds` attachment (`Wounds.PARTS`, a fraction per part, synced to the creature
+    itself, saved, dropped when everything is whole, not kept through death) is only how vanilla health is spread.
+    Healing of any kind (regeneration, food, Kitchen's stomach) fills the most hurt part first; health lost without a
+    routed hit comes off the limbs first and never kills (`MIN_VITAL_UNROUTED` 0.05). Players are brought in line every
+    `PLAYER_RECONCILE_TICKS` (10).
+  - **Where hits land** (`HitRouting`): a player's swing on a person by the part their crosshair crosses (`LimbBoxes`, a
+    leg low down is the foot); other blows by the height, side and facing of the hit point (`HEAD_FROM` 0.75, `BODY_FROM`
+    0.4, `FOOT_BELOW` 0.12, `SIDE_SHARE` 0.25, `FRONT_SHARE` 0.2). Falls land on the feet (front and hind legs, legs,
+    wings), explosions spread over every part by share, drowning on the head, fire, magic and lightning on the body.
+    A part at zero spills the rest on (limb to body, foot to leg to body, body to head, head to body).
+  - **Death:** head or body at zero kills through a new `jaymospowers:wounds` damage type ("died of their wounds") dealt
+    like Dismember's decapitation, so Kingdoms' downing and other powers' death cancels still apply; if the death is
+    cancelled the vital part gets `MIN_VITAL_AFTER_SAVE` (0.1) back.
+  - **`/wounds show|part <part> <health> [target]|heal [target]`** (gamemasters), and a body silhouette bottom-right
+    (`client/wounds/WoundsHud`: parts coloured by fraction, white flash for 8 ticks on a loss, fades 3 s after all whole).

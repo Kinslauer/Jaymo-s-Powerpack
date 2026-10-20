@@ -141,7 +141,7 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
 
 ## Phases (each its own release, built and tested before the next)
 
-1. **Core.** `BodyPlan`, the `Wounds` attachment, damage routing (hits, falls, fire, explosions), overflow, natural
+1. **Core. Built in 0.14.0 (written without a compiler; not yet built or tested on the Deck).** `BodyPlan`, the `Wounds` attachment, damage routing (hits, falls, fire, explosions), overflow, natural
    healing, a debug command (`/wounds part <part> <amount>`, `/wounds show`), and the HUD silhouette. No debuffs or
    downed yet.
 2. **Downed.** Move Downed from Kingdoms into Powers, universal. Kingdoms reads the shared tag (tending, food revive,

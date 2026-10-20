@@ -1,0 +1,21 @@
+{
+	"wounds.jaymospowers.part.head": "Head",
+	"wounds.jaymospowers.part.body": "Body",
+	"wounds.jaymospowers.part.left_arm": "Left arm",
+	"wounds.jaymospowers.part.right_arm": "Right arm",
+	"wounds.jaymospowers.part.left_leg": "Left leg",
+	"wounds.jaymospowers.part.right_leg": "Right leg",
+	"wounds.jaymospowers.part.left_foot": "Left foot",
+	"wounds.jaymospowers.part.right_foot": "Right foot",
+	"wounds.jaymospowers.part.front_legs": "Front legs",
+	"wounds.jaymospowers.part.hind_legs": "Hind legs",
+	"wounds.jaymospowers.part.legs": "Legs",
+	"wounds.jaymospowers.part.wings": "Wings",
+	"commands.jaymospowers.wounds.line": "%1$s: %2$s / %3$s hearts",
+	"commands.jaymospowers.wounds.hurt": "Wounded %1$s by %2$s health",
+	"commands.jaymospowers.wounds.heal": "Healed every part",
+	"commands.jaymospowers.wounds.not_living": "That has no body parts",
+	"commands.jaymospowers.wounds.unknown_part": "That creature has no such part",
+	"death.attack.jaymospowers.wounds": "%1$s died of their wounds",
+	"death.attack.jaymospowers.wounds.player": "%1$s died of wounds dealt by %2$s"
+}
