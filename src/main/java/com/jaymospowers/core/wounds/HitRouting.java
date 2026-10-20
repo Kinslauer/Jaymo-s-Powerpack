@@ -42,7 +42,7 @@ final class HitRouting {
 			for (int i = 0; i < plan.size(); i++) {
 				damage(points, plan, plan.part(i), loss * plan.share(i));
 			}
-		} else if (source.is(DamageTypeTags.IS_DROWNING)) {
+		} else if (source.is(DamageTypeTags.IS_DROWNING) || source.is(DamageTypes.IN_WALL)) {
 			damage(points, plan, BodyPart.HEAD, loss);
 		} else if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)
 			|| source.is(DamageTypes.LIGHTNING_BOLT)) {

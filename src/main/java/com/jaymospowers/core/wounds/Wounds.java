@@ -118,7 +118,7 @@ public final class Wounds {
 	 */
 	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by) {
 		BodyPlan plan = BodyPlan.of(entity);
-		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F) {
+		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || kingdomsDowned(entity)) {
 			return;
 		}
 		float max = entity.getMaxHealth();
@@ -154,6 +154,22 @@ public final class Wounds {
 		float[] points = load(entity, plan);
 		reconcile(points, plan, entity.getMaxHealth(), entity.getHealth());
 		store(entity, plan, points);
+	}
+
+	private static boolean downedLooked;
+	private static @Nullable AttachmentType<?> kingdomsDowned;
+
+	/** Kingdoms' downed guards bleed out on their own health: Wounds leaves them alone (looked up by name; Kingdoms is optional). */
+	private static boolean kingdomsDowned(LivingEntity entity) {
+		if (!downedLooked) {
+			downedLooked = true;
+			try {
+				kingdomsDowned = (AttachmentType<?>) Class.forName("com.jaymoskingdoms.Downed").getField("DOWNED").get(null);
+			} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+				kingdomsDowned = null;
+			}
+		}
+		return kingdomsDowned != null && entity.getAttached(kingdomsDowned) != null;
 	}
 
 	// ---- hits -------------------------------------------------------------------------------------------------------------
