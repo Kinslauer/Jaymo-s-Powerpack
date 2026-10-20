@@ -1818,7 +1818,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
-- **0.14.0, Emberborn Kindle (Kingdoms 0.7.97):** Andy: "expand on emberborn, with a left click hold ability, and
+- **0.14.0, Emberborn Kindle (Kingdoms 0.7.98):** Andy: "expand on emberborn, with a left click hold ability, and
   synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
   from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
   candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
