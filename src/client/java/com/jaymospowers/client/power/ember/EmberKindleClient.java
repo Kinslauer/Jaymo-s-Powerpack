@@ -30,6 +30,8 @@ import net.minecraft.world.entity.player.Player;
 public final class EmberKindleClient {
 	/** Ticks held before the flame starts (a quick click stays a punch), and how often a held button says so again. */
 	static final int KINDLE_HOLD = 4, REFRESH = 5;
+	/** Ticks after asking before the server's word counts: if the flame isn't running by then, it was put out (no food). */
+	static final int GRACE = 10;
 	/** The bar's width (pixels), how far over the crosshair, and its colours. */
 	static final int BAR_WIDTH = 52, BAR_UP = 33, BAR_UP_SMOKE = 47;
 	static final int HEAT_COLOR = 0xFF7A1A, WHITE_COLOR = 0xFFF4E0;
@@ -37,6 +39,8 @@ public final class EmberKindleClient {
 
 	private static int held;
 	private static boolean on;
+	/** The server put the flame out while it was still held: nothing more until the button is let go. */
+	private static boolean out;
 
 	private EmberKindleClient() {
 	}
@@ -52,6 +56,7 @@ public final class EmberKindleClient {
 	public static void held(boolean down) {
 		if (!down) {
 			held = 0;
+			out = false;
 			if (on) {
 				on = false;
 				if (Minecraft.getInstance().getConnection() != null) {
@@ -61,6 +66,15 @@ public final class EmberKindleClient {
 			return;
 		}
 		held++;
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (on && held >= KINDLE_HOLD + GRACE && player != null && !EmberKindle.kindling(player)) {
+			// the server stopped it (too hungry, the hand filled): stand aside so the click digs again
+			on = false;
+			out = true;
+		}
+		if (out) {
+			return;
+		}
 		if (!on && held >= KINDLE_HOLD) {
 			on = true;
 			ClientPlayNetworking.send(new EmberKindle.Kindle(true));

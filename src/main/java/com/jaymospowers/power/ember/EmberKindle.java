@@ -86,7 +86,7 @@ public final class EmberKindle {
 	static final float EXHAUSTION = 0.03F;
 	static final int MIN_FOOD = 6;
 	/** The client's word lasts this long (ticks): no "still held" in that time and it stops. */
-	static final int TIMEOUT = 15;
+	static final int TIMEOUT = 40;
 	/** With the Smoke power: sooty smoke left behind every {@link #SMOKE_EVERY} ticks (before the power's own boost), and its least soot. */
 	static final float SMOKE = 0.15F, SMOKE_SOOT = 0.7F;
 	static final int SMOKE_EVERY = 4;

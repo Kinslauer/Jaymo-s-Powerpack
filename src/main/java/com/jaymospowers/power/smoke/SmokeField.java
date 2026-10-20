@@ -235,7 +235,7 @@ public final class SmokeField {
 
 	/** Like {@link #puff}, but pure white cloud (soot 0) whatever the heat. */
 	static void puffCloud(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
-		add(level, at, owner instanceof ServerPlayer ? amount * MOVE_SMOKE : amount, owner, 0.0F);
+		add(level, at, owner instanceof ServerPlayer ? amount * MOVE_SMOKE : amount, owner, 0.0F, false);
 	}
 
 	/** Marks {@code owner}'s smoke as smog until game time {@code until} (refreshed every tick while they're corrupted). */
@@ -296,10 +296,15 @@ public final class SmokeField {
 				soot = 0.0F;
 			}
 		}
-		add(level, at, amount, owner, soot);
+		add(level, at, amount, owner, soot, false);
 	}
 
-	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot) {
+	/**
+	 * {@code keepOthers}: (0.14.0) never take a block from another owner (an Emberborn's flame smoke and a flashover's
+	 * ash, so a flashover only ever burns its maker's own cloud).
+	 */
+	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot,
+		boolean keepOthers) {
 		if (amount <= 0.0F) {
 			return;
 		}
@@ -325,7 +330,7 @@ public final class SmokeField {
 		while (left > 0.0F && !queue.isEmpty()) {
 			long key = queue.dequeueLong();
 			filled.add(key);
-			left = fill(field, key, BILLOW, left, ownerId, soot);
+			left = fill(field, key, BILLOW, left, ownerId, soot, keepOthers);
 			for (Direction direction : Direction.values()) {
 				long next = BlockPos.offset(key, direction);
 				if (seen.size() < PUFF_REACH && seen.add(next) && leak(level, BlockPos.of(next)) > 0.0F) {
@@ -334,12 +339,12 @@ public final class SmokeField {
 			}
 		}
 		for (int i = 0; i < filled.size() && left > 0.0F; i++) {
-			left = fill(field, filled.getLong(i), CAP, left, ownerId, soot);
+			left = fill(field, filled.getLong(i), CAP, left, ownerId, soot, keepOthers);
 		}
 	}
 
 	/** Fills the block {@code key} up to {@code upTo} from {@code left}; returns what's left. */
-	private static float fill(Field field, long key, float upTo, float left, int ownerId, float soot) {
+	private static float fill(Field field, long key, float upTo, float left, int ownerId, float soot, boolean keepOthers) {
 		float now = field.density.get(key);
 		float room = upTo - now;
 		if (room <= 0.0F) {
@@ -348,7 +353,10 @@ public final class SmokeField {
 		float put = Math.min(room, left);
 		field.density.put(key, now + put);
 		field.soot.put(key, (field.soot.get(key) * now + soot * put) / (now + put));
-		if (ownerId != 0 || now < put) {
+		int had = field.owner.get(key);
+		if (keepOthers && had != 0 && had != ownerId) {
+			// (0.14.0) someone else's smoke stays theirs
+		} else if (ownerId != 0 || now < put) {
 			field.owner.put(key, ownerId);
 		}
 		return left - put;
@@ -865,6 +873,6 @@ public final class SmokeField {
 				soot = Math.max(soot, SMOG_SOOT);
 			}
 		}
-		add(level, at, amount, owner, Math.min(1.0F, soot));
+		add(level, at, amount, owner, Math.min(1.0F, soot), true);
 	}
 }

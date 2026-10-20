@@ -27,12 +27,15 @@ is a `static final` at the top of its class. Open questions are at the end.
 
 ## 0.14.0 (Track A, built)
 Built as planned, in `power/ember` (`EmberKindle`, `EmberFireball`, `EmberFlashover`) and
-`client/power/ember/EmberKindleClient`; lang `lang/parts/ember.json`. Not compiled in the cloud (no Fabric maven).
+`client/power/ember/EmberKindleClient`; lang `lang/parts/ember.json`. Compiled on Andy's PC. Review fixes: an
+Emberborn's flame smoke and flashover ash never take a block of someone else's smoke (so a flashover only burns its
+maker's own cloud); if the server puts the flame out while it's held (too hungry), the client stands aside so the click
+digs again.
 - **Emberborn on the client:** a synced `emberborn` attachment, set from Kingdoms' `jaymoskingdoms_heritage_emberborn`
   tag once a second (anyone, power or not). Kindle's state (`ember_kindle`: running + heat in twentieths) is synced to
   all for the bar and the pose.
 - **Input:** through `RaceHoldClient` like the Frost-born's prison: the flame starts after 4 ticks held (a quick click
-  stays a punch), the client says "still held" every 5 ticks and the server stops it after 15 without word; let go and
+  stays a punch), the client says "still held" every 5 ticks and the server stops it after 40 without word (a lag spike shouldn't eat the fireball); let go and
   it stops at once. With a power other than Smoke it's sneak + left hold; Smoke keeps the plain hold. Once the flame
   runs it keeps the click at blocks too (digging is held off, `ZFighterAttackMixin`), so you can aim at a campfire.
   A Z Fighter Emberborn: as a Frost-born, Kindle only when nothing is in plain reach (else the hold combo).

@@ -3402,3 +3402,5 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
   red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
   faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).
+- **0.7.97, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
+  fireball), which Jaymo's Powers 0.14.0 runs.
