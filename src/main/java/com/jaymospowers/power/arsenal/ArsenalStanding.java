@@ -2,7 +2,10 @@ package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.chrono.ChronoEcho;
+import com.jaymospowers.power.chrono.future.FutureMech;
 import com.jaymospowers.power.web.WebNet;
+import com.jaymospowers.power.zfighter.ZFighterRogue;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
@@ -72,6 +75,8 @@ public final class ArsenalStanding {
 	static final double CATCH_RADIUS = 0.7, CATCH_BOTTOM = 0.3, CATCH_HEIGHT = 2.3;
 	/** Where things come out: this far in front of the portal (clear of its own catch zone). */
 	static final double EXIT_DISTANCE = 1.4;
+	/** Two ends in one dimension must be at least this far apart (across), or one's exit lands in the other's catch zone. */
+	static final double MIN_GAP = EXIT_DISTANCE + CATCH_RADIUS + 0.3;
 	/** How far (blocks) from a remembered place the far portal looks for safe ground, and how far up and down. */
 	static final int GROUND_RADIUS = 3, GROUND_UP = 3, GROUND_DOWN = 6;
 	/** A hum from each portal this often (ticks); motes drift off it this often. */
@@ -207,6 +212,12 @@ public final class ArsenalStanding {
 			return;
 		}
 		End near = near(player);
+		if (near.dimension() == far.dimension() && Math.abs(near.pos().y - far.pos().y) < CATCH_HEIGHT
+			&& Math.hypot(near.pos().x - far.pos().x, near.pos().z - far.pos().z) < MIN_GAP) {
+			// too close: coming out of one would land inside the other
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.portal_no_ground").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		long now = server.overworld().getGameTime();
 		List<Pair> pairs = new ArrayList<>(pairs(server));
 		pairs.add(new Pair(player.getUUID(), now, now + LIFE, near, far));
@@ -404,7 +415,8 @@ public final class ArsenalStanding {
 		if (entity instanceof ServerPlayer) {
 			return true;
 		}
-		if (!entity.getPassengers().isEmpty() || entity instanceof ArmorStand || entity instanceof EnderDragon || entity instanceof WitherBoss) {
+		if (!entity.getPassengers().isEmpty() || entity instanceof ArmorStand || entity instanceof EnderDragon || entity instanceof WitherBoss
+			|| entity instanceof FutureMech || entity instanceof ZFighterRogue rogue && rogue.tyrant() || entity instanceof ChronoEcho) {
 			return false;
 		}
 		return entity instanceof LivingEntity || entity instanceof ItemEntity || entity instanceof Projectile;
