@@ -515,3 +515,33 @@ Pocket Arsenal get a Nether of their own. Everyone else, and Emberborn without A
 - **Attachments** (persistent, copy on death), listed via `ArsenalEmber` in `registerAttachments()`: `STRANDED`,
   `ESCAPED`, `NETHER_MODE`. Rifts carry a `nether` flag; the client still draws them with the portal swirl (particles
   differ server-side only).
+
+## 0.13.36: standing portals
+Andy: Rick's Stuff's portal gun, "the portal radial menu, and placing semi permanent portals to places youve been".
+Ideas only; nothing is copied. All of it needs B unlocked (as Z and X do). Server logic: `ArsenalPlaces` (the places)
+and `ArsenalStanding` (the portal pairs); client: `ArsenalPlacesScreen` (the radial), opened from `ArsenalPowerClient.onKey`.
+- **Places:** Sneak + R marks where you stand (**Marks**: 8, newest first, the oldest goes when full). **Recent** keeps your
+  last 8 arrivals: every change of dimension (noticed by polling, so vanilla portals, deaths and Arsenal rifts all count) and
+  every void gate step, merged when within 32 blocks of an entry already there. Each place is its dimension, position, yaw and
+  biome (the menu names it "Plains (120, 64, -33)"). Persistent, copy on death, synced to the owner. Nothing in the Arsenal
+  pocket or the time chamber is remembered. The Aether (`jaymospowers:aether`) counts like anywhere else.
+- **Keys:** G alone is still Return and R alone is still Reach. Only Sneak + R and Sneak + G are new (Sneak + V and Sneak + Z
+  were already taken). An ascended Arsenal keeps Sneak + R as the pin first (a held summoned weapon is pinned; an empty hand
+  with a pin unpins); with neither, it marks. Sneak + G no longer recalls a standing Damocles (plain G does).
+- **The menu:** hold Sneak + G, point at a slice, let go (or click). One slice per place, clockwise from the top, with
+  the biome and coordinates, dimension and distance in the panel below; wheel or Tab flips Marks / Recent; the last slice,
+  "Close my portals", shows while any pair is open; the middle cancels. The pick goes to the server as
+  `ArsenalStanding.Pick(tab, index)` (index -1 is close); the server looks the place up itself.
+- **Portals:** a pair opens, one `NEAR_DISTANCE` (2) blocks ahead of you facing you, one at the place on safe ground within
+  3 blocks (floor, two clear blocks, no fluid; it turns to the facing with room in front). They last `LIFE` (24000 ticks, a
+  day) and are saved in an Overworld level attachment, so they outlast restarts. Players, mobs (not bosses), items and thrown
+  things walk in either one and come out of the other, turned to its facing, keeping their momentum and with the fall
+  cleared; 20 ticks between passes for each entity. Up to 3 pairs per owner (the oldest closes), 30 s between openings. Not
+  from or into the pocket or the time chamber. Drawn by the Arsenal rift renderer (`ArsenalPocket.sync` adds them to its
+  portal list), upright and person-sized, with motes and a hum.
+- **Tuning** is the constants at the top of `ArsenalStanding` and `ArsenalPlaces`. Both classes hold attachments and are in
+  `registerAttachments()`: `arsenal_marks`, `arsenal_recent`, `arsenal_standing` (Overworld), `arsenal_standing_open`
+  (synced count, for the menu).
+- **Check first in game:** that Sneak + G opens the menu and letting go picks; that a thrown item or a falling mob goes
+  through and comes out the right way; that a pair survives a restart; that the far portal lands somewhere sensible in the
+  Nether and the Aether.

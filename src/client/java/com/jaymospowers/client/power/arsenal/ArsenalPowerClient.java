@@ -80,6 +80,16 @@ public final class ArsenalPowerClient implements PowerClient {
 		});
 	}
 
+	/** (0.13.36) Sneak + G (once B is unlocked): the places menu; it picks on letting go. The server skips Return for it. */
+	@Override
+	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (down && key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && minecraft.gui.screen() == null && !player.isSpectator()
+			&& com.jaymospowers.power.arsenal.ArsenalPlaces.unlocked(player)) {
+			minecraft.gui.setScreen(new ArsenalPlacesScreen(JaymosPowersClient.keyMapping(PowerKey.ABILITY_2)));
+		}
+	}
+
 	/** The power skill key's mapping (registered in {@code WebSymbioteClient}). */
 	private static final String SKILL_KEY = "key.jaymospowers.web_symbiote";
 	private static net.minecraft.client.KeyMapping skillKey;
