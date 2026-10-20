@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.chrono.ChronoEcho;
 import com.jaymospowers.power.chrono.future.FutureMech;
+import com.jaymospowers.power.gravity.GravityWeight;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.zfighter.ZFighterRogue;
 import com.mojang.serialization.Codec;
@@ -212,6 +213,10 @@ public final class ArsenalStanding {
 			return;
 		}
 		End near = near(player);
+		if (near == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.portal_no_ground").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		if (near.dimension() == far.dimension() && Math.abs(near.pos().y - far.pos().y) < CATCH_HEIGHT
 			&& Math.hypot(near.pos().x - far.pos().x, near.pos().z - far.pos().z) < MIN_GAP) {
 			// too close: coming out of one would land inside the other
@@ -277,20 +282,19 @@ public final class ArsenalStanding {
 		}
 	}
 
-	/** Your end: in front of you at your feet, as far as {@link #NEAR_DISTANCE}, never inside a wall; it faces you. */
-	private static End near(ServerPlayer player) {
+	/**
+	 * Your end: {@link #NEAR_DISTANCE} in front of you at your feet, facing you. Null when that spot is in a wall or what
+	 * comes out of it would be.
+	 */
+	private static @Nullable End near(ServerPlayer player) {
 		double rad = Math.toRadians(player.getYRot());
 		Vec3 ahead = new Vec3(-Math.sin(rad), 0.0, Math.cos(rad));
-		Vec3 feet = player.position();
-		Vec3 spot = feet.add(ahead);
-		for (double d = NEAR_DISTANCE; d > 1.0; d -= 0.5) {
-			Vec3 at = feet.add(ahead.scale(d));
-			if (player.level().noCollision(new AABB(at.x - 0.3, at.y + 0.05, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3))) {
-				spot = at;
-				break;
-			}
+		Vec3 at = player.position().add(ahead.scale(NEAR_DISTANCE));
+		if (!player.level().noCollision(new AABB(at.x - 0.3, at.y + 0.05, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3))) {
+			return null;
 		}
-		return new End(player.level().dimension(), spot, player.getYRot() + 180.0F);
+		End end = new End(player.level().dimension(), at, player.getYRot() + 180.0F);
+		return player.level() instanceof ServerLevel level && roomAhead(level, end) ? end : null;
 	}
 
 	/**
@@ -318,7 +322,7 @@ public final class ArsenalStanding {
 								return end;
 							}
 						}
-						return new End(level.dimension(), base, yaw);
+						// no facing has room: keep looking elsewhere
 					}
 				}
 			}
@@ -416,7 +420,8 @@ public final class ArsenalStanding {
 			return true;
 		}
 		if (!entity.getPassengers().isEmpty() || entity instanceof ArmorStand || entity instanceof EnderDragon || entity instanceof WitherBoss
-			|| entity instanceof FutureMech || entity instanceof ZFighterRogue rogue && rogue.tyrant() || entity instanceof ChronoEcho) {
+			|| entity instanceof FutureMech || entity instanceof ZFighterRogue rogue && rogue.tyrant() || entity instanceof ChronoEcho
+			|| entity.getType().builtInRegistryHolder().is(GravityWeight.BOSSES)) {
 			return false;
 		}
 		return entity instanceof LivingEntity || entity instanceof ItemEntity || entity instanceof Projectile;
