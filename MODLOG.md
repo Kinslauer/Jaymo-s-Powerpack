@@ -1818,3 +1818,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.36, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
+  stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
+  (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
+  cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
+  bracers on the forearms and long coat tails split front and back, hanging from the waist to the knees) and the
+  **Peaked Hood** (a deep hood with a pointed peak over the brow, its underside in shadow, and a cowl over the
+  shoulders). Our own design, drawn by `tools/gen_costume.py`; `tools/costume_preview.py` draws it on a player, front,
+  side and back, in white/red and black/grey (`art-overhaul/assassin/`). A hood (the plain one or the peaked one) that
+  is up leaves the face and the real name showing, but someone else's name tag is only drawn within 8 blocks
+  (`CostumeClient.HOOD_NAME_RANGE`), and the wearer carries the entity tag `jaymospowers_hooded:<key>` (the same
+  identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
+  costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
+  bracers, mantle and cowl's growth).

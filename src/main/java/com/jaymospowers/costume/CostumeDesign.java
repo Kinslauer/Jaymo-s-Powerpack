@@ -43,7 +43,9 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	public enum Cut implements StringRepresentable {
 		BODYSUIT, ARMOURED, ROBES, COAT, RAGGED,
 		WEBBED("web"), WINDSWEPT("wind"), DENSE("gravity"), CLOCKWORK("chrono"), BANDOLIER("arsenal"), RESONANT("resonance"),
-		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform");
+		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform"),
+		// (0.13.36) anyone's: the assassin's robe
+		ASSASSIN;
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
 		public static final StreamCodec<ByteBuf, Cut> STREAM_CODEC = CostumeDesign.byOrdinal(values());
@@ -69,10 +71,21 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	public enum Mask implements StringRepresentable {
 		NONE(false), HALF_MASK(false), FULL_MASK(true), HOOD(false), HELMET(true), GOGGLES(false),
 		// (0.11.78) power sets
-		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter");
+		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter"),
+		// (0.13.36) anyone's: a deep hood with a peak over the brow; like the plain hood it leaves the face showing
+		PEAKED_HOOD(false);
 
 		public static final Codec<Mask> CODEC = StringRepresentable.fromEnum(Mask::values);
 		public static final StreamCodec<ByteBuf, Mask> STREAM_CODEC = CostumeDesign.byOrdinal(values());
+
+		/**
+		 * (0.13.36) Whether it is a hood ({@link #HOOD}, {@link #PEAKED_HOOD}): the face shows, but a hooded player is
+		 * harder to pick out at a distance ({@code SecretIdentity#HOODED}, the name tag's range) and Kingdoms' stealth
+		 * reads it.
+		 */
+		public boolean isHood() {
+			return this == HOOD || this == PEAKED_HOOD;
+		}
 
 		/** Whether it hides who you are (the whole face is covered). */
 		public final boolean hidesFace;

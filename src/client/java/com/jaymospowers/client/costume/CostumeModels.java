@@ -44,6 +44,14 @@ final class CostumeModels {
 	static final int SHORT_CAPE = 11, LONG_CAPE = 20, TATTERED_CAPE = 19;
 	/** (0.11.78) Wind's gale cloak (its tails reach past the knees) and Darktide's tide cape. */
 	static final int GALE_CAPE = 22, TIDE_CAPE = 20;
+	/**
+	 * (0.13.36) The assassin's robe: its coat tails hang from the waist (pixels) this far down, one pixel thick, standing
+	 * this far (pixels) clear of the suit's front and back, and swing out with the legs (this much of the leg's swing);
+	 * and how far the bracers, mantle, the peaked hood's brim and its cowl are grown.
+	 */
+	static final int TAIL_TOP = 9, TAIL_LENGTH = 11;
+	static final float TAIL_GAP = 0.05F, TAIL_SWAY = 0.6F;
+	static final float BRACER_GROW = 0.15F, MANTLE_GROW = 0.2F, HOOD_BRIM_GROW = 0.4F, COWL_GROW = 0.6F;
 	/** The emblem patch on the chest: its size (pixels) and the gap in front of the suit's chest. */
 	static final float EMBLEM_SIZE = 6.0F, EMBLEM_TOP = 1.5F, EMBLEM_GAP = 0.05F;
 	/**
@@ -69,6 +77,8 @@ final class CostumeModels {
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
 		private final @Nullable ModelPart bust, emblem;
+		/** (0.13.36) The assassin's coat tails, when this model has them. */
+		private final @Nullable ModelPart tailFront, tailBack;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
 			super(root, slim);
@@ -76,6 +86,8 @@ final class CostumeModels {
 			this.cape = this.body.hasChild("cape") ? this.body.getChild("cape") : null;
 			this.bust = this.body.hasChild(CostumeBody.BUST) ? this.body.getChild(CostumeBody.BUST) : null;
 			this.emblem = this.body.hasChild("emblem") ? this.body.getChild("emblem") : null;
+			this.tailFront = this.body.hasChild("tail_front") ? this.body.getChild("tail_front") : null;
+			this.tailBack = this.body.hasChild("tail_back") ? this.body.getChild("tail_back") : null;
 			hideSkinLayers();
 		}
 
@@ -114,6 +126,15 @@ final class CostumeModels {
 			}
 			bust(parent);
 			hideSkinLayers();
+			if (this.tailFront != null && this.tailBack != null) {
+				// (0.13.36) the coat tails swing out ahead of a leg going forward and behind one going back
+				float forward = Math.min(0.0F, Math.min(this.rightLeg.xRot, this.leftLeg.xRot));
+				float back = Math.max(0.0F, Math.max(this.rightLeg.xRot, this.leftLeg.xRot));
+				this.tailFront.xRot = forward * TAIL_SWAY;
+				// (under a cape the back tail hangs still, or it would swing through the cape)
+				CostumeDesign worn = state.getData(CostumeClient.KEY);
+				this.tailBack.xRot = worn != null && worn.cape() != CostumeDesign.Cape.NONE ? 0.0F : back * TAIL_SWAY;
+			}
 			if (this.cape != null) {
 				// as the vanilla cape (PlayerCapeModel)
 				this.cape.rotateBy(new Quaternionf()
@@ -230,10 +251,39 @@ final class CostumeModels {
 			root.getChild("left_arm").addOrReplaceChild("pad", CubeListBuilder.create().texOffs(32, 0).mirror()
 				.addBox(slim ? -2.0F : -1.5F, -2.8F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
 		}
+		if (cut == CostumeDesign.Cut.ASSASSIN) {
+			assassin(mesh.getRoot(), slim);
+		}
 		// (0.11.78) a bust over MCA's, shown and placed only when the body has one (Worn.bust); textured from the chest
 		mesh.getRoot().getChild("body").addOrReplaceChild(CostumeBody.BUST, CubeListBuilder.create().texOffs(BUST_U, BUST_V)
 			.addBox(BUST_X, BUST_Y, BUST_Z, BUST_W, BUST_H, BUST_D, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
 		return LayerDefinition.create(mesh, 64, 64);
+	}
+
+	/**
+	 * (0.13.36) The assassin's robe over the suit: a layered shoulder mantle (the armoured cut's pad and a lower layer,
+	 * textured from the unused hat region), leather bracers on the forearms (the sleeve regions), and long coat tails
+	 * hanging from the waist in front and behind (the jacket and pants regions). Painted by tools/gen_costume.py.
+	 */
+	private static void assassin(PartDefinition root, boolean slim) {
+		for (boolean left : new boolean[] {false, true}) {
+			PartDefinition arm = root.getChild(left ? "left_arm" : "right_arm");
+			float x = left ? (slim ? -2.0F : -1.5F) : (slim ? -3.0F : -3.5F);
+			arm.addOrReplaceChild("pad", CubeListBuilder.create().texOffs(32, 0)
+				.addBox(x, -2.8F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
+			arm.addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(32, 8)
+				.addBox(x, -0.8F, -2.5F, 5.0F, 2.0F, 5.0F, new CubeDeformation(SUIT_GROW + MANTLE_GROW)), PartPose.ZERO);
+			float bx = left ? -1.0F : (slim ? -2.0F : -3.0F);
+			arm.addOrReplaceChild("bracer", CubeListBuilder.create().texOffs(left ? 48 : 40, left ? 48 : 32)
+				.addBox(bx, 5.0F, -2.0F, slim ? 3.0F : 4.0F, 4.0F, 4.0F, new CubeDeformation(SUIT_GROW + BRACER_GROW)), PartPose.ZERO);
+		}
+		PartDefinition body = root.getChild("body");
+		float front = -2.0F - SUIT_GROW - TAIL_GAP - 1.0F, back = 2.0F + SUIT_GROW + TAIL_GAP;
+		// hinged on their own top edge at the waist, so they swing clear of the robe (Worn.setupAnim)
+		body.addOrReplaceChild("tail_front", CubeListBuilder.create().texOffs(0, 32)
+			.addBox(-4.0F, 0.0F, -1.0F, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, front + 1.0F));
+		body.addOrReplaceChild("tail_back", CubeListBuilder.create().texOffs(20, 32)
+			.addBox(-4.0F, 0.0F, 0.0F, 8.0F, TAIL_LENGTH, 1.0F), PartPose.offset(0.0F, TAIL_TOP, back));
 	}
 
 	/** The bones only, for pieces that hang off one of them. */
@@ -248,7 +298,7 @@ final class CostumeModels {
 		MeshDefinition mesh = bones();
 		PartDefinition head = mesh.getRoot().getChild("head");
 		float grow = switch (mask) {
-			case HOOD, ASH_VEIL -> HOOD_GROW;
+			case HOOD, ASH_VEIL, PEAKED_HOOD -> HOOD_GROW;
 			case HELMET -> HELMET_GROW;
 			default -> MASK_GROW;
 		};
@@ -256,6 +306,13 @@ final class CostumeModels {
 			PartPose.ZERO);
 		if (mask == CostumeDesign.Mask.HELMET) {
 			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(32, 0).addBox(-0.5F, -11.0F, -4.5F, 1.0F, 2.0F, 9.0F), PartPose.ZERO);
+		}
+		if (mask == CostumeDesign.Mask.PEAKED_HOOD) {
+			// (0.13.36) the peak: a brim standing out over the brow, shading the upper face; and a cowl falling onto the shoulders
+			head.addOrReplaceChild("brim", CubeListBuilder.create().texOffs(0, 16)
+				.addBox(-4.0F, -8.0F, -7.0F, 8.0F, 2.0F, 3.0F, new CubeDeformation(HOOD_BRIM_GROW)), PartPose.ZERO);
+			head.addOrReplaceChild("cowl", CubeListBuilder.create().texOffs(24, 16)
+				.addBox(-4.0F, 0.0F, -3.0F, 8.0F, 2.0F, 6.0F, new CubeDeformation(COWL_GROW)), PartPose.ZERO);
 		}
 		return LayerDefinition.create(mesh, 64, 32);
 	}

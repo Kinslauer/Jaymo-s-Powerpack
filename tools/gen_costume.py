@@ -439,9 +439,87 @@ def carapace(part, face, x, y, w, h, rng):
     return (P, -25 if edge else 0)
 
 
+def assassin(part, face, x, y, w, h, rng):
+    """Assassin (0.13.36): a fitted robe crossed at the chest with a trimmed lapel, a sash and buckle at the waist,
+    leather-dark forearms under the bracers, boots; the coat tails, bracers and mantle are separate boxes (ASSASSIN_BOXES)."""
+    if is_arm(part):
+        if face == "top":
+            return P
+        if y == 11 or face == "bottom":
+            return None  # bare hands
+        if y >= 7:
+            return (S, -45)  # the forearm under the bracer
+        return P
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return (S, -70)  # boots
+        if face != "top" and y == 8:
+            return S  # their cuffs
+        return P
+    if face == "top":
+        return P
+    if face in ("front", "back", "left", "right") and y in (8, 9):
+        if face == "front" and x in (3, 4):
+            return (S, -45) if y == 8 else (S, -20)  # the buckle
+        return S
+    if face == "front" and y < 8:
+        left, right = 1 + y // 2, 6 - y // 2
+        if x == left or x == right:
+            return S  # the lapel's trim
+        if left < x < right:
+            return (P, -45)  # the shirt under the robe
+        return P
+    if face == "back" and y < 8 and x == 3:
+        return (P, -30)  # the seam
+    if face in ("left", "right") and y == 7:
+        return (P, -25)
+    return P
+
+
+def assassin_tail(part, face, x, y, w, h, rng):
+    """The assassin's coat tails: split up the middle, a trimmed hem, the inner edges in shade."""
+    if face in ("front", "back"):
+        split = 1 if part == "tail_front" else 3
+        if x in (3, 4) and y >= split:
+            return None
+        if y == 0:
+            return S  # under the sash
+        if y >= h - 2:
+            return S
+        if x in (2, 5) and y >= split:
+            return (P, -35)
+        return P
+    if face in ("top", "bottom"):
+        return (P, -40)
+    return S if y >= h - 2 else (P, -20)
+
+
+def assassin_bracer(part, face, x, y, w, h, rng):
+    """Leather bracers in the secondary colour's shade, strapped top and bottom."""
+    if face in ("top", "bottom") or y in (0, h - 1):
+        return (S, -105)
+    return (S, -70)
+
+
+def assassin_pad(part, face, x, y, w, h, rng):
+    """The mantle's upper layer in the primary with a trimmed edge; the lower layer in the secondary, hem in shade."""
+    if part == "pad":
+        return S if (face not in ("top", "bottom") and y == h - 1) else P
+    return (S, -60) if (face not in ("top", "bottom") and y == h - 1) else (S, -10)
+
+
+# (0.13.36) the assassin's extra boxes: (name, texture u, v, w, h, d, pattern), per slim; CostumeModels.assassin
+def assassin_boxes(slim):
+    aw = 3 if slim else 4
+    return [("pad", 32, 0, 5, 3, 5, assassin_pad), ("mantle", 32, 8, 5, 2, 5, assassin_pad),
+            ("bracer", 40, 32, aw, 4, 4, assassin_bracer), ("bracer", 48, 48, aw, 4, 4, assassin_bracer),
+            ("tail_front", 0, 32, 8, 11, 1, assassin_tail), ("tail_back", 20, 32, 8, 11, 1, assassin_tail)]
+
+
 CUTS = {"bodysuit": bodysuit, "armoured": armoured, "robes": robes, "coat": coat, "ragged": ragged,
         "webbed": webbed, "windswept": windswept, "dense": dense, "clockwork": clockwork, "bandolier": bandolier,
-        "resonant": resonant, "tidal": tidal, "ash_wraps": ash_wraps, "gi": gi, "carapace": carapace}
+        "resonant": resonant, "tidal": tidal, "ash_wraps": ash_wraps, "gi": gi, "carapace": carapace,
+        "assassin": assassin}
 
 
 def suits():
@@ -461,6 +539,9 @@ def suits():
                             img = primary if rim else secondary
                             shade = cloth_shade(x, y, fw, fh, rng) - 10
                             img.putpixel((fx + x, fy + y), (shade, shade, shade, 255))
+            if name == "assassin":
+                for part, u, v, w, h, d, extra in assassin_boxes(slim):
+                    paint_box(primary, secondary, u, v, w, h, d, part, extra, rng)
             tag = "_slim" if slim else ""
             save(primary, os.path.join(COSTUME, "suit", name + tag + "_primary.png"))
             save(secondary, os.path.join(COSTUME, "suit", name + tag + "_secondary.png"))
@@ -569,8 +650,54 @@ def headband(face, x, y):
     return None
 
 
+def peaked_hood(face, x, y):
+    """Assassin (0.13.36): a deep hood, the face left open but shaded under the peak; lined at the cheeks."""
+    if face == "bottom":
+        return None
+    if face == "front":
+        if y == 0:
+            return P
+        if y == 1:
+            return (P, -70)
+        if y == 2 and 1 <= x <= 6:
+            return (P, -150)  # the shadow under the peak
+        if x in (0, 7):
+            return P
+        return None
+    if face in ("left", "right"):
+        edge = (x == 0) if face == "left" else (x == 7)
+        return (S, -30) if edge and y >= 2 else P
+    if face == "back" and y == 7:
+        return S
+    return P
+
+
+def peaked_brim(part, face, x, y, w, h, rng):
+    """The peak (8x2x3 over the brow): a pointed beak, the underside as dark shade, a trimmed lip."""
+    d = 3
+    if part == "brim":
+        if face == "front":
+            if x in (0, 7) or (y == 1 and x in (1, 6)):
+                return None  # the point
+            return S if y == 1 else P
+        if face == "top":
+            if y == d - 1 and x in (0, 1, 6, 7) or y == d - 2 and x in (0, 7):
+                return None
+            return P
+        if face == "bottom":
+            return (P, -175)  # the underside, in shadow
+        return (P, -30)
+    # the cowl (8x2x6), falling onto the shoulders
+    if face == "bottom":
+        return (P, -120)
+    if face in ("top",):
+        return P
+    return S if y == h - 1 else P
+
+
 MASKS = {"half_mask": half_mask, "full_mask": full_mask, "hood": hood, "helmet": helmet, "goggles": goggles,
-         "web_mask": web_mask, "ash_veil": ash_veil, "headband": headband}
+         "web_mask": web_mask, "ash_veil": ash_veil, "headband": headband,
+         "peaked_hood": peaked_hood}
 
 
 def masks():
@@ -589,6 +716,9 @@ def masks():
                     if name in ("helmet", "goggles") and which == S:
                         shade = min(255, shade + 10)  # polished
                     (primary if which == P else secondary).putpixel((fx + x, fy + y), (shade, shade, shade, 255))
+        if name == "peaked_hood":
+            for part, u, v, w, h, d in (("brim", 0, 16, 8, 2, 3), ("cowl", 24, 16, 8, 2, 6)):
+                paint_box(primary, secondary, u, v, w, h, d, part, peaked_brim, rng)
         if name == "helmet":
             for face, (fx, fy, fw, fh) in box_faces(32, 0, 1, 2, 9).items():
                 for y in range(fh):
