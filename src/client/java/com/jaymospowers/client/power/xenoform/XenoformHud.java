@@ -45,6 +45,9 @@ final class XenoformHud {
 		"knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT},
 		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE},
 		"nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER});
+	/** The slam's burst of light: where the band is on screen (shares of the width and height), how big it blooms (share of the height), its layers and row height. */
+	private static final float BURST_X = 0.52F, BURST_Y = 0.74F, BURST_SIZE = 0.4F;
+	private static final int BURST_LAYERS = 5, BURST_STEP = 3, BURST_ALPHA = 30;
 	private static final Item[] NO_ICONS = {Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON};
 
 	private XenoformHud() {
@@ -57,6 +60,7 @@ final class XenoformHud {
 		int height = graphics.guiHeight();
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
 		flash(graphics, width, height, delta);
+		burst(graphics, width, height, delta);
 		XenoformState.Hud hud = XenoformState.hud(player);
 		XenoForm form = XenoformState.form(player);
 		long now = player.level().getGameTime();
@@ -87,6 +91,29 @@ final class XenoformHud {
 		graphics.fill(0, height - edge, width, height, color);
 		graphics.fill(0, edge, edge, height - edge, color);
 		graphics.fill(width - edge, edge, width, height - edge, color);
+	}
+
+	/** The slam landing in first person: green light blooming out from the band and fading, as nested soft ellipses. */
+	private static void burst(GuiGraphicsExtractor graphics, int width, int height, DeltaTracker delta) {
+		if (XenoformPowerClient.burst <= 0) {
+			return;
+		}
+		float left = (XenoformPowerClient.burst - delta.getGameTimeDeltaPartialTick(false)) / (float)XenoformPowerClient.BURST_TICKS;
+		if (left <= 0.0F) {
+			return;
+		}
+		float bloom = 0.25F + 0.75F * (1.0F - left);
+		int cx = Math.round(width * BURST_X);
+		int cy = Math.round(height * BURST_Y);
+		for (int layer = BURST_LAYERS; layer >= 1; layer--) {
+			float ry = height * BURST_SIZE * bloom * layer / BURST_LAYERS;
+			float rx = ry * 1.5F;
+			int color = Mth.clamp((int)(BURST_ALPHA * left * 1.3F), 0, 255) << 24 | (layer == 1 ? 0xD8FFE0 : XenoformPower.COLOR);
+			for (float dy = -ry; dy < ry; dy += BURST_STEP) {
+				int half = (int)(rx * Mth.sqrt(1.0F - dy * dy / (ry * ry)));
+				graphics.fill(cx - half, cy + (int)dy, cx + half, cy + (int)dy + BURST_STEP, color);
+			}
+		}
 	}
 
 	/** Z: the dialled alien, and the band's state. */

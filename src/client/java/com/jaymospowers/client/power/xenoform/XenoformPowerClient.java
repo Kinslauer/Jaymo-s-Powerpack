@@ -27,6 +27,8 @@ public final class XenoformPowerClient implements PowerClient {
 	private static final String SKILL_KEY = "key.jaymospowers.web_symbiote";
 	/** The flash on changing shape lasts this many ticks. */
 	static final int FLASH_TICKS = 12;
+	/** The burst of light at the band when the slam lands (first person) lasts this many ticks. */
+	static final int BURST_TICKS = 8;
 
 	private static @Nullable KeyMapping skillKey;
 	private static boolean skillWasDown;
@@ -34,6 +36,8 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Ticks left of the flash, and the colour of the shape it marked. */
 	static int flash;
 	static int flashColor;
+	/** Ticks left of the slam's burst of light. */
+	static int burst;
 
 	private XenoformPowerClient() {
 	}
@@ -114,6 +118,9 @@ public final class XenoformPowerClient implements PowerClient {
 		if (flash > 0) {
 			flash--;
 		}
+		if (burst > 0) {
+			burst--;
+		}
 	}
 
 	@Override
@@ -136,6 +143,7 @@ public final class XenoformPowerClient implements PowerClient {
 		skillWasDown = false;
 		formWas = active ? player.getAttached(XenoformState.FORM) : null;
 		flash = 0;
+		burst = 0;
 		XenoformSlap.clear();
 	}
 }

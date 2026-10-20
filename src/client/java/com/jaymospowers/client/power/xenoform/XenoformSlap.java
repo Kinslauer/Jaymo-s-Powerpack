@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.xenoform;
 
+import com.jaymospowers.client.ScreenShake;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
@@ -22,14 +24,28 @@ import org.jspecify.annotations.Nullable;
  * person by {@code XenoformFirstPersonMixin}.
  */
 public final class XenoformSlap {
-	/** {@code raise}: how far the wrist is up and the hand poised (0-1); {@code strike}: how far the hand has come down on it. */
-	public record Pose(float raise, float strike) {
+	/**
+	 * The slap as raw clocks: {@code rise} the wrist coming up with the hand poised (0-1), {@code hit} the hand coming down
+	 * on it (0-1), {@code since} the ticks since the hand landed (-1 before it has), {@code fall} the arms dropping away
+	 * (0-1). Third person eases them ({@link #raise}, {@link #strike}); first person shapes its own curves from them
+	 * ({@link XenoformSlamView}).
+	 */
+	public record Pose(float rise, float hit, float since, float fall) {
+		/** How far the wrist is up and the hand poised (0-1), eased, as the arms fall away. */
+		public float raise() {
+			return ease(this.rise) * ease(1.0F - this.fall);
+		}
+
+		/** How far the hand has come down on it (0-1), eased. */
+		public float strike() {
+			return ease(this.hit) * ease(1.0F - this.fall);
+		}
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:xenoform_slap");
 
 	/** Ticks: the wrist rising; the hand dropping; resting on the band after the slam; the arms falling back. */
-	static final float RAISE_TICKS = 5.0F, STRIKE_TICKS = 3.0F, REST_TICKS = 4.0F, DROP_TICKS = 6.0F;
+	static final float RAISE_TICKS = 5.5F, STRIKE_TICKS = 2.0F, REST_TICKS = 4.0F, DROP_TICKS = 6.0F;
 	/** Someone else's slap starts with the wrist already on its way: this long before the hand drops. */
 	static final float OTHERS_RAISE_TICKS = 2.0F;
 	/** A hold older than this when the change comes isn't what caused it (a timed-out form, a glitch). */
@@ -38,6 +54,9 @@ public final class XenoformSlap {
 	static final float WRIST_X = -1.15F, WRIST_Y = 0.85F;
 	/** The right hand poised high, and down on the wrist. */
 	static final float POISED_X = -2.4F, POISED_Y = -0.3F, POISED_Z = 0.3F, STRUCK_X = -1.34F, STRUCK_Y = -0.49F;
+	/** First person: the camera kick when the hand lands (degrees, ticks). */
+	static final float IMPACT_SHAKE = 0.9F;
+	static final int IMPACT_SHAKE_TICKS = 7;
 	/** The head looks down at the band. */
 	static final float HEAD_DOWN = 0.4F;
 
@@ -45,6 +64,8 @@ public final class XenoformSlap {
 	private static float holdAt = -1.0F, releaseAt = -1.0F, slamAt = -1.0F;
 	/** The hold began as yourself: letting go is the slam (the hand comes down then), not a hold timer. */
 	private static boolean slamOnRelease;
+	/** The first-person burst and kick of this slam have gone off (once a slam). */
+	private static boolean landed;
 	/** The running slam started from your own release: play the strike, like everyone else's slap. */
 	private static boolean selfStrike;
 	// everyone else: the form each was last seen in, and when their slap started
@@ -79,7 +100,9 @@ public final class XenoformSlap {
 	public static void changed(float now) {
 		boolean striking = selfStrike && slamAt >= 0.0F && now - slamAt <= HOLD_STALE_TICKS;
 		if (!striking && holdAt >= 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
-			slamAt = now;
+			// an alien's hand has already come down by the hold's own clock: carry on from there, so the landing isn't played twice
+			float late = slamOnRelease ? 0.0F : Math.max(0.0F, now - holdAt - XenoformPower.HOLD_TICKS);
+			slamAt = now - late;
 			selfStrike = false;
 		}
 		holdAt = -1.0F;
@@ -88,7 +111,7 @@ public final class XenoformSlap {
 
 	public static void clear() {
 		holdAt = releaseAt = slamAt = -1.0F;
-		selfStrike = slamOnRelease = false;
+		selfStrike = slamOnRelease = landed = false;
 		FORMS.clear();
 		SLAMS.clear();
 	}
@@ -101,6 +124,7 @@ public final class XenoformSlap {
 			if (pose == null) {
 				slamAt = -1.0F;
 				selfStrike = false;
+				landed = false;
 			}
 			return pose;
 		}
@@ -126,38 +150,49 @@ public final class XenoformSlap {
 			float dt = now - slam;
 			if (!fromHold) {
 				if (dt < OTHERS_RAISE_TICKS) {
-					return new Pose(ease(dt / OTHERS_RAISE_TICKS), 0.0F);
+					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F);
 				}
 				if (dt < OTHERS_RAISE_TICKS + STRIKE_TICKS) {
-					return new Pose(1.0F, ease((dt - OTHERS_RAISE_TICKS) / STRIKE_TICKS));
+					return new Pose(1.0F, (dt - OTHERS_RAISE_TICKS) / STRIKE_TICKS, -1.0F, 0.0F);
 				}
 				dt -= OTHERS_RAISE_TICKS + STRIKE_TICKS;
 			}
+			// dt: the ticks since the hand landed
 			if (dt < REST_TICKS) {
-				return new Pose(1.0F, 1.0F);
+				return new Pose(1.0F, 1.0F, dt, 0.0F);
 			}
 			if (dt < REST_TICKS + DROP_TICKS) {
-				float f = ease(1.0F - (dt - REST_TICKS) / DROP_TICKS);
-				return new Pose(f, f);
+				return new Pose(1.0F, 1.0F, dt, (dt - REST_TICKS) / DROP_TICKS);
 			}
 			return null;
 		}
 		if (hold >= 0.0F) {
 			float dt = now - hold;
-			float raise = ease(Math.min(1.0F, dt / RAISE_TICKS));
+			float rise = Math.min(1.0F, dt / RAISE_TICKS);
 			// as yourself the hand waits, poised, for as long as you hold (and scroll); as an alien it lands as the hold turns you back
-			float strike = poisedWhileHeld ? 0.0F : ease(Mth.clamp((dt - (XenoformPower.HOLD_TICKS - STRIKE_TICKS)) / STRIKE_TICKS, 0.0F, 1.0F));
+			float hit = poisedWhileHeld ? 0.0F : Mth.clamp((dt - (XenoformPower.HOLD_TICKS - STRIKE_TICKS)) / STRIKE_TICKS, 0.0F, 1.0F);
+			float since = hit >= 1.0F ? dt - XenoformPower.HOLD_TICKS : -1.0F;
+			float fall = 0.0F;
 			if (release >= 0.0F) {
-				float f = 1.0F - (now - release) / DROP_TICKS;
-				if (f <= 0.0F) {
+				fall = (now - release) / DROP_TICKS;
+				if (fall >= 1.0F) {
 					return null;
 				}
-				raise *= ease(f);
-				strike *= ease(f);
 			}
-			return new Pose(raise, strike);
+			return new Pose(rise, hit, since, fall);
 		}
 		return null;
+	}
+
+	/** First person, once the hand has landed: the camera's kick and the burst of light, once a slam. */
+	public static void landed(Pose pose, LocalPlayer player) {
+		if (pose.since() < 0.0F || landed) {
+			return;
+		}
+		landed = true;
+		// felt from just under the eye: the view dips, then rattles
+		ScreenShake.add(IMPACT_SHAKE, IMPACT_SHAKE_TICKS, player.getEyePosition().add(0.0, -0.5, 0.0));
+		XenoformPowerClient.burst = XenoformPowerClient.BURST_TICKS;
 	}
 
 	private static float ease(float t) {
