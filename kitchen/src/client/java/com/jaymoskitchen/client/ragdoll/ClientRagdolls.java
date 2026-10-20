@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 public final class ClientRagdolls {
 	/** A body unheard of this long (ticks) while its entity is gone is forgotten. */
 	private static final int FORGET_TICKS = 40;
+	/** A body unheard of longer than this (ticks) jumps to its next points instead of gliding there. */
+	private static final int GAP_TICKS = 2;
 
 	/** One body: its rig, and its points a tick ago and now (x, y, z each). */
 	public static final class Track {
@@ -84,6 +86,10 @@ public final class ClientRagdolls {
 				return;
 			}
 			TRACKS.put(id, track);
+			fill(track.now, snapshot);
+			System.arraycopy(track.now, 0, track.before, 0, track.now.length);
+		} else if (track.unseen > GAP_TICKS) {
+			// silent a while (carried, asleep): it starts where it is now rather than sliding from where it was
 			fill(track.now, snapshot);
 			System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 		} else {

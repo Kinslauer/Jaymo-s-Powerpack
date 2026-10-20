@@ -121,8 +121,9 @@ public final class LimpController {
 		}
 		if (body != null) {
 			if (player != owner || minecraft.level != level || !player.isAlive() || player.isRemoved()) {
-				// respawned or died: the server already knows; changed level: let it know we're up
-				finish(minecraft, player == owner && player.isAlive());
+				// died: the server already knows; respawned or changed level: let it know we're up (the new player object
+				// after a portal isn't the owner, so it can't be told apart by that)
+				finish(minecraft, player.isAlive());
 			} else {
 				limpTick(minecraft, player);
 			}

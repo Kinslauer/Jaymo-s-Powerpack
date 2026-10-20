@@ -30,6 +30,9 @@ public final class LivingRagdolls {
 	private static final int STALE_TICKS = 60;
 	/** A dead player's last body is kept this long (ticks) for the corpse, then forgotten. */
 	private static final int DEATH_KEEP_TICKS = 20;
+	/** A relayed body must be about player-sized and this near the player (blocks), or it's thrown away. */
+	private static final float MIN_SIZE = 0.1F, MAX_SIZE = 8.0F;
+	private static final double MAX_OFFSET = 32.0;
 
 	/** On a player lying limp (synced to everyone, not saved): everyone draws them as the relayed ragdoll. */
 	public static final AttachmentType<Boolean> LIMP = AttachmentRegistry.create(JaymosKitchen.id("limp"),
@@ -39,6 +42,8 @@ public final class LivingRagdolls {
 	private static final class Entry {
 		RagdollSnapshot snapshot;
 		long lastPose;
+		/** The game tick of the last relayed pose (one a tick at most). */
+		long lastRelay = -1;
 		int deadFor;
 	}
 
@@ -73,10 +78,18 @@ public final class LivingRagdolls {
 			if (!isLimp(player)) {
 				return;
 			}
+			RagdollSnapshot snapshot = payload.snapshot();
+			if (!believable(player, snapshot)) {
+				return;
+			}
 			Entry entry = ENTRIES.computeIfAbsent(player.getUUID(), id -> new Entry());
-			entry.snapshot = payload.snapshot();
-			entry.lastPose = player.level().getGameTime();
-			RagdollNet.sendAround(player, payload.snapshot(), player);
+			long now = player.level().getGameTime();
+			entry.snapshot = snapshot;
+			entry.lastPose = now;
+			if (entry.lastRelay != now) {
+				entry.lastRelay = now;
+				RagdollNet.sendAround(player, snapshot, player);
+			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			Iterator<Map.Entry<UUID, Entry>> it = ENTRIES.entrySet().iterator();
@@ -108,6 +121,22 @@ public final class LivingRagdolls {
 			handler.player.removeAttached(LIMP);
 			ENTRIES.remove(handler.player.getUUID());
 		});
+	}
+
+	/** A client's body for itself: a real shape, a sane size, all its points, and lying where the player is. */
+	private static boolean believable(ServerPlayer player, RagdollSnapshot s) {
+		if (s.shape() < 0 || s.shape() >= RagdollRig.Shape.values().length) {
+			return false;
+		}
+		// written so NaN fails every test
+		if (!(s.width() >= MIN_SIZE && s.width() <= MAX_SIZE && s.height() >= MIN_SIZE && s.height() <= MAX_SIZE)) {
+			return false;
+		}
+		if (!(Math.abs(s.x() - player.getX()) <= MAX_OFFSET && Math.abs(s.y() - player.getY()) <= MAX_OFFSET
+			&& Math.abs(s.z() - player.getZ()) <= MAX_OFFSET)) {
+			return false;
+		}
+		return s.count() == s.rig().count && s.points().length == s.count() * 3;
 	}
 
 	/** True while {@code entity} is a player lying limp. */

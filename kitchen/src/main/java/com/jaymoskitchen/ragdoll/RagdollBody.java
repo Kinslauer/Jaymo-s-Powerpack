@@ -31,7 +31,7 @@ public final class RagdollBody {
 	private static final int ITERATIONS = 6;
 	/** The furthest a point may move in one sub-step, as a share of its size, and the most sub-steps in a tick. */
 	private static final float SUBSTEP_SHARE = 0.9F;
-	private static final int MAX_SUBSTEPS = 6;
+	private static final int MAX_SUBSTEPS = 14;
 	/** No point moves faster than this (blocks a tick). */
 	private static final float MAX_SPEED = 2.5F;
 	/** Still below this speed (blocks a tick) for this many ticks, it falls asleep; asleep, it checks every so often. */
@@ -330,6 +330,7 @@ public final class RagdollBody {
 	public void step(RagdollWorld world, float gravity) {
 		ticks++;
 		int n = rig.count;
+		boolean kicked = false;
 		if (asleep) {
 			// asleep: wake if someone walks into it, and look again now and then in case the ground went (a block
 			// broken under it)
@@ -343,6 +344,7 @@ public final class RagdollBody {
 				movers.clear();
 				world.movers(box[0], box[1], box[2], box[3], box[4], box[5], movers);
 				kick();
+				kicked = true;
 				if (asleep) {
 					return;
 				}
@@ -377,10 +379,13 @@ public final class RagdollBody {
 		double reach = fastest + biggest + 0.1;
 		solids.clear();
 		world.solids(minX - reach, minY - reach, minZ - reach, maxX + reach, maxY + reach, maxZ + reach, solids);
-		movers.clear();
-		world.movers(minX - biggest, minY - biggest, minZ - biggest, maxX + biggest, maxY + biggest, maxZ + biggest,
-			movers);
-		kick();
+		if (!kicked) {
+			// (just woken by a kick, it isn't kicked again this tick)
+			movers.clear();
+			world.movers(minX - biggest, minY - biggest, minZ - biggest, maxX + biggest, maxY + biggest, maxZ + biggest,
+				movers);
+			kick();
+		}
 
 		int substeps = (int) Math.min(MAX_SUBSTEPS, Math.max(1, Math.ceil(fastest / (smallest * 2 * SUBSTEP_SHARE))));
 		double g = gravity / ((double) substeps * substeps);
@@ -664,7 +669,10 @@ public final class RagdollBody {
 		return out;
 	}
 
-	/** Puts the points back from {@link #relative}, at rest; false if they don't fit this rig. */
+	/**
+	 * Puts the points back from {@link #relative}, at rest but awake (a body saved mid-fall falls on; a settled one
+	 * settles again in {@code SLEEP_TICKS}); false if they don't fit this rig.
+	 */
 	public boolean restore(float[] points, double ox, double oy, double oz) {
 		if (points == null || points.length != rig.count * 3) {
 			return false;
@@ -677,8 +685,7 @@ public final class RagdollBody {
 		if (!sane()) {
 			return false;
 		}
-		asleep = true;
-		sleepingFor = 0;
+		wake();
 		return true;
 	}
 
