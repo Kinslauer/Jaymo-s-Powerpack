@@ -9,6 +9,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Icestone: freezes the water and lava around it. Water (source blocks) within {@link #RADIUS_SQUARED} becomes ice, lava
@@ -30,6 +32,15 @@ public class IcestoneBlock extends Block {
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
 		if (!oldState.is(this)) {
 			level.scheduleTick(pos, this, LOOK_EVERY);
+		}
+	}
+
+	/** A neighbour changed (water poured next to it, say): look at once (a scheduled tick may already be pending 20 ticks out). */
+	@Override
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation,
+		boolean movedByPiston) {
+		if (level instanceof ServerLevel server) {
+			freeze(server, pos);
 		}
 	}
 

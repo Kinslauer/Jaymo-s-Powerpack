@@ -26,6 +26,7 @@ public final class Aether {
 		AetherItems.init();
 		FloatingBlockEntity.register();
 		AercloudBlock.register();
+		QuicksoilSpeed.register();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();
