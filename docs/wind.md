@@ -638,19 +638,20 @@ client half is `client/BeamClashClient`.
 Wind is the power that gets you to the Aether, the way Chrono's Fast Forward gets you to the future. Lore: the Aether
 scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths and the four Giants).
 
-- **The dimension** `jaymospowers:aether` is pure datapack: `dimension/aether.json`, `dimension_type/aether.json`
-  (bright, skylight, no ceiling, min_y 0, height 256, clouds at 40, beds set spawn), `worldgen/noise_settings/aether.json`
-  and four biomes `aether_highfields` (green and sky blue), `aether_magnetic` (violet-grey), `aether_arctic` (pale ice,
-  snow, temperature 0) and `aether_irradiated` (lime-yellow). Vanilla placed features only; passive animals only; no carvers.
-  The noise settings are vanilla `floating_islands` with `temperature` and `vegetation` wired to the vanilla climate noises
-  (scale 3, so a highland spans roughly 250 blocks); vanilla's own router leaves both at 0.0, which would give a single
-  biome. The four biomes are the temperature/humidity quadrants of the multi_noise source.
+- **The dimension** `jaymospowers:aether` is datapack plus four Java features (`com.jaymospowers.aether`), described in
+  `docs/aether.md` ("The dimension"): floating holystone islands (y 14-128, most of the mass at y 32-95) under an eternal
+  noon, clouds at y 9.5, four skyroot biomes (meadow, forest, grove, woodland), grass and skyroot trees on the islands,
+  aerclouds, ores, lakes. No mobs yet. The old highlands (`aether_highfields`, `aether_magnetic`, `aether_arctic`,
+  `aether_irradiated`) are gone: an existing world's Aether chunks that were generated with them keep their old biome ids
+  (which no longer exist), so use a fresh Aether (delete the world's `DIM-aether` folder, or a new world).
 - **Up.** A Wind user in flight in the Overworld who climbs to within `ASCEND_MARGIN` (4) blocks of the top build height,
   with ability 4 (B) unlocked (`Mastery.isUnlocked`), rises with every player within `COMPANION_RADIUS` (4). Arrival: same
-  x/z on the top of the island; none there, so a square spiral out in 16-block steps to `SEARCH_RADIUS` (96); none at all,
-  the open air at y 128 with Slow Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The first
+  x/z standing on bare island ground (the highest block must be solid and not a log or leaves, with two free blocks over
+  it, looked for within `STAND_SEARCH` (3) blocks so a tree's trunk is not picked); none there, so a square spiral out in
+  16-block steps to `SEARCH_RADIUS` (96); none at all, the open air at y 128 (above the highest peak, near y 115) with Slow
+  Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The first
   visit tells the lore (`VISITED`). No Return is stored: the way home is the fall.
-- **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (4) in the Aether lands in the Overworld at the same x/z,
+- **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (4; the lowest islands and cloud banks are above y 2) in the Aether lands in the Overworld at the same x/z,
   `ARRIVE_ABOVE_GROUND` (48) above the ground (capped `ARRIVE_BELOW_TOP` (8) under the top), with Slow Falling for
   `SLOW_FALL_TICKS` (600), plenty to land. Fall damage still applies once it ends. Dying takes you to your own spawn as usual.
 - Tuning: constants at the top of `WindAether`. Not playtested; the dimension needs a fresh world or a datapack reload to exist.

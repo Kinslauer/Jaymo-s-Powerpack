@@ -1,0 +1,71 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#c0c0ff",
+    "minecraft:visual/fog_color": "#9393bc",
+    "minecraft:visual/water_fog_color": "#050533"
+  },
+  "carvers": [],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#3f76e4",
+    "grass_color": "#b1ffcb",
+    "foliage_color": "#b1ffcb"
+  },
+  "features": [
+    [
+      "jaymospowers:quicksoil_shelf"
+    ],
+    [
+      "jaymospowers:aether_water_lake"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "jaymospowers:aether_ore_dirt",
+      "jaymospowers:aether_ore_icestone",
+      "jaymospowers:aether_ore_ambrosium",
+      "jaymospowers:aether_ore_zanite",
+      "jaymospowers:aether_ore_gravitite_buried",
+      "jaymospowers:aether_ore_gravitite"
+    ],
+    [],
+    [
+      "jaymospowers:aether_water_spring"
+    ],
+    [
+      "jaymospowers:aether_trees_grove",
+      "jaymospowers:aether_grass",
+      "jaymospowers:aether_tall_grass",
+      "jaymospowers:aether_white_flower",
+      "jaymospowers:aether_purple_flower",
+      "jaymospowers:aether_berry_bush"
+    ],
+    [
+      "jaymospowers:crystal_island",
+      "jaymospowers:aercloud_bank",
+      "jaymospowers:aercloud_cold",
+      "jaymospowers:aercloud_blue",
+      "jaymospowers:aercloud_golden"
+    ]
+  ],
+  "has_precipitation": false,
+  "temperature": 0.8
+}

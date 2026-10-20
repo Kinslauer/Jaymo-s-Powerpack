@@ -741,6 +741,8 @@ def assets():
 
     # lang
     lang = {"itemGroup.jaymospowers.aether": "The Aether"}
+    # shown by the dimension's bed rule (dimension_type/aether.json): there is no night to sleep through
+    lang["message.jaymospowers.aether.no_sleep"] = "There is no night in the Aether to sleep through."
     for b, n in NAMES.items():
         lang["block.jaymospowers." + b] = n
     for i, n in ITEM_NAMES.items():

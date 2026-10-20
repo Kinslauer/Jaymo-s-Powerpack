@@ -17,6 +17,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -26,20 +28,23 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.13.36) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating islands in four
- * highlands: Highfields, Magnetic, Arctic and Irradiated; see {@code docs/wind.md}).
+ * (0.13.36) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating holystone islands under
+ * an eternal noon, in four skyroot biomes; see {@code docs/aether.md} and {@code docs/wind.md}).
  * <ul>
  * <li>A Wind user flying in the Overworld who climbs to within {@link #ASCEND_MARGIN} blocks of the top of the world, with
  * the fourth ability (B) unlocked, rises into the Aether with every player within {@link #COMPANION_RADIUS} blocks.</li>
- * <li>They arrive at the same x/z on the top of an island there, or the nearest island within {@link #SEARCH_RADIUS}
- * blocks, or (no island anywhere near) in the open air at {@link #EMPTY_ARRIVAL_Y} with Slow Falling.</li>
+ * <li>They arrive at the same x/z standing on an island there (on the ground, not on a tree: {@link #standAt}), or the
+ * nearest island within {@link #SEARCH_RADIUS} blocks, or (no island anywhere near) in the open air at
+ * {@link #EMPTY_ARRIVAL_Y} with Slow Falling.</li>
  * <li>The way home is the old Aether's: anyone (Wind or not) who falls below {@link #FALL_OUT_Y} lands back in the
  * Overworld, {@link #ARRIVE_ABOVE_GROUND} blocks above the ground at the same x/z, floating down on Slow Falling.</li>
  * </ul>
@@ -55,9 +60,12 @@ public final class WindAether {
 	static final int ASCEND_COOLDOWN = 200;
 	/** How far (blocks) to search outward for an island when the arrival column is empty air, and the step between probes (a chunk). */
 	static final int SEARCH_RADIUS = 96, SEARCH_STEP = 16;
-	/** With no island anywhere near: arrive in the air at this height, floating for this many ticks. */
+	/** With no island anywhere near: arrive in the air at this height (above every island: the terrain tops out near y 115),
+	 * floating for this many ticks. */
 	static final int EMPTY_ARRIVAL_Y = 128, EMPTY_SLOW_FALL_TICKS = 400;
-	/** Falling below this height in the Aether takes you home. */
+	/** How far (blocks) from a probed column to look for ground that is clear of trees. */
+	static final int STAND_SEARCH = 3;
+	/** Falling below this height in the Aether takes you home (the lowest islands and cloud banks sit above y 2). */
 	static final int FALL_OUT_Y = 4;
 	/** Home: this many blocks above the ground (never closer than ARRIVE_BELOW_TOP to the world's top), floating down for
 	 * this many ticks, long enough to land (fall damage applies again once it ends). */
@@ -126,7 +134,7 @@ public final class WindAether {
 		}
 	}
 
-	/** The top of the island at (x, z), else of the nearest one found spiralling out; {x, y, z}, or null if none. */
+	/** Somewhere to stand on the island at (x, z), else on the nearest one found spiralling out; {x, y, z}, or null if none. */
 	private static int[] findIsland(ServerLevel aether, int x, int z) {
 		for (int r = 0; r <= SEARCH_RADIUS; r += SEARCH_STEP) {
 			// the square ring at distance r (just the centre when r is 0), a chunk between probes
@@ -135,9 +143,9 @@ public final class WindAether {
 					if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
 						continue;
 					}
-					int y = topAt(aether, x + dx, z + dz);
-					if (y > aether.getMinY()) {
-						return new int[] {x + dx, y, z + dz};
+					int[] spot = standAt(aether, x + dx, z + dz);
+					if (spot != null) {
+						return spot;
 					}
 				}
 			}
@@ -149,6 +157,47 @@ public final class WindAether {
 	private static int topAt(ServerLevel level, int x, int z) {
 		level.getChunk(x >> 4, z >> 4);
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+	}
+
+	/**
+	 * Ground to stand on at (x, z) or close beside it (within {@link #STAND_SEARCH}): {x, y, z} with y the first free
+	 * block above the top of the ground, or null. Trees stand on the islands, so the top block of a column is often a log
+	 * (the heightmap does not skip logs); a column counts only if its top is bare solid ground with room for a player.
+	 */
+	private static int[] standAt(ServerLevel level, int x, int z) {
+		for (int r = 0; r <= STAND_SEARCH; r++) {
+			for (int dx = -r; dx <= r; dx++) {
+				for (int dz = -r; dz <= r; dz++) {
+					if (Math.max(Math.abs(dx), Math.abs(dz)) == r) {
+						int y = standY(level, x + dx, z + dz);
+						if (y >= 0) {
+							return new int[] {x + dx, y, z + dz};
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/** The height to stand at in the column (x, z): just above bare ground with two free blocks over it; -1 if there is none. */
+	private static int standY(ServerLevel level, int x, int z) {
+		int y = topAt(level, x, z);
+		if (y <= level.getMinY() + 1) {
+			return -1;
+		}
+		BlockPos below = new BlockPos(x, y - 1, z);
+		BlockState ground = level.getBlockState(below);
+		if (!ground.isFaceSturdy(level, below, Direction.UP) || ground.is(BlockTags.LOGS) || ground.is(BlockTags.LEAVES)) {
+			return -1;
+		}
+		for (int i = 0; i < 2; i++) {
+			BlockPos at = new BlockPos(x, y + i, z);
+			if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty() || !level.getFluidState(at).isEmpty()) {
+				return -1;
+			}
+		}
+		return y;
 	}
 
 	private static void arrive(ServerPlayer player, ServerLevel aether, int x, int z, int[] spot, int index, int of) {
@@ -169,9 +218,9 @@ public final class WindAether {
 		if (spot != null) {
 			ax = spot[0] + dx + 0.5;
 			az = spot[2] + dz + 0.5;
-			int own = topAt(aether, spot[0] + dx, spot[2] + dz);
-			// a companion's own column may be off the island's edge: use the first one's height
-			ay = own > aether.getMinY() ? own : spot[1];
+			int own = standY(aether, spot[0] + dx, spot[2] + dz);
+			// a companion's own column may be off the island's edge or under a tree: use the first one's height
+			ay = own >= 0 ? own : spot[1];
 		} else {
 			ax = x + dx + 0.5;
 			az = z + dz + 0.5;
