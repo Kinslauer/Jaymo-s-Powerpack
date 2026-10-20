@@ -216,11 +216,19 @@ public final class WindAether {
 		double ay;
 		double az;
 		if (spot != null) {
-			ax = spot[0] + dx + 0.5;
-			az = spot[2] + dz + 0.5;
-			int own = standY(aether, spot[0] + dx, spot[2] + dz);
-			// a companion's own column may be off the island's edge or under a tree: use the first one's height
-			ay = own >= 0 ? own : spot[1];
+			// a companion's own column may be a trunk, leaves or off the island's edge: find ground beside it,
+			// and failing that share the leader's spot (known to have room)
+			int[] own = spot;
+			if (dx != 0 || dz != 0) {
+				int y = standY(aether, spot[0] + dx, spot[2] + dz);
+				own = y >= 0 ? new int[] {spot[0] + dx, y, spot[2] + dz} : standAt(aether, spot[0] + dx, spot[2] + dz);
+				if (own == null) {
+					own = spot;
+				}
+			}
+			ax = own[0] + 0.5;
+			ay = own[1];
+			az = own[2] + 0.5;
 		} else {
 			ax = x + dx + 0.5;
 			az = z + dz + 0.5;
