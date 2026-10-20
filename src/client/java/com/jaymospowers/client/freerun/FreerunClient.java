@@ -55,6 +55,8 @@ public final class FreerunClient {
 	private static boolean confirmed, jumpWasDown;
 	/** Wall faces kicked off and run along since last on the ground (bits by 3D index). */
 	private static int kicked, ran;
+	/** (review) Ticks of grip spent clinging since last on the ground, and how many were spent when this cling began: letting go and catching the wall again doesn't renew the grip. */
+	private static int gripped, clingBase;
 
 	private FreerunClient() {
 	}
@@ -93,6 +95,7 @@ public final class FreerunClient {
 		if (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
 			kicked = 0;
 			ran = 0;
+			gripped = 0;
 			airTicks = 0;
 		} else {
 			airTicks++;
@@ -171,18 +174,21 @@ public final class FreerunClient {
 
 	private static boolean tryCling(LocalPlayer player) {
 		Direction facing = player.getDirection();
-		if (player.getDeltaMovement().y < -Freerun.CLING_CATCH_FALL || !Freerun.climbable(player.level(), player, facing, REACH)) {
+		int grip = Freerun.GRIP_TICKS[Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.GRIP_TICKS.length) - 1];
+		if (gripped >= grip || player.getDeltaMovement().y < -Freerun.CLING_CATCH_FALL || !Freerun.climbable(player.level(), player, facing, REACH)) {
 			return false;
 		}
 		player.setDeltaMovement(Vec3.ZERO);
 		player.resetFallDistance();
 		start(player, Freerun.CLING, facing, BlockPos.ZERO);
+		clingBase = gripped;
 		return true;
 	}
 
 	private static void tickCling(LocalPlayer player, Input input, boolean jumpPressed) {
 		Direction face = wall;
 		ticks++;
+		gripped = clingBase + ticks;
 		Integer move = player.getAttached(Freerun.MOVE);
 		if (face == null || !confirm(move != null && WebParkour.kind(move) == Freerun.CLING) || player.onGround() || input.shift()) {
 			letGo(player);
@@ -194,7 +200,7 @@ public final class FreerunClient {
 		}
 		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.CLIMB_SPEED.length);
 		int grip = Freerun.GRIP_TICKS[rank - 1];
-		if (ticks > grip + Freerun.SLIP_TICKS) {
+		if (gripped > grip + Freerun.SLIP_TICKS) {
 			letGo(player);
 			return;
 		}
@@ -218,7 +224,7 @@ public final class FreerunClient {
 			letGo(player);
 			return;
 		}
-		boolean slipping = ticks > grip;
+		boolean slipping = gripped > grip;
 		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.CLIMB_SPEED[rank - 1] : 0.0;
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
@@ -428,6 +434,7 @@ public final class FreerunClient {
 		bar = null;
 		kicked = 0;
 		ran = 0;
+		gripped = 0;
 		cooldown = 0;
 		airTicks = 0;
 		jumpWasDown = false;

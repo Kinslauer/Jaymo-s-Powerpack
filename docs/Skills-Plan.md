@@ -107,7 +107,7 @@ carrying or carried, crawling, meditating, on a ledge, or in a web slinger's own
   you land; also off a cling or a wall run.
 - **Sure Footing**: on narrow tops (`jaymospowers:freerun_narrow`: fences, walls, gates, panes, bars, chains, end and
   lightning rods) you walk and sprint at full speed with your arms out to balance, and take 75% less knockback.
-  Without it (only with Kingdoms loaded) a narrow top is walked: no sprinting, 30% slower (`UNSTEADY_SLOW`).
+  `UNSTEADY_SLOW` (Powers `Freerun`) can make narrow tops slow and unsprintable without it; it's 0 (off) until Andy decides.
 - **Leap of Faith** (2 pts): from any height, landing in a hay bale, water or leaves (`freerun_soft_landing`) takes
   no fall damage: Andy's accepted exception to "fall damage always applies". Falling (fast) looking at least 50° down,
   you dive head first (the wind's dive pose).

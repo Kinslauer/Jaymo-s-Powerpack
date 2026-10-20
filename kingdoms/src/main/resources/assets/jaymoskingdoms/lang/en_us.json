@@ -219,7 +219,7 @@
 	"skill.jaymoskingdoms.perk.freerunner": "Freerunner",
 	"skill.jaymoskingdoms.perk.freerunner.desc": "Sprint and jump at anything waist-high (up to a block and a half: a fence, a wall, a block) to vault it without losing speed. Rank 2: wall kick. In the air beside or facing a wall, jump to kick off it, once per wall until you land.",
 	"skill.jaymoskingdoms.perk.sure_footing": "Sure Footing",
-	"skill.jaymoskingdoms.perk.sure_footing.desc": "Balance on narrow tops (fences, walls, panes, bars, chains, rods): walk and sprint along them at full speed, arms out, and take 75% less knockback there. Without it you can't sprint on them and walk 30% slower.",
+	"skill.jaymoskingdoms.perk.sure_footing.desc": "Balance on narrow tops (fences, walls, panes, bars, chains, rods): walk and sprint along them at full speed, arms out, and take 75% less knockback there.",
 	"skill.jaymoskingdoms.perk.leap_of_faith": "Leap of Faith",
 	"skill.jaymoskingdoms.perk.leap_of_faith.desc": "From any height, a landing in a hay bale, water or leaves takes no fall damage. Fall looking down and you dive head first.",
 	"skill.jaymoskingdoms.perk.bar_swing": "Bar Swing",

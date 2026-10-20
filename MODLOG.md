@@ -1837,8 +1837,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
   3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
   jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
-  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
-  slower there), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
+  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; `UNSTEADY_SLOW` could slow
+  those without it there, off until Andy decides), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
   (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
   (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
   hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags

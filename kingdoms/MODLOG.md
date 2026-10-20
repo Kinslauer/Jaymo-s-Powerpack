@@ -3435,4 +3435,5 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   Sure Footing), Wall Runner (lvl 12, 2 ranks, needs Leap of Faith); appended to `Skills.Perk`, so no ordinal moves.
   The moves are Jaymo's Powers' (`Freerun`), reading the ranks through `Skills.rank(Player, String)`. Stealth
   experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
-  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`).
+  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
+  pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).

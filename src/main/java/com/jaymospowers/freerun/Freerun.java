@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * wall, a block) vaults it at full speed; rank 2, a wall kick: in the air beside or facing a wall, Jump kicks off it
  * ({@link #KICK_UP} up, {@link #KICK_OUT} out), each wall face once until you land.</li>
  * <li><b>Sure Footing</b>: on narrow tops (fences, walls, panes, bars, chains, rods; {@link #NARROW}) you walk and
- * sprint at full speed (without it, {@link #UNSTEADY_SLOW} slower and no sprinting), knocked back
+ * sprint at full speed ({@link #UNSTEADY_SLOW}, off for now, would slow those without it), knocked back
  * {@link #FOOTING_KNOCKBACK} less, arms out to balance.</li>
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
@@ -134,6 +134,8 @@ public final class Freerun {
 	public static final double BAR_HANG_DROP = 1.85;
 	/** Bar Swing: how long the grip holds (ticks), and letting go with Jump: forward and up (blocks/tick). */
 	public static final int BAR_MAX_TICKS = 200;
+	/** (review) How near (squared, from the eyes to the bar's middle) a bar must be to catch it and to stay on it. */
+	static final double BAR_REACH_SQR = 9.0;
 	public static final double RELEASE_FORWARD = 0.9, RELEASE_UP = 0.5;
 	/** What can be swung from (horizontal chains only). */
 	public static final TagKey<Block> BARS = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_bars"));
@@ -233,6 +235,8 @@ public final class Freerun {
 	private static final Map<UUID, Doing> DOING = new HashMap<>();
 	/** Server: wall faces kicked off and run along since the player last touched the ground (bits by 3D index). */
 	private static final Map<UUID, Integer> KICKED = new HashMap<>(), RAN = new HashMap<>();
+	/** (review) Player → ticks spent clinging since last on the ground: a new cling doesn't renew the grip. */
+	private static final Map<UUID, Integer> GRIPPED = new HashMap<>();
 	/** Server: until when (game time) a player just off a wall or bar isn't kicked for how they move. */
 	private static final Map<UUID, Long> GRACE = new HashMap<>();
 	/** Server: the last vault look, so the next differs. */
@@ -257,6 +261,7 @@ public final class Freerun {
 			DOING.clear();
 			KICKED.clear();
 			RAN.clear();
+			GRIPPED.clear();
 			GRACE.clear();
 			LAST_VARIANT.clear();
 		});
@@ -266,6 +271,7 @@ public final class Freerun {
 		DOING.remove(id);
 		KICKED.remove(id);
 		RAN.remove(id);
+		GRIPPED.remove(id);
 		GRACE.remove(id);
 		LAST_VARIANT.remove(id);
 	}
@@ -531,7 +537,8 @@ public final class Freerun {
 				return rank(player, Perk.FREERUNNER) >= 1
 					&& vaultHeight(level, player, Vec3.directionFromRotation(0.0F, player.getYRot()), VAULT_REACH + SERVER_REACH) > 0.0;
 			case CLING:
-				return side != null && rank(player, Perk.CLIMBER) >= 1 && climbable(level, player, side, SERVER_REACH);
+				return side != null && rank(player, Perk.CLIMBER) >= 1 && GRIPPED.getOrDefault(player.getUUID(), 0) < grip(player)
+					&& climbable(level, player, side, SERVER_REACH);
 			case WALL_JUMP:
 				return side != null && rank(player, Perk.FREERUNNER) >= 2 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
 					&& (current != null && current.kind == CLING || (KICKED.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0);
@@ -539,12 +546,20 @@ public final class Freerun {
 				return side != null && rank(player, Perk.WALL_RUNNER) >= 1 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
 					&& (RAN.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0;
 			case BAR:
+				// (rank and reach first: the client's position mustn't make the server look at, or load, a far block)
+				if (rank(player, Perk.BAR_SWING) < 1 || player.getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) >= BAR_REACH_SQR) {
+					return false;
+				}
 				double bottom = barBottom(level, pos);
-				return rank(player, Perk.BAR_SWING) >= 1 && !Double.isNaN(bottom) && bottom > player.getEyeY() - 0.6
-					&& player.getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) < 9.0;
+				return !Double.isNaN(bottom) && bottom > player.getEyeY() - 0.6;
 			default:
 				return false;
 		}
+	}
+
+	/** The ticks {@code player}'s grip lasts on a wall (Climber's rank), before they start to slip. */
+	private static int grip(Player player) {
+		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1];
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */
@@ -577,14 +592,16 @@ public final class Freerun {
 			int max = switch (doing.kind) {
 				case VAULT -> WebParkour.VAULT_TICKS;
 				case WALL_JUMP -> WebParkour.WALL_JUMP_TICKS;
-				case CLING -> GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1] + SLIP_TICKS + SERVER_SLACK_TICKS;
+				case CLING -> grip(player) + SLIP_TICKS + SERVER_SLACK_TICKS;
 				case WALL_RUN -> RUN_TICKS[Mth.clamp(perk(player, Perk.WALL_RUNNER), 1, RUN_TICKS.length) - 1] + SERVER_SLACK_TICKS;
 				default -> BAR_MAX_TICKS + SERVER_SLACK_TICKS;
 			};
 			boolean lost = switch (doing.kind) {
-				case CLING -> player.onGround() || side == null || !WebWallRun.wallAt(level, player, side, SERVER_REACH);
+				case CLING -> player.onGround() || side == null || !WebWallRun.wallAt(level, player, side, SERVER_REACH)
+					|| GRIPPED.getOrDefault(player.getUUID(), 0) > grip(player) + SLIP_TICKS + SERVER_SLACK_TICKS;
 				case WALL_RUN -> doing.ticks > 2 && player.onGround() || side == null || !WebWallRun.wallAt(level, player, side, SERVER_REACH);
-				case BAR -> player.onGround() || Double.isNaN(barBottom(level, doing.pos));
+				case BAR -> player.onGround() || player.getEyePosition().distanceToSqr(Vec3.atCenterOf(doing.pos)) >= BAR_REACH_SQR
+					|| Double.isNaN(barBottom(level, doing.pos));
 				default -> false;
 			};
 			if (!player.isAlive() || doing.ticks >= max || lost || !canMove(player)) {
@@ -598,6 +615,9 @@ public final class Freerun {
 				continue;
 			}
 			doing.ticks++;
+			if (doing.kind == CLING) {
+				GRIPPED.merge(player.getUUID(), 1, Integer::sum);
+			}
 			if (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN) {
 				// holding on isn't falling, but it is work
 				player.resetFallDistance();
@@ -625,6 +645,7 @@ public final class Freerun {
 			if (player.onGround() || player.isInWater() || player.onClimbable()) {
 				KICKED.remove(player.getUUID());
 				RAN.remove(player.getUUID());
+				GRIPPED.remove(player.getUUID());
 			}
 			boolean narrow = onNarrowTop(player);
 			set(player, Attributes.KNOCKBACK_RESISTANCE, FOOTING_ID, narrow && perk(player, Perk.SURE_FOOTING) > 0 ? FOOTING_KNOCKBACK : 0.0,
