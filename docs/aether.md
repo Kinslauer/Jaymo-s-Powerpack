@@ -6,7 +6,8 @@ feel follow it; every line of Java and JSON is ours and every texture is painted
 behaviour only, nothing copied). The dimension is `jaymospowers:aether`. The way in is Wind's (`power/wind/aether/WindAether`),
 there is no portal. All numbers are `static final` constants at the top of the class named in brackets.
 
-This page is the blocks and items (Track A1). Worldgen and sky are track A2, mobs C/D (see the design notes).
+This page is the blocks and items (Track A1) and then the dimension itself (Track A2: terrain, biomes, features, sky). Mobs are
+tracks C/D (see the design notes).
 
 ## How it is made
 
@@ -58,8 +59,7 @@ This page is the blocks and items (Track A1). Worldgen and sky are track A2, mob
 Planks / Leaves / Sapling**. An axe strips logs and wood (`Aether.init`). Planks come from any Aether log
 (`#jaymospowers:aether_logs`, golden oak too), wood from 2x2 logs. Leaves drop their sapling with the vanilla chances
 (5% to 10% with Fortune), sticks 2%+, and themselves with shears or Silk Touch. The sapling grows the configured
-feature `jaymospowers:skyroot_tree` (made by the dimension's worldgen, track A2; until it exists the sapling just
-keeps its stage).
+feature `jaymospowers:skyroot_tree` (made by the dimension's worldgen, see "The dimension" below).
 
 **Golden Oak** (amber bark, gold leaves): **Golden Oak Log / Wood / Leaves / Sapling** (feature
 `jaymospowers:golden_oak_tree`). Mined with an axe the log and wood also drop 1 to 2 golden amber. The leaves
@@ -82,6 +82,67 @@ stick makes 4).
 - **Blue Berry**: food 2 (saturation 0.4). **White Apple**: food 4, always edible, uncommon, and clears every harmful
   effect when eaten [WhiteAppleItem].
 
+## The dimension (Track A2)
+
+`jaymospowers:aether` is datapack plus four Java features. Wind is still the way in ([docs/wind.md](wind.md)). All tuning
+numbers are in the JSON named below or are `static final` constants at the top of the feature class.
+
+**Terrain** (`worldgen/noise_settings/aether.json`, `worldgen/density_function/aether/{islands,base_3d_noise}.json`)
+- Islands only between y 14 and 128 of a 256-high world (min_y 0); holystone is the default block, sea level is -64 (no
+  ocean), no aquifers, ore veins or carvers. Surface (`worldgen/material_rule/aether.json`): aether grass on the top
+  layer, aether dirt under it for the surface depth, holystone below.
+- The density is -0.15 + A x (-0.1 + B x (0.12 + n)): `n` is vanilla's old blended noise (factors 80/160, smear 8, scale 0.25
+  across and up, as The Aether's skylands use, so islands are tens of blocks wide and flat-ish), A ramps 0 to 1 over
+  y 14 to 46 (thin undersides) and B ramps 1 to 0 over y 64 to 128 (thin tops, nothing above 128). A column is solid
+  where the result is above 0. In practice: about 9% of the volume is solid (preview slice) and most of the mass lies between y 32 and 79;
+  the offsets are not yet retuned for the 0.25 scales, so raise the 0.12 if the islands come out too sparse.
+- `tools/preview_aether_terrain.py [z] [seed] [out.png]` draws a 256x128 side view from the shipped JSON (numpy and
+  Pillow; the noise is a stand-in for the game's, so shapes and densities match, not a given seed) and prints the share of
+  the mass per 16 blocks of height. Re-tune the constants in the JSON and run it again.
+- Climate: temperature and vegetation are the vanilla climate noises at scale 3 (regions a few hundred blocks wide);
+  temperature is stretched 1.4x so the hot band (woodland) is reachable.
+
+**Biomes** (`worldgen/biome/skyroot_{meadow,forest,grove,woodland}.json`; replace the old Aether II highlands)
+All four share sky #C0C0FF, fog #9393BC, water #3F76E4, water fog #050533, grass and foliage #B1FFCB, no precipitation,
+and the same feature list; only the tree count differs. `natural_mob_spawns` is empty everywhere (mobs are added later by
+Fabric `BiomeModifications`). The multi_noise split follows The Aether's: meadow the coldest band and the dry middle,
+forest the wet cold and temperate bands, grove the dry warm band, woodland the hottest.
+
+**Features** (all in the biomes' own feature lists, never `BiomeModifications`)
+| Step | Feature | Notes |
+|---|---|---|
+| raw generation | `quicksoil_shelf` (Java) | 1 in 5 chunks; 8 discs of radius 3.46 on island undersides below y 48 |
+| lakes | `aether_water_lake` (vanilla `lake`) | 1 in 15 chunks; only fits where an island is thick enough |
+| ores | `aether_ore_dirt` 20x33, `_icestone` 10x32, `_ambrosium` 20x16, `_zanite` 14x5 (y 0-75, half discarded in air), `_gravitite` 7x4 (trapezoid 0-74) and `_gravitite_buried` 5x3 | all in holystone |
+| springs | `aether_water_spring` | 30 tries, y 8-128, on holystone or aether dirt |
+| vegetation | `aether_trees_<biome>`, grass, tall grass, white and purple flowers, berry bushes | see below |
+| top layer | `crystal_island` (Java, 1 in 20 chunks, y 50-110), `aercloud_cold` (1 in 7, y 32-96, 16 steps), `aercloud_blue` (1 in 24, 8 steps), `aercloud_golden` (1 in 75, y 96-127, 4 steps), `aercloud_bank` (1 in 3, y 2-30, 28 steps, big and thick) | clouds only take air |
+
+- **Trees**: `skyroot_tree` is a vanilla `tree` (straight 4-6 trunk, blob crown radius 2 height 3, aether dirt under the
+  trunk). `aether_trees` picks it, or 1 time in 100 the golden oak (`GoldenOakFeature`: 10-log trunk, branches of 1-2
+  logs at heights 5-8, ragged round crown of radius 4). Placement per biome: attempts start at a random height (y 36-100)
+  and scan down to the first island top, so every layer of islands gets trees, not just the highest. The attempt counts
+  allow for misses: meadow 2, grove 5 (10% 7), forest 14 (10% 16), woodland 11 (10% 13), about 1, 2, 6, 5 trees a chunk
+  where there is ground. The crystal island's tree (`CrystalIslandFeature`): 7 skyroot logs, four side logs at heights 2
+  and 5, a diamond crown of crystal leaves (one in five fruit).
+- Aerclouds are random-walk blobs (`AercloudFeature`: cloud kind, steps, blob radius, thickness in the JSON).
+- Ground cover below the topmost layer is sparse: grass and flowers use the surface heightmap with a vertical spread of
+  a few blocks.
+
+**Sky and time** (`dimension_type/aether.json`, `timeline/aether_noon.json`, `tags/timeline/in_aether.json`)
+- Eternal day: the Aether's timeline holds the sun at noon (angle 0), no moon or stars, no sunrise band; the overworld
+  clock still ticks (the Overworld's own day is unaffected). Beds can set spawn but cannot be slept in (`can_sleep`
+  never, with the message `message.jaymospowers.aether.no_sleep`); respawn anchors do not work.
+- Clouds are low (height 9.5, seen from above, under the islands), white; no rain anywhere (no biome has precipitation).
+- Skylight on, no ceiling, ambient light 0. Monsters spawn at light 0-7 (none do yet).
+
+**Arriving and leaving**: see `docs/wind.md`. Arrival stands the player on bare ground (not on a tree) on the nearest
+island; the fall home is below y 4 (the lowest islands and cloud banks sit above that).
+
+**To check first in game**: that the dimension loads (the data uses 26.3 formats that were checked against the vanilla
+data files, not run): terrain shape and density, the four biomes appearing, trees on islands, golden oak, a crystal
+island, clouds above and below, quicksoil under island edges, a lake, a fresh Wind arrival.
+
 ## What is not in yet
 
 - Aether tools and armour (skyroot, holystone, zanite, gravitite) and Skyroot's double drops, the Holystone tool's
@@ -98,4 +159,4 @@ stick makes 4).
 Place a gravitite ore under open sky (it should rise and stop under the first ceiling); jump into a blue aercloud
 (and sneak in one); fall onto a cold one from 20 blocks; put icestone beside a water source and a lava pool; use a
 shard on aether grass; mine zanite ore with a wooden pickaxe (no drop, no XP) and a stone one; bone-meal a skyroot
-sapling once the dimension's tree feature exists.
+sapling and a golden oak sapling (the trees are `jaymospowers:skyroot_tree` and `golden_oak_tree`).

@@ -24,6 +24,7 @@ public final class Aether {
 	public static void init() {
 		AetherBlocks.init();
 		AetherItems.init();
+		AetherFeatures.init();
 		FloatingBlockEntity.register();
 		AercloudBlock.register();
 		QuicksoilSpeed.register();

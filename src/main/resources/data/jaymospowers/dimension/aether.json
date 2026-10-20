@@ -6,32 +6,14 @@
       "type": "minecraft:multi_noise",
       "biomes": [
         {
-          "biome": "jaymospowers:aether_highfields",
-          "parameters": {
-            "temperature": [
-              0.0,
-              1.0
-            ],
-            "humidity": [
-              -1.0,
-              0.0
-            ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "jaymospowers:aether_magnetic",
+          "biome": "jaymospowers:skyroot_meadow",
           "parameters": {
             "temperature": [
               -1.0,
-              0.0
+              -0.8
             ],
             "humidity": [
-              0.0,
+              -1.0,
               1.0
             ],
             "continentalness": 0.0,
@@ -42,10 +24,10 @@
           }
         },
         {
-          "biome": "jaymospowers:aether_arctic",
+          "biome": "jaymospowers:skyroot_meadow",
           "parameters": {
             "temperature": [
-              -1.0,
+              -0.8,
               0.0
             ],
             "humidity": [
@@ -60,15 +42,141 @@
           }
         },
         {
-          "biome": "jaymospowers:aether_irradiated",
+          "biome": "jaymospowers:skyroot_meadow",
           "parameters": {
             "temperature": [
-              0.0,
+              0.93,
               1.0
+            ],
+            "humidity": [
+              -1.0,
+              -0.1
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_forest",
+          "parameters": {
+            "temperature": [
+              -0.8,
+              0.0
             ],
             "humidity": [
               0.0,
               1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_forest",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.4
+            ],
+            "humidity": [
+              0.55,
+              0.9
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_forest",
+          "parameters": {
+            "temperature": [
+              0.93,
+              0.94
+            ],
+            "humidity": [
+              0.8,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_grove",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.4
+            ],
+            "humidity": [
+              -1.0,
+              0.55
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_grove",
+          "parameters": {
+            "temperature": [
+              0.0,
+              0.4
+            ],
+            "humidity": [
+              0.9,
+              1.0
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_grove",
+          "parameters": {
+            "temperature": [
+              0.4,
+              0.93
+            ],
+            "humidity": [
+              -1.0,
+              0.1
+            ],
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:skyroot_woodland",
+          "parameters": {
+            "temperature": [
+              0.94,
+              1.0
+            ],
+            "humidity": [
+              -0.1,
+              0.8
             ],
             "continentalness": 0.0,
             "erosion": 0.0,
