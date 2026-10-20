@@ -1891,7 +1891,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     other parts, and health nothing can hold is refused (vanilla health is held to the parts' total). A break is set by
     a priest (Fractures' 2 emeralds), a respawn, a Hermit Bean, Verdant's healing, Chrono's Bloom or Wind's Zephyr's
     Breath (`Wounds.mendAll`); then it heals normally and the break clears above the cap. No more knitting by itself
-    (phase 4 brings the splint). `/wounds break <part> [target]` and `/wounds mend [target]`.
+    (phase 4 brings the splint). Breaks from a fall come set: they heal by themselves, the limp or crawl lasting only
+    until the leg is back above the cap. A set bone broken again comes unset. A severed leg's foot never heals either.
+    Known cost: healing that's refused (vanilla regeneration onto capped parts) still spends the food and saturation it
+    took. `/wounds break <part> [target]` and `/wounds mend [target]`.
   - **Fractures folds in:** a blunt blow's break is `Wounds.breakPart` (the limb's health gone, marked broken). Its own
     `broken_bones`, `bones_mending` and `bones_mended_by` attachments, limp and empty-hand are gone (the old saved limp
     modifier is taken off on load); the head daze and the skeleton shatter stay. `Fractures.heal`, `startMend`, `broken`
@@ -1899,7 +1902,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Sever on overkill** (`Dismember.severOnOverkill`, called by Wounds): a blade's blow on a limb already broken, or
     one that takes the head past zero, for more than `SEVER_OVERKILL` (half) of that part, cuts it off at
     `min(1, SEVER_BASE (0.6) * scale)`; the old chances are the scale (`RATE` times the blade's chance over a plain
-    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone. A power's own cut
+    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone; a killing blow is still tested (worked out on a copy of the parts), so heads and
+    limbs still come off onto the corpse. A power's own cut
     (`Dismember.cut`) lands its blow on the part it aimed at. A severed limb stays at zero and broken; regrowth sets it.
     A headless zombie or skeleton now dies only when its body gives out.
   - **Cripplings rerouted:** Darktide's leg strikes (G Crescent low, Ink Cross, Fang Barrage, any low Darktide hit) wound

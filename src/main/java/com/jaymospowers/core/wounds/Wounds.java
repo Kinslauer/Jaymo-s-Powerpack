@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -222,12 +223,68 @@ public final class Wounds {
 
 	/** (0.14.2) Every limb that went from something to zero between {@code was} and {@code now} is broken. */
 	private static void markBreaks(LivingEntity entity, BodyPlan plan, float[] was, float[] now, @Nullable Entity by) {
+		markBreaks(entity, plan, was, now, by, false);
+	}
+
+	/** (0.14.2) As above; {@code healing}: the breaks come set (a fall's). */
+	private static void markBreaks(LivingEntity entity, BodyPlan plan, float[] was, float[] now, @Nullable Entity by, boolean healing) {
 		for (int i = 0; i < now.length; i++) {
 			BodyPart part = plan.part(i);
 			if (!part.vital() && was[i] > EPS && now[i] <= EPS) {
-				Breaks.mark(entity, part, by);
+				Breaks.mark(entity, part, by, healing);
 			}
 		}
+	}
+
+	/**
+	 * (0.14.2) The overkill test on the part a blow {@code landed} on ({@code was} before it, {@code now} after, {@code loss}
+	 * routed): a limb already broken, or the head taken past zero, by more than {@link Dismember#SEVER_OVERKILL} of it; then
+	 * Dismember rolls ({@link Dismember#severOnOverkill}). True if the part came off.
+	 */
+	private static boolean sever(LivingEntity victim, BodyPlan plan, DamageSource source, @Nullable BodyPart landed, float[] was, float[] now,
+		float loss, float max, float taken) {
+		if (landed == null || taken < Dismember.MIN_DAMAGE || landed == BodyPart.LEFT_FOOT || landed == BodyPart.RIGHT_FOOT) {
+			return false;
+		}
+		int index = plan.index(landed);
+		int limb = Breaks.limb(landed);
+		if (index < 0 || limb == 0) {
+			return false;
+		}
+		float most = Dismember.SEVER_OVERKILL * plan.share(index) * max;
+		boolean overkill = landed == BodyPart.HEAD
+			? was[index] > EPS && now[index] <= EPS && loss - was[index] > most
+			: !landed.vital() && Breaks.isBroken(victim, landed) && loss > most;
+		return overkill && Dismember.severOnOverkill(victim, limb, source);
+	}
+
+	/**
+	 * (0.14.2) A blow that killed outright: where it landed is worked out on a copy of the parts (the dead keep theirs as
+	 * they were), and a blade's overkill may still take that part off, onto the corpse.
+	 */
+	private static void killingBlow(LivingEntity victim, DamageSource source, float taken, boolean blocked) {
+		BodyPlan plan = BodyPlan.of(victim);
+		if (blocked || plan == null || plan == BodyPlan.SIMPLE || victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
+			return;
+		}
+		float max = victim.getMaxHealth();
+		float health = Math.max(0.0F, victim.getHealth());
+		float[] points = load(victim, plan);
+		reconcile(points, plan, max, Math.min(max, health + taken), Breaks.caps(victim, plan));
+		float[] was = points.clone();
+		float loss = sum(points) - health;
+		if (loss <= EPS) {
+			return;
+		}
+		BodyPart aimed = Dismember.cutAim(victim);
+		BodyPart landed;
+		if (aimed != null && plan.index(aimed) >= 0) {
+			HitRouting.damage(points, plan, aimed, loss);
+			landed = aimed;
+		} else {
+			landed = HitRouting.route(victim, plan, source, points, max, loss);
+		}
+		sever(victim, plan, source, landed, was, points, loss, max, taken);
 	}
 
 	/** Full health, every part whole. */
@@ -280,6 +337,11 @@ public final class Wounds {
 	// ---- hits -------------------------------------------------------------------------------------------------------------
 
 	private static void onDamage(LivingEntity victim, DamageSource source, float base, float taken, boolean blocked) {
+		if (taken > 0.0F && !FINISHING.contains(victim) && victim.level() instanceof ServerLevel && (!victim.isAlive() || victim.getHealth() <= 0.0F)) {
+			// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
+			killingBlow(victim, source, taken, blocked);
+			return;
+		}
 		if (taken <= 0.0F || FINISHING.contains(victim) || !(victim.level() instanceof ServerLevel level) || !victim.isAlive()
 			|| victim.getHealth() <= 0.0F) {
 			return;
@@ -323,22 +385,13 @@ public final class Wounds {
 		}
 		Entity by = source.getEntity();
 		// (0.14.2) overkill: a blade on a limb already broken, or past the head's zero, may cut it off
-		if (landed != null && !blocked) {
-			int index = plan.index(landed);
-			boolean overkill = landed == BodyPart.HEAD
-				? was[index] > EPS && points[index] <= EPS && loss - was[index] > Dismember.SEVER_OVERKILL * plan.share(index) * max
-				: !landed.vital() && Breaks.isBroken(victim, landed) && loss > Dismember.SEVER_OVERKILL * plan.share(index) * max;
-			int limb = Breaks.limb(landed);
-			if (overkill && limb != 0 && landed != BodyPart.LEFT_FOOT && landed != BodyPart.RIGHT_FOOT && taken >= Dismember.MIN_DAMAGE
-				&& Dismember.severOnOverkill(victim, limb, source)) {
-				if (landed == BodyPart.HEAD || !victim.isAlive()) {
-					// (a severed head is Dismember's to end: death, a blind stagger, or an undead fighting on)
-					return;
-				}
-			}
+		if (!blocked && sever(victim, plan, source, landed, was, points, loss, max, taken)
+			&& (landed == BodyPart.HEAD || !victim.isAlive())) {
+			// (a severed head is Dismember's to end: death, a blind stagger, or an undead fighting on)
+			return;
 		}
-		// (0.14.2) a limb this hit took to zero breaks
-		markBreaks(victim, plan, was, points, by);
+		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
+		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
 		if (victim.isAlive() && lethal(victim, points, plan)) {
 			finish(level, victim, plan, by);
 		}

@@ -205,7 +205,7 @@ public final class Breaks {
 
 	/** Whether {@code part} has been cut off (Dismember): a foot goes with its leg. */
 	static boolean missing(LivingEntity entity, BodyPart part) {
-		int limb = part == BodyPart.LEFT_FOOT || part == BodyPart.RIGHT_FOOT ? 0 : limb(part);
+		int limb = limb(part);
 		return limb != 0 && (Dismember.missing(entity) & limb) != 0;
 	}
 
@@ -287,12 +287,30 @@ public final class Breaks {
 	 * held, and the effects at once. True if it wasn't broken before. Head and body never break (they down or kill).
 	 */
 	static boolean mark(LivingEntity entity, BodyPart part, @Nullable Entity by) {
+		return mark(entity, part, by, false);
+	}
+
+	/**
+	 * As {@link #mark(LivingEntity, BodyPart, Entity)}; {@code healing}: (0.14.2) the break comes set (a fall's: it heals by
+	 * itself, the limp or crawl lasting only until it's back above {@link #BROKEN_CAP}).
+	 */
+	static boolean mark(LivingEntity entity, BodyPart part, @Nullable Entity by, boolean healing) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (part.vital() || plan == null || plan.index(part) < 0 || !(entity.level() instanceof ServerLevel level)) {
 			return false;
 		}
 		int mask = broken(entity);
 		if ((mask & bit(part)) != 0) {
+			// broken again: a bone that was set comes unset (a sprain or a lost part has nothing to set)
+			Integer was = entity.getAttached(SET);
+			if (!healing && was != null && (was & bit(part)) != 0 && (SPRAINS & bit(part)) == 0 && !missing(entity, part)) {
+				int left = was & ~bit(part);
+				if (left == 0) {
+					entity.removeAttached(SET);
+				} else {
+					entity.setAttached(SET, left);
+				}
+			}
 			return false;
 		}
 		entity.setAttached(BROKEN, mask | bit(part));
@@ -305,6 +323,9 @@ public final class Breaks {
 			} else {
 				entity.setAttached(SET, left);
 			}
+		}
+		if (healing) {
+			entity.setAttached(SET, set(entity) | bit(part));
 		}
 		entity.addTag(TAG_PREFIX + name(part));
 		TRACKED.add(entity);
