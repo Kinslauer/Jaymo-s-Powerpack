@@ -38,6 +38,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -156,6 +157,8 @@ public final class Identities {
 
 	/** Player → the identity they were last seen in ("" bare-faced). */
 	private static final Map<UUID, String> WAS = new HashMap<>();
+	/** (0.7.98) Players last seen in a hood (not a mask): taking it off is lowering it. */
+	private static final Set<UUID> WAS_HOODED = new HashSet<>();
 	/** Player/power → when a use of it last counted. */
 	private static final Map<String, Long> LAST_SIGHTING = new HashMap<>();
 	/** Player/faction → when its guards last stopped them masked (or let them through). */
@@ -173,11 +176,13 @@ public final class Identities {
 		ServerTickEvents.END_SERVER_TICK.register(Identities::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			WAS.remove(handler.player.getUUID());
+			WAS_HOODED.remove(handler.player.getUUID());
 			SENT_OFF.remove(handler.player.getUUID());
 			EXILED_IN.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAS.clear();
+			WAS_HOODED.clear();
 			LAST_SIGHTING.clear();
 			CHALLENGED.clear();
 			SENT_OFF.clear();
@@ -512,20 +517,21 @@ public final class Identities {
 	 * {@code f}'s people is within {@link #HOOD_KNOWN_RANGE}, facing them (the {@link #REVEAL_VIEW_COS} gaze), and they
 	 * are not in the dark, that witness sees the face under the hood and the settlement knows who it was ({@link #link},
 	 * "recognised") before the crime is put to anyone's name. Seen from further, from behind or in the dark, it stays
-	 * on the hooded figure.
+	 * on the hooded figure. {@code turned}, if any, is a witness who has just turned on them (a pickpocket's mark): it
+	 * counts as facing them. Golems can't tell a face, let alone say whose.
 	 */
-	static void recognise(ServerLevel level, ServerPlayer player, Faction f, List<LivingEntity> seen) {
+	static void recognise(ServerLevel level, ServerPlayer player, Faction f, List<LivingEntity> seen, @Nullable LivingEntity turned) {
 		String key = hoodKey(player);
 		if (key == null || masked(player) || seen.isEmpty() || persona(player, f.id()) == null || Heritage.dark(player)) {
 			return;
 		}
 		for (LivingEntity e : seen) {
-			if (e.distanceTo(player) > HOOD_KNOWN_RANGE) {
+			if (e instanceof IronGolem || e.distanceTo(player) > HOOD_KNOWN_RANGE) {
 				continue;
 			}
 			Vec3 look = e.getViewVector(1.0F);
 			Vec3 to = player.getEyePosition().subtract(e.getEyePosition()).normalize();
-			if (look.dot(to) >= REVEAL_VIEW_COS) {
+			if (e == turned || look.dot(to) >= REVEAL_VIEW_COS) {
 				link(level, player, key, f, e, "recognised");
 				return;
 			}
@@ -616,6 +622,7 @@ public final class Identities {
 			String cur = key(player);
 			String mask = maskKey(player);
 			String was = WAS.put(player.getUUID(), cur == null ? "" : cur);
+			boolean wasHooded = cur != null && mask == null ? !WAS_HOODED.add(player.getUUID()) : WAS_HOODED.remove(player.getUUID());
 			if (mask != null) {
 				noteName(server, mask, tagName(player));
 			}
@@ -632,7 +639,8 @@ public final class Identities {
 			}
 			if (was != null) {
 				if (!was.isEmpty() && cur == null) {
-					revealed(level, player, was, "unmasked");
+					// (0.7.98: a hood lowered in view gives you away like a mask taken off)
+					revealed(level, player, was, wasHooded ? "lowered" : "unmasked");
 				} else if (was.isEmpty() && mask != null) {
 					// (0.7.98: pulling a hood up in view gives nothing away; lowering it does)
 					revealed(level, player, cur, "masked");

@@ -50,7 +50,7 @@ def hidden_blade():
         for i, ch in enumerate(shades):
             px[x0 + i, y] = (*IRON[int(ch)], 255) if ch.isdigit() else (*LEATHER[ch], 255)
     for x, y in STRAPS:
-        px[x, y] = (*LEATHER["B"], 255) if px[x, y][:3] != LEATHER["A"] else (*LEATHER["A"], 255)
+        px[x, y] = (*LEATHER["A"], 255)
     px[4, 10] = (*IRON[4], 255)
     os.makedirs(OUT, exist_ok=True)
     img.save(os.path.join(OUT, "hidden_blade.png"))

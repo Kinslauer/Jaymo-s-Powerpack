@@ -512,7 +512,7 @@ public final class Theft {
 		Weight w = weight != null ? weight : crime.weight;
 		if (!seen.isEmpty()) {
 			// (0.7.98) a hood is a fragile mask: seen close, face on, in the light, it is you
-			Identities.recognise(level, player, f, seen);
+			Identities.recognise(level, player, f, seen, null);
 			// (0.5.39) word gets round: its people will ask about it
 			Approaches.suspect(player, f.id(), level.getGameTime());
 		}

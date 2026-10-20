@@ -598,7 +598,7 @@ public final class Approaches {
 		boolean sworn = !masked && f.member(player.getUUID()) != null;
 		boolean suspected = suspected(player, f.id(), now);
 		// (0.7.98: a hood hides your name from the guards, but MCA's villagers still know your face)
-		int hearts = Identities.masked(player) ? 0 : hearts(mob, player);
+		int hearts = masked && Identities.masked(player) ? 0 : hearts(mob, player);
 		boolean friend = McaCompat.isMca(mob) ? hearts >= GIFT_HEARTS : rep >= GIFT_REP;
 		boolean known = McaCompat.isMca(mob) ? hearts >= GREET_HEARTS : rep >= GREET_REP;
 		int[] w = new int[TOPICS.length];

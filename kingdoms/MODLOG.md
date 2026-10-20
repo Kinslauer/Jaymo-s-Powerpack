@@ -3412,3 +3412,19 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
+- **0.7.98, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
+  costumes to add to stealth, while not completely concealing identity like it does now ... They also need a hidden
+  blade weapon, craftable at all times but usable only by those with sufficient stealth skill." Powers tags a hooded
+  player (`jaymospowers_hooded:<key>`, a Hood or Peaked Hood with the face showing). Witnesses see a hooded player at
+  0.75 the range (thefts, trespass, deeds; on top of sneaking), and a hood is a fragile mask: a stranger in it is "a
+  hooded figure" with its own name and crimes, unless a witness within 6 blocks, facing them, in the light, sees the
+  face when a crime is seen: then that settlement knows who it is ("recognised") and the crime is theirs. Lowering
+  the hood in view gives it away like a mask; paranoid guards ask hooded strangers to lower it; MCA villagers still
+  know a hooded friend (`Identities`, `Theft`, `Pickpocket`, `Trespass`, `Deeds`, `Approaches`). The hidden blade
+  (`HiddenBlade`, numbers at its top): a leather bracer with a spring blade, always craftable (` I `/`LNL`/` S `),
+  a dagger (4 damage, 2.2 a second, iron durability, Better Combat dagger moves, a light blade), worked only from
+  Stealth 5 (below: 1 damage a blow, "the spring jams"). Fall 4+ blocks onto a living thing with it in either hand
+  and the fall damage is theirs, not yours, as your own blow, and they're Crippled (an attachment, saved: 70% slower,
+  no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
+  full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
+  rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
