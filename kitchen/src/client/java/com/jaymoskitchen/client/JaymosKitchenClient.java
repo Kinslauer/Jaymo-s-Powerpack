@@ -41,6 +41,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		// (0.5.0) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
+		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);

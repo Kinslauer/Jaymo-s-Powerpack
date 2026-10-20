@@ -43,6 +43,7 @@ public class JaymosKitchen implements ModInitializer {
 		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
+		com.jaymoskitchen.ragdoll.RagdollNet.register();
 		ModItems.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
