@@ -498,3 +498,20 @@ taken from the creative tab have no enchantment.
   there.
 - **Ender step on players:** `randomTeleport` on a `ServerPlayer` from inside `AFTER_DAMAGE` (same as the existing
   blink).
+
+## 0.13.35: Emberborn rifts into the Nether
+Emberborn (a Jaymo's Kingdoms heritage, read by reflection in `ArsenalEmber.emberborn`; false without Kingdoms) who use
+Pocket Arsenal get a Nether of their own. Everyone else, and Emberborn without Arsenal, is unchanged.
+- **Random rift:** until they have escaped, a Z rift opened in the Overworld is a Nether rift with chance
+  `NETHER_CHANCE` (0.3), rolled when it opens (so followers go the same way). It burns (flames, smoke, blaze shot).
+  Walking in lands you at x/8, z/8 on safe ground (solid floor, two air, no lava, searched y 120 to 32 within 4 blocks),
+  else on a small obsidian/netherrack platform at y 64. The opener is then `STRANDED`.
+- **Stranded:** Z opens the ordinary pocket rift, and its exit returns you to the Nether (`RETURN`), so the pocket is no
+  way out. Reaching the Overworld by any means (checked every 20 ticks in `ArsenalEmber.tick`) clears `STRANDED`, sets
+  `ESCAPED`, and says Sneak+Z now chooses where rifts lead.
+- **Escaped:** no more random Nether rifts. Sneak+Z (free in Arsenal: only Sneak+V and Sneak+Reach were used) flips
+  `NETHER_MODE` with a message. In Nether mode, Z from the Overworld opens a rift into the Nether (x/8) and from the
+  Nether one to the Overworld (x*8, heightmap surface). In pocket mode Z is the usual pocket rift.
+- **Attachments** (persistent, copy on death), listed via `ArsenalEmber` in `registerAttachments()`: `STRANDED`,
+  `ESCAPED`, `NETHER_MODE`. Rifts carry a `nether` flag; the client still draws them with the portal swirl (particles
+  differ server-side only).

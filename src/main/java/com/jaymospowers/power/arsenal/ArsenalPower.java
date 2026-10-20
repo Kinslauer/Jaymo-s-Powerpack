@@ -236,6 +236,10 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down && slotUnlocked(player, "mode")) {
+			// (0.13.35) an Emberborn who escaped the Nether: Sneak + Z flips where their rifts lead
+			if (player.isShiftKeyDown() && ArsenalEmber.flip(player)) {
+				return;
+			}
 			ArsenalPocket.toggle(player);
 		}
 	}
@@ -288,6 +292,7 @@ public final class ArsenalPower implements Power {
 			ArsenalGates.tick(player);
 		}
 		ArsenalVoid.tick(player);
+		ArsenalEmber.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);
