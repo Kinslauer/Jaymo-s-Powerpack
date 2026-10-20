@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -209,15 +210,20 @@ public abstract class XenoForm {
 		AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach)).inflate(1.0);
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
 			e -> e instanceof LivingEntity living && living.isAlive() && e != player && !e.isSpectator() && !(e instanceof ArmorStand)
-				&& !e.isPassengerOfSameVehicle(player) && filter.test(e), 0.3F);
+				&& !e.isPassengerOfSameVehicle(player) && !spared(player, e) && filter.test(e), 0.3F);
 		return hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
 	}
 
-	/** Every living creature within {@code radius} of the player (not the player, their passengers or spectators). */
+	/** The player's own pets and mounts, and anyone on their team, are never hit by their form's moves. */
+	private static boolean spared(ServerPlayer player, Entity e) {
+		return e instanceof OwnableEntity pet && pet.getOwner() == player || player.isAlliedTo(e);
+	}
+
+	/** Every living creature within {@code radius} of the player (not the player, their pets, team, passengers or spectators). */
 	protected static List<LivingEntity> around(ServerPlayer player, double radius) {
 		return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isPassengerOfSameVehicle(player)
-				&& e.distanceToSqr(player) <= radius * radius);
+				&& !spared(player, e) && e.distanceToSqr(player) <= radius * radius);
 	}
 
 	/** Shoves {@code target} away from {@code from}, {@code out} along the ground and {@code up} upward. */

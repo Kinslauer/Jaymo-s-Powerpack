@@ -461,11 +461,11 @@ public final class Velox extends XenoForm {
 		boolean was = live.standstill > 0;
 		int elapsed = STANDSTILL_TICKS - live.standstill;
 		live.standstill = 0;
+		MobEffectInstance had = live.savedSpeed;
 		releaseAll(live);
 		if (was) {
 			player.removeEffect(MobEffects.SPEED);
 			// the beacon or potion Speed it replaced comes back, with the time it ran down meanwhile
-			MobEffectInstance had = live.savedSpeed;
 			if (had != null && (had.isInfiniteDuration() || had.getDuration() > elapsed)) {
 				player.addEffect(had.isInfiniteDuration() ? had : new MobEffectInstance(had.getEffect(), had.getDuration() - elapsed,
 					had.getAmplifier(), had.isAmbient(), had.isVisible(), had.showIcon()));
