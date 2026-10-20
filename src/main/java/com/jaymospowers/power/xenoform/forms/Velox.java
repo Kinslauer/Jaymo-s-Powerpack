@@ -99,7 +99,7 @@ public final class Velox extends XenoForm {
 			fall.removeModifier(SAFE_FALL_ID);
 		}
 		burstModifiers(player, false);
-		releaseAll(live);
+		releaseAll(live, player.level().getServer());
 		live.bursting = false;
 		live.standstill = 0;
 	}
@@ -236,7 +236,7 @@ public final class Velox extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.bursting && live.wallRun > 0 && live.wallRun <= WALL_RUN_TICKS || !live.chain.isEmpty();
+		return live.bursting && live.wallRun > 0 && live.wallRun <= WALL_RUN_TICKS && player.horizontalCollision || !live.chain.isEmpty();
 	}
 
 	@Override
@@ -363,7 +363,9 @@ public final class Velox extends XenoForm {
 	/** One flicker: beside (behind) the target, and a blow. */
 	private static void strike(ServerPlayer player, LivingEntity target) {
 		ServerLevel level = player.level();
-		Vec3 behind = target.position().subtract(target.getLookAngle().horizontal().normalize().scale(1.2));
+		Vec3 flat = target.getLookAngle().horizontal();
+		flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : flat.normalize();
+		Vec3 behind = target.position().subtract(flat.scale(1.2));
 		Vec3 from = player.position();
 		burst(level, ParticleTypes.CLOUD, from.add(0.0, 0.5, 0.0), 6, 0.3, 0.02);
 		float yaw = (float)(Math.toDegrees(Math.atan2(-(target.getX() - behind.x), target.getZ() - behind.z)));
@@ -470,7 +472,7 @@ public final class Velox extends XenoForm {
 		int elapsed = STANDSTILL_TICKS - live.standstill;
 		live.standstill = 0;
 		MobEffectInstance had = live.savedSpeed;
-		releaseAll(live);
+		releaseAll(live, player.level().getServer());
 		if (was) {
 			player.removeEffect(MobEffects.SPEED);
 			// the beacon or potion Speed it replaced comes back, with the time it ran down meanwhile
@@ -487,14 +489,28 @@ public final class Velox extends XenoForm {
 	}
 
 	/** Lets go of every projectile Standstill holds. */
-	private static void releaseAll(XenoformPower.Live live) {
+	private static void releaseAll(XenoformPower.Live live, net.minecraft.server.MinecraftServer server) {
 		for (XenoformPower.Held held : live.held.values()) {
 			if (held.projectile().isAlive()) {
 				release(held.projectile(), held.caught());
+			} else {
+				releaseCopy(server, held);
 			}
 		}
 		live.held.clear();
 		live.savedSpeed = null;
+	}
+
+	/** A projectile that went through a portal is replaced by a copy with the same UUID in the other dimension: let that one go. */
+	private static void releaseCopy(net.minecraft.server.MinecraftServer server, XenoformPower.Held held) {
+		Projectile projectile = held.projectile();
+		if (projectile.getRemovalReason() == Entity.RemovalReason.CHANGED_DIMENSION) {
+			for (ServerLevel other : server.getAllLevels()) {
+				if (other.getEntity(projectile.getUUID()) instanceof Projectile copy && copy != projectile) {
+					release(copy, held.caught());
+				}
+			}
+		}
 	}
 
 	private static void release(Projectile projectile, double[] caught) {
