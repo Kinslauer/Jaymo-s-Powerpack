@@ -35,14 +35,14 @@ public final class XenoformSlamView {
 	static final float[] L_ANCHOR = {1.0F, 7.5F, 0.0F};
 	static final float[] L_POS_DOWN = {-0.15F, -1.1F, -0.5F}, L_POS_UP = {0.08F, -0.33F, -1.0F};
 	/** The forearm's lean in the view's plane, its swing in and out, and its roll about its own length, in degrees (the roll turns the dial toward you). */
-	static final float L_TILT_DOWN = 70.0F, L_TILT = 30.0F, L_YAW_DOWN = 0.0F, L_YAW = 8.0F, L_ROLL_DOWN = -117.0F, L_ROLL = -120.0F;
+	static final float L_TILT_DOWN = 70.0F, L_TILT = 8.0F, L_YAW_DOWN = 0.0F, L_YAW = 8.0F, L_ROLL_DOWN = -117.0F, L_ROLL = -120.0F;
 	/** Breathing and impact: how far (blocks) the wrist bobs and dips, and the roll and pitch they add (degrees). */
 	static final float L_BOB_Y = 0.008F, L_BOB_ROLL = 1.0F, L_DIP_Y = 0.05F, L_DIP_PITCH = 6.0F;
 
 	/** The right hand's end (the middle of the end of the arm, in model pixels): from low and right, poised, and down on the dial. */
 	static final float[] R_ANCHOR = {-1.0F, 10.0F, 0.0F};
 	static final float[] R_POS_DOWN = {1.1F, -0.9F, -0.7F}, R_POS_POISED = {0.14F, 0.02F, -0.86F}, R_POS_STRUCK = {0.0F, -0.25F, -0.84F};
-	static final float R_TILT_DOWN = 20.0F, R_TILT = 20.0F, R_TILT_STRUCK = 12.0F;
+	static final float R_TILT_DOWN = -20.0F, R_TILT = -20.0F, R_TILT_STRUCK = -12.0F;
 	static final float R_YAW_DOWN = 0.0F, R_YAW = -8.0F, R_YAW_STRUCK = -15.0F;
 	static final float R_ROLL_DOWN = 0.0F, R_ROLL = 0.0F, R_ROLL_STRUCK = 0.0F;
 	static final float R_BOB_Y = 0.01F, R_BOB_ROLL = 2.0F;

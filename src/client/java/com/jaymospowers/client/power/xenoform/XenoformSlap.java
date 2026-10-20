@@ -68,6 +68,8 @@ public final class XenoformSlap {
 	private static boolean landed;
 	/** The running slam started from your own release: play the strike, like everyone else's slap. */
 	private static boolean selfStrike;
+	/** An alien's hold that the change cut short: when it began (the wrist keeps rising), else -1. The hand then lands at slamAt. */
+	private static float earlyFrom = -1.0F;
 	// everyone else: the form each was last seen in, and when their slap started
 	private static final Map<UUID, @Nullable String> FORMS = new HashMap<>();
 	private static final Map<UUID, Float> SLAMS = new HashMap<>();
@@ -86,9 +88,12 @@ public final class XenoformSlap {
 	public static void release(float now) {
 		if (holdAt >= 0.0F && releaseAt < 0.0F) {
 			if (slamOnRelease) {
-				// the wrist is already up: start the strike straight away
-				slamAt = now - OTHERS_RAISE_TICKS;
+				// the wrist carries on up from where the hold had it, then the strike: no snap on a short tap
+				float r = ease(Math.min(1.0F, Math.max(0.0F, now - holdAt) / RAISE_TICKS));
+				slamAt = now - OTHERS_RAISE_TICKS * r;
 				selfStrike = true;
+				landed = false;
+				earlyFrom = -1.0F;
 				holdAt = -1.0F;
 				return;
 			}
@@ -101,8 +106,17 @@ public final class XenoformSlap {
 		boolean striking = selfStrike && slamAt >= 0.0F && now - slamAt <= HOLD_STALE_TICKS;
 		if (!striking && holdAt >= 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
 			// an alien's hand has already come down by the hold's own clock: carry on from there, so the landing isn't played twice
-			float late = slamOnRelease ? 0.0F : Math.max(0.0F, now - holdAt - XenoformPower.HOLD_TICKS);
-			slamAt = now - late;
+			float held = now - holdAt;
+			if (!slamOnRelease && held < XenoformPower.HOLD_TICKS) {
+				// cut short (the form ran out): the hand comes down from where the hold had it, over the usual strike
+				float hit = Mth.clamp((held - (XenoformPower.HOLD_TICKS - STRIKE_TICKS)) / STRIKE_TICKS, 0.0F, 1.0F);
+				slamAt = now + (1.0F - hit) * STRIKE_TICKS;
+				earlyFrom = holdAt;
+			} else {
+				float late = slamOnRelease ? 0.0F : Math.max(0.0F, held - XenoformPower.HOLD_TICKS);
+				slamAt = now - late;
+				earlyFrom = -1.0F;
+			}
 			selfStrike = false;
 		}
 		holdAt = -1.0F;
@@ -110,7 +124,7 @@ public final class XenoformSlap {
 	}
 
 	public static void clear() {
-		holdAt = releaseAt = slamAt = -1.0F;
+		holdAt = releaseAt = slamAt = earlyFrom = -1.0F;
 		selfStrike = slamOnRelease = landed = false;
 		FORMS.clear();
 		SLAMS.clear();
@@ -125,6 +139,7 @@ public final class XenoformSlap {
 				slamAt = -1.0F;
 				selfStrike = false;
 				landed = false;
+				earlyFrom = -1.0F;
 			}
 			return pose;
 		}
@@ -148,6 +163,10 @@ public final class XenoformSlap {
 	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld) {
 		if (slam >= 0.0F) {
 			float dt = now - slam;
+			if (fromHold && dt < 0.0F && earlyFrom >= 0.0F) {
+				// the hand still on its way down after a cut-short hold
+				return new Pose(Math.min(1.0F, (now - earlyFrom) / RAISE_TICKS), 1.0F + dt / STRIKE_TICKS, -1.0F, 0.0F);
+			}
 			if (!fromHold) {
 				if (dt < OTHERS_RAISE_TICKS) {
 					return new Pose(dt / OTHERS_RAISE_TICKS, 0.0F, -1.0F, 0.0F);

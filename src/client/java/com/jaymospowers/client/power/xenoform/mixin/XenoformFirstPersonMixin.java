@@ -55,11 +55,15 @@ abstract class XenoformFirstPersonMixin {
 			this.jaymospowers$liftedInvisible = true;
 		}
 		XenoformSlap.Pose pose = avatar.getData(XenoformSlap.KEY);
-		if (pose == null || hands.isScoping || self.getAttached(Carry.CARRYING) != null) {
+		if (pose == null) {
+			return;
+		}
+		// the impact is felt at the landing whether or not the hands are drawn
+		XenoformSlap.landed(pose, self);
+		if (hands.isScoping || self.getAttached(Carry.CARRYING) != null) {
 			return;
 		}
 		float time = self.tickCount + partialTicks;
-		XenoformSlap.landed(pose, self);
 		poseStack.pushPose();
 		// the same lag behind the view as the usual hands
 		poseStack.rotateDegrees(Axis.XP, (hands.viewXRot - hands.xBob) * 0.1F);
