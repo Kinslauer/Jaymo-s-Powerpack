@@ -1,5 +1,11 @@
 package com.jaymospowers.aether.mob;
 
+import com.jaymospowers.JaymosPowers;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,7 +29,28 @@ public final class AerbunnyRide {
 	private static boolean jumpWasHeld;
 	private static int hops;
 
+	/** Client → server: the rider hopped (the server puffs the bunny so everyone sees it swell). */
+	public record Hop() implements CustomPacketPayload {
+		public static final Type<Hop> TYPE = new Type<>(JaymosPowers.id("aerbunny_hop"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Hop> CODEC = StreamCodec.unit(new Hop());
+
+		@Override
+		public Type<Hop> type() {
+			return TYPE;
+		}
+	}
+
 	private AerbunnyRide() {
+	}
+
+	public static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Hop.TYPE, Hop.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Hop.TYPE, (payload, context) -> {
+			Aerbunny bunny = carried(context.player());
+			if (bunny != null) {
+				bunny.setPuff(PUFF_TICKS);
+			}
+		});
 	}
 
 	/** The bunny on {@code player}'s head, or null. */
@@ -36,23 +63,26 @@ public final class AerbunnyRide {
 		return null;
 	}
 
-	/** One tick for the local {@code player}; {@code jumpHeld} is the jump key. */
-	public static void tick(Player player, boolean jumpHeld) {
+	/** One tick for the local {@code player}; {@code jumpHeld} is the jump key. True when the rider hopped (send {@link Hop}). */
+	public static boolean tick(Player player, boolean jumpHeld) {
 		boolean pressed = jumpHeld && !jumpWasHeld;
 		jumpWasHeld = jumpHeld;
 		Aerbunny bunny = carried(player);
 		if (bunny == null || player.onGround() || player.isInWater() || player.isFallFlying() || player.getAbilities().flying) {
 			hops = 0;
-			return;
+			return false;
 		}
+		boolean hopped = false;
 		Vec3 motion = player.getDeltaMovement();
 		if (pressed && hops < MAX_HOPS && player.fallDistance > HOP_AFTER) {
 			hops++;
 			player.setDeltaMovement(motion.x, HOP_SPEED, motion.z);
 			player.fallDistance = 0.0;
 			bunny.setPuff(PUFF_TICKS);
+			hopped = true;
 		} else if (motion.y < -RIDER_FALL) {
 			player.setDeltaMovement(motion.x, -RIDER_FALL, motion.z);
 		}
+		return hopped;
 	}
 }

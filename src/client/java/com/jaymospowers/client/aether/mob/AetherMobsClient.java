@@ -3,6 +3,7 @@ package com.jaymospowers.client.aether.mob;
 import com.jaymospowers.aether.mob.AerbunnyRide;
 import com.jaymospowers.aether.mob.AetherMobs;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -33,7 +34,9 @@ public final class AetherMobsClient {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		if (player != null && !player.isSpectator()) {
-			AerbunnyRide.tick(player, jumpHeld());
+			if (AerbunnyRide.tick(player, jumpHeld())) {
+				ClientPlayNetworking.send(new AerbunnyRide.Hop());
+			}
 		}
 	}
 }

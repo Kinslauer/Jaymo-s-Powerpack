@@ -54,6 +54,7 @@ public final class AetherMobs {
 	}
 
 	public static void init() {
+		AerbunnyRide.init();
 		PHYG = type("phyg", EntityType.Builder.of(Phyg::new, MobCategory.CREATURE).sized(0.9F, 0.9F).clientTrackingRange(10));
 		FLYING_COW = type("flying_cow", EntityType.Builder.of(FlyingCow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10));
 		SHEEPUFF = type("sheepuff", EntityType.Builder.of(Sheepuff::new, MobCategory.CREATURE).sized(0.9F, 1.3F).clientTrackingRange(10));
