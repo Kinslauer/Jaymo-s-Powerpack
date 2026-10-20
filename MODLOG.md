@@ -1881,11 +1881,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     through death) and the scoreboard tag `jaymoskitchen.broken.<part>` for Kitchen's corpses. Effects are transient
     modifiers refreshed every `REFRESH_TICKS` (20), ids `jaymospowers:wounds_*`: an arm -30% attack damage, -25% attack
     speed, -30% digging per arm, no shield or bow from its hand, `ARM_DROP_CHANCE` (25%) the hand drops what it held as
-    it breaks; both arms (or one broken and one gone): a player can't swing or use anything. A leg -30% speed, -40% jump,
+    it breaks; both arms (or one broken and one gone): a player can't swing, dig, place or use anything, but food, drink,
+    potions and medicine (anything with a `FOOD` or `CONSUMABLE` component) still go down. A leg -30% speed, -40% jump,
     no sprinting; a player's two legs: crawl only (`Crawl`, the key and Jump don't stand them up); a mob's every leg:
-    -70% speed, no jump. A foot -10% speed each. Wings: the flyer is pulled down and loses its flying speed. A severed
+    -70% speed, no jump. A sprained foot -10% speed each while at zero; a sprain is never capped and needs no setting:
+    it heals as any part does and clears above `BROKEN_CAP` (a hard fall doesn't send you to a priest). Wings: the flyer is pulled down and loses its flying speed. A severed
     part takes Dismember's own effects instead, never both.
-  - **Healing:** an unset break never heals past `BROKEN_CAP` (25%) and a severed part not at all; the surplus goes to
+  - **Healing:** an unset break (arm, leg, wing) never heals past `BROKEN_CAP` (25%) and a severed part not at all; the surplus goes to
     other parts, and health nothing can hold is refused (vanilla health is held to the parts' total). A break is set by
     a priest (Fractures' 2 emeralds), a respawn, a Hermit Bean, Verdant's healing, Chrono's Bloom or Wind's Zephyr's
     Breath (`Wounds.mendAll`); then it heals normally and the break clears above the cap. No more knitting by itself

@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -53,10 +54,11 @@ import org.jspecify.annotations.Nullable;
  * {@link #BROKEN_CAP}. Until it's set, healing never lifts it above {@link #BROKEN_CAP} ({@link Wounds}).
  * <ul>
  * <li><b>Arm:</b> weaker, slower blows and slower digging; no shield or bow from that hand; the hand may drop what it
- * held as it breaks ({@link #ARM_DROP_CHANCE}). Both arms: a player can't use or swing anything at all.</li>
+ * held as it breaks ({@link #ARM_DROP_CHANCE}). Both arms: a player can't swing, dig, place or use anything but
+ * food, drink and medicine.</li>
  * <li><b>Leg:</b> slower, no sprinting, a lower jump. A player's two legs: crawl only ({@link Crawl}); a mob's every
  * leg: barely moving.</li>
- * <li><b>Foot:</b> a little slower.</li>
+ * <li><b>Foot:</b> a little slower while at zero; a sprain heals by itself (never capped, never needs setting).</li>
  * <li><b>Wings:</b> a flyer comes down and can't take off.</li>
  * </ul>
  * The effects are transient attribute modifiers refreshed every {@link #REFRESH_TICKS}, so they go cleanly with the
@@ -104,6 +106,8 @@ public final class Breaks {
 	private static final BodyPart[] ARMS = {BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM};
 	private static final BodyPart[] LEGS = {BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG, BodyPart.FRONT_LEGS, BodyPart.HIND_LEGS, BodyPart.LEGS};
 	private static final BodyPart[] FEET = {BodyPart.LEFT_FOOT, BodyPart.RIGHT_FOOT};
+	/** (0.14.2) The feet's bits: sprains, never capped, healing by themselves. */
+	private static final int SPRAINS = 1 << BodyPart.LEFT_FOOT.ordinal() | 1 << BodyPart.RIGHT_FOOT.ordinal();
 
 	/** Everyone with a break (or whose break just went), until their effects are gone. Not saved: a reload finds them again. */
 	private static final Set<LivingEntity> TRACKED = new HashSet<>();
@@ -133,10 +137,13 @@ public final class Breaks {
 				apply(newPlayer, 0, 0);
 			}
 		});
-		// both arms gone: nothing can be swung or used; one arm: no shield or bow from its hand
+		// both arms gone: nothing can be swung, dug, placed or used, but food and drink still go down (and phase 4's
+		// medicine); one arm: no shield or bow from its hand
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> armless(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> armless(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseItemCallback.EVENT.register((player, level, hand) -> armless(player)
+		UseBlockCallback.EVENT.register((player, level, hand, hit) -> armless(player) && !player.getItemInHand(hand).isEmpty()
+			&& !consumable(player.getItemInHand(hand)) ? InteractionResult.FAIL : InteractionResult.PASS);
+		UseItemCallback.EVENT.register((player, level, hand) -> armless(player) && !consumable(player.getItemInHand(hand))
 			|| armBroken(player, hand) && twoHanded(player.getItemInHand(hand)) ? InteractionResult.FAIL : InteractionResult.PASS);
 		ServerTickEvents.END_SERVER_TICK.register(Breaks::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> TRACKED.clear());
@@ -150,10 +157,13 @@ public final class Breaks {
 		return mask == null ? 0 : mask;
 	}
 
-	/** The broken parts that have been set (server side). */
+	/**
+	 * The broken parts that have been set (server side). (0.14.2) A sprained foot counts as set from the start: it heals
+	 * as any part does, and the sprain goes once it's back above {@link #BROKEN_CAP}; no priest needed.
+	 */
 	public static int set(Entity entity) {
 		Integer mask = entity.getAttached(SET);
-		return mask == null ? 0 : mask & broken(entity);
+		return ((mask == null ? 0 : mask) | SPRAINS) & broken(entity);
 	}
 
 	/** The broken parts not yet set: these never heal past {@link #BROKEN_CAP}. */
@@ -251,6 +261,11 @@ public final class Breaks {
 			return false;
 		}
 		return armBroken(player, InteractionHand.MAIN_HAND) && armBroken(player, InteractionHand.OFF_HAND);
+	}
+
+	/** (0.14.2) What two broken arms can still get down: food, drink, potions, medicine (anything eaten or drunk). */
+	static boolean consumable(ItemStack stack) {
+		return stack.has(DataComponents.FOOD) || stack.has(DataComponents.CONSUMABLE);
 	}
 
 	/** What a single broken arm can't work: a shield (anything that blocks) or a bow or crossbow. */

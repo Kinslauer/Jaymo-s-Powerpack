@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * then only the head kills them.
  * <p>
  * (0.14.2) Phase 3: a limb that a routed hit takes to zero is broken ({@link Breaks}: an arm or a leg; a foot sprained, a
- * wing grounded) and, until it is set, never heals past {@link Breaks#BROKEN_CAP}; a severed one never heals at all.
+ * wing grounded) and, until it is set, never heals past {@link Breaks#BROKEN_CAP} (a sprained foot heals freely); a
+ * severed one never heals at all.
  * Health that the capped parts can't hold is refused (vanilla health is held to the parts' total). A hit with a blade on
  * an already broken limb, or one that takes the head past zero, for more than {@link Dismember#SEVER_OVERKILL} of that
  * part cuts it off ({@link Dismember#severOnOverkill}).
