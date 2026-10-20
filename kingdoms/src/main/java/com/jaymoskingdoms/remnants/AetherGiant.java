@@ -45,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.97) The Aether's Giants: the Highfield, Magnetic, Arctic and Irradiated Giants, the last of the Aether's remnants
+ * (0.7.98) The Aether's Giants: the Highfield, Magnetic, Arctic and Irradiated Giants, the last of the Aether's remnants
  * on the Overworld, each risen beside a monolith of its element ({@link Monoliths}). All four stamp the ground (everyone
  * near is hurt and thrown); each also has its element's own power ({@link #power}) and an aura round it:
  * <ul>

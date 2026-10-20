@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 /**
- * (0.7.97) Ancient Remnants' own monoliths (Obscuria's mod, its Obscuria Modding License allows compatibility layers),
+ * (0.7.98) Ancient Remnants' own monoliths (Obscuria's mod, its Obscuria Modding License allows compatibility layers),
  * when it's loaded: each of its monoliths found in the loaded chunks round a player is remembered as an Aether monolith,
  * its element by its biome, and wakes a Giant like ours ({@link Monoliths}). Nothing of the mod's is touched: its
  * structures are only read, by id. Ancient Remnants has no Fabric 26.3 build yet, so for now this sleeps.

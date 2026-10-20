@@ -499,7 +499,7 @@ taken from the creative tab have no enchantment.
 - **Ender step on players:** `randomTeleport` on a `ServerPlayer` from inside `AFTER_DAMAGE` (same as the existing
   blink).
 
-## 0.13.35: Emberborn rifts into the Nether
+## 0.13.36: Emberborn rifts into the Nether
 Emberborn (a Jaymo's Kingdoms heritage, read by reflection in `ArsenalEmber.emberborn`; false without Kingdoms) who use
 Pocket Arsenal get a Nether of their own. Everyone else, and Emberborn without Arsenal, is unchanged.
 - **Random rift:** until they have escaped, a Z rift opened in the Overworld is a Nether rift with chance

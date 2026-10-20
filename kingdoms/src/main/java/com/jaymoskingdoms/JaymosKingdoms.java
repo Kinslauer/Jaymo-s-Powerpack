@@ -158,6 +158,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Torches.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
 		com.jaymoskingdoms.wild.SpiderKinds.register();
+		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
+		com.jaymoskingdoms.wild.SpiderMinds.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();

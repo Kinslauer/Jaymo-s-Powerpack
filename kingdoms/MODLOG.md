@@ -3402,7 +3402,17 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
   red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
   faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).
-- **0.7.97, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
+- **0.7.97, small spiders that hunt:** Andy: "Can we make every spider this size? (More Babies) then give them this ai
+  (NYF's Spiders, Yuka)". Every spider is now half size and every cave spider about two thirds, hitbox and all (the
+  sizes of More Babies' baby spiders, all rights reserved, so only its proportions; `wild.SpiderMinds.size`, the
+  game's scale attribute, saved with the spider so corpses keep it). NYF's Spiders has no 26.3 build; Stormie's
+  Spiders, already in the pack, is its fork, so the wall and ceiling climbing was already there. On top of it, our
+  own hunting after Yuka's ideas (MIT; `wild.SpiderMinds`, numbers at its top): spiders remember where they last saw
+  you and which way you went, and in the dark hear you run or jump (sneak past); they run at where you'll be, spread
+  round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
+  went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
+  whoever walks under. The tarantula keeps its size.
+- **0.7.98, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
   throughout the overworld, the last surviving puzzle pieces being the monoliths and their respective Giants, The
   Highfield Giant, Magnetic, Arctic, and Irradiated all spawn near one and increase world tier when the first is
   killed." Neither Ancient Remnants nor the Aether II runs on Fabric 26.3, so Andy chose a remake (`docs/remnants.md`).

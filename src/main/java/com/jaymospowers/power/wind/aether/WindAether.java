@@ -33,7 +33,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.13.35) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating islands in four
+ * (0.13.36) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating islands in four
  * highlands: Highfields, Magnetic, Arctic and Irradiated; see {@code docs/wind.md}).
  * <ul>
  * <li>A Wind user flying in the Overworld who climbs to within {@link #ASCEND_MARGIN} blocks of the top of the world, with

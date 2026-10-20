@@ -46,7 +46,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.97) The Aether's remnants, Andy's lore for the pack: the Aether scattered pieces of itself across the Overworld,
+ * (0.7.98) The Aether's remnants, Andy's lore for the pack: the Aether scattered pieces of itself across the Overworld,
  * and the last of them are the monoliths and their Giants. Our own remake of Ancient Remnants' monoliths (that mod has
  * no Fabric 26.3 build; nothing of its code, structures or art is used): a broken pillar of its element's stone with a
  * glowing core floating over its crown, raised now and then out in the wild a little way from a player

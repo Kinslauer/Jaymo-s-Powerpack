@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.13.35) Emberborn rifts into the Nether. An Emberborn (a Jaymo's Kingdoms heritage, read by reflection only) who
+ * (0.13.36) Emberborn rifts into the Nether. An Emberborn (a Jaymo's Kingdoms heritage, read by reflection only) who
  * uses Pocket Arsenal and hasn't yet escaped the Nether may find that the rift Z opens is a Nether rift
  * ({@link #NETHER_CHANCE}, rolled when it opens): walking through lands them in the Nether and strands them there.
  * While stranded, Z opens the ordinary pocket rift, whose way out leads back to the Nether, so the pocket is no way
