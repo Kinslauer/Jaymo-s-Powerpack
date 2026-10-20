@@ -461,7 +461,8 @@ public final class Theft {
 
 	/** The faction's people who see {@code player} now, nearest first. */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
-		double range = player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE;
+		// (0.7.98) a hood hides you from farther off, on top of sneaking
+		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());
@@ -510,6 +511,8 @@ public final class Theft {
 		}
 		Weight w = weight != null ? weight : crime.weight;
 		if (!seen.isEmpty()) {
+			// (0.7.98) a hood is a fragile mask: seen close, face on, in the light, it is you
+			Identities.recognise(level, player, f, seen);
 			// (0.5.39) word gets round: its people will ask about it
 			Approaches.suspect(player, f.id(), level.getGameTime());
 		}
