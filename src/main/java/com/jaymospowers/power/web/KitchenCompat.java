@@ -111,8 +111,26 @@ public final class KitchenCompat {
 		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
 	}
 
+	/** (0.14.3) Wounds: how drunk a player is (Kitchen's {@code Drunk} points), 0 without Kitchen. */
+	public static int drunk(Player player) {
+		return LOADED ? Kitchen.drunk(player) : 0;
+	}
+
+	/** (0.14.3) Wounds: whether {@code stack} is Kitchen's strong spirits (poured on a wound, it cleans it). */
+	public static boolean isStrongSpirits(net.minecraft.world.item.ItemStack stack) {
+		return LOADED && Kitchen.spirits(stack);
+	}
+
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
+		static int drunk(Player player) {
+			return com.jaymoskitchen.brewing.Drunk.level(player);
+		}
+
+		static boolean spirits(net.minecraft.world.item.ItemStack stack) {
+			return com.jaymoskitchen.brewing.Brewing.STRONG_SPIRITS != null && stack.is(com.jaymoskitchen.brewing.Brewing.STRONG_SPIRITS);
+		}
+
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
 		}

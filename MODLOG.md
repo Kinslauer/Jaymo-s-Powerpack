@@ -1911,3 +1911,33 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     the struck leg by `DarktideStatus.LEG_WOUND` (half of it) through `Wounds.hurtPart` instead of the 5 s crawl, so two
     strikes break it; Pounce's three stabs count a broken leg as crippled. The timed crawl stays for bodies Wounds
     doesn't part. The Great Ape's leg-crippling (a timed knock-down of a transformation) and trips and stuns stay as they were.
+- **0.14.3, Wounds phase 4 (medieval medicine):** bleeding, festering, pain and the medieval kit (spec
+  `docs/Wounds-Phase4.md`, track A; Kingdoms' clerics are track B). Numbers at the top of `core/wounds/Bleeding`,
+  `Treatment` and `Pain`. Written without a compiler: build it before anything else.
+  - **Bleeding** (`core/wounds/Bleeding`): a blade, a projectile or a zombie's claws dealing `BLEED_FROM` (2) or more to
+    a part opens a cut (`jaymospowers:wounds_bleeding`, a bit per part, synced to the target). Every `BLEED_TICKS` (4 s)
+    a cut drips and costs the part `BLEED_DAMAGE` (0.5; a stump `STUMP_BLEED` 1) as `jaymospowers:bleeding` damage, and
+    a cut closes by itself after `BLEED_STOP_TICKS` (30 s); a stump never does. A bleeding part heals no further than
+    `CUT_CAP` (half). Not while downed, not in creative, never the bloodless. Kingdoms' tending (tag
+    `jaymospowers_bandaged`) stops all bleeding and binds the worst part.
+  - **Festering:** a dirty cut (a rag, a zombie's claws) may fester (`FESTER_CHANCE` 5% each bleed tick): the part
+    can't heal past where it stood, a fever every `FEVER_TICKS` (Weakness, the body hurt, a sickly shimmer), and a limb
+    left festering `FESTER_LIMB_TICKS` (a day) rots off (a stump, bled shut). Strong spirits or honey (sneak + use,
+    looking down, or on another) clean it.
+  - **The kit** (creative tab Medicine, `core/wounds/MedicineItems`, icons by `tools/vanilla_style/medicine.py`):
+    linen bandage (stops a cut, heals 3 over 10 s), rag (stops it, heals 1.5, dirty), splint (a broken arm or leg is
+    usable and heals; `Breaks.splint`), needle and thread (8 uses: stitches a cut, stings 1, the part heals past half),
+    a red-hot blade (heat it on a lit campfire, fire or lava: seals even a stump, burns 2), smelling salts (4 uses: a
+    downed body up at once with 2 health, Speed then Nausea; a passed-out player 40% and the whole vial), jar of leeches
+    (1 health for long numbness), willow-bark tea (numb after 10 s, for 3 min), poppy syrup (numb 6 min, wakes the
+    downed; two at once knocks you out; addictive). Recipes in `recipe/medicine/`; poppy syrup needs Kitchen's strong
+    spirits.
+  - **Treatment** (`core/wounds/Treatment`): use on yourself or another opens the body screen
+    (`client/wounds/BodyScreen`: the silhouette, each part's state, greyed where the medicine can't help); pick a part
+    and hold still. Sneak + use treats the worst part while sneak is held. Moving, a hit, or the medicine leaving the
+    hand spoils it. Use on a downed body treats it before Downed's pick-up.
+  - **Pain** (`core/wounds/Pain`): numb (tea, leeches, poppy, or Kitchen drunk 4+) ignores the effects of breaks.
+    Poppy addiction rises 20 a dose, decays always; past 40 and 5 min without, withdrawal: Weakness, Nausea pulses,
+    the shakes (`client/wounds/MedicineHud`).
+  - **Downed:** a knocked-out body (`Downed.knockOut`) comes round on its own; `Downed.rouse` and `wake` for the salts
+    and the poppy.

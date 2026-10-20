@@ -135,11 +135,17 @@ public final class Downed {
 	/** A downed player who has passed out (lies still, the screen darker). Saved, synced to everyone. */
 	public static final AttachmentType<Boolean> OUT = AttachmentRegistry.create(JaymosPowers.id("downed_out"),
 		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.14.3) Knocked out for a while (too much poppy): when they come round (game time), shifted up one bit, the low bit set
+	 * if they were down before it (they come round still down). Saved, server side.
+	 */
+	public static final AttachmentType<Long> KNOCKED = AttachmentRegistry.create(JaymosPowers.id("downed_knocked"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** A downed player's slow crawl. */
 	static final Identifier SLOW_ID = JaymosPowers.id("downed_slow");
 	/** Revive and the downed's empty hands run before every other mod's right-click on them (trades, quests, pockets, carrying). */
-	private static final Identifier FIRST = JaymosPowers.id("downed_first");
+	static final Identifier FIRST = JaymosPowers.id("downed_first");
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
 
@@ -203,7 +209,7 @@ public final class Downed {
 			if (!downable(entity) || !spared(entity, source)) {
 				return true;
 			}
-			goDown(level, entity, source);
+			goDown(level, entity, source, false);
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
@@ -300,15 +306,22 @@ public final class Downed {
 
 	// ---- going down, getting up ------------------------------------------------------------------------------------------
 
-	private static void goDown(ServerLevel level, LivingEntity entity, DamageSource source) {
+	/** Down they go; {@code source}: what felled them (null: nothing did, a knock-out); {@code keepHealth}: (0.14.3) a knock-out takes none. */
+	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
 		boolean crawler = !(entity instanceof Player) && level.getRandom().nextFloat() < CRAWLER_CHANCE;
-		entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
+		if (!keepHealth) {
+			entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
+		}
 		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
 		entity.removeAttached(WOUNDS);
 		entity.removeAttached(OUT);
 		entity.addTag(DOWNED_TAG);
 		entity.removeTag(REVIVE_TAG);
-		FELLED_BY.put(entity, source);
+		if (source != null) {
+			FELLED_BY.put(entity, source);
+		} else {
+			FELLED_BY.remove(entity);
+		}
 		// head and body hold on to a little (the rest is spread as Wounds keeps it)
 		Wounds.settle(entity);
 		entity.stopUsingItem();
@@ -340,6 +353,7 @@ public final class Downed {
 		entity.removeAttached(DOWNED);
 		entity.removeAttached(WOUNDS);
 		entity.removeAttached(OUT);
+		entity.removeAttached(KNOCKED);
 		entity.removeTag(DOWNED_TAG);
 		entity.removeTag(REVIVE_TAG);
 		if (entity instanceof Player player) {
@@ -372,6 +386,95 @@ public final class Downed {
 		if (entity instanceof ServerPlayer player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.up").withStyle(ChatFormatting.GREEN));
 		}
+	}
+
+	/**
+	 * (0.14.3) Brings a downed one round, or knocks them out: {@code passedOut} false, they come round (a passed-out player
+	 * crawls again, their bleeding-out clock started afresh; a mob drags itself along); true, they pass out where they lie.
+	 * Nothing for one who isn't down.
+	 */
+	public static void wake(LivingEntity entity, boolean passedOut) {
+		if (!isDowned(entity) || !(entity.level() instanceof ServerLevel level)) {
+			return;
+		}
+		if (passedOut) {
+			entity.setAttached(OUT, true);
+			return;
+		}
+		boolean wasOut = passedOut(entity);
+		entity.removeAttached(OUT);
+		entity.removeAttached(KNOCKED);
+		if (!(entity instanceof Player)) {
+			// (a mob drags itself along from here; its own clock runs on)
+			entity.setAttached(DOWNED, since(entity) << 1 | 1L);
+		} else if (wasOut) {
+			// (a player who'd passed out crawls again, a fresh while before they pass out again)
+			entity.setAttached(DOWNED, level.getGameTime() << 1);
+		}
+		if (wasOut && entity instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.come_round").withStyle(ChatFormatting.YELLOW));
+		}
+	}
+
+	/**
+	 * (0.14.3) Smelling salts: a downed one is up on the spot, with only {@code vital} health points (head and body share
+	 * them; the rest is as it was). True if they were down.
+	 */
+	public static boolean rouse(ServerLevel level, LivingEntity entity, float vital) {
+		if (!isDowned(entity)) {
+			return false;
+		}
+		if (Carry.carrierOf(entity) instanceof ServerPlayer carrier) {
+			Carry.slip(carrier);
+		}
+		forget(entity);
+		entity.stopRiding();
+		entity.setHealth(Math.min(entity.getMaxHealth(), Math.max(entity.getHealth(), vital)));
+		// (head and body hold on to a little: the rest follows the health)
+		Wounds.settle(entity);
+		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.NEUTRAL, 0.8F, 1.6F);
+		if (entity instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.roused").withStyle(ChatFormatting.GREEN));
+		}
+		return true;
+	}
+
+	/**
+	 * (0.14.3) Knocked out for {@code ticks} (too much poppy): one who's up goes down where they stand (no health lost) and
+	 * passes out, and gets up again by themselves after; one already down passes out, and comes round still down. Only
+	 * those who can go down ({@link #downable}) or already are. True if they were knocked out.
+	 */
+	public static boolean knockOut(ServerLevel level, LivingEntity entity, int ticks) {
+		boolean was = isDowned(entity);
+		if (!was && !downable(entity)) {
+			return false;
+		}
+		if (!was) {
+			goDown(level, entity, null, true);
+		}
+		// (out cold: no crawling away)
+		entity.setAttached(DOWNED, since(entity) << 1);
+		entity.setAttached(OUT, true);
+		entity.setAttached(KNOCKED, (level.getGameTime() + ticks) << 1 | (was ? 1L : 0L));
+		if (entity instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_out").withStyle(ChatFormatting.DARK_PURPLE));
+		}
+		return true;
+	}
+
+	/** (0.14.3) A knock-out's end: they come round (still down if they were before it, else up). True if it ended just now. */
+	private static boolean comeRound(ServerLevel level, LivingEntity entity) {
+		Long knocked = entity.getAttached(KNOCKED);
+		if (knocked == null || level.getGameTime() < knocked >> 1) {
+			return false;
+		}
+		entity.removeAttached(KNOCKED);
+		if ((knocked & 1L) != 0L) {
+			wake(entity, false);
+		} else {
+			getUp(level, entity);
+		}
+		return true;
 	}
 
 	/**
@@ -422,6 +525,11 @@ public final class Downed {
 		if (!(mob.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// (0.14.3) Kingdoms' villagers bandaged it
+		Bleeding.tended(mob);
+		if (comeRound(level, mob)) {
+			return;
+		}
 		if (mob.entityTags().contains(REVIVE_TAG)) {
 			// (tended back on its feet by someone else's hands: Kingdoms' villagers)
 			getUp(level, mob);
@@ -432,7 +540,7 @@ public final class Downed {
 		}
 		long now = level.getGameTime();
 		Long wounds = mob.getAttached(WOUNDS);
-		if (wounds == null && now - since(mob) >= RECOVER_TICKS) {
+		if (wounds == null && now - since(mob) >= RECOVER_TICKS && !mob.hasAttached(KNOCKED)) {
 			getUp(level, mob);
 			return;
 		}
@@ -471,8 +579,14 @@ public final class Downed {
 
 	/** A downed player's tick: the crawl held, passing out, giving up, and the getting up someone else asked for. */
 	private static void tickPlayer(ServerLevel level, ServerPlayer player) {
+		// (0.14.3) Kingdoms' villagers bandaged them
+		Bleeding.tended(player);
 		if (player.isCreative() || player.isSpectator() || player.entityTags().contains(REVIVE_TAG)) {
 			getUp(level, player);
+			return;
+		}
+		// (0.14.3) a knock-out over: up, or still down if they were before it
+		if (comeRound(level, player) && !isDowned(player)) {
 			return;
 		}
 		if (!player.entityTags().contains(DOWNED_TAG)) {
@@ -504,6 +618,14 @@ public final class Downed {
 				speed.addOrUpdateTransientModifier(new AttributeModifier(SLOW_ID, slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			}
 		}
+		if (player.hasAttached(KNOCKED)) {
+			// (0.14.3) knocked out, not dying: nothing to give up, they'll come round
+			GIVING_UP.remove(player.getUUID());
+			if (now % HINT_TICKS == 0) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_out").withStyle(ChatFormatting.DARK_PURPLE));
+			}
+			return;
+		}
 		// giving up: sneak held (server side, from the player's input)
 		int held = player.isShiftKeyDown() ? GIVING_UP.merge(player.getUUID(), 1, Integer::sum) : 0;
 		if (held == 0) {
@@ -528,6 +650,10 @@ public final class Downed {
 		net.minecraft.world.phys.@Nullable EntityHitResult hit) {
 		if (isDowned(player)) {
 			return InteractionResult.FAIL;
+		}
+		if (!world.isClientSide() && Treatment.claimsDowned(player, hand, entity)) {
+			// (0.14.3) medicine in hand that can help them: Treatment's, not a revive
+			return InteractionResult.PASS;
 		}
 		Revive held = world.isClientSide() || hand != InteractionHand.MAIN_HAND ? null : REVIVING.get(player.getUUID());
 		if (held != null && held.body == entity) {

@@ -150,7 +150,8 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
 3. **Cripplings. Built in 0.14.2 (written without a compiler; not yet built or tested on the Deck; spec
    `docs/Wounds-Phase3.md`).** Broken arm, leg, foot and wing debuffs. Existing cripplings rerouted. Sever on overkill (Dismember).
    Corpses show the breaks.
-4. **Medicine.** The medieval kit, treatment channel, body screen, poppy addiction, smelling salts, needle, cautery,
+4. **Medicine. Built in 0.14.3 (written without a compiler; not yet built or tested on the Deck; spec
+   `docs/Wounds-Phase4.md`, Kingdoms' clerics in its track B).** The medieval kit, treatment channel, body screen, poppy addiction, smelling salts, needle, cautery,
    festering, leeches, Kingdoms clerics as surgeons. Kitchen's brewing system and still (its own Kitchen release).
 5. **Polish.** Client effects, limps and hanging arms, quadruped downed pose, tuning, docs (`Abilities.md`), JEI pages.
 

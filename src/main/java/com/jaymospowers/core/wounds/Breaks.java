@@ -82,6 +82,10 @@ public final class Breaks {
 	public static final double WING_FALL = 0.12, WING_FLY = -1.0;
 	/** (0.14.2) How often the effects are refreshed and healed breaks cleared (ticks). */
 	public static final int REFRESH_TICKS = 20;
+	/** (0.14.3) A splinted break keeps only this share of its effects (Andy's splint: "lifts most of the debuff"). */
+	public static final double SPLINT_KEEP = 0.25;
+	/** (0.14.3) Per splint worn: speed lost (the splint's own stiffness). */
+	public static final double SPLINT_SPEED = -0.05;
 	/** (0.14.2) What Kitchen reads off a body for each broken part (then the part's name). */
 	public static final String TAG_PREFIX = "jaymoskitchen.broken.";
 
@@ -92,6 +96,11 @@ public final class Breaks {
 	public static final AttachmentType<Integer> SET = AttachmentRegistry.create(JaymosPowers.id("wounds_set"),
 		builder -> builder.persistent(Codec.INT));
 
+	/** (0.14.3) The broken parts in a splint (set, most of their effects lifted). Saved, synced to everyone (a splinted leg shows), not kept through death. */
+	public static final AttachmentType<Integer> SPLINTED = AttachmentRegistry.create(JaymosPowers.id("wounds_splinted"),
+		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	private static final Identifier SPLINT_SPEED_ID = JaymosPowers.id("wounds_splint_speed");
 	private static final Identifier ARM_DAMAGE_ID = JaymosPowers.id("wounds_arm_damage");
 	private static final Identifier ARM_SPEED_ID = JaymosPowers.id("wounds_arm_attack_speed");
 	private static final Identifier ARM_DIG_ID = JaymosPowers.id("wounds_arm_dig");
@@ -175,6 +184,43 @@ public final class Breaks {
 		return (broken(entity) & bit(part)) != 0;
 	}
 
+	/** (0.14.3) The broken parts in a splint. */
+	public static int splinted(Entity entity) {
+		return entity.getAttachedOrElse(SPLINTED, 0) & broken(entity);
+	}
+
+	/** (0.14.3) Whether a splint can go on {@code part}: an arm or a leg, broken, still there, not splinted yet. */
+	static boolean splintable(LivingEntity entity, BodyPart part) {
+		boolean limb = part == BodyPart.LEFT_ARM || part == BodyPart.RIGHT_ARM;
+		for (BodyPart leg : LEGS) {
+			limb |= part == leg;
+		}
+		return limb && isBroken(entity, part) && !missing(entity, part) && (splinted(entity) & bit(part)) == 0;
+	}
+
+	/** (0.14.3) A splint on {@code part}: set, and most of its effects lifted while it's worn (it comes off as the bone knits). */
+	static boolean splint(LivingEntity entity, BodyPart part) {
+		if (!splintable(entity, part)) {
+			return false;
+		}
+		entity.setAttached(SET, set(entity) | bit(part));
+		entity.setAttached(SPLINTED, splinted(entity) | bit(part));
+		TRACKED.add(entity);
+		refresh(entity);
+		return true;
+	}
+
+	private static void unsplint(LivingEntity entity, int mask) {
+		int left = entity.getAttachedOrElse(SPLINTED, 0) & ~mask;
+		if (left == 0) {
+			if (entity.hasAttached(SPLINTED)) {
+				entity.removeAttached(SPLINTED);
+			}
+		} else {
+			entity.setAttached(SPLINTED, left);
+		}
+	}
+
 	static int bit(BodyPart part) {
 		return 1 << part.ordinal();
 	}
@@ -228,9 +274,13 @@ public final class Breaks {
 	static float @Nullable [] caps(LivingEntity entity, BodyPlan plan) {
 		int unset = unset(entity);
 		int gone = Dismember.missing(entity);
-		if (unset == 0 && gone == 0) {
+		// (0.14.3) an open cut heals only so far, a festering part not at all
+		int cut = Bleeding.bleeding(entity);
+		int fester = Bleeding.festering(entity);
+		if (unset == 0 && gone == 0 && cut == 0 && fester == 0) {
 			return null;
 		}
+		java.util.List<Float> stored = fester == 0 ? null : entity.getAttached(Wounds.PARTS);
 		float[] caps = new float[plan.size()];
 		boolean any = false;
 		for (int i = 0; i < caps.length; i++) {
@@ -239,8 +289,19 @@ public final class Breaks {
 			if (!part.vital() && missing(entity, part)) {
 				caps[i] = 0.0F;
 				any = true;
-			} else if ((unset & bit(part)) != 0) {
+				continue;
+			}
+			if ((unset & bit(part)) != 0) {
 				caps[i] = BROKEN_CAP;
+				any = true;
+			}
+			if ((cut & bit(part)) != 0) {
+				caps[i] = Math.min(caps[i], Bleeding.CUT_CAP);
+				any = true;
+			}
+			if ((fester & bit(part)) != 0) {
+				float now = stored != null && stored.size() == caps.length ? stored.get(i) : 1.0F;
+				caps[i] = Math.min(caps[i], Math.max(0.0F, now));
 				any = true;
 			}
 		}
@@ -260,7 +321,16 @@ public final class Breaks {
 		if ((mask & (bit(BodyPart.LEFT_ARM) | bit(BodyPart.RIGHT_ARM))) == 0) {
 			return false;
 		}
-		return armBroken(player, InteractionHand.MAIN_HAND) && armBroken(player, InteractionHand.OFF_HAND);
+		// (0.14.3) an arm in a splint can still hold a cup or a spoon
+		return armBroken(player, InteractionHand.MAIN_HAND) && armBroken(player, InteractionHand.OFF_HAND) && !splintedArm(player, InteractionHand.MAIN_HAND)
+			&& !splintedArm(player, InteractionHand.OFF_HAND);
+	}
+
+	/** (0.14.3) Whether the arm on {@code hand}'s side is broken but splinted. */
+	private static boolean splintedArm(LivingEntity entity, InteractionHand hand) {
+		boolean right = (entity.getMainArm() == HumanoidArm.RIGHT) == (hand == InteractionHand.MAIN_HAND);
+		BodyPart arm = right ? BodyPart.RIGHT_ARM : BodyPart.LEFT_ARM;
+		return (splinted(entity) & bit(arm)) != 0 && !missing(entity, arm);
 	}
 
 	/** (0.14.2) What two broken arms can still get down: food, drink, potions, medicine (anything eaten or drunk). */
@@ -275,9 +345,11 @@ public final class Breaks {
 
 	/** A person whose two legs are both broken (not severed): crawling is all that's left. */
 	public static boolean crawlOnly(Entity entity) {
+		// (0.14.3) both splinted: a slow hobble, on their feet
 		return entity instanceof LivingEntity living && BodyPlan.of(living) == BodyPlan.HUMANOID
 			&& isBroken(living, BodyPart.LEFT_LEG) && isBroken(living, BodyPart.RIGHT_LEG)
-			&& !missing(living, BodyPart.LEFT_LEG) && !missing(living, BodyPart.RIGHT_LEG);
+			&& !missing(living, BodyPart.LEFT_LEG) && !missing(living, BodyPart.RIGHT_LEG)
+			&& (splinted(living) & (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG))) != (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG));
 	}
 
 	// ---- breaking, setting, knitting --------------------------------------------------------------------------------------
@@ -310,10 +382,13 @@ public final class Breaks {
 				} else {
 					entity.setAttached(SET, left);
 				}
+				// (0.14.3) and the splint's no good on a fresh break
+				unsplint(entity, bit(part));
 			}
 			return false;
 		}
 		entity.setAttached(BROKEN, mask | bit(part));
+		unsplint(entity, bit(part));
 		Integer set = entity.getAttached(SET);
 		if (set != null && (set & bit(part)) != 0) {
 			// a fresh break isn't set
@@ -380,6 +455,7 @@ public final class Breaks {
 		int mask = broken(entity);
 		entity.removeAttached(BROKEN);
 		entity.removeAttached(SET);
+		unsplint(entity, -1);
 		clearTags(entity, mask);
 		apply(entity, 0, Dismember.missing(entity));
 		uncrawl(entity, crawled);
@@ -397,6 +473,8 @@ public final class Breaks {
 			entity.setAttached(SET, set(entity) | (broken(entity) & mask));
 			refresh(entity);
 		}
+		// (0.14.3) no stump left to bleed, nothing left festering there
+		Bleeding.regrown(entity, mask);
 	}
 
 	/**
@@ -412,6 +490,7 @@ public final class Breaks {
 				entity.removeAttached(SET);
 				clearTags(entity, mask);
 			}
+			unsplint(entity, -1);
 			apply(entity, 0, Dismember.missing(entity));
 			return;
 		}
@@ -446,6 +525,8 @@ public final class Breaks {
 				}
 			}
 			clearTags(entity, healed);
+			// (0.14.3) the splint comes off as the bone knits
+			unsplint(entity, healed);
 			if (entity instanceof Player player) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.knit").withStyle(ChatFormatting.GREEN));
 			}
@@ -482,11 +563,16 @@ public final class Breaks {
 
 	/** The modifiers for the breaks in {@code mask} (severed parts, {@code gone}, take Dismember's effects instead). */
 	static void apply(LivingEntity entity, int mask, int gone) {
-		int arms = 0, legs = 0, legParts = 0, feet = 0;
+		int legs = 0, legParts = 0, feet = 0, splints = 0;
+		// (0.14.3) a splinted break keeps only SPLINT_KEEP of its effects
+		double arms = 0.0, legWeight = 0.0;
+		int splinted = entity.getAttachedOrElse(SPLINTED, 0) & mask;
 		BodyPlan plan = BodyPlan.of(entity);
 		for (BodyPart part : ARMS) {
 			if ((mask & bit(part)) != 0 && (gone & limb(part)) == 0) {
-				arms++;
+				boolean splint = (splinted & bit(part)) != 0;
+				arms += splint ? SPLINT_KEEP : 1.0;
+				splints += splint ? 1 : 0;
 			}
 		}
 		for (BodyPart part : LEGS) {
@@ -495,6 +581,9 @@ public final class Breaks {
 			}
 			if ((mask & bit(part)) != 0 && (limb(part) == 0 || (gone & limb(part)) == 0)) {
 				legs++;
+				boolean splint = (splinted & bit(part)) != 0;
+				legWeight = Math.max(legWeight, splint ? SPLINT_KEEP : 1.0);
+				splints += splint ? 1 : 0;
 			}
 		}
 		for (BodyPart part : FEET) {
@@ -503,17 +592,25 @@ public final class Breaks {
 			}
 		}
 		boolean allLegs = legs > 0 && legs >= legParts && !(entity instanceof Player);
-		if (Downed.isDowned(entity)) {
+		boolean down = Downed.isDowned(entity);
+		if (down) {
 			// (the downed one's pace is the downed state's: no limp on top of it)
+			legs = 0;
+			feet = 0;
+		}
+		if (Pain.numb(entity)) {
+			// (0.14.3) willow bark, poppy, leeches or drink: the pain's hidden, the slowness and weakness with it
+			arms = 0.0;
 			legs = 0;
 			feet = 0;
 		}
 		modifier(entity, Attributes.ATTACK_DAMAGE, ARM_DAMAGE_ID, ARM_DAMAGE * arms);
 		modifier(entity, Attributes.ATTACK_SPEED, ARM_SPEED_ID, ARM_ATTACK_SPEED * arms);
 		modifier(entity, Attributes.BLOCK_BREAK_SPEED, ARM_DIG_ID, ARM_DIG * arms);
-		modifier(entity, Attributes.MOVEMENT_SPEED, LEG_SPEED_ID, legs == 0 ? 0.0 : allLegs ? ALL_LEGS_SPEED : LEG_SPEED);
-		modifier(entity, Attributes.JUMP_STRENGTH, LEG_JUMP_ID, legs == 0 ? 0.0 : allLegs ? ALL_LEGS_JUMP : LEG_JUMP);
+		modifier(entity, Attributes.MOVEMENT_SPEED, LEG_SPEED_ID, legs == 0 ? 0.0 : (allLegs ? ALL_LEGS_SPEED : LEG_SPEED) * legWeight);
+		modifier(entity, Attributes.JUMP_STRENGTH, LEG_JUMP_ID, legs == 0 ? 0.0 : (allLegs ? ALL_LEGS_JUMP : LEG_JUMP) * legWeight);
 		modifier(entity, Attributes.MOVEMENT_SPEED, FOOT_SPEED_ID, FOOT_SPEED * feet);
+		modifier(entity, Attributes.MOVEMENT_SPEED, SPLINT_SPEED_ID, down ? 0.0 : SPLINT_SPEED * splints);
 		modifier(entity, Attributes.FLYING_SPEED, WING_FLY_ID, (mask & bit(BodyPart.WINGS)) != 0 ? WING_FLY : 0.0);
 		if (legs > 0 && entity.isSprinting()) {
 			entity.setSprinting(false);

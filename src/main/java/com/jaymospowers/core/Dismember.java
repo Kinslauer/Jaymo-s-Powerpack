@@ -398,6 +398,10 @@ public final class Dismember {
 			com.jaymospowers.core.wounds.BodyPart lost = com.jaymospowers.core.wounds.Breaks.part(part);
 			if (lost != null) {
 				com.jaymospowers.core.wounds.Wounds.breakPart(target, lost, by);
+				if (!shattered) {
+					// (0.14.3) and the stump bleeds until it's seared shut (cautery)
+					com.jaymospowers.core.wounds.Bleeding.stump(target, lost);
+				}
 			}
 		}
 		switch (part) {

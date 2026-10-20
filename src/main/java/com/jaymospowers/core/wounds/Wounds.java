@@ -111,6 +111,11 @@ public final class Wounds {
 		Downed.register();
 		// (0.14.2) phase 3: broken limbs
 		Breaks.register();
+		// (0.14.3) phase 4: cuts and festering, the medieval kit, pain and the poppy
+		Bleeding.register();
+		MedicineItems.register();
+		Treatment.register();
+		Pain.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(KILLING_PHASE, (entity, source, amount) -> {
@@ -168,6 +173,11 @@ public final class Wounds {
 	 * give, spilling over as a hit would. Head or body at zero kills (by {@code by}, if any).
 	 */
 	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by) {
+		hurtPart(entity, part, amount, by, null);
+	}
+
+	/** (0.14.3) As above; if it kills, it's by {@code type} (null: {@link #WOUNDS_DAMAGE}; bleeding's own, {@link Bleeding#BLEEDING_DAMAGE}). */
+	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by, @Nullable ResourceKey<DamageType> type) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
 			return;
@@ -188,8 +198,42 @@ public final class Wounds {
 		// (0.14.2) a limb this took to zero breaks
 		markBreaks(entity, plan, was, points, by);
 		if (lethal(entity, points, plan)) {
-			finish(level, entity, plan, by);
+			finish(level, entity, plan, by, type);
 		}
+	}
+
+	/**
+	 * (0.14.3) Heals {@code part} itself by up to {@code amount} (a dressing): its health and the creature's go up together,
+	 * no further than the part may heal ({@link Breaks#caps}). Returns what it took.
+	 */
+	public static float healPart(LivingEntity entity, BodyPart part, float amount) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || !(entity.level() instanceof ServerLevel) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
+			return 0.0F;
+		}
+		if (plan == BodyPlan.SIMPLE) {
+			float before = entity.getHealth();
+			entity.setHealth(Math.min(entity.getMaxHealth(), before + amount));
+			return entity.getHealth() - before;
+		}
+		int index = plan.index(part);
+		if (index < 0) {
+			return 0.0F;
+		}
+		float max = entity.getMaxHealth();
+		float[] caps = Breaks.caps(entity, plan);
+		float[] points = load(entity, plan);
+		reconcile(points, plan, max, entity.getHealth(), caps);
+		float health = Math.min(entity.getHealth(), sum(points));
+		float most = plan.share(index) * max * (caps == null ? 1.0F : caps[index]);
+		float add = Math.min(amount, Math.max(0.0F, most - points[index]));
+		if (add <= EPS) {
+			return 0.0F;
+		}
+		points[index] += add;
+		entity.setHealth(Math.min(max, health + add));
+		store(entity, plan, points);
+		return add;
 	}
 
 	/**
@@ -311,7 +355,7 @@ public final class Wounds {
 	/** (0.14.2) Notes a death about to go through: the blow, how hard, and the parts as they were, when (game time). */
 	private static void noteKilling(LivingEntity victim, DamageSource source, float amount) {
 		BodyPlan plan = BodyPlan.of(victim);
-		if (FINISHING.contains(victim) || amount <= 0.0F || source.is(Dismember.DECAPITATION) || source.is(WOUNDS_DAMAGE) || plan == null || plan == BodyPlan.SIMPLE || !(victim.level() instanceof ServerLevel level)
+		if (FINISHING.contains(victim) || amount <= 0.0F || source.is(Dismember.DECAPITATION) || source.is(WOUNDS_DAMAGE) || source.is(Bleeding.BLEEDING_DAMAGE) || plan == null || plan == BodyPlan.SIMPLE || !(victim.level() instanceof ServerLevel level)
 			|| victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return;
 		}
@@ -322,6 +366,8 @@ public final class Wounds {
 	public static void healAll(LivingEntity entity) {
 		// (0.14.2) and every break gone with it
 		Breaks.clearAll(entity);
+		// (0.14.3) and every cut and fever
+		Bleeding.clearAll(entity);
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);
@@ -418,17 +464,21 @@ public final class Wounds {
 		}
 		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
 		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
+		// (0.14.3) a blade, a shot or claws that cut deep enough opens a bleeding cut
+		if (!blocked && victim.isAlive()) {
+			Bleeding.onHit(victim, plan, source, landed, was, points);
+		}
 		if (victim.isAlive() && lethal(victim, points, plan)) {
-			finish(level, victim, plan, by);
+			finish(level, victim, plan, by, null);
 		}
 	}
 
 	/** Head or body is gone: the creature dies of its wounds, through its death events (so {@link Downed} can down them instead). */
-	private static void finish(ServerLevel level, LivingEntity victim, BodyPlan plan, @Nullable Entity by) {
+	private static void finish(ServerLevel level, LivingEntity victim, BodyPlan plan, @Nullable Entity by, @Nullable ResourceKey<DamageType> type) {
 		if (FINISHING.contains(victim)) {
 			return;
 		}
-		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(WOUNDS_DAMAGE), by);
+		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(type == null ? WOUNDS_DAMAGE : type), by);
 		FINISHING.add(victim);
 		try {
 			victim.setInvulnerableTime(0);
