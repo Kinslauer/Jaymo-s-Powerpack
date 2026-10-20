@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskitchen.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["AvatarRendererMixin", "ModelFeatureRendererMixin", "FirstPersonHandsMixin", "LivingEntityRendererMixin", "OvenRendererMixin", "OvenRendererToolsMixin", "OvenBlockMixin", "MinecraftUseMixin", "RagdollModelMixin"],
+	"client": ["AvatarRendererMixin", "ModelFeatureRendererMixin", "FirstPersonHandsMixin", "LivingEntityRendererMixin", "OvenRendererMixin", "OvenRendererToolsMixin", "OvenBlockMixin", "MinecraftUseMixin", "RagdollModelMixin", "RagdollAvatarRendererMixin", "LimpInputMixin", "MinecraftLimpMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

@@ -215,7 +215,7 @@ public final class Ledge {
 			return false;
 		}
 		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player)
-			|| Crawl.crawling(player) || player.getAttached(Meditate.STATE) != null) {
+			|| Crawl.crawling(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
 			return false;
 		}
 		return !FlightRoll.powerFlying(player)

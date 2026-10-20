@@ -44,6 +44,8 @@ public class JaymosKitchen implements ModInitializer {
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
 		com.jaymoskitchen.ragdoll.RagdollNet.register();
+		// (0.5.0) living players going limp (its LIMP attachment is class-loaded here, on both sides)
+		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		ModItems.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();

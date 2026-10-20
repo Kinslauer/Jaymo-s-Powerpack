@@ -213,6 +213,54 @@ public final class KitchenCompat {
 		}
 	}
 
+	// ---- Kitchen's living ragdolls (0.5.0+), reached by reflection: this build compiles against an older Kitchen jar
+
+	private static java.lang.reflect.@Nullable Method limpMethod;
+	private static boolean limpLooked;
+
+	/** Whether this entity is a player lying limp as a ragdoll (a crash, a blast...): false without a Kitchen that has them. */
+	public static boolean isLimp(Entity entity) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!limpLooked) {
+			limpLooked = true;
+			try {
+				limpMethod = Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("isLimp", Entity.class);
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				limpMethod = null;
+			}
+		}
+		if (limpMethod == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(limpMethod.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Powers that hold a player (being carried, Gravity's lift or hold, a web) keep them from going limp: Kitchen asks
+	 * these before it knocks anyone down, and lets them up if one starts.
+	 */
+	public static void registerRagdollVetoes() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> held = player -> com.jaymospowers.core.Carry.isCarried(player)
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.HELD) != null
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) != null
+				|| player.getAttached(WebPower.HELD) != null || player.getAttached(WebPower.HITCH) != null;
+			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addVeto", java.util.function.Predicate.class)
+				.invoke(null, held);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen without living ragdolls: nothing to veto
+		}
+	}
+
 	/** Kitchen's hearty meals: a power that gives its holder more stomach slots (summed with any others). */
 	public static void extraStomachSlots(java.util.function.ToIntFunction<Player> slots) {
 		if (LOADED) {
