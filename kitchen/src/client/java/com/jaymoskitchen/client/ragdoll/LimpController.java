@@ -238,6 +238,10 @@ public final class LimpController {
 		ticks = 0;
 		still = 0;
 		player.setSprinting(false);
+		if (player.isUsingItem() && minecraft.gameMode != null) {
+			// a bow drawn or food half-eaten is let go (tells the server too)
+			minecraft.gameMode.releaseUsingItem(player);
+		}
 		player.setPose(Pose.SWIMMING);
 		if (minecraft.options.getCameraType().isFirstPerson()) {
 			restoreCamera = minecraft.options.getCameraType();

@@ -3,7 +3,9 @@ package com.jaymoskitchen.corpse;
 import com.jaymoskitchen.horse.CartEntity;
 import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
+import com.jaymoskitchen.ragdoll.RagdollNet;
 import com.jaymoskitchen.ragdoll.RagdollShapes;
+import com.jaymoskitchen.ragdoll.RagdollSnapshot;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
@@ -314,6 +316,13 @@ public class CorpseEntity extends Entity {
 
 	// ---- (0.5.0) ragdoll ---------------------------------------------------------------------------------------------
 
+	/** Server: sends its body's points to one player who just came into range. */
+	void sendRagdollTo(net.minecraft.server.level.ServerPlayer player) {
+		if (ragdoll != null && carrier() == null) {
+			RagdollNet.sendTo(player, this, RagdollSnapshot.of(ragdoll.body));
+		}
+	}
+
 	/** The rig of its body: the dead mob's real standing size (so babies and scaled mobs fit), a player's 0.6 by 1.8. */
 	private RagdollRig rig() {
 		if (rigCache == null) {
@@ -321,7 +330,9 @@ public class CorpseEntity extends Entity {
 				EntityType<?> type = isPlayerCorpse() ? EntityTypes.PLAYER : sourceType();
 				float width = 0.6F, height = 1.8F;
 				if (type != null && type != EntityTypes.PLAYER) {
-					EntityDimensions standing = type.getDimensions();
+					// the mob as it was (a baby, a scaled one), else its type's size
+					EntityDimensions standing = rebuild() instanceof LivingEntity mob ? mob.getDimensions(Pose.STANDING)
+						: type.getDimensions();
 					width = standing.width();
 					height = standing.height();
 				}

@@ -110,8 +110,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	@Override
 	protected boolean affectedByCulling(CorpseEntity corpse) {
 		ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
-		if (track != null && !track.asleep() && corpse.carrier() == null) {
-			// (0.5.0) a ragdoll on the move reaches well outside the corpse's small box
+		if (track != null && corpse.carrier() == null) {
+			// (0.5.0) a ragdoll, moving or sprawled at rest, reaches well outside the corpse's small box
 			return false;
 		}
 		return !(corpse.isTumbling() || corpse.falling()) && super.affectedByCulling(corpse);

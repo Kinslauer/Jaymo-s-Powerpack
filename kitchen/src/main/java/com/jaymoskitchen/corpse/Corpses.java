@@ -8,6 +8,7 @@ import com.jaymoskitchen.ragdoll.RagdollBody;
 import com.jaymoskitchen.ragdoll.RagdollRig;
 import com.jaymoskitchen.ragdoll.RagdollShapes;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -93,6 +94,12 @@ public final class Corpses {
 				.updateInterval(1)
 				.noSummon()
 				.build(corpseKey));
+		// (0.5.0) someone coming into range sees a resting body's points at once, not at its next resend
+		EntityTrackingEvents.START_TRACKING.register((tracked, player) -> {
+			if (tracked instanceof CorpseEntity corpse) {
+				corpse.sendRagdollTo(player);
+			}
+		});
 
 		CORPSE_DATA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("corpse"),
 			DataComponentType.<CorpseData>builder()
