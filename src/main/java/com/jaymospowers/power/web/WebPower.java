@@ -908,6 +908,17 @@ public final class WebPower implements Power {
 		}
 	}
 
+	/** The whip (or its pry) takes both swing webs over: no longer swinging on them (their lines become its lines). */
+	static void handOverSwings(ServerPlayer player) {
+		State state = state(player);
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			player.removeAttached(rope(hand));
+			state.swingEntity[hand] = -1;
+			state.swinging[hand] = false;
+		}
+		state.graceTicks = 0;
+	}
+
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
 		player.removeAttached(rope(hand));
 		state.swingEntity[hand] = -1;

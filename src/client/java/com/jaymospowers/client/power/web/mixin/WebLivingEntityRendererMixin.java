@@ -26,6 +26,17 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.power.web.WebParkourPose.rotate(state, poseStack, entityScale);
 	}
 
+	/** Your own move in first person: First-person Model shows the body's posed arms (see WebFirstPerson). */
+	@Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;"
+		+ "Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
+	private void jaymospowers$ownArms(LivingEntityRenderState state, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+		net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
+		if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar
+			&& com.jaymospowers.client.power.web.WebFirstPerson.posing(avatar)) {
+			com.jaymospowers.client.power.web.FirstPersonCompat.showArms(avatar);
+		}
+	}
+
 	/** Creatures on the end of a web go limp (see WebRagdoll). */
 	@Inject(
 		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
