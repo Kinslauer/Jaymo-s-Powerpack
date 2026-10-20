@@ -50,7 +50,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class CostumeClient {
 	/** The costume to draw on this player, or null. */
-	public static final RenderStateDataKey<CostumeDesign> KEY = RenderStateDataKey.create(() -> "jaymospowers:costume");
+	/** (0.13.36) A hooded player's name tag is shown only to viewers within this many blocks. */
+	public static final double HOOD_NAME_RANGE = 8.0;
+	public static final RenderStateDataKey<CostumeDesign> KEY =RenderStateDataKey.create(() -> "jaymospowers:costume");
 
 	/** While the designer draws its preview: the design shown on the local player in place of what they wear. */
 	private static @Nullable CostumeDesign preview;
@@ -129,6 +131,13 @@ public final class CostumeClient {
 			if (masked != null) {
 				state.nameTag = masked;
 				state.scoreText = null;
+			} else if (player != Minecraft.getInstance().player && Costume.hooded(player)) {
+				// (0.13.36) a hood up: their real name, but only when you are close (never your own)
+				LocalPlayer me = Minecraft.getInstance().player;
+				if (me == null || me.distanceToSqr(player) > HOOD_NAME_RANGE * HOOD_NAME_RANGE) {
+					state.nameTag = null;
+					state.scoreText = null;
+				}
 			}
 		}
 		if (design == null) {
