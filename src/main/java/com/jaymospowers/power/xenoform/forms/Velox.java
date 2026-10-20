@@ -228,7 +228,7 @@ public final class Velox extends XenoForm {
 		if (!live.chain.isEmpty() && ++live.chainTick >= CHAIN_SPACING) {
 			live.chainTick = 0;
 			Entity next = level.getEntity(live.chain.remove(0));
-			if (next instanceof LivingEntity living && living.isAlive() && living.distanceToSqr(player) <= CHAIN_RANGE * CHAIN_RANGE * 2.0) {
+			if (next instanceof LivingEntity living && living.isAlive() && living.distanceToSqr(player) <= CHAIN_RANGE * CHAIN_RANGE) {
 				strike(player, living);
 			}
 		}
@@ -404,7 +404,7 @@ public final class Velox extends XenoForm {
 		}
 		// projectiles caught in it hang almost still
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(STANDSTILL_RADIUS),
-			p -> p.isAlive() && p.getOwner() != player && p.distanceToSqr(player) <= r2)) {
+			p -> p.isAlive() && p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())) && p.distanceToSqr(player) <= r2)) {
 			XenoformPower.Held held = live.held.get(projectile.getId());
 			if (held == null) {
 				Vec3 v = projectile.getDeltaMovement();
@@ -420,6 +420,14 @@ public final class Velox extends XenoForm {
 		live.held.values().removeIf(held -> {
 			Projectile projectile = held.projectile();
 			if (!projectile.isAlive()) {
+				// through a portal it is replaced by a copy with the same UUID in the other dimension: let that one go
+				if (projectile.getRemovalReason() == Entity.RemovalReason.CHANGED_DIMENSION) {
+					for (ServerLevel other : level.getServer().getAllLevels()) {
+						if (other != level && other.getEntity(projectile.getUUID()) instanceof Projectile copy) {
+							release(copy, held.caught());
+						}
+					}
+				}
 				return true;
 			}
 			if (projectile.level() != level || projectile.distanceToSqr(player) > r2) {

@@ -215,7 +215,7 @@ public abstract class XenoForm {
 	}
 
 	/** The player's own pets and mounts, and anyone on their team, are never hit by their form's moves. */
-	private static boolean spared(ServerPlayer player, Entity e) {
+	protected static boolean spared(ServerPlayer player, Entity e) {
 		return e instanceof OwnableEntity pet && pet.getOwner() == player || player.isAlliedTo(e);
 	}
 
