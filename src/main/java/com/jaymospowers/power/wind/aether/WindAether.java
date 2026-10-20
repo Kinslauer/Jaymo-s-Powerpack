@@ -156,8 +156,10 @@ public final class WindAether {
 			player.stopRiding();
 		}
 		burst(from, player.position());
-		double angle = of <= 1 ? 0.0 : Math.PI * 2.0 * index / of;
-		double radius = of <= 1 ? 0.0 : 1.5;
+		// the leader (index 0) stands on the found column; companions ring around it
+		boolean companion = index > 0 && of > 1;
+		double angle = companion ? Math.PI * 2.0 * (index - 1) / (of - 1) : 0.0;
+		double radius = companion ? 1.5 : 0.0;
 		int dx = (int) Math.round(Math.cos(angle) * radius);
 		int dz = (int) Math.round(Math.sin(angle) * radius);
 		double ax;
