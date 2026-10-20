@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * wall, a block) vaults it at full speed; rank 2, a wall kick: in the air beside or facing a wall, Jump kicks off it
  * ({@link #KICK_UP} up, {@link #KICK_OUT} out), each wall face once until you land.</li>
  * <li><b>Sure Footing</b>: on narrow tops (fences, walls, panes, bars, chains, rods; {@link #NARROW}) you walk and
- * sprint at full speed ({@link #UNSTEADY_SLOW}, off for now, would slow those without it), knocked back
+ * sprint at full speed (without it, {@link #UNSTEADY_SLOW} slower and no sprinting), knocked back
  * {@link #FOOTING_KNOCKBACK} less, arms out to balance.</li>
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
@@ -115,11 +115,8 @@ public final class Freerun {
 
 	/** Sure Footing: knockback taken away on a narrow top (0.75 = 75% less). */
 	public static final double FOOTING_KNOCKBACK = 0.75;
-	/**
-	 * Without Sure Footing (and only with Kingdoms loaded): on a narrow top you're this much slower and can't sprint.
-	 * Off (0) until Andy says otherwise: it would slow everyone who walks a fence or wall top.
-	 */
-	public static final double UNSTEADY_SLOW = 0.0;
+	/** Without Sure Footing (and only with Kingdoms loaded): on a narrow top you're this much slower and can't sprint (Andy's call). */
+	public static final double UNSTEADY_SLOW = 0.3;
 	/** Narrow tops: balancing on these. */
 	public static final TagKey<Block> NARROW = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_narrow"));
 
