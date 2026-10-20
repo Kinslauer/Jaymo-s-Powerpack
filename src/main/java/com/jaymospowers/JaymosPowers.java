@@ -60,6 +60,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.rig.Rig.init();
 		// (0.11.89) the Backpack: worn on the back, set down on the ground, torn apart only by strong blasts
 		com.jaymospowers.backpack.Backpack.init();
+		// (0.13.36) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
+		com.jaymospowers.aether.Aether.init();
 		registerAttachments();
 	}
 
