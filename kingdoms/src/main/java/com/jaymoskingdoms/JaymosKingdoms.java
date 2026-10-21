@@ -104,6 +104,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// (0.7.138) with MCA, rulers are the town's own villagers
+		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
+		Rulers.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Frights.register();

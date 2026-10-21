@@ -113,6 +113,11 @@ public final class Purists {
 		if (f == null || f.leader().isEmpty()) {
 			return null;
 		}
+		// (0.7.138) a villager crowned is of their own blood
+		Heritage.Kind crowned = Rulers.blood(f);
+		if (crowned != null) {
+			return crowned;
+		}
 		UUID id = f.leader().get();
 		long mix = Long.rotateLeft(id.getLeastSignificantBits(), 13) * 0x9E3779B97F4A7C15L + id.getMostSignificantBits();
 		int total = 0;

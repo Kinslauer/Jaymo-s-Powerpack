@@ -58,6 +58,10 @@ final class Arrests {
 	/** The guard's pace, and the prisoner's (a villager's brain). */
 	static final double GUARD_SPEED = 1.1;
 	static final float PRISONER_SPEED = 0.75F;
+	/** (0.7.138) An MCA guard beats a crook down by hand (their brain is set aside for the arrest): this hard, this often (ticks), this close. */
+	static final float VILLAGER_BLOW = 3.0F;
+	static final int BLOW_TICKS = 20;
+	static final double BLOW_REACH = 2.5;
 	/** At the audience: the guard speaks, then the ruler after this long, then the sentence is carried out after this (ticks). */
 	static final int VERDICT_TICKS = 20 * 4, CARRY_OUT_TICKS = 20 * 3;
 	/** How far words at an audience carry, and how far players are told the sentence in chat. */
@@ -105,7 +109,8 @@ final class Arrests {
 	private static final class Arrest {
 		/** A villager crook ({@link Crooks}), or (0.7.132) a looter handed over. */
 		final PathfinderMob crook;
-		final Folk guard;
+		/** A folk guard, or (0.7.138) one of the realm's MCA guards. */
+		final PathfinderMob guard;
 		final int faction;
 		final String crime;
 		/** (0.7.132) How notorious: a crook's own, a looter's by the bodies he robbed. */
@@ -118,7 +123,7 @@ final class Arrests {
 		int blows;
 		Vec3 away = Vec3.ZERO;
 
-		Arrest(PathfinderMob crook, Folk guard, int faction, String crime, long until) {
+		Arrest(PathfinderMob crook, PathfinderMob guard, int faction, String crime, long until) {
 			this.crook = crook;
 			this.guard = guard;
 			this.faction = faction;
@@ -156,14 +161,16 @@ final class Arrests {
 		if (ARRESTS.containsKey(crook.getUUID())) {
 			return true;
 		}
-		Folk guard = null;
+		PathfinderMob guard = null;
 		double best = Double.MAX_VALUE;
-		for (Folk g : level.getEntitiesOfClass(Folk.class, crook.getBoundingBox().inflate(CALL_RANGE),
-			g -> g.isAlive() && g.factionId() == f.id() && g.combatant() && !g.leader() && g.getTarget() == null && !escorting(g))) {
-			double d = g.distanceToSqr(crook);
+		// (0.7.138) folk guards, and the realm's MCA guards not on their ruler's escort
+		for (Worker w : Workers.near(level, crook.getBoundingBox().inflate(CALL_RANGE),
+			g -> g.isAlive() && g.factionId() == f.id() && (g instanceof Folk folk ? folk.combatant() && !folk.leader() : g.role() == Folk.GUARD && Royals.escortOf(g) == null)
+				&& Rulers.target(g.mob()) == null && !escorting(g.mob()))) {
+			double d = w.mob().distanceToSqr(crook);
 			if (d < best) {
 				best = d;
-				guard = g;
+				guard = w.mob();
 			}
 		}
 		if (guard == null) {
@@ -179,7 +186,7 @@ final class Arrests {
 	 * (0.7.132) A downed looter is set down before {@code guard}: the guard has him got up and marches him to the ruler for
 	 * judgement. {@code bringer} brought him in.
 	 */
-	static void handOver(ServerLevel level, PathfinderMob looter, Folk guard, Faction f, String crime, int notoriety, ServerPlayer bringer) {
+	static void handOver(ServerLevel level, PathfinderMob looter, PathfinderMob guard, Faction f, String crime, int notoriety, ServerPlayer bringer) {
 		if (ARRESTS.containsKey(looter.getUUID())) {
 			return;
 		}
@@ -192,11 +199,11 @@ final class Arrests {
 	}
 
 	/** (0.7.132) {@code guard} is taking someone to judgement just now. */
-	static boolean busy(Folk guard) {
+	static boolean busy(Entity guard) {
 		return escorting(guard);
 	}
 
-	private static boolean escorting(Folk guard) {
+	private static boolean escorting(Entity guard) {
 		for (Arrest a : ARRESTS.values()) {
 			if (a.guard == guard) {
 				return true;
@@ -221,10 +228,20 @@ final class Arrests {
 		}
 	}
 
+	/** (0.7.138) {@code ruler} is hearing a case just now (a villager ruler stands still for it, {@link Rulers#step}). */
+	static boolean judging(Entity ruler) {
+		for (Arrest a : ARRESTS.values()) {
+			if ((a.stage == Stage.AUDIENCE || a.stage == Stage.PUNISH) && Rulers.faction(ruler) == a.faction && Rulers.is(ruler)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** One tick of an arrest; false when it's over. */
 	private static boolean step(ServerLevel level, Arrest a, long now) {
 		PathfinderMob crook = a.crook;
-		Folk guard = a.guard;
+		PathfinderMob guard = a.guard;
 		if (!crook.isAlive() || crook.isRemoved() || crook.level() != level) {
 			return false;
 		}
@@ -277,6 +294,15 @@ final class Arrests {
 			case BEAT -> {
 				if (Downed.isDowned(crook)) {
 					haul(level, a, now);
+				} else if (!(guard instanceof Folk) && now % BLOW_TICKS == 0) {
+					// (0.7.138) an MCA guard: by hand
+					if (guard.distanceTo(crook) <= BLOW_REACH) {
+						guard.getLookControl().setLookAt(crook, 30.0F, 30.0F);
+						guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+						crook.hurtServer(level, level.damageSources().mobAttack(guard), VILLAGER_BLOW);
+					} else {
+						guard.getNavigation().moveTo(crook, GUARD_SPEED);
+					}
 				}
 			}
 			case LEAD -> {
@@ -336,7 +362,7 @@ final class Arrests {
 	}
 
 	/** (0.7.132) The prisoner walks at the guard's back: a villager by its brain, a looter by his navigation. */
-	private static void follow(PathfinderMob crook, Folk guard) {
+	private static void follow(PathfinderMob crook, PathfinderMob guard) {
 		if (crook instanceof Villager v) {
 			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(guard, false), PRISONER_SPEED, 1);
 		} else if (crook.distanceToSqr(guard) > 2.0 * 2.0) {
@@ -351,10 +377,9 @@ final class Arrests {
 
 	/** The ruler, if he's about (alive, loaded, not fighting); else null, and the audience is held at the seat. */
 	private static @Nullable LivingEntity judge(ServerLevel level, Faction f) {
-		if (f.leader().isPresent() && level.getEntity(f.leader().get()) instanceof Folk ruler && ruler.isAlive() && ruler.getTarget() == null) {
-			return ruler;
-		}
-		return null;
+		// (0.7.138) a folk ruler, or a villager crowned
+		PathfinderMob ruler = Rulers.of(level, f);
+		return ruler != null && Rulers.target(ruler) == null ? ruler : null;
 	}
 
 	/** At the audience: everyone stands still and faces the ruler (or the guard, with none). */
@@ -366,7 +391,7 @@ final class Arrests {
 		a.crook.getLookControl().setLookAt(facing, 30.0F, 30.0F);
 		if (judge != null) {
 			a.guard.getLookControl().setLookAt(judge, 30.0F, 30.0F);
-			if (judge instanceof Folk ruler) {
+			if (judge instanceof PathfinderMob ruler) {
 				ruler.getNavigation().stop();
 				ruler.getLookControl().setLookAt(a.crook, 30.0F, 30.0F);
 			}
@@ -400,7 +425,7 @@ final class Arrests {
 	/** The sentence is carried out; false when it's done (an exile goes on walking). */
 	private static boolean punish(ServerLevel level, Arrest a, Faction f, long now) {
 		PathfinderMob crook = a.crook;
-		Folk guard = a.guard;
+		PathfinderMob guard = a.guard;
 		RandomSource random = level.getRandom();
 		switch (a.sentence) {
 			case PARDON -> {

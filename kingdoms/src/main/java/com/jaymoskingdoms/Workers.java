@@ -106,6 +106,14 @@ public final class Workers {
 				return false;
 			}
 		}
+		if (Rulers.leaderRole(w.role()) && w instanceof Enlisted e) {
+			// (0.7.138) a realm's ruler, one of its villagers: their day at court and on their round
+			return Rulers.step(level, e);
+		}
+		if (w.role() == Folk.GUARD && w instanceof Enlisted e) {
+			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
+			return Rulers.guardStep(level, e);
+		}
 		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
 			// (0.5.53) a court wizard lives as a villager until a foe comes near
 			if (Hermits.is(e)) {
