@@ -2093,3 +2093,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   beside the hotbar) still showing next to the feathers. Combat Roll left the pack in 0.15.5, but nothing took the jar
   out of the CurseForge profile, so it kept loading. `combat_roll` joins `removedIdsFromProfile`: the next Build Modpack
   moves it into `removed-mods`. The dark segmented bar above the hotbar is vanilla's empty experience bar.
+- **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
+  steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
+  the horse to the keys and its camera follows the mouse.
