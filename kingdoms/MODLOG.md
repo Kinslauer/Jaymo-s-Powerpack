@@ -3623,7 +3623,38 @@ should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBlad
 - Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
   (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
 
-## 0.7.117: the hidden blade moves, and shows
+## 0.7.116: your own designs and work areas (pack 0.15.21)
+Andy wanted the builder side of Villager Workers (talhanation, All Rights Reserved: ideas only, nothing of its code or
+art) in our builders, and picked "your own designs + areas" first. Written from how it behaves, not from its code.
+- **Surveyor's rod** (`Surveyor`, `jaymoskingdoms:surveyor_rod`; stick, red dye, gold nugget on a diagonal). Sneak and
+  use it to change mode: Design, Plot, Field, Quarry, Storage. Use it on two blocks to set two corners (shown with
+  sparks while you hold it); plain use at the sky clears them. Corners and mode are kept in memory, per player.
+- **Designs** (`Designs`): build something, mark its corners in Design mode (take in its floor), then
+  `/kingdom design save <name>`. It's saved as a structure file, `<world>/jaymoskingdoms_designs/<name>.nbt` (the same
+  format as a structure block's, so those can be dropped in too). On a plot, `/kingdom plot build design.<name>` has the
+  builders put it up block by block from storage like any catalogue building, standing as it was built if it fits
+  that way. Up to 32 x 32 across, 48 high, 16000 blocks; 24 per player (creative: any). Only blocks: containers come
+  empty, no entities. `/kingdom design list | delete <name>`; a design a project or plot is using can't be changed or
+  deleted. Lost buildings from a design are rebuilt like the others (`Rebuilds`). The template-to-blueprint reader moved
+  from `GrimSites` to `Blueprint.fromTemplate`.
+- **Plot** mode marks a plot of any size from two corners (`Plots.markBox`); the stake still marks a square.
+- **Field** (`Areas`, kept as a `field` among the faction's buildings): 3 to 17 a side. A farmer is taken on at once
+  and keeps it like a farm (`Farmers.farms` counts fields). Till it and sow a row; he does the rest.
+- **Quarry** (`quarry`): 3 to 16 a side, from the higher corner down to the lower one (8 deep if they're level; at most
+  64). Each quarry wants a miner (`Gatherers.wanted`), taken on at once. Miners dig quarries before their mine: the
+  highest layer with anything left, nearest block first, carried to storage, torches as it gets dark. Water or lava
+  beside a block is stopped first with stone he carries (or a cobblestone from storage), else the block is left. A
+  stair is left along the north edge (step j dug j layers down); deeper than that, the stuck-walk puff gets them in and
+  out. Grass, containers and his torches are left. A dug-out quarry is looked over again every minute.
+- **Storage** mode adds a chest or barrel (both halves of a double chest) to the settlement's storage, or takes it out
+  (not the depot or the last one). The first one of a settlement with none becomes its depot.
+- `/kingdom area list` shows the fields and quarries (outlined) and how many storage containers; `/kingdom area clear`
+  unmarks the field or quarry you stand in. Marking needs a lord's rank (or creative), in the faction's own land, clear
+  of buildings and plots.
+- **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
+  fireball), which Jaymo's Powers 0.15.22 runs.
+
+## 0.7.119: the hidden blade moves, and shows
 The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
 right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
 `client/mixin/blade/HiddenBladePoseMixin`.
