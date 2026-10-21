@@ -2145,3 +2145,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   by id, `costume/BanditMask`) hide the face like a costume: the wearer goes by "Bandit" over their head, in chat and on
   the tab list, or "Pirate" in or on the water, in a boat or on a ship, or on a sea, beach or river biome. They're
   tagged `jaymospowers_masked:bandit_<uuid>` (one identity per player), which Kingdoms reads like a costume's.
+- **0.15.33, the symbiote's falls, meals and blob legs:**
+  - **Falls:** bare of the suit, its catch looked 4 blocks down only every 10 ticks, so at speed it almost never saw the
+    ground coming and you took the full fall. Now any bond it isn't sulking over takes no fall damage at all
+    (`WebSymbiote.takesFalls`; the suit and Living Armor as before), its tendrils reach for the ground each tick
+    (`reachForGround`, looking 3 ticks of the fall ahead) and goo splashes out on landing. Sulking, only the Cushion
+    keeps a fall from killing you.
+  - **Players are food:** with Jaymo's Kitchen, its hunger hunt goes after other players like any creature
+    (`huntable`), kills them (a downed one has 10 hearts to get through) and eats the corpse; a player's corpse is
+    `edible` now, and its hotbar spills on the ground first (`KitchenCompat.spill`). It still never feeds on anything
+    living. Creative players and the white strain's targets are unchanged.
+  - **Downed players have 10 hearts** (`Downed.DOWNED_PLAYER_HEALTH`, was 3): Andy wanted damage, not a count of ten
+    hits, to finish them. A player's blow on a downed player is now ordinary damage out of those 10 hearts; downed
+    mobs still count ten wounds.
+  - **Its temper:** a player's body it would eat on its own (Living Armor feeding itself, a hunt), it stops over for 1.5
+    seconds first (`HESITATE_TICKS`) with a warning and your screen darkening: throw it clear and it lets it be.
+    Consume (you asking) doesn't wait. Asked the same thing again within 30 seconds (a flint struck, a locked ability,
+    the suit while it sulks, an inedible corpse...: `nag`), it answers annoyed with more stress; a third time it's fed
+    up and storms off with you 20 blocks (`stormOff`). A second flint is ripped from your hand and hurled well away.
+  - **Letting go when stuck:** walking you somewhere (storming off, a sight, out of the heat or cold) and making under a
+    block of headway in 3 seconds, it lets go of you there and then (`letGoIfStuck`) instead of holding on until the
+    takeover ran out or you fought free.
+  - **Blob legs:** a fleeing or seeking blob outran its tendrils (two could step at a time, 5 ticks a step), so they
+    stretched metres behind it; and a blob tracked again restarted its clock under the same id, freezing every leg
+    mid-step. Moving fast, tendrils now plant further ahead, step quicker and all at once; any stretched past reach
+    lets go at once, and a restarted clock resets the legs (`WebBlobRenderer`).
