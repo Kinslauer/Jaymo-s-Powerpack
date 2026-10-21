@@ -17,3 +17,5 @@ is for sale. Once milkucha releases for 26.3, the pack switches to the official 
   - `TRMTPotions`: Fabric API's `FabricPotionBrewingBuilder` is gone (brewing is data-driven in 26.3), so the Potion of
     Lightness recipes (awkward + feather, + redstone for long) are JSON in `data/trmt/recipe/brewing/`, for potions,
     splash and lingering potions.
+  - `DisconnectedScreenMixin`: the "get the matching version" button opens its link with `Blaze3D.openUri` (moved
+    off `Util.OS` in 26.3).
