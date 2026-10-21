@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
@@ -128,6 +129,7 @@ public final class CostumeClient {
 		// (0.11.78) filled in again as it is drawn (CostumeBody), never left over from another frame
 		state.setData(CostumeBody.BODY, null);
 		state.setData(CostumeBody.PARENT, null);
+		state.setData(CostumeCover.KEY, null);
 		if (entity instanceof Player player && state.nameTag != null) {
 			// (0.11.70) a hidden face: the costume's name over their head, not theirs (nor their score)
 			Component masked = SecretIdentity.maskedName(player);
@@ -172,9 +174,11 @@ public final class CostumeClient {
 	/** Draws the worn costume over a player, piece by piece, each piece once per colour. */
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private final CostumeModels.Set models;
+		private final RenderLayerParent<AvatarRenderState, PlayerModel> renderer;
 
 		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
+			this.renderer = renderer;
 			this.models = new CostumeModels.Set(this::getParentModel);
 		}
 
@@ -192,8 +196,11 @@ public final class CostumeClient {
 			boolean slim = CostumeBody.slim(parent, state.skin.model() == PlayerModelType.SLIM);
 			String cut = design.cut().getSerializedName();
 			CostumeModels.Worn suit = this.models.suit(design.cut(), slim);
-			renderColoredCutoutModel(suit, CostumeModels.texture("suit", cut, slim, false), poseStack, collector, lightCoords, state, primary, 1);
-			renderColoredCutoutModel(suit, CostumeModels.texture("suit", cut, slim, true), poseStack, collector, lightCoords, state, secondary, 1);
+			Identifier suitPrimary = CostumeModels.texture("suit", cut, slim, false), suitSecondary = CostumeModels.texture("suit", cut, slim, true);
+			renderColoredCutoutModel(suit, suitPrimary, poseStack, collector, lightCoords, state, primary, 1);
+			renderColoredCutoutModel(suit, suitSecondary, poseStack, collector, lightCoords, state, secondary, 1);
+			// (0.15.34) the skin under what the suit covers isn't drawn (CostumeCover)
+			CostumeCover.mark(state, this.renderer, suitPrimary, suitSecondary);
 			CostumeModels.Worn mask = this.models.mask(design.mask());
 			if (mask != null) {
 				String name = design.mask().getSerializedName();

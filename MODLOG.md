@@ -499,9 +499,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.82, Alex's Mobs:** adds Alex's Mobs (Fabric) 26.3-1.0.0 and its library Citadel (Fabric) 26.3-1.0.0, both
   LGPL-3.0 and pulled from CurseForge by id (cursemaven): about 90 animals and monsters across the overworld, Nether
   and End. It has no horses; Jaymo's Equestrian still owns those. Its elephant spawns alongside ours.
-- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.42 (see `kingdoms/MODLOG.md`): iron golems
+- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.62 (see `kingdoms/MODLOG.md`): iron golems
   never speak, and they beat out fires in settlements.
-- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.63 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
   rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
 - **0.8.85, Symbiote fixes (Andy's list):**
   - **Wall tethers:** your view is held facing away from the wall (80° either side; level or below on a ceiling,
@@ -519,7 +519,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Dread vignette by bond:** a line or a feeding is fainter at a strong bond, stronger at a weak one; under bond 60
     a faint vignette lingers, breathing and blinking darker more often as the bond drops. Full strength is kept for a
     weak bond's own lines (ignored, neglected, at the edge, leaving you) and every takeover (`WebSymbioteDread`).
-- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.44 (see `kingdoms/MODLOG.md`): a
+- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.64 (see `kingdoms/MODLOG.md`): a
   horse trusts each rider on their own account (it bucks strangers and comes to a whistle at 60), learns trail, racing,
   jumping and war to level 5 with tricks (rear, sliding stop, side-pass, war kick, kneeling), gets hungry and thirsty,
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
@@ -531,22 +531,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
   more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
   in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).
-- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
+- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.65 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
 - **0.8.89, fish loot instantly:** ships Jaymo's Kitchen 0.4.29 (see `kitchen/MODLOG.md`): clicking any fish corpse
   (vanilla or Alex's Mobs, beached flying fish included) drops its loot and the body is gone at once.
-- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
+- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.66: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
-- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.67 (see `kingdoms/MODLOG.md`):
   stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
   and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
   cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
   horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
   another town against the clock). Stablehands and farriers have their own screen: right-click them.
-- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.68 and Jaymo's Kitchen 0.4.31: every iron golem
   (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
@@ -555,7 +555,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
   gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
   `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
-- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.69 (see `kingdoms/MODLOG.md`): only about one villager in
   twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
   settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
   Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
@@ -2130,3 +2130,78 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
   user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
   cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.
+- **0.15.31, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
+  anything but crawl" and "you shouldnt be healing to full health on the ground with no assistance". The server already
+  dropped power-key presses, but the client still ran its own half and some 80 other ability packets went through.
+  Now, while the local player is down, `DownedKeysMixin` makes every acting key read as up (Jump, Sprint, attack, use,
+  pick, drop, swap hands, and every `key.jaymospowers.*`): held abilities let go, only moving, the A / D roll, Sneak
+  (give up), looking, chat and menus are left. On the server the downed are a `Powers` silencer, `WindFlight.canFly`
+  says no (Wind, Z Fighter and Smoke's vapour flight end), and going down calls the new `Power.onDowned` (Gravity,
+  Chrono, Cryo, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
+  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's
+  Kitchen 0.5.7 (slower stomach regen that stops at 60%, the rest needs treatment; its jar still needs building into
+  `libs/`). Breaks (set by a splint or a priest) and stumps (cautery, or villagers binding them) already needed tending.
+- **0.15.32, bandit masks hide the face:** ships Jaymo's Kingdoms 0.7.125. Kingdoms' bandit mask and bandana (found
+  by id, `costume/BanditMask`) hide the face like a costume: the wearer goes by "Bandit" over their head, in chat and on
+  the tab list, or "Pirate" in or on the water, in a boat or on a ship, or on a sea, beach or river biome. They're
+  tagged `jaymospowers_masked:bandit_<uuid>` (one identity per player), which Kingdoms reads like a costume's.
+- **0.15.33, the symbiote's falls, meals and blob legs:**
+  - **Falls:** bare of the suit, its catch looked 4 blocks down only every 10 ticks, so at speed it almost never saw the
+    ground coming and you took the full fall. Now any bond it isn't sulking over takes no fall damage at all
+    (`WebSymbiote.takesFalls`; the suit and Living Armor as before), its tendrils reach for the ground each tick
+    (`reachForGround`, looking 3 ticks of the fall ahead) and goo splashes out on landing. Sulking, only the Cushion
+    keeps a fall from killing you.
+  - **Players are food:** with Jaymo's Kitchen, its hunger hunt goes after other players like any creature
+    (`huntable`), kills them (a downed one has 10 hearts to get through) and eats the corpse; a player's corpse is
+    `edible` now, and its hotbar spills on the ground first (`KitchenCompat.spill`). It still never feeds on anything
+    living. Creative players and the white strain's targets are unchanged.
+  - **Downed players have 10 hearts** (`Downed.DOWNED_PLAYER_HEALTH`, was 3): Andy wanted damage, not a count of ten
+    hits, to finish them. A player's blow on a downed player is now ordinary damage out of those 10 hearts; downed
+    mobs still count ten wounds.
+  - **Its temper:** a player's body it would eat on its own (Living Armor feeding itself, a hunt), it stops over for 1.5
+    seconds first (`HESITATE_TICKS`) with a warning and your screen darkening: throw it clear and it lets it be.
+    Consume (you asking) doesn't wait. Asked the same thing again within 30 seconds (a flint struck, a locked ability,
+    the suit while it sulks, an inedible corpse...: `nag`), it answers annoyed with more stress; a third time it's fed
+    up and storms off with you 20 blocks (`stormOff`). A second flint is ripped from your hand and hurled well away.
+  - **Letting go when stuck:** walking you somewhere (storming off, a sight, out of the heat or cold) and making under a
+    block of headway in 3 seconds, it lets go of you there and then (`letGoIfStuck`) instead of holding on until the
+    takeover ran out or you fought free.
+  - **Blob legs:** a fleeing or seeking blob outran its tendrils (two could step at a time, 5 ticks a step), so they
+    stretched metres behind it; and a blob tracked again restarted its clock under the same id, freezing every leg
+    mid-step. Moving fast, tendrils now plant further ahead, step quicker and all at once; any stretched past reach
+    lets go at once, and a restarted clock resets the legs (`WebBlobRenderer`).
+- **0.15.34, costumes cover the MCA body for real:** Andy: "costumes still clip, almost all of the villager skin
+  underneath is visible in motion". 0.13.26's looser suit didn't reach the cause. With MCA a player's body is drawn by
+  MCA's own layers (skin, face, clothes, hair), each posed from a copy of the body taken as the layers start; when the
+  models are finally drawn, our poses that add to a limb (Chrono's reel, Wind's kicks, a carry's give, Z-Fighter
+  combos...) land on that copy a second time, and MCA never draws the model's root (Gravity's lean), so the suit and
+  the skin went different ways. And MCA's animation model keeps its bust off the root, so the suit never had one while
+  MCA drew its own through it. Now: the parts of the body the suit's textures cover whole aren't drawn under it, on the
+  renderer's body and MCA's layers (`CostumeCover`, a hide just before each model is drawn, shown again after); the gi's
+  bare forearms, the ragged cut's holes and the like still show the skin. Over an MCA body the costume takes the very
+  pose MCA's layers use and drops the root as they do (`CostumeBody.mcaPose`, `Worn.beforeDraw`), and the suit's bust
+  follows MCA's again (`CostumeBody.bust`). Heads untouched (masks have eye holes); first person unchanged.
+- **0.15.36, Better With Mods batch 2: smithing (Kingdoms 0.7.128, Kitchen 0.5.8):** batch 2 of the BWM port (MIT,
+  our own code; plan in the "Better With Mods: what fits our pack" doc). Andy: steel gets both a netherite tier and a
+  trait; ore smelting in the furnace is slower.
+  - Brick kiln (`tinkering/kiln`): no kiln block. A space walled on 3+ sides and the top by bricks, nether bricks or
+    mud bricks, with heat under it (campfire/fire 1; soul campfire, lava, magma, a lit Forge Hearth 2), fires what you
+    right-click into it (`KilnLoadBlock`/`KilnLoadEntity`, sneak for the stack). 8 crack stages, each 20 + 60*(8-S)/8
+    ticks for S the summed 3x3 heat. Clay ball -> brick, clay -> terracotta, Unfired Pot (4 clay) -> decorated pot,
+    log -> charcoal (+25% a second), netherrack -> nether brick (heat 2), grout -> seared brick (2), Crucible Steel
+    Blend (2 iron + coal) -> steel ingot (2). Static table in `Kiln`; no JEI page yet.
+  - Furnace: raw ores and ore blocks (`jaymospowers:slow_smelt`) take 4x as long (`SlowOreSmeltMixin`,
+    `FURNACE_ORE_SLOWDOWN`). Blast furnace and Kitchen untouched.
+  - Bellows (`tinkering/forge`): pump by right-click (a little hunger) or a Wind Whistle gust (`WindJet` hook); for 5 s
+    the fire it faces counts +1 heat, and a smeltery controller or drain it faces melts twice as fast
+    (`SmelteryEntity.blow`). Forge Hearth: coal/charcoal (up to 8) at heat 2, lit by flint and steel or a fire charge,
+    or bare-handed by an Emberborn. Its fuel is lost if broken.
+  - Steel: `Molten.STEEL`, alloyed 1 iron + 1 pig iron (the smeltery can't hold coal) or fired from the crucible blend.
+    Ingot, nugget, block (c: tags), melting and casting like the other metals. `TinkerMaterial.STEEL`: 1500 durability,
+    speed 7, attack 3, netherite tier, trait Tempered (25% of wear doesn't land, not stacking; +1 damage a level
+    through armour on armoured targets). Art from `tools/gen_steel.py`, which must be re-run after
+    `tinkering_assets.py`/`armory_assets.py` (likewise `tools/gen_smithing.py`).
+  - Broadhead Arrow (`armory/BroadheadArrowItem`): 3 steel nuggets + stick + feather -> 4. 4 damage and a bleeding
+    body cut from the recurve bow, 60% from any other bow or a dispenser. Flies as a vanilla arrow.
+  - Linen bandages take `jaymospowers:bandage_cloth` (white wool or Kitchen's hemp cloth).
+  - Not built with Loom or played yet; javac 0 errors on all three mods.

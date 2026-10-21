@@ -197,6 +197,8 @@ public final class Approaches {
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
 		String enemy = "";
+		/** (0.7.126) A crook's bargain that's a scam ({@link Crooks}): you pay, and the goods never come. */
+		boolean scam;
 		/** (0.7.20) They speak a tongue you don't ({@link Languages}): what they mean, as you make it out from their hands. */
 		boolean foreign;
 		Component gesture = Component.empty();
@@ -671,6 +673,10 @@ public final class Approaches {
 			if (mob instanceof Villager v && DEALS.containsKey(profession(v)) && rep >= WARY_REP) {
 				w[BARGAIN] = 2;
 			}
+			if (rep >= WARY_REP) {
+				// (0.7.126) a crook always has something going cheap
+				w[BARGAIN] = Math.max(w[BARGAIN], Crooks.bargainWeight(mob, rep));
+			}
 			if (friend) {
 				w[GIFT] = 2;
 			}
@@ -791,12 +797,20 @@ public final class Approaches {
 			}
 			case BARGAIN -> {
 				Deal deal = a.mob instanceof Villager v ? DEALS.get(profession(v)) : null;
+				if (deal == null && Crooks.isCrook(a.mob)) {
+					// (0.7.126) a crook deals in anything
+					List<Deal> all = new ArrayList<>(DEALS.values());
+					deal = all.get(random.nextInt(all.size()));
+				}
 				if (deal == null) {
 					deal = DEALS.get("farmer");
 				}
-				a.goods = new ItemStack(deal.item(), deal.count());
-				boolean friend = McaCompat.isMca(a.mob) ? hearts(a.mob, player) >= GREET_HEARTS : Reputation.get(player, f.id()) >= GREET_REP;
-				a.price = Math.max(1, deal.price() - (friend ? FRIEND_DISCOUNT : 0));
+				int rep = Reputation.get(player, f.id());
+				a.scam = Crooks.scams(a.mob, rep, random);
+				// (0.7.126) a scam looks like the best deal you'll get all week
+				a.goods = new ItemStack(deal.item(), a.scam ? Math.min(deal.item().getDefaultMaxStackSize(), deal.count() * 3 / 2) : deal.count());
+				boolean friend = McaCompat.isMca(a.mob) ? hearts(a.mob, player) >= GREET_HEARTS : rep >= GREET_REP;
+				a.price = Math.max(1, deal.price() - (friend || a.scam ? FRIEND_DISCOUNT : 0));
 				a.variant = random.nextInt(OPENINGS[BARGAIN]);
 			}
 			case WAR -> {
@@ -1176,7 +1190,11 @@ public final class Approaches {
 				}
 			}
 			case BARGAIN -> {
-				if (option == 0 && emeralds(player) >= a.price) {
+				if (option == 0 && emeralds(player) >= a.price && a.scam && a.mob instanceof Villager crook) {
+					// (0.7.126) paid for goods that will never come
+					take(player, Items.EMERALD, a.price);
+					Crooks.scammed(level, crook, player, f.id(), a.price);
+				} else if (option == 0 && emeralds(player) >= a.price) {
 					take(player, Items.EMERALD, a.price);
 					ItemStack goods = a.goods.copy();
 					if (!player.getInventory().add(goods)) {

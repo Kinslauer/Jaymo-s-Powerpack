@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "L": "minecraft:leather",
+    "C": "minecraft:copper_ingot"
+  },
+  "pattern": [
+    "PPP",
+    "LLL",
+    "PCP"
+  ],
+  "result": {
+    "id": "jaymospowers:bellows"
+  }
+}

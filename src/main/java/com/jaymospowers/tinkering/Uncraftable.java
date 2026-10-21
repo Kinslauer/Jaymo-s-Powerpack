@@ -24,6 +24,8 @@ public final class Uncraftable {
 	 * Station from their heads instead ({@link WeaponParts}); the musket bayonet stays a musket and a knife put together.
 	 */
 	static final Set<String> FORGED = forged();
+	/** (0.15.36) Andy: "All tools need crafting routes through jaymos": other mods' tools forged from heads instead. */
+	static final Set<String> FORGED_TOOLS = Set.of("pantryforblockheads:knife");
 
 	private static Set<String> forged() {
 		Set<String> ids = new java.util.HashSet<>();
@@ -51,6 +53,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !RECIPES.contains(id) && !FORGED.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !RECIPES.contains(id) && !FORGED.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

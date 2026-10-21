@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/bounty_board"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/bounty_board",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/bounty_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/bounty_board",
+      "y": 270
+    }
+  }
+}

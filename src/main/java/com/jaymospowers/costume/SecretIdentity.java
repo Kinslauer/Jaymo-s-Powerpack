@@ -94,7 +94,12 @@ public final class SecretIdentity {
 		CostumeDesign worn = Costume.worn(player);
 		// (0.11.82) a Rig Helm hides the face when the costume doesn't: its name (or "a Rig pilot") is shown
 		// (0.12.3) a mask taken off hides nobody (Costume#faceHidden)
-		return worn != null && Costume.faceHidden(player) ? shownName(worn) : com.jaymospowers.rig.Rig.helmIdentity(player);
+		if (worn != null && Costume.faceHidden(player)) {
+			return shownName(worn);
+		}
+		Component helm = com.jaymospowers.rig.Rig.helmIdentity(player);
+		// (0.15.32) a bandit mask or bandana from Jaymo's Kingdoms: "Bandit", or "Pirate" by the water
+		return helm != null ? helm : BanditMask.wears(player) ? BanditMask.name(player) : null;
 	}
 
 	/** Brings {@code player}'s tags in line with what they wear. */
@@ -116,6 +121,9 @@ public final class SecretIdentity {
 					&& player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).getCustomName() != null) {
 					want.add(NAME + name);
 				}
+			} else if (BanditMask.wears(player)) {
+				// (0.15.32) behind a bandit mask: the bandit's own identity (Kingdoms names it by where they are)
+				want.add(MASKED + BanditMask.key(player));
 			}
 		}
 		if (worn != null && Costume.hooded(player)) {

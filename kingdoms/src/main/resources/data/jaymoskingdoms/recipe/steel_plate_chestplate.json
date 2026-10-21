@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "steel_plate_chestplate",
+  "key": {
+    "S": "#c:ingots/steel",
+    "L": "#c:leather_straps"
+  },
+  "pattern": [
+    "L L",
+    "SSS",
+    "SSS"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:steel_plate_chestplate"
+  }
+}

@@ -41,6 +41,8 @@ public enum TinkerMaterial {
 	AMETHYST_BRONZE("amethyst_bronze", Stats.AMETHYST_BRONZE, Trait.CRUMBLING, true),
 	PIG_IRON("pig_iron", Stats.PIG_IRON, Trait.TASTY, true),
 	SLIMESTEEL("slimesteel", Stats.SLIMESTEEL, Trait.OVERSLIME, true),
+	/** (Smithing) Iron and pig iron alloyed, or crucible steel fired in a kiln: netherite-tier, Tempered. */
+	STEEL("steel", Stats.STEEL, Trait.TEMPERED, true),
 	LEATHER("leather", null, Trait.TANNED),
 	STRING("string", null, Trait.STRINGY),
 	VINE("vine", null, Trait.SOLAR_POWERED);
@@ -79,6 +81,7 @@ public enum TinkerMaterial {
 		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 1.5F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
+		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
 	}
 
 	/** Material units per item: a plank or ingot is 1, a log 4, a block of metal 9. */

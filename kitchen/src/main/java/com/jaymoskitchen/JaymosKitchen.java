@@ -62,6 +62,9 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();
 		Sowing.register();
+		com.jaymoskitchen.farm.Hemp.register();
+		// fat, tallow, bark and tanning (its SOAKS attachment is class-loaded here)
+		com.jaymoskitchen.tanning.Tanning.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
 		com.jaymoskitchen.season.Seasons.register();

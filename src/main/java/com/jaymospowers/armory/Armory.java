@@ -172,6 +172,10 @@ public final class Armory {
 		item("caveman_boots", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.BOOTS));
 		// antiquity's bow, Japan's throwing irons, the whalers' harpoon
 		item("recurve_bow", RecurveBowItem::new, p -> p.durability(RecurveBowItem.DURABILITY).enchantable(1));
+		// (Smithing) its steel broadhead
+		item("broadhead_arrow", BroadheadArrowItem::new, p -> p.component(DataComponents.LORE, new ItemLore(
+			List.of(Component.translatable("item.jaymospowers.broadhead_arrow.hint").withStyle(ChatFormatting.GRAY)))));
+		BroadheadArrowItem.init();
 		item("kunai", props -> new ThrowingWeaponItem(props, 4.0F, false, false),
 			p -> p.stacksTo(16).attributes(net.minecraft.world.item.component.ItemAttributeModifiers.builder()
 				.add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE, new net.minecraft.world.entity.ai.attributes.AttributeModifier(

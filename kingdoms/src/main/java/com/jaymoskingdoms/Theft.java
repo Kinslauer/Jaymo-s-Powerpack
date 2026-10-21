@@ -460,6 +460,10 @@ public final class Theft {
 			// (a ruler's death is its own story: see KingdomEvents)
 			return;
 		}
+		if (Crooks.fairGame(victim, killer)) {
+			// (0.7.126) a known criminal, or the crook who robbed you: no murder
+			return;
+		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
 		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
 			// (0.7.109) seen: the dead one's family won't forget who did it
@@ -559,6 +563,8 @@ public final class Theft {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
 				.withStyle(ChatFormatting.DARK_RED));
 		}
+		// (0.7.125) a price on their head (or their mask's)
+		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, crime.cry);
 		pursue(level, f, player);
 	}
 

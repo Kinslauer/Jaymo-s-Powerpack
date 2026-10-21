@@ -667,7 +667,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
 
 ## 0.4.31: iron golems carry corpses in their arms
-- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+- For Jaymo's Kingdoms 0.5.68, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
   carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
   golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.
 ## 0.4.32: butcher villagers
@@ -684,7 +684,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   gossip, or, if you're experienced with butchering, from the cuts they hand you (the hand-over says the x). Who's
   experienced is set by `Butchers.setExperienced(Predicate<Player>)` (Jaymo's Kingdoms' first Survival perk, by
   reflection); nobody without it.
-  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
+  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.67's townsfolk call it) returns a line: trash
   talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
   botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones
   you haven't heard of first. Far-off butchers come from a per-dimension ledger (`jaymoskitchen:butcher_ledger`) of
@@ -855,3 +855,18 @@ after `Mill.register()`.
   fruit instead), and `WinterCold` drains 0.025 exhaustion a second from anyone out under the sky in a temperate land
   who isn't by a fire or lava (`setColdProof` lets Kingdoms spare Frostborn).
   Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.
+
+### 0.5.7: slower healing
+Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
+unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
+Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
+
+- **0.5.8, tanning and hemp (Better With Mods batch 2, Powers 0.15.36, Kingdoms 0.7.128):** `tanning/Tanning`: fatty
+  animals butchered on a block or by a butcher give Animal Fat (`ButcheringBonus`), melted into Tallow on a campfire,
+  in a furnace or in the cooking pot; tallow + string = candle. Stripping a log drops Bark 35% of the time. Leather +
+  bark in a water cauldron (one bark a hide, up to 8; adding a hide restarts the timer) tans in 5 minutes; empty hand
+  takes out Tanned Leather, which crafts into 3 Leather Straps (`c:leather_straps`, `jaymoskitchen:straps`).
+  `farm/Hemp`: seeds 3% from grass, a two-tall crop on farmland (Sowing takes it); fibre -> string (3 for 2) or Hemp
+  Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
+  `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
+  Art: `tools/vanilla_style/tanning.py`.

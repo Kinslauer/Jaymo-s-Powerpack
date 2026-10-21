@@ -9,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -39,6 +40,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Warlord</b>: a raider chief's furs. A horned iron cap, fur mantle and pelt, a bone pauldron and a hide kilt;
  * hard to knock back (leather and bone).</li>
  * </ul>
+ * (Smithing) And plain <b>steel plate</b>, flat vanilla-style layers with no raised pieces: the toughest of them, made
+ * from {@code #c:ingots/steel} (Jaymo's Powers' smeltery or kiln) buckled with {@code #c:leather_straps} (Jaymo's
+ * Kitchen's), or with plain leather for more steel. Not one of {@link #SETS} (it has no 3D shape).
  */
 public final class Armory {
 	/** Each set's numbers: durability multiplier, defence (boots, leggings, chest, helmet), enchantability, toughness, knockback resistance. */
@@ -46,7 +50,12 @@ public final class Armory {
 	static final ArmorMaterial GLADIATOR = material("gladiator", 14, 1, 4, 6, 3, 14, SoundEvents.ARMOR_EQUIP_COPPER, 0.0F, 0.0F, ItemTags.REPAIRS_COPPER_ARMOR);
 	static final ArmorMaterial RONIN = material("ronin", 18, 2, 5, 6, 2, 12, SoundEvents.ARMOR_EQUIP_CHAIN, 0.5F, 0.0F, ItemTags.REPAIRS_IRON_ARMOR);
 	static final ArmorMaterial WARLORD = material("warlord", 16, 2, 5, 6, 3, 12, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.1F, ItemTags.REPAIRS_LEATHER_ARMOR);
+	/** Steel ingots by the common tag (Jaymo's Powers makes them; no code dependency). */
+	static final TagKey<Item> STEEL_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/steel"));
+	static final ArmorMaterial STEEL_PLATE = material("steel_plate", 30, 3, 6, 7, 3, 10, SoundEvents.ARMOR_EQUIP_IRON, 2.5F, 0.05F, STEEL_INGOTS);
 
+	/** (Smithing) The steel plate pieces by {@link ArmorType}. */
+	public static final Map<ArmorType, Item> STEEL_PLATE_PIECES = new LinkedHashMap<>();
 	/** The sets by name, each its pieces by {@link ArmorType} (helmet, chestplate, leggings, boots). */
 	public static final Map<String, Map<ArmorType, Item>> SETS = new LinkedHashMap<>();
 	private static final ArmorType[] PIECES = {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS};
@@ -68,6 +77,7 @@ public final class Armory {
 		register("gladiator", GLADIATOR, all);
 		register("ronin", RONIN, all);
 		register("warlord", WARLORD, all);
+		STEEL_PLATE_PIECES.putAll(pieces("steel_plate", STEEL_PLATE, all));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
 			for (Item item : all) {
@@ -78,6 +88,10 @@ public final class Armory {
 	}
 
 	private static void register(String name, ArmorMaterial material, List<Item> all) {
+		SETS.put(name, pieces(name, material, all));
+	}
+
+	private static Map<ArmorType, Item> pieces(String name, ArmorMaterial material, List<Item> all) {
 		Map<ArmorType, Item> set = new LinkedHashMap<>();
 		for (ArmorType type : PIECES) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name + "_" + type.getName()));
@@ -85,7 +99,7 @@ public final class Armory {
 			set.put(type, item);
 			all.add(item);
 		}
-		SETS.put(name, set);
+		return set;
 	}
 
 	/** The set an item belongs to, or null. */
