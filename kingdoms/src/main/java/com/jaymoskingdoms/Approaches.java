@@ -94,7 +94,7 @@ public final class Approaches {
 	static final long HALT_TICKS = 72000L;
 	static final int GUARD_GAP = 20 * 60 * 8;
 	/**
-	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; (0.7.129) PURIST to a
+	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; (0.7.130) PURIST to a
 	 * stranger not of his blood, then to one of it; last, a place with no ruler): how keen they are to search you, ask a
 	 * toll, offer a bout, test your loyalty.
 	 */
@@ -171,7 +171,7 @@ public final class Approaches {
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}); 0 for the guards' own, one per temper. */
 	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0, 3};
 	/**
-	 * (0.6.2) Temper keys, in {@link Tempers.Temper} order ((0.7.129) a purist's guards to one of his own blood after his),
+	 * (0.6.2) Temper keys, in {@link Tempers.Temper} order ((0.7.130) a purist's guards to one of his own blood after his),
 	 * then a place with no ruler of its own.
 	 */
 	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "purist", "purist_kin", "plain"};
@@ -762,7 +762,7 @@ public final class Approaches {
 	}
 
 	/**
-	 * (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}; (0.7.129) a purist's
+	 * (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}; (0.7.130) a purist's
 	 * by whether {@code player} is of his blood.
 	 */
 	private static int temper(MinecraftServer server, Faction f, ServerPlayer player) {
@@ -774,7 +774,7 @@ public final class Approaches {
 		return t == null ? PLAIN : t.ordinal();
 	}
 
-	/** (0.7.129) Whose temper {@code f}'s people go by: its own ruler's, or its liege's for a fief (or itself, with neither). */
+	/** (0.7.130) Whose temper {@code f}'s people go by: its own ruler's, or its liege's for a fief (or itself, with neither). */
 	private static Faction ruler(MinecraftServer server, Faction f) {
 		if (Tempers.of(f) != null) {
 			return f;
@@ -876,7 +876,7 @@ public final class Approaches {
 		String line = key(a) + "." + (guardsOwn(a.topic) ? TEMPERS[a.variant] : a.variant), more = line + ".more";
 		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
-			// (0.7.129) and the blood: yours, then the purist king's
+			// (0.7.130) and the blood: yours, then the purist king's
 			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.price, Purists.name(Heritage.of(player)), ruler == null ? "?" : Purists.bloodName(ruler)};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
 			case WAR -> new Object[] {a.enemy};
@@ -903,7 +903,7 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
-					// (0.7.129) a purist realm's pride in its blood (or a grumble from one not of it)
+					// (0.7.130) a purist realm's pride in its blood (or a grumble from one not of it)
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
 				if (said == null) {
@@ -1336,7 +1336,7 @@ public final class Approaches {
 					if (tv == TYRANT || tv == PARANOID) {
 						Theft.arrest(player, level, f, ARREST_TICKS);
 					} else if (tv == PURIST) {
-						// (0.7.129) shoved out of his way: he'll not lower himself to more
+						// (0.7.130) shoved out of his way: he'll not lower himself to more
 						Purists.shoulder(level, a.mob, player);
 					}
 				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
@@ -1379,7 +1379,7 @@ public final class Approaches {
 						Reputation.change(player, f, HAGGLE_FAILED_REP);
 						reply(level, a, k + "haggle_failed." + temper, tv == PURIST ? Speech.RED : Speech.YELLOW);
 						if (tv == PURIST) {
-							// (0.7.129) haggling with his betters
+							// (0.7.130) haggling with his betters
 							Purists.shoulder(level, a.mob, player);
 						}
 					}

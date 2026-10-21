@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Reveler</b>: greets his people with gifts, and at dusk throws a feast at his seat: the villagers gather, there's
  * music and fireworks, they're given bread (and so have children), and it eats into the stores; players at his feast
  * are remembered fondly.</li>
- * <li><b>Purist</b>: (0.7.129) proud of his blood ({@link Purists#blood}) and insists his realm be of it: most born on his
+ * <li><b>Purist</b>: (0.7.130) proud of his blood ({@link Purists#blood}) and insists his realm be of it: most born on his
  * land are, his folk and guards are, and he ridicules and pushes past everyone who isn't, as his people do
  * ({@link Purists}). His own kind he greets with bread and pride; good name comes quick to them and slow to outsiders.</li>
  * </ul>
@@ -59,7 +59,7 @@ import org.jspecify.annotations.Nullable;
 final class Tempers {
 	enum Temper {
 		TYRANT, NOBLE, WARLORD, PARANOID, REVELER,
-		/** (0.7.129) Drawn on its own ({@link #PURIST_ONE_IN}), so the others' rulers keep the temper they had. */
+		/** (0.7.130) Drawn on its own ({@link #PURIST_ONE_IN}), so the others' rulers keep the temper they had. */
 		PURIST;
 
 		String key() {
@@ -67,7 +67,7 @@ final class Tempers {
 		}
 	}
 
-	/** (0.7.129) One ruler in this many is a purist. */
+	/** (0.7.130) One ruler in this many is a purist. */
 	static final int PURIST_ONE_IN = 6;
 	/** Production: materials, food and taxes, in percent of the usual, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST). */
 	static final int[] MATERIALS = {75, 125, 100, 100, 100, 100}, FOOD = {85, 125, 100, 100, 85, 100}, TAXES = {200, 75, 125, 100, 100, 110};
@@ -93,7 +93,7 @@ final class Tempers {
 	static final int TICK = 20;
 	/** How far his words carry to players. */
 	static final double SPEECH_RANGE = 16.0;
-	/** (0.7.129) The purist pushes one not of his blood out of his path this hard, and gives his own kind this much bread. */
+	/** (0.7.130) The purist pushes one not of his blood out of his path this hard, and gives his own kind this much bread. */
 	static final double PURIST_PUSH = 0.7;
 	static final int PURIST_BREAD = 2;
 
@@ -117,7 +117,7 @@ final class Tempers {
 		}
 		UUID id = f.leader().get();
 		long mix = id.getMostSignificantBits() * 31 + id.getLeastSignificantBits();
-		// (0.7.129) the purist on his own draw, so the rest keep the temper they had before there were purists
+		// (0.7.130) the purist on his own draw, so the rest keep the temper they had before there were purists
 		long proud = Long.rotateLeft(mix, 23) * 0x9E3779B97F4A7C15L;
 		if (Math.floorMod(proud >>> 11, (long)PURIST_ONE_IN) == 0) {
 			return Temper.PURIST;
@@ -129,7 +129,7 @@ final class Tempers {
 		return of(Factions.get(server, faction));
 	}
 
-	/** What it says of a ruler (for {@code /kingdom info}); (0.7.129) a purist's, with his blood. */
+	/** What it says of a ruler (for {@code /kingdom info}); (0.7.130) a purist's, with his blood. */
 	static Component describe(Temper t, Faction f) {
 		return t == Temper.PURIST ? Component.translatable("temper.jaymoskingdoms.purist.of", Purists.bloodName(f))
 			: Component.translatable("temper.jaymoskingdoms." + t.key());
@@ -218,7 +218,7 @@ final class Tempers {
 				return true;
 			}
 			case PURIST -> {
-				// (0.7.129) bread and pride for his own blood; a sneer and a shove out of his path for anyone else
+				// (0.7.130) bread and pride for his own blood; a sneer and a shove out of his path for anyone else
 				if (Purists.kin(f, v)) {
 					gift(v, new ItemStack(Items.BREAD, PURIST_BREAD));
 					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.8, v.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
@@ -334,7 +334,7 @@ final class Tempers {
 			}
 			Folk king = level.getEntity(f.leader().get()) instanceof Folk k && k.isAlive() ? k : null;
 			if (temper == Temper.PURIST && king != null) {
-				// (0.7.129) a purist is of the blood he's proud of
+				// (0.7.130) a purist is of the blood he's proud of
 				Heritage.Kind blood = Purists.blood(f);
 				if (blood != null && VillagerHeritage.of(king) != blood) {
 					VillagerHeritage.born(king, blood, null);

@@ -3781,7 +3781,7 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
   (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.
 
-## 0.7.129: the Purist ruler (pack 0.15.37)
+## 0.7.130: the Purist ruler (pack 0.15.38)
 Andy (2026-10-20): "Add a new king temper, Purist, they insist on a high population of its own heritage. Ridiculing
 and stepping over those who are not. Very prideful ruler". `Purists`, plus a column in `Tempers`, `Retinue` and
 `Approaches`.
