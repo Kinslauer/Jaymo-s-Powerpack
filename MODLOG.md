@@ -2271,7 +2271,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     stretches inside a spin stay straight, so a twirl doesn't stop at every quarter turn. The hit's keyframe and every
     begin/end/stop tick are unchanged, so Better Combat's damage timing is the same. `tools/check_player_animations.py`
     checks every file parses and every key sits within the animation.
-- **0.15.44, ships Jaymo's Kitchen 0.5.11 (Better With Mods batch 3, mills):** shafts, windmills and waterwheels that
+- **0.15.45, ships Jaymo's Kitchen 0.5.11 (Better With Mods batch 3, mills):** shafts, windmills and waterwheels that
   work Kitchen's horse machines, the village windmills of Epic Structures turning for real, a potter's wheel that
   throws clay into Tinkering's Unfired Pot (`jaymospowers:unfired_pot`, looked up by id), a bloody chopper, manure
   and fertile farmland. No Powers code changed. Details in the Kitchen MODLOG.

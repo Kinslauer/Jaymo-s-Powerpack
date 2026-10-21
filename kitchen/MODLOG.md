@@ -880,7 +880,7 @@ weight on each step, and the body leans back against it. A creature crawling on 
 downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
 the body rocking, the head lifting to look ahead. The ragdoll is untouched.
 
-### 0.5.11: mills (Better With Mods batch 3, pack 0.15.44)
+### 0.5.11: mills (Better With Mods batch 3, pack 0.15.45)
 Batch 3 of the BWM port (MIT, our own code).
 - `mill/power`: a wooden Shaft (runs of up to `SHAFT_MAX` 8) and one plain Shaft Corner, no gearboxes. A Windmill
   (sail cloth: wool or hemp cloth, tag `sail_cloth`) or Waterwheel set on a shaft's end turns it; the machine at the
