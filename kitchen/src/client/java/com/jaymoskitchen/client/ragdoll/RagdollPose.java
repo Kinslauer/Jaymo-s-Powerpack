@@ -194,7 +194,7 @@ public final class RagdollPose {
 		}
 		for (String[] overlay : OVERLAYS) {
 			if (root.hasChild(overlay[0]) && root.hasChild(overlay[1])) {
-				root.getChild(overlay[0]).copyFrom(root.getChild(overlay[1]));
+				root.getChild(overlay[0]).loadPose(root.getChild(overlay[1]).storePose());
 			}
 		}
 	}
