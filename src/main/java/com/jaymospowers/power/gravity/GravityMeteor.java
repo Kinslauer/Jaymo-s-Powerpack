@@ -2,6 +2,7 @@ package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Flames;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,6 +48,11 @@ import net.minecraft.world.phys.Vec3;
  * while before they clear.
  */
 final class GravityMeteor {
+	/** A charging meteor: a deep hum, rising, with stone grinding under it at uneven beats. */
+	static final Soundscape.Layer CHARGE_HUM = Soundscape.Layer.of(0.9F, 1.1F, 0.96F, 1.04F, SoundEvents.BEACON_AMBIENT);
+	static final Soundscape.Layer CHARGE_GRIND = Soundscape.Layer.of(0.3F, 0.5F, 0.4F, 0.6F, SoundEvents.GRAVEL_BREAK, SoundEvents.STONE_BREAK)
+		.chance(0.4F);
+
 	static final double RANGE_MIN = 48.0, RANGE_MAX = 128.0, HEIGHT = 70.0;
 	static final int FALL_TICKS = 40, COOLDOWN_MIN = 900, COOLDOWN = 3600;
 	/** C held this long for the biggest, furthest meteor; a tap brings the small one at {@code RANGE_MIN}. */
@@ -170,8 +176,8 @@ final class GravityMeteor {
 			double a = i / (double)points * Math.PI * 2.0 + held * 0.15;
 			level.sendParticles(player, SHADOW, true, false, to.x + Math.cos(a) * r, to.y + 0.2, to.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		if (held % 10 == 0 && charge < 1.0F) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F, 0.5F + charge);
+		if (charge < 1.0F && Soundscape.due(player, "gravity.meteor", 8, 13)) {
+			Soundscape.play(level, player.position(), SoundSource.PLAYERS, CHARGE_HUM.pitched(0.5F + charge), CHARGE_GRIND);
 		}
 	}
 

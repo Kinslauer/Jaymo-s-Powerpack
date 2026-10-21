@@ -89,6 +89,8 @@ public final class Enchanting {
 			return InteractionResult.SUCCESS;
 		});
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> drops.forEach(Enchanting::trimLoot));
+		// (BWM port) mobs a player kills now and then drop a scroll teaching one enchantment
+		EnchantDrops.init();
 	}
 
 	/** Learns what's in the book: what's new (or a higher level) leaves the book; an empty book burns up. */

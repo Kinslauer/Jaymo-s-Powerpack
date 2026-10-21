@@ -50,12 +50,10 @@ final class DarktideLive {
 	/** Ticks the shade has stood in sunlight. */
 	int sunTicks;
 
-	// Combat Roll
+	// the dodge (DarktideDodges)
 	long rollStart = -1L;
 	boolean rollEvaded;
 	boolean rollHit;
-	/** Roll charges the client last said it has; -1 until it says (no Combat Roll: dashes cost none). */
-	int rolls = -1;
 
 	// R/G/V/B in progress
 	@Nullable Undertow undertow;

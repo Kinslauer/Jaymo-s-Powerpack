@@ -260,7 +260,7 @@ public final class Powers {
 		if (down && power != null && silenced(player)) {
 			return;
 		}
-		if (power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player)) && player.isAlive()
+		if (power != null && power.ultimateAnswers(player) && player.isAlive()
 			&& !player.isSpectator()) {
 			power.onUltimate(player, down);
 			if (down) {

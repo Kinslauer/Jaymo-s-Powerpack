@@ -63,12 +63,21 @@ import org.jspecify.annotations.Nullable;
  * at night (moon-silver by day, as ever; its own red eyes give way to them), and blood mist for the wisps.</li>
  * <li><b>Earthling:</b> training wraps round the fists, and a ki glow over them only while near death has made it flare
  * ({@code EarthlingSurge}); no eye glow, no particles.</li>
+ * <li><b>Stormborn:</b> (0.7.106) forked lightning-scar lines up the forearms, pale blue, dim until a thunderstorm makes
+ * them flicker bright; sparks then. Plain eyes.</li>
+ * <li><b>Dawnborn:</b> (0.7.106) a gold sun-ring on the back of each hand; warm gold eyes that glow by day only.</li>
+ * <li><b>Endborn:</b> (0.7.106) purple specks scattered up the forearms; purple eyes; portal motes drift off the hands at
+ * night, out of the rain.</li>
+ * <li><b>Dragonblood:</b> (0.7.106) dark scale patches on the forearms and one cheek, glowing ember-orange in the dark
+ * only; amber eyes that glow at night only.</li>
+ * <li><b>Deepborn:</b> (0.7.106) teal sculk veins up the forearms pulsing slowly; pale eyes; now and then a sculk pop in
+ * dark places.</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
-	/** How a heritage's eyes glow. */
-	enum Eyes { ALWAYS, DAY, NEVER }
+	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
+	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
 	/** One heritage's look: its texture name, how many drawings to pick from (by UUID), eyes, and particle rate (0: none). */
 	enum Kind {
@@ -78,7 +87,12 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		VERDANT(Heritage.Kind.VERDANT, "verdant", 1, 0, Eyes.NEVER, 0),
 		FROSTBORN(Heritage.Kind.FROSTBORN, "frostborn", 1, 0xFFC8ECFF, Eyes.ALWAYS, 16),
 		NIGHTBORN(Heritage.Kind.NIGHTBORN, "nightborn", 1, 0xFFECEEFF, Eyes.DAY, 12),
-		EARTHLING(Heritage.Kind.EARTHLING, "earthling", 1, 0, Eyes.NEVER, 0);
+		EARTHLING(Heritage.Kind.EARTHLING, "earthling", 1, 0, Eyes.NEVER, 0),
+		STORMBORN(Heritage.Kind.STORMBORN, "stormborn", 1, 0xFFC4E4FF, Eyes.STORM, 20),
+		DAWNBORN(Heritage.Kind.DAWNBORN, "dawnborn", 1, 0xFFFFD27A, Eyes.DAY, 0),
+		ENDBORN(Heritage.Kind.ENDBORN, "endborn", 1, 0xFFD69CFF, Eyes.ALWAYS, 10),
+		DRAGONBLOOD(Heritage.Kind.DRAGONBLOOD, "dragonblood", 1, 0xFFFFB040, Eyes.NIGHT, 0),
+		DEEPBORN(Heritage.Kind.DEEPBORN, "deepborn", 1, 0xFFB8F4EC, Eyes.ALWAYS, 40);
 
 		final Heritage.Kind heritage;
 		final Identifier[] skin, glow;
@@ -141,6 +155,13 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 
 	/** (0.7.80) A sneaking Sylvan's glow, dimmed to this (opaque ARGB tint; out entirely for a Thief or with a Stealth perk). */
 	static final int SYLVAN_SNEAK_GLOW = 0xFF4A4A4A;
+	/**
+	 * (0.7.106) A Stormborn's scars: dim like this out of a storm; in one, bright with a flicker one tick in
+	 * {@code STORM_FLICKER} (in threes), dimmer to this between. A Deepborn's veins pulse from {@code DEEP_PULSE_LOW} of
+	 * full and back, over {@code DEEP_PULSE_TICKS}.
+	 */
+	static final int STORM_CALM_GLOW = 0xFF505A64, STORM_GLOW = 0xFFB4B4B4, STORM_FLICKER = 11, DEEP_PULSE_TICKS = 60;
+	static final float DEEP_PULSE_LOW = 0.35F;
 
 	public static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:heritage_look");
 
@@ -178,12 +199,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			return;
 		}
 		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
-		boolean lit = blood || switch (kind.eyes) {
-			case ALWAYS -> true;
-			case DAY -> entity.level().isBrightOutside();
-			case NEVER -> false;
-		};
-		int glow = -1;
+		boolean lit = blood || eyesLit(kind, entity);
+		int glow = mood(kind, entity);
 		int flags = entity.getAttachedOrElse(Heritage.LOOK, 0);
 		if (kind == Kind.TIDEBORN) {
 			// (0.7.80) a Tideborn glows under water, and at night while still wet; dry, not at all
@@ -198,6 +215,41 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			glow = EarthlingSurge.surging(entity) ? -1 : 0;
 		}
 		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
+	}
+
+	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */
+	static boolean eyesLit(Kind kind, LivingEntity entity) {
+		return switch (kind.eyes) {
+			case ALWAYS -> true;
+			case DAY -> entity.level().isBrightOutside();
+			case NIGHT -> entity.level().isDarkOutside();
+			case STORM -> entity.level().isThundering();
+			case NEVER -> false;
+		};
+	}
+
+	/**
+	 * (0.7.106) The glow's tint that changes with the weather and the hour (players and villagers alike): a Stormborn's
+	 * scars flicker in a thunderstorm and sit dim out of one, a Dragonblood's scales glow at night only, a Deepborn's veins
+	 * pulse. -1 (full) for the rest.
+	 */
+	static int mood(Kind kind, LivingEntity entity) {
+		return switch (kind) {
+			case STORMBORN -> {
+				if (!entity.level().isThundering()) {
+					yield STORM_CALM_GLOW;
+				}
+				int t = (entity.tickCount + (entity.getId() * 7)) / 3;
+				yield t % STORM_FLICKER == 0 ? -1 : STORM_GLOW;
+			}
+			case DRAGONBLOOD -> entity.level().isDarkOutside() ? -1 : 0;
+			case DEEPBORN -> {
+				float wave = 0.5F + 0.5F * Mth.sin((entity.tickCount + entity.getId() * 13) * Mth.TWO_PI / DEEP_PULSE_TICKS);
+				int g = Math.round(255 * (DEEP_PULSE_LOW + (1.0F - DEEP_PULSE_LOW) * wave));
+				yield 0xFF000000 | g << 16 | g << 8 | g;
+			}
+			default -> -1;
+		};
 	}
 
 	static int variant(UUID id, int drawings) {
@@ -357,6 +409,21 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 					}
 				}
 				case FROSTBORN -> level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
+				case STORMBORN -> {
+					if (level.isThundering()) {
+						level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0.0, 0.05, 0.0);
+					}
+				}
+				case ENDBORN -> {
+					if (level.isDarkOutside() && !player.isInWaterOrRain()) {
+						level.addParticle(ParticleTypes.PORTAL, x, y, z, (random.nextDouble() - 0.5) * 0.5, -random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.5);
+					}
+				}
+				case DEEPBORN -> {
+					if (level.getMaxLocalRawBrightness(player.blockPosition()) <= 7) {
+						level.addParticle(ParticleTypes.SCULK_CHARGE_POP, x, y, z, 0.0, 0.02, 0.0);
+					}
+				}
 				case NIGHTBORN -> {
 					if (level.isDarkOutside()) {
 						// (0.7.88) a Nightborn vampire's wisps are blood mist

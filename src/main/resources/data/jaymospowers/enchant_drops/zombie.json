@@ -1,0 +1,9 @@
+{
+  "entities": [
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:zombie_villager"
+  ],
+  "enchantment": "minecraft:smite"
+}

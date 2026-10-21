@@ -1,15 +1,16 @@
 package com.jaymospowers.client.power.smoke;
 
 import com.jaymospowers.client.ScreenShake;
+import com.jaymospowers.client.sound.Accents;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
+import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.power.smoke.SmokeVapour;
 import com.jaymospowers.power.wind.WindFlight;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec2;
@@ -56,6 +57,9 @@ public final class SmokeFlightClient {
 	static final double DIVE_GRAVITY = 0.07;
 	static final double DIVE_OVERSPEED = 1.25;
 
+	/** Breaking into a cruise: a burst of air, now and then a crackle of embers. */
+	static final Soundscape.Layer LAUNCH = Soundscape.Layer.of(0.35F, 0.5F, 0.7F, 0.95F, SoundEvents.BREEZE_SHOOT, SoundEvents.BREEZE_JUMP);
+
 	private static boolean flying;
 	private static boolean cruising;
 	/** Ascended (Cloudshaper): top speed in the rain. */
@@ -89,6 +93,21 @@ public final class SmokeFlightClient {
 		return cruising ? Mth.clamp(speed / top(player), 0.0, 1.0) : 0.0;
 	}
 
+	/** The flight's velocity this tick (blocks a tick), for the sound. */
+	static Vec3 velocity() {
+		return velocity;
+	}
+
+	/** Speed over the top speed (past 1 in a dive), cruising or not, for the sound. */
+	static double speedOverTop(LocalPlayer player) {
+		return flying ? velocity.length() / top(player) : 0.0;
+	}
+
+	/** Whether the flier asked to be wholly smoke. */
+	static boolean wholly() {
+		return flying && wholeWanted;
+	}
+
 	private static double top(LocalPlayer player) {
 		double top = Mastery.starterOnly(player) ? STARTER_TOP_SPEED : TOP_SPEED;
 		// a cloudshaper (ascended, not smog) flies faster in the rain
@@ -101,6 +120,7 @@ public final class SmokeFlightClient {
 	/** Every client tick, from the power's own tick. */
 	static void tick(Minecraft minecraft, LocalPlayer player) {
 		fly(player);
+		SmokeFlightSound.tick(player);
 		// fully mastered, Shift turns the whole body to smoke: the server is told when that starts and stops
 		boolean whole = flying && wholeWanted && Mastery.unlocked(player) >= Mastery.ALL;
 		if (whole != wholeSent && ClientPlayNetworking.canSend(SmokeVapour.Whole.TYPE)) {
@@ -137,7 +157,7 @@ public final class SmokeFlightClient {
 		if (player.horizontalCollision && cruising && speed > 0.9) {
 			// flew into something: the cruise is over
 			ScreenShake.add((float)Math.min(2.0, speed));
-			player.level().playLocalSound(player, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.7F, 0.6F);
+			Accents.play(player, SmokeFlightSound.STEAM.louder(2.0F), SmokeFlightSound.CRACKLE);
 		}
 		if (player.horizontalCollision && cruising) {
 			cruising = false;
@@ -175,7 +195,7 @@ public final class SmokeFlightClient {
 			cruising = true;
 			speed = Math.max(CRUISE_ENTER_SPEED, motion.length());
 			velocity = dir.scale(speed);
-			player.level().playLocalSound(player, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.4F, 0.8F);
+			Accents.play(player, LAUNCH);
 			ScreenShake.add(0.6F);
 			return;
 		}
@@ -212,8 +232,7 @@ public final class SmokeFlightClient {
 			cruising = true;
 			speed = Math.max(CRUISE_ENTER_SPEED, velocity.length());
 			velocity = velocity.lerp(player.getLookAngle().scale(speed), 0.5);
-			player.level().playLocalSound(player, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
-			player.level().playLocalSound(player, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.4F, 0.8F);
+			Accents.play(player, LAUNCH, SmokeFlightSound.STEAM.louder(1.8F));
 			ScreenShake.add(0.4F);
 		}
 	}

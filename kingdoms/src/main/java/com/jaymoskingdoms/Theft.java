@@ -126,7 +126,11 @@ public final class Theft {
 		/** (0.6.9) lingering in someone's house ({@link Trespass}). */
 		TRESPASS(Weight.LIGHT, "trespass"),
 		/** (0.7.0) a vampire player seen feeding ({@link VampirePlayers}). */
-		BLOODLETTING(Weight.HEAVY, "bloodletting");
+		BLOODLETTING(Weight.HEAVY, "bloodletting"),
+		/** (0.7.121) striking one of its people ({@link Retaliation}). */
+		ASSAULT(Weight.LIGHT, "assault"),
+		/** (0.7.132) one of its dead robbed ({@link Looters#playerRobbed}). */
+		ROBBING(Weight.MEDIUM, "robbing");
 
 		final Weight weight;
 		final String cry;
@@ -216,8 +220,9 @@ public final class Theft {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
-			if (source.getEntity() instanceof ServerPlayer player) {
-				hitBack(player, entity);
+			if (source.getEntity() instanceof ServerPlayer player && !hitBack(player, entity) && entity.level() instanceof ServerLevel level) {
+				// (0.7.121) not one of a crowd after an arsonist: they may fight back
+				Retaliation.struck(player, level, entity);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Theft::tick);
@@ -265,8 +270,11 @@ public final class Theft {
 		player.setAttached(WANTED, Map.copyOf(wanted));
 	}
 
-	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others). */
+	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others), or (0.7.121) in a brawl ({@link Retaliation}). */
 	public static boolean rioting(LivingEntity who) {
+		if (Retaliation.brawling(who)) {
+			return true;
+		}
 		for (Riot riot : RIOTS.values()) {
 			if (riot.rioters.containsKey(who.getUUID())) {
 				return true;
@@ -454,7 +462,15 @@ public final class Theft {
 			// (a ruler's death is its own story: see KingdomEvents)
 			return;
 		}
+		if (Crooks.fairGame(victim, killer)) {
+			// (0.7.126) a known criminal, or the crook who robbed you: no murder
+			return;
+		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
+		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
+			// (0.7.109) seen: the dead one's family won't forget who did it
+			Recollections.murdered(level, killer, victim);
+		}
 	}
 
 	// ---- witnesses and consequences -----------------------------------------------------------------------------
@@ -533,6 +549,8 @@ public final class Theft {
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
+		// (0.7.109) each who saw it remembers it
+		Recollections.crime(player, seen, crime.cry);
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);
 		}
@@ -547,6 +565,8 @@ public final class Theft {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
 				.withStyle(ChatFormatting.DARK_RED));
 		}
+		// (0.7.125) a price on their head (or their mask's)
+		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, crime.cry);
 		pursue(level, f, player);
 	}
 
@@ -610,8 +630,8 @@ public final class Theft {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.riot", f.name()).withStyle(ChatFormatting.RED));
 	}
 
-	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters. */
-	private static void hitBack(ServerPlayer player, LivingEntity victim) {
+	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters (true). */
+	private static boolean hitBack(ServerPlayer player, LivingEntity victim) {
 		Riot riot = RIOTS.get(player.getUUID());
 		if (riot != null && riot.rioters.containsKey(victim.getUUID())) {
 			RIOTS.remove(player.getUUID());
@@ -625,7 +645,9 @@ public final class Theft {
 					}
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 	/** The crowds close on their arsonists and hit them. */

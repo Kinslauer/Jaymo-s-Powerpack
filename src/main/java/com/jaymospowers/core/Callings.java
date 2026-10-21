@@ -66,6 +66,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Z Fighter: kill {@link #FIST_KILLS_NEEDED} monsters with your bare fists. Awakens at once.</li>
  * <li>Smoke: breathe a fire's smoke ({@link #SMOKE_FIRES}+ burning blocks or lit campfires round you) for
  * {@link #SMOKE_SECONDS} s in a row and live. A day off, once a day.</li>
+ * <li>Cryokinesis (0.14.0): stand in powder snow or out in a snowstorm, freezing, for {@link #CRYO_SECONDS} s in a row
+ * and live. A day off, once a day. A Frost-born is called sooner: {@link #CRYO_FROST_BORN_SECONDS} s, and two days off.</li>
  * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once, and it is the
  * only way: fate never hands Xenoform out and it can't be an affinity ({@code Power.fated}).</li>
  * </ul>
@@ -102,6 +104,9 @@ public final class Callings {
 	public static final int SMOKE_FIRES = 3;
 	public static final int SMOKE_REACH = 4;
 	public static final int SMOKE_SECONDS = 60;
+	/** (0.14.0) Cryokinesis: seconds in a row freezing in powder snow or a snowstorm (a Frost-born's fewer). */
+	public static final int CRYO_SECONDS = 60;
+	public static final int CRYO_FROST_BORN_SECONDS = 30;
 
 	/** Highest fall distance this flight, per player (reset on landing). */
 	private static final Map<UUID, Double> FALLS = new HashMap<>();
@@ -115,6 +120,9 @@ public final class Callings {
 	/** Smoke: seconds in a row spent in a fire's smoke, and the day it last counted. */
 	private static final Map<UUID, Integer> IN_SMOKE = new HashMap<>();
 	private static final Map<UUID, Long> SMOKE_DAY = new HashMap<>();
+	/** (0.14.0) Cryokinesis: seconds in a row spent freezing, and the day it last counted. */
+	private static final Map<UUID, Integer> IN_COLD = new HashMap<>();
+	private static final Map<UUID, Long> COLD_DAY = new HashMap<>();
 
 	private Callings() {
 	}
@@ -182,6 +190,8 @@ public final class Callings {
 			BELL_DAY.clear();
 			IN_SMOKE.clear();
 			SMOKE_DAY.clear();
+			IN_COLD.clear();
+			COLD_DAY.clear();
 		});
 	}
 
@@ -197,6 +207,7 @@ public final class Callings {
 		SLEPT_WITH_CLOCK.remove(id);
 		AT_SEA.remove(id);
 		IN_SMOKE.remove(id);
+		IN_COLD.remove(id);
 	}
 
 	/** Wind (a Breeze), Z Fighter (bare fists) and Arsenal (weapons): kills by a powerless player. */
@@ -315,7 +326,33 @@ public final class Callings {
 			} else {
 				IN_SMOKE.remove(id);
 			}
+			// Cryokinesis: a minute freezing in powder snow or out in a snowstorm, once a day (sooner for the Frost-born)
+			if (freezing(level, player)) {
+				boolean frostBorn = com.jaymospowers.power.zfighter.ZFighterLineage.of(player) == com.jaymospowers.power.zfighter.ZFighterLineage.FROST;
+				int seconds = IN_COLD.merge(id, 1, Integer::sum);
+				if (seconds >= (frostBorn ? CRYO_FROST_BORN_SECONDS : CRYO_SECONDS)) {
+					IN_COLD.remove(id);
+					if (once(COLD_DAY, player)) {
+						call(player, "cryo", frostBorn ? DAY * 2 : DAY);
+					}
+				}
+			} else {
+				IN_COLD.remove(id);
+			}
 		}
+	}
+
+	/**
+	 * (0.14.0) In powder snow, or under the open sky where snow is falling on them, and cold through: freezing, or
+	 * (a Frost-born, whom the cold can't freeze) simply standing in it.
+	 */
+	private static boolean freezing(ServerLevel level, ServerPlayer player) {
+		boolean snowing = level.precipitationAt(BlockPos.containing(player.getEyePosition())) == net.minecraft.world.level.biome.Biome.Precipitation.SNOW;
+		if (!player.isInPowderSnow && !snowing) {
+			return false;
+		}
+		return player.getTicksFrozen() > 0 || snowing
+			|| com.jaymospowers.power.zfighter.ZFighterLineage.of(player) == com.jaymospowers.power.zfighter.ZFighterLineage.FROST;
 	}
 
 	/** Burning blocks and lit campfires within {@link #SMOKE_REACH} blocks of {@code center} (stops counting at enough). */

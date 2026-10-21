@@ -100,9 +100,27 @@ public final class PoseTakeover {
 		return drawing instanceof AvatarRenderState avatar && posed(avatar);
 	}
 
+	/** Kitchen's ragdoll pose key (a limp player), fetched once by reflection; null if this Kitchen has none. */
+	private static net.fabricmc.fabric.api.client.rendering.v1.@Nullable RenderStateDataKey<?> ragdollKey;
+	private static boolean ragdollLooked;
+
+	/** (0.15.8) A player lying limp as Kitchen's ragdoll: its limbs are set last of all, so nothing may animate over them. */
+	private static boolean ragdolled(AvatarRenderState s) {
+		if (!ragdollLooked) {
+			ragdollLooked = true;
+			try {
+				ragdollKey = (net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<?>)
+					Class.forName("com.jaymoskitchen.client.ragdoll.RagdollPose").getField("KEY").get(null);
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				ragdollKey = null;
+			}
+		}
+		return ragdollKey != null && s.getData(ragdollKey) != null;
+	}
+
 	public static boolean posed(AvatarRenderState s) {
-		return aiming(s) || s.getData(CrawlPose.KEY) != null || s.getData(LedgePose.KEY) != null
-			|| s.getData(com.jaymospowers.client.freerun.BalancePose.KEY) != null || s.getData(com.jaymospowers.client.freerun.BarHangPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(FreefallPose.KEY) != null
+		return aiming(s) || ragdolled(s) || s.getData(CrawlPose.KEY) != null || s.getData(LedgePose.KEY) != null
+			|| s.getData(com.jaymospowers.client.freerun.RunPose.SLIDE) != null || s.getData(com.jaymospowers.client.freerun.BalancePose.KEY) != null || s.getData(com.jaymospowers.client.freerun.BarHangPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(CarryPose.CARRIER_KEY) != null || s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| WindPose.posed(s)
 			|| s.getData(GravityWalkPose.KEY) != null || s.getData(GravityBoardPose.KEY) != null || s.getData(GravityKneelPose.KEY) != null
@@ -122,10 +140,12 @@ public final class PoseTakeover {
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null || s.getData(ZFighterChargePose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSpiritPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeMovePose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.cryo.CryoPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.rig.RigPose.KEY) != null
 			|| Boolean.TRUE.equals(s.getData(ZFighterGuardPose.KEY))
 			|| Boolean.TRUE.equals(s.getData(com.jaymospowers.client.power.zfighter.ZFighterFiringPose.KEY))
 			|| s.getData(com.jaymospowers.client.power.zfighter.RaceHoldClient.STRETCH) != null
+			|| Boolean.TRUE.equals(s.getData(com.jaymospowers.client.power.ember.EmberKindleClient.KEY))
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterComboPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterDiscPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null;

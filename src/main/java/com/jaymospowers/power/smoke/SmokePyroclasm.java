@@ -1,5 +1,6 @@
 package com.jaymospowers.power.smoke;
 
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,10 @@ import net.minecraft.world.phys.Vec3;
  * {@code doFireTick} off keeps bases safe) and leaves smog behind. Cooldown {@link #COOLDOWN}.
  */
 final class SmokePyroclasm {
+	/** A burning flow's sound: a fire's roar at uneven beats, with spits and crackles over it. */
+	static final Soundscape.Layer FLOW_ROAR = Soundscape.Layer.of(1.0F, 1.3F, 0.45F, 0.6F, SoundEvents.FIRE_AMBIENT);
+	static final Soundscape.Layer FLOW_SPIT = Soundscape.Layer.of(0.5F, 0.8F, 0.6F, 0.9F, SoundEvents.BLAZE_BURN, SoundEvents.CAMPFIRE_CRACKLE).chance(0.5F);
+
 	static final int GATHER_TICKS = 60;
 	static final double REACH_MIN = 12.0, REACH_MAX = 24.0;
 	/** How fast it rolls (blocks a tick), and how wide it is (radius) setting out and at the end. */
@@ -162,8 +167,8 @@ final class SmokePyroclasm {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.5, at.z, 3, width * 0.4, 0.4, width * 0.4, 0.01);
 		level.sendParticles(ParticleTypes.FLAME, at.x, at.y - 0.3, at.z, 6, width * 0.4, 0.3, width * 0.4, 0.02);
 		level.sendParticles(ParticleTypes.ASH, at.x, at.y, at.z, 12, width * 0.6, 0.8, width * 0.6, 0.02);
-		if (flow.age % 8 == 0) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 1.2F, 0.5F);
+		if (Soundscape.due(level, System.identityHashCode(flow), "smoke.pyroclasm", 6, 12)) {
+			Soundscape.play(level, at, SoundSource.PLAYERS, FLOW_ROAR, FLOW_SPIT);
 		}
 		if (flow.age % HIT_EVERY == 0) {
 			for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(width, 1.8, width),

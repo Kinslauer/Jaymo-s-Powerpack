@@ -48,6 +48,8 @@ final class Raids {
 	/** How often a camp considers a raid (ticks), the chance it does when it can, and the wait after one (ticks: two days). */
 	static final int CHECK_TICKS = 200;
 	static final float RAID_CHANCE = 0.12F;
+	/** (0.7.123) The raid chance's factor in summer and in winter (Kitchen's seasons). */
+	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
 	static final long TARGET_COOLDOWN_TICKS = 24000L;
@@ -87,6 +89,8 @@ final class Raids {
 	static final int ORCS_PER_RANGER = 3;
 	/** (0.7.42) A pirate landing party: every this many, one is a gunner (pistols). */
 	static final int PIRATES_PER_GUNNER = 3;
+	/** (0.7.107) ...and every this many, one is a bombardier (dynamite), off the roster too. */
+	static final int PIRATES_PER_BOMBARDIER = 4;
 
 	enum Phase {
 		MARCH, PLUNDER, RETURN
@@ -160,6 +164,12 @@ final class Raids {
 
 	// ---- starting ------------------------------------------------------------------------------------------------
 
+	/** (0.7.123) With Kitchen's seasons, raids are likelier in summer and rarer in winter, when camps sit by their fires. */
+	static float seasonFactor(ServerLevel level) {
+		String season = KitchenCompat.season(level);
+		return "summer".equals(season) ? SUMMER_RAIDS : "winter".equals(season) ? WINTER_RAIDS : 1.0F;
+	}
+
 	/** Every {@link #CHECK_TICKS}: camps that may raid look for a settlement with a player near it. */
 	private static void consider(MinecraftServer server, ServerLevel level) {
 		long now = level.getGameTime();
@@ -175,7 +185,7 @@ final class Raids {
 				continue;
 			}
 			Faction target = target(server, level, camp);
-			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE)) {
+			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE) * seasonFactor(level)) {
 				start(level, camp, target);
 			}
 		}
@@ -256,7 +266,8 @@ final class Raids {
 			}
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			// (0.5.47) an orc war band: grunts, every third one a ranger
-			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER : Pirates.DECKHAND)
+			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
+					: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
 				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);

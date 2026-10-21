@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin;
 
+import com.jaymoskingdoms.client.HiddenBladeClient;
 import com.jaymoskingdoms.client.MobAnimations;
 import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
@@ -18,5 +19,6 @@ abstract class MobSwingModelFeatureRendererMixin {
 		PullerPose.apply(submit.model(), submit.state());
 		PickpocketPose.apply(submit.model(), submit.state());
 		MobAnimations.apply(submit.model(), submit.state());
+		HiddenBladeClient.pose(submit.model(), submit.state());
 	}
 }

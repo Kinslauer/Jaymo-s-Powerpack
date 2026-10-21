@@ -279,7 +279,7 @@ public final class WebSwing {
 
 	/**
 	 * The last tick both webs were on things small enough to reel in: double-tap Sneak is then the hard yank (see
-	 * {@code WebPower.REEL_YANK_*}), not Combat Roll's roll.
+	 * {@code WebPower.REEL_YANK_*}), not a dodge.
 	 */
 	public static int reelReadyTick = Integer.MIN_VALUE / 2;
 

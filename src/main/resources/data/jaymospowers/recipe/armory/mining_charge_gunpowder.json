@@ -1,0 +1,33 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:registry_contains",
+        "registry": "minecraft:item",
+        "values": [
+          "weaponmod:dynamite"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "G": "minecraft:gunpowder",
+    "S": [
+      "minecraft:sand",
+      "minecraft:red_sand"
+    ],
+    "T": "minecraft:string"
+  },
+  "pattern": [
+    "TGT",
+    "GSG",
+    "TGT"
+  ],
+  "result": {
+    "id": "jaymospowers:mining_charge",
+    "count": 2
+  }
+}

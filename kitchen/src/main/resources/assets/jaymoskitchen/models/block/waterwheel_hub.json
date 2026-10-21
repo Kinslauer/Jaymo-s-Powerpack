@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "log": "minecraft:block/spruce_log",
+    "top": "minecraft:block/spruce_log_top",
+    "plank": "minecraft:block/spruce_planks",
+    "spoke": "minecraft:block/stripped_spruce_log",
+    "particle": "minecraft:block/spruce_planks"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        4,
+        1
+      ],
+      "to": [
+        12,
+        12,
+        15
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#top"
+        },
+        "south": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#top"
+        },
+        "east": {
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ],
+          "texture": "#log"
+        },
+        "west": {
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ],
+          "texture": "#log"
+        },
+        "up": {
+          "uv": [
+            4,
+            1,
+            12,
+            15
+          ],
+          "texture": "#log"
+        },
+        "down": {
+          "uv": [
+            4,
+            1,
+            12,
+            15
+          ],
+          "texture": "#log"
+        }
+      }
+    }
+  ]
+}

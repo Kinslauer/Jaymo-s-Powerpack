@@ -209,7 +209,8 @@ public final class ClassPerks {
 	/** Everything a class does through attributes, from the class, the held weapon and the armour worn now. */
 	static void attributes(ServerPlayer player) {
 		PlayerClass cls = Classes.classOf(player);
-		ItemStack held = player.getMainHandItem();
+		// (0.7.113: a hidden blade out over an empty hand is a light blade too)
+		ItemStack held = HiddenBlade.weapon(player);
 		int light = 0, heavy = 0;
 		for (EquipmentSlot slot : ARMOR) {
 			ItemStack piece = player.getItemBySlot(slot);

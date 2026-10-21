@@ -667,7 +667,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
 
 ## 0.4.31: iron golems carry corpses in their arms
-- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+- For Jaymo's Kingdoms 0.5.68, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
   carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
   golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.
 ## 0.4.32: butcher villagers
@@ -684,7 +684,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   gossip, or, if you're experienced with butchering, from the cuts they hand you (the hand-over says the x). Who's
   experienced is set by `Butchers.setExperienced(Predicate<Player>)` (Jaymo's Kingdoms' first Survival perk, by
   reflection); nobody without it.
-  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
+  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.67's townsfolk call it) returns a line: trash
   talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
   botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones
   you haven't heard of first. Far-off butchers come from a per-dimension ledger (`jaymoskitchen:butcher_ledger`) of
@@ -807,3 +807,96 @@ after `Mill.register()`.
 - Recipes: cask (planks, stick tap, iron hoops), still (a cauldron ringed by four copper ingots). Art by
   `tools/vanilla_style/brewing.py` (textures and block models).
 - Tuning: the constants at the top of `CaskEntity`, `StillEntity`, `Drunk`.
+- **0.5.1, ragdolls:** Andy: "I need these implemented in place of our corpses" (Sable: Ragdolls, Sable: Ragdoll Corpse,
+  Ragdoll Reactions; all three All Rights Reserved and built on NeoForge's Sable engine, so this is our own physics from
+  how they behave, nothing taken from them), and living players too. See `docs/ragdolls.md`.
+  - Engine (`ragdoll/`): Verlet point-mass skeletons (`RagdollRig`: humanoid, four-legged or a rigid box, by the
+    `ragdoll_humanoid` / `_quadruped` / `_box` entity tags or guessed from size), rigid torso, limbs held in cones,
+    pushed out of block collision boxes with friction and a little bounce, sub-stepped so nothing tunnels, floating in
+    water, kicked by walkers and vehicles, asleep once still (`RagdollBody`). `tools/ragdoll_sim` checks it without the
+    game (falls, walls, ledges, stairs, water, giants, kicks).
+  - Corpses: a mob crumples on its first tick of dying (no keel-over); the server simulates the body
+    (`corpse/CorpseRagdoll`), saves it, and sends its points to watchers every tick it moves. Hits, blasts (weaker than
+    12 damage now fling instead of shredding), rummaging, chopping, bites, Lift and tendrils all move it. Carried,
+    slung and carted bodies hang limp as before and become ragdolls again when let go. A dead player's own model is
+    hidden while their corpse is by.
+  - Living players go limp on a crash at speed, a hard landing, a big blast or shove, or being run over by a cart, boat
+    or charging rider; their own client simulates the ragdoll (`client/ragdoll/LimpController`), the server relays it
+    (`LivingRagdolls`); third-person camera, no moving or using, back up once still (1.5 to 7 s). Dying limp leaves
+    that exact body. Jaymo's Powers keeps you from going limp while a power holds you.
+- **0.5.2, Better With Mods batch 1:** `stomach/RawFood`: raw meat and fish (`raw_meats`) give Hunger II for 30 s
+  30% of the time, an Undercooked dish half as often (replaces the old 60% Hunger I and raw chicken's own chance);
+  you can still eat while sick. Llamas and trader llamas drop 1-2 mutton. `EatGroundSeedsGoal` became
+  `farm/EatGroundFoodGoal`: every farm animal eats its own food off the ground (tame pets don't). `farm/LayingHens`:
+  a hen that pecks a seed lays at the next dawn; unfed hens lay at half speed (`ChickenMixin`).
+- **0.5.3, ragdolls less touchy:** Andy (2026-10-21): "using web z and other movement abilities ragdolls the user, it
+  should only be after a large hit on players, or impact with the ground", and no ragdoll on landing for Smoke, anyone
+  whose fall damage was negated, or with slow falling. A sudden change in speed no longer knocks anyone limp (that was
+  every dash, zip and launch). `LivingRagdolls` now judges hits on the server by the damage they really did: a blow
+  or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
+  actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
+  count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
+- **0.5.5, zombies eat villagers:** Andy (2026-10-21): "zombies should also eat villagers, preventing a burial". A
+  zombie (husk, drowned, zombie villager) now stops to feed even mid-chase: `Scavengers`' gnaw goal sits ahead of its
+  attack for zombies, and chasing a villager no longer counts as busy (a player or anything else it's fighting still
+  pulls it off). Zombies go for villagers' bodies first (`villagers` entity tag). A villager eaten by anything isn't
+  buried: with MCA, which lays a villager in a tombstone the tick it dies, `corpse/McaGraves` empties that tombstone
+  again, so there's no grave to mourn at and nothing for the Staff of Life to raise. Corpses keep the dead mob's UUID
+  even when their look is cut down (`CorpseEntity.deadId`).
+- **0.5.6, seasons:** Andy (2026-10-21) asked whether seasons could work in, and picked our own over Ecliptic Seasons
+  (its Fabric port is All Rights Reserved with no 26.3 build). Spec and differences in `docs/Seasons-Plan.md`.
+  `season/Seasons`: an 84-day year (spring, summer, autumn, winter; early, mid and late parts of 7 days) from the
+  overworld clock plus a saved shift (`/season set <season> [early|mid|late]` for ops, `/season` for anyone); each new
+  part is announced, and holding a clock shows the date. Only temperate lands (biome base temperature 0.55-0.9) feel
+  it. `BiomeSeasonMixin` chills them (winter -0.8, so it snows and ponds freeze); `SeasonalWeather` melts open snow
+  and ice there out of winter. `SeasonalCrops`: crops in `tags/block/seasons/<season>` grow only then, others all but
+  winter; out of season they wait; under glass (`greenhouse_roof`) or a solid roof they grow all year. Andy wants winter
+  "very harsh": in winter the frost kills crops left in the open (25% a random tick; berry bushes and cocoa lose their
+  fruit instead), and `WinterCold` drains 0.025 exhaustion a second from anyone out under the sky in a temperate land
+  who isn't by a fire or lava (`setColdProof` lets Kingdoms spare Frostborn).
+  Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.
+
+### 0.5.7: slower healing
+Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
+unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
+Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
+
+- **0.5.8, tanning and hemp (Better With Mods batch 2, Powers 0.15.36, Kingdoms 0.7.128):** `tanning/Tanning`: fatty
+  animals butchered on a block or by a butcher give Animal Fat (`ButcheringBonus`), melted into Tallow on a campfire,
+  in a furnace or in the cooking pot; tallow + string = candle. Stripping a log drops Bark 35% of the time. Leather +
+  bark in a water cauldron (one bark a hide, up to 8; adding a hide restarts the timer) tans in 5 minutes; empty hand
+  takes out Tanned Leather, which crafts into 3 Leather Straps (`c:leather_straps`, `jaymoskitchen:straps`).
+  `farm/Hemp`: seeds 3% from grass, a two-tall crop on farmland (Sowing takes it); fibre -> string (3 for 2) or Hemp
+  Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
+  `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
+  Art: `tools/vanilla_style/tanning.py`.
+- **0.5.9:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
+  never an animal, fish, player or iron body), `hasValuables()`, `lookTag()`, and `setOnRobbed(BiConsumer)`, called
+  when a player takes anything off a body by hand.
+### 0.5.10: smoother carrying and crawling
+Andy, on Powers' animation preview: "do all this, add a better crawling and downed animation too". Carrying a corpse
+eases in and out (`PoseEase`, a small spring of Kitchen's own): the arms go down to take it and lift it, dip under the
+weight on each step, and the body leans back against it. A creature crawling on shot legs does an army crawl like a
+downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
+the body rocking, the head lifting to look ahead. The ragdoll is untouched.
+
+### 0.5.11: mills (Better With Mods batch 3, pack 0.15.45)
+Batch 3 of the BWM port (MIT, our own code).
+- `mill/power`: a wooden Shaft (runs of up to `SHAFT_MAX` 8) and one plain Shaft Corner, no gearboxes. A Windmill
+  (sail cloth: wool or hemp cloth, tag `sail_cloth`) or Waterwheel set on a shaft's end turns it; the machine at the
+  far end works as if a horse walked it (`ShaftDriven.turnFromShaft`). Windmills turn faster in rain and faster again
+  in thunder; waterwheels need flowing water at their lower half. Works the horse mill, horse chopper and press.
+- Village windmills (`VillageWindmills`, data `village_windmills/*.json`): with Epic Structures: Villages, its three
+  windmill towers (plains_big_house_1, plains_meeting_point_4, desert_fisher_1) lose their stone sails at worldgen and
+  get a turning windmill whose shaft runs inside to a working horse mill. Only touches the chunk being generated;
+  rotation only (jigsaw pieces never mirror). Not seen in a generated world yet; a short stub of the old axle log stays
+  past the corner in two towers, and the meeting-point tower's shaft runs level into its mill.
+- `mill/machines`: Potter's Wheel (shaft from below, or right-click by hand for 3 turns, a little hunger) throws a clay
+  block on top into Powers' Unfired Pot over 8 turns (a Flower Pot without Powers; sneak-click switches; table in
+  `potters_wheel/*.json`). Bloody Chopper (`bloody_chopper`, shaft-driven only): saws the log ahead into 6 planks and
+  bark, and hurts anything against the blade (4 every 10 ticks, bleeding, own death message).
+- `farm/Manure`: fed or bred farm animals (`manure_makers`) leave manure now and then near a player, at most once a
+  day each; it composts and tans like bark (tag `tanning_agents`). Fertilizer (bone meal + manure, 2) makes Fertile
+  Farmland: crops grow faster, 1 in 150 growth steps turns it back. Sowing now plants on any `minecraft:supports_crops`
+  block.
+- Art: `tools/vanilla_style/power.py`, `power_machines.py`, `farm.py`. javac clean; nothing played yet.

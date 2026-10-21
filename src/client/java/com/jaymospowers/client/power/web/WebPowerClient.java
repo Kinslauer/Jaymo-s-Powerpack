@@ -49,8 +49,6 @@ public final class WebPowerClient implements PowerClient {
 		WebCutClient.register();
 		// a Verdant or Frost-born with the suit: the plain left click is the weapon arm's, sneak + left hold the race's
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.powerWants(com.jaymospowers.power.web.WebMorph::usable);
-		// Combat Roll's charges, for the Spider-Sense counters
-		WebRollsClient.init();
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {

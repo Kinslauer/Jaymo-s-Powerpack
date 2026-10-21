@@ -98,6 +98,9 @@ public final class Tinkering {
 	/** (0.8.111) Silver: its ores (stone and deepslate), raw ore, ingot (in {@link #ALLOY_INGOTS}), nugget and blocks. */
 	public static Block SILVER_ORE, DEEPSLATE_SILVER_ORE, RAW_SILVER_BLOCK, SILVER_BLOCK;
 	public static Item RAW_SILVER, SILVER_INGOT, SILVER_NUGGET;
+	/** (Smithing) Steel: its ingot (in {@link #ALLOY_INGOTS}), nugget and block, and the crucible blend a kiln fires into it. */
+	public static Block STEEL_BLOCK;
+	public static Item STEEL_INGOT, STEEL_NUGGET, STEEL_BLEND;
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
 	/** Whether tooltips spell out what each trait does (the client makes this "Shift is held"). */
@@ -149,6 +152,9 @@ public final class Tinkering {
 			new MenuType<>(ToolStationMenu::new, FeatureFlags.VANILLA_SET));
 
 		registerSmeltery();
+		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
+		com.jaymospowers.tinkering.kiln.Kiln.register();
+		com.jaymospowers.tinkering.forge.Forge.register();
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("tinkering"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
@@ -169,6 +175,9 @@ public final class Tinkering {
 			output.accept(RAW_SILVER);
 			output.accept(SILVER_NUGGET);
 			ALLOY_INGOTS.values().forEach(output::accept);
+			output.accept(STEEL_NUGGET);
+			output.accept(STEEL_BLOCK);
+			output.accept(STEEL_BLEND);
 			CASTS.forEach((shape, cast) -> {
 				if (shape != CastItem.Shape.WEAPON) {
 					output.accept(cast);
@@ -223,11 +232,12 @@ public final class Tinkering {
 		SEARED_BRICK = item("seared_brick", Item::new, Function.identity());
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
-		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL)) {
+		for (Molten alloy : List.of(Molten.ROSE_GOLD, Molten.AMETHYST_BRONZE, Molten.PIG_IRON, Molten.SLIMESTEEL, Molten.STEEL)) {
 			Item ingot = item(alloy.id + "_ingot", Item::new, Function.identity());
 			ALLOY_INGOTS.put(alloy, ingot);
 			TinkerMaterial.own(alloy.material, 1, ingot);
 		}
+		registerSteel();
 		for (CastItem.Shape shape : CastItem.Shape.values()) {
 			CASTS.put(shape, item(shape.id + "_cast", p -> new CastItem(p, shape), Function.identity()));
 		}
@@ -241,6 +251,18 @@ public final class Tinkering {
 			new BlockEntityType<>(CastingEntity::new, Set.of(CASTING_TABLE, CASTING_BASIN)));
 		SMELTERY_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("smeltery"),
 			new ExtendedMenuType<>(SmelteryMenu::new, BlockPos.STREAM_CODEC));
+	}
+
+	/** (Smithing) Steel's nugget, block and crucible blend (two iron ingots and a coal, fired in a hot kiln). */
+	private static void registerSteel() {
+		STEEL_INGOT = ALLOY_INGOTS.get(Molten.STEEL);
+		STEEL_BLOCK = block("steel_block", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
+			.instrument(NoteBlockInstrument.IRON_XYLOPHONE).strength(6.0F, 7.0F).sound(SoundType.METAL).requiresCorrectToolForDrops());
+		STEEL_NUGGET = item("steel_nugget", Item::new, Function.identity());
+		STEEL_BLEND = item("steel_blend", Item::new, p -> p.component(DataComponents.LORE, new ItemLore(List.of(
+			Component.translatable("tooltip.jaymospowers.tinkering.steel_blend").withStyle(ChatFormatting.GRAY)))));
+		TinkerMaterial.own(TinkerMaterial.STEEL, 9, STEEL_BLOCK.asItem());
+		Melting.alloyForms(Molten.STEEL, STEEL_NUGGET, STEEL_BLOCK.asItem());
 	}
 
 	/** (0.8.111) Silver ore in the Overworld, smelted like iron or melted (doubled) in the smeltery; a metal for parts. */

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:steel_block"
+  ],
+  "result": {
+    "id": "jaymospowers:steel_ingot",
+    "count": 9
+  }
+}

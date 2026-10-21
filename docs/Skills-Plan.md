@@ -121,6 +121,35 @@ carrying or carried, crawling, meditating, on a ledge, or in a web slinger's own
 - Poses: the web's vault, cling (hand over hand, or Not Enough Animations' ladder climb), wall kick and wall run poses;
   a new arms-out balance (`BalancePose`) and a bar hang, swinging from the hands (`BarHangPose`).
 
+## Shadows: mob senses (Stealth's third page, Kingdoms 0.7.111)
+The ideas of Dynamic Stealth (MIT, 1.12.2), written afresh for 26.3 in `Senses` (+ `LivingEntityVisibilityMixin`,
+client `SensesClient`). Numbers are `static final` constants at the top of `Senses`. The tree screen's page button now
+cycles: Stealth -> Freerunning -> Shadows -> back (tiers 0-3, 4-7, 8-11).
+- **Sight.** How far a hostile or neutral mob notices you = follow range x vanilla's visibility (invisibility, mob
+  heads) x Powers' Darktide veil (both already in `getVisibilityPercent`) x `Senses.factor`: light at your eyes 0.25
+  (dark) to 1.0; sneaking 0.6 (also Soft Step and heritage); standing still 0.8; outside its 120 degree view cone 0.3
+  (not within 2 blocks); hood 0.75 (`Identities.HOOD_SIGHT`); glowing or burning 1.5; never below 0.05. A mob already
+  after you with you in sight sees you at full range. Creative/spectator players and the kingdoms' folk are untouched;
+  a boss's sight is never cut below 0.4 (`BOSS_SIGHT_MIN`) and its view cone is 240 degrees (`BOSS_VIEW_COS`).
+- **Losing track.** 100 ticks without line of sight and the mob drops you (neutral ones stop being angry), walks to
+  where it last saw you (up to 10 s), looks about for 5 s ("searching"), then gives up. A flagless goal counts; a
+  MOVE+LOOK goal walks. State is the non-persistent attachment `Senses.TRACK`. Bosses (wither, dragon, warden, elder
+  guardian, `c:bosses`) never lose track; `Folk` are exempt.
+- **Gauge.** An eye above the crosshair (`textures/gui/awareness_eye.png`, drawn by `tools/gen_items.py`): fills from
+  the bottom as the nearest noticing monster closes from its full follow range to where it spots you, opens red when
+  one targets you, half-closes (amber) while one searches. A 1-byte S2C payload (`Senses.Gauge`) every 5 ticks, only on
+  change.
+- **Unaware blows.** A melee hit on a hostile or neutral mob that isn't after you and is behind its view cone (or is
+  searching for you) is a sneak attack (0.7.114: bosses too, only while after no one, capped at 15% of their max health
+  (`BOSS_BLOW_SHARE`); tame pets too, except by their own owner), x2 (Sneak Attack: x2.5, x3). Never on players. The hidden blade's full-strength
+  stab on an unaware one is an assassination, x10 like the crippled stab (not stacking), with Assassinate; without it,
+  only the sneak attack. Both hook in `LivingEntityHurtMixin` after `HiddenBlade.dealt`.
+- XP: sneak attack +1 (at most every 20 s), assassination +3.
+- Perks (tier, column, level, ranks x cost): Shadowed (8, 0, lvl 5, 3x1: -10% sight per rank, in proportion to how dark
+  it is where you stand); Quiet Step (8, 2, lvl 5, 2x1: sneaking 0.5, then 0.4); Slip the Net (9, 0, lvl 10, 1x1, needs
+  Shadowed: lose track in half the time); Sneak Attack (9, 2, lvl 10, 2x1, needs Quiet Step); Assassinate (10, 1, lvl 15,
+  1x2, needs Slip the Net and Sneak Attack). 10 points; Stealth tops out at 25 so with the other pages not everything fits.
+
 ## Survival (built, Kingdoms 0.5.52)
 XP: a ripe crop harvested (+1), every 2 hunger points eaten back (+1), a night lived through (+15), taking damage and
 living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per level.
@@ -170,6 +199,27 @@ first page's 15 you can't have everything: pick a build.
 - Area blows only touch foes (monsters, and anything targeting you), never bystanders or other players, so a fight in
   town doesn't become a crime.
 - The tree screen pages: Strength's "Combat Arts >" button (bottom right) shows tiers 4-7.
+
+## Medicine: Survival's second page (0.7.136 / Powers 0.15.49)
+Andy (2026-10-21): "a medicine tree in the same vein as shadow and free running but for survival, that way every skill
+has at least one sub path". Survival now goes to level 25 (practice still counts the first 15). The treating itself is
+Jaymo's Powers' Wounds (`core/wounds/MedicineSkill` reads the ranks by reflection); every treatment finished and every
+downed one brought round tags the healer `jaymospowers_treated`, which Kingdoms turns into 2 Survival XP (at most every 10 s).
+- Tier 4 (level 3): **Steady Hands** (3 ranks: every treatment and revive 15% quicker per rank), **Field Dresser**
+  (2 ranks: bandages and rags heal 35% more per rank).
+- Tier 5 (level 8): **Bonesetter** (a splint mends 3 health into the limb at once; stitches and searings hurt half),
+  **Plague Doctor** (2 pts: Nightfall's Atrophy caught for half as long, never level II, half its pricks and weakness;
+  Andy: "you can also use leeches for benefits, when noone else can": a Plague Doctor's leeches draw the plague and poison out of whoever they're on).
+- Tier 6 (level 12): **Lifesaver** (2 pts: whoever you bring round gets up on half health with bleeding stopped; your
+  smelling salts always wake a passed-out player).
+- Tier 7 (level 15): **Second Wind** (2 pts), Andy: "a self revive through this tree, called second wind that allows
+  them to eat while downed to rise, once a day". Downed and awake, hold use with food: 3 s of eating, then up (Powers
+  `SelfRevive`). The first page's old Second Wind (heal when low) is shown as **Rally** now; its saved key is unchanged.
+
+## Stealth from sneaking past (0.7.136)
+Andy (2026-10-21): "sneaking near enemies undetected should passively grow your stealth skill". Sneaking and moving
+with a monster in sight within 12 blocks that isn't after you or hunting you: 1 Stealth XP per 10 s of it (twice as
+fast within 6 blocks). Being spotted or searched for starts the count over (`Senses.sneakPast`).
 
 ## Respec (Andy's answer)
 A court wizard unmakes your perks for 5 emeralds + 1 per rank, or drink a bottle o' enchanting (sneak and use it).

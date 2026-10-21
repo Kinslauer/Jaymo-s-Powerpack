@@ -9,6 +9,10 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   `lang/parts/<name>.json` and its mixin configs. Core shared code is in `core/`, `api/`.
   - Screen shake: every power goes through `core/Shakes` (server: `send`, `around`, `heavy`, each with the spot it
     came from) and `client/ScreenShake` (directional kick + rattle, stacking, explosions shake too). Don't add another.
+  - Held sounds: every power's sustained sound goes through `core/Soundscape` (layers of variants with jittered
+    volume/pitch, `due` for uneven timing instead of `tickCount % N`, echoes when enclosed) and, on the player's own
+    side, `client/sound/PowerLoop` (a looping bed that follows speed/charge) plus `client/sound/Accents`. Don't add
+    a bare `% N == 0` sound loop.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
   - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log.
@@ -29,6 +33,7 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   write to the CurseForge profile and the friends' server folder, `../Serverfiles`, which isn't in the repo).
 
 ## 26.3 API facts learned the hard way
+`ModelPart` has no `copyFrom`: use `part.loadPose(other.storePose())`; `EntityTypes.PLAYER` (not `EntityType.PLAYER`); Kitchen's jar builds to `E:\jaymos-kitchen-build\libs\`;
 `Entity.syncVelocity = true` (no hurtMarked); `ServerPlayer.drop(stack, false, Prediction.SERVER_ONLY)`;
 `new ItemStack(item).getHoverName()`; `Vec3.STREAM_CODEC`; `EntityType.builtInRegistryHolder().is(tag)`;
 `PushReaction.IMMOVEABLE`; `collector.submitMovingBlock(poseStack, MovingBlockRenderState, outlineColor)`;
@@ -43,7 +48,8 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - **Attachments** must be class-loaded at init on both sides or dedicated servers break ("Client does not support the
   syncable attachments"): every class holding an `AttachmentType` is listed in `JaymosPowers.registerAttachments()`.
 - Poses go through `WebModelFeatureRendererMixin.prepareModel` (after `setupAnim`) and render-state extraction via
-  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`).
+  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`). (0.15.42) Ease
+  a pose in and out with `client/PoseBlend` (a `Channel` per pose, a `Frame` of offsets from vanilla, `Track.apply`).
 - Never write Java with PowerShell `Set-Content` (it adds a BOM). Edits were done with small Python scripts
   asserting each replaced snippet occurs exactly once.
 

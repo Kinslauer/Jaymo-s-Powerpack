@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": "jaymoskitchen:hemp_fibre"
+  },
+  "pattern": [
+    "F",
+    "F",
+    "F"
+  ],
+  "result": {
+    "id": "minecraft:string",
+    "count": 2
+  }
+}

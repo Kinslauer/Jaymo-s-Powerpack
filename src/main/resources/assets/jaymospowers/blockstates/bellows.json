@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,pumped=false": {
+      "model": "jaymospowers:block/tinkering/bellows",
+      "y": 0
+    },
+    "facing=north,pumped=true": {
+      "model": "jaymospowers:block/tinkering/bellows_pumped",
+      "y": 0
+    },
+    "facing=east,pumped=false": {
+      "model": "jaymospowers:block/tinkering/bellows",
+      "y": 90
+    },
+    "facing=east,pumped=true": {
+      "model": "jaymospowers:block/tinkering/bellows_pumped",
+      "y": 90
+    },
+    "facing=south,pumped=false": {
+      "model": "jaymospowers:block/tinkering/bellows",
+      "y": 180
+    },
+    "facing=south,pumped=true": {
+      "model": "jaymospowers:block/tinkering/bellows_pumped",
+      "y": 180
+    },
+    "facing=west,pumped=false": {
+      "model": "jaymospowers:block/tinkering/bellows",
+      "y": 270
+    },
+    "facing=west,pumped=true": {
+      "model": "jaymospowers:block/tinkering/bellows_pumped",
+      "y": 270
+    }
+  }
+}

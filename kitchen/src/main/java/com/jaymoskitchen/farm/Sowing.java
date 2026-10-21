@@ -12,6 +12,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -23,10 +24,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Sowing by hand: right-click with seeds to scatter a few in a fan in front of you. Those that land on open farmland
  * take root; the rest lie on the ground, where chickens (and anything else that eats seeds) will go and peck them up
- * (see {@link EatGroundSeedsGoal}). Sneak + right-click still plants one seed exactly where you're looking.
+ * (see {@link EatGroundFoodGoal}, which every farm animal has for its own food). Sneak + right-click still plants one seed exactly where you're looking.
  */
 public final class Sowing {
 	/** Seeds that can be scattered (data/jaymoskitchen/tags/item/sowable_seeds.json). */
@@ -50,10 +49,10 @@ public final class Sowing {
 	public static void register() {
 		UseItemCallback.EVENT.register((player, level, hand) -> sow(player, level, hand));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> sow(player, level, hand));
-		// anything that eats seeds goes for them on the ground
+		// every farm animal goes for its food on the ground (seeds for chickens)
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Animal animal && animal.isFood(new ItemStack(Items.WHEAT_SEEDS))) {
-				((MobAccessor) animal).jaymoskitchen$goals().addGoal(3, new EatGroundSeedsGoal(animal));
+			if (entity instanceof Animal animal) {
+				((MobAccessor) animal).jaymoskitchen$goals().addGoal(3, new EatGroundFoodGoal(animal));
 			}
 		});
 	}
@@ -119,7 +118,7 @@ public final class Sowing {
 
 	/** Plants a seed on open farmland, as a hand would. */
 	private static boolean plant(ServerLevel level, BlockPos ground, ItemStack seed, Player player) {
-		if (!(seed.getItem() instanceof BlockItem blockItem) || !level.getBlockState(ground).is(Blocks.FARMLAND)) {
+		if (!(seed.getItem() instanceof BlockItem blockItem) || !level.getBlockState(ground).is(BlockTags.SUPPORTS_CROPS)) {
 			return false;
 		}
 		BlockPos above = ground.above();

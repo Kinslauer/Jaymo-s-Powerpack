@@ -2,8 +2,10 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Carry;
+import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,15 +68,18 @@ import org.jspecify.annotations.Nullable;
  * {@link #DOWNED_TAG}) for what only it knows: villagers tending the downed, disarming a downed guard, and its folk
  * skipping the downed in their routines.
  * <p>
- * <b>Who goes down</b> ({@link #downable}): players (not in creative or spectator), villagers, anything carrying
- * {@link #DOWNABLE_TAG} (Kingdoms marks its folk), and tamed animals. Monsters, wild animals and bosses die; so does
+ * <b>Who goes down</b> ({@link #downable}): players (not in creative or spectator), villagers, (0.15.41) every humanoid
+ * (monsters too: zombies, skeletons, illagers), anything carrying {@link #DOWNABLE_TAG} (Kingdoms marks its folk), and
+ * tamed animals. Other monsters, wild animals and bosses die; so does
  * anything that loses its head, and anything killed by what ignores invulnerability (the void, {@code /kill}).
  * <p>
- * <b>Down:</b> at {@link #DOWNED_HEALTH}, head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
+ * <b>Down:</b> at {@link #DOWNED_HEALTH} (a player at {@link #DOWNED_PLAYER_HEALTH}), head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
  * ({@code DownedMobMixin}); some ({@link #CRAWLER_CHANCE}) drag themselves away from whoever felled them. Players are held
- * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. Fire, falls
- * and mobs still hurt, out of what's left, and can kill (that death counts). A player's blow is a wound instead
- * ({@link #MAX_WOUNDS}th kills); once a player has hit one, a mob or tamed animal won't get up by itself
+ * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. (0.15.31) Nor
+ * powers: whatever was running ends as they fall ({@link Power#onDowned}), their keys are dead (a silencer, and the client
+ * lets go of every key but moving and sneak: {@code DownedKeysMixin}), and nothing heals them ({@code DownedHealMixin}). Fire, falls
+ * and mobs still hurt, out of what's left, and can kill (that death counts); so does a player's blow on a downed player.
+ * A player's blow on a downed mob is a wound instead ({@link #MAX_WOUNDS}th kills); once a player has hit one, a mob or tamed animal won't get up by itself
  * ({@link #RECOVER_TICKS}) and bleeds out {@link #BLEED_OUT_TICKS} after the last hit.
  * <p>
  * <b>Players don't bleed out into a respawn</b> (Andy: "Lie until roused or give up"): after {@link #BLEED_OUT_TICKS}
@@ -89,12 +94,17 @@ import org.jspecify.annotations.Nullable;
 public final class Downed {
 	/** A downed one's health: what mobs, fire and falls have left to take. */
 	public static final float DOWNED_HEALTH = 6.0F;
+	/**
+	 * (0.15.33) A downed player's health instead (10 hearts; Andy: "dealing that much damage would kill them, not strictly
+	 * 10 hits"): every blow takes it as damage, a player's too, and running it out is their death.
+	 */
+	public static final float DOWNED_PLAYER_HEALTH = 20.0F;
 	/** How long a downed mob or tamed animal no player has hit lies there before getting back up (ticks), and the health it, or anyone brought round, gets up with (share of its most). */
 	public static final int RECOVER_TICKS = 1200;
 	public static final float RECOVER_HEALTH = 0.3F;
 	/** How long after a player's last hit a downed mob bleeds out (ticks), and how long a downed player crawls before passing out. */
 	public static final int BLEED_OUT_TICKS = 2400;
-	/** The player's hit that kills a downed one outright. */
+	/** The player's hit that kills a downed mob outright (a downed player has {@link #DOWNED_PLAYER_HEALTH} instead). */
 	public static final int MAX_WOUNDS = 10;
 	/** The share of downed mobs who drag themselves along; the rest lie still. */
 	public static final float CRAWLER_CHANCE = 0.5F;
@@ -213,11 +223,12 @@ public final class Downed {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)) {
-				// (mobs, fire, falls: real harm, out of what's left)
+			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
+				|| entity instanceof Player) {
+				// (mobs, fire, falls: real harm, out of what's left; (0.15.33) on a downed player, a player's blow too)
 				return true;
 			}
-			// a player's blow (or arrow): a wound, the tenth kills
+			// a player's blow (or arrow) on a downed mob: a wound, the tenth kills
 			if (entity.level() instanceof ServerLevel level) {
 				wound(level, entity, source);
 			}
@@ -233,9 +244,25 @@ public final class Downed {
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseItemCallback.EVENT.register((player, level, hand) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			if (!isDowned(player)) {
+				return InteractionResult.PASS;
+			}
+			// (0.15.49) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
+			InteractionResult eat = SelfRevive.use(player, hand);
+			return eat != null ? eat : InteractionResult.FAIL;
+		});
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (!isDowned(player)) {
+				return InteractionResult.PASS;
+			}
+			// (0.15.49) but Second Wind's eating to rise ({@link SelfRevive})
+			InteractionResult eat = SelfRevive.use(player, hand);
+			return eat != null ? eat : InteractionResult.FAIL;
+		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isDowned(player));
+		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
+		Powers.addSilencer(Downed::isDowned);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			players(server);
 			revives(server);
@@ -278,17 +305,20 @@ public final class Downed {
 	}
 
 	/**
-	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), a villager,
-	 * one of Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
+	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), (0.15.41) any
+	 * humanoid ({@link BodyPlan#HUMANOID}: villagers, folk, illagers, witches, piglins, zombies, skeletons...), one of
+	 * Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
 	 */
 	public static boolean downable(LivingEntity entity) {
 		if (entity instanceof Player player) {
 			return !player.isCreative() && !player.isSpectator();
 		}
-		if (!(entity instanceof Mob) || BodyPlan.of(entity) == null) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (!(entity instanceof Mob) || plan == null) {
 			return false;
 		}
-		if (entity instanceof Villager || entity.entityTags().contains(DOWNABLE_TAG)) {
+		// (0.15.41) Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate"
+		if (plan == BodyPlan.HUMANOID || entity instanceof Villager || entity.entityTags().contains(DOWNABLE_TAG)) {
 			return true;
 		}
 		return entity instanceof TamableAnimal tame && tame.isTame() || entity instanceof AbstractHorse horse && horse.isTamed();
@@ -310,7 +340,7 @@ public final class Downed {
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
 		boolean crawler = !(entity instanceof Player) && level.getRandom().nextFloat() < CRAWLER_CHANCE;
 		if (!keepHealth) {
-			entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
+			entity.setHealth(Math.min(entity instanceof Player ? DOWNED_PLAYER_HEALTH : DOWNED_HEALTH, entity.getMaxHealth()));
 		}
 		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
 		entity.removeAttached(WOUNDS);
@@ -340,6 +370,11 @@ public final class Downed {
 			// whatever they carried falls from their arms
 			Carry.slip(player);
 			player.setSprinting(false);
+			// (0.15.31) whatever power was running ends: a flight, a hold, a grab
+			Power power = Powers.of(player);
+			if (power != null) {
+				power.onDowned(player);
+			}
 			GIVING_UP.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.down").withStyle(ChatFormatting.RED));
 		}
@@ -730,9 +765,11 @@ public final class Downed {
 					0.8F + level.getRandom().nextFloat() * 0.4F);
 				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 			}
-			if (r.ticks < REVIVE_TICKS) {
+			// (0.15.49) Steady Hands: quicker ({@link MedicineSkill})
+			int need = MedicineSkill.ticks(player, REVIVE_TICKS);
+			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {
-					int filled = Math.round(REVIVE_BAR * r.ticks / (float) REVIVE_TICKS);
+					int filled = Math.round(REVIVE_BAR * r.ticks / (float) need);
 					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
 				}
@@ -750,6 +787,8 @@ public final class Downed {
 			stack.consume(1, player);
 			player.getInventory().setChanged();
 			getUp(level, body);
+			MedicineSkill.broughtRound(player, body);
+			MedicineSkill.treated(player);
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));

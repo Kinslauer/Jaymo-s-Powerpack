@@ -16,9 +16,18 @@ import net.minecraft.world.entity.player.Player;
 /**
  * How a player on a ledge looks, for everyone: hanging, the body square to the wall with both arms up on the edge and
  * the legs dangling, swaying a little from the hands; climbing, the arms pull down and press on the top while the body
- * leans in over it, the right knee comes up onto the edge, then the left, and they stand.
+ * leans in over it, the right knee comes up onto the edge, then the left, and they stand. (0.15.42) Catching the edge
+ * eases in ({@link PoseBlend}): the arms come up on springs, the body swings in under the hands from the catch and
+ * settles into the hang, the legs swinging after it; letting go or standing eases back out.
  */
 public final class LedgePose {
+	/** The catch: the swing in under the hands (degrees), how fast it swings (radians a second) and dies away (per second). */
+	static final float CATCH_SWING = 9.0F, CATCH_SWING_RATE = 7.0F, CATCH_SWING_DECAY = 2.6F;
+	/** The legs swinging after the body on the catch (radians), and the arms taking the jolt (radians, bent a little more). */
+	static final float CATCH_LEGS = 0.35F, CATCH_ARMS = 0.18F;
+	/** How quick the hang comes on (the weight's spring, times its usual). */
+	static final float ENTRY_SPEED = 1.4F;
+	private static final PoseBlend.Channel BLEND = PoseBlend.channel("ledge");
 	/** Hanging: the sway from the hands (degrees, and radians a tick) and the legs' dangle (radians). */
 	static final float SWAY_DEGREES = 3.0F, SWAY_SPEED = 0.07F, DANGLE = 0.14F;
 	/** Climbing: how far the body leans in over the edge at the most (degrees). */
@@ -83,10 +92,15 @@ public final class LedgePose {
 		if (ledge == null) {
 			return;
 		}
+		PoseBlend.Track track = BLEND.peek(state.id);
 		if (ledge.climb() < 0.0F) {
+			float amount = track == null ? 0.0F : track.amount();
+			// the swing in from the catch, dying away
+			float age = track == null ? 10.0F : track.age();
+			float swing = catchSwing(age);
 			poseStack.translate(0.0F, HANDS, 0.0F);
-			poseStack.rotateDegrees(Axis.ZP, Mth.sin(ledge.time() * SWAY_SPEED) * SWAY_DEGREES);
-			poseStack.rotateDegrees(Axis.XP, Mth.sin(ledge.time() * SWAY_SPEED * 0.7F + 1.3F) * SWAY_DEGREES * 0.4F);
+			poseStack.rotateDegrees(Axis.ZP, Mth.sin(ledge.time() * SWAY_SPEED) * SWAY_DEGREES * amount);
+			poseStack.rotateDegrees(Axis.XP, (Mth.sin(ledge.time() * SWAY_SPEED * 0.7F + 1.3F) * SWAY_DEGREES * 0.4F + swing * CATCH_SWING) * amount);
 			poseStack.translate(0.0F, -HANDS, 0.0F);
 			return;
 		}
@@ -97,25 +111,45 @@ public final class LedgePose {
 		poseStack.translate(0.0F, -0.9F, 0.0F);
 	}
 
-	/** Right after the model animates: the arms on the edge, the legs dangling or climbing. */
+	/** The swing in under the hands after the catch, {@code age} seconds on (about -1 to 1, dying away). */
+	private static float catchSwing(float age) {
+		return (float)Math.exp(-age * CATCH_SWING_DECAY) * Mth.sin(age * CATCH_SWING_RATE);
+	}
+
+	/** Right after the model animates: the arms on the edge, the legs dangling or climbing, eased in and out. */
 	public static void applyModel(Model<?> model, Object renderState) {
 		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h)) {
 			return;
 		}
 		State ledge = state.getData(KEY);
-		if (ledge == null) {
+		PoseBlend.Track track = BLEND.track(state.id, ledge != null, 0.0F, ENTRY_SPEED);
+		if (track == null) {
 			return;
 		}
+		if (ledge == null) {
+			track.apply(h, null);
+			return;
+		}
+		PoseBlend.Frame frame = new PoseBlend.Frame(h);
+		pose(h, ledge, track.age());
+		frame.take(h);
+		track.apply(h, frame);
+	}
+
+	private static void pose(HumanoidModel<?> h, State ledge, float age) {
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		float p = ledge.climb();
 		if (p < 0.0F) {
 			float t = ledge.time();
 			float give = Mth.sin(t * SWAY_SPEED * 1.3F) * 0.04F;
-			set(h.rightArm, ARM_UP + give, 0.0F, ARM_SPREAD);
-			set(h.leftArm, ARM_UP - give, 0.0F, -ARM_SPREAD);
-			set(h.rightLeg, DANGLE * Mth.sin(t * 0.09F) + 0.05F, 0.0F, 0.05F);
-			set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F, 0.0F, -0.05F);
+			// the catch: the arms take the jolt, the legs swing on after the body (a beat behind it)
+			float jolt = (float)Math.exp(-age * CATCH_SWING_DECAY * 1.5F) * CATCH_ARMS;
+			float legs = catchSwing(Math.max(0.0F, age - 0.12F)) * CATCH_LEGS;
+			set(h.rightArm, ARM_UP + give + jolt, 0.0F, ARM_SPREAD);
+			set(h.leftArm, ARM_UP - give + jolt, 0.0F, -ARM_SPREAD);
+			set(h.rightLeg, DANGLE * Mth.sin(t * 0.09F) + 0.05F - legs, 0.0F, 0.05F);
+			set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F - legs * 0.8F, 0.0F, -0.05F);
 			return;
 		}
 		// the arms: pull down from overhead, press on the top, then come down to the sides as you stand

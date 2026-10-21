@@ -1,0 +1,13 @@
+The galleon, the cargo ship, the trader ship, the war trireme and the drakkar that Jaymo's Kingdoms' pirates, navies
+and merchants sail are the ships of Jaki Versatile Structures: Sails & Sea
+(https://github.com/jackieLama/jvssailandsea, https://www.curseforge.com/minecraft/mc-mods/jaki-versatile-structures-sails-sea),
+by Jackiefr (structures) and TheGoldenWorld, licensed under the GNU General Public License v3 (LICENSE, beside this
+file).
+
+Taken from it, under that licence, unchanged: the structure files illager_galleon.nbt, cargo_ship.nbt,
+villager_trader_ship.nbt, roman_war_trireme.nbt and drakkar.nbt (data/jaymoskingdoms/structure/jaki/).
+
+When a ship is launched (com.jaymoskingdoms.sailing.JakiShips) the game reads them and changes its copy: their crews,
+water and decorative block data are left out, a helm is added, the galleon's blackstone guns become ship's cannons,
+the trireme and the drakkar are given guns along their rails, one colour of their sails takes the crew's colours, and
+their barrels' loot comes from vanilla shipwreck and outpost tables.

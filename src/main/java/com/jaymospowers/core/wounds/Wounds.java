@@ -115,6 +115,7 @@ public final class Wounds {
 		Bleeding.register();
 		MedicineItems.register();
 		Treatment.register();
+		SelfRevive.register();
 		Pain.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);

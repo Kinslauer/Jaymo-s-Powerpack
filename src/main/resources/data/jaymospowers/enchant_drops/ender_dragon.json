@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:ender_dragon"
+  ],
+  "enchantment": "minecraft:sweeping_edge",
+  "chance": 1.0
+}

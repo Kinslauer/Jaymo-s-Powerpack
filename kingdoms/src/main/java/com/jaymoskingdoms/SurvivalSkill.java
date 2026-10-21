@@ -12,7 +12,18 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +45,7 @@ import net.minecraft.world.level.block.NetherWartBlock;
  * (0.5.52) The Survival pillar of the skill tree ({@link Skills}). It grows as you live off the land: harvesting ripe
  * crops, eating, living through the night, and taking a beating and living. Practice makes hunger drain slower.
  *
- * <p>Perks: Forager (an extra harvest), Second Wind (healing when you're low), Weathered (fire and frost bite less),
+ * <p>Perks: Forager (an extra harvest), Second Wind (shown as Rally since 0.7.136; healing when you're low), Weathered (fire and frost bite less),
  * Iron Stomach (food's Hunger never takes hold), Hardy Landing (falls hurt less, never not at all; it only scales the
  * fall damage vanilla deals, so a power that cancels fall damage still cancels it) and Last Stand (once a day, a
  * killing blow leaves you on half a heart).
@@ -49,6 +60,13 @@ public final class SurvivalSkill {
 	static final float PRACTICE_PER_LEVEL = 0.02F;
 	/** Forager: per rank, the chance a ripe crop gives an extra harvest. */
 	static final float FORAGER_PER_RANK = 0.08F;
+	/**
+	 * (0.7.103) Forager, after Better With Mods' seeds from tilling (MIT; its idea, our own code): per rank, the chance
+	 * hoeing grass or dirt turns up a seed ({@link #TILLED_SEEDS}); and the Survival experience a find gives.
+	 */
+	static final double TILL_SEED_CHANCE_PER_RANK = 0.04;
+	static final int XP_TILL_SEED = 1;
+	static final TagKey<Item> TILLED_SEEDS = TagKey.create(Registries.ITEM, JaymosKingdoms.id("tilled_seeds"));
 	/** Second Wind: under this share of your health, Regeneration this long per rank (ticks), at most this often (ticks). */
 	static final float SECOND_WIND_HEALTH = 0.3F;
 	static final int SECOND_WIND_TICKS = 50;
@@ -75,6 +93,31 @@ public final class SurvivalSkill {
 	private SurvivalSkill() {
 	}
 
+	/**
+	 * A hoe about to till grass or dirt (the game's own rule: open air above, not from underneath): a Forager may turn up
+	 * a seed. Read before the hoe acts, so the ground is still grass or dirt.
+	 */
+	private static void tilled(ServerPlayer player, ServerLevel level, ItemStack tool, BlockPos pos, Direction face) {
+		if (!tool.is(ItemTags.HOES) || face == Direction.DOWN || !level.getBlockState(pos.above()).isAir()) {
+			return;
+		}
+		BlockState ground = level.getBlockState(pos);
+		if (!ground.is(Blocks.GRASS_BLOCK) && !ground.is(Blocks.DIRT)) {
+			return;
+		}
+		int forager = Skills.rank(player, Skills.Perk.FORAGER);
+		if (forager <= 0 || level.getRandom().nextDouble() >= TILL_SEED_CHANCE_PER_RANK * forager) {
+			return;
+		}
+		List<Item> seeds = new java.util.ArrayList<>();
+		BuiltInRegistries.ITEM.getTagOrEmpty(TILLED_SEEDS).forEach(h -> seeds.add(h.value()));
+		if (seeds.isEmpty()) {
+			return;
+		}
+		Block.popResourceFromFace(level, pos, Direction.UP, new ItemStack(seeds.get(level.getRandom().nextInt(seeds.size()))));
+		Skills.grant(player, Skills.Pillar.SURVIVAL, XP_TILL_SEED);
+	}
+
 	static void register() {
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
 			if (!(player instanceof ServerPlayer sp) || !(world instanceof ServerLevel level) || sp.isCreative() || !ripe(state)) {
@@ -88,6 +131,12 @@ public final class SurvivalSkill {
 					Block.popResource(level, pos, drops.get(level.getRandom().nextInt(drops.size())).copy());
 				}
 			}
+		});
+		UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
+			if (player instanceof ServerPlayer sp && world instanceof ServerLevel level && !sp.isSpectator()) {
+				tilled(sp, level, sp.getItemInHand(hand), hit.getBlockPos(), hit.getDirection());
+			}
+			return InteractionResult.PASS;
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!(entity instanceof ServerPlayer sp) || !sp.isAlive() || sp.isCreative() || damageTaken <= 0.0F) {
@@ -195,7 +244,8 @@ public final class SurvivalSkill {
 
 	/** How much slower {@code player}'s hunger drains, as a factor on its exhaustion (practice). */
 	static float exhaustion(ServerPlayer player) {
-		return 1.0F - PRACTICE_PER_LEVEL * Skills.of(player).level(Skills.Pillar.SURVIVAL);
+		// (0.7.136) practice counts the first page's 15 levels only: the levels past it pay for Medicine
+		return 1.0F - PRACTICE_PER_LEVEL * Math.min(Skills.MAX_LEVEL, Skills.of(player).level(Skills.Pillar.SURVIVAL));
 	}
 
 	/** Weathered's burning time and Hardy Landing's fall damage, as attribute modifiers. */

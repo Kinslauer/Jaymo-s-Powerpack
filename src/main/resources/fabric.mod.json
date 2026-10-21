@@ -12,7 +12,8 @@
 		"client": ["com.jaymospowers.client.JaymosPowersClient"],
 		"server": ["com.jaymospowers.JaymosPowersServer"],
 		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset"],
-		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei", "com.jaymospowers.client.jei.MedicineJei"]
+		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei", "com.jaymospowers.client.jei.MedicineJei"],
+		"jade": ["com.jaymospowers.client.compat.JadeEntitiesOnly"]
 	},
 	"mixins": [
 		"jaymospowers.mixins.json",
@@ -42,7 +43,8 @@
 		{ "config": "jaymospowers.nea.client.mixins.json", "environment": "client" },
 		"jaymospowers.smoke.mixins.json",
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
-		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" }
+		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:shaft",
+    "jaymoskitchen:shaft",
+    "#minecraft:planks"
+  ],
+  "result": {
+    "id": "jaymoskitchen:shaft_corner"
+  }
+}

@@ -65,6 +65,18 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.playerCorpse(entity);
 	}
 
+	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
+	static boolean playersLeaveCorpses() {
+		return LOADED;
+	}
+
+	/** (0.15.33) Before a player's corpse is eaten: the hotbar it holds drops where it lies. */
+	static void spill(Entity corpse) {
+		if (LOADED) {
+			Kitchen.spill(corpse);
+		}
+	}
+
 	/** A dead player who got back up (Kitchen's zombie player): what a roaming symbiote bonds with. */
 	static boolean isZombiePlayer(Entity entity) {
 		return LOADED && Kitchen.zombiePlayer(entity);
@@ -180,6 +192,41 @@ public final class KitchenCompat {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse();
 		}
 
+		private static java.lang.reflect.@Nullable Field hotbarField;
+		private static boolean hotbarLooked;
+
+		@SuppressWarnings("unchecked")
+		static void spill(Entity entity) {
+			if (!(entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) || !corpse.isPlayerCorpse()
+				|| !(entity.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+				return;
+			}
+			if (!hotbarLooked) {
+				hotbarLooked = true;
+				try {
+					hotbarField = com.jaymoskitchen.corpse.CorpseEntity.class.getDeclaredField("hotbar");
+					hotbarField.setAccessible(true);
+				} catch (ReflectiveOperationException | RuntimeException e) {
+					hotbarField = null;
+				}
+			}
+			if (hotbarField == null) {
+				return;
+			}
+			try {
+				java.util.List<net.minecraft.world.item.ItemStack> hotbar = (java.util.List<net.minecraft.world.item.ItemStack>)hotbarField.get(corpse);
+				for (int i = 0; i < hotbar.size(); i++) {
+					net.minecraft.world.item.ItemStack stack = hotbar.get(i);
+					if (!stack.isEmpty()) {
+						corpse.spawnAtLocation(level, stack.copy(), 0.3F);
+						hotbar.set(i, net.minecraft.world.item.ItemStack.EMPTY);
+					}
+				}
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// (left in the body: gone with it)
+			}
+		}
+
 		static boolean zombiePlayer(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.ZombiePlayer;
 		}
@@ -228,6 +275,54 @@ public final class KitchenCompat {
 			if (entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) {
 				corpse.jolt(true);
 			}
+		}
+	}
+
+	// ---- Kitchen's living ragdolls (0.5.1+), reached by reflection: this build compiles against an older Kitchen jar
+
+	private static java.lang.reflect.@Nullable Method limpMethod;
+	private static boolean limpLooked;
+
+	/** Whether this entity is a player lying limp as a ragdoll (a crash, a blast...): false without a Kitchen that has them. */
+	public static boolean isLimp(Entity entity) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!limpLooked) {
+			limpLooked = true;
+			try {
+				limpMethod = Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("isLimp", Entity.class);
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				limpMethod = null;
+			}
+		}
+		if (limpMethod == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(limpMethod.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Powers that hold a player (being carried, Gravity's lift or hold, a web) keep them from going limp: Kitchen asks
+	 * these before it knocks anyone down, and lets them up if one starts.
+	 */
+	public static void registerRagdollVetoes() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> held = player -> com.jaymospowers.core.Carry.isCarried(player)
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.HELD) != null
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) != null
+				|| player.getAttached(WebPower.HELD) != null || player.getAttached(WebPower.HITCH) != null;
+			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addVeto", java.util.function.Predicate.class)
+				.invoke(null, held);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen without living ragdolls: nothing to veto
 		}
 	}
 

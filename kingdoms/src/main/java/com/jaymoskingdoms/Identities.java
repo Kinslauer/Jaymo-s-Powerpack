@@ -200,14 +200,17 @@ public final class Identities {
 		return mask != null ? mask : hoodKey(e);
 	}
 
-	/** (0.7.102) The identity {@code e} is fully masked as (Powers' tag), or null. */
+	/**
+	 * (0.7.102) The identity {@code e} is fully masked as (Powers' tag), or null. (0.7.125) A bandit mask or bandana is a
+	 * mask too ({@link Bandits}): Powers tags it with the same key, and without Powers it's seen to here.
+	 */
 	static @Nullable String maskKey(Entity e) {
 		for (String tag : e.entityTags()) {
 			if (tag.startsWith(MASKED)) {
 				return tag.substring(MASKED.length());
 			}
 		}
-		return null;
+		return Bandits.wears(e) ? Bandits.key(e) : null;
 	}
 
 	/** (0.7.102) The identity {@code e} is hooded as (Powers' tag), or null. */
@@ -250,6 +253,10 @@ public final class Identities {
 
 	/** (0.7.102) What {@code e} goes by under {@link #key}: the costume's name, "a hooded figure" for a nameless hood. */
 	private static Component nameFor(Entity e) {
+		if (Bandits.is(maskKey(e))) {
+			// (0.7.125) a bandit, or a pirate by the water
+			return Bandits.alias(e);
+		}
 		String name = tagName(e);
 		return name.isEmpty() && hooded(e) ? Component.translatable("identity.jaymoskingdoms.hooded") : nameOf(name);
 	}
@@ -320,7 +327,7 @@ public final class Identities {
 		if (!masked(player)) {
 			return text;
 		}
-		String mask = tagName(player).isEmpty() ? UNNAMED : tagName(player);
+		String mask = Bandits.is(maskKey(player)) ? Bandits.alias(player).getString() : tagName(player).isEmpty() ? UNNAMED : tagName(player);
 		Set<String> real = new HashSet<>();
 		real.add(player.getName().getString());
 		for (String n : names) {
@@ -494,7 +501,7 @@ public final class Identities {
 			wanted.merge(fid, until, Math::max);
 			player.setAttached(Theft.WANTED, Map.copyOf(wanted));
 		}
-		Component name = id.name().isEmpty() ? nameFor(player) : nameOf(id.name());
+		Component name = Bandits.is(key) ? Bandits.alias(player) : id.name().isEmpty() ? nameFor(player) : nameOf(id.name());
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.identity.known." + how, f.name(), name)
 			.withStyle(how.equals("word") ? ChatFormatting.GRAY : ChatFormatting.GOLD, ChatFormatting.ITALIC));
 		if (witness != null) {

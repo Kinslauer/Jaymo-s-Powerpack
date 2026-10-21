@@ -3,19 +3,14 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
-import java.lang.reflect.Proxy;
-import java.util.Optional;
 import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
@@ -26,7 +21,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -43,8 +37,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * And he has <b>Corrupted mode</b> (sneak+C in base form; again to leave, or C to go Super instead): Super 1's fists,
  * speed and ki power without its ki drain, paid for in blood ({@link #DRAIN} health a second, down to one heart, when
- * it ends), with life steal on every hit ({@link #LIFE_STEAL} of the damage). He gets {@link #ROLL_CHARGES} Combat Roll
- * charges, and every roll is a blink instead: towards his target, or behind it if he's already close.
+ * it ends), with life steal on every hit ({@link #LIFE_STEAL} of the damage). He gets {@link #DODGE_BONUS} golden feathers
+ * ({@code stamina.Feathers}), and every dodge is a blink instead: towards his target, or behind it if he's already close.
  */
 public final class ZFighterCorruption {
 	/** A dark lesson fills this much of the meter (three corrupt). */
@@ -55,8 +49,9 @@ public final class ZFighterCorruption {
 	static final float DRAIN = 1.0F;
 	static final float LIFE_STEAL = 0.35F;
 	static final float LOWEST = 2.0F;
-	static final int ROLL_CHARGES = 3;
-	/** A roll's blink: how far towards a target (stopping this short), behind one within this, or ahead with none. */
+	/** Corrupted mode's golden feathers (half-feathers: two more dodges). */
+	static final int DODGE_BONUS = 12;
+	/** A dodge's blink: how far towards a target (stopping this short), behind one within this, or ahead with none. */
 	static final double BLINK = 8.0;
 	static final double BLINK_SHORT = 1.8;
 	static final double BEHIND_WITHIN = 5.0;
@@ -71,11 +66,6 @@ public final class ZFighterCorruption {
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_corrupted_fists");
 	private static final Identifier SPEED_ID = JaymosPowers.id("zfighter_corrupted_speed");
-	private static final Identifier ROLLS_ID = JaymosPowers.id("zfighter_corrupted_rolls");
-	private static final Identifier ROLL_COUNT = Identifier.fromNamespaceAndPath("combat_roll", "count");
-	private static final boolean ROLLS_LOADED = FabricLoader.getInstance().isModLoaded("combat_roll");
-	private static @Nullable Holder<Attribute> rollCount;
-	private static boolean looked;
 
 	private ZFighterCorruption() {
 	}
@@ -89,7 +79,13 @@ public final class ZFighterCorruption {
 					entity.getZ(), 6, 0.25, 0.3, 0.25, 0.0);
 			}
 		});
-		hookRolls();
+		// (0.15.5) the pack's own dodge: golden feathers in Corrupted mode, and every dodge a blink
+		com.jaymospowers.stamina.Feathers.addBonus(player -> mode(player) ? DODGE_BONUS : 0);
+		com.jaymospowers.stamina.Dodge.onDodge((player, direction) -> {
+			if (mode(player)) {
+				blink(player);
+			}
+		});
 	}
 
 	public static boolean corrupted(net.minecraft.world.entity.player.Player player) {
@@ -124,7 +120,6 @@ public final class ZFighterCorruption {
 			return true;
 		}
 		player.setAttached(MODE, true);
-		rolls(player, true);
 		ZFighterPower.refresh(player, live);
 		ServerLevel level = player.level();
 		level.sendParticles(new DustParticleOptions(MARK_COLOR, 2.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.8, 1.0,
@@ -142,15 +137,13 @@ public final class ZFighterCorruption {
 			return;
 		}
 		player.removeAttached(MODE);
-		rolls(player, false);
 		ZFighterPower.refresh(player, live);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 0.6F);
 	}
 
-	/** The power is gone: no mode, no corrupted attributes, no extra rolls. */
+	/** The power is gone: no mode, no corrupted attributes. */
 	static void clear(ServerPlayer player) {
 		player.removeAttached(MODE);
-		rolls(player, false);
 		AttributeInstance fists = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
 		if (fists != null) {
 			fists.removeModifier(FIST_ID);
@@ -208,71 +201,7 @@ public final class ZFighterCorruption {
 		return factor;
 	}
 
-	// ---------------------------------------------------------------- Combat Roll: charges and blinks
-
-	private static @Nullable Holder<Attribute> rollCount() {
-		if (!looked) {
-			looked = true;
-			Optional<Holder.Reference<Attribute>> holder = BuiltInRegistries.ATTRIBUTE.get(ROLL_COUNT);
-			rollCount = holder.isPresent() ? holder.get() : null;
-		}
-		return rollCount;
-	}
-
-	/** Corrupted mode's roll charges, on or off (Combat Roll's own count attribute). */
-	private static void rolls(ServerPlayer player, boolean on) {
-		if (!ROLLS_LOADED) {
-			return;
-		}
-		Holder<Attribute> attribute = rollCount();
-		AttributeInstance instance = attribute == null ? null : player.getAttribute(attribute);
-		if (instance == null) {
-			return;
-		}
-		double extra = ROLL_CHARGES - instance.getBaseValue();
-		if (on && extra > 0.0) {
-			instance.addOrUpdateTransientModifier(new AttributeModifier(ROLLS_ID, extra, AttributeModifier.Operation.ADD_VALUE));
-		} else {
-			instance.removeModifier(ROLLS_ID);
-		}
-	}
-
-	/** Combat Roll's server event, by reflection (as Darktide does): a roll in Corrupted mode becomes a blink. */
-	private static void hookRolls() {
-		if (!ROLLS_LOADED) {
-			return;
-		}
-		try {
-			Class<?> events = Class.forName("net.combat_roll.api.event.ServerSideRollEvents");
-			Class<?> listener = Class.forName("net.combat_roll.api.event.ServerSideRollEvents$PlayerStartRolling");
-			Object event = events.getField("PLAYER_START_ROLLING").get(null);
-			Object proxy = Proxy.newProxyInstance(ZFighterCorruption.class.getClassLoader(), new Class<?>[] {listener}, (self, method, args) -> {
-				switch (method.getName()) {
-					case "onPlayerStartedRolling" -> {
-						if (args != null && args.length > 0 && args[0] instanceof ServerPlayer player && mode(player)) {
-							blink(player);
-						}
-						return null;
-					}
-					case "hashCode" -> {
-						return System.identityHashCode(self);
-					}
-					case "equals" -> {
-						return self == args[0];
-					}
-					case "toString" -> {
-						return "ZFighterCorruptedRolls";
-					}
-					default -> {
-						return null;
-					}
-				}
-			});
-			Class.forName("net.combat_roll.api.event.Event").getMethod("register", Object.class).invoke(event, proxy);
-		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
-			JaymosPowers.LOGGER.warn("Combat Roll is loaded but its roll event wasn't found; Corrupted mode's rolls won't blink", e);
-		}
-	}
+	// ---------------------------------------------------------------- the dodge's blink
 
 	/** The blink: towards his target, behind it if close, or ahead with none; only to somewhere he fits. */
 	static void blink(ServerPlayer player) {

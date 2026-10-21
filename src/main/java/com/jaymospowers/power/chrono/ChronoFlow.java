@@ -91,6 +91,8 @@ public final class ChronoFlow {
 	public static final int INTANGIBLE_TICKS = 40, DODGE_TICKS = 20;
 	/** Roll charges on entering Time Flow: each time stop after a Space counter spends one. */
 	public static final int ROLL_CHARGES = 3;
+	/** (0.15.5) Golden feathers a time-bender holds ({@code stamina.Feathers}; half-feathers: two more dodges). */
+	public static final int DODGE_BONUS = 12;
 	/** The time stop follows the Space counter: Space again while it plays or this many ticks after. */
 	public static final int FOLLOW_TICKS = 12;
 	/** The time stop's Stasis Field lasts this many times as long as G's (3-6 s, by abilities unlocked). */
@@ -313,6 +315,7 @@ public final class ChronoFlow {
 	}
 
 	static void init() {
+		com.jaymospowers.stamina.Feathers.addBonus(player -> Powers.has(player, ChronoPower.INSTANCE) ? DODGE_BONUS : 0);
 		PayloadTypeRegistry.serverboundPlay().register(Strike.TYPE, Strike.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Parry.TYPE, Parry.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Spin.TYPE, Spin.CODEC);

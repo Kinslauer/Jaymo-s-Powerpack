@@ -66,6 +66,8 @@ public class SmelteryEntity extends BlockEntity implements Container {
 	private int slots;
 	private int ticks;
 	private boolean dirty;
+	/** (bellows) Melts faster until this game time. */
+	private long blownUntil;
 
 	/** What the screen shows: each slot's melting progress (0-100, or -1 when it can't melt), fuel, slots in use. */
 	public final ContainerData data = new ContainerData() {
@@ -131,8 +133,9 @@ public class SmelteryEntity extends BlockEntity implements Container {
 		takeFuel();
 		boolean melting = false;
 		if (formed && fuel > 0) {
+			int speed = level.getGameTime() < blownUntil ? com.jaymospowers.tinkering.forge.BellowsBlock.MELT_SPEED : 1;
 			for (int i = 0; i < slots; i++) {
-				melting |= melt(i);
+				melting |= melt(i, speed);
 			}
 			if (ticks % 20 == 0) {
 				cookInside(level);
@@ -174,8 +177,13 @@ public class SmelteryEntity extends BlockEntity implements Container {
 		}
 	}
 
-	/** One tick of melting a slot; true if it's heating something. */
-	private boolean melt(int slot) {
+	/** Bellows blow into it: it melts faster until {@code until} (game time). */
+	public void blow(long until) {
+		blownUntil = Math.max(blownUntil, until);
+	}
+
+	/** One tick of melting a slot ({@code speed} ticks' worth); true if it's heating something. */
+	private boolean melt(int slot, int speed) {
 		ItemStack stack = items.get(slot);
 		Melting.Result result = stack.isEmpty() ? null : Melting.of(stack);
 		if (result == null) {
@@ -183,11 +191,14 @@ public class SmelteryEntity extends BlockEntity implements Container {
 			return false;
 		}
 		if (progress[slot] < result.ticks()) {
-			progress[slot]++;
+			progress[slot] = Math.min(result.ticks(), progress[slot] + speed);
 			return true;
 		}
-		if (tank.fill(result.molten(), result.amount(), true) == result.amount()) {
-			tank.fill(result.molten(), result.amount(), false);
+		// (0.13) every liquid it holds (iron and gold for a paladin's helmet) goes in at once, or it waits for room
+		if (tank.space() >= result.total()) {
+			for (Melting.Input part : result.parts()) {
+				tank.fill(part.molten(), part.amount(), false);
+			}
 			stack.shrink(1);
 			progress[slot] = 0;
 			dirty = true;

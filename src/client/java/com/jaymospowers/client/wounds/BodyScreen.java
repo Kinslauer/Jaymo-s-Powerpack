@@ -10,6 +10,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -17,7 +20,8 @@ import net.minecraft.util.Mth;
  * (0.14.4) The body screen (Wounds phase 4): the creature being treated, its parts each a button (greyed where the
  * medicine in hand can't help), a person's drawn large as the HUD's silhouette beside them. Hovering a part or its
  * button shows its state in the box at the bottom. Picking one sends only the part ({@link Treatment.Treat}); the server
- * checks it again and runs the treatment (hold still).
+ * checks it again and runs the treatment (hold still). (0.15.18) Also opened from the inventory's {@link BodyButton}, to
+ * look over your own wounds: Escape goes back to the inventory.
  */
 public class BodyScreen extends Screen {
 	private static final int MAX_W = 320;
@@ -33,14 +37,46 @@ public class BodyScreen extends Screen {
 	};
 
 	private final Treatment.OpenBody body;
+	/** Opened from the inventory: Escape goes back to it. */
+	private final boolean back;
 
-	public BodyScreen(Treatment.OpenBody body) {
-		super(Component.translatable("screen.jaymospowers.wounds.body", body.name()));
+	public BodyScreen(Treatment.OpenBody body, boolean back) {
+		super(body.look() ? Component.translatable("screen.jaymospowers.wounds.look") : Component.translatable("screen.jaymospowers.wounds.body", body.name()));
 		this.body = body;
+		this.back = back;
 	}
 
 	static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(Treatment.OpenBody.TYPE, (payload, context) -> context.client().gui.setScreen(new BodyScreen(payload)));
+		ClientPlayNetworking.registerGlobalReceiver(Treatment.OpenBody.TYPE, (payload, context) -> {
+			var minecraft = context.client();
+			boolean back = minecraft.gui.screen() instanceof InventoryScreen || minecraft.gui.screen() instanceof CreativeModeInventoryScreen;
+			if (back && minecraft.player != null) {
+				// leave the inventory as Escape would (the crafting grid empties on both sides), without going to the game
+				minecraft.player.connection.send(new ServerboundContainerClosePacket(minecraft.player.containerMenu.containerId));
+			}
+			minecraft.gui.setScreen(new BodyScreen(payload, back));
+		});
+		BodyButton.init();
+	}
+
+	/** Whether the medicine in hand helps any part (when looking without medicine, none). */
+	private boolean treating() {
+		for (int i = 0; i < count(); i++) {
+			if ((state(i) & Treatment.HELPS) != 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void onClose() {
+		if (this.back && this.minecraft.player != null) {
+			// (the inventory opens the creative one itself in creative)
+			this.minecraft.gui.setScreen(new InventoryScreen(this.minecraft.player));
+		} else {
+			super.onClose();
+		}
 	}
 
 	private boolean person() {
@@ -103,7 +139,8 @@ public class BodyScreen extends Screen {
 			int index = i;
 			Button button = addRenderableWidget(Button.builder(label(i), b -> {
 				ClientPlayNetworking.send(new Treatment.Treat(this.body.entity(), this.body.parts().get(index)));
-				this.onClose();
+				// to the game, where the treatment's bar shows
+				this.minecraft.gui.setScreen(null);
 			}).bounds(buttonX(), rowY(i) + 1, BUTTON_W, 16).build());
 			button.active = (state(i) & Treatment.HELPS) != 0;
 		}
@@ -120,7 +157,8 @@ public class BodyScreen extends Screen {
 		int y = top();
 		int w = panelW();
 		UiStyle.panel(graphics, x, y, w, panelH(), ACCENT);
-		UiStyle.header(graphics, this.font, x, y, w, null, this.title, Component.translatable("screen.jaymospowers.wounds.body_sub"), ACCENT, 0);
+		UiStyle.header(graphics, this.font, x, y, w, null, this.title, 
+			Component.translatable(treating() || !this.body.look() ? "screen.jaymospowers.wounds.body_sub" : "screen.jaymospowers.wounds.look_sub"), ACCENT, 0);
 		int hovered = -1;
 		for (int i = 0; i < count(); i++) {
 			if (UiStyle.over(mouseX, mouseY, buttonX(), rowY(i), BUTTON_W, ROW - 2)) {
@@ -173,12 +211,13 @@ public class BodyScreen extends Screen {
 			int percent = Math.round(Mth.clamp(this.body.fractions().get(hovered), 0.0F, 1.0F) * 100.0F);
 			lines.add(Component.translatable("screen.jaymospowers.wounds.health", percent));
 			lines.add(states(hovered));
-			if ((state(hovered) & Treatment.HELPS) == 0) {
+			if ((state(hovered) & Treatment.HELPS) == 0 && treating()) {
 				lines.add(Component.translatable("screen.jaymospowers.wounds.state.cannot"));
 			}
 			UiStyle.detail(graphics, this.font, x, dy, w, DETAIL_LINES, part(hovered).displayName(), ACCENT, lines);
 		} else {
-			UiStyle.detail(graphics, this.font, x, dy, w, DETAIL_LINES, null, ACCENT, List.of(Component.translatable("screen.jaymospowers.wounds.help")));
+			UiStyle.detail(graphics, this.font, x, dy, w, DETAIL_LINES, null, ACCENT, 
+				List.of(Component.translatable(treating() || !this.body.look() ? "screen.jaymospowers.wounds.help" : "screen.jaymospowers.wounds.look_help")));
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
@@ -197,7 +236,7 @@ public class BodyScreen extends Screen {
 		return Component.literal(String.join(", ", words));
 	}
 
-	private static int colour(float fraction) {
+	static int colour(float fraction) {
 		if (fraction > 0.75F) {
 			return WoundsHud.GOOD;
 		}
