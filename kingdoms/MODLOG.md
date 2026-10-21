@@ -3838,7 +3838,7 @@ and stepping over those who are not. Very prideful ruler". `Purists`, plus a col
 - Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
   harsh lean (+25) when he sentences an arrested crook.
 
-## 0.7.131: the Hornkin, a Nether faction (pack 0.15.39)
+## 0.7.131: the Hornkin, a Nether faction (pack 0.15.40)
 Andy (2026-10-20): "I want a new nether faction along the lines of" Just-In NETHER (NeoForge/Forge, All Rights
 Reserved: only its idea, bull-folk at war with piglins over gold, no code or art). Stage 1 of 3 (plan:
 project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `tools/gen_nether.py`.
