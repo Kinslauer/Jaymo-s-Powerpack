@@ -114,6 +114,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Frights.register();
+		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
