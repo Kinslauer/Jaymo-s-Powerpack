@@ -356,7 +356,8 @@ public final class PoseBlend {
 
 	/** Lays {@code off} (offsets from the model's angles now) over the model by {@code w}. */
 	static void lay(HumanoidModel<?> h, float[] off, float w) {
-		if (w <= 0.0F) {
+		if (w <= 0.0F || PosedCopy.of(h)) {
+			// (0.15.44) nothing to lay, or the model copied a body that has it already (MCA's layers)
 			return;
 		}
 		addPart(h.head, off, HEAD, w);
@@ -380,6 +381,10 @@ public final class PoseBlend {
 	 * The parts are moved where they hang from and turned with it, as ZFighterComboPose's turn does.
 	 */
 	public static void bend(HumanoidModel<?> h, float pitch, float yaw, float roll, float drop, float forward) {
+		if (PosedCopy.of(h)) {
+			// (0.15.44) bent already, in the body it copied (MCA's layers)
+			return;
+		}
 		if (Math.abs(pitch) > 1.0E-4F || Math.abs(yaw) > 1.0E-4F || Math.abs(roll) > 1.0E-4F) {
 			Quaternionf q = new Quaternionf().rotationZYX(roll, yaw, pitch);
 			Vector3f hip = new Vector3f(0.0F, HIP_Y, 0.0F);

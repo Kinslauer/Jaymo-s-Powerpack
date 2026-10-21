@@ -2275,3 +2275,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   work Kitchen's horse machines, the village windmills of Epic Structures turning for real, a potter's wheel that
   throws clay into Tinkering's Unfired Pot (`jaymospowers:unfired_pot`, looked up by id), a bloody chopper, manure
   and fertile farmland. No Powers code changed. Details in the Kitchen MODLOG.
+- **0.15.46, poses laid once on MCA bodies:** Andy: "down state doesnt look write, looks like the animation is drawn
+  twice again, down arrow crawling is the same, and so is the slide". Since 0.15.42 every eased pose goes through
+  `PoseBlend`, which adds its offsets to the model it's given. With MCA a body is drawn by MCA's layers, whose models
+  take a copy of the already-posed body in their own `setupAnim` (`receivesDeferredAnimationPose`), and a costume over
+  them takes the same copy; our model-feature hooks then added every pose a second time. `PosedCopy` spots those models
+  (MCA's flag, read by reflection; `CostumeModels.Worn` when over an MCA body) and `PoseBlend.lay`/`bend` leave them.
