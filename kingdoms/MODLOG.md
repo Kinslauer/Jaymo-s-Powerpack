@@ -3623,7 +3623,7 @@ should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBlad
 - Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
   (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
 
-### 0.7.116, seasons (with Kitchen 0.5.4)
+## 0.7.116: seasons (with Kitchen 0.5.4)
 - Andy chose our own seasons (2026-10-21); Kitchen keeps the calendar, read here through `KitchenCompat.season`,
   `dayOfYear` and `temperate` (all soft without Kitchen 0.5.4).
 - Heritages: in a temperate land, summer counts +0.25 warmer and winter 0.8 colder, so plains are hot for an
