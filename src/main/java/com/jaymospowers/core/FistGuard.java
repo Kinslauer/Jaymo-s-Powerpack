@@ -3,7 +3,7 @@ package com.jaymospowers.core;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.14.5) Fighting bare-handed, what you pick up never lands in your fist: while you've hit or been hit by a mob in the
+ * (0.14.8) Fighting bare-handed, what you pick up never lands in your fist: while you've hit or been hit by a mob in the
  * last {@link #COMBAT_TICKS}, an empty selected hotbar slot is skipped when a picked-up item looks for a free slot
  * (mixin/FistGuardInventoryMixin), so the item goes to the next free slot, or stays on the ground if there is none.
  * Our own take on the one feature Andy wanted from Locked In Slots (Fuzss, MPL-2.0; nothing copied), and it works the

@@ -175,7 +175,7 @@ def packMods = [
 	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
 	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
 	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
-	// QOL (0.14.5), all shipped unchanged. Auto HUD (LGPL-3.0, Crendgrim): hides the hotbar, hearts, hunger and the rest
+	// QOL (0.14.8), all shipped unchanged. Auto HUD (LGPL-3.0, Crendgrim): hides the hotbar, hearts, hunger and the rest
 	// while nothing on them changes, and brings each back when it does. Client-only.
 	[dep: "maven.modrinth:autohud:zvVWJ8QJ", cf: [623806, 9237281]],
 	// Respawning Animals (MPL-2.0, Fuzss): farm animals slowly respawn in loaded land, like monsters do, so the wild
