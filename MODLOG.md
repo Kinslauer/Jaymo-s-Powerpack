@@ -2119,3 +2119,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   in front so it's visible, not off to the side and lost in the costume. Springing it raises the arm into a guard ahead
   of you and runs the blade out of the housing; a blow with it is a straight thrust; the bracer stands clear of costume
   sleeves. Details in the Kingdoms MODLOG.
+
+- **0.15.30, seasons reach the powers (Kitchen 0.5.6, Kingdoms 0.7.123):** Kitchen 0.5.6 brings the pack's own seasons,
+  and Andy asked for every power to feel them ("all of em"). `core/Seasons` reads Kitchen's calendar by reflection, so
+  it does nothing without Kitchen 0.5.6, and it only counts in temperate lands. Cryokinesis: `CryoPower.strength` is
+  x1.2 in winter and x0.85 in summer. Ember: winter counts as chilled (`EmberKindle.chilled`), and in summer Kindle,
+  the fireball and Flashover do x1.2 fire damage (`EmberKindle.seasonal`). Smoke: in winter `SmokeField` fades at
+  x0.6 and rises at half rate, so it hangs low. Symbiote: its hunger drains 1.5x faster in winter. Darktide: in winter
+  `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later. Client `SeasonAura` gives every power user an
+  occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
+  user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
+  cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.

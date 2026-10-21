@@ -159,7 +159,7 @@ public final class EmberFlashover {
 		Flames.area(level, box, BURN_SECONDS, wave.owner, e -> true);
 		for (Entity entity : level.getEntities(wave.owner, box, e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator())) {
 			if (wave.caught.add(entity.getId())) {
-				((LivingEntity)entity).hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, wave.owner), DAMAGE);
+				((LivingEntity)entity).hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, wave.owner), EmberKindle.seasonal(wave.owner, DAMAGE));
 			}
 		}
 	}

@@ -167,7 +167,7 @@ public final class EmberFireball {
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(RADIUS),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && e.getBoundingBox().distanceToSqr(at) <= r2)) {
 			double share = 1.0 - 0.5 * Math.sqrt(living.getBoundingBox().distanceToSqr(at)) / RADIUS;
-			living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, owner), (float)(DAMAGE * share));
+			living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, owner), EmberKindle.seasonal(owner, (float)(DAMAGE * share)));
 		}
 		if (block != null) {
 			EmberKindle.touch(level, block, owner);
