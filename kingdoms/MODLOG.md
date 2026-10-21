@@ -3770,4 +3770,4 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   70+ execution (beheaded: `jaymoskitchen.missing.head`, then killed). `Arrests.SENTENCED` takes the crook off the
   bounty board (`Bounties.sentenced`), and `Crooks.SEEN` posts seen crooks there (`Bounties.crime`).
   A guard who's killed, downed or called away lets the crook bolt. Villages without folk guards still send golems.
-- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.33.
+- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.34.
