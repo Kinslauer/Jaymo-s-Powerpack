@@ -42,7 +42,8 @@
 		{ "config": "jaymospowers.nea.client.mixins.json", "environment": "client" },
 		"jaymospowers.smoke.mixins.json",
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
-		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" }
+		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
+		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

@@ -54,6 +54,11 @@ public final class CryoSlideClient {
 		return skating;
 	}
 
+	/** (0.15.32) The local skater's sideways velocity (blocks a tick), for the pose's lean ({@link CryoPose}). */
+	static Vec3 velocity() {
+		return velocity;
+	}
+
 	/** 0..1 of the top (sprint) speed, for the HUD. */
 	public static double speedFraction(LocalPlayer player) {
 		return skating ? Mth.clamp(velocity.horizontalDistance() / top(player, true), 0.0, 1.0) : 0.0;
