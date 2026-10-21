@@ -72,7 +72,7 @@ public final class Skills {
 	 */
 	public static final int STEALTH_MAX_LEVEL = 25;
 	/**
-	 * (0.7.135) Survival's highest level: its second page, Medicine (Steady Hands to Lifesaver; the treating is Jaymo's
+	 * (0.7.135) Survival's highest level: its second page, Medicine (Steady Hands to Second Wind; the treating is Jaymo's
 	 * Powers' Wounds, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
 	 */
 	public static final int SURVIVAL_MAX_LEVEL = 25;
@@ -200,7 +200,9 @@ public final class Skills {
 		FIELD_DRESSER(Pillar.SURVIVAL, 2, 1, 3, 4, 2),
 		BONESETTER(Pillar.SURVIVAL, 1, 1, 8, 5, 0, STEADY_HANDS),
 		PLAGUE_DOCTOR(Pillar.SURVIVAL, 1, 2, 8, 5, 2, FIELD_DRESSER),
-		LIFESAVER(Pillar.SURVIVAL, 1, 2, 12, 6, 1, BONESETTER, PLAGUE_DOCTOR);
+		LIFESAVER(Pillar.SURVIVAL, 1, 2, 12, 6, 1, BONESETTER, PLAGUE_DOCTOR),
+		// shown as "Second Wind" (the first page's old Second Wind is shown as Rally now; its key stays, so nobody's ranks move)
+		SELF_REVIVE(Pillar.SURVIVAL, 1, 2, 15, 7, 1, LIFESAVER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

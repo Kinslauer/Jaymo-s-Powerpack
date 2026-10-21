@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Plague Doctor</b>: Kingdoms' own (the Nightfall plague's Atrophy goes easier on you); and here, leeches you
  * put on draw out the bad blood: the plague ({@link #ATROPHY}) and poison. Andy: "you can also use leeches for benefits,
  * when noone else can".</li>
+ * <li><b>Second Wind</b>: eat while downed to rise, once a day ({@link SelfRevive}).</li>
  * <li><b>Lifesaver</b>: someone you bring round gets up with {@link #LIFESAVER_HEALTH} of their health and their bleeding
  * stopped; your smelling salts always rouse a player who has passed out.</li>
  * </ul>

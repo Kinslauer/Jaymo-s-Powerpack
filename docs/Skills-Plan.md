@@ -212,6 +212,9 @@ downed one brought round tags the healer `jaymospowers_treated`, which Kingdoms 
   Andy: "you can also use leeches for benefits, when noone else can": a Plague Doctor's leeches draw the plague and poison out of whoever they're on).
 - Tier 6 (level 12): **Lifesaver** (2 pts: whoever you bring round gets up on half health with bleeding stopped; your
   smelling salts always wake a passed-out player).
+- Tier 7 (level 15): **Second Wind** (2 pts), Andy: "a self revive through this tree, called second wind that allows
+  them to eat while downed to rise, once a day". Downed and awake, hold use with food: 3 s of eating, then up (Powers
+  `SelfRevive`). The first page's old Second Wind (heal when low) is shown as **Rally** now; its saved key is unchanged.
 
 ## Stealth from sneaking past (0.7.135)
 Andy (2026-10-21): "sneaking near enemies undetected should passively grow your stealth skill". Sneaking and moving

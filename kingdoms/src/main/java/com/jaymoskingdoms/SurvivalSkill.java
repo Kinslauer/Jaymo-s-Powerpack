@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.NetherWartBlock;
  * (0.5.52) The Survival pillar of the skill tree ({@link Skills}). It grows as you live off the land: harvesting ripe
  * crops, eating, living through the night, and taking a beating and living. Practice makes hunger drain slower.
  *
- * <p>Perks: Forager (an extra harvest), Second Wind (healing when you're low), Weathered (fire and frost bite less),
+ * <p>Perks: Forager (an extra harvest), Second Wind (shown as Rally since 0.7.135; healing when you're low), Weathered (fire and frost bite less),
  * Iron Stomach (food's Hunger never takes hold), Hardy Landing (falls hurt less, never not at all; it only scales the
  * fall damage vanilla deals, so a power that cancels fall damage still cancels it) and Last Stand (once a day, a
  * killing blow leaves you on half a heart).

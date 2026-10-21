@@ -244,8 +244,22 @@ public final class Downed {
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
-		UseItemCallback.EVENT.register((player, level, hand) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
+		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			if (!isDowned(player)) {
+				return InteractionResult.PASS;
+			}
+			// (0.15.46) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
+			InteractionResult eat = SelfRevive.use(player, hand);
+			return eat != null ? eat : InteractionResult.FAIL;
+		});
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (!isDowned(player)) {
+				return InteractionResult.PASS;
+			}
+			// (0.15.46) but Second Wind's eating to rise ({@link SelfRevive})
+			InteractionResult eat = SelfRevive.use(player, hand);
+			return eat != null ? eat : InteractionResult.FAIL;
+		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isDowned(player));
 		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
 		Powers.addSilencer(Downed::isDowned);
