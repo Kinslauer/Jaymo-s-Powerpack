@@ -860,3 +860,10 @@ after `Mill.register()`.
 Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
 unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
 Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
+
+### 0.5.8: smoother carrying and crawling
+Andy, on Powers' animation preview: "do all this, add a better crawling and downed animation too". Carrying a corpse
+eases in and out (`PoseEase`, a small spring of Kitchen's own): the arms go down to take it and lift it, dip under the
+weight on each step, and the body leans back against it. A creature crawling on shot legs does an army crawl like a
+downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
+the body rocking, the head lifting to look ahead. The ragdoll is untouched.
