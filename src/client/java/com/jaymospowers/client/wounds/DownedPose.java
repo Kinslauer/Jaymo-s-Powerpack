@@ -1,6 +1,8 @@
-package com.jaymoskingdoms.client;
+package com.jaymospowers.client.wounds;
 
-import com.jaymoskingdoms.Downed;
+import com.jaymospowers.core.Carry;
+import com.jaymospowers.core.wounds.BodyPlan;
+import com.jaymospowers.core.wounds.Downed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -10,31 +12,37 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.73) A downed guard ({@link Downed}) on the ground: a crawler lies face down and hauls itself along on its
- * forearms, legs dragging, head raised; the rest lie on their backs, one hand clutched to the chest, the other arm flung
- * out, a knee drawn up, head lolled to one side, breathing shallow. They drop into it over {@link #FALL_TICKS}.
+ * (0.14.1, from Kingdoms' 0.7.73) Someone downed ({@link Downed}) on the ground. People ({@link BodyPlan#HUMANOID}): a
+ * crawler lies face down and hauls itself along on its forearms, legs dragging, head raised; the rest lie on their backs,
+ * one hand clutched to the chest, the other arm flung out, a knee drawn up, head lolled to one side, breathing shallow.
+ * Anything else (a downed wolf or horse) lies on its side. They drop into it over {@link #FALL_TICKS}. Players aren't
+ * drawn here: the downed state holds them in {@code Crawl}'s pose. Nor is anyone being carried ({@code CarryPose}).
  */
 public final class DownedPose {
 	/** How long the fall to the ground takes (ticks). */
 	static final float FALL_TICKS = 6.0F;
 	/** How far the body is raised off the ground lying face down and on its back (blocks). */
 	static final float FACE_DOWN_LIFT = 0.3F, ON_BACK_LIFT = 0.2F;
+	/** An animal on its side: how far over it rolls (degrees). */
+	static final float SIDE_ROLL = 90.0F;
 
-	/** This frame's {amount 0..1, 1 for a crawler, 0 for one on its back}. */
-	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:downed");
+	/** This frame's {amount 0..1, 1 for a crawler, 1 for a person (else on its side)}. */
+	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:downed");
 
 	private DownedPose() {
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (!Downed.isDowned(entity)) {
+		if (entity instanceof Player || !Downed.isDowned(entity) || Carry.isCarried(entity)) {
 			return;
 		}
 		float down = entity.level().getGameTime() + partialTicks - Downed.since(entity);
 		float amount = Mth.clamp(down / FALL_TICKS, 0.0F, 1.0F);
-		state.setData(KEY, new float[] {amount * amount * (3.0F - 2.0F * amount), Downed.crawls(entity) ? 1.0F : 0.0F});
+		boolean person = BodyPlan.of(entity) == BodyPlan.HUMANOID;
+		state.setData(KEY, new float[] {amount * amount * (3.0F - 2.0F * amount), Downed.crawls(entity) ? 1.0F : 0.0F, person ? 1.0F : 0.0F});
 	}
 
 	/** After the body's been turned to face its way: lay it on the ground. */
@@ -45,7 +53,12 @@ public final class DownedPose {
 		}
 		float amount = pose[0];
 		float height = state.boundingBoxHeight / Math.max(entityScale, 0.01F);
-		if (pose[1] > 0.0F) {
+		if (pose[2] <= 0.0F) {
+			// on its side, along the ground where it stood, raised by half its width so it lies on the ground, not in it
+			float width = state.boundingBoxWidth / Math.max(entityScale, 0.01F);
+			poseStack.translate(height * 0.5F * amount, width * 0.5F * amount, 0.0F);
+			poseStack.rotate(Axis.ZP.rotationDegrees(SIDE_ROLL * amount));
+		} else if (pose[1] > 0.0F) {
 			// face down, the body along the ground ahead of its feet
 			poseStack.rotate(Axis.XP.rotationDegrees(-90.0F * amount));
 			poseStack.translate(0.0F, -height * 0.555F * amount, FACE_DOWN_LIFT * amount);
@@ -62,7 +75,7 @@ public final class DownedPose {
 			return;
 		}
 		float[] pose = living.getData(KEY);
-		if (pose == null) {
+		if (pose == null || pose[2] <= 0.0F) {
 			return;
 		}
 		if (pose[1] > 0.0F) {
