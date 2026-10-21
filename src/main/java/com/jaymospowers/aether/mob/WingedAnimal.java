@@ -1,6 +1,9 @@
 package com.jaymospowers.aether.mob;
 
+import com.jaymospowers.aether.AetherFlora;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.level.Level;
 
 /**
@@ -16,6 +19,12 @@ public abstract class WingedAnimal extends RideableAnimal {
 
 	protected WingedAnimal(EntityType<? extends WingedAnimal> type, Level level) {
 		super(type, level);
+	}
+
+	/** Valkyrie wings calm it: whoever holds them can climb on (and keeps it calm only while held). */
+	@Override
+	protected @Nullable Item calmItem() {
+		return AetherFlora.VALKYRIE_WINGS;
 	}
 
 	@Override

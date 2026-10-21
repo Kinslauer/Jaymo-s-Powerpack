@@ -1,6 +1,5 @@
 package com.jaymospowers.aether.mob;
 
-import com.jaymospowers.aether.AetherItems;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -15,7 +14,6 @@ import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -26,13 +24,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The phyg, the Aether's flying pig: a pig with white feathered wings. Saddle it (a saddle on its back) and ride it:
- * it jumps high, flaps once more in mid-air and glides while jump is held (see {@link WingedAnimal}). It breeds on
- * blue berries.
+ * The phyg, the Aether's flying pig: a pig with white feathered wings. Hold valkyrie wings and it lets you climb on (put
+ * them away and it bolts), or saddle it for good. Ridden it jumps high, flaps once more in mid-air and glides while jump is
+ * held (see {@link WingedAnimal}). It breeds on oranges and blue berries.
  */
 public class Phyg extends WingedAnimal {
 	// ---- tuning ----
 	public static final double HEALTH = 10.0, SPEED = 0.25;
+	/** Ridden, it goes at this share of its speed (Aether II's 0.6). */
+	public static final float RIDE_SPEED = 0.6F;
 	/** Its rider sits this high above its feet (blocks). */
 	public static final double SEAT = 0.8;
 
@@ -48,9 +48,9 @@ public class Phyg extends WingedAnimal {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
+		this.goalSelector.addGoal(1, new SpookPanicGoal(1.25));
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.2, stack -> stack.is(AetherItems.BLUE_BERRY), false));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.2, AetherAnimals::isAnimalFood, false));
 		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -63,8 +63,13 @@ public class Phyg extends WingedAnimal {
 	}
 
 	@Override
+	protected float rideSpeed() {
+		return RIDE_SPEED;
+	}
+
+	@Override
 	public boolean isFood(ItemStack stack) {
-		return stack.is(AetherItems.BLUE_BERRY);
+		return AetherAnimals.isAnimalFood(stack);
 	}
 
 	@Override
