@@ -24,9 +24,9 @@ public final class SentryCurrent {
 	private SentryCurrent() {
 	}
 
-	/** Whether {@code state} is a block that has a LIT state. */
+	/** Whether {@code state} is a tagged current-carrying block (never a vanilla block that merely has LIT). */
 	public static boolean carries(BlockState state) {
-		return state.hasProperty(SentryBlock.LIT);
+		return state.is(DungeonBlocks.CARRIES_SENTRY_CURRENT) && state.hasProperty(SentryBlock.LIT);
 	}
 
 	/** A block saw a neighbour change: a redstone signal arriving toggles it, one leaving only lets it be toggled again. */
