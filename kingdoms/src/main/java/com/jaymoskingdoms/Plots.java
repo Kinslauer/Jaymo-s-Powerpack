@@ -18,19 +18,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Plots: ground a lord of a faction marks for its builders (with {@code /kingdom plot mark} or a plot stake). The
- * builders never touch anything built outside them; on a plot they may clear whatever stands there (it goes into the
- * faction's storage) and build, even over the lord's own builds. The lord may choose what goes up on it
- * ({@code /kingdom plot build <building>}); otherwise it gets the next building in the growth order that fits.
+ * Plots: ground a lord of a faction marks for its builders (with {@code /kingdom plot mark}, a plot stake, or four stakes
+ * strung into a rectangle: {@link PlotLines}). The builders never touch anything built outside them; on a plot they may
+ * clear whatever stands there (it goes into the faction's storage) and build, even over the lord's own builds. The lord
+ * may choose what goes up on it ({@code /kingdom plot build <building>}); otherwise it gets the next building in the
+ * growth order that fits.
  */
 public final class Plots {
 	/** A marked rectangle's smallest and largest side; a plot stake marks a square this size (sneaking: the chunk). */
@@ -44,29 +44,11 @@ public final class Plots {
 	}
 
 	static void register() {
+		// (batch 4) the stake is a post set in the ground now, strung to others with string (PlotLines)
+		PlotLines.register();
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("plot_stake"));
-		PLOT_STAKE = Registry.register(BuiltInRegistries.ITEM, key, new Stake(new Item.Properties().setId(key).stacksTo(16)));
+		PLOT_STAKE = Registry.register(BuiltInRegistries.ITEM, key, new BlockItem(PlotLines.STAKE, new Item.Properties().setId(key).stacksTo(16)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Items.LEAD, PLOT_STAKE));
-	}
-
-	/** The plot stake: used on the ground in your faction's land, it marks a plot there. */
-	static final class Stake extends Item {
-		Stake(Properties properties) {
-			super(properties);
-		}
-
-		@Override
-		public InteractionResult useOn(UseOnContext context) {
-			if (!(context.getPlayer() instanceof ServerPlayer player)) {
-				return InteractionResult.SUCCESS;
-			}
-			BlockPos at = context.getClickedPos();
-			boolean ok = mark(player, at, STAKE_SIDE, STAKE_SIDE, player.isShiftKeyDown());
-			if (ok && !player.isCreative()) {
-				context.getItemInHand().shrink(1);
-			}
-			return ok ? InteractionResult.SUCCESS : InteractionResult.FAIL;
-		}
 	}
 
 	/** {@code player} may mark plots for {@code faction}. */

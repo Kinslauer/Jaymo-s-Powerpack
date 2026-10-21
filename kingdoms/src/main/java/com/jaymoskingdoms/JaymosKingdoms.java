@@ -64,6 +64,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
+		// (batch 4) building: dirt, grass and path slabs; wind chimes; the rope lift (rope, anchor, pulley, platform)
+		EarthSlabs.register();
+		WindChimes.register();
+		RopeLift.register();
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();
@@ -165,6 +169,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wars.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
+		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
+		com.jaymoskingdoms.carpentry.Carpentry.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)

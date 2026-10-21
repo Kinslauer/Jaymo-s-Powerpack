@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:moulding",
+  "ingredients": [
+    "jaymoskingdoms:acacia_corner",
+    "jaymoskingdoms:acacia_corner"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:acacia_moulding"
+  }
+}

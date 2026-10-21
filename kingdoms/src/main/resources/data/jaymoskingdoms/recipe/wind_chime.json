@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "decorations",
+  "key": {
+    "S": "minecraft:string",
+    "P": "minecraft:bamboo_slab",
+    "B": "minecraft:bamboo"
+  },
+  "pattern": [
+    " S ",
+    "BPB",
+    "B B"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:wind_chime",
+    "count": 1
+  }
+}

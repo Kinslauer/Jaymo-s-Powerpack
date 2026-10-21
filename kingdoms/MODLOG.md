@@ -4021,3 +4021,27 @@ Andy (2026-10-21): "Stage 2 please" (of the Nether faction plan, project-files `
   minute later once none is near; the walls and hoard stay. The news goes to players within 96.
 - Ops: `/kingdom netherfort found` (a pair just ahead; works with `execute in the_nether positioned ...`),
   `/kingdom netherfort host` (the nearest fort sends a host now), `/kingdom netherfort info`.
+
+## 0.7.143: building (Better With Mods batch 4, pack 0.15.56)
+Batch 4 of the BWM port (MIT, our own code).
+- Carpentry (`carpentry/`, generator `kingdoms/tools/gen_carpentry.py`): Siding, Moulding and Corner (half, quarter,
+  eighth blocks, waterloggable, placed by where on the face you click) in 10 woods (oak to pale oak, bamboo) and
+  stone, cobblestone, stone brick and brick: 42 blocks. Crafting: block -> 2 sidings, 2 slabs -> 2 sidings, siding -> 2
+  mouldings, moulding -> 2 corners, and 2 of a piece back up; stonecutter for the stones. No Kitchen chopper recipes
+  (its chopper is code-only, logs only).
+- Benches and Tables per wood (20 blocks), joining in rows with legs at the ends. Right-click a bench to sit
+  (`BenchSeats`: a temporary, unbreakable cushion of the kind `Cushions` uses, gone when you stand or the bench breaks).
+- Wattle, Grate and Slats: wooden panes that join like iron bars.
+- Plot stakes stand as posts (`PlotLines`): string from stake to stake (straight, up to 31 blocks) draws a line; four
+  strung into a closed rectangle mark a plot of exactly that size through `Plots.mark`. An empty hand on an unstrung
+  stake still marks 11x11 (sneak: the chunk). Breaking a stake drops it and its string.
+- Dirt, Grass and Dirt Path Slabs (`EarthSlabs`); a shovel paths a dirt or grass slab. King's Roads climb one-block
+  steps in half steps (path slab or the paving's own slab) where the neighbouring chunk is already paved; they count
+  as road for `RoadPace`.
+- Wind chimes, bamboo and iron (`WindChimes`): ring in rain and storms and when something walks into them; a sneaking
+  Soft Step player slips past.
+- Rope lift (`RopeLift`): climbable rope lowered from an anchor, a pulley cranked by hand (a little hunger) or turned by
+  a Kitchen shaft (`KitchenShafts`, read by block id and its turning/axis state, so Kingdoms needs no Kitchen code),
+  and a platform that steps one block at a time carrying whoever stands on it; cut the rope and it falls (fall damage
+  as normal).
+- Generator `kingdoms/tools/gen_building.py`. javac clean; nothing played yet.

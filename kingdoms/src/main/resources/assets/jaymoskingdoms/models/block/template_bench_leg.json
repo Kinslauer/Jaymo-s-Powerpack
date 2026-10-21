@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "#planks"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        3,
+        5,
+        3
+      ],
+      "faces": {
+        "down": {
+          "texture": "#planks",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#planks"
+        },
+        "north": {
+          "texture": "#planks"
+        },
+        "south": {
+          "texture": "#planks"
+        },
+        "west": {
+          "texture": "#planks"
+        },
+        "east": {
+          "texture": "#planks"
+        }
+      }
+    }
+  ]
+}

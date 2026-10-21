@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_corner",
+  "textures": {
+    "all": "minecraft:block/mangrove_planks"
+  }
+}

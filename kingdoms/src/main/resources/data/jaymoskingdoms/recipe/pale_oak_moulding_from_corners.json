@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:moulding",
+  "ingredients": [
+    "jaymoskingdoms:pale_oak_corner",
+    "jaymoskingdoms:pale_oak_corner"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:pale_oak_moulding"
+  }
+}

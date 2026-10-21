@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:moulding",
+  "ingredients": [
+    "jaymoskingdoms:spruce_corner",
+    "jaymoskingdoms:spruce_corner"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:spruce_moulding"
+  }
+}

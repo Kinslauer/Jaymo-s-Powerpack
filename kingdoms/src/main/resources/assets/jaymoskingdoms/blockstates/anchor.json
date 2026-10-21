@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "jaymoskingdoms:block/anchor"
+    },
+    "facing=down": {
+      "model": "jaymoskingdoms:block/anchor"
+    },
+    "facing=north": {
+      "model": "jaymoskingdoms:block/anchor_wall"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/anchor_wall",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/anchor_wall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/anchor_wall",
+      "y": 270
+    }
+  }
+}

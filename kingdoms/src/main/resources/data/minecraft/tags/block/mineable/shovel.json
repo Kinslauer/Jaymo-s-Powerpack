@@ -1,6 +1,9 @@
 {
   "values": [
     "jaymoskingdoms:sand_layer",
-    "jaymoskingdoms:red_sand_layer"
+    "jaymoskingdoms:red_sand_layer",
+    "jaymoskingdoms:dirt_slab",
+    "jaymoskingdoms:grass_slab",
+    "jaymoskingdoms:dirt_path_slab"
   ]
 }

@@ -1,4 +1,12 @@
 {
-	"replace": false,
-	"values": ["jaymoskingdoms:chopped_log", "jaymoskingdoms:ship_helm"]
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:chopped_log",
+    "jaymoskingdoms:ship_helm",
+    "#jaymoskingdoms:carpentry_wood",
+    "jaymoskingdoms:plot_stake",
+    "jaymoskingdoms:pulley",
+    "jaymoskingdoms:platform",
+    "jaymoskingdoms:wind_chime"
+  ]
 }

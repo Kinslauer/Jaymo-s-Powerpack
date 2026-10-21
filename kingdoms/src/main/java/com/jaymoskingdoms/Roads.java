@@ -26,6 +26,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -63,7 +64,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Laid.</b> A road is paved a chunk at a time as its chunks load: a path three wide in the ground's own style (dirt
  * path and gravel in the green, sandstone in the desert, cobble on rock and near towns), graded up to {@link #GRADE}
- * blocks to keep it even, trees in its way felled, plank bridges over water, a lantern post every so often and a
+ * blocks to keep it even, a half step (a path slab, or the stone's own slab) where it still climbs a block, trees in its
+ * way felled, plank bridges over water, a lantern post every so often and a
  * milestone at each end saying where it goes and how far. It leaves the settlements' own streets alone and only ever
  * touches natural ground, never anything built. A chunk is paved once; what players do to it after is theirs.
  *
@@ -625,13 +627,21 @@ public final class Roads {
 				}
 			}
 		}
+		List<BlockPos> tops = new ArrayList<>();
 		for (Map.Entry<Long, Integer> e : columns.entrySet()) {
 			int x = (int)(e.getKey() >> 32), z = (int)(long)e.getKey();
 			double town = nearest(seats, x, z);
 			if (town < TOWN_CLEAR) {
 				continue;
 			}
-			column(level, x, z, e.getValue(), town < PAVED_NEAR, wide.contains(e.getKey()), random);
+			BlockPos top = column(level, x, z, e.getValue(), town < PAVED_NEAR, wide.contains(e.getKey()), random);
+			if (top != null) {
+				tops.add(top);
+			}
+		}
+		// (batch 4) half steps where it still climbs a block
+		for (BlockPos top : tops) {
+			step(level, top);
 		}
 		// lantern posts along it, and a milestone at each end
 		Line line = line(road);
@@ -704,30 +714,30 @@ public final class Roads {
 		return s.isAir() || (s.canBeReplaced() && level.getFluidState(pos).isEmpty());
 	}
 
-	/** One column of road: graded, surfaced, its way cleared; or a bridge plank over water. */
-	private static void column(ServerLevel level, int x, int z, int graded, boolean paved, boolean edge, RandomSource random) {
+	/** One column of road: graded, surfaced, its way cleared; or a bridge plank over water. The road's top, if it laid one. */
+	private static @Nullable BlockPos column(ServerLevel level, int x, int z, int graded, boolean paved, boolean edge, RandomSource random) {
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).below();
 		for (int i = 0; i < 12 && (level.getBlockState(top).is(BlockTags.LOGS) || clearable(level, top, level.getBlockState(top))); i++) {
 			BlockState s = level.getBlockState(top);
 			if (s.is(BlockTags.LOGS) && !fell(level, top)) {
-				return;
+				return null;
 			}
 			top = top.below();
 		}
 		BlockState ground = level.getBlockState(top);
 		if (!level.getFluidState(top).isEmpty()) {
 			if (!level.getFluidState(top).is(net.minecraft.tags.FluidTags.WATER) || !level.getFluidState(top).isSource()) {
-				return;
+				return null;
 			}
 			// a bridge: planks on the water, a rail along its edges
 			level.setBlock(top, Blocks.SPRUCE_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
 			if (edge && clearable(level, top.above(), level.getBlockState(top.above()))) {
 				level.setBlock(top.above(), Blocks.SPRUCE_FENCE.defaultBlockState(), Block.UPDATE_ALL);
 			}
-			return;
+			return null;
 		}
 		if (edge || !natural(ground)) {
-			return;
+			return null;
 		}
 		int y = Math.abs(top.getY() - graded) <= GRADE ? graded : top.getY();
 		BlockState fill = ground.is(BlockTags.SAND) ? (ground.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE : Blocks.SANDSTONE).defaultBlockState()
@@ -747,7 +757,7 @@ public final class Roads {
 		BlockPos road = new BlockPos(x, y, z);
 		BlockState under = level.getBlockState(road);
 		if (!natural(under) && !clearable(level, road, under)) {
-			return;
+			return null;
 		}
 		for (int up = 1; up <= 3; up++) {
 			BlockPos at = road.above(up);
@@ -759,6 +769,27 @@ public final class Roads {
 			}
 		}
 		level.setBlock(road, surface(ground, paved, random), Block.UPDATE_CLIENTS);
+		return road;
+	}
+
+	/**
+	 * (batch 4) A half step on the road top at {@code top} where a road top beside it stands one block higher, so the road
+	 * climbs in half steps: a path slab on a dirt road, the stone's own slab on a paved one.
+	 */
+	private static void step(ServerLevel level, BlockPos top) {
+		BlockState slab = EarthSlabs.stepFor(level.getBlockState(top));
+		BlockPos at = top.above();
+		if (slab == null || !level.getBlockState(at).isAir()) {
+			return;
+		}
+		for (Direction d : Direction.Plane.HORIZONTAL) {
+			BlockPos higher = at.relative(d);
+			if (EarthSlabs.stepFor(level.getBlockState(higher)) != null && !level.getBlockState(higher).is(BlockTags.SLABS)
+				&& level.getBlockState(higher.above()).isAir()) {
+				level.setBlock(at, slab, Block.UPDATE_CLIENTS);
+				return;
+			}
+		}
 	}
 
 	/** The road's top: in the style of the ground it crosses (stone near towns). */

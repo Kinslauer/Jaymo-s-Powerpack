@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_bench_leg",
+  "textures": {
+    "planks": "minecraft:block/birch_planks"
+  }
+}

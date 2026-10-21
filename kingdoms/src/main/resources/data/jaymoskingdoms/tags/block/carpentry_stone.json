@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:stone_siding",
+    "jaymoskingdoms:stone_moulding",
+    "jaymoskingdoms:stone_corner",
+    "jaymoskingdoms:cobblestone_siding",
+    "jaymoskingdoms:cobblestone_moulding",
+    "jaymoskingdoms:cobblestone_corner",
+    "jaymoskingdoms:stone_brick_siding",
+    "jaymoskingdoms:stone_brick_moulding",
+    "jaymoskingdoms:stone_brick_corner",
+    "jaymoskingdoms:brick_siding",
+    "jaymoskingdoms:brick_moulding",
+    "jaymoskingdoms:brick_corner"
+  ]
+}

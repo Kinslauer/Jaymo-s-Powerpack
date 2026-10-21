@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_table_inventory",
+  "textures": {
+    "planks": "minecraft:block/mangrove_planks"
+  }
+}

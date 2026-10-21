@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "I": "minecraft:iron_ingot",
+    "R": "jaymoskingdoms:rope"
+  },
+  "pattern": [
+    "PPP",
+    "IRI",
+    "PPP"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:pulley",
+    "count": 1
+  }
+}

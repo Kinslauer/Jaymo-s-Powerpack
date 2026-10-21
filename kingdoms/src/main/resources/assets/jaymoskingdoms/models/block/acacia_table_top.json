@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_table_top",
+  "textures": {
+    "planks": "minecraft:block/acacia_planks"
+  }
+}
