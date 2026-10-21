@@ -29,6 +29,7 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   write to the CurseForge profile and the friends' server folder, `../Serverfiles`, which isn't in the repo).
 
 ## 26.3 API facts learned the hard way
+`ModelPart` has no `copyFrom`: use `part.loadPose(other.storePose())`; `EntityTypes.PLAYER` (not `EntityType.PLAYER`); Kitchen's jar builds to `E:\jaymos-kitchen-build\libs\`;
 `Entity.syncVelocity = true` (no hurtMarked); `ServerPlayer.drop(stack, false, Prediction.SERVER_ONLY)`;
 `new ItemStack(item).getHoverName()`; `Vec3.STREAM_CODEC`; `EntityType.builtInRegistryHolder().is(tag)`;
 `PushReaction.IMMOVEABLE`; `collector.submitMovingBlock(poseStack, MovingBlockRenderState, outlineColor)`;
