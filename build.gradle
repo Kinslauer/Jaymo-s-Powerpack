@@ -225,7 +225,7 @@ def packModsOverride = [
 	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
 	// Interactic Renewed (MIT; EmpireWarrior81's fork of glisco's Interactic): items on the ground lie flat and show
 	// their name under the crosshair, you pick them up by right-clicking them (Jaymo's Powers switches its auto pickup
-	// off once per install: core/PickupPreset) and hold Q to throw them hard. Not on CurseForge. Needs owo-lib.
+	// off once per install: core/PickupPreset) and hold Q to throw them hard. Not on CurseForge. Its config library (ewlib, MIT) is inside its jar.
 	[dep: "maven.modrinth:interactic-renewed:B6iZXYFE"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
@@ -246,6 +246,19 @@ tasks.register("buildKingdoms", GradleBuild) {
 }
 def kingdomsLibs = file(file("E:/").exists() ? "E:/jaymos-kingdoms-build/libs" : "kingdoms/build/libs")
 def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsProps.version}.jar" }.builtBy("buildKingdoms")
+// The Roads More Travelled (CC BY-NC 4.0, by milkucha; github.com/milkucha/trmt): paths wear into grass, dirt and sand
+// where people and mounts walk most, and grow back when left alone. It has no 26.3 build, so ports/trmt is its 26.1.x
+// source ported to 26.3 (changes listed in ports/trmt/PORT.md, credit kept), built by the pack tasks and shipped as an
+// override like Kingdoms. Free pack, so the non-commercial licence holds. TODO: once milkucha releases for 26.3
+// (Modrinth 74oZhrEe, CurseForge 1512955), move it into packMods and delete ports/trmt.
+def trmtProps = new Properties()
+file("ports/trmt/gradle.properties").withInputStream { trmtProps.load(it) }
+tasks.register("buildTrmt", GradleBuild) {
+	dir = file("ports/trmt")
+	tasks = ["build"]
+}
+def trmtLibs = file(file("E:/").exists() ? "E:/trmt-port-build/libs" : "ports/trmt/build/libs")
+def trmtJar = fileTree(trmtLibs) { include "trmt-${trmtProps.mod_version}.jar" }.builtBy("buildTrmt")
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
@@ -340,6 +353,7 @@ tasks.register("modpackMods", Sync) {
 	from kitchenJar
 	from mcaJar
 	from kingdomsJar
+	from trmtJar
 	from localPackJars
 	into new File(packDir, "mods")
 }
@@ -371,6 +385,7 @@ tasks.register("curseforgePack", Zip) {
 		from kitchenJar
 		from mcaJar
 		from kingdomsJar
+		from trmtJar
 	}
 }
 // the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
@@ -399,6 +414,7 @@ tasks.register("serverMods", Sync) {
 	from kitchenJar
 	from mcaJar
 	from kingdomsJar
+	from trmtJar
 	from localPackJars
 	into new File(serverDir, "mods")
 }
@@ -407,13 +423,14 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar", "buildKingdoms"
+	dependsOn "jar", "buildKingdoms", "buildTrmt"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
 		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
 		mcaJar.files.each { wanted << [jar: it, prefix: "mca-fabric-"] }
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
+		trmtJar.files.each { wanted << [jar: it, prefix: "trmt-"] }
 		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
 		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }
 		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {
