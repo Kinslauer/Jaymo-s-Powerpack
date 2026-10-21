@@ -39,6 +39,8 @@ public final class Aether {
 		com.jaymospowers.aether.dungeon.Dungeon.init();
 		// the other Aether II structures: outposts, camps, towers, dens, Veradexian works, Brexallen, the mineshaft, remnants, the guardian tree
 		com.jaymospowers.aether.structure.Structures.init();
+		// Aether II gear: tools, hammers, armour sets, gliders, the altar
+		com.jaymospowers.aether.gear.AetherGear.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();

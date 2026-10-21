@@ -62,7 +62,7 @@ public class FloatingBlock extends Block {
 	}
 
 	/** Space a floating block can rise into: air, fire, fluid, plants. */
-	static boolean free(BlockState state) {
+	public static boolean free(BlockState state) {
 		return state.isAir() || state.is(BlockTags.REPLACEABLE);
 	}
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "jaymospowers:purple_aercloud",
+    "T": "jaymospowers:cloudtwine",
+    "S": "minecraft:stick",
+    "Z": "jaymospowers:zanite_gemstone"
+  },
+  "pattern": [
+    "AAA",
+    "TZT",
+    "S S"
+  ],
+  "result": {
+    "id": "jaymospowers:purple_aercloud_glider"
+  }
+}

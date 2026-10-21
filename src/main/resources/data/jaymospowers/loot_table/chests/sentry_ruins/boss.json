@@ -41,22 +41,67 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_helmet",
+          "name": "jaymospowers:neptune_helmet",
           "weight": 1
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_chestplate",
+          "name": "jaymospowers:neptune_chestplate",
           "weight": 1
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_leggings",
+          "name": "jaymospowers:neptune_leggings",
           "weight": 1
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_boots",
+          "name": "jaymospowers:neptune_boots",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_helmet",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_chestplate",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_leggings",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_boots",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:neptune_helmet",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:neptune_chestplate",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:neptune_leggings",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:neptune_boots",
           "weight": 1
         }
       ]
@@ -70,23 +115,33 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_pickaxe",
+          "name": "jaymospowers:zanite_pickaxe",
           "weight": 3
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_axe",
+          "name": "jaymospowers:zanite_hammer",
           "weight": 3
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:shield",
+          "name": "jaymospowers:zanite_axe",
           "weight": 2
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_sword",
-          "weight": 3
+          "name": "jaymospowers:zanite_shortsword",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:shield",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_shears",
+          "weight": 1
         },
         {
           "type": "minecraft:item",
@@ -102,6 +157,35 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:golden_aercloud_glider",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:blue_aercloud_glider",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:purple_aercloud_glider",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:cold_aercloud_glider",
+          "weight": 1
         }
       ]
     },
@@ -183,8 +267,38 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:golden_apple",
+          "name": "jaymospowers:enchanted_blue_berry",
           "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:enchanted_orange",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_apple",
+          "weight": 2,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -198,37 +312,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "jaymospowers:orange",
-          "weight": 2,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:blue_berry",
-          "weight": 2,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "jaymospowers:wyndberry",
+          "name": "jaymospowers:enchanted_wyndberry",
           "weight": 1,
           "modifier": [
             {
@@ -236,7 +320,7 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 3
+                "max": 2
               }
             }
           ]
@@ -305,6 +389,21 @@
                 "type": "minecraft:uniform",
                 "min": 3,
                 "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:arkenium_plate",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
               }
             }
           ]

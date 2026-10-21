@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "jaymospowers:arkenium_plate",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "##",
+    " S",
+    " S"
+  ],
+  "result": {
+    "id": "jaymospowers:arkenium_hoe"
+  }
+}

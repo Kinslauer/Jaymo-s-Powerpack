@@ -22,6 +22,7 @@
     "jaymospowers:sentry_spawner",
     "jaymospowers:sentry_trap",
     "jaymospowers:faded_holystone_pillar",
-    "jaymospowers:faded_holystone_keystone"
+    "jaymospowers:faded_holystone_keystone",
+    "jaymospowers:altar"
   ]
 }

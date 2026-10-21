@@ -57,7 +57,7 @@ public class FloatingBlockEntity extends Entity {
 	}
 
 	/** One lifting off from {@code pos} (the block there already cleared). */
-	static FloatingBlockEntity create(ServerLevel level, BlockPos pos, BlockState state, boolean asItem) {
+	public static FloatingBlockEntity create(ServerLevel level, BlockPos pos, BlockState state, boolean asItem) {
 		FloatingBlockEntity entity = new FloatingBlockEntity(TYPE, level);
 		entity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 		entity.entityData.set(DATA_STATE, Block.getId(state));
