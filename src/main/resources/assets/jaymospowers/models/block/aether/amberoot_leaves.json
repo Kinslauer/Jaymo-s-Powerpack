@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "jaymospowers:block/aether/amberoot_leaves"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "suspicious_stew",
+  "ingredients": [
+    "minecraft:bowl",
+    "#minecraft:mushrooms",
+    "#minecraft:mushrooms",
+    "jaymospowers:pluracian"
+  ],
+  "result": {
+    "id": "minecraft:suspicious_stew",
+    "components": {
+      "minecraft:suspicious_stew_effects": [
+        {
+          "duration": 120,
+          "id": "minecraft:jump_boost"
+        }
+      ]
+    }
+  }
+}

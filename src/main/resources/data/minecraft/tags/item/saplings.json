@@ -1,6 +1,15 @@
 {
   "values": [
     "jaymospowers:skyroot_sapling",
-    "jaymospowers:golden_oak_sapling"
+    "jaymospowers:golden_oak_sapling",
+    "jaymospowers:skyplane_sapling",
+    "jaymospowers:skybirch_sapling",
+    "jaymospowers:skypine_sapling",
+    "jaymospowers:wisproot_sapling",
+    "jaymospowers:wisptop_sapling",
+    "jaymospowers:greatroot_sapling",
+    "jaymospowers:greatoak_sapling",
+    "jaymospowers:greatboa_sapling",
+    "jaymospowers:amberoot_sapling"
   ]
 }

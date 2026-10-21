@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "jaymospowers:block/aether/amberoot_pressure_plate"
+    },
+    "powered=true": {
+      "model": "jaymospowers:block/aether/amberoot_pressure_plate_down"
+    }
+  }
+}

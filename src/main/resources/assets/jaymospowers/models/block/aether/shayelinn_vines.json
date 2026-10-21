@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/vine",
+  "textures": {
+    "particle": "jaymospowers:block/aether/shayelinn_vines",
+    "vine": "jaymospowers:block/aether/shayelinn_vines"
+  }
+}
