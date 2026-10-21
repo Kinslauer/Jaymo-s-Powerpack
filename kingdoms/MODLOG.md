@@ -3781,6 +3781,41 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
   (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.
 
+## 0.7.129: the Nightfall Plague (pack 0.15.37)
+Our own take on Nightfall Plague (Forge/NeoForge, All Rights Reserved: only its ideas, no code or art), in
+`nightfall/`, woven into our vampires. Art and data by `tools/gen_nightfall.py`.
+- **Atrophy** (`Atrophy`, effect `jaymoskingdoms:atrophy`): a weak poison (never kills on its own; level II pricks twice
+  as often); each blow taken may leave you weak 2 s. Whatever dies with it in its blood (not players) rises as a
+  vampire bat. It doesn't take in the undead, vampires, or anyone with Immunity.
+- **Immunity** (`Immunity`): 10 min (20 long) of no plague, now and then clears hunger, wither or poison, a heart every
+  5 s. It burns the undead and vampires instead. It does **not** cure a turned vampire (still the priest's quest).
+- **Brewing** (data recipes, 26.3 style): awkward + Cursed Tusk = Immunity; + redstone = long; Immunity + fermented
+  spider eye = the Plague potion; + glowstone = strong. Splash/lingering as usual, so tipped arrows: the Immunity Arrow
+  and the Tusk Arrow (the Plague's).
+- **Night Bleeder** (`NightBleeder`, an illager): 50 health, 6 bite; rare at night, and up to 2 in a raid's last waves
+  (15 s fire resistance). Bites heal it and give the plague (worse if already in you). Calls 2-3 vampire bats in a
+  fight, vanishing a second; leaps to about 3 blocks short of you; burns by day and runs for shade unless fighting;
+  a wooden blade does 2.5x. Brought down by anything but a critical hit (falling strike, full-draw arrow) it breaks
+  into a **Blightwing** (`Blightwing`: 14 health, flees, may dive at whoever hits it) that lands as a Night Bleeder
+  again in 30 s at half health. 3 looks. Drops 3-5 emeralds, 1-2 Cursed Tusks, 2% a totem. Invisible in a spyglass.
+- **Vampire bats** (`VampireBat`): 8 health; in flocks at night under the open sky; latch on and drink (a blow shakes
+  them off) or charge and reel. Summoned ones vanish after 50 s. They leave every vampire alone.
+- **Callings** (`Callings`): hand one of our vampires a brewing stand, smoker, chiseled bookshelf or note block and it
+  becomes an Alchemist, Slaughter, Chronicler or Bard. Right-click with emeralds for its ware (Immunity potion 6,
+  3 Dried Meat 2, Cursed Card 12, Lute 10); with red food (4 for 1 emerald), books (1) or music discs (3) to sell.
+  Raw beef quiets any vampire for the night (`Vampires.feedBeef`). Sneak-click is still the villager's own screen.
+- **Relics** (`Relics`): Cursed Tusk (hits give the plague), Cursed Card (use: a vampire's dash; held, sometimes Speed),
+  Lute (monsters within 15 calmed 4 s and can't land a blow, Night Vision 20 s + 2 s a monster), Dried Meat (1-3
+  hearts, 1.5x at night, 2x under a full moon).
+- **Nightmares** (`Nightfalls`): falling asleep at night, 3% (+15% with the plague, +3% per plague relic carried, at most
+  50%): 4 s you can't leave the bed, then you're torn awake by 5-7 vampire bats or two Blightwings about to turn.
+- **The Nightfall** (`Nightfalls`): with the plague in you, a totem saving you, a nightmare, or 8+ of the plague's
+  creatures within 32 blocks set it off (not within 5 days of the last). 2-3 nights: each dawn the clock skips to the
+  next dusk, nobody sleeps (creative aside), vampires get Strength and Speed, the undead don't burn, fires smoke out,
+  more bats and Bleeders about, and a pale miasma fog (`NightfallClient`, `MiasmaFogMixin`). `/kingdom nightfall
+  start|stop` (ops).
+- Not remade: the music disc (it needs a song of its own), achievements, the cleric buying tusks.
+
 ## 0.7.130: the Purist ruler (pack 0.15.38)
 Andy (2026-10-20): "Add a new king temper, Purist, they insist on a high population of its own heritage. Ridiculing
 and stepping over those who are not. Very prideful ruler". `Purists`, plus a column in `Tempers`, `Retinue` and
