@@ -71,6 +71,9 @@ public final class Pain {
 	/** (0.14.4) Smelling salts just went under the nose (game time): the white flash. Synced to its owner, not saved. */
 	public static final AttachmentType<Long> JOLT = AttachmentRegistry.create(JaymosPowers.id("wounds_jolt"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
+	/** (0.14.5) The pain is dulled ({@link #numb}; no pain blur on the client). Synced to its owner, not saved (worked out again each second). */
+	public static final AttachmentType<Boolean> DULLED = AttachmentRegistry.create(JaymosPowers.id("wounds_dulled"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
 	private Pain() {
 	}
@@ -90,6 +93,11 @@ public final class Pain {
 			return true;
 		}
 		return entity instanceof Player player && KitchenCompat.drunk(player) >= DRUNK_NUMB;
+	}
+
+	/** (0.14.5) Whether the pain is dulled, as last synced to its owner (client side; server side use {@link #numb}). */
+	public static boolean dulled(Entity entity) {
+		return entity.hasAttached(DULLED);
 	}
 
 	/** (0.14.4) Under poppy (both sides, for its owner: the haze). */
@@ -165,6 +173,13 @@ public final class Pain {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			// (0.14.5) whether the pain is dulled, for the owner's screen
+			boolean dulled = player.isAlive() && numb(player);
+			if (dulled && !player.hasAttached(DULLED)) {
+				player.setAttached(DULLED, true);
+			} else if (!dulled && player.hasAttached(DULLED)) {
+				player.removeAttached(DULLED);
+			}
 			Float addiction = player.getAttached(ADDICTION);
 			if (addiction == null) {
 				if (player.hasAttached(WITHDRAWAL)) {

@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
  * The body silhouette (bottom-right of the screen): each part of a person coloured by how whole it is, flashing white
  * when it loses health. Shown while any part is hurt, and fading out for {@link #FADE_TICKS} once all are whole. It
  * reads the {@link Wounds#PARTS} attachment (a humanoid's eight parts, in {@code BodyPlan.HUMANOID} order); the vanilla
- * hearts stay.
+ * hearts stay. (0.14.5) A drop also sets off {@link PainHud}'s red edge.
  */
 public final class WoundsHud {
 	/** How long it lingers (fading) after every part is whole again. */
@@ -50,6 +50,12 @@ public final class WoundsHud {
 	public static void init() {
 		ClientTickEvents.END_CLIENT_TICK.register(WoundsHud::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("wounds_hud"), WoundsHud::render);
+		PainHud.init();
+	}
+
+	/** (0.14.5) How whole the local player's part {@code index} was last tick (plan order: 0 head, 1 body). */
+	static float part(int index) {
+		return index >= 0 && index < last.length ? last[index] : 1.0F;
 	}
 
 	private static float[] whole() {
@@ -80,14 +86,19 @@ public final class WoundsHud {
 			return;
 		}
 		float[] now = current(player);
+		float drop = 0.0F;
 		for (int i = 0; i < now.length; i++) {
 			if (now[i] < last[i] - 0.001F) {
+				drop = Math.max(drop, last[i] - now[i]);
 				FLASHING[i] = FLASH_TICKS;
 			} else if (FLASHING[i] > 0) {
 				FLASHING[i]--;
 			}
 		}
 		last = now;
+		if (drop > 0.0F) {
+			PainHud.hit(drop);
+		}
 		if (player.getAttached(Wounds.PARTS) != null) {
 			lastPresent = ticks;
 		}
