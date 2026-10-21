@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:leather_straps",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:straps",
+      "required": false
+    }
+  ]
+}
