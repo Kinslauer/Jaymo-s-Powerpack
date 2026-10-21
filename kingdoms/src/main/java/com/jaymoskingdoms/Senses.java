@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonSittingPhase;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
@@ -64,9 +65,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
  * it is searching) is a sneak attack, {@link #SNEAK_ATTACK_MULT}; Sneak Attack's ranks make it more. The hidden blade's
  * full-strength stab on an unaware one is an assassination ({@link HiddenBlade}, Assassinate).</li>
- * <li><b>Bosses and pets</b> (0.7.113): even they can get got. A boss is harder to catch: stealth cuts its sight no lower
+ * <li><b>Bosses and pets</b> (0.7.114): even they can get got. A boss is harder to catch: stealth cuts its sight no lower
  * than {@link #BOSS_SIGHT_MIN}, it sees in a wider cone ({@link #BOSS_VIEW_COS}), it is only unaware while it is after no
- * one at all, and a sneak attack or assassination on it deals at most {@link #BOSS_BLOW_SHARE} of its health. A tame pet
+ * one at all (the dragon: only while perched), and a sneak attack or assassination on it deals at most {@link #BOSS_BLOW_SHARE} of its health. A tame pet
  * can be caught unaware like any other mob, except by its own owner (no accidental assassination of your own dog).</li>
  * </ul>
  */
@@ -101,8 +102,8 @@ public final class Senses {
 
 	/** Bosses: stealth cuts their sight no lower than this share; they see within this cosine of their look (-0.5: a 240 degree cone). */
 	static final double BOSS_SIGHT_MIN = 0.4, BOSS_VIEW_COS = -0.5;
-	/** Bosses: a sneak attack or assassination deals at most this share of their max health (never less than the plain blow). */
-	static final float BOSS_BLOW_SHARE = 0.15F;
+	/** Bosses: a sneak attack or assassination deals at most this share of their max health, and never less than this times the plain blow. */
+	static final float BOSS_BLOW_SHARE = 0.15F, BOSS_BLOW_MIN_MULT = 1.5F;
 
 	/** The gauge: how often it is worked out (ticks), how far it looks (blocks), and how many steps a "noticing" fill has. */
 	static final int GAUGE_TICKS = 5;
@@ -478,11 +479,13 @@ public final class Senses {
 
 	/**
 	 * {@code target} is a hostile or neutral mob that isn't after {@code player} and can't see them: they're behind it, or it
-	 * is searching. A boss only while it is after no one at all; a tame pet never of its own owner.
+	 * is searching. A boss only while it is after no one at all (the dragon, which never targets anyone, only while perched);
+	 * a tame pet (a wolf: other pets aren't hostile or neutral) never of its own owner.
 	 */
 	static boolean unaware(LivingEntity target, ServerPlayer player) {
 		if (!(target instanceof Mob mob) || !sensing(mob) || mob instanceof TamableAnimal tame && tame.isOwnedBy(player) || !mob.isAlive()
-			|| mob.getTarget() == player || boss(mob) && mob.getTarget() != null) {
+			|| mob.getTarget() == player || boss(mob) && mob.getTarget() != null
+			|| mob instanceof EnderDragon dragon && !(dragon.getPhaseManager().getCurrentPhase() instanceof AbstractDragonSittingPhase)) {
 			return false;
 		}
 		return searchingFor(mob, player) || !inCone(mob, player);
@@ -493,12 +496,16 @@ public final class Senses {
 		return target.getInvulnerableTime() > 10 && !source.is(DamageTypeTags.BYPASSES_COOLDOWN);
 	}
 
-	/** What an unaware blow of {@code blow} deals {@code target}: on a boss, no more than {@link #BOSS_BLOW_SHARE} of its health, never less than {@code plain}. */
+	/**
+	 * What an unaware blow of {@code blow} deals {@code target}: on a boss, no more than {@link #BOSS_BLOW_SHARE} of its health,
+	 * never less than {@link #BOSS_BLOW_MIN_MULT} times {@code plain} (more than the plain blow, so the hurt mixin still sees
+	 * the hidden blade's assassination as its own and doesn't add a sneak attack on top).
+	 */
 	static float unawareBlow(LivingEntity target, float plain, float blow) {
 		if (!(target instanceof Mob mob) || !boss(mob)) {
 			return blow;
 		}
-		return Math.max(plain, Math.min(blow, mob.getMaxHealth() * BOSS_BLOW_SHARE));
+		return Math.max(plain * BOSS_BLOW_MIN_MULT, Math.min(blow, mob.getMaxHealth() * BOSS_BLOW_SHARE));
 	}
 
 	/** Whether {@code player}'s hidden blade can assassinate {@code target} (Assassinate, and it is unaware of them). */
