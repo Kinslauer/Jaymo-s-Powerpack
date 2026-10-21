@@ -149,6 +149,7 @@ public final class Tinkering {
 			new MenuType<>(ToolStationMenu::new, FeatureFlags.VANILLA_SET));
 
 		registerSmeltery();
+		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("tinkering"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()

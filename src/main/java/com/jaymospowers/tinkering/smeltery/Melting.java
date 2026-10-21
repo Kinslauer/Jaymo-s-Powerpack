@@ -5,6 +5,8 @@ import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.WeaponPartItem;
 import com.jaymospowers.tinkering.WeaponParts;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +26,55 @@ public final class Melting {
 	static final int MELT_BASE_TICKS = 20, MELT_MB_PER_TICK = 3;
 	/** Ores and raw ore give this many ingots' worth. */
 	static final int ORE_INGOTS = 2;
+	/** (0.13) Ingots in uncraftable metal: horse and nautilus armour, a bell, chainmail (helmet, chest, legs, boots). */
+	static final int HORSE_ARMOUR_INGOTS = 9, NAUTILUS_ARMOUR_INGOTS = 7, BELL_INGOTS = 4;
+	static final int[] CHAINMAIL_INGOTS = {3, 5, 4, 2};
+	/** (0.13) A chipped and a damaged anvil (a new one is 31 ingots). */
+	static final int[] WORN_ANVIL_INGOTS = {20, 10};
 
-	/** What an item melts into. */
-	public record Result(Molten molten, int amount) {
+	/**
+	 * What an item melts into: one or more liquids, the largest share first (a paladin's helmet is iron and gold).
+	 * {@link #molten()} and {@link #amount()} are that largest share.
+	 */
+	public record Result(List<Input> parts) {
+		public Result(Molten molten, int amount) {
+			this(List.of(new Input(molten, amount)));
+		}
+
+		public Molten molten() {
+			return parts.getFirst().molten();
+		}
+
+		public int amount() {
+			return parts.getFirst().amount();
+		}
+
+		/** Every liquid it gives, together (mB). */
+		public int total() {
+			int total = 0;
+			for (Input part : parts) {
+				total += part.amount();
+			}
+			return total;
+		}
+
 		public int ticks() {
-			return MELT_BASE_TICKS + amount / MELT_MB_PER_TICK;
+			return MELT_BASE_TICKS + total() / MELT_MB_PER_TICK;
+		}
+
+		/** Several liquids, largest first; null if there's nothing. */
+		public static @Nullable Result of(Map<Molten, Integer> liquids) {
+			List<Input> parts = new ArrayList<>();
+			liquids.forEach((molten, amount) -> {
+				if (amount > 0) {
+					parts.add(new Input(molten, amount));
+				}
+			});
+			if (parts.isEmpty()) {
+				return null;
+			}
+			parts.sort(Comparator.comparingInt(Input::amount).reversed().thenComparing(Input::molten));
+			return new Result(List.copyOf(parts));
 		}
 	}
 
@@ -47,6 +93,11 @@ public final class Melting {
 		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
+	/**
+	 * (0.13) Melting worked out once the game is up ({@link MeltingRecipes}): data files, forged weapons, and anything
+	 * made from metal by a recipe. The server sends it to players, so both sides agree.
+	 */
+	private static volatile Map<Item, Result> extra = Map.of();
 
 	static {
 		int ingot = Molten.INGOT;
@@ -59,9 +110,28 @@ public final class Melting {
 		gear(Molten.GOLD, Items.GOLDEN_SWORD, Items.GOLDEN_PICKAXE, Items.GOLDEN_AXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_HOE,
 			Items.GOLDEN_SPEAR, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS);
 		add(Molten.GOLD, Molten.NUGGET * 6, Items.NETHER_GOLD_ORE);
+		// (0.13) metal nobody can craft: mount armour, chainmail, the village bell
+		add(Molten.IRON, ingot * HORSE_ARMOUR_INGOTS, Items.IRON_HORSE_ARMOR);
+		add(Molten.GOLD, ingot * HORSE_ARMOUR_INGOTS, Items.GOLDEN_HORSE_ARMOR);
+		add(Molten.COPPER, ingot * HORSE_ARMOUR_INGOTS, Items.COPPER_HORSE_ARMOR);
+		add(Molten.IRON, ingot * NAUTILUS_ARMOUR_INGOTS, Items.IRON_NAUTILUS_ARMOR);
+		add(Molten.GOLD, ingot * NAUTILUS_ARMOUR_INGOTS, Items.GOLDEN_NAUTILUS_ARMOR);
+		add(Molten.COPPER, ingot * NAUTILUS_ARMOUR_INGOTS, Items.COPPER_NAUTILUS_ARMOR);
+		Item[] chainmail = {Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS};
+		for (int i = 0; i < chainmail.length; i++) {
+			add(Molten.IRON, ingot * CHAINMAIL_INGOTS[i], chainmail[i]);
+		}
+		add(Molten.GOLD, ingot * BELL_INGOTS, Items.BELL);
+		// a worn anvil gives back less than a new one (which melts by its recipe)
+		add(Molten.IRON, ingot * WORN_ANVIL_INGOTS[0], Items.CHIPPED_ANVIL);
+		add(Molten.IRON, ingot * WORN_ANVIL_INGOTS[1], Items.DAMAGED_ANVIL);
 		metal(Molten.COPPER, Items.COPPER_INGOT, Items.COPPER_NUGGET, null, Items.RAW_COPPER, Items.RAW_COPPER_BLOCK);
 		for (Item block : Items.COPPER_BLOCK.asList()) {
 			add(Molten.COPPER, Molten.BLOCK, block);
+		}
+		// a copper golem's statue is the block it was built from
+		for (Item statue : Items.COPPER_GOLEM_STATUE.asList()) {
+			add(Molten.COPPER, Molten.BLOCK, statue);
 		}
 		gear(Molten.COPPER, Items.COPPER_SWORD, Items.COPPER_PICKAXE, Items.COPPER_AXE, Items.COPPER_SHOVEL, Items.COPPER_HOE,
 			Items.COPPER_SPEAR, Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS);
@@ -110,6 +180,22 @@ public final class Melting {
 
 	/** What one of this item melts into, or null. */
 	public static @Nullable Result of(ItemStack stack) {
+		Result result = builtIn(stack);
+		return result != null ? result : extra.get(stack.getItem());
+	}
+
+	/** The extras ({@link MeltingRecipes}), for sending to players. */
+	public static Map<Item, Result> extra() {
+		return extra;
+	}
+
+	/** Swaps in a new set of extras (worked out on the server, or received from it). */
+	public static void setExtra(Map<Item, Result> map) {
+		extra = Map.copyOf(map);
+	}
+
+	/** What one of this item melts into by the built-in table and rules alone (without the extras), or null. */
+	static @Nullable Result builtIn(ItemStack stack) {
 		Result listed = ITEMS.get(stack.getItem());
 		if (listed != null) {
 			return listed;
