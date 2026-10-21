@@ -1,6 +1,7 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.gravity.GravityWeight;
 import com.jaymospowers.power.web.KitchenCompat;
@@ -83,6 +84,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * So can a severed head or limb ({@link SeveredPart}), dangling from one hand ({@link #PART}): right-click it with an
  * empty hand (or sneak + right-click), the same controls to drop or throw it.
+ * <p>
+ * (0.14.1) And anyone downed ({@link Downed}), whatever they are: a sneak + right-click tap on them is the downed
+ * state's own (held, it brings them round), which picks them up through {@link #pickUpDowned}. A downed player can't
+ * pick anything up, nor struggle free.
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
@@ -303,7 +308,7 @@ public final class Carry {
 		if (!entity.isAlive() || entity.isSpectator()) {
 			return false;
 		}
-		if (entity instanceof Player || entity instanceof SeveredPart) {
+		if (entity instanceof Player || entity instanceof SeveredPart || Downed.isDowned(entity)) {
 			return true;
 		}
 		return entity instanceof LivingEntity && (entity.getType().builtInRegistryHolder().is(CARRYABLE)
@@ -352,8 +357,8 @@ public final class Carry {
 	 * stun, held up by Lift, on the end of a web, still flying from a throw, webbed down (no jump), asleep.
 	 */
 	public static boolean canStruggle(ServerPlayer player) {
-		// (0.15.1) lying limp from a crash is as helpless as being stunned
-		if (!player.isAlive() || player.isSleeping() || KitchenCompat.isLimp(player)) {
+		// (0.15.3) lying limp from a crash is as helpless as being stunned
+		if (!player.isAlive() || player.isSleeping() || Downed.isDowned(player) || KitchenCompat.isLimp(player)) {
 			return false;
 		}
 		long now = player.level().getGameTime();
@@ -385,8 +390,12 @@ public final class Carry {
 	// ---- picking up
 
 	private static InteractionResult onUseEntity(Player player, Level level, InteractionHand hand, Entity target, @Nullable EntityHitResult hit) {
-		if (isCarried(player)) {
+		if (isCarried(player) || Downed.isDowned(player)) {
 			return InteractionResult.FAIL;
+		}
+		if (player.isShiftKeyDown() && Downed.isDowned(target)) {
+			// (0.14.1) the downed state's: a tap picks them up, a hold brings them round (Downed)
+			return InteractionResult.PASS;
 		}
 		Carrying already = player.getAttached(CARRYING);
 		if (already != null && already.target() == target.getId()) {
@@ -412,6 +421,26 @@ public final class Carry {
 			pickUp(carrier, target);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * (0.14.1) A tap of sneak + use on someone downed ({@link Downed}) picks them up, if this player could pick anything up
+	 * just now. Whether it did.
+	 */
+	public static boolean pickUpDowned(ServerPlayer carrier, Entity target) {
+		if (isCarried(carrier) || isCarrying(carrier) || Downed.isDowned(carrier) || KitchenCompat.isCarryingCorpse(carrier) || carrier.isPassenger()
+			|| carrier.isSleeping() || carrier.isSpectator() || !canBeCarried(target)) {
+			return false;
+		}
+		if (isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle()) {
+			return false;
+		}
+		Long ready = REGRAB.get(target.getUUID());
+		if (ready != null && carrier.level().getGameTime() < ready) {
+			return false;
+		}
+		pickUp(carrier, target);
+		return true;
 	}
 
 	static void pickUp(ServerPlayer carrier, Entity target) {

@@ -142,6 +142,7 @@ public final class WeaponParts {
 		armory("ninjato_blade", "ninjato", 2, Assembly.GUARD_ROD);
 		armory("saber_blade", "saber", 2, Assembly.GUARD_ROD);
 		armory("machete_blade", "machete", 2, Assembly.ROD_BINDING);
+		armory("rapier_blade", "rapier", 1, Assembly.GUARD_ROD);
 		add(new Kind("kunai_blade", "jaymospowers:kunai", Scheme.SINGLE, INGOT, Assembly.BINDING, 4));
 		add(new Kind("throwing_star_blank", "jaymospowers:throwing_star", Scheme.SINGLE, 4 * Molten.NUGGET, Assembly.ALONE, 2));
 		add(new Kind("harpoon_head", "jaymospowers:harpoon", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 1));

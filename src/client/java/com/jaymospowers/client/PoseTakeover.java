@@ -104,7 +104,7 @@ public final class PoseTakeover {
 	private static net.fabricmc.fabric.api.client.rendering.v1.@Nullable RenderStateDataKey<?> ragdollKey;
 	private static boolean ragdollLooked;
 
-	/** (0.15.1) A player lying limp as Kitchen's ragdoll: its limbs are set last of all, so nothing may animate over them. */
+	/** (0.15.3) A player lying limp as Kitchen's ragdoll: its limbs are set last of all, so nothing may animate over them. */
 	private static boolean ragdolled(AvatarRenderState s) {
 		if (!ragdollLooked) {
 			ragdollLooked = true;

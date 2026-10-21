@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:poppy",
+    "minecraft:sugar",
+    "jaymoskitchen:strong_spirits",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "jaymospowers:poppy_syrup",
+    "count": 1
+  }
+}

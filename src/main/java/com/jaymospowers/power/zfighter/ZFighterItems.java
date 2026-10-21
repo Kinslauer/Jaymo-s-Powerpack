@@ -217,10 +217,12 @@ public final class ZFighterItems {
 		public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
 			ItemStack left = super.finishUsingItem(stack, level, entity);
 			if (level instanceof ServerLevel server) {
-				entity.setHealth(entity.getMaxHealth());
-				// bones set and lost limbs grown back
-				com.jaymospowers.core.Fractures.heal(entity);
+				// lost limbs grown back and bones set, then whole ((0.14.2) in that order: a part still missing or unset can't take
+				// the healing, and Wounds would refuse it)
 				com.jaymospowers.core.Dismember.regrow(entity, true);
+				com.jaymospowers.core.Fractures.heal(entity);
+				entity.setHealth(entity.getMaxHealth());
+				com.jaymospowers.core.wounds.Wounds.reconcile(entity);
 				List<MobEffectInstance> ailments = new ArrayList<>();
 				for (MobEffectInstance effect : entity.getActiveEffects()) {
 					if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {

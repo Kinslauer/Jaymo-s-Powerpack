@@ -1,6 +1,7 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.net.PowerPayloads;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -16,14 +17,23 @@ public final class PowerEvents {
 		PowerPayloads.register();
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.KeyInput.TYPE, (payload, ctx) -> {
 			PowerKey key = PowerKey.byIndex(payload.key());
-			if (key != null) {
+			// (0.14.1) a downed player's powers are out of reach (a key let go still goes through)
+			if (key != null && !(payload.down() && Downed.isDowned(ctx.player()))) {
 				Powers.key(ctx.player(), key, payload.down());
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ModeKey.TYPE,
-			(payload, ctx) -> Powers.mode(ctx.player(), payload.down()));
+			(payload, ctx) -> {
+				if (!(payload.down() && Downed.isDowned(ctx.player()))) {
+					Powers.mode(ctx.player(), payload.down());
+				}
+			});
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.UltimateKey.TYPE,
-			(payload, ctx) -> Powers.ultimate(ctx.player(), payload.down()));
+			(payload, ctx) -> {
+				if (!(payload.down() && Downed.isDowned(ctx.player()))) {
+					Powers.ultimate(ctx.player(), payload.down());
+				}
+			});
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ChooseAffinity.TYPE,
 			(payload, ctx) -> Affinity.choose(ctx.player(), payload.affinity()));
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ChoosePower.TYPE,

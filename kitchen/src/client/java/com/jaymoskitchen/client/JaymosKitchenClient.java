@@ -44,6 +44,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		com.jaymoskitchen.client.ragdoll.LimpController.register();
+		// drinking: the view sways when you're drunk
+		com.jaymoskitchen.client.brewing.DrunkSway.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);

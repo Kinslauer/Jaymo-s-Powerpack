@@ -304,7 +304,7 @@ public final class WebSymbiote {
 	 */
 	public static final int FEED_NONE = 0, FEED_KILL = 1, FEED_GRAB = 2, FEED_CARRY = 3, FEED_FEED = 4;
 	public static final int CORPSE_WAIT_TICKS = 60, GRAB_HAUL_TICKS = 8, GRAB_TIMEOUT = 80, CARRY_TIMEOUT = 20;
-	/** (0.15.1) 5, up from 3: Kitchen corpses are ragdolls now and can tumble a little way from where they fell. */
+	/** (0.15.3) 5, up from 3: Kitchen corpses are ragdolls now and can tumble a little way from where they fell. */
 	public static final double CORPSE_FIND_RADIUS = 5.0;
 	/** Consume: a corpse a tendril can take from this far; something weak enough is finished off by a lash landing {@code CONSUME_FINISH_LAG} later. */
 	public static final double CONSUME_CORPSE_RANGE = 6.0;

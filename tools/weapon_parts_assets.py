@@ -40,6 +40,7 @@ PARTS = [
     ("ninjato_blade", "Ninjato Blade", "armory:ninjato", ["iron", "gold"]),
     ("saber_blade", "Saber Blade", "armory:saber", ["iron", "gold"]),
     ("machete_blade", "Machete Blade", "armory:machete", ["iron", "gold"]),
+    ("rapier_blade", "Rapier Blade", "armory:rapier", ["iron", "gold"]),
     ("kunai_blade", "Kunai Blade", "single:kunai", ["iron"]),
     ("throwing_star_blank", "Throwing Star Blank", "single:throwing_star", ["iron"]),
     ("harpoon_head", "Harpoon Head", "single:harpoon", ["iron"]),
