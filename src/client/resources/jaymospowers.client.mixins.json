@@ -22,6 +22,7 @@
 		"DismemberModelFeatureRendererMixin",
 		"DownedLivingEntityRendererMixin",
 		"DownedModelFeatureRendererMixin",
+		"DownedKeysMixin",
 		"CarryCameraMixin",
 		"HeadCamMixin",
 		"CarryFirstPersonMixin",

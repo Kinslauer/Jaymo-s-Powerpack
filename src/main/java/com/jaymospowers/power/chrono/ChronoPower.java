@@ -198,6 +198,17 @@ public final class ChronoPower implements Power {
 		state.synced = false;
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// stasis, bloom, overclock and trail end (cooldowns kept), and so does the flow
+		ChronoState state = STATES.get(player.getUUID());
+		if (state != null) {
+			stopAll(player, state);
+		}
+		ChronoFlow.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		ChronoState state = STATES.get(player.getUUID());
