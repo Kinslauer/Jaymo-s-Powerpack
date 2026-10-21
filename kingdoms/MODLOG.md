@@ -3454,3 +3454,25 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
   mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
   mood change. Numbers at the top of `EmberHugs`.
+- **0.7.104, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.15.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
+- **0.7.104, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
+  side of Jaymo's Powers' Wounds phase 4 (`docs/Wounds-Phase4.md`, track B; written without a compiler, not yet built
+  or tested). **Clerics are barber-surgeons:** a grown cleric also sells Powers' linen bandages (3 for 2 emeralds),
+  splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds
+  while your bones are broken still has them set (Powers' `Fractures`). **Taverns and festivals sell drink:** a grown
+  villager standing in (or at the door of) one of a realm's standing taverns, or raising a toast at its festival, sells
+  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once offered, the drink stays on their trades (so walking out and back in never restocks it)
+  (`Remedies`, prices at its top). The wares go on when a player right-clicks the villager, just before the trading
+  screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
+  **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside
+  `jaymospowers_revive`, and Powers stops its bleeding and gives it a bandage's heal.
