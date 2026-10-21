@@ -83,18 +83,18 @@ import org.jspecify.annotations.Nullable;
  * character level climbs; hits harder the worse they're hurt; always hungry.</li>
  * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; (0.7.92) near death
  * their ki flares with a random buff for a while ({@link EarthlingSurge}).</li>
- * <li><b>Stormborn:</b> (0.7.97) quicker under the open sky, and lightning never hurts them; in a thunderstorm their blows
+ * <li><b>Stormborn:</b> (0.7.106) quicker under the open sky, and lightning never hurts them; in a thunderstorm their blows
  * throw a spark to a monster nearby. Deep underground they're sluggish.</li>
- * <li><b>Dawnborn:</b> (0.7.97) Nightborn's mirror: stronger and slowly healing under the open sun, hitting the undead
+ * <li><b>Dawnborn:</b> (0.7.106) Nightborn's mirror: stronger and slowly healing under the open sun, hitting the undead
  * harder; in the dark they hit lighter and hunger faster.</li>
- * <li><b>Endborn:</b> (0.7.97, earned) now and then blink aside from an arrow or anything thrown; endermen don't mind
+ * <li><b>Endborn:</b> (0.7.106, earned) now and then blink aside from an arrow or anything thrown; endermen don't mind
  * their stare. Water and rain hurt them a little, like an enderman.</li>
- * <li><b>Dragonblood:</b> (0.7.97, earned) fire and dragon's breath do them half harm; the hoard: the more gold they
+ * <li><b>Dragonblood:</b> (0.7.106, earned) fire and dragon's breath do them half harm; the hoard: the more gold they
  * carry the harder they hit, and carrying none they hit lighter.</li>
- * <li><b>Deepborn:</b> (0.7.97, earned) sneaking, they sense the creatures round them through walls (client); they never
+ * <li><b>Deepborn:</b> (0.7.106, earned) sneaking, they sense the creatures round them through walls (client); they never
  * set off sculk (the Warden can't hear them either). Blasts stun them, and the open sun dulls them.</li>
  * </ul>
- * (0.7.97) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
+ * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
  * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). Earning one ({@link #UNLOCKED}) gives a Blood Rite
  * ({@link #RITE_ITEM}): read, it opens the heritage screen to change your blood to one you've earned.
@@ -149,40 +149,40 @@ public final class Heritage {
 	/** Earthling: skill experience, as a factor. */
 	static final float EARTHLING_XP = 1.25F;
 	/**
-	 * (0.7.97) Stormborn: walking speed under the open sky, and lost deep underground (no sky, below the sea), as shares.
+	 * (0.7.106) Stormborn: walking speed under the open sky, and lost deep underground (no sky, below the sea), as shares.
 	 * In a thunderstorm under the sky a blow throws a spark of this much harm to the nearest monster this close to what
 	 * they hit.
 	 */
 	static final double STORM_SKY_SPEED = 0.08, STORM_DEEP_SLOW = 0.08, STORM_SPARK_RANGE = 4.0;
 	static final float STORM_SPARK_DAMAGE = 3.0F;
-	/** (0.7.97) A Stormborn throws a spark at most this often (ticks), so a target's hurt-immunity doesn't let them spam it. */
+	/** (0.7.106) A Stormborn throws a spark at most this often (ticks), so a target's hurt-immunity doesn't let them spam it. */
 	static final int STORM_SPARK_EVERY = 10;
 	/**
-	 * (0.7.97) Dawnborn: blows in the sun, the share more against the undead, blows lost in the dark (shares); in the sun
+	 * (0.7.106) Dawnborn: blows in the sun, the share more against the undead, blows lost in the dark (shares); in the sun
 	 * they heal this much this often (ticks); hunger in the dark, as a factor.
 	 */
 	static final double DAWN_SUN_DAMAGE = 0.1, DAWN_DARK_WEAK = 0.1;
 	static final float DAWN_UNDEAD = 0.2F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
 	static final int DAWN_HEAL_EVERY = 100;
 	/**
-	 * (0.7.97) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
+	 * (0.7.106) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
 	 * they can again (ticks); water and rain hurt this much this often (ticks).
 	 */
 	static final float END_BLINK_CHANCE = 0.25F, END_WET_DAMAGE = 1.0F;
 	static final double END_BLINK_RANGE = 8.0;
 	static final int END_BLINK_COOLDOWN = 60, END_WET_EVERY = 40;
 	/**
-	 * (0.7.97) Dragonblood: the share of fire and dragon's breath they take; the hoard: blows harder by up to
+	 * (0.7.106) Dragonblood: the share of fire and dragon's breath they take; the hoard: blows harder by up to
 	 * {@code DRAGON_HOARD_MAX} (a share) as their gold rises to {@code DRAGON_HOARD_FULL} ingots' worth (a nugget a
 	 * ninth, a block nine), and lighter by {@code DRAGON_POOR} carrying none.
 	 */
 	static final float DRAGON_FIRE_TAKEN = 0.5F;
 	static final double DRAGON_HOARD_MAX = 0.15, DRAGON_POOR = 0.1, DRAGON_HOARD_FULL = 64.0;
-	/** (0.7.97) Deepborn: how long a blast stuns them (ticks); blows lost in the open sun (a share). */
+	/** (0.7.106) Deepborn: how long a blast stuns them (ticks); blows lost in the open sun (a share). */
 	static final int DEEP_STUN_TICKS = 60;
 	static final double DEEP_SUN_WEAK = 0.1;
 	/**
-	 * (0.7.97) The unlocks: seeing the Ender Dragon die within this far; a tamed dragon of theirs, or a digging Warden,
+	 * (0.7.106) The unlocks: seeing the Ender Dragon die within this far; a tamed dragon of theirs, or a digging Warden,
 	 * within this far; looked for this often (ticks).
 	 */
 	static final double UNLOCK_DRAGON_RANGE = 192.0, UNLOCK_NEAR_RANGE = 20.0;
@@ -209,7 +209,7 @@ public final class Heritage {
 
 	/**
 	 * The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a
-	 * point). (0.7.97) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and taken up with a
+	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and taken up with a
 	 * Blood Rite.
 	 */
 	public enum Kind {
@@ -233,7 +233,7 @@ public final class Heritage {
 		public final int freePoints;
 		public final Item icon;
 		public final List<Stats.Stat> bonuses;
-		/** (0.7.97) Woken in play, not picked at the start. */
+		/** (0.7.106) Woken in play, not picked at the start. */
 		public final boolean earned;
 
 		Kind(int freePoints, Item icon, Stats.Stat... bonuses) {
@@ -308,25 +308,25 @@ public final class Heritage {
 	static final AttachmentType<Integer> WET = AttachmentRegistry.create(JaymosKingdoms.id("heritage_wet"), builder -> builder.persistent(Codec.INT));
 
 	/**
-	 * (0.7.97) The earned heritages a player has woken (their keys). Saved, kept through death, synced to its own player
+	 * (0.7.106) The earned heritages a player has woken (their keys). Saved, kept through death, synced to its own player
 	 * (the screen shows them).
 	 */
 	public static final AttachmentType<List<String>> UNLOCKED = AttachmentRegistry.create(JaymosKingdoms.id("heritage_unlocked"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath()
 			.syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
-	/** (0.7.97) The Blood Rite: read, it opens the heritage screen to take up an earned heritage. */
+	/** (0.7.106) The Blood Rite: read, it opens the heritage screen to take up an earned heritage. */
 	public static Item RITE_ITEM;
 
-	/** (0.7.97) Players who've read a Blood Rite and have the screen up to choose (not saved). */
+	/** (0.7.106) Players who've read a Blood Rite and have the screen up to choose (not saved). */
 	private static final java.util.Set<UUID> RITE_OPEN = new java.util.HashSet<>();
-	/** (0.7.97) When each Endborn may next blink aside (game time). */
+	/** (0.7.106) When each Endborn may next blink aside (game time). */
 	private static final Map<UUID, Long> BLINK_READY = new HashMap<>();
-	/** (0.7.97) When each Stormborn last threw a spark (game time). */
+	/** (0.7.106) When each Stormborn last threw a spark (game time). */
 	private static final Map<UUID, Long> SPARKED = new HashMap<>();
 
 	/**
-	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). (0.7.97)
+	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). (0.7.106)
 	 * {@code rite}: a Blood Rite was read, so only the earned heritages they've woken can be picked.
 	 */
 	public record Open(boolean forced, boolean rite) implements CustomPacketPayload {
@@ -368,7 +368,7 @@ public final class Heritage {
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
 			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
-		// (0.7.97) Stormborn: lightning never hurts; Endborn: now and then blink aside from what's thrown or shot
+		// (0.7.106) Stormborn: lightning never hurts; Endborn: now and then blink aside from what's thrown or shot
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player)
 			|| !(source.is(DamageTypeTags.IS_LIGHTNING) && is(player, Kind.STORMBORN)) && !blink(player, source));
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
@@ -415,7 +415,7 @@ public final class Heritage {
 		}
 		Kind kind = all[ordinal];
 		if (of(player) != null) {
-			// (0.7.97) a Blood Rite's choice: only an earned heritage they've woken, and the rite is spent on it
+			// (0.7.106) a Blood Rite's choice: only an earned heritage they've woken, and the rite is spent on it
 			if (RITE_OPEN.remove(player.getUUID()) && kind != of(player) && kind.earned && unlocked(player, kind)) {
 				if (!spendRite(player)) {
 					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_gone").withStyle(ChatFormatting.GRAY));
@@ -520,7 +520,7 @@ public final class Heritage {
 		if (kind != Kind.TIDEBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
-		// (0.7.97) the new bloods' modifiers that change with where they stand, taken off everyone else
+		// (0.7.106) the new bloods' modifiers that change with where they stand, taken off everyone else
 		if (kind != Kind.STORMBORN) {
 			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_sky", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
@@ -754,7 +754,7 @@ public final class Heritage {
 		return is(player, Kind.SYLVAN) ? SYLVAN_SNEAK : 0.0;
 	}
 
-	// ---- (0.7.97) the new bloods -----------------------------------------------------------------------------------
+	// ---- (0.7.106) the new bloods -----------------------------------------------------------------------------------
 
 	/** Under the open sky (nothing overhead), in the Overworld's light: a Stormborn's home. */
 	static boolean openSky(ServerPlayer player) {
@@ -877,7 +877,7 @@ public final class Heritage {
 		nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);
 	}
 
-	// ---- (0.7.97) earned heritages and the Blood Rite ------------------------------------------------------------
+	// ---- (0.7.106) earned heritages and the Blood Rite ------------------------------------------------------------
 
 	/** Whether {@code player} has woken earned heritage {@code kind} (any heritage that isn't earned is always open). */
 	public static boolean unlocked(Player player, Kind kind) {
@@ -1006,7 +1006,7 @@ public final class Heritage {
 	/** {@code /kingdom heritage set|clear|get|unlock}, for ops. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		var players = Commands.argument("players", EntityArgument.players());
-		// (0.7.97) wake an earned heritage in them, as if they'd earned it (with its Blood Rite)
+		// (0.7.106) wake an earned heritage in them, as if they'd earned it (with its Blood Rite)
 		var unlockPlayers = Commands.argument("players", EntityArgument.players());
 		for (Kind kind : Kind.values()) {
 			if (!kind.earned) {

@@ -25,13 +25,13 @@ import org.jspecify.annotations.Nullable;
  * it; Choose seals it, for life. It can't be shut without picking.
  * (0.7.75) Rows wrap instead of being cut off, and the pane scrolls with the mouse wheel when it runs long; pointing at
  * it while it overflows scrolls it slowly on its own, to the end and back.
- * (0.7.97) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. Read, a
+ * (0.7.106) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. Read, a
  * Blood Rite opens the screen too ({@link #rite}): then only the earned heritages you've woken can be picked. The rows
  * shrink to fit when there are more heritages than the panel is tall, dropping their icons when too small for them.
  */
 final class HeritageScreen extends Screen {
 	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
-	/** (0.7.97) A Blood Rite's accent: dark blood red. */
+	/** (0.7.106) A Blood Rite's accent: dark blood red. */
 	static final int RITE_ACCENT = 0xFFB0323C;
 	/** The heritage screen's accent: a deep teal, apart from the class screen's gold. */
 	static final int ACCENT = 0xFF4FB8A8;
@@ -44,7 +44,7 @@ final class HeritageScreen extends Screen {
 	static final long LEAD_MS = 5000L, LEAD_FADE_MS = 1500L;
 
 	private final boolean forced;
-	/** (0.7.97) Opened by a Blood Rite: only an earned heritage you've woken (and aren't) can be picked. */
+	/** (0.7.106) Opened by a Blood Rite: only an earned heritage you've woken (and aren't) can be picked. */
 	private final boolean rite;
 	private Heritage.@Nullable Kind picked;
 	private @Nullable Button choose;
@@ -119,7 +119,7 @@ final class HeritageScreen extends Screen {
 		return panelW() - LIST_W;
 	}
 
-	/** (0.7.97) A list row's height: as tall as {@link #LIST_ROW}, shrunk so every heritage fits. */
+	/** (0.7.106) A list row's height: as tall as {@link #LIST_ROW}, shrunk so every heritage fits. */
 	private int rowH() {
 		int fit = (panelH() - HEADER - 4) / Heritage.Kind.values().length;
 		return Math.clamp(fit, MIN_ROW, LIST_ROW);
@@ -129,13 +129,13 @@ final class HeritageScreen extends Screen {
 		return top() + HEADER + index * rowH();
 	}
 
-	/** (0.7.97) An earned heritage the player hasn't woken: a "???" with a hint. */
+	/** (0.7.106) An earned heritage the player hasn't woken: a "???" with a hint. */
 	private static boolean hidden(Heritage.Kind kind) {
 		Minecraft minecraft = Minecraft.getInstance();
 		return kind.earned && (minecraft.player == null || !Heritage.unlocked(minecraft.player, kind) && Heritage.of(minecraft.player) != kind);
 	}
 
-	/** (0.7.97) Whether {@code kind} can be picked here: any that isn't hidden; under a Blood Rite, an earned one woken and not yours. */
+	/** (0.7.106) Whether {@code kind} can be picked here: any that isn't hidden; under a Blood Rite, an earned one woken and not yours. */
 	private boolean pickable(Heritage.Kind kind) {
 		if (hidden(kind)) {
 			return false;
@@ -345,7 +345,7 @@ final class HeritageScreen extends Screen {
 		return this.rite ? RITE_ACCENT : ACCENT;
 	}
 
-	/** Every heritage down the left, the picked one marked; (0.7.97) those that can't be picked here greyed. */
+	/** Every heritage down the left, the picked one marked; (0.7.106) those that can't be picked here greyed. */
 	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top();
 		int accent = accent();

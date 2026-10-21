@@ -74,6 +74,7 @@ public final class SmokePower implements Power {
 		SmokeJet.init();
 		SmokePyroclasm.init();
 		SmokeCloudshaper.init();
+		SmokeParticles.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SmokeScreen.clear();

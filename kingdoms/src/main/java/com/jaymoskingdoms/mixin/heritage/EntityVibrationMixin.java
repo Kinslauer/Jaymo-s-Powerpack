@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.97) A Deepborn moves like the deep dark itself ({@link Heritage}): their vibrations are dampened, as if on wool,
+ * (0.7.106) A Deepborn moves like the deep dark itself ({@link Heritage}): their vibrations are dampened, as if on wool,
  * so sculk sensors, shriekers and the Warden never hear them.
  */
 @Mixin(Entity.class)

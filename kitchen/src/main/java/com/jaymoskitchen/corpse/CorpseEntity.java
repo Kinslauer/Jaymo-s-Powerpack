@@ -35,6 +35,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -527,7 +528,12 @@ public class CorpseEntity extends Entity {
 		}
 		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
 		if (entity != null) {
-			entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+			ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag);
+			entity.load(input);
+			// (0.4.50) the game reads attributes only on the server; the client's body needs its size (scale) too
+			if (level().isClientSide() && entity instanceof LivingEntity living) {
+				input.read("attributes", AttributeInstance.Packed.LIST_CODEC).ifPresent(living.getAttributes()::apply);
+			}
 		}
 		return entity;
 	}

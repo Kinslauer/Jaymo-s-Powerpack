@@ -32,6 +32,8 @@ public final class LedgeClient {
 	private static boolean confirmed;
 	/** Jump was let go since the grab: the next press climbs. */
 	private static boolean jumpReleased;
+	/** (0.14.3) Caught at the top of a freerun climb ({@link #catchFromClimb}): holding forward pulls up and over, no Jump needed. */
+	private static boolean autoClimb;
 
 	private LedgeClient() {
 	}
@@ -53,7 +55,8 @@ public final class LedgeClient {
 
 	/** Both hands are on the edge: no swings, no item use (vanilla's and Better Combat's both start from these clicks). */
 	private static void swallowClicks(Minecraft minecraft) {
-		if (phase == Phase.NONE) {
+		// (0.14.3) and while both hands hold a wall or a bar (freerunning)
+		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()) {
 			return;
 		}
 		while (minecraft.options.keyAttack.consumeClick()) {
@@ -83,13 +86,30 @@ public final class LedgeClient {
 
 	private static void tryGrab(LocalPlayer player, Input input) {
 		if (cooldown > 0 || !input.forward() || !input.jump() || input.shift() || input.backward() || player.onGround()
-			|| player.getDeltaMovement().y < Ledge.GRAB_MIN_VY || !Ledge.canHang(player)) {
+			|| player.getDeltaMovement().y < Ledge.GRAB_MIN_VY || !Ledge.canHang(player) || com.jaymospowers.client.freerun.FreerunClient.active()) {
 			return;
 		}
 		Ledge.Spot found = Ledge.find(player);
 		if (found == null) {
 			return;
 		}
+		grab(player, found);
+	}
+
+	/**
+	 * (0.14.3) A freerunner's climb (Climber, {@code FreerunClient}) reached the top of its wall: the edge is caught
+	 * there, and (forward still held) they pull up and over once the hang settles. The cling has already ended.
+	 */
+	public static void catchFromClimb(LocalPlayer player, Ledge.Spot found) {
+		if (phase != Phase.NONE || !Ledge.canHang(player)) {
+			return;
+		}
+		grab(player, found);
+		autoClimb = true;
+	}
+
+	private static void grab(LocalPlayer player, Ledge.Spot found) {
+		autoClimb = false;
 		spot = found;
 		phase = Phase.HANG;
 		ticks = 0;
@@ -115,7 +135,7 @@ public final class LedgeClient {
 			letGo(player);
 			return;
 		}
-		if (input.jump() && jumpReleased && ticks >= Ledge.GRAB_SETTLE_TICKS) {
+		if ((input.jump() && jumpReleased || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
 			phase = Phase.CLIMB;
 			ticks = 0;
 			Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true);
@@ -205,6 +225,7 @@ public final class LedgeClient {
 
 	private static void end() {
 		phase = Phase.NONE;
+		autoClimb = false;
 		spot = null;
 		ticks = 0;
 		Ledge.localHold = null;

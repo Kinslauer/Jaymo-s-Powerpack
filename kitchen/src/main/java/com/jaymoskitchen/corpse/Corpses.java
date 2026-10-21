@@ -10,6 +10,8 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -192,8 +194,18 @@ public final class Corpses {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, mob.registryAccess());
 		mob.saveWithoutId(output);
 		CompoundTag tag = output.buildResult();
+		// (0.4.50) a mob's size is part of its look (Kingdoms' small spiders, grown apes): its scale stays
+		ListTag scale = new ListTag();
+		for (Tag attribute : tag.getListOrEmpty("attributes")) {
+			if (attribute instanceof CompoundTag entry && entry.getStringOr("id", "").equals("minecraft:scale")) {
+				scale.add(entry);
+			}
+		}
 		for (String key : HEAVY_KEYS) {
 			tag.remove(key);
+		}
+		if (!scale.isEmpty()) {
+			tag.put("attributes", scale);
 		}
 		tag.putString("id", EntityType.getKey(mob.getType()).toString());
 		String look = tag.toString();

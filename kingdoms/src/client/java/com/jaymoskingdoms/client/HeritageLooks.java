@@ -63,20 +63,20 @@ import org.jspecify.annotations.Nullable;
  * at night (moon-silver by day, as ever; its own red eyes give way to them), and blood mist for the wisps.</li>
  * <li><b>Earthling:</b> training wraps round the fists, and a ki glow over them only while near death has made it flare
  * ({@code EarthlingSurge}); no eye glow, no particles.</li>
- * <li><b>Stormborn:</b> (0.7.97) forked lightning-scar lines up the forearms, pale blue, dim until a thunderstorm makes
+ * <li><b>Stormborn:</b> (0.7.106) forked lightning-scar lines up the forearms, pale blue, dim until a thunderstorm makes
  * them flicker bright; sparks then. Plain eyes.</li>
- * <li><b>Dawnborn:</b> (0.7.97) a gold sun-ring on the back of each hand; warm gold eyes that glow by day only.</li>
- * <li><b>Endborn:</b> (0.7.97) purple specks scattered up the forearms; purple eyes; portal motes drift off the hands at
+ * <li><b>Dawnborn:</b> (0.7.106) a gold sun-ring on the back of each hand; warm gold eyes that glow by day only.</li>
+ * <li><b>Endborn:</b> (0.7.106) purple specks scattered up the forearms; purple eyes; portal motes drift off the hands at
  * night, out of the rain.</li>
- * <li><b>Dragonblood:</b> (0.7.97) dark scale patches on the forearms and one cheek, glowing ember-orange in the dark
+ * <li><b>Dragonblood:</b> (0.7.106) dark scale patches on the forearms and one cheek, glowing ember-orange in the dark
  * only; amber eyes that glow at night only.</li>
- * <li><b>Deepborn:</b> (0.7.97) teal sculk veins up the forearms pulsing slowly; pale eyes; now and then a sculk pop in
+ * <li><b>Deepborn:</b> (0.7.106) teal sculk veins up the forearms pulsing slowly; pale eyes; now and then a sculk pop in
  * dark places.</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
 public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerModel> {
-	/** How a heritage's eyes glow. (0.7.97) {@code NIGHT}: in the dark of night only. */
+	/** How a heritage's eyes glow. (0.7.106) {@code NIGHT}: in the dark of night only. */
 	enum Eyes { ALWAYS, DAY, NIGHT, STORM, NEVER }
 
 	/** One heritage's look: its texture name, how many drawings to pick from (by UUID), eyes, and particle rate (0: none). */
@@ -156,7 +156,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	/** (0.7.80) A sneaking Sylvan's glow, dimmed to this (opaque ARGB tint; out entirely for a Thief or with a Stealth perk). */
 	static final int SYLVAN_SNEAK_GLOW = 0xFF4A4A4A;
 	/**
-	 * (0.7.97) A Stormborn's scars: dim like this out of a storm; in one, bright with a flicker one tick in
+	 * (0.7.106) A Stormborn's scars: dim like this out of a storm; in one, bright with a flicker one tick in
 	 * {@code STORM_FLICKER} (in threes), dimmer to this between. A Deepborn's veins pulse from {@code DEEP_PULSE_LOW} of
 	 * full and back, over {@code DEEP_PULSE_TICKS}.
 	 */
@@ -229,7 +229,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	}
 
 	/**
-	 * (0.7.97) The glow's tint that changes with the weather and the hour (players and villagers alike): a Stormborn's
+	 * (0.7.106) The glow's tint that changes with the weather and the hour (players and villagers alike): a Stormborn's
 	 * scars flicker in a thunderstorm and sit dim out of one, a Dragonblood's scales glow at night only, a Deepborn's veins
 	 * pulse. -1 (full) for the rest.
 	 */

@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 /**
- * (0.7.97) A Deepborn's sense ({@link Heritage}): sneaking, they feel the creatures round them through stone and walls,
+ * (0.7.106) A Deepborn's sense ({@link Heritage}): sneaking, they feel the creatures round them through stone and walls,
  * outlined on their own screen alone (client mixin {@code MinecraftGlowMixin}); nobody else sees a thing.
  */
 public final class DeepSense {

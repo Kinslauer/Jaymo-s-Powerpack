@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Weights</b> ({@code W_*}): (0.7.91) {@link #COMMON_SHARE} of folk are plain Heartlanders or Earthlings (between
  * them by their weights); the other bloods share the rest, the Verdant and the Warrior-born rarest. The land leans them ({@link #LEAN}): Frostborn in the cold, Emberborn in the heat (and each shuns the other's,
  * {@link #SHUN}), Tideborn by the sea and the rivers, Sylvan in the forests, Stoneborn in the mountains and badlands,
- * Verdant in the jungle. Everyone born in the Verdant World is Verdant. (0.7.97) Stormborn lean to the heights, Dawnborn to
+ * Verdant in the jungle. Everyone born in the Verdant World is Verdant. (0.7.106) Stormborn lean to the heights, Dawnborn to
  * the savannas; the earned bloods (Endborn, Dragonblood, Deepborn) are never rolled: only a child of one carries it.</li>
  * <li><b>Looks:</b> a Verdant gets the green ({@link Verdants#SHADE}: MCA's skin, antennae); the rest wear their marks
  * and eyes through the client's HeritageLooks, as players do.</li>
@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Gifts and flaws</b> that work on a villager ({@link #fit}, {@link #tick}): an Emberborn never burns and is sapped
  * in the cold, a Frostborn never freezes, a Tideborn holds its breath long and swims well, a Stoneborn walks a little
  * slow, a Sylvan lands soft (and a fighting one hits lighter), a Verdant burns longer, a Nightborn is quicker in the dark,
- * a Warrior-born fights harder wounded. (0.7.97) A Stormborn shrugs off lightning; a Dragonblood takes half from fire
+ * a Warrior-born fights harder wounded. (0.7.106) A Stormborn shrugs off lightning; a Dragonblood takes half from fire
  * and a Dawnborn hits the undead harder ({@link Heritage#dealt}). Attribute points, hunger, character level and skill
  * experience are a player's alone.</li>
  * </ul>
@@ -67,7 +67,7 @@ public final class VillagerHeritage {
 	/** How likely each heritage is, before the land leans it (out of their sum). */
 	static final int W_HEARTLANDER = 560, W_STONEBORN = 60, W_TIDEBORN = 50, W_SYLVAN = 50, W_VERDANT = 15, W_EMBERBORN = 35,
 		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70, W_STORMBORN = 30, W_DAWNBORN = 30;
-	/** (0.7.97) Stormborn lean this high up (the peaks, where the storms break). */
+	/** (0.7.106) Stormborn lean this high up (the peaks, where the storms break). */
 	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
 	static final float COMMON_SHARE = 0.9F;
@@ -115,7 +115,7 @@ public final class VillagerHeritage {
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> LOADED.remove(entity));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LOADED.clear());
 		ServerTickEvents.END_SERVER_TICK.register(VillagerHeritage::tick);
-		// an Emberborn villager: fire, lava and burning never hurt; (0.7.97) a Stormborn's, lightning
+		// an Emberborn villager: fire, lava and burning never hurt; (0.7.106) a Stormborn's, lightning
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> entity instanceof Player
 			|| !(source.is(DamageTypeTags.IS_FIRE) && of(entity) == Heritage.Kind.EMBERBORN)
 			&& !(source.is(DamageTypeTags.IS_LIGHTNING) && of(entity) == Heritage.Kind.STORMBORN));
@@ -184,7 +184,7 @@ public final class VillagerHeritage {
 				case EARTHLING -> W_EARTHLING;
 				case STORMBORN -> W_STORMBORN * (pos.getY() >= HIGH_Y ? LEAN : 1);
 				case DAWNBORN -> W_DAWNBORN * (biome.is(BiomeTags.IS_SAVANNA) ? LEAN : 1);
-				// (0.7.97) earned bloods are only ever inherited
+				// (0.7.106) earned bloods are only ever inherited
 				case ENDBORN, DRAGONBLOOD, DEEPBORN -> 0;
 			};
 			weights[i] = w;

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.97) What a sneaking Deepborn senses through the walls is outlined on their screen alone ({@link DeepSense}). */
+/** (0.7.106) What a sneaking Deepborn senses through the walls is outlined on their screen alone ({@link DeepSense}). */
 @Mixin(Minecraft.class)
 abstract class MinecraftGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("HEAD"), cancellable = true)
