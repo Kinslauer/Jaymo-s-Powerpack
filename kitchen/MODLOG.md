@@ -900,3 +900,11 @@ Batch 3 of the BWM port (MIT, our own code).
   Farmland: crops grow faster, 1 in 150 growth steps turns it back. Sowing now plants on any `minecraft:supports_crops`
   block.
 - Art: `tools/vanilla_style/power.py`, `power_machines.py`, `farm.py`. javac clean; nothing played yet.
+
+### 0.5.12: bait and the exploding pot (Better With Mods batch 5, pack 0.15.57, Kingdoms 0.7.144)
+- Fish Bait (`fishing/Bait`, `mixin/FishingHookMixin`): rotten flesh or raw meat/fish + wheat or bread makes 4. Held in
+  the hand without the rod, fish bite 100 ticks sooner (like Lure I) with +1 luck; one bait per fish landed. Water
+  under 2 deep, or with no sky above the bobber, bites 1.5x slower (bait or not).
+- Exploding pot (`cooking/ExplodingPot`): right-click a lit station with gunpowder, TNT or WeaponMod dynamite to slip
+  one into the next dish cooked there (the cook isn't told). If that dish comes out burnt or charred, it blows up: no
+  block damage or fire, knockback, at most 2 hearts, dish and ingredients lost.

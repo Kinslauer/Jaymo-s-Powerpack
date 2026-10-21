@@ -223,6 +223,9 @@ public final class Kitchen {
 	 * {@link Dish#hobTicks()}.
 	 */
 	static void award(ServerPlayer player, Dish dish, BlockPos pos, Quality quality) {
+		if (ExplodingPot.blowsUp(player, pos, quality)) {
+			return;
+		}
 		ItemStack stack = new ItemStack(ModItems.dish(dish));
 		quality.apply(stack, dish);
 		ServerLevel level = player.level();

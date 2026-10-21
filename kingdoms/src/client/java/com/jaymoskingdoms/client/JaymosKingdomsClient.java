@@ -81,6 +81,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		NightGiftsClient.register();
 		BloodVision.register();
 		WarriorFury.register();
+		// BWM batch 5: the gloom's whispers and dark edges
+		GloomClient.register();
 		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
 		HiddenBladeClient.register();

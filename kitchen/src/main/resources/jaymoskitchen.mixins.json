@@ -15,6 +15,7 @@
 		"CraftingTableBlockMixin",
 		"CropSeasonMixin",
 		"EntityMixin",
+		"FishingHookMixin",
 		"IceMeltMixin",
 		"ItemAccessor",
 		"KitchenMenuMixin",
