@@ -1,0 +1,54 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:block_state_property",
+        "block": "jaymospowers:moa_egg",
+        "properties": {
+          "kind": "0"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:blue_moa_egg"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:block_state_property",
+        "block": "jaymospowers:moa_egg",
+        "properties": {
+          "kind": "1"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:white_moa_egg"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:block_state_property",
+        "block": "jaymospowers:moa_egg",
+        "properties": {
+          "kind": "2"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:black_moa_egg"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/moa_egg"
+}

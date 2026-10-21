@@ -10,8 +10,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -33,11 +35,13 @@ public abstract class RideableAnimal extends Animal {
 	public static final double SAFE_FALL = 1024.0;
 	/** The rider sideways and backwards moves at this share of forward speed. */
 	public static final float STRAFE = 0.5F, REVERSE = 0.25F;
+	/** How long (ticks) it bolts after its rider stops holding the calm item. */
+	public static final int SPOOK_TICKS = 100;
 
 	/** Wing and leg flap: the phase and how hard (0 on the ground, 1 in the air), with last tick's for smoothing. */
 	public float flap, oFlap, flapSpeed, oFlapSpeed;
 
-	private int airJumps, airCooldown;
+	private int airJumps, airCooldown, spook;
 	private boolean jumpWasHeld, glideHeld;
 
 	protected RideableAnimal(EntityType<? extends RideableAnimal> type, Level level) {
@@ -75,6 +79,28 @@ public abstract class RideableAnimal extends Animal {
 	/** How high the rider sits above its feet (blocks). */
 	protected abstract double seatHeight();
 
+	/** The item that calms it: a player holding it can climb on without a saddle (null for none). */
+	protected @Nullable Item calmItem() {
+		return null;
+	}
+
+	/** Whether {@code player} holds the calm item. */
+	protected boolean calms(Player player) {
+		Item calm = this.calmItem();
+		return calm != null && (player.getMainHandItem().is(calm) || player.getOffhandItem().is(calm));
+	}
+
+	/** What a kind does with its jumps: the jumps it has on the ground (default: all), after a jump in mid-air, and each ride tick. */
+	protected int refill(int jumpsLeft) {
+		return this.maxAirJumps();
+	}
+
+	protected void airJumped() {
+	}
+
+	protected void rideTick(boolean onGround) {
+	}
+
 	/** Whether this one may be saddled (the moa only if a player raised it). */
 	protected boolean canBeSaddled() {
 		return !this.isBaby();
@@ -91,6 +117,13 @@ public abstract class RideableAnimal extends Animal {
 		ItemStack held = player.getItemInHand(hand);
 		if (this.isFood(held)) {
 			return super.mobInteract(player, hand);
+		}
+		Item calm = this.calmItem();
+		if (calm != null && held.is(calm) && !this.isBaby() && !this.isVehicle() && !player.isSecondaryUseActive()) {
+			if (!this.level().isClientSide()) {
+				player.startRiding(this);
+			}
+			return InteractionResult.SUCCESS;
 		}
 		if (!this.isSaddled() && held.is(Items.SADDLE) && this.canBeSaddled()) {
 			if (!this.level().isClientSide()) {
@@ -111,7 +144,7 @@ public abstract class RideableAnimal extends Animal {
 
 	@Override
 	public @Nullable LivingEntity getControllingPassenger() {
-		return this.isSaddled() && this.getFirstPassenger() instanceof Player player ? player : null;
+		return this.getFirstPassenger() instanceof Player player && (this.isSaddled() || this.calms(player)) ? player : null;
 	}
 
 	@Override
@@ -142,11 +175,12 @@ public abstract class RideableAnimal extends Animal {
 	/** The jump key, read where the ride is simulated (the rider's own client). */
 	private void rideJump() {
 		boolean held = AetherMobs.jumpHeld.getAsBoolean();
+		this.rideTick(this.onGround());
 		boolean pressed = held && !this.jumpWasHeld;
 		this.jumpWasHeld = held;
 		Vec3 motion = this.getDeltaMovement();
 		if (this.onGround()) {
-			this.airJumps = this.maxAirJumps();
+			this.airJumps = this.refill(this.airJumps);
 			this.glideHeld = false;
 			if (held) {
 				this.setDeltaMovement(motion.x, this.groundJump(), motion.z);
@@ -154,6 +188,7 @@ public abstract class RideableAnimal extends Animal {
 		} else {
 			if (pressed && this.airJumps > 0 && this.airCooldown <= 0) {
 				this.airJumps--;
+				this.airJumped();
 				this.airCooldown = AIR_JUMP_COOLDOWN;
 				this.setDeltaMovement(motion.x, this.airJump(), motion.z);
 				this.playSound(SoundEvents.PARROT_FLY, 0.6F, 1.2F);
@@ -176,6 +211,33 @@ public abstract class RideableAnimal extends Animal {
 			this.setDeltaMovement(motion.x, -cap, motion.z);
 		}
 		this.resetFallDistance();
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.level() instanceof ServerLevel && this.calmItem() != null) {
+			// a rider without a saddle needs the calm item in hand: put it away and the mount bolts
+			if (!this.isSaddled() && this.getFirstPassenger() instanceof Player rider && !this.calms(rider)) {
+				rider.stopRiding();
+				this.spook = SPOOK_TICKS;
+			}
+			if (this.spook > 0) {
+				this.spook--;
+			}
+		}
+	}
+
+	/** Runs for its life when spooked (use instead of a plain {@link PanicGoal}). */
+	public class SpookPanicGoal extends PanicGoal {
+		public SpookPanicGoal(double speed) {
+			super(RideableAnimal.this, speed);
+		}
+
+		@Override
+		protected boolean shouldPanic() {
+			return RideableAnimal.this.spook > 0 || super.shouldPanic();
+		}
 	}
 
 	@Override

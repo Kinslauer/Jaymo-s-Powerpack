@@ -35,7 +35,9 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -50,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * The sheepuff, the Aether's cloud sheep. It grazes aether grass; after eating {@link #GRASS_TO_PUFF} patches it puffs
  * up: it drifts down slowly, takes no fall damage and jumps high. Shearing a puffed one lets the air out (and gives
  * more wool than a plain shearing); a plain shearing leaves it bare until it grazes again. Wool is mostly white, and
- * sometimes light blue, cyan, lime, pink or (very rarely) purple.
+ * sometimes light gray, gray, cyan or a colour of its climate (see {@link #randomColor}); dye changes it.
  */
 public class Sheepuff extends Animal {
 	// ---- tuning ----
@@ -63,12 +65,12 @@ public class Sheepuff extends Animal {
 	public static final int WOOL_MIN = 1, WOOL_MAX = 3, PUFFED_WOOL_MIN = 2, PUFFED_WOOL_MAX = 4;
 	/** How long it munches (ticks), and the chance each tick it starts (one in this many; kids graze sooner). */
 	public static final int EAT_TICKS = 40, EAT_ODDS = 1000, BABY_EAT_ODDS = 50;
-	/** Colour odds (a share each): light blue, cyan, lime, pink; and a one in this many chance of purple. */
-	public static final float LIGHT_BLUE = 0.05F, CYAN = 0.05F, LIME = 0.05F, PINK = 0.03F;
-	public static final int PURPLE_ODDS = 500;
+	/** Wild colour odds (a share each): light gray, gray and cyan; the zone's own fourth colour; and a one in this many chance of magenta (highfields only). */
+	public static final float COMMON = 0.05F, ZONE_ODDS = 0.03F;
+	public static final int MAGENTA_ODDS = 500;
 
-	/** Wool colours by index (the wool item is {@code <name>_wool}); the skins are {@code sheepuff_<name>}. */
-	public static final String[] COLORS = {"white", "light_blue", "cyan", "lime", "pink", "purple"};
+	/** Wool colours by index (see {@link Wool}); the skins are {@code sheepuff_<name>}. */
+	public static final String[] COLORS = Wool.NAMES;
 
 	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(Sheepuff.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> PUFFED = SynchedEntityData.defineId(Sheepuff.class, EntityDataSerializers.BOOLEAN);
@@ -92,7 +94,7 @@ public class Sheepuff extends Animal {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.1, stack -> stack.is(Items.WHEAT), false));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.1, AetherAnimals::isAnimalFood, false));
 		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
 		this.goalSelector.addGoal(5, new EatGrassGoal());
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
@@ -142,28 +144,39 @@ public class Sheepuff extends Animal {
 		return this.entityData.get(EATING);
 	}
 
-	/** A colour picked by the odds above. */
-	public static int randomColor(RandomSource random) {
-		if (random.nextInt(PURPLE_ODDS) == 0) {
-			return 5;
+	/** A wild colour for the biome at {@code pos}: mostly white; light gray, gray and cyan 5% each; and 3% of the zone's own (yellow, light blue, brown). */
+	public static int randomColor(ServerLevelAccessor level, BlockPos pos, RandomSource random) {
+		if (!Zone.in(level, pos)) {
+			return 0;
+		}
+		Zone zone = Zone.at(level, pos);
+		if (zone == Zone.HIGHFIELDS && random.nextInt(MAGENTA_ODDS) == 0) {
+			return Wool.index("magenta");
 		}
 		float roll = random.nextFloat();
-		if (roll < LIGHT_BLUE) {
-			return 1;
+		if (roll < COMMON) {
+			return Wool.index("light_gray");
 		}
-		if (roll < LIGHT_BLUE + CYAN) {
-			return 2;
+		if (roll < COMMON * 2) {
+			return Wool.index("gray");
 		}
-		if (roll < LIGHT_BLUE + CYAN + LIME) {
-			return 3;
+		if (roll < COMMON * 3) {
+			return Wool.index("cyan");
 		}
-		return roll < LIGHT_BLUE + CYAN + LIME + PINK ? 4 : 0;
+		if (roll < COMMON * 3 + ZONE_ODDS) {
+			return Wool.index(switch (zone) {
+				case HIGHFIELDS -> "yellow";
+				case MAGNETIC -> "light_blue";
+				case ARCTIC -> "brown";
+			});
+		}
+		return 0;
 	}
 
 	@Override
 	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
 		@Nullable SpawnGroupData groupData) {
-		this.setColor(randomColor(this.random));
+		this.setColor(randomColor(level, this.blockPosition(), this.random));
 		return super.finalizeSpawn(level, difficulty, reason, groupData);
 	}
 
@@ -208,6 +221,14 @@ public class Sheepuff extends Animal {
 			}
 			return InteractionResult.SUCCESS;
 		}
+		DyeColor dye = held.get(DataComponents.DYE);
+		if (dye != null && !this.isBaby() && Wool.index(dye) != this.color()) {
+			if (!this.level().isClientSide()) {
+				this.setColor(Wool.index(dye));
+				held.consume(1, player);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		return super.mobInteract(player, hand);
 	}
 
@@ -227,7 +248,7 @@ public class Sheepuff extends Animal {
 
 	/** Its wool item. */
 	private net.minecraft.world.item.Item wool() {
-		return BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(COLORS[this.color()] + "_wool"));
+		return Wool.item(this.color());
 	}
 
 	@Override
@@ -240,7 +261,7 @@ public class Sheepuff extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack stack) {
-		return stack.is(Items.WHEAT);
+		return AetherAnimals.isAnimalFood(stack);
 	}
 
 	@Override

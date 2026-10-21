@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:mutton",
+          "name": "jaymospowers:kirrid_loin",
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -14,6 +14,18 @@
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
+              }
+            },
+            {
+              "type": "minecraft:furnace_smelt",
+              "condition": {
+                "type": "minecraft:entity_properties",
+                "entity": "this",
+                "predicate": {
+                  "minecraft:flags": {
+                    "is_on_fire": true
+                  }
+                }
               }
             },
             {

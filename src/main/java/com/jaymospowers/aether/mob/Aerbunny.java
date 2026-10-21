@@ -19,7 +19,14 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
+import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.server.level.ServerPlayer;
+import com.jaymospowers.aether.AetherFlora;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -31,9 +38,11 @@ import org.jspecify.annotations.Nullable;
  * The aerbunny, the Aether's small white rabbit of clouds. It hops about, drifts down slowly, and flees for a few
  * seconds when a player hits it. Pick it up with an empty hand (sneak and use to put it down) and it sits on your
  * head: your fall is slowed, and once you have dropped far enough you can hop again in mid-air (jump), which puffs it
- * up for a moment. The rider's side of that is {@link AerbunnyRide}, run on the rider's client.
+ * up for a moment. The rider's side of that is {@link AerbunnyRide}, run on the rider's client. Give a wild one an orange
+ * and it may take to you (one try in three): it then follows you, sits when you sneak-use it with an empty hand, and
+ * mends from brettl grass, which is also what it breeds on (a wild pair's young are tame to whoever fed them).
  */
-public class Aerbunny extends Animal {
+public class Aerbunny extends TamableAnimal {
 	// ---- tuning ----
 	public static final double HEALTH = 6.0, SPEED = 0.28;
 	/** The most it falls a tick, when it falls by itself. */
@@ -44,6 +53,9 @@ public class Aerbunny extends Animal {
 	public static final int HOP_EVERY = 12;
 	/** After it is put down, it can't be picked up again for this long (ticks), so one click does not do both. */
 	public static final int PICKUP_COOLDOWN = 10;
+	/** Taming: one orange in this many works; brettl grass heals this much. */
+	public static final int TAME_ODDS = 3;
+	public static final float GRASS_HEAL = 2.0F;
 
 	private static final EntityDataAccessor<Integer> PUFF = SynchedEntityData.defineId(Aerbunny.class, EntityDataSerializers.INT);
 
@@ -61,10 +73,14 @@ public class Aerbunny extends Animal {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new PanicGoal(this, 1.8));
-		this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 0.8));
-		this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6.0F));
-		this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+		this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+		this.goalSelector.addGoal(2, new PanicGoal(this, 1.3));
+		this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
+		this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, stack -> stack.is(AetherFlora.BRETTL_GRASS), false));
+		this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1, 10.0F, 2.0F));
+		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
+		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
+		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 	}
 
 	@Override
@@ -128,7 +144,7 @@ public class Aerbunny extends Animal {
 	public void aiStep() {
 		super.aiStep();
 		// a rabbit's walk is a string of hops
-		if (this.carrier() == null && this.onGround() && this.tickCount % HOP_EVERY == 0
+		if (this.carrier() == null && !this.isInSittingPose() && this.onGround() && this.tickCount % HOP_EVERY == 0
 			&& this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4) {
 			this.getJumpControl().jump();
 		}
@@ -136,6 +152,9 @@ public class Aerbunny extends Animal {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		if (this.carrier() != null && source.getEntity() == this.carrier()) {
+			return false;
+		}
 		boolean hurt = super.hurtServer(level, source, amount);
 		if (hurt && source.getEntity() instanceof Player) {
 			this.fleeTicks = FLEE_MIN + this.random.nextInt(FLEE_SPREAD);
@@ -155,10 +174,39 @@ public class Aerbunny extends Animal {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack held = player.getItemInHand(hand);
+		if (held.is(AetherFlora.ORANGE) && !this.isTame()) {
+			if (!this.level().isClientSide()) {
+				if (!player.isCreative()) {
+					held.shrink(1);
+				}
+				if (this.random.nextInt(TAME_ODDS) == 0) {
+					this.tame(player);
+					this.setOrderedToSit(true);
+					this.level().broadcastEntityEvent(this, (byte)7);
+				} else {
+					this.level().broadcastEntityEvent(this, (byte)6);
+				}
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (held.is(AetherFlora.BRETTL_GRASS) && this.isTame() && this.getHealth() < this.getMaxHealth()) {
+			if (!this.level().isClientSide()) {
+				this.heal(GRASS_HEAL);
+				held.consume(1, player);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (held.isEmpty() && this.isTame() && this.isOwnedBy(player) && player.isSecondaryUseActive() && this.carrier() == null) {
+			if (!this.level().isClientSide()) {
+				this.setOrderedToSit(!this.isOrderedToSit());
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (held.isEmpty() && hand == InteractionHand.MAIN_HAND && !player.isSecondaryUseActive() && this.carrier() == null
 			&& this.fleeTicks <= 0 && this.tickCount - this.putDownAt >= PICKUP_COOLDOWN && player.getPassengers().isEmpty()) {
 			if (!this.level().isClientSide()) {
 				if (this.startRiding(player, true, true)) {
+					this.setOrderedToSit(false);
 					this.lastY = player.getY();
 					this.playSound(SoundEvents.RABBIT_JUMP, 0.6F, 1.4F);
 				}
@@ -170,17 +218,17 @@ public class Aerbunny extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack stack) {
-		return false;
-	}
-
-	@Override
-	public boolean canFallInLove() {
-		return false;
+		return stack.is(AetherFlora.BRETTL_GRASS);
 	}
 
 	@Override
 	public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-		return null;
+		Aerbunny baby = AetherMobs.AERBUNNY.create(level, EntitySpawnReason.BREEDING);
+		ServerPlayer cause = this.getLoveCause();
+		if (baby != null && cause != null) {
+			baby.tame(cause);
+		}
+		return baby;
 	}
 
 	@Override

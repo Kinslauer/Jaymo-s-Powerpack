@@ -201,7 +201,8 @@ data (every id exists, one feature order, saplings have trees).
   Woodland (wet), Frigid Sierra (the middle and high layers, depth 0.3 up). Irradiated (above 0.65): Battleground Wastes (dry),
   Contaminated Jungle (wet). Hestveil Caverns takes the cave layer (depth below -1). Expanse is registered and never placed.
 - Temperature, downfall and the sky, fog and water colours are from the notes; precipitation on in all; `natural_mob_spawns` empty
-  (Fabric `BiomeModifications` adds the animals: everything in `#is_aether` but Hestveil, the moa in the highfields only);
+  (Fabric `BiomeModifications` adds the animals into the highfields, magnetic and arctic tags, see "Aether II animals"; the moa only
+  through its nests);
   creature spawn probability 0.2; the irradiated biomes drop end-rod motes.
 - Every biome's feature lists are cut from one master order (`MASTER`/`VEGETAL` in the features file) so the game never meets two
   orders. Anything placed by height rather than by surface (ores, clouds, springs, cloudbed, quicksoil shelves, crystal islands, cave
@@ -259,7 +260,7 @@ the underside; falling out below y -8 and landing home; day and night; a moa on 
 - Fire: Aether wood and leaves are tagged to burn from lava (`logs_that_burn`) but have no spread/burn odds yet; no
   fuel or compost values; no skyroot stairs, slabs, fences, doors, signs, boats or buckets.
 - Aether grass tint, bonemeal on aether grass (flowers and grass), the water-to-holystone rule over quicksoil.
-- Mobs (Moa, Phyg, Flying Cow, Sheepuff, Aerbunny, Zephyr, Cockatrice, Aechor Plant, Swets, Whirlwind): tracks C and D.
+- Whirlwind and the other mobs of Aether I that Aether II does not have.
 
 ## To check first in game
 
@@ -278,14 +279,16 @@ eggs sit in the "The Aether" creative tab. All spawn through Fabric `BiomeModifi
 `#jaymospowers:is_aether` minus the Hestveil caverns (the moa only into `#jaymospowers:is_aether_highfields`; the biome files are not
 touched), as the creature category, on the `animals_spawnable_on` tag (aether grass is in it), in daylight. The biomes'
 own `creature_spawn_probability` (the Aether uses 0.25) decides how many are there when a chunk is first made.
+**Aether II changed the numbers (see "Aether II animals" below, which wins): spawns are now by the three climate tags
+(`AetherAnimals`), sizes and healths are the notes', and the moa has no natural spawn but its nests.**
 
 | Animal | Spawn weight, group | HP | Notes |
 |---|---|---|---|
-| Phyg | 10, 3-4 | 10 | breeds on blue berries; saddle and ride |
-| Sheepuff | 12, 3-4 | 8 | breeds on wheat |
-| Flying cow | 12, 2-5 | 10 | breeds on wheat; milk with a bucket; saddle and ride |
-| Aerbunny | 11, 3 | 6 | no breeding |
-| Moa | 8, 1-3 | 35 | blue 100 / white 50 / black 25 by weight; lays eggs |
+| Phyg | 1, 2-4 | 10 | breeds on oranges and blue berries; valkyrie wings or a saddle to ride |
+| Sheepuff | 1, 2-4 | 8 | breeds on oranges and blue berries; all 16 colours |
+| Flying cow | 1, 2-4 | 10 | breeds on oranges and blue berries; milk with a bucket; valkyrie wings or a saddle |
+| Aerbunny | 14, 1-3 | 6 | tamed with an orange; no breeding drops |
+| Moa | none (nests only) | 35 | blue 100 / white 50 / black 25 by weight; territorial |
 
 - **Riding** [RideableAnimal]: right-click a saddled one (not sneaking) to mount; steer with the movement keys, jump
   with the jump key. A ride is simulated on the rider's own client, like any mount, so it needs no packet; the jump key
@@ -295,23 +298,20 @@ own `creature_spawn_probability` (the Aether uses 0.25) decides how many are the
     holding jump while falling glides (falls at most 0.1 a tick; 0.5 otherwise). The cow carries a rider at 0.75 speed.
     The wings are folded on the ground and spread and beat in the air.
   - **Moa** [Moa]: jumps in mid-air 3 (blue), 4 (white), 8 (black), one per press with a 10-tick cooldown; they come back
-    on the ground. Falls at most 0.1 a tick loose or gliding, 0.5 ridden. A wild moa can't be saddled: use a moa egg
-    (laid by a moa every 5 to 10 minutes while grown and unridden, or from the creative tab) on the ground to hatch a
-    chick that you raised; feed it blue berries to hurry the 20 minutes it takes to grow up, then saddle it. It heals
-    1 HP every 45 seconds. (Not in: Nature Staff sit/follow, tamed moas hunting swets, the Aether's incubator: the egg
-    hatches the moment it is used.)
+    on the ground. Falls at most 0.1 a tick loose or gliding, 0.5 ridden. (Aether II's stamina, growth and nest rules
+    replace the old ones: see "Aether II animals".)
 - **Sheepuff** [Sheepuff]: grazes the aether grass under it (it turns to aether dirt); after 2 patches it puffs up: falls
   at most 0.05 a tick, no fall damage, jump strength 0.9 (a normal sheep's is 0.42). Shearing a puffed one lets the air
   out and gives 2-4 wool (it keeps its wool); a plain shearing gives 1-3 and leaves it bare until it grazes again. Colour
-  on spawn: 5% light blue, 5% cyan, 5% lime, 3% pink, 1 in 500 purple, else white. Drops mutton and its wool unless bare.
+  on spawn: see "Aether II animals". Drops a kirrid loin and its wool unless bare.
 - **Aerbunny** [Aerbunny, AerbunnyRide]: right-click with an empty hand to carry it on your head (sneak to put it down).
   Carried: your fall is capped at 0.25 a tick (no fall damage for a drop that gentle, within the "descents under 0.5 b/t"
   rule), and once you have fallen more than 1.1 blocks jump hops you up (0.55) and puffs the bunny; at most 2 hops per time in the air (refilled on the ground), so it
   can't chain into flight. This runs on your client (movement is yours), so other players see the bunny but
   the hop is yours. Hit by a player it flees for 100-149 ticks (and can't be picked up while it does).
-- Drops (`data/jaymospowers/loot_table/entities`): phyg porkchop 1-3 + feather 0-1; flying cow leather 0-2 + beef 1-3;
-  sheepuff mutton 1-2 (+ wool from the entity); aerbunny string 0-2; moa feather 2-3. All with Looting.
-- Tuning is in `static final` constants at the top of each class (`AetherMobs` has the spawn weights).
+- Drops (`data/jaymospowers/loot_table/entities`, Aether II's): phyg 1-3 raw taegore meat; flying cow 1-3 burrukai rib cut;
+  sheepuff 1-2 kirrid loin (+ wool from the entity); aerbunny and moa nothing. Meats come cooked from a burning mob; Looting.
+- Tuning is in `static final` constants at the top of each class (`AetherAnimals` has the spawn weights).
 
 To check first in game: spawn each from its egg; saddle a phyg (jump, flap, glide), a flying cow and a hatched moa;
 let a sheepuff graze twice and shear it puffed and plain; pick up an aerbunny and jump off a cliff.
@@ -398,3 +398,88 @@ a spawn because hostile.md gives it none.
 To check first in game: Zephyr and Tempest flying and aiming (flying speed, hover point); swets latching and detaching;
 Skephid hanging upside down (renderer flip); Aechor Plant warning when hit with the wrong tool; Bladeshroom Hunter burying;
 sun behaviour of Tempest, Cockatrice and Skephid; shield stun from webbing balls.
+
+## Aether II animals (Track P) [aether.mob]
+
+Behaviour and numbers from `aether2-study/passive.md`, our own code, models and skins. `AetherAnimals` registers the new
+animals, their items, the moa egg block, the placements and every spawn (all the animals, old and new); `Zone` is the
+highfields / magnetic / arctic climate read from the biome tags (`#jaymospowers:is_aether_<zone>`). Art and data come from
+`tools/gen_aether_mobs.py` (older animals, sheepuff colours, their loot) then `tools/gen_aether_animals.py` (the rest; both read
+the models' `part(...)` lines); `tools/check_aether_animals.py .` checks the pieces hang together. Names are in
+`lang/parts/aether_animals.json`.
+
+**Spawns** (weight, group; the biome files are not touched): highfields, magnetic and arctic biomes get taegore 14 (1-2),
+burrukai 14 (1), kirrid 14 (1-2), aerbunny 14 (1-3), phyg, flying cow and sheepuff 1 (2-4 each), glitterwing and shroudwing
+1 (1-2, ambient), aerwhale 1 (1). Prismallards (1, 1-3) float on the highfields' lakes (not the dry Flourishing Field). The
+irradiated biomes and the caves have no animals. Ground animals need light above 8 (aether grass etc.); the aerwhale needs open
+sky and passes one natural roll in 40. No natural spawn: moa (nests), skyroot lizard (leaves).
+
+| Animal | Size | HP | Notes |
+|---|---|---|---|
+| Phyg | 0.95 x 0.85 | 10 | valkyrie wings in hand = calm: climb on without a saddle (ride speed 0.6; the saddle works too); put the wings away and it bolts |
+| Flying cow | 0.95 x 1.1 | 10 | same with ride speed 0.7; milk with a bucket |
+| Sheepuff | 0.9 x 1.25 | 8 | puffs on its 2nd graze; 16 colours; wild colour by climate |
+| Aerbunny | 0.55 x 0.45 | 6 | an orange tames it, 1 in 3 per try (then it sits; brettl grass heals 2); wild ones can still be carried |
+| Moa | 1.25 x 2.35 | 35 | see below |
+| Kirrid | 0.95 x 1.35 | 16 | hops; wool shell; plate |
+| Burrukai | 1.5 x 1.95 | 26 | neutral; attack 3, knockback 4, armour 6, stun on ram |
+| Taegore | 1.3 x 1.7 | 18 | shy digger |
+| Skyroot lizard | 0.95 x 0.35 | 4 | from leaves |
+| Prismallard | 0.5 x 0.6 | 4 | lays eggs |
+| Glitterwing / Shroudwing | 0.75 / 0.5 | 2 | ambient insects |
+| Aerwhale | 3 x 3 | 20 | drifts through the sky |
+
+- **Food**: orange or blueberry tempts and breeds phyg, flying cow, sheepuff, kirrid, burrukai and taegore (`isAnimalFood`).
+- **Sheepuff colours** (wild, by climate; every other colour comes from dye): light gray 5%, gray 5%, cyan 5%, then 3% yellow
+  (highfields) / light blue (magnetic) / brown (arctic), 1 in 500 magenta in the highfields, else white. 16 skins
+  `sheepuff_<dye>`.
+- **Kirrid** [Kirrid]: moves in hops (0.5-0.65 jump power in the notes; here `HOP_UP`/`HOP_FORWARD`, a wait of 10 ticks on
+  the ground). Two plated adults ram each other (charge 80 ticks, within 2 blocks each hit has a 1% chance to knock the plate off,
+  which drops a kirrid plate and regrows after 6000 ticks; 600-2400 ticks between rams). Grazing aether grass (every 600-1200
+  ticks, 60 ticks) turns it to aether dirt and brings the wool back sooner. Shears: 1-3 cloudwool of its colour, regrows in 2400 ticks;
+  dye recolours the wool. Wild colour by zone: highfields undyed cloudwool (white, brown, black 5% each, lime 1/500), magnetic
+  light blue (gray, lime, green 5%; purple 1/500), arctic white (brown, magenta, pink 5%; blue 1/500). The arctic kind has horns.
+  Skins `kirrid_<zone>_<wool>` (51). Drops 1-2 kirrid loin and its wool.
+- **Burrukai** [Burrukai]: neutral. Hurt by a living thing it stays angry 600 ticks (babies never fight back); it winds up 30 ticks,
+  then rams at speed 2.25, and a hit within its width does damage and stuns (shield-style) for 70 ticks; if it misses it gives up
+  after 50 ticks. Drops 1-3 rib cut, 0-2 beast pelt, 1-3 burrukai plate. Skins `burrukai_<zone>`.
+- **Taegore** [Taegore]: flees sprinting players within 24 blocks (1.7x) unless they wear a piece of the item tag
+  `#jaymospowers:beast_pelt_armor` (empty now; the gear track fills it with beast pelt armour). Every 9600 ticks (the first after 2400) it picks a diggable spot 10-40 blocks
+  away (aether grass or dirt, coarse dirt, shimmering silt, ferrosite mud, moss), walks there and digs for 240 ticks: one of
+  skyroot stick, skyroot pinecone, valkyrie wings, blueberry, satival bulb, holystone twig, holystone rock. It remembers 20
+  places. Drops 1-3 raw taegore meat and 1-3 beast pelt. Skins `taegore_<zone>`.
+- **Skyroot lizard** [SkyrootLizard]: not in the biomes. When a leaf block's loot is dropped (broken by a player, or decay), 1 in 10
+  makes one at that spot, of the kind matching the leaves (10 kinds, skins `skyroot_lizard_<leaf>`). It flees sprinting players
+  within 8 blocks. A stick (plain or skyroot) used on it turns it into a skyroot lizard on a stick (food 4).
+- **Prismallard** [Prismallard]: floats on lakes; panics at 1.4; tempted and bred with arilum bulbs; an adult lays a prismallard egg
+  every 6000-11999 ticks (it drops as an item; thrown, it breaks and 1 egg in 8 hatches a chick); falls at 0.6 speed. Drops 1-2
+  leg, 1-2 feather.
+- **Glitterwing** (11 kinds) and **Shroudwing** (6) [Insect]: hover about, keep 6 blocks from players who are not sneaking, land and
+  rest every 200-600 ticks, no fall damage, cannot be leashed. The kind comes from the biome (wet, lush, highfields, dark).
+- **Aerwhale** [Aerwhale]: drifts toward points 16-32 blocks away through open air, never into blocks; a long low song every 1200
+  ticks. No riding, no drops.
+- **Moa** [Moa, MoaEggBlock]: no natural spawn except the worldgen nests (`MoaNestFeature`: a woven skyroot sticks ring and bed
+  with a moa egg block in 75% of nests and a grown wild moa guarding 35%). A wild grown moa is territorial: a player within 5
+  blocks (Manhattan) of its nest and within 18 of it is attacked; hurt by a player, it and the grown wild moas within 16 stay angry
+  for 600 ticks. Babies never fight back; a moa a player raised never fights its owner. A moa egg block on woven skyroot sticks
+  hatches in three stages of 4000 (+0-299) ticks, about 12000 in all; elsewhere 8000 a stage. An egg a player placed hatches a
+  chick they raised (saddle and ride, shears, saddle bags later); a nest egg a wild one. The egg item used on the ground still
+  hatches a raised chick at once. **Chick growth**: hungry for 8000 ticks once every 2400-4799; feeding in that window (aechor petal or
+  blueberry) counts 2 if more than 4000 ticks were left, else 1, and moves it a stage on; a missed window also moves it a stage
+  on; three stages make an adult. How well it was fed shifts its stamina at that moment: nothing fed -4, exactly 3 -1, else +1
+  (the notes' code never gives the -2 case; we do not either). **Stamina** (jumps in mid-air): 3 blue, 4 white, 8 black, shifted by
+  feeding, never under 3; each air jump costs 1 and starts a 300-tick wait that counts down 12 a tick on the ground, 1 in the
+  air. Adults heal 5 from food, 1 HP in 900 ticks. Only a grown moa a player raised takes a saddle and gives 4 moa feathers to
+  shears (up to 2000 ticks between; 32 durability).
+- **Items**: raw/cooked taegore meat (3/8 food), burrukai rib cut and cooked (3/8), kirrid loin and cutlet (2/6), prismallard leg
+  and roast (2/6), skyroot lizard on a stick (4), beast pelt, burrukai plate, kirrid plate, prismallard feather, moa feather,
+  prismallard egg, and a spawn egg each. Smelting, smoking and campfire recipes for the four meats are in `data/.../recipe/aether`.
+- **Moa egg block** (`moa_egg`): properties kind (blue/white/black), stage (0-2, cracks), owned, low (an egg on the 8-pixel sticks is
+  drawn and shaped 8 pixels lower). Breaking it drops the egg item of its kind.
+
+Not in: Edward the trader and the cloud skiff (other tracks), saddle bags, the beast pelt armour, bestiary pages, the shroudwing
+and glitterwing biome gates beyond a name check (see `Insect.pickVariant`), the blightfly's glow pass.
+
+To check first in game: spawn each from its egg; ride a phyg with valkyrie wings held and put them away; tame an aerbunny with
+oranges; walk into a moa nest (and out); place an egg on sticks and wait; shear a puffed sheepuff; watch two kirrids ram; break
+leaves for a lizard; throw prismallard eggs; follow a taegore to a dig.

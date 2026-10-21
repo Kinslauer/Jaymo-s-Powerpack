@@ -16,7 +16,6 @@ import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -29,16 +28,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The flying cow: a cow with feathered wings, saddled and ridden like the phyg ({@link WingedAnimal}). A bucket
- * milks it; it breeds on wheat.
+ * The flying cow: a cow with feathered wings, ridden like the phyg: with valkyrie wings in hand, or saddled
+ * ({@link WingedAnimal}). A bucket milks it; it breeds on oranges and blue berries.
  */
 public class FlyingCow extends WingedAnimal {
 	// ---- tuning ----
 	public static final double HEALTH = 10.0, SPEED = 0.2;
 	/** Its rider sits this high above its feet (blocks). */
 	public static final double SEAT = 1.1;
-	/** A saddled flying cow carries its rider at this share of its speed (the Aether slows it to 0.75). */
-	public static final float RIDE_SPEED = 0.75F;
+	/** A saddled flying cow carries its rider at this share of its speed (Aether II's 0.7). */
+	public static final float RIDE_SPEED = 0.7F;
 
 	public FlyingCow(EntityType<? extends FlyingCow> type, Level level) {
 		super(type, level);
@@ -52,9 +51,9 @@ public class FlyingCow extends WingedAnimal {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new PanicGoal(this, 1.4));
+		this.goalSelector.addGoal(1, new SpookPanicGoal(2.0));
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.2, stack -> stack.is(Items.WHEAT), false));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.2, AetherAnimals::isAnimalFood, false));
 		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -84,7 +83,7 @@ public class FlyingCow extends WingedAnimal {
 
 	@Override
 	public boolean isFood(ItemStack stack) {
-		return stack.is(Items.WHEAT);
+		return AetherAnimals.isAnimalFood(stack);
 	}
 
 	@Override

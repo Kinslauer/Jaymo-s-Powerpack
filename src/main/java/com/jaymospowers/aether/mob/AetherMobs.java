@@ -31,12 +31,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * in the highfields), added to their spawn lists here by biome tag, never in the biome files, on any block of the {@code animals_spawnable_on} tag (aether grass is in it).
  */
 public final class AetherMobs {
-	// ---- tuning: spawn weight, smallest and largest group (the Aether's numbers) ----
-	public static final int PHYG_WEIGHT = 10, PHYG_MIN = 3, PHYG_MAX = 4;
-	public static final int SHEEPUFF_WEIGHT = 12, SHEEPUFF_MIN = 3, SHEEPUFF_MAX = 4;
-	public static final int FLYING_COW_WEIGHT = 12, FLYING_COW_MIN = 2, FLYING_COW_MAX = 5;
-	public static final int AERBUNNY_WEIGHT = 11, AERBUNNY_MIN = 3, AERBUNNY_MAX = 3;
-	public static final int MOA_WEIGHT = 8, MOA_MIN = 1, MOA_MAX = 3;
+	// (spawn weights and group sizes are in AetherAnimals, with the new animals': Aether II's table)
 
 	public static EntityType<Phyg> PHYG;
 	public static EntityType<FlyingCow> FLYING_COW;
@@ -55,11 +50,11 @@ public final class AetherMobs {
 
 	public static void init() {
 		AerbunnyRide.init();
-		PHYG = type("phyg", EntityType.Builder.of(Phyg::new, MobCategory.CREATURE).sized(0.9F, 0.9F).clientTrackingRange(10));
-		FLYING_COW = type("flying_cow", EntityType.Builder.of(FlyingCow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10));
-		SHEEPUFF = type("sheepuff", EntityType.Builder.of(Sheepuff::new, MobCategory.CREATURE).sized(0.9F, 1.3F).clientTrackingRange(10));
-		AERBUNNY = type("aerbunny", EntityType.Builder.of(Aerbunny::new, MobCategory.CREATURE).sized(0.6F, 0.5F).clientTrackingRange(8));
-		MOA = type("moa", EntityType.Builder.of(Moa::new, MobCategory.CREATURE).sized(0.9F, 2.15F).clientTrackingRange(10));
+		PHYG = type("phyg", EntityType.Builder.of(Phyg::new, MobCategory.CREATURE).sized(0.95F, 0.85F).clientTrackingRange(10));
+		FLYING_COW = type("flying_cow", EntityType.Builder.of(FlyingCow::new, MobCategory.CREATURE).sized(0.95F, 1.1F).eyeHeight(1.05F).clientTrackingRange(10));
+		SHEEPUFF = type("sheepuff", EntityType.Builder.of(Sheepuff::new, MobCategory.CREATURE).sized(0.9F, 1.25F).eyeHeight(0.85F).clientTrackingRange(10));
+		AERBUNNY = type("aerbunny", EntityType.Builder.of(Aerbunny::new, MobCategory.CREATURE).sized(0.55F, 0.45F).eyeHeight(0.25F).clientTrackingRange(8));
+		MOA = type("moa", EntityType.Builder.of(Moa::new, MobCategory.CREATURE).sized(1.25F, 2.35F).eyeHeight(2.1F).clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(PHYG, Phyg.createAttributes());
 		FabricDefaultAttributeRegistry.register(FLYING_COW, FlyingCow.createAttributes());
 		FabricDefaultAttributeRegistry.register(SHEEPUFF, Sheepuff.createAttributes());
@@ -81,13 +76,9 @@ public final class AetherMobs {
 		place(SHEEPUFF);
 		place(AERBUNNY);
 		place(MOA);
-		var skyroot = BiomeSelectors.tag(biomeTag("is_aether")).and(BiomeSelectors.excludeByKey(biome("hestveil_caverns")));
-		var highfields = BiomeSelectors.tag(biomeTag("is_aether_highfields"));
-		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, PHYG, PHYG_WEIGHT, PHYG_MIN, PHYG_MAX);
-		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, SHEEPUFF, SHEEPUFF_WEIGHT, SHEEPUFF_MIN, SHEEPUFF_MAX);
-		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, FLYING_COW, FLYING_COW_WEIGHT, FLYING_COW_MIN, FLYING_COW_MAX);
-		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, AERBUNNY, AERBUNNY_WEIGHT, AERBUNNY_MIN, AERBUNNY_MAX);
-		BiomeModifications.addSpawn(highfields, MobCategory.CREATURE, MOA, MOA_WEIGHT, MOA_MIN, MOA_MAX);
+		// (where they spawn is in AetherAnimals.spawns, by the three climates' biome tags; the moa has no natural spawn, only nests)
+
+		AetherAnimals.init();
 
 		// the eggs and spawn eggs sit in the Aether's creative tab (made in AetherItems)
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("aether"));

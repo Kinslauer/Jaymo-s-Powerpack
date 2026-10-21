@@ -278,6 +278,17 @@ WOOL = {
     "lime": ramp("a8de5a", "92c846", "bded7c", "7bb034"),
     "pink": ramp("f2a6c8", "e690b8", "f8c0d8", "d67aa4"),
     "purple": ramp("a77ad8", "9264c4", "bf98e8", "7d52ab"),
+    # the rest of the dyes (Aether II's sheepuff takes all sixteen)
+    "light_gray": ramp("b4b8ba", "a0a4a8", "c8cccf", "8a8e92"),
+    "gray": ramp("6a7276", "596064", "7d868a", "4a5054"),
+    "yellow": ramp("f4d44e", "e6c23a", "faea78", "cfa92a"),
+    "brown": ramp("9a6c42", "855a34", "ae8056", "6e4826"),
+    "magenta": ramp("d070c8", "bc5cb4", "e290dc", "a04898"),
+    "orange": ramp("f29a3c", "e4852a", "f8b868", "c46c1a"),
+    "red": ramp("c8443c", "b43430", "dc6458", "962826"),
+    "green": ramp("6e9a3a", "5c8630", "86b252", "4a6e26"),
+    "blue": ramp("4e62c4", "3e52b0", "6c80dc", "32428c"),
+    "black": ramp("3a3a42", "2c2c34", "4e4e58", "1e1e26"),
 }
 
 
@@ -434,8 +445,13 @@ def items():
 
 # ---------------------------------------------------------------- loot (the 26.3 format: "modifier" on entries)
 
-def drop(item, lo, hi, looting=True):
+ON_FIRE = {"type": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:flags": {"is_on_fire": True}}}
+
+
+def drop(item, lo, hi, looting=True, smelt=False):
     mods = [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}}]
+    if smelt:
+        mods.append({"type": "minecraft:furnace_smelt", "condition": ON_FIRE})
     if looting:
         mods.append({"type": "minecraft:enchanted_count_increase", "count": {"type": "minecraft:uniform", "min": 0.0, "max": 1.0},
                      "enchantment": "minecraft:looting"})
@@ -443,13 +459,14 @@ def drop(item, lo, hi, looting=True):
 
 
 def loot():
+    # Aether II's drops (the notes' DROPS SUMMARY): the three herd animals drop the new meats; a sheepuff's wool is dropped by
+    # the entity itself (its colour); the aerbunny and the moa drop nothing (a moa gives feathers to shears)
     tables = {
-        "phyg": [drop("minecraft:porkchop", 1, 3), drop("minecraft:feather", 0, 1)],
-        "flying_cow": [drop("minecraft:leather", 0, 2), drop("minecraft:beef", 1, 3)],
-        # a sheepuff's wool is dropped by the entity itself (its colour); a sheared one has none
-        "sheepuff": [drop("minecraft:mutton", 1, 2)],
-        "aerbunny": [drop("minecraft:string", 0, 2)],
-        "moa": [drop("minecraft:feather", 2, 3)],
+        "phyg": [drop("%s:raw_taegore_meat" % NS, 1, 3, smelt=True)],
+        "flying_cow": [drop("%s:burrukai_rib_cut" % NS, 1, 3, smelt=True)],
+        "sheepuff": [drop("%s:kirrid_loin" % NS, 1, 2, smelt=True)],
+        "aerbunny": [],
+        "moa": [],
     }
     for name, pools in tables.items():
         write(os.path.join(DATA, "loot_table", "entities", name + ".json"),
