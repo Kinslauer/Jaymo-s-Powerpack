@@ -72,7 +72,7 @@ final class CostumeModels {
 	 * are then laid on it like on any player model, by the model-feature mixins. A cape, if it has one, swings like the
 	 * vanilla cape from the render state's cape motion.
 	 */
-	static class Worn extends PlayerModel {
+	static class Worn extends PlayerModel implements com.jaymospowers.client.PosedCopy.Holder {
 		private final Supplier<PlayerModel> wearer;
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
@@ -195,6 +195,12 @@ final class CostumeModels {
 		 * draws its body's parts each on its own and never the root (CommonVillagerModel.renderCommon), so a pose that
 		 * moves the root (Gravity's arm lean) would otherwise carry the costume off the body.
 		 */
+		/** (0.15.44) Over an MCA body it wears the posed body's copy: our poses aren't laid on it again. */
+		@Override
+		public boolean carriesPose() {
+			return this.mcaBody;
+		}
+
 		void beforeDraw() {
 			if (this.mcaBody) {
 				root().loadPose(PartPose.ZERO);

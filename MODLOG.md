@@ -2271,3 +2271,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     stretches inside a spin stay straight, so a twirl doesn't stop at every quarter turn. The hit's keyframe and every
     begin/end/stop tick are unchanged, so Better Combat's damage timing is the same. `tools/check_player_animations.py`
     checks every file parses and every key sits within the animation.
+- **0.15.44, poses laid once on MCA bodies:** Andy: "down state doesnt look write, looks like the animation is drawn
+  twice again, down arrow crawling is the same, and so is the slide". Since 0.15.42 every eased pose goes through
+  `PoseBlend`, which adds its offsets to the model it's given. With MCA a body is drawn by MCA's layers, whose models
+  take a copy of the already-posed body in their own `setupAnim` (`receivesDeferredAnimationPose`), and a costume over
+  them takes the same copy; our model-feature hooks then added every pose a second time. `PosedCopy` spots those models
+  (MCA's flag, read by reflection; `CostumeModels.Worn` when over an MCA body) and `PoseBlend.lay`/`bend` leave them.
