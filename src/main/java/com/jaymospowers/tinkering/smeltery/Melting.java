@@ -1,12 +1,16 @@
 package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.tinkering.PartType;
+import com.jaymospowers.tinkering.TinkerMaterial;
+import com.jaymospowers.tinkering.TinkerToolItem;
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.WeaponPartItem;
 import com.jaymospowers.tinkering.WeaponParts;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -189,10 +193,28 @@ public final class Melting {
 		}
 	}
 
-	/** What one of this item melts into, or null. */
+	/** What one of this item melts into, or null. (0.15.36) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
 		Result result = builtIn(stack);
-		return result != null ? result : extra.get(stack.getItem());
+		if (result == null) {
+			result = extra.get(stack.getItem());
+		}
+		return result == null ? null : worn(stack, result);
+	}
+
+	/** (0.15.36) The share of a damaged item's metal that's left (at least a drop of its main liquid). */
+	private static Result worn(ItemStack stack, Result result) {
+		if (!stack.isDamageableItem() || !stack.isDamaged()) {
+			return result;
+		}
+		int max = stack.getMaxDamage();
+		int left = max - stack.getDamageValue();
+		Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+		for (Input part : result.parts()) {
+			liquids.merge(part.molten(), (int) ((long) part.amount() * left / max), Integer::sum);
+		}
+		Result scaled = Result.of(liquids);
+		return scaled != null ? scaled : new Result(result.molten(), 1);
 	}
 
 	/** The extras ({@link MeltingRecipes}), for sending to players. */
@@ -235,6 +257,22 @@ public final class Melting {
 			if (molten != null) {
 				return new Result(molten, part.part.cost * Molten.INGOT);
 			}
+		}
+		if (stack.getItem() instanceof TinkerToolItem tool) {
+			// (0.15.36) a Tinkering tool: each metal part's worth
+			Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+			List<TinkerMaterial> materials = ToolStats.materials(stack);
+			for (int i = 0; i < tool.type.parts.size() && i < materials.size(); i++) {
+				Molten molten = Molten.of(materials.get(i));
+				if (molten != null) {
+					liquids.merge(molten, tool.type.parts.get(i).part().cost * Molten.INGOT, Integer::sum);
+				}
+			}
+			return Result.of(liquids);
+		}
+		if (stack.getItem() instanceof CastItem) {
+			// (0.15.36) a gold cast took an ingot of gold
+			return new Result(Molten.GOLD, Molten.INGOT);
 		}
 		return null;
 	}
