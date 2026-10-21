@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.aether.AetherFlora;
 import com.jaymospowers.aether.AetherItems;
+import com.jaymospowers.aether.monster.AetherMonster;
 import java.util.ArrayDeque;
 import java.util.EnumSet;
 import java.util.List;
@@ -65,9 +66,17 @@ public class Taegore extends ZoneAnimal {
 	private int digWait = DIG_WAIT_FIRST;
 	private final ArrayDeque<BlockPos> explored = new ArrayDeque<>();
 
+	/** Weak spots: -1 takes more from that kind of blow (see AetherMonster.factor). */
+	public static final int SLASH = -1, IMPACT = 0, PIERCE = 0;
+
 	public Taegore(EntityType<? extends Taegore> type, Level level) {
 		super(type, level);
 		this.digWait = DIG_WAIT_FIRST / 2 + this.random.nextInt(DIG_WAIT_FIRST * 3);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		return super.hurtServer(level, source, amount * AetherMonster.factor(source, SLASH, IMPACT, PIERCE, false));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

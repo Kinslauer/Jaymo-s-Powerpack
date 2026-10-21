@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.mob;
 
+import com.jaymospowers.aether.monster.AetherMonster;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -58,6 +59,9 @@ public class Burrukai extends ZoneAnimal {
 	private int ramPause;
 	private int windUp;
 
+	/** Weak spots: -1 takes more from that kind of blow (see AetherMonster.factor). */
+	public static final int SLASH = 0, IMPACT = -1, PIERCE = 0;
+
 	public Burrukai(EntityType<? extends Burrukai> type, Level level) {
 		super(type, level);
 	}
@@ -98,7 +102,7 @@ public class Burrukai extends ZoneAnimal {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		boolean hurt = super.hurtServer(level, source, amount);
+		boolean hurt = super.hurtServer(level, source, amount * AetherMonster.factor(source, SLASH, IMPACT, PIERCE, false));
 		if (hurt && !this.isBaby() && source.getEntity() instanceof LivingEntity attacker && attacker != this && !(attacker instanceof Burrukai b && b.isBaby())) {
 			if (!(attacker instanceof Player player) || (!player.isCreative() && !player.isSpectator())) {
 				this.anger = ANGER_TICKS;

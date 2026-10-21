@@ -44,25 +44,26 @@ public abstract class AetherMonster extends Monster {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		return super.hurtServer(level, source, amount * this.factor(source));
+		return super.hurtServer(level, source, amount * factor(source, this.slash, this.impact, this.pierce, this.blighted() && this.inSun()));
 	}
 
-	private float factor(DamageSource source) {
+	/** The damage multiplier for a blow against the given slash, impact and pierce strengths (shared with the passive animals). */
+	public static float factor(DamageSource source, int slash, int impact, int pierce, boolean sunWeak) {
 		int spot;
 		if (source.is(DamageTypeTags.IS_PROJECTILE)) {
-			spot = this.pierce;
+			spot = pierce;
 		} else if (source.getDirectEntity() instanceof LivingEntity attacker && attacker == source.getEntity()) {
 			ItemStack held = attacker.getMainHandItem();
 			if (held.is(ItemTags.SPEARS)) {
-				spot = this.pierce;
+				spot = pierce;
 			} else if (held.is(ItemTags.SWORDS) || held.is(ItemTags.AXES)) {
-				spot = this.slash;
+				spot = slash;
 			} else {
 				// picks, shovels, hoes, maces and bare fists
-				spot = this.impact;
+				spot = impact;
 			}
 		} else if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-			spot = this.impact;
+			spot = impact;
 		} else {
 			return 1.0F;
 		}
@@ -70,7 +71,7 @@ public abstract class AetherMonster extends Monster {
 			return Math.max(0.4F, 1.0F - STRONG_STEP * spot);
 		}
 		if (spot < 0) {
-			return 1.0F - WEAK_STEP * spot * (this.blighted() && this.inSun() ? SUN_WEAKNESS : 1.0F);
+			return 1.0F - WEAK_STEP * spot * (sunWeak ? SUN_WEAKNESS : 1.0F);
 		}
 		return 1.0F;
 	}

@@ -1,6 +1,7 @@
 package com.jaymospowers.aether.mob;
 
 import com.jaymospowers.aether.AetherBlocks;
+import com.jaymospowers.aether.monster.AetherMonster;
 import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -77,8 +78,16 @@ public class Kirrid extends ZoneAnimal {
 
 	private int hopWait, woolTimer, plateTimer, ramCooldown = RAM_COOLDOWN_MIN, grazeWait = GRAZE_WAIT_MIN;
 
+	/** Weak spots: -1 takes more from that kind of blow (see AetherMonster.factor). */
+	public static final int SLASH = 0, IMPACT = 0, PIERCE = -1;
+
 	public Kirrid(EntityType<? extends Kirrid> type, Level level) {
 		super(type, level);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		return super.hurtServer(level, source, amount * AetherMonster.factor(source, SLASH, IMPACT, PIERCE, false));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

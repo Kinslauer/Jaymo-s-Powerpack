@@ -1,6 +1,7 @@
 package com.jaymospowers.aether.mob;
 
 import com.jaymospowers.aether.AetherItems;
+import com.jaymospowers.aether.monster.AetherMonster;
 import com.jaymospowers.aether.monster.AetherMonsters;
 import java.util.EnumSet;
 import java.util.List;
@@ -103,7 +104,12 @@ public class Moa extends RideableAnimal {
 
 	/** Raised by a player from an egg: the only kind that takes a saddle. */
 	private boolean raised;
+	/** Seen as a chick this life, so the shift is set once when it grows up. */
+	private boolean chick;
 	private int eggTimer, anger, hungerWait, hungry, fed, staminaShift, shearWait, staminaCooldown;
+
+	/** Weak spots: -1 takes more from that kind of blow (see AetherMonster.factor). */
+	public static final int SLASH = -1, IMPACT = 0, PIERCE = 0;
 
 	public Moa(EntityType<? extends Moa> type, Level level) {
 		super(type, level);
@@ -280,7 +286,13 @@ public class Moa extends RideableAnimal {
 				this.shearWait--;
 			}
 			if (this.isBaby()) {
+				this.chick = true;
 				this.growthTick(level);
+			} else if (this.chick) {
+				// grown up, by feeding or by waiting: its feeding sets its stamina
+				this.chick = false;
+				this.staminaShift = this.fed == 0 ? SHIFT_STARVED : this.fed == 3 ? SHIFT_THREE : SHIFT_FED;
+				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getX(), this.getY() + 1.0, this.getZ(), 8, 0.4, 0.5, 0.4, 0.0);
 			} else if (this.raised && !this.isVehicle() && --this.eggTimer <= 0) {
 				this.eggTimer = EGG_MIN + this.random.nextInt(EGG_SPREAD);
 				this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
@@ -314,8 +326,6 @@ public class Moa extends RideableAnimal {
 		int next = Math.min(STAGES, done + 1);
 		if (next >= STAGES) {
 			this.setAge(0);
-			this.staminaShift = this.fed == 0 ? SHIFT_STARVED : this.fed == 3 ? SHIFT_THREE : SHIFT_FED;
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getX(), this.getY() + 1.0, this.getZ(), 8, 0.4, 0.5, 0.4, 0.0);
 		} else {
 			this.setAge(-CHICK_TICKS + next * (CHICK_TICKS / STAGES));
 		}
@@ -360,7 +370,7 @@ public class Moa extends RideableAnimal {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		boolean hurt = super.hurtServer(level, source, amount);
+		boolean hurt = super.hurtServer(level, source, amount * AetherMonster.factor(source, SLASH, IMPACT, PIERCE, false));
 		if (hurt && !this.isBaby() && !this.raised && source.getEntity() instanceof Player player && !player.isCreative() && !player.isSpectator()) {
 			this.angryAt(level, player);
 		}
