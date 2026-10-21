@@ -287,6 +287,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.118: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
+		// the vampires' callings, nightmares and the Nightfall (and their attachments)
+		com.jaymoskingdoms.nightfall.Nightfall.register();
 		// 0.7.92: an Earthling near death: the ki round the fists flares, with a buff (its attachment)
 		LOGGER.debug("earthling surge attachment: {}", EarthlingSurge.UNTIL);
 		EarthlingSurge.register();
