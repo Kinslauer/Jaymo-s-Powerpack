@@ -108,7 +108,7 @@ public final class WindStaff {
 	}
 
 	/**
-	 * (0.15.16, Andy: "wind should keep the quarterstaff abilities regardless of class") Who the staff's gales answer:
+	 * (0.15.17, Andy: "wind should keep the quarterstaff abilities regardless of class") Who the staff's gales answer:
 	 * anyone with the Wind power, whatever their class, and still an air Sorcerer without it.
 	 */
 	static boolean wielder(Player player) {
