@@ -490,7 +490,7 @@ public final class Crooks {
 		for (int tries = 0; tries < 24; tries++) {
 			BlockPos pos = at.offset(random.nextInt(25) - 12, random.nextInt(7) - 3, random.nextInt(25) - 12);
 			BlockState state = level.getBlockState(pos);
-			boolean burns = state.is(BlockTags.LOGS_THAT_BURN) || state.is(BlockTags.PLANKS) || state.is(BlockTags.WOOL) || state.is(Blocks.HAY_BLOCK);
+			boolean burns = state.is(BlockTags.LOGS) || state.is(BlockTags.PLANKS) || state.is(BlockTags.WOOL) || state.is(Blocks.HAY_BLOCK);
 			if (burns && level.getBlockState(pos.above()).isAir() && !Placed.any(level, pos)) {
 				return pos;
 			}

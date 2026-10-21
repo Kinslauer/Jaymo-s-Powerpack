@@ -3692,4 +3692,4 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   who owes you, isn't murder (`Crooks.fairGame`); guards and golems stop beating a downed crook.
 - Reputation: every chance against a player is scaled by `1 - rep/750`, between 0.1 and 1.5 (a friend of the town is
   rarely robbed; a disliked stranger is robbed more).
-- Not yet seen in game: built without a compiler run of the whole tree (see the PR).
+- Compile-checked (the changed files against the 26.3 jars and the 0.7.115 jar); not yet seen in game.
