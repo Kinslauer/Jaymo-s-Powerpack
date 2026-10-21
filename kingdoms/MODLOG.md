@@ -3669,7 +3669,24 @@ The user: "lightning strikes during storms absolutely destroys forests. water sh
   wildfire disaster are unchanged.
 - Water placed on fire always put it out; nothing here changed that.
 
-## 0.7.121: the hidden blade moves, and shows
+## 0.7.121: villagers fight back (pack 0.15.28)
+The user linked the Villager Retaliation mod (NeoForge 1.21.1, all rights reserved, "don't port without permission"),
+so only the idea is used; nothing of its code. Most of what it does Kingdoms already had: witnessed crimes (`Theft`),
+reputation per faction (`Reputation`), each villager's memory of each player and gossip (`Recollections`), quests,
+hired workers. What was missing was a villager standing up for themselves when struck: `Retaliation`.
+- Strike a grown villager or a settlement's civilian (not a guard, ruler, orc, thrall, captive or someone downed) and
+  they square up and punch back (1 damage, every 25 ticks each, the crowd lands one every 10 ticks). Onlookers who see
+  it (`Theft.witnesses`) join in, up to 5. Seen, it's `Crime.ASSAULT`, a light crime (-10 reputation, a cry, a memory).
+- Someone under 30% health runs off. The rest cool off 30 s after your last blow on one of them, or when you're downed.
+- Feared (reputation -600 or under, or an outlaw there): the struck one runs instead, and nobody joins in.
+- Paying off: emeralds in hand, use a brawler. 3 emeralds plus 3 per extra blow you landed, at most 32. That one stops;
+  paying the one you first struck ends the whole fight. They remember being paid (`Kind.PAID_OFF`) as well as the blow.
+  At reputation -100 or under (or an outlaw) they refuse your coin.
+- A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
+  crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Tuning: the constants at the top of `Retaliation`.
+
+## 0.7.122: the hidden blade moves, and shows
 The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
 right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
 `client/mixin/blade/HiddenBladePoseMixin`.

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.121) A player with a hidden blade sprung holds that arm up ahead in a guard, and thrusts with it (see HiddenBladeClient). */
+/** (0.7.122) A player with a hidden blade sprung holds that arm up ahead in a guard, and thrusts with it (see HiddenBladeClient). */
 @Mixin(PlayerModel.class)
 abstract class HiddenBladePoseMixin {
 	@Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)V", at = @At("TAIL"))
