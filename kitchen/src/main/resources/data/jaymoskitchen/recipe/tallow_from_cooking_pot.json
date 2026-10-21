@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:cooking_pot",
+    "jaymoskitchen:animal_fat",
+    "jaymoskitchen:animal_fat"
+  ],
+  "result": {
+    "id": "jaymoskitchen:tallow",
+    "count": 2
+  }
+}

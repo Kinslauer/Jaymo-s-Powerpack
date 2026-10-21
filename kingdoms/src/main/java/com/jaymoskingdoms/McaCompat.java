@@ -201,7 +201,7 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kin(a, b) : STRANGERS;
 	}
 
-	/** (0.7.126) How {@code v} was related to someone now dead ({@code dead}, by UUID): {@link #STRANGERS} without MCA. */
+	/** (0.7.131) How {@code v} was related to someone now dead ({@code dead}, by UUID): {@link #STRANGERS} without MCA. */
 	static int kinOf(Villager v, java.util.UUID dead) {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
 	}

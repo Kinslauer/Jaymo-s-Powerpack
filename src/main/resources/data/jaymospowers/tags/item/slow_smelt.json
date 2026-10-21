@@ -1,0 +1,29 @@
+{
+  "values": [
+    "#minecraft:iron_ores",
+    "#minecraft:gold_ores",
+    "#minecraft:copper_ores",
+    "#minecraft:coal_ores",
+    "#minecraft:diamond_ores",
+    "#minecraft:emerald_ores",
+    "#minecraft:lapis_ores",
+    "#minecraft:redstone_ores",
+    "minecraft:nether_gold_ore",
+    "minecraft:nether_quartz_ore",
+    "minecraft:ancient_debris",
+    "minecraft:raw_iron",
+    "minecraft:raw_gold",
+    "minecraft:raw_copper",
+    "jaymospowers:silver_ore",
+    "jaymospowers:deepslate_silver_ore",
+    "jaymospowers:raw_silver",
+    {
+      "id": "#c:ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_materials",
+      "required": false
+    }
+  ]
+}

@@ -125,6 +125,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/mattock/handle_slimesteel"
             }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_steel"
+            }
           }
         ],
         "fallback": {
@@ -259,6 +266,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_broken_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_steel"
+              }
             }
           ],
           "fallback": {
@@ -388,6 +402,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_steel"
               }
             }
           ],
@@ -524,6 +545,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_broken_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_steel"
+              }
             }
           ],
           "fallback": {
@@ -653,6 +681,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_steel"
               }
             }
           ],

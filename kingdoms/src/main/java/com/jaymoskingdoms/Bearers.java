@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.126) After the fighting, the townsfolk clear the field of the dead (with Jaymo's Kitchen's corpses). Once things
+ * (0.7.131) After the fighting, the townsfolk clear the field of the dead (with Jaymo's Kitchen's corpses). Once things
  * are quiet round a body lying in a settlement's land (no monsters about, nobody fighting, no raid), a grown villager (or
  * one of its working folk, or a guard with nothing to fight) comes out, takes it up in their arms and carries it off:
  * <ul>
@@ -449,7 +449,7 @@ public final class Bearers {
 	}
 
 	/**
-	 * (0.7.126) A person's body lying in a settlement's land: the settlement's to bury or burn (so iron golems leave it be,
+	 * (0.7.131) A person's body lying in a settlement's land: the settlement's to bury or burn (so iron golems leave it be,
 	 * however long the fighting keeps the bearers away).
 	 */
 	static boolean theirs(ServerLevel level, Entity corpse) {

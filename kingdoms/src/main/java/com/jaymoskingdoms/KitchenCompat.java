@@ -22,7 +22,7 @@ final class KitchenCompat {
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
 	/**
-	 * (0.7.126) For {@link Bearers} and {@link Looters} (Kitchen 0.5.8): a robber's take ({@code robBy}), whether a body has
+	 * (0.7.131) For {@link Bearers} and {@link Looters} (Kitchen 0.5.9): a robber's take ({@code robBy}), whether a body has
 	 * anything on it worth taking, its saved data (who it was), and who a player is carrying.
 	 */
 	private static final @Nullable Method ROB_BY, HAS_VALUABLES, LOOK_TAG, CARRIED_BY, SINCE_DEATH;
@@ -88,7 +88,7 @@ final class KitchenCompat {
 				carriedBy = corpse.getMethod("carriedBy", net.minecraft.world.entity.player.Player.class);
 				sinceDeath = corpse.getMethod("sinceDeath");
 			} catch (ReflectiveOperationException e) {
-				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the dead to be buried or robbed (needs 0.5.8): {}", e.toString());
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the dead to be buried or robbed (needs 0.5.9): {}", e.toString());
 				robBy = null;
 			}
 		}
@@ -174,43 +174,43 @@ final class KitchenCompat {
 		return CORPSE != null;
 	}
 
-	/** (0.7.126) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.8). */
+	/** (0.7.131) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */
 	static boolean burials() {
 		return ROB_BY != null;
 	}
 
-	/** (0.7.126) Any Kitchen corpse, lying free: nobody carrying it, not in a cart or on a horse. */
+	/** (0.7.131) Any Kitchen corpse, lying free: nobody carrying it, not in a cart or on a horse. */
 	static boolean isFreeCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger() && call(CARRIER, entity) == null;
 	}
 
-	/** (0.7.126) A player's body (never buried, burned or robbed: their things stay theirs). */
+	/** (0.7.131) A player's body (never buried, burned or robbed: their things stay theirs). */
 	static boolean isPlayerCorpse(Entity corpse) {
 		return Boolean.TRUE.equals(call(PLAYER_CORPSE, corpse));
 	}
 
-	/** (0.7.126) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
+	/** (0.7.131) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
 	static boolean hasValuables(Entity corpse) {
 		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));
 	}
 
-	/** (0.7.126) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
+	/** (0.7.131) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
 	@SuppressWarnings("unchecked")
 	static java.util.List<net.minecraft.world.item.ItemStack> robBy(Entity corpse, Entity robber) {
 		return call(ROB_BY, corpse, robber) instanceof java.util.List<?> list ? (java.util.List<net.minecraft.world.item.ItemStack>)list : java.util.List.of();
 	}
 
-	/** (0.7.126) The dead mob's saved data (a fresh copy), or null. */
+	/** (0.7.131) The dead mob's saved data (a fresh copy), or null. */
 	static net.minecraft.nbt.@Nullable CompoundTag lookTag(Entity corpse) {
 		return call(LOOK_TAG, corpse) instanceof net.minecraft.nbt.CompoundTag tag ? tag : null;
 	}
 
-	/** (0.7.126) Ticks since it died (very large for a body that was lying there before a reload). */
+	/** (0.7.131) Ticks since it died (very large for a body that was lying there before a reload). */
 	static long sinceDeath(Entity corpse) {
 		return call(SINCE_DEATH, corpse) instanceof Long ticks ? ticks : Long.MAX_VALUE;
 	}
 
-	/** (0.7.126) The body {@code player} is carrying in their arms, if any. */
+	/** (0.7.131) The body {@code player} is carrying in their arms, if any. */
 	static @Nullable Entity carriedBy(net.minecraft.world.entity.player.Player player) {
 		if (CARRIED_BY == null) {
 			return null;
@@ -223,7 +223,7 @@ final class KitchenCompat {
 		}
 	}
 
-	/** (0.7.126) Tells Kitchen to call {@code hook} whenever a player takes something off a body by hand ({@link Looters#playerRobbed}). */
+	/** (0.7.131) Tells Kitchen to call {@code hook} whenever a player takes something off a body by hand ({@link Looters#playerRobbed}). */
 	static void onRobbed(java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, Entity> hook) {
 		if (ROB_BY == null) {
 			return;

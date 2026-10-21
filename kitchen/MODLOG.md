@@ -860,6 +860,16 @@ after `Mill.register()`.
 Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
 unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
 Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
-- **0.5.8:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
+
+- **0.5.8, tanning and hemp (Better With Mods batch 2, Powers 0.15.36, Kingdoms 0.7.128):** `tanning/Tanning`: fatty
+  animals butchered on a block or by a butcher give Animal Fat (`ButcheringBonus`), melted into Tallow on a campfire,
+  in a furnace or in the cooking pot; tallow + string = candle. Stripping a log drops Bark 35% of the time. Leather +
+  bark in a water cauldron (one bark a hide, up to 8; adding a hide restarts the timer) tans in 5 minutes; empty hand
+  takes out Tanned Leather, which crafts into 3 Leather Straps (`c:leather_straps`, `jaymoskitchen:straps`).
+  `farm/Hemp`: seeds 3% from grass, a two-tall crop on farmland (Sowing takes it); fibre -> string (3 for 2) or Hemp
+  Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
+  `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
+  Art: `tools/vanilla_style/tanning.py`.
+- **0.5.9:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
   never an animal, fish, player or iron body), `hasValuables()`, `lookTag()`, and `setOnRobbed(BiConsumer)`, called
   when a player takes anything off a body by hand.

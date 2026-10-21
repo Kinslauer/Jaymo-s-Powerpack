@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "jaymospowers:block/tinkering/forge_hearth_front",
+    "side": "jaymospowers:block/tinkering/forge_hearth_side",
+    "top": "jaymospowers:block/tinkering/forge_hearth_top",
+    "bottom": "jaymospowers:block/tinkering/forge_hearth_side"
+  }
+}

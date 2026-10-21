@@ -234,7 +234,7 @@ public final class Undertakers {
 		}
 	}
 
-	/** (0.7.126) {@code mob} is carrying a corpse to the fire, or was called away to one. */
+	/** (0.7.131) {@code mob} is carrying a corpse to the fire, or was called away to one. */
 	static boolean busy(Entity mob) {
 		return DUTIES.containsKey(mob.getUUID()) || BUSY.containsKey(mob.getUUID());
 	}

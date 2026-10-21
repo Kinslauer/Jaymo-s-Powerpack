@@ -131,7 +131,8 @@ public final class Heritage {
 	/**
 	 * Emberborn: fire never hurts them and never stays lit on them. In the cold their blows and their walking speed drop
 	 * by these shares; freezing (powder snow) takes the bigger ones. Both Emberborn and Frostborn: hunger where they
-	 * thrive and where they don't.
+	 * thrive and where they don't. Wool clothes take a share of an Emberborn's cold penalties off a piece
+	 * ({@link WoolClothes#WOOL_COLD_SHARE}).
 	 */
 	static final double EMBER_COLD_WEAK = 0.15, EMBER_COLD_SLOW = 0.10, EMBER_FREEZING_WEAK = 0.30, EMBER_FREEZING_SLOW = 0.20;
 	static final float THRIVE_HUNGER = 0.8F, WILT_HUNGER = 1.25F;
@@ -583,8 +584,10 @@ public final class Heritage {
 					weak = EMBER_COLD_WEAK;
 					slow = EMBER_COLD_SLOW;
 				}
-				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_chill", -weak, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_chill", -slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				// knitted wool keeps some of it off, a share a piece
+				double bare = 1.0 - WoolClothes.warmth(player);
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_chill", -weak * bare, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_chill", -slow * bare, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
 				player.setTicksFrozen(0);
 			} else if (kind == Kind.STORMBORN) {
@@ -705,7 +708,8 @@ public final class Heritage {
 		return switch (kind) {
 			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
 			case VERDANT -> inSun(player) ? (spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
-			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : chilled(player) ? WILT_HUNGER : 1.0F;
+			case EMBERBORN -> hot(player) ? THRIVE_HUNGER
+				: chilled(player) ? 1.0F + (WILT_HUNGER - 1.0F) * (float) (1.0 - WoolClothes.warmth(player)) : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
 			case DAWNBORN -> dark(player) ? DAWN_DARK_HUNGER : 1.0F;

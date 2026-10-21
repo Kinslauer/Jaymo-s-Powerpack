@@ -275,7 +275,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * (0.5.8) Takes the next piece of gear off the body (worn as {@link #takeGear} says) and returns it, or an empty stack
+	 * (0.5.9) Takes the next piece of gear off the body (worn as {@link #takeGear} says) and returns it, or an empty stack
 	 * if it has nothing on.
 	 */
 	private ItemStack takeGearPiece() {
@@ -308,11 +308,11 @@ public class CorpseEntity extends Entity {
 		return ItemStack.EMPTY;
 	}
 
-	/** (0.5.8) Called when a player takes something off a body (searching it, or a piece of its gear); see {@link #setOnRobbed}. */
+	/** (0.5.9) Called when a player takes something off a body (searching it, or a piece of its gear); see {@link #setOnRobbed}. */
 	private static java.util.function.@Nullable BiConsumer<Player, Entity> onRobbed;
 
 	/**
-	 * (0.5.8) Jaymo's Kingdoms: told whenever a player takes something off a body by hand (its pockets searched, or a piece
+	 * (0.5.9) Jaymo's Kingdoms: told whenever a player takes something off a body by hand (its pockets searched, or a piece
 	 * of what it wears or holds), so robbing the dead can be a crime. Not for fish, butchering, or a player's own hotbar back.
 	 */
 	public static void setOnRobbed(java.util.function.BiConsumer<Player, Entity> hook) {
@@ -330,7 +330,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * (0.5.8) Robbed by something that isn't a player (Jaymo's Kingdoms: a looter come for the battlefield's dead): its
+	 * (0.5.9) Robbed by something that isn't a player (Jaymo's Kingdoms: a looter come for the battlefield's dead): its
 	 * pockets and everything it wears or holds, worn as {@link #takeGear} would leave them. Nothing from an animal, a fish,
 	 * a player's body (their things stay theirs) or an iron one. Returns what was taken (empty if nothing).
 	 */
@@ -358,16 +358,16 @@ public class CorpseEntity extends Entity {
 		return taken;
 	}
 
-	/** (0.5.8) A body that can be robbed at all: not an animal's, a fish's, a player's or an iron one. */
+	/** (0.5.9) A body that can be robbed at all: not an animal's, a fish's, a player's or an iron one. */
 	private boolean robbable() {
 		return kind != CorpseKind.ANIMAL && kind != CorpseKind.FISH && kind != CorpseKind.PLAYER && !isPlayerCorpse() && !isHeavy() && !isFish();
 	}
 
-	/** (0.5.8) The look {@link #hasValuables} last answered for, and its answer. */
+	/** (0.5.9) The look {@link #hasValuables} last answered for, and its answer. */
 	private @Nullable String valuablesLook;
 	private boolean lookHasGear;
 
-	/** (0.5.8) Something on it worth a robber's while: unsearched pockets with something in them, or gear still on it. */
+	/** (0.5.9) Something on it worth a robber's while: unsearched pockets with something in them, or gear still on it. */
 	public boolean hasValuables() {
 		if (!robbable()) {
 			return false;
@@ -384,7 +384,7 @@ public class CorpseEntity extends Entity {
 		return lookHasGear;
 	}
 
-	/** (0.5.8) The dead mob's saved data (its UUID, its name, a Kingdoms folk's realm and role), or null. A fresh copy. */
+	/** (0.5.9) The dead mob's saved data (its UUID, its name, a Kingdoms folk's realm and role), or null. A fresh copy. */
 	public @Nullable CompoundTag lookTag() {
 		return parse(look());
 	}

@@ -68,6 +68,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Surveyor.register();
 		Designs.register();
 		Armory.register();
+		// knitted wool clothes: light armour that keeps the cold off an Emberborn
+		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
@@ -79,7 +81,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
-		// 0.7.126: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
+		// 0.7.131: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
 		Looters.register();
@@ -102,6 +104,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
+		Purists.register();
 		Frights.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
@@ -123,7 +127,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Theft.register();
 		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.130: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
@@ -133,6 +137,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
+		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
+		Crooks.register();
+		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
+		Arrests.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
@@ -292,6 +301,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
+		// the vampires' callings, nightmares and the Nightfall (and their attachments)
+		com.jaymoskingdoms.nightfall.Nightfall.register();
 		// 0.7.92: an Earthling near death: the ki round the fists flares, with a buff (its attachment)
 		LOGGER.debug("earthling surge attachment: {}", EarthlingSurge.UNTIL);
 		EarthlingSurge.register();
@@ -308,7 +320,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
-		// 0.7.125: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
+		// 0.7.126: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
 		Bandits.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();

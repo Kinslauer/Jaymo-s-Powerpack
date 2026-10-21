@@ -135,6 +135,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/handle_slimesteel"
                   }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_steel"
+                  }
                 }
               ],
               "fallback": {
@@ -269,6 +276,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_broken_slimesteel"
                     }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_steel"
+                    }
                   }
                 ],
                 "fallback": {
@@ -398,6 +412,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_steel"
                     }
                   }
                 ],
@@ -534,6 +555,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_broken_slimesteel"
                     }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_steel"
+                    }
                   }
                 ],
                 "fallback": {
@@ -663,6 +691,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_steel"
                     }
                   }
                 ],
@@ -794,6 +829,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_slimesteel"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_steel"
                   }
                 }
               ],
@@ -932,6 +974,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/handle_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_steel"
+              }
             }
           ],
           "fallback": {
@@ -1066,6 +1115,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_slimesteel"
                 }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_steel"
+                }
               }
             ],
             "fallback": {
@@ -1195,6 +1251,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_steel"
                 }
               }
             ],
@@ -1331,6 +1394,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_slimesteel"
                 }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_steel"
+                }
               }
             ],
             "fallback": {
@@ -1460,6 +1530,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_steel"
                 }
               }
             ],
@@ -1591,6 +1668,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_steel"
               }
             }
           ],

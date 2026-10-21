@@ -146,6 +146,10 @@ final class Retaliation {
 		if (!fighter(victim) || Theft.rioting(victim)) {
 			return;
 		}
+		if (Crooks.fairGame(victim, player)) {
+			// (0.7.126) a known criminal, or the crook who robbed you: nobody takes their side, and it's no assault
+			return;
+		}
 		Faction f = factionOf(level, victim);
 		if (f != null && Wars.enemy(player, f)) {
 			// (an enemy soldier: they run, as from any raider)
