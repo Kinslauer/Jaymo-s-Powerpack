@@ -32,6 +32,15 @@ public final class LedgeClient {
 	private static boolean confirmed;
 	/** Jump was let go since the grab: the next press climbs. */
 	private static boolean jumpReleased;
+	/** (0.14.3) Caught at the top of a freerun climb ({@link #catchFromClimb}): holding forward pulls up and over, no Jump needed. */
+	private static boolean autoClimb;
+	/** (0.15.12) Caught by sneaking off an edge: the body goes out from the edge, then down. Shift was down for it: it lets go only once released and pressed again. */
+	private static boolean edge, shiftLatch;
+	/** (0.15.12) Sneak + Back from a hang: a drop that looks for a ledge this far (blocks) under the one let go of, for this many ticks. */
+	private static final int DROP_TICKS = 10;
+	private static final double DROP_MAX = 3.2;
+	private static int dropLeft;
+	private static double dropTop;
 
 	private LedgeClient() {
 	}
@@ -53,7 +62,8 @@ public final class LedgeClient {
 
 	/** Both hands are on the edge: no swings, no item use (vanilla's and Better Combat's both start from these clicks). */
 	private static void swallowClicks(Minecraft minecraft) {
-		if (phase == Phase.NONE) {
+		// (0.14.3) and while both hands hold a wall or a bar (freerunning)
+		if (phase == Phase.NONE && !com.jaymospowers.client.freerun.FreerunClient.holding()) {
 			return;
 		}
 		while (minecraft.options.keyAttack.consumeClick()) {
@@ -74,8 +84,11 @@ public final class LedgeClient {
 			cooldown--;
 		}
 		Input input = player.input.keyPresses;
+		if (dropLeft > 0) {
+			tickDrop(player);
+		}
 		switch (phase) {
-			case NONE -> tryGrab(player, input);
+		case NONE -> tryGrab(player, input);
 			case HANG -> tickHang(player, input);
 			case CLIMB -> tickClimb(player);
 		}
@@ -83,13 +96,66 @@ public final class LedgeClient {
 
 	private static void tryGrab(LocalPlayer player, Input input) {
 		if (cooldown > 0 || !input.forward() || !input.jump() || input.shift() || input.backward() || player.onGround()
-			|| player.getDeltaMovement().y < Ledge.GRAB_MIN_VY || !Ledge.canHang(player)) {
+			|| player.getDeltaMovement().y < Ledge.GRAB_MIN_VY || !Ledge.canHang(player) || com.jaymospowers.client.freerun.FreerunClient.active()) {
 			return;
 		}
 		Ledge.Spot found = Ledge.find(player);
 		if (found == null) {
 			return;
 		}
+		grab(player, found);
+	}
+
+	/**
+	 * (0.15.12) Falling after a drop from a hang (Sneak + Back): the first ledge 1 to 3 blocks under the one let go of, in
+	 * reach as the body passes it, is caught.
+	 */
+	private static void tickDrop(LocalPlayer player) {
+		dropLeft--;
+		if (phase != Phase.NONE || player.onGround() || player.isInWater() || !Ledge.canHang(player)) {
+			dropLeft = 0;
+			return;
+		}
+		Ledge.Spot found = Ledge.find(player);
+		if (found != null && found.top() <= dropTop - 0.9 && found.top() >= dropTop - DROP_MAX) {
+			dropLeft = 0;
+			grab(player, found);
+		}
+	}
+
+	/**
+	 * (0.15.12) Sneaking off an edge with Climber (see {@code FreerunClient}): hang from the edge just left, below it, turned
+	 * round to face its wall. {@code found} is {@link Ledge#edgeSpot}.
+	 */
+	public static void catchEdge(LocalPlayer player, Ledge.Spot found) {
+		if (phase != Phase.NONE || !Ledge.canHang(player)) {
+			return;
+		}
+		grab(player, found);
+		edge = true;
+		shiftLatch = true;
+		player.setYRot(found.face().toYRot());
+		player.yRotO = player.getYRot();
+		player.setYHeadRot(player.getYRot());
+		player.yHeadRotO = player.getYRot();
+	}
+
+	/**
+	 * (0.14.3) A freerunner's climb (Climber, {@code FreerunClient}) reached the top of its wall: the edge is caught
+	 * there, and (forward still held) they pull up and over once the hang settles. The cling has already ended.
+	 */
+	public static void catchFromClimb(LocalPlayer player, Ledge.Spot found) {
+		if (phase != Phase.NONE || !Ledge.canHang(player)) {
+			return;
+		}
+		grab(player, found);
+		autoClimb = true;
+	}
+
+	private static void grab(LocalPlayer player, Ledge.Spot found) {
+	autoClimb = false;
+	edge = false;
+	shiftLatch = false;
 		spot = found;
 		phase = Phase.HANG;
 		ticks = 0;
@@ -109,13 +175,26 @@ public final class LedgeClient {
 		boolean held = player.hasAttached(Ledge.HOLD);
 		confirmed |= held;
 		jumpReleased |= !input.jump();
+		if (!input.shift()) {
+			shiftLatch = false;
+		}
+		if (at != null && input.shift() && input.backward() && !shiftLatch) {
+			// (0.15.12) Sneak + Back: drop, and catch a ledge 1 to 3 blocks lower if there is one
+			double top = at.top();
+			letGo(player);
+			player.setDeltaMovement(0.0, 0.0, 0.0);
+			cooldown = 0;
+			dropLeft = DROP_TICKS;
+			dropTop = top;
+			return;
+		}
 		float away = Math.abs(Mth.wrapDegrees(player.getYRot() - (at == null ? 0.0F : at.face().toYRot())));
-		if (at == null || !Ledge.canHang(player) || !Ledge.holdable(player.level(), at.pos()) || input.shift() || input.backward()
+		if (at == null || !Ledge.canHang(player)	|| !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || input.backward()
 			|| away > Ledge.LOOK_AWAY_DEGREES || ticks > Ledge.HANG_MAX_TICKS || confirmed && !held || !confirmed && ticks > Ledge.CONFIRM_TICKS) {
 			letGo(player);
 			return;
 		}
-		if (input.jump() && jumpReleased && ticks >= Ledge.GRAB_SETTLE_TICKS) {
+		if ((input.jump() && jumpReleased || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
 			phase = Phase.CLIMB;
 			ticks = 0;
 			Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true);
@@ -152,7 +231,14 @@ public final class LedgeClient {
 		Vec3 target;
 		if (phase == Phase.HANG) {
 			float t = Math.min(1.0F, (ticks + 1.0F) / Ledge.GRAB_SETTLE_TICKS);
-			target = caughtAt.lerp(at.hang(), smooth(t));
+			if (edge) {
+				// out from the edge first, then down it
+				Vec3 hang = at.hang();
+				target = t < 0.5F ? new Vec3(Mth.lerp(smooth(t * 2.0F), caughtAt.x, hang.x), caughtAt.y, Mth.lerp(smooth(t * 2.0F), caughtAt.z, hang.z))
+					: new Vec3(hang.x, Mth.lerp(smooth(t * 2.0F - 1.0F), caughtAt.y, hang.y), hang.z);
+			} else {
+				target = caughtAt.lerp(at.hang(), smooth(t));
+			}
 		} else {
 			float p = Math.min(1.0F, (ticks + 1.0F) / Ledge.CLIMB_TICKS);
 			target = climbPath(at, p);
@@ -204,7 +290,9 @@ public final class LedgeClient {
 	}
 
 	private static void end() {
-		phase = Phase.NONE;
+	phase = Phase.NONE;
+	edge = false;
+		autoClimb = false;
 		spot = null;
 		ticks = 0;
 		Ledge.localHold = null;
@@ -212,7 +300,8 @@ public final class LedgeClient {
 	}
 
 	private static void reset() {
-		end();
+	end();
+	dropLeft = 0;
 		cooldown = 0;
 		confirmed = false;
 	}

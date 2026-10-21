@@ -1,6 +1,12 @@
 package com.jaymoskitchen.corpse;
 
 import com.jaymoskitchen.horse.CartEntity;
+import com.jaymoskitchen.ragdoll.RagdollBody;
+import com.jaymoskitchen.ragdoll.RagdollRig;
+import com.jaymoskitchen.ragdoll.RagdollNet;
+import com.jaymoskitchen.ragdoll.RagdollShapes;
+import com.jaymoskitchen.ragdoll.RagdollSnapshot;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +45,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +54,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -210,6 +214,15 @@ public class CorpseEntity extends Entity {
 		refreshDimensions();
 	}
 
+	/** (0.5.1) Server: its physics body (null while carried, slung or in a cart: those draw it limp instead). */
+	private @Nullable CorpseRagdoll ragdoll;
+	/** (0.5.1) Its rig, saved with it: shape id (-1 until known), and the standing size it was built for. */
+	private int rigShape = -1;
+	private float rigWidth, rigHeight;
+	private @Nullable RagdollRig rigCache;
+	/** (0.5.1) Points loaded from a save (relative to where it was), put back on the first tick. */
+	private float @Nullable [] savedPoints;
+
 	/** A slim-skinned player's body (or their zombie's): it sounds higher. */
 	private boolean slim;
 
@@ -301,12 +314,105 @@ public class CorpseEntity extends Entity {
 		return look.getCompoundOrEmpty("drop_chances").getFloatOr(slot, 0.0F) > 1.0F;
 	}
 
+	// ---- (0.5.1) ragdoll ---------------------------------------------------------------------------------------------
+
+	/** Server: sends its body's points to one player who just came into range. */
+	void sendRagdollTo(net.minecraft.server.level.ServerPlayer player) {
+		if (ragdoll != null && carrier() == null) {
+			RagdollNet.sendTo(player, this, RagdollSnapshot.of(ragdoll.body));
+		}
+	}
+
+	/** The rig of its body: the dead mob's real standing size (so babies and scaled mobs fit), a player's 0.6 by 1.8. */
+	private RagdollRig rig() {
+		if (rigCache == null) {
+			if (rigShape < 0 || rigWidth <= 0.0F || rigHeight <= 0.0F) {
+				EntityType<?> type = isPlayerCorpse() ? EntityTypes.PLAYER : sourceType();
+				float width = 0.6F, height = 1.8F;
+				if (type != null && type != EntityTypes.PLAYER) {
+					// the mob as it was (a baby, a scaled one), else its type's size
+					EntityDimensions standing = rebuild() instanceof LivingEntity mob ? mob.getDimensions(Pose.STANDING)
+						: type.getDimensions();
+					width = standing.width();
+					height = standing.height();
+				}
+				rigCache = type == null ? RagdollRig.of(RagdollRig.Shape.BOX, 0.5F, 0.4F) : RagdollShapes.rig(type, width, height);
+				rigShape = rigCache.shape.ordinal();
+				rigWidth = rigCache.width;
+				rigHeight = rigCache.height;
+			} else {
+				rigCache = RagdollRig.of(RagdollRig.Shape.byId(rigShape), rigWidth, rigHeight);
+			}
+		}
+		return rigCache;
+	}
+
+	/** Server: starts the body from one already made (a dying mob's, a limp player's). The corpse moves to it. */
+	void startRagdoll(RagdollBody body) {
+		this.rigCache = body.rig;
+		this.rigShape = body.rig.shape.ordinal();
+		this.rigWidth = body.rig.width;
+		this.rigHeight = body.rig.height;
+		this.ragdoll = new CorpseRagdoll(this, body);
+	}
+
+	/** A body lying where the corpse is, its limbs splayed (face up or down, and how, from its pose seed). */
+	RagdollBody lyingBody() {
+		boolean faceUp = new java.util.Random(poseSeed()).nextBoolean();
+		return RagdollBody.lying(rig(), getX(), getY(), getZ(), getYRot(), faceUp, poseSeed());
+	}
+
+	/**
+	 * Server: let go of, or set down: the body lies where the corpse is, moving at {@code velocity}. {@code rest}: it
+	 * isn't moving at all (set down on a butcher block).
+	 */
+	private void lieDown(Vec3 velocity, boolean rest) {
+		if (!(level() instanceof ServerLevel)) {
+			return;
+		}
+		RagdollBody made = lyingBody();
+		if (rest) {
+			made.stop();
+		} else {
+			made.setSpeed(velocity.x, velocity.y, velocity.z);
+		}
+		this.ragdoll = new CorpseRagdoll(this, made);
+	}
+
+	/** Free on the server: the body is stepped (made first if there isn't one: loaded, or let go of some other way). */
+	private void tickRagdoll(ServerLevel level) {
+		if (ragdoll == null) {
+			RagdollBody saved = null;
+			if (savedPoints != null) {
+				saved = new RagdollBody(rig());
+				if (!saved.restore(savedPoints, getX(), getY(), getZ())) {
+					saved = null;
+				}
+				savedPoints = null;
+			}
+			if (saved != null) {
+				ragdoll = new CorpseRagdoll(this, saved);
+			} else {
+				lieDown(getDeltaMovement(), false);
+			}
+		}
+		ragdoll.tick(this, level);
+	}
+
+	void setTumbling(boolean tumbling) {
+		this.entityData.set(TUMBLING, tumbling);
+	}
+
 	/** Entity events: the body jolts, hard (an axe blow) or lightly (rummaged through). */
 	private static final byte JOLT_HARD = 70, JOLT_LIGHT = 71;
 
 	/** Server: the body jolts with the blow (an axe) or the rummaging (looting it). */
 	public void jolt(boolean hard) {
 		level().broadcastEntityEvent(this, hard ? JOLT_HARD : JOLT_LIGHT);
+		if (ragdoll != null && !level().isClientSide()) {
+			// (0.5.1) the body moves too
+			ragdoll.jolt(hard, random);
+		}
 	}
 
 	@Override
@@ -444,6 +550,18 @@ public class CorpseEntity extends Entity {
 
 	public String look() {
 		return this.entityData.get(LOOK);
+	}
+
+	/** (0.5.5) Who this was when alive (the dead mob's own id, from its look), so its grave can be found. */
+	public Optional<java.util.UUID> deadId() {
+		CompoundTag tag = parse(look());
+		return tag == null ? Optional.empty() : tag.read("UUID", net.minecraft.core.UUIDUtil.CODEC);
+	}
+
+	/** (0.5.5) A villager's body (vanilla's, MCA's, a wandering trader). */
+	public boolean isVillager() {
+		EntityType<?> type = sourceType();
+		return type != null && type.builtInRegistryHolder().is(Corpses.VILLAGERS);
 	}
 
 	/** The parts the body lost (bits: head 1, right arm 2, left arm 4, right leg 8, left leg 16). */
@@ -656,6 +774,7 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		if (carrier != null) {
+			this.ragdoll = null;
 			// held across the carrier's arms, in front of them
 			Vec3 at = carryPosition(carrier, carrier.getYRot(), carrier.getX(), carrier.getY(), carrier.getZ(), getBbWidth());
 			setPos(at.x, at.y, at.z);
@@ -673,13 +792,19 @@ public class CorpseEntity extends Entity {
 			}
 			return;
 		}
+		if (this.entityData.get(CARRIER) >= 0 && !level().isClientSide()) {
+			// the carrier is gone from this level (logged out, changed dimension, unloaded): it drops
+			setCarrier(null);
+		}
 		if (grabCooldown > 0 && !level().isClientSide()) {
 			grabCooldown--;
 		}
 		if (tickSlung()) {
+			this.ragdoll = null;
 			return;
 		}
 		if (isPassenger()) {
+			this.ragdoll = null;
 			// lying in a cart: the cart moves it
 			if (level() instanceof ServerLevel level) {
 				serverTick(level);
@@ -689,59 +814,9 @@ public class CorpseEntity extends Entity {
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
 			return;
 		}
-		// falling into a block (wedged in a wall, landed half inside the ground): it's eased out the nearest open way, as
-		// a dropped item is, and a fall that stops getting anywhere ends where it is instead of tumbling on forever
-		if (isTumbling() && !isNoGravity()) {
-			boolean inBlock = !level().noCollision(this, getBoundingBox().deflate(1.0E-7));
-			this.noPhysics = inBlock;
-			if (inBlock) {
-				moveTowardsClosestSpace(getX(), (getBoundingBox().minY + getBoundingBox().maxY) / 2.0, getZ());
-			}
-			if (!level().isClientSide()) {
-				stuckTicks = position().distanceToSqr(xo, yo, zo) < STUCK_MOVE * STUCK_MOVE ? stuckTicks + 1 : 0;
-				if (stuckTicks >= STUCK_TICKS) {
-					stuckTicks = 0;
-					this.noPhysics = false;
-					setDeltaMovement(Vec3.ZERO);
-					this.entityData.set(TUMBLING, false);
-				}
-			}
-		} else {
-			this.noPhysics = false;
-			stuckTicks = 0;
-		}
-		// fall and settle; corpses don't slide around. A body already lying on something solid skips the collision
-		// work (most corpses, most of the time); the moment the block under it goes, it falls again at once
-		if (isNoGravity()) {
-			// held up by something (a gravity power, say): it drifts where it's pushed, and still bumps into things
-			move(MoverType.SELF, getDeltaMovement());
-			setDeltaMovement(getDeltaMovement().scale(0.85));
-		} else if (!restingOnSolid()) {
-			setDeltaMovement(getDeltaMovement().add(0.0, -0.04, 0.0));
-			move(MoverType.SELF, getDeltaMovement());
-			double drag = onGround() ? 0.5 : 0.91;
-			setDeltaMovement(getDeltaMovement().multiply(drag, onGround() ? 0.0 : 0.98, drag));
-		}
-		if (onGround() && !isNoGravity() && level() instanceof ServerLevel here) {
-			int overhang = overhang();
-			Vec3 slide = null;
-			if (overhang != 0) {
-				// lying across an edge with an end over nothing: it slides off that way, still falling, until it lies
-				// flat on blocks along its whole length (or drops off altogether)
-				float yaw = getYRot() * Mth.DEG_TO_RAD;
-				slide = new Vec3(Mth.cos(yaw) * overhang, 0.0, Mth.sin(yaw) * overhang);
-			} else if (!solidUnder(0.0)) {
-				// its middle is over nothing but its edge is caught on a block's rim: pushed off, away from that block
-				slide = awayFromRim();
-			}
-			if (slide != null) {
-				setDeltaMovement(slide.x * 0.12, getDeltaMovement().y, slide.z * 0.12);
-				this.entityData.set(TUMBLING, true);
-			} else if (isTumbling()) {
-				// down flat: it lies as it fell
-				this.entityData.set(TUMBLING, false);
-				play(here, SoundEvents.PLAYER_SMALL_FALL, 0.7F);
-			}
+		// (0.5.1) free: the body is a ragdoll, simulated here; the corpse is wherever its middle is (see CorpseRagdoll)
+		if (level() instanceof ServerLevel here) {
+			tickRagdoll(here);
 		}
 
 		if (level() instanceof ServerLevel level) {
@@ -794,68 +869,6 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		return false;
-	}
-
-	/** On the ground and still, with something solid right under its middle: nothing for physics to do this tick. */
-	private boolean restingOnSolid() {
-		if (!onGround() || getDeltaMovement().lengthSqr() > 1.0E-6) {
-			return false;
-		}
-		return solidUnder(0.0) && overhang() == 0;
-	}
-
-	/** Whether there's a block to lie on under the body's line, {@code along} blocks from its middle toward its head. */
-	private boolean solidUnder(double along) {
-		float yaw = getYRot() * Mth.DEG_TO_RAD;
-		BlockPos below = BlockPos.containing(getX() + Mth.cos(yaw) * along, getY() - 0.05, getZ() + Mth.sin(yaw) * along);
-		return !level().getBlockState(below).getCollisionShape(level(), below).isEmpty();
-	}
-
-	/** Which way to push a body that's caught on the rim of a block under its edge: from those blocks toward its middle. */
-	private Vec3 awayFromRim() {
-		AABB box = getBoundingBox();
-		double sumX = 0.0, sumZ = 0.0;
-		int found = 0;
-		for (double x : new double[] {box.minX + 0.01, box.maxX - 0.01}) {
-			for (double z : new double[] {box.minZ + 0.01, box.maxZ - 0.01}) {
-				BlockPos below = BlockPos.containing(x, getY() - 0.05, z);
-				if (!level().getBlockState(below).getCollisionShape(level(), below).isEmpty()) {
-					sumX += below.getX() + 0.5;
-					sumZ += below.getZ() + 0.5;
-					found++;
-				}
-			}
-		}
-		Vec3 away = found == 0 ? Vec3.ZERO : new Vec3(getX() - sumX / found, 0.0, getZ() - sumZ / found);
-		if (away.lengthSqr() < 1.0E-4) {
-			float yaw = getYRot() * Mth.DEG_TO_RAD;
-			away = new Vec3(Mth.cos(yaw), 0.0, Mth.sin(yaw));
-		}
-		return away.normalize();
-	}
-
-	/**
-	 * A body lies along its facing ((cos, sin) of its yaw), as long as the mob stood tall. With its middle on a block but
-	 * an end over nothing, it isn't lying flat: +1 or -1 for the end that hangs out (it slides off that way), 0 if it's
-	 * lying on blocks all along (or its middle isn't on anything, which gravity sees to). Laid on a butcher block, the
-	 * block holds it however far it hangs over.
-	 */
-	private int overhang() {
-		BlockPos centre = BlockPos.containing(getX(), getY() - 0.05, getZ());
-		if (!solidUnder(0.0) || Corpses.isButcherBlock(level().getBlockState(centre))) {
-			return 0;
-		}
-		EntityType<?> type = sourceType();
-		float length = isPlayerCorpse() ? 1.8F : type == null ? 0.5F : type.getDimensions().height();
-		double half = Mth.clamp(length * 0.5 - 0.15, 0.0, 1.5);
-		if (half < 0.2) {
-			return 0;
-		}
-		boolean head = solidUnder(half), feet = solidUnder(-half);
-		if (head && feet) {
-			return 0;
-		}
-		return !head && !feet ? (poseSeed() & 1) == 0 ? 1 : -1 : head ? -1 : 1;
 	}
 
 	private void serverTick(ServerLevel level) {
@@ -1153,6 +1166,7 @@ public class CorpseEntity extends Entity {
 		// air drag (0.91 a tick) leaves about 9 ticks' worth of its starting speed
 		double flight = 9.0;
 		setDeltaMovement(off.x / flight, 0.3, off.z / flight);
+		lieDown(getDeltaMovement(), false);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
 		}
@@ -1563,6 +1577,9 @@ public class CorpseEntity extends Entity {
 			unsling(false);
 		}
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
+		if (carrier != null) {
+			this.ragdoll = null;
+		}
 		setNoGravity(carrier != null);
 		this.noPhysics = carrier != null;
 	}
@@ -1636,6 +1653,7 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(SLUNG, horse.getId());
 		this.slungHorse = horse.getUUID();
 		this.slingFrom = position();
+		this.ragdoll = null;
 		setNoGravity(true);
 		this.noPhysics = true;
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -1656,6 +1674,7 @@ public class CorpseEntity extends Entity {
 			setOnGround(false);
 			this.entityData.set(TUMBLING, true);
 			setDeltaMovement(0.0, 0.1, 0.0);
+			lieDown(getDeltaMovement(), false);
 		}
 	}
 
@@ -1751,6 +1770,12 @@ public class CorpseEntity extends Entity {
 
 	/** Server: the carrier lets go. It drops from where it was held, carried on by their momentum, tumbling limp. */
 	public void drop(Player player) {
+		letGo(player);
+		lieDown(getDeltaMovement(), false);
+	}
+
+	/** Lets go of the body (see {@link #drop}), without making its physics body yet: toss sets its speed first. */
+	private void letGo(Player player) {
 		setCarrier(null);
 		grabCooldown = GRAB_COOLDOWN;
 		setOnGround(false);
@@ -1769,10 +1794,6 @@ public class CorpseEntity extends Entity {
 	 * were pulled toward your grab.
 	 */
 	private static final float CATCH_RADIUS = 2.0F;
-	/** (0.4.36) A tumbling body that moves less than this a tick for this many ticks is stuck: it stops where it is. */
-	private static final double STUCK_MOVE = 0.01;
-	private static final int STUCK_TICKS = 40;
-	private int stuckTicks;
 
 	@Override
 	public float getPickRadius() {
@@ -1810,13 +1831,15 @@ public class CorpseEntity extends Entity {
 		double out = cart.getBbWidth() * 0.5 + 0.6 + random.nextDouble() * 0.3;
 		setPos(cart.getX() + away.x * out, cart.getY() + 0.7, cart.getZ() + away.z * out);
 		setDeltaMovement(away.x * (0.14 + random.nextDouble() * 0.06), 0.12, away.z * (0.14 + random.nextDouble() * 0.06));
+		lieDown(getDeltaMovement(), false);
 	}
 
 	/** Server: thrown a short way ahead of the carrier, tumbling; it lands on the ground or in a cart it hits. */
 	public void toss(Player player) {
-		drop(player);
+		letGo(player);
 		Vec3 ahead = player.getViewVector(1.0F).multiply(1.0, 0.0, 1.0).normalize();
 		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(ahead.x * 0.42, 0.28, ahead.z * 0.42));
+		lieDown(getDeltaMovement(), false);
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
 		}
@@ -1866,14 +1889,26 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(POSE, random.nextInt());
 		snapTo(at.x, at.y, at.z, yaw, 0.0F);
 		setDeltaMovement(Vec3.ZERO);
+		// (0.5.1) lies there; on a butcher block it rests at once
+		lieDown(Vec3.ZERO, onButcherBlock());
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.7F);
 		}
 	}
 
+	/** (0.5.1) A blow knocks the body this hard: a base plus a share of the damage, at most the cap (blocks a tick). */
+	private static final double SMACK_BASE = 0.18, SMACK_PER_DAMAGE = 0.04, SMACK_MAX = 0.7;
+	/** (0.5.1) A blast of at least this much damage shreds the body; a weaker one only flings it. */
+	private static final float SHRED_DAMAGE = 12.0F;
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION) || isRemoved() || carrier() != null) {
+		if (isRemoved() || carrier() != null) {
+			return false;
+		}
+		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
+			// (0.5.1) a blow or an arrow: it takes no harm, but the body is knocked about
+			smack(source, damage);
 			return false;
 		}
 		if (isCreeper()) {
@@ -1881,6 +1916,10 @@ public class CorpseEntity extends Entity {
 			discard();
 			level.explode(this, getX(), getY() + 0.3, getZ(), isChargedCreeper() ? 6.0F : 3.0F, Level.ExplosionInteraction.MOB);
 			return true;
+		}
+		if (damage < SHRED_DAMAGE) {
+			// (0.5.1) a weak blast: not enough to shred it; the knockback it gave has already flung the body
+			return false;
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 12, 0.4, 0.2, 0.4, 0.05);
@@ -1893,6 +1932,23 @@ public class CorpseEntity extends Entity {
 		dropLoot(level);
 		discard();
 		return true;
+	}
+
+	/** (0.5.1) Knocks the body from a melee blow or a projectile: at the part nearest the attacker, along their look or the arrow's flight. */
+	private void smack(DamageSource source, float damage) {
+		if (ragdoll == null || isPassenger()) {
+			return;
+		}
+		Entity direct = source.getDirectEntity();
+		Entity attacker = source.getEntity();
+		Entity from = direct != null ? direct : attacker;
+		if (from == null) {
+			return;
+		}
+		Vec3 at = direct != null && direct != attacker ? direct.position() : from.getEyePosition();
+		Vec3 push = direct instanceof net.minecraft.world.entity.projectile.Projectile && direct != attacker
+			? direct.getDeltaMovement() : from.getViewVector(1.0F);
+		ragdoll.smack(at, push, Math.min(SMACK_MAX, SMACK_BASE + damage * SMACK_PER_DAMAGE));
 	}
 
 	@Override
@@ -1917,6 +1973,18 @@ public class CorpseEntity extends Entity {
 		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
 		this.bites = input.getIntOr("Bites", 0);
 		this.entityData.set(MISSING, input.getIntOr("Missing", 0));
+		// (0.5.1) its ragdoll: the rig it was built for and where its points lay (saves without them lie down from the pose seed)
+		this.rigShape = input.getIntOr("RigShape", -1);
+		this.rigWidth = input.getFloatOr("RigW", 0.0F);
+		this.rigHeight = input.getFloatOr("RigH", 0.0F);
+		this.rigCache = null;
+		List<Float> points = input.read("Points", Codec.FLOAT.listOf()).orElse(List.of());
+		if (!points.isEmpty()) {
+			this.savedPoints = new float[points.size()];
+			for (int i = 0; i < savedPoints.length; i++) {
+				this.savedPoints[i] = points.get(i);
+			}
+		}
 		// whatever held it up (a gravity power) is gone after a reload
 		setNoGravity(false);
 		// (0.4.48) slung over a horse: found again by the horse's id once it's about (tickSlung)
@@ -1952,6 +2020,19 @@ public class CorpseEntity extends Entity {
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
 		output.putInt("Missing", missing());
+		if (rigShape >= 0) {
+			output.putInt("RigShape", rigShape);
+			output.putFloat("RigW", rigWidth);
+			output.putFloat("RigH", rigHeight);
+		}
+		if (ragdoll != null) {
+			float[] relative = ragdoll.body.relative(getX(), getY(), getZ());
+			List<Float> points = new ArrayList<>(relative.length);
+			for (float value : relative) {
+				points.add(value);
+			}
+			output.store("Points", Codec.FLOAT.listOf(), points);
+		}
 		if (this.slungHorse != null) {
 			output.putString("SlungOn", this.slungHorse.toString());
 		}

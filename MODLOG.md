@@ -29,6 +29,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - its own mixin configs, `jaymospowers.<name>[.client].mixins.json`
   - its own lang file, `lang/parts/<name>.json`, which `processResources` merges into `en_us.json`
 - Each power has its own `init()`.
+- Sound (0.15.7, after Resonance's idea of conditions-driven ambience; LGPL, no 26.3 build, nothing copied):
+  `core/Soundscape` stacks layers of variants at uneven beats and echoes them in caves; the flier's side of a flight
+  is `client/sound/PowerLoop` beds plus `Accents` that react to speed, banking, braking, rain, water and altitude.
 
 ## Environment
 - Same toolchain as Jaymo's Kitchen: JDK 25, `GRADLE_USER_HOME=E:\gradle-home`, Loom 1.18, Fabric API 0.161.0+26.3.
@@ -496,9 +499,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.82, Alex's Mobs:** adds Alex's Mobs (Fabric) 26.3-1.0.0 and its library Citadel (Fabric) 26.3-1.0.0, both
   LGPL-3.0 and pulled from CurseForge by id (cursemaven): about 90 animals and monsters across the overworld, Nether
   and End. It has no horses; Jaymo's Equestrian still owns those. Its elephant spawns alongside ours.
-- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.42 (see `kingdoms/MODLOG.md`): iron golems
+- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.62 (see `kingdoms/MODLOG.md`): iron golems
   never speak, and they beat out fires in settlements.
-- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.63 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
   rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
 - **0.8.85, Symbiote fixes (Andy's list):**
   - **Wall tethers:** your view is held facing away from the wall (80° either side; level or below on a ceiling,
@@ -516,7 +519,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Dread vignette by bond:** a line or a feeding is fainter at a strong bond, stronger at a weak one; under bond 60
     a faint vignette lingers, breathing and blinking darker more often as the bond drops. Full strength is kept for a
     weak bond's own lines (ignored, neglected, at the edge, leaving you) and every takeover (`WebSymbioteDread`).
-- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.44 (see `kingdoms/MODLOG.md`): a
+- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.64 (see `kingdoms/MODLOG.md`): a
   horse trusts each rider on their own account (it bucks strangers and comes to a whistle at 60), learns trail, racing,
   jumping and war to level 5 with tricks (rear, sliding stop, side-pass, war kick, kneeling), gets hungry and thirsty,
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
@@ -528,22 +531,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
   more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
   in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).
-- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
+- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.65 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
 - **0.8.89, fish loot instantly:** ships Jaymo's Kitchen 0.4.29 (see `kitchen/MODLOG.md`): clicking any fish corpse
   (vanilla or Alex's Mobs, beached flying fish included) drops its loot and the body is gone at once.
-- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
+- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.66: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
-- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.67 (see `kingdoms/MODLOG.md`):
   stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
   and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
   cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
   horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
   another town against the clock). Stablehands and farriers have their own screen: right-click them.
-- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.68 and Jaymo's Kitchen 0.4.31: every iron golem
   (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
@@ -552,7 +555,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
   gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
   `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
-- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.69 (see `kingdoms/MODLOG.md`): only about one villager in
   twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
   settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
   Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
@@ -1818,3 +1821,327 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
+- **0.13.36, Web Whip on Sneak; one pair of hands in first person:** Andy: "Web swing grab attacks should be activated by
+  holding shift while two lines are attached" and "all the counters and moves should be better animated in first person.
+  Right now there are doubled hands". With both swing webs within 3 blocks of each other on one creature or on terrain,
+  Sneak starts the whip, or pries the terrain loose while held (let go early: cracks stay, the attack ends); Sneak + R
+  or G no longer does. Small catches still reel in and far-apart webs still slingshot. In first person with
+  First-person Model, the vanilla hands (and the extra carry/ledge arms) aren't drawn while a move poses your body's
+  arms, and First-person Model's hiding of an item-holding body arm is undone for the move. See docs/web.md.
+- **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
+  stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
+  (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
+  cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
+  bracers on the forearms and long coat tails split front and back, hanging from the waist to the knees) and the
+  **Peaked Hood** (a deep hood with a pointed peak over the brow, its underside in shadow, and a cowl over the
+  shoulders). Our own design, drawn by `tools/gen_costume.py`; `tools/costume_preview.py` draws it on a player, front,
+  side and back, in white/red and black/grey (`art-overhaul/assassin/`). A hood (the plain one or the peaked one) that
+  is up leaves the face and the real name showing, but someone else's name tag is only drawn within 8 blocks
+  (`CostumeClient.HOOD_NAME_RANGE`), and the wearer carries the entity tag `jaymospowers_hooded:<key>` (the same
+  identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
+  costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
+  bracers, mantle and cowl's growth).
+- **0.14.3, freerunning (Kingdoms 0.7.101's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
+  (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
+  Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
+  synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
+  3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
+  jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
+  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
+  slower there, Andy's call), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
+  (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
+  (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
+  hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags
+  the player `jaymospowers_freerun` for Kingdoms' Stealth experience. Web slingers keep their own parkour: the two
+  stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
+  wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
+  Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
+- **0.14.5, Smoke's particles are geyser steam:** Andy: regular and ascended smoke should use "the geyser particle
+  effect" (potent sulfur over lava), "far thicker", the gas staying for both and corrupted smoke keeping its particles;
+  then "just use the particles and not their specific properties". New `jaymospowers:smoke_steam`
+  (`SmokeParticles.STEAM`, client `SmokeSteam`): vanilla's `geyser_poof` sprites, moving like smoke (keeps its
+  velocity, slows and rises a little), smoky grey and translucent. It replaces the campfire smoke of Smoke Jet, Vapour
+  Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb; Vapour Form's start throws a column of it
+  up. Corrupted (not ascended) users keep the old particles. See docs/smoke.md.
+- **0.15.1, Wounds phase 1 (core):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings, remove our
+  downed system for a universal one written like this https://modrinth.com/mod/first-aid-new". The first of five phases
+  (`docs/Wounds-Plan.md`); no debuffs and no downed state yet, and Kingdoms' `Downed` is untouched. Written without a
+  compiler: build it before anything else.
+  - **Body parts:** `core/wounds/BodyPlan` gives each living thing parts that share its max health: humanoid (head, body,
+    two arms, two legs, two feet), quadruped (head, body, front and hind legs), arthropod, flyer and simple (body only,
+    left to vanilla health). The plan comes from the new entity type tags `jaymospowers:body/humanoid`, `quadruped`,
+    `arthropod`, `flyer`, `simple`, else from the shape (taller than 1.3 times its width is a person). Bosses (`c:bosses`,
+    the Ender Dragon, the Wither) and armor stands keep plain health.
+  - **Health stays real:** the `jaymospowers:wounds` attachment (`Wounds.PARTS`, a fraction per part, synced to the creature
+    itself, saved, dropped when everything is whole, not kept through death) is only how vanilla health is spread.
+    Healing of any kind (regeneration, food, Kitchen's stomach) fills the most hurt part first; health lost without a
+    routed hit comes off the limbs first and never kills (`MIN_VITAL_UNROUTED` 0.05). Players are brought in line every
+    `PLAYER_RECONCILE_TICKS` (10).
+  - **Where hits land** (`HitRouting`): a player's swing on a person by the part their crosshair crosses (`LimbBoxes`, a
+    leg low down is the foot); other blows by the height, side and facing of the hit point (`HEAD_FROM` 0.75, `BODY_FROM`
+    0.4, `FOOT_BELOW` 0.12, `SIDE_SHARE` 0.25, `FRONT_SHARE` 0.2). Falls land on the feet (front and hind legs, legs,
+    wings), explosions spread over every part by share, drowning on the head, fire, magic and lightning on the body.
+    A part at zero spills the rest on (limb to body, foot to leg to body, body to head, head to body).
+  - **Death:** head or body at zero kills through a new `jaymospowers:wounds` damage type ("died of their wounds") dealt
+    like Dismember's decapitation, so Kingdoms' downing and other powers' death cancels still apply; if the death is
+    cancelled the vital part gets `MIN_VITAL_AFTER_SAVE` (0.1) back.
+  - **`/wounds show|part <part> <health> [target]|heal [target]`** (gamemasters), and a body silhouette bottom-right
+    (`client/wounds/WoundsHud`: parts coloured by fraction, white flash for 8 ticks on a loss, fades 3 s after all whole).
+- **0.15.1, Wounds phase 2 (downed, for everyone):** Andy (2026-10-19): "remove our downed system for a universal one".
+  Kingdoms' downed guards (its 0.7.73-0.7.93) move here as `core/wounds/Downed` (spec `docs/Wounds-Phase2.md`; numbers
+  at its top). Written without a compiler: build it before anything else.
+  - **Who goes down** instead of dying: players (not creative or spectator), villagers, anything Kingdoms marks with the
+    scoreboard tag `jaymospowers_downable` (its folk), and tamed animals (a tame `TamableAnimal`, a tamed horse, donkey,
+    llama or camel). Monsters, wild animals and bosses die; so does anything beheaded (or already headless), anything
+    killed by what ignores invulnerability (the void, `/kill`), and anyone with a totem in hand (the totem goes first).
+    Every other mod's death save (Darktide's shade, Xenoform, sparring, Kingdoms' Last Stand) runs before it.
+  - **Down:** `DOWNED_HEALTH` (6), head and body given a little back (`Wounds.settle`). The `jaymospowers:downed`
+    attachment (game time, crawler bit; saved, synced to all) and the tag `jaymospowers_downed`, which Kingdoms reads.
+    Mobs lose their AI (`DownedMobMixin`); half (`CRAWLER_CHANCE`) drag themselves from whoever felled them. Players
+    are held in a slow crawl (`Crawl`, `PLAYER_CRAWL_SLOW` -50%, Jump doesn't stand them up), drop whatever they
+    carry, and can't attack, use, build, break, pick anyone up or press a power key; their screen greys
+    (`client/wounds/DownedHud`).
+  - **While down:** fire, falls and mobs hurt out of what's left and can kill (that death counts; while down, Wounds
+    leaves the parts to follow the health). A player's blow is a wound instead, the `MAX_WOUNDS`th (10) kills. A mob
+    or tamed animal no player has hit gets up after `RECOVER_TICKS` (1 min) at `RECOVER_HEALTH` (30%); once a player
+    has hit it, it bleeds out `BLEED_OUT_TICKS` (2 min) after the last hit.
+  - **Players don't bleed out into a respawn** (Andy: "Lie until roused or give up"): after `BLEED_OUT_TICKS` they pass
+    out (`jaymospowers:downed_out`; they lie still, the screen darker, a slow heartbeat) until brought round, or they
+    hold sneak for `GIVE_UP_TICKS` (5 s; a bar over the hotbar) to give up: a death of their wounds credited to whoever
+    felled them. Logging out keeps it; respawning, `/kill` and the void clear it.
+  - **Bringing one round:** sneak + hold use on a downed one (Kingdoms' 0.7.93 revive, for everyone): a tap picks them
+    up (`Carry.pickUpDowned`; anyone downed is carryable, a carried one can't struggle free), held for `REVIVE_TICKS`
+    (3 s) it gets them up for the least filling food you carry; a tamed animal takes one of its own treats instead
+    (`Downed.TREATS`: a wolf bone or meat, a cat fish, a horse golden carrot, apple or hay...). Kingdoms' villagers still
+    tend the downed: they set the tag `jaymospowers_revive` and the body gets up on its next tick.
+  - **Zombies and skeletons fight on:** when Wounds' lethal rule fires on one because its body (not its head) gave out,
+    `Wounds.UNDEAD_FIGHT_ON` (60%) it fights on (tag `jaymospowers_fights_on`); then only its head kills it.
+  - **Pose** (`client/wounds/DownedPose`, from Kingdoms): people lie on their backs or crawl face down as before; any
+    other body (a wolf, a horse) lies on its side. Downed players keep `Crawl`'s pose.
+- **0.15.1, Wounds phase 3 (cripplings):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings".
+  Broken limbs, sever on overkill, and the old cripplings rerouted into Wounds (spec `docs/Wounds-Phase3.md`; numbers at
+  the top of `core/wounds/Breaks` and `Dismember`). Written without a compiler: build it before anything else.
+  - **Broken parts** (`core/wounds/Breaks`): a limb a routed hit takes to zero is broken (arm, leg), sprained (foot) or
+    grounded (wing): the `jaymospowers:wounds_broken` bitmask (a bit per `BodyPart`; saved, synced to all, not kept
+    through death) and the scoreboard tag `jaymoskitchen.broken.<part>` for Kitchen's corpses. Effects are transient
+    modifiers refreshed every `REFRESH_TICKS` (20), ids `jaymospowers:wounds_*`: an arm -30% attack damage, -25% attack
+    speed, -30% digging per arm, no shield or bow from its hand, `ARM_DROP_CHANCE` (25%) the hand drops what it held as
+    it breaks; both arms (or one broken and one gone): a player can't swing, dig, place or use anything, but food, drink,
+    potions and medicine (anything with a `FOOD` or `CONSUMABLE` component) still go down. A leg -30% speed, -40% jump,
+    no sprinting; a player's two legs: crawl only (`Crawl`, the key and Jump don't stand them up); a mob's every leg:
+    -70% speed, no jump. A sprained foot -10% speed each while at zero; a sprain is never capped and needs no setting:
+    it heals as any part does and clears above `BROKEN_CAP` (a hard fall doesn't send you to a priest). Wings: the flyer is pulled down and loses its flying speed. A severed
+    part takes Dismember's own effects instead, never both.
+  - **Healing:** an unset break (arm, leg, wing) never heals past `BROKEN_CAP` (25%) and a severed part not at all; the surplus goes to
+    other parts, and health nothing can hold is refused (vanilla health is held to the parts' total). A break is set by
+    a priest (Fractures' 2 emeralds), a respawn, a Hermit Bean, Verdant's healing, Chrono's Bloom or Wind's Zephyr's
+    Breath (`Wounds.mendAll`); then it heals normally and the break clears above the cap. No more knitting by itself
+    (phase 4 brings the splint). Breaks from a fall come set: they heal by themselves, the limp or crawl lasting only
+    until the leg is back above the cap. A set bone broken again comes unset. A severed leg's foot never heals either.
+    Known cost: healing that's refused (vanilla regeneration onto capped parts) still spends the food and saturation it
+    took. `/wounds break <part> [target]` and `/wounds mend [target]`.
+  - **Fractures folds in:** a blunt blow's break is `Wounds.breakPart` (the limb's health gone, marked broken). Its own
+    `broken_bones`, `bones_mending` and `bones_mended_by` attachments, limp and empty-hand are gone (the old saved limp
+    modifier is taken off on load); the head daze and the skeleton shatter stay. `Fractures.heal`, `startMend`, `broken`
+    and `breakBone` still work, delegating. The client's hanging arms and legs read Wounds' broken parts.
+  - **Sever on overkill** (`Dismember.severOnOverkill`, called by Wounds): a blade's blow on a limb already broken, or
+    one that takes the head past zero, for more than `SEVER_OVERKILL` (half) of that part, cuts it off at
+    `min(1, SEVER_BASE (0.6) * scale)`; the old chances are the scale (`RATE` times the blade's chance over a plain
+    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone; a killing blow is still tested, so heads and limbs still come off onto the corpse
+    (Fabric's after-damage event never sees a killing blow, so the blow and the parts before it are noted in a last
+    `ALLOW_DEATH` phase after Downed's, and tested in `AFTER_DEATH` once the death has gone through). A power's own cut
+    (`Dismember.cut`) lands its blow on the part it aimed at. A severed limb stays at zero and broken; regrowth sets it.
+    A headless zombie or skeleton now dies only when its body gives out.
+  - **Cripplings rerouted:** Darktide's leg strikes (G Crescent low, Ink Cross, Fang Barrage, any low Darktide hit) wound
+    the struck leg by `DarktideStatus.LEG_WOUND` (half of it) through `Wounds.hurtPart` instead of the 5 s crawl, so two
+    strikes break it; Pounce's three stabs count a broken leg as crippled. The timed crawl stays for bodies Wounds
+    doesn't part. The Great Ape's leg-crippling (a timed knock-down of a transformation) and trips and stuns stay as they were.
+- **0.15.1, Wounds phase 4 (medieval medicine):** bleeding, festering, pain and the medieval kit (spec
+  `docs/Wounds-Phase4.md`, track A; Kingdoms' clerics are track B). Numbers at the top of `core/wounds/Bleeding`,
+  `Treatment` and `Pain`. Written without a compiler: build it before anything else.
+  - **Bleeding** (`core/wounds/Bleeding`): a blade, a projectile or a zombie's claws dealing `BLEED_FROM` (2) or more to
+    a part opens a cut (`jaymospowers:wounds_bleeding`, a bit per part, synced to the target). Every `BLEED_TICKS` (4 s)
+    a cut drips and costs the part `BLEED_DAMAGE` (0.5; a stump `STUMP_BLEED` 1) as `jaymospowers:bleeding` damage, and
+    a cut closes by itself after `BLEED_STOP_TICKS` (30 s); a stump never does. A bleeding part heals no further than
+    `CUT_CAP` (half). Not while downed, not in creative, never the bloodless. Kingdoms' tending (tag
+    `jaymospowers_bandaged`) stops all bleeding and binds the worst part.
+  - **Festering:** a dirty cut (a rag, a zombie's claws) may fester (`FESTER_CHANCE` 5% each bleed tick): the part
+    can't heal past where it stood, a fever every `FEVER_TICKS` (Weakness, the body hurt, a sickly shimmer), and a limb
+    left festering `FESTER_LIMB_TICKS` (a day) rots off (a stump, bled shut). Strong spirits or honey (sneak + use,
+    looking down, or on another) clean it.
+  - **The kit** (creative tab Medicine, `core/wounds/MedicineItems`, icons by `tools/vanilla_style/medicine.py`):
+    linen bandage (stops a cut, heals 3 over 10 s), rag (stops it, heals 1.5, dirty), splint (a broken arm or leg is
+    usable and heals; `Breaks.splint`), needle and thread (8 uses: stitches a cut, stings 1, the part heals past half),
+    a red-hot blade (heat it on a lit campfire, fire or lava: seals even a stump, burns 2), smelling salts (4 uses: a
+    downed body up at once with 2 health, Speed then Nausea; a passed-out player 40% and the whole vial), jar of leeches
+    (1 health for long numbness), willow-bark tea (numb after 10 s, for 3 min), poppy syrup (numb 6 min, wakes the
+    downed; two at once knocks you out; addictive). Recipes in `recipe/medicine/`; poppy syrup needs Kitchen's strong
+    spirits.
+  - **Treatment** (`core/wounds/Treatment`): use on yourself or another opens the body screen
+    (`client/wounds/BodyScreen`: the silhouette, each part's state, greyed where the medicine can't help); pick a part
+    and hold still. Sneak + use treats the worst part while sneak is held. Moving, a hit, or the medicine leaving the
+    hand spoils it. Use on a downed body treats it before Downed's pick-up.
+  - **Pain** (`core/wounds/Pain`): numb (tea, leeches, poppy, or Kitchen drunk 4+) ignores the effects of breaks.
+    Poppy addiction rises 20 a dose, decays always; past 40 and 5 min without, withdrawal: Weakness, Nausea pulses,
+    the shakes (`client/wounds/MedicineHud`).
+  - **Downed:** a knocked-out body (`Downed.knockOut`) comes round on its own; `Downed.rouse` and `wake` for the salts
+    and the poppy.
+- **0.15.1, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
+  `docs/Wounds-Phase5.md`; track A the client feel, track B the rules, tuning, docs and JEI). Written without a
+  compiler: build it before anything else.
+  - **A limp** (`client/Dismembered`, `GAIT_*`): a broken leg drags or swings short, the good leg's steps shorten
+    and the body dips on the bad step, seen by everyone; a splinted leg limps half as much, a sprained foot half too.
+    Only on foot (not swimming, riding, crawling or downed), humanoid models only.
+  - **Pain on screen** (`client/wounds/PainHud`): head or body under 35% with the pain not dulled (`Pain.DULLED`, now
+    synced to its owner each second), the screen edges darken and slowly throb; any part losing health flashes the
+    edges red for 6 ticks, stronger for a bigger drop (none in the first second after joining); head or body under
+    15% on your feet, a heartbeat that quickens (18 down to 11 ticks) with a faint red pulse. Smelling salts bring a
+    sharp gasp (`MedicineHud`, `GASP_*`). None of it in creative or spectator.
+  - **Freerunning respects breaks** (`freerun/Freerun.canMove`, from PR #339): no freerunning move at all on a broken
+    leg out of a splint, or with both arms broken (or gone); one broken arm or a sprained foot rules out only the moves
+    that hang on the grip, the climb (cling) and the bar swing (`Freerun.canMove(player, kind)`, `gripMove`). Wounds'
+    `Breaks.legsUsable`, `armsUsable` and `gripUsable` read the synced bitmasks, so the client (`FreerunClient` doesn't
+    try those moves, and lets go of a climb or a bar when an arm breaks or a foot sprains) and the server (refuses and
+    ends them) agree. A splinted leg freeruns; a splinted arm still counts as broken for the grip.
+  - **`jaymospowers_crippled`:** anything with a broken leg (any of its legs, splinted or not, severed included) carries
+    this scoreboard tag, put on and taken off with `Breaks`' refresh (every second; `Breaks.CRIPPLED_TAG`). For a later
+    Kingdoms patch: its hidden blade's 10x on a Crippled foe (Kingdoms 0.7.101) could read the tag too. Kingdoms is
+    untouched.
+  - **Tuning:** `Bleeding.FEVER_TICKS` 400 → 1200 (a fever every minute, was every 20 s): a festering part can't heal,
+    so a festering chest bled a player down from one dirty cut within a minute or two; the plan's fever is "slow
+    damage". Everything else in phases 1-4 is unchanged; the open questions went to Andy (stump bleed, festering
+    chance, head cuts, the sever chance on a broken limb).
+  - **JEI:** a Medicine page (`client/jei/MedicineJei`, a second `jei_mod_plugin` on `SimpleCategory`): each kit item,
+    honey, Kitchen's strong spirits (when loaded) and a red-hot blade, with what it treats and how it's used, the
+    numbers read off `Treatment` and `Pain`. Lang `jei.jaymospowers.medicine.*` in `lang/parts/wounds.json`.
+  - **Docs:** a Wounds section in `docs/Abilities.md` (body parts, downed, breaks, bleeding and festering, every
+    medicine with its recipe, addiction, Kingdoms' clerics and taverns, `/wounds`), and a Wounds entry in
+    `docs/HANDOFF.md` (the event order learned, the shared scoreboard tags). Phase 5 marked built in
+    `docs/Wounds-Plan.md`.
+- **0.15.2, the rapier (with Kingdoms 0.7.105's shields, clash and tiered gear):** Andy picked all five of Just-In
+  COMBAT's ideas (Forge 1.20.1, All Rights Reserved: ideas only, our own code and art). The Armory gets a rapier in
+  every tier (`Armory.WEAPONS`, `armory/RapierItem`; sprites, models, Better Combat's `rapier` preset, the wooden recipe
+  and the netherite smithing from `tools/gen_rapier.py`, which runs after `armory_assets.py`). A little lighter than a
+  sword and quicker (+2 damage over the material, -2.0 speed). Right-click lunges: 1.1 blocks a tick forward, and the
+  first foe in front of the point within 7 ticks is run through for 1.6x your attack damage (1.5 s cooldown, some
+  hunger, a point of durability). Mobs holding one lunge at their target from 2.8 to 6.5 blocks off (3.5 s between).
+  Forged like the rest: a Rapier Blade (1 ingot) with a crossguard and a rod at the Tool Station
+  (`tinkering/WeaponParts`, sprites cut by `tools/weapon_parts_assets.py`). Numbers at the top of `RapierItem`.
+- **0.15.4, Sharpness cuts (the fifth Just-In COMBAT idea, on Wounds):** a weapon with Sharpness counts as a blade for
+  Wounds' cuts, and each level lowers the damage a hit needs to open one by 0.3 (2.0 plain, 0.5 at the least):
+  `Bleeding.SHARPNESS_BLEED_FROM`, `SHARP_BLEED_FROM_MIN`.
+- **0.15.5, feathers and the dodge, in place of Combat Roll:** Andy asked for Feathers and Elenai Dodge 2 to replace
+  our dodge and its HUD. Both are Forge only (to 1.20.x); the maintained fork, Feathers of Fatigue, is NeoForge 26.3 and
+  GPL-3; Elenai Dodge 2 is CC BY-NC-SA. Powers is MIT, so it's our own, from their ideas only (`docs/dodge.md`, the
+  spec and sources). `stamina/Feathers`: a row of 20 above the hunger bar, armour holds back 0.35 a point, regrowth 1
+  per 10 ticks after a pause that grows with spends in a row, halved by cold and by hunger at 6 or less, 6 red strain
+  feathers past empty (repaid first, faster at rest), exhaustion past the strain until a third is back, 4 held back
+  in the Nether without Fire Resistance, a sleep refills it, and golden bonus feathers from powers. `stamina/Dodge`:
+  Left Alt or double-tap Sneak hops you 0.85 along your movement keys (back with none), ground only, 6 feathers, a
+  10-tick cooldown, 5 ticks where melee and projectiles miss, 0.4 hunger. Darktide +12 golden (Riptide Dash costs a
+  dodge, a landed flurry refunds it, evasion Flow on our dodge: `DarktideDodges`, was `CombatRollCompat`), Web +20
+  (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks, Chrono +12 (Andy: the powers that had extra dodges get extra feathers). The client-side charge packets
+  (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
+  `tools/gen_feathers.py`. Combat Roll is out of the pack.
+- **0.15.8 (Kitchen 0.5.1), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
+  Kitchen does the physics (see `kitchen/MODLOG.md`, `docs/ragdolls.md`); Powers only ties in, by reflection so it
+  still builds against the old Kitchen jar: `KitchenCompat.isLimp`, no struggling free of a carry or catching a ledge
+  while limp, no going limp while carried, Lifted, Gravity-held or webbed (`KitchenCompat.registerRagdollVetoes`), the
+  limp pose counts in `PoseTakeover.posed`, and the symbiote looks for a fresh corpse within 5 blocks (was 3), since
+  ragdolls tumble.
+- **0.15.9, Better With Mods batch 1 and everything metal melts (Kingdoms 0.7.108, Kitchen 0.5.2):** Andy picked
+  BWM ideas (MIT, 1.12 Forge; our own Fabric code, plan in the "Better With Mods: what fits our pack" doc) and asked
+  that "ALL metal items added to the pack ... melt right back down into their crafted material's metals".
+  `tinkering/smeltery/MeltingRecipes` works out every crafted item's metal from the recipe book after each reload
+  (lowest recipe wins, fixpoint, base metal forms excluded), reads `data/*/tinkering_melting/*.json` for
+  uncraftable items (Kingdoms ships its paladin, gladiator and ronin sets and barding), and syncs the list to
+  clients for JEI. `Melting.Result` can hold several liquids (a paladin helmet gives iron and gold); the smeltery
+  waits for room for all of them. Fixed entries: horse armour 9 ingots, nautilus armour 7, chainmail 3/5/4/2,
+  bell 4 gold, chipped/damaged anvil 20/10. `LOG_GAPS` logs metal-named items that still don't melt (netherite:
+  no liquid yet). Also: the Mining Charge (`armory/MiningChargeBlock`; digs a 3x3x3 hole into the block it's on,
+  harvesting drops, `CHARGE_DAMAGE`; WeaponMod dynamite recipe or a gunpowder one through Fabric load conditions),
+  Arcane Scroll drops (`enchanting/EnchantDrops`, per-mob table in `data/jaymospowers/enchant_drops/`, Looting
+  raises the chance), enchanted-book tooltips naming the gear an enchantment fits (`EnchantSlotTooltip`), and
+  `core/ExplosionLog` (one log line per player-caused explosion).
+- **0.15.11, free rein riding:** ships Jaymo's Kingdoms 0.7.110: in third person the camera turns freely and WASD turns
+  your horse toward it, like Better Mount Steering (which has no 26.3 build). Also fixes a broken swing mixin that
+  kept the game from starting.
+- **0.15.12, fast run, slide, wall transitions, pole climb (after ParCool's ideas):** Andy liked ParCool's "breaking
+  into a faster sprint after time spent running, and the climbing mechanics, like wall transitions, and running".
+  ParCool is LGPL and Powers is MIT, so nothing was copied: these are our own moves, folded into `freerun`.
+  - **Fast run** (`freerun/FastRun`, everyone): 40 ticks of sprinting gives +30% speed (Freerunner 1: +40%,
+    Freerunner 2: after 25 ticks). It ends on a stop, a turn of 60°+, a hit, hunger ≤ 6 or water. Attacking keeps it.
+    It costs a little hunger and no feathers, and shows a lean (`RunPose`) and dust.
+  - **Slide** (`freerun/Slide`): in a fast run, hold Sneak for 4+ ticks (a tap is left for the dodge). You slide for
+    15 ticks in the crawl pose, under 1-high gaps, and can jump out of it. The server confirms it before the pose
+    changes.
+  - **Vertical wall run:** jump at a wall in a fast run (or a sprint with Wall Runner) to run 2.5 blocks up it (Wall
+    Runner: 3, then 4). At the top, Ledge's grab takes over; otherwise, with Climber, you cling.
+  - **Wall transitions** (Climber, `freerun/FreerunWalls`):
+    - a side wall run into a cling;
+    - from a cling, Jump + Back/Left/Right hops to a wall up to 3 blocks off;
+    - clings follow inside and outside corners;
+    - from a ledge hang, Sneak + Back drops to a ledge 1-3 blocks lower;
+    - hold Sneak + Forward at an edge for 6 ticks to hang off it.
+  - **Pole climb** (everyone; tag `freerun_poles`): press Forward into 2+ stacked fences, walls, chains, end rods,
+    bamboo or lightning rods. Climb with Forward/Jump (faster with Climber), slide down with Sneak, leap off with
+    Jump + direction.
+  - `FreerunClient.active()` covers slide, vertical run and pole, and `holding()` covers poles, so the dodge stands
+    aside.
+  - The server checks height, rise and fall rates, cooldowns and corners for each move.
+- **0.15.16, Combat Roll's leftover HUD:** Andy saw the old roll indicators (Combat Roll's blue arrow and key hint
+  beside the hotbar) still showing next to the feathers. Combat Roll left the pack in 0.15.5, but nothing took the jar
+  out of the CurseForge profile, so it kept loading. `combat_roll` joins `removedIdsFromProfile`: the next Build Modpack
+  moves it into `removed-mods`. The dark segmented bar above the hotbar is vanilla's empty experience bar.
+- **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
+  steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
+  the horse to the keys and its camera follows the mouse.
+- **0.15.22, Emberborn Kindle (Kingdoms 0.7.117):** Andy: "expand on emberborn, with a left click hold ability, and
+  synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
+  from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
+  candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
+  at full heat throws a fireball (2.5-block burst, no block damage, 5 s cooldown). Cold halves it, rain only hisses.
+  With the Smoke power: their body is a heat source for their smoke, the flame leaves soot, and flame meeting their own
+  smoke sets off a flashover that races through the cloud. Plain left hold for Smoke users, sneak + hold with other
+  powers (`RaceHoldClient`). All in `power/ember` and `docs/Ember-Ice-Plan.md`. Smoke puffs marked keep-others never
+  take another owner's block (`SmokeField.add`).
+- **0.15.22, Cryokinesis (ice power):** Andy: "smoke instead of fire" for the ice synergy. A new power (`power/cryo`,
+  `docs/cryo.md`): R Ice Slide (skate with inertia; water ahead freezes into a frosted-ice bridge; wall crashes hurt by
+  speed), G Frost Breath (8-block cone that slows and freezes, ices water for 30 s, puts out burning creatures), V Ice
+  Shards (a fan of 5), B Flash Freeze (3 s packed-ice shell, never into a creature), X Ice Wall (5x3, 15 s, never into a
+  creature), Z Snow mode (slow and blind, no hurt), C Blizzard (20 s whiteout, 16 blocks). C answers once every
+  ability is mastered (`Power.ultimateAnswers`), since Cryokinesis has no fates yet. Frost-born users take no freeze
+  damage and are stronger where it snows. Every placed block is recorded by `CryoIce` and melted back. Freezing fog:
+  breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
+  snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
+  server crash (not a normal stop) leaves the ice standing.
+- **0.15.29, hidden blade visuals (Kingdoms 0.7.122):** Andy: the hidden blade should animate for players and be held
+  in front so it's visible, not off to the side and lost in the costume. Springing it raises the arm into a guard ahead
+  of you and runs the blade out of the housing; a blow with it is a straight thrust; the bracer stands clear of costume
+  sleeves. Details in the Kingdoms MODLOG.
+
+- **0.15.30, seasons reach the powers (Kitchen 0.5.6, Kingdoms 0.7.123):** Kitchen 0.5.6 brings the pack's own seasons,
+  and Andy asked for every power to feel them ("all of em"). `core/Seasons` reads Kitchen's calendar by reflection, so
+  it does nothing without Kitchen 0.5.6, and it only counts in temperate lands. Cryokinesis: `CryoPower.strength` is
+  x1.2 in winter and x0.85 in summer. Ember: winter counts as chilled (`EmberKindle.chilled`), and in summer Kindle,
+  the fireball and Flashover do x1.2 fire damage (`EmberKindle.seasonal`). Smoke: in winter `SmokeField` fades at
+  x0.6 and rises at half rate, so it hangs low. Symbiote: its hunger drains 1.5x faster in winter. Darktide: in winter
+  `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later. Client `SeasonAura` gives every power user an
+  occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
+  user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
+  cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.
+- **0.15.31, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
+  anything but crawl" and "you shouldnt be healing to full health on the ground with no assistance". The server already
+  dropped power-key presses, but the client still ran its own half and some 80 other ability packets went through.
+  Now, while the local player is down, `DownedKeysMixin` makes every acting key read as up (Jump, Sprint, attack, use,
+  pick, drop, swap hands, and every `key.jaymospowers.*`): held abilities let go, only moving, the A / D roll, Sneak
+  (give up), looking, chat and menus are left. On the server the downed are a `Powers` silencer, `WindFlight.canFly`
+  says no (Wind, Z Fighter and Smoke's vapour flight end), and going down calls the new `Power.onDowned` (Gravity,
+  Chrono, Cryo, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
+  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's
+  Kitchen 0.5.7 (slower stomach regen that stops at 60%, the rest needs treatment; its jar still needs building into
+  `libs/`). Breaks (set by a splint or a priest) and stumps (cautery, or villagers binding them) already needed tending.
+- **0.15.32, bandit masks hide the face:** ships Jaymo's Kingdoms 0.7.125. Kingdoms' bandit mask and bandana (found
+  by id, `costume/BanditMask`) hide the face like a costume: the wearer goes by "Bandit" over their head, in chat and on
+  the tab list, or "Pirate" in or on the water, in a boat or on a ship, or on a sea, beach or river biome. They're
+  tagged `jaymospowers_masked:bandit_<uuid>` (one identity per player), which Kingdoms reads like a costume's.

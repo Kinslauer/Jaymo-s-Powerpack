@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.98) The Purist ruler ({@link Tempers.Temper#PURIST}): a proud king of one blood ({@link Heritage}) who insists his
+ * (0.7.127) The Purist ruler ({@link Tempers.Temper#PURIST}): a proud king of one blood ({@link Heritage}) who insists his
  * realm be of it too, and looks down on everyone who isn't. His blood is fixed by who he is ({@link #blood}), as his
  * temper is, and he's made of it if he wasn't.
  * <ul>

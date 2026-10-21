@@ -1,0 +1,18 @@
+{
+  "items": {
+    "jaymoskingdoms:paladin_helmet": {"iron": 360, "gold": 90},
+    "jaymoskingdoms:paladin_chestplate": {"iron": 630, "gold": 90},
+    "jaymoskingdoms:paladin_leggings": {"iron": 450, "gold": 180},
+    "jaymoskingdoms:paladin_boots": {"iron": 180, "gold": 180},
+    "jaymoskingdoms:gladiator_helmet": {"copper": 360},
+    "jaymoskingdoms:gladiator_chestplate": {"copper": 630},
+    "jaymoskingdoms:gladiator_leggings": {"copper": 450},
+    "jaymoskingdoms:gladiator_boots": {"copper": 180},
+    "jaymoskingdoms:ronin_helmet": {"iron": 360},
+    "jaymoskingdoms:ronin_chestplate": {"iron": 630},
+    "jaymoskingdoms:ronin_leggings": {"iron": 450},
+    "jaymoskingdoms:ronin_boots": {"iron": 180},
+    "jaymoskingdoms:chain_barding": {"iron": 550},
+    "jaymoskingdoms:plate_barding": {"iron": 4600}
+  }
+}

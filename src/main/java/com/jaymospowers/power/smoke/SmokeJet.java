@@ -2,6 +2,7 @@ package com.jaymospowers.power.smoke;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +36,10 @@ import net.minecraft.world.phys.Vec3;
  * Everyone in view sees it ({@link #JETTING}; the client draws it).
  */
 public final class SmokeJet {
+	/** The jet's sound: a hiss at uneven beats, sometimes a roar of air behind it. */
+	static final Soundscape.Layer JET_HISS = Soundscape.Layer.of(0.3F, 0.45F, 0.4F, 0.6F, SoundEvents.FIRE_EXTINGUISH);
+	static final Soundscape.Layer JET_ROAR = Soundscape.Layer.of(0.3F, 0.5F, 0.5F, 0.7F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BLAZE_BURN).chance(0.5F);
+
 	/** How far the jet reaches (blocks), how wide it is at your hands and how much wider a block further. */
 	public static final double RANGE = 14.0, MOUTH = 0.3, SPREAD = 0.14;
 	/** Smoke laid along it a tick (a block's worth is 1), and every how many blocks. */
@@ -181,9 +186,8 @@ public final class SmokeJet {
 			}
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
-		if (player.tickCount % 10 == 0) {
-			level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.35F,
-				0.4F + level.getRandom().nextFloat() * 0.15F);
+		if (Soundscape.due(player, "smoke.jet", 7, 14)) {
+			Soundscape.play(level, player.position().add(0.0, 1.0, 0.0), SoundSource.PLAYERS, JET_HISS, JET_ROAR);
 		}
 	}
 }

@@ -15,6 +15,8 @@ abstract class WebModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.FreefallPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.BalancePose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.RunPose.applyModel(submit.model(), submit.state());
 		WebArms.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebFeral.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebSuitGrowth.applyModel(submit.model(), submit.state());

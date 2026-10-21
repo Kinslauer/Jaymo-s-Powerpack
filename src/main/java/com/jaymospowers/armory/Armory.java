@@ -43,6 +43,11 @@ import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -58,6 +63,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>The machete cuts through leaves, vines and crops fast.</li>
  * <li>The round shield blocks like a shield and comes up a little quicker.</li>
  * <li>The recurve bow shoots harder than a plain bow ({@link RecurveBowItem#POWER}).</li>
+ * <li>(0.15.2) The rapier lunges on right-click and runs through the first foe ahead ({@link RapierItem}).</li>
  * </ul>
  */
 public final class Armory {
@@ -120,13 +126,17 @@ public final class Armory {
 		// Japan and the sea
 		new Weapon("ninjato", Style.SWORD, 2.5F, -2.1F, 0.0F),
 		new Weapon("saber", Style.SWORD, 3.0F, -2.3F, 0.0F),
-		new Weapon("machete", Style.SWORD, 2.5F, -2.2F, 0.0F));
+		new Weapon("machete", Style.SWORD, 2.5F, -2.2F, 0.0F),
+		// (0.15.2) the duellist's rapier: lunges on right-click (RapierItem)
+		new Weapon("rapier", Style.SWORD, 2.0F, -2.0F, 0.0F));
 
 	/** Every Armory item, by id, in the order the creative tab lists them. */
 	static final Map<String, Item> ITEMS = new java.util.LinkedHashMap<>();
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
+	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
+	public static Block MINING_CHARGE;
 	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
 
 	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
@@ -173,6 +183,13 @@ public final class Armory {
 		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
 		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
 		BombGliderNet.init();
+		// (BWM port) the mining charge: stuck to a block, it digs a 3x3x3 hole into it
+		ResourceKey<Block> chargeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("mining_charge"));
+		MINING_CHARGE = Registry.register(BuiltInRegistries.BLOCK, chargeKey, new MiningChargeBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.FIRE).instabreak().sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)
+			.setId(chargeKey)));
+		item("mining_charge", p -> new BlockItem(MINING_CHARGE, p), p -> p.useBlockDescriptionPrefix().component(DataComponents.LORE, new ItemLore(
+			List.of(Component.translatable("block.jaymospowers.mining_charge.hint").withStyle(ChatFormatting.GRAY)))));
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("armory"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
@@ -182,6 +199,7 @@ public final class Armory {
 		CreativeModeTabEvents.modifyOutputEvent(tab).register(output -> ITEMS.values().forEach(output::accept));
 
 		ArmoryHits.init();
+		RapierItem.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
 				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem())) {
@@ -259,6 +277,9 @@ public final class Armory {
 				Component.translatable("item.jaymospowers.lance.charge").withStyle(ChatFormatting.GRAY)))));
 		} else if (weapon.id().equals("machete")) {
 			props = props.andThen(p -> p.component(DataComponents.TOOL, macheteTool()));
+		} else if (weapon.id().equals("rapier")) {
+			props = props.andThen(p -> p.component(DataComponents.LORE, new ItemLore(List.of(
+				Component.translatable("item.jaymospowers.rapier.lunge").withStyle(ChatFormatting.GRAY)))));
 		}
 		if (tier == Tier.NETHERITE) {
 			props = props.andThen(Item.Properties::fireResistant);
@@ -268,7 +289,7 @@ public final class Armory {
 			boolean spins = weapon.id().equals("hatchet");
 			return item(id, p -> new ThrowingWeaponItem(p, thrown, spins, true), props);
 		}
-		return item(id, Item::new, props);
+		return item(id, weapon.id().equals("rapier") ? RapierItem::new : Item::new, props);
 	}
 
 	private static Item throwing(String id, Function<Item.Properties, Item.Properties> props, float thrown, boolean spins) {

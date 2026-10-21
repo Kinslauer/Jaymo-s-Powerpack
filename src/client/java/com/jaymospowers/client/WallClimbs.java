@@ -26,6 +26,11 @@ public final class WallClimbs {
 		if (move != null && WebParkour.kind(move) == WebParkour.CLING) {
 			return true;
 		}
+		// (0.14.3) and a freerunner's climb (Climber)
+		Integer freerun = player.getAttached(com.jaymospowers.freerun.Freerun.MOVE);
+		if (freerun != null && WebParkour.kind(freerun) == WebParkour.CLING) {
+			return true;
+		}
 		return WebSymbiote.isBonded(player) && WebSymbiote.state(player).has(WebSymbioteState.CRAWL) && WebSymbiote.touchingWall(player);
 	}
 }

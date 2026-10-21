@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * politely, to give him room; at worst a gentle push. Never thrown out.</li>
  * <li><b>Reveler</b>: a gift and a cheer once a day. Pester him and his guards toss you off, laughing, and that's the
  * end of it. Never thrown out.</li>
- * <li><b>Purist</b>: (0.7.98) his own blood ({@link Purists}) is welcome: a proud word and good name once a day. Anyone
+ * <li><b>Purist</b>: (0.7.127) his own blood ({@link Purists}) is welcome: a proud word and good name once a day. Anyone
  * else near him is beneath him: his guards sneer at them and shove them out of his path, then throw them out of his
  * city if they keep hanging about.</li>
  * </ul>
@@ -100,7 +100,7 @@ final class Retinue {
 	static final int NOBLE_BREAD = 2, NOBLE_FRIEND = 20;
 	/** The reveler's toss: up, and out. */
 	static final double TOSS_UP = 0.7, TOSS_OUT = 1.0;
-	/** (0.7.98) The purist gives one of his own blood this much bread with his daily word. */
+	/** (0.7.127) The purist gives one of his own blood this much bread with his daily word. */
 	static final int PURIST_BREAD = 2;
 
 	private static final class Watch {
@@ -172,7 +172,7 @@ final class Retinue {
 		return switch (t) {
 			case TYRANT -> !kneeling(p);
 			case WARLORD -> armed(p);
-			// (0.7.98) only those not of his blood
+			// (0.7.127) only those not of his blood
 			case PURIST -> !Purists.kin(f, p);
 			default -> true;
 		};
@@ -210,7 +210,7 @@ final class Retinue {
 		}
 		long now = level.getGameTime();
 		if (t == Tempers.Temper.PURIST && Purists.kin(f, p)) {
-			// (0.7.98) one of his own blood may clasp his hand
+			// (0.7.127) one of his own blood may clasp his hand
 			Speech.say(level, king, Component.translatable(speech(t, "kin_hands"), Purists.bloodName(f)), Speech.GOLD, SPEECH_RANGE);
 			return InteractionResult.PASS;
 		}
@@ -377,7 +377,7 @@ final class Retinue {
 				w.heat = 0;
 			}
 			case PURIST -> {
-				// (0.7.98) a sneer, and shoved out of his path
+				// (0.7.127) a sneer, and shoved out of his path
 				shove(level, guard, p, away, r.shove(), 0.2);
 				Speech.say(level, by, Component.translatable(speech(t, "watch" + level.getRandom().nextInt(4)), Purists.name(Heritage.of(p)),
 					Purists.bloodName(f)), Speech.RED, SPEECH_RANGE);

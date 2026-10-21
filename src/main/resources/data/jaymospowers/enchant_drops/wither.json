@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:wither"
+  ],
+  "enchantment": "minecraft:knockback",
+  "chance": 1.0
+}

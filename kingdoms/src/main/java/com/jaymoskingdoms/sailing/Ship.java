@@ -73,8 +73,8 @@ import org.jspecify.annotations.Nullable;
  * entity's position is that column's middle at the keel.
  */
 public final class Ship extends Entity {
-	/** The most blocks one ship may hold, and its longest side. */
-	static final int MOST_BLOCKS = 3000, LONGEST = 64;
+	/** The most blocks one ship may hold ((0.7.112) 5000, was 3000: room for Jaki's galleon), and its longest side. */
+	static final int MOST_BLOCKS = 5000, LONGEST = 64;
 	/** Top speed (blocks/tick): per block of waterline, per (square root of) sail, its paddling speed with no sails, and the most. */
 	static final double PER_LENGTH = 0.04, PER_SAIL = 0.1, PADDLE = 0.05, FASTEST = 0.8;
 	/** How quickly it gathers or loses way (a share of the gap a tick), and its sails set or furled (a share a tick). */

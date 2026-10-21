@@ -46,6 +46,11 @@ public final class Storms {
 	static final double EDGE = 40.0;
 	/** Lightning: one strike per this many ticks under a thunderstorm, and under a supercell. */
 	static final int STRIKE_THUNDER = 140, STRIKE_SUPERCELL = 60;
+	/** (0.7.120) A storm's bolt lights a fire only this often, and then only where it struck (no sparks around it, and
+	 * none from its after-flashes): every bolt lighting five fires burnt whole forests down. */
+	public static final float STRIKE_FIRE_CHANCE = 0.25F;
+	/** The entity tag a storm cell's bolts carry, so {@code LightningBoltMixin} tames their fire. */
+	public static final String BOLT_TAG = "jaymoskingdoms.storm_bolt";
 	/** A supercell puts down its tornado once it's this close to someone (and gathered); the chance each roll. */
 	static final double TOUCHDOWN_NEAR = 170.0;
 	static final float TOUCHDOWN_CHANCE = 0.3F;
@@ -275,6 +280,7 @@ public final class Storms {
 			.filter(p -> level.getBlockState(p).is(BlockTags.LIGHTNING_RODS)).findFirst().map(BlockPos::immutable).orElse(null);
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.EVENT);
 		if (bolt != null) {
+			bolt.addTag(BOLT_TAG);
 			bolt.snapTo(Vec3.atBottomCenterOf(rod != null ? rod.above() : top));
 			level.addFreshEntity(bolt);
 		}

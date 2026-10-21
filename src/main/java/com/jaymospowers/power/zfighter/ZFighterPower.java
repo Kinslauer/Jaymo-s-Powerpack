@@ -6,6 +6,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.List;
@@ -454,6 +455,17 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.inherit(player);
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// out of the air (Ki flight also ends by WindFlight.canFly) and out of any combo string
+		Live live = LIVE.get(player.getUUID());
+		if (live != null && live.flying) {
+			endFlight(player, live);
+		}
+		ZFighterCombo.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		Live live = LIVE.remove(player.getUUID());
@@ -547,10 +559,10 @@ public final class ZFighterPower implements Power {
 				}
 				aura(player, live, live.ki >= max ? CHARGE_AURA_FULL : CHARGE_AURA);
 				chargeFx(player, live, now);
-				if (now % 16 == 0) {
+				if (Soundscape.due(player, "ki.power_up", 12, 20)) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.2F,
-						0.7F + fill * 0.9F);
+					Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.2F).pitched(0.7F + fill * 0.9F),
+						ZFighterKi.KI_SURGE);
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {

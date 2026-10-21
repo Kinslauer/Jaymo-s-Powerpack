@@ -39,6 +39,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -75,6 +76,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		NightGiftsClient.register();
 		BloodVision.register();
 		WarriorFury.register();
+		// 0.7.111: the awareness gauge (mob senses)
+		SensesClient.register();
+		HiddenBladeClient.register();
 		VampireLooks.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours

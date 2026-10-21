@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -171,8 +172,8 @@ public final class ZFighterDisc {
 			level.sendParticles(new DustParticleOptions(color, 0.8F), true, false, at.x + ox, at.y, at.z + oz, 0, -ox, 0.0, -oz, 0.12);
 		}
 		if (held % HUM_EVERY == 0) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F,
-				Mth.lerp(charge, HUM_PITCH_FROM, HUM_PITCH_TO));
+			Soundscape.play(level, player.position(), SoundSource.PLAYERS,
+				ZFighterKi.KI_HUM.louder(0.8F).pitched(Mth.lerp(charge, HUM_PITCH_FROM, HUM_PITCH_TO)));
 		}
 		if (held % CHIME_EVERY == 1) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.35F + 0.4F * charge,
