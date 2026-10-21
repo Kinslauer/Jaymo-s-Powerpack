@@ -25,9 +25,14 @@ import org.jspecify.annotations.Nullable;
  * it; Choose seals it, for life. It can't be shut without picking.
  * (0.7.75) Rows wrap instead of being cut off, and the pane scrolls with the mouse wheel when it runs long; pointing at
  * it while it overflows scrolls it slowly on its own, to the end and back.
+ * (0.7.106) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. Read, a
+ * Blood Rite opens the screen too ({@link #rite}): then only the earned heritages you've woken can be picked. The rows
+ * shrink to fit when there are more heritages than the panel is tall, dropping their icons when too small for them.
  */
 final class HeritageScreen extends Screen {
-	static final int MAX_W = 420, MAX_H = 250, LIST_W = 118, LIST_ROW = 19, HEADER = 34, FOOTER = 24;
+	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
+	/** (0.7.106) A Blood Rite's accent: dark blood red. */
+	static final int RITE_ACCENT = 0xFFB0323C;
 	/** The heritage screen's accent: a deep teal, apart from the class screen's gold. */
 	static final int ACCENT = 0xFF4FB8A8;
 	/** After Choose, how long the heritage may take to come back before the screen is put up again (ms). */
@@ -39,6 +44,8 @@ final class HeritageScreen extends Screen {
 	static final long LEAD_MS = 5000L, LEAD_FADE_MS = 1500L;
 
 	private final boolean forced;
+	/** (0.7.106) Opened by a Blood Rite: only an earned heritage you've woken (and aren't) can be picked. */
+	private final boolean rite;
 	private Heritage.@Nullable Kind picked;
 	private @Nullable Button choose;
 	/** How far down the right pane is scrolled, and for which heritage (it starts over for each one). */
@@ -54,15 +61,16 @@ final class HeritageScreen extends Screen {
 	/** When the lead line first showed (0: not yet); once gone it stays gone, whichever heritage or screen. */
 	private static long leadFrom;
 
-	HeritageScreen(boolean forced) {
-		super(Component.translatable("gui.jaymoskingdoms.heritage.title"));
+	HeritageScreen(boolean forced, boolean rite) {
+		super(Component.translatable(rite ? "gui.jaymoskingdoms.heritage.rite_title" : "gui.jaymoskingdoms.heritage.title"));
 		this.forced = forced;
+		this.rite = rite;
 	}
 
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(Heritage.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
-			context.client().gui.setScreen(new HeritageScreen(payload.forced()));
+			context.client().gui.setScreen(new HeritageScreen(payload.forced(), payload.rite()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
@@ -71,7 +79,7 @@ final class HeritageScreen extends Screen {
 			if (Heritage.of(minecraft.player) != null) {
 				owed = false;
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
-				minecraft.gui.setScreen(new HeritageScreen(true));
+				minecraft.gui.setScreen(new HeritageScreen(true, false));
 			}
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> owed = false);
@@ -111,8 +119,36 @@ final class HeritageScreen extends Screen {
 		return panelW() - LIST_W;
 	}
 
+	/** (0.7.106) A list row's height: as tall as {@link #LIST_ROW}, shrunk so every heritage fits. */
+	private int rowH() {
+		int fit = (panelH() - HEADER - 4) / Heritage.Kind.values().length;
+		return Math.clamp(fit, MIN_ROW, LIST_ROW);
+	}
+
 	private int rowY(int index) {
-		return top() + HEADER + index * LIST_ROW;
+		return top() + HEADER + index * rowH();
+	}
+
+	/** (0.7.106) An earned heritage the player hasn't woken: a "???" with a hint. */
+	private static boolean hidden(Heritage.Kind kind) {
+		Minecraft minecraft = Minecraft.getInstance();
+		return kind.earned && (minecraft.player == null || !Heritage.unlocked(minecraft.player, kind) && Heritage.of(minecraft.player) != kind);
+	}
+
+	/** (0.7.106) Whether {@code kind} can be picked here: any that isn't hidden; under a Blood Rite, an earned one woken and not yours. */
+	private boolean pickable(Heritage.Kind kind) {
+		if (hidden(kind)) {
+			return false;
+		}
+		if (!this.rite) {
+			return true;
+		}
+		Minecraft minecraft = Minecraft.getInstance();
+		return kind.earned && minecraft.player != null && Heritage.of(minecraft.player) != kind;
+	}
+
+	private static Component name(Heritage.Kind kind) {
+		return hidden(kind) ? Component.translatable("gui.jaymoskingdoms.heritage.unknown") : Component.translatable("heritage.jaymoskingdoms." + kind.key());
 	}
 
 	private static boolean done() {
@@ -122,7 +158,7 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	protected void init() {
-		if (done()) {
+		if (!this.rite && done()) {
 			onClose();
 			return;
 		}
@@ -143,12 +179,13 @@ final class HeritageScreen extends Screen {
 
 	private Heritage.@Nullable Kind rowAt(int mouseX, int mouseY) {
 		Heritage.Kind[] all = Heritage.Kind.values();
+		int rh = rowH();
 		for (int i = 0; i < all.length; i++) {
 			int ry = rowY(i);
-			if (ry + LIST_ROW > top() + panelH() - 4) {
+			if (ry + rh > top() + panelH() - 4) {
 				break;
 			}
-			if (Ui.over(mouseX, mouseY, left() + 4, ry, LIST_W - 8, LIST_ROW - 2)) {
+			if (Ui.over(mouseX, mouseY, left() + 4, ry, LIST_W - 8, rh - 2)) {
 				return all[i];
 			}
 		}
@@ -158,7 +195,7 @@ final class HeritageScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		Heritage.Kind row = rowAt((int)event.x(), (int)event.y());
-		if (row != null) {
+		if (row != null && pickable(row)) {
 			this.picked = row;
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;
@@ -168,22 +205,28 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (done()) {
+		if (!this.rite && done()) {
 			onClose();
 			return;
 		}
 		int x = left(), y = top(), w = panelW(), h = panelH();
-		Ui.panel(graphics, x, y, w, h, ACCENT);
+		int accent = accent();
+		Ui.panel(graphics, x, y, w, h, accent);
 		list(graphics, mouseX, mouseY);
 		Heritage.Kind hover = rowAt(mouseX, mouseY);
-		Heritage.Kind kind = hover != null ? hover : this.picked != null ? this.picked : Heritage.Kind.values()[0];
+		Heritage.Kind kind = hover != null ? hover : this.picked != null ? this.picked : firstPickable();
 		int px = paneX(), pw = paneW();
 
 		// the header: its icon, its name, and whether it's yours yet
-		graphics.item(new ItemStack(kind.icon), px + 8, y + 8);
-		Ui.line(graphics, this.font, Component.translatable("heritage.jaymoskingdoms." + kind.key()), px + 28, y + 7, pw - 36, kind == this.picked ? ACCENT : Ui.TEXT);
-		Ui.line(graphics, this.font, kind == this.picked ? Component.translatable("gui.jaymoskingdoms.heritage.picked")
-			: Component.translatable("gui.jaymoskingdoms.heritage.press"), px + 28, y + 18, pw - 36, Ui.DIM);
+		boolean hidden = hidden(kind);
+		if (!hidden) {
+			graphics.item(new ItemStack(kind.icon), px + 8, y + 8);
+		}
+		Ui.line(graphics, this.font, name(kind), px + 28, y + 7, pw - 36, kind == this.picked ? accent : Ui.TEXT);
+		Ui.line(graphics, this.font, Component.translatable(hidden ? "gui.jaymoskingdoms.heritage.earned"
+			: !pickable(kind) ? "gui.jaymoskingdoms.heritage.rite_cant"
+			: kind == this.picked ? this.rite ? "gui.jaymoskingdoms.heritage.rite_picked" : "gui.jaymoskingdoms.heritage.picked"
+			: "gui.jaymoskingdoms.heritage.press"), px + 28, y + 18, pw - 36, Ui.DIM);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
 
 		// the free points, the gift (green) and the flaw (red), a row each, wrapped; then its story. All of it scrolls.
@@ -195,7 +238,7 @@ final class HeritageScreen extends Screen {
 		int textW = pw - 20;
 		int viewTop = y + HEADER, viewBottom = y + h - FOOTER - 2;
 		this.viewH = viewBottom - viewTop;
-		List<Component> rows = kind.card();
+		List<Component> rows = hidden ? List.of(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".hint")) : kind.card();
 		List<List<FormattedCharSequence>> wrapped = new ArrayList<>();
 		int contentH = 0;
 		for (Component row : rows) {
@@ -204,12 +247,12 @@ final class HeritageScreen extends Screen {
 			contentH += split.size() * Ui.LINE + 4;
 		}
 		List<Component> text = new ArrayList<>();
-		text.add(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".desc"));
-		int lead = leadColor();
+		text.add(Component.translatable(hidden ? "gui.jaymoskingdoms.heritage.earned_desc" : "heritage.jaymoskingdoms." + kind.key() + ".desc"));
+		int lead = this.rite ? 0 : leadColor();
 		if (this.picked == null && lead != 0) {
 			text.add(Component.translatable("gui.jaymoskingdoms.heritage.lead").withColor(lead));
 		}
-		Component name = Component.translatable("heritage.jaymoskingdoms." + kind.key());
+		Component name = name(kind);
 		int storyLines = Ui.detailLines(this.font, pw, name, text);
 		int storyTop = contentH + 6;
 		contentH = storyTop + 5 + storyLines * Ui.LINE + 4;
@@ -223,19 +266,20 @@ final class HeritageScreen extends Screen {
 			List<FormattedCharSequence> split = wrapped.get(i);
 			int rh = split.size() * Ui.LINE + 4;
 			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + rh - 1, i, false);
-			int color = i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
+			int color = hidden ? Ui.DIM : i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
 			for (int l = 0; l < split.size(); l++) {
 				graphics.text(this.font, split.get(l), px + 10, ry + 2 + l * Ui.LINE, color);
 			}
 			ry += rh;
 		}
-		Ui.detail(graphics, this.font, px, viewTop - this.scroll + storyTop, pw, storyLines + 1, name, ACCENT, text);
+		Ui.detail(graphics, this.font, px, viewTop - this.scroll + storyTop, pw, storyLines + 1, name, accent, text);
 		graphics.disableScissor();
 		Ui.scrollbar(graphics, px + pw - 4, viewTop, this.viewH, this.viewH, contentH, this.scroll);
 
 		if (this.choose != null) {
 			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
-				: Component.translatable("gui.jaymoskingdoms.heritage.confirm", Component.translatable("heritage.jaymoskingdoms." + this.picked.key())));
+				: Component.translatable(this.rite ? "gui.jaymoskingdoms.heritage.rite_confirm" : "gui.jaymoskingdoms.heritage.confirm",
+					Component.translatable("heritage.jaymoskingdoms." + this.picked.key())));
 			this.choose.active = this.picked != null;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -286,29 +330,52 @@ final class HeritageScreen extends Screen {
 		this.scroll = t < AUTO_PAUSE_MS ? 0 : (int)Math.min(max, (t - AUTO_PAUSE_MS) * AUTO_SPEED / 1000L);
 	}
 
-	/** Every heritage down the left, the picked one marked. */
+	/** What the right pane shows before anything's pointed at or picked: the first that can be picked. */
+	private Heritage.Kind firstPickable() {
+		for (Heritage.Kind kind : Heritage.Kind.values()) {
+			if (pickable(kind)) {
+				return kind;
+			}
+		}
+		return Heritage.Kind.values()[0];
+	}
+
+	/** The screen's accent: teal, or blood red under a Blood Rite. */
+	private int accent() {
+		return this.rite ? RITE_ACCENT : ACCENT;
+	}
+
+	/** Every heritage down the left, the picked one marked; (0.7.106) those that can't be picked here greyed. */
 	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top();
+		int accent = accent();
 		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
-		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.heritage.sub"), x + 8, y + 19, LIST_W - 12, Ui.DIM);
+		Ui.line(graphics, this.font, Component.translatable(this.rite ? "gui.jaymoskingdoms.heritage.rite_sub" : "gui.jaymoskingdoms.heritage.sub"),
+			x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
 		Heritage.Kind[] all = Heritage.Kind.values();
 		Heritage.Kind hover = rowAt(mouseX, mouseY);
+		int rh = rowH();
+		boolean icons = rh >= ICON_ROW;
 		for (int i = 0; i < all.length; i++) {
 			Heritage.Kind kind = all[i];
 			int ry = rowY(i);
-			if (ry + LIST_ROW > y + panelH() - 4) {
+			if (ry + rh > y + panelH() - 4) {
 				break;
 			}
 			boolean picked = kind == this.picked;
-			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2,
-				picked ? Ui.ROW_PICKED : kind == hover ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW_ALT : 0x0CFFFFFF);
+			boolean open = pickable(kind);
+			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + rh - 2,
+				picked ? Ui.ROW_PICKED : kind == hover && open ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW_ALT : 0x0CFFFFFF);
 			if (picked) {
-				graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, ACCENT);
+				graphics.fill(x + 4, ry, x + 6, ry + rh - 2, accent);
 			}
-			graphics.item(new ItemStack(kind.icon), x + 8, ry + 1);
-			Ui.line(graphics, this.font, Component.translatable("heritage.jaymoskingdoms." + kind.key()), x + 27, ry + 5, LIST_W - 34,
-				picked ? ACCENT : kind == hover ? Ui.TEXT : Ui.DIM);
+			if (icons && !hidden(kind)) {
+				graphics.item(new ItemStack(kind.icon), x + 8, ry + 1);
+			}
+			int tx = icons ? x + 27 : x + 10;
+			Ui.line(graphics, this.font, name(kind), tx, ry + (rh - 2 - 8) / 2 + 1, x + LIST_W - 7 - tx,
+				picked ? accent : !open ? Ui.HINT : kind == hover ? Ui.TEXT : Ui.DIM);
 		}
 	}
 }

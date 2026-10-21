@@ -34,11 +34,14 @@ public final class ModelPoses {
 	public static void apply(Model<?> model, Object state) {
 		CrawlPose.applyModel(model, state);
 		LedgePose.applyModel(model, state);
+		com.jaymospowers.client.freerun.BarHangPose.applyModel(model, state);
 		MeditatePose.applyModel(model, state);
 		CarryPose.applyModel(model, state);
 		WindPose.applyModel(model, state);
 		ArsenalArmPose.applyModel(model, state);
 		FreefallPose.applyModel(model, state);
+		com.jaymospowers.client.freerun.BalancePose.applyModel(model, state);
+		com.jaymospowers.client.freerun.RunPose.applyModel(model, state);
 		WebArms.applyModel(model, state);
 		WebFeral.applyModel(model, state);
 		WebSuitGrowth.applyModel(model, state);

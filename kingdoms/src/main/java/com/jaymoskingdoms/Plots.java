@@ -103,6 +103,37 @@ public final class Plots {
 			min = new BlockPos(ground.getX() - (w - 1) / 2, ground.getY(), ground.getZ() - (d - 1) / 2);
 			max = min.offset(w - 1, 0, d - 1);
 		}
+		return mark(player, f, min, max, ground);
+	}
+
+	/**
+	 * (0.7.116) Marks the plot with corners {@code a} and {@code b} (the {@link Surveyor}'s rod), its floor the lower
+	 * one's height. Tells the player how it went; true if marked.
+	 */
+	static boolean markBox(ServerPlayer player, BlockPos a, BlockPos b) {
+		MinecraftServer server = player.level().getServer();
+		BlockPos lo = Surveyor.min(a, b), hi = Surveyor.max(a, b);
+		BlockPos min = lo, max = new BlockPos(hi.getX(), lo.getY(), hi.getZ());
+		int w = max.getX() - min.getX() + 1, d = max.getZ() - min.getZ() + 1;
+		if (w < MIN_SIDE || d < MIN_SIDE || w > MAX_SIDE || d > MAX_SIDE) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.size", w, d, MIN_SIDE, MAX_SIDE).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		Faction f = Factions.at(server, player.level(), min);
+		if (f == null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.not_land").withStyle(ChatFormatting.RED));
+			return false;
+		}
+		if (!mayMark(player, f)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.lords_only", f.name()).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		return mark(player, f, min, max, b);
+	}
+
+	private static boolean mark(ServerPlayer player, Faction f, BlockPos min, BlockPos max, BlockPos ground) {
+		MinecraftServer server = player.level().getServer();
+		ServerLevel level = player.level();
 		for (BlockPos corner : new BlockPos[] {min, max, new BlockPos(min.getX(), 0, max.getZ()), new BlockPos(max.getX(), 0, min.getZ())}) {
 			if (!f.claims(ChunkPos.containing(corner))) {
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.outside", f.name()).withStyle(ChatFormatting.RED));
@@ -196,7 +227,7 @@ public final class Plots {
 		Faction f = managed.getKey();
 		Works.Plot plot = managed.getValue();
 		MinecraftServer server = player.level().getServer();
-		boolean known = Blueprint.catalogue(f.type()).stream().anyMatch(e -> e.id().equals(building));
+		boolean known = Blueprint.catalogue(f.type()).stream().anyMatch(e -> e.id().equals(building)) || Designs.entry(building) != null;
 		if (!known) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.unknown", building).withStyle(ChatFormatting.RED));
 			return false;

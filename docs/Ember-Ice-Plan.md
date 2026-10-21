@@ -25,7 +25,7 @@ is a `static final` at the top of its class. Open questions are at the end.
   smoke away into a puff of black soot. Smokescreen or a Smoke Bomb, then a flick of flame, is a fire trap.
 - **For them, the plain left hold stays Kindle** even though they have a power (Smoke has no left-click hold).
 
-## 0.14.0 (Track A, built)
+## 0.15.22 (Track A, built)
 Built as planned, in `power/ember` (`EmberKindle`, `EmberFireball`, `EmberFlashover`) and
 `client/power/ember/EmberKindleClient`; lang `lang/parts/ember.json`. Compiled on Andy's PC. Review fixes: an
 Emberborn's flame smoke and flashover ash never take a block of someone else's smoke (so a flashover only burns its

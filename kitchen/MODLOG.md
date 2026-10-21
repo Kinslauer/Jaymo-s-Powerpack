@@ -776,3 +776,63 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.
 - **0.4.50:** a corpse keeps its mob's size: the scale attribute stays in the saved look (Kingdoms' half-size spiders,
   grown apes), the rest of the attributes are still left out (`Corpses.look`).
+
+## 0.5.0: brewing
+Andy, for the Wounds plan's medieval medicine: "add a brewing system and block to kitchen". Strong spirits (aqua vitae)
+are what Jaymo's Powers' future Wounds system drinks to dull pain and pours on a wound. Everything is in-world
+(right-click), no GUI, like the mill machines. New packages `brewing` and `client/brewing`; `Brewing.register()` runs
+after `Mill.register()`.
+- **Cask** (`CaskBlock`, `CaskEntity`, `jaymoskitchen:cask`): a wooden barrel on its side with a tap; axe-mineable, drops
+  itself. Right-click with a water bucket (fills it) or water bottles (+1, glass bottle back) up to `CAPACITY` = 3, and
+  add `BASE_PER_BATCH` = 3 of one base: wheat for Ale, apples for Cider, honey bottles for Mead (bottle back), sweet or
+  glow berries for Berry Wine. Mixing bases is refused; sneaking with an empty hand takes the last base back. Full of
+  both, it seals and ferments for `FERMENT_TICKS` = 12000 (half a day; bubbles now and then), then holds
+  `DRINKS_PER_BATCH` = 3 drinks, each drawn off with a glass bottle. An empty hand shows the status as an overlay.
+- **Still** (`StillBlock`, `StillEntity`, `jaymoskitchen:still`): a copper pot still; pickaxe-mineable. Pour in
+  `POT` = 3 fermented drinks (any mix; glass bottles back). With a heat source directly below (lit campfire or soul
+  campfire, fire, soul fire, lava, magma block, or a lit furnace, smoker or blast furnace) it distils for
+  `DISTIL_TICKS` = 2400 into one Strong Spirits, taken with a glass bottle; unheated, progress pauses.
+- **Drinks** (stack 16, drinking animation, leave a glass bottle, in Food & Drinks): `ale` (+1 drunk), `cider` (+1),
+  `mead` (+2), `berry_wine` (+2) are food drinks and land in the drink slot of the Stomach; `strong_spirits` has no
+  food (drinkable always, like a potion), gives +4 drunk and Strength I for `SPIRIT_COURAGE_TICKS` = 600. Drunkenness
+  is applied at the top of `Stomach.eat`, which both the food and the no-food drink mixins already call, so it fires for
+  every drink whether or not the stomach has room.
+- **Drunkenness** (`Drunk`, attachment `jaymoskitchen:drunk`, saved, synced to its owner, lost on death): up to
+  `MAX_DRUNK` = 16 points, one wearing off every `DECAY_TICKS` = 600. Tipsy (1-3) only sways the screen; from
+  `DRUNK_FROM` = 4, Slowness I; from `VERY_DRUNK_FROM` = 8, Nausea, Mining Fatigue I and a random stagger now and then.
+  Sobering up from a peak of `HANGOVER_FROM` = 6 or more gives Weakness I and Hunger I for `HANGOVER_TICKS` = 2400.
+  `Drunk.level(player)` and `Drunk.drink(player, points)` are public for Jaymo's Powers.
+- **Client sway** (`client/brewing/DrunkSway`): the local player's view sways by a slow sine in yaw and pitch, more the
+  drunker they are; not in menus.
+- Recipes: cask (planks, stick tap, iron hoops), still (a cauldron ringed by four copper ingots). Art by
+  `tools/vanilla_style/brewing.py` (textures and block models).
+- Tuning: the constants at the top of `CaskEntity`, `StillEntity`, `Drunk`.
+- **0.5.1, ragdolls:** Andy: "I need these implemented in place of our corpses" (Sable: Ragdolls, Sable: Ragdoll Corpse,
+  Ragdoll Reactions; all three All Rights Reserved and built on NeoForge's Sable engine, so this is our own physics from
+  how they behave, nothing taken from them), and living players too. See `docs/ragdolls.md`.
+  - Engine (`ragdoll/`): Verlet point-mass skeletons (`RagdollRig`: humanoid, four-legged or a rigid box, by the
+    `ragdoll_humanoid` / `_quadruped` / `_box` entity tags or guessed from size), rigid torso, limbs held in cones,
+    pushed out of block collision boxes with friction and a little bounce, sub-stepped so nothing tunnels, floating in
+    water, kicked by walkers and vehicles, asleep once still (`RagdollBody`). `tools/ragdoll_sim` checks it without the
+    game (falls, walls, ledges, stairs, water, giants, kicks).
+  - Corpses: a mob crumples on its first tick of dying (no keel-over); the server simulates the body
+    (`corpse/CorpseRagdoll`), saves it, and sends its points to watchers every tick it moves. Hits, blasts (weaker than
+    12 damage now fling instead of shredding), rummaging, chopping, bites, Lift and tendrils all move it. Carried,
+    slung and carted bodies hang limp as before and become ragdolls again when let go. A dead player's own model is
+    hidden while their corpse is by.
+  - Living players go limp on a crash at speed, a hard landing, a big blast or shove, or being run over by a cart, boat
+    or charging rider; their own client simulates the ragdoll (`client/ragdoll/LimpController`), the server relays it
+    (`LivingRagdolls`); third-person camera, no moving or using, back up once still (1.5 to 7 s). Dying limp leaves
+    that exact body. Jaymo's Powers keeps you from going limp while a power holds you.
+- **0.5.2, Better With Mods batch 1:** `stomach/RawFood`: raw meat and fish (`raw_meats`) give Hunger II for 30 s
+  30% of the time, an Undercooked dish half as often (replaces the old 60% Hunger I and raw chicken's own chance);
+  you can still eat while sick. Llamas and trader llamas drop 1-2 mutton. `EatGroundSeedsGoal` became
+  `farm/EatGroundFoodGoal`: every farm animal eats its own food off the ground (tame pets don't). `farm/LayingHens`:
+  a hen that pecks a seed lays at the next dawn; unfed hens lay at half speed (`ChickenMixin`).
+- **0.5.3, ragdolls less touchy:** Andy (2026-10-21): "using web z and other movement abilities ragdolls the user, it
+  should only be after a large hit on players, or impact with the ground", and no ragdoll on landing for Smoke, anyone
+  whose fall damage was negated, or with slow falling. A sudden change in speed no longer knocks anyone limp (that was
+  every dash, zip and launch). `LivingRagdolls` now judges hits on the server by the damage they really did: a blow
+  or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
+  actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
+  count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.

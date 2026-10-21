@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskingdoms:hidden_blade",
     {
       "id": "jaymospowers:wooden_dagger",
       "required": false

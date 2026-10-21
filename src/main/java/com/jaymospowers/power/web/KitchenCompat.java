@@ -111,8 +111,26 @@ public final class KitchenCompat {
 		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
 	}
 
+	/** (0.14.4) Wounds: how drunk a player is (Kitchen's {@code Drunk} points), 0 without Kitchen. */
+	public static int drunk(Player player) {
+		return LOADED ? Kitchen.drunk(player) : 0;
+	}
+
+	/** (0.14.4) Wounds: whether {@code stack} is Kitchen's strong spirits (poured on a wound, it cleans it). */
+	public static boolean isStrongSpirits(net.minecraft.world.item.ItemStack stack) {
+		return LOADED && Kitchen.spirits(stack);
+	}
+
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
+		static int drunk(Player player) {
+			return com.jaymoskitchen.brewing.Drunk.level(player);
+		}
+
+		static boolean spirits(net.minecraft.world.item.ItemStack stack) {
+			return com.jaymoskitchen.brewing.Brewing.STRONG_SPIRITS != null && stack.is(com.jaymoskitchen.brewing.Brewing.STRONG_SPIRITS);
+		}
+
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
 		}
@@ -210,6 +228,54 @@ public final class KitchenCompat {
 			if (entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) {
 				corpse.jolt(true);
 			}
+		}
+	}
+
+	// ---- Kitchen's living ragdolls (0.5.1+), reached by reflection: this build compiles against an older Kitchen jar
+
+	private static java.lang.reflect.@Nullable Method limpMethod;
+	private static boolean limpLooked;
+
+	/** Whether this entity is a player lying limp as a ragdoll (a crash, a blast...): false without a Kitchen that has them. */
+	public static boolean isLimp(Entity entity) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!limpLooked) {
+			limpLooked = true;
+			try {
+				limpMethod = Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("isLimp", Entity.class);
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				limpMethod = null;
+			}
+		}
+		if (limpMethod == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(limpMethod.invoke(null, entity));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Powers that hold a player (being carried, Gravity's lift or hold, a web) keep them from going limp: Kitchen asks
+	 * these before it knocks anyone down, and lets them up if one starts.
+	 */
+	public static void registerRagdollVetoes() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> held = player -> com.jaymospowers.core.Carry.isCarried(player)
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.HELD) != null
+				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) != null
+				|| player.getAttached(WebPower.HELD) != null || player.getAttached(WebPower.HITCH) != null;
+			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addVeto", java.util.function.Predicate.class)
+				.invoke(null, held);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen without living ragdolls: nothing to veto
 		}
 	}
 

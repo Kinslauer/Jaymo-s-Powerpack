@@ -33,6 +33,11 @@ abstract class CarryFirstPersonMixin {
 		if (carrying == null || player.avatarRenderState == null || hands.isScoping) {
 			return;
 		}
+		if (com.jaymospowers.client.power.web.FirstPersonCompat.bodyShown()) {
+			// First-person Model draws your body, its arms already holding on: no second pair
+			ci.cancel();
+			return;
+		}
 		boolean animal = !(self.level().getEntity(carrying.target()) instanceof Player);
 		poseStack.pushPose();
 		// the same lag behind the view as the usual hands

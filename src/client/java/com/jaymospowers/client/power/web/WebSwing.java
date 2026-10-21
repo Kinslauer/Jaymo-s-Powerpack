@@ -279,7 +279,7 @@ public final class WebSwing {
 
 	/**
 	 * The last tick both webs were on things small enough to reel in: double-tap Sneak is then the hard yank (see
-	 * {@code WebPower.REEL_YANK_*}), not Combat Roll's roll.
+	 * {@code WebPower.REEL_YANK_*}), not a dodge.
 	 */
 	public static int reelReadyTick = Integer.MIN_VALUE / 2;
 
@@ -423,6 +423,56 @@ public final class WebSwing {
 		}
 	}
 
+	/** The whip (or its pry) took both webs over (see WebWhip): they're no longer ours to swing on. */
+	void handedOver(LocalPlayer player) {
+		for (Strand strand : strands) {
+			strand.attached = false;
+		}
+		if (slinging) {
+			endStrain();
+			slinging = false;
+			slingDraw = 0.0F;
+		}
+		flying = !player.onGround();
+	}
+
+	/**
+	 * Both webs stuck near each other ({@link com.jaymospowers.power.web.WebWhip#NEAR}) on the same creature (one too big
+	 * to reel in) or on terrain: Sneak there is the whip, not the slingshot.
+	 */
+	private boolean whipReady(LocalPlayer player) {
+		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
+		if (!a.attached || !b.attached || a.travel > 0 || b.travel > 0 || a.anchor.distanceTo(b.anchor) > com.jaymospowers.power.web.WebWhip.NEAR) {
+			return false;
+		}
+		if (a.entityId < 0 && b.entityId < 0) {
+			return true;
+		}
+		Entity on = a.entityId == b.entityId ? player.level().getEntity(a.entityId) : null;
+		return com.jaymospowers.power.web.WebWhip.whippable(player, on) && !WebAnchors.reelable(on);
+	}
+
+	/** Sneak last tick, and whether this Sneak press went to the whip (so letting go tells the server). */
+	private boolean whipSneakWas, whipHeld;
+
+	/** Sneak pressed with both webs on one thing: the whip (or the pry) starts; let go and a pry not yet loose is off. */
+	private boolean tickWhipSneak(LocalPlayer player) {
+		boolean sneak = player.input.keyPresses.shift();
+		boolean pressed = sneak && !whipSneakWas;
+		whipSneakWas = sneak;
+		if (whipHeld && !sneak) {
+			whipHeld = false;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false));
+			return false;
+		}
+		if (pressed && whipReady(player)) {
+			whipHeld = true;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true));
+			return true;
+		}
+		return false;
+	}
+
 	/** The server refused that hand's web, or its anchor broke. */
 	void rejected(LocalPlayer player, int hand) {
 		if (hand < 0 || hand >= strands.length) {
@@ -548,6 +598,10 @@ public final class WebSwing {
 				play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
 			}
 		}
+		if (tickWhipSneak(player)) {
+			// (the server answers by taking the webs over)
+			return;
+		}
 		if (!attached()) {
 			flying = !player.onGround();
 			return;
@@ -579,7 +633,7 @@ public final class WebSwing {
 		boolean hang = !player.onGround() && (input.jump() || input.shift())
 			&& !input.forward() && !input.backward() && !input.left() && !input.right()
 			&& player.getDeltaMovement().length() < STILL_SPEED;
-		if (bothAttached() && input.shift() && !hang) {
+		if (bothAttached() && input.shift() && !hang && !whipHeld) {
 			swingJumpTicks = 0;
 			tickSling(player, input);
 			return;

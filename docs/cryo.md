@@ -1,4 +1,4 @@
-# Cryokinesis (0.14.0)
+# Cryokinesis (0.15.22)
 
 Andy (2026-10-17) asked for an ice power whose synergy is "with smoke instead of fire". The plan is
 `docs/Ember-Ice-Plan.md` ("Track B" and "Ice into smoke: freezing fog"). Power id `cryo`, display name

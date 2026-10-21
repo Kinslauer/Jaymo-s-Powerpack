@@ -26,11 +26,18 @@ import org.jspecify.annotations.Nullable;
  * death messages, the name tag: {@code mixin/CostumeNameMixin}, {@code CostumeTabListMixin}). Which power was just
  * used is already tagged by {@code core.Oddities} ({@code jaymospowers_odd:power/<power>}).
  * <p>
+ * (0.14.3) A hood ({@link CostumeDesign.Mask#isHood}: the hood, the peaked hood) that is up leaves the face showing, so no
+ * identity is hidden, but the player carries a third tag, {@link #HOODED}{@code <key>} (the same {@link #key} the
+ * masked tag would have), for Kingdoms' stealth to read; it is removed when the hood comes off or a face-hiding piece
+ * replaces it. The client shows a hooded player's name tag only within {@code CostumeClient#HOOD_NAME_RANGE}.
+ * <p>
  * (0.12.3) With the costume's mask taken off ({@link Costume#UNMASKED}) the face shows: no identity, the real name.
  */
 public final class SecretIdentity {
 	/** The tags' prefixes. */
 	public static final String MASKED = "jaymospowers_masked:", NAME = "jaymospowers_mask_name:";
+	/** (0.14.3) The tag of a player with a hood up (the face showing). */
+	public static final String HOODED = "jaymospowers_hooded:";
 	/** How often every player's tags are brought up to date (ticks); putting a costume on or off does it at once too. */
 	static final int EVERY = 10;
 
@@ -111,9 +118,16 @@ public final class SecretIdentity {
 				}
 			}
 		}
+		if (worn != null && Costume.hooded(player)) {
+			want.add(HOODED + key(worn));
+			// (the hood's name, for Kingdoms' "hooded figure", unless a Rig Helm's identity already gives one)
+			if (!worn.name().isEmpty() && want.stream().noneMatch(t -> t.startsWith(NAME))) {
+				want.add(NAME + worn.name());
+			}
+		}
 		boolean changed = false;
 		for (String tag : new ArrayList<>(player.entityTags())) {
-			if ((tag.startsWith(MASKED) || tag.startsWith(NAME)) && !want.contains(tag)) {
+			if ((tag.startsWith(MASKED) || tag.startsWith(NAME) || tag.startsWith(HOODED)) && !want.contains(tag)) {
 				player.removeTag(tag);
 				changed = true;
 			}

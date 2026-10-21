@@ -50,6 +50,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Camps.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
+		HiddenBlade.register();
+		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
+		Senses.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
@@ -60,6 +64,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
+		// (0.7.116) the surveyor's rod, players' own designs and work areas
+		Surveyor.register();
+		Designs.register();
 		Armory.register();
 		Buildings.register();
 		Construction.register();
@@ -107,11 +114,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
+		MobTweaks.register();
 		Theft.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
-		LOGGER.debug("downed attachment: {}", Downed.DOWNED);
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
+		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
+		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
+		// the villager screens open, so the trades are there when they do)
+		Remedies.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
@@ -140,6 +152,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
+		MobShields.register();
+		BladeClash.register();
 		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
@@ -165,6 +180,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		Cannonball.register();
+		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
+		Dynamite.register();
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
@@ -174,6 +191,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// 0.7.103: roads are quicker going, sand, snow and leaves slower
+		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
 		Milestones.register();
 		Cavalry.register();
@@ -206,6 +225,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
+		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
+		Recollections.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
@@ -247,6 +269,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
+		// 0.7.103: sinkholes: sand and gravel over nothing gives way under a player
+		com.jaymoskingdoms.disasters.LooseGround.register();
 		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();

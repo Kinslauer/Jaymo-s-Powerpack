@@ -155,6 +155,9 @@ public final class Approaches {
 	/** How far a guard looks for someone with work, to send a stranger to. */
 	static final double WORK_SEARCH = 48.0;
 
+	/** (0.7.109) How keen someone with something to say about what they remember of you is to come over and say it. */
+	static final int REMARK_WEIGHT = 4;
+
 	/** What they come over about. */
 	static final int QUEST_OFFER = 0, QUEST_CHECK = 1, ACCUSE = 2, HALT = 3, QUESTION = 4, HUNGRY = 5, BARGAIN = 6, GIFT = 7, WAR = 8,
 		GOSSIP = 9, GREET = 10, CHILD = 11, WARN = 12, SEARCH = 13, TOLL = 14, BOUT = 15, LOYALTY = 16,
@@ -597,7 +600,8 @@ public final class Approaches {
 		boolean masked = Identities.hidden(player, f.id());
 		boolean sworn = !masked && f.member(player.getUUID()) != null;
 		boolean suspected = suspected(player, f.id(), now);
-		int hearts = masked ? 0 : hearts(mob, player);
+		// (0.7.101: a hood hides your name from the guards, but MCA's villagers still know your face)
+		int hearts = masked && Identities.masked(player) ? 0 : hearts(mob, player);
 		boolean friend = McaCompat.isMca(mob) ? hearts >= GIFT_HEARTS : rep >= GIFT_REP;
 		boolean known = McaCompat.isMca(mob) ? hearts >= GREET_HEARTS : rep >= GREET_REP;
 		int[] w = new int[TOPICS.length];
@@ -621,7 +625,8 @@ public final class Approaches {
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f);
-			if (!sworn) {
+			// (0.7.100) nor of one their settlement owes for bringing one of its own home
+			if (!sworn && Captives.owed(player, f.id()) <= 0) {
 				w[SEARCH] = SEARCH_W[tv];
 				w[TOLL] = TOLL_W[tv];
 			}
@@ -673,6 +678,23 @@ public final class Approaches {
 				w[GREET] = 2;
 			}
 			w[GOSSIP] = 2;
+			// (0.7.109) what they remember of you: something to say about it; warm to you, or cold
+			int lean = masked ? 0 : Recollections.leaning(mob, player);
+			if (lean <= Recollections.REFUSE && only < 0) {
+				return null;
+			}
+			if (lean <= Recollections.COLD) {
+				w[GIFT] = 0;
+				w[BARGAIN] = 0;
+				w[HUNGRY] = 0;
+				w[GREET] = 0;
+			} else if (lean >= Recollections.WARM) {
+				w[GREET] += 1;
+				w[GIFT] += 1;
+			}
+			if (Recollections.hasRemark(mob, player)) {
+				w[GREET] = Math.max(w[GREET], REMARK_WEIGHT);
+			}
 		}
 		if (!Languages.understands(player, mob)) {
 			// (0.7.20) you don't speak their tongue: only what hands and faces can say
@@ -828,6 +850,13 @@ public final class Approaches {
 			default -> new Object[0];
 		};
 		Component said = null;
+		if (a.topic == GREET && !a.foreign) {
+			// (0.7.109) what they remember of you, and haven't yet said
+			said = Recollections.remark(a.mob, player, level.getRandom());
+			if (said != null) {
+				more = "recall.jaymoskingdoms.more";
+			}
+		}
 		if (a.topic == GOSSIP) {
 			if (!a.enemy.isEmpty()) {
 				// (0.5.52) word of what you are (Renown)
@@ -838,6 +867,10 @@ public final class Approaches {
 				// (0.7.61) what you did for them (or elsewhere, as they've heard); (0.6.11) something strange seen lately;
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
+				if (said == null) {
+					// (0.7.109) what they saw another player do
+					said = Recollections.gossip(a.mob, player, level.getRandom());
+				}
 				if (said == null) {
 					// now and then, their own blood (VillagerHeritage)
 					said = VillagerHeritage.gossip(level, a.mob, player);
@@ -1068,6 +1101,8 @@ public final class Approaches {
 
 	private static void reply(ServerLevel level, Approach a, String key, int color, Object... args) {
 		tell(level, a, Component.translatable(key, args), color);
+		// (0.7.109) and they remember how you answered
+		Recollections.replied(a.mob, level.getServer().getPlayerList().getPlayer(a.player), key, a.enemy.isEmpty() ? null : a.enemy);
 	}
 
 	/** (0.7.51) What they say in an approach is said to the one they came to: only that player sees it. */

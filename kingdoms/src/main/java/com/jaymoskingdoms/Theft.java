@@ -455,13 +455,18 @@ public final class Theft {
 			return;
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
+		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
+			// (0.7.109) seen: the dead one's family won't forget who did it
+			Recollections.murdered(level, killer, victim);
+		}
 	}
 
 	// ---- witnesses and consequences -----------------------------------------------------------------------------
 
 	/** The faction's people who see {@code player} now, nearest first. */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
-		double range = player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE;
+		// (0.7.102) a hood hides you from farther off, on top of sneaking
+		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());
@@ -510,6 +515,8 @@ public final class Theft {
 		}
 		Weight w = weight != null ? weight : crime.weight;
 		if (!seen.isEmpty()) {
+			// (0.7.102) a hood is a fragile mask: seen close, face on, in the light, it is you
+			Identities.recognise(level, player, f, seen, null);
 			// (0.5.39) word gets round: its people will ask about it
 			Approaches.suspect(player, f.id(), level.getGameTime());
 		}
@@ -530,6 +537,8 @@ public final class Theft {
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
+		// (0.7.109) each who saw it remembers it
+		Recollections.crime(player, seen, crime.cry);
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);
 		}
@@ -553,6 +562,10 @@ public final class Theft {
 	 */
 	static void arrest(ServerPlayer player, ServerLevel level, Faction f, long ticks) {
 		if (Wars.enemy(player, f)) {
+			return;
+		}
+		if (Captives.pardon(player, f)) {
+			// (0.7.100) they owe you for one you brought home: this once, they let it go
 			return;
 		}
 		markWanted(player, f.id(), level.getGameTime() + ticks);
