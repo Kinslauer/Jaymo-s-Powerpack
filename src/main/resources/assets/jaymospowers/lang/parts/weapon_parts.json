@@ -18,6 +18,7 @@
   "item.jaymospowers.ninjato_blade": "Ninjato Blade",
   "item.jaymospowers.saber_blade": "Saber Blade",
   "item.jaymospowers.machete_blade": "Machete Blade",
+  "item.jaymospowers.rapier_blade": "Rapier Blade",
   "item.jaymospowers.kunai_blade": "Kunai Blade",
   "item.jaymospowers.throwing_star_blank": "Throwing Star Blank",
   "item.jaymospowers.harpoon_head": "Harpoon Head",
@@ -35,9 +36,9 @@
   "gui.jaymospowers.part_builder.weapons": "Weapon Parts (%s/%s)",
   "gui.jaymospowers.part_builder.stone_only": "Weapon parts are shaped from stone; metal ones are cast.",
   "tooltip.jaymospowers.tinkering.weapon_part": "Tool Station: %s",
+  "tooltip.jaymospowers.tinkering.weapon_part.with": "with a %s",
+  "tooltip.jaymospowers.tinkering.weapon_part.with2": "with a %s and a %s",
   "tooltip.jaymospowers.tinkering.weapon_part.alone": "on its own",
   "tooltip.jaymospowers.tinkering.weapon_part.makes": "Makes: %s",
-  "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it).",
-  "tooltip.jaymospowers.tinkering.weapon_part.with": "with a %s",
-  "tooltip.jaymospowers.tinkering.weapon_part.with2": "with a %s and a %s"
+  "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it)."
 }

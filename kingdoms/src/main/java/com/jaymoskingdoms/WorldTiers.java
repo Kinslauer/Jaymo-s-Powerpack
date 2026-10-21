@@ -352,6 +352,7 @@ public final class WorldTiers {
 
 	/** Gives {@code mob} tier {@code tier}'s strength, keeping how hurt it is. */
 	static void raise(Mob mob, int tier) {
+		boolean first = mob.getAttachedOrElse(MOB_TIER, 0) == 0;
 		float share = mob.getMaxHealth() > 0.0F ? mob.getHealth() / mob.getMaxHealth() : 1.0F;
 		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, HEALTH[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		modify(mob, Attributes.ATTACK_DAMAGE, DAMAGE_ID, DAMAGE[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -360,6 +361,10 @@ public final class WorldTiers {
 		modify(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		mob.setHealth(mob.getMaxHealth() * share);
 		mob.setAttached(MOB_TIER, tier);
+		// (0.7.105) and the tier shows: gear for it (MonsterGear), the first time it takes one
+		if (first && mob.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			MonsterGear.arm(level, mob, tier);
+		}
 	}
 
 	private static void modify(Mob mob, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
