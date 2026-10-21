@@ -11,7 +11,7 @@
 		"main": ["com.jaymospowers.JaymosPowers"],
 		"client": ["com.jaymospowers.client.JaymosPowersClient"],
 		"server": ["com.jaymospowers.JaymosPowersServer"],
-		"preLaunch": ["com.jaymospowers.client.CameraPreset"],
+		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset"],
 		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei"]
 	},
 	"mixins": [

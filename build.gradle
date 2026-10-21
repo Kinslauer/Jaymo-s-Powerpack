@@ -175,6 +175,23 @@ def packMods = [
 	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
 	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
 	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
+	// QOL (0.14.5), all shipped unchanged. Auto HUD (LGPL-3.0, Crendgrim): hides the hotbar, hearts, hunger and the rest
+	// while nothing on them changes, and brings each back when it does. Client-only.
+	[dep: "maven.modrinth:autohud:zvVWJ8QJ", cf: [623806, 9237281]],
+	// Respawning Animals (MPL-2.0, Fuzss): farm animals slowly respawn in loaded land, like monsters do, so the wild
+	// doesn't empty out; animals you breed or name never despawn. Server-side; needs Puzzles Lib (MPL-2.0, Fuzss) and
+	// Forge Config API Port (above).
+	[dep: "maven.modrinth:respawning-animals:IwgPloQF", cf: [322765, 8985572]],
+	[dep: "maven.modrinth:puzzles-lib:68hLXNWE", cf: [495476, 9173689]],
+	// Geophilic (all rights reserved, everloste; downloaded by id from its own pages, never copied or edited): subtler
+	// overworld biomes, with rocks, fallen logs, stumps, moss and bushes. Worldgen, so new chunks only.
+	[dep: "maven.modrinth:geophilic:5kFV8CEz", cf: [711216, 8966202]],
+	// Streams Reflowing (all rights reserved, but "You can add this to any modpack, anywhere"): rivers and streams that
+	// run downhill from springs through lakes to the sea, and water that keeps flowing. Worldgen, so new chunks only.
+	[dep: "maven.modrinth:streams-reflowing:1PyyzYS1", cf: [1581408, 9216745]],
+	// Jade (CC BY-NC-SA 4.0, Snownee; shipped unchanged in a free pack): the little panel naming the block or mob under
+	// your crosshair, with its mod, health and what it's doing. Works with JEI.
+	[dep: "maven.modrinth:jade:71CTWqdE", cf: [324717, 9042194]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -206,6 +223,10 @@ def packModsOverride = [
 	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
 	// Fabric port stops at 1.21.1. Beta. Needs Forge Config API Port (packMods) and Player Animation Library 1.2.7+.
 	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
+	// Interactic Renewed (MIT; EmpireWarrior81's fork of glisco's Interactic): items on the ground lie flat and show
+	// their name under the crosshair, you pick them up by right-clicking them (Jaymo's Powers switches its auto pickup
+	// off once per install: core/PickupPreset) and hold Q to throw them hard. Not on CurseForge. Needs owo-lib.
+	[dep: "maven.modrinth:interactic-renewed:B6iZXYFE"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
