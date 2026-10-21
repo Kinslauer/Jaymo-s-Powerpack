@@ -153,7 +153,10 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
 4. **Medicine. Built in 0.14.4 (written without a compiler; not yet built or tested on the Deck; spec
    `docs/Wounds-Phase4.md`, Kingdoms' clerics in its track B).** The medieval kit, treatment channel, body screen, poppy addiction, smelling salts, needle, cautery,
    festering, leeches, Kingdoms clerics as surgeons. Kitchen's brewing system and still (its own Kitchen release).
-5. **Polish.** Client effects, limps and hanging arms, quadruped downed pose, tuning, docs (`Abilities.md`), JEI pages.
+5. **Polish. Built in 0.14.5 (written without a compiler; not yet built or tested on the Deck; spec
+   `docs/Wounds-Phase5.md`: track A the client feel, track B the rules, tuning, docs and JEI).** Client effects, limps
+   and hanging arms, quadruped downed pose, tuning, docs (`Abilities.md`), JEI pages. Freerunning respects breaks;
+   a broken leg tags its owner `jaymospowers_crippled` for a later Kingdoms patch.
 
 Per CLAUDE.md: big patches run as parallel tracks, 2 at a time. Phases 1 and 2 are sequential (2 needs 1). 3 and 4
 can run side by side after 2. Each phase bumps the version and gets a server test on the Deck.

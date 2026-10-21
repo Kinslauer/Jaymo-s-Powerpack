@@ -63,6 +63,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * The effects are transient attribute modifiers refreshed every {@link #REFRESH_TICKS}, so they go cleanly with the
  * break. Kitchen's corpses read the scoreboard tags {@code jaymoskitchen.broken.<part>} as they read the missing parts.
+ * (0.14.5) A broken leg also tags its owner {@link #CRIPPLED_TAG}, and freerunning asks {@link #legsUsable},
+ * {@link #armsUsable} and {@link #gripUsable} (both sides).
  * A severed limb ({@link Dismember#MISSING}) stays broken and at zero, and takes Dismember's own effects instead.
  */
 public final class Breaks {
@@ -88,6 +90,11 @@ public final class Breaks {
 	public static final double SPLINT_SPEED = -0.05;
 	/** (0.14.2) What Kitchen reads off a body for each broken part (then the part's name). */
 	public static final String TAG_PREFIX = "jaymoskitchen.broken.";
+	/**
+	 * (0.14.5) On anything with a broken leg (any of its legs, splinted or not), put on and taken off with the refresh: for
+	 * a later Kingdoms patch, whose hidden blade does 10x on a Crippled foe (Kingdoms never compiles against Powers).
+	 */
+	public static final String CRIPPLED_TAG = "jaymospowers_crippled";
 
 	/** (0.14.2) The broken parts (a bit per {@link BodyPart#ordinal()}). Saved, synced to everyone (limps, hanging arms), not kept through death. */
 	public static final AttachmentType<Integer> BROKEN = AttachmentRegistry.create(JaymosPowers.id("wounds_broken"),
@@ -143,6 +150,7 @@ public final class Breaks {
 				refresh(newPlayer);
 			} else {
 				clearTags(newPlayer, -1);
+				crippled(newPlayer, 0);
 				apply(newPlayer, 0, 0);
 			}
 		});
@@ -352,6 +360,39 @@ public final class Breaks {
 			&& (splinted(living) & (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG))) != (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG));
 	}
 
+	/**
+	 * (0.14.5) Whether {@code entity}'s legs carry it for freerunning: no leg broken (or gone) out of a splint. A splinted
+	 * leg holds (its effects mostly lifted); a sprained foot is {@link #gripUsable}'s.
+	 */
+	public static boolean legsUsable(Entity entity) {
+		if (!(entity instanceof LivingEntity living)) {
+			return true;
+		}
+		int bad = broken(living) & ~splinted(living);
+		for (BodyPart part : LEGS) {
+			if ((bad & bit(part)) != 0 || missing(living, part)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** (0.14.5) Whether {@code entity} has an arm to freerun with: not both broken (or gone), splinted or not. */
+	public static boolean armsUsable(Entity entity) {
+		return !(entity instanceof LivingEntity living) || !(armBroken(living, InteractionHand.MAIN_HAND) && armBroken(living, InteractionHand.OFF_HAND));
+	}
+
+	/**
+	 * (0.14.5) Whether {@code entity} can hold on to a wall or a bar (freerunning's climb and bar swing): both arms sound
+	 * (none broken or gone, splinted or not) and neither foot sprained.
+	 */
+	public static boolean gripUsable(Entity entity) {
+		if (!(entity instanceof LivingEntity living)) {
+			return true;
+		}
+		return !armBroken(living, InteractionHand.MAIN_HAND) && !armBroken(living, InteractionHand.OFF_HAND) && (broken(living) & SPRAINS) == 0;
+	}
+
 	// ---- breaking, setting, knitting --------------------------------------------------------------------------------------
 
 	/**
@@ -457,6 +498,7 @@ public final class Breaks {
 		entity.removeAttached(SET);
 		unsplint(entity, -1);
 		clearTags(entity, mask);
+		crippled(entity, 0);
 		apply(entity, 0, Dismember.missing(entity));
 		uncrawl(entity, crawled);
 	}
@@ -490,6 +532,7 @@ public final class Breaks {
 				entity.removeAttached(SET);
 				clearTags(entity, mask);
 			}
+			crippled(entity, 0);
 			unsplint(entity, -1);
 			apply(entity, 0, Dismember.missing(entity));
 			return;
@@ -532,6 +575,7 @@ public final class Breaks {
 			}
 		}
 		apply(entity, mask, Dismember.missing(entity));
+		crippled(entity, mask);
 		uncrawl(entity, crawled);
 		if (entity instanceof Player player && crawlOnly(player) && !player.hasAttached(Crawl.CRAWLING) && Crawl.canCrawl(player)
 			&& !com.jaymospowers.core.Carry.isCarried(player)) {
@@ -552,6 +596,19 @@ public final class Breaks {
 			if ((mask & bit(part)) != 0) {
 				entity.removeTag(TAG_PREFIX + name(part));
 			}
+		}
+	}
+
+	/** (0.14.5) {@link #CRIPPLED_TAG} on while any leg in {@code mask} is broken, off once none is. */
+	private static void crippled(LivingEntity entity, int mask) {
+		boolean leg = false;
+		for (BodyPart part : LEGS) {
+			leg |= (mask & bit(part)) != 0;
+		}
+		if (leg) {
+			entity.addTag(CRIPPLED_TAG);
+		} else {
+			entity.removeTag(CRIPPLED_TAG);
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.jaymospowers.freerun;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Ledge;
+import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.power.web.WebParkour;
 import com.jaymospowers.power.web.WebWallRun;
 import io.netty.buffer.ByteBuf;
@@ -303,10 +304,24 @@ public final class Freerun {
 	/**
 	 * Whether this player may freerun right now: on their own feet or in the air (not flying, gliding, swimming,
 	 * riding, carried, carrying, crawling, meditating, in a power's or the web's own movement: {@link Ledge#canHang}),
-	 * and not on a ledge.
+	 * and not on a ledge. (0.14.5) Nor on a broken leg out of a splint, nor with both arms broken (Wounds'
+	 * {@link Breaks#legsUsable}, {@link Breaks#armsUsable}: synced, so both sides agree).
 	 */
 	public static boolean canMove(Player player) {
-		return Ledge.canHang(player) && !Ledge.onLedge(player);
+		return Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player) && Breaks.armsUsable(player);
+	}
+
+	/**
+	 * (0.14.5) {@link #canMove}, and for the moves that hang on the hands and feet (a cling and climb, a bar swing) a
+	 * sound grip too: one broken arm or a sprained foot rules those out ({@link Breaks#gripUsable}).
+	 */
+	public static boolean canMove(Player player, int kind) {
+		return canMove(player) && (!gripMove(kind) || Breaks.gripUsable(player));
+	}
+
+	/** (0.14.5) The moves that hang on both hands and the feet: {@link #CLING} (the climb) and {@link #BAR}. */
+	public static boolean gripMove(int kind) {
+		return kind == CLING || kind == BAR;
 	}
 
 	/** The height (blocks over the feet) of something waist-high just ahead a vault would clear ({@link #VAULT_HEIGHTS}), or 0. */
@@ -478,7 +493,7 @@ public final class Freerun {
 		}
 		Direction side = move.face() >= 0 && move.face() < Direction.values().length ? Direction.from3DDataValue(move.face()) : null;
 		boolean wall = side != null && side.getAxis().isHorizontal();
-		if (!canMove(player) || Ledge.powerMoving(player) || !valid(level, player, kind, wall ? side : null, move.pos(), current)) {
+		if (!canMove(player, kind) || Ledge.powerMoving(player) || !valid(level, player, kind, wall ? side : null, move.pos(), current)) {
 			stop(player);
 			return;
 		}
@@ -601,7 +616,7 @@ public final class Freerun {
 					|| Double.isNaN(barBottom(level, doing.pos));
 				default -> false;
 			};
-			if (!player.isAlive() || doing.ticks >= max || lost || !canMove(player)) {
+			if (!player.isAlive() || doing.ticks >= max || lost || !canMove(player, doing.kind)) {
 				it.remove();
 				if (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN) {
 					GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
