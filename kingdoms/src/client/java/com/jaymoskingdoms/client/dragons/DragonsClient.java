@@ -172,7 +172,7 @@ public final class DragonsClient {
 	private static void hud(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (player == null || minecraft.options.hideGui) {
+		if (player == null || minecraft.gui.hud.isHidden()) {
 			return;
 		}
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
