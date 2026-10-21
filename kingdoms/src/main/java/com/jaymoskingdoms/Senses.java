@@ -4,8 +4,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -27,6 +26,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,7 +40,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -56,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * already after you, with you in sight, sees you at full range. Creative and spectator players are untouched.</li>
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
- * {@link #LOOK_TICKS}. Bosses and the kingdoms' own folk are exempt. State lives on the mob in {@link #TRACK}.</li>
+ * {@link #LOOK_TICKS}. Bosses and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
  * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes.</li>
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
  * it is searching) is a sneak attack, {@link #SNEAK_ATTACK_MULT}; Sneak Attack's ranks make it more. The hidden blade's
@@ -115,8 +117,8 @@ public final class Senses {
 		int walkLeft, lookLeft;
 	}
 
-	/** On every hostile or neutral mob (its goals are added when it loads). */
-	static final AttachmentType<Track> TRACK = AttachmentRegistry.create(JaymosKingdoms.id("senses_track"));
+	/** Every hostile or neutral mob's, made when it loads together with its goals. */
+	private static final Map<Mob, Track> TRACKS = new WeakHashMap<>();
 
 	/** Server → player: what to show on the awareness gauge (state, and for {@link #NOTICING} how full, in {@link #FILL_STEPS}). */
 	public record Gauge(int state, int fill) implements CustomPacketPayload {
@@ -148,9 +150,9 @@ public final class Senses {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Gauge.TYPE, Gauge.CODEC);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Mob mob && minded(mob) && mob.getAttached(TRACK) == null) {
+			if (entity instanceof Mob mob && minded(mob) && !(mob instanceof Spider) && !TRACKS.containsKey(mob)) {
 				Track track = new Track();
-				mob.setAttached(TRACK, track);
+				TRACKS.put(mob, track);
 				var goals = ((MobAccessor) mob).jaymoskingdoms$goals();
 				// no flags: counts beside everything else; the search wants the legs and the eyes
 				goals.addGoal(0, new WatchGoal(mob, track));
@@ -164,6 +166,7 @@ public final class Senses {
 			MOVING.clear();
 			SENT.clear();
 			STRUCK.clear();
+			TRACKS.clear();
 		});
 	}
 
@@ -387,7 +390,7 @@ public final class Senses {
 
 	/** {@code mob} is hunting for {@code player}, who slipped away. */
 	static boolean searchingFor(Mob mob, Player player) {
-		Track t = mob.getAttached(TRACK);
+		Track t = TRACKS.get(mob);
 		return t != null && t.searching && player.getUUID().equals(t.who);
 	}
 
@@ -438,10 +441,10 @@ public final class Senses {
 
 	/** 0 if {@code mob} takes no notice of {@code player}; else 1 to {@link #FILL_STEPS}, as they come from where it could just see them to where it would spot them. */
 	private static int noticing(ServerLevel level, Mob mob, ServerPlayer player) {
-		if (mob.getTarget() != null || !mob.hasLineOfSight(player)) {
+		double follow = mob.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE) ? mob.getAttributeValue(Attributes.FOLLOW_RANGE) : 16.0;
+		if (mob.getTarget() != null || mob.distanceTo(player) >= follow || !mob.hasLineOfSight(player)) {
 			return 0;
 		}
-		double follow = mob.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE) ? mob.getAttributeValue(Attributes.FOLLOW_RANGE) : 16.0;
 		double spot = Math.max(2.0, follow * player.getVisibilityPercent(level, mob));
 		double dist = mob.distanceTo(player);
 		if (dist >= follow || spot >= follow) {
@@ -455,10 +458,16 @@ public final class Senses {
 
 	/** {@code target} is a hostile or neutral mob that isn't after {@code player} and can't see them: they're behind it, or it is searching. */
 	static boolean unaware(LivingEntity target, ServerPlayer player) {
-		if (!(target instanceof Mob mob) || !(mob instanceof Enemy || mob instanceof NeutralMob) || !mob.isAlive() || mob.getTarget() == player) {
+		if (!(target instanceof Mob mob) || !minded(mob) || mob instanceof TamableAnimal tame && tame.isTame() || !mob.isAlive()
+			|| mob.getTarget() == player) {
 			return false;
 		}
 		return searchingFor(mob, player) || !inCone(mob, player);
+	}
+
+	/** {@code target} is still in its hurt cooldown and would turn this blow away (vanilla's {@code hurtServer}): no bonus, no feedback. */
+	static boolean cooling(LivingEntity target, DamageSource source) {
+		return target.getInvulnerableTime() > 10 && !source.is(DamageTypeTags.BYPASSES_COOLDOWN);
 	}
 
 	/** Whether {@code player}'s hidden blade can assassinate {@code target} (Assassinate, and it is unaware of them). */
@@ -474,6 +483,9 @@ public final class Senses {
 		if (CombatArts.striking() || target instanceof Player || !(source.getEntity() instanceof ServerPlayer sp)
 			|| source.getDirectEntity() != sp || !source.is(DamageTypes.PLAYER_ATTACK) || sp.isSpectator() || target == sp
 			|| HiddenBlade.is(sp.getMainHandItem()) && !HiddenBlade.skilled(sp) || !unaware(target, sp)) {
+			return amount;
+		}
+		if (cooling(target, source)) {
 			return amount;
 		}
 		long now = sp.level().getGameTime();

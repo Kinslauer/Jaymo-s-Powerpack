@@ -189,7 +189,7 @@ public final class HiddenBlade {
 		boolean cripple = crippled(target);
 		// (0.7.103) an unaware monster taken from behind (or while it searches) by a hand that has learned Assassinate: the same ten times
 		boolean assassin = Senses.assassinable(target, sp);
-		if (!(cripple || assassin) || !CombatArts.fullStrength(sp, now)) {
+		if (!(cripple || assassin) || !CombatArts.fullStrength(sp, now) || Senses.cooling(target, source)) {
 			return amount;
 		}
 		long[] last = STABBED.get(sp.getUUID());
