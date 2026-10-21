@@ -35,6 +35,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.sailing.ShipShot.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.2F, false));
 		ShipClient.init();
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		// (batch 4) plot stakes' lines, path and grass slabs, wind chimes, the rope lift
+		BuildingClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
