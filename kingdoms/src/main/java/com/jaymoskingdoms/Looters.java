@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.131) Robbing the dead (with Jaymo's Kitchen's corpses). Where bodies lie with something still on them, someone
+ * (0.7.132) Robbing the dead (with Jaymo's Kitchen's corpses). Where bodies lie with something still on them, someone
  * comes for it:
  * <ul>
  * <li><b>Looters.</b> Where three or more bodies lie together (a battlefield, a raid beaten off, a camp put to the sword),
@@ -114,12 +114,12 @@ public final class Looters {
 	/** Lines a looter, a poor villager, a guard who catches one, may say. */
 	static final int LINES = 3;
 	/**
-	 * (0.7.131) Handed over: a downed looter set down within this of a free guard (with the player within that) is taken
+	 * (0.7.132) Handed over: a downed looter set down within this of a free guard (with the player within that) is taken
 	 * for judgement; looked for this often (ticks). The bringer's thanks; notoriety is this plus a body robbed.
 	 */
 	static final double HAND_REACH = 4.0, BRINGER_REACH = 8.0;
 	static final int HAND_CHECK = 10, REP_BROUGHT = 8, BROUGHT_NOTORIETY = 1;
-	/** (0.7.131) News of the sentence, told by a grown villager of that settlement within this; looked for this often; kept this long. */
+	/** (0.7.132) News of the sentence, told by a grown villager of that settlement within this; looked for this often; kept this long. */
 	static final double NEWS_REACH = 12.0;
 	static final int NEWS_CHECK = 40;
 	static final long NEWS_KEEP = 20L * 60 * 20 * 3;
@@ -161,10 +161,10 @@ public final class Looters {
 	private static final Map<UUID, Long> KINDRED = new HashMap<>();
 	/** Which players have already been charged with robbing which bodies (one crime a body). */
 	private static final Map<UUID, Set<UUID>> CHARGED = new HashMap<>();
-	/** (0.7.131) News: a sentence on a looter a player brought in but didn't see carried out. */
+	/** (0.7.132) News: a sentence on a looter a player brought in but didn't see carried out. */
 	private record News(int faction, String sentence, long at) {
 	}
-	/** (0.7.131) Player → what they're yet to hear. */
+	/** (0.7.132) Player → what they're yet to hear. */
 	private static final Map<UUID, List<News>> NEWS = new HashMap<>();
 
 	private Looters() {
@@ -417,7 +417,7 @@ public final class Looters {
 			return stepPoor(level, p, (Villager)who, now);
 		}
 		if (Downed.isDowned(who)) {
-			// (0.7.131) down: he lies there till he's got up, or carried off to a guard
+			// (0.7.132) down: he lies there till he's got up, or carried off to a guard
 			p.body = null;
 			return true;
 		}
@@ -658,7 +658,7 @@ public final class Looters {
 		p.sack.clear();
 	}
 
-	// ---- judgement (0.7.131) ---------------------------------------------------------------------------------------------
+	// ---- judgement (0.7.132) ---------------------------------------------------------------------------------------------
 
 	/**
 	 * Andy: "you can also drop a downed one in front of a guard for judgement". A downed looter lying (not carried) within

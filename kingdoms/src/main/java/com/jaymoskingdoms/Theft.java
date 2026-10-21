@@ -129,7 +129,7 @@ public final class Theft {
 		BLOODLETTING(Weight.HEAVY, "bloodletting"),
 		/** (0.7.121) striking one of its people ({@link Retaliation}). */
 		ASSAULT(Weight.LIGHT, "assault"),
-		/** (0.7.131) one of its dead robbed ({@link Looters#playerRobbed}). */
+		/** (0.7.132) one of its dead robbed ({@link Looters#playerRobbed}). */
 		ROBBING(Weight.MEDIUM, "robbing");
 
 		final Weight weight;

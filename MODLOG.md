@@ -2213,3 +2213,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
   rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
   away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
+- **0.15.41, the pack's dead cleared and robbed:** ships Jaymo's Kingdoms 0.7.132 (bearers, graves, mourning, looters,
+  judgement for a looter carried to a guard) and Jaymo's Kitchen 0.5.9 (corpses can be robbed; `libs/`).

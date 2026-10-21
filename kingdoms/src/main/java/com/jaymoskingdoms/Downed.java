@@ -146,7 +146,7 @@ public final class Downed {
 			return true;
 		}
 		if (Looters.is(entity)) {
-			// (0.7.131) a looter goes down too, to be carried to a guard for judgement
+			// (0.7.132) a looter goes down too, to be carried to a guard for judgement
 			return true;
 		}
 		if (entity instanceof Folk folk && !Orcs.isOrc(folk) && entity.level() instanceof ServerLevel level) {
@@ -216,7 +216,7 @@ public final class Downed {
 	 * fighting, asleep or tending another) walks over.
 	 */
 	private static void findHelper(ServerLevel level, Mob body) {
-		// (0.7.131) nobody tends a looter
+		// (0.7.132) nobody tends a looter
 		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || Looters.is(body)) {
 			return;
 		}

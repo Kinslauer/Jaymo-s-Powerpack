@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>A village without folk guards still sets its golems on a crook, as before.
  *
- * <p>(0.7.131) Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
+ * <p>(0.7.132) Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
  * jailed or executed, or freed!)". A downed looter ({@link Looters}) set down before a guard is handed over
  * ({@link #handOver}): got up and marched to the same audience. A looter is never exiled: that sentence is the cells
  * ({@link Sentence#JAIL}), where the guard walks him off to the seat and he's taken below. Whoever brought him in sees it
@@ -80,7 +80,7 @@ final class Arrests {
 
 	enum Sentence {
 		PARDON, FLOG, EXILE, EXECUTE,
-		/** (0.7.131) Locked in the cells (a looter's in place of exile). */
+		/** (0.7.132) Locked in the cells (a looter's in place of exile). */
 		JAIL;
 
 		String key() {
@@ -99,18 +99,18 @@ final class Arrests {
 		CHASE, BEAT, LEAD, AUDIENCE, PUNISH, EXILE
 	}
 
-	/** (0.7.131) A jailed looter is walked off to the cells this long at most (ticks). */
+	/** (0.7.132) A jailed looter is walked off to the cells this long at most (ticks). */
 	static final int JAIL_TICKS = 20 * 30;
 
 	private static final class Arrest {
-		/** A villager crook ({@link Crooks}), or (0.7.131) a looter handed over. */
+		/** A villager crook ({@link Crooks}), or (0.7.132) a looter handed over. */
 		final PathfinderMob crook;
 		final Folk guard;
 		final int faction;
 		final String crime;
-		/** (0.7.131) How notorious: a crook's own, a looter's by the bodies he robbed. */
+		/** (0.7.132) How notorious: a crook's own, a looter's by the bodies he robbed. */
 		int notoriety;
-		/** (0.7.131) The player who brought him in (handed over), or null. */
+		/** (0.7.132) The player who brought him in (handed over), or null. */
 		@Nullable UUID bringer;
 		Stage stage = Stage.CHASE;
 		long until, next;
@@ -176,7 +176,7 @@ final class Arrests {
 	}
 
 	/**
-	 * (0.7.131) A downed looter is set down before {@code guard}: the guard has him got up and marches him to the ruler for
+	 * (0.7.132) A downed looter is set down before {@code guard}: the guard has him got up and marches him to the ruler for
 	 * judgement. {@code bringer} brought him in.
 	 */
 	static void handOver(ServerLevel level, PathfinderMob looter, Folk guard, Faction f, String crime, int notoriety, ServerPlayer bringer) {
@@ -191,7 +191,7 @@ final class Arrests {
 		haul(level, a, level.getGameTime());
 	}
 
-	/** (0.7.131) {@code guard} is taking someone to judgement just now. */
+	/** (0.7.132) {@code guard} is taking someone to judgement just now. */
 	static boolean busy(Folk guard) {
 		return escorting(guard);
 	}
@@ -335,7 +335,7 @@ final class Arrests {
 		lead(a, now);
 	}
 
-	/** (0.7.131) The prisoner walks at the guard's back: a villager by its brain, a looter by his navigation. */
+	/** (0.7.132) The prisoner walks at the guard's back: a villager by its brain, a looter by his navigation. */
 	private static void follow(PathfinderMob crook, Folk guard) {
 		if (crook instanceof Villager v) {
 			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(guard, false), PRISONER_SPEED, 1);
@@ -381,7 +381,7 @@ final class Arrests {
 		int score = a.notoriety * PER_NOTORIETY + lean + random.nextInt(CHANCE_SPREAD + 1);
 		a.sentence = score >= EXECUTE_FROM ? Sentence.EXECUTE : score >= EXILE_FROM ? Sentence.EXILE : score >= FLOG_FROM ? Sentence.FLOG : Sentence.PARDON;
 		if (a.sentence == Sentence.EXILE && a.looter()) {
-			// (0.7.131) no realm lets a looter go to rob the next field: the cells
+			// (0.7.132) no realm lets a looter go to rob the next field: the cells
 			a.sentence = Sentence.JAIL;
 		}
 		LivingEntity judge = judge(level, f);

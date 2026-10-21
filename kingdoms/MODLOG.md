@@ -3837,7 +3837,7 @@ and stepping over those who are not. Very prideful ruler". `Purists`, plus a col
   `Villager.updateSpecialPrices`). **Good name:** kin win it at 150% and lose at 75%; outsiders the reverse.
 - Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
   harsh lean (+25) when he sentences an arrested crook.
-- **0.7.131, clearing the dead, graves, mourning, looters:** Andy: "i want someone to clear the battlefield of dead, or
+- **0.7.132, clearing the dead, graves, mourning, looters:** Andy: "i want someone to clear the battlefield of dead, or
   maybe come try to rob the corpses". With Jaymo's Kitchen's corpses (0.5.9): once it's quiet round a body in a
   settlement's land (no monsters, nobody fighting, no raid), a grown villager, a working folk or an idle guard carries it
   off (`Bearers`, numbers at its top). Its own dead (villagers, traders, its own folk) are buried in a graveyard it lays
@@ -3854,3 +3854,10 @@ and stepping over those who are not. Very prideful ruler". `Purists`, plus a col
   shames them into dropping it, a player who hits one at it gets +3. A player taking anything off a settlement's own
   dead in its land commits grave robbing (`Theft.Crime.ROBBING`, medium, once a body). Players' bodies are never
   touched; monsters stay the guards' and golems' (who now leave bodies being buried or robbed alone).
+  Judgement: Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
+  jailed or executed, or freed!)". Looters now go down instead of dying (nobody tends them). Carry one (sneak + use) and
+  set him down within 4 blocks of a free guard: the guard takes his sack, you're thanked (+8, and +6 from each other
+  settlement he robbed), and he's marched to the ruler like any crook (`Arrests.handOver`), charged with robbing the
+  dead, notoriety 1 + the bodies he robbed. The sentence: pardon (freed), a flogging, the cells (new `JAIL`, in place of
+  exile for a looter: walked off to the seat and taken below), or death. Within 48 blocks you see it; further off, the
+  next grown villager of that settlement you pass tells you how it went. One who slips his guard runs again.
