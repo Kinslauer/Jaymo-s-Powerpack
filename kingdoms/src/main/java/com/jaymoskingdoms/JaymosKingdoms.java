@@ -129,10 +129,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
-		// 0.7.124: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
+		// 0.7.125: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
-		// 0.7.124: the guards arrest crooks and march them to the ruler for judgment
+		// 0.7.125: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();

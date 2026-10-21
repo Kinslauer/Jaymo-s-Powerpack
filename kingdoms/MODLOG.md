@@ -3711,7 +3711,7 @@ right now it is held to the side of the player and is caught in the costume." `c
 - Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
 - Festivals: every realm fit to keep one holds a festival on the first day of each season.
 
-## 0.7.124: crooks among the villagers
+## 0.7.125: crooks among the villagers, and the guards arrest them
 Andy: "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing from the player, and upon
 prompts of good deals (8 cod 3 emeralds) they can scam you ... rep has an effect, the higher it is, the less likely to
 be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Theft`, `JaymosKingdoms`).
@@ -3734,4 +3734,14 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   who owes you, isn't murder (`Crooks.fairGame`); guards and golems stop beating a downed crook.
 - Reputation: every chance against a player is scaled by `1 - rep/750`, between 0.1 and 1.5 (a friend of the town is
   rarely robbed; a disliked stranger is robbed more).
-- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.31.
+- Arrests (`Arrests`). Andy: "can you make guards attempt to arrest before killing criminals? either give them a visible
+  audience with the king or make a jail cell building ... and executions." Took the audience. Where a realm keeps folk
+  guards, a seen crook isn't chased by every guard and golem: the nearest free guard runs them down and calls a halt.
+  They come quietly (55%, -6% per notoriety, at least 15%) or resist, and are beaten down and got up again
+  (`jaymospowers_revive`). The guard marches them to the ruler (or the seat with no ruler about) for an audience: he
+  names the crime, the ruler pronounces sentence aloud, players within 48 are told in chat, and it's carried out there.
+  Sentence score = notoriety x 10 + temper lean (tyrant +30, noble -20, warlord +15, paranoid +20, reveler -10) + 0-30:
+  under 20 a pardon, 20+ a flogging (3 blows, never below 2 hearts), 45+ exile (they walk 80 blocks out and are gone),
+  70+ execution (beheaded: `jaymoskitchen.missing.head`, then killed). `Arrests.SENTENCED` tells the bounty board.
+  A guard who's killed, downed or called away lets the crook bolt. Villages without folk guards still send golems.
+- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.32.

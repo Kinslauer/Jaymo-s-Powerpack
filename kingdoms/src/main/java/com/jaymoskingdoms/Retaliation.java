@@ -147,7 +147,7 @@ final class Retaliation {
 			return;
 		}
 		if (Crooks.fairGame(victim, player)) {
-			// (0.7.124) a known criminal, or the crook who robbed you: nobody takes their side, and it's no assault
+			// (0.7.125) a known criminal, or the crook who robbed you: nobody takes their side, and it's no assault
 			return;
 		}
 		Faction f = factionOf(level, victim);
