@@ -2285,6 +2285,37 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
   every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
   and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.
+- **0.15.51, Velox replaces Blur, and a new first-person band slam:** Andy asked whether Alien Evolution (KonaDolomite,
+  All Rights Reserved, Palladium 1.20.1) could improve the Xenoform, "primarily add XLR8 in place of Blur", and to use
+  its first-person slam. Nothing of it is copied: an original speedster and our own slam. Blur is now **Velox**
+  (`forms/Velox.java`; the id stays `blur`, so bands keep it): 80% faster, runs on water while sprinting
+  (`ChronoWaterRunMixin` asks `Velox.runsOnWater`); R held is a Speed Burst (+120% speed, whole-block steps, climbs
+  walls on contact, up to 6 s); G Rapid Punches (6 hits of 2 on what you aim at); V Cyclone (everything within 6 swept
+  round you and lifted); B Chain Strike as before; the Ultimate is Standstill (6 s: everything living within 24 nearly
+  frozen, projectiles hang at 5% speed and fly on after, you get Speed II; again every 30 s). Corrupted, a burst that
+  ends runs on until a wall or a creature. A new body and skin: crest, a visor that drops over the eyes at speed, snout,
+  ball feet, longer tail, dark blue with white chevrons. Every Xenoform area or aimed move now spares your own pets and
+  scoreboard teammates (`XenoForm.spared`). The first-person slam is rebuilt (`XenoformSlamView`): forearm up across
+  the view with the band face up, the dial pops as a glowing cap, the palm drops onto it, a dip, a view kick and a
+  green burst. Compile-checked against the 26.3 jars only; not yet run in game.
+- **Duplex, a duplicating alien from copper golems:** Andy asked for a "Ditto" Xeno using copper golems. Like Velox it
+  takes no borrowed name: **Duplex** (`forms/Duplex.java`, id `duplex`, scanned from a copper golem). 0.9x, 18 hp, fists
+  3. R Split: a double steps out (`XenoDouble`, 6 hp, fists 3, never saved; it pops when you stop being Duplex or leave),
+  up to 3; doubles go for what you hit and what hits you, and a loyal one's death costs you 2. G Rally (aimed target
+  within 16, or come back), V Switch (trade places with the aimed or farthest double), B Merge (doubles pop back into
+  you, 3 health each). Ultimate Copper Storm: fills to 3 doubles, visual-only lightning on each, 6 damage within 3 of a
+  double, doubles charged (Speed II, Strength, Glowing) for 20 s, up to 6 doubles meanwhile; again every 20 s.
+  Copper body with seams, rivets and verdigris, a swaying
+  lightning rod, pale cyan eyes (`XenoFormModels.Duplex`, `gen_xenoform.duplex`, `XenoDoubleRenderer`). A complete band
+  is now 9 aliens; anyone already ascended stays ascended. Compile-checked against the 26.3 jars; not yet run in game.
+- **Duplex's name counts, and corruption is just the wrong alien (same release):** Andy asked that the name change as you
+  split (Duplex, Triplex, Quadruplex) and that corruption be only "a different xeno" across the board, with no per-alien
+  method for now. Duplex is called by how many of you there are (`Duplex.title`: shown over the hotbar on each split,
+  merge or death, and on the HUD clock, which counts your doubles from their synced owner); rogue doubles are gone.
+  Every alien's corruption twist is removed (Bulwark, Pyre, Velox, Prism, Wisp, Gremlin, Knell, Wyrm), with their
+  `CORRUPT_*` constants, `Live.runaway`/`wingStall`, the chat line on changing and the `.corrupt` lang keys. A corrupted
+  band still gives the wrong alien on 1 slam in 4 and changes you on its own; `XenoForm.corrupt` is an empty per-tick
+  hook for later. Compile-checked against the 26.3 jars; not yet run in game.
 - **0.15.53, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
   first ability key no longer fires your power: R is the dragon's fire breath. Told by the mount's id
   (`jaymoskingdoms:*_dragon`), so Powers still loads without Kingdoms (`JaymosPowersClient.steeringDragon`).
