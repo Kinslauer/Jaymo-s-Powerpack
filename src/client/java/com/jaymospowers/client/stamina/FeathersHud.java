@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.15.0) The feathers row ({@link Feathers}), in vanilla's place for such things: right above the hunger bar (above
+ * (0.15.4) The feathers row ({@link Feathers}), in vanilla's place for such things: right above the hunger bar (above
  * the air bubbles when they show, above a mount's hearts when riding), ten icons draining from the left as hunger
  * does. Blue feathers, golden ones over them (a power's bonus), red strain once the row is empty, grey ones held back
  * by armour or heat at the left end, pale and shaking while exhausted; the empty slots flash for a moment when

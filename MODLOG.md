@@ -1853,7 +1853,178 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
   wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
   Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
-- **0.15.0, feathers and the dodge, in place of Combat Roll:** Andy asked for Feathers and Elenai Dodge 2 to replace
+- **0.14.5, Smoke's particles are geyser steam:** Andy: regular and ascended smoke should use "the geyser particle
+  effect" (potent sulfur over lava), "far thicker", the gas staying for both and corrupted smoke keeping its particles;
+  then "just use the particles and not their specific properties". New `jaymospowers:smoke_steam`
+  (`SmokeParticles.STEAM`, client `SmokeSteam`): vanilla's `geyser_poof` sprites, moving like smoke (keeps its
+  velocity, slows and rises a little), smoky grey and translucent. It replaces the campfire smoke of Smoke Jet, Vapour
+  Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb; Vapour Form's start throws a column of it
+  up. Corrupted (not ascended) users keep the old particles. See docs/smoke.md.
+- **0.15.1, Wounds phase 1 (core):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings, remove our
+  downed system for a universal one written like this https://modrinth.com/mod/first-aid-new". The first of five phases
+  (`docs/Wounds-Plan.md`); no debuffs and no downed state yet, and Kingdoms' `Downed` is untouched. Written without a
+  compiler: build it before anything else.
+  - **Body parts:** `core/wounds/BodyPlan` gives each living thing parts that share its max health: humanoid (head, body,
+    two arms, two legs, two feet), quadruped (head, body, front and hind legs), arthropod, flyer and simple (body only,
+    left to vanilla health). The plan comes from the new entity type tags `jaymospowers:body/humanoid`, `quadruped`,
+    `arthropod`, `flyer`, `simple`, else from the shape (taller than 1.3 times its width is a person). Bosses (`c:bosses`,
+    the Ender Dragon, the Wither) and armor stands keep plain health.
+  - **Health stays real:** the `jaymospowers:wounds` attachment (`Wounds.PARTS`, a fraction per part, synced to the creature
+    itself, saved, dropped when everything is whole, not kept through death) is only how vanilla health is spread.
+    Healing of any kind (regeneration, food, Kitchen's stomach) fills the most hurt part first; health lost without a
+    routed hit comes off the limbs first and never kills (`MIN_VITAL_UNROUTED` 0.05). Players are brought in line every
+    `PLAYER_RECONCILE_TICKS` (10).
+  - **Where hits land** (`HitRouting`): a player's swing on a person by the part their crosshair crosses (`LimbBoxes`, a
+    leg low down is the foot); other blows by the height, side and facing of the hit point (`HEAD_FROM` 0.75, `BODY_FROM`
+    0.4, `FOOT_BELOW` 0.12, `SIDE_SHARE` 0.25, `FRONT_SHARE` 0.2). Falls land on the feet (front and hind legs, legs,
+    wings), explosions spread over every part by share, drowning on the head, fire, magic and lightning on the body.
+    A part at zero spills the rest on (limb to body, foot to leg to body, body to head, head to body).
+  - **Death:** head or body at zero kills through a new `jaymospowers:wounds` damage type ("died of their wounds") dealt
+    like Dismember's decapitation, so Kingdoms' downing and other powers' death cancels still apply; if the death is
+    cancelled the vital part gets `MIN_VITAL_AFTER_SAVE` (0.1) back.
+  - **`/wounds show|part <part> <health> [target]|heal [target]`** (gamemasters), and a body silhouette bottom-right
+    (`client/wounds/WoundsHud`: parts coloured by fraction, white flash for 8 ticks on a loss, fades 3 s after all whole).
+- **0.15.1, Wounds phase 2 (downed, for everyone):** Andy (2026-10-19): "remove our downed system for a universal one".
+  Kingdoms' downed guards (its 0.7.73-0.7.93) move here as `core/wounds/Downed` (spec `docs/Wounds-Phase2.md`; numbers
+  at its top). Written without a compiler: build it before anything else.
+  - **Who goes down** instead of dying: players (not creative or spectator), villagers, anything Kingdoms marks with the
+    scoreboard tag `jaymospowers_downable` (its folk), and tamed animals (a tame `TamableAnimal`, a tamed horse, donkey,
+    llama or camel). Monsters, wild animals and bosses die; so does anything beheaded (or already headless), anything
+    killed by what ignores invulnerability (the void, `/kill`), and anyone with a totem in hand (the totem goes first).
+    Every other mod's death save (Darktide's shade, Xenoform, sparring, Kingdoms' Last Stand) runs before it.
+  - **Down:** `DOWNED_HEALTH` (6), head and body given a little back (`Wounds.settle`). The `jaymospowers:downed`
+    attachment (game time, crawler bit; saved, synced to all) and the tag `jaymospowers_downed`, which Kingdoms reads.
+    Mobs lose their AI (`DownedMobMixin`); half (`CRAWLER_CHANCE`) drag themselves from whoever felled them. Players
+    are held in a slow crawl (`Crawl`, `PLAYER_CRAWL_SLOW` -50%, Jump doesn't stand them up), drop whatever they
+    carry, and can't attack, use, build, break, pick anyone up or press a power key; their screen greys
+    (`client/wounds/DownedHud`).
+  - **While down:** fire, falls and mobs hurt out of what's left and can kill (that death counts; while down, Wounds
+    leaves the parts to follow the health). A player's blow is a wound instead, the `MAX_WOUNDS`th (10) kills. A mob
+    or tamed animal no player has hit gets up after `RECOVER_TICKS` (1 min) at `RECOVER_HEALTH` (30%); once a player
+    has hit it, it bleeds out `BLEED_OUT_TICKS` (2 min) after the last hit.
+  - **Players don't bleed out into a respawn** (Andy: "Lie until roused or give up"): after `BLEED_OUT_TICKS` they pass
+    out (`jaymospowers:downed_out`; they lie still, the screen darker, a slow heartbeat) until brought round, or they
+    hold sneak for `GIVE_UP_TICKS` (5 s; a bar over the hotbar) to give up: a death of their wounds credited to whoever
+    felled them. Logging out keeps it; respawning, `/kill` and the void clear it.
+  - **Bringing one round:** sneak + hold use on a downed one (Kingdoms' 0.7.93 revive, for everyone): a tap picks them
+    up (`Carry.pickUpDowned`; anyone downed is carryable, a carried one can't struggle free), held for `REVIVE_TICKS`
+    (3 s) it gets them up for the least filling food you carry; a tamed animal takes one of its own treats instead
+    (`Downed.TREATS`: a wolf bone or meat, a cat fish, a horse golden carrot, apple or hay...). Kingdoms' villagers still
+    tend the downed: they set the tag `jaymospowers_revive` and the body gets up on its next tick.
+  - **Zombies and skeletons fight on:** when Wounds' lethal rule fires on one because its body (not its head) gave out,
+    `Wounds.UNDEAD_FIGHT_ON` (60%) it fights on (tag `jaymospowers_fights_on`); then only its head kills it.
+  - **Pose** (`client/wounds/DownedPose`, from Kingdoms): people lie on their backs or crawl face down as before; any
+    other body (a wolf, a horse) lies on its side. Downed players keep `Crawl`'s pose.
+- **0.15.1, Wounds phase 3 (cripplings):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings".
+  Broken limbs, sever on overkill, and the old cripplings rerouted into Wounds (spec `docs/Wounds-Phase3.md`; numbers at
+  the top of `core/wounds/Breaks` and `Dismember`). Written without a compiler: build it before anything else.
+  - **Broken parts** (`core/wounds/Breaks`): a limb a routed hit takes to zero is broken (arm, leg), sprained (foot) or
+    grounded (wing): the `jaymospowers:wounds_broken` bitmask (a bit per `BodyPart`; saved, synced to all, not kept
+    through death) and the scoreboard tag `jaymoskitchen.broken.<part>` for Kitchen's corpses. Effects are transient
+    modifiers refreshed every `REFRESH_TICKS` (20), ids `jaymospowers:wounds_*`: an arm -30% attack damage, -25% attack
+    speed, -30% digging per arm, no shield or bow from its hand, `ARM_DROP_CHANCE` (25%) the hand drops what it held as
+    it breaks; both arms (or one broken and one gone): a player can't swing, dig, place or use anything, but food, drink,
+    potions and medicine (anything with a `FOOD` or `CONSUMABLE` component) still go down. A leg -30% speed, -40% jump,
+    no sprinting; a player's two legs: crawl only (`Crawl`, the key and Jump don't stand them up); a mob's every leg:
+    -70% speed, no jump. A sprained foot -10% speed each while at zero; a sprain is never capped and needs no setting:
+    it heals as any part does and clears above `BROKEN_CAP` (a hard fall doesn't send you to a priest). Wings: the flyer is pulled down and loses its flying speed. A severed
+    part takes Dismember's own effects instead, never both.
+  - **Healing:** an unset break (arm, leg, wing) never heals past `BROKEN_CAP` (25%) and a severed part not at all; the surplus goes to
+    other parts, and health nothing can hold is refused (vanilla health is held to the parts' total). A break is set by
+    a priest (Fractures' 2 emeralds), a respawn, a Hermit Bean, Verdant's healing, Chrono's Bloom or Wind's Zephyr's
+    Breath (`Wounds.mendAll`); then it heals normally and the break clears above the cap. No more knitting by itself
+    (phase 4 brings the splint). Breaks from a fall come set: they heal by themselves, the limp or crawl lasting only
+    until the leg is back above the cap. A set bone broken again comes unset. A severed leg's foot never heals either.
+    Known cost: healing that's refused (vanilla regeneration onto capped parts) still spends the food and saturation it
+    took. `/wounds break <part> [target]` and `/wounds mend [target]`.
+  - **Fractures folds in:** a blunt blow's break is `Wounds.breakPart` (the limb's health gone, marked broken). Its own
+    `broken_bones`, `bones_mending` and `bones_mended_by` attachments, limp and empty-hand are gone (the old saved limp
+    modifier is taken off on load); the head daze and the skeleton shatter stay. `Fractures.heal`, `startMend`, `broken`
+    and `breakBone` still work, delegating. The client's hanging arms and legs read Wounds' broken parts.
+  - **Sever on overkill** (`Dismember.severOnOverkill`, called by Wounds): a blade's blow on a limb already broken, or
+    one that takes the head past zero, for more than `SEVER_OVERKILL` (half) of that part, cuts it off at
+    `min(1, SEVER_BASE (0.6) * scale)`; the old chances are the scale (`RATE` times the blade's chance over a plain
+    blade's: a sword 0.3, Darktide's katana 1, skeletons three times). The flat random sever is gone; a killing blow is still tested, so heads and limbs still come off onto the corpse
+    (Fabric's after-damage event never sees a killing blow, so the blow and the parts before it are noted in a last
+    `ALLOW_DEATH` phase after Downed's, and tested in `AFTER_DEATH` once the death has gone through). A power's own cut
+    (`Dismember.cut`) lands its blow on the part it aimed at. A severed limb stays at zero and broken; regrowth sets it.
+    A headless zombie or skeleton now dies only when its body gives out.
+  - **Cripplings rerouted:** Darktide's leg strikes (G Crescent low, Ink Cross, Fang Barrage, any low Darktide hit) wound
+    the struck leg by `DarktideStatus.LEG_WOUND` (half of it) through `Wounds.hurtPart` instead of the 5 s crawl, so two
+    strikes break it; Pounce's three stabs count a broken leg as crippled. The timed crawl stays for bodies Wounds
+    doesn't part. The Great Ape's leg-crippling (a timed knock-down of a transformation) and trips and stuns stay as they were.
+- **0.15.1, Wounds phase 4 (medieval medicine):** bleeding, festering, pain and the medieval kit (spec
+  `docs/Wounds-Phase4.md`, track A; Kingdoms' clerics are track B). Numbers at the top of `core/wounds/Bleeding`,
+  `Treatment` and `Pain`. Written without a compiler: build it before anything else.
+  - **Bleeding** (`core/wounds/Bleeding`): a blade, a projectile or a zombie's claws dealing `BLEED_FROM` (2) or more to
+    a part opens a cut (`jaymospowers:wounds_bleeding`, a bit per part, synced to the target). Every `BLEED_TICKS` (4 s)
+    a cut drips and costs the part `BLEED_DAMAGE` (0.5; a stump `STUMP_BLEED` 1) as `jaymospowers:bleeding` damage, and
+    a cut closes by itself after `BLEED_STOP_TICKS` (30 s); a stump never does. A bleeding part heals no further than
+    `CUT_CAP` (half). Not while downed, not in creative, never the bloodless. Kingdoms' tending (tag
+    `jaymospowers_bandaged`) stops all bleeding and binds the worst part.
+  - **Festering:** a dirty cut (a rag, a zombie's claws) may fester (`FESTER_CHANCE` 5% each bleed tick): the part
+    can't heal past where it stood, a fever every `FEVER_TICKS` (Weakness, the body hurt, a sickly shimmer), and a limb
+    left festering `FESTER_LIMB_TICKS` (a day) rots off (a stump, bled shut). Strong spirits or honey (sneak + use,
+    looking down, or on another) clean it.
+  - **The kit** (creative tab Medicine, `core/wounds/MedicineItems`, icons by `tools/vanilla_style/medicine.py`):
+    linen bandage (stops a cut, heals 3 over 10 s), rag (stops it, heals 1.5, dirty), splint (a broken arm or leg is
+    usable and heals; `Breaks.splint`), needle and thread (8 uses: stitches a cut, stings 1, the part heals past half),
+    a red-hot blade (heat it on a lit campfire, fire or lava: seals even a stump, burns 2), smelling salts (4 uses: a
+    downed body up at once with 2 health, Speed then Nausea; a passed-out player 40% and the whole vial), jar of leeches
+    (1 health for long numbness), willow-bark tea (numb after 10 s, for 3 min), poppy syrup (numb 6 min, wakes the
+    downed; two at once knocks you out; addictive). Recipes in `recipe/medicine/`; poppy syrup needs Kitchen's strong
+    spirits.
+  - **Treatment** (`core/wounds/Treatment`): use on yourself or another opens the body screen
+    (`client/wounds/BodyScreen`: the silhouette, each part's state, greyed where the medicine can't help); pick a part
+    and hold still. Sneak + use treats the worst part while sneak is held. Moving, a hit, or the medicine leaving the
+    hand spoils it. Use on a downed body treats it before Downed's pick-up.
+  - **Pain** (`core/wounds/Pain`): numb (tea, leeches, poppy, or Kitchen drunk 4+) ignores the effects of breaks.
+    Poppy addiction rises 20 a dose, decays always; past 40 and 5 min without, withdrawal: Weakness, Nausea pulses,
+    the shakes (`client/wounds/MedicineHud`).
+  - **Downed:** a knocked-out body (`Downed.knockOut`) comes round on its own; `Downed.rouse` and `wake` for the salts
+    and the poppy.
+- **0.15.1, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
+  `docs/Wounds-Phase5.md`; track A the client feel, track B the rules, tuning, docs and JEI). Written without a
+  compiler: build it before anything else.
+  - **A limp** (`client/Dismembered`, `GAIT_*`): a broken leg drags or swings short, the good leg's steps shorten
+    and the body dips on the bad step, seen by everyone; a splinted leg limps half as much, a sprained foot half too.
+    Only on foot (not swimming, riding, crawling or downed), humanoid models only.
+  - **Pain on screen** (`client/wounds/PainHud`): head or body under 35% with the pain not dulled (`Pain.DULLED`, now
+    synced to its owner each second), the screen edges darken and slowly throb; any part losing health flashes the
+    edges red for 6 ticks, stronger for a bigger drop (none in the first second after joining); head or body under
+    15% on your feet, a heartbeat that quickens (18 down to 11 ticks) with a faint red pulse. Smelling salts bring a
+    sharp gasp (`MedicineHud`, `GASP_*`). None of it in creative or spectator.
+  - **Freerunning respects breaks** (`freerun/Freerun.canMove`, from PR #339): no freerunning move at all on a broken
+    leg out of a splint, or with both arms broken (or gone); one broken arm or a sprained foot rules out only the moves
+    that hang on the grip, the climb (cling) and the bar swing (`Freerun.canMove(player, kind)`, `gripMove`). Wounds'
+    `Breaks.legsUsable`, `armsUsable` and `gripUsable` read the synced bitmasks, so the client (`FreerunClient` doesn't
+    try those moves, and lets go of a climb or a bar when an arm breaks or a foot sprains) and the server (refuses and
+    ends them) agree. A splinted leg freeruns; a splinted arm still counts as broken for the grip.
+  - **`jaymospowers_crippled`:** anything with a broken leg (any of its legs, splinted or not, severed included) carries
+    this scoreboard tag, put on and taken off with `Breaks`' refresh (every second; `Breaks.CRIPPLED_TAG`). For a later
+    Kingdoms patch: its hidden blade's 10x on a Crippled foe (Kingdoms 0.7.101) could read the tag too. Kingdoms is
+    untouched.
+  - **Tuning:** `Bleeding.FEVER_TICKS` 400 → 1200 (a fever every minute, was every 20 s): a festering part can't heal,
+    so a festering chest bled a player down from one dirty cut within a minute or two; the plan's fever is "slow
+    damage". Everything else in phases 1-4 is unchanged; the open questions went to Andy (stump bleed, festering
+    chance, head cuts, the sever chance on a broken limb).
+  - **JEI:** a Medicine page (`client/jei/MedicineJei`, a second `jei_mod_plugin` on `SimpleCategory`): each kit item,
+    honey, Kitchen's strong spirits (when loaded) and a red-hot blade, with what it treats and how it's used, the
+    numbers read off `Treatment` and `Pain`. Lang `jei.jaymospowers.medicine.*` in `lang/parts/wounds.json`.
+  - **Docs:** a Wounds section in `docs/Abilities.md` (body parts, downed, breaks, bleeding and festering, every
+    medicine with its recipe, addiction, Kingdoms' clerics and taverns, `/wounds`), and a Wounds entry in
+    `docs/HANDOFF.md` (the event order learned, the shared scoreboard tags). Phase 5 marked built in
+    `docs/Wounds-Plan.md`.
+- **0.15.2, the rapier (with Kingdoms 0.7.105's shields, clash and tiered gear):** Andy picked all five of Just-In
+  COMBAT's ideas (Forge 1.20.1, All Rights Reserved: ideas only, our own code and art). The Armory gets a rapier in
+  every tier (`Armory.WEAPONS`, `armory/RapierItem`; sprites, models, Better Combat's `rapier` preset, the wooden recipe
+  and the netherite smithing from `tools/gen_rapier.py`, which runs after `armory_assets.py`). A little lighter than a
+  sword and quicker (+2 damage over the material, -2.0 speed). Right-click lunges: 1.1 blocks a tick forward, and the
+  first foe in front of the point within 7 ticks is run through for 1.6x your attack damage (1.5 s cooldown, some
+  hunger, a point of durability). Mobs holding one lunge at their target from 2.8 to 6.5 blocks off (3.5 s between).
+  Forged like the rest: a Rapier Blade (1 ingot) with a crossguard and a rod at the Tool Station
+  (`tinkering/WeaponParts`, sprites cut by `tools/weapon_parts_assets.py`). Numbers at the top of `RapierItem`.
+- **0.15.4, feathers and the dodge, in place of Combat Roll:** Andy asked for Feathers and Elenai Dodge 2 to replace
   our dodge and its HUD. Both are Forge only (to 1.20.x); the maintained fork, Feathers of Fatigue, is NeoForge 26.3 and
   GPL-3; Elenai Dodge 2 is CC BY-NC-SA. Powers is MIT, so it's our own, from their ideas only (`docs/dodge.md`, the
   spec and sources). `stamina/Feathers`: a row of 20 above the hunger bar, armour holds back 0.35 a point, regrowth 1

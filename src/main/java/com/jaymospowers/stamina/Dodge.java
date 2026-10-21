@@ -2,6 +2,7 @@ package com.jaymospowers.stamina;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Ledge;
+import com.jaymospowers.core.wounds.Breaks;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.15.0) The dodge, replacing Combat Roll: our own after Elenai Dodge 2's ideas (see {@code docs/dodge.md}). Left
+ * (0.15.4) The dodge, replacing Combat Roll: our own after Elenai Dodge 2's ideas (see {@code docs/dodge.md}). Left
  * Alt, or Sneak tapped twice, hops you {@link #SPEED} along the way you're holding (back if you hold nothing), on the
  * ground only, for {@link #COST} of your {@link Feathers}. For the first {@link #EVADE_TICKS} of it a melee blow or a
  * projectile misses you. Hunger: {@link #EXHAUSTION}.
@@ -90,9 +91,12 @@ public final class Dodge {
 		LISTENERS.add(listener);
 	}
 
-	/** Whether {@code player} may dodge now (both sides): on their own feet on the ground, in none of the powers' own moves. */
+	/**
+	 * Whether {@code player} may dodge now (both sides): on their own feet on the ground, in none of the powers' own
+	 * moves, and not on a broken leg out of a splint (Wounds' {@link Breaks#legsUsable}, synced).
+	 */
 	public static boolean canDodge(Player player) {
-		return player.onGround() && Ledge.canHang(player) && !Ledge.onLedge(player) && !player.isUsingItem();
+		return player.onGround() && Ledge.canHang(player) && !Ledge.onLedge(player) && !player.isUsingItem() && Breaks.legsUsable(player);
 	}
 
 	private static void start(ServerPlayer player, Start start) {
@@ -100,7 +104,7 @@ public final class Dodge {
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
 		// the client checked the ground as it hopped; by now the server may already have it in the air
-		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player))) {
+		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK || !(Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player))) {
 			return;
 		}
 		if (!Feathers.spend(player, COST)) {

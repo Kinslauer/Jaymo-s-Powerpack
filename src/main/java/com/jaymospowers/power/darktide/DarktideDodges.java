@@ -11,7 +11,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.15.0) Darktide and the dodge ({@link Dodge}, the pack's own, in place of Combat Roll): Darktide gets
+ * (0.15.4) Darktide and the dodge ({@link Dodge}, the pack's own, in place of Combat Roll): Darktide gets
  * {@link #BONUS} golden {@link Feathers} on top of the row, and a dodge that slips an attack is an evasion
  * (+{@link #EVASION_FLOW} Flow and an ink trail).
  * <ul>

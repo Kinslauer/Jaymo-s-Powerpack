@@ -104,7 +104,8 @@ public final class FreerunClient {
 			// no Sure Footing: a narrow top is walked, not run
 			player.setSprinting(false);
 		}
-		boolean free = !player.isSpectator() && Freerun.canMove(player) && !LedgeClient.active()
+		// (0.14.5) a broken arm or a sprained foot mid-climb or mid-hang lets go (Wounds)
+		boolean free = !player.isSpectator() && Freerun.canMove(player, kind) && !LedgeClient.active()
 			&& !com.jaymospowers.client.power.web.WebPowerClient.parkourBusy();
 		if (!free) {
 			if (active()) {
@@ -140,13 +141,14 @@ public final class FreerunClient {
 			return;
 		}
 		double vy = player.getDeltaMovement().y;
-		if (input.jump() && vy > -0.4 && Freerun.perk(player, Freerun.Perk.BAR_SWING) >= 1 && tryBar(player)) {
+		if (input.jump() && vy > -0.4 && Freerun.perk(player, Freerun.Perk.BAR_SWING) >= 1 && Freerun.canMove(player, Freerun.BAR) && tryBar(player)) {
 			return;
 		}
 		if (input.forward() && !input.shift() && player.isSprinting() && Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1 && tryRun(player)) {
 			return;
 		}
-		if (input.forward() && input.jump() && !input.shift() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && tryCling(player)) {
+		if (input.forward() && input.jump() && !input.shift() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && Freerun.canMove(player, Freerun.CLING)
+			&& tryCling(player)) {
 			return;
 		}
 		if (jumpPressed && airTicks > 2 && Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {

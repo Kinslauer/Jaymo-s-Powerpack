@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.0) The dodge on this side (see {@link Dodge}): the Dodge key (Left Alt), or Sneak tapped twice within
+ * (0.15.4) The dodge on this side (see {@link Dodge}): the Dodge key (Left Alt), or Sneak tapped twice within
  * {@link #DOUBLE_TAP_TICKS} (the gesture Combat Roll had here, kept). R and Sneak + R belong to the powers. The hop
  * goes the way the movement keys point (back with none held), at once, and the server is told.
  * <p>Carried over from the Sneak gesture: no dodge from Sneak while clinging to a wall or hanging from a bar (web

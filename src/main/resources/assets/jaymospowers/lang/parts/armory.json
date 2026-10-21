@@ -129,5 +129,12 @@
   "message.jaymospowers.bomb_glider.keys": "W/S speed, A/D turn, Jump climb, Sneak dive (or step off when landed), Sneak+Jump bail out",
   "message.jaymospowers.bomb_glider.out_of_fuel": "The burner sputters out: gliding down",
   "message.jaymospowers.bomb_glider.empty": "The dynamite rack is empty",
-  "message.jaymospowers.bomb_glider.full": "No room for that in the glider"
+  "message.jaymospowers.bomb_glider.full": "No room for that in the glider",
+  "item.jaymospowers.rapier.lunge": "Right-click: lunge and run through the first foe ahead",
+  "item.jaymospowers.wooden_rapier": "Wooden Rapier",
+  "item.jaymospowers.stone_rapier": "Stone Rapier",
+  "item.jaymospowers.iron_rapier": "Iron Rapier",
+  "item.jaymospowers.golden_rapier": "Golden Rapier",
+  "item.jaymospowers.diamond_rapier": "Diamond Rapier",
+  "item.jaymospowers.netherite_rapier": "Netherite Rapier"
 }

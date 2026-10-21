@@ -1,4 +1,4 @@
-# Feathers and the dodge (Powers 0.15.0)
+# Feathers and the dodge (Powers 0.15.4)
 
 Andy (2026-10-21): Feathers and Elenai Dodge 2 "can replace our dodge system and HUD elements". This page is the
 clean-room spec the remake was built from (REA-Prompts' clone checklist: behaviour, not code; evidence for each

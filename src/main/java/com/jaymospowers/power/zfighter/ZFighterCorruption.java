@@ -79,7 +79,7 @@ public final class ZFighterCorruption {
 					entity.getZ(), 6, 0.25, 0.3, 0.25, 0.0);
 			}
 		});
-		// (0.15.0) the pack's own dodge: golden feathers in Corrupted mode, and every dodge a blink
+		// (0.15.4) the pack's own dodge: golden feathers in Corrupted mode, and every dodge a blink
 		com.jaymospowers.stamina.Feathers.addBonus(player -> mode(player) ? DODGE_BONUS : 0);
 		com.jaymospowers.stamina.Dodge.onDodge((player, direction) -> {
 			if (mode(player)) {
