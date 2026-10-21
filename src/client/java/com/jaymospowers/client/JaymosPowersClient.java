@@ -220,7 +220,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			// (0.13.7) on a bomb glider, ability 1 drops its dynamite instead (BombGliderClient)
 			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown()
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
-				// (0.15.50) steering a Kingdoms dragon, ability 1's key (R) is its breath
+				// (0.15.51) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
