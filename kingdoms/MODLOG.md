@@ -3894,3 +3894,27 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
 - Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
   high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
   out the same way.
+## 0.7.135: Notus, the first wind dragon
+- Andy: "Names : Boreas, Zephyrus, Notus, Eurus, and Aeolus." The plan for all five is `docs/Dragons-Plan.md` (our own
+  design; nothing taken from Berk's Dragon Academy). Notus, the south wind, comes first, end to end.
+- **Notus** (`jaymoskingdoms:notus_dragon`, `dragons/NotusDragon`, on the horse base like the war elephant): a heavy
+  fire dragon, 220 health, tough hide, tail club and back spikes. A miniboss: a boss bar while wild (`BossBars`), in
+  `c:bosses`. A hand-written model with procedural animation (flapping, gliding, hovering to breathe, landing, walking,
+  perched, crashed, sitting); art painted by `tools/gen_dragons.py`.
+- Andy: "can you slightly differentiate every dragon visually like the heritages?" Every dragon rolls a look at birth
+  and keeps it (`DragonLook`, synced): one of four hide shades, long, short or twin horns, now and then a lost back
+  spike, and one of four glowing marking patterns (an emissive layer, with glowing eyes). Shared by the dragons to come.
+- **Wild:** a rare encounter in the badlands, and now and then in the basalt deltas. It circles high, perches on the
+  tallest spot near, and goes for players within 22 blocks: swoops, hovers and breathes fire, or lands to bite and
+  tail-sweep. Andy: "fire burns blocks": a wild one's fire follows mobGriefing; a ridden one's always burns.
+- **Taming:** worn below a third of its health it crashes and stays grounded a while. Crouch near it with empty hands
+  and a trust meter (yours only, on your HUD) fills; cooked mutton fills it faster, Emberborn twice as fast. A drawn
+  weapon, sprinting at it or hurting it drains it; empty, it bolts. Its trust is its own, not Equestrian's Bond.
+  Only kills count as beating a dragon (for Eurus and Aeolus, later).
+- **Tamed:** follows, sits (sneak-use, empty hands), defends you. Saddle in the horse slot. Flight with the free-rein
+  camera: Space takes off and climbs, W flies where you look, S brakes to a hover, Shift dives (and lands; on the ground
+  it dismounts). Stamina: hard flight and fire drain it, meat refills it, exhausted it glides down. R breathes fire
+  where you look (the same key as Powers' first ability: rebind one). Andy: "you can have a piggyback rider": a second
+  player sits behind the owner.
+- Spawn egg; ops: `/kingdom dragon` summons a wild one, `/kingdom dragon tame` a tamed one.
+- Not yet seen in game: written without a compiler, so the first build may need fixes.
