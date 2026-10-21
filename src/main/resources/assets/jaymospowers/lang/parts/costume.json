@@ -54,6 +54,8 @@
   "screen.jaymospowers.costume.wearing": "Wearing: %s",
   "screen.jaymospowers.costume.wearing_none": "Wearing no costume",
   "costume.jaymospowers.identity.unnamed": "Masked Stranger",
+  "costume.jaymospowers.identity.bandit": "Bandit",
+  "costume.jaymospowers.identity.pirate": "Pirate",
   "costume.jaymospowers.cut.webbed": "Webbed Suit",
   "costume.jaymospowers.cut.windswept": "Windswept",
   "costume.jaymospowers.cut.dense": "Dense Plate",

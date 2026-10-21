@@ -455,6 +455,17 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.inherit(player);
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// out of the air (Ki flight also ends by WindFlight.canFly) and out of any combo string
+		Live live = LIVE.get(player.getUUID());
+		if (live != null && live.flying) {
+			endFlight(player, live);
+		}
+		ZFighterCombo.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		Live live = LIVE.remove(player.getUUID());

@@ -117,6 +117,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
 		Theft.register();
+		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
@@ -303,6 +304,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
+		// 0.7.125: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
+		Bandits.register();
+		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
+		Bounties.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

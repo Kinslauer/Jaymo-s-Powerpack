@@ -15,6 +15,7 @@
 		"DismemberMobMixin",
 		"ExplosionLogMixin",
 		"DownedMobMixin",
+		"DownedHealMixin",
 		"FistGuardInventoryMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",

@@ -24,7 +24,7 @@ public final class Uncraftable {
 	 * Station from their heads instead ({@link WeaponParts}); the musket bayonet stays a musket and a knife put together.
 	 */
 	static final Set<String> FORGED = forged();
-	/** (0.15.22) Andy: "All tools need crafting routes through jaymos": other mods' tools forged from heads instead. */
+	/** (0.15.34) Andy: "All tools need crafting routes through jaymos": other mods' tools forged from heads instead. */
 	static final Set<String> FORGED_TOOLS = Set.of("pantryforblockheads:knife");
 
 	private static Set<String> forged() {

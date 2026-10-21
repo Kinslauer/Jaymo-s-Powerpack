@@ -20,6 +20,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
@@ -33,6 +34,9 @@ import org.joml.Vector3f;
  * turning and bobbing, overlapping their neighbours so a cloud reads as one mass, lit by the world's light (dark at
  * night, glowing by a torch), pale grey or sooty black by what made it and what it passed through. Between updates each block's thickness eases from the last value to the new one.
  * Your own smoke is drawn faint (you see through it). With your head in someone else's smoke the screen greys out.
+ * <p>(0.14.0) Freezing fog ({@link SmokeNet.Field#FROZEN}, Cryokinesis' cold on smoke) hangs still (no bobbing or
+ * turning), pale blue, and glitters: each puff catches the light now and then (drawn bright), and a few snowflakes drift
+ * down out of it. Your head in it tints the view frost-blue instead of grey.
  */
 public final class SmokeFieldClient {
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/smoke/puff.png");
@@ -50,6 +54,13 @@ public final class SmokeFieldClient {
 	static final int VIEW_GREY = 0x8E9094;
 	static final float VIEW_FULL = 1.6F;
 	static final float VIEW_MAX_ALPHA = 0.93F;
+	/** (0.14.0) Freezing fog: the view's frost-blue, how fast a puff's glint comes round, the glint drawn at full light, and snowflakes a tick. */
+	static final int VIEW_FROST = 0xC2D8EA;
+	static final float GLINT_SPEED = 0.23F;
+	static final float GLINT_BRIGHT = 0.82F;
+	static final int FULL_BRIGHT = 0xF000F0;
+	static final int FLAKES = 3;
+	static final double FLAKE_RANGE = 24.0;
 
 	private static Long2FloatOpenHashMap before = new Long2FloatOpenHashMap();
 	private static Long2FloatOpenHashMap now = new Long2FloatOpenHashMap();
@@ -58,6 +69,9 @@ public final class SmokeFieldClient {
 	private static Long2FloatOpenHashMap soot = new Long2FloatOpenHashMap();
 	/** Blocks whose smoke is smog (a corrupted Smoke user's): drawn yellow-brown. */
 	private static LongOpenHashSet smog = new LongOpenHashSet();
+	/** (0.14.0) Blocks whose smoke is freezing fog, and the same as an array (for picking snowflakes at random). */
+	private static LongOpenHashSet frozen = new LongOpenHashSet();
+	private static long[] frozenKeys = new long[0];
 	private static int sinceUpdate;
 	private static int age;
 
@@ -74,6 +88,7 @@ public final class SmokeFieldClient {
 			if (!minecraft.isPaused()) {
 				sinceUpdate++;
 				age++;
+				flakes(minecraft);
 			}
 		});
 		LevelRenderEvents.COLLECT_SUBMITS.register(SmokeFieldClient::render);
@@ -86,6 +101,8 @@ public final class SmokeFieldClient {
 		yours = new LongOpenHashSet();
 		soot = new Long2FloatOpenHashMap();
 		smog = new LongOpenHashSet();
+		frozen = new LongOpenHashSet();
+		frozenKeys = new long[0];
 	}
 
 	private static void receive(SmokeNet.Field field) {
@@ -94,6 +111,7 @@ public final class SmokeFieldClient {
 		LongOpenHashSet mine = new LongOpenHashSet();
 		Long2FloatOpenHashMap soots = new Long2FloatOpenHashMap();
 		LongOpenHashSet smogs = new LongOpenHashSet();
+		LongOpenHashSet frosts = new LongOpenHashSet();
 		int ox = BlockPos.getX(field.origin());
 		int oy = BlockPos.getY(field.origin());
 		int oz = BlockPos.getZ(field.origin());
@@ -107,12 +125,17 @@ public final class SmokeFieldClient {
 			if ((cells[i + 5] & SmokeNet.Field.SMOG) != 0) {
 				smogs.add(key);
 			}
+			if ((cells[i + 5] & SmokeNet.Field.FROZEN) != 0) {
+				frosts.add(key);
+			}
 		}
 		before = now;
 		now = next;
 		yours = mine;
 		soot = soots;
 		smog = smogs;
+		frozen = frosts;
+		frozenKeys = frosts.toLongArray();
 		sinceUpdate = 0;
 	}
 
@@ -138,7 +161,7 @@ public final class SmokeFieldClient {
 			return;
 		}
 		float alpha = Math.min(VIEW_MAX_ALPHA, d / VIEW_FULL * VIEW_MAX_ALPHA);
-		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (int)(alpha * 255.0F) << 24 | VIEW_GREY);
+		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (int)(alpha * 255.0F) << 24 | (frozen.contains(key) ? VIEW_FROST : VIEW_GREY));
 	}
 
 	// ---------------------------------------------------------------- the smoke
@@ -181,13 +204,16 @@ public final class SmokeFieldClient {
 				}
 				int light = LightCoordsUtil.getLightCoords(minecraft.level, cursor.set(x, y, z));
 				float own = yours.contains(key) ? ownAlpha : 1.0F;
+				// freezing fog hangs still: its puffs keep the pose they froze in
+				boolean ice = frozen.contains(key);
+				float still = ice ? 0.0F : time;
 				int n = d >= 1.8F ? 3 : d >= 0.6F ? 2 : 1;
 				for (int i = 0; i < n; i++) {
 					long h = mix(key * 31L + i);
 					float phase = (h & 0xFFFF) / 65535.0F * Mth.TWO_PI;
-					float px = x + 0.5F + ((h >>> 16 & 0xFF) / 255.0F - 0.5F) * 0.7F + 0.12F * Mth.sin(time * 0.021F + phase);
-					float py = y + 0.5F + ((h >>> 24 & 0xFF) / 255.0F - 0.5F) * 0.6F + 0.15F * Mth.sin(time * 0.017F + phase * 1.7F);
-					float pz = z + 0.5F + ((h >>> 32 & 0xFF) / 255.0F - 0.5F) * 0.7F + 0.12F * Mth.cos(time * 0.019F + phase);
+					float px = x + 0.5F + ((h >>> 16 & 0xFF) / 255.0F - 0.5F) * 0.7F + 0.12F * Mth.sin(still * 0.021F + phase);
+					float py = y + 0.5F + ((h >>> 24 & 0xFF) / 255.0F - 0.5F) * 0.6F + 0.15F * Mth.sin(still * 0.017F + phase * 1.7F);
+					float pz = z + 0.5F + ((h >>> 32 & 0xFF) / 255.0F - 0.5F) * 0.7F + 0.12F * Mth.cos(still * 0.019F + phase);
 					double dx = px - camera.x;
 					double dy = py - camera.y;
 					double dz = pz - camera.z;
@@ -203,13 +229,20 @@ public final class SmokeFieldClient {
 					puffs[o] = (float)dx;
 					puffs[o + 1] = (float)dy;
 					puffs[o + 2] = (float)dz;
-					puffs[o + 3] = 0.7F + 0.32F * Math.min(d, 2.5F) + 0.06F * Mth.sin(time * 0.03F + phase);
-					puffs[o + 4] = phase + time * 0.004F * ((h & 0x10000) == 0 ? 1.0F : -1.0F);
+					puffs[o + 3] = 0.7F + 0.32F * Math.min(d, 2.5F) + 0.06F * Mth.sin(still * 0.03F + phase);
+					puffs[o + 4] = phase + still * 0.004F * ((h & 0x10000) == 0 ? 1.0F : -1.0F);
 					puffs[o + 5] = alpha;
 					puffs[o + 6] = h >>> 40 & 3;
-					// the shade; smog is flagged by adding SMOG_FLAG to it
-					puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F * 0.15F + 0.85F * (1.0F - soot.get(key)) + (smog.contains(key) ? SMOG_FLAG : 0.0F);
-					lights[count - 1] = light;
+					// the shade; smog is flagged by adding SMOG_FLAG to it, freezing fog by adding FROST_FLAG to its glint (0-1)
+					if (ice) {
+						float glint = Math.max(0.0F, Mth.sin(time * GLINT_SPEED + phase * 5.0F + (h >>> 44 & 0xFF) * 0.1F));
+						glint = glint * glint * glint;
+						puffs[o + 7] = FROST_FLAG + glint;
+						lights[count - 1] = glint > GLINT_BRIGHT ? FULL_BRIGHT : light;
+					} else {
+						puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F * 0.15F + 0.85F * (1.0F - soot.get(key)) + (smog.contains(key) ? SMOG_FLAG : 0.0F);
+						lights[count - 1] = light;
+					}
 				}
 			}
 		}
@@ -235,11 +268,25 @@ public final class SmokeFieldClient {
 	private static final int PUFF = 8;
 	/** Added to a puff's shade to mark it as smog. */
 	private static final float SMOG_FLAG = 2.0F;
+	/** (0.14.0) Added to a frozen puff's glint to mark it as freezing fog. */
+	private static final float FROST_FLAG = 4.0F;
 
 	private static void puff(VertexConsumer buffer, PoseStack.Pose pose, Quaternionf turn, Vector3f corner, float x, float y, float z, float half,
 			float alpha, int light, int cell, float shade) {
 		float u0 = (cell & 1) * 0.5F;
 		float v0 = (cell >> 1) * 0.5F;
+		if (shade >= FROST_FLAG) {
+			// freezing fog: pale ice-blue, going white as it glints
+			float glint = Math.min(1.0F, shade - FROST_FLAG);
+			int fr = (int)(176 + 79 * glint);
+			int fg = (int)(212 + 43 * glint);
+			int frost = (int)(Math.min(1.0F, alpha * (1.0F + 0.6F * glint)) * 255.0F) << 24 | fr << 16 | fg << 8 | 255;
+			vertex(buffer, pose, turn, corner, x, y, z, -half, -half, frost, u0, v0 + 0.5F, light);
+			vertex(buffer, pose, turn, corner, x, y, z, half, -half, frost, u0 + 0.5F, v0 + 0.5F, light);
+			vertex(buffer, pose, turn, corner, x, y, z, half, half, frost, u0 + 0.5F, v0, light);
+			vertex(buffer, pose, turn, corner, x, y, z, -half, half, frost, u0, v0, light);
+			return;
+		}
 		boolean smoggy = shade >= SMOG_FLAG;
 		int grey = (int)(40 + 196 * (smoggy ? shade - SMOG_FLAG : shade));
 		// smog is a sickly yellow-brown; plain smoke a faintly blue grey
@@ -258,6 +305,25 @@ public final class SmokeFieldClient {
 		turn.transform(corner.set(cx, cy, 0.0F));
 		buffer.addVertex(pose, x + corner.x, y + corner.y, z + corner.z).setColor(color).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY)
 			.setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
+	}
+
+	/** (0.14.0) A few snowflakes drift down out of freezing fog near the camera. */
+	private static void flakes(Minecraft minecraft) {
+		if (frozenKeys.length == 0 || minecraft.level == null || minecraft.player == null) {
+			return;
+		}
+		Vec3 camera = minecraft.player.getEyePosition();
+		net.minecraft.util.RandomSource random = minecraft.level.getRandom();
+		for (int i = 0; i < FLAKES; i++) {
+			long key = frozenKeys[random.nextInt(frozenKeys.length)];
+			double x = BlockPos.getX(key) + random.nextDouble();
+			double y = BlockPos.getY(key) + random.nextDouble();
+			double z = BlockPos.getZ(key) + random.nextDouble();
+			if (Math.abs(x - camera.x) > FLAKE_RANGE || Math.abs(y - camera.y) > FLAKE_RANGE || Math.abs(z - camera.z) > FLAKE_RANGE) {
+				continue;
+			}
+			minecraft.level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
+		}
 	}
 
 	/** A quick 64-bit mix, for each puff's own offsets. */
