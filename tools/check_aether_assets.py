@@ -76,6 +76,8 @@ for sub in ("blockstates", "items", "models"):
             check_ref("tex" if k == "tex" else "model", v, os.path.relpath(p, A))
 # 4. recipes reference real ids
 known = set(ids) | set(re.findall(r'item\("([a-z_]+)"', isrc)) | {"ambrosium_shard","zanite_gemstone","golden_amber","blue_berry","white_apple"}
+# other tracks' Aether blocks and items (AetherFlora, mobs...) count as known when they have an item definition
+known |= {f[:-5] for f in os.listdir(os.path.join(A, "items"))} | {f[:-5] for f in os.listdir(os.path.join(A, "blockstates"))}
 for p in glob.glob(os.path.join(D, "recipe/aether/*.json")):
     j = json.load(open(p, encoding="utf-8"))
     def walk(o):

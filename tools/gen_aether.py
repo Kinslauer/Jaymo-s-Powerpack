@@ -664,7 +664,7 @@ NAMES = {
     "white_flower": "White Flower", "purple_flower": "Purple Flower", "ambrosium_torch": "Ambrosium Torch",
 }
 ITEM_NAMES = {"ambrosium_shard": "Ambrosium Shard", "zanite_gemstone": "Zanite Gemstone", "golden_amber": "Golden Amber",
-              "blue_berry": "Blue Berry", "white_apple": "White Apple"}
+              "blue_berry": "Blueberry", "white_apple": "White Apple"}
 
 
 def tex(name, kind="block"):
