@@ -3454,7 +3454,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
   mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
   mood change. Numbers at the top of `EmberHugs`.
-- **0.7.103, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+- **0.7.104, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
   barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
   (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
   taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon

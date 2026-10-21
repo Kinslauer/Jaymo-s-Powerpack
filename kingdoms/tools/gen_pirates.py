@@ -3,7 +3,7 @@ or a beard, a red or black bandana, a striped shirt, tarred breeches, bare feet)
 and hands, a leather jerkin, a powder horn's strap), two powder monkeys (boys: no beard, a ragged shirt, sooty cheeks),
 the pirate captain (a black tricorn with gold edging, a great black beard, an eyepatch, a long red coat with gold
 buttons), the shipwright (a flat cap, a leather apron, tools at the belt) and the sea captain (a blue coat with gold
-epaulettes and buttons, white breeches, a bicorne). (0.7.103) Two bombardiers: soot-streaked faces with singed brows,
+epaulettes and buttons, white breeches, a bicorne). (0.7.104) Two bombardiers: soot-streaked faces with singed brows,
 a bandana, a striped shirt with its sleeves rolled, and a leather bandolier across the chest with red sticks of dynamite in
 its loops (and more at the belt). Run from the kingdoms project root: python -I tools/gen_pirates.py"""
 from PIL import Image
