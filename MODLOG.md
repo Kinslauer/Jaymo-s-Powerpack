@@ -2213,3 +2213,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
   rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
   away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
+- **0.15.40, smoother bodies (Kitchen 0.5.9, Kingdoms 0.7.131):** Andy saw the animation preview and said "do all this,
+  add a better crawling and downed animation too". New `client/PoseBlend`: each pose gets a weight per player on a
+  slightly bouncy spring (it eases in and out, nothing snaps), and springs on how far the pose moves each part from
+  vanilla's, so a jump between keys follows through with a small overshoot. Real time, not frames; a pose ending keeps
+  its last shape while it eases out; entries go once eased out or 3 s unseen. It can also bend the upper body at the
+  hips (forward, turned, tipped) and lower it, so poses use the torso, head and legs, not just the arms.
+  - Ember's Kindle: the shoulder draws back first, then the arm pushes out with the body turned in, the free arm braced
+    and the feet set; it trembles more as the heat builds; let go at full heat it whips over into the fireball throw.
+  - Freerun: the run's lean eases in and out. The slide is no longer the swimming pose: you drop in on bent knees and
+    lie back on one hip, lead leg out, a hand trailing the ground, the other arm up, eyes ahead, and pop back up into
+    the run (vanilla's swim tilt is switched off for it, as for a carried body).
+  - Carrying: the carrier bends at the hips and knees to pick up and set down, and walks heavier, swaying, the arms
+    giving on each step.
+  - Time Flow's jab, quick jab, hook, uppercut, lunge and barrage coil, then turn the hips and shoulders through with a
+    step, overshoot a little and recover to a guard held between blows; the other moves are eased the same way.
+  - Gravity's Lift grip: the arm's aim eases onto the target with the chest turned to it, a lean, the free arm out.
+  - Ledges: the catch swings the body in under the hands and settles. Z Fighter's guard and wave beam ease in with a
+    stance under them.
+  - Crawling (`CrawlPose`, the gesture crawl and downed players): an army crawl, arms sweeping ahead along the ground
+    and pulling back in turn, the opposite knee driving, the body rocking, the head lifting to look ahead; a broken
+    limb drags (Wounds' breaks are synced to everyone) and the rest work harder. Downed players breathe hard, rest the
+    head when still, try now and then to push up and sink back, and bounce as they hit the ground; passed out, they lie
+    limp with the head turned aside. Downed humanoid mobs (`wounds/DownedPose`) fall with weight (the knees go, then a
+    faster drop and a small bounce), crawl the same way, and on their backs breathe unevenly, clutch their worst wound
+    (a broken arm or leg, else the chest) and try to sit up. First person is unchanged.

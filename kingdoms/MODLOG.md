@@ -3837,3 +3837,8 @@ and stepping over those who are not. Very prideful ruler". `Purists`, plus a col
   `Villager.updateSpecialPrices`). **Good name:** kin win it at 150% and lose at 75%; outsiders the reverse.
 - Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
   harsh lean (+25) when he sentences an arrested crook.
+
+## 0.7.131: an eased pickpocket's reach (with Powers 0.15.40, Kitchen 0.5.9)
+- Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
+  high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
+  out the same way.

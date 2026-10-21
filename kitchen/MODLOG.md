@@ -870,3 +870,9 @@ Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest ne
   Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
   `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
   Art: `tools/vanilla_style/tanning.py`.
+### 0.5.9: smoother carrying and crawling
+Andy, on Powers' animation preview: "do all this, add a better crawling and downed animation too". Carrying a corpse
+eases in and out (`PoseEase`, a small spring of Kitchen's own): the arms go down to take it and lift it, dip under the
+weight on each step, and the body leans back against it. A creature crawling on shot legs does an army crawl like a
+downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
+the body rocking, the head lifting to look ahead. The ragdoll is untouched.
