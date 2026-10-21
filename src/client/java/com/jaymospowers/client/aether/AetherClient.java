@@ -23,6 +23,7 @@ public final class AetherClient {
 		com.jaymospowers.client.aether.monster.AetherMonstersClient.init();
 		com.jaymospowers.client.aether.dungeon.DungeonClient.init();
 		AetherFloraClient.init();
+		com.jaymospowers.client.aether.gear.AetherGearClient.init();
 	}
 
 	private static void tick(Minecraft minecraft) {
