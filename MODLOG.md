@@ -2337,3 +2337,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.56, ships Jaymo's Kingdoms 0.7.143 (Better With Mods batch 4, building):** timber trim, benches and tables,
   wattle panels, strung plot stakes, earth slabs with half-step King's Roads, wind chimes and a rope lift. No Powers
   code changed. Details in the Kingdoms MODLOG.
+- **0.15.57, ships Jaymo's Kingdoms 0.7.144 and Kitchen 0.5.12 (Better With Mods batch 5, atmosphere):** Gloom with
+  Blood-Moon-only damage, the beacon watch-light, skittish herds, fish bait and the exploding pot. This finishes the
+  BWM port. No Powers code changed. Details in the Kingdoms and Kitchen MODLOGs.

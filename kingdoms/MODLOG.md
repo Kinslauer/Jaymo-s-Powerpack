@@ -4045,3 +4045,19 @@ Batch 4 of the BWM port (MIT, our own code).
   and a platform that steps one block at a time carrying whoever stands on it; cut the rope and it falls (fall damage
   as normal).
 - Generator `kingdoms/tools/gen_building.py`. javac clean; nothing played yet.
+
+## 0.7.144: atmosphere (Better With Mods batch 5, pack 0.15.57, Kitchen 0.5.12)
+The last batch of the BWM port (MIT, our own code).
+- Gloom (`Gloom`, client `GloomClient`), Overworld only: pitch darkness at the eyes slowly builds a hidden gloom.
+  30 s: quiet cave whispers; 1 min: darkened screen edges; 2 min: the edges breathe and short Darkness pulses come.
+  Andy: real damage, only on Blood Moons, so at the top stage on a Blood or Super Blood Moon night it deals half a
+  heart every 2 s through armour (damage type `gloom`, "was taken by the dark"); never on other nights. Light drains it
+  6x faster than it builds: a lit spot, Night Vision, or any light-giving block held in either hand. Nightborn,
+  creative and spectators are immune. No meter; respawning or rejoining clears it. Emberborn flame hands don't count
+  (only Powers tracks them).
+- Beacon watch-light (`BeaconWatch`, `mixin/beacons/BeaconWatchMixin`): a beacon whose whole pyramid is one block keeps
+  its normal powers, plus: all iron makes hostiles in its range glow; all emerald raises the World Tier loot of
+  hostiles killed in range one step (capped at Legend; loot only, not XP; one line in `WorldTiers`).
+- Skittish herds (`Herds`, entity tag `skittish`): hit a farm animal and others of its kind that can see it flee the
+  attacker for about 4 s; sprinting or breaking blocks within 8 blocks spooks them (2 less per Soft Step rank;
+  sneaking never does). Leashed, tamed and named animals ignore spooks but still flee when hit. Pens aren't detected.
