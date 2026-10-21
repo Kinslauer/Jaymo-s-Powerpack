@@ -456,7 +456,7 @@ public final class Theft {
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
 		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
-			// (0.7.108) seen: the dead one's family won't forget who did it
+			// (0.7.109) seen: the dead one's family won't forget who did it
 			Recollections.murdered(level, killer, victim);
 		}
 	}
@@ -537,7 +537,7 @@ public final class Theft {
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
-		// (0.7.108) each who saw it remembers it
+		// (0.7.109) each who saw it remembers it
 		Recollections.crime(player, seen, crime.cry);
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);

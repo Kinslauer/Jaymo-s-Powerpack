@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.7.108) MCA's villager chat AI (off unless an op switches it on: {@code /mca chatAI default}) knows a villager's
+ * (0.7.109) MCA's villager chat AI (off unless an op switches it on: {@code /mca chatAI default}) knows a villager's
  * name, personality, family and village. This adds what Kingdoms knows: the realm they live in, its ruler and his
  * temper, its wars, how the realm takes the player (reputation, rank, wanted, deeds, renown), the tasks the player is
  * doing for them, their friends and foes among the neighbours, and everything they remember of the player

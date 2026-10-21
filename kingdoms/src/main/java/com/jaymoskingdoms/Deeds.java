@@ -215,7 +215,7 @@ public final class Deeds {
 		}
 		THANKED.put(by.getUUID(), now);
 		for (LivingEntity w : seen) {
-			// (0.7.108) each who saw it remembers it
+			// (0.7.109) each who saw it remembers it
 			Recollections.remember(w, by, Recollections.Kind.SAW_DEED, Component.translatable("recall.jaymoskingdoms.deed.fire"));
 		}
 		LivingEntity thanker = seen.get(level.getRandom().nextInt(seen.size()));
@@ -253,7 +253,7 @@ public final class Deeds {
 		}
 		SAVED.put(key, now);
 		thank(level, saved, player, "talk.jaymoskingdoms.deed.save.thanks", SAVE_HEARTS);
-		// (0.7.108) and never forgets it
+		// (0.7.109) and never forgets it
 		Recollections.remember(saved, player, Recollections.Kind.SAVED, Component.empty());
 		if (level.getRandom().nextFloat() < SAVE_GIFT_CHANCE) {
 			give(player, new ItemStack(GIFTS.get(level.getRandom().nextInt(GIFTS.size()))));
@@ -281,7 +281,7 @@ public final class Deeds {
 	/** {@code player} brought {@code captive} home to {@code home}: the whole place knows of it. */
 	static void broughtHome(ServerLevel level, ServerPlayer player, Villager captive, Faction home, List<ItemStack> rewards, int rep, int hearts) {
 		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.home", hearts);
-		// (0.7.108) they, and their family, remember it always
+		// (0.7.109) they, and their family, remember it always
 		Recollections.broughtHome(level, player, captive);
 		for (ItemStack reward : rewards) {
 			give(player, reward);
@@ -331,7 +331,7 @@ public final class Deeds {
 		Component deed = Component.translatable(family.contains(".rescue.") ? "recall.jaymoskingdoms.deed.rescue" : "recall.jaymoskingdoms.deed.save");
 		for (LivingEntity w : seen) {
 			warm(w, player, hearts);
-			// (0.7.108) each who saw it remembers it
+			// (0.7.109) each who saw it remembers it
 			Recollections.remember(w, player, Recollections.Kind.SAW_DEED, deed);
 			if (w instanceof Villager v) {
 				McaCompat.cheer(v, CHEER);

@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:spider",
+    "minecraft:cave_spider"
+  ],
+  "enchantment": "minecraft:bane_of_arthropods"
+}

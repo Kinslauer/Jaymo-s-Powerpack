@@ -1144,6 +1144,7 @@
 	"item.jaymoskingdoms.scroll_of_fire": "Scroll of Fire",
 	"item.jaymoskingdoms.scroll_of_warding": "Scroll of Warding",
 	"item.jaymoskingdoms.scroll_of_arcane_bolt": "Scroll of the Arcane Bolt",
+	"item.jaymoskingdoms.bat_wing": "Bat Wing",
 	"message.jaymoskingdoms.scroll_no_target": "Nothing in sight to read it at.",
 	"message.jaymoskingdoms.caster_none": "No kingdom or camp within 400 blocks.",
 	"message.jaymoskingdoms.caster_summoned": "%s joins %s.",

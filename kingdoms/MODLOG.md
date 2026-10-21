@@ -3523,7 +3523,15 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
   each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
   landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
-- **0.7.108, villagers remember you (and MCA's chat AI is told):** Andy wanted MCA's chat AI worked in, more villager
+- **0.7.108, Better With Mods batch 1 (Powers 0.15.9):** `MobTweaks`: baby zombies -25% speed and damage
+  (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). Zombies and husks hunt
+  `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
+  safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
+  hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
+  `RoadPace`: `road_pace` blocks +15% (horses too; TRMT's worn dirt and sand paths count), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.
+- **0.7.109, villagers remember you (and MCA's chat AI is told):** Andy wanted MCA's chat AI worked in, more villager
   interactions, and villagers who remember you and what you did with them. Each villager (and folk) now keeps
   `Recollections`: per player (masked strangers under the costume's stand-in), up to 12 memories of 30 kinds, each with
   a weight and a lifetime (small things 2-6 weeks; a life saved, a captive brought home, kin murdered: for good). They

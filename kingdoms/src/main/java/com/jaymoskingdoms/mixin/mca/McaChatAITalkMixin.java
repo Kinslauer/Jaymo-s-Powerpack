@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.108) What a player says to a villager through MCA's chat AI is remembered ({@link Recollections}): the last few
+ * (0.7.109) What a player says to a villager through MCA's chat AI is remembered ({@link Recollections}): the last few
  * things, for a month, so the next conversation (days later, or after a restart) can pick up where it left off.
  */
 @Mixin(ChatAI.class)

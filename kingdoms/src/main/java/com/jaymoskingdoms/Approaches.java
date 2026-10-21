@@ -155,7 +155,7 @@ public final class Approaches {
 	/** How far a guard looks for someone with work, to send a stranger to. */
 	static final double WORK_SEARCH = 48.0;
 
-	/** (0.7.108) How keen someone with something to say about what they remember of you is to come over and say it. */
+	/** (0.7.109) How keen someone with something to say about what they remember of you is to come over and say it. */
 	static final int REMARK_WEIGHT = 4;
 
 	/** What they come over about. */
@@ -678,7 +678,7 @@ public final class Approaches {
 				w[GREET] = 2;
 			}
 			w[GOSSIP] = 2;
-			// (0.7.108) what they remember of you: something to say about it; warm to you, or cold
+			// (0.7.109) what they remember of you: something to say about it; warm to you, or cold
 			int lean = masked ? 0 : Recollections.leaning(mob, player);
 			if (lean <= Recollections.REFUSE && only < 0) {
 				return null;
@@ -851,7 +851,7 @@ public final class Approaches {
 		};
 		Component said = null;
 		if (a.topic == GREET && !a.foreign) {
-			// (0.7.108) what they remember of you, and haven't yet said
+			// (0.7.109) what they remember of you, and haven't yet said
 			said = Recollections.remark(a.mob, player, level.getRandom());
 			if (said != null) {
 				more = "recall.jaymoskingdoms.more";
@@ -868,7 +868,7 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
-					// (0.7.108) what they saw another player do
+					// (0.7.109) what they saw another player do
 					said = Recollections.gossip(a.mob, player, level.getRandom());
 				}
 				if (said == null) {
@@ -1101,7 +1101,7 @@ public final class Approaches {
 
 	private static void reply(ServerLevel level, Approach a, String key, int color, Object... args) {
 		tell(level, a, Component.translatable(key, args), color);
-		// (0.7.108) and they remember how you answered
+		// (0.7.109) and they remember how you answered
 		Recollections.replied(a.mob, level.getServer().getPlayerList().getPlayer(a.player), key, a.enemy.isEmpty() ? null : a.enemy);
 	}
 

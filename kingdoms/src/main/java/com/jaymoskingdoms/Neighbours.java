@@ -552,7 +552,7 @@ final class Neighbours {
 		RandomSource random = level.getRandom();
 		shift(m.a, m.b, m.kind.regard);
 		if (!m.kind.sour()) {
-			// (0.7.108) friends talk: of what they've seen players do, too
+			// (0.7.109) friends talk: of what they've seen players do, too
 			Recollections.share(m.a, m.b, random);
 			Recollections.share(m.b, m.a, random);
 		}

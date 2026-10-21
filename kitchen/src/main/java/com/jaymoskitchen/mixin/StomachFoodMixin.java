@@ -1,5 +1,6 @@
 package com.jaymoskitchen.mixin;
 
+import com.jaymoskitchen.stomach.RawFood;
 import com.jaymoskitchen.stomach.Stomach;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +21,8 @@ abstract class StomachFoodMixin {
 	private void jaymoskitchen$intoStomach(Level level, LivingEntity user, ItemStack stack, Consumable consumable, CallbackInfo ci) {
 		if (user instanceof ServerPlayer player) {
 			Stomach.eat(player, stack, consumable.animation() == ItemUseAnimation.DRINK);
+			// raw meat or an undercooked dish may make you sick
+			RawFood.eaten(player, stack);
 		}
 	}
 }

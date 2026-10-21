@@ -824,3 +824,8 @@ after `Mill.register()`.
     or charging rider; their own client simulates the ragdoll (`client/ragdoll/LimpController`), the server relays it
     (`LivingRagdolls`); third-person camera, no moving or using, back up once still (1.5 to 7 s). Dying limp leaves
     that exact body. Jaymo's Powers keeps you from going limp while a power holds you.
+- **0.5.2, Better With Mods batch 1:** `stomach/RawFood`: raw meat and fish (`raw_meats`) give Hunger II for 30 s
+  30% of the time, an Undercooked dish half as often (replaces the old 60% Hunger I and raw chicken's own chance);
+  you can still eat while sick. Llamas and trader llamas drop 1-2 mutton. `EatGroundSeedsGoal` became
+  `farm/EatGroundFoodGoal`: every farm animal eats its own food off the ground (tame pets don't). `farm/LayingHens`:
+  a hen that pecks a seed lays at the next dawn; unfed hens lay at half speed (`ChickenMixin`).

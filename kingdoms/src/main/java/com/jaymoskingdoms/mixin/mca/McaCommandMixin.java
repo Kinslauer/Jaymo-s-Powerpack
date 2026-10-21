@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.5.29) And the main page's Quests button opens the villager's quests.
  * (0.7.55) And Change Clothes asks a tailor for a fitting ({@link com.jaymoskingdoms.Tailors}).
  * (0.7.69) And a tailor sells a Costume Table and sews costumes ({@link com.jaymoskingdoms.TailorCostumes}).
- * (0.7.108) A gift is remembered ({@link com.jaymoskingdoms.Recollections}): what it was, and whether it was welcome.
+ * (0.7.109) A gift is remembered ({@link com.jaymoskingdoms.Recollections}): what it was, and whether it was welcome.
  * (0.7.20) A villager whose tongue you don't speak ({@link Languages}) only does what needs no words ({@link Languages#SIMPLE_COMMANDS}).
  */
 @Mixin(VillagerCommandHandler.class)
@@ -61,7 +61,7 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 		}
 	}
 
-	/** (0.7.108) What's being given, and their hearts before. */
+	/** (0.7.109) What's being given, and their hearts before. */
 	@org.spongepowered.asm.mixin.Unique
 	private net.minecraft.world.item.ItemStack jaymoskingdoms$gift = net.minecraft.world.item.ItemStack.EMPTY;
 	@org.spongepowered.asm.mixin.Unique

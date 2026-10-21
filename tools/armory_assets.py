@@ -291,6 +291,10 @@ def main(aow):
     lang["message.jaymospowers.bomb_glider.out_of_fuel"] = "The burner sputters out: gliding down"
     lang["message.jaymospowers.bomb_glider.empty"] = "The dynamite rack is empty"
     lang["message.jaymospowers.bomb_glider.full"] = "No room for that in the glider"
+    # (BWM port) the mining charge (its art: tools/gen_mining_charge.py; models, recipes and loot are hand-written)
+    lang["block.jaymospowers.mining_charge"] = "Mining Charge"
+    lang["block.jaymospowers.mining_charge.hint"] = ("Stick it on rock, light it (redstone, flint and steel, a burning arrow): "
+                                                     "it digs a 3x3 hole into the block")
     for tag, values in tags.items():
         write(os.path.join(MC_DATA, "tags", "item", tag + ".json"), {"values": values})
     write(os.path.join(MC_DATA, "tags", "item", "enchantable", "bow.json"), {"values": [f"{NS}:recurve_bow"]})
