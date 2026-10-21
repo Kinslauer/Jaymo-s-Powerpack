@@ -46,7 +46,7 @@ public final class SeasonTints {
 		Seasons.look(client.level);
 		int at = stage();
 		if (drawn >= 0 && at != drawn) {
-			client.levelRenderer.allChanged();
+			client.levelExtractor.allChanged();
 		}
 		drawn = at;
 	}
