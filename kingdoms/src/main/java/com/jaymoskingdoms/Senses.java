@@ -41,6 +41,7 @@ import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
@@ -58,11 +59,15 @@ import org.jspecify.annotations.Nullable;
  * already after you, with you in sight, sees you at full range. Creative and spectator players are untouched.</li>
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
- * {@link #LOOK_TICKS}. Bosses and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
+ * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
  * <li><b>The gauge</b> ({@link Gauge}): the nearest mob's state, sent a few times a second only when it changes.</li>
  * <li><b>Unaware blows</b> ({@link #dealt}): a melee hit on a monster that isn't after you and can't see you (behind it, or
  * it is searching) is a sneak attack, {@link #SNEAK_ATTACK_MULT}; Sneak Attack's ranks make it more. The hidden blade's
  * full-strength stab on an unaware one is an assassination ({@link HiddenBlade}, Assassinate).</li>
+ * <li><b>Bosses and pets</b> (0.7.113): even they can get got. A boss is harder to catch: stealth cuts its sight no lower
+ * than {@link #BOSS_SIGHT_MIN}, it sees in a wider cone ({@link #BOSS_VIEW_COS}), it is only unaware while it is after no
+ * one at all, and a sneak attack or assassination on it deals at most {@link #BOSS_BLOW_SHARE} of its health. A tame pet
+ * can be caught unaware like any other mob, except by its own owner (no accidental assassination of your own dog).</li>
  * </ul>
  */
 public final class Senses {
@@ -93,6 +98,11 @@ public final class Senses {
 	/** A sneak attack multiplies the blow by this; Sneak Attack rank 1 and rank 2 by these instead. */
 	static final float SNEAK_ATTACK_MULT = 2.0F;
 	static final float[] SNEAK_ATTACK_RANK_MULT = {2.5F, 3.0F};
+
+	/** Bosses: stealth cuts their sight no lower than this share; they see within this cosine of their look (-0.5: a 240 degree cone). */
+	static final double BOSS_SIGHT_MIN = 0.4, BOSS_VIEW_COS = -0.5;
+	/** Bosses: a sneak attack or assassination deals at most this share of their max health (never less than the plain blow). */
+	static final float BOSS_BLOW_SHARE = 0.15F;
 
 	/** The gauge: how often it is worked out (ticks), how far it looks (blocks), and how many steps a "noticing" fill has. */
 	static final int GAUGE_TICKS = 5;
@@ -177,9 +187,14 @@ public final class Senses {
 		STRUCK.remove(id);
 	}
 
-	/** A mob that senses: hostile or neutral, not a boss, not one of the kingdoms' own folk. */
+	/** A mob that senses (sight, the gauge, unaware blows): hostile or neutral, bosses too, not one of the kingdoms' own folk. */
+	static boolean sensing(Mob mob) {
+		return (mob instanceof Enemy || mob instanceof NeutralMob) && !(mob instanceof Folk);
+	}
+
+	/** A mob that also loses track and searches: one that senses, not a boss (a boss never gives up the hunt). */
 	static boolean minded(Mob mob) {
-		return (mob instanceof Enemy || mob instanceof NeutralMob) && !boss(mob) && !(mob instanceof Folk);
+		return sensing(mob) && !boss(mob);
 	}
 
 	static boolean boss(Mob mob) {
@@ -199,22 +214,27 @@ public final class Senses {
 		return looker.getTarget() == player && looker.hasLineOfSight(player);
 	}
 
-	/** {@code player} is in front of {@code looker}, inside its view cone. */
+	/** {@code player} is in front of {@code looker}, inside its view cone (a boss's is wider). */
 	static boolean inCone(LivingEntity looker, LivingEntity player) {
 		Vec3 to = player.getEyePosition().subtract(looker.getEyePosition());
 		double len = to.length();
 		if (len < 1.0E-4) {
 			return true;
 		}
-		return looker.getViewVector(1.0F).dot(to.scale(1.0 / len)) >= VIEW_COS;
+		Vec3 view = looker.getViewVector(1.0F);
+		if (looker instanceof EnderDragon) {
+			// (the dragon flies along its yaw's back: its head is where a mob's back would be)
+			view = view.multiply(-1.0, 1.0, -1.0);
+		}
+		return view.dot(to.scale(1.0 / len)) >= (looker instanceof Mob mob && boss(mob) ? BOSS_VIEW_COS : VIEW_COS);
 	}
 
 	/**
 	 * What a mob's range for noticing {@code player} is multiplied by, on top of vanilla's (see the class comment). 1 for a
-	 * creative or spectator player, a boss, or anything that isn't a hostile or neutral mob.
+	 * creative or spectator player, or anything that isn't a hostile or neutral mob. A boss's never drops below {@link #BOSS_SIGHT_MIN}.
 	 */
 	public static double factor(LivingEntity self, ServerLevel level, Entity looking) {
-		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || !minded(looker) || locked(looker, player)) {
+		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || !sensing(looker) || locked(looker, player)) {
 			return 1.0;
 		}
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
@@ -235,7 +255,7 @@ public final class Senses {
 		if (player.isOnFire() || player.hasEffect(MobEffects.GLOWING)) {
 			f *= LIT;
 		}
-		return Math.max(MIN_FACTOR, f);
+		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 
 	// ---- losing track and searching ----------------------------------------------------------------------------------
@@ -413,7 +433,7 @@ public final class Senses {
 	private static void sync(ServerPlayer player) {
 		int state = IDLE, fill = 0;
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
-			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE), m -> m.isAlive() && minded(m))) {
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE), m -> m.isAlive() && sensing(m))) {
 				if (mob.getTarget() == player) {
 					state = SPOTTED;
 					break;
@@ -456,10 +476,13 @@ public final class Senses {
 
 	// ---- unaware blows -------------------------------------------------------------------------------------------------
 
-	/** {@code target} is a hostile or neutral mob that isn't after {@code player} and can't see them: they're behind it, or it is searching. */
+	/**
+	 * {@code target} is a hostile or neutral mob that isn't after {@code player} and can't see them: they're behind it, or it
+	 * is searching. A boss only while it is after no one at all; a tame pet never of its own owner.
+	 */
 	static boolean unaware(LivingEntity target, ServerPlayer player) {
-		if (!(target instanceof Mob mob) || !minded(mob) || mob instanceof TamableAnimal tame && tame.isTame() || !mob.isAlive()
-			|| mob.getTarget() == player) {
+		if (!(target instanceof Mob mob) || !sensing(mob) || mob instanceof TamableAnimal tame && tame.isOwnedBy(player) || !mob.isAlive()
+			|| mob.getTarget() == player || boss(mob) && mob.getTarget() != null) {
 			return false;
 		}
 		return searchingFor(mob, player) || !inCone(mob, player);
@@ -468,6 +491,14 @@ public final class Senses {
 	/** {@code target} is still in its hurt cooldown and would turn this blow away (vanilla's {@code hurtServer}): no bonus, no feedback. */
 	static boolean cooling(LivingEntity target, DamageSource source) {
 		return target.getInvulnerableTime() > 10 && !source.is(DamageTypeTags.BYPASSES_COOLDOWN);
+	}
+
+	/** What an unaware blow of {@code blow} deals {@code target}: on a boss, no more than {@link #BOSS_BLOW_SHARE} of its health, never less than {@code plain}. */
+	static float unawareBlow(LivingEntity target, float plain, float blow) {
+		if (!(target instanceof Mob mob) || !boss(mob)) {
+			return blow;
+		}
+		return Math.max(plain, Math.min(blow, mob.getMaxHealth() * BOSS_BLOW_SHARE));
 	}
 
 	/** Whether {@code player}'s hidden blade can assassinate {@code target} (Assassinate, and it is unaware of them). */
@@ -502,6 +533,6 @@ public final class Senses {
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
-		return amount * mult;
+		return unawareBlow(target, amount, amount * mult);
 	}
 }
