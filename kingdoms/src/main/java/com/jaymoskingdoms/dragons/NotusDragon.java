@@ -216,7 +216,7 @@ public class NotusDragon extends AbstractHorse {
 		return (this.entityData.get(DATA_FLAGS) & f) != 0;
 	}
 
-	private void setFlag(int f, boolean on) {
+	private void setDragonFlag(int f, boolean on) {
 		byte b = this.entityData.get(DATA_FLAGS);
 		byte now = (byte)(on ? b | f : b & ~f);
 		if (now != b) {
@@ -311,7 +311,7 @@ public class NotusDragon extends AbstractHorse {
 				spend(BREATH_DRAIN / 20.0F);
 			}
 		}
-		setFlag(BREATHING, this.breathTicks > 0 || riderBreath);
+		setDragonFlag(BREATHING, this.breathTicks > 0 || riderBreath);
 	}
 
 	/** Its riders' stamina and its wings: the owner flies it; it tires and rests. */
@@ -330,7 +330,7 @@ public class NotusDragon extends AbstractHorse {
 			setStamina(stamina() + REST_REGEN / 20.0F);
 		}
 		if (exhausted() && stamina() >= RECOVER) {
-			setFlag(EXHAUSTED, false);
+			setDragonFlag(EXHAUSTED, false);
 		}
 		if (this.tickCount % 20 == 0 && this.bar != null) {
 			this.bar.removeAllPlayers();
@@ -341,7 +341,7 @@ public class NotusDragon extends AbstractHorse {
 	private void spend(float amount) {
 		setStamina(stamina() - amount);
 		if (stamina() <= 0.0F && !exhausted()) {
-			setFlag(EXHAUSTED, true);
+			setDragonFlag(EXHAUSTED, true);
 			if (this.getControllingPassenger() instanceof ServerPlayer rider) {
 				rider.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.dragon.exhausted", this.getDisplayName())
 					.withStyle(ChatFormatting.GOLD));
@@ -402,7 +402,7 @@ public class NotusDragon extends AbstractHorse {
 				Vec3 top = Vec3.atBottomCenterOf(this.perch.above());
 				double flat = top.subtract(this.position()).horizontalDistance();
 				setFlying(true);
-				flyToward(level, top.add(0.0, flat > 6.0 ? 3.0 : 0.0), flat > 6.0 ? CRUISE_SPEED : 0.25, flat < 6.0);
+				flyToward(level, top.add(0.0, flat > 6.0 ? 3.0 : 0.0, 0.0), flat > 6.0 ? CRUISE_SPEED : 0.25, flat < 6.0);
 				if (flat < 1.5 && this.getY() - top.y < 1.5 || this.onGround() && flat < 4.0 || this.wildTicks > 600) {
 					land();
 					this.wild = Wild.PERCHED;
@@ -786,7 +786,7 @@ public class NotusDragon extends AbstractHorse {
 	/** Worn down: it falls out of the sky, and stays down a while. */
 	private void crash(ServerLevel level) {
 		setFlying(false);
-		setFlag(GROUNDED, true);
+		setDragonFlag(GROUNDED, true);
 		this.groundedLeft = GROUNDED_TICKS;
 		this.breathTicks = 0;
 		this.foe = null;
@@ -892,7 +892,7 @@ public class NotusDragon extends AbstractHorse {
 
 	/** It's had enough: it heals, takes to the air and flies off. */
 	private void bolt(ServerLevel level) {
-		setFlag(GROUNDED, false);
+		setDragonFlag(GROUNDED, false);
 		this.setHealth(Math.max(this.getHealth(), this.getMaxHealth() * BOLT_HEAL));
 		this.entityData.set(DATA_TRUST, 0.0F);
 		this.entityData.set(DATA_TAMER, -1);
@@ -908,7 +908,7 @@ public class NotusDragon extends AbstractHorse {
 	private void tame(ServerLevel level, Player player) {
 		this.tameWithName(player);
 		this.setPersistenceRequired();
-		setFlag(GROUNDED, false);
+		setDragonFlag(GROUNDED, false);
 		this.entityData.set(DATA_TAMER, -1);
 		setStamina(STAMINA);
 		this.foe = null;
@@ -1008,7 +1008,7 @@ public class NotusDragon extends AbstractHorse {
 		if (player.isSecondaryUseActive()) {
 			if (stack.isEmpty()) {
 				if (server && owner(player)) {
-					setFlag(SITTING, !sitting());
+					setDragonFlag(SITTING, !sitting());
 					player.sendOverlayMessage(Component.translatable(sitting() ? "message.jaymoskingdoms.dragon.sits" : "message.jaymoskingdoms.dragon.follows",
 						this.getDisplayName()));
 				}
@@ -1028,7 +1028,7 @@ public class NotusDragon extends AbstractHorse {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.dragon.not_yours", this.getDisplayName()));
 				return InteractionResult.SUCCESS;
 			}
-			setFlag(SITTING, false);
+			setDragonFlag(SITTING, false);
 			player.setYRot(this.getYRot());
 			player.setXRot(this.getXRot());
 			player.startRiding(this);
