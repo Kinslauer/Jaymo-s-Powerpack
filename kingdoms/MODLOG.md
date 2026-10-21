@@ -3894,3 +3894,19 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
 - Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
   high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
   out the same way.
+
+## 0.7.135: the hidden blade's guard holds, and shows in first person (pack 0.15.44)
+Andy: "the blades still are not held in front of the player, i want to be able to see the blade deployed in first
+person, and also have other players see that it is deployed. it should be held up in guard up front while idle, then
+back to normal when retracted. and only move when the player does."
+- Why 0.7.122's guard never showed: it was set at the end of `PlayerModel.setupAnim`, and Entity Model Features (Fresh
+  Animations' player animations) animates the model after that, laying its own arms back over it. Now the guard goes on
+  right after every animation of the model (for the layers, and as the body, costume and armour are each drawn, from
+  the existing `MobSwing*` hooks), and EMF pauses its animations for a player whose blade is sprung (`EmfBladePause`,
+  as Powers does for its poses). `HiddenBladePoseMixin` is gone.
+- The guard is higher (the arm nearly level, `GUARD_PITCH` -1.3) and still: only the walk sways it (a fifth of
+  vanilla's swing), no idle bob. Sheathed, the arm goes back to normal.
+- First person: each empty hand with its blade sprung comes up into a guard (`firstPersonGuard`, `FIRST_*`): in toward
+  the middle of the view, raised and turned in so the blade points ahead past the fist; the off hand rises in from
+  below; a blow thrusts the arm forward. `HiddenBladeOffHandMixin` became `HiddenBladeFirstPersonMixin`, both hands.
+  With First-person Model drawing your body, the third-person guard puts the arm (and blade) in front of you.

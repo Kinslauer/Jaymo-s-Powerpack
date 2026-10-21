@@ -2271,3 +2271,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     stretches inside a spin stay straight, so a twirl doesn't stop at every quarter turn. The hit's keyframe and every
     begin/end/stop tick are unchanged, so Better Combat's damage timing is the same. `tools/check_player_animations.py`
     checks every file parses and every key sits within the animation.
+- **0.15.44, the hidden blade's guard (Kingdoms 0.7.135):** Andy: the blade still wasn't held up in front. Fresh
+  Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
+  every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
+  and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.

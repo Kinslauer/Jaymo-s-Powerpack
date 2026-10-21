@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin;
 
+import com.jaymoskingdoms.client.HiddenBladeClient;
 import com.jaymoskingdoms.client.MobAnimations;
 import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
@@ -42,5 +43,6 @@ abstract class MobSwingLivingEntityRendererMixin {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 }
