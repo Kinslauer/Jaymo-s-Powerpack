@@ -16,25 +16,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.113) First person: an empty off hand draws no arm, but one with its hidden blade out shows it (see HiddenBladeClient). */
+/**
+ * (0.7.135) First person, each empty hand: with its hidden blade springing or out, your bare arm comes up into the guard
+ * (the off hand, which the game doesn't draw empty, rises in from below), and a blow is a thrust (see HiddenBladeClient).
+ */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
-abstract class HiddenBladeOffHandMixin {
+abstract class HiddenBladeFirstPersonMixin {
 	@Shadow
 	private void renderPlayerArm(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, float inverseArmHeight,
 		float attackValue, HumanoidArm arm, PlayerRenderState playerState) {
 	}
 
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
-	private void jaymoskingdoms$bladeOffArm(PlayerRenderState playerState, FirstPersonHandsAndItemsRenderState state, float partialTicks, float xRot,
+	private void jaymoskingdoms$bladeGuard(PlayerRenderState playerState, FirstPersonHandsAndItemsRenderState state, float partialTicks, float xRot,
 		InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
 		int lightCoords, CallbackInfo ci) {
 		AvatarRenderState avatar = playerState.avatarRenderState;
-		if (hand != InteractionHand.OFF_HAND || !itemStack.isEmpty() || state.isScoping || avatar == null || avatar.isInvisible
-			|| !HiddenBladeClient.showOffArm()) {
+		if (!itemStack.isEmpty() || state.isScoping || avatar == null || avatar.isInvisible) {
 			return;
 		}
 		poseStack.pushPose();
-		this.renderPlayerArm(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, attack, avatar.mainArm.getOpposite(), playerState);
+		float guard = HiddenBladeClient.firstPersonGuard(poseStack, avatar, hand, attack);
+		if (guard <= 0.0F) {
+			poseStack.popPose();
+			return;
+		}
+		HumanoidArm arm = hand == InteractionHand.MAIN_HAND ? avatar.mainArm : avatar.mainArm.getOpposite();
+		// the punch fades out as the guard comes up (the thrust is the guard's own)
+		this.renderPlayerArm(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, attack * (1.0F - guard), arm, playerState);
 		poseStack.popPose();
 		ci.cancel();
 	}

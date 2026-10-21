@@ -248,7 +248,7 @@ public final class Downed {
 			if (!isDowned(player)) {
 				return InteractionResult.PASS;
 			}
-			// (0.15.46) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
+			// (0.15.49) lying face down, use lands on the ground: Second Wind's eating still counts ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
 			return eat != null ? eat : InteractionResult.FAIL;
 		});
@@ -256,7 +256,7 @@ public final class Downed {
 			if (!isDowned(player)) {
 				return InteractionResult.PASS;
 			}
-			// (0.15.46) but Second Wind's eating to rise ({@link SelfRevive})
+			// (0.15.49) but Second Wind's eating to rise ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
 			return eat != null ? eat : InteractionResult.FAIL;
 		});
@@ -765,7 +765,7 @@ public final class Downed {
 					0.8F + level.getRandom().nextFloat() * 0.4F);
 				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 			}
-			// (0.15.46) Steady Hands: quicker ({@link MedicineSkill})
+			// (0.15.49) Steady Hands: quicker ({@link MedicineSkill})
 			int need = MedicineSkill.ticks(player, REVIVE_TICKS);
 			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {

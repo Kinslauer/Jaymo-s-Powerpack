@@ -29,7 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.46) Second Wind, the self revive on the Medicine page of Jaymo's Kingdoms' Survival tree. Andy (2026-10-21):
+ * (0.15.49) Second Wind, the self revive on the Medicine page of Jaymo's Kingdoms' Survival tree. Andy (2026-10-21):
  * "they also gain a self revive through this tree, called second wind that allows them to eat while downed to rise, once
  * a day". Down (not passed out or knocked out), with food in hand: hold use to eat it for {@link #EAT_TICKS} (Steady
  * Hands quickens it), and you get up as a revive would get you up (Lifesaver's half health too). Then not again for

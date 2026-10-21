@@ -114,7 +114,7 @@ public final class Senses {
 	public static final int IDLE = 0, NOTICING = 1, SEARCHING = 2, SPOTTED = 3;
 
 	/**
-	 * (0.7.135) Sneaking past: a sneaking, moving player with a monster in sight within {@link #SNEAK_PAST_RANGE} blocks
+	 * (0.7.136) Sneaking past: a sneaking, moving player with a monster in sight within {@link #SNEAK_PAST_RANGE} blocks
 	 * (that isn't after them or hunting them) counts the time; every {@link #SNEAK_PAST_TICKS} of it is Stealth
 	 * experience ({@link Skills#sneakPast}). Within {@link #SNEAK_PAST_CLOSE} blocks it counts twice as fast.
 	 */
@@ -162,7 +162,7 @@ public final class Senses {
 	private static final Map<UUID, Integer> SENT = new HashMap<>();
 	/** Player → {target entity id, game time} of their last sneak attack (one blow, hurt twice, counts once). */
 	private static final Map<UUID, long[]> STRUCK = new HashMap<>();
-	/** (0.7.135) Player → ticks spent sneaking past monsters toward the next Stealth experience. */
+	/** (0.7.136) Player → ticks spent sneaking past monsters toward the next Stealth experience. */
 	private static final Map<UUID, Integer> SNEAKING_PAST = new HashMap<>();
 
 	private Senses() {
@@ -445,7 +445,7 @@ public final class Senses {
 	/** Works out what {@code player}'s gauge shows, and sends it if it changed. */
 	private static void sync(ServerPlayer player) {
 		int state = IDLE, fill = 0;
-		// (0.7.135) how near the nearest monster in sight is, sneaking past it: 0 none, 1 near, 2 close
+		// (0.7.136) how near the nearest monster in sight is, sneaking past it: 0 none, 1 near, 2 close
 		int past = 0;
 		boolean sneaking = player.isCrouching() && MOVING.getOrDefault(player.getUUID(), false);
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
@@ -485,7 +485,7 @@ public final class Senses {
 	}
 
 	/**
-	 * (0.7.135) Andy: "sneaking near enemies undetected should passively grow your stealth skill". Every gauge update
+	 * (0.7.136) Andy: "sneaking near enemies undetected should passively grow your stealth skill". Every gauge update
 	 * {@code player} spends sneaking past an unaware monster ({@code past}: 1 near, 2 close) counts toward a little Stealth
 	 * experience. Spotted or hunted, the count starts over.
 	 */

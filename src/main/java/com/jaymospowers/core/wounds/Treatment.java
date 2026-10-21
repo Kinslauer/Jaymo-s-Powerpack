@@ -180,7 +180,7 @@ public final class Treatment {
 		final InteractionHand hand;
 		final Vec3 from, targetFrom;
 		final boolean sneak;
-		/** (0.15.46) How long it takes this healer (Steady Hands, {@link MedicineSkill}). */
+		/** (0.15.49) How long it takes this healer (Steady Hands, {@link MedicineSkill}). */
 		final int need;
 		int ticks;
 
@@ -652,13 +652,13 @@ public final class Treatment {
 			case BANDAGE, RAG -> {
 				boolean rag = s.remedy == Remedy.RAG;
 				Bleeding.stop(body, part, false);
-				// (0.15.46) Field Dresser: a better dressing
+				// (0.15.49) Field Dresser: a better dressing
 				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, rag);
 				stack.consume(1, player);
 			}
 			case SPLINT -> {
 				if (Breaks.splint(body, part) && MedicineSkill.bonesetter(player)) {
-					// (0.15.46) Bonesetter: set well, the limb starts to mend at once
+					// (0.15.49) Bonesetter: set well, the limb starts to mend at once
 					Wounds.healPart(body, part, MedicineSkill.BONESETTER_HEAL);
 				}
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.9F);
@@ -689,7 +689,7 @@ public final class Treatment {
 				if (Downed.passedOut(body) && body instanceof Player) {
 					// (a deep swoon: a chance, and the whole vial)
 					stack.hurtAndBreak(stack.getMaxDamage() - stack.getDamageValue(), player, s.hand);
-					// (0.15.46) Lifesaver: they always come to
+					// (0.15.49) Lifesaver: they always come to
 					if (!MedicineSkill.lifesaver(player) && level.getRandom().nextFloat() >= ROUSE_CHANCE) {
 						player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.salts_failed", body.getDisplayName())
 							.withStyle(ChatFormatting.GRAY));
@@ -708,7 +708,7 @@ public final class Treatment {
 				Wounds.hurtPart(body, BodyPart.BODY, LEECH_COST, null);
 				Pain.leeches(body);
 				if (MedicineSkill.bleedBadBlood(player, body)) {
-					// (0.15.46) a Plague Doctor's leeches draw out the plague and poison
+					// (0.15.49) a Plague Doctor's leeches draw out the plague and poison
 					level.sendParticles(ParticleTypes.SQUID_INK, body.getX(), body.getY() + body.getBbHeight() * 0.5, body.getZ(), 8, 0.2, 0.2, 0.2, 0.01);
 					done = Component.translatable("message.jaymospowers.wounds.leeches_bad_blood", body.getDisplayName());
 				}
@@ -722,7 +722,7 @@ public final class Treatment {
 			}
 		}
 		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
-		// (0.15.46) a little Survival experience (Kingdoms)
+		// (0.15.49) a little Survival experience (Kingdoms)
 		MedicineSkill.treated(player);
 	}
 }

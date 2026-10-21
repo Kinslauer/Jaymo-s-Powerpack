@@ -188,8 +188,9 @@ def packMods = [
 	// Streams Reflowing (all rights reserved, but "You can add this to any modpack, anywhere"): rivers and streams that
 	// run downhill from springs through lakes to the sea, and water that keeps flowing. Worldgen, so new chunks only.
 	[dep: "maven.modrinth:streams-reflowing:1PyyzYS1", cf: [1581408, 9216745]],
-	// Jade (CC BY-NC-SA 4.0, Snownee; shipped unchanged in a free pack): the little panel naming the block or mob under
-	// your crosshair, with its mod, health and what it's doing. Works with JEI.
+	// Jade (CC BY-NC-SA 4.0, Snownee; shipped unchanged in a free pack): the little panel naming the mob, player or
+	// dropped item under your crosshair, with its mod, health and what it's doing. Works with JEI. Blocks show nothing
+	// (0.15.47, client/compat/JadeEntitiesOnly).
 	[dep: "maven.modrinth:jade:71CTWqdE", cf: [324717, 9042194]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
@@ -341,6 +342,8 @@ dependencies {
 	compileOnly "maven.modrinth:entitytexturefeatures:OOEycXyN"
 	// (0.11.31) compiled against for its recipe pages; touched only via client/jei (its jei_mod_plugin entrypoint)
 	compileOnly "maven.modrinth:jei:wQJNj1C5"
+	// (0.15.47) compiled against to keep its panel off blocks; touched only via client/compat/JadeEntitiesOnly (its jade entrypoint)
+	compileOnly "maven.modrinth:jade:71CTWqdE"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }

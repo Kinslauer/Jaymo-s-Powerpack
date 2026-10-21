@@ -31,7 +31,7 @@ final class Atrophy extends MobEffect {
 			// (an Immunity potion in them, or a vampire's own blood: it doesn't take)
 			return false;
 		}
-		// (0.7.135) a Plague Doctor feels only half its pricks
+		// (0.7.136) a Plague Doctor feels only half its pricks
 		if (mob.getHealth() > 1.0F && !(Nightfall.plagueDoctor(mob) && mob.getRandom().nextFloat() >= Nightfall.PLAGUE_DOCTOR_TAKES)) {
 			mob.hurtServer(level, mob.damageSources().magic(), PRICK);
 		}

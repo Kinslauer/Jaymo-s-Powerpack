@@ -72,7 +72,7 @@ public final class Skills {
 	 */
 	public static final int STEALTH_MAX_LEVEL = 25;
 	/**
-	 * (0.7.135) Survival's highest level: its second page, Medicine (Steady Hands to Second Wind; the treating is Jaymo's
+	 * (0.7.136) Survival's highest level: its second page, Medicine (Steady Hands to Second Wind; the treating is Jaymo's
 	 * Powers' Wounds, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
 	 */
 	public static final int SURVIVAL_MAX_LEVEL = 25;
@@ -95,15 +95,15 @@ public final class Skills {
 	 */
 	static final int XP_SNEAK_ATTACK = 1, XP_ASSASSINATION = 3;
 	static final long SNEAK_XP_TICKS = 400L;
-	/** (0.7.135) Stealth experience for sneaking past monsters unseen ({@link Senses#SNEAK_PAST_TICKS} of it). */
+	/** (0.7.136) Stealth experience for sneaking past monsters unseen ({@link Senses#SNEAK_PAST_TICKS} of it). */
 	static final int XP_SNEAK_PAST = 1;
 	/**
-	 * (0.7.135) Survival experience for medicine: a treatment finished or a downed one brought round (Jaymo's Powers tags
+	 * (0.7.136) Survival experience for medicine: a treatment finished or a downed one brought round (Jaymo's Powers tags
 	 * the healer {@link #TREATED_TAG}), at most every {@link #TREAT_XP_TICKS} (10 s).
 	 */
 	static final int XP_TREAT = 2;
 	static final long TREAT_XP_TICKS = 200L;
-	/** (0.7.135) The entity tag Jaymo's Powers puts on a player for each treatment they finish ({@code Medicine.XP_TAG}); taken off as it's read. */
+	/** (0.7.136) The entity tag Jaymo's Powers puts on a player for each treatment they finish ({@code Medicine.XP_TAG}); taken off as it's read. */
 	static final String TREATED_TAG = "jaymospowers_treated";
 	/** (0.7.102) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
 	static final String FREERUN_TAG = "jaymospowers_freerun";
@@ -195,7 +195,7 @@ public final class Skills {
 		SLIP_THE_NET(Pillar.STEALTH, 1, 1, 10, 9, 0, SHADOWED),
 		SNEAK_ATTACK(Pillar.STEALTH, 2, 1, 10, 9, 2, QUIET_STEP),
 		ASSASSINATE(Pillar.STEALTH, 1, 2, 15, 10, 1, SLIP_THE_NET, SNEAK_ATTACK),
-		// (0.7.135) Survival's second page, Medicine: the treating is Jaymo's Powers' Wounds, the plague is Nightfall's; last, so no ordinal moves
+		// (0.7.136) Survival's second page, Medicine: the treating is Jaymo's Powers' Wounds, the plague is Nightfall's; last, so no ordinal moves
 		STEADY_HANDS(Pillar.SURVIVAL, 3, 1, 3, 4, 0),
 		FIELD_DRESSER(Pillar.SURVIVAL, 2, 1, 3, 4, 2),
 		BONESETTER(Pillar.SURVIVAL, 1, 1, 8, 5, 0, STEADY_HANDS),
@@ -315,7 +315,7 @@ public final class Skills {
 	private static final Map<UUID, Long> NEXT_FREERUN_XP = new HashMap<>();
 	/** (0.7.111) Player → game time a sneak attack next gives experience. */
 	private static final Map<UUID, Long> NEXT_SNEAK_XP = new HashMap<>();
-	/** (0.7.135) Player → game time a treatment next gives experience. */
+	/** (0.7.136) Player → game time a treatment next gives experience. */
 	private static final Map<UUID, Long> NEXT_TREAT_XP = new HashMap<>();
 
 	private Skills() {
@@ -344,7 +344,7 @@ public final class Skills {
 					player.removeTag(FREERUN_TAG);
 					freerun(player, player.level().getGameTime());
 				}
-				// (0.7.135) and treatments (Powers' Wounds tags the healer): a little Survival experience
+				// (0.7.136) and treatments (Powers' Wounds tags the healer): a little Survival experience
 				if (player.entityTags().contains(TREATED_TAG)) {
 					player.removeTag(TREATED_TAG);
 					treated(player, player.level().getGameTime());
@@ -612,12 +612,12 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_SNEAK_ATTACK);
 	}
 
-	/** (0.7.135) Sneaking past monsters unseen for a while ({@link Senses}): a little experience. */
+	/** (0.7.136) Sneaking past monsters unseen for a while ({@link Senses}): a little experience. */
 	static void sneakPast(ServerPlayer player) {
 		grant(player, Pillar.STEALTH, XP_SNEAK_PAST);
 	}
 
-	/** (0.7.135) A treatment finished: a little Survival experience, at most every {@link #TREAT_XP_TICKS}. */
+	/** (0.7.136) A treatment finished: a little Survival experience, at most every {@link #TREAT_XP_TICKS}. */
 	static void treated(ServerPlayer player, long now) {
 		if (NEXT_TREAT_XP.getOrDefault(player.getUUID(), 0L) > now) {
 			return;

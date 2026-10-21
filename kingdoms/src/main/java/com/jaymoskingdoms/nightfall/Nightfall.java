@@ -85,7 +85,7 @@ public final class Nightfall {
 
 	static final DustParticleOptions BLOOD = new DustParticleOptions(0x8A0303, 1.0F);
 
-	/** (0.7.135) Plague Doctor: the share of the plague's time they catch, and the share of its pricks and weakenings that take. */
+	/** (0.7.136) Plague Doctor: the share of the plague's time they catch, and the share of its pricks and weakenings that take. */
 	static final float PLAGUE_DOCTOR_TICKS = 0.5F, PLAGUE_DOCTOR_TAKES = 0.5F;
 	public static Holder<MobEffect> ATROPHY, IMMUNITY;
 	public static Holder<Potion> IMMUNITY_POTION, LONG_IMMUNITY_POTION, ATROPHY_POTION, STRONG_ATROPHY_POTION;
@@ -193,7 +193,7 @@ public final class Nightfall {
 		return !mob.hasEffect(IMMUNITY) && !Immunity.unholy(mob) && !(mob instanceof Player p && (p.isCreative() || p.isSpectator()));
 	}
 
-	/** Gives {@code mob} the plague, if it can catch it. (0.7.135) A Plague Doctor catches it for half as long, and never worse than level I. */
+	/** Gives {@code mob} the plague, if it can catch it. (0.7.136) A Plague Doctor catches it for half as long, and never worse than level I. */
 	static void infect(LivingEntity mob, int ticks, int amplifier) {
 		if (catches(mob)) {
 			if (plagueDoctor(mob)) {
@@ -204,7 +204,7 @@ public final class Nightfall {
 		}
 	}
 
-	/** (0.7.135) {@code mob} is a player who knows Plague Doctor (Survival's Medicine page): the plague goes easier on them. */
+	/** (0.7.136) {@code mob} is a player who knows Plague Doctor (Survival's Medicine page): the plague goes easier on them. */
 	static boolean plagueDoctor(LivingEntity mob) {
 		return mob instanceof Player p && Skills.of(p).rank(Skills.Perk.PLAGUE_DOCTOR) > 0;
 	}

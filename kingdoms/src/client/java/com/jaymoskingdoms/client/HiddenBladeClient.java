@@ -3,14 +3,17 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.HiddenBlade;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -47,8 +50,16 @@ import net.minecraft.world.phys.HitResult;
  * <p>
  * (0.7.122) It moves: springing raises the arm in front of you into a guard, then the blade shoots out of the housing
  * ({@link #SPRING_TICKS}); sheathing runs it back. While it's out over an empty hand that arm is held up ahead
- * ({@code GUARD_*}, from {@code HiddenBladePoseMixin}, so costumes follow it), and a blow with it is a straight thrust
- * ({@code STAB_*}) rather than a punch. The bracer stands {@link #BRACER_GROW} proud so it shows over a costume's sleeve.
+ * ({@code GUARD_*}), and a blow with it is a straight thrust ({@code STAB_*}) rather than a punch. The bracer stands
+ * {@link #BRACER_GROW} proud so it shows over a costume's sleeve.
+ * <p>
+ * (0.7.135) Andy: "the blades still are not held in front of the player". Entity Model Features (Fresh Animations)
+ * animates the player model after the game does and laid its own idle arms back over the guard, so: the guard goes on
+ * right after every animation of the model, for the layers and as each model (body, costume, armour) is drawn
+ * ({@link #pose}, from {@code MobSwingLivingEntityRendererMixin} and {@code MobSwingModelFeatureRendererMixin}), and
+ * EMF's animations pause for a player while their blade is sprung ({@code EmfBladePause}), as they do for Powers' poses.
+ * The guard is still: only the walk sways it, with none of the idle bob. In first person the bare arm comes up into
+ * the same guard ({@link #firstPersonGuard}, {@code FIRST_GUARD}), the blade pointing ahead past the fist.
  */
 public final class HiddenBladeClient {
 	// ===== the knobs ================================================================================================
@@ -68,9 +79,17 @@ public final class HiddenBladeClient {
 	 * (0.7.122) The guard, blade out: the arm raised ahead this far (radians, 0 hanging, -pi/2 straight out), plus this
 	 * share of where you look up or down; turned in across the body this far; this much of the walk's arm swing kept.
 	 */
-	static final float GUARD_PITCH = -1.15F, GUARD_LOOK = 0.5F, GUARD_IN = 0.4F, GUARD_SWAY = 0.25F;
+	static final float GUARD_PITCH = -1.3F, GUARD_LOOK = 0.5F, GUARD_IN = 0.35F, GUARD_SWAY = 0.2F;
 	/** (0.7.122) A blow with the blade out: the arm thrust straight ahead (plus this share of the look) and this far forward (pixels). */
 	static final float STAB_LOOK = 0.8F, STAB_REACH = 3.0F;
+	/**
+	 * (0.7.135) First person, the guard: the bare arm moved in toward the middle of the view, up and forward (blocks), then
+	 * turned about the shoulder: raised, turned in, tipped (degrees). The thrust pushes it this far forward (blocks).
+	 */
+	static final float FIRST_IN = 0.16F, FIRST_UP = 0.1F, FIRST_FORWARD = 0.05F, FIRST_RAISE = 12.0F, FIRST_TURN = 10.0F, FIRST_TIP = 4.0F;
+	static final float FIRST_STAB = 0.3F;
+	/** First person: the shoulder the arm turns about (right arm; x right, y up, z toward you), and how far below the view the empty off hand starts. */
+	static final float FIRST_SHOULDER_X = 0.75F, FIRST_SHOULDER_Y = -0.85F, FIRST_ENTRY_DROP = 0.6F;
 	// ================================================================================================================
 
 	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/hidden_blade.png");
@@ -94,6 +113,9 @@ public final class HiddenBladeClient {
 				helper.register(new Layer(avatar));
 			}
 		});
+		if (FabricLoader.getInstance().isModLoaded("entity_model_features")) {
+			EmfBladePause.register();
+		}
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.options.keyUse.isDown()) {
 				released = true;
@@ -185,16 +207,22 @@ public final class HiddenBladeClient {
 	}
 
 	/**
-	 * (0.7.122) After the player model is posed ({@code HiddenBladePoseMixin}): an arm whose hand is empty with its blade
-	 * springing or out comes up into the guard ahead of you, and a blow with it is a thrust.
+	 * (0.7.135) Right after a player's model is animated (for the layers, and as the body, costume and armour are each
+	 * drawn): an arm whose hand is empty with its blade springing or out comes up into the guard ahead of you, and a blow
+	 * with it is a thrust. Laid over whatever animated the arm, so it holds whoever did.
 	 */
-	public static void pose(PlayerModel model, AvatarRenderState state) {
+	public static void pose(Model<?> m, Object s) {
+		if (!(m instanceof HumanoidModel<?> model) || !(s instanceof AvatarRenderState state)) {
+			return;
+		}
 		float[] sprung = state.getData(SPRUNG);
 		if (sprung == null || state.isFallFlying || state.swimAmount > 0.0F
 			|| state.rightArmPose.affectsOffhandPose() || state.leftArmPose.affectsOffhandPose()) {
 			return;
 		}
 		HumanoidArm swingArm = state.currentSwing != null && state.swingAnimation > 0.0F ? state.currentSwing.hand().asArm(state.mainArm) : null;
+		float look = Mth.clamp(state.xRot * Mth.DEG_TO_RAD, -0.8F, 0.6F);
+		float turn = Mth.clamp(state.yRot * Mth.DEG_TO_RAD, -0.5F, 0.5F) * 0.5F;
 		for (int side = 0; side < 2; side++) {
 			boolean right = side == 0;
 			float raise = raise(sprung[wrist(right, state.mainArm)]);
@@ -202,9 +230,10 @@ public final class HiddenBladeClient {
 				continue;
 			}
 			ModelPart arm = right ? model.rightArm : model.leftArm;
-			float look = Mth.clamp(model.head.xRot, -0.8F, 0.6F);
-			float guardX = GUARD_PITCH + look * GUARD_LOOK + arm.xRot * GUARD_SWAY + (state.isCrouching ? 0.4F : 0.0F);
-			float guardY = (right ? -GUARD_IN : GUARD_IN) + Mth.clamp(model.head.yRot, -0.5F, 0.5F) * 0.5F;
+			// still but for the walk: vanilla's own arm swing, scaled down, and none of the idle bob
+			float walk = Mth.cos(state.walkAnimationPos * 0.6662F + (right ? (float) Math.PI : 0.0F)) * state.walkAnimationSpeed / state.speedValue;
+			float guardX = GUARD_PITCH + look * GUARD_LOOK + walk * GUARD_SWAY + (state.isCrouching ? 0.4F : 0.0F);
+			float guardY = (right ? -GUARD_IN : GUARD_IN) + turn;
 			if (swingArm == (right ? HumanoidArm.RIGHT : HumanoidArm.LEFT)) {
 				// the blow: straight out along the look, and forward, then back to the guard
 				float stab = Mth.sin(state.swingAnimation * (float) Math.PI);
@@ -216,6 +245,46 @@ public final class HiddenBladeClient {
 			arm.yRot = Mth.lerp(raise, arm.yRot, guardY);
 			arm.zRot = Mth.lerp(raise, arm.zRot, 0.0F);
 		}
+	}
+
+	/** (0.7.135) Whether EMF should leave this entity's model alone: a player whose blade is springing or out (EmfBladePause). */
+	public static boolean guarding(Object entity) {
+		if (!(entity instanceof Player player)) {
+			return false;
+		}
+		float[] spring = SPRINGS.get(player);
+		return spring != null ? spring[0] > 0.0F || spring[1] > 0.0F || spring[2] > 0.0F || spring[3] > 0.0F
+			: (HiddenBlade.bits(player) & 12) != 0;
+	}
+
+	/**
+	 * (0.7.135) First person, before the game draws your bare arm for {@code hand}: with that wrist's blade springing or
+	 * out, moves the arm into the guard and returns how far (0-1); 0 leaves the hand to the game. {@code attack}: the
+	 * swing, thrust forward instead of the punch.
+	 */
+	public static float firstPersonGuard(PoseStack poseStack, AvatarRenderState avatar, InteractionHand hand, float attack) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null || avatar.id != player.getId()) {
+			return 0.0F;
+		}
+		boolean main = hand == InteractionHand.MAIN_HAND;
+		float raise = raise(sprung(player, main ? HiddenBlade.MAIN : HiddenBlade.OFF,
+			Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+		if (raise <= 0.0F) {
+			return 0.0F;
+		}
+		boolean right = (main ? avatar.mainArm : avatar.mainArm.getOpposite()) == HumanoidArm.RIGHT;
+		float side = right ? 1.0F : -1.0F;
+		float stab = attack > 0.0F ? Mth.sin(attack * (float) Math.PI) : 0.0F;
+		// the empty off hand isn't drawn by the game: it rises in from below
+		float drop = main ? 0.0F : (1.0F - raise) * FIRST_ENTRY_DROP;
+		poseStack.translate(-side * FIRST_IN * raise, FIRST_UP * raise - drop, -(FIRST_FORWARD * raise + FIRST_STAB * stab));
+		poseStack.translate(side * FIRST_SHOULDER_X, FIRST_SHOULDER_Y, 0.0F);
+		poseStack.rotateDegrees(Axis.XP, FIRST_RAISE * raise);
+		poseStack.rotateDegrees(Axis.YP, side * FIRST_TURN * raise);
+		poseStack.rotateDegrees(Axis.ZP, side * FIRST_TIP * raise);
+		poseStack.translate(-side * FIRST_SHOULDER_X, -FIRST_SHOULDER_Y, 0.0F);
+		return raise;
 	}
 
 	private static void build() {
@@ -285,13 +354,6 @@ public final class HiddenBladeClient {
 		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM,
 			sprung(player, wrist, Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		poseStack.popPose();
-	}
-
-	/** First person: the off hand is empty, so the game draws no arm there; with its blade out, draw the arm (and blade) anyway. */
-	public static boolean showOffArm() {
-		LocalPlayer player = Minecraft.getInstance().player;
-		return player != null && player.getOffhandItem().isEmpty()
-			&& sprung(player, HiddenBlade.OFF, Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) > RAISE_SHARE;
 	}
 
 	/** Draws the blades on the wrists as the arms are posed now. */
