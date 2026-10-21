@@ -332,6 +332,7 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 		});
 		WebSymbiote.register();
+		WebSymbioteInfection.register();
 		WebCracks.register();
 		WebMorph.register();
 		WebSymbioteBlob.init();
@@ -1266,6 +1267,10 @@ public final class WebPower implements Power {
 	}
 
 	static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
+		if (!Powers.has(player, INSTANCE)) {
+			// (0.15.52) a symbiote in someone who isn't a web slinger: nothing of theirs would reel them in
+			return;
+		}
 		State state = state(player);
 		state.swinging[WebNet.MAIN] = false;
 		state.swinging[WebNet.OFF] = false;

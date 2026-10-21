@@ -156,6 +156,12 @@ public final class WebSymbioteBond {
 	static void onBond(ServerPlayer player, int bond) {
 		clear(player);
 		player.removeAttached(FOUGHT);
+		if (!player.isCreative() && !com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE)) {
+			// (0.15.52) in someone who isn't a web slinger it acclimates every time, and quicker: WebSymbioteInfection
+			player.setAttached(DORMANT, WebSymbioteInfection.ACCLIMATE_TICKS);
+			live(player).whisperAt = player.level().getGameTime() + WebSymbiote.BOND_TICKS + DORMANT_FIRST;
+			return;
+		}
 		if (Boolean.TRUE.equals(player.getAttached(MET)) || player.isCreative()) {
 			return;
 		}

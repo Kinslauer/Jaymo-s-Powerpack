@@ -82,6 +82,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 	static final int ROAM_RADIUS = 10;
 	/** It notices a web slinger or a risen body this far off. */
 	static final double SEEK_RANGE = 16.0;
+	/**
+	 * (0.15.52) Chasing a web slinger: in anyone else's sight (within {@code PURSUE_UNSEEN}) it crawls, its home moved
+	 * {@code PURSUE_STEP} ahead every scan; unwatched it goes under and comes up {@code PURSUE_SURFACE} from them.
+	 */
+	static final double PURSUE_UNSEEN = 48.0, PURSUE_STEP = 20.0, PURSUE_SURFACE = 24.0;
 	/** It gives up a chase this far from home. */
 	static final double LEASH = 32.0;
 	/** Close enough to leap on and take hold. */
@@ -137,6 +142,12 @@ public class WebSymbioteBlob extends PathfinderMob {
 	private final java.util.Set<java.util.UUID> spurned = new java.util.HashSet<>();
 	private int mobRest;
 
+	/**
+	 * (0.15.52) The web slinger it left its last host for ({@link WebSymbioteInfection}): it makes for them, however far,
+	 * until it reaches them, loses them (gone, or another world) or has to run from fire. Not saved.
+	 */
+	private java.util.@Nullable UUID pursuing;
+
 	/** Who (or what) it's after right now; worked out again every {@link #SCAN_EVERY}. */
 	private @Nullable Entity quarry;
 	/** Whoever went for it, and until when it hunts them. */
@@ -184,6 +195,57 @@ public class WebSymbioteBlob extends PathfinderMob {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_DEATH, SoundSource.HOSTILE, 1.4F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 1.0F, 0.5F);
 		return blob;
+	}
+
+	/** (0.15.52) It makes for {@code target} (see {@link #pursuing}). */
+	WebSymbioteBlob pursue(Player target) {
+		this.pursuing = target.getUUID();
+		return this;
+	}
+
+	/**
+	 * (0.15.52) A step of the chase: near enough, it goes for them as for any host (one who already has a symbiote, it
+	 * only settles down near); far off, it heads their way, and once nobody else is watching it, it crawls the rest of
+	 * the way unseen and comes up {@link #PURSUE_SURFACE} blocks from them.
+	 */
+	private void pursue(ServerLevel level) {
+		Player target = this.pursuing == null ? null : level.getPlayerByUUID(this.pursuing);
+		if (target == null || !target.isAlive() || target.isSpectator()) {
+			this.pursuing = null;
+			return;
+		}
+		double distance = this.distanceTo(target);
+		if (distance <= SEEK_RANGE) {
+			this.setHomeTo(target.blockPosition(), ROAM_RADIUS);
+			if (this.wants(target, target.position())) {
+				this.quarry = target;
+			} else {
+				// it has one already: it stays about them, a host for whoever comes next
+				this.pursuing = null;
+				this.quarry = null;
+			}
+			return;
+		}
+		this.quarry = null;
+		Vec3 toward = target.position().subtract(this.position()).horizontal();
+		boolean watched = !level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(PURSUE_UNSEEN), p -> p != target && !p.isSpectator()).isEmpty();
+		if (!watched && toward.lengthSqr() > 1.0E-4) {
+			// out of everyone's sight: underground the rest of the way, and up again just short of them
+			Vec3 back = toward.normalize().scale(-PURSUE_SURFACE);
+			BlockPos column = BlockPos.containing(target.getX() + back.x, target.getY(), target.getZ() + back.z);
+			if (level.isLoaded(column)) {
+				int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
+				this.snapTo(column.getX() + 0.5, y, column.getZ() + 0.5, this.getYRot(), 0.0F);
+				this.getNavigation().stop();
+				this.setHomeTo(target.blockPosition(), ROAM_RADIUS);
+				level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.2, this.getZ(), 20, 0.3, 0.1, 0.3, 0.05);
+				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 1.0F, 0.5F);
+				return;
+			}
+		}
+		// in sight of someone: it hauls itself off their way (its home runs on ahead of it)
+		Vec3 ahead = this.position().add(toward.normalize().scale(Math.min(distance, PURSUE_STEP)));
+		this.setHomeTo(BlockPos.containing(ahead), ROAM_RADIUS);
 	}
 
 	/** It has just left {@code host} (rejected, or dead): it won't go back, and rests a moment first. */
@@ -303,7 +365,13 @@ public class WebSymbioteBlob extends PathfinderMob {
 				}
 			}
 		}
-		if (this.tickCount >= SETTLE_TICKS && this.quarry == null && this.fleeFrom == null && this.onGround() && this.settle(level)) {
+		if (this.pursuing != null && this.tickCount % SCAN_EVERY == 0 && this.grudge == null && this.fleeFrom == null) {
+			this.pursue(level);
+			if (this.isRemoved()) {
+				return;
+			}
+		}
+		if (this.tickCount >= SETTLE_TICKS && this.pursuing == null && this.quarry == null && this.fleeFrom == null && this.onGround() && this.settle(level)) {
 			return;
 		}
 		if (this.fireGrace > 0) {
@@ -325,7 +393,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 				this.marks(foe);
 			}
 		}
-		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
+		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null && this.pursuing == null) {
 			this.quarry = findHost(level);
 		}
 		boolean moving = this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4;
@@ -372,8 +440,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (zombie != null) {
 			return zombie;
 		}
-		Entity player = level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SEEK_RANGE), p -> wants(p, home)).stream()
-			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this))).orElse(null);
+		// (0.15.52) anyone will do now, but a web slinger first
+		Entity player = level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SEEK_RANGE), p -> this.wants(p, home)).stream()
+			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this) + (Powers.has(p, WebPower.INSTANCE) ? 0.0 : SEEK_RANGE * SEEK_RANGE * 4.0)))
+			.orElse(null);
 		if (player != null || this.mobRest > 0) {
 			return player;
 		}
@@ -382,15 +452,16 @@ public class WebSymbioteBlob extends PathfinderMob {
 			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
 	}
 
-	private static boolean wants(Player player, Vec3 home) {
-		return player.isAlive() && !player.isSpectator() && Powers.has(player, WebPower.INSTANCE) && !WebSymbiote.state(player).bonded()
+	/** (0.15.52) Anyone without a symbiote (not only a web slinger: {@link WebSymbioteInfection}), but never the one it just left. */
+	private boolean wants(Player player, Vec3 home) {
+		return player.isAlive() && !player.isSpectator() && !WebSymbiote.state(player).bonded() && !this.spurned.contains(player.getUUID())
 			&& player.position().distanceTo(home) <= LEASH;
 	}
 
 	/** Leaps on and takes hold. */
 	private void join(ServerLevel level, Entity host) {
 		if (host instanceof ServerPlayer player) {
-			if (!wants(player, Vec3.atCenterOf(this.getHomePosition()))) {
+			if (!this.wants(player, Vec3.atCenterOf(this.getHomePosition()))) {
 				return;
 			}
 			WebSymbiote.bond(player, this.position(), this.strain());
@@ -414,11 +485,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 	}
 
 	/**
-	 * A web slinger already wearing a symbiote: it won't turn on one of its own (a black or white one spares the black
-	 * and the white; the red one only the red).
+	 * Someone already wearing a symbiote (since 0.15.52, web slinger or not): it won't turn on one of its own (a black or
+	 * white one spares the black and the white; the red one only the red).
 	 */
 	private boolean kin(Player player) {
-		return Powers.has(player, WebPower.INSTANCE) && WebSymbiote.state(player).bonded() && !WebSymbioteStrains.rivals(this, player);
+		return WebSymbiote.state(player).bonded() && !WebSymbioteStrains.rivals(this, player);
 	}
 
 	/** {@code source} hurt it (or tried): mark whoever did it. */
@@ -463,7 +534,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		Vec3 to = foe.position().add(0.0, foe.getBbHeight() * 0.6, 0.0);
 		this.tendril(level, from, to);
 		this.getLookControl().setLookAt(foe, 90.0F, 90.0F);
-		if (foe instanceof ServerPlayer player && wants(player, player.position())) {
+		if (foe instanceof ServerPlayer player && this.wants(player, player.position())) {
 			// it goes for the one it was always after: up the tendril and in
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
 			Shakes.send(player, 8.0F, from);

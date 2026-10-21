@@ -1079,15 +1079,15 @@ public final class WebSymbiote {
 		return suitShown(player) || armored(player) || isBonded(player) && !player.isCreative() && !sulking(player);
 	}
 
-	/** Bonded, and still a web slinger (the symbiote only answers one). */
+	/** Bonded (since 0.15.52 anyone can host one, web slinger or not: see {@link WebSymbioteInfection}). */
 	public static boolean isBonded(Player player) {
-		return state(player).bonded() && Powers.has(player, WebPower.INSTANCE);
+		return state(player).bonded();
 	}
 
 	/** Others should see the black suit (and black webs). */
 	public static boolean suitShown(Player player) {
 		WebSymbioteState state = state(player);
-		return state.bonded() && state.has(WebSymbioteState.SUIT) && Powers.has(player, WebPower.INSTANCE);
+		return state.bonded() && state.has(WebSymbioteState.SUIT);
 	}
 
 	/**
@@ -1108,7 +1108,7 @@ public final class WebSymbiote {
 	 * body without the suit flag, which is why its charged jump used to do nothing).
 	 */
 	public static boolean leapBody(Player player) {
-		return suitShown(player) || bulked(player) && Powers.has(player, WebPower.INSTANCE);
+		return suitShown(player) || bulked(player) && state(player).bonded();
 	}
 
 	/** The suit comes at your call (it shows itself on bonding, and in every takeover, regardless). */
@@ -1181,7 +1181,7 @@ public final class WebSymbiote {
 	}
 
 	/** Wall Crawl is on: the server lets them hang on walls and ceilings without the flying kick. */
-	static boolean allowsFloating(ServerPlayer player) {
+	public static boolean allowsFloating(ServerPlayer player) {
 		return isToggled(player, WebSymbioteState.CRAWL);
 	}
 
@@ -1310,7 +1310,8 @@ public final class WebSymbiote {
 
 	/** The bond moved to {@code value} (clamped): each ability it now opens is announced, as is the whole bond. */
 	private static WebSymbioteState bondTo(ServerPlayer player, WebSymbioteState state, int value) {
-		int to = Mth.clamp(value, 0, BOND_MAX);
+		// (0.15.52) acclimated in a host who isn't a web slinger, it neither warms nor cools: WebSymbioteInfection
+		int to = WebSymbioteInfection.held(player) ? WebSymbioteInfection.HOLD_BOND : Mth.clamp(value, 0, BOND_MAX);
 		int from = state.bond();
 		if (to == from) {
 			return state;
@@ -1365,7 +1366,12 @@ public final class WebSymbiote {
 		return new DustParticleOptions(SHEEN, scale);
 	}
 
-	/** Every tick, for a web slinger (from WebPower.tick). */
+	/** It has anything to tick for this player: a bond, or what's left of one (it crawling away, the effects). */
+	static boolean ticking(ServerPlayer player) {
+		return player.getAttached(LIVE) != null || state(player).bonded();
+	}
+
+	/** Every tick, for a web slinger (from WebPower.tick), or for anyone else it's in (from WebSymbioteInfection). */
 	static void tick(ServerPlayer player) {
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
@@ -1853,14 +1859,12 @@ public final class WebSymbiote {
 			return InteractionResult.SUCCESS;
 		}
 		Vec3 center = Vec3.atBottomCenterOf(pos).add(0.0, 0.3, 0.0);
-		if (!Powers.has(sp, WebPower.INSTANCE) || !sp.isShiftKeyDown() || state(sp).bonded()) {
-			// it recoils from anyone else (and from a careless touch)
+		// (0.15.52) anyone can take it in now, not only a web slinger: WebSymbioteInfection
+		if (!sp.isShiftKeyDown() || state(sp).bonded()) {
+			// it recoils from a careless touch (and from one who already has one)
 			serverLevel.playSound(null, pos, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.0F, 0.5F);
 			serverLevel.playSound(null, pos, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.BLOCKS, 0.8F, 1.6F);
 			serverLevel.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y, center.z, 8, 0.25, 0.15, 0.25, 0.04);
-			if (!Powers.has(sp, WebPower.INSTANCE)) {
-				whisper(sp, "recoil");
-			}
 			return InteractionResult.SUCCESS;
 		}
 		serverLevel.removeBlock(pos, false);
@@ -1946,7 +1950,7 @@ public final class WebSymbiote {
 	 * You died: it lets go of you for good (the bond is gone; earn it back from scratch with this one or another) and
 	 * crawls out of your body as a {@link WebSymbioteBlob}, which stays near where you fell.
 	 */
-	static void withdraw(ServerPlayer player) {
+	static WebSymbioteBlob withdraw(ServerPlayer player) {
 		WebSymbioteState old = state(player);
 		endShroud(player);
 		Live live = live(player);
@@ -1967,7 +1971,24 @@ public final class WebSymbiote {
 		WebSymbioteBond.clear(player);
 		WebSymbioteStrains.onUnbond(player);
 		// the one that leaves is still the strain it was
-		WebSymbioteStrains.mark(WebSymbioteBlob.release(player.level(), player.position()), old.kind());
+		WebSymbioteBlob blob = WebSymbioteBlob.release(player.level(), player.position());
+		WebSymbioteStrains.mark(blob, old.kind());
+		return blob;
+	}
+
+	/**
+	 * (0.15.52) It leaves a host who isn't a web slinger of its own accord ({@link WebSymbioteInfection}), saying
+	 * {@code line} as it goes: it pours out of them alive, and the blob it becomes won't take them again.
+	 */
+	static WebSymbioteBlob leave(ServerPlayer player, String line) {
+		whisper(player, line);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 1.3F);
+		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.08);
+		com.jaymospowers.core.Shakes.send(player, 1.0F);
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 0, false, false));
+		return withdraw(player).spurn(player);
 	}
 
 	/** The suit is coming off by tearing (see {@link #TORN}). */
@@ -3509,7 +3530,8 @@ public final class WebSymbiote {
 		if (target != null) {
 			Vec3 center = target.getBoundingBox().getCenter();
 			double volume = target.getBbWidth() * target.getBbWidth() * target.getBbHeight();
-			if (volume > TENDRIL_HEAVY_VOLUME) {
+			// (a host who isn't a web slinger has no zip to ride: it flings even the big ones)
+			if (volume > TENDRIL_HEAVY_VOLUME && Powers.has(player, WebPower.INSTANCE)) {
 				int maxTicks = Mth.ceil(center.distanceTo(player.position()) / WebPower.ZIP_SPEED) + 12;
 				WebPower.startPull(player, new WebNet.Pull(center, target.position(), target.getId(), maxTicks, (byte)-1),
 					new WebLine(WebLine.YANK, center, target.getId()));
@@ -3536,7 +3558,7 @@ public final class WebSymbiote {
 			return true;
 		}
 		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(TENDRIL_RANGE)));
-		if (hit.getType() == HitResult.Type.MISS) {
+		if (hit.getType() == HitResult.Type.MISS || !Powers.has(player, WebPower.INSTANCE)) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 0.8F);
 			return false;
 		}
