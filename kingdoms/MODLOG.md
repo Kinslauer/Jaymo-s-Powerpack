@@ -3967,3 +3967,29 @@ back to normal when retracted. and only move when the player does."
   (`PowersCompat.corrupted`, by reflection on Powers' `Fate.isCorrupted`). Anyone already Stormborn keeps it; villagers
   are born Stormborn as before.
 - Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.141: Eurus and Aeolus, the dragons in disguise
+- Andy: "Eurus and Aeolus are actually MCA villagers, they can spawn anywhere and will transform after questioning you
+  if you have already beaten two other dragons." Skins by a friend of Andy's (`textures/entity/dragon/<kind>/villager.png`).
+- **Records** (`dragons/DragonRecords`, kept through death, synced): which kinds of wind dragon a player helped kill (only
+  kills count, Andy), and whether they ever tamed one.
+- **Disguises** (`dragons/Disguises`): now and then, out of sight near a player in the Overworld, a stranger: an MCA
+  villager wearing the friend's skin (no clothes, hair or face layers; a plain villager without MCA). Right-click and
+  they ask who you are and what you've slain. Eurus shows itself to anyone who's beaten 2 kinds of wind dragon, Aeolus
+  to 3; Wind, Arsenal, Chrono or Darktide users, dragon tamers and anyone with an earned heritage are trusted anyway.
+  Everyone else is shooed off (a shove, then 5 minutes' cold shoulder). They never take a town post, and wander off
+  after 3 days unvisited.
+- Andy: "The disguised villagers can be damaged 3 times, then they will violently assault the player who did. No
+  transformation, just increasingly condescending messages until they snap." Nothing hurts them; a player's first two
+  blows earn a sneer each, the third and they lay into the player for six seconds (Eurus 5 a blow, Aeolus 8), throw
+  them clear, and won't speak to them for 5 minutes.
+- **Eurus** (`dragons/EurusDragon`): the east wind, a storm dragon. Fastest and frailest of the five, lean with a whip
+  tail; faster still in rain. Its breath (`DragonStorm`) is a bolt that chains to 3 more creatures, and in a thunderstorm
+  may call real lightning. Cooked rabbit is its favourite; Stormborn bond twice as fast. A Wind-power rider flies it
+  faster (1.15x, 1.3x in rain). A wild one with nothing to fight flies off.
+- **Aeolus** (`dragons/AeolusDragon`): the father of winds, the final boss. Huge (1600 health), can't be tamed or ridden.
+  His breath turns through fire, frost, acid and storm. Below two thirds: gusts that throw you back. Below a third: a
+  gale every so often, warned by a ring, that throws everything near. Beaten, he calms every wild wind dragon within 192
+  blocks for a day and leaves four eggs.
+- **Eggs** (`dragons/DragonEggs`): Notus, Boreas, Zephyrus and Eurus eggs. Use one on a block to hatch a tamed hatchling,
+  which grows with time and faster on its favourite food or meat. A wild dragon that's calmed won't pick fights.

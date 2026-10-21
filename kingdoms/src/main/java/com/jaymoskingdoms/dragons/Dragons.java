@@ -42,7 +42,8 @@ import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus so far. In
+ * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus, and (0.7.141)
+ * Eurus and Aeolus, who go about disguised as villagers ({@link Disguises}). In
  * the Overworld each comes as a rare wilderness encounter ({@code Encounters}, biome tags
  * {@code jaymoskingdoms:has_<species>_dragon}): Notus over the badlands, Boreas over the frozen peaks, Zephyrus in the
  * swamps. In the Nether, where encounters don't reach, this looks for Notus over the basalt deltas (its tag). The
@@ -57,14 +58,16 @@ public final class Dragons {
 
 	/** The species' bodies (width, height in blocks). */
 	static final float NOTUS_WIDTH = 3.0F, NOTUS_HEIGHT = 2.4F, BOREAS_WIDTH = 2.6F, BOREAS_HEIGHT = 2.0F, ZEPHYRUS_WIDTH = 2.6F,
-		ZEPHYRUS_HEIGHT = 1.8F;
+		ZEPHYRUS_HEIGHT = 1.8F, EURUS_WIDTH = 2.4F, EURUS_HEIGHT = 1.8F, AEOLUS_WIDTH = 6.0F, AEOLUS_HEIGHT = 5.0F;
 
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
 
 	public static EntityType<NotusDragon> NOTUS_DRAGON;
 	public static EntityType<BoreasDragon> BOREAS_DRAGON;
 	public static EntityType<ZephyrusDragon> ZEPHYRUS_DRAGON;
-	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG;
+	public static EntityType<EurusDragon> EURUS_DRAGON;
+	public static EntityType<AeolusDragon> AEOLUS_DRAGON;
+	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG;
 	/** By name, for the op command. */
 	private static final Map<String, EntityType<? extends WindDragon>> BY_NAME = new LinkedHashMap<>();
 
@@ -91,13 +94,23 @@ public final class Dragons {
 		NOTUS_DRAGON = dragon("notus", NotusDragon::new, NOTUS_WIDTH, NOTUS_HEIGHT, true, NotusDragon.createAttributes());
 		BOREAS_DRAGON = dragon("boreas", BoreasDragon::new, BOREAS_WIDTH, BOREAS_HEIGHT, false, BoreasDragon.createAttributes());
 		ZEPHYRUS_DRAGON = dragon("zephyrus", ZephyrusDragon::new, ZEPHYRUS_WIDTH, ZEPHYRUS_HEIGHT, false, ZephyrusDragon.createAttributes());
+		// (0.7.141) the two in disguise (Disguises): Eurus, the east wind, and Aeolus, keeper of the winds
+		EURUS_DRAGON = dragon("eurus", EurusDragon::new, EURUS_WIDTH, EURUS_HEIGHT, false, EurusDragon.createAttributes());
+		AEOLUS_DRAGON = dragon("aeolus", AeolusDragon::new, AEOLUS_WIDTH, AEOLUS_HEIGHT, true, AeolusDragon.createAttributes());
 		NOTUS_DRAGON_SPAWN_EGG = egg(NOTUS_DRAGON);
 		BOREAS_DRAGON_SPAWN_EGG = egg(BOREAS_DRAGON);
 		ZEPHYRUS_DRAGON_SPAWN_EGG = egg(ZEPHYRUS_DRAGON);
+		EURUS_DRAGON_SPAWN_EGG = egg(EURUS_DRAGON);
+		AEOLUS_DRAGON_SPAWN_EGG = egg(AEOLUS_DRAGON);
+		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
+		Disguises.register();
+		DragonEggs.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> {
 			output.insertAfter(Items.ENDER_DRAGON_SPAWN_EGG, NOTUS_DRAGON_SPAWN_EGG);
 			output.insertAfter(NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG);
 			output.insertAfter(BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG);
+			output.insertAfter(ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG);
+			output.insertAfter(EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG);
 		});
 
 		PayloadTypeRegistry.serverboundPlay().register(Breathe.TYPE, Breathe.CODEC);
@@ -108,8 +121,8 @@ public final class Dragons {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
-		// testing (op): /kingdom dragon [notus|boreas|zephyrus] [tame]: a wild one (Notus unless named), or a tamed, saddled
-		// one, at your side
+		// testing (op): /kingdom dragon [notus|boreas|zephyrus|eurus|aeolus] [tame]: a wild one (Notus unless named), or a
+		// tamed, saddled one, at your side
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
 			LiteralArgumentBuilder<CommandSourceStack> dragon = Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(c -> spawn(c.getSource().getPlayerOrException(), NOTUS_DRAGON, false))
@@ -148,8 +161,9 @@ public final class Dragons {
 		dragon.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot() + 180.0F, 0.0F);
 		dragon.finalizeSpawn(player.level(), player.level().getCurrentDifficultyAt(at), EntitySpawnReason.COMMAND, null);
 		player.level().addFreshEntity(dragon);
-		if (tame) {
+		if (tame && dragon.tameable()) {
 			dragon.tameWithName(player);
+			DragonRecords.tamed(player);
 			dragon.setPersistenceRequired();
 			dragon.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
 		}

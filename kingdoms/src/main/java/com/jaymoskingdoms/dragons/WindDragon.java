@@ -1,9 +1,12 @@
 package com.jaymoskingdoms.dragons;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -128,6 +131,10 @@ public abstract class WindDragon extends AbstractHorse {
 	static final float FAVOURITE_STAMINA = 40.0F, MEAT_STAMINA = 20.0F, MEAL_HEAL = 6.0F;
 	/** How long one breath packet keeps the rider's fire going (ticks). */
 	static final int RIDER_BREATH_HOLD = 6;
+	/** A hatchling: how much a meal grows it (seconds of growing, as ageUp takes them), its favourite and any other meat. */
+	static final int HATCHLING_FAVOURITE_GROWTH = 60, HATCHLING_MEAT_GROWTH = 20;
+	/** Who fought it shares in beating it from this near (blocks). */
+	static final double CREDIT_RANGE = 64.0;
 	/** Following: it comes from this far, stops this near, and is brought over from beyond this. */
 	static final double FOLLOW_START = 10.0, FOLLOW_STOP = 5.0, FOLLOW_TELEPORT = 40.0;
 
@@ -162,6 +169,10 @@ public abstract class WindDragon extends AbstractHorse {
 	private @Nullable Vec3 lastPos;
 	private double floorY = Double.NaN;
 	private @Nullable ServerBossEvent bar;
+	/** The players who've hurt it (wild): they share in beating it. */
+	private final Set<UUID> hunters = new HashSet<>();
+	/** Calmed until this game time (Aeolus beaten near it). */
+	private long calmUntil;
 
 	// ---- the client's smoothed animation (see the model) ----
 	public float flyAnim, flyAnimO, breathAnim, breathAnimO, landAnim, landAnimO, sitAnim, sitAnimO, crashAnim, crashAnimO;
@@ -343,6 +354,19 @@ public abstract class WindDragon extends AbstractHorse {
 
 	protected BossEvent.BossBarColor barColor() {
 		return BossEvent.BossBarColor.RED;
+	}
+
+	/** Whether it can be worn down and tamed (Aeolus can't: it fights to the end). */
+	protected boolean tameable() {
+		return true;
+	}
+
+	/**
+	 * How much faster {@code rider} flies it than the usual ({@code DragonsClient}'s thrust and top speed): 1 for most.
+	 * Called on the rider's client, so it may only read what's synced (the weather, the rider's power).
+	 */
+	public float riderSpeedFactor(Player rider) {
+		return 1.0F;
 	}
 
 	/** Called every tick it sits on its perch, wild (a species that rests in the water keeps there). */
@@ -597,7 +621,7 @@ public abstract class WindDragon extends AbstractHorse {
 
 	/** The player it's after: the one an encounter set it on, or anyone (not creative) who comes near. */
 	private @Nullable LivingEntity wildFoe(ServerLevel level) {
-		if (level.getDifficulty() == Difficulty.PEACEFUL) {
+		if (level.getDifficulty() == Difficulty.PEACEFUL || calm(level)) {
 			return null;
 		}
 		LivingEntity target = this.foe != null ? this.foe : this.getTarget();
@@ -624,7 +648,7 @@ public abstract class WindDragon extends AbstractHorse {
 			&& !(e instanceof Player p && (p.isCreative() || p.isSpectator()));
 	}
 
-	private void fight(ServerLevel level, LivingEntity target) {
+	protected void fight(ServerLevel level, LivingEntity target) {
 		this.wildTicks++;
 		this.home = target.position();
 		switch (this.wild) {
@@ -700,7 +724,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/** Picks its next move against {@code target}. */
-	private void next(ServerLevel level, LivingEntity target) {
+	protected void next(ServerLevel level, LivingEntity target) {
 		this.wildTicks = 0;
 		this.swoopFrom = null;
 		float roll = this.random.nextFloat();
@@ -715,7 +739,7 @@ public abstract class WindDragon extends AbstractHorse {
 	}
 
 	/** On its feet: bite whoever's in reach, sweep the tail round when it's crowded or they're beside it, breathe at range. */
-	private void groundFight(ServerLevel level, LivingEntity target, boolean breathe) {
+	protected void groundFight(ServerLevel level, LivingEntity target, boolean breathe) {
 		lookAt(target);
 		double reach = BITE_REACH + this.getBbWidth() * 0.5 + target.getBbWidth() * 0.5;
 		double distance = this.distanceTo(target);
@@ -857,11 +881,15 @@ public abstract class WindDragon extends AbstractHorse {
 			return hurt;
 		}
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity l ? l : null;
+		Player hunter = credited(level, source);
+		if (hunter != null) {
+			this.hunters.add(hunter.getUUID());
+		}
 		if (grounded()) {
 			if (attacker != null) {
 				distrust(level, attacker, HURT_DRAIN);
 			}
-		} else if (this.getHealth() < this.getMaxHealth() * CRASH_AT) {
+		} else if (tameable() && this.getHealth() < this.getMaxHealth() * CRASH_AT) {
 			crash(level);
 		} else if (attacker != null && valid(attacker) && this.foe == null) {
 			this.foe = attacker;
@@ -991,6 +1019,7 @@ public abstract class WindDragon extends AbstractHorse {
 
 	private void tame(ServerLevel level, Player player) {
 		this.tameWithName(player);
+		DragonRecords.tamed(player);
 		this.setPersistenceRequired();
 		setDragonFlag(GROUNDED, false);
 		this.entityData.set(DATA_TAMER, -1);
@@ -1061,6 +1090,10 @@ public abstract class WindDragon extends AbstractHorse {
 	public InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		boolean server = !this.level().isClientSide();
+		if (server && this.isTamed() && owner(player)) {
+			// (0.7.141) those who tamed one before the records were kept are known by it too
+			DragonRecords.tamed(player);
+		}
 		if (!this.isTamed()) {
 			if (grounded() && favourite(stack)) {
 				if (server && this.level() instanceof ServerLevel level && this.tickCount - this.offeredAt >= OFFER_EVERY) {
@@ -1074,6 +1107,16 @@ public abstract class WindDragon extends AbstractHorse {
 			}
 			return InteractionResult.PASS;
 		}
+		if (stack.is(ItemTags.MEAT) && this.isBaby()) {
+			// a hatchling grows on meat (its favourite most)
+			if (server) {
+				this.ageUp(favourite(stack) ? HATCHLING_FAVOURITE_GROWTH : HATCHLING_MEAT_GROWTH, true);
+				this.heal(MEAL_HEAL);
+				stack.consume(1, player);
+				this.playSound(SoundEvents.GENERIC_EAT.value(), 1.0F, 1.2F);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (stack.is(ItemTags.MEAT) && (stamina() < STAMINA - 5.0F || this.getHealth() < this.getMaxHealth())) {
 			if (server) {
 				setStamina(stamina() + (favourite(stack) ? FAVOURITE_STAMINA : MEAT_STAMINA));
@@ -1083,7 +1126,7 @@ public abstract class WindDragon extends AbstractHorse {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		if (stack.is(Items.SADDLE) && !saddled() && !this.isVehicle()) {
+		if (stack.is(Items.SADDLE) && !saddled() && !this.isVehicle() && !this.isBaby()) {
 			if (server) {
 				this.setItemSlot(EquipmentSlot.SADDLE, stack.split(1));
 			}
@@ -1215,7 +1258,51 @@ public abstract class WindDragon extends AbstractHorse {
 		if (this.bar != null) {
 			this.bar.removeAllPlayers();
 		}
+		if (!this.isTamed() && this.level() instanceof ServerLevel level) {
+			// Andy: only kills count as beating a dragon: its killer and whoever fought it (still near) beat it
+			// (the killer however far off: a bow shot at a high flier counts)
+			Player killer = credited(level, source);
+			if (killer != null) {
+				DragonRecords.slain(killer, species());
+			}
+			for (UUID id : this.hunters) {
+				if (level.getPlayerByUUID(id) instanceof ServerPlayer hunter && hunter != killer && hunter.distanceToSqr(this) < CREDIT_RANGE * CREDIT_RANGE) {
+					DragonRecords.slain(hunter, species());
+				}
+			}
+		}
 		super.die(source);
+	}
+
+	/**
+	 * Who a blow is to {@code source}'s credit: a player's own, or one dealt by a dragon they own (its breath, ridden).
+	 */
+	static @Nullable Player credited(ServerLevel level, DamageSource source) {
+		Entity by = source.getEntity();
+		if (by instanceof Player player) {
+			return player;
+		}
+		if (by instanceof WindDragon dragon && dragon.isTamed() && dragon.getOwnerReference() != null) {
+			return level.getPlayerByUUID(dragon.getOwnerReference().getUUID());
+		}
+		return null;
+	}
+
+	/** Its species, by id ("notus", "boreas", ...). */
+	public String species() {
+		String path = BuiltInRegistries.ENTITY_TYPE.getKey(this.getType()).getPath();
+		return path.endsWith("_dragon") ? path.substring(0, path.length() - "_dragon".length()) : path;
+	}
+
+	/** (0.7.141) Calmed (Aeolus beaten near it): until game time {@code until} a wild one goes for no one. */
+	public void calmUntil(long until) {
+		this.calmUntil = Math.max(this.calmUntil, until);
+		this.foe = null;
+		this.setTarget(null);
+	}
+
+	private boolean calm(ServerLevel level) {
+		return level.getGameTime() < this.calmUntil;
 	}
 
 	@Override
@@ -1233,6 +1320,8 @@ public abstract class WindDragon extends AbstractHorse {
 		output.putFloat("dragon_stamina", stamina());
 		output.putInt("dragon_flags", this.entityData.get(DATA_FLAGS) & (GROUNDED | SITTING));
 		output.putInt("dragon_grounded", this.groundedLeft);
+		output.putLong("dragon_calm_until", this.calmUntil);
+		output.putString("dragon_hunters", String.join(",", this.hunters.stream().map(UUID::toString).toList()));
 	}
 
 	@Override
@@ -1243,6 +1332,15 @@ public abstract class WindDragon extends AbstractHorse {
 		setStamina(input.getFloatOr("dragon_stamina", STAMINA));
 		this.entityData.set(DATA_FLAGS, (byte)input.getIntOr("dragon_flags", 0));
 		this.groundedLeft = input.getIntOr("dragon_grounded", 0);
+		this.calmUntil = input.getLongOr("dragon_calm_until", 0L);
+		this.hunters.clear();
+		for (String id : input.getStringOr("dragon_hunters", "").split(",")) {
+			try {
+				this.hunters.add(UUID.fromString(id));
+			} catch (IllegalArgumentException e) {
+				// (none saved, or not a uuid)
+			}
+		}
 	}
 
 	@Override
