@@ -51,7 +51,7 @@ final class QuestBoard {
 	 */
 	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F, 0.3F};
 	static final float WARBAND_CHANCE = 0.5F;
-	/** (0.7.146) How often a king's quest is a bounty on a Nether warlord (when a fort stands). */
+	/** (0.7.147) How often a king's quest is a bounty on a Nether warlord (when a fort stands). */
 	static final float NETHER_BOUNTY_CHANCE = 0.2F;
 	/** (0.7.42) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
 	static final float ESCORT_CHANCE = 0.2F;
@@ -431,7 +431,7 @@ final class QuestBoard {
 			}
 		}
 		if (random.nextFloat() < NETHER_BOUNTY_CHANCE) {
-			// (0.7.146) a bounty on a Nether warlord, while one holds a fort
+			// (0.7.147) a bounty on a Nether warlord, while one holds a fort
 			Quest q = netherBounty(level, f, who, random);
 			if (q != null) {
 				return q;
@@ -444,7 +444,7 @@ final class QuestBoard {
 		return q != null ? q : chief(level, f, who, random);
 	}
 
-	/** (0.7.146) A bounty on the warlord of the standing Nether fort nearest the realm (by Nether reckoning); null with none. */
+	/** (0.7.147) A bounty on the warlord of the standing Nether fort nearest the realm (by Nether reckoning); null with none. */
 	static @Nullable Quest netherBounty(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
 		ServerLevel nether = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
 		if (nether == null) {

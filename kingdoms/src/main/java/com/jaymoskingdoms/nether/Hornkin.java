@@ -121,12 +121,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	static final int FEUD_EVERY = 20;
 	/** An ingot buys this many of its wares, at most. */
 	static final int WARES_MOST = 3;
-	/** (0.7.146) The truce: an Emberborn who hands it gold gets this many more wares, and a fair chance of a rarer one (a gold block: RARE_FOR_BLOCK of them). */
+	/** (0.7.147) The truce: an Emberborn who hands it gold gets this many more wares, and a fair chance of a rarer one (a gold block: RARE_FOR_BLOCK of them). */
 	static final int TRUCE_EXTRA = 2, RARE_FOR_BLOCK = 3;
 	static final float TRUCE_RARE_CHANCE = 0.25F;
-	/** (0.7.146) A raider goes home once it has this much gold; in a town it roams this far from the seat, and finds chests this far off. */
+	/** (0.7.147) A raider goes home once it has this much gold; in a town it roams this far from the seat, and finds chests this far off. */
 	static final int RAID_LOOT = 3, RAID_RADIUS = 28, RAID_CHEST_REACH = 10;
-	/** (0.7.146) Home from a raid: in the portal at this distance; or gone anyway if it can't get there in this long. */
+	/** (0.7.147) Home from a raid: in the portal at this distance; or gone anyway if it can't get there in this long. */
 	static final double PORTAL_REACHED = 2.0;
 	static final int HOMEWARD_MOST = 20 * 90;
 	/** What a Hornkin trades for a gold ingot: its own wares, not a piglin's. */
@@ -136,7 +136,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		() -> new ItemStack(Items.BLAZE_POWDER), () -> new ItemStack(Items.LEATHER, 3), () -> new ItemStack(Items.BONE, 3), () -> new ItemStack(Items.BLACKSTONE, 8),
 		() -> new ItemStack(Items.GILDED_BLACKSTONE), () -> new ItemStack(Items.CRIMSON_FUNGUS, 2), () -> new ItemStack(Items.COOKED_PORKCHOP, 2),
 		() -> new ItemStack(Items.GLOWSTONE_DUST, 4), () -> new ItemStack(Items.ARROW, 6));
-	/** (0.7.146) What it keeps for an Emberborn it trades with in good faith. */
+	/** (0.7.147) What it keeps for an Emberborn it trades with in good faith. */
 	static final List<java.util.function.Supplier<ItemStack>> TRUCE_WARES = List.of(() -> new ItemStack(Items.BLAZE_ROD, 2),
 		() -> new ItemStack(Items.GILDED_BLACKSTONE, 2), () -> new ItemStack(Items.CRYING_OBSIDIAN, 2), () -> new ItemStack(Items.MAGMA_BLOCK, 4),
 		() -> new ItemStack(Items.GHAST_TEAR), () -> new ItemStack(Items.NETHERITE_SCRAP));
@@ -152,9 +152,9 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	private final @Nullable ServerBossEvent bar;
 	/** The gold it keeps (dropped when it dies). */
 	private int hoard;
-	/** (0.7.146) Who handed it the gold it's admiring (the truce), if anyone. */
+	/** (0.7.147) Who handed it the gold it's admiring (the truce), if anyone. */
 	private java.util.@Nullable UUID trader;
-	/** (0.7.146) On a portal raid: its party, the spot by the portal it came out at (and goes home through), its time left, and whether it's going home. */
+	/** (0.7.147) On a portal raid: its party, the spot by the portal it came out at (and goes home through), its time left, and whether it's going home. */
 	private int raid, raidLeft;
 	private @Nullable BlockPos portal;
 	private boolean homeward;
@@ -284,7 +284,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			if (this.portal == null) {
 				this.turnOutside(level);
 			} else {
-				// (0.7.146) a raid is short enough that the Overworld doesn't turn it
+				// (0.7.147) a raid is short enough that the Overworld doesn't turn it
 				this.raidStep(level);
 			}
 			if (this.isRemoved()) {
@@ -385,7 +385,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		return this.marchTo;
 	}
 
-	/** (0.7.146) Sends it raiding {@code town} for {@link #RAID_LOOT} gold or {@code ticks}, from (and back to) {@code portal}; see {@link PortalRaids}. */
+	/** (0.7.147) Sends it raiding {@code town} for {@link #RAID_LOOT} gold or {@code ticks}, from (and back to) {@code portal}; see {@link PortalRaids}. */
 	void raid(int party, BlockPos portal, BlockPos town, int ticks) {
 		this.raid = party;
 		this.portal = portal;
@@ -402,7 +402,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		return this.raid;
 	}
 
-	/** (0.7.146) A raider turns for the portal (time's up, its loot's enough, or it's been bought off). */
+	/** (0.7.147) A raider turns for the portal (time's up, its loot's enough, or it's been bought off). */
 	void goHome() {
 		if (this.portal == null || this.homeward) {
 			return;
@@ -432,7 +432,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	@Override
 	public boolean canUsePortal(boolean ignorePassenger) {
-		// (0.7.146) a raider goes home its own way (it carries its gold off through the portal: see raidStep)
+		// (0.7.147) a raider goes home its own way (it carries its gold off through the portal: see raidStep)
 		return this.portal == null && super.canUsePortal(ignorePassenger);
 	}
 
@@ -611,7 +611,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		this.trader = null;
 		boolean truce = trader != null && Heritage.is(trader, Heritage.Kind.EMBERBORN);
 		if (this.portal != null && trader == null) {
-			// (0.7.146) a raider keeps what it takes, to carry home
+			// (0.7.147) a raider keeps what it takes, to carry home
 			if (!gold.isEmpty()) {
 				this.hoard++;
 			}
@@ -625,7 +625,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			}
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PIGLIN_CELEBRATE, SoundSource.HOSTILE, 1.0F, 0.6F);
 		} else if (truce && gold.is(Items.GOLD_BLOCK)) {
-			// (0.7.146) a whole block, in good faith: its best
+			// (0.7.147) a whole block, in good faith: its best
 			for (int i = 0; i < RARE_FOR_BLOCK; i++) {
 				this.spawnAtLocation(level, TRUCE_WARES.get(this.random.nextInt(TRUCE_WARES.size())).get());
 			}
@@ -636,7 +636,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	}
 
 	/**
-	 * (0.7.146) The truce: an Emberborn can hand it gold (a trade, with better wares, see {@link #doneAdmiring}); and a
+	 * (0.7.147) The truce: an Emberborn can hand it gold (a trade, with better wares, see {@link #doneAdmiring}); and a
 	 * raider handed a gold block by an Emberborn takes it and leads its whole party home ({@link PortalRaids#boughtOff}).
 	 */
 	@Override
@@ -849,7 +849,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			BlockPos goal = Hornkin.this.marchTo != null ? Hornkin.this.marchTo : Hornkin.this.getHomePosition();
 			Vec3 to = Vec3.atBottomCenterOf(goal).subtract(Hornkin.this.position());
 			if (Hornkin.this.homeward) {
-				// (0.7.146) home through the portal: right up to it (raidStep sees it through)
+				// (0.7.147) home through the portal: right up to it (raidStep sees it through)
 				Vec3 step = to.horizontalDistance() > MARCH_STRIDE ? Hornkin.this.position().add(to.normalize().scale(MARCH_STRIDE)) : Vec3.atBottomCenterOf(goal);
 				Hornkin.this.getNavigation().moveTo(step.x, step.y, step.z, 1.1);
 				return;

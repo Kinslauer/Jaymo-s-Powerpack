@@ -91,7 +91,7 @@ public final class Quests {
 	static final int HOLD_TICKS = 20 * 60 * 2;
 	/** A chief's death counts for those with the quest this near it. */
 	static final double CHIEF_CREDIT_RANGE = 160.0;
-	/** (0.7.146) A king's bounty on a Nether warlord targets his fort as this plus its id. */
+	/** (0.7.147) A king's bounty on a Nether warlord targets his fort as this plus its id. */
 	static final String NETHER_FORT = "netherfort:";
 	/** (0.5.49) Giving up a quest costs this much reputation with the giver's settlement (a king's, this much). */
 	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
@@ -897,7 +897,7 @@ public final class Quests {
 	}
 
 	/**
-	 * (0.7.146) A Nether fort's warlord fell ({@code NetherForts}): a king's bounty on him ({@code "netherfort:" + fort}) is
+	 * (0.7.147) A Nether fort's warlord fell ({@code NetherForts}): a king's bounty on him ({@code "netherfort:" + fort}) is
 	 * done for everyone after him who struck him down or was near.
 	 */
 	public static void netherWarlordSlain(ServerLevel level, LivingEntity entity, DamageSource source, int fort) {
@@ -1153,7 +1153,7 @@ public final class Quests {
 			case Quest.FETCH -> Component.translatable(key, keepsakeName(q), ruin(o.target()), x(q), z(q));
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
-			// (0.7.146 a Nether warlord's bounty names him too)
+			// (0.7.147 a Nether warlord's bounty names him too)
 			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q), o.otherName());
 			case Quest.REGICIDE, Quest.WARBAND -> Component.translatable(key, o.place(), x(q), z(q));
 			case Quest.BREAK_IN -> Component.translatable(key, o.place());
