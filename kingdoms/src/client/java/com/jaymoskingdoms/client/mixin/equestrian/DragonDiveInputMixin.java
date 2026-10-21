@@ -20,7 +20,7 @@ abstract class DragonDiveInputMixin extends ClientInput {
 	private void jaymoskingdoms$dragonDive(CallbackInfo ci) {
 		// the piggyback rider too, or Shift drops them mid-flight
 		WindDragon dragon = Minecraft.getInstance().player != null && Minecraft.getInstance().player.getVehicle() instanceof WindDragon d ? d : null;
-		if (dragon == null || !dragon.airborne()) {
+		if (dragon == null || !dragon.steeredAloft()) {
 			return;
 		}
 		Input k = this.keyPresses;

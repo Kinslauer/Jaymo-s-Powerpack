@@ -114,11 +114,14 @@ public class BoreasDragon extends WindDragon {
 		return BossEvent.BossBarColor.WHITE;
 	}
 
-	/** A peak is often snow over rock (a layer of snow isn't solid): it perches on that too, with room over it. */
+	/**
+	 * A peak is often rock under a layer of snow (the heightmap passes through the layer, so {@code top} is the rock): it
+	 * perches on that too, with room over the snow.
+	 */
 	@Override
 	protected boolean perchable(ServerLevel level, BlockPos top) {
 		return super.perchable(level, top)
-			|| level.getBlockState(top).is(Blocks.SNOW) && level.getBlockState(top.below()).isSolid() && room(level, top);
+			|| level.getBlockState(top).isSolid() && level.getBlockState(top.above()).is(Blocks.SNOW) && room(level, top.above());
 	}
 
 	/** The north wind never freezes itself, however long it hangs in powder snow. */

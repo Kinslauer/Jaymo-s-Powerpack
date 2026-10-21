@@ -14,6 +14,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -121,6 +122,16 @@ public final class DragonAcid {
 		}
 	}
 
+	/** Whether a tamed dragon's riders, owner or the owner's pets are near enough {@code at} for a puddle there to reach them. */
+	private static boolean nearFriends(LivingEntity dragon, Vec3 at) {
+		if (!(dragon instanceof OwnableEntity ownable) || ownable.getOwner() == null && !dragon.isVehicle()) {
+			return false;
+		}
+		double reach = PUDDLE_RADIUS + 1.0;
+		AABB box = new AABB(at, at).inflate(reach, 2.0, reach);
+		return !dragon.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != dragon && DragonBreath.spared(dragon, e)).isEmpty();
+	}
+
 	/** Draws a gob's flight from {@code from} to {@code to}: a fat green bead with drips. */
 	private static void trail(ServerLevel level, Vec3 from, Vec3 to) {
 		Vec3 d = to.subtract(from);
@@ -147,6 +158,10 @@ public final class DragonAcid {
 			if (e.hurtServer(level, dragon.damageSources().indirectMagic(dragon, dragon), DAMAGE)) {
 				e.addEffect(new MobEffectInstance(MobEffects.POISON, POISON_TICKS, POISON_LEVEL), dragon);
 			}
+		}
+		if (nearFriends(dragon, at)) {
+			// a tamed one's puddle would poison its own (a cloud spares no one): the splash alone
+			return;
 		}
 		AreaEffectCloud puddle = new AreaEffectCloud(level, at.x, at.y, at.z);
 		puddle.setOwner(dragon);

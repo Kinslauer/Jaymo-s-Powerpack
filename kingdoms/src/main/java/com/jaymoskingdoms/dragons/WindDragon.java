@@ -264,6 +264,11 @@ public abstract class WindDragon extends AbstractHorse {
 		return this.isNoGravity() && !this.onGround();
 	}
 
+	/** Steered off the ground, in the air or (Zephyrus) under water: Shift dives and S brakes rather than dismounting or turning. */
+	public boolean steeredAloft() {
+		return this.isNoGravity() && !this.onGround();
+	}
+
 	/** Where its breath comes from. */
 	public Vec3 mouth() {
 		boolean air = this.airborne();
@@ -403,10 +408,10 @@ public abstract class WindDragon extends AbstractHorse {
 		for (Entity passenger : this.getPassengers()) {
 			passenger.resetFallDistance();
 		}
-		if (ridden && !this.onGround()) {
+		if (ridden && !this.onGround() && !this.isInWater()) {
 			boolean hard = moved.y > 0.05 || moved.horizontalDistance() > 0.5;
 			spend((hard ? flapDrain() : glideDrain()) / 20.0F);
-		} else if (this.onGround() || !ridden) {
+		} else if (this.onGround() || !ridden || this.isInWater()) {
 			setStamina(stamina() + REST_REGEN / 20.0F);
 		}
 		if (exhausted() && stamina() >= RECOVER) {

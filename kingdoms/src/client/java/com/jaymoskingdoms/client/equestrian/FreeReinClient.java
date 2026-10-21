@@ -96,7 +96,7 @@ public final class FreeReinClient {
 			heading = camYaw;
 		} else {
 			// (0.7.137) on a flying dragon S brakes (DragonsClient) instead of turning it round
-			boolean braking = player.getVehicle() instanceof com.jaymoskingdoms.dragons.WindDragon dragon && dragon.airborne();
+			boolean braking = player.getVehicle() instanceof com.jaymoskingdoms.dragons.WindDragon dragon && dragon.steeredAloft();
 			float ahead = (minecraft.options.keyUp.isDown() ? 1.0F : 0.0F) - (minecraft.options.keyDown.isDown() && !braking ? 1.0F : 0.0F);
 			float right = (minecraft.options.keyRight.isDown() ? 1.0F : 0.0F) - (minecraft.options.keyLeft.isDown() ? 1.0F : 0.0F);
 			if (ahead != 0.0F || right != 0.0F) {

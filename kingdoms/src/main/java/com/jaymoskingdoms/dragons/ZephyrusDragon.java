@@ -48,6 +48,8 @@ public class ZephyrusDragon extends WindDragon {
 	static final double SINK_FREE = 0.03;
 	/** Floating: how much of it is under (blocks of water over its feet), how hard the water lifts it back toward that. */
 	static final double FLOAT_DEPTH = 0.85, LIFT_GAIN = 0.08, LIFT_MAX = 0.06, SINK_MAX = 0.03;
+	/** Paddling into a bank: the hop that heaves it out, and the room it needs over it (blocks). */
+	static final double BANK_HOP = 0.3, BANK_HOP_ROOM = 0.6;
 
 	// ---- perching in the water ----
 	/** How far from home it looks for a spot (blocks), and how many it tries. */
@@ -180,7 +182,16 @@ public class ZephyrusDragon extends WindDragon {
 		}
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		Vec3 now = this.getDeltaMovement();
+		if (this.horizontalCollision && this.isFree(now.x, now.y + BANK_HOP_ROOM, now.z)) {
+			// against a bank: it heaves itself up and out (as vanilla's swimmers do)
+			now = new Vec3(now.x, BANK_HOP, now.z);
+		}
 		this.setDeltaMovement(now.x * PADDLE_DRAG, now.y * PADDLE_DRAG_Y, now.z * PADDLE_DRAG);
+	}
+
+	/** No float goal: {@link #travel} and {@link #perchedTick} keep it at its depth (the goal's hops would lift it). */
+	@Override
+	protected void registerGoals() {
 	}
 
 	// ---- perching in the water ------------------------------------------------------------------------------------------
