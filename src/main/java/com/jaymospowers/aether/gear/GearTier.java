@@ -22,7 +22,7 @@ public enum GearTier {
 
 	/** Shortsword: damage added to the material's bonus, swing speed (quick). Hammer: the same, but heavy and slow. */
 	public static final float SWORD_DAMAGE = 3.0F, SWORD_SPEED = -2.2F;
-	public static final float HAMMER_DAMAGE = 4.5F, HAMMER_SPEED = -3.3F;
+	public static final float HAMMER_DAMAGE = 3.0F, HAMMER_SPEED = -3.3F;
 	public static final float PICKAXE_DAMAGE = 1.0F, PICKAXE_SPEED = -2.8F;
 	public static final float AXE_DAMAGE = 6.0F, AXE_SPEED = -3.1F;
 	public static final float SHOVEL_DAMAGE = 1.5F, SHOVEL_SPEED = -3.0F;

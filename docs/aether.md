@@ -515,7 +515,7 @@ Everything is in the "The Aether" creative tab. Behaviour and numbers are from t
 | Arkenium | 1561 | 6 | 2 | 14 | iron | arkenium plate |
 | Gravitite | 1561 | 8 | 3 | 10 | diamond | enchanted gravitite |
 The shortsword is quick (-2.2, a slash: it is in `#minecraft:swords`, so mobs with a weak spot to slashes take more); the
-hammer is the heavy one (4.5 added damage, -3.3 speed) and is *not* a sword, so its blows count as impacts. Pickaxes, axes,
+hammer is the heavy one (3 added damage, 3/4/5/5/6 by metal as in the notes, -3.3 speed) and is *not* a sword, so its blows count as impacts. Pickaxes, axes,
 shovels and hoes join the vanilla tool tags (the Slider takes pickaxes only, so these work on it). **Zanite Shears**: 238
 durability, vanilla shears' behaviour. **Arkenium Plate**: smelt or blast inert arkenium, or use the altar. Tools are mended with
 their metal on an anvil or at the altar.

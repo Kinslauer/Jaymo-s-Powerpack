@@ -10,6 +10,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +27,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * it works, {@link #PROCESS_TICKS} ticks; otherwise the work drains away at {@link #DECAY} a tick. Changing the input
  * starts over. When done it uses one shard from each of the N slots and one input item, and puts the result in the output.
  */
-public class AltarBlockEntity extends BlockEntity implements Container {
+public class AltarBlockEntity extends BlockEntity implements WorldlyContainer {
 	// ---- tuning ----
 	public static final int PROCESS_TICKS = 200, DECAY = 2;
 	public static final int INPUT = 0, FUEL_FIRST = 1, FUEL_COUNT = 8, OUTPUT = 9, SIZE = 10;
@@ -192,6 +194,24 @@ public class AltarBlockEntity extends BlockEntity implements Container {
 			return false;
 		}
 		return slot == INPUT || stack.is(AetherItems.AMBROSIUM_SHARD);
+	}
+
+	// Hoppers and the like only take the output; inputs and shards go in, never out.
+	private static final int[] ALL_SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+	@Override
+	public int[] getSlotsForFace(Direction face) {
+		return ALL_SLOTS;
+	}
+
+	@Override
+	public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction face) {
+		return canPlaceItem(slot, stack);
+	}
+
+	@Override
+	public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction face) {
+		return slot == OUTPUT;
 	}
 
 	@Override
