@@ -3736,7 +3736,7 @@ identity the same way a costume does but npcs call you a bandit/ pirate dependin
   (royal from 90; it drops, or it's yours when you bring them in), 60 health plus 1.5 per emerald (240 at most), 10
   armour, a boss bar, and it fights the nearest player it can see within 24 blocks (6 damage plus 1 per 25 emeralds).
 
-## 0.7.127: the Purist ruler (pack 0.15.34)
+## 0.7.127: the Purist ruler (pack 0.15.35)
 Andy (2026-10-20): "Add a new king temper, Purist, they insist on a high population of its own heritage. Ridiculing
 and stepping over those who are not. Very prideful ruler". `Purists`, plus a column in `Tempers`, `Retinue` and
 `Approaches`.
