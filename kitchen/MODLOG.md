@@ -879,3 +879,24 @@ eases in and out (`PoseEase`, a small spring of Kitchen's own): the arms go down
 weight on each step, and the body leans back against it. A creature crawling on shot legs does an army crawl like a
 downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
 the body rocking, the head lifting to look ahead. The ragdoll is untouched.
+
+### 0.5.11: mills (Better With Mods batch 3, pack 0.15.45)
+Batch 3 of the BWM port (MIT, our own code).
+- `mill/power`: a wooden Shaft (runs of up to `SHAFT_MAX` 8) and one plain Shaft Corner, no gearboxes. A Windmill
+  (sail cloth: wool or hemp cloth, tag `sail_cloth`) or Waterwheel set on a shaft's end turns it; the machine at the
+  far end works as if a horse walked it (`ShaftDriven.turnFromShaft`). Windmills turn faster in rain and faster again
+  in thunder; waterwheels need flowing water at their lower half. Works the horse mill, horse chopper and press.
+- Village windmills (`VillageWindmills`, data `village_windmills/*.json`): with Epic Structures: Villages, its three
+  windmill towers (plains_big_house_1, plains_meeting_point_4, desert_fisher_1) lose their stone sails at worldgen and
+  get a turning windmill whose shaft runs inside to a working horse mill. Only touches the chunk being generated;
+  rotation only (jigsaw pieces never mirror). Not seen in a generated world yet; a short stub of the old axle log stays
+  past the corner in two towers, and the meeting-point tower's shaft runs level into its mill.
+- `mill/machines`: Potter's Wheel (shaft from below, or right-click by hand for 3 turns, a little hunger) throws a clay
+  block on top into Powers' Unfired Pot over 8 turns (a Flower Pot without Powers; sneak-click switches; table in
+  `potters_wheel/*.json`). Bloody Chopper (`bloody_chopper`, shaft-driven only): saws the log ahead into 6 planks and
+  bark, and hurts anything against the blade (4 every 10 ticks, bleeding, own death message).
+- `farm/Manure`: fed or bred farm animals (`manure_makers`) leave manure now and then near a player, at most once a
+  day each; it composts and tans like bark (tag `tanning_agents`). Fertilizer (bone meal + manure, 2) makes Fertile
+  Farmland: crops grow faster, 1 in 150 growth steps turns it back. Sowing now plants on any `minecraft:supports_crops`
+  block.
+- Art: `tools/vanilla_style/power.py`, `power_machines.py`, `farm.py`. javac clean; nothing played yet.
