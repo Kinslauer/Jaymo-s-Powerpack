@@ -4588,5 +4588,14 @@
 	"disguise.jaymoskingdoms.aeolus.shoo.2": "Hm. Young. Come back when you have seen more of the sky.",
 	"disguise.jaymoskingdoms.aeolus.shoo.3": "Run along now. The old have no use for the green.",
 	"disguise.jaymoskingdoms.aeolus.busy": "Ah. You again. The winds have not changed their minds.",
-	"disguise.jaymoskingdoms.aeolus.cramped": "There is no room here for what I am. Walk with me to open ground."
+	"disguise.jaymoskingdoms.aeolus.cramped": "There is no room here for what I am. Walk with me to open ground.",
+	"item.jaymoskingdoms.notus_dragon_egg": "Notus Dragon Egg",
+	"item.jaymoskingdoms.boreas_dragon_egg": "Boreas Dragon Egg",
+	"item.jaymoskingdoms.zephyrus_dragon_egg": "Zephyrus Dragon Egg",
+	"item.jaymoskingdoms.eurus_dragon_egg": "Eurus Dragon Egg",
+	"message.jaymoskingdoms.dragon_egg.hatched": "%s hatches, and takes to you.",
+	"message.jaymoskingdoms.aeolus.phase2": "The wind rises round Aeolus.",
+	"message.jaymoskingdoms.aeolus.phase3": "Aeolus breathes all four winds at once.",
+	"message.jaymoskingdoms.aeolus.gale": "The sky draws breath. Get low!",
+	"message.jaymoskingdoms.aeolus.fallen": "Aeolus falls. The winds are calm, and four eggs lie where he fell."
 }
