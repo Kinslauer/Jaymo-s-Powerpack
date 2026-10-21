@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.122) Andy (2026-10-21): "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing
+ * (0.7.123) Andy (2026-10-21): "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing
  * from the player, and upon prompts of good deals (8 cod 3 emeralds) they can scam you and say so with dialogue above
  * their head and the player can confront them about it which can prompt them either giving the emeralds back or trying
  * to run and if the player downs the npc they get their money back. rep has an effect, the higher it is, the less
@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>pickpocketing</b> a player: they come up behind you and help themselves to your emeralds (or a bit of a
  * stack); you may feel it ({@link #FEEL_CHANCE}), or only find it gone later;</li>
  * <li><b>arson</b> (at night, once in {@link #ARSON_GAP} per settlement): they set fire to a woodpile, a wall or a
- * haystack (never anything a player placed) and run; the settlement answers the fire as any other
+ * haystack inside their own town (players' builds there included) and run; the settlement answers the fire as any other
  * ({@link Firefighting}).</li>
  * </ul>
  * And a crook's bargains ({@link Approaches}) look better than anyone's, and are often scams: you pay, they go off to
@@ -457,7 +457,7 @@ public final class Crooks {
 		}
 		Long lastFire = ARSON.get(f.id());
 		if (night && (lastFire == null || now - lastFire >= ARSON_GAP)) {
-			BlockPos spot = kindling(level, crook, random);
+			BlockPos spot = kindling(level, crook, f, random);
 			if (spot != null) {
 				options.add(new Job(crook, Kind.ARSON, f.id(), null, spot, until));
 				weights.add(ARSON_W * 100);
@@ -484,14 +484,19 @@ public final class Crooks {
 		}
 	}
 
-	/** Something that burns, in the settlement, with air above it, that no player put there; or null. */
-	private static @Nullable BlockPos kindling(ServerLevel level, Villager crook, RandomSource random) {
+	/** Something that burns, with air above it, inside {@code f}'s own settlement (players' builds there too); or null. */
+	private static @Nullable BlockPos kindling(ServerLevel level, Villager crook, Faction f, RandomSource random) {
 		BlockPos at = crook.blockPosition();
 		for (int tries = 0; tries < 24; tries++) {
 			BlockPos pos = at.offset(random.nextInt(25) - 12, random.nextInt(7) - 3, random.nextInt(25) - 12);
 			BlockState state = level.getBlockState(pos);
 			boolean burns = state.is(BlockTags.LOGS) || state.is(BlockTags.PLANKS) || state.is(BlockTags.WOOL) || state.is(Blocks.HAY_BLOCK);
-			if (burns && level.getBlockState(pos.above()).isAir() && !Placed.any(level, pos)) {
+			if (!burns || !level.getBlockState(pos.above()).isAir()) {
+				continue;
+			}
+			// (Andy: players' blocks burn too, but only inside the town the crook lives in)
+			Faction there = Factions.around(level.getServer(), level, pos, Villages.VILLAGE_RADIUS);
+			if (there != null && there.id() == f.id()) {
 				return pos;
 			}
 		}

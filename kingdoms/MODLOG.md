@@ -3669,7 +3669,38 @@ The user: "lightning strikes during storms absolutely destroys forests. water sh
   wildfire disaster are unchanged.
 - Water placed on fire always put it out; nothing here changed that.
 
-## 0.7.122: crooks among the villagers
+## 0.7.121: villagers fight back (pack 0.15.28)
+The user linked the Villager Retaliation mod (NeoForge 1.21.1, all rights reserved, "don't port without permission"),
+so only the idea is used; nothing of its code. Most of what it does Kingdoms already had: witnessed crimes (`Theft`),
+reputation per faction (`Reputation`), each villager's memory of each player and gossip (`Recollections`), quests,
+hired workers. What was missing was a villager standing up for themselves when struck: `Retaliation`.
+- Strike a grown villager or a settlement's civilian (not a guard, ruler, orc, thrall, captive or someone downed) and
+  they square up and punch back (1 damage, every 25 ticks each, the crowd lands one every 10 ticks). Onlookers who see
+  it (`Theft.witnesses`) join in, up to 5. Seen, it's `Crime.ASSAULT`, a light crime (-10 reputation, a cry, a memory).
+- Someone under 30% health runs off. The rest cool off 30 s after your last blow on one of them, or when you're downed.
+- Feared (reputation -600 or under, or an outlaw there): the struck one runs instead, and nobody joins in.
+- Paying off: emeralds in hand, use a brawler. 3 emeralds plus 3 per extra blow you landed, at most 32. That one stops;
+  paying the one you first struck ends the whole fight. They remember being paid (`Kind.PAID_OFF`) as well as the blow.
+  At reputation -100 or under (or an outlaw) they refuse your coin.
+- A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
+  crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Tuning: the constants at the top of `Retaliation`.
+
+## 0.7.122: the hidden blade moves, and shows
+The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
+right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
+`client/mixin/blade/HiddenBladePoseMixin`.
+- Springing it is animated: the arm comes up into a guard, then the blade runs out of the housing (`SPRING_TICKS` 5,
+  the first half the arm, the rest the blade); sheathing runs it back. Tracked per player on the client each tick,
+  so everyone sees everyone's, in third and first person.
+- Out over an empty hand, that arm is held up ahead of you (`GUARD_*`: about 65 degrees up, turned in across the body,
+  following your look a little), not hanging at your side. The pose is set at the end of `PlayerModel.setupAnim`, so
+  costumes (which copy the player model's pose) follow it. Skipped while swimming, gliding, or holding a two-handed item.
+- A blow with the blade out is a straight thrust along your look (`STAB_*`) instead of a punch.
+- The bracer stands 0.4 px prouder (`BRACER_GROW`), clear of the assassin costume's own bracer and any suit sleeve it
+  used to z-fight with; the housing and blade sit out with it.
+
+## 0.7.123: crooks among the villagers
 Andy: "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing from the player, and upon
 prompts of good deals (8 cod 3 emeralds) they can scam you ... rep has an effect, the higher it is, the less likely to
 be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Theft`, `JaymosKingdoms`).
@@ -3677,7 +3708,7 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   saved). Every 5 s a free crook near a player has a 5% chance to set about something: lift from a neighbour's pack, mug
   a lone neighbour (3 blows, never below 3 hearts), pick a player's pocket (up to 4 emeralds, else half a stack, never
   the held item or a weapon), mug a player (night only), or set fire to logs/planks/wool/hay (night, once in 3 days per
-  settlement, never a block a player placed; `Firefighting` answers it).
+  settlement, inside their own town only, players' builds there included; `Firefighting` answers it).
 - Seen (a non-crook villager, folk or golem with sight of it, or the victim noticing; a mugging is always known): the
   witness cries out over their head, the guards and golems within 32 chase the crook, the crook runs, and they're a
   known criminal: `jaymoskingdoms:notoriety` (saved), scoreboard tag `jaymoskingdoms_criminal`, and `Crooks.SEEN`
@@ -3692,4 +3723,4 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   who owes you, isn't murder (`Crooks.fairGame`); guards and golems stop beating a downed crook.
 - Reputation: every chance against a player is scaled by `1 - rep/750`, between 0.1 and 1.5 (a friend of the town is
   rarely robbed; a disliked stranger is robbed more).
-- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.29.
+- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.30.
