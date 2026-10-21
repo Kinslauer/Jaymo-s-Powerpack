@@ -9,6 +9,10 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   `lang/parts/<name>.json` and its mixin configs. Core shared code is in `core/`, `api/`.
   - Screen shake: every power goes through `core/Shakes` (server: `send`, `around`, `heavy`, each with the spot it
     came from) and `client/ScreenShake` (directional kick + rattle, stacking, explosions shake too). Don't add another.
+  - Held sounds: every power's sustained sound goes through `core/Soundscape` (layers of variants with jittered
+    volume/pitch, `due` for uneven timing instead of `tickCount % N`, echoes when enclosed) and, on the player's own
+    side, `client/sound/PowerLoop` (a looping bed that follows speed/charge) plus `client/sound/Accents`. Don't add
+    a bare `% N == 0` sound loop.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
   - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log.

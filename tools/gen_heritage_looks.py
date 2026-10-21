@@ -8,6 +8,7 @@ mockups in the art overhaul project (art-overhaul/lineages/).
 nightborn_blood_* (0.7.88) - a Nightborn vampire's: the shadow deep red, the eyes red-silver at night
 Sylvan's vine winds its own way on each player (4 drawings, sylvan_<n>), Tideborn's gills come in 3 sets with their
 fins (tideborn_<n>); fins.png and fins_glow.png are the Tideborn fins' model texture (client HeritageLooks).
+(Kingdoms 0.7.97) Stormborn, Dawnborn, Endborn, Dragonblood and Deepborn, from the five new heritages Andy picked.
 Nothing is copied; colours are vanilla's own ramps. Run from the project root:  python -I tools/gen_heritage_looks.py
 """
 import os
@@ -189,6 +190,105 @@ def earthling(rng, solid, glow):
     hands(hand)
 
 
+def stormborn(rng, solid, glow):
+    """Forked lightning scars climbing the forearms from the hand: pale scar by day, pale blue light."""
+    SCAR = [(206, 218, 232, 255), (176, 192, 212, 255)]
+    BOLT = [(214, 240, 255, 255), (130, 190, 255, 255)]
+    for x0, x1, y0 in ARMS:
+        w = x1 - x0
+        for start in (1 + rng.randrange(3), 9 + rng.randrange(3)):  # two bolts round each arm
+            x, r = start, 0
+            while r < 10:
+                y = y0 + 11 - r
+                put(solid, x0 + x % w, y, SCAR[r % 2])
+                put(glow, x0 + x % w, y, BOLT[0] if r < 4 else BOLT[1])
+                if r in (3, 6) and rng.random() < 0.7:  # a fork off to the side
+                    fx = x + rng.choice((-1, 1))
+                    for f in range(1, 3):
+                        put(solid, x0 + (fx + (f - 1) * (fx - x)) % w, y - f, SCAR[1])
+                        put(glow, x0 + (fx + (f - 1) * (fx - x)) % w, y - f, BOLT[1])
+                x += rng.choice((-1, 0, 1, 1)) if rng.random() < 0.6 else 0
+                r += 1
+
+    def hand(x, y):
+        if rng.random() < 0.3:
+            put(glow, x, y, BOLT[1])
+    hands(hand)
+
+
+def dawnborn(rng, solid, glow):
+    """A gold sun-ring on the back of each hand, short rays above it."""
+    GOLD = [(232, 180, 56, 255), (196, 140, 36, 255)]
+    SUN = [(255, 226, 120, 255), (250, 190, 70, 255)]
+    RING = [".##.", "#..#", "#..#", ".##."]
+    for x0, x1, y0 in ARMS:
+        for row, line in enumerate(RING):
+            y = y0 + 11 - 4 + row  # rows 4 up to 1 above the hand
+            for col, ch in enumerate(line):
+                if ch == "#":
+                    put(solid, x0 + 4 + col, y, GOLD[row % 2])
+                    put(glow, x0 + 4 + col, y, SUN[0])
+        for col in (4, 7):  # rays from the ring's top corners, and one up the middle
+            put(solid, x0 + col, y0 + 11 - 5, GOLD[1])
+            put(glow, x0 + col, y0 + 11 - 5, SUN[1])
+        put(glow, x0 + 5, y0 + 11 - 6, SUN[1])
+        put(glow, x0 + 6, y0 + 11 - 6, SUN[1])
+
+
+def endborn(rng, solid, glow):
+    """End-stone dark specks scattered up the forearms, some alight in the End's purple."""
+    SPECK = [(40, 20, 56, 255), (64, 34, 88, 255)]
+    LIGHT = [(214, 140, 255, 255), (160, 90, 230, 255)]
+
+    def specks(x, y, r, x0, x1):
+        if rng.random() < max(0.0, 0.42 - r * 0.045):
+            put(solid, x, y, rng.choice(SPECK))
+            if rng.random() < 0.45:
+                put(glow, x, y, LIGHT[0] if r < 3 else LIGHT[1])
+    arm_pixels(specks)
+    hands(lambda x, y: put(solid, x, y, SPECK[0]))
+
+
+def dragonblood(rng, solid, glow):
+    """Dark scale patches on the forearms and the right cheek; their edges glow like embers in the dark."""
+    SCALE = [(96, 34, 28, 255), (72, 24, 22, 255), (124, 48, 34, 255)]
+    EMBER = [(255, 150, 50, 255), (220, 90, 24, 255)]
+
+    def scales(x, y, r, x0, x1):
+        if r < 6 or (r < 8 and rng.random() < 0.5):
+            put(solid, x, y, SCALE[(x // 2 + y) % 2] if (x + r) % 2 == 0 else SCALE[2])
+            if (x + y) % 3 == 0 and rng.random() < 0.6:
+                put(glow, x, y, EMBER[0] if r < 3 else EMBER[1])
+    arm_pixels(scales)
+    hands(lambda x, y: put(solid, x, y, SCALE[1]))
+    for x, y in ((8, 13), (9, 13), (8, 14), (9, 14), (10, 14), (9, 15)):  # the cheek
+        put(solid, x, y, SCALE[(x + y) % 2])
+    put(glow, 9, 14, EMBER[1])
+
+
+def deepborn(rng, solid, glow):
+    """Sculk veins branching up the forearms from the fingertips, dark teal, alight in the deep dark's cyan."""
+    VEIN = [(14, 52, 60, 255), (8, 36, 44, 255)]
+    PULSE = [(70, 230, 210, 255), (24, 150, 160, 255)]
+    for x0, x1, y0 in ARMS:
+        w = x1 - x0
+        for start in (2, 6, 10, 14):
+            x = start + rng.randrange(2)
+            top = 6 + rng.randrange(4)
+            for r in range(top):
+                y = y0 + 11 - r
+                put(solid, x0 + x % w, y, VEIN[r % 2])
+                put(glow, x0 + x % w, y, PULSE[0] if r < 2 or r == top - 1 else PULSE[1])
+                if rng.random() < 0.35:
+                    x += rng.choice((-1, 1))
+
+    def hand(x, y):
+        put(solid, x, y, VEIN[1])
+        if rng.random() < 0.5:
+            put(glow, x, y, PULSE[1])
+    hands(hand)
+
+
 def write(name, fn, *args, seed=None):
     solid, glow = blank(), blank()
     fn(random.Random(sum(map(ord, seed or name)) * 31), solid, glow, *args)
@@ -198,7 +298,9 @@ def write(name, fn, *args, seed=None):
 
 # eye colours (the stock spots; client HeritageLooks has the same colours for each skin's own eyes)
 EYE_COLOURS = {"stoneborn": (214, 170, 255), "tideborn": (110, 250, 235), "sylvan": (214, 245, 150),
-               "frostborn": (200, 236, 255), "nightborn": (236, 238, 255), "nightborn_blood": (255, 184, 192)}
+               "frostborn": (200, 236, 255), "nightborn": (236, 238, 255), "nightborn_blood": (255, 184, 192),
+               "dawnborn": (255, 210, 122), "endborn": (214, 156, 255), "dragonblood": (255, 176, 64),
+               "deepborn": (184, 244, 236), "stormborn": (196, 228, 255)}
 
 write("stoneborn", stoneborn)
 for v in range(3):
@@ -210,6 +312,11 @@ write("frostborn", frostborn)
 write("nightborn", nightborn)
 write("nightborn_blood", nightborn, True, seed="nightborn")  # the same shadow, so the stars stay put
 write("earthling", earthling)
+write("stormborn", stormborn)
+write("dawnborn", dawnborn)
+write("endborn", endborn)
+write("dragonblood", dragonblood)
+write("deepborn", deepborn)
 for key, c in EYE_COLOURS.items():
     img = blank()
     for x, y in EYES:

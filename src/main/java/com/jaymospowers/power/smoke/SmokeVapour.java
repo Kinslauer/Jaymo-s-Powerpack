@@ -5,6 +5,7 @@ import com.jaymospowers.backpack.Backpack;
 import com.jaymospowers.compat.ToolBeltCompat;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.power.wind.WindFlight;
 import java.util.EnumSet;
@@ -57,6 +58,11 @@ import org.jspecify.annotations.Nullable;
  * creative inventory, is handed straight back.
  */
 public final class SmokeVapour {
+	/** A flier's trail as others hear it. */
+	static final Soundscape.Layer TRAIL_HISS = Soundscape.Layer.of(0.18F, 0.3F, 0.4F, 0.65F, SoundEvents.FIRE_EXTINGUISH);
+	static final Soundscape.Layer TRAIL_CRACKLE = Soundscape.Layer.of(0.3F, 0.5F, 0.7F, 1.0F, SoundEvents.CAMPFIRE_CRACKLE).chance(0.4F);
+	static final Soundscape.Layer TRAIL_RUSH = Soundscape.Layer.of(0.3F, 0.5F, 0.6F, 0.9F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BREEZE_WHIRL)
+		.chance(0.5F);
 	/** Smoke a tick your legs pour out (a block's worth is 1); a fresh awakening's (only this ability) is thinner. */
 	static final float TRAIL = 0.6F;
 	static final float STARTER_TRAIL = 0.35F;
@@ -265,9 +271,12 @@ public final class SmokeVapour {
 		player.causeFoodExhaustion(EXHAUSTION + (float)moved * EXHAUSTION_PER_BLOCK);
 		// the legs pour out a trail, from the hips down
 		SmokeField.puff(level, now.add(0.0, player.getBbHeight() * 0.25, 0.0), Mastery.starterOnly(player) ? STARTER_TRAIL : TRAIL, player);
-		if (player.tickCount % 16 == 0) {
-			level.playSound(null, now.x, now.y, now.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.25F,
-				0.4F + level.getRandom().nextFloat() * 0.2F);
+		// what others hear of a flier going by (the flier hears their own, client-side): a hiss and crackle at uneven
+		// beats, and a rush of air when they're moving fast
+		if (Soundscape.due(player, "smoke.trail", 10, 26)) {
+			float pace = (float)Math.min(1.0, moved / 2.0);
+			Soundscape.play(level, player, now, SoundSource.PLAYERS, TRAIL_HISS.pitched(1.0F + 0.4F * pace), TRAIL_CRACKLE,
+				TRAIL_RUSH.louder(pace));
 		}
 	}
 

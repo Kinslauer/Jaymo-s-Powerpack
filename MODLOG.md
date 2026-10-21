@@ -29,6 +29,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - its own mixin configs, `jaymospowers.<name>[.client].mixins.json`
   - its own lang file, `lang/parts/<name>.json`, which `processResources` merges into `en_us.json`
 - Each power has its own `init()`.
+- Sound (0.15.7, after Resonance's idea of conditions-driven ambience; LGPL, no 26.3 build, nothing copied):
+  `core/Soundscape` stacks layers of variants at uneven beats and echoes them in caves; the flier's side of a flight
+  is `client/sound/PowerLoop` beds plus `Accents` that react to speed, banking, braking, rain, water and altitude.
 
 ## Environment
 - Same toolchain as Jaymo's Kitchen: JDK 25, `GRADLE_USER_HOME=E:\gradle-home`, Loom 1.18, Fabric API 0.161.0+26.3.
@@ -2027,7 +2030,20 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.4, Sharpness cuts (the fifth Just-In COMBAT idea, on Wounds):** a weapon with Sharpness counts as a blade for
   Wounds' cuts, and each level lowers the damage a hit needs to open one by 0.3 (2.0 plain, 0.5 at the least):
   `Bleeding.SHARPNESS_BLEED_FROM`, `SHARP_BLEED_FROM_MIN`.
-- **0.15.6 (Kitchen 0.5.1), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
+- **0.15.5, feathers and the dodge, in place of Combat Roll:** Andy asked for Feathers and Elenai Dodge 2 to replace
+  our dodge and its HUD. Both are Forge only (to 1.20.x); the maintained fork, Feathers of Fatigue, is NeoForge 26.3 and
+  GPL-3; Elenai Dodge 2 is CC BY-NC-SA. Powers is MIT, so it's our own, from their ideas only (`docs/dodge.md`, the
+  spec and sources). `stamina/Feathers`: a row of 20 above the hunger bar, armour holds back 0.35 a point, regrowth 1
+  per 10 ticks after a pause that grows with spends in a row, halved by cold and by hunger at 6 or less, 6 red strain
+  feathers past empty (repaid first, faster at rest), exhaustion past the strain until a third is back, 4 held back
+  in the Nether without Fire Resistance, a sleep refills it, and golden bonus feathers from powers. `stamina/Dodge`:
+  Left Alt or double-tap Sneak hops you 0.85 along your movement keys (back with none), ground only, 6 feathers, a
+  10-tick cooldown, 5 ticks where melee and projectiles miss, 0.4 hunger. Darktide +12 golden (Riptide Dash costs a
+  dodge, a landed flurry refunds it, evasion Flow on our dodge: `DarktideDodges`, was `CombatRollCompat`), Web +20
+  (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks, Chrono +12 (Andy: the powers that had extra dodges get extra feathers). The client-side charge packets
+  (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
+  `tools/gen_feathers.py`. Combat Roll is out of the pack.
+- **0.15.8 (Kitchen 0.5.1), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
   Kitchen does the physics (see `kitchen/MODLOG.md`, `docs/ragdolls.md`); Powers only ties in, by reflection so it
   still builds against the old Kitchen jar: `KitchenCompat.isLimp`, no struggling free of a carry or catching a ledge
   while limp, no going limp while carried, Lifted, Gravity-held or webbed (`KitchenCompat.registerRagdollVetoes`), the

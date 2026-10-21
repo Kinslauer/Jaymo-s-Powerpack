@@ -4,6 +4,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -56,6 +57,10 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 final class DarktideMoves {
+	/** The tide's wash, a different splash each time. */
+	static final Soundscape.Layer WASH = Soundscape.Layer.of(0.5F, 0.7F, 0.6F, 0.85F, SoundEvents.GENERIC_SPLASH, SoundEvents.PLAYER_SPLASH,
+		SoundEvents.BOAT_PADDLE_WATER);
+
 	// ---- R: Dark Strike ----
 	static final double STRIKE_REACH = 3.5;
 	/** A blade at full charge: this many times its damage (1× uncharged); empowered: {@link #EMPOWERED_FACTOR} at full charge. */
@@ -101,7 +106,7 @@ final class DarktideMoves {
 	// ---- B: Riptide Dash (knives, ascended) ----
 	static final double DASH_LENGTH = 5.0, DASH_SPEED = 1.0;
 	/**
-	 * Each dash spends a Combat Roll charge (a landed flurry refunds it, see CombatRollCompat). A dash that lands is
+	 * Each dash spends a dodge's feathers (a landed flurry refunds them, see DarktideDodges). A dash that lands is
 	 * ready again at once; one that misses waits DASH_MISS_COOLDOWN, a flurry FLURRY_COOLDOWN (ticks).
 	 */
 	static final int DASH_TICKS = 5, DASH_MISS_COOLDOWN = 100, FLURRY_COOLDOWN = 1200;
@@ -506,7 +511,7 @@ final class DarktideMoves {
 			}
 		}
 		if (wave.step % 3 == 0) {
-			level.playSound(null, front.x, front.y, front.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6F, 0.7F);
+			Soundscape.play(level, front, SoundSource.PLAYERS, WASH);
 		}
 		if (wave.step >= TIDE_LENGTH) {
 			if (wave.linger) {
@@ -663,12 +668,12 @@ final class DarktideMoves {
 
 	static void dash(ServerPlayer player) {
 		DarktideLive live = DarktidePower.live(player);
-		if (live.dash != null || !readyOrSilent(player, DarktideState.DASH) || !CombatRollCompat.hasRoll(player)
+		if (live.dash != null || !readyOrSilent(player, DarktideState.DASH) || !DarktideDodges.hasRoll(player)
 			|| !DarktidePower.spend(player, DASH_FLOW)) {
 			return;
 		}
-		// every dash (and flurry) spends a Combat Roll charge; a flurry that lands gives it back
-		CombatRollCompat.spendRoll(player);
+		// every dash (and flurry) spends a dodge's feathers; a flurry that lands gives them back
+		DarktideDodges.spendRoll(player);
 		ServerLevel level = player.level();
 		Vec3 dir = Vec3.directionFromRotation(0.0F, player.getYRot());
 		DarktideLive.Dash dash = new DarktideLive.Dash(level.getGameTime(), player.position(), dir);
@@ -715,7 +720,7 @@ final class DarktideMoves {
 				player.teleportTo(level, behind.x, target.getY(), behind.z, Set.of(), player.getYRot() + 180.0F, player.getXRot(), false);
 				hit(player, target, FLURRY_HIT_DAMAGE * FLURRY_HITS);
 				com.jaymospowers.core.Shakes.send(player, 1.0F, target.getBoundingBox().getCenter());
-				CombatRollCompat.refundRoll(player);
+				DarktideDodges.refundRoll(player);
 				live.dash = null;
 			}
 			return;
