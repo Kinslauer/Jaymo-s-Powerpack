@@ -397,7 +397,7 @@ public class AeolusDragon extends WindDragon {
 			ItemEntity egg = new ItemEntity(level, this.getX(), this.getY() + 1.0, this.getZ(), DragonEggs.egg(species));
 			egg.setDeltaMovement((this.random.nextDouble() - 0.5) * 0.4, 0.3, (this.random.nextDouble() - 0.5) * 0.4);
 			egg.setUnlimitedLifetime();
-			egg.setInvulnerable(true);
+			egg.setPermanentlyInvulnerable(true);
 			level.addFreshEntity(egg);
 		}
 		level.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY() + 2.0, this.getZ(), 120, 4.0, 2.0, 4.0, 0.2);
