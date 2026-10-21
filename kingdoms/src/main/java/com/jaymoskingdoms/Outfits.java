@@ -60,6 +60,8 @@ public final class Outfits {
 	static final float BARBARIAN_TRIM_CHANCE = 0.5F;
 	/** (0.5.30) One realm in this many arms its guards from {@link Armory} (its land's set, in its colour). */
 	static final int ARMOURY_REALMS = 2;
+	/** (0.7.105) A guard's chance of fencing with a rapier from Jaymo's Powers (a lord always does), when it's there. */
+	static final float GUARD_RAPIER_CHANCE = 0.2F;
 	/** (0.5.30) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
 	static final float RAIDER_HORNS_CHANCE = 0.3F;
 
@@ -150,10 +152,28 @@ public final class Outfits {
 				default -> {
 				}
 			}
+			fencer(folk, random);
 		} catch (RuntimeException e) {
 			// a registry without one of the vanilla trims or patterns (a data pack took it out): the role's plain gear stays
 			JaymosKingdoms.LOGGER.debug("Folk outfit skipped", e);
 		}
+	}
+
+	/**
+	 * (0.7.105) A realm's duellists: a lord, and now and then a guard, fence with a rapier of their sword's metal (Jaymo's
+	 * Powers' {@code RapierItem}: it lunges), when Powers is there.
+	 */
+	private static void fencer(Folk folk, RandomSource random) {
+		if (!(folk.role() == Folk.LORD || folk.role() == Folk.GUARD && random.nextFloat() < GUARD_RAPIER_CHANCE)) {
+			return;
+		}
+		ItemStack sword = folk.getMainHandItem();
+		String metal = sword.is(Items.DIAMOND_SWORD) ? "diamond" : sword.is(Items.NETHERITE_SWORD) ? "netherite" : sword.is(Items.IRON_SWORD) ? "iron" : null;
+		if (metal == null) {
+			return;
+		}
+		net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", metal + "_rapier"))
+			.ifPresent(rapier -> folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(rapier)));
 	}
 
 	private static void guard(Folk folk, Heraldry arms, Climate climate, RandomSource random) {

@@ -2015,3 +2015,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     medicine with its recipe, addiction, Kingdoms' clerics and taverns, `/wounds`), and a Wounds entry in
     `docs/HANDOFF.md` (the event order learned, the shared scoreboard tags). Phase 5 marked built in
     `docs/Wounds-Plan.md`.
+- **0.15.2, the rapier (with Kingdoms 0.7.105's shields, clash and tiered gear):** Andy picked all five of Just-In
+  COMBAT's ideas (Forge 1.20.1, All Rights Reserved: ideas only, our own code and art). The Armory gets a rapier in
+  every tier (`Armory.WEAPONS`, `armory/RapierItem`; sprites, models, Better Combat's `rapier` preset, the wooden recipe
+  and the netherite smithing from `tools/gen_rapier.py`, which runs after `armory_assets.py`). A little lighter than a
+  sword and quicker (+2 damage over the material, -2.0 speed). Right-click lunges: 1.1 blocks a tick forward, and the
+  first foe in front of the point within 7 ticks is run through for 1.6x your attack damage (1.5 s cooldown, some
+  hunger, a point of durability). Mobs holding one lunge at their target from 2.8 to 6.5 blocks off (3.5 s between).
+  Forged like the rest: a Rapier Blade (1 ingot) with a crossguard and a rod at the Tool Station
+  (`tinkering/WeaponParts`, sprites cut by `tools/weapon_parts_assets.py`). Numbers at the top of `RapierItem`.

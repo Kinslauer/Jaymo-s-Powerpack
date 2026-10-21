@@ -3476,3 +3476,19 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
   **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside
   `jaymospowers_revive`, and Powers stops its bleeding and gives it a bandage's heal.
+- **0.7.105, Just-In COMBAT's ideas, our own way (with Powers 0.15.2's rapier):** Andy picked all five (the mod is All
+  Rights Reserved, so its ideas only). **Shields** (`MobShields`): a melee mob with a shield in its off hand (guards,
+  kings and lords already carry their realm's; tiered zombies now too) raises it 55% of the times it could, for 1 to
+  2.5 s, while a foe is within 7 blocks, and lowers it to strike (the goal's blow waits, `MeleeAttackGoalMixin`); it
+  goes up at once against a drawn bow or loaded crossbow within 28. Vanilla's blocking does the rest (front only); an
+  axe knocks it aside for as long as a player's (`LivingEntityBlockMixin`); watchers see the raised arm
+  (`ShieldPoseHumanoidMobRendererMixin`). **Blade clash** (`BladeClash`): when two armed fighters face each other and
+  one's blow lands within 3 ticks of the other's swing (a full-strength swing for a player, one that hadn't landed yet)
+  or just before a Better Combat mob's wound-up blow, neither hurts: sparks, a ring of steel, both pushed back; then
+  no clash for a second. Hitting straight back after being hit is a trade, not a clash. **Tiered monster gear**
+  (`MonsterGear`): a zombie or skeleton taking a World Tier above Hearth for the first time fills empty armour slots
+  (25/40/55/70% each by tier), may take a weapon (zombies) or trade its bow for a blade (skeletons), and an armed zombie
+  a shield; each piece one of five grades (leather and stone, copper, chainmail and iron blades, iron and rapiers or
+  longswords, diamond), rarer the higher, odds rising with the tier; rare pieces sometimes and legendary always
+  enchanted. **Duellists**: a lord, and one guard in five, fence with a rapier of their sword's metal when Powers is
+  there (`Outfits.fencer`). Bleeding, the fifth idea, is already Wounds' (Powers' PR #331).
