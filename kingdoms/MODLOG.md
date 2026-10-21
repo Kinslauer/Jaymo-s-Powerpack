@@ -3887,3 +3887,6 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
   dead, notoriety 1 + the bodies he robbed. The sentence: pardon (freed), a flogging, the cells (new `JAIL`, in place of
   exile for a looter: walked off to the seat and taken below), or death. Within 48 blocks you see it; further off, the
   next grown villager of that settlement you pass tells you how it went. One who slips his guard runs again.
+  Andy: "ALL HUMANOIDS go down": every folk is now marked downable (rulers, orcs, raiders, barbarians, looters too), and
+  Powers 0.15.41 downs every humanoid monster. Villagers only tend their own (villagers and a settlement's folk), never a
+  downed looter, raider or monster.

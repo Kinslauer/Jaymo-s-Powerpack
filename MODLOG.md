@@ -2215,3 +2215,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
 - **0.15.41, the pack's dead cleared and robbed:** ships Jaymo's Kingdoms 0.7.132 (bearers, graves, mourning, looters,
   judgement for a looter carried to a guard) and Jaymo's Kitchen 0.5.9 (corpses can be robbed; `libs/`).
+  Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate": `Downed.downable`
+  now downs every mob with the humanoid body plan (`BodyPlan.HUMANOID`: zombies, skeletons, illagers, witches, piglins,
+  endermen, Kingdoms' folk, modded humanoids by shape), not only villagers, tagged folk and tamed animals. Beheading,
+  `/kill`, the void, a totem and bosses still end it as before.
