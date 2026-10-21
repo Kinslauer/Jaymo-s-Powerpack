@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["LevelWeatherMixin"],
+	"mixins": ["FireBlockRainMixin", "LevelWeatherMixin", "LightningBoltMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
