@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "#minecraft:wool"
+  },
+  "pattern": [
+    "WWW",
+    "W W"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:wool_cap"
+  }
+}

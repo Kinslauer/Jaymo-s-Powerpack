@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:tanned_leather"
+  ],
+  "result": {
+    "id": "jaymoskitchen:leather_straps",
+    "count": 3
+  }
+}

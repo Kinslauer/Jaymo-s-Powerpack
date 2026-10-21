@@ -461,5 +461,20 @@
 	"message.jaymoskitchen.still.cold": "Full, but cold. Light a fire beneath it",
 	"message.jaymoskitchen.still.started": "Full. It starts to distil",
 	"message.jaymoskitchen.still.distilling": "Distilling: %s%%",
-	"message.jaymoskitchen.still.ready": "Strong Spirits ready. Right-click with a glass bottle"
+	"message.jaymoskitchen.still.ready": "Strong Spirits ready. Right-click with a glass bottle",
+	"item.jaymoskitchen.animal_fat": "Animal Fat",
+	"item.jaymoskitchen.tallow": "Tallow",
+	"item.jaymoskitchen.bark": "Bark",
+	"item.jaymoskitchen.tanned_leather": "Tanned Leather",
+	"item.jaymoskitchen.leather_straps": "Leather Straps",
+	"item.jaymoskitchen.hemp_seeds": "Hemp Seeds",
+	"item.jaymoskitchen.hemp_fibre": "Hemp Fibre",
+	"item.jaymoskitchen.hemp_cloth": "Hemp Cloth",
+	"block.jaymoskitchen.hemp": "Hemp",
+	"block.jaymoskitchen.hemp_top": "Hemp",
+	"message.jaymoskitchen.tanning.no_bark": "Each hide needs a piece of bark in the water with it",
+	"message.jaymoskitchen.tanning.full": "The cauldron can't take any more hides",
+	"message.jaymoskitchen.tanning.soaking": "%s hide(s) soaking with bark. Leave them a while",
+	"message.jaymoskitchen.tanning.wait": "%s hide(s) still tanning: about %s min more",
+	"message.jaymoskitchen.tanning.done": "You lift out %s tanned hide(s)"
 }
