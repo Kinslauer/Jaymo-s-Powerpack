@@ -97,7 +97,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
   (the alien appears mid-slap). The pose is read onto the render state in `extract`, laid over any humanoid model
   after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
-- The first-person slam (`XenoformSlamView`, since 0.13.35; its numbers were tuned against offline pictures, see its
+- The first-person slam (`XenoformSlamView`, since 0.15.5; its numbers were tuned against offline pictures, see its
   javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
   at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) and the
   right hand waits above and to the right; the hand comes straight down over 2 ticks and covers the dial; on contact

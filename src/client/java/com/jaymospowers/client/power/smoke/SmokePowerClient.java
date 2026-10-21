@@ -44,6 +44,7 @@ public final class SmokePowerClient implements PowerClient {
 		PowerClients.register(SmokePower.ID, INSTANCE);
 		SmokeFieldClient.init();
 		SmokeJetClient.init();
+		SmokeSteam.register();
 		ClientTickEvents.END_CLIENT_TICK.register(SmokeFlightPose::tick);
 	}
 

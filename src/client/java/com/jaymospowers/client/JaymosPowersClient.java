@@ -95,6 +95,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		com.jaymospowers.client.wounds.WoundsHud.init();
+		com.jaymospowers.client.wounds.DownedHud.init();
+		com.jaymospowers.client.wounds.MedicineHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();
@@ -111,6 +114,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
+		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
+		com.jaymospowers.client.freerun.FreerunClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */

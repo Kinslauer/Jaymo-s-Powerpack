@@ -3402,3 +3402,93 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   (`Heritage.rage`/`fury`, numbers at its top; Warrior-born villagers too). It shows: their own screen's edges burn
   red and throb with a heartbeat that quickens as they near death, and everyone sees them breathe hot, ragged puffs,
   faster as the rage grows (client `WarriorFury`; health is already synced, so nothing new goes over the wire).
+- **0.7.97, small spiders that hunt:** Andy: "Can we make every spider this size? (More Babies) then give them this ai
+  (NYF's Spiders, Yuka)". Every spider is now half size and every cave spider about two thirds, hitbox and all (the
+  sizes of More Babies' baby spiders, all rights reserved, so only its proportions; `wild.SpiderMinds.size`, the
+  game's scale attribute, saved with the spider so corpses keep it). NYF's Spiders has no 26.3 build; Stormie's
+  Spiders, already in the pack, is its fork, so the wall and ceiling climbing was already there. On top of it, our
+  own hunting after Yuka's ideas (MIT; `wild.SpiderMinds`, numbers at its top): spiders remember where they last saw
+  you and which way you went, and in the dark hear you run or jump (sneak past); they run at where you'll be, spread
+  round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
+  went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
+  whoever walks under. The tarantula keeps its size.
+- **0.7.100, bigger rewards for returned captives:** Andy: "villagers should reward you more for returning a captured
+  prisoner". Each captive is now someone at home: one of its folk, one of its guards (20%), or kin of its ruler (10%,
+  only where there's a ruler); freeing them says which. Brought home, their family pay 6-12 emeralds (guard 8-16, kin
+  12-24) and the settlement adds a reward from its treasury: 8/16/40 plus 2%/4%/8% of its worth, up to 30/60/150,
+  never leaving it under 20 (a rich realm pays far more for its own). A guard hands you a sword, shield, crossbow or
+  helmet; the ruler's kin a golden apple and 1-3 diamonds. Reputation 60/90/150 (was 40), the one brought home's hearts
+  50/60/80, witnesses' 5, and two of their family (real MCA kin first, else the nearest neighbours) come to thank you
+  for 20 hearts each. Members gain 10/25/60 standing. The settlement then owes you a favour (2 for kin, up to 3): while
+  it does, its guards neither toll nor search you, and the next time they'd arrest you they let it go (spends one).
+  A realm at war with you, or one that doesn't know you (masked), pays no treasury reward and owes no favour.
+  Numbers at the top of `Captives`.
+- **0.7.101, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
+  costumes to add to stealth, while not completely concealing identity like it does now ... They also need a hidden
+  blade weapon, craftable at all times but usable only by those with sufficient stealth skill." Powers tags a hooded
+  player (`jaymospowers_hooded:<key>`, a Hood or Peaked Hood with the face showing). Witnesses see a hooded player at
+  0.75 the range (thefts, trespass, deeds; on top of sneaking), and a hood is a fragile mask: a stranger in it is "a
+  hooded figure" with its own name and crimes, unless a witness within 6 blocks, facing them, in the light, sees the
+  face when a crime is seen: then that settlement knows who it is ("recognised") and the crime is theirs. Lowering
+  the hood in view gives it away like a mask; paranoid guards ask hooded strangers to lower it; MCA villagers still
+  know a hooded friend (`Identities`, `Theft`, `Pickpocket`, `Trespass`, `Deeds`, `Approaches`). The hidden blade
+  (`HiddenBlade`, numbers at its top): a leather bracer with a spring blade, always craftable (` I `/`LNL`/` S `),
+  a dagger (4 damage, 2.2 a second, iron durability, Better Combat dagger moves, a light blade), worked only from
+  Stealth 5 (below: 1 damage a blow, "the spring jams"). Fall 4+ blocks onto a living thing with it in either hand
+  and the fall damage is theirs, not yours, as your own blow, and they're Crippled (an attachment, saved: 70% slower,
+  no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
+  full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
+  rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
+- **0.7.101, freerunning (the Stealth tree's second page, with Powers 0.14.3):** Andy picked "Full freerunning".
+  Stealth goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still counts to 15, pocket practice only the first
+  15 levels) and gets a second page, "Freerunning" (12 points): Climber (lvl 3, 3 ranks), Freerunner (lvl 3, 2),
+  Sure Footing (lvl 8, needs Climber), Leap of Faith (lvl 8, 2 pts, needs Freerunner), Bar Swing (lvl 12, 2 pts, needs
+  Sure Footing), Wall Runner (lvl 12, 2 ranks, needs Leap of Faith); appended to `Skills.Perk`, so no ordinal moves.
+  The moves are Jaymo's Powers' (`Freerun`), reading the ranks through `Skills.rank(Player, String)`. Stealth
+  experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
+  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
+  pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).
+- **0.7.102, Emberborn too hot to hug:** Andy: "hugging emberborn villagers and players is impossible without fire
+  resistance". Hugging an Emberborn (villager or player) without being Emberborn, fireproof or under Fire Resistance
+  burns you (3 s fire, 2 damage) and throws you back; no hug, no hearts. MCA's hug menu works both ways (an Emberborn
+  player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
+  mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
+  mood change. Numbers at the top of `EmberHugs`.
+- **0.7.104, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.15.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
+- **0.7.104, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
+  side of Jaymo's Powers' Wounds phase 4 (`docs/Wounds-Phase4.md`, track B; written without a compiler, not yet built
+  or tested). **Clerics are barber-surgeons:** a grown cleric also sells Powers' linen bandages (3 for 2 emeralds),
+  splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds
+  while your bones are broken still has them set (Powers' `Fractures`). **Taverns and festivals sell drink:** a grown
+  villager standing in (or at the door of) one of a realm's standing taverns, or raising a toast at its festival, sells
+  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once offered, the drink stays on their trades (so walking out and back in never restocks it)
+  (`Remedies`, prices at its top). The wares go on when a player right-clicks the villager, just before the trading
+  screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
+  **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside
+  `jaymospowers_revive`, and Powers stops its bleeding and gives it a bandage's heal.
+- **0.7.105, Just-In COMBAT's ideas, our own way (with Powers 0.15.2's rapier):** Andy picked all five (the mod is All
+  Rights Reserved, so its ideas only). **Shields** (`MobShields`): a melee mob with a shield in its off hand (guards,
+  kings and lords already carry their realm's; tiered zombies now too) raises it 55% of the times it could, for 1 to
+  2.5 s, while a foe is within 7 blocks, and lowers it to strike (the goal's blow waits, `MeleeAttackGoalMixin`); it
+  goes up at once against a drawn bow or loaded crossbow within 28. Vanilla's blocking does the rest (front only); an
+  axe knocks it aside for as long as a player's (`LivingEntityBlockMixin`); watchers see the raised arm
+  (`ShieldPoseHumanoidMobRendererMixin`). **Blade clash** (`BladeClash`): when two armed fighters face each other and
+  one's blow lands within 3 ticks of the other's swing (a full-strength swing for a player, one that hadn't landed yet)
+  or just before a Better Combat mob's wound-up blow, neither hurts: sparks, a ring of steel, both pushed back; then
+  no clash for a second. Hitting straight back after being hit is a trade, not a clash. **Tiered monster gear**
+  (`MonsterGear`): a zombie or skeleton taking a World Tier above Hearth for the first time fills empty armour slots
+  (25/40/55/70% each by tier), may take a weapon (zombies) or trade its bow for a blade (skeletons), and an armed zombie
+  a shield; each piece one of five grades (leather and stone, copper, chainmail and iron blades, iron and rapiers or
+  longswords, diamond), rarer the higher, odds rising with the tier; rare pieces sometimes and legendary always
+  enchanted. **Duellists**: a lord, and one guard in five, fence with a rapier of their sword's metal when Powers is
+  there (`Outfits.fencer`). Bleeding, the fifth idea, is already Wounds' (Powers' PR #331).

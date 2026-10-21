@@ -79,6 +79,10 @@ public class CostumeItem extends Item {
 			Component.translatable("costume.jaymospowers.mask." + design.mask().getSerializedName())).withStyle(ChatFormatting.GRAY));
 		builder.accept(Component.translatable("tooltip.jaymospowers.costume.cape",
 			Component.translatable("costume.jaymospowers.cape." + design.cape().getSerializedName())).withStyle(ChatFormatting.GRAY));
+		if (design.mask().isHood()) {
+			// (0.14.3) the face shows, but the name tag can't be read from afar (CostumeClient.HOOD_NAME_RANGE)
+			builder.accept(Component.translatable("tooltip.jaymospowers.costume.hooded").withStyle(ChatFormatting.GRAY));
+		}
 		if (design.hasEmblem()) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.emblem").withStyle(ChatFormatting.GRAY));
 		}

@@ -57,7 +57,7 @@ final class WebWallRunClient {
 		boolean free = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying()
 			&& !player.getAbilities().flying && !player.isPassenger() && !player.isSpectator() && player.isAlive()
 			&& !swing.attached() && swing.pull == null && swing.wingsTicks == 0 && !WebSymbioteClient.driving()
-			&& !WebPower.ragdolled(player);
+			&& !WebPower.ragdolled(player) && !com.jaymospowers.client.freerun.FreerunClient.active();
 		if (face == null) {
 			if (free && input.forward() && !input.shift()) {
 				tryStart(player);

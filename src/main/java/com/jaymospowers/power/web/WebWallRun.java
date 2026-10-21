@@ -152,7 +152,7 @@ public final class WebWallRun {
 	}
 
 	/** A footfall on the wall: its own step sound, and a puff of its dust, for everyone. */
-	private static void footstep(ServerPlayer player, Direction face) {
+	public static void footstep(ServerPlayer player, Direction face) {
 		ServerLevel level = player.level();
 		BlockPos pos = wallBlock(level, player, face);
 		if (pos == null) {

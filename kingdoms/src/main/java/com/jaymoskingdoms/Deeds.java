@@ -59,11 +59,11 @@ public final class Deeds {
 	}
 
 	/** Reputation each deed earns with the settlement: a fire put out, a life saved, a captive freed, and brought home. */
-	static final int FIRE_REP = 1, SAVE_REP = 6, FREED_REP = 10, HOME_REP = 40;
+	static final int FIRE_REP = 1, SAVE_REP = 6, FREED_REP = 10;
 	/** The most reputation fires and saves earn with one settlement in a day (so a blaze or a horde isn't a fortune). */
 	static final int DAILY_REP = 60;
-	/** Hearts (MCA): the one saved, a captive brought home, the one freed, and each who saw it. */
-	static final int SAVE_HEARTS = 10, HOME_HEARTS = 25, FREED_HEARTS = 10, WITNESS_HEARTS = 2;
+	/** Hearts (MCA): the one saved, the one freed, each who saw it, and each who saw a captive brought home. (A homecoming's own: {@link Captives}.) */
+	static final int SAVE_HEARTS = 10, FREED_HEARTS = 10, WITNESS_HEARTS = 2, HOMECOMING_HEARTS = 5;
 	/** MCA mood lift for those who saw it. */
 	static final int CHEER = 5;
 	/** How far off folk see a deed; how near a player must be to a fire that went out to have put it out; how near the one saved. */
@@ -272,13 +272,27 @@ public final class Deeds {
 	}
 
 	/** {@code player} brought {@code captive} home to {@code home}: the whole place knows of it. */
-	static void broughtHome(ServerLevel level, ServerPlayer player, Villager captive, Faction home, ItemStack reward) {
-		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.home", HOME_HEARTS);
-		give(player, reward);
+	static void broughtHome(ServerLevel level, ServerPlayer player, Villager captive, Faction home, List<ItemStack> rewards, int rep, int hearts) {
+		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.home", hearts);
+		for (ItemStack reward : rewards) {
+			give(player, reward);
+		}
 		captive.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		cheer(level, player, captive, "talk.jaymoskingdoms.deed.rescue.cheer");
+		cheer(level, player, captive, "talk.jaymoskingdoms.deed.rescue.cheer", HOMECOMING_HEARTS);
 		record(player, home, Kind.RESCUE);
-		Reputation.change(player, home, HOME_REP);
+		Reputation.change(player, home, rep);
+	}
+
+	/** (0.7.100) Up to {@code most} grown villagers nearest {@code captive} come as their family and thank {@code player}. */
+	static void family(ServerLevel level, ServerPlayer player, Villager captive, int most, double range, int hearts) {
+		List<Villager> near = level.getEntitiesOfClass(Villager.class, captive.getBoundingBox().inflate(range), v -> v != captive && v.isAlive()
+			&& !v.isBaby() && !v.isSleeping() && !v.isNoAi() && !v.hasAttached(Captives.CAPTIVE) && !Theft.rioting(v));
+		// (their own kin first, if any live here; else the neighbours nearest, who're as good as family)
+		near.sort(java.util.Comparator.<Villager>comparingInt(v -> McaCompat.kin(captive, v) == McaCompat.STRANGERS ? 1 : 0)
+			.thenComparingDouble(v -> v.distanceToSqr(captive)));
+		for (Villager kin : near.subList(0, Math.min(most, near.size()))) {
+			thank(level, kin, player, "talk.jaymoskingdoms.deed.rescue.family", hearts);
+		}
 	}
 
 	// ---- reactions ---------------------------------------------------------------------------------------------------
@@ -294,6 +308,10 @@ public final class Deeds {
 
 	/** Everyone else who saw {@code player} help {@code helped} warms to them, and one cheers aloud. */
 	private static void cheer(ServerLevel level, ServerPlayer player, LivingEntity helped, String family) {
+		cheer(level, player, helped, family, WITNESS_HEARTS);
+	}
+
+	private static void cheer(ServerLevel level, ServerPlayer player, LivingEntity helped, String family, int hearts) {
 		List<LivingEntity> seen = witnesses(level, player, helped);
 		if (seen.isEmpty()) {
 			return;
@@ -302,7 +320,7 @@ public final class Deeds {
 		lookAt(loud, player);
 		Speech.say(level, loud, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.WHITE, WITNESS_RANGE + 8.0);
 		for (LivingEntity w : seen) {
-			warm(w, player, WITNESS_HEARTS);
+			warm(w, player, hearts);
 			if (w instanceof Villager v) {
 				McaCompat.cheer(v, CHEER);
 			}
@@ -316,7 +334,7 @@ public final class Deeds {
 	/** Grown villagers (and a settlement's folk) near {@code player} who can see them, but not {@code besides}, captives or rioters. */
 	private static List<LivingEntity> witnesses(ServerLevel level, ServerPlayer player, @Nullable LivingEntity besides) {
 		List<LivingEntity> out = new ArrayList<>();
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE),
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE * Identities.hoodSight(player)),
 			e -> e.isAlive() && e != besides && friendly(e))) {
 			if (e.isSleeping() || e.isBaby() || e instanceof Mob m && m.isNoAi() || Theft.rioting(e) || !e.hasLineOfSight(player)) {
 				continue;
