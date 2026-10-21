@@ -85,12 +85,17 @@ public final class Melting {
 	public record Input(Molten molten, int amount) {
 	}
 
-	/** Tinkers' alloys, in per-batch amounts (one batch every tick or so). */
+	/**
+	 * Tinkers' alloys, in per-batch amounts (one batch every tick or so). (Smithing) Steel is wrought iron fined with
+	 * carbon-rich pig iron, an ingot of each for one of steel (the smeltery holds no coal); a kiln can make it from
+	 * coal directly ({@code kiln.Kiln}).
+	 */
 	public static final List<Alloy> ALLOYS = List.of(
 		new Alloy(Molten.ROSE_GOLD, 40, List.of(new Input(Molten.COPPER, 30), new Input(Molten.GOLD, 10))),
 		new Alloy(Molten.AMETHYST_BRONZE, 9, List.of(new Input(Molten.COPPER, 9), new Input(Molten.AMETHYST, 10))),
 		new Alloy(Molten.PIG_IRON, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.BLOOD, 5), new Input(Molten.HONEY, 5))),
-		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))));
+		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))),
+		new Alloy(Molten.STEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.PIG_IRON, 9))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/**
@@ -151,6 +156,12 @@ public final class Melting {
 	public static void silver(Item ingot, Item nugget, Item block, Item raw, Item rawBlock, Item... ores) {
 		metal(Molten.SILVER, ingot, nugget, block, raw, rawBlock);
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
+	}
+
+	/** (Smithing) An alloy's nugget and block (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
+	public static void alloyForms(Molten molten, Item nugget, Item block) {
+		add(molten, Molten.NUGGET, nugget);
+		add(molten, Molten.BLOCK, block);
 	}
 
 	/** An ingot, nugget, block and raw ore (doubled) of a metal. */
@@ -303,6 +314,7 @@ public final class Melting {
 			case GOLD -> new ItemStack(Items.GOLD_NUGGET);
 			case COPPER -> new ItemStack(Items.COPPER_NUGGET);
 			case SILVER -> new ItemStack(Tinkering.SILVER_NUGGET);
+			case STEEL -> new ItemStack(Tinkering.STEEL_NUGGET);
 			default -> null;
 		};
 	}
@@ -317,6 +329,7 @@ public final class Melting {
 			case GOLD -> new BasinResult(new ItemStack(Items.GOLD_BLOCK), Molten.BLOCK);
 			case COPPER -> new BasinResult(new ItemStack(Items.COPPER_BLOCK.weathering().unaffected()), Molten.BLOCK);
 			case SILVER -> new BasinResult(new ItemStack(Tinkering.SILVER_BLOCK), Molten.BLOCK);
+			case STEEL -> new BasinResult(new ItemStack(Tinkering.STEEL_BLOCK), Molten.BLOCK);
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);

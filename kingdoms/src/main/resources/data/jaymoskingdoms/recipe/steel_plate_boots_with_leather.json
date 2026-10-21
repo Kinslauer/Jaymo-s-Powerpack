@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "steel_plate_boots",
+  "key": {
+    "S": "#c:ingots/steel",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "S S",
+    "SLS"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:steel_plate_boots"
+  }
+}
