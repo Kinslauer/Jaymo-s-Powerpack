@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.gear;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -14,7 +15,6 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.core.component.DataComponents;
 
 /**
  * An aercloud glider: hold right-click in mid-air to glide. The fall slows to {@link #SINK} a tick (sneak to dive at

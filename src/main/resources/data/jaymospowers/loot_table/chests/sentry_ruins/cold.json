@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_pickaxe",
+          "name": "jaymospowers:holystone_pickaxe",
           "weight": 2
         },
         {
@@ -20,8 +20,33 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond_pickaxe",
+          "name": "jaymospowers:zanite_pickaxe",
           "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:zanite_hammer",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:burrukai_plate_helmet",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:burrukai_plate_chestplate",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:burrukai_plate_leggings",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:burrukai_plate_boots",
+          "weight": 1
         },
         {
           "type": "minecraft:item",
@@ -30,27 +55,27 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_chestplate",
-          "weight": 1
+          "name": "jaymospowers:beast_pelt",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 4
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_helmet",
-          "weight": 1
+          "name": "jaymospowers:cold_aercloud_glider",
+          "weight": 3
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_leggings",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:iron_boots",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:diamond_axe",
+          "name": "jaymospowers:golden_aercloud_glider",
           "weight": 1
         },
         {
@@ -169,12 +194,12 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_pickaxe",
+          "name": "jaymospowers:holystone_pickaxe",
           "weight": 2
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_axe",
+          "name": "jaymospowers:holystone_hammer",
           "weight": 1
         },
         {
@@ -262,6 +287,21 @@
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:burrukai_plate",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
               }
             }
           ]
@@ -406,7 +446,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:leather",
+          "name": "jaymospowers:beast_pelt",
           "weight": 2,
           "modifier": [
             {

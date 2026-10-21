@@ -7,9 +7,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -17,29 +15,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * What gravitite does: a gravitite tool used on a block lifts it as a rising block ({@link FloatingBlockEntity}), unless that
- * block holds items (a block entity), can't be broken, or has nothing but a solid block over it. Sneak with a shovel, axe or hoe
- * to use it the ordinary way instead. The whole gravitite armour set also gives one extra jump in mid-air: the client
- * sends {@link DoubleJump} (the move itself is the player's own, as every movement is), the server checks the set and that
- * the jump wasn't spent since the last landing, and forgets the fall.
+ * What gravitite does: a gravitite tool ({@link GravititeToolItem}) used on a block lifts it as a rising block
+ * ({@link FloatingBlockEntity}), unless that block holds items (a block entity), can't be broken, or has a solid block over
+ * it. The whole gravitite armour set also gives one extra jump in mid-air: the client sends {@link DoubleJump} (the move
+ * itself is the player's own, as every movement is), the server checks the set and that the jump wasn't spent since the last
+ * landing, and forgets the fall.
  */
 public final class GravititeTools {
 	// ---- tuning ----
@@ -68,10 +61,6 @@ public final class GravititeTools {
 	}
 
 	static void init() {
-		Identifier first = JaymosPowers.id("gravitite_lift");
-		UseBlockCallback.EVENT.addPhaseOrdering(first, Event.DEFAULT_PHASE);
-		UseBlockCallback.EVENT.register(first, GravititeTools::lift);
-
 		PayloadTypeRegistry.serverboundPlay().register(DoubleJump.TYPE, DoubleJump.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(DoubleJump.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
@@ -95,28 +84,22 @@ public final class GravititeTools {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SPENT.remove(handler.getPlayer().getUUID()));
 	}
 
-	/** A gravitite tool on a block: lift it. */
-	private static InteractionResult lift(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
-		ItemStack held = player.getItemInHand(hand);
-		if (player.isSpectator() || !held.is(AetherGear.GRAVITITE_TOOLS)) {
-			return InteractionResult.PASS;
-		}
-		// sneaking, a shovel, axe or hoe does its own job (stripping, flattening, tilling)
-		if (player.isShiftKeyDown() && !held.is(ItemTags.PICKAXES)) {
-			return InteractionResult.PASS;
-		}
-		BlockPos pos = hit.getBlockPos();
+	/** Lifts the block {@code context} points at if it can be, and says whether it did. */
+	static boolean lift(UseOnContext context) {
+		Player player = context.getPlayer();
+		Level level = context.getLevel();
+		BlockPos pos = context.getClickedPos();
 		BlockState state = level.getBlockState(pos);
-		if (!liftable(level, pos, state)) {
-			return InteractionResult.PASS;
+		if (player == null || player.isSpectator() || !liftable(level, pos, state)) {
+			return false;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
 			server.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 			server.addFreshEntity(FloatingBlockEntity.create(server, pos, state, false));
 			server.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0F, 0.8F);
-			held.hurtAndBreak(LIFT_WEAR, sp, hand);
+			context.getItemInHand().hurtAndBreak(LIFT_WEAR, sp, context.getHand());
 		}
-		return InteractionResult.SUCCESS;
+		return true;
 	}
 
 	/** Blocks that can be lifted: solid ones with room above, nothing that holds items, grows over two blocks, or can't be broken. */

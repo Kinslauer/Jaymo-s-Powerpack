@@ -494,3 +494,87 @@ Package `com.jaymospowers.aether.dungeon` (client: `client/aether/dungeon`), lan
 - **Loot**: `loot_table/chests/sentry_ruins/{common,rare,deposit,cold,boss}.json`, existing items plus vanilla gear.
 - **Checked**: compile check clean (only the 12 expected old errors); the dev server boots and `/place structure jaymospowers:sentry_ruins` in the Aether builds it with one Slider and no log errors.
 - **Not checked in game**: how the rooms look and play, the fight itself, the client renders and skins, how often the structure is found while exploring.
+
+## Aether II gear
+
+Track G of the Aether II rebuild (`DESIGN2.md`): tools, hammers, armour, gliders and the altar, in
+`com.jaymospowers.aether.gear` (client: `client/aether/gear`). `python -I tools/gen_aether_gear.py` paints every
+sprite and armour layer (our own shapes, vanilla's flat shade-ramps) and writes the item definitions, models, equipment
+assets, recipes, tags and `lang/parts/aether_gear.json`; `python -I tools/check_aether_gear.py .` checks it all hangs together
+(ids the Java registers against assets, recipes, tags and lang). All numbers are `static final` constants at the top of
+`GearTier`, `ArmorSet`, `ArmorAbilities`, `GravititeTools`, `AercloudGliderItem`, `AltarRecipes` and `AltarBlockEntity`.
+Everything is in the "The Aether" creative tab. Behaviour and numbers are from the Aether II notes (`structures.md` section 5).
+
+**Tools** [GearTier, AetherGear]. Five metals, each with a **Shortsword**, **Hammer**, **Pickaxe**, **Axe**, **Shovel** and
+**Hoe** (the hoe stands in for Aether II's trowel): `<metal>_shortsword`, `_hammer`, `_pickaxe`, `_axe`, `_shovel`, `_hoe`.
+| Metal | Durability | Speed | Attack bonus | Enchant | Mines like | Made from |
+|---|---|---|---|---|---|---|
+| Skyroot | 59 | 2 | 0 | 15 | wood | skyroot planks |
+| Holystone | 131 | 4 | 1 | 5 | stone | holystone |
+| Zanite | 250 | 6 | 2 | 14 | iron | zanite gemstone |
+| Arkenium | 1561 | 6 | 2 | 14 | iron | arkenium plate |
+| Gravitite | 1561 | 8 | 3 | 10 | diamond | enchanted gravitite |
+The shortsword is quick (-2.2, a slash: it is in `#minecraft:swords`, so mobs with a weak spot to slashes take more); the
+hammer is the heavy one (4.5 added damage, -3.3 speed) and is *not* a sword, so its blows count as impacts. Pickaxes, axes,
+shovels and hoes join the vanilla tool tags (the Slider takes pickaxes only, so these work on it). **Zanite Shears**: 238
+durability, vanilla shears' behaviour. **Arkenium Plate**: smelt or blast inert arkenium, or use the altar. Tools are mended with
+their metal on an anvil or at the altar.
+- **Gravitite tools** [GravititeToolItem, GravititeTools]: right-click a block to lift it as a rising block (the same
+  `FloatingBlockEntity` gravitite ore uses), if it holds no items (no block entity), is not unbreakable, is not a
+  two-high block or a bed, and has air or a plant above. The block's own use comes first (doors, levers), and sneaking with
+  the axe, shovel or hoe does the ordinary job (strip, flatten, till). A lift costs 1 durability.
+
+**Armour** [ArmorSet, ArmorAbilities]: Helmet, Chestplate, Leggings and Boots (`<set>_helmet` and so on) of six sets.
+| Set | Durability x | Defence (helm/chest/legs/boots) | Enchant | Toughness | Made from |
+|---|---|---|---|---|---|
+| Beast Pelt | 5 | 1 / 3 / 2 / 1 | 15 | 0 | beast pelt |
+| Burrukai Plate | 5 | 2 / 5 / 4 / 1 | 15 | 0 | burrukai plate |
+| Zanite | 15 | 2 / 6 / 5 / 2 | 9 | 0 | zanite gemstone |
+| Arkenium | 15 | 2 / 6 / 5 / 2 | 10 | 1 | arkenium plate |
+| Gravitite | 33 | 3 / 8 / 6 / 3 | 10 | 2 | enchanted gravitite |
+| Neptune | 33 | 2 / 6 / 5 / 2 | 10 | 1 | (boss loot only; mends with zanite) |
+Full-set bonuses (every five ticks the set is looked at; the attributes are transient):
+- **Zanite**: +0.15 attack speed, +2 mining speed, +5% walking speed.
+- **Arkenium**: +0.3 explosion knockback resistance, and 16% of every hit that doesn't kill is healed straight back (the game
+  has no hook to shrink a blow before it lands).
+- **Gravitite**: falls hurt half as much (fall damage multiplier -0.5), and **one extra jump in mid-air** (1.25x a jump, a push of
+  0.2 the way you steer): the client makes the move (movement is the player's own) and sends `DoubleJump`; the server checks
+  the set and forgets the fall; it comes back on landing or in water.
+- **Neptune**: water movement efficiency +2 (capped at 1 by the game), +1.5 oxygen.
+- Beast Pelt: a taegore isn't scared of whoever wears any piece (`#jaymospowers:beast_pelt_armor`, read by the animals
+  track). Burrukai Plate has no bonus. Gloves (zanite, arkenium, gravitite, neptune) are not made.
+
+**Aercloud gliders** [AercloudGliderItem]: `cold_`, `golden_`, `blue_` and `purple_aercloud_glider`. Hold right-click in
+mid-air to glide (not on the ground, in water, riding or flying): the fall slows to -0.025 a tick (sneak to dive at -0.15), you
+steer by walking (forward full, sideways half, back a quarter, 0.03 a tick; golden 0.04), and you never take fall damage while
+it is open. Opening one costs 1 durability (cold 5, golden 30, blue 3, purple 3); the glide lasts 160 ticks (golden 400), then
+an 80-tick wait; letting go early waits 2 ticks. **Blue** throws you up 2 blocks a tick as it opens, **purple** multiplies your sideways
+speed by 6 (at least 0.2, at most 3 a tick), each once until you land. The steering is on the gliding player's own client
+(Armory's bomb glider is a vehicle, so no precedent; this is the rule quicksoil's speed cap follows: players move on their own
+side); the server counts the time, wears the item and forgets the fall. Recipes: three aerclouds of the colour over cloudtwine, a centre piece (ambrosium shard, golden amber or
+zanite) and sticks.
+
+**Enchanted fruit**: **Enchanted Blueberry**, **Enchanted Orange**, **Enchanted Wyndberry**: 6 hunger, saturation 1.0 and
+Regeneration II for 6 seconds. Made at the altar.
+
+**Altar** [AltarBlock, AltarBlockEntity, AltarMenu, AltarRecipes; client AltarScreen]. Craft it from holystone and a zanite
+gemstone (`HZH / .H. / HHH`). Right-click for its screen: the input in the middle, a ring of eight ambrosium-shard slots round
+it (clockwise from the top; a recipe asks for the first N, ringed in gold), the output on the right, an arrow that fills as it
+works. A recipe needs the first N shard slots each holding a shard and room for its result; it works 200 ticks (a missing shard
+or full output drains the work by 2 a tick; changing the input starts over), then uses one shard from each of the N slots and
+one input item. Shift-click puts shards into the slot with the fewest. What it does:
+- **Repairs** any damaged Aether tool, hammer, shears, armour piece or glider, by tier (shards): skyroot and beast pelt 1,
+  holystone 2, burrukai 3, zanite 4, arkenium 5, neptune 6, gravitite 8; gliders cold 1, golden 3, blue 2, purple 2.
+- **Quicksoil to quicksoil glass** (1), **inert arkenium, arkenium ore or undershale arkenium ore to arkenium plate** (3, 4, 4),
+  **fruit to enchanted fruit**: blueberry 1, orange 1, wyndberry 2.
+- Dropping the altar drops what is on it.
+
+**Loot** [tools/gen_aether_dungeon.py]. The Sentry Ruins' crates now use this gear in place of the vanilla stand-ins: the boss
+crate gives two neptune pieces, a roll of zanite or neptune armour, zanite tools and shears, maybe a golden, blue or purple glider,
+enchanted fruit and arkenium plates; the rare crate gives burrukai armour, zanite and holystone tools, cold and golden
+gliders and beast pelts; common crates give holystone tools and hammers, burrukai plates and beast pelts. Not made (not
+in this mod yet): Hammer of Demolition, Sentry Boots, kinetic thrusters, gloves, pendants, charms, shifting glass.
+
+**Check first in game**: gliding (hold right-click in the air: slow fall, steering, the blue and purple boosts once, no fall
+damage, landing refuels), the gravitite extra jump (a double tap of jump in the air in a full set), lifting blocks with a gravitite
+tool, the altar's screen and a repair, and the zanite and arkenium set bonuses on the attribute readout.

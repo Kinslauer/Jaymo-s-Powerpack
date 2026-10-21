@@ -114,6 +114,7 @@
     "jaymospowers:sentry_brick_button",
     "jaymospowers:sentry_spawner",
     "jaymospowers:sentry_trap",
-    "jaymospowers:sentry_crate"
+    "jaymospowers:sentry_crate",
+    "jaymospowers:altar"
   ]
 }

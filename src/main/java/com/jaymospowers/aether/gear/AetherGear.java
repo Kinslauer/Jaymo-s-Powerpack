@@ -1,18 +1,18 @@
 package com.jaymospowers.aether.gear;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.aether.AetherBlocks;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.flag.FeatureFlags;
@@ -30,8 +30,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.core.component.DataComponents;
-import java.util.Set;
 
 /**
  * The Aether's gear (docs/aether.md, "Aether II gear"): tools and hammers of five metals, zanite shears, six armour sets with
@@ -56,8 +54,6 @@ public final class AetherGear {
 	public static Block ALTAR;
 	public static BlockEntityType<AltarBlockEntity> ALTAR_ENTITY;
 	public static MenuType<AltarMenu> ALTAR_MENU;
-	/** The four gravitite tools that lift a block they are used on ({@code #jaymospowers:gravitite_tools}). */
-	public static final TagKey<Item> GRAVITITE_TOOLS = TagKey.create(Registries.ITEM, JaymosPowers.id("gravitite_tools"));
 	/** Every item of the gear, for the creative tab and the altar's repair table. */
 	private static final List<Item> ALL = new ArrayList<>();
 
@@ -108,10 +104,12 @@ public final class AetherGear {
 	private static void tools(GearTier tier) {
 		SHORTSWORD.put(tier, item(tier.id + "_shortsword", Item::new, p -> p.sword(tier.material, GearTier.SWORD_DAMAGE, GearTier.SWORD_SPEED)));
 		HAMMER.put(tier, item(tier.id + "_hammer", Item::new, p -> p.sword(tier.material, GearTier.HAMMER_DAMAGE, GearTier.HAMMER_SPEED)));
-		PICKAXE.put(tier, item(tier.id + "_pickaxe", Item::new, p -> p.pickaxe(tier.material, GearTier.PICKAXE_DAMAGE, GearTier.PICKAXE_SPEED)));
-		AXE.put(tier, item(tier.id + "_axe", Item::new, p -> p.axe(tier.material, GearTier.AXE_DAMAGE, GearTier.AXE_SPEED)));
-		SHOVEL.put(tier, item(tier.id + "_shovel", Item::new, p -> p.shovel(tier.material, GearTier.SHOVEL_DAMAGE, GearTier.SHOVEL_SPEED)));
-		HOE.put(tier, item(tier.id + "_hoe", Item::new, p -> p.hoe(tier.material, -tier.material.attackDamageBonus(), tier.hoeSpeed)));
+		// gravitite's tools lift the block they are used on
+		Function<Item.Properties, Item> factory = tier == GearTier.GRAVITITE ? GravititeToolItem::new : Item::new;
+		PICKAXE.put(tier, item(tier.id + "_pickaxe", factory, p -> p.pickaxe(tier.material, GearTier.PICKAXE_DAMAGE, GearTier.PICKAXE_SPEED)));
+		AXE.put(tier, item(tier.id + "_axe", factory, p -> p.axe(tier.material, GearTier.AXE_DAMAGE, GearTier.AXE_SPEED)));
+		SHOVEL.put(tier, item(tier.id + "_shovel", factory, p -> p.shovel(tier.material, GearTier.SHOVEL_DAMAGE, GearTier.SHOVEL_SPEED)));
+		HOE.put(tier, item(tier.id + "_hoe", factory, p -> p.hoe(tier.material, -tier.material.attackDamageBonus(), tier.hoeSpeed)));
 	}
 
 	private static Item enchanted(String id) {
@@ -137,10 +135,5 @@ public final class AetherGear {
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(customize.apply(new Item.Properties().setId(key))));
 		ALL.add(item);
 		return item;
-	}
-
-	/** The block item of the gravitite the tools are made of. */
-	public static Item enchantedGravitite() {
-		return AetherBlocks.ENCHANTED_GRAVITITE.asItem();
 	}
 }

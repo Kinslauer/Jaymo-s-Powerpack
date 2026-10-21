@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "jaymospowers:beast_pelt"
+  },
+  "pattern": [
+    "# #",
+    "# #"
+  ],
+  "result": {
+    "id": "jaymospowers:beast_pelt_boots"
+  }
+}

@@ -644,25 +644,30 @@ def chest(name, pools):
           {"type": "minecraft:chest", "pools": pools, "random_sequence": "%s:chests/sentry_ruins/%s" % (NS, name)})
 
 
-# what the notes' loot becomes with the gear we have: their holystone and zanite tools and Burrukai plate become vanilla gear until the
-# Aether's own gear exists; their discs, vanilla discs; their enchanted fruit, our fruit and golden apples
-RARE_GEAR = [item(mc("iron_pickaxe"), weight=2), item(mc("crossbow"), weight=2), item(mc("diamond_pickaxe"), weight=2), item(mc("shield"), weight=2),
-             item(mc("iron_chestplate")), item(mc("iron_helmet")), item(mc("iron_leggings")), item(mc("iron_boots")), item(mc("diamond_axe")),
+# what the notes' loot becomes with the gear we have: the Aether's own tools, armour and gliders (track G), vanilla's crossbow and
+# shield, vanilla discs, our fruit and golden apples. Their zanite gloves, charms, pendants and Hammer of Demolition are not made.
+RARE_GEAR = [item(jp("holystone_pickaxe"), weight=2), item(mc("crossbow"), weight=2), item(jp("zanite_pickaxe"), weight=2), item(jp("zanite_hammer")),
+             item(jp("burrukai_plate_helmet")), item(jp("burrukai_plate_chestplate")), item(jp("burrukai_plate_leggings")),
+             item(jp("burrukai_plate_boots")), item(mc("shield"), weight=2), item(jp("beast_pelt"), 2, 4, 3),
+             item(jp("cold_aercloud_glider"), weight=3), item(jp("golden_aercloud_glider")),
              item(jp("cold_aercloud"), 2, 4, 3), item(jp("golden_aercloud"), 1, 2), item(jp("arkenium_lantern"), 1, 2), item(mc("saddle"), weight=2),
              item(jp("enchanted_gravitite"), 1, 2, 2), item(mc("golden_apple"), 1, 1, 2), item(mc("music_disc_cat"))]
+NEPTUNE = [item(jp("neptune_" + p)) for p in ("helmet", "chestplate", "leggings", "boots")]
+ZANITE_ARMOR = [item(jp("zanite_" + p), weight=2) for p in ("helmet", "chestplate", "leggings", "boots")]
 
 
 def loot():
     rare = pool(1, RARE_GEAR)
     common = [
         pool((1, 2), RARE_GEAR),
-        pool((1, 2), [item(jp("ambrosium_torch"), 2, 6, 14), item(jp("scatterglass_shard"), 2, 5, 8), item(mc("iron_pickaxe"), weight=2),
-                      item(mc("iron_axe"), weight=1), item(mc("crossbow"), weight=1)]),
+        pool((1, 2), [item(jp("ambrosium_torch"), 2, 6, 14), item(jp("scatterglass_shard"), 2, 5, 8), item(jp("holystone_pickaxe"), weight=2),
+                      item(jp("holystone_hammer"), weight=1), item(mc("crossbow"), weight=1)]),
         pool((1, 3), [item(jp("ambrosium_shard"), 2, 5, 5), item(jp("scatterglass_shard"), 1, 4, 3), item(jp("golden_amber"), 1, 3, 3),
-                      item(jp("zanite_gemstone"), 1, 2, 2), item(jp("inert_arkenium"), 1, 2, 1)]),
+                      item(jp("zanite_gemstone"), 1, 2, 2), item(jp("inert_arkenium"), 1, 2, 1),
+                      item(jp("burrukai_plate"), 1, 3, 2)]),
         pool((0, 2), [item(jp("orange"), 1, 3, 3), item(jp("blue_berry"), 1, 3, 3), item(jp("wyndberry"), 1, 2, 2), item(jp("satival_bulb"), 1, 2, 2)]),
         pool((2, 4), [item(jp("cloudtwine"), 1, 3, 3), item(jp("swet_gel"), 1, 3, 2), item(jp("swet_sugar"), 1, 2, 1), item(jp("cockatrice_feather"), 1, 2, 1),
-                      item(mc("leather"), 1, 2, 2), item(jp("glint_coin"), 1, 3, 2)]),
+                      item(jp("beast_pelt"), 1, 2, 2), item(jp("glint_coin"), 1, 3, 2)]),
     ]
     chest("common", common)
     chest("rare", [rare])
@@ -673,14 +678,20 @@ def loot():
                                           item(jp("swet_gel"), 2, 4, 2), item(jp("icestone_bricks"), 3, 6, 2)])])
     chest("boss", [
         pool(1, [item(mc("music_disc_otherside")), item(mc("music_disc_stal")), item(mc("music_disc_mellohi")), item(jp("irradiated_holystone"), 4, 8)]),
-        pool(2, [item(mc("diamond_helmet")), item(mc("diamond_chestplate")), item(mc("diamond_leggings")), item(mc("diamond_boots"))]),
-        pool((1, 2), [item(mc("diamond_pickaxe"), weight=3), item(mc("diamond_axe"), weight=3), item(mc("shield"), weight=2), item(mc("diamond_sword"), weight=3),
+        # two guaranteed pieces of neptune armour, then a chance of more (or of zanite armour)
+        pool(2, NEPTUNE),
+        pool(1, ZANITE_ARMOR + [dict(piece, weight=1) for piece in NEPTUNE]),
+        pool((1, 2), [item(jp("zanite_pickaxe"), weight=3), item(jp("zanite_hammer"), weight=3), item(jp("zanite_axe"), weight=2),
+                      item(jp("zanite_shortsword"), weight=2), item(mc("shield"), weight=1), item(jp("zanite_shears"), weight=1),
                       item(jp("arkenium_lantern"), 1, 2, 1)]),
+        pool((0, 1), [item(jp("golden_aercloud_glider"), weight=2), item(jp("blue_aercloud_glider"), weight=2), item(jp("purple_aercloud_glider"), weight=2),
+                      item(jp("cold_aercloud_glider"), weight=1)]),
         pool((1, 3), [item(jp("zanite_gemstone"), 2, 5), item(jp("inert_arkenium"), 2, 5), item(jp("glint_gemstone"), 1, 3), item(jp("enchanted_gravitite"), 1, 3)]),
-        pool((2, 3), [item(mc("golden_apple"), 1, 2, 3), item(jp("orange"), 2, 4, 2), item(jp("blue_berry"), 2, 4, 2), item(jp("wyndberry"), 1, 3, 1),
-                      item(mc("enchanted_golden_apple"), 1, 1, 1)]),
+        pool((2, 3), [item(jp("enchanted_blue_berry"), 1, 3, 3), item(jp("enchanted_orange"), 1, 3, 2), item(mc("golden_apple"), 1, 2, 2),
+                      item(jp("enchanted_wyndberry"), 1, 2, 1), item(mc("enchanted_golden_apple"), 1, 1, 1)]),
         pool((2, 3), [item(jp("glint_coin"), 3, 8, 3), item(jp("glint_gemstone"), 1, 2, 1)]),
-        pool((1, 2), [item(jp("zanite_gemstone"), 3, 6, 2), item(jp("inert_arkenium"), 2, 4, 1), item(jp("golden_amber_block"), 1, 1, 1)]),
+        pool((1, 2), [item(jp("zanite_gemstone"), 3, 6, 2), item(jp("arkenium_plate"), 1, 3, 2), item(jp("inert_arkenium"), 2, 4, 1),
+                      item(jp("golden_amber_block"), 1, 1, 1)]),
     ])
 
 
