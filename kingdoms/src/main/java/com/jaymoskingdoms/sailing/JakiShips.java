@@ -33,7 +33,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.111) Ships drawn by Jackiefr for Jaki Versatile Structures: Sails &amp; Sea (GPLv3: the structure files ship
+ * (0.7.112) Ships drawn by Jackiefr for Jaki Versatile Structures: Sails &amp; Sea (GPLv3: the structure files ship
  * unchanged in data/jaymoskingdoms/structure/jaki, with its licence and a notice in licenses/jaki), sailed by our crews
  * ({@link Fleet}): a pirate's galleon and drakkar, a navy's war trireme, a merchant's cargo ship and trader. Each is
  * read from its file when she's launched and made one of ours: her own crew, the sea in and round her and her

@@ -2066,3 +2066,26 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.11, free rein riding:** ships Jaymo's Kingdoms 0.7.110: in third person the camera turns freely and WASD turns
   your horse toward it, like Better Mount Steering (which has no 26.3 build). Also fixes a broken swing mixin that
   kept the game from starting.
+- **0.15.12, fast run, slide, wall transitions, pole climb (after ParCool's ideas):** Andy liked ParCool's "breaking
+  into a faster sprint after time spent running, and the climbing mechanics, like wall transitions, and running".
+  ParCool is LGPL and Powers is MIT, so nothing was copied: these are our own moves, folded into `freerun`.
+  - **Fast run** (`freerun/FastRun`, everyone): 40 ticks of sprinting gives +30% speed (Freerunner 1: +40%,
+    Freerunner 2: after 25 ticks). It ends on a stop, a turn of 60°+, a hit, hunger ≤ 6 or water. Attacking keeps it.
+    It costs a little hunger and no feathers, and shows a lean (`RunPose`) and dust.
+  - **Slide** (`freerun/Slide`): in a fast run, hold Sneak for 4+ ticks (a tap is left for the dodge). You slide for
+    15 ticks in the crawl pose, under 1-high gaps, and can jump out of it. The server confirms it before the pose
+    changes.
+  - **Vertical wall run:** jump at a wall in a fast run (or a sprint with Wall Runner) to run 2.5 blocks up it (Wall
+    Runner: 3, then 4). At the top, Ledge's grab takes over; otherwise, with Climber, you cling.
+  - **Wall transitions** (Climber, `freerun/FreerunWalls`):
+    - a side wall run into a cling;
+    - from a cling, Jump + Back/Left/Right hops to a wall up to 3 blocks off;
+    - clings follow inside and outside corners;
+    - from a ledge hang, Sneak + Back drops to a ledge 1-3 blocks lower;
+    - hold Sneak + Forward at an edge for 6 ticks to hang off it.
+  - **Pole climb** (everyone; tag `freerun_poles`): press Forward into 2+ stacked fences, walls, chains, end rods,
+    bamboo or lightning rods. Climb with Forward/Jump (faster with Climber), slide down with Sneak, leap off with
+    Jump + direction.
+  - `FreerunClient.active()` covers slide, vertical run and pole, and `holding()` covers poles, so the dodge stands
+    aside.
+  - The server checks height, rise and fall rates, cooldowns and corners for each move.

@@ -147,7 +147,7 @@ final class FleetCommands {
 	}
 
 	/**
-	 * (0.7.111) A ship of any rig built on open water near you (or where the command runs), bow the way you face, and cast
+	 * (0.7.112) A ship of any rig built on open water near you (or where the command runs), bow the way you face, and cast
 	 * off with no crew: to look over, or board and sail yourself.
 	 */
 	private static int ship(CommandContext<CommandSourceStack> c) {

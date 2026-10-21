@@ -3557,7 +3557,28 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   Key "Free Rein on/off" (unbound) switches it. The idea is Better Mount Steering's (Seramicx, MIT, no 26.3 build); our
   own code. The side-pass gait keeps its strafing.
 - Fixed master's `LivingEntitySwingMixin` target (dots in a descriptor) that stopped the game from starting.
-- **0.7.111, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
+- **0.7.111, mob senses: Stealth's third page, Shadows (after Dynamic Stealth's ideas):** Andy wanted Dynamic Stealth
+  (MIT, 1.12.2) worked in. It is written afresh in `Senses` (constants at the top).
+  - **Sight:** how far hostile and neutral mobs notice you is their range × light (dark 0.25), sneaking (0.6, through
+    `Skills.sneakFactor`), standing still (0.8), being outside their 120° view cone (0.3, unless within 2 blocks), a
+    hood (0.75) and glowing or burning (1.5). It's applied in a mixin on `getVisibilityPercent`
+    (`LivingEntityVisibilityMixin`), on top of Darktide's veil.
+  - **Losing track:** after 100 ticks without sight, a mob walks to where it last saw you, looks around for 5 s, then
+    gives up. Bosses, Folk and spiders are exempt; spiders keep `SpiderMinds`.
+  - **Awareness eye:** a HUD eye above the crosshair (`SensesClient`, `textures/gui/awareness_eye.png` from
+    `tools/gen_items.py`). It fills while a mob is noticing you, turns amber and half-closed while one searches, and
+    red and open once one has spotted you.
+  - **Unaware blows:** melee on an unaware mob is a sneak attack for ×2. With Assassinate, a full hidden blade stab is
+    an assassination for ×10, not stacked with Crippled's ×10. Never on players, bosses or pets.
+  - **Perks** (page 3, Shadows):
+    - Shadowed (3×1, level 5);
+    - Quiet Step (2×1, level 5);
+    - Slip the Net (1×1, level 10);
+    - Sneak Attack (2×1, level 10; ×2.5 / ×3);
+    - Assassinate (1×2, level 15).
+    Stealth XP: +1 per sneak attack (at most every 20 s), +3 per assassination.
+  - Also, Kingdoms' Climber, Freerunner and Wall Runner descriptions now mention Powers 0.15.12's new moves.
+- **0.7.112, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
   and for pirates and other factions. Its licence is GPLv3, so its structure files ship unchanged in
   `data/jaymoskingdoms/structure/jaki/` with the licence and a notice in `licenses/jaki/` (our code stays MIT).
   `JakiShips` reads five of them when a ship is launched (brought up to date by the game's data fixer) and makes each

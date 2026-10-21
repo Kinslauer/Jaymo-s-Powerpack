@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
 public final class Fleet {
 	public enum Rig {
 		SLOOP, BRIGANTINE, FRIGATE, COG,
-		/** (0.7.111) Jaki's ships ({@link JakiShips}): a pirate's galleon and drakkar, a navy's war trireme, a merchant's cargo ship and trader. */
+		/** (0.7.112) Jaki's ships ({@link JakiShips}): a pirate's galleon and drakkar, a navy's war trireme, a merchant's cargo ship and trader. */
 		GALLEON(JakiShips.Design.GALLEON), DRAKKAR(JakiShips.Design.DRAKKAR), WAR_TRIREME(JakiShips.Design.WAR_TRIREME),
 		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER);
 
@@ -115,7 +115,7 @@ public final class Fleet {
 		return cells;
 	}
 
-	/** One block of a ship as she's built: where (in her frame), what, and (0.7.111) the loot her barrel's filled with (null: none). */
+	/** One block of a ship as she's built: where (in her frame), what, and (0.7.112) the loot her barrel's filled with (null: none). */
 	record Part(BlockPos at, BlockState state, @Nullable ResourceKey<LootTable> loot) {
 		Part(BlockPos at, BlockState state) {
 			this(at, state, null);
@@ -189,7 +189,7 @@ public final class Fleet {
 			}
 			return null;
 		}
-		// her hold: the first chest aboard ((0.7.111) or barrel, on a ship with no chests)
+		// her hold: the first chest aboard ((0.7.112) or barrel, on a ship with no chests)
 		Hull h = ship.hull();
 		if (h != null) {
 			for (Ship.Piece p : h.pieces) {
@@ -206,7 +206,7 @@ public final class Fleet {
 	}
 
 	/**
-	 * (0.7.111) Builds a {@code rig} in {@code look} on the water at {@code water} as {@link #launch} does, her blocks left
+	 * (0.7.112) Builds a {@code rig} in {@code look} on the water at {@code water} as {@link #launch} does, her blocks left
 	 * in the world (where they went added to {@code where}): her helm, or null if there's no room or water deep enough there.
 	 */
 	public static @Nullable BlockPos lay(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, List<BlockPos> where) {
@@ -257,7 +257,7 @@ public final class Fleet {
 		return helm;
 	}
 
-	/** (0.7.111) The ship {@link #lay laid} with her helm at {@code helm}, her hold bailed and cast off with no crew (null: she wouldn't go). */
+	/** (0.7.112) The ship {@link #lay laid} with her helm at {@code helm}, her hold bailed and cast off with no crew (null: she wouldn't go). */
 	public static @Nullable Ship castOff(ServerLevel level, BlockPos helm) {
 		ShipKits.placed(level, helm, null);
 		return Ship.castOff(level, helm, null, null);
@@ -346,7 +346,7 @@ public final class Fleet {
 			}
 		}
 		List<Vec3> deck = new ArrayList<>();
-		// (0.7.111) and on a ship whose helm is up on her quarterdeck (Jaki's), her open decks below it, above the water
+		// (0.7.112) and on a ship whose helm is up on her quarterdeck (Jaki's), her open decks below it, above the water
 		int lowest = Mth.ceil(h.minY + h.draft) + 1;
 		for (int i = 0; i < h.pieces.size(); i++) {
 			Ship.Piece p = h.pieces.get(i);
@@ -365,7 +365,7 @@ public final class Fleet {
 		return new Stations(helm, guns, deck);
 	}
 
-	/** (0.7.111) Whether nothing of her is above a piece: open to the sky. */
+	/** (0.7.112) Whether nothing of her is above a piece: open to the sky. */
 	private static boolean sky(Hull h, Ship.Piece p) {
 		for (int y = p.y() + 1; y <= h.maxY; y++) {
 			if (h.at(p.x(), y, p.z()) >= 0) {

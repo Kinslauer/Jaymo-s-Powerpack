@@ -103,14 +103,15 @@ final class SkillScreen extends Screen {
 		return perk.pillar == pillar && perk.tier / Skills.Perk.PAGE_TIERS == page;
 	}
 
-	/** Whether {@code pillar}'s tree runs onto a second page. */
-	private static boolean twoPages() {
+	/** How many pages {@code pillar}'s tree runs to (1 if it fits on the first). */
+	private static int pages() {
+		int deepest = 0;
 		for (Skills.Perk perk : Skills.Perk.values()) {
-			if (perk.pillar == pillar && perk.tier >= Skills.Perk.PAGE_TIERS) {
-				return true;
+			if (perk.pillar == pillar) {
+				deepest = Math.max(deepest, perk.tier / Skills.Perk.PAGE_TIERS);
 			}
 		}
-		return false;
+		return deepest + 1;
 	}
 
 	@Override
@@ -141,11 +142,14 @@ final class SkillScreen extends Screen {
 		// (0.7.82) the world tiers, beside Done
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
-		if (stats || !twoPages()) {
+		int pages = pages();
+		if (stats || pages < 2) {
 			page = 0;
 		} else {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + (1 - page)), b -> {
-				page = 1 - page;
+			// (the button names the page it goes to; the last page goes round to the first)
+			int next = (page + 1) % pages;
+			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + next), b -> {
+				page = next;
 				rebuildWidgets();
 			}).bounds(left() + 6, fy, 92, 16).build());
 		}
@@ -304,7 +308,7 @@ final class SkillScreen extends Screen {
 		} else if (!pillar.open) {
 			text.add(Component.translatable("gui.jaymoskingdoms.skills.plan." + pillar.key()));
 		} else {
-			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? ".1" : "")).withColor(Ui.DIM));
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? "." + page : "")).withColor(Ui.DIM));
 			Classes.PlayerClass cls = this.minecraft.player == null ? null : Classes.classOf(this.minecraft.player);
 			text.add(cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none").withColor(Ui.DIM)
 				: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())).withColor(Ui.GOLD));
@@ -324,7 +328,7 @@ final class SkillScreen extends Screen {
 		int x = left(), y = top(), w = panelW();
 		Component name = Component.translatable("skill.jaymoskingdoms." + pillar.key());
 		if (page > 0) {
-			name = Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + ".1.title");
+			name = Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + page + ".title");
 		}
 		int textW = w - 20 - XP_BAR_W - 12;
 		if (!pillar.open) {
