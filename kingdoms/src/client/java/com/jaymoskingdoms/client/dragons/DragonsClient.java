@@ -61,7 +61,7 @@ public final class DragonsClient {
 	static final double TRUST_RANGE = 24.0;
 	static final int BAR_WIDTH = 64, CHIP = 20;
 	/** The species' shadows (blocks). */
-	static final float NOTUS_SHADOW = 2.0F, BOREAS_SHADOW = 1.8F, ZEPHYRUS_SHADOW = 1.8F;
+	static final float NOTUS_SHADOW = 2.0F, BOREAS_SHADOW = 1.8F, ZEPHYRUS_SHADOW = 1.8F, EURUS_SHADOW = 1.6F, AEOLUS_SHADOW = 5.0F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -76,6 +76,10 @@ public final class DragonsClient {
 			.bakeRoot()), BOREAS_SHADOW));
 		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
 			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
+		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new EurusDragonModel(EurusDragonModel.createBodyLayer()
+			.bakeRoot()), EURUS_SHADOW));
+		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new AeolusDragonModel(AeolusDragonModel
+			.createBodyLayer().bakeRoot()), AEOLUS_SHADOW, AeolusDragonModel.SCALE));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
@@ -120,6 +124,9 @@ public final class DragonsClient {
 	}
 
 	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
+		// (0.7.139) some fly faster for some riders (Eurus for a Wind user in a gale)
+		LocalPlayer rider = minecraft.player;
+		double boost = rider == null ? 1.0 : dragon.riderSpeedFactor(rider);
 		boolean tired = dragon.exhausted();
 		boolean up = minecraft.options.keyJump.isDown() && !tired;
 		boolean forward = minecraft.options.keyUp.isDown();
@@ -136,9 +143,9 @@ public final class DragonsClient {
 		double x = m.x / AIR_DRAG, y = m.y / AIR_DRAG_Y, z = m.z / AIR_DRAG;
 		if (forward && !tired) {
 			Vec3 look = DragonBreath.aim(yaw, pitch);
-			x += look.x * THRUST;
-			y += look.y * THRUST;
-			z += look.z * THRUST;
+			x += look.x * THRUST * boost;
+			y += look.y * THRUST * boost;
+			z += look.z * THRUST * boost;
 		} else {
 			x *= GLIDE_DRAG;
 			z *= GLIDE_DRAG;
@@ -158,7 +165,7 @@ public final class DragonsClient {
 		if (tired) {
 			y = Math.min(y, -EXHAUSTED_SINK);
 		}
-		double speed = Math.sqrt(x * x + y * y + z * z), top = dive ? MAX_DIVE_SPEED : CRUISE;
+		double speed = Math.sqrt(x * x + y * y + z * z), top = (dive ? MAX_DIVE_SPEED : CRUISE) * boost;
 		if (speed > top) {
 			x *= top / speed;
 			y *= top / speed;

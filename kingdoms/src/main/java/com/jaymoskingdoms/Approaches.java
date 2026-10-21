@@ -1096,6 +1096,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (com.jaymoskingdoms.dragons.Disguises.answer(player, answer)) {
+			// (0.7.139) a villager who isn't one, questioning you
+			return;
+		}
 		if (Skills.answer(player, answer)) {
 			// (0.5.52) a court wizard's offer to unmake your skills
 			return;
