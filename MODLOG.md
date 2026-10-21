@@ -2281,3 +2281,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   take a copy of the already-posed body in their own `setupAnim` (`receivesDeferredAnimationPose`), and a costume over
   them takes the same copy; our model-feature hooks then added every pose a second time. `PosedCopy` spots those models
   (MCA's flag, read by reflection; `CostumeModels.Worn` when over an MCA body) and `PoseBlend.lay`/`bend` leave them.
+- **0.15.48, the hidden blade's guard (Kingdoms 0.7.135):** Andy: the blade still wasn't held up in front. Fresh
+  Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
+  every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
+  and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.
