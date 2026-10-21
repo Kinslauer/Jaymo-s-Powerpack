@@ -168,8 +168,6 @@ public final class WeaponParts {
 		balkon("flail_head", "flail", 1, Assembly.ROD_BINDING);
 		balkon("boomerang_edge", "boomerang", 1, Assembly.ROD_BINDING);
 		// (0.15.22) Andy: "All tools need crafting routes through jaymos": the tools Tinkering doesn't make are forged too
-		add(new Kind("shear_blades", "minecraft:shears", Scheme.SINGLE, 2 * INGOT, Assembly.ALONE, 1));
-		add(new Kind("fire_striker", "minecraft:flint_and_steel", Scheme.SINGLE, INGOT, Assembly.BINDING, 1));
 		add(new Kind("fishing_hook", "minecraft:fishing_rod", Scheme.SINGLE, Molten.NUGGET, Assembly.ROD_BINDING, 1));
 		add(new Kind("brush_ferrule", "minecraft:brush", Scheme.SINGLE_COPPER, INGOT, Assembly.ROD_BINDING, 1));
 		// Pantry for Blockheads' kitchen knife (its own recipe is dropped by id, tinkering/Uncraftable)

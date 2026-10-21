@@ -128,12 +128,10 @@ MOLTEN = [
     ("amethyst_bronze", "Molten Amethyst Bronze", "molten/alloy/amethyst_bronze"),
     ("pig_iron", "Molten Pig Iron", "molten/alloy/pig_iron"), ("slimesteel", "Molten Slimesteel", "molten/alloy/slimesteel"),
     ("slime", "Liquid Slime", "slime/earth"), ("honey", "Honey", "food/honey"), ("blood", "Blood", None),
-    # (0.15.22) netherite, and the scrap and debris it's alloyed from (Tinkers' tints its stone fluid for debris)
-    ("netherite", "Molten Netherite", "molten/alloy/netherite"), ("debris", "Molten Debris", "molten/stone"),
 ]
 BLOOD_TINT = (120, 8, 8)
 # plain fluids tinted: molten id to (r, g, b)
-TINTS = {"blood": BLOOD_TINT, "debris": (0x41 * 3, 0x1E * 3, 0x15 * 3)}
+TINTS = {"blood": BLOOD_TINT}
 
 # alloy ingots: our id, Tinkers' texture
 INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
@@ -597,7 +595,7 @@ ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 OFF_WEAPONS = ("diamond_spear", "stone_spear", "copper_spear", "iron_spear", "golden_spear")
 # (0.15.22) Andy: "All tools need crafting routes through jaymos": these are forged at the Tool Station from cast heads
 # too (tinkering/WeaponParts)
-OFF_FORGED_TOOLS = ("shears", "flint_and_steel", "fishing_rod", "brush")
+OFF_FORGED_TOOLS = ("fishing_rod", "brush")
 
 
 def vanilla_off():
