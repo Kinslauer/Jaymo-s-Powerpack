@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     "minecraft:string",
-    "minecraft:white_wool"
+    "#jaymospowers:bandage_cloth"
   ],
   "result": {
     "id": "jaymospowers:linen_bandage",
