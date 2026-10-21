@@ -91,7 +91,7 @@ public final class ChronoFlow {
 	public static final int INTANGIBLE_TICKS = 40, DODGE_TICKS = 20;
 	/** Roll charges on entering Time Flow: each time stop after a Space counter spends one. */
 	public static final int ROLL_CHARGES = 3;
-	/** (0.15.4) Golden feathers a time-bender holds ({@code stamina.Feathers}; half-feathers: two more dodges). */
+	/** (0.15.5) Golden feathers a time-bender holds ({@code stamina.Feathers}; half-feathers: two more dodges). */
 	public static final int DODGE_BONUS = 12;
 	/** The time stop follows the Space counter: Space again while it plays or this many ticks after. */
 	public static final int FOLLOW_TICKS = 12;

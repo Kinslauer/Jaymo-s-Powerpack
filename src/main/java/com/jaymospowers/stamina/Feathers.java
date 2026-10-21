@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
 /**
- * (0.15.4) Feathers: the pack's stamina, our own after the ideas of Elenai's Feathers and Darkona's Feathers of
+ * (0.15.5) Feathers: the pack's stamina, our own after the ideas of Elenai's Feathers and Darkona's Feathers of
  * Fatigue (both Forge/NeoForge only and GPL / NC-SA, so nothing of theirs is copied; see {@code docs/dodge.md}). A row
  * of feathers above the hunger bar, two to an icon, that dodges ({@link Dodge}) and powers spend.
  * <ul>

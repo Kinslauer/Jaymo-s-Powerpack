@@ -6,7 +6,7 @@ import com.jaymospowers.stamina.Feathers;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.15.4) Web and the pack's {@link Feathers} (in place of Combat Roll's charges): a web slinger gets
+ * (0.15.5) Web and the pack's {@link Feathers} (in place of Combat Roll's charges): a web slinger gets
  * {@link #BONUS} golden feathers on top of the row, and every Spider-Sense counter ({@link WebCounter}) spends a
  * dodge's worth ({@link Dodge#COST}); without them, a dodge opens no counter.
  */

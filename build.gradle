@@ -96,7 +96,7 @@ def packMods = [
 	// stay on CurseForge/Modrinth): sneak+right-click a grindstone with a tool for sharpened hits
 	[dep: "maven.modrinth:grindstone-sharper-tools:L4PcjMdo", cf: [347346, 9034113]],
 	[dep: "maven.modrinth:collective:oPyHSBXE", cf: [342584, 9122800]],
-	// (Combat Roll left in 0.15.4: the dodge and the feathers are our own now, stamina/Dodge and stamina/Feathers)
+	// (Combat Roll left in 0.15.5: the dodge and the feathers are our own now, stamina/Dodge and stamina/Feathers)
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
 	[dep: "maven.modrinth:epic-structures-villages:hCRa4eFr", cf: [1308486, 8830175]],

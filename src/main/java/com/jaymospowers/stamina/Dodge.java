@@ -30,7 +30,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.15.4) The dodge, replacing Combat Roll: our own after Elenai Dodge 2's ideas (see {@code docs/dodge.md}). Left
+ * (0.15.5) The dodge, replacing Combat Roll: our own after Elenai Dodge 2's ideas (see {@code docs/dodge.md}). Left
  * Alt, or Sneak tapped twice, hops you {@link #SPEED} along the way you're holding (back if you hold nothing), on the
  * ground only, for {@link #COST} of your {@link Feathers}. For the first {@link #EVADE_TICKS} of it a melee blow or a
  * projectile misses you. Hunger: {@link #EXHAUSTION}.
