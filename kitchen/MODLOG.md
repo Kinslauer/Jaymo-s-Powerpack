@@ -861,7 +861,7 @@ Andy: "healing is too quick". Meals heal a point every 280 ticks at a regenerati
 unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
 Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
 
-- **0.5.8, tanning and hemp (Better With Mods batch 2, Powers 0.15.33, Kingdoms 0.7.126):** `tanning/Tanning`: fatty
+- **0.5.8, tanning and hemp (Better With Mods batch 2, Powers 0.15.35, Kingdoms 0.7.128):** `tanning/Tanning`: fatty
   animals butchered on a block or by a butcher give Animal Fat (`ButcheringBonus`), melted into Tallow on a campfire,
   in a furnace or in the cooking pot; tallow + string = candle. Stripping a log drops Bark 35% of the time. Leather +
   bark in a water cauldron (one bark a hide, up to 8; adding a hide restarts the timer) tans in 5 minutes; empty hand

@@ -36,6 +36,15 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 	private static final double PLANT_REACH = 0.95, PLANT_AHEAD = 0.45, LET_GO = 1.55;
 	/** A step: ticks to reach its new spot, and how high it arcs. */
 	private static final float STEP_TICKS = 5.0F;
+	/**
+	 * Hurrying (fleeing, seeking a host): each block a tick of speed plants a tendril this many ticks of travel further
+	 * ahead (at most {@code MAX_AHEAD} blocks) and shortens a step to as little as {@code MIN_STEP_TICKS}; past
+	 * {@code FAST} blocks a tick any number may step at once, not just a couple.
+	 */
+	private static final double AHEAD_TICKS = 4.0, MAX_AHEAD = 2.2, FAST = 0.2;
+	private static final float MIN_STEP_TICKS = 2.0F;
+	/** Stretched past this (blocks from the body), a tendril lets go whatever the others are doing; past {@code SNAP}, it springs back from the body instead of being dragged over. */
+	private static final double MAX_STRETCH = 2.1, SNAP = 4.0;
 	private static final double STEP_ARC = 0.45;
 	private static final double LEG_ROOT_RADIUS = 0.085, LEG_TIP_RADIUS = 0.025;
 	/** A tendril's fixed length (blocks): planted closer, its knee rises higher; further, it stretches straight. */
@@ -54,6 +63,9 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 		final Vec3[] at = new Vec3[LEGS];
 		final Vec3[] from = new Vec3[LEGS];
 		final float[] stepAt = new float[LEGS];
+		final float[] stepTicks = new float[LEGS];
+		/** The last time drawn (a blob tracked again restarts its tick count under the same id). */
+		float lastTime = -1.0F;
 	}
 
 	private final Map<Integer, Feet> feet = new HashMap<>();
@@ -82,25 +94,43 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 		state.heading = heading;
 		float time = blob.tickCount + partialTicks;
 		Feet legs = this.feet.computeIfAbsent(blob.getId(), id -> new Feet());
+		if (time < legs.lastTime - 1.0F) {
+			// tracked again (its clock started over): the old grips would wait out the old clock, stuck and stretched
+			legs = new Feet();
+			this.feet.put(blob.getId(), legs);
+		}
+		legs.lastTime = time;
+		double speed = Math.sqrt(motion.lengthSqr());
+		double ahead = state.moving ? Math.min(MAX_AHEAD, PLANT_AHEAD + speed * AHEAD_TICKS) : 0.0;
+		float stepTicks = (float)Mth.clamp(STEP_TICKS / (1.0 + speed * 10.0), MIN_STEP_TICKS, STEP_TICKS);
+		int budget = speed > FAST ? LEGS : 2;
+		// (planting further ahead, each grip may be that much further off before it lets go)
+		double slack = Math.max(0.0, ahead - PLANT_AHEAD);
 		int stepping = 0;
 		for (int i = 0; i < LEGS; i++) {
-			if (legs.at[i] != null && time - legs.stepAt[i] < STEP_TICKS) {
+			if (busy(legs, i, time)) {
 				stepping++;
 			}
 		}
 		for (int i = 0; i < LEGS; i++) {
 			float angle = (i / (float)(LEGS - 1) * 2.0F - 1.0F) * LEG_SPREAD * Mth.DEG_TO_RAD;
 			Vec3 dir = new Vec3(heading.x * Mth.cos(angle) - heading.z * Mth.sin(angle), 0.0, heading.x * Mth.sin(angle) + heading.z * Mth.cos(angle));
-			Vec3 want = body.add(dir.scale(PLANT_REACH)).add(heading.scale(state.moving ? PLANT_AHEAD : 0.0));
-			boolean far = legs.at[i] == null || legs.at[i].distanceTo(body) > LET_GO || Math.abs(legs.at[i].y - body.y) > 1.5;
+			Vec3 want = body.add(dir.scale(PLANT_REACH)).add(heading.scale(ahead));
+			double reach = legs.at[i] == null ? Double.MAX_VALUE : shown(legs, i, time).distanceTo(body);
+			boolean far = legs.at[i] == null || legs.at[i].distanceTo(body) > LET_GO + slack || Math.abs(legs.at[i].y - body.y) > 1.5;
 			boolean behind = state.moving && legs.at[i] != null && legs.at[i].subtract(body).dot(heading) < -0.35;
-			boolean busy = legs.at[i] != null && time - legs.stepAt[i] < STEP_TICKS;
-			// a couple at a time, so it always has a grip
-			if (!busy && (far || behind) && (legs.at[i] == null || stepping < 2)) {
-				legs.from[i] = legs.at[i] == null ? body : shown(legs, i, time);
+			boolean busy = busy(legs, i, time);
+			// stretched too far: it lets go now (mid-step too, if the body has outrun where it was stepping to)
+			boolean torn = reach > MAX_STRETCH + slack && (!busy || legs.at[i].distanceTo(body) > MAX_STRETCH + slack);
+			// a couple at a time, so it always has a grip (any number, hurrying or torn loose)
+			if (torn || !busy && (far || behind) && (legs.at[i] == null || stepping < budget)) {
+				legs.from[i] = reach > SNAP + slack ? body : shown(legs, i, time);
 				legs.at[i] = ground(blob.level(), want);
 				legs.stepAt[i] = time;
-				stepping++;
+				legs.stepTicks[i] = stepTicks;
+				if (!busy) {
+					stepping++;
+				}
 			}
 			Vec3 tip = shown(legs, i, time);
 			if (!state.moving && i == LEGS / 2) {
@@ -115,9 +145,14 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 		}
 	}
 
+	/** Tendril {@code i} is mid-step. */
+	private static boolean busy(Feet legs, int i, float time) {
+		return legs.at[i] != null && time - legs.stepAt[i] < legs.stepTicks[i];
+	}
+
 	/** Where tendril {@code i}'s tip shows now: planted, or arcing over to its new spot. */
 	private static Vec3 shown(Feet legs, int i, float time) {
-		float k = Mth.clamp((time - legs.stepAt[i]) / STEP_TICKS, 0.0F, 1.0F);
+		float k = Mth.clamp((time - legs.stepAt[i]) / Math.max(1.0F, legs.stepTicks[i]), 0.0F, 1.0F);
 		if (k >= 1.0F || legs.from[i] == null) {
 			return legs.at[i];
 		}
