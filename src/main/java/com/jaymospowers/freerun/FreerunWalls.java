@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.14.6) Geometry shared by the newer freerun moves (the vertical wall run, wall transitions and the pole climb), both
+ * (0.15.11) Geometry shared by the newer freerun moves (the vertical wall run, wall transitions and the pole climb), both
  * sides. Kept out of {@link Freerun} so that stays readable.
  */
 public final class FreerunWalls {

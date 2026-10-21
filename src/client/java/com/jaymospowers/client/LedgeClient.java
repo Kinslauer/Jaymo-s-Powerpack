@@ -34,9 +34,9 @@ public final class LedgeClient {
 	private static boolean jumpReleased;
 	/** (0.14.3) Caught at the top of a freerun climb ({@link #catchFromClimb}): holding forward pulls up and over, no Jump needed. */
 	private static boolean autoClimb;
-	/** (0.14.6) Caught by sneaking off an edge: the body goes out from the edge, then down. Shift was down for it: it lets go only once released and pressed again. */
+	/** (0.15.11) Caught by sneaking off an edge: the body goes out from the edge, then down. Shift was down for it: it lets go only once released and pressed again. */
 	private static boolean edge, shiftLatch;
-	/** (0.14.6) Sneak + Back from a hang: a drop that looks for a ledge this far (blocks) under the one let go of, for this many ticks. */
+	/** (0.15.11) Sneak + Back from a hang: a drop that looks for a ledge this far (blocks) under the one let go of, for this many ticks. */
 	private static final int DROP_TICKS = 10;
 	private static final double DROP_MAX = 3.2;
 	private static int dropLeft;
@@ -107,7 +107,7 @@ public final class LedgeClient {
 	}
 
 	/**
-	 * (0.14.6) Falling after a drop from a hang (Sneak + Back): the first ledge 1 to 3 blocks under the one let go of, in
+	 * (0.15.11) Falling after a drop from a hang (Sneak + Back): the first ledge 1 to 3 blocks under the one let go of, in
 	 * reach as the body passes it, is caught.
 	 */
 	private static void tickDrop(LocalPlayer player) {
@@ -124,7 +124,7 @@ public final class LedgeClient {
 	}
 
 	/**
-	 * (0.14.6) Sneaking off an edge with Climber (see {@code FreerunClient}): hang from the edge just left, below it, turned
+	 * (0.15.11) Sneaking off an edge with Climber (see {@code FreerunClient}): hang from the edge just left, below it, turned
 	 * round to face its wall. {@code found} is {@link Ledge#edgeSpot}.
 	 */
 	public static void catchEdge(LocalPlayer player, Ledge.Spot found) {
@@ -179,7 +179,7 @@ public final class LedgeClient {
 			shiftLatch = false;
 		}
 		if (at != null && input.shift() && input.backward() && !shiftLatch) {
-			// (0.14.6) Sneak + Back: drop, and catch a ledge 1 to 3 blocks lower if there is one
+			// (0.15.11) Sneak + Back: drop, and catch a ledge 1 to 3 blocks lower if there is one
 			double top = at.top();
 			letGo(player);
 			player.setDeltaMovement(0.0, 0.0, 0.0);
