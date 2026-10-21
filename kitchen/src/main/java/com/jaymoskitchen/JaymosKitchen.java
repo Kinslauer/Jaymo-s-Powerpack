@@ -47,6 +47,7 @@ public class JaymosKitchen implements ModInitializer {
 		// (0.5.1) living players going limp (its LIMP attachment is class-loaded here, on both sides)
 		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		ModItems.register();
+		com.jaymoskitchen.fishing.Bait.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
 		Corpses.register();
@@ -58,6 +59,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
+		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();

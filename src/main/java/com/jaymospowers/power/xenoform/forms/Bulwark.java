@@ -33,7 +33,6 @@ import net.minecraft.world.phys.Vec3;
  * <li>C (ascended), Titan: twice your size, a hide of stone ({@link #TITAN_ARMOR} armour), {@link #TITAN_HEALTH} more
  * health, and the clap smashes walls up to {@link #TITAN_BREAK_DEPTH} blocks thick ahead of you.</li>
  * </ul>
- * Corrupted: the fists hit {@link #CORRUPT_EXTRA_DAMAGE} harder, and every slam's landing hurts you too.
  */
 public final class Bulwark extends XenoForm {
 	// ---- tuning ----
@@ -58,8 +57,6 @@ public final class Bulwark extends XenoForm {
 	public static final double CLAP_SHAKE_RANGE = 14.0, SLAM_SHAKE_RANGE = 16.0, TITAN_SHAKE_RANGE = 24.0;
 	public static final int TITAN_BREAK_DEPTH = 3, TITAN_BREAK_HALF_WIDTH = 1, TITAN_BREAK_HEIGHT = 3;
 	public static final float TITAN_BREAK_MAX_HARDNESS = 6.0F;
-	/** Corrupted: harder fists, and the slam's bite on yourself. */
-	public static final float CORRUPT_EXTRA_DAMAGE = 2.0F, CORRUPT_SLAM_SELF = 3.0F;
 
 	private static final net.minecraft.resources.Identifier TITAN_SCALE_ID = com.jaymospowers.JaymosPowers.id("xenoform_titan_scale");
 	private static final net.minecraft.resources.Identifier TITAN_ARMOR_ID = com.jaymospowers.JaymosPowers.id("xenoform_titan_armor");
@@ -123,16 +120,13 @@ public final class Bulwark extends XenoForm {
 		if (live.combo > 0 && now >= live.comboNext) {
 			live.combo--;
 			live.comboNext = now + COMBO_SPACING;
-			punch(player, live.combo == 0, live.corrupted ? CORRUPT_EXTRA_DAMAGE : 0.0F);
+			punch(player, live.combo == 0);
 		}
 		if (live.leaping) {
 			live.leapTicks++;
 			if (live.leapTicks > 3 && (player.onGround() || player.isInWater())) {
 				live.leaping = false;
 				slam(player);
-				if (live.corrupted) {
-					player.hurtServer(player.level(), player.damageSources().generic(), CORRUPT_SLAM_SELF);
-				}
 			} else if (live.leapTicks > 100) {
 				live.leaping = false;
 			}
@@ -234,7 +228,7 @@ public final class Bulwark extends XenoForm {
 		}
 	}
 
-	private static void punch(ServerPlayer player, boolean last, float extra) {
+	private static void punch(ServerPlayer player, boolean last) {
 		player.swing(player.getRandom().nextBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 		LivingEntity target = aimed(player, COMBO_REACH, e -> true);
 		if (target == null) {
@@ -242,7 +236,7 @@ public final class Bulwark extends XenoForm {
 			return;
 		}
 		ServerLevel level = player.level();
-		target.hurtServer(level, player.damageSources().playerAttack(player), COMBO_DAMAGE + extra);
+		target.hurtServer(level, player.damageSources().playerAttack(player), COMBO_DAMAGE);
 		target.hurtTime = 0;
 		if (last) {
 			shove(target, player.position(), 1.2, 0.5);

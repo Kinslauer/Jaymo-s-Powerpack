@@ -1,6 +1,8 @@
 package com.jaymospowers.power.chrono.mixin;
 
 import com.jaymospowers.power.chrono.ChronoSpeed;
+import com.jaymospowers.power.xenoform.forms.Velox;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FluidState;
@@ -20,12 +22,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * runners always sank. Ours is a full block, so you run level with the shore, above the water rather than in it.
  *
  * <p>(0.11.40) Lava holds you up the same way (see {@link ChronoSpeed#runsOn}).
+ *
+ * <p>Velox, the Xenoform speedster, also runs across water (water only) while sprinting, not sneaking ({@link Velox#runsOnWater}).
  */
 @Mixin(LivingEntity.class)
 abstract class ChronoWaterRunMixin {
 	@Inject(method = "canStandOnFluid", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$chronoWaterRun(FluidState fluid, CallbackInfoReturnable<Boolean> cir) {
-		if ((Object) this instanceof Player player && ChronoSpeed.runsOn(player, fluid)) {
+		if ((Object) this instanceof Player player && (ChronoSpeed.runsOn(player, fluid) || fluid.is(FluidTags.WATER) && Velox.runsOnWater(player))) {
 			cir.setReturnValue(true);
 		}
 	}
@@ -33,7 +37,7 @@ abstract class ChronoWaterRunMixin {
 	@Inject(method = "getLiquidCollisionShape", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$chronoWaterRunShape(CallbackInfoReturnable<VoxelShape> cir) {
 		// the fluid itself is checked by canStandOnFluid above (water or lava)
-		if ((Object) this instanceof Player player && ChronoSpeed.runsOnFluids(player)) {
+		if ((Object) this instanceof Player player && (ChronoSpeed.runsOnFluids(player) || Velox.runsOnWater(player))) {
 			cir.setReturnValue(Shapes.block());
 		}
 	}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymoskingdoms:acacia_siding",
+    "jaymoskingdoms:acacia_siding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:acacia_planks"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/template_bars_side_alt",
+  "textures": {
+    "bars": "jaymoskingdoms:block/slats",
+    "edge": "jaymoskingdoms:block/slats",
+    "particle": "jaymoskingdoms:block/slats"
+  }
+}

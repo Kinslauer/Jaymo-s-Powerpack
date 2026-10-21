@@ -48,6 +48,8 @@ KINDS = {
     'hurler': (0x5C2E25, 0x381A15, 0x946450, 0xD8C8A8, 0x2A1A1A, 0xC9A227, 0xFF6A00, 0xFF7A1A),
     'brute': (0x2E1E1C, 0x1A100F, 0x6A4A40, 0x3A3030, 0x4A0E12, 0xF2C230, 0xFF3A1A, None),
     'zombified': (0x6E7A5C, 0x4A5440, 0x8E8C70, 0xB8B09A, 0x4A2E22, 0x8A7A3A, 0xC8E070, None),
+    # (0.7.142) the war forts' warlord: near-black hide, bronze horns tipped in gold, a gold crown (on the hat layer)
+    'warlord': (0x3A1512, 0x200A08, 0x7A4A3A, 0x9A6A30, 0x1A1414, 0xF2C230, 0xFF2A00, None),
 }
 BONE, HOOF, NOSTRIL, MOUTH = rgb(0xD8D0B8), rgb(0x1E1412), rgb(0x150A08), rgb(0x2A0E0A)
 
@@ -96,7 +98,7 @@ def skin(name):
         return fur(hide)
 
     def arm(face, x, y, fw, fh):
-        if name == 'brute' and y in (2, 3) and face != 'top':
+        if name in ('brute', 'warlord') and y in (2, 3) and face != 'top':
             return jitter(trim, 10, rnd)
         if 8 <= y <= 10 and face != 'top':
             return jitter(rgb(0x4A2E1E), 6, rnd)
@@ -129,13 +131,13 @@ def skin(name):
         # pale at the root, darker towards the outer end (the right horn's outer end is its west face side)
         t = x / max(1, fw - 1) if face in ('north', 'south', 'top', 'bottom') else 0.5
         c = mix(horn, dark, 0.15 + 0.25 * t)
-        if name == 'brute':
+        if name in ('brute', 'warlord'):
             c = mix(c, trim, 0.25) if face != 'bottom' else c
         return jitter(c, 6, rnd)
 
     def horn_tip(face, x, y, fw, fh):
         if face == 'top':
-            return jitter(trim if name == 'brute' else mix(horn, dark, 0.7), 6, rnd)
+            return jitter(trim if name in ('brute', 'warlord') else mix(horn, dark, 0.7), 6, rnd)
         t = 1.0 - y / max(1, fh - 1)
         return jitter(mix(horn, dark, 0.3 + 0.4 * t), 6, rnd)
 
@@ -156,6 +158,17 @@ def skin(name):
         return jitter(cloth, 8, rnd)
 
     box(img, 0, 0, 8, 8, 8, head)
+    if name == 'warlord':
+        # a gold crown round the top of the head: a band two pixels deep, points between
+        def crown(face, x, y, fw, fh):
+            if face in ('top', 'bottom'):
+                return None
+            if y == 0 and x % 2 == 0:
+                return jitter(trim, 12, rnd)
+            if y in (1, 2):
+                return jitter(rgb(0xFF2A00) if x == fw // 2 and y == 2 and face == 'north' else trim, 12, rnd)
+            return None
+        box(img, 32, 0, 8, 8, 8, crown)
     box(img, 16, 16, 8, 12, 4, body)
     box(img, 40, 16, 4, 12, 4, arm)
     box(img, 0, 16, 4, 12, 4, leg)
@@ -191,7 +204,7 @@ def egg(name, base, spots, seed):
 
 
 EGGS = {'hornkin_spawn_egg': (0x7A3B2A, 0xF2C230), 'hornkin_hurler_spawn_egg': (0x5C2E25, 0xFF7A1A),
-        'hornkin_brute_spawn_egg': (0x2E1E1C, 0xF2C230), 'zombified_hornkin_spawn_egg': (0x6E7A5C, 0xD8D0B8)}
+        'hornkin_brute_spawn_egg': (0x2E1E1C, 0xF2C230), 'hornkin_warlord_spawn_egg': (0x3A1512, 0xE0B040), 'zombified_hornkin_spawn_egg': (0x6E7A5C, 0xD8D0B8)}
 
 
 def write(path, obj):
@@ -224,6 +237,8 @@ def loot():
     table('hornkin', [entry('minecraft:leather', 0, 2), entry('minecraft:gold_nugget', 1, 4)])
     table('hornkin_hurler', [entry('minecraft:magma_cream', 0, 2), entry('minecraft:gold_nugget', 1, 3)])
     table('hornkin_brute', [entry('minecraft:leather', 1, 3), entry('minecraft:gold_ingot', 1, 3), entry('minecraft:bone', 1, 2)])
+    table('hornkin_warlord', [entry('minecraft:gold_ingot', 4, 8), entry('minecraft:gold_block', 1, 1, False),
+                              entry('minecraft:leather', 2, 4)])
     table('zombified_hornkin', [entry('minecraft:rotten_flesh', 0, 2), entry('minecraft:gold_nugget', 0, 2)])
 
 

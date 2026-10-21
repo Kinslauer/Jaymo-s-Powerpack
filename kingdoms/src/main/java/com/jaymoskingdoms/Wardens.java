@@ -16,6 +16,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -93,14 +94,13 @@ public final class Wardens {
 		Factions.level(server).setAttached(WARDENS, Map.copyOf(map));
 	}
 
-	/** The faction's guards about its seat. */
+	/** The faction's guards about its seat (folk, and (0.7.138) its MCA guards). */
 	static int guards(ServerLevel level, Faction faction) {
-		return level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(Royals.ESCORT_CALL),
-			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD).size();
+		return Rulers.guards(level, faction, new AABB(faction.seat()).inflate(Royals.ESCORT_CALL));
 	}
 
 	/** One of his wardens is in the world and near him. */
-	static boolean wardenNear(ServerLevel level, Faction faction, Folk ruler) {
+	static boolean wardenNear(ServerLevel level, Faction faction, LivingEntity ruler) {
 		for (UUID id : of(level.getServer(), faction.id())) {
 			ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
 			if (p != null && p.level() == level && p.distanceTo(ruler) <= WARDEN_NEAR) {
@@ -111,7 +111,7 @@ public final class Wardens {
 	}
 
 	/** Too few guards to go out, and no warden at his side. */
-	static boolean confined(ServerLevel level, Faction faction, Folk ruler) {
+	static boolean confined(ServerLevel level, Faction faction, LivingEntity ruler) {
 		return guards(level, faction) < GUARDS_LEAST && !wardenNear(level, faction, ruler);
 	}
 
@@ -119,10 +119,10 @@ public final class Wardens {
 	 * At an audience with a ruler short of guards: he says he dares not go out and, at most once a day for each
 	 * player (and never to one sworn elsewhere or one he counts unwelcome), he may offer them a place.
 	 */
-	static void audience(ServerLevel level, ServerPlayer player, Faction faction, Folk ruler) {
+	static void audience(ServerLevel level, ServerPlayer player, Faction faction, LivingEntity ruler) {
 		MinecraftServer server = level.getServer();
 		int guards = guards(level, faction);
-		if (!ruler.leader() || !faction.type().isRealm() || guards >= GUARDS_LEAST) {
+		if (!Rulers.is(ruler) || !faction.type().isRealm() || guards >= GUARDS_LEAST) {
 			return;
 		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.warden.confined", ruler.getDisplayName(), guards)

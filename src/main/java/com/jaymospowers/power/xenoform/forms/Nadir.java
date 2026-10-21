@@ -196,7 +196,9 @@ public final class Nadir extends XenoForm {
 	private static void phase(ServerPlayer player, XenoformPower.Live live, ServerPlayer target) {
 		ServerLevel from = player.level();
 		ServerLevel to = target.level();
-		Vec3 behind = target.position().subtract(target.getLookAngle().horizontal().normalize().scale(1.5));
+		Vec3 flat = target.getLookAngle().horizontal();
+		flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : flat.normalize();
+		Vec3 behind = target.position().subtract(flat.scale(1.5));
 		if (!to.noCollision(player, player.getBoundingBox().move(behind.subtract(player.position())))) {
 			behind = target.position();
 		}

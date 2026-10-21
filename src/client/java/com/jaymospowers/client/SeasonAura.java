@@ -13,7 +13,8 @@ import net.minecraft.util.RandomSource;
 /**
  * (0.15.31) Every power user carries a little of the season about them where there are seasons ({@link Seasons}):
  * petals in spring, fireflies on summer nights, turning leaves in autumn, snowflakes in winter, now and then. A Wind
- * user whirls it: a ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard).
+ * user whirls it: a ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard);
+ * (0.15.54) not spring's petals, though.
  * Drawn on each client, no packets.
  */
 final class SeasonAura {
@@ -50,7 +51,10 @@ final class SeasonAura {
 				continue;
 			}
 			if (Powers.has(player, WindPower.INSTANCE)) {
-				whirl(level, player, mote, random);
+				// (0.15.54) no blossom petals in a Wind user's whirl: spring's wind carries none
+				if (season != Seasons.Season.SPRING) {
+					whirl(level, player, mote, random);
+				}
 			} else if (random.nextFloat() < MOTE_CHANCE) {
 				level.addParticle(mote, player.getX() + (random.nextDouble() - 0.5) * 2.0, player.getY() + 1.6 + random.nextDouble() * 0.8,
 					player.getZ() + (random.nextDouble() - 0.5) * 2.0, 0.0, -0.02, 0.0);

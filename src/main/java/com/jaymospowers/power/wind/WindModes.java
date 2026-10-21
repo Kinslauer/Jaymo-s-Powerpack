@@ -135,6 +135,8 @@ public final class WindModes {
 	/** The cloak's slowest fall (b/t) while Jump is held, and the sink the server lets pass as "not a fall". */
 	public static final double CLOAK_FALL_SPEED = 0.12;
 	static final double CLOAK_SAFE_SINK = 0.2;
+	/** (0.15.54) From this many unlocked abilities the cloak's drift is steady; before, the body wobbles on it. */
+	static final int STEADY_MASTERY = 2;
 
 	private static final Identifier CLOAK_ID = JaymosPowers.id("wind_cloak");
 	private static final Identifier SHOCK_SPEED_ID = JaymosPowers.id("wind_shock_speed");
@@ -145,6 +147,12 @@ public final class WindModes {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** On a wind user: drifting down on the cloak right now (clients draw the wisps, and let them fade after). */
 	public static final AttachmentType<Boolean> DRIFTING = AttachmentRegistry.create(JaymosPowers.id("wind_drifting"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.15.54) On a wind user drifting on the cloak before they've mastered it ({@link #STEADY_MASTERY}): the wind holds
+	 * them up unsteadily, and everyone sees their arms and legs wobble about.
+	 */
+	public static final AttachmentType<Boolean> WOBBLY = AttachmentRegistry.create(JaymosPowers.id("wind_wobbly"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** On a creature: rooted by a shock (clients draw it crackling). */
 	public static final AttachmentType<Boolean> SHOCKED = AttachmentRegistry.create(JaymosPowers.id("wind_shocked"),
@@ -264,6 +272,7 @@ public final class WindModes {
 		ServerLevel level = player.level();
 		cloak(player, true);
 		drift(player);
+		WindFall.tick(player);
 		// a slow, held descent (the cloak) isn't a fall; the rest still is
 		if (!player.onGround() && player.getY() < player.yo && player.getY() - player.yo > -CLOAK_SAFE_SINK) {
 			player.fallDistance = Math.min(player.fallDistance, 1.0);
@@ -332,6 +341,14 @@ public final class WindModes {
 				player.setAttached(DRIFTING, true);
 			} else {
 				player.removeAttached(DRIFTING);
+			}
+		}
+		boolean wobbly = drifting && Mastery.unlocked(player) < STEADY_MASTERY;
+		if (wobbly != (player.getAttached(WOBBLY) != null)) {
+			if (wobbly) {
+				player.setAttached(WOBBLY, true);
+			} else {
+				player.removeAttached(WOBBLY);
 			}
 		}
 	}
@@ -631,6 +648,7 @@ public final class WindModes {
 	static void clear(ServerPlayer player) {
 		player.removeAttached(MODE);
 		player.removeAttached(DRIFTING);
+		player.removeAttached(WOBBLY);
 		NEXT_FLASH.remove(player.getUUID());
 		cloak(player, false);
 	}

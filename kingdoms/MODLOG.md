@@ -3910,6 +3910,157 @@ back to normal when retracted. and only move when the player does."
   the middle of the view, raised and turned in so the blade points ahead past the fist; the off hand rises in from
   below; a blow thrusts the arm forward. `HiddenBladeOffHandMixin` became `HiddenBladeFirstPersonMixin`, both hands.
   With First-person Model drawing your body, the third-person guard puts the arm (and blade) in front of you.
+
+## 0.7.137: Notus, Boreas and Zephyrus, the first wind dragons
+- Andy: "Names : Boreas, Zephyrus, Notus, Eurus, and Aeolus." The plan for all five is `docs/Dragons-Plan.md` (our own
+  design; nothing taken from Berk's Dragon Academy). Notus, the south wind, came first, end to end; Boreas and
+  Zephyrus share its body (`dragons/WindDragon`: the wild AI, taming, riding, stamina) with their own shape, breath, home
+  and nature.
+- **Notus** (`jaymoskingdoms:notus_dragon`, `dragons/NotusDragon`, on the horse base like the war elephant): a heavy
+  fire dragon, 220 health, tough hide, tail club and back spikes. A miniboss: a boss bar while wild (`BossBars`), in
+  `c:bosses`. A hand-written model with procedural animation (flapping, gliding, hovering to breathe, landing, walking,
+  perched, crashed, sitting); art painted by `tools/gen_dragons.py`.
+- Andy: "can you slightly differentiate every dragon visually like the heritages?" Every dragon rolls a look at birth
+  and keeps it (`DragonLook`, synced): one of four hide shades, long, short or twin horns, now and then a lost back
+  spike, and one of four glowing marking patterns (an emissive layer, with glowing eyes). Shared by the dragons to come.
+- **Wild:** a rare encounter in the badlands, and now and then in the basalt deltas. It circles high, perches on the
+  tallest spot near, and goes for players within 22 blocks: swoops, hovers and breathes fire, or lands to bite and
+  tail-sweep. Andy: "fire burns blocks": a wild one's fire follows mobGriefing; a ridden one's always burns.
+- **Taming:** worn below a third of its health it crashes and stays grounded a while. Crouch near it with empty hands
+  and a trust meter (yours only, on your HUD) fills; cooked mutton fills it faster, Emberborn twice as fast. A drawn
+  weapon, sprinting at it or hurting it drains it; empty, it bolts. Its trust is its own, not Equestrian's Bond.
+  Only kills count as beating a dragon (for Eurus and Aeolus, later).
+- **Tamed:** follows, sits (sneak-use, empty hands), defends you. Saddle in the horse slot. Flight with the free-rein
+  camera: Space takes off and climbs, W flies where you look, S brakes to a hover, Shift dives (and lands; on the ground
+  it dismounts). Stamina: hard flight and fire drain it, meat refills it, exhausted it glides down. R breathes fire
+  where you look (Powers 0.15.53 lets go of its first ability while you steer one). Andy: "you can have a piggyback rider": a second
+  player sits behind the owner. Only the owner steers: left alone in the saddle, the passenger can't fly or breathe
+  and the dragon lands; in the air the passenger's Shift doesn't throw them off.
+- Wild ones despawn far from players like other monsters (not tamed or named ones), none come on Peaceful, and the boss
+  bar leaves your screen once you're out of its range.
+- **Boreas**, the north wind (`jaymoskingdoms:boreas_dragon`, `dragons/BoreasDragon`): a long, lean frost dragon of the
+  frozen and jagged peaks and the ice spikes, 180 health, a thinner hide. A glider that barely flaps and dives in
+  silence (soft wingbeats, no roar before the swoop, faster than Notus; ridden it tires slowly aloft). Its breath
+  (`DragonFrost`) is a cone of freezing mist: freeze damage, Slowness and the powder-snow chill; it puts out fires
+  (burning creatures, fire, lit campfires) and turns still water to frosted ice that melts again (mobGriefing, as fire).
+  It never freezes itself. Raw salmon; the Frostborn and Cryokinesis users win it over twice as fast (Powers read
+  through `PowersCompat`, never required). A white boss bar. Its own model (a five-piece neck, a blade-finned tail,
+  very long swept wings, icicle spikes) and art (`tools/gen_boreas.py`).
+- **Zephyrus**, the west wind (`jaymoskingdoms:zephyrus_dragon`, `dragons/ZephyrusDragon`): a low, broad, amphibious
+  dragon of the swamps and mangroves, 190 health. Wild, it lies half sunk in the water (only its head and back
+  showing) and bursts out to swoop on whoever comes near. It swims as well as it flies: it breathes underwater, the
+  current doesn't push it, and ridden in water it swims where you look and doesn't sink. It spits acid (`DragonAcid`):
+  gobs that hurt and poison and leave a toxic puddle (never changing blocks); its own poison doesn't touch it. Tropical
+  fish; Verdant and Tideborn twice as fast. A green boss bar. Its own model (a short thick neck, a flat frilled head,
+  a paddle tail, webbed feet and ragged wings) and art (`tools/gen_zephyrus.py`).
+- Encounters: Boreas over the frozen peaks, jagged peaks, snowy slopes and ice spikes, Zephyrus in swamps and mangrove
+  swamps (as rare as Notus). The breath key is now "Dragon Breath (riding)".
+- Spawn eggs; ops: `/kingdom dragon [notus|boreas|zephyrus] [tame]` summons a wild one (Notus unless named), or a
+  tamed, saddled one.
+- Not yet seen in game: written without a compiler, so the first build may need fixes.
+
+## 0.7.140: the Stormborn is earned (pack 0.15.54)
+
+- Andy: "Stormborn should be unlocked as a heritage when wind users corrupt their power." Stormborn is now an earned
+  heritage like the Endborn: hidden as "???" at character creation with a hint, and woken (with its Blood Rite) once
+  the player's Jaymo's Powers Wind is corrupted (Stormbound), checked with the other unlocks every 5 s
+  (`PowersCompat.corrupted`, by reflection on Powers' `Fate.isCorrupted`). Anyone already Stormborn keeps it; villagers
+  are born Stormborn as before.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.141: Eurus and Aeolus, the dragons in disguise
+- Andy: "Eurus and Aeolus are actually MCA villagers, they can spawn anywhere and will transform after questioning you
+  if you have already beaten two other dragons." Skins by a friend of Andy's (`textures/entity/dragon/<kind>/villager.png`).
+- **Records** (`dragons/DragonRecords`, kept through death, synced): which kinds of wind dragon a player helped kill (only
+  kills count, Andy), and whether they ever tamed one.
+- **Disguises** (`dragons/Disguises`): now and then, out of sight near a player in the Overworld, a stranger: an MCA
+  villager wearing the friend's skin (no clothes, hair or face layers; a plain villager without MCA). Right-click and
+  they ask who you are and what you've slain. Eurus shows itself to anyone who's beaten 2 kinds of wind dragon, Aeolus
+  to 3; Wind, Arsenal, Chrono or Darktide users, dragon tamers and anyone with an earned heritage are trusted anyway.
+  Everyone else is shooed off (a shove, then 5 minutes' cold shoulder). They never take a town post, and wander off
+  after 3 days unvisited.
+- Andy: "The disguised villagers can be damaged 3 times, then they will violently assault the player who did. No
+  transformation, just increasingly condescending messages until they snap." Nothing hurts them; a player's first two
+  blows earn a sneer each, the third and they lay into the player for six seconds (Eurus 5 a blow, Aeolus 8), throw
+  them clear, and won't speak to them for 5 minutes.
+- **Eurus** (`dragons/EurusDragon`): the east wind, a storm dragon. Fastest and frailest of the five, lean with a whip
+  tail; faster still in rain. Its breath (`DragonStorm`) is a bolt that chains to 3 more creatures, and in a thunderstorm
+  may call real lightning. Cooked rabbit is its favourite; Stormborn bond twice as fast. A Wind-power rider flies it
+  faster (1.15x, 1.3x in rain). A wild one with nothing to fight flies off.
+- **Aeolus** (`dragons/AeolusDragon`): the father of winds, the final boss. Huge (1600 health), can't be tamed or ridden.
+  His breath turns through fire, frost, acid and storm. Below two thirds: gusts that throw you back. Below a third: a
+  gale every so often, warned by a ring, that throws everything near. Beaten, he calms every wild wind dragon within 192
+  blocks for a day and leaves four eggs.
+- **Eggs** (`dragons/DragonEggs`): Notus, Boreas, Zephyrus and Eurus eggs. Use one on a block to hatch a tamed hatchling,
+  which grows with time and faster on its favourite food or meat. A wild dragon that's calmed won't pick fights.
+
+## 0.7.142: Nether war forts and their warlords (pack 0.15.55)
+Andy (2026-10-21): "Stage 2 please" (of the Nether faction plan, project-files `nether-faction/Nether-Plan.md`).
+`NetherForts`, `FortBuildings`, plus the warlord in `Hornkin`.
+- **Forts:** every 2 minutes, 30% per player in the Nether with no standing fort within 320 blocks: a rival pair rises
+  72-140 blocks off, out of sight (no player within 48), on level ground with headroom, at least 240 from older forts.
+  A **Hornkin war fort** (wastes or crimson forest; blackstone-brick walls with gilded stones and crenels, four towers
+  with soul lanterns, soul fires, the warlord's keep with a throne, a gold block and the hoard chest) and, 56-88 blocks
+  off, a **piglin war camp** (nether-brick palisade, basalt posts with lanterns, red and black tents, a war fire, the
+  warboss's gold seat and war chest). Gates face each other. Hoards: gold ingots and nuggets, gilded blackstone, maybe a
+  golden apple; magma cream, leather, 15% netherite scrap (Hornkin) or a crossbow, arrows, pork (piglins). Fort
+  Hornkin leave their own hoard alone.
+- **Hornkin Warlord** (`Hornkin.Kind.WARLORD`, own skin with a gold crown, drawn 1.75x): 260 health, 13 blow, 10
+  armour; red boss bar (to whoever hits him, as every boss); the horn charge (his breaks a raised shield for 5 s) and
+  the ground stamp; below half health, a rally roar (every 40 s): Strength and Speed to Hornkin within 24, they turn
+  on his foe, two more warriors come. Spawn egg too.
+- **Piglin Warboss:** a piglin brute made 1.45x, 220 health, 12 blow, gold helmet and chestplate, netherite axe, yellow
+  boss bar; leaps at foes 4-12 blocks off (every 10 s) and slams down where he lands (8, thrown); below half health a
+  war horn (every 40 s): his piglins rally and two more come.
+- **Garrisons:** 7 Hornkin (warriors, hurlers, a brute now and then) and 6 piglins (some brutes); they keep within 10
+  of their walls and take a new recruit every 5 minutes up to 10. Fort piglins don't zombify.
+- **War hosts:** about every 6 minutes while a player is within 160 of either, each fort sends 4-6 out of its gate to
+  march on the other's walls (in 16-block strides), and hold there once they arrive. They fight whoever they meet;
+  both sides attack players as before (Emberborn still spared by the Hornkin).
+- **A warlord falls:** his side breaks. Everyone of his fort (garrison and hosts) runs from players and is gone a
+  minute later once none is near; the walls and hoard stay. The news goes to players within 96.
+- Ops: `/kingdom netherfort found` (a pair just ahead; works with `execute in the_nether positioned ...`),
+  `/kingdom netherfort host` (the nearest fort sends a host now), `/kingdom netherfort info`.
+
+## 0.7.143: building (Better With Mods batch 4, pack 0.15.56)
+Batch 4 of the BWM port (MIT, our own code).
+- Carpentry (`carpentry/`, generator `kingdoms/tools/gen_carpentry.py`): Siding, Moulding and Corner (half, quarter,
+  eighth blocks, waterloggable, placed by where on the face you click) in 10 woods (oak to pale oak, bamboo) and
+  stone, cobblestone, stone brick and brick: 42 blocks. Crafting: block -> 2 sidings, 2 slabs -> 2 sidings, siding -> 2
+  mouldings, moulding -> 2 corners, and 2 of a piece back up; stonecutter for the stones. No Kitchen chopper recipes
+  (its chopper is code-only, logs only).
+- Benches and Tables per wood (20 blocks), joining in rows with legs at the ends. Right-click a bench to sit
+  (`BenchSeats`: a temporary, unbreakable cushion of the kind `Cushions` uses, gone when you stand or the bench breaks).
+- Wattle, Grate and Slats: wooden panes that join like iron bars.
+- Plot stakes stand as posts (`PlotLines`): string from stake to stake (straight, up to 31 blocks) draws a line; four
+  strung into a closed rectangle mark a plot of exactly that size through `Plots.mark`. An empty hand on an unstrung
+  stake still marks 11x11 (sneak: the chunk). Breaking a stake drops it and its string.
+- Dirt, Grass and Dirt Path Slabs (`EarthSlabs`); a shovel paths a dirt or grass slab. King's Roads climb one-block
+  steps in half steps (path slab or the paving's own slab) where the neighbouring chunk is already paved; they count
+  as road for `RoadPace`.
+- Wind chimes, bamboo and iron (`WindChimes`): ring in rain and storms and when something walks into them; a sneaking
+  Soft Step player slips past.
+- Rope lift (`RopeLift`): climbable rope lowered from an anchor, a pulley cranked by hand (a little hunger) or turned by
+  a Kitchen shaft (`KitchenShafts`, read by block id and its turning/axis state, so Kingdoms needs no Kitchen code),
+  and a platform that steps one block at a time carrying whoever stands on it; cut the rope and it falls (fall damage
+  as normal).
+- Generator `kingdoms/tools/gen_building.py`. javac clean; nothing played yet.
+
+## 0.7.144: atmosphere (Better With Mods batch 5, pack 0.15.57, Kitchen 0.5.12)
+The last batch of the BWM port (MIT, our own code).
+- Gloom (`Gloom`, client `GloomClient`), Overworld only: pitch darkness at the eyes slowly builds a hidden gloom.
+  30 s: quiet cave whispers; 1 min: darkened screen edges; 2 min: the edges breathe and short Darkness pulses come.
+  Andy: real damage, only on Blood Moons, so at the top stage on a Blood or Super Blood Moon night it deals half a
+  heart every 2 s through armour (damage type `gloom`, "was taken by the dark"); never on other nights. Light drains it
+  6x faster than it builds: a lit spot, Night Vision, or any light-giving block held in either hand. Nightborn,
+  creative and spectators are immune. No meter; respawning or rejoining clears it. Emberborn flame hands don't count
+  (only Powers tracks them).
+- Beacon watch-light (`BeaconWatch`, `mixin/beacons/BeaconWatchMixin`): a beacon whose whole pyramid is one block keeps
+  its normal powers, plus: all iron makes hostiles in its range glow; all emerald raises the World Tier loot of
+  hostiles killed in range one step (capped at Legend; loot only, not XP; one line in `WorldTiers`).
+- Skittish herds (`Herds`, entity tag `skittish`): hit a farm animal and others of its kind that can see it flee the
+  attacker for about 4 s; sprinting or breaking blocks within 8 blocks spooks them (2 less per Soft Step rank;
+  sneaking never does). Leashed, tamed and named animals ignore spooks but still flee when hit. Pens aren't detected.
 - **0.7.98, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
   throughout the overworld, the last surviving puzzle pieces being the monoliths and their respective Giants, The
   Highfield Giant, Magnetic, Arctic, and Irradiated all spawn near one and increase world tier when the first is

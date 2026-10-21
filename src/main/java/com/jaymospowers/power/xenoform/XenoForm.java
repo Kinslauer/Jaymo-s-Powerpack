@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -110,7 +111,7 @@ public abstract class XenoForm {
 		return false;
 	}
 
-	/** C again while already the Ultimate (Swarm swaps bodies, Afterimage sends another decoy, ...). */
+	/** C again while already the Ultimate (Swarm swaps bodies, Standstill starts again, ...). */
 	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
 	}
 
@@ -123,11 +124,10 @@ public abstract class XenoForm {
 	}
 
 	/**
-	 * The band's corruption, in this alien ({@code live.corrupted}): the line shown when you change while corrupted,
-	 * lang {@code xenoform.jaymospowers.<id>.corrupt}. The twist itself lives in each form's moves.
+	 * Every tick while the band is corrupted and this alien is out. The corruption is the wrong alien on a slam (and
+	 * the band changing you on its own); no alien adds a twist of its own yet.
 	 */
-	public Component corruptLine() {
-		return Component.translatable("xenoform.jaymospowers." + id + ".corrupt");
+	public void corrupt(ServerPlayer player, XenoformPower.Live live) {
 	}
 
 	/** True while the form may hang in the air without the server's floating kick. */
@@ -182,7 +182,7 @@ public abstract class XenoForm {
 		return mob;
 	}
 
-	/** Removes every minion in {@code ids} (Swarm's gremlins, Afterimage's decoys) with a puff. */
+	/** Removes every minion in {@code ids} (Swarm's gremlins) with a puff. */
 	protected static void dismiss(ServerLevel level, List<Integer> ids) {
 		for (int id : ids) {
 			Entity e = level.getEntity(id);
@@ -209,15 +209,20 @@ public abstract class XenoForm {
 		AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(reach)).inflate(1.0);
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
 			e -> e instanceof LivingEntity living && living.isAlive() && e != player && !e.isSpectator() && !(e instanceof ArmorStand)
-				&& !e.isPassengerOfSameVehicle(player) && filter.test(e), 0.3F);
+				&& !e.isPassengerOfSameVehicle(player) && !spared(player, e) && filter.test(e), 0.3F);
 		return hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
 	}
 
-	/** Every living creature within {@code radius} of the player (not the player, their passengers or spectators). */
+	/** The player's own pets and mounts, and anyone on their team, are never hit by their form's moves. */
+	protected static boolean spared(ServerPlayer player, Entity e) {
+		return e instanceof OwnableEntity pet && pet.getOwner() == player || player.isAlliedTo(e);
+	}
+
+	/** Every living creature within {@code radius} of the player (not the player, their pets, team, passengers or spectators). */
 	protected static List<LivingEntity> around(ServerPlayer player, double radius) {
 		return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isPassengerOfSameVehicle(player)
-				&& e.distanceToSqr(player) <= radius * radius);
+				&& !spared(player, e) && e.distanceToSqr(player) <= radius * radius);
 	}
 
 	/** Shoves {@code target} away from {@code from}, {@code out} along the ground and {@code up} upward. */

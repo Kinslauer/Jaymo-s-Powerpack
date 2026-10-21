@@ -46,7 +46,13 @@ public final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity)
+		// (0.7.137) a wild dragon too; (0.7.138) a villager crowned too; (0.7.142) the Nether forts' lords
+		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity)
+			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed()
+			// (0.7.142) the Nether forts' warlords and warbosses
+			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
+			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD
+			// (0.7.98) the Aether Giants
 			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity);
 	}
 

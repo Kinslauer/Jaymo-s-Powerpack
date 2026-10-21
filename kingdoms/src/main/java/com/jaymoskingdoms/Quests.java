@@ -44,6 +44,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
@@ -752,7 +753,7 @@ public final class Quests {
 		}
 		// (0.5.29) a king some other king wanted dead
 		if (entity instanceof Folk king && king.role() == Folk.KING) {
-			regicide(level, king, source);
+			regicide(level, king, king.factionId(), source);
 		}
 		// (0.5.56) a beast quest's beast, whoever struck it down; a survive quest's player fell before dawn
 		if (Monsters.legend(entity.getType())) {
@@ -793,17 +794,18 @@ public final class Quests {
 	 * {@code king} has fallen: done for each player sent for him who struck him down or stood near. Done cunningly (sworn
 	 * to his realm, so let close; or while he was out on his round) it pays more, and a false oath is broken with it.
 	 */
-	private static void regicide(ServerLevel level, Folk king, DamageSource source) {
+	/** A king some other king wanted dead is dead ({@code realm}'s: a folk, or (0.7.138) a villager crowned, from {@link KingdomEvents}). */
+	static void regicide(ServerLevel level, PathfinderMob king, int realm, DamageSource source) {
 		MinecraftServer server = level.getServer();
 		boolean out = Royals.out(king);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			for (Quest q : log(p)) {
-				if (q.kind() != Quest.REGICIDE || q.counted() || !q.objective().target().equals("realm:" + king.factionId())
+				if (q.kind() != Quest.REGICIDE || q.counted() || !q.objective().target().equals("realm:" + realm)
 					|| !(source.getEntity() == p || (p.level() == level && p.distanceToSqr(king) < CHIEF_CREDIT_RANGE * CHIEF_CREDIT_RANGE))) {
 					continue;
 				}
 				Faction sworn = Factions.of(server, p.getUUID());
-				boolean oath = sworn != null && sworn.id() == king.factionId();
+				boolean oath = sworn != null && sworn.id() == realm;
 				Quest done = q.withProgress(1);
 				p.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.regicide.done", king.getDisplayName(), q.giver().name())
 					.withStyle(ChatFormatting.GOLD));
@@ -816,7 +818,7 @@ public final class Quests {
 				}
 				if (oath) {
 					// (the oath was false, and now everyone knows it)
-					Factions.update(server, king.factionId(), f -> f.withMember(p.getUUID(), null));
+					Factions.update(server, realm, f -> f.withMember(p.getUUID(), null));
 				}
 				put(p, done);
 				sync(p, true);

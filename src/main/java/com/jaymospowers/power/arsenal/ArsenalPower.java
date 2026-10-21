@@ -203,6 +203,11 @@ public final class ArsenalPower implements Power {
 			ArsenalGates.key(player, down);
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && voided) {
+			// the Sword of Damocles: held, you aim it; let go, it comes (like the Gravity Meteor)
+			ArsenalDamocles.key(player, down);
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -236,13 +241,7 @@ public final class ArsenalPower implements Power {
 			}
 			case ABILITY_3 -> barrage(player);
 			// B: Rift Chains; the Void Arsenal's drops the Sword of Damocles instead (the pocket lives on Z)
-			case ABILITY_4 -> {
-				if (voided) {
-					ArsenalDamocles.cast(player);
-				} else {
-					ArsenalChains.key(player);
-				}
-			}
+			case ABILITY_4 -> ArsenalChains.key(player);
 		}
 	}
 
@@ -290,6 +289,7 @@ public final class ArsenalPower implements Power {
 		// the gates close and the chains let go of whoever they bound
 		ArsenalGates.close(player);
 		ArsenalChains.onLost(player);
+		ArsenalDamocles.cancelAim(player);
 	}
 
 	@Override

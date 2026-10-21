@@ -257,6 +257,19 @@ public final class McaCompat {
 		return LOADED ? McaBridge.enlist(level, f, role, at, home, radius) : null;
 	}
 
+	/**
+	 * (0.7.138) One of {@code f}'s villagers made its ruler ({@code role}: a king, a lord): the late ruler's family first
+	 * ({@code house}: who they were), else anyone grown, else someone who moves in. Null without MCA.
+	 */
+	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
+		return LOADED ? McaBridge.enlistRuler(level, f, role, house) : null;
+	}
+
+	/** (0.7.138) A posted folk guard of a realm, with MCA loaded: an MCA guard of the same blood takes the post; true if so. */
+	static boolean becomeGuard(ServerLevel level, Folk folk) {
+		return LOADED && McaBridge.convertGuard(level, folk);
+	}
+
 	/** (0.5.53) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;

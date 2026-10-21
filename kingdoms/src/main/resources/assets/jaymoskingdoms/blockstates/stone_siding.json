@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "jaymoskingdoms:block/stone_siding",
+      "x": 90,
+      "uvlock": true
+    },
+    "facing=up": {
+      "model": "jaymoskingdoms:block/stone_siding",
+      "x": 270,
+      "uvlock": true
+    },
+    "facing=north": {
+      "model": "jaymoskingdoms:block/stone_siding"
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/stone_siding",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/stone_siding",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/stone_siding",
+      "y": 90,
+      "uvlock": true
+    }
+  }
+}

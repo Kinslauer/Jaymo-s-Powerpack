@@ -37,8 +37,6 @@ import net.minecraft.world.phys.Vec3;
  * <li>C (ascended), Sunheart: the jet goes faster ({@link #FLIGHT_SPEED}), and R becomes a held beam of fire
  * {@link #BEAM_RANGE} blocks long that burns whatever it touches.</li>
  * </ul>
- * Corrupted: your fire spreads. The nova and the trail light the ground around you, and nothing of yours puts it out.
- * Water bites twice as hard.
  */
 public final class Pyre extends XenoForm {
 	// ---- tuning ----
@@ -63,8 +61,6 @@ public final class Pyre extends XenoForm {
 	public static final double BEAM_RANGE = 12.0;
 	public static final float BEAM_DAMAGE = 2.0F;
 	public static final int BEAM_EVERY = 4, BEAM_BURN_SECONDS = 3;
-	/** Corrupted: the share of ground round a nova set alight; the water bite's multiplier. */
-	public static final float CORRUPT_SPREAD = 0.3F, CORRUPT_WET = 2.0F;
 
 	public Pyre() {
 		super("pyre", 1.0F, 24.0F, 4.0, 0.0, 0.0, 0.0, Items.MAGMA_BLOCK, 0xFF8A2A);
@@ -121,9 +117,6 @@ public final class Pyre extends XenoForm {
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
 					nova(player);
-					if (live.corrupted) {
-						spread(player);
-					}
 					cooldown(player, live, V, NOVA_COOLDOWN);
 				}
 			}
@@ -165,9 +158,6 @@ public final class Pyre extends XenoForm {
 				if (level.getBlockState(at).isAir() && BaseFireBlock.canBePlacedAt(level, at, Direction.NORTH)) {
 					level.setBlock(at, BaseFireBlock.getState(level, at), Block.UPDATE_ALL);
 				}
-				if (live.corrupted) {
-					light(level, at.offset(player.getRandom().nextInt(3) - 1, 0, player.getRandom().nextInt(3) - 1));
-				}
 				level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.2, 0.0, 0.2, 0.0);
 			}
 		}
@@ -180,7 +170,7 @@ public final class Pyre extends XenoForm {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.4, 0.3, 0.02);
 			}
 			if (player.tickCount % WET_EVERY == 0) {
-				player.hurtServer(level, player.damageSources().drown(), live.corrupted ? WET_DAMAGE * CORRUPT_WET : WET_DAMAGE);
+				player.hurtServer(level, player.damageSources().drown(), WET_DAMAGE);
 				sound(player, SoundEvents.FIRE_EXTINGUISH, 0.6F, 1.2F);
 			}
 		}
@@ -283,18 +273,6 @@ public final class Pyre extends XenoForm {
 	private static void light(ServerLevel level, BlockPos pos) {
 		if (level.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(level, pos, Direction.NORTH)) {
 			level.setBlock(pos, BaseFireBlock.getState(level, pos), Block.UPDATE_ALL);
-		}
-	}
-
-	/** Corrupted: the nova leaves the ground round you burning. */
-	private static void spread(ServerPlayer player) {
-		ServerLevel level = player.level();
-		BlockPos feet = player.blockPosition();
-		int r = (int)NOVA_RADIUS;
-		for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-r, -1, -r), feet.offset(r, 1, r))) {
-			if (player.getRandom().nextFloat() < CORRUPT_SPREAD && pos.distSqr(feet) <= r * r) {
-				light(level, pos.immutable());
-			}
 		}
 	}
 

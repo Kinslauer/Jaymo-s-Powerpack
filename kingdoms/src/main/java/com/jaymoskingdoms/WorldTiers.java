@@ -242,6 +242,8 @@ public final class WorldTiers {
 				tier = chest ? of(player).ordinal() : 0;
 			} else {
 				tier = entity == null ? 0 : entity.getAttachedOrElse(MOB_TIER, 0);
+				// (BWM batch 5) slain in an emerald beacon's watch: a step higher
+				tier = entity == null ? 0 : Math.min(DOUBLE_LOOT.length - 1, tier + BeaconWatch.lootStep(entity));
 			}
 			if (tier <= 0) {
 				return;

@@ -64,6 +64,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
+		// (batch 4) building: dirt, grass and path slabs; wind chimes; the rope lift (rope, anchor, pulley, platform)
+		EarthSlabs.register();
+		WindChimes.register();
+		RopeLift.register();
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();
@@ -104,9 +108,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// (0.7.138) with MCA, rulers are the town's own villagers
+		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
+		Rulers.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Frights.register();
+		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -163,6 +171,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wars.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
+		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
+		com.jaymoskingdoms.carpentry.Carpentry.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
@@ -273,6 +283,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
+		// 0.7.137: the wind dragons (Notus first)
+		com.jaymoskingdoms.dragons.Dragons.register();
 		// 0.7.97: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
 		com.jaymoskingdoms.remnants.Monoliths.register();
 		Encounters.register();
@@ -329,6 +341,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		// BWM batch 5: the gloom of the dark (and its attachment)
+		Gloom.register();
+		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
+		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
+		BeaconWatch.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

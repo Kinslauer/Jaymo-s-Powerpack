@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "jaymoskingdoms:block/pulley_side",
+    "top": "minecraft:block/oak_planks",
+    "bottom": "jaymoskingdoms:block/pulley_bottom"
+  }
+}

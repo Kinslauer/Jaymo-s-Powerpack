@@ -1,0 +1,45 @@
+{
+  "variants": {
+    "corner=down_north_west": {
+      "model": "jaymoskingdoms:block/dark_oak_corner"
+    },
+    "corner=down_north_east": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "y": 90,
+      "uvlock": true
+    },
+    "corner=down_south_west": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "y": 270,
+      "uvlock": true
+    },
+    "corner=down_south_east": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "y": 180,
+      "uvlock": true
+    },
+    "corner=up_north_west": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "corner=up_north_east": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "corner=up_south_west": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "x": 180,
+      "uvlock": true
+    },
+    "corner=up_south_east": {
+      "model": "jaymoskingdoms:block/dark_oak_corner",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

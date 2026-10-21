@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -68,28 +69,33 @@ public final class Royals {
 		return t >= DAWN && t < DUSK;
 	}
 
-	/** A ruler who keeps a seat (a king or a lord; chiefs and warlords keep their camps). */
-	static boolean walks(Folk folk) {
-		return folk.role() == Folk.KING || folk.role() == Folk.LORD;
+	/** A ruler who keeps a seat (a king or a lord, folk or (0.7.138) villager; chiefs and warlords keep their camps). */
+	static boolean walks(Entity ruler) {
+		return Rulers.leaderRole(Rulers.role(ruler));
 	}
 
 	static void clear() {
 	}
 
 	/** (0.5.26) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */
-	static boolean out(Folk ruler) {
+	static boolean out(PathfinderMob ruler) {
 		if (!walks(ruler) || !(ruler.level() instanceof ServerLevel level) || !daytime(level)) {
 			return false;
 		}
-		Castle.Keep keep = Factions.keep(level.getServer(), ruler.factionId());
+		Castle.Keep keep = Factions.keep(level.getServer(), Rulers.faction(ruler));
 		return keep != null && ruler.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 16.0 * 16.0;
 	}
 
 	// ---- the ruler's round ------------------------------------------------------------------------------------------
 
-	/** His day: out on his round while it's light, back on his throne when it isn't. */
+	/**
+	 * His day: out on his round while it's light, back on his throne when it isn't. A folk ruler's goal; (0.7.138) a
+	 * villager ruler's from {@link Rulers#step} (no carriage for them).
+	 */
 	static final class Round extends Goal {
-		private final Folk king;
+		private final PathfinderMob king;
+		/** The same ruler, if he's a folk (the carriage is a folk ruler's alone). */
+		private final @Nullable Folk folk;
 		private final List<BlockPos> stops = new ArrayList<>();
 		private boolean out;
 		private int greeting;
@@ -97,23 +103,24 @@ public final class Royals {
 		private double best;
 		private long improvedAt;
 
-		Round(Folk king) {
+		Round(PathfinderMob king) {
 			this.king = king;
+			this.folk = king instanceof Folk f ? f : null;
 			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 		}
 
 		@Override
 		public boolean canUse() {
 			// (nor while a player hears what work he has: Quests holds him)
-			if (!walks(this.king) || this.king.getTarget() != null || Quests.listening(this.king) || !(this.king.level() instanceof ServerLevel level)) {
+			if (!walks(this.king) || Rulers.target(this.king) != null || Quests.listening(this.king) || !(this.king.level() instanceof ServerLevel level)) {
 				return false;
 			}
-			Castle.Keep keep = Factions.keep(level.getServer(), this.king.factionId());
+			Castle.Keep keep = Factions.keep(level.getServer(), Rulers.faction(this.king));
 			if (keep == null) {
 				return false;
 			}
 			// out by day (unless he's too few guards to dare it); by night, or kept in, only to get home
-			Faction faction = Factions.get(level.getServer(), this.king.factionId());
+			Faction faction = Factions.get(level.getServer(), Rulers.faction(this.king));
 			boolean out = daytime(level) && faction != null && !Wardens.confined(level, faction, this.king) && Tempers.staysOut(level, faction);
 			return out || this.out || this.king.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 4.0;
 		}
@@ -137,8 +144,8 @@ public final class Royals {
 		@Override
 		public void tick() {
 			ServerLevel level = (ServerLevel)this.king.level();
-			Faction faction = Factions.get(level.getServer(), this.king.factionId());
-			Castle.Keep keep = Factions.keep(level.getServer(), this.king.factionId());
+			Faction faction = Factions.get(level.getServer(), Rulers.faction(this.king));
+			Castle.Keep keep = Factions.keep(level.getServer(), Rulers.faction(this.king));
 			if (faction == null || keep == null) {
 				return;
 			}
@@ -157,9 +164,9 @@ public final class Royals {
 				release(level, this.king);
 			}
 			// (0.5.14) driven home in his carriage: he gets down at his gate and walks in
-			if (Carriages.riding(this.king)) {
+			if (this.folk != null && Carriages.riding(this.folk)) {
 				if (this.walk(level, keep.gate(), now, Carriages.ALIGHT_REACH) || now - this.improvedAt > STUCK_TICKS) {
-					Carriages.alight(this.king);
+					Carriages.alight(this.folk);
 					this.goal = null;
 				}
 				return;
@@ -170,7 +177,9 @@ public final class Royals {
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (the way in is blocked: his guards see him to his throne)
 				poof(level, this.king);
-				Carriages.alight(this.king);
+				if (this.folk != null) {
+					Carriages.alight(this.folk);
+				}
 				this.king.teleportTo(keep.throne().getX() + 0.5, keep.throne().getY(), keep.throne().getZ() + 0.5);
 				poof(level, this.king);
 				this.king.setHomeTo(keep.throne(), 3);
@@ -201,7 +210,7 @@ public final class Royals {
 				this.stops.add(v.blockPosition());
 			}
 			this.stops.add(faction.seat());
-			if (Carriages.of(level, faction) != null) {
+			if (this.folk != null && Carriages.of(level, faction) != null) {
 				// (0.7.90) driven in his carriage: only where it can go, open courts and the outskirts (it stuck fast in
 				// alleys, yards and porches); a stop with no open ground near it is passed by
 				List<BlockPos> open = new ArrayList<>();
@@ -251,19 +260,25 @@ public final class Royals {
 				return;
 			}
 			// (0.5.14) a wealthy king rides his round in his carriage, if it's waiting for him
-			Carriages.board(level, faction, this.king);
+			if (this.folk != null) {
+				Carriages.board(level, faction, this.folk);
+			}
 			BlockPos stop = this.stops.getFirst();
 			if (this.walk(level, stop, now, STOP_REACH)) {
 				this.stops.removeFirst();
-				Carriages.stop(this.king);
+				if (this.folk != null) {
+					Carriages.stop(this.folk);
+				}
 				this.greeting = GREET_TICKS;
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (no way there, penned in by a fence or a gate: he turns up there in a puff, as builders do; his escort follows)
 				BlockPos at = Construction.standable(level, stop, 3);
 				poof(level, this.king);
-				Carriages.stop(this.king);
-				if (Carriages.riding(this.king)) {
-					Carriages.teleport(this.king, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				if (this.folk != null) {
+					Carriages.stop(this.folk);
+				}
+				if (this.folk != null && Carriages.riding(this.folk)) {
+					Carriages.teleport(this.folk, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 				} else {
 					this.king.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 				}
@@ -301,7 +316,7 @@ public final class Royals {
 				this.improvedAt = now;
 			}
 			double d = Math.sqrt(this.king.distanceToSqr(Vec3.atBottomCenterOf(to)));
-			if (d <= reach + Carriages.reach(this.king)) {
+			if (d <= reach + (this.folk != null ? Carriages.reach(this.folk) : 0.0)) {
 				return true;
 			}
 			if (d < this.best - 0.5) {
@@ -310,7 +325,11 @@ public final class Royals {
 			}
 			if (this.king.getNavigation().isDone() || now % 20 == 0) {
 				BlockPos leg = Construction.leg(level, this.king, to);
-				Carriages.moveTo(this.king, leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
+				if (this.folk != null) {
+					Carriages.moveTo(this.folk, leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
+				} else {
+					this.king.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
+				}
 			}
 			return false;
 		}
@@ -318,30 +337,119 @@ public final class Royals {
 
 	// ---- his escort -------------------------------------------------------------------------------------------------
 
-	/** Calls up to {@link #ESCORT_MOST} ({@link #LORD_ESCORT_MOST} for a lord) of the faction's guards (the nearest) to {@code king}'s back. */
-	static void escort(ServerLevel level, Faction faction, Folk king) {
-		List<Folk> guards = new ArrayList<>(level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(ESCORT_CALL),
-			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && g.getTarget() == null && g.task().isEmpty()
-				&& (g.escort() == null || g.escort().equals(king.getUUID()))));
+	/** (0.7.138) An MCA guard's escort, kept in their task: {@code escort:<ruler>:<slot>}. */
+	static final String ESCORT_TASK = "escort:";
+
+	/** The ruler {@code g} walks behind (a folk's, or an MCA guard's from their task), or null. */
+	static @Nullable UUID escortOf(Worker g) {
+		if (g instanceof Folk folk) {
+			return folk.escort();
+		}
+		String task = g.task();
+		if (!task.startsWith(ESCORT_TASK)) {
+			return null;
+		}
+		String[] parts = task.split(":");
+		try {
+			return parts.length == 3 ? UUID.fromString(parts[1]) : null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
+	/** {@code g}'s place in the column. */
+	static int slotOf(Worker g) {
+		if (g instanceof Folk folk) {
+			return folk.escortSlot();
+		}
+		String[] parts = g.task().split(":");
+		try {
+			return parts.length == 3 ? Integer.parseInt(parts[2]) : 0;
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	/** {@code g} falls in behind {@code leader} at {@code slot} (an MCA guard's post is their home, kept). */
+	static void follow(Worker g, UUID leader, int slot) {
+		if (g instanceof Folk folk) {
+			folk.follow(leader, slot);
+		} else {
+			g.setTask(ESCORT_TASK + leader + ":" + slot);
+		}
+	}
+
+	/** Back to their post. */
+	static void unfollow(Worker g) {
+		if (g instanceof Folk folk) {
+			folk.unfollow();
+		} else if (g.task().startsWith(ESCORT_TASK)) {
+			g.setTask("");
+		}
+	}
+
+	/**
+	 * Calls up to {@link #ESCORT_MOST} ({@link #LORD_ESCORT_MOST} for a lord) of the faction's guards (the nearest; folk
+	 * and (0.7.138) MCA guards) to {@code king}'s back.
+	 */
+	static void escort(ServerLevel level, Faction faction, PathfinderMob king) {
+		List<Worker> guards = new ArrayList<>(Workers.near(level, new AABB(faction.seat()).inflate(ESCORT_CALL),
+			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && Rulers.target(g.mob()) == null
+				&& (g instanceof Folk ? g.task().isEmpty() : g.task().isEmpty() || g.task().startsWith(ESCORT_TASK)) && !Arrests.busy(g.mob())
+				&& (escortOf(g) == null || escortOf(g).equals(king.getUUID()))));
 		// the hall's and the town's guards first; the gate's keep it, unless they're needed to make up the least
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
-		java.util.function.Predicate<Folk> atGate = g -> keep != null && g.escort() == null && g.getHomePosition().closerThan(keep.gate(), GATE_POST);
-		guards.sort(Comparator.comparing((Folk g) -> atGate.test(g)).thenComparingDouble(g -> g.distanceToSqr(king)));
-		int most = king.role() == Folk.LORD ? LORD_ESCORT_MOST : ESCORT_MOST;
+		java.util.function.Predicate<Worker> atGate = g -> keep != null && escortOf(g) == null && g.getHomePosition().closerThan(keep.gate(), GATE_POST);
+		guards.sort(Comparator.comparing((Worker g) -> atGate.test(g)).thenComparingDouble(g -> g.mob().distanceToSqr(king)));
+		int most = Rulers.role(king) == Folk.LORD ? LORD_ESCORT_MOST : ESCORT_MOST;
 		int slot = 0;
-		for (Folk g : guards) {
+		for (Worker g : guards) {
 			if (slot < most && (slot < ESCORT_LEAST || !atGate.test(g))) {
-				g.follow(king.getUUID(), slot++);
-			} else if (king.getUUID().equals(g.escort())) {
-				g.unfollow();
+				follow(g, king.getUUID(), slot++);
+			} else if (king.getUUID().equals(escortOf(g))) {
+				unfollow(g);
 			}
 		}
 	}
 
 	/** Night: his escort goes back to their posts. */
-	static void release(ServerLevel level, Folk king) {
-		for (Folk g : level.getEntitiesOfClass(Folk.class, king.getBoundingBox().inflate(ESCORT_CALL * 2), g -> king.getUUID().equals(g.escort()))) {
-			g.unfollow();
+	static void release(ServerLevel level, PathfinderMob king) {
+		for (Worker g : Workers.near(level, king.getBoundingBox().inflate(ESCORT_CALL * 2), g -> king.getUUID().equals(escortOf(g)))) {
+			unfollow(g);
+		}
+	}
+
+	/**
+	 * {@code guard} keeps their place in {@code king}'s column ({@code slot}: pairs, two blocks apart, behind him): walked
+	 * to it, brought up if far behind, facing ahead once there.
+	 */
+	static void keepUp(ServerLevel level, PathfinderMob guard, PathfinderMob king, int slot) {
+		// behind him: rows of two, a block and a half either side
+		Vec3 facing = Vec3.directionFromRotation(0.0F, king.getYRot());
+		Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
+		// (0.5.14) wider apart on horseback, and further back behind a carriage
+		double spread = guard instanceof Folk f && Cavalry.mounted(f) ? 1.7 : 1.0;
+		double back = (king instanceof Folk k && Carriages.riding(k) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
+		double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;
+		Vec3 place = king.position().subtract(facing.scale(back)).add(right.scale(side));
+		double d = guard.position().distanceTo(place);
+		if (guard instanceof Folk && guard.tickCount % 20 == 0) {
+			guard.setHomeTo(king.blockPosition(), ROAM_RADIUS);
+		}
+		if (guard.distanceTo(king) > ESCORT_LOST) {
+			BlockPos to = Construction.standable(level, BlockPos.containing(place), 3);
+			poof(level, guard);
+			Cavalry.teleport(guard, to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
+			poof(level, guard);
+			return;
+		}
+		if (d > 1.5) {
+			if (guard.getNavigation().isDone() || guard.tickCount % 10 == 0) {
+				guard.getNavigation().moveTo(place.x, place.y, place.z, d > 6.0 ? CATCH_UP_SPEED : ESCORT_SPEED);
+			}
+		} else {
+			guard.getNavigation().stop();
+			guard.getLookControl().setLookAt(king.getX() + facing.x * 8.0, king.getEyeY(), king.getZ() + facing.z * 8.0);
 		}
 	}
 
@@ -354,13 +462,13 @@ public final class Royals {
 			this.setFlags(EnumSet.of(Flag.MOVE));
 		}
 
-		private @Nullable Folk leader() {
+		private @Nullable PathfinderMob leader() {
 			UUID id = this.guard.escort();
 			if (id == null || !(this.guard.level() instanceof ServerLevel level)) {
 				return null;
 			}
 			Entity e = level.getEntity(id);
-			return e instanceof Folk f && f.isAlive() ? f : null;
+			return e instanceof PathfinderMob f && f.isAlive() ? f : null;
 		}
 
 		@Override
@@ -393,39 +501,9 @@ public final class Royals {
 
 		@Override
 		public void tick() {
-			Folk king = this.leader();
-			if (king == null) {
-				return;
-			}
-			int slot = this.guard.escortSlot();
-			// behind him: rows of two, a block and a half either side
-			Vec3 facing = Vec3.directionFromRotation(0.0F, king.getYRot());
-			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
-			// (0.5.14) wider apart on horseback, and further back behind a carriage
-			double spread = Cavalry.mounted(this.guard) ? 1.7 : 1.0;
-			double back = (Carriages.riding(king) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
-			double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;
-			Vec3 place = king.position().subtract(facing.scale(back)).add(right.scale(side));
-			double d = this.guard.position().distanceTo(place);
-			if (this.guard.tickCount % 20 == 0) {
-				this.guard.setHomeTo(king.blockPosition(), ROAM_RADIUS);
-			}
-			if (this.guard.distanceTo(king) > ESCORT_LOST) {
-				ServerLevel level = (ServerLevel)this.guard.level();
-				BlockPos to = Construction.standable(level, BlockPos.containing(place), 3);
-				poof(level, this.guard);
-				Cavalry.teleport(this.guard, to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
-				poof(level, this.guard);
-				return;
-			}
-			if (d > 1.5) {
-				if (this.guard.getNavigation().isDone() || this.guard.tickCount % 10 == 0) {
-					this.guard.getNavigation().moveTo(place.x, place.y, place.z, d > 6.0 ? CATCH_UP_SPEED : ESCORT_SPEED);
-				}
-			} else {
-				this.guard.getNavigation().stop();
-				this.guard.getLookControl().setLookAt(king.getX() + Vec3.directionFromRotation(0.0F, king.getYRot()).x * 8.0, king.getEyeY(),
-					king.getZ() + Vec3.directionFromRotation(0.0F, king.getYRot()).z * 8.0);
+			PathfinderMob king = this.leader();
+			if (king != null) {
+				keepUp((ServerLevel)this.guard.level(), this.guard, king, this.guard.escortSlot());
 			}
 		}
 	}

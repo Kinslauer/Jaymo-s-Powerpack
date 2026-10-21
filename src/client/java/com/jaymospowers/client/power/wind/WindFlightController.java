@@ -565,7 +565,8 @@ public final class WindFlightController {
 	}
 
 	private void takeOff(Minecraft minecraft, LocalPlayer player) {
-		if (!WindFlight.canFly(player) || player.isFallFlying()) {
+		// (0.15.54) lying limp, the wind answers only once it's mastered enough (it lifts you out of the ragdoll)
+		if (!WindFlight.canFly(player) || player.isFallFlying() || !com.jaymospowers.power.wind.WindFall.canTakeOff(player)) {
 			return;
 		}
 		boolean grounded = player.onGround();

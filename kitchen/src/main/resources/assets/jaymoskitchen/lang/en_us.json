@@ -517,5 +517,8 @@
 	"item.jaymoskitchen.waterwheel": "Waterwheel",
 	"message.jaymoskitchen.power.on_shaft": "Set it on the end of a level wooden shaft.",
 	"message.jaymoskitchen.power.no_room": "It needs open space all round to turn: %1$s by %1$s blocks across the shaft.",
-	"message.jaymoskitchen.mill.need_power": "Tie on a horse (bring one on a lead and right-click), or turn it with a shaft from a windmill or waterwheel."
+	"message.jaymoskitchen.mill.need_power": "Tie on a horse (bring one on a lead and right-click), or turn it with a shaft from a windmill or waterwheel.",
+	"message.jaymoskitchen.pot_spiked": "You slip %s in with whatever cooks here next. If it scorches...",
+	"message.jaymoskitchen.pot_exploded": "The pot blows up! Something was in it that shouldn't have been.",
+	"item.jaymoskitchen.fish_bait": "Fish Bait"
 }

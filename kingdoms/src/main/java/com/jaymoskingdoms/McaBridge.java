@@ -260,7 +260,9 @@ final class McaBridge {
 	private static @Nullable VillagerEntityMCA candidate(ServerLevel level, Faction f, int role) {
 		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0 && !v.isProfessionImportant()
-				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
+				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID()))
+				// (0.7.141) never a wind dragon in disguise
+				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null);
 		if (role == Folk.GUARD && Purists.is(f)) {
 			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();
 			if (!kin.isEmpty()) {
@@ -279,6 +281,79 @@ final class McaBridge {
 			}
 		}
 		return null;
+	}
+
+	// ---- rulers and guards (0.7.138) -----------------------------------------------------------------------------------
+
+	/** {@link McaCompat#enlistRuler}. */
+	static @Nullable Worker enlistRuler(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
+		VillagerEntityMCA villager = heir(level, f, house);
+		if (villager == null) {
+			// nobody grown in the town: someone moves in to take the throne
+			Castle.Keep keep = Factions.keep(level.getServer(), f.id());
+			BlockPos at = keep != null ? keep.throne() : ShutIn.openGround(level, f.seat());
+			villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at != null ? at : f.seat())).withAge(0)
+				.spawn(EntitySpawnReason.MOB_SUMMONED);
+			if (villager == null) {
+				return null;
+			}
+		}
+		Enlisted w = worker(villager);
+		if (w.role() >= 0) {
+			// (a guard leaves their post for the throne: a place to fill)
+			Economy.lost(level.getServer(), w.factionId(), w.role());
+			w.discharge();
+		}
+		w.enlist(role, f.id());
+		return w;
+	}
+
+	/**
+	 * {@code f}'s heir among its grown villagers (its guards too, the townsfolk first): the late ruler's family
+	 * ({@code house}), then their widow or widower, then anyone.
+	 */
+	private static @Nullable VillagerEntityMCA heir(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && !v.isBaby() && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
+				&& !v.getUUID().equals(house));
+		if (all.isEmpty()) {
+			return null;
+		}
+		if (house != null) {
+			for (int kin : new int[] {McaCompat.KIN, McaCompat.PARTNER}) {
+				List<VillagerEntityMCA> family = all.stream().filter(v -> kinOf(v, house) == kin).toList();
+				if (!family.isEmpty()) {
+					return family.get(level.getRandom().nextInt(family.size()));
+				}
+			}
+		}
+		List<VillagerEntityMCA> townsfolk = all.stream().filter(v -> worker(v).role() < 0).toList();
+		List<VillagerEntityMCA> pick = townsfolk.isEmpty() ? all : townsfolk;
+		return pick.get(level.getRandom().nextInt(pick.size()));
+	}
+
+	/** {@link McaCompat#becomeGuard}: an MCA guard (or archer) of the same blood takes {@code folk}'s post. */
+	static boolean convertGuard(ServerLevel level, Folk folk) {
+		Faction f = Factions.get(level.getServer(), folk.factionId());
+		if (f == null || !Workers.inPlace(f, Folk.GUARD)) {
+			return false;
+		}
+		VillagerProfession job = level.getRandom().nextInt(3) == 0 ? ProfessionsMCA.ARCHER : ProfessionsMCA.GUARD;
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
+			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		worker(villager).enlist(Folk.GUARD, f.id());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
 	}
 
 	private static int tier(VillagerEntityMCA v) {
@@ -312,6 +387,16 @@ final class McaBridge {
 		if (e.role() < 0 && Hermits.due(villager) && Hermits.onSkyIsland(level, villager.blockPosition())) {
 			hermit(level, villager, e);
 			return true;
+		}
+		if (Rulers.leaderRole(e.role())) {
+			// (0.7.138) a realm's ruler, whatever their trade: while the throne is theirs
+			Faction f = Factions.get(level.getServer(), e.factionId());
+			if (f != null && !f.fallen() && !villager.isBaby() && f.leader().map(villager.getUUID()::equals).orElse(false)) {
+				return true;
+			}
+			Rulers.unfit(villager);
+			e.discharge();
+			return false;
 		}
 		int job = villager.isGuard() ? Folk.GUARD : Professions.role(villager.getVillagerData().profession());
 		MinecraftServer server = level.getServer();

@@ -4,6 +4,7 @@ import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Recollections;
+import com.jaymoskingdoms.Rulers;
 import com.jaymoskingdoms.SkinTones;
 import com.jaymoskingdoms.Tails;
 import com.jaymoskingdoms.VillagerHeritage;
@@ -35,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * remember and haven't said yet.
  * (0.7.102) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
  * safe is burned and pulls away, and the villager says so.
+ * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) with a villager ruler: as with a folk ruler.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -80,6 +82,13 @@ abstract class McaDialogueMixin {
 				Tails.explain(player, villager);
 			}
 			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && Rulers.ANSWER.equals(answer)) {
+			// (0.7.138) an audience with a villager ruler
+			villager.getInteractions().stopInteracting();
+			Rulers.audience(player, villager);
 			ci.cancel();
 			return;
 		}

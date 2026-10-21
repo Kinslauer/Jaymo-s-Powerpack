@@ -2285,6 +2285,61 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
   every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
   and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.
+- **0.15.51, Velox replaces Blur, and a new first-person band slam:** Andy asked whether Alien Evolution (KonaDolomite,
+  All Rights Reserved, Palladium 1.20.1) could improve the Xenoform, "primarily add XLR8 in place of Blur", and to use
+  its first-person slam. Nothing of it is copied: an original speedster and our own slam. Blur is now **Velox**
+  (`forms/Velox.java`; the id stays `blur`, so bands keep it): 80% faster, runs on water while sprinting
+  (`ChronoWaterRunMixin` asks `Velox.runsOnWater`); R held is a Speed Burst (+120% speed, whole-block steps, climbs
+  walls on contact, up to 6 s); G Rapid Punches (6 hits of 2 on what you aim at); V Cyclone (everything within 6 swept
+  round you and lifted); B Chain Strike as before; the Ultimate is Standstill (6 s: everything living within 24 nearly
+  frozen, projectiles hang at 5% speed and fly on after, you get Speed II; again every 30 s). Corrupted, a burst that
+  ends runs on until a wall or a creature. A new body and skin: crest, a visor that drops over the eyes at speed, snout,
+  ball feet, longer tail, dark blue with white chevrons. Every Xenoform area or aimed move now spares your own pets and
+  scoreboard teammates (`XenoForm.spared`). The first-person slam is rebuilt (`XenoformSlamView`): forearm up across
+  the view with the band face up, the dial pops as a glowing cap, the palm drops onto it, a dip, a view kick and a
+  green burst. Compile-checked against the 26.3 jars only; not yet run in game.
+- **Duplex, a duplicating alien from copper golems:** Andy asked for a "Ditto" Xeno using copper golems. Like Velox it
+  takes no borrowed name: **Duplex** (`forms/Duplex.java`, id `duplex`, scanned from a copper golem). 0.9x, 18 hp, fists
+  3. R Split: a double steps out (`XenoDouble`, 6 hp, fists 3, never saved; it pops when you stop being Duplex or leave),
+  up to 3; doubles go for what you hit and what hits you, and a loyal one's death costs you 2. G Rally (aimed target
+  within 16, or come back), V Switch (trade places with the aimed or farthest double), B Merge (doubles pop back into
+  you, 3 health each). Ultimate Copper Storm: fills to 3 doubles, visual-only lightning on each, 6 damage within 3 of a
+  double, doubles charged (Speed II, Strength, Glowing) for 20 s, up to 6 doubles meanwhile; again every 20 s.
+  Copper body with seams, rivets and verdigris, a swaying
+  lightning rod, pale cyan eyes (`XenoFormModels.Duplex`, `gen_xenoform.duplex`, `XenoDoubleRenderer`). A complete band
+  is now 9 aliens; anyone already ascended stays ascended. Compile-checked against the 26.3 jars; not yet run in game.
+- **Duplex's name counts, and corruption is just the wrong alien (same release):** Andy asked that the name change as you
+  split (Duplex, Triplex, Quadruplex) and that corruption be only "a different xeno" across the board, with no per-alien
+  method for now. Duplex is called by how many of you there are (`Duplex.title`: shown over the hotbar on each split,
+  merge or death, and on the HUD clock, which counts your doubles from their synced owner); rogue doubles are gone.
+  Every alien's corruption twist is removed (Bulwark, Pyre, Velox, Prism, Wisp, Gremlin, Knell, Wyrm), with their
+  `CORRUPT_*` constants, `Live.runaway`/`wingStall`, the chat line on changing and the `.corrupt` lang keys. A corrupted
+  band still gives the wrong alien on 1 slam in 4 and changes you on its own; `XenoForm.corrupt` is an empty per-tick
+  hook for later. Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.53, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
+  first ability key no longer fires your power: R is the dragon's fire breath. Told by the mount's id
+  (`jaymoskingdoms:*_dragon`), so Powers still loads without Kingdoms (`JaymosPowersClient.steeringDragon`).
+- **0.15.54, Wind lands softly, wobbles early, and the storm wakes the Stormborn (Kingdoms 0.7.140):** Andy's list:
+  - Falls: "i have a clip where the user slowly descended and still took the damage. It shouldnt work this way past
+    mastery 2, and even then the damage should scale lower related to the speed." From 2 unlocked abilities a Wind user
+    takes no fall damage at all; before that a fall's damage is scaled by how fast they were really coming down
+    (the server's own fastest sink of the last few ticks, easing off as they slow): nothing below 0.45 b/t (the cloak's
+    drift, a hover sink), in full from 1.5 b/t (`WindFall`, `WindFallMixin` on `calculateFallDamage`).
+  - Ragdolls (Kitchen's living ragdolls): flying, or within a second of it, a Wind user can't be knocked limp, so
+    catching a fall with the flight never ends in a ragdoll (a Kitchen veto, `WindFall.holdsUp`). Lying limp, R only
+    takes off from mastery 2, and doing so lifts you straight out of the ragdoll; before that the wind won't answer
+    until you're up (client and server both, `WindFall.canTakeOff`).
+  - The cloak's drift before mastery 2 is unsteady: arms windmilling out for balance, legs kicking, the body rocking
+    (`WindWobble`, synced by `WindModes.WOBBLY` so everyone sees it).
+  - No blossom petals in a Wind user's seasonal whirl (`SeasonAura`: spring gives Wind none).
+  - Kingdoms 0.7.140: the Stormborn heritage is earned now, woken when a Wind user's power is corrupted.
+  Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.56, ships Jaymo's Kingdoms 0.7.143 (Better With Mods batch 4, building):** timber trim, benches and tables,
+  wattle panels, strung plot stakes, earth slabs with half-step King's Roads, wind chimes and a rope lift. No Powers
+  code changed. Details in the Kingdoms MODLOG.
+- **0.15.57, ships Jaymo's Kingdoms 0.7.144 and Kitchen 0.5.12 (Better With Mods batch 5, atmosphere):** Gloom with
+  Blood-Moon-only damage, the beacon watch-light, skittish herds, fish bait and the exploding pot. This finishes the
+  BWM port. No Powers code changed. Details in the Kingdoms and Kitchen MODLOGs.
 - **0.13.36, Wind into the Aether, Emberborn rifts into the Nether:** Andy tied the Aether into the pack's lore (Kingdoms
   0.7.98's monoliths and Giants are its last remnants) and wanted Wind to be the way there, as Chrono's Fast Forward is
   to the future. A Wind user with B unlocked who flies to the top of the Overworld rises into our own Aether

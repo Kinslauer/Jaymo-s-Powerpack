@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:siding",
+  "ingredients": [
+    "jaymoskingdoms:mangrove_moulding",
+    "jaymoskingdoms:mangrove_moulding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:mangrove_siding"
+  }
+}
