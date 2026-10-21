@@ -272,6 +272,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
+		// 0.7.137: the wind dragons (Notus first)
+		com.jaymoskingdoms.dragons.Dragons.register();
 		Encounters.register();
 		Sightings.register();
 		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)
