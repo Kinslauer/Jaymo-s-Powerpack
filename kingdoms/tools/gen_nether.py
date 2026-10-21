@@ -4,7 +4,8 @@ the mod it's after, is All Rights Reserved: nothing of it is used):
   64x64 skin above, the muzzle, nose ring, horns, ears and loincloth below;
 - the four spawn eggs' icons and item models, and the Hornkin's loot tables.
 Run from kingdoms/: python3 tools/gen_nether.py"""
-import json, os, random
+import json
+import math, os, random
 from PIL import Image
 
 RES = 'src/main/resources/'
@@ -213,8 +214,45 @@ def write(path, obj):
         f.write('\n')
 
 
+def horn(name, base, tip, band, seed, bands=0, mouth=False):
+    """A crescent horn: wide at its root (left), arching up and over to a point (right)."""
+    p, rnd = {}, random.Random(seed)
+    n = 60
+    band_at = [int(n * (0.12 + 0.22 * b)) for b in range(bands)]
+    for i in range(n + 1):
+        t = i / n
+        a = math.radians(185 + 140 * t)
+        x, y = 8.5 + 6.0 * math.cos(a), 11.0 + 7.0 * math.sin(a)
+        r = 2.4 * (1.0 - t) ** 0.9 + 0.4
+        c = jitter(band, 8, rnd) if any(abs(i - b) <= 1 for b in band_at) else mix(base, tip, t ** 1.4)
+        for yy in range(16):
+            for xx in range(16):
+                dx, dy = xx + 0.5 - x, yy + 0.5 - y
+                if dx * dx + dy * dy <= r * r:
+                    shade = c
+                    if dy > r * 0.45:
+                        shade = mix(c, (20, 12, 8, 255), 0.35)
+                    elif dy < -r * 0.5:
+                        shade = mix(c, (255, 250, 230, 255), 0.3)
+                    p[(xx, yy)] = jitter(shade, 5, rnd)
+    if mouth:
+        for q in ((0, 11), (0, 12), (0, 13), (1, 11), (1, 13)):
+            p[q] = jitter(band, 10, rnd)
+    out = {}
+    for (xx, yy) in p:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            q = (xx + dx, yy + dy)
+            if q not in p and 0 <= q[0] < 16 and 0 <= q[1] < 16:
+                out[q] = (34, 20, 14, 255)
+    p.update(out)
+    icon(name, 16, p)
+
+
+TROPHIES = ('hornkin_horn', 'war_horn')
+
+
 def item_models():
-    for name in EGGS:
+    for name in list(EGGS) + list(TROPHIES):
         write(ASSETS + 'items/' + name + '.json', {'model': {'type': 'minecraft:model', 'model': 'jaymoskingdoms:item/' + name}})
         write(ASSETS + 'models/item/' + name + '.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': 'jaymoskingdoms:item/' + name}})
 
@@ -234,11 +272,12 @@ def table(name, pools):
 
 
 def loot():
-    table('hornkin', [entry('minecraft:leather', 0, 2), entry('minecraft:gold_nugget', 1, 4)])
-    table('hornkin_hurler', [entry('minecraft:magma_cream', 0, 2), entry('minecraft:gold_nugget', 1, 3)])
-    table('hornkin_brute', [entry('minecraft:leather', 1, 3), entry('minecraft:gold_ingot', 1, 3), entry('minecraft:bone', 1, 2)])
+    horn = 'jaymoskingdoms:hornkin_horn'
+    table('hornkin', [entry('minecraft:leather', 0, 2), entry('minecraft:gold_nugget', 1, 4), entry(horn, 0, 1)])
+    table('hornkin_hurler', [entry('minecraft:magma_cream', 0, 2), entry('minecraft:gold_nugget', 1, 3), entry(horn, 0, 1)])
+    table('hornkin_brute', [entry('minecraft:leather', 1, 3), entry('minecraft:gold_ingot', 1, 3), entry('minecraft:bone', 1, 2), entry(horn, 1, 2)])
     table('hornkin_warlord', [entry('minecraft:gold_ingot', 4, 8), entry('minecraft:gold_block', 1, 1, False),
-                              entry('minecraft:leather', 2, 4)])
+                              entry('minecraft:leather', 2, 4), entry(horn, 2, 2, False)])
     table('zombified_hornkin', [entry('minecraft:rotten_flesh', 0, 2), entry('minecraft:gold_nugget', 0, 2)])
 
 
@@ -247,5 +286,7 @@ if __name__ == '__main__':
         skin(kind)
     for i, (name, (base, spots)) in enumerate(EGGS.items()):
         egg(name, rgb(base), rgb(spots), 40 + i)
+    horn('hornkin_horn', rgb(0x6B4A2E), rgb(0xE8DCC0), rgb(0xD8A030), 61)
+    horn('war_horn', rgb(0x3A2418), rgb(0xD9C9A0), rgb(0xE8B840), 62, bands=3, mouth=True)
     item_models()
     loot()

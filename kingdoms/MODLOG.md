@@ -4061,3 +4061,22 @@ The last batch of the BWM port (MIT, our own code).
 - Skittish herds (`Herds`, entity tag `skittish`): hit a farm animal and others of its kind that can see it flee the
   attacker for about 4 s; sprinting or breaking blocks within 8 blocks spooks them (2 less per Soft Step rank;
   sneaking never does). Leashed, tamed and named animals ignore spooks but still flee when hit. Pens aren't detected.
+
+## 0.7.145: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.58)
+Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: nothing of it used).
+- Portal raids (`nether/PortalRaids`): while a Hornkin war fort stands in the Nether, a town with a Nether portal
+  within 96 blocks of its seat and a player within 96 may see 3-6 Hornkin (sometimes a brute) step out of it (3% a
+  check every 20 s per town; a town isn't raided again for an hour). They walk into town, roam within 28 blocks of the
+  seat, take gold from chests within 10 blocks, fight whoever crosses them, and after 5 minutes, or once each has 3 gold, walk back
+  into the portal with it (killed, they drop it). Raiders don't turn zombified in the Overworld and can't use portals
+  themselves. `/kingdom netherfort raid` sends one on the nearest town now (needs a standing Hornkin fort).
+- Warlord bounties: a king's quest is now and then (20%, while any Nether fort stands) a bounty on the warlord of the
+  standing fort nearest his realm by Nether reckoning: Hornkin Warlord or Piglin Warboss. Done like a chief quest:
+  you struck him down or were within 160 blocks.
+- Trophies (`nether/NetherTrophies`): Hornkin Horns (warriors and hurlers 0-1, brutes 1-2, warlords 2); a ruler with a
+  court pays 2 emeralds a horn and a little reputation (hand them over like a bounty head). A fallen warlord or
+  warboss drops a Warlord's War Horn: blown, you and players within 16 blocks get Strength I and Speed I for 30 s
+  (2 minute cooldown).
+- The gold truce: an Emberborn can hand a Hornkin gold directly. An ingot buys 2 more wares than usual and a 25% chance
+  of a rare one (blaze rods, gilded blackstone, crying obsidian, magma blocks, a ghast tear, netherite scrap); a gold
+  block buys 3 rare ones. An Emberborn who hands a raider a gold block buys off its whole party.

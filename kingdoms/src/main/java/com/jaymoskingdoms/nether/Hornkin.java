@@ -24,6 +24,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.damagesource.DamageSource;
@@ -120,6 +121,14 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	static final int FEUD_EVERY = 20;
 	/** An ingot buys this many of its wares, at most. */
 	static final int WARES_MOST = 3;
+	/** (0.7.145) The truce: an Emberborn who hands it gold gets this many more wares, and a fair chance of a rarer one (a gold block: RARE_FOR_BLOCK of them). */
+	static final int TRUCE_EXTRA = 2, RARE_FOR_BLOCK = 3;
+	static final float TRUCE_RARE_CHANCE = 0.25F;
+	/** (0.7.145) A raider goes home once it has this much gold; in a town it roams this far from the seat, and finds chests this far off. */
+	static final int RAID_LOOT = 3, RAID_RADIUS = 28, RAID_CHEST_REACH = 10;
+	/** (0.7.145) Home from a raid: in the portal at this distance; or gone anyway if it can't get there in this long. */
+	static final double PORTAL_REACHED = 2.0;
+	static final int HOMEWARD_MOST = 20 * 90;
 	/** What a Hornkin trades for a gold ingot: its own wares, not a piglin's. */
 	/** Built when traded, not at class load: an ItemStack can't be made before item components are bound
 	 * (0.7.133 crashed the game at startup). */
@@ -127,6 +136,10 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		() -> new ItemStack(Items.BLAZE_POWDER), () -> new ItemStack(Items.LEATHER, 3), () -> new ItemStack(Items.BONE, 3), () -> new ItemStack(Items.BLACKSTONE, 8),
 		() -> new ItemStack(Items.GILDED_BLACKSTONE), () -> new ItemStack(Items.CRIMSON_FUNGUS, 2), () -> new ItemStack(Items.COOKED_PORKCHOP, 2),
 		() -> new ItemStack(Items.GLOWSTONE_DUST, 4), () -> new ItemStack(Items.ARROW, 6));
+	/** (0.7.145) What it keeps for an Emberborn it trades with in good faith. */
+	static final List<java.util.function.Supplier<ItemStack>> TRUCE_WARES = List.of(() -> new ItemStack(Items.BLAZE_ROD, 2),
+		() -> new ItemStack(Items.GILDED_BLACKSTONE, 2), () -> new ItemStack(Items.CRYING_OBSIDIAN, 2), () -> new ItemStack(Items.MAGMA_BLOCK, 4),
+		() -> new ItemStack(Items.GHAST_TEAR), () -> new ItemStack(Items.NETHERITE_SCRAP));
 
 	private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(Hornkin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> ADMIRING = SynchedEntityData.defineId(Hornkin.class, EntityDataSerializers.BOOLEAN);
@@ -139,6 +152,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	private final @Nullable ServerBossEvent bar;
 	/** The gold it keeps (dropped when it dies). */
 	private int hoard;
+	/** (0.7.145) Who handed it the gold it's admiring (the truce), if anyone. */
+	private java.util.@Nullable UUID trader;
+	/** (0.7.145) On a portal raid: its party, the spot by the portal it came out at (and goes home through), its time left, and whether it's going home. */
+	private int raid, raidLeft;
+	private @Nullable BlockPos portal;
+	private boolean homeward;
 
 	public Hornkin(EntityType<? extends Hornkin> type, Level level, Kind kind) {
 		super(type, level);
@@ -214,7 +233,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	/** Whether it goes for {@code target} unprovoked: not while admiring gold; never an Emberborn; past {@link #SIGHT} only one wearing gold. */
 	private boolean hunts(LivingEntity target) {
-		if (this.admiring() || this.routed() || !(target instanceof Player player)) {
+		if (this.admiring() || this.routed() || this.homeward || !(target instanceof Player player)) {
 			return false;
 		}
 		if (!this.zombified() && Heritage.is(player, Heritage.Kind.EMBERBORN)) {
@@ -262,7 +281,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
 		if (!this.zombified()) {
-			this.turnOutside(level);
+			if (this.portal == null) {
+				this.turnOutside(level);
+			} else {
+				// (0.7.145) a raid is short enough that the Overworld doesn't turn it
+				this.raidStep(level);
+			}
 			if (this.isRemoved()) {
 				return;
 			}
@@ -359,6 +383,57 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	@Nullable BlockPos marchingTo() {
 		return this.marchTo;
+	}
+
+	/** (0.7.145) Sends it raiding {@code town} for {@link #RAID_LOOT} gold or {@code ticks}, from (and back to) {@code portal}; see {@link PortalRaids}. */
+	void raid(int party, BlockPos portal, BlockPos town, int ticks) {
+		this.raid = party;
+		this.portal = portal;
+		this.raidLeft = ticks;
+		this.marchTo = town;
+		this.setPersistenceRequired();
+	}
+
+	boolean raiding() {
+		return this.portal != null;
+	}
+
+	int raidId() {
+		return this.raid;
+	}
+
+	/** (0.7.145) A raider turns for the portal (time's up, its loot's enough, or it's been bought off). */
+	void goHome() {
+		if (this.portal == null || this.homeward) {
+			return;
+		}
+		this.homeward = true;
+		this.raidLeft = HOMEWARD_MOST;
+		this.clearHome();
+		this.marchTo = this.portal;
+		this.setTarget(null);
+	}
+
+	private void raidStep(ServerLevel level) {
+		if (this.portal == null) {
+			return;
+		}
+		if (!this.homeward) {
+			if (--this.raidLeft <= 0 || this.hoard >= RAID_LOOT) {
+				this.goHome();
+			}
+			return;
+		}
+		Vec3 to = Vec3.atBottomCenterOf(this.portal).subtract(this.position());
+		if (--this.raidLeft <= 0 || to.horizontalDistance() < PORTAL_REACHED && Math.abs(to.y) < 3.0) {
+			PortalRaids.leave(level, this);
+		}
+	}
+
+	@Override
+	public boolean canUsePortal(boolean ignorePassenger) {
+		// (0.7.145) a raider goes home its own way (it carries its gold off through the portal: see raidStep)
+		return this.portal == null && super.canUsePortal(ignorePassenger);
 	}
 
 	@Override
@@ -532,15 +607,59 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		ItemStack gold = this.getOffhandItem();
 		this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 		this.entityData.set(ADMIRING, false);
-		if (gold.is(Items.GOLD_INGOT)) {
-			int n = 1 + this.random.nextInt(WARES_MOST);
+		Player trader = this.trader == null ? null : level.getPlayerByUUID(this.trader);
+		this.trader = null;
+		boolean truce = trader != null && Heritage.is(trader, Heritage.Kind.EMBERBORN);
+		if (this.portal != null && trader == null) {
+			// (0.7.145) a raider keeps what it takes, to carry home
+			if (!gold.isEmpty()) {
+				this.hoard++;
+			}
+		} else if (gold.is(Items.GOLD_INGOT)) {
+			int n = 1 + this.random.nextInt(WARES_MOST) + (truce ? TRUCE_EXTRA : 0);
 			for (int i = 0; i < n; i++) {
 				this.spawnAtLocation(level, WARES.get(this.random.nextInt(WARES.size())).get());
 			}
+			if (truce && this.random.nextFloat() < TRUCE_RARE_CHANCE) {
+				this.spawnAtLocation(level, TRUCE_WARES.get(this.random.nextInt(TRUCE_WARES.size())).get());
+			}
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PIGLIN_CELEBRATE, SoundSource.HOSTILE, 1.0F, 0.6F);
+		} else if (truce && gold.is(Items.GOLD_BLOCK)) {
+			// (0.7.145) a whole block, in good faith: its best
+			for (int i = 0; i < RARE_FOR_BLOCK; i++) {
+				this.spawnAtLocation(level, TRUCE_WARES.get(this.random.nextInt(TRUCE_WARES.size())).get());
+			}
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PIGLIN_CELEBRATE, SoundSource.HOSTILE, 1.0F, 0.5F);
 		} else if (!gold.isEmpty()) {
 			this.hoard++;
 		}
+	}
+
+	/**
+	 * (0.7.145) The truce: an Emberborn can hand it gold (a trade, with better wares, see {@link #doneAdmiring}); and a
+	 * raider handed a gold block by an Emberborn takes it and leads its whole party home ({@link PortalRaids#boughtOff}).
+	 */
+	@Override
+	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+		ItemStack held = player.getItemInHand(hand);
+		if (!(this.level() instanceof ServerLevel level) || this.zombified() || this.routed() || this.getTarget() == player || !gold(held)
+			|| !Heritage.is(player, Heritage.Kind.EMBERBORN)) {
+			return super.mobInteract(player, hand);
+		}
+		if (this.portal != null && !this.homeward && held.is(Items.GOLD_BLOCK)) {
+			held.consume(1, player);
+			this.hoard++;
+			PortalRaids.boughtOff(level, this, player);
+			return InteractionResult.SUCCESS;
+		}
+		if (!this.wantsToPickUp(level, held)) {
+			return super.mobInteract(player, hand);
+		}
+		ItemStack one = held.copyWithCount(1);
+		held.consume(1, player);
+		this.trader = player.getUUID();
+		this.admire(level, one);
+		return InteractionResult.SUCCESS;
 	}
 
 	private void dropHoard(ServerLevel level) {
@@ -591,7 +710,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	@Override
 	public boolean removeWhenFarAway(double distSqr) {
-		return this.hoard == 0 && !this.admiring() && NetherForts.tag(this) == null && super.removeWhenFarAway(distSqr);
+		return this.hoard == 0 && !this.admiring() && NetherForts.tag(this) == null && this.portal == null && super.removeWhenFarAway(distSqr);
 	}
 
 	@Override
@@ -604,6 +723,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		if (this.marchTo != null) {
 			output.putLong("MarchTo", this.marchTo.asLong());
 		}
+		if (this.portal != null) {
+			output.putLong("RaidPortal", this.portal.asLong());
+			output.putInt("Raid", this.raid);
+			output.putInt("RaidLeft", this.raidLeft);
+			output.putBoolean("Homeward", this.homeward);
+		}
 	}
 
 	@Override
@@ -615,6 +740,11 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		this.routed = input.getIntOr("Routed", 0);
 		long march = input.getLongOr("MarchTo", Long.MIN_VALUE);
 		this.marchTo = march == Long.MIN_VALUE ? null : BlockPos.of(march);
+		long portal = input.getLongOr("RaidPortal", Long.MIN_VALUE);
+		this.portal = portal == Long.MIN_VALUE ? null : BlockPos.of(portal);
+		this.raid = input.getIntOr("Raid", 0);
+		this.raidLeft = input.getIntOr("RaidLeft", 0);
+		this.homeward = input.getBooleanOr("Homeward", false);
 		this.entityData.set(ADMIRING, this.admireTicks > 0);
 	}
 
@@ -718,9 +848,15 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		public void start() {
 			BlockPos goal = Hornkin.this.marchTo != null ? Hornkin.this.marchTo : Hornkin.this.getHomePosition();
 			Vec3 to = Vec3.atBottomCenterOf(goal).subtract(Hornkin.this.position());
+			if (Hornkin.this.homeward) {
+				// (0.7.145) home through the portal: right up to it (raidStep sees it through)
+				Vec3 step = to.horizontalDistance() > MARCH_STRIDE ? Hornkin.this.position().add(to.normalize().scale(MARCH_STRIDE)) : Vec3.atBottomCenterOf(goal);
+				Hornkin.this.getNavigation().moveTo(step.x, step.y, step.z, 1.1);
+				return;
+			}
 			if (Hornkin.this.marchTo != null && to.horizontalDistance() < MARCH_ARRIVED) {
-				// arrived: it holds the field here, at the walls it came to take
-				Hornkin.this.setHomeTo(goal, NetherForts.HOLD_RADIUS);
+				// arrived: it holds the field here, at the walls it came to take (or, raiding, roams the town for gold)
+				Hornkin.this.setHomeTo(goal, Hornkin.this.portal != null ? RAID_RADIUS : NetherForts.HOLD_RADIUS);
 				Hornkin.this.marchTo = null;
 				return;
 			}
@@ -743,12 +879,14 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		public boolean canUse() {
 			// (0.7.142) a fort's own leave its hoard be
 			if (Hornkin.this.getTarget() != null || Hornkin.this.admiring() || !Hornkin.this.getOffhandItem().isEmpty() || NetherForts.tag(Hornkin.this) != null
+				|| Hornkin.this.homeward
 				|| (Hornkin.this.tickCount + Hornkin.this.getId()) % CHEST_EVERY != 0 || !(Hornkin.this.level() instanceof ServerLevel level)) {
 				return false;
 			}
 			this.chest = null;
 			BlockPos at = Hornkin.this.blockPosition();
-			for (BlockPos pos : BlockPos.betweenClosed(at.offset(-CHEST_REACH, -CHEST_HEIGHT, -CHEST_REACH), at.offset(CHEST_REACH, CHEST_HEIGHT, CHEST_REACH))) {
+			int reach = Hornkin.this.portal != null ? RAID_CHEST_REACH : CHEST_REACH;
+			for (BlockPos pos : BlockPos.betweenClosed(at.offset(-reach, -CHEST_HEIGHT, -reach), at.offset(reach, CHEST_HEIGHT, reach))) {
 				if (level.getBlockEntity(pos) instanceof Container container && slotWithGold(container) >= 0) {
 					this.chest = pos.immutable();
 					return true;
