@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.smoke;
 import com.jaymospowers.client.Dismembered;
 import com.jaymospowers.client.power.wind.WindPose;
 import com.jaymospowers.power.smoke.SmokeMoves;
+import com.jaymospowers.power.smoke.SmokeParticles;
 import com.jaymospowers.power.smoke.SmokeVapour;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
@@ -92,7 +93,7 @@ public final class SmokeFlightPose {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double out = SPILL_SPEED * (0.5 + random.nextDouble());
 			Vec3 at = hips.add(random.nextGaussian() * 0.15, -random.nextDouble() * 0.7, random.nextGaussian() * 0.15);
-			level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.WHITE_SMOKE : ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, Math.cos(a) * out,
+			level.addParticle(SmokeParticles.puff(player, random.nextInt(3) == 0 ? ParticleTypes.WHITE_SMOKE : ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, Math.cos(a) * out,
 				-0.01, Math.sin(a) * out);
 		}
 	}
@@ -119,13 +120,13 @@ public final class SmokeFlightPose {
 			Vec3 at = waist.add(down.scale(along)).add(random.nextGaussian() * 0.12 * scale, random.nextGaussian() * 0.08 * scale,
 				random.nextGaussian() * 0.12 * scale);
 			Vec3 v = down.scale(POUR + random.nextDouble() * 0.05).add(motion.scale(0.3));
-			level.addParticle(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, v.x + random.nextGaussian() * 0.015, v.y, v.z + random.nextGaussian() * 0.015);
+			level.addParticle(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, v.x + random.nextGaussian() * 0.015, v.y, v.z + random.nextGaussian() * 0.015);
 		}
 		for (int i = 0; i < (own ? 1 : WISPS); i++) {
 			Vec3 at = waist.add(down.scale(random.nextDouble() * TAIL * scale * 1.2))
 				.add(random.nextGaussian() * 0.15 * scale, 0.0, random.nextGaussian() * 0.15 * scale);
 			Vec3 v = down.scale(POUR * 0.6).add(motion.scale(0.2));
-			level.addParticle(ParticleTypes.WHITE_SMOKE, at.x, at.y, at.z, v.x, v.y, v.z);
+			level.addParticle(SmokeParticles.puff(player, ParticleTypes.WHITE_SMOKE), at.x, at.y, at.z, v.x, v.y, v.z);
 		}
 		if (wholly) {
 			// the rest of the body, head to waist, is a streaming cloud too
@@ -134,13 +135,13 @@ public final class SmokeFlightPose {
 				Vec3 at = middle.add(look.scale((random.nextDouble() - 0.3) * height * 0.6))
 					.add(random.nextGaussian() * 0.2, random.nextGaussian() * 0.15, random.nextGaussian() * 0.2);
 				Vec3 v = look.scale(-0.05).add(motion.scale(0.4));
-				level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.WHITE_SMOKE : ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, v.x, v.y, v.z);
+				level.addParticle(SmokeParticles.puff(player, random.nextInt(3) == 0 ? ParticleTypes.WHITE_SMOKE : ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, v.x, v.y, v.z);
 			}
 		}
 		if (random.nextInt(own ? 6 : 3) == 0) {
 			// the tip of the tail curls away in a big slow plume
 			Vec3 tip = waist.add(down.scale(TAIL * scale));
-			level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, tip.x, tip.y, tip.z, down.x * 0.03 + motion.x * 0.1, -0.02,
+			level.addParticle(SmokeParticles.puff(player, ParticleTypes.CAMPFIRE_COSY_SMOKE), tip.x, tip.y, tip.z, down.x * 0.03 + motion.x * 0.1, -0.02,
 				down.z * 0.03 + motion.z * 0.1);
 		}
 	}
