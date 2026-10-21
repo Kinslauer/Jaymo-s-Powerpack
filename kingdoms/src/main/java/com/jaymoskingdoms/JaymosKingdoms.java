@@ -109,6 +109,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
+		MobTweaks.register();
 		Theft.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
@@ -176,6 +178,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// 0.7.103: roads are quicker going, sand, snow and leaves slower
+		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
 		Milestones.register();
 		Cavalry.register();
@@ -249,6 +253,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
+		// 0.7.103: sinkholes: sand and gravel over nothing gives way under a player
+		com.jaymoskingdoms.disasters.LooseGround.register();
 		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();

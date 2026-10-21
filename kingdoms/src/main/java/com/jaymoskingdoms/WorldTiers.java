@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -83,6 +84,13 @@ public final class WorldTiers {
 	/** Per tier, what unlocks it: great foes slain, and the feat it also needs (0: none). */
 	static final int[] FOES_NEEDED = {0, 1, 5, 12, 25};
 	static final int[] FEAT_NEEDED = {0, 0, Progress.NETHER, Progress.WITHER, Progress.DRAGON};
+	/**
+	 * (0.7.103) Per tier: the chance each empty armour slot, and the weapon hand, of a hostile taking its first tier is
+	 * filled ({@link #arm}); at the top tier this share of what's handed out is diamond. The game's own drop chances stand.
+	 */
+	static final double[] TIER_ARMOR_CHANCE = {0.0, 0.10, 0.20, 0.35, 0.50};
+	static final double[] TIER_WEAPON_CHANCE = {0.0, 0.10, 0.20, 0.30, 0.45};
+	static final double TOP_DIAMOND_SHARE = 0.35;
 
 	public enum Tier {
 		HEARTH(Items.CAMPFIRE, 0xFF8FB86A),
@@ -352,6 +360,7 @@ public final class WorldTiers {
 
 	/** Gives {@code mob} tier {@code tier}'s strength, keeping how hurt it is. */
 	static void raise(Mob mob, int tier) {
+		boolean first = mob.getAttachedOrElse(MOB_TIER, 0) <= 0;
 		float share = mob.getMaxHealth() > 0.0F ? mob.getHealth() / mob.getMaxHealth() : 1.0F;
 		modify(mob, Attributes.MAX_HEALTH, HEALTH_ID, HEALTH[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		modify(mob, Attributes.ATTACK_DAMAGE, DAMAGE_ID, DAMAGE[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -360,6 +369,61 @@ public final class WorldTiers {
 		modify(mob, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED[tier], AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		mob.setHealth(mob.getMaxHealth() * share);
 		mob.setAttached(MOB_TIER, tier);
+		if (first) {
+			arm(mob, tier);
+		}
+	}
+
+	/**
+	 * (0.7.103) Gear for a hostile taking its first tier, after Better With Mods' tiered mob equipment (MIT; our own
+	 * code): zombies and husks iron armour and an iron sword or shovel (at the top tier some of it diamond), piglins gold
+	 * armour, wither skeletons a stone axe. Only empty slots are filled (a wither skeleton's sword gives way to the axe).
+	 */
+	static void arm(Mob mob, int tier) {
+		if (tier <= 0 || tier >= TIER_ARMOR_CHANCE.length) {
+			return;
+		}
+		net.minecraft.util.RandomSource random = mob.getRandom();
+		EntityType<?> type = mob.getType();
+		if (type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK) {
+			boolean top = tier == TIER_ARMOR_CHANCE.length - 1;
+			for (EquipmentSlot slot : ARMOR_SLOTS) {
+				if (mob.getItemBySlot(slot).isEmpty() && random.nextDouble() < TIER_ARMOR_CHANCE[tier]) {
+					boolean diamond = top && random.nextDouble() < TOP_DIAMOND_SHARE;
+					mob.setItemSlot(slot, new ItemStack(piece(slot, diamond ? DIAMOND_ARMOR : IRON_ARMOR)));
+				}
+			}
+			if (mob.getMainHandItem().isEmpty() && random.nextDouble() < TIER_WEAPON_CHANCE[tier]) {
+				boolean diamond = top && random.nextDouble() < TOP_DIAMOND_SHARE, sword = random.nextBoolean();
+				mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(sword ? (diamond ? Items.DIAMOND_SWORD : Items.IRON_SWORD)
+					: (diamond ? Items.DIAMOND_SHOVEL : Items.IRON_SHOVEL)));
+			}
+		} else if (type == EntityTypes.PIGLIN) {
+			for (EquipmentSlot slot : ARMOR_SLOTS) {
+				if (mob.getItemBySlot(slot).isEmpty() && random.nextDouble() < TIER_ARMOR_CHANCE[tier]) {
+					mob.setItemSlot(slot, new ItemStack(piece(slot, GOLD_ARMOR)));
+				}
+			}
+		} else if (type == EntityTypes.WITHER_SKELETON) {
+			if ((mob.getMainHandItem().isEmpty() || mob.getMainHandItem().is(Items.STONE_SWORD)) && random.nextDouble() < TIER_WEAPON_CHANCE[tier]) {
+				mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_AXE));
+			}
+		}
+	}
+
+	private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	private static final net.minecraft.world.item.Item[] IRON_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS},
+		DIAMOND_ARMOR = {Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS},
+		GOLD_ARMOR = {Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS};
+
+	/** The piece of {@code set} (head, chest, legs, feet) for {@code slot}. */
+	private static net.minecraft.world.item.Item piece(EquipmentSlot slot, net.minecraft.world.item.Item[] set) {
+		return set[switch (slot) {
+			case HEAD -> 0;
+			case CHEST -> 1;
+			case LEGS -> 2;
+			default -> 3;
+		}];
 	}
 
 	private static void modify(Mob mob, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation op) {
