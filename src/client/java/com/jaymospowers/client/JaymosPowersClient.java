@@ -88,7 +88,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
-		CombatRollTaps.init();
+		com.jaymospowers.client.stamina.DodgeClient.init();
+		com.jaymospowers.client.stamina.FeathersHud.init();
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();

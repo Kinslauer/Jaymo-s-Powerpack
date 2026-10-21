@@ -1853,3 +1853,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
   wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
   Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
+- **0.15.0, feathers and the dodge, in place of Combat Roll:** Andy asked for Feathers and Elenai Dodge 2 to replace
+  our dodge and its HUD. Both are Forge only (to 1.20.x); the maintained fork, Feathers of Fatigue, is NeoForge 26.3 and
+  GPL-3; Elenai Dodge 2 is CC BY-NC-SA. Powers is MIT, so it's our own, from their ideas only (`docs/dodge.md`, the
+  spec and sources). `stamina/Feathers`: a row of 20 above the hunger bar, armour holds back 0.35 a point, regrowth 1
+  per 10 ticks after a pause that grows with spends in a row, halved by cold and by hunger at 6 or less, 6 red strain
+  feathers past empty (repaid first, faster at rest), exhaustion past the strain until a third is back, 4 held back
+  in the Nether without Fire Resistance, a sleep refills it, and golden bonus feathers from powers. `stamina/Dodge`:
+  Left Alt or double-tap Sneak hops you 0.85 along your movement keys (back with none), ground only, 6 feathers, a
+  10-tick cooldown, 5 ticks where melee and projectiles miss, 0.4 hunger. Darktide +6 golden (Riptide Dash costs a
+  dodge, a landed flurry refunds it, evasion Flow on our dodge: `DarktideDodges`, was `CombatRollCompat`), Web +12
+  (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks. The client-side charge packets
+  (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
+  `tools/gen_feathers.py`. Combat Roll is out of the pack.

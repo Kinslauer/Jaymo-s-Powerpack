@@ -70,7 +70,7 @@ public final class FreerunClient {
 		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.WALL_RUN;
 	}
 
-	/** Clinging to a wall or hanging from a bar (Sneak lets go: no Combat Roll from it). */
+	/** Clinging to a wall or hanging from a bar (Sneak lets go: no dodge from it, see DodgeClient). */
 	public static boolean holding() {
 		return kind == Freerun.CLING || kind == Freerun.BAR;
 	}

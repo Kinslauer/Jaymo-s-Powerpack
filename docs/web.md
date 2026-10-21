@@ -66,12 +66,9 @@ a host that isnt a web user."
   it's hauled up at `CLIMB_SPEED` 0.3 b/t, pressed `CLIMB_HUG` into the face and shoved `CLIMB_OVER` 0.22 over the lip,
   with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
   lifts it already); never in water or riding.
-- **Roll charges (`WebRolls`, client `WebRollsClient`):** with Combat Roll in the pack, a web slinger holds
-  `ROLL_CHARGES` 5 roll charges (Combat Roll's `combat_roll:count`, a transient modifier while Web is your power,
-  checked every second; Combat Roll refills them one at a time on its own recharge and shows them on its own HUD). Each
-  Spider-Sense counter (`WebCounter`) spends one; with none left a dodge still sidesteps but opens no counter window.
-  The count lives on the client and is reported to the server (`web_rolls`); the server spends with `web_roll_charge`.
-  Without Combat Roll, counters cost nothing (as before).
+- **Feathers (`WebRolls`; 0.15.0, in place of Combat Roll's charges, `docs/dodge.md`):** a web slinger gets `BONUS`
+  12 golden feathers over the feathers row (two more dodges). Each Spider-Sense counter (`WebCounter`) spends a
+  dodge's worth (`Dodge.COST`); without them a dodge still sidesteps but opens no counter window.
 - **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
   host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
   peaceful one now wastes too, at `CALM_DECAY_SHARE` half that, and is spat out badly hurt but alive. Web slingers bonded
