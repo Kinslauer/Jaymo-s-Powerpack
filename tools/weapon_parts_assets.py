@@ -54,7 +54,7 @@ PARTS = [
     ("katana_blade", "Katana Blade", "balkon:katana", ["iron", "gold", "copper"]),
     ("flail_head", "Flail Head", "balkon:flail", ["iron", "gold", "copper"]),
     ("boomerang_edge", "Boomerang Edge", "balkon:boomerang", ["iron", "gold", "copper"]),
-    # (0.15.34) tools forged the same way, drawn here (DRAWN) rather than cut from vanilla's or Pantry's art
+    # (0.15.36) tools forged the same way, drawn here (DRAWN) rather than cut from vanilla's or Pantry's art
     ("fishing_hook", "Fishing Hook", "drawn:fishing_hook", ["iron"]),
     ("brush_ferrule", "Brush Ferrule", "drawn:brush_ferrule", ["copper"]),
     ("kitchen_knife_blade", "Kitchen Knife Blade", "drawn:kitchen_knife_blade", ["iron"]),

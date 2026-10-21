@@ -182,7 +182,7 @@ public final class Melting {
 		}
 	}
 
-	/** What one of this item melts into, or null. (0.15.34) Worn gear melts into what's left of it. */
+	/** What one of this item melts into, or null. (0.15.36) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
 		Result result = builtIn(stack);
 		if (result == null) {
@@ -191,7 +191,7 @@ public final class Melting {
 		return result == null ? null : worn(stack, result);
 	}
 
-	/** (0.15.34) The share of a damaged item's metal that's left (at least a drop of its main liquid). */
+	/** (0.15.36) The share of a damaged item's metal that's left (at least a drop of its main liquid). */
 	private static Result worn(ItemStack stack, Result result) {
 		if (!stack.isDamageableItem() || !stack.isDamaged()) {
 			return result;
@@ -248,7 +248,7 @@ public final class Melting {
 			}
 		}
 		if (stack.getItem() instanceof TinkerToolItem tool) {
-			// (0.15.34) a Tinkering tool: each metal part's worth
+			// (0.15.36) a Tinkering tool: each metal part's worth
 			Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
 			List<TinkerMaterial> materials = ToolStats.materials(stack);
 			for (int i = 0; i < tool.type.parts.size() && i < materials.size(); i++) {
@@ -260,7 +260,7 @@ public final class Melting {
 			return Result.of(liquids);
 		}
 		if (stack.getItem() instanceof CastItem) {
-			// (0.15.34) a gold cast took an ingot of gold
+			// (0.15.36) a gold cast took an ingot of gold
 			return new Result(Molten.GOLD, Molten.INGOT);
 		}
 		return null;
