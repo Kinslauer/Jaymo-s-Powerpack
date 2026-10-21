@@ -337,6 +337,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		// BWM batch 5: the gloom of the dark (and its attachment)
+		Gloom.register();
+		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

@@ -4703,5 +4703,7 @@
 	"message.jaymoskingdoms.pulley.wound": "The rope is wound all the way in.",
 	"message.jaymoskingdoms.pulley.full": "The pulley can't hold any more rope.",
 	"message.jaymoskingdoms.pulley.no_rope": "No rope left on the pulley: give it some.",
-	"message.jaymoskingdoms.pulley.blocked": "Something's in the way."
+	"message.jaymoskingdoms.pulley.blocked": "Something's in the way.",
+	"death.attack.jaymoskingdoms.gloom": "%1$s was taken by the dark",
+	"death.attack.jaymoskingdoms.gloom.player": "%1$s was taken by the dark while fleeing %2$s"
 }
