@@ -638,20 +638,26 @@ client half is `client/BeamClashClient`.
 Wind is the power that gets you to the Aether, the way Chrono's Fast Forward gets you to the future. Lore: the Aether
 scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths and the four Giants).
 
-- **The dimension** `jaymospowers:aether` is datapack plus four Java features (`com.jaymospowers.aether`), described in
-  `docs/aether.md` ("The dimension"): floating holystone islands (y 14-128, most of the mass at y 32-95) under an eternal
-  noon, clouds at y 9.5, four skyroot biomes (meadow, forest, grove, woodland), grass and skyroot trees on the islands,
-  aerclouds, ores, lakes. No mobs yet. The old highlands (`aether_highfields`, `aether_magnetic`, `aether_arctic`,
-  `aether_irradiated`) are gone: an existing world's Aether chunks that were generated with them keep their old biome ids
-  (which no longer exist), so use a fresh Aether (delete the world's `DIM-aether` folder, or a new world).
+- **The dimension** `jaymospowers:aether` is datapack plus nine Java features (`com.jaymospowers.aether`, `aether.world`),
+  described in `docs/aether.md` ("The dimension"): Aether II's Holy Isles. Dimension y -32 to 384: big lowland islands
+  (tops y 95-135, undersides y 6-60, caves and the Hestveil caverns inside), a broken archipelago of islets above y 130
+  (two layers, tops near y 170 and 230) with open sky between, a cloudbed far below at y -30..-18. Sixteen biomes (four
+  highfields, four magnetic, four arctic, two irradiated, Hestveil, and the unplaced Expanse), the Overworld's day and night,
+  trees, ores, lakes, plants and all six aercloud colours. The old four skyroot biomes are gone: an existing world's Aether
+  chunks keep their old biome ids (which no longer exist), so use a fresh Aether (delete the world's `DIM-aether` folder,
+  or a new world).
 - **Up.** A Wind user in flight in the Overworld who climbs to within `ASCEND_MARGIN` (4) blocks of the top build height,
   with ability 4 (B) unlocked (`Mastery.isUnlocked`), rises with every player within `COMPANION_RADIUS` (4). Arrival: same
-  x/z standing on bare island ground (the highest block must be solid and not a log or leaves, with two free blocks over
-  it, looked for within `STAND_SEARCH` (3) blocks so a tree's trunk is not picked); none there, so a square spiral out in
-  16-block steps to `SEARCH_RADIUS` (96); none at all, the open air at y 128 (above the highest peak, near y 115) with Slow
-  Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The first
-  visit tells the lore (`VISITED`). No Return is stored: the way home is the fall.
-- **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (4; the lowest islands and cloud banks start at y 10, so they stay above it) in the Aether lands in the Overworld at the same x/z,
+  x/z standing on bare lowland ground (`aetherTopAt`: the heightmap's top if it is at or below `ARRIVAL_SCAN_TOP` (150), else
+  the first walkable ground scanning down from there, so an islet overhead is not picked; the block must be solid and not a
+  log or leaves, with two free blocks over it), looked for within `STAND_SEARCH` (3) blocks so a tree's trunk is not picked;
+  none there, so a square spiral out in 16-block steps to `SEARCH_RADIUS` (96); none at all, the open air at y 150 (above the
+  lowland tops, near y 135) with Slow Falling (`EMPTY_SLOW_FALL_TICKS`). `ASCEND_COOLDOWN` (200 ticks) stops looping. The
+  first visit tells the lore (`VISITED`). No Return is stored: the way home is the fall.
+- **Home.** Anyone (Wind or not) below `FALL_OUT_Y` (-8; the islands' undersides start at y 6 and the cloudbed floats below
+  that line, y -30..-18, as scenery) in the Aether lands in the Overworld at the same x/z,
   `ARRIVE_ABOVE_GROUND` (48) above the ground (capped `ARRIVE_BELOW_TOP` (8) under the top), with Slow Falling for
   `SLOW_FALL_TICKS` (600), plenty to land. Fall damage still applies once it ends. Dying takes you to your own spawn as usual.
+  Arsenal standing portals (`ArsenalStanding`) search for safe ground around remembered positions and have no heights of
+  their own, so the new dimension needs no change there.
 - Tuning: constants at the top of `WindAether`. Not playtested; the dimension needs a fresh world or a datapack reload to exist.

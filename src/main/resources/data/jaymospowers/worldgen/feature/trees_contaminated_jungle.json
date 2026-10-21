@@ -1,0 +1,93 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:irradiated_skyroot_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.025,
+      "feature": {
+        "feature": "jaymospowers:irradiated_large_skyroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.05,
+      "feature": {
+        "feature": "jaymospowers:irradiated_wisproot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.002,
+      "feature": {
+        "feature": "jaymospowers:irradiated_skyplane_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.075,
+      "feature": {
+        "feature": "jaymospowers:irradiated_greatoak_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.005,
+      "feature": {
+        "feature": "jaymospowers:irradiated_skybirch_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0075,
+      "feature": {
+        "feature": "jaymospowers:irradiated_wisptop_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.125,
+      "feature": {
+        "feature": "jaymospowers:irradiated_greatroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.001,
+      "feature": {
+        "feature": "jaymospowers:irradiated_skypine_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.025,
+      "feature": {
+        "feature": "jaymospowers:irradiated_greatboa_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.025,
+      "feature": {
+        "feature": "jaymospowers:amberoot_sparse_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.065,
+      "feature": {
+        "feature": "jaymospowers:amberoot_singular_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.065,
+      "feature": {
+        "feature": "jaymospowers:amberoot_large_tree",
+        "placement": []
+      }
+    }
+  ]
+}

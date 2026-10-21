@@ -2,6 +2,6 @@
   "type": "jaymospowers:aercloud",
   "cloud": "cold",
   "bounds": 16,
-  "spread": 2,
+  "spread": 3,
   "thickness": 1
 }

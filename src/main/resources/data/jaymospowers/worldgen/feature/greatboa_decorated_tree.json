@@ -1,0 +1,56 @@
+{
+  "type": "minecraft:tree",
+  "below_trunk_provider": {
+    "id": "jaymospowers:aether_dirt"
+  },
+  "decorators": [
+    {
+      "type": "minecraft:place_on_ground",
+      "block_state_provider": {
+        "id": "jaymospowers:arctic_snow",
+        "properties": {
+          "layers": "1"
+        }
+      },
+      "height": 2,
+      "radius": 4,
+      "tries": 40
+    }
+  ],
+  "foliage_placer": {
+    "type": "minecraft:mega_pine_foliage_placer",
+    "radius": 0,
+    "offset": 0,
+    "crown_height": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 9,
+      "max_inclusive": 14
+    }
+  },
+  "foliage_provider": {
+    "id": "jaymospowers:greatboa_leaves",
+    "properties": {
+      "distance": "7",
+      "persistent": "false",
+      "waterlogged": "false"
+    }
+  },
+  "ignore_vines": false,
+  "minimum_size": {
+    "type": "minecraft:two_layers_feature_size",
+    "lower_size": 1,
+    "upper_size": 2
+  },
+  "trunk_placer": {
+    "type": "minecraft:giant_trunk_placer",
+    "base_height": 15,
+    "height_rand_a": 3,
+    "height_rand_b": 8
+  },
+  "trunk_provider": {
+    "id": "jaymospowers:greatroot_log",
+    "properties": {
+      "axis": "y"
+    }
+  }
+}

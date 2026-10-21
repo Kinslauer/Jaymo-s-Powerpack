@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:huge_red_mushroom",
+  "can_place_on": {
+    "type": "minecraft:matching_block_tag",
+    "tag": "jaymospowers:aether_mushroom_can_place_on"
+  },
+  "cap_provider": {
+    "id": "jaymospowers:magnetic_shroom_block",
+    "properties": {
+      "up": "true",
+      "down": "false",
+      "north": "true",
+      "south": "true",
+      "east": "true",
+      "west": "true"
+    }
+  },
+  "stem_provider": {
+    "id": "jaymospowers:magnetic_shroom_stem",
+    "properties": {
+      "up": "false",
+      "down": "false",
+      "north": "true",
+      "south": "true",
+      "east": "true",
+      "west": "true"
+    }
+  }
+}

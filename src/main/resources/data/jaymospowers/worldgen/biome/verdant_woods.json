@@ -1,0 +1,107 @@
+{
+  "attributes": {
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.2,
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/fog_color": "#ecebfc",
+    "minecraft:visual/sky_color": "#c9d1ff",
+    "minecraft:visual/water_fog_color": "#55708a"
+  },
+  "carvers": [],
+  "downfall": 0.8,
+  "effects": {
+    "water_color": "#a2d5f2",
+    "grass_color": "#a6f5bf",
+    "foliage_color": "#a6f5bf"
+  },
+  "features": [
+    [
+      "jaymospowers:cloudbed"
+    ],
+    [
+      "jaymospowers:lake_water"
+    ],
+    [
+      "jaymospowers:disk_coarse_dirt",
+      "jaymospowers:boulder_mossy",
+      "jaymospowers:moss_patch_bryalinn_forest",
+      "jaymospowers:quicksoil_shelf"
+    ],
+    [],
+    [],
+    [],
+    [
+      "jaymospowers:ore_agiosite",
+      "jaymospowers:ore_agiosite_small",
+      "jaymospowers:ore_ambrosium",
+      "jaymospowers:ore_ambrosium_high",
+      "jaymospowers:ore_arkenium",
+      "jaymospowers:ore_corrobonite",
+      "jaymospowers:ore_glint",
+      "jaymospowers:ore_gravitite",
+      "jaymospowers:ore_gravitite_buried",
+      "jaymospowers:ore_zanite",
+      "jaymospowers:ore_zanite_mountain",
+      "jaymospowers:ore_quartz",
+      "jaymospowers:ore_icestone",
+      "jaymospowers:ore_icestone_small",
+      "jaymospowers:ore_crude_scatterglass",
+      "jaymospowers:ore_ichorite"
+    ],
+    [
+      "jaymospowers:pointed_holystone",
+      "jaymospowers:pointed_holystone_cave"
+    ],
+    [
+      "jaymospowers:spring_water"
+    ],
+    [
+      "jaymospowers:trees_verdant_woods",
+      "jaymospowers:trees_verdant_woods_high",
+      "jaymospowers:moa_nests",
+      "jaymospowers:grass_medium",
+      "jaymospowers:grass_small",
+      "jaymospowers:fern_patch",
+      "jaymospowers:blueberry_common",
+      "jaymospowers:orange_trees",
+      "jaymospowers:flowers_highfields",
+      "jaymospowers:valkyrie_sprouts",
+      "jaymospowers:brettl_patch",
+      "jaymospowers:holystone_rocks",
+      "jaymospowers:holystone_twigs"
+    ],
+    [
+      "jaymospowers:aercloud_cold_surface",
+      "jaymospowers:aercloud_golden_surface",
+      "jaymospowers:aercloud_blue_surface",
+      "jaymospowers:aercloud_green_surface",
+      "jaymospowers:aercloud_purple_surface",
+      "jaymospowers:aercloud_blue_lower",
+      "jaymospowers:aercloud_green_lower",
+      "jaymospowers:aercloud_purple_lower",
+      "jaymospowers:aercloud_storm_lower",
+      "jaymospowers:aercloud_cold_middle",
+      "jaymospowers:aercloud_storm_middle",
+      "jaymospowers:aercloud_green_high",
+      "jaymospowers:aercloud_purple_high",
+      "jaymospowers:aercloud_storm_high",
+      "jaymospowers:crystal_island"
+    ]
+  ],
+  "has_precipitation": true,
+  "temperature": 0.7
+}

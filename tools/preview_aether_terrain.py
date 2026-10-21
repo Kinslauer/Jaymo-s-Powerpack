@@ -1,185 +1,444 @@
-"""Draws a side-on slice of the Aether's terrain so the island shapes can be eyeballed without launching the game.
+#!/usr/bin/env python3
+"""Draws the Aether's terrain from the shipped data: a vertical slice and top-down maps (height and biome).
 
-    python -I tools/preview_aether_terrain.py [z] [seed] [out.png]
+It reads src/main/resources/data/jaymospowers/{worldgen/density_function,worldgen/noise,worldgen/noise_settings,dimension}
+and evaluates the real density-function JSON (the types the Aether uses: add, sub, mul, min, max, clamp, abs, square, cube,
+squeeze, gradient, noise, range_choice, spline, lerp and the cache/interpolated wrappers) on a grid. Interpolated functions
+are sampled at their cell corners and blended trilinearly, as the game does. The noise is a stand-in (my own Perlin, scaled
+to the game's NormalNoise deviation of about 0.336), so shapes and densities match the data, not the game's exact seed.
 
-It reads the real data (worldgen/noise_settings/aether.json and the density functions it names) and evaluates the
-final density with a small interpreter, so a change to the JSON shows up here. Only the density function types the
-Aether uses are supported (add, mul, lerp, gradient, clamp, squeeze, interpolated, old_blended_noise, constants).
-
-The one stand-in is the noise: the game's old blended noise is rebuilt here from the same recipe (8 main octaves
-choosing between two 16-octave limit noises, y smeared in steps of smear_scale_multiplier), but with Perlin noise seeded
-by numpy, so islands will not match a given world seed, only their size, density and shape. Needs numpy and Pillow.
-
-Writes a 256x128 block slice at the chosen z (default 0), 4 pixels a block, and prints how much of the solid mass sits
-in each 16-block band of height. Solid cells above air are drawn green, the dirt layers under them brown, the rest
-holystone grey; the cell grid (8 wide, 4 tall) the game interpolates over is applied, as it is in the game.
+Usage (from the repo root):
+  python3 -I tools/preview_aether_terrain.py [--seed N] [--z Z] [--x0 X] [--span N] [--out DIR] [--map-x X --map-z Z --map-span N]
+Writes aether_slice.png, aether_map_height.png and aether_map_biome.png into DIR, and prints the terrain's numbers.
+Needs numpy and Pillow.
 """
+import argparse
 import json
+import math
 import os
 import sys
+import tempfile
+import zlib
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "src", "main", "resources", "data")
-OUT_DIR = "/tmp/claude-0/-home-user-Jaymo-s-Powerpack/2b93d717-3c36-5b65-add9-935a1021d356/scratchpad/aether-study"
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATA = os.path.join(ROOT, 'src/main/resources/data')
+SPLIT_Y = 140            # the picture's lowland/upper split
+MIN_Y, HEIGHT = 0, 384   # the noise region (noise_settings.noise)
+TARGET_STD = 0.336       # what the game's NormalNoise comes to (measured on the real classes)
 
-WIDTH, HEIGHT = 256, 128
-SCALE = 4
-DIRT_LAYERS = 3
 
-GRADS = np.array([(1, 1, 0), (-1, 1, 0), (1, -1, 0), (-1, -1, 0), (1, 0, 1), (-1, 0, 1), (1, 0, -1), (-1, 0, -1),
-                  (0, 1, 1), (0, -1, 1), (0, 1, -1), (0, -1, -1), (1, 1, 0), (0, -1, 1), (-1, 1, 0), (0, -1, -1)], dtype=float)
-
+# ---------------------------------------------------------------- noise
 
 class Perlin:
-    """Improved Perlin noise with the game's gradient set, plus its y smear (the fractional y snapped to y_scale steps)."""
-
     def __init__(self, rng):
+        p = np.arange(256)
+        rng.shuffle(p)
+        self.p = np.concatenate([p, p]).astype(np.int64)
         self.off = rng.uniform(0, 256, 3)
-        self.perm = np.concatenate([rng.permutation(256)] * 2)
 
-    def noise(self, x, y, z, y_scale=0.0):
-        x, y, z = x + self.off[0], y + self.off[1], z + self.off[2]
-        xi, yi, zi = np.floor(x), np.floor(y), np.floor(z)
-        xf, yf, zf = x - xi, y - yi, z - zi
-        yr = np.floor(yf / y_scale + 1e-7) * y_scale if y_scale else 0.0
-        xi, yi, zi = xi.astype(int) & 255, yi.astype(int) & 255, zi.astype(int) & 255
-        p = self.perm
+    def at(self, x, y, z):
+        x, y, z = np.broadcast_arrays(x + self.off[0], y + self.off[1], z + self.off[2])
+        xi = np.floor(x)
+        yi = np.floor(y)
+        zi = np.floor(z)
+        fx, fy, fz = x - xi, y - yi, z - zi
+        X, Y, Z = xi.astype(np.int64) & 255, yi.astype(np.int64) & 255, zi.astype(np.int64) & 255
+        u = fx * fx * fx * (fx * (fx * 6 - 15) + 10)
+        v = fy * fy * fy * (fy * (fy * 6 - 15) + 10)
+        w = fz * fz * fz * (fz * (fz * 6 - 15) + 10)
+        p = self.p
+        A = p[X] + Y
+        AA = p[A] + Z
+        AB = p[A + 1] + Z
+        B = p[X + 1] + Y
+        BA = p[B] + Z
+        BB = p[B + 1] + Z
 
-        def corner(dx, dy, dz):
-            h = p[p[p[xi + dx] + yi + dy] + zi + dz] & 15
-            g = GRADS[h]
-            return g[..., 0] * (xf - dx) + g[..., 1] * (yf - yr - dy) + g[..., 2] * (zf - dz)
+        def grad(h, a, b, c):
+            h = h & 15
+            uu = np.where(h < 8, a, b)
+            vv = np.where(h < 4, b, np.where((h == 12) | (h == 14), a, c))
+            return np.where((h & 1) == 0, uu, -uu) + np.where((h & 2) == 0, vv, -vv)
 
-        def fade(t):
-            return t * t * t * (t * (t * 6 - 15) + 10)
+        def lerp(t, a, b):
+            return a + t * (b - a)
 
-        u, v, w = fade(xf), fade(yf), fade(zf)
-        lerp = lambda t, a, b: a + t * (b - a)
         return lerp(w,
-                    lerp(v, lerp(u, corner(0, 0, 0), corner(1, 0, 0)), lerp(u, corner(0, 1, 0), corner(1, 1, 0))),
-                    lerp(v, lerp(u, corner(0, 0, 1), corner(1, 0, 1)), lerp(u, corner(0, 1, 1), corner(1, 1, 1))))
+                    lerp(v, lerp(u, grad(p[AA], fx, fy, fz), grad(p[BA], fx - 1, fy, fz)),
+                         lerp(u, grad(p[AB], fx, fy - 1, fz), grad(p[BB], fx - 1, fy - 1, fz))),
+                    lerp(v, lerp(u, grad(p[AA + 1], fx, fy, fz - 1), grad(p[BA + 1], fx - 1, fy, fz - 1)),
+                         lerp(u, grad(p[AB + 1], fx, fy - 1, fz - 1), grad(p[BB + 1], fx - 1, fy - 1, fz - 1))))
 
 
-class BlendedNoise:
-    def __init__(self, cfg, seed):
-        rng = np.random.RandomState(seed)
-        self.main = [Perlin(rng) for _ in range(8)]
-        self.lo = [Perlin(rng) for _ in range(16)]
-        self.hi = [Perlin(rng) for _ in range(16)]
-        self.xz_m = 684.412 * cfg["xz_scale"]
-        self.y_m = 684.412 * cfg["y_scale"]
-        self.xz_f, self.y_f = cfg["xz_factor"], cfg["y_factor"]
-        self.smear = cfg["smear_scale_multiplier"]
+class NormalNoise:
+    """The game's two-layer octave noise: octave i is 2^(first+i) cycles a block, weighted by amplitude * 2^-i."""
 
-    def __call__(self, X, Y, Z):
-        d0, d1, d2 = X * self.xz_m, Y * self.y_m, Z * self.xz_m
-        d3, d4, d5 = d0 / self.xz_f, d1 / self.y_f, d2 / self.xz_f
-        d6 = self.y_m * self.smear
-        d7 = d6 / self.y_f
-        sel, f = 0.0, 1.0
-        for p in self.main:
-            sel = sel + p.noise(d3 * f, d4 * f, d5 * f, d7 * f) / f
-            f /= 2
-        t = np.clip((sel / 10.0 + 1.0) / 2.0, 0.0, 1.0)
-        lo = hi = 0.0
-        f = 1.0
-        for a, b in zip(self.lo, self.hi):
-            lo = lo + a.noise(d0 * f, d1 * f, d2 * f, d6 * f) / f
-            hi = hi + b.noise(d0 * f, d1 * f, d2 * f, d6 * f) / f
-            f /= 2
-        return (lo / 512.0 + (hi / 512.0 - lo / 512.0) * t) / 128.0
+    def __init__(self, seed, name, first, amps):
+        rng = np.random.RandomState((zlib.crc32(name.encode()) ^ seed) & 0x7fffffff)
+        self.first, self.amps = first, amps
+        self.a = [Perlin(rng) for _ in amps]
+        self.b = [Perlin(rng) for _ in amps]
+        self.k = 1.0
+        pts = np.random.RandomState(7).uniform(0, 1 << 14, (3, 30000))
+        self.k = TARGET_STD / max(1e-9, float(np.std(self.value(pts[0], pts[1], pts[2]))))
+
+    def value(self, x, y, z):
+        total = 0.0
+        for i, amp in enumerate(self.amps):
+            if amp == 0.0:
+                continue
+            f = 2.0 ** (self.first + i)
+            w = amp * 0.5 ** i
+            total = total + w * (self.a[i].at(x * f, y * f, z * f) + self.b[i].at(x * f * 1.0181268882175227, y * f * 1.0181268882175227, z * f * 1.0181268882175227))
+        return total * self.k
 
 
-def load_function(ref):
-    ns, path = ref.split(":")
-    if ns == "minecraft":
-        raise SystemExit("preview does not know vanilla density function " + ref)
-    with open(os.path.join(DATA, ns, "worldgen", "density_function", path + ".json")) as f:
-        return json.load(f)
+# ---------------------------------------------------------------- density functions
 
-
-class Evaluator:
+class World:
     def __init__(self, seed):
         self.seed = seed
+        self.files = {}
         self.noises = {}
 
-    def ev(self, node, X, Y, Z):
-        if isinstance(node, (int, float)):
-            return np.full_like(X, float(node))
-        if isinstance(node, str):
-            return self.ev(load_function(node), X, Y, Z)
-        t = node["type"].split(":")[1]
-        if t == "add":
-            return self.ev(node["left"], X, Y, Z) + self.ev(node["right"], X, Y, Z)
-        if t == "mul":
-            return self.ev(node["left"], X, Y, Z) * self.ev(node["right"], X, Y, Z)
-        if t == "clamp":
-            return np.clip(self.ev(node["input"], X, Y, Z), node["min"], node["max"])
-        if t == "lerp":
-            a = self.ev(node["alpha"], X, Y, Z)
-            f, s = self.ev(node["first"], X, Y, Z), self.ev(node["second"], X, Y, Z)
-            return f + a * (s - f)
-        if t == "gradient":
-            u = (Y - node["from_coordinate"]) / (node["to_coordinate"] - node["from_coordinate"])
-            return node["from_value"] + np.clip(u, 0, 1) * (node["to_value"] - node["from_value"])
-        if t == "squeeze":
-            c = np.clip(self.ev(node["input"], X, Y, Z), -1, 1)
-            return c / 2 - c * c * c / 24
-        if t == "beardifier":
-            return np.zeros_like(X)
-        if t in ("blend_density", "cache_2d", "cache_once", "flat_cache"):
-            return self.ev(node["input"], X, Y, Z)
-        if t == "interpolated":
-            cx, cy, cz = node["cell_size_xz"], node["cell_size_y"], node["cell_size_xz"]
-            x0, y0, z0 = np.floor(X / cx) * cx, np.floor(Y / cy) * cy, np.floor(Z / cz) * cz
-            fx, fy, fz = (X - x0) / cx, (Y - y0) / cy, (Z - z0) / cz
-            out = 0.0
-            for dx in (0, 1):
-                for dy in (0, 1):
-                    for dz in (0, 1):
-                        w = (fx if dx else 1 - fx) * (fy if dy else 1 - fy) * (fz if dz else 1 - fz)
-                        out = out + w * self.ev(node["input"], x0 + dx * cx, y0 + dy * cy, z0 + dz * cz)
-            return out
-        if t == "old_blended_noise":
-            key = json.dumps(node, sort_keys=True)
-            if key not in self.noises:
-                self.noises[key] = BlendedNoise(node, self.seed)
-            return self.noises[key](X, Y, Z)
-        raise SystemExit("preview does not know density function type " + node["type"])
+    def load(self, kind, ident):
+        key = (kind, ident)
+        if key not in self.files:
+            ns, _, path = ident.partition(':')
+            with open(os.path.join(DATA, ns, 'worldgen', kind, path + '.json'), encoding='utf-8') as f:
+                self.files[key] = json.load(f)
+        return self.files[key]
+
+    def noise(self, ident):
+        if ident not in self.noises:
+            try:
+                d = self.load('noise', ident)
+            except FileNotFoundError:
+                # vanilla noises the Aether borrows: only the offset (the shifts) matters here
+                d = {'base_octave': -3, 'octave_count': 4, 'amplitude_modifiers': [1.0, 1.0, 1.0, 0.0]}
+            amps = d.get('amplitude_modifiers') or [1.0] * d.get('octave_count', 1)
+            self.noises[ident] = NormalNoise(self.seed, ident, d['base_octave'], amps)
+        return self.noises[ident]
+
+
+def smooth_spline(spline, v):
+    pts = spline['points']
+    loc = np.array([p['location'] for p in pts], dtype=float)
+    val = np.array([p['value'] for p in pts], dtype=float)
+    der = np.array([p['derivative'] for p in pts], dtype=float)
+    v = np.asarray(v, dtype=float)
+    idx = np.clip(np.searchsorted(loc, v) - 1, 0, len(loc) - 2)
+    x0, x1 = loc[idx], loc[idx + 1]
+    h = x1 - x0
+    t = np.clip((v - x0) / h, 0.0, 1.0)
+    y0, y1, d0, d1 = val[idx], val[idx + 1], der[idx] * h, der[idx + 1] * h
+    t2, t3 = t * t, t * t * t
+    out = (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * d0 + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * d1
+    out = np.where(v < loc[0], val[0] + der[0] * (v - loc[0]), out)
+    out = np.where(v > loc[-1], val[-1] + der[-1] * (v - loc[-1]), out)
+    return out
+
+
+class Ctx:
+    """A grid: 1-D axes of x, y and z, evaluated as an open mesh (so 2-D parts stay cheap)."""
+
+    def __init__(self, xs, ys, zs):
+        self.xs, self.ys, self.zs = np.asarray(xs, float), np.asarray(ys, float), np.asarray(zs, float)
+        self.X = self.xs.reshape(-1, 1, 1)
+        self.Y = self.ys.reshape(1, -1, 1)
+        self.Z = self.zs.reshape(1, 1, -1)
+        self.memo = {}
+
+
+def lerp_axis(arr, axis, coarse, fine):
+    """Linear interpolation of arr along axis from the coarse coordinates to the fine ones."""
+    step = coarse[1] - coarse[0]
+    pos = (fine - coarse[0]) / step
+    i0 = np.clip(np.floor(pos).astype(int), 0, len(coarse) - 2)
+    f = pos - i0
+    a = np.take(arr, i0, axis=axis)
+    b = np.take(arr, i0 + 1, axis=axis)
+    shape = [1, 1, 1]
+    shape[axis] = -1
+    f = f.reshape(shape)
+    return a * (1 - f) + b * f
+
+
+def ev(world, node, ctx):
+    if isinstance(node, (int, float)):
+        return float(node)
+    if isinstance(node, str):
+        if node == 'minecraft:y':
+            return ctx.Y
+        if node in ('minecraft:shift_x', 'minecraft:shift_z'):
+            n = world.noise('minecraft:offset')
+            if node.endswith('x'):
+                return n.value(ctx.X * 0.25, 0.0, ctx.Z * 0.25) * 4.0
+            return n.value(ctx.Z * 0.25, ctx.X * 0.25, 0.0) * 4.0
+        key = ('ref', node)
+        if key not in ctx.memo:
+            ctx.memo[key] = ev(world, world.load('density_function', node), ctx)
+        return ctx.memo[key]
+    t = node['type'].split(':')[-1]
+    if t in ('add', 'sub', 'mul', 'min', 'max'):
+        a, b = ev(world, node['left'], ctx), ev(world, node['right'], ctx)
+        return {'add': np.add, 'sub': np.subtract, 'mul': np.multiply, 'min': np.minimum, 'max': np.maximum}[t](a, b)
+    if t == 'clamp':
+        return np.clip(ev(world, node['input'], ctx), node['min'], node['max'])
+    if t == 'abs':
+        return np.abs(ev(world, node['input'], ctx))
+    if t == 'square':
+        return np.square(ev(world, node['input'], ctx))
+    if t == 'cube':
+        return np.power(ev(world, node['input'], ctx), 3)
+    if t == 'half_negative':
+        v = ev(world, node['input'], ctx)
+        return np.where(v > 0, v, v * 0.5)
+    if t == 'quarter_negative':
+        v = ev(world, node['input'], ctx)
+        return np.where(v > 0, v, v * 0.25)
+    if t == 'squeeze':
+        c = np.clip(ev(world, node['input'], ctx), -1.0, 1.0)
+        return c / 2.0 - c * c * c / 24.0
+    if t in ('cache', 'flat_cache', 'cache_once', 'cache_2d', 'blend_density', 'cache_all_in_cell'):
+        return ev(world, node['input'], ctx)
+    if t in ('beardifier', 'blend_alpha', 'blend_offset'):
+        return 0.0 if t != 'blend_alpha' else 1.0
+    if t == 'gradient':
+        v = ctx.Y
+        lo, hi = node['from_coordinate'], node['to_coordinate']
+        f = np.clip((v - lo) / (hi - lo), 0.0, 1.0)
+        return node['from_value'] + f * (node['to_value'] - node['from_value'])
+    if t == 'noise':
+        n = world.noise(node['noise'])
+        xz, yy = node.get('xz_scale', 1.0), node.get('y_scale', 1.0)
+        x = ctx.X * xz
+        z = ctx.Z * xz
+        if 'shift_x' in node:
+            x = x + ev(world, node['shift_x'], ctx)
+        if 'shift_z' in node:
+            z = z + ev(world, node['shift_z'], ctx)
+        y = ctx.Y * yy if yy != 0.0 else 0.0
+        return n.value(x, y, z)
+    if t == 'range_choice':
+        v = ev(world, node['input'], ctx)
+        inside = (v >= node['min_inclusive']) & (v < node['max_exclusive'])
+        return np.where(inside, ev(world, node['when_in_range'], ctx), ev(world, node['when_out_of_range'], ctx))
+    if t == 'lerp':
+        a = ev(world, node['alpha'], ctx)
+        f, s = ev(world, node['first'], ctx), ev(world, node['second'], ctx)
+        return f + a * (s - f)
+    if t == 'spline':
+        sp = node['spline']
+        return smooth_spline(sp, ev(world, sp['coordinate'], ctx))
+    if t == 'interpolated':
+        cxz, cy = node['cell_size_xz'], node['cell_size_y']
+        def gap(a):
+            return float(a[1] - a[0]) if len(a) > 1 else float('inf')
+        if gap(ctx.xs) >= cxz and gap(ctx.zs) >= cxz and gap(ctx.ys) >= cy:
+            return ev(world, node['input'], ctx)     # a coarse picture: sample the cells directly
+        cx = np.arange(math.floor(ctx.xs.min() / cxz) * cxz, ctx.xs.max() + cxz + 1, cxz, dtype=float)
+        cz = np.arange(math.floor(ctx.zs.min() / cxz) * cxz, ctx.zs.max() + cxz + 1, cxz, dtype=float)
+        cyv = np.arange(math.floor(ctx.ys.min() / cy) * cy, ctx.ys.max() + cy + 1, cy, dtype=float)
+        cctx = Ctx(cx, cyv, cz)
+        c = ev(world, node['input'], cctx)
+        c = np.broadcast_to(c, (len(cx), len(cyv), len(cz)))
+        c = lerp_axis(c, 0, cx, ctx.xs)
+        c = lerp_axis(c, 1, cyv, ctx.ys)
+        return lerp_axis(c, 2, cz, ctx.zs)
+    raise ValueError('density function type not supported by the preview: ' + t)
+
+
+def full(arr, ctx):
+    return np.broadcast_to(arr, (len(ctx.xs), len(ctx.ys), len(ctx.zs)))
+
+
+# ---------------------------------------------------------------- the picture
+
+SKY_TOP, SKY_BOTTOM = np.array([150, 190, 255]), np.array([225, 235, 255])
+STONE, UNDERSHALE, DIRT, GRASS = (205, 207, 214), (96, 98, 112), (150, 138, 124), (120, 220, 140)
+
+
+def slice_image(world, final, x0, z0, span, scale):
+    xs = np.arange(x0, x0 + span)
+    ys = np.arange(MIN_Y, MIN_Y + HEIGHT)
+    ctx = Ctx(xs, ys, [z0])
+    d = full(ev(world, final, ctx), ctx)[:, :, 0]
+    solid = d > 0
+    img = np.zeros((HEIGHT, span, 3), dtype=np.uint8)
+    sky = (SKY_BOTTOM[None, :] + (SKY_TOP - SKY_BOTTOM)[None, :] * (np.arange(HEIGHT)[:, None] / HEIGHT)).astype(np.uint8)
+    img[:] = sky[::-1][:, None, :] if False else sky[:, None, :]
+    # colour columns: grass on the top block of each island run, dirt under it, undershale deep down
+    for xi in range(span):
+        col = solid[xi]
+        depth = 0
+        for yi in range(HEIGHT - 1, -1, -1):
+            if col[yi]:
+                if depth == 0:
+                    c = GRASS
+                elif depth <= 3:
+                    c = DIRT
+                else:
+                    c = UNDERSHALE if yi < 64 else STONE
+                img[yi, xi] = c
+                depth += 1
+            else:
+                depth = 0
+    img = img[::-1]  # y up
+    out = Image.fromarray(img).resize((span * scale, HEIGHT * scale), Image.NEAREST)
+    draw = ImageDraw.Draw(out)
+    for yv in (0, 64, 128, 192, 256, 320, 384):
+        py = (HEIGHT - (yv - MIN_Y)) * scale - 1
+        draw.line([(0, py), (6 * scale, py)], fill=(0, 0, 0))
+        draw.text((7 * scale, py - 5), 'y%d' % yv, fill=(0, 0, 0))
+    return out, d
+
+
+def surface_heights(d):
+    """Top solid block of every column (-1 where there is none), and the mass per 32 blocks of height."""
+    solid = d > 0
+    any_ = solid.any(axis=1)
+    top = np.where(any_, solid.shape[1] - 1 - np.argmax(solid[:, ::-1], axis=1), -1) + MIN_Y
+    return top
+
+
+BIOME_COLOURS = {
+    'frozen_lakes': (180, 215, 255), 'sheer_tundra': (225, 235, 245), 'enduring_woodland': (90, 140, 150), 'frigid_sierra': (255, 255, 255),
+    'shimmering_basin': (110, 190, 255), 'flourishing_field': (170, 235, 120), 'verdant_woods': (40, 150, 60), 'shrouded_forest': (20, 90, 50),
+    'violet_highwoods': (160, 110, 220), 'turquoise_forest': (50, 190, 180), 'glistening_swamp': (80, 120, 90), 'magnetic_scar': (170, 100, 70),
+    'battleground_wastes': (210, 190, 90), 'contaminated_jungle': (150, 170, 40), 'hestveil_caverns': (120, 60, 60), 'expanse': (255, 200, 255),
+}
+
+
+def pick_biomes(world, dim, T, H, E, W, D):
+    """The multi-noise source's choice: the entry whose parameter box is nearest (sum of squared gaps)."""
+    entries = dim['generator']['biome_source']['biomes']
+    names = [e['biome'].split(':')[1] for e in entries]
+    best = np.full(T.shape, 1e18)
+    which = np.zeros(T.shape, dtype=int)
+    vals = {'temperature': T, 'humidity': H, 'erosion': E, 'weirdness': W, 'depth': D}
+    for i, e in enumerate(entries):
+        cost = np.zeros(T.shape)
+        for key, arr in vals.items():
+            r = e['parameters'][key]
+            lo, hi = (r, r) if not isinstance(r, list) else (r[0], r[1])
+            gap = np.maximum(0.0, np.maximum(lo - arr, arr - hi))
+            cost = cost + gap * gap
+        better = cost < best
+        best = np.where(better, cost, best)
+        which = np.where(better, i, which)
+    return names, which
+
+
+def map_images(world, final, dim, mx0, mz0, span, step):
+    xs = np.arange(mx0, mx0 + span, step)
+    zs = np.arange(mz0, mz0 + span, step)
+    ys = np.arange(MIN_Y, MIN_Y + HEIGHT, 8)
+    ctx = Ctx(xs, ys, zs)
+    d = full(ev(world, final, ctx), ctx)
+    solid = d > 0
+    low = ys < SPLIT_Y
+    sl = solid[:, low, :]
+    any_ = sl.any(axis=1)
+    topi = sl.shape[1] - 1 - np.argmax(sl[:, ::-1, :], axis=1)
+    top = np.where(any_, ys[low][topi], -1)          # (x, z): the lowland's highest block
+    up_cells = solid[:, ~low, :].sum(axis=1)         # how much upper-island mass stands over each column
+    # colour by height; columns with no lowland ground stay sky, upper islets are drawn as a shade
+    hm = np.zeros(top.shape + (3,), dtype=np.uint8)
+    hm[:] = (205, 225, 255)
+    pal = [(0, (90, 60, 90)), (40, (120, 120, 150)), (80, (110, 200, 120)), (110, (70, 170, 80)), (125, (240, 240, 180)), (140, (255, 200, 200))]
+    for xi in range(top.shape[0]):
+        for zi in range(top.shape[1]):
+            h = top[xi, zi]
+            if h >= 0:
+                for k in range(len(pal) - 1):
+                    if pal[k][0] <= h <= pal[k + 1][0]:
+                        t = (h - pal[k][0]) / (pal[k + 1][0] - pal[k][0])
+                        hm[xi, zi] = tuple(int(pal[k][1][c] + t * (pal[k + 1][1][c] - pal[k][1][c])) for c in range(3))
+                        break
+            if up_cells[xi, zi] > 0:
+                shade = max(60, 200 - 12 * int(up_cells[xi, zi]))
+                hm[xi, zi] = (shade // 2, shade // 2, 255 - (255 - shade) // 3) if h < 0 else (hm[xi, zi] // 2 + np.array([100, 60, 120])).astype(np.uint8)
+    # biomes at each column's surface
+    c2 = Ctx(xs, [0], zs)
+    T = full(ev(world, 'jaymospowers:aether/climate/temperature', c2), c2)[:, 0, :]
+    Hh = full(ev(world, 'jaymospowers:aether/climate/humidity', c2), c2)[:, 0, :]
+    E = full(ev(world, 'jaymospowers:aether/climate/erosion', c2), c2)[:, 0, :]
+    Wd = full(ev(world, 'jaymospowers:aether/climate/weirdness', c2), c2)[:, 0, :]
+    ytop = np.where(top >= 0, top, 100).astype(float)
+    # depth at the surface height
+    cy = Ctx([0], ytop.ravel(), [0])
+    Dd = full(ev(world, 'jaymospowers:aether/climate/depth', cy), cy)[0, :, 0].reshape(top.shape)
+    names, which = pick_biomes(world, dim, T, Hh, E, Wd, Dd)
+    bm = np.zeros(top.shape + (3,), dtype=np.uint8)
+    bm[:] = (230, 240, 255)
+    counts = {}
+    for xi in range(top.shape[0]):
+        for zi in range(top.shape[1]):
+            if top[xi, zi] >= 0:
+                name = names[which[xi, zi]]
+                bm[xi, zi] = BIOME_COLOURS.get(name, (255, 0, 255))
+                counts[name] = counts.get(name, 0) + 1
+    def up(a, scale):
+        return Image.fromarray(np.transpose(a, (1, 0, 2))).resize((a.shape[0] * scale, a.shape[1] * scale), Image.NEAREST)
+    return up(hm, 3), up(bm, 3), top, counts, (T, Hh, E, Wd)
+
+
+def mass_profile(d):
+    solid = d > 0
+    per_y = solid.sum(axis=(0, 2)).astype(float) if solid.ndim == 3 else solid.sum(axis=0).astype(float)
+    return per_y
 
 
 def main():
-    z = float(sys.argv[1]) if len(sys.argv) > 1 else 0.0
-    seed = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-    out = sys.argv[3] if len(sys.argv) > 3 else os.path.join(OUT_DIR, "aether_terrain_preview.png")
-    with open(os.path.join(DATA, "jaymospowers", "worldgen", "noise_settings", "aether.json")) as f:
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--seed', type=int, default=12345)
+    ap.add_argument('--z', type=int, default=0)
+    ap.add_argument('--x0', type=int, default=0)
+    ap.add_argument('--span', type=int, default=640)
+    ap.add_argument('--scale', type=int, default=2)
+    ap.add_argument('--map-x', type=int, default=-1024)
+    ap.add_argument('--map-z', type=int, default=-1024)
+    ap.add_argument('--map-span', type=int, default=2048)
+    ap.add_argument('--map-step', type=int, default=32)
+    ap.add_argument('--out', default=tempfile.gettempdir())
+    ap.add_argument('--no-map', action='store_true')
+    args = ap.parse_args()
+    world = World(args.seed)
+    with open(os.path.join(DATA, 'jaymospowers/dimension/aether.json'), encoding='utf-8') as f:
+        dim = json.load(f)
+    with open(os.path.join(DATA, 'jaymospowers/worldgen/noise_settings/aether.json'), encoding='utf-8') as f:
         settings = json.load(f)
-    final = settings["noise_router"]["final_density"]
-    X, Y = np.meshgrid(np.arange(WIDTH, dtype=float), np.arange(HEIGHT, dtype=float))
-    solid = Evaluator(seed).ev(final, X, Y, np.full_like(X, z)) > 0  # [y][x]
-    print("solid share of the slice: %.1f%%" % (100.0 * solid.mean()))
-    total = solid.sum()
-    for lo in range(0, HEIGHT, 16):
-        share = 100.0 * solid[lo:lo + 16].sum() / max(total, 1)
-        print("y %3d-%3d  %5.1f%% of the mass  %s" % (lo, lo + 15, share, "#" * int(share / 2)))
-    sky = np.array([192, 192, 255], dtype=np.uint8)
-    img = np.empty((HEIGHT, WIDTH, 3), dtype=np.uint8)
-    img[:] = sky
-    for x in range(WIDTH):
-        depth = 0
-        for y in range(HEIGHT - 1, -1, -1):
-            if not solid[y, x]:
-                depth = 0
-                continue
-            depth += 1
-            img[y, x] = (110, 214, 140) if depth == 1 else (140, 110, 90) if depth <= 1 + DIRT_LAYERS else (225, 228, 235)
-    img = img[::-1]  # y up
-    Image.fromarray(img).resize((WIDTH * SCALE, HEIGHT * SCALE), Image.NEAREST).save(out)
-    print("wrote", out)
+    final = settings['noise_router']['final_density']
+    os.makedirs(args.out, exist_ok=True)
+
+    img, d = slice_image(world, final, args.x0, args.z, args.span, args.scale)
+    path = os.path.join(args.out, 'aether_slice.png')
+    img.save(path)
+    print('wrote', path)
+    mass = (d > 0).sum(axis=0)
+    total = mass.sum()
+    print('solid share of the slice: %.1f%%' % (100.0 * total / d.size))
+    print('share of the mass per 32 blocks of height:')
+    for y0 in range(0, HEIGHT, 32):
+        print('  y %3d-%3d  %5.1f%%' % (y0, y0 + 31, 100.0 * mass[y0:y0 + 32].sum() / max(1, total)))
+    if not args.no_map:
+        hm, bm, top, counts, _ = map_images(world, final, dim, args.map_x, args.map_z, args.map_span, args.map_step)
+        hp = os.path.join(args.out, 'aether_map_height.png')
+        bp = os.path.join(args.out, 'aether_map_biome.png')
+        hm.save(hp)
+        bm.save(bp)
+        print('wrote', hp)
+        print('wrote', bp)
+        cover = (top >= 0).mean()
+        print('columns with lowland ground (below y140): %.1f%%' % (100.0 * cover))
+        total = sum(counts.values()) or 1
+        for name, n in sorted(counts.items(), key=lambda kv: -kv[1]):
+            print('  %-20s %5.1f%%' % (name, 100.0 * n / total))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
