@@ -4063,5 +4063,9 @@
 	"recall.jaymoskingdoms.deed.save": "save someone's life",
 	"recall.jaymoskingdoms.deed.rescue": "bring a captive home",
 	"recall.jaymoskingdoms.command.nobody": "Nobody near you remembers anything.",
-	"recall.jaymoskingdoms.command.head": "%s remembers %s thing(s) of you (leaning %s):"
+	"recall.jaymoskingdoms.command.head": "%s remembers %s thing(s) of you (leaning %s):",
+	"item.jaymoskingdoms.wool_cap": "Wool Cap",
+	"item.jaymoskingdoms.wool_shirt": "Wool Shirt",
+	"item.jaymoskingdoms.wool_pants": "Wool Pants",
+	"item.jaymoskingdoms.wool_socks": "Wool Socks"
 }

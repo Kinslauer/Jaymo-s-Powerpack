@@ -1,0 +1,20 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymoskingdoms:wool",
+        "dyeable": {
+          "color_when_undyed": -1449005
+        }
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymoskingdoms:wool",
+        "dyeable": {
+          "color_when_undyed": -1449005
+        }
+      }
+    ]
+  }
+}
