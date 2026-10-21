@@ -299,7 +299,35 @@ public final class Ledge {
 		if (gap < -0.05 || gap > REACH) {
 			return null;
 		}
-		double hangAlong = wall - sign * (half + HANG_GAP);
+		return finish(player, level, pos, face, top, wall, sign);
+		}
+
+		/**
+		 * (0.15.12) The ledge hang under the edge of the block at {@code pos} the player is standing on, the way they were
+		 * walking ({@code walk}): they turn round and hang from its far edge, facing the wall. Null when the block won't do or
+		 * there's no room to hang. Used by the freerunner's sneak off an edge (Climber).
+		 */
+		public static @Nullable Spot edgeSpot(Player player, BlockPos pos, Direction walk) {
+			Level level = player.level();
+			BlockState state = level.getBlockState(pos);
+			VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.of(player));
+			if (shape.isEmpty() || state.is(NO_GRAB) || topArea(shape) < MIN_TOP_AREA) {
+				return null;
+			}
+			double top = pos.getY() + shape.max(Direction.Axis.Y);
+			if (Math.abs(top - player.getY()) > 0.1) {
+				return null;
+			}
+			int sign = walk.getAxisDirection().getStep();
+			double wall = walk.getAxis() == Direction.Axis.X
+				? pos.getX() + (sign > 0 ? shape.max(Direction.Axis.X) : shape.min(Direction.Axis.X))
+				: pos.getZ() + (sign > 0 ? shape.max(Direction.Axis.Z) : shape.min(Direction.Axis.Z));
+			return finish(player, level, pos, walk.getOpposite(), top, wall, -sign);
+		}
+
+		private static @Nullable Spot finish(Player player, Level level, BlockPos pos, Direction face, double top, double wall, int sign) {
+			double half = player.getBbWidth() * 0.5;
+			double hangAlong = wall - sign * (half + HANG_GAP);
 		double onAlong = wall + sign * CLIMB_IN;
 		Vec3 hang = face.getAxis() == Direction.Axis.X ? new Vec3(hangAlong, top - HANG_FEET_BELOW_EDGE, player.getZ())
 			: new Vec3(player.getX(), top - HANG_FEET_BELOW_EDGE, hangAlong);

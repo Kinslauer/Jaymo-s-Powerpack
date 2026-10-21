@@ -173,7 +173,7 @@ public final class HiddenBlade {
 	/**
 	 * What a blow deals, from {@code amount} (LivingEntity.hurtServer, after ClassPerks and CombatArts): a hidden blade in
 	 * unskilled hands jams ({@link #UNSKILLED_DAMAGE}); in skilled ones, a full-strength stab at a Crippled foe deals
-	 * {@link #CRIPPLED_STAB} times. Only a player's own melee blow with the blade in their main hand, never one of the
+	 * {@link #CRIPPLED_STAB} times (so is one at a monster that doesn't know it's there, with Assassinate: not stacking). Only a player's own melee blow with the blade in their main hand, never one of the
 	 * Combat Arts' own (a cleave, a bleed, a leap).
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
@@ -186,7 +186,10 @@ public final class HiddenBlade {
 			jammed(sp, now);
 			return Math.min(amount, UNSKILLED_DAMAGE);
 		}
-		if (!crippled(target) || !CombatArts.fullStrength(sp, now)) {
+		boolean cripple = crippled(target);
+		// (0.7.111) an unaware monster taken from behind (or while it searches) by a hand that has learned Assassinate: the same ten times
+		boolean assassin = Senses.assassinable(target, sp);
+		if (!(cripple || assassin) || !CombatArts.fullStrength(sp, now) || Senses.cooling(target, source)) {
 			return amount;
 		}
 		long[] last = STABBED.get(sp.getUUID());
@@ -199,7 +202,13 @@ public final class HiddenBlade {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.5F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 16, 0.25, 0.3, 0.25, 0.25);
 		}
-		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
+		if (assassin) {
+			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.assassinate").withStyle(ChatFormatting.DARK_RED));
+			Skills.assassination(sp);
+		} else {
+			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
+		}
+		// (the crippled and the assassin's bonus are one and the same: they don't stack)
 		return amount * CRIPPLED_STAB;
 	}
 

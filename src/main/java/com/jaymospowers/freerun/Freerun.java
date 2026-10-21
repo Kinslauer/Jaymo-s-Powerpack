@@ -141,6 +141,25 @@ public final class Freerun {
 	/** Wall Runner: how long a run lasts (ticks: 1.5 and 2.5 s), by rank. */
 	public static final int[] RUN_TICKS = {30, 50};
 
+	/** (0.15.12) Vertical wall run: how high it climbs (blocks) with no Wall Runner, rank 1 and rank 2; the rise per tick at the start and the end of it. */
+	public static final double[] UP_HEIGHT = {2.5, 3.0, 4.0};
+	public static final double UP_START = 0.42, UP_END = 0.12;
+	/** Vertical wall run: the wall may be this far ahead when you jump (blocks), and you must face it within this many degrees. */
+	public static final double UP_REACH = 1.2;
+	public static final float UP_FACING_DEGREES = 35.0F;
+	/** Wall transitions: a wall hop reaches a wall this far off (blocks), flies at most this long (ticks), and its upward kick. */
+	public static final double HOP_RANGE = 3.0, HOP_UP = 0.42;
+	public static final int HOP_TICKS = 14;
+	/** Wall transitions: sneaking forward at an edge this long (ticks) with Climber catches it into a ledge hang below. */
+	public static final int EDGE_HOLD_TICKS = 6;
+	/** Pole climb: climbing speed (blocks/tick) by Climber rank 0 to 3, sliding down, and leaping off (sideways/up, blocks/tick). */
+	public static final double[] POLE_CLIMB = {0.07, 0.085, 0.10, 0.12};
+	public static final double POLE_SLIDE = 0.3, POLE_LEAP_OUT = 0.55, POLE_LEAP_UP = 0.42;
+	/** Pole climb: the longest hold (ticks: 2 minutes). */
+	public static final int POLE_MAX_TICKS = 2400;
+	/** (review) Server: a cling may have no wall against it this many ticks while the client crosses a corner. */
+	public static final int CORNER_GRACE_TICKS = 5;
+
 	/** Hunger (exhaustion; 4 is a hunger point): each vault, kick, catch of a wall or bar, wall run and swing off. */
 	public static final float MOVE_EXHAUSTION = 0.3F;
 	/** Hunger every tick you cling, hang or run, and for every block climbed. */
@@ -159,7 +178,7 @@ public final class Freerun {
 
 	/** Moves (as in {@link Move}): the first four are {@link WebParkour}'s own kinds, so its pose draws them. */
 	public static final int NONE = 0, VAULT = WebParkour.VAULT, CLING = WebParkour.CLING, WALL_JUMP = WebParkour.WALL_JUMP, BAR = 5, WALL_RUN = 6,
-		RELEASE = 7;
+		RELEASE = 7, UP_RUN = 8, SLIDE = 9, POLE = 10, HOP = 11;
 
 	/** The perks, in the order they're packed into {@link #PERKS} (4 bits each), with their Kingdoms keys. */
 	public enum Perk {
@@ -217,22 +236,27 @@ public final class Freerun {
 
 	/** Server: a move in progress. */
 	private static final class Doing {
-		final int kind, face;
+		final int kind;
+				int face;
 		final BlockPos pos;
 		int ticks;
 		double lastY;
+		/** (review) Where it began (height), and ticks the wall has been missing (a corner is crossed in a few). */
+		double startY;
+		int missing;
 
 		Doing(int kind, int face, BlockPos pos, double y) {
 			this.kind = kind;
 			this.face = face;
 			this.pos = pos;
 			this.lastY = y;
-		}
+			this.startY = y;
+			}
 	}
 
 	private static final Map<UUID, Doing> DOING = new HashMap<>();
 	/** Server: wall faces kicked off and run along since the player last touched the ground (bits by 3D index). */
-	private static final Map<UUID, Integer> KICKED = new HashMap<>(), RAN = new HashMap<>();
+	private static final Map<UUID, Integer> KICKED = new HashMap<>(), RAN = new HashMap<>(), UP_RAN = new HashMap<>();
 	/** (review) Player → ticks spent clinging since last on the ground: a new cling doesn't renew the grip. */
 	private static final Map<UUID, Integer> GRIPPED = new HashMap<>();
 	/** Server: until when (game time) a player just off a wall or bar isn't kicked for how they move. */
@@ -255,10 +279,13 @@ public final class Freerun {
 			return true;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
+		FastRun.init();
+		Slide.init();
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			DOING.clear();
 			KICKED.clear();
 			RAN.clear();
+			UP_RAN.clear();
 			GRIPPED.clear();
 			GRACE.clear();
 			LAST_VARIANT.clear();
@@ -269,6 +296,7 @@ public final class Freerun {
 		DOING.remove(id);
 		KICKED.remove(id);
 		RAN.remove(id);
+		UP_RAN.remove(id);
 		GRIPPED.remove(id);
 		GRACE.remove(id);
 		LAST_VARIANT.remove(id);
@@ -321,7 +349,18 @@ public final class Freerun {
 
 	/** (0.14.5) The moves that hang on both hands and the feet: {@link #CLING} (the climb) and {@link #BAR}. */
 	public static boolean gripMove(int kind) {
-		return kind == CLING || kind == BAR;
+		return kind == CLING || kind == BAR || kind == POLE;
+	}
+
+	/** (0.15.12) The moves the player stays in for a while, in the air or on a wall (they arrest a fall and are let hang without being kicked). */
+	static boolean held(int kind) {
+		return kind == CLING || kind == BAR || kind == WALL_RUN || kind == UP_RUN || kind == POLE;
+	}
+
+	/** Server: the player is in one of the {@link #held} moves right now. */
+	static boolean holdingMove(ServerPlayer player) {
+		Doing doing = DOING.get(player.getUUID());
+		return doing != null && held(doing.kind);
 	}
 
 	/** The height (blocks over the feet) of something waist-high just ahead a vault would clear ({@link #VAULT_HEIGHTS}), or 0. */
@@ -465,7 +504,7 @@ public final class Freerun {
 	/** Server: a player clinging, hanging or wall running (or just off one) moves however it puts them, without being kicked. */
 	public static boolean relaxesMovement(ServerPlayer player) {
 		Doing doing = DOING.get(player.getUUID());
-		if (doing != null && (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN)) {
+		if (doing != null && held(doing.kind)) {
 			return true;
 		}
 		Long until = GRACE.get(player.getUUID());
@@ -478,7 +517,17 @@ public final class Freerun {
 		int kind = move.kind();
 		Doing current = DOING.get(player.getUUID());
 		if (kind == NONE) {
+			Slide.end(player);
 			stop(player);
+			return;
+		}
+		if (kind == SLIDE) {
+			if (Slide.valid(player) && !Ledge.powerMoving(player)) {
+				stop(player);
+				Slide.start(player);
+			} else {
+				Slide.end(player);
+			}
 			return;
 		}
 		ServerLevel level = player.level();
@@ -525,8 +574,23 @@ public final class Freerun {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.6F, 0.8F);
 				WebParkour.dust(level, player, side, 8);
 			}
+			case UP_RUN -> {
+				UP_RAN.merge(player.getUUID(), 1 << side.get3DDataValue(), (a, b) -> a | b);
+				player.setAttached(MOVE, CLING * 8 + side.get3DDataValue() + 1);
+				player.resetFallDistance();
+				WebParkour.dust(level, player, side, 6);
+			}
+			case POLE -> {
+				player.setAttached(MOVE, CLING * 8 + side.get3DDataValue() + 1);
+				player.resetFallDistance();
+			}
+			case HOP -> {
+				player.setAttached(MOVE, WALL_JUMP * 8 + side.get3DDataValue() + 1);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.6F, 1.0F);
+				WebParkour.dust(level, player, side, 6);
+			}
 			case WALL_RUN -> {
-				RAN.merge(player.getUUID(), 1 << side.get3DDataValue(), (a, b) -> a | b);
+			RAN.merge(player.getUUID(), 1 << side.get3DDataValue(), (a, b) -> a | b);
 				player.setAttached(WALL, side.get3DDataValue());
 				player.resetFallDistance();
 			}
@@ -557,8 +621,20 @@ public final class Freerun {
 			case WALL_RUN:
 				return side != null && rank(player, Perk.WALL_RUNNER) >= 1 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
 					&& (RAN.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0;
+			case UP_RUN:
+				// (review) it starts from a jump: off the ground and rising
+				return side != null && !player.onGround() && player.getY() > player.yo
+					&& (FastRun.active(player) || player.isSprinting() && rank(player, Perk.WALL_RUNNER) >= 1)
+					&& FreerunWalls.runnableNear(level, player, side)
+					&& (UP_RAN.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0;
+			case POLE:
+				return side != null && FreerunWalls.poleAt(level, player, side, SERVER_REACH);
+			case HOP:
+				// (review) from a cling, at the wall it holds, off the ground
+				return side != null && rank(player, Perk.CLIMBER) >= 1 && current != null && current.kind == CLING && !player.onGround()
+					&& WebWallRun.wallAt(level, player, side, SERVER_REACH);
 			case BAR:
-				// (rank and reach first: the client's position mustn't make the server look at, or load, a far block)
+			// (rank and reach first: the client's position mustn't make the server look at, or load, a far block)
 				if (rank(player, Perk.BAR_SWING) < 1 || player.getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) >= BAR_REACH_SQR) {
 					return false;
 				}
@@ -575,14 +651,14 @@ public final class Freerun {
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */
-	private static void moved(ServerPlayer player) {
+	static void moved(ServerPlayer player) {
 		player.addTag(XP_TAG);
 	}
 
 	private static void stop(ServerPlayer player) {
 		Doing doing = DOING.remove(player.getUUID());
-		if (doing != null && (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN)) {
-			GRACE.put(player.getUUID(), player.level().getGameTime() + RELEASE_GRACE_TICKS);
+		if (doing != null && held(doing.kind)) {
+		GRACE.put(player.getUUID(), player.level().getGameTime() + RELEASE_GRACE_TICKS);
 		}
 		player.removeAttached(MOVE);
 		player.removeAttached(HANG);
@@ -604,12 +680,26 @@ public final class Freerun {
 			int max = switch (doing.kind) {
 				case VAULT -> WebParkour.VAULT_TICKS;
 				case WALL_JUMP -> WebParkour.WALL_JUMP_TICKS;
+				case HOP -> HOP_TICKS + SERVER_SLACK_TICKS;
+				case UP_RUN -> 24 + SERVER_SLACK_TICKS;
+				case POLE -> POLE_MAX_TICKS + SERVER_SLACK_TICKS;
 				case CLING -> grip(player) + SLIP_TICKS + SERVER_SLACK_TICKS;
 				case WALL_RUN -> RUN_TICKS[Mth.clamp(perk(player, Perk.WALL_RUNNER), 1, RUN_TICKS.length) - 1] + SERVER_SLACK_TICKS;
 				default -> BAR_MAX_TICKS + SERVER_SLACK_TICKS;
 			};
-			boolean lost = switch (doing.kind) {
-				case CLING -> player.onGround() || side == null || !WebWallRun.wallAt(level, player, side, SERVER_REACH)
+			// (review) the climbs are the client's, but the server holds them to their own speeds and heights
+			double rise = player.getY() - doing.lastY;
+			boolean overrun = switch (doing.kind) {
+				case UP_RUN -> player.getY() > doing.startY + UP_HEIGHT[Mth.clamp(perk(player, Perk.WALL_RUNNER), 0, UP_HEIGHT.length - 1)] + 0.5
+					|| doing.ticks > 2 && player.getY() < doing.startY - 0.05;
+				case POLE -> rise > POLE_CLIMB[Mth.clamp(perk(player, Perk.CLIMBER), 0, POLE_CLIMB.length - 1)] * 2.0 + 0.1 || -rise > POLE_SLIDE * 2.0 + 0.1;
+				case CLING -> rise > CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 1, CLIMB_SPEED.length) - 1] * 2.0 + 0.1;
+				default -> false;
+			};
+			boolean lost = overrun || switch (doing.kind) {
+			case UP_RUN -> doing.ticks > 2 && player.onGround() || side == null	|| !FreerunWalls.wallNear(level, player, side);
+			case POLE -> doing.ticks > 3 && player.onGround() || side == null || !FreerunWalls.poleAt(level, player, side, SERVER_REACH);
+			case CLING -> player.onGround() || side == null || !wallOrCorner(level, player, doing, side)
 					|| GRIPPED.getOrDefault(player.getUUID(), 0) > grip(player) + SLIP_TICKS + SERVER_SLACK_TICKS;
 				case WALL_RUN -> doing.ticks > 2 && player.onGround() || side == null || !WebWallRun.wallAt(level, player, side, SERVER_REACH);
 				case BAR -> player.onGround() || player.getEyePosition().distanceToSqr(Vec3.atCenterOf(doing.pos)) >= BAR_REACH_SQR
@@ -618,8 +708,8 @@ public final class Freerun {
 			};
 			if (!player.isAlive() || doing.ticks >= max || lost || !canMove(player, doing.kind)) {
 				it.remove();
-				if (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN) {
-					GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
+				if (held(doing.kind)) {
+				GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
 				}
 				player.removeAttached(MOVE);
 				player.removeAttached(HANG);
@@ -630,17 +720,17 @@ public final class Freerun {
 			if (doing.kind == CLING) {
 				GRIPPED.merge(player.getUUID(), 1, Integer::sum);
 			}
-			if (doing.kind == CLING || doing.kind == BAR || doing.kind == WALL_RUN) {
-				// holding on isn't falling, but it is work
+			if (held(doing.kind)) {
+			// holding on isn't falling, but it is work
 				player.resetFallDistance();
 				player.causeFoodExhaustion(HOLD_EXHAUSTION);
 			}
-			if (doing.kind == CLING) {
-				double climbed = player.getY() - doing.lastY;
+			if (doing.kind == CLING || doing.kind == POLE || doing.kind == UP_RUN) {
+			double climbed = player.getY() - doing.lastY;
 				if (climbed > 0.0) {
 					player.causeFoodExhaustion((float)(climbed * CLIMB_EXHAUSTION));
 				}
-				if (doing.ticks == GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1]) {
+				if (doing.kind == CLING && doing.ticks == GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1]) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.freerun.slipping").withStyle(ChatFormatting.GRAY));
 				}
 			}
@@ -657,6 +747,7 @@ public final class Freerun {
 			if (player.onGround() || player.isInWater() || player.onClimbable()) {
 				KICKED.remove(player.getUUID());
 				RAN.remove(player.getUUID());
+				UP_RAN.remove(player.getUUID());
 				GRIPPED.remove(player.getUUID());
 			}
 			boolean narrow = onNarrowTop(player);
@@ -669,6 +760,27 @@ public final class Freerun {
 			long now = server.overworld().getGameTime();
 			GRACE.values().removeIf(until -> until < now);
 		}
+	}
+
+	/**
+	 * (0.15.12) A cling follows its wall round a corner: when the wall it holds is gone it takes whichever other wall
+	 * is against the player (the client turns the body; the pose follows {@link #MOVE}). False when there is none.
+	 */
+	private static boolean wallOrCorner(ServerLevel level, ServerPlayer player, Doing doing, Direction side) {
+		if (WebWallRun.wallAt(level, player, side, SERVER_REACH)) {
+			doing.missing = 0;
+			return true;
+		}
+		for (Direction other : Direction.Plane.HORIZONTAL) {
+			if (other != side && climbable(level, player, other, SERVER_REACH)) {
+				doing.face = other.get3DDataValue();
+				doing.missing = 0;
+				player.setAttached(MOVE, CLING * 8 + other.get3DDataValue() + 1);
+				return true;
+			}
+		}
+		// the client's corner step takes a few ticks: the wall may be missing that long
+		return ++doing.missing <= CORNER_GRACE_TICKS;
 	}
 
 	/** Reads the player's ranks from Kingdoms and syncs them (only when they change). */
@@ -706,7 +818,7 @@ public final class Freerun {
 	}
 
 	/** Keeps one of our modifiers on ({@code amount} non-zero) or off. */
-	private static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
+	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
 		AttributeInstance instance = player.getAttribute(attribute);
 		if (instance == null) {
 			return;
