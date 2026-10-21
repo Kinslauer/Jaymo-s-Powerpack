@@ -38,8 +38,6 @@ import net.minecraft.world.phys.Vec3;
  * <li>C (ascended), Elder Wyrm: twice your size with scales of {@link #ELDER_ARMOR} armour, wings that cost nothing, a
  * breath you can pour out every {@link #ELDER_BREATH_COOLDOWN} ticks, and a gust half again as wide.</li>
  * </ul>
- * Corrupted: the wings tear. In the air they give out at random for {@link #CORRUPT_STALL_TICKS} (no slow fall), and
- * your breath lingers twice as long.
  */
 public final class Wyrm extends XenoForm {
 	// ---- tuning ----
@@ -63,9 +61,6 @@ public final class Wyrm extends XenoForm {
 	/** Elder Wyrm: extra size (on the form's 1.2x), armour, the breath's cooldown, and the gust's reach multiplier. */
 	public static final double ELDER_EXTRA_SCALE = 0.8, ELDER_ARMOR = 8.0, ELDER_GUST = 1.5;
 	public static final int ELDER_BREATH_COOLDOWN = 40;
-	/** Corrupted: the chance a tick the wings give out, and for how long; the breath's lingering. */
-	public static final int CORRUPT_STALL_CHANCE = 100, CORRUPT_STALL_TICKS = 30;
-	public static final float CORRUPT_BREATH = 2.0F;
 
 	private static final net.minecraft.resources.Identifier ELDER_SCALE_ID = com.jaymospowers.JaymosPowers.id("xenoform_elder_scale");
 	private static final net.minecraft.resources.Identifier ELDER_ARMOR_ID = com.jaymospowers.JaymosPowers.id("xenoform_elder_armor");
@@ -87,9 +82,6 @@ public final class Wyrm extends XenoForm {
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		if (key == PowerKey.ABILITY_2) {
-			if (down && live.wingStall > 0) {
-				return;
-			}
 			if (down != live.wings) {
 				live.wings = down;
 				if (down) {
@@ -107,7 +99,7 @@ public final class Wyrm extends XenoForm {
 		switch (key) {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
-					breath(player, live.corrupted ? CORRUPT_BREATH : 1.0F);
+					breath(player, 1.0F);
 					cooldown(player, live, R, live.ultimate ? ELDER_BREATH_COOLDOWN : BREATH_COOLDOWN);
 				}
 			}
@@ -130,16 +122,6 @@ public final class Wyrm extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		if (live.wingStall > 0) {
-			live.wingStall--;
-		}
-		if (live.wings && live.corrupted && !player.onGround() && player.getRandom().nextInt(CORRUPT_STALL_CHANCE) == 0) {
-			// the torn wing gives out
-			live.wings = false;
-			live.wingStall = CORRUPT_STALL_TICKS;
-			sound(player, SoundEvents.ENDER_DRAGON_HURT, 1.0F, 1.4F);
-			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.6, 0.3, 0.6, 0.3);
-		}
 		if (live.wings) {
 			Vec3 want = player.getLookAngle().scale(WING_SPEED);
 			Vec3 motion = player.getDeltaMovement().lerp(want, WING_EASE);

@@ -38,13 +38,17 @@ final class XenoformHud {
 	private static final Map<String, Item[]> ICONS = Map.of(
 		"bulwark", new Item[] {Items.IRON_INGOT, Items.HEAVY_CORE, Items.LEAD, Items.ANVIL},
 		"pyre", new Item[] {Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.MAGMA_BLOCK},
-		"blur", new Item[] {Items.FEATHER, Items.LADDER, Items.WIND_CHARGE, Items.ENDER_PEARL},
+		"blur", new Item[] {Items.SUGAR, Items.PISTON, Items.WIND_CHARGE, Items.ENDER_PEARL},
 		"prism", new Item[] {Items.AMETHYST_SHARD, Items.AMETHYST_BLOCK, Items.SHIELD, Items.POINTED_DRIPSTONE},
 		"wisp", new Item[] {Items.PHANTOM_MEMBRANE, Items.GLASS, Items.SCULK_SHRIEKER, Items.ELYTRA},
 		"gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE},
 		"knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT},
 		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE},
+		"duplex", new Item[] {Items.COPPER_INGOT, Items.LIGHTNING_ROD.asList().get(0), Items.COPPER_BULB.asList().get(0), Items.HONEYCOMB},
 		"nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER});
+	/** The slam's burst of light: where the band is on screen (shares of the width and height), how big it blooms (share of the height), its layers and row height. */
+	private static final float BURST_X = 0.52F, BURST_Y = 0.74F, BURST_SIZE = 0.4F;
+	private static final int BURST_LAYERS = 5, BURST_STEP = 3, BURST_ALPHA = 30;
 	private static final Item[] NO_ICONS = {Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON};
 
 	private XenoformHud() {
@@ -57,6 +61,7 @@ final class XenoformHud {
 		int height = graphics.guiHeight();
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
 		flash(graphics, width, height, delta);
+		burst(graphics, width, height, delta);
 		XenoformState.Hud hud = XenoformState.hud(player);
 		XenoForm form = XenoformState.form(player);
 		long now = player.level().getGameTime();
@@ -87,6 +92,29 @@ final class XenoformHud {
 		graphics.fill(0, height - edge, width, height, color);
 		graphics.fill(0, edge, edge, height - edge, color);
 		graphics.fill(width - edge, edge, width, height - edge, color);
+	}
+
+	/** The slam landing in first person: green light blooming out from the band and fading, as nested soft ellipses. */
+	private static void burst(GuiGraphicsExtractor graphics, int width, int height, DeltaTracker delta) {
+		if (XenoformPowerClient.burst <= 0) {
+			return;
+		}
+		float left = (XenoformPowerClient.burst - delta.getGameTimeDeltaPartialTick(false)) / (float)XenoformPowerClient.BURST_TICKS;
+		if (left <= 0.0F) {
+			return;
+		}
+		float bloom = 0.25F + 0.75F * (1.0F - left);
+		int cx = Math.round(width * BURST_X);
+		int cy = Math.round(height * BURST_Y);
+		for (int layer = BURST_LAYERS; layer >= 1; layer--) {
+			float ry = height * BURST_SIZE * bloom * layer / BURST_LAYERS;
+			float rx = ry * 1.5F;
+			int color = Mth.clamp((int)(BURST_ALPHA * left * 1.3F), 0, 255) << 24 | (layer == 1 ? 0xD8FFE0 : XenoformPower.COLOR);
+			for (float dy = -ry; dy < ry; dy += BURST_STEP) {
+				int half = (int)(rx * Mth.sqrt(1.0F - dy * dy / (ry * ry)));
+				graphics.fill(cx - half, cy + (int)dy, cx + half, cy + (int)dy + BURST_STEP, color);
+			}
+		}
 	}
 
 	/** Z: the dialled alien, and the band's state. */
@@ -166,10 +194,25 @@ final class XenoformHud {
 		int color = warn ? pulse(WARN_COLOR, 0xFFFFFF, time * 1.2F) : form.color;
 		graphics.fill(x, y + 8, x + BAR_WIDTH, y + 11, 0x90000000);
 		graphics.fill(x, y + 8, x + Mth.ceil(BAR_WIDTH * share), y + 11, 0xFF000000 | color);
-		Component name = form.name();
+		Component name = form == com.jaymospowers.power.xenoform.XenoForms.DUPLEX ? com.jaymospowers.power.xenoform.forms.Duplex.title(1 + doubles()) : form.name();
 		graphics.text(font, name.getString(), x, y - 2, 0xFF000000 | form.color);
 		String seconds = String.valueOf(Mth.ceil(hud.formTicks() / 20.0F));
 		graphics.text(font, seconds, x + BAR_WIDTH - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
+	}
+
+	/** How many of Duplex's doubles of yours this client can see. */
+	private static int doubles() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null || minecraft.player == null) {
+			return 0;
+		}
+		int count = 0;
+		for (net.minecraft.world.entity.Entity e : minecraft.level.entitiesForRendering()) {
+			if (e instanceof com.jaymospowers.power.xenoform.XenoDouble twin && twin.isAlive() && twin.isDoubleOf(minecraft.player)) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private static int chipsWidth(int count) {

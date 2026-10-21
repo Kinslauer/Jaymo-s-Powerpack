@@ -65,7 +65,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Gremlin** | silverfish | 0.3x, 10 hp, fists 2, 20% faster, no fall damage; fits 1x1 gaps | Spring: 1.1 up, 0.6 out (1.5 s) | Sabotage: within 16 blocks, levers and buttons are pulled, doors/trapdoors/gates toggled, wire/repeaters/comparators/torches popped off (5 s) | Bite: 3 damage within 2.5; players lose 4 food, mobs get Hunger II + Weakness; you heal 2 and eat 2 (3 s) | Climb (hold): up any wall at 0.18/tick |
 | **Knell** | Warden | 1.3x, 50 hp, fists 8, slower, 90% knockback resist, steps up a block | Sonic Boom: 15-block line through walls, 10 sonic damage + 2.5 knockback (8 s) | Tremor Sense (hold): Glowing on everything within 24 | Shriek: 4 damage, Darkness 6 s, Slowness II to all within 12 (15 s) | Burrow: 1 s digging (immune, Slowness X), teleport to the surface where you look up to 16 blocks, 1 s emerging (12 s) |
 | **Wyrm** | Ender Dragon (any part) | 1.2x, 36 hp, fists 5, 40% knockback resist; water and rain 1 hp/s; its own breath can't hurt it | Dragon's Breath: an `AreaEffectCloud` 5 blocks ahead on the ground, radius 3, 5 s, Instant Damage II (10 s) | Wings (hold): fly toward where you look at 0.9/tick, free; slow falling on release | Wing Gust: 3 damage, shove 1.6 out to all within 6, you recoil (6 s) | Rift: teleport up to 12 blocks where you look (4 s) |
-| **Blur** | horse (any) | 0.9x, 20 hp, fists 4, 60% faster, 4 blocks of extra safe fall | Dash: 1.5 blocks/tick for 8 ticks (2 s) | Wall Run (hold): against a wall, climb at 0.32/tick for up to 2 s | Whirlwind: pulls everything within 5 in, 4 damage (8 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
+| **Velox** | horse (any) | 0.9x, 20 hp, fists 4, 80% faster, 4 blocks of extra safe fall; runs on water while sprinting | Speed Burst (hold): +120% speed, steps up whole blocks, climbs walls on contact, up to 6 s (3 s) | Rapid Punches: 6 double hits, one every 2 ticks, on the creature you aim at within 3.5; the last shoves (5 s) | Cyclone: 1.5 s, sweeps everything within 6 round you and lifts it up to 3.5 blocks, 3 damage once (10 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
+| **Duplex** | copper golem | 0.9x, 18 hp, fists 3, 10% faster, 20% knockback resist; the name counts you all (`Duplex.title`, also on the HUD): Duplex, Triplex, Quadruplex, up to Septuplex | Split: a double steps out beside you (`XenoDouble`: 6 hp, fists 3, never saved), up to 3; doubles go for what you hit and what hits you; a loyal double's death costs you 2 (2 s) | Rally: doubles target what you aim at within 16; at nothing, they come back (1 s) | Switch: trade places with the aimed double, or the farthest within 32 (2 s) | Merge: doubles within 24 pop back into you, healing 3 each (8 s) |
 
 ## Rendering [client/power/xenoform]
 
@@ -75,10 +76,9 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   `isInvisible` again so the shadow still falls.
 - `XenoFormModels`: each alien is a `HumanoidModel` built from `HumanoidModel.createMesh` with a different inflation and
   extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crown and hair of fire,
-  shoulder plumes, forearm flames and core; Blur's
-  fin, snout and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
-  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Blur's
-  ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
+  shoulder plumes, forearm flames and core; Velox's
+  crest, visor, snout, ball feet and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
+  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Prism's shoulder shards, Gremlin's tail; Duplex's swaying lightning rod and belt, which its doubles wear too, drawn by `XenoDoubleRenderer`), so it takes the player's own pose, swing, crouch and swim. Skins are
   64x128: the vanilla layout in the top 64 rows, every extra in the rows below (nothing shares texels with a limb);
   `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
   every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
@@ -98,6 +98,12 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
   (the alien appears mid-slap). The pose is read onto the render state in `extract`, laid over any humanoid model
   after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
+- The first-person slam (`XenoformSlamView`, since 0.15.51; its numbers were tuned against offline pictures, see its
+  javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
+  at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) and the
+  right hand waits above and to the right; the hand comes straight down over 2 ticks and covers the dial; on contact
+  the forearm dips and springs back, the view kicks once (`ScreenShake`) and a green burst blooms (`XenoformHud`);
+  then both arms drop away.
 - Flight (`XenoformFlightPose`, client): the server syncs how an alien is flying (`XenoformState.FLIGHT`, from
   `XenoForm.flight`). Pyre's jet, Wyrm's wings and Nadir's flight make `WindPose` treat the alien as cruising once it
   moves at 0.25/tick, so it takes Wind's lean, banking and stretched-out limbs (Pyre keeps its arms swept back as jets). Wyrm's wings beat deep while flying and
@@ -115,7 +121,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 
 ## Stage 3: ascension, the Ultimates, the twists, the kingdoms
 
-- **Ascension.** The power ascends on its own once the band is complete (all eight aliens scanned) and the power fully
+- **Ascension.** The power ascends on its own once the band is complete (all nine aliens scanned; Duplex, added in 0.15.51, made it nine, and anyone already ascended stays ascended) and the power fully
   mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
   changes until you slam.
 - **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form for the rest of the timer
@@ -126,21 +132,17 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 |---|---|---|
 | Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
 | Pyre | Sunheart | The jet flies at 0.8/tick; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
-| Blur | Afterimage | An invisible, glowing horse of your DNA bolts away for 10 s; mobs hunting you within 20 blocks retarget to it. C again every 10 s. |
+| Velox | Standstill | Everything living within 24 blocks gets Slowness VII and its speed cut for 6 s; projectiles hang at 5% speed, then fly on; you get Speed II. C again every 30 s. |
 | Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
 | Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |
 | Gremlin | Swarm | 3 glowing silverfish follow you, bite what you bite and never attack players. C again swaps places with the farthest (nearest, sneaking), every second. |
 | Knell | The Tolling | Rooted, 5 tolls 2 s apart: 6 sonic damage, a shove and darkness (players) to all within 8; Resistance II meanwhile. Again after 30 s. |
 | Wyrm | Elder Wyrm | 2x size, +8 armour, wings cost nothing, breath every 2 s, gust 1.5x wide. |
+| Duplex | Copper Storm | Fills up to 3 doubles, then visual-only lightning on each: 6 lightning damage to everything within 3 of a double (not you or yours), and the doubles get Speed II, Strength and Glowing for 20 s; up to 6 doubles while it lasts (the extras pop when it ends). C again every 20 s. |
 
-- **The corruption, per alien** (`live.corrupted`, refreshed every tick; the line `xenoform.jaymospowers.<id>.corrupt`
-  is sent in chat when you change while corrupted): Bulwark's fists +2 and the slam costs you 3; Pyre's nova and trail
-  light the ground round you and water bites double; Blur's dash runs until a wall or a creature (up to 3 s, 4 damage
-  to what it hits); Prism's reflect lets 1 arrow in 4 through; Wisp's shroud shows you 10 ticks in every 60 and 1 phase
-  in 4 bites (3 in-wall damage, nausea); Gremlin's bite catches everyone within 2.5 of its mark and each sabotage also
-  throws a random lever/button within 6; Knell's boom gives you darkness and its shriek fires every sculk shrieker
-  within 12 (`SculkShriekerBlockEntity.tryShriek`, so the Warden's count climbs); Wyrm's wings give out 1 tick in 100
-  for 30 ticks (no slow falling) and its breath lasts 10 s.
+- **The corruption** is the band's alone: corrupted, a slam may give the wrong alien and the band changes you on its
+  own (above). No alien has a twist of its own (0.15.51 removed them at Andy's word); `XenoForm.corrupt` is the empty
+  hook, called every tick while the band is corrupted, for any that's added later.
 - **Jaymo's Kingdoms** (`kingdoms/.../Aliens`, by entity tag `jaymospowers_xenoform` and `jaymospowers_xenoform:<id>`,
   set in `transform` and cleared in `revert`): to a kingdom's people an alien is a monster. Villagers run from one
   (`Frights`), guards hunt it (`Folk`'s player target goal, `MobCombat.foe`), unless that realm's folk or villagers saw

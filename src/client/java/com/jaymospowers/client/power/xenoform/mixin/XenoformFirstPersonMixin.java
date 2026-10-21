@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.xenoform.mixin;
 
 import com.jaymospowers.client.power.xenoform.XenoformClient;
+import com.jaymospowers.client.power.xenoform.XenoformSlamView;
 import com.jaymospowers.client.power.xenoform.XenoformSlap;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -27,8 +28,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <ul>
  * <li>as an alien, your arm still shows: the renderer skips the bare arm of an invisible body, and the body was made
  * invisible so the alien could stand in for it, so the flag is lifted for the hands and put back after;</li>
- * <li>the slam of the band (see XenoformSlap): the left forearm comes up across the view with the band on its wrist, the
- * right fist rises and drops onto it. While it plays, the usual hands are replaced.</li>
+ * <li>the slam of the band (see XenoformSlap, and XenoformSlamView for the placements): the left forearm swings up across
+ * the view with the band's face turned up at you, the right hand hovers above it and comes down on the dial. While it
+ * plays, the usual hands are replaced.</li>
  * </ul>
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
@@ -53,28 +55,33 @@ abstract class XenoformFirstPersonMixin {
 			this.jaymospowers$liftedInvisible = true;
 		}
 		XenoformSlap.Pose pose = avatar.getData(XenoformSlap.KEY);
-		if (pose == null || hands.isScoping || self.getAttached(Carry.CARRYING) != null) {
+		if (pose == null) {
 			return;
 		}
-		float raise = pose.raise(), strike = pose.strike();
+		// the impact is felt at the landing whether or not the hands are drawn
+		XenoformSlap.landed(pose, self);
+		if (hands.isScoping || self.getAttached(Carry.CARRYING) != null) {
+			return;
+		}
+		float time = self.tickCount + partialTicks;
 		poseStack.pushPose();
 		// the same lag behind the view as the usual hands
 		poseStack.rotateDegrees(Axis.XP, (hands.viewXRot - hands.xBob) * 0.1F);
 		poseStack.rotateDegrees(Axis.YP, (hands.viewYRot - hands.yBob) * 0.1F);
 		int light = avatar.lightCoords;
 		XenoformArmInvoker arms = (XenoformArmInvoker)this;
-		// the band's wrist: up and in across the lower view, the forearm turned nearly level
+		// the band's wrist: up from below into a bar across the lower view, the band's face turned up at you
+		// (the band goes on with the arm: XenoformAvatarRendererMixin, after renderHand, with the dial's cap)
 		poseStack.pushPose();
-		poseStack.translate(0.1F * raise, 0.3F * raise, 0.05F * raise);
-		poseStack.rotateDegrees(Axis.ZP, -25.0F * raise);
-		// (the band goes on with the arm: XenoformAvatarRendererMixin, after renderHand)
-		arms.jaymospowers$renderPlayerArm(poseStack, collector, light, 0.0F, 0.0F, HumanoidArm.LEFT, player);
+		XenoformSlamView.dial(pose, time);
+		XenoformSlamView.left(poseStack, pose, time);
+		arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.LEFT, player);
+		XenoformSlamView.dialDone();
 		poseStack.popPose();
-		// the striking hand: up and back, then down and across onto the wrist
+		// the striking hand: poised above and to the right, then down flat on the dial
 		poseStack.pushPose();
-		poseStack.translate(-0.5F * strike, 0.35F * raise - 0.3F * strike, -0.1F * raise + 0.1F * strike);
-		poseStack.rotateDegrees(Axis.XP, 35.0F * raise - 25.0F * strike);
-		arms.jaymospowers$renderPlayerArm(poseStack, collector, light, 0.0F, 0.0F, HumanoidArm.RIGHT, player);
+		XenoformSlamView.right(poseStack, pose, time);
+		arms.jaymospowers$renderPlayerHand(poseStack, collector, light, HumanoidArm.RIGHT, player);
 		poseStack.popPose();
 		poseStack.popPose();
 		this.jaymospowers$restoreInvisible(player);
