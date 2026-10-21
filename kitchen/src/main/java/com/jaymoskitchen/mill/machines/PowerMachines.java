@@ -29,8 +29,11 @@ import net.minecraft.world.level.material.MapColor;
  */
 public final class PowerMachines {
 	public static PottersWheelBlock POTTERS_WHEEL;
+	public static ChopperBlock CHOPPER;
 	public static BlockEntityType<PottersWheelEntity> POTTERS_WHEEL_ENTITY;
+	public static BlockEntityType<ChopperEntity> CHOPPER_ENTITY;
 	public static Item POTTERS_WHEEL_ITEM;
+	public static Item CHOPPER_ITEM;
 
 	private PowerMachines() {
 	}
@@ -38,14 +41,19 @@ public final class PowerMachines {
 	public static void register() {
 		POTTERS_WHEEL = block("potters_wheel", PottersWheelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 			.instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CHOPPER = block("bloody_chopper", ChopperBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+			.instrument(NoteBlockInstrument.BASS).strength(2.5F).sound(SoundType.WOOD).noOcclusion());
 		POTTERS_WHEEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("potters_wheel"),
 			new BlockEntityType<>(PottersWheelEntity::new, Set.of(POTTERS_WHEEL)));
+		CHOPPER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("bloody_chopper"),
+			new BlockEntityType<>(ChopperEntity::new, Set.of(CHOPPER)));
 		POTTERS_WHEEL_ITEM = blockItem("potters_wheel", POTTERS_WHEEL);
+		CHOPPER_ITEM = blockItem("bloody_chopper", CHOPPER);
 
 		ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(JaymosKitchen.id("potters_wheel"), new PottersWheelRecipes());
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
-			for (Item item : List.of(POTTERS_WHEEL_ITEM)) {
+			for (Item item : List.of(POTTERS_WHEEL_ITEM, CHOPPER_ITEM)) {
 				output.accept(new ItemStack(item));
 			}
 		});
