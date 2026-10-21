@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.BeamClash;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -250,7 +251,7 @@ public final class ZFighterWaveBeam {
 		strike(player, wave, head);
 		sparks(wave, head);
 		if (wave.age % HUM_EVERY == 0) {
-			level.playSound(null, head.x, head.y, head.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.4F, spec.pitch());
+			Soundscape.play(level, head, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.4F).pitched(spec.pitch()), ZFighterKi.KI_SURGE);
 		}
 		if (!done) {
 			send(wave, head, false);

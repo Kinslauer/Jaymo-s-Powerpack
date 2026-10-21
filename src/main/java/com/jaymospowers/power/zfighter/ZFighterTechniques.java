@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.Soundscape;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -373,7 +374,7 @@ final class ZFighterTechniques {
 		level.sendParticles(new DustParticleOptions(0xFFFFFF, 3.5F), true, false, centre.x, centre.y, centre.z, 3, size * 0.25, size * 0.25,
 			size * 0.25, 0.0);
 		if (now % 20 == 0) {
-			level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 2.0F, 0.5F + (float)size * 0.05F);
+			Soundscape.play(level, centre, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(2.0F).pitched(0.5F + (float)size * 0.05F), ZFighterKi.KI_SURGE);
 		}
 	}
 

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#jaymospowers:stripped_logs",
+    "minecraft:potion",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "id": "jaymospowers:willow_bark_tea",
+    "count": 1
+  }
+}

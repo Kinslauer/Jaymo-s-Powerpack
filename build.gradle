@@ -96,8 +96,7 @@ def packMods = [
 	// stay on CurseForge/Modrinth): sneak+right-click a grindstone with a tool for sharpened hits
 	[dep: "maven.modrinth:grindstone-sharper-tools:L4PcjMdo", cf: [347346, 9034113]],
 	[dep: "maven.modrinth:collective:oPyHSBXE", cf: [342584, 9122800]],
-	// Combat Roll (GPL-3.0, by Better Combat's author): the dodge roll
-	[dep: "maven.modrinth:combat-roll:OuZGcMyV", cf: [678036, 8906551]],
+	// (Combat Roll left in 0.15.5: the dodge and the feathers are our own now, stamina/Dodge and stamina/Feathers)
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
 	[dep: "maven.modrinth:epic-structures-villages:hCRa4eFr", cf: [1308486, 8830175]],
@@ -175,6 +174,23 @@ def packMods = [
 	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
 	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
 	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
+	// QOL (0.15.3), all shipped unchanged. Auto HUD (LGPL-3.0, Crendgrim): hides the hotbar, hearts, hunger and the rest
+	// while nothing on them changes, and brings each back when it does. Client-only.
+	[dep: "maven.modrinth:autohud:zvVWJ8QJ", cf: [623806, 9237281]],
+	// Respawning Animals (MPL-2.0, Fuzss): farm animals slowly respawn in loaded land, like monsters do, so the wild
+	// doesn't empty out; animals you breed or name never despawn. Server-side; needs Puzzles Lib (MPL-2.0, Fuzss) and
+	// Forge Config API Port (above).
+	[dep: "maven.modrinth:respawning-animals:IwgPloQF", cf: [322765, 8985572]],
+	[dep: "maven.modrinth:puzzles-lib:68hLXNWE", cf: [495476, 9173689]],
+	// Geophilic (all rights reserved, everloste; downloaded by id from its own pages, never copied or edited): subtler
+	// overworld biomes, with rocks, fallen logs, stumps, moss and bushes. Worldgen, so new chunks only.
+	[dep: "maven.modrinth:geophilic:5kFV8CEz", cf: [711216, 8966202]],
+	// Streams Reflowing (all rights reserved, but "You can add this to any modpack, anywhere"): rivers and streams that
+	// run downhill from springs through lakes to the sea, and water that keeps flowing. Worldgen, so new chunks only.
+	[dep: "maven.modrinth:streams-reflowing:1PyyzYS1", cf: [1581408, 9216745]],
+	// Jade (CC BY-NC-SA 4.0, Snownee; shipped unchanged in a free pack): the little panel naming the block or mob under
+	// your crosshair, with its mod, health and what it's doing. Works with JEI.
+	[dep: "maven.modrinth:jade:71CTWqdE", cf: [324717, 9042194]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -206,6 +222,10 @@ def packModsOverride = [
 	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
 	// Fabric port stops at 1.21.1. Beta. Needs Forge Config API Port (packMods) and Player Animation Library 1.2.7+.
 	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
+	// Interactic Renewed (MIT; EmpireWarrior81's fork of glisco's Interactic): items on the ground lie flat and show
+	// their name under the crosshair, you pick them up by right-clicking them (Jaymo's Powers switches its auto pickup
+	// off once per install: core/PickupPreset) and hold Q to throw them hard. Not on CurseForge. Its config library (ewlib, MIT) is inside its jar.
+	[dep: "maven.modrinth:interactic-renewed:B6iZXYFE"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
@@ -225,6 +245,19 @@ tasks.register("buildKingdoms", GradleBuild) {
 }
 def kingdomsLibs = file(file("E:/").exists() ? "E:/jaymos-kingdoms-build/libs" : "kingdoms/build/libs")
 def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsProps.version}.jar" }.builtBy("buildKingdoms")
+// The Roads More Travelled (CC BY-NC 4.0, by milkucha; github.com/milkucha/trmt): paths wear into grass, dirt and sand
+// where people and mounts walk most, and grow back when left alone. It has no 26.3 build, so ports/trmt is its 26.1.x
+// source ported to 26.3 (changes listed in ports/trmt/PORT.md, credit kept), built by the pack tasks and shipped as an
+// override like Kingdoms. Free pack, so the non-commercial licence holds. TODO: once milkucha releases for 26.3
+// (Modrinth 74oZhrEe, CurseForge 1512955), move it into packMods and delete ports/trmt.
+def trmtProps = new Properties()
+file("ports/trmt/gradle.properties").withInputStream { trmtProps.load(it) }
+tasks.register("buildTrmt", GradleBuild) {
+	dir = file("ports/trmt")
+	tasks = ["build"]
+}
+def trmtLibs = file(file("E:/").exists() ? "E:/trmt-port-build/libs" : "ports/trmt/build/libs")
+def trmtJar = fileTree(trmtLibs) { include "trmt-${trmtProps.mod_version}.jar" }.builtBy("buildTrmt")
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
@@ -319,6 +352,7 @@ tasks.register("modpackMods", Sync) {
 	from kitchenJar
 	from mcaJar
 	from kingdomsJar
+	from trmtJar
 	from localPackJars
 	into new File(packDir, "mods")
 }
@@ -350,6 +384,7 @@ tasks.register("curseforgePack", Zip) {
 		from kitchenJar
 		from mcaJar
 		from kingdomsJar
+		from trmtJar
 	}
 }
 // the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
@@ -378,6 +413,7 @@ tasks.register("serverMods", Sync) {
 	from kitchenJar
 	from mcaJar
 	from kingdomsJar
+	from trmtJar
 	from localPackJars
 	into new File(serverDir, "mods")
 }
@@ -386,13 +422,14 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar", "buildKingdoms"
+	dependsOn "jar", "buildKingdoms", "buildTrmt"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
 		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
 		mcaJar.files.each { wanted << [jar: it, prefix: "mca-fabric-"] }
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
+		trmtJar.files.each { wanted << [jar: it, prefix: "trmt-"] }
 		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
 		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }
 		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {

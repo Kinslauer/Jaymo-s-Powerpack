@@ -20,7 +20,7 @@ abstract class VillagerTradeMixin {
 			// (0.7.20) a few more words of their tongue
 			Languages.traded(v);
 			if (v.getTradingPlayer() instanceof net.minecraft.server.level.ServerPlayer player) {
-				// (0.7.98) and they remember a customer
+				// (0.7.108) and they remember a customer
 				com.jaymoskingdoms.Recollections.trade(v, player);
 			}
 		}

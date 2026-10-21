@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.98) What each of a settlement's people remembers of each player: the gift you gave them, the trades, the hug
+ * (0.7.108) What each of a settlement's people remembers of each player: the gift you gave them, the trades, the hug
  * they welcomed (or didn't), the lie you told them, the theft they saw, the day you saved their life or brought their
  * brother home from captivity. Held by the villager (or folk) themselves, under the player (a masked stranger under
  * the costume's stand-in, {@link Identities#standIn}), and kept for as long as it matters to them: small things for a

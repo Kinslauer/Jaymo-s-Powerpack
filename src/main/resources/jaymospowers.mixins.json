@@ -13,6 +13,8 @@
 		"CrawlJumpMixin",
 		"CrawlPlayerMixin",
 		"DismemberMobMixin",
+		"DownedMobMixin",
+		"FistGuardInventoryMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

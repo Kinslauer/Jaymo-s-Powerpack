@@ -2,6 +2,7 @@ package com.jaymospowers.power.wind;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.power.smoke.SmokeField;
 import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
@@ -38,6 +39,10 @@ import net.minecraft.world.phys.Vec3;
  * {@link #KINGDOMS_TAG} and pushes the ship). Everyone in view sees the stream ({@link #JETTING}; the client draws it).
  */
 public final class WindJet {
+	/** The jet's sound: a high rush of air at uneven beats, sometimes a whirl. */
+	static final Soundscape.Layer JET_RUSH = Soundscape.Layer.of(0.65F, 0.9F, 1.3F, 1.65F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BREEZE_IDLE_GROUND);
+	static final Soundscape.Layer JET_WHIRL = Soundscape.Layer.of(0.3F, 0.45F, 1.2F, 1.5F, SoundEvents.BREEZE_WHIRL).chance(0.3F);
+
 	/** How far the stream reaches (blocks), how wide it is at your hands and how much wider a block further. */
 	public static final double RANGE = 18.0, MOUTH = 0.35, SPREAD = 0.12;
 	/** Its push on what it catches (blocks/tick a tick, near you; nothing at its far end), and the most it gives. */
@@ -166,9 +171,8 @@ public final class WindJet {
 			e.fallDistance = 0.0;
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
-		if (player.tickCount % 16 == 0) {
-			level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS, 0.8F,
-				1.4F + level.getRandom().nextFloat() * 0.2F);
+		if (Soundscape.due(player, "wind.jet", 10, 22)) {
+			Soundscape.play(level, player.position().add(0.0, 1.0, 0.0), SoundSource.PLAYERS, JET_RUSH, JET_WHIRL);
 		}
 	}
 

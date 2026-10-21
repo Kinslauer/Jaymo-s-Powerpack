@@ -342,12 +342,14 @@ public final class Pickpocket {
 			mob.getLookControl().setLookAt(player);
 		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.pickpocket.caught", mark.getDisplayName()).withStyle(ChatFormatting.RED));
-		// (0.7.98) they won't forget the hand in their pocket
+		// (0.7.108) they won't forget the hand in their pocket
 		Recollections.remember(mark, player, Recollections.Kind.ROBBED, Component.empty());
 		if (f != null && !Wars.enemy(player, f)) {
 			List<LivingEntity> seen = new ArrayList<>(Theft.witnesses(level, f, player));
 			seen.remove(mark);
 			seen.addFirst(mark);
+			// (0.7.102) the mark turned and looked: close enough, a hood doesn't hide whose hand it was
+			Identities.recognise(level, player, f, seen, mark);
 			Theft.commit(player, level, f, Theft.Crime.PICKPOCKET, null, false, seen);
 		} else {
 			// (no law here: they only shout)

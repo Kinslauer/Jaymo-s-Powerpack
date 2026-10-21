@@ -73,37 +73,11 @@ public final class DarktideNet {
 		}
 	}
 
-	/** Client → server: how many Combat Roll charges the player has right now (sent whenever it changes). */
-	public record Rolls(int available) implements CustomPacketPayload {
-		public static final Type<Rolls> TYPE = new Type<>(JaymosPowers.id("darktide_rolls"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Rolls> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.available), buf -> new Rolls(buf.readVarInt()));
-
-		@Override
-		public Type<Rolls> type() {
-			return TYPE;
-		}
-	}
-
-	/** Server → client: a Combat Roll charge spent by a dash ({@code -1}) or given back by a landed flurry ({@code +1}). */
-	public record RollCharge(int change) implements CustomPacketPayload {
-		public static final Type<RollCharge> TYPE = new Type<>(JaymosPowers.id("darktide_roll_charge"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, RollCharge> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.change), buf -> new RollCharge(buf.readVarInt()));
-
-		@Override
-		public Type<RollCharge> type() {
-			return TYPE;
-		}
-	}
-
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Skill.TYPE, Skill.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(NightKey.TYPE, NightKey.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Fx.TYPE, Fx.CODEC);
-		PayloadTypeRegistry.serverboundPlay().register(Rolls.TYPE, Rolls.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(RollCharge.TYPE, RollCharge.CODEC);
 	}
 
 	/** Sends an effect to everyone close enough to see {@code at}. */

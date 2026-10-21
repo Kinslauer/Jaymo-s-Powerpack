@@ -215,7 +215,7 @@ public final class Ledge {
 			return false;
 		}
 		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player)
-			|| Crawl.crawling(player) || player.getAttached(Meditate.STATE) != null) {
+			|| Crawl.crawling(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
 			return false;
 		}
 		return !FlightRoll.powerFlying(player)
@@ -347,7 +347,8 @@ public final class Ledge {
 
 	/** Server: a player on a ledge (or just off one) moves however the hang and climb put them, without being kicked. */
 	public static boolean relaxesMovement(ServerPlayer player) {
-		if (HOLDING.containsKey(player.getUUID())) {
+		// (0.14.3) and a freerunner clinging to a wall, hanging from a bar or running along a wall (Freerun)
+		if (HOLDING.containsKey(player.getUUID()) || com.jaymospowers.freerun.Freerun.relaxesMovement(player)) {
 			return true;
 		}
 		Long until = GRACE.get(player.getUUID());

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.98) MCA's villager chat AI (off unless an op runs {@code /mca chatAI default}) is told what Kingdoms knows: the
+ * (0.7.108) MCA's villager chat AI (off unless an op runs {@code /mca chatAI default}) is told what Kingdoms knows: the
  * villager's realm, ruler, wars and neighbours, how the realm takes the player, and what the villager remembers of
  * them ({@link ChatPrompts}).
  */

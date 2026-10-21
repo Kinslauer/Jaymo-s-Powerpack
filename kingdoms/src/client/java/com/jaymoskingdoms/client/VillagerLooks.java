@@ -69,12 +69,8 @@ public final class VillagerLooks {
 			return;
 		}
 		HeritageLooks.Kind kind = HeritageLooks.Kind.of(heritage);
-		boolean lit = heritage == Heritage.Kind.EMBERBORN || kind != null && switch (kind.eyes) {
-			case ALWAYS -> true;
-			case DAY -> entity.level().isBrightOutside();
-			case NEVER -> false;
-		};
-		int glow = -1;
+		boolean lit = heritage == Heritage.Kind.EMBERBORN || kind != null && HeritageLooks.eyesLit(kind, entity);
+		int glow = kind == null ? -1 : HeritageLooks.mood(kind, entity);
 		if (heritage == Heritage.Kind.TIDEBORN) {
 			// lit under water, and in the rain or wet at night
 			boolean on = entity.isUnderWater() || entity.isInWaterOrRain() && entity.level().isDarkOutside();

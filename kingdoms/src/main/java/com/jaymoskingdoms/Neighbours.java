@@ -139,6 +139,8 @@ final class Neighbours {
 		int aHits, bHits;
 		/** (0.7.21) An ambush: the opener lands every blow. */
 		boolean ambush;
+		/** (0.7.102) A hug that burned one of them ({@link EmberHugs}): it ends there and comes to nothing (no regard, no mood). */
+		boolean burned;
 
 		Meeting(Villager a, Villager b, int faction, Kind kind, long now) {
 			this.a = a;
@@ -309,7 +311,12 @@ final class Neighbours {
 				}
 			}
 		}
-		return deck.get(random.nextInt(deck.size()));
+		Kind kind = deck.get(random.nextInt(deck.size()));
+		if ((kind == Kind.HUG || kind == Kind.AFFECTION) && EmberHugs.burned(a, b) != null && random.nextFloat() >= EmberHugs.TRY_ANYWAY) {
+			// (0.7.102) one of them is Emberborn and the other can't take the heat: they mostly know better than to try
+			kind = Kind.CHAT;
+		}
+		return kind;
 	}
 
 	private static void add(List<Kind> deck, Object... kindsAndWeights) {
@@ -377,6 +384,10 @@ final class Neighbours {
 			return finish(level, m, now);
 		}
 		beat(level, m, now);
+		if (m.burned) {
+			// (0.7.102) a hug that burned: they let go at once, so the burned one is free to pull away
+			return false;
+		}
 		m.beat++;
 		m.next = now + (m.kind == Kind.FIGHT ? BLOW : BEAT);
 		return true;
@@ -458,6 +469,14 @@ final class Neighbours {
 				level.playSound(null, m.a.getX(), m.a.getY(), m.a.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.5F, 1.0F);
 			}
 			case HUG, AFFECTION -> {
+				LivingEntity burned = opener ? null : EmberHugs.burned(m.a, m.b);
+				if (burned != null) {
+					// (0.7.102) an Emberborn is too hot to hold: the other is burned and pulls away, and that's the end of it
+					EmberHugs.burn(level, burned == m.a ? m.b : m.a, burned);
+					say(level, burned, "ember_hug", Speech.YELLOW, burned == m.a ? m.b : m.a);
+					m.burned = true;
+					return;
+				}
 				if (!opener) {
 					m.a.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 					m.b.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
@@ -533,7 +552,7 @@ final class Neighbours {
 		RandomSource random = level.getRandom();
 		shift(m.a, m.b, m.kind.regard);
 		if (!m.kind.sour()) {
-			// (0.7.98) friends talk: of what they've seen players do, too
+			// (0.7.108) friends talk: of what they've seen players do, too
 			Recollections.share(m.a, m.b, random);
 			Recollections.share(m.b, m.a, random);
 		}

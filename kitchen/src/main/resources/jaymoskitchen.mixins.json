@@ -14,6 +14,7 @@
 		"EntityMixin",
 		"ItemAccessor",
 		"KitchenMenuMixin",
+		"LimpPlayerMixin",
 		"LivingEntityMixin",
 		"MobAccessor",
 		"OvenBlockCollisionMixin",
