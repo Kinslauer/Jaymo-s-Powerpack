@@ -21,16 +21,13 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
-<<<<<<< HEAD
 	/**
 	 * (0.7.126) For {@link Bearers} and {@link Looters} (Kitchen 0.5.8): a robber's take ({@code robBy}), whether a body has
 	 * anything on it worth taking, its saved data (who it was), and who a player is carrying.
 	 */
 	private static final @Nullable Method ROB_BY, HAS_VALUABLES, LOOK_TAG, CARRIED_BY, SINCE_DEATH;
-=======
 	/** (0.7.123) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
 	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
->>>>>>> origin/master
 
 	static {
 		Class<?> corpse = null;
@@ -82,7 +79,6 @@ final class KitchenCompat {
 			}
 		}
 		BURNS = burns;
-<<<<<<< HEAD
 		Method robBy = null, hasValuables = null, lookTag = null, carriedBy = null, sinceDeath = null;
 		if (corpse != null) {
 			try {
@@ -101,7 +97,6 @@ final class KitchenCompat {
 		LOOK_TAG = robBy == null ? null : lookTag;
 		CARRIED_BY = robBy == null ? null : carriedBy;
 		SINCE_DEATH = robBy == null ? null : sinceDeath;
-=======
 		Method seasonName = null, dayOfYear = null, temperate = null;
 		if (FabricLoader.getInstance().isModLoaded(MOD)) {
 			try {
@@ -147,7 +142,6 @@ final class KitchenCompat {
 			JaymosKingdoms.LOGGER.debug("Kitchen seasons call failed: {}", e.toString());
 			return null;
 		}
->>>>>>> origin/master
 	}
 
 	private KitchenCompat() {

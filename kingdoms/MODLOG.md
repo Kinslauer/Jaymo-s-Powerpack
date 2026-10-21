@@ -3735,3 +3735,20 @@ identity the same way a costume does but npcs call you a bandit/ pirate dependin
 - **Minibosses:** a crook with a bounty of 40 or more, once someone takes it, is armed when found: a relic weapon
   (royal from 90; it drops, or it's yours when you bring them in), 60 health plus 1.5 per emerald (240 at most), 10
   armour, a boss bar, and it fights the nearest player it can see within 24 blocks (6 damage plus 1 per 25 emeralds).
+- **0.7.126, clearing the dead, graves, mourning, looters:** Andy: "i want someone to clear the battlefield of dead, or
+  maybe come try to rob the corpses". With Jaymo's Kitchen's corpses (0.5.8): once it's quiet round a body in a
+  settlement's land (no monsters, nobody fighting, no raid), a grown villager, a working folk or an idle guard carries it
+  off (`Bearers`, numbers at its top). Its own dead (villagers, traders, its own folk) are buried in a graveyard it lays
+  out in rows on open ground 16-44 blocks from the seat: a dug mound of coarse dirt and a headstone wall (cobblestone in
+  a village, stone brick in a realm, sandstone in the desert); right-click a headstone empty-handed to read who lies
+  there (`jaymoskingdoms:graves`). The enemy's dead are left two minutes, then burned (`Undertakers`' safe fires). With
+  MCA, the spouse and kin come to the grave, kneel, weep and speak, the first leaves a flower, and their mood drops; for
+  four days after they may come back to visit. No family: a neighbour or two; a soldier: his comrades. A player who
+  carried the body there is thanked (+3, three times a day). Robbers (`Looters`): where 3+ bodies with something on them
+  lie near a player, a band of 1-3 ragged looters (Folk role 80) may creep in (likelier by night), kneel at each body
+  and strip it, then slip away; a guard or golem who spots them, a blow, or a player close and upright sends them
+  running (not a sneaking player, nor one who's been robbing bodies too). Killed, their sack spills and the settlements
+  they robbed thank you (+6). A settlement's jobless and nitwit villagers sometimes rob a body in its land; a guard
+  shames them into dropping it, a player who hits one at it gets +3. A player taking anything off a settlement's own
+  dead in its land commits grave robbing (`Theft.Crime.ROBBING`, medium, once a body). Players' bodies are never
+  touched; monsters stay the guards' and golems' (who now leave bodies being buried or robbed alone).

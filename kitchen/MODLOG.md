@@ -860,3 +860,6 @@ after `Mill.register()`.
 Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
 unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
 Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.
+- **0.5.8:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
+  never an animal, fish, player or iron body), `hasValuables()`, `lookTag()`, and `setOnRobbed(BiConsumer)`, called
+  when a player takes anything off a body by hand.
