@@ -1,0 +1,6 @@
+{
+  "input": "minecraft:clay",
+  "output": "jaymospowers:unfired_pot",
+  "steps": 8,
+  "priority": 10
+}
