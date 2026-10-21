@@ -53,9 +53,9 @@ def packMods = [
 	// the extras from the friends' server (Modrinth version ids, matched by file hash)
 	[dep: "maven.modrinth:pantry-for-blockheads:JsGFynFi", cf: [1514716, 8893586]],
 	[dep: "maven.modrinth:natures-compass:pHan4UQ9", cf: [252848, 8916820]],
-	[dep: "maven.modrinth:jei:QfoQJyPO", cf: [238222, 9068072]],
+	[dep: "maven.modrinth:jei:wQJNj1C5", cf: [238222, 9255015]],
 	[dep: "maven.modrinth:mezzconfig:GKiA7PV4", cf: [1689768, 9048674]],
-	[dep: "maven.modrinth:xaeros-minimap:B2aG1aya", cf: [263420, 9067206]],
+	[dep: "maven.modrinth:xaeros-minimap:eUEhnw8G", cf: [263420, 9265879]],
 	[dep: "maven.modrinth:sodium:bAZQdGpg", cf: [394468, 8888037]],
 	[dep: "maven.modrinth:ok-zoomer:3UXOK2JF", cf: [354047, 8899781]],
 	// Moog's Voyager Structures (MIT): new structures in world generation, and its library (LGPL-3.0)
@@ -69,8 +69,8 @@ def packMods = [
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
 	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
 	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
-	[dep: "maven.modrinth:ambientsounds:T9Nl4OKj", cf: [254284, 9099194]],
-	[dep: "maven.modrinth:creativecore:GO707F1h", cf: [257814, 9027378]],
+	[dep: "maven.modrinth:ambientsounds:LFUkYKC1", cf: [254284, 9254861]],
+	[dep: "maven.modrinth:creativecore:mzuUQoPB", cf: [257814, 9265584]],
 	// Subtle Effects (all rights reserved, by MincraftEinstein; "use this mod in modpacks with credit and a link",
 	// modrinth.com/mod/subtle-effects): sparks on fires, snoring, dust clouds, burning entities, heartbeat at low health
 	// and more, all toggled in its config. Server-side too (some effects need it), so every client needs it to join.
@@ -85,17 +85,17 @@ def packMods = [
 	// the block model through Fabric's renderer API, so they light and shade normally under Iris. Needs Fabric API only.
 	[dep: "maven.modrinth:snow-imprints:vVPbnY0q", cf: [1474300, 8893476]],
 	// MRU (all rights reserved) and YetAnotherConfigLib (LGPL-3.0): libraries for Sounds below
-	[dep: "maven.modrinth:mru:wpEZ3KrZ", cf: [669659, 9063992]],
+	[dep: "maven.modrinth:mru:fHDvIf3d", cf: [669659, 9233343]],
 	[dep: "maven.modrinth:yacl:s9SjoFu1", cf: [667299, 8935498]],
 	// ATi Structures, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): big medieval castles,
 	// forts and ruins from vanilla blocks, with vanilla mobs and loot
 	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: [1158208, 8984306]],
 	// Moog's Paths (CC0): biome-styled roads, trails and bridges across the overworld, for carts and carriages
-	[dep: "maven.modrinth:mp-moogs-paths:NKtkFzI1", cf: [1546855, 9106149]],
+	[dep: "maven.modrinth:mp-moogs-paths:irh19s8L", cf: [1546855, 9148952]],
 	// Grindstone Sharper Tools and its library Collective (all rights reserved; modpacks allowed while the downloads
 	// stay on CurseForge/Modrinth): sneak+right-click a grindstone with a tool for sharpened hits
 	[dep: "maven.modrinth:grindstone-sharper-tools:L4PcjMdo", cf: [347346, 9034113]],
-	[dep: "maven.modrinth:collective:oPyHSBXE", cf: [342584, 9122800]],
+	[dep: "maven.modrinth:collective:94WEkZry", cf: [342584, 9272094]],
 	// (Combat Roll left in 0.15.5: the dodge and the feathers are our own now, stamina/Dodge and stamina/Feathers)
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
@@ -125,7 +125,7 @@ def packMods = [
 	// Nether Portal Spread (all rights reserved, by Serilum; modpacks allowed while downloads stay on CurseForge/Modrinth;
 	// needs Collective, above): a lit nether portal slowly turns the overworld round it to netherrack, magma and soul
 	// sand. Server-side.
-	[dep: "maven.modrinth:nether-portal-spread:WcSmdj09", cf: [342097, 9033522]],
+	[dep: "maven.modrinth:nether-portal-spread:LOQ01v7s", cf: [342097, 9224177]],
 	// Traveler Tool Belt (all rights reserved, by Tiviacz; downloaded by id, never copied): an upgradeable belt worn on
 	// the hip; hold its key for a radial menu that swaps the tool into your hand. gigaherz's Tool Belt is NeoForge-only.
 	// Its key starts on R (a power key): client/KeyConflicts moves it to Caps Lock. Needs Forge Config API Port.
@@ -165,8 +165,8 @@ def packMods = [
 	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
 	// from resource packs, here for Fresh Animations: Player Extension (packResourcePacks). Client-only. Our own poses
 	// pause its animations while they play (client/EmfCompat).
-	[dep: "maven.modrinth:entity-model-features:N7d5LddE", cf: [844662, 9064964]],
-	[dep: "maven.modrinth:entitytexturefeatures:O8J3sxxp", cf: [568563, 9055242]],
+	[dep: "maven.modrinth:entity-model-features:vF6qLXsA", cf: [844662, 9188547]],
+	[dep: "maven.modrinth:entitytexturefeatures:OOEycXyN", cf: [568563, 9188429]],
 	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
 	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
 	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
@@ -290,16 +290,20 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it)
 def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils"]
-// a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
-def modId = { File jar ->
+// a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
+def modJson = { File jar ->
 	try {
 		new java.util.zip.ZipFile(jar).withCloseable { zip ->
 			def entry = zip.getEntry("fabric.mod.json")
-			entry == null ? null : new JsonSlurper().parse(zip.getInputStream(entry)).id
+			entry == null ? null : new JsonSlurper().parse(zip.getInputStream(entry))
 		}
 	} catch (IOException ignored) {
 		null
 	}
+}
+def modId = { File jar ->
+	def json = modJson(jar)
+	json == null ? null : json.id
 }
 def localPackJars = files(localPackMods.collect { it.file })
 
@@ -332,10 +336,10 @@ dependencies {
 	// compiled against to make its swings hit bodies, not boxes; touched only via client/compat/mixin/LimbSwingMixin
 	compileOnly "maven.modrinth:better-combat:8Vyq1h9a"
 	// compiled against to pause Fresh Animations' player animations under our poses; touched only via client/EmfAccess
-	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
-	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
+	compileOnly "maven.modrinth:entity-model-features:vF6qLXsA"
+	compileOnly "maven.modrinth:entitytexturefeatures:OOEycXyN"
 	// (0.11.31) compiled against for its recipe pages; touched only via client/jei (its jei_mod_plugin entrypoint)
-	compileOnly "maven.modrinth:jei:QfoQJyPO"
+	compileOnly "maven.modrinth:jei:wQJNj1C5"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
@@ -445,6 +449,32 @@ tasks.register("profileMods") {
 			if (f.renameTo(new File(removedDir, f.name))) {
 				logger.lifecycle("Moved ${f.name} out of your CurseForge profile (into removed-mods)")
 			}
+		}
+		// pack mods newer than the profile's copy replace it (0.15.14: the profile kept Cloth Config 26.3.158, and
+		// WeaponMod 1.25.2 crashed the client asking for 26.3.159). Never downgrade: CurseForge often has newer files
+		// than the pack's Modrinth deps.
+		def versionParts = { String v -> v.split(/[+\-]/)[0].findAll(/\d+/).collect { it as long } }
+		def isNewer = { String a, String b ->
+			def x = versionParts(a), y = versionParts(b)
+			for (int i = 0; i < Math.max(x.size(), y.size()); i++) {
+				def c = (i < x.size() ? x[i] : 0L) <=> (i < y.size() ? y[i] : 0L)
+				if (c != 0) return c > 0
+			}
+			false
+		}
+		def packById = configurations.packJars.files.collectEntries { jar -> [(modId(jar)): jar] }.findAll { it.key != null }
+		profileMods.listFiles().findAll { it.name.endsWith(".jar") }.each { f ->
+			def json = modJson(f)
+			def jar = json == null ? null : packById[json.id]
+			if (jar == null || !isNewer(modJson(jar).version as String, json.version as String)) return
+			def stale = new File(f.path + ".old")
+			if (!f.renameTo(stale)) {
+				logger.warn("Couldn't update ${f.name} in your CurseForge profile (is Minecraft running?). Close the game, then run Build Modpack again.")
+				return
+			}
+			java.nio.file.Files.copy(jar.toPath(), new File(profileMods, jar.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+			stale.delete()
+			logger.lifecycle("Updated ${f.name} (${json.version}) to ${jar.name} (${modJson(jar).version}) in your CurseForge profile")
 		}
 		// mods that joined the pack join the profile too (any pack mod whose id the profile doesn't have yet)
 		def have = profileMods.listFiles().findAll { it.name.endsWith(".jar") }.collect { modId(it) } as Set
