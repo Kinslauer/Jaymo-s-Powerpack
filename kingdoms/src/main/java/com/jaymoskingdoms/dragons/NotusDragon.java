@@ -488,13 +488,13 @@ public class NotusDragon extends AbstractHorse {
 			int x = Mth.floor(centre.x) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
 			int z = Mth.floor(centre.z) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
 			BlockPos top;
+			if (!level.isLoaded(new BlockPos(x, 0, z))) {
+				continue;
+			}
 			if (nether) {
 				double y = floorBelow(level, BlockPos.containing(x, this.getY(), z));
 				top = BlockPos.containing(x, y - 1.0, z);
 			} else {
-				if (!level.isLoaded(new BlockPos(x, 0, z))) {
-					continue;
-				}
 				top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z)).below();
 			}
 			BlockState state = level.getBlockState(top);
@@ -1095,7 +1095,22 @@ public class NotusDragon extends AbstractHorse {
 
 	@Override
 	public boolean removeWhenFarAway(double distance) {
-		return false;
+		return !this.isTamed() && !this.hasCustomName();
+	}
+
+	/** Only its owner steers it: a piggyback rider left alone in the saddle can't fly or breathe, so it lands. */
+	@Override
+	public @Nullable LivingEntity getControllingPassenger() {
+		LivingEntity rider = super.getControllingPassenger();
+		return rider instanceof Player player && owner(player) ? rider : null;
+	}
+
+	@Override
+	public void stopSeenByPlayer(ServerPlayer player) {
+		super.stopSeenByPlayer(player);
+		if (this.bar != null) {
+			this.bar.removePlayer(player);
+		}
 	}
 
 	@Override

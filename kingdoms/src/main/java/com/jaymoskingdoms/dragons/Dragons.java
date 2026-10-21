@@ -124,7 +124,7 @@ public final class Dragons {
 			return;
 		}
 		ServerLevel level = server.getLevel(Level.NETHER);
-		if (level == null) {
+		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
 			return;
 		}
 		RandomSource random = level.getRandom();

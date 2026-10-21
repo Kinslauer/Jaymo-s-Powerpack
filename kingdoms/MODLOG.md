@@ -3932,6 +3932,9 @@ back to normal when retracted. and only move when the player does."
   camera: Space takes off and climbs, W flies where you look, S brakes to a hover, Shift dives (and lands; on the ground
   it dismounts). Stamina: hard flight and fire drain it, meat refills it, exhausted it glides down. R breathes fire
   where you look (Powers 0.15.50 lets go of its first ability while you steer one). Andy: "you can have a piggyback rider": a second
-  player sits behind the owner.
+  player sits behind the owner. Only the owner steers: left alone in the saddle, the passenger can't fly or breathe
+  and the dragon lands; in the air the passenger's Shift doesn't throw them off.
+- Wild ones despawn far from players like other monsters (not tamed or named ones), none come on Peaceful, and the boss
+  bar leaves your screen once you're out of its range.
 - Spawn egg; ops: `/kingdom dragon` summons a wild one, `/kingdom dragon tame` a tamed one.
 - Not yet seen in game: written without a compiler, so the first build may need fixes.
