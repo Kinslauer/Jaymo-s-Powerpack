@@ -3890,3 +3890,7 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
   Andy: "ALL HUMANOIDS go down": every folk is now marked downable (rulers, orcs, raiders, barbarians, looters too), and
   Powers 0.15.41 downs every humanoid monster. Villagers only tend their own (villagers and a settlement's folk), never a
   downed looter, raider or monster.
+## 0.7.133: an eased pickpocket's reach (with Powers 0.15.42, Kitchen 0.5.10)
+- Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
+  high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
+  out the same way.

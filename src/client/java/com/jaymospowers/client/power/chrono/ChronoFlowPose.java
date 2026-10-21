@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.client.PoseBlend;
 import com.jaymospowers.power.chrono.ChronoFlow;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
@@ -16,8 +17,57 @@ import net.minecraft.world.entity.Entity;
  * shoulder throw, each then the answer) and
  * Chrono Punch's quick jabs and its Time Flow barrage. Everything is set outright from the blow's progress, so applying it twice
  * changes nothing.
+ * <p>
+ * (0.15.42) The plain blows (jab, quick jab, hook, uppercut, lunge, the barrage's punches) are whole-body now: each coils
+ * first (the fist drawn back, the body turned away), then the hips and shoulders turn through it with a step in, and it
+ * recovers into a guard. Every blow, these and the rest, is laid on through {@link PoseBlend}: eased in and out, on springs
+ * that carry the fist a little past the strike, the guard held a moment between blows.
  */
 public final class ChronoFlowPose {
+	/** Share of the time to the hit spent coiling; share of what's after it spent holding the strike before the recovery. */
+	public static final float COIL_SHARE = 0.55F, HOLD_SHARE = 0.25F;
+	/** The guard held after a blow before it eases out (seconds), and the weight's speed (times its usual). */
+	public static final float LINGER = 0.3F, WEIGHT_SPEED = 1.8F;
+	/** The blows are quick: the springs this many times as stiff. */
+	static final float STIFFNESS = 2.5F;
+	/** While walking the stance's legs give way to the walk by this much at the most. */
+	static final float WALK_LEGS = 0.6F, STANCE_WALK = 0.6F;
+
+	/**
+	 * One key of a blow, for a right-handed lead (mirrored for the left): the lead arm's and the guard arm's pitch,
+	 * inward turn and elbow in (radians); the hips' turn ({@code yaw}, + the lead shoulder back) and lean ({@code pitch},
+	 * + forward); the front and back legs' swing; the step forward and the drop (model pixels).
+	 */
+	record Key(float lx, float ly, float lz, float gx, float gy, float gz, float yaw, float pitch, float front, float back, float fwd,
+		float drop) {
+		Key mix(Key o, float t) {
+			return new Key(Mth.lerp(t, lx, o.lx), Mth.lerp(t, ly, o.ly), Mth.lerp(t, lz, o.lz), Mth.lerp(t, gx, o.gx), Mth.lerp(t, gy, o.gy),
+				Mth.lerp(t, gz, o.gz), Mth.lerp(t, yaw, o.yaw), Mth.lerp(t, pitch, o.pitch), Mth.lerp(t, front, o.front),
+				Mth.lerp(t, back, o.back), Mth.lerp(t, fwd, o.fwd), Mth.lerp(t, drop, o.drop));
+		}
+	}
+
+	/** Fists up, elbows in, a little sunk, the feet staggered. */
+	static final Key GUARD = new Key(-1.15F, 0.3F, 0.2F, -1.25F, 0.3F, 0.25F, 0.0F, 0.05F, -0.15F, 0.15F, 0.0F, 0.3F);
+	/** Jab: drawn back, turned away; then straight out, the shoulder through, a step in. */
+	static final Key JAB_COIL = new Key(0.45F, 0.0F, 0.05F, -1.3F, 0.3F, 0.25F, 0.4F, -0.03F, -0.15F, 0.15F, -0.4F, 0.3F);
+	static final Key JAB_STRIKE = new Key(-1.68F, 0.05F, 0.0F, -1.2F, 0.35F, 0.25F, -0.55F, 0.1F, -0.45F, 0.35F, 1.6F, 0.2F);
+	/** The quick jab: the same, shorter. */
+	static final Key RAPID_COIL = new Key(0.1F, 0.0F, 0.05F, -1.3F, 0.3F, 0.25F, 0.2F, 0.0F, -0.15F, 0.15F, 0.0F, 0.3F);
+	static final Key RAPID_STRIKE = new Key(-1.62F, 0.05F, 0.0F, -1.2F, 0.35F, 0.25F, -0.35F, 0.06F, -0.3F, 0.25F, 1.0F, 0.2F);
+	/** Hook: the arm cocked out to the side, the body wound away; then swung round across, the hips turning hard. */
+	static final Key HOOK_COIL = new Key(-1.1F, -0.9F, -0.3F, -1.3F, 0.3F, 0.25F, 0.45F, 0.0F, -0.2F, 0.2F, 0.0F, 0.5F);
+	static final Key HOOK_STRIKE = new Key(-1.45F, 0.55F, 0.1F, -1.2F, 0.4F, 0.25F, -0.75F, 0.08F, -0.35F, 0.3F, 0.8F, 0.3F);
+	/** Uppercut: sunk low, the fist dropped; then driven up from the legs, the body rising and leaning back. */
+	static final Key UPPER_COIL = new Key(0.4F, 0.0F, 0.15F, -1.3F, 0.3F, 0.25F, 0.3F, 0.2F, -0.3F, 0.3F, 0.0F, 1.6F);
+	static final Key UPPER_STRIKE = new Key(-2.7F, 0.1F, 0.0F, -1.2F, 0.35F, 0.25F, -0.4F, -0.15F, -0.35F, 0.3F, 0.8F, -0.2F);
+	/** Lunge: gathered and drawn back; then a long step through, the fist out, the other arm thrown back. */
+	static final Key LUNGE_COIL = new Key(0.5F, 0.0F, 0.05F, -1.2F, 0.3F, 0.25F, 0.45F, 0.0F, -0.2F, 0.2F, -0.6F, 0.9F);
+	static final Key LUNGE_STRIKE = new Key(-1.7F, 0.05F, 0.0F, 0.6F, 0.0F, -0.2F, -0.5F, 0.3F, -0.7F, 0.6F, 3.0F, 1.0F);
+	/** The barrage's punch out (each from the guard and back, the fists alternating). */
+	static final Key BARRAGE_STRIKE = new Key(-1.62F, 0.1F, 0.0F, -1.25F, 0.35F, 0.25F, -0.35F, 0.15F, -0.25F, 0.3F, 0.8F, 0.4F);
+
+	private static final PoseBlend.Channel BLEND = PoseBlend.channel("chrono_flow");
 	/** The blow on this player and how far through it they are (0-1). */
 	public record Pose(ChronoFlow.Move move, float p) {
 	}
@@ -46,9 +96,104 @@ public final class ChronoFlowPose {
 			return;
 		}
 		Pose pose = avatar.getData(KEY);
-		if (pose == null) {
+		PoseBlend.Track track = BLEND.track(avatar.id, pose != null, LINGER, WEIGHT_SPEED);
+		if (track == null) {
 			return;
 		}
+		if (pose == null) {
+			// between blows or after the last: the guard (or whatever the blow ended on) held, then eased out
+			track.apply(h, null);
+			return;
+		}
+		PoseBlend.Frame frame = new PoseBlend.Frame(h);
+		if (!blow(frame, pose, avatar)) {
+			// the rest keep their own keys, laid on eased
+			legacy(h, pose);
+			frame.take(h);
+		}
+		track.apply(h, frame, STIFFNESS);
+	}
+
+	/** The plain blows, whole-body: false for the others ({@link #legacy}). */
+	private static boolean blow(PoseBlend.Frame f, Pose pose, AvatarRenderState avatar) {
+		ChronoFlow.Move move = pose.move();
+		float p = pose.p();
+		int side = move.side() > 0 ? 1 : -1;
+		Key coil, strike;
+		switch (move.style()) {
+			case ChronoFlow.JAB -> {
+				coil = JAB_COIL;
+				strike = JAB_STRIKE;
+			}
+			case ChronoFlow.RAPID -> {
+				coil = RAPID_COIL;
+				strike = RAPID_STRIKE;
+			}
+			case ChronoFlow.HOOK -> {
+				coil = HOOK_COIL;
+				strike = HOOK_STRIKE;
+			}
+			case ChronoFlow.UPPERCUT -> {
+				coil = UPPER_COIL;
+				strike = UPPER_STRIKE;
+			}
+			case ChronoFlow.LUNGE -> {
+				coil = LUNGE_COIL;
+				strike = LUNGE_STRIKE;
+			}
+			case ChronoFlow.BARRAGE -> {
+				// a punch every few ticks, fists alternating: each driven out fast from the guard and drawn back
+				float beat = p * ChronoFlow.BARRAGE_PUNCHES;
+				int n = Math.min(ChronoFlow.BARRAGE_PUNCHES - 1, (int)beat);
+				float q = beat - n;
+				float out = q < 0.4F ? q / 0.4F : 1.0F - (q - 0.4F) / 0.6F;
+				lay(f, GUARD.mix(BARRAGE_STRIKE, PoseBlend.smooth(out)), n % 2 == 0 ? 1 : -1, avatar);
+				return true;
+			}
+			default -> {
+				return false;
+			}
+		}
+		float hit = Mth.clamp(move.hitAt() / (float)move.duration(), 0.05F, 0.95F);
+		float c = hit * COIL_SHARE;
+		Key key;
+		if (p < c) {
+			key = GUARD.mix(coil, PoseBlend.seg(p, 0.0F, c));
+		} else if (p < hit) {
+			key = coil.mix(strike, PoseBlend.seg(p, c, hit));
+		} else {
+			key = strike.mix(GUARD, PoseBlend.seg(p, hit + (1.0F - hit) * HOLD_SHARE, 1.0F));
+		}
+		lay(f, key, side, avatar);
+		return true;
+	}
+
+	/** One key on the frame, for a blow led by {@code side}'s arm (1 the right). */
+	private static void lay(PoseBlend.Frame f, Key k, int side, AvatarRenderState avatar) {
+		float yaw = k.yaw() * side;
+		int lead = side > 0 ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM;
+		int guard = side > 0 ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM;
+		// the arms aimed from the front: the hips' turn and lean taken back out of them (all of it from the lead, half
+		// from the guard, which goes round with the chest)
+		f.set(lead, k.lx() - k.pitch(), -side * k.ly() - yaw, -side * k.lz());
+		f.set(guard, k.gx() - k.pitch(), side * k.gy() - yaw * 0.5F, side * k.gz());
+		f.set(PoseBlend.HIP_YAW, yaw);
+		f.set(PoseBlend.HIP_PITCH, k.pitch());
+		f.set(PoseBlend.FORWARD, k.fwd());
+		f.set(PoseBlend.DROP, k.drop());
+		// the eyes stay on the foe
+		f.add(PoseBlend.HEAD, -k.pitch());
+		f.add(PoseBlend.HEAD + 1, -yaw);
+		// the step: the front foot (the guard's side) forward, the back one behind; walking takes over some of it
+		float stance = 1.0F - WALK_LEGS * Mth.clamp(avatar.walkAnimationSpeed / STANCE_WALK, 0.0F, 1.0F);
+		int front = side > 0 ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG;
+		int back = side > 0 ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG;
+		f.mix(front, k.front(), 0.0F, -side * 0.05F, stance);
+		f.mix(back, k.back(), 0.0F, side * 0.05F, stance);
+	}
+
+	/** The other blows' own keys, set straight on the model (taken from it into the frame after). */
+	private static void legacy(HumanoidModel<?> h, Pose pose) {
 		float p = pose.p();
 		// out fast, back slower
 		float e = p < 0.35F ? p / 0.35F : 1.0F - (p - 0.35F) / 0.65F;
@@ -59,49 +204,7 @@ public final class ChronoFlowPose {
 		ModelPart frontLeg = side > 0 ? h.leftLeg : h.rightLeg;
 		ModelPart backLeg = side > 0 ? h.rightLeg : h.leftLeg;
 		switch (pose.move().style()) {
-			case ChronoFlow.JAB, ChronoFlow.RAPID -> {
-				set(lead, -Mth.HALF_PI, 0.0F, 0.0F, e);
-				set(guard, -1.25F, side * 0.3F, side * 0.25F, Math.max(e, 0.6F));
-				h.body.yRot = side * -0.35F * e;
-			}
-			case ChronoFlow.BARRAGE -> {
-				// a punch every few ticks, fists alternating: each driven out fast and drawn back, the body twisting into it
-				float beat = p * ChronoFlow.BARRAGE_PUNCHES;
-				int n = Math.min(ChronoFlow.BARRAGE_PUNCHES - 1, (int)beat);
-				float q = beat - n;
-				float out = q < 0.4F ? q / 0.4F : 1.0F - (q - 0.4F) / 0.6F;
-				out = out * out * (3.0F - 2.0F * out);
-				int s = n % 2 == 0 ? 1 : -1;
-				ModelPart punching = s > 0 ? h.rightArm : h.leftArm;
-				ModelPart drawn = s > 0 ? h.leftArm : h.rightArm;
-				set(punching, -1.25F, s * -0.3F, s * -0.25F, 1.0F);
-				set(punching, -Mth.HALF_PI - 0.05F, s * 0.1F, 0.0F, out);
-				set(drawn, -1.25F, s * 0.3F, s * 0.25F, 1.0F);
-				set(h.leftLeg, -0.25F, 0.0F, 0.0F, 1.0F);
-				set(h.rightLeg, 0.3F, 0.0F, 0.0F, 1.0F);
-				h.body.yRot = s * -0.35F * out;
-				h.body.xRot = 0.15F;
-			}
-			case ChronoFlow.HOOK -> {
-				// swung round from the side
-				set(lead, -Mth.HALF_PI, Mth.lerp(p, side * 1.0F, side * -0.5F), 0.0F, e);
-				set(guard, -1.25F, side * 0.3F, side * 0.25F, 0.7F);
-				h.body.yRot = Mth.lerp(p, side * 0.3F, side * -0.5F) * e;
-			}
-			case ChronoFlow.UPPERCUT -> {
-				// from low, driven up
-				set(lead, Mth.lerp(Math.min(1.0F, p * 2.0F), 0.4F, -2.7F), 0.0F, side * -0.15F, e);
-				set(guard, -1.25F, side * 0.3F, side * 0.25F, 0.7F);
-				h.body.xRot = -0.15F * e;
-			}
-			case ChronoFlow.LUNGE -> {
-				set(lead, -Mth.HALF_PI - 0.1F, 0.0F, 0.0F, e);
-				set(guard, 0.6F, 0.0F, side * 0.2F, e);
-				set(frontLeg, -0.7F, 0.0F, 0.0F, e);
-				set(backLeg, 0.6F, 0.0F, 0.0F, e);
-				h.body.xRot = 0.3F * e;
-				h.body.yRot = side * -0.4F * e;
-			}
+			// (0.15.42) the jab, quick jab, hook, uppercut, lunge and barrage are blow()'s now
 			case ChronoFlow.SPIN -> {
 				// (0.11.40) the Space counter: a spinning kick, the leg swung out level, arms flung wide for the turn
 				float out = seg(p, 0.0F, 0.25F) * (1.0F - seg(p, 0.75F, 1.0F));

@@ -873,3 +873,9 @@ Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest ne
 - **0.5.9:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
   never an animal, fish, player or iron body), `hasValuables()`, `lookTag()`, and `setOnRobbed(BiConsumer)`, called
   when a player takes anything off a body by hand.
+### 0.5.10: smoother carrying and crawling
+Andy, on Powers' animation preview: "do all this, add a better crawling and downed animation too". Carrying a corpse
+eases in and out (`PoseEase`, a small spring of Kitchen's own): the arms go down to take it and lift it, dip under the
+weight on each step, and the body leans back against it. A creature crawling on shot legs does an army crawl like a
+downed player's in Powers: arms sweeping ahead along the ground and pulling back in turn, the opposite knee driving,
+the body rocking, the head lifting to look ahead. The ragdoll is untouched.

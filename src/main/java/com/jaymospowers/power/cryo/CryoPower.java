@@ -96,6 +96,7 @@ public final class CryoPower implements Power {
 		CryoSlide.stop(player, false);
 		CryoBreath.stop(player, false);
 		CryoBlizzard.end(player, false);
+		CryoMoves.forget(player);
 	}
 
 	@Override
@@ -160,6 +161,7 @@ public final class CryoPower implements Power {
 		CryoSlide.tick(player);
 		CryoBreath.tick(player);
 		CryoBlizzard.tick(player);
+		CryoMoves.tick(player);
 	}
 
 	@Override

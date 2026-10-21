@@ -88,6 +88,7 @@ public final class CryoWall {
 			return;
 		}
 		CryoPower.cooldown(player, CryoState.WALL, COOLDOWN);
+		CryoMoves.begin(player, CryoMoves.WALL);
 		com.jaymospowers.core.Mastery.used(player);
 		Vec3 at = Vec3.atCenterOf(base);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 1.2F, 0.5F);
