@@ -113,6 +113,16 @@ public final class Looters {
 	static final int REP_STOPPED = 6, REP_CAUGHT = 3;
 	/** Lines a looter, a poor villager, a guard who catches one, may say. */
 	static final int LINES = 3;
+	/**
+	 * (0.7.131) Handed over: a downed looter set down within this of a free guard (with the player within that) is taken
+	 * for judgement; looked for this often (ticks). The bringer's thanks; notoriety is this plus a body robbed.
+	 */
+	static final double HAND_REACH = 4.0, BRINGER_REACH = 8.0;
+	static final int HAND_CHECK = 10, REP_BROUGHT = 8, BROUGHT_NOTORIETY = 1;
+	/** (0.7.131) News of the sentence, told by a grown villager of that settlement within this; looked for this often; kept this long. */
+	static final double NEWS_REACH = 12.0;
+	static final int NEWS_CHECK = 40;
+	static final long NEWS_KEEP = 20L * 60 * 20 * 3;
 	static final double SAY_RANGE = 16.0;
 
 	enum Stage { CREEP, ROB, LEAVE, RUN }
@@ -151,6 +161,11 @@ public final class Looters {
 	private static final Map<UUID, Long> KINDRED = new HashMap<>();
 	/** Which players have already been charged with robbing which bodies (one crime a body). */
 	private static final Map<UUID, Set<UUID>> CHARGED = new HashMap<>();
+	/** (0.7.131) News: a sentence on a looter a player brought in but didn't see carried out. */
+	private record News(int faction, String sentence, long at) {
+	}
+	/** (0.7.131) Player → what they're yet to hear. */
+	private static final Map<UUID, List<News>> NEWS = new HashMap<>();
 
 	private Looters() {
 	}
@@ -163,6 +178,7 @@ public final class Looters {
 			LOOTED.clear();
 			KINDRED.clear();
 			CHARGED.clear();
+			NEWS.clear();
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity.level() instanceof ServerLevel level) {
@@ -229,6 +245,12 @@ public final class Looters {
 				}
 			}
 		}
+		if (now % HAND_CHECK == 0 && !PLOTS.isEmpty()) {
+			handOvers(level);
+		}
+		if (now % NEWS_CHECK == 0 && !NEWS.isEmpty()) {
+			news(level, now);
+		}
 		if (now % FIELD_CHECK == 0) {
 			LOOTED.values().removeIf(until -> until < now);
 			KINDRED.values().removeIf(at -> now - at > KINDRED_TICKS);
@@ -249,7 +271,7 @@ public final class Looters {
 	/** Looters left over (after a restart) with no plot: off they go. */
 	private static void strays(ServerLevel level, long now) {
 		for (Entity e : level.getAllEntities()) {
-			if (is(e) && e.isAlive() && !PLOTS.containsKey(e.getUUID())) {
+			if (is(e) && e.isAlive() && !PLOTS.containsKey(e.getUUID()) && !Arrests.held(e)) {
 				Plot p = new Plot(e.getUUID(), e.blockPosition(), e.position(), false, now, now + LEAVE_TICKS);
 				p.stage = Stage.LEAVE;
 				PLOTS.put(e.getUUID(), p);
@@ -393,6 +415,11 @@ public final class Looters {
 		}
 		if (p.poor) {
 			return stepPoor(level, p, (Villager)who, now);
+		}
+		if (Downed.isDowned(who)) {
+			// (0.7.131) down: he lies there till he's got up, or carried off to a guard
+			p.body = null;
+			return true;
 		}
 		if (p.stage == Stage.CREEP || p.stage == Stage.ROB) {
 			LivingEntity threat = threat(level, who);
@@ -629,6 +656,129 @@ public final class Looters {
 			level.playSound(null, who.blockPosition(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		}
 		p.sack.clear();
+	}
+
+	// ---- judgement (0.7.131) ---------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy: "you can also drop a downed one in front of a guard for judgement". A downed looter lying (not carried) within
+	 * {@link #HAND_REACH} of a free guard, with a player by, is handed over: the guard takes his sack and marches him to
+	 * the ruler ({@link Arrests#handOver}); the player's thanked.
+	 */
+	private static void handOvers(ServerLevel level) {
+		for (Plot p : new ArrayList<>(PLOTS.values())) {
+			if (p.poor || !(level.getEntity(p.who) instanceof PathfinderMob who) || !who.isAlive() || !Downed.isDowned(who) || who.isPassenger()) {
+				continue;
+			}
+			ServerPlayer bringer = null;
+			for (ServerPlayer player : level.players()) {
+				if (!player.isSpectator() && player.distanceToSqr(who) < BRINGER_REACH * BRINGER_REACH) {
+					if (KitchenCompat.carriedBy(player) == who) {
+						bringer = null;
+						break;
+					}
+					if (bringer == null || player.distanceToSqr(who) < bringer.distanceToSqr(who)) {
+						bringer = player;
+					}
+				}
+			}
+			if (bringer == null) {
+				continue;
+			}
+			Folk guard = null;
+			Faction law = null;
+			double best = HAND_REACH * HAND_REACH;
+			for (Folk f : level.getEntitiesOfClass(Folk.class, who.getBoundingBox().inflate(HAND_REACH), Looters::free)) {
+				double d = f.distanceToSqr(who);
+				if (d < best) {
+					best = d;
+					guard = f;
+					law = Factions.get(level.getServer(), f.factionId());
+				}
+			}
+			if (guard == null || law == null) {
+				continue;
+			}
+			PLOTS.remove(p.who);
+			// the sack's the crown's now
+			p.sack.clear();
+			Reputation.change(bringer, law, REP_BROUGHT);
+			bringer.sendSystemMessage(Component.translatable("message.jaymoskingdoms.looter.handed", law.name()).withStyle(ChatFormatting.GREEN));
+			for (int id : p.robbedFrom) {
+				Faction f = Factions.get(level.getServer(), id);
+				if (id != law.id() && f != null && !f.fallen()) {
+					Reputation.change(bringer, f, REP_STOPPED);
+					bringer.sendSystemMessage(Component.translatable("message.jaymoskingdoms.looter.stopped", f.name()).withStyle(ChatFormatting.GREEN));
+				}
+			}
+			level.playSound(null, who.blockPosition(), SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.NEUTRAL, 1.0F, 0.9F);
+			Arrests.handOver(level, who, guard, law, "robbing", BROUGHT_NOTORIETY + p.robbed, bringer);
+		}
+	}
+
+	/** A guard free to take a prisoner: a settlement's fighting folk, not its ruler, not busy, fighting or down. */
+	private static boolean free(Folk f) {
+		Folk.Role role = Folk.role(f.role());
+		return f.isAlive() && guard(f) && (role == null || !role.leader()) && f.getTarget() == null && !Downed.isDowned(f) && !Arrests.busy(f)
+			&& !Bearers.busy(f);
+	}
+
+	/** {@code looter} slipped his guard on the way to judgement: he runs again. */
+	static void escaped(ServerLevel level, PathfinderMob looter, Vec3 from) {
+		long now = level.getGameTime();
+		Plot p = new Plot(looter.getUUID(), BlockPos.containing(from), from, false, now, now + LEAVE_TICKS);
+		p.stage = Stage.RUN;
+		p.stageAt = now;
+		PLOTS.put(looter.getUUID(), p);
+	}
+
+	/**
+	 * A looter {@code bringer} handed over has had his sentence. Nearby, they saw it; away, the townsfolk tell them when next
+	 * they pass.
+	 */
+	static void judged(ServerLevel level, UUID bringer, int faction, LivingEntity crook, String sentence) {
+		if (level.getServer().getPlayerList().getPlayer(bringer) instanceof ServerPlayer player && player.level() == level
+			&& player.distanceToSqr(crook) < Arrests.ANNOUNCE_RANGE * Arrests.ANNOUNCE_RANGE) {
+			return;
+		}
+		NEWS.computeIfAbsent(bringer, k -> new ArrayList<>()).add(new News(faction, sentence, level.getGameTime()));
+	}
+
+	/** Players with news to hear: a grown villager of that settlement nearby tells them. */
+	private static void news(ServerLevel level, long now) {
+		for (Iterator<Map.Entry<UUID, List<News>>> it = NEWS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, List<News>> e = it.next();
+			e.getValue().removeIf(n -> now - n.at() > NEWS_KEEP);
+			if (e.getValue().isEmpty()) {
+				it.remove();
+				continue;
+			}
+			if (!(level.getServer().getPlayerList().getPlayer(e.getKey()) instanceof ServerPlayer player) || player.level() != level || player.isSpectator()) {
+				continue;
+			}
+			for (Iterator<News> ni = e.getValue().iterator(); ni.hasNext(); ) {
+				News n = ni.next();
+				Villager teller = null;
+				double best = NEWS_REACH * NEWS_REACH;
+				for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(NEWS_REACH),
+					v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && v.hasLineOfSight(player))) {
+					Faction law = Theft.lawAt(level, v.blockPosition());
+					double d = v.distanceToSqr(player);
+					if (law != null && law.id() == n.faction() && d < best) {
+						best = d;
+						teller = v;
+					}
+				}
+				if (teller != null) {
+					teller.getLookControl().setLookAt(player);
+					Speech.sayTo(level, teller, player,
+						Component.translatable("message.jaymoskingdoms.looter.news." + n.sentence() + "." + level.getRandom().nextInt(LINES)), Speech.YELLOW);
+					ni.remove();
+					// one piece of news at a time
+					break;
+				}
+			}
+		}
 	}
 
 	// ---- the poor --------------------------------------------------------------------------------------------------------
