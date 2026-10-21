@@ -2096,3 +2096,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
   steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
   the horse to the keys and its camera follows the mouse.
+- **0.15.22, Emberborn Kindle (Kingdoms 0.7.117):** Andy: "expand on emberborn, with a left click hold ability, and
+  synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
+  from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
+  candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
+  at full heat throws a fireball (2.5-block burst, no block damage, 5 s cooldown). Cold halves it, rain only hisses.
+  With the Smoke power: their body is a heat source for their smoke, the flame leaves soot, and flame meeting their own
+  smoke sets off a flashover that races through the cloud. Plain left hold for Smoke users, sneak + hold with other
+  powers (`RaceHoldClient`). All in `power/ember` and `docs/Ember-Ice-Plan.md`. Smoke puffs marked keep-others never
+  take another owner's block (`SmokeField.add`).
+- **0.15.22, Cryokinesis (ice power):** Andy: "smoke instead of fire" for the ice synergy. A new power (`power/cryo`,
+  `docs/cryo.md`): R Ice Slide (skate with inertia; water ahead freezes into a frosted-ice bridge; wall crashes hurt by
+  speed), G Frost Breath (8-block cone that slows and freezes, ices water for 30 s, puts out burning creatures), V Ice
+  Shards (a fan of 5), B Flash Freeze (3 s packed-ice shell, never into a creature), X Ice Wall (5x3, 15 s, never into a
+  creature), Z Snow mode (slow and blind, no hurt), C Blizzard (20 s whiteout, 16 blocks). C answers once every
+  ability is mastered (`Power.ultimateAnswers`), since Cryokinesis has no fates yet. Frost-born users take no freeze
+  damage and are stronger where it snows. Every placed block is recorded by `CryoIce` and melted back. Freezing fog:
+  breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
+  snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
+  server crash (not a normal stop) leaves the ice standing.

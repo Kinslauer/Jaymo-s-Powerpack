@@ -17,12 +17,13 @@ public final class SmokeNet {
 	 * Server → one client: all the smoke near them, replacing what they had. {@code origin} is a packed block position;
 	 * {@code cells} is {@link #STRIDE} bytes a block: x, y, z off the origin, density (0-255 of {@link SmokeField#CAP})
 	 * and flags ({@link #YOURS}: you made it; the upper seven bits are its soot, 0-127), then more flags ({@link #SMOG}:
-	 * it's smog). Empty: no smoke near you any more.
+	 * it's smog; {@link #FROZEN}, 0.14.0: it's freezing fog). Empty: no smoke near you any more.
 	 */
 	public record Field(long origin, byte[] cells) implements CustomPacketPayload {
 		public static final int STRIDE = 6;
 		public static final int YOURS = 1;
 		public static final int SMOG = 1;
+		public static final int FROZEN = 2;
 		public static final Type<Field> TYPE = new Type<>(JaymosPowers.id("smoke_field"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Field> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {

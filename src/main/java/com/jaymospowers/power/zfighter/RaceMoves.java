@@ -29,7 +29,8 @@ import net.minecraft.world.phys.Vec3;
  * (0.11.101) The races' own left-mouse holds, for anyone of that blood (Z Fighter or not), bare-handed and not at a
  * block: a Verdant's <b>stretch punch</b>, the arm shooting out up to {@link #STRETCH_RANGE} blocks to strike what it
  * meets or snatch an item back; a Frost-born's <b>ice prison</b> (Jaymo's Kingdoms' FrostPrison, asked for through the
- * {@link #FROST_TAG} tag). A Z Fighter's hold combo keeps anything within plain reach; a Verdant Z Fighter's whole hold
+ * {@link #FROST_TAG} tag); (0.14.0) an Emberborn's <b>Kindle</b>, a held stream of flame ({@code power.ember.EmberKindle},
+ * started here). A Z Fighter's hold combo keeps anything within plain reach; a Verdant Z Fighter's whole hold
  * is his combo, which stretches ({@link ZFighterStretchCombo}).
  */
 public final class RaceMoves {
@@ -69,6 +70,8 @@ public final class RaceMoves {
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, context) -> hold(context.player()));
+		// (0.14.0) an Emberborn's Kindle, a held stream with its own packets (power.ember)
+		com.jaymospowers.power.ember.EmberKindle.init();
 	}
 
 	private static void hold(ServerPlayer player) {
