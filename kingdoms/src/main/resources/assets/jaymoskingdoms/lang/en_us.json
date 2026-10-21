@@ -4536,5 +4536,19 @@
 	"message.jaymoskingdoms.looter.news.exile.0": "They sent your looter packing out of the realm.",
 	"message.jaymoskingdoms.looter.news.exile.1": "The looter's banished. Let some other land deal with him.",
 	"message.jaymoskingdoms.looter.news.exile.2": "Exiled, that grave robber. Good.",
-	"message.jaymoskingdoms.arrest.sentence": "%s sentences %s for %s: %s."
+	"message.jaymoskingdoms.arrest.sentence": "%s sentences %s for %s: %s.",
+	"entity.jaymoskingdoms.notus_dragon": "Notus",
+	"item.jaymoskingdoms.notus_dragon_spawn_egg": "Notus Spawn Egg",
+	"message.jaymoskingdoms.encounter.notus_dragon": "A shadow crosses the sun and the air smells of cinders. Notus, the south wind, has seen you.",
+	"message.jaymoskingdoms.dragon.crashed": "%s crashes to the ground, wounded and wary. Come close crouching, with empty hands, and it may come to trust you.",
+	"message.jaymoskingdoms.dragon.bolted": "%s has had enough. It bolts into the sky.",
+	"message.jaymoskingdoms.dragon.tamed": "%s lowers its head and lets you touch its snout. It's yours.",
+	"message.jaymoskingdoms.dragon.exhausted": "%s is exhausted and can only glide down. Let it rest, or feed it meat.",
+	"message.jaymoskingdoms.dragon.sits": "%s settles down and waits.",
+	"message.jaymoskingdoms.dragon.follows": "%s gets up to follow you.",
+	"message.jaymoskingdoms.dragon.not_yours": "%s won't carry you unless its owner is in the saddle.",
+	"key.category.jaymoskingdoms.dragons": "Jaymo's Dragons",
+	"key.jaymoskingdoms.dragon_breath": "Dragon Fire Breath (riding)",
+	"hud.jaymoskingdoms.dragon_exhausted": "Exhausted",
+	"hud.jaymoskingdoms.dragon_trust": "%s's trust"
 }
