@@ -2340,7 +2340,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.57, ships Jaymo's Kingdoms 0.7.144 and Kitchen 0.5.12 (Better With Mods batch 5, atmosphere):** Gloom with
   Blood-Moon-only damage, the beacon watch-light, skittish herds, fish bait and the exploding pot. This finishes the
   BWM port. No Powers code changed. Details in the Kingdoms and Kitchen MODLOGs.
-- **0.15.58, the Z Fighter's ki aura:** a faint aura of his own ki colour now hugs every Z Fighter standing in base
+- **0.15.59, the Z Fighter's ki aura:** a faint aura of his own ki colour now hugs every Z Fighter standing in base
   form, more often and bigger the further his max ki has grown (a step every 40 past 100, up to 4); a form's aura roars
   a little harder with power too, and the base-form charging/flight motes take his ki colour instead of the lineage's.
   Charging to full ki flashes the aura once: a blast round his feet, a ring of ki, the ground torn up and thrown out,

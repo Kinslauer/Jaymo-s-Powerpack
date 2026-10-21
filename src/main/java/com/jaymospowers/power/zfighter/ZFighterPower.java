@@ -167,7 +167,7 @@ public final class ZFighterPower implements Power {
 	static final int IDLE_SPARKS_PER_FORM = 2;
 	private static final int CRACKLE_COLOR = 0xD8ECFF;
 	/**
-	 * (0.15.58) Andy: "a faint ki colored aura around z fighters that intensifies with their increasing power/forms". In
+	 * (0.15.59) Andy: "a faint ki colored aura around z fighters that intensifies with their increasing power/forms". In
 	 * base form, not charging: a few small motes of his ki colour hugging him every {@link #FAINT_AURA_EVERY} ticks (one
 	 * tick sooner, and a little bigger, for each step of power), this big at the weakest.
 	 */
@@ -176,7 +176,7 @@ public final class ZFighterPower implements Power {
 	/** A step of power for the aura: every this much max ki above {@link #BASE_MAX_KI}, up to this many steps. */
 	static final int AURA_KI_STEP = 40, AURA_STEPS = 4;
 	/**
-	 * (0.15.58) Charged to full: the aura flashes once and the power blows out round him. Blasts of smoke, motes of ki in
+	 * (0.15.59) Charged to full: the aura flashes once and the power blows out round him. Blasts of smoke, motes of ki in
 	 * the ring, bits of ground thrown out to this far, and the shake (felt this far).
 	 */
 	static final int FULL_BURST_BLASTS = 5, FULL_BURST_RING = 36, FULL_BURST_DEBRIS = 40;
@@ -185,7 +185,7 @@ public final class ZFighterPower implements Power {
 	static final double FULL_BURST_SHAKE_RANGE = 16.0;
 	/** Never twice in this many ticks (ki bobbing at full). */
 	static final int FULL_BURST_GAP = 40;
-	/** (0.15.58) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
+	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
 	static final double SHOUT_RANGE = 32.0;
 	static final int SHOUT_LINES = 3;
 
@@ -630,7 +630,7 @@ public final class ZFighterPower implements Power {
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
-			// (0.15.58) and a little harder the stronger he's grown
+			// (0.15.59) and a little harder the stronger he's grown
 			aura(player, live, live.charging ? live.form : 1 + 2 * live.form + auraStep(max) / 2);
 			if (now % 2 == 0) {
 				debris(player, live);
@@ -933,7 +933,7 @@ public final class ZFighterPower implements Power {
 	}
 
 	/**
-	 * (0.15.58) Andy: "supers (warrior borns) exclaiming angrily with every form". A Warrior-born screams his way into each
+	 * (0.15.59) Andy: "supers (warrior borns) exclaiming angrily with every form". A Warrior-born screams his way into each
 	 * form: a furious yell (with a roar under it from Super 2 up) everyone near hears, and the words in their chat.
 	 */
 	private static void shout(ServerPlayer player, int form) {
@@ -1051,7 +1051,7 @@ public final class ZFighterPower implements Power {
 		}
 	}
 
-	/** (0.15.58) His aura's step of power (0 to {@link #AURA_STEPS}): how far his max ki has grown past the start. */
+	/** (0.15.59) His aura's step of power (0 to {@link #AURA_STEPS}): how far his max ki has grown past the start. */
 	static int auraStep(int max) {
 		return Mth.clamp((max - BASE_MAX_KI) / AURA_KI_STEP, 0, AURA_STEPS);
 	}
@@ -1065,7 +1065,7 @@ public final class ZFighterPower implements Power {
 	}
 
 	/**
-	 * (0.15.58) Base form, not charging: a faint aura of his ki colour hugging his outline, drifting up. The stronger he's
+	 * (0.15.59) Base form, not charging: a faint aura of his ki colour hugging his outline, drifting up. The stronger he's
 	 * grown, the more often and the bigger. Not while hidden (invisible) or as the Great Ape.
 	 */
 	private static void faintAura(ServerPlayer player, Live live, long now, int max) {
@@ -1089,7 +1089,7 @@ public final class ZFighterPower implements Power {
 	}
 
 	/**
-	 * (0.15.58) Andy: "at max ki charge the aura flashes once with a explosion around the user kicking up debris particles
+	 * (0.15.59) Andy: "at max ki charge the aura flashes once with a explosion around the user kicking up debris particles
 	 * and playing a blast/tnt sound". Charged to full: a flash of his aura, a blast round his feet, a ring of ki and the
 	 * ground thrown out from under him, and the boom.
 	 */
@@ -1255,7 +1255,7 @@ public final class ZFighterPower implements Power {
 		if (live.raging()) {
 			return new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 1.5F);
 		}
-		// (0.15.58) in base form, his own ki colour
+		// (0.15.59) in base form, his own ki colour
 		return new DustParticleOptions(auraColor(live), live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
 	}
 
