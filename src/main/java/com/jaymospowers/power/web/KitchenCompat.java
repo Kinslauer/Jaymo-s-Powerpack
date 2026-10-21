@@ -318,7 +318,9 @@ public final class KitchenCompat {
 			java.util.function.Predicate<Player> held = player -> com.jaymospowers.core.Carry.isCarried(player)
 				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.HELD) != null
 				|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) != null
-				|| player.getAttached(WebPower.HELD) != null || player.getAttached(WebPower.HITCH) != null;
+				|| player.getAttached(WebPower.HELD) != null || player.getAttached(WebPower.HITCH) != null
+				// (0.15.54) a Wind user who takes to the air (catching a fall, or R from the ground past mastery 2)
+				|| com.jaymospowers.power.wind.WindFall.holdsUp(player);
 			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addVeto", java.util.function.Predicate.class)
 				.invoke(null, held);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
