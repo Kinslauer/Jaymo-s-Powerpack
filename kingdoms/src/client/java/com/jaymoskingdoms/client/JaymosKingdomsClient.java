@@ -78,6 +78,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WarriorFury.register();
 		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
+		HiddenBladeClient.register();
 		VampireLooks.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours

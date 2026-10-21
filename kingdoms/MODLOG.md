@@ -3592,3 +3592,20 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   drive them, and anyone's. Ships may hold 5000 blocks (was 3000) for the galleon. Crews stand on any open deck under a
   raised quarterdeck too. Ops: `/kingdom fleet ship <rig>` builds any rig on open water near you and casts her off
   empty. Left out: their catamarans, small trireme and submarine.
+
+## 0.7.113: the hidden blade is worn on the wrist
+The user: "more like the web shooters, equipped in either one or both hands, and with an empty hand right clicking
+should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBladeClient` + `client/mixin/blade/*`.
+- The bracer is no longer a sword. Use it to strap it on that hand's wrist (else the other's): one or both arms, kept in
+  the synced, saved `jaymoskingdoms:hidden_blades` attachment, dropped on death unless keepInventory.
+- Use with that hand empty (nothing else taking the click: no door, no villager) springs the blade out or sheathes it
+  (`HiddenBladeUseMixin`, at vanilla's held-item use in `Minecraft.startUseItem`); main hand first, both together when
+  both hands are empty. Anything taken into the hand sheathes it. Sneak + use at the sky takes a sheathed one off.
+- Out over an empty main hand: +3 attack, -1.8 speed (an iron sword's 4 and 2.2/s), a light blade for the class perks
+  and Combat Arts (`HiddenBlade.weapon`), the 10x stab on the Crippled and Assassinate on the unaware. Unskilled
+  (Stealth < 5) the spring jams and it won't come out.
+- The leap needs a blade on a wrist whose hand is empty, and springs it.
+- Drawn on the arm (bracer, steel housing, blade past the fingers when out) in third person and first person; an empty
+  off hand's arm is drawn in first person while its blade is out. Texture from `tools/gen_hidden_blade.py`.
+- Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
+  (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
