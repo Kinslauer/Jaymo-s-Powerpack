@@ -751,9 +751,11 @@ public final class Downed {
 					0.8F + level.getRandom().nextFloat() * 0.4F);
 				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 			}
-			if (r.ticks < REVIVE_TICKS) {
+			// (0.15.44) Steady Hands: quicker ({@link MedicineSkill})
+			int need = MedicineSkill.ticks(player, REVIVE_TICKS);
+			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {
-					int filled = Math.round(REVIVE_BAR * r.ticks / (float) REVIVE_TICKS);
+					int filled = Math.round(REVIVE_BAR * r.ticks / (float) need);
 					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
 				}
@@ -771,6 +773,8 @@ public final class Downed {
 			stack.consume(1, player);
 			player.getInventory().setChanged();
 			getUp(level, body);
+			MedicineSkill.broughtRound(player, body);
+			MedicineSkill.treated(player);
 			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));

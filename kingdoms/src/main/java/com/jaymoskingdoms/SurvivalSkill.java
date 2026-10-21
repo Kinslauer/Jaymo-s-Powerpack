@@ -244,7 +244,8 @@ public final class SurvivalSkill {
 
 	/** How much slower {@code player}'s hunger drains, as a factor on its exhaustion (practice). */
 	static float exhaustion(ServerPlayer player) {
-		return 1.0F - PRACTICE_PER_LEVEL * Skills.of(player).level(Skills.Pillar.SURVIVAL);
+		// (0.7.135) practice counts the first page's 15 levels only: the levels past it pay for Medicine
+		return 1.0F - PRACTICE_PER_LEVEL * Math.min(Skills.MAX_LEVEL, Skills.of(player).level(Skills.Pillar.SURVIVAL));
 	}
 
 	/** Weathered's burning time and Hardy Landing's fall damage, as attribute modifiers. */
