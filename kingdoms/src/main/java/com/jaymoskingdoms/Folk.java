@@ -557,8 +557,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.7.138) with MCA, a realm's ruler is one of its own people: this one hands over the throne
 			return;
 		}
-		if (this.tickCount % 20 == 0 && this.role() == BARBARIAN && McaCompat.becomeRaider(level, this)) {
-			// (0.7.148) with MCA, a barbarian camp's raiders at home are villagers: an MCA guard of its blood takes this one's place
+		if (this.tickCount % 20 == 0 && Barbarians.villagerRole(this.role()) && McaCompat.becomeRaider(level, this)) {
+			// (0.7.148) with MCA, a camp's raiders (and a cove's deckhands) at home are villagers: an MCA guard of its blood takes this one's place
 			return;
 		}
 		if (this.tickCount % 20 == 0 && Rulers.guardMayConvert(level, this) && McaCompat.becomeGuard(level, this)) {

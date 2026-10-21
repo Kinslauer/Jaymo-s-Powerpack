@@ -357,8 +357,8 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.148) {@link McaCompat#becomeRaider}: an MCA guard of the same blood, in the same hides and with the same axe,
-	 * takes {@code folk}'s place in its camp, enlisted to it as a {@link Folk#BARBARIAN} (on its roster as before).
+	 * (0.7.148) {@link McaCompat#becomeRaider}: an MCA guard of the same blood, in the same gear (a raider's hides and
+	 * axe, a deckhand's cutlass), takes {@code folk}'s place in its camp, enlisted to it in the same role (on its roster as before).
 	 */
 	static boolean convertRaider(ServerLevel level, Folk folk) {
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD)
@@ -381,7 +381,7 @@ final class McaBridge {
 			}
 		}
 		Barbarians.harden(villager);
-		worker(villager).enlist(Folk.BARBARIAN, folk.factionId());
+		worker(villager).enlist(folk.role(), folk.factionId());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		folk.discard();
@@ -430,14 +430,14 @@ final class McaBridge {
 			e.discharge();
 			return false;
 		}
-		if (e.role() == Folk.BARBARIAN) {
-			// (0.7.148) a barbarian camp's villager, while it stands and they're its guard; a fallen camp's are scattered
+		if (Barbarians.villagerRole(e.role())) {
+			// (0.7.148) a camp's (or cove's) villager, while it stands and they're its guard; a fallen camp's are scattered
 			Faction camp = Factions.get(level.getServer(), e.factionId());
 			if (camp != null && !camp.fallen() && villager.isGuard() && !villager.isBaby()) {
 				return true;
 			}
 			if (camp != null && !camp.fallen()) {
-				Economy.lost(level.getServer(), camp.id(), Folk.BARBARIAN);
+				Economy.lost(level.getServer(), camp.id(), e.role());
 			}
 			e.discharge();
 			return false;

@@ -4074,20 +4074,27 @@ The last batch of the BWM port (MIT, our own code).
   raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Compiles against the real 26.3 jars;
   not yet seen in game.
 
-## 0.7.148: outlaws among the barbarians; camp raiders as MCA villagers (pack 0.15.62)
+## 0.7.148: outlaws and disguises among barbarians and pirates; camp folk as MCA villagers (pack 0.15.62)
 Andy: "Is there a way to affiliate with the barbarians? If not they should also be MCA and become non hostile when you
 are negative rep." There was no way before (only goblins had a disguise).
-- Outlaws (`Barbarians.outlaw`, `spares`): a player some standing kingdom, fiefdom or village thinks ill of (below 0)
-  is let be by the plain barbarian camps: raiders, chief and shamans, at home and on raids. Masked, the costume's or
-  bandit mask's reputation counts. Near a camp that spares them (40 blocks) they're told so, once a day per camp.
-  Orc, goblin, illager and pirate camps are unchanged.
-- Camp grudges: killing a plain camp's raider now costs -40 with that camp (`KingdomEvents.lostHand`); at -100 the
-  camp hunts you again, outlaw or not.
-- With MCA, a camp's raiders at home become MCA villagers (`McaBridge.convertRaider`, from `Folk` every second): an
-  MCA guard of the same heritage in the same hides and axe (also in their pack, since MCA guards dress from it),
-  30 health, enlisted to the camp as a barbarian (still on its roster). They fight through MCA's guard brain with the
-  raiders' targets (`McaCompat.foe`). Realm guards (folk and MCA) hunt them; other camps leave them be; killing one
-  isn't a crime (`Deeds`). When the chief falls they scatter like the folk do. The chief and raid war bands stay folk.
+- Outlaws (`Barbarians.outlaw`, `spares`): Andy, "only the nearest camp, unless you get so infamous that word travels
+  that far." A barbarian camp or pirate cove lets you be when the standing realm nearest it holds your reputation
+  below 0, or any realm has you at -500 or worse. That covers its raiders, chief, shamans and raids (pirates: crews,
+  captains and landing parties too). Masked, the costume's or bandit mask's reputation counts. Near a camp that
+  spares you (40 blocks) you're told so, once a day per camp. Orc, goblin and illager camps are unchanged.
+- Camp grudges: killing a barbarian camp's or cove's own costs -40 with it (`KingdomEvents.lostHand`); at -100 it
+  hunts you again, outlaw or not.
+- Disguises (`Barbarians.passesFor`): Andy, "Wearing the bandana works as a pirate disguise and so does the full
+  barbarian outfit + stone weapon." A bandana among pirates, or a leather jerkin and leggings (leather or nothing on
+  head and feet) with a stone axe, sword or spear among barbarians, and they take you for one of their own whatever
+  your reputation. Striking one of them gives you away to that camp for 5 minutes.
+- With MCA, a camp's raiders at home and a cove's deckhands ashore become MCA villagers (`McaBridge.convertRaider`,
+  from `Folk` every second): an MCA guard of the same heritage in the same gear (also in their pack, since MCA guards
+  dress from it), 30 health, enlisted to the camp in the same role (still on its roster). They fight through MCA's
+  guard brain with the camp's targets (`McaCompat.foe`). Realm guards (folk and MCA) hunt them; other camps leave them
+  be; killing one isn't a crime (`Deeds`). When the camp falls they scatter like the folk do. Chiefs, pirate
+  captains, gunners, bombardiers, ships' crews and raid war bands stay folk (their pistols, dynamite and ship
+  stations are folk AI).
 - Not tested in game.
 
 ## 0.7.147: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.61)

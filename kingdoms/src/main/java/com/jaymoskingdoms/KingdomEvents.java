@@ -515,8 +515,8 @@ public final class KingdomEvents {
 			Economy.lost(server, faction.id(), role);
 		}
 		// a camp's hatred of you changes nothing (barbarians are at war with everyone already), but (0.7.148) a barbarian
-		// camp's: it's what keeps an outlaw welcome there ({@link Barbarians#spares})
-		if (killer != null && (faction.type() != FactionType.BARBARIAN || Barbarians.plainCamp(server, faction.id()))) {
+		// camp's or pirate cove's: it's what keeps an outlaw welcome there ({@link Barbarians#spares})
+		if (killer != null && (faction.type() != FactionType.BARBARIAN || Barbarians.sparingCamp(server, faction.id()))) {
 			Reputation.change(killer, faction, Folk.isBuilder(role) ? REP_KILL_BUILDER : REP_KILL_GUARD);
 		}
 	}
