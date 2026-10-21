@@ -2141,3 +2141,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's
   Kitchen 0.5.7 (slower stomach regen that stops at 60%, the rest needs treatment; its jar still needs building into
   `libs/`). Breaks (set by a splint or a priest) and stumps (cautery, or villagers binding them) already needed tending.
+- **0.15.32, bandit masks hide the face:** ships Jaymo's Kingdoms 0.7.125. Kingdoms' bandit mask and bandana (found
+  by id, `costume/BanditMask`) hide the face like a costume: the wearer goes by "Bandit" over their head, in chat and on
+  the tab list, or "Pirate" in or on the water, in a boat or on a ship, or on a sea, beach or river biome. They're
+  tagged `jaymospowers_masked:bandit_<uuid>` (one identity per player), which Kingdoms reads like a costume's.
