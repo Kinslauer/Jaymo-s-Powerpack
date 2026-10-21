@@ -116,9 +116,58 @@ public final class CostumeBody {
 		}
 	}
 
-	/** {@code model}'s bust (MCA's "breasts" part on the root), or null. */
+	/**
+	 * (0.15.23) Lays on {@code costume} the pose MCA's own layers draw this player's villager body in, when they do: the
+	 * copy of the body MCA's skin layer took as the layers began (its HumanoidModelPose on the render state, read by
+	 * name). The body's model is animated once more when it's finally drawn, and our poses that add to a limb land on
+	 * MCA's copy a second time; taking the same copy, the costume moves with the skin under it. False when MCA doesn't
+	 * draw this body (no copy this frame), or can't be read.
+	 */
+	static boolean mcaPose(Object state, PlayerModel costume) {
+		if (mcaPoseBroken || !MCA_LOADED) {
+			return false;
+		}
+		try {
+			if (mcaGetPose == null) {
+				mcaGetPose = state.getClass().getMethod("mca$getHumanoidModelPose");
+			}
+			Object pose = mcaGetPose.invoke(state);
+			if (pose == null) {
+				return false;
+			}
+			if (mcaApplyPose == null) {
+				mcaApplyPose = pose.getClass().getMethod("applyTo", net.minecraft.client.model.HumanoidModel.class);
+			}
+			mcaApplyPose.invoke(pose, costume);
+			return true;
+		} catch (Throwable e) {
+			mcaPoseBroken = true;
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't read MCA's body pose; costumes follow the plain body's", e);
+			return false;
+		}
+	}
+
+	private static final boolean MCA_LOADED = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mca");
+	private static @Nullable Method mcaGetPose, mcaApplyPose;
+	private static boolean mcaPoseBroken;
+
+	/**
+	 * {@code model}'s bust (MCA's "breasts" part on the root), or null. (0.15.23) The model MCA animates its villager
+	 * body with (made from the plain player layer) keeps its bust off the root, in its public field {@code breasts}: there
+	 * it is set up all the same, and MCA's layers draw a bust from it, so the suit's goes over it.
+	 */
 	static @Nullable ModelPart bust(PlayerModel model) {
-		return model.root().hasChild(BUST) ? model.root().getChild(BUST) : null;
+		if (model.root().hasChild(BUST)) {
+			return model.root().getChild(BUST);
+		}
+		if (!isMca(model)) {
+			return null;
+		}
+		try {
+			return model.getClass().getField(BUST).get(model) instanceof ModelPart part ? part : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
 	}
 
 	static final String BUST = "breasts";
