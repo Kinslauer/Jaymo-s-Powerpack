@@ -193,7 +193,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:elytra",
+          "name": "jaymospowers:golden_aercloud_glider",
           "weight": 1
         },
         {

@@ -228,12 +228,12 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:stone_pickaxe",
+          "name": "jaymospowers:holystone_pickaxe",
           "weight": 3
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_pickaxe",
+          "name": "jaymospowers:zanite_pickaxe",
           "weight": 3
         },
         {

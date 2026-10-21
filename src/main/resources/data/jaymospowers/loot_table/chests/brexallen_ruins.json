@@ -189,7 +189,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_pickaxe",
+          "name": "jaymospowers:zanite_pickaxe",
           "weight": 3
         },
         {

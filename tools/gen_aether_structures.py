@@ -36,7 +36,7 @@ ramp = ga.ramp
 seeded = ga.seeded
 mdl = lambda name: "%s:block/%s/%s" % (NS, SUB, name)
 
-TRACK_G = False
+TRACK_G = True
 
 # ---------------------------------------------------------------- the blocks
 
