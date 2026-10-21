@@ -2,7 +2,10 @@ package com.jaymospowers.client.power.xenoform;
 
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
+import com.jaymospowers.power.xenoform.XenoForm;
+import com.jaymospowers.power.xenoform.XenoForms;
 import com.jaymospowers.power.xenoform.XenoNet;
+import com.jaymospowers.power.xenoform.XenoVoices;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,6 +30,8 @@ public final class XenoformPowerClient implements PowerClient {
 	private static final String SKILL_KEY = "key.jaymospowers.web_symbiote";
 	/** The flash on changing shape lasts this many ticks. */
 	static final int FLASH_TICKS = 12;
+	/** The burst of light at the band when the slam lands (first person) lasts this many ticks. */
+	static final int BURST_TICKS = 8;
 
 	private static @Nullable KeyMapping skillKey;
 	private static boolean skillWasDown;
@@ -34,12 +39,15 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Ticks left of the flash, and the colour of the shape it marked. */
 	static int flash;
 	static int flashColor;
+	/** Ticks left of the slam's burst of light. */
+	static int burst;
 
 	private XenoformPowerClient() {
 	}
 
 	public static void init() {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoDouble.TYPE, XenoDoubleRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
@@ -106,13 +114,16 @@ public final class XenoformPowerClient implements PowerClient {
 		String form = player.getAttached(XenoformState.FORM);
 		if (!java.util.Objects.equals(form, formWas)) {
 			formWas = form;
-			XenoformSlap.changed(player.tickCount);
+			XenoformSlap.changed(player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 			var shape = XenoformState.form(player);
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
 		}
 		if (flash > 0) {
 			flash--;
+		}
+		if (burst > 0) {
+			burst--;
 		}
 	}
 
@@ -124,11 +135,22 @@ public final class XenoformPowerClient implements PowerClient {
 	/** Z: the wrist comes up while it's held (the wheel turns the dial), the hand lands as the band slams on letting go. */
 	@Override
 	public void onMode(LocalPlayer player, boolean down) {
+		// the same fractional clock the slap pose reads (tick + partial), so the release doesn't quantise to a tick
+		float now = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		if (down) {
-			XenoformSlap.holdStart(player.tickCount, player.getAttached(XenoformState.FORM) == null);
+			XenoformSlap.holdStart(now, player.getAttached(XenoformState.FORM) == null);
+		} else if (player.getAttached(XenoformState.FORM) == null && refused(player)) {
+			// a band still recharging, or Nadir dialled before the voices are content, refuses the change: the arms drop away, no strike, kick or burst for nothing
+			XenoformSlap.drop(now);
 		} else {
-			XenoformSlap.release(player.tickCount);
+			XenoformSlap.release(now);
 		}
+	}
+
+	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
+	private static boolean refused(LocalPlayer player) {
+		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
+		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
 	}
 
 	@Override
@@ -136,6 +158,7 @@ public final class XenoformPowerClient implements PowerClient {
 		skillWasDown = false;
 		formWas = active ? player.getAttached(XenoformState.FORM) : null;
 		flash = 0;
+		burst = 0;
 		XenoformSlap.clear();
 	}
 }

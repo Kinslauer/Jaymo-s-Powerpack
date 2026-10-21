@@ -45,7 +45,6 @@ import net.minecraft.world.phys.Vec3;
  * fast, unable to strike, with amethyst grown round it; you're hard as the crystal meanwhile. Again every
  * {@link #GEODE_COOLDOWN}.</li>
  * </ul>
- * Corrupted: the reflect stance is flawed. One arrow in {@link #CORRUPT_FLAW} isn't turned at all and goes into you.
  */
 public final class Prism extends XenoForm {
 	// ---- tuning ----
@@ -61,8 +60,6 @@ public final class Prism extends XenoForm {
 	/** Geode: its reach, how long it holds, C's cooldown, and the resistance you get while it holds (amplifier). */
 	public static final double GEODE_RADIUS = 6.0;
 	public static final int GEODE_TICKS = 80, GEODE_COOLDOWN = 400, GEODE_RESISTANCE = 2;
-	/** Corrupted: one arrow in this many gets through the stance. */
-	public static final int CORRUPT_FLAW = 4;
 
 	private static final BlockState CRYSTAL = Blocks.AMETHYST_BLOCK.defaultBlockState();
 	private static final BlockParticleOption CRYSTAL_DUST = new BlockParticleOption(ParticleTypes.BLOCK, CRYSTAL);
@@ -148,12 +145,6 @@ public final class Prism extends XenoForm {
 		ServerLevel level = player.level();
 		Entity incoming = source.getDirectEntity();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
-		if (live.corrupted && incoming instanceof AbstractArrow && player.getRandom().nextInt(CORRUPT_FLAW) == 0) {
-			// the flaw: this one finds the crack
-			sound(player, SoundEvents.AMETHYST_CLUSTER_BREAK, 1.0F, 0.5F);
-			level.sendParticles(CRYSTAL_DUST, at.x, at.y, at.z, 16, 0.3, 0.3, 0.3, 0.0);
-			return true;
-		}
 		if (incoming instanceof AbstractArrow old) {
 			Vec3 back = old.getDeltaMovement().scale(-1.0);
 			if (source.getEntity() != null && source.getEntity() != player) {

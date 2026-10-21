@@ -94,6 +94,9 @@ public final class XenoformPower implements Power {
 	private static final Identifier STEP_ID = JaymosPowers.id("xenoform_step");
 
 	/** Server-side bookkeeping for one player (not saved: a relog turns them back first). */
+	/** A projectile Standstill holds (kept by reference, so it is let go in whichever dimension it is in) and its caught state. */
+	public record Held(net.minecraft.world.entity.projectile.Projectile projectile, double[] caught) {}
+
 	public static final class Live {
 		@Nullable XenoForm form;
 		int ticksLeft, total;
@@ -115,17 +118,27 @@ public final class XenoformPower implements Power {
 		public int combo;
 		public long comboNext;
 		public int grabbed = -1;
-		/** Bulwark: in a leap, and ticks since it started. Blur: ticks left of a dash's speed. */
+		/** Bulwark: in a leap, and ticks since it started. */
 		public boolean leaping;
 		public int leapTicks;
-		public int dashTicks;
 		/** Pyre: ticks left of the magma trail; the jet is held. */
 		public int trailTicks;
 		public boolean jet;
-		/** Blur: ticks spent on the wall this run; the chain strike's targets and its clock. */
+		/** Velox: the speed burst is on, and its ticks so far; ticks spent on the wall this run; the chain strike's targets and its clock. */
+		public boolean bursting;
+		public int burstTicks;
 		public int wallRun;
 		public final List<Integer> chain = new ArrayList<>();
 		public int chainTick;
+		/** Velox: rapid punches left, whom they hit (entity id) and ticks to the next; ticks left of the cyclone. */
+		public int punches, punchTick;
+		public int punchTarget = -1;
+		public int cyclone;
+		/** Velox's Standstill: ticks left, and each projectile held still (entity id to its velocity when caught and whether it flew without gravity). */
+		public int standstill;
+		public final Map<Integer, Held> held = new HashMap<>();
+		/** The Speed effect Standstill replaced (null: none), put back when it ends. */
+		public net.minecraft.world.effect.MobEffectInstance savedSpeed;
 		/** Prism: in the reflect stance; the wall's blocks and when it falls. */
 		public boolean reflecting;
 		public final List<net.minecraft.core.BlockPos> wall = new ArrayList<>();
@@ -145,9 +158,9 @@ public final class XenoformPower implements Power {
 		/** In the Ultimate form (C, ascended) for the rest of this timer; the Ultimate's own move's cooldown. */
 		public boolean ultimate;
 		public long ultimateNext;
-		/** The band is corrupted right now: each alien's moves carry their twist. Refreshed every tick. */
+		/** The band is corrupted right now (a slam may give the wrong alien; see {@link XenoForm#corrupt}). Refreshed every tick. */
 		public boolean corrupted;
-		/** What the Ultimate summoned (entity ids): Swarm's gremlins, Afterimage's decoys. Dismissed when it ends. */
+		/** What the Ultimate summoned (entity ids): Swarm's gremlins. Dismissed when it ends. */
 		public final List<Integer> minions = new ArrayList<>();
 		/** Revenant: the creature possessed (entity id, -1 none). Sunheart: the beam is held. */
 		public int possessed = -1;
@@ -157,14 +170,15 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
-		/** Corrupted Wyrm: ticks the wings are out; corrupted Blur: ticks of a dash that won't stop. */
-		public int wingStall, runaway;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
 		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
 		public @Nullable UUID beaconTarget;
 		public int beaconHeld;
 		public long beaconTapAt;
+		/** Duplex: its doubles (entity ids), and when Copper Storm's charge wears off. */
+		public final List<Integer> doubles = new ArrayList<>();
+		public long chargedUntil;
 
 		void clearForm() {
 			form = null;
@@ -175,12 +189,19 @@ public final class XenoformPower implements Power {
 			grabbed = -1;
 			leaping = false;
 			leapTicks = 0;
-			dashTicks = 0;
 			trailTicks = 0;
 			jet = false;
+			bursting = false;
+			burstTicks = 0;
 			wallRun = 0;
 			chain.clear();
 			chainTick = 0;
+			punches = punchTick = 0;
+			punchTarget = -1;
+			cyclone = 0;
+			standstill = 0;
+			held.clear();
+			savedSpeed = null;
 			reflecting = false;
 			wall.clear();
 			shroud = glide = false;
@@ -200,10 +221,11 @@ public final class XenoformPower implements Power {
 			frozen.clear();
 			geodeUntil = 0L;
 			tolls = 0;
-			wingStall = runaway = 0;
 			hurt = false;
 			beaconTarget = null;
 			beaconHeld = 0;
+			doubles.clear();
+			chargedUntil = 0L;
 			hudDirty = true;
 		}
 	}
@@ -217,6 +239,7 @@ public final class XenoformPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		XenoNet.register();
+		XenoDouble.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		FallingStars.init();
@@ -373,6 +396,9 @@ public final class XenoformPower implements Power {
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 				live.form.tick(player, live);
+				if (live.corrupted && live.form != null) {
+					live.form.corrupt(player, live);
+				}
 				if (live.form != null) {
 					int flight = live.form.flight(player, live);
 					if (flight != XenoformState.flight(player)) {
@@ -727,9 +753,6 @@ public final class XenoformPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.4F, 1.8F);
 		player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		form.onEnter(player, live);
-		if (live.corrupted) {
-			player.sendSystemMessage(form.corruptLine().copy().withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-		}
 		Mastery.used(player);
 		live.hudDirty = true;
 		return true;
