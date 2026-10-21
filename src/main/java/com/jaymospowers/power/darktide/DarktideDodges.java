@@ -23,8 +23,8 @@ import net.minecraft.world.phys.AABB;
  * </ul>
  */
 final class DarktideDodges {
-	/** Golden feathers while Darktide is your power (half-feathers: one more dodge). */
-	static final int BONUS = 6;
+	/** Golden feathers while Darktide is your power (half-feathers: two more dodges). */
+	static final int BONUS = 12;
 	static final float EVASION_FLOW = 10.0F;
 	static final int WINDOW = 8;
 	static final double NEAR_PROJECTILE = 2.5, NEAR_MOB = 3.0;

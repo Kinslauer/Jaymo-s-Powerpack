@@ -48,9 +48,9 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
   your facing, back with none held. The hop is applied on the client at once.
 - `client/stamina/FeathersHud`: the row, right above hunger, moved up for air bubbles and a mount's hearts. Art
   `textures/gui/feathers.png` from `tools/gen_feathers.py` (9x9 icons on vanilla's HUD grid).
-- Powers: Darktide +6 golden (`DarktideDodges`; dashes cost a dodge's feathers, a landed flurry refunds them; the
-  evasion Flow now fires on our dodge), Web +12 golden (`WebRolls`; each counter spends a dodge's worth), Corrupted
-  mode +12 golden and every dodge is the blink (`ZFighterCorruption`).
+- Powers (Andy: the powers that had extra dodges get extra feathers): Darktide +12 golden (`DarktideDodges`; dashes cost a dodge's feathers, a landed flurry refunds them; the
+  evasion Flow now fires on our dodge), Web +20 golden (`WebRolls`; each counter spends a dodge's worth), Corrupted
+  mode +12 golden and every dodge is the blink (`ZFighterCorruption`), Chrono +12 golden (`ChronoFlow.DODGE_BONUS`; its own Time Flow roll charges stay as they were).
 - Combat Roll left the pack (its HUD and its enchantments with it).
 
 ## To check in game

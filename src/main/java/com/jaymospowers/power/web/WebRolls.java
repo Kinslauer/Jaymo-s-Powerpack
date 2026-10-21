@@ -12,8 +12,8 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public final class WebRolls {
 	// ===== the knobs ================================================================================================
-	/** Golden feathers a web slinger holds (half-feathers: two more dodges). */
-	public static final int BONUS = 12;
+	/** Golden feathers a web slinger holds (half-feathers: a full golden row, three more dodges). */
+	public static final int BONUS = 20;
 	// ================================================================================================================
 
 	private WebRolls() {

@@ -67,7 +67,7 @@ a host that isnt a web user."
   with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
   lifts it already); never in water or riding.
 - **Feathers (`WebRolls`; 0.15.0, in place of Combat Roll's charges, `docs/dodge.md`):** a web slinger gets `BONUS`
-  12 golden feathers over the feathers row (two more dodges). Each Spider-Sense counter (`WebCounter`) spends a
+  20 golden feathers over the feathers row (a full golden row, three more dodges). Each Spider-Sense counter (`WebCounter`) spends a
   dodge's worth (`Dodge.COST`); without them a dodge still sidesteps but opens no counter window.
 - **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
   host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
