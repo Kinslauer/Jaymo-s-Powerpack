@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.cryo.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["CryoAvatarRendererMixin", "CryoModelFeatureRendererMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

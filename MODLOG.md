@@ -2238,3 +2238,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     limp with the head turned aside. Downed humanoid mobs (`wounds/DownedPose`) fall with weight (the knees go, then a
     faster drop and a small bounce), crawl the same way, and on their backs breathe unevenly, clutch their worst wound
     (a broken arm or leg, else the chest) and try to sit up. First person is unchanged.
+- **0.15.40, Cryokinesis poses and livelier weapon animations:** part of the animation upgrade Andy approved (wind-up,
+  follow-through, the whole body moving, eased springs).
+  - Cryokinesis had no body poses; now every move has one, seen in third person by everyone (`client/power/cryo/CryoPose`).
+    Ice Slide is a skater's crouch: torso low and forward, legs apart pushing off in turn as you speed up, arms out for
+    balance, the whole body leaning into a turn (from the slide's own velocity for you, from movement for others).
+    Frost Breath braces the legs and pushes the chest and head forward; the hand goes to the mouth, then is thrown out
+    along the breath, trembling. Ice Shards is a wind-up and a fanned sweep across the body with a step and a twist,
+    carried through. Flash Freeze draws both hands to the chest and pushes them out; the Ice Wall dips low and drives
+    both palms up. The Blizzard raises both arms overhead and spreads them, swaying and shivering while it rages. The
+    held poses come and go on small springs, so they ease in and out. The server now tells everyone which move is being
+    made through a small synced `CryoMoves` attachment, like Smoke's.
+  - Our 8 Better Combat weapon animations (sword twirl slash and whirl, axe flip chop, dagger flip, polearm whirl, the
+    three staff twirls) are re-keyed in `tools/combat_animations.py`: a wind-up before the hit and a follow-through
+    after, the head looking toward the blade, the torso in on every move, and a step or weight shift on the legs (the
+    sword slash, axe chop, dagger flip and front staff twirl had none). Eased curves replace the straight ones; only the
+    stretches inside a spin stay straight, so a twirl doesn't stop at every quarter turn. The hit's keyframe and every
+    begin/end/stop tick are unchanged, so Better Combat's damage timing is the same. `tools/check_player_animations.py`
+    checks every file parses and every key sits within the animation.

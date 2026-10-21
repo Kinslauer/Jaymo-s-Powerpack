@@ -140,6 +140,7 @@ public final class PoseTakeover {
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null || s.getData(ZFighterChargePose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSpiritPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeMovePose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.cryo.CryoPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.rig.RigPose.KEY) != null
 			|| Boolean.TRUE.equals(s.getData(ZFighterGuardPose.KEY))
 			|| Boolean.TRUE.equals(s.getData(com.jaymospowers.client.power.zfighter.ZFighterFiringPose.KEY))
