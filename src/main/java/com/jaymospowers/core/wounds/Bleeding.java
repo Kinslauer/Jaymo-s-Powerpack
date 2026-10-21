@@ -68,8 +68,11 @@ public final class Bleeding {
 	public static final float CUT_CAP = 0.5F;
 	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
 	public static final float FESTER_CHANCE = 0.05F;
-	/** (0.14.4) A fever: this often (ticks), this much off the body. */
-	public static final int FEVER_TICKS = 400;
+	/**
+	 * (0.14.4) A fever: this often (ticks), this much off the body. (0.14.5) Every minute, was every 20 s: a festering
+	 * body can't heal, so a fever every 20 s downed a player from a single dirty cut on the chest within a minute or two.
+	 */
+	public static final int FEVER_TICKS = 1200;
 	public static final float FEVER_DAMAGE = 1.0F;
 	/** (0.14.4) A limb festering this long (a Minecraft day) is lost to save the body. */
 	public static final int FESTER_LIMB_TICKS = 24000;

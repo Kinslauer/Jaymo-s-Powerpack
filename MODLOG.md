@@ -1976,3 +1976,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     the shakes (`client/wounds/MedicineHud`).
   - **Downed:** a knocked-out body (`Downed.knockOut`) comes round on its own; `Downed.rouse` and `wake` for the salts
     and the poppy.
+- **0.14.5, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
+  `docs/Wounds-Phase5.md`; track A the client feel, track B the rules, tuning, docs and JEI). Written without a
+  compiler: build it before anything else.
+  - TRACK A: client effects (limp, pain blur, hit pulse, critical heartbeat, salts gasp)
+  - **Freerunning respects breaks** (`freerun/Freerun.canMove`, from PR #339): no freerunning move at all on a broken
+    leg out of a splint, or with both arms broken (or gone); one broken arm or a sprained foot rules out only the moves
+    that hang on the grip, the climb (cling) and the bar swing (`Freerun.canMove(player, kind)`, `gripMove`). Wounds'
+    `Breaks.legsUsable`, `armsUsable` and `gripUsable` read the synced bitmasks, so the client (`FreerunClient` doesn't
+    try those moves, and lets go of a climb or a bar when an arm breaks or a foot sprains) and the server (refuses and
+    ends them) agree. A splinted leg freeruns; a splinted arm still counts as broken for the grip.
+  - **`jaymospowers_crippled`:** anything with a broken leg (any of its legs, splinted or not, severed included) carries
+    this scoreboard tag, put on and taken off with `Breaks`' refresh (every second; `Breaks.CRIPPLED_TAG`). For a later
+    Kingdoms patch: its hidden blade's 10x on a Crippled foe (Kingdoms 0.7.101) could read the tag too. Kingdoms is
+    untouched.
+  - **Tuning:** `Bleeding.FEVER_TICKS` 400 → 1200 (a fever every minute, was every 20 s): a festering part can't heal,
+    so a festering chest bled a player down from one dirty cut within a minute or two; the plan's fever is "slow
+    damage". Everything else in phases 1-4 is unchanged; the open questions went to Andy (stump bleed, festering
+    chance, head cuts, the sever chance on a broken limb).
+  - **JEI:** a Medicine page (`client/jei/MedicineJei`, a second `jei_mod_plugin` on `SimpleCategory`): each kit item,
+    honey, Kitchen's strong spirits (when loaded) and a red-hot blade, with what it treats and how it's used, the
+    numbers read off `Treatment` and `Pain`. Lang `jei.jaymospowers.medicine.*` in `lang/parts/wounds.json`.
+  - **Docs:** a Wounds section in `docs/Abilities.md` (body parts, downed, breaks, bleeding and festering, every
+    medicine with its recipe, addiction, Kingdoms' clerics and taverns, `/wounds`), and a Wounds entry in
+    `docs/HANDOFF.md` (the event order learned, the shared scoreboard tags). Phase 5 marked built in
+    `docs/Wounds-Plan.md`.
