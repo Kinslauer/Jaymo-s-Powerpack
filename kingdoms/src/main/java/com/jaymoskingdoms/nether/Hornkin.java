@@ -103,10 +103,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	/** An ingot buys this many of its wares, at most. */
 	static final int WARES_MOST = 3;
 	/** What a Hornkin trades for a gold ingot: its own wares, not a piglin's. */
-	static final List<ItemStack> WARES = List.of(new ItemStack(Items.QUARTZ, 4), new ItemStack(Items.MAGMA_CREAM, 2), new ItemStack(Items.FIRE_CHARGE, 2),
-		new ItemStack(Items.BLAZE_POWDER), new ItemStack(Items.LEATHER, 3), new ItemStack(Items.BONE, 3), new ItemStack(Items.BLACKSTONE, 8),
-		new ItemStack(Items.GILDED_BLACKSTONE), new ItemStack(Items.CRIMSON_FUNGUS, 2), new ItemStack(Items.COOKED_PORKCHOP, 2),
-		new ItemStack(Items.GLOWSTONE_DUST, 4), new ItemStack(Items.ARROW, 6));
+	/** Built when traded, not at class load: an ItemStack can't be made before item components are bound
+	 * (0.7.133 crashed the game at startup). */
+	static final List<java.util.function.Supplier<ItemStack>> WARES = List.of(() -> new ItemStack(Items.QUARTZ, 4), () -> new ItemStack(Items.MAGMA_CREAM, 2), () -> new ItemStack(Items.FIRE_CHARGE, 2),
+		() -> new ItemStack(Items.BLAZE_POWDER), () -> new ItemStack(Items.LEATHER, 3), () -> new ItemStack(Items.BONE, 3), () -> new ItemStack(Items.BLACKSTONE, 8),
+		() -> new ItemStack(Items.GILDED_BLACKSTONE), () -> new ItemStack(Items.CRIMSON_FUNGUS, 2), () -> new ItemStack(Items.COOKED_PORKCHOP, 2),
+		() -> new ItemStack(Items.GLOWSTONE_DUST, 4), () -> new ItemStack(Items.ARROW, 6));
 
 	private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(Hornkin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> ADMIRING = SynchedEntityData.defineId(Hornkin.class, EntityDataSerializers.BOOLEAN);
@@ -409,7 +411,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		if (gold.is(Items.GOLD_INGOT)) {
 			int n = 1 + this.random.nextInt(WARES_MOST);
 			for (int i = 0; i < n; i++) {
-				this.spawnAtLocation(level, WARES.get(this.random.nextInt(WARES.size())).copy());
+				this.spawnAtLocation(level, WARES.get(this.random.nextInt(WARES.size())).get());
 			}
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PIGLIN_CELEBRATE, SoundSource.HOSTILE, 1.0F, 0.6F);
 		} else if (!gold.isEmpty()) {
