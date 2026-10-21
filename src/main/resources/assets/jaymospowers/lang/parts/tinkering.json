@@ -231,6 +231,15 @@
   "block.jaymospowers.forge_hearth": "Forge Hearth",
   "tooltip.jaymospowers.tinkering.unfired_pot": "Fire it in a brick kiln to make a decorated pot.",
   "tooltip.jaymospowers.tinkering.bellows": "Pump it (or blow wind into it): the fire it faces burns hotter for a while.",
-  "tooltip.jaymospowers.tinkering.forge_hearth": "Burns coal or charcoal hot enough for netherrack and grout.",
-  "message.jaymospowers.forge_hearth.no_fuel": "The hearth needs coal or charcoal."
+  "tooltip.jaymospowers.tinkering.forge_hearth": "Burns coal or charcoal hot enough for netherrack, grout and crucible steel.",
+  "message.jaymospowers.forge_hearth.no_fuel": "The hearth needs coal or charcoal.",
+  "material.jaymospowers.steel": "Steel",
+  "molten.jaymospowers.steel": "Molten Steel",
+  "item.jaymospowers.steel_ingot": "Steel Ingot",
+  "item.jaymospowers.steel_nugget": "Steel Nugget",
+  "item.jaymospowers.steel_blend": "Crucible Steel Blend",
+  "block.jaymospowers.steel_block": "Block of Steel",
+  "trait.jaymospowers.tempered": "Tempered",
+  "trait.jaymospowers.tempered.desc": "Often takes a knock without wearing, and bites through armour.",
+  "tooltip.jaymospowers.tinkering.steel_blend": "Fire it in a brick kiln over a forge hearth (heat 2) for a steel ingot."
 }

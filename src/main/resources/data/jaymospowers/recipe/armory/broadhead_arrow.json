@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "N": "#c:nuggets/steel",
+    "S": "minecraft:stick",
+    "F": "minecraft:feather"
+  },
+  "pattern": [
+    "NNN",
+    " S ",
+    " F "
+  ],
+  "result": {
+    "id": "jaymospowers:broadhead_arrow",
+    "count": 4
+  }
+}

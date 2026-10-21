@@ -18,6 +18,7 @@ public enum Molten {
 	AMETHYST_BRONZE("amethyst_bronze", 0xFFD49BD9, TinkerMaterial.AMETHYST_BRONZE),
 	PIG_IRON("pig_iron", 0xFFEFA9A9, TinkerMaterial.PIG_IRON),
 	SLIMESTEEL("slimesteel", 0xFF74C8C7, TinkerMaterial.SLIMESTEEL),
+	STEEL("steel", 0xFFF2B866, TinkerMaterial.STEEL),
 	SLIME("slime", 0xFF7EBE5A, null),
 	HONEY("honey", 0xFFF9A42C, null),
 	BLOOD("blood", 0xFF6B0000, null);

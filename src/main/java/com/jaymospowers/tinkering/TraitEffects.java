@@ -45,6 +45,8 @@ public final class TraitEffects {
 	static final double MAGNET_RANGE = 3.0, MAGNET_PULL = 0.08;
 	/** Searing: extra damage per level against anything that isn't fireproof. */
 	static final float SEARING_DAMAGE = 1.5F;
+	/** Tempered (steel): damage per level that goes through armour, against anything wearing some. */
+	static final float TEMPERED_ARMOR_PIERCE = 1.0F;
 	/** Tasty: hunger at or under which it can be nibbled, chance per level a use, food and saturation, durability it costs. */
 	static final int TASTY_HUNGER = 16, TASTY_FOOD = 2, TASTY_COST = 5;
 	static final float TASTY_CHANCE = 0.05F, TASTY_SATURATION = 0.3F;
@@ -111,7 +113,7 @@ public final class TraitEffects {
 		});
 	}
 
-	/** After a hit lands: Piercing and Smite add their damage. */
+	/** After a hit lands: Piercing, Smite, Searing and Tempered add their damage. */
 	static void afterHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (!(attacker.level() instanceof ServerLevel level) || ToolStats.isBroken(stack) || !target.isAlive()) {
 			return;
@@ -136,6 +138,11 @@ public final class TraitEffects {
 		if (pierce > 0 && target.isAlive()) {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), pierce * PIERCE_DAMAGE);
+		}
+		int tempered = stats.level(Trait.TEMPERED);
+		if (tempered > 0 && target.isAlive() && target.getArmorValue() > 0) {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), tempered * TEMPERED_ARMOR_PIERCE);
 		}
 		tasty(stack, attacker, stats);
 		gainXp(stack, attacker, XP_PER_HIT);
