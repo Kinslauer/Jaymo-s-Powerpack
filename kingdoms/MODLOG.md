@@ -3511,3 +3511,15 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
   Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
   pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+- **0.7.107, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+  barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
+  (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
+  taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon
+  (`tools/gen_items.py`, vanilla style) are our own. From 3.5 to 20 blocks he keeps his distance (backs off inside 7)
+  and lobs a lit stick at where his foe is going, sight or no sight, so walls and roofs don't save you; closer, he draws
+  his cutlass. **Dynamite** (`Dynamite`): a 2.5 s fuse from the throw; it arcs, bounces and sizzles, then bursts like a
+  cannonball (12 at its heart, 3.5 blocks, a shove) and leaves blocks whole; it never hurts his own side. Water puts it
+  out (the stick drops). Hit a lit stick and it flies where you look and is yours. The item throws the same (16 to a
+  stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
+  each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
+  landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.

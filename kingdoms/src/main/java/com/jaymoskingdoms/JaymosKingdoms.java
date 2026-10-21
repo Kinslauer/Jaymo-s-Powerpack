@@ -173,6 +173,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		Cannonball.register();
+		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
+		Dynamite.register();
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
