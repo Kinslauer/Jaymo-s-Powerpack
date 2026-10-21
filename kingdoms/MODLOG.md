@@ -3736,11 +3736,47 @@ identity the same way a costume does but npcs call you a bandit/ pirate dependin
   (royal from 90; it drops, or it's yours when you bring them in), 60 health plus 1.5 per emerald (240 at most), 10
   armour, a boss bar, and it fights the nearest player it can see within 24 blocks (6 damage plus 1 per 25 emeralds).
 
-## 0.7.128: wool clothes and steel plate (Better With Mods batch 2, pack 0.15.35, Kitchen 0.5.8)
+## 0.7.126: crooks among the villagers, and the guards arrest them
+Andy: "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing from the player, and upon
+prompts of good deals (8 cod 3 emeralds) they can scam you ... rep has an effect, the higher it is, the less likely to
+be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Theft`, `JaymosKingdoms`).
+- 8% of a settlement's grown villagers (not guards, outlaws or cultists) are crooks, decided once (`jaymoskingdoms:crook`,
+  saved). Every 5 s a free crook near a player has a 5% chance to set about something: lift from a neighbour's pack, mug
+  a lone neighbour (3 blows, never below 3 hearts), pick a player's pocket (up to 4 emeralds, else half a stack, never
+  the held item or a weapon), mug a player (night only), or set fire to logs/planks/wool/hay (night, once in 3 days per
+  settlement, inside their own town only, players' builds there included; `Firefighting` answers it).
+- Seen (a non-crook villager, folk or golem with sight of it, or the victim noticing; a mugging is always known): the
+  witness cries out over their head, the guards and golems within 32 chase the crook, the crook runs, and they're a
+  known criminal: `jaymoskingdoms:notoriety` (saved), scoreboard tag `jaymoskingdoms_criminal`, and `Crooks.SEEN`
+  listeners (the bounty board) get the faction and a bounty (5 + 4 per notoriety).
+- Pickpocketed players feel it half the time (named in chat), or only notice it gone 30-90 s later (unnamed).
+- Scams: a crook offers bargains from any trade (craftsmen's own deals otherwise), 70% of them scams; a scam reads half
+  again as many goods for one emerald less. You pay, they say they'll fetch it and walk off, and 4 s later crow about it
+  over their head.
+- Owed: whatever a crook took from you (theft, mugging, scam) can be demanded back for 5 minutes by right-clicking them:
+  35% they hand it over (+25% with a weapon in hand, +4% per 100 reputation, 10-85%), else they bolt. Downed or killed
+  within a day, their pockets go straight back to you (within 24 blocks) or drop. Killing a known criminal, or a crook
+  who owes you, isn't murder (`Crooks.fairGame`); guards and golems stop beating a downed crook.
+- Reputation: every chance against a player is scaled by `1 - rep/750`, between 0.1 and 1.5 (a friend of the town is
+  rarely robbed; a disliked stranger is robbed more).
+- Arrests (`Arrests`). Andy: "can you make guards attempt to arrest before killing criminals? either give them a visible
+  audience with the king or make a jail cell building ... and executions." Took the audience. Where a realm keeps folk
+  guards, a seen crook isn't chased by every guard and golem: the nearest free guard runs them down and calls a halt.
+  They come quietly (55%, -6% per notoriety, at least 15%) or resist, and are beaten down and got up again
+  (`jaymospowers_revive`). The guard marches them to the ruler (or the seat with no ruler about) for an audience: he
+  names the crime, the ruler pronounces sentence aloud, players within 48 are told in chat, and it's carried out there.
+  Sentence score = notoriety x 10 + temper lean (tyrant +30, noble -20, warlord +15, paranoid +20, reveler -10) + 0-30:
+  under 20 a pardon, 20+ a flogging (3 blows, never below 2 hearts), 45+ exile (they walk 80 blocks out and are gone),
+  70+ execution (beheaded: `jaymoskitchen.missing.head`, then killed). `Arrests.SENTENCED` takes the crook off the
+  bounty board (`Bounties.sentenced`), and `Crooks.SEEN` posts seen crooks there (`Bounties.crime`).
+  A guard who's killed, downed or called away lets the crook bolt. Villages without folk guards still send golems.
+- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.35.
+
+## 0.7.128: wool clothes and steel plate (Better With Mods batch 2, pack 0.15.36, Kitchen 0.5.8)
 - Wool cap, shirt, pants and socks (`WoolClothes`): dyeable light armour (0/1/1/0), crafted from wool, sold dyed by
   shepherds. Each piece takes `WOOL_COLD_SHARE` (20%) off an Emberborn's cold weakness, slowness, freezing and cold
   hunger, and (tag `jaymoskitchen:warm_clothing`) 20% off Kitchen's winter cold hunger for anyone.
 - Steel plate armour (`Armory`): 3/7/6/3 (19), toughness 2.5, knockback resistance 0.05, tagged `heavy_armor`. Made from
-  `#c:ingots/steel` (Powers 0.15.35) and `#c:leather_straps` (Kitchen 0.5.8), or with plain leather for 1-2 more steel.
+  `#c:ingots/steel` (Powers 0.15.36) and `#c:leather_straps` (Kitchen 0.5.8), or with plain leather for 1-2 more steel.
   Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
   (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.

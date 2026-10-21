@@ -209,6 +209,9 @@ public final class Bounties {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(BOARD_ITEM));
 		ServerTickEvents.END_SERVER_TICK.register(Bounties::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(Bounties::died);
+		// (0.7.126) crooks seen at a crime are posted; one the court has sentenced is off the board
+		Crooks.SEEN.add(Bounties::crime);
+		Arrests.SENTENCED.add(Bounties::sentenced);
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(world instanceof ServerLevel level)) {
 				return InteractionResult.PASS;
@@ -267,6 +270,18 @@ public final class Bounties {
 	 * A crook was seen at a crime against {@code faction}: a bounty of {@code emeralds} on them there (the higher of it and
 	 * what's on them already). {@code Crooks} calls this for every crime of a crook's that someone sees.
 	 */
+	/** (0.7.126, from {@link Arrests}) The court has sentenced {@code crook}: their bounties are off the board (an executed one leaves no head to claim). */
+	public static void sentenced(LivingEntity crook, int faction, String sentence) {
+		if (!(crook.level() instanceof ServerLevel level)) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		Map<String, Bounty> map = new HashMap<>(all(server));
+		if (map.values().removeIf(b -> b.target().equals(crook.getStringUUID()))) {
+			server.overworld().setAttached(ALL, Map.copyOf(map));
+		}
+	}
+
 	public static void crime(LivingEntity crook, int faction, int emeralds) {
 		if (!(crook.level() instanceof ServerLevel level) || emeralds <= 0) {
 			return;

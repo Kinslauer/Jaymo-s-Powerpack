@@ -2181,7 +2181,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   bare forearms, the ragged cut's holes and the like still show the skin. Over an MCA body the costume takes the very
   pose MCA's layers use and drops the root as they do (`CostumeBody.mcaPose`, `Worn.beforeDraw`), and the suit's bust
   follows MCA's again (`CostumeBody.bust`). Heads untouched (masks have eye holes); first person unchanged.
-- **0.15.35, Better With Mods batch 2: smithing (Kingdoms 0.7.128, Kitchen 0.5.8):** batch 2 of the BWM port (MIT,
+- **0.15.36, Better With Mods batch 2: smithing (Kingdoms 0.7.128, Kitchen 0.5.8):** batch 2 of the BWM port (MIT,
   our own code; plan in the "Better With Mods: what fits our pack" doc). Andy: steel gets both a netherite tier and a
   trait; ore smelting in the furnace is slower.
   - Brick kiln (`tinkering/kiln`): no kiln block. A space walled on 3+ sides and the top by bricks, nether bricks or
