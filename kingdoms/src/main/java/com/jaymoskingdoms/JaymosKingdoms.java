@@ -81,6 +81,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
+		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
+		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
+		Bearers.register();
+		Looters.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);
@@ -300,6 +304,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();
+		// 0.7.131: the Nether's faction, stage 1: the Hornkin and their gold feud with the piglins (our own after Just-In NETHER)
+		com.jaymoskingdoms.nether.Nether.register();
 		// 0.7.92: an Earthling near death: the ki round the fists flares, with a buff (its attachment)
 		LOGGER.debug("earthling surge attachment: {}", EarthlingSurge.UNTIL);
 		EarthlingSurge.register();

@@ -68,8 +68,9 @@ import org.jspecify.annotations.Nullable;
  * {@link #DOWNED_TAG}) for what only it knows: villagers tending the downed, disarming a downed guard, and its folk
  * skipping the downed in their routines.
  * <p>
- * <b>Who goes down</b> ({@link #downable}): players (not in creative or spectator), villagers, anything carrying
- * {@link #DOWNABLE_TAG} (Kingdoms marks its folk), and tamed animals. Monsters, wild animals and bosses die; so does
+ * <b>Who goes down</b> ({@link #downable}): players (not in creative or spectator), villagers, (0.15.41) every humanoid
+ * (monsters too: zombies, skeletons, illagers), anything carrying {@link #DOWNABLE_TAG} (Kingdoms marks its folk), and
+ * tamed animals. Other monsters, wild animals and bosses die; so does
  * anything that loses its head, and anything killed by what ignores invulnerability (the void, {@code /kill}).
  * <p>
  * <b>Down:</b> at {@link #DOWNED_HEALTH} (a player at {@link #DOWNED_PLAYER_HEALTH}), head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
@@ -290,17 +291,20 @@ public final class Downed {
 	}
 
 	/**
-	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), a villager,
-	 * one of Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
+	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), (0.15.41) any
+	 * humanoid ({@link BodyPlan#HUMANOID}: villagers, folk, illagers, witches, piglins, zombies, skeletons...), one of
+	 * Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
 	 */
 	public static boolean downable(LivingEntity entity) {
 		if (entity instanceof Player player) {
 			return !player.isCreative() && !player.isSpectator();
 		}
-		if (!(entity instanceof Mob) || BodyPlan.of(entity) == null) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (!(entity instanceof Mob) || plan == null) {
 			return false;
 		}
-		if (entity instanceof Villager || entity.entityTags().contains(DOWNABLE_TAG)) {
+		// (0.15.41) Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate"
+		if (plan == BodyPlan.HUMANOID || entity instanceof Villager || entity.entityTags().contains(DOWNABLE_TAG)) {
 			return true;
 		}
 		return entity instanceof TamableAnimal tame && tame.isTame() || entity instanceof AbstractHorse horse && horse.isTamed();

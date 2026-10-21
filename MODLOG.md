@@ -2213,7 +2213,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
   rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
   away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
-- **0.15.40, smoother bodies (Kitchen 0.5.9, Kingdoms 0.7.131):** Andy saw the animation preview and said "do all this,
+- **0.15.41, the pack's dead cleared and robbed:** ships Jaymo's Kingdoms 0.7.132 (bearers, graves, mourning, looters,
+  judgement for a looter carried to a guard) and Jaymo's Kitchen 0.5.9 (corpses can be robbed; `libs/`).
+  Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate": `Downed.downable`
+  now downs every mob with the humanoid body plan (`BodyPlan.HUMANOID`: zombies, skeletons, illagers, witches, piglins,
+  endermen, Kingdoms' folk, modded humanoids by shape), not only villagers, tagged folk and tamed animals. Beheading,
+  `/kill`, the void, a totem and bosses still end it as before.
+- **0.15.42, smoother bodies (Kitchen 0.5.10, Kingdoms 0.7.133):** Andy saw the animation preview and said "do all this,
   add a better crawling and downed animation too". New `client/PoseBlend`: each pose gets a weight per player on a
   slightly bouncy spring (it eases in and out, nothing snaps), and springs on how far the pose moves each part from
   vanilla's, so a jump between keys follows through with a small overshoot. Real time, not frames; a pose ending keeps
@@ -2247,7 +2253,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     raised). They ease in and out on the same weights as third person (`client/FirstPersonArms`,
     `PowerArmsFirstPersonMixin`); only an empty hand is posed, so held items, Better Combat's swings and the view bob
     are untouched, and with First-person Model the body's own arms show the poses as before.
-- **0.15.40, Cryokinesis poses and livelier weapon animations:** part of the animation upgrade Andy approved (wind-up,
+- **0.15.42, Cryokinesis poses and livelier weapon animations:** part of the animation upgrade Andy approved (wind-up,
   follow-through, the whole body moving, eased springs).
   - Cryokinesis had no body poses; now every move has one, seen in third person by everyone (`client/power/cryo/CryoPose`).
     Ice Slide is a skater's crouch: torso low and forward, legs apart pushing off in turn as you speed up, arms out for

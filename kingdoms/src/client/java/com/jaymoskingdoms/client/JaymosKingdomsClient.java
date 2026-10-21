@@ -52,6 +52,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
+		// 0.7.131: the Hornkin of the Nether
+		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket

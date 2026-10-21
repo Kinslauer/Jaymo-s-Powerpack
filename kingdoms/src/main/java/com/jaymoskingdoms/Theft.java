@@ -128,7 +128,9 @@ public final class Theft {
 		/** (0.7.0) a vampire player seen feeding ({@link VampirePlayers}). */
 		BLOODLETTING(Weight.HEAVY, "bloodletting"),
 		/** (0.7.121) striking one of its people ({@link Retaliation}). */
-		ASSAULT(Weight.LIGHT, "assault");
+		ASSAULT(Weight.LIGHT, "assault"),
+		/** (0.7.132) one of its dead robbed ({@link Looters#playerRobbed}). */
+		ROBBING(Weight.MEDIUM, "robbing");
 
 		final Weight weight;
 		final String cry;
