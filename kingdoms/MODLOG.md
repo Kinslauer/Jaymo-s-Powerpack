@@ -3711,11 +3711,11 @@ right now it is held to the side of the player and is caught in the costume." `c
 - Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
 - Festivals: every realm fit to keep one holds a festival on the first day of each season.
 
-## 0.7.124: wool clothes and steel plate (Better With Mods batch 2, pack 0.15.31, Kitchen 0.5.7)
+## 0.7.126: wool clothes and steel plate (Better With Mods batch 2, pack 0.15.32, Kitchen 0.5.8)
 - Wool cap, shirt, pants and socks (`WoolClothes`): dyeable light armour (0/1/1/0), crafted from wool, sold dyed by
   shepherds. Each piece takes `WOOL_COLD_SHARE` (20%) off an Emberborn's cold weakness, slowness, freezing and cold
   hunger, and (tag `jaymoskitchen:warm_clothing`) 20% off Kitchen's winter cold hunger for anyone.
 - Steel plate armour (`Armory`): 3/7/6/3 (19), toughness 2.5, knockback resistance 0.05, tagged `heavy_armor`. Made from
-  `#c:ingots/steel` (Powers 0.15.31) and `#c:leather_straps` (Kitchen 0.5.7), or with plain leather for 1-2 more steel.
+  `#c:ingots/steel` (Powers 0.15.32) and `#c:leather_straps` (Kitchen 0.5.8), or with plain leather for 1-2 more steel.
   Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
   (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.
