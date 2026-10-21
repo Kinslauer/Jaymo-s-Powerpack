@@ -43,7 +43,7 @@ public interface Power {
 	}
 
 	/**
-	 * (0.15.28) The player just went down (Wounds' downed state): end whatever is running (holds, grabs, forms of
+	 * (0.15.30) The player just went down (Wounds' downed state): end whatever is running (holds, grabs, forms of
 	 * movement), keeping cooldowns and everything earned. While they're down their keys do nothing.
 	 */
 	default void onDowned(ServerPlayer player) {

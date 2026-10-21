@@ -132,7 +132,7 @@ public final class ResonancePower implements Power {
 		player.setAttached(STATE, ResonanceState.NONE);
 	}
 
-	/** (0.15.28) Downed: what was running ends. */
+	/** (0.15.30) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		// a hum in progress ends without its last note

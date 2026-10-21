@@ -2115,7 +2115,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
   snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
   server crash (not a normal stop) leaves the ice standing.
-- **0.15.28, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
+- **0.15.29, hidden blade visuals (Kingdoms 0.7.122):** Andy: the hidden blade should animate for players and be held
+  in front so it's visible, not off to the side and lost in the costume. Springing it raises the arm into a guard ahead
+  of you and runs the blade out of the housing; a blow with it is a straight thrust; the bracer stands clear of costume
+  sleeves. Details in the Kingdoms MODLOG.
+- **0.15.30, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
   anything but crawl" and "you shouldnt be healing to full health on the ground with no assistance". The server already
   dropped power-key presses, but the client still ran its own half and some 80 other ability packets went through.
   Now, while the local player is down, `DownedKeysMixin` makes every acting key read as up (Jump, Sprint, attack, use,

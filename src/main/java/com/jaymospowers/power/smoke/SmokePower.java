@@ -149,7 +149,7 @@ public final class SmokePower implements Power {
 		player.setAttached(STATE, SmokeState.NONE);
 	}
 
-	/** (0.15.28) Downed: what was running ends. */
+	/** (0.15.30) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		// the screen, the smother and the jet stop (no cooldown), the vapour body comes back together

@@ -198,7 +198,7 @@ public final class ChronoPower implements Power {
 		state.synced = false;
 	}
 
-	/** (0.15.28) Downed: what was running ends. */
+	/** (0.15.30) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		// stasis, bloom, overclock and trail end (cooldowns kept), and so does the flow

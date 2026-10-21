@@ -139,7 +139,7 @@ public final class CryoPower implements Power {
 		player.setAttached(STATE, CryoState.NONE);
 	}
 
-	/** (0.15.28) Downed: the slide, the breath and the blizzard end (no cooldown). */
+	/** (0.15.30) Downed: the slide, the breath and the blizzard end (no cooldown). */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		forget(player);
