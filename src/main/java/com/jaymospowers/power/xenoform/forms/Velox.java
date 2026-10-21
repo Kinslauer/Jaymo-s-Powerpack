@@ -39,7 +39,6 @@ import net.minecraft.world.phys.Vec3;
  * <li>C (ascended), Standstill: for {@link #STANDSTILL_TICKS} everything living within {@link #STANDSTILL_RADIUS} crawls
  * and every projectile hangs in the air; C again every {@link #STANDSTILL_COOLDOWN}.</li>
  * </ul>
- * Corrupted: when a burst ends your legs won't stop (up to {@link #CORRUPT_RUNAWAY_TICKS}, or until a wall or a creature).
  */
 public final class Velox extends XenoForm {
 	// ---- tuning ----
@@ -63,10 +62,6 @@ public final class Velox extends XenoForm {
 	public static final int STANDSTILL_TICKS = 120, STANDSTILL_COOLDOWN = 600;
 	public static final double STANDSTILL_RADIUS = 24.0, STANDSTILL_DRAG = 0.1, STANDSTILL_PROJECTILE = 0.05;
 	public static final int STANDSTILL_SLOWNESS = 6;
-	/** Corrupted: a run that won't stop goes at this speed for at most this long, and hits for this much. */
-	public static final double CORRUPT_RUNAWAY_SPEED = 1.1;
-	public static final int CORRUPT_RUNAWAY_TICKS = 60;
-	public static final float CORRUPT_RUNAWAY_DAMAGE = 4.0F;
 
 	private static final Identifier SAFE_FALL_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_fall");
 	private static final Identifier BURST_SPEED_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_burst");
@@ -187,28 +182,6 @@ public final class Velox extends XenoForm {
 				}
 			}
 		}
-		// corrupted: the legs won't stop
-		if (live.runaway > 0) {
-			live.runaway--;
-			List<LivingEntity> hit = around(player, 1.2);
-			if (player.horizontalCollision || !hit.isEmpty() || live.runaway == 0) {
-				for (LivingEntity living : hit) {
-					living.hurtServer(level, player.damageSources().playerAttack(player), CORRUPT_RUNAWAY_DAMAGE);
-					shove(living, player.position(), 1.0, 0.4);
-				}
-				live.runaway = 0;
-				player.setDeltaMovement(Vec3.ZERO);
-				player.syncVelocity = true;
-				sound(player, SoundEvents.HORSE_ANGRY, 0.8F, 1.4F);
-				com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.9F);
-			} else {
-				Vec3 look = player.getLookAngle().horizontal();
-				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
-				player.setDeltaMovement(look.scale(CORRUPT_RUNAWAY_SPEED).add(0.0, player.getDeltaMovement().y, 0.0));
-				player.syncVelocity = true;
-				burst(level, ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 2, 0.2, 0.01);
-			}
-		}
 		// the rapid punches, one at a time
 		if (live.punches > 0) {
 			Entity target = level.getEntity(live.punchTarget);
@@ -241,7 +214,7 @@ public final class Velox extends XenoForm {
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
-		return live.bursting || live.runaway > 0 || !live.chain.isEmpty() || live.chainTick > 0;
+		return live.bursting || !live.chain.isEmpty() || live.chainTick > 0;
 	}
 
 	// ---- Speed Burst ----
@@ -267,16 +240,13 @@ public final class Velox extends XenoForm {
 		}
 	}
 
-	/** Let go (or time's up): back to normal speed, the cooldown starts, and corrupted legs run on. */
+	/** Let go (or time's up): back to normal speed, and the cooldown starts. */
 	private static void endBurst(ServerPlayer player, XenoformPower.Live live) {
 		live.bursting = false;
 		live.burstTicks = 0;
 		live.wallRun = 0;
 		burstModifiers(player, false);
 		cooldown(player, live, R, BURST_COOLDOWN);
-		if (live.corrupted) {
-			live.runaway = CORRUPT_RUNAWAY_TICKS;
-		}
 		burst(player.level(), ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 8, 0.3, 0.03);
 	}
 

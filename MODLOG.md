@@ -2285,7 +2285,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
   every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
   and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.
-- **0.15.50, Velox replaces Blur, and a new first-person band slam:** Andy asked whether Alien Evolution (KonaDolomite,
+- **0.15.51, Velox replaces Blur, and a new first-person band slam:** Andy asked whether Alien Evolution (KonaDolomite,
   All Rights Reserved, Palladium 1.20.1) could improve the Xenoform, "primarily add XLR8 in place of Blur", and to use
   its first-person slam. Nothing of it is copied: an original speedster and our own slam. Blur is now **Velox**
   (`forms/Velox.java`; the id stays `blur`, so bands keep it): 80% faster, runs on water while sprinting
@@ -2305,6 +2305,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   within 16, or come back), V Switch (trade places with the aimed or farthest double), B Merge (doubles pop back into
   you, 3 health each). Ultimate Copper Storm: fills to 3 doubles, visual-only lightning on each, 6 damage within 3 of a
   double, doubles charged (Speed II, Strength, Glowing) for 20 s, up to 6 doubles meanwhile; again every 20 s.
-  Corrupted: every fourth split is a red rogue that hunts you. Copper body with seams, rivets and verdigris, a swaying
+  Copper body with seams, rivets and verdigris, a swaying
   lightning rod, pale cyan eyes (`XenoFormModels.Duplex`, `gen_xenoform.duplex`, `XenoDoubleRenderer`). A complete band
   is now 9 aliens; anyone already ascended stays ascended. Compile-checked against the 26.3 jars; not yet run in game.
+- **Duplex's name counts, and corruption is just the wrong alien (same release):** Andy asked that the name change as you
+  split (Duplex, Triplex, Quadruplex) and that corruption be only "a different xeno" across the board, with no per-alien
+  method for now. Duplex is called by how many of you there are (`Duplex.title`: shown over the hotbar on each split,
+  merge or death, and on the HUD clock, which counts your doubles from their synced owner); rogue doubles are gone.
+  Every alien's corruption twist is removed (Bulwark, Pyre, Velox, Prism, Wisp, Gremlin, Knell, Wyrm), with their
+  `CORRUPT_*` constants, `Live.runaway`/`wingStall`, the chat line on changing and the `.corrupt` lang keys. A corrupted
+  band still gives the wrong alien on 1 slam in 4 and changes you on its own; `XenoForm.corrupt` is an empty per-tick
+  hook for later. Compile-checked against the 26.3 jars; not yet run in game.

@@ -158,7 +158,7 @@ public final class XenoformPower implements Power {
 		/** In the Ultimate form (C, ascended) for the rest of this timer; the Ultimate's own move's cooldown. */
 		public boolean ultimate;
 		public long ultimateNext;
-		/** The band is corrupted right now: each alien's moves carry their twist. Refreshed every tick. */
+		/** The band is corrupted right now (a slam may give the wrong alien; see {@link XenoForm#corrupt}). Refreshed every tick. */
 		public boolean corrupted;
 		/** What the Ultimate summoned (entity ids): Swarm's gremlins. Dismissed when it ends. */
 		public final List<Integer> minions = new ArrayList<>();
@@ -170,17 +170,14 @@ public final class XenoformPower implements Power {
 		public final List<Integer> frozen = new ArrayList<>();
 		public long geodeUntil;
 		public int tolls;
-		/** Corrupted Wyrm: ticks the wings are out; corrupted Velox: ticks of a run that won't stop. */
-		public int wingStall, runaway;
 		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
 		public boolean hurt;
 		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
 		public @Nullable UUID beaconTarget;
 		public int beaconHeld;
 		public long beaconTapAt;
-		/** Duplex: its doubles (entity ids), how many it has split off this change (every few corrupted ones go rogue), and when Copper Storm's charge wears off. */
+		/** Duplex: its doubles (entity ids), and when Copper Storm's charge wears off. */
 		public final List<Integer> doubles = new ArrayList<>();
-		public int splits;
 		public long chargedUntil;
 
 		void clearForm() {
@@ -224,12 +221,10 @@ public final class XenoformPower implements Power {
 			frozen.clear();
 			geodeUntil = 0L;
 			tolls = 0;
-			wingStall = runaway = 0;
 			hurt = false;
 			beaconTarget = null;
 			beaconHeld = 0;
 			doubles.clear();
-			splits = 0;
 			chargedUntil = 0L;
 			hudDirty = true;
 		}
@@ -401,6 +396,9 @@ public final class XenoformPower implements Power {
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 				live.form.tick(player, live);
+				if (live.corrupted && live.form != null) {
+					live.form.corrupt(player, live);
+				}
 				if (live.form != null) {
 					int flight = live.form.flight(player, live);
 					if (flight != XenoformState.flight(player)) {
@@ -755,9 +753,6 @@ public final class XenoformPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.4F, 1.8F);
 		player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		form.onEnter(player, live);
-		if (live.corrupted) {
-			player.sendSystemMessage(form.corruptLine().copy().withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-		}
 		Mastery.used(player);
 		live.hudDirty = true;
 		return true;

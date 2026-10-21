@@ -194,10 +194,25 @@ final class XenoformHud {
 		int color = warn ? pulse(WARN_COLOR, 0xFFFFFF, time * 1.2F) : form.color;
 		graphics.fill(x, y + 8, x + BAR_WIDTH, y + 11, 0x90000000);
 		graphics.fill(x, y + 8, x + Mth.ceil(BAR_WIDTH * share), y + 11, 0xFF000000 | color);
-		Component name = form.name();
+		Component name = form == com.jaymospowers.power.xenoform.XenoForms.DUPLEX ? com.jaymospowers.power.xenoform.forms.Duplex.title(1 + doubles()) : form.name();
 		graphics.text(font, name.getString(), x, y - 2, 0xFF000000 | form.color);
 		String seconds = String.valueOf(Mth.ceil(hud.formTicks() / 20.0F));
 		graphics.text(font, seconds, x + BAR_WIDTH - font.width(seconds), y - 2, warn ? 0xFF000000 | color : 0xFFFFFFFF);
+	}
+
+	/** How many of Duplex's doubles of yours this client can see. */
+	private static int doubles() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null || minecraft.player == null) {
+			return 0;
+		}
+		int count = 0;
+		for (net.minecraft.world.entity.Entity e : minecraft.level.entitiesForRendering()) {
+			if (e instanceof com.jaymospowers.power.xenoform.XenoDouble twin && twin.isAlive() && twin.isDoubleOf(minecraft.player)) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private static int chipsWidth(int count) {

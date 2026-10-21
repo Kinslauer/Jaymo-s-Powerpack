@@ -193,7 +193,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 187 | Wyrm | V | Wing Gust | 3 damage and a 1.6 shove to all within 6 blocks; you recoil. 6 s. | |
 | 188 | Wyrm | B | Rift | Teleport up to 12 blocks where you look. 4 s. | |
 | 189 | Wyrm | passive | Of the End | Water and rain do 1 hp/s. | |
-| 189a | Duplex | R | Split | **New in 0.15.50.** A double of you steps out (up to 3). Each has 6 health, follows you and fights what you hit and what hits you. If one dies, you take 2. 2 s. | |
+| 189a | Duplex | R | Split | **New in 0.15.51.** A double of you steps out (up to 3), and your name grows with them: Triplex, Quadruplex, and on up to Septuplex in the Ultimate. Each has 6 health, follows you and fights what you hit and what hits you. If one dies, you take 2. 2 s. | |
 | 189b | Duplex | G | Rally | Your doubles go for the creature you aim at, up to 16 blocks; aimed at nothing, they come back. 1 s. | |
 | 189c | Duplex | V | Switch | Trade places with the double you aim at, or the farthest one. 2 s. | |
 | 189d | Duplex | B | Merge | Every double within 24 blocks runs back into you; each heals you 3. 8 s. | |
@@ -207,8 +207,8 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 197 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |
 | 198 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
 | 199 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust reaches 50% farther. | |
-| 199a | Duplex | C | Copper Storm | A full set of doubles, then lightning on each: 6 damage to everything within 3 of them, and they're charged (fast, strong, glowing) for 20 s; up to 6 doubles meanwhile. C again every 20 s. Corrupted: one split in 4 is a red rogue that hunts you. | |
-| 200 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
+| 199a | Duplex | C | Copper Storm | A full set of doubles, then lightning on each: 6 damage to everything within 3 of them, and they're charged (fast, strong, glowing) for 20 s; up to 6 doubles meanwhile. C again every 20 s. | |
+| 200 | Any | corrupted | (none) | **Changed in 0.15.51.** The aliens no longer have twists of their own: corruption is only the band giving you the wrong alien (line 168). | |
 | 201 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band, in rounds that never end: two pairs of conflicting yes/no questions (each wants a yes; 6 pairs, changing by round), then a deed each (odd rounds: 3 changes without a blow, 12 lives as an alien; even rounds: 3 changes ended by hand, 2 knockouts taken). Then Nadir may be slammed once; when that change ends, the next round begins. | |
 | 202 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |
 | 203 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |

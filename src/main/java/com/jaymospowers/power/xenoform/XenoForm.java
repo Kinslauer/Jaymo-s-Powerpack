@@ -124,11 +124,10 @@ public abstract class XenoForm {
 	}
 
 	/**
-	 * The band's corruption, in this alien ({@code live.corrupted}): the line shown when you change while corrupted,
-	 * lang {@code xenoform.jaymospowers.<id>.corrupt}. The twist itself lives in each form's moves.
+	 * Every tick while the band is corrupted and this alien is out. The corruption is the wrong alien on a slam (and
+	 * the band changing you on its own); no alien adds a twist of its own yet.
 	 */
-	public Component corruptLine() {
-		return Component.translatable("xenoform.jaymospowers." + id + ".corrupt");
+	public void corrupt(ServerPlayer player, XenoformPower.Live live) {
 	}
 
 	/** True while the form may hang in the air without the server's floating kick. */

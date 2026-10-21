@@ -14,6 +14,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -37,8 +39,8 @@ import org.jspecify.annotations.Nullable;
  * <li>C (ascended), Copper Storm: lightning strikes every double, shocking everything round it, and leaves them
  * charged (fast, strong, glowing); up to {@link #STORM_MAX_DOUBLES} doubles while it lasts. C again strikes again.</li>
  * </ul>
- * A loyal double that dies stings you for {@link #DEATH_STING}. Corrupted: every {@link #CORRUPT_EVERY}th split comes
- * out rogue, red-tinted and after you.
+ * A double that dies stings you for {@link #DEATH_STING}. The name counts you all ({@link #title}): two of you is
+ * Duplex, three Triplex, four Quadruplex, and so on.
  */
 public final class Duplex extends XenoForm {
 	// ---- tuning ----
@@ -57,8 +59,8 @@ public final class Duplex extends XenoForm {
 	public static final double STORM_RADIUS = 3.0;
 	public static final float STORM_DAMAGE = 6.0F;
 	public static final int STORM_COOLDOWN = 400, CHARGE_TICKS = 400;
-	/** Corrupted: one split in this many is rogue. */
-	public static final int CORRUPT_EVERY = 4;
+	/** The name for each count of you (you and your doubles): 1 and 2 are both Duplex. */
+	private static final String[] TITLES = {"duplex", "duplex", "duplex", "triplex", "quadruplex", "quintuplex", "sextuplex", "septuplex"};
 
 	public Duplex() {
 		super("duplex", 0.9F, 18.0F, 3.0, 0.1, 0.2, 0.0, Items.COPPER_INGOT, 0xE07B4A);
@@ -136,25 +138,37 @@ public final class Duplex extends XenoForm {
 		}
 	}
 
-	/** A loyal double died: it stings. Called by the double itself. */
+	/** A double died: it stings, and you're one fewer. Called by the double itself. */
 	public static void doubleDied(ServerPlayer player, ServerLevel level) {
 		if (XenoformState.form(player) != XenoForms.DUPLEX) {
 			return;
 		}
 		player.hurtServer(level, player.damageSources().magic(), DEATH_STING);
 		level.sendParticles(ParticleTypes.WAX_OFF, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.3, 0.5, 0.3, 0.05);
+		int left = (int)level.getEntities(XenoDouble.TYPE, e -> e.isAlive() && e.isDoubleOf(player)).size();
+		announce(player, 1 + left);
 	}
 
-	/** Whether {@code e} is one of the player's doubles (rogue or not). */
+	/** What you're called with {@code count} of you about (you included): Duplex, Triplex, Quadruplex... */
+	public static Component title(int count) {
+		return Component.translatable("xenoform.jaymospowers." + TITLES[Math.max(0, Math.min(count, TITLES.length - 1))]);
+	}
+
+	/** Your new name, over the hotbar. */
+	private static void announce(ServerPlayer player, int count) {
+		player.sendOverlayMessage(title(count).copy().withStyle(style -> style.withColor(TextColor.fromRgb(XenoForms.DUPLEX.color)).withBold(true)));
+	}
+
+	/** Whether {@code e} is one of the player's doubles. */
 	private static boolean mine(ServerPlayer player, Entity e) {
 		return e instanceof XenoDouble twin && twin.isDoubleOf(player);
 	}
 
-	/** The player's living, loyal doubles. */
+	/** The player's living doubles. */
 	private static List<XenoDouble> loyal(ServerPlayer player, XenoformPower.Live live) {
 		List<XenoDouble> out = new ArrayList<>();
 		for (int id : live.doubles) {
-			if (player.level().getEntity(id) instanceof XenoDouble twin && twin.isAlive() && !twin.rogue()) {
+			if (player.level().getEntity(id) instanceof XenoDouble twin && twin.isAlive()) {
 				out.add(twin);
 			}
 		}
@@ -178,18 +192,17 @@ public final class Duplex extends XenoForm {
 		if (live.doubles.size() >= cap) {
 			return false;
 		}
-		boolean rogue = live.corrupted && ++live.splits % CORRUPT_EVERY == 0;
-		XenoDouble twin = spawnDouble(player, live, rogue);
-		if (twin == null) {
+		if (spawnDouble(player, live) == null) {
 			return false;
 		}
+		announce(player, 1 + live.doubles.size());
 		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 1.2F);
 		sound(player, SoundEvents.COPPER_PLACE, 1.0F, 0.8F);
 		return true;
 	}
 
 	/** A double beside you (left or right, whichever has room; else where you stand). */
-	private static @Nullable XenoDouble spawnDouble(ServerPlayer player, XenoformPower.Live live, boolean rogue) {
+	private static @Nullable XenoDouble spawnDouble(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		XenoDouble twin = XenoDouble.TYPE.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (twin == null) {
@@ -206,18 +219,14 @@ public final class Duplex extends XenoForm {
 		twin.snapTo(at.x, at.y, at.z, player.getYRot(), 0.0F);
 		twin.setYHeadRot(player.getYRot());
 		twin.addTag(XenoformState.MINION_TAG);
-		twin.bindTo(player, rogue);
-		if (live.chargedUntil > level.getGameTime() && !rogue) {
+		twin.bindTo(player);
+		if (live.chargedUntil > level.getGameTime()) {
 			charge(twin, (int)(live.chargedUntil - level.getGameTime()));
 		}
 		if (!level.addFreshEntity(twin)) {
 			return null;
 		}
 		live.doubles.add(twin.getId());
-		if (rogue) {
-			twin.setTarget(player);
-			level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 1.0, at.z, 14, 0.3, 0.5, 0.3, 0.02);
-		}
 		level.sendParticles(ParticleTypes.WAX_ON, at.x, at.y + 1.0, at.z, 14, 0.3, 0.5, 0.3, 0.05);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0, at.z, 10, 0.3, 0.5, 0.3, 0.08);
 		return twin;
@@ -252,7 +261,7 @@ public final class Duplex extends XenoForm {
 	private static boolean swap(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		LivingEntity aimedAt = aimedDouble(player);
-		XenoDouble pick = aimedAt instanceof XenoDouble twin && !twin.rogue() ? twin : null;
+		XenoDouble pick = aimedAt instanceof XenoDouble twin ? twin : null;
 		if (pick == null) {
 			double best = -1.0;
 			for (XenoDouble twin : loyal(player, live)) {
@@ -298,7 +307,7 @@ public final class Duplex extends XenoForm {
 				it.remove();
 				continue;
 			}
-			if (twin.rogue() || twin.distanceToSqr(player) > MERGE_RANGE * MERGE_RANGE) {
+			if (twin.distanceToSqr(player) > MERGE_RANGE * MERGE_RANGE) {
 				continue;
 			}
 			// a streak of copper from the double back into you
@@ -317,6 +326,7 @@ public final class Duplex extends XenoForm {
 			return false;
 		}
 		player.heal(MERGE_HEAL * merged);
+		announce(player, 1 + live.doubles.size());
 		burst(level, ParticleTypes.HAPPY_VILLAGER, player.position().add(0.0, 1.0, 0.0), 6 * merged, 0.4, 0.02);
 		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 0.7F);
 		return true;
@@ -328,7 +338,7 @@ public final class Duplex extends XenoForm {
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
 		// the storm brings a full set of doubles with it
 		while (loyal(player, live).size() < MAX_DOUBLES && live.doubles.size() < STORM_MAX_DOUBLES) {
-			if (spawnDouble(player, live, false) == null) {
+			if (spawnDouble(player, live) == null) {
 				break;
 			}
 		}
@@ -336,6 +346,7 @@ public final class Duplex extends XenoForm {
 			return false;
 		}
 		storm(player, live);
+		announce(player, 1 + live.doubles.size());
 		return true;
 	}
 
@@ -350,17 +361,20 @@ public final class Duplex extends XenoForm {
 	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
 		live.chargedUntil = 0L;
 		ServerLevel level = player.level();
-		// back down to the everyday count: the newest extras go first
+		// back down to the everyday count: the newest extras go first, and the name with them
 		live.doubles.removeIf(id -> !(level.getEntity(id) instanceof XenoDouble twin) || !twin.isAlive());
-		while (live.doubles.size() > MAX_DOUBLES) {
-			int id = live.doubles.remove(live.doubles.size() - 1);
-			if (level.getEntity(id) instanceof XenoDouble twin) {
-				twin.pop(level);
+		if (live.doubles.size() > MAX_DOUBLES) {
+			while (live.doubles.size() > MAX_DOUBLES) {
+				int id = live.doubles.remove(live.doubles.size() - 1);
+				if (level.getEntity(id) instanceof XenoDouble twin) {
+					twin.pop(level);
+				}
 			}
+			announce(player, 1 + MAX_DOUBLES);
 		}
 	}
 
-	/** Lightning (for show) on every loyal double, a shock round each, and the charge. */
+	/** Lightning (for show) on every double, a shock round each, and the charge. */
 	private static void storm(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		List<XenoDouble> doubles = loyal(player, live);

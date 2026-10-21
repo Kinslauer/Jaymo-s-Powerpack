@@ -2,6 +2,7 @@ package com.jaymospowers.power.xenoform;
 
 import com.jaymospowers.JaymosPowers;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
@@ -18,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -37,7 +39,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * One of Duplex's doubles: a copy of the alien that steps out of it, follows it about and fights what it fights. It
  * belongs to its owner only while they are Duplex and nearby; otherwise it pops. It's never saved (a reload ends it).
- * A rogue double (corruption) hunts its owner instead, and is tinted red.
+ * Its owner is synced, so their HUD can count their doubles.
  */
 public class XenoDouble extends PathfinderMob {
 	// ---- tuning ----
@@ -50,9 +52,8 @@ public class XenoDouble extends PathfinderMob {
 
 	public static EntityType<XenoDouble> TYPE;
 
-	private static final EntityDataAccessor<Boolean> DATA_ROGUE = SynchedEntityData.defineId(XenoDouble.class, EntityDataSerializers.BOOLEAN);
-
-	private @Nullable UUID owner;
+	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(XenoDouble.class,
+		EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
 
 	public XenoDouble(EntityType<? extends XenoDouble> type, Level level) {
 		super(type, level);
@@ -82,7 +83,7 @@ public class XenoDouble extends PathfinderMob {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(DATA_ROGUE, false);
+		builder.define(DATA_OWNER, Optional.empty());
 	}
 
 	@Override
@@ -97,40 +98,36 @@ public class XenoDouble extends PathfinderMob {
 
 	// ---------------------------------------------------------------- owner
 
-	public void bindTo(ServerPlayer player, boolean rogue) {
-		this.owner = player.getUUID();
-		this.entityData.set(DATA_ROGUE, rogue);
+	public void bindTo(ServerPlayer player) {
+		this.entityData.set(DATA_OWNER, Optional.of(EntityReference.of(player.getUUID())));
 		this.setCustomName(player.getName());
 		this.setCustomNameVisible(false);
 	}
 
-	public boolean rogue() {
-		return this.entityData.get(DATA_ROGUE);
+	public @Nullable UUID owner() {
+		return this.entityData.get(DATA_OWNER).map(EntityReference::getUUID).orElse(null);
 	}
 
 	public boolean isDoubleOf(Entity player) {
-		return this.owner != null && this.owner.equals(player.getUUID());
+		return player.getUUID().equals(this.owner());
 	}
 
 	/** The owner, if they're online and in this level. */
 	public @Nullable ServerPlayer ownerPlayer() {
-		if (this.owner == null || !(this.level() instanceof ServerLevel level)) {
+		UUID owner = this.owner();
+		if (owner == null || !(this.level() instanceof ServerLevel level)) {
 			return null;
 		}
-		ServerPlayer player = level.getServer().getPlayerList().getPlayer(this.owner);
+		ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
 		return player != null && player.level() == level ? player : null;
 	}
 
-	/** Loyal doubles of one owner stand together, with their owner (a rogue stands alone). */
+	/** One owner's doubles stand together, with their owner. */
 	@Override
 	protected boolean considersEntityAsAlly(Entity other) {
-		if (this.owner != null && !this.rogue()) {
-			if (other.getUUID().equals(this.owner)) {
-				return true;
-			}
-			if (other instanceof XenoDouble twin && !twin.rogue() && this.owner.equals(twin.owner)) {
-				return true;
-			}
+		UUID owner = this.owner();
+		if (owner != null && (other.getUUID().equals(owner) || other instanceof XenoDouble twin && owner.equals(twin.owner()))) {
+			return true;
 		}
 		return super.considersEntityAsAlly(other);
 	}
@@ -147,11 +144,7 @@ public class XenoDouble extends PathfinderMob {
 			return;
 		}
 		LivingEntity target = this.getTarget();
-		if (this.rogue()) {
-			if (target != player) {
-				this.setTarget(player);
-			}
-		} else if (target != null && (target == player || target instanceof XenoDouble twin && !twin.rogue() && this.owner.equals(twin.owner))) {
+		if (target != null && (target == player || target instanceof XenoDouble twin && twin.isDoubleOf(player))) {
 			this.setTarget(null);
 		}
 	}
@@ -165,20 +158,20 @@ public class XenoDouble extends PathfinderMob {
 
 	// ---------------------------------------------------------------- fighting
 
-	/** Its owner's blows pass through a loyal double. */
+	/** Its owner's blows pass through it. */
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		if (!this.rogue() && source.getEntity() != null && this.isDoubleOf(source.getEntity())) {
+		if (source.getEntity() != null && this.isDoubleOf(source.getEntity())) {
 			return false;
 		}
 		return super.hurtServer(level, source, damage);
 	}
 
-	/** A loyal double's death stings its owner. */
+	/** A double's death stings its owner. */
 	@Override
 	public void die(DamageSource source) {
 		super.die(source);
-		if (this.level() instanceof ServerLevel level && !this.rogue()) {
+		if (this.level() instanceof ServerLevel level) {
 			ServerPlayer player = this.ownerPlayer();
 			if (player != null) {
 				com.jaymospowers.power.xenoform.forms.Duplex.doubleDied(player, level);
@@ -225,7 +218,7 @@ public class XenoDouble extends PathfinderMob {
 
 		@Override
 		public boolean canUse() {
-			if (this.mob.rogue() || this.mob.getTarget() != null) {
+			if (this.mob.getTarget() != null) {
 				return false;
 			}
 			this.player = this.mob.ownerPlayer();

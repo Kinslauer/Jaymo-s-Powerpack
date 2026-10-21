@@ -9,16 +9,10 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
 
-/** Draws one of Duplex's doubles as Duplex itself (its own model and skin), tinted red when it has gone rogue. */
-public class XenoDoubleRenderer extends MobRenderer<XenoDouble, XenoDoubleRenderer.State, HumanoidModel<AvatarRenderState>> {
-	/** A rogue double's tint. */
-	private static final int ROGUE_TINT = 0xFFFF7A6A;
+/** Draws one of Duplex's doubles as Duplex itself: its own model and skin. */
+public class XenoDoubleRenderer extends MobRenderer<XenoDouble, AvatarRenderState, HumanoidModel<AvatarRenderState>> {
 	/** Drawn at Duplex's size (as players are drawn, then the form's 0.9). */
 	private static final float SCALE = 0.9375F * 0.9F;
-
-	public static final class State extends AvatarRenderState {
-		boolean rogue;
-	}
 
 	private final XenoFormModels.FormModel form;
 
@@ -28,30 +22,24 @@ public class XenoDoubleRenderer extends MobRenderer<XenoDouble, XenoDoubleRender
 	}
 
 	@Override
-	public State createRenderState() {
-		return new State();
+	public AvatarRenderState createRenderState() {
+		return new AvatarRenderState();
 	}
 
 	@Override
-	public void extractRenderState(XenoDouble entity, State state, float partialTicks) {
+	public void extractRenderState(XenoDouble entity, AvatarRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		HumanoidMobRenderer.extractHumanoidRenderState(entity, state, partialTicks, this.itemModelResolver);
 		state.id = entity.getId();
-		state.rogue = entity.rogue();
 	}
 
 	@Override
-	public Identifier getTextureLocation(State state) {
+	public Identifier getTextureLocation(AvatarRenderState state) {
 		return this.form.texture;
 	}
 
 	@Override
-	protected void scale(State state, PoseStack poseStack) {
+	protected void scale(AvatarRenderState state, PoseStack poseStack) {
 		poseStack.scale(SCALE, SCALE, SCALE);
-	}
-
-	@Override
-	protected int getModelTint(State state) {
-		return state.rogue ? ROGUE_TINT : super.getModelTint(state);
 	}
 }
