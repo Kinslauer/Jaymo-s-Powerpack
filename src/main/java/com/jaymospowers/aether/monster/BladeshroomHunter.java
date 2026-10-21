@@ -228,6 +228,11 @@ public class BladeshroomHunter extends AetherMonster {
 
 		@Override
 		public boolean canContinueToUse() {
+			// a swing in progress finishes only while its target still lives
+			LivingEntity target = this.hunter.getTarget();
+			if (target == null || !target.isAlive()) {
+				return false;
+			}
 			return this.canUse() || this.hunter.strike() >= 0;
 		}
 
@@ -246,6 +251,7 @@ public class BladeshroomHunter extends AetherMonster {
 			BladeshroomHunter h = this.hunter;
 			LivingEntity target = h.getTarget();
 			if (target == null || !(h.level() instanceof ServerLevel level)) {
+				h.entityData.set(STRIKE, -1);
 				return;
 			}
 			h.getLookControl().setLookAt(target, 40.0F, 40.0F);
