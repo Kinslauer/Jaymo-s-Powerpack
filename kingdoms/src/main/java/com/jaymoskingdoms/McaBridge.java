@@ -281,6 +281,35 @@ final class McaBridge {
 		return null;
 	}
 
+	/** (0.7.138) {@link McaCompat#sworn}. */
+	static @Nullable Villager sworn(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
+		Folk.Role spec = Folk.role(role);
+		if (spec != null && spec.leader()) {
+			return heir(level, f, house);
+		}
+		int grown = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && !v.isBaby()).size();
+		return grown > Economy.MIN_VILLAGERS_KEPT ? candidate(level, f, Folk.GUARD) : null;
+	}
+
+	/** (0.7.138) {@code f}'s heir among its grown villagers: the late ruler's family, then his widow, then anyone. */
+	private static @Nullable VillagerEntityMCA heir(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
+		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0);
+		if (all.isEmpty()) {
+			return null;
+		}
+		if (house != null) {
+			for (int kin : new int[] {McaCompat.KIN, McaCompat.PARTNER}) {
+				List<VillagerEntityMCA> family = all.stream().filter(v -> kinOf(v, house) == kin).toList();
+				if (!family.isEmpty()) {
+					return family.get(level.getRandom().nextInt(family.size()));
+				}
+			}
+		}
+		return all.get(level.getRandom().nextInt(all.size()));
+	}
+
 	private static int tier(VillagerEntityMCA v) {
 		var profession = v.getVillagerData().profession();
 		if (profession.is(VillagerProfession.NONE) || profession.is(VillagerProfession.NITWIT)) {

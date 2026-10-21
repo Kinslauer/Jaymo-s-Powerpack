@@ -121,9 +121,15 @@ public final class KingdomEvents {
 			}
 			for (Faction faction : Factions.all(server)) {
 				if (faction.successionAt() >= 0 && now >= faction.successionAt() && !faction.fallen()) {
-					crown(overworld, faction.withSuccessionAt(-1L));
+					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L));
 					announce(server, Component.translatable(faction.type() == FactionType.FIEFDOM ? "message.jaymoskingdoms.succession.lord"
 						: "message.jaymoskingdoms.succession", faction.name()).withStyle(ChatFormatting.GOLD));
+					// (0.7.138) one of its own people (Sworn)
+					String heir = crowned == null || crowned.leader().isEmpty() || !(overworld.getEntity(crowned.leader().get()) instanceof Folk ruler)
+						? null : ruler.getAttached(Sworn.NAME);
+					if (heir != null) {
+						announce(server, Component.translatable("message.jaymoskingdoms.succession.sworn", heir, faction.name()).withStyle(ChatFormatting.GOLD));
+					}
 				}
 			}
 			Storehouse.tick(server);
@@ -351,6 +357,8 @@ public final class KingdomEvents {
 			return Factions.get(server, faction.id());
 		}
 		Folk ruler = spawn(level, faction, role);
+		// (0.7.138) his house, if he was one of its villagers (Sworn)
+		Sworn.crowned(server, faction.id(), ruler);
 		return Factions.update(server, faction.id(), f -> f.withLeader(ruler == null ? Optional.empty() : Optional.of(ruler.getUUID())));
 	}
 
@@ -364,6 +372,8 @@ public final class KingdomEvents {
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		Folk.Role spec = Folk.role(role);
 		boolean ruler = spec != null && spec.leader();
+		// (0.7.138) with MCA, one of its own villagers sworn in
+		Villager sworn = Sworn.pick(level, faction, role);
 		Folk folk = null;
 		if (keep != null) {
 			folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
@@ -396,6 +406,9 @@ public final class KingdomEvents {
 			}
 			folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			folk.setup(role, faction, at, radius);
+			if (sworn != null) {
+				Sworn.take(level, folk, sworn);
+			}
 			level.addFreshEntity(folk);
 		} else {
 			for (int tries = 0; tries < 12 && folk == null; tries++) {
@@ -410,6 +423,9 @@ public final class KingdomEvents {
 				}
 				folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 				folk.setup(role, faction, faction.seat(), Folk.HOME_RADIUS);
+				if (sworn != null) {
+					Sworn.take(level, folk, sworn);
+				}
 				level.addFreshEntity(folk);
 			}
 		}
@@ -444,6 +460,11 @@ public final class KingdomEvents {
 		}
 		archer.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		archer.setup(Folk.ARCHER, faction, post, 1);
+		// (0.7.138) with MCA, one of its own villagers sworn in
+		Villager sworn = Sworn.pick(level, faction, Folk.ARCHER);
+		if (sworn != null) {
+			Sworn.take(level, archer, sworn);
+		}
 		level.addFreshEntity(archer);
 		Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(Folk.ARCHER, 1)));
 		return archer;
@@ -592,6 +613,12 @@ public final class KingdomEvents {
 		Faction overlord = faction.type() == FactionType.FIEFDOM ? Relations.overlord(server, faction) : null;
 		if (overlord != null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.fief", faction.name(), overlord.name())
+				.withStyle(ChatFormatting.GRAY));
+		}
+		// (0.7.138) whose blood they are (folk have no MCA menu to ask)
+		Heritage.Kind blood = VillagerHeritage.of(folk);
+		if (blood != null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.blood", folk.getDisplayName(), Purists.name(blood))
 				.withStyle(ChatFormatting.GRAY));
 		}
 		if (member != null) {

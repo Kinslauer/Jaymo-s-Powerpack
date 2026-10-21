@@ -113,7 +113,11 @@ public final class Purists {
 		if (f == null || f.leader().isEmpty()) {
 			return null;
 		}
-		UUID id = f.leader().get();
+		return blood(f.leader().get());
+	}
+
+	/** (0.7.138) The blood of a ruler with {@code id}, were he a purist ({@link Sworn#rulerId}). */
+	static Heritage.Kind blood(UUID id) {
 		long mix = Long.rotateLeft(id.getLeastSignificantBits(), 13) * 0x9E3779B97F4A7C15L + id.getMostSignificantBits();
 		int total = 0;
 		for (int w : BLOOD_W) {

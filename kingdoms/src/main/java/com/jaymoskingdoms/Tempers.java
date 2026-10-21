@@ -115,7 +115,11 @@ final class Tempers {
 		if (f == null || !f.type().isRealm() || f.leader().isEmpty() || f.members().containsKey(f.leader().get())) {
 			return null;
 		}
-		UUID id = f.leader().get();
+		return of(f.leader().get());
+	}
+
+	/** (0.7.138) The temper of a ruler with {@code id} ({@link Sworn#rulerId}). */
+	static Temper of(UUID id) {
 		long mix = id.getMostSignificantBits() * 31 + id.getLeastSignificantBits();
 		// (0.7.130) the purist on his own draw, so the rest keep the temper they had before there were purists
 		long proud = Long.rotateLeft(mix, 23) * 0x9E3779B97F4A7C15L;

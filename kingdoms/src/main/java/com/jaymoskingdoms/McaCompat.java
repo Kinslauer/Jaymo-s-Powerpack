@@ -257,6 +257,14 @@ public final class McaCompat {
 		return LOADED ? McaBridge.enlist(level, f, role, at, home, radius) : null;
 	}
 
+	/**
+	 * (0.7.138) The villager {@code f} swears in as its {@code role} ({@link Sworn}): a ruler's heir, his house's family
+	 * first ({@code house}: who the late ruler was born); a guard or archer while the town can spare one. Null without MCA.
+	 */
+	static @Nullable Villager sworn(ServerLevel level, Faction f, int role, java.util.@Nullable UUID house) {
+		return LOADED ? McaBridge.sworn(level, f, role, house) : null;
+	}
+
 	/** (0.5.53) {@code f}'s court wizard: {@code chosen}, else the eldest of its spare villagers; null if it has no elder (or without MCA). */
 	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
 		return LOADED ? McaBridge.enlistWizard(level, f, chosen) : null;

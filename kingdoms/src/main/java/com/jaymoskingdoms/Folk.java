@@ -638,6 +638,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				this.setItemSlot(slot, ItemStack.EMPTY);
 			}
 			ROLES.get(role).outfit().accept(this, faction);
+			// (0.7.138) one sworn in from the villagers keeps their own name before the new title
+			Sworn.titled(this);
 			this.setHealth(this.getMaxHealth() * health);
 			// his bar in its new colour and name
 			if (this.bossBar != null) {
