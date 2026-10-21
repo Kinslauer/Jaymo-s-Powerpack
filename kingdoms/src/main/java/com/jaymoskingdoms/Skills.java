@@ -71,6 +71,11 @@ public final class Skills {
 	 * Powers' {@code Freerun}, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
 	 */
 	public static final int STEALTH_MAX_LEVEL = 25;
+	/**
+	 * (0.7.136) Survival's highest level: its second page, Medicine (Steady Hands to Second Wind; the treating is Jaymo's
+	 * Powers' Wounds, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
+	 */
+	public static final int SURVIVAL_MAX_LEVEL = 25;
 	/** Stealth experience: a pocket picked clean with something in it, an empty one, a theft nobody saw. */
 	static final int XP_LIFT = 10, XP_EMPTY = 2, XP_THEFT = 4;
 	/** A guard's pocket counts this many times over; a sleeper's this share. */
@@ -90,6 +95,16 @@ public final class Skills {
 	 */
 	static final int XP_SNEAK_ATTACK = 1, XP_ASSASSINATION = 3;
 	static final long SNEAK_XP_TICKS = 400L;
+	/** (0.7.136) Stealth experience for sneaking past monsters unseen ({@link Senses#SNEAK_PAST_TICKS} of it). */
+	static final int XP_SNEAK_PAST = 1;
+	/**
+	 * (0.7.136) Survival experience for medicine: a treatment finished or a downed one brought round (Jaymo's Powers tags
+	 * the healer {@link #TREATED_TAG}), at most every {@link #TREAT_XP_TICKS} (10 s).
+	 */
+	static final int XP_TREAT = 2;
+	static final long TREAT_XP_TICKS = 200L;
+	/** (0.7.136) The entity tag Jaymo's Powers puts on a player for each treatment they finish ({@code Medicine.XP_TAG}); taken off as it's read. */
+	static final String TREATED_TAG = "jaymospowers_treated";
 	/** (0.7.102) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
 	static final String FREERUN_TAG = "jaymospowers_freerun";
 	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
@@ -113,7 +128,7 @@ public final class Skills {
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
-		SURVIVAL(true, MAX_LEVEL), STEALTH(true, STEALTH_MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
+		SURVIVAL(true, SURVIVAL_MAX_LEVEL), STEALTH(true, STEALTH_MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
 
 		public final boolean open;
 		/** The pillar's highest level. */
@@ -179,7 +194,15 @@ public final class Skills {
 		QUIET_STEP(Pillar.STEALTH, 2, 1, 5, 8, 2),
 		SLIP_THE_NET(Pillar.STEALTH, 1, 1, 10, 9, 0, SHADOWED),
 		SNEAK_ATTACK(Pillar.STEALTH, 2, 1, 10, 9, 2, QUIET_STEP),
-		ASSASSINATE(Pillar.STEALTH, 1, 2, 15, 10, 1, SLIP_THE_NET, SNEAK_ATTACK);
+		ASSASSINATE(Pillar.STEALTH, 1, 2, 15, 10, 1, SLIP_THE_NET, SNEAK_ATTACK),
+		// (0.7.136) Survival's second page, Medicine: the treating is Jaymo's Powers' Wounds, the plague is Nightfall's; last, so no ordinal moves
+		STEADY_HANDS(Pillar.SURVIVAL, 3, 1, 3, 4, 0),
+		FIELD_DRESSER(Pillar.SURVIVAL, 2, 1, 3, 4, 2),
+		BONESETTER(Pillar.SURVIVAL, 1, 1, 8, 5, 0, STEADY_HANDS),
+		PLAGUE_DOCTOR(Pillar.SURVIVAL, 1, 2, 8, 5, 2, FIELD_DRESSER),
+		LIFESAVER(Pillar.SURVIVAL, 1, 2, 12, 6, 1, BONESETTER, PLAGUE_DOCTOR),
+		// shown as "Second Wind" (the first page's old Second Wind is shown as Rally now; its key stays, so nobody's ranks move)
+		SELF_REVIVE(Pillar.SURVIVAL, 1, 2, 15, 7, 1, LIFESAVER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -292,6 +315,8 @@ public final class Skills {
 	private static final Map<UUID, Long> NEXT_FREERUN_XP = new HashMap<>();
 	/** (0.7.111) Player → game time a sneak attack next gives experience. */
 	private static final Map<UUID, Long> NEXT_SNEAK_XP = new HashMap<>();
+	/** (0.7.136) Player → game time a treatment next gives experience. */
+	private static final Map<UUID, Long> NEXT_TREAT_XP = new HashMap<>();
 
 	private Skills() {
 	}
@@ -306,6 +331,7 @@ public final class Skills {
 			NEXT_THEFT_XP.clear();
 			NEXT_FREERUN_XP.clear();
 			NEXT_SNEAK_XP.clear();
+			NEXT_TREAT_XP.clear();
 			RESPEC_OFFERS.clear();
 		});
 		// (0.7.102) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
@@ -317,6 +343,11 @@ public final class Skills {
 				if (player.entityTags().contains(FREERUN_TAG)) {
 					player.removeTag(FREERUN_TAG);
 					freerun(player, player.level().getGameTime());
+				}
+				// (0.7.136) and treatments (Powers' Wounds tags the healer): a little Survival experience
+				if (player.entityTags().contains(TREATED_TAG)) {
+					player.removeTag(TREATED_TAG);
+					treated(player, player.level().getGameTime());
 				}
 			}
 		});
@@ -579,6 +610,20 @@ public final class Skills {
 		}
 		NEXT_SNEAK_XP.put(player.getUUID(), now + SNEAK_XP_TICKS);
 		grant(player, Pillar.STEALTH, XP_SNEAK_ATTACK);
+	}
+
+	/** (0.7.136) Sneaking past monsters unseen for a while ({@link Senses}): a little experience. */
+	static void sneakPast(ServerPlayer player) {
+		grant(player, Pillar.STEALTH, XP_SNEAK_PAST);
+	}
+
+	/** (0.7.136) A treatment finished: a little Survival experience, at most every {@link #TREAT_XP_TICKS}. */
+	static void treated(ServerPlayer player, long now) {
+		if (NEXT_TREAT_XP.getOrDefault(player.getUUID(), 0L) > now) {
+			return;
+		}
+		NEXT_TREAT_XP.put(player.getUUID(), now + TREAT_XP_TICKS);
+		grant(player, Pillar.SURVIVAL, XP_TREAT);
 	}
 
 	/** (0.7.111) An assassination (an unaware hidden blade stab): more experience, every time. */

@@ -200,6 +200,27 @@ first page's 15 you can't have everything: pick a build.
   town doesn't become a crime.
 - The tree screen pages: Strength's "Combat Arts >" button (bottom right) shows tiers 4-7.
 
+## Medicine: Survival's second page (0.7.136 / Powers 0.15.49)
+Andy (2026-10-21): "a medicine tree in the same vein as shadow and free running but for survival, that way every skill
+has at least one sub path". Survival now goes to level 25 (practice still counts the first 15). The treating itself is
+Jaymo's Powers' Wounds (`core/wounds/MedicineSkill` reads the ranks by reflection); every treatment finished and every
+downed one brought round tags the healer `jaymospowers_treated`, which Kingdoms turns into 2 Survival XP (at most every 10 s).
+- Tier 4 (level 3): **Steady Hands** (3 ranks: every treatment and revive 15% quicker per rank), **Field Dresser**
+  (2 ranks: bandages and rags heal 35% more per rank).
+- Tier 5 (level 8): **Bonesetter** (a splint mends 3 health into the limb at once; stitches and searings hurt half),
+  **Plague Doctor** (2 pts: Nightfall's Atrophy caught for half as long, never level II, half its pricks and weakness;
+  Andy: "you can also use leeches for benefits, when noone else can": a Plague Doctor's leeches draw the plague and poison out of whoever they're on).
+- Tier 6 (level 12): **Lifesaver** (2 pts: whoever you bring round gets up on half health with bleeding stopped; your
+  smelling salts always wake a passed-out player).
+- Tier 7 (level 15): **Second Wind** (2 pts), Andy: "a self revive through this tree, called second wind that allows
+  them to eat while downed to rise, once a day". Downed and awake, hold use with food: 3 s of eating, then up (Powers
+  `SelfRevive`). The first page's old Second Wind (heal when low) is shown as **Rally** now; its saved key is unchanged.
+
+## Stealth from sneaking past (0.7.136)
+Andy (2026-10-21): "sneaking near enemies undetected should passively grow your stealth skill". Sneaking and moving
+with a monster in sight within 12 blocks that isn't after you or hunting you: 1 Stealth XP per 10 s of it (twice as
+fast within 6 blocks). Being spotted or searched for starts the count over (`Senses.sneakPast`).
+
 ## Respec (Andy's answer)
 A court wizard unmakes your perks for 5 emeralds + 1 per rank, or drink a bottle o' enchanting (sneak and use it).
 Your XP and levels stay; every point comes back to spend again.

@@ -31,7 +31,8 @@ final class Atrophy extends MobEffect {
 			// (an Immunity potion in them, or a vampire's own blood: it doesn't take)
 			return false;
 		}
-		if (mob.getHealth() > 1.0F) {
+		// (0.7.136) a Plague Doctor feels only half its pricks
+		if (mob.getHealth() > 1.0F && !(Nightfall.plagueDoctor(mob) && mob.getRandom().nextFloat() >= Nightfall.PLAGUE_DOCTOR_TAKES)) {
 			mob.hurtServer(level, mob.damageSources().magic(), PRICK);
 		}
 		return true;
@@ -45,7 +46,8 @@ final class Atrophy extends MobEffect {
 
 	@Override
 	public void onMobHurt(ServerLevel level, LivingEntity mob, int amplifier, DamageSource source, float damage) {
-		if (damage > 0.0F && mob.getRandom().nextFloat() < (amplifier > 0 ? WEAKEN_CHANCE_II : WEAKEN_CHANCE)) {
+		float chance = (amplifier > 0 ? WEAKEN_CHANCE_II : WEAKEN_CHANCE) * (Nightfall.plagueDoctor(mob) ? Nightfall.PLAGUE_DOCTOR_TAKES : 1.0F);
+		if (damage > 0.0F && mob.getRandom().nextFloat() < chance) {
 			mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAKEN_TICKS, amplifier > 0 ? 1 : 0));
 		}
 	}

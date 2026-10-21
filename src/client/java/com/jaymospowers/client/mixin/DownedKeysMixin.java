@@ -1,6 +1,7 @@
 package com.jaymospowers.client.mixin;
 
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.SelfRevive;
 import java.util.Set;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,7 @@ abstract class DownedKeysMixin {
 			return false;
 		}
 		LocalPlayer player = Minecraft.getInstance().player;
-		return player != null && Downed.isDowned(player);
+		// (0.15.49) use stays live for Second Wind's eating to rise, with food in hand
+		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && SelfRevive.canEat(player));
 	}
 }

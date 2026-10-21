@@ -180,9 +180,11 @@ public final class Treatment {
 		final InteractionHand hand;
 		final Vec3 from, targetFrom;
 		final boolean sneak;
+		/** (0.15.49) How long it takes this healer (Steady Hands, {@link MedicineSkill}). */
+		final int need;
 		int ticks;
 
-		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak) {
+		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak, int need) {
 			this.target = target;
 			this.part = part;
 			this.remedy = remedy;
@@ -190,6 +192,7 @@ public final class Treatment {
 			this.from = from;
 			this.targetFrom = target.position();
 			this.sneak = sneak;
+			this.need = need;
 		}
 	}
 
@@ -573,7 +576,7 @@ public final class Treatment {
 			// (already at it: use repeats while held)
 			return;
 		}
-		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak));
+		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak, MedicineSkill.ticks(player, remedy.ticks)));
 		Component what = part == null ? body.getDisplayName() : part.displayName();
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.treating", Component.translatable(remedy.key()), what)
 			.withStyle(ChatFormatting.GRAY));
@@ -625,9 +628,9 @@ public final class Treatment {
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 0.5F,
 					0.8F + level.getRandom().nextFloat() * 0.4F);
 			}
-			if (s.ticks < s.remedy.ticks) {
+			if (s.ticks < s.need) {
 				if (s.ticks % 2 == 0) {
-					int filled = Math.round(BAR * s.ticks / (float) s.remedy.ticks);
+					int filled = Math.round(BAR * s.ticks / (float) s.need);
 					String bar = "|".repeat(filled) + ".".repeat(BAR - filled);
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.treating_bar", Component.translatable(s.remedy.key()), bar)
 						.withStyle(ChatFormatting.GRAY));
@@ -649,22 +652,26 @@ public final class Treatment {
 			case BANDAGE, RAG -> {
 				boolean rag = s.remedy == Remedy.RAG;
 				Bleeding.stop(body, part, false);
-				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, BANDAGE_TICKS, rag);
+				// (0.15.49) Field Dresser: a better dressing
+				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, rag);
 				stack.consume(1, player);
 			}
 			case SPLINT -> {
-				Breaks.splint(body, part);
+				if (Breaks.splint(body, part) && MedicineSkill.bonesetter(player)) {
+					// (0.15.49) Bonesetter: set well, the limb starts to mend at once
+					Wounds.healPart(body, part, MedicineSkill.BONESETTER_HEAL);
+				}
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.9F);
 				stack.consume(1, player);
 			}
 			case NEEDLE -> {
 				Bleeding.stop(body, part, false);
-				Wounds.hurtPart(body, part, NEEDLE_HURT, null);
+				Wounds.hurtPart(body, part, MedicineSkill.hurt(player, NEEDLE_HURT), null);
 				stack.hurtAndBreak(1, player, s.hand);
 			}
 			case CAUTERY -> {
 				Bleeding.stop(body, part, true);
-				Wounds.hurtPart(body, part, CAUTERY_BURN, null);
+				Wounds.hurtPart(body, part, MedicineSkill.hurt(player, CAUTERY_BURN), null);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
 				level.sendParticles(ParticleTypes.SMOKE, body.getX(), body.getY() + body.getBbHeight() * 0.5, body.getZ(), 10, 0.2, 0.2, 0.2, 0.01);
 				// (the flesh takes the heat out of it)
@@ -682,7 +689,8 @@ public final class Treatment {
 				if (Downed.passedOut(body) && body instanceof Player) {
 					// (a deep swoon: a chance, and the whole vial)
 					stack.hurtAndBreak(stack.getMaxDamage() - stack.getDamageValue(), player, s.hand);
-					if (level.getRandom().nextFloat() >= ROUSE_CHANCE) {
+					// (0.15.49) Lifesaver: they always come to
+					if (!MedicineSkill.lifesaver(player) && level.getRandom().nextFloat() >= ROUSE_CHANCE) {
 						player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.salts_failed", body.getDisplayName())
 							.withStyle(ChatFormatting.GRAY));
 						return;
@@ -693,11 +701,17 @@ public final class Treatment {
 				if (Downed.rouse(level, body, SALTS_HEALTH)) {
 					body.addEffect(new MobEffectInstance(MobEffects.SPEED, SALTS_SPEED_TICKS, 0));
 					body.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SALTS_DAZE_TICKS, 0));
+					MedicineSkill.broughtRound(player, body);
 				}
 			}
 			case LEECHES -> {
 				Wounds.hurtPart(body, BodyPart.BODY, LEECH_COST, null);
 				Pain.leeches(body);
+				if (MedicineSkill.bleedBadBlood(player, body)) {
+					// (0.15.49) a Plague Doctor's leeches draw out the plague and poison
+					level.sendParticles(ParticleTypes.SQUID_INK, body.getX(), body.getY() + body.getBbHeight() * 0.5, body.getZ(), 8, 0.2, 0.2, 0.2, 0.01);
+					done = Component.translatable("message.jaymospowers.wounds.leeches_bad_blood", body.getDisplayName());
+				}
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 1.3F);
 				stack.consume(1, player);
 			}
@@ -708,5 +722,7 @@ public final class Treatment {
 			}
 		}
 		player.sendOverlayMessage(done.copy().withStyle(ChatFormatting.GREEN));
+		// (0.15.49) a little Survival experience (Kingdoms)
+		MedicineSkill.treated(player);
 	}
 }

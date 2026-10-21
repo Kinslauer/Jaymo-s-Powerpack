@@ -113,6 +113,14 @@ public final class Senses {
 	/** The gauge's states. */
 	public static final int IDLE = 0, NOTICING = 1, SEARCHING = 2, SPOTTED = 3;
 
+	/**
+	 * (0.7.136) Sneaking past: a sneaking, moving player with a monster in sight within {@link #SNEAK_PAST_RANGE} blocks
+	 * (that isn't after them or hunting them) counts the time; every {@link #SNEAK_PAST_TICKS} of it is Stealth
+	 * experience ({@link Skills#sneakPast}). Within {@link #SNEAK_PAST_CLOSE} blocks it counts twice as fast.
+	 */
+	static final double SNEAK_PAST_RANGE = 12.0, SNEAK_PAST_CLOSE = 6.0;
+	static final int SNEAK_PAST_TICKS = 200;
+
 	private static final TagKey<EntityType<?>> BOSSES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("c", "bosses"));
 
 	/** What a mob remembers of the player it lost. Not saved: a reload forgets the hunt. */
@@ -154,6 +162,8 @@ public final class Senses {
 	private static final Map<UUID, Integer> SENT = new HashMap<>();
 	/** Player → {target entity id, game time} of their last sneak attack (one blow, hurt twice, counts once). */
 	private static final Map<UUID, long[]> STRUCK = new HashMap<>();
+	/** (0.7.136) Player → ticks spent sneaking past monsters toward the next Stealth experience. */
+	private static final Map<UUID, Integer> SNEAKING_PAST = new HashMap<>();
 
 	private Senses() {
 	}
@@ -177,6 +187,7 @@ public final class Senses {
 			MOVING.clear();
 			SENT.clear();
 			STRUCK.clear();
+			SNEAKING_PAST.clear();
 			TRACKS.clear();
 		});
 	}
@@ -186,6 +197,7 @@ public final class Senses {
 		MOVING.remove(id);
 		SENT.remove(id);
 		STRUCK.remove(id);
+		SNEAKING_PAST.remove(id);
 	}
 
 	/** A mob that senses (sight, the gauge, unaware blows): hostile or neutral, bosses too, not one of the kingdoms' own folk. */
@@ -433,6 +445,9 @@ public final class Senses {
 	/** Works out what {@code player}'s gauge shows, and sends it if it changed. */
 	private static void sync(ServerPlayer player) {
 		int state = IDLE, fill = 0;
+		// (0.7.136) how near the nearest monster in sight is, sneaking past it: 0 none, 1 near, 2 close
+		int past = 0;
+		boolean sneaking = player.isCrouching() && MOVING.getOrDefault(player.getUUID(), false);
 		if (!touched(player) && player.isAlive() && player.level() instanceof ServerLevel level) {
 			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(GAUGE_RANGE), m -> m.isAlive() && sensing(m))) {
 				if (mob.getTarget() == player) {
@@ -441,15 +456,24 @@ public final class Senses {
 				}
 				if (searchingFor(mob, player)) {
 					state = Math.max(state, SEARCHING);
-				} else if (state <= NOTICING && mob instanceof Enemy) {
-					int f = noticing(level, mob, player);
-					if (f > 0) {
-						state = NOTICING;
-						fill = Math.max(fill, f);
+				} else if (mob instanceof Enemy) {
+					if (state <= NOTICING) {
+						int f = noticing(level, mob, player);
+						if (f > 0) {
+							state = NOTICING;
+							fill = Math.max(fill, f);
+						}
+					}
+					if (sneaking && past < 2 && mob.getTarget() == null) {
+						double d = mob.distanceTo(player);
+						if (d < SNEAK_PAST_RANGE && mob.hasLineOfSight(player)) {
+							past = Math.max(past, d < SNEAK_PAST_CLOSE ? 2 : 1);
+						}
 					}
 				}
 			}
 		}
+		sneakPast(player, past, state == SPOTTED || state == SEARCHING);
 		if (state != NOTICING) {
 			fill = 0;
 		}
@@ -458,6 +482,27 @@ public final class Senses {
 		if ((last == null ? 0 : last) != packed) {
 			ServerPlayNetworking.send(player, new Gauge(state, fill));
 		}
+	}
+
+	/**
+	 * (0.7.136) Andy: "sneaking near enemies undetected should passively grow your stealth skill". Every gauge update
+	 * {@code player} spends sneaking past an unaware monster ({@code past}: 1 near, 2 close) counts toward a little Stealth
+	 * experience. Spotted or hunted, the count starts over.
+	 */
+	private static void sneakPast(ServerPlayer player, int past, boolean seen) {
+		if (seen) {
+			SNEAKING_PAST.remove(player.getUUID());
+			return;
+		}
+		if (past <= 0) {
+			return;
+		}
+		int ticks = SNEAKING_PAST.getOrDefault(player.getUUID(), 0) + GAUGE_TICKS * past;
+		if (ticks >= SNEAK_PAST_TICKS) {
+			ticks -= SNEAK_PAST_TICKS;
+			Skills.sneakPast(player);
+		}
+		SNEAKING_PAST.put(player.getUUID(), ticks);
 	}
 
 	/** 0 if {@code mob} takes no notice of {@code player}; else 1 to {@link #FILL_STEPS}, as they come from where it could just see them to where it would spot them. */
