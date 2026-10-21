@@ -405,8 +405,8 @@ public final class HiddenBlade {
 		} else {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
 		}
-		// (the crippled and the assassin's bonus are one and the same: they don't stack)
-		return amount * CRIPPLED_STAB;
+		// (the crippled and the assassin's bonus are one and the same: they don't stack; an assassination on a boss is capped)
+		return cripple ? amount * CRIPPLED_STAB : Senses.unawareBlow(target, amount, amount * CRIPPLED_STAB);
 	}
 
 	// ---- the leap ------------------------------------------------------------------------------------------------------

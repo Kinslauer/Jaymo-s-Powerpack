@@ -3598,6 +3598,13 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   skipped without it): under free rein its tick leaves your heading alone, and its camera looks where the free rein
   camera looks instead of swinging round with the horse. Seen in the dev game with Shoulder Surfing: D turns the horse
   to the camera's right and S rides it back toward the camera; the mouse turns only the camera.
+- **0.7.114, even they can get got:** the patch notes said bosses and tamed pets are never caught unaware; the user
+  said they can be. `Senses.sensing` (sight, the gauge, unaware blows) now takes bosses; `minded` (losing track and
+  searching) still leaves them out, so a boss never gives up the hunt. A boss is harder to catch: stealth cuts its sight
+  no lower than 0.4, its view cone is 240 degrees, it is unaware only while it is after no one (the dragon, which never targets anyone, only while perched), and a sneak attack or
+  assassination on it deals at most 15% of its max health (Wither 45, Ender Dragon 30), never less than 1.5x the plain blow
+  (`BOSS_*` constants). The dragon's view is flipped (it flies along its yaw's back). A tame pet can be caught unaware
+  by anyone but its own owner, so you can't one-shot your own dog by accident. Folk stay exempt. Only wolves count as pets here: cats and parrots aren't hostile or neutral, so Senses never takes them.
 
 ## 0.7.115: the hidden blade is worn on the wrist
 The user: "more like the web shooters, equipped in either one or both hands, and with an empty hand right clicking
