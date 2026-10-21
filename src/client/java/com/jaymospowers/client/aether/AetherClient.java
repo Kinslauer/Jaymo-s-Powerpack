@@ -21,6 +21,7 @@ public final class AetherClient {
 		ClientTickEvents.END_CLIENT_TICK.register(AetherClient::tick);
 		com.jaymospowers.client.aether.mob.AetherMobsClient.init();
 		com.jaymospowers.client.aether.monster.AetherMonstersClient.init();
+		com.jaymospowers.client.aether.dungeon.DungeonClient.init();
 		AetherFloraClient.init();
 	}
 

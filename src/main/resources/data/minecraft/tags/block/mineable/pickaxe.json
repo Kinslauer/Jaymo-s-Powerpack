@@ -100,6 +100,20 @@
     "jaymospowers:arctic_ice_crystal",
     "jaymospowers:arkenium_lantern",
     "jaymospowers:arkenium_chain",
-    "jaymospowers:arkenium_bars"
+    "jaymospowers:arkenium_bars",
+    "jaymospowers:sentry_bricks",
+    "jaymospowers:sentry_base_bricks",
+    "jaymospowers:sentry_flagstones",
+    "jaymospowers:sentry_tile",
+    "jaymospowers:sentry_capstone_bricks",
+    "jaymospowers:sentry_lightstone",
+    "jaymospowers:sentry_pillar",
+    "jaymospowers:sentry_brick_stairs",
+    "jaymospowers:sentry_brick_slab",
+    "jaymospowers:sentry_brick_wall",
+    "jaymospowers:sentry_brick_button",
+    "jaymospowers:sentry_spawner",
+    "jaymospowers:sentry_trap",
+    "jaymospowers:sentry_crate"
   ]
 }

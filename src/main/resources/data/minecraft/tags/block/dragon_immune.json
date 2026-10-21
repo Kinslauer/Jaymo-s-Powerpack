@@ -1,6 +1,14 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:backpack"
+    "jaymospowers:backpack",
+    "jaymospowers:locked_undershale",
+    "jaymospowers:locked_undershale_bricks",
+    "jaymospowers:locked_sentry_bricks",
+    "jaymospowers:locked_sentry_flagstones",
+    "jaymospowers:locked_sentry_lightstone",
+    "jaymospowers:boss_doorway",
+    "jaymospowers:treasure_doorway",
+    "jaymospowers:sentry_crate"
   ]
 }

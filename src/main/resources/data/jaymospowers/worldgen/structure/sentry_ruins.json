@@ -1,0 +1,7 @@
+{
+  "type": "jaymospowers:sentry_ruins",
+  "biomes": "#jaymospowers:has_structure/sentry_ruins",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}
