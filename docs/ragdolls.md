@@ -10,10 +10,12 @@ physics, written from how they behave.
   gravity, limbs flopping, folds over whatever it lands on (steps, ledges, fences, slabs), slides off edges, tumbles down
   stairs, floats in water. Thrown, dropped or tipped out of a cart, it tumbles and lands as physics says. Hitting it,
   rummaging it, chopping it, scavengers biting it, blasts and anyone walking or riding over it shove it about.
-- **Living players go limp** when they crash at speed (a wall at elytra or flight speed), land hard (a fall of about
-  ten blocks), get blown up or shoved very hard, or get run over by a cart, boat or charging rider. They tumble as a
-  ragdoll, the camera pulls back to third person, they can't move or use anything, and they get back up once they
-  stop (1.5 to 7 seconds). Fall and crash damage are unchanged. A player who dies limp leaves exactly that body.
+- **Living players go limp** (0.5.3) when they take a big hit or blast (8+ damage before armour), land hard (a fall
+  that really did 6+ damage: no ragdoll when Smoke, slow falling or a power's cushion cancels it), crash into a wall on
+  an elytra, or get run over by a cart, boat or charging rider. Speed alone never counts, so dashes, zips and launches
+  from powers don't knock you down. They tumble as a ragdoll, the camera pulls back to third person, they can't move
+  or use anything, and they get back up once they stop (1.5 to 7 seconds). Fall and crash damage are unchanged. A
+  player who dies limp leaves exactly that body.
 - Carried, slung and carted corpses still hang limp in the arms as before (the old Limp/Flop springs).
 
 ## How it works

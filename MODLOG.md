@@ -2089,3 +2089,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - `FreerunClient.active()` covers slide, vertical run and pole, and `holding()` covers poles, so the dodge stands
     aside.
   - The server checks height, rise and fall rates, cooldowns and corners for each move.
+- **0.15.16, Combat Roll's leftover HUD:** Andy saw the old roll indicators (Combat Roll's blue arrow and key hint
+  beside the hotbar) still showing next to the feathers. Combat Roll left the pack in 0.15.5, but nothing took the jar
+  out of the CurseForge profile, so it kept loading. `combat_roll` joins `removedIdsFromProfile`: the next Build Modpack
+  moves it into `removed-mods`. The dark segmented bar above the hotbar is vanilla's empty experience bar.
+- **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
+  steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
+  the horse to the keys and its camera follows the mouse.

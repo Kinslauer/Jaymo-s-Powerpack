@@ -3592,8 +3592,14 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   drive them, and anyone's. Ships may hold 5000 blocks (was 3000) for the galleon. Crews stand on any open deck under a
   raised quarterdeck too. Ops: `/kingdom fleet ship <rig>` builds any rig on open water near you and casts her off
   empty. Left out: their catamarans, small trireme and submarine.
+- **0.7.113, free rein with Shoulder Surfing:** Andy found the movement keys didn't move the horse under free rein. With
+  Shoulder Surfing Reloaded's coupled camera (the pack's preset), it turned you to its own camera every tick, so the
+  keys couldn't turn you and the mouse couldn't turn its camera. Two optional mixins (`client/mixin/shouldersurfing`,
+  skipped without it): under free rein its tick leaves your heading alone, and its camera looks where the free rein
+  camera looks instead of swinging round with the horse. Seen in the dev game with Shoulder Surfing: D turns the horse
+  to the camera's right and S rides it back toward the camera; the mouse turns only the camera.
 
-## 0.7.113: the hidden blade is worn on the wrist
+## 0.7.115: the hidden blade is worn on the wrist
 The user: "more like the web shooters, equipped in either one or both hands, and with an empty hand right clicking
 should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBladeClient` + `client/mixin/blade/*`.
 - The bracer is no longer a sword. Use it to strap it on that hand's wrist (else the other's): one or both arms, kept in
