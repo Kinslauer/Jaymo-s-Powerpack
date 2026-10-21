@@ -45,7 +45,7 @@ import net.minecraft.world.phys.HitResult;
  * arm: a leather bracer round the wrist ({@code BRACER_*}), the spring's steel housing on the palm side, and, out, the
  * blade along the palm side past the fingers ({@code BLADE_*}).
  * <p>
- * (0.7.119) It moves: springing raises the arm in front of you into a guard, then the blade shoots out of the housing
+ * (0.7.121) It moves: springing raises the arm in front of you into a guard, then the blade shoots out of the housing
  * ({@link #SPRING_TICKS}); sheathing runs it back. While it's out over an empty hand that arm is held up ahead
  * ({@code GUARD_*}, from {@code HiddenBladePoseMixin}, so costumes follow it), and a blow with it is a straight thrust
  * ({@code STAB_*}) rather than a punch. The bracer stands {@link #BRACER_GROW} proud so it shows over a costume's sleeve.
@@ -54,7 +54,7 @@ public final class HiddenBladeClient {
 	// ===== the knobs ================================================================================================
 	/** The bracer: from this far down the arm (pixels below the shoulder pivot), this tall, this far out round the arm. */
 	static final float BRACER_TOP = 5.5F, BRACER_HEIGHT = 3.0F, BRACER_HALF = 2.5F;
-	/** (0.7.119) How far the bracer and all on it stand out past that (pixels): clear of a costume's sleeve and bracer (2.5 out). */
+	/** (0.7.121) How far the bracer and all on it stand out past that (pixels): clear of a costume's sleeve and bracer (2.5 out). */
 	static final float BRACER_GROW = 0.4F;
 	/** The housing on the palm side: from this far down, this long. */
 	static final float HOUSING_TOP = 5.0F, HOUSING_LENGTH = 4.0F;
@@ -62,23 +62,23 @@ public final class HiddenBladeClient {
 	static final float BLADE_TOP = 6.0F, BLADE_TIP = 15.0F, BLADE_THICK = 0.5F, BLADE_WIDTH = 1.0F;
 	/** The middle of a wide arm, and of a slim one, off the shoulder pivot (pixels, toward the body's outside). */
 	static final float WIDE_ARM_MIDDLE = 1.0F, SLIM_ARM_MIDDLE = 0.5F;
-	/** (0.7.119) Springing it out (or in) takes this long (ticks): the first {@link #RAISE_SHARE} of it raises the arm, the rest runs the blade out. */
+	/** (0.7.121) Springing it out (or in) takes this long (ticks): the first {@link #RAISE_SHARE} of it raises the arm, the rest runs the blade out. */
 	static final float SPRING_TICKS = 5.0F, RAISE_SHARE = 0.5F;
 	/**
-	 * (0.7.119) The guard, blade out: the arm raised ahead this far (radians, 0 hanging, -pi/2 straight out), plus this
+	 * (0.7.121) The guard, blade out: the arm raised ahead this far (radians, 0 hanging, -pi/2 straight out), plus this
 	 * share of where you look up or down; turned in across the body this far; this much of the walk's arm swing kept.
 	 */
 	static final float GUARD_PITCH = -1.15F, GUARD_LOOK = 0.5F, GUARD_IN = 0.4F, GUARD_SWAY = 0.25F;
-	/** (0.7.119) A blow with the blade out: the arm thrust straight ahead (plus this share of the look) and this far forward (pixels). */
+	/** (0.7.121) A blow with the blade out: the arm thrust straight ahead (plus this share of the look) and this far forward (pixels). */
 	static final float STAB_LOOK = 0.8F, STAB_REACH = 3.0F;
 	// ================================================================================================================
 
 	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/hidden_blade.png");
 	/** On a player's render state: {@link HiddenBlade#WORN}'s bits, or null if none are shown. */
 	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:hidden_blades");
-	/** (0.7.119) On a player's render state: how far each wrist's blade is sprung, {main, off}, 0 sheathed to 1 out. */
+	/** (0.7.121) On a player's render state: how far each wrist's blade is sprung, {main, off}, 0 sheathed to 1 out. */
 	static final RenderStateDataKey<float[]> SPRUNG = RenderStateDataKey.create(() -> "jaymoskingdoms:hidden_blades_sprung");
-	/** (0.7.119) Player → each wrist's spring {main, off} now, then {main, off} a tick ago (players seen wearing a blade). */
+	/** (0.7.121) Player → each wrist's spring {main, off} now, then {main, off} a tick ago (players seen wearing a blade). */
 	private static final Map<Player, float[]> SPRINGS = new WeakHashMap<>();
 
 	private static ModelPart rightBracer, leftBracer, rightBlade, leftBlade;
@@ -127,7 +127,7 @@ public final class HiddenBladeClient {
 		return true;
 	}
 
-	/** (0.7.119) One tick of a player's springs: each runs toward out or in, as their blade is. */
+	/** (0.7.121) One tick of a player's springs: each runs toward out or in, as their blade is. */
 	private static void tickSpring(Player player) {
 		int bits = HiddenBlade.bits(player);
 		float[] spring = SPRINGS.get(player);
@@ -150,7 +150,7 @@ public final class HiddenBladeClient {
 		}
 	}
 
-	/** (0.7.119) How far a player's blade on {@code wrist} is sprung right now, 0 sheathed to 1 out. */
+	/** (0.7.121) How far a player's blade on {@code wrist} is sprung right now, 0 sheathed to 1 out. */
 	private static float sprung(Player player, int wrist, float partialTicks) {
 		float[] spring = SPRINGS.get(player);
 		if (spring == null) {
@@ -159,13 +159,13 @@ public final class HiddenBladeClient {
 		return Mth.lerp(partialTicks, spring[2 + wrist], spring[wrist]);
 	}
 
-	/** (0.7.119) The arm's share of a spring: up over the first part, eased. */
+	/** (0.7.121) The arm's share of a spring: up over the first part, eased. */
 	private static float raise(float sprung) {
 		float t = Math.min(1.0F, sprung / RAISE_SHARE);
 		return t * t * (3.0F - 2.0F * t);
 	}
 
-	/** (0.7.119) The blade's share of a spring: out over the rest, fast at first like a spring. */
+	/** (0.7.121) The blade's share of a spring: out over the rest, fast at first like a spring. */
 	private static float extend(float sprung) {
 		float t = Mth.clamp((sprung - RAISE_SHARE) / (1.0F - RAISE_SHARE), 0.0F, 1.0F);
 		return 1.0F - (1.0F - t) * (1.0F - t);
@@ -185,7 +185,7 @@ public final class HiddenBladeClient {
 	}
 
 	/**
-	 * (0.7.119) After the player model is posed ({@code HiddenBladePoseMixin}): an arm whose hand is empty with its blade
+	 * (0.7.121) After the player model is posed ({@code HiddenBladePoseMixin}): an arm whose hand is empty with its blade
 	 * springing or out comes up into the guard ahead of you, and a blow with it is a thrust.
 	 */
 	public static void pose(PlayerModel model, AvatarRenderState state) {
@@ -253,7 +253,7 @@ public final class HiddenBladeClient {
 		collector.submitModelPart(right ? rightBracer : leftBracer, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
 		float extend = extend(sprung);
 		if (extend > 0.0F) {
-			// (0.7.119) run out of the housing: grown from its root, the rest still inside the housing
+			// (0.7.121) run out of the housing: grown from its root, the rest still inside the housing
 			float shown = (HOUSING_TOP + HOUSING_LENGTH - BLADE_TOP) / (BLADE_TIP - BLADE_TOP);
 			float length = shown + (1.0F - shown) * extend;
 			poseStack.translate(0.0F, BLADE_TOP / 16.0F, 0.0F);

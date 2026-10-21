@@ -3654,7 +3654,22 @@ art) in our builders, and picked "your own designs + areas" first. Written from 
 - **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
   fireball), which Jaymo's Powers 0.15.22 runs.
 
-## 0.7.119: the hidden blade moves, and shows
+## 0.7.120: storms stop burning the forests down (pack 0.15.27)
+The user: "lightning strikes during storms absolutely destroys forests. water should still put fires out."
+- Why: a storm cell (`Storms`) strikes real lightning every few seconds under it, and each vanilla bolt lights its spot
+  and up to four around it on Normal/Hard, plus more on its after-flashes. And the fire never saw the cell's rain:
+  `FireBlock.tick` asks the world's weather (`isRaining()`) before it lets rain put it out or stop it spreading, so
+  under a cell on an otherwise clear day the fires burnt on through the downpour.
+- `FireBlockRainMixin`: in the fire's tick, rain under a storm cell counts as rain, so cell rain now puts fires out and
+  stops them spreading as vanilla's rain does. Where it rains is still `isRainingAt` (open sky), so a fire under leaves
+  or a roof isn't put out by it, as in vanilla.
+- `LightningBoltMixin`: a storm cell's bolts (tagged `Storms.BOLT_TAG`) light a fire only 1 in 4 strikes
+  (`Storms.STRIKE_FIRE_CHANCE`), and then only the block they hit: no sparks around it, none from after-flashes.
+  They still strike, hurt and charge lightning rods. Vanilla's own lightning, tridents, powers and the dry-lightning
+  wildfire disaster are unchanged.
+- Water placed on fire always put it out; nothing here changed that.
+
+## 0.7.121: the hidden blade moves, and shows
 The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
 right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
 `client/mixin/blade/HiddenBladePoseMixin`.

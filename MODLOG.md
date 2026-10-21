@@ -2115,7 +2115,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
   snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
   server crash (not a normal stop) leaves the ice standing.
-- **0.15.25, hidden blade visuals (Kingdoms 0.7.119):** Andy: the hidden blade should animate for players and be held
+- **0.15.28, hidden blade visuals (Kingdoms 0.7.121):** Andy: the hidden blade should animate for players and be held
   in front so it's visible, not off to the side and lost in the costume. Springing it raises the arm into a guard ahead
   of you and runs the blade out of the housing; a blow with it is a straight thrust; the bracer stands clear of costume
   sleeves. Details in the Kingdoms MODLOG.
