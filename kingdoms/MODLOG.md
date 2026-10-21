@@ -3710,3 +3710,8 @@ right now it is held to the side of the player and is caught in the costume." `c
   predicate.
 - Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
 - Festivals: every realm fit to keep one holds a festival on the first day of each season.
+
+## 0.7.124: an eased pickpocket's reach (with Powers 0.15.32, Kitchen 0.5.8)
+- Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
+  high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
+  out the same way.
