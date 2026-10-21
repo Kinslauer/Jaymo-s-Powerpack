@@ -63,7 +63,7 @@ public final class Bleeding {
 	/** (0.14.4) A cut opens on a part that a blade, a shot or claws took at least this much from (health points). */
 	public static final float BLEED_FROM = 2.0F;
 	/**
-	 * (0.15.3) Sharpness (Just-In COMBAT's idea: a sharpened weapon makes its target bleed): any weapon with it cuts, and
+	 * (0.15.4) Sharpness (Just-In COMBAT's idea: a sharpened weapon makes its target bleed): any weapon with it cuts, and
 	 * each level lowers {@link #BLEED_FROM} by this much, to no less than {@link #SHARP_BLEED_FROM_MIN}.
 	 */
 	public static final float SHARPNESS_BLEED_FROM = 0.3F, SHARP_BLEED_FROM_MIN = 0.5F;
