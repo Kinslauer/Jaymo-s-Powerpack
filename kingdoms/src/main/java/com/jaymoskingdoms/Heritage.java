@@ -125,6 +125,8 @@ public final class Heritage {
 	static final double SYLVAN_SAFE_FALL = 1.5, SYLVAN_SNEAK = 0.1, SYLVAN_WEAK = 0.1;
 	/** Verdant: hunger in the sun, as a factor, and how much longer fire burns (a share). */
 	static final float VERDANT_SUN_HUNGER = 0.65F;
+	/** (0.7.123) Verdant hunger in the spring sun, as a factor (Kitchen's seasons). */
+	static final float VERDANT_SPRING_HUNGER = 0.5F;
 	static final double VERDANT_BURN = 0.5;
 	/**
 	 * Emberborn: fire never hurts them and never stays lit on them. In the cold their blows and their walking speed drop
@@ -135,6 +137,11 @@ public final class Heritage {
 	static final float THRIVE_HUNGER = 0.8F, WILT_HUNGER = 1.25F;
 	/** A biome this hot (base temperature) or hotter is hot; this cold or colder is cold. */
 	static final float HOT = 1.0F, COLD = 0.2F;
+	/**
+	 * (0.7.123) With Kitchen's seasons, how much warmer a temperate land is in summer and colder in winter for {@link #hot}
+	 * and {@link #cold}: plains (0.8) are hot in summer and cold in winter.
+	 */
+	static final float SUMMER_WARMTH = 0.25F, WINTER_CHILL = 0.8F;
 	/** Nightborn: blows and speed in the dark (shares), blows in the sun (a share off). Dark: night, or light this low. */
 	static final double NIGHT_DAMAGE = 0.1, NIGHT_SPEED = 0.05, SUN_WEAK = 0.1;
 	static final int DARK_LIGHT = 7;
@@ -697,7 +704,7 @@ public final class Heritage {
 		}
 		return switch (kind) {
 			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
-			case VERDANT -> inSun(player) ? VERDANT_SUN_HUNGER : 1.0F;
+			case VERDANT -> inSun(player) ? (spring(player) ? VERDANT_SPRING_HUNGER : VERDANT_SUN_HUNGER) : 1.0F;
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : chilled(player) ? WILT_HUNGER : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
@@ -706,8 +713,22 @@ public final class Heritage {
 		};
 	}
 
+	/**
+	 * (0.7.123) The land's warmth where {@code player} stands: its biome's, and with Kitchen's seasons a temperate land
+	 * (plains, forests) is warmer in summer and colder in winter, enough to be hot or cold for an Emberborn or Frostborn.
+	 */
 	private static float temperature(ServerPlayer player) {
-		return player.level().getBiome(player.blockPosition()).value().getBaseTemperature();
+		float base = player.level().getBiome(player.blockPosition()).value().getBaseTemperature();
+		if (!KitchenCompat.temperate(base)) {
+			return base;
+		}
+		String season = KitchenCompat.season(player.level());
+		return "summer".equals(season) ? base + SUMMER_WARMTH : "winter".equals(season) ? base - WINTER_CHILL : base;
+	}
+
+	/** (0.7.123) Verdant in spring: everything's growing, so the sun feeds them even more. */
+	static boolean spring(ServerPlayer player) {
+		return "spring".equals(KitchenCompat.season(player.level()));
 	}
 
 	static boolean hot(ServerPlayer player) {
@@ -718,7 +739,7 @@ public final class Heritage {
 		return temperature(player) <= COLD;
 	}
 
-	/** In the cold, for an Emberborn: a cold land (snow, ice, the frozen peaks), or freezing. The pack has no seasons, so this is its winter. */
+	/** In the cold, for an Emberborn: a cold land (snow, ice, the frozen peaks, a temperate land in winter), or freezing. */
 	static boolean chilled(ServerPlayer player) {
 		return cold(player) || player.getTicksFrozen() > 0;
 	}

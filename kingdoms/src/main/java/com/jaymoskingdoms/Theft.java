@@ -461,7 +461,7 @@ public final class Theft {
 			return;
 		}
 		if (Crooks.fairGame(victim, killer)) {
-			// (0.7.123) a known criminal, or the crook who robbed you: no murder
+			// (0.7.124) a known criminal, or the crook who robbed you: no murder
 			return;
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);

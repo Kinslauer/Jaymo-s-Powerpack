@@ -843,3 +843,15 @@ after `Mill.register()`.
   buried: with MCA, which lays a villager in a tombstone the tick it dies, `corpse/McaGraves` empties that tombstone
   again, so there's no grave to mourn at and nothing for the Staff of Life to raise. Corpses keep the dead mob's UUID
   even when their look is cut down (`CorpseEntity.deadId`).
+- **0.5.6, seasons:** Andy (2026-10-21) asked whether seasons could work in, and picked our own over Ecliptic Seasons
+  (its Fabric port is All Rights Reserved with no 26.3 build). Spec and differences in `docs/Seasons-Plan.md`.
+  `season/Seasons`: an 84-day year (spring, summer, autumn, winter; early, mid and late parts of 7 days) from the
+  overworld clock plus a saved shift (`/season set <season> [early|mid|late]` for ops, `/season` for anyone); each new
+  part is announced, and holding a clock shows the date. Only temperate lands (biome base temperature 0.55-0.9) feel
+  it. `BiomeSeasonMixin` chills them (winter -0.8, so it snows and ponds freeze); `SeasonalWeather` melts open snow
+  and ice there out of winter. `SeasonalCrops`: crops in `tags/block/seasons/<season>` grow only then, others all but
+  winter; out of season they wait; under glass (`greenhouse_roof`) or a solid roof they grow all year. Andy wants winter
+  "very harsh": in winter the frost kills crops left in the open (25% a random tick; berry bushes and cocoa lose their
+  fruit instead), and `WinterCold` drains 0.025 exhaustion a second from anyone out under the sky in a temperate land
+  who isn't by a fire or lava (`setColdProof` lets Kingdoms spare Frostborn).
+  Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.

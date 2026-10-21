@@ -30,6 +30,8 @@ public final class DarktideFlow {
 	static final int DAYLIGHT_FLOOR = 50;
 	/** Night: from dusk to dawn on the dimension's clock (ticks into the day). */
 	public static final long NIGHT_START = 12000L, NIGHT_END = 23500L;
+	/** (0.15.30) In winter night comes this much sooner and lasts this much past {@link #NIGHT_END} (ticks). */
+	static final long WINTER_DUSK_SOONER = 1500L, WINTER_DAWN_LATER = 1000L;
 
 	private DarktideFlow() {
 	}
@@ -40,6 +42,10 @@ public final class DarktideFlow {
 			return false;
 		}
 		long time = Math.floorMod(level.getDefaultClockTime(), 24000L);
+		// (0.15.30) winter's nights are longer (Kitchen's seasons): dusk comes sooner and dawn later
+		if (com.jaymospowers.core.Seasons.of(level) == com.jaymospowers.core.Seasons.Season.WINTER) {
+			return time >= NIGHT_START - WINTER_DUSK_SOONER || time < NIGHT_END + WINTER_DAWN_LATER - 24000L;
+		}
 		return time >= NIGHT_START && time < NIGHT_END;
 	}
 

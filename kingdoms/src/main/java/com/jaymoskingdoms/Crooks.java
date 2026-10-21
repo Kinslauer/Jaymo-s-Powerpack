@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.123) Andy (2026-10-21): "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing
+ * (0.7.124) Andy (2026-10-21): "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing
  * from the player, and upon prompts of good deals (8 cod 3 emeralds) they can scam you and say so with dialogue above
  * their head and the player can confront them about it which can prompt them either giving the emeralds back or trying
  * to run and if the player downs the npc they get their money back. rep has an effect, the higher it is, the less
