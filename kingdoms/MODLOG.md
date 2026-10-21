@@ -3454,3 +3454,12 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
   mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
   mood change. Numbers at the top of `EmberHugs`.
+- **0.7.103, Better With Mods batch 1 (Powers 0.14.5):** `MobTweaks`: baby zombies -25% speed and damage
+  (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). `WorldTiers` rolls armour and weapons for mobs as
+  they take a tier (iron, some diamond at Legend; piglins gold, wither skeletons a stone axe). Zombies and husks hunt
+  `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
+  safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
+  hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
+  `RoadPace`: `road_pace` blocks +15% (horses too), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.

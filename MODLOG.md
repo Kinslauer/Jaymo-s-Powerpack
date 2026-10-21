@@ -1853,3 +1853,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
   wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
   Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
+- **0.14.5, Better With Mods batch 1 and everything metal melts (Kingdoms 0.7.103, Kitchen 0.4.51):** Andy picked
+  BWM ideas (MIT, 1.12 Forge; our own Fabric code, plan in the "Better With Mods: what fits our pack" doc) and asked
+  that "ALL metal items added to the pack ... melt right back down into their crafted material's metals".
+  `tinkering/smeltery/MeltingRecipes` works out every crafted item's metal from the recipe book after each reload
+  (lowest recipe wins, fixpoint, base metal forms excluded), reads `data/*/tinkering_melting/*.json` for
+  uncraftable items (Kingdoms ships its paladin, gladiator and ronin sets and barding), and syncs the list to
+  clients for JEI. `Melting.Result` can hold several liquids (a paladin helmet gives iron and gold); the smeltery
+  waits for room for all of them. Fixed entries: horse armour 9 ingots, nautilus armour 7, chainmail 3/5/4/2,
+  bell 4 gold, chipped/damaged anvil 20/10. `LOG_GAPS` logs metal-named items that still don't melt (netherite:
+  no liquid yet). Also: the Mining Charge (`armory/MiningChargeBlock`; digs a 3x3x3 hole into the block it's on,
+  harvesting drops, `CHARGE_DAMAGE`; WeaponMod dynamite recipe or a gunpowder one through Fabric load conditions),
+  Arcane Scroll drops (`enchanting/EnchantDrops`, per-mob table in `data/jaymospowers/enchant_drops/`, Looting
+  raises the chance), enchanted-book tooltips naming the gear an enchantment fits (`EnchantSlotTooltip`), and
+  `core/ExplosionLog` (one log line per player-caused explosion).

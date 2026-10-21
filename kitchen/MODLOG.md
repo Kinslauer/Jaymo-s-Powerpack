@@ -776,3 +776,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.
 - **0.4.50:** a corpse keeps its mob's size: the scale attribute stays in the saved look (Kingdoms' half-size spiders,
   grown apes), the rest of the attributes are still left out (`Corpses.look`).
+- **0.4.51, Better With Mods batch 1:** `stomach/RawFood`: raw meat and fish (`raw_meats`) give Hunger II for 30 s
+  30% of the time, an Undercooked dish half as often (replaces the old 60% Hunger I and raw chicken's own chance);
+  you can still eat while sick. Llamas and trader llamas drop 1-2 mutton. `EatGroundSeedsGoal` became
+  `farm/EatGroundFoodGoal`: every farm animal eats its own food off the ground (tame pets don't). `farm/LayingHens`:
+  a hen that pecks a seed lays at the next dawn; unfed hens lay at half speed (`ChickenMixin`).
