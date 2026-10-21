@@ -125,7 +125,7 @@ public final class Heritage {
 	static final double SYLVAN_SAFE_FALL = 1.5, SYLVAN_SNEAK = 0.1, SYLVAN_WEAK = 0.1;
 	/** Verdant: hunger in the sun, as a factor, and how much longer fire burns (a share). */
 	static final float VERDANT_SUN_HUNGER = 0.65F;
-	/** (0.7.118) Verdant hunger in the spring sun, as a factor (Kitchen's seasons). */
+	/** (0.7.121) Verdant hunger in the spring sun, as a factor (Kitchen's seasons). */
 	static final float VERDANT_SPRING_HUNGER = 0.5F;
 	static final double VERDANT_BURN = 0.5;
 	/**
@@ -138,7 +138,7 @@ public final class Heritage {
 	/** A biome this hot (base temperature) or hotter is hot; this cold or colder is cold. */
 	static final float HOT = 1.0F, COLD = 0.2F;
 	/**
-	 * (0.7.118) With Kitchen's seasons, how much warmer a temperate land is in summer and colder in winter for {@link #hot}
+	 * (0.7.121) With Kitchen's seasons, how much warmer a temperate land is in summer and colder in winter for {@link #hot}
 	 * and {@link #cold}: plains (0.8) are hot in summer and cold in winter.
 	 */
 	static final float SUMMER_WARMTH = 0.25F, WINTER_CHILL = 0.8F;
@@ -714,7 +714,7 @@ public final class Heritage {
 	}
 
 	/**
-	 * (0.7.118) The land's warmth where {@code player} stands: its biome's, and with Kitchen's seasons a temperate land
+	 * (0.7.121) The land's warmth where {@code player} stands: its biome's, and with Kitchen's seasons a temperate land
 	 * (plains, forests) is warmer in summer and colder in winter, enough to be hot or cold for an Emberborn or Frostborn.
 	 */
 	private static float temperature(ServerPlayer player) {
@@ -726,7 +726,7 @@ public final class Heritage {
 		return "summer".equals(season) ? base + SUMMER_WARMTH : "winter".equals(season) ? base - WINTER_CHILL : base;
 	}
 
-	/** (0.7.118) Verdant in spring: everything's growing, so the sun feeds them even more. */
+	/** (0.7.121) Verdant in spring: everything's growing, so the sun feeds them even more. */
 	static boolean spring(ServerPlayer player) {
 		return "spring".equals(KitchenCompat.season(player.level()));
 	}

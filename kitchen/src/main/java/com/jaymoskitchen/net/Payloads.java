@@ -367,7 +367,7 @@ public final class Payloads {
 		}
 	}
 
-	/** (0.5.4) Server → client: how many days the calendar runs ahead of the world's day count (see {@code Seasons}). */
+	/** (0.5.6) Server → client: how many days the calendar runs ahead of the world's day count (see {@code Seasons}). */
 	public record SeasonSync(int shift) implements CustomPacketPayload {
 		public static final Type<SeasonSync> TYPE = new Type<>(JaymosKitchen.id("season_sync"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SeasonSync> CODEC = CustomPacketPayload.codec(

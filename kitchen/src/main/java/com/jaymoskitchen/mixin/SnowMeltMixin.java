@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.4) Winter's snow melts away out of winter (see {@link SeasonalWeather}). */
+/** (0.5.6) Winter's snow melts away out of winter (see {@link SeasonalWeather}). */
 @Mixin(SnowLayerBlock.class)
 abstract class SnowMeltMixin {
 	@Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)

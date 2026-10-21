@@ -48,7 +48,7 @@ final class Raids {
 	/** How often a camp considers a raid (ticks), the chance it does when it can, and the wait after one (ticks: two days). */
 	static final int CHECK_TICKS = 200;
 	static final float RAID_CHANCE = 0.12F;
-	/** (0.7.118) The raid chance's factor in summer and in winter (Kitchen's seasons). */
+	/** (0.7.121) The raid chance's factor in summer and in winter (Kitchen's seasons). */
 	static final float SUMMER_RAIDS = 1.5F, WINTER_RAIDS = 0.4F;
 	static final long COOLDOWN_TICKS = 48000L;
 	/** The same settlement isn't raided again for this long (ticks: a day), by any camp. */
@@ -164,7 +164,7 @@ final class Raids {
 
 	// ---- starting ------------------------------------------------------------------------------------------------
 
-	/** (0.7.118) With Kitchen's seasons, raids are likelier in summer and rarer in winter, when camps sit by their fires. */
+	/** (0.7.121) With Kitchen's seasons, raids are likelier in summer and rarer in winter, when camps sit by their fires. */
 	static float seasonFactor(ServerLevel level) {
 		String season = KitchenCompat.season(level);
 		return "summer".equals(season) ? SUMMER_RAIDS : "winter".equals(season) ? WINTER_RAIDS : 1.0F;

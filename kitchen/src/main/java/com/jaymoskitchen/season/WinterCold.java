@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.5.4) Winter bites (Andy: "very harsh. yes."): out in the open in a temperate land in winter you burn through food,
+ * (0.5.6) Winter bites (Andy: "very harsh. yes."): out in the open in a temperate land in winter you burn through food,
  * unless you're under a roof or warming yourself by a fire or lava. Another mod can make someone proof against it
  * ({@link #setColdProof}: Kingdoms' Frostborn).
  */

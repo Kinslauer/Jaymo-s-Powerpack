@@ -23,7 +23,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.5.4) Seasons: the pack's own, built from scratch after Andy picked "build our own" over Ecliptic Seasons (its Fabric
+ * (0.5.6) Seasons: the pack's own, built from scratch after Andy picked "build our own" over Ecliptic Seasons (its Fabric
  * port is All Rights Reserved with no 26.3 build; see {@code docs/Seasons-Plan.md}). The year runs from the world's
  * day count, so sleeping and {@code /time} move it on too: spring, summer, autumn and winter, each an early, mid and late
  * part of {@link #DAYS_PER_PART} days. Only temperate lands (plains, forests, swamps, beaches) feel it: colder ones are

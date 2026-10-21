@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.5.4) Snow and ice through the year. Winter makes temperate lands cold enough to snow and to freeze still water (the
+ * (0.5.6) Snow and ice through the year. Winter makes temperate lands cold enough to snow and to freeze still water (the
  * biome mixin lowers their temperature by {@link Season#chill}, so the game's own weather does the rest). Out of winter,
  * snow and ice left open to the sky there melt away a little at a time ({@code SeasonMeltMixin}); under a roof they keep.
  */

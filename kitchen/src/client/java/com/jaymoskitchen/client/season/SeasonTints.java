@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 
 /**
- * (0.5.4) Leaves and grass through the year, in temperate lands only: fresh green in early spring, a dry tinge late in
+ * (0.5.6) Leaves and grass through the year, in temperate lands only: fresh green in early spring, a dry tinge late in
  * summer, gold to rust through autumn and a bare brown in winter. The colours shift once a part of a season (a week), so
  * the chunks are redrawn then. {@code SeasonTintMixin} applies them to the biome's own colours.
  */

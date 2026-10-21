@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.4) Seasonal leaves and grass in temperate lands (see {@link SeasonTints}). */
+/** (0.5.6) Seasonal leaves and grass in temperate lands (see {@link SeasonTints}). */
 @Mixin(Biome.class)
 abstract class SeasonTintMixin {
 	@Inject(method = "getFoliageColor", at = @At("RETURN"), cancellable = true)

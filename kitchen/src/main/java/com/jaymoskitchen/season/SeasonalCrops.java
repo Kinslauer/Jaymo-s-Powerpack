@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.5.4) Crops by season. A crop in one or more of the block tags {@code jaymoskitchen:seasons/<season>} grows only in
+ * (0.5.6) Crops by season. A crop in one or more of the block tags {@code jaymoskitchen:seasons/<season>} grows only in
  * those seasons; any other crop (other mods' too) grows in all but winter. Out of season it waits, and in winter the
  * frost kills it ({@link #waits}).
  * Sheltered crops grow all year: under glass ({@code jaymoskitchen:greenhouse_roof}) or any solid roof. Only temperate
@@ -43,7 +43,7 @@ public final class SeasonalCrops {
 	}
 
 	/**
-	 * Whether this crop holds off growing this tick, being out of season. (0.5.4, Andy: "very harsh") In winter a crop
+	 * Whether this crop holds off growing this tick, being out of season. (0.5.6, Andy: "very harsh") In winter a crop
 	 * left in the open is killed by the frost now and then: grain, roots, stems and pitcher pods die, berry bushes and
 	 * cocoa lose what was on them.
 	 */

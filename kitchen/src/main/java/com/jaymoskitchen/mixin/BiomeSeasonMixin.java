@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.5.4) Temperate lands are colder out of summer, most of all in winter, when they're cold enough to snow and freeze
+ * (0.5.6) Temperate lands are colder out of summer, most of all in winter, when they're cold enough to snow and freeze
  * still water: the game's own rain-or-snow and freezing go by this temperature, on both sides.
  */
 @Mixin(Biome.class)
