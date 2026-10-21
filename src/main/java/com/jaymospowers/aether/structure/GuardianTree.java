@@ -172,10 +172,15 @@ final class GuardianTree {
 	private static void crown(Site s) {
 		int f = s.floor, cy = f + TRUNK_H + CROWN_UP;
 		int n = AetherStructure.GUARDIAN_SIZE - 1;
+		int vaultTop = f + TRUNK_H + 5;
 		s.fill(0, cy - (int)CROWN_H, 0, n, cy + (int)CROWN_H, n, (u, y, v) -> {
 			double du = (u - C) / CROWN_R, dv = (v - C) / CROWN_R, dy = (y - cy) / CROWN_H;
 			double d = du * du + dv * dv + dy * dy + (s.rnd(u, y, v, 59) - 0.5) * 0.25;
 			if (d > 1.0 || y < f + TRUNK_H && radius(u, v) < R_FOOT) {
+				return null;
+			}
+			// the vault's room and the hollow under its roof stay open
+			if (y <= vaultTop && radius(u, v) < R_IN) {
 				return null;
 			}
 			// only where nothing else stands (the trunk and the vault are built, the leaves go in the rest)

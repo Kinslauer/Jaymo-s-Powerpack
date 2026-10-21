@@ -124,7 +124,7 @@ final class Deep {
 			s.fill(0, f + 3, v, 4, f + 3, v, Kit.b("skyroot_planks"));
 			if (v % (FRAME_EVERY * 2) == 1) {
 				s.set(1, f, v, Kit.b("ambrosium_torch"));
-			} else if (s.rnd(v, 0, 0, 37) < TUNNEL_VASE) {
+			} else if (v + 2 < len && s.rnd(v, 0, 0, 37) < TUNNEL_VASE) {
 				s.vase(s.rnd(v, 1, 0, 38) < 0.5F ? 1 : 3, f, v + 2, s.rnd(v, 2, 0, 39) < 0.5F ? "holystone" : "brexallen", "vases/undercloud_mineshaft");
 			}
 		}
