@@ -230,7 +230,7 @@ public final class Pirates {
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;
 		}
-		return target instanceof Villager || target instanceof IronGolem;
+		return target instanceof Villager && !Barbarians.isCampVillager(target) || target instanceof IronGolem;
 	}
 
 	/** A pirate's own tick (from {@link Folk#customServerAiStep}): pistols at a foe close by, and shouts in a fight. */

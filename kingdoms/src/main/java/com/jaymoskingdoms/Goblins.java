@@ -132,7 +132,7 @@ public final class Goblins {
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;
 		}
-		return target instanceof Villager || target instanceof IronGolem && !((IronGolem)target).isPlayerCreated();
+		return target instanceof Villager && !Barbarians.isCampVillager(target) || target instanceof IronGolem && !((IronGolem)target).isPlayerCreated();
 	}
 
 	/** A goblin died (not the king: his death clears the village): now and then it leaves its mask behind. */

@@ -2377,6 +2377,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the TNT boom and a light shake. A Warrior-born screams into every form (a yell, a roar under it from Super 2 up, and
   one of three lines per form in nearby chat). Tuning at the top of `ZFighterPower`. Combo animations untouched.
   Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.62, ships Jaymo's Kingdoms 0.7.148:** outlaws (negative reputation with a realm) are spared by barbarian
+  camps, and with MCA a camp's raiders are MCA villagers (details in the Kingdoms MODLOG).
 - **0.15.61, ships Jaymo's Kingdoms 0.7.147 (Nether faction stage 3):** Hornkin portal raids on towns, Nether warlord
   bounties, Hornkin trophies and the Emberborn gold truce (details in the Kingdoms MODLOG). Powers: Andy's ruling,
   Z Fighter tyrant raids (`ZFighterRaids`) now only come to a kingdom with a player near it in world tier Borderlands

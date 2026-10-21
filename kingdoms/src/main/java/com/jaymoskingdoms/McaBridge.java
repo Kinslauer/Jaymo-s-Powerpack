@@ -356,6 +356,38 @@ final class McaBridge {
 		return true;
 	}
 
+	/**
+	 * (0.7.148) {@link McaCompat#becomeRaider}: an MCA guard of the same blood, in the same hides and with the same axe,
+	 * takes {@code folk}'s place in its camp, enlisted to it as a {@link Folk#BARBARIAN} (on its roster as before).
+	 */
+	static boolean convertRaider(ServerLevel level, Folk folk) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(ProfessionsMCA.GUARD)
+			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return false;
+		}
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				// worn, and kept in their pack too: MCA's guards dress from what they carry
+				villager.setItemSlot(slot, worn.copy());
+				villager.getInventory().addItem(worn.copy());
+				villager.setDropChance(slot, 0.0F);
+			}
+		}
+		Barbarians.harden(villager);
+		worker(villager).enlist(Folk.BARBARIAN, folk.factionId());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		folk.discard();
+		return true;
+	}
+
 	private static int tier(VillagerEntityMCA v) {
 		var profession = v.getVillagerData().profession();
 		if (profession.is(VillagerProfession.NONE) || profession.is(VillagerProfession.NITWIT)) {
@@ -395,6 +427,18 @@ final class McaBridge {
 				return true;
 			}
 			Rulers.unfit(villager);
+			e.discharge();
+			return false;
+		}
+		if (e.role() == Folk.BARBARIAN) {
+			// (0.7.148) a barbarian camp's villager, while it stands and they're its guard; a fallen camp's are scattered
+			Faction camp = Factions.get(level.getServer(), e.factionId());
+			if (camp != null && !camp.fallen() && villager.isGuard() && !villager.isBaby()) {
+				return true;
+			}
+			if (camp != null && !camp.fallen()) {
+				Economy.lost(level.getServer(), camp.id(), Folk.BARBARIAN);
+			}
 			e.discharge();
 			return false;
 		}
