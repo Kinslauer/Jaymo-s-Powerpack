@@ -3654,7 +3654,7 @@ art) in our builders, and picked "your own designs + areas" first. Written from 
 - **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
   fireball), which Jaymo's Powers 0.15.22 runs.
 
-## 0.7.120: storms stop burning the forests down
+## 0.7.120: storms stop burning the forests down (pack 0.15.27)
 The user: "lightning strikes during storms absolutely destroys forests. water should still put fires out."
 - Why: a storm cell (`Storms`) strikes real lightning every few seconds under it, and each vanilla bolt lights its spot
   and up to four around it on Normal/Hard, plus more on its after-flashes. And the fire never saw the cell's rain:
