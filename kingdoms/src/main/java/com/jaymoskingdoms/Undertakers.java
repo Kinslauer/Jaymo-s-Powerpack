@@ -170,7 +170,8 @@ public final class Undertakers {
 				UUID id = corpse.getUUID();
 				long[] seen = SEEN.computeIfAbsent(id, k -> new long[] {now, now});
 				seen[1] = now;
-				if (!free || LEFT.containsKey(id) || claimed(id) || Bearers.claimed(id) || Looters.claimed(id) || !KitchenCompat.isHostile(corpse) && now - seen[0] < SETTLE_TICKS) {
+				if (!free || LEFT.containsKey(id) || claimed(id) || Bearers.claimed(id) || Looters.claimed(id) || Bearers.theirs(level, corpse)
+					|| !KitchenCompat.isHostile(corpse) && now - seen[0] < SETTLE_TICKS) {
 					continue;
 				}
 				double d = golem.distanceToSqr(corpse);

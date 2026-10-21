@@ -412,8 +412,9 @@ public final class Bearers {
 			}
 			PathfinderMob bearer = freeBearer(level, f, corpse);
 			if (bearer == null) {
-				// nobody free at all
-				return;
+				// nobody free near this one: left a while, so it doesn't hold up the rest
+				LEFT.put(id, now + RETRY);
+				continue;
 			}
 			Duty duty;
 			if (ours) {
@@ -445,6 +446,14 @@ public final class Bearers {
 			JaymosKingdoms.LOGGER.debug("{} of {} takes {}'s body at {} ({})", bearer.getName().getString(), f.name(), dead.name().getString(),
 				corpse.blockPosition(), duty.kind);
 		}
+	}
+
+	/**
+	 * (0.7.126) A person's body lying in a settlement's land: the settlement's to bury or burn (so iron golems leave it be,
+	 * however long the fighting keeps the bearers away).
+	 */
+	static boolean theirs(ServerLevel level, Entity corpse) {
+		return KitchenCompat.burials() && who(level, corpse).person() && Theft.lawAt(level, corpse.blockPosition()) != null;
 	}
 
 	/** Quiet round {@code at}: no monster, nobody fighting, no raid under way. */
@@ -509,7 +518,7 @@ public final class Bearers {
 			return false;
 		}
 		boolean holding = KitchenCompat.carrier(corpse) == bearer;
-		if (bearer.getTarget() != null || now > d.until || bearer instanceof Villager v && McaCompat.panicking(v)) {
+		if (bearer.getTarget() != null || now > d.until || bearer instanceof Villager v && McaCompat.panicking(v) || Undertakers.busy(bearer)) {
 			// called away (a fight, a fright), or it's taking too long: put it down where they stand
 			if (holding) {
 				KitchenCompat.throwAt(corpse, bearer.position());
@@ -755,7 +764,7 @@ public final class Bearers {
 						continue;
 					}
 					double d = head.distSqr(a);
-					if (d < bestD && fits(level, head)) {
+					if (d < bestD && fits(level, head) && ours(level, f, head) && untouched(level, head)) {
 						bestD = d;
 						best = head;
 					}
@@ -772,7 +781,8 @@ public final class Bearers {
 				double angle = (k + (r % 2) * 0.5) * Math.PI * 2.0 / RING_ANGLES;
 				int x = seat.getX() + (int)Math.round(Math.cos(angle) * r), z = seat.getZ() + (int)Math.round(Math.sin(angle) * r);
 				BlockPos head = surface(level, x, z);
-				if (head != null && Math.abs(head.getY() - seat.getY()) <= 12 && !taken(graves, head) && fits(level, head) && roomy(level, head)) {
+				if (head != null && Math.abs(head.getY() - seat.getY()) <= 12 && !taken(graves, head) && fits(level, head) && ours(level, f, head)
+					&& roomy(level, head)) {
 					return head;
 				}
 			}
@@ -832,18 +842,57 @@ public final class Bearers {
 				}
 			}
 		}
-		if (fit * 3 < all * 2) {
-			return false;
+		return fit * 3 >= all * 2 && untouched(level, head) && !nearGraves(level, head);
+	}
+
+	/** The new graveyard's first grave isn't hard by another graveyard's (whose own walls would read as building). */
+	private static boolean nearGraves(ServerLevel level, BlockPos head) {
+		for (Grave g : level.getAttachedOrElse(GRAVES, List.of())) {
+			if (g.headPos().distSqr(head) < 4 * 4) {
+				return true;
+			}
 		}
-		// nothing a settlement made right beside it (a path, a field, a wall, a floor)
+		return false;
+	}
+
+	/** In {@code f}'s own land (not a neighbour's, not the wilds, not a player's place by it). */
+	private static boolean ours(ServerLevel level, Faction f, BlockPos head) {
+		Faction law = Theft.lawAt(level, head);
+		return law != null && law.id() == f.id();
+	}
+
+	/**
+	 * Nothing anyone made right beside a grave (a path, a field, a fence, a floor, a door, a bed, a placed block): only
+	 * other graves' headstones, which are walls, are let by.
+	 */
+	private static boolean untouched(ServerLevel level, BlockPos head) {
+		List<Grave> graves = level.getAttachedOrElse(GRAVES, List.of());
 		for (BlockPos p : BlockPos.betweenClosed(head.offset(-2, -1, -2), head.offset(2, 1, 3))) {
+			if (!level.isLoaded(p)) {
+				return false;
+			}
 			BlockState s = level.getBlockState(p);
+			if (s.is(BlockTags.WALLS) && isHeadstone(graves, p)) {
+				continue;
+			}
 			if (s.is(Blocks.DIRT_PATH) || s.is(Blocks.FARMLAND) || s.is(BlockTags.PLANKS) || s.is(BlockTags.WALLS) || s.is(BlockTags.FENCES)
-				|| s.is(BlockTags.DOORS) || s.is(BlockTags.BEDS) || s.is(Blocks.COBBLESTONE) || s.is(BlockTags.STONE_BRICKS)) {
+				|| s.is(BlockTags.FENCE_GATES) || s.is(BlockTags.DOORS) || s.is(BlockTags.BEDS) || s.is(Blocks.COBBLESTONE) || s.is(BlockTags.STONE_BRICKS)
+				|| s.is(BlockTags.LOGS) || s.is(BlockTags.WOOL) || s.is(Blocks.HAY_BLOCK) || s.is(BlockTags.CROPS)
+				|| !s.isAir() && Placed.any(level, p)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	private static boolean isHeadstone(List<Grave> graves, BlockPos p) {
+		long at = p.asLong();
+		for (Grave g : graves) {
+			if (g.head() == at) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Who lies under the headstone at {@code pos}, read out to {@code player}. */
@@ -938,6 +987,7 @@ public final class Bearers {
 	/** Walks one mourner on; false when they're done. */
 	private static boolean mourn(ServerLevel level, Mourner m, long now) {
 		if (!(level.getEntity(m.who) instanceof PathfinderMob who) || !who.isAlive() || who.isSleeping() || who.getTarget() != null
+			|| Undertakers.busy(who)
 			|| who instanceof Villager v && McaCompat.panicking(v)) {
 			return false;
 		}
