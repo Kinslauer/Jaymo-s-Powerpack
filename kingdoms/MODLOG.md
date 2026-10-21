@@ -3547,6 +3547,16 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   takes the player (reputation, rank, wanted, deeds, renown, tongue), tasks the player is doing for them, their friends
   and foes among the neighbours, and every memory, to the villager's prompt (mixin on MCA's `ChatAIContext`).
   `/kingdom memories` (ops) shows what the nearest villager remembers of you. Numbers at the top of `Recollections`.
+
+## 0.7.110: free rein riding (pack 0.15.11)
+- **Free rein** (`equestrian.FreeRein`, client `FreeReinClient`, `FreeReinViewMixin`/`FreeReinYawMixin`, `MouseHandlerMixin`):
+  steering any horse-type mount in third person, the mouse turns the camera on its own and the movement keys turn your
+  horse toward where the camera looks (W ahead, A/D to the sides, S back toward the camera), a quarter of the way each
+  tick, with the breed's own turn limits on top. Aiming a bow turns you to the camera at once; the crosshair targets
+  where the camera looks; a flying mount climbs where you look. Back in first person you face where the camera faced.
+  Key "Free Rein on/off" (unbound) switches it. The idea is Better Mount Steering's (Seramicx, MIT, no 26.3 build); our
+  own code. The side-pass gait keeps its strafing.
+- Fixed master's `LivingEntitySwingMixin` target (dots in a descriptor) that stopped the game from starting.
 - **0.7.111, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
   and for pirates and other factions. Its licence is GPLv3, so its structure files ship unchanged in
   `data/jaymoskingdoms/structure/jaki/` with the licence and a notice in `licenses/jaki/` (our code stays MIT).

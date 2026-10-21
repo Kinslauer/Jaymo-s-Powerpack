@@ -2063,3 +2063,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Arcane Scroll drops (`enchanting/EnchantDrops`, per-mob table in `data/jaymospowers/enchant_drops/`, Looting
   raises the chance), enchanted-book tooltips naming the gear an enchantment fits (`EnchantSlotTooltip`), and
   `core/ExplosionLog` (one log line per player-caused explosion).
+- **0.15.11, free rein riding:** ships Jaymo's Kingdoms 0.7.110: in third person the camera turns freely and WASD turns
+  your horse toward it, like Better Mount Steering (which has no 26.3 build). Also fixes a broken swing mixin that
+  kept the game from starting.
