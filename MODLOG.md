@@ -2116,17 +2116,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
   server crash (not a normal stop) leaves the ice standing.
 
-## 0.15.28: seasons reach the powers (with Kitchen 0.5.6, Kingdoms 0.7.121)
-Kitchen 0.5.6 brings the pack's own seasons. Andy asked how the powers should feel them and said "all of em".
-`core/Seasons` reads Kitchen's calendar by reflection, so it fails soft without it. It only counts in temperate lands.
-- **Cryokinesis:** `CryoPower.strength` is x1.2 in winter and x0.85 in summer.
-- **Ember:** winter counts as chilled for `EmberKindle.chilled`. In summer, Kindle, the fireball and Flashover do x1.2
-  fire damage (`EmberKindle.seasonal`).
-- **Smoke:** in winter, `SmokeField` fades at x0.6 and rises at half rate, so it hangs low and lingers.
-- **Symbiote:** in winter its hunger drains 1.5x faster (`WebSymbiote.WINTER_HUNGER`).
-- **Darktide:** in winter, `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later.
-- **Everyone with a power:** client `SeasonAura` draws an occasional mote: cherry petals in spring, fireflies on
-  summer nights, poplar leaves in autumn and snowflakes in winter. A Wind user is wrapped in a spinning whirl of them,
-  which thickens in flight.
-- **Wind in winter:** Kitchen's winter chill already makes temperate lands cold enough to snow. So
-  `WindCold.isCold` now counts them in winter too, and Wind's wind-ups and cooldowns stretch there.
+- **0.15.29, seasons reach the powers (Kitchen 0.5.6, Kingdoms 0.7.122):** Kitchen 0.5.6 brings the pack's own seasons,
+  and Andy asked for every power to feel them ("all of em"). `core/Seasons` reads Kitchen's calendar by reflection, so
+  it does nothing without Kitchen 0.5.6, and it only counts in temperate lands. Cryokinesis: `CryoPower.strength` is
+  x1.2 in winter and x0.85 in summer. Ember: winter counts as chilled (`EmberKindle.chilled`), and in summer Kindle,
+  the fireball and Flashover do x1.2 fire damage (`EmberKindle.seasonal`). Smoke: in winter `SmokeField` fades at
+  x0.6 and rises at half rate, so it hangs low. Symbiote: its hunger drains 1.5x faster in winter. Darktide: in winter
+  `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later. Client `SeasonAura` gives every power user an
+  occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
+  user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
+  cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.

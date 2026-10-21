@@ -36,5 +36,5 @@ berries, cocoa, torchflower, pitcher; autumn wheat, carrots, potatoes, beetroots
 - Kingdoms (through its `KitchenCompat`): harvest stock and farmer prices by season, fewer raids in deep winter,
   a festival at each season change. Heritages: Frostborn strong in winter, Emberborn in summer, Verdant/Sylvan in
   spring. Powers: light flavour only.
-- Andy's answers (2026-10-21): 84-day year is right; winter very harsh; powers: "all of em" (built in Powers 0.15.28, see
+- Andy's answers (2026-10-21): 84-day year is right; winter very harsh; powers: "all of em" (built in Powers 0.15.29, see
   `core/Seasons` and the root MODLOG).

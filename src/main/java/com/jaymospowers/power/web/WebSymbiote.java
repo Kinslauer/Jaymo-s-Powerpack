@@ -92,7 +92,7 @@ public final class WebSymbiote {
 	public static final double ARMOR_KNOCKBACK_RESIST = 0.6;
 	/** Living Armor makes it hungry this many times faster. */
 	public static final int ARMOR_DRAIN_MULT = 3;
-	/** (0.15.28) In winter (Kitchen's seasons) its hunger drains this many times faster. */
+	/** (0.15.29) In winter (Kitchen's seasons) its hunger drains this many times faster. */
 	public static final float WINTER_HUNGER = 1.5F;
 	/** Consume: reach, the biggest thing it'll eat (max health), what it heals you and feeds it. */
 	public static final double CONSUME_RANGE = 3.0;
@@ -1327,7 +1327,7 @@ public final class WebSymbiote {
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
-		// (0.15.28) the cold makes it hungrier: in winter, where there are seasons
+		// (0.15.29) the cold makes it hungrier: in winter, where there are seasons
 		if (com.jaymospowers.core.Seasons.is(player, com.jaymospowers.core.Seasons.Season.WINTER)) {
 			drainTicks = Math.max(1, Math.round(drainTicks / WINTER_HUNGER));
 		}
