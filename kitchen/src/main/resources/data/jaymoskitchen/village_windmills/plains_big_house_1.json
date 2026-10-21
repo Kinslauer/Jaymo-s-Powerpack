@@ -1,0 +1,90 @@
+{
+  "_comment": "Epic Structures: Villages' plains windmill tower. Sails face north (-z); the shaft goes through the wall (z=3) to a corner just inside, then down five shafts to a mill on the tower floor (y=9), in the ring of mangrove wood round the centre post.",
+  "template": "minecraft:village/plains/houses/plains_big_house_1",
+  "size": [
+    15,
+    29,
+    15
+  ],
+  "hub": [
+    7,
+    16,
+    1
+  ],
+  "sail_plane": {
+    "from": [
+      0,
+      9,
+      1
+    ],
+    "to": [
+      14,
+      23,
+      1
+    ]
+  },
+  "sail_blocks": [
+    "minecraft:diorite",
+    "minecraft:diorite_stairs",
+    "minecraft:dark_oak_stairs",
+    "minecraft:spruce_stairs",
+    "minecraft:grindstone",
+    "minecraft:stripped_spruce_log"
+  ],
+  "path": [
+    [
+      7,
+      16,
+      2
+    ],
+    [
+      7,
+      16,
+      3
+    ],
+    [
+      7,
+      16,
+      4
+    ],
+    [
+      7,
+      15,
+      4
+    ],
+    [
+      7,
+      14,
+      4
+    ],
+    [
+      7,
+      13,
+      4
+    ],
+    [
+      7,
+      12,
+      4
+    ],
+    [
+      7,
+      11,
+      4
+    ],
+    [
+      7,
+      10,
+      4
+    ]
+  ],
+  "millstone_facing": "south",
+  "clear": [
+    [
+      7,
+      16,
+      0
+    ]
+  ],
+  "set": []
+}

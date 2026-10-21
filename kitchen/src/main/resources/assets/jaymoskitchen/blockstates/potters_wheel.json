@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "wheel=false": {
+      "model": "jaymoskitchen:block/potters_wheel"
+    },
+    "wheel=true": {
+      "model": "jaymoskitchen:block/potters_wheel_wheel"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "axis=x,turning=false": {
+      "model": "jaymoskitchen:block/shaft",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,turning=true": {
+      "model": "jaymoskitchen:block/shaft_turning",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,turning=false": {
+      "model": "jaymoskitchen:block/shaft"
+    },
+    "axis=y,turning=true": {
+      "model": "jaymoskitchen:block/shaft_turning"
+    },
+    "axis=z,turning=false": {
+      "model": "jaymoskitchen:block/shaft",
+      "x": 90
+    },
+    "axis=z,turning=true": {
+      "model": "jaymoskitchen:block/shaft_turning",
+      "x": 90
+    }
+  }
+}

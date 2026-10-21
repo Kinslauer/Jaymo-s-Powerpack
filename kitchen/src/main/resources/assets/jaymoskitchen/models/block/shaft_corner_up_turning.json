@@ -1,0 +1,217 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "side": "jaymoskitchen:block/shaft",
+    "end": "jaymoskitchen:block/shaft_end",
+    "particle": "jaymoskitchen:block/shaft",
+    "turning": "jaymoskitchen:block/shaft_turning",
+    "wheel": "minecraft:block/stripped_dark_oak_log",
+    "wheel_top": "minecraft:block/stripped_dark_oak_log_top"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        4,
+        4
+      ],
+      "to": [
+        12,
+        12,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel_top"
+        },
+        "south": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel_top"
+        },
+        "east": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel"
+        },
+        "west": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel"
+        },
+        "up": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel"
+        },
+        "down": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#wheel"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        5,
+        0
+      ],
+      "to": [
+        11,
+        11,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#end"
+        },
+        "south": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#end"
+        },
+        "east": {
+          "uv": [
+            12,
+            5,
+            16,
+            11
+          ],
+          "texture": "#turning"
+        },
+        "west": {
+          "uv": [
+            0,
+            5,
+            4,
+            11
+          ],
+          "texture": "#turning"
+        },
+        "up": {
+          "uv": [
+            5,
+            0,
+            11,
+            4
+          ],
+          "texture": "#turning"
+        },
+        "down": {
+          "uv": [
+            5,
+            12,
+            11,
+            16
+          ],
+          "texture": "#turning"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        12,
+        5
+      ],
+      "to": [
+        11,
+        16,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            0,
+            11,
+            4
+          ],
+          "texture": "#turning"
+        },
+        "south": {
+          "uv": [
+            5,
+            0,
+            11,
+            4
+          ],
+          "texture": "#turning"
+        },
+        "east": {
+          "uv": [
+            5,
+            0,
+            11,
+            4
+          ],
+          "texture": "#turning"
+        },
+        "west": {
+          "uv": [
+            5,
+            0,
+            11,
+            4
+          ],
+          "texture": "#turning"
+        },
+        "up": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#end"
+        },
+        "down": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#end"
+        }
+      }
+    }
+  ]
+}
