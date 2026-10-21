@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "decorations",
+  "category": "misc",
   "key": {
     "S": "minecraft:string",
     "P": "minecraft:bamboo_slab",
