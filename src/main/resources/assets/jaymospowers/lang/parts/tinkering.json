@@ -224,5 +224,13 @@
   "jei.jaymospowers.casting.used_up": "The item is used up",
   "jei.jaymospowers.melting.into": "Melts into %s of %s",
   "jei.jaymospowers.alloying.in": "%s of %s",
-  "jei.jaymospowers.alloying.out": "makes %s of %s"
+  "jei.jaymospowers.alloying.out": "makes %s of %s",
+  "block.jaymospowers.kiln_load": "Kiln Load",
+  "block.jaymospowers.unfired_pot": "Unfired Pot",
+  "block.jaymospowers.bellows": "Bellows",
+  "block.jaymospowers.forge_hearth": "Forge Hearth",
+  "tooltip.jaymospowers.tinkering.unfired_pot": "Fire it in a brick kiln to make a decorated pot.",
+  "tooltip.jaymospowers.tinkering.bellows": "Pump it (or blow wind into it): the fire it faces burns hotter for a while.",
+  "tooltip.jaymospowers.tinkering.forge_hearth": "Burns coal or charcoal hot enough for netherrack and grout.",
+  "message.jaymospowers.forge_hearth.no_fuel": "The hearth needs coal or charcoal."
 }

@@ -26,6 +26,7 @@ public final class TinkeringClient {
 		BlockEntityRenderers.register(Tinkering.SMELTERY_ENTITY, SmelteryRenderer::new);
 		BlockEntityRenderers.register(Tinkering.CASTING_ENTITY, CastingRenderer::new);
 		BlockEntityRenderers.register(Tinkering.FAUCET_ENTITY, FaucetRenderer::new);
+		BlockEntityRenderers.register(com.jaymospowers.tinkering.kiln.Kiln.KILN_LOAD_ENTITY, KilnLoadRenderer::new);
 		// (0.13) what melts by recipe, data file or forged weapon, as the server worked it out
 		ClientPlayNetworking.registerGlobalReceiver(MeltingRecipes.Sync.TYPE, (payload, context) -> Melting.setExtra(payload.items()));
 		// (0.8.76) Armory weapons level up and take modifiers like tinker tools
