@@ -2063,7 +2063,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Arcane Scroll drops (`enchanting/EnchantDrops`, per-mob table in `data/jaymospowers/enchant_drops/`, Looting
   raises the chance), enchanted-book tooltips naming the gear an enchantment fits (`EnchantSlotTooltip`), and
   `core/ExplosionLog` (one log line per player-caused explosion).
-- **0.15.11, fast run, slide, wall transitions, pole climb (after ParCool's ideas):** Andy liked ParCool's "breaking
+- **0.15.11, free rein riding:** ships Jaymo's Kingdoms 0.7.110: in third person the camera turns freely and WASD turns
+  your horse toward it, like Better Mount Steering (which has no 26.3 build). Also fixes a broken swing mixin that
+  kept the game from starting.
+- **0.15.12, fast run, slide, wall transitions, pole climb (after ParCool's ideas):** Andy liked ParCool's "breaking
   into a faster sprint after time spent running, and the climbing mechanics, like wall transitions, and running".
   ParCool is LGPL and Powers is MIT, so nothing was copied: these are our own moves, folded into `freerun`.
   - **Fast run** (`freerun/FastRun`, everyone): 40 ticks of sprinting gives +30% speed (Freerunner 1: +40%,

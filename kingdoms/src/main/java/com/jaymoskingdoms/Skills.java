@@ -85,7 +85,7 @@ public final class Skills {
 	static final int XP_FREERUN = 1, XP_BLADE_LEAP = 6;
 	static final long FREERUN_XP_TICKS = 400L;
 	/**
-	 * (0.7.110) Stealth experience for mob senses ({@link Senses}): a sneak attack (at most every {@link #SNEAK_XP_TICKS}, 20 s),
+	 * (0.7.111) Stealth experience for mob senses ({@link Senses}): a sneak attack (at most every {@link #SNEAK_XP_TICKS}, 20 s),
 	 * an assassination (every one).
 	 */
 	static final int XP_SNEAK_ATTACK = 1, XP_ASSASSINATION = 3;
@@ -174,7 +174,7 @@ public final class Skills {
 		LEAP_OF_FAITH(Pillar.STEALTH, 1, 2, 8, 5, 2, FREERUNNER),
 		BAR_SWING(Pillar.STEALTH, 1, 2, 12, 6, 0, SURE_FOOTING),
 		WALL_RUNNER(Pillar.STEALTH, 2, 1, 12, 6, 2, LEAP_OF_FAITH),
-		// (0.7.110) Stealth's third page, Shadows: how far mobs see you, how fast they lose you, and what an unaware blow does (Senses)
+		// (0.7.111) Stealth's third page, Shadows: how far mobs see you, how fast they lose you, and what an unaware blow does (Senses)
 		SHADOWED(Pillar.STEALTH, 3, 1, 5, 8, 0),
 		QUIET_STEP(Pillar.STEALTH, 2, 1, 5, 8, 2),
 		SLIP_THE_NET(Pillar.STEALTH, 1, 1, 10, 9, 0, SHADOWED),
@@ -290,7 +290,7 @@ public final class Skills {
 	private static final Map<UUID, Long> NEXT_THEFT_XP = new HashMap<>();
 	/** (0.7.102) Player → game time a freerun move next gives experience. */
 	private static final Map<UUID, Long> NEXT_FREERUN_XP = new HashMap<>();
-	/** (0.7.110) Player → game time a sneak attack next gives experience. */
+	/** (0.7.111) Player → game time a sneak attack next gives experience. */
 	private static final Map<UUID, Long> NEXT_SNEAK_XP = new HashMap<>();
 
 	private Skills() {
@@ -572,7 +572,7 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_FREERUN);
 	}
 
-	/** (0.7.110) A sneak attack: a little experience, at most every {@link #SNEAK_XP_TICKS}. */
+	/** (0.7.111) A sneak attack: a little experience, at most every {@link #SNEAK_XP_TICKS}. */
 	static void sneakAttack(ServerPlayer player, long now) {
 		if (NEXT_SNEAK_XP.getOrDefault(player.getUUID(), 0L) > now) {
 			return;
@@ -581,7 +581,7 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_SNEAK_ATTACK);
 	}
 
-	/** (0.7.110) An assassination (an unaware hidden blade stab): more experience, every time. */
+	/** (0.7.111) An assassination (an unaware hidden blade stab): more experience, every time. */
 	static void assassination(ServerPlayer player) {
 		grant(player, Pillar.STEALTH, XP_ASSASSINATION);
 	}

@@ -303,7 +303,7 @@ public final class Ledge {
 		}
 
 		/**
-		 * (0.15.11) The ledge hang under the edge of the block at {@code pos} the player is standing on, the way they were
+		 * (0.15.12) The ledge hang under the edge of the block at {@code pos} the player is standing on, the way they were
 		 * walking ({@code walk}): they turn round and hang from its far edge, facing the wall. Null when the block won't do or
 		 * there's no room to hang. Used by the freerunner's sneak off an edge (Climber).
 		 */

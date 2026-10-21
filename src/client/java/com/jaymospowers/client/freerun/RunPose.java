@@ -14,7 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.15.11) The fast run and the slide as everyone sees them: a runner in a fast run ({@link FastRun#active}) leans
+ * (0.15.12) The fast run and the slide as everyone sees them: a runner in a fast run ({@link FastRun#active}) leans
  * forward from the feet; a slider ({@link Slide#sliding}) lies in the swimming pose, arms straight ahead, legs together.
  * Both come from the synced flags, so they show on every player in view.
  */

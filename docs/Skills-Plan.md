@@ -121,7 +121,7 @@ carrying or carried, crawling, meditating, on a ledge, or in a web slinger's own
 - Poses: the web's vault, cling (hand over hand, or Not Enough Animations' ladder climb), wall kick and wall run poses;
   a new arms-out balance (`BalancePose`) and a bar hang, swinging from the hands (`BarHangPose`).
 
-## Shadows: mob senses (Stealth's third page, Kingdoms 0.7.110)
+## Shadows: mob senses (Stealth's third page, Kingdoms 0.7.111)
 The ideas of Dynamic Stealth (MIT, 1.12.2), written afresh for 26.3 in `Senses` (+ `LivingEntityVisibilityMixin`,
 client `SensesClient`). Numbers are `static final` constants at the top of `Senses`. The tree screen's page button now
 cycles: Stealth -> Freerunning -> Shadows -> back (tiers 0-3, 4-7, 8-11).

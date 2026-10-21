@@ -1,7 +1,7 @@
 """Draws Jaymo's Kingdoms' item sprites (original art). Run from kingdoms/: python -I tools/gen_items.py
 
 plot_stake: a pointed wooden stake with a little red pennant tied on near the top.
-awareness_eye (0.7.110): the stealth gauge's eye, four frames.
+awareness_eye (0.7.111): the stealth gauge's eye, four frames.
 hidden_blade (0.7.101): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
 top-right, no black outlines, light from the top-left, vanilla's own iron ramp).
 dynamite (0.7.107): a fat red stick wrapped in a paper band, its fuse lit at the top right; drawn as a capsule along the
@@ -130,7 +130,7 @@ GUI = os.path.join("src", "main", "resources", "assets", "jaymoskingdoms", "text
 
 
 def awareness_eye():
-    """awareness_eye (0.7.110): the stealth gauge, a 16x64 sheet of four 16x16 eyes (original art, vanilla GUI style:
+    """awareness_eye (0.7.111): the stealth gauge, a 16x64 sheet of four 16x16 eyes (original art, vanilla GUI style:
     a dark outline, light from the top-left).
     frame 0: an empty eye, grey (a monster is noticing you; the fill is drawn over it from frame 3, bottom up)
     frame 1: half-closed, amber (a monster is searching for you)

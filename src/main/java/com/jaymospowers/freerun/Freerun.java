@@ -141,7 +141,7 @@ public final class Freerun {
 	/** Wall Runner: how long a run lasts (ticks: 1.5 and 2.5 s), by rank. */
 	public static final int[] RUN_TICKS = {30, 50};
 
-	/** (0.15.11) Vertical wall run: how high it climbs (blocks) with no Wall Runner, rank 1 and rank 2; the rise per tick at the start and the end of it. */
+	/** (0.15.12) Vertical wall run: how high it climbs (blocks) with no Wall Runner, rank 1 and rank 2; the rise per tick at the start and the end of it. */
 	public static final double[] UP_HEIGHT = {2.5, 3.0, 4.0};
 	public static final double UP_START = 0.42, UP_END = 0.12;
 	/** Vertical wall run: the wall may be this far ahead when you jump (blocks), and you must face it within this many degrees. */
@@ -352,7 +352,7 @@ public final class Freerun {
 		return kind == CLING || kind == BAR || kind == POLE;
 	}
 
-	/** (0.15.11) The moves the player stays in for a while, in the air or on a wall (they arrest a fall and are let hang without being kicked). */
+	/** (0.15.12) The moves the player stays in for a while, in the air or on a wall (they arrest a fall and are let hang without being kicked). */
 	static boolean held(int kind) {
 		return kind == CLING || kind == BAR || kind == WALL_RUN || kind == UP_RUN || kind == POLE;
 	}
@@ -763,7 +763,7 @@ public final class Freerun {
 	}
 
 	/**
-	 * (0.15.11) A cling follows its wall round a corner: when the wall it holds is gone it takes whichever other wall
+	 * (0.15.12) A cling follows its wall round a corner: when the wall it holds is gone it takes whichever other wall
 	 * is against the player (the client turns the body; the pose follows {@link #MOVE}). False when there is none.
 	 */
 	private static boolean wallOrCorner(ServerLevel level, ServerPlayer player, Doing doing, Direction side) {

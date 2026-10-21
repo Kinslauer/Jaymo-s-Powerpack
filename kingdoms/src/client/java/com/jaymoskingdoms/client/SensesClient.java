@@ -16,7 +16,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.110) The awareness gauge ({@link Senses}): a small eye above the crosshair. It fills (from the bottom) as the nearest
+ * (0.7.111) The awareness gauge ({@link Senses}): a small eye above the crosshair. It fills (from the bottom) as the nearest
  * monster that is noticing you gets close to spotting you, opens red when one has spotted you, and half-closes (amber) while
  * one searches for where you went. The server sends its state a few times a second, only when it changes; the eye fades in
  * and out here. The sheet {@code textures/gui/awareness_eye.png} (made by {@code tools/gen_items.py}) has four 16x16

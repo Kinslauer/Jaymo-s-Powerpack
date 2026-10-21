@@ -45,10 +45,10 @@ public final class FreerunClient {
 	private static final double HUG = 0.02, RUN_HUG = 0.06;
 	/** Ticks a refused (unconfirmed) held move lasts, ticks to settle under a bar, and before another move after letting go. */
 	private static final int CONFIRM_TICKS = 20, BAR_SETTLE_TICKS = 4, LET_GO_COOLDOWN = 8;
-	/** (0.15.11) Going round a corner while clinging: how far (blocks) and over how many ticks. */
+	/** (0.15.12) Going round a corner while clinging: how far (blocks) and over how many ticks. */
 	private static final double CORNER_STEP = 0.5;
 	private static final int CORNER_TICKS = 3;
-	/** (0.15.11) A wall hop flies this many ticks' worth of air drag (the sum of 0.91^n): speed = distance / this. */
+	/** (0.15.12) A wall hop flies this many ticks' worth of air drag (the sum of 0.91^n): speed = distance / this. */
 	private static final double HOP_DRAG_SUM = 6.9;
 	/** (review) Ticks a slide waits for the server's go-ahead before giving up. */
 	private static final int SLIDE_CONFIRM_TICKS = 10;
@@ -68,18 +68,18 @@ public final class FreerunClient {
 	private static int kicked, ran;
 	/** (review) Ticks of grip spent clinging since last on the ground, and how many were spent when this cling began: letting go and catching the wall again doesn't renew the grip. */
 	private static int gripped, clingBase;
-	/** (0.15.11) Wall faces run up since last on the ground; the vertical run's length in ticks. */
+	/** (0.15.12) Wall faces run up since last on the ground; the vertical run's length in ticks. */
 	private static int upRan, upMax;
-	/** (0.15.11) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
+	/** (0.15.12) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
 	private static int sneakTicks, edgeTicks, slideWait;
-	/** (0.15.11) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
+	/** (0.15.12) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
 	private static Vec3 runDir = Vec3.ZERO, slideDir = Vec3.ZERO;
 	private static double runSpeed, slideSpeed;
-	/** (0.15.11) A corner being turned while clinging: ticks left, the step per tick and the wall that follows. */
+	/** (0.15.12) A corner being turned while clinging: ticks left, the step per tick and the wall that follows. */
 	private static int cornerLeft;
 	private static Vec3 cornerStep = Vec3.ZERO;
 	private static @Nullable Direction cornerFace;
-	/** (0.15.11) A wall hop: ticks left and the wall it is flying at. */
+	/** (0.15.12) A wall hop: ticks left and the wall it is flying at. */
 	private static int hopLeft;
 	private static @Nullable Direction hopFace;
 
@@ -292,14 +292,14 @@ public final class FreerunClient {
 		if (strafeIn != 0.0) {
 			Direction toward = strafeIn > 0.0 ? face.getCounterClockWise() : face.getClockWise();
 			if (WebWallRun.wallAt(player.level(), player, toward, 0.2) && Freerun.climbable(player.level(), player, toward, REACH)) {
-				// (0.15.11) an inside corner: the wall you shimmy into takes over
+				// (0.15.12) an inside corner: the wall you shimmy into takes over
 				wall = toward;
 				snapYaw(player, toward);
 				player.setDeltaMovement(Vec3.ZERO);
 				return;
 			}
 			if (!WebWallRun.wallAt(player.level(), player, face, REACH)) {
-				// (0.15.11) an outside corner: round it, onto the wall's end face
+				// (0.15.12) an outside corner: round it, onto the wall's end face
 				Direction round = toward.getOpposite();
 				AABB moved = player.getBoundingBox().move(face.getStepX() * CORNER_STEP, 0.0, face.getStepZ() * CORNER_STEP);
 				if (player.level().noCollision(player, moved) && FreerunWalls.wallAtBox(player.level(), player, moved, round, REACH)) {
@@ -445,7 +445,7 @@ public final class FreerunClient {
 		ticks++;
 		if (face == null || !confirm(player.getAttached(Freerun.WALL) != null) || !input.forward() || input.shift() || ticks > maxTicks
 			|| player.onGround() || !WebWallRun.wallAt(player.level(), player, face, RUN_REACH)) {
-				// (0.15.11) pressing toward the wall as the run ends: Climber takes hold of it
+				// (0.15.12) pressing toward the wall as the run ends: Climber takes hold of it
 				if (face != null && !input.shift() && !player.onGround() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1
 					&& keysDirection(player, input, false).dot(new Vec3(face.getStepX(), 0.0, face.getStepZ())) > 0.5
 					&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {

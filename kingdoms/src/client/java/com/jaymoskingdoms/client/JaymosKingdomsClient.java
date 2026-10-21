@@ -76,7 +76,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		NightGiftsClient.register();
 		BloodVision.register();
 		WarriorFury.register();
-		// 0.7.110: the awareness gauge (mob senses)
+		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
 		VampireLooks.register();
 		TalkScreen.register();

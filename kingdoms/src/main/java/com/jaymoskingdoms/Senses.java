@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.110) Mob senses, the Stealth tree's answer to being seen by monsters (the ideas of Dynamic Stealth, written afresh).
+ * (0.7.111) Mob senses, the Stealth tree's answer to being seen by monsters (the ideas of Dynamic Stealth, written afresh).
  * <ul>
  * <li><b>Sight</b> ({@link #factor}, from {@code LivingEntityVisibilityMixin}): how far a hostile or neutral mob notices a
  * player is its follow range times this. Vanilla's own sight (invisibility, mob heads) and Darktide's veil are applied

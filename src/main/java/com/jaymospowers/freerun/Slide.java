@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.15.11) The slide, for everyone: in a fast run ({@link FastRun}), HOLD Sneak for {@link #HOLD_TICKS} ticks (a tap is the
+ * (0.15.12) The slide, for everyone: in a fast run ({@link FastRun}), HOLD Sneak for {@link #HOLD_TICKS} ticks (a tap is the
  * dodge's double-tap, left alone) and you drop into a crawl-height slide for {@link #TICKS} ticks, keeping your speed with
  * friction ({@code FreerunClient} moves the body; client-authoritative like the other moves). Low enough for a 1-high gap;
  * if a block is overhead when it ends, vanilla's own crawl keeps you down until there is room. The server checks the fast

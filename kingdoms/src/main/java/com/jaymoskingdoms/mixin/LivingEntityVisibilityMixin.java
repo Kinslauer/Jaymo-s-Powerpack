@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.110) Mob senses ({@link Senses#factor}): how far a hostile or neutral mob notices a player (its follow range times
+ * (0.7.111) Mob senses ({@link Senses#factor}): how far a hostile or neutral mob notices a player (its follow range times
  * this) follows the light, sneaking, standing still, where the mob looks, a hood and glowing. At the return, so vanilla's
  * invisibility and mob heads and Jaymo's Powers' Darktide veil have already had their say and this multiplies on top.
  * Every target goal asks {@code getVisibilityPercent} through {@code TargetingConditions}.

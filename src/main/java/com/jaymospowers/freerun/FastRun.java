@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.15.11) The fast run, for everyone (no perk): after {@link #DELAY} ticks of unbroken sprinting you break into a faster
+ * (0.15.12) The fast run, for everyone (no perk): after {@link #DELAY} ticks of unbroken sprinting you break into a faster
  * run, {@link #BONUS} more movement speed (an attribute modifier, so the client feels it too), a forward lean (see
  * {@code client/freerun/RunPose}) and dust at the feet. It ends on: no longer sprinting, a turn sharper than
  * {@link #TURN_DEGREES} within a few ticks, taking a hit, hunger at {@link #MIN_FOOD} or below, or entering water.
