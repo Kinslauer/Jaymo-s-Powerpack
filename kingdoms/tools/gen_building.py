@@ -224,7 +224,7 @@ def chime(name, plate, rod, recipe_key, recipe_pattern):
     blockstate(name, {"variants": {"ringing=false": {"model": NS + "block/" + name}, "ringing=true": {"model": NS + "block/" + name}}})
     item_def(name, NS + "block/" + name)
     drops_self(name)
-    recipe(name, {"type": "minecraft:crafting_shaped", "category": "decorations", "key": recipe_key, "pattern": recipe_pattern,
+    recipe(name, {"type": "minecraft:crafting_shaped", "category": "misc", "key": recipe_key, "pattern": recipe_pattern,
                   "result": {"id": NS + name, "count": 1}})
 
 
