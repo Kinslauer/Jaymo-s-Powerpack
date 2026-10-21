@@ -126,7 +126,9 @@ public final class Theft {
 		/** (0.6.9) lingering in someone's house ({@link Trespass}). */
 		TRESPASS(Weight.LIGHT, "trespass"),
 		/** (0.7.0) a vampire player seen feeding ({@link VampirePlayers}). */
-		BLOODLETTING(Weight.HEAVY, "bloodletting");
+		BLOODLETTING(Weight.HEAVY, "bloodletting"),
+		/** (0.7.121) striking one of its people ({@link Retaliation}). */
+		ASSAULT(Weight.LIGHT, "assault");
 
 		final Weight weight;
 		final String cry;
@@ -216,8 +218,9 @@ public final class Theft {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
-			if (source.getEntity() instanceof ServerPlayer player) {
-				hitBack(player, entity);
+			if (source.getEntity() instanceof ServerPlayer player && !hitBack(player, entity) && entity.level() instanceof ServerLevel level) {
+				// (0.7.121) not one of a crowd after an arsonist: they may fight back
+				Retaliation.struck(player, level, entity);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Theft::tick);
@@ -265,8 +268,11 @@ public final class Theft {
 		player.setAttached(WANTED, Map.copyOf(wanted));
 	}
 
-	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others). */
+	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others), or (0.7.121) in a brawl ({@link Retaliation}). */
 	public static boolean rioting(LivingEntity who) {
+		if (Retaliation.brawling(who)) {
+			return true;
+		}
 		for (Riot riot : RIOTS.values()) {
 			if (riot.rioters.containsKey(who.getUUID())) {
 				return true;
@@ -616,8 +622,8 @@ public final class Theft {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.riot", f.name()).withStyle(ChatFormatting.RED));
 	}
 
-	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters. */
-	private static void hitBack(ServerPlayer player, LivingEntity victim) {
+	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters (true). */
+	private static boolean hitBack(ServerPlayer player, LivingEntity victim) {
 		Riot riot = RIOTS.get(player.getUUID());
 		if (riot != null && riot.rioters.containsKey(victim.getUUID())) {
 			RIOTS.remove(player.getUUID());
@@ -631,7 +637,9 @@ public final class Theft {
 					}
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 	/** The crowds close on their arsonists and hit them. */
