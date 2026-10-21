@@ -58,6 +58,8 @@ public final class Power {
 		WINDMILL_ITEM = item("windmill", props -> new RotorItem(Rotor.WINDMILL, props), new Item.Properties().stacksTo(1));
 		WATERWHEEL_ITEM = item("waterwheel", props -> new RotorItem(Rotor.WATERWHEEL, props), new Item.Properties().stacksTo(1));
 
+		VillageWindmills.register();
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			for (Item item : List.of(SHAFT_ITEM, CORNER_ITEM, WINDMILL_ITEM, WATERWHEEL_ITEM)) {
 				output.accept(new ItemStack(item));

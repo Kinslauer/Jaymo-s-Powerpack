@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -164,9 +165,9 @@ public final class VillageWindmills {
 	 * A village piece was just placed (its part in this chunk, {@code box}): if it's a listed windmill tower, make
 	 * the windmill real. Called from world generation; touches only blocks inside {@code box}.
 	 */
-	public static void placed(Identifier id, StructureTemplate template, WorldGenLevel level, BlockPos origin, Rotation rotation, BoundingBox box) {
+	public static void placed(Identifier id, StructureTemplateManager templates, WorldGenLevel level, BlockPos origin, Rotation rotation, BoundingBox box) {
 		Windmill mill = byTemplate.get(id);
-		if (mill == null || !template.getSize().equals(mill.size())) {
+		if (mill == null || !templates.get(id).map(t -> t.getSize().equals(mill.size())).orElse(false)) {
 			return;
 		}
 		// the stone sails come down

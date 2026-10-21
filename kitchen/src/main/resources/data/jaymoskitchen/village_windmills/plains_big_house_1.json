@@ -1,5 +1,5 @@
 {
-  "_comment": "Epic Structures: Villages' plains windmill tower. Sails face north (-z); the shaft goes 2 blocks into the tower, turns down the inside of the wall and drives a mill on the floor.",
+  "_comment": "Epic Structures: Villages' plains windmill tower. Sails face north (-z); the shaft goes through the wall (z=3) to a corner just inside, then down five shafts to a mill on the tower floor (y=9), in the ring of mangrove wood round the centre post.",
   "template": "minecraft:village/plains/houses/plains_big_house_1",
   "size": [
     15,
@@ -13,12 +13,12 @@
   ],
   "sail_plane": {
     "from": [
-      1,
+      0,
       9,
       1
     ],
     "to": [
-      13,
+      14,
       23,
       1
     ]

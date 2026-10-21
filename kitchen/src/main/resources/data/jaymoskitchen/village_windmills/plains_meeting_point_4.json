@@ -1,5 +1,5 @@
 {
-  "_comment": "Epic Structures: Villages' little plains windmill. Sails face north (-z); the shaft runs level into the side of a mill in the room at the top.",
+  "_comment": "Epic Structures: Villages' little plains windmill. Sails face north (-z); the shaft runs level through the wall (z=5) into a mill in the middle of the top room, where the stone grindstone was (no corner needed). A log fills the hole in the floor under it.",
   "template": "minecraft:village/plains/houses/plains_meeting_point_4",
   "size": [
     14,
@@ -56,11 +56,6 @@
       6,
       14,
       7
-    ],
-    [
-      6,
-      14,
-      8
     ]
   ],
   "millstone_facing": "north",
@@ -76,7 +71,7 @@
       "pos": [
         6,
         13,
-        8
+        7
       ],
       "block": "minecraft:oak_log"
     }
