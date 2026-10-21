@@ -61,7 +61,7 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - The user reads the `docs/Abilities.md` table to request changes.
 
 ## Where things stand
-- **Wounds** (Powers 0.14.0-0.14.5, `core/wounds/`, plan `docs/Wounds-Plan.md`, specs `docs/Wounds-Phase2.md` to
+- **Wounds** (Powers 0.15.1, `core/wounds/`, plan `docs/Wounds-Plan.md`, specs `docs/Wounds-Phase2.md` to
   `Phase5.md`; all five phases written without a compiler, not yet built or tested on the Deck): every living thing's
   health spread over body parts, the downed state (moved from Kingdoms), broken limbs, bleeding and festering, pain,
   the medieval kit, and the client's HUD, poses and effects. Player-facing rules in `docs/Abilities.md` (Wounds).
@@ -75,7 +75,7 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
   - **Scoreboard tags shared across the mods** (Kingdoms and Kitchen never compile against Powers; they read and write
     these): `jaymospowers_downed` (on everyone downed), `jaymospowers_downable` (Kingdoms puts it on its folk),
     `jaymospowers_revive` (Kingdoms' tending gets the downed up), `jaymospowers_bandaged` (Kingdoms' tending stops the
-    bleeding), `jaymospowers_fights_on` (an undead fighting on without its body), `jaymospowers_crippled` (0.14.5: a
+    bleeding), `jaymospowers_fights_on` (an undead fighting on without its body), `jaymospowers_crippled` (a
     broken leg; not read by Kingdoms yet), `jaymospowers_freerun` (Kingdoms' Stealth experience), and Kitchen's
     corpse tags `jaymoskitchen.missing.<part>` and `jaymoskitchen.broken.<part>`.
 - **Powers 0.8.0** is built on branch `plan-0.8` (not merged to master, not packaged, not playtested): everything in

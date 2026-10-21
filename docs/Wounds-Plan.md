@@ -140,20 +140,21 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
 - **Body screen** for treatment (key: H menu tab, or right-click with medicine).
 
 ## Phases (each its own release, built and tested before the next)
+(All five phases ship together as Powers 0.15.1 and Kingdoms 0.7.104; the phase specs keep the working numbers 0.14.0-0.14.5.)
 
-1. **Core. Built in 0.14.0 (written without a compiler; not yet built or tested on the Deck).** `BodyPlan`, the `Wounds` attachment, damage routing (hits, falls, fire, explosions), overflow, natural
+1. **Core. Built in 0.15.1 (written without a compiler; not yet built or tested on the Deck).** `BodyPlan`, the `Wounds` attachment, damage routing (hits, falls, fire, explosions), overflow, natural
    healing, a debug command (`/wounds part <part> <amount>`, `/wounds show`), and the HUD silhouette. No debuffs or
    downed yet.
-2. **Downed. Built in 0.14.1 with Kingdoms 0.7.98 (written without a compiler; not yet built or tested on the Deck;
+2. **Downed. Built in 0.15.1 with Kingdoms 0.7.104 (written without a compiler; not yet built or tested on the Deck;
    spec `docs/Wounds-Phase2.md`).** Move Downed from Kingdoms into Powers, universal. Kingdoms reads the shared tag
    (tending, food revive, guards). Bleed out, give up, carry.
-3. **Cripplings. Built in 0.14.2 (written without a compiler; not yet built or tested on the Deck; spec
+3. **Cripplings. Built in 0.15.1 (written without a compiler; not yet built or tested on the Deck; spec
    `docs/Wounds-Phase3.md`).** Broken arm, leg, foot and wing debuffs. Existing cripplings rerouted. Sever on overkill (Dismember).
    Corpses show the breaks.
-4. **Medicine. Built in 0.14.4 (written without a compiler; not yet built or tested on the Deck; spec
+4. **Medicine. Built in 0.15.1 (written without a compiler; not yet built or tested on the Deck; spec
    `docs/Wounds-Phase4.md`, Kingdoms' clerics in its track B).** The medieval kit, treatment channel, body screen, poppy addiction, smelling salts, needle, cautery,
    festering, leeches, Kingdoms clerics as surgeons. Kitchen's brewing system and still (its own Kitchen release).
-5. **Polish. Built in 0.14.5 (written without a compiler; not yet built or tested on the Deck; spec
+5. **Polish. Built in 0.15.1 (written without a compiler; not yet built or tested on the Deck; spec
    `docs/Wounds-Phase5.md`: track A the client feel, track B the rules, tuning, docs and JEI).** Client effects, limps
    and hanging arms, quadruped downed pose, tuning, docs (`Abilities.md`), JEI pages. Freerunning respects breaks;
    a broken leg tags its owner `jaymospowers_crippled` for a later Kingdoms patch.

@@ -346,7 +346,7 @@ public final class Pickpocket {
 			List<LivingEntity> seen = new ArrayList<>(Theft.witnesses(level, f, player));
 			seen.remove(mark);
 			seen.addFirst(mark);
-			// (0.7.101) the mark turned and looked: close enough, a hood doesn't hide whose hand it was
+			// (0.7.102) the mark turned and looked: close enough, a hood doesn't hide whose hand it was
 			Identities.recognise(level, player, f, seen, mark);
 			Theft.commit(player, level, f, Theft.Crime.PICKPOCKET, null, false, seen);
 		} else {

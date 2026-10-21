@@ -3412,17 +3412,6 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
-- **0.7.98, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
-  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
-  lying pose now live in Jaymo's Powers 0.14.1 (`core/wounds/Downed`), for players and tamed animals too (see its
-  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
-  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
-  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
-  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
-  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
-  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
-  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
-  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
 - **0.7.100, bigger rewards for returned captives:** Andy: "villagers should reward you more for returning a captured
   prisoner". Each captive is now someone at home: one of its folk, one of its guards (20%), or kin of its ruler (10%,
   only where there's a ruler); freeing them says which. Brought home, their family pay 6-12 emeralds (guard 8-16, kin
@@ -3459,7 +3448,24 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
   `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
   pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).
-- **0.7.102, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
+- **0.7.102, Emberborn too hot to hug:** Andy: "hugging emberborn villagers and players is impossible without fire
+  resistance". Hugging an Emberborn (villager or player) without being Emberborn, fireproof or under Fire Resistance
+  burns you (3 s fire, 2 damage) and throws you back; no hug, no hearts. MCA's hug menu works both ways (an Emberborn
+  player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
+  mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
+  mood change. Numbers at the top of `EmberHugs`.
+- **0.7.104, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.15.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
+- **0.7.104, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
   side of Jaymo's Powers' Wounds phase 4 (`docs/Wounds-Phase4.md`, track B; written without a compiler, not yet built
   or tested). **Clerics are barber-surgeons:** a grown cleric also sells Powers' linen bandages (3 for 2 emeralds),
   splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds

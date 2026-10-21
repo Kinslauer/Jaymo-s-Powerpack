@@ -1818,7 +1818,49 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   shield over a 70° arc, the staff taking the wear. A wind sorcerer's right mouse is still the Staff Vault, and the Wind
   power's gust no longer tears a quarterstaff out of the hand as if it were a shield. Forged weapons are the same items,
   so they do it too.
-- **0.14.0, Wounds phase 1 (core):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings, remove our
+- **0.13.36, Web Whip on Sneak; one pair of hands in first person:** Andy: "Web swing grab attacks should be activated by
+  holding shift while two lines are attached" and "all the counters and moves should be better animated in first person.
+  Right now there are doubled hands". With both swing webs within 3 blocks of each other on one creature or on terrain,
+  Sneak starts the whip, or pries the terrain loose while held (let go early: cracks stay, the attack ends); Sneak + R
+  or G no longer does. Small catches still reel in and far-apart webs still slingshot. In first person with
+  First-person Model, the vanilla hands (and the extra carry/ledge arms) aren't drawn while a move poses your body's
+  arms, and First-person Model's hiding of an item-holding body arm is undone for the move. See docs/web.md.
+- **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
+  stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
+  (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
+  cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
+  bracers on the forearms and long coat tails split front and back, hanging from the waist to the knees) and the
+  **Peaked Hood** (a deep hood with a pointed peak over the brow, its underside in shadow, and a cowl over the
+  shoulders). Our own design, drawn by `tools/gen_costume.py`; `tools/costume_preview.py` draws it on a player, front,
+  side and back, in white/red and black/grey (`art-overhaul/assassin/`). A hood (the plain one or the peaked one) that
+  is up leaves the face and the real name showing, but someone else's name tag is only drawn within 8 blocks
+  (`CostumeClient.HOOD_NAME_RANGE`), and the wearer carries the entity tag `jaymospowers_hooded:<key>` (the same
+  identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
+  costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
+  bracers, mantle and cowl's growth).
+- **0.14.3, freerunning (Kingdoms 0.7.101's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
+  (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
+  Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
+  synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
+  3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
+  jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
+  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
+  slower there, Andy's call), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
+  (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
+  (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
+  hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags
+  the player `jaymospowers_freerun` for Kingdoms' Stealth experience. Web slingers keep their own parkour: the two
+  stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
+  wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
+  Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
+- **0.14.5, Smoke's particles are geyser steam:** Andy: regular and ascended smoke should use "the geyser particle
+  effect" (potent sulfur over lava), "far thicker", the gas staying for both and corrupted smoke keeping its particles;
+  then "just use the particles and not their specific properties". New `jaymospowers:smoke_steam`
+  (`SmokeParticles.STEAM`, client `SmokeSteam`): vanilla's `geyser_poof` sprites, moving like smoke (keeps its
+  velocity, slows and rises a little), smoky grey and translucent. It replaces the campfire smoke of Smoke Jet, Vapour
+  Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb; Vapour Form's start throws a column of it
+  up. Corrupted (not ascended) users keep the old particles. See docs/smoke.md.
+- **0.15.1, Wounds phase 1 (core):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings, remove our
   downed system for a universal one written like this https://modrinth.com/mod/first-aid-new". The first of five phases
   (`docs/Wounds-Plan.md`); no debuffs and no downed state yet, and Kingdoms' `Downed` is untouched. Written without a
   compiler: build it before anything else.
@@ -1842,7 +1884,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     cancelled the vital part gets `MIN_VITAL_AFTER_SAVE` (0.1) back.
   - **`/wounds show|part <part> <health> [target]|heal [target]`** (gamemasters), and a body silhouette bottom-right
     (`client/wounds/WoundsHud`: parts coloured by fraction, white flash for 8 ticks on a loss, fades 3 s after all whole).
-- **0.14.1, Wounds phase 2 (downed, for everyone):** Andy (2026-10-19): "remove our downed system for a universal one".
+- **0.15.1, Wounds phase 2 (downed, for everyone):** Andy (2026-10-19): "remove our downed system for a universal one".
   Kingdoms' downed guards (its 0.7.73-0.7.93) move here as `core/wounds/Downed` (spec `docs/Wounds-Phase2.md`; numbers
   at its top). Written without a compiler: build it before anything else.
   - **Who goes down** instead of dying: players (not creative or spectator), villagers, anything Kingdoms marks with the
@@ -1873,7 +1915,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     `Wounds.UNDEAD_FIGHT_ON` (60%) it fights on (tag `jaymospowers_fights_on`); then only its head kills it.
   - **Pose** (`client/wounds/DownedPose`, from Kingdoms): people lie on their backs or crawl face down as before; any
     other body (a wolf, a horse) lies on its side. Downed players keep `Crawl`'s pose.
-- **0.14.2, Wounds phase 3 (cripplings):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings".
+- **0.15.1, Wounds phase 3 (cripplings):** Andy (2026-10-19): "I NEED this worked in with our corpses and cripplings".
   Broken limbs, sever on overkill, and the old cripplings rerouted into Wounds (spec `docs/Wounds-Phase3.md`; numbers at
   the top of `core/wounds/Breaks` and `Dismember`). Written without a compiler: build it before anything else.
   - **Broken parts** (`core/wounds/Breaks`): a limb a routed hit takes to zero is broken (arm, leg), sprained (foot) or
@@ -1911,42 +1953,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     the struck leg by `DarktideStatus.LEG_WOUND` (half of it) through `Wounds.hurtPart` instead of the 5 s crawl, so two
     strikes break it; Pounce's three stabs count a broken leg as crippled. The timed crawl stays for bodies Wounds
     doesn't part. The Great Ape's leg-crippling (a timed knock-down of a transformation) and trips and stuns stay as they were.
-- **0.13.36, Web Whip on Sneak; one pair of hands in first person:** Andy: "Web swing grab attacks should be activated by
-  holding shift while two lines are attached" and "all the counters and moves should be better animated in first person.
-  Right now there are doubled hands". With both swing webs within 3 blocks of each other on one creature or on terrain,
-  Sneak starts the whip, or pries the terrain loose while held (let go early: cracks stay, the attack ends); Sneak + R
-  or G no longer does. Small catches still reel in and far-apart webs still slingshot. In first person with
-  First-person Model, the vanilla hands (and the extra carry/ledge arms) aren't drawn while a move poses your body's
-  arms, and First-person Model's hiding of an item-holding body arm is undone for the move. See docs/web.md.
-- **0.14.3, hoods hide you at a distance, and the assassin's robe:** Andy: "id like any hooded costumes to add to
-  stealth, while not completely concealing identity like it does now. This outfit is a good base for the assassins"
-  (a white and red hooded robe). Two new pieces at the Costume Table, anyone's (no power set): the **Assassin's Robe**
-  cut (a fitted robe crossed at the chest, a secondary-colour sash and buckle, a layered shoulder mantle, leather
-  bracers on the forearms and long coat tails split front and back, hanging from the waist to the knees) and the
-  **Peaked Hood** (a deep hood with a pointed peak over the brow, its underside in shadow, and a cowl over the
-  shoulders). Our own design, drawn by `tools/gen_costume.py`; `tools/costume_preview.py` draws it on a player, front,
-  side and back, in white/red and black/grey (`art-overhaul/assassin/`). A hood (the plain one or the peaked one) that
-  is up leaves the face and the real name showing, but someone else's name tag is only drawn within 8 blocks
-  (`CostumeClient.HOOD_NAME_RANGE`), and the wearer carries the entity tag `jaymospowers_hooded:<key>` (the same
-  identity key the masked tag uses; `SecretIdentity.HOODED`, `Costume.hooded`) for Kingdoms' stealth to read. The
-  costume's tooltip says so. Numbers at the top of `CostumeModels` (tails 11 px from 9 below the shoulders, the brim,
-  bracers, mantle and cowl's growth).
-- **0.14.3, freerunning (Kingdoms 0.7.101's Stealth page 2):** Andy picked "Full freerunning". The moves are ours
-  (`freerun/Freerun`, client `client/freerun/FreerunClient`, numbers at the top of `Freerun`); the perks are
-  Kingdoms', read by reflection on `Skills.rank(Player, String)` like Meditate (nobody has them without Kingdoms) and
-  synced to every client (`Freerun.PERKS`) for the poses. Climber (cling to tall walls, climb 0.05/0.07/0.09, grip
-  3/6/10 s then slip; the ledge grab takes over at the top, `LedgeClient.catchFromClimb`), Freerunner (a sprinting
-  jump vaults anything up to 1.5 high at full speed; rank 2, a wall kick, up 0.5 out 0.45, once per wall per airtime),
-  Sure Footing (narrow tops at full speed, 75% less knockback, arms out; without it, with Kingdoms, no sprint and 30%
-  slower there, Andy's call), Leap of Faith (no fall damage into hay, water or leaves; a head-first dive looking down), Bar Swing
-  (catch a fence, bar or chain over your head and hang, swinging; Jump flies off forward 0.9, up 0.5) and Wall Runner
-  (1.5/2.5 s along a wall, kick off with Freerunner 2). Every move is checked on the server (rank and geometry), costs
-  hunger and keeps your speed; a cling, hang or wall run stops a fall counting, a vault or kick doesn't. Each move tags
-  the player `jaymospowers_freerun` for Kingdoms' Stealth experience. Web slingers keep their own parkour: the two
-  stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
-  wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
-  Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
-- **0.14.4, Wounds phase 4 (medieval medicine):** bleeding, festering, pain and the medieval kit (spec
+- **0.15.1, Wounds phase 4 (medieval medicine):** bleeding, festering, pain and the medieval kit (spec
   `docs/Wounds-Phase4.md`, track A; Kingdoms' clerics are track B). Numbers at the top of `core/wounds/Bleeding`,
   `Treatment` and `Pain`. Written without a compiler: build it before anything else.
   - **Bleeding** (`core/wounds/Bleeding`): a blade, a projectile or a zombie's claws dealing `BLEED_FROM` (2) or more to
@@ -1976,7 +1983,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     the shakes (`client/wounds/MedicineHud`).
   - **Downed:** a knocked-out body (`Downed.knockOut`) comes round on its own; `Downed.rouse` and `wake` for the salts
     and the poppy.
-- **0.14.5, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
+- **0.15.1, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
   `docs/Wounds-Phase5.md`; track A the client feel, track B the rules, tuning, docs and JEI). Written without a
   compiler: build it before anything else.
   - **A limp** (`client/Dismembered`, `GAIT_*`): a broken leg drags or swings short, the good leg's steps shorten
