@@ -48,7 +48,7 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - **Attachments** must be class-loaded at init on both sides or dedicated servers break ("Client does not support the
   syncable attachments"): every class holding an `AttachmentType` is listed in `JaymosPowers.registerAttachments()`.
 - Poses go through `WebModelFeatureRendererMixin.prepareModel` (after `setupAnim`) and render-state extraction via
-  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`). (0.15.40) Ease
+  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`). (0.15.42) Ease
   a pose in and out with `client/PoseBlend` (a `Channel` per pose, a `Frame` of offsets from vanilla, `Track.apply`).
 - Never write Java with PowerShell `Set-Content` (it adds a BOM). Edits were done with small Python scripts
   asserting each replaced snippet occurs exactly once.

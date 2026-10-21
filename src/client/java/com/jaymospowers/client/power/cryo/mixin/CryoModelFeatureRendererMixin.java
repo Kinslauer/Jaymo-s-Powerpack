@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.40) Right after a model animates: a Cryokinesis user's pose for the move they're making (see CryoPose). */
+/** (0.15.42) Right after a model animates: a Cryokinesis user's pose for the move they're making (see CryoPose). */
 @Mixin(ModelFeatureRenderer.class)
 abstract class CryoModelFeatureRendererMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;setupAnim(Ljava/lang/Object;)V",

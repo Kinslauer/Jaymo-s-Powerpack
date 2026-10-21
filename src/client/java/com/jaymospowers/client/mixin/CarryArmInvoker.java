@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
  * Draws one bare first-person arm (for the carrying hold, see CarryFirstPersonMixin, and the moves' arms, see
- * PowerArmsFirstPersonMixin); and (0.15.40) one hand again at another equip height (PowerArmsFirstPersonMixin).
+ * PowerArmsFirstPersonMixin); and (0.15.42) one hand again at another equip height (PowerArmsFirstPersonMixin).
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 interface CarryArmInvoker {

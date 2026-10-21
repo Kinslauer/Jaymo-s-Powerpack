@@ -12,7 +12,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.40) Shared easing for our procedural body poses, so nothing snaps on or off. Each pose owns a {@link Channel}; each
+ * (0.15.42) Shared easing for our procedural body poses, so nothing snaps on or off. Each pose owns a {@link Channel}; each
  * entity drawn with it gets a {@link Track} (by entity id) holding:
  * <ul>
  * <li>a <b>weight</b> (0-1) on a slightly underdamped spring: it eases the pose in and out and settles with a small

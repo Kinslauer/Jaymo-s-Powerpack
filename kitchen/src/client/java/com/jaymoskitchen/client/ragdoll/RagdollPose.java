@@ -181,7 +181,7 @@ public final class RagdollPose {
 			// the torso is the whole model's turn: its own animation (crouching, breathing) is undone
 			ModelPart body = root.getChild("body");
 			if (shape == RagdollRig.Shape.HUMANOID) {
-				// (0.5.9) back to rest, pivots too: Powers' eased poses bend at the hips and shift the upper body
+				// (0.5.10) back to rest, pivots too: Powers' eased poses bend at the hips and shift the upper body
 				body.resetPose();
 			}
 		}

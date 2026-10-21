@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * A gravity user holding something with Lift reaches out for it: the main arm points straight at the held creature's
  * head (raised high for a choke). A slam throws the arm up overhead as the creature is hauled up, then brings it down
- * hard as it plummets. Everyone's, from the synced grip and slam pose. (0.15.40) The grip's reach eases in and out and
+ * hard as it plummets. Everyone's, from the synced grip and slam pose. (0.15.42) The grip's reach eases in and out and
  * follows its target on springs ({@link PoseBlend}), with the body behind it: the chest turned toward it, leaning into
  * the hold, the free arm out for balance and the feet set.
  */

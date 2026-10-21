@@ -95,5 +95,5 @@ No mixins.
 
 ## Left for later
 - Fates (the plan's open question 3): no corruption or ascension yet; the Blizzard comes with mastery instead.
-- No `docs/Abilities.md` rows yet. (Body poses for every move came in 0.15.40: `CryoPose`, from `CryoMoves`.)
+- No `docs/Abilities.md` rows yet. (Body poses for every move came in 0.15.42: `CryoPose`, from `CryoMoves`.)
 - Other players walking on the land lane don't skate (only the slider does); it's a look.

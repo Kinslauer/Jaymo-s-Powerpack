@@ -18,7 +18,7 @@ import net.minecraft.world.entity.Entity;
  * Chrono Punch's quick jabs and its Time Flow barrage. Everything is set outright from the blow's progress, so applying it twice
  * changes nothing.
  * <p>
- * (0.15.40) The plain blows (jab, quick jab, hook, uppercut, lunge, the barrage's punches) are whole-body now: each coils
+ * (0.15.42) The plain blows (jab, quick jab, hook, uppercut, lunge, the barrage's punches) are whole-body now: each coils
  * first (the fist drawn back, the body turned away), then the hips and shoulders turn through it with a step in, and it
  * recovers into a guard. Every blow, these and the rest, is laid on through {@link PoseBlend}: eased in and out, on springs
  * that carry the fist a little past the strike, the guard held a moment between blows.
@@ -204,7 +204,7 @@ public final class ChronoFlowPose {
 		ModelPart frontLeg = side > 0 ? h.leftLeg : h.rightLeg;
 		ModelPart backLeg = side > 0 ? h.rightLeg : h.leftLeg;
 		switch (pose.move().style()) {
-			// (0.15.40) the jab, quick jab, hook, uppercut, lunge and barrage are blow()'s now
+			// (0.15.42) the jab, quick jab, hook, uppercut, lunge and barrage are blow()'s now
 			case ChronoFlow.SPIN -> {
 				// (0.11.40) the Space counter: a spinning kick, the leg swung out level, arms flung wide for the turn
 				float out = seg(p, 0.0F, 0.25F) * (1.0F - seg(p, 0.75F, 1.0F));

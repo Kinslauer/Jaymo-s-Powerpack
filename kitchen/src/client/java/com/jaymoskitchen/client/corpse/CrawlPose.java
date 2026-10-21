@@ -15,7 +15,7 @@ import net.minecraft.util.Mth;
  * haul themselves along on their arms and look up at what they're after; four-legged animals sink their hindquarters and drag their back legs.
  * The amount (0 standing to 1 down) is set on the render state by {@code LivingEntityRendererMixin}.
  * <p>
- * (0.5.9) The humanoid's crawl is an army crawl, as Jaymo's Powers draws a downed player's: each arm sweeps ahead along
+ * (0.5.10) The humanoid's crawl is an army crawl, as Jaymo's Powers draws a downed player's: each arm sweeps ahead along
  * the ground, lifted coming forward, and pulls back out to the side planted while the other comes forward; the opposite
  * knee drives up the side; the body rocks onto the driving side; the head lifts to look ahead on each pull.
  */

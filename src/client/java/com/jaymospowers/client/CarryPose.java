@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * blocks (world-sized, whatever the body's scale) in the body's frame before the model is drawn (+X its right, +Y up,
  * -Z its front).
  * <p>
- * (0.15.40) The carrier's side moves with the weight ({@link PoseBlend}): they bend at the hips and knees to pick it up,
+ * (0.15.42) The carrier's side moves with the weight ({@link PoseBlend}): they bend at the hips and knees to pick it up,
  * lift with the legs, and carry it with a heavier, rolling walk, the body swaying and the arms giving a little on each
  * step; setting it down bends them the same way, and the hold eases in and out.
  */
@@ -77,7 +77,7 @@ public final class CarryPose {
 	static final float BLOCK_ARMS = -1.1F;
 	/** Holding a severed part: the right arm a little forward (radians), out from the side. */
 	static final float PART_ARM = -0.5F, PART_ARM_OUT = 0.12F;
-	/** (0.15.40) Picking up: reaching down (seconds), then lifting until; setting down takes this long before the hold eases out. */
+	/** (0.15.42) Picking up: reaching down (seconds), then lifting until; setting down takes this long before the hold eases out. */
 	static final float PICKUP_REACH = 0.25F, PICKUP_TIME = 0.6F, SET_DOWN_TIME = 0.4F;
 	/** The bend to pick up or set down: at the hips (radians), lowered (model pixels), knees, arms reaching down, head. */
 	static final float BEND_PITCH = 0.75F, BEND_DROP = 2.6F, BEND_KNEES = -0.35F, BEND_ARMS = -1.05F, BEND_ARMS_OUT = 0.12F,
@@ -355,7 +355,7 @@ public final class CarryPose {
 	}
 
 	/**
-	 * (0.15.40) The carrier, eased: the bend to pick it up and the lift, the hold's arms over a weighted walk, the bend to set
+	 * (0.15.42) The carrier, eased: the bend to pick it up and the lift, the hold's arms over a weighted walk, the bend to set
 	 * it down (the last hold is kept on the track for that), all laid on by the hold's weight.
 	 */
 	private static void carrier(HumanoidModel<?> h, LivingEntityRenderState living, @Nullable Holding holding) {
@@ -416,7 +416,7 @@ public final class CarryPose {
 		track.apply(h, f);
 	}
 
-	/** (0.15.40) Whether a hold is picked up off the ground (and set down there): not a part in the hand, nor Gravity's lift. */
+	/** (0.15.42) Whether a hold is picked up off the ground (and set down there): not a part in the hand, nor Gravity's lift. */
 	private static boolean bends(int hold) {
 		return hold != Carry.PART && hold != Carry.OVERHEAD;
 	}

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.15.40) First person, each hand: the big moves pose your own bare arm (FirstPersonArms: Kindle, Time Flow, Lift,
+ * (0.15.42) First person, each hand: the big moves pose your own bare arm (FirstPersonArms: Kindle, Time Flow, Lift,
  * Cryokinesis), only where the hand is empty; and while the carry arms come in or go (CarryFirstPersonMixin), what the
  * hands hold sinks out of view or rises back the way vanilla's own equip does (the hand drawn again at that height).
  */

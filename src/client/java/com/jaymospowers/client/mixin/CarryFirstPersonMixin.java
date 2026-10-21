@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Carrying, in first person: your hands are full. The bare arms take the hold instead of whatever's in them. (0.15.40)
+ * Carrying, in first person: your hands are full. The bare arms take the hold instead of whatever's in them. (0.15.42)
  * They rise in under the load as what the hands held sinks away (PowerArmsFirstPersonMixin), bob with your steps, and
  * sink out again as it comes back when you let go (FirstPersonArms).
  */

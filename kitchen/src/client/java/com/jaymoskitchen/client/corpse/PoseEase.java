@@ -5,7 +5,7 @@ import java.util.Map;
 import net.minecraft.util.Mth;
 
 /**
- * (0.5.9) A pose eased in and out per entity, so it doesn't snap on or off: a weight (0-1) on a slightly underdamped
+ * (0.5.10) A pose eased in and out per entity, so it doesn't snap on or off: a weight (0-1) on a slightly underdamped
  * spring, stepped by real time (the same at any frame rate; stepped twice in a frame, it moves by nothing the second time).
  * Kitchen's own (it doesn't build against Jaymo's Powers, which has a fuller one). Render thread only; an entity's
  * entry goes when it has eased out, or when it hasn't been drawn for {@link #FORGET_NANOS}.

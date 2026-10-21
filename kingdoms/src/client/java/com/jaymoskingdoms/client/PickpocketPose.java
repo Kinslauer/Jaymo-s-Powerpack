@@ -23,7 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
  * goes forward and down into it, the fingers working, the other arm drawn in. Laid over the player's model right after
  * it's posed, like {@link PullerPose}.
  * <p>
- * (0.7.131) Eased: the hand goes in on a soft spring (a little high first, then slipping down into the pocket), the body
+ * (0.7.133) Eased: the hand goes in on a soft spring (a little high first, then slipping down into the pocket), the body
  * leaning in and the head bowed to watch it, and comes back out the same way when it's done.
  */
 public final class PickpocketPose {

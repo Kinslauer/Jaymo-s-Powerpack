@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.40) The big moves in your own view: vanilla's first-person bare arm, posed. Driven from the same state the
+ * (0.15.42) The big moves in your own view: vanilla's first-person bare arm, posed. Driven from the same state the
  * third-person poses read (the render state's keys, the synced attachments) and eased the same way ({@link PoseBlend}
  * weights), so first and third person agree. Drawn from {@code PowerArmsFirstPersonMixin} (each hand, before vanilla's
  * {@code renderPlayerArm}) and {@code CarryFirstPersonMixin}.
