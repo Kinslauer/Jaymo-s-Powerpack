@@ -80,7 +80,7 @@ public final class EmberKindle {
 	static final float COLD = 0.2F;
 	/** Damage to what it catches every {@link #HIT_EVERY} ticks, and white-hot; how long they burn (seconds). */
 	static final float DAMAGE = 1.0F, WHITE_DAMAGE = 2.0F;
-	/** (0.15.29) Ember's fire damage in summer, as a factor, where there are seasons (Kitchen's); winter chills ({@link #chilled}). */
+	/** (0.15.30) Ember's fire damage in summer, as a factor, where there are seasons (Kitchen's); winter chills ({@link #chilled}). */
 	static final float SUMMER_HEAT = 1.2F;
 	static final int HIT_EVERY = 10, BURN_SECONDS = 3, WHITE_BURN_SECONDS = 5;
 	/** How often (ticks) it lights or melts the block it plays on. */
@@ -181,7 +181,7 @@ public final class EmberKindle {
 			|| Seasons.is(player, Seasons.Season.WINTER);
 	}
 
-	/** (0.15.29) Ember's fire damage from {@code owner}: {@link #SUMMER_HEAT} times as much in summer, where there are seasons. */
+	/** (0.15.30) Ember's fire damage from {@code owner}: {@link #SUMMER_HEAT} times as much in summer, where there are seasons. */
 	static float seasonal(@org.jspecify.annotations.Nullable Entity owner, float damage) {
 		return Seasons.is(owner, Seasons.Season.SUMMER) ? damage * SUMMER_HEAT : damage;
 	}

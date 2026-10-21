@@ -20,7 +20,7 @@ abstract class HiddenBladeAvatarRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymoskingdoms$bladeState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
-		HiddenBladeClient.extract(entity, state);
+		HiddenBladeClient.extract(entity, state, partialTicks);
 	}
 
 	@Inject(method = "renderHand", at = @At("TAIL"))

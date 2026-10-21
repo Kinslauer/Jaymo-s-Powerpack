@@ -21,7 +21,7 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
-	/** (0.7.122) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
+	/** (0.7.123) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
 	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
 
 	static {
@@ -92,19 +92,19 @@ final class KitchenCompat {
 	}
 
 	/**
-	 * (0.7.122) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
+	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.6.
 	 */
 	static @Nullable String season(net.minecraft.world.level.Level level) {
 		return invoke(SEASON_NAME, level) instanceof String name ? name : null;
 	}
 
-	/** (0.7.122) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
+	/** (0.7.123) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
 	static int dayOfYear(net.minecraft.world.level.Level level) {
 		return invoke(DAY_OF_YEAR, level) instanceof Integer day ? day : -1;
 	}
 
-	/** (0.7.122) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
+	/** (0.7.123) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
 	static boolean temperate(float baseTemperature) {
 		return Boolean.TRUE.equals(invoke(TEMPERATE, baseTemperature));
 	}
@@ -135,7 +135,7 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
 		}
-		// (0.7.122) winter's cold doesn't touch a Frostborn
+		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
 				Class.forName("com.jaymoskitchen.season.WinterCold").getMethod("setColdProof", java.util.function.Predicate.class)

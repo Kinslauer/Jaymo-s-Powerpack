@@ -11,7 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 
 /**
- * (0.15.29) Every power user carries a little of the season about them where there are seasons ({@link Seasons}):
+ * (0.15.30) Every power user carries a little of the season about them where there are seasons ({@link Seasons}):
  * petals in spring, fireflies on summer nights, turning leaves in autumn, snowflakes in winter, now and then. A Wind
  * user whirls it: a ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard).
  * Drawn on each client, no packets.

@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.29) Jaymo's Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}), read by reflection so Powers still
+ * (0.15.30) Jaymo's Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}), read by reflection so Powers still
  * builds and runs against a Kitchen without them (before 0.5.6 there are no seasons). Seasons are felt only in temperate
  * lands (plains, forests, swamps): {@link #at} is null anywhere else. Both sides (Kitchen syncs its calendar).
  * <p>

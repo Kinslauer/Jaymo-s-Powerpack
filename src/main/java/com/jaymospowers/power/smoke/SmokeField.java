@@ -86,7 +86,7 @@ public final class SmokeField {
 	static final int PUFF_REACH = 2400;
 	/** Share of a block's smoke that climbs into the block above each step. */
 	static final float RISE = 0.2F;
-	/** (0.15.29) In winter (Kitchen's seasons): the share of its fading smoke keeps (slower), and of its rising. */
+	/** (0.15.30) In winter (Kitchen's seasons): the share of its fading smoke keeps (slower), and of its rising. */
 	static final float WINTER_LINGER = 0.6F, WINTER_RISE = 0.5F;
 	/** Share of the difference that flows to a thinner neighbour beside it, and below it, each step. */
 	static final float SPREAD = 0.1F;
@@ -556,7 +556,7 @@ public final class SmokeField {
 		Direction downwindX = windX >= 0 ? Direction.EAST : Direction.WEST;
 		Direction downwindZ = windZ >= 0 ? Direction.SOUTH : Direction.NORTH;
 		float decayScale = field.crowded ? 3.0F : 1.0F;
-		// (0.15.29) in winter (Kitchen's seasons) smoke hangs low in the cold air and lingers
+		// (0.15.30) in winter (Kitchen's seasons) smoke hangs low in the cold air and lingers
 		boolean winter = com.jaymospowers.core.Seasons.of(level) == com.jaymospowers.core.Seasons.Season.WINTER;
 		if (winter) {
 			decayScale *= WINTER_LINGER;
