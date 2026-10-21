@@ -3958,3 +3958,12 @@ back to normal when retracted. and only move when the player does."
 - Spawn eggs; ops: `/kingdom dragon [notus|boreas|zephyrus] [tame]` summons a wild one (Notus unless named), or a
   tamed, saddled one.
 - Not yet seen in game: written without a compiler, so the first build may need fixes.
+
+## 0.7.140: the Stormborn is earned (pack 0.15.54)
+
+- Andy: "Stormborn should be unlocked as a heritage when wind users corrupt their power." Stormborn is now an earned
+  heritage like the Endborn: hidden as "???" at character creation with a hint, and woken (with its Blood Rite) once
+  the player's Jaymo's Powers Wind is corrupted (Stormbound), checked with the other unlocks every 5 s
+  (`PowersCompat.corrupted`, by reflection on Powers' `Fate.isCorrupted`). Anyone already Stormborn keeps it; villagers
+  are born Stormborn as before.
+- Compile-checked against the 26.3 jars; not yet run in game.

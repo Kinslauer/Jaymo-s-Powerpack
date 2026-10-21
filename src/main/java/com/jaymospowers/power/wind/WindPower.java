@@ -138,6 +138,7 @@ public final class WindPower implements Power {
 			}
 			WindStorm.forget(handler.player);
 			WindWeather.forget(handler.player);
+			WindFall.forget(handler.player);
 		});
 	}
 
@@ -605,7 +606,8 @@ public final class WindPower implements Power {
 			return;
 		}
 		State s = this.state(player);
-		if (next.flying() && !WindFlight.canFly(player)) {
+		// (0.15.54) lying limp, only a Wind user who has mastered enough gets back into the air (see WindFall)
+		if (next.flying() && (!WindFlight.canFly(player) || !s.flight.flying() && !WindFall.canTakeOff(player))) {
 			this.setFlight(player, s, WindFlight.NONE, false);
 			this.sendStatus(player, s, 0.0F, true);
 			return;

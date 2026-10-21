@@ -96,7 +96,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
- * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). Earning one ({@link #UNLOCKED}) gives a Blood Rite
+ * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.140) The Stormborn is earned too: it wakes in a
+ * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). Earning one ({@link #UNLOCKED}) gives a Blood Rite
  * ({@link #RITE_ITEM}): read, it opens the heritage screen to change your blood to one you've earned.
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
@@ -231,7 +232,7 @@ public final class Heritage {
 		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS),
 		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
 		EARTHLING(0, Items.BOOK, Stats.Stat.WITS, Stats.Stat.ENDURANCE),
-		STORMBORN(0, Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.AGILITY, Stats.Stat.FINESSE),
+		STORMBORN(true, 0, Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.AGILITY, Stats.Stat.FINESSE),
 		DAWNBORN(0, Items.SUNFLOWER, Stats.Stat.MIGHT, Stats.Stat.GRIT),
 		ENDBORN(true, 0, Items.ENDER_PEARL, Stats.Stat.WITS, Stats.Stat.FINESSE),
 		DRAGONBLOOD(true, 0, Items.DRAGON_BREATH, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
@@ -945,6 +946,10 @@ public final class Heritage {
 				unlock(player, Kind.ENDBORN);
 				unlock(player, Kind.DRAGONBLOOD);
 			}
+		}
+		// (0.7.140) a wind the storm has taken (Jaymo's Powers' Stormbound) wakes the Stormborn
+		if (!unlocked(player, Kind.STORMBORN) && "wind".equals(PowersCompat.power(player)) && PowersCompat.corrupted(player)) {
+			unlock(player, Kind.STORMBORN);
 		}
 		var near = player.getBoundingBox().inflate(UNLOCK_NEAR_RANGE);
 		if (!unlocked(player, Kind.DEEPBORN)) {
