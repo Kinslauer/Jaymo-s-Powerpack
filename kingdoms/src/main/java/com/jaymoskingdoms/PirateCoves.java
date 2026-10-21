@@ -62,6 +62,8 @@ final class PirateCoves {
 	static final int POLE = 7;
 	/** A new cove: deckhands ashore, and the hoard it starts with. */
 	static final int START_HANDS = 3, MAX_HANDS = 6, DAYS_PER_HAND = 2;
+	/** (0.7.103) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
+	static final int BOMBARDIERS = 1, MAX_BOMBARDIERS = 2, DAYS_TO_SECOND_BOMBARDIER = 4;
 	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
 	/** What it takes in each day (smuggling, wrecking). */
 	static final int DAY_GOLD = 2, DAY_EMERALDS = 1, DAY_GUNPOWDER = 2, DAY_FISH = 4;
@@ -202,6 +204,9 @@ final class PirateCoves {
 		Camps.takeSides(server, id, KIND);
 		for (int i = 0; i < START_HANDS; i++) {
 			spawn(level, id, Pirates.DECKHAND, spot(level, fire, random), fire, RADIUS);
+		}
+		for (int i = 0; i < BOMBARDIERS; i++) {
+			bombardier(level, Factions.get(server, id), spot(level, fire, random), fire);
 		}
 		if (launch(level, Factions.get(server, id)) == null) {
 			// (no room to put her out yet: her captain waits ashore, and she's built when there's room)
@@ -475,6 +480,27 @@ final class PirateCoves {
 		if (hands < cap) {
 			spawn(level, camp.id(), Pirates.DECKHAND, spot(level, data.center(), level.getRandom()), data.center(), RADIUS);
 		}
+		int bombers = data.grown() >= DAYS_TO_SECOND_BOMBARDIER ? MAX_BOMBARDIERS : BOMBARDIERS;
+		BlockPos center = data.center();
+		int around = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(center).inflate(RADIUS * 4),
+			f -> f.isAlive() && f.factionId() == camp.id() && f.role() == Pirates.BOMBARDIER).size();
+		if (around < bombers) {
+			bombardier(level, camp, spot(level, center, level.getRandom()), center);
+		}
+	}
+
+	/** (0.7.103) A bombardier ashore at the cove: off its roster, as its gunners are (so no vacancy is kept for him). */
+	private static void bombardier(ServerLevel level, @Nullable Faction camp, BlockPos at, BlockPos home) {
+		if (camp == null) {
+			return;
+		}
+		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
+		if (folk == null) {
+			return;
+		}
+		folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		folk.setup(Pirates.BOMBARDIER, camp, home, RADIUS);
+		level.addFreshEntity(folk);
 	}
 
 	/** {@code days}' growth: what the cove takes in (smuggling, wrecking, fishing). */

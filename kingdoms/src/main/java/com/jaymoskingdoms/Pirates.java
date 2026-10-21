@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.sailing.Ship;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.component.DataComponents;
@@ -12,11 +13,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -26,6 +30,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -43,6 +48,8 @@ import net.minecraft.world.phys.Vec3;
 public final class Pirates {
 	/** The roles (folk ids; clear of the realms', the camps' 20-24, goblins' 30-32, casters' 40-42, orcs' 50-53, assassins' 60). */
 	public static final int CAPTAIN = 70, GUNNER = 71, DECKHAND = 72, POWDER_MONKEY = 73, SHIPWRIGHT = 74, SEA_CAPTAIN = 75;
+	/** (0.7.103) A bombardier: lobs lit {@link Dynamite} over walls and heads, and backs off from a foe who closes. */
+	public static final int BOMBARDIER = 76;
 	/** A captain: health, blows, pace, how hard he is to shove. */
 	static final double CAPTAIN_HEALTH = 160.0, CAPTAIN_DAMAGE = 8.0, CAPTAIN_SPEED = 0.3, CAPTAIN_KNOCKBACK_RESIST = 0.6;
 	/** A gunner's, a deckhand's and a powder monkey's health and blows; a sea captain's. */
@@ -56,6 +63,14 @@ public final class Pirates {
 	static final double PISTOL_NEAREST = 3.0, PISTOL_FURTHEST = 22.0;
 	static final int PISTOL_RELOAD = 90, PISTOL_JITTER = 50;
 	static final float PISTOL_DAMAGE = 6.0F, PISTOL_SPEED = 3.2F, PISTOL_SPREAD = 4.0F;
+	/** A bombardier's health and blows (his cutlass, when a foe gets close). */
+	static final double BOMBARDIER_HEALTH = 24.0, BOMBARDIER_DAMAGE = 3.5;
+	/** He lobs from this far to this far (closer, he draws his cutlass), and backs off from a foe nearer than {@link #BOMB_BACK_OFF}. */
+	static final double BOMB_NEAREST = 3.5, BOMB_FURTHEST = 20.0, BOMB_BACK_OFF = 7.0;
+	/** Between throws (ticks, plus up to the jitter); the stick's flight (ticks) at the least and the most. */
+	static final int BOMB_RELOAD = 70, BOMB_JITTER = 40, BOMB_FLIGHT_MIN = 14, BOMB_FLIGHT_MAX = 30;
+	/** How wide of his mark a throw lands at its furthest (blocks). */
+	static final double BOMB_STRAY = 1.5;
 	/** While fighting, a pirate shouts about once in this many ticks. */
 	static final int SHOUT_ONE_IN = 300;
 	/** Their colours: a red bandana, a black one; a sailor's striped shirt (white), a blue coat; tar-black breeches. */
@@ -116,6 +131,13 @@ public final class Pirates {
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GUNPOWDER));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.powder_monkey_of", faction.name()));
 		}));
+		Folk.defineRole(new Folk.Role(BOMBARDIER, "pirate_bombardier", true, false, null, (folk, faction) -> {
+			base(folk, BOMBARDIER_HEALTH, BOMBARDIER_DAMAGE, 0.3);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+			folk.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Dynamite.ITEM));
+			folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, folk.getRandom().nextBoolean() ? RED_CLOTH : BLACK_CLOTH));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.pirate_bombardier_of", faction.name()));
+		}));
 		Folk.defineRole(new Folk.Role(SHIPWRIGHT, "shipwright", false, false, null, (folk, faction) -> {
 			base(folk, 24.0, 2.0, 0.27);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
@@ -172,21 +194,21 @@ public final class Pirates {
 	}
 
 	public static boolean isPirate(int role) {
-		return role >= CAPTAIN && role <= POWDER_MONKEY;
+		return role >= CAPTAIN && role <= POWDER_MONKEY || role == BOMBARDIER;
 	}
 
 	public static boolean isPirate(LivingEntity entity) {
 		return entity instanceof Folk folk && isPirate(folk.role());
 	}
 
-	/** Never on a roster: a captain (his cove's leader, or one ashore), a shipwright, a sea captain (deckhands ashore are). */
+	/** Never on a roster: a captain (his cove's leader, or one ashore), a shipwright, a sea captain, a bombardier (deckhands ashore are). */
 	static boolean offRoster(int role) {
-		return role == CAPTAIN || role == SHIPWRIGHT || role == SEA_CAPTAIN || role == GUNNER || role == POWDER_MONKEY;
+		return role == CAPTAIN || role == SHIPWRIGHT || role == SEA_CAPTAIN || role == GUNNER || role == POWDER_MONKEY || role == BOMBARDIER;
 	}
 
 	/** It's one of the sailors' roles (shown with its own skin). */
 	public static boolean isSailor(int role) {
-		return role >= CAPTAIN && role <= SEA_CAPTAIN;
+		return role >= CAPTAIN && role <= SEA_CAPTAIN || role == BOMBARDIER;
 	}
 
 	/**
@@ -197,6 +219,7 @@ public final class Pirates {
 	static void addGoals(Folk folk, GoalSelector goals, GoalSelector targets) {
 		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true,
 			(target, level) -> isPirate(folk.role()) && folk.combatant() && prey(target)));
+		goals.addGoal(1, new Lob(folk));
 	}
 
 	/** What a pirate attacks on sight. */
@@ -213,7 +236,7 @@ public final class Pirates {
 	/** A pirate's own tick (from {@link Folk#customServerAiStep}): pistols at a foe close by, and shouts in a fight. */
 	static void tick(ServerLevel level, Folk folk) {
 		int role = folk.role();
-		if (role != CAPTAIN && role != GUNNER && role != DECKHAND) {
+		if (role != CAPTAIN && role != GUNNER && role != DECKHAND && role != BOMBARDIER) {
 			return;
 		}
 		LivingEntity foe = folk.getTarget();
@@ -224,7 +247,7 @@ public final class Pirates {
 		if ((folk.tickCount + folk.getId()) % 10 == 0 && random.nextInt(SHOUT_ONE_IN / 10) == 0) {
 			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.pirate.cry_" + random.nextInt(8)), Speech.RED, 24.0);
 		}
-		if (role == DECKHAND) {
+		if (role == DECKHAND || role == BOMBARDIER) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -278,6 +301,82 @@ public final class Pirates {
 	/** Whether {@code folk} is one of a ship's crew, at their station aboard her. */
 	public static boolean aboard(Folk folk) {
 		return folk.getVehicle() instanceof Ship && folk.hasAttached(Ship.SEAT);
+	}
+
+	/**
+	 * (0.7.103) A bombardier's fight: from {@link #BOMB_NEAREST} to {@link #BOMB_FURTHEST} of his foe he keeps his
+	 * distance (backing off from one who comes within {@link #BOMB_BACK_OFF}) and lobs lit dynamite at where the foe is
+	 * going, sight or no sight (over a wall, onto a roof); closer, it gives way to his cutlass.
+	 */
+	static final class Lob extends Goal {
+		private final Folk bomber;
+		private int reload;
+		private int backOff;
+
+		Lob(Folk bomber) {
+			this.bomber = bomber;
+			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (this.bomber.role() != BOMBARDIER || this.bomber.isSleeping()) {
+				return false;
+			}
+			LivingEntity foe = this.bomber.getTarget();
+			if (foe == null || !foe.isAlive()) {
+				return false;
+			}
+			double d = this.bomber.distanceTo(foe);
+			return d >= BOMB_NEAREST && d <= BOMB_FURTHEST;
+		}
+
+		@Override
+		public void start() {
+			this.reload = Math.max(this.reload, 10 + this.bomber.getRandom().nextInt(BOMB_JITTER + 1));
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			LivingEntity foe = this.bomber.getTarget();
+			if (foe == null || !(this.bomber.level() instanceof ServerLevel level)) {
+				return;
+			}
+			this.bomber.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+			double d = this.bomber.distanceTo(foe);
+			if (d < BOMB_BACK_OFF && !aboard(this.bomber)) {
+				if (--this.backOff <= 0 || this.bomber.getNavigation().isDone()) {
+					this.backOff = 20;
+					Vec3 away = DefaultRandomPos.getPosAway(this.bomber, 8, 4, foe.position());
+					if (away != null) {
+						this.bomber.getNavigation().moveTo(away.x, away.y, away.z, 1.1);
+					}
+				}
+			} else {
+				this.bomber.getNavigation().stop();
+			}
+			if (--this.reload > 0) {
+				return;
+			}
+			RandomSource random = level.getRandom();
+			this.reload = BOMB_RELOAD + random.nextInt(BOMB_JITTER + 1);
+			int flight = (int) Math.round(Math.min(BOMB_FLIGHT_MAX, Math.max(BOMB_FLIGHT_MIN, 10.0 + d)));
+			// where he'll be when it comes down, give or take
+			double stray = BOMB_STRAY * d / BOMB_FURTHEST;
+			Vec3 mark = foe.position().add(foe.getDeltaMovement().multiply(flight * 0.6, 0.0, flight * 0.6))
+				.add((random.nextDouble() * 2.0 - 1.0) * stray, 0.0, (random.nextDouble() * 2.0 - 1.0) * stray);
+			Vec3 from = new Vec3(this.bomber.getX(), this.bomber.getEyeY() - 0.2, this.bomber.getZ());
+			this.bomber.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+			Dynamite.light(level, this.bomber, Dynamite.lob(from, mark, flight));
+			if (random.nextInt(3) == 0) {
+				Speech.say(level, this.bomber, Component.translatable("speech.jaymoskingdoms.pirate.bomb_" + random.nextInt(4)), Speech.RED, 24.0);
+			}
+		}
 	}
 
 	static void clear() {

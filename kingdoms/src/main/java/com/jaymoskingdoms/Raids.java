@@ -87,6 +87,8 @@ final class Raids {
 	static final int ORCS_PER_RANGER = 3;
 	/** (0.7.42) A pirate landing party: every this many, one is a gunner (pistols). */
 	static final int PIRATES_PER_GUNNER = 3;
+	/** (0.7.103) ...and every this many, one is a bombardier (dynamite), off the roster too. */
+	static final int PIRATES_PER_BOMBARDIER = 4;
 
 	enum Phase {
 		MARCH, PLUNDER, RETURN
@@ -256,7 +258,8 @@ final class Raids {
 			}
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			// (0.5.47) an orc war band: grunts, every third one a ranger
-			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER : Pirates.DECKHAND)
+			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
+					: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
 				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
