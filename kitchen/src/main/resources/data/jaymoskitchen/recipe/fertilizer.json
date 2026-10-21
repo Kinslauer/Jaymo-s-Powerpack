@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bone_meal",
+    "jaymoskitchen:manure"
+  ],
+  "result": {
+    "id": "jaymoskitchen:fertilizer",
+    "count": 2
+  }
+}

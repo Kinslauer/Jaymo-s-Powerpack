@@ -12,6 +12,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -25,7 +26,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
@@ -118,7 +118,7 @@ public final class Sowing {
 
 	/** Plants a seed on open farmland, as a hand would. */
 	private static boolean plant(ServerLevel level, BlockPos ground, ItemStack seed, Player player) {
-		if (!(seed.getItem() instanceof BlockItem blockItem) || !level.getBlockState(ground).is(Blocks.FARMLAND)) {
+		if (!(seed.getItem() instanceof BlockItem blockItem) || !level.getBlockState(ground).is(BlockTags.SUPPORTS_CROPS)) {
 			return false;
 		}
 		BlockPos above = ground.above();
