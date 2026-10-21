@@ -166,6 +166,28 @@ public final class ZFighterPower implements Power {
 	static final int IDLE_CRACKLE = 8;
 	static final int IDLE_SPARKS_PER_FORM = 2;
 	private static final int CRACKLE_COLOR = 0xD8ECFF;
+	/**
+	 * (0.15.59) Andy: "a faint ki colored aura around z fighters that intensifies with their increasing power/forms". In
+	 * base form, not charging: a few small motes of his ki colour hugging him every {@link #FAINT_AURA_EVERY} ticks (one
+	 * tick sooner, and a little bigger, for each step of power), this big at the weakest.
+	 */
+	static final int FAINT_AURA_EVERY = 6;
+	static final float FAINT_AURA_SIZE = 0.55F;
+	/** A step of power for the aura: every this much max ki above {@link #BASE_MAX_KI}, up to this many steps. */
+	static final int AURA_KI_STEP = 40, AURA_STEPS = 4;
+	/**
+	 * (0.15.59) Charged to full: the aura flashes once and the power blows out round him. Blasts of smoke, motes of ki in
+	 * the ring, bits of ground thrown out to this far, and the shake (felt this far).
+	 */
+	static final int FULL_BURST_BLASTS = 5, FULL_BURST_RING = 36, FULL_BURST_DEBRIS = 40;
+	static final double FULL_BURST_RADIUS = 3.5;
+	static final float FULL_BURST_SHAKE = 0.5F;
+	static final double FULL_BURST_SHAKE_RANGE = 16.0;
+	/** Never twice in this many ticks (ki bobbing at full). */
+	static final int FULL_BURST_GAP = 40;
+	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
+	static final double SHOUT_RANGE = 32.0;
+	static final int SHOUT_LINES = 3;
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_fists");
 	private static final Identifier SUPER_FIST_ID = JaymosPowers.id("zfighter_super_fists");
@@ -282,6 +304,8 @@ public final class ZFighterPower implements Power {
 		float rage;
 		int rageTicks;
 		int rageCooldown;
+		/** When his charge last filled him (the burst). */
+		long lastFullBurst = -1000L;
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
 		/** (0.13.27) His ki colour ({@link #KI_COLOR}), kept fresh each tick; -1 before the first. */
@@ -529,6 +553,7 @@ public final class ZFighterPower implements Power {
 		int max = maxKi(player);
 		boolean creative = player.isCreative();
 		int food = player.getFoodData().getFoodLevel();
+		float startKi = live.ki;
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
@@ -559,6 +584,9 @@ public final class ZFighterPower implements Power {
 				}
 				aura(player, live, live.ki >= max ? CHARGE_AURA_FULL : CHARGE_AURA);
 				chargeFx(player, live, now);
+				if (startKi < max && live.ki >= max && now - live.lastFullBurst >= FULL_BURST_GAP) {
+					fullBurst(player, live, now);
+				}
 				if (Soundscape.due(player, "ki.power_up", 12, 20)) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
 					Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.2F).pitched(0.7F + fill * 0.9F),
@@ -602,7 +630,8 @@ public final class ZFighterPower implements Power {
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
-			aura(player, live, live.charging ? live.form : 1 + 2 * live.form);
+			// (0.15.59) and a little harder the stronger he's grown
+			aura(player, live, live.charging ? live.form : 1 + 2 * live.form + auraStep(max) / 2);
 			if (now % 2 == 0) {
 				debris(player, live);
 			}
@@ -613,6 +642,8 @@ public final class ZFighterPower implements Power {
 				endSuper(player, live);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			}
+		} else if (!live.charging) {
+			faintAura(player, live, now, max);
 		}
 		if (live.limit > 0) {
 			float burn = LIMIT_HEALTH[live.limit] * ZFighterLineage.limitFactor(player);
@@ -895,7 +926,33 @@ public final class ZFighterPower implements Power {
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * form);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		com.jaymospowers.core.Shakes.heavy(player, center, SUPER_SHAKE_RANGE, SUPER_SHAKE + SUPER_SHAKE_PER_FORM * form);
+		if (live.lineage == ZFighterLineage.WARRIOR) {
+			shout(player, form);
+		}
 		refresh(player, live);
+	}
+
+	/**
+	 * (0.15.59) Andy: "supers (warrior borns) exclaiming angrily with every form". A Warrior-born screams his way into each
+	 * form: a furious yell (with a roar under it from Super 2 up) everyone near hears, and the words in their chat.
+	 */
+	private static void shout(ServerPlayer player, int form) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.VINDICATOR_CELEBRATE, SoundSource.PLAYERS, 1.6F,
+			0.75F - 0.05F * form);
+		if (form >= 2) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 0.5F + 0.3F * form,
+				1.5F - 0.15F * form);
+		}
+		Component said = Component.translatable("message.jaymospowers.zfighter_shout", player.getDisplayName(),
+			Component.translatable("message.jaymospowers.zfighter_shout." + Math.clamp(form, 1, 3) + "." + random.nextInt(SHOUT_LINES)))
+			.withStyle(ChatFormatting.GOLD);
+		for (ServerPlayer near : level.players()) {
+			if (near.distanceToSqr(player) <= SHOUT_RANGE * SHOUT_RANGE) {
+				near.sendSystemMessage(said);
+			}
+		}
 	}
 
 	/** Down one form (to base from Super). */
@@ -992,6 +1049,78 @@ public final class ZFighterPower implements Power {
 			level.sendParticles(dust, true, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0,
 				0.0, 0.15 + 0.07 * live.form);
 		}
+	}
+
+	/** (0.15.59) His aura's step of power (0 to {@link #AURA_STEPS}): how far his max ki has grown past the start. */
+	static int auraStep(int max) {
+		return Mth.clamp((max - BASE_MAX_KI) / AURA_KI_STEP, 0, AURA_STEPS);
+	}
+
+	/** The aura's colour: his own ki colour in base form, the form's in a form, red in a rage. */
+	static int auraColor(Live live) {
+		if (live.raging()) {
+			return ZFighterBattle.RAGE_COLOR;
+		}
+		return live.form == 0 ? ZFighterKi.baseColor(live, ZFighterLineage.color(live.lineage, 0)) : ZFighterLineage.color(live.lineage, live.form);
+	}
+
+	/**
+	 * (0.15.59) Base form, not charging: a faint aura of his ki colour hugging his outline, drifting up. The stronger he's
+	 * grown, the more often and the bigger. Not while hidden (invisible) or as the Great Ape.
+	 */
+	private static void faintAura(ServerPlayer player, Live live, long now, int max) {
+		if (player.isInvisible() || player.isSpectator() || ZFighterLineage.ape(player)) {
+			return;
+		}
+		int step = auraStep(max);
+		if (now % (FAINT_AURA_EVERY - step) != 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		DustParticleOptions dust = new DustParticleOptions(auraColor(live), FAINT_AURA_SIZE + 0.12F * step);
+		for (int i = 0; i < 1 + step / 2; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double r = 0.4 + random.nextDouble() * 0.15;
+			double h = 0.1 + random.nextDouble() * (player.getBbHeight() - 0.1);
+			level.sendParticles(dust, false, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0,
+				1.0, 0.0, 0.03 + 0.01 * step);
+		}
+	}
+
+	/**
+	 * (0.15.59) Andy: "at max ki charge the aura flashes once with a explosion around the user kicking up debris particles
+	 * and playing a blast/tnt sound". Charged to full: a flash of his aura, a blast round his feet, a ring of ki and the
+	 * ground thrown out from under him, and the boom.
+	 */
+	static void fullBurst(ServerPlayer player, Live live, long now) {
+		live.lastFullBurst = now;
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		Vec3 c = player.position();
+		int color = auraColor(live);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), true, true, c.x, c.y + 1.0, c.z, 1, 0.0, 0.0,
+			0.0, 0.0);
+		level.sendParticles(ParticleTypes.EXPLOSION, true, false, c.x, c.y + 0.4, c.z, FULL_BURST_BLASTS, 1.0, 0.3, 1.0, 0.0);
+		DustParticleOptions ring = new DustParticleOptions(color, 1.6F + 0.2F * live.form);
+		BlockState ground = groundUnder(player);
+		BlockParticleOption bits = ground == null ? null : new BlockParticleOption(ParticleTypes.BLOCK, ground);
+		for (int i = 0; i < FULL_BURST_RING; i++) {
+			double a = Math.PI * 2.0 * i / FULL_BURST_RING;
+			double cos = Math.cos(a), sin = Math.sin(a);
+			level.sendParticles(ring, true, false, c.x + cos * 0.6, c.y + 0.3 + random.nextDouble() * 1.4, c.z + sin * 0.6, 0, cos, 0.05, sin,
+				0.5 + random.nextDouble() * 0.3);
+			level.sendParticles(ParticleTypes.POOF, true, false, c.x + cos * 0.5, c.y + 0.1, c.z + sin * 0.5, 0, cos, 0.0, sin,
+				0.25 + random.nextDouble() * 0.15);
+			if (bits != null) {
+				// the ground torn up and thrown out
+				level.sendParticles(bits, true, false, c.x + cos * 0.7, c.y + 0.1, c.z + sin * 0.7, 0, cos, 0.6 + random.nextDouble() * 0.4, sin,
+					0.4 + random.nextDouble() * 0.3);
+			}
+		}
+		debris(player, FULL_BURST_DEBRIS, FULL_BURST_RADIUS, 0.7 + 0.1 * live.form, true);
+		level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4F, 0.9F + 0.05F * live.form);
+		com.jaymospowers.core.Shakes.heavy(player, c, FULL_BURST_SHAKE_RANGE, FULL_BURST_SHAKE);
 	}
 
 	/** In a form near the ground: bits of the ground under him tear loose and rip upwards, more with each form. */
@@ -1126,7 +1255,8 @@ public final class ZFighterPower implements Power {
 		if (live.raging()) {
 			return new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 1.5F);
 		}
-		return new DustParticleOptions(ZFighterLineage.color(live.lineage, live.form), live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
+		// (0.15.59) in base form, his own ki colour
+		return new DustParticleOptions(auraColor(live), live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
 	}
 
 	// ---------------------------------------------------------------- attributes
