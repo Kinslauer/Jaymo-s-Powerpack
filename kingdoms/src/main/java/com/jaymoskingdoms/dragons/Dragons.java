@@ -161,8 +161,9 @@ public final class Dragons {
 		dragon.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot() + 180.0F, 0.0F);
 		dragon.finalizeSpawn(player.level(), player.level().getCurrentDifficultyAt(at), EntitySpawnReason.COMMAND, null);
 		player.level().addFreshEntity(dragon);
-		if (tame) {
+		if (tame && dragon.tameable()) {
 			dragon.tameWithName(player);
+			DragonRecords.tamed(player);
 			dragon.setPersistenceRequired();
 			dragon.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
 		}

@@ -94,6 +94,8 @@ public final class Disguises {
 	static final int PATIENCE = 2;
 	/** Blows forgotten after this long (game ticks). */
 	static final long GRUDGE_TICKS = 6000L;
+	/** Blows closer together than this (ticks) count as one. */
+	static final long STRIKE_GAP = 10L;
 	/** The beating: how long it lasts, how often a blow lands, how far they'll reach and chase, how hard they hit. */
 	static final int ASSAULT_TICKS = 120, ASSAULT_EVERY = 10;
 	static final double ASSAULT_REACH = 2.5, ASSAULT_CHASE = 24.0, ASSAULT_SPEED = 0.9;
@@ -269,7 +271,8 @@ public final class Disguises {
 				continue;
 			}
 			ServerPlayer player = players.get(random.nextInt(players.size()));
-			if (kind == Kind.AEOLUS && !level.getEntitiesOfClass(AeolusDragon.class, player.getBoundingBox().inflate(AEOLUS_SPACE)).isEmpty()) {
+			if (kind == Kind.AEOLUS && (!level.getEntitiesOfClass(AeolusDragon.class, player.getBoundingBox().inflate(AEOLUS_SPACE)).isEmpty()
+				|| !level.getEntities(Dragons.AEOLUS_DRAGON, d -> d.isAlive()).isEmpty())) {
 				continue;
 			}
 			spawn(level, player, kind, random);
@@ -364,6 +367,9 @@ public final class Disguises {
 		long[] blows = STRUCK.get(key);
 		if (blows == null || now - blows[1] > GRUDGE_TICKS) {
 			blows = new long[] {0L, now};
+		} else if (blows[0] > 0 && now - blows[1] < STRIKE_GAP) {
+			// a volley, or a spell that hits again and again, is one blow
+			return;
 		}
 		blows[0]++;
 		blows[1] = now;
@@ -397,7 +403,9 @@ public final class Disguises {
 			long now = level.getGameTime();
 			boolean last = now >= assault.until();
 			villager.getLookControl().setLookAt(victim);
-			villager.getNavigation().moveTo(victim, ASSAULT_SPEED);
+			if (now % ASSAULT_EVERY == 0) {
+				villager.getNavigation().moveTo(victim, ASSAULT_SPEED);
+			}
 			boolean close = villager.distanceToSqr(victim) <= ASSAULT_REACH * ASSAULT_REACH;
 			if (now % ASSAULT_EVERY == 0 && !close && villager.onGround()) {
 				// a villager's own feet won't always take it there: it flings itself at them
@@ -538,6 +546,8 @@ public final class Disguises {
 		double x = villager.getX(), y = villager.getY() + 1.0, z = villager.getZ();
 		villager.discard();
 		dragon.finalizeSpawn(level, level.getCurrentDifficultyAt(dragon.blockPosition()), EntitySpawnReason.EVENT, null);
+		// (an encounter that takes long to come by: it leaves on its own terms, not the despawner's)
+		dragon.setPersistenceRequired();
 		level.addFreshEntity(dragon);
 		// (a wild dragon after this player: its own AI picks the target up from getTarget)
 		dragon.setTarget(player);

@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
@@ -79,7 +80,7 @@ public final class DragonStorm {
 			struck.add(at);
 			Vec3 to = at.getBoundingBox().getCenter();
 			arc(level, from, to, random);
-			at.hurtServer(level, dragon.damageSources().lightningBolt(), damage);
+			at.hurtServer(level, dragon.damageSources().source(DamageTypes.LIGHTNING_BOLT, dragon), damage);
 			level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 0.7F, 1.4F + random.nextFloat() * 0.4F);
 			if (struck.size() > CHAIN_MAX) {
 				break;

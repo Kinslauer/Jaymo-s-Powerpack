@@ -86,6 +86,7 @@ public final class DragonEggs {
 			// (finalizeSpawn makes it grown, so the hatchling's age comes after)
 			dragon.setBaby(true);
 			dragon.tameWithName(player);
+			DragonRecords.tamed(player);
 			dragon.setPersistenceRequired();
 			if (!server.noCollision(dragon)) {
 				dragon.discard();

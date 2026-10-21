@@ -204,8 +204,13 @@ public class AeolusDragon extends WindDragon {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		if (this.leaving > 0) {
-			leave(level);
-			return;
+			if (!engaged(level) && this.hurtTime == 0) {
+				leave(level);
+				return;
+			}
+			// called back: someone came, or struck him
+			this.leaving = 0;
+			this.idle = 0;
 		}
 		super.customServerAiStep(level);
 		boolean engaged = engaged(level);

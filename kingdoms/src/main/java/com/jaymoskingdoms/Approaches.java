@@ -544,7 +544,9 @@ public final class Approaches {
 	/** Whether {@code mob} is free to come over: awake, not working, fighting, riding, or already talking to someone. */
 	private static boolean free(Mob mob) {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
-			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)) {
+			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)
+			// (0.7.139) a wind dragon in disguise keeps its own counsel
+			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;
 		}
 		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm) || Hermits.is(mob) || Tag.playing(mob) || Trespass.watching(mob)) {

@@ -131,8 +131,8 @@ public abstract class WindDragon extends AbstractHorse {
 	static final float FAVOURITE_STAMINA = 40.0F, MEAT_STAMINA = 20.0F, MEAL_HEAL = 6.0F;
 	/** How long one breath packet keeps the rider's fire going (ticks). */
 	static final int RIDER_BREATH_HOLD = 6;
-	/** A hatchling: how much a meal grows it (ticks of growing), its favourite and any other meat. */
-	static final int HATCHLING_FAVOURITE_GROWTH = 1200, HATCHLING_MEAT_GROWTH = 400;
+	/** A hatchling: how much a meal grows it (seconds of growing, as ageUp takes them), its favourite and any other meat. */
+	static final int HATCHLING_FAVOURITE_GROWTH = 60, HATCHLING_MEAT_GROWTH = 20;
 	/** Who fought it shares in beating it from this near (blocks). */
 	static final double CREDIT_RANGE = 64.0;
 	/** Following: it comes from this far, stops this near, and is brought over from beyond this. */
@@ -881,7 +881,8 @@ public abstract class WindDragon extends AbstractHorse {
 			return hurt;
 		}
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity l ? l : null;
-		if (attacker instanceof Player hunter) {
+		Player hunter = credited(level, source);
+		if (hunter != null) {
 			this.hunters.add(hunter.getUUID());
 		}
 		if (grounded()) {
@@ -1089,6 +1090,10 @@ public abstract class WindDragon extends AbstractHorse {
 	public InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		boolean server = !this.level().isClientSide();
+		if (server && this.isTamed() && owner(player)) {
+			// (0.7.139) those who tamed one before the records were kept are known by it too
+			DragonRecords.tamed(player);
+		}
 		if (!this.isTamed()) {
 			if (grounded() && favourite(stack)) {
 				if (server && this.level() instanceof ServerLevel level && this.tickCount - this.offeredAt >= OFFER_EVERY) {
@@ -1255,16 +1260,32 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 		if (!this.isTamed() && this.level() instanceof ServerLevel level) {
 			// Andy: only kills count as beating a dragon: its killer and whoever fought it (still near) beat it
-			if (source.getEntity() instanceof Player killer) {
-				this.hunters.add(killer.getUUID());
+			// (the killer however far off: a bow shot at a high flier counts)
+			Player killer = credited(level, source);
+			if (killer != null) {
+				DragonRecords.slain(killer, species());
 			}
 			for (UUID id : this.hunters) {
-				if (level.getPlayerByUUID(id) instanceof ServerPlayer hunter && hunter.distanceToSqr(this) < CREDIT_RANGE * CREDIT_RANGE) {
+				if (level.getPlayerByUUID(id) instanceof ServerPlayer hunter && hunter != killer && hunter.distanceToSqr(this) < CREDIT_RANGE * CREDIT_RANGE) {
 					DragonRecords.slain(hunter, species());
 				}
 			}
 		}
 		super.die(source);
+	}
+
+	/**
+	 * Who a blow is to {@code source}'s credit: a player's own, or one dealt by a dragon they own (its breath, ridden).
+	 */
+	static @Nullable Player credited(ServerLevel level, DamageSource source) {
+		Entity by = source.getEntity();
+		if (by instanceof Player player) {
+			return player;
+		}
+		if (by instanceof WindDragon dragon && dragon.isTamed() && dragon.getOwnerReference() != null) {
+			return level.getPlayerByUUID(dragon.getOwnerReference().getUUID());
+		}
+		return null;
 	}
 
 	/** Its species, by id ("notus", "boreas", ...). */
@@ -1300,6 +1321,7 @@ public abstract class WindDragon extends AbstractHorse {
 		output.putInt("dragon_flags", this.entityData.get(DATA_FLAGS) & (GROUNDED | SITTING));
 		output.putInt("dragon_grounded", this.groundedLeft);
 		output.putLong("dragon_calm_until", this.calmUntil);
+		output.putString("dragon_hunters", String.join(",", this.hunters.stream().map(UUID::toString).toList()));
 	}
 
 	@Override
@@ -1311,6 +1333,14 @@ public abstract class WindDragon extends AbstractHorse {
 		this.entityData.set(DATA_FLAGS, (byte)input.getIntOr("dragon_flags", 0));
 		this.groundedLeft = input.getIntOr("dragon_grounded", 0);
 		this.calmUntil = input.getLongOr("dragon_calm_until", 0L);
+		this.hunters.clear();
+		for (String id : input.getStringOr("dragon_hunters", "").split(",")) {
+			try {
+				this.hunters.add(UUID.fromString(id));
+			} catch (IllegalArgumentException e) {
+				// (none saved, or not a uuid)
+			}
+		}
 	}
 
 	@Override
