@@ -33,6 +33,8 @@ public final class Aether {
 		AetherSoilTools.register();
 		// the passive animals: moa, phyg, flying cow, sheepuff, aerbunny
 		com.jaymospowers.aether.mob.AetherMobs.init();
+		// Aether II's hostile mobs (zephyr, tempest, cockatrice, swets, plants, skephid, talutons, bladeshroom hunter)
+		com.jaymospowers.aether.monster.AetherMonsters.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();

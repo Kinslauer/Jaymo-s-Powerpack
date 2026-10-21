@@ -359,3 +359,42 @@ Clean room: behaviour from the notes, every line and pixel ours. The shaped bloc
 Not done, for later: signs, bookshelves, beds and the decorative planks (shingles, beams) of the building notes; fire and
 compost values (no precedent in the repo); a leaf pile for every leaf type; mossy wisproot wood; huge-mushroom and orange-tree
 worldgen (Track W). The old item name "Blue Berry" still has to become "Blueberry" in `gen_aether.py` (its lang part owns the key).
+
+## Aether II monsters (Track H) [aether.monster]
+Eleven hostile mobs, their shots, four status effects and five drops. Code is in `aether/monster/` (registry
+`AetherMonsters`, effects `AetherEffects`, shots `AetherShot`, base class `AetherMonster` with slash/impact/pierce
+resistance) and `client/aether/monster/` (one `AetherMonsterRenderer` with a `Look` per mob, ten generated models; both
+swets share `SwetModel`). Tuning numbers are `static final` constants at the top of each class. Spawns use
+`BiomeModifications` against the `#jaymospowers:is_aether*` tags (by `TagKey` only).
+
+| Mob | Behaviour | Drops | Spawn weight |
+|---|---|---|---|
+| Zephyr | flies; 100-tick Blow Away cycle (circle, breath, gust box), webbing shot every 60 ticks at 8-40 blocks | cloudtwine | all Aether biomes (1-2 in irradiated) |
+| Tempest | hovers relative to its target (the Aether II hover bug is fixed); 65-tick thunderball volley; hides in sun | cloudtwine | the 12 ordinary biomes + irradiated |
+| Cockatrice | venomous bite with a lunge; 4-dart volley; flees sun, digs in | cockatrice feather | 4 |
+| Blue Swet / Golden Swet | hops; latches (max 3 per player, slows, drains hunger); water shrinks it; size 0.6-1.25 | swet gel, swet sugar | 2 / 1 (groups of 1-2) |
+| Aechor Plant | rooted; ring of 10 toxic darts every 60 ticks; only hoe, axe or shears hurt it | aechor petal | 5 |
+| Carrion Sprout | rooted; night trap holds and bites 2 every 30 ticks | none | 3 |
+| Skephid | wall and ceiling climber; hangs upside down, webbing shot; flees sun | none | 1 |
+| Arkenium Taluton | 8 damage, knockback 1.2, 40-tick swing | none | 3 |
+| Gravitite Taluton | slow fall, wall climb, debris every 100 ticks | none | 4 |
+| Bladeshroom Hunter | buries and unburies; 38-tick cut, lunge | none | 2 in the magnetic biomes (our addition) |
+
+Each mob has a loot table (`loot_table/entities/<mob>.json`, drops use `killed_by_player` and the enchanted-bonus chance), a
+spawn egg and a skin (plus glow overlays for seven). The five new drop items have textures, item definitions and lang.
+
+- **Effects**: Webbed (-85% speed, no jump), Venom (1 magic damage every 30 ticks, can kill), Toxin (every 12 ticks, stops at
+  1 HP), Electric Shock (-3 attack damage, lightning damage every 25 ticks). Icons are in `textures/mob_effect/`.
+- **Shots** (`AetherShot.Kind`, one entity type and item each, drawn with `ThrownItemRenderer`): zephyr web, skephid web
+  (both stun a blocking shield), thunderball (non-destructive blast plus a shock field), venomous dart, toxic dart, debris
+  (accelerates). Monsters never hit each other directly (a thunderball's blast and field still reach them).
+- **Files**: `tools/gen_aether_monsters.py` reads the model `part()` lines and paints skins, glows, sprites, eggs, effect
+  icons, item JSON, loot tables and `lang/parts/aether_monsters.json`; `tools/check_aether_monsters.py` validates them.
+
+Simplifications and additions: no buildup meters (plain effects instead); no cutting items (Aechor and Carrion cuttings left
+out); hoe, axe or shears stand in for trowels; Skephid ceiling AI is approximate (leap, then cling); Bladeshroom Hunter gets
+a spawn because hostile.md gives it none.
+
+To check first in game: Zephyr and Tempest flying and aiming (flying speed, hover point); swets latching and detaching;
+Skephid hanging upside down (renderer flip); Aechor Plant warning when hit with the wrong tool; Bladeshroom Hunter burying;
+sun behaviour of Tempest, Cockatrice and Skephid; shield stun from webbing balls.
