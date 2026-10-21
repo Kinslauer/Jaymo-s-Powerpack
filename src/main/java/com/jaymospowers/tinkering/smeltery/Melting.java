@@ -1,12 +1,16 @@
 package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.tinkering.PartType;
+import com.jaymospowers.tinkering.TinkerMaterial;
+import com.jaymospowers.tinkering.TinkerToolItem;
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.WeaponPartItem;
 import com.jaymospowers.tinkering.WeaponParts;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,12 +89,17 @@ public final class Melting {
 	public record Input(Molten molten, int amount) {
 	}
 
-	/** Tinkers' alloys, in per-batch amounts (one batch every tick or so). */
+	/**
+	 * Tinkers' alloys, in per-batch amounts (one batch every tick or so). (Smithing) Steel is wrought iron fined with
+	 * carbon-rich pig iron, an ingot of each for one of steel (the smeltery holds no coal); a kiln can make it from
+	 * coal directly ({@code kiln.Kiln}).
+	 */
 	public static final List<Alloy> ALLOYS = List.of(
 		new Alloy(Molten.ROSE_GOLD, 40, List.of(new Input(Molten.COPPER, 30), new Input(Molten.GOLD, 10))),
 		new Alloy(Molten.AMETHYST_BRONZE, 9, List.of(new Input(Molten.COPPER, 9), new Input(Molten.AMETHYST, 10))),
 		new Alloy(Molten.PIG_IRON, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.BLOOD, 5), new Input(Molten.HONEY, 5))),
-		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))));
+		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))),
+		new Alloy(Molten.STEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.PIG_IRON, 9))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/**
@@ -153,6 +162,12 @@ public final class Melting {
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
 	}
 
+	/** (Smithing) An alloy's nugget and block (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
+	public static void alloyForms(Molten molten, Item nugget, Item block) {
+		add(molten, Molten.NUGGET, nugget);
+		add(molten, Molten.BLOCK, block);
+	}
+
 	/** An ingot, nugget, block and raw ore (doubled) of a metal. */
 	private static void metal(Molten molten, Item ingot, Item nugget, @Nullable Item block, Item raw, Item rawBlock) {
 		add(molten, Molten.INGOT, ingot);
@@ -178,10 +193,28 @@ public final class Melting {
 		}
 	}
 
-	/** What one of this item melts into, or null. */
+	/** What one of this item melts into, or null. (0.15.36) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
 		Result result = builtIn(stack);
-		return result != null ? result : extra.get(stack.getItem());
+		if (result == null) {
+			result = extra.get(stack.getItem());
+		}
+		return result == null ? null : worn(stack, result);
+	}
+
+	/** (0.15.36) The share of a damaged item's metal that's left (at least a drop of its main liquid). */
+	private static Result worn(ItemStack stack, Result result) {
+		if (!stack.isDamageableItem() || !stack.isDamaged()) {
+			return result;
+		}
+		int max = stack.getMaxDamage();
+		int left = max - stack.getDamageValue();
+		Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+		for (Input part : result.parts()) {
+			liquids.merge(part.molten(), (int) ((long) part.amount() * left / max), Integer::sum);
+		}
+		Result scaled = Result.of(liquids);
+		return scaled != null ? scaled : new Result(result.molten(), 1);
 	}
 
 	/** The extras ({@link MeltingRecipes}), for sending to players. */
@@ -224,6 +257,22 @@ public final class Melting {
 			if (molten != null) {
 				return new Result(molten, part.part.cost * Molten.INGOT);
 			}
+		}
+		if (stack.getItem() instanceof TinkerToolItem tool) {
+			// (0.15.36) a Tinkering tool: each metal part's worth
+			Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+			List<TinkerMaterial> materials = ToolStats.materials(stack);
+			for (int i = 0; i < tool.type.parts.size() && i < materials.size(); i++) {
+				Molten molten = Molten.of(materials.get(i));
+				if (molten != null) {
+					liquids.merge(molten, tool.type.parts.get(i).part().cost * Molten.INGOT, Integer::sum);
+				}
+			}
+			return Result.of(liquids);
+		}
+		if (stack.getItem() instanceof CastItem) {
+			// (0.15.36) a gold cast took an ingot of gold
+			return new Result(Molten.GOLD, Molten.INGOT);
 		}
 		return null;
 	}
@@ -303,6 +352,7 @@ public final class Melting {
 			case GOLD -> new ItemStack(Items.GOLD_NUGGET);
 			case COPPER -> new ItemStack(Items.COPPER_NUGGET);
 			case SILVER -> new ItemStack(Tinkering.SILVER_NUGGET);
+			case STEEL -> new ItemStack(Tinkering.STEEL_NUGGET);
 			default -> null;
 		};
 	}
@@ -317,6 +367,7 @@ public final class Melting {
 			case GOLD -> new BasinResult(new ItemStack(Items.GOLD_BLOCK), Molten.BLOCK);
 			case COPPER -> new BasinResult(new ItemStack(Items.COPPER_BLOCK.weathering().unaffected()), Molten.BLOCK);
 			case SILVER -> new BasinResult(new ItemStack(Tinkering.SILVER_BLOCK), Molten.BLOCK);
+			case STEEL -> new BasinResult(new ItemStack(Tinkering.STEEL_BLOCK), Molten.BLOCK);
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);

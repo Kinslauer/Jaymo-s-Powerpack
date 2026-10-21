@@ -157,7 +157,7 @@ public final class VillagerHeritage {
 			return Heritage.Kind.VERDANT;
 		}
 		if (level instanceof ServerLevel server) {
-			// (0.7.127) on a purist king's land, most are born to his blood
+			// (0.7.129) on a purist king's land, most are born to his blood
 			Heritage.Kind proud = Purists.lean(server, pos, random);
 			if (proud != null) {
 				return proud;
@@ -302,7 +302,7 @@ public final class VillagerHeritage {
 			}
 			return;
 		}
-		// (0.7.127) a purist realm's own folk are all of its ruler's blood
+		// (0.7.129) a purist realm's own folk are all of its ruler's blood
 		Heritage.Kind proud = folk.factionId() >= 0 ? Purists.folk(level.getServer(), folk.factionId()) : null;
 		if (proud != null && of(folk) != proud) {
 			born(folk, proud, null);

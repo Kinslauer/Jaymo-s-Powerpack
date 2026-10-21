@@ -125,6 +125,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/sword/handle_slimesteel"
             }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_steel"
+            }
           }
         ],
         "fallback": {
@@ -259,6 +266,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/sword/head_broken_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_steel"
+              }
             }
           ],
           "fallback": {
@@ -388,6 +402,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/sword/head_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_steel"
               }
             }
           ],
@@ -519,6 +540,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/sword/guard_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_steel"
             }
           }
         ],

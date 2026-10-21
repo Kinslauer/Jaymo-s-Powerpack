@@ -332,7 +332,7 @@ final class Assassins {
 				hirer = feuds.get(random.nextInt(feuds.size())).id();
 				motive = "rival";
 			} else if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.PURIST) && random.nextBoolean()) {
-				// (0.7.127) a purist's own people not of his blood have had enough of him too
+				// (0.7.129) a purist's own people not of his blood have had enough of him too
 				motive = "people";
 			} else {
 				motive = random.nextBoolean() ? "heir" : "guild";

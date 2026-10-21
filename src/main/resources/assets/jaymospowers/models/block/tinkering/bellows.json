@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "jaymospowers:block/tinkering/bellows_front",
+    "side": "jaymospowers:block/tinkering/bellows_side",
+    "top": "jaymospowers:block/tinkering/bellows_top",
+    "bottom": "jaymospowers:block/tinkering/bellows_top"
+  }
+}

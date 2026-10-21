@@ -243,7 +243,7 @@ final class McaBridge {
 	/**
 	 * The villager {@code f} promotes: a grown one of its own who isn't its ruler, a guard or anything else MCA counts
 	 * important, nor already at work; one without a trade first, then one who hasn't started theirs, then anyone.
-	 * (0.7.127) A purist ruler's guards are drafted from his own blood ({@link Purists}) while any are to be had.
+	 * (0.7.129) A purist ruler's guards are drafted from his own blood ({@link Purists}) while any are to be had.
 	 */
 	private static @Nullable VillagerEntityMCA candidate(ServerLevel level, Faction f, int role) {
 		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),

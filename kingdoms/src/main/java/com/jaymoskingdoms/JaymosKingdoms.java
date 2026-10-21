@@ -68,6 +68,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Surveyor.register();
 		Designs.register();
 		Armory.register();
+		// knitted wool clothes: light armour that keeps the cold off an Emberborn
+		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
@@ -98,7 +100,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
-		// 0.7.127: the purist ruler's townsfolk mind a stranger's blood
+		// 0.7.129: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Frights.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
@@ -121,7 +123,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Theft.register();
 		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.127: the downed state itself is
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.129: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
@@ -131,6 +133,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
+		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
+		Crooks.register();
+		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
+		Arrests.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
@@ -306,7 +313,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
-		// 0.7.125: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
+		// 0.7.126: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
 		Bandits.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();

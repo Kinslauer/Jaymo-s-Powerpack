@@ -94,7 +94,7 @@ public final class Approaches {
 	static final long HALT_TICKS = 72000L;
 	static final int GUARD_GAP = 20 * 60 * 8;
 	/**
-	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; (0.7.127) PURIST to a
+	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; (0.7.129) PURIST to a
 	 * stranger not of his blood, then to one of it; last, a place with no ruler): how keen they are to search you, ask a
 	 * toll, offer a bout, test your loyalty.
 	 */
@@ -171,7 +171,7 @@ public final class Approaches {
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}); 0 for the guards' own, one per temper. */
 	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0, 3};
 	/**
-	 * (0.6.2) Temper keys, in {@link Tempers.Temper} order ((0.7.127) a purist's guards to one of his own blood after his),
+	 * (0.6.2) Temper keys, in {@link Tempers.Temper} order ((0.7.129) a purist's guards to one of his own blood after his),
 	 * then a place with no ruler of its own.
 	 */
 	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "purist", "purist_kin", "plain"};
@@ -203,6 +203,8 @@ public final class Approaches {
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
 		String enemy = "";
+		/** (0.7.126) A crook's bargain that's a scam ({@link Crooks}): you pay, and the goods never come. */
+		boolean scam;
 		/** (0.7.20) They speak a tongue you don't ({@link Languages}): what they mean, as you make it out from their hands. */
 		boolean foreign;
 		Component gesture = Component.empty();
@@ -677,6 +679,10 @@ public final class Approaches {
 			if (mob instanceof Villager v && DEALS.containsKey(profession(v)) && rep >= WARY_REP) {
 				w[BARGAIN] = 2;
 			}
+			if (rep >= WARY_REP) {
+				// (0.7.126) a crook always has something going cheap
+				w[BARGAIN] = Math.max(w[BARGAIN], Crooks.bargainWeight(mob, rep));
+			}
 			if (friend) {
 				w[GIFT] = 2;
 			}
@@ -756,7 +762,7 @@ public final class Approaches {
 	}
 
 	/**
-	 * (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}; (0.7.127) a purist's
+	 * (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}; (0.7.129) a purist's
 	 * by whether {@code player} is of his blood.
 	 */
 	private static int temper(MinecraftServer server, Faction f, ServerPlayer player) {
@@ -768,7 +774,7 @@ public final class Approaches {
 		return t == null ? PLAIN : t.ordinal();
 	}
 
-	/** (0.7.127) Whose temper {@code f}'s people go by: its own ruler's, or its liege's for a fief (or itself, with neither). */
+	/** (0.7.129) Whose temper {@code f}'s people go by: its own ruler's, or its liege's for a fief (or itself, with neither). */
 	private static Faction ruler(MinecraftServer server, Faction f) {
 		if (Tempers.of(f) != null) {
 			return f;
@@ -810,12 +816,20 @@ public final class Approaches {
 			}
 			case BARGAIN -> {
 				Deal deal = a.mob instanceof Villager v ? DEALS.get(profession(v)) : null;
+				if (deal == null && Crooks.isCrook(a.mob)) {
+					// (0.7.126) a crook deals in anything
+					List<Deal> all = new ArrayList<>(DEALS.values());
+					deal = all.get(random.nextInt(all.size()));
+				}
 				if (deal == null) {
 					deal = DEALS.get("farmer");
 				}
-				a.goods = new ItemStack(deal.item(), deal.count());
-				boolean friend = McaCompat.isMca(a.mob) ? hearts(a.mob, player) >= GREET_HEARTS : Reputation.get(player, f.id()) >= GREET_REP;
-				a.price = Math.max(1, deal.price() - (friend ? FRIEND_DISCOUNT : 0));
+				int rep = Reputation.get(player, f.id());
+				a.scam = Crooks.scams(a.mob, rep, random);
+				// (0.7.126) a scam looks like the best deal you'll get all week
+				a.goods = new ItemStack(deal.item(), a.scam ? Math.min(deal.item().getDefaultMaxStackSize(), deal.count() * 3 / 2) : deal.count());
+				boolean friend = McaCompat.isMca(a.mob) ? hearts(a.mob, player) >= GREET_HEARTS : rep >= GREET_REP;
+				a.price = Math.max(1, deal.price() - (friend || a.scam ? FRIEND_DISCOUNT : 0));
 				a.variant = random.nextInt(OPENINGS[BARGAIN]);
 			}
 			case WAR -> {
@@ -862,7 +876,7 @@ public final class Approaches {
 		String line = key(a) + "." + (guardsOwn(a.topic) ? TEMPERS[a.variant] : a.variant), more = line + ".more";
 		Faction ruler = f == null ? null : ruler(level.getServer(), f);
 		Object[] args = switch (a.topic) {
-			// (0.7.127) and the blood: yours, then the purist king's
+			// (0.7.129) and the blood: yours, then the purist king's
 			case SEARCH, TOLL, BOUT, LOYALTY -> new Object[] {a.price, Purists.name(Heritage.of(player)), ruler == null ? "?" : Purists.bloodName(ruler)};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
 			case WAR -> new Object[] {a.enemy};
@@ -889,7 +903,7 @@ public final class Approaches {
 				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Deeds.gossip(level, player, f);
 				if (said == null) {
-					// (0.7.127) a purist realm's pride in its blood (or a grumble from one not of it)
+					// (0.7.129) a purist realm's pride in its blood (or a grumble from one not of it)
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
 				if (said == null) {
@@ -1201,7 +1215,11 @@ public final class Approaches {
 				}
 			}
 			case BARGAIN -> {
-				if (option == 0 && emeralds(player) >= a.price) {
+				if (option == 0 && emeralds(player) >= a.price && a.scam && a.mob instanceof Villager crook) {
+					// (0.7.126) paid for goods that will never come
+					take(player, Items.EMERALD, a.price);
+					Crooks.scammed(level, crook, player, f.id(), a.price);
+				} else if (option == 0 && emeralds(player) >= a.price) {
 					take(player, Items.EMERALD, a.price);
 					ItemStack goods = a.goods.copy();
 					if (!player.getInventory().add(goods)) {
@@ -1318,7 +1336,7 @@ public final class Approaches {
 					if (tv == TYRANT || tv == PARANOID) {
 						Theft.arrest(player, level, f, ARREST_TICKS);
 					} else if (tv == PURIST) {
-						// (0.7.127) shoved out of his way: he'll not lower himself to more
+						// (0.7.129) shoved out of his way: he'll not lower himself to more
 						Purists.shoulder(level, a.mob, player);
 					}
 				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN || tv == PURIST_KIN) {
@@ -1361,7 +1379,7 @@ public final class Approaches {
 						Reputation.change(player, f, HAGGLE_FAILED_REP);
 						reply(level, a, k + "haggle_failed." + temper, tv == PURIST ? Speech.RED : Speech.YELLOW);
 						if (tv == PURIST) {
-							// (0.7.127) haggling with his betters
+							// (0.7.129) haggling with his betters
 							Purists.shoulder(level, a.mob, player);
 						}
 					}

@@ -64,7 +64,7 @@ public final class Reputation {
 		}
 		// (0.5.12) as its ruler's temper takes it
 		by = Tempers.reputation(kingdom, by);
-		// (0.7.127) and a purist ruler's, by your blood
+		// (0.7.129) and a purist ruler's, by your blood
 		by = Purists.reputation(kingdom, player, by);
 		String persona = Identities.persona(player, kingdom.id());
 		if (persona != null) {
