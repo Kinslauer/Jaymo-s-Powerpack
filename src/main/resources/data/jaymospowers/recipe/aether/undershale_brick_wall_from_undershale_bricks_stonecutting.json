@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:undershale_bricks",
+  "result": {
+    "id": "jaymospowers:undershale_brick_wall"
+  }
+}

@@ -23,7 +23,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 
 /**
- * (Kingdoms 0.7.145) The Nether faction's trophies. A Hornkin's horn (warriors, brutes and warlords drop them): a ruler
+ * (Kingdoms 0.7.146) The Nether faction's trophies. A Hornkin's horn (warriors, brutes and warlords drop them): a ruler
  * pays a bounty in emeralds for each ({@code Bounties}). A warlord's war horn, from a fallen Hornkin Warlord or Piglin
  * Warboss: blown, it rallies you and the players near you.
  */

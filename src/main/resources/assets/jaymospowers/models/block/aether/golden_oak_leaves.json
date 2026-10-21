@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "jaymospowers:block/aether/golden_oak_leaves"
+  }
+}

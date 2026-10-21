@@ -1,0 +1,72 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:skyplane_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": {
+        "feature": "jaymospowers:skyplane_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.025,
+      "feature": {
+        "feature": "jaymospowers:skyroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.015,
+      "feature": {
+        "feature": "jaymospowers:skyroot_leafpile_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0015,
+      "feature": {
+        "feature": "jaymospowers:nest_skyroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.015,
+      "feature": {
+        "feature": "jaymospowers:wisproot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.005,
+      "feature": {
+        "feature": "jaymospowers:greatoak_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.01,
+      "feature": {
+        "feature": "jaymospowers:amberoot_sparse_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0125,
+      "feature": {
+        "feature": "jaymospowers:fallen_skyroot_log",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.01,
+      "feature": {
+        "feature": "jaymospowers:golden_oak_tree",
+        "placement": []
+      }
+    }
+  ]
+}

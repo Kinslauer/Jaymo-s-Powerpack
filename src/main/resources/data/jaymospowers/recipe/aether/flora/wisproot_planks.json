@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymospowers:wisproot_logs"
+  ],
+  "result": {
+    "id": "jaymospowers:wisproot_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:glint_block"
+  ],
+  "result": {
+    "id": "jaymospowers:glint_gemstone",
+    "count": 9
+  },
+  "group": "glint_gemstone"
+}

@@ -4061,8 +4061,20 @@ The last batch of the BWM port (MIT, our own code).
 - Skittish herds (`Herds`, entity tag `skittish`): hit a farm animal and others of its kind that can see it flee the
   attacker for about 4 s; sprinting or breaking blocks within 8 blocks spooks them (2 less per Soft Step rank;
   sneaking never does). Leashed, tamed and named animals ignore spooks but still flee when hit. Pens aren't detected.
+- **0.7.145, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
+  throughout the overworld, the last surviving puzzle pieces being the monoliths and their respective Giants, The
+  Highfield Giant, Magnetic, Arctic, and Irradiated all spawn near one and increase world tier when the first is
+  killed." Neither Ancient Remnants nor the Aether II runs on Fabric 26.3, so Andy chose a remake (`docs/remnants.md`).
+  Monoliths of our own (a broken banded pillar of its element's stone, a glowing core floating over it) rise now and
+  then out in the wild near a player, never within 1200 blocks of another, their element by the biome. Coming near one
+  wakes its Giant: four new bosses (320 health, a ground stamp, boss bars in their colours) with their element's power:
+  the Highfield gust, the Magnetic pull, the Arctic freeze, the Irradiated sickness. The first Giant slain in a world
+  raises the world's floor tier to Borderlands for everyone (`WorldTiers.raiseFloor`); each counts as a great foe.
+  Ancient Remnants' own monoliths count too if it's ever loaded (`AncientRemnantsCompat`). Ops: `/kingdom monolith
+  raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Compiles against the real 26.3 jars;
+  not yet seen in game.
 
-## 0.7.145: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.58)
+## 0.7.146: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.59)
 Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: nothing of it used).
 - Portal raids (`nether/PortalRaids`): while a Hornkin war fort stands in the Nether, a town with a Nether portal
   within 96 blocks of its seat and a player within 96 may see 3-6 Hornkin (sometimes a brute) step out of it (3% a

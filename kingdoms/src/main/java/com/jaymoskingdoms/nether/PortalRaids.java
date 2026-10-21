@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (Kingdoms 0.7.145) The Nether faction, stage 3: Hornkin raid parties come through a Nether portal near a town for its
+ * (Kingdoms 0.7.146) The Nether faction, stage 3: Hornkin raid parties come through a Nether portal near a town for its
  * gold. While a Hornkin war fort stands in the Nether, a town with a portal near it and a player about may now and then
  * see a party step out of it. They go for the town's chests (gold only), fight whoever crosses them, and when they have
  * enough gold or their time is up they walk back into the portal with it. An Emberborn can buy the whole party off with a

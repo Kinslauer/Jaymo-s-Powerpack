@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:undershale_bricks"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "jaymospowers:undershale_brick_slab",
+    "count": 6
+  }
+}

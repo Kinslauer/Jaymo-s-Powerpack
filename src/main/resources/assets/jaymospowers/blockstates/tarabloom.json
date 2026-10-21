@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "jaymospowers:block/aether/tarabloom_bottom"
+    },
+    "half=upper": {
+      "model": "jaymospowers:block/aether/tarabloom_top"
+    }
+  }
+}

@@ -205,7 +205,7 @@ public final class NetherForts {
 				.then(Commands.literal("found").executes(NetherForts::foundHere))
 				.then(Commands.literal("host").executes(NetherForts::hostNow))
 				.then(Commands.literal("info").executes(NetherForts::info))
-				// (0.7.145) a portal raid on the nearest town, now
+				// (0.7.146) a portal raid on the nearest town, now
 				.then(Commands.literal("raid").executes(PortalRaids::raidNow)))));
 	}
 
@@ -237,7 +237,7 @@ public final class NetherForts {
 		return all == null ? List.of() : all;
 	}
 
-	/** (0.7.145) The forts (either side) still standing. */
+	/** (0.7.146) The forts (either side) still standing. */
 	public static List<Fort> standing(ServerLevel nether) {
 		return forts(nether).stream().filter(f -> !f.fallen()).toList();
 	}
@@ -487,7 +487,7 @@ public final class NetherForts {
 			return;
 		}
 		put(level, fort.fall());
-		// (0.7.145) the warlord's war horn, a trophy; and a king's bounty on him, paid
+		// (0.7.146) the warlord's war horn, a trophy; and a king's bounty on him, paid
 		entity.spawnAtLocation(level, new ItemStack(NetherTrophies.WAR_HORN));
 		com.jaymoskingdoms.Quests.netherWarlordSlain(level, entity, source, fort.id());
 		long now = level.getGameTime();

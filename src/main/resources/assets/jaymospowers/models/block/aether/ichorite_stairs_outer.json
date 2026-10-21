@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/ichorite",
+    "side": "jaymospowers:block/aether/ichorite",
+    "top": "jaymospowers:block/aether/ichorite"
+  }
+}

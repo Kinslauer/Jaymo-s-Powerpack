@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "jaymospowers:skyroot_planks",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "#",
+    "S",
+    "S"
+  ],
+  "result": {
+    "id": "jaymospowers:skyroot_shovel"
+  }
+}

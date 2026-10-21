@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/undershale_bricks",
+    "side": "jaymospowers:block/aether/undershale_bricks",
+    "top": "jaymospowers:block/aether/undershale_bricks"
+  }
+}

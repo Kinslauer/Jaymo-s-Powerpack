@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:ambrosium_block"
+  ],
+  "result": {
+    "id": "jaymospowers:ambrosium_shard",
+    "count": 9
+  },
+  "group": "ambrosium_shard"
+}

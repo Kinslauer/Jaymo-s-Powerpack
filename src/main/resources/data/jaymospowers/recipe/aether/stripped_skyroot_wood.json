@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:stripped_skyroot_log"
+  },
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_skyroot_wood",
+    "count": 3
+  },
+  "group": "bark"
+}

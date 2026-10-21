@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:squeeze",
+    "input": {
+      "type": "minecraft:interpolated",
+      "cell_size_xz": 4,
+      "cell_size_y": 4,
+      "input": {
+        "type": "minecraft:max",
+        "left": {
+          "type": "minecraft:min",
+          "left": {
+            "type": "minecraft:min",
+            "left": "jaymospowers:aether/terrain/base_islands",
+            "right": "jaymospowers:aether/terrain/caves"
+          },
+          "right": "jaymospowers:aether/terrain/hestveil"
+        },
+        "right": {
+          "type": "minecraft:range_choice",
+          "input": "minecraft:y",
+          "min_inclusive": -4096.0,
+          "max_exclusive": 128.0,
+          "when_in_range": -1.0,
+          "when_out_of_range": "jaymospowers:aether/terrain/shattered_islands"
+        }
+      }
+    }
+  },
+  "right": {
+    "type": "minecraft:beardifier"
+  }
+}

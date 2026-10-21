@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:golden_amber_block"
+  ],
+  "result": {
+    "id": "jaymospowers:golden_amber",
+    "count": 9
+  },
+  "group": "golden_amber"
+}

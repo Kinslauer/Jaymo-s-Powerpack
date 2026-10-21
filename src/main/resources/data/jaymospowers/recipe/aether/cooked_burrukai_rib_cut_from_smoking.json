@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.35,
+  "ingredient": "jaymospowers:burrukai_rib_cut",
+  "result": {
+    "id": "jaymospowers:cooked_burrukai_rib_cut"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": "jaymospowers:holystone",
+    "Z": "jaymospowers:zanite_gemstone"
+  },
+  "pattern": [
+    "HZH",
+    " H ",
+    "HHH"
+  ],
+  "result": {
+    "id": "jaymospowers:altar"
+  }
+}

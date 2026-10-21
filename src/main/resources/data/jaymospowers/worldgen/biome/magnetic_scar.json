@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.2,
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/fog_color": "#edeef5",
+    "minecraft:visual/sky_color": "#c5cbeb",
+    "minecraft:visual/water_fog_color": "#607496"
+  },
+  "carvers": [],
+  "downfall": 0.3,
+  "effects": {
+    "water_color": "#abbdd9",
+    "grass_color": "#c9e0d0",
+    "foliage_color": "#c9e0d0"
+  },
+  "features": [
+    [
+      "jaymospowers:cloudbed"
+    ],
+    [],
+    [
+      "jaymospowers:disk_ferrosite_sand",
+      "jaymospowers:boulder_holystone",
+      "jaymospowers:ferrosite_spikes_scar",
+      "jaymospowers:ferrosite_pillars",
+      "jaymospowers:ferrosite_pillars_high",
+      "jaymospowers:quicksoil_shelf"
+    ],
+    [],
+    [],
+    [],
+    [
+      "jaymospowers:ore_agiosite",
+      "jaymospowers:ore_agiosite_small",
+      "jaymospowers:ore_ambrosium",
+      "jaymospowers:ore_ambrosium_high",
+      "jaymospowers:ore_arkenium",
+      "jaymospowers:ore_corrobonite",
+      "jaymospowers:ore_glint",
+      "jaymospowers:ore_gravitite",
+      "jaymospowers:ore_gravitite_buried",
+      "jaymospowers:ore_zanite",
+      "jaymospowers:ore_zanite_mountain",
+      "jaymospowers:ore_quartz",
+      "jaymospowers:ore_icestone",
+      "jaymospowers:ore_icestone_small",
+      "jaymospowers:ore_crude_scatterglass",
+      "jaymospowers:ore_ichorite"
+    ],
+    [
+      "jaymospowers:pointed_holystone",
+      "jaymospowers:pointed_holystone_cave"
+    ],
+    [
+      "jaymospowers:spring_water"
+    ],
+    [
+      "jaymospowers:trees_magnetic_scar",
+      "jaymospowers:trees_magnetic_scar_high",
+      "jaymospowers:grass_small",
+      "jaymospowers:flowers_magnetic",
+      "jaymospowers:magnetic_shrooms",
+      "jaymospowers:holystone_rocks"
+    ],
+    [
+      "jaymospowers:aercloud_cold_surface",
+      "jaymospowers:aercloud_golden_surface",
+      "jaymospowers:aercloud_blue_surface",
+      "jaymospowers:aercloud_green_surface",
+      "jaymospowers:aercloud_purple_surface",
+      "jaymospowers:aercloud_blue_lower",
+      "jaymospowers:aercloud_green_lower",
+      "jaymospowers:aercloud_purple_lower",
+      "jaymospowers:aercloud_storm_lower",
+      "jaymospowers:aercloud_cold_middle",
+      "jaymospowers:aercloud_storm_middle",
+      "jaymospowers:aercloud_green_high",
+      "jaymospowers:aercloud_purple_high",
+      "jaymospowers:aercloud_storm_high",
+      "jaymospowers:crystal_island"
+    ]
+  ],
+  "has_precipitation": true,
+  "temperature": 0.6
+}

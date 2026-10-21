@@ -119,6 +119,7 @@ public final class WindPower implements Power {
 		WindKick.init();
 		WindCyclone.init();
 		WindJet.init();
+		com.jaymospowers.power.wind.aether.WindAether.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
@@ -300,6 +301,12 @@ public final class WindPower implements Power {
 	boolean flewRecently(ServerPlayer player, int ticks) {
 		State s = this.states.get(player.getUUID());
 		return s != null && (s.flight.flying() || player.tickCount - s.lastFlightTick <= ticks);
+	}
+
+	/** (0.13.35) In wind flight right now (for {@code WindAether}'s rise into the Aether). */
+	public static boolean flying(ServerPlayer player) {
+		State s = INSTANCE.states.get(player.getUUID());
+		return s != null && s.flight.flying();
 	}
 
 	/** Debug: every cooldown back to zero. */

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_single_face",
+  "textures": {
+    "texture": "jaymospowers:block/aether/magnetic_shroom_stem"
+  }
+}

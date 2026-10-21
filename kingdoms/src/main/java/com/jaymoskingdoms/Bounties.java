@@ -537,7 +537,7 @@ public final class Bounties {
 			return false;
 		}
 		ItemStack held = player.getMainHandItem();
-		// (0.7.145) Hornkin horns, a bounty on raiders from the Nether
+		// (0.7.146) Hornkin horns, a bounty on raiders from the Nether
 		if (held.is(com.jaymoskingdoms.nether.NetherTrophies.HORNKIN_HORN)) {
 			int horns = held.getCount();
 			int emeralds = horns * com.jaymoskingdoms.nether.NetherTrophies.HORN_BOUNTY;

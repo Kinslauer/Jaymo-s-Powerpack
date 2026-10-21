@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/mossy_holystone_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/mossy_holystone"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/mossy_holystone_slab_top"
+    }
+  }
+}

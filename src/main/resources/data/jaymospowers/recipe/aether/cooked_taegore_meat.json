@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": "jaymospowers:raw_taegore_meat",
+  "result": {
+    "id": "jaymospowers:cooked_taegore_meat"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:infected_guardian_tree",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 22,
+    "separation": 10,
+    "salt": 1380213109,
+    "spread_type": "linear",
+    "exclusion_zone": {
+      "other_set": "jaymospowers:outposts",
+      "chunk_count": 5
+    }
+  }
+}

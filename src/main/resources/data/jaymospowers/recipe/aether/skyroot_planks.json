@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymospowers:aether_logs"
+  ],
+  "result": {
+    "id": "jaymospowers:skyroot_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:disk",
+  "half_height": 0,
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 5,
+    "max_inclusive": 8
+  },
+  "state_provider": {
+    "id": "jaymospowers:arctic_ice"
+  },
+  "target": {
+    "type": "minecraft:matching_fluids",
+    "fluids": "minecraft:water"
+  }
+}
