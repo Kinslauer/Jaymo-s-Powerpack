@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion, (0.7.97) an Aether Giant) shows only to the players who've hit it: by hand, with an
+ * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion, (0.7.145) an Aether Giant) shows only to the players who've hit it: by hand, with an
  * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
  */
@@ -52,7 +52,7 @@ public final class BossBars {
 			// (0.7.142) the Nether forts' warlords and warbosses
 			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
 			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD
-			// (0.7.98) the Aether Giants
+			// (0.7.145) the Aether Giants
 			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity);
 	}
 

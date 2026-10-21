@@ -432,7 +432,7 @@ public final class ArsenalPocket {
 					list.add(new Portal(rift.pos.x, rift.pos.y, rift.pos.z, rift.yaw, rift.opened, voidRift, false));
 				}
 			}
-			// (0.13.36) the standing portals (Sneak + G menu) are drawn the same way
+			// (0.15.58) the standing portals (Sneak + G menu) are drawn the same way
 			ArsenalStanding.portalsNear(server, here, me, VIEW_DISTANCE, list);
 			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 				for (ArsenalGates.Gate gate : ArsenalGates.gates(player)) {

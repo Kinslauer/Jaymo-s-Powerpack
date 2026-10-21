@@ -285,7 +285,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.monsters.Monsters.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
-		// 0.7.97: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
+		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
 		com.jaymoskingdoms.remnants.Monoliths.register();
 		Encounters.register();
 		Sightings.register();

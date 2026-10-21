@@ -633,7 +633,7 @@ client half is `client/BeamClashClient`.
   inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
 - Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
 
-## 0.13.36: the way into the Aether (`power/wind/aether/WindAether.java`)
+## 0.15.58: the way into the Aether (`power/wind/aether/WindAether.java`)
 
 Wind is the power that gets you to the Aether, the way Chrono's Fast Forward gets you to the future. Lore: the Aether
 scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths and the four Giants).

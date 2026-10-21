@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.13.36) Arsenal's standing portals (the idea of Rick's Stuff's portal gun, built our own way). Sneak + G opens the
+ * (0.15.58) Arsenal's standing portals (the idea of Rick's Stuff's portal gun, built our own way). Sneak + G opens the
  * places menu (the client's {@code ArsenalPlacesScreen}); letting go over a place opens a pair of upright portals: one
  * {@link #NEAR_DISTANCE} blocks ahead of you, facing you, and one at the place, on safe ground near it. They stay open a
  * Minecraft day ({@link #LIFE}), saved with the world (an Overworld level attachment) so they survive restarts. Players,

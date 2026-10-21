@@ -61,7 +61,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  * vanilla boss), a trip to the Nether, the Wither, the Ender Dragon. Everyone near a great foe when it falls shares the
  * kill. A player can go back down at any time, a minute after their last change.
  * <p>
- * (0.7.97) The world itself has a tier too, its floor: no one plays below it. It starts at Hearth; the first of the
+ * (0.7.145) The world itself has a tier too, its floor: no one plays below it. It starts at Hearth; the first of the
  * Aether's Giants to fall ({@code remnants/Monoliths}) raises it to Borderlands, lifting everyone (and everyone who joins
  * later) up to it.
  */
@@ -199,7 +199,7 @@ public final class WorldTiers {
 		builder -> builder.persistent(Progress.CODEC).copyOnDeath().syncWith(Progress.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** When a player last changed tier (game time). Not saved. */
 	static final AttachmentType<Long> CHANGED = AttachmentRegistry.create(JaymosKingdoms.id("world_tier_changed"));
-	/** (0.7.97) The world's floor tier (its ordinal), on the Overworld: no player's tier is below it. */
+	/** (0.7.145) The world's floor tier (its ordinal), on the Overworld: no player's tier is below it. */
 	static final AttachmentType<Integer> FLOOR = AttachmentRegistry.create(JaymosKingdoms.id("world_tier_floor"), builder -> builder.persistent(Codec.INT));
 	/** The tier a hostile has taken (its ordinal). Saved with it. */
 	static final AttachmentType<Integer> MOB_TIER = AttachmentRegistry.create(JaymosKingdoms.id("mob_world_tier"), builder -> builder.persistent(Codec.INT));
@@ -315,7 +315,7 @@ public final class WorldTiers {
 			.withStyle(ChatFormatting.GOLD));
 	}
 
-	// ---- the world's floor (0.7.97) -------------------------------------------------------------------------------------
+	// ---- the world's floor (0.7.145) -------------------------------------------------------------------------------------
 
 	/** The world's floor tier (its ordinal): Hearth until the first of the Aether's Giants falls. */
 	public static int floor(MinecraftServer server) {

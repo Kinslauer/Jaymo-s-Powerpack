@@ -220,7 +220,7 @@ public final class ArsenalPower implements Power {
 		}
 		switch (key) {
 			case ABILITY_1 -> {
-				// (0.13.36) Sneak + R marks a place (an ascended Arsenal's pin comes first: held summoned weapon, or empty hand with a pin)
+				// (0.15.58) Sneak + R marks a place (an ascended Arsenal's pin comes first: held summoned weapon, or empty hand with a pin)
 				if (ArsenalPlaces.sneakKey(player)) {
 					if (!ArsenalArmory.tryPin(player)) {
 						ArsenalPlaces.mark(player);
@@ -230,7 +230,7 @@ public final class ArsenalPower implements Power {
 				}
 			}
 			case ABILITY_2 -> {
-				// (0.13.36) Sneak + G opens the places menu on the client (it sends the pick); no Return this time
+				// (0.15.58) Sneak + G opens the places menu on the client (it sends the pick); no Return this time
 				if (ArsenalPlaces.sneakKey(player)) {
 					return;
 				}

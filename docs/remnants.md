@@ -1,4 +1,4 @@
-# The Aether's remnants: monoliths and Giants (Kingdoms 0.7.98)
+# The Aether's remnants: monoliths and Giants (Kingdoms 0.7.145)
 
 ## The lore (Andy, 2026-10-20)
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces of that puzzle are the

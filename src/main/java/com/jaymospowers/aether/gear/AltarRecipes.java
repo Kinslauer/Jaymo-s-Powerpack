@@ -28,8 +28,12 @@ public final class AltarRecipes {
 
 	/** Shards needed to repair each repairable item. */
 	private static final Map<Item, Integer> REPAIRS = new HashMap<>();
+	/** What an item turns into; stacks are made only when asked for, since an ItemStack can't exist before the registries bind. */
+	private record Conversion(Item result, int fuel) {
+	}
+
 	/** Items that turn into something else. */
-	private static final Map<Item, Recipe> CONVERSIONS = new HashMap<>();
+	private static final Map<Item, Conversion> CONVERSIONS = new HashMap<>();
 
 	private AltarRecipes() {
 	}
@@ -77,7 +81,7 @@ public final class AltarRecipes {
 	}
 
 	private static void convert(Item from, Item to, int fuel) {
-		CONVERSIONS.put(from, new Recipe(new ItemStack(to), fuel));
+		CONVERSIONS.put(from, new Conversion(to, fuel));
 	}
 
 	/** The recipe for what is in the input slot, or null. */
@@ -94,7 +98,7 @@ public final class AltarRecipes {
 			fixed.setDamageValue(0);
 			return new Recipe(fixed, repair);
 		}
-		Recipe conversion = CONVERSIONS.get(input.getItem());
-		return conversion == null ? null : new Recipe(conversion.result().copy(), conversion.fuel());
+		Conversion conversion = CONVERSIONS.get(input.getItem());
+		return conversion == null ? null : new Recipe(new ItemStack(conversion.result()), conversion.fuel());
 	}
 }

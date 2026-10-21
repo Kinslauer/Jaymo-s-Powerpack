@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.13.36) The places an Arsenal user remembers, for the standing portals ({@link ArsenalStanding}). Marks: Sneak + R
+ * (0.15.58) The places an Arsenal user remembers, for the standing portals ({@link ArsenalStanding}). Marks: Sneak + R
  * marks where you stand, up to {@link #MAX} (the oldest goes when full). Recent: where you arrived after every
  * dimension change and every Arsenal teleport, up to {@link #MAX}, merged when within {@link #MERGE_RADIUS} blocks of
  * an entry already there. Both are saved, kept through death and synced to their owner for the menu. Newest first.

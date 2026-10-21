@@ -53,7 +53,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
-		// (0.7.97) the Aether's Giants
+		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		// 0.7.131: the Hornkin of the Nether

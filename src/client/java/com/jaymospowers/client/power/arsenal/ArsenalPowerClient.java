@@ -80,7 +80,7 @@ public final class ArsenalPowerClient implements PowerClient {
 		});
 	}
 
-	/** (0.13.36) Sneak + G (once B is unlocked): the places menu; it picks on letting go. The server skips Return for it. */
+	/** (0.15.58) Sneak + G (once B is unlocked): the places menu; it picks on letting go. The server skips Return for it. */
 	@Override
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		Minecraft minecraft = Minecraft.getInstance();

@@ -55,7 +55,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
-		// (0.13.36) the Aether: the rising gravitite block, quicksoil's speed cap
+		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);

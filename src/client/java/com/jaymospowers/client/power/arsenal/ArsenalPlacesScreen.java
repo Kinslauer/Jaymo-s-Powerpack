@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.13.36) Arsenal's places menu (Sneak + G, like Rig's radial): one slice for each remembered place, clockwise from
+ * (0.15.58) Arsenal's places menu (Sneak + G, like Rig's radial): one slice for each remembered place, clockwise from
  * the top, each showing its biome and coordinates, its dimension and how far away it is. The mouse wheel or Tab flips
  * between Marks (Sneak + R) and Recent arrivals. Let go of G over a slice (or click) and a pair of standing portals
  * opens there ({@code ArsenalStanding}); the last slice, "Close my portals", shows while any are open; the middle

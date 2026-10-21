@@ -37,7 +37,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.13.36) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating holystone islands under
+ * (0.15.58) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating holystone islands under
  * the Overworld's day and night, in sixteen biomes (Aether II's Holy Isles); see {@code docs/aether.md} and {@code docs/wind.md}).
  * <ul>
  * <li>A Wind user flying in the Overworld who climbs to within {@link #ASCEND_MARGIN} blocks of the top of the world, with

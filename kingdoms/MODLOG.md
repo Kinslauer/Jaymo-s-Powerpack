@@ -4061,7 +4061,7 @@ The last batch of the BWM port (MIT, our own code).
 - Skittish herds (`Herds`, entity tag `skittish`): hit a farm animal and others of its kind that can see it flee the
   attacker for about 4 s; sprinting or breaking blocks within 8 blocks spooks them (2 less per Soft Step rank;
   sneaking never does). Leashed, tamed and named animals ignore spooks but still flee when hit. Pens aren't detected.
-- **0.7.98, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
+- **0.7.145, the Aether's remnants: monoliths and their Giants:** Andy: "the aether scattered remnants of itself
   throughout the overworld, the last surviving puzzle pieces being the monoliths and their respective Giants, The
   Highfield Giant, Magnetic, Arctic, and Irradiated all spawn near one and increase world tier when the first is
   killed." Neither Ancient Remnants nor the Aether II runs on Fabric 26.3, so Andy chose a remake (`docs/remnants.md`).
@@ -4071,5 +4071,5 @@ The last batch of the BWM port (MIT, our own code).
   the Highfield gust, the Magnetic pull, the Arctic freeze, the Irradiated sickness. The first Giant slain in a world
   raises the world's floor tier to Borderlands for everyone (`WorldTiers.raiseFloor`); each counts as a great foe.
   Ancient Remnants' own monoliths count too if it's ever loaded (`AncientRemnantsCompat`). Ops: `/kingdom monolith
-  raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Built; not yet
-  compiled or seen in game.
+  raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Compiles against the real 26.3 jars;
+  not yet seen in game.

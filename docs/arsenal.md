@@ -501,7 +501,7 @@ taken from the creative tab have no enchantment.
 - **Ender step on players:** `randomTeleport` on a `ServerPlayer` from inside `AFTER_DAMAGE` (same as the existing
   blink).
 
-## 0.13.36: Emberborn rifts into the Nether
+## 0.15.58: Emberborn rifts into the Nether
 Emberborn (a Jaymo's Kingdoms heritage, read by reflection in `ArsenalEmber.emberborn`; false without Kingdoms) who use
 Pocket Arsenal get a Nether of their own. Everyone else, and Emberborn without Arsenal, is unchanged.
 - **Random rift:** until they have escaped, a Z rift opened in the Overworld is a Nether rift with chance
@@ -518,7 +518,7 @@ Pocket Arsenal get a Nether of their own. Everyone else, and Emberborn without A
   `ESCAPED`, `NETHER_MODE`. Rifts carry a `nether` flag; the client still draws them with the portal swirl (particles
   differ server-side only).
 
-## 0.13.36: standing portals
+## 0.15.58: standing portals
 Andy: Rick's Stuff's portal gun, "the portal radial menu, and placing semi permanent portals to places youve been".
 Ideas only; nothing is copied. All of it needs B unlocked (as Z and X do). Server logic: `ArsenalPlaces` (the places)
 and `ArsenalStanding` (the portal pairs); client: `ArsenalPlacesScreen` (the radial), opened from `ArsenalPowerClient.onKey`.
