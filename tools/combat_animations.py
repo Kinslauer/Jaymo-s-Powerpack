@@ -87,7 +87,7 @@ def spin(start, end, total, steps, part, channel, extra=None):
 
 
 # --- the quarterstaff ---------------------------------------------------------------------------------------------
-# (0.15.32) Every animation here was re-keyed: a wind-up before the hit and a follow-through after it, the head looking
+# (0.15.37) Every animation here was re-keyed: a wind-up before the hit and a follow-through after it, the head looking
 # toward the blade, the torso and the legs (a step or a weight shift) in on it, and eased curves. The hit's own
 # keyframe, beginTick, endTick and stopTick are as they were (Better Combat's damage window hangs on them).
 

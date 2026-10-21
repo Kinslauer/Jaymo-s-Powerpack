@@ -54,7 +54,7 @@ public final class CryoSlideClient {
 		return skating;
 	}
 
-	/** (0.15.32) The local skater's sideways velocity (blocks a tick), for the pose's lean ({@link CryoPose}). */
+	/** (0.15.37) The local skater's sideways velocity (blocks a tick), for the pose's lean ({@link CryoPose}). */
 	static Vec3 velocity() {
 		return velocity;
 	}

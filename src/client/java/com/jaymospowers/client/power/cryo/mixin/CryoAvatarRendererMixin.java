@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.32) The Cryokinesis poses go on the player's render state (CryoPose). */
+/** (0.15.37) The Cryokinesis poses go on the player's render state (CryoPose). */
 @Mixin(AvatarRenderer.class)
 abstract class CryoAvatarRendererMixin {
 	@Inject(
