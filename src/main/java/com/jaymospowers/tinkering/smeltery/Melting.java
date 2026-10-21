@@ -1,19 +1,29 @@
 package com.jaymospowers.tinkering.smeltery;
 
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.armory.TaczGuns;
 import com.jaymospowers.tinkering.PartType;
+import com.jaymospowers.tinkering.TinkerMaterial;
+import com.jaymospowers.tinkering.TinkerToolItem;
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.WeaponPartItem;
 import com.jaymospowers.tinkering.WeaponParts;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -90,7 +100,9 @@ public final class Melting {
 		new Alloy(Molten.ROSE_GOLD, 40, List.of(new Input(Molten.COPPER, 30), new Input(Molten.GOLD, 10))),
 		new Alloy(Molten.AMETHYST_BRONZE, 9, List.of(new Input(Molten.COPPER, 9), new Input(Molten.AMETHYST, 10))),
 		new Alloy(Molten.PIG_IRON, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.BLOOD, 5), new Input(Molten.HONEY, 5))),
-		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))));
+		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))),
+		// (0.15.22) vanilla's: four netherite scrap and four gold make an ingot of netherite
+		new Alloy(Molten.NETHERITE, 9, List.of(new Input(Molten.DEBRIS, 36), new Input(Molten.GOLD, 36))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/**
@@ -135,6 +147,11 @@ public final class Melting {
 		}
 		gear(Molten.COPPER, Items.COPPER_SWORD, Items.COPPER_PICKAXE, Items.COPPER_AXE, Items.COPPER_SHOVEL, Items.COPPER_HOE,
 			Items.COPPER_SPEAR, Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS);
+		// (0.15.22) netherite (its gear melts by the smithing recipe), and the scrap and debris it's alloyed from
+		add(Molten.NETHERITE, ingot, Items.NETHERITE_INGOT);
+		add(Molten.NETHERITE, Molten.BLOCK, Items.NETHERITE_BLOCK);
+		add(Molten.DEBRIS, ingot, Items.NETHERITE_SCRAP);
+		add(Molten.DEBRIS, ingot * ORE_INGOTS, Items.ANCIENT_DEBRIS);
 		add(Molten.AMETHYST, 100, Items.AMETHYST_SHARD);
 		add(Molten.AMETHYST, 400, Items.AMETHYST_BLOCK);
 		add(Molten.SLIME, 250, Items.SLIME_BALL);
@@ -178,10 +195,28 @@ public final class Melting {
 		}
 	}
 
-	/** What one of this item melts into, or null. */
+	/** What one of this item melts into, or null. (0.15.22) Worn gear melts into what's left of it. */
 	public static @Nullable Result of(ItemStack stack) {
 		Result result = builtIn(stack);
-		return result != null ? result : extra.get(stack.getItem());
+		if (result == null) {
+			result = extra.get(stack.getItem());
+		}
+		return result == null ? null : worn(stack, result);
+	}
+
+	/** (0.15.22) The share of a damaged item's metal that's left (at least a drop of its main liquid). */
+	private static Result worn(ItemStack stack, Result result) {
+		if (!stack.isDamageableItem() || !stack.isDamaged()) {
+			return result;
+		}
+		int max = stack.getMaxDamage();
+		int left = max - stack.getDamageValue();
+		Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+		for (Input part : result.parts()) {
+			liquids.merge(part.molten(), (int) ((long) part.amount() * left / max), Integer::sum);
+		}
+		Result scaled = Result.of(liquids);
+		return scaled != null ? scaled : new Result(result.molten(), 1);
 	}
 
 	/** The extras ({@link MeltingRecipes}), for sending to players. */
@@ -225,7 +260,53 @@ public final class Melting {
 				return new Result(molten, part.part.cost * Molten.INGOT);
 			}
 		}
-		return null;
+		if (stack.getItem() instanceof TinkerToolItem tool) {
+			// (0.15.22) a Tinkering tool: each metal part's worth
+			Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
+			List<TinkerMaterial> materials = ToolStats.materials(stack);
+			for (int i = 0; i < tool.type.parts.size() && i < materials.size(); i++) {
+				Molten molten = Molten.of(materials.get(i));
+				if (molten != null) {
+					liquids.merge(molten, tool.type.parts.get(i).part().cost * Molten.INGOT, Integer::sum);
+				}
+			}
+			return Result.of(liquids);
+		}
+		if (stack.getItem() instanceof CastItem) {
+			// (0.15.22) a gold cast took an ingot of gold
+			return new Result(Molten.GOLD, Molten.INGOT);
+		}
+		return tacz(stack);
+	}
+
+	/**
+	 * (0.15.22) Our flintlocks are TaCZ guns (one item, told apart by its gun id): what their recipes take. A modern gun
+	 * brought back from the future is this much iron; the Arsenal's summoned void flintlock doesn't melt.
+	 */
+	static final Map<String, Result> GUNS = Map.of(
+		"jaymospowers:musket", new Result(Molten.IRON, Molten.INGOT * 4),
+		"jaymospowers:blunderbuss", new Result(List.of(new Input(Molten.COPPER, Molten.INGOT * 6), new Input(Molten.IRON, Molten.INGOT * 2))),
+		"jaymospowers:flintlock_pistol", new Result(Molten.IRON, Molten.INGOT * 2));
+	static final Result MODERN_GUN = new Result(Molten.IRON, Molten.INGOT * 4);
+	/** Our TaCZ rounds, by ammo id: musket balls are 8 nuggets for 16, shot 9 nuggets for 8. */
+	static final Map<String, Result> AMMO = Map.of(
+		"jaymospowers:musket_ball", new Result(Molten.IRON, Molten.NUGGET * 8 / 16),
+		"jaymospowers:shot", new Result(Molten.IRON, Molten.NUGGET * 9 / 8));
+
+	private static @Nullable Result tacz(ItemStack stack) {
+		if (!TaczGuns.LOADED) {
+			return null;
+		}
+		Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		if (!"tacz".equals(id.getNamespace())) {
+			return null;
+		}
+		if (id.getPath().equals("modern_kinetic_gun")) {
+			String gun = TaczGuns.gunId(stack);
+			return gun.isEmpty() ? null : gun.startsWith(JaymosPowers.MOD_ID + ":") ? GUNS.get(gun) : MODERN_GUN;
+		}
+		CustomData data = id.getPath().equals("ammo") ? stack.get(DataComponents.CUSTOM_DATA) : null;
+		return data == null ? null : AMMO.get(data.copyTag().getStringOr("AmmoId", ""));
 	}
 
 	/** The alloy whose ingot this is, or null. */
@@ -292,6 +373,8 @@ public final class Melting {
 			case IRON -> Items.IRON_INGOT;
 			case GOLD -> Items.GOLD_INGOT;
 			case COPPER -> Items.COPPER_INGOT;
+			case NETHERITE -> Items.NETHERITE_INGOT;
+			case DEBRIS -> Items.NETHERITE_SCRAP;
 			default -> Tinkering.ALLOY_INGOTS.get(molten);
 		};
 		return item == null ? null : new ItemStack(item);
@@ -317,6 +400,7 @@ public final class Melting {
 			case GOLD -> new BasinResult(new ItemStack(Items.GOLD_BLOCK), Molten.BLOCK);
 			case COPPER -> new BasinResult(new ItemStack(Items.COPPER_BLOCK.weathering().unaffected()), Molten.BLOCK);
 			case SILVER -> new BasinResult(new ItemStack(Tinkering.SILVER_BLOCK), Molten.BLOCK);
+			case NETHERITE -> new BasinResult(new ItemStack(Items.NETHERITE_BLOCK), Molten.BLOCK);
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);

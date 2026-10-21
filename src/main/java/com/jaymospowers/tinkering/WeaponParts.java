@@ -24,8 +24,11 @@ import org.jspecify.annotations.Nullable;
  * tools/weapon_parts_assets.py.
  */
 public final class WeaponParts {
-	/** How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only. */
-	public enum Scheme { PREFIX, SUFFIX, SINGLE }
+	/**
+	 * How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only
+	 * (or, {@code SINGLE_COPPER}, copper only).
+	 */
+	public enum Scheme { PREFIX, SUFFIX, SINGLE, SINGLE_COPPER }
 
 	/**
 	 * What else the Tool Station needs besides the head, any material. (0.11.77) Andy: the big weapons take a Tough
@@ -106,13 +109,19 @@ public final class WeaponParts {
 				case PREFIX -> metal.prefixTier + "_" + base();
 				case SUFFIX -> base() + "." + metal.suffixTier;
 				case SINGLE -> metal == Metal.IRON ? base() : null;
+				case SINGLE_COPPER -> metal == Metal.COPPER ? base() : null;
 			};
 			return path == null ? null : BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath(namespace(), path)).orElse(null);
 		}
 
 		/** Whether its weapons are in the game at all (Balkon's need WeaponMod). */
 		public boolean loaded() {
-			return in(Metal.IRON) != null;
+			for (Metal metal : Metal.values()) {
+				if (metal.molten != null && in(metal) != null) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public Item item() {
@@ -158,6 +167,13 @@ public final class WeaponParts {
 		balkon("katana_blade", "katana", 2, Assembly.GUARD_ROD);
 		balkon("flail_head", "flail", 1, Assembly.ROD_BINDING);
 		balkon("boomerang_edge", "boomerang", 1, Assembly.ROD_BINDING);
+		// (0.15.22) Andy: "All tools need crafting routes through jaymos": the tools Tinkering doesn't make are forged too
+		add(new Kind("shear_blades", "minecraft:shears", Scheme.SINGLE, 2 * INGOT, Assembly.ALONE, 1));
+		add(new Kind("fire_striker", "minecraft:flint_and_steel", Scheme.SINGLE, INGOT, Assembly.BINDING, 1));
+		add(new Kind("fishing_hook", "minecraft:fishing_rod", Scheme.SINGLE, Molten.NUGGET, Assembly.ROD_BINDING, 1));
+		add(new Kind("brush_ferrule", "minecraft:brush", Scheme.SINGLE_COPPER, INGOT, Assembly.ROD_BINDING, 1));
+		// Pantry for Blockheads' kitchen knife (its own recipe is dropped by id, tinkering/Uncraftable)
+		add(new Kind("kitchen_knife_blade", "pantryforblockheads:knife", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
 	}
 
 	private WeaponParts() {

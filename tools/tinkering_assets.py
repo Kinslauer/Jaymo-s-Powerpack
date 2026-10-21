@@ -128,8 +128,12 @@ MOLTEN = [
     ("amethyst_bronze", "Molten Amethyst Bronze", "molten/alloy/amethyst_bronze"),
     ("pig_iron", "Molten Pig Iron", "molten/alloy/pig_iron"), ("slimesteel", "Molten Slimesteel", "molten/alloy/slimesteel"),
     ("slime", "Liquid Slime", "slime/earth"), ("honey", "Honey", "food/honey"), ("blood", "Blood", None),
+    # (0.15.22) netherite, and the scrap and debris it's alloyed from (Tinkers' tints its stone fluid for debris)
+    ("netherite", "Molten Netherite", "molten/alloy/netherite"), ("debris", "Molten Debris", "molten/stone"),
 ]
 BLOOD_TINT = (120, 8, 8)
+# plain fluids tinted: molten id to (r, g, b)
+TINTS = {"blood": BLOOD_TINT, "debris": (0x41 * 3, 0x1E * 3, 0x15 * 3)}
 
 # alloy ingots: our id, Tinkers' texture
 INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
@@ -488,12 +492,13 @@ def smeltery(tcon):
     for mid, _, folder in MOLTEN:
         src = os.path.join(tex, "fluid", folder if folder else "molten", "still.png")
         im = Image.open(src).convert("RGBA")
-        if folder is None:
+        if mid in TINTS:
+            tint = TINTS[mid]
             px = im.load()
             for y in range(im.size[1]):
                 for x in range(im.size[0]):
                     r, g, b, a = px[x, y]
-                    px[x, y] = (r * BLOOD_TINT[0] // 255, g * BLOOD_TINT[1] // 255 + 4, b * BLOOD_TINT[2] // 255 + 4, a)
+                    px[x, y] = (min(255, r * tint[0] // 255), min(255, g * tint[1] // 255 + 4), min(255, b * tint[2] // 255 + 4), a)
         save_molten(im, open(src + ".mcmeta").read(), mid)
     lava = os.path.join(tex, "fluid", "molten", "blaze", "still.png")
     Image.open(lava).convert("RGBA").crop((0, 0, 16, 16)).save(os.path.join(ASSETS, "textures", "gui", "tinkering", "molten", "lava.png"))
@@ -590,6 +595,9 @@ ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # dropped by tinkering/Uncraftable). (0.11.77) Andy: all weapons are forged, so stone and metal spears are put together
 # at the Tool Station from a Spear Tip (tinkering/WeaponParts)
 OFF_WEAPONS = ("diamond_spear", "stone_spear", "copper_spear", "iron_spear", "golden_spear")
+# (0.15.22) Andy: "All tools need crafting routes through jaymos": these are forged at the Tool Station from cast heads
+# too (tinkering/WeaponParts)
+OFF_FORGED_TOOLS = ("shears", "flint_and_steel", "fishing_rod", "brush")
 
 
 def vanilla_off():
@@ -610,6 +618,9 @@ def vanilla_off():
     for item in OFF_WEAPONS:
         write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
         write(os.path.join(MC_DATA, "advancement", "recipes", "combat", item + ".json"), off)
+    for item in OFF_FORGED_TOOLS:
+        write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
+        write(os.path.join(MC_DATA, "advancement", "recipes", "tools", item + ".json"), off)
 
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
