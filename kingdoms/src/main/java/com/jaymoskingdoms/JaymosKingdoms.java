@@ -340,6 +340,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
 		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
+		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
+		BeaconWatch.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();
