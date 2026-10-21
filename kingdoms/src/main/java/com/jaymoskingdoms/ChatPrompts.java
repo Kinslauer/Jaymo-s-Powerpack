@@ -74,7 +74,7 @@ public final class ChatPrompts {
 			Tempers.Temper t = Tempers.of(f);
 			sb.append(" It is ruled by ").append(ruler);
 			if (t != null) {
-				sb.append(", who is ").append(Tempers.describe(t).getString());
+				sb.append(", who is ").append(Tempers.describe(t, f).getString());
 			}
 			sb.append('.');
 		}

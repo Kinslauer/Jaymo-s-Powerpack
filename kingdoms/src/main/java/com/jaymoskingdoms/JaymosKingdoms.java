@@ -100,6 +100,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
+		Purists.register();
 		Frights.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
@@ -121,7 +123,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Theft.register();
 		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.130: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
 		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before

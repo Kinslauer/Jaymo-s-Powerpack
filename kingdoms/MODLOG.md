@@ -3815,3 +3815,25 @@ Our own take on Nightfall Plague (Forge/NeoForge, All Rights Reserved: only its 
   more bats and Bleeders about, and a pale miasma fog (`NightfallClient`, `MiasmaFogMixin`). `/kingdom nightfall
   start|stop` (ops).
 - Not remade: the music disc (it needs a song of its own), achievements, the cleric buying tusks.
+
+## 0.7.130: the Purist ruler (pack 0.15.38)
+Andy (2026-10-20): "Add a new king temper, Purist, they insist on a high population of its own heritage. Ridiculing
+and stepping over those who are not. Very prideful ruler". `Purists`, plus a column in `Tempers`, `Retinue` and
+`Approaches`.
+- **Who:** one ruler in 6 (`Tempers.PURIST_ONE_IN`), drawn on its own so every other ruler keeps the temper he had.
+  His blood (`Purists.blood`) comes from his id like his temper (any heritage, Heartlander likeliest); he's made of it.
+- **His people:** 85% born within 96 blocks of his seat are of his blood; every folk his realm sets up is; MCA guards
+  are drafted from his own kind first. `/kingdom info` says "a purist, proud of his X blood".
+- **On his rounds:** bread and praise for his own kind; anyone else gets a sneer and is pushed out of his path.
+- **His guards about him (`Retinue`):** his own blood may clasp his hand and gets a proud word, bread and +1 good name
+  once a day. Anyone else close is shoved and sneered at, and thrown out of the city (5 minutes) if they keep hanging
+  about (heat 60).
+- **Guards' business (`Approaches`):** two columns, `purist` (outsiders: searched and tolled often, 4-emerald toll,
+  10% haggle, refusing gets you shoved, bribes refused, insults drawn on) and `purist_kin` (never searched, 1-emerald
+  toll, friendly bouts). Guard lines name your blood and his (`%2$s`, `%3$s`).
+- **Townsfolk (`Purists.tick`):** his-blood folk jeer at an outsider, shoulder them aside when in the way, greet kin;
+  now and then turn on a neighbour of another blood in front of a player (who slinks off). Gossip: pride, or grumbles.
+- **Prices:** his land's traders charge outsiders 35% more (at least 1), kin 20% less (`VillagerPriceMixin` on
+  `Villager.updateSpecialPrices`). **Good name:** kin win it at 150% and lose at 75%; outsiders the reverse.
+- Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
+  harsh lean (+25) when he sentences an arrested crook.
