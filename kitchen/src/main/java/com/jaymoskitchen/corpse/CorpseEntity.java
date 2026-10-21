@@ -552,13 +552,13 @@ public class CorpseEntity extends Entity {
 		return this.entityData.get(LOOK);
 	}
 
-	/** (0.5.4) Who this was when alive (the dead mob's own id, from its look), so its grave can be found. */
+	/** (0.5.5) Who this was when alive (the dead mob's own id, from its look), so its grave can be found. */
 	public Optional<java.util.UUID> deadId() {
 		CompoundTag tag = parse(look());
 		return tag == null ? Optional.empty() : tag.read("UUID", net.minecraft.core.UUIDUtil.CODEC);
 	}
 
-	/** (0.5.4) A villager's body (vanilla's, MCA's, a wandering trader). */
+	/** (0.5.5) A villager's body (vanilla's, MCA's, a wandering trader). */
 	public boolean isVillager() {
 		EntityType<?> type = sourceType();
 		return type != null && type.builtInRegistryHolder().is(Corpses.VILLAGERS);

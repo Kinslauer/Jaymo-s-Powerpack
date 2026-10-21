@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * carried, and the scavengers nearby eat the meat off the ground, one piece at a time, until they're full. Tame animals
  * don't, and players' kills are left for the player.
  * <p>
- * (0.5.4) Zombies go for villagers' bodies first, and a zombie in a village doesn't leave a meal to chase the next
+ * (0.5.5) Zombies go for villagers' bodies first, and a zombie in a village doesn't leave a meal to chase the next
  * villager: only a player (or anything else) it's fighting pulls it off. A villager that's been eaten (by anything)
  * isn't buried: with MCA its tombstone is emptied again ({@link McaGraves}).
  */
@@ -64,7 +64,7 @@ public final class Scavengers {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && mob.is(SCAVENGERS)) {
 				Hunger hunger = new Hunger();
-				// (0.5.4) a zombie stops to feed even mid-chase (ahead of its attack), as long as it's only villagers it's after
+				// (0.5.5) a zombie stops to feed even mid-chase (ahead of its attack), as long as it's only villagers it's after
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(mob instanceof Zombie ? 1 : 6, new GnawGoal(mob, hunger));
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatMeatGoal(mob, hunger));
 			}
@@ -77,7 +77,7 @@ public final class Scavengers {
 			|| mob instanceof TamableAnimal tame && tame.isTame();
 	}
 
-	/** (0.5.4) Whether {@code mob} may feed with {@code target} about: a zombie leaves villagers be while it eats one. */
+	/** (0.5.5) Whether {@code mob} may feed with {@code target} about: a zombie leaves villagers be while it eats one. */
 	private static boolean feedingOver(Mob mob, net.minecraft.world.entity.LivingEntity target) {
 		return mob instanceof Zombie && target.is(Corpses.VILLAGERS);
 	}
@@ -224,7 +224,7 @@ public final class Scavengers {
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.5F);
 				java.util.Optional<java.util.UUID> villager = body.isVillager() ? body.deadId() : java.util.Optional.empty();
 				CARRION.addAll(body.tearApart(level));
-				// (0.5.4) nothing left of them to bury
+				// (0.5.5) nothing left of them to bury
 				villager.ifPresent(dead -> McaGraves.unbury(level, dead));
 				body = null;
 			}

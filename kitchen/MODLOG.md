@@ -836,7 +836,7 @@ after `Mill.register()`.
   or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
   actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
   count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
-- **0.5.4, zombies eat villagers:** Andy (2026-10-21): "zombies should also eat villagers, preventing a burial". A
+- **0.5.5, zombies eat villagers:** Andy (2026-10-21): "zombies should also eat villagers, preventing a burial". A
   zombie (husk, drowned, zombie villager) now stops to feed even mid-chase: `Scavengers`' gnaw goal sits ahead of its
   attack for zombies, and chasing a villager no longer counts as busy (a player or anything else it's fighting still
   pulls it off). Zombies go for villagers' bodies first (`villagers` entity tag). A villager eaten by anything isn't

@@ -6,7 +6,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.level.ServerLevel;
 
 /**
- * (0.5.4) Minecraft Comes Alive lays a dead villager in a tombstone in its village's graveyard the moment it dies (so
+ * (0.5.5) Minecraft Comes Alive lays a dead villager in a tombstone in its village's graveyard the moment it dies (so
  * its family mourns there, and the Staff of Life can raise it). One a zombie has eaten has nothing left to bury: its
  * tombstone is emptied again (the stone stays, free for the next), so there's no grave to mourn at and nobody to raise.
  * Only touches MCA when it's loaded.
