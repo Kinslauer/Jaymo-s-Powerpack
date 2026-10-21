@@ -67,6 +67,8 @@ public final class Recollections {
 		BEAT_YOU(1, 30, true, false, "%1$s beat you in a bout.", ""),
 		LOST_TO_YOU(0, 30, true, false, "You beat %1$s in a bout.", ""),
 		STRUCK(-3, 30, true, true, "%1$s struck you.", "%1$s struck %3$s."),
+		/** (0.7.121) {@link Retaliation}. */
+		PAID_OFF(1, 30, true, false, "%1$s struck you, then paid you to let the fight go.", ""),
 		CRIME(-3, 60, true, true, "You saw %1$s commit %2$s.", "%3$s saw %1$s commit %2$s."),
 		ROBBED(-4, 60, true, true, "%1$s tried to pick your pocket.", "%1$s tried to pick %3$s's pocket."),
 		KILLED_KIN(-12, 0, true, true, "%1$s killed %2$s, who was family to you.", "%1$s killed %2$s, family of %3$s."),
