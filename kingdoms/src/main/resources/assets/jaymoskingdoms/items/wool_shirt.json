@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/wool_shirt",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -1449005
+      }
+    ]
+  }
+}

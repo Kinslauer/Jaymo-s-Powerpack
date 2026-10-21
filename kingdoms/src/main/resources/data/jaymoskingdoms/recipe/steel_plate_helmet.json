@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "steel_plate_helmet",
+  "key": {
+    "S": "#c:ingots/steel",
+    "L": "#c:leather_straps"
+  },
+  "pattern": [
+    "SLS",
+    "S S"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:steel_plate_helmet"
+  }
+}

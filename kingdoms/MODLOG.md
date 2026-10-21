@@ -3771,3 +3771,12 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   bounty board (`Bounties.sentenced`), and `Crooks.SEEN` posts seen crooks there (`Bounties.crime`).
   A guard who's killed, downed or called away lets the crook bolt. Villages without folk guards still send golems.
 - Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.35.
+
+## 0.7.128: wool clothes and steel plate (Better With Mods batch 2, pack 0.15.36, Kitchen 0.5.8)
+- Wool cap, shirt, pants and socks (`WoolClothes`): dyeable light armour (0/1/1/0), crafted from wool, sold dyed by
+  shepherds. Each piece takes `WOOL_COLD_SHARE` (20%) off an Emberborn's cold weakness, slowness, freezing and cold
+  hunger, and (tag `jaymoskitchen:warm_clothing`) 20% off Kitchen's winter cold hunger for anyone.
+- Steel plate armour (`Armory`): 3/7/6/3 (19), toughness 2.5, knockback resistance 0.05, tagged `heavy_armor`. Made from
+  `#c:ingots/steel` (Powers 0.15.36) and `#c:leather_straps` (Kitchen 0.5.8), or with plain leather for 1-2 more steel.
+  Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
+  (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.

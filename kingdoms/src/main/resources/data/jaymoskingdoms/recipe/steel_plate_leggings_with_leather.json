@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "steel_plate_leggings",
+  "key": {
+    "S": "#c:ingots/steel",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "SSS",
+    "SLS",
+    "S S"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:steel_plate_leggings"
+  }
+}

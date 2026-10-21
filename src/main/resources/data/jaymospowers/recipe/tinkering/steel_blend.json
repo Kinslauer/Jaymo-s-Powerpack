@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "#minecraft:coals"
+  ],
+  "result": {
+    "id": "jaymospowers:steel_blend"
+  }
+}

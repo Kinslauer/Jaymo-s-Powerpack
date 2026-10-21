@@ -138,6 +138,10 @@ public final class WindJet {
 		// in a beam clash it ends at the knot: it doesn't blow the other stream away
 		double reach = com.jaymospowers.core.BeamClash.clamp(player, from, reach(level, player, from, look, RANGE));
 		Vec3 to = from.add(look.scale(reach));
+		if (player.tickCount % DOUSE_EVERY == 0 && reach < RANGE) {
+			// (Tinkering) a stream blown into a bellows pumps it
+			com.jaymospowers.tinkering.forge.BellowsBlock.gust(level, net.minecraft.core.BlockPos.containing(from.add(look.scale(reach + 0.1))));
+		}
 		// the smoke in its way is blown on and thinned; the fire in its way goes out
 		boolean douse = player.tickCount % DOUSE_EVERY == 0;
 		for (double t = 0.0; t <= reach; t += 1.5) {

@@ -2181,3 +2181,27 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   bare forearms, the ragged cut's holes and the like still show the skin. Over an MCA body the costume takes the very
   pose MCA's layers use and drops the root as they do (`CostumeBody.mcaPose`, `Worn.beforeDraw`), and the suit's bust
   follows MCA's again (`CostumeBody.bust`). Heads untouched (masks have eye holes); first person unchanged.
+- **0.15.36, Better With Mods batch 2: smithing (Kingdoms 0.7.128, Kitchen 0.5.8):** batch 2 of the BWM port (MIT,
+  our own code; plan in the "Better With Mods: what fits our pack" doc). Andy: steel gets both a netherite tier and a
+  trait; ore smelting in the furnace is slower.
+  - Brick kiln (`tinkering/kiln`): no kiln block. A space walled on 3+ sides and the top by bricks, nether bricks or
+    mud bricks, with heat under it (campfire/fire 1; soul campfire, lava, magma, a lit Forge Hearth 2), fires what you
+    right-click into it (`KilnLoadBlock`/`KilnLoadEntity`, sneak for the stack). 8 crack stages, each 20 + 60*(8-S)/8
+    ticks for S the summed 3x3 heat. Clay ball -> brick, clay -> terracotta, Unfired Pot (4 clay) -> decorated pot,
+    log -> charcoal (+25% a second), netherrack -> nether brick (heat 2), grout -> seared brick (2), Crucible Steel
+    Blend (2 iron + coal) -> steel ingot (2). Static table in `Kiln`; no JEI page yet.
+  - Furnace: raw ores and ore blocks (`jaymospowers:slow_smelt`) take 4x as long (`SlowOreSmeltMixin`,
+    `FURNACE_ORE_SLOWDOWN`). Blast furnace and Kitchen untouched.
+  - Bellows (`tinkering/forge`): pump by right-click (a little hunger) or a Wind Whistle gust (`WindJet` hook); for 5 s
+    the fire it faces counts +1 heat, and a smeltery controller or drain it faces melts twice as fast
+    (`SmelteryEntity.blow`). Forge Hearth: coal/charcoal (up to 8) at heat 2, lit by flint and steel or a fire charge,
+    or bare-handed by an Emberborn. Its fuel is lost if broken.
+  - Steel: `Molten.STEEL`, alloyed 1 iron + 1 pig iron (the smeltery can't hold coal) or fired from the crucible blend.
+    Ingot, nugget, block (c: tags), melting and casting like the other metals. `TinkerMaterial.STEEL`: 1500 durability,
+    speed 7, attack 3, netherite tier, trait Tempered (25% of wear doesn't land, not stacking; +1 damage a level
+    through armour on armoured targets). Art from `tools/gen_steel.py`, which must be re-run after
+    `tinkering_assets.py`/`armory_assets.py` (likewise `tools/gen_smithing.py`).
+  - Broadhead Arrow (`armory/BroadheadArrowItem`): 3 steel nuggets + stick + feather -> 4. 4 damage and a bleeding
+    body cut from the recurve bow, 60% from any other bow or a dispenser. Flies as a vanilla arrow.
+  - Linen bandages take `jaymospowers:bandage_cloth` (white wool or Kitchen's hemp cloth).
+  - Not built with Loom or played yet; javac 0 errors on all three mods.

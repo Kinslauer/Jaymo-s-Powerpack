@@ -68,6 +68,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Surveyor.register();
 		Designs.register();
 		Armory.register();
+		// knitted wool clothes: light armour that keeps the cold off an Emberborn
+		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else

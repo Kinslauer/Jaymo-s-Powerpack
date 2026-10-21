@@ -13,6 +13,10 @@
     "jaymoskingdoms:ronin_leggings": {"iron": 450},
     "jaymoskingdoms:ronin_boots": {"iron": 180},
     "jaymoskingdoms:chain_barding": {"iron": 550},
-    "jaymoskingdoms:plate_barding": {"iron": 4600}
+    "jaymoskingdoms:plate_barding": {"iron": 4600},
+    "jaymoskingdoms:steel_plate_helmet": {"steel": 360},
+    "jaymoskingdoms:steel_plate_chestplate": {"steel": 540},
+    "jaymoskingdoms:steel_plate_leggings": {"steel": 450},
+    "jaymoskingdoms:steel_plate_boots": {"steel": 180}
   }
 }
