@@ -53,8 +53,8 @@ public class FlyingCow extends WingedAnimal {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new SpookPanicGoal(2.0));
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.2, AetherAnimals::isAnimalFood, false));
-		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, AetherAnimals::isAnimalFood, false));
+		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.25));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));

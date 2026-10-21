@@ -54,6 +54,8 @@ public class Kirrid extends ZoneAnimal {
 	/** Hops: how far up and forward, and the wait on the ground after one (ticks). */
 	public static final double HOP_UP = 0.46, HOP_FORWARD = 0.27;
 	public static final int HOP_WAIT = 10;
+	/** At or above this move speed a hop waits 1 tick after landing instead of HOP_WAIT. */
+	public static final double FAST_HOP_SPEED = 0.6;
 	/** Wool: how long it takes to grow back (ticks), what each patch grazed takes off that, and the shearing yield. */
 	public static final int WOOL_REGROW = 2400, GRAZE_SHAVE_MIN = 30, GRAZE_SHAVE_SPREAD = 30, WOOL_MIN = 1, WOOL_MAX = 3;
 	/** Grazing: the wait between meals (ticks), how long a meal is, and the tick the grass goes. */
@@ -92,7 +94,7 @@ public class Kirrid extends ZoneAnimal {
 		this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, AetherAnimals::isAnimalFood, false));
 		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.25));
 		this.goalSelector.addGoal(6, new GrazeGoal());
-		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
+		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.5));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
 	}
@@ -193,7 +195,7 @@ public class Kirrid extends ZoneAnimal {
 				float scale = 0.5F + this.random.nextFloat() * 0.5F;
 				Vec3 motion = this.getDeltaMovement();
 				this.setDeltaMovement(motion.x + look.x * HOP_FORWARD * scale * 2, HOP_UP * (0.7 + 0.3 * scale), motion.z + look.z * HOP_FORWARD * scale * 2);
-				this.hopWait = HOP_WAIT;
+				this.hopWait = this.getMoveControl().getSpeedModifier() < FAST_HOP_SPEED ? HOP_WAIT : 1;
 			}
 		}
 	}

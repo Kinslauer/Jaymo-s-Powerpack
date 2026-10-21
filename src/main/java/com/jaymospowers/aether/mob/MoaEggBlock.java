@@ -1,6 +1,8 @@
 package com.jaymospowers.aether.mob;
 
 import com.jaymospowers.aether.AetherFlora;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -128,6 +131,12 @@ public class MoaEggBlock extends Block {
 			chick.setHome(pos);
 			level.addFreshEntity(chick);
 		}
+	}
+
+	/** One egg of this block's kind (the loot table is empty; block_state_property is not a 26.3 loot condition). */
+	@Override
+	protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+		return List.of(new ItemStack(Moa.eggOf(kindOf(state))));
 	}
 
 	@Override
