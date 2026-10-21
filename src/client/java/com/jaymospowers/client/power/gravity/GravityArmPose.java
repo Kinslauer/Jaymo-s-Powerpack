@@ -41,6 +41,8 @@ public final class GravityArmPose {
 		}
 		Entity self = minecraft.level.getEntity(avatar.id);
 		if (self != null && slam(humanoid, avatar, self, minecraft.level.getGameTime())) {
+			// the grip lets go as the slam starts, so it eases off underneath instead of popping back after
+			BLEND.track(avatar.id, false);
 			return;
 		}
 		Integer grip = self == null ? null : self.getAttached(GravityPower.GRIP);

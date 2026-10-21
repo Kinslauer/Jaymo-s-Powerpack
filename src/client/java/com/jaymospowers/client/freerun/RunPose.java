@@ -71,7 +71,8 @@ public final class RunPose {
 	public static void extractAvatar(Avatar entity, AvatarRenderState state, float partialTicks) {
 		boolean slide = entity instanceof Player player && Slide.sliding(player);
 		PoseBlend.Track track = SLIDE_BLEND.track(entity.getId(), slide);
-		if (track == null || !slide) {
+		// while easing out too, unless it's become a real crawl (a low ceiling), which vanilla tilts as usual
+		if (track == null || !slide && entity.isVisuallySwimming()) {
 			return;
 		}
 		state.isVisuallySwimming = false;
