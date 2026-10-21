@@ -52,6 +52,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Disguise.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
+		// (0.7.103) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows, and the mobs' state
+		LOGGER.debug("mob senses attachment: {}", Senses.TRACK);
+		Senses.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
