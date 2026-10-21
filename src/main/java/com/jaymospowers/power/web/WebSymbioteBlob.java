@@ -128,6 +128,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** The red one: it goes for anything living this close, and this share of its lashes at a mob it could take take it instead. */
 	static final double RED_AGGRO_RANGE = 10.0;
 	static final float RED_TAKE_CHANCE = 0.3F;
+	/** (0.15.52) The share of the times it could take a player that it does, rather than attack them (white always does). */
+	static final float RED_BOND_CHANCE = 0.3F, BLACK_BOND_CHANCE = 0.8F;
 
 	public static EntityType<WebSymbioteBlob> TYPE;
 
@@ -464,6 +466,11 @@ public class WebSymbioteBlob extends PathfinderMob {
 			if (!this.wants(player, Vec3.atCenterOf(this.getHomePosition()))) {
 				return;
 			}
+			if (!this.takes()) {
+				// (0.15.52) not this time: it goes for them instead (and tries again with every lash: defend)
+				this.marks(player);
+				return;
+			}
 			WebSymbiote.bond(player, this.position(), this.strain());
 		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
 			WebBehemoth.possess(level, mob);
@@ -514,6 +521,19 @@ public class WebSymbioteBlob extends PathfinderMob {
 		}
 	}
 
+	/**
+	 * (0.15.52) Andy: "Red should have a 30% chance to bond, every other time it still attacks, black is more curious and
+	 * will bond instead of attack 80%". Rolled each time it could take a player (reaching them, or each lash).
+	 */
+	private boolean takes() {
+		float chance = switch (this.strain()) {
+			case RED -> RED_BOND_CHANCE;
+			case BLACK -> BLACK_BOND_CHANCE;
+			case WHITE -> 1.0F;
+		};
+		return this.random.nextFloat() < chance;
+	}
+
 	/** Burning with nobody to blame: whoever stands nearest set it, as far as it's concerned. */
 	private void blameNearest(ServerLevel level) {
 		level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(BLAME_RANGE), this::hunts).stream()
@@ -534,7 +554,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		Vec3 to = foe.position().add(0.0, foe.getBbHeight() * 0.6, 0.0);
 		this.tendril(level, from, to);
 		this.getLookControl().setLookAt(foe, 90.0F, 90.0F);
-		if (foe instanceof ServerPlayer player && this.wants(player, player.position())) {
+		if (foe instanceof ServerPlayer player && this.wants(player, player.position()) && this.takes()) {
 			// it goes for the one it was always after: up the tendril and in
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
 			Shakes.send(player, 8.0F, from);
