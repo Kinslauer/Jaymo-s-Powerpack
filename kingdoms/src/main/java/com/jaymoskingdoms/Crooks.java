@@ -73,8 +73,9 @@ import org.jspecify.annotations.Nullable;
  * "fetch your goods", and a moment later they crow about it over their head.
  *
  * <p>A crime someone sees (a neighbour, a guard, a golem, or the victim noticing) has the witness cry out, the guards and
- * golems about set on the crook, the crook run, and makes them a known criminal ({@link #NOTORIETY}, the
- * {@link #CRIMINAL_TAG}, and {@link #SEEN} for the bounty board). Whatever they took from a player is owed back
+ * golems about set on the crook (where a realm keeps guards, one arrests them instead: {@link Arrests}), the crook
+ * run, and makes them a known criminal ({@link #NOTORIETY}, the {@link #CRIMINAL_TAG}, and {@link #SEEN} for the bounty
+ * board). Whatever they took from a player is owed back
  * ({@link Owed}): right-click them within {@link #CONFRONT_TICKS} to confront them, and they either hand it back or bolt;
  * down them (or kill them) and it falls out of their pockets, back to you. Hitting or killing a crook who robbed you, or a
  * known criminal, is no crime ({@link #fairGame}).
@@ -404,7 +405,7 @@ public final class Crooks {
 	/** Free to get up to something: awake, up, not trading, talking, running, panicking, tending or fighting. */
 	private static boolean free(Villager v) {
 		return !v.isSleeping() && !Downed.isDowned(v) && !Downed.helping(v) && !v.isTrading() && !Approaches.talking(v)
-			&& !JOBS.containsKey(v.getUUID()) && !RUNS.containsKey(v.getUUID()) && v.getLastHurtByMob() == null
+			&& !JOBS.containsKey(v.getUUID()) && !RUNS.containsKey(v.getUUID()) && !Arrests.held(v) && v.getLastHurtByMob() == null
 			&& !v.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY);
 	}
 
@@ -755,6 +756,11 @@ public final class Crooks {
 			Speech.say(level, witness, line("cry." + cry, random), Speech.RED, Approaches.SPEECH_RANGE);
 		}
 		known(level, crook, f.id(), note);
+		if (Arrests.arrest(level, crook, f, cry)) {
+			// (0.7.124) a realm's guards take them alive, for the ruler to judge; they run for it meanwhile
+			run(level, crook, witness.position());
+			return;
+		}
 		for (Folk guard : level.getEntitiesOfClass(Folk.class, crook.getBoundingBox().inflate(CHASE_RANGE),
 			g -> g.isAlive() && g.factionId() == f.id() && g.combatant())) {
 			if (guard.getTarget() == null || !guard.getTarget().isAlive()) {
@@ -792,6 +798,17 @@ public final class Crooks {
 		Vec3 to = crook.position().add(away.normalize().scale(RUN_DISTANCE));
 		RUNS.put(crook.getUUID(), new Run(crook, to, level.getGameTime() + RUN_TICKS));
 		BehaviorUtils.setWalkAndLookTargetMemories(crook, BlockPos.containing(to), RUN_SPEED, 2);
+	}
+
+	/** (From {@link Arrests}) {@code crook} makes off, away from {@code from}. */
+	static void flee(ServerLevel level, Villager crook, Vec3 from) {
+		run(level, crook, from);
+	}
+
+	/** (From {@link Arrests}) {@code crook} stops running: they've been taken. */
+	static void stopRunning(Villager crook) {
+		RUNS.remove(crook.getUUID());
+		crook.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 	}
 
 	/** Done unseen: they wander off as if nothing happened. */
