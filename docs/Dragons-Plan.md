@@ -48,11 +48,16 @@ have wind control, a tamed dragon, an unlocked heritage, arsenal, chrono or dark
 
 ## Build order
 1. **Notus, end to end** (Kingdoms 0.7.137): built, below.
-2. **Boreas and Zephyrus**: the same body, riding and taming, each with its own shape, breath, home and personality.
+2. **Boreas and Zephyrus** (also 0.7.137): the same body, riding and taming, each with its own shape, breath, home
+   and personality. Built, below.
 3. **Eurus and Aeolus**: the villagers in disguise (MCA), their questions and reveal, Eurus as a dragon, Aeolus as the
    boss, then eggs and hatchlings.
 
 ## What's built (0.7.137, not yet seen in game)
+- `dragons/WindDragon` holds what every wind dragon shares (all of the below but the breath, food, bond, home and
+  body); a species overrides its hooks (`favourite`, `breathe`, `bondFactor`, `seat`, `cruiseSpeed`, `perchable`...).
+  `BoreasDragon` + `DragonFrost` (frost cone; peaks), `ZephyrusDragon` + `DragonAcid` (acid gobs and puddles; perches in
+  water, swims). Client: one `WindDragonRenderer`, a model per species, art from `tools/gen_<species>.py`.
 - `dragons/NotusDragon` (extends `AbstractHorse`, so it's an `OwnableEntity` with the horse's saddle slot and inventory
   screen, as `WarElephant`), `DragonBreath` (the cone, shared), `DragonLook` (the variation, shared), `Dragons`
   (registration, the rider's `Breathe` packet, the Nether's deltas, `/kingdom dragon [tame]` for ops, the spawn egg).
@@ -69,6 +74,4 @@ have wind control, a tamed dragon, an unlocked heritage, arsenal, chrono or dark
 ## Left for later
 - Notus: Kindle not scaring it (a Powers tie-in), whistling it to you, barrel rolls (A A), armour for it, its own
   sounds, eggs.
-- The R key is shared with Powers' first ability key: both fire in the saddle. Either a Powers-side check (skip ability
-  1 while steering a dragon, through a compat check) or a different default.
-- Boreas, Zephyrus, Eurus, Aeolus, eggs and hatchlings (phases 2 and 3).
+- Eurus, Aeolus, eggs and hatchlings (phase 3). Boreas: its frost freezing Smoke's smoke into fog (a Powers tie-in).
