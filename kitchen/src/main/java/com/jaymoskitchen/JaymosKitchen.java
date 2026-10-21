@@ -58,6 +58,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
+		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();
