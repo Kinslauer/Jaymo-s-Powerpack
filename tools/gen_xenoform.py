@@ -1042,7 +1042,67 @@ def nadir():
     save(img, "entity/xenoform_nadir.png")
 
 
-FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir")
+def duplex():
+    """Riveted copper gone green at the edges: a stocky copper body with seams and rivets, verdigris creeping in
+    patches, pale cyan eyes in a dark visor slot, a darker copper belt with a bright buckle, a lightning rod with a
+    polished ball tip on its head, and the insignia on its chest."""
+    img = new_skin()
+    copper = (190, 104, 66)
+    seam = shade(copper, 0.62)
+    rivet = (238, 170, 120, 255)
+    verdigris = (88, 168, 136)
+    parts(img, copper, 0.14)
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            x0, y0, x1, y1 = b
+            # a seam round each face, a rivet at its corners, and verdigris creeping in from an edge or two
+            outline(img, b, seam)
+            for (x, y) in ((x0, y0), (x1 - 1, y0), (x0, y1 - 1), (x1 - 1, y1 - 1)):
+                if x1 - x0 > 2 and y1 - y0 > 2:
+                    img.putpixel((x, y), rivet)
+            for _ in range(rng.randrange(1, 3)):
+                cx, cy = rng.choice(((x0, rng.randrange(y0, y1)), (x1 - 1, rng.randrange(y0, y1)), (rng.randrange(x0, x1), y1 - 1)))
+                for y in range(y0, y1):
+                    for x in range(x0, x1):
+                        d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                        if d < 2.6 and rng.random() < 0.75:
+                            img.putpixel((x, y), lerp(img.getpixel((x, y)), verdigris + (255,), 0.85 * (1 - d / 3.2)))
+            speckle(img, b, shade(copper, 1.18), (x1 - x0) * (y1 - y0) // 14)
+    # plates across the chest and the shins, split by a seam
+    bx0, by0, bx1, by1 = front(BODY)
+    rect(img, (bx0 + 1, by0 + 6, bx1 - 1, by0 + 7), seam)
+    for part in LEGS + ARMS:
+        x0, y0, x1, y1 = front(part)
+        rect(img, (x0, y0 + 6, x1, y0 + 7), seam)
+    # the face: a dark visor slot with two pale cyan eyes, a riveted jaw line
+    rect(img, (9, 10, 15, 13), (40, 22, 16, 255))
+    rect(img, (10, 11, 12, 12), (170, 245, 240, 255))
+    rect(img, (13, 11, 15, 12), (170, 245, 240, 255))
+    img.putpixel((10, 11), (235, 255, 255, 255))
+    img.putpixel((13, 11), (235, 255, 255, 255))
+    rect(img, (9, 14, 15, 15), seam)
+    img.putpixel((9, 14), rivet)
+    img.putpixel((14, 14), rivet)
+    chest_insignia(img, rim=(60, 30, 18, 255))
+    # extras: rod 1x4x1 at (0,64); ball tip 2x2x2 at (8,64); belt 9x2x5 at (0,72)
+    rod = (0, 64, 1, 4, 1)
+    box(img, rod, shade(copper, 0.9), 0.1)
+    knob = (8, 64, 2, 2, 2)
+    box(img, knob, (232, 150, 96), 0.08)
+    for name, (x0, y0, x1, y1) in faces(*knob).items():
+        img.putpixel((x0, y0), (255, 214, 170, 255))
+    belt = (0, 72, 9, 2, 5)
+    box(img, belt, shade(copper, 0.7), 0.1)
+    for name, b in faces(*belt).items():
+        speckle(img, b, verdigris + (255,), 3)
+    lx0, ly0, lx1, ly1 = front(belt)
+    rect(img, (lx0 + 3, ly0, lx0 + 6, ly1), (240, 196, 110, 255))
+    rect(img, (lx0 + 4, ly0, lx0 + 5, ly1), (120, 70, 40, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_duplex.png")
+
+
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir", "duplex")
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
@@ -1052,6 +1112,7 @@ EXTRAS_IN_FRONT = {
     "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
     "knell": (((8, 64, 10, 8, 2), (7, 9)), ((0, 76, 12, 3, 5), (6, 6))),
     "nadir": (((0, 64, 12, 4, 6), (6, 7)),),
+    "duplex": (((0, 72, 9, 2, 5), (7, 17)),),
 }
 
 
@@ -1088,6 +1149,7 @@ if __name__ == "__main__":
     knell()
     wyrm()
     nadir()
+    duplex()
     band_worn()
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:

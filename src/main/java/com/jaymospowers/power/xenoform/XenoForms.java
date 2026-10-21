@@ -2,6 +2,7 @@ package com.jaymospowers.power.xenoform;
 
 import com.jaymospowers.power.xenoform.forms.Velox;
 import com.jaymospowers.power.xenoform.forms.Bulwark;
+import com.jaymospowers.power.xenoform.forms.Duplex;
 import com.jaymospowers.power.xenoform.forms.Gremlin;
 import com.jaymospowers.power.xenoform.forms.Knell;
 import com.jaymospowers.power.xenoform.forms.Nadir;
@@ -18,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Every alien the band knows, in dial order. The first {@link #STARTERS} are the ones a fresh band comes with one of;
  * the rest are scanned from the creatures that carry their DNA. Stage 1 shipped Bulwark, Pyre and Blur (now Velox); stage 2 added Prism, Wisp,
- * Gremlin, Knell (scanned from a Warden) and Wyrm (from the Ender Dragon); stage 3 Nadir, the void alien the voices give.
+ * Gremlin, Knell (scanned from a Warden) and Wyrm (from the Ender Dragon); stage 3 Nadir, the void alien the voices give; then Duplex (from a copper golem).
  */
 public final class XenoForms {
 	private static final Map<String, XenoForm> ALL = new LinkedHashMap<>();
@@ -33,6 +34,7 @@ public final class XenoForms {
 	public static final XenoForm GREMLIN = register(new Gremlin());
 	public static final XenoForm KNELL = register(new Knell());
 	public static final XenoForm WYRM = register(new Wyrm());
+	public static final XenoForm DUPLEX = register(new Duplex());
 	/** The void alien: no creature carries it; the two voices give it ({@link XenoVoices}). */
 	public static final XenoForm NADIR = register(new Nadir());
 

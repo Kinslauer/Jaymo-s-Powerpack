@@ -44,6 +44,7 @@ final class XenoformHud {
 		"gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE},
 		"knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT},
 		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE},
+		"duplex", new Item[] {Items.COPPER_INGOT, Items.LIGHTNING_ROD.asList().get(0), Items.COPPER_BULB.asList().get(0), Items.HONEYCOMB},
 		"nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER});
 	/** The slam's burst of light: where the band is on screen (shares of the width and height), how big it blooms (share of the height), its layers and row height. */
 	private static final float BURST_X = 0.52F, BURST_Y = 0.74F, BURST_SIZE = 0.4F;

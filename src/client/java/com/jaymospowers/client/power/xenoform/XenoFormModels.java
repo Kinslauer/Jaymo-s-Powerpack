@@ -52,6 +52,7 @@ public final class XenoFormModels {
 			MODELS.put("knell", new Knell());
 			MODELS.put("wyrm", new Wyrm());
 			MODELS.put("nadir", new Nadir());
+			MODELS.put("duplex", new Duplex());
 		}
 		return MODELS.get(form);
 	}
@@ -338,6 +339,37 @@ public final class XenoFormModels {
 			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F
 				+ Math.max(0.0F, m.fall()) * 0.9F * m.air() + m.land() * 0.25F;
 			this.mantle.zRot = -m.trail() * 0.3F;
+		}
+	}
+
+	/** Duplex: stocky and riveted, a copper belt, and a lightning rod with a ball tip on its head that sways as it walks. */
+	static final class Duplex extends FormModel {
+		private final ModelPart rod;
+
+		Duplex() {
+			super(bake(mesh()), "duplex");
+			this.rod = this.head.getChild("rod");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition rod = root.getChild("head").addOrReplaceChild("rod", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+				PartPose.offset(0.0F, -8.4F, 0.0F));
+			rod.addOrReplaceChild("knob", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F), PartPose.offset(0.0F, -4.0F, 0.0F));
+			root.getChild("body").addOrReplaceChild("belt", CubeListBuilder.create().texOffs(0, 72).addBox(-4.5F, 9.0F, -2.5F, 9.0F, 2.0F, 5.0F, new CubeDeformation(0.4F)),
+				PartPose.ZERO);
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the rod nods with each step, lags a turn and whips back on landing
+			float step = Mth.sin(state.walkAnimationPos * 0.6662F * 2.0F) * 0.12F * state.walkAnimationSpeed;
+			this.rod.xRot = step - m.land() * 0.4F + Math.max(0.0F, m.fall()) * 0.3F * m.air();
+			this.rod.zRot = -m.trail() * 0.35F + Mth.sin(state.ageInTicks * 0.05F) * 0.03F;
 		}
 	}
 

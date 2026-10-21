@@ -2040,3 +2040,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   scoreboard teammates (`XenoForm.spared`). The first-person slam is rebuilt (`XenoformSlamView`): forearm up across
   the view with the band face up, the dial pops as a glowing cap, the palm drops onto it, a dip, a view kick and a
   green burst. Compile-checked against the 26.3 jars only; not yet run in game.
+- **Duplex, a duplicating alien from copper golems:** Andy asked for a "Ditto" Xeno using copper golems. Like Velox it
+  takes no borrowed name: **Duplex** (`forms/Duplex.java`, id `duplex`, scanned from a copper golem). 0.9x, 18 hp, fists
+  3. R Split: a double steps out (`XenoDouble`, 6 hp, fists 3, never saved; it pops when you stop being Duplex or leave),
+  up to 3; doubles go for what you hit and what hits you, and a loyal one's death costs you 2. G Rally (aimed target
+  within 16, or come back), V Switch (trade places with the aimed or farthest double), B Merge (doubles pop back into
+  you, 3 health each). Ultimate Copper Storm: fills to 3 doubles, visual-only lightning on each, 6 damage within 3 of a
+  double, doubles charged (Speed II, Strength, Glowing) for 20 s, up to 6 doubles meanwhile; again every 20 s.
+  Corrupted: every fourth split is a red rogue that hunts you. Copper body with seams, rivets and verdigris, a swaying
+  lightning rod, pale cyan eyes (`XenoFormModels.Duplex`, `gen_xenoform.duplex`, `XenoDoubleRenderer`). A complete band
+  is now 9 aliens; anyone already ascended stays ascended. Compile-checked against the 26.3 jars; not yet run in game.

@@ -156,7 +156,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 |---|---|---|---|---|---|
 | 152 | Getting it | | Falling star | On a clear night a star may fall near you (40–100 blocks off, once a day per world at most). Mine the Fallen Star in its crater with an iron pickaxe: 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Right-click the band on (powerless survival players get the power at once). | |
 | 153 | Band | Z | Dial / Slam | Hold: the wrist comes up; scroll to turn the dial through the aliens the band holds. Let go: the band slams and you become the dialled alien. As an alien, hold 0.5 s to turn back. A form lasts a random 1–5 min until fully mastered, then 5; beeps through the last 10 s. At zero health you're knocked back into yourself; the band recharges 1 min (2 after a knockout). Fists only while changed. | |
-| 154 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Velox, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm. | |
+| 154 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Velox, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm, copper golem = Duplex. | |
 | 155 | Bulwark | R | Fist Combo | 3 blows at 4 ticks, 5 damage each, the last one shoves. 2 s. | |
 | 156 | Bulwark | G | Ground Clap | 6 damage and a shove to all within 5 blocks, debris ring. 8 s. | |
 | 157 | Bulwark | V | Grab and Throw | Lift the creature you look at overhead; V again hurls it at 1.5 blocks/tick. Looking at the ground rips a 4-block chunk out and throws it. 1 s. | |
@@ -192,7 +192,11 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 187 | Wyrm | V | Wing Gust | 3 damage and a 1.6 shove to all within 6 blocks; you recoil. 6 s. | |
 | 188 | Wyrm | B | Rift | Teleport up to 12 blocks where you look. 4 s. | |
 | 189 | Wyrm | passive | Of the End | Water and rain do 1 hp/s. | |
-| 190 | Any | passive | Ascension | The power ascends once all 8 aliens are scanned and the power is fully mastered. C then works as an alien. | |
+| 189a | Duplex | R | Split | **New in 0.15.5.** A double of you steps out (up to 3). Each has 6 health, follows you and fights what you hit and what hits you. If one dies, you take 2. 2 s. | |
+| 189b | Duplex | G | Rally | Your doubles go for the creature you aim at, up to 16 blocks; aimed at nothing, they come back. 1 s. | |
+| 189c | Duplex | V | Switch | Trade places with the double you aim at, or the farthest one. 2 s. | |
+| 189d | Duplex | B | Merge | Every double within 24 blocks runs back into you; each heals you 3. 8 s. | |
+| 190 | Any | passive | Ascension | The power ascends once all 9 aliens are scanned (anyone already ascended stays so) and the power is fully mastered. C then works as an alien. | |
 | 191 | Any | C (ascended) | Ultimate | As an alien: become its Ultimate form for the rest of the timer. C again is the Ultimate's own move where it has one. | |
 | 192 | Bulwark | C | Titan | 2x size, +12 armour, +20 health; the Ground Clap smashes walls up to 3 blocks thick ahead of you. | |
 | 193 | Pyre | C | Sunheart | The Flame Jet flies 45% faster; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
@@ -202,6 +206,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 197 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |
 | 198 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
 | 199 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust reaches 50% farther. | |
+| 199a | Duplex | C | Copper Storm | A full set of doubles, then lightning on each: 6 damage to everything within 3 of them, and they're charged (fast, strong, glowing) for 20 s; up to 6 doubles meanwhile. C again every 20 s. Corrupted: one split in 4 is a red rogue that hunts you. | |
 | 200 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
 | 201 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band, in rounds that never end: two pairs of conflicting yes/no questions (each wants a yes; 6 pairs, changing by round), then a deed each (odd rounds: 3 changes without a blow, 12 lives as an alien; even rounds: 3 changes ended by hand, 2 knockouts taken). Then Nadir may be slammed once; when that change ends, the next round begins. | |
 | 202 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |

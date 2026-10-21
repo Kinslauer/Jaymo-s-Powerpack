@@ -178,6 +178,10 @@ public final class XenoformPower implements Power {
 		public @Nullable UUID beaconTarget;
 		public int beaconHeld;
 		public long beaconTapAt;
+		/** Duplex: its doubles (entity ids), how many it has split off this change (every few corrupted ones go rogue), and when Copper Storm's charge wears off. */
+		public final List<Integer> doubles = new ArrayList<>();
+		public int splits;
+		public long chargedUntil;
 
 		void clearForm() {
 			form = null;
@@ -224,6 +228,9 @@ public final class XenoformPower implements Power {
 			hurt = false;
 			beaconTarget = null;
 			beaconHeld = 0;
+			doubles.clear();
+			splits = 0;
+			chargedUntil = 0L;
 			hudDirty = true;
 		}
 	}
@@ -237,6 +244,7 @@ public final class XenoformPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		XenoNet.register();
+		XenoDouble.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();
 		FallingStars.init();
