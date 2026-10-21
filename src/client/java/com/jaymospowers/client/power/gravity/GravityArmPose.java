@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.client.PoseBlend;
 import com.jaymospowers.power.gravity.GravityPower;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
@@ -14,9 +15,19 @@ import net.minecraft.world.phys.Vec3;
 /**
  * A gravity user holding something with Lift reaches out for it: the main arm points straight at the held creature's
  * head (raised high for a choke). A slam throws the arm up overhead as the creature is hauled up, then brings it down
- * hard as it plummets. Everyone's, from the synced grip and slam pose.
+ * hard as it plummets. Everyone's, from the synced grip and slam pose. (0.15.32) The grip's reach eases in and out and
+ * follows its target on springs ({@link PoseBlend}), with the body behind it: the chest turned toward it, leaning into
+ * the hold, the free arm out for balance and the feet set.
  */
 public final class GravityArmPose {
+	/** How much of the reach's turn the chest takes (and the most, radians), and the lean into the hold. */
+	static final float BODY_TURN = 0.35F, BODY_TURN_MAX = 0.5F, LEAN = 0.08F, LEAN_PER_PITCH = 0.1F;
+	/** The free arm out for balance (forward x, out to its side z), and the feet set (faded out while walking). */
+	static final float FREE_ARM = -0.35F, FREE_OUT = 0.25F, STANCE = 0.2F, STANCE_WALK = 0.6F;
+	/** The strain in the reaching arm (radians) and its beat (per tick). */
+	static final float STRAIN = 0.02F, STRAIN_BEAT = 1.7F;
+	private static final PoseBlend.Channel BLEND = PoseBlend.channel("gravity_grip");
+
 	private GravityArmPose() {
 	}
 
@@ -34,11 +45,17 @@ public final class GravityArmPose {
 		}
 		Integer grip = self == null ? null : self.getAttached(GravityPower.GRIP);
 		Entity held = grip == null ? null : minecraft.level.getEntity(grip);
-		if (held == null) {
+		boolean on = held != null && avatar.deathTime <= 0.0F;
+		PoseBlend.Track track = BLEND.track(avatar.id, on);
+		if (track == null || avatar.deathTime > 0.0F) {
+			return;
+		}
+		if (!on) {
+			track.apply(humanoid, null);
 			return;
 		}
 		boolean right = avatar.mainArm != HumanoidArm.LEFT;
-		ModelPart arm = right ? humanoid.rightArm : humanoid.leftArm;
+		float side = right ? 1.0F : -1.0F;
 		Vec3 shoulder = self.position().add(0.0, self.getBbHeight() * 0.8, 0.0);
 		Vec3 head = held.getEyePosition();
 		Vec3 to = head.subtract(shoulder);
@@ -46,9 +63,26 @@ public final class GravityArmPose {
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float relative = Mth.wrapDegrees(yaw - avatar.bodyRot);
 		float pitchDown = (float)-Mth.atan2(to.y, horizontal);
-		arm.xRot = -Mth.HALF_PI + pitchDown;
-		arm.yRot = relative * Mth.DEG_TO_RAD;
-		arm.zRot = 0.0F;
+		float aimY = relative * Mth.DEG_TO_RAD;
+		PoseBlend.Frame f = new PoseBlend.Frame(humanoid);
+		// the chest turned toward it and leaned into the hold (back a little for something held high)
+		float turn = Mth.clamp(aimY * BODY_TURN, -BODY_TURN_MAX, BODY_TURN_MAX);
+		float lean = LEAN + Mth.clamp(pitchDown, -1.0F, 1.0F) * LEAN_PER_PITCH;
+		f.set(PoseBlend.HIP_YAW, turn);
+		f.set(PoseBlend.HIP_PITCH, lean);
+		// the arm still on its target (the body's turn and lean taken back out of it), straining
+		f.set(right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, -Mth.HALF_PI + pitchDown - lean, aimY - turn, 0.0F);
+		f.shake(right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, Mth.sin(avatar.ageInTicks * STRAIN_BEAT) * STRAIN);
+		// the free arm out for balance
+		f.set(right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM, FREE_ARM, 0.0F, -side * FREE_OUT);
+		// the head stays on its look
+		f.add(PoseBlend.HEAD, -lean);
+		f.add(PoseBlend.HEAD + 1, -turn);
+		// the feet set: the reaching side's back
+		float stance = STANCE * (1.0F - Mth.clamp(avatar.walkAnimationSpeed / STANCE_WALK, 0.0F, 1.0F));
+		f.add(right ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG, stance);
+		f.add(right ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG, -stance);
+		track.apply(humanoid, f);
 	}
 
 	/** Ticks to bring the arm up overhead, and to swing it down; how long it stays down after the hit. */
