@@ -836,3 +836,12 @@ after `Mill.register()`.
   or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
   actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
   count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
+- **0.5.4, seasons:** Andy (2026-10-21) asked whether seasons could work in, and picked our own over Ecliptic Seasons
+  (its Fabric port is All Rights Reserved with no 26.3 build). Spec and differences in `docs/Seasons-Plan.md`.
+  `season/Seasons`: an 84-day year (spring, summer, autumn, winter; early, mid and late parts of 7 days) from the
+  overworld clock plus a saved shift (`/season set <season> [early|mid|late]` for ops, `/season` for anyone); each new
+  part is announced, and holding a clock shows the date. Only temperate lands (biome base temperature 0.55-0.9) feel
+  it. `BiomeSeasonMixin` chills them (winter -0.8, so it snows and ponds freeze); `SeasonalWeather` melts open snow
+  and ice there out of winter. `SeasonalCrops`: crops in `tags/block/seasons/<season>` grow only then, others all but
+  winter; out of season they wait (never die); under glass (`greenhouse_roof`) or a solid roof they grow all year.
+  Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.

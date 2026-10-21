@@ -3622,3 +3622,12 @@ should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBlad
   off hand's arm is drawn in first person while its blade is out. Texture from `tools/gen_hidden_blade.py`.
 - Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
   (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
+
+### 0.7.116, seasons (with Kitchen 0.5.4)
+- Andy chose our own seasons (2026-10-21); Kitchen keeps the calendar, read here through `KitchenCompat.season`,
+  `dayOfYear` and `temperate` (all soft without Kitchen 0.5.4).
+- Heritages: in a temperate land, summer counts +0.25 warmer and winter 0.8 colder, so plains are hot for an
+  Emberborn in summer and cold (a Frostborn's thriving, an Emberborn's wilting) in winter. Verdant feed even better
+  on spring sun (hunger x0.5 instead of x0.65).
+- Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
+- Festivals: every realm fit to keep one holds a festival on the first day of each season.
