@@ -12,10 +12,10 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
-/** Draws the Hornkin ({@link Nether}): one model, a skin for each kind, the brute drawn half again as big. */
+/** Draws the Hornkin ({@link Nether}): one model, a skin for each kind, the brute half again as big, the warlord bigger still. */
 public final class HornkinRenderer extends HumanoidMobRenderer<Hornkin, HornkinRenderer.State, HornkinModel> {
 	/** How much bigger than a man each kind is drawn (in {@link Hornkin.Kind} order). */
-	static final float[] SCALE = {1.1F, 1.05F, 1.45F, 1.1F};
+	static final float[] SCALE = {1.1F, 1.05F, 1.45F, 1.1F, 1.75F};
 
 	public static final class State extends HumanoidRenderState {
 		Hornkin.Kind kind = Hornkin.Kind.WARRIOR;
@@ -65,6 +65,7 @@ public final class HornkinRenderer extends HumanoidMobRenderer<Hornkin, HornkinR
 		register(Nether.HORNKIN_HURLER, Hornkin.Kind.HURLER);
 		register(Nether.HORNKIN_BRUTE, Hornkin.Kind.BRUTE);
 		register(Nether.ZOMBIFIED_HORNKIN, Hornkin.Kind.ZOMBIFIED);
+		register(Nether.HORNKIN_WARLORD, Hornkin.Kind.WARLORD);
 		EntityRenderers.register(Nether.MAGMA_BOMB, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 	}
 }

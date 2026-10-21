@@ -33,9 +33,9 @@ public final class Nether {
 	/** Natural spawns (a zombified piglin is 100 in the wastes), and how many come together. */
 	static final int WARRIOR_WEIGHT = 8, WARRIOR_MIN = 2, WARRIOR_MAX = 4, HURLER_WEIGHT = 4, HURLER_MIN = 1, HURLER_MAX = 2, BRUTE_WEIGHT = 1;
 
-	public static EntityType<Hornkin> HORNKIN, HORNKIN_HURLER, HORNKIN_BRUTE, ZOMBIFIED_HORNKIN;
+	public static EntityType<Hornkin> HORNKIN, HORNKIN_HURLER, HORNKIN_BRUTE, ZOMBIFIED_HORNKIN, HORNKIN_WARLORD;
 	public static EntityType<MagmaBomb> MAGMA_BOMB;
-	public static Item HORNKIN_SPAWN_EGG, HORNKIN_HURLER_SPAWN_EGG, HORNKIN_BRUTE_SPAWN_EGG, ZOMBIFIED_HORNKIN_SPAWN_EGG;
+	public static Item HORNKIN_SPAWN_EGG, HORNKIN_HURLER_SPAWN_EGG, HORNKIN_BRUTE_SPAWN_EGG, ZOMBIFIED_HORNKIN_SPAWN_EGG, HORNKIN_WARLORD_SPAWN_EGG;
 
 	private Nether() {
 	}
@@ -45,6 +45,8 @@ public final class Nether {
 		HORNKIN_HURLER = hornkin("hornkin_hurler", Hornkin.Kind.HURLER, 0.7F, 2.1F);
 		HORNKIN_BRUTE = hornkin("hornkin_brute", Hornkin.Kind.BRUTE, 1.0F, 2.8F);
 		ZOMBIFIED_HORNKIN = hornkin("zombified_hornkin", Hornkin.Kind.ZOMBIFIED, 0.7F, 2.1F);
+		// (0.7.142) the war forts' warlords (never spawned wild: see NetherForts)
+		HORNKIN_WARLORD = hornkin("hornkin_warlord", Hornkin.Kind.WARLORD, 1.2F, 3.4F);
 		MAGMA_BOMB = type("magma_bomb", EntityType.Builder.<MagmaBomb>of(MagmaBomb::new, MobCategory.MISC).noLootTable().sized(0.3F, 0.3F)
 			.clientTrackingRange(4).updateInterval(10));
 
@@ -62,12 +64,17 @@ public final class Nether {
 		HORNKIN_HURLER_SPAWN_EGG = egg("hornkin_hurler_spawn_egg", HORNKIN_HURLER);
 		HORNKIN_BRUTE_SPAWN_EGG = egg("hornkin_brute_spawn_egg", HORNKIN_BRUTE);
 		ZOMBIFIED_HORNKIN_SPAWN_EGG = egg("zombified_hornkin_spawn_egg", ZOMBIFIED_HORNKIN);
+		HORNKIN_WARLORD_SPAWN_EGG = egg("hornkin_warlord_spawn_egg", HORNKIN_WARLORD);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> {
 			output.insertAfter(Items.PIGLIN_BRUTE_SPAWN_EGG, HORNKIN_SPAWN_EGG);
 			output.insertAfter(HORNKIN_SPAWN_EGG, HORNKIN_HURLER_SPAWN_EGG);
 			output.insertAfter(HORNKIN_HURLER_SPAWN_EGG, HORNKIN_BRUTE_SPAWN_EGG);
-			output.insertAfter(HORNKIN_BRUTE_SPAWN_EGG, ZOMBIFIED_HORNKIN_SPAWN_EGG);
+			output.insertAfter(HORNKIN_BRUTE_SPAWN_EGG, HORNKIN_WARLORD_SPAWN_EGG);
+			output.insertAfter(HORNKIN_WARLORD_SPAWN_EGG, ZOMBIFIED_HORNKIN_SPAWN_EGG);
 		});
+		// (0.7.142) stage 2: the war forts, their warlords and war hosts (and their attachments)
+		JaymosKingdoms.LOGGER.debug("nether fort attachments: {} {}", NetherForts.FORTS, NetherForts.TAG);
+		NetherForts.register();
 	}
 
 	private static EntityType<Hornkin> hornkin(String name, Hornkin.Kind kind, float width, float height) {
