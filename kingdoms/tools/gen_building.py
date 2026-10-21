@@ -217,5 +217,38 @@ def earth_slabs():
     slab_recipe("dirt_path_slab", "minecraft:dirt_path")
 
 
+# ---- 3. wind chimes -------------------------------------------------------------------------------------------------
+
+def chime(name, plate, rod, recipe_key, recipe_pattern):
+    # a little plate under the block, four rods of different lengths and a clapper on a thread in the middle
+    rods = [((4.5, 6, 4.5), (5.5, 14, 5.5)), ((10.5, 4, 4.5), (11.5, 14, 5.5)),
+            ((4.5, 5, 10.5), (5.5, 14, 11.5)), ((10.5, 7, 10.5), (11.5, 14, 11.5))]
+    elements = [box((4, 14, 4), (12, 15, 12), "#plate"), box((7.5, 15, 7.5), (8.5, 16, 8.5), "#plate")]
+    elements += [box(a, b, "#rod") for a, b in rods]
+    elements.append(box((7.75, 10, 7.75), (8.25, 14, 8.25), "#plate", sides=("north", "south", "west", "east")))
+    elements.append(box((6.5, 8, 6.5), (9.5, 10, 9.5), "#plate"))
+    block_model(name, {"parent": "minecraft:block/block", "textures": {"particle": rod, "plate": plate, "rod": rod},
+                       "elements": elements, "display": {
+                           "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.85, 0.85, 0.85]},
+                           "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.5, 0.5, 0.5]},
+                           "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.75, 0.75, 0.75]},
+                           "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
+                           "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]}}})
+    # (one model whether it's ringing or not: it rings, it doesn't light up)
+    blockstate(name, {"variants": {"ringing=false": {"model": NS + "block/" + name}, "ringing=true": {"model": NS + "block/" + name}}})
+    item_def(name, NS + "block/" + name)
+    drops_self(name)
+    recipe(name, {"type": "minecraft:crafting_shaped", "category": "decorations", "key": recipe_key, "pattern": recipe_pattern,
+                  "result": {"id": NS + name, "count": 1}})
+
+
+def wind_chimes():
+    chime("wind_chime", "minecraft:block/bamboo_planks", "minecraft:block/bamboo_block",
+          {"S": "minecraft:string", "P": "minecraft:bamboo_slab", "B": "minecraft:bamboo"}, [" S ", "BPB", "B B"])
+    chime("iron_wind_chime", "minecraft:block/dark_oak_planks", "minecraft:block/iron_block",
+          {"S": "minecraft:string", "P": "#minecraft:wooden_slabs", "N": "minecraft:iron_nugget"}, [" S ", "NPN", "N N"])
+
+
 plot_stake()
 earth_slabs()
+wind_chimes()

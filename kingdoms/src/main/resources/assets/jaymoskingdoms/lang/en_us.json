@@ -4621,5 +4621,7 @@
 	"message.jaymoskingdoms.stake.full": "That stake can't hold another line.",
 	"block.jaymoskingdoms.dirt_slab": "Dirt Slab",
 	"block.jaymoskingdoms.grass_slab": "Grass Slab",
-	"block.jaymoskingdoms.dirt_path_slab": "Dirt Path Slab"
+	"block.jaymoskingdoms.dirt_path_slab": "Dirt Path Slab",
+	"block.jaymoskingdoms.wind_chime": "Bamboo Wind Chime",
+	"block.jaymoskingdoms.iron_wind_chime": "Iron Wind Chime"
 }
