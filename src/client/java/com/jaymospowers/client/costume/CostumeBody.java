@@ -117,7 +117,7 @@ public final class CostumeBody {
 	}
 
 	/**
-	 * (0.15.32) Lays on {@code costume} the pose MCA's own layers draw this player's villager body in, when they do: the
+	 * (0.15.34) Lays on {@code costume} the pose MCA's own layers draw this player's villager body in, when they do: the
 	 * copy of the body MCA's skin layer took as the layers began (its HumanoidModelPose on the render state, read by
 	 * name). The body's model is animated once more when it's finally drawn, and our poses that add to a limb land on
 	 * MCA's copy a second time; taking the same copy, the costume moves with the skin under it. False when MCA doesn't
@@ -152,7 +152,7 @@ public final class CostumeBody {
 	private static boolean mcaPoseBroken;
 
 	/**
-	 * {@code model}'s bust (MCA's "breasts" part on the root), or null. (0.15.32) The model MCA animates its villager
+	 * {@code model}'s bust (MCA's "breasts" part on the root), or null. (0.15.34) The model MCA animates its villager
 	 * body with (made from the plain player layer) keeps its bust off the root, in its public field {@code breasts}: there
 	 * it is set up all the same, and MCA's layers draw a bust from it, so the suit's goes over it.
 	 */

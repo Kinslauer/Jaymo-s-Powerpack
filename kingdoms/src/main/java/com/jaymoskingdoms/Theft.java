@@ -559,6 +559,8 @@ public final class Theft {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
 				.withStyle(ChatFormatting.DARK_RED));
 		}
+		// (0.7.125) a price on their head (or their mask's)
+		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, crime.cry);
 		pursue(level, f, player);
 	}
 
