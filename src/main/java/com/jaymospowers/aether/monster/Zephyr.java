@@ -42,7 +42,7 @@ public class Zephyr extends AetherMonster {
 	/** The gust's box: width, height and length (blocks) ahead of it. */
 	public static final double GUST_WIDTH = 5.0, GUST_HEIGHT = 2.0, GUST_LENGTH = 10.5;
 	/** The shove each tick of the gust: ordinary, on something webbed, and the lift that goes with it. */
-	public static final double PUSH = 0.2, WEBBED_PUSH = 0.9, LIFT = 0.04;
+	public static final double PUSH = 0.2, WEBBED_PUSH = 1.2, LIFT = 0.04;
 	/** Webbing shot: every 60 ticks from this far to this far; sound at 50, the spit at 60. */
 	public static final double SHOOT_MIN = 8.0, SHOOT_MAX = 40.0;
 	public static final int SHOOT_CYCLE = 60, SHOOT_SOUND = 50, SHOOT_ANIM = 53;
