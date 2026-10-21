@@ -536,8 +536,21 @@ public final class Bounties {
 		if (court == null) {
 			return false;
 		}
-		// a head in hand
 		ItemStack held = player.getMainHandItem();
+		// (0.7.147) Hornkin horns, a bounty on raiders from the Nether
+		if (held.is(com.jaymoskingdoms.nether.NetherTrophies.HORNKIN_HORN)) {
+			int horns = held.getCount();
+			int emeralds = horns * com.jaymoskingdoms.nether.NetherTrophies.HORN_BOUNTY;
+			held.shrink(horns);
+			for (int left = emeralds; left > 0; left -= 64) {
+				give(player, new ItemStack(Items.EMERALD, Math.min(64, left)));
+			}
+			Reputation.change(player, court, Math.max(1, horns / 4));
+			Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty.horns", horns, emeralds), Speech.GOLD);
+			level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
+			return true;
+		}
+		// a head in hand
 		CustomData data = held.is(Items.PLAYER_HEAD) ? held.get(DataComponents.CUSTOM_DATA) : null;
 		String headOf = data == null ? null : data.copyTag().getString(HEAD_KEY).orElse(null);
 		if (headOf != null) {

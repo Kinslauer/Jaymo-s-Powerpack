@@ -75,6 +75,25 @@
 					]
 				}
 			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "jaymoskingdoms:hornkin_horn",
+					"modifier": [
+						{
+							"type": "minecraft:set_count",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 2,
+								"max": 2
+							}
+						}
+					]
+				}
+			]
 		}
 	],
 	"random_sequence": "jaymoskingdoms:entities/hornkin_warlord"

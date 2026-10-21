@@ -91,6 +91,8 @@ public final class Quests {
 	static final int HOLD_TICKS = 20 * 60 * 2;
 	/** A chief's death counts for those with the quest this near it. */
 	static final double CHIEF_CREDIT_RANGE = 160.0;
+	/** (0.7.147) A king's bounty on a Nether warlord targets his fort as this plus its id. */
+	static final String NETHER_FORT = "netherfort:";
 	/** (0.5.49) Giving up a quest costs this much reputation with the giver's settlement (a king's, this much). */
 	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
 	/** A delivered letter: hearts with whoever gets it. */
@@ -894,6 +896,24 @@ public final class Quests {
 		}
 	}
 
+	/**
+	 * (0.7.147) A Nether fort's warlord fell ({@code NetherForts}): a king's bounty on him ({@code "netherfort:" + fort}) is
+	 * done for everyone after him who struck him down or was near.
+	 */
+	public static void netherWarlordSlain(ServerLevel level, LivingEntity entity, DamageSource source, int fort) {
+		for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+			for (Quest q : log(p)) {
+				if (q.kind() == Quest.CHIEF && q.objective().target().equals(NETHER_FORT + fort) && !q.counted()
+					&& (source.getEntity() == p || (p.level() == level && p.distanceToSqr(entity) < CHIEF_CREDIT_RANGE * CHIEF_CREDIT_RANGE))) {
+					put(p, q.withProgress(1));
+					p.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.champion_slain", entity.getDisplayName(), q.giver().name())
+						.withStyle(ChatFormatting.GOLD));
+					sync(p, true);
+				}
+			}
+		}
+	}
+
 	/** The camp {@code entity} is chief or warlord of, or -1. */
 	private static int campOf(Entity entity) {
 		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF || Pirates.isCoveCaptain(folk))) {
@@ -1133,7 +1153,8 @@ public final class Quests {
 			case Quest.FETCH -> Component.translatable(key, keepsakeName(q), ruin(o.target()), x(q), z(q));
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
-			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q));
+			// (0.7.147 a Nether warlord's bounty names him too)
+			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q), o.otherName());
 			case Quest.REGICIDE, Quest.WARBAND -> Component.translatable(key, o.place(), x(q), z(q));
 			case Quest.BREAK_IN -> Component.translatable(key, o.place());
 			case Quest.STUD -> Component.translatable(key, breedName(q), o.count());
@@ -1161,7 +1182,8 @@ public final class Quests {
 			case Quest.DELIVER -> Component.translatable("quest.jaymoskingdoms.objective.deliver", addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable("quest.jaymoskingdoms.objective.champion", Component.translatable("foe.jaymoskingdoms." + o.otherName()),
 				ruin(o.target()), x(q), z(q));
-			case Quest.CHIEF -> Component.translatable("quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
+			case Quest.CHIEF -> Component.translatable(o.target().startsWith(NETHER_FORT) ? "quest.jaymoskingdoms.objective.nether_warlord"
+				: "quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
 			case Quest.WARBAND -> Component.translatable("quest.jaymoskingdoms.objective.warband", realmName(level, q.giver().faction()), o.place());
 			case Quest.BREAK_IN -> Component.translatable("quest.jaymoskingdoms.objective.break_in", q.giver().name());

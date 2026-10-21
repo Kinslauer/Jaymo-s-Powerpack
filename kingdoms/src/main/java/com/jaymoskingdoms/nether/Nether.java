@@ -75,6 +75,9 @@ public final class Nether {
 		// (0.7.142) stage 2: the war forts, their warlords and war hosts (and their attachments)
 		JaymosKingdoms.LOGGER.debug("nether fort attachments: {} {}", NetherForts.FORTS, NetherForts.TAG);
 		NetherForts.register();
+		// (0.7.147) stage 3: portal raids on the towns, trophies
+		NetherTrophies.register();
+		PortalRaids.register();
 	}
 
 	private static EntityType<Hornkin> hornkin(String name, Hornkin.Kind kind, float width, float height) {

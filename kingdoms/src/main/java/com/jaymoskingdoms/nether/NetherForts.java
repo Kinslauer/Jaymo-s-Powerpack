@@ -204,7 +204,9 @@ public final class NetherForts {
 			.then(Commands.literal("netherfort").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("found").executes(NetherForts::foundHere))
 				.then(Commands.literal("host").executes(NetherForts::hostNow))
-				.then(Commands.literal("info").executes(NetherForts::info)))));
+				.then(Commands.literal("info").executes(NetherForts::info))
+				// (0.7.147) a portal raid on the nearest town, now
+				.then(Commands.literal("raid").executes(PortalRaids::raidNow)))));
 	}
 
 	// ---- who's who -----------------------------------------------------------------------------------------------------
@@ -233,6 +235,11 @@ public final class NetherForts {
 	static List<Fort> forts(ServerLevel nether) {
 		List<Fort> all = nether.getAttached(FORTS);
 		return all == null ? List.of() : all;
+	}
+
+	/** (0.7.147) The forts (either side) still standing. */
+	public static List<Fort> standing(ServerLevel nether) {
+		return forts(nether).stream().filter(f -> !f.fallen()).toList();
 	}
 
 	static @Nullable Fort fort(ServerLevel nether, int id) {
@@ -480,6 +487,9 @@ public final class NetherForts {
 			return;
 		}
 		put(level, fort.fall());
+		// (0.7.147) the warlord's war horn, a trophy; and a king's bounty on him, paid
+		entity.spawnAtLocation(level, new ItemStack(NetherTrophies.WAR_HORN));
+		com.jaymoskingdoms.Quests.netherWarlordSlain(level, entity, source, fort.id());
 		long now = level.getGameTime();
 		for (Mob mob : List.copyOf(LOADED)) {
 			Tag t = tag(mob);
