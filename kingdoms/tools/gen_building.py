@@ -1,8 +1,8 @@
 """Assets for batch 4's building blocks (plot stakes, path and grass slabs, wind chimes, the rope lift).
 
-Blockstates, block and item models, item definitions and loot tables; the few textures that aren't vanilla's own are
-painted here as 16x16 pixel grids in vanilla's colours (docs/Vanilla-Style.md). Blocks cut from a vanilla material use
-vanilla's texture.
+Blockstates, block and item models, item definitions, loot tables and recipes. Blocks cut from a vanilla material use
+vanilla's texture; the few that aren't are painted here, 16x16, in vanilla's colours (docs/Vanilla-Style.md): the rope,
+and the platform and pulley on vanilla's own oak planks.
 
 Run from kingdoms/: python -I tools/gen_building.py
 """
@@ -100,22 +100,8 @@ def png(path, rows):
         f.write(chunk(b"IEND", b""))
 
 
-def paint(grid, palette):
-    """Rows of characters, each looked up in the palette ('.' is clear)."""
-    rows = []
-    for line in grid:
-        assert len(line) == 16, line
-        rows.append([(0, 0, 0, 0) if c == "." else palette[c] + (255,) for c in line])
-    assert len(rows) == 16
-    return rows
-
-
 def hexrgb(h):
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
-
-
-def texture(kind, name, grid, palette):
-    png(os.path.join(ASSETS, "textures", kind, name + ".png"), paint(grid, {k: hexrgb(v) for k, v in palette.items()}))
 
 
 # ---- 1. plot stakes -------------------------------------------------------------------------------------------------
@@ -249,6 +235,151 @@ def wind_chimes():
           {"S": "minecraft:string", "P": "#minecraft:wooden_slabs", "N": "minecraft:iron_nugget"}, [" S ", "NPN", "N N"])
 
 
+# ---- 4. the rope lift -----------------------------------------------------------------------------------------------
+
+# vanilla's oak planks (its 7 colours, darkest first, and its pixels), the base of the pulley and the platform
+OAK = ["67502c", "7e6237", "967441", "9f844d", "af8f55", "b8945f", "c29d62"]
+OAK_PIXELS = [
+    "5456666656666652", "5544234555445533", "4555454333344552", "2112210011010010",
+    "5636666366654435", "4554343234455554", "3345444255544333", "0011210000111210",
+    "5665446666666653", "5455554333434332", "6544333344443353", "0012210001211000",
+    "6356655366636566", "4455334335545444", "4334543255433333", "0110012221010000",
+]
+# iron, lightest first (vanilla's iron block and bars); hemp rope, lightest first
+IRON = ["e6e6e6", "c1c1c1", "9c9c9c", "686868"]
+HEMP = ["d8be8a", "bf9f68", "a07d4a", "7a5a32", "5c4224"]
+
+
+def oak():
+    return [[hexrgb(OAK[int(c)]) for c in row] for row in OAK_PIXELS]
+
+
+def save(kind, name, pixels):
+    """pixels: 16 rows of (r, g, b) or None (clear)."""
+    png(os.path.join(ASSETS, "textures", kind, name + ".png"),
+        [[(0, 0, 0, 0) if p is None else p + (255,) for p in row] for row in pixels])
+
+
+def rope_textures():
+    # the block: a twisted hemp strand, three strands laid diagonally, lit from the top-left
+    px = [[hexrgb(HEMP[[0, 1, 2, 3][(x + y) % 4] if (x + 2 * y) % 8 else 3]) for x in range(16)] for y in range(16)]
+    save("block", "rope", px)
+    # the item: a coil seen from above, its loose end hanging off to the lower right
+    px = [[None] * 16 for _ in range(16)]
+    for y in range(16):
+        for x in range(16):
+            dx, dy = (x - 7.0) / 6.5, (y - 7.0) / 5.5
+            d = dx * dx + dy * dy
+            if 0.12 <= d <= 1.0:
+                # two turns of rope: a groove between them, the inner turn a shade darker
+                lit = (-dx - dy) * 0.7 - (0.6 if d < 0.45 else 0.0)
+                shade = 0 if lit > 0.7 else 1 if lit > 0.1 else 2 if lit > -0.5 else 3
+                if 0.45 <= d <= 0.55:
+                    shade = 4
+                if (x + y) % 3 == 0:
+                    shade = min(4, shade + 1)
+                px[y][x] = hexrgb(HEMP[shade])
+    for i, (x, y) in enumerate([(12, 11), (12, 12), (13, 13), (13, 14), (14, 15)]):
+        px[y][x] = hexrgb(HEMP[2 if i % 2 else 1])
+        if x + 1 < 16:
+            px[y][x + 1] = hexrgb(HEMP[3])
+    save("item", "rope", px)
+
+
+def pulley_textures():
+    # the side: oak planks, a wheel with an iron rim, four spokes and an iron hub, rope over the top of it
+    px = oak()
+    cx = cy = 7.5
+    for y in range(16):
+        for x in range(16):
+            r = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+            if 4.6 <= r <= 5.9:
+                px[y][x] = hexrgb(IRON[1 if x + y < 15 else 2])
+            elif 5.9 < r <= 6.6:
+                px[y][x] = hexrgb(IRON[3])
+            elif r < 4.6:
+                spoke = abs(x - cx) < 1 or abs(y - cy) < 1
+                px[y][x] = hexrgb(OAK[4] if spoke else OAK[0])
+    for y in (7, 8):
+        for x in (7, 8):
+            px[y][x] = hexrgb(IRON[0] if (x, y) == (7, 7) else IRON[2])
+    save("block", "pulley_side", px)
+    # the bottom: oak planks with the hole the rope runs through
+    px = oak()
+    for y in range(5, 11):
+        for x in range(5, 11):
+            edge = x in (5, 10) or y in (5, 10)
+            px[y][x] = hexrgb(IRON[2] if edge else "2b1e10")
+    for y in range(6, 10):
+        for x in (7, 8):
+            px[y][x] = hexrgb(HEMP[1 if x == 7 else 3])
+    save("block", "pulley_bottom", px)
+
+
+def platform_texture():
+    # oak planks bound with two iron straps, a rivet where each crosses a board
+    px = oak()
+    for y in range(16):
+        for x in (2, 3, 12, 13):
+            px[y][x] = hexrgb(IRON[1] if x in (2, 12) else IRON[2])
+    for y in (1, 5, 9, 13):
+        for x in (2, 12):
+            px[y][x] = hexrgb(IRON[0])
+            px[y][x + 1] = hexrgb(IRON[3])
+    save("block", "platform", px)
+
+
+def rope_lift():
+    rope_textures()
+    pulley_textures()
+    platform_texture()
+
+    block_model("rope", {"parent": "minecraft:block/block", "textures": {"particle": NS + "block/rope", "rope": NS + "block/rope"},
+                         "elements": [box((6.5, 0, 6.5), (9.5, 16, 9.5), "#rope", sides=("north", "south", "west", "east"))]})
+    blockstate("rope", {"variants": {"": {"model": NS + "block/rope"}}})
+    item_model("rope", {"parent": "minecraft:item/generated", "textures": {"layer0": NS + "item/rope"}})
+    item_def("rope", NS + "item/rope")
+    drops_self("rope")
+    recipe("rope", {"type": "minecraft:crafting_shaped", "category": "misc", "key": {"S": "minecraft:string"},
+                    "pattern": ["S", "S", "S"], "result": {"id": NS + "rope", "count": 2}})
+
+    # the anchor: an iron plate fixed to a block, a hooked arm the rope hangs from (under a block: hanging straight down)
+    tex = {"particle": "minecraft:block/iron_block", "plate": "minecraft:block/iron_block"}
+    block_model("anchor", {"parent": "minecraft:block/block", "textures": tex, "elements": [
+        box((4, 13, 4), (12, 16, 12), "#plate"), box((6.5, 8, 6.5), (9.5, 13, 9.5), "#plate")]})
+    block_model("anchor_wall", {"parent": "minecraft:block/block", "textures": tex, "elements": [
+        box((4, 4, 0), (12, 12, 3), "#plate"), box((6.5, 4, 3), (9.5, 7, 9.5), "#plate")]})
+    variants = {"facing=up": {"model": NS + "block/anchor"}, "facing=down": {"model": NS + "block/anchor"}}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        v = {"model": NS + "block/anchor_wall"}
+        if y:
+            v["y"] = y
+        variants["facing=" + facing] = v
+    blockstate("anchor", {"variants": variants})
+    item_def("anchor", NS + "block/anchor")
+    drops_self("anchor")
+    recipe("anchor", {"type": "minecraft:crafting_shaped", "category": "misc", "key": {"I": "minecraft:iron_ingot", "N": "minecraft:iron_nugget"},
+                      "pattern": ["NIN", " N "], "result": {"id": NS + "anchor", "count": 1}})
+
+    block_model("pulley", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "side": NS + "block/pulley_side", "top": "minecraft:block/oak_planks", "bottom": NS + "block/pulley_bottom"}})
+    blockstate("pulley", {"variants": {"": {"model": NS + "block/pulley"}}})
+    item_def("pulley", NS + "block/pulley")
+    drops_self("pulley")
+    recipe("pulley", {"type": "minecraft:crafting_shaped", "category": "misc", "key": {
+        "P": "#minecraft:planks", "I": "minecraft:iron_ingot", "R": NS + "rope"},
+        "pattern": ["PPP", "IRI", "PPP"], "result": {"id": NS + "pulley", "count": 1}})
+
+    block_model("platform", {"parent": "minecraft:block/cube_all", "textures": {"all": NS + "block/platform"}})
+    blockstate("platform", {"variants": {"": {"model": NS + "block/platform"}}})
+    item_def("platform", NS + "block/platform")
+    drops_self("platform")
+    recipe("platform", {"type": "minecraft:crafting_shaped", "category": "building", "key": {
+        "P": "#minecraft:planks", "I": "minecraft:iron_ingot"},
+        "pattern": ["PPP", "I I"], "result": {"id": NS + "platform", "count": 3}})
+
+
 plot_stake()
 earth_slabs()
 wind_chimes()
+rope_lift()

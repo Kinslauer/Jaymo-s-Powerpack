@@ -116,7 +116,7 @@ public final class WindChimes {
 		protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 			BlockState above = level.getBlockState(pos.above());
 			return Block.canSupportCenter(level, pos.above(), Direction.DOWN) || above.is(BlockTags.FENCES) || above.is(BlockTags.WALLS)
-				|| above.is(BlockTags.CHAINS) || above.is(Blocks.IRON_CHAIN);
+				|| above.is(BlockTags.CHAINS) || above.is(Blocks.IRON_CHAIN) || RopeLift.hangsFrom(above);
 		}
 
 		@Override

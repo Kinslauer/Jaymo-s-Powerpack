@@ -67,6 +67,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (batch 4) building: dirt, grass and path slabs; wind chimes; the rope lift (rope, anchor, pulley, platform)
 		EarthSlabs.register();
 		WindChimes.register();
+		RopeLift.register();
 		// (0.7.116) the surveyor's rod, players' own designs and work areas
 		Surveyor.register();
 		Designs.register();

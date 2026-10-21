@@ -4623,5 +4623,14 @@
 	"block.jaymoskingdoms.grass_slab": "Grass Slab",
 	"block.jaymoskingdoms.dirt_path_slab": "Dirt Path Slab",
 	"block.jaymoskingdoms.wind_chime": "Bamboo Wind Chime",
-	"block.jaymoskingdoms.iron_wind_chime": "Iron Wind Chime"
+	"block.jaymoskingdoms.iron_wind_chime": "Iron Wind Chime",
+	"block.jaymoskingdoms.rope": "Rope",
+	"block.jaymoskingdoms.anchor": "Anchor",
+	"block.jaymoskingdoms.pulley": "Pulley",
+	"block.jaymoskingdoms.platform": "Platform",
+	"message.jaymoskingdoms.pulley.stock": "Rope on the pulley: %s",
+	"message.jaymoskingdoms.pulley.wound": "The rope is wound all the way in.",
+	"message.jaymoskingdoms.pulley.full": "The pulley can't hold any more rope.",
+	"message.jaymoskingdoms.pulley.no_rope": "No rope left on the pulley: give it some.",
+	"message.jaymoskingdoms.pulley.blocked": "Something's in the way."
 }
