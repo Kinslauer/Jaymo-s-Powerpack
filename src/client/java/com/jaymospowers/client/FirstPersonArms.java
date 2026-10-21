@@ -143,7 +143,7 @@ public final class FirstPersonArms {
 		Arm arm = ARMS[main ? 0 : 1];
 		LocalPlayer self = Minecraft.getInstance().player;
 		if (self == null || avatar.id != self.getId() || !empty || carrySink > 0.0F || self.getAttached(Carry.CARRYING) != null
-			|| FirstPersonCompat.bodyShown()) {
+			|| com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(self) || FirstPersonCompat.bodyShown()) {
 			arm.live = false;
 			return -1.0F;
 		}
