@@ -303,6 +303,21 @@ public final class McaCompat {
 	}
 
 	/** A worker {@link Folk} of a realm, with MCA loaded: a villager takes its place (same job, same work); true if so. */
+	/** (0.7.148) With MCA, a camp's raider (or a cove's deckhand) at home becomes one of MCA's villagers ({@link Barbarians}). True if so (the folk is gone). */
+	static boolean becomeRaider(ServerLevel level, Folk folk) {
+		return LOADED && Barbarians.mayBecomeVillager(level, folk) && McaBridge.convertRaider(level, folk);
+	}
+
+	/** (0.7.148) A fallen camp's MCA villagers scatter (gone, as its folk are). */
+	static void scatterRaiders(ServerLevel level, int camp, AABB box) {
+		if (LOADED) {
+			for (Worker w : McaBridge.workers(level, box, w -> Barbarians.villagerRole(w.role()) && w.factionId() == camp)) {
+				level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, w.mob().getX(), w.mob().getY() + 1.0, w.mob().getZ(), 10, 0.3, 0.5, 0.3, 0.02);
+				w.mob().discard();
+			}
+		}
+	}
+
 	static boolean becomeVillager(ServerLevel level, Folk folk) {
 		return LOADED && folk.style() != FactionType.BARBARIAN && McaBridge.convert(level, folk);
 	}
@@ -325,6 +340,10 @@ public final class McaCompat {
 	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
 	 */
 	public static boolean foe(LivingEntity guard, LivingEntity target) {
+		if (guard instanceof Worker w && Barbarians.villagerRole(w.role()) && guard.level().getServer() != null) {
+			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
+			return Barbarians.villagerPrey(w.role(), w.factionId(), target);
+		}
 		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD || guard.level().getServer() == null) {
 			return false;
 		}
@@ -336,7 +355,8 @@ public final class McaCompat {
 		if (target instanceof Folk folk) {
 			return folk.factionId() != faction && (folk.style() == FactionType.BARBARIAN || Relations.between(server, faction, folk.factionId()) == Relation.WAR);
 		}
-		return false;
+		// (0.7.148) a barbarian camp's MCA villager
+		return Barbarians.isCampVillager(target);
 	}
 
 	/** A player left: forget what was looked up for them. */

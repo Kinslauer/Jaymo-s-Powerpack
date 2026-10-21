@@ -218,19 +218,19 @@ public final class Pirates {
 	 */
 	static void addGoals(Folk folk, GoalSelector goals, GoalSelector targets) {
 		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true,
-			(target, level) -> isPirate(folk.role()) && folk.combatant() && prey(target)));
+			(target, level) -> isPirate(folk.role()) && folk.combatant() && prey(folk.factionId(), target)));
 		goals.addGoal(1, new Lob(folk));
 	}
 
-	/** What a pirate attacks on sight. */
-	static boolean prey(LivingEntity target) {
+	/** What {@code camp}'s pirates attack on sight: (0.7.148) not an outlaw their cove spares ({@link Barbarians#spares}). */
+	static boolean prey(int camp, LivingEntity target) {
 		if (target instanceof ServerPlayer player) {
-			return !player.isCreative() && !player.isSpectator();
+			return !player.isCreative() && !player.isSpectator() && !Barbarians.spares(player, camp);
 		}
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;
 		}
-		return target instanceof Villager || target instanceof IronGolem;
+		return target instanceof Villager && !Barbarians.isCampVillager(target) || target instanceof IronGolem;
 	}
 
 	/** A pirate's own tick (from {@link Folk#customServerAiStep}): pistols at a foe close by, and shouts in a fight. */

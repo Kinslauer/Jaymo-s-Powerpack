@@ -648,6 +648,7 @@ public final class Camps {
 			level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 			folk.discard();
 		}
+		McaCompat.scatterRaiders(level, camp.id(), new AABB(camp.seat()).inflate(SCATTER_RANGE));
 		Illagers.scatter(level, camp.id(), camp.seat(), SCATTER_RANGE, chief);
 		Factions.update(server, camp.id(), f -> f.withFallen(true).withLeader(Optional.empty())
 			.withHoldings(f.holdings().withRoster(Map.of()).withVacancies(Map.of()).withStorage(List.of(), Optional.empty())));
