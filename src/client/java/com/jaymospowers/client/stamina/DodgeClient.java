@@ -28,12 +28,16 @@ import org.jspecify.annotations.Nullable;
 public final class DodgeClient {
 	/** The most ticks between two Sneak presses that count as a double tap. */
 	private static final int DOUBLE_TAP_TICKS = 6;
+	/** A first press held longer than this (ticks) is a hold, not a tap (a freerunner's slide is a held Sneak). */
+	private static final int TAP_HOLD_TICKS = 3;
 	/** After a cling or bar hang, ticks on the ground before Sneak taps dodge again. */
 	private static final int CLING_SETTLE = 10;
 
 	private static @Nullable KeyMapping dodgeKey;
 	private static boolean sneakWasDown;
 	private static int sinceLastTap = Integer.MAX_VALUE;
+	/** How long Sneak has been held down this press. */
+	private static int held;
 	private static boolean afterCling;
 	private static int groundedAfterCling;
 	/** Ticks until the next dodge (the server's {@link Dodge#COOLDOWN}, kept here too so the hop isn't spent twice). */
@@ -93,6 +97,11 @@ public final class DodgeClient {
 			sinceLastTap = Integer.MAX_VALUE;
 			sneakWasDown = sneak;
 			return false;
+		}
+		held = sneak ? held + 1 : 0;
+		if (held > TAP_HOLD_TICKS) {
+			// held, not tapped: it doesn't start a double tap
+			sinceLastTap = Integer.MAX_VALUE;
 		}
 		boolean tapped = false;
 		if (sneak && !sneakWasDown) {
