@@ -367,7 +367,21 @@ public final class Payloads {
 		}
 	}
 
+	/** (0.5.6) Server → client: how many days the calendar runs ahead of the world's day count (see {@code Seasons}). */
+	public record SeasonSync(int shift) implements CustomPacketPayload {
+		public static final Type<SeasonSync> TYPE = new Type<>(JaymosKitchen.id("season_sync"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, SeasonSync> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.shift),
+			buf -> new SeasonSync(buf.readVarInt()));
+
+		@Override
+		public Type<SeasonSync> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(SeasonSync.TYPE, SeasonSync.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);

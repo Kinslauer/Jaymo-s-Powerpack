@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": ["ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin",
-		"blade.HiddenBladeUseMixin", "blade.HiddenBladeAvatarRendererMixin", "blade.HiddenBladeOffHandMixin"],
+		"blade.HiddenBladeUseMixin", "blade.HiddenBladeAvatarRendererMixin", "blade.HiddenBladeOffHandMixin", "blade.HiddenBladePoseMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

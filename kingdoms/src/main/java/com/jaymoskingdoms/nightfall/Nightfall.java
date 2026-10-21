@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (Kingdoms 0.7.118) The Nightfall Plague, our own take on the Forge mod of that name (All Rights Reserved: nothing of
+ * (Kingdoms 0.7.124) The Nightfall Plague, our own take on the Forge mod of that name (All Rights Reserved: nothing of
  * it is used, only its ideas), woven into our vampires ({@link Vampires}):
  *
  * <ul>
