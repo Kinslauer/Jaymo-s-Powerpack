@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
@@ -28,6 +29,10 @@ import org.jspecify.annotations.Nullable;
  * a moment. A Gravity user holds a big mob up overhead, arms raised, the body floating and bobbing there. Distances are
  * blocks (world-sized, whatever the body's scale) in the body's frame before the model is drawn (+X its right, +Y up,
  * -Z its front).
+ * <p>
+ * (0.15.42) The carrier's side moves with the weight ({@link PoseBlend}): they bend at the hips and knees to pick it up,
+ * lift with the legs, and carry it with a heavier, rolling walk, the body swaying and the arms giving a little on each
+ * step; setting it down bends them the same way, and the hold eases in and out.
  */
 public final class CarryPose {
 	/** On a carried body: how it's held. */
@@ -72,6 +77,17 @@ public final class CarryPose {
 	static final float BLOCK_ARMS = -1.1F;
 	/** Holding a severed part: the right arm a little forward (radians), out from the side. */
 	static final float PART_ARM = -0.5F, PART_ARM_OUT = 0.12F;
+	/** (0.15.42) Picking up: reaching down (seconds), then lifting until; setting down takes this long before the hold eases out. */
+	static final float PICKUP_REACH = 0.25F, PICKUP_TIME = 0.6F, SET_DOWN_TIME = 0.4F;
+	/** The bend to pick up or set down: at the hips (radians), lowered (model pixels), knees, arms reaching down, head. */
+	static final float BEND_PITCH = 0.75F, BEND_DROP = 2.6F, BEND_KNEES = -0.35F, BEND_ARMS = -1.05F, BEND_ARMS_OUT = 0.12F,
+		BEND_HEAD = 0.3F;
+	/** The weighted walk: the body's sway (radians), its roll through the hips, the bob (pixels), the arms' give a step. */
+	static final float WALK_SWAY = 0.06F, WALK_ROLL = 0.05F, WALK_BOB = 0.6F, WALK_GIVE = 0.08F;
+	/** Leaning against the weight: back for a load in front, forward for one on the shoulder or back (radians). */
+	static final float LEAN_FRONT = -0.08F, LEAN_BACK = 0.1F;
+	private static final PoseBlend.Channel CARRIER_BLEND = PoseBlend.channel("carry_carrier");
+
 	/** First person: how the carrier's arms sit for each hold. */
 	public static final float FIRST_PERSON_EQUIP = 0.12F;
 
@@ -279,9 +295,8 @@ public final class CarryPose {
 			}
 			return;
 		}
-		Holding holding = living.getData(CARRIER_KEY);
-		if (holding != null && model instanceof HumanoidModel<?> h) {
-			carrierArms(h, holding);
+		if (model instanceof HumanoidModel<?> h) {
+			carrier(h, living, living.getData(CARRIER_KEY));
 		}
 		Float thrown = living.getData(THROWN_KEY);
 		if (thrown != null) {
@@ -337,6 +352,73 @@ public final class CarryPose {
 		h.hat.xRot = h.head.xRot;
 		h.hat.yRot = h.head.yRot;
 		h.hat.zRot = h.head.zRot;
+	}
+
+	/**
+	 * (0.15.42) The carrier, eased: the bend to pick it up and the lift, the hold's arms over a weighted walk, the bend to set
+	 * it down (the last hold is kept on the track for that), all laid on by the hold's weight.
+	 */
+	private static void carrier(HumanoidModel<?> h, LivingEntityRenderState living, @Nullable Holding holding) {
+		if (!(living instanceof AvatarRenderState avatar)) {
+			if (holding != null) {
+				carrierArms(h, holding);
+			}
+			return;
+		}
+		boolean on = holding != null && living.deathTime <= 0.0F;
+		PoseBlend.Track before = CARRIER_BLEND.peek(avatar.id);
+		Holding last = holding != null ? holding : before != null && before.memo instanceof Holding kept ? kept : null;
+		boolean bends = last != null && bends(last.hold());
+		PoseBlend.Track track = CARRIER_BLEND.track(avatar.id, on, bends ? SET_DOWN_TIME : 0.0F, 1.0F);
+		if (track == null) {
+			return;
+		}
+		if (on) {
+			track.memo = holding;
+		}
+		if (last == null || living.deathTime > 0.0F) {
+			track.apply(h, null);
+			return;
+		}
+		PoseBlend.Frame f = new PoseBlend.Frame(h);
+		// the hold's own arms, set as before and taken as the target
+		carrierArms(h, last);
+		f.take(h);
+		float t = track.age();
+		float bend = !bends ? 0.0F : on ? 1.0F - PoseBlend.seg(t, PICKUP_REACH, PICKUP_TIME) : PoseBlend.seg(t, 0.0F, SET_DOWN_TIME * 0.6F);
+		float carry = 1.0F - bend;
+		// the weighted walk: the body rolling over each step, the arms giving under the load
+		float speed = Mth.clamp(avatar.walkAnimationSpeed, 0.0F, 1.0F);
+		float cycle = avatar.walkAnimationPos * 0.6662F;
+		float step = Math.abs(Mth.sin(cycle)) * speed * carry;
+		f.add(PoseBlend.HIP_ROLL, Mth.sin(cycle) * WALK_SWAY * speed * carry);
+		f.add(PoseBlend.HIP_YAW, Mth.cos(cycle) * WALK_ROLL * speed * carry);
+		f.add(PoseBlend.DROP, step * WALK_BOB);
+		f.add(PoseBlend.RIGHT_ARM, step * WALK_GIVE);
+		f.add(PoseBlend.LEFT_ARM, step * WALK_GIVE);
+		float lean = switch (last.hold()) {
+			case Carry.BRIDAL, Carry.BLOCK -> LEAN_FRONT;
+			case Carry.FIREMAN, Carry.SHOULDER, Carry.PART, Carry.OVERHEAD -> 0.0F;
+			default -> LEAN_BACK;
+		};
+		f.add(PoseBlend.HIP_PITCH, lean * carry);
+		f.add(PoseBlend.HEAD, -lean * carry);
+		if (bend > 0.0F) {
+			// bent at the hips and knees, the arms down to it, eyes on it
+			f.add(PoseBlend.HIP_PITCH, BEND_PITCH * bend);
+			f.add(PoseBlend.DROP, BEND_DROP * bend);
+			f.add(PoseBlend.HEAD, (BEND_HEAD - BEND_PITCH) * bend);
+			f.mix(PoseBlend.RIGHT_LEG, BEND_KNEES, 0.0F, 0.05F, bend);
+			f.mix(PoseBlend.LEFT_LEG, BEND_KNEES, 0.0F, -0.05F, bend);
+			f.mix(PoseBlend.RIGHT_ARM, BEND_ARMS, 0.0F, BEND_ARMS_OUT, bend);
+			f.mix(PoseBlend.LEFT_ARM, BEND_ARMS, 0.0F, -BEND_ARMS_OUT, bend);
+		}
+		track.apply(h, f);
+	}
+
+	/** (0.15.42) Whether a hold is picked up off the ground (and set down there): not a part in the hand, nor Gravity's lift. */
+	private static boolean bends(int hold) {
+		return hold != Carry.PART && hold != Carry.OVERHEAD;
 	}
 
 	/** The carrier's arms in the hold (players), or round the little animal. */

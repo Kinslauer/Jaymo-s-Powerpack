@@ -49,8 +49,6 @@ public final class WebPowerClient implements PowerClient {
 		WebCutClient.register();
 		// a Verdant or Frost-born with the suit: the plain left click is the weapon arm's, sneak + left hold the race's
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.powerWants(com.jaymospowers.power.web.WebMorph::usable);
-		// Combat Roll's charges, for the Spider-Sense counters
-		WebRollsClient.init();
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
@@ -210,11 +208,26 @@ public final class WebPowerClient implements PowerClient {
 				INSTANCE.swing.rejected(context.player(), payload.hand());
 			}
 		});
+		// the whip (or its pry) took both swing webs over: stop swinging on them
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.power.web.WebWhip.Taken.TYPE, (payload, context) -> {
+			if (isActive(context.player())) {
+				INSTANCE.swing.handedOver(context.player());
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Pull.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {
 				INSTANCE.swing.startPull(context.player(), payload);
 			}
 		});
+	}
+
+	/**
+	 * (0.14.3) The local web slinger is swinging, being pulled, on the wings, in a parkour move or running along a wall:
+	 * freerunning ({@code FreerunClient}) stands aside.
+	 */
+	public static boolean parkourBusy() {
+		return INSTANCE.parkour.active() || INSTANCE.wallRun.running() || INSTANCE.swing.attached() || INSTANCE.swing.pull != null
+			|| INSTANCE.swing.wingsTicks != 0;
 	}
 
 	static boolean isActive(@Nullable LocalPlayer player) {
@@ -279,20 +292,6 @@ public final class WebPowerClient implements PowerClient {
 				return;
 			}
 		}
-		// Sneak with no web out, aimed at something in reach: the web catches it; Sneak with the other key puts the
-		// second web on it, and with both attached it's whipped about and slammed down (see WebWhip)
-		if (down && !tendrils && player.isShiftKeyDown() && !swing.attached() && swing.pull == null
-			&& (whipCatch(player, 1 - hand) || com.jaymospowers.power.web.WebWhip.aim(player, com.jaymospowers.power.web.WebWhip.RANGE
-				* com.jaymospowers.power.web.WebSymbiote.reachScale(player)) != null)) {
-			whipping[hand] = true;
-			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Start(hand));
-			return;
-		}
-		if (!down && whipping[hand]) {
-			// (the whip plays out on its own)
-			whipping[hand] = false;
-			return;
-		}
 		if (!down && grabbing[hand]) {
 			grabbing[hand] = false;
 			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, -1));
@@ -307,14 +306,6 @@ public final class WebPowerClient implements PowerClient {
 
 	/** Which tendril is holding something (so its key's release throws instead of ending a swing). */
 	private final boolean[] grabbing = new boolean[2];
-	/** Which key started a whip (so its release doesn't let go of a swing web). */
-	private final boolean[] whipping = new boolean[2];
-
-	/** That hand's web is on a whip's catch (waiting for the other web). */
-	private static boolean whipCatch(LocalPlayer player, int hand) {
-		com.jaymospowers.power.web.WebLine line = player.getAttached(WebPower.line(hand));
-		return line != null && line.kind() == com.jaymospowers.power.web.WebLine.YANK && line.entityId() >= 0;
-	}
 
 	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
 	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {

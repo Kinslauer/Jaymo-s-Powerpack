@@ -115,7 +115,7 @@ public final class Costume {
 	/** Whether this player's face is hidden by their costume (for a later secret identity). */
 	public static boolean masked(Player player) {
 		// (0.11.82) a Rig Helm hides the face too
-		return faceHidden(player) || com.jaymospowers.rig.Rig.helmIdentity(player) != null;
+		return faceHidden(player) || com.jaymospowers.rig.Rig.helmIdentity(player) != null || BanditMask.wears(player);
 	}
 
 	/** (0.12.3) Whether this player's costume's head piece is off just now (either side). */
@@ -127,6 +127,15 @@ public final class Costume {
 	public static boolean faceHidden(Player player) {
 		CostumeDesign worn = worn(player);
 		return worn != null && worn.mask().hidesFace && !unmasked(player);
+	}
+
+	/**
+	 * (0.14.3) Whether this player has a hood up: the worn costume's head piece is a hood ({@link CostumeDesign.Mask#isHood})
+	 * and on, with the face not hidden (either side).
+	 */
+	public static boolean hooded(Player player) {
+		CostumeDesign worn = worn(player);
+		return worn != null && worn.mask().isHood() && !unmasked(player) && !faceHidden(player);
 	}
 
 	/**

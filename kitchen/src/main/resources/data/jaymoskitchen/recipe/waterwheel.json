@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PSP",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "jaymoskitchen:shaft"
+  },
+  "result": {
+    "id": "jaymoskitchen:waterwheel"
+  }
+}

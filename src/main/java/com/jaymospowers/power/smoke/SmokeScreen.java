@@ -1,5 +1,6 @@
 package com.jaymospowers.power.smoke;
 
+import com.jaymospowers.core.Soundscape;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -16,6 +17,10 @@ import net.minecraft.world.phys.Vec3;
  * poured.
  */
 final class SmokeScreen {
+	/** A held screen smoulders: crackles at uneven beats, now and then a hiss. */
+	static final Soundscape.Layer SCREEN_CRACKLE = Soundscape.Layer.of(0.55F, 0.8F, 0.55F, 0.85F, SoundEvents.CAMPFIRE_CRACKLE);
+	static final Soundscape.Layer SCREEN_HISS = Soundscape.Layer.of(0.2F, 0.3F, 0.5F, 0.8F, SoundEvents.FIRE_EXTINGUISH).chance(0.4F);
+
 	/** Smoke a tick (a block's worth is 1; a thick, hiding cloud is 3 a block), and how long one pour lasts. */
 	static final float POUR = 3.0F;
 	static final int MAX_TICKS = 200;
@@ -84,8 +89,8 @@ final class SmokeScreen {
 			SmokeField.bank(player, level.getGameTime() + BANK_TICKS);
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
-		if (held % 12 == 0) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.PLAYERS, 0.7F, 0.6F + level.getRandom().nextFloat() * 0.2F);
+		if (Soundscape.due(player, "smoke.screen", 8, 18)) {
+			Soundscape.play(level, at, SoundSource.PLAYERS, SCREEN_CRACKLE, SCREEN_HISS);
 		}
 	}
 

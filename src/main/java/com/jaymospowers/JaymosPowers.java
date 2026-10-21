@@ -26,13 +26,20 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Carry.init();
 		com.jaymospowers.core.Crawl.init();
 		com.jaymospowers.core.Ledge.init();
+		// (0.14.3) freerunning, Kingdoms' Stealth tree's second page
+		com.jaymospowers.freerun.Freerun.init();
+		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
+		com.jaymospowers.stamina.Feathers.init();
+		com.jaymospowers.stamina.Dodge.init();
 		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.FlightRoll.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
+		com.jaymospowers.core.wounds.Wounds.init();
 		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
+		com.jaymospowers.core.Soundscape.register();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
@@ -48,6 +55,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.xenoform.XenoformPower.init();
 		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		com.jaymospowers.power.smoke.SmokePower.init();
+		// (0.14.0) Cryokinesis, the ice power
+		com.jaymospowers.power.cryo.CryoPower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
@@ -62,6 +71,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.backpack.Backpack.init();
 		// (0.13.36) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
+		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
+		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		registerAttachments();
 	}
 
@@ -72,7 +83,7 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.Fractures", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers",
+			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
@@ -87,8 +98,10 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.XenoformState",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
+			"power.ember.EmberKindle",
+			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack",
 		};
 		for (String holder : holders) {
 			try {

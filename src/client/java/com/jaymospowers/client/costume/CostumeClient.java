@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
@@ -47,8 +48,13 @@ import org.jspecify.annotations.Nullable;
  * (0.12.3) The mask key ({@link #maskKey}, apostrophe by default: every letter is taken by Powers, Kingdoms or
  * vanilla) takes the costume's head piece off and puts it back ({@code Costume.toggleMask}); with it off
  * ({@code Costume.UNMASKED}) the head piece isn't drawn and the face shows.
+ * <p>
+ * (0.14.3) A hood up ({@code Costume.hooded}) leaves the face and the real name showing, but someone else's name tag
+ * only within {@link #HOOD_NAME_RANGE}.
  */
 public final class CostumeClient {
+	/** (0.14.3) A hooded player's name tag is shown only to viewers within this many blocks. */
+	public static final double HOOD_NAME_RANGE = 8.0;
 	/** The costume to draw on this player, or null. */
 	public static final RenderStateDataKey<CostumeDesign> KEY = RenderStateDataKey.create(() -> "jaymospowers:costume");
 
@@ -123,12 +129,20 @@ public final class CostumeClient {
 		// (0.11.78) filled in again as it is drawn (CostumeBody), never left over from another frame
 		state.setData(CostumeBody.BODY, null);
 		state.setData(CostumeBody.PARENT, null);
+		state.setData(CostumeCover.KEY, null);
 		if (entity instanceof Player player && state.nameTag != null) {
 			// (0.11.70) a hidden face: the costume's name over their head, not theirs (nor their score)
 			Component masked = SecretIdentity.maskedName(player);
 			if (masked != null) {
 				state.nameTag = masked;
 				state.scoreText = null;
+			} else if (player != Minecraft.getInstance().player && Costume.hooded(player)) {
+				// (0.14.3) a hood up: their real name, but only when you are close (never your own)
+				LocalPlayer me = Minecraft.getInstance().player;
+				if (me == null || me.distanceToSqr(player) > HOOD_NAME_RANGE * HOOD_NAME_RANGE) {
+					state.nameTag = null;
+					state.scoreText = null;
+				}
 			}
 		}
 		if (design == null) {
@@ -160,9 +174,11 @@ public final class CostumeClient {
 	/** Draws the worn costume over a player, piece by piece, each piece once per colour. */
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private final CostumeModels.Set models;
+		private final RenderLayerParent<AvatarRenderState, PlayerModel> renderer;
 
 		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
+			this.renderer = renderer;
 			this.models = new CostumeModels.Set(this::getParentModel);
 		}
 
@@ -180,8 +196,11 @@ public final class CostumeClient {
 			boolean slim = CostumeBody.slim(parent, state.skin.model() == PlayerModelType.SLIM);
 			String cut = design.cut().getSerializedName();
 			CostumeModels.Worn suit = this.models.suit(design.cut(), slim);
-			renderColoredCutoutModel(suit, CostumeModels.texture("suit", cut, slim, false), poseStack, collector, lightCoords, state, primary, 1);
-			renderColoredCutoutModel(suit, CostumeModels.texture("suit", cut, slim, true), poseStack, collector, lightCoords, state, secondary, 1);
+			Identifier suitPrimary = CostumeModels.texture("suit", cut, slim, false), suitSecondary = CostumeModels.texture("suit", cut, slim, true);
+			renderColoredCutoutModel(suit, suitPrimary, poseStack, collector, lightCoords, state, primary, 1);
+			renderColoredCutoutModel(suit, suitSecondary, poseStack, collector, lightCoords, state, secondary, 1);
+			// (0.15.34) the skin under what the suit covers isn't drawn (CostumeCover)
+			CostumeCover.mark(state, this.renderer, suitPrimary, suitSecondary);
 			CostumeModels.Worn mask = this.models.mask(design.mask());
 			if (mask != null) {
 				String name = design.mask().getSerializedName();

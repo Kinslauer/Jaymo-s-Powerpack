@@ -19,6 +19,10 @@ abstract class VillagerTradeMixin {
 		if ((Object)this instanceof Villager v) {
 			// (0.7.20) a few more words of their tongue
 			Languages.traded(v);
+			if (v.getTradingPlayer() instanceof net.minecraft.server.level.ServerPlayer player) {
+				// (0.7.109) and they remember a customer
+				com.jaymoskingdoms.Recollections.trade(v, player);
+			}
 		}
 	}
 }

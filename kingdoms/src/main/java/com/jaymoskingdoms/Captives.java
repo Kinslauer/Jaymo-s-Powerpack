@@ -87,16 +87,50 @@ public final class Captives {
 	static final long LOST_TICKS = 600L, ESCORT_TICKS = 3L * 24000L;
 	/** How often captives think (ticks); how often camps and dungeons are looked at for new ones. */
 	static final int THINK = 20, LOOK = 200;
-	/** Emeralds a captive's family gives for their return. */
-	static final int REWARD_LEAST = 3, REWARD_MOST = 8;
+	/** (0.7.100) Who a captive is at home: one of its folk, one of its guards, or kin of its ruler (rolled when they're taken). */
+	static final int FOLK = 0, GUARD = 1, KIN = 2;
+	static final String[] STANDINGS = {"folk", "guard", "kin"};
+	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
+	static final float GUARD_CHANCE = 0.2F, KIN_CHANCE = 0.1F;
+	/** Emeralds the family give from their own purse for their return, by standing. */
+	static final int[] PURSE_LEAST = {6, 8, 12}, PURSE_MOST = {12, 16, 24};
+	/**
+	 * What the settlement adds from its treasury, by standing: this much, plus this share of its worth ({@link Wealth#worth}),
+	 * up to this; never leaving it with less than {@link #TREASURY_KEPT}. A rich realm pays far more for its own.
+	 */
+	static final int[] BOUNTY_BASE = {8, 16, 40}, BOUNTY_MOST = {30, 60, 150};
+	static final float[] BOUNTY_SHARE = {0.02F, 0.04F, 0.08F};
+	static final long TREASURY_KEPT = 20L;
+	/** Reputation with the settlement, the one brought home's hearts (MCA), and standing in it for its own members, by standing. */
+	static final int[] HOME_REP = {60, 90, 150}, HOME_HEARTS = {50, 60, 80}, HOME_STANDING = {10, 25, 60};
+	/** How many of their family come running to thank you, and the hearts each gives. */
+	static final int FAMILY = 2, FAMILY_HEARTS = 20;
+	static final double FAMILY_RANGE = 24.0;
+	/** What a guard hands you (one of these), and what the ruler's kin do (a golden apple and some diamonds). */
+	static final List<net.minecraft.world.item.Item> GUARD_GIFTS = List.of(Items.IRON_SWORD, Items.SHIELD, Items.CROSSBOW, Items.IRON_HELMET);
+	static final int KIN_DIAMONDS_LEAST = 1, KIN_DIAMONDS_MOST = 3;
+	/**
+	 * Favours the settlement owes you for each brought home, by standing, and the most it owes at once. While it owes you
+	 * one, its guards neither toll nor search you, and the next time they'd arrest you they let it go (that spends one).
+	 */
+	static final int[] FAVOURS_GIVEN = {1, 1, 2};
+	static final int FAVOURS_MOST = 3;
 
-	/** A captive: the settlement they were taken from (-1: none), who freed them (empty while bound), and since when (game time). */
-	public record Captive(int home, Optional<UUID> rescuer, long since) {
+	/**
+	 * A captive: the settlement they were taken from (-1: none), who freed them (empty while bound), since when (game time),
+	 * and who they are there ({@link #FOLK}, {@link #GUARD}, {@link #KIN}).
+	 */
+	public record Captive(int home, Optional<UUID> rescuer, long since, int standing) {
 		public static final Codec<Captive> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("home", -1).forGetter(Captive::home),
 				UUIDUtil.CODEC.optionalFieldOf("rescuer").forGetter(Captive::rescuer),
-				Codec.LONG.optionalFieldOf("since", 0L).forGetter(Captive::since))
+				Codec.LONG.optionalFieldOf("since", 0L).forGetter(Captive::since),
+				Codec.INT.optionalFieldOf("standing", FOLK).forGetter(Captive::standing))
 			.apply(i, Captive::new));
+
+		int standingIndex() {
+			return Mth.clamp(standing, FOLK, KIN);
+		}
 	}
 
 	/** On a villager: they're a captive (bound or being led home). Saved. */
@@ -109,6 +143,10 @@ public final class Captives {
 	/** On the overworld: camp id → when it last took captives (game time). Saved. */
 	static final AttachmentType<Map<String, Long>> CAMPS = AttachmentRegistry.create(JaymosKingdoms.id("captive_camps"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+
+	/** (0.7.100) Per player: settlement id → favours it owes them for those they brought home. Saved, kept through death. */
+	static final AttachmentType<Map<String, Integer>> FAVOURS = AttachmentRegistry.create(JaymosKingdoms.id("captive_favours"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)).copyOnDeath());
 
 	private static final Set<Villager> LOADED = new HashSet<>();
 	private static final Set<BlockPos> SPAWNERS = new HashSet<>();
@@ -181,7 +219,7 @@ public final class Captives {
 		// (0.7.77) set up as a fresh spawn would be: it's here MCA rolls their genes and skin (built bare, they had none)
 		v.finalizeSpawn(level, level.getCurrentDifficultyAt(at), net.minecraft.world.entity.EntitySpawnReason.EVENT, null);
 		Faction home = nearestSettlement(level.getServer(), at);
-		v.setAttached(CAPTIVE, new Captive(home == null ? -1 : home.id(), Optional.empty(), level.getGameTime()));
+		v.setAttached(CAPTIVE, new Captive(home == null ? -1 : home.id(), Optional.empty(), level.getGameTime(), standing(home, level.getRandom())));
 		bind(v, true);
 		v.setPersistenceRequired();
 		level.addFreshEntity(v);
@@ -199,6 +237,18 @@ public final class Captives {
 		} else {
 			v.removeAttached(BOUND);
 		}
+	}
+
+	/** Who a captive taken from {@code home} is there. */
+	private static int standing(@Nullable Faction home, RandomSource random) {
+		if (home == null) {
+			return FOLK;
+		}
+		float roll = random.nextFloat();
+		if (roll < KIN_CHANCE && home.leader().isPresent()) {
+			return KIN;
+		}
+		return roll < KIN_CHANCE + GUARD_CHANCE ? GUARD : FOLK;
 	}
 
 	private static @Nullable Faction nearestSettlement(MinecraftServer server, BlockPos at) {
@@ -313,8 +363,9 @@ public final class Captives {
 	static void free(ServerLevel level, ServerPlayer player, Villager captive) {
 		Captive c = captive.getAttached(CAPTIVE);
 		int home = c == null ? -1 : c.home();
+		int standing = c == null ? FOLK : c.standingIndex();
 		bind(captive, false);
-		captive.setAttached(CAPTIVE, new Captive(home, Optional.of(player.getUUID()), level.getGameTime()));
+		captive.setAttached(CAPTIVE, new Captive(home, Optional.of(player.getUUID()), level.getGameTime(), standing));
 		PLEADED.remove(captive.getUUID());
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, captive.getX(), captive.getY(), captive.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.NEUTRAL, 1.0F, 0.8F);
@@ -325,7 +376,8 @@ public final class Captives {
 		}
 		Deeds.freed(level, player, captive, f);
 		player.sendSystemMessage(f != null
-			? Component.translatable("message.jaymoskingdoms.captive.freed", captive.getDisplayName(), f.name()).withStyle(ChatFormatting.GREEN)
+			? Component.translatable("message.jaymoskingdoms.captive.freed" + (standing == FOLK ? "" : "." + STANDINGS[standing]), captive.getDisplayName(), f.name())
+				.withStyle(ChatFormatting.GREEN)
 			: Component.translatable("message.jaymoskingdoms.captive.freed.nowhere", captive.getDisplayName()).withStyle(ChatFormatting.GREEN));
 	}
 
@@ -384,7 +436,8 @@ public final class Captives {
 		boolean homeless = home == null || home.fallen();
 		if (here != null && (homeless || here.id() == home.id())) {
 			if (p != null) {
-				arrive(level, p, v, here);
+				// (taken in by a settlement not their own, they're nobody's guard or kin there)
+				arrive(level, p, v, here, homeless ? FOLK : c.standingIndex());
 			} else {
 				v.removeAttached(CAPTIVE);
 			}
@@ -408,15 +461,103 @@ public final class Captives {
 		}
 	}
 
-	/** Home: the rescue's done. */
-	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home) {
+	/**
+	 * Home: the rescue's done. (0.7.100) Their family pay from their own purse and come running to thank you, the settlement adds
+	 * a reward from its treasury (more the richer it is and the more the one brought home matters to it), a guard or the ruler's
+	 * kin hand you something of their own, and the settlement owes you a favour.
+	 */
+	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home, int standing) {
 		v.removeAttached(CAPTIVE);
 		LOADED.remove(v);
 		LOST.remove(v.getUUID());
-		ItemStack reward = new ItemStack(Items.EMERALD, Mth.nextInt(level.getRandom(), REWARD_LEAST, REWARD_MOST));
-		Deeds.broughtHome(level, player, v, home, reward);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.home", v.getDisplayName(), home.name()).withStyle(ChatFormatting.GOLD));
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		int purse = Mth.nextInt(random, PURSE_LEAST[standing], PURSE_MOST[standing]);
+		// (a realm at war with you, or that can't tell who you are behind a mask, thanks you but pays nothing from its
+		// treasury and owes you no favour)
+		boolean known = !Wars.enemy(player, home) && !Identities.hidden(player, home.id());
+		int bounty = known ? bounty(server, home, standing) : 0;
+		List<ItemStack> rewards = new ArrayList<>();
+		rewards.add(new ItemStack(Items.EMERALD, purse + bounty));
+		if (standing == GUARD) {
+			rewards.add(new ItemStack(GUARD_GIFTS.get(random.nextInt(GUARD_GIFTS.size()))));
+		} else if (standing == KIN) {
+			rewards.add(new ItemStack(Items.GOLDEN_APPLE));
+			rewards.add(new ItemStack(Items.DIAMOND, Mth.nextInt(random, KIN_DIAMONDS_LEAST, KIN_DIAMONDS_MOST)));
+		}
+		Deeds.broughtHome(level, player, v, home, rewards, HOME_REP[standing], HOME_HEARTS[standing]);
+		Deeds.family(level, player, v, FAMILY, FAMILY_RANGE, FAMILY_HEARTS);
+		if (known) {
+			Faction.Member member = home.member(player.getUUID());
+			if (member != null) {
+				KingdomEvents.standing(server, player, home, member.standing() + HOME_STANDING[standing]);
+			}
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.home" + (standing == FOLK ? "" : "." + STANDINGS[standing]),
+			v.getDisplayName(), home.name()).withStyle(ChatFormatting.GOLD));
+		player.sendSystemMessage(bounty > 0
+			? Component.translatable("message.jaymoskingdoms.captive.reward", purse, home.name(), bounty).withStyle(ChatFormatting.GOLD)
+			: Component.translatable("message.jaymoskingdoms.captive.reward.purse", purse).withStyle(ChatFormatting.GOLD));
+		if (known && owe(player, home, FAVOURS_GIVEN[standing])) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.favour", home.name(), owed(player, home.id()))
+				.withStyle(ChatFormatting.YELLOW));
+		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	/** What {@code home}'s treasury pays for one of {@code standing} brought back, taken out of it now. */
+	private static int bounty(MinecraftServer server, Faction home, int standing) {
+		long worth = Wealth.worth(server, home);
+		int want = (int)Math.min(BOUNTY_MOST[standing], BOUNTY_BASE[standing] + (long)(Math.max(0L, worth) * BOUNTY_SHARE[standing]));
+		int[] paid = {0};
+		Factions.update(server, home.id(), f -> {
+			long can = Math.max(0L, f.treasury() - TREASURY_KEPT);
+			paid[0] = (int)Math.min(want, can);
+			return paid[0] > 0 ? f.withTreasury(f.treasury() - paid[0]) : f;
+		});
+		return paid[0];
+	}
+
+	// ---- favours -----------------------------------------------------------------------------------------------------
+
+	/** Favours settlement {@code factionId} owes {@code player} (none to a masked stranger: they don't know who it is). */
+	public static int owed(Player player, int factionId) {
+		if (player instanceof ServerPlayer sp && Identities.hidden(sp, factionId)) {
+			return 0;
+		}
+		return player.getAttachedOrElse(FAVOURS, Map.of()).getOrDefault(Integer.toString(factionId), 0);
+	}
+
+	/** {@code f} owes {@code player} {@code more} favours (up to {@link #FAVOURS_MOST}); whether it owes any more than before. */
+	private static boolean owe(ServerPlayer player, Faction f, int more) {
+		String id = Integer.toString(f.id());
+		Map<String, Integer> all = new HashMap<>(player.getAttachedOrElse(FAVOURS, Map.of()));
+		int had = all.getOrDefault(id, 0);
+		int now = Math.min(FAVOURS_MOST, had + more);
+		if (now <= had) {
+			return false;
+		}
+		all.put(id, now);
+		player.setAttached(FAVOURS, Map.copyOf(all));
+		return true;
+	}
+
+	/** (Theft) {@code f}'s guards would arrest {@code player}: if it owes them a favour, it's spent and they let it go. */
+	static boolean pardon(ServerPlayer player, Faction f) {
+		int had = owed(player, f.id());
+		if (had <= 0) {
+			return false;
+		}
+		Map<String, Integer> all = new HashMap<>(player.getAttachedOrElse(FAVOURS, Map.of()));
+		String id = Integer.toString(f.id());
+		if (had == 1) {
+			all.remove(id);
+		} else {
+			all.put(id, had - 1);
+		}
+		player.setAttached(FAVOURS, Map.copyOf(all));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.captive.pardon", f.name(), had - 1).withStyle(ChatFormatting.YELLOW));
+		return true;
 	}
 
 	/** Left behind (or too long on the road): they go their own way, still grateful. */

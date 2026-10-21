@@ -24,6 +24,8 @@ public final class QuestNet {
 	public static final int OFFER = 0, ACTIVE = 1, READY = 2;
 	/** What the player chose: take it, turn it in, give it up; or they closed the screen (the giver may go about their day). */
 	public static final int ACCEPT = 0, TURN_IN = 1, ABANDON = 2, CLOSE = 3;
+	/** (0.7.125) The "giver" a bounty board's screen is opened for ({@link Bounties}): no entity. */
+	public static final int BOARD = -7;
 
 	/** One quest as the giver's screen shows it. */
 	public record View(String id, int state, boolean royal, Component title, Component text, Component objective, List<ItemStack> rewards, List<Component> extras) {

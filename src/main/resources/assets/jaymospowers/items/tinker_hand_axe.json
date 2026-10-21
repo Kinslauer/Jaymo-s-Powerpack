@@ -125,6 +125,13 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/hand_axe/handle_slimesteel"
             }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/hand_axe/handle_steel"
+            }
           }
         ],
         "fallback": {
@@ -259,6 +266,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/hand_axe/head_broken_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/hand_axe/head_broken_steel"
+              }
             }
           ],
           "fallback": {
@@ -388,6 +402,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/hand_axe/head_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/hand_axe/head_steel"
               }
             }
           ],
@@ -540,6 +561,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/hand_axe/binding_vine"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/hand_axe/binding_steel"
             }
           }
         ],

@@ -284,6 +284,14 @@ public final class ArsenalPower implements Power {
 		player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.6, 1.0, 0.6, 0.1);
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the gates close and the chains let go of whoever they bound
+		ArsenalGates.close(player);
+		ArsenalChains.onLost(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		ArsenalGates.close(player);

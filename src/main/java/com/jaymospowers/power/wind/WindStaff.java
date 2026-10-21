@@ -1,6 +1,7 @@
 package com.jaymospowers.power.wind;
 
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Powers;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -30,7 +31,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.10.17) The quarterstaff in a wind sorcerer's hand (a Kingdoms Sorcerer of the air). Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
+ * (0.10.17) The quarterstaff in a Wind power user's hand (whatever their class) or a wind sorcerer's (a Kingdoms Sorcerer of the air). Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
  * overhead slam) each carry a gale of their own, counted by our own chain of landed swings (Better Combat's combo index
  * never reaches the server):
  * <ol>
@@ -43,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * </ol>
  * Right click (or sneak + right click, standing) is the <b>Staff Vault</b>: plant the staff and ride a gust forward
  * and up (straight up when sneaking), landing soft. Every hit with a staff also leaves a puff of air. In anyone else's
- * hand (a Wind power user included) it's just a staff. The Tempest mode (Z) and the ascension make every gale hit harder.
+ * hand (anyone without the Wind power) it's just a staff. The Tempest mode (Z) and the ascension make every gale hit harder.
  */
 public final class WindStaff {
 	/** A chain breaks if no swing lands for this long (ticks); a swing is counted once however many it hits. */
@@ -83,12 +84,12 @@ public final class WindStaff {
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!inGale && damageTaken > 0.0F && source.is(DamageTypes.PLAYER_ATTACK) && source.getDirectEntity() instanceof ServerPlayer attacker
-				&& entity != attacker && isStaff(attacker.getMainHandItem()) && wind(attacker)) {
+				&& entity != attacker && isStaff(attacker.getMainHandItem()) && wielder(attacker)) {
 				hit(attacker, entity);
 			}
 		});
 		UseItemCallback.EVENT.register((player, world, hand) -> {
-			if (hand != InteractionHand.MAIN_HAND || !isStaff(player.getItemInHand(hand)) || !wind(player)) {
+			if (hand != InteractionHand.MAIN_HAND || !isStaff(player.getItemInHand(hand)) || !wielder(player)) {
 				return InteractionResult.PASS;
 			}
 			if (player instanceof ServerPlayer serverPlayer) {
@@ -104,6 +105,14 @@ public final class WindStaff {
 	/** Any quarterstaff (the Armory's, or one another mod names so). */
 	public static boolean isStaff(ItemStack stack) {
 		return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("quarterstaff");
+	}
+
+	/**
+	 * (0.15.16, Andy: "wind should keep the quarterstaff abilities regardless of class") Who the staff's gales answer:
+	 * anyone with the Wind power, whatever their class, and still an air Sorcerer without it.
+	 */
+	static boolean wielder(Player player) {
+		return Powers.has(player, WindPower.INSTANCE) || wind(player);
 	}
 
 	/**

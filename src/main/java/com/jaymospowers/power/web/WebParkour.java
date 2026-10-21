@@ -231,7 +231,7 @@ public final class WebParkour {
 	}
 
 	/** A puff of the block's dust: off the wall at {@code side}, or the ground underfoot. */
-	private static void dust(ServerLevel level, ServerPlayer player, @Nullable Direction side, int count) {
+	public static void dust(ServerLevel level, ServerPlayer player, @Nullable Direction side, int count) {
 		BlockPos pos = side == null ? player.blockPosition().below()
 			: BlockPos.containing(player.getX() + side.getStepX() * 0.8, player.getY() + 1.0, player.getZ() + side.getStepZ() * 0.8);
 		BlockState state = level.getBlockState(pos);

@@ -1,6 +1,8 @@
 package com.jaymospowers.client.power.wind;
 
+import com.jaymospowers.client.sound.Accents;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.power.wind.WindFlight;
 import com.jaymospowers.power.wind.WindNet;
 import com.jaymospowers.power.wind.WindPower;
@@ -11,13 +13,16 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +34,12 @@ import org.jspecify.annotations.Nullable;
  * The server is told the state via {@code wind_flight}.
  */
 public final class WindFlightController {
+	/** Flight accents: gusts this high over the ground (or above this height), spray within this height of water. */
+	static final int GUST_HEIGHT = 24, GUST_ALTITUDE = 150, SPRAY_HEIGHT = 3;
+	static final Soundscape.Layer GUST = Soundscape.Layer.of(0.25F, 0.45F, 0.7F, 1.0F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BREEZE_IDLE_GROUND);
+	static final Soundscape.Layer RAIN = Soundscape.Layer.of(0.15F, 0.3F, 0.9F, 1.3F, SoundEvents.WEATHER_RAIN);
+	static final Soundscape.Layer SPRAY = Soundscape.Layer.of(0.2F, 0.35F, 1.1F, 1.5F, SoundEvents.PLAYER_SPLASH, SoundEvents.GENERIC_SPLASH);
+
 	// ---- tuning (blocks per tick; 1 b/t = 20 m/s) -------------------------------------------------------------
 	/** Top cruise speed in a plain rainy sky (weather factor 1.0); the weather scales it (see {@link #topSpeed()}). */
 	public static final double TOP_SPEED = 2.5;
@@ -670,6 +681,7 @@ public final class WindFlightController {
 
 	private void effects(Minecraft minecraft, LocalPlayer player) {
 		this.ensureLoop(minecraft, player);
+		this.accents(player);
 		ClientLevel level = minecraft.level;
 		if (level == null || !this.state.fast()) {
 			return;
@@ -703,6 +715,25 @@ public final class WindFlightController {
 		}
 		if (sonic && this.ticks % 3 == 0) {
 			level.addParticle(ParticleTypes.SMALL_GUST, player.getX() - dir.x * 2.0, player.getY() + 0.9 - dir.y * 2.0, player.getZ() - dir.z * 2.0, 0.0, 0.0, 0.0);
+		}
+	}
+
+	/**
+	 * Over the rushing loop, the world answers at uneven beats: gusts buffet the flier high up, rain patters on them,
+	 * and a fast flight skimming water throws up spray.
+	 */
+	private void accents(LocalPlayer player) {
+		float speed = (float)this.speedFraction();
+		BlockPos pos = player.blockPosition();
+		int ground = player.level().getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+		if (player.getY() - ground > GUST_HEIGHT || player.getY() > GUST_ALTITUDE) {
+			Accents.every(player, "wind.gust", 30, 80, GUST.louder(0.6F + speed));
+		}
+		if (player.level().isRainingAt(pos.above())) {
+			Accents.every(player, "wind.rain", 6, 14, RAIN.louder(0.5F + speed));
+		}
+		if (this.state.fast() && player.getY() - ground < SPRAY_HEIGHT && player.level().getFluidState(pos.below()).is(FluidTags.WATER)) {
+			Accents.every(player, "wind.spray", 6, 12, SPRAY.louder(0.5F + speed));
 		}
 	}
 

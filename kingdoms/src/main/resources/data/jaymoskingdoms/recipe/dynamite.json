@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "minecraft:string",
+    "G": "minecraft:gunpowder",
+    "P": "minecraft:paper"
+  },
+  "pattern": [
+    "S",
+    "G",
+    "P"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:dynamite",
+    "count": 2
+  }
+}

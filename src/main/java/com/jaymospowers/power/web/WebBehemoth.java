@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Soundscape;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -46,6 +47,9 @@ import net.minecraft.world.phys.Vec3;
  * drown it (see {@code mixin.WebHostZombieMixin}).
  */
 public final class WebBehemoth {
+	/** The behemoth's idle growl, at uneven beats and never twice alike. */
+	static final Soundscape.Layer GROWL = Soundscape.Layer.of(0.6F, 0.85F, 0.5F, 0.7F, SoundEvents.WARDEN_AGITATED, SoundEvents.WARDEN_ANGRY);
+
 	// ---- tuning ----
 	/** On top of the zombie's own: health, melee damage, size (+70%: the big body), speed (x1.3), knockback resistance. */
 	static final double HEALTH_BONUS = 160.0, DAMAGE_BONUS = 10.0, SCALE_BONUS = 0.7, SPEED_BONUS = 0.3, KNOCKBACK_RESIST = 0.8;
@@ -209,8 +213,8 @@ public final class WebBehemoth {
 		}
 		lash(level, host, now);
 		fury(level, host, target, now);
-		if (host.tickCount % 80 == 0) {
-			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.HOSTILE, 0.7F, 0.6F);
+		if (Soundscape.due(host, "symbiote.behemoth", 60, 120)) {
+			Soundscape.play(level, host.position(), SoundSource.HOSTILE, GROWL);
 		}
 		if (host.getRandom().nextInt(4) == 0) {
 			level.sendParticles(WebSymbioteStrains.dust(host, 1.0F), host.getX(), host.getY() + host.getBbHeight() * 0.6, host.getZ(), 1,

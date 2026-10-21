@@ -126,6 +126,10 @@ final class CrawlTaps {
 	}
 
 	private static void startRoll(LocalPlayer player, boolean right) {
+		if (com.jaymospowers.core.wounds.Downed.passedOut(player)) {
+			// (0.14.1) passed out: lying still
+			return;
+		}
 		long now = player.level().getGameTime();
 		Crawl.Rolling next = Crawl.nextRoll(lastRoll, now, right);
 		if (next == null) {

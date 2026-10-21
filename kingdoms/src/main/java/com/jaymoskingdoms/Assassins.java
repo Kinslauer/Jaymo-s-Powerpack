@@ -81,8 +81,8 @@ final class Assassins {
 
 	/** Each day, the chance of a contract on a realm's ruler, before his temper and his feuds. */
 	static final float REALM_CHANCE = 0.015F;
-	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER): how many enemies he makes. */
-	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F};
+	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST): how many enemies he makes. */
+	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F, 2.0F};
 	/** A realm with a rival or an enemy at war: this many times as likely. */
 	static final float FEUD_CHANCE = 2.0F;
 	/** Of a feuding realm's contracts, the share its rivals pay for (the rest are his own people's, an heir's, or no one knows). */
@@ -104,7 +104,12 @@ final class Assassins {
 	static final double PLAYER_SPACE = 14.0;
 	/** A player is marked at night only (time of day). */
 	static final long NIGHT_FROM = 13000L, NIGHT_TO = 23000L;
-	/** The assassin: his health, his blows (his iron sword adds 5), his speed; his walk while he stalks and his reach for the stab. */
+	/**
+	 * The assassin: his health, his blows (his blade adds to them), his speed; his walk while he stalks and his reach for
+	 * the stab. (0.7.102) His hidden blade adds 3 where the old iron sword added 5, so drawn, his blows gain
+	 * {@link #BLADE_MAKEUP}: 7 as before.
+	 */
+	static final double BLADE_MAKEUP = 2.0;
 	static final double HEALTH = 30.0, DAMAGE = 2.0, SPEED = 0.32, STALK_SPEED = 0.7, STAB_REACH = 2.6;
 	/** The stab: this share of a ruler's health (asleep: the second), this much to a player, and the player's poison (ticks, level). */
 	static final float STAB_SHARE = 0.25F, SLEEP_STAB_SHARE = 0.5F, PLAYER_STAB = 6.0F;
@@ -326,7 +331,8 @@ final class Assassins {
 			if (!feuds.isEmpty() && random.nextFloat() < RIVAL_SHARE) {
 				hirer = feuds.get(random.nextInt(feuds.size())).id();
 				motive = "rival";
-			} else if (temper == Tempers.Temper.TYRANT && random.nextBoolean()) {
+			} else if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.PURIST) && random.nextBoolean()) {
+				// (0.7.130) a purist's own people not of his blood have had enough of him too
 				motive = "people";
 			} else {
 				motive = random.nextBoolean() ? "heir" : "guild";
@@ -515,13 +521,18 @@ final class Assassins {
 		a.setCustomName(Component.translatable("entity.jaymoskingdoms.stranger"));
 	}
 
-	/** The cloak off: black leathers, a blade. */
+	/** The cloak off: black leathers, a blade (0.7.101: a hidden blade, sprung from his bracer). */
 	private static void reveal(ServerLevel level, Folk a) {
 		a.setItemSlot(EquipmentSlot.HEAD, leathers(Items.LEATHER_HELMET));
 		a.setItemSlot(EquipmentSlot.CHEST, leathers(Items.LEATHER_CHESTPLATE));
 		a.setItemSlot(EquipmentSlot.LEGS, leathers(Items.LEATHER_LEGGINGS));
 		a.setItemSlot(EquipmentSlot.FEET, leathers(Items.LEATHER_BOOTS));
-		a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+		if (HiddenBlade.ITEM != null) {
+			a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(HiddenBlade.ITEM));
+			a.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(DAMAGE + BLADE_MAKEUP);
+		} else {
+			a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+		}
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			a.setDropChance(slot, 0.0F);
 		}

@@ -48,6 +48,8 @@ public final class ToolStats {
 	static final float CRUMBLING_SPEED = 0.5F;
 	/** Stringy and Solar Powered (in sunlight): chance per level that a point of wear doesn't land. */
 	static final float STRINGY_CHANCE = 0.15F, SOLAR_CHANCE = 0.25F;
+	/** Tempered (steel): chance that a point of wear doesn't land, however many steel parts (it doesn't stack). */
+	static final float TEMPERED_CHANCE = 0.25F;
 	/** One material unit repairs this share of the tool, over the cost of its main part (a pick head: 25% a unit). */
 	static final float REPAIR_FACTOR = 0.5F;
 	/** Cultivated: repairs go this much further per level. */
@@ -237,7 +239,7 @@ public final class ToolStats {
 		return speed + bonus;
 	}
 
-	/** The wear a hit or block really costs once Tanned, Stringy and Solar Powered have had their say. */
+	/** The wear a hit or block really costs once Tanned, Stringy, Solar Powered and Tempered have had their say. */
 	public static int wear(ItemStack stack, int amount, ServerLevel level, @Nullable ServerPlayer player) {
 		Stats stats = stats(stack);
 		if (stats == null || amount <= 0) {
@@ -249,6 +251,9 @@ public final class ToolStats {
 		float skip = stats.level(Trait.STRINGY) * STRINGY_CHANCE;
 		if (player != null && stats.level(Trait.SOLAR_POWERED) > 0 && level.isBrightOutside() && level.canSeeSky(player.blockPosition().above())) {
 			skip += stats.level(Trait.SOLAR_POWERED) * SOLAR_CHANCE;
+		}
+		if (stats.level(Trait.TEMPERED) > 0) {
+			skip += TEMPERED_CHANCE;
 		}
 		if (skip <= 0) {
 			return amount;

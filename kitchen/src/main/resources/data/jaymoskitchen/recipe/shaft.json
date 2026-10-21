@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "S",
+    "L",
+    "S"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "L": "#minecraft:logs"
+  },
+  "result": {
+    "id": "jaymoskitchen:shaft",
+    "count": 2
+  }
+}

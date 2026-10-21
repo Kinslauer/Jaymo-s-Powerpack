@@ -135,6 +135,13 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/sledge_hammer/handle_slimesteel"
                   }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_steel"
+                  }
                 }
               ],
               "fallback": {
@@ -269,6 +276,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_slimesteel"
                     }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_steel"
+                    }
                   }
                 ],
                 "fallback": {
@@ -398,6 +412,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_steel"
                     }
                   }
                 ],
@@ -534,6 +555,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_slimesteel"
                     }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_steel"
+                    }
                   }
                 ],
                 "fallback": {
@@ -663,6 +691,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_steel"
                     }
                   }
                 ],
@@ -799,6 +834,13 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_slimesteel"
                     }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_steel"
+                    }
                   }
                 ],
                 "fallback": {
@@ -928,6 +970,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_steel"
                     }
                   }
                 ],
@@ -1067,6 +1116,13 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_slimesteel"
               }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_steel"
+              }
             }
           ],
           "fallback": {
@@ -1201,6 +1257,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_slimesteel"
                 }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_steel"
+                }
               }
             ],
             "fallback": {
@@ -1330,6 +1393,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_steel"
                 }
               }
             ],
@@ -1466,6 +1536,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_slimesteel"
                 }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_steel"
+                }
               }
             ],
             "fallback": {
@@ -1595,6 +1672,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_steel"
                 }
               }
             ],
@@ -1731,6 +1815,13 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_slimesteel"
                 }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_steel"
+                }
               }
             ],
             "fallback": {
@@ -1860,6 +1951,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_steel"
                 }
               }
             ],

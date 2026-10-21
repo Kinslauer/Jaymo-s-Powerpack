@@ -74,6 +74,7 @@ public final class SmokePower implements Power {
 		SmokeJet.init();
 		SmokePyroclasm.init();
 		SmokeCloudshaper.init();
+		SmokeParticles.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SmokeScreen.clear();
@@ -146,6 +147,16 @@ public final class SmokePower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, SmokeState.NONE);
+	}
+
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the screen, the smother and the jet stop (no cooldown), the vapour body comes back together
+		SmokeScreen.stop(player, false);
+		SmokeSmother.stop(player, false);
+		SmokeJet.stop(player);
+		SmokeVapour.disarm(player);
 	}
 
 	@Override

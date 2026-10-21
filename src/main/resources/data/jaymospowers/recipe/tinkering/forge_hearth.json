@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:bricks",
+    "F": "minecraft:campfire"
+  },
+  "pattern": [
+    "B B",
+    "BFB",
+    "BBB"
+  ],
+  "result": {
+    "id": "jaymospowers:forge_hearth"
+  }
+}

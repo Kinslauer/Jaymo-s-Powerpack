@@ -27,7 +27,8 @@ public enum Trait {
 	ENHANCED("enhanced", ChatFormatting.LIGHT_PURPLE),
 	CRUMBLING("crumbling", ChatFormatting.LIGHT_PURPLE),
 	TASTY("tasty", ChatFormatting.LIGHT_PURPLE),
-	OVERSLIME("overslime", ChatFormatting.GREEN);
+	OVERSLIME("overslime", ChatFormatting.GREEN),
+	TEMPERED("tempered", ChatFormatting.DARK_AQUA);
 
 	public final String id;
 	public final ChatFormatting colour;

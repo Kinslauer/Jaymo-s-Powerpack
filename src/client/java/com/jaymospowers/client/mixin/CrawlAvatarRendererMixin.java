@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** A gesture crawl (see CrawlPose): read onto the render state; a roll turned after the swimming tilt. */
+/**
+ * A gesture crawl (see CrawlPose): read onto the render state; a roll turned after the swimming tilt. (0.15.42) And the
+ * freerun slide's state, finished here after the player's own fields (see RunPose).
+ */
 @Mixin(AvatarRenderer.class)
 abstract class CrawlAvatarRendererMixin {
 	@Inject(
@@ -18,6 +21,8 @@ abstract class CrawlAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$crawlState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		CrawlPose.extract(entity, state, partialTicks);
+		// (0.15.42) the freerun slide's own lie-back in place of the swimming tilt (see RunPose)
+		com.jaymospowers.client.freerun.RunPose.extractAvatar(entity, state, partialTicks);
 	}
 
 	@Inject(
