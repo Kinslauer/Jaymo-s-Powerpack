@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -13,9 +14,9 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
  * A drifting aercloud: a random walk of {@code bounds} steps, each laying a small flattened blob of cloud blocks into
- * open air. {@code cloud} is "cold", "blue" or "golden"; {@code spread} is the blob's widest horizontal radius and
- * {@code thickness} its vertical one. The data makes cold clouds ({@code bounds} 16), rarer blue ones (8), rare golden
- * ones high up (4), and the big low banks of cold cloud under the islands.
+ * open air. {@code cloud} is "cold", "blue", "golden", "green", "purple" or "storm"; {@code spread} is the blob's widest
+ * horizontal radius and {@code thickness} its vertical one. The data makes every colour by height band (the surface,
+ * lower, middle and high bands of the dimension, docs/aether.md). A purple cloud's blocks each face a random way.
  *
  * <p>Clouds only take air, so one set among islands hugs them; and they only go where this generation step may write
  * (a walk that wanders too far from its chunk stops there).
@@ -45,8 +46,12 @@ public record AercloudFeature(String cloud, int bounds, int spread, int thicknes
 		Block block = switch (this.cloud) {
 			case "blue" -> AetherBlocks.BLUE_AERCLOUD;
 			case "golden" -> AetherBlocks.GOLDEN_AERCLOUD;
+			case "green" -> AetherBlocks.GREEN_AERCLOUD;
+			case "purple" -> AetherBlocks.PURPLE_AERCLOUD;
+			case "storm" -> AetherBlocks.STORM_AERCLOUD;
 			default -> AetherBlocks.COLD_AERCLOUD;
 		};
+		boolean purple = block == AetherBlocks.PURPLE_AERCLOUD;
 		BlockState state = block.defaultBlockState();
 		int x = origin.getX();
 		int y = origin.getY();
@@ -54,7 +59,7 @@ public record AercloudFeature(String cloud, int bounds, int spread, int thicknes
 		boolean placed = false;
 		for (int step = 0; step < this.bounds; step++) {
 			// the walk ends once its centre leaves the region this step may write
-			if (!level.ensureCanWrite(new BlockPos(x, y, z))) {
+			if (!AetherFeatures.canWrite(level, new BlockPos(x, y, z))) {
 				break;
 			}
 			int rx = 1 + random.nextInt(this.spread);
@@ -66,7 +71,8 @@ public record AercloudFeature(String cloud, int bounds, int spread, int thicknes
 						double d = (double)(dx * dx) / (rx * rx + 1) + (double)(dy * dy) / (this.thickness * this.thickness + 1) + (double)(dz * dz) / (rz * rz + 1);
 						BlockPos at = new BlockPos(x + dx, y + dy, z + dz);
 						if (d <= 1.0 && AetherFeatures.isAir(level, at)) {
-							placed |= AetherFeatures.put(level, at, state);
+							BlockState put = purple ? state.setValue(PurpleAercloudBlock.FACING, Direction.getRandom(random)) : state;
+							placed |= AetherFeatures.put(level, at, put);
 						}
 					}
 				}

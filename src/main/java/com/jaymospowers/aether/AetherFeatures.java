@@ -1,6 +1,11 @@
 package com.jaymospowers.aether;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.aether.world.CloudbedFeature;
+import com.jaymospowers.aether.world.FerrositeSpireFeature;
+import com.jaymospowers.aether.world.IceSpikeFeature;
+import com.jaymospowers.aether.world.MoaNestFeature;
+import com.jaymospowers.aether.world.PointedHolystoneFeature;
 import com.mojang.serialization.MapCodec;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -10,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -18,8 +24,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
- * The Aether's own worldgen features (docs/aether.md, "The dimension"): golden oak, crystal islands, aerclouds and
- * quicksoil shelves. Each is a {@link Feature} with its configured feature in {@code data/jaymospowers/worldgen/feature}
+ * The Aether's own worldgen features (docs/aether.md, "The dimension"): golden oak, crystal islands, aerclouds,
+ * quicksoil shelves, and (package {@code aether.world}) the cloudbed, ice spikes, ferrosite spires, moa nests and
+ * pointed holystone. Each is a {@link Feature} with its configured feature in {@code data/jaymospowers/worldgen/feature}
  * and its placement in {@code worldgen/placed_feature}; the biomes list the placed features. Everything else the
  * dimension grows (skyroot trees, ores, lakes, springs, plants) is vanilla feature types in that data.
  *
@@ -40,25 +47,38 @@ public final class AetherFeatures {
 		register("crystal_island", CrystalIslandFeature.CODEC);
 		register("aercloud", AercloudFeature.CODEC);
 		register("quicksoil_shelf", QuicksoilShelfFeature.CODEC);
+		register("cloudbed", CloudbedFeature.CODEC);
+		register("ice_spike", IceSpikeFeature.CODEC);
+		register("ferrosite_spire", FerrositeSpireFeature.CODEC);
+		register("moa_nest", MoaNestFeature.CODEC);
+		register("pointed_holystone", PointedHolystoneFeature.CODEC);
 	}
 
 	private static void register(String id, MapCodec<? extends Feature> codec) {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id(id), codec);
 	}
 
+	/**
+	 * Whether this generation step may write at {@code pos}. The same test {@code ensureCanWrite} makes, but without its
+	 * error log: features that wander (clouds, spikes) reach past their chunk's neighbourhood now and then, and that is fine.
+	 */
+	public static boolean canWrite(WorldGenLevel level, BlockPos pos) {
+		return level instanceof WorldGenRegion region ? region.isWithinWriteZone(pos) : level.ensureCanWrite(pos);
+	}
+
 	/** Sets a block, unless {@code pos} lies outside what this generation step may write. */
-	static boolean put(WorldGenLevel level, BlockPos pos, BlockState state) {
-		return level.ensureCanWrite(pos) && level.setBlock(pos, state, FLAGS);
+	public static boolean put(WorldGenLevel level, BlockPos pos, BlockState state) {
+		return canWrite(level, pos) && level.setBlock(pos, state, FLAGS);
 	}
 
 	/** Open air that may be written to. */
-	static boolean isAir(WorldGenLevel level, BlockPos pos) {
-		return level.ensureCanWrite(pos) && level.getBlockState(pos).isAir();
+	public static boolean isAir(WorldGenLevel level, BlockPos pos) {
+		return canWrite(level, pos) && level.getBlockState(pos).isAir();
 	}
 
 	/** Room for a tree: air, or what trees grow through (plants, leaves, snow). */
-	static boolean isFree(WorldGenLevel level, BlockPos pos) {
-		if (!level.ensureCanWrite(pos)) {
+	public static boolean isFree(WorldGenLevel level, BlockPos pos) {
+		if (!canWrite(level, pos)) {
 			return false;
 		}
 		BlockState state = level.getBlockState(pos);

@@ -1,6 +1,8 @@
 package com.jaymospowers.aether;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -11,15 +13,18 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 /**
  * Quicksoil shelves: golden quicksoil plastered along the undersides of islands in the low part of the sky. Each patch
  * is a flat disc about {@link #RADIUS} blocks across laid on the first underside found in a random column of the chunk
- * (the first air with island right above it, looking up from the bottom, below {@link #MAX_Y}); only air with a solid
+ * (the first air with island right above it, looking up from {@code min_y} (default the bottom of the world) to {@code max_y} (default {@link #MAX_Y})); only air with a solid
  * block over it gets quicksoil, so the discs hug the islands and overlapping ones join into a shelf.
  */
-public record QuicksoilShelfFeature() implements Feature {
-	public static final MapCodec<QuicksoilShelfFeature> CODEC = MapCodec.unit(QuicksoilShelfFeature::new);
-
+public record QuicksoilShelfFeature(int minY, int maxY) implements Feature {
 	/** Patches tried in a chunk that has a shelf, how far up they look, and the disc's radius. */
 	public static final int PATCHES = 8, MAX_Y = 48;
 	public static final double RADIUS = 3.46;
+
+	public static final MapCodec<QuicksoilShelfFeature> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+			Codec.INT.optionalFieldOf("min_y", Integer.MIN_VALUE).forGetter(QuicksoilShelfFeature::minY),
+			Codec.INT.optionalFieldOf("max_y", MAX_Y).forGetter(QuicksoilShelfFeature::maxY))
+		.apply(i, QuicksoilShelfFeature::new));
 
 	@Override
 	public MapCodec<QuicksoilShelfFeature> codec() {
@@ -35,7 +40,7 @@ public record QuicksoilShelfFeature() implements Feature {
 		for (int i = 0; i < PATCHES; i++) {
 			int x = chunkX + random.nextInt(16);
 			int z = chunkZ + random.nextInt(16);
-			int y = underside(level, x, z);
+			int y = underside(level, x, z, this.minY, this.maxY);
 			if (y < 0) {
 				continue;
 			}
@@ -56,9 +61,9 @@ public record QuicksoilShelfFeature() implements Feature {
 	}
 
 	/** The height of the first underside in a column (air with island above it), or -1. */
-	private static int underside(WorldGenLevel level, int x, int z) {
+	private static int underside(WorldGenLevel level, int x, int z, int minY, int maxY) {
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-		for (int y = level.getMinY() + 1; y < MAX_Y; y++) {
+		for (int y = Math.max(level.getMinY() + 1, minY); y < maxY; y++) {
 			at.set(x, y, z);
 			if (AetherFeatures.isAir(level, at) && isIsland(level.getBlockState(at.above()))) {
 				return y;

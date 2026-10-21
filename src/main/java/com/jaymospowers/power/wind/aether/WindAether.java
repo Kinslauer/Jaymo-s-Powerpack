@@ -38,13 +38,14 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.13.36) Wind's way into the Aether ({@code jaymospowers:aether}, a datapack dimension of floating holystone islands under
- * an eternal noon, in four skyroot biomes; see {@code docs/aether.md} and {@code docs/wind.md}).
+ * the Overworld's day and night, in sixteen biomes (Aether II's Holy Isles); see {@code docs/aether.md} and {@code docs/wind.md}).
  * <ul>
  * <li>A Wind user flying in the Overworld who climbs to within {@link #ASCEND_MARGIN} blocks of the top of the world, with
  * the fourth ability (B) unlocked, rises into the Aether with every player within {@link #COMPANION_RADIUS} blocks.</li>
- * <li>They arrive at the same x/z standing on an island there (on the ground, not on a tree: {@link #standAt}), or the
- * nearest island within {@link #SEARCH_RADIUS} blocks, or (no island anywhere near) in the open air at
- * {@link #EMPTY_ARRIVAL_Y} with Slow Falling.</li>
+ * <li>They arrive at the same x/z standing on an island there (on the ground, not on a tree: {@link #standAt}; the big
+ * lowland islands, not the broken islets above y {@link #ARRIVAL_SCAN_TOP}), or the nearest island within
+ * {@link #SEARCH_RADIUS} blocks, or (no island anywhere near) in the open air at {@link #EMPTY_ARRIVAL_Y} with Slow
+ * Falling.</li>
  * <li>The way home is the old Aether's: anyone (Wind or not) who falls below {@link #FALL_OUT_Y} lands back in the
  * Overworld, {@link #ARRIVE_ABOVE_GROUND} blocks above the ground at the same x/z, floating down on Slow Falling.</li>
  * </ul>
@@ -60,13 +61,16 @@ public final class WindAether {
 	static final int ASCEND_COOLDOWN = 200;
 	/** How far (blocks) to search outward for an island when the arrival column is empty air, and the step between probes (a chunk). */
 	static final int SEARCH_RADIUS = 96, SEARCH_STEP = 16;
-	/** With no island anywhere near: arrive in the air at this height (above every island: the terrain tops out near y 115),
+	/** With no island anywhere near: arrive in the air at this height (above the lowland islands, which top out near y 135),
 	 * floating for this many ticks. */
-	static final int EMPTY_ARRIVAL_Y = 128, EMPTY_SLOW_FALL_TICKS = 400;
+	static final int EMPTY_ARRIVAL_Y = 150, EMPTY_SLOW_FALL_TICKS = 400;
+	/** Arrival looks for ground at or below this height: the lowland islands, not the shattered islets over them. */
+	static final int ARRIVAL_SCAN_TOP = 150;
 	/** How far (blocks) from a probed column to look for ground that is clear of trees. */
 	static final int STAND_SEARCH = 3;
-	/** Falling below this height in the Aether takes you home (the lowest islands and cloud banks sit above y 2). */
-	static final int FALL_OUT_Y = 4;
+	/** Falling below this height in the Aether takes you home (the islands' undersides sit above y 0; the dimension reaches
+	 * down to y -32, where the cloudbed floats as scenery below this line). */
+	static final int FALL_OUT_Y = -8;
 	/** Home: this many blocks above the ground (never closer than ARRIVE_BELOW_TOP to the world's top), floating down for
 	 * this many ticks, long enough to land (fall damage applies again once it ends). */
 	static final int ARRIVE_ABOVE_GROUND = 48, ARRIVE_BELOW_TOP = 8, SLOW_FALL_TICKS = 600;
@@ -160,6 +164,28 @@ public final class WindAether {
 	}
 
 	/**
+	 * The height just above the ground of the lowland at (x, z): the heightmap's top if it is at or below
+	 * {@link #ARRIVAL_SCAN_TOP}, else (a shattered islet is overhead) the first walkable ground found scanning down from
+	 * there. The world's floor if there is none.
+	 */
+	private static int aetherTopAt(ServerLevel level, int x, int z) {
+		int top = topAt(level, x, z);
+		if (top <= ARRIVAL_SCAN_TOP) {
+			return top;
+		}
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos(x, ARRIVAL_SCAN_TOP, z);
+		for (int y = ARRIVAL_SCAN_TOP; y > level.getMinY(); y--) {
+			at.setY(y);
+			boolean free = level.getBlockState(at).getCollisionShape(level, at).isEmpty();
+			at.setY(y - 1);
+			if (free && !level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
+				return y;
+			}
+		}
+		return level.getMinY();
+	}
+
+	/**
 	 * Ground to stand on at (x, z) or close beside it (within {@link #STAND_SEARCH}): {x, y, z} with y the first free
 	 * block above the top of the ground, or null. Trees stand on the islands, so the top block of a column is often a log
 	 * (the heightmap does not skip logs); a column counts only if its top is bare solid ground with room for a player.
@@ -182,7 +208,7 @@ public final class WindAether {
 
 	/** The height to stand at in the column (x, z): just above bare ground with two free blocks over it; -1 if there is none. */
 	private static int standY(ServerLevel level, int x, int z) {
-		int y = topAt(level, x, z);
+		int y = aetherTopAt(level, x, z);
 		if (y <= level.getMinY() + 1) {
 			return -1;
 		}

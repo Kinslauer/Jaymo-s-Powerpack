@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:mul",
+  "left": {
+    "type": "minecraft:noise",
+    "noise": "jaymospowers:aether/humidity",
+    "xz_scale": 0.9,
+    "y_scale": 0.0,
+    "shift_x": "minecraft:shift_x",
+    "shift_z": "minecraft:shift_z"
+  },
+  "right": 2.4
+}

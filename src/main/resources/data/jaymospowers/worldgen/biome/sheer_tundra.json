@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.2,
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/fog_color": "#f3f0ff",
+    "minecraft:visual/sky_color": "#e7e3fc",
+    "minecraft:visual/water_fog_color": "#3e5082"
+  },
+  "carvers": [],
+  "downfall": 0.5,
+  "effects": {
+    "water_color": "#637aa8",
+    "grass_color": "#c4f0ec",
+    "foliage_color": "#c4f0ec"
+  },
+  "features": [
+    [
+      "jaymospowers:cloudbed"
+    ],
+    [
+      "jaymospowers:lake_pond_arctic"
+    ],
+    [
+      "jaymospowers:disk_packed_ice",
+      "jaymospowers:boulder_icestone_tundra",
+      "jaymospowers:ice_spike_clusters",
+      "jaymospowers:quicksoil_shelf"
+    ],
+    [],
+    [],
+    [],
+    [
+      "jaymospowers:ore_agiosite",
+      "jaymospowers:ore_agiosite_small",
+      "jaymospowers:ore_ambrosium",
+      "jaymospowers:ore_ambrosium_high",
+      "jaymospowers:ore_arkenium",
+      "jaymospowers:ore_corrobonite",
+      "jaymospowers:ore_glint",
+      "jaymospowers:ore_gravitite",
+      "jaymospowers:ore_gravitite_buried",
+      "jaymospowers:ore_zanite",
+      "jaymospowers:ore_zanite_mountain",
+      "jaymospowers:ore_quartz",
+      "jaymospowers:ore_icestone",
+      "jaymospowers:ore_icestone_small",
+      "jaymospowers:ore_crude_scatterglass",
+      "jaymospowers:ore_ichorite"
+    ],
+    [
+      "jaymospowers:pointed_holystone",
+      "jaymospowers:pointed_holystone_cave"
+    ],
+    [
+      "jaymospowers:spring_water"
+    ],
+    [
+      "jaymospowers:grass_small",
+      "jaymospowers:flowers_arctic",
+      "jaymospowers:holystone_rocks"
+    ],
+    [
+      "jaymospowers:aercloud_cold_surface",
+      "jaymospowers:aercloud_golden_surface",
+      "jaymospowers:aercloud_blue_surface",
+      "jaymospowers:aercloud_green_surface",
+      "jaymospowers:aercloud_purple_surface",
+      "jaymospowers:aercloud_blue_lower",
+      "jaymospowers:aercloud_green_lower",
+      "jaymospowers:aercloud_purple_lower",
+      "jaymospowers:aercloud_storm_lower",
+      "jaymospowers:aercloud_cold_middle",
+      "jaymospowers:aercloud_storm_middle",
+      "jaymospowers:aercloud_green_high",
+      "jaymospowers:aercloud_purple_high",
+      "jaymospowers:aercloud_storm_high",
+      "jaymospowers:crystal_island"
+    ]
+  ],
+  "has_precipitation": true,
+  "temperature": -0.4
+}

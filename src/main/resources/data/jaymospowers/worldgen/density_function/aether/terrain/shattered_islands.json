@@ -1,0 +1,357 @@
+{
+  "type": "minecraft:max",
+  "left": {
+    "type": "minecraft:min",
+    "left": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:sub",
+          "left": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:add",
+              "left": 168.0,
+              "right": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:noise",
+                  "noise": "jaymospowers:aether/height_shatter_a",
+                  "xz_scale": 0.35,
+                  "y_scale": 0.0
+                },
+                "right": 38.0
+              }
+            },
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:noise",
+                    "noise": "jaymospowers:aether/mask_shatter_a",
+                    "xz_scale": 1.3,
+                    "y_scale": 0.0
+                  },
+                  "right": 3.0
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": 6.0
+            }
+          },
+          "right": "minecraft:y"
+        },
+        "right": 0.35
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "jaymospowers:aether/island_rough",
+          "xz_scale": 1.0,
+          "y_scale": 1.0
+        },
+        "right": 0.35
+      }
+    },
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:sub",
+          "left": "minecraft:y",
+          "right": {
+            "type": "minecraft:max",
+            "left": {
+              "type": "minecraft:sub",
+              "left": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:add",
+                  "left": 168.0,
+                  "right": {
+                    "type": "minecraft:mul",
+                    "left": {
+                      "type": "minecraft:noise",
+                      "noise": "jaymospowers:aether/height_shatter_a",
+                      "xz_scale": 0.35,
+                      "y_scale": 0.0
+                    },
+                    "right": 38.0
+                  }
+                },
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:noise",
+                        "noise": "jaymospowers:aether/mask_shatter_a",
+                        "xz_scale": 1.3,
+                        "y_scale": 0.0
+                      },
+                      "right": 3.0
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 6.0
+                }
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:sub",
+                      "left": {
+                        "type": "minecraft:mul",
+                        "left": {
+                          "type": "minecraft:noise",
+                          "noise": "jaymospowers:aether/mask_shatter_a",
+                          "xz_scale": 1.3,
+                          "y_scale": 0.0
+                        },
+                        "right": 3.0
+                      },
+                      "right": 0.75
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 70.0
+                },
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:sub",
+                        "left": {
+                          "type": "minecraft:mul",
+                          "left": {
+                            "type": "minecraft:noise",
+                            "noise": "jaymospowers:aether/mask_shatter_a",
+                            "xz_scale": 1.3,
+                            "y_scale": 0.0
+                          },
+                          "right": 3.0
+                        },
+                        "right": 0.75
+                      },
+                      "right": 40.0
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 6.0
+                }
+              }
+            },
+            "right": 132.0
+          }
+        },
+        "right": 0.16
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "jaymospowers:aether/island_rough",
+          "xz_scale": 1.0,
+          "y_scale": 1.0
+        },
+        "right": 1.2
+      }
+    }
+  },
+  "right": {
+    "type": "minecraft:min",
+    "left": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:sub",
+          "left": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:add",
+              "left": 226.0,
+              "right": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:noise",
+                  "noise": "jaymospowers:aether/height_shatter_b",
+                  "xz_scale": 0.3,
+                  "y_scale": 0.0
+                },
+                "right": 34.0
+              }
+            },
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:noise",
+                    "noise": "jaymospowers:aether/mask_shatter_b",
+                    "xz_scale": 1.1,
+                    "y_scale": 0.0
+                  },
+                  "right": 3.0
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": 6.0
+            }
+          },
+          "right": "minecraft:y"
+        },
+        "right": 0.35
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "jaymospowers:aether/island_rough",
+          "xz_scale": 1.0,
+          "y_scale": 1.0
+        },
+        "right": 0.35
+      }
+    },
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:sub",
+          "left": "minecraft:y",
+          "right": {
+            "type": "minecraft:max",
+            "left": {
+              "type": "minecraft:sub",
+              "left": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:add",
+                  "left": 226.0,
+                  "right": {
+                    "type": "minecraft:mul",
+                    "left": {
+                      "type": "minecraft:noise",
+                      "noise": "jaymospowers:aether/height_shatter_b",
+                      "xz_scale": 0.3,
+                      "y_scale": 0.0
+                    },
+                    "right": 34.0
+                  }
+                },
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:noise",
+                        "noise": "jaymospowers:aether/mask_shatter_b",
+                        "xz_scale": 1.1,
+                        "y_scale": 0.0
+                      },
+                      "right": 3.0
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 6.0
+                }
+              },
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:sub",
+                      "left": {
+                        "type": "minecraft:mul",
+                        "left": {
+                          "type": "minecraft:noise",
+                          "noise": "jaymospowers:aether/mask_shatter_b",
+                          "xz_scale": 1.1,
+                          "y_scale": 0.0
+                        },
+                        "right": 3.0
+                      },
+                      "right": 0.85
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 60.0
+                },
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:clamp",
+                    "input": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:sub",
+                        "left": {
+                          "type": "minecraft:mul",
+                          "left": {
+                            "type": "minecraft:noise",
+                            "noise": "jaymospowers:aether/mask_shatter_b",
+                            "xz_scale": 1.1,
+                            "y_scale": 0.0
+                          },
+                          "right": 3.0
+                        },
+                        "right": 0.85
+                      },
+                      "right": 40.0
+                    },
+                    "min": 0.0,
+                    "max": 1.0
+                  },
+                  "right": 6.0
+                }
+              }
+            },
+            "right": 176.0
+          }
+        },
+        "right": 0.16
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "jaymospowers:aether/island_rough",
+          "xz_scale": 1.0,
+          "y_scale": 1.0
+        },
+        "right": 1.2
+      }
+    }
+  }
+}

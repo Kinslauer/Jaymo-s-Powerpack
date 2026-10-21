@@ -6,182 +6,812 @@
       "type": "minecraft:multi_noise",
       "biomes": [
         {
-          "biome": "jaymospowers:skyroot_meadow",
+          "biome": "jaymospowers:hestveil_caverns",
           "parameters": {
             "temperature": [
+              -2.0,
+              2.0
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              -2.0,
+              -1.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:frozen_lakes",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              -0.4
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.3,
+              2.0
+            ],
+            "depth": [
               -1.0,
-              -0.8
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:sheer_tundra",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              -0.4
             ],
             "humidity": [
+              -2.0,
+              -0.35
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
               -1.0,
-              1.0
+              0.3
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "jaymospowers:skyroot_meadow",
+          "biome": "jaymospowers:enduring_woodland",
           "parameters": {
             "temperature": [
-              -0.8,
-              0.0
+              -2.0,
+              -0.4
             ],
             "humidity": [
+              -0.35,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
               -1.0,
-              0.0
+              0.3
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "jaymospowers:skyroot_meadow",
+          "biome": "jaymospowers:shimmering_basin",
           "parameters": {
             "temperature": [
-              0.93,
-              1.0
+              -0.4,
+              0.65
             ],
             "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.3,
+              2.0
+            ],
+            "depth": [
               -1.0,
-              -0.1
+              0.3
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "jaymospowers:skyroot_forest",
+          "biome": "jaymospowers:flourishing_field",
           "parameters": {
             "temperature": [
-              -0.8,
-              0.0
+              -0.4,
+              0.65
             ],
             "humidity": [
-              0.0,
-              1.0
+              -2.0,
+              -0.35
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "jaymospowers:skyroot_forest",
-          "parameters": {
-            "temperature": [
-              0.0,
-              0.4
+            "continentalness": [
+              -2.0,
+              2.0
             ],
-            "humidity": [
-              0.55,
-              0.9
+            "erosion": [
+              -2.0,
+              0.485
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "jaymospowers:skyroot_forest",
-          "parameters": {
-            "temperature": [
-              0.93,
-              0.94
+            "weirdness": [
+              -2.0,
+              0.3
             ],
-            "humidity": [
-              0.8,
-              1.0
-            ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "jaymospowers:skyroot_grove",
-          "parameters": {
-            "temperature": [
-              0.0,
-              0.4
-            ],
-            "humidity": [
+            "depth": [
               -1.0,
-              0.55
+              0.3
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "jaymospowers:skyroot_grove",
+          "biome": "jaymospowers:verdant_woods",
           "parameters": {
             "temperature": [
-              0.0,
-              0.4
+              -0.4,
+              0.65
             ],
             "humidity": [
-              0.9,
-              1.0
+              -0.35,
+              0.45
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "jaymospowers:skyroot_grove",
-          "parameters": {
-            "temperature": [
-              0.4,
-              0.93
+            "continentalness": [
+              -2.0,
+              2.0
             ],
-            "humidity": [
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
               -1.0,
-              0.1
+              0.3
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "jaymospowers:skyroot_woodland",
+          "biome": "jaymospowers:shrouded_forest",
           "parameters": {
             "temperature": [
-              0.94,
-              1.0
+              -0.4,
+              0.65
             ],
             "humidity": [
-              -0.1,
-              0.8
+              0.45,
+              2.0
             ],
-            "continentalness": 0.0,
-            "erosion": 0.0,
-            "weirdness": 0.0,
-            "depth": 0.0,
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:battleground_wastes",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              -2.0,
+              0.2
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:contaminated_jungle",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              0.2,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:magnetic_scar",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              0.3,
+              2.0
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:violet_highwoods",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              -0.35
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:turquoise_forest",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -0.35,
+              0.45
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:glistening_swamp",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              0.45,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:magnetic_scar",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              -1.0,
+              0.3
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:frigid_sierra",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              -0.4
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:shimmering_basin",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.3,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:flourishing_field",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              -0.35
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:verdant_woods",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              -0.35,
+              0.45
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:shrouded_forest",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              0.45,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:battleground_wastes",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              -2.0,
+              0.2
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:contaminated_jungle",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              0.2,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:magnetic_scar",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              0.3,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:violet_highwoods",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -2.0,
+              -0.35
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:turquoise_forest",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              -0.35,
+              0.45
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:glistening_swamp",
+          "parameters": {
+            "temperature": [
+              -2.0,
+              0.65
+            ],
+            "humidity": [
+              0.45,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              0.3
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:magnetic_scar",
+          "parameters": {
+            "temperature": [
+              0.65,
+              2.0
+            ],
+            "humidity": [
+              -2.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              0.485,
+              2.0
+            ],
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
             "offset": 0.0
           }
         }

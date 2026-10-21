@@ -27,8 +27,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * The Aether's passive animals: the moa, phyg, flying cow, sheepuff and aerbunny (docs/aether.md). Their spawn eggs,
- * the three moa eggs, their attributes, and where they live: the four skyroot biomes (added to their spawn lists here,
- * by key, never in the biome files), on any block of the {@code animals_spawnable_on} tag (aether grass is in it).
+ * the three moa eggs, their attributes, and where they live: every Aether biome but the Hestveil caverns (the moa only
+ * in the highfields), added to their spawn lists here by biome tag, never in the biome files, on any block of the {@code animals_spawnable_on} tag (aether grass is in it).
  */
 public final class AetherMobs {
 	// ---- tuning: spawn weight, smallest and largest group (the Aether's numbers) ----
@@ -81,12 +81,13 @@ public final class AetherMobs {
 		place(SHEEPUFF);
 		place(AERBUNNY);
 		place(MOA);
-		var skyroot = BiomeSelectors.includeByKey(biome("skyroot_meadow"), biome("skyroot_forest"), biome("skyroot_grove"), biome("skyroot_woodland"));
+		var skyroot = BiomeSelectors.tag(biomeTag("is_aether")).and(BiomeSelectors.excludeByKey(biome("hestveil_caverns")));
+		var highfields = BiomeSelectors.tag(biomeTag("is_aether_highfields"));
 		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, PHYG, PHYG_WEIGHT, PHYG_MIN, PHYG_MAX);
 		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, SHEEPUFF, SHEEPUFF_WEIGHT, SHEEPUFF_MIN, SHEEPUFF_MAX);
 		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, FLYING_COW, FLYING_COW_WEIGHT, FLYING_COW_MIN, FLYING_COW_MAX);
 		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, AERBUNNY, AERBUNNY_WEIGHT, AERBUNNY_MIN, AERBUNNY_MAX);
-		BiomeModifications.addSpawn(skyroot, MobCategory.CREATURE, MOA, MOA_WEIGHT, MOA_MIN, MOA_MAX);
+		BiomeModifications.addSpawn(highfields, MobCategory.CREATURE, MOA, MOA_WEIGHT, MOA_MIN, MOA_MAX);
 
 		// the eggs and spawn eggs sit in the Aether's creative tab (made in AetherItems)
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("aether"));
@@ -102,7 +103,12 @@ public final class AetherMobs {
 		SpawnPlacements.register(type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
 	}
 
-	/** An Aether skyroot biome's key (the biomes are data, made with the dimension). */
+	/** An Aether biome tag (the biomes are data, made with the dimension). */
+	private static net.minecraft.tags.TagKey<Biome> biomeTag(String name) {
+		return net.minecraft.tags.TagKey.create(Registries.BIOME, JaymosPowers.id(name));
+	}
+
+	/** An Aether biome's key. */
 	private static ResourceKey<Biome> biome(String name) {
 		return ResourceKey.create(Registries.BIOME, JaymosPowers.id(name));
 	}

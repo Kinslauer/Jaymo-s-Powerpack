@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 /**
  * A golden oak: a straight golden-barked trunk {@link #TRUNK} tall with short branches thrown out of it part way up
  * and a round, ragged crown of golden leaves. The rare tree of the Aether (a hundredth of tree rolls, see
- * {@code worldgen/feature/aether_trees.json}); the golden oak sapling grows the same tree.
+ * {@code worldgen/feature/trees_verdant_woods.json}); the golden oak sapling grows the same tree.
  *
  * <p>Needs soil under its foot and a clear trunk; leaves only take the room they find.
  */

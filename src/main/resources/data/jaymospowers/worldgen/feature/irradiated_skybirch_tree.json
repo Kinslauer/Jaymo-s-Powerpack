@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:tree",
+  "below_trunk_provider": {
+    "id": "jaymospowers:aether_dirt"
+  },
+  "decorators": [],
+  "foliage_placer": {
+    "type": "minecraft:random_spread_foliage_placer",
+    "radius": 3,
+    "offset": 0,
+    "foliage_height": 3,
+    "leaf_placement_attempts": 70
+  },
+  "foliage_provider": {
+    "id": "jaymospowers:irradiated_leaves",
+    "properties": {
+      "distance": "7",
+      "persistent": "false",
+      "waterlogged": "false"
+    }
+  },
+  "ignore_vines": true,
+  "minimum_size": {
+    "type": "minecraft:three_layers_feature_size",
+    "upper_size": 2
+  },
+  "trunk_placer": {
+    "type": "minecraft:straight_trunk_placer",
+    "base_height": 5,
+    "height_rand_a": 2,
+    "height_rand_b": 2
+  },
+  "trunk_provider": {
+    "id": "jaymospowers:skyroot_log",
+    "properties": {
+      "axis": "y"
+    }
+  }
+}

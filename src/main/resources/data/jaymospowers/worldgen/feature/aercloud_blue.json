@@ -1,7 +1,7 @@
 {
   "type": "jaymospowers:aercloud",
   "cloud": "blue",
-  "bounds": 8,
-  "spread": 2,
+  "bounds": 10,
+  "spread": 3,
   "thickness": 1
 }

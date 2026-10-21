@@ -23,12 +23,12 @@
     },
     "minecraft:gameplay/bed_rule": {
       "can_set_spawn": "always",
-      "can_sleep": "never",
+      "can_sleep": "when_dark",
       "error_message": {
-        "translate": "message.jaymospowers.aether.no_sleep"
+        "translate": "block.minecraft.bed.no_sleep"
       }
     },
-    "minecraft:gameplay/nether_portal_spawns_piglin": false,
+    "minecraft:gameplay/nether_portal_spawns_piglin": true,
     "minecraft:gameplay/respawn_anchor_works": false,
     "minecraft:gameplay/straw_bed_rule": {
       "can_set_spawn": "never",
@@ -39,25 +39,25 @@
       }
     },
     "minecraft:visual/ambient_light_color": "#0a0a0a",
-    "minecraft:visual/cloud_color": "#ccffffff",
-    "minecraft:visual/cloud_height": 9.5,
-    "minecraft:visual/fog_color": "#9393bc",
-    "minecraft:visual/sky_color": "#c0c0ff"
+    "minecraft:visual/cloud_color": "#ffffffff",
+    "minecraft:visual/cloud_height": 320.33,
+    "minecraft:visual/fog_color": "#ecebfc",
+    "minecraft:visual/sky_color": "#c9d1ff"
   },
   "coordinate_scale": 1.0,
   "default_clock": "minecraft:overworld",
   "has_ceiling": false,
   "has_ender_dragon_fight": false,
   "has_skylight": true,
-  "height": 256,
+  "height": 416,
   "infiniburn": "#minecraft:infiniburn_overworld",
-  "logical_height": 256,
-  "min_y": 0,
+  "logical_height": 416,
+  "min_y": -32,
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": {
     "type": "minecraft:uniform",
     "max_inclusive": 7,
     "min_inclusive": 0
   },
-  "timelines": "#jaymospowers:in_aether"
+  "timelines": "#minecraft:in_overworld"
 }

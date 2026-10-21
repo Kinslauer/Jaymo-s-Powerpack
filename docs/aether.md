@@ -162,66 +162,93 @@ green, purple and storm aercloud; a corrobonite ore left to grow clusters; the s
 - **Blue Berry**: food 2 (saturation 0.4). **White Apple**: food 4, always edible, uncommon, and clears every harmful
   effect when eaten [WhiteAppleItem].
 
-## The dimension (Track A2)
+## The dimension (Aether II, Track W)
 
-`jaymospowers:aether` is datapack plus four Java features. Wind is still the way in ([docs/wind.md](wind.md)). All tuning
-numbers are in the JSON named below or are `static final` constants at the top of the feature class.
+`jaymospowers:aether` is Aether II's Holy Isles, remade from behaviour notes: datapack plus Java features. Wind is still the
+way in ([docs/wind.md](wind.md)). Everything below is written by `tools/gen_aether_world.py` (terrain, dimension, biomes,
+tags) and `tools/aether_world_features.py` (every configured and placed feature and each biome's lists); edit those and
+rerun `python3 -I tools/gen_aether_world.py`, never the JSON. Tuning numbers sit at the top of the terrain section of the
+generator and in `static final` constants at the top of each feature class. `python3 -I tools/check_aether_world.py` checks the
+data (every id exists, one feature order, saplings have trees).
 
-**Terrain** (`worldgen/noise_settings/aether.json`, `worldgen/density_function/aether/{islands,base_3d_noise}.json`)
-- Islands only between y 14 and 128 of a 256-high world (min_y 0); holystone is the default block, sea level is -64 (no
-  ocean), no aquifers, ore veins or carvers. Surface (`worldgen/material_rule/aether.json`): aether grass on the top
-  layer, aether dirt under it for the surface depth, holystone below.
-- The density is -0.15 + A x (-0.1 + B x (0.12 + n)): `n` is vanilla's old blended noise (factors 80/160, smear 8, scale 0.25
-  across and up, as The Aether's skylands use, so islands are tens of blocks wide and flat-ish), A ramps 0 to 1 over
-  y 14 to 46 (thin undersides) and B ramps 1 to 0 over y 64 to 128 (thin tops, nothing above 128). A column is solid
-  where the result is above 0. In practice: about 9% of the volume is solid (preview slice) and most of the mass lies between y 32 and 79;
-  the offsets are not yet retuned for the 0.25 scales, so raise the 0.12 if the islands come out too sparse.
-- `tools/preview_aether_terrain.py [z] [seed] [out.png]` draws a 256x128 side view from the shipped JSON (numpy and
-  Pillow; the noise is a stand-in for the game's, so shapes and densities match, not a given seed) and prints the share of
-  the mass per 16 blocks of height. Re-tune the constants in the JSON and run it again.
-- Climate: temperature and vegetation are the vanilla climate noises at scale 3 (regions a few hundred blocks wide);
-  temperature is stretched 1.4x so the hot band (woodland) is reachable.
+**Shape** (`worldgen/noise_settings/aether.json`, `worldgen/density_function/aether/**`, `worldgen/noise/aether/*`)
+- The dimension runs y -32 to 384 (`dimension_type/aether.json`: min_y -32, height and logical height 416); the terrain
+  is generated in y 0 to 384 (noise settings `min_y` 0, height 384; cells 4 across, 4 up so tunnels resolve). Sea level -64:
+  no ocean, no aquifers, no ore veins; water comes only from lakes and springs. Holystone is the default block.
+- `final_islands` = squeeze(interpolated(max(min(base islands, caves, Hestveil), upper islets gated above y 128))) + beardifier.
+  - **Lowland islands** (`terrain/base_islands`): a big mask noise (octave about 640 blocks) decides where an island is; each is a
+    lens, its top at y 108 plus hills (tops y 95-135), its thickness growing with the mask (up to about 105 blocks, bottom never
+    below y 6), a 3D roughness on both faces. About 55% of the columns have lowland ground.
+  - **Caves** (`terrain/caves`): two noises near zero make tunnels (radius 0.16 in noise units), faded out between y 88 and 108
+    so the surface stays whole; `terrain/hestveil` opens big caverns in y 8-58.
+  - **Upper islets** (`terrain/shattered_islands`): two more island layers (tops near y 168 and 226, up to 70 and 60 blocks
+    thick, at least 6) that only exist above y 128, so most of the sky between stays open.
+- Climate (`climate/*`): temperature, humidity, erosion and weirdness are shifted noises; depth is a curve of height (cave layer,
+  lowland, middle, high) that sorts biomes by layer.
+- Surface (`worldgen/material_rule/aether.json`), in order: arctic snow patches in Frigid Sierra, arctic packed ice patches in the
+  arctic biomes, irradiated holystone patches in Battleground Wastes, ferrosite in Magnetic Scar and under the soil of the
+  magnetic biomes, mossy holystone patches, aether grass over aether dirt above y 80 (caves below stay bare), undershale between y 56
+  and 78 and below.
+- `tools/preview_aether_terrain.py [--seed --z --x0 --span --scale --map-span --map-step --no-map --out]` evaluates these JSON files
+  (numpy and Pillow; a stand-in for the game's noise, so shapes match, not a given seed) and writes a side view (`aether_slice.png`),
+  a lowland height map with the upper islets shaded, and a biome map, and prints the mass per 32 blocks of height.
 
-**Biomes** (`worldgen/biome/skyroot_{meadow,forest,grove,woodland}.json`; replace the old Aether II highlands)
-All four share sky #C0C0FF, fog #9393BC, water #3F76E4, water fog #050533, grass and foliage #B1FFCB, no precipitation,
-and the same feature list; only the tree count differs. `natural_mob_spawns` is empty everywhere (mobs are added later by
-Fabric `BiomeModifications`). The multi_noise split follows The Aether's: meadow the coldest band and the dry middle,
-forest the wet cold and temperate bands, grove the dry warm band, woodland the hottest.
+**Biomes** (`worldgen/biome/*.json`, 16, names in `lang/parts/aether_world.json`; tags `#jaymospowers:is_aether` (all),
+`is_aether_highfields`, `is_aether_magnetic`, `is_aether_arctic`, `is_aether_irradiated` in `tags/worldgen/biome`)
+- Highfields (temperature -0.4 to 0.65): Shimmering Basin (lake variant, weirdness at least 0.3), Flourishing Field (dry), Verdant
+  Woods (mid), Shrouded Forest (wet). Magnetic (erosion at least 0.485): Magnetic Scar (weirdness at least 0.3), Violet Highwoods
+  (dry), Turquoise Forest (mid), Glistening Swamp (wet). Arctic (below -0.4): Frozen Lakes (lake variant), Sheer Tundra (dry), Enduring
+  Woodland (wet), Frigid Sierra (the middle and high layers, depth 0.3 up). Irradiated (above 0.65): Battleground Wastes (dry),
+  Contaminated Jungle (wet). Hestveil Caverns takes the cave layer (depth below -1). Expanse is registered and never placed.
+- Temperature, downfall and the sky, fog and water colours are from the notes; precipitation on in all; `natural_mob_spawns` empty
+  (Fabric `BiomeModifications` adds the animals: everything in `#is_aether` but Hestveil, the moa in the highfields only);
+  creature spawn probability 0.2; the irradiated biomes drop end-rod motes.
+- Every biome's feature lists are cut from one master order (`MASTER`/`VEGETAL` in the features file) so the game never meets two
+  orders. Anything placed by height rather than by surface (ores, clouds, springs, cloudbed, quicksoil shelves, crystal islands, cave
+  pointed holystone) is in every biome, Hestveil too, because the biome at a height is whichever the depth router picks there.
 
-**Features** (all in the biomes' own feature lists, never `BiomeModifications`)
-| Step | Feature | Notes |
-|---|---|---|
-| raw generation | `quicksoil_shelf` (Java) | 1 in 5 chunks; 8 discs of radius 3.46 on island undersides below y 48 |
-| lakes | `aether_water_lake` (vanilla `lake`) | 1 in 15 chunks; only fits where an island is thick enough |
-| ores | `aether_ore_dirt` 20x33, `_icestone` 10x32, `_ambrosium` 20x16, `_zanite` 14x5 (y 0-75, half discarded in air), `_gravitite` 7x4 (trapezoid 0-74) and `_gravitite_buried` 5x3 | all in holystone |
-| springs | `aether_water_spring` | 30 tries, y 8-128, on holystone or aether dirt |
-| vegetation | `aether_trees_<biome>`, grass, tall grass, white and purple flowers, berry bushes | see below |
-| top layer | `crystal_island` (Java, 1 in 20 chunks, y 50-110), `aercloud_cold` (1 in 7, y 32-96, 16 steps), `aercloud_blue` (1 in 24, 8 steps), `aercloud_golden` (1 in 75, y 96-127, 4 steps), `aercloud_bank` (1 in 3, y 2-30, 28 steps, big and thick) | clouds only take air |
+**Placement**: a feature scan can be at most 32 blocks long, so surface features (trees, plants, lakes, boulders, spikes) start at a
+random height over the lowland tops (y 110-138, `LOW_START`) and scan down to the first ground; about half the attempts land, so the
+counts are the notes' per-chunk counts as attempts. The upper islets get `HIGH_SHARE` (half) of the attempts with starts in y 150-276.
 
-- **Trees**: `skyroot_tree` is a vanilla `tree` (straight 4-6 trunk, blob crown radius 2 height 3, aether dirt under the
-  trunk). `aether_trees` picks it, or 1 time in 100 the golden oak (`GoldenOakFeature`: 10-log trunk, branches of 1-2
-  logs at heights 5-8, ragged round crown of radius 4). Placement per biome: attempts start at a random height (y 36-100)
-  and scan down to the first island top, so every layer of islands gets trees, not just the highest. The attempt counts
-  allow for misses: meadow 2, grove 5 (10% 7), forest 14 (10% 16), woodland 11 (10% 13), about 1, 2, 6, 5 trees a chunk
-  where there is ground. The crystal island's tree (`CrystalIslandFeature`): 7 skyroot logs, four side logs at heights 2
-  and 5, a diamond crown of crystal leaves (one in five fruit).
-- Aerclouds are random-walk blobs (`AercloudFeature`: cloud kind, steps, blob radius, thickness in the JSON).
-- Ground cover below the topmost layer is sparse: grass and flowers use the surface heightmap with a vertical spread of
-  a few blocks.
+**Features** (`worldgen/feature`, `worldgen/placed_feature`; Java ones in `com.jaymospowers.aether.world` unless noted)
+- **Trees**: one feature per sapling, `<tree>_tree` (skyplane, skybirch, skypine, wisproot, wisptop, greatroot, greatoak, greatboa,
+  amberoot) and `skyroot_tree`, plus the forms the biomes use (large, short, nest, ferns, leaf piles, snowy, irradiated), vanilla
+  `tree` features; a vanilla `random_selector` per biome (`trees_<biome>`) with the notes' weights; fallen logs are vanilla
+  `fallen_tree`. `golden_oak_tree` (Java, `GoldenOakFeature`) is rare in the verdant and shrouded woods.
+- **Ores** (all of N1's): agiosite, ambrosium, arkenium, corrobonite, glint, gravitite, zanite, holystone quartz, icestone, crude
+  scatterglass, with the notes' sizes and counts, in holystone and undershale (`aether_stone_ore_replaceables`,
+  `aether_undershale_ore_replaceables`), plus ichorite pockets in the undershale.
+- **Water**: vanilla `lake` ponds (plain, arctic with packed ice rims, swamp with ferrosite mud), springs, arilum on the water, arctic
+  ice sheets over cold lakes (an `arctic_ice` disk, since there is no freeze step).
+- **Plants and ground**: grass, ferns, bushes, flower fields per zone, blueberries, orange trees, valkyrie sprouts, brettl, holystone
+  rocks and twigs, magnetic shrooms and huge magnetic shrooms (vanilla `huge_red_mushroom` with our blocks), rotshrooms (plants only),
+  bryalinn, shayelinn and ambrelinn moss patches (`vegetation_patch`), coarse dirt, silt, ferrosite sand, quicksoil and packed ice
+  discs, boulders (`block_blob`).
+- **Java**: `cloudbed` (a sea of cold aercloud at y -30..-18 from value noise of the world seed; scenery, below the fall-home line),
+  `ice_spike` (foot radius 4.25, about 7.5 blocks of height per block of radius, one in ten mega at 6.25), `ferrosite_spire`
+  (`kind` spike or pillar), `moa_nest` (woven skyroot sticks ring on level ground), `pointed_holystone` (one spike on the nearest floor,
+  in the open or in caves), `aercloud` (cold, blue, golden, green, purple with random facing, storm; placed in the surface, lower,
+  middle and high bands from the notes), `quicksoil_shelf` (now with `min_y` 40, `max_y` 110), `crystal_island` (a rare sight in the
+  sky, y 150-260), `golden_oak`.
+- All Java writes go through `AetherFeatures.put`/`isAir`, which test `canWrite` (quiet, unlike `ensureCanWrite`), so wandering
+  features near a chunk border just stop.
 
-**Sky and time** (`dimension_type/aether.json`, `timeline/aether_noon.json`, `tags/timeline/in_aether.json`)
-- Eternal day: the Aether's timeline holds the sun at noon (angle 0), no moon or stars, no sunrise band; the overworld
-  clock still ticks (the Overworld's own day is unaffected). Beds can set spawn but cannot be slept in (`can_sleep`
-  never, with the message `message.jaymospowers.aether.no_sleep`); respawn anchors do not work.
-- Clouds are low (height 9.5, seen from above, under the islands), white; no rain anywhere (no biome has precipitation).
-- Skylight on, no ceiling, ambient light 0. Monsters spawn at light 0-7 (none do yet).
+**Sky and time** (`dimension_type/aether.json`)
+- The Overworld's day and night (`timelines` is `#minecraft:in_overworld`, clock `minecraft:overworld`); beds work only when it is
+  dark (`when_dark`); respawn anchors do not work. Clouds are white at height 320.33. Skylight on, no ceiling, ambient light 0 with
+  colour #0a0a0a; monsters spawn at light 0-7 (no Aether monsters yet).
 
-**Arriving and leaving**: see `docs/wind.md`. Arrival stands the player on bare ground (not on a tree) on the nearest
-island; the fall home is below y 4 (the lowest islands and cloud banks sit above that).
+**Arriving and leaving**: see `docs/wind.md`. Arrival stands the player on bare lowland ground (not on a tree, not on an islet overhead);
+the fall home is below y -8.
 
-**To check first in game**: that the dimension loads (the data uses 26.3 formats that were checked against the vanilla
-data files, not run): terrain shape and density, the four biomes appearing, trees on islands, golden oak, a crystal
-island, clouds above and below, quicksoil under island edges, a lake, a fresh Wind arrival.
+**Not done from the notes**: Hestveil and alkahest blocks, density-function lakes (we use vanilla `lake` features), the freeze step for
+arctic water, sunken swamp trees, the tree decorators beyond leaf piles, ferns and snow, rotshroom shelves and huge rotshrooms, the
+structures (other tracks), custom sky, weather and cloud renderers.
+
+**To check first in game**: that the dimension loads with a fresh Aether (the server boot test did, and every biome was found with
+`locate biome`); the look from a Wind arrival (big islands, islets above, open sky); trees and ores; caves; lakes; the cloudbed from
+the underside; falling out below y -8 and landing home; day and night; a moa on a highfields island.
 
 ## What is not in yet
 
@@ -248,7 +275,7 @@ models and renderers in `client/aether/mob`, skins painted by `tools/gen_aether_
 `part(...)` lines for the texture layout, so rerun it after editing a model; run `gen_aether.py` first when running both:
 that one rewrites `lang/parts/aether.json` and this one adds its block back at the end). Spawn eggs and the three moa
 eggs sit in the "The Aether" creative tab. All spawn through Fabric `BiomeModifications.addSpawn` into
-`jaymospowers:skyroot_meadow`, `skyroot_forest`, `skyroot_grove`, `skyroot_woodland` (by key; the biome files are not
+`#jaymospowers:is_aether` minus the Hestveil caverns (the moa only into `#jaymospowers:is_aether_highfields`; the biome files are not
 touched), as the creature category, on the `animals_spawnable_on` tag (aether grass is in it), in daylight. The biomes'
 own `creature_spawn_probability` (the Aether uses 0.25) decides how many are there when a chunk is first made.
 

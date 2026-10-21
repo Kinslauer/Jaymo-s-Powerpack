@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": {
+          "id": "jaymospowers:orange_tree",
+          "properties": {
+            "age": "3",
+            "half": "lower"
+          }
+        },
+        "weight": 3
+      },
+      {
+        "data": {
+          "id": "jaymospowers:orange_tree",
+          "properties": {
+            "age": "2",
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ]
+  }
+}
