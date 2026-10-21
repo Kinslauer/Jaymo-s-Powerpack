@@ -200,7 +200,7 @@ first page's 15 you can't have everything: pick a build.
   town doesn't become a crime.
 - The tree screen pages: Strength's "Combat Arts >" button (bottom right) shows tiers 4-7.
 
-## Medicine: Survival's second page (0.7.135 / Powers 0.15.44)
+## Medicine: Survival's second page (0.7.135 / Powers 0.15.46)
 Andy (2026-10-21): "a medicine tree in the same vein as shadow and free running but for survival, that way every skill
 has at least one sub path". Survival now goes to level 25 (practice still counts the first 15). The treating itself is
 Jaymo's Powers' Wounds (`core/wounds/MedicineSkill` reads the ranks by reflection); every treatment finished and every

@@ -751,7 +751,7 @@ public final class Downed {
 					0.8F + level.getRandom().nextFloat() * 0.4F);
 				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 			}
-			// (0.15.44) Steady Hands: quicker ({@link MedicineSkill})
+			// (0.15.46) Steady Hands: quicker ({@link MedicineSkill})
 			int need = MedicineSkill.ticks(player, REVIVE_TICKS);
 			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {

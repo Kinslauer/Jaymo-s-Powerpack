@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.44) The Medicine page of Jaymo's Kingdoms' Survival tree, worked into our treating ({@link Treatment}) and our
+ * (0.15.46) The Medicine page of Jaymo's Kingdoms' Survival tree, worked into our treating ({@link Treatment}) and our
  * revives ({@link Downed}). Andy (2026-10-21): "a medicine tree in the same vein as shadow and free running but for
  * survival". Kingdoms holds the ranks and we read them by reflection on {@code com.jaymoskingdoms.Skills.rank(Player,
  * String)}, as {@code Meditate} and {@code Freerun} do; without Kingdoms every rank is 0 and nothing changes. All

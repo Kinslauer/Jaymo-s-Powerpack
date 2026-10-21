@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "PSP",
+    "PPP"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "#minecraft:planks",
+    "S": "jaymoskitchen:shaft"
+  },
+  "result": {
+    "id": "jaymoskitchen:bloody_chopper"
+  }
+}

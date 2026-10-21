@@ -1,0 +1,50 @@
+{
+  "variants": {
+    "facing=north,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper"
+    },
+    "facing=north,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning"
+    },
+    "facing=east,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper",
+      "y": 90
+    },
+    "facing=east,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning",
+      "y": 90
+    },
+    "facing=south,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper",
+      "y": 180
+    },
+    "facing=south,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning",
+      "y": 180
+    },
+    "facing=west,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper",
+      "y": 270
+    },
+    "facing=west,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning",
+      "y": 270
+    },
+    "facing=up,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper",
+      "x": 270
+    },
+    "facing=up,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning",
+      "x": 270
+    },
+    "facing=down,turning=false": {
+      "model": "jaymoskitchen:block/bloody_chopper",
+      "x": 90
+    },
+    "facing=down,turning=true": {
+      "model": "jaymoskitchen:block/bloody_chopper_turning",
+      "x": 90
+    }
+  }
+}
