@@ -75,6 +75,10 @@ public final class Mill {
 			}
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(new ItemStack(FLOUR)));
+		// shafts, windmills and waterwheels, which work the horse machines too
+		com.jaymoskitchen.mill.power.Power.register();
+		// the potter's wheel and bloody chopper, which shafts turn
+		com.jaymoskitchen.mill.machines.PowerMachines.register();
 	}
 
 	private static <B extends Block> B block(String name, java.util.function.Function<BlockBehaviour.Properties, B> factory,

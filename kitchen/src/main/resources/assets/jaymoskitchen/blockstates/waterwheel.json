@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskitchen:block/waterwheel"
+    },
+    "facing=east": {
+      "model": "jaymoskitchen:block/waterwheel"
+    },
+    "facing=south": {
+      "model": "jaymoskitchen:block/waterwheel"
+    },
+    "facing=west": {
+      "model": "jaymoskitchen:block/waterwheel"
+    }
+  }
+}

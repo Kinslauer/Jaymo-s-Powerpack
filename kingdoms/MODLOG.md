@@ -3895,7 +3895,7 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
   high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
   out the same way.
 
-## 0.7.135: the hidden blade's guard holds, and shows in first person (pack 0.15.44)
+## 0.7.135: the hidden blade's guard holds, and shows in first person (pack 0.15.48)
 Andy: "the blades still are not held in front of the player, i want to be able to see the blade deployed in first
 person, and also have other players see that it is deployed. it should be held up in guard up front while idle, then
 back to normal when retracted. and only move when the player does."

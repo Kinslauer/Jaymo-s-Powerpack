@@ -1,0 +1,139 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/spruce_planks",
+    "planks": "minecraft:block/spruce_planks",
+    "post": "minecraft:block/stripped_spruce_log",
+    "post_end": "minecraft:block/stripped_spruce_log_top"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        3,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            13,
+            14,
+            16
+          ],
+          "texture": "#planks"
+        },
+        "south": {
+          "uv": [
+            2,
+            13,
+            14,
+            16
+          ],
+          "texture": "#planks"
+        },
+        "west": {
+          "uv": [
+            2,
+            13,
+            14,
+            16
+          ],
+          "texture": "#planks"
+        },
+        "east": {
+          "uv": [
+            2,
+            13,
+            14,
+            16
+          ],
+          "texture": "#planks"
+        },
+        "up": {
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ],
+          "texture": "#planks"
+        },
+        "down": {
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ],
+          "texture": "#planks",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        3,
+        6
+      ],
+      "to": [
+        10,
+        13,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            3,
+            10,
+            13
+          ],
+          "texture": "#post"
+        },
+        "south": {
+          "uv": [
+            6,
+            3,
+            10,
+            13
+          ],
+          "texture": "#post"
+        },
+        "west": {
+          "uv": [
+            6,
+            3,
+            10,
+            13
+          ],
+          "texture": "#post"
+        },
+        "east": {
+          "uv": [
+            6,
+            3,
+            10,
+            13
+          ],
+          "texture": "#post"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#post_end"
+        }
+      }
+    }
+  ]
+}

@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * (Better With Mods' rendering and tanning, MIT; our own code.) Butchering a fatty animal properly (on a butcher block,
  * or by a butcher villager) gives animal fat; fat rendered on a campfire, or in a cooking pot, is tallow; tallow and
  * string make a candle. Stripping a log with an axe sometimes peels off a piece of bark. Leather soaked with bark in a
- * water cauldron tans: right-click the cauldron with leather (a piece of bark from your pockets goes in with each hide),
+ * water cauldron tans: right-click the cauldron with leather (a piece of bark, or manure, from your pockets goes in with each hide),
  * wait {@link #TAN_TICKS}, then right-click it again to lift out tanned leather, which cuts into leather straps.
  */
 public final class Tanning {
@@ -57,6 +57,8 @@ public final class Tanning {
 	static final int MAX_HIDES = 8;
 	/** Straps for other mods' recipes: {@code c:leather_straps} (and our own {@code jaymoskitchen:straps}). */
 	public static final TagKey<Item> STRAPS = TagKey.create(Registries.ITEM, JaymosKitchen.id("straps"));
+	/** What goes in the water with each hide: bark, or manure ({@code jaymoskitchen:tanning_agents}). */
+	public static final TagKey<Item> TANNING_AGENTS = TagKey.create(Registries.ITEM, JaymosKitchen.id("tanning_agents"));
 
 	public static Item ANIMAL_FAT;
 	public static Item TALLOW;
@@ -181,7 +183,7 @@ public final class Tanning {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.tanning.full"));
 			return;
 		}
-		int bark = player.getInventory().findSlotMatchingItem(new ItemStack(BARK));
+		int bark = agentSlot(player);
 		if (bark < 0 && !player.hasInfiniteMaterials()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.tanning.no_bark"));
 			return;
@@ -196,6 +198,16 @@ public final class Tanning {
 		level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.6F, 1.3F);
 		level.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 8, 0.25, 0.05, 0.25, 0.1);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.tanning.soaking", hides + 1));
+	}
+
+	/** The first inventory slot holding a tanning agent (bark, manure: {@link #TANNING_AGENTS}), or -1. */
+	private static int agentSlot(Player player) {
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (player.getInventory().getItem(i).is(TANNING_AGENTS)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/** Right-clicked with an empty hand: done, the hides come out tanned (and the water goes down); not yet, how long. */
