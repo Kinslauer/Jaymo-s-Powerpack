@@ -65,6 +65,18 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.playerCorpse(entity);
 	}
 
+	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
+	static boolean playersLeaveCorpses() {
+		return LOADED;
+	}
+
+	/** (0.15.33) Before a player's corpse is eaten: the hotbar it holds drops where it lies. */
+	static void spill(Entity corpse) {
+		if (LOADED) {
+			Kitchen.spill(corpse);
+		}
+	}
+
 	/** A dead player who got back up (Kitchen's zombie player): what a roaming symbiote bonds with. */
 	static boolean isZombiePlayer(Entity entity) {
 		return LOADED && Kitchen.zombiePlayer(entity);
@@ -178,6 +190,41 @@ public final class KitchenCompat {
 
 		static boolean playerCorpse(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse();
+		}
+
+		private static java.lang.reflect.@Nullable Field hotbarField;
+		private static boolean hotbarLooked;
+
+		@SuppressWarnings("unchecked")
+		static void spill(Entity entity) {
+			if (!(entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) || !corpse.isPlayerCorpse()
+				|| !(entity.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+				return;
+			}
+			if (!hotbarLooked) {
+				hotbarLooked = true;
+				try {
+					hotbarField = com.jaymoskitchen.corpse.CorpseEntity.class.getDeclaredField("hotbar");
+					hotbarField.setAccessible(true);
+				} catch (ReflectiveOperationException | RuntimeException e) {
+					hotbarField = null;
+				}
+			}
+			if (hotbarField == null) {
+				return;
+			}
+			try {
+				java.util.List<net.minecraft.world.item.ItemStack> hotbar = (java.util.List<net.minecraft.world.item.ItemStack>)hotbarField.get(corpse);
+				for (int i = 0; i < hotbar.size(); i++) {
+					net.minecraft.world.item.ItemStack stack = hotbar.get(i);
+					if (!stack.isEmpty()) {
+						corpse.spawnAtLocation(level, stack.copy(), 0.3F);
+						hotbar.set(i, net.minecraft.world.item.ItemStack.EMPTY);
+					}
+				}
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// (left in the body: gone with it)
+			}
 		}
 
 		static boolean zombiePlayer(Entity entity) {
