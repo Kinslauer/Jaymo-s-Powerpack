@@ -2,6 +2,9 @@ package com.jaymospowers.aether.mob;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -47,7 +50,12 @@ public class Burrukai extends ZoneAnimal {
 	/** Stun after a ram: slowness level (0 = I) and how long (ticks). */
 	public static final int STUN_LEVEL = 3, STUN_TICKS = 70;
 
+	private static final EntityDataAccessor<Boolean> WINDING_UP = SynchedEntityData.defineId(Burrukai.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(Burrukai.class, EntityDataSerializers.BOOLEAN);
+
 	private int anger;
+	/** Pause after a missed ram before it may start another (ticks). */
+	private int ramPause;
 	private int windUp;
 
 	public Burrukai(EntityType<? extends Burrukai> type, Level level) {
@@ -72,13 +80,20 @@ public class Burrukai extends ZoneAnimal {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 	}
 
-	/** Winding up to charge (it paws the ground), for the model. */
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+		super.defineSynchedData(entityData);
+		entityData.define(WINDING_UP, false);
+		entityData.define(ANGRY, false);
+	}
+
+	/** Winding up to charge (it paws the ground), for the model (synced). */
 	public boolean isWindingUp() {
-		return this.windUp > 0;
+		return this.entityData.get(WINDING_UP);
 	}
 
 	public boolean isAngry() {
-		return this.anger > 0;
+		return this.entityData.get(ANGRY);
 	}
 
 	@Override
@@ -96,6 +111,13 @@ public class Burrukai extends ZoneAnimal {
 	@Override
 	public void aiStep() {
 		super.aiStep();
+		if (!this.level().isClientSide()) {
+			if (this.ramPause > 0) {
+				this.ramPause--;
+			}
+			this.entityData.set(WINDING_UP, this.windUp > 0);
+			this.entityData.set(ANGRY, this.anger > 0);
+		}
 		if (this.anger > 0 && --this.anger == 0) {
 			this.setTarget(null);
 			this.windUp = 0;
@@ -162,7 +184,7 @@ public class Burrukai extends ZoneAnimal {
 	/** Wind up, charge, and ram its target. */
 	private final class RamGoal extends Goal {
 		private int charge, rest;
-		private boolean hit;
+		private boolean hit, missed;
 
 		RamGoal() {
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
@@ -171,12 +193,14 @@ public class Burrukai extends ZoneAnimal {
 		@Override
 		public boolean canUse() {
 			LivingEntity target = Burrukai.this.getTarget();
-			return target != null && target.isAlive() && !Burrukai.this.isBaby() && Burrukai.this.anger > 0;
+			return target != null && target.isAlive() && !Burrukai.this.isBaby() && Burrukai.this.anger > 0 && Burrukai.this.ramPause == 0;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return this.canUse() && (this.rest > 0 || this.charge < CHARGE_TICKS && !this.hit);
+			LivingEntity target = Burrukai.this.getTarget();
+			boolean live = target != null && target.isAlive() && Burrukai.this.anger > 0;
+			return live && (this.rest > 0 || this.charge < CHARGE_TICKS && !this.hit);
 		}
 
 		@Override
@@ -185,12 +209,16 @@ public class Burrukai extends ZoneAnimal {
 			this.charge = 0;
 			this.rest = 0;
 			this.hit = false;
+			this.missed = false;
 			Burrukai.this.getNavigation().stop();
 			Burrukai.this.playSound(SoundEvents.RAVAGER_ROAR, 0.6F, 1.4F);
 		}
 
 		@Override
 		public void stop() {
+			if (this.missed) {
+				Burrukai.this.ramPause = REST_TICKS;
+			}
 			Burrukai.this.windUp = 0;
 			Burrukai.this.getNavigation().stop();
 		}
@@ -205,7 +233,7 @@ public class Burrukai extends ZoneAnimal {
 			self.getLookControl().setLookAt(target, 30.0F, 30.0F);
 			if (this.rest > 0) {
 				this.rest--;
-				if (this.rest == 0) {
+				if (this.rest == 0 && !this.missed) {
 					this.start();
 				}
 				return;
@@ -226,7 +254,8 @@ public class Burrukai extends ZoneAnimal {
 				this.rest = REST_TICKS;
 				self.getNavigation().stop();
 			} else if (this.charge >= CHARGE_TICKS) {
-				// missed: a breather, then another run
+				// missed: a breather, then the ram ends
+				this.missed = true;
 				this.rest = REST_TICKS;
 				self.getNavigation().stop();
 			}

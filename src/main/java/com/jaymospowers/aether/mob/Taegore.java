@@ -143,12 +143,25 @@ public class Taegore extends ZoneAnimal {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putInt("dig_wait", this.digWait);
+		int[] spots = new int[this.explored.size() * 3];
+		int i = 0;
+		for (BlockPos pos : this.explored) {
+			spots[i++] = pos.getX();
+			spots[i++] = pos.getY();
+			spots[i++] = pos.getZ();
+		}
+		output.putIntArray("explored", spots);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.digWait = input.getIntOr("dig_wait", DIG_WAIT_FIRST);
+		this.explored.clear();
+		int[] spots = input.getIntArray("explored").orElse(new int[0]);
+		for (int i = 0; i + 2 < spots.length && this.explored.size() < MEMORY; i += 3) {
+			this.explored.addLast(new BlockPos(spots[i], spots[i + 1], spots[i + 2]));
+		}
 	}
 
 	@Override
