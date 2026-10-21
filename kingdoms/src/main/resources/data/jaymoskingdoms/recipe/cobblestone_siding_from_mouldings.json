@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:siding",
+  "ingredients": [
+    "jaymoskingdoms:cobblestone_moulding",
+    "jaymoskingdoms:cobblestone_moulding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:cobblestone_siding"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:stone_brick_corner"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/stone_brick_corner"
+}

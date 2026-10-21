@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_moulding_upright",
+  "textures": {
+    "all": "minecraft:block/dark_oak_planks"
+  }
+}

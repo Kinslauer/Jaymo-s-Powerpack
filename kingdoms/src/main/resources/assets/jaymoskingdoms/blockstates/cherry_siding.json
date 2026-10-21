@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "jaymoskingdoms:block/cherry_siding",
+      "x": 90,
+      "uvlock": true
+    },
+    "facing=up": {
+      "model": "jaymoskingdoms:block/cherry_siding",
+      "x": 270,
+      "uvlock": true
+    },
+    "facing=north": {
+      "model": "jaymoskingdoms:block/cherry_siding"
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/cherry_siding",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/cherry_siding",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/cherry_siding",
+      "y": 90,
+      "uvlock": true
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:siding",
+  "ingredients": [
+    "jaymoskingdoms:jungle_moulding",
+    "jaymoskingdoms:jungle_moulding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:jungle_siding"
+  }
+}
