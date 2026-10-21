@@ -41,6 +41,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		// drinking: the view sways when you're drunk
+		com.jaymoskitchen.client.brewing.DrunkSway.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);

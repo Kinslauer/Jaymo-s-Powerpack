@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
 public final class Pirates {
 	/** The roles (folk ids; clear of the realms', the camps' 20-24, goblins' 30-32, casters' 40-42, orcs' 50-53, assassins' 60). */
 	public static final int CAPTAIN = 70, GUNNER = 71, DECKHAND = 72, POWDER_MONKEY = 73, SHIPWRIGHT = 74, SEA_CAPTAIN = 75;
-	/** (0.7.104) A bombardier: lobs lit {@link Dynamite} over walls and heads, and backs off from a foe who closes. */
+	/** (0.7.106) A bombardier: lobs lit {@link Dynamite} over walls and heads, and backs off from a foe who closes. */
 	public static final int BOMBARDIER = 76;
 	/** A captain: health, blows, pace, how hard he is to shove. */
 	static final double CAPTAIN_HEALTH = 160.0, CAPTAIN_DAMAGE = 8.0, CAPTAIN_SPEED = 0.3, CAPTAIN_KNOCKBACK_RESIST = 0.6;
@@ -304,7 +304,7 @@ public final class Pirates {
 	}
 
 	/**
-	 * (0.7.104) A bombardier's fight: from {@link #BOMB_NEAREST} to {@link #BOMB_FURTHEST} of his foe he keeps his
+	 * (0.7.106) A bombardier's fight: from {@link #BOMB_NEAREST} to {@link #BOMB_FURTHEST} of his foe he keeps his
 	 * distance (backing off from one who comes within {@link #BOMB_BACK_OFF}) and lobs lit dynamite at where the foe is
 	 * going, sight or no sight (over a wall, onto a roof); closer, it gives way to his cutlass.
 	 */

@@ -1,0 +1,21 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:slime",
+		"minecraft:magma_cube",
+		"minecraft:cod",
+		"minecraft:salmon",
+		"minecraft:tropical_fish",
+		"minecraft:pufferfish",
+		"minecraft:squid",
+		"minecraft:glow_squid",
+		"minecraft:ghast",
+		"minecraft:blaze",
+		"minecraft:iron_golem",
+		"minecraft:snow_golem",
+		"minecraft:creeper",
+		"minecraft:guardian",
+		"minecraft:elder_guardian",
+		"minecraft:shulker"
+	]
+}

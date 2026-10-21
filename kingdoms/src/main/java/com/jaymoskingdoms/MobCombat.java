@@ -412,6 +412,20 @@ public final class MobCombat {
 		return swing != null && mob.level().getGameTime() < swing.endsAt;
 	}
 
+	/** (0.7.105) Whether this mob's blow is about to land: wound up, landing within {@code ticks} ({@link BladeClash}). */
+	public static boolean blowWithin(Mob mob, int ticks) {
+		Swing swing = SWINGS.get(mob);
+		return swing != null && swing.hitAt >= 0 && swing.hitAt - mob.level().getGameTime() <= ticks;
+	}
+
+	/** (0.7.105) Its blow is stopped short (a clash, {@link BladeClash}): the swing runs out without landing. */
+	public static void checkBlow(Mob mob) {
+		Swing swing = SWINGS.get(mob);
+		if (swing != null) {
+			swing.hitAt = -1;
+		}
+	}
+
 	/** The sidestep: fighting folk may dodge a player's blow. */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
 		if (!(entity instanceof Folk folk) || !folk.combatant() || !(entity.level() instanceof ServerLevel level)) {

@@ -62,7 +62,7 @@ final class PirateCoves {
 	static final int POLE = 7;
 	/** A new cove: deckhands ashore, and the hoard it starts with. */
 	static final int START_HANDS = 3, MAX_HANDS = 6, DAYS_PER_HAND = 2;
-	/** (0.7.104) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
+	/** (0.7.106) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
 	static final int BOMBARDIERS = 1, MAX_BOMBARDIERS = 2, DAYS_TO_SECOND_BOMBARDIER = 4;
 	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
 	/** What it takes in each day (smuggling, wrecking). */
@@ -489,7 +489,7 @@ final class PirateCoves {
 		}
 	}
 
-	/** (0.7.104) A bombardier ashore at the cove: off its roster, as its gunners are (so no vacancy is kept for him). */
+	/** (0.7.106) A bombardier ashore at the cove: off its roster, as its gunners are (so no vacancy is kept for him). */
 	private static void bombardier(ServerLevel level, @Nullable Faction camp, BlockPos at, BlockPos home) {
 		if (camp == null) {
 			return;

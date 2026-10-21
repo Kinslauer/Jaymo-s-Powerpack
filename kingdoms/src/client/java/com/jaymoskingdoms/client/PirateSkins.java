@@ -6,7 +6,7 @@ import net.minecraft.resources.Identifier;
 
 /**
  * (0.7.42) The sailors' looks, all original (drawn by {@code tools/gen_pirates.py}): pirate deckhands in striped shirts
- * and bandanas, sooty gunners in leather jerkins, ragged powder monkeys, (0.7.104) singed bombardiers with a bandolier of dynamite, the pirate captain in his tricorn and red coat,
+ * and bandanas, sooty gunners in leather jerkins, ragged powder monkeys, (0.7.106) singed bombardiers with a bandolier of dynamite, the pirate captain in his tricorn and red coat,
  * a harbour's shipwright in his apron, and a realm's sea captain in navy blue.
  */
 final class PirateSkins {

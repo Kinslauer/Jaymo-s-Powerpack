@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:slime_ball",
+    "minecraft:potion"
+  ],
+  "result": {
+    "id": "jaymospowers:leeches",
+    "count": 1
+  }
+}

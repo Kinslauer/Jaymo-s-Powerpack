@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "jaymospowers:linen_bandage",
+    "count": 4
+  }
+}

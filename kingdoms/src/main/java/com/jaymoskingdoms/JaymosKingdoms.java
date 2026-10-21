@@ -111,9 +111,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		Stalkers.register();
 		Theft.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
-		LOGGER.debug("downed attachment: {}", Downed.DOWNED);
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
+		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
+		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
+		// the villager screens open, so the trades are there when they do)
+		Remedies.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
@@ -142,6 +145,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
+		MobShields.register();
+		BladeClash.register();
 		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
@@ -167,7 +173,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		Cannonball.register();
-		// (0.7.104) the pirate bombardiers' dynamite (the thrown stick and the item)
+		// (0.7.106) the pirate bombardiers' dynamite (the thrown stick and the item)
 		Dynamite.register();
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
