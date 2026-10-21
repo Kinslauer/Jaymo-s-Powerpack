@@ -72,13 +72,13 @@ import org.jspecify.annotations.Nullable;
  * {@link #DOWNABLE_TAG} (Kingdoms marks its folk), and tamed animals. Monsters, wild animals and bosses die; so does
  * anything that loses its head, and anything killed by what ignores invulnerability (the void, {@code /kill}).
  * <p>
- * <b>Down:</b> at {@link #DOWNED_HEALTH}, head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
+ * <b>Down:</b> at {@link #DOWNED_HEALTH} (a player at {@link #DOWNED_PLAYER_HEALTH}), head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
  * ({@code DownedMobMixin}); some ({@link #CRAWLER_CHANCE}) drag themselves away from whoever felled them. Players are held
  * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. (0.15.31) Nor
  * powers: whatever was running ends as they fall ({@link Power#onDowned}), their keys are dead (a silencer, and the client
  * lets go of every key but moving and sneak: {@code DownedKeysMixin}), and nothing heals them ({@code DownedHealMixin}). Fire, falls
- * and mobs still hurt, out of what's left, and can kill (that death counts). A player's blow is a wound instead
- * ({@link #MAX_WOUNDS}th kills); once a player has hit one, a mob or tamed animal won't get up by itself
+ * and mobs still hurt, out of what's left, and can kill (that death counts); so does a player's blow on a downed player.
+ * A player's blow on a downed mob is a wound instead ({@link #MAX_WOUNDS}th kills); once a player has hit one, a mob or tamed animal won't get up by itself
  * ({@link #RECOVER_TICKS}) and bleeds out {@link #BLEED_OUT_TICKS} after the last hit.
  * <p>
  * <b>Players don't bleed out into a respawn</b> (Andy: "Lie until roused or give up"): after {@link #BLEED_OUT_TICKS}
@@ -93,12 +93,17 @@ import org.jspecify.annotations.Nullable;
 public final class Downed {
 	/** A downed one's health: what mobs, fire and falls have left to take. */
 	public static final float DOWNED_HEALTH = 6.0F;
+	/**
+	 * (0.15.33) A downed player's health instead (10 hearts; Andy: "dealing that much damage would kill them, not strictly
+	 * 10 hits"): every blow takes it as damage, a player's too, and running it out is their death.
+	 */
+	public static final float DOWNED_PLAYER_HEALTH = 20.0F;
 	/** How long a downed mob or tamed animal no player has hit lies there before getting back up (ticks), and the health it, or anyone brought round, gets up with (share of its most). */
 	public static final int RECOVER_TICKS = 1200;
 	public static final float RECOVER_HEALTH = 0.3F;
 	/** How long after a player's last hit a downed mob bleeds out (ticks), and how long a downed player crawls before passing out. */
 	public static final int BLEED_OUT_TICKS = 2400;
-	/** The player's hit that kills a downed one outright. */
+	/** The player's hit that kills a downed mob outright (a downed player has {@link #DOWNED_PLAYER_HEALTH} instead). */
 	public static final int MAX_WOUNDS = 10;
 	/** The share of downed mobs who drag themselves along; the rest lie still. */
 	public static final float CRAWLER_CHANCE = 0.5F;
@@ -217,11 +222,12 @@ public final class Downed {
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)) {
-				// (mobs, fire, falls: real harm, out of what's left)
+			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
+				|| entity instanceof Player) {
+				// (mobs, fire, falls: real harm, out of what's left; (0.15.33) on a downed player, a player's blow too)
 				return true;
 			}
-			// a player's blow (or arrow): a wound, the tenth kills
+			// a player's blow (or arrow) on a downed mob: a wound, the tenth kills
 			if (entity.level() instanceof ServerLevel level) {
 				wound(level, entity, source);
 			}
@@ -316,7 +322,7 @@ public final class Downed {
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
 		boolean crawler = !(entity instanceof Player) && level.getRandom().nextFloat() < CRAWLER_CHANCE;
 		if (!keepHealth) {
-			entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
+			entity.setHealth(Math.min(entity instanceof Player ? DOWNED_PLAYER_HEALTH : DOWNED_HEALTH, entity.getMaxHealth()));
 		}
 		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
 		entity.removeAttached(WOUNDS);
