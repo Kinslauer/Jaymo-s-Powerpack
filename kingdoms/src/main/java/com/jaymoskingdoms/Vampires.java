@@ -542,6 +542,22 @@ public final class Vampires {
 		release(mob);
 	}
 
+	/** (Nightfall) A vampire fed raw beef by hand: the hunger's quieted for tonight, as if it had fed. */
+	public static boolean feedBeef(PathfinderMob mob) {
+		Vampire v = mob.getAttached(VAMPIRE);
+		if (v == null) {
+			return false;
+		}
+		long clock = mob.level().getOverworldClockTime();
+		fed(mob, v, nightIndex(clock), mob.level().getGameTime());
+		return true;
+	}
+
+	/** (Nightfall) A half-turned player: none of a vampire's weaknesses. */
+	public static boolean dhampir(Entity e) {
+		return kind(e) == Kind.DHAMPIR;
+	}
+
 	/** (0.7.88) The Elder drank from someone who offered: he's fed, and rests. */
 	static void fedElder(PathfinderMob elder, long clock, long now) {
 		Vampire v = elder.getAttached(VAMPIRE);

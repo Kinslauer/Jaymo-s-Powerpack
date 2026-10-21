@@ -51,6 +51,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket
