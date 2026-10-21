@@ -170,7 +170,7 @@ public final class Undertakers {
 				UUID id = corpse.getUUID();
 				long[] seen = SEEN.computeIfAbsent(id, k -> new long[] {now, now});
 				seen[1] = now;
-				if (!free || LEFT.containsKey(id) || claimed(id) || !KitchenCompat.isHostile(corpse) && now - seen[0] < SETTLE_TICKS) {
+				if (!free || LEFT.containsKey(id) || claimed(id) || Bearers.claimed(id) || Looters.claimed(id) || !KitchenCompat.isHostile(corpse) && now - seen[0] < SETTLE_TICKS) {
 					continue;
 				}
 				double d = golem.distanceToSqr(corpse);
@@ -202,7 +202,7 @@ public final class Undertakers {
 			if (taken >= MOST_PER_ROUND) {
 				return;
 			}
-			if (LEFT.containsKey(corpse.getUUID()) || claimed(corpse.getUUID())) {
+			if (LEFT.containsKey(corpse.getUUID()) || claimed(corpse.getUUID()) || Bearers.claimed(corpse.getUUID()) || Looters.claimed(corpse.getUUID())) {
 				continue;
 			}
 			// (0.5.48) iron golems see to corpses on their own (golems)
@@ -233,6 +233,11 @@ public final class Undertakers {
 		}
 	}
 
+	/** (0.7.98) {@code mob} is carrying a corpse to the fire, or was called away to one. */
+	static boolean busy(Entity mob) {
+		return DUTIES.containsKey(mob.getUUID()) || BUSY.containsKey(mob.getUUID());
+	}
+
 	private static boolean claimed(UUID corpse) {
 		for (Duty d : DUTIES.values()) {
 			if (d.corpse.equals(corpse)) {
@@ -252,7 +257,8 @@ public final class Undertakers {
 		PathfinderMob best = null;
 		double bestD = Double.MAX_VALUE;
 		for (PathfinderMob g : guards) {
-			if (!g.isAlive() || g.getTarget() != null || g.isSleeping() || g.isBaby() || DUTIES.containsKey(g.getUUID()) || BUSY.containsKey(g.getUUID())) {
+			if (!g.isAlive() || g.getTarget() != null || g.isSleeping() || g.isBaby() || DUTIES.containsKey(g.getUUID()) || BUSY.containsKey(g.getUUID())
+				|| Bearers.busy(g)) {
 				continue;
 			}
 			double d = g.distanceToSqr(corpse);
@@ -360,7 +366,7 @@ public final class Undertakers {
 		return dx * dx + dz * dz;
 	}
 
-	private static void walk(PathfinderMob guard, BlockPos to) {
+	static void walk(PathfinderMob guard, BlockPos to) {
 		if (guard instanceof Villager v) {
 			BehaviorUtils.setWalkAndLookTargetMemories(v, to, VILLAGER_SPEED, 1);
 		} else {
@@ -369,7 +375,7 @@ public final class Undertakers {
 	}
 
 	/** The nearest fire pit, lit campfire or lava within {@code reach} of {@code at}, or null. */
-	private static @Nullable BlockPos pyre(ServerLevel level, BlockPos at, int reach) {
+	static @Nullable BlockPos pyre(ServerLevel level, BlockPos at, int reach) {
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
 		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-reach, -PYRE_DEPTH, -reach), at.offset(reach, PYRE_DEPTH, reach))) {
@@ -415,7 +421,7 @@ public final class Undertakers {
 	}
 
 	/** Nothing that catches (wood, wool, leaves, grass...) within {@link #CLEAR} blocks of {@code pos}. */
-	private static boolean clear(ServerLevel level, BlockPos pos) {
+	static boolean clear(ServerLevel level, BlockPos pos) {
 		for (BlockPos p : BlockPos.betweenClosed(pos.offset(-CLEAR, -1, -CLEAR), pos.offset(CLEAR, 2, CLEAR))) {
 			if (level.getBlockState(p).ignitedByLava()) {
 				return false;
@@ -425,7 +431,7 @@ public final class Undertakers {
 	}
 
 	/** The nearest bare ground to {@code from} (within {@link #SPOT_REACH}) where a corpse can burn safely, or null. */
-	private static @Nullable BlockPos spot(ServerLevel level, BlockPos from) {
+	static @Nullable BlockPos spot(ServerLevel level, BlockPos from) {
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
 		for (int dx = -SPOT_REACH; dx <= SPOT_REACH; dx++) {

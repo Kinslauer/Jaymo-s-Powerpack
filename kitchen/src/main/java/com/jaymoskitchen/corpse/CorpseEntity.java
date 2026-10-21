@@ -248,9 +248,27 @@ public class CorpseEntity extends Entity {
 	 * if it has nothing on.
 	 */
 	private boolean takeGear(ServerLevel level, Player player) {
+		ItemStack stack = takeGearPiece();
+		if (stack.isEmpty()) {
+			return false;
+		}
+		if (!player.getInventory().add(stack)) {
+			spawnAtLocation(level, stack, 0.3F);
+		}
+		jolt(false);
+		play(level, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.9F);
+		robbed(player);
+		return true;
+	}
+
+	/**
+	 * (0.4.51) Takes the next piece of gear off the body (worn as {@link #takeGear} says) and returns it, or an empty stack
+	 * if it has nothing on.
+	 */
+	private ItemStack takeGearPiece() {
 		CompoundTag tag = parse(look());
 		if (tag == null) {
-			return false;
+			return ItemStack.EMPTY;
 		}
 		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
 		for (String slot : GEAR) {
@@ -272,14 +290,90 @@ public class CorpseEntity extends Entity {
 			if (stack.isEmpty()) {
 				continue;
 			}
-			if (!player.getInventory().add(stack)) {
-				spawnAtLocation(level, stack, 0.3F);
+			return stack;
+		}
+		return ItemStack.EMPTY;
+	}
+
+	/** (0.4.51) Called when a player takes something off a body (searching it, or a piece of its gear); see {@link #setOnRobbed}. */
+	private static java.util.function.@Nullable BiConsumer<Player, Entity> onRobbed;
+
+	/**
+	 * (0.4.51) Jaymo's Kingdoms: told whenever a player takes something off a body by hand (its pockets searched, or a piece
+	 * of what it wears or holds), so robbing the dead can be a crime. Not for fish, butchering, or a player's own hotbar back.
+	 */
+	public static void setOnRobbed(java.util.function.BiConsumer<Player, Entity> hook) {
+		onRobbed = hook;
+	}
+
+	private void robbed(Player player) {
+		if (onRobbed != null) {
+			try {
+				onRobbed.accept(player, this);
+			} catch (RuntimeException e) {
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A corpse-robbing hook failed: {}", e.toString());
 			}
+		}
+	}
+
+	/**
+	 * (0.4.51) Robbed by something that isn't a player (Jaymo's Kingdoms: a looter come for the battlefield's dead): its
+	 * pockets and everything it wears or holds, worn as {@link #takeGear} would leave them. Nothing from an animal, a fish,
+	 * a player's body (their things stay theirs) or an iron one. Returns what was taken (empty if nothing).
+	 */
+	public List<ItemStack> robBy(Entity robber) {
+		List<ItemStack> taken = new ArrayList<>();
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !robbable()) {
+			return taken;
+		}
+		if (!searched) {
+			for (ItemStack stack : loot) {
+				if (!stack.isEmpty()) {
+					taken.add(stack.copy());
+				}
+			}
+			loot.clear();
+			searched = true;
+		}
+		for (ItemStack piece = takeGearPiece(); !piece.isEmpty(); piece = takeGearPiece()) {
+			taken.add(piece);
+		}
+		if (!taken.isEmpty()) {
 			jolt(false);
-			play(level, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.9F);
+			play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F);
+		}
+		return taken;
+	}
+
+	/** (0.4.51) A body that can be robbed at all: not an animal's, a fish's, a player's or an iron one. */
+	private boolean robbable() {
+		return kind != CorpseKind.ANIMAL && kind != CorpseKind.FISH && kind != CorpseKind.PLAYER && !isPlayerCorpse() && !isHeavy() && !isFish();
+	}
+
+	/** (0.4.51) The look {@link #hasValuables} last answered for, and its answer. */
+	private @Nullable String valuablesLook;
+	private boolean lookHasGear;
+
+	/** (0.4.51) Something on it worth a robber's while: unsearched pockets with something in them, or gear still on it. */
+	public boolean hasValuables() {
+		if (!robbable()) {
+			return false;
+		}
+		if (!searched && !loot.isEmpty()) {
 			return true;
 		}
-		return false;
+		String look = look();
+		if (!look.equals(valuablesLook)) {
+			CompoundTag tag = parse(look);
+			lookHasGear = tag != null && !tag.getCompoundOrEmpty("equipment").isEmpty();
+			valuablesLook = look;
+		}
+		return lookHasGear;
+	}
+
+	/** (0.4.51) The dead mob's saved data (its UUID, its name, a Kingdoms folk's realm and role), or null. A fresh copy. */
+	public @Nullable CompoundTag lookTag() {
+		return parse(look());
 	}
 
 	/**
@@ -1337,6 +1431,7 @@ public class CorpseEntity extends Entity {
 		searched = true;
 		jolt(false);
 		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		robbed(player);
 		return InteractionResult.SUCCESS_SERVER;
 	}
 

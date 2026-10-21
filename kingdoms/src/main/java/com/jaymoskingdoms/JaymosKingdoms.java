@@ -72,6 +72,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
+		// 0.7.98: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
+		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
+		Bearers.register();
+		Looters.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);

@@ -201,6 +201,11 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kin(a, b) : STRANGERS;
 	}
 
+	/** (0.7.98) How {@code v} was related to someone now dead ({@code dead}, by UUID): {@link #STRANGERS} without MCA. */
+	static int kinOf(Villager v, java.util.UUID dead) {
+		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
+	}
+
 	/** (0.7.19) An MCA villager's temper, by their personality: 1 warm (friendly, upbeat, peaceful), -1 sour (greedy, gloomy), -2 crabby; else 0. */
 	static int temper(Villager v) {
 		return LOADED ? McaBridge.temper(v) : 0;

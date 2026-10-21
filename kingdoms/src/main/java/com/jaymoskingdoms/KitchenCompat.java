@@ -21,6 +21,11 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
+	/**
+	 * (0.7.98) For {@link Bearers} and {@link Looters} (Kitchen 0.4.51): a robber's take ({@code robBy}), whether a body has
+	 * anything on it worth taking, its saved data (who it was), and who a player is carrying.
+	 */
+	private static final @Nullable Method ROB_BY, HAS_VALUABLES, LOOK_TAG, CARRIED_BY, SINCE_DEATH;
 
 	static {
 		Class<?> corpse = null;
@@ -72,6 +77,24 @@ final class KitchenCompat {
 			}
 		}
 		BURNS = burns;
+		Method robBy = null, hasValuables = null, lookTag = null, carriedBy = null, sinceDeath = null;
+		if (corpse != null) {
+			try {
+				robBy = corpse.getMethod("robBy", Entity.class);
+				hasValuables = corpse.getMethod("hasValuables");
+				lookTag = corpse.getMethod("lookTag");
+				carriedBy = corpse.getMethod("carriedBy", net.minecraft.world.entity.player.Player.class);
+				sinceDeath = corpse.getMethod("sinceDeath");
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the dead to be buried or robbed (needs 0.4.51): {}", e.toString());
+				robBy = null;
+			}
+		}
+		ROB_BY = robBy;
+		HAS_VALUABLES = robBy == null ? null : hasValuables;
+		LOOK_TAG = robBy == null ? null : lookTag;
+		CARRIED_BY = robBy == null ? null : carriedBy;
+		SINCE_DEATH = robBy == null ? null : sinceDeath;
 	}
 
 	private KitchenCompat() {
@@ -93,6 +116,67 @@ final class KitchenCompat {
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
+	}
+
+	/** (0.7.98) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.4.51). */
+	static boolean burials() {
+		return ROB_BY != null;
+	}
+
+	/** (0.7.98) Any Kitchen corpse, lying free: nobody carrying it, not in a cart or on a horse. */
+	static boolean isFreeCorpse(Entity entity) {
+		return CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger() && call(CARRIER, entity) == null;
+	}
+
+	/** (0.7.98) A player's body (never buried, burned or robbed: their things stay theirs). */
+	static boolean isPlayerCorpse(Entity corpse) {
+		return Boolean.TRUE.equals(call(PLAYER_CORPSE, corpse));
+	}
+
+	/** (0.7.98) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
+	static boolean hasValuables(Entity corpse) {
+		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));
+	}
+
+	/** (0.7.98) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
+	@SuppressWarnings("unchecked")
+	static java.util.List<net.minecraft.world.item.ItemStack> robBy(Entity corpse, Entity robber) {
+		return call(ROB_BY, corpse, robber) instanceof java.util.List<?> list ? (java.util.List<net.minecraft.world.item.ItemStack>)list : java.util.List.of();
+	}
+
+	/** (0.7.98) The dead mob's saved data (a fresh copy), or null. */
+	static net.minecraft.nbt.@Nullable CompoundTag lookTag(Entity corpse) {
+		return call(LOOK_TAG, corpse) instanceof net.minecraft.nbt.CompoundTag tag ? tag : null;
+	}
+
+	/** (0.7.98) Ticks since it died (very large for a body that was lying there before a reload). */
+	static long sinceDeath(Entity corpse) {
+		return call(SINCE_DEATH, corpse) instanceof Long ticks ? ticks : Long.MAX_VALUE;
+	}
+
+	/** (0.7.98) The body {@code player} is carrying in their arms, if any. */
+	static @Nullable Entity carriedBy(net.minecraft.world.entity.player.Player player) {
+		if (CARRIED_BY == null) {
+			return null;
+		}
+		try {
+			return CARRIED_BY.invoke(null, player) instanceof Entity e ? e : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen carriedBy failed: {}", e.toString());
+			return null;
+		}
+	}
+
+	/** (0.7.98) Tells Kitchen to call {@code hook} whenever a player takes something off a body by hand ({@link Looters#playerRobbed}). */
+	static void onRobbed(java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, Entity> hook) {
+		if (ROB_BY == null) {
+			return;
+		}
+		try {
+			CORPSE.getMethod("setOnRobbed", java.util.function.BiConsumer.class).invoke(null, hook);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen won't say when a body is robbed: {}", e.toString());
+		}
 	}
 
 	/** A Kitchen corpse of a monster (a zombie, a skeleton, a spider...), lying free: nobody carrying it, not in a cart. */
