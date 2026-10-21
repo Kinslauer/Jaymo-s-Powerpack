@@ -2123,5 +2123,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (give up), looking, chat and menus are left. On the server the downed are a `Powers` silencer, `WindFlight.canFly`
   says no (Wind, Z Fighter and Smoke's vapour flight end), and going down calls the new `Power.onDowned` (Gravity,
   Chrono, Cryo, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
-  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's Kitchen 0.5.6 (slower stomach
-  regen; its jar still needs building into `libs/`).
+  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's
+  Kitchen 0.5.6 (slower stomach regen that stops at 60%, the rest needs treatment; its jar still needs building into
+  `libs/`). Breaks (set by a splint or a priest) and stumps (cautery, or villagers binding them) already needed tending.

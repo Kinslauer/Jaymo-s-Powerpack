@@ -847,3 +847,4 @@ after `Mill.register()`.
 ### 0.5.6: slower healing
 Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
 unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
+Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.

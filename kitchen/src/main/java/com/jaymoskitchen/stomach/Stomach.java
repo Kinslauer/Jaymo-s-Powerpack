@@ -71,6 +71,11 @@ public final class Stomach {
 	static final float REGEN_PER_NUTRITION = 0.1F;
 	/** At a regeneration of 1, one health point back every this many ticks. (0.5.6: was 80) */
 	static final int REGEN_INTERVAL = 280;
+	/**
+	 * (0.5.6) Your meals heal you only up to this share of your most health. Andy: "you shouldnt be healing to full health
+	 * ... with no assistance": the rest takes treatment (Powers' bandages, salves and the like) or other help.
+	 */
+	public static final float SELF_HEAL_CAP = 0.6F;
 	/** (0.5.6) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
 	static final String DOWNED_TAG = "jaymospowers_downed";
 	/** A drink in its slot makes every food count this much more. */
@@ -382,6 +387,11 @@ public final class Stomach {
 			return;
 		}
 		UUID id = player.getUUID();
+		if (player.getHealth() >= player.getMaxHealth() * SELF_HEAL_CAP) {
+			// (0.5.6) as far as a full stomach takes you: the rest needs tending
+			REGEN_PROGRESS.remove(id);
+			return;
+		}
 		if (player.entityTags().contains(DOWNED_TAG)) {
 			// (0.5.6) lying downed: no healing on your own, and nothing saved up for when you're up
 			REGEN_PROGRESS.remove(id);
