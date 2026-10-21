@@ -3699,3 +3699,14 @@ right now it is held to the side of the player and is caught in the costume." `c
 - A blow with the blade out is a straight thrust along your look (`STAB_*`) instead of a punch.
 - The bracer stands 0.4 px prouder (`BRACER_GROW`), clear of the assassin costume's own bracer and any suit sleeve it
   used to z-fight with; the housing and blade sit out with it.
+
+## 0.7.123: seasons (with Kitchen 0.5.6, pack 0.15.30)
+- Andy chose our own seasons (2026-10-21); Kitchen keeps the calendar, read here through `KitchenCompat.season`,
+  `dayOfYear` and `temperate` (all soft without Kitchen 0.5.6).
+- Heritages: in a temperate land, summer counts +0.25 warmer and winter 0.8 colder, so plains are hot for an
+  Emberborn in summer and cold (a Frostborn's thriving, an Emberborn's wilting) in winter. Verdant feed even better
+  on spring sun (hunger x0.5 instead of x0.65).
+- Frostborn don't feel Kitchen's winter cold (no extra hunger out in the open): `KitchenCompat.skills` hands Kitchen the
+  predicate.
+- Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
+- Festivals: every realm fit to keep one holds a festival on the first day of each season.

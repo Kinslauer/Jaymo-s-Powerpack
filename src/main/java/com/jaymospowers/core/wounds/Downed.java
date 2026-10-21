@@ -74,7 +74,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * <b>Down:</b> at {@link #DOWNED_HEALTH}, head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
  * ({@code DownedMobMixin}); some ({@link #CRAWLER_CHANCE}) drag themselves away from whoever felled them. Players are held
- * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. (0.15.30) Nor
+ * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. (0.15.31) Nor
  * powers: whatever was running ends as they fall ({@link Power#onDowned}), their keys are dead (a silencer, and the client
  * lets go of every key but moving and sneak: {@code DownedKeysMixin}), and nothing heals them ({@code DownedHealMixin}). Fire, falls
  * and mobs still hurt, out of what's left, and can kill (that death counts). A player's blow is a wound instead
@@ -240,7 +240,7 @@ public final class Downed {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseItemCallback.EVENT.register((player, level, hand) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isDowned(player));
-		// (0.15.30) and no powers: every check that asks whether a player's power keys are live says no
+		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
 		Powers.addSilencer(Downed::isDowned);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			players(server);
@@ -346,7 +346,7 @@ public final class Downed {
 			// whatever they carried falls from their arms
 			Carry.slip(player);
 			player.setSprinting(false);
-			// (0.15.30) whatever power was running ends: a flight, a hold, a grab
+			// (0.15.31) whatever power was running ends: a flight, a hold, a grab
 			Power power = Powers.of(player);
 			if (power != null) {
 				power.onDowned(player);

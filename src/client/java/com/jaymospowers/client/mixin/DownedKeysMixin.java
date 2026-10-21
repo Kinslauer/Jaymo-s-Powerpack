@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.15.30) Downed, all you can do is crawl. Andy (2026-10-21): "when players are downed, they should not be able to use
+ * (0.15.31) Downed, all you can do is crawl. Andy (2026-10-21): "when players are downed, they should not be able to use
  * powers, or really do anything but crawl". While the local player is down, every key that acts reads as up and its
  * presses are swallowed: Jump, Sprint, attack, use, pick, drop, swap hands, and every one of ours (the ability keys, Mode,
  * Ultimate, Dodge, Crawl, the menu...). A key already held counts as let go, so a held ability ends. Moving (and the

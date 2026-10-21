@@ -64,19 +64,19 @@ public final class Stomach {
 	static final int MAX_TICKS = 40 * 60 * 20;
 	/** A slot can be eaten into again once this much of it is left. */
 	public static final float EAT_AGAIN = 0.2F;
-	/** Ticks without being hurt before your meals start healing you. (0.5.6: was 200; Andy: "healing is too quick") */
+	/** Ticks without being hurt before your meals start healing you. (0.5.7: was 200; Andy: "healing is too quick") */
 	static final int REGEN_DELAY = 400;
 	/** Regeneration with an empty stomach, and what each point of nutrition adds (per meal, 0.25 to 2). */
 	static final float BASE_REGEN = 0.25F;
 	static final float REGEN_PER_NUTRITION = 0.1F;
-	/** At a regeneration of 1, one health point back every this many ticks. (0.5.6: was 80) */
+	/** At a regeneration of 1, one health point back every this many ticks. (0.5.7: was 80) */
 	static final int REGEN_INTERVAL = 280;
 	/**
-	 * (0.5.6) Your meals heal you only up to this share of your most health. Andy: "you shouldnt be healing to full health
+	 * (0.5.7) Your meals heal you only up to this share of your most health. Andy: "you shouldnt be healing to full health
 	 * ... with no assistance": the rest takes treatment (Powers' bandages, salves and the like) or other help.
 	 */
 	public static final float SELF_HEAL_CAP = 0.6F;
-	/** (0.5.6) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
+	/** (0.5.7) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
 	static final String DOWNED_TAG = "jaymospowers_downed";
 	/** A drink in its slot makes every food count this much more. */
 	static final float DRINK_BONUS = 0.1F;
@@ -388,12 +388,12 @@ public final class Stomach {
 		}
 		UUID id = player.getUUID();
 		if (player.getHealth() >= player.getMaxHealth() * SELF_HEAL_CAP) {
-			// (0.5.6) as far as a full stomach takes you: the rest needs tending
+			// (0.5.7) as far as a full stomach takes you: the rest needs tending
 			REGEN_PROGRESS.remove(id);
 			return;
 		}
 		if (player.entityTags().contains(DOWNED_TAG)) {
-			// (0.5.6) lying downed: no healing on your own, and nothing saved up for when you're up
+			// (0.5.7) lying downed: no healing on your own, and nothing saved up for when you're up
 			REGEN_PROGRESS.remove(id);
 			return;
 		}

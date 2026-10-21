@@ -64,6 +64,7 @@ public class JaymosKitchen implements ModInitializer {
 		Sowing.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.season.Seasons.register();
 		com.jaymoskitchen.stomach.RawFood.register();
 
 		// sneak + right-click with an empty hand: a lit campfire, furnace, smoker or blast furnace opens the kitchen;

@@ -3,6 +3,7 @@ package com.jaymospowers.power.ember;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Seasons;
 import com.jaymospowers.power.smoke.SmokeField;
 import com.jaymospowers.power.smoke.SmokePower;
 import io.netty.buffer.ByteBuf;
@@ -79,6 +80,8 @@ public final class EmberKindle {
 	static final float COLD = 0.2F;
 	/** Damage to what it catches every {@link #HIT_EVERY} ticks, and white-hot; how long they burn (seconds). */
 	static final float DAMAGE = 1.0F, WHITE_DAMAGE = 2.0F;
+	/** (0.15.31) Ember's fire damage in summer, as a factor, where there are seasons (Kitchen's); winter chills ({@link #chilled}). */
+	static final float SUMMER_HEAT = 1.2F;
 	static final int HIT_EVERY = 10, BURN_SECONDS = 3, WHITE_BURN_SECONDS = 5;
 	/** How often (ticks) it lights or melts the block it plays on. */
 	static final int BLOCK_EVERY = 5;
@@ -174,7 +177,13 @@ public final class EmberKindle {
 	 * {@code Heritage.chilled} does: a cold land (biome temperature at or under {@link #COLD}) or freezing.
 	 */
 	static boolean chilled(ServerPlayer player) {
-		return player.getTicksFrozen() > 0 || player.level().getBiome(player.blockPosition()).value().getBaseTemperature() <= COLD;
+		return player.getTicksFrozen() > 0 || player.level().getBiome(player.blockPosition()).value().getBaseTemperature() <= COLD
+			|| Seasons.is(player, Seasons.Season.WINTER);
+	}
+
+	/** (0.15.31) Ember's fire damage from {@code owner}: {@link #SUMMER_HEAT} times as much in summer, where there are seasons. */
+	static float seasonal(@org.jspecify.annotations.Nullable Entity owner, float damage) {
+		return Seasons.is(owner, Seasons.Season.SUMMER) ? damage * SUMMER_HEAT : damage;
 	}
 
 	private static void hold(ServerPlayer player, boolean on) {
@@ -376,7 +385,7 @@ public final class EmberKindle {
 			}
 			Flames.touch(level, entity, white ? WHITE_BURN_SECONDS : BURN_SECONDS, player);
 			if (entity instanceof LivingEntity living) {
-				living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, player), white ? WHITE_DAMAGE : DAMAGE);
+				living.hurtServer(level, level.damageSources().source(DamageTypes.IN_FIRE, player), seasonal(player, white ? WHITE_DAMAGE : DAMAGE));
 			}
 		}
 	}

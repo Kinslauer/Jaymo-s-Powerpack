@@ -21,6 +21,8 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
+	/** (0.7.123) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
+	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
 
 	static {
 		Class<?> corpse = null;
@@ -72,6 +74,51 @@ final class KitchenCompat {
 			}
 		}
 		BURNS = burns;
+		Method seasonName = null, dayOfYear = null, temperate = null;
+		if (FabricLoader.getInstance().isModLoaded(MOD)) {
+			try {
+				Class<?> seasons = Class.forName("com.jaymoskitchen.season.Seasons");
+				seasonName = seasons.getMethod("seasonName", net.minecraft.world.level.Level.class);
+				dayOfYear = seasons.getMethod("dayOfYear", net.minecraft.world.level.Level.class);
+				temperate = seasons.getMethod("temperate", float.class);
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for seasons (needs 0.5.6): {}", e.toString());
+				seasonName = null;
+			}
+		}
+		SEASON_NAME = seasonName;
+		DAY_OF_YEAR = dayOfYear;
+		TEMPERATE = temperate;
+	}
+
+	/**
+	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
+	 * null without Kitchen 0.5.6.
+	 */
+	static @Nullable String season(net.minecraft.world.level.Level level) {
+		return invoke(SEASON_NAME, level) instanceof String name ? name : null;
+	}
+
+	/** (0.7.123) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
+	static int dayOfYear(net.minecraft.world.level.Level level) {
+		return invoke(DAY_OF_YEAR, level) instanceof Integer day ? day : -1;
+	}
+
+	/** (0.7.123) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
+	static boolean temperate(float baseTemperature) {
+		return Boolean.TRUE.equals(invoke(TEMPERATE, baseTemperature));
+	}
+
+	private static @Nullable Object invoke(@Nullable Method method, Object arg) {
+		if (method == null) {
+			return null;
+		}
+		try {
+			return method.invoke(null, arg);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen seasons call failed: {}", e.toString());
+			return null;
+		}
 	}
 
 	private KitchenCompat() {
@@ -87,6 +134,15 @@ final class KitchenCompat {
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.rank(player, Skills.Perk.FORAGER) > 0);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
+		}
+		// (0.7.123) winter's cold doesn't touch a Frostborn
+		if (SEASON_NAME != null) {
+			try {
+				Class.forName("com.jaymoskitchen.season.WinterCold").getMethod("setColdProof", java.util.function.Predicate.class)
+					.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.FROSTBORN));
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
+			}
 		}
 	}
 
