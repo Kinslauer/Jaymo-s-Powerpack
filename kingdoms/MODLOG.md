@@ -3456,7 +3456,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   mood change. Numbers at the top of `EmberHugs`.
 - **0.7.103, Make Do (OmniCrossbow as a skill):** Andy: "Marksman class should get acess to this
   (modrinth.com/mod/omnicrossbow)", then "It should be a node in the skill tree under survival, unlocks a utility across
-  classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.14.5,
+  classes". OmniCrossbow (LGPL-3.0, by ThePotatoArchivist) joins the pack unchanged (Powers 0.14.8,
   `packModsOverride`). A new Survival perk, **Make Do** (level 5, 2 points, under Forager, tier 1 middle), lets any
   class's crossbow load anything from the off hand. Then "No omni enchant at all": the mod's Omni enchantment is
   stripped from every loot table's drops (`LootTableEvents.MODIFY_DROPS`; an Omni-only book becomes a plain book) and

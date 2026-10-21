@@ -1853,6 +1853,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stand aside for each other (`WebPowerClient.parkourBusy`, `FreerunClient.active`). The web's vault, cling, kick and
   wall run poses draw the freerun moves too (`Freerun.MOVE`, `Freerun.WALL`); new `BalancePose` and `BarHangPose`.
   Block tags `jaymospowers:freerun_narrow`, `freerun_bars`, `freerun_soft_landing`, `freerun_no_climb`.
-- **0.14.5, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
+- **0.14.5, Smoke's particles are geyser steam:** Andy: regular and ascended smoke should use "the geyser particle
+  effect" (potent sulfur over lava), "far thicker", the gas staying for both and corrupted smoke keeping its particles;
+  then "just use the particles and not their specific properties". New `jaymospowers:smoke_steam`
+  (`SmokeParticles.STEAM`, client `SmokeSteam`): vanilla's `geyser_poof` sprites, moving like smoke (keeps its
+  velocity, slows and rises a little), smoky grey and translucent. It replaces the campfire smoke of Smoke Jet, Vapour
+  Form's tail, spill, landing, hits and start, Smoke Step and Smoke Bomb; Vapour Form's start throws a column of it
+  up. Corrupted (not ascended) users keep the old particles. See docs/smoke.md.
+- **0.14.8, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
   untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
   Kingdoms 0.7.103 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.
