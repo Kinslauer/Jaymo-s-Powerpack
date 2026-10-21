@@ -3454,12 +3454,80 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
   mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
   mood change. Numbers at the top of `EmberHugs`.
-- **0.7.103, Better With Mods batch 1 (Powers 0.14.5):** `MobTweaks`: baby zombies -25% speed and damage
+- **0.7.104, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.15.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
+- **0.7.104, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
+  side of Jaymo's Powers' Wounds phase 4 (`docs/Wounds-Phase4.md`, track B; written without a compiler, not yet built
+  or tested). **Clerics are barber-surgeons:** a grown cleric also sells Powers' linen bandages (3 for 2 emeralds),
+  splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds
+  while your bones are broken still has them set (Powers' `Fractures`). **Taverns and festivals sell drink:** a grown
+  villager standing in (or at the door of) one of a realm's standing taverns, or raising a toast at its festival, sells
+  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once offered, the drink stays on their trades (so walking out and back in never restocks it)
+  (`Remedies`, prices at its top). The wares go on when a player right-clicks the villager, just before the trading
+  screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
+  **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside
+  `jaymospowers_revive`, and Powers stops its bleeding and gives it a bandage's heal.
+- **0.7.105, Just-In COMBAT's ideas, our own way (with Powers 0.15.2's rapier):** Andy picked all five (the mod is All
+  Rights Reserved, so its ideas only). **Shields** (`MobShields`): a melee mob with a shield in its off hand (guards,
+  kings and lords already carry their realm's; tiered zombies now too) raises it 55% of the times it could, for 1 to
+  2.5 s, while a foe is within 7 blocks, and lowers it to strike (the goal's blow waits, `MeleeAttackGoalMixin`); it
+  goes up at once against a drawn bow or loaded crossbow within 28. Vanilla's blocking does the rest (front only); an
+  axe knocks it aside for as long as a player's (`LivingEntityBlockMixin`); watchers see the raised arm
+  (`ShieldPoseHumanoidMobRendererMixin`). **Blade clash** (`BladeClash`): when two armed fighters face each other and
+  one's blow lands within 3 ticks of the other's swing (a full-strength swing for a player, one that hadn't landed yet)
+  or just before a Better Combat mob's wound-up blow, neither hurts: sparks, a ring of steel, both pushed back; then
+  no clash for a second. Hitting straight back after being hit is a trade, not a clash. **Tiered monster gear**
+  (`MonsterGear`): a zombie or skeleton taking a World Tier above Hearth for the first time fills empty armour slots
+  (25/40/55/70% each by tier), may take a weapon (zombies) or trade its bow for a blade (skeletons), and an armed zombie
+  a shield; each piece one of five grades (leather and stone, copper, chainmail and iron blades, iron and rapiers or
+  longswords, diamond), rarer the higher, odds rising with the tier; rare pieces sometimes and legendary always
+  enchanted. **Duellists**: a lord, and one guard in five, fence with a rapier of their sword's metal when Powers is
+  there (`Outfits.fencer`). Bleeding, the fifth idea, is already Wounds' (Powers' PR #331).
+- **0.7.106, five new heritages and the Blood Rite:** Andy: "Can you brainstorm 5 more heritages" / "Additional
+  Heritages/ unlockable classes", then "these are great. go for it." (`Heritage`, ideas in
+  `heritages/new-heritages-brainstorm.md`). Two can be picked at the start and three are earned:
+  - **Stormborn** (Agility, Finesse): faster under open sky, slower deep underground, immune to lightning; in a
+    thunderstorm under open sky their hits arc a spark to the nearest enemy, and their eyes glow
+    electric blue in any thunderstorm (Andy: "The stormborn eyes should glow during storms along with the sparks."). Villagers lean Stormborn up high.
+  - **Dawnborn** (Might, Grit): heal slowly in sunlight, hit undead 20% harder, weaker and hungrier in the dark.
+    Villagers lean Dawnborn in savannas.
+  - **Endborn** (Wits, Finesse), earned near a dying Ender Dragon: endermen ignore their stare, a hit can blink them
+    away, water and rain burn them.
+  - **Dragonblood** (Might, Endurance), earned near a dying Ender Dragon or a tamed dragon: half fire and dragon
+    breath damage, stronger with a hoard of gold and gems in their pack, weaker when poor.
+  - **Deepborn** (Endurance, Wits), earned near a Warden digging away: silent to sculk, sense living things nearby
+    while sneaking, explosions stun them, weaker in sunlight.
+  Waking an earned heritage gives a **Blood Rite** (`jaymoskingdoms:blood_rite`); drinking it reopens the heritage
+  menu to switch to one you've woken. The menu shows earned heritages as "???" with a hint until woken, and fits on
+  small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
+  Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
+  pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+- **0.7.107, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+  barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
+  (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
+  taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon
+  (`tools/gen_items.py`, vanilla style) are our own. From 3.5 to 20 blocks he keeps his distance (backs off inside 7)
+  and lobs a lit stick at where his foe is going, sight or no sight, so walls and roofs don't save you; closer, he draws
+  his cutlass. **Dynamite** (`Dynamite`): a 2.5 s fuse from the throw; it arcs, bounces and sizzles, then bursts like a
+  cannonball (12 at its heart, 3.5 blocks, a shove) and leaves blocks whole; it never hurts his own side. Water puts it
+  out (the stick drops). Hit a lit stick and it flies where you look and is yours. The item throws the same (16 to a
+  stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
+  each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
+  landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
+- **0.7.108, Better With Mods batch 1 (Powers 0.15.9):** `MobTweaks`: baby zombies -25% speed and damage
   (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
-  attacker, and every teleport rumbles (`EndermanThunderMixin`). `WorldTiers` rolls armour and weapons for mobs as
-  they take a tier (iron, some diamond at Legend; piglins gold, wither skeletons a stone axe). Zombies and husks hunt
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). Zombies and husks hunt
   `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
   safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
   hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
-  `RoadPace`: `road_pace` blocks +15% (horses too), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `RoadPace`: `road_pace` blocks +15% (horses too; TRMT's worn dirt and sand paths count), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
   `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.

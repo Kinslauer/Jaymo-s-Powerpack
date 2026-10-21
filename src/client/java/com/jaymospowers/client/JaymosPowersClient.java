@@ -90,13 +90,17 @@ public class JaymosPowersClient implements ClientModInitializer {
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
-		CombatRollTaps.init();
+		com.jaymospowers.client.stamina.DodgeClient.init();
+		com.jaymospowers.client.stamina.FeathersHud.init();
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		com.jaymospowers.client.wounds.WoundsHud.init();
+		com.jaymospowers.client.wounds.DownedHud.init();
+		com.jaymospowers.client.wounds.MedicineHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();

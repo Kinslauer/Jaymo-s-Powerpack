@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Soundscape;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,9 @@ import net.minecraft.world.phys.Vec3;
  * lashes at everything near, wastes away and dies in it; it is never spat out early. The strain goes back out with it.
  */
 public final class WebInhabit {
+	/** An inhabited host's heartbeat: steady, but never quite the same beat twice. */
+	static final Soundscape.Layer HEARTBEAT = Soundscape.Layer.of(0.5F, 0.7F, 0.75F, 0.85F, SoundEvents.WARDEN_HEARTBEAT);
+
 	// ---- tuning ----
 	/** How long a peaceful mob holds it before it's rejected, and a hostile one before it dies (ticks). */
 	static final int CALM_MIN = 400, CALM_MAX = 800, HOSTILE_MIN = 1200, HOSTILE_MAX = 1800;
@@ -199,8 +203,8 @@ public final class WebInhabit {
 			level.sendParticles(WebSymbioteStrains.dust(host, 0.9F), host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1,
 				host.getBbWidth() * 0.4, host.getBbHeight() * 0.3, host.getBbWidth() * 0.4, 0.0);
 		}
-		if (host.tickCount % 100 == 0) {
-			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 0.6F, 0.8F);
+		if (Soundscape.due(host, "symbiote.inhabit", 85, 115)) {
+			Soundscape.play(level, host.position(), SoundSource.HOSTILE, HEARTBEAT);
 		}
 	}
 

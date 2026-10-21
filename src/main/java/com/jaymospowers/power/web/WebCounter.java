@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
  * whips out of the arm ({@link #bundle}, drawn by {@code WebTendrilBundle}), wraps it, hauls it through a big arc
  * ({@link WebHaul}) and slams it into the ground in a burst of black mass and dust, then recoils into the arm.
  *
- * <p>Every counter spends one Combat Roll charge ({@link WebRolls}); with none left, a dodge opens no counter.
+ * <p>Every counter spends a dodge's feathers ({@link WebRolls}); without them, a dodge opens no counter.
  */
 public final class WebCounter {
 	/** Ticks after a dodge that right click counters. */
@@ -256,10 +256,10 @@ public final class WebCounter {
 		player.removeAttached(LIVE);
 	}
 
-	/** A sense dodge just happened: right click counters for a moment (if there's a Combat Roll charge to spend on it). */
+	/** A sense dodge just happened: right click counters for a moment (if there are the feathers to spend on it). */
 	static void opened(ServerPlayer player, Entity attacker) {
 		if (!WebRolls.has(player)) {
-			// out of roll charges: the dodge still happens, but no counter
+			// out of feathers: the dodge still happens, but no counter
 			return;
 		}
 		Live live = live(player);
@@ -285,7 +285,7 @@ public final class WebCounter {
 			return;
 		}
 		if (!WebRolls.has(player)) {
-			// the roll charges went on rolling since the dodge: no counter
+			// the feathers went on dodging since: no counter
 			player.removeAttached(READY);
 			return;
 		}
@@ -306,7 +306,7 @@ public final class WebCounter {
 			kind = base + player.getRandom().nextInt(WEB_COUNTERS);
 		} while (kind == live.lastKind);
 		live.lastKind = kind;
-		// every counter spends a Combat Roll charge
+		// every counter spends a dodge's feathers
 		WebRolls.spend(player);
 		player.removeAttached(READY);
 		player.setAttached(ACTIVE, new Active(kind, target.getId(), now));

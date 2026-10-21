@@ -7,6 +7,18 @@
     "minecraft:smooth_sandstone",
     "minecraft:smooth_red_sandstone",
     "minecraft:cut_sandstone",
-    "minecraft:cut_red_sandstone"
+    "minecraft:cut_red_sandstone",
+    {
+      "id": "trmt:eroded_dirt",
+      "required": false
+    },
+    {
+      "id": "trmt:eroded_coarse_dirt",
+      "required": false
+    },
+    {
+      "id": "trmt:eroded_sand",
+      "required": false
+    }
   ]
 }

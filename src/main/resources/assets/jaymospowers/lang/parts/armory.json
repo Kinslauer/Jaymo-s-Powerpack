@@ -131,5 +131,12 @@
   "message.jaymospowers.bomb_glider.empty": "The dynamite rack is empty",
   "message.jaymospowers.bomb_glider.full": "No room for that in the glider",
   "block.jaymospowers.mining_charge": "Mining Charge",
-  "block.jaymospowers.mining_charge.hint": "Stick it on rock, light it (redstone, flint and steel, a burning arrow): it digs a 3x3 hole into the block"
+  "block.jaymospowers.mining_charge.hint": "Stick it on rock, light it (redstone, flint and steel, a burning arrow): it digs a 3x3 hole into the block",
+  "item.jaymospowers.rapier.lunge": "Right-click: lunge and run through the first foe ahead",
+  "item.jaymospowers.wooden_rapier": "Wooden Rapier",
+  "item.jaymospowers.stone_rapier": "Stone Rapier",
+  "item.jaymospowers.iron_rapier": "Iron Rapier",
+  "item.jaymospowers.golden_rapier": "Golden Rapier",
+  "item.jaymospowers.diamond_rapier": "Diamond Rapier",
+  "item.jaymospowers.netherite_rapier": "Netherite Rapier"
 }

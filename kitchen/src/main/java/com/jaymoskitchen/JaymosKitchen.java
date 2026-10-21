@@ -43,6 +43,9 @@ public class JaymosKitchen implements ModInitializer {
 		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
+		com.jaymoskitchen.ragdoll.RagdollNet.register();
+		// (0.5.1) living players going limp (its LIMP attachment is class-loaded here, on both sides)
+		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		ModItems.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
@@ -52,6 +55,7 @@ public class JaymosKitchen implements ModInitializer {
 		PlayerCorpses.register();
 		Saddlebags.register();
 		Mill.register();
+		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();

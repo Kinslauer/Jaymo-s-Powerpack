@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.smoke;
 
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.smoke.SmokeJet;
+import com.jaymospowers.power.smoke.SmokeParticles;
 import com.jaymospowers.power.smoke.SmokePower;
 import com.jaymospowers.power.web.WebSymbiote;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -111,13 +112,13 @@ final class SmokeJetClient {
 				Vec3 p = hands.add(look.scale(t));
 				Vec3 v = look.scale(SPEED * (1.0 - 0.5 * t / SmokeJet.RANGE) * (0.7 + random.nextDouble() * 0.5)).add(random.nextGaussian() * WANDER,
 					random.nextGaussian() * WANDER, random.nextGaussian() * WANDER);
-				level.addParticle(t > reach * 0.4 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE, p.x + random.nextGaussian() * r,
+				level.addParticle(SmokeParticles.puff(player, t > reach * 0.4 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE), p.x + random.nextGaussian() * r,
 					p.y + random.nextGaussian() * r, p.z + random.nextGaussian() * r, v.x, v.y, v.z);
 			}
 			// it billows out where it slows, and where a wall breaks it
 			if (player.tickCount % 2 == 0) {
 				Vec3 end = hands.add(look.scale(Math.max(0.0, reach - 0.3)));
-				level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, end.x + random.nextGaussian() * 0.4, end.y + random.nextGaussian() * 0.4,
+				level.addParticle(SmokeParticles.puff(player, ParticleTypes.CAMPFIRE_COSY_SMOKE), end.x + random.nextGaussian() * 0.4, end.y + random.nextGaussian() * 0.4,
 					end.z + random.nextGaussian() * 0.4, random.nextGaussian() * 0.02, 0.02, random.nextGaussian() * 0.02);
 			}
 		}

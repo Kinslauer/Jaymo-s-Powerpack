@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import com.jaymoskitchen.ragdoll.LivingRagdolls;
+import com.jaymoskitchen.ragdoll.RagdollBody;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -59,7 +61,7 @@ public final class PlayerCorpses {
 		int jaymoskitchen$selected();
 	}
 
-	/** The player's death animation has ended: their body stays, with their hotbar. */
+	/** The player has started to die: their body appears, with their hotbar. */
 	public static void spawn(ServerPlayer player) {
 		ServerLevel level = player.level();
 		CorpseEntity corpse = new CorpseEntity(Corpses.CORPSE, level);
@@ -70,6 +72,9 @@ public final class PlayerCorpses {
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
 		corpse.markJustDied();
+		// (0.5.1) a player who died limp leaves exactly that body; otherwise they crumple like any mob
+		RagdollBody limp = LivingRagdolls.lastBody(player);
+		corpse.startRagdoll(limp != null ? limp : Corpses.deathBody(player));
 		level.addFreshEntity(corpse);
 	}
 
