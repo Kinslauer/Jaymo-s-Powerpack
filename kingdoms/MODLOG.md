@@ -3710,8 +3710,33 @@ right now it is held to the side of the player and is caught in the costume." `c
   predicate.
 - Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
 - Festivals: every realm fit to keep one holds a festival on the first day of each season.
+## 0.7.125: bounties, bandits and pirates
+Andy: "Add a bounty board in town for criminal npcs and players ... add bandit masks and bandanas that hide your
+identity the same way a costume does but npcs call you a bandit/ pirate depending on location". With Jaymo's Powers
+0.15.32. Built without a game run; compile-checked against the 26.3 jars.
+- **Bandit mask and bandana** (`Bandits`; crafted from black or red wool and string; worn on the head): a mask to
+  `Identities` (its `maskKey` sees them even without Powers), the identity `bandit_<uuid>`, one per player whichever of
+  the two they wear. Its own reputation, wanted time and bounties; given away like a costume (put on or off in view, a
+  guard's unmasking, powers seen used both masked and bare-faced). The folk call you **the Pirate** in or on the water,
+  in a boat or on a ship, or on a sea, beach or river biome, **the Bandit** anywhere else. Townsfolk who see a masked
+  bandit come in cry out (once in 2 minutes per settlement). Art by `tools/gen_bounties.py`.
+- **Bounties** (`Bounties`): a player seen at a medium or heavy crime gets a price on their head with the realm that
+  holds the settlement (6 or 15 emeralds a crime, up to 320), on their mask if they wore one. Crooked villagers get
+  theirs from `Crooks` (the NPC crime patch) through `Bounties.crime(crook, faction, emeralds)`.
+- **The bounty board** (`BountyBoard`): every kingdom, fiefdom and village puts one up 3-8 blocks from its bell (again 3
+  days after it's broken); craftable too (planks, paper, sticks). Right-clicked, it lists its realm's bounties on the
+  quest screen, highest first: the name and price, the crime, what the head's worth, whether they're dangerous. Take
+  one (3 at a time) to learn roughly where they were last seen (40 blocks either way, rounded to 10; ask again for
+  fresher word). Taken bounties open to others again after 3 days; untouched ones come down after 10 days.
+- **Bringing them in:** carry a downed target (Powers' Wounds) to the realm's ruler and right-click the ruler: the full
+  price, and reputation (a quarter of the price). A crook goes to the cells; a player is fined what emeralds they carry
+  (up to the price), forgiven their wanted time there and got up. A target killed by a player drops a **head** (a
+  player's own face) worth half, handed to the ruler the same way.
+- **Minibosses:** a crook with a bounty of 40 or more, once someone takes it, is armed when found: a relic weapon
+  (royal from 90; it drops, or it's yours when you bring them in), 60 health plus 1.5 per emerald (240 at most), 10
+  armour, a boss bar, and it fights the nearest player it can see within 24 blocks (6 damage plus 1 per 25 emeralds).
 
-## 0.7.125: crooks among the villagers, and the guards arrest them
+## 0.7.126: crooks among the villagers, and the guards arrest them
 Andy: "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing from the player, and upon
 prompts of good deals (8 cod 3 emeralds) they can scam you ... rep has an effect, the higher it is, the less likely to
 be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Theft`, `JaymosKingdoms`).
@@ -3742,6 +3767,7 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   names the crime, the ruler pronounces sentence aloud, players within 48 are told in chat, and it's carried out there.
   Sentence score = notoriety x 10 + temper lean (tyrant +30, noble -20, warlord +15, paranoid +20, reveler -10) + 0-30:
   under 20 a pardon, 20+ a flogging (3 blows, never below 2 hearts), 45+ exile (they walk 80 blocks out and are gone),
-  70+ execution (beheaded: `jaymoskitchen.missing.head`, then killed). `Arrests.SENTENCED` tells the bounty board.
+  70+ execution (beheaded: `jaymoskitchen.missing.head`, then killed). `Arrests.SENTENCED` takes the crook off the
+  bounty board (`Bounties.sentenced`), and `Crooks.SEEN` posts seen crooks there (`Bounties.crime`).
   A guard who's killed, downed or called away lets the crook bolt. Villages without folk guards still send golems.
-- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.32.
+- Compile-checked (the changed files against the 26.3 jars); not yet seen in game. Pack 0.15.33.

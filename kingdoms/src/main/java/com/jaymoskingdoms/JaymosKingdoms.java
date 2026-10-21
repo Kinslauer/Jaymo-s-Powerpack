@@ -129,10 +129,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
-		// 0.7.125: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
+		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
-		// 0.7.125: the guards arrest crooks and march them to the ruler for judgment
+		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
@@ -309,6 +309,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
+		// 0.7.126: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
+		Bandits.register();
+		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
+		Bounties.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

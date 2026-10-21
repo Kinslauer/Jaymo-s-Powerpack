@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.125) Andy (2026-10-21): "can you make guards attempt to arrest before killing criminals? either give them a visible
+ * (0.7.126) Andy (2026-10-21): "can you make guards attempt to arrest before killing criminals? either give them a visible
  * audience with the king or make a jail cell building that populates passively with criminals, and executions."
  *
  * <p>A crook seen at a crime ({@link Crooks}) where a realm keeps guards isn't cut down: the nearest free guard runs them

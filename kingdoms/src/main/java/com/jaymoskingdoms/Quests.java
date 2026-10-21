@@ -382,6 +382,11 @@ public final class Quests {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (act.entityId() == QuestNet.BOARD) {
+			// (0.7.125) the bounty board's screen
+			Bounties.act(player, act);
+			return;
+		}
 		Entity found = level.getEntity(act.entityId());
 		if (act.action() == QuestNet.CLOSE) {
 			if (found instanceof LivingEntity giver && HELD.containsKey(giver) && HELD.get(giver).player() == player) {
