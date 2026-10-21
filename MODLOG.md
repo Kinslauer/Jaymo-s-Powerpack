@@ -2334,6 +2334,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - No blossom petals in a Wind user's seasonal whirl (`SeasonAura`: spring gives Wind none).
   - Kingdoms 0.7.140: the Stormborn heritage is earned now, woken when a Wind user's power is corrupted.
   Compile-checked against the 26.3 jars; not yet run in game.
-- **0.15.55, ships Jaymo's Kingdoms 0.7.142 (Better With Mods batch 4, building):** timber trim, benches and tables,
+- **0.15.56, ships Jaymo's Kingdoms 0.7.143 (Better With Mods batch 4, building):** timber trim, benches and tables,
   wattle panels, strung plot stakes, earth slabs with half-step King's Roads, wind chimes and a rope lift. No Powers
   code changed. Details in the Kingdoms MODLOG.

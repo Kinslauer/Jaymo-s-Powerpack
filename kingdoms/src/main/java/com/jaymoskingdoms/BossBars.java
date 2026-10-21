@@ -46,9 +46,12 @@ public final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		// (0.7.137) a wild dragon too; (0.7.138) a villager crowned too
+		// (0.7.137) a wild dragon too; (0.7.138) a villager crowned too; (0.7.142) the Nether forts' lords
 		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity)
-			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed();
+			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed()
+			// (0.7.142) the Nether forts' warlords and warbosses
+			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
+			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD;
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
