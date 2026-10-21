@@ -1,0 +1,27 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:fences",
+		"#minecraft:walls",
+		"minecraft:iron_chain",
+		"minecraft:end_rod",
+		"minecraft:bamboo",
+		"minecraft:lightning_rod",
+		{ "id": "minecraft:chain", "required": false },
+		{ "id": "minecraft:copper_chain", "required": false },
+		{ "id": "minecraft:exposed_copper_chain", "required": false },
+		{ "id": "minecraft:weathered_copper_chain", "required": false },
+		{ "id": "minecraft:oxidized_copper_chain", "required": false },
+		{ "id": "minecraft:waxed_copper_chain", "required": false },
+		{ "id": "minecraft:waxed_exposed_copper_chain", "required": false },
+		{ "id": "minecraft:waxed_weathered_copper_chain", "required": false },
+		{ "id": "minecraft:waxed_oxidized_copper_chain", "required": false },
+		{ "id": "minecraft:exposed_lightning_rod", "required": false },
+		{ "id": "minecraft:weathered_lightning_rod", "required": false },
+		{ "id": "minecraft:oxidized_lightning_rod", "required": false },
+		{ "id": "minecraft:waxed_lightning_rod", "required": false },
+		{ "id": "minecraft:waxed_exposed_lightning_rod", "required": false },
+		{ "id": "minecraft:waxed_weathered_lightning_rod", "required": false },
+		{ "id": "minecraft:waxed_oxidized_lightning_rod", "required": false }
+	]
+}
