@@ -2237,7 +2237,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     head when still, try now and then to push up and sink back, and bounce as they hit the ground; passed out, they lie
     limp with the head turned aside. Downed humanoid mobs (`wounds/DownedPose`) fall with weight (the knees go, then a
     faster drop and a small bounce), crawl the same way, and on their backs breathe unevenly, clutch their worst wound
-    (a broken arm or leg, else the chest) and try to sit up. First person is unchanged.
+    (a broken arm or leg, else the chest) and try to sit up.
+  - First person (Andy: "the big ones get first-person arms"): your own bare arm now plays Kindle (drawn back, pushed
+    out palm-first trembling with the heat, whipped forward on the throw), carrying (both arms rise in under the load
+    as what you held sinks away, bob with your steps, and sink out when you let go), Time Flow's blows (guard, coil,
+    punch and recoil on the third-person timing, the barrage's alternating fists, the push and the counters' palm
+    strike), Lift's grip (the arm reaching after the held creature, straining) and Cryokinesis (breath hand to the mouth
+    then thrown out, the shard sweep, the two-handed freeze push, the wall's palms driving up, the Blizzard's arms
+    raised). They ease in and out on the same weights as third person (`client/FirstPersonArms`,
+    `PowerArmsFirstPersonMixin`); only an empty hand is posed, so held items, Better Combat's swings and the view bob
+    are untouched, and with First-person Model the body's own arms show the poses as before.
 - **0.15.40, Cryokinesis poses and livelier weapon animations:** part of the animation upgrade Andy approved (wind-up,
   follow-through, the whole body moving, eased springs).
   - Cryokinesis had no body poses; now every move has one, seen in third person by everyone (`client/power/cryo/CryoPose`).

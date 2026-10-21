@@ -25,9 +25,9 @@ import net.minecraft.world.entity.Entity;
  */
 public final class ChronoFlowPose {
 	/** Share of the time to the hit spent coiling; share of what's after it spent holding the strike before the recovery. */
-	static final float COIL_SHARE = 0.55F, HOLD_SHARE = 0.25F;
+	public static final float COIL_SHARE = 0.55F, HOLD_SHARE = 0.25F;
 	/** The guard held after a blow before it eases out (seconds), and the weight's speed (times its usual). */
-	static final float LINGER = 0.3F, WEIGHT_SPEED = 1.8F;
+	public static final float LINGER = 0.3F, WEIGHT_SPEED = 1.8F;
 	/** The blows are quick: the springs this many times as stiff. */
 	static final float STIFFNESS = 2.5F;
 	/** While walking the stance's legs give way to the walk by this much at the most. */
