@@ -1,24 +1,33 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.sailing.Crew;
+import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Ship;
 import com.jaymoskingdoms.sailing.Ships;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.42) Operators' commands for the ships with crews of their own (debug: plain text): {@code /kingdom fleet harbour |
- * navy | merchant | pirate | wreck | chart | info}.
+ * navy | merchant | pirate | wreck | chart | info | ship <rig>}.
  */
 final class FleetCommands {
 	private FleetCommands() {
@@ -32,7 +41,10 @@ final class FleetCommands {
 			.then(Commands.literal("pirate").executes(FleetCommands::pirate))
 			.then(Commands.literal("wreck").executes(FleetCommands::wreck))
 			.then(Commands.literal("chart").executes(FleetCommands::chart))
-			.then(Commands.literal("info").executes(FleetCommands::info));
+			.then(Commands.literal("info").executes(FleetCommands::info))
+			.then(Commands.literal("ship").then(Commands.argument("rig", StringArgumentType.word())
+				.suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Fleet.Rig.values()).map(Fleet.Rig::id), b))
+				.executes(FleetCommands::ship)));
 	}
 
 	private static @Nullable Faction nearest(CommandContext<CommandSourceStack> c, Predicate<Faction> which) throws CommandSyntaxException {
@@ -132,6 +144,38 @@ final class FleetCommands {
 		ServerLevel level = Factions.level(c.getSource().getServer());
 		player.getInventory().addAndPickItem(TreasureWrecks.chart(level, player.blockPosition(), level.getRandom()));
 		return ok(c, "A Pirate's Chart");
+	}
+
+	/**
+	 * (0.7.112) A ship of any rig built on open water near you (or where the command runs), bow the way you face, and cast
+	 * off with no crew: to look over, or board and sail yourself.
+	 */
+	private static int ship(CommandContext<CommandSourceStack> c) {
+		String id = StringArgumentType.getString(c, "rig");
+		Fleet.Rig rig = Arrays.stream(Fleet.Rig.values()).filter(r -> r.id().equals(id)).findFirst().orElse(null);
+		if (rig == null) {
+			return fail(c, "No rig " + id);
+		}
+		ServerLevel level = c.getSource().getLevel();
+		BlockPos near = BlockPos.containing(c.getSource().getPosition());
+		Direction bow = Direction.fromYRot(c.getSource().getRotation().y);
+		Fleet.Look look = new Fleet.Look(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.SPRUCE_LOG, Blocks.WOOL.pick(DyeColor.WHITE), null);
+		for (int tries = 0; tries < 8; tries++) {
+			BlockPos water = Fleet.openSea(level, near, 48, 6, level.getRandom());
+			List<BlockPos> where = new ArrayList<>();
+			BlockPos helm = water == null ? null : Fleet.lay(level, rig, look, water, bow, where);
+			if (helm == null) {
+				continue;
+			}
+			Ship ship = Fleet.castOff(level, helm);
+			if (ship == null || ship.hull() == null) {
+				return fail(c, "A " + id + " (" + where.size() + " blocks) was built at " + helm.toShortString() + " but wouldn't cast off");
+			}
+			var h = ship.hull();
+			return ok(c, "A " + id + " (" + h.pieces.size() + " blocks, " + h.sails + " sails, " + h.cannons.length + " guns, draws "
+				+ String.format(java.util.Locale.ROOT, "%.1f", h.draft) + ") at " + ship.blockPosition().toShortString());
+		}
+		return fail(c, "No open sea with room for a " + id + " within 48 blocks (loaded)");
 	}
 
 	private static int info(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
