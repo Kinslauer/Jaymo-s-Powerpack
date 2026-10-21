@@ -9,7 +9,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ShovelItem;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -24,11 +25,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Extends shovel path-flattening to cover trmt:eroded_coarse_dirt,
  * matching the behaviour of its vanilla counterpart (coarse_dirt).
  */
-@Mixin(ShovelItem.class)
+// 26.3: hoes and shovels are plain Items with a data-driven block transformer, so this hooks Item.useOn
+@Mixin(Item.class)
 public class ShovelItemMixin {
 
     @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
     private void trmt$flattenErodedBlocks(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        if (!context.getItemInHand().is(ItemTags.SHOVELS)) {
+            return;
+        }
         BlockPos pos = context.getClickedPos();
         Level world = context.getLevel();
         BlockState state = world.getBlockState(pos);
@@ -38,7 +43,7 @@ public class ShovelItemMixin {
         }
 
         Player player = context.getPlayer();
-        world.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
+        world.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN.value(), SoundSource.BLOCKS, 1.0f, 1.0f);
         if (!world.isClientSide()) {
             world.setBlock(pos, Blocks.DIRT_PATH.defaultBlockState(),
                     Block.UPDATE_ALL | Block.UPDATE_IMMEDIATE);

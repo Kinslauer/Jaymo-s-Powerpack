@@ -12,3 +12,8 @@ is for sale. Once milkucha releases for 26.3, the pack switches to the official 
   files left out; Gradle wrapper from Jaymo's Kitchen.
 - `fabric.mod.json`: depends on `minecraft ~26.3` and `fabricloader >=0.19.5`.
 - Source: any API changes from 26.1 to 26.3 are listed below as they're made.
+  - `HoeItemMixin`, `ShovelItemMixin`: 26.3 has no `HoeItem`/`ShovelItem` (tools are plain `Item`s with a block
+    transformer), so both hook `Item.useOn` and check `ItemTags.HOES` / `ItemTags.SHOVELS`; sounds take `.value()`.
+  - `TRMTPotions`: Fabric API's `FabricPotionBrewingBuilder` is gone (brewing is data-driven in 26.3), so the Potion of
+    Lightness recipes (awkward + feather, + redstone for long) are JSON in `data/trmt/recipe/brewing/`, for potions,
+    splash and lingering potions.
