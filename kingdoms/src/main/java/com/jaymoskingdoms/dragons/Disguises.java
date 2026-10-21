@@ -43,6 +43,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -85,6 +86,21 @@ public final class Disguises {
 	static final double SHOO_PUSH = 0.9, SHOO_UP = 0.35;
 	static final int REVEAL_LIFT_MAX = 12;
 	/** The colours of their words (RGB): Eurus' storm blue, Aeolus' old gold. */
+	/**
+	 * Andy: "The disguised villagers can be damaged 3 times, then they will violently assault the player who did. No
+	 * transformation, just increasingly condescending messages until they snap." The blows they'll take from one player
+	 * (each answered with a sneer, none hurting them) before the next one makes them snap.
+	 */
+	static final int PATIENCE = 2;
+	/** Blows forgotten after this long (game ticks). */
+	static final long GRUDGE_TICKS = 6000L;
+	/** The beating: how long it lasts, how often a blow lands, how far they'll reach and chase, how hard they hit. */
+	static final int ASSAULT_TICKS = 120, ASSAULT_EVERY = 10;
+	static final double ASSAULT_REACH = 2.5, ASSAULT_CHASE = 24.0, ASSAULT_SPEED = 0.9;
+	static final float EURUS_BLOW = 5.0F, AEOLUS_BLOW = 8.0F;
+	static final double LUNGE = 0.7, LUNGE_UP = 0.35;
+	static final double BLOW_PUSH = 0.6, FINAL_PUSH = 1.8, FINAL_UP = 0.7;
+
 	static final int EURUS_COLOR = 0x9FD3FF, AEOLUS_COLOR = 0xE8D9A0;
 
 	/** The disguised villager's kind ("eurus" or "aeolus"); synced to everyone who sees it, for the skin. */
@@ -145,6 +161,14 @@ public final class Disguises {
 	private static final Map<UUID, Asking> ASKED = new HashMap<>();
 	/** Who's been shooed off, by player and kind: until when (game time). */
 	private static final Map<String, Long> SHOOED = new HashMap<>();
+	/** Blows taken, by player and kind: how many, and when the last landed. */
+	private static final Map<String, long[]> STRUCK = new HashMap<>();
+	/** Beatings under way: the villager on whom, until when. */
+	private static final Map<Villager, Assault> ASSAULTS = new HashMap<>();
+
+	/** {@code villager} (a {@code kind}) laying into {@code victim} until {@code until}. */
+	private record Assault(Kind kind, UUID victim, long until) {
+	}
 
 	private Disguises() {
 	}
@@ -165,12 +189,21 @@ public final class Disguises {
 				for (Set<Villager> set : LOADED.values()) {
 					set.remove(v);
 				}
+				ASSAULTS.remove(v);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Disguises::tick);
-		// not a scratch on them: a blow does nothing (they don't reveal, and they don't turn angry)
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			entity.getAttached(DISGUISE) == null || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
+		// not a scratch on them; a player's blows are borne with a sneer, and then not at all (struck)
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			Kind kind = entity instanceof Villager ? kind(entity) : null;
+			if (kind == null || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+				return true;
+			}
+			if (source.getEntity() instanceof ServerPlayer player && !player.isCreative() && entity.level() instanceof ServerLevel level) {
+				struck(level, player, (Villager)entity, kind);
+			}
+			return false;
+		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp)
 				|| !(entity instanceof Villager villager) || !(world instanceof ServerLevel level)) {
@@ -189,6 +222,8 @@ public final class Disguises {
 			LOADED.values().forEach(Set::clear);
 			ASKED.clear();
 			SHOOED.clear();
+			STRUCK.clear();
+			ASSAULTS.clear();
 		});
 	}
 
@@ -212,6 +247,9 @@ public final class Disguises {
 		}
 		if (ticks % UPKEEP_TICKS == 0) {
 			upkeep(server);
+		}
+		if (!ASSAULTS.isEmpty()) {
+			assaults();
 		}
 	}
 
@@ -310,6 +348,81 @@ public final class Disguises {
 					JaymosKingdoms.LOGGER.debug("{} went on its way", kind(v) == null ? "a disguise" : kind(v).id);
 					v.discard();
 				}
+			}
+		}
+	}
+
+	// ---- struck ---------------------------------------------------------------------------------------------------------
+
+	/** {@code player} hit {@code villager}: a sneer, a colder one, then they snap. They stay villagers throughout. */
+	private static void struck(ServerLevel level, ServerPlayer player, Villager villager, Kind kind) {
+		if (ASSAULTS.containsKey(villager)) {
+			return;
+		}
+		String key = key(player, kind);
+		long now = level.getGameTime();
+		long[] blows = STRUCK.get(key);
+		if (blows == null || now - blows[1] > GRUDGE_TICKS) {
+			blows = new long[] {0L, now};
+		}
+		blows[0]++;
+		blows[1] = now;
+		STRUCK.put(key, blows);
+		ASKED.remove(player.getUUID());
+		villager.getLookControl().setLookAt(player);
+		if (blows[0] <= PATIENCE) {
+			say(player, villager, kind, Component.translatable(lang(kind, "struck." + blows[0])));
+			level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.NEUTRAL, 1.0F, 0.8F);
+			return;
+		}
+		STRUCK.remove(key);
+		say(player, villager, kind, Component.translatable(lang(kind, "snap")));
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.HOSTILE, 1.2F, 0.6F);
+		ASSAULTS.put(villager, new Assault(kind, player.getUUID(), now + ASSAULT_TICKS));
+	}
+
+	/** Each beating under way: chase the one who struck them and lay into them; the last blow throws them clear. */
+	private static void assaults() {
+		var it = ASSAULTS.entrySet().iterator();
+		while (it.hasNext()) {
+			var entry = it.next();
+			Villager villager = entry.getKey();
+			Assault assault = entry.getValue();
+			if (!villager.isAlive() || !(villager.level() instanceof ServerLevel level)
+				|| !(level.getPlayerByUUID(assault.victim()) instanceof ServerPlayer victim) || !victim.isAlive() || victim.isSpectator()
+				|| victim.distanceToSqr(villager) > ASSAULT_CHASE * ASSAULT_CHASE) {
+				it.remove();
+				continue;
+			}
+			long now = level.getGameTime();
+			boolean last = now >= assault.until();
+			villager.getLookControl().setLookAt(victim);
+			villager.getNavigation().moveTo(victim, ASSAULT_SPEED);
+			boolean close = villager.distanceToSqr(victim) <= ASSAULT_REACH * ASSAULT_REACH;
+			if (now % ASSAULT_EVERY == 0 && !close && villager.onGround()) {
+				// a villager's own feet won't always take it there: it flings itself at them
+				Vec3 at = victim.position().subtract(villager.position()).multiply(1.0, 0.0, 1.0);
+				Vec3 lunge = at.lengthSqr() < 1.0E-4 ? Vec3.ZERO : at.normalize().scale(LUNGE);
+				villager.setDeltaMovement(lunge.x, LUNGE_UP, lunge.z);
+				villager.syncVelocity = true;
+			}
+			if ((now % ASSAULT_EVERY == 0 || last) && close) {
+				villager.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				victim.hurtServer(level, level.damageSources().mobAttack(villager), assault.kind() == Kind.EURUS ? EURUS_BLOW : AEOLUS_BLOW);
+				Vec3 away = victim.position().subtract(villager.position()).multiply(1.0, 0.0, 1.0);
+				Vec3 push = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize().scale(last ? FINAL_PUSH : BLOW_PUSH);
+				victim.setDeltaMovement(push.x, last ? FINAL_UP : 0.25, push.z);
+				victim.syncVelocity = true;
+				level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), last ? SoundEvents.PLAYER_ATTACK_KNOCKBACK : SoundEvents.PLAYER_ATTACK_STRONG,
+					SoundSource.HOSTILE, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.3F);
+				level.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY() + 1.0, victim.getZ(), 6, 0.3, 0.4, 0.3, 0.1);
+			}
+			if (last) {
+				say(victim, villager, assault.kind(), Component.translatable(lang(assault.kind(), "after")));
+				villager.getNavigation().stop();
+				// and they won't hear another word from them for a while
+				SHOOED.put(key(victim, assault.kind()), now + SHOO_TICKS);
+				it.remove();
 			}
 		}
 	}

@@ -4601,5 +4601,13 @@
 	"message.jaymoskingdoms.aeolus.phase2": "The wind rises round Aeolus.",
 	"message.jaymoskingdoms.aeolus.phase3": "Aeolus breathes all four winds at once.",
 	"message.jaymoskingdoms.aeolus.gale": "The sky draws breath. Get low!",
-	"message.jaymoskingdoms.aeolus.fallen": "Aeolus falls. The winds are calm, and four eggs lie where he fell."
+	"message.jaymoskingdoms.aeolus.fallen": "Aeolus falls. The winds are calm, and four eggs lie where he fell.",
+	"disguise.jaymoskingdoms.eurus.struck.1": "Ha! Was that meant to sting? I've been hit harder by a breeze.",
+	"disguise.jaymoskingdoms.eurus.struck.2": "Again? You flail like a hatchling in a gale. Do that once more and see what happens.",
+	"disguise.jaymoskingdoms.eurus.snap": "ENOUGH!",
+	"disguise.jaymoskingdoms.eurus.after": "There. Now you know what a storm feels like. Crawl off.",
+	"disguise.jaymoskingdoms.aeolus.struck.1": "Mm. A child tugging at my sleeve. How sweet. Run along.",
+	"disguise.jaymoskingdoms.aeolus.struck.2": "I have watched mountains wear down to sand, little one. I can wait out your tantrum. But not for ever.",
+	"disguise.jaymoskingdoms.aeolus.snap": "So be it. Let the old man teach you manners.",
+	"disguise.jaymoskingdoms.aeolus.after": "Lie there and think on it. The young never listen until they're on the ground."
 }
