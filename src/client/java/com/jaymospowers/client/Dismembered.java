@@ -1,8 +1,12 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
-import com.jaymospowers.core.Fractures;
 import com.jaymospowers.core.SeveredPart;
+import com.jaymospowers.core.wounds.BodyPart;
+import com.jaymospowers.core.wounds.Breaks;
+import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.Wounds;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +15,15 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -39,6 +46,14 @@ public final class Dismembered {
 	public static final RenderStateDataKey<Integer> BROKEN = RenderStateDataKey.create(() -> "jaymospowers:broken_bones");
 	/** A broken limb's droop: an arm a little forward and out from the side, a leg trailing slightly behind and in. */
 	private static final float LIMP_ARM_PITCH = -0.1F, LIMP_ARM_ROLL = 0.12F, LIMP_LEG_PITCH = 0.18F, LIMP_LEG_ROLL = -0.05F;
+	/** (0.14.5) On a living body's render state: how badly each leg limps, {left, right} (0 sound, 1 broken), and 1 when walking on its feet (else 0). */
+	public static final RenderStateDataKey<float[]> GAIT = RenderStateDataKey.create(() -> "jaymospowers:gait");
+	/** (0.14.5) How badly a leg limps: broken, broken in a splint (half), and only the foot sprained. */
+	private static final float GAIT_BROKEN = 1.0F, GAIT_SPLINTED = 0.5F, GAIT_SPRAINED = 0.5F;
+	/** (0.14.5) The limp: a sprained leg's swing cut by this much, the sound leg's by this much, and the body's dip on the bad step (model pixels). */
+	private static final float GAIT_SWING_CUT = 0.6F, GAIT_OTHER_CUT = 0.25F, GAIT_DIP = 1.5F;
+	/** The walk's stride, as vanilla's humanoid model swings its legs. */
+	private static final float GAIT_STRIDE = 0.6662F;
 	public static final RenderStateDataKey<Integer> ONLY = RenderStateDataKey.create(() -> "jaymospowers:only_part");
 
 	private static final Map<ModelPart, Function<String, ModelPart>> LOOKUPS = new WeakHashMap<>();
@@ -74,8 +89,27 @@ public final class Dismembered {
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int mask = Dismember.missing(entity);
 		state.setData(MISSING, mask == 0 ? null : mask);
-		int broken = Fractures.broken(entity);
+		// (0.14.2) Wounds' broken arms and legs (synced to everyone)
+		int broken = Wounds.brokenLimbs(entity);
 		state.setData(BROKEN, broken == 0 ? null : broken);
+		// (0.14.5) the limp: broken legs and sprained feet (both synced to everyone), half as bad in a splint
+		float left = gait(entity, BodyPart.LEFT_LEG, BodyPart.LEFT_FOOT), right = gait(entity, BodyPart.RIGHT_LEG, BodyPart.RIGHT_FOOT);
+		boolean walking = entity.onGround() && !entity.isPassenger() && !entity.isInWater() && !Downed.isDowned(entity)
+			&& !(entity instanceof Player player && Crawl.crawling(player));
+		state.setData(GAIT, left <= 0.0F && right <= 0.0F ? null : new float[] {left, right, walking ? 1.0F : 0.0F});
+	}
+
+	/** (0.14.5) How badly {@code leg} limps: 0 when sound or cut off. */
+	private static float gait(LivingEntity entity, BodyPart leg, BodyPart foot) {
+		if ((Dismember.missing(entity) & Breaks.limb(leg)) != 0) {
+			return 0.0F;
+		}
+		int broken = Wounds.broken(entity);
+		int bit = 1 << leg.ordinal();
+		if ((broken & bit) != 0) {
+			return (Breaks.splinted(entity) & bit) != 0 ? GAIT_SPLINTED : GAIT_BROKEN;
+		}
+		return (broken & 1 << foot.ordinal()) != 0 ? GAIT_SPRAINED : 0.0F;
 	}
 
 	/** Right after a model animates: the lost parts hidden (or all but the severed one). */
@@ -108,8 +142,12 @@ public final class Dismembered {
 			return;
 		}
 		Integer broken = renderState.getData(BROKEN);
+		float[] gait = renderState.getData(GAIT);
 		if (broken != null) {
-			limp(root, broken);
+			limp(root, broken, gait);
+		}
+		if (gait != null && model instanceof HumanoidModel<?> && renderState instanceof LivingEntityRenderState living) {
+			walk(root, living, gait, broken == null ? 0 : broken);
 		}
 		Integer missing = renderState.getData(MISSING);
 		if (missing == null) {
@@ -124,8 +162,11 @@ public final class Dismembered {
 		}
 	}
 
-	/** Broken limbs ({@link Fractures}) hang limp: an arm dangles at the side, a leg drags straight, neither swings. */
-	private static void limp(ModelPart root, int broken) {
+	/**
+	 * Broken limbs (Wounds' broken parts, (0.14.2); before, Fractures') hang limp: an arm dangles at the side, a leg drags
+	 * straight, neither swings. (0.14.5) A splinted leg ({@code gait} under 1) only goes halfway there.
+	 */
+	private static void limp(ModelPart root, int broken, float @Nullable [] gait) {
 		for (int part : new int[] {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG}) {
 			if ((broken & part) == 0) {
 				continue;
@@ -136,10 +177,52 @@ public final class Dismembered {
 			}
 			boolean right = part == Dismember.RIGHT_ARM || part == Dismember.RIGHT_LEG;
 			boolean arm = part == Dismember.RIGHT_ARM || part == Dismember.LEFT_ARM;
-			limb.xRot = arm ? LIMP_ARM_PITCH : LIMP_LEG_PITCH;
-			limb.yRot = 0.0F;
-			limb.zRot = (right ? 1.0F : -1.0F) * (arm ? LIMP_ARM_ROLL : LIMP_LEG_ROLL);
+			float roll = (right ? 1.0F : -1.0F) * (arm ? LIMP_ARM_ROLL : LIMP_LEG_ROLL);
+			if (arm) {
+				limb.xRot = LIMP_ARM_PITCH;
+				limb.yRot = 0.0F;
+				limb.zRot = roll;
+				continue;
+			}
+			float how = gait == null ? 1.0F : Mth.clamp(gait[right ? 1 : 0], 0.0F, 1.0F);
+			limb.xRot = Mth.lerp(how, limb.xRot, LIMP_LEG_PITCH);
+			limb.yRot = Mth.lerp(how, limb.yRot, 0.0F);
+			limb.zRot = Mth.lerp(how, limb.zRot, roll);
 		}
+	}
+
+	/**
+	 * (0.14.5) The limp on the walk, after {@link #limp}: a sprained leg's swing is shortened, the sound leg takes shorter
+	 * steps too, and the whole body dips each time its weight comes down on the bad leg. Only on foot (not swimming,
+	 * crawling, riding or downed), and only in humanoid models, whose pose is reset every frame, so the dip never builds up.
+	 */
+	private static void walk(ModelPart root, LivingEntityRenderState state, float[] gait, int broken) {
+		float stride = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+		if (gait[2] <= 0.0F || stride <= 0.01F) {
+			return;
+		}
+		float dip = 0.0F;
+		for (int side = 0; side < 2; side++) {
+			boolean right = side == 1;
+			int part = right ? Dismember.RIGHT_LEG : Dismember.LEFT_LEG;
+			float how = Mth.clamp(gait[side], 0.0F, 1.0F);
+			float other = Mth.clamp(gait[1 - side], 0.0F, 1.0F);
+			ModelPart leg = find(root, names(part)[0]);
+			if (leg != null) {
+				if (how > 0.0F && (broken & part) == 0) {
+					leg.xRot *= 1.0F - GAIT_SWING_CUT * how;
+				} else if (how <= 0.0F && other > 0.0F) {
+					leg.xRot *= 1.0F - GAIT_OTHER_CUT * other;
+				}
+			}
+			if (how > 0.0F) {
+				// the bad leg's stance: vanilla swings the right leg as cos(step) and the left half a stride behind, so it
+				// carries the body while its swing angle is rising (sin falling below zero)
+				float step = state.walkAnimationPos * GAIT_STRIDE + (right ? 0.0F : Mth.PI);
+				dip += GAIT_DIP * how * stride * Math.max(0.0F, -Mth.sin(step));
+			}
+		}
+		root.y += dip;
 	}
 
 	/** Hides {@code part} until the model's drawn ({@link #restore}). */

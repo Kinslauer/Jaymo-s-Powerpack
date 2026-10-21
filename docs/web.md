@@ -66,12 +66,9 @@ a host that isnt a web user."
   it's hauled up at `CLIMB_SPEED` 0.3 b/t, pressed `CLIMB_HUG` into the face and shoved `CLIMB_OVER` 0.22 over the lip,
   with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
   lifts it already); never in water or riding.
-- **Roll charges (`WebRolls`, client `WebRollsClient`):** with Combat Roll in the pack, a web slinger holds
-  `ROLL_CHARGES` 5 roll charges (Combat Roll's `combat_roll:count`, a transient modifier while Web is your power,
-  checked every second; Combat Roll refills them one at a time on its own recharge and shows them on its own HUD). Each
-  Spider-Sense counter (`WebCounter`) spends one; with none left a dodge still sidesteps but opens no counter window.
-  The count lives on the client and is reported to the server (`web_rolls`); the server spends with `web_roll_charge`.
-  Without Combat Roll, counters cost nothing (as before).
+- **Feathers (`WebRolls`; 0.15.5, in place of Combat Roll's charges, `docs/dodge.md`):** a web slinger gets `BONUS`
+  20 golden feathers over the feathers row (a full golden row, three more dodges). Each Spider-Sense counter (`WebCounter`) spends a
+  dodge's worth (`Dodge.COST`); without them a dodge still sidesteps but opens no counter window.
 - **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
   host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
   peaceful one now wastes too, at `CALM_DECAY_SHARE` half that, and is spat out badly hurt but alive. Web slingers bonded
@@ -276,8 +273,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Taut lines:** a line with no more than `WebRopeSim.TAUT_SLACK` 0.3 blocks of slack is drawn dead straight, easing
   into a free hang by `LOOSE_SLACK` 2.0; a line stuck to something moving (a whip's catch) keeps its growth, so whips
   and the midair lasso draw to both hands through the spin.
-- **Web Whip (Sneak + R or G, no web out):** aimed within `WebWhip.RANGE` 16 (× symbiote reach) at a creature, a corpse
-  (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
+- **Web Whip (Sneak with both swing webs on one thing, since 0.13.36; was Sneak + R or G):** see "Web Whip on Sneak"
+  below for how it starts now. A creature, a corpse (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
   catches it and you whip it about, one of three ways at random: **overhead** (up over your head, down in front),
   **seesaw** (down in front, then back over into the ground behind) or **lasso** (round you once, then overhead and
   down). Each slam hits for `DAMAGE` 9 (5 to anything else where it lands) and breaks a crater under it, bigger for
@@ -1466,3 +1463,24 @@ come from `tools/gen_web_strains.py`, run with `python3 -I`); no names from anyo
   `WebSymbioteState`, `WebSymbioteBond`, `WebSymbioteBlob`, `WebInhabit`, `WebBehemoth`, `WebMorph`, `WebBall`,
   `WebTendrilCombos`, `WebPower`, `WebSymbioteGooBlock`, `WebCraterFeature`, `WebDebugCommand`; client `WebStrainLook`
   (new) and the symbiote layers, `WebLineRenderer`, `WebTendrilBundle`, `WebBlobRenderer`, `WebSymbioteScreen`.
+
+## Web Whip on Sneak, and moves seen in first person (0.13.36)
+Andy: "Web swing grab attacks should be activated by holding shift while two lines are attached... whenever you have two
+lines attached near each other on terrain or on a mob, pressing shift starts the attack, or starts breaking the terrain
+for the debris attack. Letting go of shift early leaves the cracks but if stopped before they break then the attack
+ends." And: "all the counters and moves should be better animated in first person. Right now there are doubled hands
+and other drawings in first person."
+- **Starting the whip:** both swing webs out, their ends within `WebWhip.NEAR` 3 blocks of each other, on the same
+  creature or on terrain: press Sneak (`WebWhip.Hold`). On a creature or corpse the whip starts at once. On terrain you
+  pry the chunk between the two ends loose for as long as you hold Sneak (`PRY_TICKS` 30, cracks spreading); it breaks
+  out and the whip starts. Let go of Sneak before it breaks and the attack ends: the cracks stay where they got to
+  (`WebCracks`), the webs let go. Your swing webs hand over to the whip (`WebPower.handOverSwings`, client
+  `WebSwing.handedOver`), so you don't swing or slingshot off them. Everything after it starts is unchanged.
+- **What Sneak still does with two webs:** both webs on something small (an item, a mob up to `REEL_MAX_SIZE`) still
+  reels it in; webs further apart than 3 blocks still brace the slingshot. Sneak + R or G no longer starts a whip.
+- **First person (`WebFirstPerson`):** with First-person Model drawing your body, while a move poses your arms (swing
+  webs out, a counter, a body pose or hang, the weapon arm forming or striking, a slam, feeding, a roar, a tendril
+  strike or combo, carrying, a ledge climb), the game's usual first-person hands aren't drawn
+  (`WebFirstPersonHandsMixin`), nor the suit sleeve or web shooter on them, nor the extra carry and ledge arms; the
+  body's posed arms are the only pair. First-person Model's own hiding of a body arm that holds an item is undone for
+  the move (`FirstPersonCompat.showArms`), so the arm still shows. Without First-person Model nothing changes.

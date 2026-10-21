@@ -182,6 +182,10 @@ public final class Planner {
 
 	/** The catalogue entry {@code id} for this faction's type (or any type, if its own has none). */
 	static Blueprint.@Nullable Entry entry(Faction f, String id) {
+		if (Designs.isDesign(id)) {
+			// (0.7.116) a player's own design
+			return Designs.entry(id);
+		}
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			if (e.id().equals(id)) {
 				return e;
@@ -347,10 +351,12 @@ public final class Planner {
 
 	// ---- sites ----------------------------------------------------------------------------------------------------
 
-	/** Fits {@code bp} on a lord's plot, centred, its door to the seat if it fits that way. Null if it doesn't fit. */
+	/** Fits {@code bp} on a lord's plot, centred, its door to the seat if it fits that way (a design as built). Null if it doesn't fit. */
 	static @Nullable Placing onPlot(Faction f, Works.Plot plot, Blueprint bp) {
 		BlockPos mid = new BlockPos((plot.min().getX() + plot.max().getX()) / 2, plot.min().getY(), (plot.min().getZ() + plot.max().getZ()) / 2);
-		Rotation best = facing(Direction.getApproximateNearest(f.seat().getX() - mid.getX(), 0, f.seat().getZ() - mid.getZ()));
+		// (0.7.116) a player's design stands as it was built, if it fits that way
+		Rotation best = Designs.isDesign(bp.id()) ? Rotation.NONE
+			: facing(Direction.getApproximateNearest(f.seat().getX() - mid.getX(), 0, f.seat().getZ() - mid.getZ()));
 		List<Rotation> order = new ArrayList<>(List.of(best, best.getRotated(Rotation.CLOCKWISE_90), best.getRotated(Rotation.CLOCKWISE_180),
 			best.getRotated(Rotation.COUNTERCLOCKWISE_90)));
 		for (Rotation r : order) {

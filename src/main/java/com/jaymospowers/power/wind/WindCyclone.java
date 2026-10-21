@@ -5,6 +5,7 @@ import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
@@ -55,6 +56,11 @@ import net.minecraft.world.phys.Vec3;
  * (fire, water, snow, sand, a thunderstorm) and carries it: see {@link WindCycloneElement}.
  */
 public final class WindCyclone {
+	/** The cyclone's roar: a whirl at uneven beats with gusts over it, deeper and louder as it grows. */
+	static final Soundscape.Layer ROAR = Soundscape.Layer.of(1.1F, 1.3F, 0.45F, 0.7F, SoundEvents.BREEZE_WHIRL);
+	static final Soundscape.Layer ROAR_GUST = Soundscape.Layer.of(0.6F, 0.9F, 0.5F, 0.8F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BREEZE_IDLE_GROUND)
+		.chance(0.5F);
+
 	/** How long X must be held before it's a Cyclone rather than a kick (ticks, ~0.4 s). The client decides it. */
 	public static final int HOLD_TICKS = 8;
 	/** The fewest unlocked abilities that give the Cyclone (a fresh awakening has only its starter). */
@@ -341,8 +347,8 @@ public final class WindCyclone {
 			WindDouse.douse(level, player.position().add(0.0, Math.min(height * 0.5, radius), 0.0), radius, player,
 				!shocking && element != WindCycloneElement.FIRE);
 		}
-		if (age % ROAR_INTERVAL == 0) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 1.2F, 0.5F + player.getRandom().nextFloat() * 0.2F);
+		if (Soundscape.due(player, "wind.cyclone", ROAR_INTERVAL * 2 / 3, ROAR_INTERVAL * 4 / 3)) {
+			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ROAR, ROAR_GUST);
 		}
 
 		boolean hit = now >= active.nextHit;

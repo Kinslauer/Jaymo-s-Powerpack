@@ -2,6 +2,7 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -55,6 +56,10 @@ import net.minecraft.world.phys.Vec3;
  * <p>Nothing here is explained in game: hints are one-line whispers, each heard once.
  */
 public final class WebSymbiote {
+	/** The symbiote's wet sounds: a squelch from a few kinds, never twice alike. */
+	static final Soundscape.Layer SQUELCH = Soundscape.Layer.of(0.45F, 0.65F, 0.9F, 1.1F, SoundEvents.SLIME_SQUISH, SoundEvents.SLIME_SQUISH_SMALL,
+		SoundEvents.HONEY_BLOCK_SLIDE);
+
 	// ===== abilities (radial menu order, clockwise from the top) ====================================================
 	public static final int TENDRIL = 0;
 	public static final int ARMOR = 1;
@@ -87,6 +92,8 @@ public final class WebSymbiote {
 	public static final double ARMOR_KNOCKBACK_RESIST = 0.6;
 	/** Living Armor makes it hungry this many times faster. */
 	public static final int ARMOR_DRAIN_MULT = 3;
+	/** (0.15.31) In winter (Kitchen's seasons) its hunger drains this many times faster. */
+	public static final float WINTER_HUNGER = 1.5F;
 	/** Consume: reach, the biggest thing it'll eat (max health), what it heals you and feeds it. */
 	public static final double CONSUME_RANGE = 3.0;
 	public static final float CONSUME_MAX_HEALTH = 10.0F;
@@ -304,7 +311,8 @@ public final class WebSymbiote {
 	 */
 	public static final int FEED_NONE = 0, FEED_KILL = 1, FEED_GRAB = 2, FEED_CARRY = 3, FEED_FEED = 4;
 	public static final int CORPSE_WAIT_TICKS = 60, GRAB_HAUL_TICKS = 8, GRAB_TIMEOUT = 80, CARRY_TIMEOUT = 20;
-	public static final double CORPSE_FIND_RADIUS = 3.0;
+	/** (0.15.8) 5, up from 3: Kitchen corpses are ragdolls now and can tumble a little way from where they fell. */
+	public static final double CORPSE_FIND_RADIUS = 5.0;
 	/** Consume: a corpse a tendril can take from this far; something weak enough is finished off by a lash landing {@code CONSUME_FINISH_LAG} later. */
 	public static final double CONSUME_CORPSE_RANGE = 6.0;
 	public static final int CONSUME_FINISH_LAG = 8;
@@ -369,6 +377,8 @@ public final class WebSymbiote {
 	public static final double MIGRATE_REACH = 2.5;
 	/** The tour "sight" that marks a climate takeover. */
 	private static final String MIGRATE_SIGHT = "climate";
+	/** (0.15.33) The sight a storm-off walks to (see {@link #STORM_DISTANCE}). */
+	private static final String STORM_SIGHT = "storm";
 	/**
 	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
 	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
@@ -470,6 +480,28 @@ public final class WebSymbiote {
 	/** Striking a flint (or throwing a fire charge) near it: a scream, stress, and it does something you didn't ask for. */
 	public static final int FLINT_STRESS = 10;
 	public static final float FLINT_LASH_DAMAGE = 4.0F;
+	/**
+	 * (0.15.33) Tired of saying it: the same thing asked of it again within {@code ANNOY_WINDOW} ticks (a flint struck,
+	 * a locked ability, the suit while it sulks...) gets an annoyed line instead and {@code ANNOY_STRESS} more stress;
+	 * a third time, it's fed up and storms off with you ({@link #STORM_DISTANCE}). Fed up with flint, it hurls the thing
+	 * {@code FLINT_HURL} blocks a tick (a plain drop is 0.3).
+	 */
+	public static final int ANNOY_WINDOW = 600, ANNOY_STRESS = 5, ANNOY_LINES = 3;
+	public static final double FLINT_HURL = 1.6;
+	/** (0.15.33) Storming off: how far it walks you away (blocks), and how long it may take at most (ticks). */
+	public static final double STORM_DISTANCE = 20.0;
+	public static final int STORM_TICKS = 400;
+	/**
+	 * (0.15.33) Walking you somewhere (storming off, a sight, out of the heat or cold) and getting no closer than
+	 * {@code STUCK_PROGRESS} blocks in {@code STUCK_LET_GO_TICKS}: it gives up and lets go of you there and then.
+	 */
+	public static final int STUCK_LET_GO_TICKS = 60;
+	public static final double STUCK_PROGRESS = 1.0;
+	/**
+	 * (0.15.33) A player's body in your arms: it stops for this long (ticks) before it eats on its own, so you can throw
+	 * it away (it doesn't stop for Consume: that's you asking).
+	 */
+	public static final int HESITATE_TICKS = 30, HESITATE_LINES = 3;
 
 	/** Bonded, your webs reach this much further, pull this much harder, and Zip cools down this much faster. */
 	public static final double REACH_SCALE = 1.5;
@@ -626,6 +658,8 @@ public final class WebSymbiote {
 	public static final double INSTINCT_THREAT_SHOVE = 0.95;
 	public static final float INSTINCT_GRAB_CHANCE = 0.5F;
 	public static final double INSTINCT_FALL_CATCH_HEIGHT = 4.0;
+	/** (0.15.33) Fallen at least this far (blocks) before its tendrils reach for the ground (it takes any landing, though). */
+	public static final double INSTINCT_FALL_MIN = 4.0;
 	public static final float INSTINCT_CATAPULT_CHANCE = 0.05F;
 	public static final double INSTINCT_CATAPULT = 1.4;
 
@@ -669,8 +703,8 @@ public final class WebSymbiote {
 
 	/** Whether it'll eat this (a creature, or a corpse by what it was). */
 	static boolean edible(Entity food) {
-		// a player's corpse holds their belongings: it's never eaten
-		return !KitchenCompat.isPlayerCorpse(food) && !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
+		// (0.15.33) a player's corpse too (Andy: it should eat players): what it held spills out first (KitchenCompat.spill)
+		return KitchenCompat.isPlayerCorpse(food) || !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
 	}
 
 	/**
@@ -724,7 +758,7 @@ public final class WebSymbiote {
 		}
 		if (off && (lockedOut(player) || sulking(player))) {
 			// (0.13.23) still angry with you: it won't let go of your face
-			whisper(player, "sulking");
+			nag(player, "sulking");
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
 			return;
 		}
@@ -882,6 +916,14 @@ public final class WebSymbiote {
 		/** When it can strike back again; whether it has already turned on you this time your hunger ran out. */
 		long retaliateReadyAt;
 		boolean sulkedThisTime;
+		/** (0.15.33) Lines it has said at your asking: when it last said each, and how many times running (see {@link #ANNOY_WINDOW}). */
+		final java.util.Map<String, long[]> annoyed = new java.util.HashMap<>();
+		/** (0.15.33) Walking you somewhere: where it last made headway, and when (see {@link #STUCK_LET_GO_TICKS}). */
+		@org.jspecify.annotations.Nullable Vec3 headwayAt;
+		long headwayTime;
+		/** (0.15.33) Before eating a player's body: when it'll stop waiting (0: not waiting); whether you asked for this meal (Consume). */
+		long hesitateUntil;
+		boolean feedAsked;
 		/** It swelled into the armour only to eat: once the meal's done it goes back (the suit as it was). */
 		boolean feedingArmor;
 		boolean suitBeforeFeeding;
@@ -1019,9 +1061,10 @@ public final class WebSymbiote {
 				live.fleeHits++;
 			}
 		});
-		// either black suit (the suit, or Living Armor and the big body) takes no fall damage at all
+		// either black suit (the suit, or Living Armor and the big body) takes no fall damage at all; (0.15.33) nor, bare,
+		// does a bond it isn't sulking over: it catches the landing (sulking, it only won't let one kill: WebSymbioteCushion)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!(entity instanceof ServerPlayer player && source.is(net.minecraft.tags.DamageTypeTags.IS_FALL) && (suitShown(player) || armored(player))));
+			!(entity instanceof ServerPlayer player && source.is(net.minecraft.tags.DamageTypeTags.IS_FALL) && takesFalls(player) && landing(player)));
 	}
 
 	// ---- shared queries (both sides: the bond is synced) -------------------------------------------------------------
@@ -1029,6 +1072,11 @@ public final class WebSymbiote {
 	public static WebSymbioteState state(Player player) {
 		WebSymbioteState state = player.getAttached(STATE);
 		return state == null ? WebSymbioteState.NONE : state;
+	}
+
+	/** (0.15.33) It takes your landings for you: in either black suit always; bare, unless it's sulking. */
+	public static boolean takesFalls(Player player) {
+		return suitShown(player) || armored(player) || isBonded(player) && !player.isCreative() && !sulking(player);
 	}
 
 	/** Bonded, and still a web slinger (the symbiote only answers one). */
@@ -1171,6 +1219,38 @@ public final class WebSymbiote {
 	}
 
 	/** It speaks: the line, and your screen darkens under it with a growl only you hear (see {@link WebNet.Dread}). */
+	/**
+	 * (0.15.33) Something it says because you asked again: the line the first time; asked again within
+	 * {@link #ANNOY_WINDOW}, an annoyed one (more stress, your screen shudders); a third time, it's fed up and storms off
+	 * with you. Returns how many times running before this one (0: the first).
+	 */
+	static int nag(ServerPlayer player, String key) {
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		long[] seen = live.annoyed.get(key);
+		int before = seen != null && now - seen[0] <= ANNOY_WINDOW ? (int)seen[1] : 0;
+		live.annoyed.put(key, new long[] {now, before + 1});
+		if (before == 0) {
+			whisper(player, key);
+			return 0;
+		}
+		WebSymbioteState state = state(player);
+		set(player, state.withStress(Math.min(STRESS_MAX, state.stress() + ANNOY_STRESS)));
+		com.jaymospowers.core.Shakes.send(player, before == 1 ? 0.4F : 0.8F, null);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F,
+			before == 1 ? 1.2F : 0.8F);
+		if (before == 1) {
+			whisper(player, "annoyed." + (1 + player.getRandom().nextInt(ANNOY_LINES)));
+			return before;
+		}
+		whisper(player, "fed_up." + (1 + player.getRandom().nextInt(ANNOY_LINES)));
+		if (stormOff(player, live, now)) {
+			// (it starts counting again once it has walked it off)
+			live.annoyed.remove(key);
+		}
+		return before;
+	}
+
 	public static void whisper(ServerPlayer player, String key) {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
@@ -1319,6 +1399,10 @@ public final class WebSymbiote {
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
+		// (0.15.31) the cold makes it hungrier: in winter, where there are seasons
+		if (com.jaymospowers.core.Seasons.is(player, com.jaymospowers.core.Seasons.Season.WINTER)) {
+			drainTicks = Math.max(1, Math.round(drainTicks / WINTER_HUNGER));
+		}
 		// (dormant, it doesn't hunger)
 		if (!player.isCreative() && !dormant && player.tickCount % drainTicks == 0 && next.satiety() > 0 && now >= live.satedUntil) {
 			next = next.withSatiety(next.satiety() - 1);
@@ -1495,6 +1579,9 @@ public final class WebSymbiote {
 		}
 		if (player.onGround() || player.isInWater()) {
 			live.caughtFall = false;
+		} else {
+			// (0.15.33) every tick, not with the rest of its instinct: a fall covers its whole lookahead between those
+			reachForGround(player, live);
 		}
 		Wall wall = player.getAttached(WALL);
 		if (wall != null) {
@@ -1728,7 +1815,7 @@ public final class WebSymbiote {
 			}
 			if (live.bondTicks % 4 == 0) {
 				level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), y, player.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
-				level.playSound(null, player.getX(), y, player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F + t * 0.4F);
+				Soundscape.play(level, new Vec3(player.getX(), y, player.getZ()), SoundSource.PLAYERS, SQUELCH.pitched(0.5F + t * 0.4F));
 			}
 			if (--live.bondTicks == 0) {
 				level.sendParticles(sheen(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.35, 0.8, 0.35, 0.0);
@@ -1742,8 +1829,8 @@ public final class WebSymbiote {
 			Vec3 at = live.crawlAwayPos;
 			float left = live.crawlAwayTicks / (float)CRAWL_AWAY_TICKS;
 			level.sendParticles(dust(0.6F + 1.2F * left), at.x, at.y + 0.1, at.z, 3, 0.12, 0.03, 0.12, 0.0);
-			if (live.crawlAwayTicks % 8 == 0) {
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.5F * left + 0.1F, 0.6F);
+			if (Soundscape.due(player, "symbiote.crawl_away", 5, 11)) {
+				Soundscape.play(level, at, SoundSource.PLAYERS, SQUELCH.louder(0.8F * left + 0.15F).pitched(0.6F));
 			}
 			if (--live.crawlAwayTicks == 0) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.2, at.z, 6, 0.2, 0.1, 0.2, 0.01);
@@ -2305,6 +2392,7 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
 		live.takeoverTarget = -1;
+		live.headwayAt = null;
 		WebTakeoverPath.stop(player, live.route);
 		live.route = null;
 		player.removeAttached(STARING);
@@ -2594,6 +2682,89 @@ public final class WebSymbiote {
 		}
 	}
 
+	/**
+	 * (0.15.33) Fed up ({@link #nag}): it takes the wheel and storms off with you, {@link #STORM_DISTANCE} blocks away from
+	 * whatever you were doing (the way you're facing away from), then lets go. False if it can't just now.
+	 */
+	private static boolean stormOff(ServerPlayer player, Live live, long now) {
+		if (live.takeoverTicks > 0 || live.feedStage != FEED_NONE || live.roarAt > 0L || player.getAttached(EATING) != null
+			|| !player.isAlive() || player.isPassenger() || player.isCreative() || player.isSpectator() || WebSymbioteBond.dormant(player)) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 away = player.getLookAngle().horizontal().reverse();
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+		live.migrateTo = player.position().add(away.scale(STORM_DISTANCE));
+		live.tourFrom = player.position();
+		live.migrateLegs = 0;
+		net.minecraft.world.entity.Interaction marker = migrateLeg(player, live, now);
+		if (marker == null) {
+			return false;
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.touring = true;
+		live.tourSight = STORM_SIGHT;
+		live.stareUntil = 0L;
+		live.struggle = 0.0F;
+		live.resisted = false;
+		live.surges = 0;
+		live.surged = false;
+		live.giftPending = false;
+		live.takeoverTicks = STORM_TICKS;
+		live.takeoverTarget = marker.getId();
+		live.headwayAt = null;
+		syncStruggle(player, live);
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
+		dread(player, 80, true, true);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 1.0F, 1.2F);
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
+		return true;
+	}
+
+	/** Storming off ({@link #stormOff}): far enough, and it lets go. */
+	private static void tickStorm(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
+			endTakeover(player, live);
+			return;
+		}
+		drive(player, live, target, false, now);
+		Vec3 to = target.position().subtract(player.position());
+		if (to.horizontalDistance() <= MIGRATE_REACH && Math.abs(to.y) <= 2.5) {
+			endTakeover(player, live);
+			whisper(player, "storm.done." + (1 + player.getRandom().nextInt(ANNOY_LINES)));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 1.2F);
+		}
+	}
+
+	/**
+	 * (0.15.33) Walking you somewhere and getting nowhere ({@link #STUCK_LET_GO_TICKS}): true once it has let go of you
+	 * (no waiting out the struggle).
+	 */
+	private static boolean letGoIfStuck(ServerPlayer player, Live live, long now) {
+		if (live.headwayAt == null || player.position().distanceTo(live.headwayAt) >= STUCK_PROGRESS) {
+			live.headwayAt = player.position();
+			live.headwayTime = now;
+			return false;
+		}
+		if (now - live.headwayTime < STUCK_LET_GO_TICKS) {
+			return false;
+		}
+		boolean migrating = MIGRATE_SIGHT.equals(live.tourSight);
+		String kind = live.climateHot ? "hot" : "cold";
+		endTakeover(player, live);
+		live.headwayAt = null;
+		if (migrating) {
+			live.climateRetryAt = now + MIGRATE_RETRY;
+			whisper(player, "climate." + kind + ".stuck");
+		} else {
+			whisper(player, "stuck_let_go");
+		}
+		return true;
+	}
+
 	/** It's had enough of the heat or the cold: it finds somewhere temperate and takes the wheel to walk you there. */
 	private static void startMigrate(ServerPlayer player, Live live, long now) {
 		ServerLevel level = player.level();
@@ -2855,6 +3026,14 @@ public final class WebSymbiote {
 
 	/** On its way to the sight; there, it turns your head to it, says so, and lets go. */
 	private static void tickTour(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		// (0.15.33) getting nowhere: it lets go now
+		if (letGoIfStuck(player, live, now)) {
+			return;
+		}
+		if (STORM_SIGHT.equals(live.tourSight)) {
+			tickStorm(player, live, now, target);
+			return;
+		}
 		if (MIGRATE_SIGHT.equals(live.tourSight)) {
 			tickMigrate(player, live, now, target);
 			return;
@@ -3180,7 +3359,7 @@ public final class WebSymbiote {
 		}
 		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && sulking(player)) {
 			// it won't come: it's still angry with you
-			whisper(player, "sulking");
+			nag(player, "sulking");
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
 			return;
 		}
@@ -3215,7 +3394,7 @@ public final class WebSymbiote {
 			boolean on = !state.has(WebSymbioteState.SUIT);
 			if (on && !suitAllowed(player)) {
 				// it showed you once; it won't cover you again until it trusts you more
-				whisper(player, "suit_locked");
+				nag(player, "suit_locked");
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
 				return;
 			}
@@ -3254,7 +3433,7 @@ public final class WebSymbiote {
 		long now = level.getGameTime();
 		if (!unlocked(player, ability) && !(ability == ARMOR && live.giftUntil > now)) {
 			// it hasn't given you that (yet) (its gift you can always put away)
-			whisper(player, "locked");
+			nag(player, "locked");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
 			return;
 		}
@@ -3269,14 +3448,14 @@ public final class WebSymbiote {
 		if (state.satiety() < COST[ability] && !player.isCreative()) {
 			// too weak
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
-			whisper(player, "weak");
+			nag(player, "weak");
 			return;
 		}
 		// a weak bond barely listens (it always lets you put a toggle away)
 		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
 		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
 			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND)) {
-			whisper(player, "ignores");
+			nag(player, "ignores");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.5F, 1.6F);
 			player.setAttached(COOLDOWNS, cooldowns.with(ability, now + 20, ABILITIES));
 			return;
@@ -3449,7 +3628,6 @@ public final class WebSymbiote {
 		BlockPos fire = nearFire(player);
 		boolean burning = player.isOnFire() || fire != null;
 		Vec3 blast = explosiveNear(player);
-		boolean falling = !player.onGround() && player.getY() - player.yo < -0.55 && player.fallDistance > 5.0F;
 		LivingEntity threat = null;
 		double best = INSTINCT_THREAT_RANGE * INSTINCT_THREAT_RANGE;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(INSTINCT_THREAT_RANGE),
@@ -3460,7 +3638,7 @@ public final class WebSymbiote {
 				threat = mob;
 			}
 		}
-		boolean danger = burning || blast != null || falling || threat != null || lowHealth(player, INSTINCT_LOW_HEALTH);
+		boolean danger = burning || blast != null || threat != null || lowHealth(player, INSTINCT_LOW_HEALTH);
 		if (!danger) {
 			return state;
 		}
@@ -3470,16 +3648,6 @@ public final class WebSymbiote {
 		// it never swells into the armour unasked: out of it, its tendrils burst from your back to act
 		state = hintOnce(player, state, HINT_INSTINCT, "instinct");
 		narrate(player, "instinct");
-		// a fall about to end: it reaches for the ground and takes the blow
-		if (falling && !live.caughtFall && groundWithin(player, INSTINCT_FALL_CATCH_HEIGHT)) {
-			live.caughtFall = true;
-			tendrilsOut(player);
-			player.resetFallDistance();
-			ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(0.0, -0.12, 0.0)));
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_FALL, SoundSource.PLAYERS, 1.0F, 0.5F);
-			level.sendParticles(dust(1.6F), player.getX(), player.getY(), player.getZ(), 16, 0.6, 0.1, 0.6, 0.0);
-			return state;
-		}
 		if (now < live.instinctReadyAt) {
 			return state;
 		}
@@ -3775,7 +3943,12 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GHAST_SCREAM, SoundSource.PLAYERS, 1.2F, 1.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.8F, 1.8F);
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.06);
-		whisper(player, "flint");
+		// (0.15.33) the same again: it hurls the thing away, and (a third time) storms off with you (nag)
+		int again = nag(player, "flint");
+		if (again > 0) {
+			hurl(player, hand);
+			return;
+		}
 		var random = player.getRandom();
 		switch (random.nextInt(3)) {
 			case 0 -> {
@@ -3809,6 +3982,29 @@ public final class WebSymbiote {
 				ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(Math.cos(a) * 1.3, 0.45, Math.sin(a) * 1.3)));
 			}
 		}
+	}
+
+	/** (0.15.33) Fed up with your fire: it rips the thing out of your hand and flings it far off ({@link #FLINT_HURL}). */
+	private static void hurl(ServerPlayer player, InteractionHand hand) {
+		ServerLevel level = player.level();
+		ItemStack stack = player.getItemInHand(hand);
+		if (stack.isEmpty()) {
+			return;
+		}
+		player.setItemInHand(hand, ItemStack.EMPTY);
+		Vec3 dir = player.getLookAngle().horizontal();
+		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : dir.normalize();
+		// off to one side or the other, and up
+		dir = dir.yRot((player.getRandom().nextBoolean() ? 1.0F : -1.0F) * (0.3F + player.getRandom().nextFloat() * 0.6F));
+		Vec3 v = dir.scale(FLINT_HURL).add(0.0, 0.55, 0.0);
+		net.minecraft.world.entity.item.ItemEntity item = new net.minecraft.world.entity.item.ItemEntity(level, player.getX(), player.getEyeY() - 0.3,
+			player.getZ(), stack, v.x, v.y, v.z);
+		item.setPickUpDelay(40);
+		item.setThrower(player);
+		level.addFreshEntity(item);
+		tendrilsOut(player);
+		player.swing(hand, SwingAnimation.DEFAULT, true);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 1.4F);
 	}
 
 	/** A lit creeper or primed TNT close by: where it is. */
@@ -3851,6 +4047,7 @@ public final class WebSymbiote {
 	 * true if a feeding began.
 	 */
 	private static boolean selfFeed(ServerPlayer player, Live live, long now, boolean hunt, boolean corpses) {
+		live.feedAsked = false;
 		Entity carried = corpses ? KitchenCompat.carriedCorpse(player) : null;
 		if (carried != null) {
 			// already in your arms: straight to the meal (one it won't touch, and it waits)
@@ -3858,6 +4055,14 @@ public final class WebSymbiote {
 				return false;
 			}
 			whisper(player, "self_feed");
+			live.feedAsked = false;
+			if (KitchenCompat.isPlayerCorpse(carried)) {
+				// (0.15.33) a player's body: through the carry, where it stops a moment first (hesitates)
+				live.feedStage = FEED_CARRY;
+				live.feedTarget = carried.getId();
+				live.feedStageAt = now;
+				return true;
+			}
 			startMeal(player, live, now, carried);
 			return true;
 		}
@@ -3926,7 +4131,7 @@ public final class WebSymbiote {
 			&& !WebTendrils.held(e);
 	}
 
-	/** Something it may hunt for food: a creature that leaves a corpse (no pets, no named ones); players only in a rampage. */
+	/** Something it may hunt for food: a creature that leaves a corpse (no pets, no named ones), or another player. */
 	private static boolean huntable(ServerPlayer player, LivingEntity e, boolean rampage) {
 		if (!e.isAlive() || e.isSpectator() || e instanceof ArmorStand || !edible(e)) {
 			return false;
@@ -3936,7 +4141,8 @@ public final class WebSymbiote {
 			return false;
 		}
 		if (e instanceof Player p) {
-			return rampage && !p.isCreative() && p != player;
+			// (0.15.33) another player is food like anything else, once there's a body to eat (Jaymo's Kitchen leaves one)
+			return (rampage || KitchenCompat.playersLeaveCorpses()) && !p.isCreative() && p != player;
 		}
 		return e instanceof Mob m && !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName() && KitchenCompat.leavesCorpse(e);
 	}
@@ -4007,6 +4213,8 @@ public final class WebSymbiote {
 
 	/** FEED: carried, so it eats (by the creature's size). */
 	private static void startMeal(ServerPlayer player, Live live, long now, Entity corpse) {
+		live.hesitateUntil = 0L;
+		live.feedAsked = false;
 		float size = mealSize(corpse);
 		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
 		live.eatFood = Math.round(Mth.lerp(size, MEAL_FOOD_MIN, MEAL_FOOD_MAX));
@@ -4151,7 +4359,15 @@ public final class WebSymbiote {
 					return;
 				}
 				// it eats only once the corpse is carried
-				if (KitchenCompat.carriedCorpse(player) == target) {
+				boolean carried = KitchenCompat.carriedCorpse(player) == target;
+				if (live.hesitateUntil > 0L && !carried) {
+					// (0.15.33) you threw the body clear while it hesitated: it lets it be
+					abortFeeding(player, live);
+					whisper(player, "hesitate.thrown");
+					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 0.7F);
+				} else if (carried && hesitates(player, live, now, target)) {
+					// (0.15.33) a player's body, unasked: it stops a moment first
+				} else if (carried) {
 					startMeal(player, live, now, target);
 				} else if (t > CARRY_TIMEOUT) {
 					abortFeeding(player, live);
@@ -4169,8 +4385,28 @@ public final class WebSymbiote {
 		}
 	}
 
+	/**
+	 * (0.15.33) A player's body in your arms, and you didn't ask (Consume): it stops {@link #HESITATE_TICKS} before it
+	 * eats, your screen darkening, so you can throw it clear. True while it's still waiting.
+	 */
+	private static boolean hesitates(ServerPlayer player, Live live, long now, Entity corpse) {
+		if (live.feedAsked || !KitchenCompat.isPlayerCorpse(corpse)) {
+			return false;
+		}
+		if (live.hesitateUntil == 0L) {
+			live.hesitateUntil = now + HESITATE_TICKS;
+			whisper(player, "hesitate." + (1 + player.getRandom().nextInt(HESITATE_LINES)));
+			dread(player, HESITATE_TICKS, true);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.8F);
+			return true;
+		}
+		return now < live.hesitateUntil;
+	}
+
 	/** The feeding stops where it is (the hunt ends, a grabbed corpse is let go). */
 	private static void abortFeeding(ServerPlayer player, Live live) {
+		live.hesitateUntil = 0L;
+		live.feedAsked = false;
 		live.takeoverMeal = false;
 		if (live.feedStage == FEED_NONE) {
 			return;
@@ -4228,6 +4464,35 @@ public final class WebSymbiote {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * (0.15.33) A fall about to end: its tendrils burst from your back and reach for the ground, a jolt you feel (the
+	 * landing itself is taken in {@link #takesFalls}). Looks {@code INSTINCT_FALL_CATCH_HEIGHT} down, or three ticks of
+	 * your fall if that's further.
+	 */
+	private static void reachForGround(ServerPlayer player, Live live) {
+		double drop = player.yo - player.getY();
+		if (live.caughtFall || player.fallDistance <= INSTINCT_FALL_MIN || drop <= 0.0 || !takesFalls(player)
+			|| !groundWithin(player, Math.max(INSTINCT_FALL_CATCH_HEIGHT, drop * 3.0 + 1.0))) {
+			return;
+		}
+		live.caughtFall = true;
+		ServerLevel level = player.level();
+		tendrilsOut(player);
+		ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(0.0, -0.12, 0.0)));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_FALL, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.sendParticles(dust(1.6F), player.getX(), player.getY(), player.getZ(), 16, 0.6, 0.1, 0.6, 0.0);
+	}
+
+	/** The landing it takes: goo splashing out under you (the damage is cancelled by the caller). Always true. */
+	private static boolean landing(ServerPlayer player) {
+		if (player.fallDistance > INSTINCT_FALL_MIN) {
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.8F, 0.6F);
+			level.sendParticles(dust(1.6F), player.getX(), player.getY() + 0.1, player.getZ(), 20, 0.7, 0.1, 0.7, 0.02);
+		}
+		return true;
 	}
 
 	private static boolean groundWithin(ServerPlayer player, double height) {
@@ -4438,6 +4703,8 @@ public final class WebSymbiote {
 		if (player.getAttached(EATING) != null || live.feedStage != FEED_NONE) {
 			return false;
 		}
+		// (0.15.33) your asking: it doesn't stop over a player's body (hesitates)
+		live.feedAsked = true;
 		Entity carried = KitchenCompat.carriedCorpse(player);
 		if (carried != null && edible(carried)) {
 			startMeal(player, live, now, carried);
@@ -4445,8 +4712,9 @@ public final class WebSymbiote {
 		}
 		if (carried != null) {
 			// it recoils from that one
-			whisper(player, "inedible");
+			nag(player, "inedible");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
+			live.feedAsked = false;
 			return false;
 		}
 		Vec3 eye = player.getEyePosition();
@@ -4471,6 +4739,7 @@ public final class WebSymbiote {
 		if (WebSymbioteStrains.asleep(player)) {
 			// asleep, it only wakes for a corpse: it kills nothing
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
+			live.feedAsked = false;
 			return false;
 		}
 		LivingEntity best = null;
@@ -4491,6 +4760,7 @@ public final class WebSymbiote {
 		}
 		if (best == null) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
+			live.feedAsked = false;
 			return false;
 		}
 		startKill(player, live, now, best, true);
@@ -4574,6 +4844,8 @@ public final class WebSymbiote {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.3F, 0.4F);
 		level.sendParticles(blood, at.x, at.y, at.z, meal.big() ? 30 : 14, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.0);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
+		// (0.15.33) a player's body: the hotbar it held falls out
+		KitchenCompat.spill(food);
 		food.discard();
 		feed(player, live.eatFeed, CONSUME_CALM);
 		// fed, it warms to you

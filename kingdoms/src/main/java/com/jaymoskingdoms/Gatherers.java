@@ -178,6 +178,8 @@ public final class Gatherers {
 	private static final class Job {
 		int phase = IDLE;
 		@Nullable BlockPos goal, stand;
+		/** (0.7.116) His goal is in a quarry (water and lava beside it are stopped, not left). */
+		boolean quarry;
 		final Bag bag = new Bag();
 		final Trip trip = new Trip();
 		final Deque<BlockPos> vein = new ArrayDeque<>();
@@ -226,11 +228,13 @@ public final class Gatherers {
 		return Works.of(server, f.id()).built().stream().filter(b -> b.entry().equals("tree_farm")).toList();
 	}
 
-	/** It wants one more of {@code role}: a mine dug short of miners, or a tree farm without its woodcutter (counting places waiting to be filled). */
+	/** It wants one more of {@code role}: a mine dug or a quarry short of miners, or a tree farm without its woodcutter (counting places waiting to be filled). */
 	static boolean wanted(MinecraftServer server, Faction f, int role) {
 		int have = f.holdings().count(role) + f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0);
 		if (role == Folk.MINER) {
-			return Mines.dug(server, f) && have < Focus.miners(server, f, MINERS_PER_MINE);
+			// (0.7.116) and a miner for each quarry a lord marked
+			int want = (Mines.dug(server, f) ? Focus.miners(server, f, MINERS_PER_MINE) : 0) + Areas.quarries(server, f).size() * Areas.MINERS_PER_QUARRY;
+			return have < want;
 		}
 		return role == Folk.WOODCUTTER && have < treeFarms(server, f).size() * WOODCUTTERS_PER_FARM;
 	}
@@ -246,7 +250,7 @@ public final class Gatherers {
 	}
 
 	/**
-	 * One of {@code role} for {@code f} (counted in its roster): a miner lives by its mine's mouth, a woodcutter at the
+	 * One of {@code role} for {@code f} (counted in its roster): a miner lives by its mine's mouth (or a quarry's stair), a woodcutter at the
 	 * tree farm with fewest woodcutters. {@code from} where he comes from (a villager taken into service), else he starts
 	 * at home. Null if there's nothing for him to work.
 	 */
@@ -254,11 +258,17 @@ public final class Gatherers {
 		BlockPos home, site;
 		if (role == Folk.MINER) {
 			Mines.Mine m = Mines.of(level.getServer(), f.id());
-			if (m == null) {
+			List<Works.Built> quarries = Areas.quarries(level.getServer(), f);
+			if (m != null && (m.done() || quarries.isEmpty())) {
+				home = Construction.standable(level, m.entrance(), 3);
+				site = m.end();
+			} else if (!quarries.isEmpty()) {
+				// (0.7.116) no mine dug yet: he lives by a quarry's stair
+				home = Construction.standable(level, Areas.home(quarries.getFirst()), 3);
+				site = home;
+			} else {
 				return null;
 			}
-			home = Construction.standable(level, m.entrance(), 3);
-			site = m.end();
 		} else {
 			List<Works.Built> farms = treeFarms(level.getServer(), f);
 			if (farms.isEmpty()) {
@@ -395,9 +405,19 @@ public final class Gatherers {
 			return;
 		}
 		if (folk.role() == Folk.MINER) {
+			// (0.7.116) a lord's quarry first, while it has anything left to dig
+			BlockPos pit = Areas.next(level, f, folk.blockPosition(), job.skip);
+			job.quarry = pit != null;
+			if (pit != null) {
+				aim(level, job, pit, null);
+				job.phase = DIG;
+				folk.setTask("quarrying");
+				return;
+			}
 			Mines.Mine m = Mines.of(level.getServer(), f.id());
 			if (m == null || !m.done() || !(oreOrStone(level, m, folk, job))) {
-				folk.setTask(m != null && m.done() ? "the mine is worked out" : "waiting for the mine");
+				folk.setTask(m != null && m.done() ? "the mine is worked out" : !Areas.quarries(level.getServer(), f).isEmpty() ? "the quarry is dug out"
+					: "waiting for the mine");
 				return;
 			}
 			job.phase = DIG;
@@ -551,6 +571,15 @@ public final class Gatherers {
 		folk.getNavigation().stop();
 		folk.getLookControl().setLookAt(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
 		boolean ore = level.getBlockState(target).is(BlockTags.ORES);
+		if (job.actAt == 0 && job.quarry && wet(level, target)) {
+			Faction f = Factions.get(level.getServer(), folk.factionId());
+			if (f == null || !Areas.plug(level, f, folk, job.bag, target)) {
+				// (nothing to stop it with: left be)
+				job.skip.add(target);
+				job.phase = IDLE;
+				return;
+			}
+		}
 		if (job.actAt == 0) {
 			job.actAt = now + (ore ? ORE_TICKS : STONE_TICKS);
 			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);

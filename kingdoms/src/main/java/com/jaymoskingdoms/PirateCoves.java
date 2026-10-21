@@ -62,6 +62,8 @@ final class PirateCoves {
 	static final int POLE = 7;
 	/** A new cove: deckhands ashore, and the hoard it starts with. */
 	static final int START_HANDS = 3, MAX_HANDS = 6, DAYS_PER_HAND = 2;
+	/** (0.7.107) Its bombardiers ashore (off its roster): one, a second once it has grown this many days; one lost comes back with the next day's growth. */
+	static final int BOMBARDIERS = 1, MAX_BOMBARDIERS = 2, DAYS_TO_SECOND_BOMBARDIER = 4;
 	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
 	/** What it takes in each day (smuggling, wrecking). */
 	static final int DAY_GOLD = 2, DAY_EMERALDS = 1, DAY_GUNPOWDER = 2, DAY_FISH = 4;
@@ -69,8 +71,10 @@ final class PirateCoves {
 	static final long REBUILD_TICKS = 48000L, MISSING_TICKS = 20 * 180;
 	/** She's never launched with a player this near her mooring. */
 	static final double LAUNCH_HIDE = 28.0;
-	/** Her crew: deckhands besides her gunners, powder monkeys; on a brigantine. */
+	/** Her crew: deckhands besides her gunners, powder monkeys; on a brigantine ((0.7.112) the galleon). */
 	static final int SLOOP_HANDS = 3, BRIG_HANDS = 5, BOYS = 1;
+	/** (0.7.112) A small ship's chance of being a drakkar rather than a sloop (Jaki's; the big one is always Jaki's galleon). */
+	static final float DRAKKAR_CHANCE = 0.4F;
 	/** How long a cached coast check holds (ticks). */
 	static final long COAST_MEMORY = 20 * 300;
 
@@ -202,6 +206,9 @@ final class PirateCoves {
 		Camps.takeSides(server, id, KIND);
 		for (int i = 0; i < START_HANDS; i++) {
 			spawn(level, id, Pirates.DECKHAND, spot(level, fire, random), fire, RADIUS);
+		}
+		for (int i = 0; i < BOMBARDIERS; i++) {
+			bombardier(level, Factions.get(server, id), spot(level, fire, random), fire);
 		}
 		if (launch(level, Factions.get(server, id)) == null) {
 			// (no room to put her out yet: her captain waits ashore, and she's built when there's room)
@@ -413,11 +420,13 @@ final class PirateCoves {
 		Crew crew = new Crew(Crew.Side.PIRATE, camp.id(), Pirates.pirateShip(random), cove.mooring());
 		Fleet.Look look = new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_LOG, Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.BLACK), Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
 		Direction bow = cove.seaward().getClockWise();
+		// (0.7.112) the big ship's Jaki's galleon (was our brigantine); the small one our sloop or Jaki's drakkar
+		Fleet.Rig rig = brig ? Fleet.Rig.GALLEON : random.nextFloat() < DRAKKAR_CHANCE ? Fleet.Rig.DRAKKAR : Fleet.Rig.SLOOP;
 		Ship ship = null;
 		for (int tries = 0; tries < 4 && ship == null; tries++) {
 			BlockPos water = tries == 0 ? cove.mooring() : Fleet.openSea(level, cove.mooring(), 24, 4, random);
 			if (water != null) {
-				ship = Corsairs.launch(level, brig ? Fleet.Rig.BRIGANTINE : Fleet.Rig.SLOOP, look, water, bow, crew, camp,
+				ship = Corsairs.launch(level, rig, look, water, bow, crew, camp,
 					new Corsairs.Complement(Pirates.CAPTAIN, Pirates.GUNNER, Pirates.DECKHAND, brig ? BRIG_HANDS : SLOOP_HANDS, BOYS));
 			}
 		}
@@ -432,7 +441,7 @@ final class PirateCoves {
 		}
 		Factions.update(server, camp.id(), f -> f.withLeader(Optional.ofNullable(captain)));
 		putCove(server, camp.id(), cove.withShip(ship.getUUID(), ship.blockPosition(), -1L));
-		JaymosKingdoms.LOGGER.info("{} put out {} ({})", camp.name(), crew.name, brig ? "brigantine" : "sloop");
+		JaymosKingdoms.LOGGER.info("{} put out {} ({})", camp.name(), crew.name, rig.id());
 		return ship;
 	}
 
@@ -475,6 +484,27 @@ final class PirateCoves {
 		if (hands < cap) {
 			spawn(level, camp.id(), Pirates.DECKHAND, spot(level, data.center(), level.getRandom()), data.center(), RADIUS);
 		}
+		int bombers = data.grown() >= DAYS_TO_SECOND_BOMBARDIER ? MAX_BOMBARDIERS : BOMBARDIERS;
+		BlockPos center = data.center();
+		int around = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(center).inflate(RADIUS * 4),
+			f -> f.isAlive() && f.factionId() == camp.id() && f.role() == Pirates.BOMBARDIER).size();
+		if (around < bombers) {
+			bombardier(level, camp, spot(level, center, level.getRandom()), center);
+		}
+	}
+
+	/** (0.7.107) A bombardier ashore at the cove: off its roster, as its gunners are (so no vacancy is kept for him). */
+	private static void bombardier(ServerLevel level, @Nullable Faction camp, BlockPos at, BlockPos home) {
+		if (camp == null) {
+			return;
+		}
+		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
+		if (folk == null) {
+			return;
+		}
+		folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+		folk.setup(Pirates.BOMBARDIER, camp, home, RADIUS);
+		level.addFreshEntity(folk);
 	}
 
 	/** {@code days}' growth: what the cove takes in (smuggling, wrecking, fishing). */

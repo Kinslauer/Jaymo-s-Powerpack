@@ -260,9 +260,13 @@ public final class TinkeringJei implements IModPlugin {
 		if (result == null) {
 			return;
 		}
-		melts.computeIfAbsent(result.molten(), m -> new ArrayList<>()).add(stack);
-		recipes.add(new SimpleCategory.Recipe(List.of(List.of(stack)), List.of(),
-			List.of(note("melting.into", Molten.amount(result.amount(), result.molten().metal()), result.molten().displayName()))));
+		// (0.13) one line for each liquid it gives (gear of two metals melts into both)
+		List<Component> notes = new ArrayList<>();
+		for (Melting.Input part : result.parts()) {
+			melts.computeIfAbsent(part.molten(), m -> new ArrayList<>()).add(stack);
+			notes.add(note("melting.into", Molten.amount(part.amount(), part.molten().metal()), part.molten().displayName()));
+		}
+		recipes.add(new SimpleCategory.Recipe(List.of(List.of(stack)), List.of(), notes));
 	}
 
 	/** Liquids mixed in the smeltery: each input slot shows what melts into that liquid; the alloy's ingot comes out. */

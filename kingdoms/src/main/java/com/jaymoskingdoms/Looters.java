@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.98) Robbing the dead (with Jaymo's Kitchen's corpses). Where bodies lie with something still on them, someone
+ * (0.7.126) Robbing the dead (with Jaymo's Kitchen's corpses). Where bodies lie with something still on them, someone
  * comes for it:
  * <ul>
  * <li><b>Looters.</b> Where three or more bodies lie together (a battlefield, a raid beaten off, a camp put to the sword),

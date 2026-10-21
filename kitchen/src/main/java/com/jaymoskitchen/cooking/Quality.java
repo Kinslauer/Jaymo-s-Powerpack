@@ -113,7 +113,7 @@ public enum Quality {
 			case UNDERCOOKED -> {
 				nutrition = Math.max(2, dish.nutrition() - 4);
 				saturation = 0.3F;
-				consumable.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.HUNGER, 30 * 20, 0), 0.6F));
+				// its sickness chance is RawFood's (half raw meat's)
 				lore.add(Component.translatable("tooltip.jaymoskitchen.undercooked").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 			}
 			case PERFECT -> {

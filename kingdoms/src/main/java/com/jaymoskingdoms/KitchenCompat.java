@@ -21,11 +21,16 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
+<<<<<<< HEAD
 	/**
-	 * (0.7.98) For {@link Bearers} and {@link Looters} (Kitchen 0.4.51): a robber's take ({@code robBy}), whether a body has
+	 * (0.7.126) For {@link Bearers} and {@link Looters} (Kitchen 0.5.8): a robber's take ({@code robBy}), whether a body has
 	 * anything on it worth taking, its saved data (who it was), and who a player is carrying.
 	 */
 	private static final @Nullable Method ROB_BY, HAS_VALUABLES, LOOK_TAG, CARRIED_BY, SINCE_DEATH;
+=======
+	/** (0.7.123) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
+	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
+>>>>>>> origin/master
 
 	static {
 		Class<?> corpse = null;
@@ -77,6 +82,7 @@ final class KitchenCompat {
 			}
 		}
 		BURNS = burns;
+<<<<<<< HEAD
 		Method robBy = null, hasValuables = null, lookTag = null, carriedBy = null, sinceDeath = null;
 		if (corpse != null) {
 			try {
@@ -86,7 +92,7 @@ final class KitchenCompat {
 				carriedBy = corpse.getMethod("carriedBy", net.minecraft.world.entity.player.Player.class);
 				sinceDeath = corpse.getMethod("sinceDeath");
 			} catch (ReflectiveOperationException e) {
-				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the dead to be buried or robbed (needs 0.4.51): {}", e.toString());
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the dead to be buried or robbed (needs 0.5.8): {}", e.toString());
 				robBy = null;
 			}
 		}
@@ -95,6 +101,53 @@ final class KitchenCompat {
 		LOOK_TAG = robBy == null ? null : lookTag;
 		CARRIED_BY = robBy == null ? null : carriedBy;
 		SINCE_DEATH = robBy == null ? null : sinceDeath;
+=======
+		Method seasonName = null, dayOfYear = null, temperate = null;
+		if (FabricLoader.getInstance().isModLoaded(MOD)) {
+			try {
+				Class<?> seasons = Class.forName("com.jaymoskitchen.season.Seasons");
+				seasonName = seasons.getMethod("seasonName", net.minecraft.world.level.Level.class);
+				dayOfYear = seasons.getMethod("dayOfYear", net.minecraft.world.level.Level.class);
+				temperate = seasons.getMethod("temperate", float.class);
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for seasons (needs 0.5.6): {}", e.toString());
+				seasonName = null;
+			}
+		}
+		SEASON_NAME = seasonName;
+		DAY_OF_YEAR = dayOfYear;
+		TEMPERATE = temperate;
+	}
+
+	/**
+	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
+	 * null without Kitchen 0.5.6.
+	 */
+	static @Nullable String season(net.minecraft.world.level.Level level) {
+		return invoke(SEASON_NAME, level) instanceof String name ? name : null;
+	}
+
+	/** (0.7.123) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
+	static int dayOfYear(net.minecraft.world.level.Level level) {
+		return invoke(DAY_OF_YEAR, level) instanceof Integer day ? day : -1;
+	}
+
+	/** (0.7.123) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
+	static boolean temperate(float baseTemperature) {
+		return Boolean.TRUE.equals(invoke(TEMPERATE, baseTemperature));
+	}
+
+	private static @Nullable Object invoke(@Nullable Method method, Object arg) {
+		if (method == null) {
+			return null;
+		}
+		try {
+			return method.invoke(null, arg);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen seasons call failed: {}", e.toString());
+			return null;
+		}
+>>>>>>> origin/master
 	}
 
 	private KitchenCompat() {
@@ -111,6 +164,15 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
 		}
+		// (0.7.123) winter's cold doesn't touch a Frostborn
+		if (SEASON_NAME != null) {
+			try {
+				Class.forName("com.jaymoskitchen.season.WinterCold").getMethod("setColdProof", java.util.function.Predicate.class)
+					.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.FROSTBORN));
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
+			}
+		}
 	}
 
 	/** Kitchen is here, and new enough. */
@@ -118,43 +180,43 @@ final class KitchenCompat {
 		return CORPSE != null;
 	}
 
-	/** (0.7.98) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.4.51). */
+	/** (0.7.126) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.8). */
 	static boolean burials() {
 		return ROB_BY != null;
 	}
 
-	/** (0.7.98) Any Kitchen corpse, lying free: nobody carrying it, not in a cart or on a horse. */
+	/** (0.7.126) Any Kitchen corpse, lying free: nobody carrying it, not in a cart or on a horse. */
 	static boolean isFreeCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger() && call(CARRIER, entity) == null;
 	}
 
-	/** (0.7.98) A player's body (never buried, burned or robbed: their things stay theirs). */
+	/** (0.7.126) A player's body (never buried, burned or robbed: their things stay theirs). */
 	static boolean isPlayerCorpse(Entity corpse) {
 		return Boolean.TRUE.equals(call(PLAYER_CORPSE, corpse));
 	}
 
-	/** (0.7.98) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
+	/** (0.7.126) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
 	static boolean hasValuables(Entity corpse) {
 		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));
 	}
 
-	/** (0.7.98) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
+	/** (0.7.126) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
 	@SuppressWarnings("unchecked")
 	static java.util.List<net.minecraft.world.item.ItemStack> robBy(Entity corpse, Entity robber) {
 		return call(ROB_BY, corpse, robber) instanceof java.util.List<?> list ? (java.util.List<net.minecraft.world.item.ItemStack>)list : java.util.List.of();
 	}
 
-	/** (0.7.98) The dead mob's saved data (a fresh copy), or null. */
+	/** (0.7.126) The dead mob's saved data (a fresh copy), or null. */
 	static net.minecraft.nbt.@Nullable CompoundTag lookTag(Entity corpse) {
 		return call(LOOK_TAG, corpse) instanceof net.minecraft.nbt.CompoundTag tag ? tag : null;
 	}
 
-	/** (0.7.98) Ticks since it died (very large for a body that was lying there before a reload). */
+	/** (0.7.126) Ticks since it died (very large for a body that was lying there before a reload). */
 	static long sinceDeath(Entity corpse) {
 		return call(SINCE_DEATH, corpse) instanceof Long ticks ? ticks : Long.MAX_VALUE;
 	}
 
-	/** (0.7.98) The body {@code player} is carrying in their arms, if any. */
+	/** (0.7.126) The body {@code player} is carrying in their arms, if any. */
 	static @Nullable Entity carriedBy(net.minecraft.world.entity.player.Player player) {
 		if (CARRIED_BY == null) {
 			return null;
@@ -167,7 +229,7 @@ final class KitchenCompat {
 		}
 	}
 
-	/** (0.7.98) Tells Kitchen to call {@code hook} whenever a player takes something off a body by hand ({@link Looters#playerRobbed}). */
+	/** (0.7.126) Tells Kitchen to call {@code hook} whenever a player takes something off a body by hand ({@link Looters#playerRobbed}). */
 	static void onRobbed(java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, Entity> hook) {
 		if (ROB_BY == null) {
 			return;

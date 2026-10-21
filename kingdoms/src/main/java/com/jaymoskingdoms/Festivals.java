@@ -58,6 +58,8 @@ final class Festivals {
 	static final double DRAWN = 96.0, WELCOME = 24.0;
 	/** A realm keeps a festival of its own about once in this many days (always on the same days for each realm). */
 	static final int OWN_EVERY_DAYS = 8;
+	/** (0.7.123) Kitchen's season length in days: each season opens with a festival. */
+	static final int SEASON_DAYS = 21;
 	/** When a festival day's gathering runs, by the time of day; the fireworks go up from dusk till this. */
 	static final long FROM = 1000L, DUSK = 12000L, TILL = 13600L;
 	/** What a called festival costs (emeralds from the treasury), and how many days must pass between called ones. */
@@ -142,6 +144,12 @@ final class Festivals {
 		return GOING.containsKey(v.getUUID());
 	}
 
+	/** (0.7.102) {@code v} is raising a toast at a festival just now (and sells drink: {@link Remedies}). */
+	static boolean toasting(Villager v) {
+		Going g = GOING.get(v.getUUID());
+		return g != null && g.part == Part.TOAST;
+	}
+
 	static long day(ServerLevel level) {
 		return Math.floorDiv(level.getOverworldClockTime(), Production.DAY_TICKS);
 	}
@@ -152,7 +160,10 @@ final class Festivals {
 		if (called != null && called == day) {
 			return true;
 		}
-		if (Math.floorMod(day + f.id() * 5L, OWN_EVERY_DAYS) != 0) {
+		// (0.7.123) with Kitchen's seasons, every realm (fit to) keeps the first day of each season too
+		int ofYear = KitchenCompat.dayOfYear(level);
+		boolean seasonDay = ofYear >= 0 && ofYear % SEASON_DAYS == 0;
+		if (!seasonDay && Math.floorMod(day + f.id() * 5L, OWN_EVERY_DAYS) != 0) {
 			return false;
 		}
 		// (whether it's fit to keep its own is settled once, the first time the day's looked at)

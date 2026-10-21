@@ -127,7 +127,9 @@ public final class Theft {
 		TRESPASS(Weight.LIGHT, "trespass"),
 		/** (0.7.0) a vampire player seen feeding ({@link VampirePlayers}). */
 		BLOODLETTING(Weight.HEAVY, "bloodletting"),
-		/** (0.7.98) one of its dead robbed ({@link Looters#playerRobbed}). */
+		/** (0.7.121) striking one of its people ({@link Retaliation}). */
+		ASSAULT(Weight.LIGHT, "assault"),
+		/** (0.7.126) one of its dead robbed ({@link Looters#playerRobbed}). */
 		ROBBING(Weight.MEDIUM, "robbing");
 
 		final Weight weight;
@@ -218,8 +220,9 @@ public final class Theft {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
-			if (source.getEntity() instanceof ServerPlayer player) {
-				hitBack(player, entity);
+			if (source.getEntity() instanceof ServerPlayer player && !hitBack(player, entity) && entity.level() instanceof ServerLevel level) {
+				// (0.7.121) not one of a crowd after an arsonist: they may fight back
+				Retaliation.struck(player, level, entity);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Theft::tick);
@@ -267,8 +270,11 @@ public final class Theft {
 		player.setAttached(WANTED, Map.copyOf(wanted));
 	}
 
-	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others). */
+	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others), or (0.7.121) in a brawl ({@link Retaliation}). */
 	public static boolean rioting(LivingEntity who) {
+		if (Retaliation.brawling(who)) {
+			return true;
+		}
 		for (Riot riot : RIOTS.values()) {
 			if (riot.rioters.containsKey(who.getUUID())) {
 				return true;
@@ -457,13 +463,18 @@ public final class Theft {
 			return;
 		}
 		commit(killer, level, f, crime, victim.blockPosition(), null, false);
+		if (crime == Crime.VILLAGER && !witnesses(level, f, killer).isEmpty()) {
+			// (0.7.109) seen: the dead one's family won't forget who did it
+			Recollections.murdered(level, killer, victim);
+		}
 	}
 
 	// ---- witnesses and consequences -----------------------------------------------------------------------------
 
 	/** The faction's people who see {@code player} now, nearest first. */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
-		double range = player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE;
+		// (0.7.102) a hood hides you from farther off, on top of sneaking
+		double range = (player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE) * Identities.hoodSight(player);
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());
@@ -512,6 +523,8 @@ public final class Theft {
 		}
 		Weight w = weight != null ? weight : crime.weight;
 		if (!seen.isEmpty()) {
+			// (0.7.102) a hood is a fragile mask: seen close, face on, in the light, it is you
+			Identities.recognise(level, player, f, seen, null);
 			// (0.5.39) word gets round: its people will ask about it
 			Approaches.suspect(player, f.id(), level.getGameTime());
 		}
@@ -532,6 +545,8 @@ public final class Theft {
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
+		// (0.7.109) each who saw it remembers it
+		Recollections.crime(player, seen, crime.cry);
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);
 		}
@@ -546,6 +561,8 @@ public final class Theft {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
 				.withStyle(ChatFormatting.DARK_RED));
 		}
+		// (0.7.125) a price on their head (or their mask's)
+		Bounties.crimeBy(player, level, f, w == Weight.HEAVY, crime.cry);
 		pursue(level, f, player);
 	}
 
@@ -555,6 +572,10 @@ public final class Theft {
 	 */
 	static void arrest(ServerPlayer player, ServerLevel level, Faction f, long ticks) {
 		if (Wars.enemy(player, f)) {
+			return;
+		}
+		if (Captives.pardon(player, f)) {
+			// (0.7.100) they owe you for one you brought home: this once, they let it go
 			return;
 		}
 		markWanted(player, f.id(), level.getGameTime() + ticks);
@@ -605,8 +626,8 @@ public final class Theft {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.riot", f.name()).withStyle(ChatFormatting.RED));
 	}
 
-	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters. */
-	private static void hitBack(ServerPlayer player, LivingEntity victim) {
+	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters (true). */
+	private static boolean hitBack(ServerPlayer player, LivingEntity victim) {
 		Riot riot = RIOTS.get(player.getUUID());
 		if (riot != null && riot.rioters.containsKey(victim.getUUID())) {
 			RIOTS.remove(player.getUUID());
@@ -620,7 +641,9 @@ public final class Theft {
 					}
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 	/** The crowds close on their arsonists and hit them. */

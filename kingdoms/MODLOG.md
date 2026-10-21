@@ -3412,3 +3412,326 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   round you when several hunt you, run off when badly hurt and short of friends (then come back), search where you
   went when they lose you, meander in curves when idle, and now and then hang from a ceiling in the dark to drop on
   whoever walks under. The tarantula keeps its size.
+- **0.7.100, bigger rewards for returned captives:** Andy: "villagers should reward you more for returning a captured
+  prisoner". Each captive is now someone at home: one of its folk, one of its guards (20%), or kin of its ruler (10%,
+  only where there's a ruler); freeing them says which. Brought home, their family pay 6-12 emeralds (guard 8-16, kin
+  12-24) and the settlement adds a reward from its treasury: 8/16/40 plus 2%/4%/8% of its worth, up to 30/60/150,
+  never leaving it under 20 (a rich realm pays far more for its own). A guard hands you a sword, shield, crossbow or
+  helmet; the ruler's kin a golden apple and 1-3 diamonds. Reputation 60/90/150 (was 40), the one brought home's hearts
+  50/60/80, witnesses' 5, and two of their family (real MCA kin first, else the nearest neighbours) come to thank you
+  for 20 hearts each. Members gain 10/25/60 standing. The settlement then owes you a favour (2 for kin, up to 3): while
+  it does, its guards neither toll nor search you, and the next time they'd arrest you they let it go (spends one).
+  A realm at war with you, or one that doesn't know you (masked), pays no treasury reward and owes no favour.
+  Numbers at the top of `Captives`.
+- **0.7.101, hoods and the hidden blade (the stealth tree):** Andy: "flesh out the stealth tree, id like any hooded
+  costumes to add to stealth, while not completely concealing identity like it does now ... They also need a hidden
+  blade weapon, craftable at all times but usable only by those with sufficient stealth skill." Powers tags a hooded
+  player (`jaymospowers_hooded:<key>`, a Hood or Peaked Hood with the face showing). Witnesses see a hooded player at
+  0.75 the range (thefts, trespass, deeds; on top of sneaking), and a hood is a fragile mask: a stranger in it is "a
+  hooded figure" with its own name and crimes, unless a witness within 6 blocks, facing them, in the light, sees the
+  face when a crime is seen: then that settlement knows who it is ("recognised") and the crime is theirs. Lowering
+  the hood in view gives it away like a mask; paranoid guards ask hooded strangers to lower it; MCA villagers still
+  know a hooded friend (`Identities`, `Theft`, `Pickpocket`, `Trespass`, `Deeds`, `Approaches`). The hidden blade
+  (`HiddenBlade`, numbers at its top): a leather bracer with a spring blade, always craftable (` I `/`LNL`/` S `),
+  a dagger (4 damage, 2.2 a second, iron durability, Better Combat dagger moves, a light blade), worked only from
+  Stealth 5 (below: 1 damage a blow, "the spring jams"). Fall 4+ blocks onto a living thing with it in either hand
+  and the fall damage is theirs, not yours, as your own blow, and they're Crippled (an attachment, saved: 70% slower,
+  no jumping or sprinting) for 6 s, +1 s per 2 blocks more, at most 20 s; a miss is a normal fall. Every
+  full-strength stab at a Crippled foe deals 10x (`LivingEntityHurtMixin`, after ClassPerks and CombatArts). The
+  rulers' assassin draws a hidden blade now (same blows, same stab). Icon drawn by `tools/gen_items.py`.
+- **0.7.101, freerunning (the Stealth tree's second page, with Powers 0.14.3):** Andy picked "Full freerunning".
+  Stealth goes to level 25 (`Skills.STEALTH_MAX_LEVEL`; alignment still counts to 15, pocket practice only the first
+  15 levels) and gets a second page, "Freerunning" (12 points): Climber (lvl 3, 3 ranks), Freerunner (lvl 3, 2),
+  Sure Footing (lvl 8, needs Climber), Leap of Faith (lvl 8, 2 pts, needs Freerunner), Bar Swing (lvl 12, 2 pts, needs
+  Sure Footing), Wall Runner (lvl 12, 2 ranks, needs Leap of Faith); appended to `Skills.Perk`, so no ordinal moves.
+  The moves are Jaymo's Powers' (`Freerun`), reading the ranks through `Skills.rank(Player, String)`. Stealth
+  experience: +1 for a freerun move at most every 20 s (Powers tags the player `jaymospowers_freerun`;
+  `Skills.freerun` takes the tag off and pays), +6 for a hidden blade leap that lands (`HiddenBlade.leap`). Like Strength's, the Master title is now at the
+  pillar's top, so a Master Rogue needs Stealth 25 (players at 15 keep the Rogue title until then).
+- **0.7.102, Emberborn too hot to hug:** Andy: "hugging emberborn villagers and players is impossible without fire
+  resistance". Hugging an Emberborn (villager or player) without being Emberborn, fireproof or under Fire Resistance
+  burns you (3 s fire, 2 damage) and throws you back; no hug, no hearts. MCA's hug menu works both ways (an Emberborn
+  player burns the villager they hug). Villager hugs and partner affection between an Emberborn and someone unsafe
+  mostly turn into a chat (75%); otherwise the unsafe one is burned, says so, and the meeting ends with no regard or
+  mood change. Numbers at the top of `EmberHugs`.
+- **0.7.104, the downed state moves into Jaymo's Powers:** Andy (2026-10-19): "remove our downed system for a universal
+  one". Going down, the AI hold, bleeding out, a player's wounds, the food revive, picking up and throwing, and the
+  lying pose now live in Jaymo's Powers 0.15.1 (`core/wounds/Downed`), for players and tamed animals too (see its
+  MODLOG and `docs/Wounds-Phase2.md`). Kingdoms never compiles against Powers: `Downed.isDowned` reads its scoreboard
+  tag `jaymospowers_downed`, and the folk who may go down (the same `downable`: villagers, guards, a settlement's folk,
+  not rulers, orcs, raiders or barbarians) are marked `jaymospowers_downable` when they're hurt. What stays here:
+  villagers tending the downed (now looked for round each player every second; when the tending is done the body is
+  tagged `jaymospowers_revive` and Powers gets it up), taking a downed guard's weapons (a plain right-click), and
+  `Rearm`, `Pickpocket`, `ShutIn`, routines and workers leaving the downed alone. `DownedMixin`, `DownedMobMixin`, the
+  client `DownedPose` and the `jaymoskingdoms:downed`/`downed_wounds` attachments are gone (anyone downed under the
+  old system just gets up). Without Jaymo's Powers, Kingdoms' folk simply die.
+- **0.7.104, barber-surgeons, bandaging and spirits:** Andy (2026-10-20): "I dont want any modern medicine". Kingdoms'
+  side of Jaymo's Powers' Wounds phase 4 (`docs/Wounds-Phase4.md`, track B; written without a compiler, not yet built
+  or tested). **Clerics are barber-surgeons:** a grown cleric also sells Powers' linen bandages (3 for 2 emeralds),
+  splints (3), smelling salts (6) and leeches (4), and Kitchen's strong spirits (4); right-clicking one with emeralds
+  while your bones are broken still has them set (Powers' `Fractures`). **Taverns and festivals sell drink:** a grown
+  villager standing in (or at the door of) one of a realm's standing taverns, or raising a toast at its festival, sells
+  Kitchen's ale (2 for 1 emerald) and strong spirits (3); once offered, the drink stays on their trades (so walking out and back in never restocks it)
+  (`Remedies`, prices at its top). The wares go on when a player right-clicks the villager, just before the trading
+  screen opens; every item is looked up by id and skipped when its mod isn't loaded, so Kingdoms still stands alone.
+  **Villagers bandage the downed:** when a villager's tending is done the body is tagged `jaymospowers_bandaged` beside
+  `jaymospowers_revive`, and Powers stops its bleeding and gives it a bandage's heal.
+- **0.7.105, Just-In COMBAT's ideas, our own way (with Powers 0.15.2's rapier):** Andy picked all five (the mod is All
+  Rights Reserved, so its ideas only). **Shields** (`MobShields`): a melee mob with a shield in its off hand (guards,
+  kings and lords already carry their realm's; tiered zombies now too) raises it 55% of the times it could, for 1 to
+  2.5 s, while a foe is within 7 blocks, and lowers it to strike (the goal's blow waits, `MeleeAttackGoalMixin`); it
+  goes up at once against a drawn bow or loaded crossbow within 28. Vanilla's blocking does the rest (front only); an
+  axe knocks it aside for as long as a player's (`LivingEntityBlockMixin`); watchers see the raised arm
+  (`ShieldPoseHumanoidMobRendererMixin`). **Blade clash** (`BladeClash`): when two armed fighters face each other and
+  one's blow lands within 3 ticks of the other's swing (a full-strength swing for a player, one that hadn't landed yet)
+  or just before a Better Combat mob's wound-up blow, neither hurts: sparks, a ring of steel, both pushed back; then
+  no clash for a second. Hitting straight back after being hit is a trade, not a clash. **Tiered monster gear**
+  (`MonsterGear`): a zombie or skeleton taking a World Tier above Hearth for the first time fills empty armour slots
+  (25/40/55/70% each by tier), may take a weapon (zombies) or trade its bow for a blade (skeletons), and an armed zombie
+  a shield; each piece one of five grades (leather and stone, copper, chainmail and iron blades, iron and rapiers or
+  longswords, diamond), rarer the higher, odds rising with the tier; rare pieces sometimes and legendary always
+  enchanted. **Duellists**: a lord, and one guard in five, fence with a rapier of their sword's metal when Powers is
+  there (`Outfits.fencer`). Bleeding, the fifth idea, is already Wounds' (Powers' PR #331).
+- **0.7.106, five new heritages and the Blood Rite:** Andy: "Can you brainstorm 5 more heritages" / "Additional
+  Heritages/ unlockable classes", then "these are great. go for it." (`Heritage`, ideas in
+  `heritages/new-heritages-brainstorm.md`). Two can be picked at the start and three are earned:
+  - **Stormborn** (Agility, Finesse): faster under open sky, slower deep underground, immune to lightning; in a
+    thunderstorm under open sky their hits arc a spark to the nearest enemy, and their eyes glow
+    electric blue in any thunderstorm (Andy: "The stormborn eyes should glow during storms along with the sparks."). Villagers lean Stormborn up high.
+  - **Dawnborn** (Might, Grit): heal slowly in sunlight, hit undead 20% harder, weaker and hungrier in the dark.
+    Villagers lean Dawnborn in savannas.
+  - **Endborn** (Wits, Finesse), earned near a dying Ender Dragon: endermen ignore their stare, a hit can blink them
+    away, water and rain burn them.
+  - **Dragonblood** (Might, Endurance), earned near a dying Ender Dragon or a tamed dragon: half fire and dragon
+    breath damage, stronger with a hoard of gold and gems in their pack, weaker when poor.
+  - **Deepborn** (Endurance, Wits), earned near a Warden digging away: silent to sculk, sense living things nearby
+    while sneaking, explosions stun them, weaker in sunlight.
+  Waking an earned heritage gives a **Blood Rite** (`jaymoskingdoms:blood_rite`); drinking it reopens the heritage
+  menu to switch to one you've woken. The menu shows earned heritages as "???" with a hint until woken, and fits on
+  small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
+  Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
+  pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+- **0.7.107, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+  barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
+  (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
+  taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon
+  (`tools/gen_items.py`, vanilla style) are our own. From 3.5 to 20 blocks he keeps his distance (backs off inside 7)
+  and lobs a lit stick at where his foe is going, sight or no sight, so walls and roofs don't save you; closer, he draws
+  his cutlass. **Dynamite** (`Dynamite`): a 2.5 s fuse from the throw; it arcs, bounces and sizzles, then bursts like a
+  cannonball (12 at its heart, 3.5 blocks, a shove) and leaves blocks whole; it never hurts his own side. Water puts it
+  out (the stick drops). Hit a lit stick and it flies where you look and is yours. The item throws the same (16 to a
+  stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
+  each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
+  landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
+- **0.7.108, Better With Mods batch 1 (Powers 0.15.9):** `MobTweaks`: baby zombies -25% speed and damage
+  (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). Zombies and husks hunt
+  `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
+  safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
+  hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
+  `RoadPace`: `road_pace` blocks +15% (horses too; TRMT's worn dirt and sand paths count), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.
+- **0.7.109, villagers remember you (and MCA's chat AI is told):** Andy wanted MCA's chat AI worked in, more villager
+  interactions, and villagers who remember you and what you did with them. Each villager (and folk) now keeps
+  `Recollections`: per player (masked strangers under the costume's stand-in), up to 12 memories of 30 kinds, each with
+  a weight and a lifetime (small things 2-6 weeks; a life saved, a captive brought home, kin murdered: for good). They
+  are recorded from MCA gifts (and whether they were welcome), trades, chats/jokes/stories/hugs/flirts/kisses (by
+  whether hearts went up or down), approach answers (kind, rude, lied, confessed, threatened, fed, bribed, bouts,
+  stood with the realm in war, played), blows, crimes seen, pickpocketing, a kinsman killed in sight of witnesses,
+  lives saved, fires put out, captives freed or brought home (their family remembers too), quests done or given up,
+  letters, and what was said to them through the chat AI. Without any AI: someone with something unsaid comes over to
+  say it (an approach greeting), brings it up in an MCA chat, gossips about what they saw other players do, passes the
+  weighty things on to friends when neighbours meet (so word gets round), and one who bears you enough ill will won't
+  chat, joke or hug at all and won't come over friendly. With MCA's chat AI switched on (an op runs
+  `/mca chatAI default`; off by default), `ChatPrompts` adds the realm, its ruler and temper, its wars, how the realm
+  takes the player (reputation, rank, wanted, deeds, renown, tongue), tasks the player is doing for them, their friends
+  and foes among the neighbours, and every memory, to the villager's prompt (mixin on MCA's `ChatAIContext`).
+  `/kingdom memories` (ops) shows what the nearest villager remembers of you. Numbers at the top of `Recollections`.
+
+## 0.7.110: free rein riding (pack 0.15.11)
+- **Free rein** (`equestrian.FreeRein`, client `FreeReinClient`, `FreeReinViewMixin`/`FreeReinYawMixin`, `MouseHandlerMixin`):
+  steering any horse-type mount in third person, the mouse turns the camera on its own and the movement keys turn your
+  horse toward where the camera looks (W ahead, A/D to the sides, S back toward the camera), a quarter of the way each
+  tick, with the breed's own turn limits on top. Aiming a bow turns you to the camera at once; the crosshair targets
+  where the camera looks; a flying mount climbs where you look. Back in first person you face where the camera faced.
+  Key "Free Rein on/off" (unbound) switches it. The idea is Better Mount Steering's (Seramicx, MIT, no 26.3 build); our
+  own code. The side-pass gait keeps its strafing.
+- Fixed master's `LivingEntitySwingMixin` target (dots in a descriptor) that stopped the game from starting.
+- **0.7.111, mob senses: Stealth's third page, Shadows (after Dynamic Stealth's ideas):** Andy wanted Dynamic Stealth
+  (MIT, 1.12.2) worked in. It is written afresh in `Senses` (constants at the top).
+  - **Sight:** how far hostile and neutral mobs notice you is their range × light (dark 0.25), sneaking (0.6, through
+    `Skills.sneakFactor`), standing still (0.8), being outside their 120° view cone (0.3, unless within 2 blocks), a
+    hood (0.75) and glowing or burning (1.5). It's applied in a mixin on `getVisibilityPercent`
+    (`LivingEntityVisibilityMixin`), on top of Darktide's veil.
+  - **Losing track:** after 100 ticks without sight, a mob walks to where it last saw you, looks around for 5 s, then
+    gives up. Bosses, Folk and spiders are exempt; spiders keep `SpiderMinds`.
+  - **Awareness eye:** a HUD eye above the crosshair (`SensesClient`, `textures/gui/awareness_eye.png` from
+    `tools/gen_items.py`). It fills while a mob is noticing you, turns amber and half-closed while one searches, and
+    red and open once one has spotted you.
+  - **Unaware blows:** melee on an unaware mob is a sneak attack for ×2. With Assassinate, a full hidden blade stab is
+    an assassination for ×10, not stacked with Crippled's ×10. Never on players, bosses or pets.
+  - **Perks** (page 3, Shadows):
+    - Shadowed (3×1, level 5);
+    - Quiet Step (2×1, level 5);
+    - Slip the Net (1×1, level 10);
+    - Sneak Attack (2×1, level 10; ×2.5 / ×3);
+    - Assassinate (1×2, level 15).
+    Stealth XP: +1 per sneak attack (at most every 20 s), +3 per assassination.
+  - Also, Kingdoms' Climber, Freerunner and Wall Runner descriptions now mention Powers 0.15.12's new moves.
+- **0.7.112, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
+  and for pirates and other factions. Its licence is GPLv3, so its structure files ship unchanged in
+  `data/jaymoskingdoms/structure/jaki/` with the licence and a notice in `licenses/jaki/` (our code stays MIT).
+  `JakiShips` reads five of them when a ship is launched (brought up to date by the game's data fixer) and makes each
+  one of ours: no water, crew or decoration data, a helm on her quarterdeck, the galleon's 22 blackstone guns made ship's
+  cannons (gunport left open, gunner where the button was), guns along the trireme's and drakkar's rails, loose sails
+  tied on with chain rigging (a ship casts off only what touches her face to face), one sail colour in her crew's, and
+  vanilla shipwreck/outpost loot in some barrels. Who sails what: pirates' big ship is the **galleon** (black sails; was
+  the brigantine) and their small one a sloop or (40%) a **drakkar**; a navy under the frigate treasury sails a **war
+  trireme** (was the brigantine); merchantmen are a **cargo ship** or a **trader** (was the cog) in their realm's colour.
+  Wool hanging in a ship's rigging now catches wind (3 blocks = one sail, `Hull.CLOTH_PER_SAIL`), so their wool sails
+  drive them, and anyone's. Ships may hold 5000 blocks (was 3000) for the galleon. Crews stand on any open deck under a
+  raised quarterdeck too. Ops: `/kingdom fleet ship <rig>` builds any rig on open water near you and casts her off
+  empty. Left out: their catamarans, small trireme and submarine.
+- **0.7.113, free rein with Shoulder Surfing:** Andy found the movement keys didn't move the horse under free rein. With
+  Shoulder Surfing Reloaded's coupled camera (the pack's preset), it turned you to its own camera every tick, so the
+  keys couldn't turn you and the mouse couldn't turn its camera. Two optional mixins (`client/mixin/shouldersurfing`,
+  skipped without it): under free rein its tick leaves your heading alone, and its camera looks where the free rein
+  camera looks instead of swinging round with the horse. Seen in the dev game with Shoulder Surfing: D turns the horse
+  to the camera's right and S rides it back toward the camera; the mouse turns only the camera.
+- **0.7.114, even they can get got:** the patch notes said bosses and tamed pets are never caught unaware; the user
+  said they can be. `Senses.sensing` (sight, the gauge, unaware blows) now takes bosses; `minded` (losing track and
+  searching) still leaves them out, so a boss never gives up the hunt. A boss is harder to catch: stealth cuts its sight
+  no lower than 0.4, its view cone is 240 degrees, it is unaware only while it is after no one (the dragon, which never targets anyone, only while perched), and a sneak attack or
+  assassination on it deals at most 15% of its max health (Wither 45, Ender Dragon 30), never less than 1.5x the plain blow
+  (`BOSS_*` constants). The dragon's view is flipped (it flies along its yaw's back). A tame pet can be caught unaware
+  by anyone but its own owner, so you can't one-shot your own dog by accident. Folk stay exempt. Only wolves count as pets here: cats and parrots aren't hostile or neutral, so Senses never takes them.
+
+## 0.7.115: the hidden blade is worn on the wrist
+The user: "more like the web shooters, equipped in either one or both hands, and with an empty hand right clicking
+should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBladeClient` + `client/mixin/blade/*`.
+- The bracer is no longer a sword. Use it to strap it on that hand's wrist (else the other's): one or both arms, kept in
+  the synced, saved `jaymoskingdoms:hidden_blades` attachment, dropped on death unless keepInventory.
+- Use with that hand empty (nothing else taking the click: no door, no villager) springs the blade out or sheathes it
+  (`HiddenBladeUseMixin`, at vanilla's held-item use in `Minecraft.startUseItem`); main hand first, both together when
+  both hands are empty. Anything taken into the hand sheathes it. Sneak + use at the sky takes a sheathed one off.
+- Out over an empty main hand: +3 attack, -1.8 speed (an iron sword's 4 and 2.2/s), a light blade for the class perks
+  and Combat Arts (`HiddenBlade.weapon`), the 10x stab on the Crippled and Assassinate on the unaware. Unskilled
+  (Stealth < 5) the spring jams and it won't come out.
+- The leap needs a blade on a wrist whose hand is empty, and springs it.
+- Drawn on the arm (bracer, steel housing, blade past the fingers when out) in third person and first person; an empty
+  off hand's arm is drawn in first person while its blade is out. Texture from `tools/gen_hidden_blade.py`.
+- Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
+  (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
+
+## 0.7.116: your own designs and work areas (pack 0.15.21)
+Andy wanted the builder side of Villager Workers (talhanation, All Rights Reserved: ideas only, nothing of its code or
+art) in our builders, and picked "your own designs + areas" first. Written from how it behaves, not from its code.
+- **Surveyor's rod** (`Surveyor`, `jaymoskingdoms:surveyor_rod`; stick, red dye, gold nugget on a diagonal). Sneak and
+  use it to change mode: Design, Plot, Field, Quarry, Storage. Use it on two blocks to set two corners (shown with
+  sparks while you hold it); plain use at the sky clears them. Corners and mode are kept in memory, per player.
+- **Designs** (`Designs`): build something, mark its corners in Design mode (take in its floor), then
+  `/kingdom design save <name>`. It's saved as a structure file, `<world>/jaymoskingdoms_designs/<name>.nbt` (the same
+  format as a structure block's, so those can be dropped in too). On a plot, `/kingdom plot build design.<name>` has the
+  builders put it up block by block from storage like any catalogue building, standing as it was built if it fits
+  that way. Up to 32 x 32 across, 48 high, 16000 blocks; 24 per player (creative: any). Only blocks: containers come
+  empty, no entities. `/kingdom design list | delete <name>`; a design a project or plot is using can't be changed or
+  deleted. Lost buildings from a design are rebuilt like the others (`Rebuilds`). The template-to-blueprint reader moved
+  from `GrimSites` to `Blueprint.fromTemplate`.
+- **Plot** mode marks a plot of any size from two corners (`Plots.markBox`); the stake still marks a square.
+- **Field** (`Areas`, kept as a `field` among the faction's buildings): 3 to 17 a side. A farmer is taken on at once
+  and keeps it like a farm (`Farmers.farms` counts fields). Till it and sow a row; he does the rest.
+- **Quarry** (`quarry`): 3 to 16 a side, from the higher corner down to the lower one (8 deep if they're level; at most
+  64). Each quarry wants a miner (`Gatherers.wanted`), taken on at once. Miners dig quarries before their mine: the
+  highest layer with anything left, nearest block first, carried to storage, torches as it gets dark. Water or lava
+  beside a block is stopped first with stone he carries (or a cobblestone from storage), else the block is left. A
+  stair is left along the north edge (step j dug j layers down); deeper than that, the stuck-walk puff gets them in and
+  out. Grass, containers and his torches are left. A dug-out quarry is looked over again every minute.
+- **Storage** mode adds a chest or barrel (both halves of a double chest) to the settlement's storage, or takes it out
+  (not the depot or the last one). The first one of a settlement with none becomes its depot.
+- `/kingdom area list` shows the fields and quarries (outlined) and how many storage containers; `/kingdom area clear`
+  unmarks the field or quarry you stand in. Marking needs a lord's rank (or creative), in the faction's own land, clear
+  of buildings and plots.
+- **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
+  fireball), which Jaymo's Powers 0.15.22 runs.
+
+## 0.7.120: storms stop burning the forests down (pack 0.15.27)
+The user: "lightning strikes during storms absolutely destroys forests. water should still put fires out."
+- Why: a storm cell (`Storms`) strikes real lightning every few seconds under it, and each vanilla bolt lights its spot
+  and up to four around it on Normal/Hard, plus more on its after-flashes. And the fire never saw the cell's rain:
+  `FireBlock.tick` asks the world's weather (`isRaining()`) before it lets rain put it out or stop it spreading, so
+  under a cell on an otherwise clear day the fires burnt on through the downpour.
+- `FireBlockRainMixin`: in the fire's tick, rain under a storm cell counts as rain, so cell rain now puts fires out and
+  stops them spreading as vanilla's rain does. Where it rains is still `isRainingAt` (open sky), so a fire under leaves
+  or a roof isn't put out by it, as in vanilla.
+- `LightningBoltMixin`: a storm cell's bolts (tagged `Storms.BOLT_TAG`) light a fire only 1 in 4 strikes
+  (`Storms.STRIKE_FIRE_CHANCE`), and then only the block they hit: no sparks around it, none from after-flashes.
+  They still strike, hurt and charge lightning rods. Vanilla's own lightning, tridents, powers and the dry-lightning
+  wildfire disaster are unchanged.
+- Water placed on fire always put it out; nothing here changed that.
+
+## 0.7.121: villagers fight back (pack 0.15.28)
+The user linked the Villager Retaliation mod (NeoForge 1.21.1, all rights reserved, "don't port without permission"),
+so only the idea is used; nothing of its code. Most of what it does Kingdoms already had: witnessed crimes (`Theft`),
+reputation per faction (`Reputation`), each villager's memory of each player and gossip (`Recollections`), quests,
+hired workers. What was missing was a villager standing up for themselves when struck: `Retaliation`.
+- Strike a grown villager or a settlement's civilian (not a guard, ruler, orc, thrall, captive or someone downed) and
+  they square up and punch back (1 damage, every 25 ticks each, the crowd lands one every 10 ticks). Onlookers who see
+  it (`Theft.witnesses`) join in, up to 5. Seen, it's `Crime.ASSAULT`, a light crime (-10 reputation, a cry, a memory).
+- Someone under 30% health runs off. The rest cool off 30 s after your last blow on one of them, or when you're downed.
+- Feared (reputation -600 or under, or an outlaw there): the struck one runs instead, and nobody joins in.
+- Paying off: emeralds in hand, use a brawler. 3 emeralds plus 3 per extra blow you landed, at most 32. That one stops;
+  paying the one you first struck ends the whole fight. They remember being paid (`Kind.PAID_OFF`) as well as the blow.
+  At reputation -100 or under (or an outlaw) they refuse your coin.
+- A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
+  crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Tuning: the constants at the top of `Retaliation`.
+
+## 0.7.122: the hidden blade moves, and shows
+The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
+right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
+`client/mixin/blade/HiddenBladePoseMixin`.
+- Springing it is animated: the arm comes up into a guard, then the blade runs out of the housing (`SPRING_TICKS` 5,
+  the first half the arm, the rest the blade); sheathing runs it back. Tracked per player on the client each tick,
+  so everyone sees everyone's, in third and first person.
+- Out over an empty hand, that arm is held up ahead of you (`GUARD_*`: about 65 degrees up, turned in across the body,
+  following your look a little), not hanging at your side. The pose is set at the end of `PlayerModel.setupAnim`, so
+  costumes (which copy the player model's pose) follow it. Skipped while swimming, gliding, or holding a two-handed item.
+- A blow with the blade out is a straight thrust along your look (`STAB_*`) instead of a punch.
+- The bracer stands 0.4 px prouder (`BRACER_GROW`), clear of the assassin costume's own bracer and any suit sleeve it
+  used to z-fight with; the housing and blade sit out with it.
+
+## 0.7.123: seasons (with Kitchen 0.5.6, pack 0.15.30)
+- Andy chose our own seasons (2026-10-21); Kitchen keeps the calendar, read here through `KitchenCompat.season`,
+  `dayOfYear` and `temperate` (all soft without Kitchen 0.5.6).
+- Heritages: in a temperate land, summer counts +0.25 warmer and winter 0.8 colder, so plains are hot for an
+  Emberborn in summer and cold (a Frostborn's thriving, an Emberborn's wilting) in winter. Verdant feed even better
+  on spring sun (hunger x0.5 instead of x0.65).
+- Frostborn don't feel Kitchen's winter cold (no extra hunger out in the open): `KitchenCompat.skills` hands Kitchen the
+  predicate.
+- Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
+- Festivals: every realm fit to keep one holds a festival on the first day of each season.
+## 0.7.125: bounties, bandits and pirates
+Andy: "Add a bounty board in town for criminal npcs and players ... add bandit masks and bandanas that hide your
+identity the same way a costume does but npcs call you a bandit/ pirate depending on location". With Jaymo's Powers
+0.15.32. Built without a game run; compile-checked against the 26.3 jars.
+- **Bandit mask and bandana** (`Bandits`; crafted from black or red wool and string; worn on the head): a mask to
+  `Identities` (its `maskKey` sees them even without Powers), the identity `bandit_<uuid>`, one per player whichever of
+  the two they wear. Its own reputation, wanted time and bounties; given away like a costume (put on or off in view, a
+  guard's unmasking, powers seen used both masked and bare-faced). The folk call you **the Pirate** in or on the water,
+  in a boat or on a ship, or on a sea, beach or river biome, **the Bandit** anywhere else. Townsfolk who see a masked
+  bandit come in cry out (once in 2 minutes per settlement). Art by `tools/gen_bounties.py`.
+- **Bounties** (`Bounties`): a player seen at a medium or heavy crime gets a price on their head with the realm that
+  holds the settlement (6 or 15 emeralds a crime, up to 320), on their mask if they wore one. Crooked villagers get
+  theirs from `Crooks` (the NPC crime patch) through `Bounties.crime(crook, faction, emeralds)`.
+- **The bounty board** (`BountyBoard`): every kingdom, fiefdom and village puts one up 3-8 blocks from its bell (again 3
+  days after it's broken); craftable too (planks, paper, sticks). Right-clicked, it lists its realm's bounties on the
+  quest screen, highest first: the name and price, the crime, what the head's worth, whether they're dangerous. Take
+  one (3 at a time) to learn roughly where they were last seen (40 blocks either way, rounded to 10; ask again for
+  fresher word). Taken bounties open to others again after 3 days; untouched ones come down after 10 days.
+- **Bringing them in:** carry a downed target (Powers' Wounds) to the realm's ruler and right-click the ruler: the full
+  price, and reputation (a quarter of the price). A crook goes to the cells; a player is fined what emeralds they carry
+  (up to the price), forgiven their wanted time there and got up. A target killed by a player drops a **head** (a
+  player's own face) worth half, handed to the ruler the same way.
+- **Minibosses:** a crook with a bounty of 40 or more, once someone takes it, is armed when found: a relic weapon
+  (royal from 90; it drops, or it's yours when you bring them in), 60 health plus 1.5 per emerald (240 at most), 10
+  armour, a boss bar, and it fights the nearest player it can see within 24 blocks (6 damage plus 1 per 25 emeralds).

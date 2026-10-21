@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,6 +63,11 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  */
 public final class ZFighterKi {
+	/** Ki's hum (a held charge, a bolt in flight), never twice alike, with a surge over it now and then. */
+	public static final Soundscape.Layer KI_HUM = Soundscape.Layer.of(0.9F, 1.1F, 0.96F, 1.04F, SoundEvents.BEACON_AMBIENT);
+	public static final Soundscape.Layer KI_SURGE = Soundscape.Layer.of(0.25F, 0.4F, 0.8F, 1.2F, SoundEvents.RESPAWN_ANCHOR_CHARGE,
+		SoundEvents.AMETHYST_BLOCK_RESONATE).chance(0.25F);
+
 	/** Ki Blast and Ki Wave's damage: ordinary, armour applies. */
 	static final ResourceKey<DamageType> KI = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("zfighter_ki"));
 
@@ -419,9 +425,8 @@ public final class ZFighterKi {
 					level.sendParticles(dust, true, false, hand.x + ox, hand.y + oy, hand.z + oz, 0, -ox, -oy, -oz, 0.1);
 				}
 			}
-			if (held % 10 == 0) {
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F,
-					1.0F + wind);
+			if (Soundscape.due(player, "ki.charge", 8, 13)) {
+				Soundscape.play(level, player.position(), SoundSource.PLAYERS, KI_HUM.louder(0.8F).pitched(1.0F + wind), KI_SURGE);
 			}
 			return;
 		}
@@ -683,7 +688,7 @@ public final class ZFighterKi {
 				// drawn by the clients as a flat disc spinning level (ZFighterOrbs), its cutting width across, sparks off its edge
 				discOrb(level, bolt.orbId, to, DISC_HALF_WIDTH * 2.0, orbColor);
 				if (bolt.age % DISC_WHIR_EVERY == 0) {
-					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.4F, DISC_WHIR_PITCH);
+					Soundscape.play(level, to, SoundSource.PLAYERS, KI_HUM.louder(0.4F).pitched(DISC_WHIR_PITCH));
 				}
 				double spin = bolt.age * 0.9;
 				for (int i = 0; i < 2; i++) {
@@ -697,8 +702,8 @@ public final class ZFighterKi {
 				if (bolt.age % 2 == 0) {
 					level.sendParticles(dust, true, false, from.x, from.y, from.z, 1, bolt.size * 0.3, bolt.size * 0.3, bolt.size * 0.3, 0.0);
 				}
-				if (bolt.age % 6 == 0) {
-					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F + (float)bolt.size * 0.3F, 0.6F);
+				if (Soundscape.due(level, bolt.orbId, "ki.bolt", 4, 8)) {
+					Soundscape.play(level, to, SoundSource.PLAYERS, KI_HUM.louder(1.0F + (float)bolt.size * 0.3F).pitched(0.6F), KI_SURGE);
 				}
 			}
 			case SPIRIT -> {
@@ -712,8 +717,8 @@ public final class ZFighterKi {
 				}
 				level.sendParticles(new DustParticleOptions(0xFFFFFF, 3.0F), true, false, to.x, to.y, to.z, 2, bolt.size * 0.2, bolt.size * 0.2,
 					bolt.size * 0.2, 0.0);
-				if (bolt.age % 6 == 0) {
-					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F + (float)bolt.size * 0.3F, 0.6F);
+				if (Soundscape.due(level, bolt.orbId, "ki.bolt", 4, 8)) {
+					Soundscape.play(level, to, SoundSource.PLAYERS, KI_HUM.louder(1.0F + (float)bolt.size * 0.3F).pitched(0.6F), KI_SURGE);
 				}
 			}
 			default -> {
@@ -1039,9 +1044,8 @@ public final class ZFighterKi {
 		if (charge >= 1.0F && now % 3 == 0) {
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
-		if ((now - live.waveFrom) % 10 == 0) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F,
-				0.8F + charge);
+		if (Soundscape.due(player, "ki.wave", 8, 13)) {
+			Soundscape.play(level, player.position(), SoundSource.PLAYERS, KI_HUM.pitched(0.8F + charge), KI_SURGE);
 		}
 	}
 

@@ -186,8 +186,11 @@ public class SmelteryEntity extends BlockEntity implements Container {
 			progress[slot]++;
 			return true;
 		}
-		if (tank.fill(result.molten(), result.amount(), true) == result.amount()) {
-			tank.fill(result.molten(), result.amount(), false);
+		// (0.13) every liquid it holds (iron and gold for a paladin's helmet) goes in at once, or it waits for room
+		if (tank.space() >= result.total()) {
+			for (Melting.Input part : result.parts()) {
+				tank.fill(part.molten(), part.amount(), false);
+			}
 			stack.shrink(1);
 			progress[slot] = 0;
 			dirty = true;
