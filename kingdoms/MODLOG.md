@@ -3800,4 +3800,5 @@ and stepping over those who are not. Very prideful ruler". `Purists`, plus a col
   now and then turn on a neighbour of another blood in front of a player (who slinks off). Gossip: pride, or grumbles.
 - **Prices:** his land's traders charge outsiders 35% more (at least 1), kin 20% less (`VillagerPriceMixin` on
   `Villager.updateSpecialPrices`). **Good name:** kin win it at 150% and lose at 75%; outsiders the reverse.
-- Also: regicide decrees (30%, "cut the rot out") and assassination contracts (2x, often paid by his own people).
+- Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
+  harsh lean (+25) when he sentences an arrested crook.

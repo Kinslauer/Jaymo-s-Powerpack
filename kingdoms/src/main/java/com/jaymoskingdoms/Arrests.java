@@ -55,9 +55,9 @@ final class Arrests {
 	static final int VERDICT_TICKS = 20 * 4, CARRY_OUT_TICKS = 20 * 3;
 	/** How far words at an audience carry, and how far players are told the sentence in chat. */
 	static final double AUDIENCE_SPEECH = 24.0, ANNOUNCE_RANGE = 48.0;
-	/** Sentencing: each notoriety counts this much, plus up to this at random; the ruler's lean by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, none). */
+	/** Sentencing: each notoriety counts this much, plus up to this at random; the ruler's lean by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST, none). */
 	static final int PER_NOTORIETY = 10, CHANCE_SPREAD = 30;
-	static final int[] TEMPER_LEAN = {30, -20, 15, 20, -10, 0};
+	static final int[] TEMPER_LEAN = {30, -20, 15, 20, -10, 25, 0};
 	/** Sentence thresholds: a flogging from this, exile from this, execution from this. */
 	static final int FLOG_FROM = 20, EXILE_FROM = 45, EXECUTE_FROM = 70;
 	/** A flogging: blows, their sting, ticks between them; never below this health. */
