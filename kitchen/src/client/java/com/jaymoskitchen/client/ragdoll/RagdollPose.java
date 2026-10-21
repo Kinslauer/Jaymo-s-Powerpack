@@ -4,6 +4,7 @@ import com.jaymoskitchen.ragdoll.RagdollRig;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import org.joml.Matrix4f;
 
@@ -180,13 +181,20 @@ public final class RagdollPose {
 			// the torso is the whole model's turn: its own animation (crouching, breathing) is undone
 			ModelPart body = root.getChild("body");
 			if (shape == RagdollRig.Shape.HUMANOID) {
-				body.xRot = body.yRot = body.zRot = 0;
+				// (0.5.10) back to rest, pivots too: Powers' eased poses bend at the hips and shift the upper body
+				body.resetPose();
 			}
 		}
 		for (int l = 0; l < limbs.length; l++) {
 			ModelPart part = find(root, limbs[l].part);
 			if (part == null) {
 				continue;
+			}
+			if (shape == RagdollRig.Shape.HUMANOID) {
+				PartPose rest = part.getInitialPose();
+				part.x = rest.x();
+				part.y = rest.y();
+				part.z = rest.z();
 			}
 			part.xRot = angles[l * 3];
 			part.yRot = angles[l * 3 + 1];

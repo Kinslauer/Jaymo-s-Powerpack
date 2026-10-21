@@ -98,6 +98,7 @@ public final class CryoFlashFreeze {
 		target.syncVelocity = true;
 		SmokeField.freeze(level, box.getCenter(), FOG_RADIUS);
 		CryoPower.cooldown(player, CryoState.FREEZE, CryoPower.mastered(player) ? COOLDOWN_MASTERED : COOLDOWN);
+		CryoMoves.begin(player, CryoMoves.FREEZE);
 		Vec3 c = box.getCenter();
 		level.sendParticles(ParticleTypes.SNOWFLAKE, c.x, c.y, c.z, 30, box.getXsize() * 0.6, box.getYsize() * 0.5, box.getZsize() * 0.6, 0.05);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);

@@ -55,6 +55,7 @@ public final class CryoPowerClient implements PowerClient {
 		ClientTickEvents.START_CLIENT_TICK.register(CryoPowerClient::input);
 		CryoLaneClient.init();
 		CryoBlizzardClient.init();
+		ClientTickEvents.END_CLIENT_TICK.register(CryoPose::tick);
 	}
 
 	@Override

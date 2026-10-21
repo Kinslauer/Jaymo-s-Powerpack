@@ -3780,3 +3780,117 @@ be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Thef
   `#c:ingots/steel` (Powers 0.15.36) and `#c:leather_straps` (Kitchen 0.5.8), or with plain leather for 1-2 more steel.
   Melts back into steel by the cheaper recipe only (4/6/5/2 ingots). Flat vanilla-style layers
   (`tools/gen_steel_plate.py`), not one of the 3D Armory sets.
+
+## 0.7.129: the Nightfall Plague (pack 0.15.37)
+Our own take on Nightfall Plague (Forge/NeoForge, All Rights Reserved: only its ideas, no code or art), in
+`nightfall/`, woven into our vampires. Art and data by `tools/gen_nightfall.py`.
+- **Atrophy** (`Atrophy`, effect `jaymoskingdoms:atrophy`): a weak poison (never kills on its own; level II pricks twice
+  as often); each blow taken may leave you weak 2 s. Whatever dies with it in its blood (not players) rises as a
+  vampire bat. It doesn't take in the undead, vampires, or anyone with Immunity.
+- **Immunity** (`Immunity`): 10 min (20 long) of no plague, now and then clears hunger, wither or poison, a heart every
+  5 s. It burns the undead and vampires instead. It does **not** cure a turned vampire (still the priest's quest).
+- **Brewing** (data recipes, 26.3 style): awkward + Cursed Tusk = Immunity; + redstone = long; Immunity + fermented
+  spider eye = the Plague potion; + glowstone = strong. Splash/lingering as usual, so tipped arrows: the Immunity Arrow
+  and the Tusk Arrow (the Plague's).
+- **Night Bleeder** (`NightBleeder`, an illager): 50 health, 6 bite; rare at night, and up to 2 in a raid's last waves
+  (15 s fire resistance). Bites heal it and give the plague (worse if already in you). Calls 2-3 vampire bats in a
+  fight, vanishing a second; leaps to about 3 blocks short of you; burns by day and runs for shade unless fighting;
+  a wooden blade does 2.5x. Brought down by anything but a critical hit (falling strike, full-draw arrow) it breaks
+  into a **Blightwing** (`Blightwing`: 14 health, flees, may dive at whoever hits it) that lands as a Night Bleeder
+  again in 30 s at half health. 3 looks. Drops 3-5 emeralds, 1-2 Cursed Tusks, 2% a totem. Invisible in a spyglass.
+- **Vampire bats** (`VampireBat`): 8 health; in flocks at night under the open sky; latch on and drink (a blow shakes
+  them off) or charge and reel. Summoned ones vanish after 50 s. They leave every vampire alone.
+- **Callings** (`Callings`): hand one of our vampires a brewing stand, smoker, chiseled bookshelf or note block and it
+  becomes an Alchemist, Slaughter, Chronicler or Bard. Right-click with emeralds for its ware (Immunity potion 6,
+  3 Dried Meat 2, Cursed Card 12, Lute 10); with red food (4 for 1 emerald), books (1) or music discs (3) to sell.
+  Raw beef quiets any vampire for the night (`Vampires.feedBeef`). Sneak-click is still the villager's own screen.
+- **Relics** (`Relics`): Cursed Tusk (hits give the plague), Cursed Card (use: a vampire's dash; held, sometimes Speed),
+  Lute (monsters within 15 calmed 4 s and can't land a blow, Night Vision 20 s + 2 s a monster), Dried Meat (1-3
+  hearts, 1.5x at night, 2x under a full moon).
+- **Nightmares** (`Nightfalls`): falling asleep at night, 3% (+15% with the plague, +3% per plague relic carried, at most
+  50%): 4 s you can't leave the bed, then you're torn awake by 5-7 vampire bats or two Blightwings about to turn.
+- **The Nightfall** (`Nightfalls`): with the plague in you, a totem saving you, a nightmare, or 8+ of the plague's
+  creatures within 32 blocks set it off (not within 5 days of the last). 2-3 nights: each dawn the clock skips to the
+  next dusk, nobody sleeps (creative aside), vampires get Strength and Speed, the undead don't burn, fires smoke out,
+  more bats and Bleeders about, and a pale miasma fog (`NightfallClient`, `MiasmaFogMixin`). `/kingdom nightfall
+  start|stop` (ops).
+- Not remade: the music disc (it needs a song of its own), achievements, the cleric buying tusks.
+
+## 0.7.130: the Purist ruler (pack 0.15.38)
+Andy (2026-10-20): "Add a new king temper, Purist, they insist on a high population of its own heritage. Ridiculing
+and stepping over those who are not. Very prideful ruler". `Purists`, plus a column in `Tempers`, `Retinue` and
+`Approaches`.
+- **Who:** one ruler in 6 (`Tempers.PURIST_ONE_IN`), drawn on its own so every other ruler keeps the temper he had.
+  His blood (`Purists.blood`) comes from his id like his temper (any heritage, Heartlander likeliest); he's made of it.
+- **His people:** 85% born within 96 blocks of his seat are of his blood; every folk his realm sets up is; MCA guards
+  are drafted from his own kind first. `/kingdom info` says "a purist, proud of his X blood".
+- **On his rounds:** bread and praise for his own kind; anyone else gets a sneer and is pushed out of his path.
+- **His guards about him (`Retinue`):** his own blood may clasp his hand and gets a proud word, bread and +1 good name
+  once a day. Anyone else close is shoved and sneered at, and thrown out of the city (5 minutes) if they keep hanging
+  about (heat 60).
+- **Guards' business (`Approaches`):** two columns, `purist` (outsiders: searched and tolled often, 4-emerald toll,
+  10% haggle, refusing gets you shoved, bribes refused, insults drawn on) and `purist_kin` (never searched, 1-emerald
+  toll, friendly bouts). Guard lines name your blood and his (`%2$s`, `%3$s`).
+- **Townsfolk (`Purists.tick`):** his-blood folk jeer at an outsider, shoulder them aside when in the way, greet kin;
+  now and then turn on a neighbour of another blood in front of a player (who slinks off). Gossip: pride, or grumbles.
+- **Prices:** his land's traders charge outsiders 35% more (at least 1), kin 20% less (`VillagerPriceMixin` on
+  `Villager.updateSpecialPrices`). **Good name:** kin win it at 150% and lose at 75%; outsiders the reverse.
+- Also: regicide decrees (30%, "cut the rot out"), assassination contracts (2x, often paid by his own people), and a
+  harsh lean (+25) when he sentences an arrested crook.
+
+## 0.7.131: the Hornkin, a Nether faction (pack 0.15.40)
+Andy (2026-10-20): "I want a new nether faction along the lines of" Just-In NETHER (NeoForge/Forge, All Rights
+Reserved: only its idea, bull-folk at war with piglins over gold, no code or art). Stage 1 of 3 (plan:
+project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `tools/gen_nether.py`.
+- **Hornkin** (`Hornkin`, `Nether`): bull-headed Nether folk, in war parties in the Nether wastes and crimson forests
+  (weights 8 warriors in 2-4s, 4 hurlers in 1-2s, 1 brute; not on nether wart blocks). Fireproof. Our own model
+  (`HornkinModel`: a man's body, bull's head, muzzle with a gold ring, swept horns, loincloth).
+  - **Warrior** (30 health, golden axe or sword): a horn charge at a foe 5-12 blocks off (every ~6 s), goring and
+    throwing the first it meets (1.5x its blow).
+  - **Hurler** (22 health): lobs magma bombs (`MagmaBomb`) that burst 2.5 blocks, 5 damage at the heart, set alight,
+    blocks left whole.
+  - **Brute** (70 health, drawn 1.45x, 6 armour): stamps the ground every ~7 s at anyone within 3.5 (7 damage, thrown).
+  - **Zombified Hornkin**: what any of them turns into after 15 s outside the Nether (as piglins do); shambles arms
+    out, its blows bring hunger, hunts players and villagers, wants no gold.
+- **The gold feud:** Hornkin attack piglins and piglin brutes on sight, and any piglin within 16 blocks that sees a
+  Hornkin turns on it (`ANGRY_AT`), so a dropped gold pile brings both. Hornkin go for players within 16 blocks, or
+  within 32 if they wear gold. **Emberborn** players are left alone unless they strike first.
+- **Gold:** they pick gold (the piglin-loved tag) off the ground and take it out of chests near them (not loot chests
+  nobody has opened yet), then stand 6 s admiring it, ignoring everyone but whoever hits them. A gold ingot buys 1-3
+  of their own wares (quartz, magma cream, fire charges, blaze powder, leather, bones, blackstone, gilded blackstone,
+  crimson fungus, cooked pork, glowstone dust, arrows); anything else goes to the hoard, dropped as nuggets at death.
+  Holding gold, they don't despawn.
+- Spawn eggs for all four; loot: nuggets, leather, magma cream, the brute gold ingots and bones.
+- Next (stage 2, if Andy wants it): Hornkin war forts and a piglin war camp, a Hornkin Warlord and a Piglin Warboss
+  leading hosts against each other.
+- **0.7.132, clearing the dead, graves, mourning, looters:** Andy: "i want someone to clear the battlefield of dead, or
+  maybe come try to rob the corpses". With Jaymo's Kitchen's corpses (0.5.9): once it's quiet round a body in a
+  settlement's land (no monsters, nobody fighting, no raid), a grown villager, a working folk or an idle guard carries it
+  off (`Bearers`, numbers at its top). Its own dead (villagers, traders, its own folk) are buried in a graveyard it lays
+  out in rows on open ground 16-44 blocks from the seat: a dug mound of coarse dirt and a headstone wall (cobblestone in
+  a village, stone brick in a realm, sandstone in the desert); right-click a headstone empty-handed to read who lies
+  there (`jaymoskingdoms:graves`). The enemy's dead are left two minutes, then burned (`Undertakers`' safe fires). With
+  MCA, the spouse and kin come to the grave, kneel, weep and speak, the first leaves a flower, and their mood drops; for
+  four days after they may come back to visit. No family: a neighbour or two; a soldier: his comrades. A player who
+  carried the body there is thanked (+3, three times a day). Robbers (`Looters`): where 3+ bodies with something on them
+  lie near a player, a band of 1-3 ragged looters (Folk role 80) may creep in (likelier by night), kneel at each body
+  and strip it, then slip away; a guard or golem who spots them, a blow, or a player close and upright sends them
+  running (not a sneaking player, nor one who's been robbing bodies too). Killed, their sack spills and the settlements
+  they robbed thank you (+6). A settlement's jobless and nitwit villagers sometimes rob a body in its land; a guard
+  shames them into dropping it, a player who hits one at it gets +3. A player taking anything off a settlement's own
+  dead in its land commits grave robbing (`Theft.Crime.ROBBING`, medium, once a body). Players' bodies are never
+  touched; monsters stay the guards' and golems' (who now leave bodies being buried or robbed alone).
+  Judgement: Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
+  jailed or executed, or freed!)". Looters now go down instead of dying (nobody tends them). Carry one (sneak + use) and
+  set him down within 4 blocks of a free guard: the guard takes his sack, you're thanked (+8, and +6 from each other
+  settlement he robbed), and he's marched to the ruler like any crook (`Arrests.handOver`), charged with robbing the
+  dead, notoriety 1 + the bodies he robbed. The sentence: pardon (freed), a flogging, the cells (new `JAIL`, in place of
+  exile for a looter: walked off to the seat and taken below), or death. Within 48 blocks you see it; further off, the
+  next grown villager of that settlement you pass tells you how it went. One who slips his guard runs again.
+  Andy: "ALL HUMANOIDS go down": every folk is now marked downable (rulers, orcs, raiders, barbarians, looters too), and
+  Powers 0.15.41 downs every humanoid monster. Villagers only tend their own (villagers and a settlement's folk), never a
+  downed looter, raider or monster.
+## 0.7.133: an eased pickpocket's reach (with Powers 0.15.42, Kitchen 0.5.10)
+- Andy, on Powers' animation preview: "do all this". The pickpocket's hand goes in on a soft spring of its own (a little
+  high first, then slipping down into the pocket), the body leaning in and the head bowed to watch it, and comes back
+  out the same way.

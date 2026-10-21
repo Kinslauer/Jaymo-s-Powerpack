@@ -2205,3 +2205,69 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     body cut from the recurve bow, 60% from any other bow or a dispenser. Flies as a vanilla arrow.
   - Linen bandages take `jaymospowers:bandage_cloth` (white wool or Kitchen's hemp cloth).
   - Not built with Loom or played yet; javac 0 errors on all three mods.
+- **0.15.39, Gravity's B reworked (Gravity Wave, Inversion):** Andy: "rework my gravity B skill it would be a cone AoE
+  infront of me shooting out a cone of gravitational waves, could carve up terrain as well, R + B = Pull target in and
+  punch them in the gut, sending them away while inverting their insides causing bleed and a heavy slow status". Held
+  and let go, B is now the Gravity Wave (`GravityWave`): a fan rolling out the way you look (4-16 blocks with the charge,
+  35° wide, 14° tall) that hurts, throws and slows what it passes and carves the ground (softer blocks readily, harder
+  with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
+  rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
+  away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
+- **0.15.41, the pack's dead cleared and robbed:** ships Jaymo's Kingdoms 0.7.132 (bearers, graves, mourning, looters,
+  judgement for a looter carried to a guard) and Jaymo's Kitchen 0.5.9 (corpses can be robbed; `libs/`).
+  Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate": `Downed.downable`
+  now downs every mob with the humanoid body plan (`BodyPlan.HUMANOID`: zombies, skeletons, illagers, witches, piglins,
+  endermen, Kingdoms' folk, modded humanoids by shape), not only villagers, tagged folk and tamed animals. Beheading,
+  `/kill`, the void, a totem and bosses still end it as before.
+- **0.15.42, smoother bodies (Kitchen 0.5.10, Kingdoms 0.7.133):** Andy saw the animation preview and said "do all this,
+  add a better crawling and downed animation too". New `client/PoseBlend`: each pose gets a weight per player on a
+  slightly bouncy spring (it eases in and out, nothing snaps), and springs on how far the pose moves each part from
+  vanilla's, so a jump between keys follows through with a small overshoot. Real time, not frames; a pose ending keeps
+  its last shape while it eases out; entries go once eased out or 3 s unseen. It can also bend the upper body at the
+  hips (forward, turned, tipped) and lower it, so poses use the torso, head and legs, not just the arms.
+  - Ember's Kindle: the shoulder draws back first, then the arm pushes out with the body turned in, the free arm braced
+    and the feet set; it trembles more as the heat builds; let go at full heat it whips over into the fireball throw.
+  - Freerun: the run's lean eases in and out. The slide is no longer the swimming pose: you drop in on bent knees and
+    lie back on one hip, lead leg out, a hand trailing the ground, the other arm up, eyes ahead, and pop back up into
+    the run (vanilla's swim tilt is switched off for it, as for a carried body).
+  - Carrying: the carrier bends at the hips and knees to pick up and set down, and walks heavier, swaying, the arms
+    giving on each step.
+  - Time Flow's jab, quick jab, hook, uppercut, lunge and barrage coil, then turn the hips and shoulders through with a
+    step, overshoot a little and recover to a guard held between blows; the other moves are eased the same way.
+  - Gravity's Lift grip: the arm's aim eases onto the target with the chest turned to it, a lean, the free arm out.
+  - Ledges: the catch swings the body in under the hands and settles. Z Fighter's guard and wave beam ease in with a
+    stance under them.
+  - Crawling (`CrawlPose`, the gesture crawl and downed players): an army crawl, arms sweeping ahead along the ground
+    and pulling back in turn, the opposite knee driving, the body rocking, the head lifting to look ahead; a broken
+    limb drags (Wounds' breaks are synced to everyone) and the rest work harder. Downed players breathe hard, rest the
+    head when still, try now and then to push up and sink back, and bounce as they hit the ground; passed out, they lie
+    limp with the head turned aside. Downed humanoid mobs (`wounds/DownedPose`) fall with weight (the knees go, then a
+    faster drop and a small bounce), crawl the same way, and on their backs breathe unevenly, clutch their worst wound
+    (a broken arm or leg, else the chest) and try to sit up.
+  - First person (Andy: "the big ones get first-person arms"): your own bare arm now plays Kindle (drawn back, pushed
+    out palm-first trembling with the heat, whipped forward on the throw), carrying (both arms rise in under the load
+    as what you held sinks away, bob with your steps, and sink out when you let go), Time Flow's blows (guard, coil,
+    punch and recoil on the third-person timing, the barrage's alternating fists, the push and the counters' palm
+    strike), Lift's grip (the arm reaching after the held creature, straining) and Cryokinesis (breath hand to the mouth
+    then thrown out, the shard sweep, the two-handed freeze push, the wall's palms driving up, the Blizzard's arms
+    raised). They ease in and out on the same weights as third person (`client/FirstPersonArms`,
+    `PowerArmsFirstPersonMixin`); only an empty hand is posed, so held items, Better Combat's swings and the view bob
+    are untouched, and with First-person Model the body's own arms show the poses as before.
+- **0.15.42, Cryokinesis poses and livelier weapon animations:** part of the animation upgrade Andy approved (wind-up,
+  follow-through, the whole body moving, eased springs).
+  - Cryokinesis had no body poses; now every move has one, seen in third person by everyone (`client/power/cryo/CryoPose`).
+    Ice Slide is a skater's crouch: torso low and forward, legs apart pushing off in turn as you speed up, arms out for
+    balance, the whole body leaning into a turn (from the slide's own velocity for you, from movement for others).
+    Frost Breath braces the legs and pushes the chest and head forward; the hand goes to the mouth, then is thrown out
+    along the breath, trembling. Ice Shards is a wind-up and a fanned sweep across the body with a step and a twist,
+    carried through. Flash Freeze draws both hands to the chest and pushes them out; the Ice Wall dips low and drives
+    both palms up. The Blizzard raises both arms overhead and spreads them, swaying and shivering while it rages. The
+    held poses come and go on small springs, so they ease in and out. The server now tells everyone which move is being
+    made through a small synced `CryoMoves` attachment, like Smoke's.
+  - Our 8 Better Combat weapon animations (sword twirl slash and whirl, axe flip chop, dagger flip, polearm whirl, the
+    three staff twirls) are re-keyed in `tools/combat_animations.py`: a wind-up before the hit and a follow-through
+    after, the head looking toward the blade, the torso in on every move, and a step or weight shift on the legs (the
+    sword slash, axe chop, dagger flip and front staff twirl had none). Eased curves replace the straight ones; only the
+    stretches inside a spin stay straight, so a twirl doesn't stop at every quarter turn. The hit's keyframe and every
+    begin/end/stop tick are unchanged, so Better Combat's damage timing is the same. `tools/check_player_animations.py`
+    checks every file parses and every key sits within the animation.

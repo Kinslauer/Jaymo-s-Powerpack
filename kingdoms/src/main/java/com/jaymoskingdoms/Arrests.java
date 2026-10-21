@@ -20,6 +20,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -40,6 +41,12 @@ import org.jspecify.annotations.Nullable;
  * realm and are gone), or execution (beheaded where they stand; with Jaymo's Kitchen the body lies headless).
  *
  * <p>A village without folk guards still sets its golems on a crook, as before.
+ *
+ * <p>(0.7.132) Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
+ * jailed or executed, or freed!)". A downed looter ({@link Looters}) set down before a guard is handed over
+ * ({@link #handOver}): got up and marched to the same audience. A looter is never exiled: that sentence is the cells
+ * ({@link Sentence#JAIL}), where the guard walks him off to the seat and he's taken below. Whoever brought him in sees it
+ * if they're by, or hears of it later from the townsfolk ({@link Looters#news}).
  */
 final class Arrests {
 	/** How far a guard is called from; how close he must come to call a halt; how close to the ruler the audience is held. */
@@ -55,9 +62,9 @@ final class Arrests {
 	static final int VERDICT_TICKS = 20 * 4, CARRY_OUT_TICKS = 20 * 3;
 	/** How far words at an audience carry, and how far players are told the sentence in chat. */
 	static final double AUDIENCE_SPEECH = 24.0, ANNOUNCE_RANGE = 48.0;
-	/** Sentencing: each notoriety counts this much, plus up to this at random; the ruler's lean by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, none). */
+	/** Sentencing: each notoriety counts this much, plus up to this at random; the ruler's lean by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST, none). */
 	static final int PER_NOTORIETY = 10, CHANCE_SPREAD = 30;
-	static final int[] TEMPER_LEAN = {30, -20, 15, 20, -10, 0};
+	static final int[] TEMPER_LEAN = {30, -20, 15, 20, -10, 25, 0};
 	/** Sentence thresholds: a flogging from this, exile from this, execution from this. */
 	static final int FLOG_FROM = 20, EXILE_FROM = 45, EXECUTE_FROM = 70;
 	/** A flogging: blows, their sting, ticks between them; never below this health. */
@@ -72,7 +79,9 @@ final class Arrests {
 	static final String HEADLESS_TAG = "jaymoskitchen.missing.head";
 
 	enum Sentence {
-		PARDON, FLOG, EXILE, EXECUTE;
+		PARDON, FLOG, EXILE, EXECUTE,
+		/** (0.7.132) Locked in the cells (a looter's in place of exile). */
+		JAIL;
 
 		String key() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);
@@ -90,23 +99,36 @@ final class Arrests {
 		CHASE, BEAT, LEAD, AUDIENCE, PUNISH, EXILE
 	}
 
+	/** (0.7.132) A jailed looter is walked off to the cells this long at most (ticks). */
+	static final int JAIL_TICKS = 20 * 30;
+
 	private static final class Arrest {
-		final Villager crook;
+		/** A villager crook ({@link Crooks}), or (0.7.132) a looter handed over. */
+		final PathfinderMob crook;
 		final Folk guard;
 		final int faction;
 		final String crime;
+		/** (0.7.132) How notorious: a crook's own, a looter's by the bodies he robbed. */
+		int notoriety;
+		/** (0.7.132) The player who brought him in (handed over), or null. */
+		@Nullable UUID bringer;
 		Stage stage = Stage.CHASE;
 		long until, next;
 		@Nullable Sentence sentence;
 		int blows;
 		Vec3 away = Vec3.ZERO;
 
-		Arrest(Villager crook, Folk guard, int faction, String crime, long until) {
+		Arrest(PathfinderMob crook, Folk guard, int faction, String crime, long until) {
 			this.crook = crook;
 			this.guard = guard;
 			this.faction = faction;
 			this.crime = crime;
 			this.until = until;
+			this.notoriety = Crooks.notoriety(crook);
+		}
+
+		boolean looter() {
+			return Looters.is(crook);
 		}
 	}
 
@@ -153,6 +175,27 @@ final class Arrests {
 		return true;
 	}
 
+	/**
+	 * (0.7.132) A downed looter is set down before {@code guard}: the guard has him got up and marches him to the ruler for
+	 * judgement. {@code bringer} brought him in.
+	 */
+	static void handOver(ServerLevel level, PathfinderMob looter, Folk guard, Faction f, String crime, int notoriety, ServerPlayer bringer) {
+		if (ARRESTS.containsKey(looter.getUUID())) {
+			return;
+		}
+		Arrest a = new Arrest(looter, guard, f.id(), crime, level.getGameTime() + LEAD_TICKS);
+		a.notoriety = notoriety;
+		a.bringer = bringer.getUUID();
+		ARRESTS.put(looter.getUUID(), a);
+		guard.getLookControl().setLookAt(looter, 30.0F, 30.0F);
+		haul(level, a, level.getGameTime());
+	}
+
+	/** (0.7.132) {@code guard} is taking someone to judgement just now. */
+	static boolean busy(Folk guard) {
+		return escorting(guard);
+	}
+
 	private static boolean escorting(Folk guard) {
 		for (Arrest a : ARRESTS.values()) {
 			if (a.guard == guard) {
@@ -180,7 +223,7 @@ final class Arrests {
 
 	/** One tick of an arrest; false when it's over. */
 	private static boolean step(ServerLevel level, Arrest a, long now) {
-		Villager crook = a.crook;
+		PathfinderMob crook = a.crook;
 		Folk guard = a.guard;
 		if (!crook.isAlive() || crook.isRemoved() || crook.level() != level) {
 			return false;
@@ -195,7 +238,11 @@ final class Arrests {
 				guard.setTarget(null);
 			}
 			if (!Downed.isDowned(crook)) {
-				Crooks.flee(level, crook, guard.position());
+				if (crook instanceof Villager v) {
+					Crooks.flee(level, v, guard.position());
+				} else {
+					Looters.escaped(level, crook, guard.position());
+				}
 			}
 			return false;
 		}
@@ -209,10 +256,12 @@ final class Arrests {
 					haul(level, a, now);
 				} else if (guard.distanceTo(crook) <= HALT_RANGE) {
 					RandomSource random = level.getRandom();
-					float submit = Math.max(SUBMIT_MIN, SUBMIT - SUBMIT_PER_NOTORIETY * Crooks.notoriety(crook));
+					float submit = Math.max(SUBMIT_MIN, SUBMIT - SUBMIT_PER_NOTORIETY * a.notoriety);
 					if (random.nextFloat() < submit) {
 						say(level, crook, "submit");
-						Crooks.stopRunning(crook);
+						if (crook instanceof Villager v) {
+							Crooks.stopRunning(v);
+						}
 						lead(a, now);
 					} else {
 						say(level, crook, "resist");
@@ -252,7 +301,7 @@ final class Arrests {
 					// the guard leads, a little slower when the prisoner lags
 					double pace = crook.distanceTo(guard) > 6.0 ? GUARD_SPEED * 0.5 : GUARD_SPEED * 0.8;
 					guard.getNavigation().moveTo(to.x, to.y, to.z, pace);
-					BehaviorUtils.setWalkAndLookTargetMemories(crook, new EntityTracker(guard, false), PRISONER_SPEED, 1);
+					follow(crook, guard);
 				}
 			}
 			case AUDIENCE -> {
@@ -279,9 +328,20 @@ final class Arrests {
 	private static void haul(ServerLevel level, Arrest a, long now) {
 		a.guard.setTarget(null);
 		a.crook.addTag(Downed.REVIVE_TAG);
-		Crooks.stopRunning(a.crook);
+		if (a.crook instanceof Villager v) {
+			Crooks.stopRunning(v);
+		}
 		say(level, a.guard, "hauled");
 		lead(a, now);
+	}
+
+	/** (0.7.132) The prisoner walks at the guard's back: a villager by its brain, a looter by his navigation. */
+	private static void follow(PathfinderMob crook, Folk guard) {
+		if (crook instanceof Villager v) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(guard, false), PRISONER_SPEED, 1);
+		} else if (crook.distanceToSqr(guard) > 2.0 * 2.0) {
+			crook.getNavigation().moveTo(guard, 1.0);
+		}
 	}
 
 	private static void lead(Arrest a, long now) {
@@ -318,8 +378,12 @@ final class Arrests {
 		RandomSource random = level.getRandom();
 		Tempers.Temper temper = Tempers.of(f);
 		int lean = TEMPER_LEAN[temper == null ? TEMPER_LEAN.length - 1 : temper.ordinal()];
-		int score = Crooks.notoriety(a.crook) * PER_NOTORIETY + lean + random.nextInt(CHANCE_SPREAD + 1);
+		int score = a.notoriety * PER_NOTORIETY + lean + random.nextInt(CHANCE_SPREAD + 1);
 		a.sentence = score >= EXECUTE_FROM ? Sentence.EXECUTE : score >= EXILE_FROM ? Sentence.EXILE : score >= FLOG_FROM ? Sentence.FLOG : Sentence.PARDON;
+		if (a.sentence == Sentence.EXILE && a.looter()) {
+			// (0.7.132) no realm lets a looter go to rob the next field: the cells
+			a.sentence = Sentence.JAIL;
+		}
 		LivingEntity judge = judge(level, f);
 		LivingEntity speaker = judge != null ? judge : a.guard;
 		Speech.say(level, speaker, Component.translatable("arrest.jaymoskingdoms.verdict." + a.sentence.key() + "." + random.nextInt(LINES)),
@@ -335,7 +399,7 @@ final class Arrests {
 
 	/** The sentence is carried out; false when it's done (an exile goes on walking). */
 	private static boolean punish(ServerLevel level, Arrest a, Faction f, long now) {
-		Villager crook = a.crook;
+		PathfinderMob crook = a.crook;
 		Folk guard = a.guard;
 		RandomSource random = level.getRandom();
 		switch (a.sentence) {
@@ -373,6 +437,15 @@ final class Arrests {
 				done(a);
 				return true;
 			}
+			case JAIL -> {
+				say(level, crook, "jailed");
+				// walked off to the cells under the seat, the guard at his back
+				a.away = Vec3.atBottomCenterOf(f.seat());
+				a.stage = Stage.EXILE;
+				a.until = now + JAIL_TICKS;
+				done(a);
+				return true;
+			}
 			case EXECUTE -> {
 				guard.getLookControl().setLookAt(crook, 30.0F, 30.0F);
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -389,13 +462,24 @@ final class Arrests {
 
 	/** The exile walks out of the realm, and is gone. */
 	private static boolean exile(ServerLevel level, Arrest a, long now) {
-		Villager crook = a.crook;
+		PathfinderMob crook = a.crook;
 		if (now > a.until || crook.position().distanceToSqr(a.away) < 9.0) {
+			if (a.sentence == Sentence.JAIL) {
+				// taken below
+				level.playSound(null, crook.getX(), crook.getY(), crook.getZ(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.8F);
+			}
 			crook.discard();
 			return false;
 		}
 		if (now % 10 == 0) {
-			BehaviorUtils.setWalkAndLookTargetMemories(crook, BlockPos.containing(a.away), PRISONER_SPEED, 2);
+			if (crook instanceof Villager v) {
+				BehaviorUtils.setWalkAndLookTargetMemories(v, BlockPos.containing(a.away), PRISONER_SPEED, 2);
+			} else {
+				crook.getNavigation().moveTo(a.away.x, a.away.y, a.away.z, 0.9);
+			}
+			if (a.sentence == Sentence.JAIL && a.guard.isAlive()) {
+				a.guard.getNavigation().moveTo(crook, 1.0);
+			}
 		}
 		return true;
 	}
@@ -403,6 +487,9 @@ final class Arrests {
 	private static void done(Arrest a) {
 		for (Sentenced s : SENTENCED) {
 			s.sentenced(a.crook, a.faction, a.sentence.key());
+		}
+		if (a.bringer != null && a.crook.level() instanceof ServerLevel level) {
+			Looters.judged(level, a.bringer, a.faction, a.crook, a.sentence.key());
 		}
 	}
 

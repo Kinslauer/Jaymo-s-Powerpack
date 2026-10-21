@@ -70,6 +70,7 @@ public final class CryoBreath {
 		long now = player.level().getGameTime();
 		HOLDS.put(player.getUUID(), now);
 		CryoPower.set(player, CryoPower.state(player).withBreath(now));
+		CryoMoves.begin(player, CryoMoves.BREATH);
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -79,6 +80,7 @@ public final class CryoBreath {
 		if (from == null) {
 			return;
 		}
+		CryoMoves.end(player, CryoMoves.BREATH);
 		if (Powers.has(player, CryoPower.INSTANCE)) {
 			CryoPower.set(player, CryoPower.state(player).withBreath(-1L));
 			if (cooldown) {

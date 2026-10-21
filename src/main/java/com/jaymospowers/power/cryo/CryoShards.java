@@ -97,6 +97,7 @@ public final class CryoShards {
 			SHARDS.add(new Shard(ball, player, snow, strength));
 		}
 		CryoPower.cooldown(player, CryoState.SHARDS, CryoPower.mastered(player) ? COOLDOWN_MASTERED : COOLDOWN);
+		CryoMoves.begin(player, CryoMoves.SHARDS);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.8F, 0.6F);
 		if (!snow) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_CLUSTER_PLACE, SoundSource.PLAYERS, 0.8F, 1.5F);
