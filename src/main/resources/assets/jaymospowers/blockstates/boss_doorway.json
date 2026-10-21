@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "closed=true": {
+      "model": "jaymospowers:block/aether/boss_doorway"
+    },
+    "closed=false": {
+      "model": "jaymospowers:block/aether/boss_doorway"
+    }
+  }
+}

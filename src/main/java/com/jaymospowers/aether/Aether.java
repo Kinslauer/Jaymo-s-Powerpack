@@ -35,6 +35,8 @@ public final class Aether {
 		com.jaymospowers.aether.mob.AetherMobs.init();
 		// Aether II's hostile mobs (zephyr, tempest, cockatrice, swets, plants, skephid, talutons, bladeshroom hunter)
 		com.jaymospowers.aether.monster.AetherMonsters.init();
+		// the Sentry Ruins: sentry blocks, the Slider and its sentries, the buried dungeon
+		com.jaymospowers.aether.dungeon.Dungeon.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();

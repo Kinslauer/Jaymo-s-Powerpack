@@ -483,3 +483,14 @@ and glitterwing biome gates beyond a name check (see `Insect.pickVariant`), the 
 To check first in game: spawn each from its egg; ride a phyg with valkyrie wings held and put them away; tame an aerbunny with
 oranges; walk into a moa nest (and out); place an egg on sticks and wait; shear a puffed sheepuff; watch two kirrids ram; break
 leaves for a lizard; throw prismallard eggs; follow a taegore to a dig.
+
+## Sentry Ruins and the Slider (Track D, phase 3) [aether.dungeon]
+
+Package `com.jaymospowers.aether.dungeon` (client: `client/aether/dungeon`), lang `lang/parts/aether_dungeon.json`, art and data from `tools/gen_aether_dungeon.py`, sanity check `python3 -I -B tools/check_aether_dungeon.py .`.
+
+- **Structure** `jaymospowers:sentry_ruins`: underground, built in code (`SentryRuins`, `RuinLayout` picks the pieces, `RuinPiece` builds them). Biome tag `has_structure/sentry_ruins` is the Aether biomes minus hestveil and expanse; spacing about 12/6 chunks. Layout: the boss room, a tunnel to a chest room, 0-4 more rooms (lounge, deposit, cold, testing, workshop, forge), a lobby, flights of stairs and a small surface ruin. A layout that would break out into the air, hit itself or reach more than 112 blocks is thrown away (up to 24 tries). "Ground" is the top of the highest run of rock at least 16 thick, because thin floating bits sit above the islands.
+- **Blocks**: sentry_bricks family (stairs, slab, wall, button, lightstone, flagstones, tile, pillar; LIT and POWERED show the sentry current), sentry_spawner, sentry_trap, sentry_crate (30% mimic), locked variants (undershale, undershale bricks, sentry bricks, sentry base bricks, flagstones, lightstone), boss_doorway, treasure_doorway. Locked blocks can only be broken with the Slider dead (they unlock on death in the boss room and the vault behind it).
+- **Mobs**: Slider (350 HP, pickaxe only, bound to its room, crushes and launches, springs a trap every 1/16 of its health, boss bar, opens the doors on death), Detonation Sentry, Sentry Golem (1-2 in some rooms), Mimic. Tuning numbers are `static final` at the top of each class and of `RuinLayout`/`RuinPiece`.
+- **Loot**: `loot_table/chests/sentry_ruins/{common,rare,deposit,cold,boss}.json`, existing items plus vanilla gear.
+- **Checked**: compile check clean (only the 12 expected old errors); the dev server boots and `/place structure jaymospowers:sentry_ruins` in the Aether builds it with one Slider and no log errors.
+- **Not checked in game**: how the rooms look and play, the fight itself, the client renders and skins, how often the structure is found while exploring.

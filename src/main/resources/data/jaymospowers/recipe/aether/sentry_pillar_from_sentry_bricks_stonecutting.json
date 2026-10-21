@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:sentry_bricks",
+  "result": {
+    "id": "jaymospowers:sentry_pillar"
+  }
+}

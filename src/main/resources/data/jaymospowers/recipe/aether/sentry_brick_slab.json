@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:sentry_bricks"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "jaymospowers:sentry_brick_slab",
+    "count": 6
+  }
+}
