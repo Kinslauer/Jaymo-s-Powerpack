@@ -28,7 +28,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.139) Aeolus, father of the winds: the last and the greatest of the wind dragons ({@link WindDragon}), the final
+ * (0.7.141) Aeolus, father of the winds: the last and the greatest of the wind dragons ({@link WindDragon}), the final
  * boss. Huge, ancient, grey-white, with the colour of each of his four sons' winds in his markings. He is never found
  * in the wild: he walks the world as a villager ({@link Disguises}) and shows himself to someone who has beaten three
  * kinds of dragon. He cannot be worn down or tamed ({@link #tameable}); he fights to the end, in three phases:

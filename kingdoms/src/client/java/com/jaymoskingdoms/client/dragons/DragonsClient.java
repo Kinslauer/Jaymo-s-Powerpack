@@ -124,7 +124,7 @@ public final class DragonsClient {
 	}
 
 	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
-		// (0.7.139) some fly faster for some riders (Eurus for a Wind user in a gale)
+		// (0.7.141) some fly faster for some riders (Eurus for a Wind user in a gale)
 		LocalPlayer rider = minecraft.player;
 		double boost = rider == null ? 1.0 : dragon.riderSpeedFactor(rider);
 		boolean tired = dragon.exhausted();

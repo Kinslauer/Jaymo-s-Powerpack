@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.139) Eurus, our own model (blocks, as the Kingdoms beasts are): the storm dragon, lean and long-winged, nothing
+ * (0.7.141) Eurus, our own model (blocks, as the Kingdoms beasts are): the storm dragon, lean and long-winged, nothing
  * like Notus's bulk. A slim, narrow body on tall, slender, taloned legs; a long, supple four-segment neck ending in a
  * small, wedge-shaped head with a crest of swept-back horns (and a pair of small spines on its skull); very long, narrow
  * wings with a swept membrane; a whip tail of six thinning segments ending in a forked fin. Its riders' saddle, girth

@@ -1091,7 +1091,7 @@ public abstract class WindDragon extends AbstractHorse {
 		ItemStack stack = player.getItemInHand(hand);
 		boolean server = !this.level().isClientSide();
 		if (server && this.isTamed() && owner(player)) {
-			// (0.7.139) those who tamed one before the records were kept are known by it too
+			// (0.7.141) those who tamed one before the records were kept are known by it too
 			DragonRecords.tamed(player);
 		}
 		if (!this.isTamed()) {
@@ -1294,7 +1294,7 @@ public abstract class WindDragon extends AbstractHorse {
 		return path.endsWith("_dragon") ? path.substring(0, path.length() - "_dragon".length()) : path;
 	}
 
-	/** (0.7.139) Calmed (Aeolus beaten near it): until game time {@code until} a wild one goes for no one. */
+	/** (0.7.141) Calmed (Aeolus beaten near it): until game time {@code until} a wild one goes for no one. */
 	public void calmUntil(long until) {
 		this.calmUntil = Math.max(this.calmUntil, until);
 		this.foe = null;

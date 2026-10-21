@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.139) Eurus's storm breath: a crackling bolt from its mouth along where it's aimed. It strikes the first creature
+ * (0.7.141) Eurus's storm breath: a crackling bolt from its mouth along where it's aimed. It strikes the first creature
  * on the line (within {@link #RANGE}), then arcs from it to up to {@link #CHAIN_MAX} more near each other, each a little
  * weaker, with sparks along every arc and a crack of thunder. Lightning damage, no fire of its own, and no block is ever
  * touched, with one rare exception: when mobGriefing allows it and it's thundering, the first creature struck may have a

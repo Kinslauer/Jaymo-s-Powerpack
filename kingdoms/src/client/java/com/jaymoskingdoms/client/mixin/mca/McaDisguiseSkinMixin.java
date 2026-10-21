@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.139) Eurus and Aeolus in their villager disguise ({@link Disguises}) wear the dragon's own skin (a 64x64 player
+ * (0.7.141) Eurus and Aeolus in their villager disguise ({@link Disguises}) wear the dragon's own skin (a 64x64 player
  * skin, {@code textures/entity/dragon/<kind>/villager.png}) in place of MCA's, with no tint on it.
  */
 @Mixin(SkinLayer.class)

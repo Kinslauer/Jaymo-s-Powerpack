@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.139) A disguised Eurus or Aeolus ({@link Disguises}) is its skin alone: MCA's clothing, hair and face layers are
+ * (0.7.141) A disguised Eurus or Aeolus ({@link Disguises}) is its skin alone: MCA's clothing, hair and face layers are
  * left out, since the skin already has all of those painted on.
  */
 @Mixin(VillagerLayer.class)

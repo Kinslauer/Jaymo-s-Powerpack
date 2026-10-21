@@ -42,7 +42,7 @@ import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus, and (0.7.139)
+ * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus, and (0.7.141)
  * Eurus and Aeolus, who go about disguised as villagers ({@link Disguises}). In
  * the Overworld each comes as a rare wilderness encounter ({@code Encounters}, biome tags
  * {@code jaymoskingdoms:has_<species>_dragon}): Notus over the badlands, Boreas over the frozen peaks, Zephyrus in the
@@ -94,7 +94,7 @@ public final class Dragons {
 		NOTUS_DRAGON = dragon("notus", NotusDragon::new, NOTUS_WIDTH, NOTUS_HEIGHT, true, NotusDragon.createAttributes());
 		BOREAS_DRAGON = dragon("boreas", BoreasDragon::new, BOREAS_WIDTH, BOREAS_HEIGHT, false, BoreasDragon.createAttributes());
 		ZEPHYRUS_DRAGON = dragon("zephyrus", ZephyrusDragon::new, ZEPHYRUS_WIDTH, ZEPHYRUS_HEIGHT, false, ZephyrusDragon.createAttributes());
-		// (0.7.139) the two in disguise (Disguises): Eurus, the east wind, and Aeolus, keeper of the winds
+		// (0.7.141) the two in disguise (Disguises): Eurus, the east wind, and Aeolus, keeper of the winds
 		EURUS_DRAGON = dragon("eurus", EurusDragon::new, EURUS_WIDTH, EURUS_HEIGHT, false, EurusDragon.createAttributes());
 		AEOLUS_DRAGON = dragon("aeolus", AeolusDragon::new, AEOLUS_WIDTH, AEOLUS_HEIGHT, true, AeolusDragon.createAttributes());
 		NOTUS_DRAGON_SPAWN_EGG = egg(NOTUS_DRAGON);

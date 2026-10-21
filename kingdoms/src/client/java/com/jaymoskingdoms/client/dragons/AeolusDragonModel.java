@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.139) Aeolus, our own model (blocks, as the Kingdoms beasts are), drawn {@link #SCALE} times as big as it is
+ * (0.7.141) Aeolus, our own model (blocks, as the Kingdoms beasts are), drawn {@link #SCALE} times as big as it is
  * built. Built to read as huge and old: a heavy, broad body with a humped shoulder and a ridge of great spikes, a thick
  * neck with a ragged mane of wisps down it and a beard, a skull crowned with swept-back horns (the dragon's own look
  * adds long, short or brow horns to them), the broadest wings of the five (a long arm with thumb-claws and a longer

@@ -261,7 +261,7 @@ final class McaBridge {
 		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0 && !v.isProfessionImportant()
 				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID()))
-				// (0.7.139) never a wind dragon in disguise
+				// (0.7.141) never a wind dragon in disguise
 				&& v.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) == null);
 		if (role == Folk.GUARD && Purists.is(f)) {
 			List<VillagerEntityMCA> kin = all.stream().filter(v -> Purists.kin(f, v)).toList();

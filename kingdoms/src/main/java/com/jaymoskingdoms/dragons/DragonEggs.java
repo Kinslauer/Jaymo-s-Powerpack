@@ -26,7 +26,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.139) Dragon eggs: one per lesser wind dragon (notus, boreas, zephyrus, eurus), dropped by Aeolus when he falls.
+ * (0.7.141) Dragon eggs: one per lesser wind dragon (notus, boreas, zephyrus, eurus), dropped by Aeolus when he falls.
  * Using one on a block hatches a hatchling of that kind right there, tamed to whoever used it (it grows on meat, see
  * {@link WindDragon}); the egg is spent unless the user is in creative.
  */

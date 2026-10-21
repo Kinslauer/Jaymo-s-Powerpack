@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.139) Eurus and Aeolus walk the world as villagers. Andy: "Eurus and Aeolus are actually MCA villagers, they can
+ * (0.7.141) Eurus and Aeolus walk the world as villagers. Andy: "Eurus and Aeolus are actually MCA villagers, they can
  * spawn anywhere and will transform after questioning you if you have already beaten two other dragons"; if you haven't
  * killed the past three "they simply shoo you off unless you have wind control, a tamed dragon, an unlocked heritage,
  * arsenal, chrono or darktide" ({@link DragonRecords}).

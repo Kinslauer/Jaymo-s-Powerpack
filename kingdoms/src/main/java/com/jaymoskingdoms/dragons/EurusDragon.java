@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.139) Eurus, the east wind: the fourth of the five wind dragons ({@link WindDragon}). The storm dragon: the fastest
+ * (0.7.141) Eurus, the east wind: the fourth of the five wind dragons ({@link WindDragon}). The storm dragon: the fastest
  * flier of them and the weakest in the hide, lean and long-winged. It has no home biome and never spawns by itself: it
  * walks the world disguised as a villager ({@link Disguises}) and shows itself to a player who has beaten two other
  * dragons. A wild one that has lost its foe, with no home to go back to, soon flies off high and is gone. Its breath is a

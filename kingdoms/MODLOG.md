@@ -3959,7 +3959,16 @@ back to normal when retracted. and only move when the player does."
   tamed, saddled one.
 - Not yet seen in game: written without a compiler, so the first build may need fixes.
 
-## 0.7.139: Eurus and Aeolus, the dragons in disguise
+## 0.7.140: the Stormborn is earned (pack 0.15.54)
+
+- Andy: "Stormborn should be unlocked as a heritage when wind users corrupt their power." Stormborn is now an earned
+  heritage like the Endborn: hidden as "???" at character creation with a hint, and woken (with its Blood Rite) once
+  the player's Jaymo's Powers Wind is corrupted (Stormbound), checked with the other unlocks every 5 s
+  (`PowersCompat.corrupted`, by reflection on Powers' `Fate.isCorrupted`). Anyone already Stormborn keeps it; villagers
+  are born Stormborn as before.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.141: Eurus and Aeolus, the dragons in disguise
 - Andy: "Eurus and Aeolus are actually MCA villagers, they can spawn anywhere and will transform after questioning you
   if you have already beaten two other dragons." Skins by a friend of Andy's (`textures/entity/dragon/<kind>/villager.png`).
 - **Records** (`dragons/DragonRecords`, kept through death, synced): which kinds of wind dragon a player helped kill (only

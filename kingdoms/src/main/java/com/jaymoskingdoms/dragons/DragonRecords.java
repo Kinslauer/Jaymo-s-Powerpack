@@ -14,7 +14,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.139) What each player has done to the wind dragons, for Eurus and Aeolus in their disguises ({@link Disguises}).
+ * (0.7.141) What each player has done to the wind dragons, for Eurus and Aeolus in their disguises ({@link Disguises}).
  * Andy: they "will transform after questioning you if you have already beaten two other dragons"; "if you haven't
  * killed the past three they simply shoo you off unless you have wind control, a tamed dragon, an unlocked heritage,
  * arsenal, chrono or darktide". Only kills count (Andy), and only different kinds: Eurus wants two of the wind dragons

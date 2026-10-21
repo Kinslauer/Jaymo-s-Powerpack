@@ -24,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> extends MobRenderer<WindDragon, WindDragonRenderer.State, M> {
 	/** How far past its box its wings, neck and tail reach (blocks), for culling. */
 	static final double REACH = 4.5, REACH_UP = 1.5;
-	/** (0.7.139) A hatchling is drawn this big. */
+	/** (0.7.141) A hatchling is drawn this big. */
 	static final float HATCHLING_SCALE = 0.35F;
 
 	static final class State extends LivingEntityRenderState {
@@ -41,7 +41,7 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		this(context, species, model, shadow, 1.0F);
 	}
 
-	/** (0.7.139) {@code scale}: how much bigger than its model it's drawn (Aeolus). */
+	/** (0.7.141) {@code scale}: how much bigger than its model it's drawn (Aeolus). */
 	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow, float scale) {
 		super(context, model, shadow);
 		this.species = species;

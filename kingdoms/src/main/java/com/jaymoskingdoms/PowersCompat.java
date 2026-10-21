@@ -14,6 +14,8 @@ import org.jspecify.annotations.Nullable;
 public final class PowersCompat {
 	private static boolean looked;
 	private static @Nullable AttachmentType<Identifier> power;
+	/** (0.7.140) Powers' {@code Fate.isCorrupted(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle corrupted;
 
 	private PowersCompat() {
 	}
@@ -25,6 +27,16 @@ public final class PowersCompat {
 		return id == null ? null : id.getPath();
 	}
 
+	/** (0.7.140) Whether {@code player}'s power has been corrupted (Wind's Stormbound, say); false without Powers. */
+	public static boolean corrupted(Player player) {
+		type();
+		try {
+			return corrupted != null && (boolean)corrupted.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static @Nullable AttachmentType<Identifier> type() {
 		if (!looked) {
@@ -32,6 +44,8 @@ public final class PowersCompat {
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
 				try {
 					power = (AttachmentType<Identifier>)Class.forName("com.jaymospowers.core.Powers").getField("POWER").get(null);
+					corrupted = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Fate"), "isCorrupted",
+						java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
 				} catch (ReflectiveOperationException | ClassCastException | LinkageError e) {
 					JaymosKingdoms.LOGGER.warn("Couldn't read Jaymo's Powers' power attachment", e);
 				}

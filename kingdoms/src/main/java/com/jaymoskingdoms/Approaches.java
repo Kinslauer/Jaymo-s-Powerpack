@@ -545,7 +545,7 @@ public final class Approaches {
 	private static boolean free(Mob mob) {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
 			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)
-			// (0.7.139) a wind dragon in disguise keeps its own counsel
+			// (0.7.141) a wind dragon in disguise keeps its own counsel
 			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;
 		}
@@ -1099,7 +1099,7 @@ public final class Approaches {
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
 		if (com.jaymoskingdoms.dragons.Disguises.answer(player, answer)) {
-			// (0.7.139) a villager who isn't one, questioning you
+			// (0.7.141) a villager who isn't one, questioning you
 			return;
 		}
 		if (Skills.answer(player, answer)) {
