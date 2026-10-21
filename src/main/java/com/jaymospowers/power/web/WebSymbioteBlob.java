@@ -466,7 +466,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 			if (!this.wants(player, Vec3.atCenterOf(this.getHomePosition()))) {
 				return;
 			}
-			if (!this.takes()) {
+			if (!this.takes(player)) {
 				// (0.15.52) not this time: it goes for them instead (and tries again with every lash: defend)
 				this.marks(player);
 				return;
@@ -523,9 +523,13 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/**
 	 * (0.15.52) Andy: "Red should have a 30% chance to bond, every other time it still attacks, black is more curious and
-	 * will bond instead of attack 80%". Rolled each time it could take a player (reaching them, or each lash).
+	 * will bond instead of attack 80%". Rolled each time it could take a player (reaching them, or each lash). Andy: "Web
+	 * is exempt, they should always bond like they used to."
 	 */
-	private boolean takes() {
+	private boolean takes(Player player) {
+		if (Powers.has(player, WebPower.INSTANCE)) {
+			return true;
+		}
 		float chance = switch (this.strain()) {
 			case RED -> RED_BOND_CHANCE;
 			case BLACK -> BLACK_BOND_CHANCE;
@@ -554,7 +558,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		Vec3 to = foe.position().add(0.0, foe.getBbHeight() * 0.6, 0.0);
 		this.tendril(level, from, to);
 		this.getLookControl().setLookAt(foe, 90.0F, 90.0F);
-		if (foe instanceof ServerPlayer player && this.wants(player, player.position()) && this.takes()) {
+		if (foe instanceof ServerPlayer player && this.wants(player, player.position()) && this.takes(player)) {
 			// it goes for the one it was always after: up the tendril and in
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
 			Shakes.send(player, 8.0F, from);
