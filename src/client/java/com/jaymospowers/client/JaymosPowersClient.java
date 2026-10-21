@@ -81,6 +81,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);

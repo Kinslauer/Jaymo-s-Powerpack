@@ -2115,3 +2115,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
   snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
   server crash (not a normal stop) leaves the ice standing.
+
+## 0.15.28: seasons reach the powers (with Kitchen 0.5.6, Kingdoms 0.7.121)
+Kitchen 0.5.6 brings the pack's own seasons. Andy asked how the powers should feel them and said "all of em".
+`core/Seasons` reads Kitchen's calendar by reflection, so it fails soft without it. It only counts in temperate lands.
+- **Cryokinesis:** `CryoPower.strength` is x1.2 in winter and x0.85 in summer.
+- **Ember:** winter counts as chilled for `EmberKindle.chilled`. In summer, Kindle, the fireball and Flashover do x1.2
+  fire damage (`EmberKindle.seasonal`).
+- **Smoke:** in winter, `SmokeField` fades at x0.6 and rises at half rate, so it hangs low and lingers.
+- **Symbiote:** in winter its hunger drains 1.5x faster (`WebSymbiote.WINTER_HUNGER`).
+- **Darktide:** in winter, `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later.
+- **Everyone with a power:** client `SeasonAura` draws an occasional mote: cherry petals in spring, fireflies on
+  summer nights, poplar leaves in autumn and snowflakes in winter. A Wind user is wrapped in a spinning whirl of them,
+  which thickens in flight.
+- **Wind in winter:** Kitchen's winter chill already makes temperate lands cold enough to snow. So
+  `WindCold.isCold` now counts them in winter too, and Wind's wind-ups and cooldowns stretch there.

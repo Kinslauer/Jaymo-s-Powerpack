@@ -5,6 +5,7 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Seasons;
 import com.jaymospowers.power.wind.WindCold;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.mojang.serialization.Codec;
@@ -56,6 +57,8 @@ public final class CryoPower implements Power {
 	// ---- tuning ----
 	/** A Frost-born in the cold: the power's numbers (reach, freezing, damage, how long the ice holds) are this much stronger. */
 	public static final float FROST_BORN_COLD = 1.25F;
+	/** (0.15.28) Strength in winter and in summer, where there are seasons (Kitchen's). */
+	static final float WINTER_STRENGTH = 1.2F, SUMMER_STRENGTH = 0.85F;
 	/** How many abilities unlock Snow mode (Z, with Frost Breath) and the Ice Wall (X). */
 	static final int MODE_AT = 2;
 	static final int WALL_AT = 3;
@@ -243,9 +246,14 @@ public final class CryoPower implements Power {
 		return ZFighterLineage.of(player) == ZFighterLineage.FROST;
 	}
 
-	/** The power's strength: {@link #FROST_BORN_COLD} for a Frost-born where it would snow, else 1. */
+	/**
+	 * The power's strength: {@link #FROST_BORN_COLD} for a Frost-born where it would snow, else 1; (0.15.28) times
+	 * {@link #WINTER_STRENGTH} in winter and {@link #SUMMER_STRENGTH} in summer in a land with seasons ({@link Seasons}).
+	 */
 	public static float strength(Player player) {
-		return frostBorn(player) && WindCold.isCold(player) ? FROST_BORN_COLD : 1.0F;
+		float base = frostBorn(player) && WindCold.isCold(player) ? FROST_BORN_COLD : 1.0F;
+		Seasons.Season season = Seasons.at(player);
+		return season == Seasons.Season.WINTER ? base * WINTER_STRENGTH : season == Seasons.Season.SUMMER ? base * SUMMER_STRENGTH : base;
 	}
 
 	/** Too hungry to keep a held move up (creative never is). */
