@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The guard's crossed forearms, raised before the face, on everyone who holds it up. (0.15.32) It eases up and down
+ * The guard's crossed forearms, raised before the face, on everyone who holds it up. (0.15.40) It eases up and down
  * ({@link PoseBlend}), with a fighter's stance under it: chin tucked, shoulders a little forward, knees set, feet apart.
  */
 public final class ZFighterGuardPose {

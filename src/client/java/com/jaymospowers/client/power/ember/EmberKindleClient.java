@@ -37,10 +37,10 @@ public final class EmberKindleClient {
 	static final int BAR_WIDTH = 52, BAR_UP = 33, BAR_UP_SMOKE = 47;
 	static final int HEAT_COLOR = 0xFF7A1A, WHITE_COLOR = 0xFFF4E0;
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:ember_kindle");
-	/** (0.15.32) The heat (0-1) on everyone kindling, for the arm's tremble and the throw. */
+	/** (0.15.40) The heat (0-1) on everyone kindling, for the arm's tremble and the throw. */
 	static final RenderStateDataKey<Float> HEAT = RenderStateDataKey.create(() -> "jaymospowers:ember_kindle_heat");
 
-	// ---- (0.15.32) the flame arm's motion (seconds and radians; see applyModel)
+	// ---- (0.15.40) the flame arm's motion (seconds and radians; see applyModel)
 	/** The shoulder drawn back before the push: how long, how far the arm (x) and the body turn away (hip yaw). */
 	static final float COIL_TIME = 0.18F, COIL_ARM = 0.45F, COIL_TURN = 0.22F;
 	/** Pushed out: the body turned in behind it (hip yaw, - is the right shoulder forward) and leaned in. */
@@ -143,7 +143,7 @@ public final class EmberKindleClient {
 	}
 
 	/**
-	 * (0.15.32, was a straight arm switched on and off) The flame arm: the shoulder draws back with the body turned away,
+	 * (0.15.40, was a straight arm switched on and off) The flame arm: the shoulder draws back with the body turned away,
 	 * then the arm pushes out along the look with the body turned in behind it, the free arm braced out and the feet set
 	 * apart; it trembles more as the heat builds. Let go at full heat, the arm whips up over the shoulder and through
 	 * with the throw. It all eases in and out ({@link com.jaymospowers.client.PoseBlend}).

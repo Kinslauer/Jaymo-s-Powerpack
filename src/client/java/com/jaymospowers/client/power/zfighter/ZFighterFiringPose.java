@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * Both arms thrust out along the beam, heels of the hands together, on everyone whose fired wave is still out. (0.15.32)
+ * Both arms thrust out along the beam, heels of the hands together, on everyone whose fired wave is still out. (0.15.40)
  * Eased in and out ({@link PoseBlend}), braced against it: leaned in, the feet planted wide one before the other, the
  * arms shaking with the beam's push.
  */

@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
  * state holds them in the crawl) or on two broken legs. A roll turns the body over once along its length, arms
  * stretched past the head and legs together.
  * <p>
- * (0.15.32) An army crawl: one forearm reaches ahead, lifted off the ground, and plants while the other pulls back under
+ * (0.15.40) An army crawl: one forearm reaches ahead, lifted off the ground, and plants while the other pulls back under
  * the chest; the opposite knee drives up the side as each arm reaches; the body rocks onto the driving side and the
  * head lifts to look ahead on each pull. A broken arm or leg (Wounds, synced to all) is left to drag (it hangs limp,
  * {@code Dismembered}) and the good ones work harder, the body rocking more onto them. Downed, it's slower and uneven,

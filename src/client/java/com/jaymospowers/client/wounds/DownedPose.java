@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
  * Anything else (a downed wolf or horse) lies on its side. Players aren't drawn here: the downed state holds them in
  * {@code Crawl}'s pose ({@code CrawlPose}). Nor is anyone being carried ({@code CarryPose}).
  * <p>
- * (0.15.32) They go down with weight: the knees give, then the body drops faster and faster and bounces a little as it
+ * (0.15.40) They go down with weight: the knees give, then the body drops faster and faster and bounces a little as it
  * hits. A crawler crawls as a downed player does ({@link CrawlPose#stroke}: arms reaching and pulling in turn, the
  * opposite knee driving, the body rocking, a broken limb dragged). One on its back breathes hard and uneven, a hand
  * clutched to its worst wound (a broken arm or leg, Wounds' breaks being what everyone sees; else the chest), and now and

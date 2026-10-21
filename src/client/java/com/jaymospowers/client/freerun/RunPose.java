@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
  * forward from the feet; a slider ({@link Slide#sliding}) drops into a feet-first slide. Both come from the synced flags,
  * so they show on every player in view.
  * <p>
- * (0.15.32) Both ease now ({@link PoseBlend}). The lean comes and goes on a spring. The slide (it was the swimming pose,
+ * (0.15.40) Both ease now ({@link PoseBlend}). The lean comes and goes on a spring. The slide (it was the swimming pose,
  * arms straight up and legs locked together) drops in on bent knees, then lies back on one hip: the lead leg out, the
  * other tucked, one hand trailing the ground and the other up for balance, the head up and looking ahead; when it ends
  * it springs back up into the run with a pop forward. Vanilla's swimming tilt is switched off for it (as for a carried

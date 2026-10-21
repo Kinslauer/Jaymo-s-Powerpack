@@ -23,7 +23,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * (0.15.37) Cryokinesis' body poses, on everyone's screen (third person; from the synced {@link CryoSlide#SLIDING},
+ * (0.15.40) Cryokinesis' body poses, on everyone's screen (third person; from the synced {@link CryoSlide#SLIDING},
  * {@link CryoBlizzard#STORM} and {@link CryoMoves#MOVE}). The held ones (the slide, the breath, the Blizzard) come and go
  * on small springs ticked here per player, so they ease in, overshoot a hair and settle, and ease out after the move
  * ends; the one-shots run on eased curves with a wind-up and a follow-through. The torso turns at the waist and carries

@@ -11,7 +11,7 @@ import net.minecraft.util.Mth;
  * A player carrying a corpse holds both arms out in front, under it. Set on the player's render state by
  * {@code AvatarRendererMixin}; applied (to their body and their armour alike) after the model animates.
  * <p>
- * (0.5.8) Eased and weighted ({@link PoseEase}): the arms go down to take it and lift it, then hold it with a strain;
+ * (0.5.9) Eased and weighted ({@link PoseEase}): the arms go down to take it and lift it, then hold it with a strain;
  * each step the arms dip under the weight and the body leans back against it; letting go, the arms ease back down.
  */
 public final class CarryPose {

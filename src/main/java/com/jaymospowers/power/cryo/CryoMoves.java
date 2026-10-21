@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.37) Which Cryokinesis move a player is making and since when, synced to everyone so every screen draws its pose
+ * (0.15.40) Which Cryokinesis move a player is making and since when, synced to everyone so every screen draws its pose
  * ({@code CryoPose}), as Smoke's {@code SmokeMoves}. Frost Breath is held and lasts while the breath does; the shards,
  * Flash Freeze and the Ice Wall are one-shots that play for {@link #length} ticks. Ice Slide and the Blizzard have synced
  * flags of their own ({@link CryoSlide#SLIDING}, {@link CryoBlizzard#STORM}).

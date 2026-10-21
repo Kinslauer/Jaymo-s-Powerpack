@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 /**
  * How a player on a ledge looks, for everyone: hanging, the body square to the wall with both arms up on the edge and
  * the legs dangling, swaying a little from the hands; climbing, the arms pull down and press on the top while the body
- * leans in over it, the right knee comes up onto the edge, then the left, and they stand. (0.15.32) Catching the edge
+ * leans in over it, the right knee comes up onto the edge, then the left, and they stand. (0.15.40) Catching the edge
  * eases in ({@link PoseBlend}): the arms come up on springs, the body swings in under the hands from the catch and
  * settles into the hang, the legs swinging after it; letting go or standing eases back out.
  */
