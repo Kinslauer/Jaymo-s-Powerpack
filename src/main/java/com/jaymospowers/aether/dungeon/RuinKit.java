@@ -1,8 +1,8 @@
 package com.jaymospowers.aether.dungeon;
 
 import com.jaymospowers.JaymosPowers;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -17,7 +17,7 @@ final class RuinKit {
 	/** Share of plain undershale (the rest is undershale bricks) in a wall. */
 	static final float UNDERSHALE_SHARE = 0.4F;
 
-	private static final Map<String, Block> BLOCKS = new HashMap<>();
+	private static final Map<String, Block> BLOCKS = new ConcurrentHashMap<>();
 
 	private RuinKit() {
 	}

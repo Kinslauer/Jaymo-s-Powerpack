@@ -19,8 +19,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class DemolitionBomb extends ThrowableItemProjectile {
 	// ---- tuning ----
-	/** Burst radius against the ground and a player, ticks it may fly, and how it falls (blocks per tick squared). */
-	public static final float BLAST = 1.5F, BLAST_ON_PLAYER = 2.0F;
+	/** Burst radius on a block, on another entity and on a player entity; ticks it may fly; how it falls (blocks per tick squared). */
+	public static final float BLAST = 1.5F, BLAST_ON_ENTITY = 1.25F, BLAST_ON_PLAYER = 1.5F;
 	public static final int LIFETIME = 160;
 	public static final double GRAVITY = 0.05;
 
@@ -70,8 +70,11 @@ public class DemolitionBomb extends ThrowableItemProjectile {
 	protected void onHit(HitResult hit) {
 		super.onHit(hit);
 		if (this.level() instanceof ServerLevel level && !this.isRemoved()) {
-			boolean onPlayer = hit instanceof net.minecraft.world.phys.EntityHitResult entityHit && entityHit.getEntity() instanceof Player;
-			level.explode(this.getOwner(), this.getX(), this.getY(), this.getZ(), onPlayer ? BLAST_ON_PLAYER : BLAST, Level.ExplosionInteraction.NONE);
+			float radius = BLAST;
+			if (hit instanceof net.minecraft.world.phys.EntityHitResult entityHit) {
+				radius = entityHit.getEntity() instanceof Player ? BLAST_ON_PLAYER : BLAST_ON_ENTITY;
+			}
+			level.explode(this.getOwner(), this.getX(), this.getY(), this.getZ(), radius, Level.ExplosionInteraction.NONE);
 			this.discard();
 		}
 	}
