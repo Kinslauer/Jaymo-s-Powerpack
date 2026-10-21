@@ -57,7 +57,7 @@ public final class CryoPower implements Power {
 	// ---- tuning ----
 	/** A Frost-born in the cold: the power's numbers (reach, freezing, damage, how long the ice holds) are this much stronger. */
 	public static final float FROST_BORN_COLD = 1.25F;
-	/** (0.15.30) Strength in winter and in summer, where there are seasons (Kitchen's). */
+	/** (0.15.31) Strength in winter and in summer, where there are seasons (Kitchen's). */
 	static final float WINTER_STRENGTH = 1.2F, SUMMER_STRENGTH = 0.85F;
 	/** How many abilities unlock Snow mode (Z, with Frost Breath) and the Ice Wall (X). */
 	static final int MODE_AT = 2;
@@ -140,6 +140,12 @@ public final class CryoPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, CryoState.NONE);
+	}
+
+	/** (0.15.31) Downed: the slide, the breath and the blizzard end (no cooldown). */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		forget(player);
 	}
 
 	@Override
@@ -247,7 +253,7 @@ public final class CryoPower implements Power {
 	}
 
 	/**
-	 * The power's strength: {@link #FROST_BORN_COLD} for a Frost-born where it would snow, else 1; (0.15.30) times
+	 * The power's strength: {@link #FROST_BORN_COLD} for a Frost-born where it would snow, else 1; (0.15.31) times
 	 * {@link #WINTER_STRENGTH} in winter and {@link #SUMMER_STRENGTH} in summer in a land with seasons ({@link Seasons}).
 	 */
 	public static float strength(Player player) {
