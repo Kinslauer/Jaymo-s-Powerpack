@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:guardian_log"
+  ],
+  "result": {
+    "id": "jaymospowers:guardian_planks",
+    "count": 4
+  }
+}

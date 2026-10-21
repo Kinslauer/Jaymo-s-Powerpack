@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymospowers:block/aether/stripped_amberoot_log_top",
+    "side": "jaymospowers:block/aether/stripped_amberoot_log"
+  }
+}

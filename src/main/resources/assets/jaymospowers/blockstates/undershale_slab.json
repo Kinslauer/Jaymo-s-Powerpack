@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/undershale_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/undershale"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/undershale_slab_top"
+    }
+  }
+}

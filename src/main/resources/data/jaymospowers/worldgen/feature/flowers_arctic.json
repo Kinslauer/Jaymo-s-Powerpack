@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "jaymospowers:lilichime",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:blade_poa",
+        "weight": 2
+      },
+      {
+        "data": "jaymospowers:pluracian",
+        "weight": 2
+      },
+      {
+        "data": "jaymospowers:white_flower",
+        "weight": 4
+      }
+    ]
+  }
+}

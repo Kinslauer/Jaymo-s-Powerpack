@@ -1,0 +1,23 @@
+{
+  "default_block": "jaymospowers:holystone",
+  "default_fluid": "minecraft:water",
+  "disable_mob_generation": false,
+  "legacy_random_source": true,
+  "material_rule": "jaymospowers:aether",
+  "noise": {
+    "height": 384,
+    "min_y": 0
+  },
+  "noise_router": {
+    "chunk_surface_level": 0.0,
+    "continents": 0.0,
+    "depth": "jaymospowers:aether/climate/depth",
+    "erosion": "jaymospowers:aether/climate/erosion",
+    "final_density": "jaymospowers:aether/terrain/final_islands",
+    "ridges": "jaymospowers:aether/climate/weirdness",
+    "temperature": "jaymospowers:aether/climate/temperature",
+    "vegetation": "jaymospowers:aether/climate/humidity"
+  },
+  "sea_level": -64,
+  "spawn_target": []
+}

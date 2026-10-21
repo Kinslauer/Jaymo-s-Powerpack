@@ -1,0 +1,111 @@
+{
+  "attributes": {
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.2,
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/fog_color": "#f0e8be",
+    "minecraft:visual/sky_color": "#fcebc5",
+    "minecraft:visual/water_fog_color": "#bccc81",
+    "minecraft:visual/ambient_particles": {
+      "argument": [
+        {
+          "particle": {
+            "type": "minecraft:end_rod"
+          },
+          "probability": 0.00625
+        }
+      ],
+      "modifier": "append"
+    }
+  },
+  "carvers": [],
+  "downfall": 0.3,
+  "effects": {
+    "water_color": "#aed4bf",
+    "grass_color": "#d8e69a",
+    "foliage_color": "#d8e69a"
+  },
+  "features": [
+    [
+      "jaymospowers:cloudbed"
+    ],
+    [
+      "jaymospowers:lake_water"
+    ],
+    [
+      "jaymospowers:disk_quicksoil",
+      "jaymospowers:boulder_holystone",
+      "jaymospowers:quicksoil_shelf"
+    ],
+    [],
+    [],
+    [],
+    [
+      "jaymospowers:ore_agiosite",
+      "jaymospowers:ore_agiosite_small",
+      "jaymospowers:ore_ambrosium",
+      "jaymospowers:ore_ambrosium_high",
+      "jaymospowers:ore_arkenium",
+      "jaymospowers:ore_corrobonite",
+      "jaymospowers:ore_glint",
+      "jaymospowers:ore_gravitite",
+      "jaymospowers:ore_gravitite_buried",
+      "jaymospowers:ore_zanite",
+      "jaymospowers:ore_zanite_mountain",
+      "jaymospowers:ore_quartz",
+      "jaymospowers:ore_icestone",
+      "jaymospowers:ore_icestone_small",
+      "jaymospowers:ore_crude_scatterglass",
+      "jaymospowers:ore_ichorite"
+    ],
+    [
+      "jaymospowers:pointed_holystone",
+      "jaymospowers:pointed_holystone_cave"
+    ],
+    [
+      "jaymospowers:spring_water"
+    ],
+    [
+      "jaymospowers:trees_battleground_wastes",
+      "jaymospowers:trees_battleground_wastes_high",
+      "jaymospowers:grass_irradiated",
+      "jaymospowers:blueberry_irradiated",
+      "jaymospowers:orange_trees_irradiated",
+      "jaymospowers:holystone_rocks",
+      "jaymospowers:holystone_twigs"
+    ],
+    [
+      "jaymospowers:aercloud_cold_surface",
+      "jaymospowers:aercloud_golden_surface",
+      "jaymospowers:aercloud_blue_surface",
+      "jaymospowers:aercloud_green_surface",
+      "jaymospowers:aercloud_purple_surface",
+      "jaymospowers:aercloud_blue_lower",
+      "jaymospowers:aercloud_green_lower",
+      "jaymospowers:aercloud_purple_lower",
+      "jaymospowers:aercloud_storm_lower",
+      "jaymospowers:aercloud_cold_middle",
+      "jaymospowers:aercloud_storm_middle",
+      "jaymospowers:aercloud_green_high",
+      "jaymospowers:aercloud_purple_high",
+      "jaymospowers:aercloud_storm_high",
+      "jaymospowers:crystal_island"
+    ]
+  ],
+  "has_precipitation": true,
+  "temperature": 1.0
+}

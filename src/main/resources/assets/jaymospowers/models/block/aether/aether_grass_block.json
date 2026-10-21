@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/aether_dirt",
+    "top": "jaymospowers:block/aether/aether_grass_block_top",
+    "side": "jaymospowers:block/aether/aether_grass_block_side"
+  }
+}

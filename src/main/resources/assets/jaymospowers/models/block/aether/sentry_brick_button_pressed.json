@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/button_pressed",
+  "textures": {
+    "texture": "jaymospowers:block/aether/sentry_bricks"
+  }
+}

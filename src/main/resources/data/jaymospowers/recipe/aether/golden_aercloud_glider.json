@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "jaymospowers:golden_aercloud",
+    "T": "jaymospowers:cloudtwine",
+    "S": "minecraft:stick",
+    "Z": "jaymospowers:golden_amber"
+  },
+  "pattern": [
+    "AAA",
+    "TZT",
+    "S S"
+  ],
+  "result": {
+    "id": "jaymospowers:golden_aercloud_glider"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:undershale",
+  "result": {
+    "id": "jaymospowers:undershale_stairs"
+  }
+}

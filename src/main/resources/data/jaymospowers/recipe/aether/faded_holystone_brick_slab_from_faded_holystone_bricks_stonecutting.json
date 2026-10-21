@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:faded_holystone_bricks",
+  "result": {
+    "id": "jaymospowers:faded_holystone_brick_slab",
+    "count": 2
+  }
+}

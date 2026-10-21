@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_chain",
+  "textures": {
+    "texture": "jaymospowers:block/aether/arkenium_chain"
+  }
+}

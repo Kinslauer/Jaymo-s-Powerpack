@@ -2340,3 +2340,33 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.57, ships Jaymo's Kingdoms 0.7.144 and Kitchen 0.5.12 (Better With Mods batch 5, atmosphere):** Gloom with
   Blood-Moon-only damage, the beacon watch-light, skittish herds, fish bait and the exploding pot. This finishes the
   BWM port. No Powers code changed. Details in the Kingdoms and Kitchen MODLOGs.
+- **0.15.58, the Aether II's Holy Isles; Wind and Arsenal ways in:** Andy tied the Aether into the pack's lore (Kingdoms
+  0.7.145's monoliths and Giants are its last remnants), wanted Wind to be the way there, as Chrono's Fast Forward is to
+  the future, and then: "i need you to do whatever you can to replicate that dimension [The Aether II] for us. all our
+  same entry methods, just with the proper dungeons mobs and blocks." So `jaymospowers:aether` is now a clean-room remake
+  of The Aether II's Holy Isles (names, numbers and behaviour only; every line of code, JSON, texture and structure is
+  ours, painted and built by `tools/gen_aether*.py`). See `docs/aether.md`.
+  - **Ways in:** a Wind user with B unlocked who flies to the top of the Overworld rises into the Aether
+    (`power/wind/aether/WindAether`) with everyone within 4 blocks; falling out of its bottom drops anyone home at the
+    same x/z, 48 blocks above the ground on Slow Falling. Arsenal users mark places (Sneak+R) and open standing portal
+    pairs to marked or recent places from a radial menu (Sneak+G), up to 3 pairs, each lasting a Minecraft day
+    (`ArsenalPlaces`, `ArsenalStanding`). Emberborn Arsenal rifts now and then (30%) tear into the Nether instead of the
+    pocket (`ArsenalEmber`); after the first escape, Sneak+Z toggles pocket/Nether.
+  - **The world:** y -32 to 384, big lowland islands with caves and the Hestveil caverns, a broken archipelago above
+    y 128, a cloudbed below; 16 biomes in four zones (Highfields, Magnetic, Arctic, Irradiated) with their trees, ores,
+    aerclouds in six colours, ice spikes, ferrosite spires, moss, lakes, huge magnetic shrooms and moa nests; day and
+    night like the Overworld.
+  - **Blocks:** about 380 new: undershale, agiosite, ichorite, ferrosite and their building families, arctic snow and
+    ice, arkenium/glint/corrobonite/quartz ores, scatterglass, cloudwool in 17 colours, greatroot/wisproot/amberoot and
+    guardian woods, ten tree types, flowers, fruit, arilum, moss, mushrooms, vases, campfires, the altar.
+  - **Mobs:** 11 monsters (Zephyr, Tempest, Cockatrice, Blue and Golden Swet, Aechor Plant, Carrion Sprout, Skephid,
+    Arkenium and Gravitite Taluton, Bladeshroom Hunter); 8 new animals (Kirrid, Burrukai, Taegore, Skyroot Lizard,
+    Prismallard, Glitterwing, Shroudwing, Aerwhale) and the Moa, Phyg, Flying Cow, Sheepuff and Aerbunny brought to the
+    Aether II's rules (valkyrie wings to ride, moa nests, eggs and stamina).
+  - **Dungeons and structures:** the Sentry Ruins with the Slider boss (pickaxes only), sentry traps and spawners,
+    mimic crates; outposts (campfire respawn), camps, watchtowers, animal dens, Veradexian ruins, library and aqueduct,
+    the ancient henge, Brexallen ruins, the undercloud mineshaft, irradiated remnants, the infected guardian tree.
+  - **Gear:** skyroot/holystone/zanite/arkenium/gravitite tools and hammers, six armour sets with set abilities, four
+    aercloud gliders, the ambrosium altar.
+  Compiles against the real 26.3 jars; a dev server boots, generates the Aether and places its structures. Not yet
+  playtested in a client.

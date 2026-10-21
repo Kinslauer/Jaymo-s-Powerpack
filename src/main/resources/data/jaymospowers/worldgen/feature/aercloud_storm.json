@@ -1,0 +1,7 @@
+{
+  "type": "jaymospowers:aercloud",
+  "cloud": "storm",
+  "bounds": 14,
+  "spread": 4,
+  "thickness": 2
+}

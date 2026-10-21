@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "jaymospowers:wisproot_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:wisproot_button"
+  },
+  "group": "wooden_button"
+}

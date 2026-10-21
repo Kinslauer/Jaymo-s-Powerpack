@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": "jaymospowers:skyroot_planks"
+  },
+  "pattern": [
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:skyroot_pressure_plate"
+  },
+  "group": "wooden_pressure_plate"
+}

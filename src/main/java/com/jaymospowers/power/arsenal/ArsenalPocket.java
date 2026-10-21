@@ -104,6 +104,8 @@ public final class ArsenalPocket {
 		final boolean voidRift;
 		final long opened;
 		long until;
+		/** (0.13.35) An Emberborn's Nether rift (see {@link ArsenalEmber}): to the Nether, or from the Nether to the Overworld. */
+		boolean nether;
 
 		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, @Nullable Vec3 arrive, boolean voidRift,
 			long opened, long until) {
@@ -214,11 +216,19 @@ public final class ArsenalPocket {
 			return;
 		}
 		boolean out = level.dimension() == POCKET;
-		int room = out ? roomAt(player.blockPosition()) : room(player);
+		// (0.13.35) rolled here, once, so whoever follows through goes the same way
+		boolean nether = !out && ArsenalEmber.netherRift(player, level);
+		int room = out || nether ? roomAt(player.blockPosition()) : room(player);
 		Vec3 at = riftSpot(player);
-		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, out ? null : pocketGate(player, room),
+		Rift made = new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, out || nether ? null : pocketGate(player, room),
 			ArsenalVoid.isVoid(player), level.getGameTime(),
-			level.getGameTime() + RIFT_TICKS));
+			level.getGameTime() + RIFT_TICKS);
+		made.nether = nether;
+		RIFTS.add(made);
+		if (nether) {
+			ArsenalEmber.opened(level, at);
+			return;
+		}
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.7F, 0.6F);
@@ -352,7 +362,10 @@ public final class ArsenalPocket {
 				if (!RIFTS.contains(rift) || other.isSpectator() || !other.isAlive() || tick - LAST_PASS.getOrDefault(other.getUUID(), -1000L) <= PASS_COOLDOWN) {
 					continue;
 				}
-				if (rift.out) {
+				if (rift.nether) {
+					LAST_PASS.put(other.getUUID(), tick);
+					ArsenalEmber.cross(other, other.getUUID().equals(rift.owner));
+				} else if (rift.out) {
 					leave(other);
 				} else {
 					enter(other, rift.room, rift.arrive);
@@ -396,6 +409,10 @@ public final class ArsenalPocket {
 	/** The doorway itself is drawn on the client; here, only a few motes drift off it. */
 	private static void outline(ServerLevel level, Rift rift) {
 		Vec3 c = rift.pos.add(0.0, RIFT_HEIGHT / 2.0, 0.0);
+		if (rift.nether) {
+			ArsenalEmber.flames(level, c, 3);
+			return;
+		}
 		level.sendParticles(rift.voidRift ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.PORTAL, c.x, c.y, c.z, 3, 0.3, 0.7, 0.3, 0.2);
 	}
 
@@ -415,6 +432,8 @@ public final class ArsenalPocket {
 					list.add(new Portal(rift.pos.x, rift.pos.y, rift.pos.z, rift.yaw, rift.opened, voidRift, false));
 				}
 			}
+			// (0.15.58) the standing portals (Sneak + G menu) are drawn the same way
+			ArsenalStanding.portalsNear(server, here, me, VIEW_DISTANCE, list);
 			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 				for (ArsenalGates.Gate gate : ArsenalGates.gates(player)) {
 					if (gate.dimension() == here && gate.pos().distanceToSqr(me) < VIEW_DISTANCE * VIEW_DISTANCE) {

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:wisproot_log",
+    "jaymospowers:bryalinn_moss_block"
+  ],
+  "result": {
+    "id": "jaymospowers:mossy_wisproot_log"
+  },
+  "group": "mossy_log"
+}

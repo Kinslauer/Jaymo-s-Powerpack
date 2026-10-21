@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/skyroot_planks",
+    "side": "jaymospowers:block/aether/skyroot_planks",
+    "top": "jaymospowers:block/aether/skyroot_planks"
+  }
+}

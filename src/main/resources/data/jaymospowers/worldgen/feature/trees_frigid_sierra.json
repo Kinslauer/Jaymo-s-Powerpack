@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:greatboa_decorated_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": {
+        "feature": "jaymospowers:skypine_decorated_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0025,
+      "feature": {
+        "feature": "jaymospowers:amberoot_snowy_tree",
+        "placement": []
+      }
+    }
+  ]
+}
