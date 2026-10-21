@@ -1,0 +1,65 @@
+{
+  "_comment": "Epic Structures: Villages' desert windmill. Sails face south (+z); the shaft runs through the wall (z=15) to a corner in the middle of the top room, where the stone grindstone was, and turns down into a mill on the centre post.",
+  "template": "minecraft:village/desert/houses/desert_fisher_1",
+  "size": [
+    26,
+    23,
+    19
+  ],
+  "hub": [
+    13,
+    14,
+    17
+  ],
+  "sail_plane": {
+    "from": [
+      6,
+      7,
+      17
+    ],
+    "to": [
+      19,
+      21,
+      17
+    ]
+  },
+  "sail_blocks": [
+    "minecraft:diorite",
+    "minecraft:diorite_stairs",
+    "minecraft:dark_oak_stairs",
+    "minecraft:spruce_stairs",
+    "minecraft:grindstone",
+    "minecraft:calcite",
+    "minecraft:oak_log"
+  ],
+  "path": [
+    [
+      13,
+      14,
+      16
+    ],
+    [
+      13,
+      14,
+      15
+    ],
+    [
+      13,
+      14,
+      14
+    ],
+    [
+      13,
+      14,
+      13
+    ],
+    [
+      13,
+      13,
+      13
+    ]
+  ],
+  "millstone_facing": "north",
+  "clear": [],
+  "set": []
+}

@@ -31,7 +31,8 @@
 		"SnowMeltMixin",
 		"StomachConsumableMixin",
 		"StomachFoodDataMixin",
-		"StomachFoodMixin"
+		"StomachFoodMixin",
+		"VillageWindmillMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
