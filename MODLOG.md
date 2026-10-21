@@ -1979,7 +1979,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.14.5, Wounds phase 5 (polish):** Andy (2026-10-20): "last phase". The last phase of `docs/Wounds-Plan.md` (spec
   `docs/Wounds-Phase5.md`; track A the client feel, track B the rules, tuning, docs and JEI). Written without a
   compiler: build it before anything else.
-  - TRACK A: client effects (limp, pain blur, hit pulse, critical heartbeat, salts gasp)
+  - **A limp** (`client/Dismembered`, `GAIT_*`): a broken leg drags or swings short, the good leg's steps shorten
+    and the body dips on the bad step, seen by everyone; a splinted leg limps half as much, a sprained foot half too.
+    Only on foot (not swimming, riding, crawling or downed), humanoid models only.
+  - **Pain on screen** (`client/wounds/PainHud`): head or body under 35% with the pain not dulled (`Pain.DULLED`, now
+    synced to its owner each second), the screen edges darken and slowly throb; any part losing health flashes the
+    edges red for 6 ticks, stronger for a bigger drop (none in the first second after joining); head or body under
+    15% on your feet, a heartbeat that quickens (18 down to 11 ticks) with a faint red pulse. Smelling salts bring a
+    sharp gasp (`MedicineHud`, `GASP_*`). None of it in creative or spectator.
   - **Freerunning respects breaks** (`freerun/Freerun.canMove`, from PR #339): no freerunning move at all on a broken
     leg out of a splint, or with both arms broken (or gone); one broken arm or a sprained foot rules out only the moves
     that hang on the grip, the climb (cling) and the bar swing (`Freerun.canMove(player, kind)`, `gripMove`). Wounds'
