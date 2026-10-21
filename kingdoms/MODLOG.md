@@ -4066,7 +4066,8 @@ The last batch of the BWM port (MIT, our own code).
 Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: nothing of it used).
 - Portal raids (`nether/PortalRaids`): while a Hornkin war fort stands in the Nether, a town with a Nether portal
   within 96 blocks of its seat and a player within 96 may see 3-6 Hornkin (sometimes a brute) step out of it (3% a
-  check every 20 s per town; a town isn't raided again for an hour). They walk into town, roam within 28 blocks of the
+  check every 20 s per town; a town isn't raided again for an hour). Andy: only for a player in world tier
+  Borderlands (the second) or higher. They walk into town, roam within 28 blocks of the
   seat, take gold from chests within 10 blocks, fight whoever crosses them, and after 5 minutes, or once each has 3 gold, walk back
   into the portal with it (killed, they drop it). Raiders don't turn zombified in the Overworld and can't use portals
   themselves. `/kingdom netherfort raid` sends one on the nearest town now (needs a standing Hornkin fort).

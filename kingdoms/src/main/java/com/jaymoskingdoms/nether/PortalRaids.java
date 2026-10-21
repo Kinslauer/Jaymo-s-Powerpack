@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Faction;
 import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.WorldTiers;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -50,6 +51,8 @@ public final class PortalRaids {
 	static final long TOWN_GAP = 20L * 60 * 60;
 	/** A player this near the seat, and a portal this near it. */
 	static final double PLAYER_RANGE = 96.0;
+	/** (Andy) Only for a player in this world tier or higher (Borderlands, the second); ops' /kingdom netherfort raid ignores it. */
+	static final WorldTiers.Tier MIN_TIER = WorldTiers.Tier.BORDERLANDS;
 	static final int PORTAL_RANGE = 96;
 	/** Who hears of it. */
 	static final double NEWS_RANGE = 160.0;
@@ -93,7 +96,8 @@ public final class PortalRaids {
 		for (Faction town : Factions.all(server)) {
 			if (town.fallen() || town.type() == FactionType.BARBARIAN || now - LAST.getOrDefault(town.id(), -TOWN_GAP) < TOWN_GAP
 				|| !overworld.isPositionEntityTicking(town.seat()) || overworld.getNearestPlayer(town.seat().getX() + 0.5, town.seat().getY(),
-					town.seat().getZ() + 0.5, PLAYER_RANGE, false) == null) {
+					town.seat().getZ() + 0.5, PLAYER_RANGE, p -> !p.isSpectator() && p instanceof Player player
+						&& WorldTiers.of(player).ordinal() >= MIN_TIER.ordinal()) == null) {
 				continue;
 			}
 			if (random.nextFloat() < RAID_CHANCE && start(overworld, town.seat(), town.name(), from)) {
