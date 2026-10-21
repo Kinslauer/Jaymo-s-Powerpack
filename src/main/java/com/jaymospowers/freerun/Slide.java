@@ -54,8 +54,6 @@ public final class Slide {
 	public static final AttachmentType<Boolean> SLIDING = AttachmentRegistry.create(JaymosPowers.id("freerun_sliding"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
-	/** Client only: the local player's entity id while they slide, so their own pose changes at once. -1 otherwise. */
-	public static volatile int localSlider = -1;
 
 	private static final Map<UUID, Integer> TICKS_SO_FAR = new HashMap<>();
 	private static final Map<UUID, Long> ENDED = new HashMap<>();
@@ -77,9 +75,6 @@ public final class Slide {
 
 	/** Sliding (either side; the local player's own copy on their client). */
 	public static boolean sliding(Player player) {
-		if (player.level().isClientSide() && player.getId() == localSlider) {
-			return true;
-		}
 		return player.hasAttached(SLIDING);
 	}
 
@@ -91,7 +86,8 @@ public final class Slide {
 
 	/** Server: whether a slide may begin: in a fast run, on the ground, Sneak down, free to freerun. */
 	static boolean valid(ServerPlayer player) {
-		return FastRun.active(player) && player.onGround() && player.isShiftKeyDown() && Freerun.canMove(player) && !sliding(player);
+		return FastRun.active(player) && player.onGround() && player.isShiftKeyDown() && Freerun.canMove(player) && !sliding(player)
+			&& !justEnded(player, COOLDOWN - 1);
 	}
 
 	static void start(ServerPlayer player) {

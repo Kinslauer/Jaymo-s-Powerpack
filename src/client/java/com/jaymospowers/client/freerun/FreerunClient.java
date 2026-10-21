@@ -50,6 +50,8 @@ public final class FreerunClient {
 	private static final int CORNER_TICKS = 3;
 	/** (0.14.6) A wall hop flies this many ticks' worth of air drag (the sum of 0.91^n): speed = distance / this. */
 	private static final double HOP_DRAG_SUM = 6.9;
+	/** (review) Ticks a slide waits for the server's go-ahead before giving up. */
+	private static final int SLIDE_CONFIRM_TICKS = 10;
 
 	private static int kind = Freerun.NONE;
 	/** The wall's side for a cling or a run (null otherwise). */
@@ -69,7 +71,7 @@ public final class FreerunClient {
 	/** (0.14.6) Wall faces run up since last on the ground; the vertical run's length in ticks. */
 	private static int upRan, upMax;
 	/** (0.14.6) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
-	private static int sneakTicks, edgeTicks;
+	private static int sneakTicks, edgeTicks, slideWait;
 	/** (0.14.6) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
 	private static Vec3 runDir = Vec3.ZERO, slideDir = Vec3.ZERO;
 	private static double runSpeed, slideSpeed;
@@ -489,13 +491,21 @@ public final class FreerunClient {
 		sneakTicks = 0;
 		slideDir = runDir.lengthSqr() > 0.5 ? runDir : Vec3.directionFromRotation(0.0F, player.getYRot());
 		slideSpeed = Mth.clamp(runSpeed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
-		Slide.localSlider = player.getId();
-		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
+		slideWait = 0;
+player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
 		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
 		return true;
 	}
 
 	private static void tickSlide(LocalPlayer player, boolean jumpPressed) {
+		if (!player.hasAttached(Slide.SLIDING)) {
+			// (review) the body only changes once the server says so, so both sides always agree on the hitbox
+			if (++slideWait > SLIDE_CONFIRM_TICKS) {
+				end(player);
+				cooldown = Slide.COOLDOWN;
+			}
+			return;
+		}
 		ticks++;
 		slideSpeed *= Slide.FRICTION;
 		if (jumpPressed) {
@@ -787,10 +797,7 @@ public final class FreerunClient {
 	/** Ends a held move here and on the server. */
 	private static void end(LocalPlayer player) {
 		boolean held = active();
-		if (kind == Freerun.SLIDE) {
-			Slide.localSlider = -1;
-		}
-		cornerLeft = 0;
+cornerLeft = 0;
 		kind = Freerun.NONE;
 		wall = null;
 		bar = null;
@@ -811,7 +818,6 @@ public final class FreerunClient {
 		hopLeft = 0;
 		sneakTicks = 0;
 		edgeTicks = 0;
-		Slide.localSlider = -1;
 		cooldown = 0;
 		airTicks = 0;
 		jumpWasDown = false;

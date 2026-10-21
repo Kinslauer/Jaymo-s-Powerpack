@@ -157,6 +157,8 @@ public final class Freerun {
 	public static final double POLE_SLIDE = 0.3, POLE_LEAP_OUT = 0.55, POLE_LEAP_UP = 0.42;
 	/** Pole climb: the longest hold (ticks: 2 minutes). */
 	public static final int POLE_MAX_TICKS = 2400;
+	/** (review) Server: a cling may have no wall against it this many ticks while the client crosses a corner. */
+	public static final int CORNER_GRACE_TICKS = 5;
 
 	/** Hunger (exhaustion; 4 is a hunger point): each vault, kick, catch of a wall or bar, wall run and swing off. */
 	public static final float MOVE_EXHAUSTION = 0.3F;
@@ -239,13 +241,17 @@ public final class Freerun {
 		final BlockPos pos;
 		int ticks;
 		double lastY;
+		/** (review) Where it began (height), and ticks the wall has been missing (a corner is crossed in a few). */
+		double startY;
+		int missing;
 
 		Doing(int kind, int face, BlockPos pos, double y) {
 			this.kind = kind;
 			this.face = face;
 			this.pos = pos;
 			this.lastY = y;
-		}
+			this.startY = y;
+			}
 	}
 
 	private static final Map<UUID, Doing> DOING = new HashMap<>();
@@ -616,13 +622,17 @@ public final class Freerun {
 				return side != null && rank(player, Perk.WALL_RUNNER) >= 1 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
 					&& (RAN.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0;
 			case UP_RUN:
-				return side != null && (FastRun.active(player) || player.isSprinting() && rank(player, Perk.WALL_RUNNER) >= 1)
+				// (review) it starts from a jump: off the ground and rising
+				return side != null && !player.onGround() && player.getY() > player.yo
+					&& (FastRun.active(player) || player.isSprinting() && rank(player, Perk.WALL_RUNNER) >= 1)
 					&& FreerunWalls.runnableNear(level, player, side)
 					&& (UP_RAN.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0;
 			case POLE:
 				return side != null && FreerunWalls.poleAt(level, player, side, SERVER_REACH);
 			case HOP:
-				return side != null && rank(player, Perk.CLIMBER) >= 1 && current != null && current.kind == CLING;
+				// (review) from a cling, at the wall it holds, off the ground
+				return side != null && rank(player, Perk.CLIMBER) >= 1 && current != null && current.kind == CLING && !player.onGround()
+					&& WebWallRun.wallAt(level, player, side, SERVER_REACH);
 			case BAR:
 			// (rank and reach first: the client's position mustn't make the server look at, or load, a far block)
 				if (rank(player, Perk.BAR_SWING) < 1 || player.getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) >= BAR_REACH_SQR) {
@@ -677,7 +687,16 @@ public final class Freerun {
 				case WALL_RUN -> RUN_TICKS[Mth.clamp(perk(player, Perk.WALL_RUNNER), 1, RUN_TICKS.length) - 1] + SERVER_SLACK_TICKS;
 				default -> BAR_MAX_TICKS + SERVER_SLACK_TICKS;
 			};
-			boolean lost = switch (doing.kind) {
+			// (review) the climbs are the client's, but the server holds them to their own speeds and heights
+			double rise = player.getY() - doing.lastY;
+			boolean overrun = switch (doing.kind) {
+				case UP_RUN -> player.getY() > doing.startY + UP_HEIGHT[Mth.clamp(perk(player, Perk.WALL_RUNNER), 0, UP_HEIGHT.length - 1)] + 0.5
+					|| doing.ticks > 2 && player.getY() < doing.startY - 0.05;
+				case POLE -> rise > POLE_CLIMB[Mth.clamp(perk(player, Perk.CLIMBER), 0, POLE_CLIMB.length - 1)] * 2.0 + 0.1 || -rise > POLE_SLIDE * 2.0 + 0.1;
+				case CLING -> rise > CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 1, CLIMB_SPEED.length) - 1] * 2.0 + 0.1;
+				default -> false;
+			};
+			boolean lost = overrun || switch (doing.kind) {
 			case UP_RUN -> doing.ticks > 2 && player.onGround() || side == null	|| !FreerunWalls.wallNear(level, player, side);
 			case POLE -> doing.ticks > 3 && player.onGround() || side == null || !FreerunWalls.poleAt(level, player, side, SERVER_REACH);
 			case CLING -> player.onGround() || side == null || !wallOrCorner(level, player, doing, side)
@@ -749,16 +768,19 @@ public final class Freerun {
 	 */
 	private static boolean wallOrCorner(ServerLevel level, ServerPlayer player, Doing doing, Direction side) {
 		if (WebWallRun.wallAt(level, player, side, SERVER_REACH)) {
+			doing.missing = 0;
 			return true;
 		}
 		for (Direction other : Direction.Plane.HORIZONTAL) {
-			if (other != side && WebWallRun.wallAt(level, player, other, SERVER_REACH)) {
+			if (other != side && climbable(level, player, other, SERVER_REACH)) {
 				doing.face = other.get3DDataValue();
+				doing.missing = 0;
 				player.setAttached(MOVE, CLING * 8 + other.get3DDataValue() + 1);
 				return true;
 			}
 		}
-		return false;
+		// the client's corner step takes a few ticks: the wall may be missing that long
+		return ++doing.missing <= CORNER_GRACE_TICKS;
 	}
 
 	/** Reads the player's ranks from Kingdoms and syncs them (only when they change). */

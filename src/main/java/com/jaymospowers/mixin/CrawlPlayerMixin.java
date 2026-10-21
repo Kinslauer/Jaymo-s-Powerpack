@@ -14,7 +14,7 @@ abstract class CrawlPlayerMixin {
 	@Inject(method = "updatePlayerPose", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$crawl(CallbackInfo ci) {
 		Player self = (Player)(Object)this;
-		if (Crawl.crawling(self) && Crawl.canCrawl(self) || com.jaymospowers.freerun.Slide.sliding(self)) {
+		if (Crawl.crawling(self) && Crawl.canCrawl(self)	|| com.jaymospowers.freerun.Slide.sliding(self) && !self.isSleeping() && !self.isPassenger() && !self.isFallFlying()) {
 			self.setPose(Pose.SWIMMING);
 			ci.cancel();
 		}

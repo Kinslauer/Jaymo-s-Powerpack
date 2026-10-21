@@ -83,24 +83,32 @@ public final class FreerunWalls {
 		if (level.noCollision(player, new AABB(box.minX, box.minY + 0.9, box.minZ, box.maxX, box.minY + 1.3, box.maxZ).move(dx, 0.0, dz))) {
 			return false;
 		}
-		for (double up : new double[] {0.5, 1.2}) {
-			if (!poleBlock(level, player, face, reach, up)) {
+		BlockPos lower = poleBlock(level, player, face, reach, 0.5), upper = poleBlock(level, player, face, reach, 1.2);
+			if (lower == null || upper == null) {
 				return false;
 			}
+			// (review) two different blocks, one over the other: a lone fence post is not a pole
+			if (lower.equals(upper)) {
+				return isPole(level, lower.above()) || isPole(level, lower.below());
+			}
+			return lower.getX() == upper.getX() && lower.getZ() == upper.getZ();
 		}
-		return true;
-	}
 
-	private static boolean poleBlock(Level level, Player player, Direction face, double reach, double up) {
+		private static boolean isPole(Level level, BlockPos pos) {
+			BlockState state = level.getBlockState(pos);
+			return state.is(POLES) && !state.getCollisionShape(level, pos).isEmpty();
+		}
+
+	private static @org.jspecify.annotations.Nullable BlockPos poleBlock(Level level, Player player, Direction face, double reach, double up) {
 		double half = player.getBbWidth() * 0.5;
 		// (a thin post can sit in the cell the player's middle is in)
 		for (double d : new double[] {0.0, half + reach * 0.5, half + reach}) {
 			BlockPos pos = BlockPos.containing(player.getX() + face.getStepX() * d, player.getY() + up, player.getZ() + face.getStepZ() * d);
 			BlockState state = level.getBlockState(pos);
 			if (state.is(POLES) && !state.getCollisionShape(level, pos).isEmpty()) {
-				return true;
+				return pos;
 			}
-		}
-		return false;
+			}
+			return null;
 	}
 }
