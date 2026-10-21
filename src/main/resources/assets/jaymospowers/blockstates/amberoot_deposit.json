@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jaymospowers:block/aether/amberoot_deposit_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "jaymospowers:block/aether/amberoot_deposit"
+    },
+    "axis=z": {
+      "model": "jaymospowers:block/aether/amberoot_deposit_horizontal",
+      "x": 90
+    }
+  }
+}

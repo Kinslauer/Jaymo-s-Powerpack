@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "lit=false,powered=false": {
+      "model": "jaymospowers:block/aether/sentry_bricks"
+    },
+    "lit=false,powered=true": {
+      "model": "jaymospowers:block/aether/sentry_bricks"
+    },
+    "lit=true,powered=false": {
+      "model": "jaymospowers:block/aether/sentry_bricks_lit"
+    },
+    "lit=true,powered=true": {
+      "model": "jaymospowers:block/aether/sentry_bricks_lit"
+    }
+  }
+}

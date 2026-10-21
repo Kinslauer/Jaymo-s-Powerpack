@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/ichorite_brick_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/ichorite_bricks"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/ichorite_brick_slab_top"
+    }
+  }
+}

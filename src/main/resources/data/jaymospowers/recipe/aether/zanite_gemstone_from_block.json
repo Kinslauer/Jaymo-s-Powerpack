@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:zanite_block"
+  ],
+  "result": {
+    "id": "jaymospowers:zanite_gemstone",
+    "count": 9
+  },
+  "group": "zanite_gemstone"
+}

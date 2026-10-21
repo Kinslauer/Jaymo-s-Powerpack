@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:greatroot_door",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:greatroot_door",
+            "state": {
+              "half": "lower"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/greatroot_door"
+}

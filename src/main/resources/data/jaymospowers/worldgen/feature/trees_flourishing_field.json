@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:short_skyroot_ferns_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": {
+        "feature": "jaymospowers:skyroot_ferns_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.3,
+      "feature": {
+        "feature": "jaymospowers:large_skyroot_ferns_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.01,
+      "feature": {
+        "feature": "jaymospowers:short_skyplane_ferns_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.2,
+      "feature": {
+        "feature": "jaymospowers:wisproot_ferns_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.005,
+      "feature": {
+        "feature": "jaymospowers:short_greatoak_ferns_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.1,
+      "feature": {
+        "feature": "jaymospowers:amberoot_fields_tree",
+        "placement": []
+      }
+    }
+  ]
+}

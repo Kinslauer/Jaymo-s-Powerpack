@@ -162,6 +162,7 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
 		ArsenalChains.init();
+		ArsenalStanding.init();
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
@@ -218,8 +219,21 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		switch (key) {
-			case ABILITY_1 -> reach(player);
+			case ABILITY_1 -> {
+				// (0.15.58) Sneak + R marks a place (an ascended Arsenal's pin comes first: held summoned weapon, or empty hand with a pin)
+				if (ArsenalPlaces.sneakKey(player)) {
+					if (!ArsenalArmory.tryPin(player)) {
+						ArsenalPlaces.mark(player);
+					}
+				} else {
+					reach(player);
+				}
+			}
 			case ABILITY_2 -> {
+				// (0.15.58) Sneak + G opens the places menu on the client (it sends the pick); no Return this time
+				if (ArsenalPlaces.sneakKey(player)) {
+					return;
+				}
 				// a standing Sword of Damocles is called back first
 				if (!ArsenalDamocles.recall(player)) {
 					sendBack(player);
@@ -235,6 +249,10 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down && slotUnlocked(player, "mode")) {
+			// (0.13.35) an Emberborn who escaped the Nether: Sneak + Z flips where their rifts lead
+			if (player.isShiftKeyDown() && ArsenalEmber.flip(player)) {
+				return;
+			}
 			ArsenalPocket.toggle(player);
 		}
 	}
@@ -282,6 +300,8 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
 		ArsenalChains.onLost(player);
+		ArsenalStanding.closeAll(player, false);
+		ArsenalPlaces.forget(player);
 		PENDING.remove(player.getUUID());
 		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
@@ -292,10 +312,12 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		tickBarrage(player);
+		ArsenalStanding.tick(player);
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			ArsenalGates.tick(player);
 		}
 		ArsenalVoid.tick(player);
+		ArsenalEmber.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);

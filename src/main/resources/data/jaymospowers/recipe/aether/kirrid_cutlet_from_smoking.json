@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.35,
+  "ingredient": "jaymospowers:kirrid_loin",
+  "result": {
+    "id": "jaymospowers:kirrid_cutlet"
+  }
+}

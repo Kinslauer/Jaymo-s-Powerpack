@@ -159,7 +159,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();
 		// 0.7.82: world tiers (after Apotheosis's): each player's chosen difficulty, foes near them take it (its attachments)
-		LOGGER.debug("world tier attachments: {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER);
+		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
+			WorldTiers.FLOOR);
 		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
@@ -284,6 +285,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.monsters.Monsters.register();
 		// 0.7.137: the wind dragons (Notus first)
 		com.jaymoskingdoms.dragons.Dragons.register();
+		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
+		com.jaymoskingdoms.remnants.Monoliths.register();
 		Encounters.register();
 		Sightings.register();
 		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)

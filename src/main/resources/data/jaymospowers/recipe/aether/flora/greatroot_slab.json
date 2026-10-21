@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:greatroot_planks"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "jaymospowers:greatroot_slab",
+    "count": 6
+  },
+  "group": "wooden_slab"
+}

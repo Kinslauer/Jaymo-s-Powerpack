@@ -1,0 +1,27 @@
+{
+  "feature": "jaymospowers:aercloud_purple",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 512
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "absolute": 256
+        },
+        "max_inclusive": {
+          "absolute": 304
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

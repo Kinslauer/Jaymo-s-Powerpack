@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/aether/sentry_crate"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/aether/sentry_crate",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/aether/sentry_crate",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/aether/sentry_crate",
+      "y": 270
+    }
+  }
+}

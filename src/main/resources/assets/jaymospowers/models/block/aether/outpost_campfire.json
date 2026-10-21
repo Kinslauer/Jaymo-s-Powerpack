@@ -1,0 +1,351 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "stone": "jaymospowers:block/aether/faded_holystone_flagstones",
+    "log": "jaymospowers:block/aether/outpost_campfire_log",
+    "flame": "jaymospowers:block/aether/campfire_flame",
+    "particle": "jaymospowers:block/aether/outpost_campfire_log"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        },
+        "north": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        },
+        "south": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        },
+        "west": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        },
+        "east": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#stone"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        2,
+        2
+      ],
+      "to": [
+        14,
+        5,
+        5
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            2,
+            2,
+            14,
+            5
+          ],
+          "texture": "#log"
+        },
+        "up": {
+          "uv": [
+            2,
+            2,
+            14,
+            5
+          ],
+          "texture": "#log"
+        },
+        "north": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "south": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "west": {
+          "uv": [
+            2,
+            11,
+            5,
+            14
+          ],
+          "texture": "#log"
+        },
+        "east": {
+          "uv": [
+            11,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        2,
+        11
+      ],
+      "to": [
+        14,
+        5,
+        14
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "up": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "north": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "south": {
+          "uv": [
+            2,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "west": {
+          "uv": [
+            11,
+            11,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "east": {
+          "uv": [
+            2,
+            11,
+            5,
+            14
+          ],
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        5,
+        2
+      ],
+      "to": [
+        5,
+        8,
+        14
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            2,
+            2,
+            5,
+            14
+          ],
+          "texture": "#log"
+        },
+        "up": {
+          "uv": [
+            2,
+            2,
+            5,
+            14
+          ],
+          "texture": "#log"
+        },
+        "north": {
+          "uv": [
+            11,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        },
+        "south": {
+          "uv": [
+            2,
+            8,
+            5,
+            11
+          ],
+          "texture": "#log"
+        },
+        "west": {
+          "uv": [
+            2,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        },
+        "east": {
+          "uv": [
+            2,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        5,
+        2
+      ],
+      "to": [
+        14,
+        8,
+        14
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            11,
+            2,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "up": {
+          "uv": [
+            11,
+            2,
+            14,
+            14
+          ],
+          "texture": "#log"
+        },
+        "north": {
+          "uv": [
+            2,
+            8,
+            5,
+            11
+          ],
+          "texture": "#log"
+        },
+        "south": {
+          "uv": [
+            11,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        },
+        "west": {
+          "uv": [
+            2,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        },
+        "east": {
+          "uv": [
+            2,
+            8,
+            14,
+            11
+          ],
+          "texture": "#log"
+        }
+      }
+    }
+  ]
+}

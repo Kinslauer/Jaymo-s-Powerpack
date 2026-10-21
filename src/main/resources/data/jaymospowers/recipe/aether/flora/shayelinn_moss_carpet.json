@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:shayelinn_moss_block"
+  },
+  "pattern": [
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:shayelinn_moss_carpet",
+    "count": 3
+  },
+  "group": "carpet"
+}

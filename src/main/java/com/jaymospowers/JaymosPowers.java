@@ -69,6 +69,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.rig.Rig.init();
 		// (0.11.89) the Backpack: worn on the back, set down on the ground, torn apart only by strong blasts
 		com.jaymospowers.backpack.Backpack.init();
+		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
+		com.jaymospowers.aether.Aether.init();
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		registerAttachments();
@@ -83,14 +85,14 @@ public class JaymosPowers implements ModInitializer {
 		String[] holders = {
 			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
-			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
-			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains",
+			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
+			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoSpeed", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebTendrils",
 			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
-			"power.wind.WindCyclone", "power.wind.WindJet",
+			"power.wind.WindCyclone", "power.wind.WindJet", "power.wind.aether.WindAether",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState",
@@ -99,7 +101,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "aether.structure.OutpostTracker",
 		};
 		for (String holder : holders) {
 			try {

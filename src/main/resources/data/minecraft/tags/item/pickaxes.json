@@ -1,6 +1,11 @@
 {
   "values": [
     "jaymospowers:tinker_pickaxe",
-    "jaymospowers:tinker_sledge_hammer"
+    "jaymospowers:tinker_sledge_hammer",
+    "jaymospowers:skyroot_pickaxe",
+    "jaymospowers:holystone_pickaxe",
+    "jaymospowers:zanite_pickaxe",
+    "jaymospowers:arkenium_pickaxe",
+    "jaymospowers:gravitite_pickaxe"
   ]
 }

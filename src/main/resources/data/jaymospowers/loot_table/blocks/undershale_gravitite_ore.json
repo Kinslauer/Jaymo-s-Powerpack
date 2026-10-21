@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:undershale_gravitite_ore"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/undershale_gravitite_ore"
+}

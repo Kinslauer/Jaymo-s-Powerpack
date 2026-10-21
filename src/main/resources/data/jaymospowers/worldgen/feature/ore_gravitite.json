@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:ore",
+  "size": 5,
+  "discard_chance_on_air_exposure": 0.0,
+  "targets": [
+    {
+      "target": {
+        "predicate_type": "minecraft:tag_match",
+        "tag": "jaymospowers:aether_stone_ore_replaceables"
+      },
+      "state": {
+        "id": "jaymospowers:gravitite_ore"
+      }
+    },
+    {
+      "target": {
+        "predicate_type": "minecraft:tag_match",
+        "tag": "jaymospowers:aether_undershale_ore_replaceables"
+      },
+      "state": {
+        "id": "jaymospowers:undershale_gravitite_ore"
+      }
+    }
+  ]
+}

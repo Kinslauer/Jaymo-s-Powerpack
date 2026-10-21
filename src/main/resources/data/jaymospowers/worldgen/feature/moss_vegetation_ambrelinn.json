@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "jaymospowers:ambrelinn_moss_carpet",
+        "weight": 25
+      },
+      {
+        "data": "jaymospowers:aether_short_grass",
+        "weight": 30
+      },
+      {
+        "data": "jaymospowers:aether_bush",
+        "weight": 4
+      }
+    ]
+  }
+}

@@ -231,6 +231,7 @@ public final class ArsenalGates {
 		}
 		player.teleportTo(level, spot.x, spot.y, spot.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
+		ArsenalPlaces.arrived(player);
 		level.sendParticles(ParticleTypes.PORTAL, spot.x, spot.y + 1.0, spot.z, 60, 0.4, 0.9, 0.4, 0.4);
 		level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9F, 0.5F);
 		READY_AT.put(player.getUUID(), level.getGameTime() + COOLDOWN);

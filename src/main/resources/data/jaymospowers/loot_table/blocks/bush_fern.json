@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:bush_fern",
+              "condition": "minecraft:tool/can_shear"
+            },
+            {
+              "type": "minecraft:item",
+              "name": "minecraft:wheat_seeds",
+              "condition": {
+                "type": "minecraft:random_chance",
+                "chance": 0.125
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:apply_bonus",
+                  "enchantment": "minecraft:fortune",
+                  "formula": "minecraft:uniform_bonus_count",
+                  "parameters": {
+                    "bonusMultiplier": 2
+                  }
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/bush_fern"
+}

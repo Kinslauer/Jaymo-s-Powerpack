@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "loaded=true": {
+      "model": "jaymospowers:block/aether/sentry_flagstones"
+    },
+    "loaded=false": {
+      "model": "jaymospowers:block/aether/sentry_trap_spent"
+    }
+  }
+}

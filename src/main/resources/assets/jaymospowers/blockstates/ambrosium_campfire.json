@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymospowers:block/aether/ambrosium_campfire"
+    },
+    "lit=true": {
+      "model": "jaymospowers:block/aether/ambrosium_campfire_lit"
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jaymospowers:block/aether/holystone",
+    "all": "jaymospowers:block/aether/holystone"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        4,
+        13
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            3,
+            12,
+            13,
+            16
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            3,
+            12,
+            13,
+            16
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            3,
+            12,
+            13,
+            16
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            3,
+            12,
+            13,
+            16
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        4,
+        4
+      ],
+      "to": [
+        12,
+        8,
+        12
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            4,
+            8,
+            12,
+            12
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            4,
+            8,
+            12,
+            12
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            4,
+            8,
+            12,
+            12
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            4,
+            8,
+            12,
+            12
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        8,
+        5.5
+      ],
+      "to": [
+        10.5,
+        12,
+        10.5
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            5.5,
+            5.5,
+            10.5,
+            10.5
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            5.5,
+            5.5,
+            10.5,
+            10.5
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            5.5,
+            4,
+            10.5,
+            8
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            5.5,
+            4,
+            10.5,
+            8
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            5.5,
+            4,
+            10.5,
+            8
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            5.5,
+            4,
+            10.5,
+            8
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        12,
+        7
+      ],
+      "to": [
+        9,
+        16,
+        9
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            7,
+            0,
+            9,
+            4
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7,
+            0,
+            9,
+            4
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            7,
+            0,
+            9,
+            4
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            7,
+            0,
+            9,
+            4
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

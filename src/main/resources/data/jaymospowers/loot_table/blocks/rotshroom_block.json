@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:rotshroom_block",
+              "condition": "minecraft:tool/can_silk_touch"
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:rotshroom",
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": {
+                    "type": "minecraft:uniform",
+                    "min": 0,
+                    "max": 2
+                  }
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/rotshroom_block"
+}

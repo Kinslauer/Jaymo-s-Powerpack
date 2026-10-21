@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:holystone_bricks",
+    "jaymospowers:holystone_bricks",
+    "jaymospowers:holystone_bricks",
+    "jaymospowers:holystone_bricks",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "jaymospowers:faded_holystone_bricks",
+    "count": 4
+  }
+}

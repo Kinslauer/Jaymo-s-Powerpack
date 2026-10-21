@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": "jaymospowers:burrukai_rib_cut",
+  "result": {
+    "id": "jaymospowers:cooked_burrukai_rib_cut"
+  }
+}

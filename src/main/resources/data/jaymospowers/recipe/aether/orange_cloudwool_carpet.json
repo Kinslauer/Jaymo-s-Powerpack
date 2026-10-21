@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:orange_cloudwool"
+  },
+  "pattern": [
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:orange_cloudwool_carpet",
+    "count": 3
+  },
+  "group": "carpet"
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/skyroot_slab"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/skyroot_slab_top"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/skyroot_planks"
+    }
+  }
+}

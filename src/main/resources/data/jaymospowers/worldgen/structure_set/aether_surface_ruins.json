@@ -1,0 +1,36 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:veradexian_ruins_temperate",
+      "weight": 3
+    },
+    {
+      "structure": "jaymospowers:veradexian_ruins_arctic",
+      "weight": 3
+    },
+    {
+      "structure": "jaymospowers:ancient_henge",
+      "weight": 4
+    },
+    {
+      "structure": "jaymospowers:veradexian_library_temperate",
+      "weight": 2
+    },
+    {
+      "structure": "jaymospowers:veradexian_library_arctic",
+      "weight": 2
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 14,
+    "separation": 8,
+    "salt": 1380213101,
+    "spread_type": "linear",
+    "frequency": 0.75,
+    "exclusion_zone": {
+      "other_set": "jaymospowers:outposts",
+      "chunk_count": 6
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:stick",
+    "A": "jaymospowers:ambrosium_shard"
+  },
+  "pattern": [
+    "A",
+    "#"
+  ],
+  "result": {
+    "id": "jaymospowers:ambrosium_torch",
+    "count": 4
+  }
+}

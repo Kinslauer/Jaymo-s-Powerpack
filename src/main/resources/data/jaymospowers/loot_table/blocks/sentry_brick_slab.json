@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:sentry_brick_slab",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:sentry_brick_slab",
+                "state": {
+                  "type": "double"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 2,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:sentry_brick_slab",
+              "condition": {
+                "type": "minecraft:survives_explosion"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/sentry_brick_slab"
+}
