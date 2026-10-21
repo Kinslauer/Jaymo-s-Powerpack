@@ -199,7 +199,7 @@ public final class CostumeClient {
 			Identifier suitPrimary = CostumeModels.texture("suit", cut, slim, false), suitSecondary = CostumeModels.texture("suit", cut, slim, true);
 			renderColoredCutoutModel(suit, suitPrimary, poseStack, collector, lightCoords, state, primary, 1);
 			renderColoredCutoutModel(suit, suitSecondary, poseStack, collector, lightCoords, state, secondary, 1);
-			// (0.15.23) the skin under what the suit covers isn't drawn (CostumeCover)
+			// (0.15.32) the skin under what the suit covers isn't drawn (CostumeCover)
 			CostumeCover.mark(state, this.renderer, suitPrimary, suitSecondary);
 			CostumeModels.Worn mask = this.models.mask(design.mask());
 			if (mask != null) {

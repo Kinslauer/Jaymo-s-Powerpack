@@ -79,7 +79,7 @@ final class CostumeModels {
 		private final @Nullable ModelPart bust, emblem;
 		/** (0.14.3) The assassin's coat tails, when this model has them. */
 		private final @Nullable ModelPart tailFront, tailBack;
-		/** (0.15.23) Whether it's being drawn over an MCA body just now (set as it animates, read just before it's drawn). */
+		/** (0.15.32) Whether it's being drawn over an MCA body just now (set as it animates, read just before it's drawn). */
 		private boolean mcaBody;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
@@ -116,7 +116,7 @@ final class CostumeModels {
 					to[i].loadPose(body[i]);
 				}
 			}
-			// (0.15.23) on an MCA body, the very pose MCA's own layers draw it in (and, like them, no root: beforeDraw)
+			// (0.15.32) on an MCA body, the very pose MCA's own layers draw it in (and, like them, no root: beforeDraw)
 			this.mcaBody = CostumeBody.mcaPose(state, this);
 			// (0.11.78) MCA draws the head at the villager's head size (scaled from the model's origin)
 			float head = CostumeBody.headScale(parent);
@@ -191,7 +191,7 @@ final class CostumeModels {
 		}
 
 		/**
-		 * (0.15.23) Just before it's drawn, after every pose (CostumeCover): over an MCA body the root's pose goes, as MCA
+		 * (0.15.32) Just before it's drawn, after every pose (CostumeCover): over an MCA body the root's pose goes, as MCA
 		 * draws its body's parts each on its own and never the root (CommonVillagerModel.renderCommon), so a pose that
 		 * moves the root (Gravity's arm lean) would otherwise carry the costume off the body.
 		 */

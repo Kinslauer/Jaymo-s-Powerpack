@@ -667,7 +667,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
 
 ## 0.4.31: iron golems carry corpses in their arms
-- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+- For Jaymo's Kingdoms 0.5.68, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
   carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
   golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.
 ## 0.4.32: butcher villagers
@@ -684,7 +684,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   gossip, or, if you're experienced with butchering, from the cuts they hand you (the hand-over says the x). Who's
   experienced is set by `Butchers.setExperienced(Predicate<Player>)` (Jaymo's Kingdoms' first Survival perk, by
   reflection); nobody without it.
-  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
+  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.67's townsfolk call it) returns a line: trash
   talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
   botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones
   you haven't heard of first. Far-off butchers come from a per-dimension ledger (`jaymoskitchen:butcher_ledger`) of
@@ -836,3 +836,27 @@ after `Mill.register()`.
   or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
   actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
   count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
+- **0.5.5, zombies eat villagers:** Andy (2026-10-21): "zombies should also eat villagers, preventing a burial". A
+  zombie (husk, drowned, zombie villager) now stops to feed even mid-chase: `Scavengers`' gnaw goal sits ahead of its
+  attack for zombies, and chasing a villager no longer counts as busy (a player or anything else it's fighting still
+  pulls it off). Zombies go for villagers' bodies first (`villagers` entity tag). A villager eaten by anything isn't
+  buried: with MCA, which lays a villager in a tombstone the tick it dies, `corpse/McaGraves` empties that tombstone
+  again, so there's no grave to mourn at and nothing for the Staff of Life to raise. Corpses keep the dead mob's UUID
+  even when their look is cut down (`CorpseEntity.deadId`).
+- **0.5.6, seasons:** Andy (2026-10-21) asked whether seasons could work in, and picked our own over Ecliptic Seasons
+  (its Fabric port is All Rights Reserved with no 26.3 build). Spec and differences in `docs/Seasons-Plan.md`.
+  `season/Seasons`: an 84-day year (spring, summer, autumn, winter; early, mid and late parts of 7 days) from the
+  overworld clock plus a saved shift (`/season set <season> [early|mid|late]` for ops, `/season` for anyone); each new
+  part is announced, and holding a clock shows the date. Only temperate lands (biome base temperature 0.55-0.9) feel
+  it. `BiomeSeasonMixin` chills them (winter -0.8, so it snows and ponds freeze); `SeasonalWeather` melts open snow
+  and ice there out of winter. `SeasonalCrops`: crops in `tags/block/seasons/<season>` grow only then, others all but
+  winter; out of season they wait; under glass (`greenhouse_roof`) or a solid roof they grow all year. Andy wants winter
+  "very harsh": in winter the frost kills crops left in the open (25% a random tick; berry bushes and cocoa lose their
+  fruit instead), and `WinterCold` drains 0.025 exhaustion a second from anyone out under the sky in a temperate land
+  who isn't by a fire or lava (`setColdProof` lets Kingdoms spare Frostborn).
+  Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.
+
+### 0.5.7: slower healing
+Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
+unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.
+Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest needs treatment or other help.

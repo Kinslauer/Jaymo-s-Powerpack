@@ -3653,3 +3653,60 @@ art) in our builders, and picked "your own designs + areas" first. Written from 
   of buildings and plots.
 - **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
   fireball), which Jaymo's Powers 0.15.22 runs.
+
+## 0.7.120: storms stop burning the forests down (pack 0.15.27)
+The user: "lightning strikes during storms absolutely destroys forests. water should still put fires out."
+- Why: a storm cell (`Storms`) strikes real lightning every few seconds under it, and each vanilla bolt lights its spot
+  and up to four around it on Normal/Hard, plus more on its after-flashes. And the fire never saw the cell's rain:
+  `FireBlock.tick` asks the world's weather (`isRaining()`) before it lets rain put it out or stop it spreading, so
+  under a cell on an otherwise clear day the fires burnt on through the downpour.
+- `FireBlockRainMixin`: in the fire's tick, rain under a storm cell counts as rain, so cell rain now puts fires out and
+  stops them spreading as vanilla's rain does. Where it rains is still `isRainingAt` (open sky), so a fire under leaves
+  or a roof isn't put out by it, as in vanilla.
+- `LightningBoltMixin`: a storm cell's bolts (tagged `Storms.BOLT_TAG`) light a fire only 1 in 4 strikes
+  (`Storms.STRIKE_FIRE_CHANCE`), and then only the block they hit: no sparks around it, none from after-flashes.
+  They still strike, hurt and charge lightning rods. Vanilla's own lightning, tridents, powers and the dry-lightning
+  wildfire disaster are unchanged.
+- Water placed on fire always put it out; nothing here changed that.
+
+## 0.7.121: villagers fight back (pack 0.15.28)
+The user linked the Villager Retaliation mod (NeoForge 1.21.1, all rights reserved, "don't port without permission"),
+so only the idea is used; nothing of its code. Most of what it does Kingdoms already had: witnessed crimes (`Theft`),
+reputation per faction (`Reputation`), each villager's memory of each player and gossip (`Recollections`), quests,
+hired workers. What was missing was a villager standing up for themselves when struck: `Retaliation`.
+- Strike a grown villager or a settlement's civilian (not a guard, ruler, orc, thrall, captive or someone downed) and
+  they square up and punch back (1 damage, every 25 ticks each, the crowd lands one every 10 ticks). Onlookers who see
+  it (`Theft.witnesses`) join in, up to 5. Seen, it's `Crime.ASSAULT`, a light crime (-10 reputation, a cry, a memory).
+- Someone under 30% health runs off. The rest cool off 30 s after your last blow on one of them, or when you're downed.
+- Feared (reputation -600 or under, or an outlaw there): the struck one runs instead, and nobody joins in.
+- Paying off: emeralds in hand, use a brawler. 3 emeralds plus 3 per extra blow you landed, at most 32. That one stops;
+  paying the one you first struck ends the whole fight. They remember being paid (`Kind.PAID_OFF`) as well as the blow.
+  At reputation -100 or under (or an outlaw) they refuse your coin.
+- A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
+  crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Tuning: the constants at the top of `Retaliation`.
+
+## 0.7.122: the hidden blade moves, and shows
+The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
+right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
+`client/mixin/blade/HiddenBladePoseMixin`.
+- Springing it is animated: the arm comes up into a guard, then the blade runs out of the housing (`SPRING_TICKS` 5,
+  the first half the arm, the rest the blade); sheathing runs it back. Tracked per player on the client each tick,
+  so everyone sees everyone's, in third and first person.
+- Out over an empty hand, that arm is held up ahead of you (`GUARD_*`: about 65 degrees up, turned in across the body,
+  following your look a little), not hanging at your side. The pose is set at the end of `PlayerModel.setupAnim`, so
+  costumes (which copy the player model's pose) follow it. Skipped while swimming, gliding, or holding a two-handed item.
+- A blow with the blade out is a straight thrust along your look (`STAB_*`) instead of a punch.
+- The bracer stands 0.4 px prouder (`BRACER_GROW`), clear of the assassin costume's own bracer and any suit sleeve it
+  used to z-fight with; the housing and blade sit out with it.
+
+## 0.7.123: seasons (with Kitchen 0.5.6, pack 0.15.30)
+- Andy chose our own seasons (2026-10-21); Kitchen keeps the calendar, read here through `KitchenCompat.season`,
+  `dayOfYear` and `temperate` (all soft without Kitchen 0.5.6).
+- Heritages: in a temperate land, summer counts +0.25 warmer and winter 0.8 colder, so plains are hot for an
+  Emberborn in summer and cold (a Frostborn's thriving, an Emberborn's wilting) in winter. Verdant feed even better
+  on spring sun (hunger x0.5 instead of x0.65).
+- Frostborn don't feel Kitchen's winter cold (no extra hunger out in the open): `KitchenCompat.skills` hands Kitchen the
+  predicate.
+- Raids: camps raid 1.5x as often in summer and 0.4x in winter (`Raids.SUMMER_RAIDS`, `WINTER_RAIDS`).
+- Festivals: every realm fit to keep one holds a festival on the first day of each season.

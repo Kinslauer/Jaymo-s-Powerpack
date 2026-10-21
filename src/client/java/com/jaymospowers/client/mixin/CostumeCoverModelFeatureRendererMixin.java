@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.15.23) Just before a model is drawn, after every pose has been laid on it: the skin a costume covers isn't drawn
+ * (0.15.32) Just before a model is drawn, after every pose has been laid on it: the skin a costume covers isn't drawn
  * (CostumeCover), and a costume over an MCA body drops its root's pose as MCA's layers do. Shown
  * again once drawn.
  */

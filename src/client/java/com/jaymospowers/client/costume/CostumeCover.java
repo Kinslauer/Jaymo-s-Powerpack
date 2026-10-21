@@ -25,7 +25,7 @@ import net.minecraft.util.ARGB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.23) The skin under a worn costume isn't drawn where the costume covers it (Andy: "costumes still clip, almost
+ * (0.15.32) The skin under a worn costume isn't drawn where the costume covers it (Andy: "costumes still clip, almost
  * all of the villager skin underneath is visible in motion"). Out-growing it (0.13.26) wasn't enough: with MCA a
  * player's villager body is drawn by MCA's own layers (skin, face, clothes, hair), each with its own model, posed from a
  * copy of the body taken as the layers start; our poses that add to a limb (a reel, a kick, a carried body's give) land
