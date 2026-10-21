@@ -21,7 +21,7 @@ final class KitchenCompat {
 	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
-	/** (0.7.116) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
+	/** (0.7.118) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
 	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
 
 	static {
@@ -92,19 +92,19 @@ final class KitchenCompat {
 	}
 
 	/**
-	 * (0.7.116) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
+	 * (0.7.118) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.4.
 	 */
 	static @Nullable String season(net.minecraft.world.level.Level level) {
 		return invoke(SEASON_NAME, level) instanceof String name ? name : null;
 	}
 
-	/** (0.7.116) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
+	/** (0.7.118) The day of Kitchen's year (from 0; a season is 21 days), or -1 without seasons. */
 	static int dayOfYear(net.minecraft.world.level.Level level) {
 		return invoke(DAY_OF_YEAR, level) instanceof Integer day ? day : -1;
 	}
 
-	/** (0.7.116) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
+	/** (0.7.118) Whether a land this warm at its base has seasons (plains, forests, swamps); false without seasons. */
 	static boolean temperate(float baseTemperature) {
 		return Boolean.TRUE.equals(invoke(TEMPERATE, baseTemperature));
 	}

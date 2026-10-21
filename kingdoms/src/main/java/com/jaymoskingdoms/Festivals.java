@@ -58,7 +58,7 @@ final class Festivals {
 	static final double DRAWN = 96.0, WELCOME = 24.0;
 	/** A realm keeps a festival of its own about once in this many days (always on the same days for each realm). */
 	static final int OWN_EVERY_DAYS = 8;
-	/** (0.7.116) Kitchen's season length in days: each season opens with a festival. */
+	/** (0.7.118) Kitchen's season length in days: each season opens with a festival. */
 	static final int SEASON_DAYS = 21;
 	/** When a festival day's gathering runs, by the time of day; the fireworks go up from dusk till this. */
 	static final long FROM = 1000L, DUSK = 12000L, TILL = 13600L;
@@ -160,7 +160,7 @@ final class Festivals {
 		if (called != null && called == day) {
 			return true;
 		}
-		// (0.7.116) with Kitchen's seasons, every realm (fit to) keeps the first day of each season too
+		// (0.7.118) with Kitchen's seasons, every realm (fit to) keeps the first day of each season too
 		int ofYear = KitchenCompat.dayOfYear(level);
 		boolean seasonDay = ofYear >= 0 && ofYear % SEASON_DAYS == 0;
 		if (!seasonDay && Math.floorMod(day + f.id() * 5L, OWN_EVERY_DAYS) != 0) {
