@@ -3622,3 +3622,17 @@ should deploy the blade." `HiddenBlade` + `HiddenBladeItem` + `client/HiddenBlad
   off hand's arm is drawn in first person while its blade is out. Texture from `tools/gen_hidden_blade.py`.
 - Old held blades are the same item id: use one to strap it on. Better Combat's dagger attributes for it were removed
   (the bracer in hand isn't a weapon). The assassin NPC still holds the item in hand (its damage is set directly).
+
+## 0.7.117: the hidden blade moves, and shows
+The user: "hidden blades should animate for players as well, and you should hold it in front of you so it is visible;
+right now it is held to the side of the player and is caught in the costume." `client/HiddenBladeClient` +
+`client/mixin/blade/HiddenBladePoseMixin`.
+- Springing it is animated: the arm comes up into a guard, then the blade runs out of the housing (`SPRING_TICKS` 5,
+  the first half the arm, the rest the blade); sheathing runs it back. Tracked per player on the client each tick,
+  so everyone sees everyone's, in third and first person.
+- Out over an empty hand, that arm is held up ahead of you (`GUARD_*`: about 65 degrees up, turned in across the body,
+  following your look a little), not hanging at your side. The pose is set at the end of `PlayerModel.setupAnim`, so
+  costumes (which copy the player model's pose) follow it. Skipped while swimming, gliding, or holding a two-handed item.
+- A blow with the blade out is a straight thrust along your look (`STAB_*`) instead of a punch.
+- The bracer stands 0.4 px prouder (`BRACER_GROW`), clear of the assassin costume's own bracer and any suit sleeve it
+  used to z-fight with; the housing and blade sit out with it.
