@@ -2285,6 +2285,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Animations (through Entity Model Features) was laying its idle arms back over the guard; now the guard goes on after
   every animation and EMF pauses for a player with a sprung blade. The guard is held still (only the walk sways it),
   and in first person your bare arm comes up into the guard with the blade pointing ahead. Details in the Kingdoms MODLOG.
-- **0.15.51, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
+- **0.15.53, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
   first ability key no longer fires your power: R is the dragon's fire breath. Told by the mount's id
   (`jaymoskingdoms:*_dragon`), so Powers still loads without Kingdoms (`JaymosPowersClient.steeringDragon`).

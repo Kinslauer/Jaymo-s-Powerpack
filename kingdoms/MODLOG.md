@@ -3931,7 +3931,7 @@ back to normal when retracted. and only move when the player does."
 - **Tamed:** follows, sits (sneak-use, empty hands), defends you. Saddle in the horse slot. Flight with the free-rein
   camera: Space takes off and climbs, W flies where you look, S brakes to a hover, Shift dives (and lands; on the ground
   it dismounts). Stamina: hard flight and fire drain it, meat refills it, exhausted it glides down. R breathes fire
-  where you look (Powers 0.15.51 lets go of its first ability while you steer one). Andy: "you can have a piggyback rider": a second
+  where you look (Powers 0.15.53 lets go of its first ability while you steer one). Andy: "you can have a piggyback rider": a second
   player sits behind the owner. Only the owner steers: left alone in the saddle, the passenger can't fly or breathe
   and the dragon lands; in the air the passenger's Shift doesn't throw them off.
 - Wild ones despawn far from players like other monsters (not tamed or named ones), none come on Peaceful, and the boss
