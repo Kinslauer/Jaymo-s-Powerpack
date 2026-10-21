@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "jaymoskingdoms:bat_wing",
+    "jaymoskingdoms:bat_wing",
+    "minecraft:fermented_spider_eye"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:scroll_of_draining"
+  }
+}

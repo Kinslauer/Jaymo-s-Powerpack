@@ -108,7 +108,7 @@ public final class EquestrianClient {
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("equestrian"));
 		whistleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.whistle", InputConstants.KEY_N, category));
 		trickKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.trick", InputConstants.KEY_J, category));
-		// (0.7.107) free rein: the camera free, the keys turn the horse toward it
+		// (0.7.110) free rein: the camera free, the keys turn the horse toward it
 		FreeReinClient.register(category);
 		ClientPlayNetworking.registerGlobalReceiver(Bonding.RiderGait.TYPE, (payload, context) -> {
 			if (payload.horse() == riding) {

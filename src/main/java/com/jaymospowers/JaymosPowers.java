@@ -39,6 +39,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
+		com.jaymospowers.core.Soundscape.register();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
@@ -66,6 +67,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.rig.Rig.init();
 		// (0.11.89) the Backpack: worn on the back, set down on the ground, torn apart only by strong blasts
 		com.jaymospowers.backpack.Backpack.init();
+		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
+		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		registerAttachments();
 	}
 

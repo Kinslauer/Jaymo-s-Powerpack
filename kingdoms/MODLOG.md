@@ -3511,8 +3511,44 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
   Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
   pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+- **0.7.107, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+  barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
+  (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
+  taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon
+  (`tools/gen_items.py`, vanilla style) are our own. From 3.5 to 20 blocks he keeps his distance (backs off inside 7)
+  and lobs a lit stick at where his foe is going, sight or no sight, so walls and roofs don't save you; closer, he draws
+  his cutlass. **Dynamite** (`Dynamite`): a 2.5 s fuse from the throw; it arcs, bounces and sizzles, then bursts like a
+  cannonball (12 at its heart, 3.5 blocks, a shove) and leaves blocks whole; it never hurts his own side. Water puts it
+  out (the stick drops). Hit a lit stick and it flies where you look and is yours. The item throws the same (16 to a
+  stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
+  each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
+  landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
+- **0.7.108, Better With Mods batch 1 (Powers 0.15.9):** `MobTweaks`: baby zombies -25% speed and damage
+  (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). Zombies and husks hunt
+  `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
+  safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
+  hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
+  `RoadPace`: `road_pace` blocks +15% (horses too; TRMT's worn dirt and sand paths count), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.
+- **0.7.109, villagers remember you (and MCA's chat AI is told):** Andy wanted MCA's chat AI worked in, more villager
+  interactions, and villagers who remember you and what you did with them. Each villager (and folk) now keeps
+  `Recollections`: per player (masked strangers under the costume's stand-in), up to 12 memories of 30 kinds, each with
+  a weight and a lifetime (small things 2-6 weeks; a life saved, a captive brought home, kin murdered: for good). They
+  are recorded from MCA gifts (and whether they were welcome), trades, chats/jokes/stories/hugs/flirts/kisses (by
+  whether hearts went up or down), approach answers (kind, rude, lied, confessed, threatened, fed, bribed, bouts,
+  stood with the realm in war, played), blows, crimes seen, pickpocketing, a kinsman killed in sight of witnesses,
+  lives saved, fires put out, captives freed or brought home (their family remembers too), quests done or given up,
+  letters, and what was said to them through the chat AI. Without any AI: someone with something unsaid comes over to
+  say it (an approach greeting), brings it up in an MCA chat, gossips about what they saw other players do, passes the
+  weighty things on to friends when neighbours meet (so word gets round), and one who bears you enough ill will won't
+  chat, joke or hug at all and won't come over friendly. With MCA's chat AI switched on (an op runs
+  `/mca chatAI default`; off by default), `ChatPrompts` adds the realm, its ruler and temper, its wars, how the realm
+  takes the player (reputation, rank, wanted, deeds, renown, tongue), tasks the player is doing for them, their friends
+  and foes among the neighbours, and every memory, to the villager's prompt (mixin on MCA's `ChatAIContext`).
+  `/kingdom memories` (ops) shows what the nearest villager remembers of you. Numbers at the top of `Recollections`.
 
-## 0.7.107: free rein riding (pack 0.15.6)
+## 0.7.110: free rein riding (pack 0.15.11)
 - **Free rein** (`equestrian.FreeRein`, client `FreeReinClient`, `FreeReinViewMixin`/`FreeReinYawMixin`, `MouseHandlerMixin`):
   steering any horse-type mount in third person, the mouse turns the camera on its own and the movement keys turn your
   horse toward where the camera looks (W ahead, A/D to the sides, S back toward the camera), a quarter of the way each

@@ -18,7 +18,7 @@ abstract class MouseHandlerMixin {
 		return EquestrianClient.scroll((int)Math.signum(wheel)) ? current : original.call(wheel, current, size);
 	}
 
-	/** (0.7.107) Under free rein the mouse turns the camera, not you. */
+	/** (0.7.110) Under free rein the mouse turns the camera, not you. */
 	@WrapOperation(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
 	private void jaymoskingdoms$freeRein(LocalPlayer player, double dx, double dy, Operation<Void> original) {
 		if (!FreeReinClient.turn(dx, dy)) {

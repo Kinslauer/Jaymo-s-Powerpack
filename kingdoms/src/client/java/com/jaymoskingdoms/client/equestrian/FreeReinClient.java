@@ -14,7 +14,7 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.107) Free rein in the saddle ({@link FreeRein}), in third person: the mouse turns the camera
+ * (0.7.110) Free rein in the saddle ({@link FreeRein}), in third person: the mouse turns the camera
  * ({@code MouseHandlerMixin}, {@code FreeReinViewMixin}) and the movement keys turn the rider toward where the camera
  * looks, a little each tick, and the horse after them. Aiming a bow or the like turns you to the camera at once. Back in
  * first person, or out of the saddle, you look where the camera looked. A key (unbound at first) switches it off and on.

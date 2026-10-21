@@ -5,6 +5,7 @@ import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fractures;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
+import com.jaymospowers.core.Soundscape;
 import java.util.Comparator;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.BlockPos;
@@ -328,8 +329,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 			this.quarry = findHost(level);
 		}
 		boolean moving = this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4;
-		if (moving && this.tickCount % 10 == 0) {
-			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 0.5F, 0.6F);
+		if (moving && Soundscape.due(this, "symbiote.blob", 7, 14)) {
+			Soundscape.play(level, this.position(), SoundSource.HOSTILE, WebSymbiote.SQUELCH.louder(0.9F).pitched(0.6F));
 		}
 		if (this.random.nextInt(moving ? 4 : 12) == 0) {
 			level.sendParticles(WebSymbioteStrains.dust(this, 0.9F), this.getX(), this.getY() + 0.1, this.getZ(), 1, 0.3, 0.02, 0.3, 0.0);

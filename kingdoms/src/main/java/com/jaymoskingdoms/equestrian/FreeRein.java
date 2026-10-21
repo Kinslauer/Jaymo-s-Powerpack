@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.107) Free rein: in third person the mouse moves the camera on its own and the movement keys turn the horse
+ * (0.7.110) Free rein: in third person the mouse moves the camera on its own and the movement keys turn the horse
  * toward where you're looking (W ahead, A and D to the sides, S back the way you came). The idea is Better Mount
  * Steering's (Seramicx, MIT); this is our own code. The client decides when it's on ({@code FreeReinClient}) and turns
  * the rider; here the ridden horse just goes forward whenever a movement key is held.

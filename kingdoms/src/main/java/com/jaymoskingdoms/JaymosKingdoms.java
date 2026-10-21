@@ -109,6 +109,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
+		MobTweaks.register();
 		Theft.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
@@ -173,6 +175,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		Cannonball.register();
+		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
+		Dynamite.register();
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
@@ -182,6 +186,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// 0.7.103: roads are quicker going, sand, snow and leaves slower
+		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
 		Milestones.register();
 		Cavalry.register();
@@ -214,6 +220,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
+		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
+		Recollections.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
@@ -255,6 +264,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
+		// 0.7.103: sinkholes: sand and gravel over nothing gives way under a player
+		com.jaymoskingdoms.disasters.LooseGround.register();
 		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.107) Under free rein your view turns with the camera ({@code FreeReinViewMixin} for the pitch). */
+/** (0.7.110) Under free rein your view turns with the camera ({@code FreeReinViewMixin} for the pitch). */
 @Mixin(LocalPlayer.class)
 abstract class FreeReinYawMixin {
 	@Inject(method = "getViewYRot", at = @At("HEAD"), cancellable = true)

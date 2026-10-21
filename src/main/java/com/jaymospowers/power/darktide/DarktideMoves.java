@@ -4,6 +4,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -56,6 +57,10 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 final class DarktideMoves {
+	/** The tide's wash, a different splash each time. */
+	static final Soundscape.Layer WASH = Soundscape.Layer.of(0.5F, 0.7F, 0.6F, 0.85F, SoundEvents.GENERIC_SPLASH, SoundEvents.PLAYER_SPLASH,
+		SoundEvents.BOAT_PADDLE_WATER);
+
 	// ---- R: Dark Strike ----
 	static final double STRIKE_REACH = 3.5;
 	/** A blade at full charge: this many times its damage (1× uncharged); empowered: {@link #EMPOWERED_FACTOR} at full charge. */
@@ -506,7 +511,7 @@ final class DarktideMoves {
 			}
 		}
 		if (wave.step % 3 == 0) {
-			level.playSound(null, front.x, front.y, front.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6F, 0.7F);
+			Soundscape.play(level, front, SoundSource.PLAYERS, WASH);
 		}
 		if (wave.step >= TIDE_LENGTH) {
 			if (wave.linger) {
