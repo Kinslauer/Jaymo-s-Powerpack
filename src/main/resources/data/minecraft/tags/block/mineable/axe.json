@@ -48,6 +48,20 @@
     "jaymospowers:skyroot_pressure_plate",
     "jaymospowers:greatroot_pressure_plate",
     "jaymospowers:wisproot_pressure_plate",
-    "jaymospowers:amberoot_pressure_plate"
+    "jaymospowers:amberoot_pressure_plate",
+    "jaymospowers:guardian_log",
+    "jaymospowers:guardian_wood",
+    "jaymospowers:stripped_guardian_log",
+    "jaymospowers:stripped_guardian_wood",
+    "jaymospowers:infected_guardian_log",
+    "jaymospowers:infected_guardian_wood",
+    "jaymospowers:guardian_planks",
+    "jaymospowers:guardian_stairs",
+    "jaymospowers:guardian_slab",
+    "jaymospowers:guardian_roots",
+    "jaymospowers:lucent_guardian_roots",
+    "jaymospowers:animal_stash",
+    "jaymospowers:outpost_campfire",
+    "jaymospowers:ambrosium_campfire"
   ]
 }

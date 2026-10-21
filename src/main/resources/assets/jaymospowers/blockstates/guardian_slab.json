@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/guardian_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/guardian_planks"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/guardian_slab_top"
+    }
+  }
+}

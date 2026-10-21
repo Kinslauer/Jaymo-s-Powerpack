@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:outpost",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 28,
+    "separation": 18,
+    "salt": 1380213108,
+    "spread_type": "linear"
+  }
+}

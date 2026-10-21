@@ -37,6 +37,8 @@ public final class Aether {
 		com.jaymospowers.aether.monster.AetherMonsters.init();
 		// the Sentry Ruins: sentry blocks, the Slider and its sentries, the buried dungeon
 		com.jaymospowers.aether.dungeon.Dungeon.init();
+		// the other Aether II structures: outposts, camps, towers, dens, Veradexian works, Brexallen, the mineshaft, remnants, the guardian tree
+		com.jaymospowers.aether.structure.Structures.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();

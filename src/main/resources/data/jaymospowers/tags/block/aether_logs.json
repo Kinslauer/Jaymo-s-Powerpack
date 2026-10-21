@@ -5,6 +5,12 @@
     "jaymospowers:stripped_skyroot_log",
     "jaymospowers:stripped_skyroot_wood",
     "jaymospowers:golden_oak_log",
-    "jaymospowers:golden_oak_wood"
+    "jaymospowers:golden_oak_wood",
+    "jaymospowers:guardian_log",
+    "jaymospowers:guardian_wood",
+    "jaymospowers:stripped_guardian_log",
+    "jaymospowers:stripped_guardian_wood",
+    "jaymospowers:infected_guardian_log",
+    "jaymospowers:infected_guardian_wood"
   ]
 }
