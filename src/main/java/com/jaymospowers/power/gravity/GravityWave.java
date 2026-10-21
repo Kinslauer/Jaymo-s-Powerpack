@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
  */
 final class GravityWave {
 	/** How far it reaches (blocks) with no charge and a full one, and how long it takes to get there (ticks). */
-	static final double RANGE_MIN = 8.0, RANGE_MAX = 16.0;
+	static final double RANGE_MIN = 4.0, RANGE_MAX = 16.0;
 	static final int TRAVEL_TICKS = 10;
 	/** The fan's spread: degrees either side, and up and down, of where you look. */
 	static final double HALF_WIDTH_DEG = 35.0, HALF_HEIGHT_DEG = 14.0;

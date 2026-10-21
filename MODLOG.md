@@ -2208,7 +2208,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.39, Gravity's B reworked (Gravity Wave, Inversion):** Andy: "rework my gravity B skill it would be a cone AoE
   infront of me shooting out a cone of gravitational waves, could carve up terrain as well, R + B = Pull target in and
   punch them in the gut, sending them away while inverting their insides causing bleed and a heavy slow status". Held
-  and let go, B is now the Gravity Wave (`GravityWave`): a fan rolling out the way you look (8-16 blocks with the charge,
+  and let go, B is now the Gravity Wave (`GravityWave`): a fan rolling out the way you look (4-16 blocks with the charge,
   35° wide, 14° tall) that hurts, throws and slows what it passes and carves the ground (softer blocks readily, harder
   with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
   rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
