@@ -225,7 +225,7 @@ def furniture():
             loot(bid)
             pattern = ["###", "| |"] if kind == "bench" else ["###", "| |", "| |"]
             write(DATA + "recipe/" + bid + ".json", {
-                "type": "minecraft:crafting_shaped", "category": "decorations", "group": NS + ":" + kind,
+                "type": "minecraft:crafting_shaped", "category": "misc", "group": NS + ":" + kind,
                 "pattern": pattern, "key": {"#": "minecraft:" + wood + "_slab", "|": "minecraft:stick"},
                 "result": {"count": 2, "id": NS + ":" + bid}})
 
