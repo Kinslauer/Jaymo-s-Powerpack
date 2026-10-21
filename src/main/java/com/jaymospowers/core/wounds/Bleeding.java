@@ -35,6 +35,8 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -60,6 +62,11 @@ import org.jspecify.annotations.Nullable;
 public final class Bleeding {
 	/** (0.14.4) A cut opens on a part that a blade, a shot or claws took at least this much from (health points). */
 	public static final float BLEED_FROM = 2.0F;
+	/**
+	 * (0.15.3) Sharpness (Just-In COMBAT's idea: a sharpened weapon makes its target bleed): any weapon with it cuts, and
+	 * each level lowers {@link #BLEED_FROM} by this much, to no less than {@link #SHARP_BLEED_FROM_MIN}.
+	 */
+	public static final float SHARPNESS_BLEED_FROM = 0.3F, SHARP_BLEED_FROM_MIN = 0.5F;
 	/** (0.14.4) A cut's loss every {@link #BLEED_TICKS}, and a severed stump's. */
 	public static final float BLEED_DAMAGE = 0.5F, STUMP_BLEED = 1.0F;
 	/** (0.14.4) How often the bleeding bleeds (ticks), and how long a cut stays open by itself. */
@@ -190,13 +197,16 @@ public final class Bleeding {
 			return;
 		}
 		int index = plan.index(landed);
-		if (index < 0 || was[index] - now[index] < BLEED_FROM) {
+		ItemStack weapon = source.getWeaponItem();
+		int sharpness = weapon == null || !(victim.level() instanceof ServerLevel level) ? 0
+			: EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS), weapon);
+		float bleedFrom = sharpness > 0 ? Math.max(SHARP_BLEED_FROM_MIN, BLEED_FROM - SHARPNESS_BLEED_FROM * sharpness) : BLEED_FROM;
+		if (index < 0 || was[index] - now[index] < bleedFrom) {
 			return;
 		}
 		Entity direct = source.getDirectEntity();
 		Entity by = source.getEntity();
-		ItemStack weapon = source.getWeaponItem();
-		boolean blade = weapon != null && Dismember.blade(weapon);
+		boolean blade = weapon != null && (Dismember.blade(weapon) || sharpness > 0);
 		boolean claws = by instanceof Zombie && direct == by;
 		if (!blade && !claws && !(direct instanceof Projectile)) {
 			return;

@@ -2024,3 +2024,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   hunger, a point of durability). Mobs holding one lunge at their target from 2.8 to 6.5 blocks off (3.5 s between).
   Forged like the rest: a Rapier Blade (1 ingot) with a crossguard and a rod at the Tool Station
   (`tinkering/WeaponParts`, sprites cut by `tools/weapon_parts_assets.py`). Numbers at the top of `RapierItem`.
+- **0.15.3, Sharpness cuts (the fifth Just-In COMBAT idea, on Wounds):** a weapon with Sharpness counts as a blade for
+  Wounds' cuts, and each level lowers the damage a hit needs to open one by 0.3 (2.0 plain, 0.5 at the least):
+  `Bleeding.SHARPNESS_BLEED_FROM`, `SHARP_BLEED_FROM_MIN`.
