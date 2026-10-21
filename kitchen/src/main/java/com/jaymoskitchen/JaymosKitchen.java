@@ -58,7 +58,9 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();
 		Sowing.register();
+		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.stomach.RawFood.register();
 
 		// sneak + right-click with an empty hand: a lit campfire, furnace, smoker or blast furnace opens the kitchen;
 		// the top of a wood, stone or slab block opens the prep board (also with Pmeh in hand, to roll a joint)
