@@ -218,7 +218,7 @@ final class Veradexian {
 				return yy == y ? (u == 10 || u == 14 ? wallB : step) : wall ? brick(s, u, yy, vv) : Kit.air();
 			});
 			if (k % 3 == 1) {
-				s.candle(11, y + 2, v, 3);
+				s.candle(11, y + 2, v, 1);
 			}
 		}
 		// the hall: shell u 6 to 18, v 19 to 35; inside u 7 to 17, v 20 to 34
@@ -247,8 +247,8 @@ final class Veradexian {
 			s.set(15, f + HALL_H - 1, v, Kit.lantern());
 		}
 		for (int v : new int[] {23, 27, 31}) {
-			s.candle(9, f + 3, v, 1);
-			s.candle(15, f + 3, v, 3);
+			s.candle(9, f + 2, v, 1);
+			s.candle(15, f + 2, v, 3);
 		}
 		// common chests in the hall's corners
 		s.chest(8, f, 33, 3, "chests/veradexian_library/common");
