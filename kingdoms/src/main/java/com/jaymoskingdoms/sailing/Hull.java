@@ -28,7 +28,7 @@ public final class Hull {
 	static final float WALL = 0.5F;
 	/** A ship may weigh at most this share of what its hull can hold up (the rest is freeboard). */
 	static final float MOST_LOAD = 0.9F;
-	/** (0.7.108) Wool hung in her rigging (not laid on a floor) catches the wind too: this many blocks of it make one sail's worth. */
+	/** (0.7.111) Wool hung in her rigging (not laid on a floor) catches the wind too: this many blocks of it make one sail's worth. */
 	static final int CLOTH_PER_SAIL = 3;
 
 	public final List<Ship.Piece> pieces;
@@ -122,7 +122,7 @@ public final class Hull {
 		this.maxY = y1;
 		this.maxZ = z1;
 		this.helm = h;
-		// (0.7.108) wool sails (Jaki's ships', or anyone's): wool with nothing under it but more wool, or air
+		// (0.7.111) wool sails (Jaki's ships', or anyone's): wool with nothing under it but more wool, or air
 		int cloth = 0;
 		for (int i = 0; i < n; i++) {
 			Ship.Piece p = pieces.get(i);

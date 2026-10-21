@@ -2043,3 +2043,23 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks, Chrono +12 (Andy: the powers that had extra dodges get extra feathers). The client-side charge packets
   (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
   `tools/gen_feathers.py`. Combat Roll is out of the pack.
+- **0.15.8 (Kitchen 0.5.1), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
+  Kitchen does the physics (see `kitchen/MODLOG.md`, `docs/ragdolls.md`); Powers only ties in, by reflection so it
+  still builds against the old Kitchen jar: `KitchenCompat.isLimp`, no struggling free of a carry or catching a ledge
+  while limp, no going limp while carried, Lifted, Gravity-held or webbed (`KitchenCompat.registerRagdollVetoes`), the
+  limp pose counts in `PoseTakeover.posed`, and the symbiote looks for a fresh corpse within 5 blocks (was 3), since
+  ragdolls tumble.
+- **0.15.9, Better With Mods batch 1 and everything metal melts (Kingdoms 0.7.108, Kitchen 0.5.2):** Andy picked
+  BWM ideas (MIT, 1.12 Forge; our own Fabric code, plan in the "Better With Mods: what fits our pack" doc) and asked
+  that "ALL metal items added to the pack ... melt right back down into their crafted material's metals".
+  `tinkering/smeltery/MeltingRecipes` works out every crafted item's metal from the recipe book after each reload
+  (lowest recipe wins, fixpoint, base metal forms excluded), reads `data/*/tinkering_melting/*.json` for
+  uncraftable items (Kingdoms ships its paladin, gladiator and ronin sets and barding), and syncs the list to
+  clients for JEI. `Melting.Result` can hold several liquids (a paladin helmet gives iron and gold); the smeltery
+  waits for room for all of them. Fixed entries: horse armour 9 ingots, nautilus armour 7, chainmail 3/5/4/2,
+  bell 4 gold, chipped/damaged anvil 20/10. `LOG_GAPS` logs metal-named items that still don't melt (netherite:
+  no liquid yet). Also: the Mining Charge (`armory/MiningChargeBlock`; digs a 3x3x3 hole into the block it's on,
+  harvesting drops, `CHARGE_DAMAGE`; WeaponMod dynamite recipe or a gunpowder one through Fabric load conditions),
+  Arcane Scroll drops (`enchanting/EnchantDrops`, per-mob table in `data/jaymospowers/enchant_drops/`, Looting
+  raises the chance), enchanted-book tooltips naming the gear an enchantment fits (`EnchantSlotTooltip`), and
+  `core/ExplosionLog` (one log line per player-caused explosion).

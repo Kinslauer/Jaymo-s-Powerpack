@@ -43,7 +43,7 @@ final class ButcheringBonus {
 	/** Rolls the extras for butchering this kind of animal on a block. */
 	static List<ItemStack> roll(@Nullable EntityType<?> type, RandomSource random) {
 		List<ItemStack> drops = new ArrayList<>();
-		for (Extra extra : EXTRAS.getOrDefault(type, BONES)) {
+		for (Extra extra : type == null ? BONES : EXTRAS.getOrDefault(type, BONES)) {
 			if (random.nextFloat() < extra.chance()) {
 				drops.add(new ItemStack(extra.item(), extra.min() + random.nextInt(extra.max() - extra.min() + 1)));
 			}

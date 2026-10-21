@@ -68,6 +68,7 @@ final class KingdomCommands {
 			.then(QuestCommands.command())
 			.then(Assassins.command())
 			.then(Approaches.command())
+			.then(Recollections.command())
 			.then(Identities.command())
 			.then(Languages.command())
 			.then(Neighbours.command())

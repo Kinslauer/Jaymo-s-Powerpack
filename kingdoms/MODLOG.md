@@ -3523,7 +3523,31 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
   each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
   landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
-- **0.7.108, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
+- **0.7.108, Better With Mods batch 1 (Powers 0.15.9):** `MobTweaks`: baby zombies -25% speed and damage
+  (ADD_MULTIPLIED_BASE, sums with tier bonuses); endermen that have taken a tier call nearby endermen onto their
+  attacker, and every teleport rumbles (`EndermanThunderMixin`). Zombies and husks hunt
+  `zombie_prey` livestock (`Prey`), spiders `spider_prey` (`SpiderMinds`); leashed, named and penned animals are
+  safe. `disasters/LooseGround`: sand or gravel over air gives way under you unless you're weightless. Forager:
+  hoeing grass turns up `tilled_seeds` (`SurvivalSkill`). Bats drop bat wings for the Scroll of Draining.
+  `RoadPace`: `road_pace` blocks +15% (horses too; TRMT's worn dirt and sand paths count), `slow_going` (sand, snow, leaves) -15% on foot, FOV held steady.
+  `tinkering_melting/armour.json` lets Powers' smeltery melt the paladin, gladiator, ronin and barding sets.
+- **0.7.109, villagers remember you (and MCA's chat AI is told):** Andy wanted MCA's chat AI worked in, more villager
+  interactions, and villagers who remember you and what you did with them. Each villager (and folk) now keeps
+  `Recollections`: per player (masked strangers under the costume's stand-in), up to 12 memories of 30 kinds, each with
+  a weight and a lifetime (small things 2-6 weeks; a life saved, a captive brought home, kin murdered: for good). They
+  are recorded from MCA gifts (and whether they were welcome), trades, chats/jokes/stories/hugs/flirts/kisses (by
+  whether hearts went up or down), approach answers (kind, rude, lied, confessed, threatened, fed, bribed, bouts,
+  stood with the realm in war, played), blows, crimes seen, pickpocketing, a kinsman killed in sight of witnesses,
+  lives saved, fires put out, captives freed or brought home (their family remembers too), quests done or given up,
+  letters, and what was said to them through the chat AI. Without any AI: someone with something unsaid comes over to
+  say it (an approach greeting), brings it up in an MCA chat, gossips about what they saw other players do, passes the
+  weighty things on to friends when neighbours meet (so word gets round), and one who bears you enough ill will won't
+  chat, joke or hug at all and won't come over friendly. With MCA's chat AI switched on (an op runs
+  `/mca chatAI default`; off by default), `ChatPrompts` adds the realm, its ruler and temper, its wars, how the realm
+  takes the player (reputation, rank, wanted, deeds, renown, tongue), tasks the player is doing for them, their friends
+  and foes among the neighbours, and every memory, to the villager's prompt (mixin on MCA's `ChatAIContext`).
+  `/kingdom memories` (ops) shows what the nearest villager remembers of you. Numbers at the top of `Recollections`.
+- **0.7.111, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
   and for pirates and other factions. Its licence is GPLv3, so its structure files ship unchanged in
   `data/jaymoskingdoms/structure/jaki/` with the licence and a notice in `licenses/jaki/` (our code stays MIT).
   `JakiShips` reads five of them when a ship is launched (brought up to date by the game's data fixer) and makes each

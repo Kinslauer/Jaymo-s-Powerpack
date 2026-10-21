@@ -57,6 +57,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
+		// (BWM port) enchanted books say what gear each enchantment goes on
+		com.jaymospowers.client.enchanting.EnchantSlotTooltip.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// (0.13.7) the bomb glider: its renderer, hold screen and drop keys

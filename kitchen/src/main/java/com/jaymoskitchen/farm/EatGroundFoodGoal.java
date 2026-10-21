@@ -6,37 +6,46 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * An animal that eats seeds (a chicken, a parrot) wanders over to seeds lying on the ground and pecks them up. Now
- * and then that puts it in the mood to breed, as hand-feeding would.
+ * A farm animal wanders over to its food lying on the ground (a chicken to seeds, a cow or sheep to wheat, a pig to
+ * carrots, a horse to apples...) and eats it, one at a time. Now and then that puts it in the mood to breed, as
+ * hand-feeding would ({@link #LOVE_CHANCE}); a chicken that pecks up a seed lays an egg at dawn ({@link LayingHens}).
+ * Tame pets (wolves, cats, parrots) leave your dropped food alone.
  */
-public class EatGroundSeedsGoal extends Goal {
+public class EatGroundFoodGoal extends Goal {
 	private static final double SEARCH = 8.0, REACH_SQ = 1.8 * 1.8;
+	/** One in this many mouthfuls puts a grown animal in love. */
+	private static final int LOVE_CHANCE = 4;
+	/** One in this many goal checks looks for food (the search isn't free). */
+	private static final int LOOK_CHANCE = 10;
 
 	private final Animal animal;
 	private @Nullable ItemEntity target;
 	private int giveUp;
 
-	public EatGroundSeedsGoal(Animal animal) {
+	public EatGroundFoodGoal(Animal animal) {
 		this.animal = animal;
 		setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 	}
 
 	@Override
 	public boolean canUse() {
-		if (animal.isVehicle() || animal.isPassenger() || animal.getRandom().nextInt(10) != 0) {
+		if (animal.isVehicle() || animal.isPassenger() || animal.getRandom().nextInt(LOOK_CHANCE) != 0
+			|| animal instanceof TamableAnimal pet && pet.isTame()) {
 			return false;
 		}
-		List<ItemEntity> seeds = animal.level().getEntitiesOfClass(ItemEntity.class, animal.getBoundingBox().inflate(SEARCH),
+		List<ItemEntity> food = animal.level().getEntitiesOfClass(ItemEntity.class, animal.getBoundingBox().inflate(SEARCH),
 			item -> item.isAlive() && animal.isFood(item.getItem()));
 		target = null;
 		double best = Double.MAX_VALUE;
-		for (ItemEntity item : seeds) {
+		for (ItemEntity item : food) {
 			double distance = item.distanceToSqr(animal);
 			if (distance < best) {
 				best = distance;
@@ -72,14 +81,17 @@ public class EatGroundSeedsGoal extends Goal {
 			}
 			return;
 		}
-		// peck
+		// eat (a chicken pecks)
 		if (animal.level() instanceof ServerLevel level) {
 			level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, target.getItem().getItem()),
 				target.getX(), target.getY() + 0.1, target.getZ(), 4, 0.1, 0.05, 0.1, 0.05);
-			animal.playSound(SoundEvents.GENERIC_EAT.value(), 0.5F, 1.4F);
+			animal.playSound(SoundEvents.GENERIC_EAT.value(), 0.5F, animal instanceof Chicken ? 1.4F : 1.0F);
 			animal.heal(1.0F);
-			if (animal.getAge() == 0 && animal.canFallInLove() && animal.getRandom().nextInt(4) == 0) {
+			if (animal.getAge() == 0 && animal.canFallInLove() && animal.getRandom().nextInt(LOVE_CHANCE) == 0) {
 				animal.setInLove(null);
+			}
+			if (animal instanceof Chicken hen) {
+				LayingHens.feed(hen);
 			}
 		}
 		target.getItem().shrink(1);

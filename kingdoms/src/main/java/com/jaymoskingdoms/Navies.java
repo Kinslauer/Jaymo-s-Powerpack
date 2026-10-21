@@ -40,9 +40,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.42) Sailing, stage 3: the kingdoms at sea. A coastal realm worth {@link #HARBOUR_TREASURY} emeralds or more keeps
  * a harbour (a pier out from its nearest shore), a {@link Pirates#SHIPWRIGHT} on it, and a warship: a frigate (a
- * brigantine while it's worth less than {@link #FRIGATE_TREASURY}; (0.7.108) now Jaki's war trireme) under its
+ * brigantine while it's worth less than {@link #FRIGATE_TREASURY}; (0.7.111) now Jaki's war trireme) under its
  * {@link Pirates#SEA_CAPTAIN}, crewed by its guards, flying its colours. She patrols off the harbour and engages any
- * pirate near it ({@link Corsairs}); lost, the shipwright builds another in a while. Merchantmen ((0.7.108) Jaki's
+ * pirate near it ({@link Corsairs}); lost, the shipwright builds another in a while. Merchantmen ((0.7.111) Jaki's
  * cargo ships and traders, in its colours) sail from harbour to harbour with goods (its caravans by sea), and run from
  * pirates; a king may ask a player to see one safely in ({@link Quest#ESCORT}).
  */
