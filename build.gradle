@@ -38,15 +38,15 @@ loom {
 }
 
 // The rest of the modpack, with each mod's CurseForge [project id, file id] for the CurseForge import zip.
-// Keep the versions in step with the CurseForge files (Cloth Config's newest Fabric file there is 26.3.158).
+// Keep the versions in step with the CurseForge files (Cloth Config's newest Fabric file there is 26.3.159).
 def packMods = [
 	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 9254134]],
 	[dep: "maven.modrinth:balm:26.3.0.3+fabric-26.3", cf: [531761, 9035245]],
 	[dep: "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3", cf: [231484, 9035244]],
 	// Balkon's WeaponMod: Legacy (MIT): the Pocket Arsenal pulls its weapons from the registry, so no compile dependency
-	[dep: "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1", cf: [1033985, 8893149]],
-	[dep: "maven.modrinth:architectury-api:22.0.4+fabric", cf: [419699, 9075717]],
-	[dep: "maven.modrinth:cloth-config:26.3.158+fabric", cf: [348521, 8884063]],
+	[dep: "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.2", cf: [1033985, 9269545]],
+	[dep: "maven.modrinth:architectury-api:22.0.5+fabric", cf: [419699, 9111314]],
+	[dep: "maven.modrinth:cloth-config:26.3.159+fabric", cf: [348521, 8952993]],
 	// Better Combat (animated weapon swings and combos; its fallback rules cover Balkon's weapons by name) and its library
 	[dep: "maven.modrinth:better-combat:8Vyq1h9a", cf: [639842, 8906536]],
 	[dep: "maven.modrinth:player-animation-library:xJ30QmpE", cf: [1283899, 9080979]],
