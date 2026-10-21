@@ -3668,3 +3668,28 @@ The user: "lightning strikes during storms absolutely destroys forests. water sh
   They still strike, hurt and charge lightning rods. Vanilla's own lightning, tridents, powers and the dry-lightning
   wildfire disaster are unchanged.
 - Water placed on fire always put it out; nothing here changed that.
+
+## 0.7.122: crooks among the villagers
+Andy: "Npcs can be criminals this consists of stealing, attacking other npcs, arson, stealing from the player, and upon
+prompts of good deals (8 cod 3 emeralds) they can scam you ... rep has an effect, the higher it is, the less likely to
+be robbed, scammed, or attacked." `Crooks` (+ small hooks in `Approaches`, `Theft`, `JaymosKingdoms`).
+- 8% of a settlement's grown villagers (not guards, outlaws or cultists) are crooks, decided once (`jaymoskingdoms:crook`,
+  saved). Every 5 s a free crook near a player has a 5% chance to set about something: lift from a neighbour's pack, mug
+  a lone neighbour (3 blows, never below 3 hearts), pick a player's pocket (up to 4 emeralds, else half a stack, never
+  the held item or a weapon), mug a player (night only), or set fire to logs/planks/wool/hay (night, once in 3 days per
+  settlement, never a block a player placed; `Firefighting` answers it).
+- Seen (a non-crook villager, folk or golem with sight of it, or the victim noticing; a mugging is always known): the
+  witness cries out over their head, the guards and golems within 32 chase the crook, the crook runs, and they're a
+  known criminal: `jaymoskingdoms:notoriety` (saved), scoreboard tag `jaymoskingdoms_criminal`, and `Crooks.SEEN`
+  listeners (the bounty board) get the faction and a bounty (5 + 4 per notoriety).
+- Pickpocketed players feel it half the time (named in chat), or only notice it gone 30-90 s later (unnamed).
+- Scams: a crook offers bargains from any trade (craftsmen's own deals otherwise), 70% of them scams; a scam reads half
+  again as many goods for one emerald less. You pay, they say they'll fetch it and walk off, and 4 s later crow about it
+  over their head.
+- Owed: whatever a crook took from you (theft, mugging, scam) can be demanded back for 5 minutes by right-clicking them:
+  35% they hand it over (+25% with a weapon in hand, +4% per 100 reputation, 10-85%), else they bolt. Downed or killed
+  within a day, their pockets go straight back to you (within 24 blocks) or drop. Killing a known criminal, or a crook
+  who owes you, isn't murder (`Crooks.fairGame`); guards and golems stop beating a downed crook.
+- Reputation: every chance against a player is scaled by `1 - rep/750`, between 0.1 and 1.5 (a friend of the town is
+  rarely robbed; a disliked stranger is robbed more).
+- Not yet seen in game: built without a compiler run of the whole tree (see the PR).
