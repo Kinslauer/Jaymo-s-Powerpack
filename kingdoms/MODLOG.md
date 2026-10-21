@@ -3993,3 +3993,31 @@ back to normal when retracted. and only move when the player does."
   blocks for a day and leaves four eggs.
 - **Eggs** (`dragons/DragonEggs`): Notus, Boreas, Zephyrus and Eurus eggs. Use one on a block to hatch a tamed hatchling,
   which grows with time and faster on its favourite food or meat. A wild dragon that's calmed won't pick fights.
+
+## 0.7.142: Nether war forts and their warlords (pack 0.15.55)
+Andy (2026-10-21): "Stage 2 please" (of the Nether faction plan, project-files `nether-faction/Nether-Plan.md`).
+`NetherForts`, `FortBuildings`, plus the warlord in `Hornkin`.
+- **Forts:** every 2 minutes, 30% per player in the Nether with no standing fort within 320 blocks: a rival pair rises
+  72-140 blocks off, out of sight (no player within 48), on level ground with headroom, at least 240 from older forts.
+  A **Hornkin war fort** (wastes or crimson forest; blackstone-brick walls with gilded stones and crenels, four towers
+  with soul lanterns, soul fires, the warlord's keep with a throne, a gold block and the hoard chest) and, 56-88 blocks
+  off, a **piglin war camp** (nether-brick palisade, basalt posts with lanterns, red and black tents, a war fire, the
+  warboss's gold seat and war chest). Gates face each other. Hoards: gold ingots and nuggets, gilded blackstone, maybe a
+  golden apple; magma cream, leather, 15% netherite scrap (Hornkin) or a crossbow, arrows, pork (piglins). Fort
+  Hornkin leave their own hoard alone.
+- **Hornkin Warlord** (`Hornkin.Kind.WARLORD`, own skin with a gold crown, drawn 1.75x): 260 health, 13 blow, 10
+  armour; red boss bar (to whoever hits him, as every boss); the horn charge (his breaks a raised shield for 5 s) and
+  the ground stamp; below half health, a rally roar (every 40 s): Strength and Speed to Hornkin within 24, they turn
+  on his foe, two more warriors come. Spawn egg too.
+- **Piglin Warboss:** a piglin brute made 1.45x, 220 health, 12 blow, gold helmet and chestplate, netherite axe, yellow
+  boss bar; leaps at foes 4-12 blocks off (every 10 s) and slams down where he lands (8, thrown); below half health a
+  war horn (every 40 s): his piglins rally and two more come.
+- **Garrisons:** 7 Hornkin (warriors, hurlers, a brute now and then) and 6 piglins (some brutes); they keep within 10
+  of their walls and take a new recruit every 5 minutes up to 10. Fort piglins don't zombify.
+- **War hosts:** about every 6 minutes while a player is within 160 of either, each fort sends 4-6 out of its gate to
+  march on the other's walls (in 16-block strides), and hold there once they arrive. They fight whoever they meet;
+  both sides attack players as before (Emberborn still spared by the Hornkin).
+- **A warlord falls:** his side breaks. Everyone of his fort (garrison and hosts) runs from players and is gone a
+  minute later once none is near; the walls and hoard stay. The news goes to players within 96.
+- Ops: `/kingdom netherfort found` (a pair just ahead; works with `execute in the_nether positioned ...`),
+  `/kingdom netherfort host` (the nearest fort sends a host now), `/kingdom netherfort info`.

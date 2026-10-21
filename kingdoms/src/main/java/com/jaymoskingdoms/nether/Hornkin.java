@@ -3,7 +3,14 @@ package com.jaymoskingdoms.nether;
 import com.jaymoskingdoms.Heritage;
 import java.util.EnumSet;
 import java.util.List;
+import com.jaymoskingdoms.BossBars;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -71,12 +78,23 @@ import org.jspecify.annotations.Nullable;
  */
 public class Hornkin extends Monster implements RangedAttackMob {
 	public enum Kind {
-		WARRIOR, HURLER, BRUTE, ZOMBIFIED
+		WARRIOR, HURLER, BRUTE, ZOMBIFIED, WARLORD
 	}
 
 	/** Health, blow, pace, how hard it is to shove, for each kind (in {@link Kind} order). */
-	static final double[] HEALTH = {30.0, 22.0, 70.0, 26.0}, DAMAGE = {6.0, 3.0, 11.0, 5.0}, SPEED = {0.30, 0.28, 0.24, 0.23},
-		KNOCKBACK_RESIST = {0.3, 0.1, 0.9, 0.2};
+	static final double[] HEALTH = {30.0, 22.0, 70.0, 26.0, 260.0}, DAMAGE = {6.0, 3.0, 11.0, 5.0, 13.0}, SPEED = {0.30, 0.28, 0.24, 0.23, 0.27},
+		KNOCKBACK_RESIST = {0.3, 0.1, 0.9, 0.2, 1.0}, ARMOR = {2.0, 2.0, 6.0, 2.0, 10.0};
+	/** (0.7.142) The warlord's rally: below this share of his health, at most this often (ticks), how far it reaches, how many warriors it calls. */
+	static final float RALLY_BELOW = 0.5F;
+	static final int RALLY_EVERY = 20 * 40, RALLY_TICKS = 20 * 15, RALLY_CALLS = 2;
+	static final double RALLY_RANGE = 24.0;
+	/** A shield caught by the warlord's horns is useless this long (ticks). */
+	static final int SHIELD_BREAK_TICKS = 20 * 5;
+	/** (0.7.142) A routed one (its fort's warlord dead) runs from players, and is gone after this long out of their reach (ticks, blocks). */
+	static final int ROUT_TICKS = 20 * 60;
+	static final double ROUT_GONE_RANGE = 24.0;
+	/** A marching host takes strides of this many blocks towards its goal; it has arrived within this many. */
+	static final double MARCH_STRIDE = 16.0, MARCH_ARRIVED = 10.0;
 	/** How far it spots prey; a player wearing gold, from this much farther. */
 	static final double SIGHT = 16.0, GOLD_SIGHT = 32.0;
 	/** Its horn charge (warriors): from how far, how long it runs at most (ticks), how often (ticks), the gore's extra damage and throw. */
@@ -114,14 +132,20 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	private static final EntityDataAccessor<Boolean> ADMIRING = SynchedEntityData.defineId(Hornkin.class, EntityDataSerializers.BOOLEAN);
 
 	private final Kind kind;
-	private int chargeTicks, chargeReady, stampReady, admireTicks, timeOut;
+	private int chargeTicks, chargeReady, stampReady, admireTicks, timeOut, rallyReady, routed;
+	/** (0.7.142) Where its war host marches (a rival fort), if it's on the march. */
+	private @Nullable BlockPos marchTo;
+	/** (0.7.142) The warlord's boss bar. */
+	private final @Nullable ServerBossEvent bar;
 	/** The gold it keeps (dropped when it dies). */
 	private int hoard;
 
 	public Hornkin(EntityType<? extends Hornkin> type, Level level, Kind kind) {
 		super(type, level);
 		this.kind = kind;
-		this.xpReward = kind == Kind.BRUTE ? 20 : 8;
+		this.xpReward = kind == Kind.WARLORD ? 80 : kind == Kind.BRUTE ? 20 : 8;
+		this.bar = kind == Kind.WARLORD ? new ServerBossEvent(this.getUUID(), this.getDisplayName(), BossEvent.BossBarColor.RED,
+			BossEvent.BossBarOverlay.NOTCHED_10) : null;
 		this.setCanPickUpLoot(kind != Kind.ZOMBIFIED);
 	}
 
@@ -133,7 +157,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			.add(Attributes.MOVEMENT_SPEED, SPEED[i])
 			.add(Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_RESIST[i])
 			.add(Attributes.FOLLOW_RANGE, GOLD_SIGHT)
-			.add(Attributes.ARMOR, kind == Kind.BRUTE ? 6.0 : 2.0);
+			.add(Attributes.ARMOR, ARMOR[i]);
 	}
 
 	public Kind kind() {
@@ -162,6 +186,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		this.goalSelector.addGoal(0, new AvoidEntityGoal<>(this, Player.class, 20.0F, 1.0, 1.3, e -> this.routed() && e.isAlive() && !e.isSpectator()));
 		this.goalSelector.addGoal(1, new AdmireGoal());
 		if (this.kind == Kind.HURLER) {
 			this.goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, THROW_EVERY, THROW_RANGE));
@@ -172,6 +197,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			this.goalSelector.addGoal(3, new SeekGoldGoal());
 			this.goalSelector.addGoal(4, new RaidChestGoal());
 		}
+		this.goalSelector.addGoal(5, new MarchGoal());
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -188,7 +214,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	/** Whether it goes for {@code target} unprovoked: not while admiring gold; never an Emberborn; past {@link #SIGHT} only one wearing gold. */
 	private boolean hunts(LivingEntity target) {
-		if (this.admiring() || !(target instanceof Player player)) {
+		if (this.admiring() || this.routed() || !(target instanceof Player player)) {
 			return false;
 		}
 		if (!this.zombified() && Heritage.is(player, Heritage.Kind.EMBERBORN)) {
@@ -223,7 +249,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
 		switch (this.kind) {
 			case WARRIOR -> this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(random.nextFloat() < 0.6F ? Items.GOLDEN_AXE : Items.GOLDEN_SWORD));
-			case BRUTE -> this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
+			case BRUTE, WARLORD -> this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
 			case ZOMBIFIED -> this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
 			case HURLER -> {
 			}
@@ -247,15 +273,107 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		if (this.admireTicks > 0 && --this.admireTicks == 0) {
 			this.doneAdmiring(level);
 		}
+		if (this.routed > 0) {
+			this.flee(level);
+			return;
+		}
 		LivingEntity target = this.getTarget();
-		if (this.kind == Kind.WARRIOR) {
+		if (this.kind == Kind.WARRIOR || this.kind == Kind.WARLORD) {
 			this.charge(level, target);
-		} else if (this.kind == Kind.BRUTE) {
+		}
+		if (this.kind == Kind.BRUTE || this.kind == Kind.WARLORD) {
 			if (this.stampReady > 0) {
 				this.stampReady--;
 			} else if (target != null && target.isAlive() && this.onGround() && this.distanceTo(target) < STAMP_TRIGGER) {
 				this.stamp(level);
 			}
+		}
+		if (this.bar != null) {
+			if (this.rallyReady > 0) {
+				this.rallyReady--;
+			} else if (target != null && this.getHealth() < this.getMaxHealth() * RALLY_BELOW) {
+				this.rally(level, target);
+			}
+			this.bar.setName(this.getDisplayName());
+			this.bar.setProgress(this.getHealth() / this.getMaxHealth());
+			BossBars.show(level, this, this.bar);
+		}
+	}
+
+	/** (0.7.142) The warlord roars: every Hornkin near him fights harder and faster and turns on his foe, and a few more come running. */
+	private void rally(ServerLevel level, LivingEntity foe) {
+		this.rallyReady = RALLY_EVERY;
+		for (Hornkin other : level.getEntitiesOfClass(Hornkin.class, this.getBoundingBox().inflate(RALLY_RANGE), h -> h.isAlive() && !h.zombified())) {
+			other.addEffect(new MobEffectInstance(MobEffects.STRENGTH, RALLY_TICKS, 0));
+			other.addEffect(new MobEffectInstance(MobEffects.SPEED, RALLY_TICKS, 0));
+			if (other != this) {
+				other.setTarget(foe);
+			}
+		}
+		NetherForts.Tag tag = NetherForts.tag(this);
+		for (int i = 0; i < RALLY_CALLS; i++) {
+			Hornkin called = Nether.HORNKIN.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (called == null) {
+				continue;
+			}
+			called.snapTo(this.getX() + this.random.nextGaussian() * 2.0, this.getY(), this.getZ() + this.random.nextGaussian() * 2.0,
+				this.random.nextFloat() * 360.0F, 0.0F);
+			called.finalizeSpawn(level, level.getCurrentDifficultyAt(this.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
+			if (tag != null) {
+				NetherForts.enlist(called, tag.fort(), NetherForts.GARRISON);
+			}
+			called.setTarget(foe);
+			level.addFreshEntity(called);
+		}
+		level.sendParticles(ParticleTypes.LAVA, this.getX(), this.getY(1.0), this.getZ(), 10, 0.5, 0.3, 0.5, 0.0);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.7F);
+		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(32.0))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hornkin_rally", this.getDisplayName()).withStyle(ChatFormatting.GOLD));
+		}
+	}
+
+	/** (0.7.142) Its warlord is dead: it runs from players, and when none is near once the rout is over, it's gone. */
+	void rout() {
+		this.routed = 1;
+		this.marchTo = null;
+		this.setTarget(null);
+		this.clearHome();
+	}
+
+	boolean routed() {
+		return this.routed > 0;
+	}
+
+	private void flee(ServerLevel level) {
+		this.setTarget(null);
+		if (++this.routed > ROUT_TICKS && level.getNearestPlayer(this, ROUT_GONE_RANGE) == null) {
+			this.dropHoard(level);
+			this.discard();
+		}
+	}
+
+	/** (0.7.142) Sends it marching on {@code goal} (a rival fort), with its host. */
+	void march(BlockPos goal) {
+		this.marchTo = goal;
+	}
+
+	@Nullable BlockPos marchingTo() {
+		return this.marchTo;
+	}
+
+	@Override
+	public void stopSeenByPlayer(ServerPlayer player) {
+		super.stopSeenByPlayer(player);
+		if (this.bar != null) {
+			this.bar.removePlayer(player);
+		}
+	}
+
+	@Override
+	public void remove(Entity.RemovalReason reason) {
+		super.remove(reason);
+		if (this.bar != null) {
+			this.bar.removeAllPlayers();
 		}
 	}
 
@@ -300,6 +418,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 			if (this.distanceTo(target) < GORE_REACH) {
 				DamageSource source = level.damageSources().mobAttack(this);
 				float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE) * GORE_BONUS;
+				if (this.kind == Kind.WARLORD && target instanceof Player player && player.isBlocking()) {
+					// the warlord's horns go through a shield: it's useless a while
+					player.getCooldowns().addCooldown(player.getUseItem(), SHIELD_BREAK_TICKS);
+					player.stopUsingItem();
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BREAK.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
+				}
 				if (target.hurtServer(level, source, damage)) {
 					Vec3 push = to.lengthSqr() > 1.0E-4 ? to.normalize().scale(GORE_THROW) : Vec3.ZERO;
 					target.setDeltaMovement(push.x, 0.5, push.z);
@@ -462,12 +586,12 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	@Override
 	public float getVoicePitch() {
-		return super.getVoicePitch() * (this.kind == Kind.BRUTE ? 0.65F : 0.8F);
+		return super.getVoicePitch() * (this.kind == Kind.WARLORD ? 0.55F : this.kind == Kind.BRUTE ? 0.65F : 0.8F);
 	}
 
 	@Override
 	public boolean removeWhenFarAway(double distSqr) {
-		return this.hoard == 0 && !this.admiring() && super.removeWhenFarAway(distSqr);
+		return this.hoard == 0 && !this.admiring() && NetherForts.tag(this) == null && super.removeWhenFarAway(distSqr);
 	}
 
 	@Override
@@ -476,6 +600,10 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		output.putInt("Hoard", this.hoard);
 		output.putInt("TimeOutside", this.timeOut);
 		output.putInt("Admire", this.admireTicks);
+		output.putInt("Routed", this.routed);
+		if (this.marchTo != null) {
+			output.putLong("MarchTo", this.marchTo.asLong());
+		}
 	}
 
 	@Override
@@ -484,6 +612,9 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		this.hoard = input.getIntOr("Hoard", 0);
 		this.timeOut = input.getIntOr("TimeOutside", 0);
 		this.admireTicks = input.getIntOr("Admire", 0);
+		this.routed = input.getIntOr("Routed", 0);
+		long march = input.getLongOr("MarchTo", Long.MIN_VALUE);
+		this.marchTo = march == Long.MIN_VALUE ? null : BlockPos.of(march);
 		this.entityData.set(ADMIRING, this.admireTicks > 0);
 	}
 
@@ -558,6 +689,47 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		}
 	}
 
+	/**
+	 * (0.7.142) On the march, it strides towards its host's goal; at home in a fort, it keeps within its walls (the strolls
+	 * already keep near home; this brings it back when a fight has drawn it out).
+	 */
+	private final class MarchGoal extends Goal {
+		MarchGoal() {
+			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (Hornkin.this.getTarget() != null || Hornkin.this.admiring() || Hornkin.this.routed()) {
+				return false;
+			}
+			if (Hornkin.this.marchTo != null) {
+				return true;
+			}
+			return Hornkin.this.hasHome() && !Hornkin.this.isWithinHome();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.canUse() && !Hornkin.this.getNavigation().isDone();
+		}
+
+		@Override
+		public void start() {
+			BlockPos goal = Hornkin.this.marchTo != null ? Hornkin.this.marchTo : Hornkin.this.getHomePosition();
+			Vec3 to = Vec3.atBottomCenterOf(goal).subtract(Hornkin.this.position());
+			if (Hornkin.this.marchTo != null && to.horizontalDistance() < MARCH_ARRIVED) {
+				// arrived: it holds the field here, at the walls it came to take
+				Hornkin.this.setHomeTo(goal, NetherForts.HOLD_RADIUS);
+				Hornkin.this.marchTo = null;
+				return;
+			}
+			Vec3 step = to.horizontalDistance() > MARCH_STRIDE ? Hornkin.this.position().add(to.normalize().scale(MARCH_STRIDE))
+				: Vec3.atBottomCenterOf(goal);
+			Hornkin.this.getNavigation().moveTo(step.x, step.y, step.z, 1.0);
+		}
+	}
+
 	/** Now and then, with nothing to fight, it goes to a chest near it with gold inside and takes some. */
 	private final class RaidChestGoal extends Goal {
 		private @Nullable BlockPos chest;
@@ -569,7 +741,8 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 		@Override
 		public boolean canUse() {
-			if (Hornkin.this.getTarget() != null || Hornkin.this.admiring() || !Hornkin.this.getOffhandItem().isEmpty()
+			// (0.7.142) a fort's own leave its hoard be
+			if (Hornkin.this.getTarget() != null || Hornkin.this.admiring() || !Hornkin.this.getOffhandItem().isEmpty() || NetherForts.tag(Hornkin.this) != null
 				|| (Hornkin.this.tickCount + Hornkin.this.getId()) % CHEST_EVERY != 0 || !(Hornkin.this.level() instanceof ServerLevel level)) {
 				return false;
 			}
