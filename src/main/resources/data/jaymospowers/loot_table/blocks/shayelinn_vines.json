@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": "minecraft:tool/can_shear",
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:shayelinn_vines"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/shayelinn_vines"
+}

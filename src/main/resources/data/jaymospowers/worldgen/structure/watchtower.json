@@ -1,0 +1,8 @@
+{
+  "type": "jaymospowers:aether_structure",
+  "biomes": "#jaymospowers:has_structure/watchtower",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "plan": "tower"
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:bryalinn_moss_block"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/bryalinn_moss_block"
+}

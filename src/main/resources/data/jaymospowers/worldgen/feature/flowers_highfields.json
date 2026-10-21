@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "jaymospowers:hesperose",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:tarabloom",
+        "weight": 2
+      },
+      {
+        "data": "jaymospowers:poasprout",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:lilichime",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:pluracian",
+        "weight": 2
+      },
+      {
+        "data": "jaymospowers:blade_poa",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:satival_shoot",
+        "weight": 1
+      },
+      {
+        "data": "jaymospowers:white_flower",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:purple_flower",
+        "weight": 3
+      }
+    ]
+  }
+}

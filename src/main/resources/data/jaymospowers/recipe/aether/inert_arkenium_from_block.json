@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:arkenium_block"
+  ],
+  "result": {
+    "id": "jaymospowers:inert_arkenium",
+    "count": 9
+  },
+  "group": "inert_arkenium"
+}

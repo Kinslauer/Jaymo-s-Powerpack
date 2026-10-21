@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:beast_pelt"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:beast_pelt"
+      }
+    ]
+  }
+}

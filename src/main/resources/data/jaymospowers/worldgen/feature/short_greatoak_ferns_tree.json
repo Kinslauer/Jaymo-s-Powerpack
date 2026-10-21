@@ -1,0 +1,49 @@
+{
+  "type": "minecraft:tree",
+  "below_trunk_provider": {
+    "id": "jaymospowers:aether_dirt"
+  },
+  "decorators": [
+    {
+      "type": "minecraft:place_on_ground",
+      "block_state_provider": {
+        "id": "jaymospowers:bush_fern"
+      },
+      "height": 2,
+      "radius": 3,
+      "tries": 18
+    }
+  ],
+  "foliage_placer": {
+    "type": "minecraft:blob_foliage_placer",
+    "radius": 4,
+    "height": 4,
+    "offset": 0
+  },
+  "foliage_provider": {
+    "id": "jaymospowers:greatoak_leaves",
+    "properties": {
+      "distance": "7",
+      "persistent": "false",
+      "waterlogged": "false"
+    }
+  },
+  "ignore_vines": true,
+  "minimum_size": {
+    "type": "minecraft:two_layers_feature_size",
+    "lower_size": 1,
+    "upper_size": 2
+  },
+  "trunk_placer": {
+    "type": "minecraft:giant_trunk_placer",
+    "base_height": 12,
+    "height_rand_a": 2,
+    "height_rand_b": 1
+  },
+  "trunk_provider": {
+    "id": "jaymospowers:skyroot_log",
+    "properties": {
+      "axis": "y"
+    }
+  }
+}

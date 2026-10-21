@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:wisptop_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.25,
+      "feature": {
+        "feature": "jaymospowers:wisptop_leafpile_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.005,
+      "feature": {
+        "feature": "jaymospowers:skybirch_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.002,
+      "feature": {
+        "feature": "jaymospowers:greatroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0025,
+      "feature": {
+        "feature": "jaymospowers:amberoot_sparse_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.0125,
+      "feature": {
+        "feature": "jaymospowers:fallen_wisproot_log",
+        "placement": []
+      }
+    }
+  ]
+}

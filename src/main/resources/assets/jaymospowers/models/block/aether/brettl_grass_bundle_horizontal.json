@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "jaymospowers:block/aether/brettl_grass_bundle_top",
+    "side": "jaymospowers:block/aether/brettl_grass_bundle"
+  }
+}

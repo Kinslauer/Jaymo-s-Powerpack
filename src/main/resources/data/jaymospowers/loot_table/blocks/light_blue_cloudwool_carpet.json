@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:light_blue_cloudwool_carpet"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/light_blue_cloudwool_carpet"
+}

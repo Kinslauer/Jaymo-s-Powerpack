@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:fallen_tree",
+  "log_decorators": [],
+  "stump_decorators": [],
+  "log_length": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 7
+  },
+  "trunk_provider": {
+    "id": "jaymospowers:skyroot_log",
+    "properties": {
+      "axis": "y"
+    }
+  }
+}

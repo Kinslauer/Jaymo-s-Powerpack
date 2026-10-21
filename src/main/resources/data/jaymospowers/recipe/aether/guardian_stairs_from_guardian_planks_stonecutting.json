@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:guardian_planks",
+  "result": {
+    "id": "jaymospowers:guardian_stairs"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymospowers:block/aether/arkenium_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymospowers:block/aether/arkenium_lantern_hanging"
+    }
+  }
+}

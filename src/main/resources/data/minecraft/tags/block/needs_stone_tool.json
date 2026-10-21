@@ -1,0 +1,28 @@
+{
+  "values": [
+    "jaymospowers:icestone",
+    "jaymospowers:zanite_ore",
+    "jaymospowers:zanite_block",
+    "jaymospowers:arkenium_ore",
+    "jaymospowers:glint_ore",
+    "jaymospowers:undershale_arkenium_ore",
+    "jaymospowers:undershale_glint_ore",
+    "jaymospowers:undershale_zanite_ore",
+    "jaymospowers:sentry_bricks",
+    "jaymospowers:sentry_base_bricks",
+    "jaymospowers:sentry_flagstones",
+    "jaymospowers:sentry_tile",
+    "jaymospowers:sentry_capstone_bricks",
+    "jaymospowers:sentry_lightstone",
+    "jaymospowers:sentry_pillar",
+    "jaymospowers:sentry_brick_stairs",
+    "jaymospowers:sentry_brick_slab",
+    "jaymospowers:sentry_brick_wall",
+    "jaymospowers:sentry_brick_button",
+    "jaymospowers:sentry_spawner",
+    "jaymospowers:sentry_trap",
+    "jaymospowers:faded_holystone_pillar",
+    "jaymospowers:faded_holystone_keystone",
+    "jaymospowers:altar"
+  ]
+}

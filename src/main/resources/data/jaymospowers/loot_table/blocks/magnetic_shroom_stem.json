@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": "minecraft:tool/can_silk_touch",
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:magnetic_shroom_stem"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/magnetic_shroom_stem"
+}

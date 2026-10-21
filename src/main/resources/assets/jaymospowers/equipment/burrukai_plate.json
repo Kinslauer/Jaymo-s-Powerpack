@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:burrukai_plate"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:burrukai_plate"
+      }
+    ]
+  }
+}

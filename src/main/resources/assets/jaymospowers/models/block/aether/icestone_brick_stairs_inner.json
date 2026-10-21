@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/icestone_bricks",
+    "side": "jaymospowers:block/aether/icestone_bricks",
+    "top": "jaymospowers:block/aether/icestone_bricks"
+  }
+}

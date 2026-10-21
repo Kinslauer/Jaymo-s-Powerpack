@@ -1,0 +1,9 @@
+{
+  "type": "jaymospowers:aether_structure",
+  "biomes": "#jaymospowers:has_structure/veradexian_ruins_temperate",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "plan": "ruins",
+  "variant": 0
+}

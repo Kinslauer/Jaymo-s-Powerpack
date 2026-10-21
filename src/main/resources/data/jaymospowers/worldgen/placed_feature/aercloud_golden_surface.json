@@ -1,0 +1,28 @@
+{
+  "feature": "jaymospowers:aercloud_golden",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 384
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "min_inclusive": {
+          "absolute": 96
+        },
+        "max_inclusive": {
+          "absolute": 208
+        },
+        "plateau": 48
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

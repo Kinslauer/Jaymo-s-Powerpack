@@ -1,0 +1,23 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:irradiated_bunker_remnants",
+      "weight": 1
+    },
+    {
+      "structure": "jaymospowers:irradiated_settlement_remnants",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 8,
+    "separation": 3,
+    "salt": 1380213107,
+    "spread_type": "linear",
+    "exclusion_zone": {
+      "other_set": "jaymospowers:sentry_ruins",
+      "chunk_count": 4
+    }
+  }
+}

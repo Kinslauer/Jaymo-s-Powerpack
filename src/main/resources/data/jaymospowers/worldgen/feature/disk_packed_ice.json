@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:disk",
+  "half_height": 1,
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 2,
+    "max_inclusive": 5
+  },
+  "state_provider": {
+    "id": "jaymospowers:arctic_packed_ice"
+  },
+  "target": {
+    "type": "minecraft:matching_blocks",
+    "blocks": [
+      "jaymospowers:aether_grass_block",
+      "jaymospowers:aether_dirt",
+      "jaymospowers:holystone",
+      "jaymospowers:arctic_snow_block"
+    ]
+  }
+}

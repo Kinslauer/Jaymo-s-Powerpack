@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:corrobonite_block"
+  ],
+  "result": {
+    "id": "jaymospowers:corrobonite_crystal",
+    "count": 9
+  },
+  "group": "corrobonite_crystal"
+}

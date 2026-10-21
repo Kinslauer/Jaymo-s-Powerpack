@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:holystone",
+  "result": {
+    "id": "jaymospowers:holystone_wall"
+  }
+}
