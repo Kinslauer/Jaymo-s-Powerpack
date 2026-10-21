@@ -46,8 +46,8 @@ public final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		// (0.7.137) a wild dragon too
-		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity)
+		// (0.7.137) a wild dragon too; (0.7.138) a villager crowned too
+		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity)
 			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed();
 	}
 
