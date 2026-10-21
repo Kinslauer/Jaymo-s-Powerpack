@@ -165,7 +165,7 @@ final class Trespass {
 			return null;
 		}
 		Villager best = null;
-		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(at).inflate(SEE_RANGE), Villager::isAlive)) {
+		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(at).inflate(SEE_RANGE * Identities.hoodSight(player)), Villager::isAlive)) {
 			if (v.isBaby() || v.isSleeping() || v.getTarget() != null || Frights.afraid(v.getUUID()) || !v.hasLineOfSight(player)) {
 				continue;
 			}

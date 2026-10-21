@@ -39,7 +39,7 @@ heat sources, changes with what it passes through, and rides its chimneys (`Chim
 Every ability pours more: Smokescreen 2.0 a tick (was 0.9), Smoke Bomb 130 / 190 mastered (was 60 / 90), Smother
 1.1 a tick on the target (was 0.5), Smoke Jet 1.5 a tick (was 0.6), and the gas fades a little slower.
 
-## Geyser steam (0.13.36)
+## Geyser steam (0.14.5)
 Andy (2026-10-20): plain and ascended smoke should use "the geyser particle effect" (potent sulfur over lava), "far
 thicker"; the gas stays for both, and corrupted smoke keeps its particles. Then: not vanilla's motion ("a jet aimed
 at the ground billows up"), "just use the particles and not their specific properties". So `SmokeParticles.STEAM`
