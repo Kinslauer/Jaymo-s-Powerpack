@@ -65,6 +65,23 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - The user reads the `docs/Abilities.md` table to request changes.
 
 ## Where things stand
+- **Wounds** (Powers 0.15.1, `core/wounds/`, plan `docs/Wounds-Plan.md`, specs `docs/Wounds-Phase2.md` to
+  `Phase5.md`; all five phases written without a compiler, not yet built or tested on the Deck): every living thing's
+  health spread over body parts, the downed state (moved from Kingdoms), broken limbs, bleeding and festering, pain,
+  the medieval kit, and the client's HUD, poses and effects. Player-facing rules in `docs/Abilities.md` (Wounds).
+  26.3 / Fabric facts it was built on:
+  - `ServerLivingEntityEvents.AFTER_DAMAGE` **never fires for a lethal hit**. Whatever must see the killing blow (a
+    head or limb severed onto the corpse) notes it in `ALLOW_DEATH` and acts in `AFTER_DEATH`.
+  - The order is `ALLOW_DAMAGE` → the hit → `ALLOW_DEATH` (every phase, in order; any `false` cancels the death) →
+    `AFTER_DEATH` (same tick, only once the death has gone through). Downed saves from death in a phase `LAST`, after
+    the default phase (so Darktide's shade, Xenoform, sparring and Kingdoms' Last Stand go first); Wounds notes the
+    killing blow in a phase after that (`KILLING_PHASE`), so only deaths nothing saved are noted.
+  - **Scoreboard tags shared across the mods** (Kingdoms and Kitchen never compile against Powers; they read and write
+    these): `jaymospowers_downed` (on everyone downed), `jaymospowers_downable` (Kingdoms puts it on its folk),
+    `jaymospowers_revive` (Kingdoms' tending gets the downed up), `jaymospowers_bandaged` (Kingdoms' tending stops the
+    bleeding), `jaymospowers_fights_on` (an undead fighting on without its body), `jaymospowers_crippled` (a
+    broken leg; not read by Kingdoms yet), `jaymospowers_freerun` (Kingdoms' Stealth experience), and Kitchen's
+    corpse tags `jaymoskitchen.missing.<part>` and `jaymoskitchen.broken.<part>`.
 - **Powers 0.8.0** is built on branch `plan-0.8` (not merged to master, not packaged, not playtested): everything in
   `docs/Plan-0.8.md`, built by agent tracks (briefed by `docs/AGENT_BRIEF_0.8.md`) and merged by the lead. The jar went
   to the user's tester. Jaymo's Kitchen is now a required dependency; First-person Model and Not Enough Animations are

@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"values": [
+		"#jaymospowers:humanoid",
+		"#minecraft:zombies",
+		"#minecraft:skeletons",
+		{
+			"id": "#minecraft:illager",
+			"required": false
+		},
+		"minecraft:player",
+		"minecraft:villager",
+		"minecraft:wandering_trader",
+		"minecraft:witch",
+		"minecraft:piglin",
+		"minecraft:piglin_brute",
+		"minecraft:zombified_piglin",
+		"minecraft:enderman"
+	]
+}

@@ -263,6 +263,8 @@ public final class Stomach {
 
 	/** Something eaten or drunk (the stack is still whole): into a slot if there's room. */
 	public static void eat(ServerPlayer player, ItemStack stack, boolean drink) {
+		// (drink, whether or not there's room in the stomach: a hangover doesn't care)
+		com.jaymoskitchen.brewing.Drunk.onDrink(player, stack);
 		Meal meal = mealOf(stack, drink);
 		if (meal == null) {
 			return;

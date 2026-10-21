@@ -207,9 +207,14 @@ final class DarktideMoves {
 
 	/** A G hit: always at the legs, so a humanoid it hurts is crippled. */
 	static boolean hitLegs(ServerPlayer player, LivingEntity target, float damage) {
-		boolean hurt = hit(player, target, damage);
-		if (hurt && target.isAlive() && DarktideStatus.humanoid(target)) {
-			DarktideStatus.cripple(target);
+		// (0.14.2) not through hit(): its aimed leg check would wound the leg a second time (Wounds keeps every strike)
+		target.setInvulnerableTime(0);
+		boolean hurt = target.hurtServer(player.level(), player.level().damageSources().playerAttack(player), damage);
+		if (hurt) {
+			if (target.isAlive() && DarktideStatus.humanoid(target)) {
+				DarktideStatus.cripple(target, player);
+			}
+			DarktideTide.enemy(player, target);
 		}
 		return hurt;
 	}
@@ -573,7 +578,7 @@ final class DarktideMoves {
 		player.teleportTo(level, target.getX(), target.getBoundingBox().maxY, target.getZ(), Set.of(), player.getYRot(), 60.0F, false);
 		player.setDeltaMovement(Vec3.ZERO);
 		player.syncVelocity = true;
-		boolean three = DarktideStatus.humanoid(target) && DarktideStatus.crippled(target);
+		boolean three = DarktideStatus.humanoid(target) && DarktideStatus.hobbled(target);
 		int stabs = three ? POUNCE_STABS_CRIPPLED : 1;
 		float factor = POUNCE_FACTOR;
 		if (pounce.empowered && live.flow >= EMPOWER_FLOW) {
