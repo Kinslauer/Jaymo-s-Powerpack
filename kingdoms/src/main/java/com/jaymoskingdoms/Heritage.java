@@ -3,8 +3,11 @@ package com.jaymoskingdoms;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -17,22 +20,44 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
@@ -58,7 +83,21 @@ import org.jspecify.annotations.Nullable;
  * character level climbs; hits harder the worse they're hurt; always hungry.</li>
  * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; (0.7.92) near death
  * their ki flares with a random buff for a while ({@link EarthlingSurge}).</li>
+ * <li><b>Stormborn:</b> (0.7.106) quicker under the open sky, and lightning never hurts them; in a thunderstorm their blows
+ * throw a spark to a monster nearby. Deep underground they're sluggish.</li>
+ * <li><b>Dawnborn:</b> (0.7.106) Nightborn's mirror: stronger and slowly healing under the open sun, hitting the undead
+ * harder; in the dark they hit lighter and hunger faster.</li>
+ * <li><b>Endborn:</b> (0.7.106, earned) now and then blink aside from an arrow or anything thrown; endermen don't mind
+ * their stare. Water and rain hurt them a little, like an enderman.</li>
+ * <li><b>Dragonblood:</b> (0.7.106, earned) fire and dragon's breath do them half harm; the hoard: the more gold they
+ * carry the harder they hit, and carrying none they hit lighter.</li>
+ * <li><b>Deepborn:</b> (0.7.106, earned) sneaking, they sense the creatures round them through walls (client); they never
+ * set off sculk (the Warden can't hear them either). Blasts stun them, and the open sun dulls them.</li>
  * </ul>
+ * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
+ * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
+ * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). Earning one ({@link #UNLOCKED}) gives a Blood Rite
+ * ({@link #RITE_ITEM}): read, it opens the heritage screen to change your blood to one you've earned.
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
  * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
@@ -109,6 +148,45 @@ public final class Heritage {
 	static final float WARRIOR_HUNGER = 1.2F;
 	/** Earthling: skill experience, as a factor. */
 	static final float EARTHLING_XP = 1.25F;
+	/**
+	 * (0.7.106) Stormborn: walking speed under the open sky, and lost deep underground (no sky, below the sea), as shares.
+	 * In a thunderstorm under the sky a blow throws a spark of this much harm to the nearest monster this close to what
+	 * they hit.
+	 */
+	static final double STORM_SKY_SPEED = 0.08, STORM_DEEP_SLOW = 0.08, STORM_SPARK_RANGE = 4.0;
+	static final float STORM_SPARK_DAMAGE = 3.0F;
+	/** (0.7.106) A Stormborn throws a spark at most this often (ticks), so a target's hurt-immunity doesn't let them spam it. */
+	static final int STORM_SPARK_EVERY = 10;
+	/**
+	 * (0.7.106) Dawnborn: blows in the sun, the share more against the undead, blows lost in the dark (shares); in the sun
+	 * they heal this much this often (ticks); hunger in the dark, as a factor.
+	 */
+	static final double DAWN_SUN_DAMAGE = 0.1, DAWN_DARK_WEAK = 0.1;
+	static final float DAWN_UNDEAD = 0.2F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
+	static final int DAWN_HEAL_EVERY = 100;
+	/**
+	 * (0.7.106) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
+	 * they can again (ticks); water and rain hurt this much this often (ticks).
+	 */
+	static final float END_BLINK_CHANCE = 0.25F, END_WET_DAMAGE = 1.0F;
+	static final double END_BLINK_RANGE = 8.0;
+	static final int END_BLINK_COOLDOWN = 60, END_WET_EVERY = 40;
+	/**
+	 * (0.7.106) Dragonblood: the share of fire and dragon's breath they take; the hoard: blows harder by up to
+	 * {@code DRAGON_HOARD_MAX} (a share) as their gold rises to {@code DRAGON_HOARD_FULL} ingots' worth (a nugget a
+	 * ninth, a block nine), and lighter by {@code DRAGON_POOR} carrying none.
+	 */
+	static final float DRAGON_FIRE_TAKEN = 0.5F;
+	static final double DRAGON_HOARD_MAX = 0.15, DRAGON_POOR = 0.1, DRAGON_HOARD_FULL = 64.0;
+	/** (0.7.106) Deepborn: how long a blast stuns them (ticks); blows lost in the open sun (a share). */
+	static final int DEEP_STUN_TICKS = 60;
+	static final double DEEP_SUN_WEAK = 0.1;
+	/**
+	 * (0.7.106) The unlocks: seeing the Ender Dragon die within this far; a tamed dragon of theirs, or a digging Warden,
+	 * within this far; looked for this often (ticks).
+	 */
+	static final double UNLOCK_DRAGON_RANGE = 192.0, UNLOCK_NEAR_RANGE = 20.0;
+	static final int UNLOCK_EVERY = 100;
 	/** The tag Jaymo's Powers reads to wrap a Warrior-born's tail away or let it out (it takes the tag off). */
 	static final String TAIL_TOGGLE_TAG = "jaymoskingdoms_tail_toggle";
 	/**
@@ -129,7 +207,11 @@ public final class Heritage {
 	static final float MCA_SIZE_CAP = 0.75F;
 	static final int SIZE_CHECK_EVERY = 200;
 
-	/** The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a point). */
+	/**
+	 * The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a
+	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and taken up with a
+	 * Blood Rite.
+	 */
 	public enum Kind {
 		HEARTLANDER(2, Items.WHEAT),
 		STONEBORN(0, Items.IRON_PICKAXE, Stats.Stat.GRIT, Stats.Stat.ENDURANCE),
@@ -140,14 +222,26 @@ public final class Heritage {
 		FROSTBORN(0, Items.SNOWBALL, Stats.Stat.GRIT, Stats.Stat.MIGHT),
 		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS),
 		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
-		EARTHLING(0, Items.BOOK, Stats.Stat.WITS, Stats.Stat.ENDURANCE);
+		EARTHLING(0, Items.BOOK, Stats.Stat.WITS, Stats.Stat.ENDURANCE),
+		STORMBORN(0, Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.AGILITY, Stats.Stat.FINESSE),
+		DAWNBORN(0, Items.SUNFLOWER, Stats.Stat.MIGHT, Stats.Stat.GRIT),
+		ENDBORN(true, 0, Items.ENDER_PEARL, Stats.Stat.WITS, Stats.Stat.FINESSE),
+		DRAGONBLOOD(true, 0, Items.DRAGON_BREATH, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
+		DEEPBORN(true, 0, Items.ECHO_SHARD, Stats.Stat.ENDURANCE, Stats.Stat.WITS);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
 		public final Item icon;
 		public final List<Stats.Stat> bonuses;
+		/** (0.7.106) Woken in play, not picked at the start. */
+		public final boolean earned;
 
 		Kind(int freePoints, Item icon, Stats.Stat... bonuses) {
+			this(false, freePoints, icon, bonuses);
+		}
+
+		Kind(boolean earned, int freePoints, Item icon, Stats.Stat... bonuses) {
+			this.earned = earned;
 			this.freePoints = freePoints;
 			this.icon = icon;
 			this.bonuses = List.of(bonuses);
@@ -213,11 +307,35 @@ public final class Heritage {
 	/** (0.7.80) A Tideborn's ticks left wet. Saved. */
 	static final AttachmentType<Integer> WET = AttachmentRegistry.create(JaymosKingdoms.id("heritage_wet"), builder -> builder.persistent(Codec.INT));
 
-	/** Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). */
-	public record Open(boolean forced) implements CustomPacketPayload {
+	/**
+	 * (0.7.106) The earned heritages a player has woken (their keys). Saved, kept through death, synced to its own player
+	 * (the screen shows them).
+	 */
+	public static final AttachmentType<List<String>> UNLOCKED = AttachmentRegistry.create(JaymosKingdoms.id("heritage_unlocked"),
+		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath()
+			.syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
+
+	/** (0.7.106) The Blood Rite: read, it opens the heritage screen to take up an earned heritage. */
+	public static Item RITE_ITEM;
+
+	/** (0.7.106) Players who've read a Blood Rite and have the screen up to choose (not saved). */
+	private static final java.util.Set<UUID> RITE_OPEN = new java.util.HashSet<>();
+	/** (0.7.106) When each Endborn may next blink aside (game time). */
+	private static final Map<UUID, Long> BLINK_READY = new HashMap<>();
+	/** (0.7.106) When each Stormborn last threw a spark (game time). */
+	private static final Map<UUID, Long> SPARKED = new HashMap<>();
+
+	/**
+	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). (0.7.106)
+	 * {@code rite}: a Blood Rite was read, so only the earned heritages they've woken can be picked.
+	 */
+	public record Open(boolean forced, boolean rite) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("heritage_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
+			(p, buf) -> {
+				buf.writeBoolean(p.forced);
+				buf.writeBoolean(p.rite);
+			}, buf -> new Open(buf.readBoolean(), buf.readBoolean()));
 
 		@Override
 		public Type<Open> type() {
@@ -241,6 +359,8 @@ public final class Heritage {
 	}
 
 	static void register() {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("blood_rite"));
+		RITE_ITEM = Registry.register(BuiltInRegistries.ITEM, key, new Rite(new Item.Properties().setId(key).stacksTo(16).rarity(Rarity.RARE)));
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind()));
@@ -248,6 +368,23 @@ public final class Heritage {
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
 			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
+		// (0.7.106) Stormborn: lightning never hurts; Endborn: now and then blink aside from what's thrown or shot
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player)
+			|| !(source.is(DamageTypeTags.IS_LIGHTNING) && is(player, Kind.STORMBORN)) && !blink(player, source));
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (entity instanceof ServerPlayer player && taken > 0.0F) {
+				stunned(player, source);
+			}
+			if (taken > 0.0F) {
+				struck(entity, source);
+			}
+		});
+		ServerLivingEntityEvents.AFTER_DEATH.register(Heritage::died);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			RITE_OPEN.remove(handler.player.getUUID());
+			BLINK_READY.remove(handler.player.getUUID());
+			SPARKED.remove(handler.player.getUUID());
+		});
 	}
 
 	public static @Nullable Kind of(Player player) {
@@ -262,7 +399,7 @@ public final class Heritage {
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(forced));
+			ServerPlayNetworking.send(player, new Open(forced, false));
 		}
 	}
 
@@ -273,10 +410,27 @@ public final class Heritage {
 
 	private static void choose(ServerPlayer player, int ordinal) {
 		Kind[] all = Kind.values();
-		if (ordinal < 0 || ordinal >= all.length || of(player) != null) {
+		if (ordinal < 0 || ordinal >= all.length) {
 			return;
 		}
-		set(player, all[ordinal]);
+		Kind kind = all[ordinal];
+		if (of(player) != null) {
+			// (0.7.106) a Blood Rite's choice: only an earned heritage they've woken, and the rite is spent on it
+			if (RITE_OPEN.remove(player.getUUID()) && kind != of(player) && kind.earned && unlocked(player, kind)) {
+				if (!spendRite(player)) {
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_gone").withStyle(ChatFormatting.GRAY));
+					return;
+				}
+				set(player, kind);
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_done",
+					Component.translatable("heritage.jaymoskingdoms." + kind.key())).withStyle(ChatFormatting.DARK_RED));
+			}
+			return;
+		}
+		if (kind.earned && !unlocked(player, kind)) {
+			return;
+		}
+		set(player, kind);
 		// (character creation: the class comes next)
 		if (Classes.classOf(player) == null) {
 			Classes.ask(player, true);
@@ -366,6 +520,16 @@ public final class Heritage {
 		if (kind != Kind.TIDEBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		// (0.7.106) the new bloods' modifiers that change with where they stand, taken off everyone else
+		if (kind != Kind.STORMBORN) {
+			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_sky", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
+		if (kind != Kind.DAWNBORN && kind != Kind.DEEPBORN) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
+		if (kind != Kind.DRAGONBLOOD) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_hoard", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
 		green(player, kind);
 	}
 
@@ -416,6 +580,31 @@ public final class Heritage {
 				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_chill", -slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
 				player.setTicksFrozen(0);
+			} else if (kind == Kind.STORMBORN) {
+				// quicker under the open sky, sluggish deep underground
+				double speed = openSky(player) ? STORM_SKY_SPEED : deep(player) ? -STORM_DEEP_SLOW : 0.0;
+				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_sky", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			} else if (kind == Kind.DAWNBORN) {
+				// the sun strengthens and mends them; the dark dulls them
+				boolean sun = inSun(player);
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", sun ? DAWN_SUN_DAMAGE : dark(player) ? -DAWN_DARK_WEAK : 0.0,
+					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				if (sun && server.getTickCount() % DAWN_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
+					player.heal(DAWN_HEAL);
+				}
+			} else if (kind == Kind.ENDBORN) {
+				// water burns them like an enderman
+				if (player.isInWaterOrRain() && server.getTickCount() % END_WET_EVERY == 0 && !player.isCreative() && !player.isSpectator()) {
+					player.hurtServer(player.level(), player.damageSources().drown(), END_WET_DAMAGE);
+				}
+			} else if (kind == Kind.DRAGONBLOOD) {
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_hoard", hoard(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			} else if (kind == Kind.DEEPBORN) {
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", inSun(player) ? -DEEP_SUN_WEAK : 0.0,
+					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			}
+			if (server.getTickCount() % UNLOCK_EVERY == 0) {
+				unlockChecks(player);
 			}
 		}
 	}
@@ -512,6 +701,7 @@ public final class Heritage {
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : chilled(player) ? WILT_HUNGER : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
 			case WARRIORBORN -> WARRIOR_HUNGER;
+			case DAWNBORN -> dark(player) ? DAWN_DARK_HUNGER : 1.0F;
 			default -> 1.0F;
 		};
 	}
@@ -564,11 +754,276 @@ public final class Heritage {
 		return is(player, Kind.SYLVAN) ? SYLVAN_SNEAK : 0.0;
 	}
 
+	// ---- (0.7.106) the new bloods -----------------------------------------------------------------------------------
+
+	/** Under the open sky (nothing overhead), in the Overworld's light: a Stormborn's home. */
+	static boolean openSky(ServerPlayer player) {
+		return player.level().canSeeSky(player.blockPosition().above());
+	}
+
+	/** Deep underground: no sky overhead and below the sea. */
+	static boolean deep(ServerPlayer player) {
+		return !player.level().canSeeSky(player.blockPosition().above()) && player.getY() < player.level().getSeaLevel();
+	}
+
+	/** A Dragonblood's hoard: their blows' share more (or less, carrying no gold at all) for the gold they carry. */
+	static double hoard(ServerPlayer player) {
+		double gold = 0.0;
+		var inventory = player.getInventory();
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (stack.is(Items.GOLD_INGOT) || stack.is(Items.RAW_GOLD)) {
+				gold += stack.getCount();
+			} else if (stack.is(Items.GOLD_NUGGET)) {
+				gold += stack.getCount() / 9.0;
+			} else if (stack.is(Items.GOLD_BLOCK)) {
+				gold += stack.getCount() * 9.0;
+			}
+		}
+		return gold <= 0.0 ? -DRAGON_POOR : DRAGON_HOARD_MAX * Math.min(1.0, gold / DRAGON_HOARD_FULL);
+	}
+
+	/** An Endborn shot at or hit by something thrown: now and then they blink aside, and it misses (true). */
+	private static boolean blink(ServerPlayer player, DamageSource source) {
+		if (!source.is(DamageTypeTags.IS_PROJECTILE) || !is(player, Kind.ENDBORN) || player.isDeadOrDying()
+			|| !(player.level() instanceof ServerLevel level) || player.isInvulnerableTo(level, source)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		Long ready = BLINK_READY.get(player.getUUID());
+		if (ready != null && now < ready || player.getRandom().nextFloat() >= END_BLINK_CHANCE) {
+			return false;
+		}
+		for (int tries = 0; tries < 16; tries++) {
+			double x = player.getX() + (player.getRandom().nextDouble() - 0.5) * 2.0 * END_BLINK_RANGE;
+			double y = player.getY() + player.getRandom().nextInt(5) - 2;
+			double z = player.getZ() + (player.getRandom().nextDouble() - 0.5) * 2.0 * END_BLINK_RANGE;
+			double fromX = player.getX(), fromY = player.getY(), fromZ = player.getZ();
+			if (player.randomTeleport(x, y, z, true, state -> false)) {
+				BLINK_READY.put(player.getUUID(), now + END_BLINK_COOLDOWN);
+				player.level().playSound(null, fromX, fromY, fromZ, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 1.2F);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 1.2F);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A Deepborn caught in a blast: the noise stuns them for a moment. */
+	private static void stunned(ServerPlayer player, DamageSource source) {
+		if (source.is(DamageTypeTags.IS_EXPLOSION) && is(player, Kind.DEEPBORN)) {
+			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, DEEP_STUN_TICKS + 40, 0, false, false, true));
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DEEP_STUN_TICKS, 2, false, false, true));
+		}
+	}
+
+	/**
+	 * Called from the hurt mixin ({@code LivingEntityHurtMixin}) for every blow to {@code target}: a Dragonblood (player or
+	 * villager) takes half from fire and dragon's breath; a Dawnborn hits the undead harder.
+	 */
+	public static float dealt(LivingEntity target, DamageSource source, float amount) {
+		if (VillagerHeritage.of(target) == Kind.DRAGONBLOOD && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
+			amount *= DRAGON_FIRE_TAKEN;
+		}
+		Entity by = source.getEntity();
+		if (!(by instanceof LivingEntity attacker) || by != source.getDirectEntity() || target.level().isClientSide()) {
+			return amount;
+		}
+		Kind kind = VillagerHeritage.of(attacker);
+		if (kind == Kind.DAWNBORN && target.is(EntityTypeTags.UNDEAD)) {
+			amount *= 1.0F + DAWN_UNDEAD;
+		}
+		return amount;
+	}
+
+	/** A blow that landed on {@code target}: a Stormborn player's, in a thunderstorm under open sky, throws a spark. */
+	private static void struck(LivingEntity target, DamageSource source) {
+		if (source.getEntity() instanceof Player attacker && source.getEntity() == source.getDirectEntity() && is(attacker, Kind.STORMBORN)
+			&& attacker.level().isThundering() && attacker.level().canSeeSky(attacker.blockPosition().above())
+			&& attacker.level() instanceof ServerLevel level) {
+			spark(level, attacker, target);
+		}
+	}
+
+	/** A Stormborn's spark: from what they hit to the nearest monster close by (not them, not it); one a swing at most. */
+	private static void spark(ServerLevel level, LivingEntity attacker, LivingEntity target) {
+		long now = level.getGameTime();
+		Long last = SPARKED.get(attacker.getUUID());
+		if (last != null && now - last < STORM_SPARK_EVERY && now >= last) {
+			return;
+		}
+		SPARKED.put(attacker.getUUID(), now);
+		LivingEntity nearest = null;
+		double best = STORM_SPARK_RANGE * STORM_SPARK_RANGE;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(STORM_SPARK_RANGE),
+			e -> e != attacker && e != target && e.isAlive() && e instanceof Enemy)) {
+			double d = e.distanceToSqr(target);
+			if (d < best) {
+				best = d;
+				nearest = e;
+			}
+		}
+		if (nearest == null) {
+			return;
+		}
+		// a line of sparks between them
+		double fx = target.getX(), fy = target.getY(0.6), fz = target.getZ();
+		double tx = nearest.getX(), ty = nearest.getY(0.6), tz = nearest.getZ();
+		for (int i = 0; i <= 8; i++) {
+			double t = i / 8.0;
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
+		}
+		level.playSound(null, tx, ty, tz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
+		nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);
+	}
+
+	// ---- (0.7.106) earned heritages and the Blood Rite ------------------------------------------------------------
+
+	/** Whether {@code player} has woken earned heritage {@code kind} (any heritage that isn't earned is always open). */
+	public static boolean unlocked(Player player, Kind kind) {
+		if (!kind.earned) {
+			return true;
+		}
+		List<String> keys = player.getAttached(UNLOCKED);
+		return keys != null && keys.contains(kind.key());
+	}
+
+	/** Wakes earned heritage {@code kind} in {@code player}, once: the word of it, and a Blood Rite to take it up. */
+	static void unlock(ServerPlayer player, Kind kind) {
+		if (!kind.earned || unlocked(player, kind)) {
+			return;
+		}
+		List<String> keys = new ArrayList<>(player.getAttachedOrElse(UNLOCKED, List.of()));
+		keys.add(kind.key());
+		player.setAttached(UNLOCKED, List.copyOf(keys));
+		ItemStack rite = new ItemStack(RITE_ITEM);
+		if (!player.getInventory().add(rite)) {
+			player.drop(rite, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.unlocked",
+			Component.translatable("heritage.jaymoskingdoms." + kind.key())).withStyle(ChatFormatting.DARK_RED));
+	}
+
+	/**
+	 * Every {@link #UNLOCK_EVERY} ticks, what's round {@code player} that wakes an earned heritage: the Ender Dragon dying
+	 * near them (Endborn and Dragonblood), a dragon of any mod tamed by them close by (Dragonblood), a Warden digging
+	 * away close by (Deepborn).
+	 */
+	static void unlockChecks(ServerPlayer player) {
+		if (!(player.level() instanceof ServerLevel level) || player.isSpectator()) {
+			return;
+		}
+		// (getDragons() leaves out a dying dragon: its health is already 0)
+		for (EnderDragon dragon : level.getEntities(EntityTypes.ENDER_DRAGON, d -> d.dragonDeathTime > 0)) {
+			if (dragon.distanceTo(player) < UNLOCK_DRAGON_RANGE) {
+				unlock(player, Kind.ENDBORN);
+				unlock(player, Kind.DRAGONBLOOD);
+			}
+		}
+		var near = player.getBoundingBox().inflate(UNLOCK_NEAR_RANGE);
+		if (!unlocked(player, Kind.DEEPBORN)) {
+			if (!level.getEntitiesOfClass(Warden.class, near, w -> w.getPose() == Pose.DIGGING).isEmpty()) {
+				unlock(player, Kind.DEEPBORN);
+			}
+		}
+		if (!unlocked(player, Kind.DRAGONBLOOD)) {
+			for (LivingEntity tame : level.getEntitiesOfClass(LivingEntity.class, near, e -> e instanceof OwnableEntity && dragon(e))) {
+				if (((OwnableEntity)tame).getOwner() == player) {
+					unlock(player, Kind.DRAGONBLOOD);
+				}
+			}
+		}
+	}
+
+	/** A dragon of any mod (its id says so), the Ender Dragon too. */
+	static boolean dragon(Entity entity) {
+		return entity instanceof EnderDragon || BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("dragon");
+	}
+
+	/** Something died: a dragon slain by a player wakes their Dragonblood, a Warden their Deepborn. */
+	private static void died(LivingEntity entity, DamageSource source) {
+		if (!(source.getEntity() instanceof ServerPlayer player)) {
+			return;
+		}
+		if (dragon(entity)) {
+			unlock(player, Kind.DRAGONBLOOD);
+		} else if (entity instanceof Warden) {
+			unlock(player, Kind.DEEPBORN);
+		}
+	}
+
+	/** Takes one Blood Rite out of {@code player}'s inventory (true), or finds none (false). Creative spends nothing. */
+	private static boolean spendRite(ServerPlayer player) {
+		if (player.isCreative()) {
+			return true;
+		}
+		var inventory = player.getInventory();
+		for (int i = 0; i < inventory.getContainerSize(); i++) {
+			ItemStack stack = inventory.getItem(i);
+			if (stack.is(RITE_ITEM)) {
+				stack.shrink(1);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The Blood Rite: read (right-click), it opens the heritage screen to change your blood to an earned one you've woken. */
+	static final class Rite extends Item {
+		Rite(Item.Properties properties) {
+			super(properties);
+		}
+
+		@Override
+		public InteractionResult use(Level level, Player player, InteractionHand hand) {
+			if (!(player instanceof ServerPlayer sp)) {
+				return InteractionResult.SUCCESS;
+			}
+			if (of(sp) == null) {
+				ask(sp, true);
+				return InteractionResult.SUCCESS;
+			}
+			boolean any = false;
+			for (Kind kind : Kind.values()) {
+				any |= kind.earned && kind != of(sp) && unlocked(sp, kind);
+			}
+			if (!any) {
+				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_silent").withStyle(ChatFormatting.GRAY));
+				return InteractionResult.FAIL;
+			}
+			if (ServerPlayNetworking.canSend(sp, Open.TYPE)) {
+				RITE_OPEN.add(sp.getUUID());
+				level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 0.8F, 0.8F);
+				ServerPlayNetworking.send(sp, new Open(false, true));
+			}
+			return InteractionResult.SUCCESS;
+		}
+	}
+
 	// ---- for ops ------------------------------------------------------------------------------------------------
 
-	/** {@code /kingdom heritage set|clear|get}, for ops. */
+	/** {@code /kingdom heritage set|clear|get|unlock}, for ops. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		var players = Commands.argument("players", EntityArgument.players());
+		// (0.7.106) wake an earned heritage in them, as if they'd earned it (with its Blood Rite)
+		var unlockPlayers = Commands.argument("players", EntityArgument.players());
+		for (Kind kind : Kind.values()) {
+			if (!kind.earned) {
+				continue;
+			}
+			unlockPlayers.then(Commands.literal(kind.key()).executes(c -> {
+				int n = 0;
+				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
+					unlock(p, kind);
+					n++;
+				}
+				int count = n;
+				c.getSource().sendSuccess(() -> Component.translatable("command.jaymoskingdoms.heritage.unlocked", count,
+					Component.translatable("heritage.jaymoskingdoms." + kind.key())), true);
+				return n;
+			}));
+		}
 		for (Kind kind : Kind.values()) {
 			players.then(Commands.literal(kind.key()).executes(c -> {
 				int n = 0;
@@ -584,6 +1039,7 @@ public final class Heritage {
 		}
 		return Commands.literal("heritage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("set").then(players))
+			.then(Commands.literal("unlock").then(unlockPlayers))
 			.then(Commands.literal("clear").then(Commands.argument("players", EntityArgument.players()).executes(c -> {
 				int n = 0;
 				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {

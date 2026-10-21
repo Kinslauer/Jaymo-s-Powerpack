@@ -3492,7 +3492,26 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   longswords, diamond), rarer the higher, odds rising with the tier; rare pieces sometimes and legendary always
   enchanted. **Duellists**: a lord, and one guard in five, fence with a rapier of their sword's metal when Powers is
   there (`Outfits.fencer`). Bleeding, the fifth idea, is already Wounds' (Powers' PR #331).
-- **0.7.106, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
+- **0.7.106, five new heritages and the Blood Rite:** Andy: "Can you brainstorm 5 more heritages" / "Additional
+  Heritages/ unlockable classes", then "these are great. go for it." (`Heritage`, ideas in
+  `heritages/new-heritages-brainstorm.md`). Two can be picked at the start and three are earned:
+  - **Stormborn** (Agility, Finesse): faster under open sky, slower deep underground, immune to lightning; in a
+    thunderstorm under open sky their hits arc a spark to the nearest enemy, and their eyes glow
+    electric blue in any thunderstorm (Andy: "The stormborn eyes should glow during storms along with the sparks."). Villagers lean Stormborn up high.
+  - **Dawnborn** (Might, Grit): heal slowly in sunlight, hit undead 20% harder, weaker and hungrier in the dark.
+    Villagers lean Dawnborn in savannas.
+  - **Endborn** (Wits, Finesse), earned near a dying Ender Dragon: endermen ignore their stare, a hit can blink them
+    away, water and rain burn them.
+  - **Dragonblood** (Might, Endurance), earned near a dying Ender Dragon or a tamed dragon: half fire and dragon
+    breath damage, stronger with a hoard of gold and gems in their pack, weaker when poor.
+  - **Deepborn** (Endurance, Wits), earned near a Warden digging away: silent to sculk, sense living things nearby
+    while sneaking, explosions stun them, weaker in sunlight.
+  Waking an earned heritage gives a **Blood Rite** (`jaymoskingdoms:blood_rite`); drinking it reopens the heritage
+  menu to switch to one you've woken. The menu shows earned heritages as "???" with a hint until woken, and fits on
+  small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
+  Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
+  pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+- **0.7.107, the pirate bombardier and dynamite:** Andy liked Zombie More's dynamite zombie, "but maybe as a pirate or
   barbarian variant that lobs them instead". Pirates already live on gunpowder, so it's a pirate: the **Bombardier**
   (`Pirates.BOMBARDIER`, role 76, off the roster like gunners). Zombie More is all rights reserved, so only the idea is
   taken: the mob, its skins (`tools/gen_pirates.py`: soot, singed brows, a bandolier of dynamite) and the dynamite icon

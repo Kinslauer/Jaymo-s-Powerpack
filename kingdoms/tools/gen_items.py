@@ -3,7 +3,7 @@
 plot_stake: a pointed wooden stake with a little red pennant tied on near the top.
 hidden_blade (0.7.101): a brown leather bracer with a spring blade run out of it, vanilla style (handle bottom-left, blade
 top-right, no black outlines, light from the top-left, vanilla's own iron ramp).
-dynamite (0.7.106): a fat red stick wrapped in a paper band, its fuse lit at the top right; drawn as a capsule along the
+dynamite (0.7.107): a fat red stick wrapped in a paper band, its fuse lit at the top right; drawn as a capsule along the
 diagonal and shaded across it (lit edge top-left), vanilla style.
 """
 import math

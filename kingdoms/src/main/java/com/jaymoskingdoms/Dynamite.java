@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.106) Dynamite: a stick of it, lit and thrown. A pirate {@link Pirates#BOMBARDIER} lobs it over whatever's between
+ * (0.7.107) Dynamite: a stick of it, lit and thrown. A pirate {@link Pirates#BOMBARDIER} lobs it over whatever's between
  * him and his foe (the idea from Zombie More's dynamite zombie; nothing of its code or art is used), and anyone can throw
  * one ({@link #ITEM}: the bombardiers drop a few, or craft them). It arcs, bounces, rolls to a stop and sizzles: the fuse
  * gives {@link #FUSE} ticks from the throw, time to run. Then it bursts like a {@link Cannonball} (hurting all within
