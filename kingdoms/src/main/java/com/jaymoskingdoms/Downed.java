@@ -137,15 +137,21 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.84) Whether the blow that would kill {@code entity} downs it instead: any villager, a settlement's own folk
-	 * (its guards and workers, not its ruler, nor orcs, raiders or barbarians). (0.7.98) Marked for Powers with
-	 * {@link #DOWNABLE_TAG}; Powers itself downs every villager.
+	 * (0.7.84) Whether the blow that would kill {@code entity} downs it instead: any villager, (0.7.132) any of Kingdoms'
+	 * folk. (0.7.98) Marked for Powers with {@link #DOWNABLE_TAG}; Powers itself downs every humanoid.
 	 */
 	public static boolean downable(LivingEntity entity) {
-		if (isGuard(entity) || entity instanceof Villager) {
+		// (0.7.132) Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate":
+		// rulers, orcs, raiders, barbarians and looters too (Powers downs every humanoid; the mark is for its other checks)
+		return isGuard(entity) || entity instanceof Villager || entity instanceof Folk;
+	}
+
+	/** (0.7.132) Someone villagers would tend: a villager, or a settlement's own folk (not a ruler, orc, raider or barbarian). */
+	private static boolean kin(LivingEntity body) {
+		if (body instanceof Villager || isGuard(body)) {
 			return true;
 		}
-		if (entity instanceof Folk folk && !Orcs.isOrc(folk) && entity.level() instanceof ServerLevel level) {
+		if (body instanceof Folk folk && !Orcs.isOrc(folk) && body.level() instanceof ServerLevel level) {
 			Folk.Role role = Folk.role(folk.role());
 			if (role != null && role.leader() || Assault.attacker(folk)) {
 				return false;
@@ -212,7 +218,8 @@ public final class Downed {
 	 * fighting, asleep or tending another) walks over.
 	 */
 	private static void findHelper(ServerLevel level, Mob body) {
-		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG)) {
+		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster
+		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || Looters.is(body) || !kin(body)) {
 			return;
 		}
 		Villager helper = null;

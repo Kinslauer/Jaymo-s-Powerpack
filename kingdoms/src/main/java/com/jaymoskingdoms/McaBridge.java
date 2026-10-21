@@ -97,6 +97,18 @@ final class McaBridge {
 		return r.getFamilyEntry().isRelative(y.getUUID()) ? McaCompat.KIN : McaCompat.STRANGERS;
 	}
 
+	/** (0.7.132) {@link McaCompat#kinOf}: their spouse (or betrothed), family, or no one to them. */
+	static int kinOf(Villager a, java.util.UUID dead) {
+		if (!(a instanceof VillagerEntityMCA x) || x.getUUID().equals(dead)) {
+			return McaCompat.STRANGERS;
+		}
+		EntityRelationship r = x.getRelationships();
+		if (r.isMarriedTo(dead) || r.isEngagedWith(dead) || r.isPromisedTo(dead) || dead.equals(r.getFamilyEntry().partner())) {
+			return McaCompat.PARTNER;
+		}
+		return r.getFamilyEntry().isRelative(dead) ? McaCompat.KIN : McaCompat.STRANGERS;
+	}
+
 	/** (0.7.19) {@link McaCompat#temper}. */
 	static int temper(Villager v) {
 		if (!(v instanceof VillagerEntityMCA m)) {

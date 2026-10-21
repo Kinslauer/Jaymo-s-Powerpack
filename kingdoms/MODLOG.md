@@ -3863,3 +3863,30 @@ project-files `nether-faction/Nether-Plan.md`), in `nether/`; art and data by `t
 - Spawn eggs for all four; loot: nuggets, leather, magma cream, the brute gold ingots and bones.
 - Next (stage 2, if Andy wants it): Hornkin war forts and a piglin war camp, a Hornkin Warlord and a Piglin Warboss
   leading hosts against each other.
+- **0.7.132, clearing the dead, graves, mourning, looters:** Andy: "i want someone to clear the battlefield of dead, or
+  maybe come try to rob the corpses". With Jaymo's Kitchen's corpses (0.5.9): once it's quiet round a body in a
+  settlement's land (no monsters, nobody fighting, no raid), a grown villager, a working folk or an idle guard carries it
+  off (`Bearers`, numbers at its top). Its own dead (villagers, traders, its own folk) are buried in a graveyard it lays
+  out in rows on open ground 16-44 blocks from the seat: a dug mound of coarse dirt and a headstone wall (cobblestone in
+  a village, stone brick in a realm, sandstone in the desert); right-click a headstone empty-handed to read who lies
+  there (`jaymoskingdoms:graves`). The enemy's dead are left two minutes, then burned (`Undertakers`' safe fires). With
+  MCA, the spouse and kin come to the grave, kneel, weep and speak, the first leaves a flower, and their mood drops; for
+  four days after they may come back to visit. No family: a neighbour or two; a soldier: his comrades. A player who
+  carried the body there is thanked (+3, three times a day). Robbers (`Looters`): where 3+ bodies with something on them
+  lie near a player, a band of 1-3 ragged looters (Folk role 80) may creep in (likelier by night), kneel at each body
+  and strip it, then slip away; a guard or golem who spots them, a blow, or a player close and upright sends them
+  running (not a sneaking player, nor one who's been robbing bodies too). Killed, their sack spills and the settlements
+  they robbed thank you (+6). A settlement's jobless and nitwit villagers sometimes rob a body in its land; a guard
+  shames them into dropping it, a player who hits one at it gets +3. A player taking anything off a settlement's own
+  dead in its land commits grave robbing (`Theft.Crime.ROBBING`, medium, once a body). Players' bodies are never
+  touched; monsters stay the guards' and golems' (who now leave bodies being buried or robbed alone).
+  Judgement: Andy: "you can also drop a downed one in front of a guard for judgement (you'll later hear or see them
+  jailed or executed, or freed!)". Looters now go down instead of dying (nobody tends them). Carry one (sneak + use) and
+  set him down within 4 blocks of a free guard: the guard takes his sack, you're thanked (+8, and +6 from each other
+  settlement he robbed), and he's marched to the ruler like any crook (`Arrests.handOver`), charged with robbing the
+  dead, notoriety 1 + the bodies he robbed. The sentence: pardon (freed), a flogging, the cells (new `JAIL`, in place of
+  exile for a looter: walked off to the seat and taken below), or death. Within 48 blocks you see it; further off, the
+  next grown villager of that settlement you pass tells you how it went. One who slips his guard runs again.
+  Andy: "ALL HUMANOIDS go down": every folk is now marked downable (rulers, orcs, raiders, barbarians, looters too), and
+  Powers 0.15.41 downs every humanoid monster. Villagers only tend their own (villagers and a settlement's folk), never a
+  downed looter, raider or monster.

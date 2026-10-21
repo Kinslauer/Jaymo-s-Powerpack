@@ -870,3 +870,6 @@ Meals heal you only up to 60% of your most health (`SELF_HEAL_CAP`): the rest ne
   Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
   `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
   Art: `tools/vanilla_style/tanning.py`.
+- **0.5.9:** for Kingdoms' bearers and looters: `CorpseEntity.robBy(Entity)` (pockets and all gear, worn as by hand;
+  never an animal, fish, player or iron body), `hasValuables()`, `lookTag()`, and `setOnRobbed(BiConsumer)`, called
+  when a player takes anything off a body by hand.
