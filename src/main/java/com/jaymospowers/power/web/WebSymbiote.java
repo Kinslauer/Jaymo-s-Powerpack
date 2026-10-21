@@ -2,6 +2,7 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.List;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -55,6 +56,10 @@ import net.minecraft.world.phys.Vec3;
  * <p>Nothing here is explained in game: hints are one-line whispers, each heard once.
  */
 public final class WebSymbiote {
+	/** The symbiote's wet sounds: a squelch from a few kinds, never twice alike. */
+	static final Soundscape.Layer SQUELCH = Soundscape.Layer.of(0.45F, 0.65F, 0.9F, 1.1F, SoundEvents.SLIME_SQUISH, SoundEvents.SLIME_SQUISH_SMALL,
+		SoundEvents.HONEY_BLOCK_SLIDE);
+
 	// ===== abilities (radial menu order, clockwise from the top) ====================================================
 	public static final int TENDRIL = 0;
 	public static final int ARMOR = 1;
@@ -1728,7 +1733,7 @@ public final class WebSymbiote {
 			}
 			if (live.bondTicks % 4 == 0) {
 				level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), y, player.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
-				level.playSound(null, player.getX(), y, player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F + t * 0.4F);
+				Soundscape.play(level, new Vec3(player.getX(), y, player.getZ()), SoundSource.PLAYERS, SQUELCH.pitched(0.5F + t * 0.4F));
 			}
 			if (--live.bondTicks == 0) {
 				level.sendParticles(sheen(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.35, 0.8, 0.35, 0.0);
@@ -1742,8 +1747,8 @@ public final class WebSymbiote {
 			Vec3 at = live.crawlAwayPos;
 			float left = live.crawlAwayTicks / (float)CRAWL_AWAY_TICKS;
 			level.sendParticles(dust(0.6F + 1.2F * left), at.x, at.y + 0.1, at.z, 3, 0.12, 0.03, 0.12, 0.0);
-			if (live.crawlAwayTicks % 8 == 0) {
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.5F * left + 0.1F, 0.6F);
+			if (Soundscape.due(player, "symbiote.crawl_away", 5, 11)) {
+				Soundscape.play(level, at, SoundSource.PLAYERS, SQUELCH.louder(0.8F * left + 0.15F).pitched(0.6F));
 			}
 			if (--live.crawlAwayTicks == 0) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.2, at.z, 6, 0.2, 0.1, 0.2, 0.01);

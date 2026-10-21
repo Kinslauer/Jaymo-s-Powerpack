@@ -1,6 +1,7 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,6 +43,10 @@ import net.minecraft.world.phys.Vec3;
  * <p>Both kinds of work are capped per server tick, and the area is rescanned once a second, so it can't lag.
  */
 final class TimeBloom {
+	/** The bloom chimes at uneven beats, a bell ringing under it now and then. */
+	static final Soundscape.Layer BLOOM_CHIME = Soundscape.Layer.of(0.7F, 0.9F, 1.2F, 1.8F, SoundEvents.AMETHYST_BLOCK_CHIME);
+	static final Soundscape.Layer BLOOM_BELL = Soundscape.Layer.of(0.2F, 0.35F, 1.4F, 1.9F, SoundEvents.BELL_RESONATE).chance(0.2F);
+
 	static final int RADIUS = 5;
 	static final int DURATION = 100;
 	/** Chance per candidate per tick of an extra random tick (vanilla is ~3/4096 per block per tick). */
@@ -237,9 +242,8 @@ final class TimeBloom {
 					1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
-		if (age % 20 == 0) {
-			Vec3 c = Vec3.atCenterOf(center);
-			level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.2F + random.nextFloat() * 0.6F);
+		if (Soundscape.due(level, center.asLong(), "chrono.bloom", 12, 30)) {
+			Soundscape.play(level, Vec3.atCenterOf(center), SoundSource.PLAYERS, BLOOM_CHIME, BLOOM_BELL);
 		}
 	}
 }
