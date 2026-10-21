@@ -9,7 +9,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
 /**
- * (0.14.8) Picking things up is a choice: once per install, Interactic Renewed's auto pickup is switched off, so items
+ * (0.15.3) Picking things up is a choice: once per install, Interactic Renewed's auto pickup is switched off, so items
  * on the ground are picked up by right-clicking them (or its pickup key) instead of by walking over them. It's one of
  * Interactic's server-side options, so the server's file is what counts; this runs on both sides. Written before
  * Interactic (its 26.3 build, config by its bundled ewlib) reads {@code config/interactic.json5}. A new file gets all of

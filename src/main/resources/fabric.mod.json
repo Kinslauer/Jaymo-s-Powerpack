@@ -12,7 +12,7 @@
 		"client": ["com.jaymospowers.client.JaymosPowersClient"],
 		"server": ["com.jaymospowers.JaymosPowersServer"],
 		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset"],
-		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei"]
+		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei", "com.jaymospowers.client.jei.MedicineJei"]
 	},
 	"mixins": [
 		"jaymospowers.mixins.json",

@@ -52,6 +52,7 @@ public class JaymosKitchen implements ModInitializer {
 		PlayerCorpses.register();
 		Saddlebags.register();
 		Mill.register();
+		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
