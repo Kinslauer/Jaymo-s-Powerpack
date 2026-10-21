@@ -29,17 +29,17 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.1) The local player going limp: a crash, a hard landing, a blast or big shove, a boat, cart or charging rider
- * running them over, or the server's say-so. Movement is the client's, so the ragdoll is simulated here: the player
+ * (0.5.1) The local player going limp: an elytra crash, a boat, cart or charging rider running them over, or the
+ * server's say-so (a big hit, a blast, a landing that really hurt: see {@link LivingRagdolls}). (0.5.3) A jump in speed
+ * alone no longer counts: dashes, zips and launches from powers did that. Movement is the client's, so the ragdoll is
+ * simulated here: the player
  * is moved after the body each tick (so the server still sees the fall and the crash), the pose goes out to everyone
  * (see {@link LivingRagdolls}), and the camera pulls back to third person until they're up again.
  */
 public final class LimpController {
-	/** Crash: going at least this fast (blocks a tick) at the start of a tick and losing this much of it against a wall. */
+	/** Crash: gliding on an elytra at least this fast (blocks a tick) at the start of a tick and losing this much of it against a wall. */
 	private static final double CRASH_SPEED = 0.6, CRASH_LOSS = 0.45;
-	/** Landing: falling at least this fast (blocks a tick) as you hit the ground. */
-	private static final double LAND_SPEED = 1.0;
-	/** Blast or shove: the velocity jumped by this much (blocks a tick) between ticks. */
+	/** A shove while already limp: the velocity jumped by this much (blocks a tick) between ticks throws the body too. */
 	private static final double KICK_SPEED = 0.9;
 	/** Run over: a vehicle or ridden mob moving at least this fast (blocks a tick) toward you, flinging you its speed times this, and up. */
 	private static final double RUN_OVER_SPEED = 0.35, RUN_OVER_FLING = 1.3, RUN_OVER_LIFT = 0.25;
@@ -72,7 +72,7 @@ public final class LimpController {
 	private static Vec3 startVelocity = Vec3.ZERO, lastEndVelocity = Vec3.ZERO;
 	/** The player object seen last tick (a new one after joining, respawning or a portal). */
 	private static @Nullable LocalPlayer lastPlayer;
-	private static boolean startOnGround;
+	private static boolean startGliding;
 	/** A shove seen at the start of this tick, and a knock the server sent. */
 	private static @Nullable Vec3 kick, knock;
 
@@ -108,7 +108,7 @@ public final class LimpController {
 			return;
 		}
 		startVelocity = player.getDeltaMovement();
-		startOnGround = player.onGround();
+		startGliding = player.isFallFlying();
 		if (player != lastPlayer) {
 			// joined, respawned or changed level: last tick's speed was another player object's, not a shove
 			lastPlayer = player;
@@ -174,21 +174,22 @@ public final class LimpController {
 		if (!able(player)) {
 			return;
 		}
-		if (sent != null) {
-			begin(minecraft, player, sent);
-			return;
-		}
-		if (cooldown > 0 || player.isInWater() || player.isSwimming()) {
+		if (cooldown > 0) {
 			return;
 		}
 		Vec3 end = player.getDeltaMovement();
+		if (sent != null) {
+			// the server's fling, plus the way they were already going along the ground
+			begin(minecraft, player, sent.add(end.x, 0.0, end.z));
+			return;
+		}
+		if (player.isInWater() || player.isSwimming()) {
+			return;
+		}
 		double startFlat = Math.hypot(startVelocity.x, startVelocity.z), endFlat = Math.hypot(end.x, end.z);
-		if (startFlat >= CRASH_SPEED && startFlat - endFlat >= CRASH_LOSS && player.horizontalCollision) {
+		// only an elytra crash: a power's dash or zip into a wall isn't one
+		if (startGliding && startFlat >= CRASH_SPEED && startFlat - endFlat >= CRASH_LOSS && player.horizontalCollision) {
 			begin(minecraft, player, new Vec3(startVelocity.x, startVelocity.y * 0.5, startVelocity.z));
-		} else if (player.onGround() && !startOnGround && startVelocity.y <= -LAND_SPEED) {
-			begin(minecraft, player, new Vec3(startVelocity.x, 0.0, startVelocity.z));
-		} else if (kick != null) {
-			begin(minecraft, player, kick);
 		} else {
 			Vec3 run = runOver(player, end);
 			if (run != null) {

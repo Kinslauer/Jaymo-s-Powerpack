@@ -11,19 +11,26 @@ import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.1) Living players knocked limp: a crash, a blast, a cart running them over, a hard landing. Their own client
  * simulates the ragdoll; the server relays it and keeps the last one (a limp player who dies leaves that body).
+ * (0.5.3) Hits and landings are judged here by the damage they really did, so a dash, zip or launch never knocks
+ * anyone down, and a landing whose fall damage was negated (Smoke, slow falling, a power's cushion) doesn't either.
  */
 public final class LivingRagdolls {
 	/** A limp player whose client sends no pose for this long (ticks) is let up. */
@@ -33,6 +40,14 @@ public final class LivingRagdolls {
 	/** A relayed body must be about player-sized and this near the player (blocks), or it's thrown away. */
 	private static final float MIN_SIZE = 0.1F, MAX_SIZE = 8.0F;
 	private static final double MAX_OFFSET = 32.0;
+	/** A hit this big (damage before armour, half-hearts) knocks a player limp; a blast too. */
+	private static final float BIG_HIT = 8.0F;
+	/** A landing that really hurt this much (damage taken, half-hearts) knocks them limp. */
+	private static final float HARD_LANDING = 6.0F;
+	/** A hit's fling away from where it came from (blocks a tick): this much, more per point of damage, at most this. */
+	private static final double HIT_FLING = 0.45, HIT_FLING_PER_DAMAGE = 0.04, HIT_FLING_MAX = 1.4, HIT_LIFT = 0.3;
+	/** A hard landing tips them forward this fast (their own speed is added on their client). */
+	private static final double LANDING_TIP = 0.2;
 
 	/** On a player lying limp (synced to everyone, not saved): everyone draws them as the relayed ragdoll. */
 	public static final AttachmentType<Boolean> LIMP = AttachmentRegistry.create(JaymosKitchen.id("limp"),
@@ -113,6 +128,11 @@ public final class LivingRagdolls {
 				}
 			}
 		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && !blocked && damageTaken > 0.0F && player.isAlive() && !isLimp(player)) {
+				knockFrom(player, source, baseDamage, damageTaken);
+			}
+		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			newPlayer.removeAttached(LIMP);
 			ENTRIES.remove(oldPlayer.getUUID());
@@ -161,6 +181,39 @@ public final class LivingRagdolls {
 	public static void knock(ServerPlayer player, double vx, double vy, double vz) {
 		if (player.isAlive() && !player.isSpectator() && !vetoed(player)) {
 			ServerPlayNetworking.send(player, new RagdollNet.Knock((float) vx, (float) vy, (float) vz));
+		}
+	}
+
+	/**
+	 * Only damage that really landed counts: a big blow or blast, or a fall that hurt. Negated falls (Smoke, a power's
+	 * cushion) never get here, and slow falling never counts.
+	 */
+	private static void knockFrom(ServerPlayer player, DamageSource source, float baseDamage, float damageTaken) {
+		if (source.is(DamageTypeTags.IS_FALL)) {
+			if (damageTaken >= HARD_LANDING && !player.hasEffect(MobEffects.SLOW_FALLING)) {
+				Vec3 look = player.getLookAngle();
+				double flat = Math.hypot(look.x, look.z);
+				if (flat < 1.0E-4) {
+					knock(player, 0.0, 0.0, 0.0);
+				} else {
+					knock(player, look.x / flat * LANDING_TIP, 0.0, look.z / flat * LANDING_TIP);
+				}
+			}
+			return;
+		}
+		boolean blast = source.is(DamageTypeTags.IS_EXPLOSION);
+		Vec3 from = source.getSourcePosition();
+		if (baseDamage < BIG_HIT || from == null && !blast) {
+			// small hits, and anything that comes from nowhere (fire, drowning, starving, magic)
+			return;
+		}
+		double dx = from == null ? 0.0 : player.getX() - from.x, dz = from == null ? 0.0 : player.getZ() - from.z;
+		double flat = Math.hypot(dx, dz);
+		double speed = Math.min(HIT_FLING_MAX, HIT_FLING + HIT_FLING_PER_DAMAGE * baseDamage);
+		if (flat < 1.0E-4) {
+			knock(player, 0.0, speed, 0.0);
+		} else {
+			knock(player, dx / flat * speed, HIT_LIFT, dz / flat * speed);
 		}
 	}
 

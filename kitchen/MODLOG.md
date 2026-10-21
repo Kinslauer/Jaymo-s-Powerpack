@@ -829,3 +829,10 @@ after `Mill.register()`.
   you can still eat while sick. Llamas and trader llamas drop 1-2 mutton. `EatGroundSeedsGoal` became
   `farm/EatGroundFoodGoal`: every farm animal eats its own food off the ground (tame pets don't). `farm/LayingHens`:
   a hen that pecks a seed lays at the next dawn; unfed hens lay at half speed (`ChickenMixin`).
+- **0.5.3, ragdolls less touchy:** Andy (2026-10-21): "using web z and other movement abilities ragdolls the user, it
+  should only be after a large hit on players, or impact with the ground", and no ragdoll on landing for Smoke, anyone
+  whose fall damage was negated, or with slow falling. A sudden change in speed no longer knocks anyone limp (that was
+  every dash, zip and launch). `LivingRagdolls` now judges hits on the server by the damage they really did: a blow
+  or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
+  actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
+  count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
