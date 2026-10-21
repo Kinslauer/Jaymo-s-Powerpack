@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.5.0) The local player lying limp doesn't steer: their travel is the ragdoll's (see LimpController), and a jump
+ * (0.5.1) The local player lying limp doesn't steer: their travel is the ragdoll's (see LimpController), and a jump
  * does not open an elytra.
  */
 @Mixin(Player.class)

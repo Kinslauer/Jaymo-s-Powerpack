@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.5.0) Ragdoll packets. Whoever simulates a body (the server for a corpse, a player's own client while they're
+ * (0.5.1) Ragdoll packets. Whoever simulates a body (the server for a corpse, a player's own client while they're
  * limp) sends its points every tick it moves; everyone else draws them.
  */
 public final class RagdollNet {

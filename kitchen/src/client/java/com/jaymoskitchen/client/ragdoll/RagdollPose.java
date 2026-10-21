@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import org.joml.Matrix4f;
 
 /**
- * (0.5.0) A ragdoll worked out for one frame, ready to draw: where the whole body goes ({@link #body}, from the
+ * (0.5.1) A ragdoll worked out for one frame, ready to draw: where the whole body goes ({@link #body}, from the
  * standing model's place to the ragdoll's torso) and how each limb turns from there. Put on the body's render state by
  * whoever draws it (a corpse's renderer, or the player renderer for a limp player) and applied, by part name, right
  * after the model animates (see {@code ModelFeatureRendererMixin}), last of all poses.

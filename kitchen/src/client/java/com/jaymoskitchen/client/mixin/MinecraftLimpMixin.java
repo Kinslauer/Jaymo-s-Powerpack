@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.0) Lying limp, a click swings at nothing and mines nothing (using is stopped in MinecraftUseMixin). */
+/** (0.5.1) Lying limp, a click swings at nothing and mines nothing (using is stopped in MinecraftUseMixin). */
 @Mixin(value = Minecraft.class, priority = 900)
 abstract class MinecraftLimpMixin {
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)

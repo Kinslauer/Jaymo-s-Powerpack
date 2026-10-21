@@ -776,7 +776,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.
 - **0.4.50:** a corpse keeps its mob's size: the scale attribute stays in the saved look (Kingdoms' half-size spiders,
   grown apes), the rest of the attributes are still left out (`Corpses.look`).
-- **0.5.0, ragdolls:** Andy: "I need these implemented in place of our corpses" (Sable: Ragdolls, Sable: Ragdoll Corpse,
+- **0.5.1, ragdolls:** Andy: "I need these implemented in place of our corpses" (Sable: Ragdolls, Sable: Ragdoll Corpse,
   Ragdoll Reactions; all three All Rights Reserved and built on NeoForge's Sable engine, so this is our own physics from
   how they behave, nothing taken from them), and living players too. See `docs/ragdolls.md`.
   - Engine (`ragdoll/`): Verlet point-mass skeletons (`RagdollRig`: humanoid, four-legged or a rigid box, by the

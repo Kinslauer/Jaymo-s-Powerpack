@@ -3,7 +3,7 @@ package com.jaymoskitchen.ragdoll;
 import java.util.Random;
 
 /**
- * (0.5.0) A ragdoll: the points of a {@link RagdollRig} moved by Verlet integration (each point remembers where it
+ * (0.5.1) A ragdoll: the points of a {@link RagdollRig} moved by Verlet integration (each point remembers where it
  * was, and keeps going the way it was going), the sticks between them held at length, the limbs held inside their
  * cones, and every point pushed out of the blocks around it, with friction and a little bounce. Gravity pulls, the
  * body topples and folds over whatever it lands on, and lies still once it settles (it then sleeps until something

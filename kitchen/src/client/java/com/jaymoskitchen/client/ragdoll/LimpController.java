@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.0) The local player going limp: a crash, a hard landing, a blast or big shove, a boat, cart or charging rider
+ * (0.5.1) The local player going limp: a crash, a hard landing, a blast or big shove, a boat, cart or charging rider
  * running them over, or the server's say-so. Movement is the client's, so the ragdoll is simulated here: the player
  * is moved after the body each tick (so the server still sees the fall and the crash), the pose goes out to everyone
  * (see {@link LivingRagdolls}), and the camera pulls back to third person until they're up again.

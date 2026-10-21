@@ -1,4 +1,4 @@
-# Ragdolls (Jaymo's Kitchen 0.5.0)
+# Ragdolls (Jaymo's Kitchen 0.5.1)
 
 Andy asked (2026-10-20) for ragdolls like **Sable: Ragdolls**, **Sable: Ragdoll Corpse** and **Ragdoll Reactions** in
 place of the pack's corpses, and for living players too. All three mods are All Rights Reserved (by leonardoinc22,

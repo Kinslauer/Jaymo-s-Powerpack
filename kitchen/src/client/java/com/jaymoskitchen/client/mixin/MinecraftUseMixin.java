@@ -32,7 +32,7 @@ abstract class MinecraftUseMixin {
 
 	@Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
 	private void jaymoskitchen$dropCarried(CallbackInfo ci) {
-		// (0.5.0) lying limp, nothing can be used
+		// (0.5.1) lying limp, nothing can be used
 		if (com.jaymoskitchen.client.ragdoll.LimpController.active()) {
 			ci.cancel();
 			return;

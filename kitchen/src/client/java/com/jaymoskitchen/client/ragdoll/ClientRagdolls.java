@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 
 /**
- * (0.5.0) Every ragdoll this client knows, by entity id: the last two sets of points it was sent (or simulated itself,
+ * (0.5.1) Every ragdoll this client knows, by entity id: the last two sets of points it was sent (or simulated itself,
  * for its own limp player), so a frame can be drawn between them. Bodies not heard from in a tick hold still; bodies
  * whose entity is gone are dropped.
  */

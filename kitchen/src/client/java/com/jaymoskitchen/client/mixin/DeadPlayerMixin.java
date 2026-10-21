@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.0) A player who has died is replaced by their corpse (a ragdoll from the first tick of dying), so their own model
+ * (0.5.1) A player who has died is replaced by their corpse (a ragdoll from the first tick of dying), so their own model
  * isn't drawn while their corpse is by.
  */
 @Mixin(AvatarRenderer.class)

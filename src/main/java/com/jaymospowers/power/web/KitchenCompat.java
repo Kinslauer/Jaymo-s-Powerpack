@@ -213,7 +213,7 @@ public final class KitchenCompat {
 		}
 	}
 
-	// ---- Kitchen's living ragdolls (0.5.0+), reached by reflection: this build compiles against an older Kitchen jar
+	// ---- Kitchen's living ragdolls (0.5.1+), reached by reflection: this build compiles against an older Kitchen jar
 
 	private static java.lang.reflect.@Nullable Method limpMethod;
 	private static boolean limpLooked;

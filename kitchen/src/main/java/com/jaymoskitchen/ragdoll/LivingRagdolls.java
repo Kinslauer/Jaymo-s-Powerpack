@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.0) Living players knocked limp: a crash, a blast, a cart running them over, a hard landing. Their own client
+ * (0.5.1) Living players knocked limp: a crash, a blast, a cart running them over, a hard landing. Their own client
  * simulates the ragdoll; the server relays it and keeps the last one (a limp player who dies leaves that body).
  */
 public final class LivingRagdolls {

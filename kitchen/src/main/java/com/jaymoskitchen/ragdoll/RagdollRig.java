@@ -1,7 +1,7 @@
 package com.jaymoskitchen.ragdoll;
 
 /**
- * (0.5.0) The skeleton a ragdoll is built from: point masses (joints, hands, feet, the head) held together by rigid
+ * (0.5.1) The skeleton a ragdoll is built from: point masses (joints, hands, feet, the head) held together by rigid
  * sticks, with each limb kept inside a cone of the ways it can really swing. Worked out from the body's standing size
  * only, so the server needs no model: every body is one of three shapes.
  * <ul>

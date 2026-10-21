@@ -71,7 +71,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		boolean ragdolled;
 		/** How far the body's own renderer turns it over as it dies (spiders roll right onto their backs). */
 		float flip;
-		/** (0.5.0) Drawn by physics: where the ragdoll's points put the body this frame (null when carried, slung, in a cart). */
+		/** (0.5.1) Drawn by physics: where the ragdoll's points put the body this frame (null when carried, slung, in a cart). */
 		@Nullable RagdollPose pose;
 	}
 
@@ -111,7 +111,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	protected boolean affectedByCulling(CorpseEntity corpse) {
 		ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
 		if (track != null && corpse.carrier() == null) {
-			// (0.5.0) a ragdoll, moving or sprawled at rest, reaches well outside the corpse's small box
+			// (0.5.1) a ragdoll, moving or sprawled at rest, reaches well outside the corpse's small box
 			return false;
 		}
 		return !(corpse.isTumbling() || corpse.falling()) && super.affectedByCulling(corpse);
@@ -287,7 +287,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	}
 
 	/**
-	 * (0.5.0) A body lying free: drawn where its ragdoll's points are this frame. The model is drawn standing at the
+	 * (0.5.1) A body lying free: drawn where its ragdoll's points are this frame. The model is drawn standing at the
 	 * corpse's own spot, then moved onto the ragdoll by {@link RagdollPose#body}; the limbs follow the physics.
 	 */
 	private void extractPhysical(CorpseEntity corpse, State state, ClientRagdolls.Track track, float partialTicks) {
@@ -442,7 +442,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			poseStack.scale(1.0F + 0.15F * c, 1.0F - 0.6F * c * c, 1.0F + 0.15F * c);
 		}
 		if (state.pose != null) {
-			// (0.5.0) onto the ragdoll
+			// (0.5.1) onto the ragdoll
 			poseStack.mulPose(state.pose.body);
 		} else {
 			place(state, poseStack);

@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * (0.5.0) A ragdoll as it is this tick, small enough to send every tick: which rig (shape and standing size), where its
+ * (0.5.1) A ragdoll as it is this tick, small enough to send every tick: which rig (shape and standing size), where its
  * middle is, and every point as a short offset from there (1/256 of a block). Asleep means it won't move again until
  * something wakes it, so the receiver can stop expecting more.
  */

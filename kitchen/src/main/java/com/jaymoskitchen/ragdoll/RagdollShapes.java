@@ -7,7 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 
 /**
- * (0.5.0) Which ragdoll a body gets. Tags first (data packs can add modded mobs), then a guess from its standing size
+ * (0.5.1) Which ragdoll a body gets. Tags first (data packs can add modded mobs), then a guess from its standing size
  * (see {@link RagdollRig#guess}). Players are always humanoid.
  */
 public final class RagdollShapes {

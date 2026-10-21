@@ -352,7 +352,7 @@ public final class Carry {
 	 * stun, held up by Lift, on the end of a web, still flying from a throw, webbed down (no jump), asleep.
 	 */
 	public static boolean canStruggle(ServerPlayer player) {
-		// (0.13.36) lying limp from a crash is as helpless as being stunned
+		// (0.15.1) lying limp from a crash is as helpless as being stunned
 		if (!player.isAlive() || player.isSleeping() || KitchenCompat.isLimp(player)) {
 			return false;
 		}

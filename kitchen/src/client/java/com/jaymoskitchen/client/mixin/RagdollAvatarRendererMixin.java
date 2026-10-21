@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.0) A limp player (this client's own, or one the server relays) is drawn as the ragdoll: the pose is worked out
+ * (0.5.1) A limp player (this client's own, or one the server relays) is drawn as the ragdoll: the pose is worked out
  * from its points here, the limbs follow in RagdollModelMixin, and the whole body is placed instead of vanilla's
  * (and everyone else's) turns. Ahead of Jaymo's Powers' mixins (priority 2000 and below).
  */

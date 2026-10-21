@@ -94,7 +94,7 @@ public final class Corpses {
 				.updateInterval(1)
 				.noSummon()
 				.build(corpseKey));
-		// (0.5.0) someone coming into range sees a resting body's points at once, not at its next resend
+		// (0.5.1) someone coming into range sees a resting body's points at once, not at its next resend
 		EntityTrackingEvents.START_TRACKING.register((tracked, player) -> {
 			if (tracked instanceof CorpseEntity corpse) {
 				corpse.sendRagdollTo(player);
@@ -203,12 +203,12 @@ public final class Corpses {
 		level.addFreshEntity(corpse);
 	}
 
-	/** (0.5.0) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
+	/** (0.5.1) A topple this hard (blocks a tick) at the head, and how much of it the rest of the body takes. */
 	private static final double TOPPLE_MIN = 0.08, TOPPLE_MAX = 0.14;
 	private static final float TOPPLE_SHARE = 0.3F;
 
 	/**
-	 * (0.5.0) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
+	 * (0.5.1) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
 	 * with a push at the head along its death knockback (any way if it had none). One lying or swimming starts lying.
 	 */
 	public static RagdollBody deathBody(LivingEntity mob) {

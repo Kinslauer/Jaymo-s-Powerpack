@@ -72,7 +72,7 @@ public final class PlayerCorpses {
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
 		corpse.markJustDied();
-		// (0.5.0) a player who died limp leaves exactly that body; otherwise they crumple like any mob
+		// (0.5.1) a player who died limp leaves exactly that body; otherwise they crumple like any mob
 		RagdollBody limp = LivingRagdolls.lastBody(player);
 		corpse.startRagdoll(limp != null ? limp : Corpses.deathBody(player));
 		level.addFreshEntity(corpse);

@@ -8,7 +8,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.5.0) The physics body of one free-lying corpse, on the server. The corpse entity is just where the body's middle
+ * (0.5.1) The physics body of one free-lying corpse, on the server. The corpse entity is just where the body's middle
  * is (and as low as it reaches); this steps the body, pushes the entity after it, and sends the points to watchers.
  * Anything that moves the entity from outside (a blast's knockback, a tendril, a Gravity draw, a scavenger's yank, a
  * teleport) shows up as a difference from what was last written to it, and is passed on to the body.

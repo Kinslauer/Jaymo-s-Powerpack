@@ -14,7 +14,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.5.0) The game's side of {@link RagdollWorld}: blocks' collision shapes, the living things and vehicles moving
+ * (0.5.1) The game's side of {@link RagdollWorld}: blocks' collision shapes, the living things and vehicles moving
  * through the body (someone walking over it kicks it, a cart running over it flings it), and water and lava.
  */
 public final class LevelRagdollWorld implements RagdollWorld {

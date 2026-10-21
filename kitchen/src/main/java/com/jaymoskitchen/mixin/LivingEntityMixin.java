@@ -103,7 +103,7 @@ abstract class LivingEntityMixin implements CorpseCapture {
 	}
 
 	/**
-	 * (0.5.0) The body appears on the first tick of dying, not after the death animation: it falls and crumples as a
+	 * (0.5.1) The body appears on the first tick of dying, not after the death animation: it falls and crumples as a
 	 * ragdoll from the start, so the mob is swapped for it at once (no puff).
 	 */
 	@Inject(method = "tickDeath", at = @At("HEAD"), cancellable = true)

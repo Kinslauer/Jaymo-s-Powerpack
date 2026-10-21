@@ -19,11 +19,23 @@ abstract class WebLivingEntityRendererMixin {
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.freerun.BalancePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebCounterPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebSuitTear.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebWallRunPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebParkourPose.rotate(state, poseStack, entityScale);
+	}
+
+	/** Your own move in first person: First-person Model shows the body's posed arms (see WebFirstPerson). */
+	@Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;"
+		+ "Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
+	private void jaymospowers$ownArms(LivingEntityRenderState state, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+		net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
+		if (state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar
+			&& com.jaymospowers.client.power.web.WebFirstPerson.posing(avatar)) {
+			com.jaymospowers.client.power.web.FirstPersonCompat.showArms(avatar);
+		}
 	}
 
 	/** Creatures on the end of a web go limp (see WebRagdoll). */
@@ -33,6 +45,7 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.freerun.BalancePose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebCounterPose.extract(entity, state, partialTicks);

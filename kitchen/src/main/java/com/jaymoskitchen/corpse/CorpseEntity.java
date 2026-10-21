@@ -214,13 +214,13 @@ public class CorpseEntity extends Entity {
 		refreshDimensions();
 	}
 
-	/** (0.5.0) Server: its physics body (null while carried, slung or in a cart: those draw it limp instead). */
+	/** (0.5.1) Server: its physics body (null while carried, slung or in a cart: those draw it limp instead). */
 	private @Nullable CorpseRagdoll ragdoll;
-	/** (0.5.0) Its rig, saved with it: shape id (-1 until known), and the standing size it was built for. */
+	/** (0.5.1) Its rig, saved with it: shape id (-1 until known), and the standing size it was built for. */
 	private int rigShape = -1;
 	private float rigWidth, rigHeight;
 	private @Nullable RagdollRig rigCache;
-	/** (0.5.0) Points loaded from a save (relative to where it was), put back on the first tick. */
+	/** (0.5.1) Points loaded from a save (relative to where it was), put back on the first tick. */
 	private float @Nullable [] savedPoints;
 
 	/** A slim-skinned player's body (or their zombie's): it sounds higher. */
@@ -314,7 +314,7 @@ public class CorpseEntity extends Entity {
 		return look.getCompoundOrEmpty("drop_chances").getFloatOr(slot, 0.0F) > 1.0F;
 	}
 
-	// ---- (0.5.0) ragdoll ---------------------------------------------------------------------------------------------
+	// ---- (0.5.1) ragdoll ---------------------------------------------------------------------------------------------
 
 	/** Server: sends its body's points to one player who just came into range. */
 	void sendRagdollTo(net.minecraft.server.level.ServerPlayer player) {
@@ -410,7 +410,7 @@ public class CorpseEntity extends Entity {
 	public void jolt(boolean hard) {
 		level().broadcastEntityEvent(this, hard ? JOLT_HARD : JOLT_LIGHT);
 		if (ragdoll != null && !level().isClientSide()) {
-			// (0.5.0) the body moves too
+			// (0.5.1) the body moves too
 			ragdoll.jolt(hard, random);
 		}
 	}
@@ -802,7 +802,7 @@ public class CorpseEntity extends Entity {
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
 			return;
 		}
-		// (0.5.0) free: the body is a ragdoll, simulated here; the corpse is wherever its middle is (see CorpseRagdoll)
+		// (0.5.1) free: the body is a ragdoll, simulated here; the corpse is wherever its middle is (see CorpseRagdoll)
 		if (level() instanceof ServerLevel here) {
 			tickRagdoll(here);
 		}
@@ -1877,16 +1877,16 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(POSE, random.nextInt());
 		snapTo(at.x, at.y, at.z, yaw, 0.0F);
 		setDeltaMovement(Vec3.ZERO);
-		// (0.5.0) lies there; on a butcher block it rests at once
+		// (0.5.1) lies there; on a butcher block it rests at once
 		lieDown(Vec3.ZERO, onButcherBlock());
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.7F);
 		}
 	}
 
-	/** (0.5.0) A blow knocks the body this hard: a base plus a share of the damage, at most the cap (blocks a tick). */
+	/** (0.5.1) A blow knocks the body this hard: a base plus a share of the damage, at most the cap (blocks a tick). */
 	private static final double SMACK_BASE = 0.18, SMACK_PER_DAMAGE = 0.04, SMACK_MAX = 0.7;
-	/** (0.5.0) A blast of at least this much damage shreds the body; a weaker one only flings it. */
+	/** (0.5.1) A blast of at least this much damage shreds the body; a weaker one only flings it. */
 	private static final float SHRED_DAMAGE = 12.0F;
 
 	@Override
@@ -1895,7 +1895,7 @@ public class CorpseEntity extends Entity {
 			return false;
 		}
 		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
-			// (0.5.0) a blow or an arrow: it takes no harm, but the body is knocked about
+			// (0.5.1) a blow or an arrow: it takes no harm, but the body is knocked about
 			smack(source, damage);
 			return false;
 		}
@@ -1906,7 +1906,7 @@ public class CorpseEntity extends Entity {
 			return true;
 		}
 		if (damage < SHRED_DAMAGE) {
-			// (0.5.0) a weak blast: not enough to shred it; the knockback it gave has already flung the body
+			// (0.5.1) a weak blast: not enough to shred it; the knockback it gave has already flung the body
 			return false;
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -1922,7 +1922,7 @@ public class CorpseEntity extends Entity {
 		return true;
 	}
 
-	/** (0.5.0) Knocks the body from a melee blow or a projectile: at the part nearest the attacker, along their look or the arrow's flight. */
+	/** (0.5.1) Knocks the body from a melee blow or a projectile: at the part nearest the attacker, along their look or the arrow's flight. */
 	private void smack(DamageSource source, float damage) {
 		if (ragdoll == null || isPassenger()) {
 			return;
@@ -1961,7 +1961,7 @@ public class CorpseEntity extends Entity {
 		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
 		this.bites = input.getIntOr("Bites", 0);
 		this.entityData.set(MISSING, input.getIntOr("Missing", 0));
-		// (0.5.0) its ragdoll: the rig it was built for and where its points lay (saves without them lie down from the pose seed)
+		// (0.5.1) its ragdoll: the rig it was built for and where its points lay (saves without them lie down from the pose seed)
 		this.rigShape = input.getIntOr("RigShape", -1);
 		this.rigWidth = input.getFloatOr("RigW", 0.0F);
 		this.rigHeight = input.getFloatOr("RigH", 0.0F);

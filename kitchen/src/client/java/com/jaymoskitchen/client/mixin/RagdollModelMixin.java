@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.0) A ragdoll's limbs, set right after the model animates and after every other pose (this mixin's priority is
+ * (0.5.1) A ragdoll's limbs, set right after the model animates and after every other pose (this mixin's priority is
  * above Jaymo's Powers' 2000): a limp or dead body goes where its physics put it, whatever else it was doing.
  */
 @Mixin(value = ModelFeatureRenderer.class, priority = 3000)

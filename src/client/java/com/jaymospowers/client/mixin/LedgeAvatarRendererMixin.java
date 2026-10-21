@@ -18,6 +18,8 @@ abstract class LedgeAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$ledgeState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		LedgePose.extract(entity, state, partialTicks);
+		// (0.14.3) hanging from a bar (Bar Swing)
+		com.jaymospowers.client.freerun.BarHangPose.extract(entity, state, partialTicks);
 	}
 
 	@Inject(
@@ -25,5 +27,6 @@ abstract class LedgeAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$ledgeSway(AvatarRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		LedgePose.rotate(state, poseStack);
+		com.jaymospowers.client.freerun.BarHangPose.rotate(state, poseStack);
 	}
 }
