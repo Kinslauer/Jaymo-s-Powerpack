@@ -43,6 +43,11 @@ import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -127,6 +132,8 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
+	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
+	public static Block MINING_CHARGE;
 	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
 
 	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
@@ -173,6 +180,13 @@ public final class Armory {
 		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
 		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
 		BombGliderNet.init();
+		// (BWM port) the mining charge: stuck to a block, it digs a 3x3x3 hole into it
+		ResourceKey<Block> chargeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("mining_charge"));
+		MINING_CHARGE = Registry.register(BuiltInRegistries.BLOCK, chargeKey, new MiningChargeBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.FIRE).instabreak().sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)
+			.setId(chargeKey)));
+		item("mining_charge", p -> new BlockItem(MINING_CHARGE, p), p -> p.useBlockDescriptionPrefix().component(DataComponents.LORE, new ItemLore(
+			List.of(Component.translatable("block.jaymospowers.mining_charge.hint").withStyle(ChatFormatting.GRAY)))));
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("armory"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
