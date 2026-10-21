@@ -211,6 +211,14 @@ public final class WindPower implements Power {
 		this.sendStatus(player, this.state(player), 0.0F, false);
 	}
 
+	/** (0.15.21) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the cyclone and the jet stop (flight ends by WindFlight.canFly, next tick)
+		WindCyclone.stop(player);
+		WindJet.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		WindCyclone.stop(player);

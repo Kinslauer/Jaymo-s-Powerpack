@@ -410,6 +410,17 @@ public final class WebPower implements Power {
 		WebStrength.physique(player);
 	}
 
+	/** (0.15.21) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the lines and ropes are let go, the wings fold, whatever the tendrils hold is dropped (the symbiote acts on its own)
+		player.removeAttached(LINE);
+		player.removeAttached(ROPE);
+		player.removeAttached(TETHER);
+		player.removeAttached(WINGS);
+		WebTendrils.releaseAll(player, false);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		AttributeInstance gravity = player.getAttribute(Attributes.GRAVITY);

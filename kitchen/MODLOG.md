@@ -836,3 +836,7 @@ after `Mill.register()`.
   or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
   actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
   count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
+
+### 0.5.4: slower healing
+Andy: "healing is too quick". Meals heal a point every 280 ticks at a regeneration of 1 (was 80), and only after 20 s
+unhurt (was 10 s). A player lying downed (Powers' `jaymospowers_downed` tag) heals nothing from their stomach.

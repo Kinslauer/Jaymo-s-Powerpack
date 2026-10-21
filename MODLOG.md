@@ -2096,3 +2096,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
   steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
   the horse to the keys and its camera follows the mouse.
+- **0.15.21, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
+  anything but crawl" and "you shouldnt be healing to full health on the ground with no assistance". The server already
+  dropped power-key presses, but the client still ran its own half and some 80 other ability packets went through.
+  Now, while the local player is down, `DownedKeysMixin` makes every acting key read as up (Jump, Sprint, attack, use,
+  pick, drop, swap hands, and every `key.jaymospowers.*`): held abilities let go, only moving, the A / D roll, Sneak
+  (give up), looking, chat and menus are left. On the server the downed are a `Powers` silencer, `WindFlight.canFly`
+  says no (Wind, Z Fighter and Smoke's vapour flight end), and going down calls the new `Power.onDowned` (Gravity,
+  Chrono, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
+  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's Kitchen 0.5.4 (slower stomach
+  regen; its jar still needs building into `libs/`).

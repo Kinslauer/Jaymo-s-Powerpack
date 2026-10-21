@@ -42,6 +42,13 @@ public interface Power {
 	default void onLost(ServerPlayer player) {
 	}
 
+	/**
+	 * (0.15.21) The player just went down (Wounds' downed state): end whatever is running (holds, grabs, forms of
+	 * movement), keeping cooldowns and everything earned. While they're down their keys do nothing.
+	 */
+	default void onDowned(ServerPlayer player) {
+	}
+
 	/** Every server tick, for each player holding this power (alive or not; check {@code isAlive()} as needed). */
 	default void tick(ServerPlayer player) {
 	}

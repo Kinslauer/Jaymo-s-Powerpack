@@ -377,6 +377,13 @@ public final class DarktidePower implements Power {
 		LIVE.put(player.getUUID(), new DarktideLive());
 	}
 
+	/** (0.15.21) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the guard, the veil, the moves, the tide's arms: all of it ends, and the real items come back
+		cleanUp(player, false);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		cleanUp(player, true);

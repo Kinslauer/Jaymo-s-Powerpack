@@ -565,6 +565,22 @@ public final class GravityPower implements Power {
 		player.setAttached(COOLDOWNS, GravityCooldowns.NONE);
 	}
 
+	/** (0.15.21) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// a lift lets go, Weightless ends (no cooldown: it wasn't their choice), and every way of moving stops
+		State state = STATES.get(player.getUUID());
+		if (state != null) {
+			dropLift(player, state, false);
+		}
+		if (player.getAttached(WEIGHTLESS_ON) != null) {
+			setWeightless(player, false);
+		}
+		GravityWalk.stop(player);
+		GravityRockFlight.stop(player);
+		GravityForward.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		State state = STATES.remove(player.getUUID());

@@ -64,13 +64,15 @@ public final class Stomach {
 	static final int MAX_TICKS = 40 * 60 * 20;
 	/** A slot can be eaten into again once this much of it is left. */
 	public static final float EAT_AGAIN = 0.2F;
-	/** Ticks without being hurt before your meals start healing you. */
-	static final int REGEN_DELAY = 200;
+	/** Ticks without being hurt before your meals start healing you. (0.5.4: was 200; Andy: "healing is too quick") */
+	static final int REGEN_DELAY = 400;
 	/** Regeneration with an empty stomach, and what each point of nutrition adds (per meal, 0.25 to 2). */
 	static final float BASE_REGEN = 0.25F;
 	static final float REGEN_PER_NUTRITION = 0.1F;
-	/** At a regeneration of 1, one health point back every this many ticks. */
-	static final int REGEN_INTERVAL = 80;
+	/** At a regeneration of 1, one health point back every this many ticks. (0.5.4: was 80) */
+	static final int REGEN_INTERVAL = 280;
+	/** (0.5.4) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
+	static final String DOWNED_TAG = "jaymospowers_downed";
 	/** A drink in its slot makes every food count this much more. */
 	static final float DRINK_BONUS = 0.1F;
 	/** Most health meals can add (an extra bar of hearts), and how much more each extra slot allows. */
@@ -380,6 +382,11 @@ public final class Stomach {
 			return;
 		}
 		UUID id = player.getUUID();
+		if (player.entityTags().contains(DOWNED_TAG)) {
+			// (0.5.4) lying downed: no healing on your own, and nothing saved up for when you're up
+			REGEN_PROGRESS.remove(id);
+			return;
+		}
 		if (now - LAST_HURT.getOrDefault(id, Long.MIN_VALUE / 2) < REGEN_DELAY) {
 			return;
 		}
