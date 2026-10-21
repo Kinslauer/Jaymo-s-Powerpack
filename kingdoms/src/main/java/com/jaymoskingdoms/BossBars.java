@@ -46,7 +46,8 @@ final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity);
+		// (0.7.138) a villager crowned too
+		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity);
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */

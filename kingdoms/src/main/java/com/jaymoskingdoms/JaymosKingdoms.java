@@ -91,8 +91,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Mines.register();
 		// 0.5.4: living trees (saplings grow up by stages, trees fell whole, the woods seed themselves) and their attachment
 		LOGGER.debug("growing tree attachment: {}", Trees.GROWING);
-		// 0.7.138: guards and rulers sworn in from the villagers (their names, births, and each realm's ruling house)
-		LOGGER.debug("sworn attachments: {} {} {}", Sworn.NAME, Sworn.BORN_AS, Sworn.HOUSES);
 		// 0.5.9: felled trees topple over whole (and their attachments)
 		FallingTree.register();
 		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
@@ -106,6 +104,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// (0.7.138) with MCA, rulers are the town's own villagers
+		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
+		Rulers.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Frights.register();

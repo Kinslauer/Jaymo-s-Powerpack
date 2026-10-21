@@ -23,6 +23,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.monster.Enemy;
@@ -124,11 +126,11 @@ public final class KingdomEvents {
 					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L));
 					announce(server, Component.translatable(faction.type() == FactionType.FIEFDOM ? "message.jaymoskingdoms.succession.lord"
 						: "message.jaymoskingdoms.succession", faction.name()).withStyle(ChatFormatting.GOLD));
-					// (0.7.138) one of its own people (Sworn)
-					String heir = crowned == null || crowned.leader().isEmpty() || !(overworld.getEntity(crowned.leader().get()) instanceof Folk ruler)
-						? null : ruler.getAttached(Sworn.NAME);
-					if (heir != null) {
-						announce(server, Component.translatable("message.jaymoskingdoms.succession.sworn", heir, faction.name()).withStyle(ChatFormatting.GOLD));
+					// (0.7.138) one of its own people, by name
+					PathfinderMob heir = crowned == null ? null : Rulers.of(overworld, crowned);
+					if (heir != null && !(heir instanceof Folk)) {
+						announce(server, Component.translatable("message.jaymoskingdoms.succession.villager", heir.getDisplayName(), faction.name())
+							.withStyle(ChatFormatting.GOLD));
 					}
 				}
 			}
@@ -356,9 +358,14 @@ public final class KingdomEvents {
 			Villages.chooseElder(level, faction);
 			return Factions.get(server, faction.id());
 		}
+		if (Rulers.inPlace(faction)) {
+			// (0.7.138) with MCA, one of its own villagers (the late ruler's family first)
+			Faction crowned = Rulers.crown(level, faction, role);
+			if (crowned != null) {
+				return crowned;
+			}
+		}
 		Folk ruler = spawn(level, faction, role);
-		// (0.7.138) his house, if he was one of its villagers (Sworn)
-		Sworn.crowned(server, faction.id(), ruler);
 		return Factions.update(server, faction.id(), f -> f.withLeader(ruler == null ? Optional.empty() : Optional.of(ruler.getUUID())));
 	}
 
@@ -372,8 +379,16 @@ public final class KingdomEvents {
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		Folk.Role spec = Folk.role(role);
 		boolean ruler = spec != null && spec.leader();
-		// (0.7.138) with MCA, one of its own villagers sworn in
-		Villager sworn = Sworn.pick(level, faction, role);
+		if (role == Folk.GUARD && keep != null && Workers.inPlace(faction, role)) {
+			// (0.7.138) with MCA, a realm's guards are its villagers (MCA guards) at the same posts; none of its own (not
+			// a folk) is returned
+			BlockPos at = guardPost(level, faction, keep);
+			int radius = at.closerThan(keep.hall(), 6.0) ? 5 : at.closerThan(keep.gate(), 4.0) ? 8 : 32;
+			if (McaCompat.enlist(level, faction, role, at, at, radius) != null) {
+				Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(role, 1)));
+				return null;
+			}
+		}
 		Folk folk = null;
 		if (keep != null) {
 			folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
@@ -387,28 +402,11 @@ public final class KingdomEvents {
 				at = hiding ? keep.cellar() : keep.throne();
 				radius = hiding ? 2 : 3;
 			} else {
-				long inside = level.getEntitiesOfClass(Folk.class, new AABB(keep.hall()).inflate(8.0),
-					f -> f.factionId() == faction.id() && f.role() == Folk.GUARD).size();
-				long atGate = level.getEntitiesOfClass(Folk.class, new AABB(keep.gate()).inflate(6.0),
-					f -> f.factionId() == faction.id() && f.role() == Folk.GUARD).size();
-				if (inside < 2) {
-					at = keep.hall().offset(random.nextInt(5) - 2, 0, random.nextInt(3) - 1);
-					radius = 5;
-				} else if (atGate < 3) {
-					at = keep.gate().offset(random.nextInt(5) - 2, 0, 0);
-					radius = 8;
-				} else {
-					// about the town
-					at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-						faction.seat().offset(random.nextInt(41) - 20, 0, random.nextInt(41) - 20));
-					radius = 32;
-				}
+				at = guardPost(level, faction, keep);
+				radius = at.closerThan(keep.hall(), 6.0) ? 5 : at.closerThan(keep.gate(), 4.0) ? 8 : 32;
 			}
 			folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			folk.setup(role, faction, at, radius);
-			if (sworn != null) {
-				Sworn.take(level, folk, sworn);
-			}
 			level.addFreshEntity(folk);
 		} else {
 			for (int tries = 0; tries < 12 && folk == null; tries++) {
@@ -423,9 +421,6 @@ public final class KingdomEvents {
 				}
 				folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 				folk.setup(role, faction, faction.seat(), Folk.HOME_RADIUS);
-				if (sworn != null) {
-					Sworn.take(level, folk, sworn);
-				}
 				level.addFreshEntity(folk);
 			}
 		}
@@ -433,6 +428,20 @@ public final class KingdomEvents {
 			Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(role, 1)));
 		}
 		return folk;
+	}
+
+	/** Where a new guard is posted: two to the throne room, three at the gate, the rest about the town (folk and MCA guards counted). */
+	private static BlockPos guardPost(ServerLevel level, Faction faction, Castle.Keep keep) {
+		var random = level.getRandom();
+		int inside = Rulers.guards(level, faction, new AABB(keep.hall()).inflate(8.0));
+		int atGate = Rulers.guards(level, faction, new AABB(keep.gate()).inflate(6.0));
+		if (inside < 2) {
+			return keep.hall().offset(random.nextInt(5) - 2, 0, random.nextInt(3) - 1);
+		} else if (atGate < 3) {
+			return keep.gate().offset(random.nextInt(5) - 2, 0, 0);
+		}
+		// about the town
+		return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, faction.seat().offset(random.nextInt(41) - 20, 0, random.nextInt(41) - 20));
 	}
 
 	/** An archer on one of the faction's posts (walls, towers, watchtowers) that has none, counted in its roster. */
@@ -460,11 +469,6 @@ public final class KingdomEvents {
 		}
 		archer.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		archer.setup(Folk.ARCHER, faction, post, 1);
-		// (0.7.138) with MCA, one of its own villagers sworn in
-		Villager sworn = Sworn.pick(level, faction, Folk.ARCHER);
-		if (sworn != null) {
-			Sworn.take(level, archer, sworn);
-		}
 		level.addFreshEntity(archer);
 		Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(Folk.ARCHER, 1)));
 		return archer;
@@ -493,8 +497,15 @@ public final class KingdomEvents {
 	static void workerDied(ServerLevel level, Worker w, DamageSource source) {
 		MinecraftServer server = level.getServer();
 		Faction faction = Factions.get(server, w.factionId());
-		if (faction != null && w.role() >= 0) {
-			lostHand(server, faction, w.role(), source.getEntity() instanceof ServerPlayer p ? p : null, true);
+		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
+		if (faction != null && Rulers.leaderRole(w.role()) && faction.leader().map(w.getUUID()::equals).orElse(false)) {
+			// (0.7.138) a villager ruler
+			if (w.role() == Folk.KING) {
+				Quests.regicide(level, w.mob(), faction.id(), source);
+			}
+			rulerDied(level, faction, w.mob(), w.role() == Folk.LORD, killer, source);
+		} else if (faction != null && w.role() >= 0 && !Rulers.leaderRole(w.role())) {
+			lostHand(server, faction, w.role(), killer, true);
 		}
 	}
 
@@ -530,13 +541,21 @@ public final class KingdomEvents {
 			lostHand(server, faction, folk.role(), killer, !Caravans.isCaravanFolk(folk));
 			return;
 		}
-		boolean wasLeader = faction.leader().isPresent() && faction.leader().get().equals(folk.getUUID());
+		rulerDied(level, faction, folk, folk.role() == Folk.LORD, killer, source);
+	}
+
+	/**
+	 * A ruler died (a folk's, or (0.7.138) a villager's on the throne): old age, murder, or the fates (a successor,
+	 * vassalage to the victor, or ruin).
+	 */
+	private static void rulerDied(ServerLevel level, Faction faction, LivingEntity ruler, boolean lord, @Nullable ServerPlayer killer, DamageSource source) {
+		MinecraftServer server = level.getServer();
+		boolean wasLeader = faction.leader().isPresent() && faction.leader().get().equals(ruler.getUUID());
 		Factions.update(server, faction.id(), f -> f.withLeader(Optional.empty()));
 		if (!faction.type().isRealm()) {
 			// (a camp's chief: the barbarians' own business)
 			return;
 		}
-		boolean lord = folk.role() == Folk.LORD;
 		if (OldAge.is(source)) {
 			// (0.5.54) died in his bed, of old age: the realm mourns, and his heir is crowned (no war, no fate decides it)
 			if (wasLeader) {
@@ -546,7 +565,7 @@ public final class KingdomEvents {
 			}
 			return;
 		}
-		if (wasLeader && Assassins.murdered(level, faction, folk, source)) {
+		if (wasLeader && Assassins.murdered(level, faction, ruler, lord, source)) {
 			// (0.5.59) murdered by an assassin's blade or poison: mourned, and his heir crowned
 			Wardens.rulerFell(level, faction);
 			Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
@@ -585,7 +604,7 @@ public final class KingdomEvents {
 			announce(server, Component.translatable("message.jaymoskingdoms.fate.vassal", faction.name(), victor.name()).withStyle(ChatFormatting.GOLD));
 		} else if (fate == 2) {
 			Factions.update(server, faction.id(), f -> f.withFallen(true).withHoldings(f.holdings().withRoster(Map.of()).withVacancies(Map.of())));
-			for (Folk other : level.getEntitiesOfClass(Folk.class, folk.getBoundingBox().inflate(RUIN_SCATTER), f -> f.factionId() == folk.factionId())) {
+			for (Folk other : level.getEntitiesOfClass(Folk.class, ruler.getBoundingBox().inflate(RUIN_SCATTER), f -> f.factionId() == faction.id())) {
 				// with nothing left to guard, they scatter
 				other.discard();
 			}
@@ -599,8 +618,13 @@ public final class KingdomEvents {
 
 	/** An audience with one of a faction's people (right click): what they think of you, and (its ruler) an offer to pledge. */
 	static void audience(ServerPlayer player, Folk folk) {
+		audience(player, folk, folk.factionId());
+	}
+
+	/** (0.7.138) An audience with {@code folk}, one of {@code factionId}'s people: a folk, or a villager ruler (MCA's menu). */
+	static void audience(ServerPlayer player, LivingEntity folk, int factionId) {
 		MinecraftServer server = player.level().getServer();
-		Faction faction = Factions.get(server, folk.factionId());
+		Faction faction = Factions.get(server, factionId);
 		// barbarians don't hold court
 		if (faction == null || faction.type() == FactionType.BARBARIAN) {
 			return;
@@ -615,7 +639,7 @@ public final class KingdomEvents {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.fief", faction.name(), overlord.name())
 				.withStyle(ChatFormatting.GRAY));
 		}
-		// (0.7.138) whose blood they are (folk have no MCA menu to ask)
+		// (0.7.138) whose blood they are
 		Heritage.Kind blood = VillagerHeritage.of(folk);
 		if (blood != null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.blood", folk.getDisplayName(), Purists.name(blood))
@@ -625,7 +649,7 @@ public final class KingdomEvents {
 			Rank rank = Rank.forStanding(member.standing());
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.member", Component.translatable(rank.key()), member.standing())
 				.withStyle(ChatFormatting.GRAY));
-		} else if (folk.leader() && faction.type().isRealm() && rep >= Reputation.WELCOME && Factions.of(server, player.getUUID()) == null) {
+		} else if (Rulers.is(folk) && faction.type().isRealm() && rep >= Reputation.WELCOME && Factions.of(server, player.getUUID()) == null) {
 			String command = "/kingdom pledge " + faction.name();
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.offer").withStyle(style -> style.withColor(ChatFormatting.GREEN)
 				.withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.literal(command)))));

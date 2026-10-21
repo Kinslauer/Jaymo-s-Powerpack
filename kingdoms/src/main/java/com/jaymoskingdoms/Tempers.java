@@ -21,6 +21,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -115,11 +116,7 @@ final class Tempers {
 		if (f == null || !f.type().isRealm() || f.leader().isEmpty() || f.members().containsKey(f.leader().get())) {
 			return null;
 		}
-		return of(f.leader().get());
-	}
-
-	/** (0.7.138) The temper of a ruler with {@code id} ({@link Sworn#rulerId}). */
-	static Temper of(UUID id) {
+		UUID id = f.leader().get();
 		long mix = id.getMostSignificantBits() * 31 + id.getLeastSignificantBits();
 		// (0.7.130) the purist on his own draw, so the rest keep the temper they had before there were purists
 		long proud = Long.rotateLeft(mix, 23) * 0x9E3779B97F4A7C15L;
@@ -181,8 +178,8 @@ final class Tempers {
 	 * He meets {@code v} on his round ({@link Royals}): how depends on his temper. False leaves it to the plain greeting
 	 * (no temper, or a noble one's: he greets, then talks).
 	 */
-	static boolean meet(ServerLevel level, Folk king, Villager v) {
-		Faction f = Factions.get(level.getServer(), king.factionId());
+	static boolean meet(ServerLevel level, PathfinderMob king, Villager v) {
+		Faction f = Factions.get(level.getServer(), Rulers.faction(king));
 		Temper t = of(f);
 		if (t == null || f == null) {
 			return false;
@@ -251,7 +248,7 @@ final class Tempers {
 	}
 
 	/** A line of his, over his head for players nearby. */
-	private static void say(ServerLevel level, Folk king, Faction f, Temper t) {
+	private static void say(ServerLevel level, PathfinderMob king, Faction f, Temper t) {
 		int line = level.getRandom().nextInt(4);
 		Component words = Component.translatable("temper.jaymoskingdoms." + t.key() + ".line" + line);
 		Speech.say(level, king, words, t == Temper.TYRANT || t == Temper.PARANOID ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
@@ -264,7 +261,7 @@ final class Tempers {
 	}
 
 	/** The tyrant passes a stall or market: food from its barrels and chests is his. */
-	private static void seizeFromStall(ServerLevel level, Folk king, Faction f) {
+	private static void seizeFromStall(ServerLevel level, PathfinderMob king, Faction f) {
 		for (Works.Built b : Works.of(level.getServer(), f.id()).built()) {
 			if (!b.entry().equals("stall") && !b.entry().equals("market")) {
 				continue;
@@ -336,7 +333,9 @@ final class Tempers {
 			if (temper == null || f.fallen() || !level.isPositionEntityTicking(f.seat())) {
 				continue;
 			}
-			Folk king = level.getEntity(f.leader().get()) instanceof Folk k && k.isAlive() ? k : null;
+			// (0.7.138) a folk ruler, or one of the town's villagers crowned (whose blood is the house's own)
+			PathfinderMob ruler = Rulers.of(level, f);
+			Folk king = ruler instanceof Folk k ? k : null;
 			if (temper == Temper.PURIST && king != null) {
 				// (0.7.130) a purist is of the blood he's proud of
 				Heritage.Kind blood = Purists.blood(f);
@@ -350,7 +349,7 @@ final class Tempers {
 				case REVELER -> {
 					if (t >= FEAST_FROM && t < FEAST_TO && FEASTED.getOrDefault(f.id(), -1L) != day) {
 						FEASTED.put(f.id(), day);
-						feast(level, f, king);
+						feast(level, f, ruler);
 					}
 				}
 				default -> {
@@ -368,7 +367,7 @@ final class Tempers {
 	}
 
 	/** The reveler's feast at the seat: his people gather, music and fireworks, bread for all, and it eats the stores. */
-	private static void feast(ServerLevel level, Faction f, @Nullable Folk king) {
+	private static void feast(ServerLevel level, Faction f, @Nullable PathfinderMob king) {
 		BlockPos seat = f.seat();
 		List<Villager> people = level.getEntitiesOfClass(Villager.class, new AABB(seat).inflate(FEAST_RANGE), Villager::isAlive);
 		for (Villager v : people) {
