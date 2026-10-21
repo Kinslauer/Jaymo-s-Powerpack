@@ -532,6 +532,11 @@ final class Neighbours {
 	private static boolean finish(ServerLevel level, Meeting m, long now) {
 		RandomSource random = level.getRandom();
 		shift(m.a, m.b, m.kind.regard);
+		if (!m.kind.sour()) {
+			// (0.7.98) friends talk: of what they've seen players do, too
+			Recollections.share(m.a, m.b, random);
+			Recollections.share(m.b, m.a, random);
+		}
 		if (m.kind.sour() && !m.ambush) {
 			// (0.7.21) a bitter enough grudge looks for someone to settle it
 			Grudges.brew(level, m.a, m.b, m.faction);
