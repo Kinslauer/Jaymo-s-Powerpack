@@ -60,6 +60,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.ROTOR_ENTITY, com.jaymoskitchen.client.mill.RotorRenderer::new);
+		// the potter's wheel turning
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
 		// what's left on crafting tables
 		BlockEntityRenderers.register(Tables.CRAFTING_TABLE, CraftingTableRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);

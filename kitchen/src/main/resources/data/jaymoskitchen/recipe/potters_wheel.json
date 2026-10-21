@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W",
+    "S",
+    "P"
+  ],
+  "key": {
+    "W": "minecraft:smooth_stone_slab",
+    "S": "minecraft:stick",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymoskitchen:potters_wheel"
+  }
+}
