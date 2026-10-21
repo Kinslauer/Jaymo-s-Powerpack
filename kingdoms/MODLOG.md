@@ -3959,7 +3959,7 @@ back to normal when retracted. and only move when the player does."
   tamed, saddled one.
 - Not yet seen in game: written without a compiler, so the first build may need fixes.
 
-## 0.7.139: the Stormborn is earned (pack 0.15.54)
+## 0.7.140: the Stormborn is earned (pack 0.15.54)
 
 - Andy: "Stormborn should be unlocked as a heritage when wind users corrupt their power." Stormborn is now an earned
   heritage like the Endborn: hidden as "???" at character creation with a hint, and woken (with its Blood Rite) once

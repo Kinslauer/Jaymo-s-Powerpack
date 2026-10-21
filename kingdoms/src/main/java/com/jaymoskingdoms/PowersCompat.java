@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 public final class PowersCompat {
 	private static boolean looked;
 	private static @Nullable AttachmentType<Identifier> power;
-	/** (0.7.139) Powers' {@code Fate.isCorrupted(Player)}. */
+	/** (0.7.140) Powers' {@code Fate.isCorrupted(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle corrupted;
 
 	private PowersCompat() {
@@ -27,7 +27,7 @@ public final class PowersCompat {
 		return id == null ? null : id.getPath();
 	}
 
-	/** (0.7.139) Whether {@code player}'s power has been corrupted (Wind's Stormbound, say); false without Powers. */
+	/** (0.7.140) Whether {@code player}'s power has been corrupted (Wind's Stormbound, say); false without Powers. */
 	public static boolean corrupted(Player player) {
 		type();
 		try {

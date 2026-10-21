@@ -96,7 +96,7 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
- * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.139) The Stormborn is earned too: it wakes in a
+ * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.140) The Stormborn is earned too: it wakes in a
  * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). Earning one ({@link #UNLOCKED}) gives a Blood Rite
  * ({@link #RITE_ITEM}): read, it opens the heritage screen to change your blood to one you've earned.
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
@@ -947,7 +947,7 @@ public final class Heritage {
 				unlock(player, Kind.DRAGONBLOOD);
 			}
 		}
-		// (0.7.139) a wind the storm has taken (Jaymo's Powers' Stormbound) wakes the Stormborn
+		// (0.7.140) a wind the storm has taken (Jaymo's Powers' Stormbound) wakes the Stormborn
 		if (!unlocked(player, Kind.STORMBORN) && "wind".equals(PowersCompat.power(player)) && PowersCompat.corrupted(player)) {
 			unlock(player, Kind.STORMBORN);
 		}

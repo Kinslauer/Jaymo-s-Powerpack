@@ -2319,7 +2319,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.53, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
   first ability key no longer fires your power: R is the dragon's fire breath. Told by the mount's id
   (`jaymoskingdoms:*_dragon`), so Powers still loads without Kingdoms (`JaymosPowersClient.steeringDragon`).
-- **0.15.54, Wind lands softly, wobbles early, and the storm wakes the Stormborn (Kingdoms 0.7.139):** Andy's list:
+- **0.15.54, Wind lands softly, wobbles early, and the storm wakes the Stormborn (Kingdoms 0.7.140):** Andy's list:
   - Falls: "i have a clip where the user slowly descended and still took the damage. It shouldnt work this way past
     mastery 2, and even then the damage should scale lower related to the speed." From 2 unlocked abilities a Wind user
     takes no fall damage at all; before that a fall's damage is scaled by how fast they were really coming down
@@ -2332,5 +2332,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - The cloak's drift before mastery 2 is unsteady: arms windmilling out for balance, legs kicking, the body rocking
     (`WindWobble`, synced by `WindModes.WOBBLY` so everyone sees it).
   - No blossom petals in a Wind user's seasonal whirl (`SeasonAura`: spring gives Wind none).
-  - Kingdoms 0.7.139: the Stormborn heritage is earned now, woken when a Wind user's power is corrupted.
+  - Kingdoms 0.7.140: the Stormborn heritage is earned now, woken when a Wind user's power is corrupted.
   Compile-checked against the 26.3 jars; not yet run in game.
