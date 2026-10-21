@@ -2,7 +2,10 @@ package com.jaymospowers.client.freerun;
 
 import com.jaymospowers.client.LedgeClient;
 import com.jaymospowers.core.Ledge;
+import com.jaymospowers.freerun.FastRun;
 import com.jaymospowers.freerun.Freerun;
+import com.jaymospowers.freerun.FreerunWalls;
+import com.jaymospowers.freerun.Slide;
 import com.jaymospowers.power.web.WebParkour;
 import com.jaymospowers.power.web.WebWallRun;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,6 +18,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -41,6 +45,11 @@ public final class FreerunClient {
 	private static final double HUG = 0.02, RUN_HUG = 0.06;
 	/** Ticks a refused (unconfirmed) held move lasts, ticks to settle under a bar, and before another move after letting go. */
 	private static final int CONFIRM_TICKS = 20, BAR_SETTLE_TICKS = 4, LET_GO_COOLDOWN = 8;
+	/** (0.14.6) Going round a corner while clinging: how far (blocks) and over how many ticks. */
+	private static final double CORNER_STEP = 0.5;
+	private static final int CORNER_TICKS = 3;
+	/** (0.14.6) A wall hop flies this many ticks' worth of air drag (the sum of 0.91^n): speed = distance / this. */
+	private static final double HOP_DRAG_SUM = 6.9;
 
 	private static int kind = Freerun.NONE;
 	/** The wall's side for a cling or a run (null otherwise). */
@@ -57,6 +66,20 @@ public final class FreerunClient {
 	private static int kicked, ran;
 	/** (review) Ticks of grip spent clinging since last on the ground, and how many were spent when this cling began: letting go and catching the wall again doesn't renew the grip. */
 	private static int gripped, clingBase;
+	/** (0.14.6) Wall faces run up since last on the ground; the vertical run's length in ticks. */
+	private static int upRan, upMax;
+	/** (0.14.6) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
+	private static int sneakTicks, edgeTicks;
+	/** (0.14.6) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
+	private static Vec3 runDir = Vec3.ZERO, slideDir = Vec3.ZERO;
+	private static double runSpeed, slideSpeed;
+	/** (0.14.6) A corner being turned while clinging: ticks left, the step per tick and the wall that follows. */
+	private static int cornerLeft;
+	private static Vec3 cornerStep = Vec3.ZERO;
+	private static @Nullable Direction cornerFace;
+	/** (0.14.6) A wall hop: ticks left and the wall it is flying at. */
+	private static int hopLeft;
+	private static @Nullable Direction hopFace;
 
 	private FreerunClient() {
 	}
@@ -65,14 +88,18 @@ public final class FreerunClient {
 		ClientTickEvents.END_CLIENT_TICK.register(FreerunClient::tick);
 	}
 
-	/** In a held move: clinging, hanging from a bar or running along a wall. */
+	/**
+	 * In a held move: clinging, hanging from a bar, running along a wall or up one, climbing a pole, or sliding. (A fast
+	 * run on its own is not: dodging out of a run is fine.)
+	 */
 	public static boolean active() {
-		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.WALL_RUN;
+		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.WALL_RUN || kind == Freerun.UP_RUN || kind == Freerun.POLE
+			|| kind == Freerun.SLIDE;
 	}
 
-	/** Clinging to a wall or hanging from a bar (Sneak lets go: no Combat Roll from it). */
+	/** Clinging to a wall, hanging from a bar or from a pole (Sneak lets go: no Combat Roll from it). */
 	public static boolean holding() {
-		return kind == Freerun.CLING || kind == Freerun.BAR;
+		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.POLE;
 	}
 
 	/** Hanging from a bar: {@link #travel} moves the body instead of the vanilla travel. */
@@ -95,10 +122,18 @@ public final class FreerunClient {
 		if (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
 			kicked = 0;
 			ran = 0;
+			upRan = 0;
 			gripped = 0;
 			airTicks = 0;
-		} else {
+			} else {
 			airTicks++;
+		}
+		if (player.isSprinting() && player.onGround()) {
+			Vec3 step = new Vec3(player.getX() - player.xo, 0.0, player.getZ() - player.zo);
+			if (step.lengthSqr() > 0.0025) {
+				runDir = step.normalize();
+				runSpeed = step.length();
+			}
 		}
 		if (Freerun.unsteady(player) && player.isSprinting()) {
 			// no Sure Footing: a narrow top is walked, not run
@@ -117,6 +152,10 @@ public final class FreerunClient {
 		switch (kind) {
 			case Freerun.CLING -> tickCling(player, input, jumpPressed);
 			case Freerun.WALL_RUN -> tickRun(player, input, jumpPressed);
+			case Freerun.UP_RUN -> tickUp(player, input);
+			case Freerun.POLE -> tickPole(player, input, jumpPressed);
+			case Freerun.SLIDE -> tickSlide(player, jumpPressed);
+			case Freerun.HOP -> tickHop(player);
 			case Freerun.BAR -> tickBar(player, input, jumpPressed);
 			case Freerun.VAULT, Freerun.WALL_JUMP -> {
 				// the pose plays out on the server's clock; here the move is done once it has its push
@@ -132,6 +171,9 @@ public final class FreerunClient {
 		if (cooldown > 0) {
 			return;
 		}
+		if (trySlide(player, input) || tryEdge(player, input)) {
+			return;
+		}
 		// (the jump off the ground has already happened this tick: airborne one tick)
 		if (jumpPressed && airTicks <= 1 && player.isSprinting() && input.forward() && Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 1
 			&& tryVault(player)) {
@@ -142,6 +184,13 @@ public final class FreerunClient {
 		}
 		double vy = player.getDeltaMovement().y;
 		if (input.jump() && vy > -0.4 && Freerun.perk(player, Freerun.Perk.BAR_SWING) >= 1 && Freerun.canMove(player, Freerun.BAR) && tryBar(player)) {
+			return;
+		}
+		if (jumpPressed && airTicks <= 1 && input.forward() && !input.shift() && player.isSprinting()
+			&& (FastRun.active(player) || Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1) && Freerun.canMove(player, Freerun.UP_RUN) && tryUpRun(player)) {
+			return;
+		}
+		if (tryPole(player, input)) {
 			return;
 		}
 		if (input.forward() && !input.shift() && player.isSprinting() && Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1 && tryRun(player)) {
@@ -175,10 +224,17 @@ public final class FreerunClient {
 	// ---- cling, climb, kick -------------------------------------------------------------------------------------------
 
 	private static boolean tryCling(LocalPlayer player) {
-		Direction facing = player.getDirection();
+		return tryCling(player, player.getDirection(), false);
+	}
+
+	/** Cling to the wall on side {@code facing} ({@code turn}: from a run or a hop, so turn the body to it). */
+	private static boolean tryCling(LocalPlayer player, Direction facing, boolean turn) {
 		int grip = Freerun.GRIP_TICKS[Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.GRIP_TICKS.length) - 1];
 		if (gripped >= grip || player.getDeltaMovement().y < -Freerun.CLING_CATCH_FALL || !Freerun.climbable(player.level(), player, facing, REACH)) {
 			return false;
+		}
+		if (turn) {
+			snapYaw(player, facing);
 		}
 		player.setDeltaMovement(Vec3.ZERO);
 		player.resetFallDistance();
@@ -196,9 +252,24 @@ public final class FreerunClient {
 			letGo(player);
 			return;
 		}
-		if (jumpPressed && Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {
-			tryKick(player, face);
+		if (cornerLeft > 0) {
+			// going round a corner: carried a step along, then the wall that follows is the new one
+			cornerLeft--;
+			player.setDeltaMovement(cornerStep);
+			player.resetFallDistance();
+			if (cornerLeft == 0) {
+				wall = cornerFace;
+			}
 			return;
+		}
+		if (jumpPressed) {
+			if (!input.forward() && (input.backward() || input.left() || input.right()) && tryHop(player, face, input)) {
+				return;
+			}
+			if (Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {
+				tryKick(player, face);
+				return;
+			}
 		}
 		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.CLIMB_SPEED.length);
 		int grip = Freerun.GRIP_TICKS[rank - 1];
@@ -215,12 +286,33 @@ public final class FreerunClient {
 				return;
 			}
 		}
+		double strafeIn = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
+		if (strafeIn != 0.0) {
+			Direction toward = strafeIn > 0.0 ? face.getCounterClockWise() : face.getClockWise();
+			if (WebWallRun.wallAt(player.level(), player, toward, 0.2) && Freerun.climbable(player.level(), player, toward, REACH)) {
+				// (0.14.6) an inside corner: the wall you shimmy into takes over
+				wall = toward;
+				snapYaw(player, toward);
+				player.setDeltaMovement(Vec3.ZERO);
+				return;
+			}
+			if (!WebWallRun.wallAt(player.level(), player, face, REACH)) {
+				// (0.14.6) an outside corner: round it, onto the wall's end face
+				Direction round = toward.getOpposite();
+				AABB moved = player.getBoundingBox().move(face.getStepX() * CORNER_STEP, 0.0, face.getStepZ() * CORNER_STEP);
+				if (player.level().noCollision(player, moved) && FreerunWalls.wallAtBox(player.level(), player, moved, round, REACH)) {
+					cornerLeft = CORNER_TICKS;
+					cornerFace = round;
+					cornerStep = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(CORNER_STEP / CORNER_TICKS);
+					snapYaw(player, round);
+					return;
+				}
+			}
+		}
 		if (!WebWallRun.wallAt(player.level(), player, face, REACH)) {
 			if (input.forward() && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
 				// the wall ran out under the hands with no ledge to catch: a scramble up and over it
-				player.setDeltaMovement(new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(WebParkour.MANTLE_IN).add(0.0, WebParkour.MANTLE_UP, 0.0));
-				player.resetFallDistance();
-				end(player);
+				scramble(player, face);
 				return;
 			}
 			letGo(player);
@@ -238,6 +330,30 @@ public final class FreerunClient {
 			Vec3 at = player.position().add(face.getStepX() * 0.35, 1.2, face.getStepZ() * 0.35);
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.02, 0.0);
 		}
+	}
+
+	/** The wall ran out (or a pole's top): up and over it, a scramble. */
+	private static void scramble(LocalPlayer player, Direction face) {
+		player.setDeltaMovement(new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(WebParkour.MANTLE_IN).add(0.0, WebParkour.MANTLE_UP, 0.0));
+		player.resetFallDistance();
+		end(player);
+	}
+
+	/** Turn the body to face a wall at once. */
+	private static void snapYaw(LocalPlayer player, Direction face) {
+		player.setYRot(face.toYRot());
+		player.yRotO = player.getYRot();
+		player.setYHeadRot(player.getYRot());
+		player.yHeadRotO = player.getYRot();
+	}
+
+	/** The way the movement keys point in the world (x, z), with or without forward. */
+	private static Vec3 keysDirection(LocalPlayer player, Input input, boolean withForward) {
+		Vec3 f = Vec3.directionFromRotation(0.0F, player.getYRot());
+		Vec3 l = new Vec3(f.z, 0.0, -f.x);
+		Vec3 mv = l.scale((input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0))
+			.add(f.scale((withForward && input.forward() ? 1.0 : 0.0) - (input.backward() ? 1.0 : 0.0)));
+		return mv.lengthSqr() < 1.0E-4 ? Vec3.ZERO : mv.normalize();
 	}
 
 	/** Let go of the wall: a little push off it, the fall from here on yours. */
@@ -327,10 +443,16 @@ public final class FreerunClient {
 		ticks++;
 		if (face == null || !confirm(player.getAttached(Freerun.WALL) != null) || !input.forward() || input.shift() || ticks > maxTicks
 			|| player.onGround() || !WebWallRun.wallAt(player.level(), player, face, RUN_REACH)) {
-			// off the wall: the run's speed carries on into the air
-			end(player);
-			return;
-		}
+				// (0.14.6) pressing toward the wall as the run ends: Climber takes hold of it
+				if (face != null && !input.shift() && !player.onGround() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1
+					&& keysDirection(player, input, false).dot(new Vec3(face.getStepX(), 0.0, face.getStepZ())) > 0.5
+					&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
+					return;
+				}
+				// off the wall: the run's speed carries on into the air
+				end(player);
+				return;
+			}
 		if (jumpPressed) {
 			if (Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {
 				tryKick(player, face);
@@ -351,6 +473,249 @@ public final class FreerunClient {
 			Vec3 at = player.position().add(face.getStepX() * 0.35, 0.2, face.getStepZ() * 0.35);
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, -along.x * 0.05, 0.01, -along.z * 0.05);
 		}
+	}
+
+	// ---- fast run slide -----------------------------------------------------------------------------------------------
+
+	/** In a fast run, Sneak held {@link Slide#HOLD_TICKS} ticks (a tap is the dodge's): drop into a slide. */
+	private static boolean trySlide(LocalPlayer player, Input input) {
+		if (!(player.onGround() && FastRun.active(player) && input.shift() && !input.jump() && Freerun.canMove(player, Freerun.SLIDE))) {
+			sneakTicks = 0;
+			return false;
+		}
+		if (++sneakTicks < Slide.HOLD_TICKS) {
+			return false;
+		}
+		sneakTicks = 0;
+		slideDir = runDir.lengthSqr() > 0.5 ? runDir : Vec3.directionFromRotation(0.0F, player.getYRot());
+		slideSpeed = Mth.clamp(runSpeed * Slide.BOOST, Slide.MIN_SPEED, Slide.MAX_SPEED);
+		Slide.localSlider = player.getId();
+		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
+		start(player, Freerun.SLIDE, null, BlockPos.ZERO);
+		return true;
+	}
+
+	private static void tickSlide(LocalPlayer player, boolean jumpPressed) {
+		ticks++;
+		slideSpeed *= Slide.FRICTION;
+		if (jumpPressed) {
+			// a jump out of it keeps the speed
+			double out = Math.min(Slide.MAX_SPEED + 0.2, slideSpeed * Slide.JUMP_KEEP + 0.1);
+			player.setDeltaMovement(slideDir.x * out, Slide.JUMP_UP, slideDir.z * out);
+			endSlide(player);
+			return;
+		}
+		if (ticks > Slide.TICKS || !player.onGround() && airTicks > 2 || slideSpeed < Slide.STOP_SPEED || ticks > 2 && player.horizontalCollision) {
+			endSlide(player);
+			return;
+		}
+		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);
+		if (ticks % 2 == 0) {
+			player.level().addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, 0.01, 0.0);
+		}
+	}
+
+	private static void endSlide(LocalPlayer player) {
+		end(player);
+		cooldown = Slide.COOLDOWN;
+		// (Sneak broke the sprint: with the sprint key still down, the run goes on)
+		if (Minecraft.getInstance().options.keySprint.isDown() && player.input.keyPresses.forward()) {
+			player.setSprinting(true);
+		}
+	}
+
+	// ---- vertical wall run ----------------------------------------------------------------------------------------------
+
+	/** A sprinting jump at a wall: up it, 2.5 blocks (Wall Runner 1: 3, rank 2: 4), then the ledge, a cling or a drop. */
+	private static boolean tryUpRun(LocalPlayer player) {
+		Direction face = Direction.fromYRot(player.getYRot());
+		if (Math.abs(Mth.wrapDegrees(player.getYRot() - face.toYRot())) > Freerun.UP_FACING_DEGREES || (upRan & 1 << face.get3DDataValue()) != 0
+			|| !FreerunWalls.runnableNear(player.level(), player, face)) {
+			return false;
+		}
+		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.WALL_RUNNER), 0, Freerun.UP_HEIGHT.length - 1);
+		upMax = (int)Math.round(Freerun.UP_HEIGHT[rank] / ((Freerun.UP_START + Freerun.UP_END) * 0.5));
+		upRan |= 1 << face.get3DDataValue();
+		player.setDeltaMovement(face.getStepX() * 0.25, Freerun.UP_START, face.getStepZ() * 0.25);
+		player.resetFallDistance();
+		start(player, Freerun.UP_RUN, face, BlockPos.ZERO);
+		return true;
+	}
+
+	private static void tickUp(LocalPlayer player, Input input) {
+		Direction face = wall;
+		ticks++;
+		if (face == null || !confirm(player.getAttached(Freerun.MOVE) != null) || input.shift() || ticks > upMax || player.onGround() && ticks > 2) {
+			finishUp(player, face, input);
+			return;
+		}
+		if (ticks >= 2) {
+			// the top of the wall is a ledge: the grab and mantle take over
+			Ledge.Spot spot = Ledge.find(player);
+			if (spot != null) {
+				end(player);
+				LedgeClient.catchFromClimb(player, spot);
+				return;
+			}
+		}
+		boolean touching = WebWallRun.wallAt(player.level(), player, face, 0.12);
+		if (!touching && !FreerunWalls.wallNear(player.level(), player, face)) {
+			if (player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
+				scramble(player, face);
+			} else {
+				letGo(player);
+			}
+			return;
+		}
+		double vy = Mth.lerp((double)ticks / upMax, Freerun.UP_START, Freerun.UP_END);
+		double push = touching ? RUN_HUG : 0.25;
+		player.setDeltaMovement(face.getStepX() * push, vy, face.getStepZ() * push);
+		player.resetFallDistance();
+		if (ticks % 2 == 0) {
+			Vec3 at = player.position().add(face.getStepX() * 0.35, 0.1, face.getStepZ() * 0.35);
+			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.02, 0.0);
+		}
+	}
+
+	/** The run's height is spent: with Climber, cling where you are; otherwise let go (drop). */
+	private static void finishUp(LocalPlayer player, @Nullable Direction face, Input input) {
+		if (face != null && !input.shift() && !player.onGround() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1
+			&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
+			return;
+		}
+		letGo(player);
+	}
+
+	// ---- wall hop (cling to cling) -------------------------------------------------------------------------------------
+
+	/** Clinging, Jump while holding Back or a side: fly to the wall behind or beside you, within {@link Freerun#HOP_RANGE} blocks. */
+	private static boolean tryHop(LocalPlayer player, Direction face, Input input) {
+		Direction dir = input.backward() ? face.getOpposite() : input.left() ? face.getCounterClockWise() : face.getClockWise();
+		double dist = -1.0;
+		for (double d = 0.3; d <= Freerun.HOP_RANGE + 0.3; d += 0.2) {
+			BlockPos pos = BlockPos.containing(player.getX() + dir.getStepX() * d, player.getY() + 1.0, player.getZ() + dir.getStepZ() * d);
+			net.minecraft.world.level.block.state.BlockState state = player.level().getBlockState(pos);
+			if (!state.getCollisionShape(player.level(), pos).isEmpty()) {
+				dist = FreerunWalls.slippery(state) ? -1.0 : d;
+				break;
+			}
+		}
+		if (dist < 0.0) {
+			return false;
+		}
+		double speed = Mth.clamp((dist - 0.3 + 0.05) / HOP_DRAG_SUM, 0.15, 0.7);
+		player.setDeltaMovement(dir.getStepX() * speed, Freerun.HOP_UP, dir.getStepZ() * speed);
+		start(player, Freerun.HOP, face, BlockPos.ZERO);
+		hopFace = dir;
+		hopLeft = Freerun.HOP_TICKS;
+		return true;
+	}
+
+	private static void tickHop(LocalPlayer player) {
+		ticks++;
+		Direction dir = hopFace;
+		if (dir == null || --hopLeft < 0 || player.onGround()) {
+			kind = Freerun.NONE;
+			wall = null;
+			return;
+		}
+		// arrived: whatever is pressed, the hands take the wall
+		if (ticks >= 3 && WebWallRun.wallAt(player.level(), player, dir, REACH) && Freerun.climbable(player.level(), player, dir, REACH)
+			&& Freerun.canMove(player, Freerun.CLING)) {
+			tryCling(player, dir, true);
+		}
+	}
+
+	// ---- pole climb ---------------------------------------------------------------------------------------------------
+
+	/** In the air, forward into a pole (a vertical run of fences, walls, chains, rods, bamboo): grab it. */
+	private static boolean tryPole(LocalPlayer player, Input input) {
+		if (player.onGround() || !input.forward() || input.shift() || player.getDeltaMovement().y < -Freerun.CLING_CATCH_FALL
+			|| !Freerun.canMove(player, Freerun.POLE)) {
+			return false;
+		}
+		Direction best = null;
+		float bestAngle = 60.0F;
+		for (Direction d : Direction.Plane.HORIZONTAL) {
+			float angle = Math.abs(Mth.wrapDegrees(player.getYRot() - d.toYRot()));
+			if (angle < bestAngle && FreerunWalls.poleAt(player.level(), player, d, REACH)) {
+				best = d;
+				bestAngle = angle;
+			}
+		}
+		if (best == null) {
+			return false;
+		}
+		player.setDeltaMovement(Vec3.ZERO);
+		player.resetFallDistance();
+		start(player, Freerun.POLE, best, BlockPos.ZERO);
+		return true;
+	}
+
+	private static void tickPole(LocalPlayer player, Input input, boolean jumpPressed) {
+		Direction face = wall;
+		ticks++;
+		Integer move = player.getAttached(Freerun.MOVE);
+		if (face == null || !confirm(move != null && WebParkour.kind(move) == Freerun.CLING) || player.onGround() && ticks > 3 || ticks > Freerun.POLE_MAX_TICKS) {
+			letGo(player);
+			return;
+		}
+		if (jumpPressed) {
+			Vec3 away = keysDirection(player, input, false);
+			if (away.lengthSqr() > 0.0) {
+				// jump + a direction (not forward): leap off it
+				player.setDeltaMovement(away.x * Freerun.POLE_LEAP_OUT, Freerun.POLE_LEAP_UP, away.z * Freerun.POLE_LEAP_OUT);
+				end(player);
+				cooldown = LET_GO_COOLDOWN;
+				return;
+			}
+		}
+		boolean up = input.forward() || input.jump();
+		if (!FreerunWalls.poleAt(player.level(), player, face, REACH)) {
+			if (up && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
+				// the top of the pole: up and onto it
+				scramble(player, face);
+			} else {
+				letGo(player);
+			}
+			return;
+		}
+		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 0, Freerun.POLE_CLIMB.length - 1);
+		double vy = input.shift() ? -Freerun.POLE_SLIDE : up ? Freerun.POLE_CLIMB[rank] : 0.0;
+		player.setDeltaMovement(face.getStepX() * HUG, vy, face.getStepZ() * HUG);
+		player.resetFallDistance();
+		if (input.shift() && ticks % 3 == 0) {
+			Vec3 at = player.position().add(face.getStepX() * 0.3, 0.9, face.getStepZ() * 0.3);
+			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.03, 0.0);
+		}
+	}
+
+	// ---- edge catch -----------------------------------------------------------------------------------------------------
+
+	/** Climber: Sneak + forward at an edge (pushing to walk off) for {@link Freerun#EDGE_HOLD_TICKS} ticks: hang from the edge, below it. */
+	private static boolean tryEdge(LocalPlayer player, Input input) {
+		if (Freerun.perk(player, Freerun.Perk.CLIMBER) < 1 || !player.onGround() || !input.shift() || !input.forward() || input.backward()) {
+			edgeTicks = 0;
+			return false;
+		}
+		Direction walk = Direction.fromYRot(player.getYRot());
+		AABB box = player.getBoundingBox();
+		if (Math.abs(Mth.wrapDegrees(player.getYRot() - walk.toYRot())) > 35.0F
+			|| !player.level().noCollision(player, box.move(walk.getStepX() * 0.1, -0.6, walk.getStepZ() * 0.1))) {
+			edgeTicks = 0;
+			return false;
+		}
+		if (++edgeTicks < Freerun.EDGE_HOLD_TICKS) {
+			return false;
+		}
+		edgeTicks = 0;
+		BlockPos support = BlockPos.containing(player.getX() - walk.getStepX() * 0.45, player.getY() - 0.05, player.getZ() - walk.getStepZ() * 0.45);
+		Ledge.Spot spot = Ledge.edgeSpot(player, support, walk);
+		if (spot == null || !Freerun.canMove(player)) {
+			return false;
+		}
+		LedgeClient.catchEdge(player, spot);
+		return true;
 	}
 
 	// ---- bar swing ----------------------------------------------------------------------------------------------------
@@ -422,6 +787,10 @@ public final class FreerunClient {
 	/** Ends a held move here and on the server. */
 	private static void end(LocalPlayer player) {
 		boolean held = active();
+		if (kind == Freerun.SLIDE) {
+			Slide.localSlider = -1;
+		}
+		cornerLeft = 0;
 		kind = Freerun.NONE;
 		wall = null;
 		bar = null;
@@ -436,7 +805,13 @@ public final class FreerunClient {
 		bar = null;
 		kicked = 0;
 		ran = 0;
+		upRan = 0;
 		gripped = 0;
+		cornerLeft = 0;
+		hopLeft = 0;
+		sneakTicks = 0;
+		edgeTicks = 0;
+		Slide.localSlider = -1;
 		cooldown = 0;
 		airTicks = 0;
 		jumpWasDown = false;
