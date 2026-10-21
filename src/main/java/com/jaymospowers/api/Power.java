@@ -43,7 +43,7 @@ public interface Power {
 	}
 
 	/**
-	 * (0.15.21) The player just went down (Wounds' downed state): end whatever is running (holds, grabs, forms of
+	 * (0.15.28) The player just went down (Wounds' downed state): end whatever is running (holds, grabs, forms of
 	 * movement), keeping cooldowns and everything earned. While they're down their keys do nothing.
 	 */
 	default void onDowned(ServerPlayer player) {
@@ -64,6 +64,15 @@ public interface Power {
 	/** Whether the C key answers a corrupted (not ascended) power too. */
 	default boolean ultimateWhenCorrupted() {
 		return false;
+	}
+
+	/**
+	 * (0.14.0) Whether the C key answers {@code player} right now. By default only an ascended power does (or a corrupted
+	 * one that says {@link #ultimateWhenCorrupted}); a power whose ultimate comes with mastery instead (Cryokinesis'
+	 * Blizzard, fully mastered) says so here. Both sides: the client only sends C when this holds, the server checks again.
+	 */
+	default boolean ultimateAnswers(Player player) {
+		return com.jaymospowers.core.Fate.isAscended(player) || ultimateWhenCorrupted() && com.jaymospowers.core.Fate.isCorrupted(player);
 	}
 
 	default void onUltimate(ServerPlayer player, boolean down) {

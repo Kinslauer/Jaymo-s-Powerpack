@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.15.21) The downed don't heal, from anything: no meal (Kitchen's stomach), no power, no potion. Andy (2026-10-21):
+ * (0.15.28) The downed don't heal, from anything: no meal (Kitchen's stomach), no power, no potion. Andy (2026-10-21):
  * "you shouldnt be healing to full health on the ground with no assistance". Only being brought round, or the smelling
  * salts, gets them up ({@link Downed}); treatment works once they are.
  */

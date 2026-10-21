@@ -565,7 +565,7 @@ public final class GravityPower implements Power {
 		player.setAttached(COOLDOWNS, GravityCooldowns.NONE);
 	}
 
-	/** (0.15.21) Downed: what was running ends. */
+	/** (0.15.28) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		// a lift lets go, Weightless ends (no cooldown: it wasn't their choice), and every way of moving stops

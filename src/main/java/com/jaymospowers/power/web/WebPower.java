@@ -410,7 +410,7 @@ public final class WebPower implements Power {
 		WebStrength.physique(player);
 	}
 
-	/** (0.15.21) Downed: what was running ends. */
+	/** (0.15.28) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
 		// the lines and ropes are let go, the wings fold, whatever the tendrils hold is dropped (the symbiote acts on its own)

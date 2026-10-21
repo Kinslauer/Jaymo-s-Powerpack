@@ -499,9 +499,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.82, Alex's Mobs:** adds Alex's Mobs (Fabric) 26.3-1.0.0 and its library Citadel (Fabric) 26.3-1.0.0, both
   LGPL-3.0 and pulled from CurseForge by id (cursemaven): about 90 animals and monsters across the overworld, Nether
   and End. It has no horses; Jaymo's Equestrian still owns those. Its elephant spawns alongside ours.
-- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.42 (see `kingdoms/MODLOG.md`): iron golems
+- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.62 (see `kingdoms/MODLOG.md`): iron golems
   never speak, and they beat out fires in settlements.
-- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.63 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
   rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
 - **0.8.85, Symbiote fixes (Andy's list):**
   - **Wall tethers:** your view is held facing away from the wall (80° either side; level or below on a ceiling,
@@ -519,7 +519,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Dread vignette by bond:** a line or a feeding is fainter at a strong bond, stronger at a weak one; under bond 60
     a faint vignette lingers, breathing and blinking darker more often as the bond drops. Full strength is kept for a
     weak bond's own lines (ignored, neglected, at the edge, leaving you) and every takeover (`WebSymbioteDread`).
-- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.44 (see `kingdoms/MODLOG.md`): a
+- **0.8.86, Jaymo's Equestrian, stage 2 (bond and tack):** ships Jaymo's Kingdoms 0.5.64 (see `kingdoms/MODLOG.md`): a
   horse trusts each rider on their own account (it bucks strangers and comes to a whistle at 60), learns trail, racing,
   jumping and war to level 5 with tricks (rear, sliding stop, side-pass, war kick, kneeling), gets hungry and thirsty,
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
@@ -531,22 +531,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
   more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
   in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).
-- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
+- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.65 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
 - **0.8.89, fish loot instantly:** ships Jaymo's Kitchen 0.4.29 (see `kitchen/MODLOG.md`): clicking any fish corpse
   (vanilla or Alex's Mobs, beached flying fish included) drops its loot and the body is gone at once.
-- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
+- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.66: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
-- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.67 (see `kingdoms/MODLOG.md`):
   stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
   and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
   cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
   horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
   another town against the clock). Stablehands and farriers have their own screen: right-click them.
-- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.68 and Jaymo's Kitchen 0.4.31: every iron golem
   (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
@@ -555,7 +555,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
   gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
   `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
-- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.69 (see `kingdoms/MODLOG.md`): only about one villager in
   twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
   settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
   Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
@@ -2096,13 +2096,32 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
   steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
   the horse to the keys and its camera follows the mouse.
-- **0.15.21, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
+- **0.15.22, Emberborn Kindle (Kingdoms 0.7.117):** Andy: "expand on emberborn, with a left click hold ability, and
+  synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
+  from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
+  candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
+  at full heat throws a fireball (2.5-block burst, no block damage, 5 s cooldown). Cold halves it, rain only hisses.
+  With the Smoke power: their body is a heat source for their smoke, the flame leaves soot, and flame meeting their own
+  smoke sets off a flashover that races through the cloud. Plain left hold for Smoke users, sneak + hold with other
+  powers (`RaceHoldClient`). All in `power/ember` and `docs/Ember-Ice-Plan.md`. Smoke puffs marked keep-others never
+  take another owner's block (`SmokeField.add`).
+- **0.15.22, Cryokinesis (ice power):** Andy: "smoke instead of fire" for the ice synergy. A new power (`power/cryo`,
+  `docs/cryo.md`): R Ice Slide (skate with inertia; water ahead freezes into a frosted-ice bridge; wall crashes hurt by
+  speed), G Frost Breath (8-block cone that slows and freezes, ices water for 30 s, puts out burning creatures), V Ice
+  Shards (a fan of 5), B Flash Freeze (3 s packed-ice shell, never into a creature), X Ice Wall (5x3, 15 s, never into a
+  creature), Z Snow mode (slow and blind, no hurt), C Blizzard (20 s whiteout, 16 blocks). C answers once every
+  ability is mastered (`Power.ultimateAnswers`), since Cryokinesis has no fates yet. Frost-born users take no freeze
+  damage and are stronger where it snows. Every placed block is recorded by `CryoIce` and melted back. Freezing fog:
+  breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
+  snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
+  server crash (not a normal stop) leaves the ice standing.
+- **0.15.28, downed means down:** Andy: "when players are downed, they should not be able to use powers, or really do
   anything but crawl" and "you shouldnt be healing to full health on the ground with no assistance". The server already
   dropped power-key presses, but the client still ran its own half and some 80 other ability packets went through.
   Now, while the local player is down, `DownedKeysMixin` makes every acting key read as up (Jump, Sprint, attack, use,
   pick, drop, swap hands, and every `key.jaymospowers.*`): held abilities let go, only moving, the A / D roll, Sneak
   (give up), looking, chat and menus are left. On the server the downed are a `Powers` silencer, `WindFlight.canFly`
   says no (Wind, Z Fighter and Smoke's vapour flight end), and going down calls the new `Power.onDowned` (Gravity,
-  Chrono, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
-  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's Kitchen 0.5.4 (slower stomach
+  Chrono, Cryo, Darktide, Web, Smoke, Arsenal, Z Fighter, Wind and Resonance end what's running; cooldowns kept).
+  `DownedHealMixin`: nothing heals the downed, whatever the source. Goes with Jaymo's Kitchen 0.5.6 (slower stomach
   regen; its jar still needs building into `libs/`).

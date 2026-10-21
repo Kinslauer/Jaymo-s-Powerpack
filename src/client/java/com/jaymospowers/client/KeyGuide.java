@@ -87,7 +87,7 @@ final class KeyGuide {
 		// the C key shows up only once it answers (ascended; some powers' corruption too)
 		// (or when the power's own state has its own C line: Darktide's Drown at night)
 		String own = player == null ? null : power.statusSuffix(player);
-		if (player != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player)
+		if (player != null && (power.ultimateAnswers(player)
 			|| own != null && Language.getInstance().has(base + "ultimate" + own))) {
 			add(lines, power, player, "ultimate", base, suffixes, args, JaymosPowersClient.ultimateKey(), COLOR_ULTIMATE, false);
 		}
