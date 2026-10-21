@@ -2205,3 +2205,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     body cut from the recurve bow, 60% from any other bow or a dispenser. Flies as a vanilla arrow.
   - Linen bandages take `jaymospowers:bandage_cloth` (white wool or Kitchen's hemp cloth).
   - Not built with Loom or played yet; javac 0 errors on all three mods.
+- **0.15.39, Gravity's B reworked (Gravity Wave, Inversion):** Andy: "rework my gravity B skill it would be a cone AoE
+  infront of me shooting out a cone of gravitational waves, could carve up terrain as well, R + B = Pull target in and
+  punch them in the gut, sending them away while inverting their insides causing bleed and a heavy slow status". Held
+  and let go, B is now the Gravity Wave (`GravityWave`): a fan rolling out the way you look (4-16 blocks with the charge,
+  35° wide, 14° tall) that hurts, throws and slows what it passes and carves the ground (softer blocks readily, harder
+  with charge, claims respected). B's tap (force kneel, and the G+B launch) is unchanged; Collapsing Horizon's ring now
+  rains where the wave ends. R+B, B while Lift holds a creature, is Inversion (`GravityGutPunch`): yanked in, gut-punched
+  away, a Wounds cut on the body plus 6 s of inner bleeding, Slowness IV and Weakness. Tuning at the top of both classes.
