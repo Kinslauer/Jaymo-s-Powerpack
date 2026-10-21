@@ -71,8 +71,10 @@ final class PirateCoves {
 	static final long REBUILD_TICKS = 48000L, MISSING_TICKS = 20 * 180;
 	/** She's never launched with a player this near her mooring. */
 	static final double LAUNCH_HIDE = 28.0;
-	/** Her crew: deckhands besides her gunners, powder monkeys; on a brigantine. */
+	/** Her crew: deckhands besides her gunners, powder monkeys; on a brigantine ((0.7.108) the galleon). */
 	static final int SLOOP_HANDS = 3, BRIG_HANDS = 5, BOYS = 1;
+	/** (0.7.108) A small ship's chance of being a drakkar rather than a sloop (Jaki's; the big one is always Jaki's galleon). */
+	static final float DRAKKAR_CHANCE = 0.4F;
 	/** How long a cached coast check holds (ticks). */
 	static final long COAST_MEMORY = 20 * 300;
 
@@ -418,11 +420,13 @@ final class PirateCoves {
 		Crew crew = new Crew(Crew.Side.PIRATE, camp.id(), Pirates.pirateShip(random), cove.mooring());
 		Fleet.Look look = new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_LOG, Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.BLACK), Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
 		Direction bow = cove.seaward().getClockWise();
+		// (0.7.108) the big ship's Jaki's galleon (was our brigantine); the small one our sloop or Jaki's drakkar
+		Fleet.Rig rig = brig ? Fleet.Rig.GALLEON : random.nextFloat() < DRAKKAR_CHANCE ? Fleet.Rig.DRAKKAR : Fleet.Rig.SLOOP;
 		Ship ship = null;
 		for (int tries = 0; tries < 4 && ship == null; tries++) {
 			BlockPos water = tries == 0 ? cove.mooring() : Fleet.openSea(level, cove.mooring(), 24, 4, random);
 			if (water != null) {
-				ship = Corsairs.launch(level, brig ? Fleet.Rig.BRIGANTINE : Fleet.Rig.SLOOP, look, water, bow, crew, camp,
+				ship = Corsairs.launch(level, rig, look, water, bow, crew, camp,
 					new Corsairs.Complement(Pirates.CAPTAIN, Pirates.GUNNER, Pirates.DECKHAND, brig ? BRIG_HANDS : SLOOP_HANDS, BOYS));
 			}
 		}
@@ -437,7 +441,7 @@ final class PirateCoves {
 		}
 		Factions.update(server, camp.id(), f -> f.withLeader(Optional.ofNullable(captain)));
 		putCove(server, camp.id(), cove.withShip(ship.getUUID(), ship.blockPosition(), -1L));
-		JaymosKingdoms.LOGGER.info("{} put out {} ({})", camp.name(), crew.name, brig ? "brigantine" : "sloop");
+		JaymosKingdoms.LOGGER.info("{} put out {} ({})", camp.name(), crew.name, rig.id());
 		return ship;
 	}
 

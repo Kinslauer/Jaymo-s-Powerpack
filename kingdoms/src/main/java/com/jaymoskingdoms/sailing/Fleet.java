@@ -10,12 +10,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -23,6 +27,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -35,7 +40,21 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Fleet {
 	public enum Rig {
-		SLOOP, BRIGANTINE, FRIGATE, COG;
+		SLOOP, BRIGANTINE, FRIGATE, COG,
+		/** (0.7.108) Jaki's ships ({@link JakiShips}): a pirate's galleon and drakkar, a navy's war trireme, a merchant's cargo ship and trader. */
+		GALLEON(JakiShips.Design.GALLEON), DRAKKAR(JakiShips.Design.DRAKKAR), WAR_TRIREME(JakiShips.Design.WAR_TRIREME),
+		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER);
+
+		/** Her design, if she's one of Jaki's (null: one of ours, drawn as the kits are). */
+		final JakiShips.@Nullable Design jaki;
+
+		Rig() {
+			this(null);
+		}
+
+		Rig(JakiShips.@Nullable Design jaki) {
+			this.jaki = jaki;
+		}
 
 		public String id() {
 			return this.name().toLowerCase(Locale.ROOT);
@@ -96,12 +115,18 @@ public final class Fleet {
 		return cells;
 	}
 
-	/** One block of a ship as she's built: where (in her frame), and what. */
-	record Part(BlockPos at, BlockState state) {
+	/** One block of a ship as she's built: where (in her frame), what, and (0.7.108) the loot her barrel's filled with (null: none). */
+	record Part(BlockPos at, BlockState state, @Nullable ResourceKey<LootTable> loot) {
+		Part(BlockPos at, BlockState state) {
+			this(at, state, null);
+		}
 	}
 
 	/** Her blocks, in {@code look}: the design's cells filled, her guns loaded, and her flag flown from her tallest mast. */
-	static List<Part> parts(Rig rig, Look look) {
+	static List<Part> parts(ServerLevel level, Rig rig, Look look) {
+		if (rig.jaki != null) {
+			return JakiShips.parts(level, rig.jaki, look);
+		}
 		List<ShipKits.Cell> cells = cells(rig);
 		List<Part> parts = new ArrayList<>();
 		int mastZ = 0, top = Integer.MIN_VALUE;
@@ -145,17 +170,61 @@ public final class Fleet {
 	 * and casts her off at once with {@code crew}: the ship, or null if there's no room or water deep enough there.
 	 */
 	public static @Nullable Ship launch(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, Crew crew) {
-		List<Part> parts = parts(rig, look);
-		List<BlockPos> where = ShipKits.room(level, parts.stream().map(Part::at).toList(), KEEL, water, bow);
-		if (where == null) {
+		List<BlockPos> where = new ArrayList<>();
+		BlockPos helm = lay(level, rig, look, water, bow, where);
+		if (helm == null) {
+			return null;
+		}
+		// her hold bailed dry, then away
+		ShipKits.placed(level, helm, null);
+		crew.born = level.getGameTime();
+		Ship ship = Ship.castOff(level, helm, null, crew);
+		if (ship == null) {
+			// (she wouldn't go: take her up again)
+			int sea = level.getSeaLevel() - 1;
+			for (BlockPos at : where) {
+				level.removeBlockEntity(at);
+				level.setBlock(at, at.getY() <= sea ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(),
+					Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS);
+			}
+			return null;
+		}
+		// her hold: the first chest aboard ((0.7.108) or barrel, on a ship with no chests)
+		Hull h = ship.hull();
+		if (h != null) {
+			for (Ship.Piece p : h.pieces) {
+				if (p.blockState().getBlock() instanceof ChestBlock) {
+					crew.hold = BlockPos.asLong(p.x(), p.y(), p.z());
+					break;
+				}
+				if (p.blockState().getBlock() instanceof BarrelBlock && crew.hold == 0L) {
+					crew.hold = BlockPos.asLong(p.x(), p.y(), p.z());
+				}
+			}
+		}
+		return ship;
+	}
+
+	/**
+	 * (0.7.108) Builds a {@code rig} in {@code look} on the water at {@code water} as {@link #launch} does, her blocks left
+	 * in the world (where they went added to {@code where}): her helm, or null if there's no room or water deep enough there.
+	 */
+	public static @Nullable BlockPos lay(ServerLevel level, Rig rig, Look look, BlockPos water, Direction bow, List<BlockPos> where) {
+		List<Part> parts = parts(level, rig, look);
+		if (parts.isEmpty()) {
+			return null;
+		}
+		List<BlockPos> room = ShipKits.room(level, parts.stream().map(Part::at).toList(), KEEL, water, bow);
+		if (room == null) {
 			return null;
 		}
 		// deep water under all of her (her keel mustn't join the seabed)
 		for (int i = 0; i < parts.size(); i++) {
-			if (parts.get(i).at().getY() == 0 && !deep(level, where.get(i), 2)) {
+			if (parts.get(i).at().getY() == 0 && !deep(level, room.get(i), 2)) {
 				return null;
 			}
 		}
+		where.addAll(room);
 		Rotation turn = ShipKits.turn(bow);
 		BlockPos helm = null;
 		for (int i = 0; i < parts.size(); i++) {
@@ -164,6 +233,9 @@ public final class Fleet {
 				state = state.setValue(BlockStateProperties.WATERLOGGED, false);
 			}
 			level.setBlock(where.get(i), state, Block.UPDATE_CLIENTS);
+			if (parts.get(i).loot() != null && level.getBlockEntity(where.get(i)) instanceof RandomizableContainer box) {
+				box.setLootTable(parts.get(i).loot(), level.getRandom().nextLong());
+			}
 			if (state.getBlock() instanceof HelmBlock) {
 				helm = where.get(i);
 			}
@@ -182,34 +254,13 @@ public final class Fleet {
 				level.setBlock(at, next, Block.UPDATE_CLIENTS);
 			}
 		}
-		if (helm == null) {
-			return null;
-		}
-		// her hold bailed dry, then away
+		return helm;
+	}
+
+	/** (0.7.108) The ship {@link #lay laid} with her helm at {@code helm}, her hold bailed and cast off with no crew (null: she wouldn't go). */
+	public static @Nullable Ship castOff(ServerLevel level, BlockPos helm) {
 		ShipKits.placed(level, helm, null);
-		crew.born = level.getGameTime();
-		Ship ship = Ship.castOff(level, helm, null, crew);
-		if (ship == null) {
-			// (she wouldn't go: take her up again)
-			int sea = level.getSeaLevel() - 1;
-			for (BlockPos at : where) {
-				level.removeBlockEntity(at);
-				level.setBlock(at, at.getY() <= sea ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(),
-					Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS);
-			}
-			return null;
-		}
-		// her hold: the first chest aboard
-		Hull h = ship.hull();
-		if (h != null) {
-			for (Ship.Piece p : h.pieces) {
-				if (p.blockState().getBlock() instanceof ChestBlock) {
-					crew.hold = BlockPos.asLong(p.x(), p.y(), p.z());
-					break;
-				}
-			}
-		}
-		return ship;
+		return Ship.castOff(level, helm, null, null);
 	}
 
 	/** Whether there's water {@code depth} blocks deep (or more) below {@code at}. */
@@ -295,9 +346,14 @@ public final class Fleet {
 			}
 		}
 		List<Vec3> deck = new ArrayList<>();
+		// (0.7.108) and on a ship whose helm is up on her quarterdeck (Jaki's), her open decks below it, above the water
+		int lowest = Mth.ceil(h.minY + h.draft) + 1;
 		for (int i = 0; i < h.pieces.size(); i++) {
 			Ship.Piece p = h.pieces.get(i);
-			if (h.hi[i] < 0.9F || h.hi[i] > 1.0F || p.y() + 1 != deckY || h.at(p.x(), p.y() + 1, p.z()) >= 0 || h.at(p.x(), p.y() + 2, p.z()) >= 0) {
+			if (h.hi[i] < 0.9F || h.hi[i] > 1.0F || h.at(p.x(), p.y() + 1, p.z()) >= 0 || h.at(p.x(), p.y() + 2, p.z()) >= 0) {
+				continue;
+			}
+			if (p.y() + 1 != deckY && !(p.y() + 1 < deckY && p.y() + 1 >= lowest && sky(h, p) && !p.blockState().is(BlockTags.WOOL))) {
 				continue;
 			}
 			long cell = BlockPos.asLong(p.x(), p.y() + 1, p.z());
@@ -307,6 +363,16 @@ public final class Fleet {
 			deck.add(new Vec3(p.x(), p.y() + h.hi[i], p.z()));
 		}
 		return new Stations(helm, guns, deck);
+	}
+
+	/** (0.7.108) Whether nothing of her is above a piece: open to the sky. */
+	private static boolean sky(Hull h, Ship.Piece p) {
+		for (int y = p.y() + 1; y <= h.maxY; y++) {
+			if (h.at(p.x(), y, p.z()) >= 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// ---- sailing her ----
@@ -392,7 +458,7 @@ public final class Fleet {
 	 * chests filled by {@code stock}. Where her chests went (none: there was no room).
 	 */
 	public static List<BlockPos> wreck(ServerLevel level, Rig rig, Look look, BlockPos floor, Direction bow, Consumer<Container> stock) {
-		List<Part> parts = parts(rig, look);
+		List<Part> parts = parts(level, rig, look);
 		Rotation turn = ShipKits.turn(bow);
 		RandomSource random = level.getRandom();
 		// she lies a little into the sand, and heeled: her keel one down, the rest as she settled

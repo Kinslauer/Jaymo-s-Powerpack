@@ -40,10 +40,11 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.42) Sailing, stage 3: the kingdoms at sea. A coastal realm worth {@link #HARBOUR_TREASURY} emeralds or more keeps
  * a harbour (a pier out from its nearest shore), a {@link Pirates#SHIPWRIGHT} on it, and a warship: a frigate (a
- * brigantine while it's worth less than {@link #FRIGATE_TREASURY}) under its {@link Pirates#SEA_CAPTAIN}, crewed by its
- * guards, flying its colours. She patrols off the harbour and engages any pirate near it ({@link Corsairs}); lost, the
- * shipwright builds another in a while. Merchantmen sail from harbour to harbour with goods (its caravans by sea), and
- * run from pirates; a king may ask a player to see one safely in ({@link Quest#ESCORT}).
+ * brigantine while it's worth less than {@link #FRIGATE_TREASURY}; (0.7.108) now Jaki's war trireme) under its
+ * {@link Pirates#SEA_CAPTAIN}, crewed by its guards, flying its colours. She patrols off the harbour and engages any
+ * pirate near it ({@link Corsairs}); lost, the shipwright builds another in a while. Merchantmen ((0.7.108) Jaki's
+ * cargo ships and traders, in its colours) sail from harbour to harbour with goods (its caravans by sea), and run from
+ * pirates; a king may ask a player to see one safely in ({@link Quest#ESCORT}).
  */
 final class Navies {
 	/** A realm keeps a harbour and a warship from this treasury; a frigate from this. */
@@ -256,7 +257,7 @@ final class Navies {
 		Block colour = Fleet.block(f.color().getName() + "_wool");
 		Fleet.Look look = new Fleet.Look(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.SPRUCE_LOG, colour,
 			f.color() == net.minecraft.world.item.DyeColor.WHITE ? Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.RED) : Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
-		Ship ship = launch(level, f, h, frigate ? Fleet.Rig.FRIGATE : Fleet.Rig.BRIGANTINE, look, crew,
+		Ship ship = launch(level, f, h, frigate ? Fleet.Rig.FRIGATE : Fleet.Rig.WAR_TRIREME, look, crew,
 			new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, NAVY_HANDS, 0));
 		if (ship != null) {
 			put(server, f.id(), h.withWarship(ship.getUUID(), ship.blockPosition(), -1L));
@@ -336,7 +337,7 @@ final class Navies {
 		crew.boundFor = to.id();
 		crew.quest = quest;
 		Fleet.Look look = new Fleet.Look(Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_FENCE, Blocks.SPRUCE_LOG, Fleet.block(from.color().getName() + "_wool"), null);
-		Ship ship = launch(level, from, h, Fleet.Rig.COG, look, crew, new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, MERCHANT_HANDS, 0));
+		Ship ship = launch(level, from, h, random.nextBoolean() ? Fleet.Rig.CARGO_SHIP : Fleet.Rig.TRADER, look, crew, new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, MERCHANT_HANDS, 0));
 		if (ship != null) {
 			put(server, from.id(), h.withMerchant(ship.getUUID(), level.getGameTime()));
 			JaymosKingdoms.LOGGER.info("{} sails from {} for {}", crew.name, from.name(), to.name());

@@ -3523,3 +3523,17 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   stack; string, gunpowder, paper in a column make 2); bombardiers drop 1-2 two times in three. One bombardier guards
   each pirate cove (a second after 4 days; a lost one comes back with the next day's growth), and every pirate
   landing party comes ashore with one or two. Numbers at the top of `Dynamite` and `Pirates`.
+- **0.7.108, Jaki's ships:** Andy asked to use the ships of Jaki Versatile Structures: Sails & Sea for our templates
+  and for pirates and other factions. Its licence is GPLv3, so its structure files ship unchanged in
+  `data/jaymoskingdoms/structure/jaki/` with the licence and a notice in `licenses/jaki/` (our code stays MIT).
+  `JakiShips` reads five of them when a ship is launched (brought up to date by the game's data fixer) and makes each
+  one of ours: no water, crew or decoration data, a helm on her quarterdeck, the galleon's 22 blackstone guns made ship's
+  cannons (gunport left open, gunner where the button was), guns along the trireme's and drakkar's rails, loose sails
+  tied on with chain rigging (a ship casts off only what touches her face to face), one sail colour in her crew's, and
+  vanilla shipwreck/outpost loot in some barrels. Who sails what: pirates' big ship is the **galleon** (black sails; was
+  the brigantine) and their small one a sloop or (40%) a **drakkar**; a navy under the frigate treasury sails a **war
+  trireme** (was the brigantine); merchantmen are a **cargo ship** or a **trader** (was the cog) in their realm's colour.
+  Wool hanging in a ship's rigging now catches wind (3 blocks = one sail, `Hull.CLOTH_PER_SAIL`), so their wool sails
+  drive them, and anyone's. Ships may hold 5000 blocks (was 3000) for the galleon. Crews stand on any open deck under a
+  raised quarterdeck too. Ops: `/kingdom fleet ship <rig>` builds any rig on open water near you and casts her off
+  empty. Left out: their catamarans, small trireme and submarine.
