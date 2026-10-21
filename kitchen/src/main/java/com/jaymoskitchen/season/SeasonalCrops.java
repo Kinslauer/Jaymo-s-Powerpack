@@ -5,12 +5,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CocoaBlock;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * (0.5.4) Crops by season. A crop in one or more of the block tags {@code jaymoskitchen:seasons/<season>} grows only in
- * those seasons; any other crop (other mods' too) grows in all but winter. Out of season it just waits, it never dies.
+ * those seasons; any other crop (other mods' too) grows in all but winter. Out of season it waits, and in winter the
+ * frost kills it ({@link #waits}).
  * Sheltered crops grow all year: under glass ({@code jaymoskitchen:greenhouse_roof}) or any solid roof. Only temperate
  * lands have seasons, so crops in a desert or the snowy north grow as they always did.
  * <p>
@@ -22,6 +26,8 @@ public final class SeasonalCrops {
 	private static final TagKey<Block>[] IN_SEASON = tags();
 	/** How far up a roof is looked for. */
 	private static final int ROOF_SEARCH = 24;
+	/** The chance a winter random tick kills a crop left in the open (a crop gets about one every minute or so). */
+	private static final float FROST_KILL = 0.25F;
 
 	private SeasonalCrops() {
 	}
@@ -36,15 +42,37 @@ public final class SeasonalCrops {
 		return tags;
 	}
 
-	/** Whether this crop holds off growing this tick, being out of season. */
-	public static boolean waits(BlockState state, ServerLevel level, BlockPos pos) {
+	/**
+	 * Whether this crop holds off growing this tick, being out of season. (0.5.4, Andy: "very harsh") In winter a crop
+	 * left in the open is killed by the frost now and then: grain, roots, stems and pitcher pods die, berry bushes and
+	 * cocoa lose what was on them.
+	 */
+	public static boolean waits(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		if (!Seasons.temperate(level.getBiome(pos).value().getBaseTemperature())) {
 			return false;
 		}
-		if (inSeason(state, Seasons.of(level))) {
+		Season season = Seasons.of(level);
+		if (inSeason(state, season) || sheltered(level, pos)) {
 			return false;
 		}
-		return !sheltered(level, pos);
+		if (season == Season.WINTER && random.nextFloat() < FROST_KILL) {
+			frost(state, level, pos);
+		}
+		return true;
+	}
+
+	private static void frost(BlockState state, ServerLevel level, BlockPos pos) {
+		if (state.getBlock() instanceof SweetBerryBushBlock) {
+			if (state.getValue(SweetBerryBushBlock.AGE) > 0) {
+				level.setBlockAndUpdate(pos, state.setValue(SweetBerryBushBlock.AGE, 0));
+			}
+		} else if (state.getBlock() instanceof CocoaBlock) {
+			if (state.getValue(CocoaBlock.AGE) > 0) {
+				level.setBlockAndUpdate(pos, state.setValue(CocoaBlock.AGE, 0));
+			}
+		} else {
+			level.destroyBlock(pos, false);
+		}
 	}
 
 	public static boolean inSeason(BlockState state, Season season) {

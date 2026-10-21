@@ -135,6 +135,15 @@ final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
 		}
+		// (0.7.118) winter's cold doesn't touch a Frostborn
+		if (SEASON_NAME != null) {
+			try {
+				Class.forName("com.jaymoskitchen.season.WinterCold").getMethod("setColdProof", java.util.function.Predicate.class)
+					.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.FROSTBORN));
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
+			}
+		}
 	}
 
 	/** Kitchen is here, and new enough. */

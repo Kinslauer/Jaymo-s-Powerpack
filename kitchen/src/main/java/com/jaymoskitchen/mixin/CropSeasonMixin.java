@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.4) Crops out of season wait instead of growing (see {@link SeasonalCrops}). */
+/** (0.5.4) Crops out of season wait instead of growing, and winter's frost kills them (see {@link SeasonalCrops}). */
 @Mixin({CropBlock.class, StemBlock.class, SweetBerryBushBlock.class, CocoaBlock.class, PitcherCropBlock.class})
 abstract class CropSeasonMixin {
 	@Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
 	private void jaymoskitchen$outOfSeason(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
-		if (SeasonalCrops.waits(state, level, pos)) {
+		if (SeasonalCrops.waits(state, level, pos, random)) {
 			ci.cancel();
 		}
 	}

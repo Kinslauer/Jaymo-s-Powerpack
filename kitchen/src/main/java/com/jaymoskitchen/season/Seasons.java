@@ -29,7 +29,8 @@ import net.minecraft.world.level.Level;
  * part of {@link #DAYS_PER_PART} days. Only temperate lands (plains, forests, swamps, beaches) feel it: colder ones are
  * always wintry, hotter ones (deserts, savannas, jungles) always summery.
  * <p>
- * What changes: winter snows and freezes ponds in temperate lands, and the rest of the year that snow and ice melts
+ * What changes: winter snows and freezes ponds in temperate lands, kills crops left in the open and makes you hungry
+ * out in the cold ({@link WinterCold}), and the rest of the year that snow and ice melts
  * ({@link SeasonalWeather}); crops grow only in their seasons unless they're under a roof or glass ({@link SeasonalCrops});
  * leaves and grass turn (the client's {@code SeasonTints}). Each new part of a season is announced, holding a clock
  * shows the date, and {@code /season} tells it (ops: {@code /season set <season> [early|mid|late]}).
@@ -142,7 +143,11 @@ public final class Seasons {
 			}
 		}
 		announced = at;
+		boolean winter = now() == Season.WINTER;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (winter) {
+				WinterCold.tick(player);
+			}
 			if (player.getMainHandItem().is(Items.CLOCK) || player.getOffhandItem().is(Items.CLOCK)) {
 				player.sendOverlayMessage(date(today));
 			}
