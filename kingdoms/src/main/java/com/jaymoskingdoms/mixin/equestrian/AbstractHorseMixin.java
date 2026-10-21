@@ -60,6 +60,9 @@ abstract class AbstractHorseMixin {
 		Vec3 v = cir.getReturnValue();
 		if (v != Vec3.ZERO && Equestrian.covered(self) && Bonding.sidePass(self, Equestrian.gaitFor(self, controller))) {
 			cir.setReturnValue(new Vec3(controller.xxa, v.y, v.z));
+		} else if (v != Vec3.ZERO && com.jaymoskingdoms.equestrian.FreeRein.active.test(controller)) {
+			// (0.7.107) free rein: the rider is turned toward the camera, so the horse just goes on
+			cir.setReturnValue(com.jaymoskingdoms.equestrian.FreeRein.input(controller, v));
 		}
 	}
 

@@ -3511,3 +3511,13 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   small screens. New looks (`tools/gen_heritage_looks.py`), `/kingdom heritage unlock <players> <heritage>` for ops.
   Hidden effects stay off the cards so players find them. Not done: Stormborn metal-armor lightning and dragon slit
   pupils; Berk's dragons aren't installed, so any tamed dragon-like mob counts.
+
+## 0.7.107: free rein riding (pack 0.15.6)
+- **Free rein** (`equestrian.FreeRein`, client `FreeReinClient`, `FreeReinViewMixin`/`FreeReinYawMixin`, `MouseHandlerMixin`):
+  steering any horse-type mount in third person, the mouse turns the camera on its own and the movement keys turn your
+  horse toward where the camera looks (W ahead, A/D to the sides, S back toward the camera), a quarter of the way each
+  tick, with the breed's own turn limits on top. Aiming a bow turns you to the camera at once; the crosshair targets
+  where the camera looks; a flying mount climbs where you look. Back in first person you face where the camera faced.
+  Key "Free Rein on/off" (unbound) switches it. The idea is Better Mount Steering's (Seramicx, MIT, no 26.3 build); our
+  own code. The side-pass gait keeps its strafing.
+- Fixed master's `LivingEntitySwingMixin` target (dots in a descriptor) that stopped the game from starting.

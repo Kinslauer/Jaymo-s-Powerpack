@@ -2040,3 +2040,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks, Chrono +12 (Andy: the powers that had extra dodges get extra feathers). The client-side charge packets
   (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
   `tools/gen_feathers.py`. Combat Roll is out of the pack.
+- **0.15.6, free rein riding:** ships Jaymo's Kingdoms 0.7.107: in third person the camera turns freely and WASD turns
+  your horse toward it, like Better Mount Steering (which has no 26.3 build). Also fixes a broken swing mixin that
+  kept the game from starting.
