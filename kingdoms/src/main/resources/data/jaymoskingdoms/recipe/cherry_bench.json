@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "decorations",
+  "group": "jaymoskingdoms:bench",
+  "pattern": [
+    "###",
+    "| |"
+  ],
+  "key": {
+    "#": "minecraft:cherry_slab",
+    "|": "minecraft:stick"
+  },
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:cherry_bench"
+  }
+}

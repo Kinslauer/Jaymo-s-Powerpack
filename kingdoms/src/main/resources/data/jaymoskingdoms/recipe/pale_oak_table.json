@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "decorations",
+  "group": "jaymoskingdoms:table",
+  "pattern": [
+    "###",
+    "| |",
+    "| |"
+  ],
+  "key": {
+    "#": "minecraft:pale_oak_slab",
+    "|": "minecraft:stick"
+  },
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:pale_oak_table"
+  }
+}
