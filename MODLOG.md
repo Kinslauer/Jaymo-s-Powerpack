@@ -2170,6 +2170,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     stretched metres behind it; and a blob tracked again restarted its clock under the same id, freezing every leg
     mid-step. Moving fast, tendrils now plant further ahead, step quicker and all at once; any stretched past reach
     lets go at once, and a restarted clock resets the legs (`WebBlobRenderer`).
+- **0.15.34, costumes cover the MCA body for real:** Andy: "costumes still clip, almost all of the villager skin
+  underneath is visible in motion". 0.13.26's looser suit didn't reach the cause. With MCA a player's body is drawn by
+  MCA's own layers (skin, face, clothes, hair), each posed from a copy of the body taken as the layers start; when the
+  models are finally drawn, our poses that add to a limb (Chrono's reel, Wind's kicks, a carry's give, Z-Fighter
+  combos...) land on that copy a second time, and MCA never draws the model's root (Gravity's lean), so the suit and
+  the skin went different ways. And MCA's animation model keeps its bust off the root, so the suit never had one while
+  MCA drew its own through it. Now: the parts of the body the suit's textures cover whole aren't drawn under it, on the
+  renderer's body and MCA's layers (`CostumeCover`, a hide just before each model is drawn, shown again after); the gi's
+  bare forearms, the ragged cut's holes and the like still show the skin. Over an MCA body the costume takes the very
+  pose MCA's layers use and drops the root as they do (`CostumeBody.mcaPose`, `Worn.beforeDraw`), and the suit's bust
+  follows MCA's again (`CostumeBody.bust`). Heads untouched (masks have eye holes); first person unchanged.
 - **0.15.35, Better With Mods batch 2: smithing (Kingdoms 0.7.128, Kitchen 0.5.8):** batch 2 of the BWM port (MIT,
   our own code; plan in the "Better With Mods: what fits our pack" doc). Andy: steel gets both a netherite tier and a
   trait; ore smelting in the furnace is slower.
