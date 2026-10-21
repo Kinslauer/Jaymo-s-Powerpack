@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_wall_post",
+  "textures": {
+    "wall": "jaymospowers:block/aether/icestone_bricks"
+  }
+}

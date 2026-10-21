@@ -28,6 +28,7 @@ public final class Aether {
 		FloatingBlockEntity.register();
 		AercloudBlock.register();
 		QuicksoilSpeed.register();
+		AetherSoilTools.register();
 		// the passive animals: moa, phyg, flying cow, sheepuff, aerbunny
 		com.jaymospowers.aether.mob.AetherMobs.init();
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
