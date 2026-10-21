@@ -3651,3 +3651,5 @@ art) in our builders, and picked "your own designs + areas" first. Written from 
 - `/kingdom area list` shows the fields and quarries (outlined) and how many storage containers; `/kingdom area clear`
   unmarks the field or quarry you stand in. Marking needs a lord's rank (or creative), in the faction's own land, clear
   of buildings and plots.
+- **0.7.117, the Emberborn's Kindle:** the heritage card names the new gift, Kindle (held left mouse: flame, heat and a
+  fireball), which Jaymo's Powers 0.15.22 runs.
