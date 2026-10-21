@@ -7,6 +7,9 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /** The boss room's doors, found by looking over the room's walls (the interior {@code room} box and the shell round it). */
 final class Doorways {
+	/** Blocks the vault shell reaches beyond the room's back wall (the alcove and its end wall). */
+	private static final int VAULT_DEPTH = RuinPiece.ALCOVE + 1;
+
 	private Doorways() {
 	}
 
@@ -43,8 +46,18 @@ final class Doorways {
 
 	/** The boss is dead: the locked blocks of the room's shell become the stone they were made to look like (so the walls can be mined). */
 	static int unlock(ServerLevel level, BoundingBox room) {
+		return unlockAround(level, reach(room));
+	}
+
+	/** The shell plus the vault behind the back wall (it may lie on any side, as the piece is rotated). Only the boss shell holds locked blocks. */
+	private static Iterable<BlockPos> reach(BoundingBox room) {
+		int m = VAULT_DEPTH;
+		return BlockPos.betweenClosed(room.minX() - m, room.minY() - 1, room.minZ() - m, room.maxX() + m, room.maxY() + 1, room.maxZ() + m);
+	}
+
+	private static int unlockAround(ServerLevel level, Iterable<BlockPos> area) {
 		int count = 0;
-		for (BlockPos pos : shell(room)) {
+		for (BlockPos pos : area) {
 			BlockState state = level.getBlockState(pos);
 			if (!(state.getBlock() instanceof LockedBlock)) {
 				continue;

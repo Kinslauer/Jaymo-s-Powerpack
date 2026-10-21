@@ -55,7 +55,7 @@ public final class DungeonBlocks {
 	public static Block SENTRY_BRICKS, SENTRY_BASE_BRICKS, SENTRY_CAPSTONE_BRICKS, SENTRY_FLAGSTONES, SENTRY_TILE, SENTRY_LIGHTSTONE, SENTRY_PILLAR;
 	public static Block SENTRY_BRICK_STAIRS, SENTRY_BRICK_SLAB, SENTRY_BRICK_WALL, SENTRY_BRICK_BUTTON;
 	public static Block SENTRY_SPAWNER, SENTRY_TRAP, SENTRY_CRATE;
-	public static Block LOCKED_UNDERSHALE, LOCKED_UNDERSHALE_BRICKS, LOCKED_SENTRY_BRICKS, LOCKED_SENTRY_FLAGSTONES, LOCKED_SENTRY_LIGHTSTONE;
+	public static Block LOCKED_UNDERSHALE, LOCKED_UNDERSHALE_BRICKS, LOCKED_SENTRY_BRICKS, LOCKED_SENTRY_BASE_BRICKS, LOCKED_SENTRY_FLAGSTONES, LOCKED_SENTRY_LIGHTSTONE;
 	public static Block BOSS_DOORWAY, TREASURE_DOORWAY;
 	public static BlockEntityType<SentrySpawnerEntity> SPAWNER_ENTITY;
 	public static BlockEntityType<SentryCrateEntity> CRATE_ENTITY;
@@ -105,6 +105,7 @@ public final class DungeonBlocks {
 		LOCKED_UNDERSHALE = add("locked_undershale", LockedBlock::new, locked(MapColor.COLOR_GRAY));
 		LOCKED_UNDERSHALE_BRICKS = add("locked_undershale_bricks", LockedBlock::new, locked(MapColor.COLOR_GRAY));
 		LOCKED_SENTRY_BRICKS = add("locked_sentry_bricks", LockedBlock::new, locked(MapColor.COLOR_ORANGE));
+		LOCKED_SENTRY_BASE_BRICKS = add("locked_sentry_base_bricks", LockedBlock::new, locked(MapColor.COLOR_ORANGE));
 		LOCKED_SENTRY_FLAGSTONES = add("locked_sentry_flagstones", LockedBlock::new, locked(MapColor.COLOR_ORANGE));
 		LOCKED_SENTRY_LIGHTSTONE = add("locked_sentry_lightstone", LockedBlock::new, locked(MapColor.COLOR_YELLOW).lightLevel(state -> LIGHTSTONE_LIGHT));
 		BOSS_DOORWAY = add("boss_doorway", BossDoorwayBlock::new, locked(MapColor.COLOR_ORANGE).noOcclusion()

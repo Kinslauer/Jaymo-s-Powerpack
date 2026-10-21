@@ -66,7 +66,8 @@ final class RuinKit {
 		String id = BuiltInRegistries.BLOCK.getKey(wall.getBlock()).getPath();
 		return switch (id) {
 			case "undershale" -> state("locked_undershale");
-			case "sentry_bricks", "sentry_base_bricks" -> state("locked_sentry_bricks");
+			case "sentry_bricks" -> state("locked_sentry_bricks");
+			case "sentry_base_bricks" -> state("locked_sentry_base_bricks");
 			case "sentry_flagstones" -> state("locked_sentry_flagstones");
 			case "sentry_lightstone" -> state("locked_sentry_lightstone");
 			default -> state("locked_undershale_bricks");
