@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.shouldersurfing",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["ShoulderSurfingMixin", "ShoulderSurfingCameraMixin"],
+	"injectors": { "defaultRequire": 0 }
+}
