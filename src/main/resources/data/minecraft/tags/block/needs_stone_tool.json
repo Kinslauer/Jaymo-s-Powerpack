@@ -2,6 +2,11 @@
   "values": [
     "jaymospowers:icestone",
     "jaymospowers:zanite_ore",
-    "jaymospowers:zanite_block"
+    "jaymospowers:zanite_block",
+    "jaymospowers:arkenium_ore",
+    "jaymospowers:glint_ore",
+    "jaymospowers:undershale_arkenium_ore",
+    "jaymospowers:undershale_glint_ore",
+    "jaymospowers:undershale_zanite_ore"
   ]
 }

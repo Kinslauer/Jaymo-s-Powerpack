@@ -74,6 +74,86 @@ on them; breaking one drops a white apple).
 stew recipes carry the effects). **Ambrosium Torch** (a torch that smokes instead of flames, light 14; a shard over a
 stick makes 4).
 
+## Aether II blocks: stone, soil, ice, ores, clouds, building
+
+The Aether is being rebuilt as The Aether II's Holy Isles (`DESIGN2.md`). This track (N1) added its stone, soil, ice,
+ore, cloud and building blocks to `AetherBlocks`/`AetherItems`; `python -I tools/gen_aether.py` paints and writes all
+of their assets and data, and `python -I tools/check_aether_assets.py .` checks that every block has a blockstate,
+models, an item definition, a loot table, a name and textures (it also parses every JSON under `src/main/resources`).
+They all sit in the "The Aether" creative tab. **Holystone is now 1.5/6** (it was 0.5), Aether II's number; icestone
+keeps 0.5. Aether grass now converts a neighbour on 1 random try in 10 [AetherGrassBlock.SPREAD_ODDS], as Aether II's
+does.
+
+**Stones** [AetherBlocks.initStones]
+- **Undershale** (dark slate, 3.0/6), **Agiosite** (purple, 1.5/6), **Ichorite** (brown, 4.0/6), **Ferrosite** (rusty
+  grey, 1.5/6).
+- **Irradiated Holystone** (sickly green veins): standing on it gives Poison I for 2 s, once a second
+  [IrradiatedHolystoneBlock].
+- **Crude Scatterglass** (cyan crystal rock, 1.5/6, half-transparent): drops 2-4 scatterglass shards (+Fortune), or
+  itself with Silk Touch.
+- **Holystone Rock** [HolystoneRockBlock]: a pebble pile, no collision, instant break, pops off when its ground goes.
+- **Pointed Holystone** [PointedHolystoneBlock]: a stepped cone standing on the ground; landing on it hurts like a
+  stalagmite (the fall counts double, FALL_MULTIPLIER).
+- Bricks: **Undershale**, **Agiosite**, **Icestone**, **Ichorite** and **Faded Holystone Bricks** (4 from 2x2 of the
+  stone; faded ones from 4 holystone bricks and a bone meal). Decorative: **Holystone Flagstones**, **Faded Holystone
+  Flagstones**, **Holystone Pillar** (a rotated pillar), **Holystone Keystone**, **Holystone Button** and **Holystone
+  Pressure Plate** (stone-type, so they sound and behave like vanilla stone ones).
+- Stairs, slabs and walls for holystone, mossy holystone, holystone bricks, faded holystone bricks, undershale,
+  undershale bricks, agiosite, agiosite bricks, icestone bricks, ichorite and ichorite bricks: crafted the vanilla way
+  and cut on a stonecutter (from the block and, for bricks, from the stone they come from).
+
+**Soils** [AetherBlocks.initSoils, AetherSoilTools, AetherPathBlock]
+- **Coarse Aether Dirt**, **Aether Dirt Path** and **Aether Farmland**. A shovel on aether grass, aether dirt or coarse
+  aether dirt makes the path; a hoe makes farmland (coarse dirt turns to plain aether dirt first), with air needed
+  above. Farmland is a vanilla `FarmlandBlock` reverting to aether dirt, and is in `supports_crops`/`grows_crops`, so
+  vanilla crops grow on it. The path and farmland drop aether dirt.
+- **Shimmering Silt** (blue-grey) and **Ferrosite Sand** (rust) fall like sand; **Ferrosite Mud** is a copy of mud.
+
+**Ice and snow** [AetherBlocks.initIce]
+- **Arctic Snow Block** and **Arctic Snow** (1-8 layers, drops that many).
+- **Arctic Ice** (friction 0.98, melts near light like ice) and **Arctic Packed Ice** (0.98, no melting); both drop
+  only with Silk Touch.
+- **Fragile Arctic Ice** [FragileArcticIceBlock]: a player standing on it cracks it 5 ticks later (BREAK_DELAY), and it
+  also breaks on 1 random tick in 5; it leaves nothing.
+- **Arctic Ice Crystal** [ArcticIceCrystalBlock]: hangs from a ceiling, no collision, light 3.
+
+**Ores and metals** [AetherBlocks.initOres]
+- In holystone (3.0/3.0): **Holystone Quartz Ore** (quartz, 2-5 XP), **Arkenium Ore** (inert arkenium, no XP),
+  **Glint Ore** (glint gemstone, 3-5 XP). In undershale (4.5/3.0): **Undershale Ambrosium / Zanite / Arkenium / Glint
+  Ore**, and **Undershale Gravitite Ore**, which floats like the holystone one.
+- **Corrobonite Ore** [CorroboniteOreBlock] (undershale-based, iron tier): every random tick it grows a **Corrobonite
+  Cluster** (an amethyst-cluster-like block, light 4, drops one crystal) onto one free face.
+- Storage: **Block of Arkenium / Glint / Corrobonite / Golden Amber** (9 of the item) and **Block of Gravitite** (4
+  enchanted gravitite).
+- Items: **Inert Arkenium**, **Glint Gemstone**, **Glint Coin** (1 gemstone makes 4 coins and back),
+  **Corrobonite Crystal**, **Scatterglass Shard**.
+
+**Glass** [AetherBlocks.initGlassAndClouds]
+- **Scatterglass** (smelt crude scatterglass, or 4 shards): clear cyan glass. **Scatterglass Pane** and **Quicksoil
+  Glass Pane** (16 from 6 of the block), both Silk Touch only.
+
+**Aerclouds** (all the cold cloud's rules unless said; no fall damage in any of them)
+- **Green Aercloud** [GreenAercloudBlock]: entering shoves you 1.0 block a tick in a random horizontal direction, at
+  most once every 20 ticks per entity (COOLDOWN).
+- **Purple Aercloud** [PurpleAercloudBlock]: has a facing (the way you were looking when you placed it, shown by the
+  arrow on its front face) and flings whatever is inside 2.0 blocks a tick that way; sneaking settles instead.
+- **Storm Aercloud** [StormAercloudBlock]: dark grey, crackles; inside it you take 1 lightning damage every 40 ticks.
+
+**Building** [AetherBlocks.initBuilding]
+- **Cloudwool** (2 from 2x2 cold aercloud) and **Cloudwool Carpet**, in white and the 16 dyes (dye one piece of
+  cloudwool); they are in the vanilla `wool` and `wool_carpets` tags.
+- **Arkenium Lantern** (a lantern around an ambrosium torch, light 15), **Arkenium Chain**, **Arkenium Bars** (iron
+  bars' shapes, from inert arkenium), all in the vanilla `lanterns`/`chains`/`bars` tags.
+
+Tags: everything is in `mineable/pickaxe` or `mineable/shovel`, with `needs_stone_tool` (arkenium, glint, zanite ores)
+and `needs_iron_tool` (corrobonite, undershale gravitite); the stairs, slabs, walls, buttons, plates, sands, ices,
+snow, mud and wools join their vanilla tags, so vanilla tools, walls, pathing and glass panes work on them.
+`#jaymospowers:aether_undershale_ore_replaceables` holds undershale, for the worldgen (track W).
+
+**To check first in game**: that the creative tab holds them all with real textures and names; a hoe and a shovel on
+aether grass; crops on aether farmland; standing on irradiated holystone and on fragile arctic ice; walking into a
+green, purple and storm aercloud; a corrobonite ore left to grow clusters; the stonecutter list for holystone.
+
 ## Items [AetherItems]
 
 - **Ambrosium Shard**: right-click on aether grass makes it enchanted; right-click elsewhere heals one heart (not at

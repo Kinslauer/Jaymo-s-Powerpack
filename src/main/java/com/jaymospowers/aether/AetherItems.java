@@ -26,6 +26,9 @@ public final class AetherItems {
 	public static final float BLUE_BERRY_SATURATION = 0.4F, WHITE_APPLE_SATURATION = 0.6F;
 
 	public static Item AMBROSIUM_SHARD, ZANITE_GEMSTONE, GOLDEN_AMBER, BLUE_BERRY, WHITE_APPLE;
+	/** Aether II's ore items (track N1): arkenium, glint (and its coin: one gemstone is {@link #COINS_PER_GEMSTONE} coins), corrobonite, scatterglass. */
+	public static Item INERT_ARKENIUM, GLINT_GEMSTONE, GLINT_COIN, CORROBONITE_CRYSTAL, SCATTERGLASS_SHARD;
+	public static final int COINS_PER_GEMSTONE = 4;
 
 	private AetherItems() {
 	}
@@ -40,6 +43,12 @@ public final class AetherItems {
 		WHITE_APPLE = item("white_apple", WhiteAppleItem::new, new Item.Properties().rarity(Rarity.UNCOMMON)
 			.food(new FoodProperties.Builder().nutrition(WHITE_APPLE_FOOD).saturationModifier(WHITE_APPLE_SATURATION).alwaysEdible().build(),
 				Consumables.defaultFood().build()));
+
+		INERT_ARKENIUM = item("inert_arkenium", Item::new, new Item.Properties());
+		GLINT_GEMSTONE = item("glint_gemstone", Item::new, new Item.Properties());
+		GLINT_COIN = item("glint_coin", Item::new, new Item.Properties());
+		CORROBONITE_CRYSTAL = item("corrobonite_crystal", Item::new, new Item.Properties());
+		SCATTERGLASS_SHARD = item("scatterglass_shard", Item::new, new Item.Properties());
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("aether"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()
@@ -58,8 +67,13 @@ public final class AetherItems {
 				AetherBlocks.WHITE_FLOWER, AetherBlocks.PURPLE_FLOWER, AetherBlocks.AMBROSIUM_TORCH)) {
 				output.accept(block);
 			}
-			for (Item item : List.of(AMBROSIUM_SHARD, ZANITE_GEMSTONE, GOLDEN_AMBER, BLUE_BERRY, WHITE_APPLE)) {
+			for (Item item : List.of(AMBROSIUM_SHARD, ZANITE_GEMSTONE, GOLDEN_AMBER, BLUE_BERRY, WHITE_APPLE,
+				INERT_ARKENIUM, GLINT_GEMSTONE, GLINT_COIN, CORROBONITE_CRYSTAL, SCATTERGLASS_SHARD)) {
 				output.accept(item);
+			}
+			// Aether II's stone, soil, ice, ore, cloud and building blocks (track N1)
+			for (Block block : AetherBlocks.added()) {
+				output.accept(block);
 			}
 		});
 	}

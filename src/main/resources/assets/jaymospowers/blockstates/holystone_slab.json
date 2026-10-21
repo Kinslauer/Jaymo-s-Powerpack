@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/aether/holystone_slab"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/aether/holystone"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/aether/holystone_slab_top"
+    }
+  }
+}

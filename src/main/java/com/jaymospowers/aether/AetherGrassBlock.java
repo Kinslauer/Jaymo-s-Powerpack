@@ -17,8 +17,11 @@ public class AetherGrassBlock extends Block {
 	// ---- tuning ----
 	/** Light needed above a dirt block for the grass to spread onto it. */
 	public static final int SPREAD_LIGHT = 9;
-	/** Spread attempts per random tick, and how far around (x and z) and below/above (y) they reach. */
-	public static final int SPREAD_TRIES = 4, SPREAD_RADIUS = 1, SPREAD_DOWN = 3, SPREAD_UP = 1;
+	/**
+	 * Spread attempts per random tick, and how far around (x and z) and below/above (y) they reach: a 3x5x3 box, as in
+	 * The Aether II. Each attempt that finds bare dirt converts it with a 1 in {@link #SPREAD_ODDS} chance.
+	 */
+	public static final int SPREAD_TRIES = 4, SPREAD_RADIUS = 1, SPREAD_DOWN = 3, SPREAD_UP = 1, SPREAD_ODDS = 10;
 
 	private final boolean spreads;
 
@@ -45,7 +48,7 @@ public class AetherGrassBlock extends Block {
 		for (int i = 0; i < SPREAD_TRIES; i++) {
 			BlockPos target = pos.offset(random.nextInt(2 * SPREAD_RADIUS + 1) - SPREAD_RADIUS,
 				random.nextInt(SPREAD_DOWN + SPREAD_UP + 1) - SPREAD_DOWN, random.nextInt(2 * SPREAD_RADIUS + 1) - SPREAD_RADIUS);
-			if (level.getBlockState(target).is(AetherBlocks.AETHER_DIRT) && !smothered(level, target)
+			if (random.nextInt(SPREAD_ODDS) == 0 && level.getBlockState(target).is(AetherBlocks.AETHER_DIRT) && !smothered(level, target)
 				&& level.getMaxLocalRawBrightness(target.above()) >= SPREAD_LIGHT) {
 				level.setBlockAndUpdate(target, this.defaultBlockState());
 			}

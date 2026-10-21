@@ -1,0 +1,184 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "1"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 1,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "2"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 2,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "3"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 3,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "4"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 4,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "5"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 5,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "6"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 6,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "7"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 7,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:item",
+              "name": "jaymospowers:arctic_snow",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:arctic_snow",
+                "state": {
+                  "layers": "8"
+                }
+              },
+              "modifier": [
+                {
+                  "type": "minecraft:set_count",
+                  "count": 8,
+                  "add": false
+                },
+                {
+                  "type": "minecraft:explosion_decay"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/arctic_snow"
+}
