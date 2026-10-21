@@ -126,9 +126,9 @@ public final class Treatment {
 	/**
 	 * (0.14.4) Server → client: open the body screen on {@code entity} (its name), its {@code parts} (by
 	 * {@link BodyPart#ordinal()}) with their {@code fractions} and {@code states} ({@link #BROKEN}...), and {@code plan}
-	 * ({@link BodyPlan#ordinal()}).
+	 * ({@link BodyPlan#ordinal()}). (0.15.18) {@code look}: opened from the inventory to look, not with medicine.
 	 */
-	public record OpenBody(int entity, String name, int plan, List<Integer> parts, List<Float> fractions, List<Integer> states)
+	public record OpenBody(int entity, String name, int plan, List<Integer> parts, List<Float> fractions, List<Integer> states, boolean look)
 		implements CustomPacketPayload {
 		public static final Type<OpenBody> TYPE = new Type<>(JaymosPowers.id("wounds_open_body"));
 		public static final StreamCodec<ByteBuf, OpenBody> CODEC = StreamCodec.composite(
@@ -138,6 +138,7 @@ public final class Treatment {
 			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), OpenBody::parts,
 			ByteBufCodecs.FLOAT.apply(ByteBufCodecs.list()), OpenBody::fractions,
 			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), OpenBody::states,
+			ByteBufCodecs.BOOL, OpenBody::look,
 			OpenBody::new);
 
 		@Override
@@ -156,6 +157,17 @@ public final class Treatment {
 
 		@Override
 		public Type<Treat> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.15.18) Client → server: show me my own body (the inventory's body button). */
+	public record LookBody() implements CustomPacketPayload {
+		public static final Type<LookBody> TYPE = new Type<>(JaymosPowers.id("wounds_look_body"));
+		public static final StreamCodec<ByteBuf, LookBody> CODEC = StreamCodec.unit(new LookBody());
+
+		@Override
+		public Type<LookBody> type() {
 			return TYPE;
 		}
 	}
@@ -193,6 +205,8 @@ public final class Treatment {
 		PayloadTypeRegistry.clientboundPlay().register(OpenBody.TYPE, OpenBody.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Treat.TYPE, Treat.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Treat.TYPE, (payload, ctx) -> picked(ctx.player(), payload.entity(), payload.part()));
+		PayloadTypeRegistry.serverboundPlay().register(LookBody.TYPE, LookBody.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(LookBody.TYPE, (payload, ctx) -> look(ctx.player()));
 		UseEntityCallback.EVENT.addPhaseOrdering(Downed.FIRST, PHASE);
 		UseEntityCallback.EVENT.addPhaseOrdering(PHASE, Event.DEFAULT_PHASE);
 		UseEntityCallback.EVENT.register(PHASE, Treatment::onUseEntity);
@@ -371,7 +385,7 @@ public final class Treatment {
 		if (player.isShiftKeyDown()) {
 			startWorst(player, player, remedy, hand, true);
 		} else {
-			open(player, player, remedy);
+			open(player, player, remedy, false);
 		}
 	}
 
@@ -416,7 +430,7 @@ public final class Treatment {
 		} else if (sneak) {
 			startWorst(server, body, remedy, hand, true);
 		} else {
-			open(server, body, remedy);
+			open(server, body, remedy, false);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -464,10 +478,32 @@ public final class Treatment {
 		return CampfireBlock.isLitCampfire(state) || state.is(BlockTags.FIRE) || state.getFluidState().is(FluidTags.LAVA);
 	}
 
-	/** The body screen, for {@code body}, with what {@code remedy} could help marked. */
-	private static void open(ServerPlayer player, LivingEntity body, Remedy remedy) {
+	/**
+	 * (0.15.18) The inventory's body button: the player's own body screen, to look. Medicine for a part in hand still
+	 * marks what it could help, so they can treat from there.
+	 */
+	private static void look(ServerPlayer player) {
+		if (player.isSpectator() || !player.isAlive()) {
+			return;
+		}
+		Remedy held = null;
+		for (InteractionHand hand : InteractionHand.values()) {
+			Remedy remedy = remedy(player.getItemInHand(hand), player.level());
+			if (remedy != null && remedy.part) {
+				held = remedy;
+				break;
+			}
+		}
+		open(player, player, held, true);
+	}
+
+	/** The body screen, for {@code body}, with what {@code remedy} (if any) could help marked. */
+	private static void open(ServerPlayer player, LivingEntity body, @Nullable Remedy remedy, boolean look) {
 		BodyPlan plan = BodyPlan.of(body);
 		if (plan == null || !ServerPlayNetworking.canSend(player, OpenBody.TYPE)) {
+			if (remedy == null) {
+				return;
+			}
 			// (no screen to show: the worst part, as sneak + use)
 			InteractionHand hand = hand(player, remedy);
 			if (hand != null) {
@@ -489,12 +525,12 @@ public final class Treatment {
 			state |= (splinted & bit) != 0 ? SPLINTED : 0;
 			state |= Bleeding.dressed(body, part) ? BANDAGED : 0;
 			state |= Breaks.missing(body, part) ? MISSING : 0;
-			state |= helps(remedy, body, part) ? HELPS : 0;
+			state |= remedy != null && helps(remedy, body, part) ? HELPS : 0;
 			parts.add(part.ordinal());
 			fractions.add(Wounds.fraction(body, part));
 			states.add(state);
 		}
-		ServerPlayNetworking.send(player, new OpenBody(body.getId(), body.getDisplayName().getString(), plan.ordinal(), parts, fractions, states));
+		ServerPlayNetworking.send(player, new OpenBody(body.getId(), body.getDisplayName().getString(), plan.ordinal(), parts, fractions, states, look));
 	}
 
 	/** The hand holding {@code remedy} (the main hand first). */
