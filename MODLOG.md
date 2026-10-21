@@ -2316,3 +2316,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `CORRUPT_*` constants, `Live.runaway`/`wingStall`, the chat line on changing and the `.corrupt` lang keys. A corrupted
   band still gives the wrong alien on 1 slam in 4 and changes you on its own; `XenoForm.corrupt` is an empty per-tick
   hook for later. Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.53, R belongs to the dragon (Kingdoms 0.7.137):** steering one of Kingdoms' new dragons (Notus first), the
+  first ability key no longer fires your power: R is the dragon's fire breath. Told by the mount's id
+  (`jaymoskingdoms:*_dragon`), so Powers still loads without Kingdoms (`JaymosPowersClient.steeringDragon`).

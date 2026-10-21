@@ -3910,3 +3910,51 @@ back to normal when retracted. and only move when the player does."
   the middle of the view, raised and turned in so the blade points ahead past the fist; the off hand rises in from
   below; a blow thrusts the arm forward. `HiddenBladeOffHandMixin` became `HiddenBladeFirstPersonMixin`, both hands.
   With First-person Model drawing your body, the third-person guard puts the arm (and blade) in front of you.
+
+## 0.7.137: Notus, Boreas and Zephyrus, the first wind dragons
+- Andy: "Names : Boreas, Zephyrus, Notus, Eurus, and Aeolus." The plan for all five is `docs/Dragons-Plan.md` (our own
+  design; nothing taken from Berk's Dragon Academy). Notus, the south wind, came first, end to end; Boreas and
+  Zephyrus share its body (`dragons/WindDragon`: the wild AI, taming, riding, stamina) with their own shape, breath, home
+  and nature.
+- **Notus** (`jaymoskingdoms:notus_dragon`, `dragons/NotusDragon`, on the horse base like the war elephant): a heavy
+  fire dragon, 220 health, tough hide, tail club and back spikes. A miniboss: a boss bar while wild (`BossBars`), in
+  `c:bosses`. A hand-written model with procedural animation (flapping, gliding, hovering to breathe, landing, walking,
+  perched, crashed, sitting); art painted by `tools/gen_dragons.py`.
+- Andy: "can you slightly differentiate every dragon visually like the heritages?" Every dragon rolls a look at birth
+  and keeps it (`DragonLook`, synced): one of four hide shades, long, short or twin horns, now and then a lost back
+  spike, and one of four glowing marking patterns (an emissive layer, with glowing eyes). Shared by the dragons to come.
+- **Wild:** a rare encounter in the badlands, and now and then in the basalt deltas. It circles high, perches on the
+  tallest spot near, and goes for players within 22 blocks: swoops, hovers and breathes fire, or lands to bite and
+  tail-sweep. Andy: "fire burns blocks": a wild one's fire follows mobGriefing; a ridden one's always burns.
+- **Taming:** worn below a third of its health it crashes and stays grounded a while. Crouch near it with empty hands
+  and a trust meter (yours only, on your HUD) fills; cooked mutton fills it faster, Emberborn twice as fast. A drawn
+  weapon, sprinting at it or hurting it drains it; empty, it bolts. Its trust is its own, not Equestrian's Bond.
+  Only kills count as beating a dragon (for Eurus and Aeolus, later).
+- **Tamed:** follows, sits (sneak-use, empty hands), defends you. Saddle in the horse slot. Flight with the free-rein
+  camera: Space takes off and climbs, W flies where you look, S brakes to a hover, Shift dives (and lands; on the ground
+  it dismounts). Stamina: hard flight and fire drain it, meat refills it, exhausted it glides down. R breathes fire
+  where you look (Powers 0.15.53 lets go of its first ability while you steer one). Andy: "you can have a piggyback rider": a second
+  player sits behind the owner. Only the owner steers: left alone in the saddle, the passenger can't fly or breathe
+  and the dragon lands; in the air the passenger's Shift doesn't throw them off.
+- Wild ones despawn far from players like other monsters (not tamed or named ones), none come on Peaceful, and the boss
+  bar leaves your screen once you're out of its range.
+- **Boreas**, the north wind (`jaymoskingdoms:boreas_dragon`, `dragons/BoreasDragon`): a long, lean frost dragon of the
+  frozen and jagged peaks and the ice spikes, 180 health, a thinner hide. A glider that barely flaps and dives in
+  silence (soft wingbeats, no roar before the swoop, faster than Notus; ridden it tires slowly aloft). Its breath
+  (`DragonFrost`) is a cone of freezing mist: freeze damage, Slowness and the powder-snow chill; it puts out fires
+  (burning creatures, fire, lit campfires) and turns still water to frosted ice that melts again (mobGriefing, as fire).
+  It never freezes itself. Raw salmon; the Frostborn and Cryokinesis users win it over twice as fast (Powers read
+  through `PowersCompat`, never required). A white boss bar. Its own model (a five-piece neck, a blade-finned tail,
+  very long swept wings, icicle spikes) and art (`tools/gen_boreas.py`).
+- **Zephyrus**, the west wind (`jaymoskingdoms:zephyrus_dragon`, `dragons/ZephyrusDragon`): a low, broad, amphibious
+  dragon of the swamps and mangroves, 190 health. Wild, it lies half sunk in the water (only its head and back
+  showing) and bursts out to swoop on whoever comes near. It swims as well as it flies: it breathes underwater, the
+  current doesn't push it, and ridden in water it swims where you look and doesn't sink. It spits acid (`DragonAcid`):
+  gobs that hurt and poison and leave a toxic puddle (never changing blocks); its own poison doesn't touch it. Tropical
+  fish; Verdant and Tideborn twice as fast. A green boss bar. Its own model (a short thick neck, a flat frilled head,
+  a paddle tail, webbed feet and ragged wings) and art (`tools/gen_zephyrus.py`).
+- Encounters: Boreas over the frozen peaks, jagged peaks, snowy slopes and ice spikes, Zephyrus in swamps and mangrove
+  swamps (as rare as Notus). The breath key is now "Dragon Breath (riding)".
+- Spawn eggs; ops: `/kingdom dragon [notus|boreas|zephyrus] [tame]` summons a wild one (Notus unless named), or a
+  tamed, saddled one.
+- Not yet seen in game: written without a compiler, so the first build may need fixes.

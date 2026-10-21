@@ -21,7 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
  * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
  */
-final class BossBars {
+public final class BossBars {
 	/** How near a player who's hit the boss must stay to keep its bar. */
 	static final double RANGE = 48.0;
 
@@ -46,12 +46,13 @@ final class BossBars {
 	}
 
 	static boolean boss(Entity entity) {
-		// (0.7.138) a villager crowned too
-		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity);
+		// (0.7.137) a wild dragon too; (0.7.138) a villager crowned too
+		return entity instanceof Folk folk ? folk.leader() : Rulers.is(entity) || Illagers.warlord(entity) || QuestFoes.champion(entity)
+			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed();
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
-	static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
+	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
 		Set<UUID> hitters = HITTERS.get(boss.getUUID());
 		double r2 = RANGE * RANGE;
 		if (hitters != null) {

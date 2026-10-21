@@ -118,7 +118,12 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:wraith", "jaymoskingdoms:has_wraith", 5, 1, 2, true),
 		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
 		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
-		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", 6, 1, 2));
+		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", 6, 1, 2),
+		// (0.7.137) the wind dragons (dragons/Dragons), rare: Notus over the badlands, Boreas over the frozen peaks, Zephyrus
+		// in the swamps
+		new Encounter("jaymoskingdoms:notus_dragon", "jaymoskingdoms:has_notus_dragon", 2, 1, 1),
+		new Encounter("jaymoskingdoms:boreas_dragon", "jaymoskingdoms:has_boreas_dragon", 2, 1, 1),
+		new Encounter("jaymoskingdoms:zephyrus_dragon", "jaymoskingdoms:has_zephyrus_dragon", 2, 1, 1));
 
 	/** A beast after a player, until {@code until} (game time). */
 	private record Hunt(Mob mob, UUID player, long until) {
@@ -326,7 +331,8 @@ public final class Encounters {
 		for (Iterator<Hunt> it = HUNTS.iterator(); it.hasNext(); ) {
 			Hunt h = it.next();
 			Mob mob = h.mob();
-			if (mob.isRemoved() || !mob.isAlive()) {
+			if (mob.isRemoved() || !mob.isAlive() || mob instanceof net.minecraft.world.entity.animal.equine.AbstractHorse tamed && tamed.isTamed()) {
+				// (0.7.137) gone, or tamed (a dragon won over mid-hunt): no longer hunting, and never cleared away
 				it.remove();
 				continue;
 			}
