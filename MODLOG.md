@@ -2043,3 +2043,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (each counter a dodge's worth), Corrupted mode +12 and every dodge blinks, Chrono +12 (Andy: the powers that had extra dodges get extra feathers). The client-side charge packets
   (`darktide_rolls`, `darktide_roll_charge`, `web_rolls`, `web_roll_charge`) are gone. HUD art from
   `tools/gen_feathers.py`. Combat Roll is out of the pack.
+- **0.15.8 (Kitchen 0.5.1), ragdolls:** Andy wanted Sable-style ragdoll corpses and Ragdoll Reactions for players.
+  Kitchen does the physics (see `kitchen/MODLOG.md`, `docs/ragdolls.md`); Powers only ties in, by reflection so it
+  still builds against the old Kitchen jar: `KitchenCompat.isLimp`, no struggling free of a carry or catching a ledge
+  while limp, no going limp while carried, Lifted, Gravity-held or webbed (`KitchenCompat.registerRagdollVetoes`), the
+  limp pose counts in `PoseTakeover.posed`, and the symbiote looks for a fresh corpse within 5 blocks (was 3), since
+  ragdolls tumble.
