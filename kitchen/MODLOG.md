@@ -836,3 +836,31 @@ after `Mill.register()`.
   or blast of 8+ before armour flings you away from where it came from, and a landing knocks you down only if it
   actually hurt for 6+ and you weren't slow falling (Smoke and every power cushion cancel the damage, so they never
   count). Wall crashes count only on an elytra. Being run over by a cart, boat or charging rider is unchanged.
+- **0.5.5, zombies eat villagers:** Andy (2026-10-21): "zombies should also eat villagers, preventing a burial". A
+  zombie (husk, drowned, zombie villager) now stops to feed even mid-chase: `Scavengers`' gnaw goal sits ahead of its
+  attack for zombies, and chasing a villager no longer counts as busy (a player or anything else it's fighting still
+  pulls it off). Zombies go for villagers' bodies first (`villagers` entity tag). A villager eaten by anything isn't
+  buried: with MCA, which lays a villager in a tombstone the tick it dies, `corpse/McaGraves` empties that tombstone
+  again, so there's no grave to mourn at and nothing for the Staff of Life to raise. Corpses keep the dead mob's UUID
+  even when their look is cut down (`CorpseEntity.deadId`).
+- **0.5.6, seasons:** Andy (2026-10-21) asked whether seasons could work in, and picked our own over Ecliptic Seasons
+  (its Fabric port is All Rights Reserved with no 26.3 build). Spec and differences in `docs/Seasons-Plan.md`.
+  `season/Seasons`: an 84-day year (spring, summer, autumn, winter; early, mid and late parts of 7 days) from the
+  overworld clock plus a saved shift (`/season set <season> [early|mid|late]` for ops, `/season` for anyone); each new
+  part is announced, and holding a clock shows the date. Only temperate lands (biome base temperature 0.55-0.9) feel
+  it. `BiomeSeasonMixin` chills them (winter -0.8, so it snows and ponds freeze); `SeasonalWeather` melts open snow
+  and ice there out of winter. `SeasonalCrops`: crops in `tags/block/seasons/<season>` grow only then, others all but
+  winter; out of season they wait; under glass (`greenhouse_roof`) or a solid roof they grow all year. Andy wants winter
+  "very harsh": in winter the frost kills crops left in the open (25% a random tick; berry bushes and cocoa lose their
+  fruit instead), and `WinterCold` drains 0.025 exhaustion a second from anyone out under the sky in a temperate land
+  who isn't by a fire or lava (`setColdProof` lets Kingdoms spare Frostborn).
+  Client `SeasonTints`: leaves and grass shift colour each part. `Seasons.seasonName/dayOfYear` for other mods.
+- **0.5.7, tanning and hemp (Better With Mods batch 2, Powers 0.15.31, Kingdoms 0.7.124):** `tanning/Tanning`: fatty
+  animals butchered on a block or by a butcher give Animal Fat (`ButcheringBonus`), melted into Tallow on a campfire,
+  in a furnace or in the cooking pot; tallow + string = candle. Stripping a log drops Bark 35% of the time. Leather +
+  bark in a water cauldron (one bark a hide, up to 8; adding a hide restarts the timer) tans in 5 minutes; empty hand
+  takes out Tanned Leather, which crafts into 3 Leather Straps (`c:leather_straps`, `jaymoskitchen:straps`).
+  `farm/Hemp`: seeds 3% from grass, a two-tall crop on farmland (Sowing takes it); fibre -> string (3 for 2) or Hemp
+  Cloth (2x2), which Powers' linen bandage accepts. Breaking grown hemp's bottom drops no fibre from the top.
+  `WinterCold`: each worn piece tagged `warm_clothing` (Kingdoms' wool clothes) takes 20% off the winter hunger.
+  Art: `tools/vanilla_style/tanning.py`.

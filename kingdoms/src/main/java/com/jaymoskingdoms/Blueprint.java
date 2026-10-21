@@ -6,8 +6,14 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A building a builder crew can put up: its footprint and every block in the order it's laid (bottom up), offsets from
@@ -53,5 +59,50 @@ public record Blueprint(String id, int width, int depth, int height, List<Placem
 	/** A faction type's growth order. */
 	public static List<Entry> catalogue(FactionType type) {
 		return Collections.unmodifiableList(CATALOGUE.getOrDefault(type, List.of()));
+	}
+
+	/**
+	 * Reads a saved structure template (a structure block's file, as {@code StructureTemplate.save} writes it) into a
+	 * blueprint: every block but air, structure voids, jigsaws and structure blocks, trimmed to what's there, its lowest
+	 * layer laid in place of the ground. Containers come empty (a blueprint has no contents). Null if it holds no blocks.
+	 */
+	public static @Nullable Blueprint fromTemplate(String id, CompoundTag tag) {
+		ListTag palette = tag.getList("palette").orElseGet(() -> tag.getListOrEmpty("palettes").getListOrEmpty(0));
+		List<BlockState> states = new ArrayList<>();
+		for (int i = 0; i < palette.size(); i++) {
+			states.add(NbtUtils.readBlockState(BuiltInRegistries.BLOCK, palette.getCompoundOrEmpty(i)));
+		}
+		List<Placement> raw = new ArrayList<>();
+		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE,
+			maxZ = Integer.MIN_VALUE;
+		ListTag blocks = tag.getListOrEmpty("blocks");
+		for (int i = 0; i < blocks.size(); i++) {
+			CompoundTag b = blocks.getCompoundOrEmpty(i);
+			int s = b.getIntOr("state", -1);
+			if (s < 0 || s >= states.size()) {
+				continue;
+			}
+			BlockState state = states.get(s);
+			if (state.isAir() || state.is(Blocks.STRUCTURE_VOID) || state.is(Blocks.JIGSAW) || state.is(Blocks.STRUCTURE_BLOCK)) {
+				continue;
+			}
+			ListTag pos = b.getListOrEmpty("pos");
+			BlockPos at = new BlockPos(pos.getIntOr(0, 0), pos.getIntOr(1, 0), pos.getIntOr(2, 0));
+			raw.add(new Placement(at, state));
+			minX = Math.min(minX, at.getX());
+			minY = Math.min(minY, at.getY());
+			minZ = Math.min(minZ, at.getZ());
+			maxX = Math.max(maxX, at.getX());
+			maxY = Math.max(maxY, at.getY());
+			maxZ = Math.max(maxZ, at.getZ());
+		}
+		if (raw.isEmpty()) {
+			return null;
+		}
+		List<Placement> placed = new ArrayList<>();
+		for (Placement pl : raw) {
+			placed.add(new Placement(pl.offset().offset(-minX, -minY, -minZ), pl.state()));
+		}
+		return new Blueprint(id, maxX - minX + 1, maxZ - minZ + 1, maxY - minY + 1, List.copyOf(placed));
 	}
 }

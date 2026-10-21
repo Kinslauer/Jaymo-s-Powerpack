@@ -55,6 +55,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.xenoform.XenoformPower.init();
 		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		com.jaymospowers.power.smoke.SmokePower.init();
+		// (0.14.0) Cryokinesis, the ice power
+		com.jaymospowers.power.cryo.CryoPower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
@@ -94,6 +96,8 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.XenoformState",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
+			"power.ember.EmberKindle",
+			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack",
 		};

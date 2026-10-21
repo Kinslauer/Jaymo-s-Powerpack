@@ -35,8 +35,13 @@ final class BuildCommands {
 	/** The buildings the faction where you stand (or yours) can put up. */
 	private static final SuggestionProvider<CommandSourceStack> BUILDINGS = (c, builder) -> {
 		Faction f = find(c);
-		return SharedSuggestionProvider.suggest(f == null ? List.of()
-			: Blueprint.catalogue(f.type()).stream().map(Blueprint.Entry::id).distinct().toList(), builder);
+		List<String> ids = new java.util.ArrayList<>();
+		if (f != null) {
+			ids.addAll(Blueprint.catalogue(f.type()).stream().map(Blueprint.Entry::id).distinct().toList());
+		}
+		// (0.7.116) and the world's designs
+		ids.addAll(Designs.ids(c.getSource().getServer()));
+		return SharedSuggestionProvider.suggest(ids, builder);
 	};
 
 	static LiteralArgumentBuilder<CommandSourceStack> plot() {

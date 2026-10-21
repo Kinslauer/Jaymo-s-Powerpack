@@ -2096,3 +2096,61 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.19, free rein with Shoulder Surfing:** ships Jaymo's Kingdoms 0.7.113. Andy found the movement keys didn't
   steer the horse under free rein: Shoulder Surfing kept turning you back to its camera. Under free rein it now leaves
   the horse to the keys and its camera follows the mouse.
+- **0.15.22, Emberborn Kindle (Kingdoms 0.7.117):** Andy: "expand on emberborn, with a left click hold ability, and
+  synergies merging smoke power into fire somehow". Anyone of Emberborn blood holds left mouse bare-handed: flame pours
+  from the palm in a cone growing 3 to 5 blocks, setting creatures alight through `core/Flames`, lighting campfires,
+  candles and TNT, melting snow and ice, never setting blocks on fire; heat builds to white-hot in 3 s, and letting go
+  at full heat throws a fireball (2.5-block burst, no block damage, 5 s cooldown). Cold halves it, rain only hisses.
+  With the Smoke power: their body is a heat source for their smoke, the flame leaves soot, and flame meeting their own
+  smoke sets off a flashover that races through the cloud. Plain left hold for Smoke users, sneak + hold with other
+  powers (`RaceHoldClient`). All in `power/ember` and `docs/Ember-Ice-Plan.md`. Smoke puffs marked keep-others never
+  take another owner's block (`SmokeField.add`).
+- **0.15.22, Cryokinesis (ice power):** Andy: "smoke instead of fire" for the ice synergy. A new power (`power/cryo`,
+  `docs/cryo.md`): R Ice Slide (skate with inertia; water ahead freezes into a frosted-ice bridge; wall crashes hurt by
+  speed), G Frost Breath (8-block cone that slows and freezes, ices water for 30 s, puts out burning creatures), V Ice
+  Shards (a fan of 5), B Flash Freeze (3 s packed-ice shell, never into a creature), X Ice Wall (5x3, 15 s, never into a
+  creature), Z Snow mode (slow and blind, no hurt), C Blizzard (20 s whiteout, 16 blocks). C answers once every
+  ability is mastered (`Power.ultimateAnswers`), since Cryokinesis has no fates yet. Frost-born users take no freeze
+  damage and are stronger where it snows. Every placed block is recorded by `CryoIce` and melted back. Freezing fog:
+  breath or Blizzard on smoke freezes it in place (`SmokeField.freeze`), slowing and chilling those inside, dropping
+  snow under open sky; fire, lava or Kindle's flame and fireball thaw it. Known gap: ice records live in memory, so a
+  server crash (not a normal stop) leaves the ice standing.
+- **0.15.29, hidden blade visuals (Kingdoms 0.7.122):** Andy: the hidden blade should animate for players and be held
+  in front so it's visible, not off to the side and lost in the costume. Springing it raises the arm into a guard ahead
+  of you and runs the blade out of the housing; a blow with it is a straight thrust; the bracer stands clear of costume
+  sleeves. Details in the Kingdoms MODLOG.
+
+- **0.15.30, seasons reach the powers (Kitchen 0.5.6, Kingdoms 0.7.123):** Kitchen 0.5.6 brings the pack's own seasons,
+  and Andy asked for every power to feel them ("all of em"). `core/Seasons` reads Kitchen's calendar by reflection, so
+  it does nothing without Kitchen 0.5.6, and it only counts in temperate lands. Cryokinesis: `CryoPower.strength` is
+  x1.2 in winter and x0.85 in summer. Ember: winter counts as chilled (`EmberKindle.chilled`), and in summer Kindle,
+  the fireball and Flashover do x1.2 fire damage (`EmberKindle.seasonal`). Smoke: in winter `SmokeField` fades at
+  x0.6 and rises at half rate, so it hangs low. Symbiote: its hunger drains 1.5x faster in winter. Darktide: in winter
+  `DarktideFlow.night` starts 1500 ticks sooner and ends 1000 later. Client `SeasonAura` gives every power user an
+  occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
+  user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
+  cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.
+- **0.15.31, Better With Mods batch 2: smithing (Kingdoms 0.7.124, Kitchen 0.5.7):** batch 2 of the BWM port (MIT,
+  our own code; plan in the "Better With Mods: what fits our pack" doc). Andy: steel gets both a netherite tier and a
+  trait; ore smelting in the furnace is slower.
+  - Brick kiln (`tinkering/kiln`): no kiln block. A space walled on 3+ sides and the top by bricks, nether bricks or
+    mud bricks, with heat under it (campfire/fire 1; soul campfire, lava, magma, a lit Forge Hearth 2), fires what you
+    right-click into it (`KilnLoadBlock`/`KilnLoadEntity`, sneak for the stack). 8 crack stages, each 20 + 60*(8-S)/8
+    ticks for S the summed 3x3 heat. Clay ball -> brick, clay -> terracotta, Unfired Pot (4 clay) -> decorated pot,
+    log -> charcoal (+25% a second), netherrack -> nether brick (heat 2), grout -> seared brick (2), Crucible Steel
+    Blend (2 iron + coal) -> steel ingot (2). Static table in `Kiln`; no JEI page yet.
+  - Furnace: raw ores and ore blocks (`jaymospowers:slow_smelt`) take 4x as long (`SlowOreSmeltMixin`,
+    `FURNACE_ORE_SLOWDOWN`). Blast furnace and Kitchen untouched.
+  - Bellows (`tinkering/forge`): pump by right-click (a little hunger) or a Wind Whistle gust (`WindJet` hook); for 5 s
+    the fire it faces counts +1 heat, and a smeltery controller or drain it faces melts twice as fast
+    (`SmelteryEntity.blow`). Forge Hearth: coal/charcoal (up to 8) at heat 2, lit by flint and steel or a fire charge,
+    or bare-handed by an Emberborn. Its fuel is lost if broken.
+  - Steel: `Molten.STEEL`, alloyed 1 iron + 1 pig iron (the smeltery can't hold coal) or fired from the crucible blend.
+    Ingot, nugget, block (c: tags), melting and casting like the other metals. `TinkerMaterial.STEEL`: 1500 durability,
+    speed 7, attack 3, netherite tier, trait Tempered (25% of wear doesn't land, not stacking; +1 damage a level
+    through armour on armoured targets). Art from `tools/gen_steel.py`, which must be re-run after
+    `tinkering_assets.py`/`armory_assets.py` (likewise `tools/gen_smithing.py`).
+  - Broadhead Arrow (`armory/BroadheadArrowItem`): 3 steel nuggets + stick + feather -> 4. 4 damage and a bleeding
+    body cut from the recurve bow, 60% from any other bow or a dispenser. Flies as a vanilla arrow.
+  - Linen bandages take `jaymospowers:bandage_cloth` (white wool or Kitchen's hemp cloth).
+  - Not built with Loom or played yet; javac 0 errors on all three mods.

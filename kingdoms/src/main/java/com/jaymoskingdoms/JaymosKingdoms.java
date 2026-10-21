@@ -64,6 +64,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
+		// (0.7.116) the surveyor's rod, players' own designs and work areas
+		Surveyor.register();
+		Designs.register();
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
@@ -116,6 +119,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
 		Theft.register();
+		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.98: the downed state itself is
 		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming

@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * Heat feeds smoke (the way Advanced Chimneys' smoke grows with every heat source tied into a chimney): a Smoke user
  * with fires, lava, magma, lit campfires or lit furnaces within {@link #REACH} blocks makes {@link #PER_SOURCE} more
  * smoke for each (up to {@link #MAX_SOURCES}), and darker, sootier smoke. Counted once a second per player.
+ * <p>
+ * (0.14.0) Smoke merged into fire: an Emberborn's own body is a heat source ({@code EmberKindle.ember}), so their smoke
+ * always pours {@link #PER_SOURCE} more and sootier.
  */
 final class SmokeHeat {
 	static final int REACH = 3;
@@ -50,7 +53,11 @@ final class SmokeHeat {
 		long now = player.level().getGameTime();
 		Count count = COUNTS.get(player.getUUID());
 		if (count == null || now - count.at >= RECOUNT || now < count.at) {
-			count = new Count(now, count(player.level(), player.blockPosition()));
+			int found = count(player.level(), player.blockPosition());
+			if (com.jaymospowers.power.ember.EmberKindle.ember(player)) {
+				found = Math.min(MAX_SOURCES, found + 1);
+			}
+			count = new Count(now, found);
 			COUNTS.put(player.getUUID(), count);
 		}
 		return count.sources;

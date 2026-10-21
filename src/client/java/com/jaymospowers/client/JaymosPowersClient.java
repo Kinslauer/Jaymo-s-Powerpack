@@ -8,7 +8,6 @@ import com.jaymospowers.client.power.chrono.ChronoPowerClient;
 import com.jaymospowers.client.power.gravity.GravityPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
-import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
@@ -54,6 +53,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
+		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
@@ -81,6 +81,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
@@ -117,6 +118,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
+		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
 	}
@@ -224,7 +226,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				client.onMode(player, mode);
 			}
 		}
-		boolean ultimate = power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player))
+		boolean ultimate = power != null && power.ultimateAnswers(player)
 			&& !seized && minecraft.gui.screen() == null && ultimateKey.isDown();
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;
