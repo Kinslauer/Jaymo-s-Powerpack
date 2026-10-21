@@ -4618,5 +4618,8 @@
 	"message.jaymoskingdoms.stake.too_far": "The string won't stretch that far: %s blocks at most.",
 	"message.jaymoskingdoms.stake.too_steep": "Those stakes are too far apart in height to string together.",
 	"message.jaymoskingdoms.stake.already": "Those stakes are already strung together.",
-	"message.jaymoskingdoms.stake.full": "That stake can't hold another line."
+	"message.jaymoskingdoms.stake.full": "That stake can't hold another line.",
+	"block.jaymoskingdoms.dirt_slab": "Dirt Slab",
+	"block.jaymoskingdoms.grass_slab": "Grass Slab",
+	"block.jaymoskingdoms.dirt_path_slab": "Dirt Path Slab"
 }

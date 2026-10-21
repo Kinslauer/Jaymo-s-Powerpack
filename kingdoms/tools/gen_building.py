@@ -137,4 +137,85 @@ def plot_stake():
     drops_self("plot_stake")
 
 
+# ---- 2. dirt, grass and path slabs ----------------------------------------------------------------------------------
+
+def slab_element(y0, y1, textures, side_uv, tint_top=False, overlay=None):
+    """A full-width slab element from y0 to y1; sides cut from side_uv, the overlay (grass sides) a tinted second skin."""
+    faces = {
+        "down": face(textures["bottom"], [0, 0, 16, 16], "down" if y0 == 0 else None),
+        "up": face(textures["top"], [0, 0, 16, 16], "up" if y1 == 16 else None, 0 if tint_top else None),
+    }
+    for s in ("north", "south", "west", "east"):
+        faces[s] = face(textures["side"], side_uv, s)
+    out = [{"from": [0, y0, 0], "to": [16, y1, 16], "faces": faces}]
+    if overlay:
+        out.append({"from": [0, y0, 0], "to": [16, y1, 16],
+                    "faces": {s: face(overlay, side_uv, s, 0) for s in ("north", "south", "west", "east")}})
+    return out
+
+
+def slab_states(name, full):
+    blockstate(name, {"variants": {
+        "type=bottom": {"model": NS + "block/" + name},
+        "type=top": {"model": NS + "block/" + name + "_top"},
+        "type=double": {"model": full},
+    }})
+
+
+def slab_loot(name, item=None, silk=False):
+    """Drops one (two from a double): the slab itself, or item; with silk, the slab only by silk touch, else item."""
+    def entry(what, condition=None):
+        e = {"type": "minecraft:item", "modifier": [
+            {"type": "minecraft:set_count", "condition": {"type": "minecraft:match_block", "blocks": NS + name,
+                                                          "state": {"type": "double"}}, "count": 2},
+            {"type": "minecraft:explosion_decay"}], "name": what}
+        if condition:
+            e["condition"] = condition
+        return e
+    if silk:
+        entries = [{"type": "minecraft:alternatives", "children": [entry(NS + name, "minecraft:tool/can_silk_touch"), entry(item)]}]
+    else:
+        entries = [entry(item or NS + name)]
+    loot(name, [{"rolls": 1, "entries": entries}])
+
+
+def slab_recipe(name, of):
+    recipe(name, {"type": "minecraft:crafting_shaped", "category": "building", "key": {"#": of}, "pattern": ["###"],
+                  "result": {"id": NS + name, "count": 6}})
+
+
+def earth_slabs():
+    dirt = {"bottom": "minecraft:block/dirt", "top": "minecraft:block/dirt", "side": "minecraft:block/dirt"}
+    block_model("dirt_slab", {"parent": "minecraft:block/slab", "textures": dirt})
+    block_model("dirt_slab_top", {"parent": "minecraft:block/slab_top", "textures": dirt})
+    slab_states("dirt_slab", "minecraft:block/dirt")
+    item_def("dirt_slab", NS + "block/dirt_slab")
+    slab_loot("dirt_slab")
+    slab_recipe("dirt_slab", "minecraft:dirt")
+
+    # grass: vanilla's grass block cut in half, its top and side overlay tinted (tint 0: the biome's grass)
+    grass = {"bottom": "minecraft:block/dirt", "top": "minecraft:block/grass_block_top", "side": "minecraft:block/grass_block_side"}
+    over = "minecraft:block/grass_block_side_overlay"
+    block_model("grass_slab", {"parent": "minecraft:block/block", "textures": {"particle": "minecraft:block/dirt"},
+                               "elements": slab_element(0, 8, grass, [0, 8, 16, 16], True, over)})
+    block_model("grass_slab_top", {"parent": "minecraft:block/block", "textures": {"particle": "minecraft:block/dirt"},
+                                   "elements": slab_element(8, 16, grass, [0, 0, 16, 8], True, over)})
+    slab_states("grass_slab", "minecraft:block/grass_block")
+    item_def("grass_slab", NS + "block/grass_slab", [{"type": "minecraft:grass", "downfall": 1.0, "temperature": 0.5}])
+    slab_loot("grass_slab", NS + "dirt_slab", silk=True)
+    slab_recipe("grass_slab", "minecraft:grass_block")
+
+    # path: a pixel low, as vanilla's dirt path is (its side's top rows are the path's worn edge)
+    path = {"bottom": "minecraft:block/dirt", "top": "minecraft:block/dirt_path_top", "side": "minecraft:block/dirt_path_side"}
+    block_model("dirt_path_slab", {"parent": "minecraft:block/block", "textures": {"particle": "minecraft:block/dirt"},
+                                   "elements": slab_element(0, 7, path, [0, 1, 16, 8])})
+    block_model("dirt_path_slab_top", {"parent": "minecraft:block/block", "textures": {"particle": "minecraft:block/dirt"},
+                                       "elements": slab_element(8, 15, path, [0, 1, 16, 8])})
+    slab_states("dirt_path_slab", "minecraft:block/dirt_path")
+    item_def("dirt_path_slab", NS + "block/dirt_path_slab")
+    slab_loot("dirt_path_slab", NS + "dirt_slab")
+    slab_recipe("dirt_path_slab", "minecraft:dirt_path")
+
+
 plot_stake()
+earth_slabs()

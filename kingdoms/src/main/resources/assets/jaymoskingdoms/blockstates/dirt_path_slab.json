@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymoskingdoms:block/dirt_path_slab"
+    },
+    "type=top": {
+      "model": "jaymoskingdoms:block/dirt_path_slab_top"
+    },
+    "type=double": {
+      "model": "minecraft:block/dirt_path"
+    }
+  }
+}

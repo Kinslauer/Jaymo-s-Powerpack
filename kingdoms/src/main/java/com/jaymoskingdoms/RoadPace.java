@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * (0.7.103) The going underfoot, after Better With Mods' movement tweaks (MIT; its idea, our own code). On a road
- * ({@link #ROAD}: dirt paths, a realm's road stone, see {@link Roads}) a player on foot goes {@link #ROAD_BONUS} faster,
+ * ({@link #ROAD}: dirt paths and path slabs, a realm's road stone, see {@link Roads}) a player on foot goes {@link #ROAD_BONUS} faster,
  * and so does the horse under a rider; in sand, snow or leaves ({@link #SLOW}) a player on foot goes
  * {@link #SLOW_DRAG} slower. Anywhere else nothing changes. It doesn't zoom the view (the client takes it back out of
  * the field of view: {@code client.mixin.tweaks.RoadPaceFovMixin}). Flying, gliding, a Gravity user gone weightless or
