@@ -2277,7 +2277,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** Where the crosshair lands (a block, a creature, or open air at {@code range}). */
-	static Vec3 aimPoint(ServerPlayer player, double range) {
+	public static Vec3 aimPoint(ServerPlayer player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
 		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

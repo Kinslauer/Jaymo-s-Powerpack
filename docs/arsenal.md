@@ -200,10 +200,12 @@ does nothing once the power is corrupted or purified. All numbers are constants 
   - About every 5.5 s on average, a dark pulse: a ring of squid ink and a quiet heartbeat.
   - In first person, it stays below eye level.
 - **Sword of Damocles** (B, `ArsenalDamocles`; drawn by `ArsenalDamoclesRenderer`)
-  - A void rift (radius 4.5) opens 30 blocks over your feet (lower under the world's ceiling, never less than 18 above
-    the ground). Motes fall from it and it rumbles.
+  - Aimed like the Gravity Meteor: hold B and a void-purple ring (shown only to you, the impact's 6-block reach) marks
+    where the crosshair lands, up to 64 blocks out (a block, a creature, or open air); let go to call it there.
+  - A void rift (radius 4.5) opens 30 blocks over the ground there (lower under the world's ceiling, never less than 18
+    above the ground). Motes fall from it and it rumbles.
   - 3 s later a 16-block sword (a netherite sword's model, void-dark with the glint) pushes out of it hilt-first over
-    0.3 s, then falls. It lands about 1 s later, point 4.5 blocks into the first solid ground under where you stood.
+    0.3 s, then falls. It lands about 1 s later, point 4.5 blocks into the first solid ground under where you aimed.
   - On its way down it breaks everything in a 3×3 column above the ground, plus a 7-block-wide slot for the
     cross-guard: up to hardness 10 (obsidian holds it). No block entities, no fluids, and only where you may build
     (spawn protection and claim mods through Fabric's break event). Blocks drop 25% of the time.
