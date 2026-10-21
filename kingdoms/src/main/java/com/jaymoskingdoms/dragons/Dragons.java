@@ -1,6 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -8,6 +11,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -27,6 +31,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -37,10 +42,11 @@ import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}); for now Notus ({@link NotusDragon}). In the Overworld it
- * comes as a rare wilderness encounter in the badlands ({@code Encounters}, biome tag
- * {@code jaymoskingdoms:has_notus_dragon}); in the Nether, where encounters don't reach, this looks for it over the
- * basalt deltas (the same tag). The rider's breath key sends {@link Breathe}. Ops: {@code /kingdom dragon [tame]}.
+ * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus so far. In
+ * the Overworld each comes as a rare wilderness encounter ({@code Encounters}, biome tags
+ * {@code jaymoskingdoms:has_<species>_dragon}): Notus over the badlands, Boreas over the frozen peaks, Zephyrus in the
+ * swamps. In the Nether, where encounters don't reach, this looks for Notus over the basalt deltas (its tag). The
+ * rider's breath key sends {@link Breathe}. Ops: {@code /kingdom dragon [notus|boreas|zephyrus] [tame]}.
  */
 public final class Dragons {
 	/** The Nether: how often each player there is weighed (ticks), and the chance Notus turns up then (about once in 25 hours in the deltas). */
@@ -49,10 +55,18 @@ public final class Dragons {
 	/** How far off it turns up there. */
 	static final int NETHER_MIN = 24, NETHER_MAX = 40;
 
+	/** The species' bodies (width, height in blocks). */
+	static final float NOTUS_WIDTH = 3.0F, NOTUS_HEIGHT = 2.4F, BOREAS_WIDTH = 2.6F, BOREAS_HEIGHT = 2.0F, ZEPHYRUS_WIDTH = 2.6F,
+		ZEPHYRUS_HEIGHT = 1.8F;
+
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
 
 	public static EntityType<NotusDragon> NOTUS_DRAGON;
-	public static Item NOTUS_DRAGON_SPAWN_EGG;
+	public static EntityType<BoreasDragon> BOREAS_DRAGON;
+	public static EntityType<ZephyrusDragon> ZEPHYRUS_DRAGON;
+	public static Item NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG;
+	/** By name, for the op command. */
+	private static final Map<String, EntityType<? extends WindDragon>> BY_NAME = new LinkedHashMap<>();
 
 	private Dragons() {
 	}
@@ -74,35 +88,59 @@ public final class Dragons {
 	}
 
 	public static void register() {
-		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("notus_dragon"));
-		NOTUS_DRAGON = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.of(NotusDragon::new, MobCategory.CREATURE)
-			.sized(3.0F, 2.4F)
-			.fireImmune()
-			.clientTrackingRange(16)
-			.build(key));
-		FabricDefaultAttributeRegistry.register(NOTUS_DRAGON, NotusDragon.createAttributes());
-		ResourceKey<Item> egg = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("notus_dragon_spawn_egg"));
-		NOTUS_DRAGON_SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM, egg, new SpawnEggItem(new Item.Properties().setId(egg).spawnEgg(NOTUS_DRAGON)));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> output.insertAfter(Items.ENDER_DRAGON_SPAWN_EGG,
-			NOTUS_DRAGON_SPAWN_EGG));
+		NOTUS_DRAGON = dragon("notus", NotusDragon::new, NOTUS_WIDTH, NOTUS_HEIGHT, true, NotusDragon.createAttributes());
+		BOREAS_DRAGON = dragon("boreas", BoreasDragon::new, BOREAS_WIDTH, BOREAS_HEIGHT, false, BoreasDragon.createAttributes());
+		ZEPHYRUS_DRAGON = dragon("zephyrus", ZephyrusDragon::new, ZEPHYRUS_WIDTH, ZEPHYRUS_HEIGHT, false, ZephyrusDragon.createAttributes());
+		NOTUS_DRAGON_SPAWN_EGG = egg(NOTUS_DRAGON);
+		BOREAS_DRAGON_SPAWN_EGG = egg(BOREAS_DRAGON);
+		ZEPHYRUS_DRAGON_SPAWN_EGG = egg(ZEPHYRUS_DRAGON);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> {
+			output.insertAfter(Items.ENDER_DRAGON_SPAWN_EGG, NOTUS_DRAGON_SPAWN_EGG);
+			output.insertAfter(NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG);
+			output.insertAfter(BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG);
+		});
 
 		PayloadTypeRegistry.serverboundPlay().register(Breathe.TYPE, Breathe.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Breathe.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
-			if (player.getVehicle() instanceof NotusDragon dragon && dragon.isTamed() && dragon.getControllingPassenger() == player) {
+			if (player.getVehicle() instanceof WindDragon dragon && dragon.isTamed() && dragon.getControllingPassenger() == player) {
 				dragon.riderBreath(payload.yaw(), payload.pitch());
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Dragons::nether);
-		// testing (op): /kingdom dragon [tame]: a wild Notus, or a tamed, saddled one, at your side
-		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
-			.then(Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-				.executes(c -> spawn(c.getSource().getPlayerOrException(), false))
-				.then(Commands.literal("tame").executes(c -> spawn(c.getSource().getPlayerOrException(), true))))));
+		// testing (op): /kingdom dragon [notus|boreas|zephyrus] [tame]: a wild one (Notus unless named), or a tamed, saddled
+		// one, at your side
+		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
+			LiteralArgumentBuilder<CommandSourceStack> dragon = Commands.literal("dragon").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.executes(c -> spawn(c.getSource().getPlayerOrException(), NOTUS_DRAGON, false))
+				.then(Commands.literal("tame").executes(c -> spawn(c.getSource().getPlayerOrException(), NOTUS_DRAGON, true)));
+			BY_NAME.forEach((name, type) -> dragon.then(Commands.literal(name)
+				.executes(c -> spawn(c.getSource().getPlayerOrException(), type, false))
+				.then(Commands.literal("tame").executes(c -> spawn(c.getSource().getPlayerOrException(), type, true)))));
+			dispatcher.register(Commands.literal("kingdom").then(dragon));
+		});
 	}
 
-	private static int spawn(ServerPlayer player, boolean tame) {
-		NotusDragon dragon = NOTUS_DRAGON.create(player.level(), EntitySpawnReason.COMMAND);
+	private static <T extends WindDragon> EntityType<T> dragon(String name, EntityType.EntityFactory<T> factory, float width, float height,
+		boolean fireImmune, AttributeSupplier.Builder attributes) {
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id(name + "_dragon"));
+		EntityType.Builder<T> builder = EntityType.Builder.of(factory, MobCategory.CREATURE).sized(width, height).clientTrackingRange(16);
+		if (fireImmune) {
+			builder = builder.fireImmune();
+		}
+		EntityType<T> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, builder.build(key));
+		FabricDefaultAttributeRegistry.register(type, attributes);
+		BY_NAME.put(name, type);
+		return type;
+	}
+
+	private static Item egg(EntityType<? extends WindDragon> type) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(BuiltInRegistries.ENTITY_TYPE.getKey(type).getPath() + "_spawn_egg"));
+		return Registry.register(BuiltInRegistries.ITEM, key, new SpawnEggItem(new Item.Properties().setId(key).spawnEgg(type)));
+	}
+
+	private static int spawn(ServerPlayer player, EntityType<? extends WindDragon> type, boolean tame) {
+		WindDragon dragon = type.create(player.level(), EntitySpawnReason.COMMAND);
 		if (dragon == null) {
 			return 0;
 		}

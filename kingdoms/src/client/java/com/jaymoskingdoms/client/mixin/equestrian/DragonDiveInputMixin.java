@@ -1,6 +1,6 @@
 package com.jaymoskingdoms.client.mixin.equestrian;
 
-import com.jaymoskingdoms.dragons.NotusDragon;
+import com.jaymoskingdoms.dragons.WindDragon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.KeyboardInput;
@@ -19,7 +19,7 @@ abstract class DragonDiveInputMixin extends ClientInput {
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void jaymoskingdoms$dragonDive(CallbackInfo ci) {
 		// the piggyback rider too, or Shift drops them mid-flight
-		NotusDragon dragon = Minecraft.getInstance().player != null && Minecraft.getInstance().player.getVehicle() instanceof NotusDragon d ? d : null;
+		WindDragon dragon = Minecraft.getInstance().player != null && Minecraft.getInstance().player.getVehicle() instanceof WindDragon d ? d : null;
 		if (dragon == null || !dragon.airborne()) {
 			return;
 		}

@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
  * climb; hovering to breathe it beats deep and slow with its wings forward and its jaw wide; landing, the wings flare.
  * Crashed, it lies low with its wings half-spread on the ground; sitting, it folds its hind legs under.
  */
-final class NotusDragonModel extends EntityModel<NotusDragonRenderer.State> {
+final class NotusDragonModel extends EntityModel<WindDragonRenderer.State> {
 	/** Wing beat: depth (radians), how far gliding cuts it; tip lag (radians behind the stroke) and its swing. */
 	static final float FLAP_DEPTH = 0.85F, GLIDE_CUT = 0.85F, TIP_LAG = 1.2F, TIP_SWING = 0.5F;
 	/** Folded wings: the arm's pitch (membrane hanging), its sweep back, its droop (outward, so the membrane clears its flank); the tip folded back along it. */
@@ -177,7 +177,7 @@ final class NotusDragonModel extends EntityModel<NotusDragonRenderer.State> {
 	}
 
 	@Override
-	public void setupAnim(NotusDragonRenderer.State s) {
+	public void setupAnim(WindDragonRenderer.State s) {
 		super.setupAnim(s);
 		float t = s.ageInTicks;
 		float fly = s.fly, crash = s.crash * (1.0F - fly), sit = s.sit * (1.0F - crash) * (1.0F - fly);

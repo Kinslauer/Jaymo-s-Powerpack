@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
  * (that the dragon can see) is burned and set alight (fire damage: what fire never hurts, Emberborn and blazes among
  * them, shrugs it off); the blocks it meets catch fire. Andy: "fire burns blocks": a wild dragon's fire obeys the
  * mobGriefing gamerule (as a creeper does), a ridden one's always burns. A tamed dragon's fire spares its riders, its
- * owner, the owner's tamed animals and teammates. Shared by every fire-breathing species.
+ * owner, the owner's tamed animals and teammates. Notus breathes it (the others breathe their own).
  */
 public final class DragonBreath {
 	/** How far the flame reaches (blocks) and the cone's half-angle (its cosine). */
@@ -87,7 +87,7 @@ public final class DragonBreath {
 
 	/** A dragon's own side: its riders, and a tamed one's owner, the owner's tamed animals and teammates. */
 	static boolean spared(LivingEntity dragon, Entity target) {
-		if (dragon.hasPassenger(target) || target instanceof NotusDragon other && !other.isTamed() && dragon instanceof NotusDragon self
+		if (dragon.hasPassenger(target) || target instanceof WindDragon other && !other.isTamed() && dragon instanceof WindDragon self
 			&& !self.isTamed()) {
 			return true;
 		}

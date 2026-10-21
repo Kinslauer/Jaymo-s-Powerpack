@@ -1,12 +1,12 @@
 package com.jaymoskingdoms.client.dragons;
 
 import com.jaymoskingdoms.dragons.DragonLook;
-import com.jaymoskingdoms.dragons.NotusDragon;
+import com.jaymoskingdoms.dragons.WindDragon;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -16,24 +16,28 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.7.137) Draws Notus: {@link NotusDragonModel} in its own hide (one of the species' shades, by its
- * {@link DragonLook}), with its glowing markings and eyes over it ({@link DragonLooks}, drawn as the wild beasts' and the
- * heritages' glowing eyes are, so they show in the dark).
+ * (0.7.137) Draws a wind dragon: its species' model ({@link NotusDragonModel}, {@link BoreasDragonModel},
+ * {@link ZephyrusDragonModel}) in its own hide (one of the species' shades, by its {@link DragonLook}), with its glowing
+ * markings and eyes over it ({@link DragonLooks}, drawn as the wild beasts' and the heritages' glowing eyes are, so they
+ * show in the dark).
  */
-final class NotusDragonRenderer extends MobRenderer<NotusDragon, NotusDragonRenderer.State, NotusDragonModel> {
-	static final String SPECIES = "notus";
-	/** Its shadow (blocks). */
-	static final float SHADOW = 2.0F;
+final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> extends MobRenderer<WindDragon, WindDragonRenderer.State, M> {
+	/** How far past its box its wings, neck and tail reach (blocks), for culling. */
+	static final double REACH = 4.5, REACH_UP = 1.5;
 
 	static final class State extends LivingEntityRenderState {
 		DragonLook look = DragonLook.decode(0);
-		float fly, breath, land, sit, crash, flap, glide, pitch;
+		float fly, breath, land, sit, crash, flap, glide, pitch, swim;
 		boolean saddled;
 	}
 
-	NotusDragonRenderer(EntityRendererProvider.Context context) {
-		super(context, new NotusDragonModel(NotusDragonModel.createBodyLayer().bakeRoot()), SHADOW);
-		this.addLayer(new Glow(this));
+	private final String species;
+
+	/** {@code species}: its folder under {@code textures/entity/dragon/}; {@code shadow}: its shadow's radius (blocks). */
+	WindDragonRenderer(EntityRendererProvider.Context context, String species, M model, float shadow) {
+		super(context, model, shadow);
+		this.species = species;
+		this.addLayer(new Glow<>(this));
 	}
 
 	@Override
@@ -42,7 +46,7 @@ final class NotusDragonRenderer extends MobRenderer<NotusDragon, NotusDragonRend
 	}
 
 	@Override
-	public void extractRenderState(NotusDragon dragon, State state, float partialTicks) {
+	public void extractRenderState(WindDragon dragon, State state, float partialTicks) {
 		super.extractRenderState(dragon, state, partialTicks);
 		state.look = dragon.look();
 		state.fly = Mth.lerp(partialTicks, dragon.flyAnimO, dragon.flyAnim);
@@ -53,24 +57,27 @@ final class NotusDragonRenderer extends MobRenderer<NotusDragon, NotusDragonRend
 		state.flap = Mth.lerp(partialTicks, dragon.flapPhaseO, dragon.flapPhase);
 		state.glide = Mth.lerp(partialTicks, dragon.glideAnimO, dragon.glideAnim);
 		state.pitch = Mth.lerp(partialTicks, dragon.pitchAnimO, dragon.pitchAnim);
+		state.swim = Mth.lerp(partialTicks, dragon.swimAnimO, dragon.swimAnim);
 		state.saddled = dragon.saddled();
 	}
 
 	@Override
 	public Identifier getTextureLocation(State state) {
-		return DragonLooks.hide(SPECIES, state.look);
+		return DragonLooks.hide(this.species, state.look);
 	}
 
 	@Override
-	protected AABB getBoundingBoxForCulling(NotusDragon dragon, float partialTicks) {
-		// its wings, neck and tail reach well past its box
-		return dragon.getBoundingBox().inflate(4.5, 1.5, 4.5);
+	protected AABB getBoundingBoxForCulling(WindDragon dragon, float partialTicks) {
+		return dragon.getBoundingBox().inflate(REACH, REACH_UP, REACH);
 	}
 
-	/** Its ember markings and eyes, glowing. */
-	private static final class Glow extends RenderLayer<State, NotusDragonModel> {
-		Glow(RenderLayerParent<State, NotusDragonModel> parent) {
+	/** Its markings and eyes, glowing. */
+	private static final class Glow<M extends EntityModel<State>> extends RenderLayer<State, M> {
+		private final WindDragonRenderer<M> renderer;
+
+		Glow(WindDragonRenderer<M> parent) {
 			super(parent);
+			this.renderer = parent;
 		}
 
 		@Override
@@ -78,7 +85,7 @@ final class NotusDragonRenderer extends MobRenderer<NotusDragon, NotusDragonRend
 			if (state.isInvisible) {
 				return;
 			}
-			collector.order(1).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(DragonLooks.marks(SPECIES, state.look)), lightCoords,
+			collector.order(1).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(DragonLooks.marks(this.renderer.species, state.look)), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 		}
 	}

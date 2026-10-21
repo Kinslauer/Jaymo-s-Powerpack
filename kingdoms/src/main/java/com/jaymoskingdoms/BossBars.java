@@ -48,7 +48,7 @@ public final class BossBars {
 	static boolean boss(Entity entity) {
 		// (0.7.137) a wild dragon too
 		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity)
-			|| entity instanceof com.jaymoskingdoms.dragons.NotusDragon dragon && !dragon.isTamed();
+			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed();
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */

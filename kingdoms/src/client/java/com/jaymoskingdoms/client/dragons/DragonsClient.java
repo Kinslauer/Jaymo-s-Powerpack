@@ -4,7 +4,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.equestrian.FreeReinClient;
 import com.jaymoskingdoms.dragons.DragonBreath;
 import com.jaymoskingdoms.dragons.Dragons;
-import com.jaymoskingdoms.dragons.NotusDragon;
+import com.jaymoskingdoms.dragons.WindDragon;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -26,10 +26,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.137) The dragons on the client ({@link Dragons}): Notus's renderer; flying a ridden dragon (the rider's client
- * moves it, as with the bat horse's flight in {@code MythicMountsClient}, with the free-rein camera); the breath key; and
- * the HUD (bottom right, right of the hotbar, in Equestrian's place and style): the dragon's stamina while you ride it,
- * and its trust while you're winning it over (only you see it).
+ * (0.7.137) The dragons on the client ({@link Dragons}): their renderers ({@link WindDragonRenderer}); flying a ridden
+ * dragon (the rider's client moves it, as with the bat horse's flight in {@code MythicMountsClient}, with the free-rein
+ * camera); the breath key; and the HUD (bottom right, right of the hotbar, in Equestrian's place and style): the
+ * dragon's stamina while you ride it, and its trust while you're winning it over (only you see it).
  * <p>
  * Flight: Space takes off from the ground and climbs; W flies where you look (the camera under free rein) and keeps its
  * momentum; let go and it glides, sinking slowly; S brakes to a hover; Shift dives (in the air it doesn't dismount,
@@ -60,6 +60,8 @@ public final class DragonsClient {
 	/** The trust meter shows for a dragon this near. */
 	static final double TRUST_RANGE = 24.0;
 	static final int BAR_WIDTH = 64, CHIP = 20;
+	/** The species' shadows (blocks). */
+	static final float NOTUS_SHADOW = 2.0F, BOREAS_SHADOW = 1.8F, ZEPHYRUS_SHADOW = 1.8F;
 	static final int STAMINA_COLOR = 0xFF9A3A, LOW_COLOR = 0xFFD45A, EXHAUSTED_COLOR = 0xE04040, TRUST_COLOR = 0xFFC86A;
 
 	private static @Nullable KeyMapping breathKey;
@@ -68,7 +70,12 @@ public final class DragonsClient {
 	}
 
 	public static void register() {
-		EntityRenderers.register(Dragons.NOTUS_DRAGON, NotusDragonRenderer::new);
+		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new WindDragonRenderer<>(c, "notus", new NotusDragonModel(NotusDragonModel.createBodyLayer().bakeRoot()),
+			NOTUS_SHADOW));
+		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new WindDragonRenderer<>(c, "boreas", new BoreasDragonModel(BoreasDragonModel.createBodyLayer()
+			.bakeRoot()), BOREAS_SHADOW));
+		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
+			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
 		breathKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.dragon_breath", InputConstants.KEY_R,
 			KeyMapping.Category.register(JaymosKingdoms.id("dragons"))));
 		ClientTickEvents.END_CLIENT_TICK.register(DragonsClient::tick);
@@ -76,8 +83,8 @@ public final class DragonsClient {
 	}
 
 	/** The dragon {@code player} rides and steers. */
-	public static @Nullable NotusDragon steered(@Nullable Player player) {
-		return player != null && player.getVehicle() instanceof NotusDragon dragon && dragon.getControllingPassenger() == player ? dragon : null;
+	public static @Nullable WindDragon steered(@Nullable Player player) {
+		return player != null && player.getVehicle() instanceof WindDragon dragon && dragon.getControllingPassenger() == player ? dragon : null;
 	}
 
 	private static boolean breathHeld(Minecraft minecraft) {
@@ -98,7 +105,7 @@ public final class DragonsClient {
 		if (player == null || minecraft.level == null || minecraft.isPaused()) {
 			return;
 		}
-		NotusDragon dragon = steered(player);
+		WindDragon dragon = steered(player);
 		if (dragon == null) {
 			return;
 		}
@@ -112,7 +119,7 @@ public final class DragonsClient {
 		}
 	}
 
-	private static void fly(Minecraft minecraft, NotusDragon dragon, float yaw, float pitch) {
+	private static void fly(Minecraft minecraft, WindDragon dragon, float yaw, float pitch) {
 		boolean tired = dragon.exhausted();
 		boolean up = minecraft.options.keyJump.isDown() && !tired;
 		boolean forward = minecraft.options.keyUp.isDown();
@@ -169,24 +176,24 @@ public final class DragonsClient {
 			return;
 		}
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
-		if (player.getVehicle() instanceof NotusDragon riding) {
-			float share = riding.stamina() / NotusDragon.STAMINA;
-			int color = riding.exhausted() ? pulse(EXHAUSTED_COLOR, 0xFFFFFF, time * 0.5F) : share < NotusDragon.RECOVER / NotusDragon.STAMINA ? LOW_COLOR
+		if (player.getVehicle() instanceof WindDragon riding) {
+			float share = riding.stamina() / WindDragon.STAMINA;
+			int color = riding.exhausted() ? pulse(EXHAUSTED_COLOR, 0xFFFFFF, time * 0.5F) : share < WindDragon.RECOVER / WindDragon.STAMINA ? LOW_COLOR
 				: STAMINA_COLOR;
 			MutableComponent label = riding.getDisplayName().copy().withColor(0xB0B0B0);
 			if (riding.exhausted()) {
 				label.append(Component.literal("  ")).append(Component.translatable("hud.jaymoskingdoms.dragon_exhausted").withColor(EXHAUSTED_COLOR));
 			}
-			bar(graphics, minecraft.font, share, color, label, NotusDragon.RECOVER / NotusDragon.STAMINA);
+			bar(graphics, minecraft.font, share, color, label, WindDragon.RECOVER / WindDragon.STAMINA);
 			return;
 		}
-		NotusDragon wooed = null;
-		for (NotusDragon dragon : player.level().getEntitiesOfClass(NotusDragon.class, player.getBoundingBox().inflate(TRUST_RANGE),
+		WindDragon wooed = null;
+		for (WindDragon dragon : player.level().getEntitiesOfClass(WindDragon.class, player.getBoundingBox().inflate(TRUST_RANGE),
 			d -> !d.isTamed() && d.tamerId() == player.getId() && d.trust() > 0.0F)) {
 			wooed = dragon;
 		}
 		if (wooed != null) {
-			float share = wooed.trust() / NotusDragon.TRUST_FULL;
+			float share = wooed.trust() / WindDragon.TRUST_FULL;
 			Component label = Component.translatable("hud.jaymoskingdoms.dragon_trust", wooed.getDisplayName()).withColor(0xB0B0B0);
 			bar(graphics, minecraft.font, share, pulse(TRUST_COLOR, 0xFFFFFF, time * 0.15F), label, -1.0F);
 		}
