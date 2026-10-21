@@ -477,6 +477,8 @@ public final class Quests {
 		}
 		Speech.tell(level, giver, player, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.thanks.king" : "quest.jaymoskingdoms.said.thanks"),
 			Speech.GOLD);
+		// (0.7.109) and they remember it
+		Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.complete", title(q)).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, player.blockPosition(), q.royal() ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
 			1.0F, 1.0F);
@@ -508,6 +510,10 @@ public final class Quests {
 		}
 		int cost = q.giver().king() ? ABANDON_ROYAL_REPUTATION : ABANDON_REPUTATION;
 		Reputation.change(player, f, -cost);
+		if (Factions.level(player.level().getServer()).getEntity(q.giver().uuid()) instanceof net.minecraft.world.entity.LivingEntity giver) {
+			// (0.7.109) the one who asked remembers it
+			Recollections.remember(giver, player, Recollections.Kind.QUEST_FAILED, title(q));
+		}
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned.reputation", cost, f.name()).withStyle(ChatFormatting.RED));
 	}
 
@@ -678,6 +684,7 @@ public final class Quests {
 			level.playSound(null, to.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		}
 		McaCompat.hearts(to, player, LETTER_HEARTS);
+		Recollections.remember(to, player, Recollections.Kind.LETTER, Component.literal(q.giver().name()));
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.letter.delivered", q.giver().name()).withStyle(ChatFormatting.GREEN));
 		sync(player, true);
 		return true;
