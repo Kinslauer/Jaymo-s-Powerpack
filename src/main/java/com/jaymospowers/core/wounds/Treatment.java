@@ -707,6 +707,11 @@ public final class Treatment {
 			case LEECHES -> {
 				Wounds.hurtPart(body, BodyPart.BODY, LEECH_COST, null);
 				Pain.leeches(body);
+				if (MedicineSkill.bleedBadBlood(player, body)) {
+					// (0.15.46) a Plague Doctor's leeches draw out the plague and poison
+					level.sendParticles(ParticleTypes.SQUID_INK, body.getX(), body.getY() + body.getBbHeight() * 0.5, body.getZ(), 8, 0.2, 0.2, 0.2, 0.01);
+					done = Component.translatable("message.jaymospowers.wounds.leeches_bad_blood", body.getDisplayName());
+				}
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 1.3F);
 				stack.consume(1, player);
 			}

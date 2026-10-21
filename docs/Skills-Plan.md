@@ -208,7 +208,8 @@ downed one brought round tags the healer `jaymospowers_treated`, which Kingdoms 
 - Tier 4 (level 3): **Steady Hands** (3 ranks: every treatment and revive 15% quicker per rank), **Field Dresser**
   (2 ranks: bandages and rags heal 35% more per rank).
 - Tier 5 (level 8): **Bonesetter** (a splint mends 3 health into the limb at once; stitches and searings hurt half),
-  **Plague Doctor** (2 pts: Nightfall's Atrophy caught for half as long, never level II, half its pricks and weakness).
+  **Plague Doctor** (2 pts: Nightfall's Atrophy caught for half as long, never level II, half its pricks and weakness;
+  Andy: "you can also use leeches for benefits, when noone else can": a Plague Doctor's leeches draw the plague and poison out of whoever they're on).
 - Tier 6 (level 12): **Lifesaver** (2 pts: whoever you bring round gets up on half health with bleeding stopped; your
   smelling salts always wake a passed-out player).
 

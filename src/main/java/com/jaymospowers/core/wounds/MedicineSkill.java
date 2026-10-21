@@ -2,6 +2,9 @@ package com.jaymospowers.core.wounds;
 
 import java.lang.reflect.Method;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
@@ -17,7 +20,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Field Dresser</b> (2 ranks): bandages and rags you tie heal {@link #FIELD_DRESSER_PER_RANK} more per rank.</li>
  * <li><b>Bonesetter</b>: a splint you put on mends {@link #BONESETTER_HEAL} into the limb at once; a stitch or a searing
  * you give hurts {@link #BONESETTER_HURT} as much.</li>
- * <li><b>Plague Doctor</b>: Kingdoms' own (the Nightfall plague's Atrophy goes easier on you).</li>
+ * <li><b>Plague Doctor</b>: Kingdoms' own (the Nightfall plague's Atrophy goes easier on you); and here, leeches you
+ * put on draw out the bad blood: the plague ({@link #ATROPHY}) and poison. Andy: "you can also use leeches for benefits,
+ * when noone else can".</li>
  * <li><b>Lifesaver</b>: someone you bring round gets up with {@link #LIFESAVER_HEALTH} of their health and their bleeding
  * stopped; your smelling salts always rouse a player who has passed out.</li>
  * </ul>
@@ -32,6 +37,8 @@ public final class MedicineSkill {
 	public static final float BONESETTER_HEAL = 3.0F, BONESETTER_HURT = 0.5F;
 	/** Lifesaver: the share of their most health someone you bring round gets up with. */
 	public static final float LIFESAVER_HEALTH = 0.5F;
+	/** Plague Doctor's leeches draw out Kingdoms' Nightfall plague (by id: we never compile against Kingdoms). */
+	static final Identifier ATROPHY = Identifier.fromNamespaceAndPath("jaymoskingdoms", "atrophy");
 	/** The scoreboard tag on a player who just finished a treatment (Kingdoms' {@code Skills.TREATED_TAG}). */
 	public static final String XP_TAG = "jaymospowers_treated";
 
@@ -81,6 +88,23 @@ public final class MedicineSkill {
 	/** A stitch's or a searing's {@code hurt}, given by {@code healer} (Bonesetter: half). */
 	static float hurt(@Nullable LivingEntity healer, float hurt) {
 		return bonesetter(healer) ? hurt * BONESETTER_HURT : hurt;
+	}
+
+	static boolean plagueDoctor(@Nullable LivingEntity healer) {
+		return rank(healer, "plague_doctor") > 0;
+	}
+
+	/** Plague Doctor: {@code healer}'s leeches on {@code body} draw out the plague and poison. True if they drew anything. */
+	static boolean bleedBadBlood(@Nullable LivingEntity healer, LivingEntity body) {
+		if (!plagueDoctor(healer)) {
+			return false;
+		}
+		boolean drew = body.removeEffect(MobEffects.POISON);
+		var plague = BuiltInRegistries.MOB_EFFECT.get(ATROPHY);
+		if (plague.isPresent()) {
+			drew |= body.removeEffect(plague.get());
+		}
+		return drew;
 	}
 
 	static boolean lifesaver(@Nullable LivingEntity healer) {
