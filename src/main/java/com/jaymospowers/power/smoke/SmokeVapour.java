@@ -138,7 +138,7 @@ public final class SmokeVapour {
 			// the shot goes through the smoke: a swirl where it went in
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.3, 0.0);
-			level.sendParticles(SmokeParticles.burst(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 10, 0.3, 0.4, 0.3, 0.02);
+			level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 10, 0.3, 0.4, 0.3, 0.02);
 			SmokeField.puff(level, at, 0.8F, player);
 			return false;
 		});
@@ -152,8 +152,8 @@ public final class SmokeVapour {
 			SmokeMoves.begin(player, SmokeMoves.LAND);
 		}
 		SmokeField.puff(level, at, LANDING_SMOKE, player);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 40, 0.9, 0.1, 0.9, 0.08);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.CAMPFIRE_COSY_SMOKE), at.x, at.y, at.z, 6, 0.6, 0.1, 0.6, 0.02);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 40, 0.9, 0.1, 0.9, 0.08);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.CAMPFIRE_COSY_SMOKE), at.x, at.y, at.z, 6, 0.6, 0.1, 0.6, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 
@@ -224,9 +224,9 @@ public final class SmokeVapour {
 		// the legs go up in a gout of smoke
 		Vec3 at = player.position().add(0.0, 0.4, 0.0);
 		SmokeField.puff(level, at, 6.0F, player);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 30, 0.4, 0.3, 0.4, 0.06);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), at.x, at.y, at.z, 30, 0.4, 0.3, 0.4, 0.06);
 		SmokeParticles.gout(level, player, at);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.WHITE_SMOKE), at.x, at.y, at.z, 20, 0.4, 0.2, 0.4, 0.04);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.WHITE_SMOKE), at.x, at.y, at.z, 20, 0.4, 0.2, 0.4, 0.04);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6F, 0.6F);
 	}

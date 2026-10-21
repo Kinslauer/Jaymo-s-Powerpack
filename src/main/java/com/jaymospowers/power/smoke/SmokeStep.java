@@ -48,14 +48,14 @@ public final class SmokeStep {
 		Vec3 from = player.position();
 		Vec3 mid = from.add(0.0, player.getBbHeight() * 0.5, 0.0);
 		SmokeField.puff(level, mid, PUFF_FROM, player);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.LARGE_SMOKE), mid.x, mid.y, mid.z, 30, 0.3, 0.6, 0.3, 0.03);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), mid.x, mid.y, mid.z, 30, 0.3, 0.6, 0.3, 0.03);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.7F);
 		player.teleportTo(level, to.x, to.y, to.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
 		SmokeMoves.begin(player, SmokeMoves.STEP);
 		Vec3 out = to.add(0.0, player.getBbHeight() * 0.5, 0.0);
 		SmokeField.puff(level, out, PUFF_TO, player);
-		level.sendParticles(SmokeParticles.burst(player, ParticleTypes.LARGE_SMOKE), out.x, out.y, out.z, 24, 0.3, 0.6, 0.3, 0.02);
+		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), out.x, out.y, out.z, 24, 0.3, 0.6, 0.3, 0.02);
 		level.playSound(null, out.x, out.y, out.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6F, 0.7F);
 		SmokePower.cooldown(player, SmokeState.STEP, SmokePower.mastered(player) ? COOLDOWN_MASTERED : COOLDOWN);
 	}
