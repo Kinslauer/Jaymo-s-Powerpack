@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -32,6 +33,10 @@ import org.jspecify.annotations.Nullable;
  * side and dragging it back, blood flying, until it's torn open. The meat spills on the ground with the rest of what it
  * carried, and the scavengers nearby eat the meat off the ground, one piece at a time, until they're full. Tame animals
  * don't, and players' kills are left for the player.
+ * <p>
+ * (0.5.4) Zombies go for villagers' bodies first, and a zombie in a village doesn't leave a meal to chase the next
+ * villager: only a player (or anything else) it's fighting pulls it off. A villager that's been eaten (by anything)
+ * isn't buried: with MCA its tombstone is emptied again ({@link McaGraves}).
  */
 public final class Scavengers {
 	/** Mobs that eat bodies (data/jaymoskitchen/tags/entity_type/scavengers.json). */
@@ -59,15 +64,22 @@ public final class Scavengers {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && mob.is(SCAVENGERS)) {
 				Hunger hunger = new Hunger();
-				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new GnawGoal(mob, hunger));
+				// (0.5.4) a zombie stops to feed even mid-chase (ahead of its attack), as long as it's only villagers it's after
+				((MobAccessor) mob).jaymoskitchen$goals().addGoal(mob instanceof Zombie ? 1 : 6, new GnawGoal(mob, hunger));
 				((MobAccessor) mob).jaymoskitchen$goals().addGoal(6, new EatMeatGoal(mob, hunger));
 			}
 		});
 	}
 
 	private static boolean busy(Mob mob) {
-		return mob.getTarget() != null || mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby()
+		return mob.getTarget() != null && !feedingOver(mob, mob.getTarget())
+			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby()
 			|| mob instanceof TamableAnimal tame && tame.isTame();
+	}
+
+	/** (0.5.4) Whether {@code mob} may feed with {@code target} about: a zombie leaves villagers be while it eats one. */
+	private static boolean feedingOver(Mob mob, net.minecraft.world.entity.LivingEntity target) {
+		return mob instanceof Zombie && target.is(Corpses.VILLAGERS);
 	}
 
 	/** A pet (a tamed wolf): it doesn't scavenge, but it eats meat dropped on the ground for it. */
@@ -121,8 +133,9 @@ public final class Scavengers {
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (CorpseEntity corpse : bodies) {
-				// its own kill first
-				double distance = corpse.distanceToSqr(mob) * (corpse.killedBy(mob) ? 0.25 : 1.0);
+				// its own kill first (and for a zombie, a villager)
+				double distance = corpse.distanceToSqr(mob) * (corpse.killedBy(mob) ? 0.25 : 1.0)
+					* (mob instanceof Zombie && corpse.isVillager() ? 0.25 : 1.0);
 				if (distance < best) {
 					best = distance;
 					body = corpse;
@@ -209,7 +222,10 @@ public final class Scavengers {
 			if (bites >= BITES + Mth.floor(body.getBbWidth() * BITES_PER_WIDTH)) {
 				level.sendParticles(blood, body.getX(), body.getY() + 0.3, body.getZ(), 40, 0.35, 0.15, 0.35, 0.25);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.5F);
+				java.util.Optional<java.util.UUID> villager = body.isVillager() ? body.deadId() : java.util.Optional.empty();
 				CARRION.addAll(body.tearApart(level));
+				// (0.5.4) nothing left of them to bury
+				villager.ifPresent(dead -> McaGraves.unbury(level, dead));
 				body = null;
 			}
 		}

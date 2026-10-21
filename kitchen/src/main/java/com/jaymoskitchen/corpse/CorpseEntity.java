@@ -552,6 +552,18 @@ public class CorpseEntity extends Entity {
 		return this.entityData.get(LOOK);
 	}
 
+	/** (0.5.4) Who this was when alive (the dead mob's own id, from its look), so its grave can be found. */
+	public Optional<java.util.UUID> deadId() {
+		CompoundTag tag = parse(look());
+		return tag == null ? Optional.empty() : tag.read("UUID", net.minecraft.core.UUIDUtil.CODEC);
+	}
+
+	/** (0.5.4) A villager's body (vanilla's, MCA's, a wandering trader). */
+	public boolean isVillager() {
+		EntityType<?> type = sourceType();
+		return type != null && type.builtInRegistryHolder().is(Corpses.VILLAGERS);
+	}
+
 	/** The parts the body lost (bits: head 1, right arm 2, left arm 4, right leg 8, left leg 16). */
 	public int missing() {
 		return this.entityData.get(MISSING);

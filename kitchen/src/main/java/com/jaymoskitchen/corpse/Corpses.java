@@ -61,6 +61,8 @@ public final class Corpses {
 	 * looted in one click and gone (see {@link CorpseKind#FISH}).
 	 */
 	public static final TagKey<EntityType<?>> FISH_CORPSES = tag("fish_corpses");
+	/** (0.5.4) Villagers, whose bodies zombies go for first and whose graves (MCA's) a zombie's meal empties ({@link Scavengers}). */
+	public static final TagKey<EntityType<?>> VILLAGERS = tag("villagers");
 
 	/** A corpse's look is the mob's saved data as text; anything longer than this is cut down to the basics. */
 	public static final int MAX_LOOK_LENGTH = 30000;
@@ -268,6 +270,8 @@ public final class Corpses {
 		if (look.length() > MAX_LOOK_LENGTH) {
 			CompoundTag minimal = new CompoundTag();
 			minimal.putString("id", EntityType.getKey(mob.getType()).toString());
+			// (0.5.4) and who it was, so its grave can still be found
+			minimal.store("UUID", net.minecraft.core.UUIDUtil.CODEC, mob.getUUID());
 			look = minimal.toString();
 		}
 		return look;
