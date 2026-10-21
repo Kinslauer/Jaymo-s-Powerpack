@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "east=false,lit=false,south=false": {
+      "model": "jaymospowers:block/aether/outpost_campfire"
+    },
+    "east=false,lit=true,south=false": {
+      "model": "jaymospowers:block/aether/outpost_campfire_lit"
+    },
+    "east=false,lit=false,south=true": {
+      "model": "jaymospowers:block/aether/outpost_campfire"
+    },
+    "east=false,lit=true,south=true": {
+      "model": "jaymospowers:block/aether/outpost_campfire_lit"
+    },
+    "east=true,lit=false,south=false": {
+      "model": "jaymospowers:block/aether/outpost_campfire"
+    },
+    "east=true,lit=true,south=false": {
+      "model": "jaymospowers:block/aether/outpost_campfire_lit"
+    },
+    "east=true,lit=false,south=true": {
+      "model": "jaymospowers:block/aether/outpost_campfire"
+    },
+    "east=true,lit=true,south=true": {
+      "model": "jaymospowers:block/aether/outpost_campfire_lit"
+    }
+  }
+}

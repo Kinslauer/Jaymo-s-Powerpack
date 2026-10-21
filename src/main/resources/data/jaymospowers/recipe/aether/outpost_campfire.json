@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": "jaymospowers:faded_holystone_flagstones",
+    "C": "jaymospowers:ambrosium_campfire"
+  },
+  "pattern": [
+    "FFF",
+    "FCF",
+    "FFF"
+  ],
+  "result": {
+    "id": "jaymospowers:outpost_campfire"
+  }
+}

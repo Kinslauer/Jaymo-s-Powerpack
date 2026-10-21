@@ -1,0 +1,9 @@
+{
+  "type": "jaymospowers:aether_structure",
+  "biomes": "#jaymospowers:has_structure/irradiated_settlement_remnants",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "plan": "irradiated",
+  "variant": 1
+}

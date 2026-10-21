@@ -20,6 +20,8 @@
     "jaymospowers:sentry_brick_wall",
     "jaymospowers:sentry_brick_button",
     "jaymospowers:sentry_spawner",
-    "jaymospowers:sentry_trap"
+    "jaymospowers:sentry_trap",
+    "jaymospowers:faded_holystone_pillar",
+    "jaymospowers:faded_holystone_keystone"
   ]
 }
