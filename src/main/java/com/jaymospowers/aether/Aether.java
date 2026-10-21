@@ -24,6 +24,8 @@ public final class Aether {
 	public static void init() {
 		AetherBlocks.init();
 		AetherItems.init();
+		// Aether II's woods, leaves, saplings and plants
+		AetherFlora.init();
 		AetherFeatures.init();
 		FloatingBlockEntity.register();
 		AercloudBlock.register();

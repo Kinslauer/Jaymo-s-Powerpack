@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "minecraft:stick",
+    "W": "jaymospowers:greatroot_planks"
+  },
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "result": {
+    "id": "jaymospowers:greatroot_fence",
+    "count": 3
+  },
+  "group": "wooden_fence"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": "jaymospowers:amberoot_planks"
+  },
+  "pattern": [
+    "##"
+  ],
+  "result": {
+    "id": "jaymospowers:amberoot_pressure_plate"
+  },
+  "group": "wooden_pressure_plate"
+}

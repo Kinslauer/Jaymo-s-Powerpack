@@ -208,3 +208,47 @@ own `creature_spawn_probability` (the Aether uses 0.25) decides how many are the
 
 To check first in game: spawn each from its egg; saddle a phyg (jump, flap, glide), a flying cow and a hatched moa;
 let a sheepuff graze twice and shear it puffed and plain; pick up an aerbunny and jump off a cliff.
+
+## Aether II woods and plants (Track N2)
+
+Aether II's trees' blocks and its plants, in `AetherFlora` (registry; `Aether.init` calls it, and it adds its items to the
+"The Aether" tab itself) with the small block classes `FloraPlantBlock`, `OrangeTreeBlock`, `WovenSticksBlock`.
+`python -I tools/gen_aether_flora.py` (Pillow only; borrows the painting helpers of `gen_aether.py`, so run that one first)
+writes every texture, model, blockstate, item definition, loot table, recipe (`data/.../recipe/aether/flora/`), tag and the
+lang part `aether_flora.json`; `python -I tools/check_aether_flora.py` checks that every registered id has all of them.
+Clean room: behaviour from the notes, every line and pixel ours. The shaped blocks reuse vanilla's block set type and wood type
+(oak's sounds and press times).
+
+- **Wood sets**: greatroot (dark brown), wisproot (pale lilac-grey), amberoot (golden brown with amber flecks) each have log,
+  wood, stripped log and wood, planks, stairs, slab, fence, fence gate, door, trapdoor, button and pressure plate (the usual
+  vanilla recipes). Skyroot gets the eight shaped blocks (its log family and planks are Aether I's). **Mossy Wisproot Log**
+  (wisproot log and a bryalinn moss block) and **Amberoot Deposit** (a log with amber chunks; an axe also drops 1 to 2 golden
+  amber). An axe strips all of them (`AetherFlora`'s own callback, like skyroot's in `Aether`). Each new wood has a log tag
+  `#jaymospowers:<wood>_logs` (planks come from it); `#jaymospowers:aether_flora_logs` joins them for `#minecraft:logs`.
+  `#jaymospowers:aether_logs` is left as it was, because skyroot planks are made from it and a greatroot log must not give them.
+- **Leaves** (cutout, no tint, like Aether I's): skyplane (pale green), skybirch (yellow-green), skypine (dark teal needles),
+  wisproot (pale violet), wisptop (violet), greatroot (deep green), greatoak (green), greatboa (frosted blue-green), amberoot
+  (gold), irradiated (olive; yellow specks drift down [IRRADIATED_LEAF_PARTICLES]; no sapling). Each drops its sapling with
+  the vanilla chances, sticks, and itself with shears or Silk Touch.
+- **Saplings** (skyplane, skybirch, skypine, wisproot, wisptop, greatroot, greatoak, greatboa, amberoot): `AetherSaplingBlock`
+  growing `jaymospowers:<tree>_tree` (Track W makes those features; until then a sapling just doesn't grow). `AetherFlora.TREES`
+  lists the keys. All saplings and the small flowers can be potted (`AetherFlora.POTTED`).
+- **Ground plants**: Aether Short, Medium and Long Grass and Bush Fern are tinted with the biome's grass colour (client:
+  `AetherFloraClient`; the textures are grey), replaceable, drop seeds or themselves with shears. **Aether Bush** (hardness
+  0.65, squat leafy block), **Holystone Twig** (flat, no collision, stands on any solid top).
+- **Flowers**: Hesperose, Poasprout, Lilichime, Pluracian (small flowers with suspicious stew recipes: regeneration 8 s,
+  saturation, night vision 10 s, jump boost 6 s), **Tarabloom** (two blocks tall), **Blade Poa**, **Satival Shoot** (drops a
+  satival bulb, food 2), **Valkyrie Sprout** (1 to 2 valkyrie wings), **Brettl Plant** (1 to 2 brettl grass; 9 make a
+  **Brettl Grass Bundle**, which turns back into 9).
+- **Orange Tree** [OrangeTreeBlock]: two blocks tall, ages 0 to 3 on random ticks in light 9+ (1 in 5). Ripe, right-click or
+  breaking gives 1 to 3 oranges (food 4; Fortune adds); picking sets it back to age 1. **Wyndberry** is only an item for now.
+- **Arilum** (lily-pad-like, placed on water) and **Blooming Arilum** (light 5; drops 1 to 2 arilum bulbs, itself with Silk Touch).
+- **Mosses**: bryalinn (green), shayelinn (cyan), ambrelinn (yellow): block (hardness 0.1; plants stand on it) and carpet, plus
+  vines for the first two (vanilla vine rules, climbable).
+- **Mushrooms**: Magnetic Shroom (light 6; the huge ones are Magnetic Shroom Block and Stem), Rotshroom and Rotshroom Block
+  (huge-mushroom blocks; no huge growing yet, the worldgen places them).
+- **Misc**: Woven Skyroot Sticks (8 pixels tall, a moa nest stands on it) and Skyroot Leaf Pile (a carpet).
+
+Not done, for later: signs, bookshelves, beds and the decorative planks (shingles, beams) of the building notes; fire and
+compost values (no precedent in the repo); a leaf pile for every leaf type; mossy wisproot wood; huge-mushroom and orange-tree
+worldgen (Track W). The old item name "Blue Berry" still has to become "Blueberry" in `gen_aether.py` (its lang part owns the key).

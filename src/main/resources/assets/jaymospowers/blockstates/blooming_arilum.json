@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/aether/blooming_arilum"
+      },
+      {
+        "model": "jaymospowers:block/aether/blooming_arilum",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/aether/blooming_arilum",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/aether/blooming_arilum",
+        "y": 270
+      }
+    ]
+  }
+}
