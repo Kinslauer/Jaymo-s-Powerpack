@@ -43,7 +43,7 @@ public final class ZFighterRaids {
 	static final long RAID_DAYS = 20L;
 	static final long RAID_SPREAD = 240000L;
 	static final double NEAR = 160.0;
-	/** (0.15.59, Andy) A tyrant only comes to a kingdom with a player near it in this world tier or higher (1: Borderlands, the second). */
+	/** (0.15.60, Andy) A tyrant only comes to a kingdom with a player near it in this world tier or higher (1: Borderlands, the second). */
 	static final int MIN_TIER = 1;
 	static final int RAID_TP = 1500;
 	static final int MIN_TP = 125;

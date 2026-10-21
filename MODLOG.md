@@ -2370,7 +2370,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     aercloud gliders, the ambrosium altar.
   Compiles against the real 26.3 jars; a dev server boots, generates the Aether and places its structures. Not yet
   playtested in a client.
-- **0.15.59, ships Jaymo's Kingdoms 0.7.146 (Nether faction stage 3):** Hornkin portal raids on towns, Nether warlord
+- **0.15.59, the Z Fighter's ki aura:** a faint aura of his own ki colour now hugs every Z Fighter standing in base
+  form, more often and bigger the further his max ki has grown (a step every 40 past 100, up to 4); a form's aura roars
+  a little harder with power too, and the base-form charging/flight motes take his ki colour instead of the lineage's.
+  Charging to full ki flashes the aura once: a blast round his feet, a ring of ki, the ground torn up and thrown out,
+  the TNT boom and a light shake. A Warrior-born screams into every form (a yell, a roar under it from Super 2 up, and
+  one of three lines per form in nearby chat). Tuning at the top of `ZFighterPower`. Combo animations untouched.
+  Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.60, ships Jaymo's Kingdoms 0.7.146 (Nether faction stage 3):** Hornkin portal raids on towns, Nether warlord
   bounties, Hornkin trophies and the Emberborn gold truce (details in the Kingdoms MODLOG). Powers: Andy's ruling,
   Z Fighter tyrant raids (`ZFighterRaids`) now only come to a kingdom with a player near it in world tier Borderlands
   (the second) or higher (`ZFighterKingdoms.worldTier`, read from Kingdoms' `WorldTiers`).

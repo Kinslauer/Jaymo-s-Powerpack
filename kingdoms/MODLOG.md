@@ -4074,7 +4074,7 @@ The last batch of the BWM port (MIT, our own code).
   raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Compiles against the real 26.3 jars;
   not yet seen in game.
 
-## 0.7.146: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.59)
+## 0.7.146: Nether raids, warlord bounties, trophies and the gold truce (pack 0.15.60)
 Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: nothing of it used).
 - Portal raids (`nether/PortalRaids`): while a Hornkin war fort stands in the Nether, a town with a Nether portal
   within 96 blocks of its seat and a player within 96 may see 3-6 Hornkin (sometimes a brute) step out of it (3% a
