@@ -29,7 +29,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - its own mixin configs, `jaymospowers.<name>[.client].mixins.json`
   - its own lang file, `lang/parts/<name>.json`, which `processResources` merges into `en_us.json`
 - Each power has its own `init()`.
-- Sound (0.14.5, after Resonance's idea of conditions-driven ambience; LGPL, no 26.3 build, nothing copied):
+- Sound (0.14.7, after Resonance's idea of conditions-driven ambience; LGPL, no 26.3 build, nothing copied):
   `core/Soundscape` stacks layers of variants at uneven beats and echoes them in caves; the flier's side of a flight
   is `client/sound/PowerLoop` beds plus `Accents` that react to speed, banking, braking, rain, water and altitude.
 
