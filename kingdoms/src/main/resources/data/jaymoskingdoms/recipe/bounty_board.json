@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PPP",
+    "XXX",
+    "S S"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "X": "minecraft:paper",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "jaymoskingdoms:bounty_board",
+    "count": 1
+  }
+}

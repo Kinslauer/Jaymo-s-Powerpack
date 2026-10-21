@@ -73,7 +73,8 @@ final class QuestScreen extends Screen {
 		QuestNet.View v = view();
 		if (v != null) {
 			if (v.state() == QuestNet.OFFER) {
-				addRenderableWidget(Button.builder(Component.translatable(v.royal() ? "quest.jaymoskingdoms.button.accept.king" : "quest.jaymoskingdoms.button.accept"),
+				addRenderableWidget(Button.builder(Component.translatable(board() ? "bounty.jaymoskingdoms.button.take"
+						: v.royal() ? "quest.jaymoskingdoms.button.accept.king" : "quest.jaymoskingdoms.button.accept"),
 					b -> act(v, QuestNet.ACCEPT)).bounds(x + 6, y, 100, 16).build());
 			} else {
 				Button turnIn = Button.builder(Component.translatable("quest.jaymoskingdoms.button.turn_in"), b -> act(v, QuestNet.TURN_IN))
@@ -96,6 +97,11 @@ final class QuestScreen extends Screen {
 	private void act(QuestNet.View v, int action) {
 		lastShown = v.id();
 		ClientPlayNetworking.send(new QuestNet.Act(open.entityId(), v.id(), action));
+	}
+
+	/** (0.7.125) A bounty board's screen: the same rows, in a bounty's words. */
+	private boolean board() {
+		return open.entityId() == QuestNet.BOARD;
 	}
 
 	private int rowAt(int mouseX, int mouseY) {
@@ -132,7 +138,11 @@ final class QuestScreen extends Screen {
 		return v.state() == QuestNet.READY ? COLOR_DONE : v.royal() ? COLOR_ROYAL : COLOR_GOLD;
 	}
 
-	private static Component label(QuestNet.View v) {
+	private Component label(QuestNet.View v) {
+		if (board()) {
+			return Component.translatable(v.state() != QuestNet.OFFER ? "bounty.jaymoskingdoms.label.hunting"
+				: v.royal() ? "bounty.jaymoskingdoms.label.dangerous" : "bounty.jaymoskingdoms.label.wanted");
+		}
 		return v.state() == QuestNet.OFFER ? Component.translatable(v.royal() ? "quest.jaymoskingdoms.label.decree" : "quest.jaymoskingdoms.label.offer")
 			: Component.translatable(v.state() == QuestNet.READY ? "quest.jaymoskingdoms.label.ready" : "quest.jaymoskingdoms.label.active");
 	}
@@ -142,7 +152,7 @@ final class QuestScreen extends Screen {
 		int x = left(), y = top(), h = panelH();
 		Ui.panel(graphics, x, y, PANEL_W, h, COLOR_GOLD);
 		Ui.line(graphics, this.font, this.title, x + 9, y + 7, PANEL_W - 18, COLOR_GOLD);
-		Ui.line(graphics, this.font, Component.translatable("quest.jaymoskingdoms.screen.sub", open.views().size()), x + 9, y + 18, PANEL_W - 18, COLOR_DIM);
+		Ui.line(graphics, this.font, Component.translatable(board() ? "bounty.jaymoskingdoms.screen.sub" : "quest.jaymoskingdoms.screen.sub", open.views().size()), x + 9, y + 18, PANEL_W - 18, COLOR_DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 4);
 		List<QuestNet.View> views = open.views();
 		if (views.isEmpty()) {
@@ -178,7 +188,7 @@ final class QuestScreen extends Screen {
 		text.add(v.text());
 		text.add(v.objective().copy().withColor(v.state() == QuestNet.READY ? COLOR_DONE : COLOR_DIM));
 		Ui.detail(graphics, this.font, x, detailY, PANEL_W, lines, v.title(), color(v), text);
-		graphics.text(this.font, Component.translatable("quest.jaymoskingdoms.label.rewards"), x + 9, rewardsY - 10, COLOR_DIM);
+		graphics.text(this.font, Component.translatable(board() ? "bounty.jaymoskingdoms.label.reward" : "quest.jaymoskingdoms.label.rewards"), x + 9, rewardsY - 10, COLOR_DIM);
 		ItemStack hovered = ItemStack.EMPTY;
 		int ix = x + 9;
 		for (ItemStack stack : v.rewards()) {

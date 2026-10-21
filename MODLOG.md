@@ -2130,3 +2130,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   occasional seasonal mote (cherry petals, fireflies on summer nights, poplar leaves, snowflakes), and wraps a Wind
   user in a spinning whirl of them that thickens in flight. Side effect: Kitchen's winter chill makes temperate lands
   cold enough to snow, so `WindCold.isCold` (Wind's longer wind-ups and cooldowns) counts them in winter too.
+- **0.15.32, bandit masks hide the face:** ships Jaymo's Kingdoms 0.7.125. Kingdoms' bandit mask and bandana (found
+  by id, `costume/BanditMask`) hide the face like a costume: the wearer goes by "Bandit" over their head, in chat and on
+  the tab list, or "Pirate" in or on the water, in a boat or on a ship, or on a sea, beach or river biome. They're
+  tagged `jaymospowers_masked:bandit_<uuid>` (one identity per player), which Kingdoms reads like a costume's.
