@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * What the Aether's monsters throw. One class, six kinds ({@link Kind}); the kind is decided by the entity type, so each
- * has its own sprite (the item it is drawn as), gravity and effect. Monsters' shots never hurt other monsters.
+ * has its own sprite (the item it is drawn as), gravity and effect. Monsters' shots never hit other monsters directly (the thunderball's blast and field are area effects and do reach them).
  */
 public class AetherShot extends ThrowableItemProjectile {
 	/** The six kinds, each with the item it is drawn as and its gravity per tick (0 flies straight). */

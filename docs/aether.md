@@ -360,7 +360,7 @@ spawn egg and a skin (plus glow overlays for seven). The five new drop items hav
   1 HP), Electric Shock (-3 attack damage, lightning damage every 25 ticks). Icons are in `textures/mob_effect/`.
 - **Shots** (`AetherShot.Kind`, one entity type and item each, drawn with `ThrownItemRenderer`): zephyr web, skephid web
   (both stun a blocking shield), thunderball (non-destructive blast plus a shock field), venomous dart, toxic dart, debris
-  (accelerates). Monsters never hit each other.
+  (accelerates). Monsters never hit each other directly (a thunderball's blast and field still reach them).
 - **Files**: `tools/gen_aether_monsters.py` reads the model `part()` lines and paints skins, glows, sprites, eggs, effect
   icons, item JSON, loot tables and `lang/parts/aether_monsters.json`; `tools/check_aether_monsters.py` validates them.
 

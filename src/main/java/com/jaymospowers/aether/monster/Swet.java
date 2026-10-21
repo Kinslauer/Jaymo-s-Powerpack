@@ -209,6 +209,8 @@ public class Swet extends AetherMonster {
 		this.wet = input.getFloatOr("wet", 0.0F);
 		this.saturation = input.getFloatOr("saturation", 0.0F);
 		this.applyScale();
+		// the latch is not saved, so a reloaded swet must not stay weightless
+		this.setNoGravity(false);
 	}
 
 	@Override
