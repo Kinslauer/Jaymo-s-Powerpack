@@ -48,6 +48,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Warding</b> (a court wizard's): absorption for you and the players beside you;</li>
  * <li><b>the Arcane Bolt</b> (a court wizard's): a lance of light at what you're looking at, twice as hard on the undead.</li>
  * </ul>
+ * (0.7.103) A Scroll of Draining can also be written: paper, two bat wings ({@link #BAT_WING}, after Better With Mods'
+ * bat wing: bats drop them) and a fermented spider eye.
  */
 public final class Arcana {
 	/** How far a scroll reaches (draining, arcane bolt). */
@@ -64,6 +66,8 @@ public final class Arcana {
 
 	public static Item BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF;
 	public static Item SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE;
+	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
+	public static Item BAT_WING;
 
 	private Arcana() {
 	}
@@ -77,6 +81,9 @@ public final class Arcana {
 		SCROLL_FIRE = item("scroll_of_fire", p -> new Scroll(p, "fire"));
 		SCROLL_WARDING = item("scroll_of_warding", p -> new Scroll(p, "warding"));
 		SCROLL_ARCANE = item("scroll_of_arcane_bolt", p -> new Scroll(p, "arcane"));
+		ResourceKey<Item> wing = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("bat_wing"));
+		BAT_WING = Registry.register(BuiltInRegistries.ITEM, wing, new Item(new Item.Properties().setId(wing)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.insertAfter(Items.PHANTOM_MEMBRANE, BAT_WING));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.TOTEM_OF_UNDYING;
 			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF)) {

@@ -1,0 +1,7 @@
+{
+  "entities": [
+    "minecraft:guardian",
+    "minecraft:elder_guardian"
+  ],
+  "enchantment": "minecraft:depth_strider"
+}

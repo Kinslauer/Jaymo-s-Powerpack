@@ -3,7 +3,10 @@ package com.jaymospowers.client.tinkering;
 import com.jaymospowers.armory.Armory;
 import com.jaymospowers.tinkering.Modifier;
 import com.jaymospowers.tinkering.Tinkering;
+import com.jaymospowers.tinkering.smeltery.Melting;
+import com.jaymospowers.tinkering.smeltery.MeltingRecipes;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
@@ -23,6 +26,8 @@ public final class TinkeringClient {
 		BlockEntityRenderers.register(Tinkering.SMELTERY_ENTITY, SmelteryRenderer::new);
 		BlockEntityRenderers.register(Tinkering.CASTING_ENTITY, CastingRenderer::new);
 		BlockEntityRenderers.register(Tinkering.FAUCET_ENTITY, FaucetRenderer::new);
+		// (0.13) what melts by recipe, data file or forged weapon, as the server worked it out
+		ClientPlayNetworking.registerGlobalReceiver(MeltingRecipes.Sync.TYPE, (payload, context) -> Melting.setExtra(payload.items()));
 		// (0.8.76) Armory weapons level up and take modifiers like tinker tools
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (!Armory.isWeapon(stack)) {
