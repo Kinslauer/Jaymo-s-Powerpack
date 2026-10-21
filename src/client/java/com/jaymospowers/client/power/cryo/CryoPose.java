@@ -75,7 +75,7 @@ public final class CryoPose {
 	 * This frame: {@code slide}/{@code breath}/{@code blizzard} each 0-1 (a little over in the overshoot), {@code lean} the
 	 * lean into a turn (+ to the right), {@code speed} 0-1 of top speed, {@code push} 0-1 how hard the legs push,
 	 * {@code stride} the push cycle's phase, the breath's and the Blizzard's ages (ticks), the one-shot ({@code kind}, a
-	 * {@link CryoMoves} kind or 0, {@code t} ticks into it) and the clock.
+	 * {@link CryoMoves} kind or 0, {@code t} ticks into it) and the clock (the player's own ticks, for the trembles).
 	 */
 	public record Pose(float slide, float lean, float speed, float push, float stride, float breath, float breathAge, float blizzard,
 		float blizzardAge, int kind, float t, float time) {
@@ -190,13 +190,15 @@ public final class CryoPose {
 			state.setData(KEY, null);
 			return;
 		}
-		float now = minecraft.level.getGameTime() + partialTicks;
+		// ages from whole ticks first, so a long-running world's game time doesn't lose the fraction to float rounding
+		long gameTime = minecraft.level.getGameTime();
+		float now = player.tickCount + partialTicks;
 		int kind = 0;
 		float t = 0.0F;
 		CryoMoves.Move move = CryoMoves.get(player);
 		if (move != null) {
 			int length = CryoMoves.length(move.kind());
-			float age = now - move.start();
+			float age = (gameTime - move.start()) + partialTicks;
 			if (length > 0 && age >= 0.0F && age < length) {
 				kind = move.kind();
 				t = age;
@@ -212,9 +214,12 @@ public final class CryoPose {
 			return;
 		}
 		float speed = Mth.clamp(Mth.lerp(partialTicks, body.prevSpeed, body.speed) / SLIDE_TOP, 0.0F, 1.0F);
+		// the held moves' ages run on between ticks while they last (and stop where they were once they end)
+		float breathAge = body.breathAge + (move != null && move.kind() == CryoMoves.BREATH ? partialTicks : 0.0F);
+		float blizzardAge = body.blizzardAge + (CryoBlizzard.raging(player) ? partialTicks : 0.0F);
 		state.setData(KEY, new Pose(body.slide.at(partialTicks), body.lean.at(partialTicks), speed, body.push.at(partialTicks),
-			Mth.lerp(partialTicks, body.prevStride, body.stride), body.breath.at(partialTicks), body.breathAge, body.blizzard.at(partialTicks),
-			body.blizzardAge, kind, t, now));
+			Mth.lerp(partialTicks, body.prevStride, body.stride), body.breath.at(partialTicks), breathAge, body.blizzard.at(partialTicks),
+			blizzardAge, kind, t, now));
 	}
 
 	/** After a humanoid model animates (via {@code CryoModelFeatureRendererMixin} and {@code ModelPoses}). */
