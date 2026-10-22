@@ -15,9 +15,11 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -35,6 +37,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -48,8 +51,9 @@ import net.minecraft.world.phys.Vec3;
  * Andy: "expand on emberborn, with a left click hold ability, and synergies merging smoke power into fire somehow".
  * Hold left mouse, bare-handed and not at a block, and flame gushes from the palm in a short cone ({@link #START_REACH}
  * blocks, reaching {@link #FULL_REACH} over the first second). What it touches is set alight ({@link Flames}) and
- * takes a little fire damage every half second; it lights campfires, candles and TNT and melts snow and ice it meets,
- * but never sets a block on fire, so nobody's village burns down by accident. It costs hunger while it runs.
+ * takes a little fire damage every half second; it lights campfires, candles and TNT and melts snow and ice it meets.
+ * (0.15.65, was never a block fire) Every {@link #FIRE_EVERY} ticks it starts a fire where it plays (on the block it
+ * meets, or the ground under its tip). It costs hunger while it runs, and while it runs the held click never digs.
  * <p>
  * Holding builds <b>heat</b> (0 to full in {@link #HEAT_TICKS}; the client's bar over the crosshair), which cools once
  * you let go. At full heat the flame burns white-hot (more damage), and letting go then throws the gathered heat as a
@@ -87,7 +91,9 @@ public final class EmberKindle {
 	static final int BLOCK_EVERY = 5;
 	/** Hunger a tick, and at or below this food it gutters out. */
 	static final float EXHAUSTION = 0.03F;
-	static final int MIN_FOOD = 6;
+	public static final int MIN_FOOD = 6;
+	/** (0.15.65) How often (ticks) the stream starts a fire where it plays, and how far under its tip it looks for ground. */
+	static final int FIRE_EVERY = 30, FIRE_DROP = 2;
 	/** The client's word lasts this long (ticks): no "still held" in that time and it stops. */
 	static final int TIMEOUT = 40;
 	/** With the Smoke power: sooty smoke left behind every {@link #SMOKE_EVERY} ticks (before the power's own boost), and its least soot. */
@@ -148,6 +154,11 @@ public final class EmberKindle {
 		PayloadTypeRegistry.serverboundPlay().register(Kindle.TYPE, Kindle.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Kindle.TYPE, (payload, context) -> hold(context.player(), payload.on()));
 		ServerTickEvents.END_SERVER_TICK.register(EmberKindle::serverTick);
+		// (0.15.65) the held click never breaks a block while the flame runs (the client holds the digging back too)
+		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+			Live live = LIVE.get(player.getUUID());
+			return live == null || !live.on;
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			LIVE.clear();
 			EmberFireball.clear();
@@ -319,10 +330,17 @@ public final class EmberKindle {
 		if ((now - live.since) % HIT_EVERY == 0) {
 			burn(player, level, from, look, reach, white);
 		}
-		if ((now - live.since) % BLOCK_EVERY == 0) {
+		boolean blocks = (now - live.since) % BLOCK_EVERY == 0;
+		// (0.15.65) Andy: "light fires at a slow tick for the flamethrower portion"
+		boolean fire = (now - live.since) % FIRE_EVERY == FIRE_EVERY - 1;
+		if (blocks || fire) {
 			HitResult touched = level.clip(new ClipContext(from, from.add(look.scale(reach + 0.3)), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-			if (touched instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
+			BlockHitResult hit = touched instanceof BlockHitResult b && b.getType() == HitResult.Type.BLOCK ? b : null;
+			if (blocks && hit != null) {
 				touch(level, hit.getBlockPos(), player);
+			}
+			if (fire) {
+				ignite(level, hit != null ? hit.getBlockPos().relative(hit.getDirection()) : BlockPos.containing(from.add(look.scale(reach))));
 			}
 		}
 		if (Powers.has(player, SmokePower.INSTANCE)) {
@@ -411,6 +429,30 @@ public final class EmberKindle {
 		if (!melt(level, pos)) {
 			melt(level, pos.above());
 		}
+	}
+
+	/**
+	 * (0.15.65) Starts one fire at {@code pos}, or the first spot under it (up to {@link #FIRE_DROP} blocks) where fire can
+	 * stand: open air or grass, out of water, on something it can burn on. True if it did.
+	 */
+	static boolean ignite(ServerLevel level, BlockPos pos) {
+		for (int dy = 0; dy <= FIRE_DROP; dy++) {
+			BlockPos at = pos.below(dy);
+			BlockState here = level.getBlockState(at);
+			if (here.getBlock() instanceof BaseFireBlock) {
+				return false;
+			}
+			if ((here.isAir() || here.canBeReplaced()) && here.getFluidState().isEmpty() && BaseFireBlock.canBePlacedAt(level, at, Direction.UP)) {
+				level.setBlockAndUpdate(at, BaseFireBlock.getState(level, at));
+				level.playSound(null, at, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, 1.2F);
+				return true;
+			}
+			if (!here.isAir() && !here.canBeReplaced()) {
+				// solid: nothing further down is in reach of the flame
+				return false;
+			}
+		}
+		return false;
 	}
 
 	/** An unlit campfire, candle or candle cake, not under water. */
