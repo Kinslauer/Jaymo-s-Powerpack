@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -26,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * twice, once per colour, from a pair of greyscale mask textures ({@code tools/gen_costume.py}): where the primary colour
  * goes and where the secondary goes, which never overlap.
  */
-final class CostumeModels {
+public final class CostumeModels {
 	/**
 	 * How far the suit stands off the skin: over its outer layer (0.25), under where armour would be. (0.13.26) And clear
 	 * of MCA's clothes, whose outer layer sits at 0.3125 (its clothing body 0.0625 plus the 0.25): at 0.3 the two fought
@@ -67,6 +68,34 @@ final class CostumeModels {
 	}
 
 	/**
+	 * (0.15.122) A model worn over the player the way a costume is, for other features (Wounds' bandages and splints):
+	 * {@code layer}'s pieces hang off the player's bones ({@link #bones}, then children of head, body, arms and legs), and
+	 * each draw it takes the pose the wearer's model is drawn in just then, other mods' animations, MCA's body and our
+	 * own poses included. {@code after} runs last as it animates (show or hide pieces for this player there: the model
+	 * is shared by everyone drawn with this renderer). Before submitting it, call {@link #wear}.
+	 */
+	public static PlayerModel worn(LayerDefinition layer, boolean slim, Supplier<PlayerModel> wearer, BiConsumer<PlayerModel, AvatarRenderState> after) {
+		return new Worn(layer.bakeRoot(), slim, wearer, after);
+	}
+
+	/** (0.15.122) The player's bones with nothing on them, to hang a {@link #worn} model's pieces off. */
+	public static MeshDefinition bareBones(boolean slim) {
+		MeshDefinition mesh = PlayerModel.createMesh(CubeDeformation.NONE, slim);
+		mesh.getRoot().clearRecursively();
+		return mesh;
+	}
+
+	/** (0.15.122) Before a {@link #worn} model is submitted: which model this player is drawn with (MCA swaps it per player). */
+	public static void wear(AvatarRenderState state, PlayerModel parent) {
+		state.setData(CostumeBody.PARENT, parent);
+	}
+
+	/** (0.15.122) Whether {@code parent} draws its arms slim (MCA's models say so themselves). */
+	public static boolean slim(PlayerModel parent, AvatarRenderState state) {
+		return CostumeBody.slim(parent, state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
+	}
+
+	/**
 	 * A model worn over the player: each frame (as it's drawn) it re-runs the wearer's model and copies its head, body and
 	 * limbs, so whatever animates the player (other mods included) moves it too; our own poses (crawl, flight, combos...)
 	 * are then laid on it like on any player model, by the model-feature mixins. A cape, if it has one, swings like the
@@ -81,10 +110,17 @@ final class CostumeModels {
 		private final @Nullable ModelPart tailFront, tailBack;
 		/** (0.15.34) Whether it's being drawn over an MCA body just now (set as it animates, read just before it's drawn). */
 		private boolean mcaBody;
+		/** (0.15.122) For a model worn by another feature ({@link #worn}): run last as it animates, with the wearer's state. */
+		private final @Nullable BiConsumer<PlayerModel, AvatarRenderState> after;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
+			this(root, slim, wearer, null);
+		}
+
+		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer, @Nullable BiConsumer<PlayerModel, AvatarRenderState> after) {
 			super(root, slim);
 			this.wearer = wearer;
+			this.after = after;
 			this.cape = this.body.hasChild("cape") ? this.body.getChild("cape") : null;
 			this.bust = this.body.hasChild(CostumeBody.BUST) ? this.body.getChild(CostumeBody.BUST) : null;
 			this.emblem = this.body.hasChild("emblem") ? this.body.getChild("emblem") : null;
@@ -146,6 +182,9 @@ final class CostumeModels {
 					.rotateX((6.0F + state.capeLean / 2.0F + state.capeFlap) * (float)(Math.PI / 180.0))
 					.rotateZ(state.capeLean2 / 2.0F * (float)(Math.PI / 180.0))
 					.rotateY((180.0F - state.capeLean2 / 2.0F) * (float)(Math.PI / 180.0)));
+			}
+			if (this.after != null) {
+				this.after.accept(this, state);
 			}
 		}
 
