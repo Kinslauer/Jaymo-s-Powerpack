@@ -4310,7 +4310,7 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   Bleeder's bite crashed the server (ConcurrentModificationException, Deck 2026-10-22). The Weakness now goes on a task
   run after the hit.
 
-## 0.7.175: rulers' and guards' standing on MCA's screen, their old ways back, and lives among their people (pack 0.15.126)
+## 0.7.176: rulers' and guards' standing on MCA's screen, their old ways back, and lives among their people (pack 0.15.129)
 - Andy: "the King or queen's temperament and status should be on this screen. same with guards. it doesnt seem like they
   still have the old behaviors anymore either. allow them to maintain and build relationships with their people."
 - MCA's interact screen (name, trade, mood, personality) now also shows, for a ruler: "Queen of X", their
