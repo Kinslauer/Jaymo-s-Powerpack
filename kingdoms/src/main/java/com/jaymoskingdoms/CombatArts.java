@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -265,7 +264,7 @@ public final class CombatArts {
 		} else if (blade(weapon) && p.rank(Skills.Perk.REND) > 0 && target.isAlive()) {
 			BLEEDS.removeIf(b -> b.target() == target);
 			BLEEDS.add(new Bleed(target, sp.getUUID(), new int[] {REND_SECONDS * 20}));
-			level.sendParticles(new DustParticleOptions(BLOOD, 1.2F), target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.3, 0.3, 0.0);
+			level.sendParticles(PowersCompat.blood(BLOOD, 1.2F), target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.3, 0.3, 0.0);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.6F);
 			if (!executed) {
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.combo.rend").withStyle(ChatFormatting.RED));
@@ -461,7 +460,7 @@ public final class CombatArts {
 			}
 			if (b.left()[0] % 20 == 0) {
 				strike(level, by, target, REND_DAMAGE);
-				level.sendParticles(new DustParticleOptions(BLOOD, 1.0F), target.getX(), target.getY(0.5), target.getZ(), 6, 0.25, 0.3, 0.25, 0.0);
+				level.sendParticles(PowersCompat.blood(BLOOD, 1.0F), target.getX(), target.getY(0.5), target.getZ(), 6, 0.25, 0.3, 0.25, 0.0);
 			}
 		}
 	}

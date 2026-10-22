@@ -4901,7 +4901,7 @@ public final class WebSymbiote {
 			}
 		}
 		Vec3 at = food.getBoundingBox().getCenter();
-		DustParticleOptions blood = new DustParticleOptions(0x7A0A0A, 1.4F);
+		var blood = com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0A0A, 1.4F);
 		if (meal.big() && t == biteAt(0, meal.reach())) {
 			// bitten clean in half
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.4F, 0.35F);

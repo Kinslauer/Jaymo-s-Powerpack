@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +51,7 @@ final class GravityGutPunch {
 	/** B's cooldown after it (ticks). */
 	static final int COOLDOWN = 220;
 
-	private static final DustParticleOptions BLOOD = new DustParticleOptions(0x7A0A0A, 1.0F);
+	private static final com.jaymospowers.core.blood.BloodParticles.Fleck BLOOD = com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0A0A, 1.0F);
 
 	private static final class Punch {
 		final ResourceKey<Level> dimension;

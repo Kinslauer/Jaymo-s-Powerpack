@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -536,9 +535,9 @@ public final class Dismember {
 
 	private static void gore(ServerLevel level, LivingEntity target, int part) {
 		Vec3 at = stump(target, part);
-		DustParticleOptions blood = new DustParticleOptions(0x8A0303, 1.4F);
+		var blood = com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F);
 		level.sendParticles(blood, at.x, at.y, at.z, 30, 0.2, 0.2, 0.2, 0.0);
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 24,
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 2.0F), at.x, at.y, at.z, 24,
 			0.15, 0.15, 0.15, 0.25);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.1);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.0F, 0.6F);
@@ -595,7 +594,7 @@ public final class Dismember {
 					for (int part : PARTS) {
 						if ((mask & part) != 0) {
 							Vec3 at = stump(body, part);
-							level.sendParticles(new DustParticleOptions(0x7A0000, 1.1F), at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.0);
+							level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.1F), at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.0);
 							level.sendParticles(ParticleTypes.DRIPPING_LAVA, at.x, at.y, at.z, 1, 0.05, 0.0, 0.05, 0.0);
 						}
 					}

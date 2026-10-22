@@ -2575,3 +2575,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and the tip forward into vanilla's crawl tilt so `CrawlPose` takes over smoothly. A slide that ends with Sneak still
   held leaves you prone (`CrawlTaps.goProne`); let go of Sneak to get up (once there's room), or use Jump or the Crawl key
   as usual. Not playtested.
+- **0.15.109, blood doesn't twinkle (Kingdoms 0.7.169):** Andy: "the blood particles currently twinkle like redstone,
+  they should just stay static if anything". All the blood still drawn as vanilla dust (which shimmers through its
+  frames and shades like redstone) is now `BloodParticles.Fleck` (client `BloodFleck`): one of Simple Blood's drop
+  sprites in a steady colour that drifts down and fades. Covers severing and stump drips (`Dismember`, `SeveredPart`),
+  the symbiote's meals, Web's morph and tendril blood, Gravity's gut punch and a cut tail; the redstone-block gore
+  flecks in `BladeBlood.crushed` and `Dismember` are blood flecks too. Kingdoms (Rend, vampires and Night Bleeders,
+  blood scent, the Lycan tear) gets it through `PowersCompat.blood` (Powers' `jaymospowers:blood_fleck_red` by id,
+  plain dust without Powers). Compile-checked; not playtested.

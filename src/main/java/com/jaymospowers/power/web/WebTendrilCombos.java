@@ -442,7 +442,7 @@ public final class WebTendrilCombos {
 				// it comes apart
 				Vec3 at = held.getBoundingBox().getCenter();
 				letGo(player, held);
-				level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.8F), at.x, at.y, at.z, 50, 0.5, 0.3, 0.5, 0.0);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD, 1.8F), at.x, at.y, at.z, 50, 0.5, 0.3, 0.5, 0.0);
 				level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, at.x, at.y, at.z, 8, 0.3, 0.2, 0.3, 0.2);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -456,9 +456,9 @@ public final class WebTendrilCombos {
 		ServerLevel level = player.level();
 		Vec3 at = new Vec3(held.getX(), held.getBoundingBox().minY, held.getZ());
 		KitchenCompat.jolt(held);
-		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.6F), at.x, at.y + 0.2, at.z, 36, held.getBbWidth() * 0.6, 0.2,
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD, 1.6F), at.x, at.y + 0.2, at.z, 36, held.getBbWidth() * 0.6, 0.2,
 			held.getBbWidth() * 0.6, 0.0);
-		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.0F), at.x, at.y + 0.5, at.z, 18, 0.9, 0.6, 0.9, 0.0);
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD, 1.0F), at.x, at.y + 0.5, at.z, 18, 0.9, 0.6, 0.9, 0.0);
 		groundDust(level, at.add(0.0, 0.5, 0.0));
 		WebHaul.burst(level, at, BURST);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.45F);
@@ -524,7 +524,7 @@ public final class WebTendrilCombos {
 		victim.hurtServer(level, level.damageSources().playerAttack(player), Mth.lerp(ramp, BARRAGE_DAMAGE, BARRAGE_DAMAGE_MAX));
 		com.jaymospowers.core.BladeBlood.splash(victim, before - victim.getHealth());
 		Vec3 at = victim.getBoundingBox().getCenter();
-		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.2F), at.x, at.y, at.z, 6 + Math.round(ramp * 10.0F),
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD, 1.2F), at.x, at.y, at.z, 6 + Math.round(ramp * 10.0F),
 			victim.getBbWidth() * 0.4, victim.getBbHeight() * 0.3, victim.getBbWidth() * 0.4, 0.0);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 0.7F + level.getRandom().nextFloat() * 0.4F);

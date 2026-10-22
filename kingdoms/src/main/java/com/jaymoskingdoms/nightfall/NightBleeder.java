@@ -185,7 +185,7 @@ public class NightBleeder extends AbstractIllager {
 		if (hit && target instanceof LivingEntity living) {
 			this.heal(BITE_HEAL);
 			Nightfall.bite(living, ATROPHY_TICKS);
-			level.sendParticles(Nightfall.BLOOD, living.getX(), living.getY(0.7), living.getZ(), 6, 0.2, 0.2, 0.2, 0.0);
+			level.sendParticles(Nightfall.blood(), living.getX(), living.getY(0.7), living.getZ(), 6, 0.2, 0.2, 0.2, 0.0);
 		}
 		return hit;
 	}

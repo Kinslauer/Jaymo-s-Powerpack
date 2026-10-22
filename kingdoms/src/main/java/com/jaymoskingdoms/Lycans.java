@@ -19,7 +19,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -40,7 +39,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.MoonPhase;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -449,7 +447,7 @@ public final class Lycans {
 	/** The beast's bursting out: smoke, blood, a crack. */
 	static void tearFx(ServerLevel level, LivingEntity mob) {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, mob.getX(), mob.getY(0.5), mob.getZ(), 20, 0.4, 0.6, 0.4, 0.03);
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()), mob.getX(), mob.getY(0.6), mob.getZ(),
+		level.sendParticles(PowersCompat.blood(0x8A0303, 2.0F), mob.getX(), mob.getY(0.6), mob.getZ(),
 			16, 0.3, 0.4, 0.3, 0.1);
 		level.playSound(null, mob.blockPosition(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.5F, 0.4F);
 	}

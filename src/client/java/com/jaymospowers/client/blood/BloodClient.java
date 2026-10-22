@@ -14,7 +14,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 /**
  * (0.15.93) The blood's client side (Iron's Simple Blood's {@code ClientEvents}, ported): each drop kind's sprites, the
- * {@link BloodParticles.Spray} that picks one of them at random, and the {@link BloodPuddle}s' own group.
+ * {@link BloodParticles.Spray} that picks one of them at random, the {@link BloodPuddle}s' own group, and (0.15.109) the
+ * still {@link BloodFleck}s.
  */
 public final class BloodClient {
 	/** The red of a drop sent without a colour (a bare {@code /particle jaymospowers:blood_drop}). */
@@ -46,6 +47,10 @@ public final class BloodClient {
 			return kinds.isEmpty() ? null : kinds.get(random.nextInt(kinds.size())).create(level, x, y, z, xd, yd, zd, options.color(),
 				options.scale());
 		});
+		registry.register(BloodParticles.FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodFleck(level, x, y, z, xd, yd,
+			zd, sprites, options.color(), options.scale()));
+		registry.register(BloodParticles.RED_FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodFleck(level, x, y, z, xd,
+			yd, zd, sprites, RED, 1.0F));
 		registry.register(BloodParticles.PUDDLE,
 			sprites -> (options, level, x, y, z, xd, yd, zd, random) -> new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale()));
 	}
