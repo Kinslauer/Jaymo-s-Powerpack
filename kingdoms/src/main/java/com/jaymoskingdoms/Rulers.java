@@ -3,8 +3,10 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -12,6 +14,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -68,17 +71,23 @@ public final class Rulers {
 	/** Badly hurt (this share of their health), they sound the horn once; the guards this near come running. */
 	static final float RALLY_AT = 0.5F;
 	static final double RALLY_RANGE = 48.0;
+	/** (0.7.171) How often a villager ruler's crown is looked for (ticks): dressed again if it's gone. */
+	static final int REGALIA_TICKS = 100;
 	/** How often a folk ruler of an MCA realm looks to hand over the throne (ticks). */
 	static final int RETIRE_TICKS = 200;
 
 	/** A villager ruler's added health (an attribute modifier). */
 	static final Identifier HEALTH = JaymosKingdoms.id("ruler_health");
 
-	/** Who holds (or last held) a realm's throne, and their blood (a purist's realm is all of it, {@link Purists}). */
-	record Reign(UUID ruler, String blood) {
+	/**
+	 * Who holds (or last held) a realm's throne, and their blood (a purist's realm is all of it, {@link Purists}); (0.7.171)
+	 * and whether she's a queen (or a lady).
+	 */
+	record Reign(UUID ruler, String blood, boolean female) {
 		static final Codec<Reign> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.CODEC.fieldOf("ruler").forGetter(Reign::ruler),
-				Codec.STRING.optionalFieldOf("blood", "").forGetter(Reign::blood))
+				Codec.STRING.optionalFieldOf("blood", "").forGetter(Reign::blood),
+				Codec.BOOL.optionalFieldOf("female", false).forGetter(Reign::female))
 			.apply(i, Reign::new));
 	}
 
@@ -192,6 +201,72 @@ public final class Rulers {
 		return reign == null || !reign.ruler().equals(f.leader().get()) ? null : Heritage.Kind.byKey(reign.blood());
 	}
 
+	/**
+	 * (0.7.171) Andy: "the mca kings should now be queens if they are female". {@code f}'s ruler is a woman: a queen (a
+	 * lady, of a fiefdom). False for a folk ruler or no ruler.
+	 */
+	static boolean queen(Faction f) {
+		MinecraftServer s = server;
+		if (s == null || f.leader().isEmpty()) {
+			return false;
+		}
+		Reign reign = Factions.level(s).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(f.id()));
+		return reign != null && reign.female() && reign.ruler().equals(f.leader().get());
+	}
+
+	/**
+	 * {@code key}, or its queen's (lady's) wording ({@code <key>.her}) if the ruler it speaks of is a woman and the line
+	 * has one (a line that never names the ruler has none).
+	 */
+	public static String her(String key, boolean female) {
+		return female && herKeys().contains(key) ? key + ".her" : key;
+	}
+
+	/** The server, while one is running. */
+	static @Nullable MinecraftServer server() {
+		return server;
+	}
+
+	/** {@code key} as said of {@code f}'s ruler: a queen's wording if she's a woman. */
+	public static String her(String key, @Nullable Faction f) {
+		return f != null && queen(f) ? her(key, true) : key;
+	}
+
+	/** {@code key} as said by {@code speaker} of the ruler of the realm they're in (a guard, a townsman). */
+	public static String herHere(String key, Entity speaker) {
+		MinecraftServer s = speaker.level().getServer();
+		return s == null ? key : her(key, Factions.realmNear(s, speaker.blockPosition(), Economy.POPULATION_RANGE));
+	}
+
+	/** The lines with a queen's wording ({@code <key>.her} in our lang file), read once. */
+	private static Set<String> herKeys() {
+		Set<String> keys = HER_KEYS;
+		if (keys == null) {
+			Set<String> found = new HashSet<>();
+			FabricLoader.getInstance().getModContainer(JaymosKingdoms.MOD_ID).flatMap(m -> m.findPath("assets/jaymoskingdoms/lang/en_us.json"))
+				.ifPresent(path -> {
+					try (java.io.Reader in = java.nio.file.Files.newBufferedReader(path)) {
+						for (String key : com.google.gson.JsonParser.parseReader(in).getAsJsonObject().keySet()) {
+							if (key.endsWith(".her")) {
+								found.add(key.substring(0, key.length() - ".her".length()));
+							}
+						}
+					} catch (java.io.IOException | RuntimeException e) {
+						JaymosKingdoms.LOGGER.warn("Couldn't read the queens' wordings: {}", e.toString());
+					}
+				});
+			keys = HER_KEYS = Set.copyOf(found);
+		}
+		return keys;
+	}
+
+	private static volatile @Nullable Set<String> HER_KEYS;
+
+	/** A ruler's title: King, Queen, Lord or Lady. */
+	static Component title(int role, boolean female) {
+		return Component.translatable("title.jaymoskingdoms." + (role == Folk.LORD ? (female ? "lady" : "lord") : (female ? "queen" : "king")));
+	}
+
 	/** Who last ruled {@code faction} (alive or dead), if a villager: their family is first in line. */
 	static @Nullable UUID house(MinecraftServer server, int faction) {
 		Reign reign = Factions.level(server).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(faction));
@@ -202,7 +277,7 @@ public final class Rulers {
 		ServerLevel level = Factions.level(server);
 		Map<String, Reign> reigns = new HashMap<>(level.getAttachedOrElse(REIGNS, Map.<String, Reign>of()));
 		Heritage.Kind kind = VillagerHeritage.of(ruler);
-		reigns.put(Integer.toString(faction), new Reign(ruler.getUUID(), kind == null ? "" : kind.key()));
+		reigns.put(Integer.toString(faction), new Reign(ruler.getUUID(), kind == null ? "" : kind.key(), McaCompat.female(ruler)));
 		level.setAttached(REIGNS, Map.copyOf(reigns));
 	}
 
@@ -219,7 +294,7 @@ public final class Rulers {
 			return null;
 		}
 		PathfinderMob mob = w.mob();
-		fit(mob, role);
+		fit(mob, role, faction);
 		Castle.Keep keep = Factions.keep(s, faction.id());
 		mob.setHomeTo(keep != null ? keep.throne() : faction.seat(), keep != null ? 3 : Folk.HOME_RADIUS);
 		Faction crowned = Factions.update(s, faction.id(), f -> f.withLeader(Optional.of(mob.getUUID())));
@@ -230,12 +305,18 @@ public final class Rulers {
 		return crowned;
 	}
 
-	/** A villager takes the throne as {@code role}: the crown on their head, and a ruler's health. */
-	static void fit(PathfinderMob mob, int role) {
-		if (!mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.GOLDEN_HELMET)) {
-			mob.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+	/**
+	 * A villager takes the throne of {@code faction} as {@code role}: (0.7.171) royal clothes from MCA's library if it has
+	 * any for them, a crown and (without those clothes) royal attire ({@link Regalia}), and a ruler's health.
+	 */
+	static void fit(PathfinderMob mob, int role, Faction faction) {
+		if (mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.GOLDEN_HELMET)) {
+			// (the plain gold helmet rulers wore before 0.7.171)
+			mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 		}
-		mob.setDropChance(EquipmentSlot.HEAD, 0.0F);
+		boolean robed = McaCompat.redress(mob);
+		Regalia.dress(mob, role, faction, McaCompat.female(mob), robed);
+		dropBar(mob.getUUID());
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.removeModifier(HEALTH);
@@ -245,11 +326,10 @@ public final class Rulers {
 		mob.setPersistenceRequired();
 	}
 
-	/** Off the throne (it fell, or went to another): the crown and the health go. */
+	/** Off the throne (it fell, or went to another; their role already gone): the regalia, royal clothes and health go. */
 	static void unfit(PathfinderMob mob) {
-		if (mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.GOLDEN_HELMET)) {
-			mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-		}
+		Regalia.undress(mob);
+		McaCompat.redress(mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) != null) {
 			health.removeModifier(HEALTH);
@@ -317,10 +397,18 @@ public final class Rulers {
 		int role = f.type() == FactionType.FIEFDOM ? Folk.LORD : Folk.KING;
 		if (w.role() != role) {
 			w.enlist(role, f.id());
-			fit(mob, role);
+			fit(mob, role, f);
+		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob)) {
+			// (0.7.171) crowned before the regalia (or it was taken off them): they're dressed for the throne
+			fit(mob, role, f);
+			if (f.leader().map(mob.getUUID()::equals).orElse(false)) {
+				// (and whether she's a queen is written down)
+				reign(s, f.id(), mob);
+			}
 		}
 		if (mob.tickCount % 5 == 0) {
-			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id, mob.getDisplayName(),
+			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id,
+				Component.translatable("entity.jaymoskingdoms.ruler_titled", title(role, McaCompat.female(mob)), mob.getDisplayName(), f.name()),
 				role == Folk.LORD ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
 			BossBars.show(level, mob, bar);
@@ -382,7 +470,8 @@ public final class Rulers {
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), net.minecraft.sounds.SoundEvents.RAID_HORN.value(),
 			net.minecraft.sounds.SoundSource.HOSTILE, 4.0F, 1.0F);
 		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, mob.getBoundingBox().inflate(32.0))) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", mob.getDisplayName()).withStyle(ChatFormatting.GOLD));
+			player.sendSystemMessage(Component.translatable(her("message.jaymoskingdoms.king_rallies", McaCompat.female(mob)), mob.getDisplayName())
+				.withStyle(ChatFormatting.GOLD));
 		}
 	}
 

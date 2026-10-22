@@ -249,7 +249,21 @@ public final class McaCompat {
 	static void register() {
 		if (LOADED) {
 			McaBridge.register();
+			ClothingLibrary.register();
 		}
+	}
+
+	/** (0.7.171) {@code e} is a woman (an MCA villager's gender); false without MCA. */
+	static boolean female(LivingEntity e) {
+		return LOADED && McaBridge.female(e);
+	}
+
+	/**
+	 * (0.7.171) {@code mob} (a ruler just crowned, or one who's stepped down) is dressed again from MCA's clothing
+	 * library ({@link ClothingLibrary}). True if they now wear royal clothes from it.
+	 */
+	static boolean redress(PathfinderMob mob) {
+		return LOADED && McaBridge.redress(mob);
 	}
 
 	/** One of {@code f}'s MCA villagers made its {@code role} (or a new one who moves in, if none can be spared); null without MCA. */

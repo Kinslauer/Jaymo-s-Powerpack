@@ -317,7 +317,7 @@ final class Festivals {
 			act(level, f, v, g, random);
 		}
 		if (random.nextFloat() < SAY_CHANCE) {
-			Speech.say(level, v, Component.translatable("festival.jaymoskingdoms." + g.part.key() + "." + random.nextInt(LINES)), Speech.GOLD, SPEECH_RANGE);
+			Speech.say(level, v, Component.translatable(Rulers.herHere("festival.jaymoskingdoms." + g.part.key() + "." + random.nextInt(LINES), v)), Speech.GOLD, SPEECH_RANGE);
 		}
 		return true;
 	}

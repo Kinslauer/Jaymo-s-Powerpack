@@ -261,7 +261,7 @@ final class Carriages {
 			if (build(level, f, keep) != null) {
 				for (ServerPlayer p : level.players()) {
 					if (p.blockPosition().closerThan(f.seat(), 96.0)) {
-						p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.carriage.bought", f.name()).withStyle(ChatFormatting.GOLD));
+						p.sendSystemMessage(Component.translatable(Rulers.her("message.jaymoskingdoms.carriage.bought", Rulers.queen(f)), f.name()).withStyle(ChatFormatting.GOLD));
 					}
 				}
 				JaymosKingdoms.LOGGER.info("{} bought its king a carriage", f.name());

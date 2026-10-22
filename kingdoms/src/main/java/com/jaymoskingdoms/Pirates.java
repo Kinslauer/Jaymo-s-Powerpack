@@ -5,8 +5,10 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -167,10 +169,14 @@ public final class Pirates {
 		return stack;
 	}
 
-	/** A flintlock pistol (ours, with TaCZ), or a crossbow without it (for the look; they fire it themselves). */
+	/**
+	 * A flintlock pistol (WeaponMod's), or a crossbow without it (for the look; they fire it themselves). (0.7.172) No
+	 * longer Jaymo's Powers' TaCZ one: Andy didn't like the TaCZ flintlocks.
+	 */
 	static ItemStack pistol() {
-		ItemStack gun = TaczGuns.gun("flintlock_pistol");
-		return gun.isEmpty() ? new ItemStack(Items.CROSSBOW) : gun;
+		Item gun = Javelins.WEAPONMOD_LOADED
+			? BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Javelins.WEAPONMOD, "flintlock")) : Items.AIR;
+		return new ItemStack(gun == Items.AIR ? Items.CROSSBOW : gun);
 	}
 
 	/** A pirate captain's name, the same every time for the same seed. */

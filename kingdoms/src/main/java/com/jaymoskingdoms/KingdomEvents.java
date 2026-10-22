@@ -124,10 +124,11 @@ public final class KingdomEvents {
 			for (Faction faction : Factions.all(server)) {
 				if (faction.successionAt() >= 0 && now >= faction.successionAt() && !faction.fallen()) {
 					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L));
-					announce(server, Component.translatable(faction.type() == FactionType.FIEFDOM ? "message.jaymoskingdoms.succession.lord"
-						: "message.jaymoskingdoms.succession", faction.name()).withStyle(ChatFormatting.GOLD));
-					// (0.7.138) one of its own people, by name
 					PathfinderMob heir = crowned == null ? null : Rulers.of(overworld, crowned);
+					// (0.7.171) a new queen (or lady), if the heir's a woman
+					announce(server, Component.translatable(Rulers.her(faction.type() == FactionType.FIEFDOM ? "message.jaymoskingdoms.succession.lord"
+						: "message.jaymoskingdoms.succession", heir != null && McaCompat.female(heir)), faction.name()).withStyle(ChatFormatting.GOLD));
+					// (0.7.138) one of its own people, by name
 					if (heir != null && !(heir instanceof Folk)) {
 						announce(server, Component.translatable("message.jaymoskingdoms.succession.villager", heir.getDisplayName(), faction.name())
 							.withStyle(ChatFormatting.GOLD));
@@ -552,6 +553,8 @@ public final class KingdomEvents {
 	private static void rulerDied(ServerLevel level, Faction faction, LivingEntity ruler, boolean lord, @Nullable ServerPlayer killer, DamageSource source) {
 		MinecraftServer server = level.getServer();
 		boolean wasLeader = faction.leader().isPresent() && faction.leader().get().equals(ruler.getUUID());
+		// (0.7.171) a queen, or a lady
+		boolean female = McaCompat.female(ruler);
 		Factions.update(server, faction.id(), f -> f.withLeader(Optional.empty()));
 		if (!faction.type().isRealm()) {
 			// (a camp's chief: the barbarians' own business)
@@ -561,7 +564,7 @@ public final class KingdomEvents {
 			// (0.5.54) died in his bed, of old age: the realm mourns, and his heir is crowned (no war, no fate decides it)
 			if (wasLeader) {
 				Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
-				announce(server, Component.translatable(lord ? "message.jaymoskingdoms.old_age.lord" : "message.jaymoskingdoms.old_age.king",
+				announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.old_age.lord" : "message.jaymoskingdoms.old_age.king", female),
 					faction.name()).withStyle(ChatFormatting.YELLOW));
 			}
 			return;
@@ -586,7 +589,7 @@ public final class KingdomEvents {
 		}
 		// (0.5.1) his wardens failed him
 		Wardens.rulerFell(level, faction);
-		announce(server, Component.translatable(lord ? "message.jaymoskingdoms.lord_fallen" : "message.jaymoskingdoms.king_fallen", faction.name(),
+		announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.lord_fallen" : "message.jaymoskingdoms.king_fallen", female), faction.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.RED));
 		// a ruler killed by the other side of a war: the war decides
 		if (Wars.rulerFell(level, faction, source)) {
@@ -612,7 +615,7 @@ public final class KingdomEvents {
 			announce(server, Component.translatable("message.jaymoskingdoms.fate.ruin", faction.name()).withStyle(ChatFormatting.DARK_RED));
 		} else {
 			Factions.update(server, faction.id(), f -> f.withSuccessionAt(heir));
-			announce(server, Component.translatable(lord ? "message.jaymoskingdoms.fate.successor_lord" : "message.jaymoskingdoms.fate.successor",
+			announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.fate.successor_lord" : "message.jaymoskingdoms.fate.successor", female),
 				faction.name()).withStyle(ChatFormatting.YELLOW));
 		}
 	}

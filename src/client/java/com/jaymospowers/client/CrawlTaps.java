@@ -18,8 +18,12 @@ import org.jspecify.annotations.Nullable;
  * again (or Jump) to get up, which waits until there's room to stand. While crawling, double-tap Left or Right to roll
  * one block that way; keep holding it to keep rolling, for up to 2 s one way before you must roll back (rolling back
  * puts the fire on you out).
+ * <p>
+ * (0.15.108) Pressed while hanging from a ledge, it climbs you in onto your belly when there's room to lie up there
+ * ({@link LedgeClient#proneClimb}; otherwise it does nothing, rather than dropping you). A slide that ends with Sneak still
+ * held leaves you prone ({@link #goProne}); you get up when you let go of Sneak (once there's room), or as usual.
  */
-final class CrawlTaps {
+public final class CrawlTaps {
 	/** The most ticks between two Left (or two Right) presses that count as a double tap for a roll. */
 	private static final int ROLL_TAP_TICKS = 7;
 
@@ -27,6 +31,8 @@ final class CrawlTaps {
 	private static boolean crawling;
 	/** Jump must be let go once after going prone before a press of it stands you up. */
 	private static boolean jumpReleased;
+	/** (0.15.108) Prone from a held slide: letting go of Sneak gets you up. */
+	private static boolean whileSneaking;
 
 	private static boolean leftWasDown;
 	private static boolean rightWasDown;
@@ -66,6 +72,7 @@ final class CrawlTaps {
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
 			crawling = false;
+			whileSneaking = false;
 			Crawl.localCrawler = -1;
 			rollLeft = 0;
 			rollStart = Long.MIN_VALUE;
@@ -81,14 +88,18 @@ final class CrawlTaps {
 		if (crawling) {
 			boolean jumpPressed = jump && jumpReleased;
 			jumpReleased |= !jump;
-			if (!Crawl.canCrawl(player) || (keyPressed || jumpPressed) && roomToStand(player)) {
+			boolean sneakLetGo = whileSneaking && !minecraft.options.keyShift.isDown();
+			if (!Crawl.canCrawl(player) || (keyPressed || jumpPressed || sneakLetGo) && roomToStand(player)) {
 				stop();
+			} else if (keyPressed) {
+				// (0.15.108) the key takes over a held-slide prone: it stays down till pressed again
+				whileSneaking = false;
 			}
+		} else if (keyPressed && LedgeClient.hanging()) {
+			// (0.15.108) on a ledge: in onto your belly if there's room, never a drop
+			LedgeClient.proneClimb(player);
 		} else if (keyPressed && Crawl.canCrawl(player)) {
-			crawling = true;
-			jumpReleased = !jump;
-			Crawl.localCrawler = player.getId();
-			ClientPlayNetworking.send(new Crawl.Key(true));
+			goProne(player, false);
 		}
 		tickRoll(minecraft, player);
 		tickAdrift(player);
@@ -166,8 +177,24 @@ final class CrawlTaps {
 		return player.level().noCollision(player, player.getDimensions(up).makeBoundingBox(player.position()).deflate(1.0E-7));
 	}
 
+	/**
+	 * (0.15.108) Go prone now (as the Crawl key does). {@code whileSneaking}: from a held slide, so letting go of Sneak gets
+	 * you up again.
+	 */
+	public static void goProne(LocalPlayer player, boolean whileSneaking) {
+		if (crawling || !Crawl.canCrawl(player)) {
+			return;
+		}
+		crawling = true;
+		CrawlTaps.whileSneaking = whileSneaking;
+		jumpReleased = !Minecraft.getInstance().options.keyJump.isDown();
+		Crawl.localCrawler = player.getId();
+		ClientPlayNetworking.send(new Crawl.Key(true));
+	}
+
 	private static void stop() {
 		crawling = false;
+		whileSneaking = false;
 		Crawl.localCrawler = -1;
 		ClientPlayNetworking.send(new Crawl.Key(false));
 	}

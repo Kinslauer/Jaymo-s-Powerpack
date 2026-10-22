@@ -51,6 +51,8 @@ public class JaymosKitchen implements ModInitializer {
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
 		Corpses.register();
+		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
+		com.jaymoskitchen.corpse.SpiderCrush.register();
 		com.jaymoskitchen.corpse.Butchers.register();
 		com.jaymoskitchen.corpse.Scavengers.register();
 		PlayerCorpses.register();

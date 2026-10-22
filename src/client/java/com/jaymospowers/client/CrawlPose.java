@@ -91,7 +91,9 @@ public final class CrawlPose {
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
-		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()) {
+		// (0.15.108) climbing in onto the belly from a ledge, LedgePose draws it until the climb is done
+		if (!(entity instanceof Player player) || !(Crawl.crawling(player) || Downed.isDowned(player)) || player.isInWater()
+			|| com.jaymospowers.core.Ledge.proneClimbing(player)) {
 			state.setData(KEY, null);
 			return;
 		}

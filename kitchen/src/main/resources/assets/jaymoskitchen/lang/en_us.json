@@ -89,6 +89,7 @@
 	"item.jaymoskitchen.corpse.of": "%s Corpse",
 	"block.jaymoskitchen.butcher_block": "Oak Butcher Block",
 	"entity.jaymoskitchen.corpse": "Corpse",
+	"entity.jaymoskitchen.spider_leg": "Spider Leg",
 	"message.jaymoskitchen.corpse.need_axe": "Chop it with an axe.",
 	"message.jaymoskitchen.corpse.carry": "Chop it with an axe, or carry it to a Butcher Block.",
 	"message.jaymoskitchen.corpse.no_room": "No room to carry it.",

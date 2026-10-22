@@ -1,0 +1,31 @@
+{
+  "textures": {
+    "particle": "jaymoskingdoms:block/town_notice_1",
+    "notice": "jaymoskingdoms:block/town_notice_1"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        2,
+        6.75
+      ],
+      "to": [
+        12,
+        11,
+        7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#notice",
+          "uv": [
+            0,
+            0,
+            8,
+            9
+          ]
+        }
+      }
+    }
+  ]
+}

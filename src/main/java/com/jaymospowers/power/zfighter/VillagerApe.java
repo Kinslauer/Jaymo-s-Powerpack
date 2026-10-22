@@ -443,7 +443,7 @@ final class VillagerApe {
 		mob.addTag(CUT_IN_RAMPAGE);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 3.0F, 0.5F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.HOSTILE, 4.0F, 0.4F);
-		level.sendParticles(new DustParticleOptions(0x8A0A0A, 3.0F), true, false, mob.getX(), mob.getY() + 1.0, mob.getZ(), 40, mob.getBbWidth() * 0.4,
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x8A0A0A, 3.0F), true, false, mob.getX(), mob.getY() + 1.0, mob.getZ(), 40, mob.getBbWidth() * 0.4,
 			0.5, mob.getBbWidth() * 0.4, 0.0);
 		tell(mob, level, "message.jaymospowers.villager_ape_cut", ChatFormatting.GOLD);
 		end(mob, live, level);

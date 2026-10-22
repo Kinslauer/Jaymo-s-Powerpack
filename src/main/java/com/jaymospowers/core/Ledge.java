@@ -47,6 +47,11 @@ import org.jspecify.annotations.Nullable;
  * wall. Press Jump again to pull yourself up and over (a short mantle: pull up, knee on the edge, stand); Sneak, Back or
  * looking away from the wall lets go.
  *
+ * <p>(0.15.108) Under a gap only one block high (no room to stand on the top), going prone (the Crawl key) while you hang
+ * pulls you up and in onto your belly instead, and you end the climb crawling. Jump does the same there, since standing
+ * isn't possible. The catch is more forgiving too: an edge a little above your eyes, a wall a little further off, or the
+ * top of a jump already falling are all caught, and Jump needn't be held (forward still is).
+ *
  * <p>The moves are the client's (player movement is client-authoritative; see {@code client/LedgeClient}): it finds the
  * ledge with {@link #find}, holds the body still and walks it up the mantle's path. The server checks the rules
  * ({@link #canHang}), resets the fall, charges the climb's hunger, plays the sounds, syncs {@link #HOLD} so everyone
@@ -55,15 +60,15 @@ import org.jspecify.annotations.Nullable;
 public final class Ledge {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
 	/** The edge may be at most this far above your eyes to be caught (blocks): "if you can see over it with a jump". */
-	public static final double EDGE_ABOVE_EYES = 0.1;
+	public static final double EDGE_ABOVE_EYES = 0.45;
 	/** The edge must be at least this far above your feet when you catch it, so one-block steps are just jumped. */
 	public static final double EDGE_ABOVE_FEET = 1.1;
 	/** Rising, or no faster than this falling (blocks/tick: the top of the jump), to catch an edge. */
-	public static final double GRAB_MIN_VY = -0.2;
+	public static final double GRAB_MIN_VY = -0.6;
 	/** The wall's face may be at most this far ahead of your body to reach it (blocks). */
-	public static final double REACH = 0.35;
+	public static final double REACH = 0.5;
 	/** Facing within this many degrees of straight at the wall to grab it (a glancing jump goes past). */
-	public static final float GRAB_FACING_DEGREES = 40.0F;
+	public static final float GRAB_FACING_DEGREES = 45.0F;
 	/** The top of the edge needs at least this much area (square blocks) to hang from: no fence posts or panes. */
 	public static final double MIN_TOP_AREA = 0.45;
 	/** Blocks never grabbed (fences, walls, gates, cactus, and anything a datapack adds). */
@@ -93,6 +98,15 @@ public final class Ledge {
 	/** Hunger each climb costs (exhaustion: 4 is one hunger point; a sprint jump is 0.2). */
 	public static final float CLIMB_EXHAUSTION = 0.6F;
 
+	/** (0.15.108) The prone climb into a 1-high gap (pull up, tip forward, slide in on your belly) takes this long (ticks). */
+	public static final int PRONE_CLIMB_TICKS = 20;
+	/** Of the prone climb, the share spent rising to the top; the rest slides in across it. */
+	public static final float PRONE_RISE_SHARE = 0.45F;
+	/** Going prone, the body (now 0.6 high) is lifted this far so the eyes stay where they were (standing eyes 1.62, prone 0.4). */
+	public static final double PRONE_EYE_KEEP = 1.22;
+	/** Where the prone climb ends: your middle this far past the edge (blocks), or {@link #CLIMB_IN} when the gap is shallower. */
+	public static final double PRONE_IN = 0.9;
+
 	/** Ticks the local client waits for the server to confirm a grab before giving up on it (a refused grab drops). */
 	public static final int CONFIRM_TICKS = 20;
 	/** After a hang or climb ends, the server goes easy on the player's movement this long (ticks). */
@@ -107,12 +121,22 @@ public final class Ledge {
 	 * A player on a ledge, for everyone's client: the wall's side ({@code face}, a horizontal direction's 2D value),
 	 * when the hang (or the climb, once {@code climbing}) began (game time).
 	 */
-	public record Hold(int face, long start, boolean climbing) {
+	public record Hold(int face, long start, boolean climbing, boolean prone) {
 		public static final StreamCodec<ByteBuf, Hold> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Hold::face,
 			ByteBufCodecs.VAR_LONG, Hold::start,
 			ByteBufCodecs.BOOL, Hold::climbing,
+			ByteBufCodecs.BOOL, Hold::prone,
 			Hold::new);
+
+		public Hold(int face, long start, boolean climbing) {
+			this(face, start, climbing, false);
+		}
+
+		/** How long this climb takes (ticks). */
+		public int climbTicks() {
+			return this.prone ? PRONE_CLIMB_TICKS : CLIMB_TICKS;
+		}
 
 		public Direction direction() {
 			return Direction.from2DDataValue(this.face);
@@ -126,9 +150,10 @@ public final class Ledge {
 	/**
 	 * A ledge found ahead: the block whose top is the edge ({@code pos}), the wall's side from the player
 	 * ({@code face}), the edge's height ({@code top}), where the body hangs ({@code hang}) and where the climb ends
-	 * ({@code onTop}).
+	 * ({@code onTop}). (0.15.108) {@code stand}: there's room to stand on the top (else only {@code onBelly}, where a prone
+	 * climb ends, null when there's no room to lie there either).
 	 */
-	public record Spot(BlockPos pos, Direction face, double top, Vec3 hang, Vec3 onTop) {
+	public record Spot(BlockPos pos, Direction face, double top, Vec3 hang, Vec3 onTop, boolean stand, @Nullable Vec3 onBelly) {
 	}
 
 	/** Client → server: caught the edge of the block at {@code pos}, on the wall at side {@code face} (2D value). */
@@ -143,10 +168,15 @@ public final class Ledge {
 		}
 	}
 
-	/** Client → server: the hanging player pulls up and over ({@code climb}), or lets go. */
-	public record Act(boolean climb) implements CustomPacketPayload {
+	/** Client → server: the hanging player pulls up and over ({@code climb}; (0.15.108) onto their belly, {@code prone}), or lets go. */
+	public record Act(boolean climb, boolean prone) implements CustomPacketPayload {
 		public static final Type<Act> TYPE = new Type<>(JaymosPowers.id("ledge_act"));
-		public static final StreamCodec<ByteBuf, Act> CODEC = ByteBufCodecs.BOOL.map(Act::new, Act::climb);
+		public static final StreamCodec<ByteBuf, Act> CODEC = StreamCodec.composite(
+			ByteBufCodecs.BOOL, Act::climb, ByteBufCodecs.BOOL, Act::prone, Act::new);
+
+		public Act(boolean climb) {
+			this(climb, false);
+		}
 
 		@Override
 		public Type<Act> type() {
@@ -171,7 +201,7 @@ public final class Ledge {
 		PayloadTypeRegistry.serverboundPlay().register(Grab.TYPE, Grab.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Act.TYPE, Act.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Grab.TYPE, (payload, ctx) -> grab(ctx.player(), payload));
-		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (payload, ctx) -> act(ctx.player(), payload.climb()));
+		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (payload, ctx) -> act(ctx.player(), payload.climb(), payload.prone()));
 		ServerTickEvents.END_SERVER_TICK.register(Ledge::tick);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (entity instanceof ServerPlayer player && damageTaken > 0.0F && !blocked && HOLDING.containsKey(player.getUUID())
@@ -197,6 +227,12 @@ public final class Ledge {
 		return player.getAttached(HOLD);
 	}
 
+	/** (0.15.108) Climbing onto their belly into a low gap (the crawl that begins with it doesn't end the hold). */
+	public static boolean proneClimbing(Player player) {
+		Hold hold = hold(player);
+		return hold != null && hold.prone();
+	}
+
 	/** Hanging from a ledge or climbing over one. */
 	public static boolean onLedge(Player player) {
 		return hold(player) != null;
@@ -215,7 +251,7 @@ public final class Ledge {
 			return false;
 		}
 		if (Carry.isCarried(player) || Carry.isCarrying(player) || Carry.isThrown(player) || KitchenCompat.isCarryingCorpse(player)
-			|| Crawl.crawling(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
+			|| Crawl.crawling(player) && !proneClimbing(player) || player.getAttached(Meditate.STATE) != null || KitchenCompat.isLimp(player)) {
 			return false;
 		}
 		return !FlightRoll.powerFlying(player)
@@ -340,19 +376,41 @@ public final class Ledge {
 		if (!level.noCollision(player, box) || hang.y > player.getY() + 0.6) {
 			return null;
 		}
-		Vec3 onTop = face.getAxis() == Direction.Axis.X ? new Vec3(onAlong, top + CLIMB_LIFT, hang.z) : new Vec3(hang.x, top + CLIMB_LIFT, onAlong);
+		Vec3 onTop = along(face, hang, onAlong, top + CLIMB_LIFT);
 		// straight up from the hang to standing height over the edge, then across onto the top
 		AABB rise = box.expandTowards(0.0, top + CLIMB_LIFT - hang.y, 0.0);
 		AABB across = box.move(0.0, top + CLIMB_LIFT - hang.y, 0.0).expandTowards(onTop.x - hang.x, 0.0, onTop.z - hang.z);
-		if (!level.noCollision(player, rise) || !level.noCollision(player, across)) {
+		boolean stand = level.noCollision(player, rise) && level.noCollision(player, across) && solidUnder(level, onTop, top);
+		// (0.15.108) lying flat: up from where the prone body starts (eyes kept level) to the top, then in on the belly
+		Vec3 onBelly = null;
+		AABB flat = player.getDimensions(net.minecraft.world.entity.Pose.SWIMMING).makeBoundingBox(hang).deflate(1.0E-7);
+		double from = Math.min(hang.y + PRONE_EYE_KEEP, top + CLIMB_LIFT);
+		AABB flatRise = flat.move(0.0, from - hang.y, 0.0).expandTowards(0.0, top + CLIMB_LIFT - from, 0.0);
+		if (level.noCollision(player, flatRise)) {
+			for (double in : new double[] {PRONE_IN, CLIMB_IN}) {
+				Vec3 belly = along(face, hang, wall + sign * in, top + CLIMB_LIFT);
+				AABB flatAcross = flat.move(0.0, top + CLIMB_LIFT - hang.y, 0.0).expandTowards(belly.x - hang.x, 0.0, belly.z - hang.z);
+				if (level.noCollision(player, flatAcross) && solidUnder(level, belly, top)) {
+					onBelly = belly;
+					break;
+				}
+			}
+		}
+		if (!stand && onBelly == null) {
 			return null;
 		}
-		// and the top really holds you up there (not a sliver of a block under the middle)
-		BlockPos under = BlockPos.containing(onTop.x, top - 0.01, onTop.z);
-		if (level.getBlockState(under).getCollisionShape(level, under).isEmpty()) {
-			return null;
-		}
-		return new Spot(pos, face, top, hang, onTop);
+		return new Spot(pos, face, top, hang, onTop, stand, onBelly);
+	}
+
+	/** {@code hang} moved to {@code at} along the wall's axis, at height {@code y}. */
+	private static Vec3 along(Direction face, Vec3 hang, double at, double y) {
+		return face.getAxis() == Direction.Axis.X ? new Vec3(at, y, hang.z) : new Vec3(hang.x, y, at);
+	}
+
+	/** The top really holds you up at {@code at} (not a sliver of a block under the middle). */
+	private static boolean solidUnder(Level level, Vec3 at, double top) {
+		BlockPos under = BlockPos.containing(at.x, top - 0.01, at.z);
+		return !level.getBlockState(under).getCollisionShape(level, under).isEmpty();
 	}
 
 	/** The area of a shape's highest face (square blocks): a full block is 1, a fence post about 0.06. */
@@ -399,7 +457,7 @@ public final class Ledge {
 		sound(level, player, pos, 0.7F, 0.8F);
 	}
 
-	private static void act(ServerPlayer player, boolean climb) {
+	private static void act(ServerPlayer player, boolean climb, boolean prone) {
 		BlockPos pos = HOLDING.get(player.getUUID());
 		Hold hold = player.getAttached(HOLD);
 		if (pos == null || hold == null) {
@@ -413,7 +471,14 @@ public final class Ledge {
 			return;
 		}
 		ServerLevel level = player.level();
-		player.setAttached(HOLD, new Hold(hold.face(), level.getGameTime(), true));
+		if (prone) {
+			// (0.15.108) onto the belly into a low gap: the crawl begins with the climb and holds after it
+			if (!Crawl.canCrawl(player)) {
+				return;
+			}
+			player.setAttached(Crawl.CRAWLING, true);
+		}
+		player.setAttached(HOLD, new Hold(hold.face(), level.getGameTime(), true, prone));
 		player.causeFoodExhaustion(CLIMB_EXHAUSTION);
 		player.resetFallDistance();
 		sound(level, player, pos, 0.8F, 0.7F);
@@ -447,7 +512,7 @@ public final class Ledge {
 			}
 			ServerLevel level = player.level();
 			long age = level.getGameTime() - hold.start();
-			boolean over = hold.climbing() ? age > CLIMB_TICKS + CLIMB_SLACK_TICKS : age > HANG_MAX_TICKS + CONFIRM_TICKS;
+			boolean over = hold.climbing() ? age > hold.climbTicks() + CLIMB_SLACK_TICKS : age > HANG_MAX_TICKS + CONFIRM_TICKS;
 			if (over || !canHang(player) || !hold.climbing() && !holdable(level, entry.getValue())) {
 				it.remove();
 				GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
@@ -455,7 +520,7 @@ public final class Ledge {
 				continue;
 			}
 			player.resetFallDistance();
-			if (hold.climbing() && age == Math.round(CLIMB_TICKS * CLIMB_RISE_SHARE)) {
+			if (hold.climbing() && age == Math.round(hold.climbTicks() * (hold.prone() ? PRONE_RISE_SHARE : CLIMB_RISE_SHARE))) {
 				// the knee goes onto the edge
 				sound(level, player, entry.getValue(), 0.5F, 1.0F);
 			}

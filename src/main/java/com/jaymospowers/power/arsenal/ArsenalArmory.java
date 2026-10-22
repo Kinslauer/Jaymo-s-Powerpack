@@ -60,8 +60,7 @@ public final class ArsenalArmory {
 		ServerLevel level = player.level();
 		ItemStack held = player.getMainHandItem();
 		if (Summoned.is(held)) {
-			// a TaCZ flintlock pins as the flintlock (TaCZ guns all share one item)
-			Item pin = ArsenalFlintlock.isFlintlock(held) ? ArsenalFlintlock.FLINTLOCK : held.getItem();
+			Item pin = held.getItem();
 			player.setAttached(PIN, BuiltInRegistries.ITEM.getKey(pin));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pinned", held.getHoverName())
 				.withStyle(ChatFormatting.GOLD));

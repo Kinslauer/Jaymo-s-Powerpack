@@ -925,3 +925,38 @@ Batch 3 of the BWM port (MIT, our own code).
 - A player tagged `jaymospowers_unpatched` (Jaymo's Powers: a wound past bruising left undressed, a cut, festering or
   an unset break) heals from meals at `Stomach.UNPATCHED_REGEN` (a quarter) of the speed. Andy: "regeneration should
   only kick in at full speed when you are fully patched up". Without Powers, nothing changes.
+
+### 0.5.16: dead animals lie on their side, eyes shut
+- Andy: "all these animals are actually corpses, they should close their eyes, and fall on their side instead of
+  biasing toward sitting up". The quadruped ragdoll's leg cones prop the physics belly down (or sitting up on the
+  rump, like a dog); tuning the physics alone didn't fix it (checked in a headless sim: torques and wider cones
+  still settled belly down). So a four-legged corpse is drawn eased onto its side as it slows down
+  (`ClientRagdolls.Track#settle`, `RagdollPose.of(..., side, sideUp)`): level along the way its head points, the
+  side that was higher stays up, its middle a torso's thickness off the ground, legs as a dead animal's lie (front
+  forward, hind back). Moving again (kicked, blown up), it goes back to the physics. Already-still corpses coming
+  into view start on their side. The physics itself (server) is unchanged.
+- Every corpse drawn by its mob's renderer has its eyes shut (`ClosedEyes`): the texture is copied once per model and
+  texture, and on the top half of the front and side faces of the head's first box (`head`, a horse's
+  `head_parts/head`, a wolf's `real_head`) a small white-and-black eye or a lone dark speck is filled with the face's
+  middle colour, the lowest row a shade darker as the lid. Bigger patches (a cow's spots, a blaze) are left alone.
+  Checked on vanilla horses, donkey, mule, cow, pig, sheep, wolf and chicken. Swapped in by
+  `LivingEntityRendererMixin` (`getRenderType`'s texture).
+
+### 0.5.17: hit bodies bleed (pack 0.15.111)
+- A blow or arrow on a corpse with flesh on it (not a skeleton's, an iron one or one on fire) is passed to hooks added
+  with `CorpseEntity.addOnHit` (plain Java types, for reflection), after the knock it already gave. Jaymo's Powers
+  splatters the body's blood with it, most with a blade (Andy: "attacking corpses when they are on the ground should
+  splatter blood especially with blades"). Without Powers, nothing changes.
+
+### 0.5.18: crushed spiders (pack 0.15.117)
+- Andy: "large blunt impacts or slams on spiders should crush them, leaving no corpse to grab, but only a random amount
+  of legs that disappear after a time". A creature in `jaymoskitchen:crushable` (spiders, cave spiders) that dies
+  crushed leaves no corpse (`corpse/SpiderCrush`, from `LivingEntityMixin`'s corpse swap): 2-6 loose legs
+  (`SpiderLeg`) fly out, tumble, lie flat and sink away after 30-60 s. They can't be picked up, grabbed or hit. Its
+  loot drops loose, except its spider eyes (squashed).
+- Crushed means the killing damage is in `jaymoskitchen:crushes` (a fall, flying into a wall, a falling anvil, block
+  or stalactite, a mace's smash) or another mod tagged it `jaymoskitchen.crushed` (Jaymo's Powers: heavy blunt kills,
+  blunt and greatsword finishers, its slams).
+- A leg keeps its spider's look, so the client draws it in that spider's own skin through its renderer (a cave
+  spider's, Kingdoms' spider kinds'), at its size: a two-piece leg broken at the knee, the same shape as Kingdoms'
+  kneed spider legs (`client/corpse/SpiderLegRenderer`). Tuning at the top of `SpiderCrush` and `SpiderLeg`.

@@ -514,7 +514,15 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 			return;
 		}
 		if (ticks > Slide.TICKS || !player.onGround() && airTicks > 2 || slideSpeed < Slide.STOP_SPEED || ticks > 2 && player.horizontalCollision) {
-			endSlide(player);
+			if (player.onGround() && player.input.keyPresses.shift()) {
+				// (0.15.108) Sneak still held: stay down, prone, till it's let go (no running on out of it)
+				end(player);
+				cooldown = Slide.COOLDOWN;
+				player.setSprinting(false);
+				com.jaymospowers.client.CrawlTaps.goProne(player, true);
+			} else {
+				endSlide(player);
+			}
 			return;
 		}
 		player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, slideDir.z * slideSpeed);

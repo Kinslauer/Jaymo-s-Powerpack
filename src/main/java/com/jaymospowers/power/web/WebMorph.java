@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -626,7 +625,7 @@ public final class WebMorph {
 			live.bleeds.add(new long[] {target.getId(), level.getGameTime() + BLEED_EVERY, BLEED_HITS});
 		}
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.3);
-		level.sendParticles(new DustParticleOptions(BLOOD_COLOR, 1.2F), at.x, at.y, at.z, 12, 0.2, 0.25, 0.2, 0.05);
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD_COLOR, 1.2F), at.x, at.y, at.z, 12, 0.2, 0.25, 0.2, 0.05);
 		sound(level, target, SoundEvents.TRIDENT_HIT, 1.0F, 1.2F);
 		sound(level, target, SoundEvents.FISHING_BOBBER_RETRIEVE, 1.0F, 0.6F);
 		sound(level, target, SoundEvents.CHAIN_BREAK, 0.6F, 0.8F);
@@ -659,7 +658,7 @@ public final class WebMorph {
 				continue;
 			}
 			if (now % 3 == 0) {
-				level.sendParticles(new DustParticleOptions(BLOOD_COLOR, 0.8F), bleeding.getX(), bleeding.getY() + bleeding.getBbHeight() * 0.55,
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(BLOOD_COLOR, 0.8F), bleeding.getX(), bleeding.getY() + bleeding.getBbHeight() * 0.55,
 					bleeding.getZ(), 2, 0.15, 0.2, 0.15, 0.0);
 			}
 			if (now >= b[1]) {

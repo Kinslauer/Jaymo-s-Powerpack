@@ -51,10 +51,32 @@ public final class BloodParticles {
 		}
 	}
 
+	/**
+	 * (0.15.109) A fleck of blood: a still drop that drifts down and fades, never shimmering like redstone dust (Andy).
+	 * Every bit of blood that isn't a {@link Spray} (gore, severing, a symbiote's meal) is these, see {@link #fleck}.
+	 */
+	public record Fleck(int color, float scale) implements ParticleOptions {
+		public static final MapCodec<Fleck> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+			Codec.INT.fieldOf("color").forGetter(Fleck::color),
+			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Fleck::scale)).apply(i, Fleck::new));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Fleck> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.INT, Fleck::color, ByteBufCodecs.FLOAT, Fleck::scale, Fleck::new);
+
+		@Override
+		public ParticleType<?> getType() {
+			return FLECK;
+		}
+	}
+
 	public static final ParticleType<Spray> SPRAY = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_spray"),
 		FabricParticleTypes.complex(true, Spray.CODEC, Spray.STREAM_CODEC));
 	public static final ParticleType<Puddle> PUDDLE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_puddle"),
 		FabricParticleTypes.complex(true, Puddle.CODEC, Puddle.STREAM_CODEC));
+
+	public static final ParticleType<Fleck> FLECK = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_fleck"),
+		FabricParticleTypes.complex(false, Fleck.CODEC, Fleck.STREAM_CODEC));
+	/** (0.15.109) A plain red {@link Fleck}, by id for mods that can't build one (Jaymo's Kingdoms looks it up). */
+	public static final SimpleParticleType RED_FLECK = simple("blood_fleck_red");
 
 	/** The drops a {@link Spray} picks from (each its own sprites, {@code particles/<name>.json}). */
 	public static final SimpleParticleType DROP = simple("blood_drop"), SPAT_1 = simple("blood_spat_1"), SPAT_2 = simple("blood_spat_2"),
@@ -65,6 +87,11 @@ public final class BloodParticles {
 
 	/** Registers the particles (by loading this class). */
 	public static void init() {
+	}
+
+	/** (0.15.109) A {@link Fleck} of this colour (RGB) and size, where a {@code DustParticleOptions} would go. */
+	public static Fleck fleck(int color, float size) {
+		return new Fleck(color, size);
 	}
 
 	private static SimpleParticleType simple(String name) {

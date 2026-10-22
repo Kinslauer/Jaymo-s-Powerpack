@@ -1361,6 +1361,7 @@ public final class GravityPower implements Power {
 			crushing = true;
 			try {
 				target.hurtServer(level, source, slam.damage());
+				com.jaymospowers.core.Crushing.mark(target);
 			} finally {
 				crushing = false;
 			}

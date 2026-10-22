@@ -353,6 +353,30 @@ public final class KitchenCompat {
 	}
 
 	/**
+	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all ({@code BladeBlood.corpse}).
+	 * Kitchen (0.5.17 on) tells us of each blow that lands on a body with flesh on it.
+	 */
+	public static void registerCorpseBlood() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.BiConsumer<Entity, java.util.Map.Entry<net.minecraft.world.damagesource.DamageSource, Float>> bleed =
+				(corpse, blow) -> {
+					net.minecraft.world.entity.EntityType<?> type = isPlayerCorpse(corpse) ? net.minecraft.world.entity.EntityTypes.PLAYER
+						: sourceType(corpse);
+					if (type != null) {
+						com.jaymospowers.core.BladeBlood.corpse(corpse, type, blow.getKey(), blow.getValue());
+					}
+				};
+			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("addOnHit", java.util.function.BiConsumer.class)
+				.invoke(null, bleed);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen that doesn't say when a body is hit: the dead don't bleed
+		}
+	}
+
+	/**
 	 * (0.15.92) A downed mob lies as it's downed ({@code DownedPose}), not also as Kitchen's leg-shot crawl: that laid it
 	 * face down a second time, so a crippled illager or skeleton stood on its head, sticking out of the ground. Its
 	 * crawl is dropped while it's down (the limp it's left with stays).

@@ -92,6 +92,7 @@ public final class NadirGraviton {
 			target.setDeltaMovement(0.0, -3.0, 0.0);
 			target.syncVelocity = true;
 			target.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
+			com.jaymospowers.core.Crushing.mark(target);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PIN_TICKS, 6, false, false, true));
 			st.pinned.put(target.getId(), level.getGameTime() + PIN_TICKS);
 			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);

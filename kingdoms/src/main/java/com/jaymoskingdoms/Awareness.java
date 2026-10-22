@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -241,7 +240,7 @@ public final class Awareness {
 				long now = level.getGameTime();
 				scents.removeIf(s -> s.dries <= now);
 				if (tick % BLOOD_SHOW_TICKS == 0) {
-					DustParticleOptions blood = new DustParticleOptions(BLOOD_COLOUR, 1.2F);
+					var blood = PowersCompat.blood(BLOOD_COLOUR, 1.2F);
 					for (Scent s : scents) {
 						level.sendParticles(blood, s.at.x, s.at.y + 0.05, s.at.z, 2, 0.2, 0.0, 0.2, 0.0);
 					}
@@ -301,7 +300,7 @@ public final class Awareness {
 		while (scents.size() > MAX_SCENTS) {
 			scents.removeFirst();
 		}
-		level.sendParticles(new DustParticleOptions(BLOOD_COLOUR, 1.4F), at.x, at.y + 0.6, at.z, drops, 0.25, 0.3, 0.25, 0.0);
+		level.sendParticles(PowersCompat.blood(BLOOD_COLOUR, 1.4F), at.x, at.y + 0.6, at.z, drops, 0.25, 0.3, 0.25, 0.0);
 	}
 
 	/** Each idle zombie near blood goes to the freshest spot it smells that is fresher than the last it followed and not underfoot. */

@@ -46,4 +46,9 @@ final class Wealth {
 	static Component describe(Tier t) {
 		return Component.translatable("wealth.jaymoskingdoms." + t.key());
 	}
+
+	/** (0.7.171) {@code f}'s wealth, as said of its ruler (a queen's carriage). */
+	static Component describe(Tier t, Faction f) {
+		return Component.translatable(Rulers.her("wealth.jaymoskingdoms." + t.key(), f));
+	}
 }

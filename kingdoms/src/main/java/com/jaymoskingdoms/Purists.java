@@ -378,10 +378,10 @@ public final class Purists {
 		Component name = Identities.shownName(player);
 		if (ours) {
 			String side = kin(f, player) ? "kin" : "outsider";
-			return Component.translatable("purist.jaymoskingdoms.gossip.proud." + side + "." + random.nextInt(PROUD_GOSSIP_LINES), bloodName(f),
+			return Component.translatable(Rulers.her("purist.jaymoskingdoms.gossip.proud." + side + "." + random.nextInt(PROUD_GOSSIP_LINES), f), bloodName(f),
 				name(Heritage.of(player)), name);
 		}
-		return Component.translatable("purist.jaymoskingdoms.gossip.grumble." + random.nextInt(GRUMBLE_GOSSIP_LINES), bloodName(f),
+		return Component.translatable(Rulers.her("purist.jaymoskingdoms.gossip.grumble." + random.nextInt(GRUMBLE_GOSSIP_LINES), f), bloodName(f),
 			name(VillagerHeritage.of(villager)), name);
 	}
 }

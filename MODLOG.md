@@ -2552,3 +2552,89 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   a Weightless zone or (held) an Event Horizon black hole at nothing. B is the Command (`nadir/NadirRules`,
   `NadirRulesScreen`): three WHO + WHAT + WHEN rules, two on at once, saved on the player. Nadir's scratch is
   `Live.nadir` (`NadirState`). Details in `docs/xenoform.md`.
+- **0.15.105, ships Jaymo's Kingdoms 0.7.165:** the character name typed in MCA's start-up creator now sticks the
+  first time (details in the Kingdoms MODLOG).
+- **0.15.106, ships Jaymo's Kingdoms 0.7.166:** hoods and the goblin disguise name you on the tab list and over your
+  head too, and a bandit mask's name reaches the tab list (details in the Kingdoms MODLOG).
+- **0.15.107, the band shows, and its hologram keeps its size:** Andy's clip: "the watch is obscured, the pov is drawn
+  way too large. and it isnt visible from third person". With First-person Model your own arm carries the band right
+  under your eye, so the hologram and its glow (sized for the drawn slam's wrist about a block away) filled the screen.
+  They're now scaled with the band's distance from your eye (`XenoHologram.REF_DISTANCE`), so they look the same size
+  either way. And the band was hidden under costumes and the symbiote suit (it skipped any covered arm, first and third
+  person): it's now drawn over them, grown round the arm to 5.5 pixels (`XenoBand.GROW`), and further over a chestplate's
+  sleeve (`ARMOUR_GROW`). Not playtested; compile-checked against the 26.3 jars.
+- **0.15.108, a kinder ledge grab, the prone climb, and staying down after a slide:** Andy: "make the ledge grab more
+  forgiving, and allow for climbing into one block gaps by going prone while holding a ledge, it animates you climbing up
+  and onto your belly. along with the slide, holding the slide keeps you in the prone stance". The catch: forward alone
+  (no Jump held) is enough, the edge may be up to 0.45 above your eyes (was 0.1), the wall 0.5 off (was 0.35), any
+  facing that's nearer the wall than its corners (45°, was 40°), and you can already be falling at 0.6 b/t (was 0.2).
+  Ledges under a gap one block high can now be caught (`Spot.stand` / `Spot.onBelly`). Hanging, the Crawl key (or Jump
+  where there's no room to stand) pulls you up and in onto your belly (`Ledge.PRONE_*`, 20 ticks): the crawl begins with
+  it, the flat body lifted so the eyes stay put, and you end it crawling; it used to drop you off the ledge, and where
+  there's no room to lie it now does nothing. `LedgePose` draws the arms pulling and reaching ahead, a knee to the edge,
+  and the tip forward into vanilla's crawl tilt so `CrawlPose` takes over smoothly. A slide that ends with Sneak still
+  held leaves you prone (`CrawlTaps.goProne`); let go of Sneak to get up (once there's room), or use Jump or the Crawl key
+  as usual. Not playtested.
+- **0.15.109, blood doesn't twinkle (Kingdoms 0.7.169):** Andy: "the blood particles currently twinkle like redstone,
+  they should just stay static if anything". All the blood still drawn as vanilla dust (which shimmers through its
+  frames and shades like redstone) is now `BloodParticles.Fleck` (client `BloodFleck`): one of Simple Blood's drop
+  sprites in a steady colour that drifts down and fades. Covers severing and stump drips (`Dismember`, `SeveredPart`),
+  the symbiote's meals, Web's morph and tendril blood, Gravity's gut punch and a cut tail; the redstone-block gore
+  flecks in `BladeBlood.crushed` and `Dismember` are blood flecks too. Kingdoms (Rend, vampires and Night Bleeders,
+  blood scent, the Lycan tear) gets it through `PowersCompat.blood` (Powers' `jaymospowers:blood_fleck_red` by id,
+  plain dust without Powers). Compile-checked; not playtested.
+- **0.15.110, ships Jaymo's Kingdoms 0.7.170 (finishers: bare hands tap, weapons from Combat Arts):** Andy: "make the
+  execution only possible with bare hands, and only activated after tapping the target three times. this is to prevent
+  accidental neck snaps. Also make all the other executions unlocked in the combat arts tree replacing the current
+  executioner function". The neck snap now takes an empty hand and three quick taps on the downed (each a fresh press,
+  within a second of the last; a hold counts for nothing), and anything that isn't a weapon finishes nobody. The
+  weapons' finishers (still a held use) need Kingdoms' Combat Arts perk Executioner, which no longer boosts a combo's
+  finisher (`Finishers.weaponsUnlocked`; everyone in creative, everyone if Kingdoms isn't loaded).
+- **0.15.111, hitting a corpse splatters its blood (Kitchen 0.5.17):** Andy: "attacking corpses when they are on the
+  ground should splatter blood especially with blades". Kitchen tells Powers of every blow or arrow that lands on a body
+  with flesh on it (`CorpseEntity.addOnHit`, registered by `KitchenCompat.registerCorpseBlood`), and
+  `BladeBlood.corpse` bleeds it in its creature's colour: a blade sprays half again a living body's drops (that fly,
+  fall and pool) plus flecks; a heavy blunt blow sprays and pools as on the living; anything else (a fist, an arrow)
+  throws only a few flecks. Never a skeleton's, an iron one, one on fire or a bloodless creature's. Tuning in
+  `BladeBlood.CORPSE_*`. Compile-checked; not playtested.
+- **0.15.114 (finishers: point-blank shot, slow neck snap, crippled targets, grabbable heads):** Andy: "the pointblank
+  finisher should use a bullet and actually play the blast". Guns (our TaCZ flintlocks, TaCZ's own, the Void Armory
+  flintlock, another mod's by name) get their own finisher, Point Blank (`Finishers.Kind.GUN`): it needs a round loaded,
+  spends it (`TaczGuns.spendRound`), and fires with the gun's own TaCZ shot sound (`TaczGuns.gunSound`), muzzle flash,
+  flame and smoke. The bow's is renamed Loosed Close and spends an arrow; the crossbow spends its bolt (or an arrow).
+  Andy: "neck break should take 5s to finish": the neck snap is a 5 s hold, strained twice, snapped at tick 100.
+  Andy: "crippled enemies should be executable too": `Finishers.helpless` takes Darktide's crawl, both legs broken or a
+  leg cut off as well as downed; a crippled one is held still while it plays, and `Downed.execute` kills it the same
+  way. Andy: "heads from decaptiations should be grabable like they are otherwise": a click (empty hand or sneak) on a
+  body or corpse that a severed part lies in takes the part (`Carry.partInView`). Compile-checked; not playtested.
+- **0.15.115, Complementary Unbound is the pack's shader pack:** Andy: "can we make these the default shaders?"
+  Complementary Unbound r5.9.3 (by EminGT, Complementary Development; CurseForge 385587, file 8884656, made for 26.2
+  and 26.3 on Iris) joins the CurseForge import by id (build.gradle `packShaderPacks`, into shaderpacks/), and Build
+  Modpack fetches it into your own profile from CurseForge's CDN like the resource packs. Once per install,
+  `client/ShaderPreset` (a preLaunch entrypoint, before Iris reads its config) sets `shaderPack` and `enableShaders`
+  in `config/iris.properties`; after that the player's own choice stands (marker `jaymospowers-shader-preset-v1`).
+  Its licence (Complementary License Agreement 1.2) lets modpacks include it only unchanged, added through
+  CurseForge's or Modrinth's own systems, never uploaded directly, and, because it's on by default, credited on the
+  pack's description page. So its settings stay at Complementary's defaults (no settings file: "simple variable
+  changes" count as modifying it), and the CurseForge page needs a credit line. Dark nights: Complementary takes sky
+  light from `gl_MultiTexCoord1`, which Kingdoms' Iris hook (0.7.164) dims, so ambient light follows the moon; direct
+  moonlight inside the shadow distance comes from the shadow map, so faces turned to the moon may keep a faint glow on
+  a new moon. Compile-checked; not seen in game.
+- **0.15.116 (finishers: an unloaded gun uses the bayonet):** Andy: "with no ammunition it should just run though with
+  the blade". A gun with no round in it plays the sword's Run Through instead of refusing (`Finishers.move`). Bows and
+  crossbows still need an arrow. Compile-checked; not playtested.
+- **0.15.117, crushed spiders (Kitchen 0.5.18):** Andy: "large blunt impacts or slams on spiders should crush them,
+  leaving no corpse to grab, but only a random amount of legs that disappear after a time". Kitchen does the crushing;
+  Powers marks the deaths it should crush with Kitchen's `jaymoskitchen.crushed` tag (`core/Crushing.mark`, only on a
+  creature the blow just killed): a heavy blunt blow's kill (`BladeBlood.heavyBlunt`: a hammer or club for 3 hearts or
+  more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt, staff
+  or greatsword finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
+  slams and dive, its thrash's splash and the Behemoth's tendril slam. Compile-checked; not playtested.
+- **0.15.118, ships Jaymo's Kingdoms 0.7.172 (TaCZ flintlocks taken out):** Andy: "i dont like the tacz flintlocks,
+  you can disable those". Our flintlock gunpack for TaCZ (musket, blunderbuss, flintlock pistol, void flintlock, musket
+  ball, shot) is gone, and with it the Gunsmith's Bench: TaCZ's gun smith table is uncraftable and in no creative tab.
+  `TaczGuns.trimDefaultPack` deletes the copy TaCZ exported into `.minecraft/tacz/jaymos_flintlocks`, which it would
+  otherwise keep loading. TaCZ itself stays, for the future's modern guns. The Void Armory's pair is always our own
+  Flintlock item now (`ArsenalFlintlock`); the old TaCZ creative-tab icons (`TaczTabIconMixin`), the future's old
+  flintlock gunners (`FutureGuns.FLINTLOCKS`) and `tools/gen_tacz_guns.py` are gone. TaCZ flintlocks already in a
+  world don't work any more. Parse-checked only (no game jars in this session); not playtested.

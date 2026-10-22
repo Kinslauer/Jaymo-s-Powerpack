@@ -570,11 +570,11 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.15.98) A finisher's last blow ({@code Finishers}): its death now, credited to {@code by}. Nothing if it isn't down
-	 * (or is dead already: an axe's beheading).
+	 * (0.15.98) A finisher's last blow ({@code Finishers}): its death now, credited to {@code by}. Nothing if it's dead
+	 * already (an axe's beheading). (0.15.114) Downed or only crippled, it dies the same way.
 	 */
 	public static void execute(ServerLevel level, LivingEntity entity, Player by) {
-		if (!isDowned(entity) || !entity.isAlive()) {
+		if (!entity.isAlive()) {
 			return;
 		}
 		FELLED_BY.put(entity, level.damageSources().playerAttack(by));

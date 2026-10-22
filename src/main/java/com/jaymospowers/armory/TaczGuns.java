@@ -11,29 +11,29 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 
 /**
- * (0.10.43) Our flintlocks in TaCZ: the musket, blunderbuss and flintlock pistol are a gunpack of our own
- * ({@code assets/jaymospowers/custom/jaymos_flintlocks}, made by tools/gen_tacz_guns.py), handed to TaCZ through its
- * API so it copies it into {@code .minecraft/tacz}; TaCZ's modern one loads too since 0.10.111, for the future only
- * ({@link #trimDefaultPack}). Through reflection, so Jaymo's Powers
- * still runs without TaCZ. TaCZ's own modern guns, ammo and attachments are taken off its benches
+ * TaCZ in the pack: its modern guns, for the future only ({@link #trimDefaultPack}). Through reflection, so Jaymo's
+ * Powers still runs without TaCZ. TaCZ's own modern guns, ammo and attachments are taken off its benches
  * ({@code tinkering/Uncraftable}). As TaCZ items the guns are {@code tacz:modern_kinetic_gun} with
- * {@code GunId: "jaymospowers:musket"} in their custom data (Kingdoms hands them out that way).
+ * {@code GunId: "tacz:ak47"} in their custom data.
+ * <p>(0.10.43) Our flintlocks (musket, blunderbuss, flintlock pistol, the Void Armory's) were a TaCZ gunpack of our
+ * own, crafted at the Gunsmith's Bench (TaCZ's gun smith table). (0.15.118) Andy: "i dont like the tacz flintlocks":
+ * the gunpack is gone (its exported copy is deleted, {@link #OLD_PACK}) and so is the bench; the Void Armory has our
+ * own Flintlock item again, Kingdoms hands out WeaponMod's musket and flintlock.
  */
 public final class TaczGuns {
 	public static final boolean LOADED = FabricLoader.getInstance().isModLoaded("tacz");
-	static final String PACK = "/assets/" + JaymosPowers.MOD_ID + "/custom/jaymos_flintlocks";
+	/** Our old flintlock gunpack, as TaCZ exported it into {@code .minecraft/tacz} (it would go on loading from there). */
+	static final String OLD_PACK = "jaymos_flintlocks";
 	/** TaCZ's own gunpack, all modern: for the future only (see trimDefaultPack). */
 	static final String DEFAULT_PACK = "tacz_default_gun";
 	/** What's left out of it: these would put it in the rest of the game. */
-	static final String[] DEFAULT_PACK_LEFT_OUT = {"data/tacz/index/blocks/gun_smith_table.json", "data/tacz/recipe",
-		"data/tacz/tacz_loot_injectors"};
+	static final String[] DEFAULT_PACK_LEFT_OUT = {"data/tacz/recipe", "data/tacz/tacz_loot_injectors"};
 
 	private TaczGuns() {
 	}
@@ -48,13 +48,6 @@ public final class TaczGuns {
 		ResourceLoader.registerBuiltinPack(JaymosPowers.id("tacz_fixes"),
 			FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			Component.literal("Jaymo's Powers: TaCZ block drops"), PackActivationType.ALWAYS_ENABLED);
-		try {
-			Class.forName("com.tacz.guns.api.resource.ResourceManager")
-				.getMethod("registerExportResource", Class.class, String.class)
-				.invoke(null, JaymosPowers.class, PACK);
-		} catch (ReflectiveOperationException | LinkageError e) {
-			JaymosPowers.LOGGER.warn("Couldn't hand our flintlocks to TaCZ", e);
-		}
 		hideModern();
 	}
 
@@ -64,8 +57,9 @@ public final class TaczGuns {
 	 * dimension; outside the future its guns, ammo and attachments are kept out of every creative tab and JEI,
 	 * {@link #hideModern}; one brought back from the future is yours to keep). We export it ourselves
 	 * (TaCZ's entry comes off its export list, so it can't undo this) and then take out what would leak it into the rest
-	 * of the game: its gun smith table index (ours points that table at our Gunsmith's Bench), its recipes (modern guns
-	 * are never craftable) and its bonus-chest pistol. TaCZ's art is CC BY-NC-ND: it's TaCZ's own copy, untouched apart
+	 * of the game: its recipes (modern guns are never craftable) and its bonus-chest pistol. (0.15.118) Its gun smith
+	 * table index stays (it was ours, the Gunsmith's Bench, until our flintlock gunpack went; a table already placed
+	 * needs one, though nothing's crafted there now), and our old flintlock gunpack is deleted. TaCZ's art is CC BY-NC-ND: it's TaCZ's own copy, untouched apart
 	 * from leaving those files out. Called from the client and dedicated-server entrypoints, which run after every mod's
 	 * main one (where TaCZ adds its pack) and before resources load (where it would copy and read them).
 	 */
@@ -92,8 +86,8 @@ public final class TaczGuns {
 			JaymosPowers.LOGGER.warn("Couldn't export TaCZ's default (modern) gunpack ourselves; TaCZ will", e);
 		}
 		java.nio.file.Path pack = root.resolve(DEFAULT_PACK);
-		for (String part : DEFAULT_PACK_LEFT_OUT) {
-			java.nio.file.Path path = pack.resolve(part);
+		for (java.nio.file.Path path : java.util.stream.Stream.concat(java.util.Arrays.stream(DEFAULT_PACK_LEFT_OUT).map(pack::resolve),
+			java.util.stream.Stream.of(root.resolve(OLD_PACK))).toList()) {
 			if (!java.nio.file.Files.exists(path)) {
 				continue;
 			}
@@ -102,7 +96,7 @@ public final class TaczGuns {
 					java.nio.file.Files.delete(p);
 				}
 			} catch (java.io.IOException | RuntimeException e) {
-				JaymosPowers.LOGGER.warn("Couldn't take {} out of TaCZ's default gunpack", path, e);
+				JaymosPowers.LOGGER.warn("Couldn't delete {} from TaCZ's gunpacks", path, e);
 			}
 		}
 	}
@@ -143,46 +137,21 @@ public final class TaczGuns {
 			output.getDisplayStacks().removeIf(TaczGuns::isModern);
 			output.getSearchTabStacks().removeIf(TaczGuns::isModern);
 		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
-			Item bench = BuiltInRegistries.ITEM.getValue(GUN_SMITH_TABLE);
-			if (bench != Items.AIR) {
-				output.accept(bench);
-			}
-		});
 	}
 
 	/**
 	 * (0.11.9) Andy: TaCZ's "Timeless & Classics Guns: Zero" tab goes (its benches, targets, statue and ammo boxes are
-	 * uncraftable and modern anyway, {@code tinkering/Uncraftable}); the one thing in it we use, the gun smith table (our
-	 * Gunsmith's Bench), moves to Functional Blocks.
+	 * uncraftable and modern anyway, {@code tinkering/Uncraftable}); the gun smith table (our Gunsmith's Bench) moved to
+	 * Functional Blocks, until (0.15.118) it went with our flintlocks.
 	 */
 	static final Identifier ZERO_TAB = Identifier.fromNamespaceAndPath("tacz", "other");
-	static final Identifier GUN_SMITH_TABLE = Identifier.fromNamespaceAndPath("tacz", "gun_smith_table");
-
-	/**
-	 * (0.11.9) Andy: TaCZ's tabs showed modern guns (a 7.62x39 round, a Glock, an AK, a shotgun) as their icons; ours show
-	 * what's in them instead. TaCZ's tab id (tacz:ammo, tacz:pistol, ...) to our icon; tabs left out are empty, so hidden.
-	 * Read by the client's {@code CreativeModeTab.getIconItem} mixin, made once per tab.
-	 */
-	public static ItemStack tabIcon(Identifier tab) {
-		if (!LOADED || !"tacz".equals(tab.getNamespace())) {
-			return ItemStack.EMPTY;
-		}
-		return switch (tab.getPath()) {
-			case "ammo" -> modernAmmo(JaymosPowers.MOD_ID + ":musket_ball", 1);
-			case "pistol" -> gun("flintlock_pistol");
-			case "rifle" -> gun("musket");
-			case "shotgun" -> gun("blunderbuss");
-			default -> ItemStack.EMPTY;
-		};
-	}
 
 	/** One of TaCZ's own guns ({@code tacz:ak47}) with {@code rounds} in it; empty without TaCZ. */
 	public static ItemStack modernGun(String name, int rounds) {
 		return gun(Identifier.fromNamespaceAndPath("tacz", name), rounds);
 	}
 
-	/** {@code count} rounds of TaCZ ammo {@code id} ({@code tacz:9mm}, or ours: {@code jaymospowers:musket_ball}); empty without TaCZ. */
+	/** {@code count} rounds of TaCZ ammo {@code id} ({@code tacz:9mm}); empty without TaCZ. */
 	public static ItemStack modernAmmo(String id, int count) {
 		Item item = LOADED ? BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("tacz", "ammo")) : Items.AIR;
 		if (item == Items.AIR) {
@@ -201,11 +170,6 @@ public final class TaczGuns {
 		return data == null ? "" : data.copyTag().getStringOr("GunId", "");
 	}
 
-	/** One of our guns by name ({@code musket}, {@code void_flintlock}, ...), loaded; empty without TaCZ. */
-	public static ItemStack gun(String name) {
-		return gun(JaymosPowers.id(name), 1);
-	}
-
 	static ItemStack gun(Identifier id, int rounds) {
 		Item item = LOADED ? BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("tacz", "modern_kinetic_gun")) : Items.AIR;
 		if (item == Items.AIR) {
@@ -220,13 +184,56 @@ public final class TaczGuns {
 		return stack;
 	}
 
-	/** Whether {@code stack} is our TaCZ gun {@code name}. */
-	public static boolean is(ItemStack stack, String name) {
-		if (!LOADED || stack.isEmpty()) {
+	/**
+	 * (0.15.114) Takes one round out of a TaCZ gun (the one in the barrel first, else the magazine's). Returns false if it
+	 * was empty.
+	 */
+	public static boolean spendRound(ItemStack stack) {
+		if (ammo(stack) <= 0) {
 			return false;
 		}
-		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-		return data != null && (JaymosPowers.MOD_ID + ":" + name).equals(data.copyTag().getStringOr("GunId", ""));
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+			if (tag.getBooleanOr("HasBulletInBarrel", false)) {
+				tag.putBoolean("HasBulletInBarrel", false);
+			} else {
+				tag.putInt("GunCurrentAmmoCount", Math.max(0, tag.getIntOr("GunCurrentAmmoCount", 0) - 1));
+			}
+		});
+		return true;
+	}
+
+	private static boolean soundLooked;
+	private static @org.jspecify.annotations.Nullable Method sendSound;
+
+	/**
+	 * (0.15.114) One of a TaCZ gun's own sounds ({@code shoot_3p}, {@code fire_select}, {@code flesh_hit}: the keys of its
+	 * display's "sounds") heard by everyone within {@code range} of {@code from}, through TaCZ (by reflection, as
+	 * {@code FutureGuns} does). Returns false if that couldn't be done.
+	 */
+	public static boolean gunSound(net.minecraft.world.entity.LivingEntity from, String gunId, String sound, int range, float volume, float pitch) {
+		if (!LOADED || gunId.isEmpty()) {
+			return false;
+		}
+		if (!soundLooked) {
+			soundLooked = true;
+			try {
+				sendSound = Class.forName("com.tacz.guns.sound.SoundManager").getMethod("sendSoundToNearby", net.minecraft.world.entity.LivingEntity.class,
+					int.class, Identifier.class, Identifier.class, String.class, float.class, float.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				sendSound = null;
+			}
+		}
+		Identifier id = Identifier.tryParse(gunId);
+		if (sendSound == null || id == null) {
+			return false;
+		}
+		try {
+			sendSound.invoke(null, from, range, id, id.withSuffix("_display"), sound, volume, pitch);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			sendSound = null;
+			return false;
+		}
 	}
 
 	/** Rounds in a TaCZ gun: its magazine plus the one in the barrel. */

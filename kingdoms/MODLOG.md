@@ -4226,3 +4226,77 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Shaders now stay on all night. If the hook doesn't take (an Iris update renames what it patches), the old switch-off
   comes back by itself, with a warning in the log.
 - Not yet seen in game: needs a check with a shader pack on a new-moon night.
+
+## 0.7.165: the creator's name sticks (pack 0.15.105)
+- Andy: "character names still randomize even though both players input their own when joining the server just now.
+  we had to use the command to make it correct". MCA's start-up creator (`DestinyScreen`) keeps the typed name on the
+  client only: its name page's Accept button moves on to the body, traits or destiny page without saving, and nothing
+  later saves it either (only the editor's own Done button does, which is why `/mca editor` fixed it). So the server
+  still had the name `CharacterNames` gives a player who hasn't picked one.
+- `client/mixin/mca/McaDestinyNameMixin`: leaving the creator's name page now saves the editor to the server
+  (`syncVillagerData`, as Done does), so the typed name reaches MCA's family tree and replaces the given one at once.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.166: costumes and disguises on the tab list (pack 0.15.106)
+- Andy: "it should do the same with equipped costumes and disguises. right now it doesnt change the scoreboard name".
+- `CharacterNames` now works out what a player shows as, not just their character name: a hood (a costume's head
+  piece that leaves the face out) shows the costume's name, or "Hooded Figure"; a goblin disguise (`Disguise`) shows
+  "Goblin". Full masks (face-hiding costumes, Rig Helms, bandit masks and bandanas) stay Powers' to name; Kingdoms now
+  stands aside for them on both sides (`Identities.maskKey`, `maskedAs`) rather than relying on mixin order.
+- The tab list is resent whenever a player's tab list name changes (checked every second). Powers resent it only when
+  a costume or Rig Helm went on or off, so a bandit mask or bandana never showed there; now it does.
+- The synced attachment is now `jaymoskingdoms:shown_name`, a text component, so "Hooded Figure" and "Goblin" are
+  translated on each client.
+- Barbarian dress isn't named: leather and a stone weapon is everyone's early-game kit.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.168: the bounty board is several blocks, with notices to pull and pin
+- Andy: "the bounty board should be multiple blocks, allowing for item frame like pulling on and placing onto the
+  board, some villagers will be seen posting to it."
+- **The board** (`BountyBoard`) is 3 blocks wide and 2 tall: spruce log posts at the ends, a stained plank face and a
+  small roof, one notice spot per block (`column`, `row`, `notice` block state). It goes up from its bottom middle
+  block and needs room for all six; breaking any block takes the whole board down, and it drops once. Pistons can't
+  move it. A town's board from before this is taken down and put up again whole (or somewhere it fits near the bell).
+- **Notices** (`bounty_notice` item): punch or use a pinned notice to pull it off, like an item off a frame. That takes
+  the bounty (the same checks as the list) and hands you the notice: "Wanted: name", the price alive and for the head,
+  the crime and where they were last seen. Use a bare spot with a notice in hand to pin it back up: that gives the hunt
+  up. Use a bare spot, or sneak-use, to read the whole list as before. Taking a bounty from the list also hands you its
+  notice; giving it up or being paid takes the notice away. Notices for bounties that are over come down by themselves.
+- **Villagers post them** (`Bounties.post`, `errands`): in daylight, now and then (`POST_CHANCE` each 5 seconds), a
+  board with a bare spot and an open bounty of its realm that isn't up yet sends a grown villager from within 32
+  blocks (awake, hands free, not wanted themselves; MCA villagers included) walking over with the notice in hand. At
+  the board they swing an arm, it's pinned with the item frame sound, and half the time they call it out ("Wanted:
+  name! 40 emeralds to whoever brings them in."). They give up after 40 seconds. The highest price goes up first.
+- **Town notices** (`TownNotices`). Andy: "they can place quests or useless notices too, to add to immersion, (bring
+  me some leashed animals, or feed, etc,) add about 5 per village type". With no bounty to post, a villager now and then
+  pins up one of their village type's five notices instead (at most 3 on a board, down again after 2 days): three
+  errands and two bits of news for each of vanilla's seven types (plains, desert, savanna, snowy, taiga, jungle, swamp).
+  Pulling an errand off is a quest from the villager who posted it, turned in to them as usual: bring hay, eggs,
+  water, coal, berries, firewood, cocoa and so on (gather quests), or bring sheep, a camel, cattle, llamas, a goat, pigs,
+  hens or frogs to them on a lead (a new `Quest.LEAD` kind: the animals are counted within 12 blocks on your lead, and
+  handed over they stay in town). Pulling news off gives you the paper ("LOST: grey cat, one white paw. Answers to
+  nothing."), which you can pin up again on any board. Town notices are white paper with a brass pin (`town_notice`).
+- Art (`tools/vanilla_style/bounty_board.py`): vanilla's spruce planks stained dark for the face, spruce log posts,
+  three notice designs (a crook's face, a masked bandit, a written notice under a red seal) in the old board's poster
+  colours, and new 16px icons for the board and the notice.
+- Not yet seen in game.
+
+## 0.7.169: blood doesn't twinkle (pack 0.15.109)
+- Andy: blood shouldn't twinkle like redstone. Rend's bleeding, vampire bites and leaps, Night Bleeders and their bats,
+  blood scent and the Lycan's tearing out now send Jaymo's Powers' still blood fleck (`PowersCompat.blood`, looked up by
+  id) instead of vanilla dust; without Powers it's dust as before.
+- Compile-checked against the 26.3 jars; not yet seen in game.
+
+## 0.7.170: Executioner unlocks the weapon finishers (pack 0.15.110)
+- Andy: "make all the other executions unlocked in the combat arts tree replacing the current executioner function".
+  The Combat Arts perk Executioner (same place in the tree, same cost, so nobody's ranks move) no longer makes a combo's
+  4th full-strength hit deal double on a foe under 30%. It now unlocks Jaymo's Powers' weapon finishers on the downed
+  (hold use with a weapon: Run Through, Executioner's chop, Skull Crusher, Pinned...). Powers reads the rank by
+  reflection (`Finishers.weaponsUnlocked`). Bare hands need no perk.
+
+## 0.7.172: no TaCZ flintlocks (pack 0.15.118)
+- Andy didn't like the TaCZ flintlocks, so Jaymo's Powers no longer ships them. Musket guards get WeaponMod's musket
+  (with an iron bayonet) or a crossbow, pirates WeaponMod's flintlock or a crossbow, and the Marksman card shows
+  WeaponMod's musket and bullets. A guard still holding an old TaCZ musket is handed a new one at his next check.
+  `TaczGuns` is gone.
+- Parse-checked only; not yet seen in game.

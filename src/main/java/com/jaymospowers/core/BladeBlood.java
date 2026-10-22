@@ -5,8 +5,6 @@ import com.jaymospowers.core.blood.BloodParticles;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -15,10 +13,10 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -57,6 +55,14 @@ public final class BladeBlood {
 	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
+	/**
+	 * (0.15.111) A blow on a corpse (Jaymo's Kitchen's, see {@link #corpse}): a blade's sprays this many times a living
+	 * body's drops and throws this many flecks per point of damage (at most this many); any other blow only spatters,
+	 * with this many flecks per point (at least one). Flecks fly this fast and are this big.
+	 */
+	static final float CORPSE_BLADE_DROPS = 1.5F, CORPSE_BLADE_FLECKS = 1.2F, CORPSE_FLECKS = 0.5F, CORPSE_FLECK_SPEED = 0.25F,
+		CORPSE_FLECK_SIZE = 1.4F;
+	static final int CORPSE_FLECKS_MAX = 16;
 
 	/** What has no blood to spill. */
 	public static final TagKey<EntityType<?>> BLOODLESS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("bloodless"));
@@ -94,6 +100,8 @@ public final class BladeBlood {
 			return;
 		}
 		if (heavyBlunt(source, damage)) {
+			// (0.15.117) a killing one crushes a spider (Kitchen)
+			Crushing.mark(target);
 			blunt(target, damage);
 			return;
 		}
@@ -117,12 +125,22 @@ public final class BladeBlood {
 
 	/** Whether {@code target} has blood to spill. */
 	public static boolean bleeds(LivingEntity target) {
-		return !target.getType().builtInRegistryHolder().is(BLOODLESS);
+		return bleeds(target.getType());
+	}
+
+	/** (0.15.111) Whether this kind of creature has blood to spill. */
+	public static boolean bleeds(EntityType<?> type) {
+		return !type.builtInRegistryHolder().is(BLOODLESS);
 	}
 
 	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
-		var type = target.getType().builtInRegistryHolder();
+		return color(target.getType());
+	}
+
+	/** (0.15.111) This kind of creature's blood colour (RGB). */
+	public static int color(EntityType<?> entityType) {
+		var type = entityType.builtInRegistryHolder();
 		if (type.is(ENDER_BLOOD)) {
 			return ENDER;
 		}
@@ -194,8 +212,43 @@ public final class BladeBlood {
 			body.getY() + body.getBbHeight() * up, body.getZ(), stump ? STUMP_DRIP_DROPS : DRIP_DROPS, w, 0.05, w, 0.01);
 	}
 
+	/**
+	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all. {@code corpse} is Jaymo's
+	 * Kitchen's body of a {@code type} (Kitchen only asks for one with flesh on it), hit by {@code source} for
+	 * {@code damage}. A blade sprays drops that fly, fall and pool, and flecks; a heavy blunt blow sprays and pools like
+	 * one on the living ({@link #heavyBlunt}); anything else (a fist, an arrow) only throws a few flecks.
+	 */
+	public static void corpse(Entity corpse, EntityType<?> type, DamageSource source, float damage) {
+		if (!(corpse.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(type)) {
+			return;
+		}
+		int color = color(type);
+		float size = (corpse.getBbWidth() + 2.0F) / 3.0F;
+		Vec3 at = corpse.getBoundingBox().getCenter();
+		double w = corpse.getBbWidth() * 0.35 + 0.05;
+		ItemStack weapon = source.getWeaponItem();
+		boolean blade = weapon != null && Dismember.blade(weapon);
+		boolean heavy = !blade && heavyBlunt(source, damage);
+		if (blade || heavy) {
+			int drops = Math.min(HIT_DROPS_MAX, Mth.floor((HIT_DROPS + damage * DROPS_PER_DAMAGE) * (blade ? CORPSE_BLADE_DROPS : BLUNT_DROPS)));
+			level.sendParticles(new BloodParticles.Spray(color, size), true, true, at.x, at.y + 0.1, at.z, drops, w, 0.05, w,
+				SPRAY_SPEED + drops * SPEED_PER_DROP);
+		}
+		if (heavy) {
+			float over = Math.max(damage - HEAVY_BLUNT, 0.0F);
+			level.sendParticles(new BloodParticles.Puddle(color, Math.min(POOL_MAX, POOL_SCALE + over * POOL_GROWTH) * size), true, true,
+				corpse.getX(), corpse.getY() + 0.1, corpse.getZ(), Math.min(POOLS_MAX, 1 + Mth.floor(over / POOL_PER_DAMAGE)), w, 0.0, w, 0.0);
+		}
+		int flecks = Math.min(CORPSE_FLECKS_MAX, Math.max(1, Mth.floor(damage * (blade ? CORPSE_BLADE_FLECKS : CORPSE_FLECKS))));
+		level.sendParticles(BloodParticles.fleck(color, CORPSE_FLECK_SIZE), at.x, at.y + 0.1, at.z, flecks, w, 0.05, w, CORPSE_FLECK_SPEED);
+		if (blade) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_STEP, SoundSource.PLAYERS, 0.6F, 0.7F + level.getRandom().nextFloat() * 0.2F);
+		}
+	}
+
 	/** If {@code target} is dead (crushed: a blow just landed that only crushing does), it bursts. */
 	public static void crushed(LivingEntity target) {
+		Crushing.mark(target);
 		if (!(target.level() instanceof ServerLevel level) || !target.isDeadOrDying() || !bleeds(target)
 			|| target instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator())) {
 			return;
@@ -205,7 +258,7 @@ public final class BladeBlood {
 		level.sendParticles(new BloodParticles.Spray(color(target), size(target)), true, true, at.x, at.y, at.z, BURST_DROPS, w, h, w,
 			BURST_SPEED);
 		pool(level, target, 2, BURST_POOL * size(target));
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+		level.sendParticles(BloodParticles.fleck(color(target), 2.0F), at.x, at.y, at.z,
 			BURST_GORE, w, h, w, BURST_GORE_SPEED);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_BREAK, SoundSource.HOSTILE, 0.8F, 0.6F);

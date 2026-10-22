@@ -18,7 +18,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -83,7 +82,10 @@ public final class Nightfall {
 	/** The plague potions' lengths (ticks): plain, strong; the Immunity potion's, plain and long. */
 	static final int ATROPHY_POTION_TICKS = 20 * 45, STRONG_ATROPHY_TICKS = 20 * 22, IMMUNITY_TICKS = 20 * 60 * 10, LONG_IMMUNITY_TICKS = 20 * 60 * 20;
 
-	static final DustParticleOptions BLOOD = new DustParticleOptions(0x8A0303, 1.0F);
+	/** (0.7.169) Blood drops (still, see {@link com.jaymoskingdoms.PowersCompat#blood}). */
+	static net.minecraft.core.particles.ParticleOptions blood() {
+		return com.jaymoskingdoms.PowersCompat.blood(0x8A0303, 1.0F);
+	}
 
 	/** (0.7.136) Plague Doctor: the share of the plague's time they catch, and the share of its pricks and weakenings that take. */
 	static final float PLAGUE_DOCTOR_TICKS = 0.5F, PLAGUE_DOCTOR_TAKES = 0.5F;
@@ -266,7 +268,7 @@ public final class Nightfall {
 		wing.setDeltaMovement(0.0, 0.4, 0.0);
 		level.addFreshEntity(wing);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, bleeder.getX(), bleeder.getY(0.5), bleeder.getZ(), 30, 0.4, 0.8, 0.4, 0.04);
-		level.sendParticles(BLOOD, bleeder.getX(), bleeder.getY(0.5), bleeder.getZ(), 12, 0.3, 0.5, 0.3, 0.0);
+		level.sendParticles(blood(), bleeder.getX(), bleeder.getY(0.5), bleeder.getZ(), 12, 0.3, 0.5, 0.3, 0.0);
 		level.playSound(null, bleeder.getX(), bleeder.getY(), bleeder.getZ(), SoundEvents.BAT_TAKEOFF, SoundSource.HOSTILE, 1.4F, 0.5F);
 		bleeder.discard();
 		return false;

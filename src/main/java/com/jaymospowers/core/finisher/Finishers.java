@@ -1,12 +1,16 @@
 package com.jaymospowers.core.finisher;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.armory.TaczGuns;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Shakes;
+import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.Treatment;
+import com.jaymospowers.power.arsenal.ArsenalFlintlock;
+import com.jaymospowers.power.darktide.DarktideStatus;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,7 +28,9 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -42,6 +48,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -52,15 +59,23 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ChargedProjectiles;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * (0.15.98) Finishers. Andy: "every weapon should be able to right click and hold a downed enemy, and then do a unique
  * finisher animation". Hold use (not sneaking: sneak + use stays the revive and the pick-up) on someone downed for
  * {@link #HOLD_TICKS} and you finish them: one move per kind of weapon in your main hand ({@link Kind}), read off the
- * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind. Anything that
- * isn't a weapon (an empty hand, a torch, a loaf) snaps the neck.
+ * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind.
+ * <p>
+ * (0.15.110) Andy: "make the execution only possible with bare hands, and only activated after tapping the target three
+ * times. this is to prevent accidental neck snaps. Also make all the other executions unlocked in the combat arts tree
+ * replacing the current executioner function". So the neck snap is bare hands only, on the {@link #TAPS}th quick tap (a
+ * hold does nothing), and anything else that isn't a weapon (a torch, a loaf) finishes nobody. The weapons' finishers
+ * are Kingdoms' Combat Arts perk Executioner ({@link #weaponsUnlocked}); without it a hold with a weapon does nothing.
  * <p>
  * The move plays out on its own once begun: you stand rooted facing them (no walking, jumping, swinging or using), the
  * body drawn by {@code FinisherPose} on every client, and the blows land on its beats (sound, blood or bone, a jolt
@@ -69,10 +84,24 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Not on tamed animals (someone's dog or horse), and only one finisher on a body at a time. A plain tap on a downed
  * guard still has Kingdoms take its weapons first.
+ * <p>
+ * (0.15.114) Andy: "the pointblank finisher should use a bullet and actually play the blast", and "neck break should take
+ * 5s to finish". Guns (our TaCZ flintlocks, TaCZ's own, the Void Armory's) have their own finisher, {@link Kind#GUN}: it
+ * needs a round in the gun, spends it, and fires with the gun's own shot (through TaCZ), flash and smoke. A bow or
+ * crossbow likewise needs an arrow and spends it ({@link #loaded}, {@link #spend}). The neck snap is a slow strangle-hold
+ * now, the snap {@link Kind#FIST}'s 100th tick.
  */
 public final class Finishers {
-	/** How long use is held on the downed before the finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
+	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
 	public static final int HOLD_TICKS = 8, HOLD_GRACE = 8;
+	/**
+	 * (0.15.110) Bare hands take taps, not a hold, so nobody snaps a neck by accident: this many taps, each a fresh press
+	 * (use quiet for more than {@link #PRESS_GAP} ticks between them, held no longer than {@link #TAP_MAX}), none more than
+	 * {@link #TAP_WINDOW} ticks after the last.
+	 */
+	public static final int TAPS = 3, PRESS_GAP = 5, TAP_MAX = 8, TAP_WINDOW = 20;
+	/** (0.15.110) The Combat Arts perk (Jaymo's Kingdoms) that unlocks every weapon's finisher; bare hands need none. */
+	static final String UNLOCK_PERK = "executioner";
 	/** How far they may be from you for it to go on (blocks, past your reach for the use). */
 	static final double SLACK = 1.0, MAX_DISTANCE = 4.0;
 	/** The hold's bar length. */
@@ -80,9 +109,12 @@ public final class Finishers {
 	/** Screen shake on a blow for you and the one being finished, and the last blow's for both and those around. */
 	static final float BEAT_SHAKE = 0.6F, KILL_SHAKE = 1.4F, AROUND_SHAKE = 0.8F;
 	static final double AROUND_RANGE = 10.0;
+	/** (0.15.114) How far the point-blank shot is heard through TaCZ (blocks), and its shake for those around. */
+	static final int SHOT_HEARD = 64;
+	static final float SHOT_AROUND_SHAKE = 0.5F;
 
 	/** How a blow lands: what it sounds and looks like. */
-	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, SNAP }
+	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP }
 
 	/**
 	 * One finisher per kind of weapon: how long it plays (ticks), the beats its blows land on (the last is the kill), how
@@ -105,12 +137,17 @@ public final class Finishers {
 		POLEARM(34, new int[] {20}, Strike.CUT),
 		/** The staff twirled, then the butt driven down twice. */
 		STAFF(38, new int[] {18, 27}, Strike.CRUSH),
-		/** Point Blank: an arrow nocked, drawn slow, aimed straight down, loosed. */
+		/** Loosed Close: an arrow nocked, drawn slow, aimed straight down, loosed. (0.15.114) Spends an arrow. */
 		BOW(32, new int[] {22}, Strike.SHOT),
-		/** A bolt to the heart: the crossbow levelled at them, and the trigger pulled. */
+		/** A bolt to the heart: the crossbow levelled at them, and the trigger pulled. (0.15.114) Spends its bolt. */
 		CROSSBOW(26, new int[] {13}, Strike.BOLT),
-		/** Bare hands (or anything that isn't a weapon): kneel, take the head in both hands, and twist. */
-		FIST(38, new int[] {20}, Strike.SNAP);
+		/** (0.15.114) Point Blank: the gun brought up, cocked, aimed down at the head at arm's length, and fired. Spends a round. */
+		GUN(30, new int[] {20}, Strike.BLAST),
+		/**
+		 * Bare hands: kneel, take the head in both hands, and twist. (0.15.114) Andy: "neck break should take 5s to finish":
+		 * a hold that strains twice against them before the snap at 5 s.
+		 */
+		FIST(118, new int[] {40, 70, 100}, Strike.SNAP);
 
 		public final int length;
 		public final int[] beats;
@@ -144,6 +181,9 @@ public final class Finishers {
 	private static final String[] SWORD_WORDS = {"sword", "katana", "saber", "sabre", "rapier", "cutlass", "scimitar", "falchion", "machete",
 		"wakizashi", "ninjato", "blade", "estoc"};
 	private static final String[] AXE_WORDS = {"axe", "hatchet", "cleaver", "tomahawk"};
+	/** (0.15.114) Another mod's gun, by name (TaCZ's and ours are known by their gun id). */
+	private static final String[] GUN_WORDS = {"musket", "blunderbuss", "flintlock", "pistol", "rifle", "revolver", "arquebus", "handgun",
+		"shotgun"};
 	private static final String[] BLUNT_WORDS = {"mace", "hammer", "cudgel", "club", "flail", "morningstar", "morning_star", "maul", "sledge",
 		"mattock", "pickaxe", "scepter", "sceptre"};
 
@@ -163,21 +203,43 @@ public final class Finishers {
 	/** Rooted while it plays: walking and jumping gone (the finisher, and a downed player being finished). */
 	static final Identifier ROOT_ID = JaymosPowers.id("finisher_root"), JUMP_ID = JaymosPowers.id("finisher_jump");
 
-	/** Use held on a downed one: on whom, since when, and when use last came. */
+	/**
+	 * Use held on a downed one: on whom, since when, and when use last came; (0.15.110) bare-handed, the taps so far and
+	 * when this press began.
+	 */
 	private static final class Hold {
 		final LivingEntity body;
 		final long start;
-		long last;
+		final boolean bare;
+		long last, pressStart;
+		int presses = 1;
 
-		Hold(LivingEntity body, long start) {
+		Hold(LivingEntity body, long start, boolean bare) {
 			this.body = body;
 			this.start = start;
+			this.bare = bare;
 			this.last = start;
+			this.pressStart = start;
 		}
 	}
 
+	private static final boolean KINGDOMS = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
+	private static final java.lang.reflect.@Nullable Method KINGDOMS_RANK;
+
+	static {
+		java.lang.reflect.Method rank = null;
+		if (KINGDOMS) {
+			try {
+				rank = Class.forName("com.jaymoskingdoms.Skills").getMethod("rank", Player.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				rank = null;
+			}
+		}
+		KINGDOMS_RANK = rank;
+	}
+
 	/** A finisher playing: who, on whom. */
-	private record Playing(ServerPlayer player, LivingEntity body) {
+	private record Playing(ServerPlayer player, LivingEntity body, boolean downed) {
 	}
 
 	private static final Map<UUID, Hold> HOLDING = new HashMap<>();
@@ -231,6 +293,9 @@ public final class Finishers {
 		if (stack.isEmpty()) {
 			return Kind.FIST;
 		}
+		if (gun(stack)) {
+			return Kind.GUN;
+		}
 		if (stack.getItem() instanceof CrossbowItem) {
 			return Kind.CROSSBOW;
 		}
@@ -280,6 +345,69 @@ public final class Finishers {
 		return Kind.FIST;
 	}
 
+	/** (0.15.114) A gun: TaCZ's (any with a gun id), the Void Armory's flintlock, or another mod's by name. */
+	static boolean gun(ItemStack stack) {
+		if (!TaczGuns.gunId(stack).isEmpty() || ArsenalFlintlock.FLINTLOCK != null && stack.is(ArsenalFlintlock.FLINTLOCK)) {
+			return true;
+		}
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return path.endsWith("_gun") || any(path, GUN_WORDS);
+	}
+
+	/**
+	 * (0.15.114) Whether {@code player}'s {@code stack} has what its finisher shoots: a round in the gun (TaCZ's, or the
+	 * Void Armory flintlock unspent; another mod's gun we can't read, so yes), an arrow for the bow, the crossbow loaded
+	 * or an arrow for it. Anything else needs nothing.
+	 */
+	static boolean loaded(Player player, ItemStack stack, Kind kind) {
+		return switch (kind) {
+			case GUN -> !TaczGuns.gunId(stack).isEmpty() ? TaczGuns.ammo(stack) > 0
+				: !(ArsenalFlintlock.FLINTLOCK != null && stack.is(ArsenalFlintlock.FLINTLOCK)) || !Boolean.TRUE.equals(stack.get(ArsenalFlintlock.SPENT));
+			case BOW, CROSSBOW -> player.hasInfiniteMaterials() || charged(stack) || !player.getProjectile(stack).isEmpty();
+			default -> true;
+		};
+	}
+
+	/**
+	 * (0.15.116) The move {@code player} plays with {@code stack}: its kind's, but a gun with no round in it (Andy: "with no
+	 * ammunition it should just run though with the blade") runs them through with the bayonet, the sword's Run Through.
+	 */
+	static Kind move(Player player, ItemStack stack) {
+		Kind kind = kind(stack);
+		return kind == Kind.GUN && !loaded(player, stack, kind) ? Kind.SWORD : kind;
+	}
+
+	private static boolean charged(ItemStack stack) {
+		ChargedProjectiles charge = stack.get(DataComponents.CHARGED_PROJECTILES);
+		return charge != null && !charge.isEmpty();
+	}
+
+	/** (0.15.114) The shot's spent: the gun's round, the crossbow's bolt, or an arrow (Infinity and creative keep theirs). */
+	static void spend(ServerLevel level, Player player, ItemStack stack, Kind kind) {
+		switch (kind) {
+			case GUN -> {
+				if (!TaczGuns.spendRound(stack) && ArsenalFlintlock.FLINTLOCK != null && stack.is(ArsenalFlintlock.FLINTLOCK)) {
+					stack.set(ArsenalFlintlock.SPENT, true);
+				}
+			}
+			case BOW, CROSSBOW -> {
+				if (kind == Kind.CROSSBOW && charged(stack)) {
+					stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
+					return;
+				}
+				if (player.hasInfiniteMaterials()) {
+					return;
+				}
+				ItemStack arrow = player.getProjectile(stack);
+				if (!arrow.isEmpty()) {
+					arrow.shrink(EnchantmentHelper.processAmmoUse(level, stack, arrow, 1));
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
 	private static boolean any(String path, String[] words) {
 		for (String word : words) {
 			if (path.contains(word)) {
@@ -289,9 +417,37 @@ public final class Finishers {
 		return false;
 	}
 
+	/**
+	 * (0.15.110) Whether {@code player} has the weapons' finishers: Andy, "make all the other executions unlocked in the combat
+	 * arts tree replacing the current executioner function". Kingdoms' Executioner perk (read by reflection, as Freerun
+	 * reads its perks); everyone in creative, and everyone if Kingdoms isn't loaded.
+	 */
+	public static boolean weaponsUnlocked(Player player) {
+		if (player.isCreative() || !KINGDOMS) {
+			return true;
+		}
+		if (KINGDOMS_RANK == null) {
+			return false;
+		}
+		try {
+			return (int) KINGDOMS_RANK.invoke(null, player, UNLOCK_PERK) > 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * (0.15.114) Whether {@code body} is down for a finisher: downed, or (Andy: "crippled enemies should be executable too")
+	 * crippled, off its feet: Darktide's crawl, both legs broken ({@link Breaks#crawlOnly}), or a leg cut off.
+	 */
+	public static boolean helpless(LivingEntity body) {
+		return Downed.isDowned(body) || DarktideStatus.crippled(body) || Breaks.crawlOnly(body)
+			|| (Dismember.missing(body) & (Dismember.LEFT_LEG | Dismember.RIGHT_LEG)) != 0;
+	}
+
 	/** Whether {@code player} may finish {@code body}: downed, not themselves, not someone's tamed animal, and not already being finished. */
 	static boolean finishable(Player player, Entity entity) {
-		return entity instanceof LivingEntity body && body != player && body.isAlive() && Downed.isDowned(body) && !Carry.isCarried(body)
+		return entity instanceof LivingEntity body && body != player && body.isAlive() && helpless(body) && !Carry.isCarried(body)
 			&& !(body instanceof TamableAnimal tame && tame.isTame()) && !(body instanceof AbstractHorse horse && horse.isTamed())
 			&& !targeted(body);
 	}
@@ -308,15 +464,33 @@ public final class Finishers {
 			|| !finishable(player, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
 			return InteractionResult.PASS;
 		}
+		ItemStack stack = player.getMainHandItem();
+		boolean bare = stack.isEmpty();
+		if (!bare && kind(stack) == Kind.FIST) {
+			// (0.15.110) Andy: "make the execution only possible with bare hands": a torch or a loaf finishes nobody
+			return InteractionResult.PASS;
+		}
 		long now = world.getGameTime();
 		Hold held = HOLDING.get(player.getUUID());
-		if (held != null && held.body == entity) {
+		if (held != null && held.body == entity && held.bare == bare) {
+			if (bare && now - held.last > PRESS_GAP) {
+				// a fresh tap
+				held.presses++;
+				held.pressStart = now;
+			}
 			held.last = now;
 		} else {
-			HOLDING.put(player.getUUID(), new Hold((LivingEntity)entity, now));
+			held = new Hold((LivingEntity) entity, now, bare);
+			HOLDING.put(player.getUUID(), held);
 		}
-		// (only watching: Kingdoms still takes a downed guard's weapons, and Downed's catch-all swallows the rest)
-		return InteractionResult.PASS;
+		if (bare && held.presses >= TAPS && player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
+			// the third tap: the neck snap
+			HOLDING.remove(player.getUUID());
+			begin(level, sp, held.body);
+		}
+		// (only watching: Kingdoms still takes a downed guard's weapons, and Downed's catch-all swallows the rest; (0.15.114)
+		// a crippled one isn't downed, so its click is kept here, no trading screen between taps)
+		return Downed.isDowned(entity) ? InteractionResult.PASS : InteractionResult.SUCCESS;
 	}
 
 	private static void holds(MinecraftServer server) {
@@ -333,18 +507,46 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (now - hold.last > HOLD_GRACE || !player.isWithinEntityInteractionRange(hold.body, SLACK)) {
+			if (!player.isWithinEntityInteractionRange(hold.body, SLACK)) {
+				it.remove();
+				continue;
+			}
+			if (hold.bare) {
+				// (0.15.110) bare hands: taps, and a press held down (or taps too slow) counts for nothing
+				if (now - hold.last > TAP_WINDOW || hold.last - hold.pressStart > TAP_MAX) {
+					it.remove();
+				} else if (now - hold.pressStart <= 1) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.taps", hold.body.getDisplayName(), TAPS - hold.presses)
+						.withStyle(ChatFormatting.DARK_RED));
+				}
+				continue;
+			}
+			if (now - hold.last > HOLD_GRACE) {
 				// let go (a tap: whatever else a click on the downed does, it did)
 				it.remove();
 				continue;
 			}
 			long held = now - hold.start;
+			if (held >= HOLD_TICKS && !weaponsUnlocked(player)) {
+				// (0.15.110) a weapon's finisher is Combat Arts' Executioner
+				it.remove();
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.locked").withStyle(ChatFormatting.GRAY));
+				continue;
+			}
 			if (held >= HOLD_TICKS) {
 				it.remove();
+				Kind kind = move(player, player.getMainHandItem());
+				if (!loaded(player, player.getMainHandItem(), kind)) {
+					// (0.15.114) nothing to shoot
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.unloaded." + kind.name().toLowerCase(java.util.Locale.ROOT))
+						.withStyle(ChatFormatting.GRAY));
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.6F);
+					continue;
+				}
 				begin(level, player, hold.body);
 				continue;
 			}
-			if (held >= 2) {
+			if (held >= 2 && weaponsUnlocked(player)) {
 				int filled = Math.round(HOLD_BAR * held / (float) HOLD_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
 					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));
@@ -355,18 +557,23 @@ public final class Finishers {
 	// ---- playing it out ---------------------------------------------------------------------------------------------------
 
 	private static void begin(ServerLevel level, ServerPlayer player, LivingEntity body) {
-		Kind kind = kind(player.getMainHandItem());
+		Kind kind = move(player, player.getMainHandItem());
 		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
-		PLAYING.put(player.getUUID(), new Playing(player, body));
+		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());
 		player.stopUsingItem();
 		player.setSprinting(false);
 		root(player, true);
-		if (body instanceof Player) {
+		if (body instanceof Player || !Downed.isDowned(body)) {
+			// (0.15.114) a crippled one is held where it is too
 			root(body, true);
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher." + kind.name().toLowerCase(java.util.Locale.ROOT),
 			body.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+		if (kind == Kind.GUN && TaczGuns.gunSound(player, TaczGuns.gunId(player.getMainHandItem()), "fire_select", 16, 1.0F, 1.0F)) {
+			// (0.15.114) the gun's own cock
+			return;
+		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), opening(kind), SoundSource.PLAYERS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.2F);
 	}
 
@@ -388,7 +595,8 @@ public final class Finishers {
 			}
 			Kind kind = finish.type();
 			int t = (int) (level.getGameTime() - finish.start());
-			boolean present = body.isAlive() && !body.isRemoved() && body.level() == level && Downed.isDowned(body) && !Carry.isCarried(body)
+			// (0.15.114) a crippled one stays held till it's over; a downed one that gets up is spared
+			boolean present = body.isAlive() && !body.isRemoved() && body.level() == level && (!p.downed() || Downed.isDowned(body)) && !Carry.isCarried(body)
 				&& player.distanceTo(body) <= MAX_DISTANCE;
 			if (t < kind.kill() && !present) {
 				// (up, carried off or gone: spared)
@@ -399,6 +607,12 @@ public final class Finishers {
 			}
 			// rooted where they stand, facing the body
 			player.setDeltaMovement(0.0, Math.min(0.0, player.getDeltaMovement().y), 0.0);
+			if (!p.downed() && body instanceof Mob mob) {
+				// (0.15.114) a crippled mob, held: no crawling off, no fighting back
+				mob.getNavigation().stop();
+				mob.setTarget(null);
+				mob.setDeltaMovement(0.0, Math.min(0.0, mob.getDeltaMovement().y), 0.0);
+			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
 					blow(level, player, body, kind, beat == kind.kill());
@@ -444,20 +658,55 @@ public final class Finishers {
 				}
 			}
 			case SHOT -> {
+				spend(level, player, player.getMainHandItem(), kind);
 				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, pitch);
 				level.playSound(null, x, y, z, SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 1.0F, pitch * 0.8F);
 				level.sendParticles(ParticleTypes.CRIT, x, y + 0.2, z, 12, 0.2, 0.2, 0.2, 0.3);
 				BladeBlood.splash(body, 6.0F);
 			}
 			case BOLT -> {
+				spend(level, player, player.getMainHandItem(), kind);
 				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, pitch);
 				level.playSound(null, x, y, z, SoundEvents.ARROW_HIT, SoundSource.PLAYERS, 1.0F, pitch * 0.7F);
 				level.sendParticles(ParticleTypes.CRIT, x, y + 0.2, z, 16, 0.2, 0.2, 0.2, 0.35);
 				BladeBlood.splash(body, 7.0F);
 			}
+			case BLAST -> {
+				ItemStack gun = player.getMainHandItem();
+				spend(level, player, gun, kind);
+				// the muzzle at arm's length toward their head, the ball's smoke into them
+				Vec3 eye = player.getEyePosition();
+				Vec3 head = new Vec3(x, y + 0.1, z);
+				Vec3 dir = head.subtract(eye).normalize();
+				Vec3 muzzle = eye.add(dir.scale(Math.min(1.0, eye.distanceTo(head) * 0.6)));
+				level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE0A0), muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 4, 0.05, 0.05, 0.05, 0.02);
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 10, 0.12, 0.12, 0.12, 0.03);
+				for (double d = 0.0, len = muzzle.distanceTo(head); d < len; d += 0.3) {
+					Vec3 at = muzzle.add(dir.scale(d));
+					level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				}
+				level.sendParticles(ParticleTypes.CRIT, x, y + 0.1, z, 14, 0.15, 0.15, 0.15, 0.3);
+				String id = TaczGuns.gunId(gun);
+				if (!TaczGuns.gunSound(player, id, "shoot_3p", SHOT_HEARD, 1.0F, 0.95F + random.nextFloat() * 0.1F)) {
+					level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.9F, 1.7F);
+					level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, 0.6F);
+				}
+				if (!TaczGuns.gunSound(body, id, "flesh_hit", 16, 1.0F, 0.9F)) {
+					level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, pitch * 0.8F);
+				}
+				BladeBlood.splash(body, 10.0F);
+				Shakes.around(level, muzzle, AROUND_RANGE, SHOT_AROUND_SHAKE);
+			}
 			case SNAP -> {
-				level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.0F, 0.5F);
-				level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.8F, 0.6F);
+				if (kill) {
+					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.0F, 0.5F);
+					level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.8F, 0.6F);
+				} else {
+					// (0.15.114) the hold tightens: they struggle, the neck strains
+					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 0.35F, 0.85F + random.nextFloat() * 0.1F);
+					level.playSound(null, x, y, z, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.7F, 0.7F);
+				}
 			}
 		}
 		// (the body jolts with it; no damage: the last blow is the death outright)
@@ -477,6 +726,10 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
+		if (kind.strike == Strike.CRUSH || kind == Kind.GREATSWORD) {
+			// (0.15.117) a spider under it is crushed flat: legs, no body (Kitchen); a greatsword is heavy enough too (Andy)
+			com.jaymospowers.core.Crushing.mark(body);
+		}
 	}
 
 	/** What's heard as it begins: steel drawn, a bowstring, a crossbow wound, cracking knuckles. */
@@ -495,9 +748,8 @@ public final class Finishers {
 		player.removeAttached(FINISHING);
 		root(player, false);
 		TARGETED.remove(body.getUUID());
-		if (body instanceof Player) {
-			root(body, false);
-		}
+		// (unrooting one that never was is nothing)
+		root(body, false);
 	}
 
 	private static void root(LivingEntity entity, boolean on) {
