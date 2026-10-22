@@ -4304,3 +4304,8 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 ## 0.7.173: the server starts again (pack 0.15.119)
 - 0.7.168's bounty board loot table used `minecraft:block_state_property`, which 26.3 doesn't have, so the whole
   datapack failed to load and the server wouldn't start. It uses `minecraft:match_block` with `state` now, as vanilla's beds do.
+
+## 0.7.174: crash when the plague weakened someone (pack 0.15.123)
+- `Atrophy.onMobHurt` added Weakness while vanilla was still walking the hurt mob's effect map in `hurtServer`, so a Night
+  Bleeder's bite crashed the server (ConcurrentModificationException, Deck 2026-10-22). The Weakness now goes on a task
+  run after the hit.
