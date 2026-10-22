@@ -6,7 +6,9 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 /**
  * (0.5.1) A ragdoll worked out for one frame, ready to draw: where the whole body goes ({@link #body}, from the
@@ -39,6 +41,14 @@ public final class RagdollPose {
 		new Limb("left_hind_leg", RagdollRig.BACK_LEFT, RagdollRig.BL_FOOT, 0, 1, 0)
 	};
 	private static final Limb[] NONE = {};
+	/**
+	 * (0.5.16) A four-legged corpse lying on its side: its limbs as a dead animal's lie (x, y, z per limb, as
+	 * {@link #QUADRUPED}): head stretched back a little, front legs reaching forward, hind legs back.
+	 */
+	private static final float[] QUADRUPED_SIDE = {-0.25F, 0, 0, -0.55F, 0, 0.05F, -0.45F, 0, -0.05F, 0.45F, 0, 0.05F,
+		0.55F, 0, -0.05F};
+	/** On its side, the torso's middle lies this far (as a share of the torso's thickness) above its lowest part. */
+	private static final float SIDE_LIFT = 0.95F;
 	/** Overlay parts some models keep beside (not inside) the part they cover: they turn with it. */
 	private static final String[][] OVERLAYS = {{"hat", "head"}, {"right_sleeve", "right_arm"}, {"left_sleeve", "left_arm"},
 		{"right_pants", "right_leg"}, {"left_pants", "left_leg"}, {"jacket", "body"}};
@@ -62,6 +72,15 @@ public final class RagdollPose {
 	 * {@code (ox, oy, oz)} (where the renderer stands the entity this frame).
 	 */
 	public static RagdollPose of(RagdollRig rig, double[] points, double ox, double oy, double oz) {
+		return of(rig, points, ox, oy, oz, 0.0F, 1);
+	}
+
+	/**
+	 * (0.5.16) As above, a four-legged body drawn {@code side} of the way (0 to 1) from where the physics has it to
+	 * lying flat on its side ({@code sideUp} 1: its right side up, -1 its left), level along the way its head points:
+	 * the physics alone props a dead animal belly down on its legs, or sitting up.
+	 */
+	public static RagdollPose of(RagdollRig rig, double[] points, double ox, double oy, double oz, float side, int sideUp) {
 		int n = rig.count;
 		float[] x = new float[n], y = new float[n], z = new float[n];
 		for (int i = 0; i < n; i++) {
@@ -72,20 +91,40 @@ public final class RagdollPose {
 		float[] now = new float[9], rest = new float[9];
 		RagdollRig.frame(x, y, z, now);
 		rig.restFrame(rest);
-		// R = now^T * rest (frames as rows): rest-world vectors to world vectors
-		float[] r = new float[9];
-		for (int row = 0; row < 3; row++) {
-			for (int col = 0; col < 3; col++) {
-				float sum = 0;
-				for (int k = 0; k < 3; k++) {
-					sum += now[k * 3 + row] * rest[k * 3 + col];
-				}
-				r[row * 3 + col] = sum;
+		float[] r = rotation(now, rest);
+		boolean onSide = side > 0.0F && rig.shape == RagdollRig.Shape.QUADRUPED;
+		float[] physical = r;
+		if (onSide) {
+			// level along where the head points (or the belly, sat bolt upright), one side to the sky
+			float lx = now[3], lz = now[5];
+			if (lx * lx + lz * lz < 0.04F) {
+				lx = now[6];
+				lz = now[8];
 			}
+			float ll = (float) Math.sqrt(lx * lx + lz * lz);
+			if (ll < 1.0E-4F) {
+				lx = 0.0F;
+				lz = 1.0F;
+				ll = 1.0F;
+			}
+			lx /= ll;
+			lz /= ll;
+			float up = sideUp >= 0 ? 1.0F : -1.0F;
+			// rows: right (to the sky or the ground), up (the head's way), forward = up x right
+			float[] lying = {0, up, 0, lx, 0, lz, -lz * up, 0, lx * up};
+			r = blend(r, rotation(lying, rest), side);
 		}
 		// the torso's middle now and standing
 		float mx = (x[0] + x[1] + x[2] + x[3]) * 0.25F, my = (y[0] + y[1] + y[2] + y[3]) * 0.25F,
 			mz = (z[0] + z[1] + z[2] + z[3]) * 0.25F;
+		if (onSide) {
+			// on its side, its middle rests a torso's thickness above the ground (its lowest part)
+			float bottom = Float.MAX_VALUE;
+			for (int i = 0; i < n; i++) {
+				bottom = Math.min(bottom, y[i] - rig.radius[i]);
+			}
+			my += (bottom + rig.radius[RagdollRig.FRONT_RIGHT] * SIDE_LIFT - my) * side;
+		}
 		float sx = (rig.restX[0] + rig.restX[1] + rig.restX[2] + rig.restX[3]) * 0.25F;
 		float sy = (rig.restY[0] + rig.restY[1] + rig.restY[2] + rig.restY[3]) * 0.25F;
 		float sz = (rig.restZ[0] + rig.restZ[1] + rig.restZ[2] + rig.restZ[3]) * 0.25F;
@@ -111,15 +150,49 @@ public final class RagdollPose {
 			Limb limb = limbs[l];
 			float ux = x[limb.tip] - x[limb.root], uy = y[limb.tip] - y[limb.root], uz = z[limb.tip] - z[limb.root];
 			// back into the standing body's frame (R transposed), then into the model's (y and z flipped)
-			float rx = r[0] * ux + r[3] * uy + r[6] * uz;
-			float ry = r[1] * ux + r[4] * uy + r[7] * uz;
-			float rz = r[2] * ux + r[5] * uy + r[8] * uz;
+			float rx = physical[0] * ux + physical[3] * uy + physical[6] * uz;
+			float ry = physical[1] * ux + physical[4] * uy + physical[7] * uz;
+			float rz = physical[2] * ux + physical[5] * uy + physical[8] * uz;
 			eulerTo(limb.restX, limb.restY, limb.restZ, rx, -ry, -rz, out);
-			angles[l * 3] = out[0];
-			angles[l * 3 + 1] = out[1];
-			angles[l * 3 + 2] = out[2];
+			for (int k = 0; k < 3; k++) {
+				angles[l * 3 + k] = onSide ? out[k] + (QUADRUPED_SIDE[l * 3 + k] - out[k]) * side : out[k];
+			}
 		}
 		return new RagdollPose(body, limbs, angles, rig.shape);
+	}
+
+	/** R = now^T * rest (frames as rows): rest-world vectors to world vectors. Rows of a 3x3 matrix. */
+	private static float[] rotation(float[] now, float[] rest) {
+		float[] r = new float[9];
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 3; col++) {
+				float sum = 0;
+				for (int k = 0; k < 3; k++) {
+					sum += now[k * 3 + row] * rest[k * 3 + col];
+				}
+				r[row * 3 + col] = sum;
+			}
+		}
+		return r;
+	}
+
+	/** (0.5.16) The turn {@code t} of the way from rotation {@code a} to {@code b} (rows of 3x3 matrices), the short way. */
+	private static float[] blend(float[] a, float[] b, float t) {
+		Quaternionf qa = matrix(a).getNormalizedRotation(new Quaternionf());
+		Quaternionf qb = matrix(b).getNormalizedRotation(new Quaternionf());
+		Matrix3f m = new Matrix3f().set(qa.slerp(qb, t));
+		float[] out = new float[9];
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 3; col++) {
+				out[row * 3 + col] = m.get(col, row);
+			}
+		}
+		return out;
+	}
+
+	private static Matrix3f matrix(float[] rows) {
+		// JOML takes columns
+		return new Matrix3f(rows[0], rows[3], rows[6], rows[1], rows[4], rows[7], rows[2], rows[5], rows[8]);
 	}
 
 	/**
