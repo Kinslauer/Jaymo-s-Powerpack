@@ -91,7 +91,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   lifts the render state's invisible flag for the hands (the body was hidden for the alien, and the renderer skips an
   invisible body's bare arm).
 - The band itself (`XenoBand`): a 5x3x5 box on the left wrist of anyone whose power is Xenoform while they're
-  themselves, its dial emissive; a layer in third person (not on an arm First-person Model hides), and on your
+  themselves, its dial emissive, grown to sit over any costume, suit or chestplate sleeve (`GROW`, `ARMOUR_GROW`,
+  since 0.15.107); a layer in third person (not on an arm First-person Model hides), and on your
   first-person left arm whenever it's drawn (AvatarRenderer.renderHand).
 - The slam (`XenoformSlap`, client only): holding Z brings the left wrist up across the chest and the right fist up
   behind it; the fist drops onto the band as the hold reaches `HOLD_TICKS` (when the server changes you), rests, and
@@ -102,7 +103,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
   at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) with the
   dialled alien standing over it as a see-through green hologram (`XenoHologram`, since 0.15.103: upright on screen,
-  facing you, red while the band would refuse, light fanning up behind it from the band), and the right hand waits up and off to the right, clear of it; the hand comes straight down over 2 ticks and covers the dial; on contact
+  facing you, red while the band would refuse, light fanning up behind it from the band; scaled with its distance from
+  your eye so it looks the same size on First-person Model's own arm), and the right hand waits up and off to the right, clear of it; the hand comes straight down over 2 ticks and covers the dial; on contact
   the forearm dips and springs back, the view kicks once (`ScreenShake`) and a green burst blooms (`XenoformHud`);
   then both arms drop away.
 - The band's flash (`BandFlash`, since 0.15.103): changing shape either way blinds everyone within `RADIUS` (10) who can
