@@ -28,10 +28,16 @@ import org.jspecify.annotations.Nullable;
  * the breathing laboured; lying still they rest the head, now and then try to push up and sink back. Passed out, they
  * lie limp, the head turned to one side. Falling down they hit the ground with a jolt. It all eases in and out
  * ({@link PoseBlend}).
+ * <p>
+ * (0.15.86) Andy (2026-10-22): "legs and torso should go limp when downed ... animate arms dragging you". Downed, the legs
+ * and torso go limp and trail along behind (no knees driving, no twist at the waist, only a slight sway from each pull),
+ * and the arms haul the body hand over hand, the chest lifting with each pull, quick enough for the slow downed crawl to
+ * read as dragging rather than gliding. Sneak (held to give up) no longer flattens the upper body into the ground
+ * (vanilla's crouch on a body lying flat): it plays the push-up struggle instead.
  */
 public final class CrawlPose {
-	/** Strokes per unit of the walk cycle (vanilla's walk is 0.6662), and the slower, uneven downed crawl's share of it. */
-	static final float STROKE = 0.42F, DOWNED_STROKE = 0.8F, DOWNED_HITCH = 0.35F;
+	/** Strokes per unit of the walk cycle (vanilla's walk is 0.6662), and the uneven downed crawl's hitch on each pull. */
+	static final float STROKE = 0.42F, DOWNED_HITCH = 0.35F;
 	/** Moving: how much of the stroke shows at a crawl's speed (walkAnimationSpeed times this, at the most 1). */
 	static final float MOVING_PER_SPEED = 2.5F;
 	/**
@@ -48,6 +54,14 @@ public final class CrawlPose {
 	static final float ROCK_DEGREES = 6.0F, TWIST = 0.08F;
 	/** A broken limb: the good ones work this much harder, and the body rocks this much more onto them. */
 	public static final float HURT_EFFORT = 1.35F, HURT_ROCK = 1.8F;
+	/**
+	 * (0.15.86) Downed, dragging: strokes per unit of the walk cycle (the downed crawl covers little ground, so the arms
+	 * work faster per block), how much of the stroke shows at its speed, the chest heaved up off the ground on each pull
+	 * (degrees), and the limp torso's sway (share of {@link #ROCK_DEGREES}).
+	 */
+	static final float DRAG_STROKE = 2.3F, DRAG_MOVING_PER_SPEED = 8.0F, DRAG_HEAVE = 4.0F, LIMP_ROCK = 0.35F;
+	/** (0.15.86) Downed, the limp legs trailing: spread apart, toes dragging (x), and the small bounce each pull gives them. */
+	static final float LIMP_LEG_OUT = 0.12F, LIMP_LEG_X = 0.08F, LIMP_BOUNCE = 0.06F;
 	/** Downed: the breathing (degrees of heave, beats per tick), quicker and deeper than at rest. */
 	static final float BREATH_DEGREES = 1.4F, BREATH_RATE = 0.22F;
 	/** Downed and lying still: an attempt to push up every this many ticks (give or take), how far up (degrees), how long (ticks). */
@@ -62,9 +76,11 @@ public final class CrawlPose {
 	/**
 	 * {@code roll}: progress through a roll (signed by direction), or null; {@code stride}/{@code speed}: the crawl's walk
 	 * cycle; {@code downed}: ticks since they went down, or -1; {@code out}: passed out; {@code broken}: the broken limbs
-	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id.
+	 * ({@link Dismember} bits); {@code age}: ticks, for the breathing; {@code id}: the player's entity id; {@code sneak}:
+	 * (0.15.86) downed and holding Sneak to give up.
 	 */
-	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id) {
+	public record State(@Nullable Float roll, float stride, float speed, float downed, boolean out, int broken, float age, int id,
+		boolean sneak) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
@@ -85,7 +101,9 @@ public final class CrawlPose {
 		boolean downed = Downed.isDowned(player);
 		float since = downed ? Math.max(0.0F, time - Downed.since(player) + partialTicks) : -1.0F;
 		state.setData(KEY, new State(roll, state.walkAnimationPos, state.walkAnimationSpeed, since, downed && Downed.passedOut(player),
-			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId()));
+			Wounds.brokenLimbs(player), player.tickCount + partialTicks, player.getId(), downed && player.isShiftKeyDown()));
+		// (0.15.86) lying flat, Sneak isn't a crouch: vanilla's would bend the upper body down into the ground
+		state.isCrouching = false;
 	}
 
 	/**
@@ -114,6 +132,8 @@ public final class CrawlPose {
 				// laboured breathing, and now and then a try at pushing up
 				lift += BREATH_DEGREES * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE)) * w;
 				lift += ATTEMPT_DEGREES * attempt(crawl) * w;
+				// (0.15.86) each arm's pull hauls the chest up off the ground a little
+				lift += DRAG_HEAVE * Math.abs(Mth.sin(phase(crawl))) * moving(crawl) * w;
 			} else {
 				lift += BREATH_DEGREES * 0.5F * (0.5F + 0.5F * Mth.sin(crawl.age() * BREATH_RATE * 0.5F)) * w;
 			}
@@ -121,6 +141,10 @@ public final class CrawlPose {
 		if (!crawl.out()) {
 			float phase = phase(crawl);
 			rock = ROCK_DEGREES * Mth.sin(phase) * moving(crawl) * hurtRock(crawl) * w;
+			if (crawl.downed() >= 0.0F) {
+				// (0.15.86) the limp torso only sways with the arms' pull
+				rock *= LIMP_ROCK;
+			}
 		}
 		if (Math.abs(rock) > 1.0E-3F) {
 			poseStack.rotateDegrees(Axis.YP, rock);
@@ -194,7 +218,8 @@ public final class CrawlPose {
 	/**
 	 * The army crawl's limbs on a frame lying face down (the swimming tilt, or a downed mob's): {@code phase} through the
 	 * stroke, {@code moving} how much of it shows (0 lying still), {@code broken} the limbs left to drag ({@link Dismember}
-	 * bits), {@code downed} resting the head lower when still. Shared with {@code DownedPose}'s crawlers.
+	 * bits), {@code downed} resting the head lower when still and (0.15.86) the legs and torso limp, dragged along by the
+	 * arms. Shared with {@code DownedPose}'s crawlers.
 	 */
 	public static void stroke(PoseBlend.Frame f, float phase, float moving, int broken, boolean downed) {
 		boolean rightArm = (broken & Dismember.RIGHT_ARM) == 0, leftArm = (broken & Dismember.LEFT_ARM) == 0;
@@ -214,6 +239,21 @@ public final class CrawlPose {
 		if (leftArm) {
 			f.set(PoseBlend.LEFT_ARM, ARM_DIP + REACH_LIFT * leftLift * moving, 0.0F, -leftSweep);
 		}
+		if (downed) {
+			// (0.15.86) limp: the legs trail apart, toes dragging, bounced a little by each pull; the waist doesn't twist
+			float bounce = LIMP_BOUNCE * Math.abs(Mth.sin(phase)) * moving;
+			if (rightLeg) {
+				f.set(PoseBlend.RIGHT_LEG, LIMP_LEG_X + bounce, 0.0F, LIMP_LEG_OUT);
+			}
+			if (leftLeg) {
+				f.set(PoseBlend.LEFT_LEG, LIMP_LEG_X + bounce * 0.8F, 0.0F, -LIMP_LEG_OUT * 0.8F);
+			}
+			f.set(PoseBlend.BODY + 1, 0.0F);
+			f.set(PoseBlend.HIP_YAW, 0.0F);
+			float look = Math.abs(Mth.sin(phase)) * moving;
+			f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, HEAD_DOWN_REST, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
+			return;
+		}
 		// the opposite knee drives up the side as an arm reaches (a good leg drives harder for a broken one)
 		float rightDrive = Math.max(0.0F, -Mth.sin(phase)) * moving * (leftLeg ? 1.0F : effort);
 		float leftDrive = Math.max(0.0F, Mth.sin(phase)) * moving * (rightLeg ? 1.0F : effort);
@@ -232,16 +272,16 @@ public final class CrawlPose {
 		f.set(PoseBlend.HEAD, Mth.lerp(look, Mth.lerp(moving, headRest, HEAD_REST), HEAD_LOOK), f.vanilla(PoseBlend.HEAD + 1) * 0.5F, 0.0F);
 	}
 
-	/** How much of the stroke shows (0 lying still to 1 crawling). */
+	/** How much of the stroke shows (0 lying still to 1 crawling); downed, the slow drag shows it all. */
 	private static float moving(State crawl) {
-		return Math.min(1.0F, crawl.speed() * MOVING_PER_SPEED);
+		return Math.min(1.0F, crawl.speed() * (crawl.downed() >= 0.0F ? DRAG_MOVING_PER_SPEED : MOVING_PER_SPEED));
 	}
 
 	/** Where in the stroke: from the distance crawled; downed, slower and hitching (lingering on each pull). */
 	private static float phase(State crawl) {
 		float phase = crawl.stride() * STROKE;
 		if (crawl.downed() >= 0.0F) {
-			phase *= DOWNED_STROKE;
+			phase *= DRAG_STROKE;
 			phase += DOWNED_HITCH * Mth.sin(phase * 2.0F);
 		}
 		return phase;
@@ -252,9 +292,18 @@ public final class CrawlPose {
 		return crawl.broken() == 0 ? 1.0F : HURT_ROCK;
 	}
 
-	/** Downed and lying still: the try at pushing up (0-1), now and then (each player on their own beat). */
+	/**
+	 * Downed and lying still: the try at pushing up (0-1), now and then (each player on their own beat). (0.15.86) Held
+	 * all the while Sneak is (giving up: the struggle that fails).
+	 */
 	private static float attempt(State crawl) {
-		if (crawl.out() || crawl.downed() < ATTEMPT_TICKS) {
+		if (crawl.out()) {
+			return 0.0F;
+		}
+		if (crawl.sneak()) {
+			return 1.0F;
+		}
+		if (crawl.downed() < ATTEMPT_TICKS) {
 			return 0.0F;
 		}
 		float still = 1.0F - moving(crawl);

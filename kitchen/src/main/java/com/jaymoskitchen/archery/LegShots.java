@@ -4,6 +4,9 @@ import com.jaymoskitchen.JaymosKitchen;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import java.util.ArrayList;
+import java.util.List;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -26,6 +29,11 @@ import net.minecraft.world.phys.Vec3;
  * it down to crawl for five seconds (thirty for hostile humanoids) (drawn on the ground: see CrawlPose), then leaves it limping. A fully drawn
  * (critical) shot hobbles longer, and every further leg hit stacks the limp up, to a limit.
  * Creatures without legs to speak of (slimes, fish, ghasts...) are listed in the {@link #NO_LEGS} tag.
+ * <p>
+ * (0.5.13) Andy (2026-10-22): "crippling should only activate if the legs are broken, not just on any hit". A leg hit
+ * only cripples (the crawl and the limp) a creature with a broken leg: Jaymo's Powers' Wounds tags a broken part
+ * {@code jaymoskitchen.broken.<part>} ({@link #BROKEN_LEG_TAGS}), so without Powers nothing is crippled. The check waits
+ * for the end of the tick, after the blow's damage has had its chance to break the leg.
  */
 public final class LegShots {
 	/** How much of a creature's height counts as legs: about the bottom three eighths, as on a player. */
@@ -54,8 +62,20 @@ public final class LegShots {
 	public static final int LONG_CRAWL_TICKS = 600;
 	public static final TagKey<EntityType<?>> DOWNED_LONG = TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("downed_long"));
 	private static final int CRAWL_AMPLIFIER = 3;
+	/** (0.5.13) The tags Powers' Wounds puts on a body for each broken leg (any of its legs). */
+	public static final List<String> BROKEN_LEG_TAGS = List.of("jaymoskitchen.broken.left_leg", "jaymoskitchen.broken.right_leg",
+		"jaymoskitchen.broken.front_legs", "jaymoskitchen.broken.hind_legs", "jaymoskitchen.broken.legs");
+	/** (0.5.13) Leg hits waiting for the end of the tick, when the blow's damage (and any break) has landed. */
+	private static final List<Runnable> PENDING = new ArrayList<>();
 
 	public static void register() {
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (!PENDING.isEmpty()) {
+				List<Runnable> due = new ArrayList<>(PENDING);
+				PENDING.clear();
+				due.forEach(Runnable::run);
+			}
+		});
 		// melee: where the swing meets the body, along the attacker's line of sight
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
 			if (level instanceof ServerLevel && !player.isSpectator() && entity instanceof LivingEntity target
@@ -75,14 +95,32 @@ public final class LegShots {
 		}
 	}
 
-	/** A player's arrow or blow landed on {@code target} at {@code hit}: if that's its legs, it's hobbled. */
+	/** A player's arrow or blow landed on {@code target} at {@code hit}: if that's its legs, and one is broken, it's hobbled. */
 	public static void onLegHit(LivingEntity target, Player attacker, Vec3 hit, boolean crit) {
-		if (!(target.level() instanceof ServerLevel level) || target.is(NO_LEGS) || target.getBbHeight() <= 0.0F) {
+		if (!(target.level() instanceof ServerLevel) || target.is(NO_LEGS) || target.getBbHeight() <= 0.0F) {
 			return;
 		}
 		// how far up the body it landed: 0 at the feet, 1 at the top of the head
 		double height = (hit.y - target.getY()) / target.getBbHeight();
 		if (height > LEG_FRACTION) {
+			return;
+		}
+		PENDING.add(() -> cripple(target, attacker, hit, crit));
+	}
+
+	/** Whether any of its legs is broken (Powers' Wounds). */
+	public static boolean legBroken(net.minecraft.world.entity.Entity entity) {
+		for (String tag : BROKEN_LEG_TAGS) {
+			if (entity.entityTags().contains(tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The end of the tick a leg hit landed: a broken leg puts it down to crawl, then leaves it limping. */
+	private static void cripple(LivingEntity target, Player attacker, Vec3 hit, boolean crit) {
+		if (!target.isAlive() || target.isRemoved() || !(target.level() instanceof ServerLevel level) || !legBroken(target)) {
 			return;
 		}
 
