@@ -9,6 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -149,6 +150,11 @@ public class XenoDouble extends PathfinderMob {
 		LivingEntity target = this.getTarget();
 		if (target != null && (target == player || target instanceof XenoDouble twin && twin.isDoubleOf(player))) {
 			this.setTarget(null);
+		}
+		// (0.15.80) it goes by the name its owner shows now (a character name given late, a costume put on), never a stale username
+		Component name = player.getDisplayName();
+		if (!name.equals(this.getCustomName())) {
+			this.setCustomName(name);
 		}
 	}
 

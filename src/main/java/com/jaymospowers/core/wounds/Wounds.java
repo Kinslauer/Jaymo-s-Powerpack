@@ -116,6 +116,8 @@ public final class Wounds {
 		MedicineItems.register();
 		Treatment.register();
 		SelfRevive.register();
+		// (0.15.82) up from the downed, but battered
+		Battered.register();
 		Pain.register();
 		// (0.14.2) a killing blow can still take a head or a limb off, onto the corpse (as Dismember's own roll did)
 		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(Downed.LAST, KILLING_PHASE);
@@ -369,6 +371,8 @@ public final class Wounds {
 		Breaks.clearAll(entity);
 		// (0.14.4) and every cut and fever
 		Bleeding.clearAll(entity);
+		// (0.15.82) and the battering from getting up
+		Battered.clear(entity);
 		entity.setHealth(entity.getMaxHealth());
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);

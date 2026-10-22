@@ -404,8 +404,21 @@ public final class Downed {
 		}
 	}
 
-	/** Brought round (or left long enough): back on its feet, hurt, and a mob back to its post (its AI takes up again). */
+	/**
+	 * Brought round (or left long enough): back on its feet, hurt, and a mob back to its post (its AI takes up again).
+	 * (0.15.82) A player gets up battered ({@link Battered}).
+	 */
 	public static void getUp(ServerLevel level, LivingEntity entity) {
+		getUp(level, entity, true);
+	}
+
+	/** (0.15.83) Undone rather than got over (Chrono's Rewind back to before the fall): up, and not battered by it. */
+	public static void undo(ServerLevel level, LivingEntity entity) {
+		getUp(level, entity, false);
+	}
+
+	/** {@code battered}: (0.15.82) false for a knock-out from standing, which was no downing. */
+	private static void getUp(ServerLevel level, LivingEntity entity, boolean battered) {
 		if (!isDowned(entity)) {
 			return;
 		}
@@ -420,6 +433,9 @@ public final class Downed {
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
 		if (entity instanceof ServerPlayer player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.up").withStyle(ChatFormatting.GREEN));
+		}
+		if (battered) {
+			Battered.gotUp(entity);
 		}
 	}
 
@@ -471,6 +487,8 @@ public final class Downed {
 		if (entity instanceof ServerPlayer player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.roused").withStyle(ChatFormatting.GREEN));
 		}
+		// (0.15.82) up, but battered
+		Battered.gotUp(entity);
 		return true;
 	}
 
@@ -509,7 +527,7 @@ public final class Downed {
 		} else {
 			// (a knock-out from standing is no rest cure: they get up as hurt as they went down)
 			float health = entity.getHealth();
-			getUp(level, entity);
+			getUp(level, entity, false);
 			entity.setHealth(health);
 			Wounds.reconcile(entity);
 		}

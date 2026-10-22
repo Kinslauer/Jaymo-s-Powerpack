@@ -2427,3 +2427,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the top). Everyone sees it: the server syncs the roll (`Dodge.ROLLING`), and your own client draws it at once. Your own
   body in first person (First-person Model) stays upright. In first person the view tumbles with the roll and dips
   toward the ground (Andy's ask; `VIEW_ROLL` turns it down, 0 switches it off).
+- **0.15.80, ships Jaymo's Kingdoms 0.7.160 (no usernames left on show):** Andy: "usernames should only show up for
+  commands, it still appears in scoreboard and over characters and it shouldnt. especially when playing duplex".
+  Anyone who kept their username in MCA's creator now gets a character name (details in the Kingdoms MODLOG). Duplex's
+  doubles (and any Xeno double) follow the name their owner shows each half second, so a name given or a costume put on
+  after the split shows on them too.
+- **0.15.83, Chrono's Rewind gets you up; no Overclock fall damage:** Andy: "chrono should be able to use R when
+  downed, this will revert him as it should". R stays live while you're down, but not after you've passed out (`Power.usableDowned`, let
+  through by `DownedKeysMixin` and `PowerEvents`). While you're down, Chrono's history holds still. A Rewind then takes
+  you back to the 3 s before the fall, on your feet (out of any carrier's arms), with the health you had then (at least
+  30%), and not battered (`Downed.undo`). Andy: "chrono should not take fall damage when using overclock": no fall
+  damage while Overclock runs.
