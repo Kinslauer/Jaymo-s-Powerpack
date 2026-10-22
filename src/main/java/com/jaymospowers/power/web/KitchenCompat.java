@@ -135,6 +135,12 @@ public final class KitchenCompat {
 
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
+		static void endLegCrawl(Entity entity) {
+			if (entity.hasAttached(com.jaymoskitchen.archery.LegShots.CRAWL)) {
+				entity.removeAttached(com.jaymoskitchen.archery.LegShots.CRAWL);
+			}
+		}
+
 		static int drunk(Player player) {
 			return com.jaymoskitchen.brewing.Drunk.level(player);
 		}
@@ -343,6 +349,17 @@ public final class KitchenCompat {
 				.invoke(null, adrift);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen without holds: the keys still stop the swimming (DownedKeysMixin)
+		}
+	}
+
+	/**
+	 * (0.15.91) A downed mob lies as it's downed ({@code DownedPose}), not also as Kitchen's leg-shot crawl: that laid it
+	 * face down a second time, so a crippled illager or skeleton stood on its head, sticking out of the ground. Its
+	 * crawl is dropped while it's down (the limp it's left with stays).
+	 */
+	public static void endLegCrawl(Entity entity) {
+		if (LOADED) {
+			Kitchen.endLegCrawl(entity);
 		}
 	}
 
