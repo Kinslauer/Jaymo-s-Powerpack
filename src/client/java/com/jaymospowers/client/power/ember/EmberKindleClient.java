@@ -2,6 +2,8 @@ package com.jaymospowers.client.power.ember;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.PoseBlend;
+import com.jaymospowers.client.mixin.MinecraftAttackInvoker;
+import com.jaymospowers.client.power.zfighter.RaceHoldClient;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.ember.EmberKindle;
 import com.jaymospowers.power.smoke.SmokePower;
@@ -64,8 +66,56 @@ public final class EmberKindleClient {
 	private static boolean on;
 	/** The server put the flame out while it was still held: nothing more until the button is let go. */
 	private static boolean out;
+	/** (0.15.65) The click's punch, held back until it's clear whether it's a punch or Kindle; and the punch thrown late. */
+	private static boolean punch, punching;
 
 	private EmberKindleClient() {
+	}
+
+	/**
+	 * (0.15.65) From vanilla's startAttack (the attack key's press): Andy, "emberborn left click hold attack should stop
+	 * you from breaking blocks or swinging for its duration". A press that may become Kindle (the race's left hold, fed
+	 * enough) doesn't punch or swing; if it's let go (or turns to a block) before the flame starts, the punch is thrown
+	 * then. Once the flame runs, clicks do nothing.
+	 */
+	public static boolean holdsClick(Minecraft minecraft) {
+		if (punching) {
+			return false;
+		}
+		if (on) {
+			return true;
+		}
+		LocalPlayer player = minecraft.player;
+		if (player == null || out || !EmberKindle.ember(player) || !RaceHoldClient.first(minecraft, player)
+			|| !RaceHoldClient.claims(minecraft, player)
+			|| !player.getAbilities().instabuild && player.getFoodData().getFoodLevel() <= EmberKindle.MIN_FOOD) {
+			return false;
+		}
+		punch = true;
+		return true;
+	}
+
+	/** (0.15.65) Whether a press is waiting to become Kindle (vanilla's held-click digging stands aside meanwhile). */
+	public static boolean pending() {
+		return punch && !on;
+	}
+
+	/** The punch held back by {@link #holdsClick}, thrown now: it wasn't Kindle after all. */
+	private static void throwPunch() {
+		if (!punch) {
+			return;
+		}
+		punch = false;
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player == null || minecraft.gui.screen() != null) {
+			return;
+		}
+		punching = true;
+		try {
+			((MinecraftAttackInvoker)minecraft).jaymospowers$startAttack();
+		} finally {
+			punching = false;
+		}
 	}
 
 	public static void init() {
@@ -80,6 +130,8 @@ public final class EmberKindleClient {
 		if (!down) {
 			held = 0;
 			out = false;
+			// let go (or turned to a block) before the flame started: it was a punch
+			throwPunch();
 			if (on) {
 				on = false;
 				if (Minecraft.getInstance().getConnection() != null) {
@@ -94,12 +146,14 @@ public final class EmberKindleClient {
 			// the server stopped it (too hungry, the hand filled): stand aside so the click digs again
 			on = false;
 			out = true;
+			punch = false;
 		}
 		if (out) {
 			return;
 		}
 		if (!on && held >= KINDLE_HOLD) {
 			on = true;
+			punch = false;
 			ClientPlayNetworking.send(new EmberKindle.Kindle(true));
 		} else if (on && held % REFRESH == 0) {
 			ClientPlayNetworking.send(new EmberKindle.Kindle(true));

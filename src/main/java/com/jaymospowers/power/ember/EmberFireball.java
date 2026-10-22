@@ -32,8 +32,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.14.0) Kindle's fireball ({@link EmberKindle}): let go at full heat and the gathered heat is thrown along the look.
  * It flies straight (no drop) until it meets a block or a creature, then bursts: everything within {@link #RADIUS} is
- * set alight ({@link Flames}) and takes fire damage, but no block is broken or set on fire (it lights a campfire, a
- * candle or TNT it hits and melts snow and ice, as the flame does). In water it fizzles out. With the Smoke power,
+ * set alight ({@link Flames}) and takes fire damage, but no block is broken (it lights a campfire, a candle or TNT it
+ * hits and melts snow and ice, as the flame does). (0.15.65) It starts one fire where it bursts. In water it fizzles out. With the Smoke power,
  * flying into the thrower's own thick smoke (or bursting by it) sets off a flashover ({@link EmberFlashover}).
  * Cooldown {@link #COOLDOWN}. Not an entity: the server moves it and draws it with particles, so nothing is saved.
  */
@@ -150,7 +150,7 @@ public final class EmberFireball {
 		return false;
 	}
 
-	/** It bursts at {@code at} (on the block {@code block}, if it hit one): fire and burning round, no block damage. */
+	/** It bursts at {@code at} (on the block {@code block}, if it hit one): fire and burning round, one fire, no block damage. */
 	private static void burst(Ball ball, Vec3 at, BlockPos block) {
 		ServerLevel level = ball.level;
 		ServerPlayer owner = ball.owner;
@@ -172,6 +172,8 @@ public final class EmberFireball {
 		if (block != null) {
 			EmberKindle.touch(level, block, owner);
 		}
+		// (0.15.65) Andy: "a single fire started at the point of impact along with the current explosion and impact effects"
+		EmberKindle.ignite(level, BlockPos.containing(at));
 		if (Powers.has(owner, SmokePower.INSTANCE)) {
 			// any of the thrower's own thick smoke in the burst goes up
 			int r = (int)Math.ceil(RADIUS);
