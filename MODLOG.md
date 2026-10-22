@@ -2412,3 +2412,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   on with no path. Taking the suit off is now only sometimes fought (60% at no bond to 30% at bond 70), up to 3 times a
   bond. Takeovers are in the plain black suit, the big body only 10% of the time (3% in non-web hosts, 40% for the anti
   one). See docs/web.md.
+- **0.15.72, Thunderclap and Sunflare, ships Jaymo's Kingdoms 0.7.154 (Stormborn and Dawnborn buffs):** Andy's
+  picks. The two heritages get a left hold of their own, like the Emberborn's Kindle (`power/heritage/HeritageMoves`,
+  held through `RaceHoldClient`, sneak + hold beside another power). Hold bare-handed 1.5 s to charge (a bar over the
+  crosshair), let go when full. Thunderclap (Stormborn, open sky only): lightning where you look, out to 48 blocks
+  (the first creature or block); a Stormborn is immune and charged by it, so it can be called at your feet. 60 s
+  cooldown, 20 s in a thunderstorm. Sunflare (Dawnborn, by day): a flash 6 blocks round that sets the undead alight
+  for 8 s, blinds other mobs 5 s and heals other players and your pets 2 hearts; 60 s cooldown. Charging, a Stormborn
+  raises a hand to the sky and a Dawnborn cups both hands out in front.

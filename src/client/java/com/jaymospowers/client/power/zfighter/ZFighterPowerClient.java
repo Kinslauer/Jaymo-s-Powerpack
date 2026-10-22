@@ -160,6 +160,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterApe.extract(entity, state);
 		RaceHoldClient.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.ember.EmberKindleClient.extract(entity, state);
+		com.jaymospowers.client.power.heritage.HeritageMovesClient.extract(entity, state);
 		ZFighterStretchPose.extract(entity, state, partialTicks);
 	}
 
@@ -175,6 +176,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterDiscPose.applyModel(model, state);
 		RaceHoldClient.applyModel(model, state);
 		com.jaymospowers.client.power.ember.EmberKindleClient.applyModel(model, state);
+		com.jaymospowers.client.power.heritage.HeritageMovesClient.applyModel(model, state);
 		ZFighterStretchPose.applyModel(model, state);
 	}
 
