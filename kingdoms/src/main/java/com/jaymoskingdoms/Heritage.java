@@ -84,9 +84,12 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; (0.7.92) near death
  * their ki flares with a random buff for a while ({@link EarthlingSurge}).</li>
  * <li><b>Stormborn:</b> (0.7.106) quicker under the open sky, and lightning never hurts them; in a thunderstorm their blows
- * throw a spark to a monster nearby. Deep underground they're sluggish.</li>
+ * throw a spark to a monster nearby. Deep underground they're sluggish. (0.7.154) Any rain sparks, the spark leaps on to a
+ * second monster, and lightning charges them (Speed II, Strength I); Jaymo's Powers gives them Thunderclap on the left
+ * hold, to call it down.</li>
  * <li><b>Dawnborn:</b> (0.7.106) Nightborn's mirror: stronger and slowly healing under the open sun, hitting the undead
- * harder; in the dark they hit lighter and hunger faster.</li>
+ * harder; in the dark they hit lighter and hunger faster. (0.7.154) By day their blows set the undead alight; Jaymo's
+ * Powers gives them Sunflare on the left hold.</li>
  * <li><b>Endborn:</b> (0.7.106, earned) now and then blink aside from an arrow or anything thrown; endermen don't mind
  * their stare. Water and rain hurt them a little, like an enderman.</li>
  * <li><b>Dragonblood:</b> (0.7.106, earned) fire and dragon's breath do them half harm; the hoard: the more gold they
@@ -158,21 +161,29 @@ public final class Heritage {
 	/** Earthling: skill experience, as a factor. */
 	static final float EARTHLING_XP = 1.25F;
 	/**
-	 * (0.7.106) Stormborn: walking speed under the open sky, and lost deep underground (no sky, below the sea), as shares.
-	 * In a thunderstorm under the sky a blow throws a spark of this much harm to the nearest monster this close to what
-	 * they hit.
+	 * (0.7.106) Stormborn: walking speed under the open sky, and lost deep underground (no sky, (0.7.154) below
+	 * {@code STORM_DEEP_Y}), as shares. In a thunderstorm under the sky a blow throws a spark of this much harm to the
+	 * nearest monster this close to what they hit. (0.7.154) Andy's buffs: any rain will do, and the spark leaps on to
+	 * {@code STORM_SPARK_CHAIN} monsters in all, each the nearest to the last.
 	 */
-	static final double STORM_SKY_SPEED = 0.08, STORM_DEEP_SLOW = 0.08, STORM_SPARK_RANGE = 4.0;
-	static final float STORM_SPARK_DAMAGE = 3.0F;
+	static final double STORM_SKY_SPEED = 0.12, STORM_DEEP_SLOW = 0.08, STORM_SPARK_RANGE = 4.0;
+	static final float STORM_SPARK_DAMAGE = 4.0F;
+	static final int STORM_SPARK_CHAIN = 2, STORM_DEEP_Y = 0;
+	/**
+	 * (0.7.154) Charged: lightning that strikes a Stormborn (it never hurts) gives them Speed II and Strength I for this
+	 * long (ticks). Jaymo's Powers' Thunderclap calls it down on purpose.
+	 */
+	static final int STORM_CHARGED_TICKS = 600;
 	/** (0.7.106) A Stormborn throws a spark at most this often (ticks), so a target's hurt-immunity doesn't let them spam it. */
 	static final int STORM_SPARK_EVERY = 10;
 	/**
 	 * (0.7.106) Dawnborn: blows in the sun, the share more against the undead, blows lost in the dark (shares); in the sun
-	 * they heal this much this often (ticks); hunger in the dark, as a factor.
+	 * they heal this much this often (ticks); hunger in the dark, as a factor. (0.7.154) Andy's buffs: the numbers up, and
+	 * by day their blows set the undead alight for {@code DAWN_UNDEAD_BURN} seconds.
 	 */
-	static final double DAWN_SUN_DAMAGE = 0.1, DAWN_DARK_WEAK = 0.1;
-	static final float DAWN_UNDEAD = 0.2F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
-	static final int DAWN_HEAL_EVERY = 100;
+	static final double DAWN_SUN_DAMAGE = 0.15, DAWN_DARK_WEAK = 0.1;
+	static final float DAWN_UNDEAD = 0.3F, DAWN_HEAL = 1.0F, DAWN_DARK_HUNGER = 1.2F;
+	static final int DAWN_HEAL_EVERY = 60, DAWN_UNDEAD_BURN = 4;
 	/**
 	 * (0.7.106) Endborn: the chance a projectile misses as they blink aside, how far they may land, and how long before
 	 * they can again (ticks); water and rain hurt this much this often (ticks).
@@ -377,9 +388,10 @@ public final class Heritage {
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
 			&& source.is(DamageTypeTags.IS_FIRE) && is(player, Kind.EMBERBORN)));
-		// (0.7.106) Stormborn: lightning never hurts; Endborn: now and then blink aside from what's thrown or shot
+		// (0.7.106) Stormborn: lightning never hurts ((0.7.154) it charges them); Endborn: now and then blink aside from
+		// what's thrown or shot
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player)
-			|| !(source.is(DamageTypeTags.IS_LIGHTNING) && is(player, Kind.STORMBORN)) && !blink(player, source));
+			|| !(source.is(DamageTypeTags.IS_LIGHTNING) && is(player, Kind.STORMBORN) && charged(player)) && !blink(player, source));
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer player && taken > 0.0F) {
 				stunned(player, source);
@@ -787,9 +799,9 @@ public final class Heritage {
 		return player.level().canSeeSky(player.blockPosition().above());
 	}
 
-	/** Deep underground: no sky overhead and below the sea. */
+	/** Deep underground: no sky overhead and (0.7.154, was below the sea) below {@link #STORM_DEEP_Y}. */
 	static boolean deep(ServerPlayer player) {
-		return !player.level().canSeeSky(player.blockPosition().above()) && player.getY() < player.level().getSeaLevel();
+		return !player.level().canSeeSky(player.blockPosition().above()) && player.getY() < STORM_DEEP_Y;
 	}
 
 	/** A Dragonblood's hoard: their blows' share more (or less, carrying no gold at all) for the gold they carry. */
@@ -858,14 +870,32 @@ public final class Heritage {
 		Kind kind = VillagerHeritage.of(attacker);
 		if (kind == Kind.DAWNBORN && target.is(EntityTypeTags.UNDEAD)) {
 			amount *= 1.0F + DAWN_UNDEAD;
+			// (0.7.154) by day the sun in their blows sets the dead alight
+			if (target.level().isBrightOutside()) {
+				target.igniteForSeconds(DAWN_UNDEAD_BURN);
+			}
 		}
 		return amount;
 	}
 
-	/** A blow that landed on {@code target}: a Stormborn player's, in a thunderstorm under open sky, throws a spark. */
+	/**
+	 * (0.7.154) Lightning struck a Stormborn: charged, Speed II and Strength I for a while, and the crackle of it. Always
+	 * true (the strike still does them no harm).
+	 */
+	private static boolean charged(ServerPlayer player) {
+		player.addEffect(new MobEffectInstance(MobEffects.SPEED, STORM_CHARGED_TICKS, 1));
+		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, STORM_CHARGED_TICKS, 0));
+		player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY(0.5), player.getZ(), 12, 0.3, 0.6, 0.3, 0.1);
+		return true;
+	}
+
+	/**
+	 * A blow that landed on {@code target}: a Stormborn player's, in a thunderstorm ((0.7.154) or any rain) under open
+	 * sky, throws a spark.
+	 */
 	private static void struck(LivingEntity target, DamageSource source) {
 		if (source.getEntity() instanceof Player attacker && source.getEntity() == source.getDirectEntity() && is(attacker, Kind.STORMBORN)
-			&& attacker.level().isThundering() && attacker.level().canSeeSky(attacker.blockPosition().above())
+			&& attacker.level().isRaining() && attacker.level().canSeeSky(attacker.blockPosition().above())
 			&& attacker.level() instanceof ServerLevel level) {
 			spark(level, attacker, target);
 		}
@@ -879,28 +909,36 @@ public final class Heritage {
 			return;
 		}
 		SPARKED.put(attacker.getUUID(), now);
-		LivingEntity nearest = null;
-		double best = STORM_SPARK_RANGE * STORM_SPARK_RANGE;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(STORM_SPARK_RANGE),
-			e -> e != attacker && e != target && e.isAlive() && e instanceof Enemy)) {
-			double d = e.distanceToSqr(target);
-			if (d < best) {
-				best = d;
-				nearest = e;
+		// (0.7.154) it leaps on from each it strikes to the nearest monster not yet struck
+		List<LivingEntity> struck = new ArrayList<>();
+		LivingEntity from = target;
+		for (int n = 0; n < STORM_SPARK_CHAIN; n++) {
+			LivingEntity at = from;
+			LivingEntity nearest = null;
+			double best = STORM_SPARK_RANGE * STORM_SPARK_RANGE;
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, at.getBoundingBox().inflate(STORM_SPARK_RANGE),
+				e -> e != attacker && e != target && !struck.contains(e) && e.isAlive() && e instanceof Enemy)) {
+				double d = e.distanceToSqr(at);
+				if (d < best) {
+					best = d;
+					nearest = e;
+				}
 			}
+			if (nearest == null) {
+				return;
+			}
+			// a line of sparks between them
+			double fx = at.getX(), fy = at.getY(0.6), fz = at.getZ();
+			double tx = nearest.getX(), ty = nearest.getY(0.6), tz = nearest.getZ();
+			for (int i = 0; i <= 8; i++) {
+				double t = i / 8.0;
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
+			}
+			level.playSound(null, tx, ty, tz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
+			nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);
+			struck.add(nearest);
+			from = nearest;
 		}
-		if (nearest == null) {
-			return;
-		}
-		// a line of sparks between them
-		double fx = target.getX(), fy = target.getY(0.6), fz = target.getZ();
-		double tx = nearest.getX(), ty = nearest.getY(0.6), tz = nearest.getZ();
-		for (int i = 0; i <= 8; i++) {
-			double t = i / 8.0;
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
-		}
-		level.playSound(null, tx, ty, tz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
-		nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);
 	}
 
 	// ---- (0.7.106) earned heritages and the Blood Rite ------------------------------------------------------------

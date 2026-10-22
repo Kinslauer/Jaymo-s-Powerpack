@@ -4149,3 +4149,12 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
   any tree, or building. dont get in the way": natural trees it walks into topple away from it, and everything else
   breakable in its way (buildings included) is smashed, a quarter of it dropped. Only its own monolith is spared.
   Needs mobGriefing on.
+
+## 0.7.154: Stormborn and Dawnborn buffs (pack 0.15.72)
+Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
+- Stormborn: 12% faster under the open sky (was 8%). Sparks fly in any rain, not just thunderstorms, deal 4 (was 3),
+  and leap on to a second monster. Lightning that strikes them charges them: Speed II and Strength I for 30 s. The
+  underground slowdown starts below Y 0 (was sea level).
+- Dawnborn: 15% harder in the sun (was 10%), heal 1 every 3 s (was 5 s), 30% more against the undead (was 20%), and by
+  day their blows set the undead alight for 4 s.
+- The two left-hold moves (Thunderclap, Sunflare) live in Jaymo's Powers 0.15.72 (`power.heritage.HeritageMoves`).
