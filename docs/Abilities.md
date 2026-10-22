@@ -167,7 +167,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 161 | Pyre | V | Fire Nova | 6 damage and 5 s of fire to all within 5 blocks. 10 s. | |
 | 162 | Pyre | B | Magma Trail | Fire under your feet for 6 s. 15 s. | |
 | 163 | Pyre | passive | Living magma | Fire and lava can't hurt it; water and rain do 1 hp/s. | |
-| 164 | Velox | R (hold) | Speed Burst | +120% speed, steps up whole blocks, climbs walls on contact, up to 6 s. 3 s. | |
+| 164 | Velox | R | Velocity | Toggle, like Chrono's Overclock: +100% speed (more sprinting), steps up whole blocks, runs up walls holding forward and over water and lava sprinting, no fall damage, Shift walks; a light blue streak behind you. R again stops it. 2 s. | |
 | 165 | Velox | G | Rapid Punches | 6 double hits on the creature you aim at within 3.5 blocks, one every 2 ticks; the last shoves. 5 s. | |
 | 166 | Velox | V | Cyclone | 1.5 s: sweeps everything within 6 blocks round you and lifts it, 3 damage once. 10 s. | |
 | 167 | Velox | B | Chain Strike | Up to 5 foes within 8 blocks: every 3 ticks you flicker behind one and hit it for 5. 12 s. | |
