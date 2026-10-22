@@ -2514,3 +2514,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food revive of a downed one kneels too. Every treatment finished still gives Kingdoms Survival experience
   (`MedicineSkill.treated`). Medicine in hand means treat; a weapon on a downed enemy is a finisher (0.15.98) (a red-hot
   blade is medicine only with sneak).
+- **0.15.102, Duplex's swarm and fetching:** Andy: "duplex' clones should deal more damage the more attackers in the
+  swarm, and be more aggressive, surrounding the target and attacking one by one, right after one another, making it a
+  violent onslaught. He also needs another ability, where you can select a block you are aiming at, and a clone will
+  come pick it up and carry it, works for every solid block unlike our current carry system". Doubles fight as a swarm
+  (`XenoDouble.SwarmGoal`, replacing the melee goal): each double on a target takes its own place in a slowly turning
+  ring round it, and they strike in turn, one right after another (every 7 ticks less one per double, never under 3),
+  each with a lunge, crits and sparks; every blow gets 35% more damage per extra double (3 doubles: x1.7, 6: x2.75)
+  and isn't stopped by the last one's hurt time. They hunt (`Duplex.quarry`): idle doubles join a mate's fight, go for
+  whatever hurts you or is hunting you or a double, what you hit in the last 5 s, or the nearest hostile you can see
+  within 12 (not calm neutral mobs). Sneak + G, Fetch: the nearest free double walks to the solid block you aim at
+  (16 blocks) and carries it off on its head (any block with a body, not just `CarryBlock.carriable`; never liquids,
+  two-block blocks, double chests or unbreakable ones; only where you could break it; a chest keeps its contents);
+  sneak + G again and it sets it down where you aim, turned as if you'd placed it. A carrying double doesn't fight and
+  follows you; it lets the block fall if it pops, merges or dies, or the server stops. `CarryBlock` gained public
+  `takeOut`, `liftableAny`, `land`, `place(..., Direction)` and `facing(..., Direction)` for it.
