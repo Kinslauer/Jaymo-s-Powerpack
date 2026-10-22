@@ -26,7 +26,7 @@ import net.minecraft.world.item.Items;
  * Both are priced like the tailor's outfits ({@link Tailors#price}): the tailor's own rate, less for friends, more for
  * people they dislike, half for family. Nothing of Powers is loaded here: only its item id and its command.
  * <p>
- * (0.7.166) Andy: "the tailor villagers should provide an option that brings you to the costume editor for up to 3
+ * (0.7.167) Andy: "the tailor villagers should provide an option that brings you to the costume editor for up to 3
  * emeralds". Sew a Costume (the costume editor) is now {@link #costumePrice}: {@link #COSTUME_MOST} emeralds, one off per
  * {@link Tailors#HEARTS_PER_EMERALD} hearts with the tailor, never under one; family pays one.
  */
@@ -35,7 +35,7 @@ public final class TailorCostumes {
 	public static final String TABLE_COMMAND = "costume_table", SEW_COMMAND = "costume";
 	/** The cheapest tailor's price for a Costume Table. */
 	static final int TABLE_BASE = 10;
-	/** (0.7.166) The most (and the cheapest) a tailor asks to sew a costume. */
+	/** (0.7.167) The most (and the cheapest) a tailor asks to sew a costume. */
 	static final int COSTUME_MOST = 3, COSTUME_LEAST = 1;
 	static final Identifier TABLE = Identifier.fromNamespaceAndPath("jaymospowers", "costume_table");
 
@@ -89,7 +89,7 @@ public final class TailorCostumes {
 			"costume tailor " + player.getStringUUID() + " " + price + " " + villager.getStringUUID());
 	}
 
-	/** (0.7.166) What {@code tailor} asks {@code player} for Sew a Costume: 3 emeralds, less for friends, 1 for family. */
+	/** (0.7.167) What {@code tailor} asks {@code player} for Sew a Costume: 3 emeralds, less for friends, 1 for family. */
 	static int costumePrice(Villager tailor, ServerPlayer player) {
 		if (McaBridge.family(tailor, player)) {
 			return COSTUME_LEAST;
