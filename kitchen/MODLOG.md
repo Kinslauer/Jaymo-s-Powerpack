@@ -908,3 +908,9 @@ Batch 3 of the BWM port (MIT, our own code).
 - Exploding pot (`cooking/ExplodingPot`): right-click a lit station with gunpowder, TNT or WeaponMod dynamite to slip
   one into the next dish cooked there (the cook isn't told). If that dish comes out burnt or charred, it blows up: no
   block damage or fire, knockback, at most 2 hearts, dish and ingredients lost.
+
+### 0.5.13: crippling only from a broken leg (pack 0.15.88)
+- Andy: "crippling should only activate if the legs are broken, not just on any hit". A leg hit (`archery/LegShots`)
+  only knocks a creature down to crawl and leaves it limping when one of its legs is broken (the
+  `jaymoskitchen.broken.<leg>` tags Jaymo's Powers' Wounds puts on). The check runs at the end of the tick, so a blow
+  that breaks the leg cripples at once. Without Powers, nothing is crippled.
