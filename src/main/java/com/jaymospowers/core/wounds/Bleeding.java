@@ -17,8 +17,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -87,8 +85,6 @@ public final class Bleeding {
 	public static final int CLEAN_TICKS = 6000;
 	/** (0.14.4) Dressings heal this often (ticks). */
 	static final int DRESS_STEP = 20;
-	/** (0.14.4) The blood's colour. */
-	static final int BLOOD = 0x7A0000;
 	/** (0.14.4) Put on a body by Kingdoms' tending villagers: its bleeding stops, with a bandage's heal. */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
 	public static final ResourceKey<DamageType> BLEEDING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("bleeding"));
@@ -545,18 +541,15 @@ public final class Bleeding {
 		}
 	}
 
-	/** Blood running from {@code part}: drops on the ground under it. */
+	/** Blood running from {@code part}: (0.15.91) drops that pool on the ground under it ({@link BladeBlood#drip}). */
 	private static void drip(ServerLevel level, LivingEntity body, BodyPart part, boolean stump) {
-		double h = body.getBbHeight();
 		double y = switch (part) {
 			case HEAD -> 0.85;
 			case BODY, LEFT_ARM, RIGHT_ARM, WINGS -> 0.6;
 			case LEFT_FOOT, RIGHT_FOOT -> 0.08;
 			default -> 0.3;
 		};
-		level.sendParticles(new DustParticleOptions(BLOOD, stump ? 1.2F : 0.8F), body.getX(), body.getY() + h * y, body.getZ(), stump ? 6 : 3,
-			body.getBbWidth() * 0.3, 0.05, body.getBbWidth() * 0.3, 0.0);
-		level.sendParticles(ParticleTypes.DRIPPING_LAVA, body.getX(), body.getY() + h * y, body.getZ(), 1, 0.1, 0.0, 0.1, 0.0);
+		BladeBlood.drip(level, body, y, stump);
 	}
 
 	private static void fever(ServerLevel level, LivingEntity body) {

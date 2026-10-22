@@ -1,0 +1,9 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:magma_cube",
+		"minecraft:squid",
+		"minecraft:glow_squid",
+		"minecraft:warden"
+	]
+}

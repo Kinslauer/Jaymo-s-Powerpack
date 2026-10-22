@@ -2457,3 +2457,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kitchen's new `LivingRagdolls.addHold`): the body floats up and bobs at the surface until you're up, given up, carried
   out or washed ashore (then back to the downed crawl). Without Kitchen you just drift up (`CrawlTaps`). Sneak still
   gives up.
+- **0.15.91, blood (Iron's Simple Blood):** Andy asked for Iron's Simple Blood (Iron431, MIT, NeoForge only, no 26.3
+  Fabric build), merged into our own blood (`BladeBlood`) rather than shipped as a mod, plus "the scaling splatter /
+  puddle for heavier blunt impacts, like the anvil or mace impacts". Its particles are ported in `core/blood`
+  (`BloodParticles`: a `Spray` of drops and a `Puddle`) and `client/blood` (`BloodDrop`, `BloodPuddle`, `BloodDecals`:
+  the puddles' own particle group through Fabric's `ParticleGroupRegistry`, its render state a `QuadParticleRenderState`
+  handing vanilla ready-made vertices so a puddle lies over the block tops under it); its sprites are in
+  `textures/particle/blood`, notice in `licenses/LICENSE_simple_blood`. Our rules stay: blades bleed, crushing
+  bursts (now with pools), the bloodless never bleed. New: a heavy blunt blow (`BladeBlood.heavyBlunt`: a falling anvil
+  or block, a mace's smash, a `Fractures.blunt` weapon, 6+ damage) sprays half again a blade's drops and lays 1-5
+  pools that widen with the damage; killing blows bleed too (`ALLOW_DEATH`, since `AFTER_DAMAGE` misses them); Wounds'
+  open cuts drip small drops that leave a trail (`BladeBlood.drip`). Blood colours by tag (`tags/entity_type/blood/`:
+  ender, dark, slime, bug). Not playtested; compile-checked against the 26.3 jars.
