@@ -4193,3 +4193,13 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - A monolith's Giant rises only for a player at Wildlands or higher, the tier after Borderlands (Andy: "do
   wildlands"). Anyone below
   who comes near only hears it hum (a low beacon drone, its element's motes round the crown); no chat text.
+
+## 0.7.160: no usernames left on show (pack 0.15.80)
+- Andy: "usernames should only show up for commands, it still appears in scoreboard and over characters and it
+  shouldnt". 0.7.149 only stood in a character name when the one in MCA's creator differed from the username, and the
+  creator starts with the username, so most players still showed it on the tab list and over their head.
+- Now a player whose MCA name is their username (or blank) is given one from MCA's own name lists for their gender
+  (`McaBridge.randomName`), written into MCA's family tree (so villagers call them that too) and kept on the player
+  (`CharacterNames.GIVEN`, saved), so it is always the same one. It is checked every second, so saving the creator
+  with the username again just puts the given name back. A name of their own, typed in MCA's editor, wins as before.
+  Commands still take usernames.

@@ -2427,3 +2427,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the top). Everyone sees it: the server syncs the roll (`Dodge.ROLLING`), and your own client draws it at once. Your own
   body in first person (First-person Model) stays upright. In first person the view tumbles with the roll and dips
   toward the ground (Andy's ask; `VIEW_ROLL` turns it down, 0 switches it off).
+- **0.15.80, ships Jaymo's Kingdoms 0.7.160 (no usernames left on show):** Andy: "usernames should only show up for
+  commands, it still appears in scoreboard and over characters and it shouldnt. especially when playing duplex".
+  Anyone who kept their username in MCA's creator now gets a character name (details in the Kingdoms MODLOG). Duplex's
+  doubles (and any Xeno double) follow the name their owner shows each half second, so a name given or a costume put on
+  after the split shows on them too.
