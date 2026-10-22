@@ -960,3 +960,21 @@ Batch 3 of the BWM port (MIT, our own code).
 - A leg keeps its spider's look, so the client draws it in that spider's own skin through its renderer (a cave
   spider's, Kingdoms' spider kinds'), at its size: a two-piece leg broken at the knee, the same shape as Kingdoms'
   kneed spider legs (`client/corpse/SpiderLegRenderer`). Tuning at the top of `SpiderCrush` and `SpiderLeg`.
+
+### 0.5.19: dead spiders on their backs
+- Andy: "dead spiders should flip upside down, eyes close or ragdoll, or all three. as is they still look alive after
+  being killed." A spider's ragdoll is a box, which lands on its feet. Now, like the dead animals of 0.5.16, a corpse
+  whose model has spider legs (`right_middle_front_leg`: spiders, cave spiders, modded spiders built the same way) is
+  drawn eased onto its back as it comes to rest (`RagdollPose.of(..., onBack)`), its back on the ground, its eight
+  legs curled up over its belly (`RagdollPose#curl`). Box bodies now get the eased rest too (`ClientRagdolls`).
+- Eyes: glowing eye layers (`EyesLayer`: a spider's, an enderman's) aren't drawn on a corpse (`EyesLayerMixin`), and
+  `ClosedEyes` also paints out brightly coloured eyes on a dull face (a spider's red eyes, with the dark pixels
+  around them).
+
+### 0.5.20: smashing dead spiders (pack 0.15.121)
+- Andy: "you should still be able to smash them when they are corpses". A spider's corpse (anything in
+  `jaymoskitchen:crushable`) hit by a crushing blow bursts like a live one crushed (0.5.18): the body is gone, 2-6 loose
+  legs fly out in its skin and at its size, and its loot drops loose, less its spider eyes (`SpiderCrush#crushCorpse`,
+  from `CorpseEntity#hurtServer`). Crushing here is the same as for a kill: damage in `jaymoskitchen:crushes` (a
+  falling anvil or block, a mace's smash), or an `addOnHit` hook tagging the corpse `jaymoskitchen.crushed` (Jaymo's
+  Powers: a heavy blunt blow). Other blows still only knock it about.

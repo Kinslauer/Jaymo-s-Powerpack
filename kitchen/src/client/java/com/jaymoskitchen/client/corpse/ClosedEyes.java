@@ -38,6 +38,11 @@ public final class ClosedEyes {
 	private static final int DARK_MAX = 90, WHITE_MIN = 190, WHITE_ABOVE = 40, WHITE_GREY = 45;
 	/** Bigger runs than this (pixels) are markings, not eyes. */
 	private static final int EYE_MAX = 4, SPECK_MAX = 2;
+	/**
+	 * (0.5.19) A brightly coloured eye (a spider's red ones) on a dull face: colour spread of the eye's pixels and the
+	 * face's most, and the largest such run (with the dark pixels touching it) that's still eyes.
+	 */
+	private static final int GLOW_SPREAD = 90, DULL_FACE = 50, GLOW_MAX = 12;
 	/** How much darker the closed lid's line is than the face. */
 	private static final float LID_SHADE = 0.68F;
 
@@ -52,9 +57,14 @@ public final class ClosedEyes {
 		state.setData(KEY, Boolean.TRUE);
 	}
 
+	/** Whether {@code state} is a corpse's, drawn with its eyes shut. */
+	public static boolean closed(Object state) {
+		return state instanceof EntityRenderState renderState && Boolean.TRUE.equals(renderState.getData(KEY));
+	}
+
 	/** The texture to draw a body with: {@code texture} with its eyes shut if the state is a corpse's. */
 	public static Identifier texture(Model<?> model, Object state, Identifier texture) {
-		if (!(state instanceof EntityRenderState renderState) || !Boolean.TRUE.equals(renderState.getData(KEY))) {
+		if (!closed(state)) {
 			return texture;
 		}
 		Map<Identifier, Identifier> byTexture = DONE.computeIfAbsent(model, m -> new HashMap<>());
@@ -145,17 +155,18 @@ public final class ClosedEyes {
 		}
 		int middle = middleColour(colours, lums);
 		int middleLum = luminance(middle);
-		// 1 dark, 2 white, 0 anything else
+		int middleSpread = spread(middle);
+		// 1 dark, 2 white, 3 brightly coloured on a dull face, 0 anything else
 		int[] kind = new int[w * h];
 		for (int i = 0; i < kind.length; i++) {
 			int lum = lums[i];
 			if (lum < 0) {
 				continue;
 			}
-			int c = colours[i];
-			int spread = Math.max(ARGB.red(c), Math.max(ARGB.green(c), ARGB.blue(c)))
-				- Math.min(ARGB.red(c), Math.min(ARGB.green(c), ARGB.blue(c)));
-			if (lum < DARK_MAX && lum < middleLum * DARK_SHARE) {
+			int spread = spread(colours[i]);
+			if (spread > GLOW_SPREAD && middleSpread < DULL_FACE) {
+				kind[i] = 3;
+			} else if (lum < DARK_MAX && lum < middleLum * DARK_SHARE) {
 				kind[i] = 1;
 			} else if (lum > WHITE_MIN && lum > middleLum + WHITE_ABOVE && spread < WHITE_GREY) {
 				kind[i] = 2;
@@ -189,6 +200,23 @@ public final class ClosedEyes {
 			if (paired || speck) {
 				for (int i : members) {
 					eye[i] = true;
+				}
+			}
+		}
+		// coloured eyes, with the dark pixels round them, however they're clustered (a spider has eight)
+		int[] glowing = new int[w * h];
+		for (int i = 0; i < kind.length; i++) {
+			glowing[i] = kind[i] == 1 || kind[i] == 3 ? 1 : 0;
+		}
+		int[] glowGroup = new int[w * h];
+		Arrays.fill(glowGroup, -1);
+		for (int i = 0; i < kind.length; i++) {
+			if (kind[i] == 3 && glowGroup[i] < 0) {
+				int[] members = flood(glowing, glowGroup, w, h, i, i);
+				if (members.length <= GLOW_MAX) {
+					for (int m : members) {
+						eye[m] = true;
+					}
 				}
 			}
 		}
@@ -245,6 +273,11 @@ public final class ClosedEyes {
 		}
 		solid.sort((a, b) -> Integer.compare(lums[a], lums[b]));
 		return colours[solid.get(solid.size() / 2)];
+	}
+
+	private static int spread(int argb) {
+		return Math.max(ARGB.red(argb), Math.max(ARGB.green(argb), ARGB.blue(argb)))
+			- Math.min(ARGB.red(argb), Math.min(ARGB.green(argb), ARGB.blue(argb)));
 	}
 
 	private static int luminance(int argb) {

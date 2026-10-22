@@ -49,6 +49,15 @@ public final class RagdollPose {
 		0.55F, 0, -0.05F};
 	/** On its side, the torso's middle lies this far (as a share of the torso's thickness) above its lowest part. */
 	private static final float SIDE_LIFT = 0.95F;
+	/** On its back, the middle rests this share of the way its back stood above it. */
+	private static final float BACK_LIFT = 0.85F;
+	/**
+	 * (0.5.19) A dead spider's legs, curled up over its belly: each tipped this far down from the body (radians, as
+	 * zRot, its own side's way), and drawn this much closer together front to back (a share of its yRot).
+	 */
+	private static final float CURL_DOWN = 1.35F, CURL_GATHER = 0.5F;
+	public static final String[] SPIDER_LEGS = {"right_hind_leg", "left_hind_leg", "right_middle_hind_leg",
+		"left_middle_hind_leg", "right_middle_front_leg", "left_middle_front_leg", "right_front_leg", "left_front_leg"};
 	/** Overlay parts some models keep beside (not inside) the part they cover: they turn with it. */
 	private static final String[][] OVERLAYS = {{"hat", "head"}, {"right_sleeve", "right_arm"}, {"left_sleeve", "left_arm"},
 		{"right_pants", "right_leg"}, {"left_pants", "left_leg"}, {"jacket", "body"}};
@@ -59,12 +68,15 @@ public final class RagdollPose {
 	/** Per limb: x, y, z rotation (radians, as ModelPart takes them). */
 	private final float[] angles;
 	public final RagdollRig.Shape shape;
+	/** (0.5.19) How far its legs are curled up as a dead spider's (0 to 1), see {@link #curl}. */
+	private final float curl;
 
-	private RagdollPose(Matrix4f body, Limb[] limbs, float[] angles, RagdollRig.Shape shape) {
+	private RagdollPose(Matrix4f body, Limb[] limbs, float[] angles, RagdollRig.Shape shape, float curl) {
 		this.body = body;
 		this.limbs = limbs;
 		this.angles = angles;
 		this.shape = shape;
+		this.curl = curl;
 	}
 
 	/**
@@ -72,15 +84,17 @@ public final class RagdollPose {
 	 * {@code (ox, oy, oz)} (where the renderer stands the entity this frame).
 	 */
 	public static RagdollPose of(RagdollRig rig, double[] points, double ox, double oy, double oz) {
-		return of(rig, points, ox, oy, oz, 0.0F, 1);
+		return of(rig, points, ox, oy, oz, 0.0F, 1, false);
 	}
 
 	/**
 	 * (0.5.16) As above, a four-legged body drawn {@code side} of the way (0 to 1) from where the physics has it to
 	 * lying flat on its side ({@code sideUp} 1: its right side up, -1 its left), level along the way its head points:
-	 * the physics alone props a dead animal belly down on its legs, or sitting up.
+	 * the physics alone props a dead animal belly down on its legs, or sitting up. (0.5.19) {@code onBack}: rolled onto
+	 * its back instead, belly to the sky and legs curled up over it (a dead spider), whatever its shape.
 	 */
-	public static RagdollPose of(RagdollRig rig, double[] points, double ox, double oy, double oz, float side, int sideUp) {
+	public static RagdollPose of(RagdollRig rig, double[] points, double ox, double oy, double oz, float side, int sideUp,
+		boolean onBack) {
 		int n = rig.count;
 		float[] x = new float[n], y = new float[n], z = new float[n];
 		for (int i = 0; i < n; i++) {
@@ -92,7 +106,7 @@ public final class RagdollPose {
 		RagdollRig.frame(x, y, z, now);
 		rig.restFrame(rest);
 		float[] r = rotation(now, rest);
-		boolean onSide = side > 0.0F && rig.shape == RagdollRig.Shape.QUADRUPED;
+		boolean onSide = side > 0.0F && (onBack || rig.shape == RagdollRig.Shape.QUADRUPED);
 		float[] physical = r;
 		if (onSide) {
 			// level along where the head points (or the belly, sat bolt upright), one side to the sky
@@ -110,24 +124,28 @@ public final class RagdollPose {
 			lx /= ll;
 			lz /= ll;
 			float up = sideUp >= 0 ? 1.0F : -1.0F;
-			// rows: right (to the sky or the ground), up (the head's way), forward = up x right
-			float[] lying = {0, up, 0, lx, 0, lz, -lz * up, 0, lx * up};
+			// rows: right (to the sky or the ground), up (the head's way), forward = up x right; on its back, right
+			// lies flat and forward (out of the belly) points at the sky
+			float[] lying = onBack ? new float[] {lz, 0, -lx, lx, 0, lz, 0, 1, 0}
+				: new float[] {0, up, 0, lx, 0, lz, -lz * up, 0, lx * up};
 			r = blend(r, rotation(lying, rest), side);
 		}
 		// the torso's middle now and standing
 		float mx = (x[0] + x[1] + x[2] + x[3]) * 0.25F, my = (y[0] + y[1] + y[2] + y[3]) * 0.25F,
 			mz = (z[0] + z[1] + z[2] + z[3]) * 0.25F;
+		float sx = (rig.restX[0] + rig.restX[1] + rig.restX[2] + rig.restX[3]) * 0.25F;
+		float sy = (rig.restY[0] + rig.restY[1] + rig.restY[2] + rig.restY[3]) * 0.25F;
+		float sz = (rig.restZ[0] + rig.restZ[1] + rig.restZ[2] + rig.restZ[3]) * 0.25F;
 		if (onSide) {
-			// on its side, its middle rests a torso's thickness above the ground (its lowest part)
+			// on its side, its middle rests a torso's thickness above the ground (its lowest part); on its back, as far
+			// as its back stood above that middle
 			float bottom = Float.MAX_VALUE;
 			for (int i = 0; i < n; i++) {
 				bottom = Math.min(bottom, y[i] - rig.radius[i]);
 			}
-			my += (bottom + rig.radius[RagdollRig.FRONT_RIGHT] * SIDE_LIFT - my) * side;
+			float lift = onBack ? (rig.height - sy) * BACK_LIFT : rig.radius[RagdollRig.FRONT_RIGHT] * SIDE_LIFT;
+			my += (bottom + lift - my) * side;
 		}
-		float sx = (rig.restX[0] + rig.restX[1] + rig.restX[2] + rig.restX[3]) * 0.25F;
-		float sy = (rig.restY[0] + rig.restY[1] + rig.restY[2] + rig.restY[3]) * 0.25F;
-		float sz = (rig.restZ[0] + rig.restZ[1] + rig.restZ[2] + rig.restZ[3]) * 0.25F;
 		Matrix4f body = new Matrix4f();
 		for (int row = 0; row < 3; row++) {
 			for (int col = 0; col < 3; col++) {
@@ -155,10 +173,10 @@ public final class RagdollPose {
 			float rz = physical[2] * ux + physical[5] * uy + physical[8] * uz;
 			eulerTo(limb.restX, limb.restY, limb.restZ, rx, -ry, -rz, out);
 			for (int k = 0; k < 3; k++) {
-				angles[l * 3 + k] = onSide ? out[k] + (QUADRUPED_SIDE[l * 3 + k] - out[k]) * side : out[k];
+				angles[l * 3 + k] = onSide && !onBack ? out[k] + (QUADRUPED_SIDE[l * 3 + k] - out[k]) * side : out[k];
 			}
 		}
-		return new RagdollPose(body, limbs, angles, rig.shape);
+		return new RagdollPose(body, onBack ? NONE : limbs, angles, rig.shape, onBack ? side : 0.0F);
 	}
 
 	/** R = now^T * rest (frames as rows): rest-world vectors to world vectors. Rows of a 3x3 matrix. */
@@ -273,10 +291,28 @@ public final class RagdollPose {
 			part.yRot = angles[l * 3 + 1];
 			part.zRot = angles[l * 3 + 2];
 		}
+		if (curl > 0.0F) {
+			curl(root);
+		}
 		for (String[] overlay : OVERLAYS) {
 			if (root.hasChild(overlay[0]) && root.hasChild(overlay[1])) {
 				root.getChild(overlay[0]).loadPose(root.getChild(overlay[1]).storePose());
 			}
+		}
+	}
+
+	/** (0.5.19) A spider's eight legs curled in toward the belly, from how they stand. */
+	private void curl(ModelPart root) {
+		for (String name : SPIDER_LEGS) {
+			ModelPart part = find(root, name);
+			if (part == null) {
+				continue;
+			}
+			PartPose rest = part.getInitialPose();
+			float down = Math.copySign(CURL_DOWN, rest.zRot());
+			part.zRot = rest.zRot() + (down - rest.zRot()) * curl;
+			part.yRot = rest.yRot() * (1.0F - (1.0F - CURL_GATHER) * curl);
+			part.xRot = rest.xRot();
 		}
 	}
 
