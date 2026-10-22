@@ -4150,7 +4150,7 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
   breakable in its way (buildings included) is smashed, a quarter of it dropped. Only its own monolith is spared.
   Needs mobGriefing on.
 
-## 0.7.153: zombie awareness (pack 0.15.70)
+## 0.7.154: zombie awareness (pack 0.15.72)
 - Andy: "player zombies should work like this [Zombie Awareness], and maybe work it in to help with our stealth".
   Zombie Awareness is ARR, so `Awareness` is our own code for its ideas. Zombies (tag `jaymoskingdoms:aware`: zombie,
   husk, drowned, zombie villager, and Kitchen's reanimated player corpses `jaymoskitchen:zombie_player`, Andy: "it should

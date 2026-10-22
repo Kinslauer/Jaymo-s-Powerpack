@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.153) Zombie awareness's hearing ({@link Awareness#heard}): every game event (the same ones sculk sensors feel) comes
+ * (0.7.154) Zombie awareness's hearing ({@link Awareness#heard}): every game event (the same ones sculk sensors feel) comes
  * through here, and the noisy ones draw the zombies that hear them.
  */
 @Mixin(ServerLevel.class)
