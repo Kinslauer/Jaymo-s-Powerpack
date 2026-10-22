@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #BURST_RADIUS}, never its thrower's own side when a folk threw it) and leaves blocks whole, so a landing party
  * doesn't level the village it raids. Water puts the fuse out. Hit a lit stick and it flies off where you're looking,
  * and is yours: bat it back at the man who threw it. Never saved.
- * <p>(0.7.156) Andy: "change dynamite to just the balkon recipe and design". There's one dynamite in the pack: Balkon's
+ * <p>(0.7.157) Andy: "change dynamite to just the balkon recipe and design". There's one dynamite in the pack: Balkon's
  * WeaponMod's ({@code weaponmod:dynamite}, MIT). With WeaponMod loaded the bombardiers hold, drop and throw its stick
  * ({@link #stick()}), ours is off the creative tab and its recipe, and an old stick of ours crafts into Balkon's. Without
  * WeaponMod ours stands in, drawn and crafted as Balkon's (string over two gunpowder makes two; its texture, MIT).
