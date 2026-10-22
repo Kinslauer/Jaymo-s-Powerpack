@@ -109,7 +109,7 @@ public final class Bleeding {
 	public static final AttachmentType<Integer> BANDAGED = AttachmentRegistry.create(JaymosPowers.id("wounds_bandaged"),
 		builder -> builder.persistent(Codec.INT));
 	/**
-	 * (0.15.89) The parts wearing a dressing anyone can see (a bit per {@link BodyPart#ordinal()}), and, shifted up
+	 * (0.15.90) The parts wearing a dressing anyone can see (a bit per {@link BodyPart#ordinal()}), and, shifted up
 	 * {@link #RAG_SHIFT}, which of those are rags. Put on with a dressing; it stays on after the dressing's heal is spent,
 	 * until the part is whole, not bleeding and not festering (or it's gone). Saved, synced to everyone, not kept through
 	 * death.
@@ -164,7 +164,7 @@ public final class Bleeding {
 		return entity.getAttachedOrElse(DIRTY, 0);
 	}
 
-	/** (0.15.89) The parts wearing a dressing you can see (the low bits), and which are rags (above {@link #RAG_SHIFT}). */
+	/** (0.15.90) The parts wearing a dressing you can see (the low bits), and which are rags (above {@link #RAG_SHIFT}). */
 	public static int wrapped(Entity entity) {
 		return entity.getAttachedOrElse(WRAPPED, 0);
 	}
@@ -296,7 +296,7 @@ public final class Bleeding {
 		dressing[0][i] = heal;
 		dressing[1][i] = heal * DRESS_STEP / Math.max(DRESS_STEP, ticks);
 		set(entity, BANDAGED, bandaged(entity) | Breaks.bit(part));
-		// (0.15.89) and it shows: linen, or a rag
+		// (0.15.90) and it shows: linen, or a rag
 		int bit = Breaks.bit(part);
 		set(entity, WRAPPED, wrapped(entity) & ~(bit << RAG_SHIFT) | bit | (dirty ? bit << RAG_SHIFT : 0));
 		long now = level.getGameTime();
@@ -473,7 +473,7 @@ public final class Bleeding {
 		set(body, BANDAGED, mask);
 	}
 
-	/** (0.15.89) A dressing comes off once its part is whole and clean (no cut, no festering), or the part is gone. */
+	/** (0.15.90) A dressing comes off once its part is whole and clean (no cut, no festering), or the part is gone. */
 	private static void unwrap(LivingEntity body) {
 		int mask = wrapped(body);
 		if (mask == 0) {

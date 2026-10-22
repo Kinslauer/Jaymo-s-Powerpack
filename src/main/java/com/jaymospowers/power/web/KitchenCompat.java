@@ -329,7 +329,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.15.89) A downed player in water ({@code Downed.adrift}) lies limp in Kitchen's ragdoll, floating, for as long
+	 * (0.15.90) A downed player in water ({@code Downed.adrift}) lies limp in Kitchen's ragdoll, floating, for as long
 	 * as they're down and in it (Andy: "you should just ragdoll, and float").
 	 */
 	public static void registerRagdollHolds() {

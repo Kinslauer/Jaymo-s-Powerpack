@@ -33,7 +33,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.PlayerModelType;
 
 /**
- * (0.15.89) Andy: "can the bandages and splints be visible on players?" A dressed part wears its linen (or a rag) and a
+ * (0.15.90) Andy: "can the bandages and splints be visible on players?" A dressed part wears its linen (or a rag) and a
  * splinted arm or leg its two wooden slats, lashed with linen, drawn on the part as it's posed, for everyone to see
  * ({@link Bleeding#WRAPPED} and {@link Breaks#SPLINTED} are synced to all). Players and any humanoid mob (a villager a
  * cleric tended). Nothing shows under armour on that part, under a costume or the symbiote's suit ({@link BodyCover}),

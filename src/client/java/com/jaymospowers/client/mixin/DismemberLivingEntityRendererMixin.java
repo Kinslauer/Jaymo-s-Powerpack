@@ -17,7 +17,7 @@ abstract class DismemberLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$lostParts(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		Dismembered.extract(entity, state);
-		// (0.15.89) and the bandages and splints that show
+		// (0.15.90) and the bandages and splints that show
 		com.jaymospowers.client.wounds.DressingsLayer.extract(entity, state);
 	}
 }

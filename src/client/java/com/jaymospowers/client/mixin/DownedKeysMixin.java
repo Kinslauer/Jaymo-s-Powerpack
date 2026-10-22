@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Ultimate, Dodge, Crawl, the menu...). A key already held counts as let go, so a held ability ends. Moving (and the
  * double-tap roll on A / D), Sneak (held to give up), looking about, the hotbar, chat and the menus still work. (0.15.83) So
  * does any ability key the power keeps live ({@link Power#usableDowned}): Chrono's Rewind, which gets you back up.
- * (0.15.89) Andy: "downed players underwater are able to swim as of right now ... you should just ragdoll, and float". In
+ * (0.15.90) Andy: "downed players underwater are able to swim as of right now ... you should just ragdoll, and float". In
  * water the moving keys go too ({@link #MOVING}): no swimming, you float limp (Kitchen's ragdoll, see
  * {@code KitchenCompat.registerRagdollHolds}; without it, {@code CrawlTaps} floats you up).
  */
@@ -32,7 +32,7 @@ abstract class DownedKeysMixin {
 	/** Vanilla's keys that act in the world. */
 	private static final Set<String> ACTING = Set.of("key.jump", "key.sprint", "key.attack", "key.use", "key.pickItem", "key.drop",
 		"key.swapOffhand");
-	/** (0.15.89) Vanilla's moving keys, swallowed too while down in water (no swimming). */
+	/** (0.15.90) Vanilla's moving keys, swallowed too while down in water (no swimming). */
 	private static final Set<String> MOVING = Set.of("key.forward", "key.back", "key.left", "key.right");
 	/** Every key of ours starts with this. */
 	private static final String OURS = "key.jaymospowers.";

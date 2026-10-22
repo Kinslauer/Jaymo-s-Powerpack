@@ -30,7 +30,7 @@ its code or art. Choices Andy made:
   attachment by id, so Kingdoms still runs without Powers.
 - **Kitchen's corpses** take the missing parts as they do now (`Dismember.MISSING` → `jaymoskitchen.missing.*`), and
   also note broken parts (a splinted leg shows on the body).
-- **Seen on the body (0.15.89):** a dressed part wears its linen (or a grey-brown rag) until it's whole and clean, and a
+- **Seen on the body (0.15.90):** a dressed part wears its linen (or a grey-brown rag) until it's whole and clean, and a
   splinted arm or leg shows two wooden slats lashed with linen (`client/wounds/DressingsLayer`, synced to everyone by
   `Bleeding.WRAPPED` and `Breaks.SPLINTED`). Players and humanoid mobs; hidden under armour on that part, under a
   costume or the symbiote's suit, and on a part that's gone. Textures from `tools/vanilla_style/dressings.py`.

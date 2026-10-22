@@ -1,4 +1,4 @@
-"""(0.15.89) The bandages and splints worn on the body (client/wounds/DressingsLayer).
+"""(0.15.90) The bandages and splints worn on the body (client/wounds/DressingsLayer).
 
 Painted as pixel grids in the item icons' own colours: linen_bandage.png's linen, rag.png's rag, and vanilla's stick
 browns for the splint's slats (as splint.png). A wrap is turns of cloth: each turn a lit upper edge, the cloth, and the

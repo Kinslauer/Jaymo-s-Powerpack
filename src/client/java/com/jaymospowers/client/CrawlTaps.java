@@ -41,7 +41,7 @@ final class CrawlTaps {
 	/** The local player's last roll, to spend a direction after 2 s just as the server does. */
 	private static Crawl.@Nullable Rolling lastRoll;
 
-	/** (0.15.89) Downed in water without Kitchen's ragdoll: drifting up (blocks a tick, added each tick) to at most this. */
+	/** (0.15.90) Downed in water without Kitchen's ragdoll: drifting up (blocks a tick, added each tick) to at most this. */
 	static final double ADRIFT_RISE = 0.02, ADRIFT_MAX_RISE = 0.06;
 
 	private CrawlTaps() {
@@ -95,7 +95,7 @@ final class CrawlTaps {
 	}
 
 	/**
-	 * (0.15.89) Downed in water there's no swimming (DownedKeysMixin): the body floats up limp. Kitchen's ragdoll does
+	 * (0.15.90) Downed in water there's no swimming (DownedKeysMixin): the body floats up limp. Kitchen's ragdoll does
 	 * that when it's there; without it they drift up here.
 	 */
 	private static void tickAdrift(LocalPlayer player) {
