@@ -42,6 +42,7 @@ public final class ModelPoses {
 		FreefallPose.applyModel(model, state);
 		com.jaymospowers.client.freerun.BalancePose.applyModel(model, state);
 		com.jaymospowers.client.freerun.RunPose.applyModel(model, state);
+		com.jaymospowers.client.freerun.UpRunPose.applyModel(model, state);
 		WebArms.applyModel(model, state);
 		WebFeral.applyModel(model, state);
 		WebSuitGrowth.applyModel(model, state);
