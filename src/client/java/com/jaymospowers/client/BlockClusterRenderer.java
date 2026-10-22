@@ -56,7 +56,7 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 	protected AABB getBoundingBoxForCulling(BlockCluster entity, float partialTicks) {
 		AABB box = super.getBoundingBoxForCulling(entity, partialTicks);
 		Float scale = entity.getAttached(BlockCluster.SCALE);
-		return scale != null && scale > 1.0F ? box.inflate(2.0 * scale) : box;
+		return scale != null && scale >= 1.0F ? box.inflate(2.0 * scale) : box;
 	}
 
 	@Override
