@@ -100,10 +100,14 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
 - The first-person slam (`XenoformSlamView`, since 0.15.51; its numbers were tuned against offline pictures, see its
   javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
-  at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) and the
-  right hand waits above and to the right; the hand comes straight down over 2 ticks and covers the dial; on contact
+  at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) with the
+  dialled alien standing over it as a see-through green hologram (`XenoHologram`, since 0.15.103: upright on screen,
+  facing you, red while the band would refuse, light fanning up behind it from the band), and the right hand waits up and off to the right, clear of it; the hand comes straight down over 2 ticks and covers the dial; on contact
   the forearm dips and springs back, the view kicks once (`ScreenShake`) and a green burst blooms (`XenoformHud`);
   then both arms drop away.
+- The band's flash (`BandFlash`, since 0.15.103): changing shape either way blinds everyone within `RADIUS` (10) who can
+  see the band for `TICKS` (10): players get a green whiteout (`XenoNet.Flash`, client `BandFlashHud`), creatures
+  Blindness, no target and Darktide's stun. Not the wearer.
 - Flight (`XenoformFlightPose`, client): the server syncs how an alien is flying (`XenoformState.FLIGHT`, from
   `XenoForm.flight`). Pyre's jet, Wyrm's wings and Nadir's flight make `WindPose` treat the alien as cruising once it
   moves at 0.25/tick, so it takes Wind's lean, banking and stretched-out limbs (Pyre keeps its arms swept back as jets). Wyrm's wings beat deep while flying and

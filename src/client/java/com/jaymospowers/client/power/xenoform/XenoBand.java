@@ -22,7 +22,8 @@ import net.minecraft.util.Mth;
  * The Xeno-Band on a wearer's left wrist: a 5x3x5 box round the forearm ({@code textures/entity/xeno_band.png}, drawn
  * by {@code tools/gen_xenoform.py}) whose dial glows ({@code xeno_band_glow.png}, an emissive pass). {@link Layer}
  * draws it on everyone whose power is Xenoform while they're themselves (the alien has the insignia instead);
- * {@link #submitFirstPerson} is the same band on your first-person left arm.
+ * {@link #submitFirstPerson} is the same band on your first-person left arm. While you hold Z the dial pops up and the
+ * dialled alien stands over it as a {@link XenoHologram}.
  */
 public final class XenoBand {
 	/** Whether this player wears the band (and is in their own shape), on the render state. */
@@ -80,6 +81,8 @@ public final class XenoBand {
 		collector.submitModelPart(part, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null);
 		float pop = XenoformSlamView.pop;
 		if (pop > 0.02F) {
+			// the dialled alien, a hologram over the dial
+			XenoHologram.submit(poseStack, collector, pop);
 			// the slam's raised dial: a small cap, glowing and pulsing
 			poseStack.translate(3.5F / 16.0F, 0.0F, 0.0F);
 			poseStack.scale(pop * XenoformSlamView.POP_PX, 1.0F, 1.0F);
