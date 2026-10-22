@@ -97,10 +97,13 @@ public class AetherGiant extends Monster {
 	static final int FLARE_COLOR = 0xFFC8F060;
 	/** Where its stamp lands, this far ahead of its middle (blocks). */
 	static final double STAMP_AHEAD = 6.0;
-	/** Too big to path through woods: with no path to its target it strides straight at it, and every this many ticks the trees it walks into are felled (away from it) and the leaves torn down. */
+	/** Too big to path through woods: with no path to its target it strides straight at it, and every this many ticks whatever it walks into is knocked down. */
 	static final int TRAMPLE_EVERY = 5;
-	/** How high up its legs it fells trees (blocks). */
+	/** How high up its legs it fells trees whole (blocks); above that, and for anything else, it smashes straight through. */
 	static final int TRAMPLE_HEIGHT = 6;
+	/** The share of what it smashes that drops, and how near its own monolith (blocks) it leaves things standing. */
+	static final float TRAMPLE_DROPS = 0.25F;
+	static final double MONOLITH_SPARED = 4.0;
 	/** How long a swing shows (ticks). */
 	static final int SWING_TICKS = 12;
 	public static final int LEFT = 1, RIGHT = 2, BOTH = 3;
@@ -249,21 +252,28 @@ public class AetherGiant extends Monster {
 		}
 	}
 
-	/** The woods it walks into: trees felled away from it (only natural ones, never a building's logs), leaves torn down. */
+	/**
+	 * Whatever it walks into, it walks through (Andy: "it should knock down any tree, or building. dont get in the way"):
+	 * natural trees topple away from it, everything else breakable in its way is smashed (a share of it dropped). Its own
+	 * monolith is spared.
+	 */
 	private void trample(ServerLevel level) {
 		AABB box = this.getBoundingBox().inflate(1.0, 0.0, 1.0);
 		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
 		int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
-		// the trees first (they need their leaves to count as trees), then whatever leaves are left in its way
+		// the trees first (they need their leaves to count as trees and fall whole), then the rest
 		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, Math.min(y1, y0 + TRAMPLE_HEIGHT), z1)) {
 			if (level.getBlockState(pos).is(BlockTags.LOGS)) {
 				Trees.trample(level, pos.immutable(), this);
 			}
 		}
 		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
-			if (level.getBlockState(pos).is(BlockTags.LEAVES)) {
-				level.destroyBlock(pos, true, this);
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || !state.getFluidState().isEmpty() && state.getCollisionShape(level, pos).isEmpty()
+				|| state.getDestroySpeed(level, pos) < 0.0F || this.monolith != null && pos.closerThan(this.monolith, MONOLITH_SPARED)) {
+				continue;
 			}
+			level.destroyBlock(pos, this.random.nextFloat() < TRAMPLE_DROPS, this);
 		}
 	}
 

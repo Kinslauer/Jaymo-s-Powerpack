@@ -39,11 +39,11 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -235,11 +235,11 @@ public final class Monoliths {
 
 	/** (0.7.152) The vanilla Giant grown to the Aether's Giants' height ({@link AetherGiant#HEIGHT}), a Great Ape's. */
 	static void sizeVanillaGiant(Entity entity) {
-		if (entity.getType() == EntityType.GIANT && entity instanceof LivingEntity giant) {
+		if (entity instanceof Giant giant) {
 			AttributeInstance scale = giant.getAttribute(Attributes.SCALE);
 			if (scale != null) {
 				scale.addOrUpdateTransientModifier(new AttributeModifier(VANILLA_GIANT_SCALE,
-					AetherGiant.HEIGHT / EntityType.GIANT.getDimensions().height() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+					AetherGiant.HEIGHT / giant.getType().getDimensions().height() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 			}
 		}
 	}

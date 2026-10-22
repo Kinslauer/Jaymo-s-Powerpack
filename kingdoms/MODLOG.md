@@ -4145,5 +4145,7 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
   size), drawn to match. The vanilla Giant gets a scale to the same height.
 - Their reach grew with them: stamp trigger 12 / range 14 (lands 6 ahead), element power 24, aura 14, flare wither
   12, step height 3, follow range 64.
-- Too big to path through woods, a Giant with no path strides straight at its target; trees it walks into topple away
-  from it (natural trees only, never building logs) and leaves in its way are torn down (mobGriefing on).
+- Too big to path through woods, a Giant with no path strides straight at its target. Andy: "it should knock down
+  any tree, or building. dont get in the way": natural trees it walks into topple away from it, and everything else
+  breakable in its way (buildings included) is smashed, a quarter of it dropped. Only its own monolith is spared.
+  Needs mobGriefing on.
