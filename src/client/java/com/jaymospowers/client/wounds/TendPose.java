@@ -16,7 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.15.96) A player treating someone ({@link Tending}), drawn for everyone: they drop onto one knee (the left), right
+ * (0.15.99) A player treating someone ({@link Tending}), drawn for everyone: they drop onto one knee (the left), right
  * foot planted, and lean in with both hands at the wound, working at it. Over someone lying down (downed, or anything
  * short) they bend well forward and reach down; over someone standing they kneel upright and reach ahead. When the work
  * ends they get back up.

@@ -137,7 +137,7 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
   and spirits. Taverns and festivals sell spirits.
 - **Using it:** right-click your own body (yourself), or another creature, opens a small body screen to pick a part.
   Sneak + right-click treats the worst part.
-- **Treating each other (0.15.96):** Andy (2026-10-22): "players should be able to use medical items on each other ...
+- **Treating each other (0.15.99):** Andy (2026-10-22): "players should be able to use medical items on each other ...
   you can hold right click with the item on them and it will play a kneeling interaction animation, then apply after a
   short hold. using meds also increases your survival skill". Hold use on someone with medicine: you drop to one knee
   at their side (`Tending`, drawn by `TendPose`, reaching down to someone lying, ahead to someone standing) and treat

@@ -124,10 +124,8 @@ public final class XenoformPower implements Power {
 		/** Pyre: ticks left of the magma trail; the jet is held. */
 		public int trailTicks;
 		public boolean jet;
-		/** Velox: the speed burst is on, and its ticks so far; ticks spent on the wall this run; the chain strike's targets and its clock. */
-		public boolean bursting;
-		public int burstTicks;
-		public int wallRun;
+		/** Velox: Velocity is switched on; the chain strike's targets and its clock. */
+		public boolean velocity;
 		public final List<Integer> chain = new ArrayList<>();
 		public int chainTick;
 		/** Velox: rapid punches left, whom they hit (entity id) and ticks to the next; ticks left of the cyclone. */
@@ -191,9 +189,7 @@ public final class XenoformPower implements Power {
 			leapTicks = 0;
 			trailTicks = 0;
 			jet = false;
-			bursting = false;
-			burstTicks = 0;
-			wallRun = 0;
+			velocity = false;
 			chain.clear();
 			chainTick = 0;
 			punches = punchTick = 0;

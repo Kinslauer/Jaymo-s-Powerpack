@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.96) Kneeling to treat someone (see TendPose): read onto the render state; the body sunk onto the knee and leaning in. */
+/** (0.15.99) Kneeling to treat someone (see TendPose): read onto the render state; the body sunk onto the knee and leaning in. */
 @Mixin(AvatarRenderer.class)
 abstract class TendAvatarRendererMixin {
 	@Inject(

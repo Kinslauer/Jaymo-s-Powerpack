@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.15.96) Down on one knee at someone's side, hands at work: a player treating another ({@link Treatment}) or bringing
+ * (0.15.99) Down on one knee at someone's side, hands at work: a player treating another ({@link Treatment}) or bringing
  * a downed one round ({@link Downed}). Andy (2026-10-22): "hold right click with the item on them and it will play a
  * kneeling interaction animation". Drawn for everyone (the client's {@code TendPose}). Whoever runs the work calls
  * {@link #keep} every tick it goes on; a player nobody kept for {@link #LINGER} ticks gets up.

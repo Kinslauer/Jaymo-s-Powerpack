@@ -65,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  * and the body screen ({@link OpenBody}) opens to pick the part; sneak + use treats the worst part it can help, with no
  * screen. Smelling salts, leeches and poppy (given to another) treat the whole body. Strong spirits (Kitchen's), a
  * honey bottle and a hot blade (cautery) work only with sneak + use: on another, or on yourself while looking down.</li>
- * <li><b>On someone else, hold use</b> (0.15.96, Andy: "you can hold right click with the item on them and it will play
+ * <li><b>On someone else, hold use</b> (0.15.99, Andy: "you can hold right click with the item on them and it will play
  * and kneeling interaction animation, then apply after a short hold"): held past {@link Downed#TAP_TICKS}, you kneel at
  * their side ({@link Tending}) and treat the worst part (or the whole body) while you hold; letting go stops it. A tap
  * with a bandage, rag, splint or needle opens the body screen instead, to pick the part. Spirits, honey and a hot blade
@@ -189,7 +189,7 @@ public final class Treatment {
 		final int need;
 		int ticks;
 		/**
-		 * (0.15.96) Held use on someone else: {@code start}, when use went down, and {@code held}, when it was last seen
+		 * (0.15.99) Held use on someone else: {@code start}, when use went down, and {@code held}, when it was last seen
 		 * held (game times). Not {@code begun} till it's held past a tap; a tap opens the body screen. {@code over}: done (or
 		 * nothing to do), kept till use is let go so holding on doesn't start it again.
 		 */
@@ -278,6 +278,15 @@ public final class Treatment {
 			return Remedy.SPIRITS;
 		}
 		return hot(stack, level) ? Remedy.CAUTERY : null;
+	}
+
+	/**
+	 * (0.15.98) Whether {@code stack} is medicine on a plain use (no sneak): our kit with its body screen, or the poppy. Spirits,
+	 * honey and a red-hot blade are only medicine with sneak, so a plain hold with them is a finisher's ({@code Finishers}).
+	 */
+	public static boolean treatsOnPlainUse(ItemStack stack, Level level) {
+		Remedy remedy = remedy(stack, level);
+		return remedy != null && !(remedy.part && !remedy.screen());
 	}
 
 	/** (0.14.4) A blade hot enough to sear: heated in a fire within {@link #HEAT_TICKS}, or with Fire Aspect on it. */
@@ -452,16 +461,16 @@ public final class Treatment {
 			return InteractionResult.SUCCESS;
 		}
 		if (old != null && old.hold && old.target == body && old.hand == hand && old.remedy == remedy) {
-			// (0.15.96) still holding use on them (the client repeats it while held)
+			// (0.15.99) still holding use on them (the client repeats it while held)
 			old.held = now;
 			return InteractionResult.SUCCESS;
 		}
-		// (0.15.96) held, it's the worst part (or the whole body) with you kneeling at their side; a tap, the body screen
+		// (0.15.99) held, it's the worst part (or the whole body) with you kneeling at their side; a tap, the body screen
 		SESSIONS.put(server.getUUID(), new Session(body, null, remedy, hand, server.position(), sneak, MedicineSkill.ticks(server, remedy.ticks), true, now));
 		return InteractionResult.SUCCESS;
 	}
 
-	/** (0.15.96) Use let go on someone before it was a hold: the body screen for our kit, else how it's done. */
+	/** (0.15.99) Use let go on someone before it was a hold: the body screen for our kit, else how it's done. */
 	private static void tapped(ServerPlayer player, Session s) {
 		if (s.remedy.screen()) {
 			open(player, s.target, s.remedy, false);
@@ -471,7 +480,7 @@ public final class Treatment {
 		}
 	}
 
-	/** (0.15.96) A hold on someone, held past a tap: settle what it treats and begin. False if there's nothing it can do. */
+	/** (0.15.99) A hold on someone, held past a tap: settle what it treats and begin. False if there's nothing it can do. */
 	private static boolean begin(ServerPlayer player, Session s) {
 		LivingEntity body = s.target;
 		if (s.remedy.part) {
@@ -664,7 +673,7 @@ public final class Treatment {
 			}
 			LivingEntity body = s.target;
 			if (s.hold) {
-				// (0.15.96) held use on someone: let go, it stops (or, a tap, the body screen)
+				// (0.15.99) held use on someone: let go, it stops (or, a tap, the body screen)
 				if (level.getGameTime() - s.held > Downed.REVIVE_GRACE) {
 					SESSIONS.remove(id);
 					if (s.begun && !s.over) {
@@ -705,7 +714,7 @@ public final class Treatment {
 				continue;
 			}
 			s.ticks++;
-			// (0.15.96) down on one knee at their side
+			// (0.15.99) down on one knee at their side
 			Tending.keep(player, body);
 			if (s.ticks % WORK_TICKS == 0) {
 				player.swing(s.hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);

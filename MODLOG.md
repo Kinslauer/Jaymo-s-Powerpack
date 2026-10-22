@@ -2482,7 +2482,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
   nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
   new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
-- **0.15.96, treating each other:** Andy: "players should be able to use medical items on each other, to bandage and
+- **0.15.97, Velox's Velocity (R), after Chrono's Overclock:** Andy: "Velox should have a velocity button like
+  Chrono's overclock, giving him the same toggle speed wall run and streak, just colored light blue". The held Speed
+  Burst on R is now **Velocity**, a toggle: on, Velox is +100% faster (`Velox.VELOCITY_SPEED`) and runs on Overclock's
+  own speed code (`ChronoSpeed.tick` with the new `ChronoSpeed.SKY` palette): Overclock's sprint boost and whole-block
+  steps, the wall run held against the wall you face (`ChronoSpeedClient`, now also ticked by `XenoformPowerClient`),
+  water and lava run while sprinting, Shift for walking speed, no fall damage, and the speed-force streak
+  (`ChronoStreak`) in light blue: afterimages of the raptor (`XenoformClient.submitGhost`), sky-blue bolts, a blue dust
+  trail. R again switches it off, then 2 s. `ChronoSpeed.FLASH` now holds the streak's colour (an int, not a boolean).
+  No phasing through walls: that stays Chrono's.
+- **0.15.98, finishers on the downed:** Andy: "every weapon should be able to right click and hold a downed enemy, and
+  then do a unique finisher animation". Hold use (not sneaking) on someone downed for 0.4 s and you finish them with a
+  move for the kind of weapon in your main hand (`core/finisher/Finishers`, read off item tags and names so forged and
+  other mods' weapons fall in): sword (Run Through), greatsword (Headsman's Stroke), dagger (Mercy Stroke), axe
+  (Executioner, the head comes off first), mace/hammer/club/pickaxe (Skull Crusher), spear/trident (Pinned), polearm
+  (Reaping), staff, bow (Point Blank), crossbow, and anything else or bare hands (Neck Snap). You stand rooted facing
+  them; blows land on the move's beats (sound, Simple Blood's blood or a crush, the body jolting, screen shake) and the
+  last one is the death, credited to you (`Downed.execute`). Stops, sparing them, if they get up, are carried off or
+  end up out of reach. Drawn for everyone by `client/finisher/FinisherPose` (keyframes eased on `PoseBlend` springs,
+  the body turned to them with a step in, the weapon turned in the hand by `FinisherItemInHandLayerMixin`); your own
+  is watched from behind, first person given back after. Not on tamed animals. Medicine in hand still treats; a
+  red-hot blade only counts as medicine with sneak. A tap on a downed guard still has Kingdoms disarm them.
+- **0.15.99, treating each other:** Andy: "players should be able to use medical items on each other, to bandage and
   splint/ heal their team. you can hold right click with the item on them and it will play and kneeling interaction
   animation, then apply after a short hold. using meds also increases your survival skill". Treating another body
   (PR #366's channel) is now a hold: hold use on someone with medicine and, past a tap (`Downed.TAP_TICKS`), you drop to
@@ -2491,5 +2512,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   before. The kneel is the synced `Tending` attachment, drawn for everyone by `TendPose` (one knee down, right foot
   planted, both hands working at the wound; bent well over someone lying down, upright for someone standing), and a
   food revive of a downed one kneels too. Every treatment finished still gives Kingdoms Survival experience
-  (`MedicineSkill.treated`). Medicine in hand means treat; a weapon on a downed enemy is left to finishers (a red-hot
+  (`MedicineSkill.treated`). Medicine in hand means treat; a weapon on a downed enemy is a finisher (0.15.98) (a red-hot
   blade is medicine only with sneak).
