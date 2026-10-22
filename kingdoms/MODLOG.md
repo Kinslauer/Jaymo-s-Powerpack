@@ -4190,5 +4190,6 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Andy: "the giants need to be rarer, and they shouldnt activate until after borderlands world tier, the monument will
   only hum." Monoliths rise a third as often (2% per player in the wild every 2 minutes, about one per 100 minutes)
   and at least 2400 blocks apart (was 1200).
-- A monolith's Giant rises only for a player at Borderlands or higher (the same gate as portal raids). Anyone below
+- A monolith's Giant rises only for a player at Wildlands or higher, the tier after Borderlands (Andy: "do
+  wildlands"). Anyone below
   who comes near only hears it hum (a low beacon drone, its element's motes round the crown); no chat text.

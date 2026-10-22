@@ -77,10 +77,11 @@ public final class Monoliths {
 	static final float RAISE_CHANCE = 0.02F;
 	static final int RAISE_NEAREST = 64, RAISE_FURTHEST = 112, SPACING = 2400;
 	/**
-	 * (0.7.159) Andy: "they shouldnt activate until after borderlands world tier, the monument will only hum". A Giant
-	 * rises only for a player at this world tier or higher (as portal raids); for anyone below, its monolith only hums.
+	 * (0.7.159) Andy: "they shouldnt activate until after borderlands world tier, the monument will only hum", then "do
+	 * wildlands". A Giant rises only for a player at this world tier (the one after Borderlands) or higher; for anyone
+	 * below, its monolith only hums.
 	 */
-	static final WorldTiers.Tier WAKE_TIER = WorldTiers.Tier.BORDERLANDS;
+	static final WorldTiers.Tier WAKE_TIER = WorldTiers.Tier.WILDLANDS;
 	/** No monolith this close to a settlement (blocks). */
 	static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** Tries at finding ground for a monolith, or for a Giant. */
