@@ -179,6 +179,19 @@ public final class CarryBlock {
 
 	/** Whether this kind of block could be picked up at all (wherever it came from). */
 	public static boolean liftable(Level level, BlockPos pos, BlockState state) {
+		return liftableShape(level, pos, state) && carriable(state);
+	}
+
+	/**
+	 * (0.15.96) Whether any solid block could be lifted here (Duplex's doubles fetch these): every block with a body,
+	 * not just the {@link #carriable} ones, but still never a liquid, plant-like filler, half of a two-block block, a
+	 * double chest or something unbreakable.
+	 */
+	public static boolean liftableAny(Level level, BlockPos pos, BlockState state) {
+		return liftableShape(level, pos, state) && !state.getCollisionShape(level, pos).isEmpty();
+	}
+
+	private static boolean liftableShape(Level level, BlockPos pos, BlockState state) {
 		if (state.isAir() || state.getBlock() instanceof LiquidBlock || state.canBeReplaced()) {
 			return false;
 		}
@@ -187,7 +200,7 @@ public final class CarryBlock {
 			|| state.hasProperty(BlockStateProperties.CHEST_TYPE) && state.getValue(BlockStateProperties.CHEST_TYPE) != ChestType.SINGLE) {
 			return false;
 		}
-		return state.getDestroySpeed(level, pos) >= 0.0F && carriable(state);
+		return state.getDestroySpeed(level, pos) >= 0.0F;
 	}
 
 	/**
@@ -227,6 +240,16 @@ public final class CarryBlock {
 
 	/** Takes the block out of the world and into the carrier's arms. */
 	private static void lift(ServerLevel level, ServerPlayer carrier, BlockPos pos, BlockState state) {
+		Display display = takeOut(level, pos, state, carrier, false);
+		Carry.pickUp(carrier, display);
+	}
+
+	/**
+	 * Takes the block out of the world (with whatever was in it) as a carried block's display beside {@code holder},
+	 * not yet riding anything: held in a player's arms, or ({@code overhead}, 0.15.96) up on a little one's head, as
+	 * Duplex's doubles carry it.
+	 */
+	public static Display takeOut(ServerLevel level, BlockPos pos, BlockState state, Entity holder, boolean overhead) {
 		BlockState held = state.hasProperty(BlockStateProperties.WATERLOGGED) ? state.setValue(BlockStateProperties.WATERLOGGED, false) : state;
 		// whatever's in it comes along, and is taken out first so nothing spills when the block goes
 		CompoundTag contents = null;
@@ -242,19 +265,21 @@ public final class CarryBlock {
 		// (and a block entity's own removal effects, like a furnace's stored XP, stay with the saved contents)
 		level.setBlock(pos, state.getFluidState().createLegacyBlock(),
 			blockEntity == null ? Block.UPDATE_ALL : Block.UPDATE_ALL | Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS);
+		// in the arms: in front of the carrier at arm height (the display turns with the carrier: +z is ahead);
+		// overhead: centred on top of whatever it rides
+		float up = overhead ? 0.0F : HOLD_UP, ahead = overhead ? -SCALE / 2.0F : HOLD_AHEAD;
 		Display display;
 		if (blockEntity == null) {
-			// centred across, in front of the carrier at arm height (the display turns with the carrier: +z is ahead)
 			Display.BlockDisplay block = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, level);
 			block.setBlockState(held);
-			block.setTransformation(new Transformation(new Vector3f(-SCALE / 2.0F, HOLD_UP, HOLD_AHEAD), null, new Vector3f(SCALE), null));
+			block.setTransformation(new Transformation(new Vector3f(-SCALE / 2.0F, up, ahead), null, new Vector3f(SCALE), null));
 			display = block;
 		} else {
 			// a chest and the like is drawn by its block entity, not a block model: show it as its item (drawn centred)
 			Display.ItemDisplay item = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
 			item.setItemStack(new ItemStack(held.getBlock()));
 			item.setItemTransform(ItemDisplayContext.NONE);
-			item.setTransformation(new Transformation(new Vector3f(0.0F, HOLD_UP + SCALE / 2.0F, HOLD_AHEAD + SCALE / 2.0F), null, new Vector3f(SCALE), null));
+			item.setTransformation(new Transformation(new Vector3f(0.0F, up + SCALE / 2.0F, ahead + SCALE / 2.0F), null, new Vector3f(SCALE), null));
 			display = item;
 		}
 		display.setAttached(STATE, held);
@@ -264,12 +289,12 @@ public final class CarryBlock {
 		// drawn even when the carrier's feet are out of view
 		display.setWidth(2.0F);
 		display.setHeight(2.0F);
-		display.setPos(carrier.getX(), carrier.getY(), carrier.getZ());
-		display.setYRot(carrier.getYRot());
+		display.setPos(holder.getX(), holder.getY(), holder.getZ());
+		display.setYRot(holder.getYRot());
 		level.addFreshEntity(display);
 		display.addTag(TAG);
-		Carry.pickUp(carrier, display);
 		level.playSound(null, pos, held.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.7F, 0.9F);
+		return display;
 	}
 
 	/**
@@ -277,7 +302,7 @@ public final class CarryBlock {
 	 * (or to a side, or behind, if that's blocked) when there is one, otherwise where the display is. If nowhere is
 	 * free, it drops as its item. Returns where it went.
 	 */
-	static Vec3 land(ServerLevel level, Entity display, @Nullable ServerPlayer carrier, Vec3 velocity) {
+	public static Vec3 land(ServerLevel level, Entity display, @Nullable ServerPlayer carrier, Vec3 velocity) {
 		BlockState state = stateOf(display);
 		CompoundTag contents = display.getAttached(CONTENTS);
 		Vec3 at = display.position();
@@ -324,7 +349,7 @@ public final class CarryBlock {
 	 */
 	static @Nullable BlockPos placeSpot(ServerPlayer carrier, Entity display) {
 		ServerLevel level = carrier.level();
-		BlockState state = facing(stateOf(display), carrier);
+		BlockState state = facing(stateOf(display), carrier.getDirection());
 		Vec3 eye = carrier.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(carrier.getLookAngle().scale(PLACE_REACH)), ClipContext.Block.OUTLINE,
 			ClipContext.Fluid.NONE, carrier));
@@ -342,7 +367,12 @@ public final class CarryBlock {
 
 	/** (0.13.11) Puts the carried block into the world at {@code pos} (from {@link #placeSpot}), with whatever was in it. */
 	static Vec3 place(ServerLevel level, Entity display, ServerPlayer carrier, BlockPos pos) {
-		BlockState state = facing(stateOf(display), carrier);
+		return place(level, display, pos, carrier.getDirection());
+	}
+
+	/** (0.15.96) Puts a carried block into the world at {@code pos}, turned as if placed by someone looking {@code toward}. */
+	public static Vec3 place(ServerLevel level, Entity display, BlockPos pos, Direction toward) {
+		BlockState state = facing(stateOf(display), toward);
 		CompoundTag contents = display.getAttached(CONTENTS);
 		display.discard();
 		if (state.isAir()) {
@@ -363,12 +393,11 @@ public final class CarryBlock {
 		return Vec3.atBottomCenterOf(pos);
 	}
 
-	/** Turned as if the carrier had just placed it: a chest facing them, an anvil lying across their view. */
-	private static BlockState facing(BlockState state, ServerPlayer carrier) {
-		if (!state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+	/** Turned as if someone looking {@code toward} had just placed it: a chest facing them, an anvil lying across their view. */
+	public static BlockState facing(BlockState state, Direction toward) {
+		if (!state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) || toward.getAxis().isVertical()) {
 			return state;
 		}
-		Direction toward = carrier.getDirection();
 		return state.setValue(BlockStateProperties.HORIZONTAL_FACING,
 			state.getBlock() instanceof AnvilBlock ? toward.getClockWise() : toward.getOpposite());
 	}
