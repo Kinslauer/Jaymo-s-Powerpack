@@ -64,6 +64,7 @@ public final class TinkeringJei implements IModPlugin {
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
 		registration.addCraftingStation(PART_BUILDER, Tinkering.PART_BUILDER);
 		registration.addCraftingStation(TOOL_STATION, Tinkering.TOOL_STATION);
+		registration.addCraftingStation(TOOL_STATION, com.jaymospowers.tinkering.table.Tables.TOOL_FORGE);
 		registration.addCraftingStation(CASTING, Tinkering.CASTING_TABLE);
 		registration.addCraftingStation(CASTING_BASIN, Tinkering.CASTING_BASIN);
 		registration.addCraftingStation(MELTING, Tinkering.SMELTERY);
