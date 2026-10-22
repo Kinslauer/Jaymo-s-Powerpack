@@ -412,6 +412,11 @@ public final class Downed {
 		getUp(level, entity, true);
 	}
 
+	/** (0.15.83) Undone rather than got over (Chrono's Rewind back to before the fall): up, and not battered by it. */
+	public static void undo(ServerLevel level, LivingEntity entity) {
+		getUp(level, entity, false);
+	}
+
 	/** {@code battered}: (0.15.82) false for a knock-out from standing, which was no downing. */
 	private static void getUp(ServerLevel level, LivingEntity entity, boolean battered) {
 		if (!isDowned(entity)) {
