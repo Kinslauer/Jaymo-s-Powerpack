@@ -2457,7 +2457,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kitchen's new `LivingRagdolls.addHold`): the body floats up and bobs at the surface until you're up, given up, carried
   out or washed ashore (then back to the downed crawl). Without Kitchen you just drift up (`CrawlTaps`). Sneak still
   gives up.
-- **0.15.91, wounds first, hearts after (Kitchen 0.5.15):** Andy: "everything should go through the wounding system
+- **0.15.94, wounds first, hearts after (Kitchen 0.5.15):** Andy: "everything should go through the wounding system
   first, for example if a certain threshold (30%) damage to your limb goes through, then it should affect your hearts
   ... regeneration should only kick in at full speed when you are fully patched up". Every hit now lands on the body
   parts before vanilla takes any health (`WoundsHurtMixin` and `WoundsPlayerHurtMixin` around `setHealth` in

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.15.91) {@link WoundsHurtMixin} for players, whose {@code actuallyHurt} is their own. */
+/** (0.15.94) {@link WoundsHurtMixin} for players, whose {@code actuallyHurt} is their own. */
 @Mixin(Player.class)
 abstract class WoundsPlayerHurtMixin {
 	@WrapOperation(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setHealth(F)V"))

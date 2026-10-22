@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.15.91) Food's own healing (vanilla's, where Kitchen's stomach doesn't stand in for it) runs at
+ * (0.15.94) Food's own healing (vanilla's, where Kitchen's stomach doesn't stand in for it) runs at
  * {@link Wounds#UNPATCHED_REGEN} until you're patched up ({@link Wounds#patchedUp}). Kitchen's meals read
  * {@link Wounds#UNPATCHED_TAG} for the same.
  */

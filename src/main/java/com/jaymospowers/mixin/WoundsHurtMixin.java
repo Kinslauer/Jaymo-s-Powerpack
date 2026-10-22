@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.15.91) Wounds first: a hit vanilla is about to take from the health lands on the parts instead, and the health
+ * (0.15.94) Wounds first: a hit vanilla is about to take from the health lands on the parts instead, and the health
  * left is what the parts' hearts come to ({@link Wounds#takeHit}). Players take theirs in {@link WoundsPlayerHurtMixin}.
  */
 @Mixin(LivingEntity.class)

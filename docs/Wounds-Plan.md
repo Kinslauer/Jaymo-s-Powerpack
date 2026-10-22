@@ -93,7 +93,7 @@ keeps working. The parts are a `Wounds` attachment: one float per part, synced t
 
 ## Healing
 
-- **Wounds first (0.15.91).** Andy (2026-10-22): "everything should go through the wounding system first ... if a
+- **Wounds first (0.15.94).** Andy (2026-10-22): "everything should go through the wounding system first ... if a
   certain threshold (30%) damage to your limb goes through, then it should affect your hearts". Every hit lands on the
   parts before vanilla touches the health (`WoundsHurtMixin`, `WoundsPlayerHurtMixin`). The first 30% of a part's own
   pool (`Wounds.HEART_SPILL_FROM`) is bruising and costs no hearts; past that the part's hearts drain faster, so a part at
