@@ -187,7 +187,32 @@ insignia on its chest (`XenoFormModels.Nadir`, `gen_xenoform.nadir`). Moves:
 - R, **Beacon**: tap to pick a player anywhere on the server (next player on each tap; they get Glowing for 3 s, so
   they show through the world to everyone); hold R for 1.5 s to phase to just behind them, across dimensions
   (`teleportTo(ServerLevel...)`). 5 s cooldown. Overlay shows who and a progress bar.
-- G V B: not decided yet (Andy: "we can work on the other abilities later"); they say so.
+- G, **Rift** (`nadir/NadirRift`). Tap at a creature (22 blocks): **Recursive Drop**, a maw in the ground under it
+  and one in the sky (7 blocks up, less under a ceiling, never under 2.5); it's pinned in the column and falls
+  through, 2 damage each pass, 7 passes, then let go (12 s cooldown). Tap at nothing: **Rift Blink** to where you
+  look (16 blocks; on a floor you land on it, at a wall or roof just short of it; 1.5 s). Hold 1 s: **Surface**,
+  straight up to the highest dry, fire-free ground with headroom in your column (under the Nether's bedrock roof;
+  10 s). Sneak + G: the **Void Pocket** (`nadir/NadirStash`, 27 slots, attachment `nadir_stash`, kept through death).
+- V, **Graviton** (`nadir/NadirGraviton`). At a creature (24 blocks; the grip breaks past 30): **Heavy Hand**. Tap:
+  yanked to arm's length, 4 damage; sneak + tap: shoved away, 2. Hold 8 ticks: slammed down, 9 damage, pinned 1.5 s;
+  sneak + hold: thrown about 12 blocks up (it takes the fall). At nothing, tap: **Weightless**, a 5-block zone where
+  you look for 3 s; whatever enters floats up helpless (Levitation III, Weakness V; mobs 3 s, players 1.5 s) and is
+  then driven down; projectiles not yours drift and slow in it (8 s). At nothing, hold 1 s: **Event Horizon**, a black
+  hole up to 32 blocks off (4 up from the ground it meets), opening over 1 s and holding 6 s. It drags every creature
+  in 16 blocks (players weakly), items and XP into a spiral; 1.5 damage every 0.5 s inside 4; anything not a player
+  with 30 health or less that reaches the core is erased (its drops come loose); then it collapses: 12 damage within
+  8, everything in 16 thrown out. Once every 45 s. Ending the form closes it quietly.
+- B, **Command** (`nadir/NadirRules`, screen `NadirRulesScreen`, packets `nadir/NadirNet`). Three rules, each WHO +
+  WHAT + WHEN, two on at once, kept on the player (attachment `nadir_rules`) and worked only while Nadir is out. WHO:
+  me, what I hit, what hits me, things near me (8), what I look at (24). WHAT: sees in the dark, moves faster, jumps
+  higher, lands softly, burns, glows, is weakened, cannot move, is pushed, is pulled, weighs nothing, weighs a ton,
+  heals, is unseen, bursts (3-block void blast, 5 damage, never you or yours), feels my pain (4 damage). WHEN: always,
+  sneaking, sprinting, in the air, at night, below half health, under rock, standing still. Effects refresh each
+  second; instant words fire every 2 s on me/near/look, and at most once a second per struck creature. A rule's own
+  damage doesn't set off more rules.
+- G V B are from-scratch takes on the Rift, Graviton and Command powers of The Awakening (CurseForge, all rights
+  reserved: ideas only, nothing of its code or art). Left out: its Domain Expansion, Mass Control weights, Dense, and
+  swallowing mobs into a pocket dimension.
 - No Ultimate; corruption doesn't trouble it.
 
 ## Later

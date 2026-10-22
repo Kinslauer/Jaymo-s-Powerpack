@@ -2544,3 +2544,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`BandFlash`). Players get a bright green whiteout on screen (`XenoNet.Flash`, `BandFlashHud`; weaker further off or
   looking away), creatures get Blindness, drop their target and stand dazed (Darktide's stun). You aren't blinded by
   your own band.
+- **0.15.104, Nadir's Rift, Graviton and Command:** Andy: "can you add the rift, graviton, and command mechanics to
+  Nadir?" (from The Awakening, which is all rights reserved, so these are from-scratch takes on its ideas). G is the
+  Rift (`nadir/NadirRift`): tap at a creature for Recursive Drop (floor and sky maws, 7 passes of 2 damage), tap at
+  nothing to blink 16 blocks, hold to Surface, sneak + G for the Void Pocket (`NadirStash`, 27 slots). V is the
+  Graviton (`nadir/NadirGraviton`): Heavy Hand at a creature (tap yank / hold slam and pin; sneaking, shove / launch),
+  a Weightless zone or (held) an Event Horizon black hole at nothing. B is the Command (`nadir/NadirRules`,
+  `NadirRulesScreen`): three WHO + WHAT + WHEN rules, two on at once, saved on the player. Nadir's scratch is
+  `Live.nadir` (`NadirState`). Details in `docs/xenoform.md`.

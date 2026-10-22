@@ -177,6 +177,8 @@ public final class XenoformPower implements Power {
 		/** Duplex: its doubles (entity ids), and when Copper Storm's charge wears off. */
 		public final List<Integer> doubles = new ArrayList<>();
 		public long chargedUntil;
+		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
+		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
 		void clearForm() {
 			form = null;
@@ -222,6 +224,7 @@ public final class XenoformPower implements Power {
 			beaconHeld = 0;
 			doubles.clear();
 			chargedUntil = 0L;
+			nadir.clear();
 			hudDirty = true;
 		}
 	}
@@ -235,6 +238,7 @@ public final class XenoformPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		XenoNet.register();
+		com.jaymospowers.power.xenoform.nadir.NadirNet.register();
 		XenoDouble.init();
 		XenoBandItem.init();
 		FallenStarBlock.init();

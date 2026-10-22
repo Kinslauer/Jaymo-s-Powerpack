@@ -49,6 +49,7 @@ public final class XenoformPowerClient implements PowerClient {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoDouble.TYPE, XenoDoubleRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
+		NadirRulesScreen.register();
 		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
