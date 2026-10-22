@@ -4226,3 +4226,13 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Shaders now stay on all night. If the hook doesn't take (an Iris update renames what it patches), the old switch-off
   comes back by itself, with a warning in the log.
 - Not yet seen in game: needs a check with a shader pack on a new-moon night.
+
+## 0.7.165: the creator's name sticks (pack 0.15.105)
+- Andy: "character names still randomize even though both players input their own when joining the server just now.
+  we had to use the command to make it correct". MCA's start-up creator (`DestinyScreen`) keeps the typed name on the
+  client only: its name page's Accept button moves on to the body, traits or destiny page without saving, and nothing
+  later saves it either (only the editor's own Done button does, which is why `/mca editor` fixed it). So the server
+  still had the name `CharacterNames` gives a player who hasn't picked one.
+- `client/mixin/mca/McaDestinyNameMixin`: leaving the creator's name page now saves the editor to the server
+  (`syncVillagerData`, as Done does), so the typed name reaches MCA's family tree and replaces the given one at once.
+- Compile-checked against the 26.3 jars; not yet run in game.

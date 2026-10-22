@@ -2552,3 +2552,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   a Weightless zone or (held) an Event Horizon black hole at nothing. B is the Command (`nadir/NadirRules`,
   `NadirRulesScreen`): three WHO + WHAT + WHEN rules, two on at once, saved on the player. Nadir's scratch is
   `Live.nadir` (`NadirState`). Details in `docs/xenoform.md`.
+- **0.15.105, ships Jaymo's Kingdoms 0.7.165:** the character name typed in MCA's start-up creator now sticks the
+  first time (details in the Kingdoms MODLOG).
