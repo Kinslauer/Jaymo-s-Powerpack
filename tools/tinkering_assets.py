@@ -12,6 +12,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 
 from PIL import Image
 
@@ -45,10 +46,12 @@ PARTS = [
     ("small_blade", "Small Blade", "head", "parts/small_blade", (0, 0)),
     ("hammer_head", "Hammer Head", "head", "sledge_hammer/head", (-3, 3)),
     ("broad_blade", "Broad Blade", "head", "cleaver/head", (-1, 1)),
+    ("broad_axe_head", "Broad Axe Head", "head", "broad_axe/blade", (0, 4)),
     ("large_plate", "Large Plate", "head", "parts/large_plate", (0, 0)),
     ("tool_handle", "Tool Handle", "handle", "parts/tool_handle", (0, 0)),
     ("tough_handle", "Tough Handle", "handle", "parts/tough_handle", (0, 0)),
     ("tool_binding", "Tool Binding", "binding", "parts/tool_binding", (0, 0)),
+    ("tough_binding", "Tough Binding", "binding", "parts/tough_binding", (0, 0)),
     # (0.11.77) for swords' weapon heads (tinkering/WeaponParts), drawn from Tinkers' sword guard
     ("crossguard", "Crossguard", "handle", "sword/guard", (3, -3)),
 ]
@@ -80,6 +83,43 @@ TOOLS = [
      [("handle", "cleaver/handle", 1), ("head", "cleaver/head", 0), ("shield", "cleaver/shield", 3),
       ("guard", "cleaver/guard", 2)],
      True, "claymore", ["swords"]),
+    # (0.15.x) Tinkers' other melee weapons and big harvest tools. The scythe, broad axe, excavator and vein hammer are
+    # held big; the layer lists follow Tinkers' own item models (a layer's number is the part its material comes from).
+    # A preset with a namespace is used as it is; any other is Better Combat's own.
+    ("dagger", "Dagger", ["small_blade", "tool_handle"],
+     [("head", "dagger/blade", 0), ("crossguard", "dagger/crossguard", 1)],
+     False, NS + ":combo_dagger", ["swords"]),
+    ("kama", "Kama", ["small_blade", "tool_handle", "tool_binding"],
+     [("handle", "pickaxe/handle", 1), ("head", "kama/head", 0), ("binding", "kama/binding", 2)],
+     False, "sickle", ["hoes", "swords"]),
+    ("scythe", "Scythe", ["broad_blade", "tough_handle", "tough_binding", "tough_handle"],
+     [("accessory", "scythe/accessory", 3), ("handle", "scythe/handle", 1), ("head", "scythe/head", 0),
+      ("binding", "scythe/binding", 2)],
+     True, NS + ":combo_war_scythe", ["hoes", "swords"]),
+    ("broad_axe", "Broad Axe", ["broad_axe_head", "tough_handle", "pick_head", "tough_binding"],
+     [("handle", "broad_axe/handle", 1), ("head", "broad_axe/blade", 0), ("back", "broad_axe/back", 2),
+      ("binding", "broad_axe/binding", 3)],
+     True, "heavy_axe", ["axes"]),
+    ("excavator", "Excavator", ["large_plate", "tough_handle", "tough_binding", "tough_handle"],
+     [("handle", "excavator/handle", 1), ("head", "excavator/head", 0), ("grip", "excavator/grip", 3),
+      ("binding", "excavator/binding", 2)],
+     True, "hammer", ["shovels"]),
+    ("vein_hammer", "Vein Hammer", ["hammer_head", "tough_handle", "tough_binding", "large_plate"],
+     [("handle", "vein_hammer/handle", 1), ("head", "vein_hammer/head", 0), ("grip", "vein_hammer/grip", 2),
+      ("front", "vein_hammer/front", 3)],
+     True, "hammer", ["pickaxes"]),
+    ("pickadze", "Pickadze", ["pick_head", "tool_handle", "adze_head"],
+     [("handle", "pickaxe/handle", 1), ("pick", "pickadze/pick", 0), ("adze", "pickadze/adze", 2)],
+     False, "pickaxe", ["pickaxes", "shovels"]),
+    ("war_pick", "War Pick", ["pick_head", "tough_handle", "tool_binding"],
+     [("body", "war_pick/body", 1), ("limb", "war_pick/limb", 0)],
+     False, "pickaxe", ["pickaxes"]),
+    ("minotaur_axe", "Minotaur Axe", ["small_axe_head", "small_axe_head", "tool_handle"],
+     [("handle", "pickaxe/handle", 2), ("front", "minotaur_axe/front", 0), ("back", "minotaur_axe/back", 1)],
+     False, "double_axe", ["axes"]),
+    ("battlesign", "Battlesign", ["large_plate", "tough_handle"],
+     [("handle", "battlesign/handle", 1), ("head", "battlesign/head", 0)],
+     False, "mace", []),
 ]
 
 TRAITS = {
@@ -97,12 +137,24 @@ TRAITS = {
     "stripping": ("Stripping", "Strips logs like an axe."),
     "tilling": ("Tilling", "Tills soil like a hoe."),
     "sweeping": ("Sweeping", "Its swings cut through a crowd."),
-    "area": ("Wide Swing", "Breaks a 3 by 3 face at once."),
+    "area": ("Wide Swing", "Breaks the blocks round the one you mined at once (sneak to break just one)."),
     "searing": ("Searing", "Hits harder on anything that can burn."),
     "enhanced": ("Enhanced", "One more modifier slot."),
     "crumbling": ("Crumbling", "Digs faster through blocks that need no tool."),
     "tasty": ("Tasty", "When you're hungry you sometimes take a bite of it."),
     "overslime": ("Overslime", "Slowly mends itself while you carry it."),
+    "padded": ("Padded", "Most of a hit's knockback is kept off, so what you hit stays in reach."),
+    "offhand_attack": ("Dual Wield", "Held in the off hand, right mouse swings it at what you're looking at."),
+    "shears": ("Shearing", "Shears sheep and the like; leaves, webs and grass it cuts drop themselves."),
+    "harvest": ("Harvest", "Grown crops it breaks or right clicks are picked and replanted, across its whole area."),
+    "pathing": ("Pathing", "Flattens grass into paths, like a shovel."),
+    "knockback": ("Knockback", "Hits knock what they hit further back."),
+    "war_charge": ("War Charge", "Each block mined charges it; the next hit spends the charges as extra damage."),
+    "charge_attack": ("Charge Attack", "Hits hard while you sprint."),
+    "blocking": ("Blocking", "Hold right mouse to block half the damage that comes at your front."),
+    "bonking": ("Bonking", "Hold the guard up, then let go to bonk what's in front of you away."),
+    "timber": ("Timber", "Fells a whole tree when you cut a log of it (sneak to cut just one)."),
+    "vein": ("Vein Mining", "Mines the whole vein of ore when you break a piece of it."),
 }
 
 # modifier id, name, what it does (the items are in com.jaymospowers.tinkering.Modifier)
@@ -236,10 +288,67 @@ def write(path, data):
             f.write("\n")
 
 
-def sprite(tcon, rel, mat):
-    """Tinkers' sprite for a material, or None when it has none."""
-    path = os.path.join(tcon, "assets", "tconstruct", "textures", "item", "tool", rel + "_tconstruct_" + mat + ".png")
-    return path if os.path.exists(path) else None
+TOOL_TEXTURES = ("assets", "tconstruct", "textures", "item", "tool")
+# (0.15.x) the grey levels Tinkers' tool templates are drawn in, and the sprites that show how a material colours each kind of part
+GREYS = (63, 102, 140, 178, 216, 255)
+DONORS = {"head": "pickaxe/head", "handle": "pickaxe/handle", "binding": "pickaxe/binding"}
+DERIVED = tempfile.mkdtemp(prefix="tinkering_sprites_")
+
+
+def palette(tcon, mat, kind):
+    """The colour a material gives each grey of a template for this kind of part, read off a tool every material has."""
+    donor = DONORS[kind]
+    base = os.path.join(tcon, *TOOL_TEXTURES)
+    paint = os.path.join(base, donor + "_tconstruct_" + mat + ".png")
+    template = os.path.join(base, donor + ".png")
+    if not (os.path.exists(paint) and os.path.exists(template)):
+        return None
+    t, p = Image.open(template).convert("RGBA"), Image.open(paint).convert("RGBA")
+    known = {}
+    for y in range(t.size[1]):
+        for x in range(t.size[0]):
+            tp = t.getpixel((x, y))
+            if tp[3] and tp[0] == tp[1] == tp[2]:
+                known[tp[0]] = p.getpixel((x, y))
+    if not known:
+        return None
+    out = {}
+    for grey in GREYS:
+        below = [g for g in known if g <= grey]
+        above = [g for g in known if g >= grey]
+        lo, hi = (max(below) if below else None), (min(above) if above else None)
+        if lo is None or hi is None or lo == hi:
+            out[grey] = known[lo if lo is not None else hi]
+        else:
+            f = (grey - lo) / (hi - lo)
+            out[grey] = tuple(round(known[lo][i] + (known[hi][i] - known[lo][i]) * f) for i in range(4))
+    return out
+
+
+def derived(tcon, rel, mat, kind):
+    """A sprite for a material Tinkers draws none of for this tool: the tool's grey template in that material's colours."""
+    template = os.path.join(tcon, *TOOL_TEXTURES, rel + ".png")
+    colours = palette(tcon, mat, kind) if kind in DONORS and os.path.exists(template) else None
+    if colours is None:
+        return None
+    im = Image.open(template).convert("RGBA")
+    for y in range(im.size[1]):
+        for x in range(im.size[0]):
+            r, g, b, a = im.getpixel((x, y))
+            if a and r == g == b:
+                im.putpixel((x, y), colours[min(GREYS, key=lambda grey: abs(grey - r))])
+    dest = os.path.join(DERIVED, rel.replace("/", "__") + "_" + mat + ".png")
+    im.save(dest)
+    return dest
+
+
+def sprite(tcon, rel, mat, kind=None):
+    """Tinkers' sprite for a material, or None when it has none. With a {@code kind} of part (head, handle, binding) a
+    missing one is drawn from the tool's grey template in that material's colours, where there is a template."""
+    path = os.path.join(tcon, *TOOL_TEXTURES, rel + "_tconstruct_" + mat + ".png")
+    if os.path.exists(path):
+        return path
+    return derived(tcon, rel, mat, kind) if kind else None
 
 
 def copy_png(src, dest_rel):
@@ -281,7 +390,7 @@ def tools(tcon):
                     if state and not sprite(tcon, src_rel + "_broken", "iron"):
                         continue
                     for mat in materials_for(PART_KIND[parts[index]]):
-                        src = sprite(tcon, src_rel + state, mat)
+                        src = sprite(tcon, src_rel + state, mat, PART_KIND[parts[index]])
                         if src is None:
                             missing.append(src_rel + state + "_" + mat)
                             continue
@@ -293,11 +402,11 @@ def tools(tcon):
             out = []
             for layer, rel, index in layers:
                 src_rel = rel if size == "small" else rel.replace("/", "/large/", 1)
-                mats = [m for m in materials_for(PART_KIND[parts[index]]) if sprite(tcon, src_rel, m)]
+                mats = [m for m in materials_for(PART_KIND[parts[index]]) if sprite(tcon, src_rel, m, PART_KIND[parts[index]])]
                 whole = by_material(index, [(m, ref(folder + "/" + layer + "_" + m)) for m in mats],
                                     ref(folder + "/" + layer + "_" + mats[0]))
                 if sprite(tcon, src_rel + "_broken", "iron"):
-                    bmats = [m for m in mats if sprite(tcon, src_rel + "_broken", m)]
+                    bmats = [m for m in mats if sprite(tcon, src_rel + "_broken", m, PART_KIND[parts[index]])]
                     broken = by_material(index, [(m, ref(folder + "/" + layer + "_broken_" + m)) for m in bmats],
                                          ref(folder + "/" + layer + "_broken_" + bmats[0]))
                     whole = {"type": "minecraft:condition", "property": "minecraft:custom_model_data", "index": 0,
@@ -534,7 +643,7 @@ def smeltery_data():
     for tag, values in (("pickaxe", [NS + ":" + x for x in blocks if x != "grout"]), ("shovel", [NS + ":grout"])):
         path = os.path.join(MC_DATA, "tags", "block", "mineable", tag + ".json")
         old = json.load(open(path)) if os.path.exists(path) else {"values": []}
-        write(path, {"values": [v for v in old["values"] if v not in values] + values})
+        write(path, {"values": old["values"] + [v for v in values if v not in old["values"]]})
 
 
 # (0.8.76) Stage 3: smiths sell parts and casts (vanilla trade data, so kingdoms' smiths and MCA's sell them too).
@@ -638,17 +747,20 @@ def data():
             "type": "minecraft:block", "random_sequence": NS + ":blocks/" + block,
             "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": NS + ":" + block}],
                        "condition": {"type": "minecraft:survives_explosion"}}]})
-    write(os.path.join(MC_DATA, "tags", "block", "mineable", "axe.json"),
-          {"values": [NS + ":part_builder", NS + ":tool_station"]})
+    axe_path = os.path.join(MC_DATA, "tags", "block", "mineable", "axe.json")
+    axe_old = json.load(open(axe_path)) if os.path.exists(axe_path) else {"values": []}
+    write(axe_path, {"values": axe_old["values"] + [v for v in (NS + ":part_builder", NS + ":tool_station") if v not in axe_old["values"]]})
     tags = {}
     for tool, _, _, _, _, preset, vanilla in TOOLS:
-        write(os.path.join(DATA, "weapon_attributes", "tinker_" + tool + ".json"), {"parent": "bettercombat:" + preset})
+        write(os.path.join(DATA, "weapon_attributes", "tinker_" + tool + ".json"),
+              {"parent": preset if ":" in preset else "bettercombat:" + preset})
         for tag in vanilla:
             tags.setdefault(tag, []).append(NS + ":tinker_" + tool)
     for tag, items in tags.items():
         path = os.path.join(MC_DATA, "tags", "item", tag + ".json")
         old = json.load(open(path)) if os.path.exists(path) else {"values": []}
-        values = [v for v in old["values"] if ":tinker_" not in v] + items
+        # a tag keeps its order: the tools already in it stay where they are, new ones go on the end
+        values = [v for v in old["values"] if ":tinker_" not in v or v in items] + [i for i in items if i not in old["values"]]
         write(path, {"values": values})
 
 
@@ -677,7 +789,11 @@ def lang():
     for mid, name, desc in MODIFIERS:
         out["modifier.jaymospowers." + mid] = name
         out["modifier.jaymospowers." + mid + ".desc"] = desc
-    write(os.path.join(ASSETS, "lang", "parts", "tinkering.json"), out)
+    # other scripts add their own lines to this file (gen_steel, gen_smithing, the JEI ones): keep them, and the order
+    path = os.path.join(ASSETS, "lang", "parts", "tinkering.json")
+    old = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    old.update(out)
+    write(path, old)
 
 
 def main():
@@ -695,6 +811,7 @@ def main():
     trades_data()
     vanilla_off()
     lang()
+    shutil.rmtree(DERIVED, ignore_errors=True)
 
 
 if __name__ == "__main__":

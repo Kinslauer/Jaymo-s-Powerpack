@@ -27,11 +27,14 @@ NS = "jaymospowers"
 
 # Tinkers' folders whose *_iron sprites are material layers (weapon heads come in iron, gold and copper only)
 TINKER_DIRS = ["part", "pickaxe", "hand_axe", "mattock", "sword", "sledge_hammer", "sledge_hammer/large", "cleaver",
-               "cleaver/large"]
+               "cleaver/large", "dagger", "kama", "scythe", "scythe/large", "broad_axe", "broad_axe/large", "excavator",
+               "excavator/large", "vein_hammer", "vein_hammer/large", "pickadze", "war_pick", "minotaur_axe", "battlesign"]
 # item definitions that pick a model by material
 TINKER_ITEMS = ["pick_head", "small_axe_head", "adze_head", "small_blade", "hammer_head", "broad_blade", "large_plate",
                 "tool_handle", "tough_handle", "tool_binding", "crossguard", "tinker_pickaxe", "tinker_hand_axe",
-                "tinker_mattock", "tinker_sword", "tinker_sledge_hammer", "tinker_cleaver"]
+                "tinker_mattock", "tinker_sword", "tinker_sledge_hammer", "tinker_cleaver", "broad_axe_head", "tough_binding",
+                "tinker_dagger", "tinker_kama", "tinker_scythe", "tinker_broad_axe", "tinker_excavator", "tinker_vein_hammer",
+                "tinker_pickadze", "tinker_war_pick", "tinker_minotaur_axe", "tinker_battlesign"]
 # steel's hue (a cold blue), how dark it is next to iron, and how much colour its shadows take
 HUE, DARKEN, SAT_LIGHT, SAT_DARK = 0.6, 0.78, 0.07, 0.2
 # coal in the crucible blend

@@ -1,0 +1,560 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 2,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_bone"
+            }
+          },
+          {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_seared_stone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_silver"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_steel"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/minotaur_axe/handle_wood"
+        }
+      },
+      {
+        "type": "minecraft:condition",
+        "property": "minecraft:custom_model_data",
+        "index": 0,
+        "on_true": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_wood"
+          }
+        },
+        "on_false": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/minotaur_axe/front_wood"
+          }
+        }
+      },
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 1,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_bone"
+            }
+          },
+          {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_seared_stone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_silver"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_steel"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/minotaur_axe/back_wood"
+        }
+      }
+    ]
+  }
+}

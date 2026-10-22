@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
@@ -50,6 +52,10 @@ public final class ToolStats {
 	static final float STRINGY_CHANCE = 0.15F, SOLAR_CHANCE = 0.25F;
 	/** Tempered (steel): chance that a point of wear doesn't land, however many steel parts (it doesn't stack). */
 	static final float TEMPERED_CHANCE = 0.25F;
+	/** The battlesign's guard: seconds to raise it, how wide it covers (degrees), and the share of a blow's damage it takes. */
+	static final float BLOCK_RAISE_SECONDS = 0.15F, BLOCK_ANGLE = 120.0F, BLOCK_SHARE = 0.5F;
+	/** Shears (kama, scythe): mining speed on cobwebs and on wool. */
+	static final float SHEARS_COBWEB_SPEED = 15.0F, SHEARS_WOOL_SPEED = 5.0F;
 	/** One material unit repairs this share of the tool, over the cost of its main part (a pick head: 25% a unit). */
 	static final float REPAIR_FACTOR = 0.5F;
 	/** Cultivated: repairs go this much further per level. */
@@ -112,6 +118,9 @@ public final class ToolStats {
 			handleAttackSpeed /= handleWeight;
 		}
 		type.traits.forEach((trait, level) -> traits.merge(trait, level, Integer::sum));
+		if (tier.ordinal() > type.maxTier.ordinal()) {
+			tier = type.maxTier;
+		}
 		int finalDurability = Math.max(1, Math.round(durability * (1 + handleDurability) * type.durabilityMultiplier));
 		float finalSpeed = Math.max(0.1F, speed * (1 + handleSpeed) * type.speedMultiplier);
 		float finalAttack = (type.attack + attack) * (1 + handleAttack) * type.attackMultiplier;
@@ -192,7 +201,15 @@ public final class ToolStats {
 		attributes.add(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, stats.attackSpeed() - 4.0F,
 			AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
 		stack.set(DataComponents.ATTRIBUTE_MODIFIERS, attributes.build());
-		stack.set(DataComponents.WEAPON, new Weapon(type.style == ToolType.Style.SWORD ? 1 : 2, broken ? 0.0F : type.disablesShields));
+		stack.set(DataComponents.WEAPON, new Weapon(type.style == ToolType.Style.TOOL ? 2 : 1, broken ? 0.0F : type.disablesShields));
+		// (0.15.x) the battlesign blocks like a shield when held up (right mouse): half of what comes at it from its front
+		if (stats.level(Trait.BLOCKING) > 0 && !broken) {
+			stack.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(BLOCK_RAISE_SECONDS, 1.0F, List.of(new BlocksAttacks.DamageReduction(
+				BLOCK_ANGLE, Optional.empty(), 0.0F, BLOCK_SHARE)), BlocksAttacks.ItemDamageFunction.DEFAULT, Optional.empty(), Optional.empty(),
+				Optional.empty()));
+		} else {
+			stack.remove(DataComponents.BLOCKS_ATTACKS);
+		}
 		stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(broken),
 			materials.stream().map(m -> m.id).toList(), List.of()));
 		stack.set(DataComponents.ITEM_NAME, Component.translatable("jaymospowers.tinkering.named", materials.getFirst().displayName(),
@@ -200,16 +217,29 @@ public final class ToolStats {
 	}
 
 	private static Tool tool(ToolType type, Stats stats, TinkerMaterial.Tier tier) {
+		if (type.style == ToolType.Style.WEAPON) {
+			return new Tool(List.of(), 1.0F, 1, false);
+		}
 		if (type.style == ToolType.Style.SWORD) {
-			return new Tool(List.of(
+			List<Tool.Rule> rules = new ArrayList<>(List.of(
 				Tool.Rule.minesAndDrops(HolderSet.direct(new Holder[] {Blocks.COBWEB.builtInRegistryHolder()}), 15.0F),
 				Tool.Rule.overrideSpeed(tag(BlockTags.SWORD_INSTANTLY_MINES), Float.MAX_VALUE),
-				Tool.Rule.overrideSpeed(tag(BlockTags.SWORD_EFFICIENT), 1.5F)), 1.0F, 2, false);
+				Tool.Rule.overrideSpeed(tag(BlockTags.SWORD_EFFICIENT), 1.5F)));
+			// (0.15.x) a dagger also cuts what a hoe does (leaves, hay, moss)
+			for (TagKey<Block> mines : type.mines) {
+				rules.add(Tool.Rule.minesAndDrops(tag(mines), stats.miningSpeed()));
+			}
+			return new Tool(rules, 1.0F, 2, false);
 		}
 		List<Tool.Rule> rules = new ArrayList<>();
 		rules.add(Tool.Rule.deniesDrops(tag(tier.incorrect)));
 		for (TagKey<Block> mines : type.mines) {
 			rules.add(Tool.Rule.minesAndDrops(tag(mines), stats.miningSpeed()));
+		}
+		// (0.15.x) shears cut cobwebs and wool fast
+		if (stats.level(Trait.SHEARS) > 0) {
+			rules.add(Tool.Rule.minesAndDrops(HolderSet.direct(new Holder[] {Blocks.COBWEB.builtInRegistryHolder()}), SHEARS_COBWEB_SPEED));
+			rules.add(Tool.Rule.minesAndDrops(tag(BlockTags.WOOL), SHEARS_WOOL_SPEED));
 		}
 		return new Tool(rules, 1.0F, 1, true);
 	}
