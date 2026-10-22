@@ -2597,10 +2597,36 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fall and pool) plus flecks; a heavy blunt blow sprays and pools as on the living; anything else (a fist, an arrow)
   throws only a few flecks. Never a skeleton's, an iron one, one on fire or a bloodless creature's. Tuning in
   `BladeBlood.CORPSE_*`. Compile-checked; not playtested.
-- **0.15.112, crushed spiders (Kitchen 0.5.18):** Andy: "large blunt impacts or slams on spiders should crush them,
+- **0.15.114 (finishers: point-blank shot, slow neck snap, crippled targets, grabbable heads):** Andy: "the pointblank
+  finisher should use a bullet and actually play the blast". Guns (our TaCZ flintlocks, TaCZ's own, the Void Armory
+  flintlock, another mod's by name) get their own finisher, Point Blank (`Finishers.Kind.GUN`): it needs a round loaded,
+  spends it (`TaczGuns.spendRound`), and fires with the gun's own TaCZ shot sound (`TaczGuns.gunSound`), muzzle flash,
+  flame and smoke. The bow's is renamed Loosed Close and spends an arrow; the crossbow spends its bolt (or an arrow).
+  Andy: "neck break should take 5s to finish": the neck snap is a 5 s hold, strained twice, snapped at tick 100.
+  Andy: "crippled enemies should be executable too": `Finishers.helpless` takes Darktide's crawl, both legs broken or a
+  leg cut off as well as downed; a crippled one is held still while it plays, and `Downed.execute` kills it the same
+  way. Andy: "heads from decaptiations should be grabable like they are otherwise": a click (empty hand or sneak) on a
+  body or corpse that a severed part lies in takes the part (`Carry.partInView`). Compile-checked; not playtested.
+- **0.15.115, Complementary Unbound is the pack's shader pack:** Andy: "can we make these the default shaders?"
+  Complementary Unbound r5.9.3 (by EminGT, Complementary Development; CurseForge 385587, file 8884656, made for 26.2
+  and 26.3 on Iris) joins the CurseForge import by id (build.gradle `packShaderPacks`, into shaderpacks/), and Build
+  Modpack fetches it into your own profile from CurseForge's CDN like the resource packs. Once per install,
+  `client/ShaderPreset` (a preLaunch entrypoint, before Iris reads its config) sets `shaderPack` and `enableShaders`
+  in `config/iris.properties`; after that the player's own choice stands (marker `jaymospowers-shader-preset-v1`).
+  Its licence (Complementary License Agreement 1.2) lets modpacks include it only unchanged, added through
+  CurseForge's or Modrinth's own systems, never uploaded directly, and, because it's on by default, credited on the
+  pack's description page. So its settings stay at Complementary's defaults (no settings file: "simple variable
+  changes" count as modifying it), and the CurseForge page needs a credit line. Dark nights: Complementary takes sky
+  light from `gl_MultiTexCoord1`, which Kingdoms' Iris hook (0.7.164) dims, so ambient light follows the moon; direct
+  moonlight inside the shadow distance comes from the shadow map, so faces turned to the moon may keep a faint glow on
+  a new moon. Compile-checked; not seen in game.
+- **0.15.116 (finishers: an unloaded gun uses the bayonet):** Andy: "with no ammunition it should just run though with
+  the blade". A gun with no round in it plays the sword's Run Through instead of refusing (`Finishers.move`). Bows and
+  crossbows still need an arrow. Compile-checked; not playtested.
+- **0.15.117, crushed spiders (Kitchen 0.5.18):** Andy: "large blunt impacts or slams on spiders should crush them,
   leaving no corpse to grab, but only a random amount of legs that disappear after a time". Kitchen does the crushing;
   Powers marks the deaths it should crush with Kitchen's `jaymoskitchen.crushed` tag (`core/Crushing.mark`, only on a
   creature the blow just killed): a heavy blunt blow's kill (`BladeBlood.heavyBlunt`: a hammer or club for 3 hearts or
-  more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt or
-  staff finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
+  more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt, staff
+  or greatsword finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
   slams and dive, its thrash's splash and the Behemoth's tendril slam. Compile-checked; not playtested.

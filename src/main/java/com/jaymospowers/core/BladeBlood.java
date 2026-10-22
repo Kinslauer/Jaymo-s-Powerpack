@@ -100,7 +100,7 @@ public final class BladeBlood {
 			return;
 		}
 		if (heavyBlunt(source, damage)) {
-			// (0.15.112) a killing one crushes a spider (Kitchen)
+			// (0.15.117) a killing one crushes a spider (Kitchen)
 			Crushing.mark(target);
 			blunt(target, damage);
 			return;

@@ -287,6 +287,14 @@ def packResourcePacks = [
 	// through Entity Model Features and Entity Texture Features (both already in the pack). Made for 26.3.
 	[cf: [1086847, 8944107], file: "Canoe boats 26.3.zip"],
 ]
+// shader packs, client-only: the CurseForge import downloads them into shaderpacks/ by id, and Jaymo's Powers chooses
+// and switches on Complementary Unbound in Iris once per install (client/ShaderPreset).
+def packShaderPacks = [
+	// Complementary Unbound (by EminGT, Complementary Development; Complementary License Agreement): modpacks may include
+	// it unchanged, added through CurseForge's own system, and must credit it on the pack's description page since it's
+	// on by default. Never copied into the pack or changed, settings included. r5.9.3 is made for 26.2 and 26.3 (Iris).
+	[cf: [385587, 8884656], file: "ComplementaryUnbound_r5.9.3.zip"],
+]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack left in 0.8.14, and Forge
@@ -383,7 +391,7 @@ tasks.register("curseforgeManifest") {
 			name           : "Jaymo's Powers",
 			version        : project.version,
 			author         : "Manigraphic78",
-			files          : (packMods + localPackMods + packResourcePacks).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
+			files          : (packMods + localPackMods + packResourcePacks + packShaderPacks).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
 			overrides      : "overrides",
 		]
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest))
@@ -498,17 +506,20 @@ tasks.register("profileMods") {
 				logger.lifecycle("Added ${jar.name} to your CurseForge profile")
 			}
 		}
-		// resource packs that joined the pack join the profile too (from CurseForge's CDN, as the import would)
+		// resource packs and shader packs that joined the pack join the profile too (from CurseForge's CDN, as the
+		// import would)
 		def profilePacks = new File(profileMods.parentFile, "resourcepacks")
-		packResourcePacks.each { p ->
-			def target = new File(profilePacks, p.file)
+		def profileShaders = new File(profileMods.parentFile, "shaderpacks")
+		(packResourcePacks.collect { [p: it, dir: profilePacks] } + packShaderPacks.collect { [p: it, dir: profileShaders] }).each { entry ->
+			def p = entry.p
+			def target = new File(entry.dir, p.file)
 			if (!target.exists()) {
 				def id = p.cf[1] as String
 				def url = "https://mediafilez.forgecdn.net/files/${id.substring(0, 4)}/${id.substring(4).replaceFirst(/^0+(?=.)/, "")}/${URLEncoder.encode(p.file, "UTF-8").replace("+", "%20")}"
 				try {
-					profilePacks.mkdirs()
+					entry.dir.mkdirs()
 					URI.create(url).toURL().withInputStream { java.nio.file.Files.copy(it, target.toPath()) }
-					logger.lifecycle("Added ${p.file} to your CurseForge profile's resource packs")
+					logger.lifecycle("Added ${p.file} to your CurseForge profile's ${entry.dir.name}")
 				} catch (IOException e) {
 					target.delete()
 					logger.warn("Couldn't download ${p.file} (${e.message}); get it from CurseForge project ${p.cf[0]}")
