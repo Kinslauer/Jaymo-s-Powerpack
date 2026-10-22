@@ -95,6 +95,9 @@ public final class Senses {
 	static final double LOOK_RADIUS = 5.0, SEARCH_SPEED = 1.0;
 	/** How near (blocks) is arrived. */
 	static final double ARRIVED = 2.0;
+	/** (0.7.153) Lures ({@link #lure}): how loud losing a target counts as, and the ticks a far lure allows per block of the walk. */
+	static final double LOST_LURE = 8.0;
+	static final int LURE_TICKS_PER_BLOCK = 12;
 
 	/** A sneak attack multiplies the blow by this; Sneak Attack rank 1 and rank 2 by these instead. */
 	static final float SNEAK_ATTACK_MULT = 2.0F;
@@ -134,6 +137,8 @@ public final class Senses {
 		boolean searching, started;
 		@Nullable Vec3 spot;
 		int walkLeft, lookLeft;
+		/** (0.7.153) How loud what it is searching for was where it stood ({@link Awareness}); a fainter lure doesn't turn it. */
+		double lure;
 	}
 
 	/** Every hostile or neutral mob's, made when it loads together with its goals. */
@@ -303,12 +308,14 @@ public final class Senses {
 			LivingEntity target = this.mob.getTarget();
 			if (target instanceof ServerPlayer player && !touched(player)) {
 				this.track.searching = false;
+				this.track.lure = 0.0;
 				if (this.track.who == null || !this.track.who.equals(player.getUUID())) {
 					// (a new target: where it is now counts as seen, whether or not the mob has a clear line to it yet)
 					this.track.who = player.getUUID();
 					this.track.seen = player.position();
 					this.track.blind = 0;
 				}
+				Awareness.called(this.mob, player);
 				if (this.mob.tickCount % 2 != 0) {
 					return;
 				}
@@ -348,6 +355,7 @@ public final class Senses {
 			this.track.spot = this.track.seen;
 			this.track.walkLeft = WALK_TICKS;
 			this.track.lookLeft = -1;
+			this.track.lure = LOST_LURE;
 		}
 
 		/** The walk and the looking round count down here, so that a goal that outranks the search can't make it last for ever. */
@@ -360,6 +368,7 @@ public final class Senses {
 			} else if (--this.track.lookLeft <= 0) {
 				this.track.searching = false;
 				this.track.spot = null;
+				this.track.lure = 0.0;
 			}
 		}
 	}
@@ -419,6 +428,29 @@ public final class Senses {
 					this.mob.getZ() + Math.sin(angle) * LOOK_RADIUS);
 			}
 		}
+	}
+
+	/**
+	 * (0.7.153) {@code mob} heard, saw or smelled something at {@code spot} ({@link Awareness}) as loud as {@code loudness}, and
+	 * goes to look, the same search as for a player it lost. Only when it is after no one, and only if it isn't already
+	 * searching for something louder: mobs always go for the louder noise. {@code who}, if anyone, is the player it gave
+	 * away (their gauge shows it searching, and it is unaware of them). False if it didn't turn.
+	 */
+	static boolean lure(Mob mob, Vec3 spot, @Nullable UUID who, double loudness) {
+		Track t = TRACKS.get(mob);
+		if (t == null || !mob.isAlive() || mob.getTarget() != null || t.searching && t.lure > loudness) {
+			return false;
+		}
+		t.searching = true;
+		t.started = false;
+		t.who = who;
+		t.seen = spot;
+		t.spot = spot;
+		t.lure = loudness;
+		t.walkLeft = Math.max(WALK_TICKS, (int) (mob.position().distanceTo(spot) * LURE_TICKS_PER_BLOCK));
+		t.lookLeft = -1;
+		mob.getNavigation().moveTo(spot.x, spot.y, spot.z, SEARCH_SPEED);
+		return true;
 	}
 
 	/** {@code mob} is hunting for {@code player}, who slipped away. */

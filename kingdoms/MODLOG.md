@@ -4149,3 +4149,19 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
   any tree, or building. dont get in the way": natural trees it walks into topple away from it, and everything else
   breakable in its way (buildings included) is smashed, a quarter of it dropped. Only its own monolith is spared.
   Needs mobGriefing on.
+
+## 0.7.153: zombie awareness (pack 0.15.70)
+- Andy: "player zombies should work like this [Zombie Awareness], and maybe work it in to help with our stealth".
+  Zombie Awareness is ARR, so `Awareness` is our own code for its ideas. Zombies (tag `jaymoskingdoms:aware`: zombie,
+  husk, drowned, zombie villager; add skeletons, creepers or witches there to make them aware too) go and look, the
+  same search `Senses` uses for a lost target, when they:
+  - hear noise (`ServerLevelGameEventMixin`): mining, placing, explosions (48 blocks), bows, eating, doors, levers,
+    buttons, plates, pistons, chests, note blocks, jukeboxes, fuses, lightning, a sprinting player's footsteps. They go
+    for the loudest they hear, so pistons and TNT draw them off. Sneaking halves your noise; Quiet Step cuts it to a
+    third (rank 2: a fifth).
+  - see a light in the dark: a held torch (anything that gives light), being on fire, or bright block light at your
+    eyes, from 40 blocks with a line of sight. Shadowed shortens it 20% a rank.
+  - smell blood: hits spill blood (red on the ground) and below 30% health you drip; zombies within 24 blocks follow
+    the freshest trail. It lasts a minute; Slip the Net halves that.
+  - hear the horde: a zombie that goes after you groans, and idle zombies within 16 blocks come.
+  Lured zombies show on the awareness gauge as searching, and count as unaware for sneak attacks.
