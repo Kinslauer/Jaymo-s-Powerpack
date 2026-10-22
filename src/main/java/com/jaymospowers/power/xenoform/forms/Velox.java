@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.power.chrono.ChronoSpeed;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
@@ -31,8 +32,10 @@ import net.minecraft.world.phys.Vec3;
  * Velox, the raptor speedster (scanned from a horse): a little smaller than you, 20 health, 80% faster, lands softly,
  * and runs across still water while sprinting ({@link #runsOnWater}).
  * <ul>
- * <li>R (hold), Speed Burst: while held, up to {@link #BURST_MAX_TICKS}, you are far faster, step up whole blocks and
- * run straight up any wall you meet (up to {@link #WALL_RUN_TICKS}).</li>
+ * <li>R, Velocity (0.15.97, after Chrono's Overclock; it replaced the held Speed Burst): a toggle. While it's on you are
+ * far faster ({@link #VELOCITY_SPEED}, and Overclock's sprint on top), stride up whole blocks, run straight up walls
+ * holding forward, across water and lava sprinting, take no fall damage, and leave Overclock's streak, light blue
+ * ({@link ChronoSpeed#SKY}). Shift for walking speed. R again switches it off, then {@link #VELOCITY_COOLDOWN}.</li>
  * <li>G, Rapid Punches: {@link #PUNCH_HITS} blows on whoever you aim at, one every {@link #PUNCH_SPACING} ticks.</li>
  * <li>V, Cyclone: sweeps everything within {@link #CYCLONE_RADIUS} round you in a tight circle and lifts it.</li>
  * <li>B, Chain Strike: flicker between up to {@link #CHAIN_TARGETS} foes within {@link #CHAIN_RANGE}, striking each.</li>
@@ -42,11 +45,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Velox extends XenoForm {
 	// ---- tuning ----
-	/** Speed Burst: the longest it lasts held, its cooldown, the speed bonus (a share of your speed) and the extra step height. */
-	public static final int BURST_MAX_TICKS = 120, BURST_COOLDOWN = 60;
-	public static final double BURST_SPEED = 1.2, BURST_STEP = 1.0;
-	public static final int WALL_RUN_TICKS = 40;
-	public static final double WALL_RUN_CLIMB = 0.32;
+	/** Velocity: the speed bonus while it's on (a share of your speed, like Overclock's Speed V), and R's wait once it's off. */
+	public static final double VELOCITY_SPEED = 1.0;
+	public static final int VELOCITY_COOLDOWN = 40;
 	/** Rapid Punches: blows, reach, ticks between blows, damage each, and the cooldown. */
 	public static final int PUNCH_HITS = 6, PUNCH_SPACING = 2, PUNCH_COOLDOWN = 100;
 	public static final double PUNCH_REACH = 3.5;
@@ -64,8 +65,7 @@ public final class Velox extends XenoForm {
 	public static final int STANDSTILL_SLOWNESS = 6;
 
 	private static final Identifier SAFE_FALL_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_fall");
-	private static final Identifier BURST_SPEED_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_burst");
-	private static final Identifier BURST_STEP_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_burst_step");
+	private static final Identifier VELOCITY_ID = com.jaymospowers.JaymosPowers.id("xenoform_blur_velocity");
 
 	public Velox() {
 		super("blur", 0.9F, 20.0F, 4.0, 0.8, 0.0, 0.0, Items.SUGAR, 0x4C8DFF);
@@ -93,35 +93,25 @@ public final class Velox extends XenoForm {
 		if (fall != null) {
 			fall.removeModifier(SAFE_FALL_ID);
 		}
-		burstModifiers(player, false);
+		velocityOff(player, live, false);
 		releaseAll(live, player.level().getServer());
-		live.bursting = false;
 		live.standstill = 0;
 	}
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
-		if (key == PowerKey.ABILITY_1) {
-			// the speed burst: held
-			if (down) {
-				if (!live.bursting && ready(player, live, R)) {
-					live.bursting = true;
-					live.burstTicks = 0;
-					live.wallRun = 0;
-					burstModifiers(player, true);
-					burst(player.level(), ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 12, 0.4, 0.05);
-					sound(player, SoundEvents.WIND_CHARGE_BURST.value(), 1.0F, 1.6F);
-					sound(player, SoundEvents.HORSE_GALLOP, 1.0F, 1.5F);
-				}
-			} else if (live.bursting) {
-				endBurst(player, live);
-			}
-			return;
-		}
 		if (!down) {
 			return;
 		}
 		switch (key) {
+			case ABILITY_1 -> {
+				// Velocity: a toggle
+				if (live.velocity) {
+					velocityOff(player, live, true);
+				} else if (ready(player, live, R)) {
+					velocityOn(player, live);
+				}
+			}
 			case ABILITY_2 -> {
 				if (ready(player, live, G) && live.punches <= 0) {
 					LivingEntity target = aimed(player, PUNCH_REACH, e -> true);
@@ -152,35 +142,10 @@ public final class Velox extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		// the speed burst: until you let go, or it runs out
-		if (live.bursting) {
-			live.burstTicks++;
-			if (live.burstTicks >= BURST_MAX_TICKS || !com.jaymospowers.core.PowerInput.isDown(player, PowerKey.ABILITY_1)) {
-				endBurst(player, live);
-			} else {
-				Vec3 motion = player.getDeltaMovement();
-				if (motion.horizontalDistanceSqr() > 0.04) {
-					// a streak behind you
-					Vec3 back = motion.horizontal().normalize().scale(-0.6);
-					burst(level, ParticleTypes.CLOUD, player.position().add(back).add(0.0, 0.4, 0.0), 2, 0.2, 0.01);
-					if (live.burstTicks % 3 == 0) {
-						burst(level, ParticleTypes.CRIT, player.position().add(back).add(0.0, 0.8, 0.0), 1, 0.2, 0.05);
-					}
-				}
-				// into a wall: straight up it
-				if (player.horizontalCollision && live.wallRun < WALL_RUN_TICKS && !player.isInWater()) {
-					live.wallRun++;
-					player.setDeltaMovement(motion.x, WALL_RUN_CLIMB, motion.z);
-					player.syncVelocity = true;
-					player.resetFallDistance();
-					if (live.wallRun % 4 == 0) {
-						burst(level, ParticleTypes.CLOUD, player.position(), 2, 0.2, 0.01);
-						sound(player, SoundEvents.HORSE_GALLOP, 0.5F, 1.8F);
-					}
-				} else if (player.onGround()) {
-					live.wallRun = 0;
-				}
-			}
+		// Velocity: Overclock's run (sprint, step, wall run, water run, streak), light blue, until R switches it off
+		if (live.velocity) {
+			velocitySpeed(player);
+			ChronoSpeed.tick(player, level, true, ChronoSpeed.SKY);
 		}
 		// the rapid punches, one at a time
 		if (live.punches > 0) {
@@ -209,45 +174,48 @@ public final class Velox extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.bursting && live.wallRun > 0 && live.wallRun <= WALL_RUN_TICKS && player.horizontalCollision || !live.chain.isEmpty();
+		return live.velocity && player.getAttached(ChronoSpeed.WALL_RUN) != null || !live.chain.isEmpty();
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
-		return live.bursting || !live.chain.isEmpty() || live.chainTick > 0;
+		return live.velocity || !live.chain.isEmpty() || live.chainTick > 0;
 	}
 
-	// ---- Speed Burst ----
+	// ---- Velocity ----
 
-	/** The burst's speed and step height, on or off. */
-	private static void burstModifiers(ServerPlayer player, boolean on) {
+	private static void velocityOn(ServerPlayer player, XenoformPower.Live live) {
+		live.velocity = true;
+		velocitySpeed(player);
+		ChronoSpeed.tick(player, player.level(), true, ChronoSpeed.SKY);
+		burst(player.level(), ChronoSpeed.SKY_DUST, player.position().add(0.0, 1.0, 0.0), 20, 0.4, 0.05);
+		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 1.0, 0.0), 12, 0.4, 0.2);
+		sound(player, SoundEvents.BEACON_POWER_SELECT, 0.8F, 2.0F);
+		sound(player, SoundEvents.HORSE_GALLOP, 1.0F, 1.5F);
+	}
+
+	/** Velocity's speed bonus, put on if it isn't (transient: a relog drops it, so the tick puts it back). */
+	private static void velocitySpeed(ServerPlayer player) {
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-		AttributeInstance step = player.getAttribute(Attributes.STEP_HEIGHT);
-		if (on) {
-			if (speed != null) {
-				speed.addOrUpdateTransientModifier(new AttributeModifier(BURST_SPEED_ID, BURST_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-			}
-			if (step != null) {
-				step.addOrUpdateTransientModifier(new AttributeModifier(BURST_STEP_ID, BURST_STEP, AttributeModifier.Operation.ADD_VALUE));
-			}
-		} else {
-			if (speed != null) {
-				speed.removeModifier(BURST_SPEED_ID);
-			}
-			if (step != null) {
-				step.removeModifier(BURST_STEP_ID);
-			}
+		if (speed != null && !speed.hasModifier(VELOCITY_ID)) {
+			speed.addTransientModifier(new AttributeModifier(VELOCITY_ID, VELOCITY_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 	}
 
-	/** Let go (or time's up): back to normal speed, and the cooldown starts. */
-	private static void endBurst(ServerPlayer player, XenoformPower.Live live) {
-		live.bursting = false;
-		live.burstTicks = 0;
-		live.wallRun = 0;
-		burstModifiers(player, false);
-		cooldown(player, live, R, BURST_COOLDOWN);
-		burst(player.level(), ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 8, 0.3, 0.03);
+	/** Velocity off: back to Velox's own speed, and (switched off with R) the cooldown starts. */
+	private static void velocityOff(ServerPlayer player, XenoformPower.Live live, boolean byKey) {
+		boolean was = live.velocity;
+		live.velocity = false;
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.removeModifier(VELOCITY_ID);
+		}
+		ChronoSpeed.clear(player);
+		if (was && byKey) {
+			cooldown(player, live, R, VELOCITY_COOLDOWN);
+			burst(player.level(), ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 8, 0.3, 0.03);
+			sound(player, SoundEvents.BEACON_DEACTIVATE, 0.6F, 1.7F);
+		}
 	}
 
 	// ---- Rapid Punches ----

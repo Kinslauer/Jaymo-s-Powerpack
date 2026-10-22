@@ -54,6 +54,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
+		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();

@@ -1,0 +1,15 @@
+{
+	"message.jaymospowers.finisher.holding": "Finishing %s... [%s] keep holding",
+	"message.jaymospowers.finisher.stopped": "%s slipped from your finisher.",
+	"message.jaymospowers.finisher.sword": "Run through: %s",
+	"message.jaymospowers.finisher.greatsword": "Headsman's stroke: %s",
+	"message.jaymospowers.finisher.dagger": "Mercy stroke: %s",
+	"message.jaymospowers.finisher.axe": "Executioner: %s",
+	"message.jaymospowers.finisher.blunt": "Skull crusher: %s",
+	"message.jaymospowers.finisher.spear": "Pinned: %s",
+	"message.jaymospowers.finisher.polearm": "Reaping: %s",
+	"message.jaymospowers.finisher.staff": "Staff strike: %s",
+	"message.jaymospowers.finisher.bow": "Point blank: %s",
+	"message.jaymospowers.finisher.crossbow": "Bolt to the heart: %s",
+	"message.jaymospowers.finisher.fist": "Neck snap: %s"
+}
