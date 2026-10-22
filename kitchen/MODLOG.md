@@ -920,3 +920,8 @@ Batch 3 of the BWM port (MIT, our own code).
   (cooldown or not) and doesn't get up on time, settling or water, only when the hold lets go (or the server does).
   Jaymo's Powers holds a downed player in water, so they float limp instead of swimming (Andy: "you should just
   ragdoll, and float").
+
+### 0.5.15: slow meals while wounded (pack 0.15.91)
+- A player tagged `jaymospowers_unpatched` (Jaymo's Powers: a wound past bruising left undressed, a cut, festering or
+  an unset break) heals from meals at `Stomach.UNPATCHED_REGEN` (a quarter) of the speed. Andy: "regeneration should
+  only kick in at full speed when you are fully patched up". Without Powers, nothing changes.

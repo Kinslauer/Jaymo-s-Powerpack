@@ -93,6 +93,14 @@ keeps working. The parts are a `Wounds` attachment: one float per part, synced t
 
 ## Healing
 
+- **Wounds first (0.15.91).** Andy (2026-10-22): "everything should go through the wounding system first ... if a
+  certain threshold (30%) damage to your limb goes through, then it should affect your hearts". Every hit lands on the
+  parts before vanilla touches the health (`WoundsHurtMixin`, `WoundsPlayerHurtMixin`). The first 30% of a part's own
+  pool (`Wounds.HEART_SPILL_FROM`) is bruising and costs no hearts; past that the part's hearts drain faster, so a part at
+  zero has still cost its whole share (the hearts are worked out from the parts, `Wounds.hearts`). Food and meals bring
+  deep wounds back up to the bruise line; bruises mend on their own (`BRUISE_MEND_TICKS`). Until you're patched up
+  (every part hurt past bruising dressed or splinted, nothing bleeding, festering or broken unset: `Wounds.patchedUp`),
+  all natural healing runs at a quarter speed (`UNPATCHED_REGEN`; Kitchen's meals read the `jaymospowers_unpatched` tag).
 - **Natural:** vanilla regeneration (food, Regeneration) goes to the most hurt part first, never above a broken part's
   `BROKEN_CAP` (0.25) until it's treated.
 - **Sleeping** heals every part a share.
