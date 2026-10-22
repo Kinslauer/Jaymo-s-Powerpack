@@ -2638,3 +2638,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Flintlock item now (`ArsenalFlintlock`); the old TaCZ creative-tab icons (`TaczTabIconMixin`), the future's old
   flintlock gunners (`FutureGuns.FLINTLOCKS`) and `tools/gen_tacz_guns.py` are gone. TaCZ flintlocks already in a
   world don't work any more. Parse-checked only (no game jars in this session); not playtested.
+- **0.15.121, smashing dead spiders (Kitchen 0.5.20):** Andy: "you should still be able to smash them when they are
+  corpses". `KitchenCompat.registerCorpseBlood` adds a second corpse hit hook: a heavy blunt blow
+  (`BladeBlood.heavyBlunt`) on a corpse tags it `jaymoskitchen.crushed`, and Kitchen bursts a spider's body into loose
+  legs. Compile-checked; not playtested.

@@ -307,7 +307,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.lift[0] = 0.0F;
 		// (0.5.16) a dead animal settles onto its side, not propped belly down on its legs
 		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z,
-			track.side(partialTicks), track.sideUp());
+			track.side(partialTicks), track.sideUp(), false);
 		state.pose = pose;
 		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
@@ -327,6 +327,12 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			corpse.placeBody(look, 0.0F);
 		}
 		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
+		if (renderer instanceof LivingEntityRenderer<?, ?, ?> living && living.getModel().root().hasChild("right_middle_front_leg")) {
+			// (0.5.19) a dead spider rolls onto its back, legs curled up
+			pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z, track.side(partialTicks),
+				track.sideUp(), true);
+			state.pose = pose;
+		}
 		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
 		if (bodyState instanceof LivingEntityRenderState living) {
 			// standing, facing front, nothing flinching: the physics does all the posing

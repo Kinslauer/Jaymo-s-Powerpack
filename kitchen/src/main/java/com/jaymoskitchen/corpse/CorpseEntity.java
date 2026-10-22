@@ -1470,6 +1470,18 @@ public class CorpseEntity extends Entity {
 		return type != null && type.builtInRegistryHolder().is(Corpses.FISH_CORPSES);
 	}
 
+	/** (0.5.20) How big the mob was against its kind (a scaled one's scale), 1 if it can't be told. */
+	float bodyScale() {
+		return rebuild() instanceof LivingEntity mob ? mob.getScale() : 1.0F;
+	}
+
+	/** (0.5.20) Its loot, taken out of it (for a body that's gone some other way: see SpiderCrush#crushCorpse). */
+	List<ItemStack> takeLoot() {
+		List<ItemStack> taken = new ArrayList<>(loot);
+		loot.clear();
+		return taken;
+	}
+
 	private void dropLoot(ServerLevel level) {
 		for (ItemStack stack : loot) {
 			spawnAtLocation(level, stack.copy(), 0.3F);
@@ -2006,7 +2018,8 @@ public class CorpseEntity extends Entity {
 			smack(source, damage);
 			// (0.5.17) and bleeds (Jaymo's Powers' blood), see addOnHit
 			hit(source, damage);
-			return false;
+			// (0.5.20) a dead spider is still smashed to legs by a crushing blow
+			return SpiderCrush.crushCorpse(this, level, source);
 		}
 		if (isCreeper()) {
 			// the blast sets off whatever made it a creeper
