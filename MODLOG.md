@@ -2432,3 +2432,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Anyone who kept their username in MCA's creator now gets a character name (details in the Kingdoms MODLOG). Duplex's
   doubles (and any Xeno double) follow the name their owner shows each half second, so a name given or a costume put on
   after the split shows on them too.
+- **0.15.83, Chrono's Rewind gets you up; no Overclock fall damage:** Andy: "chrono should be able to use R when
+  downed, this will revert him as it should". R stays live while you're down, but not after you've passed out (`Power.usableDowned`, let
+  through by `DownedKeysMixin` and `PowerEvents`). While you're down, Chrono's history holds still. A Rewind then takes
+  you back to the 3 s before the fall, on your feet (out of any carrier's arms), with the health you had then (at least
+  30%), and not battered (`Downed.undo`). Andy: "chrono should not take fall damage when using overclock": no fall
+  damage while Overclock runs.

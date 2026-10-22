@@ -5,6 +5,8 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.Wounds;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -26,14 +29,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -42,7 +48,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Chronokinesis: golden clockwork time magic. Everything is decided here, on the server.
  * <ul>
- * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
+ * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out). (0.15.83) It works
+ * downed too: back to the 3 s before you went down, on your feet with the health you had then.</li>
  * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s. Since 0.10.96 it also resets every
  * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
@@ -72,6 +79,8 @@ public final class ChronoPower implements Power {
 	/** Rewind needs at least this much history (0.5 s), so it can't be spammed right after a teleport or respawn. */
 	static final int REWIND_MIN_HISTORY = 10;
 	static final int REWIND_COOLDOWN = 300;
+	/** (0.15.83) A Rewind out of the downed state leaves you with at least this share of your most health. */
+	static final float REWIND_UP_HEALTH = Downed.RECOVER_HEALTH;
 	static final int STASIS_COOLDOWN = 600;
 	static final int OVERCLOCK_TICKS = 120;
 	static final int OVERCLOCK_COOLDOWN = 500;
@@ -140,6 +149,9 @@ public final class ChronoPower implements Power {
 				ChronoMemory.count(ChronoMemory.of(serverPlayer).mined, BuiltInRegistries.BLOCK.getKey(state.getBlock()));
 			}
 		});
+		// (0.15.83) Andy: "chrono should not take fall damage when using overclock"
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && overclocked(player)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
 			if (state != null) {
@@ -196,6 +208,16 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		state.clearHistory();
 		state.synced = false;
+	}
+
+	/**
+	 * (0.15.83) Andy: "chrono should be able to use R when downed, this will revert him as it should". Rewind stays live
+	 * while down (not passed out), once it's unlocked.
+	 */
+	@Override
+	public boolean usableDowned(Player player, PowerKey key) {
+		return key == PowerKey.ABILITY_1 && !Downed.passedOut(player) && !com.jaymospowers.core.Mastery.starterOnly(player)
+			&& com.jaymospowers.core.Mastery.isUnlocked(player, key);
 	}
 
 	/** (0.15.31) Downed: what was running ends. */
@@ -303,7 +325,16 @@ public final class ChronoPower implements Power {
 			return;
 		}
 
-		state.record(player.position(), player.getYRot(), player.getXRot(), player.getHealth(), level.dimension());
+		// (0.15.83) down, time holds on to the moments before the fall (a Rewind takes you back to them, and up); up again
+		// by any other means, those moments are stale
+		boolean downed = Downed.isDowned(player);
+		if (!downed) {
+			if (state.downed) {
+				state.clearHistory();
+			}
+			state.record(player.position(), player.getYRot(), player.getXRot(), player.getHealth(), level.dimension());
+		}
+		state.downed = downed;
 		remember(player, memory, level);
 		sleep(player, state, memory, level);
 
@@ -556,11 +587,13 @@ public final class ChronoPower implements Power {
 		if (state.spansOtherDimension(level.dimension())) {
 			return fail(player, "message.jaymospowers.chrono_rewind_tangled");
 		}
-		// the oldest recorded spot you'd fit into again (blocks may have been placed there since)
+		// the oldest recorded spot you'd fit into again (blocks may have been placed there since); downed, standing up
+		boolean downed = Downed.isDowned(player);
 		int chosen = -1;
 		Vec3 here = player.position();
 		for (int age = state.size() - 1; age >= REWIND_MIN_HISTORY - 1; age--) {
-			AABB box = player.getBoundingBox().move(state.pos(age).subtract(here));
+			AABB box = downed ? player.getDimensions(Pose.STANDING).makeBoundingBox(state.pos(age))
+				: player.getBoundingBox().move(state.pos(age).subtract(here));
 			if (level.noCollision(player, box)) {
 				chosen = age;
 				break;
@@ -576,13 +609,22 @@ public final class ChronoPower implements Power {
 		level.playSound(null, here.x, here.y, here.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 1.5F);
 		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
 
+		if (downed) {
+			// (0.15.83) back to before the fall: up off the ground (out of any arms that carried you), and not battered
+			Downed.undo(level, player);
+		}
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
 		player.teleportTo(level, target.x, target.y, target.z, Set.of(), state.yRot(chosen), state.xRot(chosen), false);
 		player.resetFallDistance();
 		player.extinguishFire();
-		if (pastHealth > player.getHealth()) {
+		if (downed) {
+			// the health you had then (never so little you'd drop straight back down)
+			player.setHealth(Math.min(player.getMaxHealth(), Math.max(pastHealth, player.getMaxHealth() * REWIND_UP_HEALTH)));
+			Wounds.reconcile(player);
+			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, target.x, target.y + 1.0, target.z, 6, 0.3, 0.5, 0.3, 0.0);
+		} else if (pastHealth > player.getHealth()) {
 			player.setHealth(Math.min(pastHealth, player.getMaxHealth()));
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, target.x, target.y + 1.0, target.z, 6, 0.3, 0.5, 0.3, 0.0);
 		}

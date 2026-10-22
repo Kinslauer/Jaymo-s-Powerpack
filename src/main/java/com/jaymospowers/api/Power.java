@@ -49,6 +49,14 @@ public interface Power {
 	default void onDowned(ServerPlayer player) {
 	}
 
+	/**
+	 * Whether {@code key} still works while the player is down (both sides: the client lets the key through, the server
+	 * acts on it). Nothing does, unless a power says so.
+	 */
+	default boolean usableDowned(Player player, PowerKey key) {
+		return false;
+	}
+
 	/** Every server tick, for each player holding this power (alive or not; check {@code isAlive()} as needed). */
 	default void tick(ServerPlayer player) {
 	}
