@@ -4286,3 +4286,10 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   blood scent and the Lycan's tearing out now send Jaymo's Powers' still blood fleck (`PowersCompat.blood`, looked up by
   id) instead of vanilla dust; without Powers it's dust as before.
 - Compile-checked against the 26.3 jars; not yet seen in game.
+
+## 0.7.170: Executioner unlocks the weapon finishers (pack 0.15.110)
+- Andy: "make all the other executions unlocked in the combat arts tree replacing the current executioner function".
+  The Combat Arts perk Executioner (same place in the tree, same cost, so nobody's ranks move) no longer makes a combo's
+  4th full-strength hit deal double on a foe under 30%. It now unlocks Jaymo's Powers' weapon finishers on the downed
+  (hold use with a weapon: Run Through, Executioner's chop, Skull Crusher, Pinned...). Powers reads the rank by
+  reflection (`Finishers.weaponsUnlocked`). Bare hands need no perk.

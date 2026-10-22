@@ -334,7 +334,7 @@
 	"skill.jaymoskingdoms.perk.earthsplitter": "Earthsplitter",
 	"skill.jaymoskingdoms.perk.earthsplitter.desc": "Finisher for axes, maces, two-handed and blunt weapons: every 4th hit of a combo, if it's full strength, cracks the ground. Foes round the target take half the blow and are thrown into the air.",
 	"skill.jaymoskingdoms.perk.executioner": "Executioner",
-	"skill.jaymoskingdoms.perk.executioner.desc": "Finisher for any weapon: every 4th hit of a combo, if it's full strength, deals double damage to a foe below 30% health.",
+	"skill.jaymoskingdoms.perk.executioner.desc": "Weapon finishers: hold use on a downed foe with a weapon to finish them with that weapon's move (sword, axe, mace, spear, bow and more). Without it, only bare hands can finish (tap three times).",
 	"skill.jaymoskingdoms.perk.rend": "Rend",
 	"skill.jaymoskingdoms.perk.rend.desc": "Finisher for swords, knives and spears: every 4th hit of a combo, if it's full strength, makes the target bleed for 5 seconds.",
 	"skill.jaymoskingdoms.perk.charge": "Charge",

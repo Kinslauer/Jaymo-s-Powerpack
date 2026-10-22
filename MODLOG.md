@@ -2583,3 +2583,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   flecks in `BladeBlood.crushed` and `Dismember` are blood flecks too. Kingdoms (Rend, vampires and Night Bleeders,
   blood scent, the Lycan tear) gets it through `PowersCompat.blood` (Powers' `jaymospowers:blood_fleck_red` by id,
   plain dust without Powers). Compile-checked; not playtested.
+- **0.15.110, ships Jaymo's Kingdoms 0.7.170 (finishers: bare hands tap, weapons from Combat Arts):** Andy: "make the
+  execution only possible with bare hands, and only activated after tapping the target three times. this is to prevent
+  accidental neck snaps. Also make all the other executions unlocked in the combat arts tree replacing the current
+  executioner function". The neck snap now takes an empty hand and three quick taps on the downed (each a fresh press,
+  within a second of the last; a hold counts for nothing), and anything that isn't a weapon finishes nobody. The
+  weapons' finishers (still a held use) need Kingdoms' Combat Arts perk Executioner, which no longer boosts a combo's
+  finisher (`Finishers.weaponsUnlocked`; everyone in creative, everyone if Kingdoms isn't loaded).
