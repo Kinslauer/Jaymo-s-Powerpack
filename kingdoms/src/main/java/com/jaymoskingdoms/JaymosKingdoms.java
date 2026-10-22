@@ -41,6 +41,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
 		McaCompat.register();
+		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
+		OmniCrossbows.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();

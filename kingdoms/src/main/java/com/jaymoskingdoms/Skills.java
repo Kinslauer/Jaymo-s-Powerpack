@@ -202,7 +202,9 @@ public final class Skills {
 		PLAGUE_DOCTOR(Pillar.SURVIVAL, 1, 2, 8, 5, 2, FIELD_DRESSER),
 		LIFESAVER(Pillar.SURVIVAL, 1, 2, 12, 6, 1, BONESETTER, PLAGUE_DOCTOR),
 		// shown as "Second Wind" (the first page's old Second Wind is shown as Rally now; its key stays, so nobody's ranks move)
-		SELF_REVIVE(Pillar.SURVIVAL, 1, 2, 15, 7, 1, LIFESAVER);
+		SELF_REVIVE(Pillar.SURVIVAL, 1, 2, 15, 7, 1, LIFESAVER),
+		// (0.7.162) any crossbow takes anything from the off hand (OmniCrossbow's Omni, as a Survival skill for every class)
+		MAKE_DO(Pillar.SURVIVAL, 1, 2, 5, 1, 1, FORAGER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -274,6 +276,9 @@ public final class Skills {
 		public @Nullable String blocked(Perk perk) {
 			if (!perk.pillar.open) {
 				return "gui.jaymoskingdoms.skills.blocked.later";
+			}
+			if (perk == Perk.MAKE_DO && !OmniCrossbows.LOADED) {
+				return "gui.jaymoskingdoms.skills.blocked.omni";
 			}
 			if (rank(perk) >= perk.maxRank) {
 				return "gui.jaymoskingdoms.skills.blocked.max";

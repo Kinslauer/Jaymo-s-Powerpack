@@ -1,0 +1,8 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.mixin.omni",
+	"plugin": "com.jaymoskingdoms.mixin.omni.OmniMixinPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["PlayerProjectileMixin"],
+	"injectors": { "defaultRequire": 1 }
+}
