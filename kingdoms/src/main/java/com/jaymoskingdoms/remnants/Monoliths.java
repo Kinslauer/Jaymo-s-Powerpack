@@ -239,7 +239,7 @@ public final class Monoliths {
 			AttributeInstance scale = giant.getAttribute(Attributes.SCALE);
 			if (scale != null) {
 				scale.addOrUpdateTransientModifier(new AttributeModifier(VANILLA_GIANT_SCALE,
-					AetherGiant.HEIGHT / EntityType.GIANT.getHeight() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+					AetherGiant.HEIGHT / EntityType.GIANT.getDimensions().height() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 			}
 		}
 	}
