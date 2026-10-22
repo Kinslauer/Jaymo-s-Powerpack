@@ -39,7 +39,7 @@ public final class XenoformClient {
 	}
 
 	/**
-	 * (0.15.96) An afterimage of a transformed runner ({@code ChronoStreak}, for Velox's Velocity): the alien their frame
+	 * (0.15.97) An afterimage of a transformed runner ({@code ChronoStreak}, for Velox's Velocity): the alien their frame
 	 * wears, translucent in {@code tint}, laid out as the player's body would be. False (nothing drawn) for a player in
 	 * their own shape.
 	 */

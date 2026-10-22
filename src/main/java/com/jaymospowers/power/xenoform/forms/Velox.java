@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * Velox, the raptor speedster (scanned from a horse): a little smaller than you, 20 health, 80% faster, lands softly,
  * and runs across still water while sprinting ({@link #runsOnWater}).
  * <ul>
- * <li>R, Velocity (0.15.96, after Chrono's Overclock; it replaced the held Speed Burst): a toggle. While it's on you are
+ * <li>R, Velocity (0.15.97, after Chrono's Overclock; it replaced the held Speed Burst): a toggle. While it's on you are
  * far faster ({@link #VELOCITY_SPEED}, and Overclock's sprint on top), stride up whole blocks, run straight up walls
  * holding forward, across water and lava sprinting, take no fall damage, and leave Overclock's streak, light blue
  * ({@link ChronoSpeed#SKY}). Shift for walking speed. R again switches it off, then {@link #VELOCITY_COOLDOWN}.</li>

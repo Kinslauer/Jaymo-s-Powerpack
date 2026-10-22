@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
  * forward; run off the top and you hop onto it. The server is told which wall, so everyone sees the body turned onto it,
  * legs running ({@link ChronoSpeed#WALL_RUN}).
  *
- * <p>(0.15.96) Velox's Velocity runs up walls the same way: {@code XenoformPowerClient} ticks this too.
+ * <p>(0.15.97) Velox's Velocity runs up walls the same way: {@code XenoformPowerClient} ticks this too.
  */
 public final class ChronoSpeedClient {
 	/** The wall being run up (into it), or null. */

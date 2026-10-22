@@ -49,7 +49,7 @@ import org.jspecify.annotations.Nullable;
  * The afterimages are the runner's own render states, kept from the frames the world drew them in (never the inventory
  * screen's), so they wear the run pose ({@link ChronoRunPose}) they had.
  *
- * <p>(0.15.96) Velox's Velocity leaves the same streak in light blue ({@link ChronoSpeed#SKY}: {@code FLASH}'s value picks
+ * <p>(0.15.97) Velox's Velocity leaves the same streak in light blue ({@link ChronoSpeed#SKY}: {@code FLASH}'s value picks
  * the colours), and its afterimages are the alien, not the player under it ({@code XenoformClient#submitGhost}).
  */
 public final class ChronoStreak {

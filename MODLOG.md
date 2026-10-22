@@ -2482,7 +2482,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
   nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
   new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
-- **0.15.96, Velox's Velocity (R), after Chrono's Overclock:** Andy: "Velox should have a velocity button like
+- **0.15.97, Velox's Velocity (R), after Chrono's Overclock:** Andy: "Velox should have a velocity button like
   Chrono's overclock, giving him the same toggle speed wall run and streak, just colored light blue". The held Speed
   Burst on R is now **Velocity**, a toggle: on, Velox is +100% faster (`Velox.VELOCITY_SPEED`) and runs on Overclock's
   own speed code (`ChronoSpeed.tick` with the new `ChronoSpeed.SKY` palette): Overclock's sprint boost and whole-block

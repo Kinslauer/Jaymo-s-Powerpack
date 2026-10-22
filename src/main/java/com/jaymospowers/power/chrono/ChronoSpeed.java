@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
  * </ul>
- * (0.15.96) Velox's Velocity (R, a toggle) runs on all of this too but phasing, in a light blue streak instead of
+ * (0.15.97) Velox's Velocity (R, a toggle) runs on all of this too but phasing, in a light blue streak instead of
  * golden ({@link #SKY}): it calls {@link #tick(ServerPlayer, ServerLevel, boolean, int)} and {@link #clear} itself.
  */
 public final class ChronoSpeed {
@@ -82,7 +82,7 @@ public final class ChronoSpeed {
 
 	/**
 	 * (0.11.57) On a player while Overclock runs, for everyone to see the speed-force streak, the run and the glyphs
-	 * ({@code ChronoStreak}, {@code ChronoRunPose}). Only on while overclocked, never saved. Since 0.15.96 the streak's
+	 * ({@code ChronoStreak}, {@code ChronoRunPose}). Only on while overclocked, never saved. Since 0.15.97 the streak's
 	 * colour ({@link #GOLD} or {@link #SKY}).
 	 */
 	public static final AttachmentType<Integer> FLASH = AttachmentRegistry.create(JaymosPowers.id("chrono_flash"),
@@ -128,7 +128,7 @@ public final class ChronoSpeed {
 		return player instanceof ServerPlayer sp && (ChronoPower.overclocked(sp) || velocity(sp));
 	}
 
-	/** (0.15.96) Whether {@code player}'s speed is Velox's Velocity (its light blue streak is on), on either side. */
+	/** (0.15.97) Whether {@code player}'s speed is Velox's Velocity (its light blue streak is on), on either side. */
 	public static boolean velocity(Player player) {
 		Integer palette = player.getAttached(FLASH);
 		return palette != null && palette == SKY;
