@@ -170,6 +170,23 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
   swings past and settles instead of snapping, and the forward pitch at speed eases in instead of jittering.
 - Board and rider bob together slowly (`BOB`), less at speed. Stepping off, the board drops square again.
 
+## 0.15.91: A real meteor
+- **Made of the Aether's magnetic region**: the falling rock is ferrosite, ichorite, arkenium ore and a gravitite ore
+  block with burning magma; its wreck lumps are ferrosite, ichorite, ferrosite sand and magma, now and then arkenium,
+  corrobonite or gravitite ore; the burst's debris particles match.
+- **Falls from build height**: it starts at the top of the world (slanting in from behind you, `FALL_SLANT`) and takes
+  `FALL_SPEED` 2.6 blocks a tick on average, 50-120 ticks, accelerating. The rock always carries `BlockCluster.SCALE`, so
+  every scaled cluster is drawn out to `BlockCluster.FAR_SEEN` (384); entity tracking is horizontal-only, so height
+  doesn't drop it. Trail particles are forced (seen from far), and a rushing roar sounds on the ground as it comes.
+- **Lands on real ground**: the aim point drops to the first solid block under it (`GravityMeteor.ground`), so aiming at
+  the sky or past a cliff no longer sets it off in mid-air. The charge marker shows the same spot.
+- **Crashes through everything**: the carve no longer runs out (cap 6000 a tick; most blocks are set to air, one in 6
+  shows its break), and it keeps carving as it grinds into the ground. Anyone in its path is struck once for 12-25
+  hearts (`HIT_DAMAGE_MIN`/`MAX`) and hurled down and out. Then it bursts as before.
+- **Nothing left hanging** (`GravityMeteorSweep`): when the shockwave is done, every clump of blocks in a box round the
+  crater (crater reach + 13, 8 under to 40 over) that touches nothing solid and doesn't reach the box's edge comes down
+  (10% drop). Clumps that already floated before the strike (Aether islets, clouds) are left, as are clumps over 4000.
+
 ## Notes and risks
 - Lifting a *player* sends them velocity updates every tick, so it may look jittery on their screen.
 - The anti-kick mixin lets any player whose gravity is below 0.02 float, so a lifted player isn't kicked.
