@@ -2563,3 +2563,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   either way. And the band was hidden under costumes and the symbiote suit (it skipped any covered arm, first and third
   person): it's now drawn over them, grown round the arm to 5.5 pixels (`XenoBand.GROW`), and further over a chestplate's
   sleeve (`ARMOUR_GROW`). Not playtested; compile-checked against the 26.3 jars.
+- **0.15.108, a kinder ledge grab, the prone climb, and staying down after a slide:** Andy: "make the ledge grab more
+  forgiving, and allow for climbing into one block gaps by going prone while holding a ledge, it animates you climbing up
+  and onto your belly. along with the slide, holding the slide keeps you in the prone stance". The catch: forward alone
+  (no Jump held) is enough, the edge may be up to 0.45 above your eyes (was 0.1), the wall 0.5 off (was 0.35), any
+  facing that's nearer the wall than its corners (45°, was 40°), and you can already be falling at 0.6 b/t (was 0.2).
+  Ledges under a gap one block high can now be caught (`Spot.stand` / `Spot.onBelly`). Hanging, the Crawl key (or Jump
+  where there's no room to stand) pulls you up and in onto your belly (`Ledge.PRONE_*`, 20 ticks): the crawl begins with
+  it, the flat body lifted so the eyes stay put, and you end it crawling; it used to drop you off the ledge, and where
+  there's no room to lie it now does nothing. `LedgePose` draws the arms pulling and reaching ahead, a knee to the edge,
+  and the tip forward into vanilla's crawl tilt so `CrawlPose` takes over smoothly. A slide that ends with Sneak still
+  held leaves you prone (`CrawlTaps.goProne`); let go of Sneak to get up (once there's room), or use Jump or the Crawl key
+  as usual. Not playtested.

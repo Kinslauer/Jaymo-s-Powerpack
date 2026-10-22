@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Ledge;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -18,6 +19,11 @@ import org.jspecify.annotations.Nullable;
  * travel is skipped, {@code LedgePlayerMixin}). A fresh press of Jump pulls up and over along a fixed path (straight up
  * beside the wall, then across onto the top); Sneak, Back, looking away, the grip giving out or the server refusing
  * lets go. The moves go through {@code move()}, so the server sees ordinary, collision-free movement.
+ *
+ * <p>(0.15.108) Forward alone (no Jump held) is enough to catch an edge. Going prone while hanging ({@link #proneClimb},
+ * from {@code CrawlTaps}), or Jump under a gap too low to stand in, pulls you up and in onto your belly: the crawl begins
+ * as the climb does (the body drops to 0.6 high, lifted so the eyes stay put), rises to the top and slides in, and you
+ * stay prone after it.
  */
 public final class LedgeClient {
 	private enum Phase { NONE, HANG, CLIMB }
@@ -27,6 +33,8 @@ public final class LedgeClient {
 	/** Where the edge was caught (the hang settles from here). */
 	private static Vec3 caughtAt = Vec3.ZERO;
 	private static int ticks;
+	/** (0.15.108) The climb under way is the prone one, onto the belly into a low gap. */
+	private static boolean prone;
 	private static int cooldown;
 	/** The server has the hold (its synced copy arrived). */
 	private static boolean confirmed;
@@ -57,7 +65,40 @@ public final class LedgeClient {
 
 	/** How far through the climb the local player is (0-1) at {@code partialTick}, or -1 while hanging (or not on a ledge). */
 	public static float localProgress(float partialTick) {
-		return phase == Phase.CLIMB ? Mth.clamp((ticks + partialTick) / Ledge.CLIMB_TICKS, 0.0F, 1.0F) : -1.0F;
+		return phase == Phase.CLIMB ? Mth.clamp((ticks + partialTick) / climbTicks(), 0.0F, 1.0F) : -1.0F;
+	}
+
+	/** (0.15.108) The local player is hanging (caught and not yet climbing). */
+	static boolean hanging() {
+		return phase == Phase.HANG;
+	}
+
+	private static int climbTicks() {
+		return prone ? Ledge.PRONE_CLIMB_TICKS : Ledge.CLIMB_TICKS;
+	}
+
+	/**
+	 * (0.15.108) Going prone while hanging: pull up and in onto the belly when the gap above the edge has room to lie in.
+	 * Returns whether the climb began (the crawl starts with it).
+	 */
+	static boolean proneClimb(LocalPlayer player) {
+		Ledge.Spot at = spot;
+		if (phase != Phase.HANG || at == null || at.onBelly() == null || !confirmed || !Crawl.canCrawl(player)) {
+			return false;
+		}
+		startClimb(player, at, true);
+		return true;
+	}
+
+	private static void startClimb(LocalPlayer player, Ledge.Spot at, boolean flat) {
+		phase = Phase.CLIMB;
+		prone = flat;
+		ticks = 0;
+		Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true, flat);
+		ClientPlayNetworking.send(new Ledge.Act(true, flat));
+		if (flat) {
+			CrawlTaps.goProne(player, false);
+		}
 	}
 
 	/** Both hands are on the edge: no swings, no item use (vanilla's and Better Combat's both start from these clicks). */
@@ -95,7 +136,7 @@ public final class LedgeClient {
 	}
 
 	private static void tryGrab(LocalPlayer player, Input input) {
-		if (cooldown > 0 || !input.forward() || !input.jump() || input.shift() || input.backward() || player.onGround()
+		if (cooldown > 0 || !input.forward() || input.shift() || input.backward() || player.onGround()
 			|| player.getDeltaMovement().y < Ledge.GRAB_MIN_VY || !Ledge.canHang(player) || com.jaymospowers.client.freerun.FreerunClient.active()) {
 			return;
 		}
@@ -153,9 +194,10 @@ public final class LedgeClient {
 	}
 
 	private static void grab(LocalPlayer player, Ledge.Spot found) {
-	autoClimb = false;
-	edge = false;
-	shiftLatch = false;
+		autoClimb = false;
+		edge = false;
+		shiftLatch = false;
+		prone = false;
 		spot = found;
 		phase = Phase.HANG;
 		ticks = 0;
@@ -195,10 +237,12 @@ public final class LedgeClient {
 			return;
 		}
 		if ((input.jump() && jumpReleased || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
-			phase = Phase.CLIMB;
-			ticks = 0;
-			Ledge.localHold = new Ledge.Hold(at.face().get2DDataValue(), player.level().getGameTime(), true);
-			ClientPlayNetworking.send(new Ledge.Act(true));
+			if (at.stand()) {
+				startClimb(player, at, false);
+			} else if (confirmed && Crawl.canCrawl(player)) {
+				// (0.15.108) no room to stand up there: in on the belly
+				startClimb(player, at, true);
+			}
 		}
 	}
 
@@ -209,7 +253,7 @@ public final class LedgeClient {
 			letGo(player);
 			return;
 		}
-		if (ticks >= Ledge.CLIMB_TICKS) {
+		if (ticks >= climbTicks()) {
 			// standing on top
 			end();
 			cooldown = Ledge.REGRAB_COOLDOWN_TICKS;
@@ -239,13 +283,16 @@ public final class LedgeClient {
 			} else {
 				target = caughtAt.lerp(at.hang(), smooth(t));
 			}
+		} else if (prone) {
+			// (the first tick still has the standing body: it only moves once the crawl has made it 0.6 high)
+			target = ticks < 1 || at.onBelly() == null ? at.hang() : pronePath(at, Math.min(1.0F, (ticks + 1.0F) / Ledge.PRONE_CLIMB_TICKS));
 		} else {
 			float p = Math.min(1.0F, (ticks + 1.0F) / Ledge.CLIMB_TICKS);
 			target = climbPath(at, p);
 		}
 		player.setDeltaMovement(Vec3.ZERO);
 		player.move(MoverType.SELF, target.subtract(player.position()));
-		if (phase == Phase.CLIMB && ticks + 1 >= Ledge.CLIMB_TICKS) {
+		if (phase == Phase.CLIMB && ticks + 1 >= climbTicks()) {
 			// set down on the top
 			player.move(MoverType.SELF, new Vec3(0.0, -0.05, 0.0));
 		}
@@ -264,6 +311,22 @@ public final class LedgeClient {
 		}
 		float q = smooth((p - rise) / (1.0F - rise));
 		return new Vec3(Mth.lerp(q, hang.x, top.x), top.y, Mth.lerp(q, hang.z, top.z));
+	}
+
+	/**
+	 * (0.15.108) The prone climb: the flat body (eyes where the hanging ones were) rises beside the wall to the top, then
+	 * slides in across it onto the belly.
+	 */
+	private static Vec3 pronePath(Ledge.Spot at, float p) {
+		Vec3 hang = at.hang();
+		Vec3 belly = at.onBelly();
+		double from = Math.min(hang.y + Ledge.PRONE_EYE_KEEP, belly.y);
+		float rise = Ledge.PRONE_RISE_SHARE;
+		if (p < rise) {
+			return new Vec3(hang.x, Mth.lerp(smooth(p / rise), from, belly.y), hang.z);
+		}
+		float q = smooth((p - rise) / (1.0F - rise));
+		return new Vec3(Mth.lerp(q, hang.x, belly.x), belly.y, Mth.lerp(q, hang.z, belly.z));
 	}
 
 	private static float smooth(float t) {
@@ -290,8 +353,9 @@ public final class LedgeClient {
 	}
 
 	private static void end() {
-	phase = Phase.NONE;
-	edge = false;
+		phase = Phase.NONE;
+		edge = false;
+		prone = false;
 		autoClimb = false;
 		spot = null;
 		ticks = 0;
