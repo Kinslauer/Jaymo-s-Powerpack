@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -30,11 +31,18 @@ public final class CharacterNames {
 	static final AttachmentType<String> NAME = AttachmentRegistry.create(JaymosKingdoms.id("character_name"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.7.159) On a player, saved: the name they were given because they kept their username in MCA's creator. Andy:
+	 * "usernames should only show up for commands". Kept, so they are always given the same one.
+	 */
+	static final AttachmentType<String> GIVEN = AttachmentRegistry.create(JaymosKingdoms.id("given_name"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath());
+
 	private CharacterNames() {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("character name attachment: {}", NAME);
+		JaymosKingdoms.LOGGER.debug("character name attachments: {} {}", NAME, GIVEN);
 		ServerPlayerEvents.JOIN.register(CharacterNames::refresh);
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
 		ServerTickEvents.END_SERVER_TICK.register(CharacterNames::tick);
@@ -52,6 +60,18 @@ public final class CharacterNames {
 	/** Brings {@code player}'s synced name in line with MCA's, and everyone's tab list with it. */
 	private static void refresh(ServerPlayer player) {
 		String name = picked(player);
+		if (name == null && McaCompat.LOADED && player.level() != null) {
+			// (0.7.159) no name of their own but their username: they get one from MCA's lists (renamed in its editor as usual)
+			String given = player.getAttached(GIVEN);
+			if (given == null) {
+				given = McaBridge.randomName(player);
+			}
+			if (given != null && !given.equals(player.getGameProfile().name())) {
+				player.setAttached(GIVEN, given);
+				McaBridge.setName(player, given);
+				name = given;
+			}
+		}
 		String had = player.getAttached(NAME);
 		if (name == null ? had == null : name.equals(had)) {
 			return;

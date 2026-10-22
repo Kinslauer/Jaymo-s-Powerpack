@@ -14,6 +14,8 @@ import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
 import net.conczin.mca.network.Network;
 import net.conczin.mca.network.s2c.PlayerDataMessage;
+import net.conczin.mca.resources.Names;
+import net.conczin.mca.server.world.data.FamilyTree;
 import net.conczin.mca.server.world.data.PlayerSaveData;
 import net.conczin.mca.util.NbtHelper;
 import net.conczin.mca.server.world.data.VillageManager;
@@ -57,6 +59,23 @@ final class McaBridge {
 	/** (0.7.92) The name {@code player} gave themselves in MCA's creator (its family tree), or their username if none. */
 	static String name(ServerPlayer player) {
 		return Messenger.getName(player);
+	}
+
+	/** (0.7.159) Writes {@code name} into MCA's family tree as {@code player}'s, so MCA and everything reading it go by it. */
+	static void setName(ServerPlayer player, String name) {
+		FamilyTree tree = FamilyTree.get(player.level());
+		tree.getOrCreate(player).setName(name);
+		tree.setDirty();
+	}
+
+	/** (0.7.159) A name MCA would give a villager of {@code player}'s gender, or null if its name lists aren't loaded. */
+	static @Nullable String randomName(ServerPlayer player) {
+		try {
+			String name = Names.pickCitizenName(PlayerSaveData.get(player).getGender(), player);
+			return name == null || name.isBlank() ? null : name.strip();
+		} catch (RuntimeException e) {
+			return null;
+		}
 	}
 
 	static boolean isMca(Villager villager) {
