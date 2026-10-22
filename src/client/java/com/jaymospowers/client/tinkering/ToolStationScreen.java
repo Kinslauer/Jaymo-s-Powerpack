@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,7 +18,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Tool Station, laid out like Tinkers' screen (MIT): parts around the big result slot; recipes or the result's stats
- * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots.
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots. (Tool Forge) The same screen draws
+ * the Tool Forge's five slots; both have the side inventory and tabs ({@link TableUi}).
  */
 public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> {
 	/** (0.8.125) Andy: an empty station shows each tool's parts in turn, this long apiece. */
@@ -36,17 +38,19 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
-		TinkerUi.slots(graphics, menu, leftPos, topPos, ToolStationMenu.RESULT);
+		TableUi.draw(graphics, font, menu.extras(), leftPos, topPos);
+		TinkerUi.slots(graphics, menu, leftPos, topPos, menu.resultSlot());
+		int infoX = TableUi.infoX(menu.extras(), leftPos, imageWidth);
 		TinkerUi.arrowRight(graphics, leftPos + 80, topPos + 46, 22, TinkerUi.DIM);
 		PartType[] ghosts = ghosts();
 		for (int i = 0; i < ghosts.length; i++) {
 			if (ghosts[i] != null) {
-				int x = leftPos + ToolStationMenu.SLOT_AT[i][0], y = topPos + ToolStationMenu.SLOT_AT[i][1];
+				int x = leftPos + menu.slotAt(i)[0], y = topPos + menu.slotAt(i)[1];
 				graphics.fakeItem(ToolPartItem.of(ghosts[i], TinkerMaterial.ROCK_STONE, 1), x, y);
 				graphics.fill(x, y, x + 16, y + 16, GHOST_FADE);
 			}
 		}
-		ItemStack result = menu.getSlot(ToolStationMenu.RESULT).getItem();
+		ItemStack result = menu.getSlot(menu.resultSlot()).getItem();
 		if (!result.isEmpty()) {
 			List<Component> lines = new ArrayList<>();
 			if (menu.status() != null) {
@@ -54,14 +58,19 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			}
 			lines.addAll(result.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(minecraft.level), minecraft.player,
 				net.minecraft.world.item.TooltipFlag.Default.NORMAL).stream().skip(1).toList());
-			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, result.getHoverName(), lines);
+			SidePanel.draw(graphics, font, infoX, topPos, result.getHoverName(), lines);
 		} else if (menu.status() != null) {
 			// why a modifier won't go on (no slots, at its max, doesn't fit a weapon)
-			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos,
+			SidePanel.draw(graphics, font, infoX, topPos,
 				menu.status().copy().withStyle(net.minecraft.ChatFormatting.RED), List.of());
 		} else {
 			List<Component> lines = new ArrayList<>();
+			boolean skipped = false;
 			for (ToolType type : ToolType.values()) {
+				if (type.parts.size() > menu.maxParts()) {
+					skipped = true;
+					continue;
+				}
 				MutableComponent parts = Component.empty();
 				for (int i = 0; i < type.parts.size(); i++) {
 					PartType part = type.parts.get(i).part();
@@ -73,7 +82,10 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 						: new net.minecraft.ChatFormatting[] {net.minecraft.ChatFormatting.YELLOW}),
 					parts.withStyle(net.minecraft.ChatFormatting.GRAY)));
 			}
-			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, Component.translatable("gui.jaymospowers.tool_station.recipes"), lines);
+			if (skipped) {
+				lines.add(Component.translatable("gui.jaymospowers.tool_station.forge_hint").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+			SidePanel.draw(graphics, font, infoX, topPos, Component.translatable("gui.jaymospowers.tool_station.recipes"), lines);
 		}
 	}
 
@@ -89,10 +101,10 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 	 * Nothing with a tool or anything else in the station (repairs and modifiers have no layout).
 	 */
 	private PartType[] ghosts() {
-		PartType[] ghosts = new PartType[ToolStationMenu.INPUTS];
+		PartType[] ghosts = new PartType[menu.inputCount()];
 		shown = null;
 		List<PartType> placed = new ArrayList<>();
-		for (int i = 0; i < ToolStationMenu.INPUTS; i++) {
+		for (int i = 0; i < menu.inputCount(); i++) {
 			ItemStack stack = menu.getSlot(i).getItem();
 			if (stack.isEmpty()) {
 				continue;
@@ -105,7 +117,7 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 		List<ToolType> fits = new ArrayList<>();
 		for (ToolType type : ToolType.values()) {
 			List<PartType> missing = missing(type, placed);
-			if (missing != null && !missing.isEmpty() && missing.size() + placed.size() <= ToolStationMenu.INPUTS) {
+			if (missing != null && !missing.isEmpty() && missing.size() + placed.size() <= menu.inputCount() && type.parts.size() <= menu.maxParts()) {
 				fits.add(type);
 			}
 		}
@@ -139,5 +151,16 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			}
 		}
 		return missing;
+	}
+
+	@Override
+	protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		super.extractTooltip(graphics, mouseX, mouseY);
+		TableUi.tooltip(graphics, font, menu.extras(), leftPos, topPos, mouseX, mouseY);
+	}
+
+	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		return TableUi.click(minecraft, menu.containerId, menu.extras(), leftPos, topPos, event.x(), event.y()) || super.mouseClicked(event, doubleClick);
 	}
 }

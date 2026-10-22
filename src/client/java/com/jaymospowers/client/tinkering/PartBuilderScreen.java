@@ -55,6 +55,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
+		TableUi.draw(graphics, font, menu.extras(), leftPos, topPos);
 		TinkerUi.slots(graphics, menu, leftPos, topPos, PartBuilderMenu.RESULT);
 		int[] buttons = buttons();
 		int rows = Math.max(1, (buttons.length + COLUMNS - 1) / COLUMNS);
@@ -94,7 +95,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			graphics.fill(x, y, x + PAGE_W, y + PAGE_H, hover ? TinkerUi.ROW_HOVER : TinkerUi.ROW);
 			graphics.centeredText(font, Component.literal(side == 0 ? "<" : ">"), x + PAGE_W / 2, y + 3, TinkerUi.ACCENT);
 		}
-		SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, title(material), info(material));
+		SidePanel.draw(graphics, font, TableUi.infoX(menu.extras(), leftPos, imageWidth), topPos, title(material), info(material));
 	}
 
 	private int selectedButton() {
@@ -189,6 +190,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		} else if (pageArrowAt(mouseX, mouseY) != 0) {
 			graphics.setTooltipForNextFrame(font, pageName(), mouseX, mouseY);
 		}
+		TableUi.tooltip(graphics, font, menu.extras(), leftPos, topPos, mouseX, mouseY);
 	}
 
 	private int cellAt(double mouseX, double mouseY) {
@@ -213,6 +215,9 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (TableUi.click(minecraft, menu.containerId, menu.extras(), leftPos, topPos, event.x(), event.y())) {
+			return true;
+		}
 		int arrow = pageArrowAt(event.x(), event.y());
 		if (arrow != 0) {
 			page = Math.floorMod(page + arrow, pages());

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/tinkering/pattern_chest"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/tinkering/pattern_chest",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/tinkering/pattern_chest",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/tinkering/pattern_chest",
+      "y": 270
+    }
+  }
+}

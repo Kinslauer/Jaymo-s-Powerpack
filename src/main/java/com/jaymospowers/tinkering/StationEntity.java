@@ -26,12 +26,15 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * What's left on a Part Builder or Tool Station: like the pack's crafting tables (Jaymo's Kitchen), the inputs stay
+ * What's left on a Part Builder, Tool Station, Tool Forge or Crafting Station: like the pack's crafting tables (Jaymo's Kitchen), the inputs stay
  * on the table when you close it, everyone can see them lying on top, and only one player works it at a time.
  */
 public class StationEntity extends BlockEntity {
-	/** Enough for either table: the Part Builder uses 2 (pattern, material), the Tool Station 4. */
-	public static final int SIZE = 4;
+	/**
+	 * Enough for any table: the Part Builder uses 2 (pattern, material), the Tool Station 4, the Tool Forge 5, the Crafting
+	 * Station 9. (Old saves hold up to 4 and load into the first slots.)
+	 */
+	public static final int SIZE = 9;
 	private final NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
 	/** Who's working the table right now (never saved). */
 	private @Nullable UUID user;
@@ -62,7 +65,7 @@ public class StationEntity extends BlockEntity {
 		}
 		ServerPlayer other = level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(user) : null;
 		AbstractContainerMenu open = other == null ? null : other.containerMenu;
-		if (!(open instanceof PartBuilderMenu) && !(open instanceof ToolStationMenu)) {
+		if (!(open instanceof PartBuilderMenu) && !(open instanceof ToolStationMenu) && !(open instanceof com.jaymospowers.tinkering.table.CraftingStationMenu)) {
 			// they left, or closed it some way we didn't hear about
 			user = null;
 			return false;
@@ -81,7 +84,7 @@ public class StationEntity extends BlockEntity {
 	}
 
 	/** A table's screen opens: lay out what was left on it, and hold it for this player. */
-	static void open(ContainerLevelAccess access, Player player, Container inputs) {
+	public static void open(ContainerLevelAccess access, Player player, Container inputs) {
 		access.execute((level, pos) -> {
 			if (level.getBlockEntity(pos) instanceof StationEntity table) {
 				table.lock(player);
@@ -94,7 +97,7 @@ public class StationEntity extends BlockEntity {
 	}
 
 	/** The screen's inputs changed: keep the table in step. */
-	static void changed(ContainerLevelAccess access, Container inputs) {
+	public static void changed(ContainerLevelAccess access, Container inputs) {
 		access.execute((level, pos) -> {
 			if (level.getBlockEntity(pos) instanceof StationEntity table && !table.isRemoved()) {
 				table.store(inputs(inputs));
@@ -103,7 +106,7 @@ public class StationEntity extends BlockEntity {
 	}
 
 	/** The screen closes: the inputs stay on the table, or come back to the player if the table is gone. */
-	static void close(ContainerLevelAccess access, Player player, Container inputs, Runnable handBack) {
+	public static void close(ContainerLevelAccess access, Player player, Container inputs, Runnable handBack) {
 		access.execute((level, pos) -> {
 			if (level.getBlockEntity(pos) instanceof StationEntity table && !table.isRemoved()) {
 				table.store(inputs(inputs));

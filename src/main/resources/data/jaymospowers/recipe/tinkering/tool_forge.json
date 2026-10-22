@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "m": "#jaymospowers:forge_metals",
+    "t": "jaymospowers:tool_station",
+    "s": "jaymospowers:seared_bricks"
+  },
+  "pattern": [
+    "mmm",
+    " t ",
+    "sss"
+  ],
+  "result": {
+    "id": "jaymospowers:tool_forge"
+  }
+}

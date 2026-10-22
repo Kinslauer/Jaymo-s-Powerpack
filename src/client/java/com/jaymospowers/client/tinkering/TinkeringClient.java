@@ -13,7 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 
-/** The Part Builder's and Tool Station's screens, and what's left lying on them. */
+/** The Part Builder's, Tool Station's, Tool Forge's and Crafting Station's screens, and what's left lying on them. */
 public final class TinkeringClient {
 	private TinkeringClient() {
 	}
@@ -21,6 +21,8 @@ public final class TinkeringClient {
 	public static void init() {
 		MenuScreens.register(Tinkering.PART_BUILDER_MENU, PartBuilderScreen::new);
 		MenuScreens.register(Tinkering.TOOL_STATION_MENU, ToolStationScreen::new);
+		MenuScreens.register(com.jaymospowers.tinkering.table.Tables.TOOL_FORGE_MENU, ToolStationScreen::new);
+		MenuScreens.register(com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION_MENU, CraftingStationScreen::new);
 		BlockEntityRenderers.register(Tinkering.STATION_ENTITY, StationRenderer::new);
 		MenuScreens.register(Tinkering.SMELTERY_MENU, SmelteryScreen::new);
 		BlockEntityRenderers.register(Tinkering.SMELTERY_ENTITY, SmelteryRenderer::new);

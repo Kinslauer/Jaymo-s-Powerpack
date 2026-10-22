@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:crafting_table",
+    "jaymospowers:pattern",
+    "#minecraft:planks"
+  ],
+  "result": {
+    "id": "jaymospowers:crafting_station"
+  }
+}

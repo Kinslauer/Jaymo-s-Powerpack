@@ -144,8 +144,11 @@ public final class Tinkering {
 		}
 		PART_BUILDER = station("part_builder", StationBlock.Kind.PART_BUILDER);
 		TOOL_STATION = station("tool_station", StationBlock.Kind.TOOL_STATION);
+		// the Tool Forge, Crafting Station and the chests (before the station entity, which takes the forge and crafting station too)
+		com.jaymospowers.tinkering.table.Tables.register();
 		STATION_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("tinker_station"),
-			new BlockEntityType<>(StationEntity::new, Set.of(PART_BUILDER, TOOL_STATION)));
+			new BlockEntityType<>(StationEntity::new, Set.of(PART_BUILDER, TOOL_STATION, com.jaymospowers.tinkering.table.Tables.TOOL_FORGE,
+				com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION)));
 		PART_BUILDER_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("part_builder"),
 			new MenuType<>(PartBuilderMenu::new, FeatureFlags.VANILLA_SET));
 		TOOL_STATION_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("tool_station"),
@@ -164,6 +167,10 @@ public final class Tinkering {
 		CreativeModeTabEvents.modifyOutputEvent(tab).register(output -> {
 			output.accept(PART_BUILDER);
 			output.accept(TOOL_STATION);
+			output.accept(com.jaymospowers.tinkering.table.Tables.TOOL_FORGE);
+			output.accept(com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION);
+			output.accept(com.jaymospowers.tinkering.table.Tables.PATTERN_CHEST);
+			output.accept(com.jaymospowers.tinkering.table.Tables.PART_CHEST);
 			output.accept(PATTERN);
 			for (Block block : List.of(GROUT, SEARED_BRICKS, SEARED_GLASS, SMELTERY, DRAIN, FAUCET, CASTING_TABLE, CASTING_BASIN)) {
 				output.accept(block);
