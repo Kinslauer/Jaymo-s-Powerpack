@@ -238,7 +238,7 @@ public final class Identities {
 		return hooded(e) ? HOOD_SIGHT : 1.0;
 	}
 
-	private static String tagName(Entity e) {
+	static String tagName(Entity e) {
 		for (String tag : e.entityTags()) {
 			if (tag.startsWith(NAME)) {
 				return tag.substring(NAME.length());

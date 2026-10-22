@@ -4226,3 +4226,26 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Shaders now stay on all night. If the hook doesn't take (an Iris update renames what it patches), the old switch-off
   comes back by itself, with a warning in the log.
 - Not yet seen in game: needs a check with a shader pack on a new-moon night.
+
+## 0.7.165: the creator's name sticks (pack 0.15.105)
+- Andy: "character names still randomize even though both players input their own when joining the server just now.
+  we had to use the command to make it correct". MCA's start-up creator (`DestinyScreen`) keeps the typed name on the
+  client only: its name page's Accept button moves on to the body, traits or destiny page without saving, and nothing
+  later saves it either (only the editor's own Done button does, which is why `/mca editor` fixed it). So the server
+  still had the name `CharacterNames` gives a player who hasn't picked one.
+- `client/mixin/mca/McaDestinyNameMixin`: leaving the creator's name page now saves the editor to the server
+  (`syncVillagerData`, as Done does), so the typed name reaches MCA's family tree and replaces the given one at once.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
+## 0.7.166: costumes and disguises on the tab list (pack 0.15.106)
+- Andy: "it should do the same with equipped costumes and disguises. right now it doesnt change the scoreboard name".
+- `CharacterNames` now works out what a player shows as, not just their character name: a hood (a costume's head
+  piece that leaves the face out) shows the costume's name, or "Hooded Figure"; a goblin disguise (`Disguise`) shows
+  "Goblin". Full masks (face-hiding costumes, Rig Helms, bandit masks and bandanas) stay Powers' to name; Kingdoms now
+  stands aside for them on both sides (`Identities.maskKey`, `maskedAs`) rather than relying on mixin order.
+- The tab list is resent whenever a player's tab list name changes (checked every second). Powers resent it only when
+  a costume or Rig Helm went on or off, so a bandit mask or bandana never showed there; now it does.
+- The synced attachment is now `jaymoskingdoms:shown_name`, a text component, so "Hooded Figure" and "Goblin" are
+  translated on each client.
+- Barbarian dress isn't named: leather and a stone weapon is everyone's early-game kit.
+- Compile-checked against the 26.3 jars; not yet run in game.
