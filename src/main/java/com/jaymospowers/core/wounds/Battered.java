@@ -5,6 +5,11 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -13,6 +18,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -30,7 +36,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
  * <li>a night's sleep in a bed ends it, and so does being healed whole ({@link Wounds#healAll}) or dying.</li>
  * </ul>
  * Going down again while battered starts it afresh when they get up. A knock-out from standing (the poppy) is no
- * downing: they come round unbattered. Players only for now.
+ * downing: they come round unbattered. (0.15.82, Andy: "yes") Everyone who goes down gets up battered: villagers,
+ * folk, every humanoid, tamed animals; a mob sleeps it off once it's seen asleep (a villager's night in bed).
  */
 public final class Battered {
 	/** How long it lasts (ticks; half a Minecraft day). */
@@ -49,11 +56,24 @@ public final class Battered {
 	private static final Identifier SPEED_ID = JaymosPowers.id("wounds_battered_speed");
 	private static final Identifier DAMAGE_ID = JaymosPowers.id("wounds_battered_damage");
 
+	/** Battered mobs (players are found through the player list). Not saved: a reload finds them again. */
+	private static final Set<LivingEntity> TRACKED = Collections.newSetFromMap(new WeakHashMap<>());
+
 	private Battered() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Battered::tick);
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (!(entity instanceof ServerPlayer) && entity instanceof LivingEntity living && living.hasAttached(UNTIL)) {
+				TRACKED.add(living);
+			}
+		});
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity instanceof LivingEntity living) {
+				TRACKED.remove(living);
+			}
+		});
 	}
 
 	/** Whether {@code entity} is battered now. */
@@ -72,12 +92,17 @@ public final class Battered {
 
 	/** Just got up from being downed: battered for {@link #TICKS}. */
 	static void gotUp(LivingEntity entity) {
-		if (!(entity instanceof ServerPlayer player) || player.isCreative() || player.isSpectator()) {
+		if (!(entity.level() instanceof ServerLevel level) || !entity.isAlive()
+			|| entity instanceof ServerPlayer p && (p.isCreative() || p.isSpectator())) {
 			return;
 		}
-		player.setAttached(UNTIL, player.level().getGameTime() + TICKS);
-		refresh(player);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.battered").withStyle(ChatFormatting.GOLD));
+		entity.setAttached(UNTIL, level.getGameTime() + TICKS);
+		refresh(entity);
+		if (entity instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.battered").withStyle(ChatFormatting.GOLD));
+		} else {
+			TRACKED.add(entity);
+		}
 	}
 
 	/** No longer battered: the mark and its effects gone. */
@@ -87,10 +112,10 @@ public final class Battered {
 		modifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_ID, 0.0);
 	}
 
-	private static void refresh(ServerPlayer player) {
-		boolean on = !Pain.numb(player);
-		modifier(player, Attributes.MOVEMENT_SPEED, SPEED_ID, on ? SPEED : 0.0);
-		modifier(player, Attributes.ATTACK_DAMAGE, DAMAGE_ID, on ? DAMAGE : 0.0);
+	private static void refresh(LivingEntity entity) {
+		boolean on = !Pain.numb(entity);
+		modifier(entity, Attributes.MOVEMENT_SPEED, SPEED_ID, on ? SPEED : 0.0);
+		modifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_ID, on ? DAMAGE : 0.0);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -115,6 +140,23 @@ public final class Battered {
 			if (refresh) {
 				refresh(player);
 			}
+		}
+		if (!refresh || TRACKED.isEmpty()) {
+			return;
+		}
+		// (a copy: clearing untracks)
+		for (LivingEntity mob : new ArrayList<>(TRACKED)) {
+			if (mob.isRemoved() || !mob.isAlive()) {
+				TRACKED.remove(mob);
+				continue;
+			}
+			// worn off, or slept off (a villager in its bed)
+			if (!is(mob) || mob.isSleeping()) {
+				clear(mob);
+				TRACKED.remove(mob);
+				continue;
+			}
+			refresh(mob);
 		}
 	}
 
