@@ -1,15 +1,26 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:registry_contains",
+        "registry": "minecraft:item",
+        "values": [
+          "weaponmod:dynamite"
+        ]
+      }
+    }
+  ],
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
+  "category": "equipment",
   "key": {
-    "S": "minecraft:string",
-    "G": "minecraft:gunpowder",
-    "P": "minecraft:paper"
+    "#": "#c:strings",
+    "X": "minecraft:gunpowder"
   },
   "pattern": [
-    "S",
-    "G",
-    "P"
+    "#",
+    "X",
+    "X"
   ],
   "result": {
     "id": "jaymoskingdoms:dynamite",

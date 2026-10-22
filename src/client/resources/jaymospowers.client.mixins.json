@@ -12,6 +12,8 @@
 		"CarryAvatarRendererMixin",
 		"CrawlAvatarRendererMixin",
 		"CrawlModelFeatureRendererMixin",
+		"DodgeAvatarRendererMixin",
+		"DodgeModelFeatureRendererMixin",
 		"LedgeAvatarRendererMixin",
 		"LedgeFirstPersonMixin",
 		"LedgeModelFeatureRendererMixin",

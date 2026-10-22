@@ -48,6 +48,9 @@ public final class DodgeClient {
 	private static int landingRoll;
 	/** Ticks since this player last dodged (the HUD flashes the row). */
 	public static int sinceDodge = Integer.MAX_VALUE;
+	/** (0.15.74) Client game time our own last roll started and which way, drawn at once ({@link DodgeRollPose}). */
+	static long rollStart = Long.MIN_VALUE;
+	static float rollX, rollZ;
 
 	private DodgeClient() {
 	}
@@ -154,6 +157,9 @@ public final class DodgeClient {
 		player.setSprinting(false);
 		cooldown = Dodge.COOLDOWN;
 		sinceDodge = 0;
+		rollStart = player.level().getGameTime();
+		rollX = (float)dir.x;
+		rollZ = (float)dir.z;
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z));
 		}
