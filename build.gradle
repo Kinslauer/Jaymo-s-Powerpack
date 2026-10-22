@@ -227,6 +227,14 @@ def packModsOverride = [
 	// their name under the crosshair, you pick them up by right-clicking them (Jaymo's Powers switches its auto pickup
 	// off once per install: core/PickupPreset) and hold Q to throw them hard. Not on CurseForge. Its config library (ewlib, MIT) is inside its jar.
 	[dep: "maven.modrinth:interactic-renewed:B6iZXYFE"],
+	// OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; github.com/ThePotatoArchivist/OmniCrossbow; shipped as the untouched
+	// jar with credit): load almost any item into a crossbow from the off hand, each flying its own way (data-driven).
+	// Jaymo's Kingdoms makes it a skill (Survival's Make Do perk, any class) and takes its Omni enchantment out of the game
+	// (OmniCrossbows). Client and server; needs Fabric Language Kotlin 2.4.20+ (packMods has 1.14.2+kotlin.2.4.21) and
+	// carries its own Kaleido Config.
+	// Pinned by its Modrinth version number (modrinth.com/mod/omnicrossbow/version/1.1.4+mc26.3, project TxqFWfQR), as
+	// Cloth Config and Balm are. TODO(home PC): move it to packMods if it has a CurseForge file.
+	[dep: "maven.modrinth:omnicrossbow:1.1.4+mc26.3"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }

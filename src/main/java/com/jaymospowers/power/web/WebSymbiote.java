@@ -507,9 +507,10 @@ public final class WebSymbiote {
 	public static final double STUCK_PROGRESS = 1.0;
 	/**
 	 * (0.15.33) A player's body in your arms: it stops for this long (ticks) before it eats on its own, so you can throw
-	 * it away (it doesn't stop for Consume: that's you asking).
+	 * it away (it doesn't stop for Consume: that's you asking). (0.15.86) Andy: "change the hesitation on eating players
+	 * back to 3s ... maybe add a few more variations to the pool".
 	 */
-	public static final int HESITATE_TICKS = 30, HESITATE_LINES = 3;
+	public static final int HESITATE_TICKS = 60, HESITATE_LINES = 9, HESITATE_THROWN_LINES = 4;
 
 	/** Bonded, your webs reach this much further, pull this much harder, and Zip cools down this much faster. */
 	public static final double REACH_SCALE = 1.5;
@@ -4438,7 +4439,7 @@ public final class WebSymbiote {
 				if (live.hesitateUntil > 0L && !carried) {
 					// (0.15.33) you threw the body clear while it hesitated: it lets it be
 					abortFeeding(player, live);
-					whisper(player, "hesitate.thrown");
+					whisper(player, "hesitate.thrown." + (1 + player.getRandom().nextInt(HESITATE_THROWN_LINES)));
 					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 0.7F);
 				} else if (carried && hesitates(player, live, now, target)) {
 					// (0.15.33) a player's body, unasked: it stops a moment first

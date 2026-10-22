@@ -1523,3 +1523,9 @@ to 3 removals."
   starts (`WebSymbiote.BIG_TAKEOVER_CHANCE` 0.1; `BIG_TAKEOVER_CHANCE_HOST` 0.03 in a host who isn't a web slinger;
   the anti/white one `BIG_TAKEOVER_CHANCE_ANTI` 0.4, Andy: "40%"); otherwise it drives you in the plain black suit. The gift after a takeover is the big
   body only if that takeover was. The near-death roar still builds the big body.
+
+## Hesitating over players, 3 s again (0.15.86)
+
+- Andy: "change the hesitation on eating players back to 3s. the messages are good maybe add a few more variations to
+  the pool". `WebSymbiote.HESITATE_TICKS` 60 (3 s); `HESITATE_LINES` 9 and `HESITATE_THROWN_LINES` 4
+  (`hesitate.N`, `hesitate.thrown.N` in `lang/parts/web.json`).

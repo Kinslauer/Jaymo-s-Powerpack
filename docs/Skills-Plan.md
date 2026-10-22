@@ -166,6 +166,12 @@ living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per leve
 - Hardy Landing (lvl 5): falls hurt 30% less, never not at all. It scales vanilla fall damage only, so powers that
   cancel fall damage (Gravity's Weightless and descents, Wind, Web) work exactly as before.
 - Last Stand (lvl 10, 2 pts): once a day, a killing blow leaves you on half a heart.
+- Make Do (lvl 5, 2 pts, under Forager; Kingdoms 0.7.162): any crossbow loads anything from the off hand, through
+  OmniCrossbow (LGPL-3.0, shipped unchanged): snowballs freeze, slime balls bounce, TNT flies lit, a fishing rod
+  grapples. Every class can learn it. The mod's Omni enchantment is gone: stripped from all loot (an Omni book comes out
+  a plain book) and from the raid's last pillager, and a /give'n one does nothing. Andy, 2026-10-20: "Marksman class
+  should get acess to this", then "It should be a node in the skill tree under survival, unlocks a utility across
+  classes", then "No omni enchant at all".
 
 ## Strength (built, Kingdoms 0.5.52)
 XP: melee blows landed, monsters killed (+4), stone, ore and wood broken. Practice: +1% melee damage per level.

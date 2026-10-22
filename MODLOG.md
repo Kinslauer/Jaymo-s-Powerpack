@@ -2438,3 +2438,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   you back to the 3 s before the fall, on your feet (out of any carrier's arms), with the health you had then (at least
   30%), and not battered (`Downed.undo`). Andy: "chrono should not take fall damage when using overclock": no fall
   damage while Overclock runs.
+- **0.15.85, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
+  untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
+  Kingdoms 0.7.162 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.
+- **0.15.86, symbiote hesitation:** Andy: "change the hesitation on eating players back to 3s. the messages are good
+  maybe add a few more variations to the pool". A player's body in your arms makes the symbiote stop for 3 s again
+  (`WebSymbiote.HESITATE_TICKS` 60) before it eats; 9 hesitation lines (was 3) and 4 for throwing the body clear (was 1).
