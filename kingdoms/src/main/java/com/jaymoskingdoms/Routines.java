@@ -44,6 +44,7 @@ import org.jspecify.annotations.Nullable;
  * <li>evening: sitting round a campfire (the bell if there's none), heading home early, a last chat.</li>
  * </ul>
  * Night is MCA's (they sleep). Anyone afraid, fighting, talking to a player, at work, on guard or playing tag is left be.
+ * (0.7.175) A realm's ruler and guards join in on their hours off ({@link Rulers#offDuty}).
  */
 final class Routines {
 	/** How often routines are thought about (ticks); how far from a seat its villagers are looked at; how far landmarks are sought. */
@@ -192,8 +193,9 @@ final class Routines {
 			return false;
 		}
 		if (v instanceof Worker w && w.role() >= 0) {
-			// (the realm's workers and guards have their own day)
-			return false;
+			// (the realm's workers and guards have their own day; (0.7.175) its ruler and guards have hours off, and
+			// spend them among their people)
+			return Rulers.offDuty(v, w, t);
 		}
 		String job = net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
 		if (job.equals("guard") || job.equals("archer")) {

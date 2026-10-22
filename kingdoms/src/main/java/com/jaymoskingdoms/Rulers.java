@@ -55,7 +55,8 @@ import org.jspecify.annotations.Nullable;
  * the townsfolk ({@link #retire}). Without MCA (and in barbarian camps) nothing changes.
  * <p>
  * Their day is the folk ruler's ({@link Royals.Round}): out on a round of the town by day with an escort of the realm's
- * guards, back at the throne by night, where they hold court ({@link #step}). A ruler is no fighter: with a foe near or a
+ * guards, then court at the throne ({@link #step}); (0.7.175) from mid-afternoon they're among their people, and they
+ * sleep in their own bed ({@link #offDuty}). A ruler is no fighter: with a foe near or a
  * fresh wound, they run as villagers do, and the guards close in; badly hurt, they sound the horn ({@link #rally}). Talk
  * to them as any villager; "Seek an audience" in MCA's menu is the folk ruler's right click ({@link KingdomEvents#audience}).
  * Their bar shows to those who strike them, as a folk ruler's does ({@link BossBars}).
@@ -75,19 +76,31 @@ public final class Rulers {
 	static final int REGALIA_TICKS = 100;
 	/** How often a folk ruler of an MCA realm looks to hand over the throne (ticks). */
 	static final int RETIRE_TICKS = 200;
+	/**
+	 * (0.7.175) A villager ruler's day (time of day): their round from dawn until ROUND_TO, court at the throne until
+	 * COURT_TO, then their own hours among their people, and the night in their own bed.
+	 */
+	static final long ROUND_TO = 5000L, COURT_TO = 8000L;
+	/**
+	 * (0.7.175) A guard's hours off, among the townsfolk: half of them (by who they are) from GUARD_EARLY to GUARD_LATE,
+	 * the rest from GUARD_LATE to COURT_TO, and all of them in the evening, from GUARD_EVENING. On an errand, at the
+	 * ruler's back, in a fight or with a prisoner, they're on duty whatever the hour.
+	 */
+	static final long GUARD_EARLY = 2000L, GUARD_LATE = 5000L, GUARD_EVENING = 9000L;
 
 	/** A villager ruler's added health (an attribute modifier). */
 	static final Identifier HEALTH = JaymosKingdoms.id("ruler_health");
 
 	/**
 	 * Who holds (or last held) a realm's throne, and their blood (a purist's realm is all of it, {@link Purists}); (0.7.171)
-	 * and whether she's a queen (or a lady).
+	 * and whether she's a queen (or a lady); (0.7.175) and the day they were crowned (-1: before that was written down).
 	 */
-	record Reign(UUID ruler, String blood, boolean female) {
+	record Reign(UUID ruler, String blood, boolean female, long since) {
 		static final Codec<Reign> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.CODEC.fieldOf("ruler").forGetter(Reign::ruler),
 				Codec.STRING.optionalFieldOf("blood", "").forGetter(Reign::blood),
-				Codec.BOOL.optionalFieldOf("female", false).forGetter(Reign::female))
+				Codec.BOOL.optionalFieldOf("female", false).forGetter(Reign::female),
+				Codec.LONG.optionalFieldOf("since", -1L).forGetter(Reign::since))
 			.apply(i, Reign::new));
 	}
 
@@ -277,8 +290,20 @@ public final class Rulers {
 		ServerLevel level = Factions.level(server);
 		Map<String, Reign> reigns = new HashMap<>(level.getAttachedOrElse(REIGNS, Map.<String, Reign>of()));
 		Heritage.Kind kind = VillagerHeritage.of(ruler);
-		reigns.put(Integer.toString(faction), new Reign(ruler.getUUID(), kind == null ? "" : kind.key(), McaCompat.female(ruler)));
+		Reign before = reigns.get(Integer.toString(faction));
+		// (0.7.175) the day they were crowned, kept while it's the same reign (one from before then counts from today)
+		long since = before != null && before.ruler().equals(ruler.getUUID()) && before.since() >= 0 ? before.since() : Production.day(server);
+		reigns.put(Integer.toString(faction), new Reign(ruler.getUUID(), kind == null ? "" : kind.key(), McaCompat.female(ruler), since));
 		level.setAttached(REIGNS, Map.copyOf(reigns));
+	}
+
+	/** (0.7.175) {@code f}'s villager ruler's reign, if one holds its throne now. */
+	static @Nullable Reign reignOf(MinecraftServer server, Faction f) {
+		if (f.leader().isEmpty()) {
+			return null;
+		}
+		Reign reign = Factions.level(server).getAttachedOrElse(REIGNS, Map.<String, Reign>of()).get(Integer.toString(f.id()));
+		return reign != null && reign.ruler().equals(f.leader().get()) ? reign : null;
 	}
 
 	// ---- the crown ------------------------------------------------------------------------------------------------------
@@ -420,8 +445,24 @@ public final class Rulers {
 			return true;
 		}
 		Royals.Round round = ROUNDS.computeIfAbsent(mob, Royals.Round::new);
-		if (mob.isSleeping() || McaCompat.busy(mob) || Quests.listening(mob) || threatened(level, mob, f)) {
+		if (f.leader().map(mob.getUUID()::equals).orElse(false) && mob.tickCount % REGALIA_TICKS == 0
+			&& (reignOf(s, f) == null || reignOf(s, f).since() < 0)) {
+			// (0.7.175) crowned before the day was written down
+			reign(s, f.id(), mob);
+		}
+		if (mob.isSleeping() || McaCompat.busy(mob) || Quests.listening(mob) || mob instanceof net.minecraft.world.entity.npc.villager.Villager v
+			&& Neighbours.meeting(v) || threatened(level, mob, f)) {
 			round.stop();
+			return false;
+		}
+		if (offDuty(Royals.timeOfDay(level))) {
+			// (0.7.175) Andy: "allow them to maintain and build relationships with their people". Their hours off: they
+			// live as their townsfolk do (MCA's day, our routines and neighbours), free of the throne's few blocks,
+			// and sleep in their own bed
+			round.leave(level);
+			if (mob.hasHome() && mob.getHomeRadius() < Royals.ROAM_RADIUS) {
+				mob.setHomeTo(f.seat(), Royals.ROAM_RADIUS);
+			}
 			return false;
 		}
 		if (round.canUse()) {
@@ -434,6 +475,29 @@ public final class Rulers {
 		}
 		mob.getNavigation().stop();
 		return true;
+	}
+
+	/** (0.7.175) A villager ruler's own hours (time of day {@code t}): after court, and the night. */
+	static boolean offDuty(long t) {
+		return t >= COURT_TO || t < Royals.DAWN;
+	}
+
+	/**
+	 * (0.7.175) {@code v} (a realm's ruler or guard, {@code w}) is free at {@code t} to live as their townsfolk do: their
+	 * routines and their neighbours ({@link Routines#freeOf}), so friendships, courtships and feuds go on with them too.
+	 */
+	static boolean offDuty(PathfinderMob v, Worker w, long t) {
+		if (leaderRole(w.role())) {
+			return offDuty(t) && !Arrests.judging(v);
+		}
+		if (w.role() != Folk.GUARD || w instanceof Folk || Royals.escortOf(w) != null || Arrests.busy(v) || target(v) != null || Retinue.sent(v)) {
+			return false;
+		}
+		if (t >= GUARD_EVENING) {
+			return true;
+		}
+		boolean early = (v.getUUID().getLeastSignificantBits() & 1L) == 0L;
+		return early ? t >= GUARD_EARLY && t < GUARD_LATE : t >= GUARD_LATE && t < COURT_TO;
 	}
 
 	/** A foe near, or a fresh wound: they leave their day and run. */
@@ -492,6 +556,11 @@ public final class Rulers {
 		PathfinderMob guard = w.mob();
 		if (Arrests.busy(guard)) {
 			// (the arrest walks them)
+			return true;
+		}
+		if (Royals.escortOf(w) == null && Retinue.sent(guard) && target(guard) == null && !guard.isSleeping() && !McaCompat.busy(guard)) {
+			// (0.7.175) sent after a stranger who's been hanging about the ruler, or one thrown out of the city ({@link Retinue})
+			Retinue.harass(guard);
 			return true;
 		}
 		UUID id = Royals.escortOf(w);

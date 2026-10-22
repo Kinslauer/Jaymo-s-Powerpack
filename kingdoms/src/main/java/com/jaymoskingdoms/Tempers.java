@@ -343,7 +343,8 @@ final class Tempers {
 					VillagerHeritage.born(king, blood, null);
 				}
 			}
-			Retinue.tick(level, f, temper, king, now);
+			// (0.7.175) a villager crowned has their retinue too
+			Retinue.tick(level, f, temper, ruler, now);
 			switch (temper) {
 				case WARLORD -> drill(level, f);
 				case REVELER -> {
@@ -358,11 +359,12 @@ final class Tempers {
 		}
 	}
 
-	/** The warlord's guards, drilled: stronger while they fight. */
+	/** The warlord's guards, drilled: stronger while they fight; (0.7.175) his MCA guards too. */
 	private static void drill(ServerLevel level, Faction f) {
-		for (Folk g : level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(Royals.ESCORT_CALL),
-			x -> x.isAlive() && x.factionId() == f.id() && x.combatant() && x.getTarget() != null)) {
-			g.addEffect(new MobEffectInstance(MobEffects.STRENGTH, TICK * 3, 0, false, false));
+		for (Worker g : Workers.near(level, new AABB(f.seat()).inflate(Royals.ESCORT_CALL),
+			x -> x.isAlive() && x.factionId() == f.id() && (x instanceof Folk folk ? folk.combatant() : x.role() == Folk.GUARD)
+				&& Rulers.target(x.mob()) != null)) {
+			g.mob().addEffect(new MobEffectInstance(MobEffects.STRENGTH, TICK * 3, 0, false, false));
 		}
 	}
 

@@ -4309,3 +4309,24 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - `Atrophy.onMobHurt` added Weakness while vanilla was still walking the hurt mob's effect map in `hurtServer`, so a Night
   Bleeder's bite crashed the server (ConcurrentModificationException, Deck 2026-10-22). The Weakness now goes on a task
   run after the hit.
+
+## 0.7.175: rulers' and guards' standing on MCA's screen, their old ways back, and lives among their people (pack 0.15.126)
+- Andy: "the King or queen's temperament and status should be on this screen. same with guards. it doesnt seem like they
+  still have the old behaviors anymore either. allow them to maintain and build relationships with their people."
+- MCA's interact screen (name, trade, mood, personality) now also shows, for a ruler: "Queen of X", their
+  temperament (coloured; hover for what it means), "Reign: N days" (hover: their blood), and what they're about now
+  (round, court, judging, among their people, home for the night). For a guard: "Guard of X", who they're sworn to
+  (hover: that ruler's temperament) and their duty (watch, off watch, escorting, leading a prisoner, seeing a stranger
+  off, fighting). `Standing` works the lines out on the server and syncs them on the villager; `McaInteractInfoMixin`
+  draws them. The Reign record now keeps the day they were crowned (older reigns count from when this loads).
+- The temper ways that 0.7.138 left with the old folk rulers work for villagers crowned and the realm's MCA guards:
+  the Retinue (kneel to the tyrant, sheathe your blade by the warlord, the noble's bread, the reveler's gifts, the
+  paranoid's and purist's guards shoving, dogging and throwing strangers out), the warlord's drilled guards, the
+  assassin's stab, poison and parry, the guards he calls, curing a poisoned ruler (milk, honey, golden apple) and warning
+  one, and carriages and rickshaws for the round. Talking to a villager ruler (right-click) doesn't count as laying hands
+  on them.
+- Rulers keep a day like their people's: their round from dawn, court until mid-afternoon, then their own time in town
+  and the night in their own bed (before, they held the throne all day and night with their brain switched off). Guards
+  get a shift off by day and the evening. Off duty, both join the townsfolk's routines and neighbours, so friendships,
+  courting, feuds and marriage go on with them (they had been left out of `Routines.freeOf`).
+- Not ported: the folk archers on posts (MCA's archers stand in). Compile-checked against the 26.3 jars; not yet seen in game.
