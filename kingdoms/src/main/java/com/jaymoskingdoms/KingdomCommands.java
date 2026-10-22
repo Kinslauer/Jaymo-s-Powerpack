@@ -167,7 +167,7 @@ final class KingdomCommands {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.focus", Focus.describe(focus)).withStyle(ChatFormatting.GRAY), false);
 		}
 		if (f.type() == FactionType.KINGDOM) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.wealth", Wealth.describe(Wealth.of(server, f)),
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.wealth", Wealth.describe(Wealth.of(server, f), f),
 				Wealth.worth(server, f)).withStyle(ChatFormatting.GRAY), false);
 		}
 		long caravans = Caravans.all(server).stream().filter(x -> x.home() == f.id() || x.lord() == f.id()).count();

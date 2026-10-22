@@ -347,6 +347,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
 		// 0.7.126: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
 		Bandits.register();
+		// 0.7.171: rulers' crowns
+		Regalia.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)

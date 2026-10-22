@@ -1359,7 +1359,7 @@ public final class Stables {
 				&& Vec3.atCenterOf(to).distanceToSqr(player.getX(), to.getY() + 0.5, player.getZ()) < RACE_FINISH * RACE_FINISH) {
 				Quests.put(player, q.withProgress(1));
 				Quests.sync(player, true);
-				player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.race.won", q.objective().place(), raceLeft(level, q))
+				player.sendSystemMessage(Component.translatable(Rulers.her("quest.jaymoskingdoms.race.won", Factions.get(level.getServer(), q.giver().faction())), q.objective().place(), raceLeft(level, q))
 					.withStyle(ChatFormatting.GOLD));
 				level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.2F);
 			}

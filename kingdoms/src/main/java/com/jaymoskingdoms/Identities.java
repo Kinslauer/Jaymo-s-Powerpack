@@ -680,7 +680,7 @@ public final class Identities {
 			Map<Faction, LivingEntity> seen = witnesses(level, player, REVEAL_RANGE, false);
 			for (Map.Entry<Faction, LivingEntity> e : seen.entrySet()) {
 				if (e.getKey().id() == here.id()) {
-					Speech.say(level, e.getValue(), Component.translatable("talk.jaymoskingdoms.identity.exiled." + level.getRandom().nextInt(LINES),
+					Speech.say(level, e.getValue(), Component.translatable(Rulers.her("talk.jaymoskingdoms.identity.exiled." + level.getRandom().nextInt(LINES), here),
 						trueName(player)), Speech.RED, 24.0);
 				}
 			}

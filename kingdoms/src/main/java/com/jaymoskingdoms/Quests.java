@@ -752,7 +752,9 @@ public final class Quests {
 			return Component.literal(q.objective().otherName());
 		}
 		String[] parts = q.objective().target().split(":");
-		return Component.translatable("quest.jaymoskingdoms.ruler." + (parts.length >= 3 ? parts[2] : "elder"), q.objective().place());
+		MinecraftServer server = Rulers.server();
+		Faction f = server == null || parts.length < 2 ? null : Factions.get(server, parseOr(parts[1]));
+		return Component.translatable(Rulers.her("quest.jaymoskingdoms.ruler." + (parts.length >= 3 ? parts[2] : "elder"), f), q.objective().place());
 	}
 
 	// ---- progress -------------------------------------------------------------------------------------------------------
@@ -1118,8 +1120,31 @@ public final class Quests {
 
 	// ---- words -------------------------------------------------------------------------------------------------------
 
+	/**
+	 * (0.7.171) The realm whose ruler a quest's words speak of: a regicide's mark, else the king who gave it; null if
+	 * neither (or no server).
+	 */
+	private static @Nullable Faction ruled(Quest q) {
+		MinecraftServer server = Rulers.server();
+		if (server == null) {
+			return null;
+		}
+		if (q.kind() == Quest.REGICIDE && q.objective().target().startsWith("realm:")) {
+			return Factions.get(server, parseOr(q.objective().target().substring("realm:".length())));
+		}
+		return q.giver().king() ? Factions.get(server, q.giver().faction()) : null;
+	}
+
+	private static int parseOr(String id) {
+		try {
+			return Integer.parseInt(id);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
 	static Component title(Quest q) {
-		String key = "quest.jaymoskingdoms." + q.template() + ".title";
+		String key = Rulers.her("quest.jaymoskingdoms." + q.template() + ".title", ruled(q));
 		return switch (q.kind()) {
 			// (who a letter's for and where; whose chief, or whose king)
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
@@ -1127,7 +1152,8 @@ public final class Quests {
 			case Quest.STUD -> Component.translatable(key, breedName(q));
 			case Quest.GRUDGE -> Component.translatable(key, q.objective().otherName());
 			// (the reasons differ by the king's temper, the title only by how it's done)
-			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", q.objective().place());
+			case Quest.REGICIDE -> Component.translatable(Rulers.her("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", ruled(q)),
+				q.objective().place());
 			default -> Component.translatable(key);
 		};
 	}
@@ -1181,7 +1207,7 @@ public final class Quests {
 
 	/** The quest's story as the giver tells it. */
 	static Component text(Quest q) {
-		String key = "quest.jaymoskingdoms." + q.template() + ".text";
+		String key = Rulers.her("quest.jaymoskingdoms." + q.template() + ".text", ruled(q));
 		Quest.Objective o = q.objective();
 		return switch (q.kind()) {
 			case Quest.SLAY -> Component.translatable(key, o.count(), foes(o.target()));
@@ -1223,7 +1249,7 @@ public final class Quests {
 				ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable(o.target().startsWith(NETHER_FORT) ? "quest.jaymoskingdoms.objective.nether_warlord"
 				: "quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
-			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
+			case Quest.REGICIDE -> Component.translatable(Rulers.her("quest.jaymoskingdoms.objective.regicide", ruled(q)), o.place(), x(q), z(q));
 			case Quest.WARBAND -> Component.translatable("quest.jaymoskingdoms.objective.warband", realmName(level, q.giver().faction()), o.place());
 			case Quest.BREAK_IN -> Component.translatable("quest.jaymoskingdoms.objective.break_in", q.giver().name());
 			case Quest.STUD -> Component.translatable("quest.jaymoskingdoms.objective.stud", breedName(q), o.count(), q.giver().name());

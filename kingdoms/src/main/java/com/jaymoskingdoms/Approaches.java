@@ -938,8 +938,9 @@ public final class Approaches {
 				}
 			}
 		}
-		a.line = said != null ? said : Component.translatable(line, args);
-		a.more = Component.translatable(more, args);
+		// (0.7.171) a queen's guards and townsfolk speak of their queen
+		a.line = said != null ? said : Component.translatable(Rulers.her(line, f), args);
+		a.more = Component.translatable(Rulers.her(more, f), args);
 		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == UNMASK || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
 		tell(level, a, a.line, a.color);
@@ -1145,7 +1146,7 @@ public final class Approaches {
 	}
 
 	private static void reply(ServerLevel level, Approach a, String key, int color, Object... args) {
-		tell(level, a, Component.translatable(key, args), color);
+		tell(level, a, Component.translatable(Rulers.her(key, Factions.get(level.getServer(), a.faction)), args), color);
 		// (0.7.109) and they remember how you answered
 		Recollections.replied(a.mob, level.getServer().getPlayerList().getPlayer(a.player), key, a.enemy.isEmpty() ? null : a.enemy);
 	}
