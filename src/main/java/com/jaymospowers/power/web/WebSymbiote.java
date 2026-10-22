@@ -264,6 +264,13 @@ public final class WebSymbiote {
 	 * "near death"), it swells into the big body and takes over to save itself,
 	 * going for whatever hurt you; it costs the bond {@code DEFEND_STRESS}, and can't happen again for {@code DEFEND_COOLDOWN}.
 	 */
+	/**
+	 * (0.15.69) Andy: "the takeovers should now happen primarily in the regular black suit, and only 10% of the time use
+	 * the large suit. even rarer for non web users (except anti)". Each takeover is in the big body this often
+	 * ({@code BIG_TAKEOVER_CHANCE}), {@code BIG_TAKEOVER_CHANCE_HOST} in a host who isn't a web slinger (the anti one keeps
+	 * the usual chance); otherwise in the plain suit. The near-death roar still builds the big body.
+	 */
+	public static final float BIG_TAKEOVER_CHANCE = 0.1F, BIG_TAKEOVER_CHANCE_HOST = 0.03F;
 	public static final float DEFEND_HEALTH = 0.3F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
 	/**
@@ -940,6 +947,8 @@ public final class WebSymbiote {
 		long suitDebutUntil;
 		/** It engulfed you for a takeover: the suit as it was before, put back after. */
 		boolean engulfed;
+		/** (0.15.69) This takeover (and the gift after it) is in the big body: rolled as it starts (see {@link #BIG_TAKEOVER_CHANCE}). */
+		boolean bigTakeover;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -1778,15 +1787,15 @@ public final class WebSymbiote {
 		if (now >= live.suitDebutUntil) {
 			live.suitDebutUntil = 0L;
 		}
-		// the big body is up exactly while it has the wheel
+		// the big body is up while it has the wheel, when this takeover rolled it (BIG_TAKEOVER_CHANCE)
 		// (and, the bond whole, whenever you wear Living Armor: the big body is yours to drive)
 		// (and while its gift lasts: the big body it was driving, yours to steer)
 		if (!next.has(WebSymbioteState.ARMOR)) {
 			live.armorSlim = false;
 		}
-		boolean bulkWanted = live.takeoverTicks > 0 || roarAge >= ROAR_BULK_AT
+		boolean bulkWanted = live.takeoverTicks > 0 && live.bigTakeover || roarAge >= ROAR_BULK_AT
 			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
-			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && !sulking(player) && !live.armorSlim;
+			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover && !sulking(player) && !live.armorSlim;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -2173,6 +2182,8 @@ public final class WebSymbiote {
 		live.surges = 0;
 		live.surged = false;
 		live.giftPending = false;
+		boolean host = !com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) && state(player).kind() != WebSymbioteStrain.WHITE;
+		live.bigTakeover = player.getRandom().nextFloat() < (host ? BIG_TAKEOVER_CHANCE_HOST : BIG_TAKEOVER_CHANCE);
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
 		syncStruggle(player, live);

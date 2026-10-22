@@ -2410,4 +2410,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   kinds). It never stops moving underwater (Wall Crawl tendrils, sprint-swimming takeovers), and takeovers stall less:
   quicker stuck checks, a ledge or wall between it and its prey counts as stuck, wall climbing, circling its prey, pressing
   on with no path. Taking the suit off is now only sometimes fought (60% at no bond to 30% at bond 70), up to 3 times a
-  bond. See docs/web.md.
+  bond. Takeovers are in the plain black suit, the big body only 10% of the time (3% in non-web hosts, the anti one
+  aside). See docs/web.md.

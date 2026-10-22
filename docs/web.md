@@ -1518,3 +1518,8 @@ to 3 removals."
 - **Taking the suit off (`WebSymbioteBond`):** each removal under `FIGHT_BOND` is fought only `FIGHT_CHANCE_LOW` 0.6
   (no bond) to `FIGHT_CHANCE_HIGH` 0.3 (bond 70) of the time; otherwise it comes off at once. Still at most `FIGHTS` 3
   fights a bond.
+- **Takeovers in the plain suit:** Andy: "the takeovers should now happen primarily in the regular black suit, and only
+  10% of the time use the large suit. even rarer for non web users (except anti)". Each takeover rolls the big body as it
+  starts (`WebSymbiote.BIG_TAKEOVER_CHANCE` 0.1; `BIG_TAKEOVER_CHANCE_HOST` 0.03 in a host who isn't a web slinger, the
+  anti/white one keeping 0.1); otherwise it drives you in the plain black suit. The gift after a takeover is the big
+  body only if that takeover was. The near-death roar still builds the big body.
