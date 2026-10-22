@@ -172,7 +172,7 @@ public final class Gremlin extends XenoForm {
 				continue;
 			}
 			clone.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, false));
-			clone.setCustomName(player.getName());
+			clone.setCustomName(player.getDisplayName());
 			clone.setCustomNameVisible(false);
 			live.minions.add(clone.getId());
 		}

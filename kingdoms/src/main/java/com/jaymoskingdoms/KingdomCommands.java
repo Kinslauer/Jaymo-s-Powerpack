@@ -208,7 +208,7 @@ final class KingdomCommands {
 		c.getSource().sendSuccess(() -> mark(peace).append(Component.translatable("message.jaymoskingdoms.info.peace", why)), false);
 		for (var entry : f.members().entrySet()) {
 			ServerPlayer member = server.getPlayerList().getPlayer(entry.getKey());
-			String who = member != null ? member.getGameProfile().name() : entry.getKey().toString().substring(0, 8);
+			String who = member != null ? Identities.trueName(member).getString() : entry.getKey().toString().substring(0, 8);
 			c.getSource().sendSuccess(() -> Component.literal("  " + who + ": ").append(Component.translatable(Rank.forStanding(entry.getValue().standing()).key()))
 				.append(" (" + entry.getValue().standing() + ")").withStyle(ChatFormatting.GRAY), false);
 		}
