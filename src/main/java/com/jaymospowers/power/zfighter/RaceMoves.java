@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
  * (0.11.101) The races' own left-mouse holds, for anyone of that blood (Z Fighter or not), bare-handed and not at a
  * block: a Verdant's <b>stretch punch</b>, the arm shooting out up to {@link #STRETCH_RANGE} blocks to strike what it
  * meets or snatch an item back; a Frost-born's <b>ice prison</b> (Jaymo's Kingdoms' FrostPrison, asked for through the
- * {@link #FROST_TAG} tag); (0.14.0) an Emberborn's <b>Kindle</b>, a held stream of flame ({@code power.ember.EmberKindle},
+ * {@link #FROST_TAG} tag), and once that's spent for the day a thin white beam ({@link FrostBeam}); (0.14.0) an Emberborn's <b>Kindle</b>, a held stream of flame ({@code power.ember.EmberKindle},
  * started here). A Z Fighter's hold combo keeps anything within plain reach; a Verdant Z Fighter's whole hold
  * is his combo, which stretches ({@link ZFighterStretchCombo}).
  */
@@ -72,6 +72,7 @@ public final class RaceMoves {
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, context) -> hold(context.player()));
 		// (0.14.0) an Emberborn's Kindle, a held stream with its own packets (power.ember)
 		com.jaymospowers.power.ember.EmberKindle.init();
+		FrostBeam.init();
 	}
 
 	private static void hold(ServerPlayer player) {
@@ -85,7 +86,8 @@ public final class RaceMoves {
 				stretch(player);
 			}
 		} else if (lineage == ZFighterLineage.FROST) {
-			player.addTag(FROST_TAG);
+			// (0.15.70) the ice prison once a day, the thin white beam after (FrostBeam)
+			FrostBeam.hold(player);
 		}
 	}
 
