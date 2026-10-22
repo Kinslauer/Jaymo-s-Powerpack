@@ -267,10 +267,11 @@ public final class WebSymbiote {
 	/**
 	 * (0.15.69) Andy: "the takeovers should now happen primarily in the regular black suit, and only 10% of the time use
 	 * the large suit. even rarer for non web users (except anti)". Each takeover is in the big body this often
-	 * ({@code BIG_TAKEOVER_CHANCE}), {@code BIG_TAKEOVER_CHANCE_HOST} in a host who isn't a web slinger (the anti one keeps
-	 * the usual chance); otherwise in the plain suit. The near-death roar still builds the big body.
+	 * ({@code BIG_TAKEOVER_CHANCE}), {@code BIG_TAKEOVER_CHANCE_HOST} in a host who isn't a web slinger; the anti one
+	 * ({@link WebSymbioteStrain#WHITE}) uses {@code BIG_TAKEOVER_CHANCE_ANTI} (Andy: "40%"); otherwise in the plain suit.
+	 * The near-death roar still builds the big body.
 	 */
-	public static final float BIG_TAKEOVER_CHANCE = 0.1F, BIG_TAKEOVER_CHANCE_HOST = 0.03F;
+	public static final float BIG_TAKEOVER_CHANCE = 0.1F, BIG_TAKEOVER_CHANCE_HOST = 0.03F, BIG_TAKEOVER_CHANCE_ANTI = 0.4F;
 	public static final float DEFEND_HEALTH = 0.3F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
 	/**
@@ -2182,8 +2183,9 @@ public final class WebSymbiote {
 		live.surges = 0;
 		live.surged = false;
 		live.giftPending = false;
-		boolean host = !com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) && state(player).kind() != WebSymbioteStrain.WHITE;
-		live.bigTakeover = player.getRandom().nextFloat() < (host ? BIG_TAKEOVER_CHANCE_HOST : BIG_TAKEOVER_CHANCE);
+		float big = state(player).kind() == WebSymbioteStrain.WHITE ? BIG_TAKEOVER_CHANCE_ANTI
+			: com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) ? BIG_TAKEOVER_CHANCE : BIG_TAKEOVER_CHANCE_HOST;
+		live.bigTakeover = player.getRandom().nextFloat() < big;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
 		syncStruggle(player, live);
