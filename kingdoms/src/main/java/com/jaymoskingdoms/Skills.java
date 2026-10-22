@@ -168,8 +168,9 @@ public final class Skills {
 		PACKHORSE(Pillar.STRENGTH, 1, 1, 5, 2, 2, BULLDOZER),
 		TITANS_GRIP(Pillar.STRENGTH, 1, 2, 10, 3, 1, QUARRYMAN, PACKHORSE),
 		// (0.6.5) the Combat Arts, Strength's second page (CombatArts): chains of blows, finishers and active skills
-		MOMENTUM(Pillar.STRENGTH, 3, 1, 15, 4, 0, TITANS_GRIP),
-		CLEAVE(Pillar.STRENGTH, 3, 1, 15, 4, 2, TITANS_GRIP),
+		// (0.7.161) its first row opens on Weapon Forms alone (set in the static block below: Weapon Forms is declared later)
+		MOMENTUM(Pillar.STRENGTH, 3, 1, 2, 4, 0),
+		CLEAVE(Pillar.STRENGTH, 3, 1, 2, 4, 2),
 		EARTHSPLITTER(Pillar.STRENGTH, 1, 2, 18, 5, 0, MOMENTUM),
 		EXECUTIONER(Pillar.STRENGTH, 1, 2, 18, 5, 1, MOMENTUM, CLEAVE),
 		REND(Pillar.STRENGTH, 1, 2, 18, 5, 2, CLEAVE),
@@ -209,7 +210,7 @@ public final class Skills {
 
 		public final Pillar pillar;
 		public final int maxRank, cost, minLevel, tier, column;
-		public final List<Perk> requires;
+		public List<Perk> requires;
 
 		Perk(Pillar pillar, int maxRank, int cost, int minLevel, int tier, int column, Perk... requires) {
 			this.pillar = pillar;
@@ -219,6 +220,11 @@ public final class Skills {
 			this.tier = tier;
 			this.column = column;
 			this.requires = List.of(requires);
+		}
+
+		static {
+			MOMENTUM.requires = List.of(WEAPON_FORMS);
+			CLEAVE.requires = List.of(WEAPON_FORMS);
 		}
 
 		public String key() {
