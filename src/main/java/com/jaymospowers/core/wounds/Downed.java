@@ -802,6 +802,8 @@ public final class Downed {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
+			// (0.15.99) down on one knee at their side
+			Tending.keep(player, body);
 			if (++r.ticks % REVIVE_WORK_TICKS == 0) {
 				// kneeling at their side, hands at work
 				player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);

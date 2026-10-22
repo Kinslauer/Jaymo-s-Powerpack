@@ -101,7 +101,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - The first-person slam (`XenoformSlamView`, since 0.15.51; its numbers were tuned against offline pictures, see its
   javadoc): the left forearm swings up into a bar across the lower middle of the view with the band's face turned up
   at you (a slight overshoot); while held it breathes, the dial pops up as a small glowing cap (`XenoBand`) with the
-  dialled alien standing over it as a see-through green hologram (`XenoHologram`, since 0.15.99: upright on screen,
+  dialled alien standing over it as a see-through green hologram (`XenoHologram`, since 0.15.100: upright on screen,
   facing you, red while the band would refuse), and the right hand waits up and off to the right, clear of it; the hand comes straight down over 2 ticks and covers the dial; on contact
   the forearm dips and springs back, the view kicks once (`ScreenShake`) and a green burst blooms (`XenoformHud`);
   then both arms drop away.
