@@ -1,0 +1,31 @@
+{
+  "textures": {
+    "particle": "jaymoskingdoms:block/bounty_notice_0",
+    "notice": "jaymoskingdoms:block/bounty_notice_0"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        5,
+        6.75
+      ],
+      "to": [
+        12,
+        15,
+        7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#notice",
+          "uv": [
+            0,
+            0,
+            9,
+            10
+          ]
+        }
+      }
+    }
+  ]
+}

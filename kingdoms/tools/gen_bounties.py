@@ -171,4 +171,4 @@ if __name__ == "__main__":
     bandana_worn()
     mask_item()
     bandana_item()
-    board_front()
+    # (0.7.168) the board is three blocks wide now: tools/vanilla_style/bounty_board.py paints it

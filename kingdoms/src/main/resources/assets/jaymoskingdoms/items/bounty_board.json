@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jaymoskingdoms:block/bounty_board"
+    "model": "jaymoskingdoms:item/bounty_board"
   }
 }

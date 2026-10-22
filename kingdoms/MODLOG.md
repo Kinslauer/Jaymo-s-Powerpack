@@ -4226,3 +4226,25 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Shaders now stay on all night. If the hook doesn't take (an Iris update renames what it patches), the old switch-off
   comes back by itself, with a warning in the log.
 - Not yet seen in game: needs a check with a shader pack on a new-moon night.
+
+## 0.7.168: the bounty board is several blocks, with notices to pull and pin
+- Andy: "the bounty board should be multiple blocks, allowing for item frame like pulling on and placing onto the
+  board, some villagers will be seen posting to it."
+- **The board** (`BountyBoard`) is 3 blocks wide and 2 tall: spruce log posts at the ends, a stained plank face and a
+  small roof, one notice spot per block (`column`, `row`, `notice` block state). It goes up from its bottom middle
+  block and needs room for all six; breaking any block takes the whole board down, and it drops once. Pistons can't
+  move it. A town's board from before this is taken down and put up again whole (or somewhere it fits near the bell).
+- **Notices** (`bounty_notice` item): punch or use a pinned notice to pull it off, like an item off a frame. That takes
+  the bounty (the same checks as the list) and hands you the notice: "Wanted: name", the price alive and for the head,
+  the crime and where they were last seen. Use a bare spot with a notice in hand to pin it back up: that gives the hunt
+  up. Use a bare spot, or sneak-use, to read the whole list as before. Taking a bounty from the list also hands you its
+  notice; giving it up or being paid takes the notice away. Notices for bounties that are over come down by themselves.
+- **Villagers post them** (`Bounties.post`, `errands`): in daylight, now and then (`POST_CHANCE` each 5 seconds), a
+  board with a bare spot and an open bounty of its realm that isn't up yet sends a grown villager from within 32
+  blocks (awake, hands free, not wanted themselves; MCA villagers included) walking over with the notice in hand. At
+  the board they swing an arm, it's pinned with the item frame sound, and half the time they call it out ("Wanted:
+  name! 40 emeralds to whoever brings them in."). They give up after 40 seconds. The highest price goes up first.
+- Art (`tools/vanilla_style/bounty_board.py`): vanilla's spruce planks stained dark for the face, spruce log posts,
+  three notice designs (a crook's face, a masked bandit, a written notice under a red seal) in the old board's poster
+  colours, and new 16px icons for the board and the notice.
+- Not yet seen in game.
