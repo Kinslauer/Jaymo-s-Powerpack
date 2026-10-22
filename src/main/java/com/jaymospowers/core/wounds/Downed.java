@@ -604,7 +604,7 @@ public final class Downed {
 		if (!mob.entityTags().contains(DOWNED_TAG)) {
 			mob.addTag(DOWNED_TAG);
 		}
-		// (0.15.91) lying downed, not also knocked flat by a leg shot (that turned it over twice, head into the ground)
+		// (0.15.92) lying downed, not also knocked flat by a leg shot (that turned it over twice, head into the ground)
 		com.jaymospowers.power.web.KitchenCompat.endLegCrawl(mob);
 		long now = level.getGameTime();
 		Long wounds = mob.getAttached(WOUNDS);

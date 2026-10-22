@@ -353,7 +353,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.15.91) A downed mob lies as it's downed ({@code DownedPose}), not also as Kitchen's leg-shot crawl: that laid it
+	 * (0.15.92) A downed mob lies as it's downed ({@code DownedPose}), not also as Kitchen's leg-shot crawl: that laid it
 	 * face down a second time, so a crippled illager or skeleton stood on its head, sticking out of the ground. Its
 	 * crawl is dropped while it's down (the limp it's left with stays).
 	 */
