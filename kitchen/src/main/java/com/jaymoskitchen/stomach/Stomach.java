@@ -78,6 +78,13 @@ public final class Stomach {
 	public static final float SELF_HEAL_CAP = 0.6F;
 	/** (0.5.7) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
 	static final String DOWNED_TAG = "jaymospowers_downed";
+	/**
+	 * (0.5.15) Jaymo's Powers' scoreboard tag on someone whose wounds aren't patched up (an open wound past bruising
+	 * undressed, a cut, festering, an unset break): their meals heal at {@link #UNPATCHED_REGEN} of the speed. Andy
+	 * (2026-10-22): "regeneration should only kick in at full speed when you are fully patched up".
+	 */
+	static final String UNPATCHED_TAG = "jaymospowers_unpatched";
+	public static final float UNPATCHED_REGEN = 0.25F;
 	/** A drink in its slot makes every food count this much more. */
 	static final float DRINK_BONUS = 0.1F;
 	/** Most health meals can add (an extra bar of hearts), and how much more each extra slot allows. */
@@ -400,7 +407,8 @@ public final class Stomach {
 		if (now - LAST_HURT.getOrDefault(id, Long.MIN_VALUE / 2) < REGEN_DELAY) {
 			return;
 		}
-		float progress = REGEN_PROGRESS.getOrDefault(id, 0.0F) + regenRate(meals) / REGEN_INTERVAL;
+		float rate = regenRate(meals) * (player.entityTags().contains(UNPATCHED_TAG) ? UNPATCHED_REGEN : 1.0F);
+		float progress = REGEN_PROGRESS.getOrDefault(id, 0.0F) + rate / REGEN_INTERVAL;
 		if (progress >= 1.0F) {
 			player.heal(1.0F);
 			progress -= 1.0F;

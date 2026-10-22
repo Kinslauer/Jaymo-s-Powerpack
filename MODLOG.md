@@ -2469,3 +2469,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   pools that widen with the damage; killing blows bleed too (`ALLOW_DEATH`, since `AFTER_DAMAGE` misses them); Wounds'
   open cuts drip small drops that leave a trail (`BladeBlood.drip`). Blood colours by tag (`tags/entity_type/blood/`:
   ender, dark, slime, bug). Not playtested; compile-checked against the 26.3 jars.
+- **0.15.94, wounds first, hearts after (Kitchen 0.5.15):** Andy: "everything should go through the wounding system
+  first, for example if a certain threshold (30%) damage to your limb goes through, then it should affect your hearts
+  ... regeneration should only kick in at full speed when you are fully patched up". Every hit now lands on the body
+  parts before vanilla takes any health (`WoundsHurtMixin` and `WoundsPlayerHurtMixin` around `setHealth` in
+  `actuallyHurt`, `Wounds.takeHit`). The first 30% of a part's pool (`Wounds.HEART_SPILL_FROM`) is bruising and costs no
+  hearts; past it the hearts drain so that a part at zero has cost its whole share (`Wounds.hearts`; never more hearts
+  than before for the same damage). Head or body at zero still downs or kills. Meals and food raise deep wounds only to
+  the bruise line; bruises mend over 3 minutes (`BRUISE_MEND_TICKS`). Until you're patched up (`Wounds.patchedUp`: each
+  part hurt past bruising dressed or splinted, nothing bleeding, festering or broken unset) natural healing runs at
+  `UNPATCHED_REGEN` (a quarter): vanilla food (`WoundsRegenMixin`) and Kitchen's meals (the `jaymospowers_unpatched` tag).
