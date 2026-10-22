@@ -23,6 +23,8 @@
 		"LedgePlayerMixin",
 		"MeditateAvatarRendererMixin",
 		"MeditateModelFeatureRendererMixin",
+		"TendAvatarRendererMixin",
+		"TendModelFeatureRendererMixin",
 		"DismemberLivingEntityRendererMixin",
 		"DismemberModelFeatureRendererMixin",
 		"DownedLivingEntityRendererMixin",

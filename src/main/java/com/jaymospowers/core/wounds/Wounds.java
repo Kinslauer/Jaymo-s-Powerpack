@@ -150,6 +150,8 @@ public final class Wounds {
 		Bleeding.register();
 		MedicineItems.register();
 		Treatment.register();
+		// (0.15.99) kneeling at someone's side to treat them
+		Tending.register();
 		SelfRevive.register();
 		// (0.15.82) up from the downed, but battered
 		Battered.register();

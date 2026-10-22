@@ -2503,3 +2503,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the body turned to them with a step in, the weapon turned in the hand by `FinisherItemInHandLayerMixin`); your own
   is watched from behind, first person given back after. Not on tamed animals. Medicine in hand still treats; a
   red-hot blade only counts as medicine with sneak. A tap on a downed guard still has Kingdoms disarm them.
+- **0.15.99, treating each other:** Andy: "players should be able to use medical items on each other, to bandage and
+  splint/ heal their team. you can hold right click with the item on them and it will play and kneeling interaction
+  animation, then apply after a short hold. using meds also increases your survival skill". Treating another body
+  (PR #366's channel) is now a hold: hold use on someone with medicine and, past a tap (`Downed.TAP_TICKS`), you drop to
+  one knee at their side and treat their worst part (salts, leeches and poppy: the whole body); let go and it stops
+  (`Treatment` hold sessions). A tap with a bandage, rag, splint or needle opens the body screen to pick the part, as
+  before. The kneel is the synced `Tending` attachment, drawn for everyone by `TendPose` (one knee down, right foot
+  planted, both hands working at the wound; bent well over someone lying down, upright for someone standing), and a
+  food revive of a downed one kneels too. Every treatment finished still gives Kingdoms Survival experience
+  (`MedicineSkill.treated`). Medicine in hand means treat; a weapon on a downed enemy is a finisher (0.15.98) (a red-hot
+  blade is medicine only with sneak).
