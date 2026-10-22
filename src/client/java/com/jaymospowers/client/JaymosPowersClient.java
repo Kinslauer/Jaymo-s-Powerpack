@@ -54,6 +54,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
+		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();

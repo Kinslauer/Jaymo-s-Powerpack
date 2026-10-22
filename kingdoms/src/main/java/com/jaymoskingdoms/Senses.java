@@ -95,7 +95,7 @@ public final class Senses {
 	static final double LOOK_RADIUS = 5.0, SEARCH_SPEED = 1.0;
 	/** How near (blocks) is arrived. */
 	static final double ARRIVED = 2.0;
-	/** (0.7.154) Lures ({@link #lure}): how loud losing a target counts as, and the ticks a far lure allows per block of the walk. */
+	/** (0.7.155) Lures ({@link #lure}): how loud losing a target counts as, and the ticks a far lure allows per block of the walk. */
 	static final double LOST_LURE = 8.0;
 	static final int LURE_TICKS_PER_BLOCK = 12;
 
@@ -137,7 +137,7 @@ public final class Senses {
 		boolean searching, started;
 		@Nullable Vec3 spot;
 		int walkLeft, lookLeft;
-		/** (0.7.154) How loud what it is searching for was where it stood ({@link Awareness}); a fainter lure doesn't turn it. */
+		/** (0.7.155) How loud what it is searching for was where it stood ({@link Awareness}); a fainter lure doesn't turn it. */
 		double lure;
 	}
 
@@ -431,7 +431,7 @@ public final class Senses {
 	}
 
 	/**
-	 * (0.7.154) {@code mob} heard, saw or smelled something at {@code spot} ({@link Awareness}) as loud as {@code loudness}, and
+	 * (0.7.155) {@code mob} heard, saw or smelled something at {@code spot} ({@link Awareness}) as loud as {@code loudness}, and
 	 * goes to look, the same search as for a player it lost. Only when it is after no one, and only if it isn't already
 	 * searching for something louder: mobs always go for the louder noise. {@code who}, if anyone, is the player it gave
 	 * away (their gauge shows it searching, and it is unaware of them). False if it didn't turn.

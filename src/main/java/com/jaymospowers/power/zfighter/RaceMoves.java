@@ -73,6 +73,8 @@ public final class RaceMoves {
 		// (0.14.0) an Emberborn's Kindle, a held stream with its own packets (power.ember)
 		com.jaymospowers.power.ember.EmberKindle.init();
 		FrostBeam.init();
+		// (0.15.72) a Stormborn's Thunderclap and a Dawnborn's Sunflare, charged holds (power.heritage)
+		com.jaymospowers.power.heritage.HeritageMoves.init();
 	}
 
 	private static void hold(ServerPlayer player) {

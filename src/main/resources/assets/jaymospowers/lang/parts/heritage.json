@@ -1,0 +1,10 @@
+{
+	"hud.jaymospowers.heritage.thunderclap": "Thunderclap",
+	"hud.jaymospowers.heritage.thunderclap.full": "Thunderclap: let go to strike",
+	"hud.jaymospowers.heritage.sunflare": "Sunflare",
+	"hud.jaymospowers.heritage.sunflare.full": "Sunflare: let go to flash",
+	"message.jaymospowers.heritage.thunderclap.cooldown": "Thunderclap gathers again in %s s",
+	"message.jaymospowers.heritage.thunderclap.no_sky": "Thunderclap needs the open sky",
+	"message.jaymospowers.heritage.sunflare.cooldown": "Sunflare gathers again in %s s",
+	"message.jaymospowers.heritage.sunflare.no_sun": "Sunflare needs the daylight"
+}
