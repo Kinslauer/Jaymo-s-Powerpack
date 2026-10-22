@@ -172,8 +172,8 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
 
 ## 0.15.91: A real meteor
 - **Straight from the Aether's magnetic region**: the falling rock, its wreck lumps and the burst's debris are all one
-  set (`GravityMeteor.rock`): ferrosite, ichorite, ferrosite sand, arkenium, corrobonite and gravitite ore. No magma or
-  vanilla stone; the fire is only its flames.
+  set (`GravityMeteor.rock`): a conglomerate of ferrosite, ichorite, ferrosite sand, arkenium, corrobonite and gravitite
+  ore, with magma where it superheated coming in. No other vanilla stone.
 - **Falls from build height**: it starts at the top of the world (slanting in from behind you, `FALL_SLANT`) and takes
   `FALL_SPEED` 2.6 blocks a tick on average, 50-120 ticks, accelerating. The rock always carries `BlockCluster.SCALE`, so
   every scaled cluster is drawn out to `BlockCluster.FAR_SEEN` (384); entity tracking is horizontal-only, so height

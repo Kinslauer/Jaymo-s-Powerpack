@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Event Horizon's C: the Meteor. Held, it gathers ({@code FULL_CHARGE} to its fullest): let go and, where you aim
  * ({@code RANGE_MIN} out to {@code RANGE_MAX} with the charge, dropped to the first solid ground under it), a rock of
- * the Aether's magnetic region (ferrosite, ichorite, ferrosite sand, arkenium, corrobonite, gravitite) is torn out of the sky
+ * the Aether's magnetic region (ferrosite, ichorite, ferrosite sand, arkenium, corrobonite, gravitite, superheated to magma in places) is torn out of the sky
  * at build height and pulled down onto it, {@code FALL_SPEED} blocks a tick on average ({@code FALL_TICKS_MIN} to
  * {@code FALL_TICKS_MAX} ticks), so everyone can watch it come: burning and trailing smoke, its shadow spreading on the
  * ground below, smashing through every block it meets on the way (roofs, trees, overhangs) and anyone in its path
@@ -112,12 +112,14 @@ final class GravityMeteor {
 	private static final DustParticleOptions SHADOW = new DustParticleOptions(0x120A1A, 2.0F);
 
 	/**
-	 * What the rock is made of, straight from the Aether's magnetic region: its nine blocks, its wreck's lumps and the
-	 * burst's debris are all of these (repeats are more common).
+	 * What the rock is made of: a conglomerate straight from the Aether's magnetic region, superheated to magma here and
+	 * there coming in through the air. Its nine blocks, its wreck's lumps and the burst's debris are all of these
+	 * (repeats are more common).
 	 */
 	private static List<BlockState> rock() {
 		BlockState ferrosite = AetherBlocks.FERROSITE.defaultBlockState(), ichorite = AetherBlocks.ICHORITE.defaultBlockState();
-		return List.of(ferrosite, ichorite, ferrosite, AetherBlocks.ARKENIUM_ORE.defaultBlockState(), ferrosite, ichorite,
+		BlockState magma = Blocks.MAGMA_BLOCK.defaultBlockState();
+		return List.of(ferrosite, magma, ichorite, AetherBlocks.ARKENIUM_ORE.defaultBlockState(), ferrosite, magma,
 			AetherBlocks.FERROSITE_SAND.defaultBlockState(), AetherBlocks.CORROBONITE_ORE.defaultBlockState(), AetherBlocks.GRAVITITE_ORE.defaultBlockState());
 	}
 
