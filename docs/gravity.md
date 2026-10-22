@@ -171,9 +171,9 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
 - Board and rider bob together slowly (`BOB`), less at speed. Stepping off, the board drops square again.
 
 ## 0.15.91: A real meteor
-- **Made of the Aether's magnetic region**: the falling rock is ferrosite, ichorite, arkenium ore and a gravitite ore
-  block with burning magma; its wreck lumps are ferrosite, ichorite, ferrosite sand and magma, now and then arkenium,
-  corrobonite or gravitite ore; the burst's debris particles match.
+- **Straight from the Aether's magnetic region**: the falling rock, its wreck lumps and the burst's debris are all one
+  set (`GravityMeteor.rock`): ferrosite, ichorite, ferrosite sand, arkenium, corrobonite and gravitite ore. No magma or
+  vanilla stone; the fire is only its flames.
 - **Falls from build height**: it starts at the top of the world (slanting in from behind you, `FALL_SLANT`) and takes
   `FALL_SPEED` 2.6 blocks a tick on average, 50-120 ticks, accelerating. The rock always carries `BlockCluster.SCALE`, so
   every scaled cluster is drawn out to `BlockCluster.FAR_SEEN` (384); entity tracking is horizontal-only, so height

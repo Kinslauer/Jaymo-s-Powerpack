@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Event Horizon's C: the Meteor. Held, it gathers ({@code FULL_CHARGE} to its fullest): let go and, where you aim
  * ({@code RANGE_MIN} out to {@code RANGE_MAX} with the charge, dropped to the first solid ground under it), a rock of
- * the Aether's magnetic region (ferrosite, ichorite, arkenium, a little gravitite, burning magma) is torn out of the sky
+ * the Aether's magnetic region (ferrosite, ichorite, ferrosite sand, arkenium, corrobonite, gravitite) is torn out of the sky
  * at build height and pulled down onto it, {@code FALL_SPEED} blocks a tick on average ({@code FALL_TICKS_MIN} to
  * {@code FALL_TICKS_MAX} ticks), so everyone can watch it come: burning and trailing smoke, its shadow spreading on the
  * ground below, smashing through every block it meets on the way (roofs, trees, overhangs) and anyone in its path
@@ -45,11 +45,9 @@ import net.minecraft.world.phys.Vec3;
  * lighter blasts ({@code CRATER_RING_POWER}) go off as the shockwave reaches them, up to {@code CRATER_RINGS} rings
  * {@code CRATER_RING_STEP} apart. {@code COOLDOWN_MIN} (a tap) to {@code COOLDOWN} (a full charge) before another.
  * The rock doesn't vanish when it hits: it bursts apart into {@code WRECK_MIN} to {@code WRECK_MAX} lumps of debris
- * (ferrosite and ichorite, scorched with magma, now and then a bit of arkenium, corrobonite or gravitite ore; more the
- * bigger it was) thrown out over the crater, where they
+ * (the rock's own Aether blocks; more the bigger it was) thrown out over the crater, where they
  * lie for {@code WRECK_LINGER_MIN} to {@code WRECK_LINGER_MAX} ticks (Lift can take them) and then crumble away. Once in a long while one of them
- * carries a symbiote, which crawls out (or is left as goo) when it breaks up. The burst throws a storm of rock and
- * earth (GravityMeteorFx, on every client within {@code BURST_SEEN}), and dust and smoke hang over the crater a long
+ * carries a symbiote, which crawls out (or is left as goo) when it breaks up. The burst throws a storm of the rock's blocks (GravityMeteorFx, on every client within {@code BURST_SEEN}), and dust and smoke hang over the crater a long
  * while before they clear. When the shockwave has run out, whatever the strike cut loose and left hanging in the air over
  * the crater (a tree's crown, a lip of an overhang) comes down too (see {@link GravityMeteorSweep}).
  */
@@ -101,8 +99,7 @@ final class GravityMeteor {
 	/** The wreck: how many lumps the rock bursts into (a tap's, a full charge's), how long they lie (ticks), how hard they fly out. */
 	static final int WRECK_MIN = 4, WRECK_MAX = 30, WRECK_LINGER_MIN = 100, WRECK_LINGER_MAX = 220;
 	static final double WRECK_OUT_MIN = 0.35, WRECK_OUT_MAX = 0.9, WRECK_UP_MIN = 0.45, WRECK_UP_MAX = 1.05;
-	/** What the lumps are made of (see {@link #wreckRock}); now and then ({@code WRECK_ORE_CHANCE} per block) a bit of ore ({@link #wreckOre}). */
-	static final float WRECK_ORE_CHANCE = 0.08F;
+	/** What the lumps are made of: the rock's own blocks (see {@link #rock}). */
 	static final int IMPACT_FIRE_SECONDS = 8;
 	/** Embedding: how long it grinds in before it bursts (a tap's, a full charge's), and how much of its width sinks in. */
 	static final int EMBED_MIN = 30, EMBED_MAX = 50;
@@ -114,25 +111,14 @@ final class GravityMeteor {
 	private static final double ROCK_HALF = 1.2;
 	private static final DustParticleOptions SHADOW = new DustParticleOptions(0x120A1A, 2.0F);
 
-	/** The falling rock: nine blocks of the Aether's magnetic region, burning magma among them. */
+	/**
+	 * What the rock is made of, straight from the Aether's magnetic region: its nine blocks, its wreck's lumps and the
+	 * burst's debris are all of these (repeats are more common).
+	 */
 	private static List<BlockState> rock() {
 		BlockState ferrosite = AetherBlocks.FERROSITE.defaultBlockState(), ichorite = AetherBlocks.ICHORITE.defaultBlockState();
-		BlockState magma = Blocks.MAGMA_BLOCK.defaultBlockState();
-		return List.of(ferrosite, magma, ichorite, ferrosite, AetherBlocks.ARKENIUM_ORE.defaultBlockState(), magma, ferrosite, ichorite,
-			AetherBlocks.GRAVITITE_ORE.defaultBlockState());
-	}
-
-	/** The wreck's rock (repeats are more common): mostly ferrosite and ichorite, scorched here and there. */
-	private static List<BlockState> wreckRock() {
-		BlockState ferrosite = AetherBlocks.FERROSITE.defaultBlockState(), ichorite = AetherBlocks.ICHORITE.defaultBlockState();
-		return List.of(ferrosite, ferrosite, ferrosite, ferrosite, ferrosite, ichorite, ichorite, ichorite,
-			AetherBlocks.FERROSITE_SAND.defaultBlockState(), Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.MAGMA_BLOCK.defaultBlockState());
-	}
-
-	/** The wreck's ore: the magnetic region's arkenium and corrobonite, and the gravitite that pulled it down. */
-	private static List<BlockState> wreckOre() {
-		return List.of(AetherBlocks.ARKENIUM_ORE.defaultBlockState(), AetherBlocks.ARKENIUM_ORE.defaultBlockState(),
-			AetherBlocks.CORROBONITE_ORE.defaultBlockState(), AetherBlocks.GRAVITITE_ORE.defaultBlockState());
+		return List.of(ferrosite, ichorite, ferrosite, AetherBlocks.ARKENIUM_ORE.defaultBlockState(), ferrosite, ichorite,
+			AetherBlocks.FERROSITE_SAND.defaultBlockState(), AetherBlocks.CORROBONITE_ORE.defaultBlockState(), AetherBlocks.GRAVITITE_ORE.defaultBlockState());
 	}
 
 	private static final class Meteor {
@@ -304,7 +290,7 @@ final class GravityMeteor {
 					continue;
 				}
 				it.remove();
-				List<Integer> debris = debrisStates(level, ground, meteor.charge);
+				List<Integer> debris = debrisStates();
 				impact(level, owner, ground, meteor.charge);
 				// after the blast, so the wreck isn't caught in it
 				wreck(level, ground, meteor.charge);
@@ -424,32 +410,19 @@ final class GravityMeteor {
 		}
 	}
 
-	/** What its debris is made of: the ground where it struck (looked at before the blast tears it up), and the rock. */
-	private static List<Integer> debrisStates(ServerLevel level, Vec3 at, float charge) {
-		var random = level.getRandom();
+	/** What its debris is made of: the rock's own blocks, straight from the Aether (the ground's spray is the embedding's). */
+	private static List<Integer> debrisStates() {
 		List<Integer> states = new ArrayList<>();
-		double reach = Math.max(3.0, radius(charge) * 0.25);
-		for (int i = 0; i < 24 && states.size() < 10; i++) {
-			double a = random.nextDouble() * Math.PI * 2.0, r = random.nextDouble() * reach;
-			net.minecraft.core.BlockPos spot = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-				net.minecraft.core.BlockPos.containing(at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r)).below();
-			for (int k = 0; k < 3; k++) {
-				// the topsoil and what's under it
-				BlockState state = level.getBlockState(spot.below(k));
-				int id = net.minecraft.world.level.block.Block.getId(state);
-				if (!state.isAir() && state.getFluidState().isEmpty() && state.shouldSpawnTerrainParticles() && !states.contains(id)) {
-					states.add(id);
-				}
+		for (BlockState state : rock()) {
+			int id = net.minecraft.world.level.block.Block.getId(state);
+			if (!states.contains(id)) {
+				states.add(id);
 			}
-		}
-		for (BlockState state : List.of(AetherBlocks.FERROSITE.defaultBlockState(), AetherBlocks.ICHORITE.defaultBlockState(),
-			AetherBlocks.ARKENIUM_ORE.defaultBlockState(), Blocks.MAGMA_BLOCK.defaultBlockState())) {
-			states.add(net.minecraft.world.level.block.Block.getId(state));
 		}
 		return states;
 	}
 
-	/** The burst, for everyone near: a storm of rock and earth, and the dust and smoke that hang there after. */
+	/** The burst, for everyone near: a storm of the rock's Aether blocks, and the dust and smoke that hang there after. */
 	private static void burst(ServerLevel level, Vec3 at, float charge, List<Integer> states) {
 		GravityMeteorBurst burst = new GravityMeteorBurst(at.x, at.y, at.z, charge, (float)radius(charge), states);
 		for (ServerPlayer player : level.players()) {
@@ -598,7 +571,7 @@ final class GravityMeteor {
 			int pieces = 1 + random.nextInt(charge > 0.5F ? 4 : 3);
 			List<BlockState> states = new ArrayList<>();
 			for (int k = 0; k < pieces; k++) {
-				List<BlockState> from = random.nextFloat() < WRECK_ORE_CHANCE ? wreckOre() : wreckRock();
+				List<BlockState> from = rock();
 				states.add(from.get(random.nextInt(from.size())));
 			}
 			double a = random.nextDouble() * Math.PI * 2.0;
