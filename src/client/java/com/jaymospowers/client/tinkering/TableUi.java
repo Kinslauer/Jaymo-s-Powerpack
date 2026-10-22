@@ -48,6 +48,16 @@ final class TableUi {
 		}
 	}
 
+	/** Whether the mouse is over the side inventory's panel (which lies outside the screen's own image). */
+	static boolean inSide(TableExtras extras, int left, int top, double mouseX, double mouseY) {
+		if (extras.size() == 0) {
+			return false;
+		}
+		int rows = (extras.size() + TableExtras.SIDE_COLUMNS - 1) / TableExtras.SIDE_COLUMNS;
+		int x = left + TableExtras.SIDE_X - SidePanel.PAD - 1;
+		return mouseX >= x && mouseX < x + SidePanel.WIDTH && mouseY >= top && mouseY < top + TableExtras.SIDE_Y + rows * 18 + 4;
+	}
+
 	/** The tab under the mouse, or null. */
 	private static StationBlock.Kind tabAt(TableExtras extras, int left, int top, double mouseX, double mouseY) {
 		List<StationBlock.Kind> tabs = extras.tabs();

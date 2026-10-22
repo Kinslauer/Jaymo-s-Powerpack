@@ -16,8 +16,12 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
@@ -55,7 +59,7 @@ public final class TableExtras {
 			this.real = null;
 			this.backing = new SimpleContainer(SIDE_MAX);
 		} else {
-			this.real = access.evaluate(TableExtras::find, null);
+			this.real = access.evaluate((level, pos) -> find(level, pos, player), null);
 			this.backing = new View(real);
 			if (real != null) {
 				sideSize.set(Math.min(SIDE_MAX, real.getContainerSize()));
@@ -180,16 +184,23 @@ public final class TableExtras {
 		};
 	}
 
-	/** The container beside the table: a Pattern or Part Chest first, else the first container block around it. */
-	private static @Nullable Container find(Level level, BlockPos pos) {
+	/**
+	 * The container beside the table: a Pattern or Part Chest first, else the first chest, barrel or shulker box around it
+	 * (not furnaces and the like, whose output slots have rules of their own), and never one locked against the player.
+	 */
+	private static @Nullable Container find(Level level, BlockPos pos, Player player) {
 		Container other = null;
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos at = pos.relative(direction);
 			BlockEntity entity = level.getBlockEntity(at);
+			if (entity instanceof BaseContainerBlockEntity locked && !locked.canOpen(player)) {
+				continue;
+			}
 			if (entity instanceof TinkerChestEntity chest) {
 				return chest;
 			}
-			if (other == null && entity instanceof Container) {
+			if (other == null && (entity instanceof ChestBlockEntity || entity instanceof BarrelBlockEntity
+				|| entity instanceof ShulkerBoxBlockEntity)) {
 				other = HopperBlockEntity.getContainerAt(level, at);
 			}
 		}

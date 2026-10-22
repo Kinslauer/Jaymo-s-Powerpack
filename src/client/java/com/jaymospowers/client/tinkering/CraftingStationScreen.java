@@ -39,4 +39,10 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		return TableUi.click(minecraft, menu.containerId, menu.extras(), leftPos, topPos, event.x(), event.y()) || super.mouseClicked(event, doubleClick);
 	}
+
+	@Override
+	protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
+		// the side inventory's slots lie left of the screen: clicks there aren't drops
+		return !TableUi.inSide(menu.extras(), left, top, mouseX, mouseY) && super.hasClickedOutside(mouseX, mouseY, left, top);
+	}
 }

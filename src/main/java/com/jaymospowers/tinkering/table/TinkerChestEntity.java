@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,7 +74,20 @@ public class TinkerChestEntity extends BaseContainerBlockEntity {
 
 	@Override
 	protected AbstractContainerMenu createMenu(int id, Inventory inventory) {
-		return new ChestMenu(MenuType.GENERIC_9x6, id, inventory, this, ROWS);
+		ChestMenu menu = new ChestMenu(MenuType.GENERIC_9x6, id, inventory, this, ROWS);
+		// the chest's own slots keep to its filter too (a plain Slot doesn't ask the container)
+		for (int i = 0; i < ROWS * 9; i++) {
+			Slot old = menu.slots.get(i);
+			Slot filtered = new Slot(this, old.getContainerSlot(), old.x, old.y) {
+				@Override
+				public boolean mayPlace(ItemStack stack) {
+					return canPlaceItem(getContainerSlot(), stack);
+				}
+			};
+			filtered.index = old.index;
+			menu.slots.set(i, filtered);
+		}
+		return menu;
 	}
 
 	@Override
