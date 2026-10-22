@@ -134,9 +134,11 @@ public final class Tinkering {
 		for (ToolType type : ToolType.values()) {
 			TOOLS.put(type, item(type.itemId(), p -> new TinkerToolItem(p, type), p -> {
 				p = p.durability(100);
-				if (type == ToolType.HAND_AXE) {
+				if (type == ToolType.HAND_AXE || type == ToolType.BROAD_AXE || type == ToolType.MINOTAUR_AXE) {
 					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.AXE));
-				} else if (type == ToolType.MATTOCK) {
+				} else if (type == ToolType.EXCAVATOR || type == ToolType.PICKADZE) {
+					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.SHOVEL));
+				} else if (type == ToolType.MATTOCK || type == ToolType.KAMA || type == ToolType.SCYTHE) {
 					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.HOE));
 				}
 				return p;

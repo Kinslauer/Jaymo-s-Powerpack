@@ -1,0 +1,560 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 1,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_bone"
+            }
+          },
+          {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_seared_stone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_silver"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_steel"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/pickadze/handle_wood"
+        }
+      },
+      {
+        "type": "minecraft:condition",
+        "property": "minecraft:custom_model_data",
+        "index": 0,
+        "on_true": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/pickadze/pick_broken_wood"
+          }
+        },
+        "on_false": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/pickadze/pick_wood"
+          }
+        }
+      },
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 2,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_bone"
+            }
+          },
+          {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_seared_stone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_silver"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_steel"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/pickadze/adze_wood"
+        }
+      }
+    ]
+  }
+}

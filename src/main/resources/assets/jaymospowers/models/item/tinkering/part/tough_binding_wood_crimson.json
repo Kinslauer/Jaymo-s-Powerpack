@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/part/tough_binding_wood_crimson"
+  }
+}

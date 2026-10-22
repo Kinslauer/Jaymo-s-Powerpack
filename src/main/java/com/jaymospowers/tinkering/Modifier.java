@@ -191,7 +191,7 @@ public enum Modifier {
 		}
 		HolderLookup.RegistryLookup<Enchantment> lookup = registries.lookupOrThrow(Registries.ENCHANTMENT);
 		ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
-		boolean sword = !(stack.getItem() instanceof TinkerToolItem tool) || tool.type.style == ToolType.Style.SWORD;
+		boolean sword = !(stack.getItem() instanceof TinkerToolItem tool) || tool.type.style != ToolType.Style.TOOL;
 		of(stack).forEach((modifier, level) -> {
 			ResourceKey<Enchantment> key = sword && modifier.swordEnchantment != null ? modifier.swordEnchantment : modifier.enchantment;
 			if (key != null) {

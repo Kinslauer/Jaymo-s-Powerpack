@@ -28,7 +28,20 @@ public enum Trait {
 	CRUMBLING("crumbling", ChatFormatting.LIGHT_PURPLE),
 	TASTY("tasty", ChatFormatting.LIGHT_PURPLE),
 	OVERSLIME("overslime", ChatFormatting.GREEN),
-	TEMPERED("tempered", ChatFormatting.DARK_AQUA);
+	TEMPERED("tempered", ChatFormatting.DARK_AQUA),
+	// (0.15.x) the melee weapons and big tools' own traits (their effects: ToolActions, TraitEffects)
+	PADDED("padded", ChatFormatting.WHITE),
+	OFFHAND("offhand_attack", ChatFormatting.AQUA),
+	SHEARS("shears", ChatFormatting.GREEN),
+	HARVEST("harvest", ChatFormatting.GREEN),
+	PATHING("pathing", ChatFormatting.GOLD),
+	KNOCKBACK("knockback", ChatFormatting.WHITE),
+	WAR_CHARGE("war_charge", ChatFormatting.RED),
+	CHARGE_ATTACK("charge_attack", ChatFormatting.RED),
+	BLOCKING("blocking", ChatFormatting.AQUA),
+	BONKING("bonking", ChatFormatting.YELLOW),
+	TIMBER("timber", ChatFormatting.GREEN),
+	VEIN("vein", ChatFormatting.AQUA);
 
 	public final String id;
 	public final ChatFormatting colour;

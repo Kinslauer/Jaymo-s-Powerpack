@@ -8,10 +8,14 @@ public enum PartType {
 	SMALL_BLADE("small_blade", Kind.HEAD, 2),
 	HAMMER_HEAD("hammer_head", Kind.HEAD, 8),
 	BROAD_BLADE("broad_blade", Kind.HEAD, 8),
+	/** (0.15.x) The broad axe's head. */
+	BROAD_AXE_HEAD("broad_axe_head", Kind.HEAD, 8),
 	LARGE_PLATE("large_plate", Kind.HEAD, 4),
 	TOOL_HANDLE("tool_handle", Kind.HANDLE, 1),
 	TOUGH_HANDLE("tough_handle", Kind.HANDLE, 3),
 	TOOL_BINDING("tool_binding", Kind.BINDING, 1),
+	/** (0.15.x) The big tools' binding (scythe, broad axe, excavator, vein hammer). */
+	TOUGH_BINDING("tough_binding", Kind.BINDING, 3),
 	/** (0.11.77) Swords' guards, for weapon heads ({@link WeaponParts}); no Tinkering tool uses it. */
 	CROSSGUARD("crossguard", Kind.HANDLE, 1);
 
