@@ -31,6 +31,8 @@ import org.jspecify.annotations.Nullable;
  * simulates the ragdoll; the server relays it and keeps the last one (a limp player who dies leaves that body).
  * (0.5.3) Hits and landings are judged here by the damage they really did, so a dash, zip or launch never knocks
  * anyone down, and a landing whose fall damage was negated (Smoke, slow falling, a power's cushion) doesn't either.
+ * (0.5.13) Another mod can also hold a player limp ({@link #addHold}): while a hold says so (Jaymo's Powers: downed in
+ * water) they go limp at once and stay so, whatever the time or the water, and the body floats.
  */
 public final class LivingRagdolls {
 	/** A limp player whose client sends no pose for this long (ticks) is let up. */
@@ -65,6 +67,8 @@ public final class LivingRagdolls {
 	private static final Map<UUID, Entry> ENTRIES = new ConcurrentHashMap<>();
 	/** Anything that says no (a power that has hold of the player). */
 	private static final List<Predicate<Player>> VETOES = new CopyOnWriteArrayList<>();
+	/** (0.5.13) Anything that keeps a player limp for as long as it says so. */
+	private static final List<Predicate<Player>> HOLDS = new CopyOnWriteArrayList<>();
 	/** Client only: whether the local player is limp right now, set by the client (so common code needn't touch client classes). */
 	private static volatile @Nullable Predicate<Player> local;
 
@@ -230,6 +234,27 @@ public final class LivingRagdolls {
 				}
 			} catch (RuntimeException e) {
 				// a broken veto doesn't hold anyone up
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (0.5.13) Another mod's say: while any hold returns true for a player they lie limp (going limp at once if they
+	 * weren't, and not getting up, in water or out, until it lets go). A veto still wins. Asked on the player's client.
+	 */
+	public static void addHold(Predicate<Player> hold) {
+		HOLDS.add(hold);
+	}
+
+	public static boolean held(Player player) {
+		for (Predicate<Player> hold : HOLDS) {
+			try {
+				if (hold.test(player)) {
+					return true;
+				}
+			} catch (RuntimeException e) {
+				// a broken hold holds no one
 			}
 		}
 		return false;

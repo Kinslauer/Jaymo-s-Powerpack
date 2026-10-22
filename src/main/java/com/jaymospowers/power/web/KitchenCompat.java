@@ -328,6 +328,24 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * (0.15.89) A downed player in water ({@code Downed.adrift}) lies limp in Kitchen's ragdoll, floating, for as long
+	 * as they're down and in it (Andy: "you should just ragdoll, and float").
+	 */
+	public static void registerRagdollHolds() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> adrift = player -> com.jaymospowers.core.wounds.Downed.isDowned(player)
+				&& com.jaymospowers.core.wounds.Downed.adrift(player);
+			Class.forName("com.jaymoskitchen.ragdoll.LivingRagdolls").getMethod("addHold", java.util.function.Predicate.class)
+				.invoke(null, adrift);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen without holds: the keys still stop the swimming (DownedKeysMixin)
+		}
+	}
+
 	/** Kitchen's hearty meals: a power that gives its holder more stomach slots (summed with any others). */
 	public static void extraStomachSlots(java.util.function.ToIntFunction<Player> slots) {
 		if (LOADED) {

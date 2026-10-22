@@ -305,6 +305,15 @@ public final class Downed {
 	}
 
 	/**
+	 * (0.15.89) In water, or floating just over it (a limp body bobbing at the surface): a downed player here can't swim
+	 * and floats limp ({@code DownedKeysMixin}, {@code KitchenCompat.registerRagdollHolds}).
+	 */
+	public static boolean adrift(Entity entity) {
+		return entity.isInWater() || entity.level().getFluidState(entity.blockPosition().below()).is(net.minecraft.tags.FluidTags.WATER)
+			&& entity.level().getFluidState(entity.blockPosition()).isEmpty() && !entity.onGround();
+	}
+
+	/**
 	 * Whether the blow that would kill {@code entity} downs it instead: a player (not creative or spectator), (0.15.41) any
 	 * humanoid ({@link BodyPlan#HUMANOID}: villagers, folk, illagers, witches, piglins, zombies, skeletons...), one of
 	 * Kingdoms' folk ({@link #DOWNABLE_TAG}), or a tamed animal. Never a boss.
