@@ -25,6 +25,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -35,9 +36,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -103,6 +109,8 @@ public final class Monoliths {
 	static final AttachmentType<Boolean> FIRST_FALLEN = AttachmentRegistry.create(JaymosKingdoms.id("first_giant_fallen"),
 		builder -> builder.persistent(Codec.BOOL));
 
+	private static final Identifier VANILLA_GIANT_SCALE = JaymosKingdoms.id("vanilla_giant_scale");
+
 	public static final Map<Element, EntityType<AetherGiant>> GIANTS = new EnumMap<>(Element.class);
 
 	private Monoliths() {
@@ -112,7 +120,7 @@ public final class Monoliths {
 		for (Element element : Element.values()) {
 			ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id(element.key() + "_giant"));
 			EntityType<AetherGiant> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
-				EntityType.Builder.<AetherGiant>of((t, l) -> new AetherGiant(t, l, element), MobCategory.MONSTER).sized(2.2F, 6.6F)
+				EntityType.Builder.<AetherGiant>of((t, l) -> new AetherGiant(t, l, element), MobCategory.MONSTER).sized(AetherGiant.WIDTH, AetherGiant.HEIGHT)
 					.clientTrackingRange(12).build(key));
 			GIANTS.put(element, type);
 			FabricDefaultAttributeRegistry.register(type, AetherGiant.createAttributes());
@@ -126,6 +134,7 @@ public final class Monoliths {
 				}
 			}
 		});
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> sizeVanillaGiant(entity));
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof AetherGiant giant) {
 				giant.dropBar();
@@ -222,6 +231,17 @@ public final class Monoliths {
 		List<AetherGiant> found = level.getEntitiesOfClass(AetherGiant.class, new AABB(m.pos()).inflate(GIANT_SEARCH),
 			g -> g.isAlive() && m.pos().equals(g.monolith()));
 		return found.isEmpty() ? null : found.getFirst();
+	}
+
+	/** (0.7.152) The vanilla Giant grown to the Aether's Giants' height ({@link AetherGiant#HEIGHT}), a Great Ape's. */
+	static void sizeVanillaGiant(Entity entity) {
+		if (entity instanceof Giant giant) {
+			AttributeInstance scale = giant.getAttribute(Attributes.SCALE);
+			if (scale != null) {
+				scale.addOrUpdateTransientModifier(new AttributeModifier(VANILLA_GIANT_SCALE,
+					AetherGiant.HEIGHT / giant.getType().getDimensions().height() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+			}
+		}
 	}
 
 	/** {@code m}'s Giant rises beside it, and everyone near hears it; null if there was no ground for it. */

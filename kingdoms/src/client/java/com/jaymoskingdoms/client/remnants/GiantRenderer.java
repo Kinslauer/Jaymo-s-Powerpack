@@ -15,9 +15,9 @@ import net.minecraft.resources.Identifier;
  * over, in its element's skin ({@code tools/gen_giants.py}).
  */
 public class GiantRenderer extends MobRenderer<AetherGiant, GiantState, GiantModel> {
-	/** How much bigger than its model it's drawn (the model stands about 2.6 blocks). */
-	static final float SCALE = 2.5F;
-	static final float SHADOW = 2.2F;
+	/** How much bigger than its model it's drawn: to its full height (the model stands about 2.64 blocks). */
+	static final float SCALE = AetherGiant.HEIGHT / 2.64F;
+	static final float SHADOW = AetherGiant.WIDTH;
 
 	private final Identifier texture;
 
