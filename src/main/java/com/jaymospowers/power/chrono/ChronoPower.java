@@ -149,9 +149,9 @@ public final class ChronoPower implements Power {
 				ChronoMemory.count(ChronoMemory.of(serverPlayer).mined, BuiltInRegistries.BLOCK.getKey(state.getBlock()));
 			}
 		});
-		// (0.15.83) Andy: "chrono should not take fall damage when using overclock"
+		// (0.15.83) Andy: "chrono should not take fall damage when using overclock" (since 0.15.96 Velox's Velocity too)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && overclocked(player)));
+			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && ChronoSpeed.overclocked(player)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
 			if (state != null) {

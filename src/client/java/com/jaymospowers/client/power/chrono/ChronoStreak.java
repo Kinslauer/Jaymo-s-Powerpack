@@ -48,6 +48,9 @@ import org.jspecify.annotations.Nullable;
  * All of it scales with how fast they're going ({@link #MIN_SPEED} to {@link #FULL_SPEED}) and fades out as they slow.
  * The afterimages are the runner's own render states, kept from the frames the world drew them in (never the inventory
  * screen's), so they wear the run pose ({@link ChronoRunPose}) they had.
+ *
+ * <p>(0.15.96) Velox's Velocity leaves the same streak in light blue ({@link ChronoSpeed#SKY}: {@code FLASH}'s value picks
+ * the colours), and its afterimages are the alien, not the player under it ({@code XenoformClient#submitGhost}).
  */
 public final class ChronoStreak {
 	// ---- tuning: speed ----
@@ -65,8 +68,8 @@ public final class ChronoStreak {
 	/** An afterimage every this many ticks back along the trail, at most {@code GHOSTS} of them. */
 	static final int GHOST_EVERY = 2;
 	static final int GHOSTS = 4;
-	/** Their tint (golden) and how opaque the nearest is at full speed (0-1). */
-	static final int GHOST_RGB = 0xFFC860;
+	/** Their tint (golden; light blue for Velox) and how opaque the nearest is at full speed (0-1). */
+	static final int[] GHOST_RGB = {0xFFC860, 0x8FD8FF};
 	static final float GHOST_ALPHA = 0.5F;
 	/** Your own afterimages closer than this to the camera (blocks) are skipped, so they don't fill the view. */
 	static final double GHOST_NEAR_CAMERA = 1.2;
@@ -84,9 +87,9 @@ public final class ChronoStreak {
 	/** Short arcs crackling off the body: how many, and how long (blocks). */
 	static final int BODY_ARCS = 2;
 	static final double ARC_LENGTH = 0.7;
-	/** The bolt's hot core and its glow: widths (blocks), colours, strongest alpha (0-255). */
+	/** The bolt's hot core and its glow: widths (blocks), colours (gold, then Velox's light blue), strongest alpha (0-255). */
 	static final float CORE_WIDTH = 0.05F, GLOW_WIDTH = 0.18F;
-	static final int CORE_RGB = 0xFFF4B0, GLOW_RGB = 0xFF8A1E;
+	static final int[] CORE_RGB = {0xFFF4B0, 0xE8F8FF}, GLOW_RGB = {0xFF8A1E, 0x4FB8FF};
 	static final int CORE_ALPHA = 230, GLOW_ALPHA = 120;
 	/** Bolt points closer than this to the camera are left out (your own streak, in first person). */
 	static final double BOLT_NEAR_CAMERA = 0.8;
@@ -109,6 +112,8 @@ public final class ChronoStreak {
 		final ArrayDeque<Sample> samples = new ArrayDeque<>();
 		float intensity, intensityO;
 		float run, runO;
+		/** Its colours ({@link ChronoSpeed#GOLD} or {@link ChronoSpeed#SKY}), kept as it fades. */
+		int palette;
 		@Nullable AvatarRenderState latest;
 	}
 
@@ -165,6 +170,10 @@ public final class ChronoStreak {
 			if (trail == null) {
 				trail = new Trail();
 				TRAILS.put(player.getId(), trail);
+			}
+			Integer palette = player.getAttached(ChronoSpeed.FLASH);
+			if (palette != null) {
+				trail.palette = Mth.clamp(palette, 0, GHOST_RGB.length - 1);
 			}
 			Vec3 was = new Vec3(player.xo, player.yo, player.zo);
 			Vec3 moved = player.position().subtract(was);
@@ -282,9 +291,11 @@ public final class ChronoStreak {
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
-			int tint = ARGB.color(Math.round(alpha * 255.0F), GHOST_RGB);
-			collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tint,
-				null, EntityRenderState.NO_OUTLINE);
+			int tint = ARGB.color(Math.round(alpha * 255.0F), GHOST_RGB[trail.palette]);
+			if (!com.jaymospowers.client.power.xenoform.XenoformClient.submitGhost(state, poseStack, collector, FULL_BRIGHT, tint)) {
+				collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tint,
+					null, EntityRenderState.NO_OUTLINE);
+			}
 			poseStack.popPose();
 		}
 	}
@@ -369,10 +380,11 @@ public final class ChronoStreak {
 		poseStack.pushPose();
 		poseStack.translate(-camera.x, -camera.y, -camera.z);
 		Vec3 eye = camera;
+		int glow = GLOW_RGB[trail.palette], core = CORE_RGB[trail.palette];
 		collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (pose, buffer) -> {
 			for (float[] bolt : bolts) {
-				ribbon(buffer, pose, bolt, eye, GLOW_WIDTH, GLOW_RGB, GLOW_ALPHA);
-				ribbon(buffer, pose, bolt, eye, CORE_WIDTH, CORE_RGB, CORE_ALPHA);
+				ribbon(buffer, pose, bolt, eye, GLOW_WIDTH, glow, GLOW_ALPHA);
+				ribbon(buffer, pose, bolt, eye, CORE_WIDTH, core, CORE_ALPHA);
 			}
 		});
 		poseStack.popPose();

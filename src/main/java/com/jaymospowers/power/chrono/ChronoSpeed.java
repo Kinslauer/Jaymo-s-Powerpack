@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -39,6 +40,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
  * </ul>
+ * (0.15.96) Velox's Velocity (R, a toggle) runs on all of this too but phasing, in a light blue streak instead of
+ * golden ({@link #SKY}): it calls {@link #tick(ServerPlayer, ServerLevel, boolean, int)} and {@link #clear} itself.
  */
 public final class ChronoSpeed {
 	// ---- tuning ----
@@ -57,6 +60,10 @@ public final class ChronoSpeed {
 	static final int PHASE_DEPTH = 4;
 	static final double PHASE_REACH = 1.5;
 	static final int PHASE_GAP = 20;
+	/** The streak's colours ({@link #FLASH}'s value): Chrono's gold, and Velox's light blue. */
+	public static final int GOLD = 0, SKY = 1;
+	/** Velox's streak behind you (server particles): a light blue dust. */
+	public static final DustParticleOptions SKY_DUST = new DustParticleOptions(0x8FD8FF, 1.2F);
 
 	static final Identifier SPRINT_MODIFIER = JaymosPowers.id("chrono_flash_sprint");
 	static final Identifier STEP_MODIFIER = JaymosPowers.id("chrono_flash_step");
@@ -75,10 +82,11 @@ public final class ChronoSpeed {
 
 	/**
 	 * (0.11.57) On a player while Overclock runs, for everyone to see the speed-force streak, the run and the glyphs
-	 * ({@code ChronoStreak}, {@code ChronoRunPose}). Only on while overclocked, never saved.
+	 * ({@code ChronoStreak}, {@code ChronoRunPose}). Only on while overclocked, never saved. Since 0.15.96 the streak's
+	 * colour ({@link #GOLD} or {@link #SKY}).
 	 */
-	public static final AttachmentType<Boolean> FLASH = AttachmentRegistry.create(JaymosPowers.id("chrono_flash"),
-		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	public static final AttachmentType<Integer> FLASH = AttachmentRegistry.create(JaymosPowers.id("chrono_flash"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	/** Client → server: running up the wall on side {@code face} (into it), or -1 for off it. */
 	public record WallRun(int face) implements CustomPacketPayload {
@@ -101,7 +109,7 @@ public final class ChronoSpeed {
 
 	private static void wallRun(ServerPlayer player, int face) {
 		Direction side = face >= 0 && face < Direction.values().length ? Direction.from3DDataValue(face) : null;
-		if (side != null && side.getAxis().isHorizontal() && ChronoPower.overclocked(player) && player.isAlive() && !player.isPassenger()) {
+		if (side != null && side.getAxis().isHorizontal() && overclocked(player) && player.isAlive() && !player.isPassenger()) {
 			player.setAttached(WALL_RUN, side.get3DDataValue());
 			player.resetFallDistance();
 		} else if (player.getAttached(WALL_RUN) != null) {
@@ -109,7 +117,7 @@ public final class ChronoSpeed {
 		}
 	}
 
-	/** Whether {@code player} is overclocked right now, on either side. */
+	/** Whether {@code player} is overclocked (or in Velox's Velocity) right now, on either side. */
 	public static boolean overclocked(Player player) {
 		if (player.level().isClientSide()) {
 			// (0.11.27) never seen is Long.MIN_VALUE, and now minus that overflows to a large negative number, which is
@@ -117,7 +125,13 @@ public final class ChronoSpeed {
 			long ago = player.level().getGameTime() - clientOverclockedAt;
 			return player.isLocalPlayer() && ago >= 0L && ago <= 2L;
 		}
-		return player instanceof ServerPlayer sp && ChronoPower.overclocked(sp);
+		return player instanceof ServerPlayer sp && (ChronoPower.overclocked(sp) || velocity(sp));
+	}
+
+	/** (0.15.96) Whether {@code player}'s speed is Velox's Velocity (its light blue streak is on), on either side. */
+	public static boolean velocity(Player player) {
+		Integer palette = player.getAttached(FLASH);
+		return palette != null && palette == SKY;
 	}
 
 	/** Whether {@code player} is overclocked as any client sees it (synced {@link #FLASH}, or the local player's own state). */
@@ -137,19 +151,23 @@ public final class ChronoSpeed {
 
 	/** Each tick (server): the sprint and step modifiers follow Overclock and sprinting; the streak behind you. */
 	static void tick(ServerPlayer player, ServerLevel level, boolean overclocked) {
+		tick(player, level, overclocked, GOLD);
+	}
+
+	/** As {@link #tick(ServerPlayer, ServerLevel, boolean)}, the streak in {@code palette}'s colours ({@link #GOLD}, {@link #SKY}). */
+	public static void tick(ServerPlayer player, ServerLevel level, boolean overclocked, int palette) {
 		control(player, overclocked && player.isShiftKeyDown() && !player.isPassenger());
-		if (overclocked != (player.getAttached(FLASH) != null)) {
-			if (overclocked) {
-				player.setAttached(FLASH, true);
-			} else {
-				player.removeAttached(FLASH);
-			}
+		Integer shown = player.getAttached(FLASH);
+		if (overclocked && (shown == null || shown != palette)) {
+			player.setAttached(FLASH, palette);
+		} else if (!overclocked && shown != null) {
+			player.removeAttached(FLASH);
 		}
 		boolean sprinting = overclocked && player.isSprinting();
 		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, sprinting);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, overclocked);
 		if (sprinting) {
-			// a golden streak where you just were
+			// a golden (or light blue) streak where you just were
 			Vec3 was = new Vec3(player.xo, player.yo, player.zo);
 			Vec3 moved = player.position().subtract(was);
 			if (moved.lengthSqr() > 0.04) {
@@ -157,7 +175,11 @@ public final class ChronoSpeed {
 					Vec3 at = was.add(moved.scale(i / 3.0));
 					ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 				}
-				ChronoFx.particles(level, player, ParticleTypes.WAX_ON, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
+				if (palette == SKY) {
+					ChronoFx.particles(level, player, SKY_DUST, was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
+				} else {
+					ChronoFx.particles(level, player, ParticleTypes.WAX_ON, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
+				}
 			}
 			FluidState under = level.getFluidState(player.blockPosition().below());
 			if (player.onGround() && under.is(FluidTags.LAVA)) {
@@ -225,8 +247,8 @@ public final class ChronoSpeed {
 		}
 	}
 
-	/** Take both modifiers off (power lost, Overclock cut short). */
-	static void clear(ServerPlayer player) {
+	/** Take both modifiers off (power lost, Overclock cut short, Velocity switched off). */
+	public static void clear(ServerPlayer player) {
 		control(player, false);
 		if (player.getAttached(FLASH) != null) {
 			player.removeAttached(FLASH);

@@ -14,15 +14,17 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.11.40) Straight up: held against the wall you face, with no sideways drift and no time limit while you hold
  * forward; run off the top and you hop onto it. The server is told which wall, so everyone sees the body turned onto it,
  * legs running ({@link ChronoSpeed#WALL_RUN}).
+ *
+ * <p>(0.15.96) Velox's Velocity runs up walls the same way: {@code XenoformPowerClient} ticks this too.
  */
-final class ChronoSpeedClient {
+public final class ChronoSpeedClient {
 	/** The wall being run up (into it), or null. */
 	private static @Nullable Direction wall;
 
 	private ChronoSpeedClient() {
 	}
 
-	static void reset() {
+	public static void reset() {
 		if (wall != null && ClientPlayNetworking.canSend(ChronoSpeed.WallRun.TYPE)) {
 			ClientPlayNetworking.send(new ChronoSpeed.WallRun(-1));
 		}
@@ -30,7 +32,7 @@ final class ChronoSpeedClient {
 		ChronoSpeed.clientOverclockedAt = Long.MIN_VALUE;
 	}
 
-	static void tick(LocalPlayer player, boolean overclocked) {
+	public static void tick(LocalPlayer player, boolean overclocked) {
 		if (overclocked) {
 			ChronoSpeed.clientOverclockedAt = player.level().getGameTime();
 		}
