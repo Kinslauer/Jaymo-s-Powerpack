@@ -36,6 +36,7 @@ public final class ModelPoses {
 		LedgePose.applyModel(model, state);
 		com.jaymospowers.client.freerun.BarHangPose.applyModel(model, state);
 		MeditatePose.applyModel(model, state);
+		com.jaymospowers.client.wounds.TendPose.applyModel(model, state);
 		CarryPose.applyModel(model, state);
 		WindPose.applyModel(model, state);
 		ArsenalArmPose.applyModel(model, state);

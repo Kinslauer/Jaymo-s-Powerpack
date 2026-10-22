@@ -65,6 +65,11 @@ import org.jspecify.annotations.Nullable;
  * and the body screen ({@link OpenBody}) opens to pick the part; sneak + use treats the worst part it can help, with no
  * screen. Smelling salts, leeches and poppy (given to another) treat the whole body. Strong spirits (Kitchen's), a
  * honey bottle and a hot blade (cautery) work only with sneak + use: on another, or on yourself while looking down.</li>
+ * <li><b>On someone else, hold use</b> (0.15.96, Andy: "you can hold right click with the item on them and it will play
+ * and kneeling interaction animation, then apply after a short hold"): held past {@link Downed#TAP_TICKS}, you kneel at
+ * their side ({@link Tending}) and treat the worst part (or the whole body) while you hold; letting go stops it. A tap
+ * with a bandage, rag, splint or needle opens the body screen instead, to pick the part. Spirits, honey and a hot blade
+ * still need sneak (a blade without it is a weapon: a downed enemy's finisher), as before.</li>
  * <li><b>It takes time:</b> each remedy is a channel of {@link Remedy#ticks} with a bar over the hotbar, cancelled by
  * either of you moving more than {@link #MOVE_LIMIT}, by either being hit, by the medicine leaving your hand, or (sneak +
  * use) by letting go of sneak. All on the server: the screen's packet only names the part.</li>
@@ -175,7 +180,7 @@ public final class Treatment {
 	/** A treatment under way: on whom, which part (null: the whole body), with what, from which hand, from where, how far along. */
 	private static final class Session {
 		final LivingEntity target;
-		final @Nullable BodyPart part;
+		@Nullable BodyPart part;
 		final Remedy remedy;
 		final InteractionHand hand;
 		final Vec3 from, targetFrom;
@@ -183,8 +188,18 @@ public final class Treatment {
 		/** (0.15.49) How long it takes this healer (Steady Hands, {@link MedicineSkill}). */
 		final int need;
 		int ticks;
+		/**
+		 * (0.15.96) Held use on someone else: {@code start}, when use went down, and {@code held}, when it was last seen
+		 * held (game times). Not {@code begun} till it's held past a tap; a tap opens the body screen. {@code over}: done (or
+		 * nothing to do), kept till use is let go so holding on doesn't start it again.
+		 */
+		final boolean hold;
+		final long start;
+		long held;
+		boolean begun, over;
 
-		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak, int need) {
+		Session(LivingEntity target, @Nullable BodyPart part, Remedy remedy, InteractionHand hand, Vec3 from, boolean sneak, int need,
+			boolean hold, long now) {
 			this.target = target;
 			this.part = part;
 			this.remedy = remedy;
@@ -193,6 +208,10 @@ public final class Treatment {
 			this.targetFrom = target.position();
 			this.sneak = sneak;
 			this.need = need;
+			this.hold = hold;
+			this.start = now;
+			this.held = now;
+			this.begun = !hold;
 		}
 	}
 
@@ -225,6 +244,9 @@ public final class Treatment {
 				Session s = e.getValue();
 				if (s.target == entity || entity instanceof Player player && player.getUUID().equals(e.getKey())) {
 					it.remove();
+					if (s.over) {
+						continue;
+					}
 					ServerPlayer healer = entity.level() instanceof ServerLevel level ? level.getServer().getPlayerList().getPlayer(e.getKey()) : null;
 					if (healer != null) {
 						stopped(healer, s);
@@ -423,19 +445,46 @@ public final class Treatment {
 			// (nothing it can do for them: Downed's revive takes it, but it ran first and passed; a revive needs the hold anyway)
 			return InteractionResult.PASS;
 		}
-		if (!remedy.part) {
-			if (helpsBody(remedy, player, body)) {
-				start(server, body, null, remedy, hand, sneak);
-			} else {
-				server.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.nothing_to_treat", body.getDisplayName(),
-					Component.translatable(remedy.key())).withStyle(ChatFormatting.GRAY));
-			}
-		} else if (sneak) {
-			startWorst(server, body, remedy, hand, true);
-		} else {
-			open(server, body, remedy, false);
+		long now = world.getGameTime();
+		Session old = SESSIONS.get(server.getUUID());
+		if (old != null && !old.hold && old.target == body) {
+			// (already at a part picked on the body screen)
+			return InteractionResult.SUCCESS;
 		}
+		if (old != null && old.hold && old.target == body && old.hand == hand && old.remedy == remedy) {
+			// (0.15.96) still holding use on them (the client repeats it while held)
+			old.held = now;
+			return InteractionResult.SUCCESS;
+		}
+		// (0.15.96) held, it's the worst part (or the whole body) with you kneeling at their side; a tap, the body screen
+		SESSIONS.put(server.getUUID(), new Session(body, null, remedy, hand, server.position(), sneak, MedicineSkill.ticks(server, remedy.ticks), true, now));
 		return InteractionResult.SUCCESS;
+	}
+
+	/** (0.15.96) Use let go on someone before it was a hold: the body screen for our kit, else how it's done. */
+	private static void tapped(ServerPlayer player, Session s) {
+		if (s.remedy.screen()) {
+			open(player, s.target, s.remedy, false);
+		} else {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.hold_to_treat", Component.translatable(s.remedy.key()),
+				s.target.getDisplayName()).withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	/** (0.15.96) A hold on someone, held past a tap: settle what it treats and begin. False if there's nothing it can do. */
+	private static boolean begin(ServerPlayer player, Session s) {
+		LivingEntity body = s.target;
+		if (s.remedy.part) {
+			s.part = worst(s.remedy, body);
+		}
+		if (s.remedy.part ? s.part == null : !helpsBody(s.remedy, player, body)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.nothing_to_treat", body.getDisplayName(),
+				Component.translatable(s.remedy.key())).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		s.begun = true;
+		announce(player, body, s.part, s.remedy);
+		return true;
 	}
 
 	/** Spirits, honey or a hot blade, sneak + use looking down: on yourself. */
@@ -576,7 +625,12 @@ public final class Treatment {
 			// (already at it: use repeats while held)
 			return;
 		}
-		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak, MedicineSkill.ticks(player, remedy.ticks)));
+		SESSIONS.put(player.getUUID(), new Session(body, part, remedy, hand, player.position(), sneak, MedicineSkill.ticks(player, remedy.ticks), false,
+			player.level().getGameTime()));
+		announce(player, body, part, remedy);
+	}
+
+	private static void announce(ServerPlayer player, LivingEntity body, @Nullable BodyPart part, Remedy remedy) {
 		Component what = part == null ? body.getDisplayName() : part.displayName();
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.treating", Component.translatable(remedy.key()), what)
 			.withStyle(ChatFormatting.GRAY));
@@ -609,6 +663,34 @@ public final class Treatment {
 				continue;
 			}
 			LivingEntity body = s.target;
+			if (s.hold) {
+				// (0.15.96) held use on someone: let go, it stops (or, a tap, the body screen)
+				if (level.getGameTime() - s.held > Downed.REVIVE_GRACE) {
+					SESSIONS.remove(id);
+					if (s.begun && !s.over) {
+						stopped(player, s);
+					} else if (s.held - s.start < Downed.TAP_TICKS && body.isAlive() && player.isWithinEntityInteractionRange(body, REACH_SLACK)) {
+						tapped(player, s);
+					}
+					continue;
+				}
+				if (s.over) {
+					continue;
+				}
+				if (!s.begun) {
+					if (s.held - s.start < Downed.TAP_TICKS) {
+						continue;
+					}
+					if (!body.isAlive()) {
+						SESSIONS.remove(id);
+						continue;
+					}
+					if (!begin(player, s)) {
+						s.over = true;
+						continue;
+					}
+				}
+			}
 			ItemStack stack = player.getItemInHand(s.hand);
 			boolean spoiled = !body.isAlive() || body.isRemoved() || body.level() != level
 				|| remedy(stack, level) != s.remedy
@@ -623,6 +705,8 @@ public final class Treatment {
 				continue;
 			}
 			s.ticks++;
+			// (0.15.96) down on one knee at their side
+			Tending.keep(player, body);
 			if (s.ticks % WORK_TICKS == 0) {
 				player.swing(s.hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 0.5F,
@@ -637,7 +721,12 @@ public final class Treatment {
 				}
 				continue;
 			}
-			SESSIONS.remove(id);
+			if (s.hold) {
+				// (held: let go before the next)
+				s.over = true;
+			} else {
+				SESSIONS.remove(id);
+			}
 			apply(level, player, s, stack);
 		}
 	}

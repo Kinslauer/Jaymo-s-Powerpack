@@ -2482,3 +2482,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
   nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
   new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
+- **0.15.96, treating each other:** Andy: "players should be able to use medical items on each other, to bandage and
+  splint/ heal their team. you can hold right click with the item on them and it will play and kneeling interaction
+  animation, then apply after a short hold. using meds also increases your survival skill". Treating another body
+  (PR #366's channel) is now a hold: hold use on someone with medicine and, past a tap (`Downed.TAP_TICKS`), you drop to
+  one knee at their side and treat their worst part (salts, leeches and poppy: the whole body); let go and it stops
+  (`Treatment` hold sessions). A tap with a bandage, rag, splint or needle opens the body screen to pick the part, as
+  before. The kneel is the synced `Tending` attachment, drawn for everyone by `TendPose` (one knee down, right foot
+  planted, both hands working at the wound; bent well over someone lying down, upright for someone standing), and a
+  food revive of a downed one kneels too. Every treatment finished still gives Kingdoms Survival experience
+  (`MedicineSkill.treated`). Medicine in hand means treat; a weapon on a downed enemy is left to finishers (a red-hot
+  blade is medicine only with sneak).

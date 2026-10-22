@@ -137,6 +137,14 @@ All medicine is medieval: nothing modern (no pills, injections or machines).
   and spirits. Taverns and festivals sell spirits.
 - **Using it:** right-click your own body (yourself), or another creature, opens a small body screen to pick a part.
   Sneak + right-click treats the worst part.
+- **Treating each other (0.15.96):** Andy (2026-10-22): "players should be able to use medical items on each other ...
+  you can hold right click with the item on them and it will play a kneeling interaction animation, then apply after a
+  short hold. using meds also increases your survival skill". Hold use on someone with medicine: you drop to one knee
+  at their side (`Tending`, drawn by `TendPose`, reaching down to someone lying, ahead to someone standing) and treat
+  their worst part, or the whole body for salts, leeches and poppy; letting go stops it. A tap with a bandage, rag,
+  splint or needle opens the body screen to pick the part. A food revive kneels too. Each treatment finished gives
+  Kingdoms Survival experience (`MedicineSkill.treated`, 0.15.49). Medicine in hand always means treat; a weapon means
+  a downed enemy's finisher (a red-hot blade is medicine only with sneak).
 
 ## Client
 
