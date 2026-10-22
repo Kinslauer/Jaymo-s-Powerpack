@@ -45,6 +45,11 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * count blocks of stone, earth, sand, drifts or wreckage near pos (its seat). place: the settlement.
 	 */
 	public static final int RELIEF = 15;
+	/**
+	 * (0.7.168) A town notice's errand ({@link TownNotices}): bring count animals (target: their entity type id) to the
+	 * giver on a lead.
+	 */
+	public static final int LEAD = 16;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

@@ -71,6 +71,8 @@ import org.jspecify.annotations.Nullable;
 public final class Quests {
 	/** How many quests a player may carry at once: villagers', and kings'. */
 	static final int MAX_QUESTS = 5, MAX_ROYAL = 1;
+	/** (0.7.168) How near (blocks) animals on your lead count for a lead quest. */
+	static final double LEAD_RANGE = 12.0;
 	/**
 	 * (0.5.49) Quests are rare. The share of a settlement's villagers who ever give quests (one in twenty; the rest never
 	 * do), and how much that share grows with a good name there (this much more at the best reputation, scaled down from it).
@@ -202,6 +204,7 @@ public final class Quests {
 			case Quest.GATHER -> count(player, item(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
 			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
+			case Quest.LEAD -> led(player, q.objective().target()).size() >= q.objective().count();
 			default -> q.counted();
 		};
 	}
@@ -467,6 +470,13 @@ public final class Quests {
 		} else if (q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) {
 			// (0.5.47) the horse goes to the giver's stable
 			Stables.questTurnIn(level, player, giver, f, q);
+		} else if (q.kind() == Quest.LEAD) {
+			// (0.7.168) the animals are the giver's now: the leads come off and they stay in town
+			List<Mob> led = led(player, q.objective().target());
+			for (Mob animal : led.subList(0, Math.min(led.size(), q.objective().count()))) {
+				animal.dropLeash();
+				animal.setPersistenceRequired();
+			}
 		}
 		remove(player, q.id());
 		// (0.7.0) a priest's hunt: the rite, there and then
@@ -525,6 +535,31 @@ public final class Quests {
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned.reputation", cost, f.name()).withStyle(ChatFormatting.RED));
 	}
 
+	/**
+	 * (0.7.168) {@code player} took {@code q} off a town notice ({@link TownNotices}): into their log, if they've room.
+	 * False if their log is full.
+	 */
+	static boolean takeFromBoard(ServerLevel level, ServerPlayer player, Quest q) {
+		long common = log(player).stream().filter(o -> !o.royal()).count();
+		if (common >= MAX_QUESTS) {
+			player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.full", MAX_QUESTS).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		List<Quest> list = new ArrayList<>(log(player));
+		list.add(q.withGivenAt(level.getGameTime()));
+		player.setAttached(LOG, List.copyOf(list));
+		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.accepted", title(q)).withStyle(ChatFormatting.YELLOW));
+		level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+		sync(player, true);
+		return true;
+	}
+
+	/** (0.7.168) The animals of {@code type} (an entity type id) {@code player} has on a lead close by. */
+	static List<Mob> led(ServerPlayer player, String type) {
+		return player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LEAD_RANGE),
+			m -> m.isAlive() && m.getLeashHolder() == player && BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).toString().equals(type));
+	}
+
 	/** Gives up quest {@code id} from anywhere ({@code /kingdom quests abandon}). */
 	static boolean abandon(ServerPlayer player, String id) {
 		Quest q = quest(player, id);
@@ -541,7 +576,8 @@ public final class Quests {
 	static int finishAll(ServerPlayer player) {
 		int n = 0;
 		for (Quest q : log(player)) {
-			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && q.kind() != Quest.BREAK_IN && q.kind() != Quest.STUD && !q.counted()) {
+			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && q.kind() != Quest.BREAK_IN && q.kind() != Quest.STUD && q.kind() != Quest.LEAD
+				&& !q.counted()) {
 				put(player, q.withProgress(q.objective().count()));
 				n++;
 			}
@@ -1150,6 +1186,7 @@ public final class Quests {
 		return switch (q.kind()) {
 			case Quest.SLAY -> Component.translatable(key, o.count(), foes(o.target()));
 			case Quest.GATHER -> Component.translatable(key, o.count(), itemName(o.target()));
+			case Quest.LEAD -> Component.translatable(key, o.count(), beastName(o.target()));
 			case Quest.FETCH -> Component.translatable(key, keepsakeName(q), ruin(o.target()), x(q), z(q));
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
@@ -1177,6 +1214,8 @@ public final class Quests {
 			case Quest.SLAY -> Component.translatable("quest.jaymoskingdoms.objective.slay", foes(o.target()), o.progress(), o.count());
 			case Quest.GATHER -> Component.translatable("quest.jaymoskingdoms.objective.gather", itemName(o.target()),
 				Math.min(count(player, item(o.target())), o.count()), o.count());
+			case Quest.LEAD -> Component.translatable("quest.jaymoskingdoms.objective.lead", beastName(o.target()),
+				Math.min(led(player, o.target()).size(), o.count()), o.count(), q.giver().name());
 			case Quest.FETCH -> Component.translatable(QuestFoes.dig(q) ? "quest.jaymoskingdoms.objective.dig" : "quest.jaymoskingdoms.objective.fetch",
 				keepsakeName(q), ruin(o.target()), x(q), z(q));
 			case Quest.DELIVER -> Component.translatable("quest.jaymoskingdoms.objective.deliver", addressee(q), o.place(), x(q), z(q));

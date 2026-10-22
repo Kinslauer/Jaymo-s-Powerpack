@@ -2,8 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "minecraft:block/spruce_planks",
-    "front": "jaymoskingdoms:block/bounty_board_front",
     "planks": "minecraft:block/spruce_planks",
+    "panel": "jaymoskingdoms:block/bounty_board_panel",
     "post": "minecraft:block/spruce_log"
   },
   "elements": [
@@ -20,7 +20,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#front",
+          "texture": "#panel",
           "uv": [
             0,
             0,
@@ -77,82 +77,91 @@
     },
     {
       "from": [
-        1,
         0,
-        7
+        3,
+        6.5
       ],
       "to": [
-        3,
-        4,
-        9
+        16,
+        5,
+        9.5
       ],
       "faces": {
         "north": {
-          "texture": "#post",
+          "texture": "#planks",
           "uv": [
             0,
-            0,
-            2,
-            4
+            11,
+            16,
+            13
           ]
         },
         "south": {
-          "texture": "#post",
+          "texture": "#planks",
           "uv": [
             0,
-            0,
-            2,
-            4
+            11,
+            16,
+            13
           ]
         },
         "east": {
-          "texture": "#post",
+          "texture": "#planks",
           "uv": [
-            0,
-            0,
-            2,
-            4
+            6.5,
+            11,
+            9.5,
+            13
           ]
         },
         "west": {
-          "texture": "#post",
+          "texture": "#planks",
+          "uv": [
+            6.5,
+            11,
+            9.5,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#planks",
           "uv": [
             0,
-            0,
-            2,
-            4
+            6.5,
+            16,
+            9.5
           ]
         },
         "down": {
-          "texture": "#post",
+          "texture": "#planks",
           "uv": [
             0,
-            0,
-            2,
-            2
+            6.5,
+            16,
+            9.5
           ]
         }
       }
     },
     {
       "from": [
-        13,
         0,
-        7
+        0,
+        6.5
       ],
       "to": [
-        15,
-        4,
-        9
+        3,
+        16,
+        9.5
       ],
       "faces": {
         "north": {
           "texture": "#post",
           "uv": [
+            13,
             0,
-            0,
-            2,
-            4
+            16,
+            16
           ]
         },
         "south": {
@@ -160,35 +169,44 @@
           "uv": [
             0,
             0,
-            2,
-            4
+            3,
+            16
           ]
         },
         "east": {
           "texture": "#post",
           "uv": [
+            6.5,
             0,
-            0,
-            2,
-            4
+            9.5,
+            16
           ]
         },
         "west": {
           "texture": "#post",
           "uv": [
+            6.5,
             0,
+            9.5,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#post",
+          "uv": [
             0,
-            2,
-            4
+            6.5,
+            3,
+            9.5
           ]
         },
         "down": {
           "texture": "#post",
           "uv": [
             0,
-            0,
-            2,
-            2
+            6.5,
+            3,
+            9.5
           ]
         }
       }
