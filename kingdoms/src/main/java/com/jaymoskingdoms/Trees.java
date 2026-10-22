@@ -569,6 +569,11 @@ public final class Trees {
 		return logs.size();
 	}
 
+	/** (0.7.151) A Giant walks into the tree standing on {@code log}: it topples away from it, if it's a natural tree. */
+	public static void trample(ServerLevel level, BlockPos log, Entity giant) {
+		fell(level, log, giant, ItemStack.EMPTY, null, false);
+	}
+
 	/**
 	 * (0.6.12) A tornado tears the tree standing on {@code foot} out of the ground whole and flings it off at
 	 * {@code velocity} ({@link FallingTree#fling}). Null (and nothing happens) if it isn't a living tree rooted in the

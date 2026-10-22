@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Trees;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,7 +13,9 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,8 +42,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -58,17 +63,23 @@ import org.jspecify.annotations.Nullable;
  * to fall in a world raises the world tier ({@link Monoliths#slain}).
  */
 public class AetherGiant extends Monster {
+	/**
+	 * (0.7.151) Andy: "make all the giants the same size as warrior born great apes". As tall as a Warrior-born's Great
+	 * Ape (a player's 1.8 blocks, 17 times over: about 30 blocks), and as broad in proportion. The vanilla Giant too
+	 * ({@link Monoliths#sizeVanillaGiant}).
+	 */
+	public static final float HEIGHT = 30.6F, WIDTH = 10.2F;
 	static final double HEALTH = 320.0, ARMOR = 10.0, TOUGHNESS = 4.0, DAMAGE = 14.0, SPEED = 0.23, KNOCKBACK_RESISTANCE = 1.0;
 	static final int EXPERIENCE = 250;
 	/** Its stamp: how often it may (ticks), how near its target must be, its reach, damage, throw, and wind-up (ticks). */
 	static final int STAMP_TICKS = 160, STAMP_WINDUP = 12;
-	static final double STAMP_TRIGGER = 6.0, STAMP_RANGE = 7.0, STAMP_THROW = 1.4;
+	static final double STAMP_TRIGGER = 12.0, STAMP_RANGE = 14.0, STAMP_THROW = 1.4;
 	static final float STAMP_DAMAGE = 12.0F;
 	/** Its element's power: how often (ticks; half that when raging) and how far it reaches. */
 	static final int POWER_TICKS = 120;
-	static final double POWER_RANGE = 14.0;
+	static final double POWER_RANGE = 24.0;
 	/** Its aura's reach (the Arctic's cold, the Irradiated's sickness). */
-	static final double AURA_RANGE = 9.0;
+	static final double AURA_RANGE = 14.0;
 	/** Below this share of its health it rages, this much faster. */
 	static final float RAGE_AT = 0.3F;
 	static final double RAGE_SPEED = 0.25;
@@ -81,9 +92,15 @@ public class AetherGiant extends Monster {
 	static final int FROST_PER_SECOND = 70, FROST_OVER = 120, BREATH_TICKS = 120, BREATH_SLOW = 2;
 	/** Irradiated: the sickness's poison (ticks) a second in its aura, the flare's poison and wither, and the wither's reach. */
 	static final int SICKNESS_TICKS = 60, FLARE_POISON_TICKS = 140, FLARE_WITHER_TICKS = 100;
-	static final double FLARE_WITHER_RANGE = 7.0;
+	static final double FLARE_WITHER_RANGE = 12.0;
 	/** The flare's flash (Ambrosium gold-green). */
 	static final int FLARE_COLOR = 0xFFC8F060;
+	/** Where its stamp lands, this far ahead of its middle (blocks). */
+	static final double STAMP_AHEAD = 6.0;
+	/** Too big to path through woods: with no path to its target it strides straight at it, and every this many ticks the trees it walks into are felled (away from it) and the leaves torn down. */
+	static final int TRAMPLE_EVERY = 5;
+	/** How high up its legs it fells trees (blocks). */
+	static final int TRAMPLE_HEIGHT = 6;
 	/** How long a swing shows (ticks). */
 	static final int SWING_TICKS = 12;
 	public static final int LEFT = 1, RIGHT = 2, BOTH = 3;
@@ -110,7 +127,7 @@ public class AetherGiant extends Monster {
 	public static AttributeSupplier.Builder createAttributes() {
 		return createMonsterAttributes().add(Attributes.MAX_HEALTH, HEALTH).add(Attributes.ARMOR, ARMOR).add(Attributes.ARMOR_TOUGHNESS, TOUGHNESS)
 			.add(Attributes.ATTACK_DAMAGE, DAMAGE).add(Attributes.MOVEMENT_SPEED, SPEED).add(Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_RESISTANCE)
-			.add(Attributes.FOLLOW_RANGE, 48.0).add(Attributes.ATTACK_KNOCKBACK, 2.0).add(Attributes.STEP_HEIGHT, 1.5);
+			.add(Attributes.FOLLOW_RANGE, 64.0).add(Attributes.ATTACK_KNOCKBACK, 2.0).add(Attributes.STEP_HEIGHT, 3.0);
 	}
 
 	public Element element() {
@@ -130,7 +147,7 @@ public class AetherGiant extends Monster {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, true));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
-		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
+		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 32.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
@@ -209,6 +226,13 @@ public class AetherGiant extends Monster {
 		}
 		LivingEntity target = this.getTarget();
 		boolean fighting = target != null && target.isAlive();
+		if (fighting && this.getNavigation().isDone()
+			&& this.distanceToSqr(target) > Mth.square(this.getBbWidth() / 2.0 + STAMP_TRIGGER / 2.0)) {
+			this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.1);
+		}
+		if (this.tickCount % TRAMPLE_EVERY == 0 && this.horizontalCollision && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+			this.trample(level);
+		}
 		if (this.powerCooldown > 0) {
 			this.powerCooldown--;
 		} else if (fighting && this.distanceToSqr(target) < POWER_RANGE * POWER_RANGE) {
@@ -225,6 +249,24 @@ public class AetherGiant extends Monster {
 		}
 	}
 
+	/** The woods it walks into: trees felled away from it (only natural ones, never a building's logs), leaves torn down. */
+	private void trample(ServerLevel level) {
+		AABB box = this.getBoundingBox().inflate(1.0, 0.0, 1.0);
+		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
+		int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
+		// the trees first (they need their leaves to count as trees), then whatever leaves are left in its way
+		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, Math.min(y1, y0 + TRAMPLE_HEIGHT), z1)) {
+			if (level.getBlockState(pos).is(BlockTags.LOGS)) {
+				Trees.trample(level, pos.immutable(), this);
+			}
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
+			if (level.getBlockState(pos).is(BlockTags.LEAVES)) {
+				level.destroyBlock(pos, true, this);
+			}
+		}
+	}
+
 	private void rage() {
 		this.raging = true;
 		AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -238,7 +280,7 @@ public class AetherGiant extends Monster {
 
 	/** Its foot brought down: everyone near is hurt and thrown, and its element's touch goes with it. */
 	private void stamp(ServerLevel level) {
-		Vec3 at = this.position().add(this.getLookAngle().multiply(2.0, 0.0, 2.0));
+		Vec3 at = this.position().add(this.getLookAngle().multiply(STAMP_AHEAD, 0.0, STAMP_AHEAD));
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, 3, 1.0, 0.1, 1.0, 0.0);
 		level.sendParticles(this.element.mote, at.x, at.y + 0.3, at.z, 50, STAMP_RANGE / 3, 0.2, STAMP_RANGE / 3, 0.05);
 		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.5F, 0.5F);
