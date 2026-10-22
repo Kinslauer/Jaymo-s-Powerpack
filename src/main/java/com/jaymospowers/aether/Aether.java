@@ -1,7 +1,11 @@
 package com.jaymospowers.aether;
 
+import com.jaymospowers.JaymosPowers;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,6 +22,13 @@ import net.minecraft.world.level.block.state.BlockState;
  * by Wind ({@code power/wind/aether/WindAether}); the trees its saplings grow are configured features in the data.
  */
 public final class Aether {
+	/**
+	 * (0.15.78) Andy: the Aether's items are out of creative (its tab and search). Lore: the Aether only scatters remnants
+	 * over the Overworld, so its things are found, not picked from a list. The items, recipes and /give stay.
+	 */
+	static final boolean HIDDEN_IN_CREATIVE = true;
+	static final Identifier TAB = JaymosPowers.id("aether");
+
 	private Aether() {
 	}
 
@@ -41,6 +52,15 @@ public final class Aether {
 		com.jaymospowers.aether.structure.Structures.init();
 		// Aether II gear: tools, hammers, armour sets, gliders, the altar
 		com.jaymospowers.aether.gear.AetherGear.init();
+		if (HIDDEN_IN_CREATIVE) {
+			// runs after every per-tab event; an empty category tab isn't shown at all (as TaczGuns hides TaCZ's Zero tab)
+			CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register((tab, output) -> {
+				if (TAB.equals(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab))) {
+					output.getDisplayStacks().clear();
+					output.getSearchTabStacks().clear();
+				}
+			});
+		}
 		// an axe strips a skyroot log or wood (vanilla's stripping only knows vanilla logs)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos pos = hit.getBlockPos();

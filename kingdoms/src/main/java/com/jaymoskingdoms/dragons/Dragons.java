@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -32,7 +31,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -105,13 +103,7 @@ public final class Dragons {
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
 		Disguises.register();
 		DragonEggs.register();
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> {
-			output.insertAfter(Items.ENDER_DRAGON_SPAWN_EGG, NOTUS_DRAGON_SPAWN_EGG);
-			output.insertAfter(NOTUS_DRAGON_SPAWN_EGG, BOREAS_DRAGON_SPAWN_EGG);
-			output.insertAfter(BOREAS_DRAGON_SPAWN_EGG, ZEPHYRUS_DRAGON_SPAWN_EGG);
-			output.insertAfter(ZEPHYRUS_DRAGON_SPAWN_EGG, EURUS_DRAGON_SPAWN_EGG);
-			output.insertAfter(EURUS_DRAGON_SPAWN_EGG, AEOLUS_DRAGON_SPAWN_EGG);
-		});
+		// (0.7.158) Andy: the dragons' spawn eggs are out of creative (tab and search); /give still has them
 
 		PayloadTypeRegistry.serverboundPlay().register(Breathe.TYPE, Breathe.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Breathe.TYPE, (payload, context) -> {
