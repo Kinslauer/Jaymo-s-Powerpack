@@ -4280,3 +4280,10 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   three notice designs (a crook's face, a masked bandit, a written notice under a red seal) in the old board's poster
   colours, and new 16px icons for the board and the notice.
 - Not yet seen in game.
+
+## 0.7.169: Executioner unlocks the weapon finishers (pack 0.15.109)
+- Andy: "make all the other executions unlocked in the combat arts tree replacing the current executioner function".
+  The Combat Arts perk Executioner (same place in the tree, same cost, so nobody's ranks move) no longer makes a combo's
+  4th full-strength hit deal double on a foe under 30%. It now unlocks Jaymo's Powers' weapon finishers on the downed
+  (hold use with a weapon: Run Through, Executioner's chop, Skull Crusher, Pinned...). Powers reads the rank by
+  reflection (`Finishers.weaponsUnlocked`). Bare hands need no perk.

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
  * (0.6.0) What a class's weapons do to whatever they hit ({@link ClassPerks#dealt}): an Archer's arrows hit harder. (0.6.5) Then
- * the Combat Arts' Momentum and Executioner ({@link CombatArts#dealt}). (0.7.106) Then the heritages' own
+ * the Combat Arts' Momentum ({@link CombatArts#dealt}). (0.7.106) Then the heritages' own
  * ({@link Heritage#dealt}): a Dragonblood's fire halved, a Dawnborn against the undead. (0.7.102) Last, the hidden blade:
  * it jams in unskilled hands, and stabs a Crippled foe for ten times the blow ({@link HiddenBlade#dealt}).
  * (0.7.111) And if it left the blow alone, a sneak attack on a monster that doesn't know you're there ({@link Senses#dealt}).

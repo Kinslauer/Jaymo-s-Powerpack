@@ -50,7 +50,9 @@ import net.minecraft.world.phys.Vec3;
  * <li>Cleave: a full-strength blow carries part of its weight into the foes beside what it hit.
  * <li>Finishers, on every {@link #FINISHER_LINK}th link when it's a full-strength blow: Earthsplitter (axes, maces, two-handed
  * and blunt weapons: the ground cracks and throws the foes round the target into the air), Rend (swords, knives and
- * spears: the target bleeds) and Executioner (any weapon: a finisher on a badly hurt foe lands much harder).
+ * spears: the target bleeds). (0.7.169) Executioner no longer lands a combo's finisher harder: Andy, "make all the other
+ * executions unlocked in the combat arts tree replacing the current executioner function". It unlocks Jaymo's Powers'
+ * weapon finishers on the downed instead (Powers reads the rank: {@code Finishers.weaponsUnlocked}).
  * <li>Active skills on the {@code Y} key: Charge (shoulder into the first foe ahead) and War Cry (sneak and {@code Y}, or
  * {@code Y} alone if it's the only one you know: foes round you are cowed, you and your friends emboldened).
  * <li>Bladestorm: every {@link #BLADESTORM_LINK}th link, you whirl and strike every foe round you.
@@ -80,8 +82,6 @@ public final class CombatArts {
 	/** Rend: the target bleeds this much every second, for this many seconds. */
 	static final float REND_DAMAGE = 1.5F;
 	static final int REND_SECONDS = 5;
-	/** Executioner: a finisher on a foe below this share of its health deals this much more. */
-	static final float EXECUTE_HEALTH = 0.3F, EXECUTE_BONUS = 1.0F;
 	/** Charge: how fast you go (blocks a tick, kept up the whole way), for how long (ticks), what it deals (times your attack damage), how hard it shoves, its wait (ticks). */
 	static final double CHARGE_SPEED = 0.8, CHARGE_LIFT = 0.12, CHARGE_SHOVE = 1.2, CHARGE_SHOVE_UP = 0.35;
 	static final int CHARGE_TICKS = 10, CHARGE_COOLDOWN = 240, CHARGE_STUN_TICKS = 40;
@@ -180,14 +180,14 @@ public final class CombatArts {
 		return now - chain.last <= CHAIN_TICKS ? chain.links : 0;
 	}
 
-	/** What a blow deals, from {@code amount} (from LivingEntity.hurtServer): Momentum, and Executioner on a finisher. */
+	/** What a blow deals, from {@code amount} (from LivingEntity.hurtServer): Momentum. */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		ServerPlayer sp = melee(source);
 		if (sp == null || target == sp) {
 			return amount;
 		}
 		Skills.Progress p = Skills.of(sp);
-		if (p.rank(Skills.Perk.MOMENTUM) == 0 && p.rank(Skills.Perk.EXECUTIONER) == 0 && p.rank(Skills.Perk.EARTHSPLITTER) == 0
+		if (p.rank(Skills.Perk.MOMENTUM) == 0 && p.rank(Skills.Perk.EARTHSPLITTER) == 0
 			&& p.rank(Skills.Perk.REND) == 0 && p.rank(Skills.Perk.BLADESTORM) == 0) {
 			return amount;
 		}
@@ -201,10 +201,6 @@ public final class CombatArts {
 		if (chain.finisherTick != now && link % FINISHER_LINK == 0 && fullStrength(sp, now)) {
 			chain.finisherTick = now;
 			chain.execute = false;
-		}
-		if (chain.finisherTick == now && p.rank(Skills.Perk.EXECUTIONER) > 0 && target.getHealth() < target.getMaxHealth() * EXECUTE_HEALTH) {
-			factor += EXECUTE_BONUS;
-			chain.execute = true;
 		}
 		return amount * factor;
 	}
@@ -249,7 +245,7 @@ public final class CombatArts {
 
 	private static boolean hasChainPerk(Skills.Progress p) {
 		return p.rank(Skills.Perk.MOMENTUM) > 0 || p.rank(Skills.Perk.EARTHSPLITTER) > 0 || p.rank(Skills.Perk.REND) > 0
-			|| p.rank(Skills.Perk.EXECUTIONER) > 0 || p.rank(Skills.Perk.BLADESTORM) > 0;
+			|| p.rank(Skills.Perk.BLADESTORM) > 0;
 	}
 
 	/** The finisher for the weapon in hand. */

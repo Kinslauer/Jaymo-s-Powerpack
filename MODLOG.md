@@ -2575,3 +2575,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and the tip forward into vanilla's crawl tilt so `CrawlPose` takes over smoothly. A slide that ends with Sneak still
   held leaves you prone (`CrawlTaps.goProne`); let go of Sneak to get up (once there's room), or use Jump or the Crawl key
   as usual. Not playtested.
+- **0.15.109, ships Jaymo's Kingdoms 0.7.169 (finishers: bare hands tap, weapons from Combat Arts):** Andy: "make the
+  execution only possible with bare hands, and only activated after tapping the target three times. this is to prevent
+  accidental neck snaps. Also make all the other executions unlocked in the combat arts tree replacing the current
+  executioner function". The neck snap now takes an empty hand and three quick taps on the downed (each a fresh press,
+  within a second of the last; a hold counts for nothing), and anything that isn't a weapon finishes nobody. The
+  weapons' finishers (still a held use) need Kingdoms' Combat Arts perk Executioner, which no longer boosts a combo's
+  finisher (`Finishers.weaponsUnlocked`; everyone in creative, everyone if Kingdoms isn't loaded).

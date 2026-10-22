@@ -59,8 +59,13 @@ import org.jspecify.annotations.Nullable;
  * (0.15.98) Finishers. Andy: "every weapon should be able to right click and hold a downed enemy, and then do a unique
  * finisher animation". Hold use (not sneaking: sneak + use stays the revive and the pick-up) on someone downed for
  * {@link #HOLD_TICKS} and you finish them: one move per kind of weapon in your main hand ({@link Kind}), read off the
- * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind. Anything that
- * isn't a weapon (an empty hand, a torch, a loaf) snaps the neck.
+ * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind.
+ * <p>
+ * (0.15.109) Andy: "make the execution only possible with bare hands, and only activated after tapping the target three
+ * times. this is to prevent accidental neck snaps. Also make all the other executions unlocked in the combat arts tree
+ * replacing the current executioner function". So the neck snap is bare hands only, on the {@link #TAPS}th quick tap (a
+ * hold does nothing), and anything else that isn't a weapon (a torch, a loaf) finishes nobody. The weapons' finishers
+ * are Kingdoms' Combat Arts perk Executioner ({@link #weaponsUnlocked}); without it a hold with a weapon does nothing.
  * <p>
  * The move plays out on its own once begun: you stand rooted facing them (no walking, jumping, swinging or using), the
  * body drawn by {@code FinisherPose} on every client, and the blows land on its beats (sound, blood or bone, a jolt
@@ -71,8 +76,16 @@ import org.jspecify.annotations.Nullable;
  * guard still has Kingdoms take its weapons first.
  */
 public final class Finishers {
-	/** How long use is held on the downed before the finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
+	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
 	public static final int HOLD_TICKS = 8, HOLD_GRACE = 8;
+	/**
+	 * (0.15.109) Bare hands take taps, not a hold, so nobody snaps a neck by accident: this many taps, each a fresh press
+	 * (use quiet for more than {@link #PRESS_GAP} ticks between them, held no longer than {@link #TAP_MAX}), none more than
+	 * {@link #TAP_WINDOW} ticks after the last.
+	 */
+	public static final int TAPS = 3, PRESS_GAP = 5, TAP_MAX = 8, TAP_WINDOW = 20;
+	/** (0.15.109) The Combat Arts perk (Jaymo's Kingdoms) that unlocks every weapon's finisher; bare hands need none. */
+	static final String UNLOCK_PERK = "executioner";
 	/** How far they may be from you for it to go on (blocks, past your reach for the use). */
 	static final double SLACK = 1.0, MAX_DISTANCE = 4.0;
 	/** The hold's bar length. */
@@ -163,17 +176,39 @@ public final class Finishers {
 	/** Rooted while it plays: walking and jumping gone (the finisher, and a downed player being finished). */
 	static final Identifier ROOT_ID = JaymosPowers.id("finisher_root"), JUMP_ID = JaymosPowers.id("finisher_jump");
 
-	/** Use held on a downed one: on whom, since when, and when use last came. */
+	/**
+	 * Use held on a downed one: on whom, since when, and when use last came; (0.15.109) bare-handed, the taps so far and
+	 * when this press began.
+	 */
 	private static final class Hold {
 		final LivingEntity body;
 		final long start;
-		long last;
+		final boolean bare;
+		long last, pressStart;
+		int presses = 1;
 
-		Hold(LivingEntity body, long start) {
+		Hold(LivingEntity body, long start, boolean bare) {
 			this.body = body;
 			this.start = start;
+			this.bare = bare;
 			this.last = start;
+			this.pressStart = start;
 		}
+	}
+
+	private static final boolean KINGDOMS = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
+	private static final java.lang.reflect.@Nullable Method KINGDOMS_RANK;
+
+	static {
+		java.lang.reflect.Method rank = null;
+		if (KINGDOMS) {
+			try {
+				rank = Class.forName("com.jaymoskingdoms.Skills").getMethod("rank", Player.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				rank = null;
+			}
+		}
+		KINGDOMS_RANK = rank;
 	}
 
 	/** A finisher playing: who, on whom. */
@@ -289,6 +324,25 @@ public final class Finishers {
 		return false;
 	}
 
+	/**
+	 * (0.15.109) Whether {@code player} has the weapons' finishers: Andy, "make all the other executions unlocked in the combat
+	 * arts tree replacing the current executioner function". Kingdoms' Executioner perk (read by reflection, as Freerun
+	 * reads its perks); everyone in creative, and everyone if Kingdoms isn't loaded.
+	 */
+	public static boolean weaponsUnlocked(Player player) {
+		if (player.isCreative() || !KINGDOMS) {
+			return true;
+		}
+		if (KINGDOMS_RANK == null) {
+			return false;
+		}
+		try {
+			return (int) KINGDOMS_RANK.invoke(null, player, UNLOCK_PERK) > 0;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** Whether {@code player} may finish {@code body}: downed, not themselves, not someone's tamed animal, and not already being finished. */
 	static boolean finishable(Player player, Entity entity) {
 		return entity instanceof LivingEntity body && body != player && body.isAlive() && Downed.isDowned(body) && !Carry.isCarried(body)
@@ -308,12 +362,29 @@ public final class Finishers {
 			|| !finishable(player, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
 			return InteractionResult.PASS;
 		}
+		ItemStack stack = player.getMainHandItem();
+		boolean bare = stack.isEmpty();
+		if (!bare && kind(stack) == Kind.FIST) {
+			// (0.15.109) Andy: "make the execution only possible with bare hands": a torch or a loaf finishes nobody
+			return InteractionResult.PASS;
+		}
 		long now = world.getGameTime();
 		Hold held = HOLDING.get(player.getUUID());
-		if (held != null && held.body == entity) {
+		if (held != null && held.body == entity && held.bare == bare) {
+			if (bare && now - held.last > PRESS_GAP) {
+				// a fresh tap
+				held.presses++;
+				held.pressStart = now;
+			}
 			held.last = now;
 		} else {
-			HOLDING.put(player.getUUID(), new Hold((LivingEntity)entity, now));
+			held = new Hold((LivingEntity) entity, now, bare);
+			HOLDING.put(player.getUUID(), held);
+		}
+		if (bare && held.presses >= TAPS && player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
+			// the third tap: the neck snap
+			HOLDING.remove(player.getUUID());
+			begin(level, sp, held.body);
 		}
 		// (only watching: Kingdoms still takes a downed guard's weapons, and Downed's catch-all swallows the rest)
 		return InteractionResult.PASS;
@@ -333,18 +404,38 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (now - hold.last > HOLD_GRACE || !player.isWithinEntityInteractionRange(hold.body, SLACK)) {
+			if (!player.isWithinEntityInteractionRange(hold.body, SLACK)) {
+				it.remove();
+				continue;
+			}
+			if (hold.bare) {
+				// (0.15.109) bare hands: taps, and a press held down (or taps too slow) counts for nothing
+				if (now - hold.last > TAP_WINDOW || hold.last - hold.pressStart > TAP_MAX) {
+					it.remove();
+				} else if (now - hold.pressStart <= 1) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.taps", hold.body.getDisplayName(), TAPS - hold.presses)
+						.withStyle(ChatFormatting.DARK_RED));
+				}
+				continue;
+			}
+			if (now - hold.last > HOLD_GRACE) {
 				// let go (a tap: whatever else a click on the downed does, it did)
 				it.remove();
 				continue;
 			}
 			long held = now - hold.start;
+			if (held >= HOLD_TICKS && !weaponsUnlocked(player)) {
+				// (0.15.109) a weapon's finisher is Combat Arts' Executioner
+				it.remove();
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.locked").withStyle(ChatFormatting.GRAY));
+				continue;
+			}
 			if (held >= HOLD_TICKS) {
 				it.remove();
 				begin(level, player, hold.body);
 				continue;
 			}
-			if (held >= 2) {
+			if (held >= 2 && weaponsUnlocked(player)) {
 				int filled = Math.round(HOLD_BAR * held / (float) HOLD_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
 					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));
