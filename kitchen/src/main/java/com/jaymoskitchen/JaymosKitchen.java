@@ -53,6 +53,8 @@ public class JaymosKitchen implements ModInitializer {
 		Corpses.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
 		com.jaymoskitchen.corpse.SpiderCrush.register();
+		// (0.5.21) bodies blown apart by blasts leave flying chunks, not a corpse
+		com.jaymoskitchen.corpse.Gibs.register();
 		com.jaymoskitchen.corpse.Butchers.register();
 		com.jaymoskitchen.corpse.Scavengers.register();
 		PlayerCorpses.register();

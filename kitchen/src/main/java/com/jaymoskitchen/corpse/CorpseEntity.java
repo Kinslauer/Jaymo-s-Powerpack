@@ -2006,7 +2006,7 @@ public class CorpseEntity extends Entity {
 	/** (0.5.1) A blow knocks the body this hard: a base plus a share of the damage, at most the cap (blocks a tick). */
 	private static final double SMACK_BASE = 0.18, SMACK_PER_DAMAGE = 0.04, SMACK_MAX = 0.7;
 	/** (0.5.1) A blast of at least this much damage shreds the body; a weaker one only flings it. */
-	private static final float SHRED_DAMAGE = 12.0F;
+	private static final float SHRED_DAMAGE = Gibs.SHRED_DAMAGE;
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
@@ -2033,15 +2033,19 @@ public class CorpseEntity extends Entity {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 12, 0.4, 0.2, 0.4, 0.05);
-		play(level, SoundEvents.SLIME_SQUISH, 0.6F);
-		if (kind == CorpseKind.SKELETON && bones > 0) {
-			spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
-		} else if (kind != CorpseKind.SKELETON) {
-			spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)), 0.2F);
+		if (kind == CorpseKind.SKELETON) {
+			// bare bones: they scatter
+			play(level, SoundEvents.SKELETON_HURT, 0.6F);
+			if (bones > 0) {
+				spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
+			}
+			dropLoot(level);
+			discard();
+			return true;
 		}
-		dropLoot(level);
-		discard();
-		return true;
+		spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)), 0.2F);
+		// (0.5.21) blown apart: chunks of it fly, its blood bursts, its loot drops loose
+		return Gibs.blowApartCorpse(this, level, source, damage);
 	}
 
 	/** (0.5.17) Told of each blow or arrow that lands on a fleshy body; see {@link #addOnHit}. */
