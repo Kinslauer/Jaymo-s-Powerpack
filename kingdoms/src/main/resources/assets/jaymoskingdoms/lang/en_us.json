@@ -1799,7 +1799,7 @@
 	"item.jaymoskingdoms.journal": "Traveller's Journal",
 	"key.category.jaymoskingdoms.journal": "Jaymo's Kingdoms",
 	"key.jaymoskingdoms.journal": "Open Traveller's Journal",
-	"gui.button.tailor": "Wardrobe Editor",
+	"gui.button.tailor": "Change Clothes",
 	"tailor.jaymoskingdoms.not": "I'm no tailor. Try a shepherd, at the loom.",
 	"tailor.jaymoskingdoms.fee": "A new outfit? %s emeralds, paid when you pick.",
 	"tailor.jaymoskingdoms.cant_pay": "A new outfit is %s emeralds. Come back when you have them.",

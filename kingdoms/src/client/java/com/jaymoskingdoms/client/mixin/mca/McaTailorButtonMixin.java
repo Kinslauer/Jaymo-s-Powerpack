@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.55) MCA's Change Clothes button (Wardrobe Editor since 0.7.167; {@code McaScreensMixin}) is only there on a tailor: a grown shepherd
+ * (0.7.55) MCA's Change Clothes button ({@code McaScreensMixin}) is only there on a tailor: a grown shepherd
  * ({@code Tailors.is}; the server checks again). (0.7.69) So are the tailor's costume buttons, and only with Jaymo's
  * Powers (whose Costume Table and designer they use).
  */
