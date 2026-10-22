@@ -432,6 +432,7 @@ public final class WebBehemoth {
 			}
 			live.hauling = false;
 			target.hurtServer(level, level.damageSources().mobAttack(host), SLAM_DAMAGE);
+			com.jaymospowers.core.Crushing.mark(target);
 			target.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, SLAM_STUN_TICKS, 3), host);
 			WebHaul.burst(level, at, SLAM_BURST);
 			if (target instanceof ServerPlayer player) {

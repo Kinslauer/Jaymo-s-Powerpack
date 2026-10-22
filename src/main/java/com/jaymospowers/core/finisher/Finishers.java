@@ -568,6 +568,10 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
+		if (kind.strike == Strike.CRUSH) {
+			// (0.15.112) a spider under it is crushed flat: legs, no body (Kitchen)
+			com.jaymospowers.core.Crushing.mark(body);
+		}
 	}
 
 	/** What's heard as it begins: steel drawn, a bowstring, a crossbow wound, cracking knuckles. */

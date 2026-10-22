@@ -185,6 +185,7 @@ public final class WebSlam {
 			}
 			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / RADIUS);
 			living.hurtServer(level, level.damageSources().playerAttack(player), damage * share);
+			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 out = new Vec3(to.x, 0.0, to.z);
 			out = out.lengthSqr() < 1.0E-4 ? ahead : out.normalize();
 			Vec3 push = out.scale(KNOCK * share).add(0.0, LIFT * share, 0.0);
@@ -226,6 +227,7 @@ public final class WebSlam {
 			}
 			float share = 1.0F - 0.5F * (float)Math.min(1.0, d / DIVE_RADIUS);
 			living.hurtServer(level, level.damageSources().playerAttack(player), damage * share);
+			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 out = new Vec3(to.x, 0.0, to.z);
 			out = out.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : out.normalize();
 			living.setDeltaMovement(living.getDeltaMovement().add(out.scale(DIVE_KNOCK * share).add(0.0, DIVE_LIFT * share, 0.0)));

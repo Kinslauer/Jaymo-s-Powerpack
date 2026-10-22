@@ -3,6 +3,7 @@ package com.jaymoskitchen.mixin;
 import com.jaymoskitchen.corpse.CorpseCapture;
 import com.jaymoskitchen.corpse.Corpses;
 import com.jaymoskitchen.corpse.PlayerCorpses;
+import com.jaymoskitchen.corpse.SpiderCrush;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,13 @@ abstract class LivingEntityMixin implements CorpseCapture {
 			return;
 		}
 		if (Corpses.leavesCorpse(self)) {
-			Corpses.spawnCorpse(self, jaymoskitchen$loot == null ? List.of() : jaymoskitchen$loot);
+			List<ItemStack> loot = jaymoskitchen$loot == null ? List.of() : jaymoskitchen$loot;
+			if (SpiderCrush.crushed(self)) {
+				// (0.5.18) a spider crushed flat leaves only legs, no body
+				SpiderCrush.crush(self, loot);
+			} else {
+				Corpses.spawnCorpse(self, loot);
+			}
 			self.remove(Entity.RemovalReason.KILLED);
 			ci.cancel();
 		}

@@ -2597,3 +2597,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fall and pool) plus flecks; a heavy blunt blow sprays and pools as on the living; anything else (a fist, an arrow)
   throws only a few flecks. Never a skeleton's, an iron one, one on fire or a bloodless creature's. Tuning in
   `BladeBlood.CORPSE_*`. Compile-checked; not playtested.
+- **0.15.112, crushed spiders (Kitchen 0.5.18):** Andy: "large blunt impacts or slams on spiders should crush them,
+  leaving no corpse to grab, but only a random amount of legs that disappear after a time". Kitchen does the crushing;
+  Powers marks the deaths it should crush with Kitchen's `jaymoskitchen.crushed` tag (`core/Crushing.mark`, only on a
+  creature the blow just killed): a heavy blunt blow's kill (`BladeBlood.heavyBlunt`: a hammer or club for 3 hearts or
+  more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt or
+  staff finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
+  slams and dive, its thrash's splash and the Behemoth's tendril slam. Compile-checked; not playtested.

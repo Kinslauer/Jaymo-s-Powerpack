@@ -947,3 +947,16 @@ Batch 3 of the BWM port (MIT, our own code).
   with `CorpseEntity.addOnHit` (plain Java types, for reflection), after the knock it already gave. Jaymo's Powers
   splatters the body's blood with it, most with a blade (Andy: "attacking corpses when they are on the ground should
   splatter blood especially with blades"). Without Powers, nothing changes.
+
+### 0.5.18: crushed spiders (pack 0.15.112)
+- Andy: "large blunt impacts or slams on spiders should crush them, leaving no corpse to grab, but only a random amount
+  of legs that disappear after a time". A creature in `jaymoskitchen:crushable` (spiders, cave spiders) that dies
+  crushed leaves no corpse (`corpse/SpiderCrush`, from `LivingEntityMixin`'s corpse swap): 2-6 loose legs
+  (`SpiderLeg`) fly out, tumble, lie flat and sink away after 30-60 s. They can't be picked up, grabbed or hit. Its
+  loot drops loose, except its spider eyes (squashed).
+- Crushed means the killing damage is in `jaymoskitchen:crushes` (a fall, flying into a wall, a falling anvil, block
+  or stalactite, a mace's smash) or another mod tagged it `jaymoskitchen.crushed` (Jaymo's Powers: heavy blunt kills,
+  blunt finishers, its slams).
+- A leg keeps its spider's look, so the client draws it in that spider's own skin through its renderer (a cave
+  spider's, Kingdoms' spider kinds'), at its size: a two-piece leg broken at the knee, the same shape as Kingdoms'
+  kneed spider legs (`client/corpse/SpiderLegRenderer`). Tuning at the top of `SpiderCrush` and `SpiderLeg`.
