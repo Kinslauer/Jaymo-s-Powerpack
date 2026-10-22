@@ -15,9 +15,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * (0.15.91) The blood's particles, ported from Iron431's Iron's Simple Blood (MIT; github.com/iron431/simple-blood-mod,
+ * (0.15.93) The blood's particles, ported from Iron431's Iron's Simple Blood (MIT; github.com/iron431/simple-blood-mod,
  * notice in {@code licenses/LICENSE_simple_blood}; its sprites under {@code textures/particle/blood/}). The server sends
- * a {@link Spray} (its colour and size); each one the client gets becomes one of the {@link #DROPS} at random (a drop,
+ * a {@link Spray} (its colour and size); each one the client gets becomes one of the drop kinds ({@link #DROP} and the rest) at random (a drop,
  * spatter, spurt or swipe) that flies, falls and leaves a {@link Puddle} where it lands, laid over whatever it lands on
  * (the client's {@code client/blood}). A {@link Puddle} can also be sent on its own (a heavy blow's pool, see
  * {@code BladeBlood}). Who bleeds, what colour and how much is {@code BladeBlood}'s.

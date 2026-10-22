@@ -541,7 +541,7 @@ public final class Bleeding {
 		}
 	}
 
-	/** Blood running from {@code part}: (0.15.91) drops that pool on the ground under it ({@link BladeBlood#drip}). */
+	/** Blood running from {@code part}: (0.15.93) drops that pool on the ground under it ({@link BladeBlood#drip}). */
 	private static void drip(ServerLevel level, LivingEntity body, BodyPart part, boolean stump) {
 		double y = switch (part) {
 			case HEAD -> 0.85;

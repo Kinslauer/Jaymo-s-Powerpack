@@ -2457,7 +2457,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kitchen's new `LivingRagdolls.addHold`): the body floats up and bobs at the surface until you're up, given up, carried
   out or washed ashore (then back to the downed crawl). Without Kitchen you just drift up (`CrawlTaps`). Sneak still
   gives up.
-- **0.15.91, blood (Iron's Simple Blood):** Andy asked for Iron's Simple Blood (Iron431, MIT, NeoForge only, no 26.3
+- **0.15.93, blood (Iron's Simple Blood):** Andy asked for Iron's Simple Blood (Iron431, MIT, NeoForge only, no 26.3
   Fabric build), merged into our own blood (`BladeBlood`) rather than shipped as a mod, plus "the scaling splatter /
   puddle for heavier blunt impacts, like the anvil or mace impacts". Its particles are ported in `core/blood`
   (`BloodParticles`: a `Spray` of drops and a `Puddle`) and `client/blood` (`BloodDrop`, `BloodPuddle`, `BloodDecals`:

@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 
 /**
- * (0.15.91) How {@link BloodPuddle}s are drawn (Iron's Simple Blood's {@code BloodDecalRenderState}, ported to 26.3):
+ * (0.15.93) How {@link BloodPuddle}s are drawn (Iron's Simple Blood's {@code BloodDecalRenderState}, ported to 26.3):
  * their own particle group ({@link #TYPE}, registered through Fabric's {@code ParticleGroupRegistry}), whose render
  * state is a {@link QuadParticleRenderState} that hands vanilla's quad particle renderer ready-made vertices instead of
  * camera-facing squares, so a puddle can be cut to the block tops it lies on.

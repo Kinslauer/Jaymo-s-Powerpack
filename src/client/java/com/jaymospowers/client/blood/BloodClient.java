@@ -13,7 +13,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 
 /**
- * (0.15.91) The blood's client side (Iron's Simple Blood's {@code ClientEvents}, ported): each drop kind's sprites, the
+ * (0.15.93) The blood's client side (Iron's Simple Blood's {@code ClientEvents}, ported): each drop kind's sprites, the
  * {@link BloodParticles.Spray} that picks one of them at random, and the {@link BloodPuddle}s' own group.
  */
 public final class BloodClient {

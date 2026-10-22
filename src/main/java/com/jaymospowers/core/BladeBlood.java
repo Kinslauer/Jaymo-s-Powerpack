@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * more. Only a creature crushed to death bursts ({@link #crushed}: Gravity's weight, a meteor, a wall it's slammed
  * into, the Great Ape's stomp), never a blade's kill. Nothing that has no blood ({@link #BLOODLESS}: bones, golems,
  * spirits) bleeds.
- * <p>(0.15.91) The blood is Iron's Simple Blood's ({@link BloodParticles}): drops, spatters and swipes that fly, fall and
+ * <p>(0.15.93) The blood is Iron's Simple Blood's ({@link BloodParticles}): drops, spatters and swipes that fly, fall and
  * pool where they land, in the creature's own colour ({@link #color}: ender purple, dark for the deep things, slime
  * green, a bug's yellow). Andy: a heavy blunt blow ({@link #heavyBlunt}: a falling anvil or block, a mace's smash, a
  * hammer or club hitting for 3 hearts or more) splatters too, and pools under the body, more and wider the harder it
@@ -46,21 +46,21 @@ public final class BladeBlood {
 	static final int BURST_DROPS = 26, BURST_GORE = 28;
 	static final double BURST_SPEED = 0.22, BURST_GORE_SPEED = 0.35;
 	static final float BURST_POOL = 3.0F;
-	/** (0.15.91) A blunt blow this heavy (health points) or more splatters, with this many times a blade's drops. */
+	/** (0.15.93) A blunt blow this heavy (health points) or more splatters, with this many times a blade's drops. */
 	static final float HEAVY_BLUNT = 6.0F, BLUNT_DROPS = 1.5F;
 	/**
-	 * (0.15.91) A heavy blunt blow's pools: one, plus one for every this much damage over {@link #HEAVY_BLUNT}, at most this
+	 * (0.15.93) A heavy blunt blow's pools: one, plus one for every this much damage over {@link #HEAVY_BLUNT}, at most this
 	 * many; each this big, plus this much per point over, at most this big (1 = a block and a half across).
 	 */
 	static final float POOL_PER_DAMAGE = 5.0F, POOL_SCALE = 0.9F, POOL_GROWTH = 0.12F, POOL_MAX = 3.0F;
 	static final int POOLS_MAX = 5;
-	/** (0.15.91) An open cut's drip: this many drops (a stump's more), this small. */
+	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
 
 	/** What has no blood to spill. */
 	public static final TagKey<EntityType<?>> BLOODLESS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("bloodless"));
-	/** (0.15.91) What bleeds another colour than red (Simple Blood's kinds). */
+	/** (0.15.93) What bleeds another colour than red (Simple Blood's kinds). */
 	public static final TagKey<EntityType<?>> ENDER_BLOOD = tag("blood/ender"), DARK_BLOOD = tag("blood/dark"),
 		SLIME_BLOOD = tag("blood/slime"), BUG_BLOOD = tag("blood/bug");
 
@@ -103,7 +103,7 @@ public final class BladeBlood {
 		}
 	}
 
-	/** (0.15.91) A falling anvil or block, a mace's smash, or a blunt weapon ({@link Fractures#blunt}) hitting this hard. */
+	/** (0.15.93) A falling anvil or block, a mace's smash, or a blunt weapon ({@link Fractures#blunt}) hitting this hard. */
 	public static boolean heavyBlunt(DamageSource source, float damage) {
 		if (damage < HEAVY_BLUNT) {
 			return false;
@@ -120,7 +120,7 @@ public final class BladeBlood {
 		return !target.getType().builtInRegistryHolder().is(BLOODLESS);
 	}
 
-	/** (0.15.91) {@code target}'s blood colour (RGB). */
+	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
 		var type = target.getType().builtInRegistryHolder();
 		if (type.is(ENDER_BLOOD)) {
@@ -164,7 +164,7 @@ public final class BladeBlood {
 	}
 
 	/**
-	 * (0.15.91) A heavy blunt blow landed on {@code target} for {@code damage}: a spray half again a blade's, and pools
+	 * (0.15.93) A heavy blunt blow landed on {@code target} for {@code damage}: a spray half again a blade's, and pools
 	 * under it, more and wider the harder it was.
 	 */
 	public static void blunt(LivingEntity target, float damage) {
@@ -184,7 +184,7 @@ public final class BladeBlood {
 			count, spread, 0.0, spread, 0.0);
 	}
 
-	/** (0.15.91) Wounds' open cut on {@code body} drips, from this far up it (a fraction of its height); a stump drips more. */
+	/** (0.15.93) Wounds' open cut on {@code body} drips, from this far up it (a fraction of its height); a stump drips more. */
 	public static void drip(ServerLevel level, LivingEntity body, double up, boolean stump) {
 		if (!bleeds(body)) {
 			return;

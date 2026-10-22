@@ -14,7 +14,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Vector3fc;
 
 /**
- * (0.15.91) One drop of a {@link BloodParticles.Spray} (Iron's Simple Blood's {@code BloodParticle} and
+ * (0.15.93) One drop of a {@link BloodParticles.Spray} (Iron's Simple Blood's {@code BloodParticle} and
  * {@code SpriteSheetBloodParticle}, ported): tossed up, falls hard, and where it lands leaves a {@link BloodPuddle}.
  * A sprite sheet ({@code frames} over 1: a spatter, spurt or swipe) plays its frames side by side; a swipe or spurt
  * ({@code directional}) turns to face the way it flies. Under water it drifts, slows, spreads and fades instead.
