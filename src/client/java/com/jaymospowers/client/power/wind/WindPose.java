@@ -145,6 +145,7 @@ public final class WindPose {
 	static void tick(Minecraft minecraft) {
 		WindHoverSway.tick(minecraft);
 		WindTumble.tick(minecraft);
+		WindWobble.tick(minecraft);
 		WindCyclonePose.tick(minecraft);
 		WindWhistlePose.tick(minecraft);
 		ClientLevel level = minecraft.level;
@@ -255,6 +256,7 @@ public final class WindPose {
 			state.setData(BANK_KEY, null);
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
+			state.setData(WindWobble.KEY, null);
 			state.setData(WindCyclonePose.KEY, null);
 			state.setData(WindWhistlePose.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
@@ -274,6 +276,7 @@ public final class WindPose {
 			state.setData(BANK_KEY, null);
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
+			state.setData(WindWobble.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
 			state.setData(WindWhistlePose.KEY, null);
 			return;
@@ -285,6 +288,7 @@ public final class WindPose {
 		state.setData(WindFlightSwing.KEY, WindFlightSwing.extract(entity, state, partialTicks));
 		WindHoverSway.extract(entity, state, partialTicks);
 		WindTumble.extract(entity, state, partialTicks);
+		WindWobble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
 		float value = amount == null ? 0.0F : Mth.lerp(partialTicks, amount[0], amount[1]);
 		float[] brake = BRAKES.get(entity.getId());
@@ -319,6 +323,7 @@ public final class WindPose {
 		}
 		WindHoverSway.rotate(state, poseStack, entityScale);
 		WindTumble.rotate(state, poseStack, entityScale);
+		WindWobble.rotate(state, poseStack, entityScale);
 		kickLean(state, poseStack);
 		WindCyclonePose.rotate(state, poseStack);
 		WindWhistlePose.rotate(state, poseStack);
@@ -525,10 +530,11 @@ public final class WindPose {
 		h.head.zRot -= bend * KICK_HIP_HEAD_LEVEL;
 	}
 
-	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, Wind Whistle, hover sway, tumble, flight swing). */
+	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, Wind Whistle, hover sway, tumble, flight swing, cloak wobble). */
 	public static boolean posed(AvatarRenderState avatar) {
 		return avatar.getData(KEY) != null || avatar.getData(KICK_KEY) != null || avatar.getData(WindCyclonePose.KEY) != null
-			|| avatar.getData(WindWhistlePose.KEY) != null || avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null;
+			|| avatar.getData(WindWhistlePose.KEY) != null || avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null
+			|| avatar.getData(WindWobble.KEY) != null;
 	}
 
 	/** After the model animates: the limbs. */
@@ -539,6 +545,7 @@ public final class WindPose {
 		// the hover ragdoll first; the cruise pose, easing in over it, wins as speed picks up
 		WindHoverSway.applyModel(model, state);
 		WindTumble.applyModel(model, state);
+		WindWobble.applyModel(model, state);
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
 			return;
 		}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:siding",
+  "ingredients": [
+    "jaymoskingdoms:bamboo_moulding",
+    "jaymoskingdoms:bamboo_moulding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:bamboo_siding"
+  }
+}

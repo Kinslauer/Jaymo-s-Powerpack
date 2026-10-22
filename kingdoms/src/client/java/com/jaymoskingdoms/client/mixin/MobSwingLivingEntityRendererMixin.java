@@ -1,6 +1,6 @@
 package com.jaymoskingdoms.client.mixin;
 
-import com.jaymoskingdoms.client.DownedPose;
+import com.jaymoskingdoms.client.HiddenBladeClient;
 import com.jaymoskingdoms.client.MobAnimations;
 import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
@@ -29,7 +29,6 @@ abstract class MobSwingLivingEntityRendererMixin {
 		MobAnimations.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
-		DownedPose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
@@ -43,13 +42,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		CameraRenderState camera, CallbackInfo ci) {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
-		DownedPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
-	}
-
-	/** (0.7.73) A downed guard is laid on the ground (DownedPose). */
-	@Inject(method = "setupRotations", at = @At("TAIL"))
-	private void jaymoskingdoms$downed(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
-		DownedPose.rotate(state, poseStack, entityScale);
+		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 }

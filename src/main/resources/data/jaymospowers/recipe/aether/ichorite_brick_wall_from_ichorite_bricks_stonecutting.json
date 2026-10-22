@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:ichorite_bricks",
+  "result": {
+    "id": "jaymospowers:ichorite_brick_wall"
+  }
+}

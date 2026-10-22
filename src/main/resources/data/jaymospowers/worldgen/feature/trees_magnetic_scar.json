@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "jaymospowers:skybirch_tree",
+    "placement": []
+  },
+  "features": [
+    {
+      "chance": 0.35,
+      "feature": {
+        "feature": "jaymospowers:wisptop_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.01,
+      "feature": {
+        "feature": "jaymospowers:greatroot_tree",
+        "placement": []
+      }
+    },
+    {
+      "chance": 0.025,
+      "feature": {
+        "feature": "jaymospowers:amberoot_sparse_tree",
+        "placement": []
+      }
+    }
+  ]
+}

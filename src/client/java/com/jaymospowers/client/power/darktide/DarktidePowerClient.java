@@ -46,7 +46,6 @@ public final class DarktidePowerClient implements PowerClient {
 		ClientPlayNetworking.registerGlobalReceiver(DarktideNet.Fx.TYPE, (payload, context) -> DarktideFx.receive(payload));
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("darktide_fx"), DarktideFx::renderOverlay);
 		ClientTickEvents.END_CLIENT_TICK.register(DarktideFx::tick);
-		DarktideRolls.init();
 	}
 
 	static boolean isActive(LocalPlayer player) {

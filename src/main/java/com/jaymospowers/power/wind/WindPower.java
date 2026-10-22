@@ -119,6 +119,7 @@ public final class WindPower implements Power {
 		WindKick.init();
 		WindCyclone.init();
 		WindJet.init();
+		com.jaymospowers.power.wind.aether.WindAether.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
@@ -138,6 +139,7 @@ public final class WindPower implements Power {
 			}
 			WindStorm.forget(handler.player);
 			WindWeather.forget(handler.player);
+			WindFall.forget(handler.player);
 		});
 	}
 
@@ -209,6 +211,14 @@ public final class WindPower implements Power {
 	public void onGained(ServerPlayer player) {
 		this.states.remove(player.getUUID());
 		this.sendStatus(player, this.state(player), 0.0F, false);
+	}
+
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the cyclone and the jet stop (flight ends by WindFlight.canFly, next tick)
+		WindCyclone.stop(player);
+		WindJet.stop(player);
 	}
 
 	@Override
@@ -291,6 +301,12 @@ public final class WindPower implements Power {
 	boolean flewRecently(ServerPlayer player, int ticks) {
 		State s = this.states.get(player.getUUID());
 		return s != null && (s.flight.flying() || player.tickCount - s.lastFlightTick <= ticks);
+	}
+
+	/** (0.13.35) In wind flight right now (for {@code WindAether}'s rise into the Aether). */
+	public static boolean flying(ServerPlayer player) {
+		State s = INSTANCE.states.get(player.getUUID());
+		return s != null && s.flight.flying();
 	}
 
 	/** Debug: every cooldown back to zero. */
@@ -597,7 +613,8 @@ public final class WindPower implements Power {
 			return;
 		}
 		State s = this.state(player);
-		if (next.flying() && !WindFlight.canFly(player)) {
+		// (0.15.54) lying limp, only a Wind user who has mastered enough gets back into the air (see WindFall)
+		if (next.flying() && (!WindFlight.canFly(player) || !s.flight.flying() && !WindFall.canTakeOff(player))) {
 			this.setFlight(player, s, WindFlight.NONE, false);
 			this.sendStatus(player, s, 0.0F, true);
 			return;

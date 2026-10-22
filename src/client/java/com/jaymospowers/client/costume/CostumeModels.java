@@ -72,13 +72,15 @@ final class CostumeModels {
 	 * are then laid on it like on any player model, by the model-feature mixins. A cape, if it has one, swings like the
 	 * vanilla cape from the render state's cape motion.
 	 */
-	static class Worn extends PlayerModel {
+	static class Worn extends PlayerModel implements com.jaymospowers.client.PosedCopy.Holder {
 		private final Supplier<PlayerModel> wearer;
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
 		private final @Nullable ModelPart bust, emblem;
 		/** (0.14.3) The assassin's coat tails, when this model has them. */
 		private final @Nullable ModelPart tailFront, tailBack;
+		/** (0.15.34) Whether it's being drawn over an MCA body just now (set as it animates, read just before it's drawn). */
+		private boolean mcaBody;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
 			super(root, slim);
@@ -114,6 +116,8 @@ final class CostumeModels {
 					to[i].loadPose(body[i]);
 				}
 			}
+			// (0.15.34) on an MCA body, the very pose MCA's own layers draw it in (and, like them, no root: beforeDraw)
+			this.mcaBody = CostumeBody.mcaPose(state, this);
 			// (0.11.78) MCA draws the head at the villager's head size (scaled from the model's origin)
 			float head = CostumeBody.headScale(parent);
 			if (head != 1.0F) {
@@ -183,6 +187,23 @@ final class CostumeModels {
 				}
 				front = syz * (theirs.z + front);
 				this.emblem.z = Math.min(0.0F, front + 2.0F + SUIT_GROW);
+			}
+		}
+
+		/**
+		 * (0.15.34) Just before it's drawn, after every pose (CostumeCover): over an MCA body the root's pose goes, as MCA
+		 * draws its body's parts each on its own and never the root (CommonVillagerModel.renderCommon), so a pose that
+		 * moves the root (Gravity's arm lean) would otherwise carry the costume off the body.
+		 */
+		/** (0.15.44) Over an MCA body it wears the posed body's copy: our poses aren't laid on it again. */
+		@Override
+		public boolean carriesPose() {
+			return this.mcaBody;
+		}
+
+		void beforeDraw() {
+			if (this.mcaBody) {
+				root().loadPose(PartPose.ZERO);
 			}
 		}
 

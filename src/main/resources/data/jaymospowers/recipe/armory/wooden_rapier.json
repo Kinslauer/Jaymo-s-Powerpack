@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "X": "#minecraft:wooden_tool_materials",
+    "S": "minecraft:stick",
+    "C": "minecraft:string"
+  },
+  "pattern": [
+    "  X",
+    " X ",
+    "CS "
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_rapier"
+  }
+}

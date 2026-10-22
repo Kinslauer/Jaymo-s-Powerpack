@@ -1,0 +1,13 @@
+{
+	"values": [
+		"#minecraft:impermeable",
+		{
+			"id": "#c:glass_blocks",
+			"required": false
+		},
+		{
+			"id": "#c:glass_panes",
+			"required": false
+		}
+	]
+}

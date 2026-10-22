@@ -72,7 +72,10 @@ import org.jspecify.annotations.Nullable;
  * <li>V, Weightless (toggle): your own gravity drops to a fraction; you jump high and fall slow (and land lighter). It
  * costs hunger and runs out.</li>
  * <li>G, Gravity Well: a point where you aim pulls everything nearby into it for a few seconds.</li>
- * <li>B, Crush (hold to charge): everything around where you aim gets many times heavier: slammed down, hurt and pinned.</li>
+ * <li>B, Gravity Wave (hold to charge): a fan of gravitic pressure rolls out the way you look, hurting, throwing and
+ * slowing what it passes and carving up the ground ({@link GravityWave}). A tap is still the force kneel around you.
+ * B while Lift holds a creature (R+B): Inversion, yanked in for a gut punch that bleeds it inside
+ * ({@link GravityGutPunch}).</li>
  * </ul>
  * 0.2.0 fate: creatures that die to the weight you gave them (falls after Lift, Crush, the Singularity) count toward
  * <b>ascension</b> (Event Horizon: unmovable, projectiles bend away; C is the {@code Singularity}); the same deaths, and
@@ -143,8 +146,7 @@ public final class GravityPower implements Power {
 	static final double HEAVY_AURA_JUMP = -0.35;
 	static final int HEAVY_AURA_REFRESH = 5;
 
-	// ---- Crush (B, charged) ----
-	static final double CRUSH_RANGE = 24.0;
+	// ---- Crush (B tap) and Gravity Wave (B, charged: see GravityWave) ----
 	public static final int CRUSH_FULL_CHARGE = 60;
 	static final double CRUSH_RADIUS_MIN = 2.5, CRUSH_RADIUS_MAX = 5.5;
 	static final float CRUSH_DAMAGE_MIN = 4.0F, CRUSH_DAMAGE_MAX = 16.0F;
@@ -565,6 +567,22 @@ public final class GravityPower implements Power {
 		player.setAttached(COOLDOWNS, GravityCooldowns.NONE);
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// a lift lets go, Weightless ends (no cooldown: it wasn't their choice), and every way of moving stops
+		State state = STATES.get(player.getUUID());
+		if (state != null) {
+			dropLift(player, state, false);
+		}
+		if (player.getAttached(WEIGHTLESS_ON) != null) {
+			setWeightless(player, false);
+		}
+		GravityWalk.stop(player);
+		GravityRockFlight.stop(player);
+		GravityForward.stop(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		State state = STATES.remove(player.getUUID());
@@ -664,7 +682,16 @@ public final class GravityPower implements Power {
 			}
 			case ABILITY_4 -> {
 				if (down) {
-					if (ready(player, CRUSH) || ownWell(player) != null) {
+					if (!state.chunkHold && state.ripFrom < 0 && ready(player, CRUSH) && liftedCreature(player, state) instanceof LivingEntity target) {
+						// R+B: Inversion, the held creature yanked in for a gut punch
+						dropLift(player, state, true);
+						// (Collapse's plummet on letting go gives way to the yank)
+						PLUMMETS.removeIf(p -> p.entity().equals(target.getUUID()));
+						GravityGutPunch.start(player, target);
+						int cooldown = GravityGutPunch.COOLDOWN;
+						player.setAttached(COOLDOWNS, cooldowns(player).withCrush(player.level().getGameTime() + cooldown, cooldown));
+						state.crushFrom = -1;
+					} else if (ready(player, CRUSH) || ownWell(player) != null) {
 						state.crushFrom = player.level().getGameTime();
 						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.5F, 1.6F);
 					}
@@ -1550,10 +1577,19 @@ public final class GravityPower implements Power {
 		GravityShockwave.start(player.level(), at);
 	}
 
+	/** What Lift holds, if it's a living creature (not a chunk, an item, a cart or a corpse), or null. */
+	private static @Nullable LivingEntity liftedCreature(ServerPlayer player, State state) {
+		if (state.liftTarget < 0) {
+			return null;
+		}
+		Entity held = player.level().getEntity(state.liftTarget);
+		return held instanceof LivingEntity living && living.isAlive() && !(held instanceof ArmorStand) ? living : null;
+	}
+
 	/**
 	 * B let go. A tap is a force kneel around you: everything within {@code CRUSH_TAP_RADIUS} is pinned and drops to
-	 * its knees, and inside your own well the tap also launches you ({@link #wellLaunch}). Held, it's the Crush where you
-	 * aim, as charged; Collapsing Horizon rains its ring down on the target instead.
+	 * its knees, and inside your own well the tap also launches you ({@link #wellLaunch}). Held, it's the Gravity Wave
+	 * the way you look, as charged ({@link GravityWave}); Collapsing Horizon also rains its ring down where the wave ends.
 	 */
 	private static void releaseCrush(ServerPlayer player, State state, long held, float charge) {
 		if (held < CRUSH_TAP_TICKS) {
@@ -1563,18 +1599,17 @@ public final class GravityPower implements Power {
 			crush(player, 0.0F, player.position(), CRUSH_TAP_RADIUS);
 			return;
 		}
-		if (GravityOrbit.collapsingHorizon(player)) {
-			if (!ready(player, CRUSH)) {
-				return;
-			}
-			ServerLevel level = player.level();
-			Vec3 at = aimPoint(player, CRUSH_RANGE);
-			GravityOrbit.rain(player, at, Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + COLLAPSE_RADIUS_BONUS);
-			int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
-			player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+		if (!ready(player, CRUSH)) {
 			return;
 		}
-		crush(player, charge, aimPoint(player, CRUSH_RANGE), Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX));
+		ServerLevel level = player.level();
+		if (GravityOrbit.collapsingHorizon(player)) {
+			GravityOrbit.rain(player, aimPoint(player, GravityWave.range(charge) + GravityWave.COLLAPSE_RANGE_BONUS),
+				Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + COLLAPSE_RADIUS_BONUS);
+		}
+		GravityWave.fire(player, charge);
+		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
+		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
 	}
 
 	/** Your own well, still up (and not yet launched out of), or null. */
@@ -1921,15 +1956,18 @@ public final class GravityPower implements Power {
 	}
 
 	/**
-	 * Crush being charged (B held): the ground it'll fall on already pulls. Everything within the blast (at the size the
-	 * charge has reached) is weighed down like Weightless's aura, until the crush comes.
+	 * The Gravity Wave being charged (B held): the pressure gathers in front of you, more of it the longer it's held
+	 * (and Collapsing Horizon's ring is drawn to where it'll rain).
 	 */
 	private static void crushZone(ServerPlayer player, State state) {
 		float charge = Mth.clamp((player.level().getGameTime() - state.crushFrom) / (float)CRUSH_FULL_CHARGE, 0.0F, 1.0F);
-		Vec3 at = aimPoint(player, CRUSH_RANGE);
-		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (Fate.isCorrupted(player) ? COLLAPSE_RADIUS_BONUS : 0.0);
-		weighDown(player, at, radius);
-		GravityOrbit.drawTo(player, at);
+		ServerLevel level = player.level();
+		Vec3 hand = player.getEyePosition().add(player.getViewVector(1.0F).scale(1.2)).subtract(0.0, 0.3, 0.0);
+		double spread = 0.15 + charge * 0.3;
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, hand.x, hand.y, hand.z, 3 + Math.round(charge * 9), spread, spread, spread, 0.02);
+		if (GravityOrbit.collapsingHorizon(player)) {
+			GravityOrbit.drawTo(player, aimPoint(player, GravityWave.range(charge) + GravityWave.COLLAPSE_RANGE_BONUS));
+		}
 	}
 
 	/** Everyone (but the user) within {@code radius} of {@code center} is heavy for a moment (refresh it to keep them so). */
@@ -1966,6 +2004,8 @@ public final class GravityPower implements Power {
 
 	private static void serverTick(MinecraftServer server) {
 		GravitySideFall.tick(server);
+		GravityWave.tick(server);
+		GravityGutPunch.tick(server);
 		GravityWalk.tick(server);
 		if (!SLAMS.isEmpty()) {
 			tickSlams(server);
@@ -2158,6 +2198,17 @@ public final class GravityPower implements Power {
 		TOUCHED.put(target.getUUID(), new Touch(player.getUUID(), player.level().getGameTime()));
 	}
 
+	/** {@code player}'s gravity hurts {@code target}: a death by it counts as one by weight (the Gravity Wave, Inversion). */
+	static void hurtByWeight(LivingEntity target, ServerPlayer player, float damage) {
+		touch(target, player);
+		crushing = true;
+		try {
+			target.hurtServer(player.level(), player.damageSources().playerAttack(player), damage);
+		} finally {
+			crushing = false;
+		}
+	}
+
 	private static void afterDeath(LivingEntity entity, DamageSource source) {
 		Touch touch = TOUCHED.remove(entity.getUUID());
 		if (touch == null || !(entity.level() instanceof ServerLevel level) || level.getGameTime() - touch.at() > TOUCH_MEMORY_TICKS) {
@@ -2226,7 +2277,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** Where the crosshair lands (a block, a creature, or open air at {@code range}). */
-	static Vec3 aimPoint(ServerPlayer player, double range) {
+	public static Vec3 aimPoint(ServerPlayer player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
 		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

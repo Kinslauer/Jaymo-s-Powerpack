@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-/** (0.7.103) Applies the Make Do mixin only when OmniCrossbow is loaded (without it a crossbow can't shoot what it'd load). */
+/** (0.7.162) Applies the Make Do mixin only when OmniCrossbow is loaded (without it a crossbow can't shoot what it'd load). */
 public final class OmniMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String mixinPackage) {

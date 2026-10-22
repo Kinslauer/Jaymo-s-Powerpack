@@ -250,7 +250,16 @@ public final class WebSymbioteClient {
 	 * hops up {@code BOUND_HOP_RISE} blocks nudged on at {@code LEAP_FORWARD} (straight up if that would land it nowhere
 	 * safe, within {@code BOUND_HOP_DROP}). Not while it's this close to what it's after ({@code BOUND_STUCK_NEAR}).
 	 */
-	static final int BOUND_STUCK_TICKS = 16;
+	static final int BOUND_STUCK_TICKS = 10;
+	/** (0.15.69) Near its prey only counts as getting somewhere this close in height (blocks), and in sight. */
+	static final double BOUND_STUCK_NEAR_Y = 1.5;
+	/**
+	 * (0.15.69) Andy: "it honestly shouldnt stop moving at all unless it is trying to feed". At its prey it circles it
+	 * ({@code TAKEOVER_CIRCLE} blocks/tick sideways, turning about every {@code TAKEOVER_CIRCLE_TICKS}); against a wall
+	 * with no way round, the tendrils climb it ({@link #FLEE_CLIMB}); with no path at all it keeps on the way it faces.
+	 */
+	static final double TAKEOVER_CIRCLE = 0.14;
+	static final int TAKEOVER_CIRCLE_TICKS = 40;
 	static final double BOUND_STUCK_MOVE = 0.6, BOUND_STUCK_RANGE = 1.5, BOUND_HOP_RISE = 2.0, BOUND_HOP_DROP = 3.0, BOUND_STUCK_NEAR = 3.0;
 	/** Your screen: a leap kicks your view on (degrees, ticks), its landing jolts it, and a zip's cord lifts you off your feet (blocks/tick). */
 	static final float BOUND_SHAKE = 0.5F, BOUND_LAND_SHAKE = 0.3F, LEDGE_LEAP_SHAKE = 0.35F;
@@ -322,6 +331,14 @@ public final class WebSymbioteClient {
 	private static int leapCoil = -1;
 	/** An escape leap after a meal: ticks coiled (-1 none), and the way it leaps (flat; zero: straight up). */
 	private static int escapeCoil = -1;
+	/**
+	 * (0.15.69) You went down and it got you up (WebSymbioteRescue): ticks since it took the legs (-1: it hasn't). It coils
+	 * {@code RESCUE_COIL} ticks and leaps as high as it can ({@code RESCUE_LEAP} x a full charge's lift), then holds the
+	 * controls (the zip is the server's) until the server hands them back, or {@code RESCUE_MAX} at most.
+	 */
+	private static int rescueTicks = -1;
+	static final int RESCUE_COIL = 10, RESCUE_MAX = 260;
+	static final double RESCUE_LEAP = 1.3;
 	private static Vec3 escapeDir = Vec3.ZERO;
 	/** How long past a full coil it waits for footing before it gives the leap up. */
 	private static final int ESCAPE_GROUND_WAIT = 40;
@@ -396,6 +413,14 @@ public final class WebSymbioteClient {
 			}
 			minecraft.options.keyUse.setDown(false);
 			minecraft.options.keyAttack.setDown(false);
+		});
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Rescue.TYPE, (payload, context) -> {
+			rescueTicks = payload.leap() ? 0 : -1;
+			if (payload.leap()) {
+				escapeCoil = -1;
+				takeoverTicks = 0;
+				clearPath();
+			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Escape.TYPE, (payload, context) -> {
 			Vec3 dir = new Vec3(payload.x(), 0.0, payload.z());
@@ -500,6 +525,7 @@ public final class WebSymbioteClient {
 		takeoverTarget = -1;
 		peelTicks = 0;
 		escapeCoil = -1;
+		rescueTicks = -1;
 		clearPath();
 		THREATS.clear();
 	}
@@ -759,7 +785,9 @@ public final class WebSymbioteClient {
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(0.0, Math.min(v.y, 0.0), 0.0);
 		}
-		if (escapeCoil >= 0 && takeoverTicks <= 0) {
+		if (rescueTicks >= 0) {
+			tickRescue(player);
+		} else if (escapeCoil >= 0 && takeoverTicks <= 0) {
 			tickEscape(player);
 		} else if (takeoverTicks > 0) {
 			tickTakeover(player, swing);
@@ -930,12 +958,34 @@ public final class WebSymbioteClient {
 
 	/** A takeover has the legs right now: the suit's own charged jump stands aside (its steps are plain hops). */
 	public static boolean driving() {
-		return takeoverTicks > 0 || escapeCoil >= 0;
+		return takeoverTicks > 0 || escapeCoil >= 0 || rescueTicks >= 0;
 	}
 
-	/** It's coiling (or just leapt) to get you clear after a meal: the movement keys don't answer. */
+	/** It's coiling (or just leapt) to get you clear after a meal, or getting you up and away: the movement keys don't answer. */
 	public static boolean escaping() {
-		return escapeCoil >= 0;
+		return escapeCoil >= 0 || rescueTicks >= 0;
+	}
+
+	/** (0.15.69) Up off the ground where you fell: a short coil, then the highest leap it has; the rest is the server's. */
+	private static void tickRescue(LocalPlayer player) {
+		rescueTicks++;
+		if (rescueTicks > RESCUE_MAX) {
+			rescueTicks = -1;
+			return;
+		}
+		sprint(player, false);
+		if (rescueTicks < RESCUE_COIL) {
+			if (rescueTicks % LEAP_SOUND_EVERY == 0) {
+				WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL, 0.6F, 0.6F + rescueTicks / (float)RESCUE_COIL);
+			}
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x * LEAP_HOLD, v.y, v.z * LEAP_HOLD);
+		} else if (rescueTicks == RESCUE_COIL) {
+			player.setDeltaMovement(0.0, com.jaymospowers.power.web.WebLeap.speed(1.0F) * RESCUE_LEAP, 0.0);
+			WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_JUMP, 1.0F, 0.4F);
+			WebSwing.play(player, net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(), 1.0F, 0.5F);
+			com.jaymospowers.client.ScreenShake.add(BOUND_SHAKE, 8, player.position().add(0.0, -1.0, 0.0));
+		}
 	}
 
 	/** Fed on a kill, it coils where you stand and leaps clear (see {@link WebSymbiote#ESCAPE_CHANCE}). */
@@ -982,9 +1032,12 @@ public final class WebSymbioteClient {
 		return takeoverTicks > 0 && sprintHeld;
 	}
 
-	/** Not swimming: a takeover sprints you whatever your hunger (it isn't your legs it's tiring; see WebSprintMixin). */
+	/**
+	 * A takeover sprints you whatever your hunger (it isn't your legs it's tiring; see WebSprintMixin), and (0.15.69) in
+	 * water too, a fast swim: it never slows to a paddle there (Andy: "should not ever stop moving underwater").
+	 */
 	private static boolean canSprint(LocalPlayer player) {
-		return !player.isInWater();
+		return true;
 	}
 
 	private static void sprint(LocalPlayer player, boolean on) {
@@ -1340,7 +1393,9 @@ public final class WebSymbioteClient {
 		}
 		// no headway for a while (and not where it wants to be, or busy): it leaps for it
 		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP
-			|| !takeoverFlee && target.position().subtract(player.position()).horizontalDistance() < BOUND_STUCK_NEAR;
+			|| !takeoverFlee && target.position().subtract(player.position()).horizontalDistance() < BOUND_STUCK_NEAR
+			// (0.15.69) near but up a ledge or behind a wall isn't there: that's stuck too
+			&& Math.abs(target.getY() - player.getY()) < BOUND_STUCK_NEAR_Y && player.hasLineOfSight(target);
 		if (settled || player.position().distanceToSqr(stuckPos) > BOUND_STUCK_MOVE * BOUND_STUCK_MOVE) {
 			stuckPos = player.position();
 			stuckSince = player.tickCount;
@@ -1383,7 +1438,22 @@ public final class WebSymbioteClient {
 	/** Its target missing for a moment: flat out along the next waypoint, eyes along the way. */
 	private static void pressOn(LocalPlayer player) {
 		if (pathMode != WebNet.TakeoverPath.PATH || pathIndex >= pathNodes.size()) {
-			sprint(player, false);
+			// (0.15.69) no way laid out: on the way it faces, flat out, hopping and climbing what's in the way
+			Vec3 on = player.getLookAngle().horizontal();
+			if (on.lengthSqr() < 1.0E-4) {
+				return;
+			}
+			on = on.normalize();
+			sprint(player, canSprint(player));
+			double up = player.getDeltaMovement().y;
+			if (player.isInWater()) {
+				up = Math.max(up, SWIM_UP);
+			} else if (player.onGround() && player.horizontalCollision) {
+				up = JUMP_SPEED;
+			} else if (player.horizontalCollision) {
+				up = Math.max(up, FLEE_CLIMB);
+			}
+			player.setDeltaMovement(on.x * TAKEOVER_SPEED, up, on.z * TAKEOVER_SPEED);
 			return;
 		}
 		Vec3 node = pathNodes.get(pathIndex);
@@ -1510,6 +1580,10 @@ public final class WebSymbioteClient {
 			// an edge the path doesn't go over: creep, straight for the waypoint
 			move = move.scale(LEDGE_CREEP);
 		}
+		if (!player.onGround() && player.horizontalCollision && !player.isInWater()) {
+			// (0.15.69) pressed to a wall off its feet: the tendrils climb it rather than hang there
+			up = Math.max(up, FLEE_CLIMB);
+		}
 		player.setDeltaMovement(move.x, up, move.z);
 		return true;
 	}
@@ -1631,10 +1705,22 @@ public final class WebSymbioteClient {
 				up = Math.max(up, SWIM_UP);
 			} else if (player.onGround() && (hop || player.horizontalCollision)) {
 				up = JUMP_SPEED;
+			} else if (player.horizontalCollision) {
+				// (0.15.69) a wall with no way round: the tendrils dig in and climb it
+				up = Math.max(up, FLEE_CLIMB);
 			}
 			sprint(player, canSprint(player));
 			Vec3 move = way.scale(canSprint(player) && !hop ? TAKEOVER_SPEED : WALK_SPEED);
 			player.setDeltaMovement(move.x, up, move.z);
+		} else {
+			// (0.15.69) at it: circling, never standing still
+			Vec3 side = flat.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : flat.normalize();
+			side = new Vec3(-side.z, 0.0, side.x).scale((player.tickCount / TAKEOVER_CIRCLE_TICKS) % 2 == 0 ? 1.0 : -1.0);
+			if (!player.level().noCollision(player, player.getBoundingBox().move(side.scale(0.6)))) {
+				side = side.reverse();
+			}
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(side.x * TAKEOVER_CIRCLE, player.isInWater() ? Math.max(v.y, SWIM_UP) : v.y, side.z * TAKEOVER_CIRCLE);
 		}
 	}
 
@@ -1709,7 +1795,8 @@ public final class WebSymbioteClient {
 			letGoOfWall();
 			return;
 		}
-		if (!WebSymbiote.crawlTendrils(player) || player.getAbilities().flying || player.isPassenger() || player.isInWater()
+		// (0.15.69) water doesn't stop them: they keep walking you along the bottom and up the banks (Andy)
+		if (!WebSymbiote.crawlTendrils(player) || player.getAbilities().flying || player.isPassenger()
 			|| player.isInLava() || swing.attached() || swing.pull != null || swing.wingsTicks > 0 || player.isFallFlying()) {
 			wallClinging = false;
 			ceilingClinging = false;

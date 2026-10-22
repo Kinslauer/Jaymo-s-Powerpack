@@ -31,7 +31,8 @@ import net.minecraft.world.phys.AABB;
  * (0.7.75) A Frostborn's gift of the day: holding left mouse bare-handed (Jaymo's Powers sends it as the tag
  * {@link #ASK_TAG}; the Frost-born race) locks the living thing they look at in a block
  * of packed ice for a while: a shell of ice round it, frozen through (held still, can't strike out, the cold biting), then
- * the ice falls away. Once a day (a Minecraft day of game time); the ice can be broken out early.
+ * the ice falls away. Once a day (a Minecraft day of game time); the ice can be broken out early. (0.7.153) A hold while
+ * the day's ice is spent is handed back to Jaymo's Powers as {@link #BEAM_TAG}: a thin white beam instead.
  */
 public final class FrostPrison {
 	/** How long the ice holds (ticks), how far the Frostborn can freeze (blocks, via {@link Arcana#sighted}), and the wait between (ticks: a day). */
@@ -62,6 +63,8 @@ public final class FrostPrison {
 	private static final List<Prison> PRISONS = new ArrayList<>();
 	/** Jaymo's Powers puts this on a Frostborn who held left mouse at something (its RaceMoves); taken off here. */
 	static final String ASK_TAG = "jaymoskingdoms_frost_prison";
+	/** Put on a Frost-born whose hold came while the day's ice is spent; Jaymo's Powers fires its beam and takes it off. */
+	static final String BEAM_TAG = "jaymospowers_frost_beam";
 
 	private FrostPrison() {
 	}
@@ -87,8 +90,8 @@ public final class FrostPrison {
 		long now = level.getGameTime();
 		Long last = player.getAttached(LAST);
 		if (last != null && now - last < COOLDOWN_TICKS && now >= last) {
-			long left = (COOLDOWN_TICKS - (now - last)) / 1200L + 1L;
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.frost_prison.wait", left).withStyle(ChatFormatting.AQUA), true);
+			// (0.7.153) the day's ice is spent: Jaymo's Powers fires its thin white beam instead (FrostBeam)
+			player.addTag(BEAM_TAG);
 			return;
 		}
 		LivingEntity target = Arcana.sighted(player);

@@ -78,7 +78,6 @@ public final class DarktidePower implements Power {
 				DarktideGedan.key(ctx.player(), payload.down());
 			}
 		});
-		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Rolls.TYPE, (payload, ctx) -> live(ctx.player()).rolls = Math.max(0, payload.available()));
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.NightKey.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			// only when the core doesn't forward C itself (so it never arrives twice)
@@ -110,7 +109,7 @@ public final class DarktidePower implements Power {
 			}
 			return InteractionResult.PASS;
 		});
-		CombatRollCompat.init();
+		DarktideDodges.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer player = handler.player;
 			if (has(player)) {
@@ -378,6 +377,13 @@ public final class DarktidePower implements Power {
 		LIVE.put(player.getUUID(), new DarktideLive());
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the guard, the veil, the moves, the tide's arms: all of it ends, and the real items come back
+		cleanUp(player, false);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		cleanUp(player, true);
@@ -396,7 +402,6 @@ public final class DarktidePower implements Power {
 		DarktideMoves.cancel(player);
 		DarktideTide.revertArms(player, false);
 		DarktideTide.meltAll(player);
-		CombatRollCompat.apply(player, false);
 		DarktideMove.clear(player);
 	}
 
@@ -451,10 +456,7 @@ public final class DarktidePower implements Power {
 		DarktideMoves.tick(player, live);
 		DarktideGedan.tick(player, live);
 		DarktideTide.tick(player, live);
-		if (player.tickCount % 20 == 0) {
-			CombatRollCompat.apply(player, true);
-		}
-		CombatRollCompat.tickEvasion(player, live);
+		DarktideDodges.tickEvasion(player, live);
 		sync(player, live);
 	}
 

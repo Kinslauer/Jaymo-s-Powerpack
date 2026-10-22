@@ -21,6 +21,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -49,23 +50,30 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Reveler</b>: greets his people with gifts, and at dusk throws a feast at his seat: the villagers gather, there's
  * music and fireworks, they're given bread (and so have children), and it eats into the stores; players at his feast
  * are remembered fondly.</li>
+ * <li><b>Purist</b>: (0.7.130) proud of his blood ({@link Purists#blood}) and insists his realm be of it: most born on his
+ * land are, his folk and guards are, and he ridicules and pushes past everyone who isn't, as his people do
+ * ({@link Purists}). His own kind he greets with bread and pride; good name comes quick to them and slow to outsiders.</li>
  * </ul>
  * How each one's guards take players about him (kneel to the tyrant, sheathe your blade by the warlord, the noble's
  * bread, the reveler's gifts) is {@link Retinue}'s.
  */
 final class Tempers {
 	enum Temper {
-		TYRANT, NOBLE, WARLORD, PARANOID, REVELER;
+		TYRANT, NOBLE, WARLORD, PARANOID, REVELER,
+		/** (0.7.130) Drawn on its own ({@link #PURIST_ONE_IN}), so the others' rulers keep the temper they had. */
+		PURIST;
 
 		String key() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);
 		}
 	}
 
-	/** Production: materials, food and taxes, in percent of the usual, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER). */
-	static final int[] MATERIALS = {75, 125, 100, 100, 100}, FOOD = {85, 125, 100, 100, 85}, TAXES = {200, 75, 125, 100, 100};
-	/** Good name won with him, and lost, in percent. */
-	static final int[] GAIN = {50, 150, 100, 50, 150}, LOSS = {100, 100, 100, 200, 100};
+	/** (0.7.130) One ruler in this many is a purist. */
+	static final int PURIST_ONE_IN = 6;
+	/** Production: materials, food and taxes, in percent of the usual, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST). */
+	static final int[] MATERIALS = {75, 125, 100, 100, 100, 100}, FOOD = {85, 125, 100, 100, 85, 100}, TAXES = {200, 75, 125, 100, 100, 110};
+	/** Good name won with him, and lost, in percent (a purist's goes by your blood too: {@link Purists#reputation}). */
+	static final int[] GAIN = {50, 150, 100, 50, 150, 100}, LOSS = {100, 100, 100, 200, 100, 100};
 	/** The tyrant's daily seizure: this share of each food in the stores (percent), at most this much of each, and goods per emerald. */
 	static final int SEIZE_PERCENT = 10, SEIZE_MOST = 32, GOODS_PER_EMERALD = 8;
 	/** What he takes from a stall when he passes it. */
@@ -86,6 +94,9 @@ final class Tempers {
 	static final int TICK = 20;
 	/** How far his words carry to players. */
 	static final double SPEECH_RANGE = 16.0;
+	/** (0.7.130) The purist pushes one not of his blood out of his path this hard, and gives his own kind this much bread. */
+	static final double PURIST_PUSH = 0.7;
+	static final int PURIST_BREAD = 2;
 
 	/** Faction id → the day of its last feast. */
 	private static final Map<Integer, Long> FEASTED = new HashMap<>();
@@ -107,16 +118,22 @@ final class Tempers {
 		}
 		UUID id = f.leader().get();
 		long mix = id.getMostSignificantBits() * 31 + id.getLeastSignificantBits();
-		return Temper.values()[(int)Math.floorMod(mix ^ (mix >>> 29), (long)Temper.values().length)];
+		// (0.7.130) the purist on his own draw, so the rest keep the temper they had before there were purists
+		long proud = Long.rotateLeft(mix, 23) * 0x9E3779B97F4A7C15L;
+		if (Math.floorMod(proud >>> 11, (long)PURIST_ONE_IN) == 0) {
+			return Temper.PURIST;
+		}
+		return Temper.values()[(int)Math.floorMod(mix ^ (mix >>> 29), (long)Temper.PURIST.ordinal())];
 	}
 
 	static @Nullable Temper of(MinecraftServer server, int faction) {
 		return of(Factions.get(server, faction));
 	}
 
-	/** What it says of a ruler (for {@code /kingdom info}). */
-	static Component describe(Temper t) {
-		return Component.translatable("temper.jaymoskingdoms." + t.key());
+	/** What it says of a ruler (for {@code /kingdom info}); (0.7.130) a purist's, with his blood. */
+	static Component describe(Temper t, Faction f) {
+		return t == Temper.PURIST ? Component.translatable("temper.jaymoskingdoms.purist.of", Purists.bloodName(f))
+			: Component.translatable("temper.jaymoskingdoms." + t.key());
 	}
 
 	private static int percent(@Nullable Faction f, int[] table) {
@@ -161,8 +178,8 @@ final class Tempers {
 	 * He meets {@code v} on his round ({@link Royals}): how depends on his temper. False leaves it to the plain greeting
 	 * (no temper, or a noble one's: he greets, then talks).
 	 */
-	static boolean meet(ServerLevel level, Folk king, Villager v) {
-		Faction f = Factions.get(level.getServer(), king.factionId());
+	static boolean meet(ServerLevel level, PathfinderMob king, Villager v) {
+		Faction f = Factions.get(level.getServer(), Rulers.faction(king));
 		Temper t = of(f);
 		if (t == null || f == null) {
 			return false;
@@ -201,6 +218,24 @@ final class Tempers {
 				say(level, king, f, t);
 				return true;
 			}
+			case PURIST -> {
+				// (0.7.130) bread and pride for his own blood; a sneer and a shove out of his path for anyone else
+				if (Purists.kin(f, v)) {
+					gift(v, new ItemStack(Items.BREAD, PURIST_BREAD));
+					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.8, v.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
+					Speech.say(level, king, Component.translatable("temper.jaymoskingdoms.purist.kin" + level.getRandom().nextInt(4), Purists.bloodName(f),
+						v.getDisplayName()), Speech.GOLD, SPEECH_RANGE);
+					return false;
+				}
+				king.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				Vec3 push = v.position().subtract(king.position()).multiply(1.0, 0.0, 1.0).normalize();
+				v.push(push.x * PURIST_PUSH, 0.15, push.z * PURIST_PUSH);
+				Purists.slink(v, king);
+				level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
+				Speech.say(level, king, Component.translatable("temper.jaymoskingdoms.purist.line" + level.getRandom().nextInt(4),
+					Purists.name(VillagerHeritage.of(v)), Purists.bloodName(f), v.getDisplayName()), Speech.RED, SPEECH_RANGE);
+				return true;
+			}
 			case REVELER -> {
 				gift(v, new ItemStack(level.getRandom().nextBoolean() ? Items.COOKIE : Items.BREAD, 2));
 				level.playSound(null, v.blockPosition(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.0F, 1.2F);
@@ -213,7 +248,7 @@ final class Tempers {
 	}
 
 	/** A line of his, over his head for players nearby. */
-	private static void say(ServerLevel level, Folk king, Faction f, Temper t) {
+	private static void say(ServerLevel level, PathfinderMob king, Faction f, Temper t) {
 		int line = level.getRandom().nextInt(4);
 		Component words = Component.translatable("temper.jaymoskingdoms." + t.key() + ".line" + line);
 		Speech.say(level, king, words, t == Temper.TYRANT || t == Temper.PARANOID ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
@@ -226,7 +261,7 @@ final class Tempers {
 	}
 
 	/** The tyrant passes a stall or market: food from its barrels and chests is his. */
-	private static void seizeFromStall(ServerLevel level, Folk king, Faction f) {
+	private static void seizeFromStall(ServerLevel level, PathfinderMob king, Faction f) {
 		for (Works.Built b : Works.of(level.getServer(), f.id()).built()) {
 			if (!b.entry().equals("stall") && !b.entry().equals("market")) {
 				continue;
@@ -298,14 +333,23 @@ final class Tempers {
 			if (temper == null || f.fallen() || !level.isPositionEntityTicking(f.seat())) {
 				continue;
 			}
-			Folk king = level.getEntity(f.leader().get()) instanceof Folk k && k.isAlive() ? k : null;
+			// (0.7.138) a folk ruler, or one of the town's villagers crowned (whose blood is the house's own)
+			PathfinderMob ruler = Rulers.of(level, f);
+			Folk king = ruler instanceof Folk k ? k : null;
+			if (temper == Temper.PURIST && king != null) {
+				// (0.7.130) a purist is of the blood he's proud of
+				Heritage.Kind blood = Purists.blood(f);
+				if (blood != null && VillagerHeritage.of(king) != blood) {
+					VillagerHeritage.born(king, blood, null);
+				}
+			}
 			Retinue.tick(level, f, temper, king, now);
 			switch (temper) {
 				case WARLORD -> drill(level, f);
 				case REVELER -> {
 					if (t >= FEAST_FROM && t < FEAST_TO && FEASTED.getOrDefault(f.id(), -1L) != day) {
 						FEASTED.put(f.id(), day);
-						feast(level, f, king);
+						feast(level, f, ruler);
 					}
 				}
 				default -> {
@@ -323,7 +367,7 @@ final class Tempers {
 	}
 
 	/** The reveler's feast at the seat: his people gather, music and fireworks, bread for all, and it eats the stores. */
-	private static void feast(ServerLevel level, Faction f, @Nullable Folk king) {
+	private static void feast(ServerLevel level, Faction f, @Nullable PathfinderMob king) {
 		BlockPos seat = f.seat();
 		List<Villager> people = level.getEntitiesOfClass(Villager.class, new AABB(seat).inflate(FEAST_RANGE), Villager::isAlive);
 		for (Villager v : people) {

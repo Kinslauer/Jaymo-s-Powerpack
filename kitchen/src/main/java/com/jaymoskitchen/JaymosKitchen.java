@@ -43,7 +43,11 @@ public class JaymosKitchen implements ModInitializer {
 		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
+		com.jaymoskitchen.ragdoll.RagdollNet.register();
+		// (0.5.1) living players going limp (its LIMP attachment is class-loaded here, on both sides)
+		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		ModItems.register();
+		com.jaymoskitchen.fishing.Bait.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
 		Corpses.register();
@@ -52,13 +56,22 @@ public class JaymosKitchen implements ModInitializer {
 		PlayerCorpses.register();
 		Saddlebags.register();
 		Mill.register();
+		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
+		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();
 		Sowing.register();
+		com.jaymoskitchen.farm.Hemp.register();
+		// fat, tallow, bark and tanning (its SOAKS attachment is class-loaded here)
+		com.jaymoskitchen.tanning.Tanning.register();
+		com.jaymoskitchen.farm.Manure.register();
+		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.season.Seasons.register();
+		com.jaymoskitchen.stomach.RawFood.register();
 
 		// sneak + right-click with an empty hand: a lit campfire, furnace, smoker or blast furnace opens the kitchen;
 		// the top of a wood, stone or slab block opens the prep board (also with Pmeh in hand, to roll a joint)

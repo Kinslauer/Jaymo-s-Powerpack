@@ -52,6 +52,8 @@ final class ChronoState {
 
 	/** False until the client has been sent the current state (new state, relog, or something changed). */
 	boolean synced;
+	/** (0.15.83) Down last tick: the history then held still, kept from before the fall for a Rewind back up. */
+	boolean downed;
 	int lastSync;
 
 	void record(Vec3 pos, float yRot, float xRot, float health, ResourceKey<Level> dimension) {

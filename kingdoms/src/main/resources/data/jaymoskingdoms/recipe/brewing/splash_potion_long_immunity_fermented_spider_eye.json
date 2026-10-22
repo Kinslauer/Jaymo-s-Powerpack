@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:brewing",
+	"input": {
+		"item": "minecraft:splash_potion",
+		"potion_contents": {
+			"potions": "jaymoskingdoms:long_immunity"
+		}
+	},
+	"output": {
+		"components": {
+			"minecraft:potion_contents": {
+				"potion": "jaymoskingdoms:atrophy"
+			}
+		},
+		"id": "minecraft:splash_potion"
+	},
+	"reagent": {
+		"item": "minecraft:fermented_spider_eye"
+	}
+}

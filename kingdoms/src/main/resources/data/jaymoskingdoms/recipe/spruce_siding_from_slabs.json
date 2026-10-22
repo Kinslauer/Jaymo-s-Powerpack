@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "jaymoskingdoms:siding",
+  "pattern": [
+    "#",
+    "#"
+  ],
+  "key": {
+    "#": "minecraft:spruce_slab"
+  },
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:spruce_siding"
+  }
+}

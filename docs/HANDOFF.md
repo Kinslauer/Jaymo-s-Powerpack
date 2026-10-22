@@ -9,6 +9,10 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   `lang/parts/<name>.json` and its mixin configs. Core shared code is in `core/`, `api/`.
   - Screen shake: every power goes through `core/Shakes` (server: `send`, `around`, `heavy`, each with the spot it
     came from) and `client/ScreenShake` (directional kick + rattle, stacking, explosions shake too). Don't add another.
+  - Held sounds: every power's sustained sound goes through `core/Soundscape` (layers of variants with jittered
+    volume/pitch, `due` for uneven timing instead of `tickCount % N`, echoes when enclosed) and, on the player's own
+    side, `client/sound/PowerLoop` (a looping bed that follows speed/charge) plus `client/sound/Accents`. Don't add
+    a bare `% N == 0` sound loop.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
   - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log.
@@ -29,6 +33,7 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   write to the CurseForge profile and the friends' server folder, `../Serverfiles`, which isn't in the repo).
 
 ## 26.3 API facts learned the hard way
+`ModelPart` has no `copyFrom`: use `part.loadPose(other.storePose())`; `EntityTypes.PLAYER` (not `EntityType.PLAYER`); Kitchen's jar builds to `E:\jaymos-kitchen-build\libs\`;
 `Entity.syncVelocity = true` (no hurtMarked); `ServerPlayer.drop(stack, false, Prediction.SERVER_ONLY)`;
 `new ItemStack(item).getHoverName()`; `Vec3.STREAM_CODEC`; `EntityType.builtInRegistryHolder().is(tag)`;
 `PushReaction.IMMOVEABLE`; `collector.submitMovingBlock(poseStack, MovingBlockRenderState, outlineColor)`;
@@ -43,7 +48,8 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - **Attachments** must be class-loaded at init on both sides or dedicated servers break ("Client does not support the
   syncable attachments"): every class holding an `AttachmentType` is listed in `JaymosPowers.registerAttachments()`.
 - Poses go through `WebModelFeatureRendererMixin.prepareModel` (after `setupAnim`) and render-state extraction via
-  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`).
+  mixins on `LivingEntityRenderer`/`AvatarRenderer` (see `WebBodyPose`, `FreefallPose`, `ChronoFlowPose`). (0.15.42) Ease
+  a pose in and out with `client/PoseBlend` (a `Channel` per pose, a `Frame` of offsets from vanilla, `Track.apply`).
 - Never write Java with PowerShell `Set-Content` (it adds a BOM). Edits were done with small Python scripts
   asserting each replaced snippet occurs exactly once.
 
@@ -61,6 +67,23 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - The user reads the `docs/Abilities.md` table to request changes.
 
 ## Where things stand
+- **Wounds** (Powers 0.15.1, `core/wounds/`, plan `docs/Wounds-Plan.md`, specs `docs/Wounds-Phase2.md` to
+  `Phase5.md`; all five phases written without a compiler, not yet built or tested on the Deck): every living thing's
+  health spread over body parts, the downed state (moved from Kingdoms), broken limbs, bleeding and festering, pain,
+  the medieval kit, and the client's HUD, poses and effects. Player-facing rules in `docs/Abilities.md` (Wounds).
+  26.3 / Fabric facts it was built on:
+  - `ServerLivingEntityEvents.AFTER_DAMAGE` **never fires for a lethal hit**. Whatever must see the killing blow (a
+    head or limb severed onto the corpse) notes it in `ALLOW_DEATH` and acts in `AFTER_DEATH`.
+  - The order is `ALLOW_DAMAGE` → the hit → `ALLOW_DEATH` (every phase, in order; any `false` cancels the death) →
+    `AFTER_DEATH` (same tick, only once the death has gone through). Downed saves from death in a phase `LAST`, after
+    the default phase (so Darktide's shade, Xenoform, sparring and Kingdoms' Last Stand go first); Wounds notes the
+    killing blow in a phase after that (`KILLING_PHASE`), so only deaths nothing saved are noted.
+  - **Scoreboard tags shared across the mods** (Kingdoms and Kitchen never compile against Powers; they read and write
+    these): `jaymospowers_downed` (on everyone downed), `jaymospowers_downable` (Kingdoms puts it on its folk),
+    `jaymospowers_revive` (Kingdoms' tending gets the downed up), `jaymospowers_bandaged` (Kingdoms' tending stops the
+    bleeding), `jaymospowers_fights_on` (an undead fighting on without its body), `jaymospowers_crippled` (a
+    broken leg; not read by Kingdoms yet), `jaymospowers_freerun` (Kingdoms' Stealth experience), and Kitchen's
+    corpse tags `jaymoskitchen.missing.<part>` and `jaymoskitchen.broken.<part>`.
 - **Powers 0.8.0** is built on branch `plan-0.8` (not merged to master, not packaged, not playtested): everything in
   `docs/Plan-0.8.md`, built by agent tracks (briefed by `docs/AGENT_BRIEF_0.8.md`) and merged by the lead. The jar went
   to the user's tester. Jaymo's Kitchen is now a required dependency; First-person Model and Not Enough Animations are

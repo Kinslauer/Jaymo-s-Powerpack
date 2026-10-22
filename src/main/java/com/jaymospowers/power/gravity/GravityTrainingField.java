@@ -3,6 +3,7 @@ package com.jaymospowers.power.gravity;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,6 +44,11 @@ import net.minecraft.world.phys.Vec3;
  * Z again takes it down. Once the Gravity Well (G) is yours.
  */
 public final class GravityTrainingField {
+	/** The field's drone: low, at uneven beats, the ground groaning under it now and then. */
+	static final Soundscape.Layer FIELD_DRONE = Soundscape.Layer.of(0.7F, 0.9F, 0.37F, 0.44F, SoundEvents.BEACON_AMBIENT);
+	static final Soundscape.Layer FIELD_GROAN = Soundscape.Layer.of(0.25F, 0.4F, 0.4F, 0.55F, SoundEvents.GRAVEL_BREAK, SoundEvents.STONE_BREAK)
+		.chance(0.3F);
+
 	static final double RADIUS = 5.0;
 	static final double PLACE_RANGE = 24.0;
 	static final int TICKS = 1200;
@@ -232,8 +238,8 @@ public final class GravityTrainingField {
 					0.0);
 			}
 		}
-		if (now % 40 == 0) {
-			level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F, 0.4F);
+		if (Soundscape.due(level, System.identityHashCode(field), "gravity.field", 30, 55)) {
+			Soundscape.play(level, c, SoundSource.PLAYERS, FIELD_DRONE, FIELD_GROAN);
 		}
 	}
 }

@@ -30,7 +30,7 @@ public final class XenoformState {
 	 * guards): {@link #TAG} while any alien, and {@link #TAG}{@code :<alien id>}. Off again the moment they turn back.
 	 */
 	public static final String TAG = "jaymospowers_xenoform";
-	/** The tag on anything a form summons (Swarm's gremlins, Afterimage's decoys): ours to clean up, never loot. */
+	/** The tag on anything a form summons (Swarm's gremlins): ours to clean up, never loot. */
 	public static final String MINION_TAG = "jaymospowers_xenoform_minion";
 
 	/** The band: the aliens unlocked (form ids, in the order they came) and the one dialled (an index into them). */
@@ -83,6 +83,13 @@ public final class XenoformState {
 				Codec.INT.optionalFieldOf("hush", 0).forGetter(Trial::hushCount),
 				Codec.INT.optionalFieldOf("clamour", 0).forGetter(Trial::clamourCount))
 			.apply(i, Trial::new));
+		public static final StreamCodec<ByteBuf, Trial> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Trial::stage,
+			ByteBufCodecs.VAR_INT, Trial::round,
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Trial::answers,
+			ByteBufCodecs.VAR_INT, Trial::hushCount,
+			ByteBufCodecs.VAR_INT, Trial::clamourCount,
+			Trial::new);
 
 		public boolean answered(String key) {
 			return answers.stream().anyMatch(a -> a.startsWith(key + "="));
@@ -158,7 +165,7 @@ public final class XenoformState {
 	public static final AttachmentType<Band> BAND = AttachmentRegistry.create(JaymosPowers.id("xenoform_band"),
 		builder -> builder.persistent(Band.CODEC).copyOnDeath().syncWith(Band.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	public static final AttachmentType<Trial> TRIAL = AttachmentRegistry.create(JaymosPowers.id("xenoform_trial"),
-		builder -> builder.persistent(Trial.CODEC).copyOnDeath());
+		builder -> builder.persistent(Trial.CODEC).copyOnDeath().syncWith(Trial.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	public static final AttachmentType<String> FORM = AttachmentRegistry.create(JaymosPowers.id("xenoform_form"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Hud> HUD = AttachmentRegistry.create(JaymosPowers.id("xenoform_hud"),

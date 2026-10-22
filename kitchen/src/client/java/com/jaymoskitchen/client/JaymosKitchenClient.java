@@ -41,6 +41,11 @@ public class JaymosKitchenClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
+		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
+		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
+		com.jaymoskitchen.client.ragdoll.LimpController.register();
+		// drinking: the view sways when you're drunk
+		com.jaymoskitchen.client.brewing.DrunkSway.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);
@@ -53,6 +58,10 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		CartClient.register();
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
+		// windmills and waterwheels turning
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.power.Power.ROTOR_ENTITY, com.jaymoskitchen.client.mill.RotorRenderer::new);
+		// the potter's wheel turning
+		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
 		// what's left on crafting tables
 		BlockEntityRenderers.register(Tables.CRAFTING_TABLE, CraftingTableRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);
@@ -71,6 +80,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			}
 		});
 
+		com.jaymoskitchen.client.season.SeasonTints.register();
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());

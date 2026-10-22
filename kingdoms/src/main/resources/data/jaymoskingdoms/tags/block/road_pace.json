@@ -1,0 +1,32 @@
+{
+  "values": [
+    "minecraft:dirt_path",
+    "minecraft:cobblestone",
+    "minecraft:mossy_cobblestone",
+    "minecraft:stone_bricks",
+    "minecraft:smooth_sandstone",
+    "minecraft:smooth_red_sandstone",
+    "minecraft:cut_sandstone",
+    "minecraft:cut_red_sandstone",
+    "jaymoskingdoms:dirt_path_slab",
+    "minecraft:cobblestone_slab",
+    "minecraft:mossy_cobblestone_slab",
+    "minecraft:stone_brick_slab",
+    "minecraft:smooth_sandstone_slab",
+    "minecraft:smooth_red_sandstone_slab",
+    "minecraft:cut_sandstone_slab",
+    "minecraft:cut_red_sandstone_slab",
+    {
+      "id": "trmt:eroded_dirt",
+      "required": false
+    },
+    {
+      "id": "trmt:eroded_coarse_dirt",
+      "required": false
+    },
+    {
+      "id": "trmt:eroded_sand",
+      "required": false
+    }
+  ]
+}

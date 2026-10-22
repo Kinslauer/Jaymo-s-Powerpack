@@ -3,7 +3,9 @@ or a beard, a red or black bandana, a striped shirt, tarred breeches, bare feet)
 and hands, a leather jerkin, a powder horn's strap), two powder monkeys (boys: no beard, a ragged shirt, sooty cheeks),
 the pirate captain (a black tricorn with gold edging, a great black beard, an eyepatch, a long red coat with gold
 buttons), the shipwright (a flat cap, a leather apron, tools at the belt) and the sea captain (a blue coat with gold
-epaulettes and buttons, white breeches, a bicorne). Run from the kingdoms project root: python -I tools/gen_pirates.py"""
+epaulettes and buttons, white breeches, a bicorne). (0.7.107) Two bombardiers: soot-streaked faces with singed brows,
+a bandana, a striped shirt with its sleeves rolled, and a leather bandolier across the chest with red sticks of dynamite in
+its loops (and more at the belt). Run from the kingdoms project root: python -I tools/gen_pirates.py"""
 from PIL import Image
 import os
 import random
@@ -262,6 +264,50 @@ def powder_monkey(i):
     save(img, "entity/pirate/powder_monkey_%d" % i)
 
 
+# Balkon's WeaponMod dynamite's own colours (0.7.156): a red stick with a grey fuse
+DYNAMITE = (193, 60, 23)
+DYNAMITE_LIT = (219, 68, 26)
+DYNAMITE_DARK = (145, 45, 17)
+DYNAMITE_CAP = (217, 217, 217)
+
+
+def bombardier(i):
+    rnd = random.Random(7600 + i)
+    img = blank()
+    skin, hair = TONES[(i + 3) % len(TONES)], HAIRS[(i + 1) % len(HAIRS)]
+    face(img, rnd, skin, hair, "stubble" if i == 0 else "full", soot=True)
+    # singed brows: the hair row over the eyes scorched to soot
+    fx, fy, fw, fh = HEAD["front"]
+    for x in (fx + 1, fx + 2, fx + 5, fx + 6):
+        px(img, x, fy + 2, shade(SOOT, rnd.randint(-6, 10)))
+    bandana(img, rnd, RED if i == 0 else BLACK_CLOTH)
+    striped(img, rnd, WHITE, BLACK_CLOTH if i == 0 else NAVY)
+    # sleeves rolled to the elbow
+    for arm in ARMS:
+        rows(img, arm, 6, 6, skin, 6, rnd)
+    hands(img, rnd, skin, soot=True)
+    legs(img, rnd, TAR, (30, 26, 24), bare=i == 1, skin=skin)
+    belt(img, rnd, LEATHER, (150, 150, 156))
+    # the bandolier, two pixels wide from the right shoulder down to the left hip, three sticks of dynamite standing in it
+    bx, by, bw, bh = BODY["front"]
+    for k in range(9):
+        for w in (0, 1):
+            x, y = bx + 7 - k + w, by + k
+            if bx <= x < bx + bw and y < by + bh:
+                px(img, x, y, (84, 56, 32) if w == 0 else (110, 76, 44))
+    for k in (1, 4, 7):
+        x, y = bx + 7 - k, by + k
+        px(img, x, y - 1, DYNAMITE_CAP)
+        px(img, x, y, DYNAMITE_LIT)
+        px(img, x, y + 1, DYNAMITE)
+        px(img, x, y + 2, DYNAMITE_DARK)
+    # and the strap over the back
+    kx, ky, kw, kh = BODY["back"]
+    for k in range(9):
+        px(img, kx + min(k, kw - 1), ky + k, (84, 56, 32))
+    save(img, "entity/pirate/bombardier_%d" % i)
+
+
 def captain():
     rnd = random.Random(7300)
     img = blank()
@@ -329,6 +375,7 @@ if __name__ == "__main__":
     for n in range(2):
         gunner(n)
         powder_monkey(n)
+        bombardier(n)
     captain()
     shipwright()
     sea_captain()

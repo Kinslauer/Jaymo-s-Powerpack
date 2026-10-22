@@ -179,7 +179,7 @@ public final class Orcs {
 		if (target instanceof Folk other) {
 			return other.style() != FactionType.BARBARIAN;
 		}
-		return target instanceof Villager || target instanceof IronGolem;
+		return target instanceof Villager && !Barbarians.isCampVillager(target) || target instanceof IronGolem;
 	}
 
 	/** An orc's own tick (from {@link Folk#customServerAiStep}): blood rage, war cries, the warchief's slam. */

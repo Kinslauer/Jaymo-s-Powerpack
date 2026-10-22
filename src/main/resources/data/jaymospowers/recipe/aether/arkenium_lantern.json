@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "jaymospowers:inert_arkenium",
+    "T": "jaymospowers:ambrosium_torch"
+  },
+  "pattern": [
+    " # ",
+    "#T#",
+    " # "
+  ],
+  "result": {
+    "id": "jaymospowers:arkenium_lantern"
+  }
+}

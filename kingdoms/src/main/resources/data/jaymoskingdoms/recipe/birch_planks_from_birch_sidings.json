@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymoskingdoms:birch_siding",
+    "jaymoskingdoms:birch_siding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:birch_planks"
+  }
+}

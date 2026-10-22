@@ -53,6 +53,8 @@ final class KingdomCommands {
 			.then(Stables.stableCommand()).then(Stables.farrierCommand())
 			// (builders: plots and projects)
 			.then(BuildCommands.plot()).then(BuildCommands.project())
+			// (0.7.116) players' own designs, and work areas laid out with the surveyor's rod
+			.then(Designs.command()).then(Areas.command())
 			// (0.6.12) ops: call up a storm or a tornado, or clear them
 			.then(com.jaymoskingdoms.disasters.Disasters.command())
 			.then(Commands.literal("found").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> found(c, null))
@@ -68,6 +70,7 @@ final class KingdomCommands {
 			.then(QuestCommands.command())
 			.then(Assassins.command())
 			.then(Approaches.command())
+			.then(Recollections.command())
 			.then(Identities.command())
 			.then(Languages.command())
 			.then(Neighbours.command())
@@ -75,6 +78,7 @@ final class KingdomCommands {
 			.then(Classes.command())
 			.then(Heritage.command())
 			.then(WorldTiers.command())
+			.then(com.jaymoskingdoms.remnants.Monoliths.command())
 			.then(SkillCommands.command())
 			.then(Captives.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))
@@ -155,7 +159,7 @@ final class KingdomCommands {
 		// (0.5.12) its ruler's temper
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper != null) {
-			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper)).withStyle(ChatFormatting.GRAY), false);
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY), false);
 		}
 		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);
@@ -204,7 +208,7 @@ final class KingdomCommands {
 		c.getSource().sendSuccess(() -> mark(peace).append(Component.translatable("message.jaymoskingdoms.info.peace", why)), false);
 		for (var entry : f.members().entrySet()) {
 			ServerPlayer member = server.getPlayerList().getPlayer(entry.getKey());
-			String who = member != null ? member.getGameProfile().name() : entry.getKey().toString().substring(0, 8);
+			String who = member != null ? Identities.trueName(member).getString() : entry.getKey().toString().substring(0, 8);
 			c.getSource().sendSuccess(() -> Component.literal("  " + who + ": ").append(Component.translatable(Rank.forStanding(entry.getValue().standing()).key()))
 				.append(" (" + entry.getValue().standing() + ")").withStyle(ChatFormatting.GRAY), false);
 		}

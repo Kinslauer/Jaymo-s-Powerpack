@@ -38,6 +38,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
@@ -81,8 +82,8 @@ final class Assassins {
 
 	/** Each day, the chance of a contract on a realm's ruler, before his temper and his feuds. */
 	static final float REALM_CHANCE = 0.015F;
-	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER): how many enemies he makes. */
-	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F};
+	/** By temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER, PURIST): how many enemies he makes. */
+	static final float[] TEMPER_CHANCE = {2.5F, 0.5F, 1.5F, 0.75F, 1.0F, 2.0F};
 	/** A realm with a rival or an enemy at war: this many times as likely. */
 	static final float FEUD_CHANCE = 2.0F;
 	/** Of a feuding realm's contracts, the share its rivals pay for (the rest are his own people's, an heir's, or no one knows). */
@@ -331,7 +332,8 @@ final class Assassins {
 			if (!feuds.isEmpty() && random.nextFloat() < RIVAL_SHARE) {
 				hirer = feuds.get(random.nextInt(feuds.size())).id();
 				motive = "rival";
-			} else if (temper == Tempers.Temper.TYRANT && random.nextBoolean()) {
+			} else if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.PURIST) && random.nextBoolean()) {
+				// (0.7.130) a purist's own people not of his blood have had enough of him too
 				motive = "people";
 			} else {
 				motive = random.nextBoolean() ? "heir" : "guild";
@@ -416,7 +418,8 @@ final class Assassins {
 	}
 
 	private static Component ruler(ServerLevel level, Faction f) {
-		if (f.leader().isPresent() && level.getEntity(f.leader().get()) instanceof Folk king) {
+		PathfinderMob king = Rulers.of(level, f);
+		if (king != null) {
 			return king.getDisplayName();
 		}
 		return Component.literal(f.name());
@@ -437,7 +440,9 @@ final class Assassins {
 				remove(server, c.target());
 				return;
 			}
-			if (!(level.getEntity(f.leader().get()) instanceof Folk king) || !king.isAlive() || !level.isPositionEntityTicking(king.blockPosition())) {
+			// (0.7.138) a folk ruler, or a villager crowned
+			PathfinderMob king = Rulers.of(level, f);
+			if (king == null || !level.isPositionEntityTicking(king.blockPosition())) {
 				return;
 			}
 			boolean seen = !level.getEntitiesOfClass(ServerPlayer.class, king.getBoundingBox().inflate(WITNESS_RANGE),
@@ -919,7 +924,7 @@ final class Assassins {
 	 * (From {@link KingdomEvents#folkDied}) A ruler died: if it was the assassin's blade or his poison, it's murder. Word
 	 * goes round, and maybe of who paid; his heir is crowned. True if so (the usual fates don't follow).
 	 */
-	static boolean murdered(ServerLevel level, Faction faction, Folk ruler, DamageSource source) {
+	static boolean murdered(ServerLevel level, Faction faction, LivingEntity ruler, boolean isLord, DamageSource source) {
 		Plot p = plotOn(ruler.getUUID());
 		boolean byBlade = is(source.getEntity());
 		boolean byPoison = p != null && p.venom > 0 && source.getEntity() == null;
@@ -932,7 +937,7 @@ final class Assassins {
 			LINGERING.remove(p);
 		}
 		MinecraftServer server = level.getServer();
-		String lord = ruler.role() == Folk.LORD ? "lord" : "king";
+		String lord = isLord ? "lord" : "king";
 		KingdomEvents.announce(server, Component.translatable("assassin.jaymoskingdoms.news.murdered." + lord, ruler.getDisplayName(), faction.name())
 			.withStyle(ChatFormatting.DARK_RED));
 		Faction hirer = p != null && p.contract.hirer() >= 0 ? Factions.get(server, p.contract.hirer()) : null;

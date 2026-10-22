@@ -162,6 +162,7 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
 		ArsenalChains.init();
+		ArsenalStanding.init();
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
@@ -202,6 +203,11 @@ public final class ArsenalPower implements Power {
 			ArsenalGates.key(player, down);
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && voided) {
+			// the Sword of Damocles: held, you aim it; let go, it comes (like the Gravity Meteor)
+			ArsenalDamocles.key(player, down);
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -213,8 +219,21 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		switch (key) {
-			case ABILITY_1 -> reach(player);
+			case ABILITY_1 -> {
+				// (0.15.58) Sneak + R marks a place (an ascended Arsenal's pin comes first: held summoned weapon, or empty hand with a pin)
+				if (ArsenalPlaces.sneakKey(player)) {
+					if (!ArsenalArmory.tryPin(player)) {
+						ArsenalPlaces.mark(player);
+					}
+				} else {
+					reach(player);
+				}
+			}
 			case ABILITY_2 -> {
+				// (0.15.58) Sneak + G opens the places menu on the client (it sends the pick); no Return this time
+				if (ArsenalPlaces.sneakKey(player)) {
+					return;
+				}
 				// a standing Sword of Damocles is called back first
 				if (!ArsenalDamocles.recall(player)) {
 					sendBack(player);
@@ -222,13 +241,7 @@ public final class ArsenalPower implements Power {
 			}
 			case ABILITY_3 -> barrage(player);
 			// B: Rift Chains; the Void Arsenal's drops the Sword of Damocles instead (the pocket lives on Z)
-			case ABILITY_4 -> {
-				if (voided) {
-					ArsenalDamocles.cast(player);
-				} else {
-					ArsenalChains.key(player);
-				}
-			}
+			case ABILITY_4 -> ArsenalChains.key(player);
 		}
 	}
 
@@ -236,6 +249,10 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down && slotUnlocked(player, "mode")) {
+			// (0.13.35) an Emberborn who escaped the Nether: Sneak + Z flips where their rifts lead
+			if (player.isShiftKeyDown() && ArsenalEmber.flip(player)) {
+				return;
+			}
 			ArsenalPocket.toggle(player);
 		}
 	}
@@ -266,6 +283,15 @@ public final class ArsenalPower implements Power {
 		player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.6, 1.0, 0.6, 0.1);
 	}
 
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the gates close and the chains let go of whoever they bound
+		ArsenalGates.close(player);
+		ArsenalChains.onLost(player);
+		ArsenalDamocles.cancelAim(player);
+	}
+
 	@Override
 	public void onLost(ServerPlayer player) {
 		ArsenalGates.close(player);
@@ -274,6 +300,8 @@ public final class ArsenalPower implements Power {
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
 		ArsenalChains.onLost(player);
+		ArsenalStanding.closeAll(player, false);
+		ArsenalPlaces.forget(player);
 		PENDING.remove(player.getUUID());
 		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
@@ -284,10 +312,12 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		tickBarrage(player);
+		ArsenalStanding.tick(player);
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			ArsenalGates.tick(player);
 		}
 		ArsenalVoid.tick(player);
+		ArsenalEmber.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);

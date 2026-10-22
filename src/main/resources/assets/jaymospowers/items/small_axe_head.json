@@ -122,6 +122,13 @@
           "type": "minecraft:model",
           "model": "jaymospowers:item/tinkering/part/small_axe_head_slimesteel"
         }
+      },
+      {
+        "when": "steel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/small_axe_head_steel"
+        }
       }
     ],
     "fallback": {

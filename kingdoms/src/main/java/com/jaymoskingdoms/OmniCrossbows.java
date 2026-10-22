@@ -16,7 +16,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 /**
- * (0.7.103) OmniCrossbow (optional; LGPL-3.0, by ThePotatoArchivist; the pack ships its jar unchanged): load almost any
+ * (0.7.162) OmniCrossbow (optional; LGPL-3.0, by ThePotatoArchivist; the pack ships its jar unchanged): load almost any
  * item into a crossbow from the off hand, and each flies its own way. In the pack it's a skill, not a treasure:
  * Survival's Make Do perk ({@link Skills.Perk#MAKE_DO}) lets any class's crossbow take anything. The mod's Omni
  * enchantment is gone (Andy: "No omni enchant at all"): it's stripped from all loot (an Omni book becomes a plain book)

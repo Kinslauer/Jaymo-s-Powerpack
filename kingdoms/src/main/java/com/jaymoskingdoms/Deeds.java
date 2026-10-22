@@ -176,7 +176,7 @@ public final class Deeds {
 
 	/** {@code who} is on the villagers' side (a villager, or a settlement's folk): their blows are a quarrel, not an attack to save anyone from. */
 	private static boolean friendly(LivingEntity who) {
-		return who instanceof Villager || who instanceof Folk folk && folk.style() != FactionType.BARBARIAN;
+		return who instanceof Villager && !Barbarians.isCampVillager(who) || who instanceof Folk folk && folk.style() != FactionType.BARBARIAN;
 	}
 
 	/** Today, as the settlements count days. */
@@ -214,6 +214,10 @@ public final class Deeds {
 			return;
 		}
 		THANKED.put(by.getUUID(), now);
+		for (LivingEntity w : seen) {
+			// (0.7.109) each who saw it remembers it
+			Recollections.remember(w, by, Recollections.Kind.SAW_DEED, Component.translatable("recall.jaymoskingdoms.deed.fire"));
+		}
 		LivingEntity thanker = seen.get(level.getRandom().nextInt(seen.size()));
 		thank(level, thanker, by, "talk.jaymoskingdoms.deed.fire.thanks", WITNESS_HEARTS);
 		for (LivingEntity w : seen) {
@@ -249,6 +253,8 @@ public final class Deeds {
 		}
 		SAVED.put(key, now);
 		thank(level, saved, player, "talk.jaymoskingdoms.deed.save.thanks", SAVE_HEARTS);
+		// (0.7.109) and never forgets it
+		Recollections.remember(saved, player, Recollections.Kind.SAVED, Component.empty());
 		if (level.getRandom().nextFloat() < SAVE_GIFT_CHANCE) {
 			give(player, new ItemStack(GIFTS.get(level.getRandom().nextInt(GIFTS.size()))));
 			saved.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -266,6 +272,7 @@ public final class Deeds {
 	/** {@code player} cut {@code captive} loose; {@code home} is where they were taken from, if anywhere. */
 	static void freed(ServerLevel level, ServerPlayer player, Villager captive, @Nullable Faction home) {
 		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.freed", FREED_HEARTS);
+		Recollections.remember(captive, player, Recollections.Kind.FREED, Component.empty());
 		if (home != null) {
 			Reputation.change(player, home, FREED_REP);
 		}
@@ -274,6 +281,8 @@ public final class Deeds {
 	/** {@code player} brought {@code captive} home to {@code home}: the whole place knows of it. */
 	static void broughtHome(ServerLevel level, ServerPlayer player, Villager captive, Faction home, List<ItemStack> rewards, int rep, int hearts) {
 		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.home", hearts);
+		// (0.7.109) they, and their family, remember it always
+		Recollections.broughtHome(level, player, captive);
 		for (ItemStack reward : rewards) {
 			give(player, reward);
 		}
@@ -319,8 +328,11 @@ public final class Deeds {
 		LivingEntity loud = seen.get(level.getRandom().nextInt(seen.size()));
 		lookAt(loud, player);
 		Speech.say(level, loud, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.WHITE, WITNESS_RANGE + 8.0);
+		Component deed = Component.translatable(family.contains(".rescue.") ? "recall.jaymoskingdoms.deed.rescue" : "recall.jaymoskingdoms.deed.save");
 		for (LivingEntity w : seen) {
 			warm(w, player, hearts);
+			// (0.7.109) each who saw it remembers it
+			Recollections.remember(w, player, Recollections.Kind.SAW_DEED, deed);
 			if (w instanceof Villager v) {
 				McaCompat.cheer(v, CHEER);
 			}

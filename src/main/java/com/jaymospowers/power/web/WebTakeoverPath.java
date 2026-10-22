@@ -78,11 +78,14 @@ final class WebTakeoverPath {
 	/** It counts as trapped unless the best spot puts at least this much more distance (blocks) between it and the threat. */
 	static final double FLEE_MIN_GAIN = 4.0;
 	// ===== stuck =====================================================================================================
-	/** No progress (moved less than {@code STUCK_MOVE} blocks) for this long (ticks): it re-paths at once. */
-	static final int STUCK_TICKS = 30;
+	/**
+	 * No progress (moved less than {@code STUCK_MOVE} blocks) for this long (ticks): it re-paths at once. (0.15.69) 15,
+	 * down from 30, and it rips through the first time (was the second): it never stands about (Andy).
+	 */
+	static final int STUCK_TICKS = 15;
 	static final double STUCK_MOVE = 0.9;
 	/** Stuck this many times in a row: it rips its way through instead. */
-	static final int STUCK_RIP_AFTER = 2;
+	static final int STUCK_RIP_AFTER = 1;
 	/** After being stuck on the straight line, it keeps to paths for this long (ticks). */
 	static final int DIRECT_BAN_TICKS = 60;
 	// ===== ripping ===================================================================================================
@@ -235,7 +238,7 @@ final class WebTakeoverPath {
 			return;
 		}
 		// progress: moved, or close enough to the prey to fight it
-		boolean there = !flee && player.distanceTo(target) - target.getBbWidth() * 0.5 <= reach + 0.5;
+		boolean there = !flee && player.distanceTo(target) - target.getBbWidth() * 0.5 <= reach + 0.5 && player.hasLineOfSight(target);
 		// (coiling for a leap counts: it's about to move)
 		if (there || player.position().distanceToSqr(route.progressPos) > STUCK_MOVE * STUCK_MOVE || route.progressAt == 0L
 			|| player.getAttached(WebPower.CHARGING) != null) {

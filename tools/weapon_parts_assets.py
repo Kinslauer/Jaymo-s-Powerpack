@@ -40,6 +40,7 @@ PARTS = [
     ("ninjato_blade", "Ninjato Blade", "armory:ninjato", ["iron", "gold"]),
     ("saber_blade", "Saber Blade", "armory:saber", ["iron", "gold"]),
     ("machete_blade", "Machete Blade", "armory:machete", ["iron", "gold"]),
+    ("rapier_blade", "Rapier Blade", "armory:rapier", ["iron", "gold"]),
     ("kunai_blade", "Kunai Blade", "single:kunai", ["iron"]),
     ("throwing_star_blank", "Throwing Star Blank", "single:throwing_star", ["iron"]),
     ("harpoon_head", "Harpoon Head", "single:harpoon", ["iron"]),
@@ -53,7 +54,68 @@ PARTS = [
     ("katana_blade", "Katana Blade", "balkon:katana", ["iron", "gold", "copper"]),
     ("flail_head", "Flail Head", "balkon:flail", ["iron", "gold", "copper"]),
     ("boomerang_edge", "Boomerang Edge", "balkon:boomerang", ["iron", "gold", "copper"]),
+    # (0.15.36) tools forged the same way, drawn here (DRAWN) rather than cut from vanilla's or Pantry's art
+    ("fishing_hook", "Fishing Hook", "drawn:fishing_hook", ["iron"]),
+    ("brush_ferrule", "Brush Ferrule", "drawn:brush_ferrule", ["copper"]),
+    ("kitchen_knife_blade", "Kitchen Knife Blade", "drawn:kitchen_knife_blade", ["iron"]),
 ]
+# our own 16x16 heads: '#' outline, 'x' metal, 'o' shine, '.' clear
+DRAWN = {
+    "fishing_hook": [
+        "................",
+        "................",
+        "........##......",
+        ".......#oo#.....",
+        "........#x#.....",
+        "........#x#.....",
+        "........#x#.....",
+        "........#x#.....",
+        "........#x#.....",
+        "...#....#x#.....",
+        "..#o#...#x#.....",
+        "..#x#..#ox#.....",
+        "..#xo##ox#......",
+        "...#xxxx#.......",
+        "....####........",
+        "................"],
+    "brush_ferrule": [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....######.....",
+        "....#oooooo#....",
+        "....#xxxxxx#....",
+        "....#oooooo#....",
+        "....#xxxxxx#....",
+        ".....######.....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"],
+    "kitchen_knife_blade": [
+        "................",
+        "............##..",
+        "...........#o#..",
+        "..........#ox#..",
+        ".........#oxx#..",
+        "........#oxx#...",
+        ".......#oxx#....",
+        "......#oxx#.....",
+        ".....#oxx#......",
+        "....#oxx#.......",
+        "...#oxx#........",
+        "...#xx#.........",
+        "....##..........",
+        "................",
+        "................",
+        "................"],
+}
+# outline, metal, shine
+DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
+                 "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128))}
 METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper"}
 ARMORY_TIER = {"stone": "stone", "iron": "iron", "gold": "golden"}
 
@@ -145,6 +207,16 @@ def tidy(img):
     return centred
 
 
+def drawn(name, metal):
+    out = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    colours = dict(zip("#xo", DRAWN_COLOURS[metal]))
+    for y, row in enumerate(DRAWN[name]):
+        for x, c in enumerate(row):
+            if c in colours:
+                out.putpixel((x, y), colours[c] + (255,))
+    return out
+
+
 def sprites(source, balkon):
     return {metal: tidy(img) for metal, img in raw_sprites(source, balkon).items()}
 
@@ -152,6 +224,9 @@ def sprites(source, balkon):
 def raw_sprites(source, balkon):
     """{metal: head sprite} for a part, stone first."""
     kind, base = source.split(":")
+    if kind == "drawn":
+        heads = {m: drawn(base, m) for m in DRAWN_COLOURS}
+        return {"stone": as_stone(heads["iron"]), **heads}
     if kind == "armory":
         wooden = load(os.path.join(ARMORY, "wooden_" + base + ".png"))
         return {m: cut(load(os.path.join(ARMORY, t + "_" + base + ".png")), wooden) for m, t in ARMORY_TIER.items()}

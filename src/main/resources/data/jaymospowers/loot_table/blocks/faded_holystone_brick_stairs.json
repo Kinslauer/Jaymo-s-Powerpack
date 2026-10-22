@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:faded_holystone_brick_stairs"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/faded_holystone_brick_stairs"
+}

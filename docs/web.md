@@ -66,12 +66,9 @@ a host that isnt a web user."
   it's hauled up at `CLIMB_SPEED` 0.3 b/t, pressed `CLIMB_HUG` into the face and shoved `CLIMB_OVER` 0.22 over the lip,
   with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
   lifts it already); never in water or riding.
-- **Roll charges (`WebRolls`, client `WebRollsClient`):** with Combat Roll in the pack, a web slinger holds
-  `ROLL_CHARGES` 5 roll charges (Combat Roll's `combat_roll:count`, a transient modifier while Web is your power,
-  checked every second; Combat Roll refills them one at a time on its own recharge and shows them on its own HUD). Each
-  Spider-Sense counter (`WebCounter`) spends one; with none left a dodge still sidesteps but opens no counter window.
-  The count lives on the client and is reported to the server (`web_rolls`); the server spends with `web_roll_charge`.
-  Without Combat Roll, counters cost nothing (as before).
+- **Feathers (`WebRolls`; 0.15.5, in place of Combat Roll's charges, `docs/dodge.md`):** a web slinger gets `BONUS`
+  20 golden feathers over the feathers row (a full golden row, three more dodges). Each Spider-Sense counter (`WebCounter`) spends a
+  dodge's worth (`Dodge.COST`); without them a dodge still sidesteps but opens no counter window.
 - **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
   host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
   peaceful one now wastes too, at `CALM_DECAY_SHARE` half that, and is spat out badly hurt but alive. Web slingers bonded
@@ -1487,3 +1484,42 @@ and other drawings in first person."
   (`WebFirstPersonHandsMixin`), nor the suit sleeve or web shooter on them, nor the extra carry and ledge arms; the
   body's posed arms are the only pair. First-person Model's own hiding of a body arm that holds an item is undone for
   the move (`FirstPersonCompat.showArms`), so the arm still shows. Without First-person Model nothing changes.
+
+## Saved when you go down, foe talk, no stalling (0.15.69)
+Andy: "the symbiote should always takeover if you go down, healing you and commenting on how close you got to death, it
+also Jumps as high as possible and web zips away before giving you control. It will only not takeover if it is too low
+on hunger, and the bond is low. It should also make more comments about what you're fighting." Then: "the symbiote
+should not ever stop moving underwater", "it honestly shouldnt stop moving at all unless it is trying to feed, it
+constantly gets stuck", and "pulling off the suit now requires 3 attempts every time. it should have a CHANCE to take up
+to 3 removals."
+- **Rescue (`WebSymbioteRescue`):** you go down (`Downed`) with a symbiote bonded: whatever it was doing stops
+  (`WebSymbiote.standDown`), and after `BEAT_TICKS` 15 it gets you up (`Downed.rouse`) at `HEALTH` 0.5 of your most
+  health, for `SATIETY_COST` 20 of its hunger. It says how close that was by your health before the felling blow:
+  `TIER_HIGH` 0.5+ ("one blow"), down to `TIER_LOW` 0.2 ("close"), under that ("a thread"), naming what felled you if it
+  is still about (`rescue.<tier>[.foe].N`). It has the legs (client `WebSymbioteClient.tickRescue`): a `RESCUE_COIL` 10
+  tick coil, then `RESCUE_LEAP` 1.3x a full charge's lift straight up. At the top (or `APEX_MAX_TICKS` 70) it zips
+  (`WebPower.takeoverZip`) to the spot furthest from what's after you, tops liked best, at least `ZIP_MIN` 8 off; when
+  the zip lets go (or with nothing to zip to, once you land, `FALL_MAX_TICKS` 100 at most) it hands the controls back
+  with a line (`rescue.release.N`). No falls hurt you meanwhile. Felled again before it leaves the ground, it starts
+  over. It refuses only when starving (`STARVING` 15 or under) and the bond is under `LOW_BOND` 30 (`rescue.weak.N`).
+  A symbiote in someone who isn't a web slinger leaps but can't zip.
+- **What you're fighting (`WebSymbioteFoes`):** what you last hit (or what last hit you) within `RECENT_TICKS` 100 and
+  `RANGE` 24: a fresh foe gets a line `NEW_CHANCE` 0.75 of the time, the same one again every 300-600 ticks at
+  `AGAIN_CHANCE` 0.5, never over another line. Lines by kind (`kind`, from the creature's id so other mods' sort too):
+  undead, skeleton, creeper, spider, enderman, slime, nether, piglin, golem, illager, villager, player, beast, sea,
+  boss, small, big, other (`foe.<kind>.N`, each naming it).
+- **Never stalls:** Wall Crawl's tendrils keep walking and hanging you underwater (`WebTendrilWalk.striding/hanging`,
+  `tickCrawl`); takeovers sprint-swim (`canSprint` always). Takeovers: stuck after `STUCK_TICKS` 15 (was 30), ripping
+  through on the first time stuck (`STUCK_RIP_AFTER` 1, was 2); near its prey only counts as getting somewhere when
+  level with it (`BOUND_STUCK_NEAR_Y` 1.5) and in sight, so a ledge or wall between them sets off the leap
+  (`BOUND_STUCK_TICKS` 10, was 16); pressed to a wall with no way round, the tendrils climb it (`FLEE_CLIMB`); at its
+  prey it circles (`TAKEOVER_CIRCLE` 0.14, turning every 40 ticks); with no path it keeps on the way it faces. Only
+  feeding (and tearing through a block) holds you still.
+- **Taking the suit off (`WebSymbioteBond`):** each removal under `FIGHT_BOND` is fought only `FIGHT_CHANCE_LOW` 0.6
+  (no bond) to `FIGHT_CHANCE_HIGH` 0.3 (bond 70) of the time; otherwise it comes off at once. Still at most `FIGHTS` 3
+  fights a bond.
+- **Takeovers in the plain suit:** Andy: "the takeovers should now happen primarily in the regular black suit, and only
+  10% of the time use the large suit. even rarer for non web users (except anti)". Each takeover rolls the big body as it
+  starts (`WebSymbiote.BIG_TAKEOVER_CHANCE` 0.1; `BIG_TAKEOVER_CHANCE_HOST` 0.03 in a host who isn't a web slinger;
+  the anti/white one `BIG_TAKEOVER_CHANCE_ANTI` 0.4, Andy: "40%"); otherwise it drives you in the plain black suit. The gift after a takeover is the big
+  body only if that takeover was. The near-death roar still builds the big body.

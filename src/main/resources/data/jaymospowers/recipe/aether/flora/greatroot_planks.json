@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymospowers:greatroot_logs"
+  ],
+  "result": {
+    "id": "jaymospowers:greatroot_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

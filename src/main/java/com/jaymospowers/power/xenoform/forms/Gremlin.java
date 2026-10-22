@@ -49,8 +49,6 @@ import net.minecraft.world.phys.Vec3;
  * <li>C (ascended), Swarm: you split: {@link #SWARM_CLONES} glowing gremlins scuttle after you, biting what you bite.
  * C again swaps you with the one farthest off (or nearest, when sneaking).</li>
  * </ul>
- * Corrupted: the bite catches everything near its mark, friend or foe, and every sabotage also throws a lever or button
- * somewhere within {@link #CORRUPT_STRAY_REACH} of you.
  */
 public final class Gremlin extends XenoForm {
 	// ---- tuning ----
@@ -65,8 +63,6 @@ public final class Gremlin extends XenoForm {
 	/** Swarm: how many gremlins, how closely they follow and how fast, and C's cooldown between swaps. */
 	public static final int SWARM_CLONES = 3, SWAP_COOLDOWN = 20;
 	public static final double SWARM_FOLLOW = 3.0, SWARM_SPEED = 1.3;
-	/** Corrupted: the bite's spread round its mark; how far a stray sabotage reaches. */
-	public static final double CORRUPT_BITE_SPREAD = 2.5, CORRUPT_STRAY_REACH = 6.0;
 
 	public Gremlin() {
 		super("gremlin", 0.3F, 10.0F, 2.0, 0.2, 0.0, 0.0, Items.REDSTONE, 0x9ADC5A);
@@ -108,9 +104,6 @@ public final class Gremlin extends XenoForm {
 			case ABILITY_2 -> {
 				if (ready(player, live, G) && sabotage(player)) {
 					cooldown(player, live, G, SABOTAGE_COOLDOWN);
-					if (live.corrupted) {
-						stray(player);
-					}
 				}
 			}
 			case ABILITY_3 -> {
@@ -166,31 +159,6 @@ public final class Gremlin extends XenoForm {
 		}
 	}
 
-	/** Corrupted: a lever or button near you, thrown at random. */
-	private static void stray(ServerPlayer player) {
-		ServerLevel level = player.level();
-		BlockPos feet = player.blockPosition();
-		int r = (int)CORRUPT_STRAY_REACH;
-		java.util.List<BlockPos> found = new java.util.ArrayList<>();
-		for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-r, -r, -r), feet.offset(r, r, r))) {
-			Block block = level.getBlockState(pos).getBlock();
-			if (block instanceof LeverBlock || block instanceof ButtonBlock) {
-				found.add(pos.immutable());
-			}
-		}
-		if (found.isEmpty()) {
-			return;
-		}
-		BlockPos pos = found.get(player.getRandom().nextInt(found.size()));
-		BlockState state = level.getBlockState(pos);
-		if (state.getBlock() instanceof LeverBlock lever) {
-			lever.pull(state, level, pos, null);
-		} else if (state.getBlock() instanceof ButtonBlock button) {
-			button.press(state, level, pos, null);
-		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.05);
-	}
-
 	// ---- Swarm ----
 
 	@Override
@@ -204,7 +172,7 @@ public final class Gremlin extends XenoForm {
 				continue;
 			}
 			clone.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, false));
-			clone.setCustomName(player.getName());
+			clone.setCustomName(player.getDisplayName());
 			clone.setCustomNameVisible(false);
 			live.minions.add(clone.getId());
 		}
@@ -321,13 +289,6 @@ public final class Gremlin extends XenoForm {
 		ServerLevel level = player.level();
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		nip(player, target);
-		if (live.corrupted) {
-			// the corrupted jaw snaps at everything near its mark
-			for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(CORRUPT_BITE_SPREAD),
-				e -> e != target && e != player && e.isAlive() && !e.entityTags().contains(com.jaymospowers.power.xenoform.XenoformState.MINION_TAG))) {
-				nip(player, other);
-			}
-		}
 		// the swarm bites too
 		for (int id : live.minions) {
 			if (level.getEntity(id) instanceof Mob clone && clone.isAlive() && clone.distanceToSqr(target) < 16.0) {

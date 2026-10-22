@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 
 /**
  * The Xeno-Band on a wearer's left wrist: a 5x3x5 box round the forearm ({@code textures/entity/xeno_band.png}, drawn
@@ -30,6 +31,7 @@ public final class XenoBand {
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_band_glow.png");
 
 	private static ModelPart worn;
+	private static ModelPart cap;
 	/** A slim (3-pixel) arm: the band, made for the 4-pixel one, is narrowed to it, about the arm's middle. */
 	static final float SLIM_WIDTH = 0.8F;
 
@@ -41,6 +43,19 @@ public final class XenoBand {
 		MeshDefinition mesh = new MeshDefinition();
 		mesh.getRoot().addOrReplaceChild("band", CubeListBuilder.create().texOffs(0, 0).addBox(-1.5F, 6.0F, -2.5F, 5.0F, 3.0F, 5.0F), pose);
 		return LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("band");
+	}
+
+	/**
+	 * The dial's cap: the dial's 3x3 face lifted out of the band (a 1-pixel slab on the band's outer face, its face sampling
+	 * the dial's texels, 11-14 x 5-8), scaled out to its height as it stands.
+	 */
+	private static ModelPart cap() {
+		if (cap == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("cap", CubeListBuilder.create().texOffs(7, 2).addBox(3.5F, 6.0F, -1.5F, 1.0F, 3.0F, 3.0F), PartPose.ZERO);
+			cap = LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("cap");
+		}
+		return cap;
 	}
 
 	/** For a layer: placed after the arm's own translateAndRotate. */
@@ -63,6 +78,17 @@ public final class XenoBand {
 		ModelPart part = worn();
 		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
 		collector.submitModelPart(part, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null);
+		float pop = XenoformSlamView.pop;
+		if (pop > 0.02F) {
+			// the slam's raised dial: a small cap, glowing and pulsing
+			poseStack.translate(3.5F / 16.0F, 0.0F, 0.0F);
+			poseStack.scale(pop * XenoformSlamView.POP_PX, 1.0F, 1.0F);
+			poseStack.translate(-3.5F / 16.0F, 0.0F, 0.0F);
+			ModelPart cap = cap();
+			collector.submitModelPart(cap, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+			int alpha = Mth.clamp((int)(XenoformSlamView.glow * 255.0F), 0, 255);
+			collector.submitModelPart(cap, poseStack, RenderTypes.eyes(GLOW), light, OverlayTexture.NO_OVERLAY, null, alpha << 24 | 0xFFFFFF);
+		}
 		poseStack.popPose();
 	}
 
@@ -98,10 +124,19 @@ public final class XenoBand {
 			}
 			// the slam pose is laid over the model after it animates; the arm here is before that, so lay it over again
 			XenoformSlap.applyModel(model, state);
+			// your own body in first person: the band's dial pops up and glows through the slam, as the drawn hands' did
+			XenoformSlap.Pose pose = state.getData(XenoformSlap.KEY);
+			boolean dial = pose != null && XenoformSlap.ownBody(state);
+			if (dial) {
+				XenoformSlamView.dial(pose, state.ageInTicks);
+			}
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
 			XenoBand.submitOnArm(poseStack, collector, lightCoords, state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
 			poseStack.popPose();
+			if (dial) {
+				XenoformSlamView.dialDone();
+			}
 		}
 	}
 }

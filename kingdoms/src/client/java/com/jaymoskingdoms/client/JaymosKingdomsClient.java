@@ -35,10 +35,13 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.sailing.ShipShot.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.2F, false));
 		ShipClient.init();
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		// (batch 4) plot stakes' lines, path and grass slabs, wind chimes, the rope lift
+		BuildingClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -50,6 +53,11 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		com.jaymoskingdoms.client.wild.WildRenderer.register();
 		com.jaymoskingdoms.client.monsters.LegendRenderer.register();
+		// (0.7.145) the Aether's Giants
+		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
+		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
+		// 0.7.131: the Hornkin of the Nether
+		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket
@@ -75,6 +83,11 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		NightGiftsClient.register();
 		BloodVision.register();
 		WarriorFury.register();
+		// BWM batch 5: the gloom's whispers and dark edges
+		GloomClient.register();
+		// 0.7.111: the awareness gauge (mob senses)
+		SensesClient.register();
+		HiddenBladeClient.register();
 		VampireLooks.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
@@ -93,6 +106,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VillagerLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
+		// 0.7.137: the wind dragons (Notus: its model, flight, breath key, trust and stamina HUD)
+		com.jaymoskingdoms.client.dragons.DragonsClient.register();
 		// 0.6.12: storm clouds, tornado funnels and the rain under a storm
 		com.jaymoskingdoms.client.disasters.StormsClient.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)

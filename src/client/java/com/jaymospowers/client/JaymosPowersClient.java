@@ -8,7 +8,6 @@ import com.jaymospowers.client.power.chrono.ChronoPowerClient;
 import com.jaymospowers.client.power.gravity.GravityPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
-import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
@@ -54,9 +53,15 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
+		com.jaymospowers.client.power.ember.EmberKindleClient.init();
+		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
+		com.jaymospowers.client.aether.AetherClient.init();
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
+		// (BWM port) enchanted books say what gear each enchantment goes on
+		com.jaymospowers.client.enchanting.EnchantSlotTooltip.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// (0.13.7) the bomb glider: its renderer, hold screen and drop keys
@@ -79,6 +84,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(SeasonAura::tick);
 		// the affinity choice waits until no other screen is open
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
@@ -88,13 +94,17 @@ public class JaymosPowersClient implements ClientModInitializer {
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
-		CombatRollTaps.init();
+		com.jaymospowers.client.stamina.DodgeClient.init();
+		com.jaymospowers.client.stamina.FeathersHud.init();
 		JeiCheats.init();
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		com.jaymospowers.client.wounds.WoundsHud.init();
+		com.jaymospowers.client.wounds.DownedHud.init();
+		com.jaymospowers.client.wounds.MedicineHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();
@@ -111,8 +121,19 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
 		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
+		com.jaymospowers.client.power.cryo.CryoPowerClient.init();
 		// (0.14.3) freerunning: after the powers' own tick (a web slinger's parkour goes first) and the ledge grab's
 		com.jaymospowers.client.freerun.FreerunClient.init();
+	}
+
+	/** Steering one of Jaymo's Kingdoms' dragons (R breathes its fire then), told by its id alone, so no compile-time tie. */
+	private static boolean steeringDragon(net.minecraft.world.entity.player.Player player) {
+		net.minecraft.world.entity.Entity mount = player.getVehicle();
+		if (mount == null || mount.getControllingPassenger() != player) {
+			return false;
+		}
+		net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(mount.getType());
+		return id.getNamespace().equals("jaymoskingdoms") && id.getPath().endsWith("_dragon");
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
@@ -201,7 +222,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
 			// (0.13.7) on a bomb glider, ability 1 drops its dynamite instead (BombGliderClient)
 			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown()
-				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null);
+				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
+				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
+				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
@@ -218,7 +241,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				client.onMode(player, mode);
 			}
 		}
-		boolean ultimate = power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player))
+		boolean ultimate = power != null && power.ultimateAnswers(player)
 			&& !seized && minecraft.gui.screen() == null && ultimateKey.isDown();
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;

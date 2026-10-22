@@ -254,7 +254,7 @@ public final class CombatArts {
 
 	/** The finisher for the weapon in hand. */
 	private static void finisher(ServerLevel level, ServerPlayer sp, Skills.Progress p, LivingEntity target, float dealt, boolean executed) {
-		ItemStack weapon = sp.getMainHandItem();
+		ItemStack weapon = HiddenBlade.weapon(sp);
 		if (executed) {
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.4, 0.3, 0.3);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);

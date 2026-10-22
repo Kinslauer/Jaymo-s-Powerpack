@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "moisture=0": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=1": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=2": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=3": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=4": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=5": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=6": {
+      "model": "jaymospowers:block/aether/aether_farmland"
+    },
+    "moisture=7": {
+      "model": "jaymospowers:block/aether/aether_farmland_moist"
+    }
+  }
+}

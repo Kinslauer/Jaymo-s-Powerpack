@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Prey;
 import com.jaymoskingdoms.mixin.MobAccessor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,8 +22,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
@@ -54,6 +57,8 @@ import org.jspecify.annotations.Nullable;
 public final class SpiderMinds {
 	/** Scale of a spider and of a cave spider (1 = the game's size). */
 	static final double SPIDER_SCALE = 0.5, CAVE_SPIDER_SCALE = 0.65;
+	/** (0.7.103) Where hunting small game ({@link Prey#SPIDER_PREY}) sits among its targets: after players (2). */
+	static final int PREY_PRIORITY = 3;
 	/** A spider is hostile below this light value (the game's own spider rule). */
 	static final float DARK = 0.5F;
 
@@ -127,6 +132,9 @@ public final class SpiderMinds {
 					goals.addGoal(4, new SearchGoal(mind));
 					goals.addGoal(4, new CeilingGoal(mind));
 					goals.addGoal(5, new WanderGoal(mind));
+					// (0.7.103) small game in the dark, beside the game's own iron golem target (3): chickens, rabbits
+					((MobAccessor) spider).jaymoskingdoms$targets().addGoal(PREY_PRIORITY, new NearestAttackableTargetGoal<>(spider, Animal.class, true,
+						(target, at) -> dark(spider) && target.getType().builtInRegistryHolder().is(Prey.SPIDER_PREY) && Prey.fair(target, at)));
 				}
 			}
 		});

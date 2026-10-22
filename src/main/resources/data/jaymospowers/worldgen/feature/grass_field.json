@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "jaymospowers:aether_short_grass",
+        "weight": 5
+      },
+      {
+        "data": "jaymospowers:aether_medium_grass",
+        "weight": 3
+      },
+      {
+        "data": "jaymospowers:aether_long_grass",
+        "weight": 2
+      }
+    ]
+  }
+}

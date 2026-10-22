@@ -43,6 +43,8 @@ public final class ZFighterRaids {
 	static final long RAID_DAYS = 20L;
 	static final long RAID_SPREAD = 240000L;
 	static final double NEAR = 160.0;
+	/** (0.15.61, Andy) A tyrant only comes to a kingdom with a player near it in this world tier or higher (1: Borderlands, the second). */
+	static final int MIN_TIER = 1;
 	static final int RAID_TP = 1500;
 	static final int MIN_TP = 125;
 	static final int RAID_EMERALDS = 48;
@@ -89,7 +91,8 @@ public final class ZFighterRaids {
 		}
 		List<ZFighterKingdoms.Settlement> near = new ArrayList<>();
 		for (ZFighterKingdoms.Settlement s : ZFighterKingdoms.settlements(server)) {
-			if ("KINGDOM".equals(s.type()) && level.getNearestPlayer(s.seat().getX(), s.seat().getY(), s.seat().getZ(), NEAR, false) != null) {
+			if ("KINGDOM".equals(s.type()) && level.getNearestPlayer(s.seat().getX(), s.seat().getY(), s.seat().getZ(), NEAR,
+				p -> !p.isSpectator() && ZFighterKingdoms.worldTier((net.minecraft.world.entity.player.Player)p) >= MIN_TIER) != null) {
 				near.add(s);
 			}
 		}

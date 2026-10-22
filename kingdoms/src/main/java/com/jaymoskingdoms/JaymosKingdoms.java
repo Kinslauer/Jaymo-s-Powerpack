@@ -41,7 +41,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
 		Professions.register();
 		McaCompat.register();
-		// (0.7.103) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
+		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
@@ -50,10 +50,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
 		LOGGER.debug("illager attachment: {}", Illagers.TAG);
 		Camps.register();
+		// 0.7.148: outlaws spared by the barbarian camps
+		Barbarians.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
+		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
+		Senses.register();
+		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
+		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
 		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
@@ -64,7 +70,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
+		// (batch 4) building: dirt, grass and path slabs; wind chimes; the rope lift (rope, anchor, pulley, platform)
+		EarthSlabs.register();
+		WindChimes.register();
+		RopeLift.register();
+		// (0.7.116) the surveyor's rod, players' own designs and work areas
+		Surveyor.register();
+		Designs.register();
 		Armory.register();
+		// knitted wool clothes: light armour that keeps the cold off an Emberborn
+		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
@@ -76,6 +91,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
+		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
+		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
+		Bearers.register();
+		Looters.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);
@@ -95,7 +114,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Retinue.register();
+		// (0.7.138) with MCA, rulers are the town's own villagers
+		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
+		Rulers.register();
+		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
+		Purists.register();
 		Frights.register();
+		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -105,21 +130,34 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.62: Jaymo's Powers' costumes: a masked player is a stranger, the costume someone of its own (and its attachments)
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
+		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
+		CharacterNames.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
+		MobTweaks.register();
 		Theft.register();
+		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
-		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
-		LOGGER.debug("downed attachment: {}", Downed.DOWNED);
+		// Pickpocket and the villager screens, whose right-click on them it takes); 0.7.130: the downed state itself is
+		// Jaymo's Powers' now (read by its scoreboard tag), this keeps the tending and the disarming
 		Downed.register();
+		// 0.7.102: clerics are barber-surgeons, taverns and festivals sell drink (Powers' and Kitchen's wares by id, before
+		// the villager screens open, so the trades are there when they do)
+		Remedies.register();
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
+		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
+		Crooks.register();
+		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
+		Arrests.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
@@ -129,7 +167,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();
 		// 0.7.82: world tiers (after Apotheosis's): each player's chosen difficulty, foes near them take it (its attachments)
-		LOGGER.debug("world tier attachments: {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER);
+		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
+			WorldTiers.FLOOR);
 		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
@@ -140,10 +179,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wars.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
+		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
+		com.jaymoskingdoms.carpentry.Carpentry.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
+		MobShields.register();
+		BladeClash.register();
 		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
@@ -169,6 +213,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		Cannonball.register();
+		// (0.7.107) the pirate bombardiers' dynamite (the thrown stick and the item)
+		Dynamite.register();
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
@@ -178,6 +224,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		// 0.7.103: roads are quicker going, sand, snow and leaves slower
+		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
 		Milestones.register();
 		Cavalry.register();
@@ -210,6 +258,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
+		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
+		Recollections.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
@@ -240,6 +291,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
+		// 0.7.137: the wind dragons (Notus first)
+		com.jaymoskingdoms.dragons.Dragons.register();
+		// 0.7.145: the Aether's remnants: monoliths and their four Giants, the first Giant's fall raising the world tier
+		com.jaymoskingdoms.remnants.Monoliths.register();
 		Encounters.register();
 		Sightings.register();
 		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)
@@ -251,6 +306,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
+		// 0.7.103: sinkholes: sand and gravel over nothing gives way under a player
+		com.jaymoskingdoms.disasters.LooseGround.register();
 		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
@@ -267,6 +324,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
+		// the vampires' callings, nightmares and the Nightfall (and their attachments)
+		com.jaymoskingdoms.nightfall.Nightfall.register();
+		// 0.7.131: the Nether's faction, stage 1: the Hornkin and their gold feud with the piglins (our own after Just-In NETHER)
+		com.jaymoskingdoms.nether.Nether.register();
 		// 0.7.92: an Earthling near death: the ki round the fists flares, with a buff (its attachment)
 		LOGGER.debug("earthling surge attachment: {}", EarthlingSurge.UNTIL);
 		EarthlingSurge.register();
@@ -283,6 +345,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
+		// 0.7.126: bandit masks and bandanas; the bounty board, bounties on crooks and players (their attachments)
+		Bandits.register();
+		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
+		Bounties.register();
+		// BWM batch 5: the gloom of the dark (and its attachment)
+		Gloom.register();
+		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);
+		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
+		BeaconWatch.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

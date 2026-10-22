@@ -1,0 +1,63 @@
+{
+  "variants": {
+    "edge=down_north": {
+      "model": "jaymoskingdoms:block/brick_moulding"
+    },
+    "edge=down_south": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "y": 180,
+      "uvlock": true
+    },
+    "edge=down_west": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "y": 270,
+      "uvlock": true
+    },
+    "edge=down_east": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "y": 90,
+      "uvlock": true
+    },
+    "edge=up_north": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "x": 180,
+      "y": 180,
+      "uvlock": true
+    },
+    "edge=up_south": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "x": 180,
+      "uvlock": true
+    },
+    "edge=up_west": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "x": 180,
+      "y": 90,
+      "uvlock": true
+    },
+    "edge=up_east": {
+      "model": "jaymoskingdoms:block/brick_moulding",
+      "x": 180,
+      "y": 270,
+      "uvlock": true
+    },
+    "edge=north_west": {
+      "model": "jaymoskingdoms:block/brick_moulding_upright"
+    },
+    "edge=north_east": {
+      "model": "jaymoskingdoms:block/brick_moulding_upright",
+      "y": 90,
+      "uvlock": true
+    },
+    "edge=south_west": {
+      "model": "jaymoskingdoms:block/brick_moulding_upright",
+      "y": 270,
+      "uvlock": true
+    },
+    "edge=south_east": {
+      "model": "jaymoskingdoms:block/brick_moulding_upright",
+      "y": 180,
+      "uvlock": true
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_right_open",
+  "textures": {
+    "bottom": "jaymospowers:block/aether/wisproot_door_bottom",
+    "top": "jaymospowers:block/aether/wisproot_door_top"
+  }
+}

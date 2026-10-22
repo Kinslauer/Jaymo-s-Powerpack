@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "jaymoskingdoms:corner",
+  "ingredients": [
+    "jaymoskingdoms:cherry_moulding"
+  ],
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:cherry_corner"
+  }
+}

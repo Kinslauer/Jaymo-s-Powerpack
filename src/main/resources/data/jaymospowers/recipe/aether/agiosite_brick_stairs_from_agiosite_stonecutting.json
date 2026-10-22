@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:agiosite",
+  "result": {
+    "id": "jaymospowers:agiosite_brick_stairs"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "minecraft:string",
+    "P": "#minecraft:wooden_slabs",
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    " S ",
+    "NPN",
+    "N N"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:iron_wind_chime",
+    "count": 1
+  }
+}

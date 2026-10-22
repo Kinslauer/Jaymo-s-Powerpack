@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymoskingdoms:stone_siding",
+    "jaymoskingdoms:stone_siding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:stone"
+  }
+}

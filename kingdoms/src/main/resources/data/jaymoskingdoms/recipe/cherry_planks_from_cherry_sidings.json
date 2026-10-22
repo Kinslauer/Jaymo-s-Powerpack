@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymoskingdoms:cherry_siding",
+    "jaymoskingdoms:cherry_siding"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:cherry_planks"
+  }
+}

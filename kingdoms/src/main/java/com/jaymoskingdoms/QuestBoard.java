@@ -49,8 +49,10 @@ final class QuestBoard {
 	 * (0.5.29) How often a king's decree is a rival king's death, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER):
 	 * never a noble's; seldom a warlord's, who'd rather send you at the head of his war party ({@link #WARBAND_CHANCE}).
 	 */
-	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F};
+	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F, 0.3F};
 	static final float WARBAND_CHANCE = 0.5F;
+	/** (0.7.147) How often a king's quest is a bounty on a Nether warlord (when a fort stands). */
+	static final float NETHER_BOUNTY_CHANCE = 0.2F;
 	/** (0.7.42) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
 	static final float ESCORT_CHANCE = 0.2F;
 	/** How far off the realm he sends you against may be. */
@@ -428,11 +430,36 @@ final class QuestBoard {
 				return q;
 			}
 		}
+		if (random.nextFloat() < NETHER_BOUNTY_CHANCE) {
+			// (0.7.147) a bounty on a Nether warlord, while one holds a fort
+			Quest q = netherBounty(level, f, who, random);
+			if (q != null) {
+				return q;
+			}
+		}
 		Quest q = random.nextFloat() < 0.4F ? chief(level, f, who, random) : null;
 		if (q == null) {
 			q = champion(level, king, f, who, random);
 		}
 		return q != null ? q : chief(level, f, who, random);
+	}
+
+	/** (0.7.147) A bounty on the warlord of the standing Nether fort nearest the realm (by Nether reckoning); null with none. */
+	static @Nullable Quest netherBounty(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
+		ServerLevel nether = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+		if (nether == null) {
+			return null;
+		}
+		BlockPos under = new BlockPos(f.seat().getX() / 8, f.seat().getY(), f.seat().getZ() / 8);
+		com.jaymoskingdoms.nether.NetherForts.Fort best = com.jaymoskingdoms.nether.NetherForts.standing(nether).stream()
+			.min(java.util.Comparator.comparingDouble(fort -> fort.center().distSqr(under))).orElse(null);
+		if (best == null) {
+			return null;
+		}
+		String side = best.side() == com.jaymoskingdoms.nether.NetherForts.HORNKIN ? "hornkin" : "piglin";
+		Quest.Objective o = new Quest.Objective(Quests.NETHER_FORT + best.id(), 1, 0, Optional.of(best.center()), Optional.empty(), best.lord(),
+			best.name(), false);
+		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, "king.nether." + side, who, o, royalReward(random), 0L);
 	}
 
 	private static @Nullable Quest chief(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {

@@ -2,6 +2,7 @@ package com.jaymospowers.power.wind;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.power.smoke.SmokeField;
 import io.netty.buffer.ByteBuf;
 import java.util.HashSet;
@@ -38,6 +39,10 @@ import net.minecraft.world.phys.Vec3;
  * {@link #KINGDOMS_TAG} and pushes the ship). Everyone in view sees the stream ({@link #JETTING}; the client draws it).
  */
 public final class WindJet {
+	/** The jet's sound: a high rush of air at uneven beats, sometimes a whirl. */
+	static final Soundscape.Layer JET_RUSH = Soundscape.Layer.of(0.65F, 0.9F, 1.3F, 1.65F, SoundEvents.BREEZE_IDLE_AIR, SoundEvents.BREEZE_IDLE_GROUND);
+	static final Soundscape.Layer JET_WHIRL = Soundscape.Layer.of(0.3F, 0.45F, 1.2F, 1.5F, SoundEvents.BREEZE_WHIRL).chance(0.3F);
+
 	/** How far the stream reaches (blocks), how wide it is at your hands and how much wider a block further. */
 	public static final double RANGE = 18.0, MOUTH = 0.35, SPREAD = 0.12;
 	/** Its push on what it catches (blocks/tick a tick, near you; nothing at its far end), and the most it gives. */
@@ -133,6 +138,10 @@ public final class WindJet {
 		// in a beam clash it ends at the knot: it doesn't blow the other stream away
 		double reach = com.jaymospowers.core.BeamClash.clamp(player, from, reach(level, player, from, look, RANGE));
 		Vec3 to = from.add(look.scale(reach));
+		if (player.tickCount % DOUSE_EVERY == 0 && reach < RANGE) {
+			// (Tinkering) a stream blown into a bellows pumps it
+			com.jaymospowers.tinkering.forge.BellowsBlock.gust(level, net.minecraft.core.BlockPos.containing(from.add(look.scale(reach + 0.1))));
+		}
 		// the smoke in its way is blown on and thinned; the fire in its way goes out
 		boolean douse = player.tickCount % DOUSE_EVERY == 0;
 		for (double t = 0.0; t <= reach; t += 1.5) {
@@ -166,9 +175,8 @@ public final class WindJet {
 			e.fallDistance = 0.0;
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
-		if (player.tickCount % 16 == 0) {
-			level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS, 0.8F,
-				1.4F + level.getRandom().nextFloat() * 0.2F);
+		if (Soundscape.due(player, "wind.jet", 10, 22)) {
+			Soundscape.play(level, player.position().add(0.0, 1.0, 0.0), SoundSource.PLAYERS, JET_RUSH, JET_WHIRL);
 		}
 	}
 

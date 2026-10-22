@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/template_table_leg",
+  "textures": {
+    "planks": "minecraft:block/pale_oak_planks"
+  }
+}

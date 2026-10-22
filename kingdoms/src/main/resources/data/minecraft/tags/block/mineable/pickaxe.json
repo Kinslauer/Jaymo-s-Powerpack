@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "jaymoskingdoms:storm_bell",
-    "jaymoskingdoms:weathervane"
+    "jaymoskingdoms:weathervane",
+    "#jaymoskingdoms:carpentry_stone",
+    "jaymoskingdoms:anchor",
+    "jaymoskingdoms:iron_wind_chime"
   ]
 }

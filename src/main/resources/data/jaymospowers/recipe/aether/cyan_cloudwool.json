@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cloudwool",
+    "minecraft:cyan_dye"
+  ],
+  "result": {
+    "id": "jaymospowers:cyan_cloudwool"
+  },
+  "group": "wool"
+}

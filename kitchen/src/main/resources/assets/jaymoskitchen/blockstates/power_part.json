@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "part=windmill_hub": {
+      "model": "jaymoskitchen:block/windmill_hub"
+    },
+    "part=windmill_spar": {
+      "model": "jaymoskitchen:block/windmill_spar"
+    },
+    "part=windmill_sail": {
+      "model": "jaymoskitchen:block/windmill_sail"
+    },
+    "part=waterwheel_hub": {
+      "model": "jaymoskitchen:block/waterwheel_hub"
+    },
+    "part=waterwheel_paddle": {
+      "model": "jaymoskitchen:block/waterwheel_paddle"
+    }
+  }
+}

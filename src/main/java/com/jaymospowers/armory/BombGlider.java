@@ -1,5 +1,6 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.core.Soundscape;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -65,6 +66,10 @@ import org.jspecify.annotations.Nullable;
  * passenger, so the server moves it and the rider is never checked (or kicked) for floating.
  */
 public class BombGlider extends Entity implements HasCustomInventoryScreen {
+	/** The powered glider's drone and burner, at uneven beats. */
+	static final Soundscape.Layer DRONE = Soundscape.Layer.of(0.6F, 0.8F, 1.6F, 1.8F, SoundEvents.BEACON_AMBIENT);
+	static final Soundscape.Layer BURNER = Soundscape.Layer.of(0.2F, 0.3F, 1.45F, 1.75F, SoundEvents.BLAZE_BURN, SoundEvents.FIRE_AMBIENT);
+
 	/** Damage it takes to break (blows, our own rider's excepted). */
 	static final float HEALTH = 20.0F;
 	/** How long a blaze rod and a lava bucket burn (ticks). */
@@ -363,11 +368,11 @@ public class BombGlider extends Entity implements HasCustomInventoryScreen {
 				level.sendParticles(ParticleTypes.FLAME, nozzle.x, nozzle.y, nozzle.z, 2, 0.05, 0.05, 0.05, 0.01);
 				level.sendParticles(ParticleTypes.SMOKE, nozzle.x, nozzle.y, nozzle.z, 1, 0.05, 0.05, 0.05, 0.01);
 			}
-			if (this.tickCount % HUM_TICKS == 0) {
-				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.NEUTRAL, 0.7F, 1.7F);
+			if (Soundscape.due(this, "glider.hum", HUM_TICKS * 3 / 4, HUM_TICKS * 5 / 4)) {
+				Soundscape.play(level, this.position(), SoundSource.NEUTRAL, DRONE);
 			}
-			if (this.tickCount % 7 == 0) {
-				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BLAZE_BURN, SoundSource.NEUTRAL, 0.25F, 1.6F);
+			if (Soundscape.due(this, "glider.burner", 5, 10)) {
+				Soundscape.play(level, this.position(), SoundSource.NEUTRAL, BURNER);
 			}
 		} else if (flying && pilot != null && this.tickCount % FLAP_TICKS == 0) {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.NEUTRAL, 0.5F, 1.3F);

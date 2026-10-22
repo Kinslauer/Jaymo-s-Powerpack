@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/aether/aether_dirt_path"
+      },
+      {
+        "model": "jaymospowers:block/aether/aether_dirt_path",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/aether/aether_dirt_path",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/aether/aether_dirt_path",
+        "y": 270
+      }
+    ]
+  }
+}

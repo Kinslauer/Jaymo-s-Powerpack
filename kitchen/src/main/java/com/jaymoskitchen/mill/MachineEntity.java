@@ -1,5 +1,6 @@
 package com.jaymoskitchen.mill;
 
+import com.jaymoskitchen.mill.power.ShaftDriven;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,14 +44,19 @@ import org.jspecify.annotations.Nullable;
 /**
  * A mill machine's workings (see {@link MachineKind}): what's loaded in it and what it's made, the press's tank,
  * and the work done so far. Worked by hand (turn, chop, pull: one effort each) or by a horse tied to it, walking
- * circles round it (a lap per effort). Hoppers can feed it from above or the sides and empty it from below.
+ * circles round it (a lap per effort), or by a turning shaft from a windmill or waterwheel (see {@link ShaftDriven}),
+ * as if a horse were walking it. Hoppers can feed it from above or the sides and empty it from below.
  */
-public class MachineEntity extends BlockEntity implements WorldlyContainer {
+public class MachineEntity extends BlockEntity implements WorldlyContainer, ShaftDriven {
 	public static final int INPUT = 0, OUTPUT = 1;
 	/** The press's tank, in millibuckets. */
 	public static final int TANK = 4000;
 	/** A worked horse walks round at this radius, and is let go further away than this. */
 	private static final double WALK_RADIUS = 3.0, SNAP_DISTANCE = 12.0;
+	/** About how long a horse takes to walk a lap, in ticks (what a turning shaft is measured against). */
+	public static final int HORSE_LAP_TICKS = 100;
+	/** A shaft at speed 1 (a windmill in clear weather, a waterwheel) works this fast next to a horse. */
+	public static final float WIND_WORK_RATE = 0.75F;
 
 	private final NonNullList<ItemStack> items = NonNullList.withSize(2, ItemStack.EMPTY);
 	private MachineFluid fluid = MachineFluid.NONE;
@@ -65,6 +71,9 @@ public class MachineEntity extends BlockEntity implements WorldlyContainer {
 	private float lastAngle = Float.NaN;
 	private int walkTicks;
 	private int syncTicks;
+	/** A turning shaft's speed, and how many more ticks it's good for (the source renews it while it turns). */
+	private float shaftRate;
+	private int shaftTicks;
 
 	public MachineEntity(BlockPos pos, BlockState state) {
 		super(Mill.MACHINE_ENTITY, pos, state);
@@ -165,8 +174,8 @@ public class MachineEntity extends BlockEntity implements WorldlyContainer {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.mill.tank",
 				Component.translatable("fluid.jaymoskitchen." + fluid.name().toLowerCase(java.util.Locale.ROOT)), fluidAmount, TANK));
 		} else if (kind.horse) {
-			player.sendOverlayMessage(Component.translatable(worker(server) == null
-				? "message.jaymoskitchen.mill.need_horse" : "message.jaymoskitchen.mill.empty"));
+			player.sendOverlayMessage(Component.translatable(worker(server) == null && shaftTicks <= 0
+				? "message.jaymoskitchen.mill.need_power" : "message.jaymoskitchen.mill.empty"));
 		} else if (kind == MachineKind.CHOPPING_BLOCK) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.mill.need_log"));
 		}
@@ -364,7 +373,45 @@ public class MachineEntity extends BlockEntity implements WorldlyContainer {
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, MachineEntity machine) {
 		if (level instanceof ServerLevel server && machine.kind().horse) {
+			machine.tickShaft(server);
 			machine.tickHorse(server);
+		}
+	}
+
+	// --- wind and water ---
+
+	@Override
+	public boolean takesShaftFrom(Direction side) {
+		// into the top (an upright shaft, or a corner above) or any side; never from underneath
+		return kind().horse && side != Direction.DOWN;
+	}
+
+	@Override
+	public void turnFromShaft(float rate, int ticks) {
+		shaftRate = rate;
+		shaftTicks = Math.max(shaftTicks, ticks);
+	}
+
+	/** A turning shaft works it as a horse walking round would, at {@link #WIND_WORK_RATE} of a horse's pace. */
+	private void tickShaft(ServerLevel level) {
+		if (shaftTicks <= 0) {
+			return;
+		}
+		shaftTicks--;
+		if (!canWork()) {
+			return;
+		}
+		progress += Mth.TWO_PI / HORSE_LAP_TICKS * WIND_WORK_RATE * shaftRate;
+		if (progress >= Mth.TWO_PI * kind().effort) {
+			finish(level);
+			play(switch (kind().work) {
+				case GRIND -> SoundEvents.GRINDSTONE_USE;
+				case CHOP -> SoundEvents.AXE_STRIP.value();
+				case PRESS -> SoundEvents.PISTON_EXTEND;
+			}, 0.8F + level.getRandom().nextFloat() * 0.2F);
+		} else if (++syncTicks >= 5) {
+			syncTicks = 0;
+			markUpdated();
 		}
 	}
 

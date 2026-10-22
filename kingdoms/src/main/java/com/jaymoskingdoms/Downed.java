@@ -1,118 +1,72 @@
 package com.jaymoskingdoms;
 
-import com.mojang.serialization.Codec;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.WeakHashMap;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.73) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers (its
- * {@link Folk}, or a villager in its service or in a guard's or archer's job) puts them down instead. Downed, they're
- * out of the fight (they go for no one): some drag themselves away from whoever felled them, the rest lie where they
- * dropped. A player can take the weapons out of their hands (right-click), but nothing else: no pockets to pick, no
- * corpse to search. Sneak + right-click picks one up over your shoulder; then right-click throws them, sneak +
- * right-click sets them down. Mobs, fire and falls (a throw's too) still hurt them, out of {@link #DOWNED_HEALTH},
- * and can kill them (Andy). Left alone, they get back up after {@link #RECOVER_TICKS} (Andy: "they
- * should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10
- * times"): once a player has hit them they won't, and they bleed out {@link #BLEED_OUT_TICKS} after the last hit, or
- * at the {@link #MAX_WOUNDS}th. Then they die (their death counts then, for wars, quests and crimes).
- * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
+ * (0.7.73) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers puts them
+ * down instead; a player can take the weapons out of their hands (right-click), but nothing else. (0.7.84) Andy:
+ * "villagers should try to help others that are downed, and they can all be downed now, unless decapitated": every
+ * villager and the settlements' own folk (not their rulers) go down, and the folk about look after their own: a grown
+ * villager near a downed one, not afraid or fighting, comes over, kneels and tends them, and after {@link #TEND_TICKS} at
+ * their side has them back on their feet (a player's hit while they tend starts it over).
  * <p>
- * (0.7.84) Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
- * decapitated". Every villager (MCA's too, children too) and the settlements' own folk (not their rulers) go down
- * now, not only guards; a blow that takes the head off still kills outright. When they do die at last they leave their
- * body and belongings as anyone would, guards too (Andy: "guards should have corpses too"). And the folk about look after their own: a
- * grown villager near a downed one, not afraid or fighting, comes over, kneels and tends them, and after
- * {@link #TEND_TICKS} at their side has them back on their feet (a player's hit while they tend starts it over).
+ * (0.7.98) Andy (2026-10-19): "remove our downed system for a universal one". The downed state itself (going down, the
+ * AI hold, bleeding out, wounds, the food revive, carrying, the pose) has moved into Jaymo's Powers' Wounds
+ * ({@code core/wounds/Downed}), for players and tamed animals too. Kingdoms never compiles against Powers: it reads the
+ * state from the scoreboard tag {@link #DOWNED_TAG}, marks which of its folk may go down with {@link #DOWNABLE_TAG} (when
+ * they're hurt), and asks for a tended one to get up with {@link #REVIVE_TAG}. What stays here is what only Kingdoms
+ * knows: who its folk are, the tending, disarming a downed guard, and (in {@code Rearm}, {@code Pickpocket},
+ * {@code ShutIn}, {@code Routines}, {@code Workers}) its folk leaving the downed alone. Without Powers, its folk simply
+ * die.
  * <p>
- * (0.7.93) Andy: "shift click holding a downed npc raises a meter to revive them, it takes one piece of food from your
- * inventory". Sneak and hold use on one: a quick tap still picks them up (on letting go), held past {@link #TAP_TICKS}
- * it's a revive. Kneeling there for {@link #REVIVE_TICKS} (a bar over the hotbar), with something to eat on you, gets
- * them up as their own recovery does; it costs the least filling food you carry. Let go, stand up, look away or step
- * off and the bar empties.
+ * (0.7.102) Andy (2026-10-20): "I dont want any modern medicine". The tending is a bandaging now: when it's done the body
+ * is tagged {@link #BANDAGED_TAG} as well, and Powers stops its bleeding and gives it a bandage's heal.
  */
 public final class Downed {
-	/** A downed guard's health: what mobs, fire and falls have left to take. */
-	static final float DOWNED_HEALTH = 6.0F;
-	/** A throw: how hard (blocks a tick) along your look, and the lift on top. */
-	static final double THROW_SPEED = 0.9, THROW_LIFT = 0.25;
-	/** How long a downed guard no player has hit lies there before getting back up (ticks), and the health it gets up with (share of its most). */
-	static final int RECOVER_TICKS = 1200;
-	static final float RECOVER_HEALTH = 0.3F;
-	/** How long after a player's last hit a wounded guard bleeds out (ticks), and the hit that kills it outright. */
-	static final int BLEED_OUT_TICKS = 2400;
-	static final int MAX_WOUNDS = 10;
-	/** The share of downed guards who drag themselves along; the rest lie still. */
-	static final float CRAWLER_CHANCE = 0.5F;
-	/** A crawler's pace, as a share of its walking speed, and how far it gets from whoever felled it before it stops. */
-	static final double CRAWL_SPEED = 0.3, CRAWL_FROM = 14.0;
 	/** (0.7.84) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
 	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
 	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
 	static final float HELP_SPEED = 0.8F;
-	/** (0.7.84) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
-	static final String DECAPITATION = "jaymospowers:decapitation", HEADLESS_TAG = "jaymoskitchen.missing.head";
-	/** (0.7.93) A player's revive: how long sneak + use is held to get them up (ticks), and what makes it a hold, not a tap (a pick-up). */
-	static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
-	/** Holding use repeats every 4 ticks: no repeat for this long and you've let go. */
-	static final int REVIVE_GRACE = 8;
-	/** How far past your reach you may lean while reviving, and how often your hands work at it (a swing, a sound). */
-	static final double REVIVE_SLACK = 0.5;
-	static final int REVIVE_WORK_TICKS = 15;
-	/** The revive bar's length. */
-	static final int REVIVE_BAR = 12;
+	/** (0.7.98) How far round each player the downed are looked for, to be tended (blocks). */
+	static final double LOOK_AROUND = 64.0;
 
+	/** (0.7.98) Jaymo's Powers' scoreboard tags: on the downed; on what may go down; on a tended one to get up. */
+	public static final String DOWNED_TAG = "jaymospowers_downed", DOWNABLE_TAG = "jaymospowers_downable", REVIVE_TAG = "jaymospowers_revive";
 	/**
-	 * A downed guard: the game time it went down, shifted up one bit, the low bit set for a crawler. Saved (it stays
-	 * down through a reload) and synced to everyone who can see it (who draw it on the ground).
+	 * (0.7.102) Jaymo's Powers' tag on a body a villager has bandaged: Powers takes it off, stops that body's bleeding and
+	 * gives it a linen bandage's heal (Wounds phase 4).
 	 */
-	public static final AttachmentType<Long> DOWNED = AttachmentRegistry.create(JaymosKingdoms.id("downed"),
-		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
-
-	/** A downed guard players have hit: when the last hit landed, shifted up 4 bits, with how many hits in the low bits. Saved. */
-	public static final AttachmentType<Long> WOUNDS = AttachmentRegistry.create(JaymosKingdoms.id("downed_wounds"),
-		builder -> builder.persistent(Codec.LONG));
-
-	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it bleeds out unclaimed). */
-	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
+	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
+	/** Our hurt listener runs before everyone else's (Powers' takes a player's blow on the downed, and stops it there). */
+	private static final Identifier EARLY = JaymosKingdoms.id("downed_early");
 
 	/** (0.7.84) Who's tending each downed one, and how long they've been at it (ticks). Not saved. */
 	private static final class Tending {
@@ -127,94 +81,47 @@ public final class Downed {
 	private static final Map<LivingEntity, Tending> TENDED = new WeakHashMap<>();
 	/** The villagers tending someone just now. */
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
-	/** (0.7.84) Townsfolk being finished off (their death let through as it comes). */
-	private static final java.util.Set<LivingEntity> FINISHING = java.util.Collections.newSetFromMap(new WeakHashMap<>());
-
-	/** (0.7.93) A player's sneak + use held on a downed one: since when, when use last came, how full the bar is, and whether it's over (use still swallowed till let go). */
-	private static final class Revive {
-		final LivingEntity body;
-		final long start;
-		long held;
-		int ticks;
-		boolean begun, over;
-
-		Revive(LivingEntity body, long start) {
-			this.body = body;
-			this.start = start;
-			this.held = start;
-		}
-	}
-
-	/** Player → their revive. Not saved. */
-	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
 
 	private Downed() {
 	}
 
 	static void register() {
-		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			if (!(entity.level() instanceof ServerLevel level)) {
-				return true;
-			}
-			if (FINISHING.contains(entity)) {
+		ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(EARLY, Event.DEFAULT_PHASE);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(EARLY, (entity, source, amount) -> {
+			if (!(entity.level() instanceof ServerLevel)) {
 				return true;
 			}
 			if (isDowned(entity)) {
-				// (a mob, fire, a fall, the void: 0.7.84, they die as anyone would, body and all)
-				forget(entity);
-				return true;
-			}
-			if (!downable(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || beheaded(entity, source)) {
-				return true;
-			}
-			goDown(level, entity, source);
-			return false;
-		});
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)) {
-				// (mobs, fire, falls: real harm, out of what it has left)
-				return true;
-			}
-			// a player's blow (or arrow): a wound (they won't get up again), the tenth kills
-			if (entity.level() instanceof ServerLevel level) {
-				wound(level, entity, source);
 				Tending tending = TENDED.get(entity);
-				if (tending != null) {
-					// (whoever was tending them starts over)
+				if (tending != null && source.getEntity() instanceof Player) {
+					// (a player's blow: whoever was tending them starts over)
 					tending.ticks = 0;
 				}
+				return true;
 			}
-			return false;
+			// (0.7.98) which of ours go down, should this blow kill: Powers reads the mark
+			boolean mark = downable(entity);
+			if (mark != entity.entityTags().contains(DOWNABLE_TAG)) {
+				if (mark) {
+					entity.addTag(DOWNABLE_TAG);
+				} else {
+					entity.removeTag(DOWNABLE_TAG);
+				}
+			}
+			return true;
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			Revive held = world.isClientSide() || hand != InteractionHand.MAIN_HAND ? null : REVIVING.get(player.getUUID());
-			if (held != null && held.body == entity) {
-				// (0.7.93) still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
-				held.held = world.getGameTime();
-				return InteractionResult.SUCCESS;
-			}
-			if (!(entity instanceof LivingEntity body) || !isDowned(body) || player.isSpectator()) {
+			// (sneak + use on the downed is Powers': it picks them up or brings them round)
+			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !ours(body)) {
 				return InteractionResult.PASS;
 			}
 			// (taken here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
 			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND) {
-				if (body.getVehicle() == player) {
-					if (player.isShiftKeyDown()) {
-						setDown(player, body);
-					} else {
-						toss(player, body);
-					}
-				} else if (player.isShiftKeyDown()) {
-					// (0.7.93) a tap picks them up once let go; held, it's a revive
-					REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime()));
-				} else {
-					disarm(player, body);
-				}
+				disarm(player, body);
 			}
 			return InteractionResult.SUCCESS;
 		});
-		ServerTickEvents.END_SERVER_TICK.register(Downed::revives);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> REVIVING.clear());
+		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
 
 	/** One of a realm's guards or archers: its folk, a villager in its service, or a villager in that job. */
@@ -230,14 +137,21 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.84) Whether the blow that would kill {@code entity} downs it instead: any villager, a settlement's own folk
-	 * (its guards and workers, not its ruler, nor orcs, raiders or barbarians).
+	 * (0.7.84) Whether the blow that would kill {@code entity} downs it instead: any villager, (0.7.132) any of Kingdoms'
+	 * folk. (0.7.98) Marked for Powers with {@link #DOWNABLE_TAG}; Powers itself downs every humanoid.
 	 */
 	public static boolean downable(LivingEntity entity) {
-		if (isGuard(entity) || entity instanceof Villager) {
+		// (0.7.132) Andy: "ALL HUMANOIDS go down, if they werent decapitated or otherwise prevented from the downstate":
+		// rulers, orcs, raiders, barbarians and looters too (Powers downs every humanoid; the mark is for its other checks)
+		return isGuard(entity) || entity instanceof Villager || entity instanceof Folk;
+	}
+
+	/** (0.7.132) Someone villagers would tend: a villager, or a settlement's own folk (not a ruler, orc, raider or barbarian). */
+	private static boolean kin(LivingEntity body) {
+		if (body instanceof Villager || isGuard(body)) {
 			return true;
 		}
-		if (entity instanceof Folk folk && !Orcs.isOrc(folk) && entity.level() instanceof ServerLevel level) {
+		if (body instanceof Folk folk && !Orcs.isOrc(folk) && body.level() instanceof ServerLevel level) {
 			Folk.Role role = Folk.role(folk.role());
 			if (role != null && role.leader() || Assault.attacker(folk)) {
 				return false;
@@ -248,18 +162,9 @@ public final class Downed {
 		return false;
 	}
 
-	/** A beheading (or a body already without its head): no getting up from that. */
-	private static boolean beheaded(LivingEntity entity, DamageSource source) {
-		return entity.entityTags().contains(HEADLESS_TAG)
-			|| source.typeHolder().unwrapKey().map(k -> k.identifier().toString().equals(DECAPITATION)).orElse(false);
-	}
-
-	/** (0.7.84) No longer down (dying as anyone would): its marks and its tending gone. */
-	private static void forget(LivingEntity entity) {
-		FELLED_BY.remove(entity);
-		untend(entity);
-		entity.removeAttached(DOWNED);
-		entity.removeAttached(WOUNDS);
+	/** (0.7.98) Ours to disarm: a villager or one of our folk (not a downed player or someone's dog). Server side. */
+	private static boolean ours(LivingEntity body) {
+		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG);
 	}
 
 	/** (0.7.84) {@code v} is tending someone downed just now. */
@@ -267,125 +172,78 @@ public final class Downed {
 		return v instanceof Villager villager && HELPING.containsKey(villager);
 	}
 
+	/** (0.7.98) Down, by Jaymo's Powers' tag. Server side only (scoreboard tags aren't sent to the clients). */
 	public static boolean isDowned(Entity entity) {
-		return entity.hasAttached(DOWNED);
-	}
-
-	/** Whether this downed guard drags itself along (rather than lying still). */
-	public static boolean crawls(Entity entity) {
-		Long downed = entity.getAttached(DOWNED);
-		return downed != null && (downed & 1L) != 0L;
-	}
-
-	/** The game time it went down. */
-	public static long since(Entity entity) {
-		Long downed = entity.getAttached(DOWNED);
-		return downed == null ? 0L : downed >> 1;
-	}
-
-	private static void goDown(ServerLevel level, LivingEntity entity, DamageSource source) {
-		boolean crawler = level.getRandom().nextFloat() < CRAWLER_CHANCE;
-		entity.setHealth(Math.min(DOWNED_HEALTH, entity.getMaxHealth()));
-		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
-		FELLED_BY.put(entity, source);
-		entity.stopUsingItem();
-		if (entity.isSleeping()) {
-			entity.stopSleeping();
-		}
-		entity.stopRiding();
-		entity.ejectPassengers();
-		entity.clearFire();
-		if (entity instanceof Mob mob) {
-			mob.setTarget(null);
-			mob.setAggressive(false);
-			mob.getNavigation().stop();
-		}
-		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.NEUTRAL, 0.9F, 0.8F);
+		return entity.entityTags().contains(DOWNED_TAG);
 	}
 
 	/**
-	 * A downed mob's tick, in place of its AI: it bleeds out, and a crawler hauls itself away from whoever felled it
-	 * (while they're near). Called by {@code DownedMixin} on the server.
+	 * (0.7.98) The tending, every tick: whoever is at it carries on; and every {@link #HELP_LOOK_TICKS}, the downed near
+	 * any player (where the world is awake) are looked over for someone to come and tend them.
 	 */
-	public static void step(Mob mob) {
-		if (!(mob.level() instanceof ServerLevel level)) {
+	private static void tick(MinecraftServer server) {
+		if (!TENDED.isEmpty()) {
+			for (Map.Entry<LivingEntity, Tending> e : new ArrayList<>(TENDED.entrySet())) {
+				LivingEntity body = e.getKey();
+				if (!(body.level() instanceof ServerLevel level) || !body.isAlive() || body.isRemoved() || !isDowned(body)) {
+					untend(body);
+					continue;
+				}
+				if (tend(level, body, e.getValue())) {
+					// (Powers gets them up on their next tick; (0.7.102) and sees to the bandaging: their bleeding stops)
+					body.addTag(REVIVE_TAG);
+					body.addTag(BANDAGED_TAG);
+					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
+				}
+			}
+		}
+		if (server.getTickCount() % HELP_LOOK_TICKS != 0) {
 			return;
 		}
-		long now = level.getGameTime();
-		Long wounds = mob.getAttached(WOUNDS);
-		if (wounds == null && now - since(mob) >= RECOVER_TICKS) {
-			getUp(level, mob);
-			return;
-		}
-		if (wounds != null && now - (wounds >> 4) >= BLEED_OUT_TICKS) {
-			DamageSource source = FELLED_BY.get(mob);
-			finish(level, mob, source != null ? source : level.damageSources().generic());
-			return;
-		}
-		if (tend(level, mob)) {
-			getUp(level, mob);
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, mob.getX(), mob.getY() + 0.8, mob.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-			return;
-		}
-		mob.setTarget(null);
-		mob.getNavigation().stop();
-		mob.setJumping(false);
-		mob.setXxa(0.0F);
-		mob.setSpeed(0.0F);
-		if (mob.getVehicle() instanceof Player carrier) {
-			// over the shoulder, across it
-			float across = carrier.getYRot() + 90.0F;
-			mob.setYRot(across);
-			mob.setYHeadRot(across);
-			mob.yBodyRot = across;
-			return;
-		}
-		DamageSource source = FELLED_BY.get(mob);
-		Entity from = source == null ? null : source.getEntity();
-		if (crawls(mob) && from != null && from.isAlive() && from.level() == level && mob.distanceToSqr(from) < CRAWL_FROM * CRAWL_FROM) {
-			float yaw = (float) (Mth.atan2(mob.getZ() - from.getZ(), mob.getX() - from.getX()) * Mth.RAD_TO_DEG) - 90.0F;
-			mob.setYRot(yaw);
-			mob.setYHeadRot(yaw);
-			mob.yBodyRot = yaw;
-			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * CRAWL_SPEED));
+		List<Mob> seen = new ArrayList<>();
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			ServerLevel level = player.level();
+			for (Mob body : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LOOK_AROUND),
+				m -> m.isAlive() && isDowned(m) && !TENDED.containsKey(m))) {
+				if (!seen.contains(body)) {
+					seen.add(body);
+					findHelper(level, body);
+				}
+			}
 		}
 	}
 
 	/**
 	 * (0.7.84) Someone comes to tend a downed {@code body}: the nearest grown villager free to (not downed, afraid,
-	 * fighting, asleep or tending another) walks over, kneels and sees to them. True once they've been at it long enough
-	 * to get them up.
+	 * fighting, asleep or tending another) walks over.
 	 */
-	private static boolean tend(ServerLevel level, Mob body) {
-		if (body.isPassenger() || body.isOnFire()) {
+	private static void findHelper(ServerLevel level, Mob body) {
+		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster
+		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || Looters.is(body) || !kin(body)) {
+			return;
+		}
+		Villager helper = null;
+		double best = HELP_RANGE * HELP_RANGE;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(HELP_RANGE), v -> canHelp(v, body) && !HELPING.containsKey(v))) {
+			double d = v.distanceToSqr(body);
+			if (d < best) {
+				best = d;
+				helper = v;
+			}
+		}
+		if (helper == null) {
+			return;
+		}
+		TENDED.put(body, new Tending(helper));
+		HELPING.put(helper, body);
+		level.playSound(null, helper.getX(), helper.getY(), helper.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.2F);
+	}
+
+	/** (0.7.84) The helper walks over, kneels and sees to them. True once they've been at it long enough to get them up. */
+	private static boolean tend(ServerLevel level, LivingEntity body, Tending tending) {
+		if (body.isPassenger() || body.isOnFire() || !canHelp(tending.helper, body)) {
 			untend(body);
 			return false;
-		}
-		Tending tending = TENDED.get(body);
-		if (tending != null && !canHelp(tending.helper, body)) {
-			untend(body);
-			tending = null;
-		}
-		if (tending == null) {
-			if (body.tickCount % HELP_LOOK_TICKS != 0) {
-				return false;
-			}
-			Villager helper = null;
-			double best = HELP_RANGE * HELP_RANGE;
-			for (Villager v : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(HELP_RANGE), v -> canHelp(v, body) && !HELPING.containsKey(v))) {
-				double d = v.distanceToSqr(body);
-				if (d < best) {
-					best = d;
-					helper = v;
-				}
-			}
-			if (helper == null) {
-				return false;
-			}
-			tending = new Tending(helper);
-			TENDED.put(body, tending);
-			HELPING.put(helper, body);
-			level.playSound(null, helper.getX(), helper.getY(), helper.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.2F);
 		}
 		Villager helper = tending.helper;
 		if (helper.distanceToSqr(body) > TEND_REACH * TEND_REACH) {
@@ -422,181 +280,6 @@ public final class Downed {
 			HELPING.remove(tending.helper);
 			tending.helper.setShiftKeyDown(false);
 		}
-	}
-
-	/** A player hit a downed guard: one more wound; the {@link #MAX_WOUNDS}th is its death. */
-	private static void wound(ServerLevel level, LivingEntity entity, DamageSource source) {
-		Long wounds = entity.getAttached(WOUNDS);
-		int count = (wounds == null ? 0 : (int) (wounds & 0xF)) + 1;
-		FELLED_BY.put(entity, source);
-		if (count >= MAX_WOUNDS) {
-			finish(level, entity, source);
-			return;
-		}
-		entity.setAttached(WOUNDS, level.getGameTime() << 4 | count);
-		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + 0.3, entity.getZ(), 3, 0.3, 0.1, 0.3, 0.1);
-		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.NEUTRAL, 0.7F, 0.8F);
-	}
-
-	/** {@code player} heaves a downed guard up over their shoulder (one at a time). */
-	private static void pickUp(Player player, LivingEntity body) {
-		if (!player.getPassengers().isEmpty() || body.isPassenger()) {
-			return;
-		}
-		body.ejectPassengers();
-		if (body.startRiding(player, true, true)) {
-			body.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.9F, 0.7F);
-		}
-	}
-
-	/** Set down at your feet. */
-	private static void setDown(Player player, LivingEntity body) {
-		body.stopRiding();
-		Vec3 ahead = player.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().scale(0.8);
-		body.snapTo(player.getX() + ahead.x, player.getY(), player.getZ() + ahead.z, body.getYRot(), 0.0F);
-		body.setDeltaMovement(Vec3.ZERO);
-		body.resetFallDistance();
-	}
-
-	/** Thrown where you're looking: it lands as anything does (falls hurt). */
-	private static void toss(Player player, LivingEntity body) {
-		body.stopRiding();
-		Vec3 look = player.getLookAngle();
-		body.snapTo(player.getX() + look.x * 0.6, player.getEyeY() - 0.4, player.getZ() + look.z * 0.6, body.getYRot(), 0.0F);
-		body.resetFallDistance();
-		body.setDeltaMovement(look.scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0));
-		body.needsSync = true;
-		body.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.6F);
-		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-	}
-
-	/** Where a carried guard sits on its carrier: over the shoulder, a little ahead. */
-	public static Vec3 carriedAt(LivingEntity carrier) {
-		Vec3 ahead = Vec3.directionFromRotation(0.0F, carrier.getYRot()).scale(0.25);
-		return carrier.position().add(ahead.x, carrier.getBbHeight() * 0.72, ahead.z);
-	}
-
-	/** Left alone long enough: it gets back on its feet, hurt, and back to its post (its AI takes up again). */
-	private static void getUp(ServerLevel level, Mob mob) {
-		FELLED_BY.remove(mob);
-		untend(mob);
-		mob.stopRiding();
-		mob.removeAttached(DOWNED);
-		mob.removeAttached(WOUNDS);
-		mob.setHealth(Math.max(1.0F, mob.getMaxHealth() * RECOVER_HEALTH));
-		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
-	}
-
-	/**
-	 * Its death, at last. (0.7.84) Andy: "guards should have corpses too": everyone, guards included, dies as anyone
-	 * would, their body (Kitchen's corpse) and what they had left behind.
-	 */
-	private static void finish(ServerLevel level, LivingEntity entity, DamageSource source) {
-		if (entity.isRemoved() || entity.isDeadOrDying()) {
-			return;
-		}
-		entity.stopRiding();
-		forget(entity);
-		FINISHING.add(entity);
-		try {
-			entity.setInvulnerableTime(0);
-			entity.hurtServer(level, source, Float.MAX_VALUE);
-		} finally {
-			FINISHING.remove(entity);
-		}
-	}
-
-	/** (0.7.93) Each player's sneak + use on a downed one: a tap picks them up, a hold fills the bar and gets them up. */
-	private static void revives(MinecraftServer server) {
-		if (REVIVING.isEmpty()) {
-			return;
-		}
-		for (Iterator<Map.Entry<UUID, Revive>> it = REVIVING.entrySet().iterator(); it.hasNext();) {
-			var e = it.next();
-			Revive r = e.getValue();
-			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
-			LivingEntity body = r.body;
-			if (player == null || !(player.level() instanceof ServerLevel level) || !player.isAlive() || !body.isAlive() || body.isRemoved()
-				|| body.level() != level) {
-				it.remove();
-				continue;
-			}
-			if (!isDowned(body)) {
-				// (up already, by someone else's hand)
-				r.over = true;
-			}
-			long now = level.getGameTime();
-			if (now - r.held > REVIVE_GRACE) {
-				// let go
-				it.remove();
-				if (r.held - r.start < TAP_TICKS && isDowned(body) && player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
-					pickUp(player, body);
-				} else if (r.begun && !r.over) {
-					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
-				}
-				continue;
-			}
-			if (r.over || r.held - r.start < TAP_TICKS) {
-				continue;
-			}
-			if (!r.begun) {
-				r.begun = true;
-				if (!(body instanceof Mob) || food(player) < 0) {
-					r.over = true;
-					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.no_food", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
-					continue;
-				}
-			}
-			if (!player.isShiftKeyDown() || body.isPassenger() || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
-				r.over = true;
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
-				continue;
-			}
-			if (++r.ticks % REVIVE_WORK_TICKS == 0) {
-				// kneeling at their side, hands at work
-				player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F,
-					0.8F + level.getRandom().nextFloat() * 0.4F);
-				level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
-			}
-			if (r.ticks < REVIVE_TICKS) {
-				if (r.ticks % 2 == 0) {
-					int filled = Math.round(REVIVE_BAR * r.ticks / (float) REVIVE_TICKS);
-					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
-					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
-				}
-				continue;
-			}
-			r.over = true;
-			int slot = food(player);
-			if (slot < 0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.no_food", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
-				continue;
-			}
-			ItemStack stack = player.getInventory().getItem(slot);
-			Component eaten = stack.getHoverName();
-			stack.consume(1, player);
-			player.getInventory().setChanged();
-			getUp(level, (Mob) body);
-			level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.revived", body.getDisplayName(), eaten).withStyle(ChatFormatting.GREEN));
-		}
-	}
-
-	/** (0.7.93) The inventory slot of the least filling thing {@code player} has to eat (the first of equals), or -1. */
-	private static int food(Player player) {
-		int best = -1;
-		FoodProperties least = null;
-		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-			FoodProperties food = player.getInventory().getItem(slot).get(DataComponents.FOOD);
-			if (food != null && (least == null || food.nutrition() < least.nutrition()
-				|| food.nutrition() == least.nutrition() && food.saturation() < least.saturation())) {
-				best = slot;
-				least = food;
-			}
-		}
-		return best;
 	}
 
 	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */

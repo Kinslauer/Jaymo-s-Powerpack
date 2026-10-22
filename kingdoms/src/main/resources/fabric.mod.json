@@ -27,6 +27,9 @@
 		"jaymoskingdoms.sleep.mixins.json",
 		"jaymoskingdoms.sailing.mixins.json",
 		"jaymoskingdoms.nightgifts.mixins.json",
+		"jaymoskingdoms.tweaks.mixins.json",
+		"jaymoskingdoms.heritage.mixins.json",
+		"jaymoskingdoms.beacons.mixins.json",
 		"jaymoskingdoms.omni.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
@@ -35,7 +38,11 @@
 		{ "config": "jaymoskingdoms.sleep.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.sailing.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.vampires.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.disasters.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.disasters.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.tweaks.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.heritage.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.shouldersurfing.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

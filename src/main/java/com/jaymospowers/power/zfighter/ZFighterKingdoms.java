@@ -32,6 +32,8 @@ final class ZFighterKingdoms {
 	private static Method F_ID, F_TYPE, F_NAME, F_SEAT, F_FALLEN, F_TREASURY;
 	private static Class<?> AGING, WORKER;
 	private static Method TRAINED;
+	/** (0.15.61) Kingdoms' WorldTiers.of(Player): the world tier a player is in. */
+	private static Method TIER_OF;
 	private static Method STAT_VALUE;
 	private static Object[] STATS;
 	private static int STAT_MAX;
@@ -71,6 +73,11 @@ final class ZFighterKingdoms {
 				STAT_VALUE = null;
 			}
 			try {
+				TIER_OF = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("of", net.minecraft.world.entity.player.Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				TIER_OF = null;
+			}
+			try {
 				TRAINED = Class.forName("com.jaymoskingdoms.ClassPerks").getMethod("trainedWith", ServerPlayer.class, net.minecraft.world.item.ItemStack.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				TRAINED = null;
@@ -103,6 +110,18 @@ final class ZFighterKingdoms {
 			return total / (double)(STATS.length * STAT_MAX);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return -1.0;
+		}
+	}
+
+	/** (0.15.61) His Kingdoms world tier, from 0 (Hearth, the first), or -1 if it can't be read. */
+	static int worldTier(net.minecraft.world.entity.player.Player player) {
+		if (TIER_OF == null) {
+			return -1;
+		}
+		try {
+			return ((Enum<?>)TIER_OF.invoke(null, player)).ordinal();
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1;
 		}
 	}
 

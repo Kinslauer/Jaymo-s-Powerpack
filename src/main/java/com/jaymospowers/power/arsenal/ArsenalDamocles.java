@@ -2,6 +2,7 @@ package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Debris;
+import com.jaymospowers.power.gravity.GravityPower;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -28,9 +30,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
- * The Void Arsenal's B, <b>Sword of Damocles</b>: a great rift tears open in the sky over you, and three seconds later
+ * The Void Arsenal's B, <b>Sword of Damocles</b>: aimed like the Gravity Meteor (hold B and a ring shows you where it
+ * will land, up to {@link #RANGE} blocks out; let go to call it), a great rift tears open in the sky there, and three seconds later
  * a sword {@link #LENGTH} blocks long pushes out of it and falls, smashing through whatever stands in its way (trees,
  * roofs, the floor above you) and driving its point into the ground, where it stands for a while. Then the rift opens
  * again and the sword is hauled back up into it, hilt first, before the rift closes behind it. Whatever it falls on is crushed; around the point, everything is thrown back.
@@ -41,7 +45,11 @@ import net.minecraft.world.phys.Vec3;
 public final class ArsenalDamocles {
 	// tuning
 	public static final int COOLDOWN = 900;
-	/** The rift opens this high over your feet (lower under the world's ceiling). */
+	/** How far out it can be aimed (where the crosshair lands: a block, a creature, or open air this far out). */
+	static final double RANGE = 64.0;
+	/** While B is held: the ring marking where it will land (shown only to you). */
+	private static final DustParticleOptions MARKER = new DustParticleOptions(0x5A1A8C, 1.6F);
+	/** The rift opens this high over the ground it's aimed at (lower under the world's ceiling). */
 	public static final double PORTAL_HEIGHT = 30.0;
 	public static final double PORTAL_RADIUS = 4.5;
 	/** The sword's length, point to pommel (blocks). */
@@ -158,6 +166,8 @@ public final class ArsenalDamocles {
 	}
 
 	private static final Map<UUID, Live> LIVE = new HashMap<>();
+	/** Who is holding B to aim, and since when (game time). */
+	private static final Map<UUID, Long> AIMING = new HashMap<>();
 
 	private ArsenalDamocles() {
 	}
@@ -215,39 +225,69 @@ public final class ArsenalDamocles {
 		return LENGTH * emerged(t);
 	}
 
-	/** B, while corrupted. */
-	static void cast(ServerPlayer player) {
-		ServerLevel level = player.level();
-		long now = level.getGameTime();
-		if (player.getAttached(FALL) != null) {
+	/**
+	 * B, while corrupted, aimed like the Gravity Meteor: pressed, it starts aiming (a ring shows where it will land);
+	 * let go, it comes down there.
+	 */
+	static void key(ServerPlayer player, boolean down) {
+		if (down) {
+			if (player.getAttached(FALL) == null && ready(player)) {
+				AIMING.put(player.getUUID(), player.level().getGameTime());
+			}
 			return;
 		}
+		if (AIMING.remove(player.getUUID()) != null) {
+			cast(player);
+		}
+	}
+
+	/** Off cooldown; if not, says so (and false). */
+	private static boolean ready(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
 		ArsenalPower.Cooldowns cd = ArsenalPower.cooldowns(player);
 		if (now < cd.damocles()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.damocles_recharging",
 				String.format("%.1f", (cd.damocles() - now) / 20.0)).withStyle(ChatFormatting.GRAY));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.3F, 1.6F);
-			return;
+			return false;
 		}
-		// the ground under you: the first solid block below your feet
-		BlockPos feet = player.blockPosition();
-		BlockPos ground = null;
-		for (int dy = 0; dy <= GROUND_SEARCH && feet.getY() - dy > level.getMinY(); dy++) {
-			BlockPos pos = feet.below(dy);
+		return true;
+	}
+
+	/** Where it's aimed: the first solid block at or below where the crosshair lands, or null if there's no ground there. */
+	private static @Nullable BlockPos aimedGround(ServerPlayer player) {
+		ServerLevel level = player.level();
+		// a hair back towards you, so a wall's face counts as the ground in front of it
+		Vec3 to = GravityPower.aimPoint(player, RANGE).subtract(player.getViewVector(1.0F).scale(0.05));
+		BlockPos from = BlockPos.containing(to);
+		for (int dy = 0; dy <= GROUND_SEARCH && from.getY() - dy > level.getMinY(); dy++) {
+			BlockPos pos = from.below(dy);
 			if (level.getBlockState(pos).isSolid()) {
-				ground = pos;
-				break;
+				return pos;
 			}
 		}
+		return null;
+	}
+
+	/** B let go: the rift opens over where you aimed. */
+	private static void cast(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (player.getAttached(FALL) != null || !ready(player)) {
+			return;
+		}
+		Vec3 to = GravityPower.aimPoint(player, RANGE);
+		BlockPos ground = aimedGround(player);
 		if (ground == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.damocles_nowhere").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		player.setAttached(ArsenalPower.COOLDOWNS, cd.withDamocles(now + COOLDOWN));
+		player.setAttached(ArsenalPower.COOLDOWNS, ArsenalPower.cooldowns(player).withDamocles(now + COOLDOWN));
 		double surface = ground.getY() + 1.0;
-		double portalY = Math.min(player.getY() + PORTAL_HEIGHT, level.getMaxY() - 1.0);
+		double portalY = Math.min(surface + PORTAL_HEIGHT, level.getMaxY() - 1.0);
 		portalY = Math.max(portalY, surface + LENGTH + 2.0);
-		Fall fall = new Fall(now, player.getX(), player.getZ(), portalY, surface - EMBED_DEPTH, player.getRandom().nextFloat() * Mth.TWO_PI);
+		Fall fall = new Fall(now, to.x, to.z, portalY, surface - EMBED_DEPTH, player.getRandom().nextFloat() * Mth.TWO_PI);
 		player.setAttached(FALL, fall);
 		Live live = new Live();
 		live.tip = fall.hiltStart();
@@ -259,8 +299,34 @@ public final class ArsenalDamocles {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.5F);
 	}
 
+	/** B still held: where it would land shows (to you). */
+	private static void aiming(ServerPlayer player, long held) {
+		ServerLevel level = player.level();
+		BlockPos ground = aimedGround(player);
+		if (ground == null) {
+			return;
+		}
+		Vec3 to = GravityPower.aimPoint(player, RANGE);
+		double y = ground.getY() + 1.2;
+		int points = 20;
+		for (int i = 0; i < points; i++) {
+			double a = i / (double) points * Math.PI * 2.0 + held * 0.15;
+			level.sendParticles(player, MARKER, true, false, to.x + Math.cos(a) * IMPACT_RADIUS, y, to.z + Math.sin(a) * IMPACT_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		// the point's mark in the middle
+		level.sendParticles(player, MARKER, true, false, to.x, y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
 	/** Every tick for the caster. */
 	static void tick(ServerPlayer player) {
+		Long aimFrom = AIMING.get(player.getUUID());
+		if (aimFrom != null) {
+			if (!player.isAlive() || !com.jaymospowers.core.Fate.isCorrupted(player)) {
+				AIMING.remove(player.getUUID());
+			} else {
+				aiming(player, player.level().getGameTime() - aimFrom);
+			}
+		}
 		Fall fall = player.getAttached(FALL);
 		if (fall == null) {
 			LIVE.remove(player.getUUID());
@@ -467,8 +533,14 @@ public final class ArsenalDamocles {
 		return true;
 	}
 
+	/** Downed mid-aim: the aim is dropped (a sword already falling keeps falling). */
+	static void cancelAim(ServerPlayer player) {
+		AIMING.remove(player.getUUID());
+	}
+
 	/** The power went away: the rift and the sword go with it. */
 	static void onLost(ServerPlayer player) {
+		AIMING.remove(player.getUUID());
 		player.removeAttached(FALL);
 		LIVE.remove(player.getUUID());
 	}

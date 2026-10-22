@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:brettl_grass_bundle"
+  ],
+  "result": {
+    "id": "jaymospowers:brettl_grass",
+    "count": 9
+  },
+  "group": "brettl_grass"
+}

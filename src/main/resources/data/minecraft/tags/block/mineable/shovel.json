@@ -1,5 +1,18 @@
 {
   "values": [
-    "jaymospowers:grout"
+    "jaymospowers:grout",
+    "jaymospowers:unfired_pot",
+    "jaymospowers:aether_dirt",
+    "jaymospowers:aether_grass_block",
+    "jaymospowers:enchanted_aether_grass_block",
+    "jaymospowers:quicksoil",
+    "jaymospowers:coarse_aether_dirt",
+    "jaymospowers:aether_dirt_path",
+    "jaymospowers:aether_farmland",
+    "jaymospowers:shimmering_silt",
+    "jaymospowers:ferrosite_sand",
+    "jaymospowers:ferrosite_mud",
+    "jaymospowers:arctic_snow_block",
+    "jaymospowers:arctic_snow"
   ]
 }

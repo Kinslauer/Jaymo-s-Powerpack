@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "ringing=false": {
+      "model": "jaymoskingdoms:block/wind_chime"
+    },
+    "ringing=true": {
+      "model": "jaymoskingdoms:block/wind_chime"
+    }
+  }
+}

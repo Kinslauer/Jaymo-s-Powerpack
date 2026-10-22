@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:icestone_bricks",
+  "result": {
+    "id": "jaymospowers:icestone_brick_slab",
+    "count": 2
+  }
+}

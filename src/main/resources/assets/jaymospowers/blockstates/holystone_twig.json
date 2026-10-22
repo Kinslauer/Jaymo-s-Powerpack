@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/aether/holystone_twig"
+      },
+      {
+        "model": "jaymospowers:block/aether/holystone_twig",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/aether/holystone_twig",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/aether/holystone_twig",
+        "y": 270
+      }
+    ]
+  }
+}

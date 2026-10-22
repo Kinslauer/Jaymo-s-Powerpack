@@ -26,6 +26,8 @@ public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
 	public abstract static class FormModel extends HumanoidModel<AvatarRenderState> {
 		public final Identifier texture;
+		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
+		float renderScale = 1.0F;
 
 		FormModel(ModelPart root, String id) {
 			super(root);
@@ -45,13 +47,14 @@ public final class XenoFormModels {
 		if (MODELS.isEmpty()) {
 			MODELS.put("bulwark", new Bulwark());
 			MODELS.put("pyre", new Pyre());
-			MODELS.put("blur", new Blur());
+			MODELS.put("blur", new Velox());
 			MODELS.put("prism", new Prism());
 			MODELS.put("wisp", new Wisp());
 			MODELS.put("gremlin", new Gremlin());
 			MODELS.put("knell", new Knell());
 			MODELS.put("wyrm", new Wyrm());
 			MODELS.put("nadir", new Nadir());
+			MODELS.put("duplex", new Duplex());
 		}
 		return MODELS.get(form);
 	}
@@ -184,31 +187,40 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Blur: slight, a fin along the skull, pricked ears, and a long tail that swings as it runs. */
-	static final class Blur extends FormModel {
-		private final ModelPart tail, tailTip;
+	/**
+	 * Velox: slight, a swept-back crest, a visor that drops over the eyes at speed, a short snout, ball-like feet and a
+	 * long tail that swings as it runs.
+	 */
+	static final class Velox extends FormModel {
+		private final ModelPart tail, tailTip, visor;
 
-		Blur() {
+		Velox() {
 			super(bake(mesh()), "blur");
 			this.tail = this.body.getChild("tail");
 			this.tailTip = this.tail.getChild("tip");
+			this.visor = this.head.getChild("visor");
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.15F), 0.0F);
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.2F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -12.0F, -4.0F, 2.0F, 4.0F, 9.0F), PartPose.ZERO);
-			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(22, 64).addBox(-2.0F, -4.0F, -7.0F, 4.0F, 3.0F, 3.0F), PartPose.ZERO);
-			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(36, 64).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
-				PartPose.offsetAndRotation(-3.0F, -8.0F, 1.0F, 0.0F, 0.0F, -0.35F));
-			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(36, 64).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
-				PartPose.offsetAndRotation(3.0F, -8.0F, 1.0F, 0.0F, 0.0F, 0.35F));
+			// the crest rises off the brow and sweeps back along the skull
+			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -3.0F, -3.0F, 2.0F, 3.0F, 5.0F), PartPose.offset(0.0F, -8.0F, 0.0F));
+			head.addOrReplaceChild("crest_sweep", CubeListBuilder.create().texOffs(14, 64).addBox(-1.0F, -1.5F, 0.0F, 2.0F, 3.0F, 8.0F),
+				PartPose.offsetAndRotation(0.0F, -9.0F, 1.0F, -0.25F, 0.0F, 0.0F));
+			head.addOrReplaceChild("visor", CubeListBuilder.create().texOffs(34, 64).addBox(-4.5F, 0.0F, -0.5F, 9.0F, 3.0F, 1.0F), PartPose.offset(0.0F, -9.0F, -4.5F));
+			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(34, 68).addBox(-2.0F, -2.0F, -7.0F, 4.0F, 2.0F, 3.0F), PartPose.ZERO);
+			// ball feet at the bottom of each leg
+			root.getChild("right_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(0, 76).addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.6F)),
+				PartPose.ZERO);
+			root.getChild("left_leg").addOrReplaceChild("foot", CubeListBuilder.create().texOffs(16, 76).addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.6F)),
+				PartPose.ZERO);
 			PartDefinition body = root.getChild("body");
-			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 78).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 8.0F),
+			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 84).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 10.0F),
 				PartPose.offsetAndRotation(0.0F, 10.5F, 1.5F, 0.5F, 0.0F, 0.0F));
-			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(22, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
-				PartPose.offsetAndRotation(0.0F, 0.0F, 7.5F, 0.3F, 0.0F, 0.0F));
+			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(26, 84).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 10.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, 0.3F, 0.0F, 0.0F));
 			return mesh;
 		}
 
@@ -217,6 +229,11 @@ public final class XenoFormModels {
 			super.setupAnim(state);
 			float run = state.walkAnimationSpeed;
 			XenoMotion.Read m = XenoMotion.read(state);
+			// the visor slides down over the eyes as it picks up speed and rides up on the brow when it slows
+			float down = Mth.clamp((run - 0.35F) / 0.4F, 0.0F, 1.0F);
+			down = down * down * (3.0F - 2.0F * down);
+			this.visor.y = Mth.lerp(down, -9.0F, -5.9F);
+			this.visor.xRot = Mth.lerp(down, -0.45F, 0.0F);
 			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.4F * run + Mth.sin(state.ageInTicks * 0.1F) * 0.08F;
 			float lift = tailLift(m);
 			this.tail.yRot = sway - m.trail() * 0.6F;
@@ -324,6 +341,60 @@ public final class XenoFormModels {
 			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F
 				+ Math.max(0.0F, m.fall()) * 0.9F * m.air() + m.land() * 0.25F;
 			this.mantle.zRot = -m.trail() * 0.3F;
+		}
+	}
+
+	/**
+	 * Duplex: a copper golem's build, box for box: a wide flat head with a nose, a short body, long arms hanging near
+	 * the ground, stubby legs and the lightning rod with its ball tip, plus a copper belt. It's built at the golem's own
+	 * size (16 pixels to the top of its head) and drawn {@link #RENDER_SCALE} times up from a player at Duplex's scale,
+	 * so the whole is a copper golem's height.
+	 */
+	static final class Duplex extends FormModel {
+		/** 16 px tall, at the player's 0.9375 and Duplex's scale, comes to a copper golem's 0.98 blocks. */
+		static final float RENDER_SCALE = 0.98F / (0.9375F * com.jaymospowers.power.xenoform.forms.Duplex.SCALE);
+		private final ModelPart rod;
+
+		Duplex() {
+			super(bake(mesh()), "duplex");
+			this.renderScale = RENDER_SCALE;
+			this.rod = this.head.getChild("rod");
+		}
+
+		private static MeshDefinition mesh() {
+			// the golem's boxes (CopperGolemModel), stood on the humanoid's feet line (y 24): legs from 19, body and
+			// head from 13; the arms hang from the top of the body
+			MeshDefinition mesh = new MeshDefinition();
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -5.0F, -5.0F, 8.0F, 5.0F, 10.0F)
+				.texOffs(40, 0).addBox(-1.0F, -2.0F, -6.0F, 2.0F, 3.0F, 2.0F), PartPose.offset(0.0F, 13.0F, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			PartDefinition rod = head.addOrReplaceChild("rod", CubeListBuilder.create().texOffs(48, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offset(0.0F, -5.0F, 0.0F));
+			rod.addOrReplaceChild("knob", CubeListBuilder.create().texOffs(40, 8).addBox(-2.0F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F), PartPose.offset(0.0F, -4.0F, 0.0F));
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 6.0F, 6.0F),
+				PartPose.offset(0.0F, 13.0F, 0.0F));
+			body.addOrReplaceChild("belt", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, 4.0F, -3.0F, 8.0F, 2.0F, 6.0F, new CubeDeformation(0.3F)),
+				PartPose.ZERO);
+			root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(28, 16).addBox(-3.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F),
+				PartPose.offset(-4.0F, 14.0F, 0.0F));
+			root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(42, 16).addBox(0.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F),
+				PartPose.offset(4.0F, 14.0F, 0.0F));
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F),
+				PartPose.offset(-2.0F, 19.0F, 0.0F));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 32).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F),
+				PartPose.offset(2.0F, 19.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the rod nods with each step, lags a turn and whips back on landing
+			float step = Mth.sin(state.walkAnimationPos * 0.6662F * 2.0F) * 0.12F * state.walkAnimationSpeed;
+			this.rod.xRot = step - m.land() * 0.4F + Math.max(0.0F, m.fall()) * 0.3F * m.air();
+			this.rod.zRot = -m.trail() * 0.35F + Mth.sin(state.ageInTicks * 0.05F) * 0.03F;
 		}
 	}
 

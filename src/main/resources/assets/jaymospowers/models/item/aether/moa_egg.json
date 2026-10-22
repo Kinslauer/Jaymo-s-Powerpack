@@ -1,0 +1,13 @@
+{
+  "parent": "jaymospowers:block/aether/moa_egg_blue_0",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": 1.0
+    }
+  }
+}

@@ -332,6 +332,7 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 		});
 		WebSymbiote.register();
+		WebSymbioteInfection.register();
 		WebCracks.register();
 		WebMorph.register();
 		WebSymbioteBlob.init();
@@ -408,6 +409,17 @@ public final class WebPower implements Power {
 	public void onGained(ServerPlayer player) {
 		ensurePassive(player);
 		WebStrength.physique(player);
+	}
+
+	/** (0.15.31) Downed: what was running ends. */
+	@Override
+	public void onDowned(ServerPlayer player) {
+		// the lines and ropes are let go, the wings fold, whatever the tendrils hold is dropped (the symbiote acts on its own)
+		player.removeAttached(LINE);
+		player.removeAttached(ROPE);
+		player.removeAttached(TETHER);
+		player.removeAttached(WINGS);
+		WebTendrils.releaseAll(player, false);
 	}
 
 	@Override
@@ -1255,6 +1267,10 @@ public final class WebPower implements Power {
 	}
 
 	static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
+		if (!Powers.has(player, INSTANCE)) {
+			// (0.15.52) a symbiote in someone who isn't a web slinger: nothing of theirs would reel them in
+			return;
+		}
 		State state = state(player);
 		state.swinging[WebNet.MAIN] = false;
 		state.swinging[WebNet.OFF] = false;

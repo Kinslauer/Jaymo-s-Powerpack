@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/aether/gravitite_taluton_spawn_egg"
+  }
+}

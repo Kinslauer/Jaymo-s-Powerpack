@@ -30,7 +30,11 @@ public final class XenoformClient {
 		if (form == null) {
 			return;
 		}
-		// the player's own body goes: no skin, no armour, no cape, nothing in the hands or on the head
+		hideBody(state);
+	}
+
+	/** The player's own body goes: no skin, no armour, no cape, nothing in the hands or on the head. */
+	public static void hideBody(AvatarRenderState state) {
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
