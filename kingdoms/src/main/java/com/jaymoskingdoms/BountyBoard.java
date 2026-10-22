@@ -24,7 +24,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -44,7 +43,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Punch or use a pinned notice to pull it off: that takes the bounty ({@link Bounties#pull}). Use a bare spot with a
  * notice in hand to pin it back up: that gives the hunt up ({@link Bounties#pin}). Use a bare spot (or sneak) to read
  * the whole list ({@link Bounties#open}).</li>
- * <li>Notices go up when a villager of the town walks over and pins one ({@link Bounties} errands).</li>
+ * <li>Notices go up when a villager of the town walks over and pins one ({@link Bounties} errands): a wanted notice, or
+ * (0.7.168) a town notice, an errand that's a quest or a bit of news ({@link TownNotices}).</li>
  * </ul>
  */
 public final class BountyBoard extends Block {
@@ -53,15 +53,19 @@ public final class BountyBoard extends Block {
 	/** Which block of the board this is: the column from the left as you face it, the row from the ground. */
 	public static final IntegerProperty COLUMN = IntegerProperty.create("column", 0, WIDTH - 1);
 	public static final IntegerProperty ROW = IntegerProperty.create("row", 0, HEIGHT - 1);
-	/** A notice is pinned on this block (which bounty it is, {@link Bounties#PINNED}). */
-	public static final BooleanProperty NOTICE = BooleanProperty.create("notice");
+	/**
+	 * What's pinned on this block: nothing, a wanted notice, or a town notice (an errand or a bit of news,
+	 * {@link TownNotices}). Which one it is: {@link Bounties#PINNED}.
+	 */
+	public static final IntegerProperty NOTICE = IntegerProperty.create("notice", 0, 2);
+	public static final int BARE = 0, WANTED = 1, TOWN = 2;
 
 	/** Each block's shape by column, row and facing (the board, the posts at the ends, the roof on top). */
 	private static final Map<Direction, VoxelShape>[][] SHAPES = shapes();
 
 	public BountyBoard(BlockBehaviour.Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(COLUMN, 1).setValue(ROW, 0).setValue(NOTICE, false));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(COLUMN, 1).setValue(ROW, 0).setValue(NOTICE, BARE));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,6 +106,11 @@ public final class BountyBoard extends Block {
 	/** The bottom middle block of the board {@code state} at {@code pos} is part of. */
 	static BlockPos anchor(BlockPos pos, BlockState state) {
 		return pos.relative(right(state.getValue(FACING)), 1 - state.getValue(COLUMN)).below(state.getValue(ROW));
+	}
+
+	/** Something is pinned on this block of a board. */
+	static boolean pinned(BlockState state) {
+		return state.getValue(NOTICE) != BARE;
 	}
 
 	static boolean isAnchor(BlockState state) {
@@ -227,7 +236,7 @@ public final class BountyBoard extends Block {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		if (!stack.is(Bounties.NOTICE_ITEM) || state.getValue(NOTICE)) {
+		if (!(stack.is(Bounties.NOTICE_ITEM) || stack.is(TownNotices.ITEM)) || pinned(state)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
@@ -240,7 +249,7 @@ public final class BountyBoard extends Block {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-			if (state.getValue(NOTICE) && !player.isSecondaryUseActive()) {
+			if (pinned(state) && !player.isSecondaryUseActive()) {
 				Bounties.pull(server, sp, pos);
 			} else {
 				Bounties.open(server, sp, anchor(pos, state));

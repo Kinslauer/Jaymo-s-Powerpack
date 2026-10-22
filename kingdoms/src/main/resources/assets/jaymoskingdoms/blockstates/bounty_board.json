@@ -15,10 +15,21 @@
         "facing": "north",
         "column": "0",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_0"
       }
     },
     {
@@ -37,10 +48,22 @@
         "facing": "east",
         "column": "0",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_0",
         "y": 90
       }
     },
@@ -60,10 +83,22 @@
         "facing": "south",
         "column": "0",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_0",
         "y": 180
       }
     },
@@ -83,10 +118,22 @@
         "facing": "west",
         "column": "0",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_0",
         "y": 270
       }
     },
@@ -105,10 +152,21 @@
         "facing": "north",
         "column": "0",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_1"
       }
     },
     {
@@ -127,10 +185,22 @@
         "facing": "east",
         "column": "0",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_1",
         "y": 90
       }
     },
@@ -150,10 +220,22 @@
         "facing": "south",
         "column": "0",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_1",
         "y": 180
       }
     },
@@ -173,10 +255,22 @@
         "facing": "west",
         "column": "0",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_0_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_0_1",
         "y": 270
       }
     },
@@ -195,10 +289,21 @@
         "facing": "north",
         "column": "1",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_0"
       }
     },
     {
@@ -217,10 +322,22 @@
         "facing": "east",
         "column": "1",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_0",
         "y": 90
       }
     },
@@ -240,10 +357,22 @@
         "facing": "south",
         "column": "1",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_0",
         "y": 180
       }
     },
@@ -263,10 +392,22 @@
         "facing": "west",
         "column": "1",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_0",
         "y": 270
       }
     },
@@ -285,10 +426,21 @@
         "facing": "north",
         "column": "1",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_1"
       }
     },
     {
@@ -307,10 +459,22 @@
         "facing": "east",
         "column": "1",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_1",
         "y": 90
       }
     },
@@ -330,10 +494,22 @@
         "facing": "south",
         "column": "1",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_1",
         "y": 180
       }
     },
@@ -353,10 +529,22 @@
         "facing": "west",
         "column": "1",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_1_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_1_1",
         "y": 270
       }
     },
@@ -375,10 +563,21 @@
         "facing": "north",
         "column": "2",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_0"
       }
     },
     {
@@ -397,10 +596,22 @@
         "facing": "east",
         "column": "2",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_0",
         "y": 90
       }
     },
@@ -420,10 +631,22 @@
         "facing": "south",
         "column": "2",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_0",
         "y": 180
       }
     },
@@ -443,10 +666,22 @@
         "facing": "west",
         "column": "2",
         "row": "0",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "0",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_0",
         "y": 270
       }
     },
@@ -465,10 +700,21 @@
         "facing": "north",
         "column": "2",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_1"
       }
     },
     {
@@ -487,10 +733,22 @@
         "facing": "east",
         "column": "2",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_1",
         "y": 90
       }
     },
@@ -510,10 +768,22 @@
         "facing": "south",
         "column": "2",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_1",
         "y": 180
       }
     },
@@ -533,10 +803,22 @@
         "facing": "west",
         "column": "2",
         "row": "1",
-        "notice": "true"
+        "notice": "1"
       },
       "apply": {
         "model": "jaymoskingdoms:block/bounty_board_notice_2_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "1",
+        "notice": "2"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_town_2_1",
         "y": 270
       }
     }

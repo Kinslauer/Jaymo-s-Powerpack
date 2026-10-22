@@ -4267,6 +4267,15 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   blocks (awake, hands free, not wanted themselves; MCA villagers included) walking over with the notice in hand. At
   the board they swing an arm, it's pinned with the item frame sound, and half the time they call it out ("Wanted:
   name! 40 emeralds to whoever brings them in."). They give up after 40 seconds. The highest price goes up first.
+- **Town notices** (`TownNotices`). Andy: "they can place quests or useless notices too, to add to immersion, (bring
+  me some leashed animals, or feed, etc,) add about 5 per village type". With no bounty to post, a villager now and then
+  pins up one of their village type's five notices instead (at most 3 on a board, down again after 2 days): three
+  errands and two bits of news for each of vanilla's seven types (plains, desert, savanna, snowy, taiga, jungle, swamp).
+  Pulling an errand off is a quest from the villager who posted it, turned in to them as usual: bring hay, eggs,
+  water, coal, berries, firewood, cocoa and so on (gather quests), or bring sheep, a camel, cattle, llamas, a goat, pigs,
+  hens or frogs to them on a lead (a new `Quest.LEAD` kind: the animals are counted within 12 blocks on your lead, and
+  handed over they stay in town). Pulling news off gives you the paper ("LOST: grey cat, one white paw. Answers to
+  nothing."), which you can pin up again on any board. Town notices are white paper with a brass pin (`town_notice`).
 - Art (`tools/vanilla_style/bounty_board.py`): vanilla's spruce planks stained dark for the face, spruce log posts,
   three notice designs (a crook's face, a masked bandit, a written notice under a red seal) in the old board's poster
   colours, and new 16px icons for the board and the notice.

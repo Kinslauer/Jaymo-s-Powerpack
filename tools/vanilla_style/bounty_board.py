@@ -1,5 +1,5 @@
 """Jaymo's Kingdoms bounty board (0.7.168): a 3-wide, 2-tall board with one notice spot per block. Paints the board
-face (vanilla's spruce planks, stained darker), three wanted notices, the notice and board item icons, and writes the
+face (vanilla's spruce planks, stained darker), three wanted notices, two town notices, the notice and board item icons, and writes the
 block models, the multipart blockstate and the item models.
 
 Usage: python -I tools/vanilla_style/bounty_board.py <vanilla 26.3 textures folder (holds block/ and item/)>"""
@@ -54,6 +54,33 @@ NOTICES = [
 ]
 NW, NH = 9, 10
 
+# (town notices: errands and news) vanilla's paper ramp, grey ink, a brass pin, a green seal
+TPAL = {'W': hx('fcfcf2'), 'w': hx('e9eaeb'), 'g': hx('d6d6d6'), 'G': hx('c1c1c1'), 'O': hx('9a9aa2'), 'K': hx('4a4a5a'), 'k': hx('8a8a96'),
+        'B': hx('b87333'), 'V': hx('4a8a3a')}
+TOWN = [
+    # an errand, a sheep drawn on it
+    ['WWWBWWWg',
+     'WwwwwwwG',
+     'WKkKKkwG',
+     'WwwwwwwG',
+     'WwwkkkwG',
+     'WwkkkKwG',
+     'WwwKwKwG',
+     'WKkKkKwG',
+     'gGGGGGGG'],
+    # news, under a green seal
+    ['WWWBWWWg',
+     'WKKkKkwG',
+     'WwwwwwwG',
+     'WkKkKKwG',
+     'WwwwwwwG',
+     'WKkkKkwG',
+     'WwwwwwwG',
+     'WwwwVVwG',
+     'gGGGGGGG'],
+]
+TW, TH = 8, 9
+
 def save(im, *path):
     p = os.path.join(ROOT, 'textures', *path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -66,6 +93,12 @@ def notice_textures():
             for x, ch in enumerate(row):
                 im.putpixel((x, y), PAL[ch])
         save(im, 'block', f'bounty_notice_{i}.png')
+    for i, rows in enumerate(TOWN):
+        im = Image.new('RGBA', (16, 16), TPAL['w'])
+        for y, row in enumerate(rows):
+            for x, ch in enumerate(row):
+                im.putpixel((x, y), TPAL[ch])
+        save(im, 'block', f'town_notice_{i}.png')
 
 def panel_texture():
     """vanilla's spruce planks, stained dark so the notices stand out, with old nail holes"""
@@ -101,6 +134,28 @@ def item_notice():
             if ch != '.':
                 im.putpixel((x + 1, y + 1), PAL[ch])
     save(im, 'item', 'bounty_notice.png')
+
+def item_town_notice():
+    """a town notice in hand: a sheet of vanilla's paper with lines of writing, a brass pin and a green seal"""
+    rows = ['.OOOOOOOOOO.',
+            'OWWWWBWWWWgO',
+            'OWwwwwwwwwGO',
+            'OWKKkKKkwwGO',
+            'OWwwwwwwwwGO',
+            'OWkKKkKKkwGO',
+            'OWwwwwwwwwGO',
+            'OWKkKKkKwwGO',
+            'OWwwwwwwwwGO',
+            'OWkKKkwwwwGO',
+            'OWwwwwwVVwGO',
+            'OgGGGGGGGGGO',
+            '.OOOOOOOOOO.']
+    im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != '.':
+                im.putpixel((x + 2, y + 1), TPAL[ch])
+    save(im, 'item', 'town_notice.png')
 
 def item_board():
     """the board in hand: roof, posts of spruce log, the stained face with three notices"""
@@ -170,6 +225,15 @@ def notice_model(c, r):
     return {'textures': {'particle': f'jaymoskingdoms:block/bounty_notice_{(c + r) % 3}', 'notice': f'jaymoskingdoms:block/bounty_notice_{(c + r) % 3}'},
             'elements': [el]}
 
+TOWN_X = {(0, 0): 4, (1, 0): 3, (2, 0): 6, (0, 1): 3, (1, 1): 5, (2, 1): 4}
+
+def town_model(c, r):
+    x = TOWN_X[(c, r)]
+    y = 6 if r == 0 else 2
+    tex = f'jaymoskingdoms:block/town_notice_{(c + r) % 2}'
+    el = {'from': [x, y, 6.75], 'to': [x + TW, y + TH, 7], 'faces': {'north': {'texture': '#notice', 'uv': [0, 0, TW, TH]}}}
+    return {'textures': {'particle': tex, 'notice': tex}, 'elements': [el]}
+
 def write(obj, *path):
     p = os.path.join(ROOT, *path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -184,16 +248,19 @@ def models():
         for r in range(H):
             write(part_model(c, r), 'models', 'block', f'bounty_board_{c}_{r}.json')
             write(notice_model(c, r), 'models', 'block', f'bounty_board_notice_{c}_{r}.json')
+            write(town_model(c, r), 'models', 'block', f'bounty_board_town_{c}_{r}.json')
             for facing, y in rot.items():
                 when = {'facing': facing, 'column': str(c), 'row': str(r)}
                 m = {'model': f'jaymoskingdoms:block/bounty_board_{c}_{r}'}
                 n = {'model': f'jaymoskingdoms:block/bounty_board_notice_{c}_{r}'}
+                t = {'model': f'jaymoskingdoms:block/bounty_board_town_{c}_{r}'}
                 if y:
-                    m['y'] = y; n['y'] = y
+                    m['y'] = y; n['y'] = y; t['y'] = y
                 multipart.append({'when': when, 'apply': m})
-                multipart.append({'when': dict(when, notice='true'), 'apply': n})
+                multipart.append({'when': dict(when, notice='1'), 'apply': n})
+                multipart.append({'when': dict(when, notice='2'), 'apply': t})
     write({'multipart': multipart}, 'blockstates', 'bounty_board.json')
-    for name in ('bounty_board', 'bounty_notice'):
+    for name in ('bounty_board', 'bounty_notice', 'town_notice'):
         write({'parent': 'minecraft:item/generated', 'textures': {'layer0': f'jaymoskingdoms:item/{name}'}}, 'models', 'item', f'{name}.json')
         write({'model': {'type': 'minecraft:model', 'model': f'jaymoskingdoms:item/{name}'}}, 'items', f'{name}.json')
 
@@ -203,4 +270,5 @@ if __name__ == '__main__':
         panel_texture()
         item_board()
     item_notice()
+    item_town_notice()
     models()

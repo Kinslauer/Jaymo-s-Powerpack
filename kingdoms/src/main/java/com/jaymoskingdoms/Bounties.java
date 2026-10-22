@@ -244,10 +244,11 @@ public final class Bounties {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(BOARD_ITEM));
 		ResourceKey<Item> noticeKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("bounty_notice"));
 		NOTICE_ITEM = Registry.register(BuiltInRegistries.ITEM, noticeKey, new Item(new Item.Properties().setId(noticeKey).stacksTo(1)));
+		TownNotices.register();
 		// (0.7.168) a punched notice comes off the board, like an item off a frame, and the board stays
 		AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
 			BlockState state = world.getBlockState(pos);
-			if (player.isSpectator() || !state.is(BOARD) || !state.getValue(BountyBoard.NOTICE)) {
+			if (player.isSpectator() || !state.is(BOARD) || !BountyBoard.pinned(state)) {
 				return InteractionResult.PASS;
 			}
 			if (world instanceof ServerLevel level && player instanceof ServerPlayer sp) {
@@ -629,7 +630,7 @@ public final class Bounties {
 	}
 
 	static @Nullable String noticeOf(ItemStack stack) {
-		CustomData data = stack.is(NOTICE_ITEM) ? stack.get(DataComponents.CUSTOM_DATA) : null;
+		CustomData data = stack.is(NOTICE_ITEM) || stack.is(TownNotices.ITEM) ? stack.get(DataComponents.CUSTOM_DATA) : null;
 		return data == null ? null : data.copyTag().getString(NOTICE_KEY).orElse(null);
 	}
 
@@ -652,7 +653,7 @@ public final class Bounties {
 		Map<String, String> map = new HashMap<>(pinned(level));
 		map.put(spot(pos), key);
 		level.setAttached(PINNED, Map.copyOf(map));
-		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, true), Block.UPDATE_CLIENTS);
+		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, TownNotices.is(key) ? BountyBoard.TOWN : BountyBoard.WANTED), Block.UPDATE_CLIENTS);
 	}
 
 	/** Whatever notice is on the board block at {@code pos} comes off. */
@@ -664,8 +665,8 @@ public final class Bounties {
 			level.setAttached(PINNED, Map.copyOf(m2));
 		}
 		BlockState state = level.getBlockState(pos);
-		if (state.is(BOARD) && state.getValue(BountyBoard.NOTICE)) {
-			level.setBlock(pos, state.setValue(BountyBoard.NOTICE, false), Block.UPDATE_CLIENTS);
+		if (state.is(BOARD) && BountyBoard.pinned(state)) {
+			level.setBlock(pos, state.setValue(BountyBoard.NOTICE, BountyBoard.BARE), Block.UPDATE_CLIENTS);
 		}
 	}
 
@@ -681,10 +682,17 @@ public final class Bounties {
 	/** (BountyBoard) {@code player} pulls the notice off the board block at {@code pos}: they take its bounty. */
 	static void pull(ServerLevel level, ServerPlayer player, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
-		if (!state.is(BOARD) || !state.getValue(BountyBoard.NOTICE)) {
+		if (!state.is(BOARD) || !BountyBoard.pinned(state)) {
 			return;
 		}
 		String key = pinned(level).get(spot(pos));
+		if (key != null && TownNotices.is(key)) {
+			if (TownNotices.pull(level, player, key)) {
+				unpin(level, pos);
+				level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
+			}
+			return;
+		}
 		Bounty b = key == null ? null : all(level.getServer()).get(key);
 		if (b == null || b.dead()) {
 			// (out of date: it comes down for nothing)
@@ -702,6 +710,13 @@ public final class Bounties {
 	static void pin(ServerLevel level, ServerPlayer player, BlockPos pos, ItemStack stack) {
 		MinecraftServer server = level.getServer();
 		String key = noticeOf(stack);
+		if (key != null && TownNotices.is(key)) {
+			// (a town notice goes up again on any board, for whoever wants to read it)
+			stack.shrink(1);
+			setNotice(level, pos, key);
+			level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
+			return;
+		}
 		Bounty b = key == null ? null : all(server).get(key);
 		long now = level.getGameTime();
 		if (b == null || b.dead()) {
@@ -1140,7 +1155,8 @@ public final class Bounties {
 			}
 			Bounty b = all.get(e.getValue());
 			BlockState state = level.getBlockState(pos);
-			if (b == null || b.dead() || b.takenByAnyone(now) || !state.is(BOARD) || !state.getValue(BountyBoard.NOTICE)) {
+			boolean over = TownNotices.is(e.getValue()) ? TownNotices.expired(e.getValue(), now) : b == null || b.dead() || b.takenByAnyone(now);
+			if (over || !state.is(BOARD) || !BountyBoard.pinned(state)) {
 				unpin(level, pos);
 			}
 		}
@@ -1167,12 +1183,15 @@ public final class Bounties {
 			}
 			Direction facing = state.getValue(BountyBoard.FACING);
 			List<BlockPos> bare = new ArrayList<>();
+			int town = 0;
 			for (int c = 0; c < BountyBoard.WIDTH; c++) {
 				for (int r = 0; r < BountyBoard.HEIGHT; r++) {
 					BlockPos p = BountyBoard.part(anchor, facing, c, r);
 					BlockState s = level.getBlockState(p);
-					if (s.is(BOARD) && !s.getValue(BountyBoard.NOTICE)) {
+					if (s.is(BOARD) && !BountyBoard.pinned(s)) {
 						bare.add(p);
+					} else if (s.is(BOARD) && s.getValue(BountyBoard.NOTICE) == BountyBoard.TOWN) {
+						town++;
 					}
 				}
 			}
@@ -1186,14 +1205,17 @@ public final class Bounties {
 					next = b;
 				}
 			}
-			Villager v = next == null ? null : poster(level, anchor);
-			if (v == null) {
+			// (0.7.168) no bounty to post: now and then a town notice instead, an errand or a bit of news, a few at a time
+			boolean news = next == null && town < TownNotices.MOST && random.nextFloat() < TownNotices.CHANCE;
+			Villager v = next == null && !news ? null : poster(level, anchor);
+			String key = v == null ? null : next != null ? next.key() : TownNotices.pick(v, up, now, random);
+			if (key == null) {
 				continue;
 			}
-			v.setItemSlot(EquipmentSlot.MAINHAND, notice(level, next, null));
+			v.setItemSlot(EquipmentSlot.MAINHAND, next != null ? notice(level, next, null) : TownNotices.item(level, key));
 			BlockPos slot = bare.get(random.nextInt(bare.size()));
-			ERRANDS.put(v.getUUID(), new Errand(v.getUUID(), anchor.immutable(), slot.immutable(), next.key(), now + POST_TIMEOUT));
-			up.add(next.key());
+			ERRANDS.put(v.getUUID(), new Errand(v.getUUID(), anchor.immutable(), slot.immutable(), key, now + POST_TIMEOUT));
+			up.add(key);
 		}
 		if (keep.size() != spots.size()) {
 			level.setAttached(BOARD_SPOTS, List.copyOf(keep));
@@ -1218,8 +1240,10 @@ public final class Bounties {
 			Villager v = level.getEntity(e.villager()) instanceof Villager found ? found : null;
 			BlockState state = level.getBlockState(e.slot());
 			Bounty b = all.get(e.key());
+			boolean town = TownNotices.is(e.key());
+			boolean over = town ? TownNotices.expired(e.key(), now) : b == null || b.dead() || b.takenByAnyone(now);
 			if (v == null || !v.isAlive() || now > e.until() || v.isSleeping() || Downed.isDowned(v) || !state.is(BOARD)
-				|| state.getValue(BountyBoard.NOTICE) || b == null || b.dead() || b.takenByAnyone(now) || !v.getMainHandItem().is(NOTICE_ITEM)) {
+				|| BountyBoard.pinned(state) || over || !v.getMainHandItem().is(town ? TownNotices.ITEM : NOTICE_ITEM)) {
 				if (v != null) {
 					emptyHand(v);
 				}
@@ -1235,7 +1259,11 @@ public final class Bounties {
 				it.remove();
 				setNotice(level, e.slot(), e.key());
 				level.playSound(null, e.slot(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
-				if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
+				if (town) {
+					if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
+						Speech.say(level, v, TownNotices.callOut(e.key(), level.getRandom()), Speech.WHITE, 12.0);
+					}
+				} else if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
 					Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.bounty.posting." + level.getRandom().nextInt(3),
 						Component.literal(b.name()), b.price()), Speech.WHITE, 12.0);
 				}
@@ -1249,7 +1277,7 @@ public final class Bounties {
 
 	/** The notice a villager was carrying is put away. */
 	private static void emptyHand(Villager v) {
-		if (v.getMainHandItem().is(NOTICE_ITEM)) {
+		if (v.getMainHandItem().is(NOTICE_ITEM) || v.getMainHandItem().is(TownNotices.ITEM)) {
 			v.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 	}
