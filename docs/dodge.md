@@ -52,6 +52,7 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
   evasion Flow now fires on our dodge), Web +20 golden (`WebRolls`; each counter spends a dodge's worth), Corrupted
   mode +12 golden and every dodge is the blink (`ZFighterCorruption`), Chrono +12 golden (`ChronoFlow.DODGE_BONUS`; its own Time Flow roll charges stay as they were).
 - Combat Roll left the pack (its HUD and its enchantments with it).
+- (0.15.74) The roll animation is ours now: `client/stamina/DodgeRollPose`, synced by `Dodge.ROLLING`.
 
 ## To check in game
 1. The row sits right above hunger; air bubbles and a horse's hearts push it up, not over it.
