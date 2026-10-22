@@ -4175,3 +4175,13 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
     the freshest trail. It lasts a minute; Slip the Net halves that.
   - hear the horde: a zombie that goes after you groans, and idle zombies within 16 blocks come.
   Lured zombies show on the awareness gauge as searching, and count as unaware for sneak attacks.
+
+## 0.7.157: one dynamite, Balkon's (pack 0.15.75)
+- Andy: "change dynamite to just the balkon recipe and design across all requirements". The pack's one dynamite is
+  Balkon's WeaponMod's (`weaponmod:dynamite`, MIT). With WeaponMod loaded, pirate bombardiers hold and drop its stick,
+  their thrown sticks look like it and leave it behind when doused (`Dynamite.stick()`). Our own `jaymoskingdoms:dynamite`
+  is off the creative tab, its recipe is off, and an old stick crafts into Balkon's (shapeless, `dynamite_to_balkon`).
+  The bomb glider, Kitchen's exploding pot and the mining charge already took only Balkon's.
+- Without WeaponMod ours stands in, as Balkon's: its recipe (string over two gunpowder makes two, was string, gunpowder,
+  paper) and its sprite and held pose (`textures/item/LICENSE-WeaponMod.txt`).
+- The bombardiers' skins (`tools/gen_pirates.py`) paint the bandolier's sticks in Balkon's red with a grey fuse.
