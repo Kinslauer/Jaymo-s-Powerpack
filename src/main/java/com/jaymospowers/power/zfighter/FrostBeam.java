@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.15.70) A Frost-born's left-mouse hold once the day's ice prison is spent: a hair-thin white beam, drawn like a ki
  * wave's Frost Needle ({@code ZFighterBeams}, style {@link ZFighterKi#NEEDLE}). It hits for only {@link #DAMAGE}, but it
- * goes exactly where the crosshair is, and a hit has {@link #WOUND_CHANCE} to wound the part it lands on: the head comes
+ * goes exactly where the crosshair is (a Z Fighter's starts weaker and grows with mastery, but fires faster), and a hit has {@link #WOUND_CHANCE} to wound the part it lands on: the head comes
  * off; an arm or leg is cut off, or crippled (broken) at {@link #CRIPPLE_SHARE}. A body that can't lose parts is crippled.
  * <p>
  * Kingdoms keeps the day's charge: a hold on cooldown comes back to us as {@link #BEAM_TAG} (Andy: "will be usable after
@@ -40,6 +40,12 @@ public final class FrostBeam {
 	public static final float DAMAGE = 3.0F;
 	public static final double RANGE = 48.0;
 	public static final int COOLDOWN = 60;
+	/**
+	 * (Andy) A Z Fighter's beam: half a heart, plus {@code Z_PER_MASTERY} for each ability his mastery has unlocked
+	 * ({@link com.jaymospowers.core.Mastery#unlocked}, 0-4: 1.5 hearts at full), and every {@code Z_COOLDOWN} ticks (1.5 s).
+	 */
+	public static final float Z_DAMAGE = 1.0F, Z_PER_MASTERY = 0.5F;
+	public static final int Z_COOLDOWN = 30;
 	public static final float RADIUS = 0.035F;
 	public static final int SHOWN_TICKS = 10;
 	public static final int COLOR = 0xFFFFFF;
@@ -84,7 +90,8 @@ public final class FrostBeam {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < COOLDOWN && now >= last) {
+		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
+		if (last != null && now - last < (fighter ? Z_COOLDOWN : COOLDOWN) && now >= last) {
 			return;
 		}
 		LAST.put(player.getUUID(), now);
@@ -106,16 +113,16 @@ public final class FrostBeam {
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 12, 0.15, 0.15, 0.15, 0.05);
 		if (target != null) {
-			strike(player, target);
+			strike(player, target, fighter ? Z_DAMAGE + Z_PER_MASTERY * com.jaymospowers.core.Mastery.unlocked(player) : DAMAGE);
 		}
 	}
 
-	/** The beam lands on the part the crosshair crosses: 1.5 hearts there, then the roll to wound it. */
-	private static void strike(ServerPlayer player, LivingEntity target) {
+	/** The beam lands on the part the crosshair crosses: {@code damage} there, then the roll to wound it. */
+	private static void strike(ServerPlayer player, LivingEntity target, float damage) {
 		ServerLevel level = player.level();
 		int part = Dismember.aimedPart(player, target);
 		// (Wounds lands a power's cut on its part; this one never severs on overkill by itself)
-		Dismember.cut(player, target, part, 0.0F, () -> target.hurtServer(level, ZFighterKi.source(player), DAMAGE));
+		Dismember.cut(player, target, part, 0.0F, () -> target.hurtServer(level, ZFighterKi.source(player), damage));
 		if (!target.isAlive() || target instanceof Player p && (p.isCreative() || p.isSpectator())
 			|| target.getRandom().nextFloat() >= WOUND_CHANCE) {
 			return;
