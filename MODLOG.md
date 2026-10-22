@@ -2451,3 +2451,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   give up) no longer bends the upper body into the ground (vanilla's crouch); it plays the push-up struggle instead.
   Andy: "crippling should only activate if the legs are broken, not just on any hit": Kitchen's leg hits now knock down
   and lame only a creature with a broken leg (Wounds' break tags, checked at the end of the tick).
+- **0.15.89, downed in water: limp and floating (Kitchen 0.5.14):** Andy: "downed players underwater are able to swim
+  as of right now, this should change. you should just ragdoll, and float". Downed in water (`Downed.adrift`), the
+  moving keys go dead as well (`DownedKeysMixin`), and Kitchen's ragdoll holds you limp (`KitchenCompat.registerRagdollHolds`,
+  Kitchen's new `LivingRagdolls.addHold`): the body floats up and bobs at the surface until you're up, given up, carried
+  out or washed ashore (then back to the downed crawl). Without Kitchen you just drift up (`CrawlTaps`). Sneak still
+  gives up.
