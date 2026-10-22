@@ -4214,7 +4214,7 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   after the mod's own mixin on `Player.getProjectile`), applied only when the mod is loaded; without the mod the perk
   can't be learned. Nothing of the mod's is compiled against.
 
-## 0.7.164: dark nights keep shaders on (pack 0.15.91)
+## 0.7.164: dark nights keep shaders on (pack 0.15.94)
 - Andy asked whether True Darkness Compat (MIT, 1.20.1 Forge only) could replace switching shaders off on dark nights,
   then "yeah lets try that, my players want shaders". Its idea, remade for 26.3 Iris (none of its code): the sky light
   level Iris hands a shader pack (`gl_MultiTexCoord1`, for Sodium's terrain and for entities, hands and block
