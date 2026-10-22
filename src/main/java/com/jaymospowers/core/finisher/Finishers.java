@@ -61,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #HOLD_TICKS} and you finish them: one move per kind of weapon in your main hand ({@link Kind}), read off the
  * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind.
  * <p>
- * (0.15.109) Andy: "make the execution only possible with bare hands, and only activated after tapping the target three
+ * (0.15.110) Andy: "make the execution only possible with bare hands, and only activated after tapping the target three
  * times. this is to prevent accidental neck snaps. Also make all the other executions unlocked in the combat arts tree
  * replacing the current executioner function". So the neck snap is bare hands only, on the {@link #TAPS}th quick tap (a
  * hold does nothing), and anything else that isn't a weapon (a torch, a loaf) finishes nobody. The weapons' finishers
@@ -79,12 +79,12 @@ public final class Finishers {
 	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
 	public static final int HOLD_TICKS = 8, HOLD_GRACE = 8;
 	/**
-	 * (0.15.109) Bare hands take taps, not a hold, so nobody snaps a neck by accident: this many taps, each a fresh press
+	 * (0.15.110) Bare hands take taps, not a hold, so nobody snaps a neck by accident: this many taps, each a fresh press
 	 * (use quiet for more than {@link #PRESS_GAP} ticks between them, held no longer than {@link #TAP_MAX}), none more than
 	 * {@link #TAP_WINDOW} ticks after the last.
 	 */
 	public static final int TAPS = 3, PRESS_GAP = 5, TAP_MAX = 8, TAP_WINDOW = 20;
-	/** (0.15.109) The Combat Arts perk (Jaymo's Kingdoms) that unlocks every weapon's finisher; bare hands need none. */
+	/** (0.15.110) The Combat Arts perk (Jaymo's Kingdoms) that unlocks every weapon's finisher; bare hands need none. */
 	static final String UNLOCK_PERK = "executioner";
 	/** How far they may be from you for it to go on (blocks, past your reach for the use). */
 	static final double SLACK = 1.0, MAX_DISTANCE = 4.0;
@@ -177,7 +177,7 @@ public final class Finishers {
 	static final Identifier ROOT_ID = JaymosPowers.id("finisher_root"), JUMP_ID = JaymosPowers.id("finisher_jump");
 
 	/**
-	 * Use held on a downed one: on whom, since when, and when use last came; (0.15.109) bare-handed, the taps so far and
+	 * Use held on a downed one: on whom, since when, and when use last came; (0.15.110) bare-handed, the taps so far and
 	 * when this press began.
 	 */
 	private static final class Hold {
@@ -325,7 +325,7 @@ public final class Finishers {
 	}
 
 	/**
-	 * (0.15.109) Whether {@code player} has the weapons' finishers: Andy, "make all the other executions unlocked in the combat
+	 * (0.15.110) Whether {@code player} has the weapons' finishers: Andy, "make all the other executions unlocked in the combat
 	 * arts tree replacing the current executioner function". Kingdoms' Executioner perk (read by reflection, as Freerun
 	 * reads its perks); everyone in creative, and everyone if Kingdoms isn't loaded.
 	 */
@@ -365,7 +365,7 @@ public final class Finishers {
 		ItemStack stack = player.getMainHandItem();
 		boolean bare = stack.isEmpty();
 		if (!bare && kind(stack) == Kind.FIST) {
-			// (0.15.109) Andy: "make the execution only possible with bare hands": a torch or a loaf finishes nobody
+			// (0.15.110) Andy: "make the execution only possible with bare hands": a torch or a loaf finishes nobody
 			return InteractionResult.PASS;
 		}
 		long now = world.getGameTime();
@@ -409,7 +409,7 @@ public final class Finishers {
 				continue;
 			}
 			if (hold.bare) {
-				// (0.15.109) bare hands: taps, and a press held down (or taps too slow) counts for nothing
+				// (0.15.110) bare hands: taps, and a press held down (or taps too slow) counts for nothing
 				if (now - hold.last > TAP_WINDOW || hold.last - hold.pressStart > TAP_MAX) {
 					it.remove();
 				} else if (now - hold.pressStart <= 1) {
@@ -425,7 +425,7 @@ public final class Finishers {
 			}
 			long held = now - hold.start;
 			if (held >= HOLD_TICKS && !weaponsUnlocked(player)) {
-				// (0.15.109) a weapon's finisher is Combat Arts' Executioner
+				// (0.15.110) a weapon's finisher is Combat Arts' Executioner
 				it.remove();
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.locked").withStyle(ChatFormatting.GRAY));
 				continue;

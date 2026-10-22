@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -191,7 +190,7 @@ public class SeveredPart extends Entity {
 			}
 			if (this.age < 40 && this.age % 3 == 0) {
 				// a trail of blood off the cut
-				level.sendParticles(new DustParticleOptions(0x7A0000, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 			}
 		} else {
 			this.spinO = this.spin;

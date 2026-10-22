@@ -807,7 +807,7 @@ public final class ZFighterLineage {
 		player.setAttached(TAIL_CUT, now + TAIL_REGROW_TICKS);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 3.0F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.PLAYERS, 4.0F, 0.4F);
-		level.sendParticles(new DustParticleOptions(0x8A0A0A, 3.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40,
+		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x8A0A0A, 3.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40,
 			player.getBbWidth() * 0.4, 0.5, player.getBbWidth() * 0.4, 0.0);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_tail_cut").withStyle(ChatFormatting.RED));
 		endApe(player, live);

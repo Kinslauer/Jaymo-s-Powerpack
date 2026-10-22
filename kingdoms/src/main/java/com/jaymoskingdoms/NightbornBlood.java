@@ -16,7 +16,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -358,7 +357,7 @@ public final class NightbornBlood {
 		}
 		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 3, false, false, false));
 		player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 0, false, false, false));
-		level.sendParticles(new DustParticleOptions(0x8A0303, 1.0F), player.getX(), player.getEyeY() - 0.25, player.getZ(), 10, 0.15, 0.15, 0.15, 0.0);
+		level.sendParticles(PowersCompat.blood(0x8A0303, 1.0F), player.getX(), player.getEyeY() - 0.25, player.getZ(), 10, 0.15, 0.15, 0.15, 0.0);
 		level.playSound(null, elder.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.HOSTILE, 0.9F, 0.5F);
 		VampirePlayers.bitten(player);
 		Vampires.fedElder(elder, level.getOverworldClockTime(), now);

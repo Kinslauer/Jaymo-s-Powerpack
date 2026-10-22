@@ -510,7 +510,7 @@ public final class Vampires {
 			h.bit = true;
 			return h;
 		});
-		level.sendParticles(new DustParticleOptions(BLOOD, 1.0F), prey.getX(), prey.getEyeY() - 0.25, prey.getZ(), 8, 0.15, 0.15, 0.15, 0.0);
+		level.sendParticles(PowersCompat.blood(BLOOD, 1.0F), prey.getX(), prey.getEyeY() - 0.25, prey.getZ(), 8, 0.15, 0.15, 0.15, 0.0);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, prey.getX(), prey.getEyeY() - 0.2, prey.getZ(), 2, 0.1, 0.1, 0.1, 0.1);
 		level.playSound(null, mob.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.HOSTILE, 0.9F, 0.55F);
 		if (!prey.isAlive()) {
