@@ -73,6 +73,8 @@ public final class LimpController {
 	/** The player object seen last tick (a new one after joining, respawning or a portal). */
 	private static @Nullable LocalPlayer lastPlayer;
 	private static boolean startGliding;
+	/** (0.5.13) Whether this limp has been held (see LivingRagdolls.addHold): once the hold lets go they get up. */
+	private static boolean heldLimp;
 	/** A shove seen at the start of this tick, and a knock the server sent. */
 	private static @Nullable Vec3 kick, knock;
 
@@ -174,10 +176,15 @@ public final class LimpController {
 		if (!able(player)) {
 			return;
 		}
-		if (cooldown > 0) {
+		if (cooldown > 0 && !LivingRagdolls.held(player)) {
 			return;
 		}
 		Vec3 end = player.getDeltaMovement();
+		if (LivingRagdolls.held(player)) {
+			// (0.5.13) held limp (downed in water): down at once, cooldown or not
+			begin(minecraft, player, sent != null ? sent.add(end.x, 0.0, end.z) : end);
+			return;
+		}
 		if (sent != null) {
 			// the server's fling, plus the way they were already going along the ground
 			begin(minecraft, player, sent.add(end.x, 0.0, end.z));
@@ -289,7 +296,11 @@ public final class LimpController {
 		boolean settled = b.asleep() || still >= STILL_TICKS;
 		// the server lets go of anyone a power takes hold of (see LivingRagdolls.addVeto)
 		boolean freed = ticks > SYNC_GRACE && player.getAttached(LivingRagdolls.LIMP) == null;
-		if (ticks >= MAX_LIMP || ticks >= MIN_LIMP && settled || player.isUnderWater() || freed) {
+		// (0.5.13) held limp (downed in water), only the server letting go gets them up
+		boolean held = LivingRagdolls.held(player);
+		boolean letGo = heldLimp && !held;
+		heldLimp |= held;
+		if (held ? freed : letGo || ticks >= MAX_LIMP || ticks >= MIN_LIMP && settled || player.isUnderWater() || freed) {
 			finish(minecraft, true);
 		}
 	}
@@ -323,6 +334,7 @@ public final class LimpController {
 		body = null;
 		owner = null;
 		level = null;
+		heldLimp = false;
 		ticks = 0;
 		still = 0;
 		kick = null;

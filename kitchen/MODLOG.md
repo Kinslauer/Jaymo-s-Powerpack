@@ -914,3 +914,9 @@ Batch 3 of the BWM port (MIT, our own code).
   only knocks a creature down to crawl and leaves it limping when one of its legs is broken (the
   `jaymoskitchen.broken.<leg>` tags Jaymo's Powers' Wounds puts on). The check runs at the end of the tick, so a blow
   that breaks the leg cripples at once. Without Powers, nothing is crippled.
+
+### 0.5.14: held ragdolls (pack 0.15.89)
+- `LivingRagdolls.addHold`: another mod can keep a player limp for as long as it says so. The player goes limp at once
+  (cooldown or not) and doesn't get up on time, settling or water, only when the hold lets go (or the server does).
+  Jaymo's Powers holds a downed player in water, so they float limp instead of swimming (Andy: "you should just
+  ragdoll, and float").

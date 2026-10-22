@@ -1,6 +1,7 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.core.Crawl;
+import com.jaymospowers.core.wounds.Downed;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -39,6 +40,9 @@ final class CrawlTaps {
 	private static long rollStart = Long.MIN_VALUE;
 	/** The local player's last roll, to spend a direction after 2 s just as the server does. */
 	private static Crawl.@Nullable Rolling lastRoll;
+
+	/** (0.15.89) Downed in water without Kitchen's ragdoll: drifting up (blocks a tick, added each tick) to at most this. */
+	static final double ADRIFT_RISE = 0.02, ADRIFT_MAX_RISE = 0.06;
 
 	private CrawlTaps() {
 	}
@@ -87,6 +91,19 @@ final class CrawlTaps {
 			ClientPlayNetworking.send(new Crawl.Key(true));
 		}
 		tickRoll(minecraft, player);
+		tickAdrift(player);
+	}
+
+	/**
+	 * (0.15.89) Downed in water there's no swimming (DownedKeysMixin): the body floats up limp. Kitchen's ragdoll does
+	 * that when it's there; without it they drift up here.
+	 */
+	private static void tickAdrift(LocalPlayer player) {
+		if (!Downed.isDowned(player) || !player.isInWater() || com.jaymospowers.power.web.KitchenCompat.isLimp(player)) {
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * 0.9, Math.min(ADRIFT_MAX_RISE, v.y + ADRIFT_RISE), v.z * 0.9);
 	}
 
 	private static void tickRoll(Minecraft minecraft, LocalPlayer player) {
