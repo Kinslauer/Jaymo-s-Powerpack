@@ -4158,3 +4158,20 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Dawnborn: 15% harder in the sun (was 10%), heal 1 every 3 s (was 5 s), 30% more against the undead (was 20%), and by
   day their blows set the undead alight for 4 s.
 - The two left-hold moves (Thunderclap, Sunflare) live in Jaymo's Powers 0.15.72 (`power.heritage.HeritageMoves`).
+
+## 0.7.155: zombie awareness (pack 0.15.73)
+- Andy: "player zombies should work like this [Zombie Awareness], and maybe work it in to help with our stealth".
+  Zombie Awareness is ARR, so `Awareness` is our own code for its ideas. Zombies (tag `jaymoskingdoms:aware`: zombie,
+  husk, drowned, zombie villager, and Kitchen's reanimated player corpses `jaymoskitchen:zombie_player`, Andy: "it should
+  apply to the reanimated corpse zombies too"; zombie corpses already rise as plain zombies; add skeletons, creepers or witches there to make them aware too) go and look, the
+  same search `Senses` uses for a lost target, when they:
+  - hear noise (`ServerLevelGameEventMixin`): mining, placing, explosions (48 blocks), bows, eating, doors, levers,
+    buttons, plates, pistons, chests, note blocks, jukeboxes, fuses, lightning, a sprinting player's footsteps. They go
+    for the loudest they hear, so pistons and TNT draw them off. Sneaking halves your noise; Quiet Step cuts it to a
+    third (rank 2: a fifth).
+  - see a light in the dark: a held torch (anything that gives light), being on fire, or bright block light at your
+    eyes, from 40 blocks with a line of sight. Shadowed shortens it 20% a rank.
+  - smell blood: hits spill blood (red on the ground) and below 30% health you drip; zombies within 24 blocks follow
+    the freshest trail. It lasts a minute; Slip the Net halves that.
+  - hear the horde: a zombie that goes after you groans, and idle zombies within 16 blocks come.
+  Lured zombies show on the awareness gauge as searching, and count as unaware for sneak attacks.
