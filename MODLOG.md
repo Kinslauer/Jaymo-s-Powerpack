@@ -2642,3 +2642,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   corpses". `KitchenCompat.registerCorpseBlood` adds a second corpse hit hook: a heavy blunt blow
   (`BladeBlood.heavyBlunt`) on a corpse tags it `jaymoskitchen.crushed`, and Kitchen bursts a spider's body into loose
   legs. Compile-checked; not playtested.
+- **0.15.124, the enchantment glint with shaders:** Andy's game crashed with Iris on ("Close the existing render pass
+  before performing additional commands" while uploading `enchanted_glint_item.png`): Iris first asks for the glint
+  textures inside a render pass, and loading a texture there is refused in 26.3. The client loads both glint textures
+  at startup now (`JaymosPowersClient`, `CLIENT_STARTED`).

@@ -74,6 +74,13 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
 		// CurseForge import downloaded
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
+		// (0.15.124) Iris (with a shader pack on) first asks for the enchantment glint textures while a render pass is
+		// open, and loading them then crashes the game ("Close the existing render pass"). Load them up front instead.
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+			for (String glint : new String[] {"textures/misc/enchanted_glint_item.png", "textures/misc/enchanted_glint_armor.png"}) {
+				client.getTextureManager().getTexture(Identifier.withDefaultNamespace(glint));
+			}
+		});
 
 		// Balkon's guns get solid 3D models in hand (an always-on built-in pack, above WeaponMod's own assets)
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_guns"),

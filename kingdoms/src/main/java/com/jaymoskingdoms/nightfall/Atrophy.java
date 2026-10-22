@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.nightfall;
 
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -48,7 +50,14 @@ final class Atrophy extends MobEffect {
 	public void onMobHurt(ServerLevel level, LivingEntity mob, int amplifier, DamageSource source, float damage) {
 		float chance = (amplifier > 0 ? WEAKEN_CHANCE_II : WEAKEN_CHANCE) * (Nightfall.plagueDoctor(mob) ? Nightfall.PLAGUE_DOCTOR_TAKES : 1.0F);
 		if (damage > 0.0F && mob.getRandom().nextFloat() < chance) {
-			mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAKEN_TICKS, amplifier > 0 ? 1 : 0));
+			// (0.7.174) after the hit: vanilla is still walking the effect map here, and adding Weakness to it then
+			// crashed the server (ConcurrentModificationException in LivingEntity.hurtServer)
+			MinecraftServer server = level.getServer();
+			server.schedule(new TickTask(server.getTickCount(), () -> {
+				if (mob.isAlive()) {
+					mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAKEN_TICKS, amplifier > 0 ? 1 : 0));
+				}
+			}));
 		}
 	}
 }
