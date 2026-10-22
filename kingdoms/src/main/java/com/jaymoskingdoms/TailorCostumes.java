@@ -33,7 +33,7 @@ import net.minecraft.world.item.Items;
 public final class TailorCostumes {
 	/** The MCA commands (the buttons' ids, less "gui.button."). */
 	public static final String TABLE_COMMAND = "costume_table", SEW_COMMAND = "costume";
-	/** The cheapest tailor's price for a Costume Table, and for a costume (the materials, the dyes and the work). */
+	/** The cheapest tailor's price for a Costume Table. */
 	static final int TABLE_BASE = 10;
 	/** (0.7.166) The most (and the cheapest) a tailor asks for the costume editor. */
 	static final int COSTUME_MOST = 3, COSTUME_LEAST = 1;
