@@ -124,10 +124,19 @@ public final class XenoBand {
 			}
 			// the slam pose is laid over the model after it animates; the arm here is before that, so lay it over again
 			XenoformSlap.applyModel(model, state);
+			// your own body in first person: the band's dial pops up and glows through the slam, as the drawn hands' did
+			XenoformSlap.Pose pose = state.getData(XenoformSlap.KEY);
+			boolean dial = pose != null && XenoformSlap.ownBody(state);
+			if (dial) {
+				XenoformSlamView.dial(pose, state.ageInTicks);
+			}
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
 			XenoBand.submitOnArm(poseStack, collector, lightCoords, state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
 			poseStack.popPose();
+			if (dial) {
+				XenoformSlamView.dialDone();
+			}
 		}
 	}
 }

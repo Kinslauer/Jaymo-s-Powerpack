@@ -44,6 +44,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Duplex extends XenoForm {
 	// ---- tuning ----
+	/** A copper golem's size: about a block to the top of its head (the player is 1.8), the rod above that. */
+	public static final float SCALE = 0.55F;
 	public static final int SPLIT_COOLDOWN = 40, MAX_DOUBLES = 3, STORM_MAX_DOUBLES = 6;
 	public static final int RALLY_COOLDOWN = 20;
 	public static final double RALLY_REACH = 16.0;
@@ -63,7 +65,7 @@ public final class Duplex extends XenoForm {
 	private static final String[] TITLES = {"duplex", "duplex", "duplex", "triplex", "quadruplex", "quintuplex", "sextuplex", "septuplex"};
 
 	public Duplex() {
-		super("duplex", 0.9F, 18.0F, 3.0, 0.1, 0.2, 0.0, Items.COPPER_INGOT, 0xE07B4A);
+		super("duplex", SCALE, 18.0F, 3.0, 0.1, 0.2, 0.0, Items.COPPER_INGOT, 0xE07B4A);
 	}
 
 	@Override

@@ -13,6 +13,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -58,6 +60,14 @@ public final class XenoformSlap {
 	static final float WRIST_X = -1.15F, WRIST_Y = 0.85F;
 	/** The right hand poised high, and down on the wrist. */
 	static final float POISED_X = -2.4F, POISED_Y = -0.3F, POISED_Z = 0.3F, STRUCK_X = -1.34F, STRUCK_Y = -0.49F;
+	/**
+	 * Your own body seen from your eyes (First-person Model drawing it): the forearm comes up level across the front of
+	 * the chest, rolled so the band's dial faces up at you, just under the middle of the view; the right hand hangs above
+	 * it and comes down onto the dial. The left arm's turn is {@link #FP_WRIST} (ZYX radians: a big roll, so it is slerped
+	 * from the arm's own pose rather than lerped angle by angle); the right arm's are angles (radians).
+	 */
+	static final Quaternionf FP_WRIST = new Quaternionf().rotationZYX(1.536F, -2.897F, 0.977F);
+	static final float FP_POISED_X = -2.57F, FP_POISED_Y = -0.85F, FP_STRUCK_X = -2.22F, FP_STRUCK_Y = -0.85F;
 	/** First person: the camera kick when the hand lands (degrees, ticks). */
 	static final float IMPACT_SHAKE = 0.9F;
 	static final int IMPACT_SHAKE_TICKS = 7;
@@ -256,13 +266,30 @@ public final class XenoformSlap {
 		if (state instanceof AvatarRenderState avatar && model instanceof HumanoidModel<?> h) {
 			Pose pose = avatar.getData(KEY);
 			if (pose != null) {
-				apply(h, pose);
+				apply(h, pose, ownBody(avatar));
 			}
 		}
 	}
 
-	public static void apply(HumanoidModel<?> h, Pose pose) {
+	/** {@code state} is your own body as First-person Model draws it in first person: the slam plays on it. */
+	public static boolean ownBody(@Nullable AvatarRenderState state) {
+		LocalPlayer self = Minecraft.getInstance().player;
+		return state != null && self != null && state.id == self.getId() && com.jaymospowers.client.power.web.FirstPersonCompat.bodyShown();
+	}
+
+	public static void apply(HumanoidModel<?> h, Pose pose, boolean firstPerson) {
 		float raise = pose.raise(), strike = pose.strike();
+		if (firstPerson) {
+			Quaternionf from = new Quaternionf().rotationZYX(h.leftArm.zRot, h.leftArm.yRot, h.leftArm.xRot);
+			Vector3f euler = from.slerp(FP_WRIST, raise).getEulerAnglesZYX(new Vector3f());
+			h.leftArm.xRot = euler.x;
+			h.leftArm.yRot = euler.y;
+			h.leftArm.zRot = euler.z;
+			h.rightArm.xRot = Mth.lerp(raise, h.rightArm.xRot, Mth.lerp(strike, FP_POISED_X, FP_STRUCK_X));
+			h.rightArm.yRot = Mth.lerp(raise, h.rightArm.yRot, Mth.lerp(strike, FP_POISED_Y, FP_STRUCK_Y));
+			h.rightArm.zRot = Mth.lerp(raise, h.rightArm.zRot, 0.0F);
+			return;
+		}
 		h.leftArm.xRot = Mth.lerp(raise, h.leftArm.xRot, WRIST_X);
 		h.leftArm.yRot = Mth.lerp(raise, h.leftArm.yRot, WRIST_Y);
 		h.leftArm.zRot = Mth.lerp(raise, h.leftArm.zRot, 0.0F);

@@ -29,6 +29,9 @@ public final class XenoformHand {
 		boolean right = arm == source.rightArm;
 		ModelPart limb = right ? model.rightArm : model.leftArm;
 		limb.resetPose();
+		// at the player arm's shoulder, wherever the form hangs its arms (Duplex's are low on a golem's body)
+		limb.x = right ? -5.0F : 5.0F;
+		limb.y = 2.0F;
 		limb.visible = true;
 		limb.zRot = right ? 0.1F : -0.1F;
 		if (model instanceof XenoFormModels.Pyre pyre) {
