@@ -2441,7 +2441,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.85, OmniCrossbow:** OmniCrossbow (LGPL-3.0, by ThePotatoArchivist; 26.3 build 1.1.4) joins the pack as an
   untouched jar (`packModsOverride`): any item loaded into a crossbow from the off hand flies its own way. Jaymo's
   Kingdoms 0.7.162 makes it Survival's Make Do perk, for every class, and takes the Omni enchantment out of the game.
-- **0.15.86, downed: limp body, arms dragging (Kitchen 0.5.13):** Andy: "legs and torso should go limp when downed ...
+- **0.15.86, symbiote hesitation:** Andy: "change the hesitation on eating players back to 3s. the messages are good
+  maybe add a few more variations to the pool". A player's body in your arms makes the symbiote stop for 3 s again
+  (`WebSymbiote.HESITATE_TICKS` 60) before it eats; 9 hesitation lines (was 3) and 4 for throwing the body clear (was 1).
+- **0.15.88, downed: limp body, arms dragging (Kitchen 0.5.13):** Andy: "legs and torso should go limp when downed ...
   animate arms dragging you while downed instead of the float we do now". Downed, the legs trail limp and the torso
   only sways a little with each pull; the arms haul you hand over hand, the chest lifting with each pull, fast enough
   that the slow downed crawl reads as dragging (`CrawlPose`, also downed mobs that crawl). Holding Sneak while downed (to
