@@ -2630,3 +2630,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt, staff
   or greatsword finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
   slams and dive, its thrash's splash and the Behemoth's tendril slam. Compile-checked; not playtested.
+- **0.15.118, ships Jaymo's Kingdoms 0.7.172 (TaCZ flintlocks taken out):** Andy: "i dont like the tacz flintlocks,
+  you can disable those". Our flintlock gunpack for TaCZ (musket, blunderbuss, flintlock pistol, void flintlock, musket
+  ball, shot) is gone, and with it the Gunsmith's Bench: TaCZ's gun smith table is uncraftable and in no creative tab.
+  `TaczGuns.trimDefaultPack` deletes the copy TaCZ exported into `.minecraft/tacz/jaymos_flintlocks`, which it would
+  otherwise keep loading. TaCZ itself stays, for the future's modern guns. The Void Armory's pair is always our own
+  Flintlock item now (`ArsenalFlintlock`); the old TaCZ creative-tab icons (`TaczTabIconMixin`), the future's old
+  flintlock gunners (`FutureGuns.FLINTLOCKS`) and `tools/gen_tacz_guns.py` are gone. TaCZ flintlocks already in a
+  world don't work any more. Parse-checked only (no game jars in this session); not playtested.

@@ -4293,3 +4293,10 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   4th full-strength hit deal double on a foe under 30%. It now unlocks Jaymo's Powers' weapon finishers on the downed
   (hold use with a weapon: Run Through, Executioner's chop, Skull Crusher, Pinned...). Powers reads the rank by
   reflection (`Finishers.weaponsUnlocked`). Bare hands need no perk.
+
+## 0.7.172: no TaCZ flintlocks (pack 0.15.118)
+- Andy didn't like the TaCZ flintlocks, so Jaymo's Powers no longer ships them. Musket guards get WeaponMod's musket
+  (with an iron bayonet) or a crossbow, pirates WeaponMod's flintlock or a crossbow, and the Marksman card shows
+  WeaponMod's musket and bullets. A guard still holding an old TaCZ musket is handed a new one at his next check.
+  `TaczGuns` is gone.
+- Parse-checked only; not yet seen in game.

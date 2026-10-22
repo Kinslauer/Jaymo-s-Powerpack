@@ -48,7 +48,6 @@
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
-		"TaczTabIconMixin",
 		"TerrainAheadMixin",
 		"FallingLeavesInvoker",
 		"MinecraftAttackInvoker"

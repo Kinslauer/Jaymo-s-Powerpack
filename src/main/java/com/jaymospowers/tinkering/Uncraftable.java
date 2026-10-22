@@ -46,10 +46,12 @@ public final class Uncraftable {
 	 * bench: the pack only uses TaCZ for our flintlocks (armory/TaczGuns), whose recipes are jaymospowers:gun/... .
 	 * (0.10.85) Andy: nothing modern at all, so every other TaCZ block and item too (ammo boxes, the ammo bench,
 	 * targets, the statue, the poster); only the gun smith table (our Gunsmith's Bench) and its gunpowder recipe stay.
+	 * (0.15.118) Andy didn't like our flintlocks, so they're gone and the gun smith table with them.
 	 */
 	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/", "tacz:misc/");
 	static final Set<String> TACZ = Set.of("tacz:attachment_workbench", "tacz:ammo_workbench", "tacz:iron_ammo_box",
-		"tacz:gold_ammo_box", "tacz:diamond_ammo_box", "tacz:statue", "tacz:target", "tacz:target_minecart");
+		"tacz:gold_ammo_box", "tacz:diamond_ammo_box", "tacz:statue", "tacz:target", "tacz:target_minecart",
+		"tacz:gun_smith_table");
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();

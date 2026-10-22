@@ -1,8 +1,0 @@
-{
-  "name": "jaymospowers.gun.blunderbuss.name",
-  "display": "jaymospowers:blunderbuss_display",
-  "data": "jaymospowers:blunderbuss_data",
-  "tooltip": "jaymospowers.gun.blunderbuss.desc",
-  "type": "shotgun",
-  "sort": 1
-}
