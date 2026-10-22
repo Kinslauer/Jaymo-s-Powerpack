@@ -74,6 +74,7 @@ public class JaymosPowers implements ModInitializer {
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollVetoes();
 		com.jaymospowers.power.web.KitchenCompat.registerRagdollHolds();
+		com.jaymospowers.power.web.KitchenCompat.registerCorpseBlood();
 		registerAttachments();
 	}
 

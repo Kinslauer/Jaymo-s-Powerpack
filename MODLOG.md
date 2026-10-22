@@ -2590,3 +2590,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   within a second of the last; a hold counts for nothing), and anything that isn't a weapon finishes nobody. The
   weapons' finishers (still a held use) need Kingdoms' Combat Arts perk Executioner, which no longer boosts a combo's
   finisher (`Finishers.weaponsUnlocked`; everyone in creative, everyone if Kingdoms isn't loaded).
+- **0.15.111, hitting a corpse splatters its blood (Kitchen 0.5.17):** Andy: "attacking corpses when they are on the
+  ground should splatter blood especially with blades". Kitchen tells Powers of every blow or arrow that lands on a body
+  with flesh on it (`CorpseEntity.addOnHit`, registered by `KitchenCompat.registerCorpseBlood`), and
+  `BladeBlood.corpse` bleeds it in its creature's colour: a blade sprays half again a living body's drops (that fly,
+  fall and pool) plus flecks; a heavy blunt blow sprays and pools as on the living; anything else (a fist, an arrow)
+  throws only a few flecks. Never a skeleton's, an iron one, one on fire or a bloodless creature's. Tuning in
+  `BladeBlood.CORPSE_*`. Compile-checked; not playtested.

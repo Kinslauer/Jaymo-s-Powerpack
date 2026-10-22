@@ -13,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -54,6 +55,14 @@ public final class BladeBlood {
 	/** (0.15.93) An open cut's drip: this many drops (a stump's more), this small. */
 	static final int DRIP_DROPS = 1, STUMP_DRIP_DROPS = 2;
 	static final float DRIP_SCALE = 0.5F;
+	/**
+	 * (0.15.111) A blow on a corpse (Jaymo's Kitchen's, see {@link #corpse}): a blade's sprays this many times a living
+	 * body's drops and throws this many flecks per point of damage (at most this many); any other blow only spatters,
+	 * with this many flecks per point (at least one). Flecks fly this fast and are this big.
+	 */
+	static final float CORPSE_BLADE_DROPS = 1.5F, CORPSE_BLADE_FLECKS = 1.2F, CORPSE_FLECKS = 0.5F, CORPSE_FLECK_SPEED = 0.25F,
+		CORPSE_FLECK_SIZE = 1.4F;
+	static final int CORPSE_FLECKS_MAX = 16;
 
 	/** What has no blood to spill. */
 	public static final TagKey<EntityType<?>> BLOODLESS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("bloodless"));
@@ -114,12 +123,22 @@ public final class BladeBlood {
 
 	/** Whether {@code target} has blood to spill. */
 	public static boolean bleeds(LivingEntity target) {
-		return !target.getType().builtInRegistryHolder().is(BLOODLESS);
+		return bleeds(target.getType());
+	}
+
+	/** (0.15.111) Whether this kind of creature has blood to spill. */
+	public static boolean bleeds(EntityType<?> type) {
+		return !type.builtInRegistryHolder().is(BLOODLESS);
 	}
 
 	/** (0.15.93) {@code target}'s blood colour (RGB). */
 	public static int color(LivingEntity target) {
-		var type = target.getType().builtInRegistryHolder();
+		return color(target.getType());
+	}
+
+	/** (0.15.111) This kind of creature's blood colour (RGB). */
+	public static int color(EntityType<?> entityType) {
+		var type = entityType.builtInRegistryHolder();
 		if (type.is(ENDER_BLOOD)) {
 			return ENDER;
 		}
@@ -189,6 +208,40 @@ public final class BladeBlood {
 		double w = body.getBbWidth() * 0.3;
 		level.sendParticles(new BloodParticles.Spray(color(body), size(body) * DRIP_SCALE), true, false, body.getX(),
 			body.getY() + body.getBbHeight() * up, body.getZ(), stump ? STUMP_DRIP_DROPS : DRIP_DROPS, w, 0.05, w, 0.01);
+	}
+
+	/**
+	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all. {@code corpse} is Jaymo's
+	 * Kitchen's body of a {@code type} (Kitchen only asks for one with flesh on it), hit by {@code source} for
+	 * {@code damage}. A blade sprays drops that fly, fall and pool, and flecks; a heavy blunt blow sprays and pools like
+	 * one on the living ({@link #heavyBlunt}); anything else (a fist, an arrow) only throws a few flecks.
+	 */
+	public static void corpse(Entity corpse, EntityType<?> type, DamageSource source, float damage) {
+		if (!(corpse.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(type)) {
+			return;
+		}
+		int color = color(type);
+		float size = (corpse.getBbWidth() + 2.0F) / 3.0F;
+		Vec3 at = corpse.getBoundingBox().getCenter();
+		double w = corpse.getBbWidth() * 0.35 + 0.05;
+		ItemStack weapon = source.getWeaponItem();
+		boolean blade = weapon != null && Dismember.blade(weapon);
+		boolean heavy = !blade && heavyBlunt(source, damage);
+		if (blade || heavy) {
+			int drops = Math.min(HIT_DROPS_MAX, Mth.floor((HIT_DROPS + damage * DROPS_PER_DAMAGE) * (blade ? CORPSE_BLADE_DROPS : BLUNT_DROPS)));
+			level.sendParticles(new BloodParticles.Spray(color, size), true, true, at.x, at.y + 0.1, at.z, drops, w, 0.05, w,
+				SPRAY_SPEED + drops * SPEED_PER_DROP);
+		}
+		if (heavy) {
+			float over = Math.max(damage - HEAVY_BLUNT, 0.0F);
+			level.sendParticles(new BloodParticles.Puddle(color, Math.min(POOL_MAX, POOL_SCALE + over * POOL_GROWTH) * size), true, true,
+				corpse.getX(), corpse.getY() + 0.1, corpse.getZ(), Math.min(POOLS_MAX, 1 + Mth.floor(over / POOL_PER_DAMAGE)), w, 0.0, w, 0.0);
+		}
+		int flecks = Math.min(CORPSE_FLECKS_MAX, Math.max(1, Mth.floor(damage * (blade ? CORPSE_BLADE_FLECKS : CORPSE_FLECKS))));
+		level.sendParticles(BloodParticles.fleck(color, CORPSE_FLECK_SIZE), at.x, at.y + 0.1, at.z, flecks, w, 0.05, w, CORPSE_FLECK_SPEED);
+		if (blade) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_STEP, SoundSource.PLAYERS, 0.6F, 0.7F + level.getRandom().nextFloat() * 0.2F);
+		}
 	}
 
 	/** If {@code target} is dead (crushed: a blow just landed that only crushing does), it bursts. */

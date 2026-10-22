@@ -941,3 +941,9 @@ Batch 3 of the BWM port (MIT, our own code).
   middle colour, the lowest row a shade darker as the lid. Bigger patches (a cow's spots, a blaze) are left alone.
   Checked on vanilla horses, donkey, mule, cow, pig, sheep, wolf and chicken. Swapped in by
   `LivingEntityRendererMixin` (`getRenderType`'s texture).
+
+### 0.5.17: hit bodies bleed (pack 0.15.111)
+- A blow or arrow on a corpse with flesh on it (not a skeleton's, an iron one or one on fire) is passed to hooks added
+  with `CorpseEntity.addOnHit` (plain Java types, for reflection), after the knock it already gave. Jaymo's Powers
+  splatters the body's blood with it, most with a blade (Andy: "attacking corpses when they are on the ground should
+  splatter blood especially with blades"). Without Powers, nothing changes.
