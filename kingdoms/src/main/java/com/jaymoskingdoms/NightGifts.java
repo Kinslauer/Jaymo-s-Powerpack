@@ -27,7 +27,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -540,7 +539,7 @@ public final class NightGifts {
 		push(player, v);
 		AIRBORNE.put(player.getUUID(), level.getGameTime());
 		player.fallDistance = 0.0;
-		level.sendParticles(new DustParticleOptions(0x8A0303, 1.4F), player.getX(), player.getY(0.5), player.getZ(), 24, 0.3, 0.5, 0.3, 0.0);
+		level.sendParticles(PowersCompat.blood(0x8A0303, 1.4F), player.getX(), player.getY(0.5), player.getZ(), 24, 0.3, 0.5, 0.3, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY(0.3), player.getZ(), 10, 0.25, 0.3, 0.25, 0.02);
 		level.playSound(null, player.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 0.9F, 0.7F);
 		return true;
@@ -590,7 +589,7 @@ public final class NightGifts {
 			level.sendParticles(ParticleTypes.CLOUD, player.getX() + Math.cos(a) * 1.5, player.getY() + 0.1, player.getZ() + Math.sin(a) * 1.5, 0,
 				Math.cos(a), 0.05, Math.sin(a), 0.35);
 		}
-		level.sendParticles(new DustParticleOptions(0x8A0303, 1.6F), player.getX(), player.getY() + 0.2, player.getZ(), deep ? 64 : 40, radius * 0.4, 0.1,
+		level.sendParticles(PowersCompat.blood(0x8A0303, 1.6F), player.getX(), player.getY() + 0.2, player.getZ(), deep ? 64 : 40, radius * 0.4, 0.1,
 			radius * 0.4, 0.0);
 		level.playSound(null, player.blockPosition(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, deep ? 0.55F : 0.7F);
 		reveal(level, player, deep ? REVEAL_RANGE * NightbornBlood.DEEP_REVEAL : REVEAL_RANGE);
@@ -681,7 +680,7 @@ public final class NightGifts {
 			int amp = had != null && last != null && now - last < LEECH_TICKS ? Math.min(LEECH_MAX, had.getAmplifier() + 1) : 0;
 			killer.removeEffect(MobEffects.ABSORPTION);
 			killer.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, LEECH_TICKS, amp, false, false, true));
-			killer.level().sendParticles(new DustParticleOptions(0x8A0303, 1.0F), victim.getX(), victim.getY(0.6), victim.getZ(), 16, 0.3, 0.4, 0.3, 0.0);
+			killer.level().sendParticles(PowersCompat.blood(0x8A0303, 1.0F), victim.getX(), victim.getY(0.6), victim.getZ(), 16, 0.3, 0.4, 0.3, 0.0);
 		} else if (g.wolf()) {
 			// Frenzy
 			killer.heal(KILL_HEAL);

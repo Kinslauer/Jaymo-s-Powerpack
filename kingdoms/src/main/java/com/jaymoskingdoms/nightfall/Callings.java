@@ -91,7 +91,7 @@ final class Callings {
 				return false;
 			}
 			held.consume(1, player);
-			level.sendParticles(Nightfall.BLOOD, mob.getX(), mob.getEyeY() - 0.2, mob.getZ(), 8, 0.15, 0.1, 0.15, 0.0);
+			level.sendParticles(Nightfall.blood(), mob.getX(), mob.getEyeY() - 0.2, mob.getZ(), 8, 0.15, 0.1, 0.15, 0.0);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 1.0F, 0.7F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.beef", mob.getDisplayName()));
 			return true;

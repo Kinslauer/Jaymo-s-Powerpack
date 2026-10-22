@@ -120,7 +120,7 @@ public class VampireBat extends Bat {
 		if (this.latched % SIP_EVERY == 0) {
 			if (prey.hurtServer(level, this.damageSources().mobAttack(this), DAMAGE * 0.5F)) {
 				this.heal(1.0F);
-				level.sendParticles(Nightfall.BLOOD, prey.getX(), prey.getEyeY() - 0.3, prey.getZ(), 3, 0.1, 0.1, 0.1, 0.0);
+				level.sendParticles(Nightfall.blood(), prey.getX(), prey.getEyeY() - 0.3, prey.getZ(), 3, 0.1, 0.1, 0.1, 0.0);
 			}
 		}
 		if (this.latched > LATCH_TICKS || !prey.isAlive()) {

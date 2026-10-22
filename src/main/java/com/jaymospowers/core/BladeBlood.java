@@ -5,8 +5,6 @@ import com.jaymospowers.core.blood.BloodParticles;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -18,7 +16,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -205,7 +202,7 @@ public final class BladeBlood {
 		level.sendParticles(new BloodParticles.Spray(color(target), size(target)), true, true, at.x, at.y, at.z, BURST_DROPS, w, h, w,
 			BURST_SPEED);
 		pool(level, target, 2, BURST_POOL * size(target));
-		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()), at.x, at.y, at.z,
+		level.sendParticles(BloodParticles.fleck(color(target), 2.0F), at.x, at.y, at.z,
 			BURST_GORE, w, h, w, BURST_GORE_SPEED);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_BREAK, SoundSource.HOSTILE, 0.8F, 0.6F);

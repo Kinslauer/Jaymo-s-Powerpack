@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
@@ -17,7 +18,27 @@ public final class PowersCompat {
 	/** (0.7.140) Powers' {@code Fate.isCorrupted(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle corrupted;
 
+	/** (0.7.169) Powers' still red blood fleck (or null before it's looked up, or without Powers). */
+	private static @Nullable ParticleOptions bloodFleck;
+	private static boolean lookedForBlood;
+
 	private PowersCompat() {
+	}
+
+	/**
+	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
+	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.
+	 */
+	public static ParticleOptions blood(int color, float size) {
+		if (!lookedForBlood) {
+			lookedForBlood = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")
+				&& net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.fromNamespaceAndPath("jaymospowers",
+					"blood_fleck_red")) instanceof net.minecraft.core.particles.SimpleParticleType fleck) {
+				bloodFleck = fleck;
+			}
+		}
+		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */

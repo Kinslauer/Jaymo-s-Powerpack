@@ -4280,3 +4280,9 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   three notice designs (a crook's face, a masked bandit, a written notice under a red seal) in the old board's poster
   colours, and new 16px icons for the board and the notice.
 - Not yet seen in game.
+
+## 0.7.169: blood doesn't twinkle (pack 0.15.109)
+- Andy: blood shouldn't twinkle like redstone. Rend's bleeding, vampire bites and leaps, Night Bleeders and their bats,
+  blood scent and the Lycan's tearing out now send Jaymo's Powers' still blood fleck (`PowersCompat.blood`, looked up by
+  id) instead of vanilla dust; without Powers it's dust as before.
+- Compile-checked against the 26.3 jars; not yet seen in game.
