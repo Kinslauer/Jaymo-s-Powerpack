@@ -68,7 +68,7 @@ public final class CostumeModels {
 	}
 
 	/**
-	 * (0.15.122) A model worn over the player the way a costume is, for other features (Wounds' bandages and splints):
+	 * (0.15.123) A model worn over the player the way a costume is, for other features (Wounds' bandages and splints):
 	 * {@code layer}'s pieces hang off the player's bones ({@link #bones}, then children of head, body, arms and legs), and
 	 * each draw it takes the pose the wearer's model is drawn in just then, other mods' animations, MCA's body and our
 	 * own poses included. {@code after} runs last as it animates (show or hide pieces for this player there: the model
@@ -78,19 +78,19 @@ public final class CostumeModels {
 		return new Worn(layer.bakeRoot(), slim, wearer, after);
 	}
 
-	/** (0.15.122) The player's bones with nothing on them, to hang a {@link #worn} model's pieces off. */
+	/** (0.15.123) The player's bones with nothing on them, to hang a {@link #worn} model's pieces off. */
 	public static MeshDefinition bareBones(boolean slim) {
 		MeshDefinition mesh = PlayerModel.createMesh(CubeDeformation.NONE, slim);
 		mesh.getRoot().clearRecursively();
 		return mesh;
 	}
 
-	/** (0.15.122) Before a {@link #worn} model is submitted: which model this player is drawn with (MCA swaps it per player). */
+	/** (0.15.123) Before a {@link #worn} model is submitted: which model this player is drawn with (MCA swaps it per player). */
 	public static void wear(AvatarRenderState state, PlayerModel parent) {
 		state.setData(CostumeBody.PARENT, parent);
 	}
 
-	/** (0.15.122) Whether {@code parent} draws its arms slim (MCA's models say so themselves). */
+	/** (0.15.123) Whether {@code parent} draws its arms slim (MCA's models say so themselves). */
 	public static boolean slim(PlayerModel parent, AvatarRenderState state) {
 		return CostumeBody.slim(parent, state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM);
 	}
@@ -110,7 +110,7 @@ public final class CostumeModels {
 		private final @Nullable ModelPart tailFront, tailBack;
 		/** (0.15.34) Whether it's being drawn over an MCA body just now (set as it animates, read just before it's drawn). */
 		private boolean mcaBody;
-		/** (0.15.122) For a model worn by another feature ({@link #worn}): run last as it animates, with the wearer's state. */
+		/** (0.15.123) For a model worn by another feature ({@link #worn}): run last as it animates, with the wearer's state. */
 		private final @Nullable BiConsumer<PlayerModel, AvatarRenderState> after;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {

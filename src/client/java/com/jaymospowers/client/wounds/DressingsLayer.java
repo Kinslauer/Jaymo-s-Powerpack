@@ -40,7 +40,7 @@ import org.jspecify.annotations.Nullable;
  * under armour on that part, under a costume or the symbiote's suit ({@link BodyCover}), on a part that's gone, or on
  * an invisible body.
  * <p>
- * (0.15.122) Andy: "the splint seems to break the animations like the old costumes did, all of the medical items seem
+ * (0.15.123) Andy: "the splint seems to break the animations like the old costumes did, all of the medical items seem
  * to cause clipping problems". On a player they were hung off the limbs as the layer was submitted, which is before
  * the body is drawn: whatever animates the body as it's drawn (other mods, MCA's body) left them behind, floating or
  * through the limb. Now a player's are a model worn the way a costume is ({@link CostumeModels#worn}), taking the pose
@@ -56,13 +56,13 @@ public final class DressingsLayer {
 	static final Identifier SPLINT = JaymosPowers.id("textures/entity/wounds/splint.png");
 	/**
 	 * How far a wrap stands off the skin (pixels): over the sleeves and trousers (0.25), MCA's clothes (0.3125) and a
-	 * costume's suit (0.35); the head's over the hat layer (0.5) and MCA's hats (0.5625). (0.15.122) On the side that
+	 * costume's suit (0.35); the head's over the hat layer (0.5) and MCA's hats (0.5625). (0.15.123) On the side that
 	 * presses on the body or the other leg, only {@link #SEAM}.
 	 */
 	static final float WRAP = 0.4F, HEAD_WRAP = 0.6F, SEAM = 0.1F;
 	/** A splint's slats: how far out from the limb (pixels, to their inner face) and how thick. */
 	static final float SLAT_GAP = 0.3F, SLAT = 0.7F;
-	/** (0.15.122) The ties: over the slats, half their height again above and below, and just over a dressing elsewhere. */
+	/** (0.15.123) The ties: over the slats, half their height again above and below, and just over a dressing elsewhere. */
 	static final float TIE_OUT = 0.1F, TIE_HEIGHT = 0.2F, TIE_OVER = 0.1F;
 
 	private static @Nullable Pieces wide, slim;
@@ -332,7 +332,7 @@ public final class DressingsLayer {
 				return;
 			}
 			if (living instanceof AvatarRenderState state && this.getParentModel() instanceof PlayerModel parent) {
-				// (0.15.122) worn like a costume: posed as the body's drawn
+				// (0.15.123) worn like a costume: posed as the body's drawn
 				if (this.worn == null) {
 					this.worn = new Worn(() -> (PlayerModel)this.getParentModel());
 				}

@@ -34,7 +34,7 @@ its code or art. Choices Andy made:
   splinted arm or leg shows two wooden slats lashed with linen (`client/wounds/DressingsLayer`, synced to everyone by
   `Bleeding.WRAPPED` and `Breaks.SPLINTED`). Players and humanoid mobs; hidden under armour on that part, under a
   costume or the symbiote's suit, and on a part that's gone. Textures from `tools/vanilla_style/dressings.py`.
-  (0.15.122) On players they're a model worn like a costume (`CostumeModels.worn`), so they take the pose the body is
+  (0.15.123) On players they're a model worn like a costume (`CostumeModels.worn`), so they take the pose the body is
   drawn in (other mods' animations, MCA) instead of trailing it; limb dressings barely grow where they press on the
   body or the other leg, and splint ties sit just over a dressing.
 
