@@ -232,19 +232,27 @@ def band():
 
 
 # ---- the band on the wrist (entity, 32x32): a 5x3x5 box; the dial on its outer face, glowing in a second texture ----
+# Close up in first person every texel shows, so it's kept plain: no outlines or grain, just a lit top row and a
+# shaded bottom row on each side, and one small round dial.
 def band_worn():
     img = Image.new("RGBA", (32, 32))
     glow = Image.new("RGBA", (32, 32))
     metal = (120, 132, 148)
-    for name, b in faces(0, 0, 5, 3, 5).items():
-        noise_fill(img, shade(metal, LIGHT[name]), 0.15, b)
-        outline(img, b, (34, 40, 48, 255))
-    # the outer face of a left wrist is the box's +x ("left") face: a 3x3 dial of green in a dark surround
+    rim = (34, 40, 48, 255)
+    for name, (x0, y0, x1, y1) in faces(0, 0, 5, 3, 5).items():
+        rect(img, (x0, y0, x1, y1), shade(metal, LIGHT[name]))
+        if name in ("front", "back", "left", "right"):
+            rect(img, (x0, y0, x1, y0 + 1), shade(metal, LIGHT[name] * 1.15))
+            rect(img, (x0, y1 - 1, x1, y1), shade(metal, LIGHT[name] * 0.7))
+    # the outer face of a left wrist is the box's +x ("left") face: a round 3x3 dial, dark corners, a green ring, a pale heart
     x0, y0, x1, y1 = faces(0, 0, 5, 3, 5)["left"]
     rect(img, (x0 + 1, y0, x0 + 4, y1), (28, 80, 44, 255))
-    rect(img, (x0 + 2, y0 + 1, x0 + 3, y0 + 2), GREEN)
-    rect(glow, (x0 + 1, y0, x0 + 4, y1), (60, 200, 90, 255))
-    rect(glow, (x0 + 2, y0 + 1, x0 + 3, y0 + 2), GREEN)
+    for cx, cy in ((x0 + 1, y0), (x0 + 3, y0), (x0 + 1, y0 + 2), (x0 + 3, y0 + 2)):
+        img.putpixel((cx, cy), rim)
+    img.putpixel((x0 + 2, y0 + 1), PALE_GREEN)
+    for cx, cy in ((x0 + 2, y0), (x0 + 1, y0 + 1), (x0 + 3, y0 + 1), (x0 + 2, y0 + 2)):
+        glow.putpixel((cx, cy), (60, 200, 90, 255))
+    glow.putpixel((x0 + 2, y0 + 1), PALE_GREEN)
     save(img, "entity/xeno_band.png")
     save(glow, "entity/xeno_band_glow.png")
 

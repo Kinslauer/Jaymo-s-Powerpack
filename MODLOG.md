@@ -2482,3 +2482,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
   nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
   new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
+- **0.15.96, the band's hologram:** Andy: "the xeno band first person drawing is a bit cluttered, it should also display a
+  hologram projection from the band showing which xeno is selected". While you hold Z as yourself, the dialled alien
+  now stands over the band's dial as a small see-through green hologram (`XenoHologram`): upright on screen whatever the
+  wrist's roll, turned to face you with a slight sway, flickering, red while the band would refuse the change
+  (recharging, or a hidden alien not yet earned). It rises with the dial's cap and sinks as the hand comes down, so it
+  follows the scroll live. Decluttered: the poised right hand waits up and off to the right instead of right over the
+  dial (`XenoformSlamView.R_POS_POISED`), and the worn band's texture lost its dark outline round every face and its
+  grain (lit top row, shaded bottom row, one small round dial; `tools/gen_xenoform.py band_worn`). Not playtested;
+  compile-checked against the 26.3 jars.

@@ -148,7 +148,7 @@ public final class XenoformPowerClient implements PowerClient {
 	}
 
 	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
-	private static boolean refused(LocalPlayer player) {
+	static boolean refused(LocalPlayer player) {
 		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
 	}
