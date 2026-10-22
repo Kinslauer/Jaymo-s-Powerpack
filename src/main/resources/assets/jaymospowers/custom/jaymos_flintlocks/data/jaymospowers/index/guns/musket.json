@@ -1,8 +1,0 @@
-{
-  "name": "jaymospowers.gun.musket.name",
-  "display": "jaymospowers:musket_display",
-  "data": "jaymospowers:musket_data",
-  "tooltip": "jaymospowers.gun.musket.desc",
-  "type": "rifle",
-  "sort": 1
-}

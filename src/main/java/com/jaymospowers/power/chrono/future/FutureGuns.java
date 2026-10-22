@@ -29,8 +29,9 @@ import org.jspecify.annotations.Nullable;
  * future only: {@code armory/TaczGuns}) and fire them at what they're fighting. A mob can't
  * pull a TaCZ trigger, so the shots are ours: bullets (a shotgun's spread of pellets) traced from the muzzle, stopped by
  * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun. Then a
- * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. The flintlocks
- * they carried before 0.10.111 still fire. Nothing here without TaCZ.
+ * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. Nothing here
+ * without TaCZ. (0.15.118) The TaCZ flintlocks gunners carried before 0.10.111 are gone from the pack, so they're no
+ * longer fired.
  */
 public final class FutureGuns {
 	public static final String TAG = "jaymospowers.gunner";
@@ -48,10 +49,6 @@ public final class FutureGuns {
 	static final Kind MG = new Kind(36.0, 3.0F, 1, 5.0F, 70, 10, 2);
 	static final Kind SHOTGUN = new Kind(12.0, 2.0F, 8, 8.0F, 30, 1, 0);
 	static final Kind SNIPER = new Kind(64.0, 12.0F, 1, 0.6F, 80, 1, 0);
-	/** Our flintlocks (gunners from before 0.10.111). */
-	static final Kind MUSKET = new Kind(32.0, 9.0F, 1, 1.5F, 100, 1, 0);
-	static final Kind FLINTLOCK_PISTOL = new Kind(18.0, 6.0F, 1, 3.0F, 60, 1, 0);
-	static final Kind BLUNDERBUSS = new Kind(10.0, 2.5F, 6, 9.0F, 90, 1, 0);
 
 	/**
 	 * The dead can barely aim: a zombie's stray is this many times the gun's own, plus this many degrees (echoes and
@@ -91,15 +88,10 @@ public final class FutureGuns {
 		new Gun("tacz:timeless50", PISTOL, "tacz:50ae", 8), new Gun("tacz:type_81", RIFLE, "tacz:762x39", 30),
 		new Gun("tacz:ump45", SMG, "tacz:45acp", 25), new Gun("tacz:uzi", SMG, "tacz:9mm", 20),
 		new Gun("tacz:vector45", SMG, "tacz:45acp", 20)};
-	static final Gun[] FLINTLOCKS = {new Gun("jaymospowers:musket", MUSKET, "", 1),
-		new Gun("jaymospowers:flintlock_pistol", FLINTLOCK_PISTOL, "", 1), new Gun("jaymospowers:blunderbuss", BLUNDERBUSS, "", 1)};
 	static final Map<String, Gun> BY_ID = new HashMap<>();
 
 	static {
 		for (Gun gun : MODERN) {
-			BY_ID.put(gun.id, gun);
-		}
-		for (Gun gun : FLINTLOCKS) {
 			BY_ID.put(gun.id, gun);
 		}
 	}
@@ -244,7 +236,6 @@ public final class FutureGuns {
 	static void fire(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
 		RandomSource random = level.getRandom();
 		Kind kind = gun.kind;
-		boolean flintlock = !gun.id.startsWith("tacz:");
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		Vec3 eye = mob.getEyePosition();
 		Vec3 aim = foe.getBoundingBox().getCenter().subtract(eye).normalize();
@@ -265,24 +256,11 @@ public final class FutureGuns {
 			} else if (wall.getType() != HitResult.Type.MISS) {
 				level.sendParticles(ParticleTypes.CRIT, end.x, end.y, end.z, 3, 0.05, 0.05, 0.05, 0.1);
 			}
-			if (flintlock) {
-				// the smoke trail of the ball
-				double len = end.distanceTo(muzzle);
-				for (double t = 0.0; t < len; t += 1.5) {
-					Vec3 p = muzzle.add(dir.scale(t));
-					level.sendParticles(ParticleTypes.SMOKE, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
-				}
-			}
 		}
-		if (flintlock) {
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 6, 0.1, 0.1, 0.1, 0.02);
-			level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 3, 0.05, 0.05, 0.05, 0.01);
-		} else {
-			level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
-		}
+		level.sendParticles(ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 2, 0.03, 0.03, 0.03, 0.01);
 		if (!report(mob, gun)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE,
-				kind == BLUNDERBUSS || kind == SHOTGUN ? 1.2F : 0.9F, (kind == FLINTLOCK_PISTOL || kind == PISTOL ? 1.9F : 1.6F) + random.nextFloat() * 0.2F);
+				kind == SHOTGUN ? 1.2F : 0.9F, (kind == PISTOL ? 1.9F : 1.6F) + random.nextFloat() * 0.2F);
 		}
 	}
 

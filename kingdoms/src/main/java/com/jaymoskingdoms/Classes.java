@@ -355,9 +355,8 @@ public final class Classes {
 			case ARCHER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), new ItemStack(Items.LEATHER_HELMET), new ItemStack(Items.LEATHER_BOOTS));
 			case SURVIVALIST -> List.of(any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), new ItemStack(Items.BREAD, 8), new ItemStack(Items.LEATHER_BOOTS));
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD), new ItemStack(Items.CHAINMAIL_CHESTPLATE));
-			case MARKSMAN -> TaczGuns.LOADED
-				? List.of(TaczGuns.gun("musket"), TaczGuns.ammo("musket_ball", 16), new ItemStack(Items.LEATHER_CHESTPLATE))
-				: List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"), new ItemStack(Items.LEATHER_CHESTPLATE));
+			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
+				new ItemStack(Items.LEATHER_CHESTPLATE));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
 			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_BOOTS), new ItemStack(Items.WHEAT, 8));

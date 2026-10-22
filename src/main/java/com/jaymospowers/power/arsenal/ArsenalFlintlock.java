@@ -1,7 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.armory.TaczGuns;
 import com.jaymospowers.core.Fate;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -42,11 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * brings the pair ({@link #PAIR_CHANCE}; always the first time). Pinned (Sneak + Reach holding one), they're the only
  * thing the rift gives you, a pair every Reach. Fire one (right click), drop it spent, and a fresh loaded one is
  * already in your hand: no Reach, no wait.
- * <p>(0.10.43) With TaCZ installed the pair are TaCZ guns instead ({@code jaymospowers:void_flintlock}, our own model
- * in the void palette, from tools/gen_tacz_guns.py), one shot each and never reloaded: click fires the main hand's,
- * the next click the off hand's (once the main one is spent, the loaded one is brought round into the main hand,
- * {@link #tickTacz}, as TaCZ only fires from there), and Q is the reload: it drops the pair and a fresh pair comes up
- * out of the rift (their draw animation).
+ * <p>(0.10.43) With TaCZ installed the pair were TaCZ guns ({@code jaymospowers:void_flintlock}); (0.15.118) Andy
+ * didn't like the TaCZ flintlocks, so it's always this item now.
  */
 public final class ArsenalFlintlock {
 	/** The shot: reach, damage (the void adds its share), how far it throws. */
@@ -55,11 +51,6 @@ public final class ArsenalFlintlock {
 	static final double KNOCKBACK = 0.5;
 	/** Chance a Reach in the Void Armory brings the pair (unpinned). */
 	static final float PAIR_CHANCE = 0.35F;
-	/** The TaCZ gun id (jaymospowers:...) of the flintlock when TaCZ is installed. */
-	static final String TACZ_GUN = "void_flintlock";
-	/** Ticks after the main hand's TaCZ flintlock is spent before the off hand's is brought round. */
-	static final int SWAP_DELAY = 6;
-	private static final java.util.Map<java.util.UUID, Integer> SPENT_SINCE = new java.util.HashMap<>();
 
 	public static Item FLINTLOCK;
 	/** {@code jaymospowers:spent}: this flintlock has been fired. */
@@ -106,55 +97,29 @@ public final class ArsenalFlintlock {
 		return pair;
 	}
 
-	/** A loaded flintlock: the TaCZ one when TaCZ is in, else ours. */
+	/** A loaded flintlock. */
 	static ItemStack fresh() {
-		ItemStack gun = TaczGuns.gun(TACZ_GUN);
-		return gun.isEmpty() ? new ItemStack(FLINTLOCK) : gun;
+		return new ItemStack(FLINTLOCK);
 	}
 
-	/** Whether {@code stack} is the Void Armory's flintlock, either kind. */
+	/** Whether {@code stack} is the Void Armory's flintlock. */
 	public static boolean isFlintlock(ItemStack stack) {
-		return stack.is(FLINTLOCK) || TaczGuns.is(stack, TACZ_GUN);
+		return stack.is(FLINTLOCK);
 	}
 
 	/**
-	 * The pair as TaCZ guns: once the main hand's has fired ({@link #SWAP_DELAY} ticks after it's seen spent, so its
-	 * shot plays out), the off hand's loaded one is brought into the main hand for the next click.
-	 */
-	static void tickTacz(ServerPlayer player) {
-		if (!TaczGuns.LOADED) {
-			return;
-		}
-		ItemStack main = player.getMainHandItem();
-		ItemStack off = player.getOffhandItem();
-		boolean ready = Summoned.is(main) && TaczGuns.is(main, TACZ_GUN) && TaczGuns.ammo(main) <= 0
-			&& Summoned.is(off) && TaczGuns.is(off, TACZ_GUN) && TaczGuns.ammo(off) > 0;
-		if (!ready) {
-			SPENT_SINCE.remove(player.getUUID());
-			return;
-		}
-		int since = SPENT_SINCE.merge(player.getUUID(), 1, Integer::sum);
-		if (since >= SWAP_DELAY) {
-			SPENT_SINCE.remove(player.getUUID());
-			player.setItemInHand(InteractionHand.MAIN_HAND, off);
-			player.setItemInHand(InteractionHand.OFF_HAND, main);
-		}
-	}
-
-	/**
-	 * A summoned flintlock hit the ground: spent (or any TaCZ one: Q is its reload), it's swapped for a loaded one
+	 * A summoned flintlock hit the ground: spent, it's swapped for a loaded one
 	 * straight into its owner's hand (it dissolves either way). Returns true if it did.
 	 */
 	public static boolean reloadOnDrop(ServerLevel level, ItemStack stack, Summoned summoned, Vec3 at) {
-		boolean tacz = TaczGuns.is(stack, TACZ_GUN);
-		if (!tacz && (!stack.is(FLINTLOCK) || !Boolean.TRUE.equals(stack.get(SPENT)))) {
+		if (!stack.is(FLINTLOCK) || !Boolean.TRUE.equals(stack.get(SPENT))) {
 			return false;
 		}
 		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(summoned.owner());
 		if (owner == null || !armory(owner) || !owner.isAlive()) {
 			return false;
 		}
-		ItemStack fresh = tacz ? ArsenalVoid.voidTouched(fresh()) : new ItemStack(FLINTLOCK);
+		ItemStack fresh = fresh();
 		fresh.set(Summoned.TYPE, summoned);
 		if (owner.getMainHandItem().isEmpty()) {
 			owner.setItemInHand(InteractionHand.MAIN_HAND, fresh);

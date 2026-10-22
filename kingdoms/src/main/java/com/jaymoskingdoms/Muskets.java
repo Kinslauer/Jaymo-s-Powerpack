@@ -66,16 +66,18 @@ final class Muskets {
 		return musket;
 	}
 
-	/** The musket a guard is handed: our TaCZ musket when TaCZ is in, else WeaponMod's (or a crossbow). */
+	/**
+	 * The musket a guard is handed: WeaponMod's (or a crossbow). (0.7.172) Jaymo's Powers' TaCZ musket is gone from the
+	 * pack (Andy didn't like the TaCZ flintlocks).
+	 */
 	static ItemStack musketStack() {
-		ItemStack gun = TaczGuns.gun("musket");
-		return gun.isEmpty() ? new ItemStack(musket()) : gun;
+		return new ItemStack(musket());
 	}
 
 	/** A guard with his musket in hand. */
 	static boolean armed(Folk folk) {
 		ItemStack held = folk.getMainHandItem();
-		return folk.role() == Folk.GUARD && (held.is(musket()) || TaczGuns.isGun(held));
+		return folk.role() == Folk.GUARD && held.is(musket());
 	}
 
 	/** One of the guards who'd carry a musket in a rich enough kingdom. */

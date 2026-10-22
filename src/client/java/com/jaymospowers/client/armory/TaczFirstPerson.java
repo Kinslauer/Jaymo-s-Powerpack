@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * TaCZ guns (our flintlocks) in first person beside First-person Model (tr7zw). Both hook the start of drawing the
+ * TaCZ guns (the future's modern ones) in first person beside First-person Model (tr7zw). Both hook the start of drawing the
  * first-person hand: TaCZ to draw the gun with its own arms, sights and animations, First-person Model to cancel the
  * vanilla hands and show your body instead. First-person Model went first, so TaCZ never drew: you saw the body's
  * third-person arm with the gun down at the hip, nothing animated and aiming couldn't bring it up. First-person Model
@@ -38,7 +38,7 @@ public final class TaczFirstPerson {
 	private TaczFirstPerson() {
 	}
 
-	/** {@code entity} has a TaCZ gun in either hand (the Arsenal's flintlocks go one to a hand). */
+	/** {@code entity} has a TaCZ gun in either hand. */
 	public static boolean holdingGun(Object entity) {
 		if (!LOADED || !(entity instanceof LivingEntity living)) {
 			return false;
