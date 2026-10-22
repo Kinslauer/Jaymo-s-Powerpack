@@ -12,9 +12,9 @@ import net.minecraft.util.RandomSource;
 
 /**
  * (0.15.31) Every power user carries a little of the season about them where there are seasons ({@link Seasons}):
- * petals in spring, fireflies on summer nights, turning leaves in autumn, snowflakes in winter, now and then. A Wind
- * user whirls it: a ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard);
- * (0.15.54) not spring's petals, though.
+ * fireflies on summer nights, turning leaves in autumn, snowflakes in winter, now and then. A Wind user whirls it: a
+ * ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard). (0.15.75) Spring
+ * has none: no petals on any power.
  * Drawn on each client, no packets.
  */
 final class SeasonAura {
@@ -51,10 +51,7 @@ final class SeasonAura {
 				continue;
 			}
 			if (Powers.has(player, WindPower.INSTANCE)) {
-				// (0.15.54) no blossom petals in a Wind user's whirl: spring's wind carries none
-				if (season != Seasons.Season.SPRING) {
-					whirl(level, player, mote, random);
-				}
+				whirl(level, player, mote, random);
 			} else if (random.nextFloat() < MOTE_CHANCE) {
 				level.addParticle(mote, player.getX() + (random.nextDouble() - 0.5) * 2.0, player.getY() + 1.6 + random.nextDouble() * 0.8,
 					player.getZ() + (random.nextDouble() - 0.5) * 2.0, 0.0, -0.02, 0.0);
@@ -62,10 +59,10 @@ final class SeasonAura {
 		}
 	}
 
-	/** The season's mote, or null when it has none now (summer by day). */
+	/** The season's mote, or null when it has none now (spring, summer by day). */
 	private static ParticleOptions mote(Seasons.Season season, ClientLevel level, RandomSource random) {
 		return switch (season) {
-			case SPRING -> ParticleTypes.CHERRY_LEAVES;
+			case SPRING -> null;
 			case SUMMER -> level.isBrightOutside() ? null : ParticleTypes.FIREFLY;
 			case AUTUMN -> switch (random.nextInt(3)) {
 				case 0 -> ParticleTypes.RED_POPLAR_LEAVES;
