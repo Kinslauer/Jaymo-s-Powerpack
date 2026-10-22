@@ -103,7 +103,7 @@ public final class Dragons {
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
 		Disguises.register();
 		DragonEggs.register();
-		// (0.7.156) Andy: the dragons' spawn eggs are out of creative (tab and search); /give still has them
+		// (0.7.157) Andy: the dragons' spawn eggs are out of creative (tab and search); /give still has them
 
 		PayloadTypeRegistry.serverboundPlay().register(Breathe.TYPE, Breathe.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Breathe.TYPE, (payload, context) -> {
