@@ -176,7 +176,10 @@ public final class Rulers {
 		if (target != null) {
 			return target;
 		}
-		return mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+		// (0.7.150) folk brains don't register ATTACK_TARGET, and getMemory throws for those (crashed the server
+		// when a crook was caught near a folk guard)
+		return mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+			? mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) : null;
 	}
 
 	/** {@code f}'s ruler's blood, if a villager crowned holds (or last held) its throne. */

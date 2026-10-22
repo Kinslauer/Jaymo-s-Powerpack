@@ -4133,3 +4133,8 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
 - The gold truce: an Emberborn can hand a Hornkin gold directly. An ingot buys 2 more wares than usual and a 25% chance
   of a rare one (blaze rods, gilded blackstone, crying obsidian, magma blocks, a ghast tear, netherite scrap); a gold
   block buys 3 rare ones. An Emberborn who hands a raider a gold block buys off its whole party.
+
+## 0.7.150: crash when a crook was caught (pack 0.15.65)
+- `Rulers.target` read a mob's brain ATTACK_TARGET without checking it was registered; folk brains don't register it,
+  so the guard search in `Arrests.arrest` threw "Unregistered memory fetched" and crashed the server (Deck, 2026-10-21).
+  It now checks `hasMemoryValue` first.
