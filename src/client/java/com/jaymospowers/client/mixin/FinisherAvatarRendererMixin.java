@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.97) A finisher (see FinisherPose): read onto the render state, facing the downed; the step, sink and bend after the body turns. */
+/** (0.15.98) A finisher (see FinisherPose): read onto the render state, facing the downed; the step, sink and bend after the body turns. */
 @Mixin(AvatarRenderer.class)
 abstract class FinisherAvatarRendererMixin {
 	@Inject(

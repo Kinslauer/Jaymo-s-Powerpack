@@ -259,7 +259,7 @@ public final class Treatment {
 	}
 
 	/**
-	 * (0.15.97) Whether {@code stack} is medicine on a plain use (no sneak): our kit with its body screen, or the poppy. Spirits,
+	 * (0.15.98) Whether {@code stack} is medicine on a plain use (no sneak): our kit with its body screen, or the poppy. Spirits,
 	 * honey and a red-hot blade are only medicine with sneak, so a plain hold with them is a finisher's ({@code Finishers}).
 	 */
 	public static boolean treatsOnPlainUse(ItemStack stack, Level level) {

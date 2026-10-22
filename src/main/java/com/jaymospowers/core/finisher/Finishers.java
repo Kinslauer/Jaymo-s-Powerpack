@@ -56,7 +56,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.97) Finishers. Andy: "every weapon should be able to right click and hold a downed enemy, and then do a unique
+ * (0.15.98) Finishers. Andy: "every weapon should be able to right click and hold a downed enemy, and then do a unique
  * finisher animation". Hold use (not sneaking: sneak + use stays the revive and the pick-up) on someone downed for
  * {@link #HOLD_TICKS} and you finish them: one move per kind of weapon in your main hand ({@link Kind}), read off the
  * item's tags and name, so a weapon forged at the Tool Station or another mod's falls in with its kind. Anything that

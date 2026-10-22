@@ -20,7 +20,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.97) How a finisher looks ({@link Finishers}), for everyone: the body turned to face whoever lies downed, a step
+ * (0.15.98) How a finisher looks ({@link Finishers}), for everyone: the body turned to face whoever lies downed, a step
  * in toward them if they're further off than the move reaches, and the move played key by key ({@link #KEYS}). Each key
  * sets how far the body sinks (onto a knee, into a lunge), how far it bends forward from the hips and turns (a
  * wind-up), both arms, both legs (as the world sees them, so they stay planted under the bend), the head, and the grip:

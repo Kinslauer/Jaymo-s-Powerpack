@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.97) Right after a model animates: a finisher's arms, legs and head (see FinisherPose). */
+/** (0.15.98) Right after a model animates: a finisher's arms, legs and head (see FinisherPose). */
 @Mixin(ModelFeatureRenderer.class)
 abstract class FinisherModelFeatureRendererMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;setupAnim(Ljava/lang/Object;)V",

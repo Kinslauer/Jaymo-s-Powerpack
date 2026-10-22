@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.97) A finisher turns the weapon in the hand (point down for a plunge, along the arm for a stab: see FinisherPose). */
+/** (0.15.98) A finisher turns the weapon in the hand (point down for a plunge, along the arm for a stab: see FinisherPose). */
 @Mixin(ItemInHandLayer.class)
 abstract class FinisherItemInHandLayerMixin {
 	@Inject(method = "submitArmWithItem", at = @At(value = "INVOKE",
