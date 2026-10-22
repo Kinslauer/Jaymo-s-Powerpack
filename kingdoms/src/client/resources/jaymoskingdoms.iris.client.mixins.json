@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.iris",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["IrisTerrainSkyLightMixin", "IrisVanillaSkyLightMixin", "IrisUniformsMixin"],
+	"injectors": { "defaultRequire": 0 }
+}

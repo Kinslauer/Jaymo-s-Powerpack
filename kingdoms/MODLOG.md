@@ -4213,3 +4213,16 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   nothing in a player's hands. `OmniCrossbows` decides, through `mixin/omni/PlayerProjectileMixin` (priority 1500,
   after the mod's own mixin on `Player.getProjectile`), applied only when the mod is loaded; without the mod the perk
   can't be learned. Nothing of the mod's is compiled against.
+
+## 0.7.164: dark nights keep shaders on (pack 0.15.91)
+- Andy asked whether True Darkness Compat (MIT, 1.20.1 Forge only) could replace switching shaders off on dark nights,
+  then "yeah lets try that, my players want shaders". Its idea, remade for 26.3 Iris (none of its code): the sky light
+  level Iris hands a shader pack (`gl_MultiTexCoord1`, for Sodium's terrain and for entities, hands and block
+  entities) is multiplied by a new uniform, `jaymo_SkyLight`, the same moonlight factor the vanilla lightmap gets
+  (`DarkNights.ShaderSkyLight`, `client/mixin/iris`, Iris by reflection and string targets, no compile dependency).
+  Under a new moon the open sky lights a pack's world no more than a cave roof does; a full or event moon is
+  unchanged. It isn't tied to particular packs (True Darkness Compat patched four): any pack that reads the light levels
+  (BSL, Complementary, Sildur's, Photon...) follows it. A pack's own "minimum light" setting still keeps some sight.
+- Shaders now stay on all night. If the hook doesn't take (an Iris update renames what it patches), the old switch-off
+  comes back by itself, with a warning in the log.
+- Not yet seen in game: needs a check with a shader pack on a new-moon night.
