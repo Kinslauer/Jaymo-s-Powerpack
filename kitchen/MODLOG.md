@@ -925,3 +925,19 @@ Batch 3 of the BWM port (MIT, our own code).
 - A player tagged `jaymospowers_unpatched` (Jaymo's Powers: a wound past bruising left undressed, a cut, festering or
   an unset break) heals from meals at `Stomach.UNPATCHED_REGEN` (a quarter) of the speed. Andy: "regeneration should
   only kick in at full speed when you are fully patched up". Without Powers, nothing changes.
+
+### 0.5.16: dead animals lie on their side, eyes shut
+- Andy: "all these animals are actually corpses, they should close their eyes, and fall on their side instead of
+  biasing toward sitting up". The quadruped ragdoll's leg cones prop the physics belly down (or sitting up on the
+  rump, like a dog); tuning the physics alone didn't fix it (checked in a headless sim: torques and wider cones
+  still settled belly down). So a four-legged corpse is drawn eased onto its side as it slows down
+  (`ClientRagdolls.Track#settle`, `RagdollPose.of(..., side, sideUp)`): level along the way its head points, the
+  side that was higher stays up, its middle a torso's thickness off the ground, legs as a dead animal's lie (front
+  forward, hind back). Moving again (kicked, blown up), it goes back to the physics. Already-still corpses coming
+  into view start on their side. The physics itself (server) is unchanged.
+- Every corpse drawn by its mob's renderer has its eyes shut (`ClosedEyes`): the texture is copied once per model and
+  texture, and on the top half of the front and side faces of the head's first box (`head`, a horse's
+  `head_parts/head`, a wolf's `real_head`) a small white-and-black eye or a lone dark speck is filled with the face's
+  middle colour, the lowest row a shade darker as the lid. Bigger patches (a cow's spots, a blaze) are left alone.
+  Checked on vanilla horses, donkey, mule, cow, pig, sheep, wolf and chicken. Swapped in by
+  `LivingEntityRendererMixin` (`getRenderType`'s texture).

@@ -2556,3 +2556,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   first time (details in the Kingdoms MODLOG).
 - **0.15.106, ships Jaymo's Kingdoms 0.7.166:** hoods and the goblin disguise name you on the tab list and over your
   head too, and a bandit mask's name reaches the tab list (details in the Kingdoms MODLOG).
+- **0.15.107, the band shows, and its hologram keeps its size:** Andy's clip: "the watch is obscured, the pov is drawn
+  way too large. and it isnt visible from third person". With First-person Model your own arm carries the band right
+  under your eye, so the hologram and its glow (sized for the drawn slam's wrist about a block away) filled the screen.
+  They're now scaled with the band's distance from your eye (`XenoHologram.REF_DISTANCE`), so they look the same size
+  either way. And the band was hidden under costumes and the symbiote suit (it skipped any covered arm, first and third
+  person): it's now drawn over them, grown round the arm to 5.5 pixels (`XenoBand.GROW`), and further over a chestplate's
+  sleeve (`ARMOUR_GROW`). Not playtested; compile-checked against the 26.3 jars.
