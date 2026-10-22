@@ -74,6 +74,8 @@ public final class ToolStats {
 
 	public static Stats compute(ToolType type, List<TinkerMaterial> materials) {
 		float headWeight = 0, durability = 0, speed = 0, attack = 0;
+		// (0.15.x) bow limbs share the durability average with the heads; grips add a share and melee damage
+		float limbWeight = 0, limbDurability = 0, gripWeight = 0, gripDurability = 0, gripAttack = 0;
 		float handleWeight = 0, handleDurability = 0, handleSpeed = 0, handleAttack = 0, handleAttackSpeed = 0;
 		TinkerMaterial.Tier tier = TinkerMaterial.Tier.WOOD;
 		Map<Trait, Integer> traits = new EnumMap<>(Trait.class);
@@ -86,7 +88,22 @@ public final class ToolStats {
 				continue;
 			}
 			switch (slot.part().kind) {
-				case HEAD -> {
+				case LIMB -> {
+					TinkerMaterial.Limb limb = material.limb();
+					if (limb != null) {
+						limbWeight += slot.scale();
+						limbDurability += limb.durability() * slot.scale();
+					}
+				}
+				case GRIP -> {
+					TinkerMaterial.Grip grip = material.grip();
+					if (grip != null) {
+						gripWeight += slot.scale();
+						gripDurability += grip.durability() * slot.scale();
+						gripAttack += grip.meleeDamage() * slot.scale();
+					}
+				}
+				case HEAD, ARROW_HEAD -> {
 					headWeight += slot.scale();
 					durability += s.durability() * slot.scale();
 					speed += s.miningSpeed() * slot.scale();
@@ -102,9 +119,22 @@ public final class ToolStats {
 					handleAttack += s.handleAttack() * slot.scale();
 					handleAttackSpeed += s.handleAttackSpeed() * slot.scale();
 				}
-				case BINDING -> {
+				default -> {
 				}
 			}
+		}
+		if (gripWeight > 0) {
+			gripDurability /= gripWeight;
+			gripAttack /= gripWeight;
+		}
+		if (limbWeight > 0) {
+			// heads and limbs average together by their shares
+			durability = (durability + limbDurability) / (headWeight + limbWeight);
+			if (headWeight > 0) {
+				speed /= headWeight;
+				attack /= headWeight;
+			}
+			headWeight = 0;
 		}
 		if (headWeight > 0) {
 			durability /= headWeight;
@@ -121,17 +151,92 @@ public final class ToolStats {
 		if (tier.ordinal() > type.maxTier.ordinal()) {
 			tier = type.maxTier;
 		}
-		int finalDurability = Math.max(1, Math.round(durability * (1 + handleDurability) * type.durabilityMultiplier));
+		int finalDurability = Math.max(1, Math.round((durability + type.ranged.baseDurability()) * (1 + handleDurability + gripDurability)
+			* type.durabilityMultiplier));
 		float finalSpeed = Math.max(0.1F, speed * (1 + handleSpeed) * type.speedMultiplier);
-		float finalAttack = (type.attack + attack) * (1 + handleAttack) * type.attackMultiplier;
+		float finalAttack = (type.attack + attack + gripAttack) * (1 + handleAttack) * type.attackMultiplier;
 		float finalAttackSpeed = type.attackSpeed * (1 + handleAttackSpeed);
 		return new Stats(finalDurability, finalSpeed, finalAttack, finalAttackSpeed, tier, traits);
+	}
+
+	/** (0.15.x) A ranged tool's numbers: draw speed, arrow velocity and accuracy as multipliers of a plain bow's, and thrown damage. */
+	public record Ranged(float drawSpeed, float velocity, float accuracy, float damage, float throwSpeed) {
+		/** Shot spread over a plain bow's: its accuracy of 0.75 is 1, 1.0 is none, and worse than 0.5 is double. */
+		public float spread() {
+			return Mth.clamp((1.0F - accuracy) / 0.25F, 0.0F, 2.0F);
+		}
+	}
+
+	/** (0.15.x) Accuracy a level of Aerodynamic (a feather) adds. */
+	static final float AERODYNAMIC_ACCURACY = 0.1F;
+	/** (0.15.x) A thrown blade's damage: its base and a share of the head's attack. */
+	static final float THROWN_HEAD_SHARE = 0.75F;
+	/** (0.15.x) An arrow's base damage (a plain arrow's 2) and the share of the head's attack it adds. */
+	static final float ARROW_BASE_DAMAGE = 2.0F, ARROW_HEAD_SHARE = 0.5F;
+
+	public static Ranged ranged(ToolType type, List<TinkerMaterial> materials) {
+		float limbWeight = 0, draw = 0, velocity = 0, accuracy = 0, gripAccuracy = 0, shaft = 0, aero = 0;
+		for (int i = 0; i < type.parts.size() && i < materials.size(); i++) {
+			ToolType.Slot slot = type.parts.get(i);
+			TinkerMaterial material = materials.get(i);
+			switch (slot.part().kind) {
+				case LIMB -> {
+					TinkerMaterial.Limb limb = material.limb();
+					if (limb != null) {
+						limbWeight += slot.scale();
+						draw += limb.drawSpeed() * slot.scale();
+						velocity += limb.velocity() * slot.scale();
+						accuracy += limb.accuracy() * slot.scale();
+					}
+				}
+				case GRIP -> {
+					TinkerMaterial.Grip grip = material.grip();
+					if (grip != null) {
+						gripAccuracy += grip.accuracy() * slot.scale();
+					}
+				}
+				case ARROW_SHAFT -> shaft += material.shaftVelocity();
+				default -> {
+				}
+			}
+			if (material.trait == Trait.AERODYNAMIC) {
+				aero += AERODYNAMIC_ACCURACY;
+			}
+		}
+		if (limbWeight > 0) {
+			draw /= limbWeight;
+			velocity /= limbWeight;
+			accuracy /= limbWeight;
+		}
+		float finalAccuracy = type.ranged.baseAccuracy() + accuracy + gripAccuracy + aero;
+		float damage = 0.0F;
+		Stats stats = compute(type, materials);
+		switch (type.style) {
+			case JAVELIN -> damage = stats.attack() * type.ranged.thrownDamage();
+			case THROWN -> damage = type.ranged.thrownDamage() + headAttack(type, materials) * THROWN_HEAD_SHARE;
+			case ARROW -> damage = ARROW_BASE_DAMAGE + headAttack(type, materials) * ARROW_HEAD_SHARE;
+			default -> {
+			}
+		}
+		return new Ranged(Math.max(0.2F, 1.0F + draw), Math.max(0.2F, 1.0F + velocity + shaft), finalAccuracy, damage, type.ranged.throwSpeed());
+	}
+
+	/** The head parts' attack, averaged. */
+	private static float headAttack(ToolType type, List<TinkerMaterial> materials) {
+		float total = 0, weight = 0;
+		for (int i = 0; i < type.parts.size() && i < materials.size(); i++) {
+			if (type.parts.get(i).part().kind == PartType.Kind.ARROW_HEAD && materials.get(i).stats != null) {
+				total += materials.get(i).stats.attack();
+				weight++;
+			}
+		}
+		return weight > 0 ? total / weight : 0.0F;
 	}
 
 	/** The materials on a tool, in part order (a raw /give gets its tool's defaults). */
 	public static List<TinkerMaterial> materials(ItemStack stack) {
 		List<String> ids = stack.get(Tinkering.TOOL_MATERIALS);
-		ToolType type = stack.getItem() instanceof TinkerToolItem tool ? tool.type : null;
+		ToolType type = stack.getItem() instanceof TinkerTool tool ? tool.type() : null;
 		List<TinkerMaterial> out = new ArrayList<>();
 		int size = type != null ? type.parts.size() : ids != null ? ids.size() : 0;
 		for (int i = 0; i < size; i++) {
@@ -145,15 +250,22 @@ public final class ToolStats {
 		if (type == null) {
 			return TinkerMaterial.WOOD;
 		}
-		return switch (type.parts.get(index).part().kind) {
+		return defaultFor(type.parts.get(index).part().kind);
+	}
+
+	/** What a part of this kind is made of when nothing says (a raw /give, the creative tab). */
+	public static TinkerMaterial defaultFor(PartType.Kind kind) {
+		return switch (kind) {
 			case HEAD -> TinkerMaterial.ROCK_STONE;
-			case HANDLE -> TinkerMaterial.WOOD;
-			case BINDING -> TinkerMaterial.STRING;
+			case HANDLE, LIMB, GRIP, ARROW_SHAFT -> TinkerMaterial.WOOD;
+			case BINDING, BOWSTRING -> TinkerMaterial.STRING;
+			case ARROW_HEAD -> TinkerMaterial.FLINT;
+			case FLETCHING -> TinkerMaterial.FEATHER;
 		};
 	}
 
 	public static @Nullable Stats stats(ItemStack stack) {
-		return stack.getItem() instanceof TinkerToolItem tool ? compute(tool.type, materials(stack)) : null;
+		return stack.getItem() instanceof TinkerTool tool ? compute(tool.type(), materials(stack)) : null;
 	}
 
 	/** A tool stack with these materials, freshly built. */
@@ -165,7 +277,7 @@ public final class ToolStats {
 	}
 
 	public static boolean isBroken(ItemStack stack) {
-		return stack.getItem() instanceof TinkerToolItem && stack.isDamageableItem() && stack.getDamageValue() >= stack.getMaxDamage();
+		return stack.getItem() instanceof TinkerTool && stack.isDamageableItem() && stack.getDamageValue() >= stack.getMaxDamage();
 	}
 
 	/** How worn the tool is, 0 (new) to 1 (broken). */
@@ -176,14 +288,21 @@ public final class ToolStats {
 
 	/** Rewrites everything a tool carries from its materials and wear. */
 	public static void apply(ItemStack stack) {
-		if (!(stack.getItem() instanceof TinkerToolItem item)) {
+		if (!(stack.getItem() instanceof TinkerTool item)) {
 			return;
 		}
-		ToolType type = item.type;
+		ToolType type = item.type();
 		List<TinkerMaterial> materials = materials(stack);
 		Stats stats = compute(type, materials);
 		if (!stack.has(Tinkering.TOOL_MATERIALS)) {
 			stack.set(Tinkering.TOOL_MATERIALS, materials.stream().map(m -> m.id).toList());
+		}
+		if (!type.style.durable()) {
+			// (0.15.x) arrows and thrown blades are plain stacks: no wear, no modifiers, just their materials' look and name
+			stack.remove(DataComponents.MAX_DAMAGE);
+			stack.remove(DataComponents.DAMAGE);
+			applyLook(stack, type, materials, false);
+			return;
 		}
 		int durability = Modifier.durability(stack, stats.durability());
 		stack.set(DataComponents.MAX_DAMAGE, durability);
@@ -210,6 +329,11 @@ public final class ToolStats {
 		} else {
 			stack.remove(DataComponents.BLOCKS_ATTACKS);
 		}
+		applyLook(stack, type, materials, broken);
+	}
+
+	/** Its model (by material, and broken or not) and its name. */
+	private static void applyLook(ItemStack stack, ToolType type, List<TinkerMaterial> materials, boolean broken) {
 		stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(broken),
 			materials.stream().map(m -> m.id).toList(), List.of()));
 		stack.set(DataComponents.ITEM_NAME, Component.translatable("jaymospowers.tinkering.named", materials.getFirst().displayName(),
@@ -217,7 +341,7 @@ public final class ToolStats {
 	}
 
 	private static Tool tool(ToolType type, Stats stats, TinkerMaterial.Tier tier) {
-		if (type.style == ToolType.Style.WEAPON) {
+		if (type.style == ToolType.Style.WEAPON || type.style.shoots() || type.style.thrown()) {
 			return new Tool(List.of(), 1.0F, 1, false);
 		}
 		if (type.style == ToolType.Style.SWORD) {
@@ -250,7 +374,7 @@ public final class ToolStats {
 
 	/** Mining speed with the traits that change as you go (Stonebound with wear, Dwarven with depth, Crumbling by block). */
 	public static float liveSpeed(Player player, ItemStack stack, BlockState state, float speed) {
-		if (speed <= 1.0F || !(stack.getItem() instanceof TinkerToolItem)) {
+		if (speed <= 1.0F || !(stack.getItem() instanceof TinkerTool)) {
 			return speed;
 		}
 		Stats stats = stats(stack);
@@ -300,10 +424,10 @@ public final class ToolStats {
 	/** Durability one unit of the head's material puts back. */
 	public static int repairPerUnit(ItemStack stack) {
 		Stats stats = stats(stack);
-		if (stats == null || !(stack.getItem() instanceof TinkerToolItem tool)) {
+		if (stats == null || !(stack.getItem() instanceof TinkerTool tool)) {
 			return 0;
 		}
-		float share = REPAIR_FACTOR / tool.type.parts.getFirst().part().cost * (1 + CULTIVATED_REPAIR * stats.level(Trait.CULTIVATED));
+		float share = REPAIR_FACTOR / tool.type().parts.getFirst().part().cost * (1 + CULTIVATED_REPAIR * stats.level(Trait.CULTIVATED));
 		return Math.max(1, Math.round(stack.getMaxDamage() * share));
 	}
 }

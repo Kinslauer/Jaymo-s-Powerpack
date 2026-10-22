@@ -59,7 +59,22 @@ public enum ToolType {
 		3.0F, 0.9F, 1.0F, 1.0F, 1.0F, List.of(BlockTags.MINEABLE_WITH_AXE), Map.of(Trait.CHARGE_ATTACK, 1, Trait.STRIPPING, 1, Trait.AREA, 1),
 		Style.TOOL, 5.0F, Aoe.column(5), TinkerMaterial.Tier.NETHERITE),
 	BATTLESIGN("battlesign", parts(PartType.LARGE_PLATE, 1, PartType.TOUGH_HANDLE, 1),
-		2.0F, 1.2F, 1.0F, 1.0F, 1.0F, List.of(), Map.of(Trait.BLOCKING, 1, Trait.BONKING, 1, Trait.KNOCKBACK, 1), Style.WEAPON, 0.0F);
+		2.0F, 1.2F, 1.0F, 1.0F, 1.0F, List.of(), Map.of(Trait.BLOCKING, 1, Trait.BONKING, 1, Trait.KNOCKBACK, 1), Style.WEAPON, 0.0F),
+
+	// (0.15.x) Tinkers' ranged weapons (docs/Tinkering-Weapons.md), their numbers from its tool definitions. Bows and the crossbow
+	// shoot arrows; the javelin is thrown (and strikes in the hand); throwing axes and shuriken are thrown by the stack
+	LONGBOW("longbow", parts(PartType.BOW_LIMB, 1, PartType.BOW_LIMB, 1, PartType.BOW_GRIP, 1, PartType.BOWSTRING, 1),
+		0.0F, 1.0F, 1.0F, 1.5F, 1.0F, Map.of(), Style.BOW, new Ranged(20, 0.75F, 120, 0.0F, 0.0F, 1, 0)),
+	CROSSBOW("crossbow", parts(PartType.BOW_LIMB, 1, PartType.BOW_GRIP, 1, PartType.BOWSTRING, 1),
+		0.0F, 1.0F, 1.0F, 2.0F, 1.0F, Map.of(), Style.CROSSBOW, new Ranged(25, 0.75F, 0, 0.0F, 0.0F, 1, 0)),
+	JAVELIN("javelin", parts(PartType.SMALL_BLADE, 1, PartType.TOOL_HANDLE, 1, PartType.BOW_LIMB, 1, PartType.BOW_GRIP, 1),
+		3.0F, 1.1F, 1.0F, 1.0F, 1.0F, Map.of(), Style.JAVELIN, new Ranged(0, 0.75F, 0, 1.2F, 2.4F, 1, 8)),
+	ARROW("arrow", parts(PartType.ARROW_HEAD, 1, PartType.ARROW_SHAFT, 1, PartType.FLETCHING, 1),
+		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.ARROW, new Ranged(0, 0.75F, 0, 0.0F, 0.0F, 4, 0)),
+	THROWING_AXE("throwing_axe", parts(PartType.ARROW_HEAD, 1, PartType.ARROW_SHAFT, 1),
+		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.THROWN, new Ranged(0, 0.5F, 0, 1.5F * 2.5F, 1.6F, 2, 10)),
+	SHURIKEN("shuriken", parts(PartType.ARROW_HEAD, 1, PartType.ARROW_HEAD, 1),
+		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.THROWN, new Ranged(0, 0.75F, 0, 1.5F * 1.5F, 3.0F, 4, 6));
 
 	/** A slot on the tool: the part it takes and its share of that part kind's stats. */
 	public record Slot(PartType part, float scale) {
@@ -69,7 +84,35 @@ public enum ToolType {
 	 * {@code TOOL}: mines its blocks. {@code SWORD}: cuts cobwebs and leaves like a sword, wears 2 a block. {@code WEAPON}: a
 	 * weapon that digs nothing (the battlesign).
 	 */
-	public enum Style { TOOL, SWORD, WEAPON }
+	public enum Style {
+		TOOL, SWORD, WEAPON,
+		/** (0.15.x) Ranged: a bow, a crossbow, a thrown spear (also strikes), a stack of arrows and a stack of thrown blades. */
+		BOW, CROSSBOW, JAVELIN, ARROW, THROWN;
+
+		/** A tool you wear down and mend, with modifiers (the arrows and thrown blades are plain stacks). */
+		public boolean durable() {
+			return this != ARROW && this != THROWN;
+		}
+
+		/** Shoots arrows. */
+		public boolean shoots() {
+			return this == BOW || this == CROSSBOW;
+		}
+
+		public boolean thrown() {
+			return this == JAVELIN || this == THROWN;
+		}
+	}
+
+	/**
+	 * (0.15.x) A ranged tool's numbers: ticks a bow takes to draw (before draw speed) and the accuracy it starts with (0.75 is a
+	 * vanilla bow's spread; each 0.25 more halves... takes the spread off by that much of it), durability it starts with before its
+	 * limbs, a thrown weapon's base damage (before the head's attack, half of it counted) and throw speed, how many one
+	 * build gives, and the ticks before another can be thrown (or, for a javelin, the hold needed to throw).
+	 */
+	public record Ranged(int drawTicks, float baseAccuracy, int baseDurability, float thrownDamage, float throwSpeed, int yield, int cooldown) {
+		public static final Ranged NONE = new Ranged(0, 0.75F, 0, 0.0F, 0.0F, 1, 0);
+	}
 
 	/**
 	 * (0.15.x) How many blocks a tool takes at once besides the one it broke ({@link TraitEffects#areaBreak}): {@code BOX} (a
@@ -116,6 +159,15 @@ public enum ToolType {
 	/** (0.15.x) The blocks it takes at once besides the one it broke, and the best tier its materials can mine at. */
 	public final Aoe aoe;
 	public final TinkerMaterial.Tier maxTier;
+	/** (0.15.x) The ranged weapons' own numbers ({@link Ranged#NONE} for the rest). */
+	public final Ranged ranged;
+
+	/** A ranged tool: nothing to mine, no traits of its own. */
+	ToolType(String id, List<Slot> parts, float attack, float attackSpeed, float attackMultiplier, float durabilityMultiplier,
+		float speedMultiplier, Map<Trait, Integer> traits, Style style, Ranged ranged) {
+		this(id, parts, attack, attackSpeed, attackMultiplier, durabilityMultiplier, speedMultiplier, List.of(), traits, style, 0.0F,
+			Aoe.NONE, TinkerMaterial.Tier.WOOD, ranged);
+	}
 
 	ToolType(String id, List<Slot> parts, float attack, float attackSpeed, float attackMultiplier, float durabilityMultiplier,
 		float speedMultiplier, List<TagKey<Block>> mines, Map<Trait, Integer> traits, Style style, float disablesShields) {
@@ -126,6 +178,13 @@ public enum ToolType {
 	ToolType(String id, List<Slot> parts, float attack, float attackSpeed, float attackMultiplier, float durabilityMultiplier,
 		float speedMultiplier, List<TagKey<Block>> mines, Map<Trait, Integer> traits, Style style, float disablesShields, Aoe aoe,
 		TinkerMaterial.Tier maxTier) {
+		this(id, parts, attack, attackSpeed, attackMultiplier, durabilityMultiplier, speedMultiplier, mines, traits, style, disablesShields,
+			aoe, maxTier, Ranged.NONE);
+	}
+
+	ToolType(String id, List<Slot> parts, float attack, float attackSpeed, float attackMultiplier, float durabilityMultiplier,
+		float speedMultiplier, List<TagKey<Block>> mines, Map<Trait, Integer> traits, Style style, float disablesShields, Aoe aoe,
+		TinkerMaterial.Tier maxTier, Ranged ranged) {
 		this.id = id;
 		this.parts = parts;
 		this.attack = attack;
@@ -139,6 +198,7 @@ public enum ToolType {
 		this.disablesShields = disablesShields;
 		this.aoe = aoe;
 		this.maxTier = maxTier;
+		this.ranged = ranged;
 	}
 
 	private static List<Slot> parts(Object... pairs) {

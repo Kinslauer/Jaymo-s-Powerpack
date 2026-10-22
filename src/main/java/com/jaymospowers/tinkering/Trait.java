@@ -41,7 +41,9 @@ public enum Trait {
 	BLOCKING("blocking", ChatFormatting.AQUA),
 	BONKING("bonking", ChatFormatting.YELLOW),
 	TIMBER("timber", ChatFormatting.GREEN),
-	VEIN("vein", ChatFormatting.AQUA);
+	VEIN("vein", ChatFormatting.AQUA),
+	// (0.15.x) feather: arrows and bows fly truer
+	AERODYNAMIC("aerodynamic", ChatFormatting.WHITE);
 
 	public final String id;
 	public final ChatFormatting colour;

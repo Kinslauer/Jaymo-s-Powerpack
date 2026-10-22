@@ -32,8 +32,19 @@ MATERIALS = [
     ("copper", "Copper", "all"), ("iron", "Iron", "all"), ("silver", "Silver", "all"), ("rose_gold", "Rose Gold", "all"),
     ("amethyst_bronze", "Amethyst Bronze", "all"), ("pig_iron", "Pig Iron", "all"), ("slimesteel", "Slimesteel", "all"),
     ("leather", "Leather", "binding"), ("string", "String", "binding"), ("vine", "Vine", "binding"),
+    # (0.15.x) arrow parts only: fletching and a blaze rod shaft (Tinkers' sprite names are in TC_NAME)
+    ("feather", "Feather", "fletching"), ("leaves", "Leaves", "fletching"), ("blaze_rod", "Blaze Rod", "shaft"),
 ]
 HEADS = [m for m, _, use in MATERIALS if use == "all"]
+BINDINGS = [m for m, _, use in MATERIALS if use in ("all", "binding")]
+# (0.15.x) the materials each ranged part comes in (limbs and grips: the ones Tinkers gives limb and grip stats; arrow heads: any head)
+LIMBS = ["wood", "wood_crimson", "wood_warped", "bone", "copper", "iron", "silver", "rose_gold", "amethyst_bronze", "pig_iron", "slimesteel"]
+STRINGS = ["string", "vine", "leather"]
+SHAFTS = ["wood", "wood_crimson", "wood_warped", "bone", "blaze_rod"]
+FLETCHINGS = ["feather", "leaves"]
+KIND_MATERIALS = {"limb": LIMBS, "grip": LIMBS, "bowstring": STRINGS, "arrow_head": HEADS, "arrow_shaft": SHAFTS, "fletching": FLETCHINGS}
+# our material id to Tinkers' sprite suffix where they differ ("feather" is Tinkers' plain white fletching, no suffix)
+TC_NAME = {"blaze_rod": "blaze", "leaves": "vine"}
 # how much bigger than a vanilla tool the sledge hammer and cleaver look in hand
 LARGE_IN_HAND = 1.5
 ALL = [m for m, _, _ in MATERIALS]
@@ -54,11 +65,20 @@ PARTS = [
     ("tough_binding", "Tough Binding", "binding", "parts/tough_binding", (0, 0)),
     # (0.11.77) for swords' weapon heads (tinkering/WeaponParts), drawn from Tinkers' sword guard
     ("crossguard", "Crossguard", "handle", "sword/guard", (3, -3)),
+    # (0.15.x) the ranged weapons' parts, drawn as Tinkers' part models are (its own offsets)
+    ("bow_limb", "Bow Limb", "limb", "longbow/limb_bottom", (5, -2)),
+    ("bow_grip", "Bow Grip", "grip", "crossbow/body", (-2, -2)),
+    ("bowstring", "Bowstring", "bowstring", "parts/bowstring", (0, 0)),
+    ("arrow_head", "Arrow Head", "arrow_head", "ammo/arrow_head", (-4, 3)),
+    ("arrow_shaft", "Arrow Shaft", "arrow_shaft", "ammo/arrow_shaft", (1, -1)),
+    ("fletching", "Fletching", "fletching", "ammo/arrow_feather", (4, -5)),
 ]
+# parts that have no gold cast (Tinkers: the Part Builder shapes these from any material)
+NO_CAST = ("bowstring", "arrow_head", "arrow_shaft", "fletching")
 PART_KIND = {p[0]: p[2] for p in PARTS}
 # shorter names for the Tool Station's recipe list
 SHORT = {"small_axe_head": "Axe Head", "small_blade": "Blade", "large_plate": "Plate", "tool_handle": "Handle",
-         "tool_binding": "Binding"}
+         "tool_binding": "Binding", "bow_limb": "Limb", "bow_grip": "Grip", "arrow_head": "Head", "arrow_shaft": "Shaft"}
 
 # tool id, name, its parts (in order), its layers bottom to top (name, Tinkers' sprite, which part), large in hand,
 # Better Combat preset, vanilla item tags
@@ -122,6 +142,18 @@ TOOLS = [
      False, "mace", []),
 ]
 
+# (0.15.x) the ranged tools (tinkering/ToolType, tinkering/ranged): id, name, Better Combat preset (a melee one only), vanilla item
+# tags, Fabric's convention tags. Their models are written by ranged_tools() below.
+RANGED = [
+    ("longbow", "Longbow", None, ["enchantable/bow"], ["tools/bow", "tools/ranged_weapon"]),
+    ("crossbow", "Crossbow", None, ["enchantable/crossbow"], ["tools/crossbow", "tools/ranged_weapon"]),
+    ("javelin", "Javelin", "bettercombat:spear", [], ["tools/ranged_weapon"]),
+    ("arrow", "Arrow", None, ["arrows"], []),
+    ("throwing_axe", "Throwing Axe", None, [], ["tools/ranged_weapon"]),
+    ("shuriken", "Shuriken", None, [], ["tools/ranged_weapon"]),
+]
+C_DATA = os.path.join(RES, "data", "c")
+
 TRAITS = {
     "cultivated": ("Cultivated", "Repairs go 50% further."),
     "stonebound": ("Stonebound", "Mines faster and hits softer the more worn it is."),
@@ -155,6 +187,7 @@ TRAITS = {
     "bonking": ("Bonking", "Hold the guard up, then let go to bonk what's in front of you away."),
     "timber": ("Timber", "Fells a whole tree when you cut a log of it (sneak to cut just one)."),
     "vein": ("Vein Mining", "Mines the whole vein of ore when you break a piece of it."),
+    "aerodynamic": ("Aerodynamic", "Fletching that flies truer: arrows, and what is thrown, scatter less."),
 }
 
 # modifier id, name, what it does (the items are in com.jaymospowers.tinkering.Modifier)
@@ -189,7 +222,7 @@ TINTS = {"blood": BLOOD_TINT}
 INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
           ("amethyst_bronze_ingot", "Amethyst Bronze Ingot", "amethyst_bronze_ingot"),
           ("pig_iron_ingot", "Pig Iron Ingot", "pigiron_ingot"), ("slimesteel_ingot", "Slimesteel Ingot", "slimesteel_ingot")]
-CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
+CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS if p[0] not in NO_CAST]
 # casts Tinkers has no sprite for
 CAST_SPRITE = {"crossguard": "tool_binding"}
 
@@ -249,6 +282,11 @@ STAT_LANG = {
     "tooltip.jaymospowers.tinkering.handle_attack": "Attack Damage: %s",
     "tooltip.jaymospowers.tinkering.handle_attack_speed": "Attack Speed: %s",
     "tooltip.jaymospowers.tinkering.binding_only": "Its trait is all a binding gives.",
+    "tooltip.jaymospowers.tinkering.part_trait_only": "Its trait is all this part gives.",
+    "tooltip.jaymospowers.tinkering.draw_speed": "Draw Speed: %s",
+    "tooltip.jaymospowers.tinkering.velocity": "Velocity: %s",
+    "tooltip.jaymospowers.tinkering.accuracy": "Accuracy: %s",
+    "tooltip.jaymospowers.tinkering.projectile_damage": "Projectile Damage: %s",
     "tooltip.jaymospowers.tinkering.trait": "%s: %s",
     "tooltip.jaymospowers.tinkering.cost": "Costs %s material",
     "tooltip.jaymospowers.tinkering.shift": "Hold Shift to see what its traits do",
@@ -345,7 +383,10 @@ def derived(tcon, rel, mat, kind):
 def sprite(tcon, rel, mat, kind=None):
     """Tinkers' sprite for a material, or None when it has none. With a {@code kind} of part (head, handle, binding) a
     missing one is drawn from the tool's grey template in that material's colours, where there is a template."""
-    path = os.path.join(tcon, *TOOL_TEXTURES, rel + "_tconstruct_" + mat + ".png")
+    if mat == "feather":
+        path = os.path.join(tcon, *TOOL_TEXTURES, rel + ".png")
+        return path if os.path.exists(path) else None
+    path = os.path.join(tcon, *TOOL_TEXTURES, rel + "_tconstruct_" + TC_NAME.get(mat, mat) + ".png")
     if os.path.exists(path):
         return path
     return derived(tcon, rel, mat, kind) if kind else None
@@ -374,7 +415,7 @@ def by_material(index, cases, fallback):
 
 
 def materials_for(kind):
-    return HEADS if kind != "binding" else ALL
+    return KIND_MATERIALS.get(kind) or (HEADS if kind != "binding" else BINDINGS)
 
 
 def tools(tcon):
@@ -441,11 +482,115 @@ def shifted(src, offset):
     return out
 
 
+def layer(tcon, tool, name, rel, index, kind, parent, done):
+    """One layer of a ranged tool: its sprite and model in every material that has one, and the model that picks between them."""
+    folder = "item/tinkering/" + tool
+    derive = "head" if kind in ("head", "arrow_head") else kind if kind in DONORS else None
+    mats = [m for m in materials_for(kind) if sprite(tcon, rel, m, derive)]
+    if not mats:
+        print("no sprites at all for", tool, rel)
+        return None
+    for mat in mats:
+        if (folder, name, mat) not in done:
+            done.add((folder, name, mat))
+            copy_png(sprite(tcon, rel, mat, derive), folder + "/" + name + "_" + mat)
+            model(folder + "/" + name + "_" + mat, parent, folder + "/" + name + "_" + mat)
+    return by_material(index, [(m, ref(folder + "/" + name + "_" + m)) for m in mats], ref(folder + "/" + name + "_" + mats[0]))
+
+
+def plain(tcon, tool, name, rel, parent):
+    """A layer that doesn't change with the material (the loaded crossbow's bolt)."""
+    folder = "item/tinkering/" + tool
+    copy_png(os.path.join(tcon, *TOOL_TEXTURES, rel + ".png"), folder + "/" + name)
+    model(folder + "/" + name, parent, folder + "/" + name)
+    return ref(folder + "/" + name)
+
+
+def composite(*nodes):
+    return {"type": "minecraft:composite", "models": [n for n in nodes if n]}
+
+
+def broken_or(broken, whole):
+    return {"type": "minecraft:condition", "property": "minecraft:custom_model_data", "index": 0, "on_true": broken, "on_false": whole}
+
+
+def pulling(whole, stages, property_, scale, thresholds):
+    """The model while it's held: the idle one, or one of the pulling stages by how long (or how far) it's been drawn."""
+    entries = [{"threshold": t, "model": m} for t, m in zip(thresholds, stages[1:])]
+    dispatch = {"type": "minecraft:range_dispatch", "property": property_, "entries": entries, "fallback": stages[0]}
+    if scale:
+        dispatch["scale"] = scale
+    return {"type": "minecraft:condition", "property": "minecraft:using_item", "on_false": whole, "on_true": dispatch}
+
+
+def ranged_tools(tcon):
+    done = set()
+    items = os.path.join(ASSETS, "items")
+
+    # longbow: two limbs, the grip and the string; the limbs bend and the string draws back over three stages
+    bow = "minecraft:item/bow"
+
+    def longbow(suffix, string=None):
+        string = suffix if string is None else string
+        return composite(
+            layer(tcon, "longbow", "limb_bottom" + suffix, "longbow/limb_bottom" + suffix, 0, "limb", bow, done),
+            layer(tcon, "longbow", "limb_top" + suffix, "longbow/limb_top" + suffix, 1, "limb", bow, done),
+            layer(tcon, "longbow", "bowstring" + string, "longbow/bowstring" + string, 3, "bowstring", bow, done),
+            layer(tcon, "longbow", "grip", "longbow/grip", 2, "grip", bow, done))
+    idle = longbow("")
+    stages = [longbow("_1"), longbow("_2"), longbow("_3")]
+    write(os.path.join(items, "tinker_longbow.json"), {"model": broken_or(
+        longbow("", "_broken"), pulling(idle, stages, "minecraft:use_duration", 0.05, [0.6, 1.0]))})
+
+    # crossbow: limb, body (the grip) and string; loaded it shows its bolt (or a rocket)
+    cross = "minecraft:item/crossbow"
+
+    def crossbow(string, *extra):
+        return composite(
+            layer(tcon, "crossbow", "limb", "crossbow/limb", 0, "limb", cross, done),
+            layer(tcon, "crossbow", "body", "crossbow/body", 1, "grip", cross, done),
+            layer(tcon, "crossbow", "bowstring" + string, "crossbow/bowstring" + string, 2, "bowstring", cross, done), *extra)
+    stages = [crossbow("_1"), crossbow("_2"), crossbow("_3")]
+    loaded = {"type": "minecraft:select", "property": "minecraft:charge_type", "cases": [
+        {"when": "arrow", "model": crossbow("_3", plain(tcon, "crossbow", "bolt", "crossbow/arrow", cross))},
+        {"when": "rocket", "model": crossbow("_3", plain(tcon, "crossbow", "rocket", "crossbow/firework", cross))}],
+        "fallback": pulling(crossbow(""), stages, "minecraft:crossbow/pull", None, [0.58, 1.0])}
+    write(os.path.join(items, "tinker_crossbow.json"), {"model": broken_or(crossbow("_broken"), loaded)})
+
+    # javelin: handle, grip, head and the guard (a limb), small in the hand's gui and big held, like the other long tools
+    def javelin(size, broken):
+        folder = "javelin/large/" if size == "large" else "javelin/"
+        parent = "minecraft:item/handheld" if size == "small" else NS + ":item/tinkering/large_tool"
+        tag = "" if size == "small" else "_large"
+        return composite(
+            layer(tcon, "javelin", "handle" + tag, folder + "handle", 1, "handle", parent, done),
+            layer(tcon, "javelin", "grip" + tag, folder + "grip", 3, "grip", parent, done),
+            layer(tcon, "javelin", "head" + ("_broken" if broken else "") + tag, folder + "head" + ("_broken" if broken else ""), 0, "head", parent, done),
+            layer(tcon, "javelin", "guard" + tag, folder + "guard", 2, "limb", parent, done))
+    small, big = broken_or(javelin("small", True), javelin("small", False)), broken_or(javelin("large", True), javelin("large", False))
+    write(os.path.join(items, "tinker_javelin.json"), {"model": {
+        "type": "minecraft:select", "property": "minecraft:display_context",
+        "cases": [{"when": ["gui", "ground", "fixed"], "model": small}], "fallback": big}})
+
+    # the arrow, throwing axe and shuriken: layers by material, nothing else
+    gen = "minecraft:item/generated"
+    write(os.path.join(items, "tinker_arrow.json"), {"model": composite(
+        layer(tcon, "arrow", "shaft", "ammo/arrow_shaft", 1, "arrow_shaft", gen, done),
+        layer(tcon, "arrow", "head", "ammo/arrow_head", 0, "arrow_head", gen, done),
+        layer(tcon, "arrow", "feather", "ammo/arrow_feather", 2, "fletching", gen, done))})
+    write(os.path.join(items, "tinker_throwing_axe.json"), {"model": composite(
+        layer(tcon, "throwing_axe", "shaft", "ammo/arrow_shaft", 1, "arrow_shaft", "minecraft:item/handheld", done),
+        layer(tcon, "throwing_axe", "head", "ammo/axe_head", 0, "arrow_head", "minecraft:item/handheld", done))})
+    write(os.path.join(items, "tinker_shuriken.json"), {"model": composite(
+        layer(tcon, "shuriken", "bottom", "ammo/shuriken_bottom", 1, "arrow_head", gen, done),
+        layer(tcon, "shuriken", "top", "ammo/shuriken_top", 0, "arrow_head", gen, done))})
+
+
 def parts(tcon):
     for part, _, kind, rel, offset in PARTS:
         cases = []
         for mat in materials_for(kind):
-            src = sprite(tcon, rel, mat)
+            src = sprite(tcon, rel, mat, "head" if kind == "arrow_head" else None)
             if src is None:
                 print("no part sprite for", part, mat)
                 continue
@@ -729,6 +874,13 @@ def vanilla_off():
         write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
         write(os.path.join(MC_DATA, "advancement", "recipes", "tools", item + ".json"), off)
 
+def add_to_tag(path, value):
+    old = json.load(open(path)) if os.path.exists(path) else {"values": []}
+    if value not in old["values"]:
+        old["values"].append(value)
+    write(path, old)
+
+
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
         "type": "minecraft:crafting_shaped", "category": "misc",
@@ -756,6 +908,15 @@ def data():
               {"parent": preset if ":" in preset else "bettercombat:" + preset})
         for tag in vanilla:
             tags.setdefault(tag, []).append(NS + ":tinker_" + tool)
+    # (0.15.x) the ranged tools: a javelin fights with Better Combat's spear, tags let the pack's bow code (Kingdoms' archers) and
+    # other mods see them; each only adds its items
+    for tool, _, preset, vanilla, convention in RANGED:
+        if preset:
+            write(os.path.join(DATA, "weapon_attributes", "tinker_" + tool + ".json"), {"parent": preset})
+        for tag in vanilla:
+            add_to_tag(os.path.join(MC_DATA, "tags", "item", tag + ".json"), NS + ":tinker_" + tool)
+        for tag in convention:
+            add_to_tag(os.path.join(C_DATA, "tags", "item", tag + ".json"), NS + ":tinker_" + tool)
     for tag, items in tags.items():
         path = os.path.join(MC_DATA, "tags", "item", tag + ".json")
         old = json.load(open(path)) if os.path.exists(path) else {"values": []}
@@ -772,6 +933,8 @@ def lang():
         out["item.jaymospowers." + part] = name
         out["item.jaymospowers." + part + ".short"] = SHORT.get(part, name)
     for tool, name, *_ in TOOLS:
+        out["item.jaymospowers.tinker_" + tool] = name
+    for tool, name, *_ in RANGED:
         out["item.jaymospowers.tinker_" + tool] = name
     for trait, (name, desc) in TRAITS.items():
         out["trait.jaymospowers." + trait] = name
@@ -803,6 +966,7 @@ def main():
     for old in (os.path.join(ASSETS, "textures", "item", "tinkering"), os.path.join(ASSETS, "models", "item", "tinkering")):
         shutil.rmtree(old, ignore_errors=True)
     tools(tcon)
+    ranged_tools(tcon)
     parts(tcon)
     stations(tcon)
     smeltery(tcon)

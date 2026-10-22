@@ -1,6 +1,6 @@
 package com.jaymospowers.tinkering.mixin;
 
-import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.ToolStats;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,7 @@ abstract class TinkerMiningSpeedMixin {
 	private void jaymospowers$liveTraits(BlockState state, CallbackInfoReturnable<Float> cir) {
 		Player self = (Player) (Object) this;
 		ItemStack held = self.getMainHandItem();
-		if (!(held.getItem() instanceof TinkerToolItem)) {
+		if (!(held.getItem() instanceof TinkerTool)) {
 			return;
 		}
 		float base = held.getDestroySpeed(state);

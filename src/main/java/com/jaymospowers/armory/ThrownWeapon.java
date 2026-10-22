@@ -1,5 +1,6 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.tinkering.ranged.Ranged;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -60,7 +61,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 
 	/** It tumbles end over end (until it lands). */
 	public boolean spins() {
-		return this.getItem().getItem() instanceof ThrowingWeaponItem weapon && weapon.spins() && !this.isInGround();
+		ItemStack item = this.getItem();
+		return (item.getItem() instanceof ThrowingWeaponItem weapon ? weapon.spins() : Ranged.spins(item)) && !this.isInGround();
 	}
 
 	private boolean harpoon() {
@@ -90,7 +92,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	protected void onHitEntity(EntityHitResult hitResult) {
 		Entity entity = hitResult.getEntity();
 		Entity owner = this.getOwner();
-		float damage = this.getItem().getItem() instanceof ThrowingWeaponItem weapon ? weapon.thrownDamage() : 2.0F;
+		// (0.15.x) Tinkering's javelin, throwing axes and shuriken are thrown as this too, with their materials' damage
+		float damage = this.getItem().getItem() instanceof ThrowingWeaponItem weapon ? weapon.thrownDamage() : Ranged.thrownDamage(this.getItem());
 		DamageSource source = this.damageSources().thrown(this, owner == null ? this : owner);
 		if (this.level() instanceof ServerLevel serverLevel) {
 			damage = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, source, damage);

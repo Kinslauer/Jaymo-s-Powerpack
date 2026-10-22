@@ -233,7 +233,9 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				for (int i : parts) {
 					uses[i] = 1;
 				}
-				return ToolStats.build(type, materials);
+				ItemStack built = ToolStats.build(type, materials);
+				built.setCount(type.ranged.yield());
+				return built;
 			}
 		}
 		return ItemStack.EMPTY;
@@ -291,13 +293,13 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 	/** A damaged tool and its head material: as much repair as the material covers. */
 	private ItemStack repair(int toolSlot) {
 		ItemStack tool = inputs.getItem(toolSlot);
-		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerToolItem item)) {
+		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerTool item)) {
 			return ItemStack.EMPTY;
 		}
 		List<TinkerMaterial> materials = ToolStats.materials(tool);
 		List<TinkerMaterial> heads = new ArrayList<>();
-		for (int i = 0; i < item.type.parts.size(); i++) {
-			if (item.type.parts.get(i).part().kind == PartType.Kind.HEAD) {
+		for (int i = 0; i < item.type().parts.size(); i++) {
+			if (item.type().parts.get(i).part().kind == PartType.Kind.HEAD || item.type().parts.get(i).part().kind == PartType.Kind.LIMB) {
 				heads.add(materials.get(i));
 			}
 		}
@@ -368,7 +370,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 	/** A tool and one part it uses: that part swapped in (the first of its kind with another material). */
 	private ItemStack swap(int toolSlot) {
 		ItemStack tool = inputs.getItem(toolSlot);
-		if (!(tool.getItem() instanceof TinkerToolItem item)) {
+		if (!(tool.getItem() instanceof TinkerTool item)) {
 			return ItemStack.EMPTY;
 		}
 		int partSlot = -1;
@@ -385,8 +387,8 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 		TinkerMaterial material = ToolPartItem.material(partStack);
 		List<TinkerMaterial> materials = new ArrayList<>(ToolStats.materials(tool));
 		int target = -1;
-		for (int i = 0; i < item.type.parts.size(); i++) {
-			if (item.type.parts.get(i).part() == part && materials.get(i) != material && target == -1) {
+		for (int i = 0; i < item.type().parts.size(); i++) {
+			if (item.type().parts.get(i).part() == part && materials.get(i) != material && target == -1) {
 				target = i;
 			}
 		}

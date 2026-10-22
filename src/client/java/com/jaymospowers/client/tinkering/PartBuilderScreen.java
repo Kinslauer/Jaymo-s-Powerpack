@@ -35,20 +35,25 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
-	/** Page 0: tool parts; page 1 on: weapon heads, 16 a page. */
+	/** Pages 0 on: tool parts, 16 a page; then the weapon heads, 16 a page. */
 	private int page;
+
+	/** How many pages the tool parts take (the ranged weapons' parts made more than 16). */
+	private static int partPages() {
+		return (PartType.values().length + CELLS - 1) / CELLS;
+	}
 
 	/** The button ids on this page, in grid order. */
 	private int[] buttons() {
-		if (page == 0) {
-			return java.util.stream.IntStream.range(0, PartType.values().length).toArray();
+		if (page < partPages()) {
+			return java.util.stream.IntStream.range(page * CELLS, Math.min(PartType.values().length, (page + 1) * CELLS)).toArray();
 		}
-		int count = WeaponParts.loaded().size(), from = (page - 1) * CELLS;
+		int count = WeaponParts.loaded().size(), from = (page - partPages()) * CELLS;
 		return java.util.stream.IntStream.range(from, Math.min(count, from + CELLS)).map(i -> PartBuilderMenu.WEAPON_BUTTONS + i).toArray();
 	}
 
 	private int pages() {
-		return 1 + (WeaponParts.loaded().size() + CELLS - 1) / CELLS;
+		return partPages() + (WeaponParts.loaded().size() + CELLS - 1) / CELLS;
 	}
 
 	@Override
@@ -108,8 +113,8 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 	}
 
 	private Component pageName() {
-		return page == 0 ? Component.translatable("gui.jaymospowers.part_builder.tools")
-			: Component.translatable("gui.jaymospowers.part_builder.weapons", page, pages() - 1);
+		return page < partPages() ? Component.translatable("gui.jaymospowers.part_builder.tools")
+			: Component.translatable("gui.jaymospowers.part_builder.weapons", page - partPages() + 1, pages() - partPages());
 	}
 
 	private Component title(TinkerMaterial material) {
@@ -156,7 +161,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		if (part == null) {
 			lines.add(Component.translatable("gui.jaymospowers.part_builder.pick"));
 		} else if (material != null) {
-			if (material.cast) {
+			if (material.cast && !part.builderOnly) {
 				lines.add(Component.translatable("gui.jaymospowers.part_builder.cast", material.displayName()));
 			} else if (!material.makes(part.kind)) {
 				lines.add(Component.translatable("gui.jaymospowers.part_builder.cannot", material.displayName(),

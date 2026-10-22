@@ -17,19 +17,33 @@ public enum PartType {
 	/** (0.15.x) The big tools' binding (scythe, broad axe, excavator, vein hammer). */
 	TOUGH_BINDING("tough_binding", Kind.BINDING, 3),
 	/** (0.11.77) Swords' guards, for weapon heads ({@link WeaponParts}); no Tinkering tool uses it. */
-	CROSSGUARD("crossguard", Kind.HANDLE, 1);
+	CROSSGUARD("crossguard", Kind.HANDLE, 1),
+	// (0.15.x) the ranged weapons' parts (docs/Tinkering-Weapons.md): limbs and grips of wood, bone and metal, strings, arrow parts
+	BOW_LIMB("bow_limb", Kind.LIMB, 3),
+	BOW_GRIP("bow_grip", Kind.GRIP, 3),
+	BOWSTRING("bowstring", Kind.BOWSTRING, 1, true),
+	ARROW_HEAD("arrow_head", Kind.ARROW_HEAD, 1, true),
+	ARROW_SHAFT("arrow_shaft", Kind.ARROW_SHAFT, 1, true),
+	FLETCHING("fletching", Kind.FLETCHING, 1, true);
 
 	/** Which of a material's stats a part uses. */
-	public enum Kind { HEAD, HANDLE, BINDING }
+	public enum Kind { HEAD, HANDLE, BINDING, LIMB, GRIP, BOWSTRING, ARROW_HEAD, ARROW_SHAFT, FLETCHING }
 
 	public final String id;
 	public final Kind kind;
 	/** Material units it takes to shape. */
 	public final int cost;
+	/** (0.15.x) Always shaped at the Part Builder, even of metal (Tinkers: strings and arrow parts have no cast). */
+	public final boolean builderOnly;
 
 	PartType(String id, Kind kind, int cost) {
+		this(id, kind, cost, false);
+	}
+
+	PartType(String id, Kind kind, int cost, boolean builderOnly) {
 		this.id = id;
 		this.kind = kind;
 		this.cost = cost;
+		this.builderOnly = builderOnly;
 	}
 }
