@@ -368,6 +368,15 @@ public final class Finishers {
 		};
 	}
 
+	/**
+	 * (0.15.116) The move {@code player} plays with {@code stack}: its kind's, but a gun with no round in it (Andy: "with no
+	 * ammunition it should just run though with the blade") runs them through with the bayonet, the sword's Run Through.
+	 */
+	static Kind move(Player player, ItemStack stack) {
+		Kind kind = kind(stack);
+		return kind == Kind.GUN && !loaded(player, stack, kind) ? Kind.SWORD : kind;
+	}
+
 	private static boolean charged(ItemStack stack) {
 		ChargedProjectiles charge = stack.get(DataComponents.CHARGED_PROJECTILES);
 		return charge != null && !charge.isEmpty();
@@ -526,7 +535,7 @@ public final class Finishers {
 			}
 			if (held >= HOLD_TICKS) {
 				it.remove();
-				Kind kind = kind(player.getMainHandItem());
+				Kind kind = move(player, player.getMainHandItem());
 				if (!loaded(player, player.getMainHandItem(), kind)) {
 					// (0.15.114) nothing to shoot
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.unloaded." + kind.name().toLowerCase(java.util.Locale.ROOT))
@@ -548,7 +557,7 @@ public final class Finishers {
 	// ---- playing it out ---------------------------------------------------------------------------------------------------
 
 	private static void begin(ServerLevel level, ServerPlayer player, LivingEntity body) {
-		Kind kind = kind(player.getMainHandItem());
+		Kind kind = move(player, player.getMainHandItem());
 		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());

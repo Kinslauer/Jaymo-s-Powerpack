@@ -2620,3 +2620,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   light from `gl_MultiTexCoord1`, which Kingdoms' Iris hook (0.7.164) dims, so ambient light follows the moon; direct
   moonlight inside the shadow distance comes from the shadow map, so faces turned to the moon may keep a faint glow on
   a new moon. Compile-checked; not seen in game.
+- **0.15.116 (finishers: an unloaded gun uses the bayonet):** Andy: "with no ammunition it should just run though with
+  the blade". A gun with no round in it plays the sword's Run Through instead of refusing (`Finishers.move`). Bows and
+  crossbows still need an arrow. Compile-checked; not playtested.
