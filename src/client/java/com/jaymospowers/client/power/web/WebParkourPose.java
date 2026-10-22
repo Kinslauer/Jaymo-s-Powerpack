@@ -79,6 +79,10 @@ public final class WebParkourPose {
 		if (move == null) {
 			// (0.14.3) a freerunner's vault, cling or wall kick (Freerun) looks the same
 			move = entity.getAttached(com.jaymospowers.freerun.Freerun.MOVE);
+			// (0.15.67) the vertical wall run has its own pose (UpRunPose)
+			if (move != null && move / 8 == com.jaymospowers.freerun.Freerun.UP_RUN) {
+				move = null;
+			}
 		}
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();

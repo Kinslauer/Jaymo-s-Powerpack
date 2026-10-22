@@ -45,7 +45,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -70,9 +69,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Freerunner</b> (2 ranks): rank 1, a sprinting jump at something waist-high (at most 1.5 blocks: a fence, a
  * wall, a block) vaults it at full speed; rank 2, a wall kick: in the air beside or facing a wall, Jump kicks off it
  * ({@link #KICK_UP} up, {@link #KICK_OUT} out), each wall face once until you land.</li>
- * <li><b>Sure Footing</b>: on narrow tops (fences, walls, panes, bars, chains, rods; {@link #NARROW}) you walk and
- * sprint at full speed (without it, {@link #UNSTEADY_SLOW} slower and no sprinting), knocked back
- * {@link #FOOTING_KNOCKBACK} less, arms out to balance.</li>
+ * <li><b>Sure Footing</b>: (0.15.67) a dodge made as you land rolls the fall off: no fall damage
+ * ({@link LandingRoll}, with a forgiving window either side of touchdown). Narrow tops ({@link #NARROW}) are no longer
+ * its: anyone walks and runs them, arms out to balance.</li>
  * <li><b>Leap of Faith</b>: from any height, landing in a hay bale, water or leaves ({@link #SOFT_LANDING}) takes no
  * fall damage (Andy's one exception to "fall damage always applies"); falling looking down, you dive head first.</li>
  * <li><b>Bar Swing</b>: jump at a fence, iron bar or chain lying above your head to catch it and hang, swinging; Jump
@@ -114,10 +113,6 @@ public final class Freerun {
 	/** Freerunner 2: the wall kick, up and out from the wall (blocks/tick), and the share of your speed along the wall it keeps. */
 	public static final double KICK_UP = 0.5, KICK_OUT = 0.45, KICK_KEEP = 0.5;
 
-	/** Sure Footing: knockback taken away on a narrow top (0.75 = 75% less). */
-	public static final double FOOTING_KNOCKBACK = 0.75;
-	/** Without Sure Footing (and only with Kingdoms loaded): on a narrow top you're this much slower and can't sprint (Andy's call). */
-	public static final double UNSTEADY_SLOW = 0.3;
 	/** Narrow tops: balancing on these. */
 	public static final TagKey<Block> NARROW = TagKey.create(Registries.BLOCK, JaymosPowers.id("freerun_narrow"));
 
@@ -143,7 +138,12 @@ public final class Freerun {
 
 	/** (0.15.12) Vertical wall run: how high it climbs (blocks) with no Wall Runner, rank 1 and rank 2; the rise per tick at the start and the end of it. */
 	public static final double[] UP_HEIGHT = {2.5, 3.0, 4.0};
-	public static final double UP_START = 0.42, UP_END = 0.12;
+	public static final double UP_START = 0.62, UP_END = 0.32;
+	/** (0.15.67) Vertical wall run: let go of forward and you slide down the wall this fast (blocks/tick), at most this long (ticks). */
+	public static final double UP_SLIDE = 0.16;
+	public static final int UP_SLIDE_TICKS = 60;
+	/** (0.15.67) Vertical wall run: Jump ejects you backwards off the wall, out and up (blocks/tick). */
+	public static final double EJECT_OUT = 0.6, EJECT_UP = 0.5;
 	/** Vertical wall run: the wall may be this far ahead when you jump (blocks), and you must face it within this many degrees. */
 	public static final double UP_REACH = 1.2;
 	public static final float UP_FACING_DEGREES = 35.0F;
@@ -217,7 +217,6 @@ public final class Freerun {
 	public static final AttachmentType<Integer> WALL = AttachmentRegistry.create(JaymosPowers.id("freerun_wall"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
-	private static final Identifier FOOTING_ID = JaymosPowers.id("freerun_footing"), UNSTEADY_ID = JaymosPowers.id("freerun_unsteady");
 
 	private static final boolean KINGDOMS = FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 	private static final Method KINGDOMS_RANK;
@@ -278,6 +277,7 @@ public final class Freerun {
 			}
 			return true;
 		});
+		LandingRoll.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
 		FastRun.init();
 		Slide.init();
@@ -471,14 +471,15 @@ public final class Freerun {
 		return player.onGround() && !player.isPassenger() && !player.isSpectator() && standingOn(player.level(), player, NARROW, player.getX(), player.getZ());
 	}
 
-	/** Sure Footing: balancing on a narrow top, arms out (any side, any player, from the synced ranks). */
-	public static boolean balancing(Player player) {
-		return perk(player, Perk.SURE_FOOTING) > 0 && onNarrowTop(player) && !player.isShiftKeyDown();
+	/** (0.15.67) Running up a wall (or sliding back down it), as last synced: any side, any player. */
+	public static boolean upRunning(Player player) {
+		Integer move = player.getAttached(MOVE);
+		return move != null && move / 8 == UP_RUN;
 	}
 
-	/** Without Sure Footing on a narrow top: slower, no sprint (only where Kingdoms, and so the perk, exists). */
-	public static boolean unsteady(Player player) {
-		return KINGDOMS && UNSTEADY_SLOW > 0.0 && perk(player, Perk.SURE_FOOTING) == 0 && onNarrowTop(player);
+	/** Balancing on a narrow top, arms out (any side, any player). (0.15.67) Everyone now, not only Sure Footing. */
+	public static boolean balancing(Player player) {
+		return onNarrowTop(player) && !player.isShiftKeyDown();
 	}
 
 	/** Leap of Faith: falling looking down, head first (any side, any player). */
@@ -576,7 +577,8 @@ public final class Freerun {
 			}
 			case UP_RUN -> {
 				UP_RAN.merge(player.getUUID(), 1 << side.get3DDataValue(), (a, b) -> a | b);
-				player.setAttached(MOVE, CLING * 8 + side.get3DDataValue() + 1);
+				// (0.15.67) its own pose now (UpRunPose), not the climb's
+				player.setAttached(MOVE, UP_RUN * 8 + side.get3DDataValue() + 1);
 				player.resetFallDistance();
 				WebParkour.dust(level, player, side, 6);
 			}
@@ -681,7 +683,7 @@ public final class Freerun {
 				case VAULT -> WebParkour.VAULT_TICKS;
 				case WALL_JUMP -> WebParkour.WALL_JUMP_TICKS;
 				case HOP -> HOP_TICKS + SERVER_SLACK_TICKS;
-				case UP_RUN -> 24 + SERVER_SLACK_TICKS;
+				case UP_RUN -> 24 + UP_SLIDE_TICKS + SERVER_SLACK_TICKS;
 				case POLE -> POLE_MAX_TICKS + SERVER_SLACK_TICKS;
 				case CLING -> grip(player) + SLIP_TICKS + SERVER_SLACK_TICKS;
 				case WALL_RUN -> RUN_TICKS[Mth.clamp(perk(player, Perk.WALL_RUNNER), 1, RUN_TICKS.length) - 1] + SERVER_SLACK_TICKS;
@@ -691,7 +693,7 @@ public final class Freerun {
 			double rise = player.getY() - doing.lastY;
 			boolean overrun = switch (doing.kind) {
 				case UP_RUN -> player.getY() > doing.startY + UP_HEIGHT[Mth.clamp(perk(player, Perk.WALL_RUNNER), 0, UP_HEIGHT.length - 1)] + 0.5
-					|| doing.ticks > 2 && player.getY() < doing.startY - 0.05;
+					|| -rise > UP_SLIDE * 2.0 + 0.1;
 				case POLE -> rise > POLE_CLIMB[Mth.clamp(perk(player, Perk.CLIMBER), 0, POLE_CLIMB.length - 1)] * 2.0 + 0.1 || -rise > POLE_SLIDE * 2.0 + 0.1;
 				case CLING -> rise > CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 1, CLIMB_SPEED.length) - 1] * 2.0 + 0.1;
 				default -> false;
@@ -750,11 +752,6 @@ public final class Freerun {
 				UP_RAN.remove(player.getUUID());
 				GRIPPED.remove(player.getUUID());
 			}
-			boolean narrow = onNarrowTop(player);
-			set(player, Attributes.KNOCKBACK_RESISTANCE, FOOTING_ID, narrow && perk(player, Perk.SURE_FOOTING) > 0 ? FOOTING_KNOCKBACK : 0.0,
-				AttributeModifier.Operation.ADD_VALUE);
-			set(player, Attributes.MOVEMENT_SPEED, UNSTEADY_ID, narrow && unsteady(player) ? -UNSTEADY_SLOW : 0.0,
-				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
 		if (!GRACE.isEmpty() && server.getTickCount() % 100 == 0) {
 			long now = server.overworld().getGameTime();
