@@ -4074,6 +4074,23 @@ The last batch of the BWM port (MIT, our own code).
   raise|list`, `/kingdom tier floor`. Numbers at the top of `remnants/Monoliths` and `AetherGiant`. Compiles against the real 26.3 jars;
   not yet seen in game.
 
+## 0.7.149: character names in place of usernames (pack 0.15.63)
+Andy: "your name on scoreboard should be the one you pick at the start, not your default user. to aid with immersion.
+it should no longer show up anywhere."
+- `CharacterNames`: the name picked in MCA's creator (its family tree, `McaBridge.name`) is a player's display name
+  (`mixin/mca/McaPlayerNameMixin`, at the return of `Player.getDisplayName`): chat, death, join and leave messages,
+  the name over their head, Jade, and every mod line that names a player by display name. The tab list shows it too
+  (`McaTabListNameMixin`), with the team's colours and no hover card (it would give the username away). A synced
+  attachment (`jaymoskingdoms:character_name`) carries it to clients; it's checked every second, so a rename in MCA's
+  editor shows at once.
+- Xaero's Minimap (`client/mixin/xaero`, optional, nothing copied) labels tracked players with the tab list's name.
+- A costume, Rig Helm or bandit mask from Jaymo's Powers still wins: its name is given at the head of the same
+  methods, so this never runs while masked. With no name picked (or without MCA) the username shows as before.
+- `/kingdom info` lists members by character name; a werewolf player's beast carries their display name.
+- Left alone: commands still take usernames (`/tp`, `/msg`, `/list`), the sidebar scoreboard and the social
+  interactions screen.
+- Compile-checked against the 26.3 jars; not yet run in game.
+
 ## 0.7.148: outlaws and disguises among barbarians and pirates; camp folk as MCA villagers (pack 0.15.62)
 Andy: "Is there a way to affiliate with the barbarians? If not they should also be MCA and become non hostile when you
 are negative rep." There was no way before (only goblins had a disguise).

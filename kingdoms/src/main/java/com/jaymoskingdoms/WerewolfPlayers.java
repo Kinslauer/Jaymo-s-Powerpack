@@ -320,7 +320,7 @@ public final class WerewolfPlayers {
 			return;
 		}
 		w.setNoAi(true);
-		w.setCustomName(player.getName());
+		w.setCustomName(player.getDisplayName());
 		w.setCustomNameVisible(false);
 		f.beast = w;
 		level.addFreshEntity(w);
