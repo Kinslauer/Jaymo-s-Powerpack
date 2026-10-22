@@ -2607,3 +2607,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   leg cut off as well as downed; a crippled one is held still while it plays, and `Downed.execute` kills it the same
   way. Andy: "heads from decaptiations should be grabable like they are otherwise": a click (empty hand or sneak) on a
   body or corpse that a severed part lies in takes the part (`Carry.partInView`). Compile-checked; not playtested.
+- **0.15.115, Complementary Unbound is the pack's shader pack:** Andy: "can we make these the default shaders?"
+  Complementary Unbound r5.9.3 (by EminGT, Complementary Development; CurseForge 385587, file 8884656, made for 26.2
+  and 26.3 on Iris) joins the CurseForge import by id (build.gradle `packShaderPacks`, into shaderpacks/), and Build
+  Modpack fetches it into your own profile from CurseForge's CDN like the resource packs. Once per install,
+  `client/ShaderPreset` (a preLaunch entrypoint, before Iris reads its config) sets `shaderPack` and `enableShaders`
+  in `config/iris.properties`; after that the player's own choice stands (marker `jaymospowers-shader-preset-v1`).
+  Its licence (Complementary License Agreement 1.2) lets modpacks include it only unchanged, added through
+  CurseForge's or Modrinth's own systems, never uploaded directly, and, because it's on by default, credited on the
+  pack's description page. So its settings stay at Complementary's defaults (no settings file: "simple variable
+  changes" count as modifying it), and the CurseForge page needs a credit line. Dark nights: Complementary takes sky
+  light from `gl_MultiTexCoord1`, which Kingdoms' Iris hook (0.7.164) dims, so ambient light follows the moon; direct
+  moonlight inside the shadow distance comes from the shadow map, so faces turned to the moon may keep a faint glow on
+  a new moon. Compile-checked; not seen in game.
