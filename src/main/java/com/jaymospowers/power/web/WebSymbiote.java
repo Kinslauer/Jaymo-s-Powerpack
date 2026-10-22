@@ -1207,7 +1207,7 @@ public final class WebSymbiote {
 		return live;
 	}
 
-	private static void set(ServerPlayer player, WebSymbioteState state) {
+	static void set(ServerPlayer player, WebSymbioteState state) {
 		WebSymbioteState was = player.getAttached(STATE);
 		// Wall Crawl's tendrils go with Living Armor: when it withdraws (or is put away), the crawl ends too
 		if (was != null && was.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.ARMOR) && state.has(WebSymbioteState.CRAWL)) {
@@ -1252,8 +1252,13 @@ public final class WebSymbiote {
 	}
 
 	public static void whisper(ServerPlayer player, String key) {
+		whisper(player, key, new Object[0]);
+	}
+
+	/** A line with {@code args} filled in (what it's fighting, say). */
+	static void whisper(ServerPlayer player, String key, Object... args) {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
@@ -1395,6 +1400,12 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		// (0.15.69) you went down: it gets you up and away (WebSymbioteRescue), and has the wheel till then
+		if (WebSymbioteRescue.tick(player, state, now)) {
+			return;
+		}
+		// and it has something to say about what you're fighting
+		WebSymbioteFoes.tick(player, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
@@ -2419,6 +2430,35 @@ public final class WebSymbiote {
 		player.removeAttached(STARING);
 		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/** (0.15.69) Whatever it was doing with your body stops: a rescue has the wheel now (WebSymbioteRescue). */
+	static void standDown(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live == null) {
+			return;
+		}
+		if (live.feedStage != FEED_NONE) {
+			abortFeeding(player, live);
+		}
+		if (live.takeoverTicks > 0 || live.takeoverTarget >= 0) {
+			endTakeover(player, live);
+		}
+		live.escapeAt = 0L;
+	}
+
+	/** (0.15.69) Nothing else it says for {@code ticks}: one voice at a time. */
+	static void hush(ServerPlayer player, long until) {
+		Live live = player.getAttached(LIVE);
+		if (live != null) {
+			live.narrateAt = Math.max(live.narrateAt, until);
+		}
+	}
+
+	/** (0.15.69) The running commentary is free to speak now (none spoken in a while). */
+	static boolean canSpeak(ServerPlayer player, long now) {
+		Live live = player.getAttached(LIVE);
+		return live == null || now >= live.narrateAt;
 	}
 
 	/** The takeover's hold, told to the client again before it runs out (a takeover has no time limit). */

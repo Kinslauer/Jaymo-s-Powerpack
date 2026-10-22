@@ -113,12 +113,13 @@ final class WebTendrilWalk {
 
 	/**
 	 * Carried on the tendrils (Wall Crawl on, off the ground, something near to grab): worked out the same on every
-	 * client from what it can see, so everyone sees the same walk.
+	 * client from what it can see, so everyone sees the same walk. (0.15.69) Underwater as well, along the bottom and the
+	 * banks: the symbiote never stops moving there (Andy).
 	 */
 	static boolean striding(Player player) {
 		return com.jaymospowers.power.web.WebSymbiote.isBonded(player)
 			&& com.jaymospowers.power.web.WebSymbiote.crawlTendrils(player)
-			&& !player.onGround() && !player.isPassenger() && !player.isFallFlying() && !player.getAbilities().flying && !player.isInWater()
+			&& !player.onGround() && !player.isPassenger() && !player.isFallFlying() && !player.getAbilities().flying
 			&& !player.isSpectator() && anchors(player, STRIDE_REACH * player.getScale()) >= 2;
 	}
 
@@ -128,7 +129,8 @@ final class WebTendrilWalk {
 	 * climb (the latch on a wall, a wall cling) isn't hanging.
 	 */
 	static boolean hanging(Player player) {
-		if (player.onGround() || player.isPassenger() || player.isInWater() || player.isFallFlying() || !climbing(player)) {
+		// (0.15.69) underwater too: they never stop moving there (Andy)
+		if (player.onGround() || player.isPassenger() || player.isFallFlying() || !climbing(player)) {
 			return false;
 		}
 		Vec3 normal = surface(player);
