@@ -375,7 +375,7 @@ final class Navies {
 					if (from != null) {
 						Reputation.change(player, from, REP_ESCORT);
 					}
-					player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.escort.arrived", crew.name, q.objective().place())
+					player.sendSystemMessage(Component.translatable(Rulers.her("quest.jaymoskingdoms.escort.arrived", Factions.get(server, q.giver().faction())), crew.name, q.objective().place())
 						.withStyle(ChatFormatting.GOLD));
 					level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 1.2F);
 				}

@@ -3,8 +3,10 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -12,6 +14,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -211,10 +214,53 @@ public final class Rulers {
 		return reign != null && reign.female() && reign.ruler().equals(f.leader().get());
 	}
 
-	/** {@code key}, or its queen's (lady's) wording ({@code <key>.her}) if the ruler it speaks of is a woman. */
-	static String her(String key, boolean female) {
-		return female ? key + ".her" : key;
+	/**
+	 * {@code key}, or its queen's (lady's) wording ({@code <key>.her}) if the ruler it speaks of is a woman and the line
+	 * has one (a line that never names the ruler has none).
+	 */
+	public static String her(String key, boolean female) {
+		return female && herKeys().contains(key) ? key + ".her" : key;
 	}
+
+	/** The server, while one is running. */
+	static @Nullable MinecraftServer server() {
+		return server;
+	}
+
+	/** {@code key} as said of {@code f}'s ruler: a queen's wording if she's a woman. */
+	public static String her(String key, @Nullable Faction f) {
+		return f != null && queen(f) ? her(key, true) : key;
+	}
+
+	/** {@code key} as said by {@code speaker} of the ruler of the realm they're in (a guard, a townsman). */
+	public static String herHere(String key, Entity speaker) {
+		MinecraftServer s = speaker.level().getServer();
+		return s == null ? key : her(key, Factions.realmNear(s, speaker.blockPosition(), Economy.POPULATION_RANGE));
+	}
+
+	/** The lines with a queen's wording ({@code <key>.her} in our lang file), read once. */
+	private static Set<String> herKeys() {
+		Set<String> keys = HER_KEYS;
+		if (keys == null) {
+			Set<String> found = new HashSet<>();
+			FabricLoader.getInstance().getModContainer(JaymosKingdoms.MOD_ID).flatMap(m -> m.findPath("assets/jaymoskingdoms/lang/en_us.json"))
+				.ifPresent(path -> {
+					try (java.io.Reader in = java.nio.file.Files.newBufferedReader(path)) {
+						for (String key : com.google.gson.JsonParser.parseReader(in).getAsJsonObject().keySet()) {
+							if (key.endsWith(".her")) {
+								found.add(key.substring(0, key.length() - ".her".length()));
+							}
+						}
+					} catch (java.io.IOException | RuntimeException e) {
+						JaymosKingdoms.LOGGER.warn("Couldn't read the queens' wordings: {}", e.toString());
+					}
+				});
+			keys = HER_KEYS = Set.copyOf(found);
+		}
+		return keys;
+	}
+
+	private static volatile @Nullable Set<String> HER_KEYS;
 
 	/** A ruler's title: King, Queen, Lord or Lady. */
 	static Component title(int role, boolean female) {

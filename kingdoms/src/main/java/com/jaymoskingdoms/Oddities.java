@@ -422,7 +422,7 @@ final class Oddities {
 		if (best.kind().startsWith(POWER)) {
 			String power = best.kind().substring(POWER.length());
 			String family = POWERS.contains(power) ? "talk.jaymoskingdoms.gossip.odd.power." + power : "talk.jaymoskingdoms.gossip.odd.power";
-			return Component.translatable(line(family, level.getRandom()), best.who() == null ? Component.literal("?") : best.who());
+			return Component.translatable(Rulers.herHere(line(family, level.getRandom()), villager), best.who() == null ? Component.literal("?") : best.who());
 		}
 		return Component.translatable(line("talk.jaymoskingdoms.gossip.odd." + best.kind(), level.getRandom()), blocks, way);
 	}
@@ -442,13 +442,13 @@ final class Oddities {
 
 	private static void say(ServerLevel level, LivingEntity p, String what, int color, long now) {
 		SPOKE.put(p.getUUID(), now + TALK_GAP);
-		Speech.say(level, p, Component.translatable(line("talk.jaymoskingdoms.odd." + what, level.getRandom())), color, 32.0);
+		Speech.say(level, p, Component.translatable(Rulers.herHere(line("talk.jaymoskingdoms.odd." + what, level.getRandom()), p)), color, 32.0);
 	}
 
 	/** A line about {@code who} (their name in it). */
 	private static void sayOf(ServerLevel level, LivingEntity p, String what, Component who, int color, long now) {
 		SPOKE.put(p.getUUID(), now + TALK_GAP);
-		Speech.say(level, p, Component.translatable(line("talk.jaymoskingdoms.odd." + what, level.getRandom()), who), color, 32.0);
+		Speech.say(level, p, Component.translatable(Rulers.herHere(line("talk.jaymoskingdoms.odd." + what, level.getRandom()), p), who), color, 32.0);
 	}
 
 	/**

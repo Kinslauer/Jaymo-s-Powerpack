@@ -605,7 +605,7 @@ final class Neighbours {
 
 	/** {@code speaker} says one of family {@code family}'s lines (to {@code to}, whose name a line may use). */
 	static void say(ServerLevel level, LivingEntity speaker, String family, int color, LivingEntity to) {
-		Speech.say(level, speaker, Component.translatable("neighbours.jaymoskingdoms." + family + "." + deal(family, level.getRandom()),
+		Speech.say(level, speaker, Component.translatable(Rulers.herHere("neighbours.jaymoskingdoms." + family + "." + deal(family, level.getRandom()), speaker),
 			to.getDisplayName()), color, SPEECH_RANGE);
 	}
 
