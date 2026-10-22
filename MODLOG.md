@@ -2404,3 +2404,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   bounties, Hornkin trophies and the Emberborn gold truce (details in the Kingdoms MODLOG). Powers: Andy's ruling,
   Z Fighter tyrant raids (`ZFighterRaids`) now only come to a kingdom with a player near it in world tier Borderlands
   (the second) or higher (`ZFighterKingdoms.worldTier`, read from Kingdoms' `WorldTiers`).
+- **0.15.69, the symbiote saves you when you go down:** Andy's asks. Go down with a symbiote and it gets you up at half
+  health, says how close that was (naming what felled you), leaps as high as it can, zips away from the fight and hands
+  you back the controls; it refuses only starving with a bond under 30. It now comments on what you're fighting (18
+  kinds). It never stops moving underwater (Wall Crawl tendrils, sprint-swimming takeovers), and takeovers stall less:
+  quicker stuck checks, a ledge or wall between it and its prey counts as stuck, wall climbing, circling its prey, pressing
+  on with no path. Taking the suit off is now only sometimes fought (60% at no bond to 30% at bond 70), up to 3 times a
+  bond. Takeovers are in the plain black suit, the big body only 10% of the time (3% in non-web hosts, 40% for the anti
+  one). See docs/web.md.

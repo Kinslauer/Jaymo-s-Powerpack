@@ -36,8 +36,14 @@ import net.minecraft.world.entity.player.Player;
  */
 public final class WebSymbioteBond {
 	// ===== the fought removal ========================================================================================
-	/** It fights you for the suit while the bond is under this, the first {@code FIGHTS} times. */
+	/** It fights you for the suit while the bond is under this, at most {@code FIGHTS} times. */
 	public static final int FIGHT_BOND = 70, FIGHTS = 3;
+	/**
+	 * (0.15.69) Andy: "it should have a CHANCE to take up to 3 removals". Each time you take the suit off, it fights you
+	 * for it only this often ({@code FIGHT_CHANCE_LOW} at no bond, down to {@code FIGHT_CHANCE_HIGH} at {@link #FIGHT_BOND});
+	 * otherwise it comes off at once. Up to {@link #FIGHTS} fights a bond, as before (was: always, the first three).
+	 */
+	public static final float FIGHT_CHANCE_LOW = 0.6F, FIGHT_CHANCE_HIGH = 0.3F;
 	/** Presses to win: {@code FIGHT_PRESSES_MAX} at no bond, down to {@code FIGHT_PRESSES_MIN} at {@code FIGHT_BOND}. */
 	public static final int FIGHT_PRESSES_MAX = 30, FIGHT_PRESSES_MIN = 12;
 	/**
@@ -233,6 +239,10 @@ public final class WebSymbioteBond {
 		int fought = player.getAttachedOrElse(FOUGHT, 0);
 		if (player.isCreative() || bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
 			|| WebSymbiote.bulked(player)) {
+			return false;
+		}
+		if (!mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
+			// (0.15.69) not this time: it lets you
 			return false;
 		}
 		long now = player.level().getGameTime();

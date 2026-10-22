@@ -264,6 +264,14 @@ public final class WebSymbiote {
 	 * "near death"), it swells into the big body and takes over to save itself,
 	 * going for whatever hurt you; it costs the bond {@code DEFEND_STRESS}, and can't happen again for {@code DEFEND_COOLDOWN}.
 	 */
+	/**
+	 * (0.15.69) Andy: "the takeovers should now happen primarily in the regular black suit, and only 10% of the time use
+	 * the large suit. even rarer for non web users (except anti)". Each takeover is in the big body this often
+	 * ({@code BIG_TAKEOVER_CHANCE}), {@code BIG_TAKEOVER_CHANCE_HOST} in a host who isn't a web slinger; the anti one
+	 * ({@link WebSymbioteStrain#WHITE}) uses {@code BIG_TAKEOVER_CHANCE_ANTI} (Andy: "40%"); otherwise in the plain suit.
+	 * The near-death roar still builds the big body.
+	 */
+	public static final float BIG_TAKEOVER_CHANCE = 0.1F, BIG_TAKEOVER_CHANCE_HOST = 0.03F, BIG_TAKEOVER_CHANCE_ANTI = 0.4F;
 	public static final float DEFEND_HEALTH = 0.3F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
 	/**
@@ -940,6 +948,8 @@ public final class WebSymbiote {
 		long suitDebutUntil;
 		/** It engulfed you for a takeover: the suit as it was before, put back after. */
 		boolean engulfed;
+		/** (0.15.69) This takeover (and the gift after it) is in the big body: rolled as it starts (see {@link #BIG_TAKEOVER_CHANCE}). */
+		boolean bigTakeover;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -1207,7 +1217,7 @@ public final class WebSymbiote {
 		return live;
 	}
 
-	private static void set(ServerPlayer player, WebSymbioteState state) {
+	static void set(ServerPlayer player, WebSymbioteState state) {
 		WebSymbioteState was = player.getAttached(STATE);
 		// Wall Crawl's tendrils go with Living Armor: when it withdraws (or is put away), the crawl ends too
 		if (was != null && was.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.ARMOR) && state.has(WebSymbioteState.CRAWL)) {
@@ -1252,8 +1262,13 @@ public final class WebSymbiote {
 	}
 
 	public static void whisper(ServerPlayer player, String key) {
+		whisper(player, key, new Object[0]);
+	}
+
+	/** A line with {@code args} filled in (what it's fighting, say). */
+	static void whisper(ServerPlayer player, String key, Object... args) {
 		// (each strain speaks in its own colour: WebSymbioteStrains)
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key, args)
 			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
@@ -1395,6 +1410,12 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		// (0.15.69) you went down: it gets you up and away (WebSymbioteRescue), and has the wheel till then
+		if (WebSymbioteRescue.tick(player, state, now)) {
+			return;
+		}
+		// and it has something to say about what you're fighting
+		WebSymbioteFoes.tick(player, now);
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
@@ -1767,15 +1788,15 @@ public final class WebSymbiote {
 		if (now >= live.suitDebutUntil) {
 			live.suitDebutUntil = 0L;
 		}
-		// the big body is up exactly while it has the wheel
+		// the big body is up while it has the wheel, when this takeover rolled it (BIG_TAKEOVER_CHANCE)
 		// (and, the bond whole, whenever you wear Living Armor: the big body is yours to drive)
 		// (and while its gift lasts: the big body it was driving, yours to steer)
 		if (!next.has(WebSymbioteState.ARMOR)) {
 			live.armorSlim = false;
 		}
-		boolean bulkWanted = live.takeoverTicks > 0 || roarAge >= ROAR_BULK_AT
+		boolean bulkWanted = live.takeoverTicks > 0 && live.bigTakeover || roarAge >= ROAR_BULK_AT
 			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
-			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && !sulking(player) && !live.armorSlim;
+			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover && !sulking(player) && !live.armorSlim;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -2162,6 +2183,9 @@ public final class WebSymbiote {
 		live.surges = 0;
 		live.surged = false;
 		live.giftPending = false;
+		float big = state(player).kind() == WebSymbioteStrain.WHITE ? BIG_TAKEOVER_CHANCE_ANTI
+			: com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE) ? BIG_TAKEOVER_CHANCE : BIG_TAKEOVER_CHANCE_HOST;
+		live.bigTakeover = player.getRandom().nextFloat() < big;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
 		syncStruggle(player, live);
@@ -2419,6 +2443,35 @@ public final class WebSymbiote {
 		player.removeAttached(STARING);
 		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/** (0.15.69) Whatever it was doing with your body stops: a rescue has the wheel now (WebSymbioteRescue). */
+	static void standDown(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live == null) {
+			return;
+		}
+		if (live.feedStage != FEED_NONE) {
+			abortFeeding(player, live);
+		}
+		if (live.takeoverTicks > 0 || live.takeoverTarget >= 0) {
+			endTakeover(player, live);
+		}
+		live.escapeAt = 0L;
+	}
+
+	/** (0.15.69) Nothing else it says for {@code ticks}: one voice at a time. */
+	static void hush(ServerPlayer player, long until) {
+		Live live = player.getAttached(LIVE);
+		if (live != null) {
+			live.narrateAt = Math.max(live.narrateAt, until);
+		}
+	}
+
+	/** (0.15.69) The running commentary is free to speak now (none spoken in a while). */
+	static boolean canSpeak(ServerPlayer player, long now) {
+		Live live = player.getAttached(LIVE);
+		return live == null || now >= live.narrateAt;
 	}
 
 	/** The takeover's hold, told to the client again before it runs out (a takeover has no time limit). */

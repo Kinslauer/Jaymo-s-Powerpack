@@ -168,6 +168,20 @@ public final class WebNet {
 		}
 	}
 
+	/**
+	 * (0.15.69) Server → client: you went down and the symbiote got you up ({@link WebSymbioteRescue}). {@code leap} true:
+	 * it has the legs, coils and leaps as high as it can; false: it hands you back the controls.
+	 */
+	public record Rescue(boolean leap) implements CustomPacketPayload {
+		public static final Type<Rescue> TYPE = new Type<>(JaymosPowers.id("web_symbiote_rescue"));
+		public static final StreamCodec<ByteBuf, Rescue> CODEC = ByteBufCodecs.BOOL.map(Rescue::new, Rescue::leap).cast();
+
+		@Override
+		public Type<Rescue> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
 	public record Takeover(int entityId, int ticks, boolean flee) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
@@ -294,6 +308,7 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(ClimbLatch.TYPE, ClimbLatch.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Escape.TYPE, Escape.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Rescue.TYPE, Rescue.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Shove.TYPE, Shove.CODEC);
