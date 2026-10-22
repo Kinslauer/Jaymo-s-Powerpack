@@ -41,6 +41,7 @@ public final class ModelPoses {
 		ArsenalArmPose.applyModel(model, state);
 		FreefallPose.applyModel(model, state);
 		com.jaymospowers.client.stamina.DodgeRollPose.applyModel(model, state);
+		com.jaymospowers.client.finisher.FinisherPose.applyModel(model, state);
 		com.jaymospowers.client.freerun.BalancePose.applyModel(model, state);
 		com.jaymospowers.client.freerun.RunPose.applyModel(model, state);
 		com.jaymospowers.client.freerun.UpRunPose.applyModel(model, state);

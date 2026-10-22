@@ -2457,3 +2457,49 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kitchen's new `LivingRagdolls.addHold`): the body floats up and bobs at the surface until you're up, given up, carried
   out or washed ashore (then back to the downed crawl). Without Kitchen you just drift up (`CrawlTaps`). Sneak still
   gives up.
+- **0.15.93, blood (Iron's Simple Blood):** Andy asked for Iron's Simple Blood (Iron431, MIT, NeoForge only, no 26.3
+  Fabric build), merged into our own blood (`BladeBlood`) rather than shipped as a mod, plus "the scaling splatter /
+  puddle for heavier blunt impacts, like the anvil or mace impacts". Its particles are ported in `core/blood`
+  (`BloodParticles`: a `Spray` of drops and a `Puddle`) and `client/blood` (`BloodDrop`, `BloodPuddle`, `BloodDecals`:
+  the puddles' own particle group through Fabric's `ParticleGroupRegistry`, its render state a `QuadParticleRenderState`
+  handing vanilla ready-made vertices so a puddle lies over the block tops under it); its sprites are in
+  `textures/particle/blood`, notice in `licenses/LICENSE_simple_blood`. Our rules stay: blades bleed, crushing
+  bursts (now with pools), the bloodless never bleed. New: a heavy blunt blow (`BladeBlood.heavyBlunt`: a falling anvil
+  or block, a mace's smash, a `Fractures.blunt` weapon, 6+ damage) sprays half again a blade's drops and lays 1-5
+  pools that widen with the damage; killing blows bleed too (`ALLOW_DEATH`, since `AFTER_DAMAGE` misses them); Wounds'
+  open cuts drip small drops that leave a trail (`BladeBlood.drip`). Blood colours by tag (`tags/entity_type/blood/`:
+  ender, dark, slime, bug). Not playtested; compile-checked against the 26.3 jars.
+- **0.15.94, wounds first, hearts after (Kitchen 0.5.15):** Andy: "everything should go through the wounding system
+  first, for example if a certain threshold (30%) damage to your limb goes through, then it should affect your hearts
+  ... regeneration should only kick in at full speed when you are fully patched up". Every hit now lands on the body
+  parts before vanilla takes any health (`WoundsHurtMixin` and `WoundsPlayerHurtMixin` around `setHealth` in
+  `actuallyHurt`, `Wounds.takeHit`). The first 30% of a part's pool (`Wounds.HEART_SPILL_FROM`) is bruising and costs no
+  hearts; past it the hearts drain so that a part at zero has cost its whole share (`Wounds.hearts`; never more hearts
+  than before for the same damage). Head or body at zero still downs or kills. Meals and food raise deep wounds only to
+  the bruise line; bruises mend over 3 minutes (`BRUISE_MEND_TICKS`). Until you're patched up (`Wounds.patchedUp`: each
+  part hurt past bruising dressed or splinted, nothing bleeding, festering or broken unset) natural healing runs at
+  `UNPATCHED_REGEN` (a quarter): vanilla food (`WoundsRegenMixin`) and Kitchen's meals (the `jaymospowers_unpatched` tag).
+- **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
+  nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
+  new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
+- **0.15.97, Velox's Velocity (R), after Chrono's Overclock:** Andy: "Velox should have a velocity button like
+  Chrono's overclock, giving him the same toggle speed wall run and streak, just colored light blue". The held Speed
+  Burst on R is now **Velocity**, a toggle: on, Velox is +100% faster (`Velox.VELOCITY_SPEED`) and runs on Overclock's
+  own speed code (`ChronoSpeed.tick` with the new `ChronoSpeed.SKY` palette): Overclock's sprint boost and whole-block
+  steps, the wall run held against the wall you face (`ChronoSpeedClient`, now also ticked by `XenoformPowerClient`),
+  water and lava run while sprinting, Shift for walking speed, no fall damage, and the speed-force streak
+  (`ChronoStreak`) in light blue: afterimages of the raptor (`XenoformClient.submitGhost`), sky-blue bolts, a blue dust
+  trail. R again switches it off, then 2 s. `ChronoSpeed.FLASH` now holds the streak's colour (an int, not a boolean).
+  No phasing through walls: that stays Chrono's.
+- **0.15.98, finishers on the downed:** Andy: "every weapon should be able to right click and hold a downed enemy, and
+  then do a unique finisher animation". Hold use (not sneaking) on someone downed for 0.4 s and you finish them with a
+  move for the kind of weapon in your main hand (`core/finisher/Finishers`, read off item tags and names so forged and
+  other mods' weapons fall in): sword (Run Through), greatsword (Headsman's Stroke), dagger (Mercy Stroke), axe
+  (Executioner, the head comes off first), mace/hammer/club/pickaxe (Skull Crusher), spear/trident (Pinned), polearm
+  (Reaping), staff, bow (Point Blank), crossbow, and anything else or bare hands (Neck Snap). You stand rooted facing
+  them; blows land on the move's beats (sound, Simple Blood's blood or a crush, the body jolting, screen shake) and the
+  last one is the death, credited to you (`Downed.execute`). Stops, sparing them, if they get up, are carried off or
+  end up out of reach. Drawn for everyone by `client/finisher/FinisherPose` (keyframes eased on `PoseBlend` springs,
+  the body turned to them with a step in, the weapon turned in the hand by `FinisherItemInHandLayerMixin`); your own
+  is watched from behind, first person given back after. Not on tamed animals. Medicine in hand still treats; a
+  red-hot blade only counts as medicine with sneak. A tap on a downed guard still has Kingdoms disarm them.

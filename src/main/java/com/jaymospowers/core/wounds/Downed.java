@@ -240,7 +240,9 @@ public final class Downed {
 		// trading with a downed villager, no saddling a downed horse
 		UseEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseEntityCallback.EVENT.register(LAST, (player, world, hand, entity, hit) ->
-			entity instanceof Mob && isDowned(entity) ? InteractionResult.SUCCESS : InteractionResult.PASS);
+			// ((0.15.98) and a plain click on a downed player is a finisher's hold, not a bow drawn or a meal eaten: Finishers)
+			(entity instanceof Mob || entity instanceof Player && !player.isShiftKeyDown()) && isDowned(entity) ? InteractionResult.SUCCESS
+				: InteractionResult.PASS);
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isDowned(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -567,6 +569,18 @@ public final class Downed {
 		}
 	}
 
+	/**
+	 * (0.15.98) A finisher's last blow ({@code Finishers}): its death now, credited to {@code by}. Nothing if it isn't down
+	 * (or is dead already: an axe's beheading).
+	 */
+	public static void execute(ServerLevel level, LivingEntity entity, Player by) {
+		if (!isDowned(entity) || !entity.isAlive()) {
+			return;
+		}
+		FELLED_BY.put(entity, level.damageSources().playerAttack(by));
+		finish(level, entity);
+	}
+
 	/** A player hit a downed one: one more wound; the {@link #MAX_WOUNDS}th is its death. */
 	private static void wound(ServerLevel level, LivingEntity entity, DamageSource source) {
 		Long wounds = entity.getAttached(WOUNDS);
@@ -604,6 +618,8 @@ public final class Downed {
 		if (!mob.entityTags().contains(DOWNED_TAG)) {
 			mob.addTag(DOWNED_TAG);
 		}
+		// (0.15.92) lying downed, not also knocked flat by a leg shot (that turned it over twice, head into the ground)
+		com.jaymospowers.power.web.KitchenCompat.endLegCrawl(mob);
 		long now = level.getGameTime();
 		Long wounds = mob.getAttached(WOUNDS);
 		if (wounds == null && now - since(mob) >= RECOVER_TICKS && !mob.hasAttached(KNOCKED)) {
@@ -619,7 +635,8 @@ public final class Downed {
 		mob.setJumping(false);
 		mob.setXxa(0.0F);
 		mob.setSpeed(0.0F);
-		if (Carry.isCarried(mob)) {
+		if (Carry.isCarried(mob) || com.jaymospowers.core.finisher.Finishers.targeted(mob)) {
+			// ((0.15.98) and lying still under a finisher)
 			return;
 		}
 		DamageSource source = FELLED_BY.get(mob);

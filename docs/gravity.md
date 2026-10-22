@@ -170,7 +170,7 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
   swings past and settles instead of snapping, and the forward pitch at speed eases in instead of jittering.
 - Board and rider bob together slowly (`BOB`), less at speed. Stepping off, the board drops square again.
 
-## 0.15.91: A real meteor
+## 0.15.99: A real meteor
 - **Straight from the Aether's magnetic region**: the falling rock, its wreck lumps and the burst's debris are all one
   set (`GravityMeteor.rock`): a conglomerate of ferrosite, ichorite, ferrosite sand, arkenium, corrobonite and gravitite
   ore, with magma where it superheated coming in. No other vanilla stone.

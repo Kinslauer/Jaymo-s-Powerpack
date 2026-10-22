@@ -111,6 +111,8 @@ public final class XenoformPowerClient implements PowerClient {
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
+		// Velox's Velocity: Overclock's wall run (and, through ChronoSpeed.overclocked, its water and lava run)
+		com.jaymospowers.client.power.chrono.ChronoSpeedClient.tick(player, com.jaymospowers.power.chrono.ChronoSpeed.velocity(player));
 		String form = player.getAttached(XenoformState.FORM);
 		if (!java.util.Objects.equals(form, formWas)) {
 			formWas = form;
@@ -160,5 +162,6 @@ public final class XenoformPowerClient implements PowerClient {
 		flash = 0;
 		burst = 0;
 		XenoformSlap.clear();
+		com.jaymospowers.client.power.chrono.ChronoSpeedClient.reset();
 	}
 }
