@@ -20,6 +20,8 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -136,6 +138,7 @@ final class Retinue {
 			FAVOURED.clear();
 			SENT.clear();
 			SENT_BY.clear();
+			SHOVED.clear();
 		});
 	}
 
@@ -217,7 +220,7 @@ final class Retinue {
 		Watch w = WATCHED.computeIfAbsent(key(f.id(), p.getUUID()), k -> new Watch());
 		w.heat = Math.min(cap(t), w.heat + rules(t).handle());
 		w.touched = now;
-		Folk guard = nearestGuard(level, f, p, SPACE * 2);
+		PathfinderMob guard = nearestGuard(level, f, p, SPACE * 2);
 		Speech.say(level, guard != null ? guard : king, Component.translatable(speech(t, "hands"), Purists.name(Heritage.of(p)), Purists.bloodName(f)),
 			t == Tempers.Temper.NOBLE || t == Tempers.Temper.REVELER ? Speech.GOLD : Speech.RED, SPEECH_RANGE);
 		if (t == Tempers.Temper.PARANOID || t == Tempers.Temper.TYRANT || t == Tempers.Temper.PURIST) {
@@ -232,8 +235,12 @@ final class Retinue {
 		return r.driveOut() != NEVER ? r.driveOut() : r.wary();
 	}
 
-	/** Every {@link Tempers#TICK} for a realm with a ruler whose seat is loaded; {@code king} is null while he's not about. */
-	static void tick(ServerLevel level, Faction f, Tempers.Temper t, @Nullable Folk king, long now) {
+	/**
+	 * Every {@link Tempers#TICK} for a realm with a ruler whose seat is loaded; {@code king} is null while he's not about.
+	 * (0.7.175) A ruler crowned from the townsfolk too (he'd had none since 0.7.138), and the realm's MCA guards do the
+	 * shoving and dogging as its folk guards did.
+	 */
+	static void tick(ServerLevel level, Faction f, Tempers.Temper t, @Nullable PathfinderMob king, long now) {
 		Rules r = rules(t);
 		if (king != null) {
 			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, king.getBoundingBox().inflate(WATCH_RANGE))) {
@@ -280,15 +287,16 @@ final class Retinue {
 			if (from == null || from != f.id()) {
 				continue;
 			}
-			if (!(level.getEntity(e.getKey()) instanceof Folk g) || !g.isAlive() || !wanted(level, f, t, e.getValue(), now)) {
+			if (!(level.getEntity(e.getKey()) instanceof LivingEntity g) || !g.isAlive() || !wanted(level, f, t, e.getValue(), now)) {
 				SENT_BY.remove(e.getKey());
+				SHOVED.remove(e.getKey());
 				it.remove();
 			}
 		}
 	}
 
 	/** A stranger {@code p} within {@link #WATCH_RANGE} of him, this second. */
-	private static void near(ServerLevel level, Faction f, Tempers.Temper t, Rules r, Folk king, ServerPlayer p, long now) {
+	private static void near(ServerLevel level, Faction f, Tempers.Temper t, Rules r, PathfinderMob king, ServerPlayer p, long now) {
 		double d = p.distanceTo(king);
 		if (d > WATCH_RANGE) {
 			return;
@@ -316,7 +324,7 @@ final class Retinue {
 		if (d <= SPACE && (t == Tempers.Temper.PARANOID || t == Tempers.Temper.WARLORD && armed(p) || t == Tempers.Temper.TYRANT && !kneeling(p)
 			|| t == Tempers.Temper.PURIST && !Purists.kin(f, p))) {
 			Watch ww = w != null ? w : WATCHED.computeIfAbsent(k, x -> new Watch());
-			Folk guard = nearestGuard(level, f, p, SPACE);
+			PathfinderMob guard = nearestGuard(level, f, p, SPACE);
 			if (t != Tempers.Temper.TYRANT) {
 				shove(level, guard, p, p.position().subtract(king.position()), r.shove(), 0.25);
 			}
@@ -345,8 +353,8 @@ final class Retinue {
 	}
 
 	/** The tempers that deal with a stranger they're wary of on the spot (not by dogging them). */
-	private static void punish(ServerLevel level, Faction f, Tempers.Temper t, Rules r, Folk king, ServerPlayer p, Watch w) {
-		Folk guard = nearestGuard(level, f, p, SPACE + 3.0);
+	private static void punish(ServerLevel level, Faction f, Tempers.Temper t, Rules r, PathfinderMob king, ServerPlayer p, Watch w) {
+		PathfinderMob guard = nearestGuard(level, f, p, SPACE + 3.0);
 		Entity by = guard != null ? guard : king;
 		Vec3 away = p.position().subtract(king.position());
 		switch (t) {
@@ -389,7 +397,7 @@ final class Retinue {
 	}
 
 	/** His daily favour to a stranger who's given no offence, if his temper has one. */
-	private static void favour(ServerLevel level, Faction f, Tempers.Temper t, Folk king, ServerPlayer p, long now) {
+	private static void favour(ServerLevel level, Faction f, Tempers.Temper t, PathfinderMob king, ServerPlayer p, long now) {
 		boolean due = switch (t) {
 			case TYRANT -> kneeling(p);
 			case WARLORD -> !armed(p) && p.getArmorValue() >= SALUTE_ARMOUR;
@@ -426,7 +434,7 @@ final class Retinue {
 			}
 		}
 		if (t == Tempers.Temper.WARLORD) {
-			Folk guard = nearestGuard(level, f, p, FAVOUR_RANGE);
+			PathfinderMob guard = nearestGuard(level, f, p, FAVOUR_RANGE);
 			if (guard != null) {
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			}
@@ -458,7 +466,7 @@ final class Retinue {
 		return w.banned(now) ? inCity(f, p) : dogs(t) && w.heat >= rules(t).wary();
 	}
 
-	private static void banish(ServerLevel level, Faction f, Tempers.Temper t, Folk king, ServerPlayer p, Watch w, long now) {
+	private static void banish(ServerLevel level, Faction f, Tempers.Temper t, PathfinderMob king, ServerPlayer p, Watch w, long now) {
 		w.bannedUntil = now + BAN_TICKS;
 		w.threatened = now;
 		p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue." + t.key() + ".banished", king.getDisplayName(), f.name(), BAN_TICKS / 1200,
@@ -495,11 +503,12 @@ final class Retinue {
 		if (already >= HARASSERS) {
 			return;
 		}
-		List<Folk> guards = level.getEntitiesOfClass(Folk.class, p.getBoundingBox().inflate(CALL_RANGE),
-			g -> g.isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD && g.escort() == null && g.getTarget() == null
-				&& !SENT.containsKey(g.getUUID()));
-		guards.sort((a, b) -> Double.compare(a.distanceToSqr(p), b.distanceToSqr(p)));
-		for (Folk g : guards) {
+		// (0.7.175) its MCA guards as well as its folk ones
+		List<Worker> guards = new java.util.ArrayList<>(Workers.near(level, p.getBoundingBox().inflate(CALL_RANGE),
+			g -> g.isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD && Royals.escortOf(g) == null && Rulers.target(g.mob()) == null
+				&& !Arrests.busy(g.mob()) && !SENT.containsKey(g.getUUID())));
+		guards.sort((a, b) -> Double.compare(a.mob().distanceToSqr(p), b.mob().distanceToSqr(p)));
+		for (Worker g : guards) {
 			if (already >= HARASSERS) {
 				break;
 			}
@@ -509,10 +518,12 @@ final class Retinue {
 		}
 	}
 
-	private static @Nullable Folk nearestGuard(ServerLevel level, Faction f, ServerPlayer p, double range) {
-		Folk best = null;
-		for (Folk g : level.getEntitiesOfClass(Folk.class, p.getBoundingBox().inflate(range),
-			g -> g.isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD && g.getTarget() == null)) {
+	/** The realm's nearest guard to {@code p} not in a fight (folk, or (0.7.175) MCA). */
+	private static @Nullable PathfinderMob nearestGuard(ServerLevel level, Faction f, ServerPlayer p, double range) {
+		PathfinderMob best = null;
+		for (Worker w : Workers.near(level, p.getBoundingBox().inflate(range),
+			g -> g.isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD && Rulers.target(g.mob()) == null)) {
+			PathfinderMob g = w.mob();
 			if (best == null || g.distanceToSqr(p) < best.distanceToSqr(p)) {
 				best = g;
 			}
@@ -521,7 +532,7 @@ final class Retinue {
 	}
 
 	/** {@code p} is shoved along {@code away} (flat), and lifted {@code up}, by {@code guard} if one's at hand. */
-	private static void shove(ServerLevel level, @Nullable Folk guard, ServerPlayer p, Vec3 away, double strength, double up) {
+	private static void shove(ServerLevel level, @Nullable PathfinderMob guard, ServerPlayer p, Vec3 away, double strength, double up) {
 		Vec3 flat = away.multiply(1.0, 0.0, 1.0);
 		if (flat.lengthSqr() < 1.0E-4) {
 			flat = new Vec3(1.0, 0.0, 0.0);
@@ -536,31 +547,88 @@ final class Retinue {
 		level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 0.7F, 1.0F);
 	}
 
+	/** (0.7.175) {@code guard} has been sent after a stranger ({@link #send}) who's still about. */
+	static boolean sent(PathfinderMob guard) {
+		return suspect(guard) != null;
+	}
+
+	private static @Nullable ServerPlayer suspect(PathfinderMob guard) {
+		UUID id = SENT.get(guard.getUUID());
+		if (id == null || !(guard.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
+		return p != null && p.level() == level && p.isAlive() ? p : null;
+	}
+
 	/**
 	 * A town guard sent after a stranger ({@link #send}): he walks up to them and shoves them along, away from the
-	 * king (watched) or away from the seat (driven out), with a word now and then. He never draws on them.
+	 * king (watched) or away from the seat (driven out), with a word now and then. He never draws on them. A folk
+	 * guard's goal ({@link Harass}); (0.7.175) an MCA guard's step ({@link Rulers#guardStep}).
 	 */
+	static void harass(PathfinderMob guard, long[] shoved) {
+		ServerPlayer p = suspect(guard);
+		Integer from = SENT_BY.get(guard.getUUID());
+		if (p == null || from == null || !(guard.level() instanceof ServerLevel level)) {
+			return;
+		}
+		Faction f = Factions.get(level.getServer(), from);
+		Tempers.Temper t = Tempers.of(f);
+		Watch w = WATCHED.get(key(from, p.getUUID()));
+		if (f == null || t == null || w == null) {
+			return;
+		}
+		long now = level.getGameTime();
+		boolean out = w.banned(now);
+		guard.getLookControl().setLookAt(p, 30.0F, 30.0F);
+		double d = guard.distanceTo(p);
+		if (d > REACH) {
+			if (guard.getNavigation().isDone() || guard.tickCount % 10 == 0) {
+				guard.getNavigation().moveTo(p, out ? DRIVE_SPEED : WALK_SPEED);
+			}
+			return;
+		}
+		guard.getNavigation().stop();
+		if (now - shoved[0] < SHOVE_TICKS) {
+			return;
+		}
+		shoved[0] = now;
+		Vec3 away;
+		if (out) {
+			away = p.position().subtract(Vec3.atBottomCenterOf(f.seat()));
+		} else {
+			Entity king = f.leader().map(level::getEntity).orElse(null);
+			away = p.position().subtract(king != null ? king.position() : guard.position());
+		}
+		shove(level, guard, p, away, out ? THROW : rules(t).shove(), 0.25);
+		level.sendParticles(ParticleTypes.ANGRY_VILLAGER, guard.getX(), guard.getY() + 2.1, guard.getZ(), 1, 0.2, 0.1, 0.2, 0.0);
+		if (now - w.threatened >= THREAT_TICKS) {
+			w.threatened = now;
+			String line = out ? "speech.jaymoskingdoms.retinue.out" + level.getRandom().nextInt(4) : speech(t, "watch" + level.getRandom().nextInt(4));
+			Speech.say(level, guard, Component.translatable(line), Speech.RED, SPEECH_RANGE);
+		}
+	}
+
+	/** An MCA guard's last shove (their step keeps no goal of its own). */
+	private static final Map<UUID, long[]> SHOVED = new HashMap<>();
+
+	static void harass(PathfinderMob guard) {
+		harass(guard, SHOVED.computeIfAbsent(guard.getUUID(), id -> new long[] {Long.MIN_VALUE / 2}));
+	}
+
+	/** A folk guard's {@link #harass}. */
 	static final class Harass extends Goal {
 		private final Folk guard;
-		private long shoved = Long.MIN_VALUE / 2;
+		private final long[] shoved = {Long.MIN_VALUE / 2};
 
 		Harass(Folk guard) {
 			this.guard = guard;
 			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 		}
 
-		private @Nullable ServerPlayer suspect() {
-			UUID id = SENT.get(this.guard.getUUID());
-			if (id == null || !(this.guard.level() instanceof ServerLevel level)) {
-				return null;
-			}
-			ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
-			return p != null && p.level() == level && p.isAlive() ? p : null;
-		}
-
 		@Override
 		public boolean canUse() {
-			return this.guard.getTarget() == null && this.guard.escort() == null && this.suspect() != null;
+			return this.guard.getTarget() == null && this.guard.escort() == null && suspect(this.guard) != null;
 		}
 
 		@Override
@@ -580,46 +648,7 @@ final class Retinue {
 
 		@Override
 		public void tick() {
-			ServerPlayer p = this.suspect();
-			Integer from = SENT_BY.get(this.guard.getUUID());
-			if (p == null || from == null || !(this.guard.level() instanceof ServerLevel level)) {
-				return;
-			}
-			Faction f = Factions.get(level.getServer(), from);
-			Tempers.Temper t = Tempers.of(f);
-			Watch w = WATCHED.get(key(from, p.getUUID()));
-			if (f == null || t == null || w == null) {
-				return;
-			}
-			long now = level.getGameTime();
-			boolean out = w.banned(now);
-			this.guard.getLookControl().setLookAt(p, 30.0F, 30.0F);
-			double d = this.guard.distanceTo(p);
-			if (d > REACH) {
-				if (this.guard.getNavigation().isDone() || this.guard.tickCount % 10 == 0) {
-					this.guard.getNavigation().moveTo(p, out ? DRIVE_SPEED : WALK_SPEED);
-				}
-				return;
-			}
-			this.guard.getNavigation().stop();
-			if (now - this.shoved < SHOVE_TICKS) {
-				return;
-			}
-			this.shoved = now;
-			Vec3 away;
-			if (out) {
-				away = p.position().subtract(Vec3.atBottomCenterOf(f.seat()));
-			} else {
-				Entity king = f.leader().map(level::getEntity).orElse(null);
-				away = p.position().subtract(king != null ? king.position() : this.guard.position());
-			}
-			shove(level, this.guard, p, away, out ? THROW : rules(t).shove(), 0.25);
-			level.sendParticles(ParticleTypes.ANGRY_VILLAGER, this.guard.getX(), this.guard.getY() + 2.1, this.guard.getZ(), 1, 0.2, 0.1, 0.2, 0.0);
-			if (now - w.threatened >= THREAT_TICKS) {
-				w.threatened = now;
-				String line = out ? "speech.jaymoskingdoms.retinue.out" + level.getRandom().nextInt(4) : speech(t, "watch" + level.getRandom().nextInt(4));
-				Speech.say(level, this.guard, Component.translatable(line), Speech.RED, SPEECH_RANGE);
-			}
+			harass(this.guard, this.shoved);
 		}
 	}
 }

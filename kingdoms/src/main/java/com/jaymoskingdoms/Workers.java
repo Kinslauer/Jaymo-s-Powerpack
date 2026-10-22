@@ -93,6 +93,10 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {
+			// (0.7.175) what MCA's screen shows of a ruler or a guard
+			Standing.update(level, w);
+		}
 		if (mob.tickCount % RECONCILE_TICKS == 0) {
 			if (w instanceof Enlisted e) {
 				// (0.5.53) how long they've been grown (elders become court wizards)

@@ -77,9 +77,20 @@ public final class Royals {
 	static void clear() {
 	}
 
+	/**
+	 * Hours when {@code king} is out on his round: by day, unless he's kept in (too few guards, {@link Wardens}) or his
+	 * temper cuts it short ({@link Tempers#staysOut}); (0.7.175) a villager crowned only until {@link Rulers#ROUND_TO},
+	 * then court, then their own hours among their people ({@link Rulers#step}).
+	 */
+	static boolean roundHours(ServerLevel level, Faction faction, PathfinderMob king) {
+		return daytime(level) && !Wardens.confined(level, faction, king) && Tempers.staysOut(level, faction)
+			&& (king instanceof Folk || timeOfDay(level) < Rulers.ROUND_TO);
+	}
+
 	/** (0.5.26) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */
 	static boolean out(PathfinderMob ruler) {
-		if (!walks(ruler) || !(ruler.level() instanceof ServerLevel level) || !daytime(level)) {
+		if (!walks(ruler) || !(ruler.level() instanceof ServerLevel level) || !daytime(level)
+			|| !(ruler instanceof Folk) && timeOfDay(level) >= Rulers.ROUND_TO) {
 			return false;
 		}
 		Castle.Keep keep = Factions.keep(level.getServer(), Rulers.faction(ruler));
@@ -94,8 +105,6 @@ public final class Royals {
 	 */
 	static final class Round extends Goal {
 		private final PathfinderMob king;
-		/** The same ruler, if he's a folk (the carriage is a folk ruler's alone). */
-		private final @Nullable Folk folk;
 		private final List<BlockPos> stops = new ArrayList<>();
 		private boolean out;
 		private int greeting;
@@ -105,7 +114,6 @@ public final class Royals {
 
 		Round(PathfinderMob king) {
 			this.king = king;
-			this.folk = king instanceof Folk f ? f : null;
 			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 		}
 
@@ -121,7 +129,7 @@ public final class Royals {
 			}
 			// out by day (unless he's too few guards to dare it); by night, or kept in, only to get home
 			Faction faction = Factions.get(level.getServer(), Rulers.faction(this.king));
-			boolean out = daytime(level) && faction != null && !Wardens.confined(level, faction, this.king) && Tempers.staysOut(level, faction);
+			boolean out = faction != null && roundHours(level, faction, this.king);
 			return out || this.out || this.king.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 4.0;
 		}
 
@@ -141,6 +149,17 @@ public final class Royals {
 			this.goal = null;
 		}
 
+		/** (0.7.175) A villager ruler's day at court is done (their hours off, or night): their escort goes back to their posts. */
+		void leave(ServerLevel level) {
+			if (this.out) {
+				this.out = false;
+				this.stops.clear();
+				release(level, this.king);
+			}
+			Carriages.alight(this.king);
+			this.stop();
+		}
+
 		@Override
 		public void tick() {
 			ServerLevel level = (ServerLevel)this.king.level();
@@ -150,7 +169,7 @@ public final class Royals {
 				return;
 			}
 			long now = level.getGameTime();
-			if (daytime(level) && !Wardens.confined(level, faction, this.king) && Tempers.staysOut(level, faction)) {
+			if (roundHours(level, faction, this.king)) {
 				if (!this.out) {
 					this.setOut(level, faction, keep);
 				}
@@ -164,9 +183,9 @@ public final class Royals {
 				release(level, this.king);
 			}
 			// (0.5.14) driven home in his carriage: he gets down at his gate and walks in
-			if (this.folk != null && Carriages.riding(this.folk)) {
+			if (Carriages.riding(this.king)) {
 				if (this.walk(level, keep.gate(), now, Carriages.ALIGHT_REACH) || now - this.improvedAt > STUCK_TICKS) {
-					Carriages.alight(this.folk);
+					Carriages.alight(this.king);
 					this.goal = null;
 				}
 				return;
@@ -177,9 +196,7 @@ public final class Royals {
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (the way in is blocked: his guards see him to his throne)
 				poof(level, this.king);
-				if (this.folk != null) {
-					Carriages.alight(this.folk);
-				}
+				Carriages.alight(this.king);
 				this.king.teleportTo(keep.throne().getX() + 0.5, keep.throne().getY(), keep.throne().getZ() + 0.5);
 				poof(level, this.king);
 				this.king.setHomeTo(keep.throne(), 3);
@@ -210,7 +227,7 @@ public final class Royals {
 				this.stops.add(v.blockPosition());
 			}
 			this.stops.add(faction.seat());
-			if (this.folk != null && Carriages.of(level, faction) != null) {
+			if (Carriages.of(level, faction) != null) {
 				// (0.7.90) driven in his carriage: only where it can go, open courts and the outskirts (it stuck fast in
 				// alleys, yards and porches); a stop with no open ground near it is passed by
 				List<BlockPos> open = new ArrayList<>();
@@ -260,25 +277,19 @@ public final class Royals {
 				return;
 			}
 			// (0.5.14) a wealthy king rides his round in his carriage, if it's waiting for him
-			if (this.folk != null) {
-				Carriages.board(level, faction, this.folk);
-			}
+			Carriages.board(level, faction, this.king);
 			BlockPos stop = this.stops.getFirst();
 			if (this.walk(level, stop, now, STOP_REACH)) {
 				this.stops.removeFirst();
-				if (this.folk != null) {
-					Carriages.stop(this.folk);
-				}
+				Carriages.stop(this.king);
 				this.greeting = GREET_TICKS;
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (no way there, penned in by a fence or a gate: he turns up there in a puff, as builders do; his escort follows)
 				BlockPos at = Construction.standable(level, stop, 3);
 				poof(level, this.king);
-				if (this.folk != null) {
-					Carriages.stop(this.folk);
-				}
-				if (this.folk != null && Carriages.riding(this.folk)) {
-					Carriages.teleport(this.folk, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				Carriages.stop(this.king);
+				if (Carriages.riding(this.king)) {
+					Carriages.teleport(this.king, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 				} else {
 					this.king.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 				}
@@ -316,7 +327,7 @@ public final class Royals {
 				this.improvedAt = now;
 			}
 			double d = Math.sqrt(this.king.distanceToSqr(Vec3.atBottomCenterOf(to)));
-			if (d <= reach + (this.folk != null ? Carriages.reach(this.folk) : 0.0)) {
+			if (d <= reach + Carriages.reach(this.king)) {
 				return true;
 			}
 			if (d < this.best - 0.5) {
@@ -325,11 +336,7 @@ public final class Royals {
 			}
 			if (this.king.getNavigation().isDone() || now % 20 == 0) {
 				BlockPos leg = Construction.leg(level, this.king, to);
-				if (this.folk != null) {
-					Carriages.moveTo(this.folk, leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
-				} else {
-					this.king.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
-				}
+				Carriages.moveTo(this.king, leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
 			}
 			return false;
 		}
@@ -429,7 +436,7 @@ public final class Royals {
 		Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
 		// (0.5.14) wider apart on horseback, and further back behind a carriage
 		double spread = guard instanceof Folk f && Cavalry.mounted(f) ? 1.7 : 1.0;
-		double back = (king instanceof Folk k && Carriages.riding(k) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
+		double back = (Carriages.riding(king) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
 		double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;
 		Vec3 place = king.position().subtract(facing.scale(back)).add(right.scale(side));
 		double d = guard.position().distanceTo(place);
