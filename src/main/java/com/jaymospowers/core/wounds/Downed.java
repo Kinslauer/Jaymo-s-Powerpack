@@ -305,7 +305,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.15.90) In water, or floating just over it (a limp body bobbing at the surface): a downed player here can't swim
+	 * (0.15.89) In water, or floating just over it (a limp body bobbing at the surface): a downed player here can't swim
 	 * and floats limp ({@code DownedKeysMixin}, {@code KitchenCompat.registerRagdollHolds}).
 	 */
 	public static boolean adrift(Entity entity) {
