@@ -2377,6 +2377,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the TNT boom and a light shake. A Warrior-born screams into every form (a yell, a roar under it from Super 2 up, and
   one of three lines per form in nearby chat). Tuning at the top of `ZFighterPower`. Combo animations untouched.
   Compile-checked against the 26.3 jars; not yet run in game.
+- **0.15.63, Duplex the size and build of a copper golem; doubles look like Duplex:** Andy asked that Duplex and its
+  doubles be a copper golem's size and build, and reported the doubles drawn as the default Steve skin. The Steve skin
+  was the game's own: `EntityRenderDispatcher.getRenderer` hands every `AvatarRenderState` to the player renderer, so
+  `XenoDoubleRenderer`'s own model and texture were never used and the state's default skin showed. The double's render
+  state is now filled like a transformed player's (form `duplex`, body hidden via `XenoformClient.hideBody`) and
+  `XenoformLayer` draws it exactly as it draws its owner. `XenoFormModels.Duplex` is rebuilt on `CopperGolemModel`'s
+  boxes (8x5x10 head with the nose, 8x6x6 body, 3x10x4 arms to the ground, 4x5x4 legs, rod and ball tip) plus the belt,
+  at the golem's own 16 px and drawn up from the feet by `FormModel.renderScale`. `Duplex.SCALE` 0.55 (was 0.9) gives a
+  copper golem's ~1 block box; `XenoDouble` takes the player's box at that `Attributes.SCALE`, so player and doubles
+  are the same size. New skin layout in `gen_xenoform.duplex`; the first-person arm is placed at the player's shoulder
+  for every form (`XenoformHand`). Compile-checked against the 26.3 jars; not yet run in game.
 - **0.15.62, ships Jaymo's Kingdoms 0.7.148:** outlaws and disguised players are spared by barbarian
   camps and pirate coves, and with MCA their raiders and deckhands are MCA villagers (details in the Kingdoms MODLOG).
 - **0.15.61, ships Jaymo's Kingdoms 0.7.147 (Nether faction stage 3):** Hornkin portal raids on towns, Nether warlord

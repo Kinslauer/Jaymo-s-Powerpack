@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 /**
  * Draws the alien in a transformed player's place. {@link XenoformClient#extract} has already hidden the player's own
  * body (invisible, no armour, no held items), so only the form's model shows, in the player's pose and at the player's
- * (scaled) size. Pyre is drawn a second time, fullbright, from its glow skin. Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
+ * (scaled) size, times the form's own {@code renderScale}. Pyre is drawn a second time, fullbright, from its glow skin. Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
  * pass over the body ({@link #glow}).
  */
 final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -26,6 +26,13 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		XenoFormModels.FormModel model = XenoFormModels.of(state.getData(XenoformClient.FORM));
 		if (model == null) {
 			return;
+		}
+		poseStack.pushPose();
+		if (model.renderScale != 1.0F) {
+			// a form built smaller than the player (Duplex) is drawn up from the feet (model y 24, 1.501 below here)
+			poseStack.translate(0.0F, 1.501F, 0.0F);
+			poseStack.scale(model.renderScale, model.renderScale, model.renderScale);
+			poseStack.translate(0.0F, -1.501F, 0.0F);
 		}
 		// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
 		renderColoredCutoutModel(model, model.texture, poseStack, collector, lightCoords, state, -1, 1);
@@ -48,6 +55,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 					glow(state.ageInTicks), null, 0);
 			}
 		}
+		poseStack.popPose();
 		// the body is drawn by now; let the shadow fall (EntityRenderer skips it for invisible states, after the layers)
 		state.isInvisible = false;
 	}

@@ -26,6 +26,8 @@ public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
 	public abstract static class FormModel extends HumanoidModel<AvatarRenderState> {
 		public final Identifier texture;
+		/** How much bigger than the player's body it's drawn, from the feet (a small form's model built small). */
+		float renderScale = 1.0F;
 
 		FormModel(ModelPart root, String id) {
 			super(root);
@@ -342,23 +344,46 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Duplex: stocky and riveted, a copper belt, and a lightning rod with a ball tip on its head that sways as it walks. */
+	/**
+	 * Duplex: a copper golem's build, box for box: a wide flat head with a nose, a short body, long arms hanging near
+	 * the ground, stubby legs and the lightning rod with its ball tip, plus a copper belt. It's built at the golem's own
+	 * size (16 pixels to the top of its head) and drawn {@link #RENDER_SCALE} times up from a player at Duplex's scale,
+	 * so the whole is a copper golem's height.
+	 */
 	static final class Duplex extends FormModel {
+		/** 16 px tall, at the player's 0.9375 and Duplex's scale, comes to a copper golem's 0.98 blocks. */
+		static final float RENDER_SCALE = 0.98F / (0.9375F * com.jaymospowers.power.xenoform.forms.Duplex.SCALE);
 		private final ModelPart rod;
 
 		Duplex() {
 			super(bake(mesh()), "duplex");
+			this.renderScale = RENDER_SCALE;
 			this.rod = this.head.getChild("rod");
 		}
 
 		private static MeshDefinition mesh() {
-			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
+			// the golem's boxes (CopperGolemModel), stood on the humanoid's feet line (y 24): legs from 19, body and
+			// head from 13; the arms hang from the top of the body
+			MeshDefinition mesh = new MeshDefinition();
 			PartDefinition root = mesh.getRoot();
-			PartDefinition rod = root.getChild("head").addOrReplaceChild("rod", CubeListBuilder.create().texOffs(0, 64).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-				PartPose.offset(0.0F, -8.4F, 0.0F));
-			rod.addOrReplaceChild("knob", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 2.0F, 2.0F), PartPose.offset(0.0F, -4.0F, 0.0F));
-			root.getChild("body").addOrReplaceChild("belt", CubeListBuilder.create().texOffs(0, 72).addBox(-4.5F, 9.0F, -2.5F, 9.0F, 2.0F, 5.0F, new CubeDeformation(0.4F)),
+			PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -5.0F, -5.0F, 8.0F, 5.0F, 10.0F)
+				.texOffs(40, 0).addBox(-1.0F, -2.0F, -6.0F, 2.0F, 3.0F, 2.0F), PartPose.offset(0.0F, 13.0F, 0.0F));
+			head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+			PartDefinition rod = head.addOrReplaceChild("rod", CubeListBuilder.create().texOffs(48, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offset(0.0F, -5.0F, 0.0F));
+			rod.addOrReplaceChild("knob", CubeListBuilder.create().texOffs(40, 8).addBox(-2.0F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F), PartPose.offset(0.0F, -4.0F, 0.0F));
+			PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 6.0F, 6.0F),
+				PartPose.offset(0.0F, 13.0F, 0.0F));
+			body.addOrReplaceChild("belt", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, 4.0F, -3.0F, 8.0F, 2.0F, 6.0F, new CubeDeformation(0.3F)),
 				PartPose.ZERO);
+			root.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(28, 16).addBox(-3.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F),
+				PartPose.offset(-4.0F, 14.0F, 0.0F));
+			root.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(42, 16).addBox(0.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F),
+				PartPose.offset(4.0F, 14.0F, 0.0F));
+			root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F),
+				PartPose.offset(-2.0F, 19.0F, 0.0F));
+			root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 32).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F),
+				PartPose.offset(2.0F, 19.0F, 0.0F));
 			return mesh;
 		}
 

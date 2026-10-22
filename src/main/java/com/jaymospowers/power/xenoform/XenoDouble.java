@@ -58,14 +58,16 @@ public class XenoDouble extends PathfinderMob {
 	public XenoDouble(EntityType<? extends XenoDouble> type, Level level) {
 		super(type, level);
 		this.setPersistenceRequired();
+		// sized like its owner as Duplex: a player's box at Duplex's scale (copper golem size)
+		this.refreshDimensions();
 	}
 
 	static void init() {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("xeno_double"));
 		TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
 			EntityType.Builder.<XenoDouble>of(XenoDouble::new, MobCategory.MISC)
-				.sized(0.55F, 1.65F)
-				.eyeHeight(1.45F)
+				.sized(0.6F, 1.8F)
+				.eyeHeight(1.62F)
 				.clientTrackingRange(8)
 				.noLootTable()
 				.build(key));
@@ -74,6 +76,7 @@ public class XenoDouble extends PathfinderMob {
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return PathfinderMob.createMobAttributes()
+			.add(Attributes.SCALE, com.jaymospowers.power.xenoform.forms.Duplex.SCALE)
 			.add(Attributes.MAX_HEALTH, MAX_HEALTH)
 			.add(Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE)
 			.add(Attributes.MOVEMENT_SPEED, MOVE_SPEED)

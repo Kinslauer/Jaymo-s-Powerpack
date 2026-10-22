@@ -1042,17 +1042,31 @@ def nadir():
     save(img, "entity/xenoform_nadir.png")
 
 
+# Duplex is built as a copper golem (XenoFormModels.Duplex), so it has its own layout in place of the vanilla one
+DUPLEX_HEAD = (0, 0, 8, 5, 10)
+DUPLEX_NOSE = (40, 0, 2, 3, 2)
+DUPLEX_ROD = (48, 0, 2, 4, 2)
+DUPLEX_KNOB = (40, 8, 4, 4, 4)
+DUPLEX_BODY = (0, 16, 8, 6, 6)
+DUPLEX_RARM = (28, 16, 3, 10, 4)
+DUPLEX_LARM = (42, 16, 3, 10, 4)
+DUPLEX_RLEG = (0, 32, 4, 5, 4)
+DUPLEX_LLEG = (16, 32, 4, 5, 4)
+DUPLEX_BELT = (0, 64, 8, 2, 6)
+DUPLEX_PARTS = (DUPLEX_HEAD, DUPLEX_BODY, DUPLEX_RARM, DUPLEX_LARM, DUPLEX_RLEG, DUPLEX_LLEG)
+
+
 def duplex():
-    """Riveted copper gone green at the edges: a stocky copper body with seams and rivets, verdigris creeping in
-    patches, pale cyan eyes in a dark visor slot, a darker copper belt with a bright buckle, a lightning rod with a
-    polished ball tip on its head, and the insignia on its chest."""
+    """Riveted copper gone green at the edges, on a copper golem's boxes: seams and rivets, verdigris creeping in
+    patches, pale cyan eyes in a dark visor slot over the golem's nose, a darker copper belt with a bright buckle, the
+    lightning rod with a polished ball tip, and a small insignia on its chest."""
     img = new_skin()
     copper = (190, 104, 66)
     seam = shade(copper, 0.62)
     rivet = (238, 170, 120, 255)
     verdigris = (88, 168, 136)
-    parts(img, copper, 0.14)
-    for part in BASE_PARTS:
+    parts(img, copper, 0.14, which=DUPLEX_PARTS)
+    for part in DUPLEX_PARTS:
         for name, b in faces(*part).items():
             x0, y0, x1, y1 = b
             # a seam round each face, a rivet at its corners, and verdigris creeping in from an edge or two
@@ -1060,45 +1074,50 @@ def duplex():
             for (x, y) in ((x0, y0), (x1 - 1, y0), (x0, y1 - 1), (x1 - 1, y1 - 1)):
                 if x1 - x0 > 2 and y1 - y0 > 2:
                     img.putpixel((x, y), rivet)
-            for _ in range(rng.randrange(1, 3)):
+            # (smaller patches on the golem's small faces, so the copper still shows)
+            small = min(x1 - x0, y1 - y0) < 5
+            reach = 1.6 if small else 2.6
+            for _ in range(1 if small else rng.randrange(1, 3)):
                 cx, cy = rng.choice(((x0, rng.randrange(y0, y1)), (x1 - 1, rng.randrange(y0, y1)), (rng.randrange(x0, x1), y1 - 1)))
                 for y in range(y0, y1):
                     for x in range(x0, x1):
                         d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-                        if d < 2.6 and rng.random() < 0.75:
-                            img.putpixel((x, y), lerp(img.getpixel((x, y)), verdigris + (255,), 0.85 * (1 - d / 3.2)))
-            speckle(img, b, shade(copper, 1.18), (x1 - x0) * (y1 - y0) // 14)
-    # plates across the chest and the shins, split by a seam
-    bx0, by0, bx1, by1 = front(BODY)
-    rect(img, (bx0 + 1, by0 + 6, bx1 - 1, by0 + 7), seam)
-    for part in LEGS + ARMS:
-        x0, y0, x1, y1 = front(part)
-        rect(img, (x0, y0 + 6, x1, y0 + 7), seam)
-    # the face: a dark visor slot with two pale cyan eyes, a riveted jaw line
-    rect(img, (9, 10, 15, 13), (40, 22, 16, 255))
-    rect(img, (10, 11, 12, 12), (170, 245, 240, 255))
-    rect(img, (13, 11, 15, 12), (170, 245, 240, 255))
-    img.putpixel((10, 11), (235, 255, 255, 255))
-    img.putpixel((13, 11), (235, 255, 255, 255))
-    rect(img, (9, 14, 15, 15), seam)
-    img.putpixel((9, 14), rivet)
-    img.putpixel((14, 14), rivet)
-    chest_insignia(img, rim=(60, 30, 18, 255))
-    # extras: rod 1x4x1 at (0,64); ball tip 2x2x2 at (8,64); belt 9x2x5 at (0,72)
-    rod = (0, 64, 1, 4, 1)
-    box(img, rod, shade(copper, 0.9), 0.1)
-    knob = (8, 64, 2, 2, 2)
-    box(img, knob, (232, 150, 96), 0.08)
-    for name, (x0, y0, x1, y1) in faces(*knob).items():
+                        if d < reach and rng.random() < 0.75:
+                            img.putpixel((x, y), lerp(img.getpixel((x, y)), verdigris + (255,), 0.85 * (1 - d / (reach + 0.6))))
+            speckle(img, b, shade(copper, 1.18), max(1, (x1 - x0) * (y1 - y0) // 14))
+    # a seam across the forearms, where the golem's hands begin
+    for part in (DUPLEX_RARM, DUPLEX_LARM):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0 + 6, x1, y0 + 7), seam)
+    # the face (8x5): a dark visor slot with two pale cyan eyes above the nose
+    fx0, fy0, fx1, fy1 = front(DUPLEX_HEAD)
+    rect(img, (fx0 + 1, fy0 + 1, fx1 - 1, fy0 + 3), (40, 22, 16, 255))
+    for ex in (fx0 + 2, fx0 + 5):
+        rect(img, (ex, fy0 + 1, ex + 1, fy0 + 3), (170, 245, 240, 255))
+        img.putpixel((ex, fy0 + 1), (235, 255, 255, 255))
+    rect(img, (fx0 + 1, fy1 - 1, fx1 - 1, fy1), seam)
+    box(img, DUPLEX_NOSE, shade(copper, 1.05), 0.1)
+    # the insignia, small enough for the golem's short chest: a green hourglass with a pale heart
+    cx0, cy0, cx1, cy1 = front(DUPLEX_BODY)
+    mx = cx0 + 3
+    rim = (60, 30, 18, 255)
+    rect(img, (mx - 1, cy0 + 1, mx + 4, cy0 + 4), rim)
+    rect(img, (mx, cy0 + 1, mx + 3, cy0 + 2), GREEN)
+    img.putpixel((mx + 1, cy0 + 2), PALE_GREEN)
+    rect(img, (mx, cy0 + 3, mx + 3, cy0 + 4), GREEN)
+    # the rod and its ball tip
+    box(img, DUPLEX_ROD, shade(copper, 0.9), 0.1)
+    box(img, DUPLEX_KNOB, (232, 150, 96), 0.08)
+    for name, (x0, y0, x1, y1) in faces(*DUPLEX_KNOB).items():
         img.putpixel((x0, y0), (255, 214, 170, 255))
-    belt = (0, 72, 9, 2, 5)
-    box(img, belt, shade(copper, 0.7), 0.1)
-    for name, b in faces(*belt).items():
-        speckle(img, b, verdigris + (255,), 3)
-    lx0, ly0, lx1, ly1 = front(belt)
-    rect(img, (lx0 + 3, ly0, lx0 + 6, ly1), (240, 196, 110, 255))
-    rect(img, (lx0 + 4, ly0, lx0 + 5, ly1), (120, 70, 40, 255))
-    clear_hat(img)
+    # the belt round the bottom of the body, a buckle at the front
+    box(img, DUPLEX_BELT, shade(copper, 0.7), 0.1)
+    for name, b in faces(*DUPLEX_BELT).items():
+        speckle(img, b, verdigris + (255,), 2)
+    lx0, ly0, lx1, ly1 = front(DUPLEX_BELT)
+    rect(img, (lx0 + 2, ly0, lx0 + 6, ly1), (240, 196, 110, 255))
+    rect(img, (lx0 + 3, ly0, lx0 + 5, ly1), (120, 70, 40, 255))
     save(img, "entity/xenoform_duplex.png")
 
 
@@ -1112,8 +1131,24 @@ EXTRAS_IN_FRONT = {
     "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
     "knell": (((8, 64, 10, 8, 2), (7, 9)), ((0, 76, 12, 3, 5), (6, 6))),
     "nadir": (((0, 64, 12, 4, 6), (6, 7)),),
-    "duplex": (((0, 72, 9, 2, 5), (7, 17)),),
 }
+
+
+def duplex_card(skin, card):
+    """Duplex's front view: the golem's parts stood on the card's feet line, rod and all."""
+    def put(part, x, y):
+        face = skin.crop(front(part))
+        card.paste(face, (x, y), face)
+    put(DUPLEX_KNOB, 10, 4)
+    put(DUPLEX_ROD, 11, 8)
+    put(DUPLEX_HEAD, 8, 12)
+    put(DUPLEX_BODY, 8, 17)
+    put(DUPLEX_BELT, 8, 21)
+    put(DUPLEX_RARM, 5, 17)
+    put(DUPLEX_LARM, 16, 17)
+    put(DUPLEX_RLEG, 8, 23)
+    put(DUPLEX_LLEG, 12, 23)
+    put(DUPLEX_NOSE, 11, 15)
 
 
 def preview(out):
@@ -1123,6 +1158,10 @@ def preview(out):
     for i, form in enumerate(FORMS):
         skin = Image.open(ROOT / "textures" / "entity" / f"xenoform_{form}.png")
         card = Image.new("RGBA", (24, 36))
+        if form == "duplex":
+            duplex_card(skin, card)
+            sheet.paste(card.resize((24 * k, 36 * k), Image.NEAREST), (i * 24 * k, 0))
+            continue
         card.paste(skin.crop(front(HEAD)), (8, 0))
         card.paste(skin.crop(front(BODY)), (8, 8))
         card.paste(skin.crop(front(RARM)), (4, 8))
