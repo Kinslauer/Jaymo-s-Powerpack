@@ -77,41 +77,66 @@ public final class SpiderCrush {
 		if (!(mob.level() instanceof ServerLevel level)) {
 			return;
 		}
-		RandomSource random = level.getRandom();
-		String look = Corpses.look(mob);
 		float size = mob.getScale() * (mob.is(EntityTypes.CAVE_SPIDER) ? SpiderLeg.CAVE_SPIDER_SIZE : 1.0F);
-		double reach = mob.getBbWidth() * 0.35;
+		burst(level, mob.getX(), mob.getY(), mob.getZ(), Corpses.look(mob), size, mob.getBbWidth(), loot);
+		for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+			ItemStack worn = mob.getItemBySlot(slot);
+			if (!worn.isEmpty()) {
+				drop(level, mob.getX(), mob.getY(), mob.getZ(), worn.copy());
+				mob.setItemSlot(slot, ItemStack.EMPTY);
+			}
+		}
+	}
+
+	/**
+	 * (0.5.20) Andy: "you should still be able to smash them when they are corpses". A dead spider's body hit by a
+	 * crushing blow ({@link #CRUSHES}, or one another mod tagged {@link #CRUSHED_TAG}: Jaymo's Powers' heavy blunt blows)
+	 * bursts into legs the same way, its loot loose. True if it did (the body is gone).
+	 */
+	static boolean crushCorpse(CorpseEntity corpse, ServerLevel level, DamageSource source) {
+		EntityType<?> type = corpse.sourceType();
+		boolean tagged = corpse.entityTags().contains(CRUSHED_TAG);
+		corpse.removeTag(CRUSHED_TAG);
+		if (type == null || !type.builtInRegistryHolder().is(CRUSHABLE) || !(tagged || source.is(CRUSHES))) {
+			return false;
+		}
+		float scale = corpse.bodyScale();
+		float size = scale * (type == EntityTypes.CAVE_SPIDER ? SpiderLeg.CAVE_SPIDER_SIZE : 1.0F);
+		burst(level, corpse.getX(), corpse.getY(), corpse.getZ(), corpse.look(), size, type.getWidth() * scale,
+			corpse.takeLoot());
+		corpse.discard();
+		return true;
+	}
+
+	/** Scatters a crushed spider's legs from {@code (x, y, z)}, drops its loot loose and squelches. */
+	private static void burst(ServerLevel level, double x, double y, double z, String look, float size, double width,
+		List<ItemStack> loot) {
+		RandomSource random = level.getRandom();
+		double reach = width * 0.35;
 		int legs = LEGS_MIN + random.nextInt(LEGS_MAX - LEGS_MIN + 1);
 		for (int i = 0; i < legs; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double cos = Math.cos(angle), sin = Math.sin(angle);
 			SpiderLeg leg = new SpiderLeg(SPIDER_LEG, level);
-			leg.snapTo(mob.getX() + cos * reach, mob.getY() + 0.1, mob.getZ() + sin * reach, random.nextFloat() * 360.0F, 0.0F);
+			leg.snapTo(x + cos * reach, y + 0.1, z + sin * reach, random.nextFloat() * 360.0F, 0.0F);
 			double out = LEG_SPREAD * (0.4 + random.nextDouble() * 0.6) * size;
 			leg.setDeltaMovement(cos * out, LEG_HOP * (0.5 + random.nextDouble() * 0.5), sin * out);
 			leg.setUp(look, size, SpiderLeg.LIFE_MIN + random.nextInt(SpiderLeg.LIFE_MAX - SpiderLeg.LIFE_MIN + 1));
 			level.addFreshEntity(leg);
 		}
 		for (ItemStack stack : loot) {
-			drop(level, mob, stack);
+			drop(level, x, y, z, stack);
 		}
-		for (EquipmentSlot slot : EquipmentSlot.VALUES) {
-			ItemStack worn = mob.getItemBySlot(slot);
-			if (!worn.isEmpty()) {
-				drop(level, mob, worn.copy());
-				mob.setItemSlot(slot, ItemStack.EMPTY);
-			}
-		}
-		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.6F);
-		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 0.9F, 1.4F);
+		level.playSound(null, x, y, z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.6F);
+		level.playSound(null, x, y, z, SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 0.9F, 1.4F);
 	}
 
-	private static void drop(ServerLevel level, LivingEntity mob, ItemStack stack) {
+	private static void drop(ServerLevel level, double x, double y, double z, ItemStack stack) {
 		if (stack.isEmpty() || stack.is(Items.SPIDER_EYE)) {
 			// the eyes went with the head
 			return;
 		}
-		ItemEntity item = new ItemEntity(level, mob.getX(), mob.getY() + 0.2, mob.getZ(), stack);
+		ItemEntity item = new ItemEntity(level, x, y + 0.2, z, stack);
 		item.setDefaultPickUpDelay();
 		level.addFreshEntity(item);
 	}

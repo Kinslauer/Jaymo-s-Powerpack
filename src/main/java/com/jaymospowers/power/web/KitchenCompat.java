@@ -369,8 +369,17 @@ public final class KitchenCompat {
 						com.jaymospowers.core.BladeBlood.corpse(corpse, type, blow.getKey(), blow.getValue());
 					}
 				};
-			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("addOnHit", java.util.function.BiConsumer.class)
-				.invoke(null, bleed);
+			// (0.15.121) a heavy blunt blow smashes a dead spider to legs, as it would a live one (Kitchen 0.5.20 reads the tag)
+			java.util.function.BiConsumer<Entity, java.util.Map.Entry<net.minecraft.world.damagesource.DamageSource, Float>> crush =
+				(corpse, blow) -> {
+					if (com.jaymospowers.core.BladeBlood.heavyBlunt(blow.getKey(), blow.getValue())) {
+						corpse.addTag(com.jaymospowers.core.Crushing.TAG);
+					}
+				};
+			java.lang.reflect.Method addOnHit = Class.forName("com.jaymoskitchen.corpse.CorpseEntity")
+				.getMethod("addOnHit", java.util.function.BiConsumer.class);
+			addOnHit.invoke(null, bleed);
+			addOnHit.invoke(null, crush);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen that doesn't say when a body is hit: the dead don't bleed
 		}
