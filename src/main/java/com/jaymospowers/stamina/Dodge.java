@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -37,6 +40,8 @@ import net.minecraft.world.phys.Vec3;
  * <p>Movement is the client's: it hops at once and tells the server ({@link Start}); the server checks the rules
  * ({@link #canDodge}, the cooldown, the feathers), spends, opens the evasion window, plays the whoosh for everyone and
  * tells the powers ({@link #onDodge}: Darktide's evasions, the Corrupted blink).
+ * <p>(0.15.74) The roll: {@link #ROLLING} is synced to everyone so they see the body tumble the way you went
+ * ({@code DodgeRollPose}); your own client draws it at once.
  */
 public final class Dodge {
 	// ===== the knobs ================================================================================================
@@ -52,6 +57,8 @@ public final class Dodge {
 	public static final float EXHAUSTION = 0.4F;
 	/** The server lets a dodge through this many ticks early (client and server clocks differ a little). */
 	static final int COOLDOWN_SLACK = 3;
+	/** How long the drawn roll takes (ticks): one full tumble. */
+	public static final int ROLL_TICKS = 10;
 	// ================================================================================================================
 
 	/** Client → server: a dodge started along {@code (x, z)} (a unit vector on the ground). */
@@ -64,6 +71,19 @@ public final class Dodge {
 			return TYPE;
 		}
 	}
+
+	/** A dodge's roll: when it started and which way it went (a unit vector on the ground). */
+	public record Rolling(long start, float x, float z) {
+		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, Rolling::start,
+			ByteBufCodecs.FLOAT, Rolling::x,
+			ByteBufCodecs.FLOAT, Rolling::z,
+			Rolling::new);
+	}
+
+	/** (0.15.74) On a player who's dodging (or last did): synced to everyone, who draw the roll. */
+	public static final AttachmentType<Rolling> ROLLING = AttachmentRegistry.create(JaymosPowers.id("dodge_roll"),
+		builder -> builder.syncWith(Rolling.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** Told of every dodge the server lets through. */
 	@FunctionalInterface
@@ -114,6 +134,7 @@ public final class Dodge {
 		player.causeFoodExhaustion(EXHAUSTION);
 		Vec3 dir = new Vec3(start.x(), 0.0, start.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()).reverse() : dir.normalize();
+		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.6F, 0.8F);
 		level.sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 0.1, player.getZ(), 4, 0.25, 0.02, 0.25, 0.02);

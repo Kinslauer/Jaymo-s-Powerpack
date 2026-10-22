@@ -2420,3 +2420,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   cooldown, 20 s in a thunderstorm. Sunflare (Dawnborn, by day): a flash 6 blocks round that sets the undead alight
   for 8 s, blinds other mobs 5 s and heals other players and your pets 2 hearts; 60 s cooldown. Charging, a Stormborn
   raises a hand to the sky and a Dawnborn cups both hands out in front.
+- **0.15.74, the dodge rolls again:** Andy: "shift double tap doesn't animate a roll anymore". It never had one of
+  its own: the roll was Combat Roll's animation, and our dodge (0.15.5) only hopped once Combat Roll left the pack.
+  Now a dodge (double-tap Sneak or Left Alt) tucks into a ball, drops low and tumbles one full turn the way it goes
+  (forward roll, back roll, or over the shoulder to either side) over 0.5 s (`client/stamina/DodgeRollPose`, tuning at
+  the top). Everyone sees it: the server syncs the roll (`Dodge.ROLLING`), and your own client draws it at once. Your own
+  body in first person (First-person Model) stays upright. In first person the view tumbles with the roll and dips
+  toward the ground (Andy's ask; `VIEW_ROLL` turns it down, 0 switches it off).
