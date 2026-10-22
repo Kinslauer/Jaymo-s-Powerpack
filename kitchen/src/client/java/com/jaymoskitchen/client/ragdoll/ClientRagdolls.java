@@ -25,6 +25,7 @@ public final class ClientRagdolls {
 	/**
 	 * (0.5.16) A four-legged body moving slower than this (blocks a tick) is eased onto its side, this much a tick (see
 	 * RagdollPose#of): its legs prop the physics belly down, sitting up like a dog, but a dead animal lies on its side.
+	 * (0.5.19) Box bodies too, for a dead spider rolled onto its back.
 	 */
 	private static final double SIDE_SPEED = 0.06;
 	private static final float SIDE_EASE = 0.12F;
@@ -77,7 +78,7 @@ public final class ClientRagdolls {
 
 		/** Already lying still when first seen (come into view): drawn on its side from the start. */
 		void onSide() {
-			if (rig.shape == RagdollRig.Shape.QUADRUPED) {
+			if (rig.shape != RagdollRig.Shape.HUMANOID) {
 				pickSide();
 				side = sideBefore = 1.0F;
 			}
@@ -99,7 +100,7 @@ public final class ClientRagdolls {
 		/** Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves. */
 		void settle() {
 			sideBefore = side;
-			if (rig.shape != RagdollRig.Shape.QUADRUPED) {
+			if (rig.shape == RagdollRig.Shape.HUMANOID) {
 				return;
 			}
 			double fastest = 0;
