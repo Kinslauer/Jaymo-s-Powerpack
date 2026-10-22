@@ -18,7 +18,7 @@ tracks C/D (see the design notes).
   the existing `data/minecraft/tags/...` files; rerunning changes nothing.
 - No render-layer code: in 26.3 the layer comes from the texture (leaves and plants are cutout by their holes) and
   the aerclouds and quicksoil glass say `force_translucent` in their models.
-- Creative tab: "The Aether" (grass block icon), all blocks and items below. (0.15.75) Hidden: `Aether.HIDDEN_IN_CREATIVE` empties it, so the tab and search show none of them; /give and recipes still work.
+- Creative tab: "The Aether" (grass block icon), all blocks and items below. (0.15.78) Hidden: `Aether.HIDDEN_IN_CREATIVE` empties it, so the tab and search show none of them; /give and recipes still work.
 
 ## Blocks
 

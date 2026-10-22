@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class Aether {
 	/**
-	 * (0.15.75) Andy: the Aether's items are out of creative (its tab and search). Lore: the Aether only scatters remnants
+	 * (0.15.78) Andy: the Aether's items are out of creative (its tab and search). Lore: the Aether only scatters remnants
 	 * over the Overworld, so its things are found, not picked from a list. The items, recipes and /give stay.
 	 */
 	static final boolean HIDDEN_IN_CREATIVE = true;

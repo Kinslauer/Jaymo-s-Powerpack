@@ -8,6 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -45,6 +46,10 @@ import org.jspecify.annotations.Nullable;
  * {@link #BURST_RADIUS}, never its thrower's own side when a folk threw it) and leaves blocks whole, so a landing party
  * doesn't level the village it raids. Water puts the fuse out. Hit a lit stick and it flies off where you're looking,
  * and is yours: bat it back at the man who threw it. Never saved.
+ * <p>(0.7.157) Andy: "change dynamite to just the balkon recipe and design". There's one dynamite in the pack: Balkon's
+ * WeaponMod's ({@code weaponmod:dynamite}, MIT). With WeaponMod loaded the bombardiers hold, drop and throw its stick
+ * ({@link #stick()}), ours is off the creative tab and its recipe, and an old stick of ours crafts into Balkon's. Without
+ * WeaponMod ours stands in, drawn and crafted as Balkon's (string over two gunpowder makes two; its texture, MIT).
  */
 public final class Dynamite extends Projectile implements ItemSupplier {
 	/** The fuse, from the throw (ticks); the sizzle gets louder over its last {@link #HURRY} ticks. */
@@ -65,7 +70,11 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 	static final int DROP_MOST = 2, DROP_NONE_ONE_IN = 3;
 
 	public static EntityType<Dynamite> TYPE;
+	/** Ours: only the stand-in for Balkon's when WeaponMod isn't loaded (use {@link #stick()}). */
 	public static Item ITEM;
+	/** Balkon's WeaponMod's dynamite, the pack's one stick. */
+	static final Identifier BALKON = Identifier.fromNamespaceAndPath(Javelins.WEAPONMOD, "dynamite");
+	private static @Nullable Item balkon;
 
 	private int fuse = FUSE;
 	private boolean bonked;
@@ -86,13 +95,26 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 			.build(key));
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("dynamite"));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new StickItem(new Item.Properties().setId(itemKey).stacksTo(16)));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.WIND_CHARGE, ITEM));
+		if (!Javelins.WEAPONMOD_LOADED) {
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.WIND_CHARGE, ITEM));
+		}
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Folk folk && folk.role() == Pirates.BOMBARDIER && folk.level() instanceof ServerLevel level
 				&& level.getRandom().nextInt(DROP_NONE_ONE_IN) > 0) {
-				folk.spawnAtLocation(level, new ItemStack(ITEM, 1 + level.getRandom().nextInt(DROP_MOST)));
+				folk.spawnAtLocation(level, new ItemStack(stick(), 1 + level.getRandom().nextInt(DROP_MOST)));
 			}
 		});
+	}
+
+	/** The pack's dynamite stick: Balkon's when WeaponMod is loaded, else ours. */
+	public static Item stick() {
+		if (!Javelins.WEAPONMOD_LOADED) {
+			return ITEM;
+		}
+		if (balkon == null) {
+			balkon = BuiltInRegistries.ITEM.getOptional(BALKON).orElse(ITEM);
+		}
+		return balkon;
 	}
 
 	/** A lit stick thrown by {@code thrower} from his hand, along {@code velocity}. */
@@ -121,7 +143,7 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 
 	@Override
 	public ItemStack getItem() {
-		return new ItemStack(ITEM);
+		return new ItemStack(stick());
 	}
 
 	@Override
@@ -135,7 +157,7 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 			// doused
 			level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y + 0.1, pos.z, 6, 0.1, 0.1, 0.1, 0.01);
 			level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.6F, 1.6F);
-			this.spawnAtLocation(level, new ItemStack(ITEM));
+			this.spawnAtLocation(level, new ItemStack(stick()));
 			this.discard();
 			return;
 		}

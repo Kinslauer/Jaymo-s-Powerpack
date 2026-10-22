@@ -264,9 +264,11 @@ def powder_monkey(i):
     save(img, "entity/pirate/powder_monkey_%d" % i)
 
 
-DYNAMITE = (196, 51, 32)
-DYNAMITE_LIT = (220, 76, 46)
-DYNAMITE_CAP = (210, 201, 177)
+# Balkon's WeaponMod dynamite's own colours (0.7.156): a red stick with a grey fuse
+DYNAMITE = (193, 60, 23)
+DYNAMITE_LIT = (219, 68, 26)
+DYNAMITE_DARK = (145, 45, 17)
+DYNAMITE_CAP = (217, 217, 217)
 
 
 def bombardier(i):
@@ -298,7 +300,7 @@ def bombardier(i):
         px(img, x, y - 1, DYNAMITE_CAP)
         px(img, x, y, DYNAMITE_LIT)
         px(img, x, y + 1, DYNAMITE)
-        px(img, x, y + 2, shade(DYNAMITE, -40))
+        px(img, x, y + 2, DYNAMITE_DARK)
     # and the strap over the back
     kx, ky, kw, kh = BODY["back"]
     for k in range(9):
