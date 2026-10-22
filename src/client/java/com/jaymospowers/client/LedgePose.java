@@ -19,6 +19,11 @@ import net.minecraft.world.entity.player.Player;
  * leans in over it, the right knee comes up onto the edge, then the left, and they stand. (0.15.42) Catching the edge
  * eases in ({@link PoseBlend}): the arms come up on springs, the body swings in under the hands from the catch and
  * settles into the hang, the legs swinging after it; letting go or standing eases back out.
+ * <p>
+ * (0.15.108) The prone climb into a low gap: the arms pull down and press on the top as the body comes up, then it tips
+ * forward over the edge onto its belly, arms reaching ahead and legs straightening out behind, ending in vanilla's own
+ * crawl tilt so the crawl ({@code CrawlPose}) takes over without a jump. The crawl's 0.6-high body is lifted at the start
+ * (eyes kept level), so the model is let back down by as much until it has tipped over.
  */
 public final class LedgePose {
 	/** The catch: the swing in under the hands (degrees), how fast it swings (radians a second) and dies away (per second). */
@@ -47,8 +52,11 @@ public final class LedgePose {
 	static final float[] FP_HANG = {-0.05F, -0.55F, -0.45F, 12.0F, 10.0F}, FP_PRESS = {-0.05F, -0.95F, -0.5F, 35.0F, 8.0F};
 	static final float FP_PRESS_END = 0.55F, FP_GONE_FROM = 0.5F, FP_GONE_AT = 1.0F, FP_GONE_DROP = 0.6F;
 
-	/** {@code climb}: 0-1 through the climb, or -1 while hanging; {@code time}: ticks, for the sway. */
-	public record State(float climb, float time) {
+	/** (0.15.108) The prone climb: done tipping onto the belly by this far through it; the arms reach ahead past the head (radians). */
+	static final float PRONE_TIPPED = 0.85F, PRONE_REACH = -2.7F;
+
+	/** {@code climb}: 0-1 through the climb, or -1 while hanging; {@code time}: ticks, for the sway; {@code prone}: (0.15.108) the climb onto the belly. */
+	public record State(float climb, float time, boolean prone) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:ledge");
@@ -72,7 +80,7 @@ public final class LedgePose {
 			}
 			climb = LedgeClient.localProgress(partialTicks);
 		} else {
-			climb = hold.climbing() ? Mth.clamp((player.level().getGameTime() - hold.start() + partialTicks) / Ledge.CLIMB_TICKS, 0.0F, 1.0F) : -1.0F;
+			climb = hold.climbing() ? Mth.clamp((player.level().getGameTime() - hold.start() + partialTicks) / hold.climbTicks(), 0.0F, 1.0F) : -1.0F;
 		}
 		if (climb >= 1.0F) {
 			state.setData(KEY, null);
@@ -83,7 +91,14 @@ public final class LedgePose {
 		state.bodyRot = hold.direction().toYRot();
 		state.yRot = Mth.clamp(Mth.wrapDegrees(head - state.bodyRot), -70.0F, 70.0F);
 		state.walkAnimationSpeed = 0.0F;
-		state.setData(KEY, new State(climb, player.tickCount + partialTicks));
+		boolean prone = hold.prone() && climb >= 0.0F;
+		if (prone) {
+			// (0.15.108) the crawl has begun: the tip onto the belly here stands in for vanilla's swimming tilt
+			state.isVisuallySwimming = false;
+			state.swimAmount = 0.0F;
+			state.isCrouching = false;
+		}
+		state.setData(KEY, new State(climb, player.tickCount + partialTicks, prone));
 	}
 
 	/** After the body faces its way: hanging, a slow sway from the hands; climbing, the lean in over the edge. */
@@ -102,6 +117,15 @@ public final class LedgePose {
 			poseStack.rotateDegrees(Axis.ZP, Mth.sin(ledge.time() * SWAY_SPEED) * SWAY_DEGREES * amount);
 			poseStack.rotateDegrees(Axis.XP, (Mth.sin(ledge.time() * SWAY_SPEED * 0.7F + 1.3F) * SWAY_DEGREES * 0.4F + swing * CATCH_SWING) * amount);
 			poseStack.translate(0.0F, -HANDS, 0.0F);
+			return;
+		}
+		if (ledge.prone()) {
+			// (0.15.108) let down by the crawl's lift (gone once tipped over), tipped forward about the feet into vanilla's crawl tilt
+			float tip = proneTip(ledge.climb());
+			float lifted = ledge.climb() * Ledge.PRONE_CLIMB_TICKS >= 1.0F ? 1.0F : 0.0F;
+			poseStack.translate(0.0F, (float)-Ledge.PRONE_EYE_KEEP * lifted * (1.0F - tip), 0.0F);
+			poseStack.rotateDegrees(Axis.XP, -90.0F * tip);
+			poseStack.translate(0.0F, -tip, 0.3F * tip);
 			return;
 		}
 		// (a negative turn about X tips the top forward) leaning in most as the knee comes up, upright again to stand
@@ -140,6 +164,10 @@ public final class LedgePose {
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		float p = ledge.climb();
+		if (p >= 0.0F && ledge.prone()) {
+			proneModel(h, p);
+			return;
+		}
 		if (p < 0.0F) {
 			float t = ledge.time();
 			float give = Mth.sin(t * SWAY_SPEED * 1.3F) * 0.04F;
@@ -164,6 +192,29 @@ public final class LedgePose {
 		float left = smooth((p - 0.55F) / 0.25F) * (1.0F - smooth((p - 0.82F) / 0.18F));
 		set(h.rightLeg, KNEE_UP * right + 0.1F * (1.0F - pull), 0.0F, 0.04F);
 		set(h.leftLeg, KNEE_UP * 0.6F * left - 0.1F * (1.0F - pull), 0.0F, -0.04F);
+	}
+
+	/** (0.15.108) How far the body has tipped onto its belly (0-1) at {@code p} through the prone climb. */
+	private static float proneTip(float p) {
+		return smooth((p - 0.15F) / (PRONE_TIPPED - 0.15F));
+	}
+
+	/**
+	 * (0.15.108) The prone climb: the arms pull down and press on the top, then reach on ahead as the body tips over; a
+	 * knee comes up to the edge, then the legs straighten out behind; the head lifts to look ahead as vanilla's crawl does.
+	 */
+	private static void proneModel(HumanoidModel<?> h, float p) {
+		float pull = smooth(p / 0.4F);
+		float reach = smooth((p - 0.45F) / 0.45F);
+		float arm = Mth.lerp(reach, Mth.lerp(pull, ARM_UP, ARM_PRESS), PRONE_REACH);
+		float spread = Mth.lerp(pull, ARM_SPREAD, ARM_SPREAD * 1.6F) * (1.0F - reach) + 0.25F * reach;
+		set(h.rightArm, arm, 0.0F, spread);
+		set(h.leftArm, arm, 0.0F, -spread);
+		float knee = smooth((p - 0.2F) / 0.25F) * (1.0F - smooth((p - 0.5F) / 0.35F));
+		float dangle = 1.0F - pull;
+		set(h.rightLeg, KNEE_UP * 0.7F * knee + 0.1F * dangle, 0.0F, 0.04F);
+		set(h.leftLeg, -0.1F * dangle, 0.0F, -0.04F);
+		h.head.xRot = Mth.lerp(proneTip(p), h.head.xRot, -Mth.PI / 4.0F);
 	}
 
 	/**
