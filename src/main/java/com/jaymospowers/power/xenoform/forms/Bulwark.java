@@ -320,6 +320,7 @@ public final class Bulwark extends XenoForm {
 		ServerLevel level = player.level();
 		for (LivingEntity living : around(player, SLAM_RADIUS)) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
+			com.jaymospowers.core.Crushing.mark(living);
 			shove(living, player.position(), 0.8, 0.6);
 		}
 		Vec3 feet = player.position();

@@ -100,6 +100,8 @@ public final class BladeBlood {
 			return;
 		}
 		if (heavyBlunt(source, damage)) {
+			// (0.15.117) a killing one crushes a spider (Kitchen)
+			Crushing.mark(target);
 			blunt(target, damage);
 			return;
 		}
@@ -246,6 +248,7 @@ public final class BladeBlood {
 
 	/** If {@code target} is dead (crushed: a blow just landed that only crushing does), it bursts. */
 	public static void crushed(LivingEntity target) {
+		Crushing.mark(target);
 		if (!(target.level() instanceof ServerLevel level) || !target.isDeadOrDying() || !bleeds(target)
 			|| target instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator())) {
 			return;

@@ -2623,3 +2623,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.116 (finishers: an unloaded gun uses the bayonet):** Andy: "with no ammunition it should just run though with
   the blade". A gun with no round in it plays the sword's Run Through instead of refusing (`Finishers.move`). Bows and
   crossbows still need an arrow. Compile-checked; not playtested.
+- **0.15.117, crushed spiders (Kitchen 0.5.18):** Andy: "large blunt impacts or slams on spiders should crush them,
+  leaving no corpse to grab, but only a random amount of legs that disappear after a time". Kitchen does the crushing;
+  Powers marks the deaths it should crush with Kitchen's `jaymoskitchen.crushed` tag (`core/Crushing.mark`, only on a
+  creature the blow just killed): a heavy blunt blow's kill (`BladeBlood.heavyBlunt`: a hammer or club for 3 hearts or
+  more), anything `BladeBlood.crushed` bursts (Gravity's weight and wall slams, the Great Ape's stomp), a blunt, staff
+  or greatsword finisher, Gravity's slam, Gravity's meteor, Bulwark's Leap Slam, Nadir's Heavy Hand slam, the symbiote's body
+  slams and dive, its thrash's splash and the Behemoth's tendril slam. Compile-checked; not playtested.

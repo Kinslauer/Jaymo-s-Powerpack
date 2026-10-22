@@ -708,7 +708,7 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	private static @Nullable CompoundTag parse(String look) {
+	static @Nullable CompoundTag parse(String look) {
 		if (look.isEmpty()) {
 			return null;
 		}
@@ -719,7 +719,7 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	private static Optional<EntityType<?>> typeOf(@Nullable CompoundTag tag) {
+	static Optional<EntityType<?>> typeOf(@Nullable CompoundTag tag) {
 		if (tag == null) {
 			return Optional.empty();
 		}

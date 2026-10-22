@@ -467,6 +467,7 @@ public final class WebTendrilCombos {
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(THRASH_SPLASH),
 			e -> e != player && e.isAlive() && !e.isSpectator() && handOf(player, e) < 0)) {
 			living.hurtServer(level, level.damageSources().playerAttack(player), THRASH_SPLASH_DAMAGE);
+			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 out = living.position().subtract(at).horizontal();
 			out = out.lengthSqr() < 1.0E-4 ? ahead(player) : out.normalize();
 			knock(living, living.getDeltaMovement().add(out.scale(0.5)).add(0.0, 0.3, 0.0));

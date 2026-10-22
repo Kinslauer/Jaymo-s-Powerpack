@@ -506,6 +506,7 @@ final class GravityMeteor {
 				GravityPower.touch(living, owner);
 			}
 			living.hurtServer(level, source, damage);
+			com.jaymospowers.core.Crushing.mark(living);
 			Vec3 away = middle.subtract(nearest);
 			Vec3 out = away.horizontal().lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.horizontal().normalize();
 			Vec3 throwVec = out.scale(1.2).add(meteor.to.subtract(meteor.from).normalize().scale(0.8));
@@ -544,6 +545,7 @@ final class GravityMeteor {
 				GravityPower.touch(living, owner);
 			}
 			living.hurtServer(level, source, damageMax * share * share + 2.0F * share);
+			com.jaymospowers.core.Crushing.mark(living);
 		}
 		// everything flammable near the strike catches
 		Flames.area(level, at, IMPACT_FIRE_RADIUS * radius / RADIUS_MIN, IMPACT_FIRE_SECONDS, owner, e -> true);
