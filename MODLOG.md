@@ -2491,3 +2491,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`ChronoStreak`) in light blue: afterimages of the raptor (`XenoformClient.submitGhost`), sky-blue bolts, a blue dust
   trail. R again switches it off, then 2 s. `ChronoSpeed.FLASH` now holds the streak's colour (an int, not a boolean).
   No phasing through walls: that stays Chrono's.
+- **0.15.98, finishers on the downed:** Andy: "every weapon should be able to right click and hold a downed enemy, and
+  then do a unique finisher animation". Hold use (not sneaking) on someone downed for 0.4 s and you finish them with a
+  move for the kind of weapon in your main hand (`core/finisher/Finishers`, read off item tags and names so forged and
+  other mods' weapons fall in): sword (Run Through), greatsword (Headsman's Stroke), dagger (Mercy Stroke), axe
+  (Executioner, the head comes off first), mace/hammer/club/pickaxe (Skull Crusher), spear/trident (Pinned), polearm
+  (Reaping), staff, bow (Point Blank), crossbow, and anything else or bare hands (Neck Snap). You stand rooted facing
+  them; blows land on the move's beats (sound, Simple Blood's blood or a crush, the body jolting, screen shake) and the
+  last one is the death, credited to you (`Downed.execute`). Stops, sparing them, if they get up, are carried off or
+  end up out of reach. Drawn for everyone by `client/finisher/FinisherPose` (keyframes eased on `PoseBlend` springs,
+  the body turned to them with a step in, the weapon turned in the hand by `FinisherItemInHandLayerMixin`); your own
+  is watched from behind, first person given back after. Not on tamed animals. Medicine in hand still treats; a
+  red-hot blade only counts as medicine with sneak. A tap on a downed guard still has Kingdoms disarm them.
