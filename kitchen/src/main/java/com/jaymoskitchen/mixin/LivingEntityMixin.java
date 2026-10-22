@@ -2,6 +2,7 @@ package com.jaymoskitchen.mixin;
 
 import com.jaymoskitchen.corpse.CorpseCapture;
 import com.jaymoskitchen.corpse.Corpses;
+import com.jaymoskitchen.corpse.Gibs;
 import com.jaymoskitchen.corpse.PlayerCorpses;
 import com.jaymoskitchen.corpse.SpiderCrush;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,6 +35,8 @@ abstract class LivingEntityMixin implements CorpseCapture {
 	@Shadow
 	@Final
 	protected EntityEquipment equipment;
+	@Shadow
+	protected float lastHurt;
 
 	@Unique
 	private @Nullable List<ItemStack> jaymoskitchen$loot;
@@ -124,7 +127,10 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		}
 		if (Corpses.leavesCorpse(self)) {
 			List<ItemStack> loot = jaymoskitchen$loot == null ? List.of() : jaymoskitchen$loot;
-			if (SpiderCrush.crushed(self)) {
+			if (Gibs.blownApart(self, lastHurt)) {
+				// (0.5.21) killed by a blast (a creeper by any): blown apart, no body
+				Gibs.blowApart(self, lastHurt, loot);
+			} else if (SpiderCrush.crushed(self)) {
 				// (0.5.18) a spider crushed flat leaves only legs, no body
 				SpiderCrush.crush(self, loot);
 			} else {

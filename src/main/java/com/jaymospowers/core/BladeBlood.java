@@ -44,6 +44,9 @@ public final class BladeBlood {
 	static final int BURST_DROPS = 26, BURST_GORE = 28;
 	static final double BURST_SPEED = 0.22, BURST_GORE_SPEED = 0.35;
 	static final float BURST_POOL = 3.0F;
+	/** (0.15.126) Blown apart by a blast: this many drops this fast, this many pools (each a burst's), this much gore this fast. */
+	static final int BLAST_DROPS = 40, BLAST_POOLS = 3, BLAST_GORE = 40;
+	static final double BLAST_SPEED = 0.35, BLAST_GORE_SPEED = 0.55;
 	/** (0.15.93) A blunt blow this heavy (health points) or more splatters, with this many times a blade's drops. */
 	static final float HEAVY_BLUNT = 6.0F, BLUNT_DROPS = 1.5F;
 	/**
@@ -262,5 +265,24 @@ public final class BladeBlood {
 			BURST_GORE, w, h, w, BURST_GORE_SPEED);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_BREAK, SoundSource.HOSTILE, 0.8F, 0.6F);
+	}
+
+	/**
+	 * (0.15.126) Andy: explosions "should blast other corpses apart into a mess". {@code body} (a creature of
+	 * {@code type}, or Jaymo's Kitchen's body of one) was just blown apart by a blast (Kitchen throws the chunks): its blood
+	 * bursts out farther than a crushing's, with pools and gore flung wide.
+	 */
+	public static void blownApart(Entity body, EntityType<?> type) {
+		if (!(body.level() instanceof ServerLevel level) || !bleeds(type)) {
+			return;
+		}
+		int color = color(type);
+		float size = (type.getWidth() + 2.0F) / 3.0F;
+		double w = type.getWidth() * 0.6 + 0.2, h = type.getHeight() * 0.3 + 0.1;
+		double x = body.getX(), y = body.getY() + type.getHeight() * 0.4, z = body.getZ();
+		level.sendParticles(new BloodParticles.Spray(color, size), true, true, x, y, z, BLAST_DROPS, w, h, w, BLAST_SPEED);
+		level.sendParticles(new BloodParticles.Puddle(color, BURST_POOL * size), true, true, body.getX(), body.getY() + 0.1, body.getZ(),
+			BLAST_POOLS, w * 1.5, 0.0, w * 1.5, 0.0);
+		level.sendParticles(BloodParticles.fleck(color, 2.0F), x, y, z, BLAST_GORE, w, h, w, BLAST_GORE_SPEED);
 	}
 }

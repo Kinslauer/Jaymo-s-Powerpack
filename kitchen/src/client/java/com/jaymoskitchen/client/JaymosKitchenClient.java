@@ -51,6 +51,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);
 		// (0.5.18) a crushed spider's loose legs
 		EntityRendererRegistry.register(com.jaymoskitchen.corpse.SpiderCrush.SPIDER_LEG, com.jaymoskitchen.client.corpse.SpiderLegRenderer::new);
+		// (0.5.21) chunks of a body blown apart
+		EntityRendererRegistry.register(com.jaymoskitchen.corpse.Gibs.GIB, com.jaymoskitchen.client.corpse.GibRenderer::new);
 		ModelLayerRegistry.registerModelLayer(CorpseRenderer.PLAYER_BODY, () -> CorpseRenderer.playerBody(false));
 		ModelLayerRegistry.registerModelLayer(CorpseRenderer.PLAYER_BODY_SLIM, () -> CorpseRenderer.playerBody(true));
 		ModelLayerRegistry.registerModelLayer(ZombiePlayerModel.TATTERS, () -> ZombiePlayerModel.tatters(false));
