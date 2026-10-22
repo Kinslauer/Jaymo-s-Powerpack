@@ -1,5 +1,8 @@
 package com.jaymospowers.client.mixin;
 
+import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.SelfRevive;
 import java.util.Set;
@@ -18,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * powers, or really do anything but crawl". While the local player is down, every key that acts reads as up and its
  * presses are swallowed: Jump, Sprint, attack, use, pick, drop, swap hands, and every one of ours (the ability keys, Mode,
  * Ultimate, Dodge, Crawl, the menu...). A key already held counts as let go, so a held ability ends. Moving (and the
- * double-tap roll on A / D), Sneak (held to give up), looking about, the hotbar, chat and the menus still work.
+ * double-tap roll on A / D), Sneak (held to give up), looking about, the hotbar, chat and the menus still work. (0.15.79) So
+ * does any ability key the power keeps live ({@link Power#usableDowned}): Chrono's Rewind, which gets you back up.
  */
 @Mixin(KeyMapping.class)
 abstract class DownedKeysMixin {
@@ -57,6 +61,21 @@ abstract class DownedKeysMixin {
 		}
 		LocalPlayer player = Minecraft.getInstance().player;
 		// (0.15.49) use stays live for Second Wind's eating to rise, with food in hand
-		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && SelfRevive.canEat(player));
+		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && SelfRevive.canEat(player))
+			&& !this.powerKeepsLive(player);
+	}
+
+	/** An ability key the player's power keeps working while they're down (Chrono's Rewind). */
+	private boolean powerKeepsLive(LocalPlayer player) {
+		Power power = Powers.of(player);
+		if (power == null) {
+			return false;
+		}
+		for (PowerKey key : PowerKey.values()) {
+			if ((OURS + key.id()).equals(this.name)) {
+				return power.usableDowned(player, key);
+			}
+		}
+		return false;
 	}
 }
