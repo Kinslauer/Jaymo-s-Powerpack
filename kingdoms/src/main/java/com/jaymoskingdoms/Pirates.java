@@ -134,7 +134,7 @@ public final class Pirates {
 		Folk.defineRole(new Folk.Role(BOMBARDIER, "pirate_bombardier", true, false, null, (folk, faction) -> {
 			base(folk, BOMBARDIER_HEALTH, BOMBARDIER_DAMAGE, 0.3);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-			folk.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Dynamite.ITEM));
+			folk.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Dynamite.stick()));
 			folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, folk.getRandom().nextBoolean() ? RED_CLOTH : BLACK_CLOTH));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.pirate_bombardier_of", faction.name()));
 		}));
