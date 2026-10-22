@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.153) Zombie awareness, after Zombie Awareness (Corosauce, ARR; its ideas, our own code). Andy: "player zombies
  * should work like this, and maybe work it in to help with our stealth". The mobs in {@link #AWARE} (the zombies: zombies,
- * husks, drowned, zombie villagers) go and look ({@link Senses#lure}, the same search as for a player they lost) when they
+ * husks, drowned, zombie villagers, and Jaymo's Kitchen's reanimated player corpses) go and look ({@link Senses#lure}, the same search as for a player they lost) when they
  * <ul>
  * <li><b>hear</b> something ({@link #heard}, from {@code ServerLevelGameEventMixin}): mining and placing blocks, explosions,
  * bows and crossbows, eating and drinking, doors, gates, trapdoors, buttons, levers, plates, tripwires, chests and barrels,

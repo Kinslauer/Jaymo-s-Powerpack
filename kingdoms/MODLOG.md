@@ -4153,7 +4153,8 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
 ## 0.7.153: zombie awareness (pack 0.15.70)
 - Andy: "player zombies should work like this [Zombie Awareness], and maybe work it in to help with our stealth".
   Zombie Awareness is ARR, so `Awareness` is our own code for its ideas. Zombies (tag `jaymoskingdoms:aware`: zombie,
-  husk, drowned, zombie villager; add skeletons, creepers or witches there to make them aware too) go and look, the
+  husk, drowned, zombie villager, and Kitchen's reanimated player corpses `jaymoskitchen:zombie_player`, Andy: "it should
+  apply to the reanimated corpse zombies too"; zombie corpses already rise as plain zombies; add skeletons, creepers or witches there to make them aware too) go and look, the
   same search `Senses` uses for a lost target, when they:
   - hear noise (`ServerLevelGameEventMixin`): mining, placing, explosions (48 blocks), bows, eating, doors, levers,
     buttons, plates, pistons, chests, note blocks, jukeboxes, fuses, lightning, a sprinting player's footsteps. They go
