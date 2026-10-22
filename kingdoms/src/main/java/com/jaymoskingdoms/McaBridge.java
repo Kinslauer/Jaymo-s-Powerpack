@@ -445,8 +445,8 @@ final class McaBridge {
 			if (f != null && !f.fallen() && !villager.isBaby() && f.leader().map(villager.getUUID()::equals).orElse(false)) {
 				return true;
 			}
-			Rulers.unfit(villager);
 			e.discharge();
+			Rulers.unfit(villager);
 			return false;
 		}
 		if (Barbarians.villagerRole(e.role())) {
@@ -639,6 +639,20 @@ final class McaBridge {
 		if (player != null) {
 			player.sendSystemMessage(message.copy().withStyle(ChatFormatting.YELLOW));
 		}
+	}
+
+	/** {@link McaCompat#female}. */
+	static boolean female(net.minecraft.world.entity.LivingEntity e) {
+		return e instanceof VillagerEntityMCA v && v.getGenetics().getGender() == Gender.FEMALE;
+	}
+
+	/** {@link McaCompat#redress}. */
+	static boolean redress(PathfinderMob mob) {
+		if (!(mob instanceof VillagerEntityMCA v)) {
+			return false;
+		}
+		ClothingLibrary.ruled(v);
+		return Rulers.is(v) && ClothingLibrary.royal(v);
 	}
 
 	static boolean busy(PathfinderMob mob) {
