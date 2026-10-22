@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * powers, or really do anything but crawl". While the local player is down, every key that acts reads as up and its
  * presses are swallowed: Jump, Sprint, attack, use, pick, drop, swap hands, and every one of ours (the ability keys, Mode,
  * Ultimate, Dodge, Crawl, the menu...). A key already held counts as let go, so a held ability ends. Moving (and the
- * double-tap roll on A / D), Sneak (held to give up), looking about, the hotbar, chat and the menus still work. (0.15.79) So
+ * double-tap roll on A / D), Sneak (held to give up), looking about, the hotbar, chat and the menus still work. (0.15.81) So
  * does any ability key the power keeps live ({@link Power#usableDowned}): Chrono's Rewind, which gets you back up.
  */
 @Mixin(KeyMapping.class)

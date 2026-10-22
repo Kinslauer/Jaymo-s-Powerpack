@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Chronokinesis: golden clockwork time magic. Everything is decided here, on the server.
  * <ul>
- * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out). (0.15.79) It works
+ * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out). (0.15.81) It works
  * downed too: back to the 3 s before you went down, on your feet with the health you had then.</li>
  * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s. Since 0.10.96 it also resets every
  * other cooldown you have running (never its own).</li>
@@ -79,7 +79,7 @@ public final class ChronoPower implements Power {
 	/** Rewind needs at least this much history (0.5 s), so it can't be spammed right after a teleport or respawn. */
 	static final int REWIND_MIN_HISTORY = 10;
 	static final int REWIND_COOLDOWN = 300;
-	/** (0.15.79) A Rewind out of the downed state leaves you with at least this share of your most health. */
+	/** (0.15.81) A Rewind out of the downed state leaves you with at least this share of your most health. */
 	static final float REWIND_UP_HEALTH = Downed.RECOVER_HEALTH;
 	static final int STASIS_COOLDOWN = 600;
 	static final int OVERCLOCK_TICKS = 120;
@@ -149,7 +149,7 @@ public final class ChronoPower implements Power {
 				ChronoMemory.count(ChronoMemory.of(serverPlayer).mined, BuiltInRegistries.BLOCK.getKey(state.getBlock()));
 			}
 		});
-		// (0.15.79) Andy: "chrono should not take fall damage when using overclock"
+		// (0.15.81) Andy: "chrono should not take fall damage when using overclock"
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && overclocked(player)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -211,7 +211,7 @@ public final class ChronoPower implements Power {
 	}
 
 	/**
-	 * (0.15.79) Andy: "chrono should be able to use R when downed, this will revert him as it should". Rewind stays live
+	 * (0.15.81) Andy: "chrono should be able to use R when downed, this will revert him as it should". Rewind stays live
 	 * while down (not passed out), once it's unlocked.
 	 */
 	@Override
@@ -325,7 +325,7 @@ public final class ChronoPower implements Power {
 			return;
 		}
 
-		// (0.15.79) down, time holds on to the moments before the fall (a Rewind takes you back to them, and up); up again
+		// (0.15.81) down, time holds on to the moments before the fall (a Rewind takes you back to them, and up); up again
 		// by any other means, those moments are stale
 		boolean downed = Downed.isDowned(player);
 		if (!downed) {
@@ -610,7 +610,7 @@ public final class ChronoPower implements Power {
 		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
 
 		if (downed) {
-			// (0.15.79) back to before the fall: up off the ground (out of any arms that carried you)
+			// (0.15.81) back to before the fall: up off the ground (out of any arms that carried you)
 			Downed.getUp(level, player);
 		}
 		if (player.isPassenger()) {
