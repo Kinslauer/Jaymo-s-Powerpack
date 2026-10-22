@@ -2650,3 +2650,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   explosions should blast other corpses apart into a mess." Kitchen throws the chunks; `KitchenCompat.registerCorpseBlood`
   hooks Kitchen's `Gibs.addOnBurst`, and `BladeBlood.blownApart` bursts the body's blood wider than a crushing (40
   drops, 3 pools, 40 flecks of gore, in its own blood colour). Compile-checked; not playtested.
+- **0.15.130, no lying stuck at no health:** Andy: "after Jung was hit by a meteor he was stuck on the ground unable to
+  revive even after giving up or being killed with commands." His health was at zero but he never died: something in
+  the death chain turned the death away without giving health back (Fabric's `ALLOW_DEATH` leaves it there), and a body
+  at no health ignores every hurt, so giving up and `/kill` did nothing and a relog kept it. `DownedLimboMixin` catches
+  it as the blow lands (a downable player goes down instead), and `Downed.limbo` checks every tick for any other way in
+  (a save loaded at zero; one who quit on the death screen is marked `DIED` and left alone): the death they were owed
+  comes, death screen and all. Each catch logs a WARN with the damage type, to find what turned the death away. Builds;
+  not playtested.
