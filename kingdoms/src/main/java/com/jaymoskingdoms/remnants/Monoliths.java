@@ -73,8 +73,14 @@ public final class Monoliths {
 	static final int RISE_NEAREST = 9, RISE_FURTHEST = 14;
 	/** Raising one: how often players in the wild are weighed (ticks), the chance each time, how far off it rises, how far apart they are. */
 	static final int RAISE_TICKS = 2400;
-	static final float RAISE_CHANCE = 0.06F;
-	static final int RAISE_NEAREST = 64, RAISE_FURTHEST = 112, SPACING = 1200;
+	/** (0.7.159) Andy: "the giants need to be rarer": a third as likely as before (about one per 100 minutes in the wild), twice as far apart. */
+	static final float RAISE_CHANCE = 0.02F;
+	static final int RAISE_NEAREST = 64, RAISE_FURTHEST = 112, SPACING = 2400;
+	/**
+	 * (0.7.159) Andy: "they shouldnt activate until after borderlands world tier, the monument will only hum". A Giant
+	 * rises only for a player at this world tier or higher (as portal raids); for anyone below, its monolith only hums.
+	 */
+	static final WorldTiers.Tier WAKE_TIER = WorldTiers.Tier.BORDERLANDS;
 	/** No monolith this close to a settlement (blocks). */
 	static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** Tries at finding ground for a monolith, or for a Giant. */
@@ -85,6 +91,9 @@ public final class Monoliths {
 	static final int GROUND_RADIUS = 4, RUBBLE = 5;
 	/** The world tier the first Giant's fall raises the world to (1: Borderlands). */
 	static final int FIRST_GIANT_TIER = 1;
+
+	/** Its hum, before a Giant can wake: how loud, and how low. */
+	static final float HUM_VOLUME = 2.0F, HUM_PITCH = 0.5F;
 
 	public static final int AWAKE = 0, CLAIMED = 1;
 
@@ -213,17 +222,34 @@ public final class Monoliths {
 				continue;
 			}
 			ServerPlayer near = null;
+			boolean anyone = false;
 			for (ServerPlayer player : level.players()) {
 				if (!player.isSpectator() && !player.isCreative() && horizontal(player.blockPosition(), m.pos()) < WAKE_RANGE * WAKE_RANGE) {
-					near = player;
-					break;
+					anyone = true;
+					if (WorldTiers.of(player).ordinal() >= WAKE_TIER.ordinal()) {
+						near = player;
+						break;
+					}
 				}
 			}
-			if (near == null || giantOf(level, m) != null) {
+			if (near == null) {
+				if (anyone) {
+					hum(level, m);
+				}
+				continue;
+			}
+			if (giantOf(level, m) != null) {
 				continue;
 			}
 			rise(level, m);
 		}
+	}
+
+	/** {@code m} hums, its Giant still asleep (no one near is in the world tier to wake it): a low drone and its motes. */
+	static void hum(ServerLevel level, Monolith m) {
+		BlockPos pos = m.pos();
+		level.playSound(null, pos, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, HUM_VOLUME, HUM_PITCH);
+		level.sendParticles(m.element().mote, pos.getX() + 0.5, pos.getY() + PILLAR_LEAST, pos.getZ() + 0.5, 6, 0.6, 1.0, 0.6, 0.01);
 	}
 
 	/** The living Giant bound to {@code m}, if one is about. */
