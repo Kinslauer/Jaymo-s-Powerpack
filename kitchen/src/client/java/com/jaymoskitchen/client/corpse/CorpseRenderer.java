@@ -281,6 +281,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		ClosedEyes.mark(bodyState);
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
 		physics(corpse, state, bodyState, baseX, baseY, baseZ, partialTicks);
@@ -304,7 +305,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.turn.identity();
 		state.move.set(0.0F, 0.0F, 0.0F);
 		state.lift[0] = 0.0F;
-		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z);
+		// (0.5.16) a dead animal settles onto its side, not propped belly down on its legs
+		RagdollPose pose = RagdollPose.of(track.rig, track.points(partialTicks), state.x, state.y, state.z,
+			track.side(partialTicks), track.sideUp());
 		state.pose = pose;
 		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
@@ -341,6 +344,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		ClosedEyes.mark(bodyState);
 		bodyState.setData(RagdollPose.KEY, pose);
 		state.body = bodyState;
 		state.bodyRenderer = renderer;

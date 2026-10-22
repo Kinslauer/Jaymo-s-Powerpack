@@ -22,6 +22,12 @@ public final class ClientRagdolls {
 	private static final int FORGET_TICKS = 40;
 	/** A body unheard of longer than this (ticks) jumps to its next points instead of gliding there. */
 	private static final int GAP_TICKS = 2;
+	/**
+	 * (0.5.16) A four-legged body moving slower than this (blocks a tick) is eased onto its side, this much a tick (see
+	 * RagdollPose#of): its legs prop the physics belly down, sitting up like a dog, but a dead animal lies on its side.
+	 */
+	private static final double SIDE_SPEED = 0.06;
+	private static final float SIDE_EASE = 0.12F;
 
 	/** One body: its rig, and its points a tick ago and now (x, y, z each). */
 	public static final class Track {
@@ -29,6 +35,9 @@ public final class ClientRagdolls {
 		final double[] before, now;
 		boolean fresh, asleep;
 		int unseen;
+		/** (0.5.16) How far onto its side it's drawn (0 as the physics has it, 1 on its side), and which side is up. */
+		float side, sideBefore;
+		int sideUp;
 
 		Track(RagdollRig rig) {
 			this.rig = rig;
@@ -54,6 +63,58 @@ public final class ClientRagdolls {
 
 		public boolean asleep() {
 			return asleep;
+		}
+
+		/** (0.5.16) How far onto its side a four-legged body is drawn, between the last two ticks. */
+		public float side(float partialTicks) {
+			return sideBefore + (side - sideBefore) * partialTicks;
+		}
+
+		/** (0.5.16) Which side is up as it lies (1 its right, -1 its left). */
+		public int sideUp() {
+			return sideUp == 0 ? 1 : sideUp;
+		}
+
+		/** Already lying still when first seen (come into view): drawn on its side from the start. */
+		void onSide() {
+			if (rig.shape == RagdollRig.Shape.QUADRUPED) {
+				pickSide();
+				side = sideBefore = 1.0F;
+			}
+		}
+
+		/** It keeps lying on whichever side is already the higher. */
+		private void pickSide() {
+			float[] frame = new float[9];
+			float[] x = new float[rig.count], y = new float[rig.count], z = new float[rig.count];
+			for (int i = 0; i < rig.count; i++) {
+				x[i] = (float) now[i * 3];
+				y[i] = (float) now[i * 3 + 1];
+				z[i] = (float) now[i * 3 + 2];
+			}
+			RagdollRig.frame(x, y, z, frame);
+			sideUp = frame[1] >= 0.0F ? 1 : -1;
+		}
+
+		/** Eases a four-legged body toward its side while it's (nearly) still, back to the physics while it moves. */
+		void settle() {
+			sideBefore = side;
+			if (rig.shape != RagdollRig.Shape.QUADRUPED) {
+				return;
+			}
+			double fastest = 0;
+			for (int i = 0; i < rig.count; i++) {
+				double dx = now[i * 3] - before[i * 3], dy = now[i * 3 + 1] - before[i * 3 + 1], dz = now[i * 3 + 2] - before[i * 3 + 2];
+				fastest = Math.max(fastest, dx * dx + dy * dy + dz * dz);
+			}
+			boolean still = Math.sqrt(fastest) < SIDE_SPEED;
+			if (still && sideUp == 0) {
+				pickSide();
+			}
+			side = Math.max(0.0F, Math.min(1.0F, side + (still ? SIDE_EASE : -SIDE_EASE)));
+			if (side == 0.0F && !still) {
+				sideUp = 0;
+			}
 		}
 	}
 
@@ -88,6 +149,9 @@ public final class ClientRagdolls {
 			TRACKS.put(id, track);
 			fill(track.now, snapshot);
 			System.arraycopy(track.now, 0, track.before, 0, track.now.length);
+			if (snapshot.asleep()) {
+				track.onSide();
+			}
 		} else if (track.unseen > GAP_TICKS) {
 			// silent a while (carried, asleep): it starts where it is now rather than sliding from where it was
 			fill(track.now, snapshot);
@@ -144,6 +208,7 @@ public final class ClientRagdolls {
 		while (it.hasNext()) {
 			Int2ObjectMap.Entry<Track> entry = it.next();
 			Track track = entry.getValue();
+			track.settle();
 			if (!track.fresh) {
 				System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 				if (++track.unseen > FORGET_TICKS && minecraft.level.getEntity(entry.getIntKey()) == null) {
