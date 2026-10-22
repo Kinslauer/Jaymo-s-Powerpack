@@ -4,12 +4,19 @@ import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoForms;
 import com.jaymospowers.power.xenoform.XenoformState;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.jaymospowers.JaymosPowers;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 
@@ -18,7 +25,9 @@ import org.joml.Vector3f;
  * glow just above the dial, so you see who you're dialling as you scroll. It stands upright on screen whatever the wrist's
  * roll and turns to face you, swaying a little so it reads as a figure; it flickers, and goes red while the band can't
  * change you yet (recharging, or a hidden alien not yet earned). It rises with the dial's cap and sinks with it as the
- * hand comes down ({@link XenoformSlamView#pop}). Drawn from {@link XenoBand#submitOnArm}, the pose stack in the arm's space.
+ * hand comes down ({@link XenoformSlamView#pop}). Behind it, light fans up out of the band: a soft gradient
+ * ({@code textures/entity/xeno_holo_glow.png}, drawn by {@code tools/gen_xenoform.py}) on a flat card facing you, tinted
+ * and flickering with the figure. Drawn from {@link XenoBand#submitOnArm}, the pose stack in the arm's space.
  */
 final class XenoHologram {
 	/** The figure's height (blocks) and how far above the dial its feet hover (band pixels out of the dial's face, then blocks up). */
@@ -30,12 +39,27 @@ final class XenoHologram {
 	static final int GLITCH_EVERY = 23;
 	/** The colours it's tinted: the band's green, or red while the band would refuse. */
 	static final int TINT = 0x7CFF9A, REFUSED_TINT = 0xFF5040;
+	/** The glow behind it: its height (blocks, from the dial up), how far behind the figure it stands (blocks), and its opacity (0-1). */
+	static final float GLOW_HEIGHT = 0.48F, GLOW_BACK = 0.05F, GLOW_ALPHA = 0.75F;
+	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_holo_glow.png");
 	/** A humanoid model's feet are this far below its origin (model pixels, y down). */
 	private static final float FEET_PX = 24.0F;
 	/** Packed light: full block and sky light. */
 	private static final int FULL_BRIGHT = 0xF000F0;
 
+	private static ModelPart card;
+
 	private XenoHologram() {
+	}
+
+	/** The glow's card: a flat 16x16 square standing up from its bottom middle (model pixels, y down), facing -z. */
+	private static ModelPart card() {
+		if (card == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("card", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -16.0F, 0.0F, 16.0F, 16.0F, 0.0F), PartPose.ZERO);
+			card = LayerDefinition.create(mesh, 64, 32).bakeRoot().getChild("card");
+		}
+		return card;
 	}
 
 	/** The pose stack is in the left arm's own space (the band's dial faces +x, its middle at y 7.5). */
@@ -53,23 +77,37 @@ final class XenoHologram {
 		float time = player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 		// where the dial is, in the stack's base space (the eye in first person; the camera sits at its origin either way)
 		Vector3f at = poseStack.last().pose().transformPosition((3.5F + OUT_PX) / 16.0F, 7.5F / 16.0F, 0.0F, new Vector3f());
+		float flicker = 1.0F - FLICKER * (0.5F + 0.5F * Mth.sin(time * FLICKER_SPEED));
+		if ((int)(time * 2.0F) % GLITCH_EVERY == 0) {
+			flicker *= 0.5F;
+		}
+		float fade = flicker * Math.min(1.0F, pop * 1.5F);
+		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : TINT;
+		// turned to face the camera (a model's front is its -z)
+		float face = (float)Math.toDegrees(Mth.atan2(at.x, at.z));
+		poseStack.pushPose();
+		poseStack.setIdentity();
+		// the glow: from the dial up, a little behind the figure, upright (the card is built y-down)
+		poseStack.translate(at.x, at.y, at.z);
+		poseStack.rotateDegrees(Axis.YP, face);
+		poseStack.translate(0.0F, 0.0F, GLOW_BACK);
+		poseStack.rotateDegrees(Axis.ZP, 180.0F);
+		float glow = GLOW_HEIGHT * pop;
+		poseStack.scale(glow, glow, glow);
+		int glowAlpha = Mth.clamp((int)(GLOW_ALPHA * fade * 255.0F), 0, 255);
+		collector.submitModelPart(card(), poseStack, RenderTypes.eyes(GLOW), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, glowAlpha << 24 | tint);
+		poseStack.popPose();
 		poseStack.pushPose();
 		poseStack.setIdentity();
 		poseStack.translate(at.x, at.y + LIFT * pop, at.z);
-		// turned to face the camera (the model's front is its -z), swaying
-		float face = (float)Math.toDegrees(Mth.atan2(at.x, at.z));
+		// the figure sways either side of facing you
 		poseStack.rotateDegrees(Axis.YP, face + SWAY_DEGREES * Mth.sin(time * SWAY_SPEED));
 		// upright: the model is built y-down
 		poseStack.rotateDegrees(Axis.ZP, 180.0F);
 		float scale = HEIGHT * pop * model.renderScale / 2.0F;
 		poseStack.scale(scale, scale, scale);
 		poseStack.translate(0.0F, -FEET_PX / 16.0F, 0.0F);
-		float flicker = 1.0F - FLICKER * (0.5F + 0.5F * Mth.sin(time * FLICKER_SPEED));
-		if ((int)(time * 2.0F) % GLITCH_EVERY == 0) {
-			flicker *= 0.5F;
-		}
-		int alpha = Mth.clamp((int)(ALPHA * flicker * Math.min(1.0F, pop * 1.5F) * 255.0F), 0, 255);
-		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : TINT;
+		int alpha = Mth.clamp((int)(ALPHA * fade * 255.0F), 0, 255);
 		// submitModelPart draws the part from its rest pose (a fresh Model round it, posed at the flush), so the figure stands still
 		collector.submitModelPart(model.root(), poseStack, RenderTypes.eyes(model.texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, alpha << 24 | tint);
 		poseStack.popPose();

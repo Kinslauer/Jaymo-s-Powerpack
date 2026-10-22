@@ -257,6 +257,23 @@ def band_worn():
     save(glow, "entity/xeno_band_glow.png")
 
 
+# ---- the hologram's glow (entity, 64x32): light fanning up out of the band, white so it takes the hologram's tint ----
+# The left 32x32 is the quad's front face, the right half its back (the same), for a zero-depth box at texOffs(0, 0).
+def holo_glow():
+    img = Image.new("RGBA", (64, 32))
+    for y in range(32):
+        for x in range(32):
+            # from the bottom middle: brightest at the band, fading up and out, a little narrower low down
+            dx = (x + 0.5 - 16.0) / 16.0
+            dy = (32.0 - (y + 0.5)) / 32.0
+            r = (dx * dx / (0.35 + 0.65 * dy) + dy * dy) ** 0.5
+            a = max(0.0, 1.0 - r) ** 1.8
+            px = (255, 255, 255, int(round(255 * a)))
+            img.putpixel((x, y), px)
+            img.putpixel((x + 32, y), px)
+    save(img, "entity/xeno_holo_glow.png")
+
+
 # ---- the fallen star (block, 16x16) ----
 def fallen_star():
     img = Image.new("RGBA", (16, 16))
@@ -1198,6 +1215,7 @@ if __name__ == "__main__":
     nadir()
     duplex()
     band_worn()
+    holo_glow()
     print("Xenoform assets written under", ROOT)
     if len(sys.argv) > 1:
         preview(sys.argv[1])
