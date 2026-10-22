@@ -230,7 +230,7 @@ public final class TaczGuns {
 	}
 
 	/**
-	 * (0.15.113) Takes one round out of a TaCZ gun (the one in the barrel first, else the magazine's). Returns false if it
+	 * (0.15.114) Takes one round out of a TaCZ gun (the one in the barrel first, else the magazine's). Returns false if it
 	 * was empty.
 	 */
 	public static boolean spendRound(ItemStack stack) {
@@ -251,7 +251,7 @@ public final class TaczGuns {
 	private static @org.jspecify.annotations.Nullable Method sendSound;
 
 	/**
-	 * (0.15.113) One of a TaCZ gun's own sounds ({@code shoot_3p}, {@code fire_select}, {@code flesh_hit}: the keys of its
+	 * (0.15.114) One of a TaCZ gun's own sounds ({@code shoot_3p}, {@code fire_select}, {@code flesh_hit}: the keys of its
 	 * display's "sounds") heard by everyone within {@code range} of {@code from}, through TaCZ (by reflection, as
 	 * {@code FutureGuns} does). Returns false if that couldn't be done.
 	 */

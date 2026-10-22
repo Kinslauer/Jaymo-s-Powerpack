@@ -571,7 +571,7 @@ public final class Downed {
 
 	/**
 	 * (0.15.98) A finisher's last blow ({@code Finishers}): its death now, credited to {@code by}. Nothing if it's dead
-	 * already (an axe's beheading). (0.15.113) Downed or only crippled, it dies the same way.
+	 * already (an axe's beheading). (0.15.114) Downed or only crippled, it dies the same way.
 	 */
 	public static void execute(ServerLevel level, LivingEntity entity, Player by) {
 		if (!entity.isAlive()) {

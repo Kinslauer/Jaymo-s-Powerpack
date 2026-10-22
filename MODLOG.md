@@ -2597,7 +2597,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fall and pool) plus flecks; a heavy blunt blow sprays and pools as on the living; anything else (a fist, an arrow)
   throws only a few flecks. Never a skeleton's, an iron one, one on fire or a bloodless creature's. Tuning in
   `BladeBlood.CORPSE_*`. Compile-checked; not playtested.
-- **0.15.113 (finishers: point-blank shot, slow neck snap, crippled targets, grabbable heads):** Andy: "the pointblank
+- **0.15.114 (finishers: point-blank shot, slow neck snap, crippled targets, grabbable heads):** Andy: "the pointblank
   finisher should use a bullet and actually play the blast". Guns (our TaCZ flintlocks, TaCZ's own, the Void Armory
   flintlock, another mod's by name) get their own finisher, Point Blank (`Finishers.Kind.GUN`): it needs a round loaded,
   spends it (`TaczGuns.spendRound`), and fires with the gun's own TaCZ shot sound (`TaczGuns.gunSound`), muzzle flash,
