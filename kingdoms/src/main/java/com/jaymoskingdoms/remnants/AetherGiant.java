@@ -64,7 +64,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class AetherGiant extends Monster {
 	/**
-	 * (0.7.151) Andy: "make all the giants the same size as warrior born great apes". As tall as a Warrior-born's Great
+	 * (0.7.152) Andy: "make all the giants the same size as warrior born great apes". As tall as a Warrior-born's Great
 	 * Ape (a player's 1.8 blocks, 17 times over: about 30 blocks), and as broad in proportion. The vanilla Giant too
 	 * ({@link Monoliths#sizeVanillaGiant}).
 	 */

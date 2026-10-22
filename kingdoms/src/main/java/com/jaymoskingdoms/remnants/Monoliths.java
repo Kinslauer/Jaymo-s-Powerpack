@@ -233,7 +233,7 @@ public final class Monoliths {
 		return found.isEmpty() ? null : found.getFirst();
 	}
 
-	/** (0.7.151) The vanilla Giant grown to the Aether's Giants' height ({@link AetherGiant#HEIGHT}), a Great Ape's. */
+	/** (0.7.152) The vanilla Giant grown to the Aether's Giants' height ({@link AetherGiant#HEIGHT}), a Great Ape's. */
 	static void sizeVanillaGiant(Entity entity) {
 		if (entity.getType() == EntityType.GIANT && entity instanceof LivingEntity giant) {
 			AttributeInstance scale = giant.getAttribute(Attributes.SCALE);

@@ -4139,7 +4139,7 @@ Stage 3 of the Nether faction (our own take on Just-In NETHER, which is ARR: not
   so the guard search in `Arrests.arrest` threw "Unregistered memory fetched" and crashed the server (Deck, 2026-10-21).
   It now checks `hasMemoryValue` first.
 
-## 0.7.151: Giants as big as a Great Ape (pack 0.15.67)
+## 0.7.152: Giants as big as a Great Ape (pack 0.15.68)
 - Andy: "make all the giants the same size as warrior born great apes". The Aether's four Giants (Highfield, Magnetic,
   Arctic, Irradiated) now stand 30.6 blocks tall and 10.2 wide (a player's 1.8 x 17, the Warrior-born Great Ape's
   size), drawn to match. The vanilla Giant gets a scale to the same height.

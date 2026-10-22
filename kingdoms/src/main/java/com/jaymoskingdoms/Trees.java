@@ -569,7 +569,7 @@ public final class Trees {
 		return logs.size();
 	}
 
-	/** (0.7.151) A Giant walks into the tree standing on {@code log}: it topples away from it, if it's a natural tree. */
+	/** (0.7.152) A Giant walks into the tree standing on {@code log}: it topples away from it, if it's a natural tree. */
 	public static void trample(ServerLevel level, BlockPos log, Entity giant) {
 		fell(level, log, giant, ItemStack.EMPTY, null, false);
 	}
