@@ -4,6 +4,13 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
+import com.jaymospowers.power.xenoform.nadir.NadirAim;
+import com.jaymospowers.power.xenoform.nadir.NadirGraviton;
+import com.jaymospowers.power.xenoform.nadir.NadirNet;
+import com.jaymospowers.power.xenoform.nadir.NadirRift;
+import com.jaymospowers.power.xenoform.nadir.NadirRules;
+import com.jaymospowers.power.xenoform.nadir.NadirStash;
+import com.jaymospowers.power.xenoform.nadir.NadirState;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,9 +35,14 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>R, Beacon: tap to pick a player, anywhere in the world (they show through everything, to everyone, for a
  * moment); hold for {@link #PHASE_HOLD} ticks to phase to them, whatever world they're in.</li>
- * <li>G V B: the void hasn't decided yet (Andy will say).</li>
+ * <li>G, the Rift ({@link NadirRift}): tap at a creature for Recursive Drop, at nothing to blink; hold to Surface;
+ * sneak + G opens the Void Pocket ({@link com.jaymospowers.power.xenoform.nadir.NadirStash}).</li>
+ * <li>V, the Graviton ({@link NadirGraviton}): at a creature, Heavy Hand (tap yank, hold slam; sneaking, shove and
+ * launch); at nothing, tap for a Weightless zone, hold for an Event Horizon.</li>
+ * <li>B, the Command ({@link NadirRules}): the Rules screen, where the void writes what the world must do.</li>
  * </ul>
- * It takes no fall, fire or drowning; its own moves are not yet many, but its body is the strongest the band knows.
+ * It takes no fall, fire or drowning, and its body is the strongest the band knows. G V B are from-scratch takes on
+ * the Rift, Graviton and Command powers of The Awakening (all rights reserved: ideas only).
  */
 public final class Nadir extends XenoForm {
 	// ---- tuning ----
@@ -83,6 +96,8 @@ public final class Nadir extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.beaconHeld = 0;
 		live.beaconTarget = null;
+		NadirGraviton.end(player, live.nadir);
+		live.nadir.clear();
 		// back to the player's own flight: creative and spectator keep theirs
 		player.getAbilities().setFlyingSpeed(NORMAL_FLY_SPEED);
 		if (!player.isCreative() && !player.isSpectator()) {
@@ -109,15 +124,98 @@ public final class Nadir extends XenoForm {
 			}
 			return;
 		}
-		if (down && ready(player, live, key == PowerKey.ABILITY_2 ? G : key == PowerKey.ABILITY_3 ? V : B)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir_later").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-			cooldown(player, live, key == PowerKey.ABILITY_2 ? G : key == PowerKey.ABILITY_3 ? V : B, 20);
+		NadirState st = live.nadir;
+		long now = player.level().getGameTime();
+		if (key == PowerKey.ABILITY_2) {
+			rift(player, live, st, now, down);
+		} else if (key == PowerKey.ABILITY_3) {
+			graviton(player, live, st, now, down);
+		} else if (key == PowerKey.ABILITY_4 && down && ready(player, live, B)) {
+			NadirNet.open(player);
+			sound(player, SoundEvents.ENCHANTMENT_TABLE_USE, 0.8F, 0.6F);
+			cooldown(player, live, B, 10);
 		}
+	}
+
+	/** G: sneak for the pocket; a tap drops what you look at, or blinks; the hold (in {@link #tick}) surfaces. */
+	private static void rift(ServerPlayer player, XenoformPower.Live live, NadirState st, long now, boolean down) {
+		if (down) {
+			if (player.isShiftKeyDown()) {
+				NadirStash.open(player);
+			} else if (ready(player, live, G)) {
+				st.riftDownAt = now;
+				st.riftFired = false;
+			}
+			return;
+		}
+		if (st.riftDownAt < 0L || st.riftFired) {
+			st.riftDownAt = -1L;
+			return;
+		}
+		st.riftDownAt = -1L;
+		LivingEntity target = NadirAim.aimed(player, NadirRift.DROP_REACH);
+		if (target != null) {
+			if (NadirRift.drop(player, st, target)) {
+				cooldown(player, live, G, NadirRift.DROP_COOLDOWN);
+			} else {
+				say(player, "rift_no_room");
+			}
+		} else if (NadirRift.blink(player)) {
+			cooldown(player, live, G, NadirRift.BLINK_COOLDOWN);
+		} else {
+			say(player, "rift_nowhere");
+		}
+	}
+
+	/** V: picks its grip as it goes down; the tap fires on release, the hold (in {@link #tick}) once it's long enough. */
+	private static void graviton(ServerPlayer player, XenoformPower.Live live, NadirState st, long now, boolean down) {
+		if (down) {
+			if (ready(player, live, V)) {
+				LivingEntity target = NadirAim.aimed(player, NadirGraviton.HAND_REACH);
+				st.gravDownAt = now;
+				st.gravTarget = target == null ? -1 : target.getId();
+				st.gravFired = false;
+			}
+			return;
+		}
+		if (st.gravDownAt < 0L || st.gravFired) {
+			st.gravDownAt = -1L;
+			return;
+		}
+		st.gravDownAt = -1L;
+		LivingEntity target = gripped(player, st);
+		if (target != null) {
+			NadirGraviton.tap(player, target, player.isShiftKeyDown());
+			cooldown(player, live, V, NadirGraviton.TAP_COOLDOWN);
+		} else if (st.gravTarget < 0) {
+			NadirGraviton.weightless(player, st);
+			cooldown(player, live, V, NadirGraviton.ZONE_COOLDOWN);
+		}
+	}
+
+	/** The creature V took hold of, while it's still alive and in reach (the grip breaks past half again the reach). */
+	private static LivingEntity gripped(ServerPlayer player, NadirState st) {
+		if (st.gravTarget < 0) {
+			return null;
+		}
+		Entity e = player.level().getEntity(st.gravTarget);
+		double reach = NadirGraviton.HAND_REACH * 1.25;
+		return e instanceof LivingEntity living && living.isAlive() && living.distanceToSqr(player) <= reach * reach ? living : null;
+	}
+
+	private static void say(ServerPlayer player, String what) {
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir." + what).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
 	}
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		NadirState st = live.nadir;
+		long now = level.getGameTime();
+		holds(player, live, st, now);
+		NadirRift.tickDrop(player, st);
+		NadirGraviton.tick(player, st);
+		NadirRules.tick(player, st);
 		// the void about it
 		if (player.tickCount % 2 == 0) {
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.0);
@@ -144,11 +242,71 @@ public final class Nadir extends XenoForm {
 		}
 	}
 
-	/** Nothing of the world touches it. */
+	/** G and V held: Surface, the Heavy Hand's hold, the Event Horizon, once they've been held long enough. */
+	private static void holds(ServerPlayer player, XenoformPower.Live live, NadirState st, long now) {
+		if (st.riftDownAt >= 0L && !st.riftFired) {
+			long held = now - st.riftDownAt;
+			if (held >= NadirRift.SURFACE_HOLD) {
+				st.riftFired = true;
+				if (NadirRift.surface(player)) {
+					cooldown(player, live, G, NadirRift.SURFACE_COOLDOWN);
+				} else {
+					say(player, "surface_none");
+				}
+			} else if (held >= 4) {
+				bar(player, "surface_hold", held, NadirRift.SURFACE_HOLD);
+			}
+		}
+		if (st.gravDownAt >= 0L && !st.gravFired) {
+			long held = now - st.gravDownAt;
+			LivingEntity target = gripped(player, st);
+			if (st.gravTarget >= 0 && target == null) {
+				// the grip broke
+				st.gravFired = true;
+			} else if (target != null && held >= NadirGraviton.HAND_HOLD) {
+				st.gravFired = true;
+				NadirGraviton.hold(player, st, target, player.isShiftKeyDown());
+				cooldown(player, live, V, NadirGraviton.HOLD_COOLDOWN);
+			} else if (target == null && held >= NadirGraviton.HORIZON_HOLD) {
+				st.gravFired = true;
+				if (st.horizon != null) {
+					say(player, "horizon_open");
+				} else if (now < st.horizonNext) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir.horizon_wait",
+						(st.horizonNext - now + 19) / 20).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+				} else {
+					NadirGraviton.horizon(player, st);
+					cooldown(player, live, V, NadirGraviton.HOLD_COOLDOWN);
+				}
+			} else if (target == null && held >= 6) {
+				bar(player, "horizon_hold", held, NadirGraviton.HORIZON_HOLD);
+			}
+		}
+	}
+
+	private static void bar(ServerPlayer player, String what, long held, int full) {
+		int bars = (int)Math.min(10, held * 10 / full);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir." + what, "|".repeat(bars) + ".".repeat(10 - bars))
+			.withStyle(ChatFormatting.LIGHT_PURPLE));
+	}
+
+	/** Nothing of the world touches it; what does strike it answers to the Command's "what hits me" rules. */
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, net.minecraft.world.damagesource.DamageSource source, float amount) {
-		return !(source.is(net.minecraft.tags.DamageTypeTags.IS_FALL) || source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)
-			|| source.is(net.minecraft.tags.DamageTypeTags.IS_DROWNING));
+		if (source.is(net.minecraft.tags.DamageTypeTags.IS_FALL) || source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)
+			|| source.is(net.minecraft.tags.DamageTypeTags.IS_DROWNING)) {
+			return false;
+		}
+		if (source.getEntity() instanceof LivingEntity attacker && attacker != player) {
+			NadirRules.onHurtBy(player, live.nadir, attacker);
+		}
+		return true;
+	}
+
+	/** What Nadir hurts answers to the Command's "what I hit" rules. */
+	@Override
+	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+		NadirRules.onHit(player, live.nadir, target);
 	}
 
 	/** Every other player on the server, by name. */
@@ -204,6 +362,11 @@ public final class Nadir extends XenoForm {
 		}
 		from.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.2);
 		from.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.5F);
+		if (from != to) {
+			// what Nadir holds open stays in the world it was made in: let it go quietly
+			NadirGraviton.end(player, live.nadir);
+			live.nadir.clear();
+		}
 		player.teleportTo(to, behind.x, behind.y, behind.z, Set.of(), target.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
 		to.sendParticles(ParticleTypes.REVERSE_PORTAL, behind.x, behind.y + 1.0, behind.z, 60, 0.4, 0.8, 0.4, 0.2);
