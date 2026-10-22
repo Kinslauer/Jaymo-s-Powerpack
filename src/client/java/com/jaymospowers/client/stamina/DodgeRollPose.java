@@ -21,8 +21,9 @@ import org.jspecify.annotations.Nullable;
  * (0.15.74) The dodge's roll ({@link Dodge}), for everyone to see: the body tucks into a ball (knees to the chest,
  * arms round them, chin down), drops low and tumbles one full turn the way the dodge went: a forward roll, a back
  * roll, or over the shoulder to the side. Combat Roll used to draw this; our own dodge only hopped until now.
- * <p>Your own roll draws at once from {@link DodgeClient}; everyone else's from the synced {@link Dodge#ROLLING}. Your
- * own body in first person (First-person Model) doesn't tumble round the camera.
+ * <p>Your own roll draws at once from {@link DodgeClient}; everyone else's from the synced {@link Dodge#ROLLING}. In
+ * first person the view tumbles with it ({@link #applyCamera}) and dips toward the ground; your own body drawn there
+ * (First-person Model) stays upright rather than swinging through the camera.
  */
 public final class DodgeRollPose {
 	// ===== the knobs ================================================================================================
@@ -32,6 +33,8 @@ public final class DodgeRollPose {
 	static final float LEG_TUCK = -1.6F, ARM_TUCK = -1.2F, ARM_IN = 0.25F, BODY_CURL = 0.45F, CHIN = 0.6F;
 	/** Of the roll, the share spent tucking in at the start, and opening out at the end. */
 	static final float TUCK_IN = 0.15F, TUCK_OUT = 0.3F;
+	/** First person: how much of the full turn the view follows (1: all the way over), and how far it dips (blocks). */
+	static final float VIEW_ROLL = 1.0F, VIEW_DIP = 0.35F;
 	// ================================================================================================================
 
 	/** {@code t}: how far through the roll (0 to 1); {@code (x, z)}: the way it goes, a unit vector on the ground. */
@@ -100,6 +103,32 @@ public final class DodgeRollPose {
 		poseStack.translate(0.0F, -DROP * Mth.sin(Mth.PI * t), 0.0F);
 		// the top tips toward the way of the dodge: about (up x way), round the body's middle
 		poseStack.rotateAround(new Quaternionf().rotateAxis(turn, -forward / length, 0.0F, -right / length), 0.0F, middle, 0.0F);
+	}
+
+	/** First person, with the hurt bob (ScreenShakeMixin): the view turns over with our own roll and dips at its middle. */
+	public static void applyCamera(PoseStack poseStack, float partialTicks) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player == null || !minecraft.options.getCameraType().isFirstPerson()) {
+			return;
+		}
+		Roll roll = roll(minecraft.player, partialTicks);
+		if (roll == null) {
+			return;
+		}
+		// the dodge's way in view space (forward is -Z, right is +X), from where we face
+		float yaw = minecraft.player.getViewYRot(partialTicks) * Mth.DEG_TO_RAD;
+		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
+		float forward = -roll.x() * sin + roll.z() * cos;
+		float right = -roll.x() * cos - roll.z() * sin;
+		float length = Mth.sqrt(forward * forward + right * right);
+		if (length < 1.0E-4F) {
+			return;
+		}
+		float t = roll.t();
+		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI * VIEW_ROLL;
+		// (the view turns the opposite way to the body: the world swings round the other way)
+		poseStack.translate(0.0F, VIEW_DIP * Mth.sin(Mth.PI * t), 0.0F);
+		poseStack.rotate(new Quaternionf().rotateAxis(-turn, -forward / length, 0.0F, -right / length));
 	}
 
 	/** Our own body drawn round the camera in first person: it stays upright (the view doesn't tumble). */

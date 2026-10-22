@@ -2425,4 +2425,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Now a dodge (double-tap Sneak or Left Alt) tucks into a ball, drops low and tumbles one full turn the way it goes
   (forward roll, back roll, or over the shoulder to either side) over 0.5 s (`client/stamina/DodgeRollPose`, tuning at
   the top). Everyone sees it: the server syncs the roll (`Dodge.ROLLING`), and your own client draws it at once. Your own
-  body in first person (First-person Model) stays upright; the view doesn't tumble.
+  body in first person (First-person Model) stays upright. In first person the view tumbles with the roll and dips
+  toward the ground (Andy's ask; `VIEW_ROLL` turns it down, 0 switches it off).
