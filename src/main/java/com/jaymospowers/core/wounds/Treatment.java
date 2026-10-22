@@ -258,6 +258,15 @@ public final class Treatment {
 		return hot(stack, level) ? Remedy.CAUTERY : null;
 	}
 
+	/**
+	 * (0.15.97) Whether {@code stack} is medicine on a plain use (no sneak): our kit with its body screen, or the poppy. Spirits,
+	 * honey and a red-hot blade are only medicine with sneak, so a plain hold with them is a finisher's ({@code Finishers}).
+	 */
+	public static boolean treatsOnPlainUse(ItemStack stack, Level level) {
+		Remedy remedy = remedy(stack, level);
+		return remedy != null && !(remedy.part && !remedy.screen());
+	}
+
 	/** (0.14.4) A blade hot enough to sear: heated in a fire within {@link #HEAT_TICKS}, or with Fire Aspect on it. */
 	public static boolean hot(ItemStack stack, Level level) {
 		if (!Dismember.blade(stack)) {
