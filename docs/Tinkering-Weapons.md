@@ -97,3 +97,99 @@ gold); the Emerald, Diamond and Netherite modifiers still lift it.
 * Steel (`tools/gen_steel.py`) is drawn for every new part and tool; the sprites of materials Tinkers draws none of for the war
   pick, minotaur axe and battlesign (wood crimson/warped, granite, diorite, blackstone, and a few more) are the tool's grey
   template in that material's colours, read off the pickaxe.
+
+---
+
+# Tinkering: Tinkers' ranged weapons
+
+Six more Tool Station tools: **longbow**, **crossbow**, **javelin**, **arrow**, **throwing axe** and **shuriken**, built from six new
+parts. Code: `tinkering/ranged/` (`TinkerBowItem`, `TinkerCrossbowItem`, `TinkerArrowItem`, and `Ranged`, which holds throwing and how
+a bow's and arrow's materials change a shot), `ToolStats.ranged` (the maths), `ToolType.Ranged` (each tool's own numbers),
+`TinkerTool` (the interface every Tinkering item implements: `TinkerToolItem`, the bow, crossbow and arrow; the shared tick and tooltip
+live there). Assets: `tools/tinkering_assets.py` (`ranged_tools`), then `tools/gen_steel.py` as before (it now also draws steel
+for the new parts and tools).
+
+## New parts
+
+| Part | Cost | Cast | Made of |
+| --- | --- | --- | --- |
+| Bow Limb (`bow_limb`) | 3 | yes | wood (and crimson/warped), bone, copper, iron, silver, rose gold, amethyst bronze, pig iron, slimesteel, steel |
+| Bow Grip (`bow_grip`) | 3 | yes | the same as limbs |
+| Bowstring (`bowstring`) | 1 | no | string, vine, leather |
+| Arrow Head (`arrow_head`) | 1 | no | any head material (stone, flint, bone, metals...), also metals at the Part Builder |
+| Arrow Shaft (`arrow_shaft`) | 1 | no | wood (and crimson/warped), bone, blaze rod |
+| Fletching (`fletching`) | 1 | no | feather, leaves |
+
+Costs are Tinkers'. The six are in the Part Builder (it now has two pages of tool parts, then the weapon heads). Bow limbs and grips have
+a gold cast like the other metal-able parts (a cast of each, melt back to their cost); bowstrings and arrow parts are Part Builder only
+and take metal there too (`PartType.builderOnly`, Tinkers' "allow uncraftable"). New materials: **Feather** and **Leaves** (fletching
+only) and **Blaze Rod** (shaft only), each a plain item (feather, any leaves, blaze rod; one unit each). Limb and grip stats are
+Tinkers' (`TinkerMaterial.Limb` and `Grip`, keyed by family, so crimson/warped wood share wood's). Stone, flint and seared stone have
+none and make neither (Tinkers gives them none either). Our steel uses Tinkers' steel limb and grip stats.
+
+Limb (durability, draw speed, velocity, accuracy) / grip (durability share, accuracy, melee damage):
+wood 60, 0, 0, 0 / 0, 0, 0; bone 100, +.05, -.05, +.05 / -.25, +.05, 1.25; copper 210, -.1, +.05, 0 / -.2, 0, .5; iron 250, -.2, +.1, 0 /
++.1, 0, 2; silver 300, -.05, 0, +.1 / -.1, -.05, 2.25; rose gold 175, +.15, -.25, +.15 / -.3, +.25, 1; amethyst bronze 720, -.15, +.15,
+-.05 / 0, +.1, 1.5; pig iron 580, 0, 0, +.1 / +.1, -.15, 2.5; slimesteel 1040, -.05, -.05, +.15 / +.2, -.1, 2.5; steel 775, -.2, +.2,
+-.1 / +.05, -.05, 2.75.
+
+## The tools
+
+| Tool | Parts | Gives | Notes |
+| --- | --- | --- | --- |
+| Longbow | limb, limb, grip, bowstring | 1 | 120 durability before limbs, x1.5; Tool Forge (4 parts) |
+| Crossbow | limb, grip, bowstring | 1 | durability x2 |
+| Javelin | small blade, tool handle, limb, grip | 1 | attack 3, speed 1.1; Tool Forge (4 parts) |
+| Arrow | arrow head, shaft, fletching | 4 | |
+| Throwing Axe | arrow head, shaft | 2 | stacks to 16 |
+| Shuriken | arrow head, arrow head | 4 | stacks to 16 |
+
+How the numbers work (all constants in `ToolStats` and `ToolType.Ranged`):
+
+* **Durability** (bows, javelin): the average of the limbs (and, on the javelin, the blade) plus the tool's base, times
+  (1 + handle share + grip share), times the multiplier. Arrows, axes and shuriken have none: they are plain stacks.
+* **Draw speed** = 1 + the limbs' average. The bow's use time counts at that speed (`releaseUsing` scales the held ticks, so a 1.2
+  draw is full in 17 ticks); the crossbow's loading time is its vanilla one over it. Quick Charge (from Haste) still works.
+* **Velocity** = 1 + the limbs' average (+ an arrow's shaft). The shot's power is multiplied by it.
+* **Accuracy** = 0.75 + the limbs' average + the grip + 0.1 for each Aerodynamic (feather). 0.75 is a vanilla bow's spread, 1.0 is none,
+  worse than 0.5 doubles it (`Ranged.spread`). A shot's spread = the bow's x the arrow's.
+* **Arrow damage** = a plain arrow's 2 + half the head's attack stat (flint 2.6, iron 3, steel 3.5). Fired from anything: a vanilla
+  bow, a dispenser, our bows. From our own bows the arrow's shaft (bone +5%, blaze rod +10% velocity) and fletching (feather: more
+  accurate) also count. Arrows are `minecraft:arrows` so any bow takes them.
+* **Thrown blades**: throwing axe 3.75 + 0.75 x the head's attack, shuriken 2.25 + 0.75 x, javelin 1.2 x its melee attack. Throw speeds
+  (blocks per tick) 1.6, 3.0 and 2.4, times the velocity (the javelin's limbs). Throwing axes spread twice a bow's (accuracy 0.5).
+* **Modifiers** on bows work as the enchantments of the job: Sharpness is Power (Piercing on the crossbow), Knockback Punch, Fiery Flame,
+  Haste Quick Charge (crossbow), Reinforced Unbreaking. On the javelin as on a sword. Arrows and thrown blades take none.
+
+## What each does
+
+* **Longbow** / **Crossbow**: a vanilla `BowItem` / `CrossbowItem` underneath (so ammo search, Infinity, Multishot, Piercing, the pull
+  animation, Kingdoms' archery checks, skeletons' preferences all just work). A broken one can't be drawn.
+* **Javelin**: held back like a trident (8 ticks at least) and thrown on release, as the Armory's `ThrownWeapon`: it hits the first thing
+  it meets, bounces off and lies where it falls (no loyalty needed) for its thrower to pick up, wearing 1 a throw. In the hand it is a
+  3-attack spear (Better Combat `spear`).
+* **Throwing axe** / **Shuriken**: right mouse throws one from the stack at once (cooldown 10 / 6 ticks), spinning, also a
+  `ThrownWeapon`, picked up again where it lands (they stack back by materials).
+* Everything has its parts' traits as the other tools do (Stringy bowstrings, Tanned leather, Aerodynamic feathers...).
+
+## Tie-ins
+
+* Item tags: the arrow `minecraft:arrows`; the longbow `minecraft:enchantable/bow` and the crossbow `enchantable/crossbow` (Kingdoms'
+  Archer/Marksman code asks for those, and for `ProjectileWeaponItem`/`CrossbowItem`, which they are); `c:tools/bow`, `c:tools/crossbow`,
+  `c:tools/ranged_weapon` (the bows, javelin, axe and shuriken).
+* The Armory's `ThrownWeapon` asks `Ranged.thrownDamage` / `Ranged.spins` for any item that isn't one of its own (two lines).
+* Models: pulling stages from Tinkers' sprites (longbow: three stages by `use_duration`, crossbow: three by `crossbow/pull`, loaded
+  shows its bolt or a rocket), broken string, the javelin held big (32 px) and small in the gui.
+
+## Not done / differences from Tinkers
+
+* Tinkers' arrow, throwing axe and shuriken stats aren't from materials (its heads are "statless"); here the head's attack counts so
+  materials matter. The arrow's traits other than Aerodynamic don't act on the arrow in flight (no tipped or modifier arrows, no
+  "arrow from vanilla arrow" recipe, no crystalshot or other bow modifiers: scope, multishot-like abilities, quiver).
+* A fired arrow is a vanilla `Arrow` (its model is the vanilla arrow). Thrown blades show their item model.
+* The crossbow does not use Tinkers' blocking-with-it model, its firework special case beyond showing the rocket, or the bow's "ammo
+  drawn in the model".
+* No fishing rod (not part of this track), no staves.
+* Limb/grip stats stand in only for the materials Tinkers gives them: wood, bone and metals. Stone, flint, seared stone, leather
+  can't make them.
+* Draw speed shortens the real draw; the pulling sprites still follow vanilla timing (a fast bow looks drawn late).

@@ -116,7 +116,7 @@ public final class TinkeringJei implements IModPlugin {
 		for (PartType part : PartType.values()) {
 			for (TinkerMaterial material : TinkerMaterial.values()) {
 				List<ItemStack> items = materials.get(material);
-				if (material.cast || !material.makes(part.kind) || items == null) {
+				if (material.cast && !part.builderOnly || !material.makes(part.kind) || items == null) {
 					continue;
 				}
 				List<ItemStack> needed = items.stream().map(s -> s.copyWithCount(PartBuilderMenu.itemsNeeded(part, s))).toList();
@@ -131,14 +131,22 @@ public final class TinkeringJei implements IModPlugin {
 	private static List<SimpleCategory.Recipe> toolStation() {
 		List<SimpleCategory.Recipe> recipes = new ArrayList<>();
 		for (ToolType type : ToolType.values()) {
-			for (TinkerMaterial material : TinkerMaterial.heads()) {
+			PartType.Kind first = type.parts.getFirst().part().kind;
+			for (TinkerMaterial material : TinkerMaterial.values()) {
+				if (!material.makes(first)) {
+					continue;
+				}
 				List<List<ItemStack>> inputs = new ArrayList<>();
 				List<TinkerMaterial> used = new ArrayList<>();
 				for (ToolType.Slot slot : type.parts) {
-					inputs.add(List.of(ToolPartItem.of(slot.part(), material, 1)));
-					used.add(material);
+					// (0.15.x) a bow's limbs and grip, an arrow's shaft... each take what they can be made of
+					TinkerMaterial made = material.makes(slot.part().kind) ? material : ToolStats.defaultFor(slot.part().kind);
+					inputs.add(List.of(ToolPartItem.of(slot.part(), made, 1)));
+					used.add(made);
 				}
-				recipes.add(new SimpleCategory.Recipe(inputs, List.of(ToolStats.build(type, used)), List.of()));
+				ItemStack built = ToolStats.build(type, used);
+				built.setCount(type.ranged.yield());
+				recipes.add(new SimpleCategory.Recipe(inputs, List.of(built), List.of()));
 			}
 		}
 		return recipes;

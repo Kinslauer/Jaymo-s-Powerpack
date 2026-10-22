@@ -42,6 +42,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BlockTransformers;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.Block;
@@ -132,8 +133,14 @@ public final class Tinkering {
 		}
 		WeaponParts.register();
 		for (ToolType type : ToolType.values()) {
-			TOOLS.put(type, item(type.itemId(), p -> new TinkerToolItem(p, type), p -> {
-				p = p.durability(100);
+			TOOLS.put(type, item(type.itemId(), p -> switch (type.style) {
+				case BOW -> new com.jaymospowers.tinkering.ranged.TinkerBowItem(p, type);
+				case CROSSBOW -> new com.jaymospowers.tinkering.ranged.TinkerCrossbowItem(p, type);
+				case ARROW -> new com.jaymospowers.tinkering.ranged.TinkerArrowItem(p, type);
+				default -> new TinkerToolItem(p, type);
+			}, p -> {
+				// (0.15.x) arrows and thrown blades stack, so they have no durability
+				p = type.style.durable() ? p.durability(100) : p.stacksTo(type.style == ToolType.Style.ARROW ? 64 : 16);
 				if (type == ToolType.HAND_AXE || type == ToolType.BROAD_AXE || type == ToolType.MINOTAUR_AXE) {
 					p = p.delayedComponent(DataComponents.BLOCK_TRANSFORMER, context -> context.getOrThrow(BlockTransformers.AXE));
 				} else if (type == ToolType.EXCAVATOR || type == ToolType.PICKADZE) {
@@ -199,16 +206,19 @@ public final class Tinkering {
 				WeaponParts.heads(kind).forEach(output::accept);
 			}
 			for (ToolType type : ToolType.values()) {
-				for (TinkerMaterial head : TinkerMaterial.heads()) {
-					if (head.id.contains("_") && !head.id.startsWith("rock_stone")) {
+				PartType.Kind first = type.parts.getFirst().part().kind;
+				for (TinkerMaterial head : TinkerMaterial.values()) {
+					if (!head.makes(first) || head.id.contains("_") && !head.id.startsWith("rock_stone")) {
 						continue;
 					}
 					List<TinkerMaterial> materials = new ArrayList<>();
 					for (ToolType.Slot slot : type.parts) {
-						materials.add(slot.part().kind == PartType.Kind.HEAD ? head
-							: slot.part().kind == PartType.Kind.HANDLE ? TinkerMaterial.WOOD : TinkerMaterial.STRING);
+						PartType.Kind kind = slot.part().kind;
+						materials.add(kind == first ? head : ToolStats.defaultFor(kind));
 					}
-					output.accept(ToolStats.build(type, materials));
+					ItemStack built = ToolStats.build(type, materials);
+					built.setCount(type.ranged.yield());
+					output.accept(built);
 				}
 			}
 			for (PartType part : PartType.values()) {

@@ -2,7 +2,7 @@ package com.jaymospowers.tinkering.smeltery;
 
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
-import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolPartItem;
@@ -258,14 +258,14 @@ public final class Melting {
 				return new Result(molten, part.part.cost * Molten.INGOT);
 			}
 		}
-		if (stack.getItem() instanceof TinkerToolItem tool) {
+		if (stack.getItem() instanceof TinkerTool tool) {
 			// (0.15.36) a Tinkering tool: each metal part's worth
 			Map<Molten, Integer> liquids = new EnumMap<>(Molten.class);
 			List<TinkerMaterial> materials = ToolStats.materials(stack);
-			for (int i = 0; i < tool.type.parts.size() && i < materials.size(); i++) {
+			for (int i = 0; i < tool.type().parts.size() && i < materials.size(); i++) {
 				Molten molten = Molten.of(materials.get(i));
 				if (molten != null) {
-					liquids.merge(molten, tool.type.parts.get(i).part().cost * Molten.INGOT, Integer::sum);
+					liquids.merge(molten, tool.type().parts.get(i).part().cost * Molten.INGOT, Integer::sum);
 				}
 			}
 			return Result.of(liquids);

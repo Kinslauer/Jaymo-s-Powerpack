@@ -138,7 +138,7 @@ public final class TraitEffects {
 	}
 
 	/** After a hit lands: Piercing, Smite, Searing and Tempered add their damage. */
-	static void afterHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+	public static void afterHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (!(attacker.level() instanceof ServerLevel level) || ToolStats.isBroken(stack) || !target.isAlive()) {
 			return;
 		}
@@ -258,12 +258,12 @@ public final class TraitEffects {
 	private static void areaBreak(ServerLevel level, ServerPlayer player, BlockPos center, BlockState centerState) {
 		ItemStack held = player.getMainHandItem();
 		ToolStats.Stats stats = ToolStats.isBroken(held) ? null : ToolStats.stats(held);
-		if (stats == null || player.isShiftKeyDown() || !(held.getItem() instanceof TinkerToolItem tool)) {
+		if (stats == null || player.isShiftKeyDown() || !(held.getItem() instanceof TinkerTool tool)) {
 			return;
 		}
 		// a tool with no area of its own but Wide Swing breaks the 3x3 face (the sledge hammer), as it always has
-		boolean legacy = tool.type.aoe.kind() == ToolType.Aoe.Kind.NONE;
-		ToolType.Aoe aoe = legacy ? ToolType.Aoe.FACE_3X3 : tool.type.aoe;
+		boolean legacy = tool.type().aoe.kind() == ToolType.Aoe.Kind.NONE;
+		ToolType.Aoe aoe = legacy ? ToolType.Aoe.FACE_3X3 : tool.type().aoe;
 		if (legacy && stats.level(Trait.AREA) <= 0) {
 			return;
 		}
@@ -288,7 +288,7 @@ public final class TraitEffects {
 				} else {
 					// the area takes what the tool is made for, never a chest or a half-grown crop
 					fits = h >= 0 && h <= hardness + AREA_HARDNESS_SLACK && !state.hasBlockEntity() && held.isCorrectToolForDrops(state)
-						&& (tool.type.mines.stream().anyMatch(state::is) || plants && h == 0.0F)
+						&& (tool.type().mines.stream().anyMatch(state::is) || plants && h == 0.0F)
 						&& (!plants || !ToolActions.crop(state) || ToolActions.matureCrop(state));
 				}
 				if (fits) {

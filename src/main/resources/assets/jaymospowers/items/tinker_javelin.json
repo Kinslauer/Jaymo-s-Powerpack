@@ -1,0 +1,1901 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": [
+          "gui",
+          "ground",
+          "fixed"
+        ],
+        "model": {
+          "type": "minecraft:condition",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "on_true": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 1,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 3,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_broken_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_wood"
+                }
+              }
+            ]
+          },
+          "on_false": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 1,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/handle_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 3,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/grip_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/head_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/javelin/guard_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_wood"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:condition",
+      "property": "minecraft:custom_model_data",
+      "index": 0,
+      "on_true": {
+        "type": "minecraft:composite",
+        "models": [
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 1,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/handle_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 3,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood_warped"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/grip_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_broken_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/head_broken_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 2,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood_warped"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/guard_large_wood"
+            }
+          }
+        ]
+      },
+      "on_false": {
+        "type": "minecraft:composite",
+        "models": [
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 1,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/handle_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/handle_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 3,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_wood_warped"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/grip_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/grip_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/head_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/head_large_wood"
+            }
+          },
+          {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 2,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_wood_warped"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/javelin/guard_large_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/javelin/guard_large_wood"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

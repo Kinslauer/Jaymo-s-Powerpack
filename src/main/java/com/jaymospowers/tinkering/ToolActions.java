@@ -78,7 +78,7 @@ public final class ToolActions {
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
 			if (state == null || !(context.getOptional(LootContextParams.TOOL) instanceof ItemStack tool)
-				|| !(tool.getItem() instanceof TinkerToolItem) || ToolStats.isBroken(tool)) {
+				|| !(tool.getItem() instanceof TinkerTool) || ToolStats.isBroken(tool)) {
 				return;
 			}
 			ToolStats.Stats stats = ToolStats.stats(tool);

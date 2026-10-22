@@ -1,13 +1,9 @@
 package com.jaymospowers.tinkering;
 
-import java.util.List;
-import java.util.Map;
+import com.jaymospowers.tinkering.ranged.Ranged;
 import java.util.function.Consumer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -17,8 +13,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -26,10 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /** A tool put together at the Tool Station. Its stats all come from its parts' materials ({@link ToolStats}). */
-public class TinkerToolItem extends Item {
-	/** Overslime: how often (ticks) it mends a point per level. */
-	static final int OVERSLIME_TICKS = 100;
-
+public class TinkerToolItem extends Item implements TinkerTool {
 	public final ToolType type;
 
 	public TinkerToolItem(Item.Properties properties, ToolType type) {
@@ -39,21 +32,12 @@ public class TinkerToolItem extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
-		// a raw /give gets its defaults (or its given materials) built in; mending a broken tool brings it back to life
-		CustomModelData look = stack.get(DataComponents.CUSTOM_MODEL_DATA);
-		boolean shownBroken = look != null && !look.flags().isEmpty() && look.flags().getFirst();
-		if (look == null || !stack.has(Tinkering.TOOL_MATERIALS) || shownBroken != ToolStats.isBroken(stack)) {
-			ToolStats.apply(stack);
-			Modifier.enchant(stack, level.registryAccess());
-		}
-		// Overslime: mends a little now and then while carried
-		if (level.getGameTime() % OVERSLIME_TICKS == 0 && stack.isDamaged() && !ToolStats.isBroken(stack)) {
-			ToolStats.Stats stats = ToolStats.stats(stack);
-			int overslime = stats == null ? 0 : stats.level(Trait.OVERSLIME);
-			if (overslime > 0) {
-				stack.setDamageValue(Math.max(0, stack.getDamageValue() - overslime));
-			}
-		}
+		TinkerTool.tick(stack, level);
+	}
+
+	@Override
+	public ToolType type() {
+		return type;
 	}
 
 	@Override
@@ -91,7 +75,24 @@ public class TinkerToolItem extends Item {
 				return swung;
 			}
 		}
+		if (type.style.thrown() && !ToolStats.isBroken(player.getItemInHand(hand))) {
+			InteractionResult thrown = Ranged.use(level, player, hand, type);
+			if (thrown != InteractionResult.PASS) {
+				return thrown;
+			}
+		}
 		return super.use(level, player, hand);
+	}
+
+	/** (0.15.x) The javelin is drawn back like a trident. */
+	@Override
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return type.style == ToolType.Style.JAVELIN ? ItemUseAnimation.TRIDENT : super.getUseAnimation(stack);
+	}
+
+	@Override
+	public int getUseDuration(ItemStack stack, LivingEntity user) {
+		return type.style == ToolType.Style.JAVELIN ? Ranged.HOLD_DURATION : super.getUseDuration(stack, user);
 	}
 
 	/** (0.15.x) Shears: right mouse on a sheep that's ready. */
@@ -107,6 +108,9 @@ public class TinkerToolItem extends Item {
 		if (type.traits.containsKey(Trait.BONKING) && ToolActions.bonk(stack, level, user, getUseDuration(stack, user) - remainingUseTicks)) {
 			return true;
 		}
+		if (type.style == ToolType.Style.JAVELIN && Ranged.releaseJavelin(stack, level, user, getUseDuration(stack, user) - remainingUseTicks)) {
+			return true;
+		}
 		return super.releaseUsing(stack, level, user, remainingUseTicks);
 	}
 
@@ -114,43 +118,6 @@ public class TinkerToolItem extends Item {
 	@SuppressWarnings("deprecation")
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
-		List<TinkerMaterial> materials = ToolStats.materials(stack);
-		ToolStats.Stats stats = ToolStats.compute(type, materials);
-		if (ToolStats.isBroken(stack)) {
-			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.broken").withStyle(ChatFormatting.RED));
-		}
-		MutableComponent names = Component.empty();
-		for (int i = 0; i < materials.size(); i++) {
-			names.append(i > 0 ? Component.literal(", ") : Component.empty()).append(materials.get(i).displayName());
-		}
-		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.materials", names).withStyle(ChatFormatting.GRAY));
-		boolean details = Tinkering.traitDetails.getAsBoolean();
-		for (Map.Entry<Trait, Integer> trait : stats.traits().entrySet()) {
-			Component name = trait.getKey().name(trait.getValue());
-			builder.accept((details ? Component.translatable("tooltip.jaymospowers.tinkering.trait", name,
-				trait.getKey().description().copy().withStyle(ChatFormatting.DARK_GRAY)) : name.copy()).withStyle(trait.getKey().colour));
-		}
-		for (Map.Entry<Modifier, Integer> modifier : Modifier.of(stack).entrySet()) {
-			Component name = modifier.getKey().name(modifier.getValue());
-			builder.accept((details ? Component.translatable("tooltip.jaymospowers.tinkering.trait", name,
-				modifier.getKey().description().copy().withStyle(ChatFormatting.DARK_GRAY)) : name.copy()).withStyle(modifier.getKey().colour));
-		}
-		if (!details) {
-			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.shift").withStyle(ChatFormatting.DARK_GRAY));
-		}
-		int xp = Modifier.xp(stack), toolLevel = Modifier.toolLevel(xp);
-		builder.accept((toolLevel >= Modifier.MAX_LEVEL ? Component.translatable("tooltip.jaymospowers.tinkering.level_max", toolLevel)
-			: Component.translatable("tooltip.jaymospowers.tinkering.level", toolLevel, xp, Modifier.xpFor(toolLevel + 1)))
-			.withStyle(ChatFormatting.YELLOW));
-		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.slots", Modifier.slots(stack) - Modifier.used(stack),
-			Modifier.slots(stack)).withStyle(ChatFormatting.GRAY));
-		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.durability", stack.getMaxDamage() - stack.getDamageValue(),
-			stack.getMaxDamage()).withStyle(ChatFormatting.GRAY));
-		if (type.style == ToolType.Style.TOOL) {
-			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.mining_speed", String.format("%.2f", stats.miningSpeed()))
-				.withStyle(ChatFormatting.GRAY));
-			builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.mining_tier", Modifier.tier(stack, stats.tier()).displayName())
-				.withStyle(ChatFormatting.GRAY));
-		}
+		TinkerTool.tooltip(stack, type, builder);
 	}
 }
