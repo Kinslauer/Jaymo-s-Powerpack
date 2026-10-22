@@ -2590,3 +2590,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   within a second of the last; a hold counts for nothing), and anything that isn't a weapon finishes nobody. The
   weapons' finishers (still a held use) need Kingdoms' Combat Arts perk Executioner, which no longer boosts a combo's
   finisher (`Finishers.weaponsUnlocked`; everyone in creative, everyone if Kingdoms isn't loaded).
+- **0.15.111 (finishers: point-blank shot, slow neck snap, crippled targets, grabbable heads):** Andy: "the pointblank
+  finisher should use a bullet and actually play the blast". Guns (our TaCZ flintlocks, TaCZ's own, the Void Armory
+  flintlock, another mod's by name) get their own finisher, Point Blank (`Finishers.Kind.GUN`): it needs a round loaded,
+  spends it (`TaczGuns.spendRound`), and fires with the gun's own TaCZ shot sound (`TaczGuns.gunSound`), muzzle flash,
+  flame and smoke. The bow's is renamed Loosed Close and spends an arrow; the crossbow spends its bolt (or an arrow).
+  Andy: "neck break should take 5s to finish": the neck snap is a 5 s hold, strained twice, snapped at tick 100.
+  Andy: "crippled enemies should be executable too": `Finishers.helpless` takes Darktide's crawl, both legs broken or a
+  leg cut off as well as downed; a crippled one is held still while it plays, and `Downed.execute` kills it the same
+  way. Andy: "heads from decaptiations should be grabable like they are otherwise": a click (empty hand or sneak) on a
+  body or corpse that a severed part lies in takes the part (`Carry.partInView`). Compile-checked; not playtested.

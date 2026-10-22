@@ -145,7 +145,7 @@ public final class FinisherPose {
 			k(27, 0.3F, 35, 0, -0.5F, -0.3F, 0, -0.5F, 0.3F, 0, -0.8F, 0.7F, 0.6F, 450),
 			k(31, 0.3F, 35, 0, -0.5F, -0.3F, 0, -0.5F, 0.3F, 0, -0.8F, 0.7F, 0.6F, 450),
 			rest(38, 360)});
-		// Point Blank: the bow brought up, an arrow drawn slow to the cheek, aimed straight down, loosed
+		// Loosed Close: the bow brought up, an arrow drawn slow to the cheek, aimed straight down, loosed
 		KEYS.put(Finishers.Kind.BOW, new Key[] {
 			rest(0, 0),
 			k(6, 0.1F, 15, 0, -1.2F, -0.2F, 0, -1.2F, 0.6F, 0, -0.3F, 0.3F, 0.6F, 0),
@@ -162,16 +162,35 @@ public final class FinisherPose {
 			k(13, 0.03F, 10, 0, -0.95F, -0.3F, 0, -1.05F, 0.6F, 0, -0.2F, 0.2F, 0.5F, 0),
 			k(18, 0.05F, 12, 0, -0.7F, -0.3F, 0, -0.75F, 0.5F, 0, -0.2F, 0.2F, 0.55F, 0),
 			rest(26, 0)});
-		// Bare hands: down on a knee, the head taken in both hands, held a beat, and twisted hard
+		// (0.15.111) Point Blank: the gun brought up at arm's length, cocked, levelled down at the head, fired, the kick
+		KEYS.put(Finishers.Kind.GUN, new Key[] {
+			rest(0, 0),
+			k(6, 0.0F, 8, 0, -1.5F, -0.1F, 0, -0.5F, 0.3F, 0, -0.1F, 0.1F, 0.45F, 0),
+			k(11, 0.05F, 16, 0, -1.2F, -0.05F, 0, -0.9F, 0.6F, 0, -0.2F, 0.2F, 0.6F, 0),
+			k(19, 0.05F, 18, 0, -1.1F, -0.05F, 0, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.65F, 0),
+			k(20, 0.02F, 10, 0, -1.75F, -0.05F, 0.05F, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.5F, 0),
+			k(24, 0.03F, 12, 0, -1.3F, -0.05F, 0, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.55F, 0),
+			rest(30, 0)});
+		// Bare hands: down on a knee, the head taken in both hands; (0.15.111) Andy: "neck break should take 5s to finish":
+		// held, it's wrenched one way and fought back twice (40, 70), a wind back, and the snap at 100
 		KEYS.put(Finishers.Kind.FIST, new Key[] {
 			rest(0, 0),
 			k(7, 0.45F, 30, 0, -0.6F, 0.1F, -0.1F, -0.6F, -0.1F, 0.1F, -1.15F, 1.35F, 0.6F, 0),
 			k(13, 0.5F, 42, 0, -0.4F, -0.25F, -0.05F, -0.4F, 0.25F, 0.05F, -1.15F, 1.35F, 0.7F, 0),
-			k(17, 0.5F, 42, -5, -0.45F, -0.3F, -0.05F, -0.35F, 0.2F, 0.05F, -1.15F, 1.35F, 0.7F, 0),
-			k(20, 0.5F, 42, 18, -0.25F, -0.6F, 0.2F, -0.6F, 0.6F, -0.1F, -1.15F, 1.35F, 0.75F, 0),
-			k(26, 0.5F, 40, 15, -0.25F, -0.6F, 0.2F, -0.6F, 0.6F, -0.1F, -1.15F, 1.35F, 0.7F, 0),
-			k(31, 0.3F, 20, 0, -0.3F, 0, 0.1F, -0.3F, 0, -0.1F, -1.0F, 1.2F, 0.5F, 0),
-			rest(38, 0)});
+			k(24, 0.5F, 42, -6, -0.45F, -0.3F, -0.05F, -0.35F, 0.2F, 0.05F, -1.15F, 1.35F, 0.7F, 0),
+			k(38, 0.5F, 43, 6, -0.35F, -0.45F, 0.1F, -0.5F, 0.4F, -0.05F, -1.15F, 1.35F, 0.72F, 0),
+			k(40, 0.52F, 44, 9, -0.3F, -0.5F, 0.14F, -0.55F, 0.45F, -0.07F, -1.15F, 1.35F, 0.75F, 0),
+			k(45, 0.5F, 41, 2, -0.42F, -0.32F, 0, -0.4F, 0.28F, 0.03F, -1.15F, 1.35F, 0.7F, 0),
+			k(56, 0.5F, 42, -4, -0.45F, -0.28F, -0.04F, -0.36F, 0.22F, 0.05F, -1.15F, 1.35F, 0.7F, 0),
+			k(68, 0.5F, 43, 8, -0.33F, -0.48F, 0.12F, -0.52F, 0.42F, -0.06F, -1.15F, 1.35F, 0.73F, 0),
+			k(70, 0.52F, 44, 11, -0.28F, -0.52F, 0.16F, -0.56F, 0.47F, -0.08F, -1.15F, 1.35F, 0.76F, 0),
+			k(76, 0.5F, 41, 3, -0.42F, -0.32F, 0, -0.4F, 0.28F, 0.03F, -1.15F, 1.35F, 0.7F, 0),
+			k(90, 0.5F, 42, -8, -0.48F, -0.25F, -0.08F, -0.32F, 0.18F, 0.06F, -1.15F, 1.35F, 0.7F, 0),
+			k(97, 0.5F, 42, -10, -0.5F, -0.22F, -0.1F, -0.3F, 0.15F, 0.08F, -1.15F, 1.35F, 0.7F, 0),
+			k(100, 0.5F, 42, 18, -0.25F, -0.6F, 0.2F, -0.6F, 0.6F, -0.1F, -1.15F, 1.35F, 0.75F, 0),
+			k(106, 0.5F, 40, 15, -0.25F, -0.6F, 0.2F, -0.6F, 0.6F, -0.1F, -1.15F, 1.35F, 0.7F, 0),
+			k(111, 0.3F, 20, 0, -0.3F, 0, 0.1F, -0.3F, 0, -0.1F, -1.0F, 1.2F, 0.5F, 0),
+			rest(118, 0)});
 	}
 
 	private static Key at(Key key, float t) {

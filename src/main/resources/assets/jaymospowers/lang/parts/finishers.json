@@ -9,9 +9,13 @@
 	"message.jaymospowers.finisher.spear": "Pinned: %s",
 	"message.jaymospowers.finisher.polearm": "Reaping: %s",
 	"message.jaymospowers.finisher.staff": "Staff strike: %s",
-	"message.jaymospowers.finisher.bow": "Point blank: %s",
+	"message.jaymospowers.finisher.bow": "Loosed close: %s",
 	"message.jaymospowers.finisher.crossbow": "Bolt to the heart: %s",
+	"message.jaymospowers.finisher.gun": "Point blank: %s",
 	"message.jaymospowers.finisher.fist": "Neck snap: %s",
 	"message.jaymospowers.finisher.taps": "Neck snap on %s: tap %s more",
-	"message.jaymospowers.finisher.locked": "Weapon finishers need Executioner (Combat Arts). Bare hands: tap three times."
+	"message.jaymospowers.finisher.locked": "Weapon finishers need Executioner (Combat Arts). Bare hands: tap three times.",
+	"message.jaymospowers.finisher.unloaded.gun": "Load a round first.",
+	"message.jaymospowers.finisher.unloaded.bow": "You need an arrow.",
+	"message.jaymospowers.finisher.unloaded.crossbow": "You need a bolt."
 }

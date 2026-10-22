@@ -98,6 +98,8 @@ public final class Carry {
 	public static final int BLOCK = 5;
 	/** A severed head or limb ({@link SeveredPart}) dangling from the right hand. Never rolled, kept in flight. */
 	public static final int PART = 6;
+	/** (0.15.111) A severed part lying in a body is found this far past reach (blocks), its box grown this much to aim at. */
+	static final double PART_REACH_SLACK = 0.5, PART_PICK_INFLATE = 0.15;
 	/** On foot only the first two are rolled; in flight any of the four. */
 	public static final int FOOT_HOLDS = 2, FLIGHT_HOLDS = 4;
 	/** Weight: the carrier walks this much slower (share of their speed) with a person, or with a small animal. */
@@ -402,6 +404,14 @@ public final class Carry {
 			// (the same click seen twice)
 			return InteractionResult.SUCCESS;
 		}
+		if (!(target instanceof SeveredPart) && (player.isShiftKeyDown() || player.getMainHandItem().isEmpty())) {
+			// (0.15.111) Andy: "heads from decaptiations should be grabable like they are otherwise": a head that came to
+			// rest in (or in front of) a body, its corpse or a finisher's, is what's taken, not the body
+			SeveredPart part = partInView(player, target, hit);
+			if (part != null) {
+				target = part;
+			}
+		}
 		// a severed part is taken with a plain right-click too, as long as the hand is empty
 		boolean grab = player.isShiftKeyDown() || target instanceof SeveredPart && player.getMainHandItem().isEmpty();
 		if (hand != InteractionHand.MAIN_HAND || !grab || player.isSpectator() || !canBeCarriedBy(player, target)) {
@@ -421,6 +431,31 @@ public final class Carry {
 			pickUp(carrier, target);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * (0.15.111) A severed part in line with {@code player}'s look and within reach, lying inside {@code clicked}'s box or
+	 * nearer than where the click met it; null if none.
+	 */
+	static @Nullable SeveredPart partInView(Player player, Entity clicked, @Nullable EntityHitResult hit) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getViewVector(1.0F).scale(player.entityInteractionRange() + PART_REACH_SLACK));
+		double clickedAt = hit != null ? hit.getLocation().distanceToSqr(eye) : clicked.distanceToSqr(eye);
+		AABB body = clicked.getBoundingBox().inflate(PART_REACH_SLACK);
+		SeveredPart best = null;
+		double bestAt = Double.MAX_VALUE;
+		for (SeveredPart part : player.level().getEntitiesOfClass(SeveredPart.class, new AABB(eye, end).inflate(1.0), p -> !isCarried(p))) {
+			var at = part.getBoundingBox().inflate(PART_PICK_INFLATE).clip(eye, end);
+			if (at.isEmpty()) {
+				continue;
+			}
+			double d = at.get().distanceToSqr(eye);
+			if (d < bestAt && (d <= clickedAt || body.intersects(part.getBoundingBox()))) {
+				best = part;
+				bestAt = d;
+			}
+		}
+		return best;
 	}
 
 	/**

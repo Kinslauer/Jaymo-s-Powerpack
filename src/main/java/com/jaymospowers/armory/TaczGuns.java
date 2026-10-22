@@ -229,6 +229,58 @@ public final class TaczGuns {
 		return data != null && (JaymosPowers.MOD_ID + ":" + name).equals(data.copyTag().getStringOr("GunId", ""));
 	}
 
+	/**
+	 * (0.15.111) Takes one round out of a TaCZ gun (the one in the barrel first, else the magazine's). Returns false if it
+	 * was empty.
+	 */
+	public static boolean spendRound(ItemStack stack) {
+		if (ammo(stack) <= 0) {
+			return false;
+		}
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+			if (tag.getBooleanOr("HasBulletInBarrel", false)) {
+				tag.putBoolean("HasBulletInBarrel", false);
+			} else {
+				tag.putInt("GunCurrentAmmoCount", Math.max(0, tag.getIntOr("GunCurrentAmmoCount", 0) - 1));
+			}
+		});
+		return true;
+	}
+
+	private static boolean soundLooked;
+	private static @org.jspecify.annotations.Nullable Method sendSound;
+
+	/**
+	 * (0.15.111) One of a TaCZ gun's own sounds ({@code shoot_3p}, {@code fire_select}, {@code flesh_hit}: the keys of its
+	 * display's "sounds") heard by everyone within {@code range} of {@code from}, through TaCZ (by reflection, as
+	 * {@code FutureGuns} does). Returns false if that couldn't be done.
+	 */
+	public static boolean gunSound(net.minecraft.world.entity.LivingEntity from, String gunId, String sound, int range, float volume, float pitch) {
+		if (!LOADED || gunId.isEmpty()) {
+			return false;
+		}
+		if (!soundLooked) {
+			soundLooked = true;
+			try {
+				sendSound = Class.forName("com.tacz.guns.sound.SoundManager").getMethod("sendSoundToNearby", net.minecraft.world.entity.LivingEntity.class,
+					int.class, Identifier.class, Identifier.class, String.class, float.class, float.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				sendSound = null;
+			}
+		}
+		Identifier id = Identifier.tryParse(gunId);
+		if (sendSound == null || id == null) {
+			return false;
+		}
+		try {
+			sendSound.invoke(null, from, range, id, id.withSuffix("_display"), sound, volume, pitch);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			sendSound = null;
+			return false;
+		}
+	}
+
 	/** Rounds in a TaCZ gun: its magazine plus the one in the barrel. */
 	public static int ammo(ItemStack stack) {
 		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
