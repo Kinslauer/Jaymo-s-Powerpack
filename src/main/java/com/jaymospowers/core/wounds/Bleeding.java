@@ -108,6 +108,15 @@ public final class Bleeding {
 	/** (0.14.4) Parts with a dressing on (healing). Saved, server side. */
 	public static final AttachmentType<Integer> BANDAGED = AttachmentRegistry.create(JaymosPowers.id("wounds_bandaged"),
 		builder -> builder.persistent(Codec.INT));
+	/**
+	 * (0.15.90) The parts wearing a dressing anyone can see (a bit per {@link BodyPart#ordinal()}), and, shifted up
+	 * {@link #RAG_SHIFT}, which of those are rags. Put on with a dressing; it stays on after the dressing's heal is spent,
+	 * until the part is whole, not bleeding and not festering (or it's gone). Saved, synced to everyone, not kept through
+	 * death.
+	 */
+	public static final AttachmentType<Integer> WRAPPED = AttachmentRegistry.create(JaymosPowers.id("wounds_wrapped"),
+		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	public static final int RAG_SHIFT = 16;
 
 	private static final int PARTS = BodyPart.values().length;
 	/** Everyone bleeding, festering, dressed or dirty. Not saved: a reload finds them again. */
@@ -124,7 +133,7 @@ public final class Bleeding {
 
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof LivingEntity living && (bleeding(living) | festering(living) | bandaged(living) | dirty(living)) != 0) {
+			if (entity instanceof LivingEntity living && (bleeding(living) | festering(living) | bandaged(living) | dirty(living) | wrapped(living)) != 0) {
 				TRACKED.add(living);
 			}
 		});
@@ -153,6 +162,11 @@ public final class Bleeding {
 
 	public static int dirty(Entity entity) {
 		return entity.getAttachedOrElse(DIRTY, 0);
+	}
+
+	/** (0.15.90) The parts wearing a dressing you can see (the low bits), and which are rags (above {@link #RAG_SHIFT}). */
+	public static int wrapped(Entity entity) {
+		return entity.getAttachedOrElse(WRAPPED, 0);
 	}
 
 	/** The bleeding parts that are stumps (severed): only cautery closes them. */
@@ -282,6 +296,9 @@ public final class Bleeding {
 		dressing[0][i] = heal;
 		dressing[1][i] = heal * DRESS_STEP / Math.max(DRESS_STEP, ticks);
 		set(entity, BANDAGED, bandaged(entity) | Breaks.bit(part));
+		// (0.15.90) and it shows: linen, or a rag
+		int bit = Breaks.bit(part);
+		set(entity, WRAPPED, wrapped(entity) & ~(bit << RAG_SHIFT) | bit | (dirty ? bit << RAG_SHIFT : 0));
 		long now = level.getGameTime();
 		if (dirty && !clean(entity, i, now)) {
 			set(entity, DIRTY, dirty(entity) | Breaks.bit(part));
@@ -347,6 +364,7 @@ public final class Bleeding {
 	/** (0.14.4) Parts grown back (Dismember's regrowth, as {@code mask} bits): no stump, nothing festering there. */
 	static void regrown(LivingEntity entity, int mask) {
 		set(entity, BLEEDING, bleeding(entity) & ~mask);
+		set(entity, WRAPPED, wrapped(entity) & ~(mask | mask << RAG_SHIFT));
 		for (BodyPart part : BodyPart.values()) {
 			if ((mask & Breaks.bit(part)) != 0 && (festering(entity) & Breaks.bit(part)) != 0) {
 				unfester(entity, part);
@@ -361,6 +379,7 @@ public final class Bleeding {
 		entity.removeAttached(FESTER_SINCE);
 		entity.removeAttached(DIRTY);
 		entity.removeAttached(BANDAGED);
+		entity.removeAttached(WRAPPED);
 		CUT_SINCE.remove(entity);
 		DRESSING.remove(entity);
 	}
@@ -411,6 +430,7 @@ public final class Bleeding {
 			if (dressTick) {
 				tended(body);
 				dress(body);
+				unwrap(body);
 			}
 			if (bleedTick && body.isAlive()) {
 				bleed(level, body);
@@ -418,7 +438,7 @@ public final class Bleeding {
 			if (feverTick && body.isAlive()) {
 				fever(level, body);
 			}
-			if ((bleeding(body) | festering(body) | bandaged(body) | dirty(body)) == 0) {
+			if ((bleeding(body) | festering(body) | bandaged(body) | dirty(body) | wrapped(body)) == 0) {
 				TRACKED.remove(body);
 				CUT_SINCE.remove(body);
 				DRESSING.remove(body);
@@ -451,6 +471,22 @@ public final class Bleeding {
 			}
 		}
 		set(body, BANDAGED, mask);
+	}
+
+	/** (0.15.90) A dressing comes off once its part is whole and clean (no cut, no festering), or the part is gone. */
+	private static void unwrap(LivingEntity body) {
+		int mask = wrapped(body);
+		if (mask == 0) {
+			return;
+		}
+		int open = bleeding(body) | festering(body) | bandaged(body);
+		for (BodyPart part : BodyPart.values()) {
+			int bit = Breaks.bit(part);
+			if ((mask & bit) != 0 && (Breaks.missing(body, part) || (open & bit) == 0 && Wounds.fraction(body, part) >= 0.999F)) {
+				mask &= ~(bit | bit << RAG_SHIFT);
+			}
+		}
+		set(body, WRAPPED, mask);
 	}
 
 	private static void bleed(ServerLevel level, LivingEntity body) {

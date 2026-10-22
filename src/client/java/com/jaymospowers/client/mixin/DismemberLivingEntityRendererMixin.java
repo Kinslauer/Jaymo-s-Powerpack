@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Which parts a body has lost, onto its render state (see Dismembered). */
+/** Which parts a body has lost, onto its render state (see Dismembered), and what's dressed or splinted (DressingsLayer). */
 @Mixin(LivingEntityRenderer.class)
 abstract class DismemberLivingEntityRendererMixin {
 	@Inject(
@@ -17,5 +17,7 @@ abstract class DismemberLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$lostParts(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		Dismembered.extract(entity, state);
+		// (0.15.90) and the bandages and splints that show
+		com.jaymospowers.client.wounds.DressingsLayer.extract(entity, state);
 	}
 }
