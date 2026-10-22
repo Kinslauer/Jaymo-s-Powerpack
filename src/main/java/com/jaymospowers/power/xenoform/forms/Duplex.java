@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import com.jaymospowers.core.CarryBlock;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,8 +27,15 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.animal.golem.CopperGolem;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -34,12 +45,16 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>R, Split: a double steps out of you (up to {@link #MAX_DOUBLES}).</li>
  * <li>G, Rally: your doubles go for the creature you aim at; aimed at nothing, they come back to you.</li>
+ * <li>Sneak + G, Fetch (0.15.96): a double goes and picks up the solid block you aim at and carries it on its head;
+ * sneak + G again and it sets it down where you aim.</li>
  * <li>V, Switch: trade places with the double you aim at (or the farthest one).</li>
  * <li>B, Merge: every double runs back into you, each healing you a little.</li>
  * <li>C (ascended), Copper Storm: lightning strikes every double, shocking everything round it, and leaves them
  * charged (fast, strong, glowing); up to {@link #STORM_MAX_DOUBLES} doubles while it lasts. C again strikes again.</li>
  * </ul>
- * A double that dies stings you for {@link #DEATH_STING}. The name counts you all ({@link #title}): two of you is
+ * (0.15.96) The doubles hunt: idle ones join a mate's fight, go for whatever hurts or hunts you or yours, and for
+ * hostile creatures near you ({@link #HUNT_RANGE}); together they swarm it ({@link XenoDouble}). A double that dies
+ * stings you for {@link #DEATH_STING}. The name counts you all ({@link #title}): two of you is
  * Duplex, three Triplex, four Quadruplex, and so on.
  */
 public final class Duplex extends XenoForm {
@@ -49,6 +64,11 @@ public final class Duplex extends XenoForm {
 	public static final int SPLIT_COOLDOWN = 40, MAX_DOUBLES = 3, STORM_MAX_DOUBLES = 6;
 	public static final int RALLY_COOLDOWN = 20;
 	public static final double RALLY_REACH = 16.0;
+	/** Fetch: how far off you can pick out a block (blocks, from the eyes). */
+	public static final double FETCH_REACH = 16.0;
+	/** Idle doubles go for hostile creatures this close to you (blocks), and for what you hit within the last {@link #HUNT_MEMORY} ticks. */
+	public static final double HUNT_RANGE = 12.0;
+	public static final int HUNT_MEMORY = 100;
 	public static final int SWITCH_COOLDOWN = 40;
 	public static final double SWITCH_REACH = 32.0;
 	public static final int MERGE_COOLDOWN = 160;
@@ -90,7 +110,7 @@ public final class Duplex extends XenoForm {
 				}
 			}
 			case ABILITY_2 -> {
-				if (ready(player, live, G) && rally(player, live)) {
+				if (ready(player, live, G) && (player.isShiftKeyDown() ? fetch(player, live) : rally(player, live))) {
 					cooldown(player, live, G, RALLY_COOLDOWN);
 				}
 			}
@@ -116,15 +136,71 @@ public final class Duplex extends XenoForm {
 		}
 		ServerLevel level = player.level();
 		live.doubles.removeIf(id -> !(level.getEntity(id) instanceof XenoDouble twin) || !twin.isAlive());
-		// whoever hurts you, the doubles go for
+		List<XenoDouble> idle = new ArrayList<>();
+		LivingEntity fighting = null;
+		for (XenoDouble twin : loyal(player, live)) {
+			LivingEntity target = twin.getTarget();
+			if (twin.busy()) {
+				continue;
+			}
+			if (target == null || !target.isAlive()) {
+				idle.add(twin);
+			} else if (fighting == null) {
+				fighting = target;
+			}
+		}
+		if (idle.isEmpty()) {
+			return;
+		}
+		LivingEntity quarry = quarry(player, live, fighting);
+		if (quarry != null) {
+			for (XenoDouble twin : idle) {
+				twin.setTarget(quarry);
+			}
+		}
+	}
+
+	/**
+	 * What idle doubles go for, first found: what a mate is fighting, whoever hurt you, whatever is hunting you or one of
+	 * your doubles, what you last hit, or the nearest hostile creature you can see near you.
+	 */
+	private static @Nullable LivingEntity quarry(ServerPlayer player, XenoformPower.Live live, @Nullable LivingEntity fighting) {
+		if (fighting != null) {
+			return fighting;
+		}
 		LivingEntity attacker = player.getLastHurtByMob();
-		if (attacker != null && attacker.isAlive() && player.tickCount - player.getLastHurtByMobTimestamp() < 40 && !mine(player, attacker)) {
-			for (XenoDouble twin : loyal(player, live)) {
-				if (twin.getTarget() == null) {
-					twin.setTarget(attacker);
+		if (fair(player, attacker) && player.tickCount - player.getLastHurtByMobTimestamp() < 40) {
+			return attacker;
+		}
+		LivingEntity best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (LivingEntity e : around(player, HUNT_RANGE)) {
+			if (!fair(player, e)) {
+				continue;
+			}
+			boolean hunting = e instanceof Mob mob && mob.getTarget() != null && (mob.getTarget() == player || mine(player, mob.getTarget()));
+			if (hunting) {
+				return e;
+			}
+			if (e instanceof Enemy && !(e instanceof NeutralMob neutral && !neutral.isAngry()) && player.hasLineOfSight(e)) {
+				double d = e.distanceToSqr(player);
+				if (d < bestDist) {
+					bestDist = d;
+					best = e;
 				}
 			}
 		}
+		LivingEntity hit = player.getLastHurtMob();
+		if (fair(player, hit) && player.tickCount - player.getLastHurtMobTimestamp() < HUNT_MEMORY) {
+			return hit;
+		}
+		return best;
+	}
+
+	/** Something the doubles may go for: alive, not you or yours, not your pets or team. */
+	private static boolean fair(ServerPlayer player, @Nullable LivingEntity e) {
+		return e != null && e.isAlive() && e != player && !mine(player, e) && !spared(player, e) && !e.isSpectator()
+			&& e.level() == player.level() && e.distanceToSqr(player) < XenoDouble.SWARM_RANGE * XenoDouble.SWARM_RANGE;
 	}
 
 	/** What you hit, your doubles go for. */
@@ -134,7 +210,7 @@ public final class Duplex extends XenoForm {
 			return;
 		}
 		for (XenoDouble twin : loyal(player, live)) {
-			if (twin.getTarget() == null) {
+			if (twin.getTarget() == null && !twin.busy()) {
 				twin.setTarget(target);
 			}
 		}
@@ -244,6 +320,9 @@ public final class Duplex extends XenoForm {
 		LivingEntity target = aimed(player, RALLY_REACH, e -> !mine(player, e));
 		ServerLevel level = player.level();
 		for (XenoDouble twin : doubles) {
+			if (twin.busy()) {
+				continue;
+			}
 			twin.setTarget(target);
 			if (target == null) {
 				twin.getNavigation().moveTo(player, XenoDouble.FOLLOW_SPEED);
@@ -256,6 +335,72 @@ public final class Duplex extends XenoForm {
 			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 0.9F);
 		}
 		return true;
+	}
+
+	// ---- sneak + G: Fetch (0.15.96) ----
+
+	/**
+	 * A double carrying a block goes and sets it down where you aim (against the face you aim at, or in its place if
+	 * that's grass and the like); with none carrying, the nearest free double goes and picks up the block you aim at.
+	 */
+	private static boolean fetch(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(FETCH_REACH)), ClipContext.Block.OUTLINE,
+			ClipContext.Fluid.NONE, player));
+		if (hit.getType() == HitResult.Type.MISS) {
+			return false;
+		}
+		List<XenoDouble> doubles = loyal(player, live);
+		XenoDouble carrier = nearest(doubles, hit.getBlockPos(), XenoDouble::carrying);
+		if (carrier != null) {
+			BlockPos pos = level.getBlockState(hit.getBlockPos()).canBeReplaced() ? hit.getBlockPos() : hit.getBlockPos().relative(hit.getDirection());
+			Entity carried = carrier.carried();
+			BlockState state = CarryBlock.facing(CarryBlock.stateOf(carried), player.getDirection());
+			if (!level.getBlockState(pos).canBeReplaced() || !state.canSurvive(level, pos)
+				|| !player.mayInteract(level, pos) || player.blockActionRestricted(level, pos, player.gameMode())) {
+				return false;
+			}
+			carrier.deliver(pos, player.getDirection());
+			mark(level, Vec3.atCenterOf(pos));
+			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 1.2F);
+			return true;
+		}
+		BlockPos pos = hit.getBlockPos();
+		BlockState state = level.getBlockState(pos);
+		if (!CarryBlock.liftableAny(level, pos, state) || !player.mayInteract(level, pos) || player.blockActionRestricted(level, pos, player.gameMode())
+			|| !PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, level.getBlockEntity(pos))) {
+			return false;
+		}
+		XenoDouble twin = nearest(doubles, pos, t -> !t.busy() && t.getTarget() == null);
+		if (twin == null) {
+			twin = nearest(doubles, pos, t -> !t.busy());
+		}
+		if (twin == null) {
+			return false;
+		}
+		twin.fetch(pos, state);
+		mark(level, Vec3.atCenterOf(pos).add(0.0, 0.6, 0.0));
+		sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 1.6F);
+		return true;
+	}
+
+	private static @Nullable XenoDouble nearest(List<XenoDouble> doubles, BlockPos pos, Predicate<XenoDouble> filter) {
+		XenoDouble best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (XenoDouble twin : doubles) {
+			double d = twin.distanceToSqr(Vec3.atCenterOf(pos));
+			if (filter.test(twin) && d < bestDist) {
+				bestDist = d;
+				best = twin;
+			}
+		}
+		return best;
+	}
+
+	/** A spark where you sent them. */
+	private static void mark(ServerLevel level, Vec3 at) {
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 10, 0.25, 0.1, 0.25, 0.05);
 	}
 
 	// ---- V: Switch ----

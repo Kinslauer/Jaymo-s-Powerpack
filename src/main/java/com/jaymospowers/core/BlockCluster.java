@@ -80,7 +80,7 @@ public class BlockCluster extends Entity {
 	public static final AttachmentType<Boolean> STEADY = AttachmentRegistry.create(JaymosPowers.id("block_cluster_steady"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
-	/** Drawn this many times its size (a big meteor's rock); unset is 1. */
+	/** Drawn this many times its size (a meteor's rock); unset is 1. Set at all (even to 1), it's seen from {@code FAR_SEEN}. */
 	public static final AttachmentType<Float> SCALE = AttachmentRegistry.create(JaymosPowers.id("block_cluster_scale"),
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 
@@ -346,11 +346,14 @@ public class BlockCluster extends Entity {
 		return new AABB(position.x - halfX, position.y + 0.7 - halfY, position.z - halfZ, position.x + halfX, position.y + 0.7 + halfY, position.z + halfZ);
 	}
 
-	/** A big one (see {@link #SCALE}) is seen from as far off as its size deserves. */
+	/** How far off a scaled one (see {@link #SCALE}) is drawn: a meteor is watched all the way down from build height. */
+	public static final double FAR_SEEN = 384.0;
+
+	/** A scaled one (see {@link #SCALE}) is seen from far off ({@code FAR_SEEN}). */
 	@Override
 	public boolean shouldRenderAtSqrDistance(double distance) {
 		Float scale = this.getAttached(SCALE);
-		return scale != null && scale > 1.0F ? distance < 256.0 * 256.0 : super.shouldRenderAtSqrDistance(distance);
+		return scale != null && scale >= 1.0F ? distance < FAR_SEEN * FAR_SEEN : super.shouldRenderAtSqrDistance(distance);
 	}
 
 	/** Into {@code player}'s inventory as its blocks (what doesn't fit drops at their feet), and the chunk is gone. */
