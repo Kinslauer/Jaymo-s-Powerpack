@@ -44,7 +44,7 @@ public final class BladeBlood {
 	static final int BURST_DROPS = 26, BURST_GORE = 28;
 	static final double BURST_SPEED = 0.22, BURST_GORE_SPEED = 0.35;
 	static final float BURST_POOL = 3.0F;
-	/** (0.15.126) Blown apart by a blast: this many drops this fast, this many pools (each a burst's), this much gore this fast. */
+	/** (0.15.128) Blown apart by a blast: this many drops this fast, this many pools (each a burst's), this much gore this fast. */
 	static final int BLAST_DROPS = 40, BLAST_POOLS = 3, BLAST_GORE = 40;
 	static final double BLAST_SPEED = 0.35, BLAST_GORE_SPEED = 0.55;
 	/** (0.15.93) A blunt blow this heavy (health points) or more splatters, with this many times a blade's drops. */
@@ -268,7 +268,7 @@ public final class BladeBlood {
 	}
 
 	/**
-	 * (0.15.126) Andy: explosions "should blast other corpses apart into a mess". {@code body} (a creature of
+	 * (0.15.128) Andy: explosions "should blast other corpses apart into a mess". {@code body} (a creature of
 	 * {@code type}, or Jaymo's Kitchen's body of one) was just blown apart by a blast (Kitchen throws the chunks): its blood
 	 * bursts out farther than a crushing's, with pools and gore flung wide.
 	 */

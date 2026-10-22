@@ -384,7 +384,7 @@ public final class KitchenCompat {
 			// an older Kitchen that doesn't say when a body is hit: the dead don't bleed
 		}
 		try {
-			// (0.15.126) a body blown apart by a blast (Kitchen 0.5.21 throws its chunks): its blood bursts
+			// (0.15.128) a body blown apart by a blast (Kitchen 0.5.21 throws its chunks): its blood bursts
 			java.util.function.BiConsumer<Entity, java.util.Map.Entry<net.minecraft.world.damagesource.DamageSource, Float>> burst =
 				(body, blast) -> {
 					net.minecraft.world.entity.EntityType<?> type = body instanceof net.minecraft.world.entity.LivingEntity ? body.getType()

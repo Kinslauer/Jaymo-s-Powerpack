@@ -2646,7 +2646,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   before performing additional commands" while uploading `enchanted_glint_item.png`): Iris first asks for the glint
   textures inside a render pass, and loading a texture there is refused in 26.3. The client loads both glint textures
   at startup now (`JaymosPowersClient`, `CLIENT_STARTED`).
-- **0.15.126, blown apart (Kitchen 0.5.21):** Andy: "creepers should not leave corpses when they explode, and other
+- **0.15.128, blown apart (Kitchen 0.5.21):** Andy: "creepers should not leave corpses when they explode, and other
   explosions should blast other corpses apart into a mess." Kitchen throws the chunks; `KitchenCompat.registerCorpseBlood`
   hooks Kitchen's `Gibs.addOnBurst`, and `BladeBlood.blownApart` bursts the body's blood wider than a crushing (40
   drops, 3 pools, 40 flecks of gore, in its own blood colour). Compile-checked; not playtested.

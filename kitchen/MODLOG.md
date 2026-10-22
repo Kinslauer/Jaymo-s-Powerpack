@@ -979,7 +979,7 @@ Batch 3 of the BWM port (MIT, our own code).
   falling anvil or block, a mace's smash), or an `addOnHit` hook tagging the corpse `jaymoskitchen.crushed` (Jaymo's
   Powers: a heavy blunt blow). Other blows still only knock it about.
 
-### 0.5.21: blown apart (pack 0.15.126)
+### 0.5.21: blown apart (pack 0.15.128)
 - Andy: "creepers should not leave corpses when they explode, and other explosions should blast other corpses apart
   into a mess." A corpse caught in a blast of 12 damage or more (`Gibs.SHRED_DAMAGE`, as before) is blown apart now
   instead of just vanishing: 5-8 chunks of it (more for a big body, fewer for a small one, at most 14) fly out away
