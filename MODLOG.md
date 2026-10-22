@@ -2479,3 +2479,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the bruise line; bruises mend over 3 minutes (`BRUISE_MEND_TICKS`). Until you're patched up (`Wounds.patchedUp`: each
   part hurt past bruising dressed or splinted, nothing bleeding, festering or broken unset) natural healing runs at
   `UNPATCHED_REGEN` (a quarter): vanilla food (`WoundsRegenMixin`) and Kitchen's meals (the `jaymospowers_unpatched` tag).
+- **0.15.95, ships Jaymo's Kingdoms 0.7.164 (dark nights keep shaders on):** Andy: "my players want shaders". Dark
+  nights no longer switch Iris shader packs off: the sky light each pack gets is scaled by the moonlight instead, so a
+  new-moon night stays dark with shaders on (True Darkness Compat's idea, remade). See Kingdoms' MODLOG.
