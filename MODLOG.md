@@ -2529,6 +2529,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   sneak + G again and it sets it down where you aim, turned as if you'd placed it. A carrying double doesn't fight and
   follows you; it lets the block fall if it pops, merges or dies, or the server stops. `CarryBlock` gained public
   `takeOut`, `liftableAny`, `land`, `place(..., Direction)` and `facing(..., Direction)` for it.
+- **0.15.103, the band's hologram:** Andy: "the xeno band first person drawing is a bit cluttered, it should also display a
+  hologram projection from the band showing which xeno is selected". While you hold Z as yourself, the dialled alien
+  now stands over the band's dial as a small see-through green hologram (`XenoHologram`): upright on screen whatever the
+  wrist's roll, turned to face you with a slight sway, flickering, red while the band would refuse the change
+  (recharging, or a hidden alien not yet earned). It rises with the dial's cap and sinks as the hand comes down, so it
+  follows the scroll live. Decluttered: the poised right hand waits up and off to the right instead of right over the
+  dial (`XenoformSlamView.R_POS_POISED`), and the worn band's texture lost its dark outline round every face and its
+  grain (lit top row, shaded bottom row, one small round dial; `tools/gen_xenoform.py band_worn`). Not playtested;
+  compile-checked against the 26.3 jars.
+  Behind the hologram, light fans up out of the band (`textures/entity/xeno_holo_glow.png`, a soft gradient on a card
+  facing you), tinted and flickering with it, red with it. And the band now flashes when you change shape (slamming in,
+  or turning back for any reason): everyone within 10 blocks who can see it is blinded for half a second
+  (`BandFlash`). Players get a bright green whiteout on screen (`XenoNet.Flash`, `BandFlashHud`; weaker further off or
+  looking away), creatures get Blindness, drop their target and stand dazed (Darktide's stun). You aren't blinded by
+  your own band.
 - **0.15.104, Nadir's Rift, Graviton and Command:** Andy: "can you add the rift, graviton, and command mechanics to
   Nadir?" (from The Awakening, which is all rights reserved, so these are from-scratch takes on its ideas). G is the
   Rift (`nadir/NadirRift`): tap at a creature for Recursive Drop (floor and sky maws, 7 passes of 2 damage), tap at

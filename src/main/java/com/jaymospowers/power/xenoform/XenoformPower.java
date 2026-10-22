@@ -749,6 +749,7 @@ public final class XenoformPower implements Power {
 		com.jaymospowers.core.Shakes.heavy(player, at, 10.0, 0.5F);
 		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | COLOR), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.12);
+		BandFlash.flash(player, at);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.4F, 1.8F);
 		player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
@@ -797,6 +798,7 @@ public final class XenoformPower implements Power {
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
 			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | COLOR), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.4, 0.6, 0.4, 0.08);
+			BandFlash.flash(player, at);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
 			if (knockout) {
 				com.jaymospowers.core.Fate.addCorruption(player, KNOCKOUT_CORRUPTION);

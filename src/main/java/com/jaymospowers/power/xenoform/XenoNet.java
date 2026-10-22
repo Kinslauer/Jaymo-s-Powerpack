@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.phys.Vec3;
 
 /** Xenoform's packets. Everything else rides on the synced attachments in {@link XenoformState}. */
 public final class XenoNet {
@@ -32,6 +33,17 @@ public final class XenoNet {
 		}
 	}
 
+	/** Server → client: a band flashed green at {@code at} (a change of shape) in your sight ({@link BandFlash}). */
+	public record Flash(Vec3 at) implements CustomPacketPayload {
+		public static final Type<Flash> TYPE = new Type<>(JaymosPowers.id("xenoform_flash"));
+		public static final StreamCodec<ByteBuf, Flash> CODEC = Vec3.STREAM_CODEC.map(Flash::new, Flash::at);
+
+		@Override
+		public Type<Flash> type() {
+			return TYPE;
+		}
+	}
+
 	private XenoNet() {
 	}
 
@@ -40,5 +52,6 @@ public final class XenoNet {
 		ServerPlayNetworking.registerGlobalReceiver(Skill.TYPE, (payload, ctx) -> XenoformPower.skill(ctx.player(), payload.down()));
 		PayloadTypeRegistry.serverboundPlay().register(Dial.TYPE, Dial.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Dial.TYPE, (payload, ctx) -> XenoformPower.scrollDial(ctx.player(), payload.by()));
+		PayloadTypeRegistry.clientboundPlay().register(Flash.TYPE, Flash.CODEC);
 	}
 }

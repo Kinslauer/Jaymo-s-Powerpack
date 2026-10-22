@@ -50,6 +50,7 @@ public final class XenoformPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.xenoform.XenoDouble.TYPE, XenoDoubleRenderer::new);
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
 		NadirRulesScreen.register();
+		BandFlashHud.init();
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
@@ -151,7 +152,7 @@ public final class XenoformPowerClient implements PowerClient {
 	}
 
 	/** Whether slamming the band now would be refused (the server's checks: the dialled hidden alien not yet earned, the recharge). */
-	private static boolean refused(LocalPlayer player) {
+	static boolean refused(LocalPlayer player) {
 		XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 		return dialled != null && dialled.hidden() && !XenoVoices.content(player) || XenoformState.hud(player).recharge() > 0;
 	}
