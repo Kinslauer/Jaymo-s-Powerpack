@@ -162,7 +162,7 @@ public final class FinisherPose {
 			k(13, 0.03F, 10, 0, -0.95F, -0.3F, 0, -1.05F, 0.6F, 0, -0.2F, 0.2F, 0.5F, 0),
 			k(18, 0.05F, 12, 0, -0.7F, -0.3F, 0, -0.75F, 0.5F, 0, -0.2F, 0.2F, 0.55F, 0),
 			rest(26, 0)});
-		// (0.15.111) Point Blank: the gun brought up at arm's length, cocked, levelled down at the head, fired, the kick
+		// (0.15.113) Point Blank: the gun brought up at arm's length, cocked, levelled down at the head, fired, the kick
 		KEYS.put(Finishers.Kind.GUN, new Key[] {
 			rest(0, 0),
 			k(6, 0.0F, 8, 0, -1.5F, -0.1F, 0, -0.5F, 0.3F, 0, -0.1F, 0.1F, 0.45F, 0),
@@ -171,7 +171,7 @@ public final class FinisherPose {
 			k(20, 0.02F, 10, 0, -1.75F, -0.05F, 0.05F, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.5F, 0),
 			k(24, 0.03F, 12, 0, -1.3F, -0.05F, 0, -0.35F, 0.1F, 0, -0.2F, 0.2F, 0.55F, 0),
 			rest(30, 0)});
-		// Bare hands: down on a knee, the head taken in both hands; (0.15.111) Andy: "neck break should take 5s to finish":
+		// Bare hands: down on a knee, the head taken in both hands; (0.15.113) Andy: "neck break should take 5s to finish":
 		// held, it's wrenched one way and fought back twice (40, 70), a wind back, and the snap at 100
 		KEYS.put(Finishers.Kind.FIST, new Key[] {
 			rest(0, 0),

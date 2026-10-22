@@ -98,7 +98,7 @@ public final class Carry {
 	public static final int BLOCK = 5;
 	/** A severed head or limb ({@link SeveredPart}) dangling from the right hand. Never rolled, kept in flight. */
 	public static final int PART = 6;
-	/** (0.15.111) A severed part lying in a body is found this far past reach (blocks), its box grown this much to aim at. */
+	/** (0.15.113) A severed part lying in a body is found this far past reach (blocks), its box grown this much to aim at. */
 	static final double PART_REACH_SLACK = 0.5, PART_PICK_INFLATE = 0.15;
 	/** On foot only the first two are rolled; in flight any of the four. */
 	public static final int FOOT_HOLDS = 2, FLIGHT_HOLDS = 4;
@@ -405,7 +405,7 @@ public final class Carry {
 			return InteractionResult.SUCCESS;
 		}
 		if (!(target instanceof SeveredPart) && (player.isShiftKeyDown() || player.getMainHandItem().isEmpty())) {
-			// (0.15.111) Andy: "heads from decaptiations should be grabable like they are otherwise": a head that came to
+			// (0.15.113) Andy: "heads from decaptiations should be grabable like they are otherwise": a head that came to
 			// rest in (or in front of) a body, its corpse or a finisher's, is what's taken, not the body
 			SeveredPart part = partInView(player, target, hit);
 			if (part != null) {
@@ -434,7 +434,7 @@ public final class Carry {
 	}
 
 	/**
-	 * (0.15.111) A severed part in line with {@code player}'s look and within reach, lying inside {@code clicked}'s box or
+	 * (0.15.113) A severed part in line with {@code player}'s look and within reach, lying inside {@code clicked}'s box or
 	 * nearer than where the click met it; null if none.
 	 */
 	static @Nullable SeveredPart partInView(Player player, Entity clicked, @Nullable EntityHitResult hit) {

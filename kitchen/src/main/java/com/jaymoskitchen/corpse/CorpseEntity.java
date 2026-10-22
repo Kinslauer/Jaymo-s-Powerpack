@@ -2004,6 +2004,8 @@ public class CorpseEntity extends Entity {
 		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
 			// (0.5.1) a blow or an arrow: it takes no harm, but the body is knocked about
 			smack(source, damage);
+			// (0.5.17) and bleeds (Jaymo's Powers' blood), see addOnHit
+			hit(source, damage);
 			return false;
 		}
 		if (isCreeper()) {
@@ -2027,6 +2029,32 @@ public class CorpseEntity extends Entity {
 		dropLoot(level);
 		discard();
 		return true;
+	}
+
+	/** (0.5.17) Told of each blow or arrow that lands on a fleshy body; see {@link #addOnHit}. */
+	private static final List<java.util.function.BiConsumer<Entity, java.util.Map.Entry<DamageSource, Float>>> ON_HIT = new ArrayList<>();
+
+	/**
+	 * (0.5.17) Jaymo's Powers: told of every blow or arrow that lands on a body that still has flesh on it (not a
+	 * skeleton's, an iron one or one on fire), with the blow and its damage, so hitting the dead splatters their blood.
+	 * Plain Java types, so it can be reached by reflection from a mod built against an older Kitchen.
+	 */
+	public static void addOnHit(java.util.function.BiConsumer<Entity, java.util.Map.Entry<DamageSource, Float>> hook) {
+		ON_HIT.add(hook);
+	}
+
+	private void hit(DamageSource source, float damage) {
+		if (ON_HIT.isEmpty() || damage <= 0.0F || kind == CorpseKind.SKELETON || isHeavy() || isOnFire()) {
+			return;
+		}
+		java.util.Map.Entry<DamageSource, Float> blow = java.util.Map.entry(source, damage);
+		for (var hook : ON_HIT) {
+			try {
+				hook.accept(this, blow);
+			} catch (RuntimeException e) {
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A corpse-hit hook failed: {}", e.toString());
+			}
+		}
 	}
 
 	/** (0.5.1) Knocks the body from a melee blow or a projectile: at the part nearest the attacker, along their look or the arrow's flight. */
