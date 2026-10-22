@@ -126,6 +126,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.62: Jaymo's Powers' costumes: a masked player is a stranger, the costume someone of its own (and its attachments)
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
+		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
+		CharacterNames.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();

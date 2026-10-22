@@ -100,7 +100,7 @@ public class XenoDouble extends PathfinderMob {
 
 	public void bindTo(ServerPlayer player) {
 		this.entityData.set(DATA_OWNER, Optional.of(EntityReference.of(player.getUUID())));
-		this.setCustomName(player.getName());
+		this.setCustomName(player.getDisplayName());
 		this.setCustomNameVisible(false);
 	}
 
