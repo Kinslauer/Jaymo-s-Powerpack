@@ -70,6 +70,8 @@ public final class FreerunClient {
 	private static int gripped, clingBase;
 	/** (0.15.12) Wall faces run up since last on the ground; the vertical run's length in ticks. */
 	private static int upRan, upMax;
+	/** (0.15.67) Forward let go mid-run: sliding back down the wall. */
+	private static boolean upSliding;
 	/** (0.15.12) Ticks Sneak has been held in a fast run (the slide), and pushed at an edge (the edge catch). */
 	private static int sneakTicks, edgeTicks, slideWait;
 	/** (0.15.12) The heading and speed of the last sprinting tick on the ground (a slide starts from them), and the slide's own. */
@@ -137,10 +139,6 @@ public final class FreerunClient {
 				runSpeed = step.length();
 			}
 		}
-		if (Freerun.unsteady(player) && player.isSprinting()) {
-			// no Sure Footing: a narrow top is walked, not run
-			player.setSprinting(false);
-		}
 		// (0.14.5) a broken arm or a sprained foot mid-climb or mid-hang lets go (Wounds)
 		boolean free = !player.isSpectator() && Freerun.canMove(player, kind) && !LedgeClient.active()
 			&& !com.jaymospowers.client.power.web.WebPowerClient.parkourBusy();
@@ -154,7 +152,7 @@ public final class FreerunClient {
 		switch (kind) {
 			case Freerun.CLING -> tickCling(player, input, jumpPressed);
 			case Freerun.WALL_RUN -> tickRun(player, input, jumpPressed);
-			case Freerun.UP_RUN -> tickUp(player, input);
+			case Freerun.UP_RUN -> tickUp(player, input, jumpPressed);
 			case Freerun.POLE -> tickPole(player, input, jumpPressed);
 			case Freerun.SLIDE -> tickSlide(player, jumpPressed);
 			case Freerun.HOP -> tickHop(player);
@@ -546,20 +544,33 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.WALL_RUNNER), 0, Freerun.UP_HEIGHT.length - 1);
 		upMax = (int)Math.round(Freerun.UP_HEIGHT[rank] / ((Freerun.UP_START + Freerun.UP_END) * 0.5));
 		upRan |= 1 << face.get3DDataValue();
+		upSliding = false;
 		player.setDeltaMovement(face.getStepX() * 0.25, Freerun.UP_START, face.getStepZ() * 0.25);
 		player.resetFallDistance();
 		start(player, Freerun.UP_RUN, face, BlockPos.ZERO);
 		return true;
 	}
 
-	private static void tickUp(LocalPlayer player, Input input) {
+	private static void tickUp(LocalPlayer player, Input input, boolean jumpPressed) {
 		Direction face = wall;
 		ticks++;
-		if (face == null || !confirm(player.getAttached(Freerun.MOVE) != null) || input.shift() || ticks > upMax || player.onGround() && ticks > 2) {
+		if (face == null || !confirm(player.getAttached(Freerun.MOVE) != null) || input.shift() || player.onGround() && ticks > 2) {
 			finishUp(player, face, input);
 			return;
 		}
-		if (ticks >= 2) {
+		if (jumpPressed && ticks > 1) {
+			eject(player, face);
+			return;
+		}
+		// (0.15.67) let go of forward and you slide back down the wall
+		if (!upSliding && ticks > 2 && !input.forward()) {
+			upSliding = true;
+		}
+		if (upSliding ? ticks > upMax + Freerun.UP_SLIDE_TICKS : ticks > upMax) {
+			finishUp(player, face, input);
+			return;
+		}
+		if (ticks >= 2 && !upSliding) {
 			// the top of the wall is a ledge: the grab and mantle take over
 			Ledge.Spot spot = Ledge.find(player);
 			if (spot != null) {
@@ -570,20 +581,39 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 		}
 		boolean touching = WebWallRun.wallAt(player.level(), player, face, 0.12);
 		if (!touching && !FreerunWalls.wallNear(player.level(), player, face)) {
-			if (player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
+			if (!upSliding && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
 				scramble(player, face);
 			} else {
 				letGo(player);
 			}
 			return;
 		}
-		double vy = Mth.lerp((double)ticks / upMax, Freerun.UP_START, Freerun.UP_END);
 		double push = touching ? RUN_HUG : 0.25;
+		if (upSliding) {
+			player.setDeltaMovement(face.getStepX() * push, -Freerun.UP_SLIDE, face.getStepZ() * push);
+			player.resetFallDistance();
+			Vec3 at = player.position().add(face.getStepX() * 0.35, 1.2, face.getStepZ() * 0.35);
+			player.level().addParticle(ParticleTypes.POOF, at.x, at.y, at.z, 0.0, 0.0, 0.0);
+			return;
+		}
+		double vy = Mth.lerp((double)ticks / upMax, Freerun.UP_START, Freerun.UP_END);
 		player.setDeltaMovement(face.getStepX() * push, vy, face.getStepZ() * push);
 		player.resetFallDistance();
 		if (ticks % 2 == 0) {
 			Vec3 at = player.position().add(face.getStepX() * 0.35, 0.1, face.getStepZ() * 0.35);
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.02, 0.0);
+		}
+	}
+
+	/** (0.15.67) Jump on the wall run (up or sliding): thrown backwards off the wall, out and up. */
+	private static void eject(LocalPlayer player, Direction face) {
+		end(player);
+		cooldown = LET_GO_COOLDOWN;
+		player.setDeltaMovement(-face.getStepX() * Freerun.EJECT_OUT, Freerun.EJECT_UP, -face.getStepZ() * Freerun.EJECT_OUT);
+		player.resetFallDistance();
+		Vec3 at = player.position().add(face.getStepX() * 0.4, 0.4, face.getStepZ() * 0.4);
+		for (int i = 0; i < 6; i++) {
+			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, -face.getStepX() * 0.08, 0.03, -face.getStepZ() * 0.08);
 		}
 	}
 

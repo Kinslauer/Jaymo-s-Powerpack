@@ -2,6 +2,8 @@ package com.jaymospowers.client.stamina;
 
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.freerun.FreerunClient;
+import com.jaymospowers.freerun.Freerun;
+import com.jaymospowers.freerun.LandingRoll;
 import com.jaymospowers.power.web.WebParkour;
 import com.jaymospowers.stamina.Dodge;
 import com.jaymospowers.stamina.Feathers;
@@ -42,6 +44,8 @@ public final class DodgeClient {
 	private static int groundedAfterCling;
 	/** Ticks until the next dodge (the server's {@link Dodge#COOLDOWN}, kept here too so the hop isn't spent twice). */
 	private static int cooldown;
+	/** (0.15.67) Sure Footing: ticks left in which a dodge pressed in the air still rolls you as you land ({@link LandingRoll}). */
+	private static int landingRoll;
 	/** Ticks since this player last dodged (the HUD flashes the row). */
 	public static int sinceDodge = Integer.MAX_VALUE;
 
@@ -64,6 +68,7 @@ public final class DodgeClient {
 		if (player == null || minecraft.gui.screen() != null) {
 			sneakWasDown = false;
 			sinceLastTap = Integer.MAX_VALUE;
+			landingRoll = 0;
 			return;
 		}
 		boolean wanted = false;
@@ -74,8 +79,21 @@ public final class DodgeClient {
 		if (sneakDoubleTap(minecraft, player)) {
 			wanted = true;
 		}
-		if (wanted) {
-			tryDodge(player);
+		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0 && Freerun.perk(player, Freerun.Perk.SURE_FOOTING) > 0) {
+			// falling: held until you land
+			landingRoll = LandingRoll.EARLY_TICKS;
+		} else if (wanted) {
+			tryDodge(player, false);
+		}
+		if (landingRoll > 0) {
+			if (player.onGround()) {
+				landingRoll = 0;
+				tryDodge(player, true);
+			} else if (player.isInWater() || player.getAbilities().flying) {
+				landingRoll = 0;
+			} else {
+				landingRoll--;
+			}
 		}
 	}
 
@@ -116,7 +134,8 @@ public final class DodgeClient {
 		return tapped;
 	}
 
-	private static void tryDodge(LocalPlayer player) {
+	/** {@code landing}: a landing roll, which goes forward when no movement key is held. */
+	private static void tryDodge(LocalPlayer player, boolean landing) {
 		if (cooldown > 0 || player.isSpectator() || !Dodge.canDodge(player) || FreerunClient.active() || !Feathers.canSpend(player, Dodge.COST)) {
 			return;
 		}
@@ -124,7 +143,7 @@ public final class DodgeClient {
 		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
 		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
 		if (forward == 0.0F && strafe == 0.0F) {
-			forward = -1.0F;
+			forward = landing ? 1.0F : -1.0F;
 		}
 		// the movement keys turned to the world by the player's facing (as vanilla's own input is)
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
