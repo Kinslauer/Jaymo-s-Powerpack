@@ -42,6 +42,12 @@ final class XenoHologram {
 	/** The glow behind it: its height (blocks, from the dial up), how far behind the figure it stands (blocks), and its opacity (0-1). */
 	static final float GLOW_HEIGHT = 0.48F, GLOW_BACK = 0.05F, GLOW_ALPHA = 0.75F;
 	static final Identifier GLOW = JaymosPowers.id("textures/entity/xeno_holo_glow.png");
+	/**
+	 * Its sizes are for a band this far from your eye (blocks: the drawn first-person slam's wrist). Nearer (First-person
+	 * Model's own arm, right under your eye) or further, the figure and glow are scaled with the distance, so they look
+	 * the same size on screen; within these bounds.
+	 */
+	static final float REF_DISTANCE = 1.0F, MIN_REACH = 0.15F, MAX_REACH = 2.0F;
 	/** A humanoid model's feet are this far below its origin (model pixels, y down). */
 	private static final float FEET_PX = 24.0F;
 	/** Packed light: full block and sky light. */
@@ -82,6 +88,7 @@ final class XenoHologram {
 			flicker *= 0.5F;
 		}
 		float fade = flicker * Math.min(1.0F, pop * 1.5F);
+		float reach = Mth.clamp(at.length() / REF_DISTANCE, MIN_REACH, MAX_REACH);
 		int tint = XenoformPowerClient.refused(player) ? REFUSED_TINT : TINT;
 		// turned to face the camera (a model's front is its -z)
 		float face = (float)Math.toDegrees(Mth.atan2(at.x, at.z));
@@ -90,21 +97,21 @@ final class XenoHologram {
 		// the glow: from the dial up, a little behind the figure, upright (the card is built y-down)
 		poseStack.translate(at.x, at.y, at.z);
 		poseStack.rotateDegrees(Axis.YP, face);
-		poseStack.translate(0.0F, 0.0F, GLOW_BACK);
+		poseStack.translate(0.0F, 0.0F, GLOW_BACK * reach);
 		poseStack.rotateDegrees(Axis.ZP, 180.0F);
-		float glow = GLOW_HEIGHT * pop;
+		float glow = GLOW_HEIGHT * pop * reach;
 		poseStack.scale(glow, glow, glow);
 		int glowAlpha = Mth.clamp((int)(GLOW_ALPHA * fade * 255.0F), 0, 255);
 		collector.submitModelPart(card(), poseStack, RenderTypes.eyes(GLOW), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, glowAlpha << 24 | tint);
 		poseStack.popPose();
 		poseStack.pushPose();
 		poseStack.setIdentity();
-		poseStack.translate(at.x, at.y + LIFT * pop, at.z);
+		poseStack.translate(at.x, at.y + LIFT * pop * reach, at.z);
 		// the figure sways either side of facing you
 		poseStack.rotateDegrees(Axis.YP, face + SWAY_DEGREES * Mth.sin(time * SWAY_SPEED));
 		// upright: the model is built y-down
 		poseStack.rotateDegrees(Axis.ZP, 180.0F);
-		float scale = HEIGHT * pop * model.renderScale / 2.0F;
+		float scale = HEIGHT * pop * reach * model.renderScale / 2.0F;
 		poseStack.scale(scale, scale, scale);
 		poseStack.translate(0.0F, -FEET_PX / 16.0F, 0.0F);
 		int alpha = Mth.clamp((int)(ALPHA * fade * 255.0F), 0, 255);
