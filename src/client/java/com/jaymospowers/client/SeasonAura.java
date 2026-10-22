@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
  * (0.15.31) A Sylvan carries a little of the season about them where there are seasons ({@link Seasons}): petals in
  * spring, fireflies on summer nights, turning leaves in autumn, snowflakes in winter, now and then. A Sylvan Wind user
  * whirls it: a ring of it spinning round them, thick while they fly (autumn's gusts of leaves, winter's blizzard);
- * (0.15.54) not spring's petals, though. (0.15.75) Only Sylvans (Jaymo's Kingdoms' heritage, read by reflection like
+ * (0.15.54) not spring's petals, though. (0.15.77) Only Sylvans (Jaymo's Kingdoms' heritage, read by reflection like
  * {@code ZFighterKingdoms}); it was every power user before. Without Kingdoms nobody has it.
  * Drawn on each client, no packets.
  */
