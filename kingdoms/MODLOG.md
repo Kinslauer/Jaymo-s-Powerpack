@@ -4186,7 +4186,15 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   paper) and its sprite and held pose (`textures/item/LICENSE-WeaponMod.txt`).
 - The bombardiers' skins (`tools/gen_pirates.py`) paint the bandolier's sticks in Balkon's red with a grey fuse.
 
-## 0.7.159: no usernames left on show (pack 0.15.79)
+## 0.7.159: Giants rarer, asleep before Borderlands (pack 0.15.79)
+- Andy: "the giants need to be rarer, and they shouldnt activate until after borderlands world tier, the monument will
+  only hum." Monoliths rise a third as often (2% per player in the wild every 2 minutes, about one per 100 minutes)
+  and at least 2400 blocks apart (was 1200).
+- A monolith's Giant rises only for a player at Wildlands or higher, the tier after Borderlands (Andy: "do
+  wildlands"). Anyone below
+  who comes near only hears it hum (a low beacon drone, its element's motes round the crown); no chat text.
+
+## 0.7.160: no usernames left on show (pack 0.15.80)
 - Andy: "usernames should only show up for commands, it still appears in scoreboard and over characters and it
   shouldnt". 0.7.149 only stood in a character name when the one in MCA's creator differed from the username, and the
   creator starts with the username, so most players still showed it on the tab list and over their head.

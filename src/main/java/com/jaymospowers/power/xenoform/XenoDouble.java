@@ -151,7 +151,7 @@ public class XenoDouble extends PathfinderMob {
 		if (target != null && (target == player || target instanceof XenoDouble twin && twin.isDoubleOf(player))) {
 			this.setTarget(null);
 		}
-		// (0.15.79) it goes by the name its owner shows now (a character name given late, a costume put on), never a stale username
+		// (0.15.80) it goes by the name its owner shows now (a character name given late, a costume put on), never a stale username
 		Component name = player.getDisplayName();
 		if (!name.equals(this.getCustomName())) {
 			this.setCustomName(name);

@@ -32,7 +32,7 @@ public final class CharacterNames {
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
 	/**
-	 * (0.7.159) On a player, saved: the name they were given because they kept their username in MCA's creator. Andy:
+	 * (0.7.160) On a player, saved: the name they were given because they kept their username in MCA's creator. Andy:
 	 * "usernames should only show up for commands". Kept, so they are always given the same one.
 	 */
 	static final AttachmentType<String> GIVEN = AttachmentRegistry.create(JaymosKingdoms.id("given_name"),
@@ -61,7 +61,7 @@ public final class CharacterNames {
 	private static void refresh(ServerPlayer player) {
 		String name = picked(player);
 		if (name == null && McaCompat.LOADED && player.level() != null) {
-			// (0.7.159) no name of their own but their username: they get one from MCA's lists (renamed in its editor as usual)
+			// (0.7.160) no name of their own but their username: they get one from MCA's lists (renamed in its editor as usual)
 			String given = player.getAttached(GIVEN);
 			if (given == null) {
 				given = McaBridge.randomName(player);
