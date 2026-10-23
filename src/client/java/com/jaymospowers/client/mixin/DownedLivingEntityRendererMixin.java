@@ -22,6 +22,15 @@ abstract class DownedLivingEntityRendererMixin {
 		DownedPose.extract(entity, state, partialTicks);
 	}
 
+	/** (0.15.142) Whatever it held its arms up for is let go before the model is posed (the armour's posing comes later, off the same state). */
+	@Inject(
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Ljava/lang/Object;)V"))
+	private void jaymospowers$downedCalm(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
+		CameraRenderState camera, CallbackInfo ci) {
+		DownedPose.calm(state);
+	}
+
 	@Inject(
 		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
