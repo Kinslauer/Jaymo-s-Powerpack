@@ -2677,3 +2677,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     arrows (4 a build), javelin, throwing axe, shuriken. New parts: bow limb, bow grip, bowstring, arrow head, arrow
     shaft, fletching; new materials feather, leaves, blaze rod.
   - Compile-checked (0 errors, JEI included); not playtested.
+- **0.15.132, the creative inventory opens again:** Tinkering put its ranged weapons in the creative tab at their crafted
+  yield (4 arrows), and the creative tab only takes stacks of 1, so opening the creative inventory crashed the game. One
+  of each now.

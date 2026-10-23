@@ -216,9 +216,9 @@ public final class Tinkering {
 						PartType.Kind kind = slot.part().kind;
 						materials.add(kind == first ? head : ToolStats.defaultFor(kind));
 					}
-					ItemStack built = ToolStats.build(type, materials);
-					built.setCount(type.ranged.yield());
-					output.accept(built);
+					// (0.15.132) one each: the creative tab only takes stacks of 1 (4 arrows crashed the game on opening
+					// the creative inventory)
+					output.accept(ToolStats.build(type, materials));
 				}
 			}
 			for (PartType part : PartType.values()) {
