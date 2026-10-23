@@ -24,7 +24,6 @@
 		"LeavesJumperMixin",
 		"LeavesPathMixin",
 		"LeavesStateMixin",
-		"LivingEntityDeadAccessor",
 		"MobGoalsAccessor",
 		"MobWeaponDropMixin",
 		"ServerGamePacketListenerImplMixin",

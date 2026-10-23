@@ -2689,3 +2689,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.137, no Minecraft skin under the MCA body:** pack bump for Kingdoms 0.7.178 (Shoulder Surfing's see-through
   close-camera view drew your Minecraft skin under MCA's villager body; MCA's bare body is also hidden under clothes
   that cover it).
+- **0.15.140, respawning after a downed death:** Andy: "Jungxvv just got the same bug." 0.15.130's catch asked vanilla's
+  `dead` flag whether a player had died, but a player's `die` never sets it (`ServerPlayer.die` doesn't call up to
+  `LivingEntity.die`), so every death looked stuck: the blow that killed a downed Jung (a zombie) put him back down with
+  health, the death screen stayed up, and the server turned his Respawn away (it only respawns players at no health)
+  and, as `die` had marked his client unloaded, most likely left him untouchable till a relog (`/kill` did nothing). Now only `Downed.DIED` (set as a player
+  dies, at the end of `die`) says they died; the accessor is gone, and a player alive with `DIED` still on (anyone this
+  caught) has it cleared. Builds; not playtested.
