@@ -1,11 +1,13 @@
 package com.jaymospowers.client.freerun;
 
 import com.jaymospowers.client.PoseBlend;
+import com.jaymospowers.client.power.web.FirstPersonCompat;
 import com.jaymospowers.freerun.FastRun;
 import com.jaymospowers.freerun.Slide;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -59,7 +61,10 @@ public final class RunPose {
 		}
 		boolean slide = Slide.sliding(player);
 		state.setData(SLIDE, slide ? Boolean.TRUE : null);
-		boolean lean = !slide && FastRun.active(player) && !player.isFallFlying() && !player.isSwimming();
+		// (0.15.122) not your own body in first person (First-person Model): leaning from the feet, its back and
+		// shoulders swung up in front of the camera
+		boolean lean = !slide && FastRun.active(player) && !player.isFallFlying() && !player.isSwimming()
+			&& !(player == Minecraft.getInstance().player && FirstPersonCompat.bodyShown());
 		state.setData(LEAN, lean ? Boolean.TRUE : null);
 		LEAN_BLEND.track(player.getId(), lean, 0.0F, LEAN_SPEED);
 	}

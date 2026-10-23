@@ -13,7 +13,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Living Armor moves like a beast. Standing, it looms like a giant: leaning forward at the hip, head thrust forward, the
  * arms hanging heavy and wide, legs apart and bent, twitching now and then.
- * Sprinting, it drops onto all fours and gallops, the arms its front legs. Swelling into the big body it doubles
+ * Sprinting, it drops onto all fours and gallops, the arms its front legs (not your own body in first person: bent
+ * double, its back and front legs swung up in front of the camera; it keeps the standing hunch there). Swelling into the big body it doubles
  * over in pain first, clutching itself and shuddering, then straightens into the hunch. Rearing for a slam in the
  * air (see WebSlam) both fists come up over its head. Everything is set outright from the render state, so applying it twice changes nothing.
  */
@@ -60,7 +61,7 @@ public final class WebFeral {
 			return;
 		}
 		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)
-		float run = tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
+		float run = ownView(avatar.id) ? 0.0F : tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
 		pose(humanoid, avatar, run, slim);
 		WebSuitGrowth.Growth growth = avatar.getData(WebSuitGrowth.KEY);
 		if (growth != null && growth.to() == 2 && growth.from() < 2) {
@@ -242,8 +243,14 @@ public final class WebFeral {
 		if (!WebSymbiote.bulked(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
 			return 0.0F;
 		}
-		float run = WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);
+		float run = ownView(player.getId()) ? 0.0F : WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);
 		return Mth.lerp(run, IDLE_BEND, RUN_BEND);
+	}
+
+	/** Your own body, drawn round the camera in first person (First-person Model): it doesn't drop to the gallop. */
+	private static boolean ownView(int id) {
+		net.minecraft.client.player.LocalPlayer self = net.minecraft.client.Minecraft.getInstance().player;
+		return self != null && id == self.getId() && FirstPersonCompat.bodyShown();
 	}
 
 	/**
