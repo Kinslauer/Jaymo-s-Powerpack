@@ -47,6 +47,15 @@ public final class Standing {
 		PathfinderMob mob = w.mob();
 		Faction f = Factions.get(level.getServer(), w.factionId());
 		Lines lines = f == null || f.fallen() ? null : Rulers.leaderRole(w.role()) ? ruler(level, mob, w, f) : w.role() == Folk.GUARD ? guard(level, mob, w, f) : null;
+		// (0.7.180) a ruler's title, for their nametag once you know their name
+		Component title = lines != null && Rulers.leaderRole(w.role()) ? Rulers.title(w.role(), McaCompat.female(mob)) : null;
+		if (title == null) {
+			if (mob.hasAttached(Introductions.TITLE)) {
+				mob.removeAttached(Introductions.TITLE);
+			}
+		} else if (!title.equals(mob.getAttached(Introductions.TITLE))) {
+			mob.setAttached(Introductions.TITLE, title);
+		}
 		if (lines == null) {
 			if (mob.hasAttached(LINES)) {
 				mob.removeAttached(LINES);

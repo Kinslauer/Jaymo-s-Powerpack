@@ -179,6 +179,8 @@ public final class Rulers {
 			return;
 		}
 		KingdomEvents.audience(player, ruler, faction(ruler));
+		// (0.7.180) the court names who you stand before
+		Introductions.learn(player, ruler);
 		if (role(ruler) == Folk.KING) {
 			Quests.open(player, ruler);
 		}

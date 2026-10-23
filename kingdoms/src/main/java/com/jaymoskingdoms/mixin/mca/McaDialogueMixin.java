@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Hermits;
+import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Recollections;
 import com.jaymoskingdoms.Rulers;
@@ -37,6 +38,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.102) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
  * safe is burned and pulls away, and the villager says so.
  * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) with a villager ruler: as with a folk ruler.
+ * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
+ * nametag shows for you from then on.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -89,6 +92,13 @@ abstract class McaDialogueMixin {
 			// (0.7.138) an audience with a villager ruler
 			villager.getInteractions().stopInteracting();
 			Rulers.audience(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
+			// (0.7.180) asked their name: they say it, and you know it from now on
+			villager.sendChatMessage(Introductions.askName(player, villager), player);
+			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;
 		}

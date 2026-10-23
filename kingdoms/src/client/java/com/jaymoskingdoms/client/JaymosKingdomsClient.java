@@ -28,6 +28,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		// (0.7.180) whose names this client's player knows
+		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
 		// 0.7.7: ships under sail, and the client's part in sailing
