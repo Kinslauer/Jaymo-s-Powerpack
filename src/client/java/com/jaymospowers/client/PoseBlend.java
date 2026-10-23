@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
@@ -256,6 +258,26 @@ public final class PoseBlend {
 			read(h, this.base);
 		}
 
+		/** (0.15.142) A frame over the six parts of a model that isn't a HumanoidModel ({@link #parts}: an illager's). */
+		public Frame(ModelPart[] parts) {
+			for (int i = 0; i < parts.length; i++) {
+				readPart(parts[i], this.base, i * 3);
+			}
+		}
+
+		/**
+		 * (0.15.142) Lays this frame straight onto {@code parts} ({@link #parts}) by {@code w}: no springs, and no bend at
+		 * the hips (a model that isn't a HumanoidModel has no track).
+		 */
+		public void put(ModelPart[] parts, float w) {
+			for (int i = 0; i < parts.length; i++) {
+				ModelPart part = parts[i];
+				part.xRot += (this.off[i * 3] + this.raw[i * 3]) * w;
+				part.yRot += (this.off[i * 3 + 1] + this.raw[i * 3 + 1]) * w;
+				part.zRot += (this.off[i * 3 + 2] + this.raw[i * 3 + 2]) * w;
+			}
+		}
+
 		/** Sets {@code part}'s rotations (radians) outright. */
 		public Frame set(int part, float x, float y, float z) {
 			this.off[part] = x - this.base[part];
@@ -322,6 +344,30 @@ public final class PoseBlend {
 			write(h, this.base);
 			return this;
 		}
+	}
+
+	/** The parts a frame poses, by their names in a model's root, in slot order. */
+	private static final String[] PART_NAMES = {"head", "body", "right_arm", "left_arm", "right_leg", "left_leg"};
+	private static final Map<Model<?>, ModelPart[]> PARTS = new WeakHashMap<>();
+	private static final ModelPart[] NO_PARTS = new ModelPart[0];
+
+	/**
+	 * (0.15.142) A model that isn't a HumanoidModel but is built like one (an illager's): its head, body, arms and legs,
+	 * found by name, for a {@link Frame#Frame(ModelPart[])}. Null if it lacks any of them.
+	 */
+	public static ModelPart @Nullable [] parts(Model<?> model) {
+		ModelPart[] parts = PARTS.computeIfAbsent(model, m -> {
+			ModelPart root = m.root();
+			ModelPart[] found = new ModelPart[PART_NAMES.length];
+			for (int i = 0; i < found.length; i++) {
+				if (!root.hasChild(PART_NAMES[i])) {
+					return NO_PARTS;
+				}
+				found[i] = root.getChild(PART_NAMES[i]);
+			}
+			return found;
+		});
+		return parts.length == 0 ? null : parts;
 	}
 
 	private static void read(HumanoidModel<?> h, float[] into) {
