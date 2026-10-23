@@ -2686,3 +2686,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Tinkers tables' info panel (`tinkering/SidePanel`) now stops at the window's bottom and scrolls with the wheel, with a
   thin scrollbar, and every table screen tells JEI where its side inventory and info panel are (`TableAreas`, through
   `TinkeringJei.registerGuiHandlers`) so JEI lays itself out around them.
+- **0.15.136, no Minecraft skin under the MCA body:** pack bump for Kingdoms 0.7.177 (Shoulder Surfing's see-through
+  close-camera view drew your Minecraft skin under MCA's villager body; MCA's bare body is also hidden under clothes
+  that cover it).

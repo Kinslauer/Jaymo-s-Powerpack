@@ -4330,3 +4330,18 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   get a shift off by day and the evening. Off duty, both join the townsfolk's routines and neighbours, so friendships,
   courting, feuds and marriage go on with them (they had been left out of `Routines.freeOf`).
 - Not ported: the folk archers on posts (MCA's archers stand in). Compile-checked against the 26.3 jars; not yet seen in game.
+
+## 0.7.177: no Minecraft skin under the MCA villager body (pack 0.15.136)
+- Andy: "it looks like the default skins are still being drawn underneath the MCA villager custom and it is causing
+  more clipping issues" (his account's Minecraft skin, seen in Time Flow's over-the-shoulder view).
+- Cause: MCA hides a villager-bodied player's own Minecraft body by giving LivingEntityRenderer.getRenderType no render
+  type. Shoulder Surfing Reloaded gives AvatarRenderer its own getRenderType, and while it fades the player in front of
+  its close camera it returns a see-through render type of the Minecraft skin without asking the method MCA hooks, so
+  the Minecraft body was drawn under MCA's and its sleeves and hat poked out. `McaShoulderSurfingBodyMixin` (after
+  Shoulder Surfing's, only when its method is there) gives an MCA body no render type again.
+- Andy: "MCA should cover the bare body too if that shows". MCA draws its bare skin-coloured body, then the clothes
+  0.0625 of a pixel over it, so from a distance or once an animation moves the copies apart the bare body showed through.
+  `McaSkinCover` hides the bare body's torso, arms and legs wherever the clothes' texture covers them whole (with the
+  jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
+  Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
+- Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
