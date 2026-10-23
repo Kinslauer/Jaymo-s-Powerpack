@@ -216,7 +216,9 @@ public final class EmberKindle {
 
 	/** Emberborn, alive, bare-handed, fed enough. */
 	private static boolean usable(ServerPlayer player) {
+		// (0.15.136) from the palm of the main hand: not with that arm gone
 		return ember(player) && player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty()
+			&& com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.MAIN_ARM)
 			&& (player.getAbilities().instabuild || player.getFoodData().getFoodLevel() > MIN_FOOD);
 	}
 
@@ -298,7 +300,8 @@ public final class EmberKindle {
 			player.causeFoodExhaustion(EXHAUSTION);
 		}
 		Vec3 from = palm(player);
-		Vec3 look = player.getViewVector(1.0F);
+		// (0.15.136) a broken arm can't hold the stream steady
+		Vec3 look = com.jaymospowers.core.wounds.LimbUse.sway(player, com.jaymospowers.core.wounds.LimbUse.MAIN_ARM, player.getViewVector(1.0F));
 		double grown = Math.min(1.0, (now - live.since) / (double)GROW_TICKS);
 		double reach = (START_REACH + (FULL_REACH - START_REACH) * grown) * (chilled ? CHILL_REACH : 1.0);
 		if (wet) {

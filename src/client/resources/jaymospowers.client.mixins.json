@@ -30,6 +30,7 @@
 		"DownedLivingEntityRendererMixin",
 		"DownedModelFeatureRendererMixin",
 		"DownedKeysMixin",
+		"LimbKeysMixin",
 		"CarryCameraMixin",
 		"HeadCamMixin",
 		"CarryFirstPersonMixin",

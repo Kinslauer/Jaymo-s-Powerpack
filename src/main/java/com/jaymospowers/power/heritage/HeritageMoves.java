@@ -187,7 +187,9 @@ public final class HeritageMoves {
 
 	/** Of either blood, alive, bare-handed. */
 	private static boolean usable(ServerPlayer player) {
-		return blood(player) != NONE && player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty();
+		// (0.15.136) raised in the main hand, as Kindle is: not with that arm gone
+		return blood(player) != NONE && player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty()
+			&& com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.MAIN_ARM);
 	}
 
 	private static void stop(ServerPlayer player, Live live) {
