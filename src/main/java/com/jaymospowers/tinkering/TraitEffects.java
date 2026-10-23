@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -69,11 +71,19 @@ public final class TraitEffects {
 	private static boolean sweeping;
 	/** Each war pick holder's charges, and the game time they run out. */
 	private static final Map<UUID, long[]> WAR_CHARGES = new HashMap<>();
+	/** When each player last swung at something while sprinting (game time), for Charge Attack. */
+	private static final Map<UUID, Long> SPRINT_SWINGS = new HashMap<>();
 
 	private TraitEffects() {
 	}
 
 	static void init() {
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!level.isClientSide() && player.isSprinting()) {
+				SPRINT_SWINGS.put(player.getUUID(), level.getGameTime());
+			}
+			return InteractionResult.PASS;
+		});
 		// (0.8.76) Armory weapons level up from hits too
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player
@@ -169,7 +179,9 @@ public final class TraitEffects {
 			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), tempered * TEMPERED_ARMOR_PIERCE);
 		}
 		int charge = stats.level(Trait.CHARGE_ATTACK);
-		if (charge > 0 && attacker.isSprinting() && target.isAlive()) {
+		// a sprinting hit stops the sprint before this runs, so the swing's start is remembered (SPRINT_SWINGS)
+		boolean sprinted = attacker.isSprinting() || SPRINT_SWINGS.getOrDefault(attacker.getUUID(), -1L) == level.getGameTime();
+		if (charge > 0 && sprinted && target.isAlive()) {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
 				: level.damageSources().mobAttack(attacker), charge * CHARGE_ATTACK_DAMAGE);
@@ -288,16 +300,22 @@ public final class TraitEffects {
 				} else {
 					// the area takes what the tool is made for, never a chest or a half-grown crop
 					fits = h >= 0 && h <= hardness + AREA_HARDNESS_SLACK && !state.hasBlockEntity() && held.isCorrectToolForDrops(state)
-						&& (tool.type().mines.stream().anyMatch(state::is) || plants && h == 0.0F)
+						&& (tool.type().mines.stream().anyMatch(state::is) || plants && h == 0.0F && reaped(state))
 						&& (!plants || !ToolActions.crop(state) || ToolActions.matureCrop(state));
 				}
-				if (fits) {
+				// spawn protection and the world border apply to every block of the area, not just the one clicked
+				if (fits && level.mayInteract(player, pos)) {
 					player.gameMode.destroyBlock(pos);
 				}
 			}
 		} finally {
 			sweeping = false;
 		}
+	}
+
+	/** What a harvesting tool's area cuts besides its own blocks: crops, grass and flowers, never torches or redstone. */
+	private static boolean reaped(BlockState state) {
+		return ToolActions.crop(state) || state.is(BlockTags.REPLACEABLE) || state.is(BlockTags.FLOWERS);
 	}
 
 	private static ItemStack head(LivingEntity entity) {

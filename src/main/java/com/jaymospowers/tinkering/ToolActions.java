@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,6 +31,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -41,6 +43,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -123,7 +126,7 @@ public final class ToolActions {
 	 */
 	static boolean harvest(ServerLevel level, ServerPlayer player, ItemStack tool, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
-		if (!matureCrop(state) || ToolStats.isBroken(tool)) {
+		if (!matureCrop(state) || ToolStats.isBroken(tool) || !level.mayInteract(player, pos)) {
 			return false;
 		}
 		List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, tool);
@@ -221,6 +224,10 @@ public final class ToolActions {
 		if (!(target instanceof LivingEntity living)) {
 			return InteractionResult.PASS;
 		}
+		// claim and PvP mods cancel attacks here, as they would a normal swing
+		if (AttackEntityCallback.EVENT.invoker().interact(player, level, InteractionHand.OFF_HAND, living, null) != InteractionResult.PASS) {
+			return InteractionResult.FAIL;
+		}
 		if (!(level instanceof ServerLevel serverLevel)) {
 			return InteractionResult.SUCCESS;
 		}
@@ -312,10 +319,14 @@ public final class ToolActions {
 	/** The entity under the crosshair within {@code reach} blocks, or null. */
 	private static Entity lookedAt(Player player, double reach) {
 		Vec3 eye = player.getEyePosition();
+		// never through a wall: the reach stops at the first block in the way
+		Vec3 end = eye.add(player.getViewVector(1.0F).scale(reach));
+		HitResult wall = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		reach = Math.min(reach, wall.getLocation().distanceTo(eye));
 		Vec3 look = player.getViewVector(1.0F).scale(reach);
 		AABB box = player.getBoundingBox().expandTowards(look).inflate(1.0);
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, eye.add(look), box,
-			entity -> !entity.isSpectator() && entity.isPickable() && entity != player, reach * reach);
+			entity -> !entity.isSpectator() && entity.isPickable() && entity.isAttackable() && entity != player, reach * reach);
 		return hit == null ? null : hit.getEntity();
 	}
 }
