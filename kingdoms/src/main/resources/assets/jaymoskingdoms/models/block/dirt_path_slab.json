@@ -1,7 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "minecraft:block/dirt"
+    "particle": "#dirt",
+    "dirt": "minecraft:block/dirt",
+    "top": "minecraft:block/dirt_path_top",
+    "side": "minecraft:block/dirt_path_side"
   },
   "elements": [
     {
@@ -23,7 +26,7 @@
             16,
             16
           ],
-          "texture": "minecraft:block/dirt",
+          "texture": "#dirt",
           "cullface": "down"
         },
         "up": {
@@ -33,7 +36,7 @@
             16,
             16
           ],
-          "texture": "minecraft:block/dirt_path_top"
+          "texture": "#top"
         },
         "north": {
           "uv": [
@@ -42,7 +45,7 @@
             16,
             8
           ],
-          "texture": "minecraft:block/dirt_path_side",
+          "texture": "#side",
           "cullface": "north"
         },
         "south": {
@@ -52,7 +55,7 @@
             16,
             8
           ],
-          "texture": "minecraft:block/dirt_path_side",
+          "texture": "#side",
           "cullface": "south"
         },
         "west": {
@@ -62,7 +65,7 @@
             16,
             8
           ],
-          "texture": "minecraft:block/dirt_path_side",
+          "texture": "#side",
           "cullface": "west"
         },
         "east": {
@@ -72,7 +75,7 @@
             16,
             8
           ],
-          "texture": "minecraft:block/dirt_path_side",
+          "texture": "#side",
           "cullface": "east"
         }
       }

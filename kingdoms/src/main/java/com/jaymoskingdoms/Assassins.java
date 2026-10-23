@@ -226,6 +226,15 @@ final class Assassins {
 				playerDied(level, player);
 			}
 		});
+		// (0.7.175) a ruler crowned from the townsfolk is cured and warned as a folk ruler was (a cure takes the click;
+		// a warning leaves MCA's menu to open)
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer p) || entity instanceof Folk
+				|| !(entity instanceof PathfinderMob ruler) || !Rulers.is(ruler)) {
+				return net.minecraft.world.InteractionResult.PASS;
+			}
+			return ruler(p, ruler, p.getItemInHand(hand)) ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS;
+		});
 	}
 
 	static boolean is(Entity e) {
@@ -635,7 +644,8 @@ final class Assassins {
 		a.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		a.getLookControl().setLookAt(victim, 30.0F, 30.0F);
 		p.struckAt = victim.position();
-		if (victim instanceof Folk ruler) {
+		if (victim instanceof PathfinderMob ruler && Rulers.is(ruler)) {
+			// (0.7.175) a folk ruler, or a villager crowned
 			Faction f = Factions.get(level.getServer(), p.contract.realm());
 			boolean parried = p.contract.forewarned() || Tempers.of(f) == Tempers.Temper.PARANOID && level.getRandom().nextFloat() < PARANOID_PARRY;
 			callGuards(level, ruler, a);
@@ -643,7 +653,7 @@ final class Assassins {
 				level.playSound(null, ruler.blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.HOSTILE, 1.0F, 1.0F);
 				Speech.say(level, ruler, Component.translatable("assassin.jaymoskingdoms.parried.says"), Speech.RED, WITNESS_RANGE);
 				witnesses(level, ruler, Component.translatable("assassin.jaymoskingdoms.parried", ruler.getDisplayName()).withStyle(ChatFormatting.GOLD));
-				ruler.setTarget(a);
+				defend(ruler, a);
 				flee(level, a, p, now);
 				return;
 			}
@@ -655,7 +665,7 @@ final class Assassins {
 			level.playSound(null, ruler.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.HOSTILE, 1.2F, 0.7F);
 			level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, ruler.getX(), ruler.getY() + 1.2, ruler.getZ(), 8, 0.3, 0.3, 0.3, 0.1);
 			p.venom = VENOM_TICKS;
-			ruler.setTarget(a);
+			defend(ruler, a);
 			witnesses(level, ruler, Component.translatable("assassin.jaymoskingdoms.strikes", ruler.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
 			witnesses(level, ruler, Component.translatable("assassin.jaymoskingdoms.poisoned", ruler.getDisplayName()).withStyle(ChatFormatting.RED));
 		} else if (victim instanceof ServerPlayer player) {
@@ -685,11 +695,19 @@ final class Assassins {
 		level.playSound(null, a.blockPosition(), SoundEvents.SPLASH_POTION_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
 	}
 
-	/** The ruler's guards come running. */
-	private static void callGuards(ServerLevel level, Folk ruler, Folk a) {
-		for (Folk g : level.getEntitiesOfClass(Folk.class, ruler.getBoundingBox().inflate(GUARD_CALL),
-			g -> g.isAlive() && g != ruler && g.combatant() && g.factionId() == ruler.factionId())) {
-			g.setTarget(a);
+	/** A folk ruler fights back; (0.7.175) a villager crowned runs, as villagers do ({@link Rulers#step}). */
+	private static void defend(PathfinderMob ruler, Folk a) {
+		if (ruler instanceof Folk) {
+			ruler.setTarget(a);
+		}
+	}
+
+	/** The ruler's guards come running (folk, and (0.7.175) MCA guards). */
+	private static void callGuards(ServerLevel level, PathfinderMob ruler, Folk a) {
+		int faction = Rulers.faction(ruler);
+		for (Worker g : Workers.near(level, ruler.getBoundingBox().inflate(GUARD_CALL),
+			g -> g.isAlive() && g.mob() != ruler && g.factionId() == faction && (g instanceof Folk folk ? folk.combatant() : g.role() == Folk.GUARD))) {
+			Rulers.charge(g.mob(), a);
 		}
 	}
 
@@ -718,7 +736,7 @@ final class Assassins {
 		if (p.venom <= 0 || p.done) {
 			return;
 		}
-		if (!(level.getEntity(p.victim) instanceof Folk ruler) || !ruler.isAlive()) {
+		if (!(level.getEntity(p.victim) instanceof PathfinderMob ruler) || !ruler.isAlive()) {
 			// (out of reach, or dead already: it's over)
 			p.venom = 0;
 			settle(level, p);
@@ -768,7 +786,7 @@ final class Assassins {
 		LINGERING.remove(p);
 		if (p.contract.realm() >= 0 && p.stage != Stage.STALK) {
 			Faction f = Factions.get(level.getServer(), p.contract.realm());
-			if (f != null && level.getEntity(p.victim) instanceof Folk ruler && ruler.isAlive()) {
+			if (f != null && level.getEntity(p.victim) instanceof PathfinderMob ruler && ruler.isAlive()) {
 				KingdomEvents.announce(level.getServer(), Component.translatable("assassin.jaymoskingdoms.news.survived", ruler.getDisplayName(), f.name())
 					.withStyle(ChatFormatting.YELLOW));
 			}
@@ -798,13 +816,20 @@ final class Assassins {
 		if (!folk.leader()) {
 			return false;
 		}
+		return ruler(player, folk, held);
+	}
+
+	/** {@code player} right-clicks ruler {@code folk} (folk, or (0.7.175) a villager crowned): cured of a poison, or warned. */
+	private static boolean ruler(ServerPlayer player, PathfinderMob folk, ItemStack held) {
+		ServerLevel level = (ServerLevel)player.level();
+		MinecraftServer server = level.getServer();
 		Plot p = plotOn(folk.getUUID());
 		if (p != null && p.venom > 0 && (held.is(Items.MILK_BUCKET) || held.is(Items.HONEY_BOTTLE) || held.is(Items.GOLDEN_APPLE)
 			|| held.is(Items.ENCHANTED_GOLDEN_APPLE))) {
 			cure(level, player, folk, p, held);
 			return true;
 		}
-		Faction f = Factions.get(server, folk.factionId());
+		Faction f = Factions.get(server, Rulers.faction(folk));
 		if (f == null || f.leader().isEmpty() || !f.leader().get().equals(folk.getUUID())) {
 			return false;
 		}
@@ -819,7 +844,7 @@ final class Assassins {
 		return false;
 	}
 
-	private static void cure(ServerLevel level, ServerPlayer player, Folk ruler, Plot p, ItemStack held) {
+	private static void cure(ServerLevel level, ServerPlayer player, PathfinderMob ruler, Plot p, ItemStack held) {
 		if (!player.isCreative()) {
 			if (held.is(Items.MILK_BUCKET)) {
 				player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
@@ -836,7 +861,7 @@ final class Assassins {
 		ruler.heal(ruler.getMaxHealth() * 0.1F);
 		level.playSound(null, ruler.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 1.0F, 1.0F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, ruler.getX(), ruler.getY() + 1.6, ruler.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
-		Faction f = Factions.get(level.getServer(), ruler.factionId());
+		Faction f = Factions.get(level.getServer(), Rulers.faction(ruler));
 		if (f != null) {
 			Reputation.change(player, f, REP_CURE);
 			int reward = (int)Math.min(CURE_REWARD, f.treasury());

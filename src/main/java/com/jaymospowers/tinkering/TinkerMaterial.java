@@ -45,7 +45,11 @@ public enum TinkerMaterial {
 	STEEL("steel", Stats.STEEL, Trait.TEMPERED, true),
 	LEATHER("leather", null, Trait.TANNED),
 	STRING("string", null, Trait.STRINGY),
-	VINE("vine", null, Trait.SOLAR_POWERED);
+	VINE("vine", null, Trait.SOLAR_POWERED),
+	// (0.15.x) arrow parts only: fletching (feather, leaves) and a blaze rod shaft; they have no head, handle or binding stats
+	FEATHER("feather", null, Trait.AERODYNAMIC),
+	LEAVES("leaves", null, Trait.SOLAR_POWERED),
+	BLAZE_ROD("blaze_rod", null, Trait.SEARING);
 
 	/** Mining tiers, weakest first: what each can't harvest. */
 	public enum Tier {
@@ -84,6 +88,35 @@ public enum TinkerMaterial {
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
 	}
 
+	/** (0.15.x) A bow limb's stats (Tinkers'): durability, and draw speed, arrow velocity and accuracy it adds (0.1 = +10%). */
+	public record Limb(int durability, float drawSpeed, float velocity, float accuracy) {
+	}
+
+	/** (0.15.x) A bow grip's stats: durability share, accuracy added, and melee damage added (a bonk with the bow). */
+	public record Grip(float durability, float accuracy, float meleeDamage) {
+	}
+
+	private static final java.util.IdentityHashMap<Stats, Limb> LIMBS = new java.util.IdentityHashMap<>();
+	private static final java.util.IdentityHashMap<Stats, Grip> GRIPS = new java.util.IdentityHashMap<>();
+
+	static {
+		limb(Stats.WOOD, new Limb(60, 0.0F, 0.0F, 0.0F), new Grip(0.0F, 0.0F, 0.0F));
+		limb(Stats.BONE, new Limb(100, 0.05F, -0.05F, 0.05F), new Grip(-0.25F, 0.05F, 1.25F));
+		limb(Stats.COPPER, new Limb(210, -0.1F, 0.05F, 0.0F), new Grip(-0.2F, 0.0F, 0.5F));
+		limb(Stats.IRON, new Limb(250, -0.2F, 0.1F, 0.0F), new Grip(0.1F, 0.0F, 2.0F));
+		limb(Stats.SILVER, new Limb(300, -0.05F, 0.0F, 0.1F), new Grip(-0.1F, -0.05F, 2.25F));
+		limb(Stats.ROSE_GOLD, new Limb(175, 0.15F, -0.25F, 0.15F), new Grip(-0.3F, 0.25F, 1.0F));
+		limb(Stats.AMETHYST_BRONZE, new Limb(720, -0.15F, 0.15F, -0.05F), new Grip(0.0F, 0.1F, 1.5F));
+		limb(Stats.PIG_IRON, new Limb(580, 0.0F, 0.0F, 0.1F), new Grip(0.1F, -0.15F, 2.5F));
+		limb(Stats.SLIMESTEEL, new Limb(1040, -0.05F, -0.05F, 0.15F), new Grip(0.2F, -0.1F, 2.5F));
+		limb(Stats.STEEL, new Limb(775, -0.2F, 0.2F, -0.1F), new Grip(0.05F, -0.05F, 2.75F));
+	}
+
+	private static void limb(Stats family, Limb limb, Grip grip) {
+		LIMBS.put(family, limb);
+		GRIPS.put(family, grip);
+	}
+
 	/** Material units per item: a plank or ingot is 1, a log 4, a block of metal 9. */
 	private static final Map<Item, TinkerMaterial> ITEMS = new LinkedHashMap<>();
 	private static final Map<Item, Integer> UNITS = new LinkedHashMap<>();
@@ -107,6 +140,8 @@ public enum TinkerMaterial {
 		units(LEATHER, 1, Items.LEATHER);
 		units(STRING, 1, Items.STRING);
 		units(VINE, 1, Items.VINE);
+		units(FEATHER, 1, Items.FEATHER);
+		units(BLAZE_ROD, 1, Items.BLAZE_ROD);
 	}
 
 	public final String id;
@@ -138,9 +173,31 @@ public enum TinkerMaterial {
 		}
 	}
 
+	/** (0.15.x) Its bow limb stats, or null when it makes no limb (stone, flint, seared stone and the like). */
+	public @Nullable Limb limb() {
+		return stats == null ? null : LIMBS.get(stats);
+	}
+
+	public @Nullable Grip grip() {
+		return stats == null ? null : GRIPS.get(stats);
+	}
+
+	/** (0.15.x) Arrow velocity a shaft of this adds (a share: 0.05 = +5%). */
+	public float shaftVelocity() {
+		return this == BONE ? 0.05F : this == BLAZE_ROD ? 0.1F : 0.0F;
+	}
+
 	/** Whether this material can make a part of that kind. */
 	public boolean makes(PartType.Kind kind) {
-		return stats != null || kind == PartType.Kind.BINDING;
+		return switch (kind) {
+			case HEAD, HANDLE, ARROW_HEAD -> stats != null;
+			case BINDING -> stats != null || this == LEATHER || this == STRING || this == VINE;
+			case LIMB -> limb() != null;
+			case GRIP -> grip() != null;
+			case BOWSTRING -> this == STRING || this == VINE || this == LEATHER;
+			case ARROW_SHAFT -> this == WOOD || this == WOOD_CRIMSON || this == WOOD_WARPED || this == BONE || this == BLAZE_ROD;
+			case FLETCHING -> this == FEATHER || this == LEAVES;
+		};
 	}
 
 	public Component displayName() {
@@ -153,7 +210,7 @@ public enum TinkerMaterial {
 		if (listed != null) {
 			return listed;
 		}
-		return stack.is(ItemTags.PLANKS) || stack.is(ItemTags.LOGS) ? WOOD : null;
+		return stack.is(ItemTags.PLANKS) || stack.is(ItemTags.LOGS) ? WOOD : stack.is(ItemTags.LEAVES) ? LEAVES : null;
 	}
 
 	/** How many material units one of this item is worth (0: not a material). */
@@ -162,7 +219,7 @@ public enum TinkerMaterial {
 		if (listed != null) {
 			return listed;
 		}
-		return stack.is(ItemTags.PLANKS) ? 1 : stack.is(ItemTags.LOGS) ? 4 : 0;
+		return stack.is(ItemTags.PLANKS) || stack.is(ItemTags.LEAVES) ? 1 : stack.is(ItemTags.LOGS) ? 4 : 0;
 	}
 
 	public static @Nullable TinkerMaterial byId(String id) {

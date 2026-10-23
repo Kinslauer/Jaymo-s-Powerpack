@@ -149,12 +149,12 @@ public enum Modifier {
 
 	/** (0.8.76) What the Tool Station gives modifiers: tinker tools and Armory weapons. */
 	public static boolean takes(ItemStack stack) {
-		return stack.getItem() instanceof TinkerToolItem || Armory.isWeapon(stack);
+		return stack.getItem() instanceof TinkerTool tool ? tool.type().style.durable() : Armory.isWeapon(stack);
 	}
 
 	/** Why this modifier can't go on this tool now, or null if it can. */
 	public static @Nullable Component cannotAdd(ItemStack tool, Modifier modifier) {
-		if (!(tool.getItem() instanceof TinkerToolItem) && !WEAPON_MODIFIERS.contains(modifier)) {
+		if (!(tool.getItem() instanceof TinkerTool) && !WEAPON_MODIFIERS.contains(modifier)) {
 			return Component.translatable("gui.jaymospowers.tool_station.weapon", modifier.name(1));
 		}
 		Map<Modifier, Integer> has = of(tool);
@@ -191,9 +191,11 @@ public enum Modifier {
 		}
 		HolderLookup.RegistryLookup<Enchantment> lookup = registries.lookupOrThrow(Registries.ENCHANTMENT);
 		ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
-		boolean sword = !(stack.getItem() instanceof TinkerToolItem tool) || tool.type.style == ToolType.Style.SWORD;
+		ToolType.Style style = stack.getItem() instanceof TinkerTool tool ? tool.type().style : ToolType.Style.SWORD;
+		boolean sword = style != ToolType.Style.TOOL;
 		of(stack).forEach((modifier, level) -> {
-			ResourceKey<Enchantment> key = sword && modifier.swordEnchantment != null ? modifier.swordEnchantment : modifier.enchantment;
+			ResourceKey<Enchantment> key = style.shoots() ? rangedEnchantment(style, modifier)
+				: sword && modifier.swordEnchantment != null ? modifier.swordEnchantment : modifier.enchantment;
 			if (key != null) {
 				lookup.get(key).ifPresent(holder -> enchantments.set(holder, Math.max(level, enchantments.getLevel(holder))));
 			}
@@ -203,6 +205,19 @@ public enum Modifier {
 			stack.set(DataComponents.DAMAGE_RESISTANT, new DamageResistant(registries.lookupOrThrow(Registries.DAMAGE_TYPE)
 				.getOrThrow(DamageTypeTags.IS_FIRE)));
 		}
+	}
+
+	/** (0.15.x) What a modifier is on a bow (Power, Punch, Flame) or crossbow (Quick Charge, Piercing, Punch's knockback is a bow's). */
+	private static @Nullable ResourceKey<Enchantment> rangedEnchantment(ToolType.Style style, Modifier modifier) {
+		boolean bow = style == ToolType.Style.BOW;
+		return switch (modifier) {
+			case HASTE -> bow ? null : Enchantments.QUICK_CHARGE;
+			case SHARPNESS -> bow ? Enchantments.POWER : Enchantments.PIERCING;
+			case FIERY -> bow ? Enchantments.FLAME : null;
+			case KNOCKBACK -> bow ? Enchantments.PUNCH : null;
+			case REINFORCED -> Enchantments.UNBREAKING;
+			default -> null;
+		};
 	}
 
 	// --- stat upgrades, used by ToolStats ---

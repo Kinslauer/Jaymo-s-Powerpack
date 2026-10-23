@@ -26,8 +26,11 @@ public class CastItem extends Item {
 		INGOT("ingot", null), NUGGET("nugget", null),
 		PICK_HEAD(PartType.PICK_HEAD), SMALL_AXE_HEAD(PartType.SMALL_AXE_HEAD), ADZE_HEAD(PartType.ADZE_HEAD),
 		SMALL_BLADE(PartType.SMALL_BLADE), HAMMER_HEAD(PartType.HAMMER_HEAD), BROAD_BLADE(PartType.BROAD_BLADE),
+		BROAD_AXE_HEAD(PartType.BROAD_AXE_HEAD), TOUGH_BINDING(PartType.TOUGH_BINDING),
 		LARGE_PLATE(PartType.LARGE_PLATE), TOOL_HANDLE(PartType.TOOL_HANDLE), TOUGH_HANDLE(PartType.TOUGH_HANDLE),
 		TOOL_BINDING(PartType.TOOL_BINDING), CROSSGUARD(PartType.CROSSGUARD),
+		/** (0.15.x) The bow limb and grip (bowstrings and arrow parts have no cast: Part Builder only). */
+		BOW_LIMB(PartType.BOW_LIMB), BOW_GRIP(PartType.BOW_GRIP),
 		/** (0.11.77) A weapon head of the kind it was made from ({@link WeaponParts}). */
 		WEAPON("weapon", null);
 

@@ -1,0 +1,13 @@
+{
+  "block.jaymospowers.tool_forge": "Tool Forge",
+  "block.jaymospowers.crafting_station": "Crafting Station",
+  "block.jaymospowers.pattern_chest": "Pattern Chest",
+  "block.jaymospowers.part_chest": "Part Chest",
+  "container.jaymospowers.tool_forge": "Tool Forge",
+  "container.jaymospowers.crafting_station": "Crafting Station",
+  "container.jaymospowers.pattern_chest": "Pattern Chest",
+  "container.jaymospowers.part_chest": "Part Chest",
+  "gui.jaymospowers.tables.side": "Nearby chest",
+  "gui.jaymospowers.tool_station.needs_forge": "Needs a Tool Forge",
+  "gui.jaymospowers.tool_station.forge_hint": "Tools of more than 3 parts are made at a Tool Forge"
+}

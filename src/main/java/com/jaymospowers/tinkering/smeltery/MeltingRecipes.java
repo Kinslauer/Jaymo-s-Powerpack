@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.WeaponPartItem;
 import com.jaymospowers.tinkering.WeaponParts;
@@ -246,7 +246,7 @@ public final class MeltingRecipes {
 	/** Whether this item may get its melting from recipes (it doesn't already melt, and isn't a base metal form). */
 	private static boolean derivable(Item item, Map<Item, Map<Molten, Integer>> fixed, Map<Item, Map<Molten, Integer>> builtIn) {
 		if (fixed.containsKey(item) || builtIn(item, builtIn) != null || item instanceof ToolPartItem
-			|| item instanceof WeaponPartItem || item instanceof TinkerToolItem) {
+			|| item instanceof WeaponPartItem || item instanceof TinkerTool) {
 			return false;
 		}
 		String path = BuiltInRegistries.ITEM.getKey(item).getPath();
@@ -365,7 +365,7 @@ public final class MeltingRecipes {
 		int gaps = 0;
 		for (Item item : BuiltInRegistries.ITEM) {
 			Identifier id = BuiltInRegistries.ITEM.getKey(item);
-			if (item instanceof ToolPartItem || item instanceof WeaponPartItem || item instanceof TinkerToolItem
+			if (item instanceof ToolPartItem || item instanceof WeaponPartItem || item instanceof TinkerTool
 				|| METAL_WORDS.stream().noneMatch(id.getPath()::contains) || Melting.of(new ItemStack(item)) != null) {
 				continue;
 			}

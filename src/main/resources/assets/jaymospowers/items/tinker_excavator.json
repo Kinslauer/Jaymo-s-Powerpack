@@ -1,0 +1,1447 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": [
+          "gui",
+          "ground",
+          "fixed"
+        ],
+        "model": {
+          "type": "minecraft:composite",
+          "models": [
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 1,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_wood_warped"
+                  }
+                },
+                {
+                  "when": "rock_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rock_stone"
+                  }
+                },
+                {
+                  "when": "rock_granite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rock_granite"
+                  }
+                },
+                {
+                  "when": "rock_diorite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rock_diorite"
+                  }
+                },
+                {
+                  "when": "rock_blackstone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rock_blackstone"
+                  }
+                },
+                {
+                  "when": "flint",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_flint"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_bone"
+                  }
+                },
+                {
+                  "when": "seared_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_seared_stone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_silver"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_slimesteel"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/handle_steel"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/handle_wood"
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "on_true": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_broken_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/head_broken_wood"
+                }
+              },
+              "on_false": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_bone"
+                    }
+                  },
+                  {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_seared_stone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/excavator/head_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/head_wood"
+                }
+              }
+            },
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 3,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_wood_warped"
+                  }
+                },
+                {
+                  "when": "rock_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rock_stone"
+                  }
+                },
+                {
+                  "when": "rock_granite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rock_granite"
+                  }
+                },
+                {
+                  "when": "rock_diorite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rock_diorite"
+                  }
+                },
+                {
+                  "when": "rock_blackstone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rock_blackstone"
+                  }
+                },
+                {
+                  "when": "flint",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_flint"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_bone"
+                  }
+                },
+                {
+                  "when": "seared_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_seared_stone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_silver"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_slimesteel"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/grip_steel"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/grip_wood"
+              }
+            },
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 2,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_wood_warped"
+                  }
+                },
+                {
+                  "when": "rock_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rock_stone"
+                  }
+                },
+                {
+                  "when": "rock_granite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rock_granite"
+                  }
+                },
+                {
+                  "when": "rock_diorite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rock_diorite"
+                  }
+                },
+                {
+                  "when": "rock_blackstone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rock_blackstone"
+                  }
+                },
+                {
+                  "when": "flint",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_flint"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_bone"
+                  }
+                },
+                {
+                  "when": "seared_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_seared_stone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_silver"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_slimesteel"
+                  }
+                },
+                {
+                  "when": "leather",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_leather"
+                  }
+                },
+                {
+                  "when": "string",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_string"
+                  }
+                },
+                {
+                  "when": "vine",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_vine"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/excavator/binding_steel"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/binding_wood"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:composite",
+      "models": [
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/handle_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/excavator/large/handle_wood"
+          }
+        },
+        {
+          "type": "minecraft:condition",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "on_true": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_broken_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/excavator/large/head_broken_wood"
+            }
+          },
+          "on_false": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_bone"
+                }
+              },
+              {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_seared_stone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_silver"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_slimesteel"
+                }
+              },
+              {
+                "when": "steel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/excavator/large/head_steel"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/excavator/large/head_wood"
+            }
+          }
+        },
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 3,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/grip_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/excavator/large/grip_wood"
+          }
+        },
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 2,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_slimesteel"
+              }
+            },
+            {
+              "when": "leather",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_leather"
+              }
+            },
+            {
+              "when": "string",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_string"
+              }
+            },
+            {
+              "when": "vine",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_vine"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/excavator/large/binding_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/excavator/large/binding_wood"
+          }
+        }
+      ]
+    }
+  }
+}

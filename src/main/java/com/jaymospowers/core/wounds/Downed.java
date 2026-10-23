@@ -6,6 +6,7 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.mixin.LivingEntityDeadAccessor;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.HashMap;
@@ -151,6 +152,12 @@ public final class Downed {
 	 */
 	public static final AttachmentType<Long> KNOCKED = AttachmentRegistry.create(JaymosPowers.id("downed_knocked"),
 		builder -> builder.persistent(Codec.LONG));
+	/**
+	 * (0.15.130) A player who has died and not yet respawned (set as they die; the body that respawns starts without it).
+	 * Saved, so one who quits on the death screen isn't taken for one stuck at no health ({@link #limbo}) when they're back.
+	 */
+	static final AttachmentType<Boolean> DIED = AttachmentRegistry.create(JaymosPowers.id("downed_died"),
+		builder -> builder.persistent(Codec.BOOL));
 
 	/** A downed player's slow crawl. */
 	static final Identifier SLOW_ID = JaymosPowers.id("downed_slow");
@@ -266,6 +273,7 @@ public final class Downed {
 		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
 		Powers.addSilencer(Downed::isDowned);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			limbo(server);
 			players(server);
 			revives(server);
 		});
@@ -275,6 +283,11 @@ public final class Downed {
 				forget(newPlayer);
 			} else if (!isDowned(newPlayer)) {
 				newPlayer.removeTag(DOWNED_TAG);
+			}
+		});
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer) {
+				entity.setAttached(DIED, true);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -725,6 +738,43 @@ public final class Downed {
 			player.sendOverlayMessage(Component.translatable(out ? "message.jaymospowers.downed.give_up_out" : "message.jaymospowers.downed.give_up", bar)
 				.withStyle(held > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
 		}
+	}
+
+	/**
+	 * (0.15.130) A player out of health who never died: something turned their death away and gave no health back (Fabric
+	 * leaves it at none), and a body at no health can't be hurt, so giving up and {@code /kill} pass it by and they lie
+	 * there for good, through a relog too. Andy (2026-10-22): Jung, after a meteor. Caught as the blow lands
+	 * ({@code DownedLimboMixin}) or, for any other way in (a save loaded at none), here each tick.
+	 */
+	private static void limbo(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.getHealth() <= 0.0F && !player.isSpectator() && !((LivingEntityDeadAccessor) player).jaymospowers$dead()
+				&& !player.hasAttached(DIED)) {
+				limbo(player.level(), player, player.getLastDamageSource());
+			}
+		}
+	}
+
+	/**
+	 * (0.15.130) {@code entity} is out of health but never died ({@link #limbo(MinecraftServer)}): a player who could go down
+	 * and wasn't goes down now (only straight after the blow, before their body starts to fall); anyone else gets the
+	 * death they were owed, death screen and all.
+	 */
+	public static void limbo(ServerLevel level, LivingEntity entity, @Nullable DamageSource source) {
+		if (!(entity instanceof ServerPlayer player) || player.isSpectator()) {
+			return;
+		}
+		DamageSource cause = source != null ? source : FELLED_BY.getOrDefault(player, level.damageSources().generic());
+		boolean down = !isDowned(player) && downable(player) && spared(player, cause) && player.deathTime == 0 && !player.isRemoved();
+		// (so the next one can be traced: whatever turned this death away left it at none)
+		JaymosPowers.LOGGER.warn("{} was left at no health without dying (hit by {}, downed: {}); {}", player.getScoreboardName(),
+			cause.getMsgId(), isDowned(player), down ? "putting them down" : "finishing the death");
+		if (down) {
+			goDown(level, player, cause, false);
+			return;
+		}
+		forget(player);
+		player.die(cause);
 	}
 
 	// ---- bringing one round -----------------------------------------------------------------------------------------------

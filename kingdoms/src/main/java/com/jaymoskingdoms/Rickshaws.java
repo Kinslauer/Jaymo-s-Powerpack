@@ -309,7 +309,7 @@ public final class Rickshaws {
 				return;
 			}
 		}
-		if (aboard != null && !(aboard instanceof Folk ruler && ruler.leader())) {
+		if (aboard != null && !Rulers.is(aboard)) {
 			setDown(level, rickshaw, aboard);
 		}
 		if (!Royals.daytime(level)) {
@@ -342,7 +342,7 @@ public final class Rickshaws {
 			return;
 		}
 		// the ruler, on his round with no carriage of his own
-		Folk ruler = rulerToFetch(level, f, rickshaw);
+		PathfinderMob ruler = rulerToFetch(level, f, rickshaw);
 		if (ruler != null) {
 			start(job, RULER, null, now);
 			job.other = ruler.getUUID();
@@ -363,7 +363,7 @@ public final class Rickshaws {
 	/** Ends whatever it was doing: anyone aboard set down, back to the rank. */
 	private static void end(ServerLevel level, Faction f, Worker puller, Job job, Wagon rickshaw, long now) {
 		for (Entity e : List.copyOf(rickshaw.getPassengers())) {
-			if (!(e instanceof Folk ruler && ruler.leader())) {
+			if (!Rulers.is(e)) {
 				setDown(level, rickshaw, e);
 			}
 		}
@@ -561,12 +561,13 @@ public final class Rickshaws {
 	// ---- the ruler --------------------------------------------------------------------------------------------------
 
 	/** Its ruler, out on his round on foot with no carriage of his own and nobody fetching him, if he's near. */
-	private static @Nullable Folk rulerToFetch(ServerLevel level, Faction f, Wagon rickshaw) {
+	private static @Nullable PathfinderMob rulerToFetch(ServerLevel level, Faction f, Wagon rickshaw) {
 		if (!f.type().isRealm() || f.leader().isEmpty() || Carriages.of(level, f) != null || !Royals.daytime(level)) {
 			return null;
 		}
 		Entity e = level.getEntity(f.leader().get());
-		if (!(e instanceof Folk ruler) || !ruler.leader() || ruler.isPassenger() || ruler.getTarget() != null
+		// (0.7.175) a folk ruler, or a villager crowned
+		if (!(e instanceof PathfinderMob ruler) || !Rulers.is(ruler) || ruler.isPassenger() || Rulers.target(ruler) != null
 			|| !Royals.out(ruler) || ruler.distanceTo(rickshaw) > RULER_RANGE) {
 			return null;
 		}
@@ -580,7 +581,7 @@ public final class Rickshaws {
 
 	private static void ruler(ServerLevel level, Faction f, Worker puller, Job job, Wagon rickshaw, long now) {
 		Entity e = job.other == null ? null : level.getEntity(job.other);
-		if (!(e instanceof Folk ruler) || !ruler.isAlive() || !Royals.daytime(level)) {
+		if (!(e instanceof PathfinderMob ruler) || !ruler.isAlive() || !Royals.daytime(level)) {
 			start(job, rickshaw.isVehicle() ? WAIT : RETURN, null, now);
 			return;
 		}
@@ -600,7 +601,7 @@ public final class Rickshaws {
 	}
 
 	/** The rickshaw waiting by {@code ruler} for him to get in, or null. */
-	static @Nullable Wagon waitingFor(ServerLevel level, Folk ruler) {
+	static @Nullable Wagon waitingFor(ServerLevel level, PathfinderMob ruler) {
 		for (Job job : JOBS.values()) {
 			if (job.phase == RULER && ruler.getUUID().equals(job.other) && job.rickshaw != null && !job.rickshaw.isRemoved()
 				&& !job.rickshaw.isVehicle() && job.rickshaw.distanceTo(ruler) <= Carriages.BOARD_REACH) {

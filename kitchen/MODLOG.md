@@ -978,3 +978,20 @@ Batch 3 of the BWM port (MIT, our own code).
   from `CorpseEntity#hurtServer`). Crushing here is the same as for a kill: damage in `jaymoskitchen:crushes` (a
   falling anvil or block, a mace's smash), or an `addOnHit` hook tagging the corpse `jaymoskitchen.crushed` (Jaymo's
   Powers: a heavy blunt blow). Other blows still only knock it about.
+
+### 0.5.21: blown apart (pack 0.15.128)
+- Andy: "creepers should not leave corpses when they explode, and other explosions should blast other corpses apart
+  into a mess." A corpse caught in a blast of 12 damage or more (`Gibs.SHRED_DAMAGE`, as before) is blown apart now
+  instead of just vanishing: 5-8 chunks of it (more for a big body, fewer for a small one, at most 14) fly out away
+  from the blast, tumble, lie about for 20-45 s and sink away (`Gib`, built on `SpiderLeg`). Its loot drops loose and
+  1-2 rotten flesh with it, as before. A bare skeleton's bones still just scatter.
+- A creature killed outright by a blast that strong is blown apart the same way instead of leaving a corpse, its gear
+  and loot loose (`Gibs.blownApart`, from `LivingEntityMixin#leaveCorpse`).
+- Creepers: one that goes off is tagged `jaymoskitchen.no_corpse` and throws 1-4 chunks of itself (`CreeperMixin`, at
+  the end of `explodeCreeper`); one killed by another blast, however weak, is blown apart too. No creeper leaves a body
+  to a blast.
+- A chunk is one box of the creature's own model, cut loose and drawn alone in the skin its renderer picks (a head, a
+  leg, a slab of torso; boxes over 9 px are drawn shrunk), chosen by the chunk's id (`client/corpse/GibRenderer`). A
+  body the client can't rebuild (a player's) throws lumps of meat (`textures/entity/gib.png`, painted new).
+- Blood: `Gibs.addOnBurst` tells Jaymo's Powers of each body blown apart (it bursts its blood); without Powers a spray
+  of red block particles. Tuning at the top of `Gibs` and `GibRenderer`.

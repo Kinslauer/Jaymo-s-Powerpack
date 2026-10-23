@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "p": "jaymospowers:pattern",
+    "b": "jaymospowers:seared_brick",
+    "C": "minecraft:chest",
+    "B": "jaymospowers:seared_bricks"
+  },
+  "pattern": [
+    " p ",
+    "bCb",
+    "bBb"
+  ],
+  "result": {
+    "id": "jaymospowers:pattern_chest"
+  }
+}

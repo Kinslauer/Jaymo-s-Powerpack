@@ -136,11 +136,11 @@ final class Carriages {
 	}
 
 	/** The carriage {@code king} sits in (or, 0.5.26, the rickshaw), or null. */
-	static @Nullable Wagon seat(Folk king) {
+	static @Nullable Wagon seat(PathfinderMob king) {
 		return king.getVehicle() instanceof Wagon w && (w.kind() == Wagon.CARRIAGE || w.kind() == Wagon.RICKSHAW) ? w : null;
 	}
 
-	static boolean riding(Folk king) {
+	static boolean riding(PathfinderMob king) {
 		return seat(king) != null;
 	}
 
@@ -154,8 +154,8 @@ final class Carriages {
 	}
 
 	/** Out on his round: he gets in, if his carriage is at hand and waiting (or, without one, a rickshaw come for him). */
-	static void board(ServerLevel level, Faction f, Folk king) {
-		if (king.isPassenger() || king.getTarget() != null) {
+	static void board(ServerLevel level, Faction f, PathfinderMob king) {
+		if (king.isPassenger() || Rulers.target(king) != null) {
 			return;
 		}
 		Wagon carriage = of(level, f);
@@ -175,7 +175,7 @@ final class Carriages {
 	}
 
 	/** He gets down (at his gate, or to fight); the carriage waits there. */
-	static void alight(Folk king) {
+	static void alight(PathfinderMob king) {
 		Wagon carriage = seat(king);
 		if (carriage == null) {
 			return;
@@ -194,7 +194,7 @@ final class Carriages {
 	 * Takes {@code king} toward {@code (x, y, z)}: on foot, or, seated, his coachman drives there. A stop is reached
 	 * {@link #SEATED_REACH} further off when he's seated.
 	 */
-	static void moveTo(Folk king, double x, double y, double z, double speed) {
+	static void moveTo(PathfinderMob king, double x, double y, double z, double speed) {
 		Wagon carriage = seat(king);
 		PathfinderMob coachman = carriage == null ? null : coachman(carriage);
 		if (coachman == null) {
@@ -209,14 +209,14 @@ final class Carriages {
 		}
 	}
 
-	static void stop(Folk king) {
+	static void stop(PathfinderMob king) {
 		Wagon carriage = seat(king);
 		PathfinderMob coachman = carriage == null ? null : coachman(carriage);
 		(coachman != null ? coachman : king).getNavigation().stop();
 	}
 
 	/** Seated, he and his carriage set down at {@code (x, y, z)} together (penned in, as he would be on foot). */
-	static void teleport(Folk king, double x, double y, double z) {
+	static void teleport(PathfinderMob king, double x, double y, double z) {
 		Wagon carriage = seat(king);
 		Entity horse = carriage == null ? null : carriage.horse();
 		if (horse == null) {
@@ -228,7 +228,7 @@ final class Carriages {
 		carriage.snapTo(x, y, z, horse.getYRot(), 0.0F);
 	}
 
-	static double reach(Folk king) {
+	static double reach(PathfinderMob king) {
 		return riding(king) ? SEATED_REACH : 0.0;
 	}
 
@@ -310,8 +310,9 @@ final class Carriages {
 	private static void tend(ServerLevel level, Faction f, Castle.Keep keep, Wagon carriage) {
 		PathfinderMob coachman = coachman(carriage);
 		Entity rider = carriage.getFirstPassenger();
-		if (rider instanceof Folk king) {
-			if (king.getTarget() != null || king.getLastHurtByMob() != null && king.tickCount - king.getLastHurtByMobTimestamp() < 60) {
+		if (rider instanceof PathfinderMob king && Rulers.is(king)) {
+			// (0.7.175) a folk ruler, or a villager crowned
+			if (Rulers.target(king) != null || king.getLastHurtByMob() != null && king.tickCount - king.getLastHurtByMobTimestamp() < 60) {
 				alight(king);
 			}
 			return;

@@ -1,0 +1,1632 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_true": {
+      "type": "minecraft:composite",
+      "models": [
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+          }
+        },
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+          }
+        },
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 2,
+          "cases": [
+            {
+              "when": "string",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/bowstring_broken_string"
+              }
+            },
+            {
+              "when": "vine",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/bowstring_broken_vine"
+              }
+            },
+            {
+              "when": "leather",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/bowstring_broken_leather"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/crossbow/bowstring_broken_string"
+          }
+        }
+      ]
+    },
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:charge_type",
+      "cases": [
+        {
+          "when": "arrow",
+          "model": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 1,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                  {
+                    "when": "string",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                    }
+                  },
+                  {
+                    "when": "vine",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_vine"
+                    }
+                  },
+                  {
+                    "when": "leather",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_leather"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                }
+              },
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/bolt"
+              }
+            ]
+          }
+        },
+        {
+          "when": "rocket",
+          "model": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 1,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                  {
+                    "when": "string",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                    }
+                  },
+                  {
+                    "when": "vine",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_vine"
+                    }
+                  },
+                  {
+                    "when": "leather",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_leather"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                }
+              },
+              {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/rocket"
+              }
+            ]
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:condition",
+        "property": "minecraft:using_item",
+        "on_false": {
+          "type": "minecraft:composite",
+          "models": [
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+              }
+            },
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 1,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                  }
+                },
+                {
+                  "when": "steel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+              }
+            },
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 2,
+              "cases": [
+                {
+                  "when": "string",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/bowstring_string"
+                  }
+                },
+                {
+                  "when": "vine",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/bowstring_vine"
+                  }
+                },
+                {
+                  "when": "leather",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/crossbow/bowstring_leather"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/crossbow/bowstring_string"
+              }
+            }
+          ]
+        },
+        "on_true": {
+          "type": "minecraft:range_dispatch",
+          "property": "minecraft:crossbow/pull",
+          "entries": [
+            {
+              "threshold": 0.58,
+              "model": {
+                "type": "minecraft:composite",
+                "models": [
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 0,
+                    "cases": [
+                      {
+                        "when": "wood",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                        }
+                      },
+                      {
+                        "when": "wood_crimson",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                        }
+                      },
+                      {
+                        "when": "wood_warped",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                        }
+                      },
+                      {
+                        "when": "bone",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                        }
+                      },
+                      {
+                        "when": "copper",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                        }
+                      },
+                      {
+                        "when": "iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                        }
+                      },
+                      {
+                        "when": "silver",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                        }
+                      },
+                      {
+                        "when": "rose_gold",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                        }
+                      },
+                      {
+                        "when": "amethyst_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                        }
+                      },
+                      {
+                        "when": "pig_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                        }
+                      },
+                      {
+                        "when": "slimesteel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                        }
+                      },
+                      {
+                        "when": "steel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                    }
+                  },
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 1,
+                    "cases": [
+                      {
+                        "when": "wood",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                        }
+                      },
+                      {
+                        "when": "wood_crimson",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                        }
+                      },
+                      {
+                        "when": "wood_warped",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                        }
+                      },
+                      {
+                        "when": "bone",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                        }
+                      },
+                      {
+                        "when": "copper",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                        }
+                      },
+                      {
+                        "when": "iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                        }
+                      },
+                      {
+                        "when": "silver",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                        }
+                      },
+                      {
+                        "when": "rose_gold",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                        }
+                      },
+                      {
+                        "when": "amethyst_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                        }
+                      },
+                      {
+                        "when": "pig_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                        }
+                      },
+                      {
+                        "when": "slimesteel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                        }
+                      },
+                      {
+                        "when": "steel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                    }
+                  },
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 2,
+                    "cases": [
+                      {
+                        "when": "string",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_2_string"
+                        }
+                      },
+                      {
+                        "when": "vine",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_2_vine"
+                        }
+                      },
+                      {
+                        "when": "leather",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_2_leather"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_2_string"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "threshold": 1.0,
+              "model": {
+                "type": "minecraft:composite",
+                "models": [
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 0,
+                    "cases": [
+                      {
+                        "when": "wood",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                        }
+                      },
+                      {
+                        "when": "wood_crimson",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                        }
+                      },
+                      {
+                        "when": "wood_warped",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                        }
+                      },
+                      {
+                        "when": "bone",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                        }
+                      },
+                      {
+                        "when": "copper",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                        }
+                      },
+                      {
+                        "when": "iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                        }
+                      },
+                      {
+                        "when": "silver",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                        }
+                      },
+                      {
+                        "when": "rose_gold",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                        }
+                      },
+                      {
+                        "when": "amethyst_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                        }
+                      },
+                      {
+                        "when": "pig_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                        }
+                      },
+                      {
+                        "when": "slimesteel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                        }
+                      },
+                      {
+                        "when": "steel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                    }
+                  },
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 1,
+                    "cases": [
+                      {
+                        "when": "wood",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                        }
+                      },
+                      {
+                        "when": "wood_crimson",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                        }
+                      },
+                      {
+                        "when": "wood_warped",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                        }
+                      },
+                      {
+                        "when": "bone",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                        }
+                      },
+                      {
+                        "when": "copper",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                        }
+                      },
+                      {
+                        "when": "iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                        }
+                      },
+                      {
+                        "when": "silver",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                        }
+                      },
+                      {
+                        "when": "rose_gold",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                        }
+                      },
+                      {
+                        "when": "amethyst_bronze",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                        }
+                      },
+                      {
+                        "when": "pig_iron",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                        }
+                      },
+                      {
+                        "when": "slimesteel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                        }
+                      },
+                      {
+                        "when": "steel",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                    }
+                  },
+                  {
+                    "type": "minecraft:select",
+                    "property": "minecraft:custom_model_data",
+                    "index": 2,
+                    "cases": [
+                      {
+                        "when": "string",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                        }
+                      },
+                      {
+                        "when": "vine",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_vine"
+                        }
+                      },
+                      {
+                        "when": "leather",
+                        "model": {
+                          "type": "minecraft:model",
+                          "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_leather"
+                        }
+                      }
+                    ],
+                    "fallback": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_3_string"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:composite",
+            "models": [
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/limb_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/limb_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 1,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_silver"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_slimesteel"
+                    }
+                  },
+                  {
+                    "when": "steel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/body_steel"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/body_wood"
+                }
+              },
+              {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                  {
+                    "when": "string",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_1_string"
+                    }
+                  },
+                  {
+                    "when": "vine",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_1_vine"
+                    }
+                  },
+                  {
+                    "when": "leather",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/crossbow/bowstring_1_leather"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/crossbow/bowstring_1_string"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

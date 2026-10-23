@@ -2642,3 +2642,38 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   corpses". `KitchenCompat.registerCorpseBlood` adds a second corpse hit hook: a heavy blunt blow
   (`BladeBlood.heavyBlunt`) on a corpse tags it `jaymoskitchen.crushed`, and Kitchen bursts a spider's body into loose
   legs. Compile-checked; not playtested.
+- **0.15.124, the enchantment glint with shaders:** Andy's game crashed with Iris on ("Close the existing render pass
+  before performing additional commands" while uploading `enchanted_glint_item.png`): Iris first asks for the glint
+  textures inside a render pass, and loading a texture there is refused in 26.3. The client loads both glint textures
+  at startup now (`JaymosPowersClient`, `CLIENT_STARTED`).
+- **0.15.128, blown apart (Kitchen 0.5.21):** Andy: "creepers should not leave corpses when they explode, and other
+  explosions should blast other corpses apart into a mess." Kitchen throws the chunks; `KitchenCompat.registerCorpseBlood`
+  hooks Kitchen's `Gibs.addOnBurst`, and `BladeBlood.blownApart` bursts the body's blood wider than a crushing (40
+  drops, 3 pools, 40 flecks of gore, in its own blood colour). Compile-checked; not playtested.
+- **0.15.130, no lying stuck at no health:** Andy: "after Jung was hit by a meteor he was stuck on the ground unable to
+  revive even after giving up or being killed with commands." His health was at zero but he never died: something in
+  the death chain turned the death away without giving health back (Fabric's `ALLOW_DEATH` leaves it there), and a body
+  at no health ignores every hurt, so giving up and `/kill` did nothing and a relog kept it. `DownedLimboMixin` catches
+  it as the blow lands (a downable player goes down instead), and `Downed.limbo` checks every tick for any other way in
+  (a save loaded at zero; one who quit on the death screen is marked `DIED` and left alone): the death they were owed
+  comes, death screen and all. Each catch logs a WARN with the damage type, to find what turned the death away. Builds;
+  not playtested.
+- **0.15.131, Tinkers' missing tables and weapons:** Andy asked whether Hephaestus (the Fabric Tinkers' Construct port)
+  could replace our Tinkering. It's MIT but stops at 1.20.1 (Mantle + Porting Lib), so its missing pieces were ported
+  into ours instead (Tinkers' code and textures, MIT; `license_tinkers_construct.txt`). Details and numbers:
+  `docs/Tinkering-Tables.md`, `docs/Tinkering-Weapons.md`.
+  - **Tool Forge** (Tinkers' anvil): 5 part slots; any tool of more than 3 parts is built only here (the Tool Station
+    says "Needs a Tool Forge"), so the sledge hammer and cleaver move to it. Recipe: 3 metal blocks over a Tool
+    Station over 3 seared bricks. **Crafting Station** (3x3 that keeps its grid), **Pattern Chest** (patterns and casts)
+    and **Part Chest** (parts and weapon heads), 54 slots each.
+  - **Side inventory and tabs:** a chest next to a Part Builder, Tool Station, Tool Forge or Crafting Station shows in a
+    panel at the left of its screen (Pattern/Part Chests first; chests, barrels and shulker boxes, never a locked one),
+    and tabs along the top hop between touching tables.
+  - **Ten melee tools/weapons:** dagger (off-hand swing on right click), kama and scythe (harvest and replant,
+    shear), broad axe (fells trees), excavator (3x3 shovel), vein hammer (ore veins), pickadze, war pick, minotaur axe
+    (sprint charge), battlesign (blocks, then bonks). New parts: broad axe head, tough binding. Area breaking is one
+    code path (`TraitEffects.areaBreak`, `ToolAreas`) and respects spawn protection; sneak breaks one block.
+  - **Ranged:** longbow and crossbow (draw speed, velocity, accuracy from their limbs, grip and string), tinker
+    arrows (4 a build), javelin, throwing axe, shuriken. New parts: bow limb, bow grip, bowstring, arrow head, arrow
+    shaft, fletching; new materials feather, leaves, blaze rod.
+  - Compile-checked (0 errors, JEI included); not playtested.

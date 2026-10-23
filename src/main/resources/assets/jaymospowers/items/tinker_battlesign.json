@@ -1,0 +1,423 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 1,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_bone"
+            }
+          },
+          {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_seared_stone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_silver"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_slimesteel"
+            }
+          },
+          {
+            "when": "steel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_steel"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/battlesign/handle_wood"
+        }
+      },
+      {
+        "type": "minecraft:condition",
+        "property": "minecraft:custom_model_data",
+        "index": 0,
+        "on_true": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/battlesign/head_broken_wood"
+          }
+        },
+        "on_false": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_bone"
+              }
+            },
+            {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_seared_stone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_silver"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_slimesteel"
+              }
+            },
+            {
+              "when": "steel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_steel"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/battlesign/head_wood"
+          }
+        }
+      }
+    ]
+  }
+}

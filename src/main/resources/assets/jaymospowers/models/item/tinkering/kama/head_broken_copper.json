@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/kama/head_broken_copper"
+  }
+}

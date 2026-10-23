@@ -45,7 +45,8 @@ public class ToolPartItem extends Item {
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
 		TinkerMaterial material = material(stack);
 		if (material == null || !stack.has(DataComponents.CUSTOM_MODEL_DATA)) {
-			TinkerMaterial fallback = part.kind == PartType.Kind.BINDING ? TinkerMaterial.STRING : TinkerMaterial.WOOD;
+			TinkerMaterial fallback = part.kind == PartType.Kind.HEAD || part.kind == PartType.Kind.HANDLE ? TinkerMaterial.WOOD
+				: ToolStats.defaultFor(part.kind);
 			ItemStack fixed = of(part, material != null ? material : fallback, stack.getCount());
 			stack.applyComponents(fixed.getComponentsPatch());
 		}
@@ -82,7 +83,25 @@ public class ToolPartItem extends Item {
 	public static List<Component> lines(PartType part, TinkerMaterial material) {
 		List<Component> out = new ArrayList<>();
 		TinkerMaterial.Stats s = material.stats;
-		if (s == null || part.kind == PartType.Kind.BINDING) {
+		TinkerMaterial.Limb limb = material.limb();
+		TinkerMaterial.Grip grip = material.grip();
+		if (part.kind == PartType.Kind.LIMB && limb != null) {
+			out.add(durability(limb.durability()));
+			out.add(percent("draw_speed", limb.drawSpeed()));
+			out.add(percent("velocity", limb.velocity()));
+			out.add(percent("accuracy", limb.accuracy()));
+		} else if (part.kind == PartType.Kind.GRIP && grip != null) {
+			out.add(percent("handle_durability", grip.durability()));
+			out.add(percent("accuracy", grip.accuracy()));
+			out.add(Component.translatable("tooltip.jaymospowers.tinkering.attack", String.format("%.2f", grip.meleeDamage())).withStyle(ChatFormatting.GRAY));
+		} else if (part.kind == PartType.Kind.ARROW_HEAD && s != null) {
+			out.add(Component.translatable("tooltip.jaymospowers.tinkering.attack", String.format("%.2f", s.attack())).withStyle(ChatFormatting.GRAY));
+		} else if (part.kind == PartType.Kind.BOWSTRING || part.kind == PartType.Kind.ARROW_SHAFT || part.kind == PartType.Kind.FLETCHING) {
+			if (part.kind == PartType.Kind.ARROW_SHAFT) {
+				out.add(percent("velocity", material.shaftVelocity()));
+			}
+			out.add(Component.translatable("tooltip.jaymospowers.tinkering.part_trait_only").withStyle(ChatFormatting.GRAY));
+		} else if (s == null || part.kind == PartType.Kind.BINDING) {
 			out.add(Component.translatable("tooltip.jaymospowers.tinkering.binding_only").withStyle(ChatFormatting.GRAY));
 		} else if (part.kind == PartType.Kind.HEAD) {
 			out.add(durability(s.durability()));

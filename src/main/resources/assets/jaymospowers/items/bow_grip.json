@@ -1,0 +1,97 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "wood",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_wood"
+        }
+      },
+      {
+        "when": "wood_crimson",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_wood_crimson"
+        }
+      },
+      {
+        "when": "wood_warped",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_wood_warped"
+        }
+      },
+      {
+        "when": "bone",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_bone"
+        }
+      },
+      {
+        "when": "copper",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_copper"
+        }
+      },
+      {
+        "when": "iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_iron"
+        }
+      },
+      {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_silver"
+        }
+      },
+      {
+        "when": "rose_gold",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_rose_gold"
+        }
+      },
+      {
+        "when": "amethyst_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_amethyst_bronze"
+        }
+      },
+      {
+        "when": "pig_iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_pig_iron"
+        }
+      },
+      {
+        "when": "slimesteel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_slimesteel"
+        }
+      },
+      {
+        "when": "steel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/bow_grip_steel"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/tinkering/part/bow_grip_wood"
+    }
+  }
+}

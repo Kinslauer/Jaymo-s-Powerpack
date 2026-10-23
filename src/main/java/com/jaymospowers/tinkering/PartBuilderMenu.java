@@ -1,5 +1,7 @@
 package com.jaymospowers.tinkering;
 
+import com.jaymospowers.tinkering.table.TableExtras;
+import com.jaymospowers.tinkering.table.TinkerTableMenu;
 import java.util.List;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -20,12 +22,17 @@ import org.jspecify.annotations.Nullable;
  * ({@link PartType#cost}); a log is worth 4 planks, a block of metal 9 ingots, and what's left over of the last item is lost.
  * The layout is Tinkers' own screen: pattern and material on the left, the 4x4 part buttons, the result on the right.
  * (0.11.77) Weapon heads ({@link WeaponParts}) are buttons {@link #WEAPON_BUTTONS} on, shaped from stone only.
+ * (Tinkers' side inventory and tabs) The container beside the table shows in a panel at the left, and the other Tinkers tables
+ * beside it are tabs along the top ({@link TableExtras}).
  */
-public class PartBuilderMenu extends AbstractContainerMenu {
+public class PartBuilderMenu extends AbstractContainerMenu implements TinkerTableMenu {
 	public static final int PATTERN = 0, MATERIAL = 1, RESULT = 2;
+	/** One past the player's inventory slots; the side inventory's come after. */
+	private static final int PLAYER_END = 3 + 36;
 	/** Button ids of the weapon heads: this plus the head's place in {@link WeaponParts#loaded()}. */
 	public static final int WEAPON_BUTTONS = 100;
 	private final ContainerLevelAccess access;
+	private final TableExtras extras;
 	private final DataSlot selected = DataSlot.standalone();
 	private final Container inputs = new SimpleContainer(2) {
 		@Override
@@ -75,8 +82,16 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 			}
 		});
 		this.addStandardInventorySlots(inventory, 8, 102);
+		this.extras = new TableExtras(access, inventory.player, StationBlock.Kind.PART_BUILDER);
+		extras.slots().forEach(this::addSlot);
+		extras.data().forEach(this::addDataSlot);
 		StationEntity.open(access, inventory.player, inputs);
 		this.addDataSlot(selected);
+	}
+
+	@Override
+	public TableExtras extras() {
+		return extras;
 	}
 
 	public @Nullable PartType selectedPart() {
@@ -123,6 +138,9 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
+		if (button >= TableExtras.TAB_BUTTONS) {
+			return extras.clickTab(player, button);
+		}
 		boolean weapon = button >= WEAPON_BUTTONS && button - WEAPON_BUTTONS < WeaponParts.loaded().size();
 		if (!weapon && (button < 0 || button >= PartType.values().length)) {
 			return false;
@@ -146,7 +164,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		ItemStack material = inputs.getItem(MATERIAL);
 		TinkerMaterial kind = TinkerMaterial.of(material);
 		ItemStack out = ItemStack.EMPTY;
-		if (part != null && kind != null && !kind.cast && kind.makes(part.kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
+		if (part != null && kind != null && (!kind.cast || part.builderOnly) && kind.makes(part.kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
 			&& material.getCount() >= itemsNeeded(part, material)) {
 			out = ToolPartItem.of(part, kind, 1);
 		}
@@ -161,7 +179,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return stillValid(access, player, Tinkering.PART_BUILDER);
+		return stillValid(access, player, Tinkering.PART_BUILDER) && extras.stillValid(player);
 	}
 
 	@Override
@@ -177,7 +195,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		}
 		ItemStack stack = slot.getItem();
 		ItemStack moved = stack.copy();
-		int end = this.slots.size();
+		int end = PLAYER_END;
 		if (index == RESULT) {
 			// take as many as the inputs allow, one part at a time
 			int made = 0;
@@ -195,16 +213,18 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 			if (!this.moveItemStackTo(stack, 3, end, true)) {
 				return ItemStack.EMPTY;
 			}
-		} else if (stack.is(Tinkering.PATTERN)) {
-			if (!this.moveItemStackTo(stack, PATTERN, PATTERN + 1, false)) {
-				return ItemStack.EMPTY;
-			}
-		} else if (TinkerMaterial.of(stack) != null) {
-			if (!this.moveItemStackTo(stack, MATERIAL, MATERIAL + 1, false)) {
+		} else if (index >= extras.first()) {
+			// from the side inventory: into the builder if it fits, else to the player
+			int into = stack.is(Tinkering.PATTERN) ? PATTERN : TinkerMaterial.of(stack) != null ? MATERIAL : -1;
+			if (!(into >= 0 && this.moveItemStackTo(stack, into, into + 1, false)) && !this.moveItemStackTo(stack, 3, end, false)) {
 				return ItemStack.EMPTY;
 			}
 		} else {
-			return ItemStack.EMPTY;
+			int into = stack.is(Tinkering.PATTERN) ? PATTERN : TinkerMaterial.of(stack) != null ? MATERIAL : -1;
+			if (!(into >= 0 && this.moveItemStackTo(stack, into, into + 1, false))
+				&& !(extras.size() > 0 && this.moveItemStackTo(stack, extras.first(), extras.end(), false))) {
+				return ItemStack.EMPTY;
+			}
 		}
 		if (stack.isEmpty()) {
 			slot.setByPlayer(ItemStack.EMPTY);
@@ -217,6 +237,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
+		extras.removed(player);
 		StationEntity.close(access, player, inputs, () -> this.clearContainer(player, inputs));
 	}
 }

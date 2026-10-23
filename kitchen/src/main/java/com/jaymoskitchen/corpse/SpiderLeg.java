@@ -72,22 +72,29 @@ public class SpiderLeg extends Entity {
 	public @Nullable Entity clientBody() {
 		if (!this.bodyTried) {
 			this.bodyTried = true;
-			CompoundTag tag = CorpseEntity.parse(this.entityData.get(LOOK));
-			Optional<EntityType<?>> type = CorpseEntity.typeOf(tag);
-			if (type.isPresent()) {
-				Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
-				if (entity != null) {
-					ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag);
-					entity.load(input);
-					if (entity instanceof LivingEntity living) {
-						input.read("attributes", AttributeInstance.Packed.LIST_CODEC).ifPresent(living.getAttributes()::apply);
-					}
-					entity.setId(-2000 - getId());
-					this.body = entity;
-				}
-			}
+			this.body = rebuild(level(), this.entityData.get(LOOK), -2000 - getId());
 		}
 		return this.body;
+	}
+
+	/** (0.5.21) The creature a {@code look} ({@link Corpses#look}) was taken from, rebuilt but never added to the world. */
+	static @Nullable Entity rebuild(Level level, String look, int id) {
+		CompoundTag tag = CorpseEntity.parse(look);
+		Optional<EntityType<?>> type = CorpseEntity.typeOf(tag);
+		if (type.isEmpty()) {
+			return null;
+		}
+		Entity entity = type.get().create(level, EntitySpawnReason.LOAD);
+		if (entity == null) {
+			return null;
+		}
+		ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag);
+		entity.load(input);
+		if (entity instanceof LivingEntity living) {
+			input.read("attributes", AttributeInstance.Packed.LIST_CODEC).ifPresent(living.getAttributes()::apply);
+		}
+		entity.setId(id);
+		return entity;
 	}
 
 	@Override
