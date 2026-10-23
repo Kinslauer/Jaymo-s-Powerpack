@@ -44,9 +44,9 @@ public final class Tables {
 		CRAFTING_STATION = block("crafting_station", p -> new StationBlock(p, StationBlock.Kind.CRAFTING_STATION), BlockBehaviour.Properties.of()
 			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion());
 		PATTERN_CHEST = block("pattern_chest", TinkerChestBlock::new, BlockBehaviour.Properties.of()
-			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD));
+			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion());
 		PART_CHEST = block("part_chest", TinkerChestBlock::new, BlockBehaviour.Properties.of()
-			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD));
+			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion());
 		CHEST_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("tinker_chest"),
 			new BlockEntityType<>(TinkerChestEntity::new, Set.of(PATTERN_CHEST, PART_CHEST)));
 		TOOL_FORGE_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("tool_forge"),

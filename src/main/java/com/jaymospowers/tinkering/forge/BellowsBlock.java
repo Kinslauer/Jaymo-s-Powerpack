@@ -12,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -19,6 +20,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Bellows (after Better With Mods' bellows, Copyright (c) 2016-2018 BeetoGuy, primetoxinz, BordListian, MIT; our own
@@ -35,6 +39,8 @@ public class BellowsBlock extends HorizontalDirectionalBlock {
 	public static final int HEAT_BONUS = 1, MELT_SPEED = 2;
 	/** Squeezed shut: it's blowing. */
 	public static final BooleanProperty PUMPED = BooleanProperty.create("pumped");
+	/** Squeezed shut it's only 10 pixels tall, so the block above mustn't hide its underside. */
+	private static final VoxelShape PUMPED_SHAPE = Block.box(0, 0, 0, 16, 10, 16);
 
 	public BellowsBlock(Block.Properties properties) {
 		super(properties);
@@ -44,6 +50,11 @@ public class BellowsBlock extends HorizontalDirectionalBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, PUMPED);
+	}
+
+	@Override
+	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return state.getValue(PUMPED) ? PUMPED_SHAPE : Shapes.block();
 	}
 
 	/** It blows the way you face when you set it down. */
