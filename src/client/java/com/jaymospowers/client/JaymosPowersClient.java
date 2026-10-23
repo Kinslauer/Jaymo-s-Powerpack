@@ -239,7 +239,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
 				if (client != null && Mastery.isUsable(player, key)) {
-					client.onKey(player, key, down);
+					// (0.15.136) a broken limb throws the aim off (LimbUse); the server throws its own
+					boolean pressed = down;
+					com.jaymospowers.core.wounds.LimbUse.aimed(player, com.jaymospowers.core.wounds.LimbUse.need(power, player, key.id()),
+						() -> client.onKey(player, key, pressed));
 				}
 			}
 		}
@@ -248,7 +251,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			modeWasDown = mode;
 			ClientPlayNetworking.send(new PowerPayloads.ModeKey(mode));
 			if (client != null) {
-				client.onMode(player, mode);
+				boolean pressed = mode;
+				com.jaymospowers.core.wounds.LimbUse.aimed(player, com.jaymospowers.core.wounds.LimbUse.need(power, player, "mode"),
+					() -> client.onMode(player, pressed));
 			}
 		}
 		boolean ultimate = power != null && power.ultimateAnswers(player)
@@ -257,7 +262,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			ultimateWasDown = ultimate;
 			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));
 			if (client != null) {
-				client.onUltimate(player, ultimate);
+				boolean pressed = ultimate;
+				com.jaymospowers.core.wounds.LimbUse.aimed(player, com.jaymospowers.core.wounds.LimbUse.need(power, player, "ultimate"),
+					() -> client.onUltimate(player, pressed));
 			}
 		}
 		if (client != null && !minecraft.isPaused()) {
@@ -268,6 +275,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		if (!minecraft.isPaused()) {
 			// after the flight has set this tick's velocity: a barrel roll slides on top of it
 			FlightRolls.tick(minecraft, player);
+			// (0.15.136) then broken and severed limbs make flying and gliding harder
+			com.jaymospowers.client.wounds.LimbMotion.tick(player);
 		}
 	}
 }
