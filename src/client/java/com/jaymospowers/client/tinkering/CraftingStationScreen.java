@@ -1,14 +1,16 @@
 package com.jaymospowers.client.tinkering;
 
 import com.jaymospowers.tinkering.table.CraftingStationMenu;
+import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /** The Crafting Station: a crafting table's layout, drawn like the other Tinkers tables, with the side inventory and tabs. */
-public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationMenu> {
+public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationMenu> implements TableAreas {
 	public CraftingStationScreen(CraftingStationMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title, 176, 166);
 		this.titleLabelX = 29;
@@ -38,6 +40,11 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		return TableUi.click(minecraft, menu.containerId, menu.extras(), leftPos, topPos, event.x(), event.y()) || super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
+	public List<Rect2i> extraAreas() {
+		return TableUi.areas(menu.extras(), leftPos, topPos, null);
 	}
 
 	@Override

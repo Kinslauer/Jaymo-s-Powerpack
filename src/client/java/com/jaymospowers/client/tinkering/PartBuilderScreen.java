@@ -12,6 +12,7 @@ import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -25,7 +26,7 @@ import net.minecraft.world.item.ItemStack;
  * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles. (0.11.77) The
  * arrows page through to the weapon heads ({@link WeaponParts}).
  */
-public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> {
+public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> implements TableAreas {
 	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4, CELLS = 16;
 	/** (0.11.77) The page arrows (tool parts, then weapon heads), above the pattern and material slots. */
 	private static final int PAGE_X = 8, PAGE_Y = 20, PAGE_W = 16, PAGE_H = 14, PAGE_STEP = 21;
@@ -34,6 +35,8 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		super(menu, inventory, title, 176, 184);
 		this.inventoryLabelY = this.imageHeight - 94;
 	}
+
+	private final SidePanel info = new SidePanel();
 
 	/** Pages 0 on: tool parts, 16 a page; then the weapon heads, 16 a page. */
 	private int page;
@@ -100,7 +103,7 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			graphics.fill(x, y, x + PAGE_W, y + PAGE_H, hover ? TinkerUi.ROW_HOVER : TinkerUi.ROW);
 			graphics.centeredText(font, Component.literal(side == 0 ? "<" : ">"), x + PAGE_W / 2, y + 3, TinkerUi.ACCENT);
 		}
-		SidePanel.draw(graphics, font, TableUi.infoX(menu.extras(), leftPos, imageWidth), topPos, title(material), info(material));
+		info.draw(graphics, font, TableUi.infoX(menu.extras(), leftPos, imageWidth), topPos, height, title(material), info(material));
 	}
 
 	private int selectedButton() {
@@ -242,8 +245,18 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 	}
 
 	@Override
+	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+		return info.scroll(x, y, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
+	}
+
+	@Override
+	public List<Rect2i> extraAreas() {
+		return TableUi.areas(menu.extras(), leftPos, topPos, info);
+	}
+
+	@Override
 	protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
 		// the side inventory's slots lie left of the screen: clicks there aren't drops
-		return !TableUi.inSide(menu.extras(), left, top, mouseX, mouseY) && super.hasClickedOutside(mouseX, mouseY, left, top);
+		return !TableUi.inSide(menu.extras(), left, top, mouseX, mouseY) && !info.contains(mouseX, mouseY) && super.hasClickedOutside(mouseX, mouseY, left, top);
 	}
 }

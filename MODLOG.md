@@ -2680,3 +2680,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.132, the creative inventory opens again:** Tinkering put its ranged weapons in the creative tab at their crafted
   yield (4 arrows), and the creative tab only takes stacks of 1, so opening the creative inventory crashed the game. One
   of each now.
+- **0.15.134, nothing overlaps:** Andy: "some UI elements overlap". Pocket Arsenal's ascended HUD drew Hundred Blades
+  on top of the R row (its bar ran through the name); Hundred Blades and the pinned weapon now sit above the first row.
+  The Tool Forge's recipe list ran past the bottom of the window and JEI's item list and search bar drew over it: the
+  Tinkers tables' info panel (`tinkering/SidePanel`) now stops at the window's bottom and scrolls with the wheel, with a
+  thin scrollbar, and every table screen tells JEI where its side inventory and info panel are (`TableAreas`, through
+  `TinkeringJei.registerGuiHandlers`) so JEI lays itself out around them.

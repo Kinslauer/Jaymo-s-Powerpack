@@ -1,6 +1,7 @@
 package com.jaymospowers.client.jei;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.tinkering.TableAreas;
 import com.jaymospowers.tinkering.PartBuilderMenu;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
@@ -18,11 +19,15 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.types.IRecipeType;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -58,6 +63,17 @@ public final class TinkeringJei implements IModPlugin {
 			new SimpleCategory(gui, CASTING_BASIN, title("casting_basin"), Tinkering.CASTING_BASIN, 1),
 			new SimpleCategory(gui, MELTING, title("melting"), Tinkering.SMELTERY, 1),
 			new SimpleCategory(gui, ALLOYING, title("alloying"), Tinkering.SMELTERY, 3));
+	}
+
+	@Override
+	public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+		// (0.15.134) the tables' side panels: JEI's item list and search bar go around them, not over them
+		registration.addGenericGuiContainerHandler(AbstractContainerScreen.class, new IGuiContainerHandler<AbstractContainerScreen<?>>() {
+			@Override
+			public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> screen) {
+				return screen instanceof TableAreas table ? table.extraAreas() : List.of();
+			}
+		});
 	}
 
 	@Override
