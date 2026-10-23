@@ -841,7 +841,11 @@ public final class Ship extends Entity {
 		List<Vec3> spots = new ArrayList<>();
 		for (Entity e : level.getEntities(this, this.getBoundingBox().inflate(1.0), e -> !(e instanceof Ship))) {
 			Vec3 local = this.toLocal(e.position());
-			if (e.getVehicle() == this && h.helm >= 0) {
+			Vec3 seat = e.getVehicle() == this && !(e instanceof Player) ? e.getAttached(SEAT) : null;
+			if (seat != null) {
+				// (0.7.179) her crew where they stood, not all heaped at her wheel
+				local = seat;
+			} else if (e.getVehicle() == this && h.helm >= 0) {
 				Piece helm = h.pieces.get(h.helm);
 				local = new Vec3(helm.x(), helm.y(), helm.z() - 1.0);
 			} else if (!this.aboard(local, 0.5)) {

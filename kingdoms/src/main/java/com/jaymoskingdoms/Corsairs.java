@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.sailing.Crew;
+import com.jaymoskingdoms.sailing.Deck;
 import com.jaymoskingdoms.sailing.Fleet;
 import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Sailing;
@@ -74,6 +75,14 @@ final class Corsairs implements Ship.Captaincy {
 	static final int REP_PLUNDER = -60;
 	/** A hold's share: how many slots. */
 	static final int SHARE = 27;
+	/**
+	 * (0.7.179) Her crew about her deck: how fast a hand strolls, a gunner goes to his guns, anyone runs in a fight
+	 * (blocks a tick); how far a hand strolls (blocks); how long each idles where they stop (ticks; a hand's is up to
+	 * four times this, twice that in a fight); how near his gun a gunner must stand to load it; how often fallen
+	 * gunners' guns are taken up (ticks).
+	 */
+	static final double WALK_PACE = 0.07, GUNNER_PACE = 0.1, RUN_PACE = 0.16, STROLL = 9.0, AT_GUN = 0.6;
+	static final int HAND_IDLE = 60, GUNNER_IDLE = 20, MONKEY_IDLE = 20, MAN_CHECK = 20;
 
 	private Corsairs() {
 	}
@@ -161,6 +170,7 @@ final class Corsairs implements Ship.Captaincy {
 		if (now % 2 == 0) {
 			this.gunnery(level, ship, crew, foe, now);
 		}
+		this.deckwork(level, ship, crew, foe, now);
 		if (!crew.captained(ship)) {
 			return null;
 		}
@@ -337,6 +347,11 @@ final class Corsairs implements Ship.Captaincy {
 				continue;
 			}
 			if (!ship.gunLoaded(gun)) {
+				if (!atGun(ship, crew, gun, gunner)) {
+					// (0.7.179) a gun's loaded by her gunner standing at it: he's on his way
+					crew.loading.remove(gun);
+					continue;
+				}
 				Long ready = crew.loading.get(gun);
 				if (ready == null) {
 					crew.loading.put(gun, now + (monkey ? RELOAD_MONKEY : RELOAD) + level.getRandom().nextInt(30));
@@ -391,6 +406,184 @@ final class Corsairs implements Ship.Captaincy {
 		double ax = hx * c - hz * s, az = hx * s + hz * c;
 		double up = Math.toRadians(Mth.clamp(elevation, LOWEST, HIGHEST));
 		return new Vec3(ax * Math.cos(up), Math.sin(up), az * Math.cos(up)).normalize();
+	}
+
+	// ---- (0.7.179) about her deck -----------------------------------------------------------------------------------
+
+	/**
+	 * Her crew about her deck ({@link Deck}): her gunners go from gun to gun of theirs, loading each, and a hand takes up
+	 * the guns of one who's fallen; in a fight her powder monkeys run between the guns; her hands stroll her deck,
+	 * idling a while wherever they stop. Her captain keeps her wheel.
+	 */
+	private void deckwork(ServerLevel level, Ship ship, Crew crew, @Nullable Ship foe, long now) {
+		Deck deck = Deck.of(ship, crew);
+		if (deck == null || deck.places.isEmpty()) {
+			return;
+		}
+		List<LivingEntity> aboard = ship.crewAboard();
+		if ((now + ship.getId()) % MAN_CHECK == 0) {
+			manGuns(ship, crew, deck, aboard);
+		}
+		RandomSource random = level.getRandom();
+		java.util.Set<UUID> here = new java.util.HashSet<>();
+		for (LivingEntity hand : aboard) {
+			UUID id = hand.getUUID();
+			here.add(id);
+			Vec3 seat = hand.getAttached(Ship.SEAT);
+			if (seat == null || id.equals(crew.captain) || Downed.isDowned(hand)) {
+				continue;
+			}
+			Crew.Walk walk = crew.walks.computeIfAbsent(id, k -> new Crew.Walk());
+			if (!walk.way.isEmpty()) {
+				step(ship, hand, seat, walk);
+				continue;
+			}
+			if (now < walk.rest) {
+				continue;
+			}
+			boolean monkey = hand instanceof Folk f && f.role() == Pirates.POWDER_MONKEY;
+			List<Long> mine = new ArrayList<>();
+			crew.gunners.forEach((gun, who) -> {
+				if (who.equals(id) && deck.guns.containsKey(gun)) {
+					mine.add(gun);
+				}
+			});
+			Vec3 to;
+			int idle;
+			if (!mine.isEmpty()) {
+				// a gunner: to the nearest gun of his that wants loading, else to the nearest of his, and stands to it
+				to = null;
+				double best = Double.MAX_VALUE;
+				for (long gun : mine) {
+					Vec3 at = deck.guns.get(gun);
+					double d = at.distanceToSqr(seat) + (ship.gunLoaded(gun) ? 10000.0 : 0.0);
+					if (d < best) {
+						best = d;
+						to = at;
+					}
+				}
+				walk.pace = foe != null ? RUN_PACE : GUNNER_PACE;
+				idle = GUNNER_IDLE;
+			} else if (monkey && foe != null) {
+				// a powder monkey in a fight: powder and shot to the guns
+				List<Vec3> guns = new ArrayList<>(deck.guns.values());
+				to = guns.isEmpty() ? null : guns.get(random.nextInt(guns.size()));
+				walk.pace = RUN_PACE;
+				idle = MONKEY_IDLE + random.nextInt(MONKEY_IDLE);
+			} else {
+				// a hand: somewhere a few steps off that nobody else is standing at or making for
+				to = this.stroll(crew, deck, aboard, seat, random);
+				walk.pace = WALK_PACE;
+				idle = (foe != null ? 2 : 1) * (HAND_IDLE + random.nextInt(HAND_IDLE * 3));
+			}
+			List<Vec3> way = to == null || to.distanceToSqr(seat) < 0.01 ? null : deck.path(seat, to);
+			if (way == null || way.isEmpty()) {
+				walk.rest = now + idle / 2;
+				continue;
+			}
+			walk.way = new ArrayList<>(way);
+			walk.rest = now + (int)(way.size() / walk.pace) + idle;
+		}
+		crew.walks.keySet().retainAll(here);
+	}
+
+	/** Where a hand strolls to: a free place on her deck he can walk to, not too far off; null to stay put. */
+	private @Nullable Vec3 stroll(Crew crew, Deck deck, List<LivingEntity> aboard, Vec3 seat, RandomSource random) {
+		java.util.Set<Vec3> taken = new java.util.HashSet<>();
+		for (LivingEntity other : aboard) {
+			Vec3 s = other.getAttached(Ship.SEAT);
+			if (s != null) {
+				taken.add(deck.nearest(s));
+			}
+			Crew.Walk w = crew.walks.get(other.getUUID());
+			if (w != null && !w.way.isEmpty()) {
+				taken.add(w.way.get(w.way.size() - 1));
+			}
+		}
+		taken.addAll(deck.guns.values());
+		List<Vec3> free = new ArrayList<>();
+		for (Vec3 p : deck.reachable(seat)) {
+			if (!taken.contains(p) && p.distanceToSqr(seat) <= STROLL * STROLL) {
+				free.add(p);
+			}
+		}
+		return free.isEmpty() ? null : free.get(random.nextInt(free.size()));
+	}
+
+	/** One step of {@code hand}'s walk: their station moved along it, and them turned the way they're going. */
+	private static void step(Ship ship, LivingEntity hand, Vec3 seat, Crew.Walk walk) {
+		Vec3 next = walk.way.get(0);
+		Vec3 d = next.subtract(seat);
+		double len = d.length();
+		Vec3 now;
+		if (len <= walk.pace) {
+			now = next;
+			walk.way.remove(0);
+		} else {
+			now = seat.add(d.scale(walk.pace / len));
+		}
+		hand.setAttached(Ship.SEAT, now);
+		double flat = d.x * d.x + d.z * d.z;
+		if (flat > 1.0E-4) {
+			// her frame turned as she lies (as Ship.toWorld)
+			float c = Mth.cos(ship.getYRot() * Mth.DEG_TO_RAD), s = Mth.sin(ship.getYRot() * Mth.DEG_TO_RAD);
+			double wx = d.x * c - d.z * s, wz = d.x * s + d.z * c;
+			float yaw = (float)(Mth.atan2(wz, wx) * Mth.RAD_TO_DEG) - 90.0F;
+			hand.setYRot(yaw);
+			hand.setYBodyRot(yaw);
+			hand.setYHeadRot(yaw);
+		}
+	}
+
+	/** Whether the gunner at {@code gun} is standing to it (or it has no place to stand: then he serves it from anywhere). */
+	private static boolean atGun(Ship ship, Crew crew, long gun, LivingEntity gunner) {
+		Deck deck = Deck.of(ship, crew);
+		Vec3 at = deck == null ? null : deck.guns.get(gun);
+		Vec3 seat = gunner.getAttached(Ship.SEAT);
+		return at == null || seat == null || at.distanceToSqr(seat) <= AT_GUN * AT_GUN;
+	}
+
+	/** Every gun with no gunner left aboard goes to a hand (the nearest), else to the gunner with fewest guns. */
+	private static void manGuns(Ship ship, Crew crew, Deck deck, List<LivingEntity> aboard) {
+		Map<UUID, LivingEntity> byId = new java.util.HashMap<>();
+		for (LivingEntity e : aboard) {
+			byId.put(e.getUUID(), e);
+		}
+		for (long gun : ship.guns()) {
+			UUID who = crew.gunners.get(gun);
+			if (who != null && byId.containsKey(who) && !Downed.isDowned(byId.get(who))) {
+				continue;
+			}
+			Vec3 at = deck.guns.get(gun);
+			LivingEntity best = null;
+			double bestD = Double.MAX_VALUE;
+			for (LivingEntity e : aboard) {
+				if (e.getUUID().equals(crew.captain) || crew.gunners.containsValue(e.getUUID()) || Downed.isDowned(e)
+					|| e instanceof Folk f && f.role() == Pirates.POWDER_MONKEY) {
+					continue;
+				}
+				Vec3 s = e.getAttached(Ship.SEAT);
+				double d = at == null || s == null ? 0.0 : at.distanceToSqr(s);
+				if (d < bestD) {
+					best = e;
+					bestD = d;
+				}
+			}
+			if (best == null) {
+				// no hand left: the gunner with fewest guns takes it too
+				Map<UUID, Integer> load = new java.util.HashMap<>();
+				for (UUID g : crew.gunners.values()) {
+					if (byId.containsKey(g) && !Downed.isDowned(byId.get(g))) {
+						load.merge(g, 1, Integer::sum);
+					}
+				}
+				best = load.entrySet().stream().min(Map.Entry.comparingByValue()).map(e -> byId.get(e.getKey())).orElse(null);
+			}
+			if (best != null) {
+				crew.gunners.put(gun, best.getUUID());
+				crew.walks.remove(best.getUUID());
+			}
+		}
 	}
 
 	// ---- going down -------------------------------------------------------------------------------------------------

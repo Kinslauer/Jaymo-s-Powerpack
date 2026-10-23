@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -73,6 +74,16 @@ public final class Crew {
 	public float wantYaw;
 	public double wantSail;
 	public boolean row, astern;
+	/** (0.7.179) Not saved: her deck, for her crew to walk ({@link Deck}), and each crewman's walk about it. */
+	public @Nullable Deck deck;
+	public final Map<UUID, Walk> walks = new HashMap<>();
+
+	/** (0.7.179) A crewman's walk: the places still to walk through (in her frame), how fast, and when they set off again. */
+	public static final class Walk {
+		public List<Vec3> way = new ArrayList<>();
+		public double pace;
+		public long rest;
+	}
 
 	public Crew(Side side, int faction, String name, BlockPos home) {
 		this.side = side;
