@@ -67,7 +67,7 @@ public final class TinkeringJei implements IModPlugin {
 
 	@Override
 	public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-		// (0.15.134) the tables' side panels: JEI's item list and search bar go around them, not over them
+		// (0.15.135) the tables' side panels: JEI's item list and search bar go around them, not over them
 		registration.addGenericGuiContainerHandler(AbstractContainerScreen.class, new IGuiContainerHandler<AbstractContainerScreen<?>>() {
 			@Override
 			public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> screen) {

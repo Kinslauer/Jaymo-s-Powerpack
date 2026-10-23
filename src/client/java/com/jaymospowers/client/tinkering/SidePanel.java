@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The info panel beside a Tinkers table's screen: (0.10.127) drawn like the H screen, a dark box with a bronze stripe and
- * wrapped lines. (0.15.134) It stops at the bottom of the window and scrolls with the wheel when its lines don't fit, and
+ * wrapped lines. (0.15.135) It stops at the bottom of the window and scrolls with the wheel when its lines don't fit, and
  * remembers where it was drawn so JEI keeps its item list clear of it ({@link #area()}).
  */
 final class SidePanel {
