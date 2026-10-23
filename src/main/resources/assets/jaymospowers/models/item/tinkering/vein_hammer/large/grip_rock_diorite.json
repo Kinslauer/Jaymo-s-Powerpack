@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:item/tinkering/large_tool",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/vein_hammer/large/grip_rock_diorite"
+  }
+}

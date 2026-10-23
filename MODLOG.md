@@ -2658,3 +2658,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (a save loaded at zero; one who quit on the death screen is marked `DIED` and left alone): the death they were owed
   comes, death screen and all. Each catch logs a WARN with the damage type, to find what turned the death away. Builds;
   not playtested.
+- **0.15.131, Tinkers' missing tables and weapons:** Andy asked whether Hephaestus (the Fabric Tinkers' Construct port)
+  could replace our Tinkering. It's MIT but stops at 1.20.1 (Mantle + Porting Lib), so its missing pieces were ported
+  into ours instead (Tinkers' code and textures, MIT; `license_tinkers_construct.txt`). Details and numbers:
+  `docs/Tinkering-Tables.md`, `docs/Tinkering-Weapons.md`.
+  - **Tool Forge** (Tinkers' anvil): 5 part slots; any tool of more than 3 parts is built only here (the Tool Station
+    says "Needs a Tool Forge"), so the sledge hammer and cleaver move to it. Recipe: 3 metal blocks over a Tool
+    Station over 3 seared bricks. **Crafting Station** (3x3 that keeps its grid), **Pattern Chest** (patterns and casts)
+    and **Part Chest** (parts and weapon heads), 54 slots each.
+  - **Side inventory and tabs:** a chest next to a Part Builder, Tool Station, Tool Forge or Crafting Station shows in a
+    panel at the left of its screen (Pattern/Part Chests first; chests, barrels and shulker boxes, never a locked one),
+    and tabs along the top hop between touching tables.
+  - **Ten melee tools/weapons:** dagger (off-hand swing on right click), kama and scythe (harvest and replant,
+    shear), broad axe (fells trees), excavator (3x3 shovel), vein hammer (ore veins), pickadze, war pick, minotaur axe
+    (sprint charge), battlesign (blocks, then bonks). New parts: broad axe head, tough binding. Area breaking is one
+    code path (`TraitEffects.areaBreak`, `ToolAreas`) and respects spawn protection; sneak breaks one block.
+  - **Ranged:** longbow and crossbow (draw speed, velocity, accuracy from their limbs, grip and string), tinker
+    arrows (4 a build), javelin, throwing axe, shuriken. New parts: bow limb, bow grip, bowstring, arrow head, arrow
+    shaft, fletching; new materials feather, leaves, blaze rod.
+  - Compile-checked (0 errors, JEI included); not playtested.

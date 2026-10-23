@@ -1,0 +1,10 @@
+{
+  "parent": "jaymospowers:block/tinkering/chest",
+  "textures": {
+    "side": "jaymospowers:block/tinkering/pattern_chest_side",
+    "front": "jaymospowers:block/tinkering/pattern_chest_front",
+    "top": "jaymospowers:block/tinkering/pattern_chest_top",
+    "drawer_front": "jaymospowers:block/tinkering/pattern_chest_drawer_front",
+    "drawer_side": "jaymospowers:block/tinkering/pattern_chest_drawer_side"
+  }
+}

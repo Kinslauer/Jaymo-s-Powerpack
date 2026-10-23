@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -54,6 +56,12 @@ public final class TraitEffects {
 	static final int XP_PER_BLOCK = 1, XP_PER_HIT = 1;
 	/** Wide swing: a block next to the one you broke goes too if it's at most this much harder. */
 	static final float AREA_HARDNESS_SLACK = 1.5F;
+	/** Charge Attack (minotaur axe): extra damage a level when you hit while sprinting. */
+	static final float CHARGE_ATTACK_DAMAGE = 3.0F;
+	/** War Charge (war pick): each block mined stacks a charge (up to this many, lost after this many ticks idle); the next hit
+	 * spends them all, this much extra damage each. */
+	static final int WAR_CHARGE_MAX = 5, WAR_CHARGE_TICKS = 100;
+	static final float WAR_CHARGE_DAMAGE = 1.5F;
 
 	/** Players with a magnet on: until when, and how far it reaches. */
 	private static final Map<UUID, long[]> MAGNETS = new HashMap<>();
@@ -61,11 +69,21 @@ public final class TraitEffects {
 	private static final Map<UUID, Direction> FACES = new HashMap<>();
 	/** Set while the wide swing breaks its extra blocks, so they don't swing again. */
 	private static boolean sweeping;
+	/** Each war pick holder's charges, and the game time they run out. */
+	private static final Map<UUID, long[]> WAR_CHARGES = new HashMap<>();
+	/** When each player last swung at something while sprinting (game time), for Charge Attack. */
+	private static final Map<UUID, Long> SPRINT_SWINGS = new HashMap<>();
 
 	private TraitEffects() {
 	}
 
 	static void init() {
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!level.isClientSide() && player.isSprinting()) {
+				SPRINT_SWINGS.put(player.getUUID(), level.getGameTime());
+			}
+			return InteractionResult.PASS;
+		});
 		// (0.8.76) Armory weapons level up from hits too
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player
@@ -77,11 +95,27 @@ public final class TraitEffects {
 			FACES.put(player.getUUID(), direction);
 			return InteractionResult.PASS;
 		});
+		// (0.15.x) Harvest: a grown crop broken with the kama or scythe is picked and replanted instead (sneak to break it)
+		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+			if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel && !serverPlayer.isShiftKeyDown()
+				&& ToolActions.matureCrop(state)) {
+				ItemStack held = serverPlayer.getMainHandItem();
+				ToolStats.Stats stats = ToolStats.isBroken(held) ? null : ToolStats.stats(held);
+				if (stats != null && stats.level(Trait.HARVEST) > 0 && ToolActions.harvest(serverLevel, serverPlayer, held, pos)) {
+					if (!sweeping) {
+						areaBreak(serverLevel, serverPlayer, pos, state);
+					}
+					return false;
+				}
+			}
+			return true;
+		});
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (!sweeping && player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel) {
-				wideSwing(serverLevel, serverPlayer, pos, state);
+				areaBreak(serverLevel, serverPlayer, pos, state);
 			}
 		});
+		ToolActions.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof LivingEntity killer && entity.level() instanceof ServerLevel level) {
 				ItemStack held = killer.getMainHandItem();
@@ -114,7 +148,7 @@ public final class TraitEffects {
 	}
 
 	/** After a hit lands: Piercing, Smite, Searing and Tempered add their damage. */
-	static void afterHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+	public static void afterHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (!(attacker.level() instanceof ServerLevel level) || ToolStats.isBroken(stack) || !target.isAlive()) {
 			return;
 		}
@@ -144,6 +178,23 @@ public final class TraitEffects {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), tempered * TEMPERED_ARMOR_PIERCE);
 		}
+		int charge = stats.level(Trait.CHARGE_ATTACK);
+		// a sprinting hit stops the sprint before this runs, so the swing's start is remembered (SPRINT_SWINGS)
+		boolean sprinted = attacker.isSprinting() || SPRINT_SWINGS.getOrDefault(attacker.getUUID(), -1L) == level.getGameTime();
+		if (charge > 0 && sprinted && target.isAlive()) {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
+				: level.damageSources().mobAttack(attacker), charge * CHARGE_ATTACK_DAMAGE);
+		}
+		if (stats.level(Trait.WAR_CHARGE) > 0 && target.isAlive()) {
+			long[] charges = WAR_CHARGES.remove(attacker.getUUID());
+			if (charges != null && charges[1] >= level.getGameTime() && charges[0] > 0) {
+				target.setInvulnerableTime(0);
+				target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
+					: level.damageSources().mobAttack(attacker), charges[0] * stats.level(Trait.WAR_CHARGE) * WAR_CHARGE_DAMAGE);
+			}
+		}
+		ToolActions.afterHit(stats, target, attacker);
 		tasty(stack, attacker, stats);
 		gainXp(stack, attacker, XP_PER_HIT);
 	}
@@ -155,6 +206,11 @@ public final class TraitEffects {
 			if (stats != null) {
 				magnet(owner, stats);
 				tasty(stack, owner, stats);
+				if (stats.level(Trait.WAR_CHARGE) > 0) {
+					long[] charges = WAR_CHARGES.computeIfAbsent(owner.getUUID(), id -> new long[2]);
+					charges[0] = charges[1] < level.getGameTime() ? 1 : Math.min(WAR_CHARGE_MAX, charges[0] + 1);
+					charges[1] = level.getGameTime() + WAR_CHARGE_TICKS;
+				}
 				gainXp(stack, owner, XP_PER_BLOCK);
 			}
 		}
@@ -206,39 +262,60 @@ public final class TraitEffects {
 		}
 	}
 
-	/** The sledge hammer breaks the 3x3 face around the block it broke (sneak to break just one). */
-	private static void wideSwing(ServerLevel level, ServerPlayer player, BlockPos center, BlockState centerState) {
+	/**
+	 * The tool's area: after a block is broken the tool takes the blocks of its area too ({@link ToolType#aoe}; the sledge
+	 * hammer's Wide Swing is the 3x3 face). They're broken as the player would (drops, wear, xp), and only the ones the tool
+	 * is right for. Sneak to break just one.
+	 */
+	private static void areaBreak(ServerLevel level, ServerPlayer player, BlockPos center, BlockState centerState) {
 		ItemStack held = player.getMainHandItem();
 		ToolStats.Stats stats = ToolStats.isBroken(held) ? null : ToolStats.stats(held);
-		if (stats == null || stats.level(Trait.AREA) <= 0 || player.isShiftKeyDown()) {
+		if (stats == null || player.isShiftKeyDown() || !(held.getItem() instanceof TinkerTool tool)) {
+			return;
+		}
+		// a tool with no area of its own but Wide Swing breaks the 3x3 face (the sledge hammer), as it always has
+		boolean legacy = tool.type().aoe.kind() == ToolType.Aoe.Kind.NONE;
+		ToolType.Aoe aoe = legacy ? ToolType.Aoe.FACE_3X3 : tool.type().aoe;
+		if (legacy && stats.level(Trait.AREA) <= 0) {
 			return;
 		}
 		Direction face = FACES.getOrDefault(player.getUUID(), Direction.UP);
 		float hardness = centerState.getDestroySpeed(level, center);
+		boolean plants = stats.level(Trait.HARVEST) > 0;
+		ToolAreas.Area area = ToolAreas.blocks(level, player, aoe, center, centerState, face);
+		boolean whole = area.whole();
 		sweeping = true;
 		try {
-			for (int a = -1; a <= 1; a++) {
-				for (int b = -1; b <= 1; b++) {
-					if (a == 0 && b == 0) {
-						continue;
-					}
-					BlockPos pos = switch (face.getAxis()) {
-						case Y -> center.offset(a, 0, b);
-						case X -> center.offset(0, a, b);
-						case Z -> center.offset(a, b, 0);
-					};
-					BlockState state = level.getBlockState(pos);
-					float h = state.getDestroySpeed(level, pos);
-					if (state.isAir() || h < 0 || h > hardness + AREA_HARDNESS_SLACK || !held.isCorrectToolForDrops(state)
-						|| ToolStats.isBroken(held)) {
-						continue;
-					}
+			for (BlockPos pos : area.blocks()) {
+				BlockState state = level.getBlockState(pos);
+				if (state.isAir() || ToolStats.isBroken(held)) {
+					continue;
+				}
+				float h = state.getDestroySpeed(level, pos);
+				boolean fits;
+				if (legacy) {
+					fits = h >= 0 && h <= hardness + AREA_HARDNESS_SLACK && held.isCorrectToolForDrops(state);
+				} else if (whole) {
+					fits = h >= 0 && held.isCorrectToolForDrops(state);
+				} else {
+					// the area takes what the tool is made for, never a chest or a half-grown crop
+					fits = h >= 0 && h <= hardness + AREA_HARDNESS_SLACK && !state.hasBlockEntity() && held.isCorrectToolForDrops(state)
+						&& (tool.type().mines.stream().anyMatch(state::is) || plants && h == 0.0F && reaped(state))
+						&& (!plants || !ToolActions.crop(state) || ToolActions.matureCrop(state));
+				}
+				// spawn protection and the world border apply to every block of the area, not just the one clicked
+				if (fits && level.mayInteract(player, pos)) {
 					player.gameMode.destroyBlock(pos);
 				}
 			}
 		} finally {
 			sweeping = false;
 		}
+	}
+
+	/** What a harvesting tool's area cuts besides its own blocks: crops, grass and flowers, never torches or redstone. */
+	private static boolean reaped(BlockState state) {
+		return ToolActions.crop(state) || state.is(BlockTags.REPLACEABLE) || state.is(BlockTags.FLOWERS);
 	}
 
 	private static ItemStack head(LivingEntity entity) {

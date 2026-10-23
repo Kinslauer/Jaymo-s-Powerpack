@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/crossbow",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/crossbow/limb_iron"
+  }
+}

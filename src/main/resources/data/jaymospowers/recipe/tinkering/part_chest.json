@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "p": "jaymospowers:pattern",
+    "s": "minecraft:stick",
+    "C": "minecraft:chest",
+    "w": "#minecraft:planks"
+  },
+  "pattern": [
+    " p ",
+    "sCs",
+    "sws"
+  ],
+  "result": {
+    "id": "jaymospowers:part_chest"
+  }
+}

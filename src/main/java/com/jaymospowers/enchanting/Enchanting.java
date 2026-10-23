@@ -1,7 +1,7 @@
 package com.jaymospowers.enchanting;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.TinkerTool;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,7 +158,7 @@ public final class Enchanting {
 	/** Whether the table takes this item at all. */
 	public static boolean enchantable(ItemStack stack) {
 		return stack.is(Items.BOOK) || stack.is(Items.ENCHANTED_BOOK)
-			|| stack.has(DataComponents.ENCHANTABLE) && !(stack.getItem() instanceof TinkerToolItem);
+			|| stack.has(DataComponents.ENCHANTABLE) && !(stack.getItem() instanceof TinkerTool);
 	}
 
 	/** How many enchantments (curses aside) this item holds, with this many curses on it. */
@@ -189,7 +189,7 @@ public final class Enchanting {
 
 	/** Whether the anvil's result holds more than its item may (and more than went in, so old items still repair). */
 	public static boolean overLimit(ItemStack result, ItemStack input) {
-		if (result.is(Items.ENCHANTED_BOOK) || result.getItem() instanceof TinkerToolItem) {
+		if (result.is(Items.ENCHANTED_BOOK) || result.getItem() instanceof TinkerTool) {
 			return false;
 		}
 		ItemEnchantments out = EnchantmentHelper.getEnchantmentsForCrafting(result);

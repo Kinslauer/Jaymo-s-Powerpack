@@ -175,7 +175,7 @@ public final class Finishers {
 		"guisarme", "voulge", "billhook"};
 	private static final String[] STAFF_WORDS = {"staff", "quarterstaff", "bo_staff"};
 	private static final String[] SPEAR_WORDS = {"spear", "lance", "pike", "trident", "javelin", "pilum"};
-	private static final String[] DAGGER_WORDS = {"dagger", "knife", "kunai", "tanto", "dirk", "stiletto", "misericorde", "shiv", "athame"};
+	private static final String[] DAGGER_WORDS = {"dagger", "knife", "kunai", "tanto", "dirk", "stiletto", "misericorde", "shiv", "athame", "kama"};
 	private static final String[] GREATSWORD_WORDS = {"claymore", "longsword", "greatsword", "great_sword", "broadsword", "zweihander", "flamberge",
 		"bastard_sword"};
 	private static final String[] SWORD_WORDS = {"sword", "katana", "saber", "sabre", "rapier", "cutlass", "scimitar", "falchion", "machete",
@@ -185,7 +185,7 @@ public final class Finishers {
 	private static final String[] GUN_WORDS = {"musket", "blunderbuss", "flintlock", "pistol", "rifle", "revolver", "arquebus", "handgun",
 		"shotgun"};
 	private static final String[] BLUNT_WORDS = {"mace", "hammer", "cudgel", "club", "flail", "morningstar", "morning_star", "maul", "sledge",
-		"mattock", "pickaxe", "scepter", "sceptre"};
+		"mattock", "pickaxe", "scepter", "sceptre", "excavator", "battlesign"};
 
 	/** The finisher being played: which, since when (game time), and on whom (entity id). Synced to everyone, not saved. */
 	public record Finish(int kind, long start, int target) {

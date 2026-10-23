@@ -1,6 +1,6 @@
 package com.jaymospowers.tinkering.mixin;
 
-import com.jaymospowers.tinkering.TinkerToolItem;
+import com.jaymospowers.tinkering.TinkerTool;
 import com.jaymospowers.tinkering.ToolStats;
 import java.util.function.Consumer;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
@@ -27,7 +27,7 @@ abstract class TinkerToolWearMixin {
 	private void jaymospowers$wearWithoutBreaking(int amount, ServerLevel level, @Nullable ServerPlayer player, Consumer<ItemStack> onBreak,
 		CallbackInfo ci) {
 		ItemStack self = (ItemStack) (Object) this;
-		if (!(self.getItem() instanceof TinkerToolItem)) {
+		if (!(self.getItem() instanceof TinkerTool)) {
 			return;
 		}
 		ci.cancel();

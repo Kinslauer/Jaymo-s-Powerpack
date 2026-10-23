@@ -1,10 +1,14 @@
 package com.jaymospowers.tinkering;
 
+import com.jaymospowers.tinkering.table.TableExtras;
+import com.jaymospowers.tinkering.table.Tables;
+import com.jaymospowers.tinkering.table.TinkerTableMenu;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Prediction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -12,6 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -23,24 +28,30 @@ import org.jspecify.annotations.Nullable;
  * too); a tool and a modifier's items adds a level of it ({@link Modifier}); a tool and one part it uses swaps that part
  * in, the old one is lost. (0.11.77) A weapon head and the parts its kind takes (a Tool Handle and a Tool Binding, mostly) make that
  * weapon ({@link WeaponParts}).
+ * <p>
+ * (Tool Forge) The same menu with 5 slots is the Tool Forge's ({@link #forge}): a tool of more than
+ * {@link Tables#STATION_MAX_PARTS} parts (or a weapon head with more than that in all) can only be put together there.
+ * Both have the side inventory and tabs ({@link TableExtras}).
  */
-public class ToolStationMenu extends AbstractContainerMenu {
+public class ToolStationMenu extends AbstractContainerMenu implements TinkerTableMenu {
 	public static final int INPUTS = 4, RESULT = 4;
 	/** Where the part slots sit, around the big result slot of Tinkers' screen. */
 	public static final int[][] SLOT_AT = {{53, 22}, {15, 60}, {33, 41}, {15, 22}};
+	/** The Tool Forge's five: the station's four corners and middle, after Tinkers' anvil. */
+	public static final int FORGE_INPUTS = 5;
+	public static final int[][] FORGE_SLOT_AT = {{53, 22}, {15, 60}, {33, 41}, {15, 22}, {53, 60}};
 	private final ContainerLevelAccess access;
+	private final StationBlock.Kind kind;
+	/** How many part slots this table has; the result slot comes next. */
+	private final int inputCount;
+	private final int[][] layout;
+	private final TableExtras extras;
 	/** For writing a modifier's enchantment onto the result. */
 	private final HolderLookup.Provider registries;
-	private final Container inputs = new SimpleContainer(INPUTS) {
-		@Override
-		public void setChanged() {
-			super.setChanged();
-			ToolStationMenu.this.slotsChanged(this);
-		}
-	};
+	private final Container inputs;
 	private final ResultContainer result = new ResultContainer();
 	/** How many of each input taking the result uses up. */
-	private int[] uses = new int[INPUTS];
+	private int[] uses;
 	/** What the station is doing, for the screen: null (nothing), or a line saying so. */
 	private @Nullable Component status;
 
@@ -50,11 +61,35 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	}
 
 	public ToolStationMenu(int id, Inventory inventory, ContainerLevelAccess access) {
-		super(Tinkering.TOOL_STATION_MENU, id);
+		this(Tinkering.TOOL_STATION_MENU, id, inventory, access, SLOT_AT, StationBlock.Kind.TOOL_STATION);
+	}
+
+	/** The Tool Forge's menu, client side. */
+	public static ToolStationMenu forge(int id, Inventory inventory) {
+		return forge(id, inventory, ContainerLevelAccess.NULL);
+	}
+
+	public static ToolStationMenu forge(int id, Inventory inventory, ContainerLevelAccess access) {
+		return new ToolStationMenu(Tables.TOOL_FORGE_MENU, id, inventory, access, FORGE_SLOT_AT, StationBlock.Kind.TOOL_FORGE);
+	}
+
+	private ToolStationMenu(MenuType<?> type, int id, Inventory inventory, ContainerLevelAccess access, int[][] layout, StationBlock.Kind kind) {
+		super(type, id);
 		this.access = access;
+		this.kind = kind;
+		this.layout = layout;
+		this.inputCount = layout.length;
+		this.uses = new int[inputCount];
+		this.inputs = new SimpleContainer(inputCount) {
+			@Override
+			public void setChanged() {
+				super.setChanged();
+				ToolStationMenu.this.slotsChanged(this);
+			}
+		};
 		this.registries = inventory.player.level().registryAccess();
-		for (int i = 0; i < INPUTS; i++) {
-			this.addSlot(new Slot(inputs, i, SLOT_AT[i][0], SLOT_AT[i][1]) {
+		for (int i = 0; i < inputCount; i++) {
+			this.addSlot(new Slot(inputs, i, layout[i][0], layout[i][1]) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
 					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof WeaponPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
@@ -62,7 +97,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 				}
 			});
 		}
-		this.addSlot(new Slot(result, RESULT, 114, 38) {
+		this.addSlot(new Slot(result, inputCount, 114, 38) {
 			@Override
 			public boolean mayPlace(ItemStack stack) {
 				return false;
@@ -71,7 +106,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			@Override
 			public void onTake(Player player, ItemStack carried) {
 				int[] used = uses;
-				for (int i = 0; i < INPUTS; i++) {
+				for (int i = 0; i < inputCount; i++) {
 					if (used[i] > 0) {
 						inputs.removeItem(i, used[i]);
 					}
@@ -81,7 +116,39 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			}
 		});
 		this.addStandardInventorySlots(inventory, 8, 102);
+		this.extras = new TableExtras(access, inventory.player, kind);
+		extras.slots().forEach(this::addSlot);
+		extras.data().forEach(this::addDataSlot);
 		StationEntity.open(access, inventory.player, inputs);
+	}
+
+	@Override
+	public TableExtras extras() {
+		return extras;
+	}
+
+	/** How many part slots there are (the result slot is the one after). */
+	public int inputCount() {
+		return inputCount;
+	}
+
+	public int resultSlot() {
+		return inputCount;
+	}
+
+	/** Where part slot {@code i} sits. */
+	public int[] slotAt(int i) {
+		return layout[i];
+	}
+
+	/** Most parts a tool can have to be put together here: 3 at the Tool Station, any at the Tool Forge. */
+	public int maxParts() {
+		return kind == StationBlock.Kind.TOOL_FORGE ? Integer.MAX_VALUE : Tables.STATION_MAX_PARTS;
+	}
+
+	/** (Tool Forge) The line for a tool that needs the Tool Forge, or null when this table can make it. */
+	private @Nullable Component forgeOnly(int parts) {
+		return parts > maxParts() ? Component.translatable("gui.jaymospowers.tool_station.needs_forge") : null;
 	}
 
 	public @Nullable Component status() {
@@ -98,11 +165,11 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	}
 
 	private void update() {
-		uses = new int[INPUTS];
+		uses = new int[inputCount];
 		status = null;
 		int toolSlot = -1;
 		int filled = 0;
-		for (int i = 0; i < INPUTS; i++) {
+		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);
 			if (!stack.isEmpty()) {
 				filled++;
@@ -123,7 +190,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		} else if (toolSlot == -1 && filled > 0) {
 			out = assemble();
 		}
-		result.setItem(RESULT, out);
+		result.setItem(inputCount, out);
 		broadcastChanges();
 	}
 
@@ -134,7 +201,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			return weapon;
 		}
 		List<Integer> parts = new ArrayList<>();
-		for (int i = 0; i < INPUTS; i++) {
+		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);
 			if (stack.isEmpty()) {
 				continue;
@@ -159,10 +226,17 @@ public class ToolStationMenu extends AbstractContainerMenu {
 				materials.add(ToolPartItem.material(inputs.getItem(match)));
 			}
 			if (materials.size() == type.parts.size()) {
+				Component forge = forgeOnly(type.parts.size());
+				if (forge != null) {
+					status = forge;
+					return ItemStack.EMPTY;
+				}
 				for (int i : parts) {
 					uses[i] = 1;
 				}
-				return ToolStats.build(type, materials);
+				ItemStack built = ToolStats.build(type, materials);
+				built.setCount(type.ranged.yield());
+				return built;
 			}
 		}
 		return ItemStack.EMPTY;
@@ -175,7 +249,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	private @Nullable ItemStack assembleWeapon() {
 		int head = -1;
 		List<PartType> others = new ArrayList<>();
-		for (int i = 0; i < INPUTS; i++) {
+		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);
 			if (stack.isEmpty()) {
 				continue;
@@ -204,7 +278,12 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		if (out == null || !needed.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		for (int i = 0; i < INPUTS; i++) {
+		Component forge = forgeOnly(others.size() + 1);
+		if (forge != null) {
+			status = forge;
+			return ItemStack.EMPTY;
+		}
+		for (int i = 0; i < inputCount; i++) {
 			if (!inputs.getItem(i).isEmpty()) {
 				uses[i] = 1;
 			}
@@ -215,27 +294,27 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	/** A damaged tool and its head material: as much repair as the material covers. */
 	private ItemStack repair(int toolSlot) {
 		ItemStack tool = inputs.getItem(toolSlot);
-		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerToolItem item)) {
+		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerTool item)) {
 			return ItemStack.EMPTY;
 		}
 		List<TinkerMaterial> materials = ToolStats.materials(tool);
 		List<TinkerMaterial> heads = new ArrayList<>();
-		for (int i = 0; i < item.type.parts.size(); i++) {
-			if (item.type.parts.get(i).part().kind == PartType.Kind.HEAD) {
+		for (int i = 0; i < item.type().parts.size(); i++) {
+			if (item.type().parts.get(i).part().kind == PartType.Kind.HEAD || item.type().parts.get(i).part().kind == PartType.Kind.LIMB) {
 				heads.add(materials.get(i));
 			}
 		}
 		int perUnit = ToolStats.repairPerUnit(tool);
 		int damage = tool.getDamageValue();
 		TinkerMaterial used = null;
-		for (int i = 0; i < INPUTS && damage > 0; i++) {
+		for (int i = 0; i < inputCount && damage > 0; i++) {
 			if (i == toolSlot || inputs.getItem(i).isEmpty()) {
 				continue;
 			}
 			ItemStack stack = inputs.getItem(i);
 			TinkerMaterial material = TinkerMaterial.of(stack);
 			if (material == null || material.stats == null || heads.stream().noneMatch(h -> h.stats == material.stats)) {
-				uses = new int[INPUTS];
+				uses = new int[inputCount];
 				return ItemStack.EMPTY;
 			}
 			used = material;
@@ -261,7 +340,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		ItemStack tool = inputs.getItem(toolSlot);
 		List<Item> others = new ArrayList<>();
 		List<Integer> slots = new ArrayList<>();
-		for (int i = 0; i < INPUTS; i++) {
+		for (int i = 0; i < inputCount; i++) {
 			if (i != toolSlot && !inputs.getItem(i).isEmpty()) {
 				others.add(inputs.getItem(i).getItem());
 				slots.add(i);
@@ -292,11 +371,11 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	/** A tool and one part it uses: that part swapped in (the first of its kind with another material). */
 	private ItemStack swap(int toolSlot) {
 		ItemStack tool = inputs.getItem(toolSlot);
-		if (!(tool.getItem() instanceof TinkerToolItem item)) {
+		if (!(tool.getItem() instanceof TinkerTool item)) {
 			return ItemStack.EMPTY;
 		}
 		int partSlot = -1;
-		for (int i = 0; i < INPUTS; i++) {
+		for (int i = 0; i < inputCount; i++) {
 			if (i != toolSlot && !inputs.getItem(i).isEmpty()) {
 				if (partSlot != -1 || !(inputs.getItem(i).getItem() instanceof ToolPartItem)) {
 					return ItemStack.EMPTY;
@@ -309,8 +388,8 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		TinkerMaterial material = ToolPartItem.material(partStack);
 		List<TinkerMaterial> materials = new ArrayList<>(ToolStats.materials(tool));
 		int target = -1;
-		for (int i = 0; i < item.type.parts.size(); i++) {
-			if (item.type.parts.get(i).part() == part && materials.get(i) != material && target == -1) {
+		for (int i = 0; i < item.type().parts.size(); i++) {
+			if (item.type().parts.get(i).part() == part && materials.get(i) != material && target == -1) {
 				target = i;
 			}
 		}
@@ -329,7 +408,12 @@ public class ToolStationMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return stillValid(access, player, Tinkering.TOOL_STATION);
+		return stillValid(access, player, kind.block()) && extras.stillValid(player);
+	}
+
+	@Override
+	public boolean clickMenuButton(Player player, int button) {
+		return extras.clickTab(player, button);
 	}
 
 	@Override
@@ -345,19 +429,33 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		}
 		ItemStack stack = slot.getItem();
 		ItemStack moved = stack.copy();
-		int end = this.slots.size();
-		if (index == RESULT) {
-			if (!this.moveItemStackTo(stack, RESULT + 1, end, true)) {
+		int resultAt = inputCount, playerStart = resultAt + 1, playerEnd = playerStart + 36;
+		if (index == resultAt) {
+			if (!this.moveItemStackTo(stack, playerStart, playerEnd, true)) {
 				return ItemStack.EMPTY;
+			}
+			// a build of several (arrows) that only partly fit: the rest goes to the player (or the floor), not lost
+			if (!stack.isEmpty()) {
+				ItemStack rest = stack.split(stack.getCount());
+				if (!player.level().isClientSide()) {
+					player.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+				}
 			}
 			slot.onTake(player, moved);
 			return moved;
 		}
-		if (index < INPUTS) {
-			if (!this.moveItemStackTo(stack, RESULT + 1, end, true)) {
+		if (index < inputCount) {
+			if (!this.moveItemStackTo(stack, playerStart, playerEnd, true)) {
 				return ItemStack.EMPTY;
 			}
-		} else if (!slots.get(0).mayPlace(stack) || !this.moveItemStackTo(stack, 0, INPUTS, false)) {
+		} else if (index >= extras.first()) {
+			// from the side inventory: into the station if it takes it, else to the player
+			if (!(slots.get(0).mayPlace(stack) && this.moveItemStackTo(stack, 0, inputCount, false))
+				&& !this.moveItemStackTo(stack, playerStart, playerEnd, false)) {
+				return ItemStack.EMPTY;
+			}
+		} else if (!(slots.get(0).mayPlace(stack) && this.moveItemStackTo(stack, 0, inputCount, false))
+			&& !(extras.size() > 0 && this.moveItemStackTo(stack, extras.first(), extras.end(), false))) {
 			return ItemStack.EMPTY;
 		}
 		if (stack.isEmpty()) {
@@ -371,6 +469,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
+		extras.removed(player);
 		StationEntity.close(access, player, inputs, () -> this.clearContainer(player, inputs));
 	}
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/longbow/limb_top_2_rose_gold"
+  }
+}
