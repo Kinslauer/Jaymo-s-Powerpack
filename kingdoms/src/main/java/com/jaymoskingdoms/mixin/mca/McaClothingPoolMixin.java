@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.ClothingLibrary;
+import com.jaymoskingdoms.Wardrobe;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.VillagerLike;
 import net.conczin.mca.resources.ClothingList;
@@ -10,7 +11,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.171) A villager's clothes come from MCA's clothing library: their job's, or a ruler's royal ones ({@link ClothingLibrary}). */
+/**
+ * (0.7.171) A villager's clothes come from MCA's clothing library: their job's, or a ruler's royal ones ({@link ClothingLibrary}).
+ * (0.7.177) MCA's own pick leaves out the banned, off-theme clothes ({@link Wardrobe}).
+ */
 @Mixin(ClothingList.class)
 abstract class McaClothingPoolMixin {
 	@Inject(method = "getPool(Lnet/conczin/mca/entity/VillagerLike;)Lnet/conczin/mca/resources/WeightedPool;", at = @At("HEAD"), cancellable = true)
@@ -20,6 +24,13 @@ abstract class McaClothingPoolMixin {
 			if (pool != null) {
 				cir.setReturnValue(pool);
 			}
+		}
+	}
+
+	@Inject(method = "getPool(Lnet/conczin/mca/entity/VillagerLike;)Lnet/conczin/mca/resources/WeightedPool;", at = @At("RETURN"), cancellable = true)
+	private void jaymoskingdoms$themed(VillagerLike<?> villager, CallbackInfoReturnable<WeightedPool<String>> cir) {
+		if (villager instanceof VillagerEntityMCA v && !v.level().isClientSide()) {
+			cir.setReturnValue(Wardrobe.filter(cir.getReturnValue(), v));
 		}
 	}
 }

@@ -250,6 +250,7 @@ public final class McaCompat {
 		if (LOADED) {
 			McaBridge.register();
 			ClothingLibrary.register();
+			Wardrobe.register();
 		}
 	}
 
