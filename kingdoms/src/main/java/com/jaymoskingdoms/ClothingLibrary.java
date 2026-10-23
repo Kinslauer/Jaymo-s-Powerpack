@@ -64,10 +64,12 @@ public final class ClothingLibrary {
 	/** How long a found list is good for before it's looked up again (ms). */
 	static final long REFRESH_MS = 24L * 60 * 60 * 1000;
 	static final int TIMEOUT_SECONDS = 15;
+	/** The saved list's form; an older one is looked up again. */
+	static final int VERSION = 2;
 
 	/** Each job's tags (by the path of its profession, or of the clothes MCA gives it, {@link Professions#clothes}). */
 	static final Map<String, List<String>> ALIASES = Map.ofEntries(
-		Map.entry("none", List.of("villager", "peasant", "commoner", "unemployed")),
+		Map.entry("none", List.of("peasant", "commoner", "unemployed")),
 		Map.entry("nitwit", List.of("nitwit", "beggar")),
 		Map.entry("armorer", List.of("armorer", "armourer", "blacksmith", "smith")),
 		Map.entry("butcher", List.of("butcher")),
@@ -98,6 +100,12 @@ public final class ClothingLibrary {
 	static final List<String> ROYAL = List.of("king", "queen", "royal", "royalty");
 	static final Set<String> FEMALE_TAGS = Set.of("female", "woman", "girl", "queen", "princess", "lady");
 	static final Set<String> MALE_TAGS = Set.of("male", "man", "boy", "king", "prince", "lord");
+	/**
+	 * (0.7.177) A job's library clothes need one of these tags too (rulers' royal ones don't): Andy wants only the
+	 * medieval look, and job tags alone brought hoodies and trainers.
+	 */
+	static final Set<String> THEME_TAGS = Set.of("medieval", "fantasy", "peasant", "knight", "viking", "renaissance", "tudor", "rustic",
+		"historical", "historic", "middle ages", "medieval fantasy", "rpg", "tunic", "robe", "armor", "armour", "elven", "dwarf", "nordic");
 	/** On a villager dressed once from the library. */
 	static final String TAG = "jaymoskingdoms.library_dressed";
 
@@ -152,9 +160,9 @@ public final class ClothingLibrary {
 			return null;
 		}
 		Gender gender = villager.getGenetics().getGender();
-		List<Entry> options = Rulers.is(villager) ? tagged(ROYAL, gender) : List.of();
+		List<Entry> options = Rulers.is(villager) ? tagged(ROYAL, gender, false) : List.of();
 		if (options.isEmpty()) {
-			options = tagged(tags(villager), gender);
+			options = tagged(tags(villager), gender, true);
 		}
 		if (options.size() < MIN_POOL && !Rulers.is(villager) || options.isEmpty()) {
 			return null;
@@ -186,10 +194,12 @@ public final class ClothingLibrary {
 		return List.copyOf(tags);
 	}
 
-	private static List<Entry> tagged(List<String> tags, Gender gender) {
+	/** The clothes with any of {@code tags} for {@code gender}: never banned or off-theme ({@link Wardrobe}), and tagged medieval if {@code themed}. */
+	private static List<Entry> tagged(List<String> tags, Gender gender, boolean themed) {
 		List<Entry> found = new ArrayList<>();
 		for (Entry e : entries.values()) {
-			if (e.fits(gender) && tags.stream().anyMatch(e.tags()::contains)) {
+			if (e.fits(gender) && tags.stream().anyMatch(e.tags()::contains) && !Wardrobe.banned(e.clothes()) && !Wardrobe.offTheme(e.tags())
+				&& (!themed || e.tags().stream().anyMatch(THEME_TAGS::contains))) {
 				found.add(e);
 			}
 		}
@@ -221,6 +231,20 @@ public final class ClothingLibrary {
 		}
 	}
 
+	/** (0.7.177) {@code clothes} are the library's and don't fit the medieval look (off-theme tags, or neither medieval nor royal). */
+	static boolean offTheme(@Nullable String clothes) {
+		if (clothes == null || !clothes.startsWith("immersive_library:")) {
+			return false;
+		}
+		try {
+			Entry e = entries.get(Integer.parseInt(clothes.substring("immersive_library:".length())));
+			return e != null && (Wardrobe.offTheme(e.tags())
+				|| e.tags().stream().noneMatch(t -> THEME_TAGS.contains(t) || ROYAL.contains(t)));
+		} catch (NumberFormatException ex) {
+			return false;
+		}
+	}
+
 	/** {@code villager} takes up a throne or leaves one: dressed again for it (unless their clothes are locked). */
 	static void ruled(VillagerEntityMCA villager) {
 		if (!entries.isEmpty() && !villager.isClothingLocked()) {
@@ -240,7 +264,8 @@ public final class ClothingLibrary {
 		try {
 			if (Files.exists(file())) {
 				JsonObject saved = JsonParser.parseString(Files.readString(file())).getAsJsonObject();
-				fetched = saved.has("fetched") ? saved.get("fetched").getAsLong() : 0L;
+				// (a list from before 0.7.177 didn't ask for the medieval ones: looked up again)
+				fetched = saved.has("fetched") && saved.has("version") && saved.get("version").getAsInt() >= VERSION ? saved.get("fetched").getAsLong() : 0L;
 				Map<Integer, Entry> found = new HashMap<>();
 				for (JsonElement e : saved.getAsJsonArray("entries")) {
 					Entry entry = GSON.fromJson(e, Entry.class);
@@ -267,8 +292,17 @@ public final class ClothingLibrary {
 		Set<String> tags = new LinkedHashSet<>(ROYAL);
 		ALIASES.values().forEach(tags::addAll);
 		try {
+			List<String[]> asks = new ArrayList<>();
 			for (String tag : tags) {
-				JsonObject list = get(client, "v2/content/mca", Map.of("whitelist", tag, "blacklist", "invalid,hair", "order", "likes",
+				asks.add(new String[] {tag, tag});
+				if (!ROYAL.contains(tag)) {
+					// (0.7.177: and the job's medieval ones, which the most liked of the job alone may not reach)
+					asks.add(new String[] {tag + ",medieval", tag});
+				}
+			}
+			for (String[] ask : asks) {
+				String tag = ask[1];
+				JsonObject list = get(client, "v2/content/mca", Map.of("whitelist", ask[0], "blacklist", "invalid,hair", "order", "likes",
 					"descending", "true", "offset", "0", "limit", Integer.toString(PER_TAG)));
 				if (list == null || !list.has("contents")) {
 					continue;
@@ -307,6 +341,7 @@ public final class ClothingLibrary {
 		try {
 			JsonObject out = new JsonObject();
 			out.addProperty("fetched", System.currentTimeMillis());
+			out.addProperty("version", VERSION);
 			JsonArray list = new JsonArray();
 			found.values().forEach(e -> list.add(GSON.toJsonTree(e)));
 			out.add("entries", list);
