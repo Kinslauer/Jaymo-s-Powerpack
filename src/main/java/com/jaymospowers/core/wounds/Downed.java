@@ -6,7 +6,6 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
-import com.jaymospowers.mixin.LivingEntityDeadAccessor;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.HashMap;
@@ -748,8 +747,12 @@ public final class Downed {
 	 */
 	private static void limbo(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (player.getHealth() <= 0.0F && !player.isSpectator() && !((LivingEntityDeadAccessor) player).jaymospowers$dead()
-				&& !player.hasAttached(DIED)) {
+			if (player.getHealth() > 0.0F) {
+				// ((0.15.140) alive after all: whatever death it marked is over)
+				if (player.hasAttached(DIED)) {
+					player.removeAttached(DIED);
+				}
+			} else if (!player.isSpectator() && !player.hasAttached(DIED)) {
 				limbo(player.level(), player, player.getLastDamageSource());
 			}
 		}
@@ -761,7 +764,9 @@ public final class Downed {
 	 * death they were owed, death screen and all.
 	 */
 	public static void limbo(ServerLevel level, LivingEntity entity, @Nullable DamageSource source) {
-		if (!(entity instanceof ServerPlayer player) || player.isSpectator()) {
+		// ((0.15.140) one who died properly is left to respawn: a player's die never sets vanilla's dead flag, so 0.15.130's
+		// check took every death for this and stood them back up, alive but turned away from the respawn)
+		if (!(entity instanceof ServerPlayer player) || player.isSpectator() || player.hasAttached(DIED)) {
 			return;
 		}
 		DamageSource cause = source != null ? source : FELLED_BY.getOrDefault(player, level.damageSources().generic());

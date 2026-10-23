@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -17,13 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(LivingEntity.class)
 abstract class DownedLimboMixin {
-	@Shadow
-	protected boolean dead;
-
 	@Inject(method = "hurtServer", at = @At("RETURN"))
 	private void jaymospowers$noLimbo(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (!this.dead && self.isDeadOrDying()) {
+		// ((0.15.140) whether it really died is Downed's to say: a player's die never sets vanilla's dead flag)
+		if (self.isDeadOrDying()) {
 			Downed.limbo(level, self, source);
 		}
 	}
