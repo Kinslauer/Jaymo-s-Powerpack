@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.177) Tells {@link McaSkinCover} which model is MCA's bare body (its skin layer's) and what the clothes drawn on
+ * (0.7.178) Tells {@link McaSkinCover} which model is MCA's bare body (its skin layer's) and what the clothes drawn on
  * each villager cover. Ahead of the other MCA layer mixins, so a disguise that drops the clothes still clears them.
  */
 @Mixin(value = VillagerLayer.class, priority = 900)

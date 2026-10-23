@@ -25,7 +25,7 @@ import net.minecraft.util.ARGB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.177) MCA's bare body isn't drawn where its clothes cover it whole (Andy: "the default skins are still being drawn
+ * (0.7.178) MCA's bare body isn't drawn where its clothes cover it whole (Andy: "the default skins are still being drawn
  * underneath the MCA villager custom and it is causing more clipping issues"). MCA draws a villager (and every player,
  * who is one: {@code McaVillagerBodyMixin}) as a bare skin-coloured body, then its clothes on a copy of that body only
  * 0.0625 of a pixel bigger. Each layer's model is posed from a copy of the body as the layers start and drawn later, so

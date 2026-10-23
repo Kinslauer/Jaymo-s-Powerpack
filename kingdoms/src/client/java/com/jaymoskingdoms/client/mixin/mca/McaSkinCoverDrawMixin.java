@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.177) Just before MCA's bare body is drawn, the parts its clothes cover go (McaSkinCover); shown again once drawn. */
+/** (0.7.178) Just before MCA's bare body is drawn, the parts its clothes cover go (McaSkinCover); shown again once drawn. */
 @Mixin(ModelFeatureRenderer.class)
 abstract class McaSkinCoverDrawMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE",

@@ -4331,7 +4331,7 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   courting, feuds and marriage go on with them (they had been left out of `Routines.freeOf`).
 - Not ported: the folk archers on posts (MCA's archers stand in). Compile-checked against the 26.3 jars; not yet seen in game.
 
-## 0.7.177: no Minecraft skin under the MCA villager body (pack 0.15.136)
+## 0.7.178: no Minecraft skin under the MCA villager body (pack 0.15.137)
 - Andy: "it looks like the default skins are still being drawn underneath the MCA villager custom and it is causing
   more clipping issues" (his account's Minecraft skin, seen in Time Flow's over-the-shoulder view).
 - Cause: MCA hides a villager-bodied player's own Minecraft body by giving LivingEntityRenderer.getRenderType no render

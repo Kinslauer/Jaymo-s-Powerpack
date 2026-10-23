@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.177) Andy: "the default skins are still being drawn underneath the MCA villager". MCA hides a villager-bodied
+ * (0.7.178) Andy: "the default skins are still being drawn underneath the MCA villager". MCA hides a villager-bodied
  * player's own Minecraft body by having LivingEntityRenderer.getRenderType give no render type. Shoulder Surfing
  * Reloaded gives AvatarRenderer its own getRenderType, which, while it fades the player in front of its camera (close
  * over the shoulder, as Time Flow holds the view), returns a see-through one of the player's Minecraft skin without
