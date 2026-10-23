@@ -85,6 +85,13 @@ public class AercloudGliderItem extends Item {
 			|| player.getCooldowns().isOnCooldown(stack)) {
 			return InteractionResult.PASS;
 		}
+		if (!com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)) {
+			// (0.15.136) held overhead in both hands: not with an arm gone (a broken one glides badly, LimbMotion)
+			if (level.isClientSide()) {
+				com.jaymospowers.core.wounds.LimbUse.refuse(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS);
+			}
+			return InteractionResult.FAIL;
+		}
 		if (!level.isClientSide() && player instanceof ServerPlayer sp) {
 			stack.hurtAndBreak(1, sp, hand);
 			if (stack.isEmpty()) {

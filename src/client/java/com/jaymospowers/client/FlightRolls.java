@@ -81,7 +81,7 @@ public final class FlightRolls {
 	}
 
 	/** Whether the local player is flying in one of the four flights that roll. */
-	private static boolean flying(LocalPlayer player) {
+	public static boolean flying(LocalPlayer player) {
 		if (player.onGround() || player.isPassenger() || player.isSpectator()) {
 			return false;
 		}
