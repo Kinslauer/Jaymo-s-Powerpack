@@ -8,6 +8,7 @@ import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Prediction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -432,6 +433,13 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 		if (index == resultAt) {
 			if (!this.moveItemStackTo(stack, playerStart, playerEnd, true)) {
 				return ItemStack.EMPTY;
+			}
+			// a build of several (arrows) that only partly fit: the rest goes to the player (or the floor), not lost
+			if (!stack.isEmpty()) {
+				ItemStack rest = stack.split(stack.getCount());
+				if (!player.level().isClientSide()) {
+					player.getInventory().placeItemBackInInventory(rest, Prediction.SERVER_ONLY);
+				}
 			}
 			slot.onTake(player, moved);
 			return moved;

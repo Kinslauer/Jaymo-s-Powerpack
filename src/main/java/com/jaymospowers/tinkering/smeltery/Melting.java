@@ -268,6 +268,9 @@ public final class Melting {
 					liquids.merge(molten, tool.type().parts.get(i).part().cost * Molten.INGOT, Integer::sum);
 				}
 			}
+			// one of a build of several (arrows, shuriken) holds only its share of the parts' metal
+			int yield = Math.max(1, tool.type().ranged.yield());
+			liquids.replaceAll((molten, amount) -> amount / yield);
 			return Result.of(liquids);
 		}
 		if (stack.getItem() instanceof CastItem) {
