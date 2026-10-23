@@ -2696,3 +2696,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and, as `die` had marked his client unloaded, most likely left him untouchable till a relog (`/kill` did nothing). Now only `Downed.DIED` (set as a player
   dies, at the end of `die`) says they died; the accessor is gone, and a player alive with `DIED` still on (anyone this
   caught) has it cleared. Builds; not playtested.
+- **0.15.141, a giant's camera:** Andy wanted big forms' camera to work like the Size Changing Mod (KProject; All
+  Rights Reserved, so only the idea), where a giant can still left-click to attack. The Great Ape's view from behind sat
+  ~7 blocks off to his right while his hits were aimed from his eyes, so the crosshair and what he hit didn't line up.
+  Now every player grown 1.6 times or more (`core/GiantReach.GIANT_FROM`: the Great Ape, a Behemoth...) seen from
+  behind gets `client/GiantCamera`: back 3.4 + 0.75 a block of height grown, up 0.1 + 0.12 a block, 0.9 to the right
+  (almost straight behind a giant), clipped by walls, in vanilla's F5 view and Shoulder Surfing's. The crosshair picks
+  along that camera's line from level with his eyes (`GiantPickMixin`, after vanilla's pick), so a click lands on what
+  it's over when it's within his reach of his eyes, as the server checks. `GiantReach` grows reach with size: +3 for
+  hitting and +4.5 for blocks per 1 of scale past 1 (at most +30; the ape keeps his own reach for hitting). Spirit
+  Bomb's pull-out and Time Flow's shoulder view still take over. First person stays in the (scaled) eyes. Compile-
+  checked; not playtested.

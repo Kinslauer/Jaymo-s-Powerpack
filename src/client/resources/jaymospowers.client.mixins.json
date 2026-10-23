@@ -33,6 +33,8 @@
 		"LimbKeysMixin",
 		"CarryCameraMixin",
 		"HeadCamMixin",
+		"GiantCameraMixin",
+		"GiantPickMixin",
 		"CarryFirstPersonMixin",
 		"PowerArmsFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
