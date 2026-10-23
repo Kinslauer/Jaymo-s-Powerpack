@@ -139,6 +139,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		boolean corrupted = Fate.isCorrupted(player);
 		int x = graphics.guiWidth() / 2 + 98;
 		int y = graphics.guiHeight() - (corrupted ? 34 : 45);
+		// the first ability row: Hundred Blades and the pin stack above it, never over it
+		int top = y;
 
 		row(graphics, font, x, y, PowerKey.ABILITY_1, "hud.jaymospowers.arsenal.reach", cd.reach() - now, ArsenalPower.REACH_COOLDOWN);
 		if (corrupted) {
@@ -169,12 +171,12 @@ public final class ArsenalPowerClient implements PowerClient {
 		}
 		// ascended: Hundred Blades on the ultimate key, above the others; and what the Armory has pinned
 		if (Fate.isAscended(player)) {
-			ultimateRow(graphics, font, x, y - 11, cd.ultimate() - now);
+			ultimateRow(graphics, font, x, top - 11, cd.ultimate() - now);
 			Item pin = ArsenalArmory.pinned(player);
 			if (pin != null) {
 				Component pinned = Component.translatable("hud.jaymospowers.arsenal.pinned", new ItemStack(pin).getHoverName());
-				graphics.fill(x - 2, y - 23, x + font.width(pinned) + 2, y - 13, 0x60000000);
-				graphics.text(font, pinned, x, y - 22, 0xFFE8C860, true);
+				graphics.fill(x - 2, top - 23, x + font.width(pinned) + 2, top - 13, 0x60000000);
+				graphics.text(font, pinned, x, top - 22, 0xFFE8C860, true);
 			}
 		}
 

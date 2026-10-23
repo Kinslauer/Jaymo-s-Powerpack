@@ -10,6 +10,7 @@ import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,13 +22,14 @@ import org.jspecify.annotations.Nullable;
  * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots. (Tool Forge) The same screen draws
  * the Tool Forge's five slots; both have the side inventory and tabs ({@link TableUi}).
  */
-public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> {
+public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> implements TableAreas {
 	/** (0.8.125) Andy: an empty station shows each tool's parts in turn, this long apiece. */
 	static final long GHOST_CYCLE_MS = 1500L;
 	/** Laid over a ghost part so it reads as a faint outline: the slot's own dark, mostly opaque. */
 	static final int GHOST_FADE = 0xA80C0C12;
 	/** The tool whose outlines are showing (named in the recipe list), or null. */
 	private @Nullable ToolType shown;
+	private final SidePanel info = new SidePanel();
 
 	public ToolStationScreen(ToolStationMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title, 176, 184);
@@ -58,10 +60,10 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			}
 			lines.addAll(result.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(minecraft.level), minecraft.player,
 				net.minecraft.world.item.TooltipFlag.Default.NORMAL).stream().skip(1).toList());
-			SidePanel.draw(graphics, font, infoX, topPos, result.getHoverName(), lines);
+			info.draw(graphics, font, infoX, topPos, height, result.getHoverName(), lines);
 		} else if (menu.status() != null) {
 			// why a modifier won't go on (no slots, at its max, doesn't fit a weapon)
-			SidePanel.draw(graphics, font, infoX, topPos,
+			info.draw(graphics, font, infoX, topPos, height,
 				menu.status().copy().withStyle(net.minecraft.ChatFormatting.RED), List.of());
 		} else {
 			List<Component> lines = new ArrayList<>();
@@ -85,7 +87,7 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			if (skipped) {
 				lines.add(Component.translatable("gui.jaymospowers.tool_station.forge_hint").withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
-			SidePanel.draw(graphics, font, infoX, topPos, Component.translatable("gui.jaymospowers.tool_station.recipes"), lines);
+			info.draw(graphics, font, infoX, topPos, height, Component.translatable("gui.jaymospowers.tool_station.recipes"), lines);
 		}
 	}
 
@@ -165,8 +167,18 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 	}
 
 	@Override
+	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+		return info.scroll(x, y, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
+	}
+
+	@Override
+	public List<Rect2i> extraAreas() {
+		return TableUi.areas(menu.extras(), leftPos, topPos, info);
+	}
+
+	@Override
 	protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
 		// the side inventory's slots lie left of the screen: clicks there aren't drops
-		return !TableUi.inSide(menu.extras(), left, top, mouseX, mouseY) && super.hasClickedOutside(mouseX, mouseY, left, top);
+		return !TableUi.inSide(menu.extras(), left, top, mouseX, mouseY) && !info.contains(mouseX, mouseY) && super.hasClickedOutside(mouseX, mouseY, left, top);
 	}
 }

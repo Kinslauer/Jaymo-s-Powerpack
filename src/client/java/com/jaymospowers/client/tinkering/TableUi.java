@@ -6,9 +6,11 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * What every Tinkers table screen draws besides its own (Tinkers' signature UX): the side inventory's panel at the left
@@ -46,6 +48,29 @@ final class TableUi {
 			}
 			graphics.item(new ItemStack(tabs.get(i).block()), x + 6, y + 6);
 		}
+	}
+
+	/** The side inventory's panel, for JEI to keep clear of, or null without one. */
+	static @Nullable Rect2i sideArea(TableExtras extras, int left, int top) {
+		if (extras.size() == 0) {
+			return null;
+		}
+		int rows = (extras.size() + TableExtras.SIDE_COLUMNS - 1) / TableExtras.SIDE_COLUMNS;
+		return new Rect2i(left + TableExtras.SIDE_X - SidePanel.PAD - 1, top, SidePanel.WIDTH, TableExtras.SIDE_Y + rows * 18 + 4);
+	}
+
+	/** The side inventory's panel and the info panel, wherever they're drawn. */
+	static List<Rect2i> areas(TableExtras extras, int left, int top, @Nullable SidePanel info) {
+		List<Rect2i> areas = new java.util.ArrayList<>(2);
+		Rect2i side = sideArea(extras, left, top);
+		if (side != null) {
+			areas.add(side);
+		}
+		Rect2i panel = info == null ? null : info.area();
+		if (panel != null) {
+			areas.add(panel);
+		}
+		return areas;
 	}
 
 	/** Whether the mouse is over the side inventory's panel (which lies outside the screen's own image). */
