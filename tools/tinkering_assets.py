@@ -728,8 +728,7 @@ def smeltery(tcon):
         copy_png(os.path.join(tex, "item", "cast", CAST_SPRITE.get(cast, cast) + ".png"), "item/tinkering/cast/" + cast)
         model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
         write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
-    # (0.11.77) the weapon cast looks like the small blade's (weapon heads: tools/weapon_parts_assets.py)
-    write(os.path.join(ASSETS, "items", "weapon_cast.json"), {"model": ref("item/tinkering/cast/small_blade")})
+    # (0.15.138) the weapon cast's look (one per redrawn head, else the small blade's) is written by tools/weapon_parts_assets.py
 
     # molten metal: animated in the world (block atlas), its first frame for the screen
     def save_molten(im, mcmeta, mid):

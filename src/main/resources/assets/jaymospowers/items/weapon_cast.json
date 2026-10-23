@@ -1,6 +1,125 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "jaymospowers:item/tinkering/cast/small_blade"
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymospowers:weapon_cast",
+    "cases": [
+      {
+        "when": "dagger_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/dagger_blade"
+        }
+      },
+      {
+        "when": "skewer_head",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/skewer_head"
+        }
+      },
+      {
+        "when": "longsword_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/longsword_blade"
+        }
+      },
+      {
+        "when": "glaive_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/glaive_blade"
+        }
+      },
+      {
+        "when": "lance_tip",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/lance_tip"
+        }
+      },
+      {
+        "when": "broadsword_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/broadsword_blade"
+        }
+      },
+      {
+        "when": "claymore_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/claymore_blade"
+        }
+      },
+      {
+        "when": "cleaver_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/cleaver_blade"
+        }
+      },
+      {
+        "when": "ninjato_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/ninjato_blade"
+        }
+      },
+      {
+        "when": "saber_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/saber_blade"
+        }
+      },
+      {
+        "when": "harpoon_head",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/harpoon_head"
+        }
+      },
+      {
+        "when": "spear_tip",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/spear_tip"
+        }
+      },
+      {
+        "when": "knife_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/knife_blade"
+        }
+      },
+      {
+        "when": "spear_head",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/spear_head"
+        }
+      },
+      {
+        "when": "halberd_head",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/halberd_head"
+        }
+      },
+      {
+        "when": "katana_blade",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cast/katana_blade"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/tinkering/cast/small_blade"
+    }
   }
 }

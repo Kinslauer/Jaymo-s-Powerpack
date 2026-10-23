@@ -116,6 +116,13 @@ DRAWN = {
 # outline, metal, shine
 DRAWN_COLOURS = {"iron": ((60, 60, 64), (160, 162, 166), (226, 228, 230)),
                  "copper": ((96, 42, 26), (196, 108, 74), (242, 170, 128))}
+# (0.15.138) Andy's redrawn iron heads (made with Gemini), 16x16 so each fills its own weapon cast 1:1. They replace the
+# cut sprites for these parts; the other metals are the iron one recoloured. Kept in tools/redrawn_heads/<part>.png, with
+# the gold Weapon Cast of each in tools/redrawn_heads/cast/<part>.png (the cast shows its head's shape).
+REDRAWN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "redrawn_heads")
+# dark to light, for recolouring a redrawn iron head
+RAMPS = {"gold": ((92, 46, 6), (182, 111, 24), (237, 200, 52), (255, 250, 170)),
+         "copper": ((80, 34, 20), (156, 78, 46), (210, 120, 82), (246, 182, 140))}
 METAL_NAMES = {"stone": "Stone", "iron": "Iron", "gold": "Gold", "copper": "Copper"}
 ARMORY_TIER = {"stone": "stone", "iron": "iron", "gold": "golden"}
 
@@ -207,6 +214,25 @@ def tidy(img):
     return centred
 
 
+def recoloured(img, ramp):
+    """A grey head recoloured along a dark-to-light ramp by brightness."""
+    out = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    for y in range(img.size[1]):
+        for x in range(img.size[0]):
+            r, g, b, a = img.getpixel((x, y))
+            if a > 0:
+                t = (0.3 * r + 0.59 * g + 0.11 * b) / 255.0 * (len(ramp) - 1)
+                i = min(int(t), len(ramp) - 2)
+                f = t - i
+                out.putpixel((x, y), tuple(int(ramp[i][c] + (ramp[i + 1][c] - ramp[i][c]) * f) for c in range(3)) + (a,))
+    return out
+
+
+def redrawn(part, metals):
+    iron = load(os.path.join(REDRAWN, part + ".png"))
+    return {"stone": as_stone(iron), "iron": iron, **{m: recoloured(iron, RAMPS[m]) for m in metals if m in RAMPS}}
+
+
 def drawn(name, metal):
     out = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     colours = dict(zip("#xo", DRAWN_COLOURS[metal]))
@@ -245,7 +271,7 @@ def main(balkon):
     shutil.rmtree(os.path.join(ASSETS, "models", OUT), ignore_errors=True)
     lang = {"weapon_metal.jaymospowers." + m: n for m, n in METAL_NAMES.items()}
     for part, name, source, metals in PARTS:
-        heads = sprites(source, balkon)
+        heads = redrawn(part, metals) if os.path.exists(os.path.join(REDRAWN, part + ".png")) else sprites(source, balkon)
         cases = []
         for metal in ["stone"] + metals:
             path = OUT + part + "_" + metal
@@ -270,11 +296,28 @@ def main(balkon):
         "tooltip.jaymospowers.tinkering.weapon_part.cast_only": "Only for making its cast (pour gold over it).",
     })
     write(os.path.join(ASSETS, "lang", "parts", "weapon_parts.json"), lang)
+    weapon_casts()
     with open(os.path.join(tex_dir, "LICENSE-WeaponMod.txt"), "w", newline="\n") as f:
         f.write("The Balkon's WeaponMod parts here are cut from Balkon's WeaponMod: Legacy's sprites, under its MIT License:\n\n")
         with open(os.path.join(balkon, "LICENSE")) as src:
             f.write(src.read())
     # Armory parts are cut from Age of Weapons sprites (MIT); its notice is in textures/item/armory
+
+
+def weapon_casts():
+    """The Weapon Cast item looks like its head's own cast (by the weapon_cast component), else the small blade's."""
+    cast = "item/tinkering/cast/"
+    cases = []
+    for part, _, _, _ in PARTS:
+        src = os.path.join(REDRAWN, "cast", part + ".png")
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(ASSETS, "textures", cast + part + ".png"))
+            write(os.path.join(ASSETS, "models", cast + part + ".json"),
+                  {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymospowers:" + cast + part}})
+            cases.append({"when": part, "model": {"type": "minecraft:model", "model": "jaymospowers:" + cast + part}})
+    write(os.path.join(ASSETS, "items", "weapon_cast.json"), {"model": {
+        "type": "minecraft:select", "property": "minecraft:component", "component": "jaymospowers:weapon_cast",
+        "cases": cases, "fallback": {"type": "minecraft:model", "model": "jaymospowers:" + cast + "small_blade"}}})
 
 
 if __name__ == "__main__":
