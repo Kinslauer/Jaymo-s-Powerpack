@@ -134,6 +134,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Identities.register();
 		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
 		CharacterNames.register();
+		// 0.7.180: names over heads only once you've been told them (and its attachments)
+		Introductions.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
