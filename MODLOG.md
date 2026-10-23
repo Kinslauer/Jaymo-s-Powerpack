@@ -2689,3 +2689,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.15.137, no Minecraft skin under the MCA body:** pack bump for Kingdoms 0.7.178 (Shoulder Surfing's see-through
   close-camera view drew your Minecraft skin under MCA's villager body; MCA's bare body is also hidden under clothes
   that cover it).
+- **0.15.138, new weapon heads and their own casts:** Andy's texture pack (Gemini) reshapes 16 forged weapon heads to fill a
+  16x16 cast cavity (broadsword, claymore, cleaver, dagger, glaive, halberd, harpoon, katana, knife, lance, longsword,
+  ninjato, saber, skewer, spear head, spear tip), iron only; gold, copper and stone are recoloured from it by shade
+  (`tools/import_weapon_heads.py`, run after `weapon_parts_assets.py`, which would put the old heads back). Each of
+  those 16 Weapon Casts now shows its own mould (`items/weapon_cast.json` selects on the `weapon_cast` component; other
+  kinds keep the small blade's). The pack's other 53 textures were already ours, unchanged.
