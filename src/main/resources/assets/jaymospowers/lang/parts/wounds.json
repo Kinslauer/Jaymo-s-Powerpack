@@ -143,5 +143,7 @@
 	"screen.jaymospowers.wounds.look": "Your wounds",
 	"screen.jaymospowers.wounds.look_sub": "Hold a bandage, splint or the like to treat from here.",
 	"screen.jaymospowers.wounds.look_help": "Hover a part to see how whole it is, and whether it's broken, bleeding or festering.",
-	"button.jaymospowers.wounds.body": "Your wounds"
+	"button.jaymospowers.wounds.body": "Your wounds",
+	"message.jaymospowers.limbs.gone": "%s gone: you can't do that without it",
+	"message.jaymospowers.limbs.no_arms": "No arms left to do that with"
 }

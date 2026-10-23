@@ -732,6 +732,10 @@ public final class WebPower implements Power {
 		if (!Powers.has(player, this) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		if (open && !com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)) {
+			// (0.15.136) spread between the arms: not with one gone
+			return;
+		}
 		State state = state(player);
 		if (open) {
 			state.wingsTicks = 1;

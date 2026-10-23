@@ -163,6 +163,11 @@ public final class WindKick {
 			|| WindCyclone.isActive(player)) {
 			return;
 		}
+		if (!com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.LEGS)) {
+			// (0.15.136) a kick, so not with a leg gone
+			com.jaymospowers.core.wounds.LimbUse.refuse(player, com.jaymospowers.core.wounds.LimbUse.LEGS);
+			return;
+		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		if (now < READY_AT.getOrDefault(player.getUUID(), 0L)) {
@@ -190,7 +195,10 @@ public final class WindKick {
 		if (player.onGround() && look.y < 0.0) {
 			look = new Vec3(look.x, 0.0, look.z);
 		}
-		return look.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : look.normalize();
+		// (0.15.136) off a broken leg the crescent goes wide
+		look = look.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : look.normalize();
+		float spread = com.jaymospowers.core.wounds.LimbUse.spread(player, com.jaymospowers.core.wounds.LimbUse.LEGS) * net.minecraft.util.Mth.DEG_TO_RAD;
+		return spread <= 0.0F ? look : look.yRot((player.getRandom().nextFloat() * 2.0F - 1.0F) * spread);
 	}
 
 	private static Vec3 side(ServerPlayer player) {

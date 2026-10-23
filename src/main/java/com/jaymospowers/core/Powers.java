@@ -3,6 +3,7 @@ package com.jaymospowers.core;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.wounds.LimbUse;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -230,9 +231,16 @@ public final class Powers {
 		if (down && power != null && silenced(player)) {
 			return;
 		}
+		// (0.15.136) a press the body can't make (a severed limb the ability is done with) never starts, and its release
+		// is swallowed too
+		int need = LimbUse.need(power, player, LimbUse.slot(key));
+		if (refusedByLimbs(player, key.ordinal(), need, down)) {
+			return;
+		}
 		PowerInput.set(player, key, down);
 		if (power != null && player.isAlive() && !player.isSpectator()) {
-			power.onKey(player, key, down);
+			// a broken one throws the aim off
+			LimbUse.aimed(player, need, () -> power.onKey(player, key, down));
 			if (down) {
 				Mastery.used(player);
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
@@ -246,8 +254,12 @@ public final class Powers {
 		if (down && power != null && silenced(player)) {
 			return;
 		}
+		int need = LimbUse.need(power, player, "mode");
+		if (refusedByLimbs(player, MODE_BIT, need, down)) {
+			return;
+		}
 		if (power != null && player.isAlive() && !player.isSpectator()) {
-			power.onMode(player, down);
+			LimbUse.aimed(player, need, () -> power.onMode(player, down));
 			if (down) {
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
 			}
@@ -262,11 +274,46 @@ public final class Powers {
 		}
 		if (power != null && power.ultimateAnswers(player) && player.isAlive()
 			&& !player.isSpectator()) {
-			power.onUltimate(player, down);
+			int need = LimbUse.need(power, player, "ultimate");
+			if (refusedByLimbs(player, ULTIMATE_BIT, need, down)) {
+				return;
+			}
+			LimbUse.aimed(player, need, () -> power.onUltimate(player, down));
 			if (down) {
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
 			}
 		}
+	}
+
+	/** (0.15.136) {@link #REFUSED}'s bits past the four ability keys. */
+	private static final int MODE_BIT = 4, ULTIMATE_BIT = 5;
+	/** (0.15.136) The keys each player pressed that their limbs refused (bits), so the release is swallowed as well. */
+	private static final Map<java.util.UUID, Integer> REFUSED = new java.util.HashMap<>();
+
+	/**
+	 * (0.15.136) Whether this press (or its release) is refused because a limb {@code need} asks for is severed
+	 * ({@link LimbUse}); a refused press says why.
+	 */
+	private static boolean refusedByLimbs(ServerPlayer player, int bit, int need, boolean down) {
+		int refused = REFUSED.getOrDefault(player.getUUID(), 0);
+		if (!down) {
+			if ((refused & 1 << bit) == 0) {
+				return false;
+			}
+			refused &= ~(1 << bit);
+			if (refused == 0) {
+				REFUSED.remove(player.getUUID());
+			} else {
+				REFUSED.put(player.getUUID(), refused);
+			}
+			return true;
+		}
+		if (LimbUse.usable(player, need)) {
+			return false;
+		}
+		REFUSED.put(player.getUUID(), refused | 1 << bit);
+		LimbUse.refuse(player, need);
+		return true;
 	}
 
 	/** From the powers screen: creative players (and operators) may pick any power, or none. */

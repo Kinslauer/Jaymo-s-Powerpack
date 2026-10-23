@@ -1111,7 +1111,8 @@ public final class WebSwing {
 			wingsNeedRelease = false;
 		}
 		boolean air = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying();
-		if (!jump || !air || attached() || wingsTicks > 0 || wingsNeedRelease) {
+		// (0.15.136) the wings are spread between the arms: with one gone they won't open
+		if (!jump || !air || attached() || wingsTicks > 0 || wingsNeedRelease || !com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)) {
 			jumpHeldAir = 0;
 			return;
 		}
