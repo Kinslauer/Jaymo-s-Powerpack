@@ -2715,3 +2715,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.149, Lost Cities in the future:** Andy picked shipping The Lost Cities (MIT, McJty; github.com/McJtyMods/LostCities)
+  unchanged and pointing it at the Chrono future. McJty's own 26.3 Fabric build (26.3-12.0.0-fabric, CurseForge
+  269024/9277225) is in `packMods`; it needs Forge Config API Port, already there. `future/FutureCities` registers its
+  `ancient` profile for `jaymospowers:future` on each server start (by reflection; Lost Cities forgets between starts)
+  and adds its city feature to the `future_ruins` biome only. The overworld is untouched unless a world is made with a
+  Lost Cities profile. The future's generator is now overworld noise with the fixed `future_ruins` biome instead of a
+  flat sea, so beyond Los Perrito the land runs on as ruined city; with Lost Cities loaded those chunks decay like the
+  island's (`FutureRuins`). Lost Cities' own bed-and-skulls trip to its `lostcities:lostcity` dimension now needs
+  bedrock under the bed. Details in docs/chrono.md. Not built or playtested here (the cloud can't reach Fabric's Maven).
