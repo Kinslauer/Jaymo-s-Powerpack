@@ -38,6 +38,13 @@ import net.minecraft.util.Mth;
  * gathers, its tip swelling into the weapon head ({@link #heads}, the same heads as the arm's), then the strike lashes
  * through it: a wind-up of its own for each weapon, the lash rolling out root first with the tip trailing, a ripple
  * back up it at the impact, and back to rest ({@code TendrilModel.morph}).
+ *
+ * <p>Out of the goo (Andy: "too often the tendrils just look like a backpack"): each tendril grows out of one of the
+ * living globs crawling over the body ({@link WebGooGlobs}), on the torso, the shoulders, the arms and the legs, out
+ * along the surface's outward way and riding that limb's pose. A tendril on a job that needs its old root ({@link #ROOTS}:
+ * a strike, the weapon, walking you up a wall, a tether, a barrage stab, a grab; everything in first person) has its
+ * glob flow over to it first. Struck while they're out ({@link WebSymbioteClient#FLAIL}), every free one thrashes wildly
+ * out from its glob, stretched long, for as long as the server's flail lasts ({@link WebSymbiote#FLAIL_TICKS}).
  */
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
@@ -85,6 +92,19 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float FLAIL_YAW = 0.9F, FLAIL_PITCH = 0.85F, FLAIL_SPEED = 0.9F, FLING_WIDE = 2.0F, FLING_STRETCH = 0.55F;
 	/** They're flung out over this share of the roar, just before it lands. */
 	private static final float FLING_LEAD = 0.1F;
+
+	// ---- out of the goo (WebGooGlobs) ----
+	/** A tendril out of a glob starts this far below its glob's outward way (radians; it curls back up as the old ones do). */
+	private static final float GLOB_TILT = -0.4F;
+	/** On the move, a glob's tendril swings this far (0-1) from its outward way round to straight back, streaming behind you. */
+	private static final float GLOB_DRAG = 0.6F;
+	/**
+	 * Struck (the hit flail, {@link WebSymbioteClient#FLAIL}): every free tendril thrashes this wildly (radians of yaw
+	 * and pitch round its outward way) at this speed, stretched this much longer, its segments whipping this hard;
+	 * easing back over the flail's last {@code HIT_FLAIL_EASE} ticks.
+	 */
+	private static final float HIT_FLAIL_YAW = 1.1F, HIT_FLAIL_PITCH = 1.0F, HIT_FLAIL_SPEED = 1.6F, HIT_FLAIL_STRETCH = 0.5F;
+	private static final float HIT_FLAIL_WHIP = 0.6F, HIT_FLAIL_EASE = 8.0F;
 
 	// ---- strikes ----
 	/** A slam: reared to this elevation (radians; past straight up, so it's over the head), and it comes down this far below the target. */
@@ -192,6 +212,9 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		poseStack.pushPose();
 		// rooted to the torso, so they lean with a crouch (or the hunch)
 		WebFeral.applyModel(this.getParentModel(), state);
+		// the goo they grow out of (it puts their roots on the state for the model)
+		WebGooGlobs.submit(poseStack, collector, lightCoords, state, this.getParentModel(), tendrils, ROOTS, onJob(state, tendrils),
+			WebStrainLook.texture(TEXTURE, state));
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
@@ -202,6 +225,31 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		}
 		heads(this.model, state, poseStack, collector, state.lightCoords);
 		poseStack.popPose();
+	}
+
+	/**
+	 * Which tendrils are on a job that needs their old root ({@link #ROOTS}) right now, so their globs flow over to it:
+	 * the upper ones striking (a strike, a combo, the weapon), the barrage's stabbers, the walkers and the spares walking
+	 * you up a wall, the tethered ones, the top two while they hold something (WebLineRenderer draws those from the old
+	 * roots), and all of them reaching for a wall or in your own first person.
+	 */
+	private static boolean[] onJob(AvatarRenderState state, WebSymbioteClient.Tendrils tendrils) {
+		boolean[] out = new boolean[ROOTS.length];
+		boolean all = tendrils.firstPerson() || tendrils.wall() != 0;
+		float[] legs = tendrils.legs();
+		WebMorphLayer.Strike strike = state.getData(WebMorphLayer.KEY);
+		WebMorphLayer.Gather gather = state.getData(WebMorphLayer.GATHER);
+		boolean morph = strike != null && strike.tendril() || gather != null && gather.tendril();
+		boolean striking = tendrils.strike() >= 0.0F || tendrils.combo() >= 0 || morph;
+		int[] stabbers = legs == null ? BARRAGE_FREE : BARRAGE_FREE_WALKING;
+		for (int t = 0; t < ROOTS.length; t++) {
+			boolean walking = legs != null && (t >= FIRST_SPARE || legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F);
+			boolean stab = tendrils.combo() == WebTendrilCombos.BARRAGE && (t == stabbers[0] || t == stabbers[1]);
+			boolean holding = t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0;
+			out[t] = all || walking || stab || holding || tendrils.tethers() != null && t >= FIRST_TETHER
+				|| striking && ROOTS[t][1] < UPPER_ROOT_Y;
+		}
+		return out;
 	}
 
 	/**
@@ -342,6 +390,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			strike.aimYaw() - avatar.yRot * Mth.DEG_TO_RAD, strike.aimPitch() - avatar.xRot * Mth.DEG_TO_RAD, strike.reach(), strike.tendril()));
 		own.setData(WebMorphLayer.GATHER, avatar.getData(WebMorphLayer.GATHER));
 		own.setData(WebStrainLook.STRAIN, avatar.getData(WebStrainLook.STRAIN));
+		// struck: they flail in front of your eyes too
+		own.setData(WebSymbioteClient.FLAIL, avatar.getData(WebSymbioteClient.FLAIL));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
@@ -571,12 +621,51 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			float stretch = 1.0F + (heavy ? STRETCH_HEAVY : STRETCH) * weight * Math.min(1.0F, swing) + (fp ? STRETCH_FIRST_PERSON * weight : 0.0F);
 			// moving, they stream back behind you, rippling (climbing, the walkers are planted limbs; see bend)
 			float drag = fp ? 0.0F : smooth(Mth.clamp(state.walkAnimationSpeed / DRAG_SPEED, 0.0F, 1.0F));
+			// where each grows from: its glob (WebGooGlobs), or its old root
+			float[] globs = state.getData(WebGooGlobs.ROOTS);
+			if (globs != null && globs.length < ROOTS.length * WebGooGlobs.STRIDE) {
+				globs = null;
+			}
+			// struck: thrashing, easing out at the end
+			Float flailAt = state.getData(WebSymbioteClient.FLAIL);
+			float hitFlail = flailAt == null ? 0.0F : 1.0F - smooth((flailAt - (WebSymbiote.FLAIL_TICKS - HIT_FLAIL_EASE)) / HIT_FLAIL_EASE);
 
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
 				boolean upper = r[1] < UPPER_ROOT_Y;
 				float side = Math.signum(r[0]);
 				ModelPart base = this.parts[t][0];
+				// its root, and which way it leans out and tilts (at rest, and streaming back on the move): out of its glob,
+				// along the surface's outward way; on its old root, as it always was
+				float on = 0.0F;
+				float leanYaw = r[3], leanPitch = r[4];
+				float dragYaw = r[3] * (1.0F - DRAG_NARROW * drag), dragPitch = r[4] * (1.0F - DRAG_LOWER * drag);
+				if (globs != null) {
+					int o = t * WebGooGlobs.STRIDE;
+					base.x = globs[o];
+					base.y = globs[o + 1];
+					base.z = globs[o + 2];
+					on = globs[o + 6];
+					if (on > 0.0F) {
+						float nx = globs[o + 3], ny = globs[o + 4], nz = globs[o + 5];
+						float gYaw = (float)Math.atan2(nx, nz);
+						float gPitch = (float)-Math.asin(Mth.clamp(ny, -1.0F, 1.0F)) + GLOB_TILT;
+						// on the move: swung round toward straight back (a little out to its side, a little down)
+						float k = drag * GLOB_DRAG;
+						float bx = Mth.lerp(k, nx, side * 0.3F), by = Mth.lerp(k, ny, 0.15F), bz = Mth.lerp(k, nz, 1.0F);
+						float bl = Math.max(1.0E-4F, Mth.sqrt(bx * bx + by * by + bz * bz));
+						float bYaw = (float)Math.atan2(bx, bz);
+						float bPitch = (float)-Math.asin(Mth.clamp(by / bl, -1.0F, 1.0F)) + GLOB_TILT * (1.0F - drag);
+						leanYaw = Mth.lerp(on, leanYaw, gYaw);
+						leanPitch = Mth.lerp(on, leanPitch, gPitch);
+						dragYaw = Mth.lerp(on, dragYaw, bYaw);
+						dragPitch = Mth.lerp(on, dragPitch, bPitch);
+					}
+				} else {
+					base.x = r[0];
+					base.y = r[1];
+					base.z = r[2];
+				}
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
 				float[] legs = tendrils.legs();
@@ -637,8 +726,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(time * 0.31F + t * 2.7F) * Mth.sin(time * 0.13F + t * 1.1F)), 8.0)
 					* FERAL_JERK * feral;
 				sway = sway + jerk;
-				float restYaw = r[3] * (1.0F - DRAG_NARROW * drag) + sway * 0.5F;
-				float restPitch = r[4] * (1.0F - DRAG_LOWER * drag) + sway;
+				float restYaw = dragYaw + sway * 0.5F;
+				float restPitch = dragPitch + sway;
 				float restCurlX = Mth.lerp(drag, 0.28F, DRAG_CURL);
 				float restCurlY = 0.0F;
 				float restLength = length;
@@ -722,10 +811,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 						: 1.0F - smooth((roar - blast) / (1.0F - blast));
 					float thrash = 1.0F - fling;
 					float a = state.ageInTicks * FLAIL_SPEED;
-					float flailYaw = r[3] * 1.3F + Mth.sin(a + t * 2.3F) * FLAIL_YAW + Mth.sin(a * 1.9F + t) * 0.3F;
-					float flailPitch = r[4] * 0.7F + Mth.sin(a * 1.2F + t * 1.7F) * FLAIL_PITCH;
-					base.yRot = Mth.lerp(fling, flailYaw, r[3] * FLING_WIDE);
-					base.xRot = Mth.lerp(fling, flailPitch, r[4] * 0.6F);
+					// (out of a glob: round its outward way, and flung straight out along it)
+					float flailYaw = Mth.lerp(on, r[3] * 1.3F, leanYaw) + Mth.sin(a + t * 2.3F) * FLAIL_YAW + Mth.sin(a * 1.9F + t) * 0.3F;
+					float flailPitch = leanPitch * 0.7F + Mth.sin(a * 1.2F + t * 1.7F) * FLAIL_PITCH;
+					base.yRot = Mth.lerp(fling, flailYaw, Mth.lerp(on, r[3] * FLING_WIDE, leanYaw));
+					base.xRot = Mth.lerp(fling, flailPitch, leanPitch * 0.6F);
 					base.zScale = length * (1.0F + FLING_STRETCH * fling + 0.15F * thrash);
 					for (int k = 1; k < SEGMENTS; k++) {
 						ModelPart segment = this.parts[t][k];
@@ -752,6 +842,24 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
 					segment.xScale = pulse;
 					segment.yScale = pulse;
+				}
+				// struck: every free one thrashes wildly out from where it grows, stretched long, whipping (one striking or
+				// reaching for a wall keeps at it)
+				float thrash = hitFlail * calm * (tendrils.wall() == 0 ? 1.0F : 0.0F);
+				if (thrash > 0.0F && base.visible) {
+					float a = state.ageInTicks * HIT_FLAIL_SPEED;
+					float flailYaw = leanYaw + Mth.sin(a + t * 2.3F) * HIT_FLAIL_YAW + Mth.sin(a * 2.3F + t * 1.1F) * 0.35F;
+					// (never swung round across the front or the back to the other side)
+					flailYaw = side < 0.0F ? Mth.clamp(flailYaw, 0.2F - Mth.PI, -0.1F) : Mth.clamp(flailYaw, 0.1F, Mth.PI - 0.2F);
+					float flailPitch = leanPitch * 0.5F + Mth.sin(a * 1.4F + t * 1.7F) * HIT_FLAIL_PITCH;
+					base.yRot = Mth.lerp(thrash, base.yRot, flailYaw);
+					base.xRot = Mth.lerp(thrash, base.xRot, flailPitch);
+					base.zScale = Mth.lerp(thrash, base.zScale, restLength * (1.0F + HIT_FLAIL_STRETCH * (0.7F + 0.3F * Mth.sin(a * 1.7F + t))));
+					for (int k = 1; k < SEGMENTS; k++) {
+						ModelPart segment = this.parts[t][k];
+						segment.xRot = Mth.lerp(thrash, segment.xRot, Mth.sin(a * 1.6F + t + k * 1.1F) * HIT_FLAIL_WHIP);
+						segment.yRot = Mth.lerp(thrash, segment.yRot, Mth.cos(a * 1.3F + t * 2.0F + k * 0.9F) * HIT_FLAIL_WHIP);
+					}
 				}
 			}
 			this.morph(state, tendrils, thick, length, fp);

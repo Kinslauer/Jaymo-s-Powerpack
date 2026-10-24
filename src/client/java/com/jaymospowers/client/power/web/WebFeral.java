@@ -16,7 +16,11 @@ import net.minecraft.world.phys.Vec3;
  * Sprinting, it drops onto all fours and gallops, the arms its front legs (not your own body in first person: bent
  * double, its back and front legs swung up in front of the camera; it keeps the standing hunch there). Swelling into the big body it doubles
  * over in pain first, clutching itself and shuddering, then straightens into the hunch. Rearing for a slam in the
- * air (see WebSlam) both fists come up over its head. Everything is set outright from the render state, so applying it twice changes nothing.
+ * air (see WebSlam) both fists come up over its head. The big body worn alone, its tendrils drawn in
+ * ({@link WebSymbioteClient#TENDRILS_IN}), is no beast: it stands and walks upright, a heavy, imposing brute (chest
+ * up, arms held out wide by the lats and swinging heavy, legs planted apart, the whole of it rolling and dropping onto
+ * each step; sprinting, it leans into a two-legged charge, arms pumping; {@link #brute}). Everything is set outright
+ * from the render state, so applying it twice changes nothing.
  */
 public final class WebFeral {
 	/** How far the body bends forward at the hip (radians): hunched, and running on all fours. */
@@ -25,10 +29,28 @@ public final class WebFeral {
 	private static final float PAIN_BEND = 1.3F, KNEE_BEND = 0.3F;
 	/** The big body's head: how hard it twitches now and then, and how far it's tilted standing (radians; were 0.25/0.12). */
 	private static final float HEAD_TWITCH = 0.1F, HEAD_TILT = 0.04F;
-	/** Its share of the growth: doubling over until {@code PAIN_IN}, writhing until {@code PAIN_OUT}, then rising. */
-	private static final float PAIN_IN = 0.15F, PAIN_OUT = 0.7F;
+	/**
+	 * Its share of the growth: doubling over until {@code PAIN_IN}, writhing as the goo flows over it until
+	 * {@code PAIN_OUT}, then rising as it swells into the brute (WebHulk.SWELL_FROM).
+	 */
+	private static final float PAIN_IN = 0.15F, PAIN_OUT = 0.62F;
 	/** The hip, in model pixels below the neck. */
 	private static final float HIP = 12.0F;
+	/**
+	 * The upright brute (the big body with its tendrils drawn in): leaning forward {@code BRUTE_LEAN} at the hip, into a
+	 * sprint {@code BRUTE_SPRINT_LEAN} (radians); the legs swinging {@code BRUTE_STRIDE} (the game's walk swings 1.4),
+	 * {@code BRUTE_SPRINT_STRIDE} sprinting, planted {@code BRUTE_STANCE} apart; the arms held out {@code BRUTE_SPREAD},
+	 * hanging {@code BRUTE_HANG} forward and swinging {@code BRUTE_ARMS} ({@code BRUTE_SPRINT_ARMS} sprinting).
+	 */
+	static final float BRUTE_LEAN = 0.1F, BRUTE_SPRINT_LEAN = 0.38F, BRUTE_STRIDE = 1.1F, BRUTE_SPRINT_STRIDE = 1.35F, BRUTE_STANCE = 0.1F;
+	static final float BRUTE_SPREAD = 0.3F, BRUTE_HANG = -0.12F, BRUTE_ARMS = 0.55F, BRUTE_SPRINT_ARMS = 1.0F;
+	/**
+	 * Its weight: with each step the torso rolls {@code BRUTE_ROLL} onto the leg it lands on and twists
+	 * {@code BRUTE_TWIST} with the swing of the arms (radians), the body drops {@code BRUTE_BOB} (pixels) onto each foot
+	 * and the head nods {@code BRUTE_NOD}; standing, the chest heaves {@code BRUTE_BREATH}. It takes about
+	 * {@code 1 / SPRINT_RATE} seconds to lean into a sprint.
+	 */
+	static final float BRUTE_ROLL = 0.05F, BRUTE_TWIST = 0.1F, BRUTE_BOB = 0.6F, BRUTE_NOD = 0.06F, BRUTE_BREATH = 0.03F, SPRINT_RATE = 4.0F;
 
 	private WebFeral() {
 	}
@@ -46,8 +68,10 @@ public final class WebFeral {
 			// only the tendrils are out: no beast in the body
 			tendrils = null;
 		}
+		// the big body worn alone (its tendrils drawn in): upright
+		boolean upright = upright(avatar);
 		Float slam = avatar.getData(WebSymbioteClient.SLAM);
-		if (slam != null && tendrils != null) {
+		if (slam != null && (tendrils != null || upright)) {
 			overhead(humanoid, avatar, slam, slim);
 			return;
 		}
@@ -56,8 +80,12 @@ public final class WebFeral {
 			coil(humanoid, avatar, charge, slim);
 			return;
 		}
-		if (tendrils == null || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
+		if (tendrils == null && !upright || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
 			|| avatar.isPassenger || avatar.isCrouching && charge == null) {
+			return;
+		}
+		if (upright) {
+			brute(humanoid, avatar, slim);
 			return;
 		}
 		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)
@@ -230,6 +258,106 @@ public final class WebFeral {
 		h.root().y = 12.0F * (1.0F - Mth.cos(KNEE_BEND * (1.0F - run)));
 	}
 
+	/** The big body worn alone, its tendrils drawn in: it stands and walks upright ({@link #brute}). */
+	static boolean upright(AvatarRenderState state) {
+		return Boolean.TRUE.equals(state.getData(WebSymbioteClient.TENDRILS_IN));
+	}
+
+	/** How far each upright brute leans into a sprint (eased), and when that was last looked at. */
+	private static final class Sprint {
+		float value;
+		long at;
+	}
+
+	private static final java.util.Map<Integer, Sprint> SPRINT = new java.util.HashMap<>();
+
+	/** How far into a sprint this upright brute is now (0-1, eased in and out over {@code 1 / SPRINT_RATE} seconds). */
+	private static float sprint(int id) {
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		float target = minecraft.level != null && minecraft.level.getEntity(id) instanceof Player player && player.isSprinting() ? 1.0F : 0.0F;
+		long now = System.nanoTime();
+		Sprint sprint = SPRINT.computeIfAbsent(id, key -> {
+			Sprint fresh = new Sprint();
+			fresh.value = target;
+			fresh.at = now;
+			return fresh;
+		});
+		float seconds = Math.min(0.25F, (now - sprint.at) / 1.0E9F);
+		sprint.at = now;
+		sprint.value += (target - sprint.value) * Math.min(1.0F, seconds * SPRINT_RATE);
+		if (SPRINT.size() > 64) {
+			SPRINT.keySet().removeIf(key -> key != id && (minecraft.level == null || minecraft.level.getEntity(key) == null));
+		}
+		return sprint.value;
+	}
+
+	/** How far an upright brute is into its sprint, as last eased (0 if it hasn't been drawn). */
+	private static float sprinted(int id) {
+		Sprint sprint = SPRINT.get(id);
+		return sprint == null ? 0.0F : sprint.value;
+	}
+
+	/** How far an upright brute's legs swing in its stride (as the game's walk swings 1.4; WebHulk.Model.limbs bends the knees to it). */
+	static float stride(AvatarRenderState state) {
+		return Mth.lerp(sprinted(state.id), BRUTE_STRIDE, BRUTE_SPRINT_STRIDE);
+	}
+
+	/**
+	 * The big body upright (its tendrils drawn in): a heavy, imposing brute. It stands tall, chest out and leaning a
+	 * little forward, legs planted apart, the arms held out wide by its lats and hanging heavy a little forward, the chest
+	 * heaving. Walking, it strides the game's way (each arm with the other leg), the torso rolling onto each foot and
+	 * twisting with the arms, the body dropping onto each step and the head nodding with it; sprinting, it leans into a
+	 * two-legged charge, legs driving long and arms pumping. A punch, or an arm holding something, keeps its own pose.
+	 */
+	private static void brute(HumanoidModel<?> h, AvatarRenderState state, boolean slim) {
+		float sprint = sprint(state.id);
+		float pos = state.walkAnimationPos;
+		float speed = Math.min(1.0F, state.walkAnimationSpeed);
+		float idle = 1.0F - speed;
+		float breathe = Mth.sin(state.ageInTicks * 0.08F);
+		float phase = pos * 0.6662F;
+		// footfalls at either end of the stride (sin 0), the body highest as the legs pass
+		float footfall = 1.0F - Math.abs(Mth.sin(phase));
+		float lean = Mth.lerp(sprint, BRUTE_LEAN, BRUTE_SPRINT_LEAN) - breathe * BRUTE_BREATH * idle;
+		float armY = slim ? 2.5F : 2.0F;
+		place(h.body, 0.0F, 0.0F, lean);
+		place(h.head, 0.0F, 0.0F, lean);
+		place(h.rightArm, -5.0F, armY, lean);
+		place(h.leftArm, 5.0F, armY, lean);
+		h.body.xRot = lean;
+		// the right shoulder comes forward with the right arm (as the left leg does)
+		h.body.yRot = -Mth.cos(phase) * BRUTE_TWIST * speed;
+		h.body.zRot = Mth.sin(phase) * BRUTE_ROLL * speed;
+		// the head held level, looking where the player looks, nodding onto each step
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD - lean * 0.7F + footfall * BRUTE_NOD * speed;
+		h.head.zRot = 0.0F;
+
+		float arms = Mth.lerp(sprint, BRUTE_ARMS, BRUTE_SPRINT_ARMS);
+		ModelPart attacking = state.mainArm == net.minecraft.world.entity.HumanoidArm.LEFT ? h.leftArm : h.rightArm;
+		for (ModelPart arm : new ModelPart[] {h.rightArm, h.leftArm}) {
+			boolean right = arm == h.rightArm;
+			float side = right ? 1.0F : -1.0F;
+			// out wide over the lats (breathing out with the chest, held in a little in a sprint)
+			arm.zRot = side * (BRUTE_SPREAD * (1.0F - 0.4F * sprint) + breathe * 0.02F * idle);
+			if (state.swingAnimation > 0.0F && arm == attacking || (right ? state.rightArmPose : state.leftArmPose) != HumanoidModel.ArmPose.EMPTY) {
+				// a punch, or something held: the game's own swing, from the leaning shoulder
+				continue;
+			}
+			// the game's walk: each arm with the leg on the other side
+			arm.xRot = Mth.cos(phase + (right ? Mth.PI : 0.0F)) * arms * speed + BRUTE_HANG - lean;
+			arm.yRot = 0.0F;
+		}
+		float stride = Mth.lerp(sprint, BRUTE_STRIDE, BRUTE_SPRINT_STRIDE);
+		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
+			boolean right = leg == h.rightLeg;
+			leg.xRot = Mth.cos(phase + (right ? 0.0F : Mth.PI)) * stride * speed;
+			leg.yRot = 0.0F;
+			leg.zRot = (right ? 1.0F : -1.0F) * BRUTE_STANCE * (1.0F - 0.5F * sprint);
+		}
+		// dropping onto each foot
+		h.root().y = BRUTE_BOB * speed * footfall;
+	}
+
 	/** Puts a part's pivot where it ends up when everything above the hip bends forward by {@code bend}. */
 	private static void place(ModelPart part, float restX, float restY, float bend) {
 		float vy = restY - HIP;
@@ -242,6 +370,10 @@ public final class WebFeral {
 	public static float bend(Player player, float partialTick) {
 		if (!WebSymbiote.bulked(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
 			return 0.0F;
+		}
+		if (!WebSymbiote.armored(player)) {
+			// worn alone, upright (see brute)
+			return Mth.lerp(sprinted(player.getId()), BRUTE_LEAN, BRUTE_SPRINT_LEAN);
 		}
 		float run = ownView(player.getId()) ? 0.0F : WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);
 		return Mth.lerp(run, IDLE_BEND, RUN_BEND);

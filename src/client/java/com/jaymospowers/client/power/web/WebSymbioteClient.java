@@ -38,6 +38,10 @@ public final class WebSymbioteClient {
 	public static final RenderStateDataKey<Boolean> SUIT = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_suit");
 	/** Living Armor's tendrils on this player: how grown (0-1), how far into a lash (0-1), and a clock for the sway. */
 	public static final RenderStateDataKey<Tendrils> TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils");
+	/** (0.15.152) The big body worn with its tendrils drawn in (WebSymbioteState.TENDRILS_IN): upright, no beast, no tendrils. */
+	public static final RenderStateDataKey<Boolean> TENDRILS_IN = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils_in");
+	/** (0.15.152) Ticks since its tendrils began flailing at a hit (WebSymbiote.FLAIL), partial ticks included; null when they aren't. */
+	public static final RenderStateDataKey<Float> FLAIL = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_flail");
 	/**
 	 * The tendrils drawing back in (Wall Crawl or Living Armor ending), as the suit comes off: how far along (0-1). They
 	 * pour back over the body, coiling round it, then unwind into the chest (see WebSuitWrapLayer).
@@ -596,6 +600,11 @@ public final class WebSymbioteClient {
 			&& entity instanceof Player p && WebSymbiote.isBonded(p) ? new float[] {counterAt, counter.kind()} : null);
 		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
 			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+		state.setData(TENDRILS_IN, bulk && !armored);
+		Long flailAt = entity.getAttached(WebSymbiote.FLAIL);
+		float flailAge = flailAt == null ? -1.0F : entity.level().getGameTime() - flailAt
+			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		state.setData(FLAIL, flailAge >= 0.0F && flailAge < WebSymbiote.FLAIL_TICKS ? flailAge : null);
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
 		// Wall Crawl on: they stay out the whole time (holding Jump, coiling a leap, between grabs), not only while they hold you
 		boolean climbing = entity instanceof Player p && WebSymbiote.isBonded(p)

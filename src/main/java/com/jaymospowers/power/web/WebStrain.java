@@ -101,7 +101,7 @@ public final class WebStrain {
 			|| !player.mayBuild()) {
 			return;
 		}
-		boolean armored = WebSymbiote.armored(player);
+		boolean armored = WebSymbiote.livingArmor(player);
 		if (!armored) {
 			// only the armour breaks through
 			progress = Math.min(progress, ALMOST);

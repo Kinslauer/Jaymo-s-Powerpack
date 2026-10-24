@@ -87,8 +87,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			}
 			return;
 		}
-		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
-		if (tendrils != null && tendrils.armor()) {
+		// (its tendrils out, or drawn in: worn alone, upright)
+		if (WebSuitGrowth.bigBody(state)) {
 			if (state.getData(WebSuitGrowth.PULL) != null) {
 				// fighting its hold: as the big body comes apart you show through it, tearing out of the suit beneath
 				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
