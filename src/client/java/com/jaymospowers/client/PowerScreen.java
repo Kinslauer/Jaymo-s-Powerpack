@@ -364,14 +364,23 @@ public class PowerScreen extends Screen {
 			Integer shown = this.minecraft.player == null ? null : this.minecraft.player.getAttached(ChronoDirectives.SHOWN);
 			int value = shown == null ? 0 : shown;
 			boolean recording = (value & ChronoDirectives.RECORDING_FLAG) != 0;
-			int directive = value & ~ChronoDirectives.RECORDING_FLAG;
+			int directive = value & 0xFF;
+			int unlocked = value >> ChronoDirectives.UNLOCKED_SHIFT;
 			for (int i = 0; i < orderButtons.size(); i++) {
 				Button b = orderButtons.get(i);
-				if (i == ChronoDirectives.RECORD_BUTTON) {
+				boolean record = i == ChronoDirectives.RECORD_BUTTON;
+				int tier = record ? ChronoDirectives.RECORD_TIER : ChronoDirectives.Directive.values()[i].tier();
+				// not yet earned: greyed out, and its tooltip says so
+				boolean open = tier <= unlocked;
+				if (record) {
 					b.setMessage(Component.translatable(recording ? "screen.jaymospowers.order.stop" : "screen.jaymospowers.order.record"));
+					b.active = open;
 				} else {
-					b.active = recording || i != directive;
+					b.active = open && (recording || i != directive);
 				}
+				String name = record ? "record" : ChronoDirectives.Directive.values()[i].name().toLowerCase(java.util.Locale.ROOT);
+				b.setTooltip(Tooltip.create(open ? Component.translatable("screen.jaymospowers.order." + name + ".desc")
+					: Component.translatable("screen.jaymospowers.order.locked", tier)));
 			}
 		}
 		if (chooseButton != null) {

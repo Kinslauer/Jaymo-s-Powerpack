@@ -15,8 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -38,10 +36,10 @@ import org.jspecify.annotations.Nullable;
  */
 final class ChronoEchoWork {
 	// ---- tuning (ticks / blocks) ----
-	/** Standby and Mirror keep within this of their owner, and blink over to them past {@link #CATCH_UP}. */
+	/** Standby keeps within this of its owner, and blink over to them past {@link #CATCH_UP}. */
 	static final double FOLLOW_NEAR = 3.5, CATCH_UP = 40.0;
 	static final double FOLLOW_SPEED = 1.1;
-	/** A blow from or by its owner this recent still counts for Mirror and Standby. */
+	/** A blow from or by its owner this recent still counts for Standby. */
 	static final int RECENT = 100;
 	/** Guard: monsters this close to the spot are fought; it goes back once more than this from it. */
 	static final double GUARD_RADIUS = 14.0, GUARD_HOME = 3.0;
@@ -50,7 +48,7 @@ final class ChronoEchoWork {
 	static final double WORK_REACH = 2.5;
 	/** Give up on a job, path point or step after this long. */
 	static final int STUCK_TICKS = 120;
-	/** Bloom: a new Time Bloom at the spot this long after the last one ended. */
+	/** Standby: a new Time Bloom where it stands this long after the last one ended. */
 	static final int BLOOM_EVERY = 30 * 20;
 	/** Loop: rest this long at the end before going round again. */
 	static final int LOOP_PAUSE = 40;
@@ -72,19 +70,18 @@ final class ChronoEchoWork {
 
 	void tick(ServerLevel level, ChronoDirectives.Orders orders) {
 		@Nullable ServerPlayer owner = this.echo.ownerPlayer() instanceof ServerPlayer p && p.level() == level ? p : null;
-		dropBadTarget(owner, orders.kind());
-		if (orders.kind() != ChronoDirectives.Directive.BLOOM && this.bloom != null) {
+		dropBadTarget(owner);
+		if (orders.kind() != ChronoDirectives.Directive.STANDBY && this.bloom != null) {
 			this.bloom = null;
 		}
 		switch (orders.kind()) {
 			case STANDBY -> {
 				defend(owner);
 				follow(level, owner);
+				bloom(level, owner);
 			}
-			case MIRROR -> mirror(level, owner);
 			case GUARD -> guard(level, owner, anchor(level, orders));
 			case HARVEST -> harvest(level, owner, anchor(level, orders));
-			case BLOOM -> bloom(level, owner, anchor(level, orders));
 			case LOOP -> loop(level, owner, orders);
 		}
 	}
@@ -94,14 +91,13 @@ final class ChronoEchoWork {
 		return orders.anchor().filter(a -> a.dimension() == level.dimension()).map(GlobalPos::pos).orElse(null);
 	}
 
-	/** Never its owner; never another player unless Mirror chose them (its owner is fighting them). */
-	private void dropBadTarget(@Nullable ServerPlayer owner, ChronoDirectives.Directive kind) {
+	/** Never its owner, nor any other player. */
+	private void dropBadTarget(@Nullable ServerPlayer owner) {
 		LivingEntity target = this.echo.getTarget();
 		if (target == null) {
 			return;
 		}
-		if (!target.isAlive() || target == owner || target instanceof ChronoEcho
-			|| target instanceof Player && kind != ChronoDirectives.Directive.MIRROR) {
+		if (!target.isAlive() || target == owner || target instanceof ChronoEcho || target instanceof Player) {
 			this.echo.setTarget(null);
 		}
 	}
@@ -153,23 +149,6 @@ final class ChronoEchoWork {
 		} else if (!this.echo.getNavigation().isDone()) {
 			this.echo.getNavigation().stop();
 		}
-	}
-
-	/** At its owner's side: their fights are its fights, their overclock its speed. */
-	private void mirror(ServerLevel level, @Nullable ServerPlayer owner) {
-		if (owner == null) {
-			defend(null);
-			return;
-		}
-		LivingEntity struck = owner.getLastHurtMob();
-		if (usable(struck, owner) && owner.tickCount - owner.getLastHurtMobTimestamp() < RECENT && this.echo.getTarget() != struck) {
-			this.echo.setTarget(struck);
-		}
-		defend(owner);
-		if (ChronoSpeed.overclocked(owner)) {
-			this.echo.addEffect(new MobEffectInstance(MobEffects.SPEED, 30, 2, false, false, false));
-		}
-		follow(level, owner);
 	}
 
 	private void guard(ServerLevel level, @Nullable ServerPlayer owner, @Nullable BlockPos home) {
@@ -353,18 +332,8 @@ final class ChronoEchoWork {
 		chest.setChanged();
 	}
 
-	// ---------------------------------------------------------------- bloom
-
-	private void bloom(ServerLevel level, @Nullable ServerPlayer owner, @Nullable BlockPos home) {
-		defend(owner);
-		if (home == null) {
-			follow(level, owner);
-			return;
-		}
-		if (fighting()) {
-			return;
-		}
-		goHome(home, 1.5);
+		/** On standby, between fights, it casts Time Bloom where it stands now and then (once its owner has Time Bloom). */
+	private void bloom(ServerLevel level, @Nullable ServerPlayer owner) {
 		if (this.bloom != null) {
 			if (!this.bloom.tick()) {
 				this.bloom = null;
@@ -374,9 +343,9 @@ final class ChronoEchoWork {
 		}
 		// it can only bend time the way its owner can
 		boolean knows = owner == null || Mastery.isUnlocked(owner, PowerKey.ABILITY_4);
-		if (knows && --this.bloomIn <= 0 && this.echo.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(home)) < 4.0) {
+		if (knows && !fighting() && --this.bloomIn <= 0 && this.echo.onGround()) {
 			this.echo.swingForAttack(InteractionHand.MAIN_HAND);
-			this.bloom = new TimeBloom(level, home, ChronoFx.style(owner));
+			this.bloom = new TimeBloom(level, this.echo.blockPosition(), ChronoFx.style(owner));
 			this.bloom.start();
 		}
 	}

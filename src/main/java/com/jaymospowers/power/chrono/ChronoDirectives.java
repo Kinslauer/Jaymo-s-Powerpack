@@ -41,13 +41,14 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.15.143) A Timeless Chrono's echo stops hunting them and takes orders, picked in the powers screen (H):
+ * Orders come with time: Standby at once, then one more for each in-game day (of play, as Timeless) up to
+ * {@link #UNLOCK_DAYS}; until then their buttons stay greyed out.
  * <ul>
- * <li><b>Standby:</b> it keeps near you and fights only what attacks it or you.</li>
+ * <li><b>Standby:</b> it keeps near you, fights only what attacks it or you, and between fights casts Time Bloom
+ * where it stands every so often (if you have it).</li>
  * <li><b>Harvest:</b> round the spot you gave the order, it reaps ripe crops (and replants them) and fells the logs and
  * mines the ores you mine most. Drops go into a chest or barrel near that spot, or onto the ground.</li>
  * <li><b>Guard:</b> it holds the spot and fights every monster that comes near, with your own Stasis and Chrono Punch.</li>
- * <li><b>Bloom:</b> it stands at the spot and casts Time Bloom there every so often (if you have it).</li>
- * <li><b>Mirror:</b> it fights at your side: it strikes what you strike and what strikes you, and runs when you overclock.</li>
  * <li><b>Record / Loop:</b> Record, do something (walk a route, reap a field, fight), then Record again: the echo
  * repeats your walk and your breaks there, over and over.</li>
  * </ul>
@@ -63,9 +64,14 @@ public final class ChronoDirectives {
 	static final double RECORD_MIN_MOVE = 1.5;
 	/** Most steps a recording keeps. */
 	static final int RECORD_MAX_STEPS = 400;
+	/** In-game days of play as Timeless (online, not creative or spectating) that unlock each tier: Harvest, Guard, Record/Loop. */
+	static final int[] UNLOCK_DAYS = {1, 2, 3};
+	static final int DAY = 24000;
+	/** How often the time served is counted up. */
+	static final int SERVE_STEP = 20;
 
 	public enum Directive {
-		STANDBY, HARVEST, GUARD, BLOOM, MIRROR, LOOP;
+		STANDBY, HARVEST, GUARD, LOOP;
 
 		static Directive of(int ordinal) {
 			Directive[] all = values();
@@ -74,7 +80,17 @@ public final class ChronoDirectives {
 
 		/** Whether it works round the spot where the order was given. */
 		boolean anchored() {
-			return this == HARVEST || this == GUARD || this == BLOOM;
+			return this == HARVEST || this == GUARD;
+		}
+
+		/** How many unlock tiers it takes (0: from the start). */
+		public int tier() {
+			return switch (this) {
+				case STANDBY -> 0;
+				case HARVEST -> 1;
+				case GUARD -> 2;
+				case LOOP -> 3;
+			};
 		}
 	}
 
@@ -107,10 +123,20 @@ public final class ChronoDirectives {
 	static final AttachmentType<Orders> ORDERS = AttachmentRegistry.create(JaymosPowers.id("chrono_orders"),
 		builder -> builder.persistent(Orders.CODEC).copyOnDeath());
 
-	/** For the powers screen: the current directive's ordinal, plus {@link #RECORDING_FLAG} while recording. Owner only. */
+	/** Ticks of play as Timeless, towards the next unlock. Saved, kept through death. */
+	static final AttachmentType<Integer> SERVED = AttachmentRegistry.create(JaymosPowers.id("chrono_orders_served"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+
+	/**
+	 * For the powers screen: the current directive's ordinal, plus {@link #RECORDING_FLAG} while recording, plus the
+	 * tiers unlocked (from {@link #UNLOCKED_SHIFT}). Owner only.
+	 */
 	public static final AttachmentType<Integer> SHOWN = AttachmentRegistry.create(JaymosPowers.id("chrono_orders_shown"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 	public static final int RECORDING_FLAG = 0x100;
+	public static final int UNLOCKED_SHIFT = 9;
+	/** Recording (and looping) take this tier. */
+	public static final int RECORD_TIER = 3;
 	/** The button index that starts or ends a recording, after the directives. */
 	public static final int RECORD_BUTTON = Directive.values().length;
 
@@ -178,6 +204,17 @@ public final class ChronoDirectives {
 		return Fate.isAscended(player);
 	}
 
+	/** How many unlock tiers {@code player} has reached. */
+	static int unlocked(ServerPlayer player) {
+		Integer served = player.getAttached(SERVED);
+		int ticks = served == null ? 0 : served;
+		int tiers = 0;
+		while (tiers < UNLOCK_DAYS.length && ticks >= UNLOCK_DAYS[tiers] * DAY) {
+			tiers++;
+		}
+		return tiers;
+	}
+
 	static Orders orders(ServerPlayer player) {
 		Orders orders = player.getAttached(ORDERS);
 		return orders == null ? Orders.NONE : orders;
@@ -186,6 +223,10 @@ public final class ChronoDirectives {
 	private static void order(ServerPlayer player, int button) {
 		if (!Powers.has(player, ChronoPower.INSTANCE) || !commandable(player)) {
 			return;
+		}
+		int tier = button == RECORD_BUTTON ? RECORD_TIER : Directive.of(button).tier();
+		if (tier > unlocked(player)) {
+			return; // greyed out on the screen: not yet
 		}
 		if (button == RECORD_BUTTON) {
 			if (RECORDINGS.containsKey(player.getUUID())) {
@@ -240,7 +281,8 @@ public final class ChronoDirectives {
 
 	/** Brings the screen's copy up to date. */
 	static void show(ServerPlayer player) {
-		int value = orders(player).directive() | (RECORDINGS.containsKey(player.getUUID()) ? RECORDING_FLAG : 0);
+		int value = orders(player).directive() | (RECORDINGS.containsKey(player.getUUID()) ? RECORDING_FLAG : 0)
+			| unlocked(player) << UNLOCKED_SHIFT;
 		Integer now = player.getAttached(SHOWN);
 		if (now == null || now != value) {
 			player.setAttached(SHOWN, value);
@@ -253,6 +295,11 @@ public final class ChronoDirectives {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % SERVE_STEP == 0) {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				serve(player);
+			}
+		}
 		if (RECORDINGS.isEmpty()) {
 			return;
 		}
@@ -277,10 +324,33 @@ public final class ChronoDirectives {
 		}
 	}
 
+	/** Time served as Timeless counts towards the next order; a newly unlocked one is told above the hotbar. */
+	private static void serve(ServerPlayer player) {
+		if (player.isCreative() || player.isSpectator() || !Powers.has(player, ChronoPower.INSTANCE) || !commandable(player)) {
+			return;
+		}
+		int before = unlocked(player);
+		if (before >= UNLOCK_DAYS.length) {
+			if (player.getAttached(SHOWN) == null) {
+				show(player);
+			}
+			return;
+		}
+		Integer served = player.getAttached(SERVED);
+		player.setAttached(SERVED, (served == null ? 0 : served) + SERVE_STEP);
+		int after = unlocked(player);
+		if (after > before) {
+			tell(player, Component.translatable("message.jaymospowers.chrono_order.unlocked." + after));
+			ChronoEchoes.soundFor(player, SoundEvents.BELL_RESONATE, 0.6F, 1.4F);
+		}
+		show(player);
+	}
+
 	/** The power was lost: orders and any recording go with it. */
 	static void forget(ServerPlayer player) {
 		RECORDINGS.remove(player.getUUID());
 		player.removeAttached(ORDERS);
+		player.removeAttached(SERVED);
 		player.removeAttached(SHOWN);
 	}
 }
