@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 /**
  * A web slinger's bond with a symbiote. Saved, kept through death, and synced to everyone (others see the suit).
- * {@code flags} holds the toggles ({@link #SUIT}, {@link #ARMOR}, {@link #CRAWL}); {@code hints} records which
+ * {@code flags} holds the toggles ({@link #SUIT}, {@link #ARMOR}, {@link #CRAWL}, {@link #TENDRILS_IN}); {@code hints} records which
  * one-time whispers have already been heard. {@code bond} (0-{@link WebSymbiote#BOND_MAX}) is how far it trusts you: it
  * starts somewhere from nothing to halfway, grows with time and meals, and opens up its abilities as it climbs.
  * {@code strain} is a {@link WebSymbioteStrain} id (0 black, 1 white, 2 red); old saves load as black.
@@ -24,6 +24,12 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	public static final int CRAWL = 4;
 	/** The big body: the symbiote swollen over you (near death, or when it takes over). Not a toggle. */
 	public static final int BULK = 8;
+	/**
+	 * (0.15.152) Living Armor's tendrils drawn in (Andy: "they should be deactivated upon the first press of living
+	 * armor. Including when in the large suit"): the big body worn alone, upright, no tendrils. Cleared when the armour
+	 * comes off, and whenever it takes the wheel (a takeover, the near-death roar).
+	 */
+	public static final int TENDRILS_IN = 16;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0, 0);
 

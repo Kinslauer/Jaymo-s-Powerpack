@@ -867,7 +867,7 @@ public final class WebSwing {
 		if (jump && player.onGround()) {
 			// the floor under you (and the wall behind, if there's one) cracks more and more, to all but breaking
 			strainTicks++;
-			boolean armored = com.jaymospowers.power.web.WebSymbiote.armored(player);
+			boolean armored = com.jaymospowers.power.web.WebSymbiote.livingArmor(player);
 			int needed = armored ? STRAIN_TICKS_ARMOR : STRAIN_TICKS;
 			float progress = Math.min(com.jaymospowers.power.web.WebStrain.ALMOST, strainTicks / (float)needed);
 			if (armored && strainTicks >= SLING_ARMOR_BREAK_TICKS) {

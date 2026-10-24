@@ -20,9 +20,11 @@ import net.minecraft.world.entity.player.Player;
  * body (the torso, then the arms and head, then the legs), coiling round each part ({@link WebSuitWrapLayer}); then it
  * folds over the body in layers along them, each part covered from its joint outward: raw goo first, then the suit
  * itself rolling over it, its edge a thick band of tendril. Taken off, it all goes back the other way. The big body is
- * built the same way: thick tendrils wrap you, then its muscle is slapped on a slab at a time (core, back, lats, chest,
- * shoulders and arms, the forearms and hands, the claws, at last the head and its jaws; {@link WebHulk}), while you're
- * doubled over in pain (see WebFeral). Everyone sees it.
+ * built the same way, larger, in the order of the film's transformation (Andy's clip): thick tendrils lash round the
+ * chest and arms, then the legs, the head last, and the goo bursts out after them over the chest and arms, streams over
+ * the shoulders and down the legs and swallows the head, hugging the body like the plain suit's goo; then every mass
+ * swells out into the brute and you grow inside it ({@link WebHulk.Model#build}), doubled over in pain until you rise
+ * (see WebFeral). Everyone sees it.
  */
 public final class WebSuitGrowth {
 	/** How long putting the suit on (or off) takes (ticks); during a roar it pieces itself together quicker. */
@@ -36,6 +38,14 @@ public final class WebSuitGrowth {
 	 */
 	static final float BODY = 0.0F, ARMS = 0.1F, HEAD = 0.16F, LEGS = 0.22F;
 	static final float WRAP_SPAN = 0.3F, GOO_AFTER = 0.28F, SUIT_AFTER = 0.14F, LAYER_SPAN = 0.26F;
+	/**
+	 * Building (or shedding) the big body, the film's order instead (the head swallowed last): when each part's tendrils
+	 * start out, body, arms, legs, head; they, and the plain suit's goo and suit under it (put on over bare skin), go on
+	 * at {@code BIG_PACE} times the suit's spans (the whole change takes longer, BULK_TICKS). Its thick tendrils sink
+	 * into the goo flowing over them {@code BIG_SINK_AFTER} after they start out, over {@code BIG_SINK_SPAN}.
+	 */
+	static final float BIG_BODY = 0.0F, BIG_ARMS = 0.04F, BIG_LEGS = 0.14F, BIG_HEAD = 0.24F, BIG_PACE = 0.6F;
+	static final float BIG_SINK_AFTER = 0.16F, BIG_SINK_SPAN = 0.2F;
 	/**
 	 * Fighting a takeover's hold (the struggle bar, {@link WebSymbiote#STRUGGLE}): you tear your way out of it as the bar
 	 * fills and it pours back over you as it drains. The big body comes apart from the last piece built (the head and
@@ -297,7 +307,7 @@ public final class WebSuitGrowth {
 		}
 		if (role == Role.HULK) {
 			WebHulk.Model hulk = (WebHulk.Model)model;
-			hulk.build(Math.min(hulkBuilt(avatar), peeledHulk(avatar)));
+			hulk.build(hulkBuilt(avatar), peeledHulk(avatar), k, avatar.ageInTicks);
 			hulk.breathe(avatar);
 			// elbows and knees bending with the stride (after the limbs are posed above)
 			hulk.limbs(avatar);
@@ -316,14 +326,22 @@ public final class WebSuitGrowth {
 		WebHulk.shift(model, hulkness(state));
 	}
 
-	/** How far into the big body's frame the body is spread (0 not at all, 1 the whole way). */
+	/** How far into the big body's frame the body is spread (0 not at all, 1 the whole way): it grows as the goo swells. */
 	static float hulkness(AvatarRenderState avatar) {
 		Growth growth = avatar.getData(KEY);
 		if (growth != null && Math.max(growth.from(), growth.to()) == 2) {
-			return ease((built(growth) - 0.25F) / 0.5F);
+			return WebHulk.frame(built(growth));
 		}
+		return bigBody(avatar) ? 1.0F : 0.0F;
+	}
+
+	/**
+	 * (0.15.152) The big body is on this player: with its tendrils out ({@link WebSymbioteClient.Tendrils#armor}) or
+	 * drawn in ({@link WebSymbioteClient#TENDRILS_IN}, worn alone, upright).
+	 */
+	public static boolean bigBody(AvatarRenderState avatar) {
 		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
-		return tendrils != null && tendrils.armor() ? 1.0F : 0.0F;
+		return tendrils != null && tendrils.armor() || Boolean.TRUE.equals(avatar.getData(WebSymbioteClient.TENDRILS_IN));
 	}
 
 	/** How far the big body is built (0-1). */
@@ -348,24 +366,40 @@ public final class WebSuitGrowth {
 		return growth.to() > growth.from() ? growth.t() : 1.0F - growth.t();
 	}
 
-	/** Each part's start (share of the change): body, arms, head, legs. */
-	static float start(int part) {
+	/** Each part's start (share of the change): body, arms, head, legs; for the big body ({@code big}) the head last. */
+	static float start(int part, boolean big) {
 		return switch (part) {
-			case 1, 2 -> ARMS;
-			case 3 -> HEAD;
-			case 4, 5 -> LEGS;
-			default -> BODY;
+			case 1, 2 -> big ? BIG_ARMS : ARMS;
+			case 3 -> big ? BIG_HEAD : HEAD;
+			case 4, 5 -> big ? BIG_LEGS : LEGS;
+			default -> big ? BIG_BODY : BODY;
 		};
 	}
 
 	/** How far a part's tendrils have wrapped it (0-1). Parts: 0 body, 1 right arm, 2 left arm, 3 head, 4 right leg, 5 left leg. */
 	static float wrapped(float built, int part) {
-		return ease((built - start(part)) / WRAP_SPAN);
+		return wrapped(built, part, false);
+	}
+
+	/** The same, building the big body ({@code big}: its order, at {@link #BIG_PACE}) or the suit. */
+	static float wrapped(float built, int part, boolean big) {
+		return ease((built - start(part, big)) / (WRAP_SPAN * (big ? BIG_PACE : 1.0F)));
 	}
 
 	/** How far a part's goo (or its suit, {@code suit}) has folded over it, from its joint outward (0-1). */
 	static float layered(float built, int part, boolean suit) {
-		return ease((built - start(part) - GOO_AFTER - (suit ? SUIT_AFTER : 0.0F)) / LAYER_SPAN);
+		return layered(built, part, suit, false);
+	}
+
+	/** The same, under the big body as it's built ({@code big}) or for the suit alone. */
+	static float layered(float built, int part, boolean suit, boolean big) {
+		float pace = big ? BIG_PACE : 1.0F;
+		return ease((built - start(part, big) - (GOO_AFTER + (suit ? SUIT_AFTER : 0.0F)) * pace) / (LAYER_SPAN * pace));
+	}
+
+	/** How far the big body's thick tendrils round a part have sunk into the goo flowing over them (0-1). */
+	static float sunk(float built, int part) {
+		return ease((built - start(part, true) - BIG_SINK_AFTER) / BIG_SINK_SPAN);
 	}
 
 	private static float ease(float x) {
@@ -437,8 +471,9 @@ public final class WebSuitGrowth {
 			return;
 		}
 		float built = built(growth);
+		boolean big = Math.max(growth.from(), growth.to()) == 2;
 		for (int i = 0; i < parts.length; i++) {
-			float cover = layered(built, i, role == Role.SUIT);
+			float cover = layered(built, i, role == Role.SUIT, big);
 			// it folds down the part from the joint (each part's pivot), thickening as it settles
 			ModelPart part = parts[i];
 			float ripple = cover > 0.0F && cover < 1.0F ? Mth.sin(cover * Mth.PI * 2.0F + avatar.ageInTicks * 0.6F) * 0.04F : 0.0F;
@@ -472,8 +507,7 @@ public final class WebSuitGrowth {
 			}
 			return growth.to() > growth.from() ? growth.t() >= COVERED_AT : growth.t() <= 1.0F - COVERED_AT;
 		}
-		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
-		return tendrils != null && tendrils.armor() || avatar.getData(WebSymbioteClient.SUIT) != null;
+		return bigBody(avatar) || avatar.getData(WebSymbioteClient.SUIT) != null;
 	}
 
 	/**

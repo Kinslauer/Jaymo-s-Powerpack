@@ -137,7 +137,7 @@ public final class PoseTakeover {
 			// the symbiote's suit and Living Armor are models of their own over the body, posed the vanilla way (and Living
 			// Armor hunches like a beast, WebFeral): Fresh Animations would move the body out from under them
 			|| s.getData(WebSymbioteClient.SUIT) != null
-			|| s.getData(WebSymbioteClient.TENDRILS) != null && s.getData(WebSymbioteClient.TENDRILS).armor()
+			|| com.jaymospowers.client.power.web.WebSuitGrowth.bigBody(s)
 			|| s.getData(com.jaymospowers.client.power.web.WebSuitGrowth.KEY) != null
 			|| s.getData(ChronoFlowPose.KEY) != null || s.getData(ChronoReelPose.KEY) != null
 			|| s.getData(XenoformFlightPose.KEY) != null || s.getData(XenoformSlap.KEY) != null

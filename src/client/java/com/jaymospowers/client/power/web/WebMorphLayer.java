@@ -267,7 +267,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		PlayerModel parent = this.getParentModel();
 		WebSuitGrowth.shift(parent, state);
 		ModelPart arm = s.side() > 0 ? parent.rightArm : parent.leftArm;
-		boolean hulk = state.getData(WebSymbioteClient.TENDRILS) instanceof WebSymbioteClient.Tendrils t && t.armor();
+		boolean hulk = WebSuitGrowth.bigBody(state);
 		boolean slim = state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
 		float handX = -s.side() * (slim ? 0.5F : 1.0F);
 		float handY = hulk ? HULK_HAND_Y : HAND_Y;
@@ -316,7 +316,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		PlayerModel parent = this.getParentModel();
 		WebSuitGrowth.shift(parent, state);
 		ModelPart arm = g.side() > 0 ? parent.rightArm : parent.leftArm;
-		boolean hulk = state.getData(WebSymbioteClient.TENDRILS) instanceof WebSymbioteClient.Tendrils t && t.armor();
+		boolean hulk = WebSuitGrowth.bigBody(state);
 		boolean slim = state.skin != null && state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
 		float age = g.age();
 		int light = state.lightCoords;

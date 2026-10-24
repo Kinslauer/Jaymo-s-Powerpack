@@ -167,8 +167,7 @@ public final class CostumeClient {
 		if (state.getData(XenoformClient.FORM) != null || state.getData(WebSymbioteClient.SUIT) != null || state.getData(WebSuitGrowth.KEY) != null) {
 			return true;
 		}
-		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
-		return tendrils != null && tendrils.armor();
+		return WebSuitGrowth.bigBody(state);
 	}
 
 	/** Draws the worn costume over a player, piece by piece, each piece once per colour. */
