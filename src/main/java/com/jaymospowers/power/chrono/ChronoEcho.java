@@ -128,6 +128,10 @@ public class ChronoEcho extends Monster {
 	private @Nullable ChronoEchoFight fight;
 	/** Back from a Nether blink with this health (0 for none). */
 	private float returnHealth;
+	/** (0.15.143) Its owner is Timeless: it obeys their orders instead of hunting everything (saved, for an offline owner). */
+	private boolean bound;
+	private ChronoDirectives.Orders orders = ChronoDirectives.Orders.NONE;
+	private @Nullable ChronoEchoWork work;
 	// client-side ticking
 	private int tickRun;
 
@@ -156,13 +160,44 @@ public class ChronoEcho extends Monster {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, CHASE_SPEED, false));
 		this.goalSelector.addGoal(5, new WalkRoutesGoal(this));
-		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, ROUTE_SPEED));
+		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, ROUTE_SPEED) {
+			@Override
+			public boolean canUse() {
+				return !ChronoEcho.this.bound && super.canUse();
+			}
+		});
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, ChronoEcho.class));
-		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+		// a bound echo picks its own fights (ChronoEchoWork), so the curse's hunting stays off for it
+		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, ChronoEcho.class) {
+			@Override
+			public boolean canUse() {
+				return !ChronoEcho.this.bound && super.canUse();
+			}
+		});
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true) {
+			@Override
+			public boolean canUse() {
+				return !ChronoEcho.this.bound && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !ChronoEcho.this.bound && super.canContinueToUse();
+			}
+		});
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
-			(target, level) -> !(target instanceof ChronoEcho) && !(target instanceof ArmorStand)));
+			(target, level) -> !(target instanceof ChronoEcho) && !(target instanceof ArmorStand)) {
+			@Override
+			public boolean canUse() {
+				return !ChronoEcho.this.bound && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !ChronoEcho.this.bound && super.canContinueToUse();
+			}
+		});
 	}
 
 	// ---------------------------------------------------------------- owner
@@ -195,6 +230,16 @@ public class ChronoEcho extends Monster {
 
 	public @Nullable UUID owner() {
 		return this.owner;
+	}
+
+	/** Whether it obeys its owner (they're Timeless). */
+	boolean bound() {
+		return this.bound;
+	}
+
+	/** The block kinds its owner mines most. */
+	List<Identifier> minedKinds() {
+		return this.minedKinds;
 	}
 
 	long bond() {
@@ -250,6 +295,25 @@ public class ChronoEcho extends Monster {
 		} else if (!future && gunner && this.tickCount % 2 == 0) {
 			com.jaymospowers.power.chrono.future.FutureGuns.tick(level, this);
 		}
+		if (this.bound) {
+			// (0.15.143) its owner's servant now: their orders, with their abilities in any fight it's in
+			if (this.fight != null && !this.fight.ally()) {
+				this.fight.end();
+				this.fight = null;
+			}
+			if (this.fight == null) {
+				this.fight = new ChronoEchoFight(this, true);
+			}
+			this.fight.tick(level);
+			if (this.work == null) {
+				this.work = new ChronoEchoWork(this);
+			}
+			this.work.tick(level, this.orders);
+			return;
+		} else if (this.fight != null && this.fight.ally()) {
+			this.fight.end();
+			this.fight = null;
+		}
 		if (level.dimension() == Level.NETHER) {
 			if (this.fight == null) {
 				this.fight = new ChronoEchoFight(this);
@@ -289,6 +353,18 @@ public class ChronoEcho extends Monster {
 		if (!Powers.has(player, ChronoPower.INSTANCE) || memory == null || memory.bond != this.bond) {
 			fade(level);
 			return false;
+		}
+		boolean bound = ChronoDirectives.commandable(player);
+		ChronoDirectives.Orders orders = ChronoDirectives.orders(player);
+		if (bound != this.bound || !orders.equals(this.orders)) {
+			if (bound && !this.bound) {
+				this.setTarget(null); // it stops hunting the moment its owner ascends
+			}
+			this.bound = bound;
+			this.orders = orders;
+			if (this.work != null) {
+				this.work.reset();
+			}
 		}
 		if (player.level() == level) {
 			if (!memory.sighted && player.isAlive() && this.distanceToSqr(player) < SIGHT_RANGE * SIGHT_RANGE && player.hasLineOfSight(this)) {
@@ -432,6 +508,24 @@ public class ChronoEcho extends Monster {
 		if (this.gone || this.isRemoved()) {
 			return false;
 		}
+		// (0.15.143) a bound echo takes blows like anyone, anywhere, but a blow that would end it only shatters it (it
+		// comes back later as ever), and the world's hazards pass through it. Its owner's own blows are the curse's as
+		// before: outside the Nether they shatter it (to send it away), in the Nether they can still end it for good.
+		boolean byOwner = source.getEntity() != null && source.getEntity().getUUID().equals(this.owner);
+		if (this.bound && !byOwner && !source.is(DamageTypes.GENERIC_KILL)) {
+			if (this.isInvulnerableTo(level, source) || damage <= 0.0F) {
+				return false;
+			}
+			if (source.getEntity() == null && source.getDirectEntity() == null && !source.is(DamageTypes.FELL_OUT_OF_WORLD)) {
+				this.clearFire();
+				return false;
+			}
+			if (damage >= this.getHealth() || source.is(DamageTypes.FELL_OUT_OF_WORLD)) {
+				shatter(level);
+				return true;
+			}
+			return super.hurtServer(level, source, damage);
+		}
 		// (0.10.111) in the future too it bleeds and can die, and dying for good opens the future to its owner
 		if (source.is(DamageTypes.GENERIC_KILL) || level.dimension() == Level.NETHER
 			|| level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE) {
@@ -568,6 +662,8 @@ public class ChronoEcho extends Monster {
 			output.store("echo_placed", Identifier.CODEC, this.placedKind);
 		}
 		output.store("echo_route", BlockPos.CODEC.listOf(), this.route);
+		output.putBoolean("echo_bound", this.bound);
+		output.store("echo_orders", ChronoDirectives.Orders.CODEC, this.orders);
 	}
 
 	@Override
@@ -580,6 +676,8 @@ public class ChronoEcho extends Monster {
 		this.minedKinds = new ArrayList<>(input.read("echo_mined", Identifier.CODEC.listOf()).orElse(List.of()));
 		this.placedKind = input.read("echo_placed", Identifier.CODEC).orElse(null);
 		this.route = new ArrayList<>(input.read("echo_route", BlockPos.CODEC.listOf()).orElse(List.of()));
+		this.bound = input.getBooleanOr("echo_bound", false);
+		this.orders = input.read("echo_orders", ChronoDirectives.Orders.CODEC).orElse(ChronoDirectives.Orders.NONE);
 	}
 
 	// ---------------------------------------------------------------- routes
@@ -642,7 +740,7 @@ public class ChronoEcho extends Monster {
 
 		@Override
 		public boolean canUse() {
-			if (this.echo.getTarget() != null) {
+			if (this.echo.getTarget() != null || this.echo.bound) {
 				return false;
 			}
 			if (this.pause > 0) {
@@ -666,7 +764,7 @@ public class ChronoEcho extends Monster {
 
 		@Override
 		public boolean canContinueToUse() {
-			return this.echo.getTarget() == null && this.current != null && this.index < this.current.size();
+			return this.echo.getTarget() == null && !this.echo.bound && this.current != null && this.index < this.current.size();
 		}
 
 		@Override

@@ -5,11 +5,14 @@ import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
+import com.jaymospowers.power.chrono.ChronoDirectives;
+import com.jaymospowers.power.chrono.ChronoPower;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -52,6 +55,8 @@ public class PowerScreen extends Screen {
 	/** How many key rows are scrolled past, when they don't all fit. */
 	private int scroll;
 	private @Nullable Button chooseButton;
+	/** The echo's orders, then Record ({@link ChronoDirectives#RECORD_BUTTON}). */
+	private final List<Button> orderButtons = new ArrayList<>();
 
 	public PowerScreen() {
 		super(Component.translatable("screen.jaymospowers.title"));
@@ -87,6 +92,17 @@ public class PowerScreen extends Screen {
 		return selected == null ? List.of() : KeyGuide.lines(selected, owner(selected));
 	}
 
+	/** Whether the panel ends in a row of buttons: creative's choose/clear, or a Timeless Chrono's echo orders. */
+	private boolean footer() {
+		return creative() || orders();
+	}
+
+	/** (0.15.143) A Timeless Chrono's echo takes orders from here. */
+	private boolean orders() {
+		Player player = this.minecraft.player;
+		return player != null && !player.isCreative() && Powers.of(player) == ChronoPower.INSTANCE && ChronoDirectives.commandable(player);
+	}
+
 	private int listW() {
 		return creative() ? LIST_W : 0;
 	}
@@ -109,7 +125,7 @@ public class PowerScreen extends Screen {
 
 	/** Tall enough for every row (or the creative list), clamped to the screen. */
 	private int panelH() {
-		int h = HEADER + rowsWanted() * ROW + 6 + 14 + detailWanted() * 9 + (creative() ? FOOTER : 0);
+		int h = HEADER + rowsWanted() * ROW + 6 + 14 + detailWanted() * 9 + (footer() ? FOOTER : 0);
 		if (creative()) {
 			h = Math.max(h, HEADER + powers.size() * LIST_ROW + FOOTER + 8);
 		}
@@ -138,12 +154,12 @@ public class PowerScreen extends Screen {
 	}
 
 	private int detailY() {
-		return top() + panelH() - detailH() - (creative() ? FOOTER : 0);
+		return top() + panelH() - detailH() - (footer() ? FOOTER : 0);
 	}
 
 	/** Lines in the detail box: as many as it wants, unless the rows need the room (never under the minimum). */
 	private int detailLines() {
-		int room = (panelH() - HEADER - rowsWanted() * ROW - 6 - 14 - (creative() ? FOOTER : 0)) / 9;
+		int room = (panelH() - HEADER - rowsWanted() * ROW - 6 - 14 - (footer() ? FOOTER : 0)) / 9;
 		return Math.max(DETAIL_MIN_LINES, Math.min(detailWanted(), room));
 	}
 
@@ -177,6 +193,25 @@ public class PowerScreen extends Screen {
 	@Override
 	protected void init() {
 		chooseButton = null;
+		orderButtons.clear();
+		if (orders()) {
+			int y = top() + panelH() - FOOTER + 3;
+			int count = ChronoDirectives.RECORD_BUTTON + 1;
+			int gap = 3;
+			int bw = (paneW() - 12 - gap * (count - 1)) / count;
+			for (int i = 0; i < count; i++) {
+				int button = i;
+				String name = i == ChronoDirectives.RECORD_BUTTON ? "record"
+					: ChronoDirectives.Directive.values()[i].name().toLowerCase(java.util.Locale.ROOT);
+				Button b = Button.builder(Component.translatable("screen.jaymospowers.order." + name),
+						press -> ClientPlayNetworking.send(new ChronoDirectives.Order(button)))
+					.bounds(paneX() + 6 + i * (bw + gap), y, bw, 16)
+					.tooltip(Tooltip.create(Component.translatable("screen.jaymospowers.order." + name + ".desc")))
+					.build();
+				orderButtons.add(addRenderableWidget(b));
+			}
+			return;
+		}
 		if (!creative()) {
 			return;
 		}
@@ -324,6 +359,29 @@ public class PowerScreen extends Screen {
 		if (detailName == null && split.size() <= room - 1) {
 			graphics.text(this.font, Component.translatable("screen.jaymospowers.hover_hint"), px + 9, ty + Math.min(room - 1, split.size()) * 9 + 2,
 				0xFF707080);
+		}
+		if (!orderButtons.isEmpty()) {
+			Integer shown = this.minecraft.player == null ? null : this.minecraft.player.getAttached(ChronoDirectives.SHOWN);
+			int value = shown == null ? 0 : shown;
+			boolean recording = (value & ChronoDirectives.RECORDING_FLAG) != 0;
+			int directive = value & 0xFF;
+			int unlocked = value >> ChronoDirectives.UNLOCKED_SHIFT;
+			for (int i = 0; i < orderButtons.size(); i++) {
+				Button b = orderButtons.get(i);
+				boolean record = i == ChronoDirectives.RECORD_BUTTON;
+				int tier = record ? ChronoDirectives.RECORD_TIER : ChronoDirectives.Directive.values()[i].tier();
+				// not yet earned: greyed out, and its tooltip says so
+				boolean open = tier <= unlocked;
+				if (record) {
+					b.setMessage(Component.translatable(recording ? "screen.jaymospowers.order.stop" : "screen.jaymospowers.order.record"));
+					b.active = open;
+				} else {
+					b.active = open && (recording || i != directive);
+				}
+				String name = record ? "record" : ChronoDirectives.Directive.values()[i].name().toLowerCase(java.util.Locale.ROOT);
+				b.setTooltip(Tooltip.create(open ? Component.translatable("screen.jaymospowers.order." + name + ".desc")
+					: Component.translatable("screen.jaymospowers.order.locked", tier)));
+			}
 		}
 		if (chooseButton != null) {
 			boolean active = power == current();

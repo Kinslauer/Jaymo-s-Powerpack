@@ -41,7 +41,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Time Flow, the mode (Z) of a Chrono that is both Timeless (ascended) and corrupted: free-flowing combat, the way a
+ * Time Flow, the mode (Z) of a Timeless (ascended) Chrono: free-flowing combat, the way a
  * brawler fights a crowd. Time bends around the fight.
  * <ul>
  * <li><b>Strikes:</b> attack toward an enemy (within {@link #RANGE}, roughly where you look) and you're carried to it:
@@ -374,9 +374,9 @@ public final class ChronoFlow {
 		return reel != null && reel.kind() == FLUNG && entity.level().getGameTime() - reel.start() < FLUNG_TICKS;
 	}
 
-	/** Whether the power can enter Time Flow: Timeless and corrupted both, or lent it by an echo's blow. */
+	/** Whether the power can enter Time Flow: Timeless (since 0.15.143, corrupted or not), or lent it by an echo's blow. */
 	static boolean available(ServerPlayer player) {
-		return Fate.isAscended(player) && Fate.isCorrupted(player) || granted(player);
+		return Fate.isAscended(player) || granted(player);
 	}
 
 	private static boolean granted(ServerPlayer player) {

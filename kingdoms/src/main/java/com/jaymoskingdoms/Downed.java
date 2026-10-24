@@ -55,6 +55,8 @@ public final class Downed {
 	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
 	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
 	static final float HELP_SPEED = 0.8F;
+	/** (0.7.181) A downed player is tended where their reputation is above this. */
+	static final int HELP_PLAYER_REP = 0;
 	/** (0.7.98) How far round each player the downed are looked for, to be tended (blocks). */
 	static final double LOOK_AROUND = 64.0;
 
@@ -162,6 +164,24 @@ public final class Downed {
 		return false;
 	}
 
+	/**
+	 * (0.7.181) Andy (2026-10-24): "guards and villagers should help players up as long as they are above 0 rep": a
+	 * downed player whose reputation with the settlement they lie in (its land, or a seat within a village's reach) is
+	 * above {@link #HELP_PLAYER_REP}. Out in the wild, nobody's.
+	 */
+	private static boolean welcome(ServerLevel level, ServerPlayer player) {
+		if (player.isCreative() || player.isSpectator()) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		Faction f = Factions.around(server, level, player.blockPosition(), Villages.VILLAGE_RADIUS);
+		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN) {
+			f = Factions.at(server, level, player.blockPosition());
+		}
+		return f != null && !f.fallen() && f.type() != FactionType.BARBARIAN && Reputation.get(player, f.id()) > HELP_PLAYER_REP
+			&& !Theft.wanted(player, f.id());
+	}
+
 	/** (0.7.98) Ours to disarm: a villager or one of our folk (not a downed player or someone's dog). Server side. */
 	private static boolean ours(LivingEntity body) {
 		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG);
@@ -203,6 +223,10 @@ public final class Downed {
 		List<Mob> seen = new ArrayList<>();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			ServerLevel level = player.level();
+			if (player.isAlive() && isDowned(player) && !TENDED.containsKey(player)) {
+				// (0.7.181) a downed player the place thinks well of
+				findHelper(level, player);
+			}
 			for (Mob body : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LOOK_AROUND),
 				m -> m.isAlive() && isDowned(m) && !TENDED.containsKey(m))) {
 				if (!seen.contains(body)) {
@@ -217,9 +241,11 @@ public final class Downed {
 	 * (0.7.84) Someone comes to tend a downed {@code body}: the nearest grown villager free to (not downed, afraid,
 	 * fighting, asleep or tending another) walks over.
 	 */
-	private static void findHelper(ServerLevel level, Mob body) {
-		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster
-		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || Looters.is(body) || !kin(body)) {
+	private static void findHelper(ServerLevel level, LivingEntity body) {
+		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster;
+		// (0.7.181) and players the settlement thinks well of
+		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG)
+			|| (body instanceof ServerPlayer player ? !welcome(level, player) : Looters.is(body) || !kin(body))) {
 			return;
 		}
 		Villager helper = null;
