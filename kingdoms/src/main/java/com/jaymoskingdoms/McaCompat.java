@@ -198,9 +198,14 @@ public final class McaCompat {
 		return LOADED && McaBridge.childOf(villager, player);
 	}
 
-	/** (0.7.184) {@code villager} is past a toddler, old enough to live on as ({@link Lineage}). */
-	static boolean grownEnough(Villager villager) {
-		return LOADED && McaBridge.grownEnough(villager);
+	/** (0.7.184) {@code villager} is a teen or grown, old enough to live on as ({@link Lineage}). */
+	static boolean teenOrOlder(Villager villager) {
+		return LOADED && McaBridge.teenOrOlder(villager);
+	}
+
+	/** (0.7.184) Puts {@code stack} in an MCA villager's pack; what doesn't fit (all of it, for anyone else) comes back. */
+	static net.minecraft.world.item.ItemStack stow(PathfinderMob villager, net.minecraft.world.item.ItemStack stack) {
+		return LOADED ? McaBridge.stow(villager, stack) : stack;
 	}
 
 	/** (0.7.184) {@link McaBridge#takeOver}: the villager left in {@code player}'s old body, or null. */

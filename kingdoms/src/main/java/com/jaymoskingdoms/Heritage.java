@@ -101,8 +101,8 @@ import org.jspecify.annotations.Nullable;
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
  * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.140) The Stormborn is earned too: it wakes in a
  * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). (0.7.184) Earning one ({@link #UNLOCKED}) no
- * longer changes your own blood (the Blood Rite is gone): it runs on in your children, and you take it up by living on
- * as one of them ({@link Lineage}).
+ * longer changes your own blood (the Blood Rite is gone): your children are born to your heritage or one you've earned
+ * ({@link VillagerHeritage#passed}), and you take it up by living on as one of them ({@link Lineage}).
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
  * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
@@ -230,8 +230,8 @@ public final class Heritage {
 
 	/**
 	 * The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a
-	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and (0.7.184) taken
-	 * up by living on as your child ({@link Lineage}).
+	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and (0.7.184) passed to
+	 * your children ({@link VillagerHeritage#passed}).
 	 */
 	public enum Kind {
 		HEARTLANDER(2, Items.WHEAT),
@@ -347,18 +347,12 @@ public final class Heritage {
 	private static final Map<UUID, Long> SPARKED = new HashMap<>();
 
 	/**
-	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). (0.7.184)
-	 * {@code lineage}: they sneak-used their child {@code child} (that child's name), so only the earned heritages
-	 * they've woken can be picked, and picking one they live on as that child ({@link Lineage}).
+	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking).
 	 */
-	public record Open(boolean forced, boolean lineage, String child) implements CustomPacketPayload {
+	public record Open(boolean forced) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("heritage_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> {
-				buf.writeBoolean(p.forced);
-				buf.writeBoolean(p.lineage);
-				buf.writeUtf(p.child);
-			}, buf -> new Open(buf.readBoolean(), buf.readBoolean(), buf.readUtf()));
+			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
 
 		@Override
 		public Type<Open> type() {
@@ -422,14 +416,7 @@ public final class Heritage {
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(forced, false, ""));
-		}
-	}
-
-	/** (0.7.184) Opens the heritage screen for {@code player}'s lineage: to live on as their child {@code child} (a name). */
-	static void askLineage(ServerPlayer player, String child) {
-		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(false, true, child));
+			ServerPlayNetworking.send(player, new Open(forced));
 		}
 	}
 
@@ -445,8 +432,6 @@ public final class Heritage {
 		}
 		Kind kind = all[ordinal];
 		if (of(player) != null) {
-			// (0.7.184) a lineage's choice: only an earned heritage they've woken, and they live on as their child in it
-			Lineage.chose(player, kind);
 			return;
 		}
 		if (kind.earned && !unlocked(player, kind)) {

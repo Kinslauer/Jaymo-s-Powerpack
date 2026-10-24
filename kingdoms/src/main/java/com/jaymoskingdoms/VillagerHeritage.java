@@ -256,7 +256,7 @@ public final class VillagerHeritage {
 
 	/** A child's heritage: one of its parents' (by a coin), or a new one if neither has any. */
 	public static void inherit(LivingEntity child, @Nullable Entity mother, @Nullable Entity father) {
-		Heritage.Kind a = mother == null ? null : of(mother), b = father == null ? null : of(father);
+		Heritage.Kind a = mother == null ? null : passed(mother, child.getRandom()), b = father == null ? null : passed(father, child.getRandom());
 		Heritage.Kind kind = a == null ? b : b == null ? a : child.getRandom().nextBoolean() ? a : b;
 		if (kind == null) {
 			Entity at = mother != null ? mother : father != null ? father : child;
@@ -267,8 +267,30 @@ public final class VillagerHeritage {
 
 	/** A baby's heritage from its real parents (a player among them): one of theirs by a coin, or null if neither has one. */
 	public static Heritage.@Nullable Kind babyBlood(Entity mother, Entity father) {
-		Heritage.Kind a = of(mother), b = of(father);
+		Heritage.Kind a = passed(mother, mother.getRandom()), b = passed(father, father.getRandom());
 		return a == null ? b : b == null ? a : mother.getRandom().nextBoolean() ? a : b;
+	}
+
+	/**
+	 * (0.7.184) The blood {@code parent} passes on. Andy: a player's child "should draw from a pool of heritages you
+	 * unlocked and the heritage you currently have", so it isn't theirs to steer: their own heritage or any earned one
+	 * they've woken, evenly. Anyone else passes on their own.
+	 */
+	static Heritage.@Nullable Kind passed(Entity parent, RandomSource random) {
+		Heritage.Kind own = of(parent);
+		if (!(parent instanceof net.minecraft.world.entity.player.Player player)) {
+			return own;
+		}
+		List<Heritage.Kind> pool = new ArrayList<>();
+		if (own != null) {
+			pool.add(own);
+		}
+		for (Heritage.Kind kind : Heritage.Kind.values()) {
+			if (kind.earned && kind != own && Heritage.unlocked(player, kind)) {
+				pool.add(kind);
+			}
+		}
+		return pool.isEmpty() ? null : pool.get(random.nextInt(pool.size()));
 	}
 
 	/** The tail tag {@code villager} carries ({@link #TAIL_WRAPPED} or {@link #TAIL_CUT}), or "". For its saved data. */

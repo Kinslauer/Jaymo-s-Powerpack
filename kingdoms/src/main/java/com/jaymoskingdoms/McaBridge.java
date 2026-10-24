@@ -778,10 +778,14 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && FamilyTree.get(player.level()).getOrCreate(player).children().contains(v.getUUID());
 	}
 
-	/** {@link McaCompat#grownEnough}: past a toddler. */
-	static boolean grownEnough(Villager villager) {
-		return villager instanceof VillagerEntityMCA v && v.getAgeState() != AgeState.BABY && v.getAgeState() != AgeState.TODDLER
-			&& v.getAgeState() != AgeState.UNASSIGNED;
+	/** {@link McaCompat#teenOrOlder}. */
+	static boolean teenOrOlder(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && (v.getAgeState() == AgeState.TEEN || v.getAgeState() == AgeState.ADULT);
+	}
+
+	/** {@link McaCompat#stow}. */
+	static net.minecraft.world.item.ItemStack stow(PathfinderMob villager, net.minecraft.world.item.ItemStack stack) {
+		return villager instanceof VillagerEntityMCA v ? v.getInventory().addItem(stack) : stack;
 	}
 
 	/**

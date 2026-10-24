@@ -2715,3 +2715,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+
+## 0.15.147: powers are handed down through a lineage (Kingdoms 0.7.184)
+- Kingdoms' Lineage (living on as your child) takes your power away and hands it down: `Affinity.passDown` (called by
+  reflection from Kingdoms' `PowersCompat`) clears the power, restarts the 3-5 day awakening and stores it as
+  `Affinity.INHERITED`. Andy: "the power you had is given a high affinity to your child, they still have to awaken it
+  themselves". At the awakening an inherited power wins over a calling and an affinity, fated or not, and is then cleared.
+- Compile-checked; not playtested.
