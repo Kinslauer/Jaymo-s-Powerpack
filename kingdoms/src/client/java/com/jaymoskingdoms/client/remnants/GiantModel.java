@@ -10,7 +10,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.97) An Aether Giant (our own). (0.7.181) Andy's titan build (drawn with Gemini): a towering slab of a torso
+ * (0.7.97) An Aether Giant (our own). (0.7.182) Andy's titan build (drawn with Gemini): a towering slab of a torso
  * with heavy back plating, a square skull under a brow crest and a hinged jaw, long arms on wide shoulders that flare
  * out as it marches (they never clip the torso), and columnar legs. It breathes, flinches when hit (jaw dropping) and
  * sprawls when it dies. A blow brings one arm up and down; a stamp lifts both arms and drops its weight onto them.

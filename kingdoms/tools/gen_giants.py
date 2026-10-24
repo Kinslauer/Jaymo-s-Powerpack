@@ -1,6 +1,6 @@
 """Skins for the Aether's Giants (kingdoms/src/main/java/com/jaymoskingdoms/remnants/AetherGiant.java, model
 client/remnants/GiantModel.java, 256x128): our own, painted here in vanilla's manner (flat shade ramps, a little noise,
-no gradients across a face). (0.7.181) Laid out for Andy's titan build (drawn with Gemini). One per element: Highfield (pale sky-stone and moss, quartz shards), Magnetic (dark
+no gradients across a face). (0.7.182) Laid out for Andy's titan build (drawn with Gemini). One per element: Highfield (pale sky-stone and moss, quartz shards), Magnetic (dark
 lodestone with rust veins, violet ore shards), Arctic (packed ice and frost, deep blue ice shards), Irradiated (mossy
 stone split by glowing Ambrosium cracks, lime shards).
 Run from kingdoms/: python3 tools/gen_giants.py"""
