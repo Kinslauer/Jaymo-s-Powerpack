@@ -118,6 +118,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Lineage.register();
 		Elders.register();
 		Retinue.register();
+		Audiences.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)

@@ -198,6 +198,22 @@ public final class Quests {
 		player.setAttached(LOG, List.copyOf(list));
 	}
 
+	/**
+	 * (0.7.184) {@code player} carries a quest item ({@link Retinue#passage}): a letter or keepsake for a quest they're
+	 * on, or the work a ruler of {@code faction} gave them, done and ready to turn in.
+	 */
+	static boolean questItem(ServerPlayer player, int faction) {
+		for (Quest q : log(player)) {
+			if ((q.kind() == Quest.DELIVER && !q.counted() || q.kind() == Quest.FETCH) && find(player, q.id()) >= 0) {
+				return true;
+			}
+			if (q.giver().king() && q.giver().faction() == faction && ready(player, q)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether {@code q} is done and can be turned in. */
 	static boolean ready(ServerPlayer player, Quest q) {
 		return switch (q.kind()) {

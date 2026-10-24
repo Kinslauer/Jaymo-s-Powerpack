@@ -139,6 +139,8 @@ public final class Standing {
 			duty = "prisoner";
 		} else if (Royals.escortOf(w) != null) {
 			duty = "escort";
+		} else if (Audiences.leading(mob)) {
+			duty = "audience";
 		} else if (Retinue.sent(mob)) {
 			duty = "stranger";
 		} else if (Rulers.target(mob) != null) {

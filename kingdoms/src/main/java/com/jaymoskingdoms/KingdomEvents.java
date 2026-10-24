@@ -658,6 +658,12 @@ public final class KingdomEvents {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.offer").withStyle(style -> style.withColor(ChatFormatting.GREEN)
 				.withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.literal(command)))));
 		}
+		if (!Rulers.is(folk) && Audiences.canAsk(folk) && member == null) {
+			// (0.7.184) a guard takes you to the ruler, if your name's good enough
+			String command = "/kingdom audience";
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.ask").withStyle(style -> style.withColor(ChatFormatting.GREEN)
+				.withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.literal(command)))));
+		}
 		// (0.5.1) a ruler short of guards keeps to his hall, and may ask for a sworn protector
 		Wardens.audience(player.level(), player, faction, folk);
 		player.level().playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 0.7F);
