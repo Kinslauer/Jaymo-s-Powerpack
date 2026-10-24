@@ -60,7 +60,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Spellcraft {
 	/** A Mage's spells hit this much harder (and last longer) than a scroll's. */
-	static final float MAGE_POWER = 1.5F;
+	static final float MAGE_POWER = 1.75F;
+	/** (0.7.184) A Mage's boon, Echo: one staff cast in this many leaves no cooldown behind. */
+	static final int MAGE_ECHO_ONE_IN = 4;
 	/** A Mage's cooldown for each spell (ticks). */
 	static final Map<String, Integer> MAGE_COOLDOWN = Map.of("fire", 60, "arcane", 40, "warding", 20 * 45, "draining", 20 * 8, "raising", 20 * 90);
 	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; the bolt's. */
@@ -218,7 +220,12 @@ public final class Spellcraft {
 		}
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
-		player.getCooldowns().addCooldown(staff, MAGE_COOLDOWN.getOrDefault(spell, 40));
+		if (player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
+			// the spell echoes: no cooldown this time
+			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
+		} else {
+			player.getCooldowns().addCooldown(staff, MAGE_COOLDOWN.getOrDefault(spell, 40));
+		}
 		Theft.sorcery(player, level, player.blockPosition());
 	}
 

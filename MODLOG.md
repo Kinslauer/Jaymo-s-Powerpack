@@ -2795,3 +2795,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
   flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. MCA avatars with camps of their own fight Hornkin and piglins in the Nether (Kingdoms 0.7.187). Compile-checked;
   not playtested.
+- **0.16.0 / Kingdoms 0.7.196 / Kitchen 0.5.23, classes up to Sorcerer:** Andy: Sorcerer seemed the strongest class, so bring the rest
+  up to it and add a boon across the board. Every number lives at the top of `ClassPerks` (Mage's in `Spellcraft`).
+  Raised: Thief blades +35% and 25% faster swing; Warlord two-handers +35%, heavy armour weighs x0.25 and gives +1
+  armour a piece; Mage casts 1.75x a scroll and loses one heart instead of two; Archer +35%; Survivalist hunger x0.6,
+  falls -40%; Brute bludgeons +40%, -6% speed (was -8%), 0.4 knockback resistance; Marksman guns +40%, no heart lost,
+  crossbow bolts +30%; Rider horse +25%, mounted blows +30%, -3% on foot. Sorcerer's numbers are the bar and stay.
+  New boon each (`ClassPerks.dealt`, now handed the target): Thief Backstab (light blade on a foe facing away x1.5),
+  Warlord Cleave (40% of a two-handed blow to up to 3 foes within 2.5 blocks, bystanders spared via `CombatArts.foes`),
+  Thief also Prowl (sneak 50% faster, Andy asked for a second), Mage Echo (1 staff cast in 4 leaves no cooldown), Archer Headshot (arrow at the head x1.5) and pins, players included (Andy's second pass): a fully drawn killing shot of 12+ with a wall within 1.5 blocks behind (along the flight) holds the body there while it dies and tags it `jaymoskitchen.pinned.<yaw>`, so Kitchen 0.5.23 hangs its corpse upright on the wall (`CorpseEntity.pin`, client `Pinned` pose) until it's picked up or the wall goes; 1 headshot in 4 with a wall behind the head takes the head off and nails only the head there (Powers `Dismember.beheadPinned`, `SeveredPart` PINNED, by reflection in `PowersCompat`); a leg shot (bottom 37.5%) pins the legs to the ground 2 s (4 s fully drawn: no walking or jumping) and tags the arrow `jaymoskingdoms.leg_pin`, so Kitchen's `LegShots` doesn't cripple as well, Survivalist Second Wind
+  (8 s unhurt: mend half a heart every 3 s, fed or not), Brute Stagger (bludgeon blows give Slowness II 1.5 s),
+  Marksman Steady Aim (shots from a crouch +25%), Rider Barding (the horse you steer takes 30% less), Sorcerer Kindred
+  Element (own element's harm halved: fire, freezing, lightning, drowning, explosions for earth, falls for air). Class
+  cards show each boon as a new row. Compile-checked status in the PR; not playtested.

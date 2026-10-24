@@ -26,7 +26,7 @@ abstract class LivingEntityHurtMixin {
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float jaymoskingdoms$classDamage(float amount, ServerLevel level, DamageSource source) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		float dealt = Heritage.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(source, amount)));
+		float dealt = Heritage.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(self, source, amount)));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
 		return Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt));

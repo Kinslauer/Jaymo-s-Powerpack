@@ -995,3 +995,23 @@ Batch 3 of the BWM port (MIT, our own code).
   body the client can't rebuild (a player's) throws lumps of meat (`textures/entity/gib.png`, painted new).
 - Blood: `Gibs.addOnBurst` tells Jaymo's Powers of each body blown apart (it bursts its blood); without Powers a spray
   of red block particles. Tuning at the top of `Gibs` and `GibRenderer`.
+
+### 0.5.23: nailed to the wall (pack 0.16.0)
+- Jaymo's Kingdoms' Archer: a fully drawn killing shot with a wall close behind tags the body
+  `jaymoskitchen.pinned.<yaw>` (`Corpses.PINNED_TAG`). Its corpse (mob or player) then hangs upright on the wall,
+  facing out, instead of falling (`CorpseEntity.pin`: no ragdoll, no gravity, saved as `Pinned`), until someone picks it
+  up or the wall behind it goes. Drawn standing, slumped 8 degrees forward, arms and legs hanging, head on its chest
+  (`client/corpse/Pinned`, applied with `Limp`).
+- An arrow tagged `jaymoskingdoms.leg_pin` (an Archer's leg shot, which pins the legs instead) doesn't cripple
+  (`LegShots.LEG_PIN_TAG`).
+- Pincushions (Andy: "make mobs pin cushion like players"): every arrow that sticks in a creature stays in it until it
+  dies (`archery/StuckArrows`, attachment `stuck_arrows`, synced and saved; at most 24; a piercing arrow passes through,
+  tridents don't stick), drawn where it went in like a player's (`client/archery/StuckArrowsLayer`, on every living
+  renderer but the player's, walking any model's parts). Its corpse keeps them (`CorpseEntity.arrows`, saved) and draws
+  them too. An empty hand (not sneaking) pulls one out a click before anything else; one that could have been picked up
+  off the ground comes out whole 60% of the time (`StuckArrows.SALVAGE_CHANCE`), the rest snap.
+- Stronger shafts (Andy: "Tinker arrows can be made with stronger shafts that refund you more of the time"): whether an
+  arrow will come out whole is rolled when it goes in. Jaymo's Powers tags a Tinkering arrow `jaymoskitchen.salvage.<%>`
+  from its shaft (`TinkerMaterial.shaftStrength`: wood 60, crimson/warped 65, bone 80, blaze rod 90); other arrows use
+  `SALVAGE_CHANCE`. The ones that will come out whole are kept as themselves (`StuckArrows.ITEMS`, corpse `ArrowItems`),
+  so a Tinkering or tipped arrow comes back as the arrow it was.

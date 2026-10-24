@@ -24,7 +24,40 @@ public final class PowersCompat {
 	private static @Nullable ParticleOptions bloodFleck;
 	private static boolean lookedForBlood;
 
+	/** (0.7.184) Powers' {@code Dismember.beheadPinned(LivingEntity, LivingEntity, Vec3, float)}. */
+	private static java.lang.invoke.@Nullable MethodHandle beheadPinned;
+	private static boolean lookedForDismember;
+
 	private PowersCompat() {
+	}
+
+	/**
+	 * (0.7.184) Takes {@code target}'s head off as Jaymo's Powers' dismemberment does (a headless mob may stagger on a while,
+	 * a skeleton fights on, anything else drops), {@code by} its killer, and nails the head to the wall at {@code wall},
+	 * facing {@code yaw}. False without Powers, or if it has no head to lose.
+	 */
+	public static boolean beheadPinned(net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.@Nullable LivingEntity by,
+		net.minecraft.world.phys.Vec3 wall, float yaw) {
+		if (!lookedForDismember) {
+			lookedForDismember = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					beheadPinned = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "beheadPinned",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class,
+							net.minecraft.world.entity.LivingEntity.class, net.minecraft.world.phys.Vec3.class, float.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' dismemberment", e);
+				}
+			}
+		}
+		if (beheadPinned == null) {
+			return false;
+		}
+		try {
+			return (boolean)beheadPinned.invoke(target, by, wall, yaw);
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/**

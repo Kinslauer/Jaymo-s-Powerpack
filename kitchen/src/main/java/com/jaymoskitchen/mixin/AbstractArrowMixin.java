@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Right after an arrow hurts something (where tipped arrows apply their potion), check for a leg shot. */
+/** Right after an arrow hurts something (where tipped arrows apply their potion), check for a leg shot; (0.5.23) the arrow stays in it. */
 @Mixin(AbstractArrow.class)
 abstract class AbstractArrowMixin {
 	@Inject(
@@ -19,6 +19,8 @@ abstract class AbstractArrowMixin {
 	private void jaymoskitchen$legShot(EntityHitResult hitResult, CallbackInfo ci) {
 		if (hitResult.getEntity() instanceof LivingEntity target) {
 			LegShots.onArrowHit((AbstractArrow) (Object) this, target, hitResult.getLocation());
+			// (0.5.23) and it stays in
+			com.jaymoskitchen.archery.StuckArrows.onArrowHit((AbstractArrow) (Object) this, target);
 		}
 	}
 }

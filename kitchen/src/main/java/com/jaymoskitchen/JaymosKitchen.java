@@ -50,6 +50,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.fishing.Bait.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
+		com.jaymoskitchen.archery.StuckArrows.register();
 		Corpses.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
 		com.jaymoskitchen.corpse.SpiderCrush.register();

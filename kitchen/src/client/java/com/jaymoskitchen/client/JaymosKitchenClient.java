@@ -76,6 +76,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatarRenderer) {
 				helper.register(new QuiverLayer(avatarRenderer, context.getModelSet()));
+			} else {
+				// (0.5.23) arrows stuck in creatures (players have the game's own)
+				helper.register(stuckArrows(renderer, context));
 			}
 			// by type: tags aren't loaded yet while renderers are being made
 			if (renderer instanceof AbstractHorseRenderer<?, ?, ?> && (entityType == EntityTypes.HORSE
@@ -116,5 +119,11 @@ public class JaymosKitchenClient implements ClientModInitializer {
 				screen.onGrillUpdate(payload);
 			}
 		});
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static net.minecraft.client.renderer.entity.layers.RenderLayer stuckArrows(net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?, ?> renderer,
+		net.minecraft.client.renderer.entity.EntityRendererProvider.Context context) {
+		return new com.jaymoskitchen.client.archery.StuckArrowsLayer((net.minecraft.client.renderer.entity.RenderLayerParent) renderer, context);
 	}
 }

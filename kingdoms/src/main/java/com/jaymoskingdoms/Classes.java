@@ -241,6 +241,7 @@ public final class Classes {
 	}
 
 	private static void tick(MinecraftServer server) {
+		ClassPerks.serverTick(server);
 		boolean shoo = server.getTickCount() % UNMADE_SHOO_EVERY == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (shoo && unmade(player)) {

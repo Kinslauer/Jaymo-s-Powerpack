@@ -27,6 +27,11 @@ import org.jspecify.annotations.Nullable;
  * also take its shaft's velocity and its fletching's accuracy ({@link Ranged#power}).
  */
 public class TinkerArrowItem extends ArrowItem implements TinkerTool {
+	/** The shaft's place among an arrow's parts (head, shaft, fletching). */
+	private static final int SHAFT = 1;
+	/** Jaymo's Kitchen's {@code StuckArrows.SALVAGE_TAG}. */
+	private static final String SALVAGE_TAG = "jaymoskitchen.salvage.";
+
 	private final ToolType type;
 
 	public TinkerArrowItem(Item.Properties properties, ToolType type) {
@@ -56,7 +61,12 @@ public class TinkerArrowItem extends ArrowItem implements TinkerTool {
 	}
 
 	private AbstractArrow withDamage(AbstractArrow arrow, ItemStack ammo) {
-		arrow.setBaseDamage(ToolStats.ranged(type, ToolStats.materials(ammo)).damage());
+		java.util.List<com.jaymospowers.tinkering.TinkerMaterial> materials = ToolStats.materials(ammo);
+		arrow.setBaseDamage(ToolStats.ranged(type, materials).damage());
+		// (0.16.0) a stronger shaft comes out of a corpse whole more often (Jaymo's Kitchen reads this tag)
+		if (materials.size() > SHAFT) {
+			arrow.addTag(SALVAGE_TAG + materials.get(SHAFT).shaftStrength());
+		}
 		return arrow;
 	}
 

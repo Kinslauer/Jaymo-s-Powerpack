@@ -70,6 +70,11 @@ public class SeveredPart extends Entity {
 	private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.STRING);
 	private static final EntityDataAccessor<Integer> PART = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> HEIGHT = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.FLOAT);
+	/** (0.15.148) Nailed to a wall by the arrow that took it off (Jaymo's Kingdoms' Archer): it hangs there until picked up. */
+	private static final EntityDataAccessor<Boolean> PINNED = SynchedEntityData.defineId(SeveredPart.class, EntityDataSerializers.BOOLEAN);
+	/** (0.15.148) Where the next head to come off goes instead of flying: nailed at this spot, facing this way (see {@link Dismember#beheadPinned}). */
+	static @org.jspecify.annotations.Nullable Vec3 pinNextAt;
+	static float pinNextYaw;
 
 	private int age;
 	/** Client side: how far it has turned over (degrees), this tick and last, and about which way it spins. */
@@ -108,6 +113,15 @@ public class SeveredPart extends Entity {
 		severed.setYRot(body.yBodyRot);
 		severed.entityData.set(PART, part);
 		severed.entityData.set(HEIGHT, body.getBbHeight());
+		if (part == Dismember.HEAD && pinNextAt != null) {
+			// (0.15.148) the arrow carries it into the wall behind and nails it there
+			severed.setPos(pinNextAt.x, pinNextAt.y - MIDDLE, pinNextAt.z);
+			severed.setDeltaMovement(Vec3.ZERO);
+			severed.setYRot(pinNextYaw);
+			severed.entityData.set(PINNED, true);
+			severed.setNoGravity(true);
+			pinNextAt = null;
+		}
 		if (body instanceof ServerPlayer player) {
 			severed.entityData.set(OWNER, player.getUUID().toString());
 			severed.entityData.set(LOOK, "{id:\"minecraft:player\",Name:\"" + player.getGameProfile().name() + "\"}");
@@ -139,6 +153,11 @@ public class SeveredPart extends Entity {
 		return this.entityData.get(LOOK);
 	}
 
+	/** (0.15.148) Whether it's nailed to a wall. */
+	public boolean pinned() {
+		return this.entityData.get(PINNED);
+	}
+
 	public int part() {
 		return this.entityData.get(PART);
 	}
@@ -166,7 +185,29 @@ public class SeveredPart extends Entity {
 		super.tick();
 		Player carrier = Carry.carrierOf(this);
 		if (carrier != null) {
+			if (pinned()) {
+				// pulled off the wall
+				this.entityData.set(PINNED, false);
+				this.setNoGravity(false);
+			}
 			carried(carrier);
+			return;
+		}
+		if (pinned()) {
+			// (0.15.148) nailed to the wall: it stays put, dripping a while, until someone takes it down
+			this.setDeltaMovement(Vec3.ZERO);
+			if (this.level() instanceof ServerLevel level) {
+				if (++this.age > LIFETIME) {
+					this.discard();
+					return;
+				}
+				if (this.age < 200 && this.age % 8 == 0) {
+					level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x7A0000, 1.0F), this.getX(), this.getY(), this.getZ(), 1, 0.03, 0.0, 0.03, 0.0);
+				}
+			} else {
+				this.spinO = this.spin;
+				this.spinVel = 0.0F;
+			}
 			return;
 		}
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, -GRAVITY, 0.0));
@@ -273,6 +314,7 @@ public class SeveredPart extends Entity {
 		builder.define(OWNER, "");
 		builder.define(PART, Dismember.HEAD);
 		builder.define(HEIGHT, 1.8F);
+		builder.define(PINNED, false);
 	}
 
 	@Override
@@ -282,6 +324,8 @@ public class SeveredPart extends Entity {
 		this.entityData.set(PART, input.getIntOr("Part", Dismember.HEAD));
 		this.entityData.set(HEIGHT, input.getFloatOr("BodyHeight", 1.8F));
 		this.age = input.getIntOr("Age", 0);
+		this.entityData.set(PINNED, input.getBooleanOr("Pinned", false));
+		this.setNoGravity(pinned());
 	}
 
 	@Override
@@ -291,5 +335,6 @@ public class SeveredPart extends Entity {
 		output.putInt("Part", part());
 		output.putFloat("BodyHeight", bodyHeight());
 		output.putInt("Age", this.age);
+		output.putBoolean("Pinned", pinned());
 	}
 }
