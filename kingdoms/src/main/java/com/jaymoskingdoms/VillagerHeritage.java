@@ -85,6 +85,8 @@ public final class VillagerHeritage {
 	static final int DEEP_Y = 40;
 	/** The chance a Warrior-born is born with its tail kept wrapped (the rest had it cut). */
 	static final float WRAPPED_CHANCE = 0.6F;
+	/** (0.7.184) Andy: "if you have a nightborn mother, the child has a 70% chance to come out nightborn". */
+	static final float NIGHTBORN_MOTHER_CHANCE = 0.7F;
 	/** Chatted with (MCA), the chance they talk of their blood instead of small talk; a Warrior-born's. */
 	public static final float CHAT_CHANCE = 0.15F, WARRIOR_CHAT_CHANCE = 0.35F;
 	/** Coming over to gossip, the chance they talk of their own blood. */
@@ -254,10 +256,9 @@ public final class VillagerHeritage {
 		LOADED.remove(villager);
 	}
 
-	/** A child's heritage: one of its parents' (by a coin), or a new one if neither has any. */
+	/** A child's heritage: one of its parents' ({@link #blood}), or a new one if neither has any. */
 	public static void inherit(LivingEntity child, @Nullable Entity mother, @Nullable Entity father) {
-		Heritage.Kind a = mother == null ? null : passed(mother, child.getRandom()), b = father == null ? null : passed(father, child.getRandom());
-		Heritage.Kind kind = a == null ? b : b == null ? a : child.getRandom().nextBoolean() ? a : b;
+		Heritage.Kind kind = blood(mother, father, child.getRandom());
 		if (kind == null) {
 			Entity at = mother != null ? mother : father != null ? father : child;
 			kind = roll(at.level(), at.blockPosition(), child.getRandom());
@@ -267,8 +268,20 @@ public final class VillagerHeritage {
 
 	/** A baby's heritage from its real parents (a player among them): one of theirs by a coin, or null if neither has one. */
 	public static Heritage.@Nullable Kind babyBlood(Entity mother, Entity father) {
-		Heritage.Kind a = passed(mother, mother.getRandom()), b = passed(father, father.getRandom());
-		return a == null ? b : b == null ? a : mother.getRandom().nextBoolean() ? a : b;
+		return blood(mother, father, mother.getRandom());
+	}
+
+	/**
+	 * A child's blood from {@code mother} and {@code father} (either may be missing): (0.7.184) a Nightborn mother's
+	 * child is Nightborn {@link #NIGHTBORN_MOTHER_CHANCE} of the time; otherwise what one parent passes on
+	 * ({@link #passed}), by a coin. Null if neither passes on any.
+	 */
+	private static Heritage.@Nullable Kind blood(@Nullable Entity mother, @Nullable Entity father, RandomSource random) {
+		if (mother != null && of(mother) == Heritage.Kind.NIGHTBORN && random.nextFloat() < NIGHTBORN_MOTHER_CHANCE) {
+			return Heritage.Kind.NIGHTBORN;
+		}
+		Heritage.Kind a = mother == null ? null : passed(mother, random), b = father == null ? null : passed(father, random);
+		return a == null ? b : b == null ? a : random.nextBoolean() ? a : b;
 	}
 
 	/**

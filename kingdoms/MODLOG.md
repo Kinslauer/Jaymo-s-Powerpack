@@ -4372,13 +4372,19 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   and attribute point comes back (`Skills.respec`; experience and levels stay).
 - Things: handed down, you keep your inventory as the child. Left with the elder, they wear your armour and what was in
   your hands (dropped whole when they die) and carry the rest in their MCA pack; what doesn't fit falls at their feet.
-- Elders live lives of their own (`Elders`, attachment `elder_journey`). Andy: "you could ask your father/mother to go
-  on an adventure with you for old times sake, or even find them on travels of their own." Asked along, they follow you
-  as MCA family does. Left be, they stay home 2-5 days, then set off for an MCA village or a standing realm's seat
-  250-1500 blocks off, stay 1-3 days and come home; never while a player is within 64 blocks, following someone, downed,
-  asleep or riding. The journey passes unseen (they're just there, the chunk loaded for them), so you can come upon them
-  in a far town; one unloaded when the visit ends stays put until someone comes by. Their heir gets an MCA letter when
-  they set off and when they're home.
+- Elders live lives of their own (`Elders`, attachments `elder_journey` on the elder and `elder_roads` on the
+  Overworld). Andy: "you could ask your father/mother to go on an adventure with you for old times sake, or even find
+  them on travels of their own", then "Is it possible to see them traveling along the way?" / "Yes please". Asked along,
+  they follow you as MCA family does. Left be, they stay home 2-5 days, then set off on foot for an MCA village or a
+  standing realm's seat 250-1500 blocks off, stay 1-3 days and walk home; they never set off while a player is within 64
+  blocks, following someone, downed, asleep or riding. On the road, like the caravans: unseen, the journey goes on in
+  the record (0.1 blocks a tick, along a King's Road where one runs their way, else straight); a player within 80 blocks
+  of where they've got to and the elder is put back in the world there (their whole saved self, same UUID and family)
+  and walks on for real (helped over anything they're stuck on for 12 s); nobody within 112 and they go back into the
+  record. A copy left in an unloading chunk is put away when it loads again. Their heir gets an MCA letter when they
+  set off and when they're home.
+- (Andy) A Nightborn mother's child is Nightborn 70% of the time (`VillagerHeritage.NIGHTBORN_MOTHER_CHANCE`), players'
+  and villagers' alike; otherwise the parents' blood as before.
 - Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles.
   The heritage screen's rite mode is gone. `/kingdom heritage set|unlock` are unchanged.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
