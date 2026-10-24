@@ -54,6 +54,11 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * None of it is a fight: the guards never draw on you. Only an actual attack (hitting the king or a guard) makes them
  * hostile, as anywhere. His realm's own people and his sworn wardens ({@link Wardens}) are no strangers.
+ * <p>
+ * (0.7.184) Andy: "guards should make way for you regardless of their king's temperament if you are carrying a quest
+ * item". Whoever carries a quest's letter or keepsake, or brings him the work he gave them ({@link Quests#questItem}), or
+ * is being led to him by one of his guards ({@link Audiences}), has free passage ({@link #passage}): no heat, no
+ * shoving, not seen out of the city (unless exiled as a vigilante), and guards in their way step aside.
  */
 final class Retinue {
 	/** Closer than this to him is close; within {@link #WATCH_RANGE} is lingering; his favours reach {@link #FAVOUR_RANGE}. */
@@ -104,6 +109,9 @@ final class Retinue {
 	static final double TOSS_UP = 0.7, TOSS_OUT = 1.0;
 	/** (0.7.130) The purist gives one of his own blood this much bread with his daily word. */
 	static final int PURIST_BREAD = 2;
+	/** (0.7.184) A guard this close to one with free passage, and ahead of them, steps aside; "make way" at most this often (ticks). */
+	static final double MAKE_WAY_RANGE = 2.5;
+	static final int MAKE_WAY_TICKS = 400;
 
 	private static final class Watch {
 		int heat;
@@ -127,6 +135,8 @@ final class Retinue {
 	private static final Map<UUID, UUID> SENT = new HashMap<>();
 	/** Guard → the faction he's from (to find the player's watch). */
 	private static final Map<UUID, Integer> SENT_BY = new HashMap<>();
+	/** (0.7.184) "faction/player" → when his guards last called to make way for them. */
+	private static final Map<String, Long> MADE_WAY = new HashMap<>();
 
 	private Retinue() {
 	}
@@ -139,6 +149,7 @@ final class Retinue {
 			SENT.clear();
 			SENT_BY.clear();
 			SHOVED.clear();
+			MADE_WAY.clear();
 		});
 	}
 
@@ -157,6 +168,20 @@ final class Retinue {
 	/** {@code p} is no stranger to him: his own people, his wardens, or not really there. */
 	private static boolean trusted(ServerLevel level, Faction f, ServerPlayer p) {
 		return p.isCreative() || p.isSpectator() || f.members().containsKey(p.getUUID()) || Wardens.of(level.getServer(), f.id()).contains(p.getUUID());
+	}
+
+	/**
+	 * (0.7.184) {@code p} has free passage past {@code f}'s guards, whatever its ruler's temper: they carry a quest's
+	 * letter or keepsake, or work for him ({@link Quests#questItem}), or one of his guards is taking them to him.
+	 */
+	static boolean passage(Faction f, ServerPlayer p, long now) {
+		return Audiences.passing(f.id(), p.getUUID(), now) || Quests.questItem(p, f.id());
+	}
+
+	/** (0.7.184) {@code p} has been thrown out of {@code f}'s city, and isn't to come back yet. */
+	static boolean banned(Faction f, ServerPlayer p, long now) {
+		Watch w = WATCHED.get(key(f.id(), p.getUUID()));
+		return w != null && w.banned(now);
 	}
 
 	/** A weapon in hand (for the warlord). */
@@ -208,10 +233,11 @@ final class Retinue {
 		}
 		Faction f = Factions.get(level.getServer(), king.factionId());
 		Tempers.Temper t = Tempers.of(f);
-		if (f == null || t == null || !isRuler(f, king) || trusted(level, f, p)) {
+		long now = level.getGameTime();
+		if (f == null || t == null || !isRuler(f, king) || trusted(level, f, p) || passage(f, p, now)) {
+			// (0.7.184) one bringing him word or work, or brought before him, may approach
 			return InteractionResult.PASS;
 		}
-		long now = level.getGameTime();
 		if (t == Tempers.Temper.PURIST && Purists.kin(f, p)) {
 			// (0.7.130) one of his own blood may clasp his hand
 			Speech.say(level, king, Component.translatable(speech(t, "kin_hands"), Purists.bloodName(f)), Speech.GOLD, SPEECH_RANGE);
@@ -244,7 +270,13 @@ final class Retinue {
 		Rules r = rules(t);
 		if (king != null) {
 			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, king.getBoundingBox().inflate(WATCH_RANGE))) {
-				if (!trusted(level, f, p)) {
+				if (trusted(level, f, p)) {
+					continue;
+				}
+				if (passage(f, p, now)) {
+					// (0.7.184) free passage: his guards make way
+					makeWay(level, f, king, p, now);
+				} else {
 					near(level, f, t, r, king, p, now);
 				}
 			}
@@ -273,7 +305,7 @@ final class Retinue {
 					continue;
 				}
 			}
-			if (p == null || p.level() != level || trusted(level, f, p)) {
+			if (p == null || p.level() != level || trusted(level, f, p) || !w.exiled && passage(f, p, now)) {
 				continue;
 			}
 			if (w.banned(now) ? inCity(f, p) : dogs(t) && w.heat >= r.wary() && king != null && p.distanceTo(king) <= WATCH_RANGE * 2) {
@@ -396,6 +428,29 @@ final class Retinue {
 		}
 	}
 
+	/** (0.7.184) Guards ahead of {@code p} (who has free passage) step aside for them, and once in a while call to make way. */
+	private static void makeWay(ServerLevel level, Faction f, PathfinderMob king, ServerPlayer p, long now) {
+		Vec3 to = king.position().subtract(p.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 look = p.getLookAngle().multiply(1.0, 0.0, 1.0);
+		boolean called = false;
+		for (Worker w : Workers.near(level, p.getBoundingBox().inflate(MAKE_WAY_RANGE),
+			g -> g.isAlive() && g.factionId() == f.id() && g.role() == Folk.GUARD && Rulers.target(g.mob()) == null && !Audiences.leading(g.mob()))) {
+			PathfinderMob g = w.mob();
+			Vec3 off = g.position().subtract(p.position()).multiply(1.0, 0.0, 1.0);
+			if (off.lengthSqr() < 1.0E-4 || off.dot(to) <= 0.0 && off.dot(look) <= 0.0) {
+				// (not in their way)
+				continue;
+			}
+			Audiences.stepAside(g, p, king.position());
+			String k = key(f.id(), p.getUUID());
+			if (!called && now - MADE_WAY.getOrDefault(k, Long.MIN_VALUE / 2) >= MAKE_WAY_TICKS) {
+				MADE_WAY.put(k, now);
+				called = true;
+				Speech.say(level, g, Component.translatable("speech.jaymoskingdoms.retinue.make_way" + level.getRandom().nextInt(3)), Speech.WHITE, SPEECH_RANGE);
+			}
+		}
+	}
+
 	/** His daily favour to a stranger who's given no offence, if his temper has one. */
 	private static void favour(ServerLevel level, Faction f, Tempers.Temper t, PathfinderMob king, ServerPlayer p, long now) {
 		boolean due = switch (t) {
@@ -460,7 +515,7 @@ final class Retinue {
 	private static boolean wanted(ServerLevel level, Faction f, Tempers.Temper t, UUID player, long now) {
 		Watch w = WATCHED.get(key(f.id(), player));
 		ServerPlayer p = level.getServer().getPlayerList().getPlayer(player);
-		if (w == null || p == null || p.level() != level || !p.isAlive() || trusted(level, f, p)) {
+		if (w == null || p == null || p.level() != level || !p.isAlive() || trusted(level, f, p) || !w.exiled && passage(f, p, now)) {
 			return false;
 		}
 		return w.banned(now) ? inCity(f, p) : dogs(t) && w.heat >= rules(t).wary();
@@ -628,7 +683,8 @@ final class Retinue {
 
 		@Override
 		public boolean canUse() {
-			return this.guard.getTarget() == null && this.guard.escort() == null && suspect(this.guard) != null;
+			// (0.7.184) or walking someone to his ruler ({@link Audiences})
+			return this.guard.getTarget() == null && (Audiences.leading(this.guard) || this.guard.escort() == null && suspect(this.guard) != null);
 		}
 
 		@Override
@@ -648,7 +704,9 @@ final class Retinue {
 
 		@Override
 		public void tick() {
-			harass(this.guard, this.shoved);
+			if (!Audiences.lead(this.guard)) {
+				harass(this.guard, this.shoved);
+			}
 		}
 	}
 }

@@ -29,6 +29,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		MobAnimations.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
+		com.jaymoskingdoms.client.HandshakePose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
@@ -42,6 +43,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		CameraRenderState camera, CallbackInfo ci) {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.HandshakePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		HiddenBladeClient.pose(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
