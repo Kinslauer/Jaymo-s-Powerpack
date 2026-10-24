@@ -29,6 +29,8 @@
 		"MobWeaponDropMixin",
 		"ServerGamePacketListenerImplMixin",
 		"WorldGenReadMixin",
+		"WeaponModFlailMixin",
+		"WeaponModMeleeUseMixin",
 		"WoundsHurtMixin",
 		"WoundsPlayerHurtMixin",
 		"WoundsRegenMixin"
