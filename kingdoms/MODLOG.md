@@ -4345,3 +4345,13 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+
+## 0.7.184: Earthling ki glow for Z Fighters only, and no marks poking through costumes (pack 0.15.147)
+- Andy: "Earthlings should have no special glow or ki effects on their heritage skin unless they are z fighters, and
+  even then the weird costume clipping is back." The near-death surge still gives every Earthling its random buff, but
+  the fists' ki glow, the sparks and the flare's sounds only come for a player with the Z Fighter power
+  (`EarthlingSurge.shows`, read through `PowersCompat`). Earthling villagers never glow.
+- Under a costume (or the symbiote's suit) a player's heritage marks and their glow aren't drawn at all. They're drawn
+  on the plain body's pose while the costume follows MCA's, so where a cut leaves skin bare (the gi's forearms) the
+  wraps and the glow slid out through the sleeves in motion. Eyes and fins work as before.
+- Compile-checked; not yet seen in game.
