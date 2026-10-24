@@ -1,6 +1,8 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
@@ -9,54 +11,73 @@ import com.jaymospowers.power.chrono.ChronoDirectives;
 import com.jaymospowers.power.chrono.ChronoPower;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The powers screen (H), styled like the Z Fighter training screen: a header with the power and its mastery, one
- * striped row per key (the key, the ability's short name, its text cut short) and a box at the bottom that shows the
- * hovered row in full. In creative a list of every power runs down the left, to look through and choose; in survival
- * it's just your power (or that it's still dormant).
+ * The powers screen (H). (0.15.147) A vanilla container window in dark tones, with tabs down its left edge:
+ * <ul>
+ * <li><b>Overview:</b> the power, its fate and mastery, and slots that press Z, C and the costume mask for you.</li>
+ * <li><b>Abilities:</b> a slot per key; pick one to read it in full, and Use presses it for you.</li>
+ * <li><b>Chrono:</b> (Chrono only) the echo's orders and the three loop slots ({@link ChronoDirectives}).</li>
+ * <li><b>Mastery:</b> what's mastered and what comes next.</li>
+ * <li><b>Powers:</b> (creative only) every power, to look through and choose.</li>
+ * </ul>
+ * The inventory has a tab that opens it too ({@link PowerInventoryTab}).
  */
 public class PowerScreen extends Screen {
-	private static final int MAX_W = 380;
-	/** The creative list of powers down the left. */
-	private static final int LIST_W = 112;
-	private static final int LIST_ROW = 20;
-	private static final int HEADER = 34;
-	private static final int ROW = 16;
-	/** The box at the bottom that shows the hovered row's whole text: tall enough for the longest row, within these. */
-	private static final int DETAIL_MIN_LINES = 4;
-	private static final int DETAIL_MAX_LINES = 9;
-	private static final int FOOTER = 22;
-	/** The widest the short-name column gets. */
-	private static final int NAME_W = 136;
-	private static final int COLOR_PANEL = 0xD0101018;
-	private static final int COLOR_ROW = 0x30FFFFFF;
-	private static final int COLOR_ROW_ALT = 0x18FFFFFF;
-	private static final int COLOR_ROW_HOVER = 0x50FFFFFF;
-	private static final int COLOR_CHIP = 0xA0000000;
-	private static final int COLOR_TEXT = 0xFFFFFFFF;
-	private static final int COLOR_DIM = 0xFFA8A8B8;
-	private static final int COLOR_BAR_BACK = 0xFF303030;
+	static final int W = 176, H = 186;
+	/** The tabs down the left edge: size, spacing, and where the first one starts below the top. */
+	static final int TAB_W = 28, TAB_H = 26, TAB_STEP = 28, TAB_TOP = 8, TAB_OUT = 26;
+	static final int SLOT = 18;
+	// the vanilla window, dark
+	static final int COLOR_EDGE = 0xFF0A0A0E;
+	static final int COLOR_LIGHT = 0xFF4A4A52;
+	static final int COLOR_SHADE = 0xFF141418;
+	static final int COLOR_BODY = 0xFF2B2B2F;
+	static final int COLOR_CANVAS = 0xFF1E1E22;
+	static final int COLOR_WELL = 0xFF242429;
+	static final int COLOR_WELL_LIGHT = 0xFF3E3E46;
+	static final int COLOR_TAB = 0xFF222226;
+	static final int COLOR_TEXT = 0xFFE0E0E8;
+	static final int COLOR_DIM = 0xFF8A8A98;
+	static final int COLOR_GOLD = 0xFFFFD54A;
+	static final int COLOR_BAR_BACK = 0xFF141418;
+	/** The inner canvas: inset from the window's edges, below the title. */
+	private static final int CANVAS_X = 7, CANVAS_Y = 18, CANVAS_W = W - 14, CANVAS_H = H - 25;
+	private static final int ROW = 18;
+
+	enum Tab {
+		OVERVIEW, ABILITIES, CHRONO, MASTERY, POWERS;
+
+		String id() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+	}
 
 	private final List<Power> powers = new ArrayList<>(Powers.all());
 	/** The power being shown (creative can look through any of them). */
 	private @Nullable Power selected;
-	/** How many key rows are scrolled past, when they don't all fit. */
+	private Tab tab = Tab.OVERVIEW;
+	/** The key line picked on the Abilities tab. */
+	private int picked;
+	/** How many rows of the creative list are scrolled past. */
 	private int scroll;
-	private @Nullable Button chooseButton;
-	/** The echo's orders, then Record ({@link ChronoDirectives#RECORD_BUTTON}). */
-	private final List<Button> orderButtons = new ArrayList<>();
+	private @Nullable Button useButton, chooseButton, clearButton;
 
 	public PowerScreen() {
 		super(Component.translatable("screen.jaymospowers.title"));
@@ -73,6 +94,18 @@ public class PowerScreen extends Screen {
 			this.powers.removeIf(power -> !power.fated() && power != own);
 		}
 		this.selected = own != null && this.powers.contains(own) ? own : this.powers.isEmpty() ? null : this.powers.getFirst();
+		if (own == null && player != null && player.isCreative()) {
+			this.tab = Tab.POWERS;
+		}
+	}
+
+	/** Opens on {@code power}'s overview (the inventory tab). */
+	public PowerScreen(Power power) {
+		this();
+		if (this.powers.contains(power)) {
+			this.selected = power;
+			this.tab = Tab.OVERVIEW;
+		}
 	}
 
 	private boolean creative() {
@@ -88,142 +121,71 @@ public class PowerScreen extends Screen {
 		return this.minecraft.player != null && power == current() ? this.minecraft.player : null;
 	}
 
-	private List<KeyGuide.Line> lines() {
-		return selected == null ? List.of() : KeyGuide.lines(selected, owner(selected));
-	}
-
-	/** Whether the panel ends in a row of buttons: creative's choose/clear, or a Timeless Chrono's echo orders. */
-	private boolean footer() {
-		return creative() || orders();
-	}
-
-	/** (0.15.143) A Timeless Chrono's echo takes orders from here. */
-	private boolean orders() {
-		Player player = this.minecraft.player;
-		return player != null && !player.isCreative() && Powers.of(player) == ChronoPower.INSTANCE && ChronoDirectives.commandable(player);
-	}
-
-	private int listW() {
-		return creative() ? LIST_W : 0;
-	}
-
-	private int panelW() {
-		return Math.min(creative() ? MAX_W + 40 : MAX_W, this.width - 12);
-	}
-
-	/** The most key rows the panel makes room for (in creative, the most any power has). */
-	private int rowsWanted() {
-		// creative keeps one height for every power, so the panel doesn't jump as you look through them
-		int rows = Math.max(1, lines().size());
-		if (creative()) {
-			for (Power power : powers) {
-				rows = Math.max(rows, KeyGuide.lines(power, owner(power)).size());
+	/** The tabs there are for the power shown. */
+	private List<Tab> tabs() {
+		List<Tab> tabs = new ArrayList<>();
+		if (this.selected != null) {
+			tabs.add(Tab.OVERVIEW);
+			tabs.add(Tab.ABILITIES);
+			if (this.selected == ChronoPower.INSTANCE) {
+				tabs.add(Tab.CHRONO);
 			}
+			tabs.add(Tab.MASTERY);
 		}
-		return rows;
-	}
-
-	/** Tall enough for every row (or the creative list), clamped to the screen. */
-	private int panelH() {
-		int h = HEADER + rowsWanted() * ROW + 6 + 14 + detailWanted() * 9 + (footer() ? FOOTER : 0);
 		if (creative()) {
-			h = Math.max(h, HEADER + powers.size() * LIST_ROW + FOOTER + 8);
+			tabs.add(Tab.POWERS);
 		}
-		return Math.min(h, this.height - 8);
+		return tabs;
 	}
 
 	private int left() {
-		return (this.width - panelW()) / 2;
+		return (this.width - W) / 2;
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - panelH()) / 2);
+		return (this.height - H) / 2;
 	}
 
-	/** Where the right-hand pane (the selected power) starts. */
-	private int paneX() {
-		return left() + listW();
+	private int cx() {
+		return left() + CANVAS_X;
 	}
 
-	private int paneW() {
-		return panelW() - listW();
+	private int cy() {
+		return top() + CANVAS_Y;
 	}
 
-	private int rowsY() {
-		return top() + HEADER;
-	}
-
-	private int detailY() {
-		return top() + panelH() - detailH() - (footer() ? FOOTER : 0);
-	}
-
-	/** Lines in the detail box: as many as it wants, unless the rows need the room (never under the minimum). */
-	private int detailLines() {
-		int room = (panelH() - HEADER - rowsWanted() * ROW - 6 - 14 - (footer() ? FOOTER : 0)) / 9;
-		return Math.max(DETAIL_MIN_LINES, Math.min(detailWanted(), room));
-	}
-
-	/** The hovered row's name and every line of the longest row's text (or the description). */
-	private int detailWanted() {
-		int wrap = paneW() - 18;
-		int most = 0;
-		// creative keeps one size for every power, so the panel doesn't jump as you look through them
-		for (Power power : creative() ? powers : selected == null ? List.<Power>of() : List.of(selected)) {
-			most = Math.max(most, this.font.split(power.description(), wrap).size() + 1);
-			for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
-				most = Math.max(most, 1 + this.font.split(line.text(), wrap).size());
-			}
-		}
-		return Mth.clamp(most, DETAIL_MIN_LINES, DETAIL_MAX_LINES);
-	}
-
-	private int detailH() {
-		return 10 + detailLines() * 9 + 4;
-	}
-
-	/** How many key rows fit above the detail box. */
-	private int visibleRows() {
-		return Math.max(1, (detailY() - 6 - rowsY()) / ROW);
-	}
-
-	private int maxScroll() {
-		return Math.max(0, lines().size() - visibleRows());
+	private List<KeyGuide.Line> lines() {
+		return this.selected == null ? List.of() : KeyGuide.lines(this.selected, owner(this.selected));
 	}
 
 	@Override
 	protected void init() {
-		chooseButton = null;
-		orderButtons.clear();
-		if (orders()) {
-			int y = top() + panelH() - FOOTER + 3;
-			int count = ChronoDirectives.RECORD_BUTTON + 1;
-			int gap = 3;
-			int bw = (paneW() - 12 - gap * (count - 1)) / count;
-			for (int i = 0; i < count; i++) {
-				int button = i;
-				String name = i == ChronoDirectives.RECORD_BUTTON ? "record"
-					: ChronoDirectives.Directive.values()[i].name().toLowerCase(java.util.Locale.ROOT);
-				Button b = Button.builder(Component.translatable("screen.jaymospowers.order." + name),
-						press -> ClientPlayNetworking.send(new ChronoDirectives.Order(button)))
-					.bounds(paneX() + 6 + i * (bw + gap), y, bw, 16)
-					.tooltip(Tooltip.create(Component.translatable("screen.jaymospowers.order." + name + ".desc")))
-					.build();
-				orderButtons.add(addRenderableWidget(b));
-			}
-			return;
+		if (!tabs().contains(this.tab)) {
+			this.tab = tabs().isEmpty() ? Tab.OVERVIEW : tabs().getFirst();
 		}
-		if (!creative()) {
-			return;
+		this.useButton = null;
+		this.chooseButton = null;
+		this.clearButton = null;
+		int bottom = cy() + CANVAS_H - 20;
+		if (this.tab == Tab.ABILITIES) {
+			this.useButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.use"), b -> use(this.picked))
+				.bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
+		} else if (this.tab == Tab.POWERS) {
+			this.chooseButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.choose"), b -> {
+				if (this.selected != null) {
+					choose(this.selected.id().toString());
+				}
+			}).bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
+			this.clearButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.clear"), b -> choose(""))
+				.bounds(cx() + 4, bottom, 90, 16).build());
 		}
-		int y = top() + panelH() - FOOTER + 3;
-		chooseButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.choose"), b -> {
-			if (selected != null) {
-				choose(selected.id().toString());
-			}
-		}).bounds(paneX() + paneW() - 86, y, 80, 16).build());
-		Button clear = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.clear"), b -> choose(""))
-			.bounds(left() + 6, y, LIST_W - 4, 16).build());
-		clear.active = current() != null;
+	}
+
+	private void select(Tab tab) {
+		if (this.tab != tab) {
+			this.tab = tab;
+			rebuildWidgets();
+		}
 	}
 
 	private void choose(String id) {
@@ -231,22 +193,94 @@ public class PowerScreen extends Screen {
 		onClose();
 	}
 
+	/** Presses a key for you (the screen closes so it lands in the world): {@link JaymosPowersClient#tap}. */
+	private void press(int key) {
+		onClose();
+		JaymosPowersClient.tap(key);
+	}
+
+	/** The Abilities tab's Use: the picked line's key, if it's one that can be pressed. */
+	private void use(int line) {
+		int key = tapKey(line);
+		if (key >= 0) {
+			press(key);
+		}
+	}
+
+	/** The key {@link JaymosPowersClient#tap} takes for line {@code i}, or -1 if it can't be pressed from here. */
+	private int tapKey(int i) {
+		List<KeyGuide.Line> lines = lines();
+		Player player = this.minecraft.player;
+		if (i < 0 || i >= lines.size() || player == null || this.selected != current() || lines.get(i).locked()) {
+			return -1;
+		}
+		String slot = lines.get(i).slot();
+		for (PowerKey key : PowerKey.values()) {
+			if (key.id().equals(slot)) {
+				return Mastery.isUsable(player, key) ? key.ordinal() : -1;
+			}
+		}
+		return switch (slot) {
+			case "mode" -> JaymosPowersClient.TAP_MODE;
+			case "ultimate" -> this.selected.ultimateAnswers(player) ? JaymosPowersClient.TAP_ULTIMATE : -1;
+			default -> -1;
+		};
+	}
+
 	@Override
 	public boolean isPauseScreen() {
 		return false;
 	}
 
+	// ---------------------------------------------------------------- clicks
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (creative()) {
-			int x = left();
-			for (int i = 0; i < powers.size(); i++) {
-				int ry = rowsY() + i * LIST_ROW;
-				if (over((int)event.x(), (int)event.y(), x + 4, ry, LIST_W - 4, LIST_ROW - 2) && ry + LIST_ROW <= top() + panelH() - FOOTER) {
-					selected = powers.get(i);
-					scroll = 0;
-					return true;
+		int mx = (int)event.x(), my = (int)event.y();
+		List<Tab> tabs = tabs();
+		for (int i = 0; i < tabs.size(); i++) {
+			if (over(mx, my, left() - TAB_OUT, top() + TAB_TOP + i * TAB_STEP, TAB_OUT, TAB_H)) {
+				select(tabs.get(i));
+				return true;
+			}
+		}
+		switch (this.tab) {
+			case OVERVIEW -> {
+				for (int i = 0; i < 3; i++) {
+					if (over(mx, my, toggleX(i), toggleY(), SLOT, SLOT) && toggleOpen(i)) {
+						toggle(i);
+						return true;
+					}
 				}
+			}
+			case ABILITIES -> {
+				List<KeyGuide.Line> lines = lines();
+				for (int i = 0; i < lines.size(); i++) {
+					if (over(mx, my, wellX(i), wellY(i), SLOT, SLOT)) {
+						this.picked = i;
+						return true;
+					}
+				}
+			}
+			case CHRONO -> {
+				for (int b = 0; b <= ChronoDirectives.CLEAR_LOOP; b++) {
+					if (over(mx, my, orderX(b), orderY(b), SLOT, SLOT) && orderOpen(b)) {
+						ClientPlayNetworking.send(new ChronoDirectives.Order(b));
+						return true;
+					}
+				}
+			}
+			case POWERS -> {
+				for (int i = 0; i < listRows(); i++) {
+					int n = i + this.scroll;
+					if (n < this.powers.size() && over(mx, my, cx() + 2, cy() + 2 + i * ROW, CANVAS_W - 4, ROW)) {
+						this.selected = this.powers.get(n);
+						this.picked = 0;
+						return true;
+					}
+				}
+			}
+			default -> {
 			}
 		}
 		return super.mouseClicked(event, doubleClick);
@@ -254,12 +288,97 @@ public class PowerScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
-		scroll = Mth.clamp(scroll - (int)Math.signum(scrollY), 0, maxScroll());
+		if (this.tab == Tab.POWERS) {
+			this.scroll = Mth.clamp(this.scroll - (int)Math.signum(scrollY), 0, Math.max(0, this.powers.size() - listRows()));
+		}
 		return true;
 	}
 
-	private static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {
+	static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {
 		return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+	}
+
+	// ---------------------------------------------------------------- drawing
+
+	@Override
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		int x = left(), y = top();
+		List<Tab> tabs = tabs();
+		// the tabs not picked sit behind the window
+		for (int i = 0; i < tabs.size(); i++) {
+			if (tabs.get(i) != this.tab) {
+				tab(graphics, tabs.get(i), i, false, mouseX, mouseY);
+			}
+		}
+		frame(graphics, x, y, W, H);
+		recess(graphics, cx(), cy(), CANVAS_W, CANVAS_H);
+		int picked = tabs.indexOf(this.tab);
+		if (picked >= 0) {
+			tab(graphics, this.tab, picked, true, mouseX, mouseY);
+		}
+		graphics.text(this.font, Component.translatable("screen.jaymospowers.tab." + this.tab.id()), x + 8, y + 6, COLOR_TEXT, false);
+		Power power = this.selected;
+		if (power == null && this.tab != Tab.POWERS) {
+			wrapped(graphics, Component.translatable("screen.jaymospowers.dormant"), cx() + 4, cy() + 4, CANVAS_W - 8, 6, COLOR_DIM);
+		} else {
+			switch (this.tab) {
+				case OVERVIEW -> overview(graphics, power, mouseX, mouseY);
+				case ABILITIES -> abilities(graphics, power, mouseX, mouseY);
+				case CHRONO -> chrono(graphics, mouseX, mouseY);
+				case MASTERY -> mastery(graphics, power);
+				case POWERS -> list(graphics, mouseX, mouseY);
+			}
+		}
+		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** Vanilla's raised window: a dark edge, a light bevel on top and left, a shadow on bottom and right. */
+	static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		graphics.fill(x, y, x + w, y + h, COLOR_EDGE);
+		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, COLOR_SHADE);
+		graphics.fill(x + 1, y + 1, x + w - 3, y + h - 3, COLOR_LIGHT);
+		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, COLOR_BODY);
+	}
+
+	/** A sunken area: shadow on top and left, light on bottom and right. */
+	static void recess(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		graphics.fill(x, y, x + w, y + h, COLOR_WELL_LIGHT);
+		graphics.fill(x, y, x + w - 1, y + h - 1, COLOR_SHADE);
+		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, COLOR_CANVAS);
+	}
+
+	/** An 18x18 item slot well. */
+	static void well(GuiGraphicsExtractor graphics, int x, int y) {
+		graphics.fill(x, y, x + SLOT, y + SLOT, COLOR_WELL_LIGHT);
+		graphics.fill(x, y, x + SLOT - 1, y + SLOT - 1, COLOR_SHADE);
+		graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, COLOR_WELL);
+	}
+
+	/** A tab on the left edge; the picked one runs into the window. */
+	private void tab(GuiGraphicsExtractor graphics, Tab tab, int i, boolean picked, int mouseX, int mouseY) {
+		int x = left() - TAB_OUT, y = top() + TAB_TOP + i * TAB_STEP;
+		graphics.fill(x, y, x + TAB_W, y + TAB_H, COLOR_EDGE);
+		graphics.fill(x + 1, y + 1, x + TAB_W, y + TAB_H - 1, picked ? COLOR_LIGHT : COLOR_SHADE);
+		graphics.fill(x + 3, y + 3, x + TAB_W, y + TAB_H - 3, picked ? COLOR_BODY : COLOR_TAB);
+		if (picked) {
+			// merge into the window: over its left edge
+			graphics.fill(x + TAB_W - 2, y + 1, left() + 3, y + TAB_H - 1, COLOR_BODY);
+		}
+		int ix = x + 6, iy = y + 5;
+		if (tab == Tab.OVERVIEW && this.selected != null) {
+			graphics.item(this.selected.icon(), ix, iy);
+		} else {
+			icon(graphics, tab.id(), ix, iy);
+		}
+		if (over(mouseX, mouseY, x, y, TAB_OUT, TAB_H)) {
+			graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.tab." + tab.id()), mouseX, mouseY);
+		}
+	}
+
+	/** One of our 16x16 GUI icons ({@code textures/gui/power_screen/<name>.png}). */
+	static void icon(GuiGraphicsExtractor graphics, String name, int x, int y) {
+		Identifier id = JaymosPowers.id("textures/gui/power_screen/" + name + ".png");
+		graphics.blit(RenderPipelines.GUI_TEXTURED, id, x, y, 0.0F, 0.0F, 16, 16, 16, 16);
 	}
 
 	/** One line of text, cut with "..." if it would run past {@code width}. */
@@ -268,222 +387,401 @@ public class PowerScreen extends Screen {
 		if (this.font.width(s) > width) {
 			s = this.font.plainSubstrByWidth(s, Math.max(0, width - this.font.width("..."))) + "...";
 		}
-		graphics.text(this.font, s, x, y, color);
+		graphics.text(this.font, s, x, y, color, false);
 	}
 
-	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		scroll = Mth.clamp(scroll, 0, maxScroll());
-		int x = left();
-		int y = top();
-		int w = panelW();
-		int h = panelH();
-		Power power = selected;
-		int accent = power == null ? COLOR_DIM : 0xFF000000 | power.color();
-		graphics.fill(x, y, x + w, y + h, COLOR_PANEL);
-		graphics.fill(x, y, x + w, y + 2, accent);
-
-		if (creative()) {
-			list(graphics, mouseX, mouseY);
+	/** Text wrapped to {@code width}, at most {@code lines} lines (cut with "..."). Returns the lines used. */
+	private int wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int lines, int color) {
+		List<FormattedCharSequence> split = this.font.split(text, width);
+		int n = Math.min(lines, split.size());
+		for (int i = 0; i < n; i++) {
+			graphics.text(this.font, split.get(i), x, y + i * 9, color, false);
 		}
-		if (power == null) {
-			// dormant: nothing to show but that
-			graphics.centeredText(this.font, this.title, this.width / 2, y + 8, COLOR_TEXT);
-			var split = this.font.split(Component.translatable("screen.jaymospowers.dormant"), w - 24);
-			for (int i = 0; i < split.size(); i++) {
-				graphics.centeredText(this.font, split.get(i), this.width / 2, y + 24 + i * 10, COLOR_DIM);
-			}
-			super.extractRenderState(graphics, mouseX, mouseY, a);
-			return;
+		if (split.size() > lines && n > 0) {
+			graphics.text(this.font, "...", x + Math.min(width - 9, this.font.width(split.get(n - 1))), y + (n - 1) * 9, COLOR_DIM, false);
 		}
-		header(graphics, power, accent);
-		Component detailName = null;
-		Component detail = power.description();
-		int detailColor = accent;
-		List<KeyGuide.Line> lines = lines();
-		int px = paneX();
-		int pw = paneW();
-		int chipW = chipWidth(lines);
-		int nameX = px + 10 + chipW + 6;
-		int nameW = Math.min(NAME_W, nameWidth(lines));
-		int textX = nameX + nameW + 8;
-		int end = Math.min(lines.size(), scroll + visibleRows());
-		for (int i = scroll; i < end; i++) {
-			KeyGuide.Line line = lines.get(i);
-			int ry = rowsY() + (i - scroll) * ROW;
-			boolean hover = over(mouseX, mouseY, px + 6, ry, pw - 12, ROW - 1);
-			graphics.fill(px + 6, ry, px + pw - 6, ry + ROW - 1, hover ? COLOR_ROW_HOVER : i % 2 == 0 ? COLOR_ROW : COLOR_ROW_ALT);
-			// the key, in a dark chip
-			graphics.fill(px + 9, ry + 2, px + 9 + chipW, ry + ROW - 3, COLOR_CHIP);
-			graphics.fill(px + 9, ry + ROW - 4, px + 9 + chipW, ry + ROW - 3, line.locked() ? COLOR_DIM : accent);
-			String key = this.font.plainSubstrByWidth(line.key().getString(), chipW - 4);
-			graphics.centeredText(this.font, Component.literal(key), px + 9 + chipW / 2, ry + 4, line.locked() ? COLOR_DIM : COLOR_TEXT);
-			Component name = line.name() != null ? line.name() : line.text();
-			line(graphics, name, nameX, ry + 4, nameW, line.color());
-			if (line.name() != null && !line.locked()) {
-				line(graphics, Component.literal(glance(line)), textX, ry + 4, px + pw - 10 - textX, COLOR_DIM);
-			}
-			if (hover) {
-				detailName = name;
-				detail = line.text();
-				detailColor = line.color();
-			}
-		}
-		if (maxScroll() > 0) {
-			// a thin scrollbar beside the rows
-			int track = visibleRows() * ROW;
-			int thumb = Math.max(8, track * visibleRows() / lines.size());
-			int at = rowsY() + (track - thumb) * scroll / maxScroll();
-			graphics.fill(px + pw - 4, rowsY(), px + pw - 2, rowsY() + track, 0x40FFFFFF);
-			graphics.fill(px + pw - 4, at, px + pw - 2, at + thumb, 0xC0FFFFFF);
-		}
-
-		// the detail box: the hovered row in full, or the power's description
-		int dy = detailY();
-		graphics.fill(px + 6, dy, px + pw - 6, dy + 1, COLOR_ROW);
-		int ty = dy + 5;
-		int room = detailLines();
-		if (detailName != null) {
-			graphics.text(this.font, detailName, px + 9, ty, detailColor);
-			ty += 10;
-			room--;
-		}
-		List<FormattedCharSequence> split = this.font.split(detail, pw - 18);
-		for (int i = 0; i < Math.min(room, split.size()); i++) {
-			graphics.text(this.font, split.get(i), px + 9, ty + i * 9, detailName == null ? COLOR_DIM : COLOR_TEXT);
-		}
-		if (split.size() > room && room > 0) {
-			// more than fits (a very small window): say so
-			graphics.text(this.font, "...", px + 9 + this.font.width(split.get(room - 1)), ty + (room - 1) * 9, COLOR_DIM);
-		}
-		if (detailName == null && split.size() <= room - 1) {
-			graphics.text(this.font, Component.translatable("screen.jaymospowers.hover_hint"), px + 9, ty + Math.min(room - 1, split.size()) * 9 + 2,
-				0xFF707080);
-		}
-		if (!orderButtons.isEmpty()) {
-			Integer shown = this.minecraft.player == null ? null : this.minecraft.player.getAttached(ChronoDirectives.SHOWN);
-			int value = shown == null ? 0 : shown;
-			boolean recording = (value & ChronoDirectives.RECORDING_FLAG) != 0;
-			int directive = value & 0xFF;
-			int unlocked = value >> ChronoDirectives.UNLOCKED_SHIFT;
-			for (int i = 0; i < orderButtons.size(); i++) {
-				Button b = orderButtons.get(i);
-				boolean record = i == ChronoDirectives.RECORD_BUTTON;
-				int tier = record ? ChronoDirectives.RECORD_TIER : ChronoDirectives.Directive.values()[i].tier();
-				// not yet earned: greyed out, and its tooltip says so
-				boolean open = tier <= unlocked;
-				if (record) {
-					b.setMessage(Component.translatable(recording ? "screen.jaymospowers.order.stop" : "screen.jaymospowers.order.record"));
-					b.active = open;
-				} else {
-					b.active = open && (recording || i != directive);
-				}
-				String name = record ? "record" : ChronoDirectives.Directive.values()[i].name().toLowerCase(java.util.Locale.ROOT);
-				b.setTooltip(Tooltip.create(open ? Component.translatable("screen.jaymospowers.order." + name + ".desc")
-					: Component.translatable("screen.jaymospowers.order.locked", tier)));
-			}
-		}
-		if (chooseButton != null) {
-			boolean active = power == current();
-			chooseButton.setMessage(Component.translatable(active ? "screen.jaymospowers.current" : "screen.jaymospowers.choose"));
-			chooseButton.active = !active;
-		}
-		super.extractRenderState(graphics, mouseX, mouseY, a);
+		return n;
 	}
 
-	/** The power's icon and name (as its fate has shaped it), and how far its mastery has come. */
-	private void header(GuiGraphicsExtractor graphics, Power power, int accent) {
-		int px = paneX();
-		int pw = paneW();
-		int y = top();
+	private void bar(GuiGraphicsExtractor graphics, int x, int y, int w, float progress, int color) {
+		graphics.fill(x, y, x + w, y + 3, COLOR_BAR_BACK);
+		graphics.fill(x, y, x + Math.round(w * Mth.clamp(progress, 0.0F, 1.0F)), y + 3, color);
+	}
+
+	private static int accent(Power power) {
+		return 0xFF000000 | power.color();
+	}
+
+	// ---------------------------------------------------------------- overview
+
+	private void overview(GuiGraphicsExtractor graphics, Power power, int mouseX, int mouseY) {
+		int x = cx() + 4, y = cy() + 4, w = CANVAS_W - 8;
 		Player player = owner(power);
-		graphics.item(power.icon(), px + 8, y + 8);
+		well(graphics, x, y);
+		graphics.item(power.icon(), x + 1, y + 1);
 		Component name = player != null ? PowerHud.title(power, Fate.state(player), player) : power.name();
-		Component sub = creative() ? Component.translatable(power == current() ? "screen.jaymospowers.current" : "screen.jaymospowers.creative_hint")
-			: Component.translatable("screen.jaymospowers.yours");
-		int barW = 84;
-		int textW = pw - 32 - barW - 14;
-		line(graphics, name, px + 28, y + 7, textW, accent);
-		line(graphics, sub, px + 28, y + 18, textW, COLOR_DIM);
-
+		line(graphics, name, x + 22, y + 1, w - 22, accent(power));
+		// the fate badge
+		Component badge;
+		int badgeColor;
+		if (player == null) {
+			badge = Component.translatable(creative() ? "screen.jaymospowers.creative_hint" : "screen.jaymospowers.yours");
+			badgeColor = COLOR_DIM;
+		} else if (Fate.isAscended(player)) {
+			badge = Component.translatable(Fate.isCorrupted(player) ? "screen.jaymospowers.badge.ascended_corrupted" : "screen.jaymospowers.badge.ascended");
+			badgeColor = COLOR_GOLD;
+		} else if (Fate.isCorrupted(player)) {
+			badge = Component.translatable("screen.jaymospowers.badge.corrupted");
+			badgeColor = 0xFFD05050;
+		} else {
+			badge = Component.translatable("screen.jaymospowers.badge.mortal");
+			badgeColor = COLOR_DIM;
+		}
+		line(graphics, badge, x + 22, y + 10, w - 22, badgeColor);
+		y += 24;
 		float progress = player != null && !player.isCreative() ? Mastery.progress(player) : -2.0F;
 		if (progress > -2.0F) {
-			int bx = px + pw - barW - 8;
 			Component label = progress < 0.0F ? Component.translatable("screen.jaymospowers.mastered")
 				: Component.translatable("screen.jaymospowers.mastery_bar", Math.round(progress * 100.0F));
-			line(graphics, label, bx, y + 7, barW, progress < 0.0F ? accent : COLOR_TEXT);
-			graphics.fill(bx, y + 19, bx + barW, y + 22, COLOR_BAR_BACK);
-			graphics.fill(bx, y + 19, bx + Math.round(barW * (progress < 0.0F ? 1.0F : progress)), y + 22, accent);
+			line(graphics, label, x, y, w, progress < 0.0F ? accent(power) : COLOR_TEXT);
+			bar(graphics, x, y + 10, w, progress < 0.0F ? 1.0F : progress, accent(power));
+			y += 18;
 		}
-		graphics.fill(px + 6, y + HEADER - 4, px + pw - 6, y + HEADER - 3, COLOR_ROW);
+		wrapped(graphics, power.description(), x, y, w, (toggleY() - 6 - y) / 9, COLOR_DIM);
+		// the slots that press keys for you
+		if (player == null) {
+			return;
+		}
+		Component hover = null;
+		for (int i = 0; i < 3; i++) {
+			int tx = toggleX(i), ty = toggleY();
+			well(graphics, tx, ty);
+			ItemStack stack = new ItemStack(i == 0 ? Items.ENDER_EYE : i == 1 ? Items.NETHER_STAR : Items.CARVED_PUMPKIN);
+			graphics.item(stack, tx + 1, ty + 1);
+			boolean open = toggleOpen(i);
+			if (!open) {
+				graphics.fill(tx + 1, ty + 1, tx + SLOT - 1, ty + SLOT - 1, 0xA0141418);
+			} else if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
+				graphics.fill(tx + 1, ty + 1, tx + SLOT - 1, ty + SLOT - 1, 0x60FFFFFF);
+			}
+			String id = i == 0 ? "mode" : i == 1 ? "ultimate" : "mask";
+			graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.toggle." + id), tx + SLOT / 2, ty + SLOT + 2, open ? COLOR_TEXT : COLOR_DIM);
+			if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
+				hover = Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
+			}
+		}
+		if (hover != null) {
+			graphics.setTooltipForNextFrame(this.font, this.font.split(hover, 160), mouseX, mouseY);
+		}
 	}
 
-	/** Creative: every power down the left, the one shown highlighted. */
+	private int toggleX(int i) {
+		int gap = (CANVAS_W - 3 * SLOT) / 4;
+		return cx() + gap + i * (SLOT + gap);
+	}
+
+	private int toggleY() {
+		return cy() + CANVAS_H - SLOT - 14;
+	}
+
+	/** Whether toggle {@code i} does anything: Z for your power, C once it answers, the mask while a costume has one. */
+	private boolean toggleOpen(int i) {
+		Player player = this.minecraft.player;
+		if (player == null || this.selected == null || this.selected != current()) {
+			return false;
+		}
+		return switch (i) {
+			case 0 -> true;
+			case 1 -> this.selected.ultimateAnswers(player);
+			default -> {
+				com.jaymospowers.costume.CostumeDesign worn = com.jaymospowers.costume.Costume.worn(player);
+				yield worn != null && worn.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE;
+			}
+		};
+	}
+
+	private void toggle(int i) {
+		switch (i) {
+			case 0 -> press(JaymosPowersClient.TAP_MODE);
+			case 1 -> press(JaymosPowersClient.TAP_ULTIMATE);
+			default -> com.jaymospowers.client.costume.CostumeClient.toggleMask();
+		}
+	}
+
+	// ---------------------------------------------------------------- abilities
+
+	/** The key wells: the four abilities on the first row, the other keys from the second. */
+	private int wellX(int i) {
+		int col = i < 4 ? i : (i - 4) % 7;
+		return cx() + 4 + col * (SLOT + 4);
+	}
+
+	private int wellY(int i) {
+		int row = i < 4 ? 0 : 1 + (i - 4) / 7;
+		return cy() + 4 + row * (SLOT + 6);
+	}
+
+	private void abilities(GuiGraphicsExtractor graphics, Power power, int mouseX, int mouseY) {
+		List<KeyGuide.Line> lines = lines();
+		if (lines.isEmpty()) {
+			return;
+		}
+		this.picked = Mth.clamp(this.picked, 0, lines.size() - 1);
+		Player player = owner(power);
+		PowerClient client = player instanceof net.minecraft.client.player.LocalPlayer local ? JaymosPowersClient.active(local) : null;
+		int shown = this.picked;
+		int bottom = 0;
+		for (int i = 0; i < lines.size(); i++) {
+			KeyGuide.Line line = lines.get(i);
+			int x = wellX(i), y = wellY(i);
+			bottom = Math.max(bottom, y + SLOT + 4);
+			well(graphics, x, y);
+			String key = this.font.plainSubstrByWidth(line.key().getString(), SLOT - 4);
+			graphics.centeredText(this.font, Component.literal(key), x + SLOT / 2, y + 5, line.locked() ? COLOR_DIM : line.color());
+			// a cooldown greys the slot from the top, as vanilla's item cooldowns do
+			PowerKey ability = abilityKey(line);
+			float cooldown = client != null && ability != null ? client.cooldown((net.minecraft.client.player.LocalPlayer)player, ability) : 0.0F;
+			if (cooldown > 0.0F) {
+				graphics.fill(x + 1, y + 1, x + SLOT - 1, y + 1 + Math.round((SLOT - 2) * cooldown), 0x90FFFFFF);
+			}
+			if (line.locked()) {
+				graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, 0x90141418);
+			}
+			if (ability != null && player != null && !player.isCreative()) {
+				// a star under each ability: gold once mastered
+				int sx = x + SLOT / 2 - 1;
+				graphics.fill(sx, y + SLOT + 1, sx + 3, y + SLOT + 3, Mastery.isUnlocked(player, ability) ? COLOR_GOLD : COLOR_WELL_LIGHT);
+			}
+			if (i == this.picked) {
+				graphics.outline(x - 1, y - 1, SLOT + 2, SLOT + 2, accent(power));
+			} else if (over(mouseX, mouseY, x, y, SLOT, SLOT)) {
+				graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, 0x40FFFFFF);
+			}
+			if (over(mouseX, mouseY, x, y, SLOT, SLOT)) {
+				shown = i;
+			}
+		}
+		// the picked (or hovered) key in full
+		KeyGuide.Line line = lines.get(shown);
+		int x = cx() + 4, y = bottom + 2, w = CANVAS_W - 8;
+		graphics.fill(x, y - 3, x + w, y - 2, COLOR_WELL_LIGHT);
+		Component name = line.name() != null ? line.name() : line.key();
+		line(graphics, Component.literal("[").append(line.key()).append("] ").append(name), x, y, w, line.color());
+		int room = (cy() + CANVAS_H - 24 - (y + 11)) / 9;
+		wrapped(graphics, line.text(), x, y + 11, w, room, COLOR_TEXT);
+		if (this.useButton != null) {
+			this.useButton.active = tapKey(this.picked) >= 0;
+		}
+	}
+
+	private static @Nullable PowerKey abilityKey(KeyGuide.Line line) {
+		for (PowerKey key : PowerKey.values()) {
+			if (key.id().equals(line.slot())) {
+				return key;
+			}
+		}
+		return null;
+	}
+
+	// ---------------------------------------------------------------- chrono
+
+	/** The order slots: the directives and Record on the first row, the loop slots and Clear on the second. */
+	private int orderX(int button) {
+		int col = button <= ChronoDirectives.RECORD_BUTTON ? button : button - ChronoDirectives.SLOT_0;
+		return cx() + 8 + col * (SLOT + 12);
+	}
+
+	private int orderY(int button) {
+		return cy() + (button <= ChronoDirectives.RECORD_BUTTON ? 16 : 56);
+	}
+
+	private int shownOrders() {
+		Integer shown = this.minecraft.player == null ? null : this.minecraft.player.getAttached(ChronoDirectives.SHOWN);
+		return shown == null ? 0 : shown;
+	}
+
+	private boolean commanding() {
+		Player player = this.minecraft.player;
+		return player != null && !player.isCreative() && current() == ChronoPower.INSTANCE && ChronoDirectives.commandable(player);
+	}
+
+	private int orderTier(int button) {
+		return button >= ChronoDirectives.RECORD_BUTTON ? ChronoDirectives.RECORD_TIER : ChronoDirectives.Directive.values()[button].tier();
+	}
+
+	/** Whether order button {@code b} can be pressed now: earned, and not the order already standing. */
+	private boolean orderOpen(int b) {
+		if (!commanding()) {
+			return false;
+		}
+		int value = shownOrders();
+		int unlocked = (value >> ChronoDirectives.UNLOCKED_SHIFT) & 0x7;
+		if (orderTier(b) > unlocked) {
+			return false;
+		}
+		boolean recording = (value & ChronoDirectives.RECORDING_FLAG) != 0;
+		if (b < ChronoDirectives.RECORD_BUTTON) {
+			return recording || b != (value & 0xFF);
+		}
+		return true;
+	}
+
+	private void chrono(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int x = cx() + 4, w = CANVAS_W - 8;
+		if (!commanding()) {
+			Player player = this.minecraft.player;
+			String why = current() != ChronoPower.INSTANCE || player == null || player.isCreative() ? "screen.jaymospowers.chrono.not_yours"
+				: "screen.jaymospowers.chrono.not_timeless";
+			wrapped(graphics, Component.translatable(why), x, cy() + 4, w, 10, COLOR_DIM);
+			return;
+		}
+		int value = shownOrders();
+		boolean recording = (value & ChronoDirectives.RECORDING_FLAG) != 0;
+		int directive = value & 0xFF;
+		int unlocked = (value >> ChronoDirectives.UNLOCKED_SHIFT) & 0x7;
+		int slot = (value >> ChronoDirectives.SLOT_SHIFT) & 0x3;
+		int filled = (value >> ChronoDirectives.FILLED_SHIFT) & 0x7;
+		graphics.text(this.font, Component.translatable("screen.jaymospowers.chrono.orders"), x, cy() + 4, COLOR_DIM, false);
+		graphics.text(this.font, Component.translatable("screen.jaymospowers.chrono.loops"), x, cy() + 44, COLOR_DIM, false);
+		Component hover = null;
+		for (int b = 0; b <= ChronoDirectives.CLEAR_LOOP; b++) {
+			int bx = orderX(b), by = orderY(b);
+			well(graphics, bx, by);
+			boolean earned = orderTier(b) <= unlocked;
+			String name;
+			Component desc;
+			if (b < ChronoDirectives.RECORD_BUTTON) {
+				name = ChronoDirectives.Directive.values()[b].name().toLowerCase(Locale.ROOT);
+				icon(graphics, name, bx + 1, by + 1);
+				desc = Component.translatable("screen.jaymospowers.order." + name + ".desc");
+				if (b == directive && !recording) {
+					graphics.outline(bx - 1, by - 1, SLOT + 2, SLOT + 2, 0xFF000000 | ChronoPower.INSTANCE.color());
+				}
+			} else if (b == ChronoDirectives.RECORD_BUTTON) {
+				name = recording ? "stop" : "record";
+				icon(graphics, "record", bx + 1, by + 1);
+				desc = Component.translatable("screen.jaymospowers.order.record.desc");
+				if (recording && (this.minecraft.level == null || this.minecraft.level.getGameTime() / 10 % 2 == 0)) {
+					graphics.outline(bx - 1, by - 1, SLOT + 2, SLOT + 2, 0xFFE04040);
+				}
+			} else if (b < ChronoDirectives.CLEAR_LOOP) {
+				int n = b - ChronoDirectives.SLOT_0;
+				boolean has = (filled & 1 << n) != 0;
+				name = "slot";
+				if (has) {
+					icon(graphics, "loop", bx + 1, by + 1);
+				}
+				graphics.text(this.font, String.valueOf(n + 1), bx + SLOT - 6, by + SLOT - 8, COLOR_TEXT, true);
+				desc = has ? Component.translatable("screen.jaymospowers.order.slot.filled", n + 1)
+					: Component.translatable("screen.jaymospowers.order.slot.empty", n + 1);
+				if (n == slot) {
+					graphics.outline(bx - 1, by - 1, SLOT + 2, SLOT + 2, 0xFF000000 | ChronoPower.INSTANCE.color());
+				}
+			} else {
+				name = "clear";
+				graphics.item(new ItemStack(Items.BARRIER), bx + 1, by + 1);
+				desc = Component.translatable("screen.jaymospowers.order.clear.desc");
+			}
+			if (!earned) {
+				graphics.fill(bx + 1, by + 1, bx + SLOT - 1, by + SLOT - 1, 0xA0141418);
+				desc = Component.translatable("screen.jaymospowers.order.locked", orderTier(b));
+			} else if (over(mouseX, mouseY, bx, by, SLOT, SLOT) && orderOpen(b)) {
+				graphics.fill(bx + 1, by + 1, bx + SLOT - 1, by + SLOT - 1, 0x40FFFFFF);
+			}
+			if (b <= ChronoDirectives.RECORD_BUTTON) {
+				String label = Component.translatable("screen.jaymospowers.order." + name).getString();
+				label = this.font.plainSubstrByWidth(label, SLOT + 10);
+				graphics.centeredText(this.font, label, bx + SLOT / 2, by + SLOT + 2, earned ? COLOR_TEXT : COLOR_DIM);
+			}
+			if (over(mouseX, mouseY, bx, by, SLOT, SLOT)) {
+				hover = desc;
+			}
+		}
+		// what's going on now, or the hovered order in full
+		int y = cy() + 84;
+		graphics.fill(x, y - 3, x + w, y - 2, COLOR_WELL_LIGHT);
+		Component now = recording ? Component.translatable("screen.jaymospowers.chrono.recording", slot + 1)
+			: Component.translatable("screen.jaymospowers.chrono.now",
+				Component.translatable("screen.jaymospowers.order." + ChronoDirectives.Directive.values()[Math.min(directive, 3)].name().toLowerCase(Locale.ROOT)));
+		wrapped(graphics, hover != null ? hover : now, x, y, w, (cy() + CANVAS_H - 4 - y) / 9, hover != null ? COLOR_TEXT : COLOR_DIM);
+	}
+
+	// ---------------------------------------------------------------- mastery
+
+	private void mastery(GuiGraphicsExtractor graphics, Power power) {
+		int x = cx() + 4, y = cy() + 4, w = CANVAS_W - 8;
+		Player player = owner(power);
+		if (player == null || player.isCreative()) {
+			wrapped(graphics, Component.translatable("screen.jaymospowers.mastery.creative"), x, y, w, 6, COLOR_DIM);
+			return;
+		}
+		int unlocked = Mastery.unlocked(player);
+		line(graphics, Component.translatable("screen.jaymospowers.mastery.count", unlocked, Mastery.ALL), x, y, w, COLOR_TEXT);
+		float progress = Mastery.progress(player);
+		y += 11;
+		if (progress >= 0.0F) {
+			line(graphics, Component.translatable("screen.jaymospowers.mastery_bar", Math.round(progress * 100.0F)), x, y, w, COLOR_DIM);
+			bar(graphics, x, y + 10, w, progress, accent(power));
+		} else {
+			line(graphics, Component.translatable("screen.jaymospowers.mastered"), x, y, w, accent(power));
+			bar(graphics, x, y + 10, w, 1.0F, accent(power));
+		}
+		y += 20;
+		// each ability in the order they come
+		List<KeyGuide.Line> lines = KeyGuide.lines(power, null);
+		PowerKey[] order = power.unlockOrder();
+		for (int i = 0; i < order.length; i++) {
+			PowerKey key = order[i];
+			boolean done = Mastery.isUnlocked(player, key);
+			well(graphics, x, y);
+			graphics.centeredText(this.font, JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage(), x + SLOT / 2, y + 5, done ? COLOR_GOLD : COLOR_DIM);
+			Component name = null;
+			for (KeyGuide.Line line : lines) {
+				if (line.slot().equals(key.id())) {
+					name = line.name() != null ? line.name() : line.text();
+				}
+			}
+			line(graphics, name == null ? Component.literal("?") : name, x + 22, y + 1, w - 22, done ? COLOR_TEXT : COLOR_DIM);
+			Component state = done ? Component.translatable("screen.jaymospowers.mastery.done")
+				: Component.translatable("screen.jaymospowers.mastery.at", Mastery.UNLOCK_AT[Math.min(i + 1, Mastery.UNLOCK_AT.length - 1)]);
+			line(graphics, state, x + 22, y + 10, w - 22, done ? COLOR_GOLD : COLOR_DIM);
+			y += SLOT + 4;
+		}
+		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
+			wrapped(graphics, Component.translatable("screen.jaymospowers.mastery.skill_tree"), x, y + 2, w, 2, COLOR_DIM);
+		}
+	}
+
+	// ---------------------------------------------------------------- powers (creative)
+
+	private int listRows() {
+		return (CANVAS_H - 26) / ROW;
+	}
+
 	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = left();
-		int y = top();
-		graphics.text(this.font, this.title, x + 8, y + 8, COLOR_TEXT);
-		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - FOOTER - 2, COLOR_ROW);
 		Power current = current();
-		int bottom = y + panelH() - FOOTER;
-		for (int i = 0; i < powers.size(); i++) {
-			Power power = powers.get(i);
-			int ry = rowsY() + i * LIST_ROW;
-			if (ry + LIST_ROW > bottom) {
-				break;
+		int rows = listRows();
+		this.scroll = Mth.clamp(this.scroll, 0, Math.max(0, this.powers.size() - rows));
+		for (int i = 0; i < rows && i + this.scroll < this.powers.size(); i++) {
+			Power power = this.powers.get(i + this.scroll);
+			int x = cx() + 2, y = cy() + 2 + i * ROW;
+			boolean shown = power == this.selected;
+			if (shown || over(mouseX, mouseY, x, y, CANVAS_W - 4, ROW)) {
+				graphics.fill(x, y, x + CANVAS_W - 4, y + ROW, shown ? 0x40FFFFFF : 0x20FFFFFF);
 			}
-			boolean shown = power == selected;
-			boolean hover = over(mouseX, mouseY, x + 4, ry, LIST_W - 8, LIST_ROW - 2);
-			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2, shown ? 0x40FFFFFF : hover ? COLOR_ROW_HOVER : i % 2 == 0 ? COLOR_ROW_ALT : 0x0CFFFFFF);
 			if (shown) {
-				graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, 0xFF000000 | power.color());
+				graphics.fill(x, y, x + 2, y + ROW, accent(power));
 			}
-			graphics.item(power.icon(), x + 8, ry + 1);
-			line(graphics, power.name(), x + 27, ry + 5, LIST_W - 34, power == current ? 0xFF000000 | power.color() : shown ? COLOR_TEXT : COLOR_DIM);
+			graphics.item(power.icon(), x + 3, y + 1);
+			line(graphics, power.name(), x + 22, y + 5, CANVAS_W - 30, power == current ? accent(power) : shown ? COLOR_TEXT : COLOR_DIM);
 		}
-	}
-
-	/** The row's text without its leading name ("Training Field (once...": "once..."), since the name is beside it. */
-	private static String glance(KeyGuide.Line line) {
-		String text = line.text().getString();
-		String name = line.name() == null ? "" : line.name().getString();
-		if (!name.isEmpty() && text.startsWith(name)) {
-			String rest = text.substring(name.length()).stripLeading();
-			if (rest.startsWith(":") || rest.startsWith(",") || rest.startsWith(";")) {
-				rest = rest.substring(1).stripLeading();
-			} else if (rest.startsWith("(") && rest.contains(")")) {
-				// "(hold): ..." keeps the hold, drops the brackets
-				int close = rest.indexOf(')');
-				String inside = rest.substring(1, close);
-				String after = rest.substring(close + 1).stripLeading();
-				after = after.startsWith(":") ? after.substring(1).stripLeading() : after;
-				rest = inside.length() <= 8 ? capitalise(inside) + ": " + after : capitalise(inside) + ". " + after;
-			}
-			if (!rest.isEmpty()) {
-				return capitalise(rest);
-			}
+		if (this.chooseButton != null) {
+			boolean active = this.selected == current;
+			this.chooseButton.setMessage(Component.translatable(active ? "screen.jaymospowers.current" : "screen.jaymospowers.choose"));
+			this.chooseButton.active = this.selected != null && !active;
 		}
-		return text;
-	}
-
-	private static String capitalise(String s) {
-		return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
-	}
-
-	/** Wide enough for the widest key name (Left Shift, say), within reason. */
-	private int chipWidth(List<KeyGuide.Line> lines) {
-		int widest = 0;
-		for (KeyGuide.Line line : lines) {
-			widest = Math.max(widest, this.font.width(line.key()));
+		if (this.clearButton != null) {
+			this.clearButton.active = current != null;
 		}
-		return Mth.clamp(widest + 8, 16, 44);
-	}
-
-	private int nameWidth(List<KeyGuide.Line> lines) {
-		int widest = 40;
-		for (KeyGuide.Line line : lines) {
-			widest = Math.max(widest, this.font.width(line.name() != null ? line.name() : line.text()));
-		}
-		return widest;
 	}
 }
