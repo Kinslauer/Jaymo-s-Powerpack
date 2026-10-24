@@ -137,6 +137,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
 		Introductions.register();
+		// (0.7.184) handshakes between players, and the groups they make
+		Groups.register();
+		Handshakes.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
