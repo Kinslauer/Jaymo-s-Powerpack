@@ -189,6 +189,8 @@ final class Neighbours {
 			^ a.getUUID().getMostSignificantBits() * 31 ^ b.getUUID().getMostSignificantBits() * 31;
 		int r = START_LOW + (int)Math.floorMod(seed * 0x9E3779B97F4A7C15L >>> 17, (long)(START_HIGH - START_LOW + 1));
 		r += TEMPER_STEP * (McaCompat.temper(a) + McaCompat.temper(b));
+		// ((0.7.186) and by their own temperaments: the cheerful warm to people, the spiteful sour on them)
+		r += TEMPER_STEP * (Temperaments.warmth(a) + Temperaments.warmth(b));
 		int kin = McaCompat.kin(a, b);
 		if (kin == McaCompat.PARTNER) {
 			r = Math.max(r, PARTNER_START);
@@ -576,7 +578,7 @@ final class Neighbours {
 				}
 			}
 			case ARGUE, SHOVE -> {
-				if (regard(m.a, m.b) <= HATE && random.nextFloat() < ESCALATE) {
+				if (regard(m.a, m.b) <= HATE && random.nextFloat() < ESCALATE * Math.max(Temperaments.escalation(m.a), Temperaments.escalation(m.b))) {
 					m.kind = m.kind == Kind.ARGUE ? Kind.SHOVE : Kind.FIGHT;
 					m.beat = 0;
 					m.next = now + BEAT / 2;
