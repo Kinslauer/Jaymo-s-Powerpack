@@ -119,6 +119,23 @@ final class ZFighterDebugCommand {
 							c.getSource().sendSuccess(() -> Component.literal("Every training method is fresh again."), false);
 							return 1;
 						})))
+				.then(Commands.literal("ape")
+					.then(Commands.literal("primal")
+						.then(Commands.argument("value", IntegerArgumentType.integer(0, ApeRage.PRIMAL_MAX))
+							.executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								ApeRage.debug(player, IntegerArgumentType.getInteger(c, "value"), false);
+								c.getSource().sendSuccess(() -> Component.literal("Primal " + ApeRage.primal(player)), false);
+								return 1;
+							})))
+					.then(Commands.literal("fit")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							ApeRage.debug(player, -1, true);
+							c.getSource().sendSuccess(() -> Component.literal(ZFighterLineage.ape(player) ? "Rage full: a fit comes now (primal "
+								+ ApeRage.primal(player) + ")." : "Not the Great Ape right now."), false);
+							return 1;
+						})))
 				.then(Commands.literal("raid")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();

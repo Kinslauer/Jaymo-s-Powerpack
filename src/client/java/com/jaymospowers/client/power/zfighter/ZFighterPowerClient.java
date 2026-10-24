@@ -190,6 +190,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		wave(graphics, font, player, state, now, time);
 		spirit(graphics, font, state, time);
 		chips(graphics, font, player, state, now, time);
+		// (0.15.148) the Great Ape's rage, and the fight against its fits
+		ApeRageClient.hud(graphics, font, player, time);
 	}
 
 	/** The Spirit Bomb gathering, over the crosshair: how full it is. */

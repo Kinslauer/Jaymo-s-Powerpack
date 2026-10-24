@@ -49,3 +49,12 @@ Andy's earlier rulings stay: "no foe fells him twice" lasts only for the rematch
 - **Slower shop:** every TP source pays a quarter (hits 0.5, kills 0.5 + 1/16 of max health, 1 per 20 s, 1 per 80 blocks, shadowboxing 0.25 a second, drills 0.5 a point, sparring, tournaments, raids, wishes, the Keeper, masters). Stat levels cost 30 + 15 per level bought. Form mastery comes at half the rate.
 - **Stats train themselves** (`ZFighterGrowth`, attachment `zfighter_growth`): each stat's own kinds of training fill its bar; a full bar is a level (same cap of 50, not counted in the shop's price). Every method tires through the in-game day (each 12 points it gives halve the next, down to 5%), so varied training is fastest. The methods and their rates are in Abilities row 221. `/powerdebug zfighter train <method> <points>` and `train newday` test it (survival).
 - Existing characters keep every level they bought; each level just gives the new, smaller amount.
+
+## Ape rage (pack 0.15.148)
+Andy: "what does an ape takeover look like to you, add that and lemme see". `ApeRage` (client `ApeRageClient`): a Z
+Fighter's Great Ape builds rage (0.6/s x (1 + primal/50), +1.2 per damage taken, +6 per kill, +25 when crippled). Full,
+the ape throws a fit: the wild ape's berserk walk takes the wheel (anything alive in sight, players and villagers too)
+for 10 s + 0.2 s per primal; hammer movement keys to break it (15 presses + primal/4, the bar drains). Win: rage back to
+30, primal -4. Ride it out: rage 50, primal +3. Primal (kept) also grows +5 a change, +1 a minute as the ape, +1 per
+person killed in a fit; at 100 a fit lasts until the moon lets go (60 presses). HUD: rage bar under the crosshair area,
+fit bar while it has you. Debug: `/powerdebug zfighter ape primal <n>`, `/powerdebug zfighter ape fit`.

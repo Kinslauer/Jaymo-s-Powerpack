@@ -210,6 +210,8 @@ public final class ZFighterLineage {
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
 		RaceMoves.init();
+		// (0.15.148) a Z Fighter's ape has a mind of its own: its rage, its fits, his primal
+		ApeRage.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -567,7 +569,8 @@ public final class ZFighterLineage {
 			}
 			return;
 		}
-		if (wild) {
+		if (wild || ApeRage.tick(player, live, level, now)) {
+			// (0.15.148) the wild ape is always berserk; a Z Fighter's only in a fit ({@link ApeRage})
 			berserk(player, live, level, now);
 		}
 		if (now % 3 == 0) {
@@ -695,6 +698,7 @@ public final class ZFighterLineage {
 			.withStyle(ChatFormatting.RED));
 		attributes(player, live);
 		player.setHealth(player.getMaxHealth());
+		ApeRage.began(player);
 	}
 
 	static void endApe(ServerPlayer player, ZFighterPower.Live live) {
@@ -706,6 +710,7 @@ public final class ZFighterLineage {
 		player.removeAttached(BERSERK);
 		player.removeAttached(WILD_GOAL);
 		player.removeAttached(WILD_FLEE);
+		ApeRage.ended(player);
 		live.crippledUntil = -1L;
 		live.wildFrom = -1L;
 		live.berserkTarget = -1;
@@ -776,6 +781,7 @@ public final class ZFighterLineage {
 		if (wild(player) && !crippled(player) && taken > 0.0F) {
 			flee(player, live, source, now);
 		}
+		ApeRage.hurt(player, taken);
 		if (crippled(player)) {
 			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by
 				&& com.jaymospowers.core.Dismember.blade(by.getMainHandItem())) {
@@ -795,6 +801,7 @@ public final class ZFighterLineage {
 			live.crippleSafeUntil = live.crippledUntil + CRIPPLE_SAFE_TICKS;
 			player.setAttached(CRIPPLED, true);
 			attributes(player, live);
+			ApeRage.crippled(player);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.PLAYERS, 4.0F, 0.4F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
 			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
