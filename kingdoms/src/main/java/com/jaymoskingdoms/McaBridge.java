@@ -778,6 +778,24 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v && FamilyTree.get(player.level()).getOrCreate(player).children().contains(v.getUUID());
 	}
 
+	/** {@link McaCompat#towns}. */
+	static List<McaCompat.Town> towns(ServerLevel level) {
+		List<McaCompat.Town> out = new ArrayList<>();
+		for (net.conczin.mca.server.world.data.Village v : VillageManager.get(level)) {
+			out.add(new McaCompat.Town(BlockPos.containing(v.getCenter().getX(), v.getCenter().getY(), v.getCenter().getZ()), v.getName()));
+		}
+		return out;
+	}
+
+	/** {@link McaCompat#letter}: into their MCA mail, and the mail notice if they're on. */
+	static void letter(ServerLevel level, java.util.UUID to, Component text) {
+		PlayerSaveData.getIfPresent(level, to).ifPresent(save -> save.sendLetter(text));
+		ServerPlayer player = level.getServer().getPlayerList().getPlayer(to);
+		if (player != null) {
+			PlayerSaveData.showMailNotification(player);
+		}
+	}
+
 	/** {@link McaCompat#teenOrOlder}. */
 	static boolean teenOrOlder(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && (v.getAgeState() == AgeState.TEEN || v.getAgeState() == AgeState.ADULT);

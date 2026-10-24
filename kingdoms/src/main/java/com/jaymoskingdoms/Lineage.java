@@ -43,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * class is unmade and asked again, and every skill and attribute point comes back to spend (experience stays).</li>
  * <li>The body you leave stays as a villager with your old look, name and heritage, an elder already, in your old place
  * in the family. It lives on by itself (ask them to follow you as MCA family will) and dies of old age in time
- * ({@link OldAge}). If they keep your things, they wear your armour and carry the rest.</li>
+ * ({@link OldAge}), and goes on journeys of their own ({@link Elders}). If they keep your things, they wear your armour
+ * and carry the rest.</li>
  * <li>Your power doesn't come with you: Jaymo's Powers hands it down as the child's inheritance, to awaken in them in
  * time like any power ({@link PowersCompat#passDown}).</li>
  * </ul>
@@ -152,6 +153,7 @@ public final class Lineage {
 		if (elderKeeps) {
 			leaveWith(player, parent);
 		}
+		Elders.start(parent, player);
 		level.sendParticles(ParticleTypes.SOUL, parent.getX(), parent.getY() + 1.0, parent.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		player.stopRiding();
 		player.teleportTo(level, to.x, to.y, to.z, Set.of(), yaw, pitch, false);

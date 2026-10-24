@@ -3820,6 +3820,8 @@
 	"command.jaymoskingdoms.heritage.unlocked": "Woke %2$s in %1$s players' blood.",
 	"message.jaymoskingdoms.heritage.unlocked": "Something old stirs in your blood: %s. Your children may be born to it.",
 	"message.jaymoskingdoms.heritage.rite_crumbles": "The rite crumbles to dust. Blood isn't changed by rites any more: it runs on in your children.",
+	"message.jaymoskingdoms.elder.set_off": "%s has packed a bag and set off for %s, to see it again while the legs still carry them. Don't wait up.",
+	"message.jaymoskingdoms.elder.home": "%s is home again from %s, tired and full of stories.",
 	"message.jaymoskingdoms.lineage.gone": "Your child isn't by you any more. The moment passes.",
 	"message.jaymoskingdoms.lineage.lives_on": "You open your eyes as your child, %2$s in your veins. %1$s lives on, grey now, and you will need a calling of your own.",
 	"item.jaymoskingdoms.blood_rite": "Blood Rite (crumbling)",

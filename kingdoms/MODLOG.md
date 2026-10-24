@@ -4372,6 +4372,13 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   and attribute point comes back (`Skills.respec`; experience and levels stay).
 - Things: handed down, you keep your inventory as the child. Left with the elder, they wear your armour and what was in
   your hands (dropped whole when they die) and carry the rest in their MCA pack; what doesn't fit falls at their feet.
+- Elders live lives of their own (`Elders`, attachment `elder_journey`). Andy: "you could ask your father/mother to go
+  on an adventure with you for old times sake, or even find them on travels of their own." Asked along, they follow you
+  as MCA family does. Left be, they stay home 2-5 days, then set off for an MCA village or a standing realm's seat
+  250-1500 blocks off, stay 1-3 days and come home; never while a player is within 64 blocks, following someone, downed,
+  asleep or riding. The journey passes unseen (they're just there, the chunk loaded for them), so you can come upon them
+  in a far town; one unloaded when the visit ends stays put until someone comes by. Their heir gets an MCA letter when
+  they set off and when they're home.
 - Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles.
   The heritage screen's rite mode is gone. `/kingdom heritage set|unlock` are unchanged.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
