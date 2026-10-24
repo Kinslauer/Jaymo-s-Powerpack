@@ -43,7 +43,9 @@ public final class PoseTakeover {
 	public static void beginDraw(LivingEntityRenderState state) {
 		drawing = state;
 		if (state instanceof AvatarRenderState avatar) {
-			if (posed(avatar)) {
+			boolean posed = posed(avatar);
+			EmfCompat.hold(avatar.id, posed);
+			if (posed) {
 				POSED.add(avatar.id);
 				if (flying(avatar)) {
 					// no walk in mid-air: the legs (and anything hung off them or the hips) stop stepping
