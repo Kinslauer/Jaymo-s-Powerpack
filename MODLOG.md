@@ -2707,3 +2707,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   hitting and +4.5 for blocks per 1 of scale past 1 (at most +30; the ape keeps his own reach for hitting). Spirit
   Bomb's pull-out and Time Flow's shoulder view still take over. First person stays in the (scaled) eyes. Compile-
   checked; not playtested.
+- **(same patch) beam battles as a film:** Andy: beam battles should zoom out so you see what's going on, like the AFK
+  cinematic (Ji AFK Cinematic; Ji Mods Source License forbids derived copies, so the idea only). `client/BeamCinematic`:
+  for the two in a clash, black bars slide in over the top and bottom (12% each), the hotbar, crosshair and status bars
+  clear (the clash panel moves into the bottom bar), and the camera (`BeamCinematicCameraMixin`, priority 2000 so it
+  has the last word) cuts every 50-90 ticks between six shots: a wide profile drifting along the beams, a slow orbit
+  round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
+  still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
+  view comes back. Compile-checked; not playtested.

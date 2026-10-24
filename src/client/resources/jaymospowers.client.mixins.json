@@ -35,6 +35,7 @@
 		"HeadCamMixin",
 		"GiantCameraMixin",
 		"GiantPickMixin",
+		"BeamCinematicCameraMixin",
 		"CarryFirstPersonMixin",
 		"PowerArmsFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",

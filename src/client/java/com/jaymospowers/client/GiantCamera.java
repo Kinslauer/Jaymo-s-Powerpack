@@ -39,7 +39,7 @@ public final class GiantCamera {
 	public static boolean active(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		return player != null && minecraft.getCameraEntity() == player && minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK
-			&& player.getScale() >= GiantReach.GIANT_FROM && !ZFighterSpiritCamera.pulling() && !ChronoFlowClient.overShoulder(minecraft);
+			&& player.getScale() >= GiantReach.GIANT_FROM && !ZFighterSpiritCamera.pulling() && !BeamCinematic.running() && !ChronoFlowClient.overShoulder(minecraft);
 	}
 
 	/** Where the view goes this frame, or null when it isn't a giant's. */
