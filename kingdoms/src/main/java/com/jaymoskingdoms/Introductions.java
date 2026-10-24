@@ -38,7 +38,8 @@ import org.jspecify.annotations.Nullable;
  * <li>A villager: "Ask their name" in MCA's menu ({@link #ANSWER}). One who bears you too much ill will won't say. A
  * ruler gives their title and realm, and their nametag carries the title from then on ({@link #TITLE}), so a king is
  * easy to pick out once met. An audience with a ruler introduces them too, and your own MCA family is always known.</li>
- * <li>A player: {@code /introduce}, looking at them. They learn your name, and are offered to introduce themselves
+ * <li>(0.7.184) A player: shake hands ({@link Handshakes}: both use on each other), which groups you too. Or
+ * {@code /introduce}, looking at them. They learn your name, and are offered to introduce themselves
  * back (a click, the same command). Not behind a full mask: a costume's name is shown to everyone anyway, and telling
  * your own would give the face away.</li>
  * </ul>
@@ -96,6 +97,10 @@ public final class Introductions {
 		}
 		if (e instanceof Player p && Identities.maskedAs(p) != null) {
 			// a full mask: the costume's name is for everyone
+			return true;
+		}
+		if (Groups.together(viewer, e)) {
+			// (0.7.184) your group is always known (Groups; an op's team too)
 			return true;
 		}
 		Set<UUID> known = viewer.getAttached(KNOWN);
