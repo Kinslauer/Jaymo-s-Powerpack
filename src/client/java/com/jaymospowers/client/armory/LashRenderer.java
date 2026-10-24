@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.147) Draws every flail's chain and ball and every whip's lash that's out ({@link Lash.State}, a synced player
+ * (0.15.148) Draws every flail's chain and ball and every whip's lash that's out ({@link Lash.State}, a synced player
  * attachment): from the hand to where {@link Lash#head} puts the head this frame, bowed back the way the head has come
  * and sagging when slack, so it trails behind a whirl and snakes out on a crack. Solid tubes, like the symbiote's
  * cords, shaded by which way each face looks and darkened in the dark.
@@ -41,7 +41,7 @@ public final class LashRenderer {
 	private static final int SEGMENTS = 18, SIDES = 6;
 	/** The ball: half its width, and its spikes' length. */
 	private static final double BALL = 0.17, SPIKE = 0.13;
-	/** (0.15.147) Garrotte: how wide the lash's turn round the neck is. */
+	/** (0.15.148) Garrotte: how wide the lash's turn round the neck is. */
 	private static final double NECK_LOOP = 0.13;
 
 	private LashRenderer() {

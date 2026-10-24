@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.147) The Web Whip's mechanics on a weapon: a head on a line, swung round you, hauled overhead and slammed down
+ * (0.15.148) The Web Whip's mechanics on a weapon: a head on a line, swung round you, hauled overhead and slammed down
  * (see {@code WebWhip}). Andy: "Can these mechanics replace the flail? And maybe add a single leather whip?"
  * <ul>
  * <li><b>Flail</b> (Balkon's, which used to throw its ball on every hit; mixin/WeaponModFlailMixin): hold use and the

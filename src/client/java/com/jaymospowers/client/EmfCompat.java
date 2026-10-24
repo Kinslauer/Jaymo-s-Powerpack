@@ -25,6 +25,18 @@ public final class EmfCompat {
 		return LOADED && body instanceof HumanoidModel<?> humanoid && EmfAccess.animatedNow(state, humanoid);
 	}
 
+	/**
+	 * (0.15.147) Keeps EMF paused for a player while one of our poses is on, by EMF's own per-player pause, which nothing
+	 * lifts. The pause condition alone isn't enough with Touch'n Motion: its EMF Compat Core lifts EMF's pause for a player
+	 * any of its addons holds a pose for (Touch'n Motion's riding pose), and Fresh Animations would come back over ours.
+	 * Paused, Touch'n Motion's own gestures step aside too (they run inside EMF's animation).
+	 */
+	static void hold(int id, boolean posed) {
+		if (LOADED) {
+			EmfAccess.hold(id, posed);
+		}
+	}
+
 	static void init() {
 		if (LOADED) {
 			EmfAccess.registerPause();

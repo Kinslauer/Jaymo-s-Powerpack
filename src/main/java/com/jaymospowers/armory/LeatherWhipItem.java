@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.15.147) A single-tail leather whip: use cracks the lash out to where you look; hold on to wrap what it cracked,
+ * (0.15.148) A single-tail leather whip: use cracks the lash out to where you look; hold on to wrap what it cracked,
  * let go to haul it over your head into the ground (or yank it off its feet, if it's too heavy). See {@link Lash}.
  */
 public class LeatherWhipItem extends Item {

@@ -177,17 +177,17 @@ public final class Finishers {
 		 */
 		IMPALE(46, new int[] {12}, Strike.STAB, new int[] {21, 28, 34, 40}),
 		/**
-		 * (0.15.147) Ball and Chain, a flail's, everyone's: the ball whirled up overhead on its chain and brought down on
+		 * (0.15.148) Ball and Chain, a flail's, everyone's: the ball whirled up overhead on its chain and brought down on
 		 * them, whirled again, and down once more with everything behind it.
 		 */
 		FLAIL(46, new int[] {18, 36}, Strike.CRUSH),
 		/**
-		 * (0.15.147) Garrotte, the leather whip's, everyone's: the lash cracked round their neck ({@link #WHIP_CRACK}), then
+		 * (0.15.148) Garrotte, the leather whip's, everyone's: the lash cracked round their neck ({@link #WHIP_CRACK}), then
 		 * hauled tight, leaning back on it, until the neck goes.
 		 */
 		WHIP(64, new int[] {24, 42, 58}, Strike.SNAP);
 
-		/** (0.15.147) The tick the whip's crack lands round the neck. */
+		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
 
 		public final int length;
@@ -341,7 +341,7 @@ public final class Finishers {
 		if (stack.isEmpty()) {
 			return Kind.FIST;
 		}
-		// (0.15.147) the flail (before "flail" makes it a club) and the whip have their own
+		// (0.15.148) the flail (before "flail" makes it a club) and the whip have their own
 		if (com.jaymospowers.armory.Lash.isFlail(stack)) {
 			return Kind.FLAIL;
 		}
@@ -437,7 +437,7 @@ public final class Finishers {
 			return stack.isDamageableItem() ? Kind.SLAM : null;
 		}
 		if (kind == Kind.FLAIL || kind == Kind.WHIP) {
-			// (0.15.147) Andy: "add a flail and whip execution": theirs for everyone, Executioner or not
+			// (0.15.148) Andy: "add a flail and whip execution": theirs for everyone, Executioner or not
 			return kind;
 		}
 		if (!weaponsUnlocked(player)) {
@@ -694,7 +694,7 @@ public final class Finishers {
 		player.stopUsingItem();
 		player.setSprinting(false);
 		if (kind == Kind.FLAIL) {
-			// (0.15.147) the ball's out on its chain (drawn by LashRenderer), not in the hand
+			// (0.15.148) the ball's out on its chain (drawn by LashRenderer), not in the hand
 			com.jaymospowers.armory.Lash.flailThrown(player, true);
 		}
 		root(player, true);
@@ -748,7 +748,7 @@ public final class Finishers {
 				mob.setDeltaMovement(0.0, Math.min(0.0, mob.getDeltaMovement().y), 0.0);
 			}
 			if (kind == Kind.WHIP && t == Kind.WHIP_CRACK && present) {
-				// (0.15.147) the lash cracks round the neck
+				// (0.15.148) the lash cracks round the neck
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.9F, 1.9F);
 				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.1F);
 			}

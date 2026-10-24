@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.15.147) Balkon's flail no longer throws its ball, on right-click or on every hit: right-click is held to whirl it
+ * (0.15.148) Balkon's flail no longer throws its ball, on right-click or on every hit: right-click is held to whirl it
  * and let go to bring it down ({@link Lash}), and a hit is a plain blunt blow. With {@link WeaponModMeleeUseMixin}.
  */
 @Mixin(targets = "ckathode.weaponmod.item.ItemFlail")

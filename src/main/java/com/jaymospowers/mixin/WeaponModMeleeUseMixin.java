@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.15.147) Balkon's flail is held in use while it whirls (its melee base class, which the flail doesn't override,
+ * (0.15.148) Balkon's flail is held in use while it whirls (its melee base class, which the flail doesn't override,
  * decides how long use lasts and what letting go does). Every other WeaponMod weapon is left as it was.
  */
 @Mixin(targets = "ckathode.weaponmod.item.ItemMelee")

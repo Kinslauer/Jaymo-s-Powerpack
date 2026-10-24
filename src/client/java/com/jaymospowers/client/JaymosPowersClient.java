@@ -69,7 +69,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// (0.13.7) the bomb glider: its renderer, hold screen and drop keys
 		com.jaymospowers.client.armory.BombGliderClient.init();
-		// (0.15.147) the flail's chain and ball, the whip's lash
+		// (0.15.148) the flail's chain and ball, the whip's lash
 		com.jaymospowers.client.armory.LashRenderer.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
