@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.15.141) A giant seen from behind: what the crosshair is over is picked along the camera's line, so his left click
+ * (0.15.143) A giant seen from behind: what the crosshair is over is picked along the camera's line, so his left click
  * hits what it points at ({@link GiantCamera#pick}). After vanilla's pick (and any other mod's), so it has the last word.
  */
 @Mixin(Minecraft.class)

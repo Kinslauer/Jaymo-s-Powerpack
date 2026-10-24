@@ -42,7 +42,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -74,7 +73,8 @@ import org.jspecify.annotations.Nullable;
  * anything that loses its head, and anything killed by what ignores invulnerability (the void, {@code /kill}).
  * <p>
  * <b>Down:</b> at {@link #DOWNED_HEALTH} (a player at {@link #DOWNED_PLAYER_HEALTH}), head and body given a little back ({@link Wounds#settle}). Mobs lose their AI
- * ({@code DownedMobMixin}); some ({@link #CRAWLER_CHANCE}) drag themselves away from whoever felled them. Players are held
+ * ({@code DownedMobMixin}); some ({@link #CRAWLER_CHANCE}, most people) drag themselves away from the fight or to a friend
+ * who'll bind them, and all groan now and then ({@link DownedCrawl}). Players are held
  * in a slow crawl ({@link Crawl}) with their hands empty of use: no attacking, using, building or breaking. (0.15.31) Nor
  * powers: whatever was running ends as they fall ({@link Power#onDowned}), their keys are dead (a silencer, and the client
  * lets go of every key but moving and sneak: {@code DownedKeysMixin}), and nothing heals them ({@code DownedHealMixin}). Fire, falls
@@ -106,10 +106,13 @@ public final class Downed {
 	public static final int BLEED_OUT_TICKS = 2400;
 	/** The player's hit that kills a downed mob outright (a downed player has {@link #DOWNED_PLAYER_HEALTH} instead). */
 	public static final int MAX_WOUNDS = 10;
-	/** The share of downed mobs who drag themselves along; the rest lie still. */
-	public static final float CRAWLER_CHANCE = 0.5F;
-	/** A crawling mob's pace, as a share of its walking speed, and how far it gets from whoever felled it before it stops. */
-	public static final double CRAWL_SPEED = 0.3, CRAWL_FROM = 14.0;
+	/**
+	 * The share of downed mobs who drag themselves along (the rest lie still, flailing now and then), and (0.15.142) of
+	 * downed people (Andy: "Humanoids should especially have a tendency to crawl away from the fight").
+	 */
+	public static final float CRAWLER_CHANCE = 0.5F, PERSON_CRAWLER_CHANCE = 0.85F;
+	/** A crawling mob's pace, as a share of its walking speed (where it crawls to: {@link DownedCrawl}). */
+	public static final double CRAWL_SPEED = 0.3;
 	/** A downed player's crawl, slower than a crawl (share of speed lost), and passed out: none at all. */
 	public static final double PLAYER_CRAWL_SLOW = -0.5, PASSED_OUT_SLOW = -1.0;
 	/** How long a downed player holds sneak to give up (ticks). */
@@ -361,7 +364,8 @@ public final class Downed {
 
 	/** Down they go; {@code source}: what felled them (null: nothing did, a knock-out); {@code keepHealth}: (0.14.4) a knock-out takes none. */
 	private static void goDown(ServerLevel level, LivingEntity entity, @Nullable DamageSource source, boolean keepHealth) {
-		boolean crawler = !(entity instanceof Player) && level.getRandom().nextFloat() < CRAWLER_CHANCE;
+		boolean crawler = !(entity instanceof Player)
+			&& level.getRandom().nextFloat() < (BodyPlan.of(entity) == BodyPlan.HUMANOID ? PERSON_CRAWLER_CHANCE : CRAWLER_CHANCE);
 		if (!keepHealth) {
 			entity.setHealth(Math.min(entity instanceof Player ? DOWNED_PLAYER_HEALTH : DOWNED_HEALTH, entity.getMaxHealth()));
 		}
@@ -407,6 +411,7 @@ public final class Downed {
 	/** No longer down (up again, dying, or respawned): its marks gone, a player's crawl and slowness with them. */
 	private static void forget(LivingEntity entity) {
 		FELLED_BY.remove(entity);
+		DownedCrawl.forget(entity);
 		boolean was = entity.hasAttached(DOWNED);
 		entity.removeAttached(DOWNED);
 		entity.removeAttached(WOUNDS);
@@ -598,6 +603,8 @@ public final class Downed {
 		Long wounds = entity.getAttached(WOUNDS);
 		int count = (wounds == null ? 0 : (int) (wounds & 0xF)) + 1;
 		FELLED_BY.put(entity, source);
+		// ((0.15.142) and whoever was binding it starts over)
+		DownedCrawl.hit(entity);
 		if (count >= MAX_WOUNDS) {
 			finish(level, entity);
 			return;
@@ -610,8 +617,8 @@ public final class Downed {
 	// ---- downed mobs ------------------------------------------------------------------------------------------------------
 
 	/**
-	 * A downed mob's tick, in place of its AI: it gets up or bleeds out, and a crawler hauls itself away from whoever
-	 * felled it (while they're near). Called by {@code DownedMobMixin} on the server.
+	 * A downed mob's tick, in place of its AI: it gets up or bleeds out, and (0.15.142) groans, and a crawler hauls itself
+	 * away from the fight or to a friend ({@link DownedCrawl}). Called by {@code DownedMobMixin} on the server.
 	 */
 	public static void step(Mob mob) {
 		if (!(mob.level() instanceof ServerLevel level)) {
@@ -643,23 +650,17 @@ public final class Downed {
 			return;
 		}
 		mob.setTarget(null);
-		mob.getNavigation().stop();
 		mob.setJumping(false);
 		mob.setXxa(0.0F);
 		mob.setSpeed(0.0F);
 		if (Carry.isCarried(mob) || com.jaymospowers.core.finisher.Finishers.targeted(mob)) {
 			// ((0.15.98) and lying still under a finisher)
+			mob.getNavigation().stop();
 			return;
 		}
+		// (0.15.142) groaning, and a crawler crawling: away from the fight, or to a friend who'll see to it
 		DamageSource source = FELLED_BY.get(mob);
-		Entity from = source == null ? null : source.getEntity();
-		if (crawls(mob) && from != null && from.isAlive() && from.level() == level && mob.distanceToSqr(from) < CRAWL_FROM * CRAWL_FROM) {
-			float yaw = (float) (Mth.atan2(mob.getZ() - from.getZ(), mob.getX() - from.getX()) * Mth.RAD_TO_DEG) - 90.0F;
-			mob.setYRot(yaw);
-			mob.setYHeadRot(yaw);
-			mob.yBodyRot = yaw;
-			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * CRAWL_SPEED));
-		}
+		DownedCrawl.tick(level, mob, source == null ? null : source.getEntity());
 	}
 
 	// ---- downed players ---------------------------------------------------------------------------------------------------

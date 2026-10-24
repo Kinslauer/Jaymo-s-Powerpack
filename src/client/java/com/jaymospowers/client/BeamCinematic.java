@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.141) A beam battle ({@link BeamClash}) as a film, for the two in it: black bars slide down and up over the
+ * (0.15.143) A beam battle ({@link BeamClash}) as a film, for the two in it: black bars slide down and up over the
  * top and bottom of the screen, the HUD clears away (the clash's own panel moves into the bottom bar), and the camera
  * cuts every few seconds between shots of the struggle: a wide profile drifting along the beams, a slow orbit round the
  * knot, over each fighter's shoulder at the other, low under the knot, and a crane high above. The idea is Ji AFK

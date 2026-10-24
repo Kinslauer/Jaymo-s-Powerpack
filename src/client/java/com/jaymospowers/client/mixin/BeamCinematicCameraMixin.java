@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.15.141) A beam battle's film ({@link BeamCinematic}) moves and turns the camera. A late priority, so it comes after
+ * (0.15.143) A beam battle's film ({@link BeamCinematic}) moves and turns the camera. A late priority, so it comes after
  * every other view (Shoulder Surfing's, the giant's, Time Flow's) and has the last word.
  */
 @Mixin(value = Camera.class, priority = 2000)

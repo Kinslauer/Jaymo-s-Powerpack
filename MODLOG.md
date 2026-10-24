@@ -2696,7 +2696,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and, as `die` had marked his client unloaded, most likely left him untouchable till a relog (`/kill` did nothing). Now only `Downed.DIED` (set as a player
   dies, at the end of `die`) says they died; the accessor is gone, and a player alive with `DIED` still on (anyone this
   caught) has it cleared. Builds; not playtested.
-- **0.15.141, a giant's camera:** Andy wanted big forms' camera to work like the Size Changing Mod (KProject; All
+- **0.15.143, a giant's camera:** Andy wanted big forms' camera to work like the Size Changing Mod (KProject; All
   Rights Reserved, so only the idea), where a giant can still left-click to attack. The Great Ape's view from behind sat
   ~7 blocks off to his right while his hits were aimed from his eyes, so the crosshair and what he hit didn't line up.
   Now every player grown 1.6 times or more (`core/GiantReach.GIANT_FROM`: the Great Ape, a Behemoth...) seen from

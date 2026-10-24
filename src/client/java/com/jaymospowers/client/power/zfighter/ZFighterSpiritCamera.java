@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Raising a Spirit Bomb, the view pulls way back and up behind him, further as the sphere grows, so he sees the whole of
- * it over his head; let go, it eases back in. Walls stop it short. (0.15.141) The Great Ape's view from behind is now
+ * it over his head; let go, it eases back in. Walls stop it short. (0.15.143) The Great Ape's view from behind is now
  * every giant's, {@link GiantCamera}.
  */
 public final class ZFighterSpiritCamera {

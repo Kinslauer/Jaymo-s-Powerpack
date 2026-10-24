@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * (0.15.141) A giant reaches as far as he's grown, after the Size Changing Mod (KProject; All Rights Reserved, so only
+ * (0.15.143) A giant reaches as far as he's grown, after the Size Changing Mod (KProject; All Rights Reserved, so only
  * the idea): any player the scale attribute has made {@link #GIANT_FROM} times bigger or more (the Great Ape, a
  * Behemoth...) has his reach for hitting and for blocks grown with him. The Great Ape's reach for hitting is his own
  * ({@code ZFighterLineage.apeReach}). The client's giant camera ({@code client/GiantCamera}) aims the crosshair along

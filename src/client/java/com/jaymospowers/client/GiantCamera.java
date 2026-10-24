@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.141) A giant's camera, after the Size Changing Mod (KProject; All Rights Reserved, so only the idea): any player
+ * (0.15.143) A giant's camera, after the Size Changing Mod (KProject; All Rights Reserved, so only the idea): any player
  * grown {@link GiantReach#GIANT_FROM} times or more (the Great Ape, a Behemoth...), seen from behind (F5's view, ours or
  * Shoulder Surfing's), has the view back and up as far as he's grown, almost straight behind him so he sees past
  * himself. The crosshair then picks along the camera's own line, starting level with his eyes, so a left click lands on

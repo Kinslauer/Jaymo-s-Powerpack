@@ -257,7 +257,7 @@ public final class BeamClashClient {
 		LocalPlayer player = minecraft.player;
 		BeamClash.State state = player == null ? null : player.getAttached(BeamClash.CLASH);
 		if (state == null || BeamCinematic.running()) {
-			// (0.15.141) in the film, the panel sits in the bottom bar (BeamCinematic)
+			// (0.15.143) in the film, the panel sits in the bottom bar (BeamCinematic)
 			return;
 		}
 		int width = graphics.guiWidth();

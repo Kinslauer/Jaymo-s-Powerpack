@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.15.141) A giant seen from behind: the view sits back and up as far as he's grown ({@link GiantCamera}). */
+/** (0.15.143) A giant seen from behind: the view sits back and up as far as he's grown ({@link GiantCamera}). */
 @Mixin(Camera.class)
 abstract class GiantCameraMixin {
 	@Shadow
