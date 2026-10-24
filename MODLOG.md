@@ -2715,3 +2715,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.151, the Flame Avatar:** Andy: an Emberborn who spends too many of their years in the Nether is consumed by
+  their own fire and becomes an avatar of flame (the end of failing to control it). `power/ember/FlameAvatar` counts
+  an Emberborn's time in the Nether (net: a quarter of it cools off elsewhere) and at 7 in-game days the fire takes
+  them (warnings at 50/75/90%); `/power avatar <targets> on|off|progress` for ops. An avatar has at most 3 hearts and a
+  20-point flame bar that takes hits first (the body flares and sets the attacker alight), refilled by fire, lava and
+  eating, slower in the cold, drained by rain and fast by water (which harms once it's out). `AvatarMoves`: R Fire
+  Fist (giant fireball, 4.5-block blast, sets fires), G Flaming Pillar (tap round you, hold at the cursor; throws up and
+  away; damage dealt comes back as flame), B Ignition Switch (tap lights what's in front for 3 flame; hold detonates
+  everything burning near). No block is broken. Plain keys without a power, sneak + key beside one. Look
+  (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
+  flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. Compile-checked; not
+  playtested.
