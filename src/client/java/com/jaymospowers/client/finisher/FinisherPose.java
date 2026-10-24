@@ -191,6 +191,37 @@ public final class FinisherPose {
 			k(106, 0.5F, 40, 15, -0.25F, -0.6F, 0.2F, -0.6F, 0.6F, -0.1F, -1.15F, 1.35F, 0.7F, 0),
 			k(111, 0.3F, 20, 0, -0.3F, 0, 0.1F, -0.3F, 0, -0.1F, -1.0F, 1.2F, 0.5F, 0),
 			rest(118, 0)});
+		// (0.15.146) Wild Slam: whatever's in hand swung up over the head in both hands and hammered down three times, turned
+		// a little this way, then that, the last with the whole body behind it
+		Key up = k(0, -0.05F, -14, 0, -3.1F, 0, 0.3F, -3.1F, 0, -0.3F, -0.35F, 0.3F, 0.35F, -20);
+		Key down = k(0, 0.3F, 40, 0, -0.45F, -0.35F, 0, -0.45F, 0.35F, 0, -0.8F, 0.65F, 0.6F, 65);
+		KEYS.put(Finishers.Kind.SLAM, new Key[] {
+			rest(0, 0),
+			at(up, 7), at(down, 10), at(down, 12),
+			turned(up, 16, 10), turned(down, 19, 10), turned(down, 21, 8),
+			turned(up, 25, -8), k(28, 0.38F, 48, -6, -0.4F, -0.35F, 0, -0.4F, 0.35F, 0, -0.95F, 0.8F, 0.65F, 65),
+			k(32, 0.36F, 46, -4, -0.42F, -0.35F, 0, -0.42F, 0.35F, 0, -0.95F, 0.8F, 0.62F, 65),
+			rest(36, 0)});
+		// (0.15.146) Stabbed Through: the blade up point down and driven through them on one knee; then stuck: tugged at
+		// leaning back, this way and that, and the last heave wrenches it out with a stagger back
+		Key pull = k(0, 0.32F, 14, 0, -0.85F, -0.3F, 0, -0.85F, 0.3F, 0, -0.9F, 1.2F, 0.5F, 95);
+		Key stuck = k(0, 0.44F, 32, 0, -0.45F, -0.4F, 0, -0.45F, 0.4F, 0, -1.0F, 1.35F, 0.6F, 90);
+		KEYS.put(Finishers.Kind.IMPALE, new Key[] {
+			rest(0, 0),
+			k(5, -0.03F, -6, 0, -2.8F, 0, 0.3F, -2.8F, 0, -0.3F, 0, 0, 0.45F, 160),
+			k(9, -0.05F, -10, 0, -2.95F, 0, 0.3F, -2.95F, 0, -0.3F, 0, 0, 0.45F, 165),
+			k(12, 0.45F, 36, 0, -0.4F, -0.4F, 0, -0.4F, 0.4F, 0, -1.0F, 1.35F, 0.6F, 90),
+			at(stuck, 17), turned(pull, 21, 8), at(stuck, 24), turned(pull, 28, -8), at(stuck, 31),
+			k(34, 0.25F, 4, 0, -1.0F, -0.3F, 0, -1.0F, 0.3F, 0, -0.8F, 1.0F, 0.45F, 100),
+			k(38, 0.3F, 10, 0, -0.9F, -0.3F, 0, -0.9F, 0.3F, 0, -0.85F, 1.1F, 0.5F, 95),
+			k(40, 0.02F, -10, 0, -1.5F, -0.3F, 0.1F, -1.3F, 0.3F, -0.1F, -0.2F, 0.35F, 0.3F, 60),
+			k(43, 0.0F, -4, 0, -0.9F, -0.1F, 0.05F, -0.6F, 0, -0.05F, -0.1F, 0.2F, 0.35F, 30),
+			rest(46, 0)});
+	}
+
+	private static Key turned(Key key, float t, float twist) {
+		return k(t, key.sink(), key.pitch(), twist, key.rax(), key.ray(), key.raz(), key.lax(), key.lay(), key.laz(), key.rightLeg(),
+			key.leftLeg(), key.head(), key.grip());
 	}
 
 	private static Key at(Key key, float t) {
@@ -254,7 +285,10 @@ public final class FinisherPose {
 		float step = 0.0F;
 		Entity body = entity.level().getEntity(finish.target());
 		if (body != null) {
-			double dx = body.getX() - entity.getX(), dz = body.getZ() - entity.getZ();
+			// (0.15.146) the neck snap kneels to the head, not the middle
+			net.minecraft.world.phys.Vec3 at = kind == Finishers.Kind.FIST && body instanceof net.minecraft.world.entity.LivingEntity living
+				? Finishers.headAt(living) : body.position();
+			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
 			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
 			float head = state.bodyRot + state.yRot;
 			state.bodyRot = yaw;

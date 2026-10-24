@@ -14,7 +14,7 @@
 	"message.jaymospowers.finisher.gun": "Point blank: %s",
 	"message.jaymospowers.finisher.fist": "Neck snap: %s",
 	"message.jaymospowers.finisher.taps": "Neck snap on %s: tap %s more",
-	"message.jaymospowers.finisher.locked": "Weapon finishers need Executioner (Combat Arts). Bare hands: tap three times.",
-	"message.jaymospowers.finisher.unloaded.bow": "You need an arrow.",
-	"message.jaymospowers.finisher.unloaded.crossbow": "You need a bolt."
+	"message.jaymospowers.finisher.slam": "Wild slam: %s",
+	"message.jaymospowers.finisher.impale": "Stabbed through: %s",
+	"message.jaymospowers.finisher.head": "Kneel at %s's head to snap the neck"
 }
