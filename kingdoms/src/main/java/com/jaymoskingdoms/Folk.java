@@ -298,7 +298,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return false;
 		}
 		ItemStack hand = this.getMainHandItem();
-		// (0.7.183) after enough failed shots it puts the bow away and fights hand to hand for a while
+		// (0.7.184) after enough failed shots it puts the bow away and fights hand to hand for a while
 		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this);
 	}
 
@@ -430,7 +430,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		// (0.7.183) a shooter whose shots keep failing moves (RangedTactics)
+		// (0.7.184) a shooter whose shots keep failing moves (RangedTactics)
 		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
@@ -825,7 +825,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			if (sees) {
 				RangedTactics.seen(this.archer);
 			} else if (this.cooldown <= 0) {
-				// (0.7.183) ready to shoot with nothing to shoot at: that is a failure too
+				// (0.7.184) ready to shoot with nothing to shoot at: that is a failure too
 				RangedTactics.blocked(this.archer, target);
 			}
 			if (--this.cooldown <= 0 && sees) {

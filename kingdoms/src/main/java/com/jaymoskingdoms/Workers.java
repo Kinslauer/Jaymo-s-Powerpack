@@ -94,7 +94,7 @@ public final class Workers {
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
 		if (RangedTactics.brainStep(mob)) {
-			// (0.7.183) a guard whose shots keep failing is on the move to a better place: its brain waits
+			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
 			return true;
 		}
 		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {
@@ -131,7 +131,7 @@ public final class Workers {
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
 		}
 		if (Barbarians.villagerRole(w.role())) {
-			// (0.7.183) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
+			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
 			Javelins.tick(level, w);
 			return Pirates.villagerStep(level, w);
 		}

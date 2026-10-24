@@ -246,7 +246,7 @@ public final class Pirates {
 	}
 
 	/**
-	 * (0.7.183) A cove's gunner, deckhand or bombardier as one of MCA's villagers (they are ashore, not aboard): the same
+	 * (0.7.184) A cove's gunner, deckhand or bombardier as one of MCA's villagers (they are ashore, not aboard): the same
 	 * pistols, shouts and dynamite as the folk's, from {@code Workers.step}. True if the villager's legs are taken
 	 * (a bombardier in his lobbing range holds his ground, and backs off from a foe who closes), the brain waiting.
 	 */

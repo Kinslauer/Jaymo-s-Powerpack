@@ -99,7 +99,7 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.WIND_CHARGE, ITEM));
 		}
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			// (0.7.183) a bombardier is a folk, or (with MCA) a villager
+			// (0.7.184) a bombardier is a folk, or (with MCA) a villager
 			if (entity instanceof Worker bomber && bomber.role() == Pirates.BOMBARDIER && entity.level() instanceof ServerLevel level
 				&& level.getRandom().nextInt(DROP_NONE_ONE_IN) > 0) {
 				entity.spawnAtLocation(level, new ItemStack(stick(), 1 + level.getRandom().nextInt(DROP_MOST)));

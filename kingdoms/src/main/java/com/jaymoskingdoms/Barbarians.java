@@ -150,7 +150,7 @@ public final class Barbarians {
 	}
 
 	/**
-	 * (0.7.148) The camp roles MCA's villagers take: a barbarian, a pirate deckhand. (0.7.183) Andy: "rework the bombardier
+	 * (0.7.148) The camp roles MCA's villagers take: a barbarian, a pirate deckhand. (0.7.184) Andy: "rework the bombardier
 	 * and other humanoid mobs that arent mca villagers back into the system. I want full integration": a cove's gunners
 	 * and bombardiers ashore too (their pistols and dynamite now run on a villager's body: {@code Pirates.villagerStep}).
 	 */

@@ -151,7 +151,7 @@ public final class Downed {
 	/** (0.7.132) Someone villagers would tend: a villager, or a settlement's own folk (not a ruler, orc, raider or barbarian). */
 	private static boolean kin(LivingEntity body) {
 		if (campMember(body)) {
-			// (0.7.183) a camp's own are tended by the camp's own villagers (see sameSide)
+			// (0.7.184) a camp's own are tended by the camp's own villagers (see sameSide)
 			return true;
 		}
 		if (body instanceof Villager || isGuard(body)) {
@@ -169,7 +169,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.183) A barbarian camp's or pirate cove's own: its MCA villagers, and its raiders and crews as folk (not a chief,
+	 * (0.7.184) A barbarian camp's or pirate cove's own: its MCA villagers, and its raiders and crews as folk (not a chief,
 	 * a captain, an orc or a goblin).
 	 */
 	private static boolean campMember(LivingEntity body) {
@@ -180,7 +180,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.183) Who tends whom: a realm's villagers their own side, a camp's villagers only their own camp's; neither
+	 * (0.7.184) Who tends whom: a realm's villagers their own side, a camp's villagers only their own camp's; neither
 	 * crosses over.
 	 */
 	private static boolean sameSide(Villager helper, LivingEntity body) {

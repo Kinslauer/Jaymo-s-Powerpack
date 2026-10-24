@@ -82,7 +82,7 @@ final class Javelins {
 		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk);
 	}
 
-	/** (0.7.183) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */
+	/** (0.7.184) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */
 	static boolean thrower(Worker w) {
 		return w.role() == Folk.BARBARIAN;
 	}
@@ -99,7 +99,7 @@ final class Javelins {
 		}
 	}
 
-	/** (0.7.183) The same throw from a camp's MCA villager ({@code Workers.step}). */
+	/** (0.7.184) The same throw from a camp's MCA villager ({@code Workers.step}). */
 	static void tick(ServerLevel level, Worker w) {
 		if (thrower(w)) {
 			tick(level, w.mob(), w.factionId());
@@ -188,7 +188,7 @@ final class Javelins {
 	}
 
 	/**
-	 * (0.7.183) The same for a camp's MCA villager as thrower: never its own camp's folk or villagers, nor a creative
+	 * (0.7.184) The same for a camp's MCA villager as thrower: never its own camp's folk or villagers, nor a creative
 	 * player; the villagers and golems the camps hunt are fair game.
 	 */
 	static boolean harms(LivingEntity thrower, LivingEntity victim) {

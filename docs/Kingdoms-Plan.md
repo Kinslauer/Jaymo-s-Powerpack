@@ -48,8 +48,8 @@ GPL-3.0. Recommended: an original mod (our own code, art and buildings) that onl
 3. **NPC kingdoms fight on their own:** autonomous battles between kingdoms; intervening wins or loses you
    reputation with each side.
 
-## Rulers dress for the day (RoyalDress)
-Andy (2026-10-23): "Give kings and queens the ability to wear armor or not as they please/ change activities throughout the day (they change before bed, etc)".
+## Rulers dress for the day (RoyalDress, Kingdoms 0.7.184)
+Andy (2026-10-24): "Give kings and queens the ability to wear armor or not as they please/ change activities throughout the day (they change before bed, etc)".
 
 - `RoyalDress` (kingdoms): every ruler (king, queen, lord, lady; folk or MCA villager) picks one of three outfits and is seen to
   change (armour sound, a puff, a word, held still a moment; hurried in danger). The set not worn is kept on the ruler
@@ -65,7 +65,7 @@ Andy (2026-10-23): "Give kings and queens the ability to wear armor or not as th
 - Tuning constants sit at the top of `RoyalDress` and `Rulers`. Without MCA only folk rulers exist; they start in plate (their
   outfit) and generate finery on first need.
 
-## Ranged tactics and the camps' MCA villagers (Kingdoms 0.7.183)
+## Ranged tactics and the camps' MCA villagers (Kingdoms 0.7.184)
 Andy: "Villager and other ranged ai should not keep firing from the same position if their attacks fail, instead they
 should reposition or try other tactics. Also rework the bombardier and other humanoid mobs that arent mca villagers
 back into the system. I want full integration."

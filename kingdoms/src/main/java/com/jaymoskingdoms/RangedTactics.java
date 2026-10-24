@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.183) Andy: "Villager and other ranged ai should not keep firing from the same position if their attacks fail,
+ * (0.7.184) Andy: "Villager and other ranged ai should not keep firing from the same position if their attacks fail,
  * instead they should reposition or try other tactics." One shared helper for every ranged attacker, so no shooter keeps
  * emptying its quiver from a spot where it can't hit.
  * <p>

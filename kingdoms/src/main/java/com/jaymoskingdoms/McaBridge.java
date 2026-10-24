@@ -390,7 +390,7 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
-		// (0.7.183) a gunner keeps his pistol in the off hand and draws a cutlass (MCA's guards would try to work a crossbow
+		// (0.7.184) a gunner keeps his pistol in the off hand and draws a cutlass (MCA's guards would try to work a crossbow
 		// themselves); a bombardier's dynamite stays in his off hand
 		boolean gunner = folk.role() == Pirates.GUNNER;
 		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
