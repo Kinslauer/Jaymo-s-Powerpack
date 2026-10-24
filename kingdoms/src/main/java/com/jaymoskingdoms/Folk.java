@@ -298,7 +298,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return false;
 		}
 		ItemStack hand = this.getMainHandItem();
-		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand);
+		// (0.7.184) after enough failed shots it puts the bow away and fights hand to hand for a while
+		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this);
 	}
 
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
@@ -429,6 +430,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// (0.7.184) a shooter whose shots keep failing moves (RangedTactics)
+		this.goalSelector.addGoal(0, new RangedTactics.RepositionGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
 		this.goalSelector.addGoal(1, new Rearm.Fetch(this));
@@ -756,7 +759,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	 * (0.7.83) What a shot is fired from: the held weapon, or a bow if the hand is empty (disarmed, or the bow put away
 	 * in the saddle). An arrow fired from an empty hand throws, and that crashed the server.
 	 */
-	static ItemStack firingWeapon(Folk folk) {
+	static ItemStack firingWeapon(net.minecraft.world.entity.LivingEntity folk) {
 		ItemStack held = folk.getMainHandItem();
 		return held.isEmpty() ? new ItemStack(Items.BOW) : held;
 	}
@@ -818,7 +821,14 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			}
 			this.archer.getNavigation().stop();
 			this.archer.getLookControl().setLookAt(target, 30.0F, 30.0F);
-			if (--this.cooldown <= 0 && this.archer.getSensing().hasLineOfSight(target)) {
+			boolean sees = this.archer.getSensing().hasLineOfSight(target);
+			if (sees) {
+				RangedTactics.seen(this.archer);
+			} else if (this.cooldown <= 0) {
+				// (0.7.184) ready to shoot with nothing to shoot at: that is a failure too
+				RangedTactics.blocked(this.archer, target);
+			}
+			if (--this.cooldown <= 0 && sees) {
 				this.cooldown = Sorcery.isCaster(this.archer.role()) ? Sorcery.CAST_TICKS : ARCHER_INTERVAL;
 				this.archer.performRangedAttack(target, 1.0F);
 			}

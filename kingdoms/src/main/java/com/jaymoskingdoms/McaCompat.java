@@ -139,6 +139,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.isMca(villager);
 	}
 
+	/** (0.7.187) A new grown MCA guard at {@code at}, in the world and in no one's service; null without MCA. */
+	public static @Nullable Villager spawnGuard(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.spawnGuard(level, at) : null;
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
@@ -191,6 +196,42 @@ public final class McaCompat {
 	/** (0.7.20) {@code villager} is {@code player}'s family in MCA (spouse, child, parent): they always understand each other. */
 	static boolean family(Villager villager, ServerPlayer player) {
 		return LOADED && McaBridge.family(villager, player);
+	}
+
+	/** (0.7.184) {@code villager} is {@code player}'s own child in MCA's family tree ({@link Lineage}); never without MCA. */
+	static boolean childOf(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.childOf(villager, player);
+	}
+
+	/** (0.7.184) An MCA village: its middle and its name. */
+	record Town(BlockPos center, String name) {
+	}
+
+	/** (0.7.184) Every MCA village in {@code level} ({@link Elders}); none without MCA. */
+	static List<Town> towns(ServerLevel level) {
+		return LOADED ? McaBridge.towns(level) : List.of();
+	}
+
+	/** (0.7.184) An MCA letter to player {@code to} (online or not); nothing without MCA. */
+	static void letter(ServerLevel level, UUID to, net.minecraft.network.chat.Component text) {
+		if (LOADED) {
+			McaBridge.letter(level, to, text);
+		}
+	}
+
+	/** (0.7.184) {@code villager} is a teen or grown, old enough to live on as ({@link Lineage}). */
+	static boolean teenOrOlder(Villager villager) {
+		return LOADED && McaBridge.teenOrOlder(villager);
+	}
+
+	/** (0.7.184) Puts {@code stack} in an MCA villager's pack; what doesn't fit (all of it, for anyone else) comes back. */
+	static net.minecraft.world.item.ItemStack stow(PathfinderMob villager, net.minecraft.world.item.ItemStack stack) {
+		return LOADED ? McaBridge.stow(villager, stack) : stack;
+	}
+
+	/** (0.7.184) {@link McaBridge#takeOver}: the villager left in {@code player}'s old body, or null. */
+	static @Nullable PathfinderMob takeOver(ServerPlayer player, Villager child, long elderSince) {
+		return LOADED ? McaBridge.takeOver(player, child, elderSince) : null;
 	}
 
 	/** (0.7.19) {@link #kin}: no kin, kin (family), partners (married, engaged or promised). */
@@ -355,6 +396,10 @@ public final class McaCompat {
 	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
 	 */
 	public static boolean foe(LivingEntity guard, LivingEntity target) {
+		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
+			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
+			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
+		}
 		if (guard instanceof Worker w && Barbarians.villagerRole(w.role()) && guard.level().getServer() != null) {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
 			return Barbarians.villagerPrey(w.role(), w.factionId(), target);

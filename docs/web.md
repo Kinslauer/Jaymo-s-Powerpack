@@ -1530,7 +1530,24 @@ to 3 removals."
   the pool". `WebSymbiote.HESITATE_TICKS` 60 (3 s); `HESITATE_LINES` 9 and `HESITATE_THROWN_LINES` 4
   (`hesitate.N`, `hesitate.thrown.N` in `lang/parts/web.json`).
 
-## 0.15.152: goo globs, tendrils in, the big body as congealed goo
+## Three rescues, and its hunger feeds yours (0.15.147)
+
+- Andy: "Symbiote ai should not be repeating actions, upon playtesting a user had been getting repeatedly downed due
+  to hunger despite the symbiote eating ... And the symbiote just kept reviving them and jumping away. That should be
+  one of maybe 3 actions. Another should involve the thin suit slowly forming over you, giving you regeneration for 5s
+  and empowering you with its abilities to fight yourself out of the situation."
+- `WebSymbioteRescue` picks one of three each time you go down, never the one it used last: **leap** (the leap and zip,
+  as before), **suit** (the plain suit grows over you where you lie, `FORM_TICKS` 30; you get up with 25% health,
+  Regeneration II for 5 s and `WebSymbiote.EMPOWERED` for 30 s: all its abilities and the suit whatever the bond; you
+  keep the controls), **lash** (tendrils burst out and hurl back, hurt and slow everything after you within 8 blocks;
+  you get up with 40% health and 3 s of Resistance II). Each has its own close-call lines (`rescue.suit.<tier>.N`,
+  `rescue.lash.<tier>.N`, `rescue.empower.N`).
+- Downed with your hunger bar under 8, a rescue feeds you up to 8 first.
+- Andy: "the symbiotes satiety should also count toward the player's shanks, contributing toward hearts as well the
+  same way eating food does now". Every 2 s that your bar isn't full and it has over 25 satiety, a point of its
+  satiety gives you 2 hunger (`WebSymbiote.SHARE_*`), so a fed symbiote keeps you fed and healing.
+
+## 0.15.164: goo globs, tendrils in, the big body as congealed goo
 - **Living Armor's tendrils drawn in (`WebSymbioteState.TENDRILS_IN`):** in the big body with the tendrils out, the
   first Living Armor press draws them in (`WebSymbiote.drawIn`): the big body alone, upright, no grabs, strikes or
   Wall Crawl; the next press takes the armour off. `armored()` now means the tendrils are out; `livingArmor()` is the

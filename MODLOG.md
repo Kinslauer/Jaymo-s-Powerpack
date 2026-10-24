@@ -2715,6 +2715,44 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+
+## 0.15.147
+- Kingdoms 0.7.184: guards make way for quest carriers whatever their ruler's temper, and walk you to the king or queen
+  when you ask for an audience (if your good name allows).
+- **0.15.147, Earthling ki glow for Z Fighters only:** packs Jaymo's Kingdoms 0.7.184 (Andy: no glow or ki effects on
+  the Earthling heritage skin unless a Z Fighter, and the costume clipping was back): the surge's glow, sparks and
+  sounds only for Z Fighters, and no heritage marks or glow under a costume. See `kingdoms/MODLOG.md`. Andy then: "Can
+  you add the wraps to the gi?" An Earthling's gi wears the wraps itself, over its wristbands and in its own pose, with
+  a Z Fighter's ki glow over them while it flares (`client/costume/KingdomsWraps`, asking Kingdoms'
+  `HeritageLooks.earthlingWraps`).
+
+## 0.15.147: powers are handed down through a lineage (Kingdoms 0.7.184)
+- Kingdoms' Lineage (living on as your child) takes your power away and hands it down: `Affinity.passDown` (called by
+  reflection from Kingdoms' `PowersCompat`) clears the power, restarts the 3-5 day awakening and stores it as
+  `Affinity.INHERITED`. Andy: "the power you had is given a high affinity to your child, they still have to awaken it
+  themselves". At the awakening an inherited power wins over a calling and an affinity, fated or not, and is then cleared.
+- Compile-checked; not playtested.
+- **0.15.147 / Kingdoms 0.7.184, rescues, ranged tactics, royal days:**
+  - Symbiote: each time you go down it picks one of three rescues, never the last one used: the leap and zip; the
+    plain suit forming over you (up with Regeneration II for 5 s and all its abilities and the suit for 30 s, whatever
+    the bond); or a tendril lash that hurls back, hurts and slows everything after you. Its satiety now feeds your
+    hunger bar (a point for 2 hunger every 2 s while it has over 25), and a rescue feeds an empty bar, so a fed
+    symbiote no longer lets you starve down again and again. See docs/web.md.
+  - Kingdoms: ranged attackers that keep missing or can't see their target change tactics (`RangedTactics`: step
+    aside, find a clear line, close in or back off, flank, take cover, or fight hand to hand); a cove's gunners and
+    bombardiers come ashore as MCA villagers keeping their pistols and dynamite, camp raiders as villagers throw rocks
+    again, and camps tend only their own downed. Kings and queens choose plate, robes or nightwear through the day
+    (`RoyalDress`) and keep a day of court, round, meal, audience, leisure and bed. See docs/Kingdoms-Plan.md.
+    Compile-checked; not playtested.
+- **0.15.149, Lost Cities in the future:** Andy picked shipping The Lost Cities (MIT, McJty; github.com/McJtyMods/LostCities)
+  unchanged and pointing it at the Chrono future. McJty's own 26.3 Fabric build (26.3-12.0.0-fabric, CurseForge
+  269024/9277225) is in `packMods`; it needs Forge Config API Port, already there. `future/FutureCities` registers its
+  `ancient` profile for `jaymospowers:future` on each server start (by reflection; Lost Cities forgets between starts)
+  and adds its city feature to the `future_ruins` biome only. The overworld is untouched unless a world is made with a
+  Lost Cities profile. The future's generator is now overworld noise with the fixed `future_ruins` biome instead of a
+  flat sea, so beyond Los Perrito the land runs on as ruined city; with Lost Cities loaded those chunks decay like the
+  island's (`FutureRuins`). Lost Cities' own bed-and-skulls trip to its `lostcities:lostcity` dimension now needs
+  bedrock under the bed. Details in docs/chrono.md. Not built or playtested here (the cloud can't reach Fabric's Maven).
 - **0.15.147, Touch'n Motion:** Andy asked whether Touch'n Motion's animations, the passive and idle ones above all,
   could be brought in. It's GPL-3.0 (STRadaT, source github.com/victorkozhokin/emf-compat), has a Fabric 26.3 build, and
   is an add-on for exactly what the pack already runs: Entity Model Features with Fresh Animations: Player Extension.
@@ -2730,3 +2768,30 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     (Touch'n Motion's riding pose), which would have brought Fresh Animations back over ours. So `EmfCompat.hold` also
     puts EMF's own per-player pause (`pauseAllCustomAnimationsForEntity`) on a posed player, which the core never
     lifts, and takes it off when the pose ends. It only removes pauses it put on. Compile-checked; not playtested.
+- **0.15.148, the flail and the leather whip (Web Whip's mechanics on weapons):** Andy: "Can these mechanics replace
+  the flail? And maybe add a single leather whip?" (`armory/Lash`, synced `Lash.State` player attachment; the head's
+  path is worked out the same on both sides, so `client/armory/LashRenderer` draws the chain/lash from the hand with
+  no lag). Balkon's flail (`mixin/WeaponModFlailMixin`, `WeaponModMeleeUseMixin`) no longer throws its ball on
+  right-click or on every hit: hold use and the ball whirls on its chain over your head, faster over 1.5 s, clipping
+  what it passes; let go and it's hauled overhead and brought down where you look (to 4.2 blocks), up to 1.7x the
+  flail's damage at full spin, splashing whoever's beside, dust and a jolt. The new leather whip (3 leather, string,
+  stick) cracks out to 7 blocks (4 damage); keep holding to wrap and hold what it cracked; let go to haul a light
+  catch (up to pig/player size) over your head into the ground (6 damage), or yank a heavy one off its feet toward
+  you, slowed 2 s. No blocks broken (towns). Then Andy: "add a flail and whip execution, the whip should also allow
+  you to climb up a wall rappel style, trusting that you hooked the edge of an up to 7 block wall": `Finishers.Kind`
+  FLAIL (Ball and Chain: whirled overhead, two blows, the ball and chain drawn by LashRenderer) and WHIP (Garrotte: cracked
+  round the neck, hauled tight three times), everyone's, Executioner or not. Whip cracked at a wall and held: hooked over
+  a top up to 7 blocks above your feet (`Lash.HOOK`); you walk up it (client-side, `LashRenderer.climb`) and over the top,
+  Sneak lowers you, letting go drops you (fall damage as ever). Compile-checked; not playtested.
+- **0.15.151, the Flame Avatar:** Andy: an Emberborn who spends too many of their years in the Nether is consumed by
+  their own fire and becomes an avatar of flame (the end of failing to control it). `power/ember/FlameAvatar` counts
+  an Emberborn's time in the Nether (net: a quarter of it cools off elsewhere) and at 7 in-game days the fire takes
+  them (warnings at 50/75/90%); `/power avatar <targets> on|off|progress` for ops. An avatar has at most 3 hearts and a
+  20-point flame bar that takes hits first (the body flares and sets the attacker alight), refilled by fire, lava and
+  eating, slower in the cold, drained by rain and fast by water (which harms once it's out); going down in water undoes it (Andy): on the hit that would drop them they revert to plain Emberborn. `AvatarMoves`: R Fire
+  Fist (giant fireball, 4.5-block blast, sets fires, 4 flame), G Flaming Pillar (tap round you, hold at the cursor; throws up and
+  away; damage dealt comes back as flame), B Ignition Switch (tap lights what's in front for 3 flame; hold detonates
+  everything burning near). No block is broken. Plain keys without a power, sneak + key beside one. Look
+  (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
+  flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. MCA avatars with camps of their own fight Hornkin and piglins in the Nether (Kingdoms 0.7.187). Compile-checked;
+  not playtested.

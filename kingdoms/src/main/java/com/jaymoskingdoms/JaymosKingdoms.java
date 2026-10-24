@@ -112,8 +112,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Jobs.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
+		RangedTactics.register();
 		Tempers.register();
+		// (0.7.184) before Retinue, Pickpocket and Quests: sneak-using your own child with an earned blood waiting
+		Lineage.register();
+		Elders.register();
 		Retinue.register();
+		Audiences.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
@@ -136,6 +141,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
 		Introductions.register();
+		// (0.7.184) handshakes between players, and the groups they make
+		Groups.register();
+		Handshakes.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
@@ -265,6 +273,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
 		LOGGER.debug("memory attachment: {}", Recollections.MEMORIES);
 		Recollections.register();
+		// 0.7.186: every humanoid's own temperament (and its attachment)
+		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
+		Temperaments.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
@@ -328,6 +339,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
+		// drive you (their attachments)
+		LOGGER.debug("takeover attachments: {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, FeralCurse.FERAL);
+		Seizures.register();
+		BloodFever.register();
+		FeralCurse.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();
@@ -353,6 +370,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		// 0.7.171: rulers' crowns
 		Regalia.register();
+		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)

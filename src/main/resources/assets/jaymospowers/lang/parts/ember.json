@@ -1,4 +1,17 @@
 {
 	"hud.jaymospowers.ember.heat": "Heat",
-	"hud.jaymospowers.ember.white": "White-hot: let go to throw"
+	"hud.jaymospowers.ember.white": "White-hot: let go to throw",
+	"hud.jaymospowers.avatar.flame": "Flame",
+	"message.jaymospowers.avatar.sign_1": "The heat here feels like home. Too much like home.",
+	"message.jaymospowers.avatar.sign_2": "The fire under your skin pushes back when you hold it.",
+	"message.jaymospowers.avatar.sign_3": "You can't remember the last time you felt cold. You can't remember feeling anything but the fire.",
+	"message.jaymospowers.avatar.consumed": "Consumed",
+	"message.jaymospowers.avatar.consumed_sub": "The fire you held so long holds you now",
+	"message.jaymospowers.avatar.guttered": "Your flame gutters out",
+	"message.jaymospowers.avatar.no_flame": "Not enough flame",
+	"message.jaymospowers.avatar.nothing_lit": "Nothing burning near",
+	"message.jaymospowers.avatar.doused": "The water takes the fire out of you. You are only Emberborn again.",
+	"commands.jaymospowers.avatar.on": "%s consumed by the flame",
+	"commands.jaymospowers.avatar.off": "%s freed from the flame",
+	"commands.jaymospowers.avatar.progress": "%s: %s of the way to the flame"
 }

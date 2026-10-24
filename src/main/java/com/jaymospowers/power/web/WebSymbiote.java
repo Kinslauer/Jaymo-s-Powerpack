@@ -232,6 +232,14 @@ public final class WebSymbiote {
 	/** At or below this it's starving: it eats from your hunger bar instead, and gets agitated. */
 	public static final int STARVING = 15;
 	public static final int STARVE_TICKS = 40;
+	/**
+	 * (0.15.147) Andy: "the symbiotes satiety should also count toward the player's shanks, contributing toward hearts as
+	 * well the same way eating food does now". Every {@code SHARE_TICKS} that your hunger bar is under {@code SHARE_FULL}
+	 * and it has more than {@code SHARE_FLOOR}, a point of its satiety feeds you {@code SHARE_FOOD} (with
+	 * {@code SHARE_SATURATION}), so a fed symbiote keeps you fed and healing.
+	 */
+	public static final int SHARE_TICKS = 40, SHARE_FLOOR = 25, SHARE_FULL = 20, SHARE_FOOD = 2;
+	public static final float SHARE_SATURATION = 0.3F;
 	public static final float STARVE_EXHAUSTION = 1.2F;
 	/** Raw meat feeds it this much per point of the meat's nutrition (and feeds you nothing). */
 	public static final int MEAT_FEED_PER_NUTRITION = 5;
@@ -823,6 +831,12 @@ public final class WebSymbiote {
 	 */
 	public static final AttachmentType<Long> DONNED = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_donned"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.15.147) Until this game time everything it has is yours, suit included, whatever the bond (the suit rescue,
+	 * {@link WebSymbioteRescue}). Synced: the radial menu shows it.
+	 */
+	public static final AttachmentType<Long> EMPOWERED = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_empowered"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/**
 	 * A meal, in order: a tendril picks it up and brings it to the head as the head swells into a maw
@@ -1137,13 +1151,19 @@ public final class WebSymbiote {
 	}
 
 	/** The suit comes at your call (it shows itself on bonding, and in every takeover, regardless). */
+	/** (0.15.147) It has lent you everything it has for now ({@link #EMPOWERED}). */
+	public static boolean empowered(Player player) {
+		Long until = player.getAttached(EMPOWERED);
+		return until != null && player.level().getGameTime() < until;
+	}
+
 	public static boolean suitAllowed(Player player) {
-		return player.isCreative() || unlockedCount(player) >= SUIT_ABILITIES;
+		return player.isCreative() || empowered(player) || unlockedCount(player) >= SUIT_ABILITIES;
 	}
 
 	/** It has given you this ability (radial index) by now: its bond has reached {@link #UNLOCK_BOND} (creative has them all). */
 	public static boolean unlocked(Player player, int ability) {
-		return ability < 0 || ability >= ABILITIES || player.isCreative() || state(player).bond() >= UNLOCK_BOND[ability];
+		return ability < 0 || ability >= ABILITIES || player.isCreative() || empowered(player) || state(player).bond() >= UNLOCK_BOND[ability];
 	}
 
 	/** How many of its six abilities it has given you. */
@@ -1455,6 +1475,12 @@ public final class WebSymbiote {
 		// (dormant, it doesn't hunger)
 		if (!player.isCreative() && !dormant && player.tickCount % drainTicks == 0 && next.satiety() > 0 && now >= live.satedUntil) {
 			next = next.withSatiety(next.satiety() - 1);
+		}
+		// (0.15.147) its satiety is yours too: fed, it keeps your hunger bar up (and so your hearts), like food
+		if (!player.isCreative() && !dormant && player.tickCount % SHARE_TICKS == 0 && next.satiety() > SHARE_FLOOR
+			&& player.getFoodData().getFoodLevel() < SHARE_FULL) {
+			next = next.withSatiety(next.satiety() - 1);
+			player.getFoodData().eat(SHARE_FOOD, SHARE_SATURATION);
 		}
 		boolean starving = next.satiety() <= STARVING;
 		if (starving && !player.isCreative()) {

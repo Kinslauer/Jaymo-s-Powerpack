@@ -93,6 +93,10 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (RangedTactics.brainStep(mob)) {
+			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
+			return true;
+		}
 		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {
 			// (0.7.175) what MCA's screen shows of a ruler or a guard
 			Standing.update(level, w);
@@ -125,6 +129,11 @@ public final class Workers {
 				Hermits.step(level, e);
 			}
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
+		}
+		if (Barbarians.villagerRole(w.role())) {
+			// (0.7.184) a camp's MCA villager keeps its folk's ranged ways: rocks, pistols, dynamite (their legs, for a bombardier's lobbing)
+			Javelins.tick(level, w);
+			return Pirates.villagerStep(level, w);
 		}
 		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
 			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob) || Downed.helping(mob)) {

@@ -90,7 +90,7 @@ public final class CostumeClient {
 	}
 
 	/** (0.12.3) Asks the server to take the mask off or put it back on (the key and the designer's button). */
-	static void toggleMask() {
+	public static void toggleMask() {
 		ClientPlayNetworking.send(new CostumeNet.ToggleMask());
 	}
 
@@ -198,6 +198,17 @@ public final class CostumeClient {
 			Identifier suitPrimary = CostumeModels.texture("suit", cut, slim, false), suitSecondary = CostumeModels.texture("suit", cut, slim, true);
 			renderColoredCutoutModel(suit, suitPrimary, poseStack, collector, lightCoords, state, primary, 1);
 			renderColoredCutoutModel(suit, suitSecondary, poseStack, collector, lightCoords, state, secondary, 1);
+			if (design.cut() == CostumeDesign.Cut.GI) {
+				// (0.15.147) an Earthling's wraps over the gi's wristbands, lit while a Z Fighter's ki flares (KingdomsWraps)
+				int wraps = KingdomsWraps.of(state);
+				if (wraps != KingdomsWraps.NONE) {
+					renderColoredCutoutModel(suit, KingdomsWraps.SKIN, poseStack, collector, lightCoords, state, -1, 2);
+				}
+				if (wraps == KingdomsWraps.LIT) {
+					collector.order(3).submitModel(suit, state, poseStack, RenderTypes.eyes(KingdomsWraps.GLOW), lightCoords, OverlayTexture.NO_OVERLAY, -1,
+						null, state.outlineColor);
+				}
+			}
 			// (0.15.34) the skin under what the suit covers isn't drawn (CostumeCover)
 			CostumeCover.mark(state, this.renderer, suitPrimary, suitSecondary);
 			CostumeModels.Worn mask = this.models.mask(design.mask());
