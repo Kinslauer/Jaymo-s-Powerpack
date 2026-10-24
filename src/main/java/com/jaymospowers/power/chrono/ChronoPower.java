@@ -137,6 +137,7 @@ public final class ChronoPower implements Power {
 		StasisField.registerLocks();
 		ChronoSpeed.register();
 		ChronoEchoes.init();
+		ChronoDirectives.init();
 		StoppedClockItem.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
@@ -246,6 +247,7 @@ public final class ChronoPower implements Power {
 		// the echoes go with the power, and so does everything time remembered
 		ChronoEchoes.fadeAll(player);
 		ChronoMemory.forget(player);
+		ChronoDirectives.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];
@@ -259,7 +261,7 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.owe(player);
 	}
 
-	/** Time Flow: in and out (Timeless and corrupted both). */
+	/** Time Flow: in and out (Timeless). */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down) {

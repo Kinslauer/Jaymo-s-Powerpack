@@ -82,22 +82,38 @@ final class ChronoEchoFight {
 	/** Whether it has dropped below {@link #BLINK_BELOW} this appearance (the blink is rolled once, on the way down). */
 	private boolean belowHalf;
 
+	/** (0.15.143) A bound echo's fight, on its owner's side: no Nether toughening, no bar, no blinking away, and Overclock drags only monsters. */
+	private final boolean ally;
+
 	ChronoEchoFight(ChronoEcho echo) {
+		this(echo, false);
+	}
+
+	ChronoEchoFight(ChronoEcho echo, boolean ally) {
 		this.echo = echo;
+		this.ally = ally;
+	}
+
+	boolean ally() {
+		return this.ally;
 	}
 
 	/** Each server tick while it's in the Nether. */
 	void tick(ServerLevel level) {
-		toughen();
+		if (!this.ally) {
+			toughen();
+		}
 		record();
 		@Nullable ServerPlayer owner = this.echo.owner() == null ? null : level.getServer().getPlayerList().getPlayer(this.echo.owner());
 		int fx = ChronoFx.style(owner);
 		LivingEntity target = this.echo.getTarget();
 		boolean fighting = target != null && target.isAlive();
-		updateBar(level, fighting);
+		if (!this.ally) {
+			updateBar(level, fighting);
+		}
 		int now = this.echo.tickCount;
 		float health = this.echo.getHealth() / this.echo.getMaxHealth();
-		if (health < BLINK_BELOW && !this.belowHalf) {
+		if (!this.ally && health < BLINK_BELOW && !this.belowHalf) {
 			this.belowHalf = true;
 			if (this.echo.getRandom().nextFloat() < BLINK_CHANCE) {
 				end();
@@ -263,6 +279,7 @@ final class ChronoEchoFight {
 	private void drag(ServerLevel level, int fx) {
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, this.echo.getBoundingBox().inflate(OVERCLOCK_DRAG_RADIUS),
 			e -> e != this.echo && e.isAlive() && !e.isSpectator() && !(e instanceof ChronoEcho)
+				&& !(this.ally && !(e instanceof net.minecraft.world.entity.monster.Enemy))
 				&& e.distanceToSqr(this.echo) <= OVERCLOCK_DRAG_RADIUS * OVERCLOCK_DRAG_RADIUS)) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, OVERCLOCK_DRAG, false, false, true), this.echo);
 		}
