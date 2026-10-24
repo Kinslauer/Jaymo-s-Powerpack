@@ -2752,3 +2752,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 ## 0.15.154
 - Kingdoms 0.7.190: guards make way for quest carriers whatever their ruler's temper, and walk you to the king or queen
   when you ask for an audience (if your good name allows).
+
+## 0.15.157: powers are handed down through a lineage (Kingdoms 0.7.192)
+- Kingdoms' Lineage (living on as your child) takes your power away and hands it down: `Affinity.passDown` (called by
+  reflection from Kingdoms' `PowersCompat`) clears the power, restarts the 3-5 day awakening and stores it as
+  `Affinity.INHERITED`. Andy: "the power you had is given a high affinity to your child, they still have to awaken it
+  themselves". At the awakening an inherited power wins over a calling and an affinity, fated or not, and is then cleared.
+- Compile-checked; not playtested.

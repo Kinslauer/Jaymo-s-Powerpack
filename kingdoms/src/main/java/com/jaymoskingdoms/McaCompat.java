@@ -198,6 +198,42 @@ public final class McaCompat {
 		return LOADED && McaBridge.family(villager, player);
 	}
 
+	/** (0.7.184) {@code villager} is {@code player}'s own child in MCA's family tree ({@link Lineage}); never without MCA. */
+	static boolean childOf(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.childOf(villager, player);
+	}
+
+	/** (0.7.184) An MCA village: its middle and its name. */
+	record Town(BlockPos center, String name) {
+	}
+
+	/** (0.7.184) Every MCA village in {@code level} ({@link Elders}); none without MCA. */
+	static List<Town> towns(ServerLevel level) {
+		return LOADED ? McaBridge.towns(level) : List.of();
+	}
+
+	/** (0.7.184) An MCA letter to player {@code to} (online or not); nothing without MCA. */
+	static void letter(ServerLevel level, UUID to, net.minecraft.network.chat.Component text) {
+		if (LOADED) {
+			McaBridge.letter(level, to, text);
+		}
+	}
+
+	/** (0.7.184) {@code villager} is a teen or grown, old enough to live on as ({@link Lineage}). */
+	static boolean teenOrOlder(Villager villager) {
+		return LOADED && McaBridge.teenOrOlder(villager);
+	}
+
+	/** (0.7.184) Puts {@code stack} in an MCA villager's pack; what doesn't fit (all of it, for anyone else) comes back. */
+	static net.minecraft.world.item.ItemStack stow(PathfinderMob villager, net.minecraft.world.item.ItemStack stack) {
+		return LOADED ? McaBridge.stow(villager, stack) : stack;
+	}
+
+	/** (0.7.184) {@link McaBridge#takeOver}: the villager left in {@code player}'s old body, or null. */
+	static @Nullable PathfinderMob takeOver(ServerPlayer player, Villager child, long elderSince) {
+		return LOADED ? McaBridge.takeOver(player, child, elderSince) : null;
+	}
+
 	/** (0.7.19) {@link #kin}: no kin, kin (family), partners (married, engaged or promised). */
 	static final int STRANGERS = 0, KIN = 1, PARTNER = 2;
 
