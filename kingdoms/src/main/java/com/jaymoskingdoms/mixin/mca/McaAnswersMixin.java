@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Rulers;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.7.10) "Explain your tail" ({@link Tails#ANSWER}, added to MCA's {@code main} menu by our dialogue data) shows only
  * to a Warrior-born Z Fighter who hasn't yet told this villager, once they're close enough friends.
- * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) shows only to a villager on a throne.
+ * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) shows only to a villager on a throne, (0.7.184) or a realm's guard.
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
@@ -33,8 +34,8 @@ abstract class McaAnswersMixin {
 			// a plain Heartlander has no blood to tell of
 			cir.getReturnValue().remove(VillagerHeritage.ANSWER);
 		}
-		if ("main".equals(name) && !Rulers.is(villager)) {
-			// (0.7.138) only a ruler holds court
+		if ("main".equals(name) && !Rulers.is(villager) && !Audiences.canAsk(villager)) {
+			// (0.7.138) only a ruler holds court; (0.7.184) a guard takes you to them
 			cir.getReturnValue().remove(Rulers.ANSWER);
 		}
 		if ("main".equals(name) && Introductions.knows(player, villager)) {

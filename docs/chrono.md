@@ -512,9 +512,27 @@ file), never as if Uospag endorsed us.
 | Modern guns | TaCZ's default gunpack loads again but is only found in the future: its guns, ammo and attachments are in no creative tab (so not in JEI) and never craftable. One you get out of the future is yours to keep. | | `armory/TaczGuns` |
 | No sun burn | Mobs never burn by day in the future. | | `mixin/FutureSunMixin` |
 
-Outside the island (x -3584..5631, z -3584..3583) is the map's own flat sea (same layers as its superflat). The map's
+Outside the island (x -3584..5631, z -3584..3583) was the map's own flat sea until 0.15.149; now it's overworld-shaped
+land in the `future_ruins` biome, built over by The Lost Cities (below). The map's
 chunks are DataVersion 3120 (1.19.2) though CurseForge tags it 26.3; vanilla upgrades each on first load, so a chunk's
 first visit is slower. Not playtested in-game yet.
+
+### 0.15.149: Lost Cities beyond the island
+
+Andy picked "ship it unchanged and point it at the future". The Lost Cities (MIT, McJty; McJty's own 26.3 Fabric
+build, in `packMods`) builds its `ancient` profile (overgrown, 90% of buildings ruined, rubble, vines) in
+`jaymospowers:future` only.
+
+| Piece | What it does | Class |
+|---|---|---|
+| Terrain | The future's generator is now `minecraft:noise` with overworld noise and the fixed `future_ruins` biome, instead of flat stone under 20 blocks of water (Lost Cities needs real ground heights). | `dimension/future.json` |
+| Which dimension | Each server start calls Lost Cities' `ILostCities.registerDimension(overworld, future, "ancient")` by reflection (it forgets between starts). Its city feature is added to `future_ruins` only, not by tagging the biome `is_overworld`, so other mods' overworld features and structures stay out. | `future/FutureCities` |
+| Its own dimension | Lost Cities' `lostcities:lostcity` dimension still exists, but its way in (a bed on two special blocks ringed by six skulls) needs bedrock under the bed now. | `future/FutureCities` |
+| Decay | With Lost Cities loaded, every newly built chunk decays like the island's (smashed glass, dead lights, dead lawns, moss, vines, cobwebs). | `future/FutureRuins` |
+
+Without Lost Cities the future beyond the island is bare ashen land. Worlds whose future was already visited keep the
+flat-sea chunks they have; the new land starts where nobody has been. Where the island's own sea meets new land at the
+region edge there's a seam. Not playtested in-game yet: tune `PROFILE` (try `wasteland` or `default`) after a look.
 
 ## 0.11.62: Overclock's speed-force streak, run and glyphs
 

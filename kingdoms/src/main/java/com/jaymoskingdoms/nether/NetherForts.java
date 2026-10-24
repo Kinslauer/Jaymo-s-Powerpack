@@ -606,7 +606,7 @@ public final class NetherForts {
 	}
 
 	/** The fit {@link #site} nearest column ({@code x}, {@code z}), looking out to SEARCH_RADIUS. Null if none. */
-	private static @Nullable BlockPos nearSite(ServerLevel nether, int x, int z, int nearY, int radius, boolean anywhere, boolean hornkin) {
+	static @Nullable BlockPos nearSite(ServerLevel nether, int x, int z, int nearY, int radius, boolean anywhere, boolean hornkin) {
 		for (int ring = 0; ring <= SEARCH_RADIUS; ring += SEARCH_STEP) {
 			for (int dx = -ring; dx <= ring; dx += SEARCH_STEP) {
 				for (int dz = -ring; dz <= ring; dz += SEARCH_STEP) {
