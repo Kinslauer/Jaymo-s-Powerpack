@@ -8,4 +8,6 @@ public final class GiantState extends LivingEntityRenderState {
 	float leftAttack, rightAttack;
 	boolean stamp;
 	boolean aggressive;
+	/** How hard it's flinching from a hit: 1 just struck, down to 0. */
+	float flinch;
 }
