@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * villagers he meets (they stop and look at him, glad of it); his escort of {@link #ESCORT_LEAST} to {@link #ESCORT_MOST}
  * guards walks in pairs behind him; with fewer than that about he dares not go out at all, unless one of his sworn
  * wardens among the players is at his side ({@link Wardens}). Before dusk he heads back to the seat, takes his throne again, and his guards go
- * back to their posts. A fight comes first: a ruler or guard with a foe drops all this until it's over.
+ * back to their posts. (0.7.181) First they hold morning court on the throne ({@link RoyalDress#MORNING_COURT_TO}). A fight comes first: a ruler or guard with a foe drops all this until it's over.
  */
 public final class Royals {
 	/** The day, by the Overworld's clock (ticks into the day): out after this, home from this on. */
@@ -84,7 +84,7 @@ public final class Royals {
 	 */
 	static boolean roundHours(ServerLevel level, Faction faction, PathfinderMob king) {
 		return daytime(level) && !Wardens.confined(level, faction, king) && Tempers.staysOut(level, faction)
-			&& (king instanceof Folk || timeOfDay(level) < Rulers.ROUND_TO);
+			&& timeOfDay(level) >= RoyalDress.MORNING_COURT_TO && (king instanceof Folk || timeOfDay(level) < Rulers.ROUND_TO);
 	}
 
 	/** (0.5.26) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */

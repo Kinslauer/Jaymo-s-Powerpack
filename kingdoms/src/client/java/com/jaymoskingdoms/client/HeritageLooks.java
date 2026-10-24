@@ -61,8 +61,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Nightborn:</b> shadow soaking the hands with stars in it; moon-silver eyes that glow by day only; dark wisps
  * at night only. (0.7.88) A Nightborn vampire's ({@link NightbornBlood#starlit}): the shadow deep red, the eyes red-silver
  * at night (moon-silver by day, as ever; its own red eyes give way to them), and blood mist for the wisps.</li>
- * <li><b>Earthling:</b> training wraps round the fists, and a ki glow over them only while near death has made it flare
- * ({@code EarthlingSurge}); no eye glow, no particles.</li>
+ * <li><b>Earthling:</b> training wraps round the fists, and (0.7.184: a Z Fighter's only) a ki glow over them only while
+ * near death has made it flare ({@code EarthlingSurge}); no eye glow, no particles.</li>
  * <li><b>Stormborn:</b> (0.7.106) forked lightning-scar lines up the forearms, pale blue, dim until a thunderstorm makes
  * them flicker bright; sparks then. Plain eyes.</li>
  * <li><b>Dawnborn:</b> (0.7.106) a gold sun-ring on the back of each hand; warm gold eyes that glow by day only.</li>
@@ -212,9 +212,24 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			glow = (flags & Heritage.LOOK_UNSEEN) != 0 ? 0 : SYLVAN_SNEAK_GLOW;
 			lit &= glow != 0;
 		} else if (kind == Kind.EARTHLING) {
-			glow = EarthlingSurge.surging(entity) ? -1 : 0;
+			// (0.7.184) only a Z Fighter's fists light up; any other Earthling just has the wraps
+			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
 		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
+	}
+
+	/**
+	 * (0.7.184) For Jaymo's Powers' gi (Andy: "Can you add the wraps to the gi?"), read by reflection, so it takes the
+	 * render state as an Object and never changes its signature: 0 when the player being drawn isn't an Earthling, 1 for
+	 * the wraps alone, 2 with a Z Fighter's ki glow over them. Powers draws them on the gi itself, in its pose, since under
+	 * a costume this layer draws no marks.
+	 */
+	public static int earthlingWraps(Object state) {
+		Look look = state instanceof AvatarRenderState avatar ? avatar.getData(KEY) : null;
+		if (look == null || look.kind() != Kind.EARTHLING) {
+			return 0;
+		}
+		return look.glow() != 0 ? 2 : 1;
 	}
 
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */
@@ -268,9 +283,14 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
 		Kind kind = look.kind();
-		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(look.blood() ? BLOOD_SKIN : kind.skin[look.variant()]), lightCoords,
-			OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
-		if (look.glow() != 0) {
+		// (0.7.184) under a costume no marks or glow either (Andy: the Earthling's ki glow "costume clipping is back"):
+		// they're drawn on the plain body's pose, the costume on MCA's, so where the cut leaves skin bare (the gi's
+		// forearms) the marks slid out through its sleeves in motion
+		if (!armFinsCovered) {
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(look.blood() ? BLOOD_SKIN : kind.skin[look.variant()]),
+				lightCoords, OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+		}
+		if (look.glow() != 0 && !armFinsCovered) {
 			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(look.blood() ? BLOOD_GLOW : kind.glow[look.variant()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 		}
