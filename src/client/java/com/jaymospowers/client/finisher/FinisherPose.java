@@ -217,6 +217,35 @@ public final class FinisherPose {
 			k(40, 0.02F, -10, 0, -1.5F, -0.3F, 0.1F, -1.3F, 0.3F, -0.1F, -0.2F, 0.35F, 0.3F, 60),
 			k(43, 0.0F, -4, 0, -0.9F, -0.1F, 0.05F, -0.6F, 0, -0.05F, -0.1F, 0.2F, 0.35F, 30),
 			rest(46, 0)});
+		// (0.15.148) Ball and Chain: the flail held up overhead and whirled (the handle twirling in the hand; the ball and
+		// chain are LashRenderer's), brought down on them, whirled again, and down with the whole body behind it
+		Key whirl = k(0, -0.03F, -6, 0, -3.0F, 0, 0.35F, -0.5F, 0.1F, -0.3F, -0.25F, 0.25F, 0.3F, 0);
+		Key crash = k(0, 0.32F, 40, 0, -0.45F, -0.3F, 0, -0.5F, 0.3F, 0, -0.85F, 0.7F, 0.6F, 60);
+		KEYS.put(Finishers.Kind.FLAIL, new Key[] {
+			rest(0, 0),
+			at(whirl, 4), twirl(whirl, 9, 180), twirl(whirl, 14, 360),
+			at(crash, 18), at(crash, 22),
+			twirl(whirl, 26, 0), twirl(whirl, 30, 180), twirl(whirl, 33, 360),
+			k(36, 0.4F, 50, 0, -0.35F, -0.35F, 0, -0.4F, 0.35F, 0, -1.0F, 0.85F, 0.65F, 65),
+			k(41, 0.38F, 46, 0, -0.4F, -0.35F, 0, -0.42F, 0.35F, 0, -1.0F, 0.85F, 0.62F, 65),
+			rest(46, 0)});
+		// (0.15.148) Garrotte: the whip drawn back and cracked out round their neck, then both hands on the lash, leaning
+		// back on it, feet braced, three hauls, the last one hard
+		Key haul = k(0, 0.12F, -12, 0, -1.0F, -0.15F, 0, -1.1F, 0.25F, 0, -0.45F, 0.55F, 0.45F, 0);
+		Key tight = k(0, 0.2F, -22, 0, -0.55F, -0.2F, 0, -0.65F, 0.3F, 0, -0.6F, 0.75F, 0.5F, 0);
+		KEYS.put(Finishers.Kind.WHIP, new Key[] {
+			rest(0, 0),
+			k(5, 0.0F, -6, -15, -2.7F, -0.2F, 0.2F, -0.4F, 0, -0.1F, -0.15F, 0.2F, 0.3F, 0),
+			k(Finishers.Kind.WHIP_CRACK, 0.05F, 18, 5, -1.0F, -0.1F, 0, -0.5F, 0, -0.1F, -0.4F, 0.4F, 0.5F, 0),
+			at(haul, 14), at(haul, 20), at(tight, 24), at(haul, 30), at(haul, 37), at(tight, 42), at(haul, 48), at(haul, 53),
+			k(58, 0.28F, -30, 10, -0.3F, -0.25F, 0, -0.4F, 0.35F, 0, -0.7F, 0.9F, 0.5F, 0),
+			at(haul, 61), rest(64, 0)});
+	}
+
+	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
+	private static Key twirl(Key key, float t, float grip) {
+		return k(t, key.sink(), key.pitch(), key.twist(), key.rax(), key.ray(), key.raz(), key.lax(), key.lay(), key.laz(), key.rightLeg(),
+			key.leftLeg(), key.head(), grip);
 	}
 
 	private static Key turned(Key key, float t, float twist) {

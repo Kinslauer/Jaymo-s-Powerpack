@@ -175,7 +175,20 @@ public final class Finishers {
 		 * (0.15.146) Stabbed Through, everyone's: the blade driven down through them, then stuck, tugged at three times
 		 * and wrenched free ({@link #after}, once they're dead).
 		 */
-		IMPALE(46, new int[] {12}, Strike.STAB, new int[] {21, 28, 34, 40});
+		IMPALE(46, new int[] {12}, Strike.STAB, new int[] {21, 28, 34, 40}),
+		/**
+		 * (0.15.148) Ball and Chain, a flail's, everyone's: the ball whirled up overhead on its chain and brought down on
+		 * them, whirled again, and down once more with everything behind it.
+		 */
+		FLAIL(46, new int[] {18, 36}, Strike.CRUSH),
+		/**
+		 * (0.15.148) Garrotte, the leather whip's, everyone's: the lash cracked round their neck ({@link #WHIP_CRACK}), then
+		 * hauled tight, leaning back on it, until the neck goes.
+		 */
+		WHIP(64, new int[] {24, 42, 58}, Strike.SNAP);
+
+		/** (0.15.148) The tick the whip's crack lands round the neck. */
+		public static final int WHIP_CRACK = 8;
 
 		public final int length;
 		public final int[] beats;
@@ -328,6 +341,13 @@ public final class Finishers {
 		if (stack.isEmpty()) {
 			return Kind.FIST;
 		}
+		// (0.15.148) the flail (before "flail" makes it a club) and the whip have their own
+		if (com.jaymospowers.armory.Lash.isFlail(stack)) {
+			return Kind.FLAIL;
+		}
+		if (com.jaymospowers.armory.Lash.isWhip(stack)) {
+			return Kind.WHIP;
+		}
 		if (gun(stack)) {
 			return Kind.GUN;
 		}
@@ -415,6 +435,10 @@ public final class Finishers {
 		if (kind == Kind.FIST) {
 			// (0.15.146) not a weapon: a tool that wears slams (a fishing rod, a shovel); a torch or a loaf finishes nobody
 			return stack.isDamageableItem() ? Kind.SLAM : null;
+		}
+		if (kind == Kind.FLAIL || kind == Kind.WHIP) {
+			// (0.15.148) Andy: "add a flail and whip execution": theirs for everyone, Executioner or not
+			return kind;
 		}
 		if (!weaponsUnlocked(player)) {
 			return basic(kind);
@@ -669,6 +693,10 @@ public final class Finishers {
 		TARGETED.put(body.getUUID(), player.getUUID());
 		player.stopUsingItem();
 		player.setSprinting(false);
+		if (kind == Kind.FLAIL) {
+			// (0.15.148) the ball's out on its chain (drawn by LashRenderer), not in the hand
+			com.jaymospowers.armory.Lash.flailThrown(player, true);
+		}
 		root(player, true);
 		if (body instanceof Player || !Downed.isDowned(body)) {
 			// (0.15.114) a crippled one is held where it is too
@@ -718,6 +746,11 @@ public final class Finishers {
 				mob.getNavigation().stop();
 				mob.setTarget(null);
 				mob.setDeltaMovement(0.0, Math.min(0.0, mob.getDeltaMovement().y), 0.0);
+			}
+			if (kind == Kind.WHIP && t == Kind.WHIP_CRACK && present) {
+				// (0.15.148) the lash cracks round the neck
+				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.9F, 1.9F);
+				level.playSound(null, body.getX(), body.getY() + 0.3, body.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.1F);
 			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
@@ -872,13 +905,18 @@ public final class Finishers {
 			case BOW -> SoundEvents.ARROW_SHOOT;
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FIST -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
-			case BLUNT, STAFF, SLAM -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case WHIP -> SoundEvents.FISHING_BOBBER_THROW;
 			default -> SoundEvents.ARMOR_EQUIP_IRON.value();
 		};
 	}
 
 	/** It's over (played out, or stopped): the marks off, the roots gone. */
 	private static void end(ServerPlayer player, LivingEntity body) {
+		Finish finish = of(player);
+		if (finish != null && finish.type() == Kind.FLAIL) {
+			com.jaymospowers.armory.Lash.flailThrown(player, false);
+		}
 		player.removeAttached(FINISHING);
 		root(player, false);
 		TARGETED.remove(body.getUUID());

@@ -2768,6 +2768,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     (Touch'n Motion's riding pose), which would have brought Fresh Animations back over ours. So `EmfCompat.hold` also
     puts EMF's own per-player pause (`pauseAllCustomAnimationsForEntity`) on a posed player, which the core never
     lifts, and takes it off when the pose ends. It only removes pauses it put on. Compile-checked; not playtested.
+- **0.15.148, the flail and the leather whip (Web Whip's mechanics on weapons):** Andy: "Can these mechanics replace
+  the flail? And maybe add a single leather whip?" (`armory/Lash`, synced `Lash.State` player attachment; the head's
+  path is worked out the same on both sides, so `client/armory/LashRenderer` draws the chain/lash from the hand with
+  no lag). Balkon's flail (`mixin/WeaponModFlailMixin`, `WeaponModMeleeUseMixin`) no longer throws its ball on
+  right-click or on every hit: hold use and the ball whirls on its chain over your head, faster over 1.5 s, clipping
+  what it passes; let go and it's hauled overhead and brought down where you look (to 4.2 blocks), up to 1.7x the
+  flail's damage at full spin, splashing whoever's beside, dust and a jolt. The new leather whip (3 leather, string,
+  stick) cracks out to 7 blocks (4 damage); keep holding to wrap and hold what it cracked; let go to haul a light
+  catch (up to pig/player size) over your head into the ground (6 damage), or yank a heavy one off its feet toward
+  you, slowed 2 s. No blocks broken (towns). Then Andy: "add a flail and whip execution, the whip should also allow
+  you to climb up a wall rappel style, trusting that you hooked the edge of an up to 7 block wall": `Finishers.Kind`
+  FLAIL (Ball and Chain: whirled overhead, two blows, the ball and chain drawn by LashRenderer) and WHIP (Garrotte: cracked
+  round the neck, hauled tight three times), everyone's, Executioner or not. Whip cracked at a wall and held: hooked over
+  a top up to 7 blocks above your feet (`Lash.HOOK`); you walk up it (client-side, `LashRenderer.climb`) and over the top,
+  Sneak lowers you, letting go drops you (fall damage as ever). Compile-checked; not playtested.
 - **0.15.151, the Flame Avatar:** Andy: an Emberborn who spends too many of their years in the Nether is consumed by
   their own fire and becomes an avatar of flame (the end of failing to control it). `power/ember/FlameAvatar` counts
   an Emberborn's time in the Nether (net: a quarter of it cools off elsewhere) and at 7 in-game days the fire takes
