@@ -620,9 +620,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		renderer.submit((S) state, poseStack, collector, camera);
 	}
 
-	/** (0.5.23) How many arrows to draw in the body (null for none). */
-	private static @Nullable Integer arrows(CorpseEntity corpse) {
+	/** (0.5.23) How many arrows to draw in the body and where (null for none). */
+	private static int @Nullable [] arrows(CorpseEntity corpse) {
 		int total = com.jaymoskitchen.archery.StuckArrows.total(corpse.arrows());
-		return total > 0 ? total : null;
+		return total > 0 ? new int[] {total, corpse.getId()} : null;
 	}
 }

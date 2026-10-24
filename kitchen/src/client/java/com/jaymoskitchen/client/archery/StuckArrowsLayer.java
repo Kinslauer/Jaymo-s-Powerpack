@@ -28,8 +28,8 @@ import net.minecraft.util.RandomSource;
  * layer only works on the player model, so this one walks any model's parts (with their parents' poses).
  */
 public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
-	/** On a living body's render state: how many arrows to draw in it. */
-	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:stuck_arrows");
+	/** On a living body's render state: {how many arrows to draw in it, the seed that places them (the entity's id)}. */
+	public static final RenderStateDataKey<int[]> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:stuck_arrows");
 
 	private final ArrowModel arrow;
 	private final ArrowRenderState arrowState = new ArrowRenderState();
@@ -43,16 +43,17 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-		Integer count = state.getData(KEY);
-		if (count == null || count <= 0 || state.isInvisible) {
+		int[] stuck = state.getData(KEY);
+		if (stuck == null || stuck[0] <= 0 || state.isInvisible) {
 			return;
 		}
+		int count = stuck[0];
 		ModelPart root = this.getParentModel().root();
 		List<ModelPart[]> parts = this.paths.computeIfAbsent(root, StuckArrowsLayer::walk);
 		if (parts.isEmpty()) {
 			return;
 		}
-		RandomSource random = RandomSource.createThreadLocalInstance(state.id);
+		RandomSource random = RandomSource.createThreadLocalInstance(stuck[1]);
 		for (int i = 0; i < count; i++) {
 			ModelPart[] path = parts.get(random.nextInt(parts.size()));
 			ModelPart part = path[path.length - 1];
