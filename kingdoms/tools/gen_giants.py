@@ -1,6 +1,6 @@
 """Skins for the Aether's Giants (kingdoms/src/main/java/com/jaymoskingdoms/remnants/AetherGiant.java, model
-client/remnants/GiantModel.java, 128x128): our own, painted here in vanilla's manner (flat shade ramps, a little noise,
-no gradients across a face). One per element: Highfield (pale sky-stone and moss, quartz shards), Magnetic (dark
+client/remnants/GiantModel.java, 256x128): our own, painted here in vanilla's manner (flat shade ramps, a little noise,
+no gradients across a face). (0.7.182) Laid out for Andy's titan build (drawn with Gemini). One per element: Highfield (pale sky-stone and moss, quartz shards), Magnetic (dark
 lodestone with rust veins, violet ore shards), Arctic (packed ice and frost, deep blue ice shards), Irradiated (mossy
 stone split by glowing Ambrosium cracks, lime shards).
 Run from kingdoms/: python3 tools/gen_giants.py"""
@@ -29,17 +29,17 @@ ELEMENTS = {
 
 # the model's boxes: (u, v, w, h, d, what)
 BOXES = [
-    (0, 0, 20, 14, 12, 'skin'),      # chest
-    (0, 26, 16, 6, 10, 'skin'),      # hips
-    (64, 0, 8, 8, 8, 'head'),        # head
-    (96, 0, 9, 2, 2, 'brow'),        # brow
-    (0, 42, 6, 26, 8, 'skin'),       # arm
-    (28, 42, 7, 6, 9, 'fist'),       # fist
-    (0, 76, 8, 5, 9, 'shoulder'),    # shoulder stone
-    (60, 42, 7, 14, 7, 'skin'),      # leg
-    (96, 16, 4, 10, 4, 'shard'),     # back shards
-    (112, 16, 2, 5, 2, 'shard'),     # crown shards
+    (0, 0, 28, 30, 16, 'skin'),      # torso
+    (88, 28, 26, 24, 4, 'shoulder'), # back plating
+    (88, 0, 14, 14, 14, 'head'),     # skull
+    (144, 0, 16, 4, 6, 'brow'),      # brow crest
+    (144, 10, 12, 6, 10, 'fist'),    # jaw
+    (0, 46, 10, 32, 10, 'skin'),     # arm
+    (40, 46, 10, 22, 10, 'skin'),    # leg
 ]
+# where each face is painted: the skull's front (14x14) and the jaw's front (12x6)
+HEAD_FACE = (88 + 14, 0 + 14)
+JAW_FACE = (144 + 10, 10 + 10)
 
 
 def faces(u, v, w, h, d):
@@ -55,7 +55,7 @@ def pick(ramp, k):
 def paint(element, seed):
     e = ELEMENTS[element]
     rnd = random.Random(seed)
-    img = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
+    img = Image.new('RGBA', (256, 128), (0, 0, 0, 0))
     px = img.load()
     for (u, v, w, h, d, what) in BOXES:
         for face, (fx, fy, fw, fh) in faces(u, v, w, h, d).items():
@@ -86,17 +86,18 @@ def paint(element, seed):
                         if what not in ('head',) and (rnd.random() < e['accent_odds'] or (x == vein_x and face in ('north', 'south') and what == 'skin')):
                             c = pick(e['accent'], rnd.randrange(len(e['accent'])))
                     px[fx + x, fy + y] = c
-    # the face: on the head's north face (8x8 at 72,8): a dark brow shadow, glowing eyes, a grim mouth
-    hx, hy = 64 + 8, 0 + 8
+    # the face, on the skull's front: a dark brow shadow over glowing eyes, deep cheeks; the mouth on the jaw's front (only its bottom 2 rows show below the skull)
+    hx, hy = HEAD_FACE
     dark = pick(e['skin'], -1)
-    for x in range(8):
-        px[hx + x, hy + 2] = dark
-    for ex in (1, 2, 5, 6):
-        px[hx + ex, hy + 3] = e['eyes'] + (255,)
-    px[hx + 1, hy + 4] = dark
-    px[hx + 6, hy + 4] = dark
-    for x in range(2, 6):
-        px[hx + x, hy + 6] = (24, 22, 26, 255)
+    for x in range(1, 13):
+        px[hx + x, hy + 5] = dark
+    for ex in (2, 3, 4, 9, 10, 11):
+        px[hx + ex, hy + 6] = e['eyes'] + (255,)
+    for ex in (2, 4, 9, 11):
+        px[hx + ex, hy + 7] = dark
+    jx, jy = JAW_FACE
+    for x in range(2, 10):
+        px[jx + x, jy + 4] = (24, 22, 26, 255)
     return img
 
 
