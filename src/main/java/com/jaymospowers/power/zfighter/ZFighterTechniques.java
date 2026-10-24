@@ -191,7 +191,7 @@ final class ZFighterTechniques {
 
 	/** Whether C (in Super 3) raises a Spirit Bomb: learned and ready. */
 	static boolean canRaise(ServerPlayer player, ZFighterPower.Live live) {
-		return live.form == ZFighterTraining.FORMS && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)
+		return live.form >= ZFighterTraining.FORMS && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)
 			&& ZFighterPower.ready(player, ZFighterState.SPIRIT);
 	}
 
@@ -221,7 +221,7 @@ final class ZFighterTechniques {
 		if (live.spiritFrom < 0) {
 			return;
 		}
-		if (live.form != ZFighterTraining.FORMS || !player.isAlive()) {
+		if (live.form < ZFighterTraining.FORMS || !player.isAlive()) {
 			cancel(player, live);
 			return;
 		}
