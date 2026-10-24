@@ -47,3 +47,20 @@ GPL-3.0. Recommended: an original mod (our own code, art and buildings) that onl
    every kingdom you join keeps its own standing for you as well (rank, trust).
 3. **NPC kingdoms fight on their own:** autonomous battles between kingdoms; intervening wins or loses you
    reputation with each side.
+
+## Ranged tactics and the camps' MCA villagers (Kingdoms 0.7.183)
+Andy: "Villager and other ranged ai should not keep firing from the same position if their attacks fail, instead they
+should reposition or try other tactics. Also rework the bombardier and other humanoid mobs that arent mca villagers
+back into the system. I want full integration."
+- `RangedTactics` is the one shared helper. Every projectile a ranged mob looses is followed; one that doesn't hit
+  the mob's target (short, wide, a wall, a raised shield, a friend in the way), or a shooter that wants to shoot but
+  can't see its target for 2 s, is a failed shot. 3 in a row and it changes tactics, one more each time that doesn't
+  help: step sideways, find a spot with a clear line, close in or back off, flank, wait in cover; at the end of the
+  list a folk or villager puts the bow away and fights hand to hand for 8 s. Tuning is in the constants at its top.
+  Covers folk archers, musketeers, javelin throwers, pistols, bombardiers, Hornkin hurlers, MCA guards and camp
+  villagers, skeletons and pillagers. Not covered: cannons (fixed), spells, piglins.
+- The camps' "other humanoids" come back into the MCA system: a cove's gunners and bombardiers ashore become MCA
+  villagers like deckhands and raiders (gunner: cutlass in hand, pistol off hand; bombardier: dynamite off hand), keep
+  their pistols, dynamite, shouts and drops; camp raiders as villagers throw rocks again; downed camp members are tended
+  by their own camp's villagers (never by a realm's, nor a realm's by a camp's). Left as folk: chiefs, captains, orcs,
+  goblins, ship crews and raid war bands (boss, species or ship-station AI that MCA's body cannot host).

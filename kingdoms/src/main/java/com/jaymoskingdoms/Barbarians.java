@@ -149,14 +149,18 @@ public final class Barbarians {
 		return !(e instanceof Folk) && e instanceof Worker w && villagerRole(w.role());
 	}
 
-	/** (0.7.148) The camp roles MCA's villagers take: a barbarian, a pirate deckhand. */
+	/**
+	 * (0.7.148) The camp roles MCA's villagers take: a barbarian, a pirate deckhand. (0.7.183) Andy: "rework the bombardier
+	 * and other humanoid mobs that arent mca villagers back into the system. I want full integration": a cove's gunners
+	 * and bombardiers ashore too (their pistols and dynamite now run on a villager's body: {@code Pirates.villagerStep}).
+	 */
 	static boolean villagerRole(int role) {
-		return role == Folk.BARBARIAN || role == Pirates.DECKHAND;
+		return role == Folk.BARBARIAN || role == Pirates.DECKHAND || role == Pirates.GUNNER || role == Pirates.BOMBARDIER;
 	}
 
 	/** (0.7.148) What a camp's villager of {@code role} goes for: a raider's prey, or a pirate's. */
 	static boolean villagerPrey(int role, int camp, LivingEntity target) {
-		return role == Pirates.DECKHAND ? Pirates.prey(camp, target) : prey(camp, target);
+		return Pirates.isPirate(role) ? Pirates.prey(camp, target) : prey(camp, target);
 	}
 
 	/** It fights for a camp (a raider or the chief). */
@@ -328,12 +332,12 @@ public final class Barbarians {
 	 */
 	static boolean mayBecomeVillager(ServerLevel level, Folk folk) {
 		if (!villagerRole(folk.role()) || !folk.task().isEmpty() || folk.getTarget() != null || folk.isPassenger()
-			|| Downed.isDowned(folk) || Corsairs.isCrew(folk)) {
+			|| Downed.isDowned(folk) || Corsairs.isCrew(folk) || Assault.attacker(folk)) {
 			return false;
 		}
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, folk.factionId());
 		return camp != null && !camp.fallen() && camp.type() == FactionType.BARBARIAN && level.dimension() == Level.OVERWORLD
-			&& (folk.role() == Pirates.DECKHAND ? Camps.pirate(server, camp.id()) : Camps.BARBARIAN.equals(Camps.kind(server, camp.id())));
+			&& (Pirates.isPirate(folk.role()) ? Camps.pirate(server, camp.id()) : Camps.BARBARIAN.equals(Camps.kind(server, camp.id())));
 	}
 }

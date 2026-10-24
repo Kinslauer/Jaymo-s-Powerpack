@@ -18,6 +18,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -92,7 +93,7 @@ public final class Pirates {
 		"Patience", "Silver Herring", "Bountiful"};
 
 	/** Pirate → the game time his pistol is loaded again (kept in memory: a restart just loads it). */
-	private static final Map<Folk, Long> PISTOL = new WeakHashMap<>();
+	private static final Map<PathfinderMob, Long> PISTOL = new WeakHashMap<>();
 
 	private Pirates() {
 	}
@@ -241,7 +242,29 @@ public final class Pirates {
 
 	/** A pirate's own tick (from {@link Folk#customServerAiStep}): pistols at a foe close by, and shouts in a fight. */
 	static void tick(ServerLevel level, Folk folk) {
-		int role = folk.role();
+		fight(level, folk, folk.role());
+	}
+
+	/**
+	 * (0.7.183) A cove's gunner, deckhand or bombardier as one of MCA's villagers (they are ashore, not aboard): the same
+	 * pistols, shouts and dynamite as the folk's, from {@code Workers.step}. True if the villager's legs are taken
+	 * (a bombardier in his lobbing range holds his ground, and backs off from a foe who closes), the brain waiting.
+	 */
+	static boolean villagerStep(ServerLevel level, Worker w) {
+		PathfinderMob mob = w.mob();
+		int role = w.role();
+		if ((role != GUNNER && role != BOMBARDIER && role != DECKHAND) || mob.isSleeping() || mob.isBaby() || Downed.isDowned(mob) || mob.isPassenger()) {
+			return false;
+		}
+		fight(level, mob, role);
+		if (role == BOMBARDIER && lobbable(mob)) {
+			BOMBS.computeIfAbsent(mob, m -> new Bomb()).tick(level, mob);
+			return true;
+		}
+		return false;
+	}
+
+	private static void fight(ServerLevel level, PathfinderMob folk, int role) {
 		if (role != CAPTAIN && role != GUNNER && role != DECKHAND && role != BOMBARDIER) {
 			return;
 		}
@@ -274,7 +297,7 @@ public final class Pirates {
 	}
 
 	/** A pistol ball at {@code foe} (sparing his own side, as javelins do). */
-	private static void shoot(ServerLevel level, Folk folk, LivingEntity foe) {
+	private static void shoot(ServerLevel level, PathfinderMob folk, LivingEntity foe) {
 		Projectile ball = Javelins.WEAPONMOD_LOADED ? WeaponModJavelins.bullet(level, folk, PISTOL_DAMAGE) : null;
 		if (ball == null) {
 			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, Folk.firingWeapon(folk));
@@ -316,8 +339,7 @@ public final class Pirates {
 	 */
 	static final class Lob extends Goal {
 		private final Folk bomber;
-		private int reload;
-		private int backOff;
+		private final Bomb bomb = new Bomb();
 
 		Lob(Folk bomber) {
 			this.bomber = bomber;
@@ -326,20 +348,12 @@ public final class Pirates {
 
 		@Override
 		public boolean canUse() {
-			if (this.bomber.role() != BOMBARDIER || this.bomber.isSleeping()) {
-				return false;
-			}
-			LivingEntity foe = this.bomber.getTarget();
-			if (foe == null || !foe.isAlive()) {
-				return false;
-			}
-			double d = this.bomber.distanceTo(foe);
-			return d >= BOMB_NEAREST && d <= BOMB_FURTHEST;
+			return this.bomber.role() == BOMBARDIER && !this.bomber.isSleeping() && lobbable(this.bomber);
 		}
 
 		@Override
 		public void start() {
-			this.reload = Math.max(this.reload, 10 + this.bomber.getRandom().nextInt(BOMB_JITTER + 1));
+			this.bomb.start(this.bomber);
 		}
 
 		@Override
@@ -349,22 +363,51 @@ public final class Pirates {
 
 		@Override
 		public void tick() {
-			LivingEntity foe = this.bomber.getTarget();
-			if (foe == null || !(this.bomber.level() instanceof ServerLevel level)) {
+			if (this.bomber.level() instanceof ServerLevel level) {
+				this.bomb.tick(level, this.bomber);
+			}
+		}
+	}
+
+	/** Whether {@code bomber} has a foe in lobbing range ({@link #BOMB_NEAREST} to {@link #BOMB_FURTHEST}). */
+	static boolean lobbable(PathfinderMob bomber) {
+		LivingEntity foe = bomber.getTarget();
+		if (foe == null || !foe.isAlive()) {
+			return false;
+		}
+		double d = bomber.distanceTo(foe);
+		return d >= BOMB_NEAREST && d <= BOMB_FURTHEST;
+	}
+
+	/** A bombardier's reload and back-off timers: the lobbing itself, for a folk's goal and an MCA villager alike. */
+	static final class Bomb {
+		private int reload = -1;
+		private int backOff;
+
+		void start(PathfinderMob bomber) {
+			this.reload = Math.max(this.reload, 10 + bomber.getRandom().nextInt(BOMB_JITTER + 1));
+		}
+
+		void tick(ServerLevel level, PathfinderMob bomber) {
+			LivingEntity foe = bomber.getTarget();
+			if (foe == null) {
 				return;
 			}
-			this.bomber.getLookControl().setLookAt(foe, 30.0F, 30.0F);
-			double d = this.bomber.distanceTo(foe);
-			if (d < BOMB_BACK_OFF && !aboard(this.bomber)) {
-				if (--this.backOff <= 0 || this.bomber.getNavigation().isDone()) {
+			if (this.reload < 0) {
+				this.start(bomber);
+			}
+			bomber.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+			double d = bomber.distanceTo(foe);
+			if (d < BOMB_BACK_OFF && !(bomber instanceof Folk folk && aboard(folk))) {
+				if (--this.backOff <= 0 || bomber.getNavigation().isDone()) {
 					this.backOff = 20;
-					Vec3 away = DefaultRandomPos.getPosAway(this.bomber, 8, 4, foe.position());
+					Vec3 away = DefaultRandomPos.getPosAway(bomber, 8, 4, foe.position());
 					if (away != null) {
-						this.bomber.getNavigation().moveTo(away.x, away.y, away.z, 1.1);
+						bomber.getNavigation().moveTo(away.x, away.y, away.z, 1.1);
 					}
 				}
-			} else {
-				this.bomber.getNavigation().stop();
+			} else if (!RangedTactics.active(bomber)) {
+				bomber.getNavigation().stop();
 			}
 			if (--this.reload > 0) {
 				return;
@@ -376,14 +419,16 @@ public final class Pirates {
 			double stray = BOMB_STRAY * d / BOMB_FURTHEST;
 			Vec3 mark = foe.position().add(foe.getDeltaMovement().multiply(flight * 0.6, 0.0, flight * 0.6))
 				.add((random.nextDouble() * 2.0 - 1.0) * stray, 0.0, (random.nextDouble() * 2.0 - 1.0) * stray);
-			Vec3 from = new Vec3(this.bomber.getX(), this.bomber.getEyeY() - 0.2, this.bomber.getZ());
-			this.bomber.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
-			Dynamite.light(level, this.bomber, Dynamite.lob(from, mark, flight));
+			Vec3 from = new Vec3(bomber.getX(), bomber.getEyeY() - 0.2, bomber.getZ());
+			bomber.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+			Dynamite.light(level, bomber, Dynamite.lob(from, mark, flight));
 			if (random.nextInt(3) == 0) {
-				Speech.say(level, this.bomber, Component.translatable("speech.jaymoskingdoms.pirate.bomb_" + random.nextInt(4)), Speech.RED, 24.0);
+				Speech.say(level, bomber, Component.translatable("speech.jaymoskingdoms.pirate.bomb_" + random.nextInt(4)), Speech.RED, 24.0);
 			}
 		}
 	}
+
+	private static final Map<PathfinderMob, Bomb> BOMBS = new WeakHashMap<>();
 
 	static void clear() {
 		PISTOL.clear();

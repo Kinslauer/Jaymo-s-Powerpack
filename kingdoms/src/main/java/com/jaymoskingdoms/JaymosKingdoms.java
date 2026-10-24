@@ -112,6 +112,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Jobs.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
+		RangedTactics.register();
 		Tempers.register();
 		Retinue.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers

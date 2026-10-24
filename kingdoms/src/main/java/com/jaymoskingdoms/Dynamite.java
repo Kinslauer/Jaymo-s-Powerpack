@@ -99,9 +99,10 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.WIND_CHARGE, ITEM));
 		}
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof Folk folk && folk.role() == Pirates.BOMBARDIER && folk.level() instanceof ServerLevel level
+			// (0.7.183) a bombardier is a folk, or (with MCA) a villager
+			if (entity instanceof Worker bomber && bomber.role() == Pirates.BOMBARDIER && entity.level() instanceof ServerLevel level
 				&& level.getRandom().nextInt(DROP_NONE_ONE_IN) > 0) {
-				folk.spawnAtLocation(level, new ItemStack(stick(), 1 + level.getRandom().nextInt(DROP_MOST)));
+				entity.spawnAtLocation(level, new ItemStack(stick(), 1 + level.getRandom().nextInt(DROP_MOST)));
 			}
 		});
 	}
@@ -221,7 +222,8 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e.isAlive() && !e.isSpectator())) {
 			double d = victim.getBoundingBox().getCenter().distanceTo(at);
-			if (d > BURST_RADIUS || owner instanceof Folk folk && (victim == folk || !Javelins.harms(folk, victim))) {
+			if (d > BURST_RADIUS || (owner instanceof Folk || owner instanceof Worker) && owner instanceof LivingEntity thrower
+				&& (victim == thrower || !Javelins.harms(thrower, victim))) {
 				continue;
 			}
 			if (victim instanceof Player p && p.isCreative()) {
