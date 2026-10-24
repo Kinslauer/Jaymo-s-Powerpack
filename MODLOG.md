@@ -2715,3 +2715,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.147, Earthling ki glow for Z Fighters only:** packs Jaymo's Kingdoms 0.7.184 (Andy: no glow or ki effects on
+  the Earthling heritage skin unless a Z Fighter, and the costume clipping was back): the surge's glow, sparks and
+  sounds only for Z Fighters, and no heritage marks or glow under a costume. See `kingdoms/MODLOG.md`. No Powers code
+  changed.
