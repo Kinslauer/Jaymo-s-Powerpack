@@ -24,6 +24,10 @@
 		{
 			"config": "jaymoskitchen.client.mixins.json",
 			"environment": "client"
+		},
+		{
+			"config": "jaymoskitchen.mca.client.mixins.json",
+			"environment": "client"
 		}
 	],
 	"depends": {
