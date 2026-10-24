@@ -64,6 +64,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
+		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
@@ -247,7 +248,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
 			// (0.13.7) on a bomb glider, ability 1 drops its dynamite instead (BombGliderClient)
-			boolean down = power != null && !seized && minecraft.gui.screen() == null && (ABILITY_KEYS[key.ordinal()].isDown() || tapped[key.ordinal()] > 0)
+			boolean physical = !seized && minecraft.gui.screen() == null && (ABILITY_KEYS[key.ordinal()].isDown() || tapped[key.ordinal()] > 0);
+			// (0.15.151) a Flame Avatar's R, G and B (sneak + the key beside a power) go to the avatar instead
+			boolean avatar = com.jaymospowers.client.power.ember.FlameAvatarClient.route(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
