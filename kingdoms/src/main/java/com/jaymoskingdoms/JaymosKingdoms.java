@@ -112,6 +112,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Jobs.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
+		RangedTactics.register();
 		Tempers.register();
 		Retinue.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
@@ -353,6 +354,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		// 0.7.171: rulers' crowns
 		Regalia.register();
+		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
