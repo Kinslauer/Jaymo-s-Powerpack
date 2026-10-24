@@ -170,7 +170,10 @@ public final class Rulers {
 		return e instanceof Worker w && leaderRole(w.role()) && e.isAlive();
 	}
 
-	/** "Seek an audience" (added to MCA's {@code main} menu by our dialogue data): shown only to a villager on a throne. */
+	/**
+	 * "Seek an audience" (added to MCA's {@code main} menu by our dialogue data): shown to a villager on a throne, and
+	 * (0.7.184) to a realm's guard, who takes you to the ruler ({@link Audiences}).
+	 */
 	public static final String ANSWER = "jaymoskingdoms_audience";
 
 	/** {@code player} seeks an audience with villager ruler {@code ruler} (from MCA's menu): as with a folk ruler, and a king's work. */
@@ -492,7 +495,8 @@ public final class Rulers {
 		if (leaderRole(w.role())) {
 			return offDuty(t) && !Arrests.judging(v);
 		}
-		if (w.role() != Folk.GUARD || w instanceof Folk || Royals.escortOf(w) != null || Arrests.busy(v) || target(v) != null || Retinue.sent(v)) {
+		if (w.role() != Folk.GUARD || w instanceof Folk || Royals.escortOf(w) != null || Arrests.busy(v) || target(v) != null || Retinue.sent(v)
+			|| Audiences.leading(v)) {
 			return false;
 		}
 		if (t >= GUARD_EVENING) {
@@ -558,6 +562,10 @@ public final class Rulers {
 		PathfinderMob guard = w.mob();
 		if (Arrests.busy(guard)) {
 			// (the arrest walks them)
+			return true;
+		}
+		if (Audiences.leading(guard) && target(guard) == null && !guard.isSleeping() && !McaCompat.busy(guard) && Audiences.lead(guard)) {
+			// (0.7.184) walking someone who asked for an audience to the ruler
 			return true;
 		}
 		if (Royals.escortOf(w) == null && Retinue.sent(guard) && target(guard) == null && !guard.isSleeping() && !McaCompat.busy(guard)) {
