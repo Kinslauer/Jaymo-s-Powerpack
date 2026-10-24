@@ -64,6 +64,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket
 		PickpocketPose.register();
+		// (0.7.184) handshakes: the arms, and your own as a film
+		HandshakePose.register();
+		HandshakeCinematic.register();
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();

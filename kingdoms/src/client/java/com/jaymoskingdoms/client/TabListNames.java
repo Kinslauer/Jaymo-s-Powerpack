@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 /**
  * (0.7.149) For other mods' lines that name a player by their username ({@code mixin/xaero}): the name the tab list shows
  * instead, their character name ({@code CharacterNames}) or a costume's while masked. (0.7.180) "Stranger" for one you
- * haven't been introduced to ({@link Introductions}).
+ * haven't been introduced to ({@link Introductions}), unless they're in your group.
  */
 public final class TabListNames {
 	private TabListNames() {
@@ -37,6 +37,12 @@ public final class TabListNames {
 			return false;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
+		// (0.7.184) your group is always known, near or not
+		ClientPacketListener connection = minecraft.getConnection();
+		PlayerInfo info = connection == null ? null : connection.getPlayerInfo(id);
+		if (info != null && info.getTeam() != null && minecraft.player != null && info.getTeam() == minecraft.player.getTeam()) {
+			return false;
+		}
 		Player near = minecraft.level == null ? null : minecraft.level.getPlayerByUUID(id);
 		// a costume's name is for everyone
 		return near == null || Identities.maskedAs(near) == null;

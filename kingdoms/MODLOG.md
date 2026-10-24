@@ -4346,6 +4346,31 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
 
+## 0.7.184: player groups and handshakes (pack 0.15.147)
+- Andy: "add a group system for players so you can see their player tags once finding and interacting with them, (both
+  players right clicking each other, for a cinematic action cam handshake, then a success sound) and scoreboard team
+  integration allowing for reduced team damage and other benefits."
+- `Handshakes`: use on another player, empty handed and not sneaking (sneak + use stays the vampire's bite and the
+  downed's pick-up), and you hold your right hand out to them for 10 s, for everyone to see. If they use on you back
+  while it's out, you shake: set facing each other at arm's length, held still, three slow pumps (2.3 s), a leather
+  creak as the hands meet and a level-up chime with an amethyst ring at the end. A blow, going down or stepping apart
+  breaks it off. Not behind a full mask (as with `/introduce`).
+- Each of the two sees it as a film (`client/HandshakeCinematic`, camera via `HandshakeCameraMixin`): black bars, the HUD
+  cleared, a wide profile pushing in, a low close shot circling the grip, then over your shoulder onto their face.
+  The arms are `client/HandshakePose`.
+- Afterwards the two know each other's names (`Introductions`) and share a group (`Groups`), which is a plain
+  scoreboard team: the offerer's, or a new "<name>'s Company" in a random colour. An op's own `/team` counts too.
+- Group perks: groupmates always see each other's names (nametag, tab list) in the group's colour; a groupmate's blows
+  land at 25% (arrows and powers too, `Groups.FRIENDLY_DAMAGE`); each groupmate within 8 blocks takes 5% off blows from
+  anyone else, up to 3 (`SIDE_GUARD`); invisible groupmates show; no shoving; vanilla `/teammsg` works.
+- `/group` lists your group (character names; offline members only counted, so no usernames), `/group leave`,
+  `/group name <name>`. Leaving or renaming an op's team is refused.
+- Andy: "The initiating player's group is what is joined, everytime. Players within the same group can still
+  handshake, but the cutscene only ever plays once for the same combo of players. Every other time it is a quicker
+  single dap variation." The taker always leaves their group for the offerer's (an empty one of ours is removed). Each
+  player keeps whom they've shaken hands with (`Handshakes.SHOOK`, saved); a pair who have gets a 0.7 s dap (hand up
+  high, one clasp and a tug, a lighter chime) with no film.
+- Compile-checked against 26.3; not yet seen in game.
 ## 0.7.184: guards make way for quest carriers, and take you to the ruler (pack 0.15.147)
 - Andy: "guards should make way for you regardless of their king's temperament if you are carrying a quest item, you
   can also request an audience from a guard and they will escort you to the king/queen as long as your rep isnt too low."
