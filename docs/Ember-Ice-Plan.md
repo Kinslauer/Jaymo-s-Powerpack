@@ -127,6 +127,10 @@ Built in `power/ember/FlameAvatar` + `AvatarMoves` (+ `mixin/EmberLivingEntityMi
   smoke, guttering as the flame runs low. Preview: project files `art-overhaul/flame-avatar/flame-avatar-preview.png`.
 - **HUD:** right of the hotbar in the chip style (above a power's chips): the flame bar, then R G B with cooldowns.
 - No block is ever broken by any of it (fires only).
+- **Avatars in the Nether (Andy; Kingdoms 0.7.187, `nether/AvatarCamps`):** MCA villager avatars live in camps of
+  their own (scorched ground, a great fire, basalt pillars, a cache) and march in bands of 3 on Hornkin forts and
+  piglin camps. They won't talk to anyone who isn't Emberborn, and only turn on players near their own camp (24
+  blocks). Same look as the player form.
 
 **Open questions for Andy:** (1) your sentence "the destructive capabilities are limited to the..." was cut off: built
 as "limited to these three moves, no block breaking"; (2) is 7 in-game days in the Nether right, and should anything

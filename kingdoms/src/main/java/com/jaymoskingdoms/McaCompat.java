@@ -139,6 +139,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.isMca(villager);
 	}
 
+	/** (0.7.187) A new grown MCA guard at {@code at}, in the world and in no one's service; null without MCA. */
+	public static @Nullable Villager spawnGuard(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.spawnGuard(level, at) : null;
+	}
+
 	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
@@ -355,6 +360,10 @@ public final class McaCompat {
 	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
 	 */
 	public static boolean foe(LivingEntity guard, LivingEntity target) {
+		if (com.jaymoskingdoms.nether.AvatarCamps.avatar(guard)) {
+			// (0.7.187) a Flame Avatar of the Nether: Hornkin, piglins, and strangers at its camp
+			return com.jaymoskingdoms.nether.AvatarCamps.prey(guard, target);
+		}
 		if (guard instanceof Worker w && Barbarians.villagerRole(w.role()) && guard.level().getServer() != null) {
 			// (0.7.148) a camp's MCA villager: what its raiders (or pirates) go for
 			return Barbarians.villagerPrey(w.role(), w.factionId(), target);

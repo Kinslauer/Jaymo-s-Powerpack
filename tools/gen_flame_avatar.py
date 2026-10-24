@@ -13,7 +13,11 @@ from PIL import Image
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets", "jaymospowers", "textures",
                    "entity", "ember")
+# Kingdoms' Flame Avatar villagers (Nether avatar camps) wear the same look
+OUT_KINGDOMS = os.path.join(os.path.dirname(__file__), "..", "kingdoms", "src", "main", "resources", "assets",
+                            "jaymoskingdoms", "textures", "entity", "ember")
 os.makedirs(OUT, exist_ok=True)
+os.makedirs(OUT_KINGDOMS, exist_ok=True)
 
 # vanilla's lava/fire ramp, hottest first (emissive: how much light each adds)
 WHITE = (255, 236, 170, 255)
@@ -37,6 +41,11 @@ CUBES = {
 
 # the outer layer (hat, jacket, sleeves, trousers) of each: the burnt crust goes over it too, so nobody's clothes show
 OUTER = {"head": (32, 0), "body": (16, 32), "right_arm": (40, 32), "left_arm": (48, 48), "right_leg": (0, 32), "left_leg": (0, 48)}
+
+
+def save(img, name):
+    for out in (OUT, OUT_KINGDOMS):
+        img.save(os.path.join(out, name))
 
 
 def crust(img, softer_face):
@@ -90,7 +99,7 @@ def char():
                 img.putpixel((x, y), c + (alpha,))
     # slim arms are a column narrower; their faces sit inside the classic ones, so they're covered too
     crust(img, True)
-    img.save(os.path.join(OUT, "avatar_char.png"))
+    save(img, "avatar_char.png")
 
 
 def crack(img, band, x, y, length, step_down=True):
@@ -167,7 +176,7 @@ def veins():
     for x in (9, 10, 13, 14):
         img.putpixel((x, 12), WHITE)
     crust(img, False)
-    img.save(os.path.join(OUT, "avatar_veins.png"))
+    save(img, "avatar_veins.png")
 
 
 char()
