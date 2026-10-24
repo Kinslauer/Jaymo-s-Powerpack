@@ -8,11 +8,16 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 
-/** (0.7.0) A werewolf player's change at will ({@link WerewolfPlayers}): {@code U}. */
+/** (0.7.0) A werewolf player's change at will ({@link WerewolfPlayers}): {@code U}. (0.7.185) Also giving in to the blood fever ({@link SeizureClient}). */
 final class WerewolfKey {
 	private static KeyMapping key;
 
 	private WerewolfKey() {
+	}
+
+	/** The key's name, as bound. */
+	static net.minecraft.network.chat.Component name() {
+		return key == null ? net.minecraft.network.chat.Component.literal("U") : key.getTranslatedKeyMessage();
 	}
 
 	static void register() {
@@ -20,7 +25,9 @@ final class WerewolfKey {
 			KeyMapping.Category.register(JaymosKingdoms.id("werewolf"))));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
-				if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(WerewolfPlayers.Shift.TYPE)) {
+				if (SeizureClient.canGiveIn()) {
+					SeizureClient.giveIn();
+				} else if (minecraft.player != null && minecraft.gui.screen() == null && ClientPlayNetworking.canSend(WerewolfPlayers.Shift.TYPE)) {
 					ClientPlayNetworking.send(new WerewolfPlayers.Shift());
 				}
 			}

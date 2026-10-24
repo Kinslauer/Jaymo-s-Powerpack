@@ -339,6 +339,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
 		LOGGER.debug("nightborn blood attachment: {}", NightbornBlood.TRACE);
 		NightbornBlood.register();
+		// 0.7.185: losing yourself to the blood or the curse: the blood fever's urges, the wolf's hunts, and the holds that
+		// drive you (their attachments)
+		LOGGER.debug("takeover attachments: {} {} {}", BloodFever.FEVER, BloodFever.SURRENDER, FeralCurse.FERAL);
+		Seizures.register();
+		BloodFever.register();
+		FeralCurse.register();
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();

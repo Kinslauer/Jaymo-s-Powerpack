@@ -68,7 +68,8 @@ public final class BloodVision {
 		}
 		vampire = Vampires.isVampire(player) && !player.isSpectator();
 		on = vampire && Vampires.night(minecraft.level.getOverworldClockTime());
-		starving = vampire && VampirePlayers.starving(player);
+		// (0.7.185) a fever past the urge's line runs as hot as starving ({@link com.jaymoskingdoms.BloodFever})
+		starving = vampire && (VampirePlayers.starving(player) || com.jaymoskingdoms.BloodFever.burning(player));
 		strength = Mth.clamp(strength + (on ? FADE : -FADE), 0.0F, 1.0F);
 	}
 
