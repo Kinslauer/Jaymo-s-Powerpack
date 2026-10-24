@@ -53,7 +53,8 @@ public final class BeamClashClient {
 	/** Losing: the body slides back this fast (blocks/tick) at the worst. */
 	private static final double SLIDE = 0.035;
 	/** The HUD panel: size; the push that fills a push meter. */
-	private static final int PANEL_W = 96, PANEL_H = 25, CHIP = 20;
+	static final int PANEL_W = 96, PANEL_H = 25;
+	private static final int CHIP = 20;
 	private static final float PUSH_FULL = BeamClash.BASE_PUSH * 2.0F + BeamClash.SURGE_MAX;
 	/** Colours by kind: wind, smoke, soot, ki. */
 	private static final int[] COLORS = {0xBFF4EA, 0x9A9A9A, 0x3A3030, 0xFFE070};
@@ -255,10 +256,10 @@ public final class BeamClashClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		BeamClash.State state = player == null ? null : player.getAttached(BeamClash.CLASH);
-		if (state == null) {
+		if (state == null || BeamCinematic.running()) {
+			// (0.15.143) in the film, the panel sits in the bottom bar (BeamCinematic)
 			return;
 		}
-		Font font = minecraft.font;
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 		int x = width / 2 + 91 + 30;
@@ -268,7 +269,18 @@ public final class BeamClashClient {
 			x = width - 2 - PANEL_W;
 			chipY = height - 22 - 30 - CHIP;
 		}
-		int y = chipY - 17 - PANEL_H;
+		panel(graphics, delta, x, chipY - 17 - PANEL_H);
+	}
+
+	/** The panel itself, its top left at {@code x, y}. */
+	static void panel(GuiGraphicsExtractor graphics, DeltaTracker delta, int x, int y) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		BeamClash.State state = player == null ? null : player.getAttached(BeamClash.CLASH);
+		if (state == null) {
+			return;
+		}
+		Font font = minecraft.font;
 		int mine = COLORS[Math.clamp(state.kind(), 0, COLORS.length - 1)];
 		int theirs = COLORS[Math.clamp(state.theirKind(), 0, COLORS.length - 1)];
 		float time = state.age() + delta.getGameTimeDeltaPartialTick(false);
