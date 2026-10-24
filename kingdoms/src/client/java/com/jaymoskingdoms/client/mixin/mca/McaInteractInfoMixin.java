@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
 import com.jaymoskingdoms.Standing;
+import com.jaymoskingdoms.Temperaments;
+import java.util.ArrayList;
 import java.util.List;
 import net.conczin.mca.client.gui.InteractScreen;
 import net.conczin.mca.entity.VillagerLike;
@@ -16,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * (0.7.175) MCA's interact screen shows a ruler's or a guard's {@link Standing} under its own lines (name, trade, mood,
  * personality, traits): a ruler's title, temperament, reign and what they're about; a guard's realm, ruler and duty.
- * Hovering a line shows more, as MCA's personality line does.
+ * Hovering a line shows more, as MCA's personality line does. (0.7.186) Everyone's own temperament comes first
+ * ({@link Temperaments}).
  */
 @Mixin(InteractScreen.class)
 abstract class McaInteractInfoMixin {
@@ -34,20 +37,32 @@ abstract class McaInteractInfoMixin {
 
 	@Inject(method = "drawTextPopups", at = @At("TAIL"))
 	private void jaymoskingdoms$standing(GuiGraphicsExtractor graphics, CallbackInfo ci) {
-		Standing.Lines standing = this.villager.asEntity().getAttached(Standing.LINES);
-		if (standing == null || this.villager.asEntity().isBaby()) {
+		if (this.villager.asEntity().isBaby()) {
 			return;
+		}
+		Standing.Lines standing = this.villager.asEntity().getAttached(Standing.LINES);
+		Temperaments.Temperament temperament = Temperaments.of(this.villager.asEntity());
+		List<Component> lines = new ArrayList<>(), hovers = new ArrayList<>();
+		if (temperament != null) {
+			lines.add(Temperaments.line(temperament));
+			hovers.add(Temperaments.hover(temperament));
+		}
+		if (standing != null) {
+			lines.addAll(standing.lines());
+			for (int i = 0; i < standing.lines().size(); i++) {
+				hovers.add(i < standing.hovers().size() ? standing.hovers().get(i) : Component.empty());
+			}
 		}
 		// (MCA's rows: trade 1, mood 2, personality 3, and traits 4 if they have any)
 		int row = this.villager.getTraits().getTraits().isEmpty() ? 4 : 5;
 		McaDynamicScreenInvoker screen = (McaDynamicScreenInvoker)this;
-		for (int i = 0; i < standing.lines().size(); i++, row++) {
+		for (int i = 0; i < lines.size(); i++, row++) {
 			int y = TOP + ROW * row;
-			Component hover = i < standing.hovers().size() ? standing.hovers().get(i) : Component.empty();
+			Component hover = hovers.get(i);
 			if (!hover.getString().isEmpty() && this.hoveringOverText(LEFT, y, WIDTH)) {
-				screen.jaymoskingdoms$drawTooltip(graphics, List.of(standing.lines().get(i), hover), LEFT, y);
+				screen.jaymoskingdoms$drawTooltip(graphics, List.of(lines.get(i), hover), LEFT, y);
 			} else {
-				screen.jaymoskingdoms$drawTooltip(graphics, standing.lines().get(i), LEFT, y);
+				screen.jaymoskingdoms$drawTooltip(graphics, lines.get(i), LEFT, y);
 			}
 		}
 	}

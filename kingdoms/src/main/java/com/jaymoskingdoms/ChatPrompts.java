@@ -31,6 +31,11 @@ public final class ChatPrompts {
 			if (!realm.isEmpty()) {
 				sb.append("Your realm: ").append(realm).append('\n');
 			}
+			// (0.7.186) their own nature
+			String temperament = Temperaments.prompt(villager);
+			if (!temperament.isEmpty()) {
+				sb.append(temperament).append('\n');
+			}
 			String neighbours = neighbours(villager);
 			if (!neighbours.isEmpty()) {
 				sb.append("Your neighbours: ").append(neighbours).append('\n');
