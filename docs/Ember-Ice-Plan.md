@@ -132,8 +132,8 @@ Built in `power/ember/FlameAvatar` + `AvatarMoves` (+ `mixin/EmberLivingEntityMi
   piglin camps. They won't talk to anyone who isn't Emberborn, and only turn on players near their own camp (24
   blocks). Same look as the player form.
 
-**Open questions for Andy:** (1) your sentence "the destructive capabilities are limited to the..." was cut off: built
-as "limited to these three moves, no block breaking"; (2) is 7 in-game days in the Nether right, and should anything
+**Open questions for Andy:** (1) "the destructive capabilities are limited to the..." (answered: "limited to the avatar": the
+three moves only work in avatar form, plain Emberborn keep only their own powers); (2) is 7 in-game days in the Nether right, and should anything
 ever undo it (answered: going down in water); (3) should Fire Fist cost flame too (answered: yes); (4) should the
 blasts break blocks.
 
