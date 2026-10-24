@@ -2808,3 +2808,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Marksman Steady Aim (shots from a crouch +25%), Rider Barding (the horse you steer takes 30% less), Sorcerer Kindred
   Element (own element's harm halved: fire, freezing, lightning, drowning, explosions for earth, falls for air). Class
   cards show each boon as a new row. Compile-checked status in the PR; not playtested.
+- **0.16.1, flail and whip executions need Executioner:** Andy: "should only work w the execution trait, and untrained
+  slams w the whip damage it." Ball and Chain and Garrotte now follow the Executioner perk like every other weapon's
+  move; untrained, both are the Wild Slam, and a whip counts as improvised (`Finishers.improvised`), so it loses ~12% of its
+  durability a blow. Compile-checked; not playtested.
