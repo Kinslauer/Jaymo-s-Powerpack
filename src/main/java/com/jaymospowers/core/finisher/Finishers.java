@@ -5,7 +5,9 @@ import com.jaymospowers.armory.TaczGuns;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.LimbBoxes;
 import com.jaymospowers.core.Shakes;
+import com.jaymospowers.core.wounds.BodyPlan;
 import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.Treatment;
@@ -47,8 +49,10 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -90,6 +94,15 @@ import org.jspecify.annotations.Nullable;
  * needs a round in the gun, spends it, and fires with the gun's own shot (through TaCZ), flash and smoke. A bow or
  * crossbow likewise needs an arrow and spends it ({@link #loaded}, {@link #spend}). The neck snap is a slow strangle-hold
  * now, the snap {@link Kind#FIST}'s 100th tick.
+ * <p>
+ * (0.15.146) Andy: "add a basic execution to weapons that is available to all, and faster than a bare hand neck snap? a
+ * wild slam with anything blunt, (using tools like a bow or fishing rod heavily damages them), and stabbing through with
+ * a struggle to remove the weapon with anything bladed. Axes slam too. Also the player should be in the correct area for
+ * a neck snap, like near the head on any humanoid". Without Executioner a held weapon now plays a basic move
+ * ({@link #basic}): {@link Kind#IMPALE} for a blade, {@link Kind#SLAM} for everything else, axes and guns included, and
+ * any tool that wears (a bow, a fishing rod, a shovel) slams too, taking {@link #IMPROVISED_WEAR} of its durability a
+ * blow ({@link #wear}). A bow or crossbow with nothing to shoot slams even with Executioner. The neck snap's taps only
+ * count kneeling at a person's head ({@link #atHead}).
  */
 public final class Finishers {
 	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
@@ -112,6 +125,14 @@ public final class Finishers {
 	/** (0.15.114) How far the point-blank shot is heard through TaCZ (blocks), and its shake for those around. */
 	static final int SHOT_HEARD = 64;
 	static final float SHOT_AROUND_SHAKE = 0.5F;
+	/**
+	 * (0.15.146) The neck snap: how near their head your feet must be (blocks, across the ground), and where the head of
+	 * someone downed lies from their middle, as a share of their height (a crawler's ahead, one on its back behind).
+	 */
+	static final double HEAD_REACH = 1.25, DOWNED_HEAD = 0.32, DOWNED_FEET = 0.555;
+	/** (0.15.146) A basic move's wear on a tool that isn't made for it (share of its durability a blow, at least the minimum), and on a weapon. */
+	static final float IMPROVISED_WEAR = 0.12F;
+	static final int IMPROVISED_WEAR_MIN = 4, WEAPON_WEAR = 1;
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP }
@@ -147,16 +168,30 @@ public final class Finishers {
 		 * Bare hands: kneel, take the head in both hands, and twist. (0.15.114) Andy: "neck break should take 5s to finish":
 		 * a hold that strains twice against them before the snap at 5 s.
 		 */
-		FIST(118, new int[] {40, 70, 100}, Strike.SNAP);
+		FIST(118, new int[] {40, 70, 100}, Strike.SNAP),
+		/** (0.15.146) Wild Slam, everyone's: whatever's in hand brought down on them three times, fast and hard. */
+		SLAM(36, new int[] {10, 19, 28}, Strike.CRUSH),
+		/**
+		 * (0.15.146) Stabbed Through, everyone's: the blade driven down through them, then stuck, tugged at three times
+		 * and wrenched free ({@link #after}, once they're dead).
+		 */
+		IMPALE(46, new int[] {12}, Strike.STAB, new int[] {21, 28, 34, 40});
 
 		public final int length;
 		public final int[] beats;
 		public final Strike strike;
+		/** (0.15.146) Beats after the kill, on the body where it died (the stuck blade's tugs; the last one pulls it free). */
+		public final int[] after;
 
 		Kind(int length, int[] beats, Strike strike) {
+			this(length, beats, strike, new int[0]);
+		}
+
+		Kind(int length, int[] beats, Strike strike, int[] after) {
 			this.length = length;
 			this.beats = beats;
 			this.strike = strike;
+			this.after = after;
 		}
 
 		/** The beat its kill lands on. */
@@ -372,9 +407,85 @@ public final class Finishers {
 	 * (0.15.116) The move {@code player} plays with {@code stack}: its kind's, but a gun with no round in it (Andy: "with no
 	 * ammunition it should just run though with the blade") runs them through with the bayonet, the sword's Run Through.
 	 */
-	static Kind move(Player player, ItemStack stack) {
+	static @Nullable Kind move(Player player, ItemStack stack) {
+		if (stack.isEmpty()) {
+			return Kind.FIST;
+		}
 		Kind kind = kind(stack);
-		return kind == Kind.GUN && !loaded(player, stack, kind) ? Kind.SWORD : kind;
+		if (kind == Kind.FIST) {
+			// (0.15.146) not a weapon: a tool that wears slams (a fishing rod, a shovel); a torch or a loaf finishes nobody
+			return stack.isDamageableItem() ? Kind.SLAM : null;
+		}
+		if (!weaponsUnlocked(player)) {
+			return basic(kind);
+		}
+		if (kind == Kind.GUN && !loaded(player, stack, kind)) {
+			return Kind.SWORD;
+		}
+		// (0.15.146) a bow with no arrow is only something to hit them with
+		return (kind == Kind.BOW || kind == Kind.CROSSBOW) && !loaded(player, stack, kind) ? Kind.SLAM : kind;
+	}
+
+	/** (0.15.146) Everyone's move with a weapon of {@code kind}: a blade stabs through, the rest (axes too) slam. */
+	static Kind basic(Kind kind) {
+		return switch (kind) {
+			case SWORD, GREATSWORD, DAGGER, SPEAR, POLEARM -> Kind.IMPALE;
+			default -> Kind.SLAM;
+		};
+	}
+
+	/** (0.15.146) A tool not made for hitting anyone: a bow, a crossbow, a fishing rod, a shovel, a hoe, shears. */
+	static boolean improvised(ItemStack stack) {
+		Kind kind = kind(stack);
+		return kind == Kind.BOW || kind == Kind.CROSSBOW || kind == Kind.FIST || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
+	}
+
+	/** (0.15.146) A basic move's blow wears what struck it: a tool heavily ({@link #IMPROVISED_WEAR}), a weapon as a hit. */
+	static void wear(ServerPlayer player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty() || !stack.isDamageableItem()) {
+			return;
+		}
+		int wear = improvised(stack) ? Math.max(IMPROVISED_WEAR_MIN, Math.round(stack.getMaxDamage() * IMPROVISED_WEAR)) : WEAPON_WEAR;
+		stack.hurtAndBreak(wear, player, EquipmentSlot.MAINHAND);
+	}
+
+	/**
+	 * (0.15.146) Where {@code body}'s head is, about: someone downed lying on the ground (DownedPose lays a crawler face
+	 * down with its head ahead, the rest on their backs with it behind), else its head's hitbox ({@link LimbBoxes}), else
+	 * its eyes. Both sides (the client's finisher kneels to it).
+	 */
+	public static Vec3 headAt(LivingEntity body) {
+		if (!(body instanceof Player) && Downed.isDowned(body) && !Carry.isCarried(body)) {
+			Vec3 forward = Vec3.directionFromRotation(0.0F, body.yBodyRot);
+			return body.position().add(forward.scale((Downed.crawls(body) ? 1.0 : -1.0) * DOWNED_HEAD * body.getDimensions(Pose.STANDING).height()));
+		}
+		for (LimbBoxes.Box box : LimbBoxes.of(body)) {
+			if (box.part() == Dismember.HEAD) {
+				return box.center();
+			}
+		}
+		return body.getEyePosition();
+	}
+
+	/**
+	 * (0.15.146) Andy: "the player should be in the correct area for a neck snap, like near the head on any humanoid":
+	 * your feet within {@link #HEAD_REACH} of a person's head across the ground, and nearer it than their feet. Anything
+	 * not built like a person can be taken from anywhere.
+	 */
+	static boolean atHead(Player player, LivingEntity body) {
+		if (BodyPlan.of(body) != BodyPlan.HUMANOID) {
+			return true;
+		}
+		Vec3 head = headAt(body);
+		double dx = head.x - player.getX(), dz = head.z - player.getZ();
+		if (dx * dx + dz * dz > HEAD_REACH * HEAD_REACH) {
+			return false;
+		}
+		// the far end: the feet of one lying down (through the middle from the head), under one standing
+		Vec3 middle = body.position();
+		Vec3 feet = middle.add(middle.subtract(head).multiply(1.0, 0.0, 1.0).scale(DOWNED_FEET / DOWNED_HEAD));
+		return head.distanceToSqr(player.getX(), head.y, player.getZ()) <= feet.distanceToSqr(player.getX(), feet.y, player.getZ());
 	}
 
 	private static boolean charged(ItemStack stack) {
@@ -466,9 +577,15 @@ public final class Finishers {
 		}
 		ItemStack stack = player.getMainHandItem();
 		boolean bare = stack.isEmpty();
-		if (!bare && kind(stack) == Kind.FIST) {
-			// (0.15.110) Andy: "make the execution only possible with bare hands": a torch or a loaf finishes nobody
+		if (!bare && move(player, stack) == null) {
+			// (0.15.110) a torch or a loaf finishes nobody
 			return InteractionResult.PASS;
+		}
+		if (bare && !atHead(player, (LivingEntity) entity)) {
+			// (0.15.146) the neck snap is done kneeling at their head: a tap anywhere else doesn't count
+			HOLDING.remove(player.getUUID());
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.head", entity.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			return Downed.isDowned(entity) ? InteractionResult.PASS : InteractionResult.SUCCESS;
 		}
 		long now = world.getGameTime();
 		Hold held = HOLDING.get(player.getUUID());
@@ -486,7 +603,7 @@ public final class Finishers {
 		if (bare && held.presses >= TAPS && player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
 			// the third tap: the neck snap
 			HOLDING.remove(player.getUUID());
-			begin(level, sp, held.body);
+			begin(level, sp, held.body, Kind.FIST);
 		}
 		// (only watching: Kingdoms still takes a downed guard's weapons, and Downed's catch-all swallows the rest; (0.15.114)
 		// a crippled one isn't downed, so its click is kept here, no trading screen between taps)
@@ -527,26 +644,16 @@ public final class Finishers {
 				continue;
 			}
 			long held = now - hold.start;
-			if (held >= HOLD_TICKS && !weaponsUnlocked(player)) {
-				// (0.15.110) a weapon's finisher is Combat Arts' Executioner
-				it.remove();
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.locked").withStyle(ChatFormatting.GRAY));
-				continue;
-			}
 			if (held >= HOLD_TICKS) {
 				it.remove();
+				// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
 				Kind kind = move(player, player.getMainHandItem());
-				if (!loaded(player, player.getMainHandItem(), kind)) {
-					// (0.15.114) nothing to shoot
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.unloaded." + kind.name().toLowerCase(java.util.Locale.ROOT))
-						.withStyle(ChatFormatting.GRAY));
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.6F);
-					continue;
+				if (kind != null && kind != Kind.FIST) {
+					begin(level, player, hold.body, kind);
 				}
-				begin(level, player, hold.body);
 				continue;
 			}
-			if (held >= 2 && weaponsUnlocked(player)) {
+			if (held >= 2) {
 				int filled = Math.round(HOLD_BAR * held / (float) HOLD_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
 					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));
@@ -556,8 +663,7 @@ public final class Finishers {
 
 	// ---- playing it out ---------------------------------------------------------------------------------------------------
 
-	private static void begin(ServerLevel level, ServerPlayer player, LivingEntity body) {
-		Kind kind = move(player, player.getMainHandItem());
+	private static void begin(ServerLevel level, ServerPlayer player, LivingEntity body, Kind kind) {
 		player.setAttached(FINISHING, new Finish(kind.ordinal(), level.getGameTime(), body.getId()));
 		PLAYING.put(player.getUUID(), new Playing(player, body, Downed.isDowned(body)));
 		TARGETED.put(body.getUUID(), player.getUUID());
@@ -616,6 +722,11 @@ public final class Finishers {
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
 					blow(level, player, body, kind, beat == kind.kill());
+				}
+			}
+			for (int i = 0; i < kind.after.length; i++) {
+				if (t == kind.after[i]) {
+					tug(level, player, body, i == kind.after.length - 1);
 				}
 			}
 			if (t >= kind.length) {
@@ -709,6 +820,10 @@ public final class Finishers {
 				}
 			}
 		}
+		if (kind == Kind.SLAM || kind == Kind.IMPALE) {
+			// (0.15.146) Andy: "using tools like a bow or fishing rod heavily damages them"
+			wear(player);
+		}
 		// (the body jolts with it; no damage: the last blow is the death outright)
 		level.broadcastDamageEvent(body, level.damageSources().playerAttack(player));
 		Shakes.send(player, kill ? KILL_SHAKE : BEAT_SHAKE, body.position());
@@ -732,13 +847,32 @@ public final class Finishers {
 		}
 	}
 
+	/**
+	 * (0.15.146) Stabbed Through's blade, stuck in them: a tug against it (flesh giving, a jolt for you), and the last one
+	 * wrenches it free with a gout of blood. Heard where they died, whatever's become of the body.
+	 */
+	private static void tug(ServerLevel level, ServerPlayer player, LivingEntity body, boolean free) {
+		double x = body.getX(), y = body.getY() + 0.3, z = body.getZ();
+		float pitch = 0.85F + level.getRandom().nextFloat() * 0.3F;
+		if (free) {
+			level.playSound(null, x, y, z, SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.8F, pitch * 0.7F);
+			level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.6F, pitch * 0.6F);
+			BladeBlood.splash(body, 6.0F);
+			Shakes.send(player, BEAT_SHAKE, new Vec3(x, y, z));
+			return;
+		}
+		level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.7F, pitch * 0.55F);
+		level.playSound(null, x, y, z, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.6F, pitch * 0.6F);
+		Shakes.send(player, BEAT_SHAKE * 0.5F, new Vec3(x, y, z));
+	}
+
 	/** What's heard as it begins: steel drawn, a bowstring, a crossbow wound, cracking knuckles. */
 	private static SoundEvent opening(Kind kind) {
 		return switch (kind) {
 			case BOW -> SoundEvents.ARROW_SHOOT;
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FIST -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
-			case BLUNT, STAFF -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case BLUNT, STAFF, SLAM -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
 			default -> SoundEvents.ARMOR_EQUIP_IRON.value();
 		};
 	}
