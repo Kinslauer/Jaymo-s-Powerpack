@@ -72,6 +72,8 @@ public final class RaceMoves {
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, context) -> hold(context.player()));
 		// (0.14.0) an Emberborn's Kindle, a held stream with its own packets (power.ember)
 		com.jaymospowers.power.ember.EmberKindle.init();
+		// (0.15.151) and what an Emberborn becomes when the fire wins
+		com.jaymospowers.power.ember.FlameAvatar.init();
 		FrostBeam.init();
 		// (0.15.72) a Stormborn's Thunderclap and a Dawnborn's Sunflare, charged holds (power.heritage)
 		com.jaymospowers.power.heritage.HeritageMoves.init();

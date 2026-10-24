@@ -167,6 +167,14 @@ def packMods = [
 	// pause its animations while they play (client/EmfCompat).
 	[dep: "maven.modrinth:entity-model-features:vF6qLXsA", cf: [844662, 9188547]],
 	[dep: "maven.modrinth:entitytexturefeatures:OOEycXyN", cf: [568563, 9188429]],
+	// Touch'n Motion (GPL-3.0, STRadaT; shipped unchanged, CurseForge only): small everyday motions on top of Fresh
+	// Animations' player model: a look at creatures nearby and signs read while idle, a hand on the wall beside you, hands
+	// on a fence top, hands through crops, feet that stand on stairs and slabs, fright at a creeper's hiss or thunder,
+	// shaking off water, hands to doors, levers, chests and animals, mining swings, fishing, rowing, riding. Client and
+	// server (the server syncs the gestures; a client needs EMF and EMF Compat: Core, GPL-3.0, client-only, below). Our
+	// own poses pause both, like Fresh Animations (client/EmfCompat#hold).
+	[dep: "curse.maven:touch-and-motion-1734204:9205898", cf: [1734204, 9205898]],
+	[dep: "maven.modrinth:emf-compat-core:oOuwcnpx", cf: [1605113, 9205859]],
 	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
 	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
 	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
@@ -207,6 +215,10 @@ def packMods = [
 def packModsNoCf = [
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// EMF Compat: Not Enough Animations (GPL-3.0, STRadaT; shipped unchanged): keeps Not Enough Animations' eating, map
+	// holding, rowing and petting showing under Fresh Animations. Here beside NEA until NEA's CurseForge ids are looked up
+	// (then this one is CurseForge project 1605181, file 9103628).
+	[dep: "maven.modrinth:not-enough-animations-emf-compat:Xs6WnTQm", cf: null],
 	// Sounds (all rights reserved, by imb11; modpacks on Modrinth and CurseForge allowed under legal.imb11.dev/mods/eula):
 	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (packMods).
 	// TODO(home PC): its CurseForge [project id, file id], as above (the cloud couldn't find its CurseForge page).

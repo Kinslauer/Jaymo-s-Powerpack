@@ -692,6 +692,11 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.187) A new grown MCA guard at {@code at}, in the world, for no settlement ({@code nether.AvatarCamps}); null if it failed. */
+	static @Nullable Villager spawnGuard(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.61) A new grown MCA villager at {@code at}, not yet added to the world ({@link Captives}). */
 	static Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).build(EntitySpawnReason.EVENT);

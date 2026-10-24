@@ -130,6 +130,7 @@ public final class PowerCommand {
 						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.resetfate", players.size()), true);
 						return players.size();
 					})))
+			.then(com.jaymospowers.power.ember.FlameAvatar.command())
 			.then(Commands.literal("get")
 				.then(Commands.argument("target", EntityArgument.player())
 					.executes(c -> {

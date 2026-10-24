@@ -92,3 +92,51 @@ Its own package `power/cryo` (+ client), lang `lang/parts/cryo.json`, doc `docs/
 1. Should Kindle set blocks on fire too (a real flamethrower), or stay creature-only as above?
 2. Name: "Cryokinesis" (beside Chronokinesis), or plain "Ice"?
 3. Should the Ice power have fates later (corrupted: a killing cold; ascended: winter's calm), like Smoke's stages?
+
+## 0.15.151: the Flame Avatar (Andy, 2026-10-24)
+"An emberborn variant that triggers whenever an emberborn spends too many of its years in the nether, they become
+consumed by the flame already within them, turning into an avatar of flame, capable of immense destruction. It should
+be seen as a problem for emberborn to control their fire, and this form is the end result of one failing to control."
+Built in `power/ember/FlameAvatar` + `AvatarMoves` (+ `mixin/EmberLivingEntityMixin`), client
+`client/power/ember/FlameAvatarClient`, lang in `lang/parts/ember.json`. Every number is a constant at the top.
+- **The way in:** time an Emberborn spends in the Nether is counted (saved, kept through death); outside it cools at a
+  quarter of the rate, so it's long stays that do it. At 7 in-game days (about 2 h 20 min in the Nether) the fire takes
+  them: a burst of flame and fires round them, the title "Consumed". Vague warnings at 50%, 75% and 90%; past 75%
+  flames lick off them. Ops: `/power avatar <targets> on|off|progress`. Only while they're still Emberborn.
+- **Undone (Andy):** going down in water. On the damage tick that would drop them in water (after what the flame
+  covers) they revert to plain Emberborn at once (steam, a message); the hit still lands, and the Nether count starts
+  over.
+- **Flaring body (passive):** 3 hearts at most, whatever adds health. A 20-point flame bar takes hits first (a blow,
+  a shot or a blast; not falls, drowning, hunger, the void or fire); a hit flares the body and sets the attacker alight
+  if they're within 4 blocks. What the flame can't cover goes to the hearts. Refills: lava 0.5 a tick, fire/lit
+  campfire/magma 0.25 a tick, 1.5 a food point eaten; 60% in the cold. Rain drains 0.02 a tick, water 0.25 a tick, and
+  in water with the flame out the avatar takes 1 damage a second.
+- **R, Fire Fist:** a giant fireball (1.4 b/t) bursting in a 4.5-block blast: 10 damage at the middle (5 at the edge),
+  burning 6 s, thrown back, up to 20 fires round it. 4 flame (Andy), 4 s cooldown.
+- **G, Flaming Pillar:** tap: a 3.5-block pillar round you; hold (8+ ticks) marks the spot under the cursor (only you
+  see it, out to 32 blocks) and letting go raises a 2.5-block pillar there. 6 damage, burning 5 s, thrown up and away,
+  up to 10 fires; half the damage dealt comes back as flame. 5 s cooldown.
+- **B, Ignition Switch:** tap: everything burnable in an 8-block cone in front is lit: campfires, candles, other
+  mods' unlit torches/lanterns/braziers, flammable blocks (up to 12 fires), creatures. 3 flame, 1 s cooldown. Hold:
+  everything burning within 16 blocks and in sight (burning creatures, fires; marked for you while held) goes off in a
+  small blast (2 blocks, 4 damage, a shove; the fire is spent), 1 flame each, up to 16. 6 s cooldown.
+- **Keys:** with no power, plain R G B; beside a power, sneak + R/G/B (V stays the power's). Hush and being downed
+  stop them like a power's.
+- **Look:** char over the skin and clothes (the face a little thinner), emissive lava veins, a molten heart, burning
+  crown and hands, wreathed in vanilla's fire (not round your own first-person camera, not in water); embers and
+  smoke, guttering as the flame runs low. Preview: project files `art-overhaul/flame-avatar/flame-avatar-preview.png`.
+- **HUD:** right of the hotbar in the chip style (above a power's chips): the flame bar, then R G B with cooldowns.
+- No block is ever broken by any of it (fires only).
+- **Avatars in the Nether (Andy; Kingdoms 0.7.187, `nether/AvatarCamps`):** MCA villager avatars live in camps of
+  their own (scorched ground, a great fire, basalt pillars, a cache) and march in bands of 3 on Hornkin forts and
+  piglin camps. They won't talk to anyone who isn't Emberborn, and only turn on players near their own camp (24
+  blocks). Same look as the player form.
+
+**Open questions for Andy:** (1) "the destructive capabilities are limited to the..." (answered: "limited to the avatar": the
+three moves only work in avatar form, plain Emberborn keep only their own powers); (2) is 7 in-game days in the Nether right, and should anything
+ever undo it (answered: going down in water); (3) should Fire Fist cost flame too (answered: yes); (4) should the
+blasts break blocks.
+
+**Check first in game:** `/power avatar @s on` as an Emberborn; take a hit (flame bar drops, body flares); step into
+water (steam, bar drains); R at a wall; G tap among mobs, G hold at a far spot; B tap at an unlit campfire and wood;
+set mobs alight, then hold B.
