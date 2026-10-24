@@ -2742,3 +2742,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
   flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. MCA avatars with camps of their own fight Hornkin and piglins in the Nether (Kingdoms 0.7.187). Compile-checked;
   not playtested.
+- **0.15.152, Earthling ki glow for Z Fighters only:** packs Jaymo's Kingdoms 0.7.188 (Andy: no glow or ki effects on
+  the Earthling heritage skin unless a Z Fighter, and the costume clipping was back): the surge's glow, sparks and
+  sounds only for Z Fighters, and no heritage marks or glow under a costume. See `kingdoms/MODLOG.md`. Andy then: "Can
+  you add the wraps to the gi?" An Earthling's gi wears the wraps itself, over its wristbands and in its own pose, with
+  a Z Fighter's ki glow over them while it flares (`client/costume/KingdomsWraps`, asking Kingdoms'
+  `HeritageLooks.earthlingWraps`).
