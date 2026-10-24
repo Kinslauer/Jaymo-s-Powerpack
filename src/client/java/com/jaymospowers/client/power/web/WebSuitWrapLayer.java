@@ -16,8 +16,10 @@ import net.minecraft.world.phys.Vec3;
  * The first half of putting the suit on (see WebSuitGrowth): the symbiote's tendrils leech out of the chest and wrap
  * the body, coiling round the torso, then down the arms, up round the head and down the legs, each from its joint out,
  * writhing as they go. Then, as the suit folds over each part along them, they sink into it, and the suit's leading edge
- * rolls down the part as a thick band of tendril. Building the big body, thicker tendrils lash round the body's new,
- * bigger frame first. Everyone sees it; taking the suit off runs it backward. When the tendrils themselves draw back in
+ * rolls down the part as a thick band of tendril. Building the big body, thicker tendrils lash round the chest and arms,
+ * the legs, the head last (the film's order, WebSuitGrowth.BIG_BODY), tight to the body at first and loosening as it
+ * swells into the big body's frame, and sink into the goo as it flows over them. Everyone sees it; taking the suit off
+ * runs it backward. When the tendrils themselves draw back in
  * (Wall Crawl or Living Armor ending), they go the same way: over the body, then back into the chest.
  */
 final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -42,6 +44,8 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		{-2.0F, 0.0F, -2.0F, 2.0F, 12.0F, 2.0F},
 		{-2.0F, 0.0F, -2.0F, 2.0F, 12.0F, 2.0F},
 	};
+	/** The big body's tendrils coil round a box {@code WRAP_HUG} of the way from the wearer's to the big body's, out to it as it grows. */
+	private static final float WRAP_HUG = 0.4F;
 	private static final float[][] HULK_BOXES = {
 		{-7.5F, -3.0F, -4.5F, 7.5F, 15.0F, 5.0F},
 		{-4.5F, -4.0F, -4.0F, 3.5F, 21.0F, 4.0F},
@@ -80,7 +84,9 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			return;
 		}
 		boolean hulk = Math.min(growth.from(), growth.to()) >= 1;
+		boolean big = Math.max(growth.from(), growth.to()) == 2;
 		float built = WebSuitGrowth.built(growth);
+		float hug = Mth.lerp(WebSuitGrowth.hulkness(state), WRAP_HUG, 1.0F);
 		PlayerModel parent = this.getParentModel();
 		WebSuitGrowth.shift(parent, state);
 		ModelPart[] parts = {parent.body, parent.rightArm, parent.leftArm, parent.head, parent.rightLeg, parent.leftLeg};
@@ -90,14 +96,14 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			if (ownView && i == 3) {
 				continue;
 			}
-			float wrap = WebSuitGrowth.wrapped(built, i);
-			// they sink into the suit as it folds over them (or into the muscle laid on, building the big body)
-			float sunk = hulk ? Mth.clamp((built - 0.55F - 0.08F * i) / 0.3F, 0.0F, 1.0F) : WebSuitGrowth.layered(built, i, true);
-			float edge = hulk ? 0.0F : WebSuitGrowth.layered(built, i, true);
+			float wrap = WebSuitGrowth.wrapped(built, i, big);
+			// they sink into the suit as it folds over them (or into the goo flowing over them, building the big body)
+			float sunk = hulk ? WebSuitGrowth.sunk(built, i) : WebSuitGrowth.layered(built, i, true, big);
+			float edge = hulk ? 0.0F : WebSuitGrowth.layered(built, i, true, big);
 			if (wrap <= 0.0F || sunk >= 1.0F && (edge <= 0.0F || edge >= 1.0F)) {
 				continue;
 			}
-			float[] box = hulk ? HULK_BOXES[i] : BOXES[i];
+			float[] box = hulk ? between(BOXES[i], HULK_BOXES[i], hug) : BOXES[i];
 			float thick = (hulk ? HULK_THICK : THICK) * (1.0F - sunk);
 			int part = i;
 			poseStack.pushPose();
@@ -193,6 +199,15 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			});
 			poseStack.popPose();
 		}
+	}
+
+	/** A box {@code t} of the way from {@code a} to {@code b}. */
+	private static float[] between(float[] a, float[] b, float t) {
+		float[] out = new float[a.length];
+		for (int i = 0; i < a.length; i++) {
+			out[i] = Mth.lerp(t, a[i], b[i]);
+		}
+		return out;
 	}
 
 	/** One strand coiling round a part from its joint, out to {@code wrap} of the way along it. */
