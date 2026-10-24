@@ -715,7 +715,7 @@ public class CorpseEntity extends Entity {
 		if (pickable && random.nextFloat() < com.jaymoskitchen.archery.StuckArrows.SALVAGE_CHANCE) {
 			ItemStack arrow = new ItemStack(Items.ARROW);
 			if (!player.getInventory().add(arrow)) {
-				player.drop(arrow, false);
+				player.drop(arrow, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			play(level, SoundEvents.ARROW_HIT_PLAYER, 1.2F);
 		} else {
