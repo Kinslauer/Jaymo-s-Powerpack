@@ -2759,3 +2759,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `Affinity.INHERITED`. Andy: "the power you had is given a high affinity to your child, they still have to awaken it
   themselves". At the awakening an inherited power wins over a calling and an affinity, fated or not, and is then cleared.
 - Compile-checked; not playtested.
+- **0.15.158 / Kingdoms 0.7.193, rescues, ranged tactics, royal days:**
+  - Symbiote: each time you go down it picks one of three rescues, never the last one used: the leap and zip; the
+    plain suit forming over you (up with Regeneration II for 5 s and all its abilities and the suit for 30 s, whatever
+    the bond); or a tendril lash that hurls back, hurts and slows everything after you. Its satiety now feeds your
+    hunger bar (a point for 2 hunger every 2 s while it has over 25), and a rescue feeds an empty bar, so a fed
+    symbiote no longer lets you starve down again and again. See docs/web.md.
+  - Kingdoms: ranged attackers that keep missing or can't see their target change tactics (`RangedTactics`: step
+    aside, find a clear line, close in or back off, flank, take cover, or fight hand to hand); a cove's gunners and
+    bombardiers come ashore as MCA villagers keeping their pistols and dynamite, camp raiders as villagers throw rocks
+    again, and camps tend only their own downed. Kings and queens choose plate, robes or nightwear through the day
+    (`RoyalDress`) and keep a day of court, round, meal, audience, leisure and bed. See docs/Kingdoms-Plan.md.
+    Compile-checked; not playtested.

@@ -112,6 +112,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Jobs.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
+		RangedTactics.register();
 		Tempers.register();
 		// (0.7.184) before Retinue, Pickpocket and Quests: sneak-using your own child with an earned blood waiting
 		Lineage.register();
@@ -360,6 +361,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		// 0.7.171: rulers' crowns
 		Regalia.register();
+		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)

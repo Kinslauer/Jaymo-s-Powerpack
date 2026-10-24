@@ -227,6 +227,18 @@ final class Routines {
 		} else {
 			kinds.addAll(List.of(Kind.FIRE, Kind.FIRE, Kind.HOME, Kind.CHAT, Kind.DANCE, Kind.CHORES, Kind.READ, Kind.SWEEP));
 		}
+		if (Rulers.is(v)) {
+			// (0.7.181) a ruler's own hours: they dine at midday, and at leisure take the garden, a stroll and the animals
+			// (and a word with whoever is near), where townsfolk have their trades
+			kinds.clear();
+			if (t >= RoyalDress.MEAL_FROM && t < RoyalDress.MEAL_TO) {
+				kinds.addAll(List.of(Kind.LUNCH, Kind.LUNCH, Kind.CHAT));
+			} else if (t < EVENING) {
+				kinds.addAll(List.of(Kind.GARDEN, Kind.STROLL, Kind.ANIMALS, Kind.CHAT, Kind.CHAT, Kind.READ));
+			} else {
+				kinds.addAll(List.of(Kind.FIRE, Kind.CHAT, Kind.DANCE, Kind.READ, Kind.HOME));
+			}
+		}
 		Kind kind = kinds.get(random.nextInt(kinds.size()));
 		Doing d = switch (kind) {
 			case WATER -> at(level, kind, pick(marks.water(), v, random), now, linger);

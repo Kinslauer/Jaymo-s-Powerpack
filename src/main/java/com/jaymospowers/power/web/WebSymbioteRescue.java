@@ -14,6 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,6 +37,21 @@ import org.jspecify.annotations.Nullable;
  * there was nothing to zip to and you've landed), it hands you back the controls with a line. No falls hurt you in
  * between. It refuses only when it's starving ({@link WebSymbiote#STARVING} or under) and the bond is under
  * {@code LOW_BOND}: then it says it's too weak, and you lie there as anyone would.
+ * <p>
+ * (0.15.147) Andy: "Symbiote ai should not be repeating actions ... the symbiote just kept reviving them and jumping
+ * away. That should be one of maybe 3 actions. Another should involve the thin suit slowly forming over you, giving you
+ * regeneration for 5s and empowering you with its abilities to fight yourself out of the situation." Each rescue picks
+ * one of three, never the one it used last time:
+ * <ul>
+ * <li>{@code LEAP}: the leap and zip above.</li>
+ * <li>{@code SUIT}: the plain suit forms over you where you lie ({@code FORM_TICKS}, the manual-equip growth), then you
+ * get up with {@code SUIT_HEALTH}, Regeneration for {@code REGEN_TICKS} (5 s) and everything it has
+ * ({@link WebSymbiote#EMPOWERED}: all its abilities and the suit, whatever the bond) for {@code EMPOWER_TICKS}; you
+ * keep the controls and fight your way out.</li>
+ * <li>{@code LASH}: tendrils burst out of you, hurl back and hurt everything after you within {@code LASH_RANGE}
+ * ({@code LASH_*}), slowed a moment, and you get up with {@code LASH_HEALTH} and a beat of Resistance.</li>
+ * </ul>
+ * Downed by hunger with your bar empty, it feeds you {@code RISE_FOOD} first, so you don't drop again at once.
  */
 public final class WebSymbioteRescue {
 	static final int BEAT_TICKS = 15;
@@ -52,8 +69,19 @@ public final class WebSymbioteRescue {
 	static final float[] ZIP_PITCHES = {-35.0F, -18.0F, 0.0F, 15.0F, 30.0F};
 	static final double ZIP_MIN = 8.0, THREAT_RANGE = 24.0;
 	static final int LINES = 3;
+	/** The three rescues; a rescue never repeats the last one. */
+	static final int LEAP = 0, SUIT = 1, LASH = 2, ACTIONS = 3;
+	/** The suit rescue: how long the suit takes to form over you, then the health, regeneration and lent powers you get. */
+	static final int FORM_TICKS = 30, REGEN_TICKS = 100, REGEN_AMPLIFIER = 1, EMPOWER_TICKS = 600;
+	static final float SUIT_HEALTH = 0.25F;
+	/** The lash: reach, damage, how hard they're thrown, how long they're slowed, and your health and Resistance after. */
+	static final double LASH_RANGE = 8.0, LASH_PUSH = 1.4, LASH_LIFT = 0.45;
+	static final float LASH_DAMAGE = 5.0F, LASH_HEALTH = 0.4F;
+	static final int LASH_SLOW_TICKS = 60, LASH_RESIST_TICKS = 60;
+	/** Felled with your hunger bar under this, it feeds you up to it as you rise. */
+	static final int RISE_FOOD = 8;
 
-	private static final int NONE = 0, WAITING = 1, LEAPING = 2, ZIPPING = 3, LANDING = 4;
+	private static final int NONE = 0, WAITING = 1, LEAPING = 2, ZIPPING = 3, LANDING = 4, FORMING = 5;
 
 	private static final class Rescue {
 		int phase = NONE;
@@ -62,6 +90,8 @@ public final class WebSymbioteRescue {
 		boolean rising;
 		boolean refused;
 		float healthWas = 1.0F;
+		int last = -1;
+		int action = LEAP;
 	}
 
 	private static final Map<UUID, Rescue> RESCUES = new HashMap<>();
@@ -114,7 +144,18 @@ public final class WebSymbioteRescue {
 		switch (rescue.phase) {
 			case WAITING -> {
 				if (now - rescue.phaseAt >= BEAT_TICKS) {
-					rise(player, state, rescue, now);
+					rescue.action = pick(player, rescue);
+					rescue.last = rescue.action;
+					switch (rescue.action) {
+						case SUIT -> form(player, state, rescue, now);
+						case LASH -> lash(player, state, rescue, now);
+						default -> rise(player, state, rescue, now);
+					}
+				}
+			}
+			case FORMING -> {
+				if (now - rescue.phaseAt >= FORM_TICKS) {
+					empower(player, rescue, now);
 				}
 			}
 			case LEAPING -> {
@@ -151,14 +192,92 @@ public final class WebSymbioteRescue {
 		return rescue.phase != NONE;
 	}
 
+	/** Any of the three but the last one used. */
+	private static int pick(ServerPlayer player, Rescue rescue) {
+		int action = player.getRandom().nextInt(ACTIONS - (rescue.last < 0 ? 0 : 1));
+		return rescue.last >= 0 && action >= rescue.last ? action + 1 : action;
+	}
+
+	/** How close that was, by your health before the felling blow. */
+	private static String tier(Rescue rescue) {
+		return rescue.healthWas >= TIER_HIGH ? "outright" : rescue.healthWas >= TIER_LOW ? "close" : "thread";
+	}
+
+	/** Up with this share of your health, for its hunger; your own hunger bar fed if it ran dry. */
+	private static void getUp(ServerPlayer player, WebSymbioteState state, float health) {
+		Downed.rouse(player.level(), player, player.getMaxHealth() * health);
+		player.setHealth(Math.max(player.getHealth(), player.getMaxHealth() * health));
+		WebSymbiote.set(player, state.withSatiety(Math.max(0, state.satiety() - SATIETY_COST)));
+		int food = player.getFoodData().getFoodLevel();
+		if (food < RISE_FOOD) {
+			player.getFoodData().eat(RISE_FOOD - food, 0.5F);
+		}
+	}
+
+	/** The suit rescue: the plain suit starts forming over you where you lie. */
+	private static void form(ServerPlayer player, WebSymbioteState state, Rescue rescue, long now) {
+		ServerLevel level = player.level();
+		WebSymbiote.set(player, state.withFlag(WebSymbioteState.SUIT, true).withFlag(WebSymbioteState.ARMOR, false)
+			.withFlag(WebSymbioteState.BULK, false));
+		player.removeAttached(WebSymbioteBond.FACE);
+		// (the manual-equip growth: tendrils wrap you, goo, then the suit)
+		player.setAttached(WebSymbiote.DONNED, now);
+		WebSymbiote.whisper(player, "rescue.suit." + tier(rescue) + "." + (1 + player.getRandom().nextInt(LINES)));
+		WebSymbiote.hush(player, now + FORM_TICKS + 60);
+		WebSymbiote.dread(player, FORM_TICKS + 20, true, true);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.sendParticles(WebSymbiote.dust(1.2F), player.getX(), player.getY() + 0.5, player.getZ(), 24, 0.5, 0.3, 0.5, 0.0);
+		rescue.phase = FORMING;
+		rescue.phaseAt = now;
+	}
+
+	/** The suit has you: up, regenerating, with all it has for a while. The controls stay yours. */
+	private static void empower(ServerPlayer player, Rescue rescue, long now) {
+		ServerLevel level = player.level();
+		getUp(player, WebSymbiote.state(player), SUIT_HEALTH);
+		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, REGEN_TICKS, REGEN_AMPLIFIER));
+		player.setAttached(WebSymbiote.EMPOWERED, now + EMPOWER_TICKS);
+		WebSymbiote.whisper(player, "rescue.empower." + (1 + player.getRandom().nextInt(LINES)));
+		WebSymbiote.hush(player, now + 100);
+		Shakes.send(player, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.5F, 1.5F);
+		level.sendParticles(WebSymbiote.dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.0);
+		rescue.phase = NONE;
+	}
+
+	/** The lash: tendrils burst out of you at everything after you, and you get up among them. */
+	private static void lash(ServerPlayer player, WebSymbioteState state, Rescue rescue, long now) {
+		ServerLevel level = player.level();
+		List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(LASH_RANGE),
+			e -> e != player && e.isAlive() && (e == foe(player) || e instanceof Mob m && (m.getTarget() == player
+				|| m instanceof net.minecraft.world.entity.monster.Enemy)));
+		for (LivingEntity e : near) {
+			Vec3 away = e.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+			e.hurtServer(level, level.damageSources().playerAttack(player), LASH_DAMAGE);
+			e.push(away.x * LASH_PUSH, LASH_LIFT, away.z * LASH_PUSH);
+			e.needsSync = true;
+			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, LASH_SLOW_TICKS, 2));
+			level.sendParticles(WebSymbiote.dust(1.0F), e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 10, 0.3, 0.4, 0.3, 0.0);
+		}
+		getUp(player, state, LASH_HEALTH);
+		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, LASH_RESIST_TICKS, 1));
+		WebSymbiote.whisper(player, "rescue.lash." + tier(rescue) + "." + (1 + player.getRandom().nextInt(LINES)));
+		WebSymbiote.hush(player, now + 120);
+		WebSymbiote.dread(player, 40, true, true);
+		Shakes.send(player, 1.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 1.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
+		level.sendParticles(WebSymbiote.dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 40, LASH_RANGE * 0.3, 0.6, LASH_RANGE * 0.3, 0.0);
+		rescue.phase = NONE;
+	}
+
 	/** Up you get: healed, told how close that was, and the leap starts. */
 	private static void rise(ServerPlayer player, WebSymbioteState state, Rescue rescue, long now) {
 		ServerLevel level = player.level();
 		LivingEntity foe = foe(player);
-		Downed.rouse(level, player, player.getMaxHealth() * HEALTH);
-		player.setHealth(Math.max(player.getHealth(), player.getMaxHealth() * HEALTH));
-		WebSymbiote.set(player, state.withSatiety(Math.max(0, state.satiety() - SATIETY_COST)));
-		String tier = rescue.healthWas >= TIER_HIGH ? "outright" : rescue.healthWas >= TIER_LOW ? "close" : "thread";
+		getUp(player, state, HEALTH);
+		String tier = tier(rescue);
 		int line = 1 + player.getRandom().nextInt(LINES);
 		if (foe != null) {
 			WebSymbiote.whisper(player, "rescue." + tier + ".foe." + line, foe.getDisplayName());

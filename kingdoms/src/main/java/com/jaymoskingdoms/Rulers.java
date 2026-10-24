@@ -340,6 +340,8 @@ public final class Rulers {
 	 * any for them, a crown and (without those clothes) royal attire ({@link Regalia}), and a ruler's health.
 	 */
 	static void fit(PathfinderMob mob, int role, Faction faction) {
+		// (0.7.181) a fresh set of regalia: what they had put by ({@link RoyalDress}) was regalia too
+		RoyalDress.reset(mob);
 		if (mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.GOLDEN_HELMET)) {
 			// (the plain gold helmet rulers wore before 0.7.171)
 			mob.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
@@ -358,6 +360,7 @@ public final class Rulers {
 
 	/** Off the throne (it fell, or went to another; their role already gone): the regalia, royal clothes and health go. */
 	static void unfit(PathfinderMob mob) {
+		RoyalDress.reset(mob);
 		Regalia.undress(mob);
 		McaCompat.redress(mob);
 		AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
@@ -428,7 +431,7 @@ public final class Rulers {
 		if (w.role() != role) {
 			w.enlist(role, f.id());
 			fit(mob, role, f);
-		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob)) {
+		} else if (mob.tickCount % REGALIA_TICKS == 0 && !Regalia.crowned(mob) && !RoyalDress.nightwear(mob)) {
 			// (0.7.171) crowned before the regalia (or it was taken off them): they're dressed for the throne
 			fit(mob, role, f);
 			if (f.leader().map(mob.getUUID()::equals).orElse(false)) {
@@ -482,9 +485,10 @@ public final class Rulers {
 		return true;
 	}
 
-	/** (0.7.175) A villager ruler's own hours (time of day {@code t}): after court, and the night. */
+	/** (0.7.175) A villager ruler's own hours (time of day {@code t}): their meal, after court, and the night. */
 	static boolean offDuty(long t) {
-		return t >= COURT_TO || t < Royals.DAWN;
+		// (0.7.181) and their midday meal, between the round and the afternoon's audience
+		return t >= COURT_TO || t < Royals.DAWN || t >= RoyalDress.MEAL_FROM && t < RoyalDress.MEAL_TO;
 	}
 
 	/**
