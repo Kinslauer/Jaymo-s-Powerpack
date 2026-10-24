@@ -57,7 +57,7 @@ import net.minecraft.world.phys.Vec3;
  * found in the future (in no creative tab or JEI), but one you bring back is yours.</li>
  * </ul>
  * It is always night there (the {@code jaymospowers:future_night} timeline). Arrival square: {@link FutureStart}.
- * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}. Androids and mechs: {@link FutureMachines}. Guns: {@link FutureGuns}.
+ * Ruins: {@link FutureRuins}. The city beyond the island: {@link FutureCities}. The dead: {@link FutureFerals}. Androids and mechs: {@link FutureMachines}. Guns: {@link FutureGuns}.
  */
 public final class Future {
 	public static final ResourceKey<Level> FUTURE = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("future"));
@@ -116,6 +116,7 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
 		FutureGuns.init();
 		FutureMachines.init();
+		FutureCities.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
 
