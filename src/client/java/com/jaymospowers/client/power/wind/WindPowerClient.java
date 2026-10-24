@@ -87,6 +87,12 @@ public final class WindPowerClient implements PowerClient {
 		return this.flight;
 	}
 
+	@Override
+	public float cooldown(LocalPlayer player, PowerKey key) {
+		WindAbility ability = WindAbility.byKey(key);
+		return ability == null ? 0.0F : Math.clamp(cooldown(ability) / (float)cooldownTotal(ability), 0.0F, 1.0F);
+	}
+
 	int cooldown(WindAbility ability) {
 		if (ability == WindAbility.TAILWIND && groundedGust()) {
 			return this.gustCooldown;
