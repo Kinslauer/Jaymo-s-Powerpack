@@ -1529,3 +1529,19 @@ to 3 removals."
 - Andy: "change the hesitation on eating players back to 3s. the messages are good maybe add a few more variations to
   the pool". `WebSymbiote.HESITATE_TICKS` 60 (3 s); `HESITATE_LINES` 9 and `HESITATE_THROWN_LINES` 4
   (`hesitate.N`, `hesitate.thrown.N` in `lang/parts/web.json`).
+
+## 0.15.152: goo globs, tendrils in, the big body as congealed goo
+- **Living Armor's tendrils drawn in (`WebSymbioteState.TENDRILS_IN`):** in the big body with the tendrils out, the
+  first Living Armor press draws them in (`WebSymbiote.drawIn`): the big body alone, upright, no grabs, strikes or
+  Wall Crawl; the next press takes the armour off. `armored()` now means the tendrils are out; `livingArmor()` is the
+  armour in any form (strength, falls, the Suit key). A takeover or the near-death roar brings them back out.
+- **Flail when hit (`WebSymbiote.FLAIL`):** struck with the tendrils out, they thrash for `FLAIL_TICKS` and hit
+  everything within `FLAIL_RADIUS` (x your size) for `FLAIL_DAMAGE` every `FLAIL_HIT_EVERY`.
+- **Goo globs (`WebGooGlobs`):** 14 living blobs creep, swell and pinch off lobes over the torso, shoulders, arms,
+  legs and the back of the head (never face, pecs or soles); each tendril grows out of one, and flows back to its old
+  root (shoulders, upper back) while it climbs, strikes or forms a weapon.
+- **The big body (`tools/gen_web_hulk.py`, `WebHulk`, `WebFeral.brute`, `WebSuitGrowth.bigBody`):** rounded goo
+  masses instead of plates, built in the film's order (chest and arms, shoulders, legs, the head last, then it swells);
+  hunched and galloping with the tendrils out, a heavy upright brute walk and two-legged charge with them in.
+- **Check first in game:** glob sizes on the big body (`BULK_OUT_*`, `BULK_SIZE` guessed), the snap between hunch
+  and upright (no blend), the fangs doubling for a moment near the end of the build, flail damage near friends.
