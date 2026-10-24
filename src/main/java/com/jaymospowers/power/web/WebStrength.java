@@ -342,7 +342,7 @@ public final class WebStrength {
 
 	/** The symbiote suit (or its big body, or Living Armor) is on: no webbed fists under it (Andy). */
 	static boolean suited(Player player) {
-		return WebSymbiote.leapBody(player) || WebSymbiote.armored(player);
+		return WebSymbiote.leapBody(player) || WebSymbiote.livingArmor(player);
 	}
 
 	/** Sneak + Z: coat the fists in web. */

@@ -224,7 +224,7 @@ public final class WebMorph {
 
 	/** The suit, the big body or Living Armor's tendrils: something of the symbiote's to form a weapon from. */
 	private static boolean worn(Player player) {
-		return WebSymbiote.suitShown(player) || WebSymbiote.armored(player);
+		return WebSymbiote.suitShown(player) || WebSymbiote.livingArmor(player);
 	}
 
 	/** Whether the weapon forms on a tendril (Living Armor's are out, or the big body's) rather than the arm. */

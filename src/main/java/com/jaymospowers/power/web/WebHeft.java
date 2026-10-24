@@ -74,7 +74,7 @@ public final class WebHeft {
 
 	/** How much {@code player} can haul on a web line by themselves. */
 	static double strength(ServerPlayer player) {
-		double scale = WebSymbiote.armored(player) ? ARMOR_STRENGTH : WebSymbiote.suitShown(player) ? SUIT_STRENGTH : 1.0;
+		double scale = WebSymbiote.livingArmor(player) ? ARMOR_STRENGTH : WebSymbiote.suitShown(player) ? SUIT_STRENGTH : 1.0;
 		return WebPower.YANK_HEAVY_VOLUME * scale;
 	}
 

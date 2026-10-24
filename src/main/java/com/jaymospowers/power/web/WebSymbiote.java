@@ -924,6 +924,8 @@ public final class WebSymbiote {
 		boolean caughtFall;
 		/** When it can strike back again; whether it has already turned on you this time your hunger ran out. */
 		long retaliateReadyAt;
+		/** (0.15.152) While its tendrils flail: when they next hit what's near. */
+		long flailHitAt;
 		boolean sulkedThisTime;
 		/** (0.15.33) Lines it has said at your asking: when it last said each, and how many times running (see {@link #ANNOY_WINDOW}). */
 		final java.util.Map<String, long[]> annoyed = new java.util.HashMap<>();
@@ -1068,6 +1070,9 @@ public final class WebSymbiote {
 			if (entity instanceof ServerPlayer victim && source.getEntity() instanceof LivingEntity attacker && attacker != victim && damageTaken > 0.0F) {
 				retaliate(victim, attacker);
 			}
+			if (entity instanceof ServerPlayer victim && damageTaken > 0.0F) {
+				flail(victim);
+			}
 			if (entity instanceof ServerPlayer victim && damageTaken > 0.0F && victim.getAttached(LIVE) instanceof Live live && live.fleeing) {
 				live.fleeHits++;
 			}
@@ -1087,7 +1092,7 @@ public final class WebSymbiote {
 
 	/** (0.15.33) It takes your landings for you: in either black suit always; bare, unless it's sulking. */
 	public static boolean takesFalls(Player player) {
-		return suitShown(player) || armored(player) || isBonded(player) && !player.isCreative() && !sulking(player);
+		return suitShown(player) || livingArmor(player) || isBonded(player) && !player.isCreative() && !sulking(player);
 	}
 
 	/** Bonded (since 0.15.52 anyone can host one, web slinger or not: see {@link WebSymbioteInfection}). */
@@ -1103,9 +1108,18 @@ public final class WebSymbiote {
 
 	/**
 	 * Living Armor's tendrils are out (they grab, hold, strike and tear chunks; the plain suit only swings), over any
-	 * suit or none, or the big body is up.
+	 * suit or none, or with the big body (unless you drew them in: {@link WebSymbioteState#TENDRILS_IN}).
 	 */
 	public static boolean armored(Player player) {
+		return livingArmor(player) && !isToggled(player, WebSymbioteState.TENDRILS_IN);
+	}
+
+	/**
+	 * (0.15.152) Living Armor is on in any form: its tendrils, the big body, or the big body worn alone with the
+	 * tendrils drawn in. For what the armour's body does (strength, falls, the Suit key shedding it); {@link #armored}
+	 * is for what the tendrils do.
+	 */
+	public static boolean livingArmor(Player player) {
 		return isToggled(player, WebSymbioteState.ARMOR) || isToggled(player, WebSymbioteState.BULK);
 	}
 
@@ -1223,6 +1237,13 @@ public final class WebSymbiote {
 		// Wall Crawl's tendrils go with Living Armor: when it withdraws (or is put away), the crawl ends too
 		if (was != null && was.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.ARMOR) && state.has(WebSymbioteState.CRAWL)) {
 			state = state.withFlag(WebSymbioteState.CRAWL, false);
+		}
+		// (0.15.152) drawn in, the tendrils can't walk you up a wall either; and they come back out with the next armour
+		if (state.has(WebSymbioteState.TENDRILS_IN) && state.has(WebSymbioteState.CRAWL)) {
+			state = state.withFlag(WebSymbioteState.CRAWL, false);
+		}
+		if (state.has(WebSymbioteState.TENDRILS_IN) && !state.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.BULK)) {
+			state = state.withFlag(WebSymbioteState.TENDRILS_IN, false);
 		}
 		if (!state.equals(was)) {
 			player.setAttached(STATE, state);
@@ -1795,6 +1816,11 @@ public final class WebSymbiote {
 		if (!next.has(WebSymbioteState.ARMOR)) {
 			live.armorSlim = false;
 		}
+		// (0.15.152) when it has the wheel (a takeover, the near-death roar), its tendrils are out whatever you chose
+		if ((live.takeoverTicks > 0 || roarAge >= 0L) && next.has(WebSymbioteState.TENDRILS_IN)) {
+			next = next.withFlag(WebSymbioteState.TENDRILS_IN, false);
+		}
+		flailTick(player, live, now);
 		boolean bulkWanted = live.takeoverTicks > 0 && live.bigTakeover || roarAge >= ROAR_BULK_AT
 			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
 			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && live.bigTakeover && !sulking(player) && !live.armorSlim;
@@ -2102,7 +2128,7 @@ public final class WebSymbiote {
 	 * just as when you burn, once per burning episode.
 	 */
 	public static void nearFlames(ServerPlayer player) {
-		if (!(suitShown(player) || armored(player)) || !player.isAlive() || player.isSpectator()) {
+		if (!(suitShown(player) || livingArmor(player)) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
 		Live live = live(player);
@@ -3440,7 +3466,7 @@ public final class WebSymbiote {
 		}
 		if (ability == SUIT_TOGGLE && isBonded(player)) {
 			WebSymbioteState state = state(player);
-			if (armored(player) && !driving(player) && !roaring(player) && (state.has(WebSymbioteState.SUIT) || suitAllowed(player))) {
+			if (livingArmor(player) && !driving(player) && !roaring(player) && (state.has(WebSymbioteState.SUIT) || suitAllowed(player))) {
 				// Living Armor (or the big body) comes down to the plain suit first, one form a press (Andy: "activating
 				// the suit while wearing the living armor brings you back to the suit, then back to your skin ... that way
 				// you can access whatever at whatever bond level"); with Living Armor put away the bond doesn't swell it
@@ -3527,7 +3553,9 @@ public final class WebSymbiote {
 			return;
 		}
 		// a weak bond barely listens (it always lets you put a toggle away)
-		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
+		// (0.15.152) in the big body with its tendrils out, the first press only draws them in (Andy: the big body alone)
+		boolean drawIn = ability == ARMOR && bulked(player) && armored(player) && live.takeoverTicks <= 0;
+		boolean puttingAway = drawIn || ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
 		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
 			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND)) {
 			nag(player, "ignores");
@@ -3537,7 +3565,7 @@ public final class WebSymbiote {
 		}
 		boolean done = switch (ability) {
 			case TENDRIL -> letGoOfWall(player) || WebTendrils.radialGrab(player) || tendril(player);
-			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
+			case ARMOR -> drawIn ? drawIn(player) : toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);
 			// in the big body, the Spike Burst is a roar
@@ -3561,7 +3589,10 @@ public final class WebSymbiote {
 			cooldown += SHROUD_TICKS;
 		} else if (ability == ARMOR) {
 			// out: it can be put away again soon; away: its cooldown starts now
-			if (state(player).has(WebSymbioteState.ARMOR)) {
+			if (drawIn) {
+				cooldown = ARMOR_TOGGLE_GAP;
+				live.armorUsedAt = now;
+			} else if (state(player).has(WebSymbioteState.ARMOR)) {
 				cooldown = ARMOR_TOGGLE_GAP;
 				live.armorOnAt = now;
 				live.armorUsedAt = now;
@@ -3645,6 +3676,19 @@ public final class WebSymbiote {
 			Vec3 at = from.add(d.scale(i / (double)steps));
 			level.sendParticles(dust(0.9F), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
+	}
+
+	/** (0.15.152) The tendrils sink back into the big body, which stays: you walk upright in it, no tendrils. */
+	private static boolean drawIn(ServerPlayer player) {
+		WebSymbioteState state = state(player);
+		set(player, state.withFlag(WebSymbioteState.TENDRILS_IN, true).withFlag(WebSymbioteState.CRAWL, false));
+		player.removeAttached(STRIKE);
+		player.removeAttached(FLAIL);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.8F, 0.5F);
+		level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.45, 0.8, 0.45, 0.0);
+		return true;
 	}
 
 	private static boolean toggle(ServerPlayer player, int flag) {
@@ -4094,6 +4138,65 @@ public final class WebSymbiote {
 	}
 
 	/** Struck with the armour up: a tendril lashes back (or snatches the attacker from further off). */
+	/**
+	 * (0.15.152) Struck with its tendrils out, every one of them flails (Andy: "they should flail out visually and
+	 * dangerously physically when attacked"): for {@code FLAIL_TICKS} they thrash wildly out from wherever they grow,
+	 * and every {@code FLAIL_HIT_EVERY} ticks whatever living thing is within {@code FLAIL_RADIUS} (× your size) takes
+	 * {@code FLAIL_DAMAGE} and is thrown {@code FLAIL_KNOCK} away. Each new hit starts it over. Synced (the start), so
+	 * everyone sees the thrashing.
+	 */
+	public static final int FLAIL_TICKS = 24, FLAIL_HIT_EVERY = 5;
+	public static final double FLAIL_RADIUS = 3.2, FLAIL_KNOCK = 0.55, FLAIL_LIFT = 0.25;
+	public static final float FLAIL_DAMAGE = 3.0F;
+	public static final AttachmentType<Long> FLAIL = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_flail"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
+	private static void flail(ServerPlayer player) {
+		if (!armored(player) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		Long was = player.getAttached(FLAIL);
+		player.setAttached(FLAIL, now);
+		if (was == null || now - was >= FLAIL_TICKS) {
+			live(player).flailHitAt = now + 1;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 0.7F, 1.5F);
+		}
+	}
+
+	/** The flailing tendrils, a tick at a time: they hit what's near, and stop when it's over or they're drawn in. */
+	private static void flailTick(ServerPlayer player, Live live, long now) {
+		Long at = player.getAttached(FLAIL);
+		if (at == null) {
+			return;
+		}
+		if (now - at >= FLAIL_TICKS || !armored(player)) {
+			player.removeAttached(FLAIL);
+			return;
+		}
+		if (now < live.flailHitAt) {
+			return;
+		}
+		live.flailHitAt = now + FLAIL_HIT_EVERY;
+		ServerLevel level = player.level();
+		double radius = FLAIL_RADIUS * player.getScale();
+		boolean hit = false;
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
+				&& !(e instanceof Player p && p.isCreative()) && e.distanceTo(player) <= radius + e.getBbWidth() * 0.5)) {
+			if (living.hurtServer(level, level.damageSources().playerAttack(player), FLAIL_DAMAGE)) {
+				Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+				away = away.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : away.normalize();
+				living.push(away.x * FLAIL_KNOCK, FLAIL_LIFT, away.z * FLAIL_KNOCK);
+				living.syncVelocity = true;
+				hit = true;
+			}
+		}
+		if (hit) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.9F, 0.6F);
+		}
+	}
+
 	private static void retaliate(ServerPlayer player, LivingEntity attacker) {
 		if (!armored(player) || !attacker.isAlive() || player.isCreative() && !player.isAlive()) {
 			return;
