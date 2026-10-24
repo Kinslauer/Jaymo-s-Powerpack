@@ -38,6 +38,10 @@ import net.minecraft.world.entity.player.Player;
  * every moon as the ape, every minute in it, every fit he loses and everyone it kills, and falls each time he wins one.
  * The more primal, the faster the rage builds, the longer the fits and the harder they are to break; at 100 the ape is
  * all that's left: a fit lasts until the moon lets him go.
+ *
+ * <p>Andy: "If you are able to fight it off successfully multiple times give access to a new form hidden until you do, a
+ * super 4". Win {@link #SUPER_4_FITS} fits and the ape and the man make their peace: {@link #SUPER_4} opens, the
+ * primal ape's look on his own body (red fur, a long red mane, fire and sparks), taken with C from his highest form.
  */
 public final class ApeRage {
 	/** Rage a second as the ape (times 1 + primal / {@code PRIMAL_RAGE_SCALE}), per point of damage taken, per kill, when crippled. */
@@ -54,6 +58,8 @@ public final class ApeRage {
 	/** Primal: gained each change, each minute as the ape, each fit lost, each person killed in a fit; lost each fit won. */
 	static final int PRIMAL_CHANGE = 5, PRIMAL_MINUTE = 1, PRIMAL_LOST_FIT = 3, PRIMAL_KILL = 1, PRIMAL_WON_FIT = 4;
 	public static final int PRIMAL_MAX = 100;
+	/** Fits won (ever) before Super 4 opens; Super 4's form number (past the three bought ones). */
+	public static final int SUPER_4_FITS = 5, SUPER_4 = 4;
 	/** A fit shakes his screen: as it starts, and every this many ticks while it has him. */
 	static final float FIT_SHAKE = 2.2F, FIT_PULSE_SHAKE = 0.8F;
 	static final int FIT_PULSE_EVERY = 30;
@@ -67,6 +73,13 @@ public final class ApeRage {
 	/** A fit has him: how far his struggle's got (0-1). Synced to him. */
 	public static final AttachmentType<Float> FIT = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_fit"),
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.targetOnly()));
+
+	/** Fits he's won, ever (saved, kept through death). */
+	public static final AttachmentType<Integer> TAMED = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_tamed"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
+	/** Super 4 is open to him (saved, kept through death, synced to him). */
+	public static final AttachmentType<Boolean> SUPER_4_OPEN = AttachmentRegistry.create(JaymosPowers.id("zfighter_super_4"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
 	/** Player → server: a heave against a fit. */
 	public record Struggle() implements CustomPacketPayload {
@@ -132,6 +145,12 @@ public final class ApeRage {
 	public static float rage(Player player) {
 		Float r = player.getAttached(RAGE);
 		return r == null ? 0.0F : r;
+	}
+
+	/** Super 4 is his to take now: opened, a Warrior-born past the breakthrough, not the ape. */
+	public static boolean super4(Player player) {
+		return Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN)) && ZFighterLineage.of(player) == ZFighterLineage.WARRIOR
+			&& ZFighterTraining.formsOpen(player) >= 1 && !ZFighterLineage.ape(player);
 	}
 
 	/** A fit has him (either side). */
@@ -284,11 +303,31 @@ public final class ApeRage {
 		addPrimal(player, won ? -PRIMAL_WON_FIT : PRIMAL_LOST_FIT);
 		ServerLevel level = player.level();
 		if (won) {
+			int tamed = player.getAttachedOrElse(TAMED, 0) + 1;
+			player.setAttached(TAMED, tamed);
+			if (tamed >= SUPER_4_FITS && !Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN))) {
+				openSuper4(player);
+				return;
+			}
+		}
+		if (won) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.PLAYERS, 3.0F, 0.5F);
 			com.jaymospowers.core.Shakes.send(player, FIT_SHAKE, null);
 		}
 		player.sendOverlayMessage(Component.translatable(won ? "message.jaymospowers.zfighter_ape_fit.won." + (1 + player.getRandom().nextInt(3))
 			: "message.jaymospowers.zfighter_ape_fit.over").withStyle(won ? ChatFormatting.GOLD : ChatFormatting.GRAY, ChatFormatting.ITALIC));
+	}
+
+	/** The ape and the man make their peace: Super 4 opens. */
+	static void openSuper4(ServerPlayer player) {
+		player.setAttached(SUPER_4_OPEN, true);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 4.0F, 0.8F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
+			player.getZ(), 120, player.getBbWidth() * 0.5, player.getBbHeight() * 0.4, player.getBbWidth() * 0.5, 0.08);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), ZFighterLineage.APE_STEP_RANGE * 1.5, FIT_SHAKE);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_super_4_open").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
 	}
 
 	/** Operators: set primal (and, with {@code fit}, fill the rage so a fit comes now). */

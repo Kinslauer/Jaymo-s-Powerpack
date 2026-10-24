@@ -58,3 +58,13 @@ for 10 s + 0.2 s per primal; hammer movement keys to break it (15 presses + prim
 30, primal -4. Ride it out: rage 50, primal +3. Primal (kept) also grows +5 a change, +1 a minute as the ape, +1 per
 person killed in a fit; at 100 a fit lasts until the moon lets go (60 presses). HUD: rage bar under the crosshair area,
 fit bar while it has you. Debug: `/powerdebug zfighter ape primal <n>`, `/powerdebug zfighter ape fit`.
+
+## Super 4 (pack 0.15.148)
+Andy: "If you are able to fight it off successfully multiple times give access to a new form hidden until you do, a super
+4, combining the primal ape look with the character, keeping the long hair, but it goes red instead of gold, crackling
+with fire and sparks". Win `ApeRage.SUPER_4_FITS` (5) ape fits (`TAMED` count) and `SUPER_4_OPEN` sets; Saiyan
+(warrior) lineage only. Hidden from the training screen until then. C from your highest unlocked form goes straight to
+Super 4 (90 ki); C in Super 4 is the Spirit Bomb. Stats are the last entry of each form array in `ZFighterPower`
+(fist 0.75, ki 1.55, drain 0.22). Hair stays long (Super 3 shape) and turns red via `ZFighterLineage.COLORS`; red fur
+on back, shoulders and arms from `ZFighterPrimalFur` (texture from `tools/gen_primal_fur.py`); flames, small flames
+and lava embers crackle off you. No mastery for Super 4. Test: `/powerdebug zfighter ape super4`.

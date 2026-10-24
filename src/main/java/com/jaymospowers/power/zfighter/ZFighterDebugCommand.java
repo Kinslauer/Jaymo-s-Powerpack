@@ -135,6 +135,13 @@ final class ZFighterDebugCommand {
 							c.getSource().sendSuccess(() -> Component.literal(ZFighterLineage.ape(player) ? "Rage full: a fit comes now (primal "
 								+ ApeRage.primal(player) + ")." : "Not the Great Ape right now."), false);
 							return 1;
+						}))
+					.then(Commands.literal("super4")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							ApeRage.openSuper4(player);
+							c.getSource().sendSuccess(() -> Component.literal("Super 4 unlocked (Saiyan lineage, C from your highest form)."), false);
+							return 1;
 						})))
 				.then(Commands.literal("raid")
 					.executes(c -> {

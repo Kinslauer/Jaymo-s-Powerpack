@@ -143,7 +143,7 @@ public final class ZFighterLineage {
 	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
 	static final int REGROW_EVERY = 600;
 	/** Giant forms grow him by this much (scale added, by form). */
-	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3};
+	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3, 1.3};
 	static final float HEAL_KI = 20.0F;
 	static final float HEAL = 6.0F;
 	static final double HEAL_RANGE = 8.0;
@@ -151,11 +151,12 @@ public final class ZFighterLineage {
 
 	/** Aura colours: [lineage][form]. */
 	private static final int[][] COLORS = {
-		{0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020},
-		{0xFFFFFF, 0xFFD54A, 0xFFE873, 0xFFC020},
-		{0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020},
-		{0xA8FF8A, 0x6CF060, 0x48D848, 0x2CC02C},
-		{0xD8B8FF, 0xC89BFF, 0xF0E8FF, 0xFFD030},
+		{0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xFFC020},
+		{0xFFFFFF, 0xFFD54A, 0xFFE873, 0xFFC020, 0xFFC020},
+		// (0.15.148) the Warrior-born's Super 4: the ape's red
+		{0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818},
+		{0xA8FF8A, 0x6CF060, 0x48D848, 0x2CC02C, 0x2CC02C},
+		{0xD8B8FF, 0xC89BFF, 0xF0E8FF, 0xFFD030, 0xFFD030},
 	};
 
 	/** Which lineage he is ({@link #NONE} until he picks). Everyone sees it (the tail). Saved, kept through death. */
@@ -266,7 +267,7 @@ public final class ZFighterLineage {
 
 	/** The aura's colour for this lineage and form. */
 	public static int color(int lineage, int form) {
-		return COLORS[Math.clamp(lineage, 0, LINEAGES - 1)][Math.clamp(form, 0, 3)];
+		return COLORS[Math.clamp(lineage, 0, LINEAGES - 1)][Math.clamp(form, 0, ApeRage.SUPER_4)];
 	}
 
 	/** The lang key of form {@code form} (1-3) for this lineage: Super, Giant or Frost-born's evolutions. */
