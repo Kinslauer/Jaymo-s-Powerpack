@@ -112,8 +112,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Jobs.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
+		RangedTactics.register();
 		Tempers.register();
+		// (0.7.184) before Retinue, Pickpocket and Quests: sneak-using your own child with an earned blood waiting
+		Lineage.register();
+		Elders.register();
 		Retinue.register();
+		Audiences.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
@@ -136,6 +141,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
 		Introductions.register();
+		// (0.7.184) handshakes between players, and the groups they make
+		Groups.register();
+		Handshakes.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
@@ -353,6 +361,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bandits.register();
 		// 0.7.171: rulers' crowns
 		Regalia.register();
+		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)

@@ -153,6 +153,66 @@ final class FortBuildings {
 		}
 	}
 
+	/** (0.7.187) An avatar camp's reach from its pyre, and its fire pillars' height. */
+	static final int AVATAR_RADIUS = 7, PILLAR_HEIGHT = 3;
+
+	/**
+	 * (0.7.187) A Flame Avatars' camp round {@code center} ({@link AvatarCamps}): scorched blackstone ground, a ring of
+	 * basalt pillars each crowned with a fire that never goes out, a magma hearth with a great fire in the middle (where
+	 * they draw their flame), and a cache of what fire leaves behind. No walls: nothing they fear needs keeping out.
+	 */
+	static Layout avatarCamp(ServerLevel level, BlockPos center, Direction gate, RandomSource random) {
+		Frame f = new Frame(level, center, gate);
+		int r = AVATAR_RADIUS;
+		f.groundwork(r, Blocks.BLACKSTONE.defaultBlockState(), null);
+		for (int a = -r; a <= r; a++) {
+			for (int b = -r; b <= r; b++) {
+				double d = Math.sqrt(a * a + b * b);
+				if (d > r + 0.5) {
+					continue;
+				}
+				// the ground scorched: blackstone and basalt, ash-pale in the middle
+				float roll = random.nextFloat();
+				BlockState ground = d < 2.5 ? Blocks.MAGMA_BLOCK.defaultBlockState()
+					: roll < 0.45F ? Blocks.BLACKSTONE.defaultBlockState() : roll < 0.75F ? Blocks.POLISHED_BLACKSTONE.defaultBlockState()
+					: roll < 0.9F ? Blocks.SMOOTH_BASALT.defaultBlockState() : Blocks.MAGMA_BLOCK.defaultBlockState();
+				f.set(a, 0, b, ground);
+			}
+		}
+		// the pyre: netherrack on the hearth, alight for ever
+		f.set(0, 1, 0, Blocks.NETHERRACK.defaultBlockState());
+		f.set(0, 2, 0, Blocks.FIRE.defaultBlockState());
+		for (int[] c : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+			f.set(c[0], 1, c[1], Blocks.CAMPFIRE.defaultBlockState());
+		}
+		// six fire pillars round it
+		for (int i = 0; i < 6; i++) {
+			double angle = i * Math.PI / 3.0 + Math.PI / 6.0;
+			int a = (int)Math.round(Math.cos(angle) * (r - 1)), b = (int)Math.round(Math.sin(angle) * (r - 1));
+			for (int y = 1; y <= PILLAR_HEIGHT; y++) {
+				f.set(a, y, b, Blocks.BASALT.defaultBlockState());
+			}
+			f.set(a, PILLAR_HEIGHT + 1, b, Blocks.NETHERRACK.defaultBlockState());
+			f.set(a, PILLAR_HEIGHT + 2, b, Blocks.FIRE.defaultBlockState());
+		}
+		// their cache, at the back
+		BlockPos hoard = f.pos(0, 1, -(r - 3));
+		level.setBlock(hoard, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, gate), Block.UPDATE_ALL);
+		if (level.getBlockEntity(hoard) instanceof ChestBlockEntity chest) {
+			int slot = 0;
+			chest.setItem(slot++, new ItemStack(Items.BLAZE_ROD, 2 + random.nextInt(4)));
+			chest.setItem(slot++, new ItemStack(Items.FIRE_CHARGE, 3 + random.nextInt(5)));
+			chest.setItem(slot++, new ItemStack(Items.MAGMA_CREAM, 2 + random.nextInt(4)));
+			chest.setItem(slot++, new ItemStack(Items.GOLD_NUGGET, 6 + random.nextInt(12)));
+			chest.setItem(slot++, new ItemStack(Items.COAL, 4 + random.nextInt(8)));
+			if (random.nextFloat() < 0.3F) {
+				chest.setItem(slot++, new ItemStack(Items.NETHERITE_SCRAP));
+			}
+			chest.setChanged();
+		}
+		return new Layout(center.above(), hoard, f.pos(0, 1, r - 1));
+	}
+
 	/** A hoard: gold, and the camp's plunder. */
 	private static void fill(ServerLevel level, BlockPos pos, RandomSource random, boolean hornkin) {
 		if (!(level.getBlockEntity(pos) instanceof ChestBlockEntity chest)) {

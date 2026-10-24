@@ -16,6 +16,7 @@ import net.conczin.mca.network.Network;
 import net.conczin.mca.network.s2c.PlayerDataMessage;
 import net.conczin.mca.resources.Names;
 import net.conczin.mca.server.world.data.FamilyTree;
+import net.conczin.mca.server.world.data.FamilyTreeNode;
 import net.conczin.mca.server.world.data.PlayerSaveData;
 import net.conczin.mca.util.NbtHelper;
 import net.conczin.mca.server.world.data.VillageManager;
@@ -390,14 +391,22 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
+		// (0.7.184) a gunner keeps his pistol in the off hand and draws a cutlass (MCA's guards would try to work a crossbow
+		// themselves); a bombardier's dynamite stays in his off hand
+		boolean gunner = folk.role() == Pirates.GUNNER;
 		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
-			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			net.minecraft.world.item.ItemStack worn = gunner && slot == EquipmentSlot.MAINHAND ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD) : folk.getItemBySlot(slot);
 			if (!worn.isEmpty()) {
 				// worn, and kept in their pack too: MCA's guards dress from what they carry
 				villager.setItemSlot(slot, worn.copy());
 				villager.getInventory().addItem(worn.copy());
 				villager.setDropChance(slot, 0.0F);
 			}
+		}
+		net.minecraft.world.item.ItemStack offhand = gunner ? folk.getMainHandItem() : folk.getOffhandItem();
+		if (!offhand.isEmpty()) {
+			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
+			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
 		Barbarians.harden(villager);
 		worker(villager).enlist(folk.role(), folk.factionId());
@@ -455,7 +464,7 @@ final class McaBridge {
 			if (camp != null && !camp.fallen() && villager.isGuard() && !villager.isBaby()) {
 				return true;
 			}
-			if (camp != null && !camp.fallen()) {
+			if (camp != null && !camp.fallen() && !Pirates.offRoster(e.role())) {
 				Economy.lost(level.getServer(), camp.id(), e.role());
 			}
 			e.discharge();
@@ -692,6 +701,11 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.187) A new grown MCA guard at {@code at}, in the world, for no settlement ({@code nether.AvatarCamps}); null if it failed. */
+	static @Nullable Villager spawnGuard(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withProfession(ProfessionsMCA.GUARD).spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.61) A new grown MCA villager at {@code at}, not yet added to the world ({@link Captives}). */
 	static Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
 		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).build(EntitySpawnReason.EVENT);
@@ -755,6 +769,188 @@ final class McaBridge {
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getResidency().getHome() : java.util.Optional.empty();
+	}
+
+	// ---- lineage (0.7.184) ----------------------------------------------------------------------------------------
+
+	/** The family tree's own links, set straight (its setters also add to the other side's children). */
+	private static final java.lang.reflect.Field FATHER = treeField("father"), MOTHER = treeField("mother"), PARTNER = treeField("partner");
+
+	private static java.lang.reflect.Field treeField(String name) {
+		try {
+			java.lang.reflect.Field f = FamilyTreeNode.class.getDeclaredField(name);
+			f.setAccessible(true);
+			return f;
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("MCA's family tree has no " + name, e);
+		}
+	}
+
+	/** {@link McaCompat#childOf}. */
+	static boolean childOf(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v && FamilyTree.get(player.level()).getOrCreate(player).children().contains(v.getUUID());
+	}
+
+	/** {@link McaCompat#towns}. */
+	static List<McaCompat.Town> towns(ServerLevel level) {
+		List<McaCompat.Town> out = new ArrayList<>();
+		for (net.conczin.mca.server.world.data.Village v : VillageManager.get(level)) {
+			out.add(new McaCompat.Town(BlockPos.containing(v.getCenter().getX(), v.getCenter().getY(), v.getCenter().getZ()), v.getName()));
+		}
+		return out;
+	}
+
+	/** {@link McaCompat#letter}: into their MCA mail, and the mail notice if they're on. */
+	static void letter(ServerLevel level, java.util.UUID to, Component text) {
+		PlayerSaveData.getIfPresent(level, to).ifPresent(save -> save.sendLetter(text));
+		ServerPlayer player = level.getServer().getPlayerList().getPlayer(to);
+		if (player != null) {
+			PlayerSaveData.showMailNotification(player);
+		}
+	}
+
+	/** {@link McaCompat#teenOrOlder}. */
+	static boolean teenOrOlder(Villager villager) {
+		return villager instanceof VillagerEntityMCA v && (v.getAgeState() == AgeState.TEEN || v.getAgeState() == AgeState.ADULT);
+	}
+
+	/** {@link McaCompat#stow}. */
+	static net.minecraft.world.item.ItemStack stow(PathfinderMob villager, net.minecraft.world.item.ItemStack stack) {
+		return villager instanceof VillagerEntityMCA v ? v.getInventory().addItem(stack) : stack;
+	}
+
+	/**
+	 * {@link Lineage}: {@code player} becomes their child {@code kid}. The player takes the child's look, name and place in
+	 * the family tree (their parents, partner, children); the body they leave behind stays where they stood as a villager
+	 * with their old look and name, an elder already ({@code elderSince}), and takes their old place in the tree. The child
+	 * villager is gone. Returns the villager left behind, or null if nothing changed.
+	 */
+	static @Nullable PathfinderMob takeOver(ServerPlayer player, Villager kid, long elderSince) {
+		if (!(kid instanceof VillagerEntityMCA child) || !(player.level() instanceof ServerLevel here)) {
+			return null;
+		}
+		FamilyTree tree = FamilyTree.get(here);
+		FamilyTreeNode me = tree.getOrCreate(player);
+		java.util.UUID p = player.getUUID(), c = child.getUUID();
+		FamilyTreeNode them = tree.getOrEmpty(c).orElse(null);
+		if (them == null || !me.children().contains(c)) {
+			return null;
+		}
+		PlayerSaveData save = PlayerSaveData.get(player);
+		// (the old self, as a villager: their look, gender and name)
+		net.conczin.mca.entity.VillagerLike<?> oldSelf = save.isEntityDataSet() ? net.conczin.mca.entity.VillagerLike.toVillager(save) : null;
+		VillagerEntityMCA parent = VillagerFactory.newVillager(here).withGender(me.gender()).withName(me.getName()).withPosition(player.position())
+			.withAge(0).build(EntitySpawnReason.EVENT);
+		if (oldSelf != null) {
+			parent.copyVillagerAttributesFrom(oldSelf);
+		}
+		parent.setYRot(player.getYRot());
+		parent.setYHeadRot(player.getYHeadRot());
+		CompoundTag kidLook = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.createEditorPatch(
+			net.conczin.mca.network.c2s.GetVillagerRequest.getVillagerData(child));
+		if (!here.addFreshEntity(parent)) {
+			return null;
+		}
+		java.util.UUID n = parent.getUUID();
+		// the tree: the player's node takes the child's place, the new villager's takes the player's, the child's goes
+		Kin was = new Kin(me), kidWas = new Kin(them);
+		FamilyTreeNode old = tree.getOrCreate(parent);
+		java.util.function.UnaryOperator<java.util.UUID> map = u -> p.equals(u) ? n : c.equals(u) ? p : u;
+		java.util.Set<java.util.UUID> touched = new java.util.HashSet<>();
+		for (Kin k : List.of(was, kidWas)) {
+			touched.add(k.father);
+			touched.add(k.mother);
+			touched.add(k.partner);
+			touched.addAll(k.children);
+		}
+		touched.removeAll(java.util.Set.of(p, c, n));
+		for (java.util.UUID id : touched) {
+			tree.getOrEmpty(id).ifPresent(node -> relink(tree, node, map));
+		}
+		was.onto(tree, old, map);
+		kidWas.onto(tree, me, map);
+		tree.remove(c);
+		tree.setDirty();
+		// the player wears the child's look now, and everyone sees it
+		CompoundTag look = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.mergeAllowedEditorPatch(save.getEntityData(), kidLook);
+		save.setEntityData(look);
+		save.setEntityDataSet(true);
+		for (ServerPlayer other : here.getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(p, look), other);
+		}
+		worker(parent).setGrownSince(elderSince);
+		child.discard();
+		return parent;
+	}
+
+	/** One node's links and name, as they were before {@link #takeOver} moved them. */
+	private static final class Kin {
+		final String name;
+		final Gender gender;
+		final java.util.UUID father, mother, partner;
+		final net.conczin.mca.entity.ai.relationship.RelationshipState state;
+		final boolean deceased;
+		final List<java.util.UUID> children;
+
+		Kin(FamilyTreeNode node) {
+			this.name = node.getName();
+			this.gender = node.gender();
+			this.father = node.father();
+			this.mother = node.mother();
+			this.partner = node.partner();
+			this.state = node.getRelationshipState();
+			this.deceased = node.isDeceased();
+			this.children = List.copyOf(node.children());
+		}
+
+		/** Writes these links (each moved by {@code map}) onto {@code node}. */
+		void onto(FamilyTree tree, FamilyTreeNode node, java.util.function.UnaryOperator<java.util.UUID> map) {
+			node.setName(this.name);
+			node.setGender(this.gender);
+			node.setDeceased(this.deceased);
+			link(node, FATHER, map.apply(this.father));
+			link(node, MOTHER, map.apply(this.mother));
+			link(node, PARTNER, map.apply(this.partner));
+			node.setRelationshipState(this.state);
+			marriedState(tree, node);
+			node.children().clear();
+			for (java.util.UUID u : this.children) {
+				node.children().add(map.apply(u));
+			}
+		}
+	}
+
+	/** Moves {@code node}'s links to the player and the child by {@code map}. */
+	private static void relink(FamilyTree tree, FamilyTreeNode node, java.util.function.UnaryOperator<java.util.UUID> map) {
+		link(node, FATHER, map.apply(node.father()));
+		link(node, MOTHER, map.apply(node.mother()));
+		link(node, PARTNER, map.apply(node.partner()));
+		marriedState(tree, node);
+		List<java.util.UUID> kids = List.copyOf(node.children());
+		node.children().clear();
+		for (java.util.UUID u : kids) {
+			node.children().add(map.apply(u));
+		}
+	}
+
+	/** A married node is married to a player or a villager, as its partner now is. */
+	private static void marriedState(FamilyTree tree, FamilyTreeNode node) {
+		var state = node.getRelationshipState();
+		if (state != net.conczin.mca.entity.ai.relationship.RelationshipState.MARRIED_TO_PLAYER
+			&& state != net.conczin.mca.entity.ai.relationship.RelationshipState.MARRIED_TO_VILLAGER) {
+			return;
+		}
+		tree.getOrEmpty(node.partner()).ifPresent(partner -> node.setRelationshipState(partner.isPlayer()
+			? net.conczin.mca.entity.ai.relationship.RelationshipState.MARRIED_TO_PLAYER
+			: net.conczin.mca.entity.ai.relationship.RelationshipState.MARRIED_TO_VILLAGER));
+	}
+
+	private static void link(FamilyTreeNode node, java.lang.reflect.Field field, java.util.UUID id) {
+		try {
+			field.set(node, id);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	static boolean destinyPending(ServerPlayer player) {
