@@ -78,6 +78,8 @@ public final class Nether {
 		// (0.7.147) stage 3: portal raids on the towns, trophies
 		NetherTrophies.register();
 		PortalRaids.register();
+		// (0.7.187) the third side: the Flame Avatars' camps
+		AvatarCamps.register();
 	}
 
 	private static EntityType<Hornkin> hornkin(String name, Hornkin.Kind kind, float width, float height) {
