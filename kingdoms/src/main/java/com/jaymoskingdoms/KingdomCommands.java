@@ -45,6 +45,14 @@ final class KingdomCommands {
 			.then(Commands.literal("deposit").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
 			.then(Commands.literal("withdraw").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
 			.then(Commands.literal("reputation").executes(KingdomCommands::reputation))
+			// (0.7.184) asking the nearest guard to be taken to their ruler (what a folk guard's audience offers)
+			.then(Commands.literal("audience").executes(c -> {
+				if (!Audiences.ask(c.getSource().getPlayerOrException())) {
+					c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.audience.no_guard"));
+					return 0;
+				}
+				return 1;
+			}))
 			// (0.5.26) hiring a rickshaw: what a rickshaw's offer runs when clicked
 			.then(Commands.literal("ride").then(Commands.argument("rickshaw", IntegerArgumentType.integer()).then(Commands.argument("to", IntegerArgumentType.integer(0))
 				.executes(c -> Rickshaws.hire(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "rickshaw"),

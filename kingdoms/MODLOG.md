@@ -4371,3 +4371,17 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Andy: "Can you add the wraps to the gi?" `HeritageLooks.earthlingWraps` tells Jaymo's Powers whether the player is an
   Earthling and whether their ki is lit, so the gi draws the wraps (and a Z Fighter's glow) itself, in its own pose.
 - Compile-checked; not yet seen in game.
+## 0.7.190: guards make way for quest carriers, and take you to the ruler (pack 0.15.154)
+- Andy: "guards should make way for you regardless of their king's temperament if you are carrying a quest item, you
+  can also request an audience from a guard and they will escort you to the king/queen as long as your rep isnt too low."
+- Free passage (`Retinue.passage`): carrying a quest's letter or keepsake, or a ruler's own quest done and ready to turn
+  in (`Quests.questItem`), or being led to the ruler (and 90 s after). Whatever the temper, no heat builds, no shoves,
+  no fines or kneeling demands, touching the ruler is allowed, and a temper ban doesn't see you out of the city (a
+  vigilante's exile still does). Guards between you and the ruler, or in front of you, step aside ("Make way!").
+- Audiences (`Audiences`): "Seek an audience" in an MCA guard's menu, or the "[Ask to be taken before the ruler]" line
+  a folk guard's audience shows (`/kingdom audience`, the nearest guard within 6 blocks). With good name of at least
+  -20, not banned, and the ruler about (within 160 blocks) and awake, the guard walks you over, waits when you fall
+  behind ("Keep up"), gives up past 40 blocks or 3 minutes, and announces you; the ruler answers by temper. Otherwise
+  he says why not (busy, banned, refused, not holding court, asleep). MCA's screen shows the guard's duty as "Taking a
+  visitor to their liege". Tuning at the top of `Audiences` and `Retinue`.
+- Compile-checked; not playtested.

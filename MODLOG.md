@@ -2748,3 +2748,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   you add the wraps to the gi?" An Earthling's gi wears the wraps itself, over its wristbands and in its own pose, with
   a Z Fighter's ki glow over them while it flares (`client/costume/KingdomsWraps`, asking Kingdoms'
   `HeritageLooks.earthlingWraps`).
+
+## 0.15.154
+- Kingdoms 0.7.190: guards make way for quest carriers whatever their ruler's temper, and walk you to the king or queen
+  when you ask for an audience (if your good name allows).
