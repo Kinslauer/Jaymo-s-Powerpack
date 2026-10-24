@@ -2730,3 +2730,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     (Touch'n Motion's riding pose), which would have brought Fresh Animations back over ours. So `EmfCompat.hold` also
     puts EMF's own per-player pause (`pauseAllCustomAnimationsForEntity`) on a posed player, which the core never
     lifts, and takes it off when the pose ends. It only removes pauses it put on. Compile-checked; not playtested.
+- **0.15.151, the Flame Avatar:** Andy: an Emberborn who spends too many of their years in the Nether is consumed by
+  their own fire and becomes an avatar of flame (the end of failing to control it). `power/ember/FlameAvatar` counts
+  an Emberborn's time in the Nether (net: a quarter of it cools off elsewhere) and at 7 in-game days the fire takes
+  them (warnings at 50/75/90%); `/power avatar <targets> on|off|progress` for ops. An avatar has at most 3 hearts and a
+  20-point flame bar that takes hits first (the body flares and sets the attacker alight), refilled by fire, lava and
+  eating, slower in the cold, drained by rain and fast by water (which harms once it's out); going down in water undoes it (Andy): on the hit that would drop them they revert to plain Emberborn. `AvatarMoves`: R Fire
+  Fist (giant fireball, 4.5-block blast, sets fires, 4 flame), G Flaming Pillar (tap round you, hold at the cursor; throws up and
+  away; damage dealt comes back as flame), B Ignition Switch (tap lights what's in front for 3 flame; hold detonates
+  everything burning near). No block is broken. Plain keys without a power, sneak + key beside one. Look
+  (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
+  flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. MCA avatars with camps of their own fight Hornkin and piglins in the Nether (Kingdoms 0.7.187). Compile-checked;
+  not playtested.
