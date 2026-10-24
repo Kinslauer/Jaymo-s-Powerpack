@@ -85,6 +85,8 @@ public final class VillagerHeritage {
 	static final int DEEP_Y = 40;
 	/** The chance a Warrior-born is born with its tail kept wrapped (the rest had it cut). */
 	static final float WRAPPED_CHANCE = 0.6F;
+	/** (0.7.184) Andy: "if you have a nightborn mother, the child has a 70% chance to come out nightborn". */
+	static final float NIGHTBORN_MOTHER_CHANCE = 0.7F;
 	/** Chatted with (MCA), the chance they talk of their blood instead of small talk; a Warrior-born's. */
 	public static final float CHAT_CHANCE = 0.15F, WARRIOR_CHAT_CHANCE = 0.35F;
 	/** Coming over to gossip, the chance they talk of their own blood. */
@@ -254,10 +256,9 @@ public final class VillagerHeritage {
 		LOADED.remove(villager);
 	}
 
-	/** A child's heritage: one of its parents' (by a coin), or a new one if neither has any. */
+	/** A child's heritage: one of its parents' ({@link #blood}), or a new one if neither has any. */
 	public static void inherit(LivingEntity child, @Nullable Entity mother, @Nullable Entity father) {
-		Heritage.Kind a = mother == null ? null : of(mother), b = father == null ? null : of(father);
-		Heritage.Kind kind = a == null ? b : b == null ? a : child.getRandom().nextBoolean() ? a : b;
+		Heritage.Kind kind = blood(mother, father, child.getRandom());
 		if (kind == null) {
 			Entity at = mother != null ? mother : father != null ? father : child;
 			kind = roll(at.level(), at.blockPosition(), child.getRandom());
@@ -267,8 +268,42 @@ public final class VillagerHeritage {
 
 	/** A baby's heritage from its real parents (a player among them): one of theirs by a coin, or null if neither has one. */
 	public static Heritage.@Nullable Kind babyBlood(Entity mother, Entity father) {
-		Heritage.Kind a = of(mother), b = of(father);
-		return a == null ? b : b == null ? a : mother.getRandom().nextBoolean() ? a : b;
+		return blood(mother, father, mother.getRandom());
+	}
+
+	/**
+	 * A child's blood from {@code mother} and {@code father} (either may be missing): (0.7.184) a Nightborn mother's
+	 * child is Nightborn {@link #NIGHTBORN_MOTHER_CHANCE} of the time; otherwise what one parent passes on
+	 * ({@link #passed}), by a coin. Null if neither passes on any.
+	 */
+	private static Heritage.@Nullable Kind blood(@Nullable Entity mother, @Nullable Entity father, RandomSource random) {
+		if (mother != null && of(mother) == Heritage.Kind.NIGHTBORN && random.nextFloat() < NIGHTBORN_MOTHER_CHANCE) {
+			return Heritage.Kind.NIGHTBORN;
+		}
+		Heritage.Kind a = mother == null ? null : passed(mother, random), b = father == null ? null : passed(father, random);
+		return a == null ? b : b == null ? a : random.nextBoolean() ? a : b;
+	}
+
+	/**
+	 * (0.7.184) The blood {@code parent} passes on. Andy: a player's child "should draw from a pool of heritages you
+	 * unlocked and the heritage you currently have", so it isn't theirs to steer: their own heritage or any earned one
+	 * they've woken, evenly. Anyone else passes on their own.
+	 */
+	static Heritage.@Nullable Kind passed(Entity parent, RandomSource random) {
+		Heritage.Kind own = of(parent);
+		if (!(parent instanceof net.minecraft.world.entity.player.Player player)) {
+			return own;
+		}
+		List<Heritage.Kind> pool = new ArrayList<>();
+		if (own != null) {
+			pool.add(own);
+		}
+		for (Heritage.Kind kind : Heritage.Kind.values()) {
+			if (kind.earned && kind != own && Heritage.unlocked(player, kind)) {
+				pool.add(kind);
+			}
+		}
+		return pool.isEmpty() ? null : pool.get(random.nextInt(pool.size()));
 	}
 
 	/** The tail tag {@code villager} carries ({@link #TAIL_WRAPPED} or {@link #TAIL_CUT}), or "". For its saved data. */

@@ -150,7 +150,7 @@ public final class Regalia {
 		return !stack.isEmpty() && stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getBooleanOr(MARK, false);
 	}
 
-	private static void put(PathfinderMob mob, EquipmentSlot slot, ItemStack stack) {
+	static void put(PathfinderMob mob, EquipmentSlot slot, ItemStack stack) {
 		CompoundTag tag = new CompoundTag();
 		tag.putBoolean(MARK, true);
 		CustomData.set(DataComponents.CUSTOM_DATA, stack, tag);
@@ -163,7 +163,7 @@ public final class Regalia {
 		return stack;
 	}
 
-	private static ItemStack trimmed(PathfinderMob mob, ItemStack stack, ResourceKey<TrimPattern> pattern, ResourceKey<TrimMaterial> material) {
+	static ItemStack trimmed(PathfinderMob mob, ItemStack stack, ResourceKey<TrimPattern> pattern, ResourceKey<TrimMaterial> material) {
 		Optional<? extends Holder<TrimPattern>> p = mob.level().registryAccess().lookupOrThrow(Registries.TRIM_PATTERN).get(pattern);
 		Optional<? extends Holder<TrimMaterial>> m = mob.level().registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL).get(material);
 		if (p.isPresent() && m.isPresent()) {

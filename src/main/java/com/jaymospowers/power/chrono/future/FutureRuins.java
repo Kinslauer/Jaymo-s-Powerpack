@@ -73,8 +73,8 @@ public final class FutureRuins {
 			return;
 		}
 		ChunkPos pos = chunk.getPos();
-		if (generated || !onIsland(pos)) {
-			// open sea beyond the map: nothing to ruin
+		if (!FutureCities.LOADED && (generated || !onIsland(pos))) {
+			// open sea beyond the map: nothing to ruin (with Lost Cities, its streets decay like the island's)
 			chunk.setAttached(RUINED, true);
 			return;
 		}
