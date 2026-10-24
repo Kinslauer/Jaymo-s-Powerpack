@@ -28,7 +28,7 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.15.147) The crosshair while you fight. Auto HUD clears the crosshair with the rest of the HUD, and over the
+ * (0.15.148) The crosshair while you fight. Auto HUD clears the crosshair with the rest of the HUD, and over the
  * shoulder (Shoulder Surfing's view sits 0.9 to the right) the middle of the screen isn't where a swing or a shot goes.
  * So whenever you aim or attack (an attack or use key held, a bow, crossbow, trident or gun in hand, an item being
  * drawn, a power key held, a creature in reach under your aim, or a swing in the last {@link #LINGER} ticks) our own
