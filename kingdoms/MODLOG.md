@@ -4345,3 +4345,33 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+
+## 0.7.184: Lineage replaces the Blood Rite (pack 0.15.147)
+- Andy: "add a lineage system that replaces blood rites, now instead unlocking a heritage will allow you to swap
+  perspectives with your offspring, and then use the heritage and new class." Then, after the first cut: a child
+  "should draw from a pool of heritages you unlocked and the heritage you currently have. That way it isnt directly
+  influenced"; no keeping inventory or powers: "the power you had is given a high affinity to your child, they still
+  have to awaken it themselves"; you choose whether to hand your things down or leave them on your elder; "shift right
+  clicking your teen and above should prompt you if you're sure you want to progress your bloodline's story".
+- Waking an earned heritage (Endborn, Dragonblood, Deepborn, Stormborn) no longer hands out a Blood Rite or changes your
+  own blood. A player's child is born to their heritage or any earned one they've woken, evenly at random
+  (`VillagerHeritage.passed`, used by both MCA birth paths), so the blood isn't theirs to pick.
+- Sneak-use one of your own MCA children, a teen or older, with an empty hand (`Lineage`, registered before Retinue,
+  Pickpocket and Quests): `LineageScreen` asks "Progress your bloodline's story?", naming the child, the blood they were
+  born to and the power you'd hand down. Hand them down / My elder keeps them / Not yet.
+- The swap (`McaBridge.takeOver`): you wake where the child stood with their MCA look (MCA's editor patch of the child
+  merged into your player look, sent to everyone), name and heritage. The child villager is gone. The body you leave
+  stays where you stood as an MCA villager with your old look, name and heritage, already an elder
+  (`CourtWizards.ELDER_DAYS` grown), so it greys and dies of old age in time; MCA family can be asked to follow as ever.
+- MCA's family tree follows: your node takes the child's place (their parents, with your old self as one of them; their
+  partner and children), the old self's new node takes yours (your spouse's partner, your other children's parent),
+  and the child's node is removed. Marriage states are set to married-to-player or married-to-villager as the new
+  partner is. Links are written straight into the nodes (reflection on `FamilyTreeNode`'s father/mother/partner).
+- Your power leaves you and is handed down (`PowersCompat.passDown` → Powers' `Affinity.passDown`): it awakens in you,
+  the child, after a fresh 3-5 days. Your class is unmade and the class screen asks again (can't be shut); every skill
+  and attribute point comes back (`Skills.respec`; experience and levels stay).
+- Things: handed down, you keep your inventory as the child. Left with the elder, they wear your armour and what was in
+  your hands (dropped whole when they die) and carry the rest in their MCA pack; what doesn't fit falls at their feet.
+- Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles.
+  The heritage screen's rite mode is gone. `/kingdom heritage set|unlock` are unchanged.
+- Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.

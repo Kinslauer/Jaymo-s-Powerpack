@@ -113,6 +113,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
 		Tempers.register();
+		// (0.7.184) before Retinue, Pickpocket and Quests: sneak-using your own child with an earned blood waiting
+		Lineage.register();
 		Retinue.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);

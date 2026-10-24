@@ -15,6 +15,8 @@ import org.jspecify.annotations.Nullable;
 public final class PowersCompat {
 	private static boolean looked;
 	private static @Nullable AttachmentType<Identifier> power;
+	/** (0.7.184) Powers' {@code Affinity.passDown(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle passDown;
 	/** (0.7.140) Powers' {@code Fate.isCorrupted(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle corrupted;
 
@@ -58,6 +60,22 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.184) {@link Lineage}: {@code player} lives on as their child, so their power leaves them and is handed down, to
+	 * awaken in the child in time. Nothing without Powers.
+	 */
+	public static void passDown(net.minecraft.server.level.ServerPlayer player) {
+		type();
+		if (passDown == null) {
+			return;
+		}
+		try {
+			passDown.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't hand down {}'s power", player.getGameProfile().name(), e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static @Nullable AttachmentType<Identifier> type() {
 		if (!looked) {
@@ -69,6 +87,12 @@ public final class PowersCompat {
 						java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
 				} catch (ReflectiveOperationException | ClassCastException | LinkageError e) {
 					JaymosKingdoms.LOGGER.warn("Couldn't read Jaymo's Powers' power attachment", e);
+				}
+				try {
+					passDown = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Affinity"), "passDown",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Powers can't hand a power down (older Powers?)", e);
 				}
 			}
 		}
