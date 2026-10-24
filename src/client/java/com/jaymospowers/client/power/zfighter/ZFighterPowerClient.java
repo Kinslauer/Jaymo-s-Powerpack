@@ -81,6 +81,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new ZFighterTail.Layer(avatar));
+				// (0.15.148) Super 4's red fur, under the mane
+				helper.register(new ZFighterPrimalFur.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
@@ -148,6 +150,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterFlightPose.extract(entity, state, partialTicks);
 		ZFighterTail.extract(entity, state);
 		ZFighterHair.extract(entity, state);
+		ZFighterPrimalFur.extract(entity, state);
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterSpiritPose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
@@ -190,6 +193,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		wave(graphics, font, player, state, now, time);
 		spirit(graphics, font, state, time);
 		chips(graphics, font, player, state, now, time);
+		// (0.15.148) the Great Ape's rage, and the fight against its fits
+		ApeRageClient.hud(graphics, font, player, time);
 	}
 
 	/** The Spirit Bomb gathering, over the crosshair: how full it is. */
@@ -281,7 +286,7 @@ public final class ZFighterPowerClient implements PowerClient {
 			ZFighterInputClient.keyLabel(Minecraft.getInstance()), limit ? pulse(0xFF3A2A, 0xFFB0A0, time * 0.6F) : CHIP_COLOR);
 		if (ultimate) {
 			// in Super 3 with the Spirit Bomb learned, C raises it: its icon and its cooldown
-			boolean spirit = state.form() == ZFighterTraining.FORMS && training.knows(ZFighterTraining.SPIRIT_BOMB);
+			boolean spirit = state.form() >= ZFighterTraining.FORMS && training.knows(ZFighterTraining.SPIRIT_BOMB);
 			int slot = spirit ? ZFighterState.SPIRIT : ZFighterState.SUPER_SLOT;
 			special(graphics, font, x + step * next, y, new ItemStack(spirit ? Items.ENDER_EYE : Items.NETHER_STAR), state.left(slot, now),
 				state.length()[slot], JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(),

@@ -4345,3 +4345,110 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+
+## 0.7.184: player groups and handshakes (pack 0.15.147)
+- Andy: "add a group system for players so you can see their player tags once finding and interacting with them, (both
+  players right clicking each other, for a cinematic action cam handshake, then a success sound) and scoreboard team
+  integration allowing for reduced team damage and other benefits."
+- `Handshakes`: use on another player, empty handed and not sneaking (sneak + use stays the vampire's bite and the
+  downed's pick-up), and you hold your right hand out to them for 10 s, for everyone to see. If they use on you back
+  while it's out, you shake: set facing each other at arm's length, held still, three slow pumps (2.3 s), a leather
+  creak as the hands meet and a level-up chime with an amethyst ring at the end. A blow, going down or stepping apart
+  breaks it off. Not behind a full mask (as with `/introduce`).
+- Each of the two sees it as a film (`client/HandshakeCinematic`, camera via `HandshakeCameraMixin`): black bars, the HUD
+  cleared, a wide profile pushing in, a low close shot circling the grip, then over your shoulder onto their face.
+  The arms are `client/HandshakePose`.
+- Afterwards the two know each other's names (`Introductions`) and share a group (`Groups`), which is a plain
+  scoreboard team: the offerer's, or a new "<name>'s Company" in a random colour. An op's own `/team` counts too.
+- Group perks: groupmates always see each other's names (nametag, tab list) in the group's colour; a groupmate's blows
+  land at 25% (arrows and powers too, `Groups.FRIENDLY_DAMAGE`); each groupmate within 8 blocks takes 5% off blows from
+  anyone else, up to 3 (`SIDE_GUARD`); invisible groupmates show; no shoving; vanilla `/teammsg` works.
+- `/group` lists your group (character names; offline members only counted, so no usernames), `/group leave`,
+  `/group name <name>`. Leaving or renaming an op's team is refused.
+- Andy: "The initiating player's group is what is joined, everytime. Players within the same group can still
+  handshake, but the cutscene only ever plays once for the same combo of players. Every other time it is a quicker
+  single dap variation." The taker always leaves their group for the offerer's (an empty one of ours is removed). Each
+  player keeps whom they've shaken hands with (`Handshakes.SHOOK`, saved); a pair who have gets a 0.7 s dap (hand up
+  high, one clasp and a tug, a lighter chime) with no film.
+- Compile-checked against 26.3; not yet seen in game.
+## 0.7.184: guards make way for quest carriers, and take you to the ruler (pack 0.15.147)
+- Andy: "guards should make way for you regardless of their king's temperament if you are carrying a quest item, you
+  can also request an audience from a guard and they will escort you to the king/queen as long as your rep isnt too low."
+- Free passage (`Retinue.passage`): carrying a quest's letter or keepsake, or a ruler's own quest done and ready to turn
+  in (`Quests.questItem`), or being led to the ruler (and 90 s after). Whatever the temper, no heat builds, no shoves,
+  no fines or kneeling demands, touching the ruler is allowed, and a temper ban doesn't see you out of the city (a
+  vigilante's exile still does). Guards between you and the ruler, or in front of you, step aside ("Make way!").
+- Audiences (`Audiences`): "Seek an audience" in an MCA guard's menu, or the "[Ask to be taken before the ruler]" line
+  a folk guard's audience shows (`/kingdom audience`, the nearest guard within 6 blocks). With good name of at least
+  -20, not banned, and the ruler about (within 160 blocks) and awake, the guard walks you over, waits when you fall
+  behind ("Keep up"), gives up past 40 blocks or 3 minutes, and announces you; the ruler answers by temper. Otherwise
+  he says why not (busy, banned, refused, not holding court, asleep). MCA's screen shows the guard's duty as "Taking a
+  visitor to their liege". Tuning at the top of `Audiences` and `Retinue`.
+- Compile-checked; not playtested.
+## 0.7.184: Earthling ki glow for Z Fighters only, and no marks poking through costumes (pack 0.15.147)
+- Andy: "Earthlings should have no special glow or ki effects on their heritage skin unless they are z fighters, and
+  even then the weird costume clipping is back." The near-death surge still gives every Earthling its random buff, but
+  the fists' ki glow, the sparks and the flare's sounds only come for a player with the Z Fighter power
+  (`EarthlingSurge.shows`, read through `PowersCompat`). Earthling villagers never glow.
+- Under a costume (or the symbiote's suit) a player's heritage marks and their glow aren't drawn at all. They're drawn
+  on the plain body's pose while the costume follows MCA's, so where a cut leaves skin bare (the gi's forearms) the
+  wraps and the glow slid out through the sleeves in motion. Eyes and fins work as before.
+- Andy: "Can you add the wraps to the gi?" `HeritageLooks.earthlingWraps` tells Jaymo's Powers whether the player is an
+  Earthling and whether their ki is lit, so the gi draws the wraps (and a Z Fighter's glow) itself, in its own pose.
+- Compile-checked; not yet seen in game.
+## 0.7.184: Lineage replaces the Blood Rite (pack 0.15.147)
+- Andy: "add a lineage system that replaces blood rites, now instead unlocking a heritage will allow you to swap
+  perspectives with your offspring, and then use the heritage and new class." Then, after the first cut: a child
+  "should draw from a pool of heritages you unlocked and the heritage you currently have. That way it isnt directly
+  influenced"; no keeping inventory or powers: "the power you had is given a high affinity to your child, they still
+  have to awaken it themselves"; you choose whether to hand your things down or leave them on your elder; "shift right
+  clicking your teen and above should prompt you if you're sure you want to progress your bloodline's story".
+- Waking an earned heritage (Endborn, Dragonblood, Deepborn, Stormborn) no longer hands out a Blood Rite or changes your
+  own blood. A player's child is born to their heritage or any earned one they've woken, evenly at random
+  (`VillagerHeritage.passed`, used by both MCA birth paths), so the blood isn't theirs to pick.
+- Sneak-use one of your own MCA children, a teen or older, with an empty hand (`Lineage`, registered before Retinue,
+  Pickpocket and Quests): `LineageScreen` asks "Progress your bloodline's story?", naming the child, the blood they were
+  born to and the power you'd hand down. Hand them down / My elder keeps them / Not yet.
+- The swap (`McaBridge.takeOver`): you wake where the child stood with their MCA look (MCA's editor patch of the child
+  merged into your player look, sent to everyone), name and heritage. The child villager is gone. The body you leave
+  stays where you stood as an MCA villager with your old look, name and heritage, already an elder
+  (`CourtWizards.ELDER_DAYS` grown), so it greys and dies of old age in time; MCA family can be asked to follow as ever.
+- MCA's family tree follows: your node takes the child's place (their parents, with your old self as one of them; their
+  partner and children), the old self's new node takes yours (your spouse's partner, your other children's parent),
+  and the child's node is removed. Marriage states are set to married-to-player or married-to-villager as the new
+  partner is. Links are written straight into the nodes (reflection on `FamilyTreeNode`'s father/mother/partner).
+- Your power leaves you and is handed down (`PowersCompat.passDown` → Powers' `Affinity.passDown`): it awakens in you,
+  the child, after a fresh 3-5 days. Your class is unmade and the class screen asks again (can't be shut); every skill
+  and attribute point comes back (`Skills.respec`; experience and levels stay).
+- Things: handed down, you keep your inventory as the child. Left with the elder, they wear your armour and what was in
+  your hands (dropped whole when they die) and carry the rest in their MCA pack; what doesn't fit falls at their feet.
+- Elders live lives of their own (`Elders`, attachments `elder_journey` on the elder and `elder_roads` on the
+  Overworld). Andy: "you could ask your father/mother to go on an adventure with you for old times sake, or even find
+  them on travels of their own", then "Is it possible to see them traveling along the way?" / "Yes please". Asked along,
+  they follow you as MCA family does. Left be, they stay home 2-5 days, then set off on foot for an MCA village or a
+  standing realm's seat 250-1500 blocks off, stay 1-3 days and walk home; they never set off while a player is within 64
+  blocks, following someone, downed, asleep or riding. On the road, like the caravans: unseen, the journey goes on in
+  the record (0.1 blocks a tick, along a King's Road where one runs their way, else straight); a player within 80 blocks
+  of where they've got to and the elder is put back in the world there (their whole saved self, same UUID and family)
+  and walks on for real (helped over anything they're stuck on for 12 s); nobody within 112 and they go back into the
+  record. A copy left in an unloading chunk is put away when it loads again. Their heir gets an MCA letter when they
+  set off and when they're home.
+- (Andy) A Nightborn mother's child is Nightborn 70% of the time (`VillagerHeritage.NIGHTBORN_MOTHER_CHANCE`), players'
+  and villagers' alike; otherwise the parents' blood as before.
+- Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles.
+  The heritage screen's rite mode is gone. `/kingdom heritage set|unlock` are unchanged.
+- Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+## 0.7.187: Flame Avatars in the Nether (pack 0.15.151)
+- Andy: "there should be mca avatar in the nether seen fighting the other two factions. They will not speak to the
+  player unless they are emberborn, and will not be hostile unless you are near one of their encampments". The
+  third Nether side beside the Hornkin and the piglins: Emberborn consumed by their fire (Powers' Flame Avatar).
+- **Camps** (`nether/AvatarCamps`, built by `FortBuildings.avatarCamp`): scorched blackstone and basalt ground round
+  a netherrack fire ringed by campfires, six basalt pillars crowned with eternal fire and a cache chest (blaze rods,
+  fire charges, magma cream, gold, sometimes netherite scrap). One may rise every few minutes 64-128 blocks from a
+  player in the Nether, at least 200 from another camp, using the forts' site search. 4 avatars at first, a recruit
+  every 4 minutes up to 6. Ops: `/kingdom avatarcamp found | info`.
+- **Avatars** are real MCA villagers (guards, born Emberborn, 40 health, gold or iron blades) wearing the Flame Avatar
+  look (charred body, glowing veins, burning). They keep to their camp, and every few minutes a band of 3 marches on
+  the nearest Hornkin fort or piglin camp. They attack Hornkin and piglins on sight, and players (not Emberborn, not
+  creative) only within 24 blocks of their own camp. Anyone not Emberborn gets no talk or menu from them.
+- Compile-checked against the 26.3 and MCA jars; not yet seen in game.

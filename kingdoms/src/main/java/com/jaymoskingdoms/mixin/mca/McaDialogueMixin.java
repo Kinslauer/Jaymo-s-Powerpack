@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
@@ -37,7 +38,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * remember and haven't said yet.
  * (0.7.102) A hug where one of you is Emberborn and the other has no fire resistance ({@link EmberHugs}): whoever isn't
  * safe is burned and pulls away, and the villager says so.
- * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) with a villager ruler: as with a folk ruler.
+ * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) with a villager ruler: as with a folk ruler. (0.7.184) Asked of a
+ * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
  */
@@ -91,7 +93,12 @@ abstract class McaDialogueMixin {
 		if ("main".equals(question) && Rulers.ANSWER.equals(answer)) {
 			// (0.7.138) an audience with a villager ruler
 			villager.getInteractions().stopInteracting();
-			Rulers.audience(player, villager);
+			if (Rulers.is(villager)) {
+				Rulers.audience(player, villager);
+			} else {
+				// (0.7.184) a guard walks you to the ruler
+				Audiences.request(player, villager);
+			}
 			ci.cancel();
 			return;
 		}

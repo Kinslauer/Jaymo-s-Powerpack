@@ -64,6 +64,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PullerPose.register();
 		// 0.5.50: a pickpocket's arm in the pocket
 		PickpocketPose.register();
+		// (0.7.184) handshakes: the arms, and your own as a film
+		HandshakePose.register();
+		HandshakeCinematic.register();
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
@@ -76,6 +79,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.6.0: the class screen (on first joining, and after a Writ of Rebirth)
 		ClassScreen.register();
 		HeritageScreen.register();
+		LineageScreen.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
 		ClassKeys.register();
@@ -84,6 +88,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
 		BloodVision.register();
+		// 0.7.185: the blood fever's and the wolf's holds (they walk you; each key a heave against them)
+		SeizureClient.register();
 		WarriorFury.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();

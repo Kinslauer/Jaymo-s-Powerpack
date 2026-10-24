@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:stick",
+    "T": "minecraft:string"
+  },
+  "pattern": [
+    "  L",
+    " LT",
+    "S  "
+  ],
+  "result": {
+    "id": "jaymospowers:leather_whip"
+  }
+}
