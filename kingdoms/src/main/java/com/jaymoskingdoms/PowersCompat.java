@@ -58,6 +58,22 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
+	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.
+	 */
+	public static ParticleOptions blood(int color, float size) {
+		if (!lookedForBlood) {
+			lookedForBlood = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")
+				&& net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.fromNamespaceAndPath("jaymospowers",
+					"blood_fleck_red")) instanceof net.minecraft.core.particles.SimpleParticleType fleck) {
+				bloodFleck = fleck;
+			}
+		}
+		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
+	}
+
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */
 	public static @Nullable String power(Player player) {
 		AttachmentType<Identifier> type = type();
