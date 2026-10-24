@@ -1,13 +1,17 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.client.armory.TaczFirstPerson;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 import traben.entity_model_features.EMFAnimationApi;
 import traben.entity_model_features.models.animation.state.EMFEntityRenderState;
 import traben.entity_model_features.models.animation.state.EMFState;
 import traben.entity_model_features.models.parts.EMFModelPartRoot;
 import traben.entity_model_features.utils.EMFAnimationPauseHandler;
+import traben.entity_model_features.utils.EMFEntity;
 
 /** The only class that touches Entity Model Features (see EmfCompat); loaded only when EMF is. */
 final class EmfAccess {
@@ -31,6 +35,33 @@ final class EmfAccess {
 			broken = true;
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't ask Entity Model Features about the body's pose; costumes keep the plain one", e);
 			return false;
+		}
+	}
+
+	/** The players we paused EMF for ourselves (see EmfCompat#hold), by entity id. */
+	private static final IntOpenHashSet HELD = new IntOpenHashSet();
+
+	static void hold(int id, boolean posed) {
+		if (broken || posed == HELD.contains(id)) {
+			return;
+		}
+		Entity entity = Minecraft.getInstance().level == null ? null : Minecraft.getInstance().level.getEntity(id);
+		if (entity == null) {
+			HELD.remove(id);
+			return;
+		}
+		try {
+			if (!posed) {
+				EMFAnimationApi.resumeAllCustomAnimationsForEntity((EMFEntity)entity);
+				HELD.remove(id);
+			} else if (!EMFAnimationPauseHandler.entitiesPaused.contains(entity.getUUID())) {
+				// a pause someone else put on is theirs to lift
+				EMFAnimationApi.pauseAllCustomAnimationsForEntity((EMFEntity)entity);
+				HELD.add(id);
+			}
+		} catch (Throwable e) {
+			broken = true;
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't pause Entity Model Features for a posed player; Touch'n Motion may lift the pause", e);
 		}
 	}
 
