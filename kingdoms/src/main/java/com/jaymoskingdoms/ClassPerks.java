@@ -51,6 +51,8 @@ public final class ClassPerks {
 	static final float THIEF_BACKSTAB = 1.5F;
 	/** How far round a foe must be facing away for a backstab: the cosine between its look and the way to the thief. */
 	static final double BACKSTAB_COS = -0.3;
+	/** (0.7.184) Thief's second boon, Prowl (Andy: "add another to thief"): they move this share faster while sneaking. */
+	static final double THIEF_PROWL = 0.5;
 	// Warlord (was +25% two-handed, armour weight x0.5)
 	static final double WARLORD_DAMAGE = 0.35, WARLORD_WEIGHT = 0.25, WARLORD_HEAVY_ARMOR_PER_PIECE = 1.0;
 	/** (0.7.184) Warlord's boon, Cleave: a two-handed blow carries this share of itself to up to {@code WARLORD_CLEAVE_COUNT}
@@ -105,7 +107,7 @@ public final class ClassPerks {
 
 	static final String DAMAGE_ID = "class_damage", ATTACK_SPEED_ID = "class_attack_speed", ARMOR_ID = "class_armor", HEALTH_ID = "class_health",
 		MOVE_ID = "class_move", WEIGHT_ID = "class_weight", OXYGEN_ID = "class_oxygen", FALL_ID = "class_fall", JUMP_ID = "class_jump",
-		DRAW_FALL_ID = "class_draw_fall", MOUNTED_ID = "class_mounted", MOUNT_ID = "class_mount", KNOCKBACK_ID = "class_knockback";
+		DRAW_FALL_ID = "class_draw_fall", MOUNTED_ID = "class_mounted", MOUNT_ID = "class_mount", KNOCKBACK_ID = "class_knockback", SNEAK_ID = "class_sneak";
 
 	private static final EquipmentSlot[] ARMOR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
@@ -153,6 +155,7 @@ public final class ClassPerks {
 				lines.add(line("blades", pct(THIEF_DAMAGE)));
 				lines.add(line("light_armor", "+" + (int) THIEF_ARMOR_PER_PIECE));
 				lines.add(line("backstab", "x" + THIEF_BACKSTAB));
+				lines.add(line("prowl", pct(THIEF_PROWL)));
 			}
 			case WARLORD -> {
 				lines.add(line("two_handed", pct(WARLORD_DAMAGE)));
@@ -262,7 +265,7 @@ public final class ClassPerks {
 				heavy++;
 			}
 		}
-		double damage = 0.0, attackSpeed = 0.0, armor = 0.0, health = 0.0, move = 0.0, weight = HEAVY_ARMOR_SLOW * heavy, oxygen = 0.0, fall = 0.0, knockback = 0.0;
+		double damage = 0.0, attackSpeed = 0.0, armor = 0.0, health = 0.0, move = 0.0, weight = HEAVY_ARMOR_SLOW * heavy, oxygen = 0.0, fall = 0.0, knockback = 0.0, sneak = 0.0;
 		if (cls != null) {
 			switch (cls) {
 				case THIEF -> {
@@ -271,6 +274,7 @@ public final class ClassPerks {
 						attackSpeed = THIEF_SPEED;
 					}
 					armor = THIEF_ARMOR_PER_PIECE * light;
+					sneak = THIEF_PROWL;
 				}
 				case WARLORD -> {
 					if (held.is(TWO_HANDED)) {
@@ -314,6 +318,7 @@ public final class ClassPerks {
 		Skills.modifier(player, Attributes.MOVEMENT_SPEED, WEIGHT_ID, -weight, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		Skills.modifier(player, Attributes.OXYGEN_BONUS, OXYGEN_ID, oxygen, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_ID, knockback, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.SNEAKING_SPEED, SNEAK_ID, sneak, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		// (a share off what's left: a power that takes fall damage to nothing keeps it at nothing, Andy's rule)
 		Skills.modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, FALL_ID, fall, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// (fewer hearts: the health bar shrinks to fit; more: the new hearts come empty, to be eaten back)

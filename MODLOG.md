@@ -2738,7 +2738,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   crossbow bolts +30%; Rider horse +25%, mounted blows +30%, -3% on foot. Sorcerer's numbers are the bar and stay.
   New boon each (`ClassPerks.dealt`, now handed the target): Thief Backstab (light blade on a foe facing away x1.5),
   Warlord Cleave (40% of a two-handed blow to up to 3 foes within 2.5 blocks, bystanders spared via `CombatArts.foes`),
-  Mage Echo (1 staff cast in 4 leaves no cooldown), Archer Headshot (arrow at the head x1.5), Survivalist Second Wind
+  Thief also Prowl (sneak 50% faster, Andy asked for a second), Mage Echo (1 staff cast in 4 leaves no cooldown), Archer Headshot (arrow at the head x1.5), Survivalist Second Wind
   (8 s unhurt: mend half a heart every 3 s, fed or not), Brute Stagger (bludgeon blows give Slowness II 1.5 s),
   Marksman Steady Aim (shots from a crouch +25%), Rider Barding (the horse you steer takes 30% less), Sorcerer Kindred
   Element (own element's harm halved: fire, freezing, lightning, drowning, explosions for earth, falls for air). Class
