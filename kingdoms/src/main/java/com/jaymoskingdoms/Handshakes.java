@@ -2,11 +2,14 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -16,6 +19,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -44,6 +48,11 @@ import net.minecraft.world.phys.Vec3;
  * it ({@code client/HandshakeCinematic}), then a chime. From then on you know each other's names
  * ({@link Introductions}) and you're in one group ({@link Groups}). A blow, a fall or stepping apart breaks it off.
  * Not behind a full mask, as with {@code /introduce}.
+ * <p>
+ * Andy: "The initiating player's group is what is joined, everytime. Players within the same group can still
+ * handshake, but the cutscene only ever plays once for the same combo of players. Every other time it is a quicker
+ * single dap variation." Each player keeps whom they've shaken hands with ({@link #SHOOK}); a pair that already has
+ * gets a quick dap ({@link Hand#DAP}: one clasp and a tug, no film) instead.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -52,10 +61,16 @@ public final class Handshakes {
 	static final double REACH = 3.0, APART = 1.1, SET_MAX = 1.5;
 	/** The handshake (ticks): the hands meet at {@link #GRIP_TICK}, let go at {@link #RELEASE_TICK}, it's over at {@link #SHAKE_TICKS}. */
 	public static final int GRIP_TICK = 10, RELEASE_TICK = 36, SHAKE_TICKS = 46;
+	/** The dap (ticks): the hands clasp at {@link #DAP_GRIP}, let go at {@link #DAP_RELEASE}, it's over at {@link #DAP_TICKS}. */
+	public static final int DAP_GRIP = 5, DAP_RELEASE = 10, DAP_TICKS = 14;
 	/** Further apart than this (blocks) mid-shake breaks it off. */
 	static final double BREAK_DISTANCE = 3.5;
 	/** The success sound's volume and pitch. */
 	static final float CHIME_VOLUME = 0.7F, CHIME_PITCH = 1.4F;
+
+	/** On a player: everyone they've shaken hands with (saved, kept through death; the server's alone). */
+	static final AttachmentType<Set<UUID>> SHOOK = AttachmentRegistry.create(JaymosKingdoms.id("shook_hands"),
+		builder -> builder.persistent(UUIDUtil.CODEC_SET).copyOnDeath());
 
 	/** Held still for it. */
 	private static final Identifier HOLD = JaymosKingdoms.id("handshake_hold");
@@ -68,8 +83,16 @@ public final class Handshakes {
 	private record Offer(UUID to, long until) {
 	}
 
-	/** {@code offerer} held out the hand {@code taker} took, at {@code start} (game time). */
-	private record Shake(UUID offerer, UUID taker, long start) {
+	/** {@code offerer} held out the hand {@code taker} took, at {@code start} (game time); a quick dap, or the full shake. */
+	private record Shake(UUID offerer, UUID taker, long start, boolean dap) {
+		int grip() {
+			return this.dap ? DAP_GRIP : GRIP_TICK;
+		}
+
+		int length() {
+			return this.dap ? DAP_TICKS : SHAKE_TICKS;
+		}
+
 		boolean has(UUID id) {
 			return this.offerer.equals(id) || this.taker.equals(id);
 		}
@@ -77,10 +100,10 @@ public final class Handshakes {
 
 	/**
 	 * Server → everyone who can see {@code playerId}: their hand toward {@code partnerId}: {@link #DOWN}, {@link #OFFERED}
-	 * (held out), or {@link #SHAKING} (the handshake starts now).
+	 * (held out), {@link #SHAKING} (the handshake starts now), or {@link #DAP} (the quick one starts now).
 	 */
 	public record Hand(int playerId, int partnerId, int state) implements CustomPacketPayload {
-		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2;
+		public static final int DOWN = 0, OFFERED = 1, SHAKING = 2, DAP = 3;
 		public static final Type<Hand> TYPE = new Type<>(JaymosKingdoms.id("handshake"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Hand> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -100,6 +123,7 @@ public final class Handshakes {
 	}
 
 	static void register() {
+		JaymosKingdoms.LOGGER.debug("handshake attachment: {}", SHOOK);
 		PayloadTypeRegistry.clientboundPlay().register(Hand.TYPE, Hand.CODEC);
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player other) || !can(player) || !can(other)
@@ -178,9 +202,25 @@ public final class Handshakes {
 		place(taker, mid.add(axis.scale(APART / 2.0)), axis.reverse());
 		hold(offerer, true);
 		hold(taker, true);
-		SHAKES.add(new Shake(offerer.getUUID(), taker.getUUID(), now));
-		send(offerer, taker.getId(), Hand.SHAKING);
-		send(taker, offerer.getId(), Hand.SHAKING);
+		boolean dap = shook(offerer, taker) && shook(taker, offerer);
+		SHAKES.add(new Shake(offerer.getUUID(), taker.getUUID(), now, dap));
+		send(offerer, taker.getId(), dap ? Hand.DAP : Hand.SHAKING);
+		send(taker, offerer.getId(), dap ? Hand.DAP : Hand.SHAKING);
+	}
+
+	/** {@code player} has shaken {@code other}'s hand before. */
+	private static boolean shook(ServerPlayer player, ServerPlayer other) {
+		Set<UUID> shook = player.getAttached(SHOOK);
+		return shook != null && shook.contains(other.getUUID());
+	}
+
+	private static void remember(ServerPlayer player, ServerPlayer other) {
+		Set<UUID> shook = player.getAttached(SHOOK);
+		if (shook == null || !shook.contains(other.getUUID())) {
+			Set<UUID> next = shook == null ? new HashSet<>() : new HashSet<>(shook);
+			next.add(other.getUUID());
+			player.setAttached(SHOOK, next);
+		}
 	}
 
 	/** {@code player} stood at {@code spot} (their own height) if it's near and clear, facing along {@code facing}. */
@@ -273,25 +313,29 @@ public final class Handshakes {
 			long t = now - s.start;
 			Vec3 mid = a.position().add(b.position()).scale(0.5).add(0.0, 1.1, 0.0);
 			ServerLevel level = a.level();
-			if (t == GRIP_TICK) {
-				level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.6F, 0.8F);
+			if (t == s.grip()) {
+				level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.6F, s.dap ? 1.1F : 0.8F);
 			}
-			if (t >= SHAKE_TICKS) {
+			if (t >= s.length()) {
 				it.remove();
 				end(server, s);
-				done(a, b, mid);
+				done(a, b, mid, s.dap);
 			}
 		}
 	}
 
-	/** The handshake went through: each knows the other's name, they're grouped, and a chime. */
-	private static void done(ServerPlayer offerer, ServerPlayer taker, Vec3 mid) {
+	/** The handshake went through: each knows the other's name, they're grouped, and a chime (a lighter one for a dap). */
+	private static void done(ServerPlayer offerer, ServerPlayer taker, Vec3 mid, boolean dap) {
 		Introductions.learn(offerer, taker);
 		Introductions.learn(taker, offerer);
+		remember(offerer, taker);
+		remember(taker, offerer);
 		Component group = Groups.shaken(offerer, taker);
 		ServerLevel level = offerer.level();
-		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, CHIME_VOLUME, CHIME_PITCH);
-		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
+		if (!dap) {
+			level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, CHIME_VOLUME, CHIME_PITCH);
+		}
+		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, dap ? 0.7F : 1.0F, dap ? 1.5F : 1.2F);
 		for (ServerPlayer[] pair : new ServerPlayer[][] {{offerer, taker}, {taker, offerer}}) {
 			pair[0].sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.done", Identities.trueName(pair[1]), group)
 				.withStyle(ChatFormatting.GREEN), true);

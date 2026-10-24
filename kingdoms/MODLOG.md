@@ -4359,11 +4359,15 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   cleared, a wide profile pushing in, a low close shot circling the grip, then over your shoulder onto their face.
   The arms are `client/HandshakePose`.
 - Afterwards the two know each other's names (`Introductions`) and share a group (`Groups`), which is a plain
-  scoreboard team: whoever has no group joins the other's, or the two start "<name>'s Company" in a random colour. Two in
-  different groups only learn names. An op's own `/team` counts as a group too.
+  scoreboard team: the offerer's, or a new "<name>'s Company" in a random colour. An op's own `/team` counts too.
 - Group perks: groupmates always see each other's names (nametag, tab list) in the group's colour; a groupmate's blows
   land at 25% (arrows and powers too, `Groups.FRIENDLY_DAMAGE`); each groupmate within 8 blocks takes 5% off blows from
   anyone else, up to 3 (`SIDE_GUARD`); invisible groupmates show; no shoving; vanilla `/teammsg` works.
 - `/group` lists your group (character names; offline members only counted, so no usernames), `/group leave`,
   `/group name <name>`. Leaving or renaming an op's team is refused.
+- Andy: "The initiating player's group is what is joined, everytime. Players within the same group can still
+  handshake, but the cutscene only ever plays once for the same combo of players. Every other time it is a quicker
+  single dap variation." The taker always leaves their group for the offerer's (an empty one of ours is removed). Each
+  player keeps whom they've shaken hands with (`Handshakes.SHOOK`, saved); a pair who have gets a 0.7 s dap (hand up
+  high, one clasp and a tug, a lighter chime) with no film.
 - Compile-checked against 26.3; not yet seen in game.

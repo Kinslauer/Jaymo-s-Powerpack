@@ -33,9 +33,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link #SIDE_GUARD}, up to {@link #SIDE_MAX} of them);</li>
  * <li>you see each other while invisible, and don't shove each other about.</li>
  * </ul>
- * {@code /group} names who's in yours, {@code /group leave} leaves it, {@code /group name <name>} renames it. A
- * group shakes hands to take someone in: whoever has no group joins the other's. Two in different groups only learn
- * each other's names.
+ * {@code /group} names who's in yours, {@code /group leave} leaves it, {@code /group name <name>} renames it. Whoever
+ * takes an offered hand joins the offerer's group, leaving their own.
  */
 public final class Groups {
 	/** A team this mod made for a group (an op's own teams are groups too, but are theirs to break up). */
@@ -70,8 +69,9 @@ public final class Groups {
 	}
 
 	/**
-	 * {@code offerer} and {@code taker} have just shaken hands: whoever has no group joins the other's, or the two start
-	 * one (named for the one who offered). What came of it, to tell them both.
+	 * {@code offerer} and {@code taker} have just shaken hands. Andy: "The initiating player's group is what is joined,
+	 * everytime": {@code taker} leaves any group of theirs for {@code offerer}'s, which is started (named for them) if they
+	 * have none. What came of it, to tell them both.
 	 */
 	static Component shaken(ServerPlayer offerer, ServerPlayer taker) {
 		Scoreboard scoreboard = offerer.level().getServer().getScoreboard();
@@ -79,12 +79,13 @@ public final class Groups {
 		if (mine != null && mine == theirs) {
 			return Component.translatable("message.jaymoskingdoms.group.already", mine.getDisplayName());
 		}
-		if (mine != null && theirs != null) {
-			return Component.translatable("message.jaymoskingdoms.group.apart");
-		}
-		PlayerTeam team = mine != null ? mine : theirs != null ? theirs : create(scoreboard, offerer);
+		PlayerTeam team = mine != null ? mine : create(scoreboard, offerer);
 		scoreboard.addPlayerToTeam(offerer.getScoreboardName(), team);
+		// (moves them off their old team; one of ours left empty goes)
 		scoreboard.addPlayerToTeam(taker.getScoreboardName(), team);
+		if (ours(theirs) && theirs.getPlayers().isEmpty()) {
+			scoreboard.removePlayerTeam(theirs);
+		}
 		return Component.translatable("message.jaymoskingdoms.group.joined", team.getDisplayName());
 	}
 

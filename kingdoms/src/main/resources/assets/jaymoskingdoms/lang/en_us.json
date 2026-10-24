@@ -3129,7 +3129,6 @@
 	"group.jaymoskingdoms.default_name": "%s's Company",
 	"message.jaymoskingdoms.group.joined": "You're both in %s.",
 	"message.jaymoskingdoms.group.already": "You're both in %s already.",
-	"message.jaymoskingdoms.group.apart": "You keep to your own groups.",
 	"message.jaymoskingdoms.group.none": "You're in no group. Shake hands with someone to start one.",
 	"message.jaymoskingdoms.group.members": "%s: %s",
 	"message.jaymoskingdoms.group.away": "(%s away)",
