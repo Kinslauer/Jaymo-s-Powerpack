@@ -10,4 +10,6 @@ public final class GiantState extends LivingEntityRenderState {
 	boolean aggressive;
 	/** How hard it's flinching from a hit: 1 just struck, down to 0. */
 	float flinch;
+	/** (0.7.184) Its entity id: the seed its death's tumble and break-up are drawn from. */
+	int seed;
 }
