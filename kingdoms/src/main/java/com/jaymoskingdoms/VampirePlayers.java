@@ -129,7 +129,8 @@ public final class VampirePlayers {
 			}
 			if (night) {
 				player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
-				player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, NIGHT_STRENGTH, true, false, true));
+				// (0.7.185) bloodbound ({@link BloodFever}): the night's strength a level higher
+				player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 40, NIGHT_STRENGTH + (BloodFever.bloodbound(player) ? 1 : 0), true, false, true));
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, NIGHT_SPEED, true, false, true));
 			} else if (sunlit(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false, true));
@@ -178,7 +179,7 @@ public final class VampirePlayers {
 	}
 
 	/** A bite from a player who's one of them. */
-	private static void drink(ServerLevel level, ServerPlayer player, LivingEntity target) {
+	static void drink(ServerLevel level, ServerPlayer player, LivingEntity target) {
 		long now = level.getGameTime();
 		Long last = LAST_DRINK.get(player.getUUID());
 		if (last != null && now - last < DRINK_EVERY) {
@@ -202,7 +203,12 @@ public final class VampirePlayers {
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.9F, 0.55F);
 		if (target.isAlive() && target instanceof PathfinderMob p && !Lycans.cursed(p) && !p.hasAttached(Vampires.BITTEN)) {
 			Vampires.bite(p, clock);
+		} else if (target.isAlive() && target instanceof ServerPlayer bitten) {
+			// (0.7.185) a ravenous fever's player prey ({@link BloodFever})
+			bitten(bitten);
 		}
+		// (0.7.185) every bite eases the blood fever
+		BloodFever.bit(player);
 		if (Vampires.night(clock)) {
 			Vampires.expose(player, nightNo);
 		}

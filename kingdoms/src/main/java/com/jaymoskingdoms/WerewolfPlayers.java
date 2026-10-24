@@ -90,6 +90,8 @@ public final class WerewolfPlayers {
 		@Nullable Werewolf beast;
 		final long since;
 		final boolean forced;
+		/** (0.7.185) It came on its own on a night that isn't the full moon ({@link FeralCurse}): it lasts till dawn. */
+		boolean wild;
 		boolean leaving;
 
 		Form(long since, boolean forced) {
@@ -137,6 +139,10 @@ public final class WerewolfPlayers {
 				killer.getFoodData().eat(KILL_FOOD, KILL_SATURATION);
 				killer.level().playSound(null, killer.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.0F, 0.6F);
 			}
+			if (source.getEntity() instanceof ServerPlayer killer && beast(killer)) {
+				// (0.7.185) every kill takes more of them
+				FeralCurse.kill(killer, entity);
+			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> end(handler.player, false));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -150,6 +156,30 @@ public final class WerewolfPlayers {
 	/** Whether {@code player} is the beast now (or changing into it). */
 	public static boolean beast(ServerPlayer player) {
 		return FORMS.containsKey(player.getUUID());
+	}
+
+	/** (0.7.185) Whether {@code player} is the beast in full now (not doubling over, not shrinking back). */
+	public static boolean beastUp(ServerPlayer player) {
+		Form f = FORMS.get(player.getUUID());
+		return f != null && f.beast != null && !f.leaving;
+	}
+
+	/** (0.7.185) The beast swipes (a hunt's blow, {@link Seizures}). */
+	static void clawAt(ServerPlayer player) {
+		Form f = FORMS.get(player.getUUID());
+		if (f != null && f.beast != null) {
+			f.beast.claw();
+		}
+	}
+
+	/** (0.7.185) The change comes on its own, whatever the moon, till dawn ({@link FeralCurse}). */
+	static void wildChange(ServerPlayer player) {
+		Lycans.Curse curse = player.getAttached(Lycans.CURSE);
+		if (curse == null || curse.half() || !player.isAlive() || FORMS.containsKey(player.getUUID())) {
+			return;
+		}
+		begin(player, player.level().getServer().overworld().getGameTime(), true);
+		FORMS.get(player.getUUID()).wild = true;
 	}
 
 	/** Whether {@code w} is a player's beast. */
@@ -238,6 +268,13 @@ public final class WerewolfPlayers {
 		if (f == null) {
 			begin(player, overworld.getGameTime(), false);
 		} else if (f.beast != null && !f.leaving) {
+			if (f.wild && Vampires.night(clock) || FeralCurse.refuses(player)) {
+				// (0.7.185) the wolf won't let go: a change that came on its own lasts the night, and a wild one can refuse
+				if (f.wild) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.werewolf.moon").withStyle(ChatFormatting.DARK_RED));
+				}
+				return;
+			}
 			f.leaving = true;
 			f.beast.changeBack();
 		}
@@ -292,7 +329,7 @@ public final class WerewolfPlayers {
 				level.addFreshEntity(f.beast);
 				w = f.beast;
 			}
-			if (f.forced && !moon && !f.leaving) {
+			if (f.forced && !(f.wild ? Vampires.night(clock) : moon) && !f.leaving) {
 				// (dawn)
 				f.leaving = true;
 				w.changeBack();
@@ -308,6 +345,7 @@ public final class WerewolfPlayers {
 			}
 			if ((now + player.getId()) % 20 == 0) {
 				buffs(player);
+				FeralCurse.beastSecond(player, moon);
 			}
 			strip(player, false);
 		}
@@ -324,9 +362,10 @@ public final class WerewolfPlayers {
 		w.setCustomNameVisible(false);
 		f.beast = w;
 		level.addFreshEntity(w);
-		if (f.forced) {
+		if (f.forced && !f.wild) {
 			player.setAttached(Lycans.CURSE, curse.changedOn(nightNo));
 		}
+		FeralCurse.toreOut(player, f.forced && !f.wild, f.wild);
 		Lycans.tearFx(level, player);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null && health.getModifier(HEALTH) == null) {
@@ -407,7 +446,7 @@ public final class WerewolfPlayers {
 		if (sick && player.level() instanceof ServerLevel level) {
 			// (0.7.66) after the first moon they come to in a den of their own, dug beneath where the night left them
 			Lycans.Curse curse = player.getAttached(Lycans.CURSE);
-			if (f.forced && curse != null && curse.moons() == 1 && Lairs.den(level, player)) {
+			if (f.forced && !f.wild && curse != null && curse.moons() == 1 && Lairs.den(level, player)) {
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.werewolf.den").withStyle(ChatFormatting.DARK_RED));
 			}
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, AFTER_TICKS, 0));
