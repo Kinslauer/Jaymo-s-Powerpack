@@ -21,6 +21,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -67,6 +72,12 @@ public final class ClassPerks {
 	/** (0.7.184) Archer's boon, Headshot: an arrow or bolt that strikes at the head (within this far below the eyes) hits this many times as hard. */
 	static final float ARCHER_HEADSHOT = 1.5F;
 	static final double HEADSHOT_BELOW_EYES = 0.35;
+	/** (0.7.184) Andy: "archer headshots can pin enemies to the wall, sometimes decapitating them first". A headshot on a
+	 * creature (not a player) with a wall within {@code ARCHER_PIN_REACH} behind it, along the arrow's flight, nails it
+	 * there for {@code ARCHER_PIN_TICKS}; one pin in {@code ARCHER_BEHEAD_ONE_IN} takes the head off first (with Jaymo's
+	 * Powers: a headless mob may stagger on, pinned, or drop). */
+	static final double ARCHER_PIN_REACH = 1.5;
+	static final int ARCHER_PIN_TICKS = 20 * 4, ARCHER_BEHEAD_ONE_IN = 4;
 	// Survivalist (was hunger x0.7, fall -30%)
 	static final float SURVIVALIST_EXHAUSTION = 0.6F;
 	static final double SURVIVALIST_OXYGEN = 1.0, SURVIVALIST_HEALTH = 2.0, SURVIVALIST_FALL = -0.4, SURVIVALIST_MOVE = 0.05;
@@ -117,6 +128,11 @@ public final class ClassPerks {
 	private static final Map<UUID, LivingEntity> MOUNTS = new HashMap<>();
 	/** Survivalist → the tick (their own tickCount) they were last hurt. */
 	private static final Map<UUID, Integer> LAST_HURT = new HashMap<>();
+	/** (0.7.184) A creature an Archer's headshot nailed to a wall: where it hangs, until when, by whom, and whether its head comes off. */
+	private record Pin(Vec3 at, long until, @Nullable ServerPlayer by, boolean behead) {
+	}
+
+	private static final Map<LivingEntity, Pin> PINNED = new HashMap<>();
 	/** True while a Warlord's cleave is landing its share on the others (so those blows don't cleave again). */
 	private static boolean cleaving;
 
@@ -215,6 +231,7 @@ public final class ClassPerks {
 		SHIELD_DOWN.clear();
 		MOUNTS.clear();
 		LAST_HURT.clear();
+		PINNED.clear();
 	}
 
 	/** The factor on {@code player}'s food exhaustion (a Survivalist's hunger drains slower). */
@@ -439,6 +456,7 @@ public final class ClassPerks {
 				amount *= (float) ARCHER_DAMAGE;
 				if (arrow.getY() + arrow.getBbHeight() * 0.5 >= target.getEyeY() - HEADSHOT_BELOW_EYES) {
 					amount *= ARCHER_HEADSHOT;
+					pin(sp, target, arrow);
 				}
 			} else if (cls == PlayerClass.MARKSMAN && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem) {
 				amount *= (float) (MARKSMAN_BOLTS + (sp.isShiftKeyDown() ? MARKSMAN_STEADY : 0.0));
@@ -472,6 +490,61 @@ public final class ClassPerks {
 			}
 		}
 		return amount;
+	}
+
+	/** An Archer's headshot: if there's a wall just behind {@code target} along the arrow's flight, it's nailed to it. */
+	private static void pin(ServerPlayer archer, LivingEntity target, AbstractArrow arrow) {
+		if (target instanceof net.minecraft.world.entity.player.Player || PINNED.containsKey(target) || !(target.level() instanceof ServerLevel level)) {
+			return;
+		}
+		Vec3 dir = arrow.getDeltaMovement().multiply(1.0, 0.0, 1.0);
+		if (dir.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		dir = dir.normalize();
+		double half = target.getBbWidth() * 0.5;
+		Vec3 from = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
+		BlockHitResult wall = level.clip(new ClipContext(from, from.add(dir.scale(half + ARCHER_PIN_REACH)), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, target));
+		if (wall.getType() != HitResult.Type.BLOCK) {
+			return;
+		}
+		// flush against the wall, its feet where they were
+		Vec3 at = new Vec3(wall.getLocation().x - dir.x * (half + 0.05), target.getY(), wall.getLocation().z - dir.z * (half + 0.05));
+		boolean behead = archer.getRandom().nextInt(ARCHER_BEHEAD_ONE_IN) == 0;
+		PINNED.put(target, new Pin(at, level.getGameTime() + ARCHER_PIN_TICKS, archer, behead));
+		level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.TRIDENT_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 0.9F, 0.7F);
+	}
+
+	/** The pinned hang where they were nailed (and lose their heads the tick after, out of the blow that pinned them). */
+	static void serverTick(net.minecraft.server.MinecraftServer server) {
+		if (PINNED.isEmpty()) {
+			return;
+		}
+		var it = PINNED.entrySet().iterator();
+		while (it.hasNext()) {
+			var e = it.next();
+			LivingEntity target = e.getKey();
+			Pin pin = e.getValue();
+			if (!target.isAlive() || target.isRemoved() || !(target.level() instanceof ServerLevel level) || level.getGameTime() > pin.until()) {
+				it.remove();
+				continue;
+			}
+			if (pin.behead()) {
+				e.setValue(pin = new Pin(pin.at(), pin.until(), pin.by(), false));
+				PowersCompat.behead(target, pin.by());
+				if (!target.isAlive()) {
+					it.remove();
+					continue;
+				}
+			}
+			target.setPos(pin.at().x, pin.at().y, pin.at().z);
+			target.setDeltaMovement(Vec3.ZERO);
+			target.hurtMarked = true;
+			if (target instanceof net.minecraft.world.entity.Mob mob) {
+				mob.getNavigation().stop();
+			}
+		}
 	}
 
 	/** Whether {@code target} has its back (near enough) to {@code attacker}. */

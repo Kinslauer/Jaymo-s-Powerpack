@@ -22,7 +22,42 @@ public final class PowersCompat {
 	private static @Nullable ParticleOptions bloodFleck;
 	private static boolean lookedForBlood;
 
+	/** (0.7.184) Powers' {@code Dismember.canLoseParts(LivingEntity)} and {@code Dismember.sever(LivingEntity, int, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle canLoseParts, sever;
+	private static boolean lookedForDismember;
+
 	private PowersCompat() {
+	}
+
+	/**
+	 * (0.7.184) Takes {@code target}'s head off as Jaymo's Powers' dismemberment does (a headless mob may stagger on a while,
+	 * a skeleton fights on, anything else drops), {@code by} its killer. False without Powers, or if it has no head to lose.
+	 */
+	public static boolean behead(net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.@Nullable LivingEntity by) {
+		if (!lookedForDismember) {
+			lookedForDismember = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> dismember = Class.forName("com.jaymospowers.core.Dismember");
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					canLoseParts = lookup.findStatic(dismember, "canLoseParts",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class));
+					sever = lookup.findStatic(dismember, "sever", java.lang.invoke.MethodType.methodType(boolean.class,
+						net.minecraft.world.entity.LivingEntity.class, int.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' dismemberment", e);
+				}
+			}
+		}
+		if (canLoseParts == null || sever == null) {
+			return false;
+		}
+		try {
+			// (Dismember.HEAD is 1)
+			return (boolean)canLoseParts.invoke(target) && (boolean)sever.invoke(target, 1, by);
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/**
