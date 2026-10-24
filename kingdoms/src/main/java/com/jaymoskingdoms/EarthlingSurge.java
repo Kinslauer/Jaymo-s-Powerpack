@@ -20,12 +20,17 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.7.92) Andy: "keep the glow but activate it only when the earthling is almost dead, and it activates giving them a
  * random buff for 5m". Brought below {@link #ALMOST_DEAD} of their health, an Earthling (player or villager) digs deep:
  * the ki round their fists flares (client HeritageLooks, VillagerLooks) and stays lit for {@link #SURGE_TICKS}, with one
  * buff drawn from {@link #BUFFS} for as long. Once over, it can't come again for {@link #REST_TICKS}.
+ * <p>
+ * (0.7.184) Andy: "Earthlings should have no special glow or ki effects on their heritage skin unless they are z
+ * fighters". The buff still comes for every Earthling; only a Z Fighter's fists light up and throw off sparks
+ * ({@link #shows}).
  */
 public final class EarthlingSurge {
 	/** The share of max health at or below which the surge comes. */
@@ -54,10 +59,15 @@ public final class EarthlingSurge {
 		});
 	}
 
-	/** Whether {@code entity}'s ki is flaring now (for its look). */
+	/** Whether {@code entity}'s ki is flaring now (the buff's clock; the look also needs {@link #shows}). */
 	public static boolean surging(Entity entity) {
 		Long until = entity.getAttached(UNTIL);
 		return until != null && entity.level().getGameTime() < until;
+	}
+
+	/** (0.7.184) Whether {@code entity}'s surge shows: only a Z Fighter's (a player with Jaymo's Powers' Z Fighter power). */
+	public static boolean shows(Entity entity) {
+		return entity instanceof Player player && "zfighter".equals(PowersCompat.power(player));
 	}
 
 	private static void surge(LivingEntity entity) {
@@ -69,7 +79,7 @@ public final class EarthlingSurge {
 		entity.setAttached(UNTIL, now + SURGE_TICKS);
 		Buff buff = BUFFS.get(entity.getRandom().nextInt(BUFFS.size()));
 		entity.addEffect(new MobEffectInstance(buff.effect(), SURGE_TICKS, buff.amplifier(), false, true, true));
-		if (entity.level() instanceof ServerLevel level) {
+		if (entity.level() instanceof ServerLevel level && shows(entity)) {
 			level.playSound(null, entity.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 			level.playSound(null, entity.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 0.7F);
 			level.sendParticles(ParticleTypes.END_ROD, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 24, 0.4, 0.6, 0.4, 0.08);

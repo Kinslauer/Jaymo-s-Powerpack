@@ -84,7 +84,8 @@ public final class VillagerLooks {
 		} else if (heritage == Heritage.Kind.SYLVAN && entity.isCrouching()) {
 			glow = HeritageLooks.SYLVAN_SNEAK_GLOW;
 		} else if (heritage == Heritage.Kind.EARTHLING) {
-			glow = EarthlingSurge.surging(entity) ? -1 : 0;
+			// (0.7.184) a villager is never a Z Fighter: no ki glow (EarthlingSurge.shows)
+			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
 		int variant = kind == null ? 0 : HeritageLooks.variant(entity.getUUID(), kind.skin.length);
 		// (0.7.187) one of the Nether's Flame Avatars: wreathed in fire (not in water)
