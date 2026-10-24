@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -63,8 +64,8 @@ final class Javelins {
 	static final String WEAPONMOD = "weaponmod";
 	static final boolean WEAPONMOD_LOADED = FabricLoader.getInstance().isModLoaded(WEAPONMOD);
 
-	private static final Map<Folk, Long> NEXT = new WeakHashMap<>();
-	private static final Map<Folk, Boolean> UNREACHABLE = new WeakHashMap<>();
+	private static final Map<PathfinderMob, Long> NEXT = new WeakHashMap<>();
+	private static final Map<PathfinderMob, Boolean> UNREACHABLE = new WeakHashMap<>();
 	/** The javelins (and tridents) folk have thrown, so the damage they do is known as theirs. */
 	private static final Set<Projectile> THROWN = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -81,6 +82,11 @@ final class Javelins {
 		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk);
 	}
 
+	/** (0.7.183) A camp's MCA villager throws too (a raider as its folk did; the pirates with a pistol or dynamite in hand don't). */
+	static boolean thrower(Worker w) {
+		return w.role() == Folk.BARBARIAN;
+	}
+
 	/** (0.5.64) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
 	static void mark(Projectile shot) {
 		THROWN.add(shot);
@@ -88,8 +94,21 @@ final class Javelins {
 
 	/** From {@link Folk#customServerAiStep}: a throw at its foe, when it can't close with it and the javelin's ready. */
 	static void tick(ServerLevel level, Folk folk) {
+		if (thrower(folk)) {
+			tick(level, folk, folk.factionId());
+		}
+	}
+
+	/** (0.7.183) The same throw from a camp's MCA villager ({@code Workers.step}). */
+	static void tick(ServerLevel level, Worker w) {
+		if (thrower(w)) {
+			tick(level, w.mob(), w.factionId());
+		}
+	}
+
+	private static void tick(ServerLevel level, PathfinderMob folk, int faction) {
 		LivingEntity foe = folk.getTarget();
-		if (foe == null || !foe.isAlive() || !thrower(folk)) {
+		if (foe == null || !foe.isAlive() || folk.isPassenger() || Downed.isDowned(folk)) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -110,7 +129,7 @@ final class Javelins {
 			return;
 		}
 		NEXT.put(folk, now + COOLDOWN + level.getRandom().nextInt(JITTER));
-		Projectile thrown = javelin(level, folk);
+		Projectile thrown = javelin(level, folk, faction);
 		if (thrown == null) {
 			return;
 		}
@@ -130,11 +149,11 @@ final class Javelins {
 	 * What it throws: a trident from an elite kingdom's guard, a rock from a poor kingdom's guard or a barbarian, else
 	 * Balkon's javelin (a rock without WeaponMod).
 	 */
-	private static @Nullable Projectile javelin(ServerLevel level, Folk folk) {
+	private static @Nullable Projectile javelin(ServerLevel level, PathfinderMob folk, int faction) {
 		MinecraftServer server = level.getServer();
-		Faction f = Factions.get(server, folk.factionId());
+		Faction f = Factions.get(server, faction);
 		boolean poor = f == null || !f.type().isRealm() || f.treasury() < POOR_TREASURY;
-		if (!poor && elite(server, folk.factionId())) {
+		if (!poor && elite(server, faction)) {
 			return new ThrownTrident(level, folk, new ItemStack(Items.TRIDENT));
 		}
 		Projectile javelin = !poor && WEAPONMOD_LOADED ? WeaponModJavelins.javelin(level, folk) : null;
@@ -142,7 +161,7 @@ final class Javelins {
 	}
 
 	/** A rock: a thrown cobblestone that hits for {@link #ROCK_DAMAGE} ({@link #allowDamage} gives a snowball its weight). */
-	private static Projectile rock(ServerLevel level, Folk folk) {
+	private static Projectile rock(ServerLevel level, LivingEntity folk) {
 		return new Snowball(level, folk, new ItemStack(Items.COBBLESTONE));
 	}
 
@@ -168,12 +187,29 @@ final class Javelins {
 		return !(victim instanceof Player p && p.isCreative());
 	}
 
+	/**
+	 * (0.7.183) The same for a camp's MCA villager as thrower: never its own camp's folk or villagers, nor a creative
+	 * player; the villagers and golems the camps hunt are fair game.
+	 */
+	static boolean harms(LivingEntity thrower, LivingEntity victim) {
+		if (thrower instanceof Folk folk) {
+			return harms(folk, victim);
+		}
+		if (victim == thrower || Barbarians.isCampVillager(victim)) {
+			return false;
+		}
+		if (victim instanceof Folk other) {
+			return other.style() != FactionType.BARBARIAN;
+		}
+		return !(victim instanceof Player p && p.isCreative());
+	}
+
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
 	private static boolean redealing;
 
 	/** A javelin spares the thrower's own side (and, from a defender, the villagers and golems he guards). */
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
-		if (!(source.getDirectEntity() instanceof Projectile javelin) || !THROWN.contains(javelin) || !(source.getEntity() instanceof Folk thrower)) {
+		if (!(source.getDirectEntity() instanceof Projectile javelin) || !THROWN.contains(javelin) || !(source.getEntity() instanceof LivingEntity thrower)) {
 			return true;
 		}
 		boolean allowed = harms(thrower, victim);

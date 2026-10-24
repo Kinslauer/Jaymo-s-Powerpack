@@ -139,7 +139,9 @@ final class Muskets {
 		double dy = foe.getY(0.5) - ball.getY();
 		double flat = Math.sqrt(dx * dx + dz * dz);
 		folk.getLookControl().setLookAt(foe, 30.0F, 30.0F);
-		folk.getNavigation().stop();
+		if (!RangedTactics.active(folk)) {
+			folk.getNavigation().stop();
+		}
 		Projectile.spawnProjectileUsingShoot(ball, level, ItemStack.EMPTY, dx, dy + flat * 0.02, dz, SPEED, SPREAD);
 		Vec3 muzzle = folk.getEyePosition().add(new Vec3(dx, dy, dz).normalize().scale(1.1));
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 6, 0.1, 0.1, 0.1, 0.02);

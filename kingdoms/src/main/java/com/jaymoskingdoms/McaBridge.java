@@ -390,14 +390,22 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
+		// (0.7.183) a gunner keeps his pistol in the off hand and draws a cutlass (MCA's guards would try to work a crossbow
+		// themselves); a bombardier's dynamite stays in his off hand
+		boolean gunner = folk.role() == Pirates.GUNNER;
 		for (EquipmentSlot slot : List.of(EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
-			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			net.minecraft.world.item.ItemStack worn = gunner && slot == EquipmentSlot.MAINHAND ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD) : folk.getItemBySlot(slot);
 			if (!worn.isEmpty()) {
 				// worn, and kept in their pack too: MCA's guards dress from what they carry
 				villager.setItemSlot(slot, worn.copy());
 				villager.getInventory().addItem(worn.copy());
 				villager.setDropChance(slot, 0.0F);
 			}
+		}
+		net.minecraft.world.item.ItemStack offhand = gunner ? folk.getMainHandItem() : folk.getOffhandItem();
+		if (!offhand.isEmpty()) {
+			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
+			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
 		Barbarians.harden(villager);
 		worker(villager).enlist(folk.role(), folk.factionId());
@@ -455,7 +463,7 @@ final class McaBridge {
 			if (camp != null && !camp.fallen() && villager.isGuard() && !villager.isBaby()) {
 				return true;
 			}
-			if (camp != null && !camp.fallen()) {
+			if (camp != null && !camp.fallen() && !Pirates.offRoster(e.role())) {
 				Economy.lost(level.getServer(), camp.id(), e.role());
 			}
 			e.discharge();

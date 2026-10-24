@@ -150,6 +150,10 @@ public final class Downed {
 
 	/** (0.7.132) Someone villagers would tend: a villager, or a settlement's own folk (not a ruler, orc, raider or barbarian). */
 	private static boolean kin(LivingEntity body) {
+		if (campMember(body)) {
+			// (0.7.183) a camp's own are tended by the camp's own villagers (see sameSide)
+			return true;
+		}
 		if (body instanceof Villager || isGuard(body)) {
 			return true;
 		}
@@ -162,6 +166,33 @@ public final class Downed {
 			return f != null && f.type() != FactionType.BARBARIAN;
 		}
 		return false;
+	}
+
+	/**
+	 * (0.7.183) A barbarian camp's or pirate cove's own: its MCA villagers, and its raiders and crews as folk (not a chief,
+	 * a captain, an orc or a goblin).
+	 */
+	private static boolean campMember(LivingEntity body) {
+		if (Barbarians.isCampVillager(body)) {
+			return true;
+		}
+		return body instanceof Folk folk && (folk.role() == Folk.BARBARIAN || Pirates.isPirate(folk.role()) && folk.role() != Pirates.CAPTAIN);
+	}
+
+	/**
+	 * (0.7.183) Who tends whom: a realm's villagers their own side, a camp's villagers only their own camp's; neither
+	 * crosses over.
+	 */
+	private static boolean sameSide(Villager helper, LivingEntity body) {
+		boolean campHelper = Barbarians.isCampVillager(helper);
+		if (campHelper != campMember(body)) {
+			return false;
+		}
+		if (!campHelper) {
+			return true;
+		}
+		int camp = body instanceof Worker w ? w.factionId() : -2;
+		return helper instanceof Worker hw && hw.factionId() == camp;
 	}
 
 	/**
@@ -296,7 +327,7 @@ public final class Downed {
 	}
 
 	private static boolean canHelp(Villager v, LivingEntity body) {
-		return v.isAlive() && v != body && !v.isBaby() && !isDowned(v) && !v.isSleeping() && !v.isPassenger() && !v.isNoAi() && v.getTarget() == null
+		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && !v.isPassenger() && !v.isNoAi() && v.getTarget() == null
 			&& !Frights.afraid(v.getUUID()) && !McaCompat.panicking(v) && v.level() == body.level() && v.distanceToSqr(body) < HELP_RANGE * HELP_RANGE * 1.5;
 	}
 
