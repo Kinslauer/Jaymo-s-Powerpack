@@ -61,7 +61,10 @@ import org.jspecify.annotations.Nullable;
  * puff of dust and a jolt. Its left-click swings are plain blunt blows.</li>
  * <li><b>Leather whip</b> ({@link LeatherWhipItem}): use cracks the lash out to where you look ({@link #WHIP_REACH}).
  * A creature it cracks is stung; keep holding and the lash wraps it and holds it to you. Let go: a light one is hauled
- * over your head and slammed down in front of you, a heavy one yanked off its feet toward you and left reeling.</li>
+ * over your head and slammed down in front of you, a heavy one yanked off its feet toward you and left reeling. Andy:
+ * "the whip should also allow you to climb up a wall rappel style, trusting that you hooked the edge of an up to 7 block
+ * wall": crack it at a wall and keep holding, and it's hooked over the top ({@link #HOOK}); you walk up the wall on it
+ * and over the top (Sneak too: down again), and letting go drops you.</li>
  * </ul>
  * The server runs it all; the head's path is worked out the same on both sides from the synced {@link State} (a player
  * attachment), so the chain or lash is drawn from the hand with no lag (client/armory/LashRenderer).
@@ -69,7 +72,7 @@ import org.jspecify.annotations.Nullable;
 public final class Lash {
 	public static final byte FLAIL = 0, WHIP = 1;
 	/** What the head is doing: whirling, coming down, flying back; (whip) cracking out, wrapped round, hauling. */
-	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6;
+	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6, HOOK = 7;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/** The whirl: the ball's circle (blocks out, and above your head), and how fast it goes round (radians a tick). */
@@ -112,6 +115,15 @@ public final class Lash {
 	/** The haul: over your head at this tick, slammed in front at the next (ticks since letting go). */
 	public static final int HEAVE_OVER = 7, HEAVE_SLAM = 12, YANK_TICKS = 6;
 	static final double HEAVE_REACH = 3.2, STEER = 0.75, MAX_SPEED = 2.6;
+	/**
+	 * (rappel) A wall whose top is at most this far above your feet can be climbed; the lash, cracked anywhere on its face,
+	 * hooks over the top. Holding use you climb this fast (blocks a tick), leaning in this hard; at the top (this far
+	 * below the lip) you go up and over it, pushed in this hard; with Sneak held too you let yourself down this fast.
+	 * The hook gives after this long anyway.
+	 */
+	public static final double CLIMB_HEIGHT = 7.0, CLIMB_SPEED = 0.2, WALL_HUG = 0.12, OVER_THE_TOP = 0.7, OVER_PUSH = 0.3,
+		LOWER_SPEED = 0.1;
+	static final int HOOK_MAX = 400;
 	/** The head flies back to the hand in this many ticks. */
 	public static final int RETURN_TICKS = 5;
 
@@ -248,6 +260,7 @@ public final class Lash {
 				yield over.lerp(state.aim(), s * s);
 			}
 			case CRACK -> state.from().lerp(state.aim(), Math.min(1.0, t / CRACK_TICKS));
+			case HOOK -> state.aim();
 			case SNAG, HEAVE, YANK -> {
 				Entity target = player.level().getEntity(state.target());
 				yield target == null ? state.aim() : target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.55, 0.0);
@@ -400,6 +413,16 @@ public final class Lash {
 					back(player, state, now);
 				}
 			}
+			case HOOK -> {
+				// the climb itself is the climber's own (client/armory/LashRenderer.climb); here, only when it's over
+				player.resetFallDistance();
+				boolean over = player.onGround() && player.getY() >= state.aim().y - 0.1;
+				if (over || t > HOOK_MAX || run.held && !player.isUsingItem()
+					|| player.getEyePosition().distanceTo(state.aim()) > WHIP_REACH + 3.0) {
+					run.held = false;
+					back(player, state, now);
+				}
+			}
 			default -> {
 				if (t >= RETURN_TICKS) {
 					return false;
@@ -428,6 +451,11 @@ public final class Lash {
 			run.spin = spin(t);
 			player.setAttached(STATE, state.to(STRIKE, now, -1, head, strikeSpot(player)));
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.6F);
+			return;
+		}
+		if (state.phase() == HOOK) {
+			// let go of the lash: whatever height you're at, you drop
+			back(player, state, now);
 			return;
 		}
 		if (state.phase() != SNAG) {
@@ -584,6 +612,13 @@ public final class Lash {
 			if (!level.getBlockState(pos).isAir()) {
 				Debris.puff(level, pos, level.getBlockState(pos), 0.25F);
 			}
+			// (rappel) still holding, on a wall: it's hooked over the top, trusting it's there
+			Vec3 lip = run.held && player.isUsingItem() ? lip(level, player, pos) : null;
+			if (lip != null) {
+				player.setAttached(STATE, state.to(HOOK, now, -1, at, lip));
+				level.playSound(null, lip.x, lip.y, lip.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.9F);
+				return;
+			}
 		}
 		back(player, state, now);
 	}
@@ -709,6 +744,37 @@ public final class Lash {
 		return block.getType() == HitResult.Type.MISS ? null : block;
 	}
 
+	/**
+	 * (rappel) The top of the wall {@code hit} is part of, if the lash could hook over it: straight up from {@code hit},
+	 * solid all the way to a top with two blocks of room over it, no more than {@link #CLIMB_HEIGHT} above your feet and
+	 * within the lash's reach. Its lip: the top's edge on your side.
+	 */
+	private static @Nullable Vec3 lip(Level level, Player player, BlockPos hit) {
+		double feet = player.getY();
+		for (BlockPos pos = hit; pos.getY() <= Mth.floor(feet + CLIMB_HEIGHT); pos = pos.above()) {
+			if (!solid(level, pos)) {
+				// a gap: not one wall
+				return null;
+			}
+			if (solid(level, pos.above()) || solid(level, pos.above(2))) {
+				continue;
+			}
+			double top = pos.getY() + level.getBlockState(pos).getCollisionShape(level, pos).max(net.minecraft.core.Direction.Axis.Y);
+			if (top - feet > CLIMB_HEIGHT || top - feet < 1.0) {
+				return null;
+			}
+			Vec3 middle = Vec3.atBottomCenterOf(pos);
+			net.minecraft.core.Direction side = net.minecraft.core.Direction.getApproximateNearest(player.getX() - middle.x, 0.0, player.getZ() - middle.z);
+			Vec3 lip = new Vec3(middle.x + side.getStepX() * 0.5, top, middle.z + side.getStepZ() * 0.5);
+			return lip.distanceTo(player.getEyePosition()) <= WHIP_REACH + 1.5 ? lip : null;
+		}
+		return null;
+	}
+
+	private static boolean solid(Level level, BlockPos pos) {
+		return !level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
+	}
+
 	/** Something a swung head can hit: alive, not you or your mount, not a stand, not someone in creative. */
 	private static boolean struck(Player player, LivingEntity entity) {
 		return entity != player && entity.isAlive() && !entity.isSpectator() && entity.isAttackable() && !(entity instanceof ArmorStand)
@@ -736,7 +802,7 @@ public final class Lash {
 		entity.needsSync = true;
 		entity.syncVelocity = true;
 		if (entity instanceof ServerPlayer other) {
-			ServerPlayNetworking.send(other, new com.jaymospowers.power.web.WebNet.Nudge(dv));
+			ServerPlayNetworking.send(other, new com.jaymospowers.power.web.WebNet.Shove(dv));
 		}
 	}
 
@@ -751,7 +817,7 @@ public final class Lash {
 	 * Balkon's flail draws its ball-less model while its ball is out (its {@code PlayerWeaponData.setFlailThrown}): so
 	 * the ball isn't in the hand and on the chain at once. Reached by name, as nothing here compiles against WeaponMod.
 	 */
-	private static void flailThrown(ServerPlayer player, boolean thrown) {
+	public static void flailThrown(ServerPlayer player, boolean thrown) {
 		try {
 			Class.forName("ckathode.weaponmod.PlayerWeaponData").getMethod("setFlailThrown", Player.class, boolean.class)
 				.invoke(null, player, thrown);
