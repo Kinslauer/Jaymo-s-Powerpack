@@ -1004,3 +1004,9 @@ Batch 3 of the BWM port (MIT, our own code).
   (`client/corpse/Pinned`, applied with `Limp`).
 - An arrow tagged `jaymoskingdoms.leg_pin` (an Archer's leg shot, which pins the legs instead) doesn't cripple
   (`LegShots.LEG_PIN_TAG`).
+- Pincushions (Andy: "make mobs pin cushion like players"): every arrow that sticks in a creature stays in it until it
+  dies (`archery/StuckArrows`, attachment `stuck_arrows`, synced and saved; at most 24; a piercing arrow passes through,
+  tridents don't stick), drawn where it went in like a player's (`client/archery/StuckArrowsLayer`, on every living
+  renderer but the player's, walking any model's parts). Its corpse keeps them (`CorpseEntity.arrows`, saved) and draws
+  them too. An empty hand (not sneaking) pulls one out a click before anything else; one that could have been picked up
+  off the ground comes out whole 60% of the time (`StuckArrows.SALVAGE_CHANCE`), the rest snap.

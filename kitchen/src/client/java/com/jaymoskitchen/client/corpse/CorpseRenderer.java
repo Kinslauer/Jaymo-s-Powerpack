@@ -292,6 +292,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		ClosedEyes.mark(bodyState);
+		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
 		physics(corpse, state, bodyState, baseX, baseY, baseZ, partialTicks);
@@ -351,6 +352,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		bodyState.setData(Pinned.KEY, Pinned.HANGING);
 		ClosedEyes.mark(bodyState);
+		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
 	}
@@ -419,6 +421,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		ClosedEyes.mark(bodyState);
+		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		bodyState.setData(RagdollPose.KEY, pose);
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -615,5 +618,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	private static <S extends EntityRenderState> void submitBody(EntityRenderer<?, S> renderer, EntityRenderState state,
 		PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		renderer.submit((S) state, poseStack, collector, camera);
+	}
+
+	/** (0.5.23) How many arrows to draw in the body (null for none). */
+	private static @Nullable Integer arrows(CorpseEntity corpse) {
+		int total = com.jaymoskitchen.archery.StuckArrows.total(corpse.arrows());
+		return total > 0 ? total : null;
 	}
 }

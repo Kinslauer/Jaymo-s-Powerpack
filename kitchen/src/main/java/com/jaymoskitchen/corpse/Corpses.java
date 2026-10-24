@@ -211,6 +211,8 @@ public final class Corpses {
 		}
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
 		corpse.setMissing(missingParts(mob));
+		// (0.5.23) the arrows it died with stay in it
+		corpse.setArrows(com.jaymoskitchen.archery.StuckArrows.of(mob));
 		LivingEntity killer = mob.getKillCredit();
 		// a pet's kill is its owner's
 		corpse.setKiller(killer, killer instanceof Player

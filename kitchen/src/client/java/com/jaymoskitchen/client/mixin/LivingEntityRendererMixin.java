@@ -20,6 +20,10 @@ abstract class LivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymoskitchen$crawl(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		CrawlPose.extract(state, LegShots.crawlAmount(entity, partialTicks));
+		// (0.5.23) the arrows stuck in it (players' are the game's own)
+		int arrows = entity instanceof net.minecraft.world.entity.player.Player ? 0
+			: com.jaymoskitchen.archery.StuckArrows.total(com.jaymoskitchen.archery.StuckArrows.of(entity));
+		state.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows > 0 ? arrows : null);
 	}
 
 	@Inject(method = "setupRotations", at = @At("TAIL"))

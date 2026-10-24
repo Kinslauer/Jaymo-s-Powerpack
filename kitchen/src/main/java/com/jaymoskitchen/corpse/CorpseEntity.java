@@ -79,6 +79,9 @@ public class CorpseEntity extends Entity {
 	/** (0.5.23) Nailed to a wall by an arrow: the way it faces out from the wall (degrees, 0-359), or -1 when it isn't. */
 	private static final EntityDataAccessor<Integer> PINNED = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
+	/** (0.5.23) The arrows still in the body (see StuckArrows): how many, and how many could come out whole, packed. */
+	private static final EntityDataAccessor<Integer> ARROWS = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
 	/** (0.5.23) How often (ticks) a pinned body checks the wall behind it is still there. */
 	private static final int PIN_CHECK_TICKS = 20;
 	private static final EntityDataAccessor<Integer> POSE = SynchedEntityData.defineId(CorpseEntity.class,
@@ -687,6 +690,39 @@ public class CorpseEntity extends Entity {
 		builder.define(SLUNG_SLOT, 0);
 		builder.define(SLUNG_AT, 0L);
 		builder.define(PINNED, -1);
+		builder.define(ARROWS, 0);
+	}
+
+	/** (0.5.23) The arrows still in the body, packed as {@link com.jaymoskitchen.archery.StuckArrows} packs them. */
+	public int arrows() {
+		return this.entityData.get(ARROWS);
+	}
+
+	public void setArrows(int packed) {
+		this.entityData.set(ARROWS, packed);
+	}
+
+	/**
+	 * (0.5.23) An empty hand pulls an arrow out: whole ({@link com.jaymoskitchen.archery.StuckArrows#SALVAGE_CHANCE} of the
+	 * time, for one that could have been picked up off the ground) or snapped.
+	 */
+	private InteractionResult pullArrow(ServerLevel level, Player player) {
+		int packed = arrows();
+		int total = com.jaymoskitchen.archery.StuckArrows.total(packed), whole = com.jaymoskitchen.archery.StuckArrows.salvageable(packed);
+		boolean pickable = random.nextInt(total) < whole;
+		setArrows(com.jaymoskitchen.archery.StuckArrows.pack(total - 1, whole - (pickable ? 1 : 0)));
+		jolt(false);
+		if (pickable && random.nextFloat() < com.jaymoskitchen.archery.StuckArrows.SALVAGE_CHANCE) {
+			ItemStack arrow = new ItemStack(Items.ARROW);
+			if (!player.getInventory().add(arrow)) {
+				player.drop(arrow, false);
+			}
+			play(level, SoundEvents.ARROW_HIT_PLAYER, 1.2F);
+		} else {
+			play(level, SoundEvents.WOOD_BREAK, 1.4F);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.arrow_snapped"));
+		}
+		return InteractionResult.SUCCESS_SERVER;
 	}
 
 	/**
@@ -1167,6 +1203,10 @@ public class CorpseEntity extends Entity {
 		}
 		ItemStack held = player.getItemInHand(hand);
 
+		// (0.5.23) arrows still in it come out first, one a click, to an empty hand
+		if (held.isEmpty() && !player.isShiftKeyDown() && com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
+			return pullArrow(level, player);
+		}
 		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
 		if (isFish()) {
 			return lootFish(level);
@@ -2193,6 +2233,7 @@ public class CorpseEntity extends Entity {
 			setNoGravity(true);
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
+		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
 		if (pinned() >= 0) {
 			setNoGravity(true);
 		}
@@ -2236,6 +2277,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (pinned() >= 0) {
 			output.putInt("Pinned", pinned());
+		}
+		if (arrows() != 0) {
+			output.putInt("Arrows", arrows());
 		}
 	}
 }

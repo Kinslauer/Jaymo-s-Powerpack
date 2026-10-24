@@ -94,6 +94,7 @@
 	"message.jaymoskitchen.corpse.need_axe": "Chop it with an axe.",
 	"message.jaymoskitchen.corpse.carry": "Chop it with an axe, or carry it to a Butcher Block.",
 	"message.jaymoskitchen.corpse.no_room": "No room to carry it.",
+	"message.jaymoskitchen.corpse.arrow_snapped": "The arrow snaps as it comes out.",
 	"message.jaymoskitchen.corpse.burn_zombie": "Nothing left on it. Burn it before it gets back up!",
 	"message.jaymoskitchen.corpse.searched": "Nothing left on it. Burn it, or let it rot.",
 	"tooltip.jaymoskitchen.quiver.count": "Arrows: %s/%s",
