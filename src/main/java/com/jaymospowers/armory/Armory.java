@@ -64,6 +64,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>The round shield blocks like a shield and comes up a little quicker.</li>
  * <li>The recurve bow shoots harder than a plain bow ({@link RecurveBowItem#POWER}).</li>
  * <li>(0.15.2) The rapier lunges on right-click and runs through the first foe ahead ({@link RapierItem}).</li>
+ * <li>(0.15.147) The leather whip cracks, wraps and hauls; Balkon's flail whirls and comes down overhead ({@link Lash}).</li>
  * </ul>
  */
 public final class Armory {
@@ -184,6 +185,10 @@ public final class Armory {
 				.build()));
 		item("throwing_star", props -> new ThrowingWeaponItem(props, 3.0F, true, false), p -> p.stacksTo(16));
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
+		// (0.15.147) the single-tail leather whip: cracks, wraps and hauls (Lash)
+		item("leather_whip", LeatherWhipItem::new, p -> p.durability(LeatherWhipItem.DURABILITY).repairable(net.minecraft.world.item.Items.LEATHER)
+			.component(DataComponents.LORE, new ItemLore(List.of(
+				Component.translatable("item.jaymospowers.leather_whip.hint").withStyle(ChatFormatting.GRAY)))));
 		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
 		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
 		BombGliderNet.init();
@@ -204,6 +209,7 @@ public final class Armory {
 
 		ArmoryHits.init();
 		RapierItem.init();
+		Lash.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker
 				&& entity.level() instanceof ServerLevel level && isLance(attacker.getMainHandItem())) {

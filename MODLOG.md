@@ -2715,3 +2715,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.147, the flail and the leather whip (Web Whip's mechanics on weapons):** Andy: "Can these mechanics replace
+  the flail? And maybe add a single leather whip?" (`armory/Lash`, synced `Lash.State` player attachment; the head's
+  path is worked out the same on both sides, so `client/armory/LashRenderer` draws the chain/lash from the hand with
+  no lag). Balkon's flail (`mixin/WeaponModFlailMixin`, `WeaponModMeleeUseMixin`) no longer throws its ball on
+  right-click or on every hit: hold use and the ball whirls on its chain over your head, faster over 1.5 s, clipping
+  what it passes; let go and it's hauled overhead and brought down where you look (to 4.2 blocks), up to 1.7x the
+  flail's damage at full spin, splashing whoever's beside, dust and a jolt. The new leather whip (3 leather, string,
+  stick) cracks out to 7 blocks (4 damage); keep holding to wrap and hold what it cracked; let go to haul a light
+  catch (up to pig/player size) over your head into the ground (6 damage), or yank a heavy one off its feet toward
+  you, slowed 2 s. No blocks broken (towns). Compile-checked; not playtested.
