@@ -60,7 +60,9 @@ public final class WeaponModGuns {
 			dir = best.getBoundingBox().getCenter().subtract(eye).normalize();
 		}
 		shot.setDeltaMovement(dir.scale(speed * (1.0 + ClassPerks.MARKSMAN_RANGE)));
-		shot.setExtraDamage(shot.extraDamage + shot.getDamage(shooter) * (float) ClassPerks.MARKSMAN_DAMAGE);
+		// (0.7.184) Steady Aim: fired from a crouch, harder again
+		double bonus = ClassPerks.MARKSMAN_DAMAGE + (shooter.isShiftKeyDown() ? ClassPerks.MARKSMAN_STEADY : 0.0);
+		shot.setExtraDamage(shot.extraDamage + shot.getDamage(shooter) * (float) bonus);
 	}
 
 	/**
