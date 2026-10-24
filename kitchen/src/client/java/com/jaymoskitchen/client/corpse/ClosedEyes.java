@@ -32,6 +32,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ClosedEyes {
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:closed_eyes");
+	/** (0.5.22) Set while MCA draws a corpse's face, so its blink holds the eyes shut ({@code McaFaceLayerMixin}). Render thread only. */
+	public static boolean drawingShut;
 
 	/** Eye pixels, against the face's middle colour: a dark pupil (luminance) and a white (luminance, greyness). */
 	private static final float DARK_SHARE = 0.55F;

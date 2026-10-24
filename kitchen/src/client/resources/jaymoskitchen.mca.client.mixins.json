@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskitchen.client.compat.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["McaFaceLayerMixin", "McaVisualsMixin"],
+	"injectors": { "defaultRequire": 0 }
+}
