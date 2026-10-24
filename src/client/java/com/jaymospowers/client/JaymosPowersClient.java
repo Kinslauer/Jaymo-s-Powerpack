@@ -110,6 +110,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ScreenShake.init();
 		BeamClashClient.init();
 		BeamCinematic.init();
+		AimCrosshair.init();
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
