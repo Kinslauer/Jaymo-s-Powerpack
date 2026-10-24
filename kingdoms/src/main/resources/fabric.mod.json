@@ -9,7 +9,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
-		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"]
+		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"],
+		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"]
 	},
 	"mixins": [
 		"jaymoskingdoms.combat.mixins.json",

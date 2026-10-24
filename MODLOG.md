@@ -2722,3 +2722,51 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `Affinity.INHERITED`. Andy: "the power you had is given a high affinity to your child, they still have to awaken it
   themselves". At the awakening an inherited power wins over a calling and an affinity, fated or not, and is then cleared.
 - Compile-checked; not playtested.
+- **0.15.147 / Kingdoms 0.7.184, rescues, ranged tactics, royal days:**
+  - Symbiote: each time you go down it picks one of three rescues, never the last one used: the leap and zip; the
+    plain suit forming over you (up with Regeneration II for 5 s and all its abilities and the suit for 30 s, whatever
+    the bond); or a tendril lash that hurls back, hurts and slows everything after you. Its satiety now feeds your
+    hunger bar (a point for 2 hunger every 2 s while it has over 25), and a rescue feeds an empty bar, so a fed
+    symbiote no longer lets you starve down again and again. See docs/web.md.
+  - Kingdoms: ranged attackers that keep missing or can't see their target change tactics (`RangedTactics`: step
+    aside, find a clear line, close in or back off, flank, take cover, or fight hand to hand); a cove's gunners and
+    bombardiers come ashore as MCA villagers keeping their pistols and dynamite, camp raiders as villagers throw rocks
+    again, and camps tend only their own downed. Kings and queens choose plate, robes or nightwear through the day
+    (`RoyalDress`) and keep a day of court, round, meal, audience, leisure and bed. See docs/Kingdoms-Plan.md.
+    Compile-checked; not playtested.
+- **0.15.149, Lost Cities in the future:** Andy picked shipping The Lost Cities (MIT, McJty; github.com/McJtyMods/LostCities)
+  unchanged and pointing it at the Chrono future. McJty's own 26.3 Fabric build (26.3-12.0.0-fabric, CurseForge
+  269024/9277225) is in `packMods`; it needs Forge Config API Port, already there. `future/FutureCities` registers its
+  `ancient` profile for `jaymospowers:future` on each server start (by reflection; Lost Cities forgets between starts)
+  and adds its city feature to the `future_ruins` biome only. The overworld is untouched unless a world is made with a
+  Lost Cities profile. The future's generator is now overworld noise with the fixed `future_ruins` biome instead of a
+  flat sea, so beyond Los Perrito the land runs on as ruined city; with Lost Cities loaded those chunks decay like the
+  island's (`FutureRuins`). Lost Cities' own bed-and-skulls trip to its `lostcities:lostcity` dimension now needs
+  bedrock under the bed. Details in docs/chrono.md. Not built or playtested here (the cloud can't reach Fabric's Maven).
+- **0.15.147, Touch'n Motion:** Andy asked whether Touch'n Motion's animations, the passive and idle ones above all,
+  could be brought in. It's GPL-3.0 (STRadaT, source github.com/victorkozhokin/emf-compat), has a Fabric 26.3 build, and
+  is an add-on for exactly what the pack already runs: Entity Model Features with Fresh Animations: Player Extension.
+  So it ships unchanged (CurseForge only: `curse.maven`, project 1734204 file 9205898) with its client library EMF
+  Compat: Core (GPL-3.0, Modrinth oOuwcnpx, CurseForge 1605113/9205859). Copying its code into ours would make our
+  mod GPL, so nothing is copied. Idle: a look at creatures nearby, signs read, a hand on a wall beside you, hands on a
+  fence top, hands through crops, feet on stairs and slabs, fright at a creeper's hiss or thunder, shaking off water.
+  It also does hands to doors, levers, chests and animals, mining swings, fishing, rowing and riding, each switchable
+  in its config (Mod Menu → EMF Compat Core). Also added: EMF Compat: Not Enough Animations (GPL-3.0, Modrinth
+  Xs6WnTQm), so NEA's eating, maps and rowing show under Fresh Animations; it sits beside NEA in `packModsNoCf`.
+  - Our poses still win. Touch'n Motion runs inside EMF's animation, so a player EMF pauses for one of our poses
+    (`PoseTakeover.posed`) gets none of it. Its core lifts EMF's pause for a player one of its addons holds a pose for
+    (Touch'n Motion's riding pose), which would have brought Fresh Animations back over ours. So `EmfCompat.hold` also
+    puts EMF's own per-player pause (`pauseAllCustomAnimationsForEntity`) on a posed player, which the core never
+    lifts, and takes it off when the pose ends. It only removes pauses it put on. Compile-checked; not playtested.
+- **0.15.151, the Flame Avatar:** Andy: an Emberborn who spends too many of their years in the Nether is consumed by
+  their own fire and becomes an avatar of flame (the end of failing to control it). `power/ember/FlameAvatar` counts
+  an Emberborn's time in the Nether (net: a quarter of it cools off elsewhere) and at 7 in-game days the fire takes
+  them (warnings at 50/75/90%); `/power avatar <targets> on|off|progress` for ops. An avatar has at most 3 hearts and a
+  20-point flame bar that takes hits first (the body flares and sets the attacker alight), refilled by fire, lava and
+  eating, slower in the cold, drained by rain and fast by water (which harms once it's out); going down in water undoes it (Andy): on the hit that would drop them they revert to plain Emberborn. `AvatarMoves`: R Fire
+  Fist (giant fireball, 4.5-block blast, sets fires, 4 flame), G Flaming Pillar (tap round you, hold at the cursor; throws up and
+  away; damage dealt comes back as flame), B Ignition Switch (tap lights what's in front for 3 flame; hold detonates
+  everything burning near). No block is broken. Plain keys without a power, sneak + key beside one. Look
+  (`client/power/ember/FlameAvatarClient`): char over the skin and clothes, emissive lava veins that dim with the
+  flame, vanilla's fire round the body, embers; textures from `tools/gen_flame_avatar.py`. MCA avatars with camps of their own fight Hornkin and piglins in the Nether (Kingdoms 0.7.187). Compile-checked;
+  not playtested.

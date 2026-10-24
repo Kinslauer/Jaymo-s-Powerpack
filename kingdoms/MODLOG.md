@@ -4388,3 +4388,17 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles.
   The heritage screen's rite mode is gone. `/kingdom heritage set|unlock` are unchanged.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+## 0.7.187: Flame Avatars in the Nether (pack 0.15.151)
+- Andy: "there should be mca avatar in the nether seen fighting the other two factions. They will not speak to the
+  player unless they are emberborn, and will not be hostile unless you are near one of their encampments". The
+  third Nether side beside the Hornkin and the piglins: Emberborn consumed by their fire (Powers' Flame Avatar).
+- **Camps** (`nether/AvatarCamps`, built by `FortBuildings.avatarCamp`): scorched blackstone and basalt ground round
+  a netherrack fire ringed by campfires, six basalt pillars crowned with eternal fire and a cache chest (blaze rods,
+  fire charges, magma cream, gold, sometimes netherite scrap). One may rise every few minutes 64-128 blocks from a
+  player in the Nether, at least 200 from another camp, using the forts' site search. 4 avatars at first, a recruit
+  every 4 minutes up to 6. Ops: `/kingdom avatarcamp found | info`.
+- **Avatars** are real MCA villagers (guards, born Emberborn, 40 health, gold or iron blades) wearing the Flame Avatar
+  look (charred body, glowing veins, burning). They keep to their camp, and every few minutes a band of 3 marches on
+  the nearest Hornkin fort or piglin camp. They attack Hornkin and piglins on sight, and players (not Emberborn, not
+  creative) only within 24 blocks of their own camp. Anyone not Emberborn gets no talk or menu from them.
+- Compile-checked against the 26.3 and MCA jars; not yet seen in game.
