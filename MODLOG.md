@@ -2715,3 +2715,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.147, Touch'n Motion:** Andy asked whether Touch'n Motion's animations, the passive and idle ones above all,
+  could be brought in. It's GPL-3.0 (STRadaT, source github.com/victorkozhokin/emf-compat), has a Fabric 26.3 build, and
+  is an add-on for exactly what the pack already runs: Entity Model Features with Fresh Animations: Player Extension.
+  So it ships unchanged (CurseForge only: `curse.maven`, project 1734204 file 9205898) with its client library EMF
+  Compat: Core (GPL-3.0, Modrinth oOuwcnpx, CurseForge 1605113/9205859). Copying its code into ours would make our
+  mod GPL, so nothing is copied. Idle: a look at creatures nearby, signs read, a hand on a wall beside you, hands on a
+  fence top, hands through crops, feet on stairs and slabs, fright at a creeper's hiss or thunder, shaking off water.
+  It also does hands to doors, levers, chests and animals, mining swings, fishing, rowing and riding, each switchable
+  in its config (Mod Menu → EMF Compat Core). Also added: EMF Compat: Not Enough Animations (GPL-3.0, Modrinth
+  Xs6WnTQm), so NEA's eating, maps and rowing show under Fresh Animations; it sits beside NEA in `packModsNoCf`.
+  - Our poses still win. Touch'n Motion runs inside EMF's animation, so a player EMF pauses for one of our poses
+    (`PoseTakeover.posed`) gets none of it. Its core lifts EMF's pause for a player one of its addons holds a pose for
+    (Touch'n Motion's riding pose), which would have brought Fresh Animations back over ours. So `EmfCompat.hold` also
+    puts EMF's own per-player pause (`pauseAllCustomAnimationsForEntity`) on a posed player, which the core never
+    lifts, and takes it off when the pose ends. It only removes pauses it put on. Compile-checked; not playtested.
