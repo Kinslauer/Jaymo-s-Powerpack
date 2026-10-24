@@ -187,6 +187,16 @@ public enum TinkerMaterial {
 		return this == BONE ? 0.05F : this == BLAZE_ROD ? 0.1F : 0.0F;
 	}
 
+	/** (0.16.0) The chance (in %) an arrow with a shaft of this comes out of a corpse whole (Jaymo's Kitchen); plain arrows 60. */
+	public int shaftStrength() {
+		return switch (this) {
+			case BONE -> 80;
+			case BLAZE_ROD -> 90;
+			case WOOD_CRIMSON, WOOD_WARPED -> 65;
+			default -> 60;
+		};
+	}
+
 	/** Whether this material can make a part of that kind. */
 	public boolean makes(PartType.Kind kind) {
 		return switch (kind) {

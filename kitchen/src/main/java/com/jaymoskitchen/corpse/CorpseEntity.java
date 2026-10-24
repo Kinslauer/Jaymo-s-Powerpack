@@ -702,9 +702,16 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(ARROWS, packed);
 	}
 
+	/** (0.5.23) The arrows in the body that will come out whole, as the items they come back as. */
+	private List<ItemStack> arrowItems = new ArrayList<>();
+
+	public void setArrowItems(List<ItemStack> items) {
+		this.arrowItems = new ArrayList<>(items);
+	}
+
 	/**
-	 * (0.5.23) An empty hand pulls an arrow out: whole ({@link com.jaymoskitchen.archery.StuckArrows#SALVAGE_CHANCE} of the
-	 * time, for one that could have been picked up off the ground) or snapped.
+	 * (0.5.23) An empty hand pulls an arrow out: whole if it was rolled to come out whole when it went in (see
+	 * {@link com.jaymoskitchen.archery.StuckArrows}), as the arrow it was, or snapped.
 	 */
 	private InteractionResult pullArrow(ServerLevel level, Player player) {
 		int packed = arrows();
@@ -712,8 +719,8 @@ public class CorpseEntity extends Entity {
 		boolean pickable = random.nextInt(total) < whole;
 		setArrows(com.jaymoskitchen.archery.StuckArrows.pack(total - 1, whole - (pickable ? 1 : 0)));
 		jolt(false);
-		if (pickable && random.nextFloat() < com.jaymoskitchen.archery.StuckArrows.SALVAGE_CHANCE) {
-			ItemStack arrow = new ItemStack(Items.ARROW);
+		if (pickable) {
+			ItemStack arrow = arrowItems.isEmpty() ? new ItemStack(Items.ARROW) : arrowItems.remove(arrowItems.size() - 1);
 			if (!player.getInventory().add(arrow)) {
 				player.drop(arrow, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
@@ -2234,6 +2241,7 @@ public class CorpseEntity extends Entity {
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
 		this.entityData.set(ARROWS, input.getIntOr("Arrows", 0));
+		this.arrowItems = new ArrayList<>(input.read("ArrowItems", ItemStack.CODEC.listOf()).orElse(List.of()));
 		if (pinned() >= 0) {
 			setNoGravity(true);
 		}
@@ -2280,6 +2288,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (arrows() != 0) {
 			output.putInt("Arrows", arrows());
+		}
+		if (!arrowItems.isEmpty()) {
+			output.store("ArrowItems", ItemStack.CODEC.listOf(), arrowItems);
 		}
 	}
 }
