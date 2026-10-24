@@ -98,8 +98,10 @@ final class Frights {
 	 */
 	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
-		double bestD = FRIGHT * FRIGHT;
-		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(FRIGHT),
+		// ((0.7.186) the brave hardly at all, the timid from farther: Temperaments)
+		double range = Temperaments.frightRange(v, FRIGHT);
+		double bestD = range * range;
+		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(range),
 			m -> m != v && m.isAlive() && (m instanceof Mob mob && (frightful(mob) || Oddities.monstrous(mob))
 				|| m instanceof ServerPlayer p && (Aliens.feared(p, f.id()) || Tails.feared(p, v))))) {
 			double d = m.distanceToSqr(v);
@@ -160,7 +162,7 @@ final class Frights {
 		if (!FRIGHTS.containsKey(v.getUUID())) {
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
 		}
-		Fright fright = new Fright(to, child, now + HIDE_TICKS);
+		Fright fright = new Fright(to, child, now + Temperaments.hideTicks(v, HIDE_TICKS));
 		FRIGHTS.put(v.getUUID(), fright);
 		return fright;
 	}

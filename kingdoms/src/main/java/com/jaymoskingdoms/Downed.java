@@ -198,19 +198,12 @@ public final class Downed {
 	/**
 	 * (0.7.181) Andy (2026-10-24): "guards and villagers should help players up as long as they are above 0 rep": a
 	 * downed player whose reputation with the settlement they lie in (its land, or a seat within a village's reach) is
-	 * above {@link #HELP_PLAYER_REP}. Out in the wild, nobody's.
+	 * above {@link #HELP_PLAYER_REP}. (0.7.186) That's now the dutiful villager's way: whether each one comes is their
+	 * temperament's to say ({@link Temperaments#helpsPlayer}): the kindhearted help anyone, in the wild too; the
+	 * spiteful only a friend.
 	 */
-	private static boolean welcome(ServerLevel level, ServerPlayer player) {
-		if (player.isCreative() || player.isSpectator()) {
-			return false;
-		}
-		MinecraftServer server = level.getServer();
-		Faction f = Factions.around(server, level, player.blockPosition(), Villages.VILLAGE_RADIUS);
-		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN) {
-			f = Factions.at(server, level, player.blockPosition());
-		}
-		return f != null && !f.fallen() && f.type() != FactionType.BARBARIAN && Reputation.get(player, f.id()) > HELP_PLAYER_REP
-			&& !Theft.wanted(player, f.id());
+	private static boolean helpable(ServerPlayer player) {
+		return !player.isCreative() && !player.isSpectator();
 	}
 
 	/** (0.7.98) Ours to disarm: a villager or one of our folk (not a downed player or someone's dog). Server side. */
@@ -255,8 +248,9 @@ public final class Downed {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			ServerLevel level = player.level();
 			if (player.isAlive() && isDowned(player) && !TENDED.containsKey(player)) {
-				// (0.7.181) a downed player the place thinks well of
+				// (0.7.181) a downed player: (0.7.186) whoever's nature has them come over
 				findHelper(level, player);
+				Temperaments.jeer(level, player);
 			}
 			for (Mob body : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LOOK_AROUND),
 				m -> m.isAlive() && isDowned(m) && !TENDED.containsKey(m))) {
@@ -274,16 +268,26 @@ public final class Downed {
 	 */
 	private static void findHelper(ServerLevel level, LivingEntity body) {
 		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster;
-		// (0.7.181) and players the settlement thinks well of
-		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG)
-			|| (body instanceof ServerPlayer player ? !welcome(level, player) : Looters.is(body) || !kin(body))) {
+		// (0.7.181) and players the settlement thinks well of; (0.7.186) or, either way, whomever a helper's temperament
+		// has them tend (Temperaments)
+		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || body instanceof ServerPlayer p && !helpable(p)) {
+			return;
+		}
+		ServerPlayer player = body instanceof ServerPlayer p ? p : null;
+		Faction place = player == null ? null : Temperaments.placeOf(level.getServer(), level, player);
+		boolean kin = player == null && !Looters.is(body) && kin(body);
+		if (player == null && !kin && !Temperaments.humanoid(body)) {
+			// (a downed animal or monster: nobody's)
 			return;
 		}
 		Villager helper = null;
-		double best = HELP_RANGE * HELP_RANGE;
-		for (Villager v : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(HELP_RANGE), v -> canHelp(v, body) && !HELPING.containsKey(v))) {
+		double best = Double.MAX_VALUE;
+		double reach = HELP_RANGE * Temperaments.RANGE_KIND / 100.0;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(reach), v -> canHelp(v, body) && !HELPING.containsKey(v))) {
 			double d = v.distanceToSqr(body);
-			if (d < best) {
+			double range = Temperaments.helpRange(v);
+			if (d < best && d <= range * range
+				&& (player != null ? Temperaments.helpsPlayer(level, v, player, place) : Temperaments.tendsMob(level, v, body, kin))) {
 				best = d;
 				helper = v;
 			}
@@ -294,6 +298,9 @@ public final class Downed {
 		TENDED.put(body, new Tending(helper));
 		HELPING.put(helper, body);
 		level.playSound(null, helper.getX(), helper.getY(), helper.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		if (player != null) {
+			Temperaments.comes(level, helper, player);
+		}
 	}
 
 	/** (0.7.84) The helper walks over, kneels and sees to them. True once they've been at it long enough to get them up. */
@@ -319,8 +326,11 @@ public final class Downed {
 			helper.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 		}
-		if (tending.ticks >= TEND_TICKS) {
+		if (tending.ticks >= Temperaments.tendTicks(helper)) {
 			untend(body);
+			if (body instanceof ServerPlayer player) {
+				Temperaments.gotUp(level, helper, player);
+			}
 			return true;
 		}
 		return false;
@@ -328,7 +338,8 @@ public final class Downed {
 
 	private static boolean canHelp(Villager v, LivingEntity body) {
 		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !isDowned(v) && !v.isSleeping() && !v.isPassenger() && !v.isNoAi() && v.getTarget() == null
-			&& !Frights.afraid(v.getUUID()) && !McaCompat.panicking(v) && v.level() == body.level() && v.distanceToSqr(body) < HELP_RANGE * HELP_RANGE * 1.5;
+			&& (!Frights.afraid(v.getUUID()) || Temperaments.fearless(v)) && !McaCompat.panicking(v) && v.level() == body.level()
+			&& v.distanceToSqr(body) < Temperaments.helpRange(v) * Temperaments.helpRange(v) * 1.5;
 	}
 
 	private static void untend(LivingEntity body) {
