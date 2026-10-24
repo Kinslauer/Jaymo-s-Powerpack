@@ -44,6 +44,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
+		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
+		com.jaymospowers.core.GiantReach.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();
