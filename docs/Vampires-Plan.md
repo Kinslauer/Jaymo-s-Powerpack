@@ -55,3 +55,24 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
    or 1 cursed werewolf, then the rite). Andy also: the change tears 30% of each armour piece's durability, then it
    breaks or falls off (built).
 5. ~~Can the Elder turn into a bat?~~ Andy: yes (built in stage 1).
+
+## Losing yourself (Kingdoms 0.7.185)
+Andy: "I want the vampire and werewolf to have their own system similar to the symbiote takeovers, slowly losing
+yourself to the blood or the curse." Built in `Seizures` (the shared hold, client `SeizureClient` + `SeizeInputMixin`),
+`BloodFever` and `FeralCurse`. While a hold has you it walks you at its prey; each new movement key press is a heave
+against it (fill the bar to break free). Tuning numbers are at the top of each class.
+
+- **Blood fever (vampire players, not dhampirs).** Fever 0-100 climbs unfed (x2 at night, x1.5 starving, faster the
+  more you've surrendered; a person hurt within 10 blocks spikes it), each bite takes 22 off. Past the urge line (70 at
+  no surrender, 40 at full) with a person in sight, the blood takes you to them and drinks. Fight it (eases the fever,
+  -3 surrender, shaking, 2 min reprieve) or give in with U (feeds till the fever breaks, +6 surrender, a minute of
+  frenzy). Losing the fight: +4. Surrender stages: 25 thirsting, 50 bloodbound (night Strength II), 75 ravenous
+  (players are prey, bites heal double), 100 lost (48 presses to break free).
+- **Feral curse (full werewolves, not wolfbloods).** Wildness 0-100: +10 a full-moon change, +6 a change that came on
+  its own, +2 at will, +0.6 a minute as the beast (x2 under the full moon), +0.5/+3 a kill (beast/person), ebbs ~2 a
+  day as yourself and when you fight the wolf off. Stages of 20: restless (as the beast the wolf hunts beasts and
+  monsters on a whim), wild (villagers are prey; badly hurt at night it may tear out, which you can fight down;
+  changing back at will fails 30%), savage (players are prey; 30% of nights the change comes on its own; refuses 60%),
+  feral (every night; hunts chain kill to kill; no changing back at night), lost (the night's change can't be fought).
+- Commands (op): `/kingdom vampire fever [n]`, `/kingdom vampire surrender <n>`, `/kingdom vampire urge`,
+  `/kingdom werewolf feral [n]`, `/kingdom werewolf whim`.

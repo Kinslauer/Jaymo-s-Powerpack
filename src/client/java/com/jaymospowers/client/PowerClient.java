@@ -31,6 +31,11 @@ public interface PowerClient {
 	default void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 	}
 
+	/** (0.15.147) How much of {@code key}'s cooldown is left, 1 (just used) to 0 (ready), for the powers screen. */
+	default float cooldown(LocalPlayer player, PowerKey key) {
+		return 0.0F;
+	}
+
 	/** The local player just gained (true) or lost (false) this power. Reset client state here. */
 	default void onActiveChanged(LocalPlayer player, boolean active) {
 	}

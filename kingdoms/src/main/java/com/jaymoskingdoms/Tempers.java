@@ -345,6 +345,7 @@ final class Tempers {
 			}
 			// (0.7.175) a villager crowned has their retinue too
 			Retinue.tick(level, f, temper, ruler, now);
+			RoyalDress.tick(level, f, temper, ruler, now);
 			switch (temper) {
 				case WARLORD -> drill(level, f);
 				case REVELER -> {

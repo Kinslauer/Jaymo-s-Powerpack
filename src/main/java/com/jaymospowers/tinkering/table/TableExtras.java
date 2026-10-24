@@ -4,6 +4,7 @@ import com.jaymospowers.tinkering.StationBlock;
 import com.jaymospowers.tinkering.StationEntity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -59,7 +60,8 @@ public final class TableExtras {
 			this.real = null;
 			this.backing = new SimpleContainer(SIDE_MAX);
 		} else {
-			this.real = access.evaluate((level, pos) -> find(level, pos, player), null);
+			// (find gives null with no container beside the table, and evaluate can't hold a null: wrap it)
+			this.real = access.evaluate((level, pos) -> Optional.ofNullable(find(level, pos, player))).flatMap(found -> found).orElse(null);
 			this.backing = new View(real);
 			if (real != null) {
 				sideSize.set(Math.min(SIDE_MAX, real.getContainerSize()));

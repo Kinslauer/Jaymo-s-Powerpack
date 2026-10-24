@@ -40,6 +40,10 @@ abstract class ZFighterApeInputMixin extends ClientInput {
 			this.moveVector = Vec2.ZERO;
 			return;
 		}
+		if (com.jaymospowers.power.zfighter.ApeRage.inFit(player)) {
+			// (0.15.148) a Z Fighter's ape in a fit: every new key a heave against it
+			com.jaymospowers.client.power.zfighter.ApeRageClient.struggleKeys(this.keyPresses);
+		}
 		Integer id = player.getAttached(ZFighterLineage.BERSERK);
 		BlockPos goal = player.getAttached(ZFighterLineage.WILD_GOAL);
 		if (id == null && goal == null) {
