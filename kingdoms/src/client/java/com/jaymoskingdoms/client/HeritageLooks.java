@@ -218,6 +218,20 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
 	}
 
+	/**
+	 * (0.7.184) For Jaymo's Powers' gi (Andy: "Can you add the wraps to the gi?"), read by reflection, so it takes the
+	 * render state as an Object and never changes its signature: 0 when the player being drawn isn't an Earthling, 1 for
+	 * the wraps alone, 2 with a Z Fighter's ki glow over them. Powers draws them on the gi itself, in its pose, since under
+	 * a costume this layer draws no marks.
+	 */
+	public static int earthlingWraps(Object state) {
+		Look look = state instanceof AvatarRenderState avatar ? avatar.getData(KEY) : null;
+		if (look == null || look.kind() != Kind.EARTHLING) {
+			return 0;
+		}
+		return look.glow() != 0 ? 2 : 1;
+	}
+
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */
 	static boolean eyesLit(Kind kind, LivingEntity entity) {
 		return switch (kind.eyes) {

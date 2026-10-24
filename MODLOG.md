@@ -2717,5 +2717,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   view comes back. Compile-checked; not playtested.
 - **0.15.147, Earthling ki glow for Z Fighters only:** packs Jaymo's Kingdoms 0.7.184 (Andy: no glow or ki effects on
   the Earthling heritage skin unless a Z Fighter, and the costume clipping was back): the surge's glow, sparks and
-  sounds only for Z Fighters, and no heritage marks or glow under a costume. See `kingdoms/MODLOG.md`. No Powers code
-  changed.
+  sounds only for Z Fighters, and no heritage marks or glow under a costume. See `kingdoms/MODLOG.md`. Andy then: "Can
+  you add the wraps to the gi?" An Earthling's gi wears the wraps itself, over its wristbands and in its own pose, with
+  a Z Fighter's ki glow over them while it flares (`client/costume/KingdomsWraps`, asking Kingdoms'
+  `HeritageLooks.earthlingWraps`).

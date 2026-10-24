@@ -4354,4 +4354,6 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Under a costume (or the symbiote's suit) a player's heritage marks and their glow aren't drawn at all. They're drawn
   on the plain body's pose while the costume follows MCA's, so where a cut leaves skin bare (the gi's forearms) the
   wraps and the glow slid out through the sleeves in motion. Eyes and fins work as before.
+- Andy: "Can you add the wraps to the gi?" `HeritageLooks.earthlingWraps` tells Jaymo's Powers whether the player is an
+  Earthling and whether their ki is lit, so the gi draws the wraps (and a Z Fighter's glow) itself, in its own pose.
 - Compile-checked; not yet seen in game.
