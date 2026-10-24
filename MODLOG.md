@@ -2715,6 +2715,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   round the knot, over each fighter's shoulder, low under the knot, and a crane overhead, all clipped by walls. Aim
   still follows the mouse (looking away still lets a ki wave go); the view holds 30 ticks past the end, then the old
   view comes back. Compile-checked; not playtested.
+- **0.15.147 / Kingdoms 0.7.184, rescues, ranged tactics, royal days:**
+  - Symbiote: each time you go down it picks one of three rescues, never the last one used: the leap and zip; the
+    plain suit forming over you (up with Regeneration II for 5 s and all its abilities and the suit for 30 s, whatever
+    the bond); or a tendril lash that hurls back, hurts and slows everything after you. Its satiety now feeds your
+    hunger bar (a point for 2 hunger every 2 s while it has over 25), and a rescue feeds an empty bar, so a fed
+    symbiote no longer lets you starve down again and again. See docs/web.md.
+  - Kingdoms: ranged attackers that keep missing or can't see their target change tactics (`RangedTactics`: step
+    aside, find a clear line, close in or back off, flank, take cover, or fight hand to hand); a cove's gunners and
+    bombardiers come ashore as MCA villagers keeping their pistols and dynamite, camp raiders as villagers throw rocks
+    again, and camps tend only their own downed. Kings and queens choose plate, robes or nightwear through the day
+    (`RoyalDress`) and keep a day of court, round, meal, audience, leisure and bed. See docs/Kingdoms-Plan.md.
+    Compile-checked; not playtested.
 - **0.15.149, Lost Cities in the future:** Andy picked shipping The Lost Cities (MIT, McJty; github.com/McJtyMods/LostCities)
   unchanged and pointing it at the Chrono future. McJty's own 26.3 Fabric build (26.3-12.0.0-fabric, CurseForge
   269024/9277225) is in `packMods`; it needs Forge Config API Port, already there. `future/FutureCities` registers its
