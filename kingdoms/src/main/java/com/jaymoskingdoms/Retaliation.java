@@ -156,8 +156,9 @@ final class Retaliation {
 			return;
 		}
 		List<LivingEntity> seen = f == null ? List.of() : Theft.witnesses(level, f, player);
-		if (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id()))) {
-			// they know what you are: they run
+		if (f != null && (Reputation.get(player, f.id()) <= FEARED || Theft.outlaw(player, f.id())) && !Temperaments.bold(victim)
+			|| Temperaments.runs(victim)) {
+			// they know what you are: they run; ((0.7.186) the brave and the hotheaded stand anyway, and the timid always run)
 			say(level, victim, "flee");
 			return;
 		}
@@ -175,7 +176,8 @@ final class Retaliation {
 			if (joined >= ASSIST_MOST) {
 				break;
 			}
-			if (w != victim && fighter(w) && !Theft.rioting(w) && !brawl.brawlers.containsKey(w.getUUID()) && !Downed.helping(w)) {
+			if (w != victim && fighter(w) && !Theft.rioting(w) && !brawl.brawlers.containsKey(w.getUUID()) && !Downed.helping(w)
+				&& !Temperaments.keepsOut(w)) {
 				brawl.brawlers.put(w.getUUID(), now + PUNCH_TICKS);
 				joined++;
 			}
@@ -201,7 +203,10 @@ final class Retaliation {
 		if (brawl == null || !brawl.brawlers.containsKey(who.getUUID())) {
 			return false;
 		}
-		if (brawl.faction != null && (Reputation.get(player, brawl.faction.id()) <= Reputation.HOSTILE || Theft.outlaw(player, brawl.faction.id()))) {
+		// ((0.7.186) the greedy take anyone's coin; the proud no one's)
+		Boolean takes = Temperaments.takesBribe(who);
+		if (takes == Boolean.FALSE || takes == null && brawl.faction != null
+			&& (Reputation.get(player, brawl.faction.id()) <= Reputation.HOSTILE || Theft.outlaw(player, brawl.faction.id()))) {
 			say(level, who, "refuse");
 			return true;
 		}
@@ -294,7 +299,7 @@ final class Retaliation {
 					b.remove();
 					continue;
 				}
-				if (mob.getHealth() < mob.getMaxHealth() * FLEE_SHARE) {
+				if (mob.getHealth() < mob.getMaxHealth() * Temperaments.fleeShare(mob, FLEE_SHARE)) {
 					// badly hurt: they run (and vanilla's panic takes them)
 					b.remove();
 					say(level, mob, "flee");
