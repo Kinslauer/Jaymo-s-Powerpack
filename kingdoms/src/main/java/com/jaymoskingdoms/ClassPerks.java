@@ -540,7 +540,7 @@ public final class ClassPerks {
 			}
 			target.setPos(pin.at().x, pin.at().y, pin.at().z);
 			target.setDeltaMovement(Vec3.ZERO);
-			target.hurtMarked = true;
+			target.needsSync = true;
 			if (target instanceof net.minecraft.world.entity.Mob mob) {
 				mob.getNavigation().stop();
 			}
