@@ -25,14 +25,15 @@ import org.jspecify.annotations.Nullable;
  * it; Choose seals it, for life. It can't be shut without picking.
  * (0.7.75) Rows wrap instead of being cut off, and the pane scrolls with the mouse wheel when it runs long; pointing at
  * it while it overflows scrolls it slowly on its own, to the end and back.
- * (0.7.106) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. Read, a
- * Blood Rite opens the screen too ({@link #rite}): then only the earned heritages you've woken can be picked. The rows
+ * (0.7.106) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. The rows
  * shrink to fit when there are more heritages than the panel is tall, dropping their icons when too small for them.
+ * (0.7.184) Sneak-using one of your children opens it for your lineage ({@link #lineage}, in place of the Blood Rite):
+ * only the earned heritages you've woken can be picked, and picking one, you live on as that child.
  */
 final class HeritageScreen extends Screen {
 	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
-	/** (0.7.106) A Blood Rite's accent: dark blood red. */
-	static final int RITE_ACCENT = 0xFFB0323C;
+	/** (0.7.184) The lineage's accent: a warm amber. */
+	static final int LINEAGE_ACCENT = 0xFFD08A4A;
 	/** The heritage screen's accent: a deep teal, apart from the class screen's gold. */
 	static final int ACCENT = 0xFF4FB8A8;
 	/** After Choose, how long the heritage may take to come back before the screen is put up again (ms). */
@@ -44,8 +45,10 @@ final class HeritageScreen extends Screen {
 	static final long LEAD_MS = 5000L, LEAD_FADE_MS = 1500L;
 
 	private final boolean forced;
-	/** (0.7.106) Opened by a Blood Rite: only an earned heritage you've woken (and aren't) can be picked. */
-	private final boolean rite;
+	/** (0.7.184) Opened for your lineage: only an earned heritage you've woken (and aren't) can be picked. */
+	private final boolean lineage;
+	/** (0.7.184) The child you'd live on as (their name), under {@link #lineage}. */
+	private final String child;
 	private Heritage.@Nullable Kind picked;
 	private @Nullable Button choose;
 	/** How far down the right pane is scrolled, and for which heritage (it starts over for each one). */
@@ -61,16 +64,17 @@ final class HeritageScreen extends Screen {
 	/** When the lead line first showed (0: not yet); once gone it stays gone, whichever heritage or screen. */
 	private static long leadFrom;
 
-	HeritageScreen(boolean forced, boolean rite) {
-		super(Component.translatable(rite ? "gui.jaymoskingdoms.heritage.rite_title" : "gui.jaymoskingdoms.heritage.title"));
+	HeritageScreen(boolean forced, boolean lineage, String child) {
+		super(Component.translatable(lineage ? "gui.jaymoskingdoms.heritage.lineage_title" : "gui.jaymoskingdoms.heritage.title"));
 		this.forced = forced;
-		this.rite = rite;
+		this.lineage = lineage;
+		this.child = child;
 	}
 
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(Heritage.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
-			context.client().gui.setScreen(new HeritageScreen(payload.forced(), payload.rite()));
+			context.client().gui.setScreen(new HeritageScreen(payload.forced(), payload.lineage(), payload.child()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
@@ -79,7 +83,7 @@ final class HeritageScreen extends Screen {
 			if (Heritage.of(minecraft.player) != null) {
 				owed = false;
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
-				minecraft.gui.setScreen(new HeritageScreen(true, false));
+				minecraft.gui.setScreen(new HeritageScreen(true, false, ""));
 			}
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> owed = false);
@@ -135,12 +139,12 @@ final class HeritageScreen extends Screen {
 		return kind.earned && (minecraft.player == null || !Heritage.unlocked(minecraft.player, kind) && Heritage.of(minecraft.player) != kind);
 	}
 
-	/** (0.7.106) Whether {@code kind} can be picked here: any that isn't hidden; under a Blood Rite, an earned one woken and not yours. */
+	/** (0.7.106) Whether {@code kind} can be picked here: any that isn't hidden; for your lineage, an earned one woken and not yours. */
 	private boolean pickable(Heritage.Kind kind) {
 		if (hidden(kind)) {
 			return false;
 		}
-		if (!this.rite) {
+		if (!this.lineage) {
 			return true;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
@@ -158,7 +162,7 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	protected void init() {
-		if (!this.rite && done()) {
+		if (!this.lineage && done()) {
 			onClose();
 			return;
 		}
@@ -205,7 +209,7 @@ final class HeritageScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		if (!this.rite && done()) {
+		if (!this.lineage && done()) {
 			onClose();
 			return;
 		}
@@ -224,8 +228,8 @@ final class HeritageScreen extends Screen {
 		}
 		Ui.line(graphics, this.font, name(kind), px + 28, y + 7, pw - 36, kind == this.picked ? accent : Ui.TEXT);
 		Ui.line(graphics, this.font, Component.translatable(hidden ? "gui.jaymoskingdoms.heritage.earned"
-			: !pickable(kind) ? "gui.jaymoskingdoms.heritage.rite_cant"
-			: kind == this.picked ? this.rite ? "gui.jaymoskingdoms.heritage.rite_picked" : "gui.jaymoskingdoms.heritage.picked"
+			: !pickable(kind) ? "gui.jaymoskingdoms.heritage.lineage_cant"
+			: kind == this.picked ? this.lineage ? "gui.jaymoskingdoms.heritage.lineage_picked" : "gui.jaymoskingdoms.heritage.picked"
 			: "gui.jaymoskingdoms.heritage.press"), px + 28, y + 18, pw - 36, Ui.DIM);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
 
@@ -248,7 +252,7 @@ final class HeritageScreen extends Screen {
 		}
 		List<Component> text = new ArrayList<>();
 		text.add(Component.translatable(hidden ? "gui.jaymoskingdoms.heritage.earned_desc" : "heritage.jaymoskingdoms." + kind.key() + ".desc"));
-		int lead = this.rite ? 0 : leadColor();
+		int lead = this.lineage ? 0 : leadColor();
 		if (this.picked == null && lead != 0) {
 			text.add(Component.translatable("gui.jaymoskingdoms.heritage.lead").withColor(lead));
 		}
@@ -278,8 +282,8 @@ final class HeritageScreen extends Screen {
 
 		if (this.choose != null) {
 			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
-				: Component.translatable(this.rite ? "gui.jaymoskingdoms.heritage.rite_confirm" : "gui.jaymoskingdoms.heritage.confirm",
-					Component.translatable("heritage.jaymoskingdoms." + this.picked.key())));
+				: this.lineage ? Component.translatable("gui.jaymoskingdoms.heritage.lineage_confirm", this.child)
+				: Component.translatable("gui.jaymoskingdoms.heritage.confirm", Component.translatable("heritage.jaymoskingdoms." + this.picked.key())));
 			this.choose.active = this.picked != null;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -340,9 +344,9 @@ final class HeritageScreen extends Screen {
 		return Heritage.Kind.values()[0];
 	}
 
-	/** The screen's accent: teal, or blood red under a Blood Rite. */
+	/** The screen's accent: teal, or amber for your lineage. */
 	private int accent() {
-		return this.rite ? RITE_ACCENT : ACCENT;
+		return this.lineage ? LINEAGE_ACCENT : ACCENT;
 	}
 
 	/** Every heritage down the left, the picked one marked; (0.7.106) those that can't be picked here greyed. */
@@ -350,7 +354,8 @@ final class HeritageScreen extends Screen {
 		int x = left(), y = top();
 		int accent = accent();
 		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
-		Ui.line(graphics, this.font, Component.translatable(this.rite ? "gui.jaymoskingdoms.heritage.rite_sub" : "gui.jaymoskingdoms.heritage.sub"),
+		Ui.line(graphics, this.font, this.lineage ? Component.translatable("gui.jaymoskingdoms.heritage.lineage_sub", this.child)
+			: Component.translatable("gui.jaymoskingdoms.heritage.sub"),
 			x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
 		Heritage.Kind[] all = Heritage.Kind.values();

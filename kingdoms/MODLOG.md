@@ -4345,3 +4345,26 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+
+## 0.7.184: Lineage replaces the Blood Rite (pack 0.15.147)
+- Andy: "add a lineage system that replaces blood rites, now instead unlocking a heritage will allow you to swap
+  perspectives with your offspring, and then use the heritage and new class."
+- Waking an earned heritage (Endborn, Dragonblood, Deepborn, Stormborn) no longer hands out a Blood Rite or changes your
+  own blood. It runs on in your children: sneak-use one of your own MCA children (past a toddler) with an empty hand
+  and the heritage screen opens as **Lineage** (amber), offering only the earned heritages you've woken. Pick one and
+  you live on as that child (`Lineage`, registered before Retinue, Pickpocket and Quests; it only takes the click when
+  it's your own child and an earned blood is waiting).
+- The swap (`McaBridge.takeOver`): you wake where the child stood with their MCA look (MCA's editor patch of the child
+  merged into your player look, sent to everyone) and their name. The child villager is gone. The body you leave stays
+  where you stood as an MCA villager with your old look, name and heritage, already an elder (`CourtWizards.ELDER_DAYS`
+  grown), so it greys and dies of old age in time.
+- MCA's family tree follows: your node takes the child's place (their parents, with your old self as one of them; their
+  partner and children), the old self's new node takes yours (your spouse's partner, your other children's parent),
+  and the child's node is removed. Marriage states are set to married-to-player or married-to-villager as the new
+  partner is. Links are written straight into the nodes (reflection on `FamilyTreeNode`'s father/mother/partner).
+- You take up the heritage (`Heritage.set`), your class is unmade and the class screen asks for a new one (can't be
+  shut), and every skill and attribute point comes back to spend (`Skills.respec`; experience and levels stay). You
+  keep what you carry and your Jaymo's Powers. Full health, a moment of darkness on waking.
+- Old Blood Rites still load (`jaymoskingdoms:blood_rite` stays registered, "Blood Rite (crumbling)"); read, one crumbles
+  and says where blood goes now. `/kingdom heritage set|unlock` are unchanged.
+- Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.

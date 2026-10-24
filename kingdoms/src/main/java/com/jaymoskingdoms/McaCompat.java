@@ -193,6 +193,21 @@ public final class McaCompat {
 		return LOADED && McaBridge.family(villager, player);
 	}
 
+	/** (0.7.184) {@code villager} is {@code player}'s own child in MCA's family tree ({@link Lineage}); never without MCA. */
+	static boolean childOf(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.childOf(villager, player);
+	}
+
+	/** (0.7.184) {@code villager} is past a toddler, old enough to live on as ({@link Lineage}). */
+	static boolean grownEnough(Villager villager) {
+		return LOADED && McaBridge.grownEnough(villager);
+	}
+
+	/** (0.7.184) {@link McaBridge#takeOver}: the villager left in {@code player}'s old body, or null. */
+	static @Nullable PathfinderMob takeOver(ServerPlayer player, Villager child, long elderSince) {
+		return LOADED ? McaBridge.takeOver(player, child, elderSince) : null;
+	}
+
 	/** (0.7.19) {@link #kin}: no kin, kin (family), partners (married, engaged or promised). */
 	static final int STRANGERS = 0, KIN = 1, PARTNER = 2;
 
