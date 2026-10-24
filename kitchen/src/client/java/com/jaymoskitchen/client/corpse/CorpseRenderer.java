@@ -73,7 +73,12 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		float flip;
 		/** (0.5.1) Drawn by physics: where the ragdoll's points put the body this frame (null when carried, slung, in a cart). */
 		@Nullable RagdollPose pose;
+		/** (0.5.23) Nailed to a wall by an arrow: drawn upright facing out from it ({@link #yaw}), slumped forward. */
+		boolean pinned;
 	}
+
+	/** (0.5.23) How far a pinned body slumps forward off its wall (degrees). */
+	private static final float PIN_SLUMP = 8.0F;
 
 	/**
 	 * (0.4.42) A dead player's body: the player model, but baked from layers of its own. Entity Model Features finds
@@ -139,6 +144,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		float yaw = corpse.getYRot();
 		Entity carrier = corpse.carrier();
 		state.pose = null;
+		state.pinned = carrier == null && corpse.pinned() >= 0;
+		if (state.pinned) {
+			extractPinned(corpse, state, corpse.pinned(), partialTicks);
+			return;
+		}
 		if (carrier == null && !corpse.isPassenger() && corpse.slungOn() == null) {
 			ClientRagdolls.Track track = ClientRagdolls.get(corpse.getId());
 			if (track != null) {
@@ -287,6 +297,64 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		physics(corpse, state, bodyState, baseX, baseY, baseZ, partialTicks);
 	}
 
+	/** (0.5.23) A body nailed to a wall: standing as it hangs there, facing out at {@code yaw}, no physics. */
+	private void extractPinned(CorpseEntity corpse, State state, float yaw, float partialTicks) {
+		state.carried = false;
+		state.tumbling = false;
+		state.sprawled = false;
+		state.ragdolled = false;
+		state.tall = true;
+		state.player = false;
+		state.body = null;
+		state.bodyRenderer = null;
+		state.yaw = yaw;
+		state.anchorX = state.anchorY = state.anchorZ = 0.0F;
+		state.tilt.identity();
+		state.turn.identity();
+		state.move.set(0.0F, 0.0F, 0.0F);
+		state.lift[0] = 0.0F;
+		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		if (corpse.isPlayerCorpse() && look == null) {
+			extractPlayer(corpse, state, null, yaw, partialTicks);
+			AvatarRenderState avatar = state.avatar;
+			avatar.setData(Ragdoll.KEY, null);
+			avatar.setData(Limp.KEY, null);
+			avatar.setData(Flop.KEY, null);
+			avatar.setData(RagdollPose.KEY, null);
+			avatar.setData(Pinned.KEY, Pinned.HANGING);
+			avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			return;
+		}
+		Entity body = look != null ? look : corpse.clientBody(yaw);
+		if (body == null) {
+			return;
+		}
+		if (look != null) {
+			corpse.placeBody(look, yaw);
+		}
+		state.bodyHeight = body.getBbHeight();
+		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
+		EntityRenderState bodyState = renderer.createRenderState(body, partialTicks);
+		if (bodyState instanceof LivingEntityRenderState living) {
+			living.hasRedOverlay = false;
+			living.deathTime = 0.0F;
+			living.walkAnimationPos = 0.0F;
+			living.walkAnimationSpeed = 0.0F;
+			living.xRot = 0.0F;
+			living.yRot = 0.0F;
+		}
+		bodyState.displayFireAnimation = false;
+		if (look != null) {
+			bodyState.lightCoords = state.lightCoords;
+		}
+		bodyState.nameTag = null;
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		bodyState.setData(Pinned.KEY, Pinned.HANGING);
+		ClosedEyes.mark(bodyState);
+		state.body = bodyState;
+		state.bodyRenderer = renderer;
+	}
+
 	/**
 	 * (0.5.1) A body lying free: drawn where its ragdoll's points are this frame. The model is drawn standing at the
 	 * corpse's own spot, then moved onto the ragdoll by {@link RagdollPose#body}; the limbs follow the physics.
@@ -420,6 +488,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		avatar.xRot = 0.0F;
 		avatar.setData(Ragdoll.KEY, null);
 		avatar.setData(Limp.KEY, null);
+		avatar.setData(Pinned.KEY, null);
 		avatar.nameTag = null;
 		if (state.carried) {
 			avatar.setData(Limp.KEY, new Limp(corpse.swingBack(partialTicks), corpse.swingLeft(partialTicks)));
@@ -479,6 +548,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	 * someone's arms, or turning over as it falls from them.
 	 */
 	private static void place(State state, PoseStack poseStack) {
+		if (state.pinned) {
+			// upright against the wall, slumped a little forward about its own left-right axis (pivoting at the feet)
+			float yaw = state.yaw * Mth.DEG_TO_RAD;
+			poseStack.rotate(new Quaternionf().rotationAxis(-PIN_SLUMP * Mth.DEG_TO_RAD, -Mth.cos(yaw), 0.0F, -Mth.sin(yaw)));
+			if (state.player) {
+				poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yaw));
+			}
+			return;
+		}
 		if (state.tumbling) {
 			// falling: it turns over about its middle, end over end and side to side, as fast as it's spinning
 			float yaw = state.carryYaw * Mth.DEG_TO_RAD;

@@ -22,8 +22,8 @@ public final class PowersCompat {
 	private static @Nullable ParticleOptions bloodFleck;
 	private static boolean lookedForBlood;
 
-	/** (0.7.184) Powers' {@code Dismember.canLoseParts(LivingEntity)} and {@code Dismember.sever(LivingEntity, int, LivingEntity)}. */
-	private static java.lang.invoke.@Nullable MethodHandle canLoseParts, sever;
+	/** (0.7.184) Powers' {@code Dismember.beheadPinned(LivingEntity, LivingEntity, Vec3, float)}. */
+	private static java.lang.invoke.@Nullable MethodHandle beheadPinned;
 	private static boolean lookedForDismember;
 
 	private PowersCompat() {
@@ -31,49 +31,31 @@ public final class PowersCompat {
 
 	/**
 	 * (0.7.184) Takes {@code target}'s head off as Jaymo's Powers' dismemberment does (a headless mob may stagger on a while,
-	 * a skeleton fights on, anything else drops), {@code by} its killer. False without Powers, or if it has no head to lose.
+	 * a skeleton fights on, anything else drops), {@code by} its killer, and nails the head to the wall at {@code wall},
+	 * facing {@code yaw}. False without Powers, or if it has no head to lose.
 	 */
-	public static boolean behead(net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.@Nullable LivingEntity by) {
+	public static boolean beheadPinned(net.minecraft.world.entity.LivingEntity target, net.minecraft.world.entity.@Nullable LivingEntity by,
+		net.minecraft.world.phys.Vec3 wall, float yaw) {
 		if (!lookedForDismember) {
 			lookedForDismember = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
 				try {
-					Class<?> dismember = Class.forName("com.jaymospowers.core.Dismember");
-					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
-					canLoseParts = lookup.findStatic(dismember, "canLoseParts",
-						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class));
-					sever = lookup.findStatic(dismember, "sever", java.lang.invoke.MethodType.methodType(boolean.class,
-						net.minecraft.world.entity.LivingEntity.class, int.class, net.minecraft.world.entity.LivingEntity.class));
+					beheadPinned = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "beheadPinned",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class,
+							net.minecraft.world.entity.LivingEntity.class, net.minecraft.world.phys.Vec3.class, float.class));
 				} catch (ReflectiveOperationException | LinkageError e) {
 					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' dismemberment", e);
 				}
 			}
 		}
-		if (canLoseParts == null || sever == null) {
+		if (beheadPinned == null) {
 			return false;
 		}
 		try {
-			// (Dismember.HEAD is 1)
-			return (boolean)canLoseParts.invoke(target) && (boolean)sever.invoke(target, 1, by);
+			return (boolean)beheadPinned.invoke(target, by, wall, yaw);
 		} catch (Throwable e) {
 			return false;
 		}
-	}
-
-	/**
-	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
-	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.
-	 */
-	public static ParticleOptions blood(int color, float size) {
-		if (!lookedForBlood) {
-			lookedForBlood = true;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")
-				&& net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.fromNamespaceAndPath("jaymospowers",
-					"blood_fleck_red")) instanceof net.minecraft.core.particles.SimpleParticleType fleck) {
-				bloodFleck = fleck;
-			}
-		}
-		return bloodFleck != null ? bloodFleck : new net.minecraft.core.particles.DustParticleOptions(color, size);
 	}
 
 	/** The id path of {@code player}'s power ("cryo", "wind", ...), or null without one (or without Powers). */

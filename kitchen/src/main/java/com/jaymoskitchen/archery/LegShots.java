@@ -38,6 +38,8 @@ import net.minecraft.world.phys.Vec3;
 public final class LegShots {
 	/** How much of a creature's height counts as legs: about the bottom three eighths, as on a player. */
 	public static final double LEG_FRACTION = 0.375;
+	/** (0.5.23) An arrow tagged this pinned the legs it hit (Jaymo's Kingdoms' Archer) and doesn't cripple them as well. */
+	public static final String LEG_PIN_TAG = "jaymoskingdoms.leg_pin";
 	/** Slowness from one leg shot: duration, and level (0 = Slowness I) for a normal and a fully drawn shot. */
 	private static final int TICKS = 60, CRIT_TICKS = 100;
 	private static final int AMPLIFIER = 0, CRIT_AMPLIFIER = 1;
@@ -90,7 +92,8 @@ public final class LegShots {
 
 	/** Called when {@code arrow} has just hurt {@code target}, having struck it at {@code hit}. */
 	public static void onArrowHit(AbstractArrow arrow, LivingEntity target, Vec3 hit) {
-		if (arrow.getOwner() instanceof Player player) {
+		// (0.5.23) an Archer's arrow pins the legs instead (Jaymo's Kingdoms tags it)
+		if (arrow.getOwner() instanceof Player player && !arrow.entityTags().contains(LEG_PIN_TAG)) {
 			onLegHit(target, player, hit, arrow.isCritArrow());
 		}
 	}

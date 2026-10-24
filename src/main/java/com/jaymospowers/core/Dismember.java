@@ -364,6 +364,24 @@ public final class Dismember {
 	}
 
 	/**
+	 * (0.15.148) Jaymo's Kingdoms (an Archer's headshot, by reflection): {@code target}'s head comes off, and instead of
+	 * flying it's nailed to the wall at {@code wall}, facing {@code yaw}. The body is left as any beheading leaves it.
+	 * True if the head came off.
+	 */
+	public static boolean beheadPinned(LivingEntity target, @Nullable LivingEntity by, Vec3 wall, float yaw) {
+		if (!canLoseParts(target)) {
+			return false;
+		}
+		SeveredPart.pinNextAt = wall;
+		SeveredPart.pinNextYaw = yaw;
+		try {
+			return lose(target, HEAD, by, false);
+		} finally {
+			SeveredPart.pinNextAt = null;
+		}
+	}
+
+	/**
 	 * A skeleton's part smashed to pieces by a blunt blow ({@link Fractures}): gone like a severed one, but nothing flies
 	 * off and nothing bleeds, just a shower of bone and a bone or two on the ground. True if it went.
 	 */

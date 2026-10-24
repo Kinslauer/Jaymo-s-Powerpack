@@ -76,6 +76,11 @@ public class CorpseEntity extends Entity {
 	/** Dropped from someone's arms and not landed yet: it tumbles limp through the air (see CorpseRenderer). */
 	private static final EntityDataAccessor<Boolean> TUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
+	/** (0.5.23) Nailed to a wall by an arrow: the way it faces out from the wall (degrees, 0-359), or -1 when it isn't. */
+	private static final EntityDataAccessor<Integer> PINNED = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	/** (0.5.23) How often (ticks) a pinned body checks the wall behind it is still there. */
+	private static final int PIN_CHECK_TICKS = 20;
 	private static final EntityDataAccessor<Integer> POSE = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
 	private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(CorpseEntity.class,
@@ -681,6 +686,41 @@ public class CorpseEntity extends Entity {
 		builder.define(SLUNG, -1);
 		builder.define(SLUNG_SLOT, 0);
 		builder.define(SLUNG_AT, 0L);
+		builder.define(PINNED, -1);
+	}
+
+	/**
+	 * (0.5.23) Jaymo's Kingdoms: an Archer's killing shot nailed this body to the wall behind it, facing out at {@code yaw}.
+	 * It hangs there upright, limp, until it's taken down (picked up) or the wall goes.
+	 */
+	public void pin(float yaw) {
+		this.entityData.set(PINNED, Math.floorMod(Math.round(yaw), 360));
+		this.ragdoll = null;
+		setNoGravity(true);
+		setDeltaMovement(Vec3.ZERO);
+		setYRot(yaw);
+	}
+
+	/** (0.5.23) The way a pinned body faces out from its wall (degrees), or -1 if it isn't pinned. */
+	public int pinned() {
+		return this.entityData.get(PINNED);
+	}
+
+	private void unpin() {
+		if (pinned() >= 0) {
+			this.entityData.set(PINNED, -1);
+			setNoGravity(false);
+		}
+	}
+
+	/** (0.5.23) Whether the wall a pinned body hangs on is still behind it. */
+	private boolean wallBehind(ServerLevel level) {
+		float radians = pinned() * net.minecraft.util.Mth.DEG_TO_RAD;
+		// facing out (-sin, cos): the wall is the other way, just past the body's half-width
+		double reach = getBbWidth() * 0.5 + 0.3;
+		BlockPos wall = BlockPos.containing(getX() + net.minecraft.util.Mth.sin(radians) * reach, getY() + 1.0,
+			getZ() - net.minecraft.util.Mth.cos(radians) * reach);
+		return !level.getBlockState(wall).getCollisionShape(level, wall).isEmpty();
 	}
 
 	/** (0.4.39) Server: it has just died, this tick (see {@link #sinceDeath}). */
@@ -906,6 +946,18 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
+			return;
+		}
+		if (pinned() >= 0) {
+			// (0.5.23) nailed to a wall: hangs where it is until the wall goes
+			this.ragdoll = null;
+			setDeltaMovement(Vec3.ZERO);
+			if (level() instanceof ServerLevel level) {
+				if (tickCount % PIN_CHECK_TICKS == 0 && !wallBehind(level)) {
+					unpin();
+				}
+				serverTick(level);
+			}
 			return;
 		}
 		// (0.5.1) free: the body is a ragdoll, simulated here; the corpse is wherever its middle is (see CorpseRagdoll)
@@ -1686,6 +1738,8 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		if (carrier != null) {
 			this.ragdoll = null;
+			// (0.5.23) pulled down off the wall
+			this.entityData.set(PINNED, -1);
 		}
 		setNoGravity(carrier != null);
 		this.noPhysics = carrier != null;
@@ -2138,6 +2192,10 @@ public class CorpseEntity extends Entity {
 		if (this.slungHorse != null) {
 			setNoGravity(true);
 		}
+		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
+		if (pinned() >= 0) {
+			setNoGravity(true);
+		}
 		refreshDimensions();
 	}
 
@@ -2175,6 +2233,9 @@ public class CorpseEntity extends Entity {
 		}
 		if (this.slungHorse != null) {
 			output.putString("SlungOn", this.slungHorse.toString());
+		}
+		if (pinned() >= 0) {
+			output.putInt("Pinned", pinned());
 		}
 	}
 }

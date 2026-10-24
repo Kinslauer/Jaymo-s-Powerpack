@@ -28,7 +28,10 @@ public record Limp(float back, float left) {
 		}
 		Ragdoll ragdoll = renderState.getData(Ragdoll.KEY);
 		Limp limp = renderState.getData(KEY);
-		if (ragdoll != null) {
+		Pinned pinned = renderState.getData(Pinned.KEY);
+		if (pinned != null) {
+			pinned.pose(model.root());
+		} else if (ragdoll != null) {
 			ragdoll.apply(model.root());
 		} else if (limp != null) {
 			limp.pose(model.root());

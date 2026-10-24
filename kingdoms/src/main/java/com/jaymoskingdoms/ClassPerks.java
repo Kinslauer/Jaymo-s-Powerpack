@@ -72,12 +72,28 @@ public final class ClassPerks {
 	/** (0.7.184) Archer's boon, Headshot: an arrow or bolt that strikes at the head (within this far below the eyes) hits this many times as hard. */
 	static final float ARCHER_HEADSHOT = 1.5F;
 	static final double HEADSHOT_BELOW_EYES = 0.35;
-	/** (0.7.184) Andy: "archer headshots can pin enemies to the wall, sometimes decapitating them first". A headshot on a
-	 * creature (not a player) with a wall within {@code ARCHER_PIN_REACH} behind it, along the arrow's flight, nails it
-	 * there for {@code ARCHER_PIN_TICKS}; one pin in {@code ARCHER_BEHEAD_ONE_IN} takes the head off first (with Jaymo's
-	 * Powers: a headless mob may stagger on, pinned, or drop). */
-	static final double ARCHER_PIN_REACH = 1.5;
-	static final int ARCHER_PIN_TICKS = 20 * 4, ARCHER_BEHEAD_ONE_IN = 4;
+	/**
+	 * (0.7.184) Andy: "archer headshots can pin enemies to the wall, sometimes decapitating them first", then "add it to
+	 * players, and a beheading pin just takes the head off and pins that... whole body pins should only come from extremely
+	 * strong bow shots that kill, and pinning can now be done but to the legs, replacing the effect of crippling". An
+	 * Archer's arrow, on anyone (players too):
+	 * <ul>
+	 * <li>a fully drawn shot of at least {@code ARCHER_IMPALE_DAMAGE} that kills, with a wall within {@code ARCHER_PIN_REACH}
+	 * behind (along its flight), nails the body there: Jaymo's Kitchen hangs the corpse on the wall;</li>
+	 * <li>one headshot in {@code ARCHER_BEHEAD_ONE_IN} with a wall that close behind the head takes the head off (Jaymo's
+	 * Powers) and nails just the head there;</li>
+	 * <li>a shot in the legs (the bottom {@code ARCHER_LEG_SHARE} of the body) pins them to the ground where they stand for
+	 * {@code ARCHER_LEG_PIN_TICKS} ({@code ARCHER_LEG_PIN_CRIT_TICKS} fully drawn), instead of Kitchen's crippling.</li>
+	 * </ul>
+	 */
+	static final double ARCHER_PIN_REACH = 1.5, ARCHER_LEG_SHARE = 0.375;
+	static final float ARCHER_IMPALE_DAMAGE = 12.0F;
+	static final int ARCHER_BEHEAD_ONE_IN = 4, ARCHER_LEG_PIN_TICKS = 40, ARCHER_LEG_PIN_CRIT_TICKS = 80;
+	/** The tag Kitchen reads off a leg-pinning arrow (so it doesn't cripple too), and the prefix of the one that hangs a corpse on the wall. */
+	static final String LEG_PIN_TAG = "jaymoskingdoms.leg_pin", CORPSE_PIN_TAG = "jaymoskitchen.pinned.";
+	static final TagKey<net.minecraft.world.entity.EntityType<?>> NO_LEGS = TagKey.create(Registries.ENTITY_TYPE,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "no_legs"));
+	static final String LEG_PIN_SPEED_ID = "archer_leg_pin_speed", LEG_PIN_JUMP_ID = "archer_leg_pin_jump";
 	// Survivalist (was hunger x0.7, fall -30%)
 	static final float SURVIVALIST_EXHAUSTION = 0.6F;
 	static final double SURVIVALIST_OXYGEN = 1.0, SURVIVALIST_HEALTH = 2.0, SURVIVALIST_FALL = -0.4, SURVIVALIST_MOVE = 0.05;
@@ -128,11 +144,18 @@ public final class ClassPerks {
 	private static final Map<UUID, LivingEntity> MOUNTS = new HashMap<>();
 	/** Survivalist → the tick (their own tickCount) they were last hurt. */
 	private static final Map<UUID, Integer> LAST_HURT = new HashMap<>();
-	/** (0.7.184) A creature an Archer's headshot nailed to a wall: where it hangs, until when, by whom, and whether its head comes off. */
-	private record Pin(Vec3 at, long until, @Nullable ServerPlayer by, boolean behead) {
+	/** (0.7.184) A body an Archer's killing shot nailed to a wall: held there while it dies; its tag comes off if it lived. */
+	private record Impale(Vec3 at, String tag) {
 	}
 
-	private static final Map<LivingEntity, Pin> PINNED = new HashMap<>();
+	/** (0.7.184) A head to come off the tick after the headshot (out of the blow that struck it), and nailed at {@code wall}. */
+	private record Beheading(LivingEntity target, @Nullable ServerPlayer by, Vec3 wall, float yaw) {
+	}
+
+	private static final Map<LivingEntity, Impale> IMPALED = new HashMap<>();
+	private static final List<Beheading> BEHEADINGS = new ArrayList<>();
+	/** (0.7.184) Legs an Archer's arrow pinned to the ground → the game time they come free. */
+	private static final Map<LivingEntity, Long> LEG_PINNED = new HashMap<>();
 	/** True while a Warlord's cleave is landing its share on the others (so those blows don't cleave again). */
 	private static boolean cleaving;
 
@@ -231,7 +254,9 @@ public final class ClassPerks {
 		SHIELD_DOWN.clear();
 		MOUNTS.clear();
 		LAST_HURT.clear();
-		PINNED.clear();
+		IMPALED.clear();
+		BEHEADINGS.clear();
+		LEG_PINNED.clear();
 	}
 
 	/** The factor on {@code player}'s food exhaustion (a Survivalist's hunger drains slower). */
@@ -454,10 +479,12 @@ public final class ClassPerks {
 		if (source.getDirectEntity() instanceof AbstractArrow arrow) {
 			if (cls == PlayerClass.ARCHER) {
 				amount *= (float) ARCHER_DAMAGE;
-				if (arrow.getY() + arrow.getBbHeight() * 0.5 >= target.getEyeY() - HEADSHOT_BELOW_EYES) {
+				double hitY = arrow.getY() + arrow.getBbHeight() * 0.5;
+				boolean head = hitY >= target.getEyeY() - HEADSHOT_BELOW_EYES;
+				if (head) {
 					amount *= ARCHER_HEADSHOT;
-					pin(sp, target, arrow);
 				}
+				pin(sp, target, arrow, amount, head, hitY);
 			} else if (cls == PlayerClass.MARKSMAN && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem) {
 				amount *= (float) (MARKSMAN_BOLTS + (sp.isShiftKeyDown() ? MARKSMAN_STEADY : 0.0));
 			}
@@ -492,9 +519,9 @@ public final class ClassPerks {
 		return amount;
 	}
 
-	/** An Archer's headshot: if there's a wall just behind {@code target} along the arrow's flight, it's nailed to it. */
-	private static void pin(ServerPlayer archer, LivingEntity target, AbstractArrow arrow) {
-		if (target instanceof net.minecraft.world.entity.player.Player || PINNED.containsKey(target) || !(target.level() instanceof ServerLevel level)) {
+	/** An Archer's arrow landing: a killing shot nails the body to a wall, a headshot may nail the head, a leg shot pins the legs. */
+	private static void pin(ServerPlayer archer, LivingEntity target, AbstractArrow arrow, float amount, boolean head, double hitY) {
+		if (!(target.level() instanceof ServerLevel level) || IMPALED.containsKey(target)) {
 			return;
 		}
 		Vec3 dir = arrow.getDeltaMovement().multiply(1.0, 0.0, 1.0);
@@ -502,47 +529,113 @@ public final class ClassPerks {
 			return;
 		}
 		dir = dir.normalize();
-		double half = target.getBbWidth() * 0.5;
-		Vec3 from = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
-		BlockHitResult wall = level.clip(new ClipContext(from, from.add(dir.scale(half + ARCHER_PIN_REACH)), ClipContext.Block.COLLIDER,
-			ClipContext.Fluid.NONE, target));
-		if (wall.getType() != HitResult.Type.BLOCK) {
-			return;
-		}
-		// flush against the wall, its feet where they were
-		Vec3 at = new Vec3(wall.getLocation().x - dir.x * (half + 0.05), target.getY(), wall.getLocation().z - dir.z * (half + 0.05));
-		boolean behead = archer.getRandom().nextInt(ARCHER_BEHEAD_ONE_IN) == 0;
-		PINNED.put(target, new Pin(at, level.getGameTime() + ARCHER_PIN_TICKS, archer, behead));
-		level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.TRIDENT_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 0.9F, 0.7F);
-	}
-
-	/** The pinned hang where they were nailed (and lose their heads the tick after, out of the blow that pinned them). */
-	static void serverTick(net.minecraft.server.MinecraftServer server) {
-		if (PINNED.isEmpty()) {
-			return;
-		}
-		var it = PINNED.entrySet().iterator();
-		while (it.hasNext()) {
-			var e = it.next();
-			LivingEntity target = e.getKey();
-			Pin pin = e.getValue();
-			if (!target.isAlive() || target.isRemoved() || !(target.level() instanceof ServerLevel level) || level.getGameTime() > pin.until()) {
-				it.remove();
-				continue;
+		// facing out of the wall, back toward the archer
+		float yaw = (float) Math.toDegrees(Math.atan2(dir.x, -dir.z));
+		if (arrow.isCritArrow() && amount >= ARCHER_IMPALE_DAMAGE && amount >= target.getHealth() + target.getAbsorptionAmount()) {
+			Vec3 wall = wall(level, target, dir, target.getY() + target.getBbHeight() * 0.6);
+			if (wall != null) {
+				// flush against the wall, its feet where they were; Kitchen hangs its corpse there by the tag
+				double half = target.getBbWidth() * 0.5 + 0.05;
+				Vec3 at = new Vec3(wall.x - dir.x * half, target.getY(), wall.z - dir.z * half);
+				String tag = CORPSE_PIN_TAG + Math.round(yaw);
+				target.addTag(tag);
+				target.setPos(at.x, at.y, at.z);
+				target.setDeltaMovement(Vec3.ZERO);
+				IMPALED.put(target, new Impale(at, tag));
+				level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.TRIDENT_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.6F);
+				return;
 			}
-			if (pin.behead()) {
-				e.setValue(pin = new Pin(pin.at(), pin.until(), pin.by(), false));
-				PowersCompat.behead(target, pin.by());
-				if (!target.isAlive()) {
-					it.remove();
-					continue;
+		}
+		if (head) {
+			if (archer.getRandom().nextInt(ARCHER_BEHEAD_ONE_IN) == 0) {
+				Vec3 wall = wall(level, target, dir, hitY);
+				if (wall != null) {
+					BEHEADINGS.add(new Beheading(target, archer, wall.subtract(dir.scale(0.18)), yaw));
 				}
 			}
-			target.setPos(pin.at().x, pin.at().y, pin.at().z);
-			target.setDeltaMovement(Vec3.ZERO);
-			target.needsSync = true;
-			if (target instanceof net.minecraft.world.entity.Mob mob) {
-				mob.getNavigation().stop();
+			return;
+		}
+		if (target.getBbHeight() > 0.0F && (hitY - target.getY()) / target.getBbHeight() <= ARCHER_LEG_SHARE && !target.is(NO_LEGS)) {
+			arrow.addTag(LEG_PIN_TAG);
+			legPin(target, level.getGameTime() + (arrow.isCritArrow() ? ARCHER_LEG_PIN_CRIT_TICKS : ARCHER_LEG_PIN_TICKS));
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), net.minecraft.sounds.SoundEvents.ARROW_HIT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 0.6F);
+		}
+	}
+
+	/** Where a wall stands within {@link #ARCHER_PIN_REACH} behind {@code target} at height {@code y}, along {@code dir}; null if none. */
+	private static @Nullable Vec3 wall(ServerLevel level, LivingEntity target, Vec3 dir, double y) {
+		Vec3 from = new Vec3(target.getX(), y, target.getZ());
+		BlockHitResult hit = level.clip(new ClipContext(from, from.add(dir.scale(target.getBbWidth() * 0.5 + ARCHER_PIN_REACH)), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, target));
+		return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : null;
+	}
+
+	/** Legs pinned to the ground until {@code until}: no walking and no jumping (works on players, who move themselves). */
+	private static void legPin(LivingEntity target, long until) {
+		LEG_PINNED.merge(target, until, Math::max);
+		legModifiers(target, true);
+	}
+
+	private static void legModifiers(LivingEntity target, boolean on) {
+		AttributeInstance speed = target.getAttribute(Attributes.MOVEMENT_SPEED);
+		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
+		if (on) {
+			if (speed != null) {
+				speed.addOrUpdateTransientModifier(new AttributeModifier(JaymosKingdoms.id(LEG_PIN_SPEED_ID), -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+			if (jump != null) {
+				jump.addOrUpdateTransientModifier(new AttributeModifier(JaymosKingdoms.id(LEG_PIN_JUMP_ID), -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+		} else {
+			if (speed != null) {
+				speed.removeModifier(JaymosKingdoms.id(LEG_PIN_SPEED_ID));
+			}
+			if (jump != null) {
+				jump.removeModifier(JaymosKingdoms.id(LEG_PIN_JUMP_ID));
+			}
+		}
+	}
+
+	/** Pinned bodies held to their walls while they die, heads taken off and nailed up, pinned legs let go when it's time. */
+	static void serverTick(net.minecraft.server.MinecraftServer server) {
+		if (!IMPALED.isEmpty()) {
+			var it = IMPALED.entrySet().iterator();
+			while (it.hasNext()) {
+				var e = it.next();
+				LivingEntity target = e.getKey();
+				Impale impale = e.getValue();
+				if (target.isRemoved()) {
+					it.remove();
+				} else if (target.isAlive()) {
+					// it lived through it: no hanging corpse after all
+					target.removeTag(impale.tag());
+					it.remove();
+				} else {
+					target.setPos(impale.at().x, impale.at().y, impale.at().z);
+					target.setDeltaMovement(Vec3.ZERO);
+				}
+			}
+		}
+		if (!BEHEADINGS.isEmpty()) {
+			List<Beheading> due = new ArrayList<>(BEHEADINGS);
+			BEHEADINGS.clear();
+			for (Beheading b : due) {
+				if (!b.target().isRemoved()) {
+					PowersCompat.beheadPinned(b.target(), b.by(), b.wall(), b.yaw());
+				}
+			}
+		}
+		if (!LEG_PINNED.isEmpty()) {
+			var it = LEG_PINNED.entrySet().iterator();
+			while (it.hasNext()) {
+				var e = it.next();
+				LivingEntity target = e.getKey();
+				if (target.isRemoved() || !target.isAlive() || target.level().getGameTime() >= e.getValue()) {
+					legModifiers(target, false);
+					it.remove();
+				} else if (target instanceof net.minecraft.world.entity.Mob mob) {
+					mob.getNavigation().stop();
+				}
 			}
 		}
 	}

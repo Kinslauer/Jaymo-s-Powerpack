@@ -156,6 +156,25 @@ public final class Corpses {
 	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 	/** (0.4.37) Prefix of the tags marking parts a body has lost ({@code head}, {@code right_arm}, ...; Jaymo's Powers sets them). */
 	public static final String MISSING_TAG = "jaymoskitchen.missing.";
+	/**
+	 * (0.5.23) Prefix of the tag Jaymo's Kingdoms puts on a body an Archer's killing shot nailed to a wall, followed by the
+	 * way it faces out from the wall in whole degrees: its corpse hangs there ({@link CorpseEntity#pin}).
+	 */
+	public static final String PINNED_TAG = "jaymoskitchen.pinned.";
+
+	/** (0.5.23) Pins {@code corpse} as {@code body}'s {@link #PINNED_TAG} says, if it carries one (which is then used up). */
+	static void pinFrom(LivingEntity body, CorpseEntity corpse) {
+		for (String tag : java.util.List.copyOf(body.entityTags())) {
+			if (tag.startsWith(PINNED_TAG)) {
+				body.removeTag(tag);
+				try {
+					corpse.pin(Float.parseFloat(tag.substring(PINNED_TAG.length())));
+				} catch (NumberFormatException ignored) {
+				}
+				return;
+			}
+		}
+	}
 	private static final String[] PARTS = {"head", "right_arm", "left_arm", "right_leg", "left_leg"};
 
 	/** The parts {@code entity} has lost, from its tags, as {@link CorpseEntity#missing()} bits. */
@@ -202,6 +221,7 @@ public final class Corpses {
 		}
 		corpse.markJustDied();
 		corpse.startRagdoll(deathBody(mob));
+		pinFrom(mob, corpse);
 		level.addFreshEntity(corpse);
 	}
 

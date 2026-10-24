@@ -995,3 +995,12 @@ Batch 3 of the BWM port (MIT, our own code).
   body the client can't rebuild (a player's) throws lumps of meat (`textures/entity/gib.png`, painted new).
 - Blood: `Gibs.addOnBurst` tells Jaymo's Powers of each body blown apart (it bursts its blood); without Powers a spray
   of red block particles. Tuning at the top of `Gibs` and `GibRenderer`.
+
+### 0.5.23: nailed to the wall (pack 0.15.148)
+- Jaymo's Kingdoms' Archer: a fully drawn killing shot with a wall close behind tags the body
+  `jaymoskitchen.pinned.<yaw>` (`Corpses.PINNED_TAG`). Its corpse (mob or player) then hangs upright on the wall,
+  facing out, instead of falling (`CorpseEntity.pin`: no ragdoll, no gravity, saved as `Pinned`), until someone picks it
+  up or the wall behind it goes. Drawn standing, slumped 8 degrees forward, arms and legs hanging, head on its chest
+  (`client/corpse/Pinned`, applied with `Limp`).
+- An arrow tagged `jaymoskingdoms.leg_pin` (an Archer's leg shot, which pins the legs instead) doesn't cripple
+  (`LegShots.LEG_PIN_TAG`).
