@@ -4345,3 +4345,25 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   jacket, sleeve and trouser layers), as the body is drawn, the way Powers' costumes cover the skin (`CostumeCover`).
   Never the head (faces and hoods have holes). Library clothes are read from their in-memory texture.
 - Compile-checked against the 26.3, MCA and Fabric API jars; not yet seen in game.
+
+## 0.7.184: player groups and handshakes (pack 0.15.147)
+- Andy: "add a group system for players so you can see their player tags once finding and interacting with them, (both
+  players right clicking each other, for a cinematic action cam handshake, then a success sound) and scoreboard team
+  integration allowing for reduced team damage and other benefits."
+- `Handshakes`: use on another player, empty handed and not sneaking (sneak + use stays the vampire's bite and the
+  downed's pick-up), and you hold your right hand out to them for 10 s, for everyone to see. If they use on you back
+  while it's out, you shake: set facing each other at arm's length, held still, three slow pumps (2.3 s), a leather
+  creak as the hands meet and a level-up chime with an amethyst ring at the end. A blow, going down or stepping apart
+  breaks it off. Not behind a full mask (as with `/introduce`).
+- Each of the two sees it as a film (`client/HandshakeCinematic`, camera via `HandshakeCameraMixin`): black bars, the HUD
+  cleared, a wide profile pushing in, a low close shot circling the grip, then over your shoulder onto their face.
+  The arms are `client/HandshakePose`.
+- Afterwards the two know each other's names (`Introductions`) and share a group (`Groups`), which is a plain
+  scoreboard team: whoever has no group joins the other's, or the two start "<name>'s Company" in a random colour. Two in
+  different groups only learn names. An op's own `/team` counts as a group too.
+- Group perks: groupmates always see each other's names (nametag, tab list) in the group's colour; a groupmate's blows
+  land at 25% (arrows and powers too, `Groups.FRIENDLY_DAMAGE`); each groupmate within 8 blocks takes 5% off blows from
+  anyone else, up to 3 (`SIDE_GUARD`); invisible groupmates show; no shoving; vanilla `/teammsg` works.
+- `/group` lists your group (character names; offline members only counted, so no usernames), `/group leave`,
+  `/group name <name>`. Leaving or renaming an op's team is refused.
+- Compile-checked against 26.3; not yet seen in game.
