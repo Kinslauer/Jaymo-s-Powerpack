@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -34,6 +35,10 @@ import org.jspecify.annotations.Nullable;
  * been told the name of ({@link #KNOWN}, synced to them alone). Until then the name over a villager's or player's head
  * isn't drawn ({@code client/mixin/tweaks/IntroNameTagMixin}), the tab list and Xaero's minimap call them a stranger,
  * and Jade (anything asking the client for their name) gets "Villager" or "Stranger".
+ * (0.7.187) Andy: "Jade should no longer show player or villager names, health or occupation until you hit them or find
+ * out through speaking with them". Jade's panel on a stranger keeps only what you can see ({@code client/compat/
+ * JadeIntroductions}): no name, no trade, and no health until you've struck them ({@link #STRUCK}). Being introduced
+ * shows all three.
  * <ul>
  * <li>A villager: "Ask their name" in MCA's menu ({@link #ANSWER}). One who bears you too much ill will won't say. A
  * ruler gives their title and realm, and their nametag carries the title from then on ({@link #TITLE}), so a king is
@@ -62,6 +67,11 @@ public final class Introductions {
 		builder -> builder.persistent(UUIDUtil.CODEC_SET).copyOnDeath()
 			.syncWith(ByteBufCodecs.collection(HashSet::new, UUIDUtil.STREAM_CODEC), AttachmentSyncPredicate.targetOnly()));
 
+	/** On a player: the strangers they've struck, whose health Jade shows them. Kept through death, not saved, synced to them alone. */
+	static final AttachmentType<Set<UUID>> STRUCK = AttachmentRegistry.create(JaymosKingdoms.id("struck"),
+		builder -> builder.copyOnDeath()
+			.syncWith(ByteBufCodecs.collection(HashSet::new, UUIDUtil.STREAM_CODEC), AttachmentSyncPredicate.targetOnly()));
+
 	/** On a ruler: their title (King, Queen, Lord, Lady), for their nametag. Synced, not saved ({@link Standing#update}). */
 	public static final AttachmentType<Component> TITLE = AttachmentRegistry.create(JaymosKingdoms.id("ruler_title"),
 		builder -> builder.syncWith(ComponentSerialization.TRUSTED_STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -76,10 +86,15 @@ public final class Introductions {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("introduction attachments: {} {}", KNOWN, TITLE);
+		JaymosKingdoms.LOGGER.debug("introduction attachments: {} {} {}", KNOWN, STRUCK, TITLE);
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
 			Commands.literal("introduce").executes(c -> introduce(c.getSource().getPlayerOrException()))));
 		ServerTickEvents.END_SERVER_TICK.register(Introductions::tick);
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (source.getEntity() instanceof ServerPlayer player) {
+				strike(player, entity);
+			}
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LAST.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST.clear());
 	}
@@ -115,6 +130,31 @@ public final class Introductions {
 		}
 		Set<UUID> known = me.getAttached(KNOWN);
 		return known != null && known.contains(id);
+	}
+
+	/** This client's player may see {@code e}'s health: they know them, or have struck them. */
+	public static boolean healthKnownHere(Entity e) {
+		if (knownHere(e)) {
+			return true;
+		}
+		Player me = viewer.get();
+		Set<UUID> struck = me == null ? null : me.getAttached(STRUCK);
+		return struck != null && struck.contains(e.getUUID());
+	}
+
+	/** {@code player} struck {@code e}: a stranger's health is theirs to see from then (Jade). */
+	static void strike(ServerPlayer player, Entity e) {
+		if (knows(player, e)) {
+			return;
+		}
+		Set<UUID> struck = player.getAttached(STRUCK);
+		if (struck != null && struck.contains(e.getUUID())) {
+			return;
+		}
+		// a new set, so it's synced
+		Set<UUID> next = struck == null ? new HashSet<>() : new HashSet<>(struck);
+		next.add(e.getUUID());
+		player.setAttached(STRUCK, next);
 	}
 
 	/** What an unintroduced player is called. */
