@@ -3,6 +3,7 @@ package com.jaymospowers.client;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.armory.TaczGuns;
+import com.jaymospowers.client.compat.AutoHudCrosshair;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -34,8 +35,9 @@ import org.jspecify.annotations.Nullable;
  * drawn, a power key held, a creature in reach under your aim, or a swing in the last {@link #LINGER} ticks) our own
  * crosshair is drawn where the attack will land: on what you'd hit (vanilla's pick, or the giant's camera-line pick,
  * {@link GiantCamera}), else where a shot from your eyes along your look meets a block. Idle, it's gone again in third
- * person, and first person keeps vanilla's (and Auto HUD's) usual one. It's its own HUD element, so Auto HUD, which
- * fades the vanilla ones, leaves it alone; the beam battle's film still clears it.
+ * person, and first person keeps vanilla's usual one. Auto HUD clears it with the rest of the HUD: while you aim it's
+ * revealed through Auto HUD's crosshair ({@link AutoHudCrosshair}), which ours hangs under, and when you stop Auto HUD
+ * fades both out as usual. The beam battle's film clears it too.
  */
 public final class AimCrosshair {
 	/** How long it stays after you last aimed or attacked (ticks). */
@@ -74,6 +76,9 @@ public final class AimCrosshair {
 		} else if (showing > 0) {
 			showing--;
 		}
+		if (showing > 0) {
+			AutoHudCrosshair.reveal();
+		}
 	}
 
 	/** Whether you're aiming or fighting right now. */
@@ -81,7 +86,7 @@ public final class AimCrosshair {
 		if (minecraft.gui.screen() != null) {
 			return false;
 		}
-		if (player.swinging || minecraft.options.keyAttack.isDown()) {
+		if (player.isSwinging() || minecraft.options.keyAttack.isDown()) {
 			return true;
 		}
 		boolean eating = player.isUsingItem() && (player.getUseItem().getUseAnimation() == ItemUseAnimation.EAT
