@@ -206,6 +206,7 @@ public class Hornkin extends Monster implements RangedAttackMob {
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(0, new AvoidEntityGoal<>(this, Player.class, 20.0F, 1.0, 1.3, e -> this.routed() && e.isAlive() && !e.isSpectator()));
+		this.goalSelector.addGoal(0, new com.jaymoskingdoms.RangedTactics.RepositionGoal(this));
 		this.goalSelector.addGoal(1, new AdmireGoal());
 		if (this.kind == Kind.HURLER) {
 			this.goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, THROW_EVERY, THROW_RANGE));

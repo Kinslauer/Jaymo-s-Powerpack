@@ -29,6 +29,13 @@ public final class Affinity {
 	/** The chosen power's id, or {@link #FATE}. Saved, kept through death, synced to its owner (for the screens). */
 	public static final AttachmentType<Identifier> AFFINITY = AttachmentRegistry.create(JaymosPowers.id("affinity"),
 		builder -> builder.persistent(Identifier.CODEC).copyOnDeath().syncWith(Identifier.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * A power handed down: Jaymo's Kingdoms' Lineage, when a player lives on as their child. Andy: "the power you had is
+	 * given a high affinity to your child, they still have to awaken it themselves". It awakens in them for sure, after
+	 * the usual wait, fated or not. Saved, kept through death; gone once it's awoken.
+	 */
+	public static final AttachmentType<Identifier> INHERITED = AttachmentRegistry.create(JaymosPowers.id("inherited_power"),
+		builder -> builder.persistent(Identifier.CODEC).copyOnDeath());
 	/** "Let fate decide": a random power awakens. */
 	public static final Identifier FATE = JaymosPowers.id("fate");
 	/** The choice screen is offered at all (switched off for now; /power affinity still sets an affinity). */
@@ -93,6 +100,27 @@ public final class Affinity {
 				.withStyle(style -> style.withColor(TextColor.fromRgb(power.color())))).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 		player.sendSystemMessage(message);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	/** The power handed down to {@code player} that hasn't awoken yet, or null. */
+	public static @Nullable Power inherited(Player player) {
+		return Powers.get(player.getAttached(INHERITED));
+	}
+
+	/**
+	 * Jaymo's Kingdoms' Lineage (called by reflection): {@code player} lives on as their child, so their power leaves them
+	 * and becomes the child's inheritance ({@link #INHERITED}), to awaken in them after a fresh 3-5 days. Without a
+	 * power, nothing is handed down (the child's own wait starts over all the same).
+	 */
+	public static void passDown(ServerPlayer player) {
+		Power power = Powers.of(player);
+		Powers.set(player, null);
+		player.removeAttached(Powers.AWAKEN_IN);
+		player.removeAttached(Powers.AWAKEN_SLOW);
+		player.removeAttached(Callings.CALLING);
+		if (power != null) {
+			player.setAttached(INHERITED, power.id());
+		}
 	}
 
 	/** For commands: sets (or with null, clears) the affinity directly. */

@@ -100,8 +100,9 @@ import org.jspecify.annotations.Nullable;
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
  * Dragon fall wakes the first two, slaying or taming any other dragon the Dragonblood, and killing a Warden or seeing
  * one dig away the Deepborn ({@link #unlockChecks}, {@link #died}). (0.7.140) The Stormborn is earned too: it wakes in a
- * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). Earning one ({@link #UNLOCKED}) gives a Blood Rite
- * ({@link #RITE_ITEM}): read, it opens the heritage screen to change your blood to one you've earned.
+ * Wind user whose power the storm corrupts (Jaymo's Powers' Stormbound). (0.7.184) Earning one ({@link #UNLOCKED}) no
+ * longer changes your own blood (the Blood Rite is gone): your children are born to your heritage or one you've earned
+ * ({@link VillagerHeritage#passed}), and you take it up by living on as one of them ({@link Lineage}).
  * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
  * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
@@ -229,8 +230,8 @@ public final class Heritage {
 
 	/**
 	 * The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a
-	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and taken up with a
-	 * Blood Rite.
+	 * point). (0.7.106) An earned one isn't offered at the start: it's woken in play ({@link #UNLOCKED}) and (0.7.184) passed to
+	 * your children ({@link VillagerHeritage#passed}).
 	 */
 	public enum Kind {
 		HEARTLANDER(2, Items.WHEAT),
@@ -335,27 +336,23 @@ public final class Heritage {
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath()
 			.syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.targetOnly()));
 
-	/** (0.7.106) The Blood Rite: read, it opens the heritage screen to take up an earned heritage. */
+	/**
+	 * (0.7.106) The Blood Rite. (0.7.184) Gone, replaced by {@link Lineage}: still registered so the ones players carry
+	 * load, and read, it crumbles and tells them where their blood went.
+	 */
 	public static Item RITE_ITEM;
-
-	/** (0.7.106) Players who've read a Blood Rite and have the screen up to choose (not saved). */
-	private static final java.util.Set<UUID> RITE_OPEN = new java.util.HashSet<>();
 	/** (0.7.106) When each Endborn may next blink aside (game time). */
 	private static final Map<UUID, Long> BLINK_READY = new HashMap<>();
 	/** (0.7.106) When each Stormborn last threw a spark (game time). */
 	private static final Map<UUID, Long> SPARKED = new HashMap<>();
 
 	/**
-	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). (0.7.106)
-	 * {@code rite}: a Blood Rite was read, so only the earned heritages they've woken can be picked.
+	 * Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking).
 	 */
-	public record Open(boolean forced, boolean rite) implements CustomPacketPayload {
+	public record Open(boolean forced) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("heritage_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> {
-				buf.writeBoolean(p.forced);
-				buf.writeBoolean(p.rite);
-			}, buf -> new Open(buf.readBoolean(), buf.readBoolean()));
+			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
 
 		@Override
 		public Type<Open> type() {
@@ -402,7 +399,6 @@ public final class Heritage {
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Heritage::died);
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			RITE_OPEN.remove(handler.player.getUUID());
 			BLINK_READY.remove(handler.player.getUUID());
 			SPARKED.remove(handler.player.getUUID());
 		});
@@ -420,7 +416,7 @@ public final class Heritage {
 	/** Opens the heritage screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(forced, false));
+			ServerPlayNetworking.send(player, new Open(forced));
 		}
 	}
 
@@ -436,16 +432,6 @@ public final class Heritage {
 		}
 		Kind kind = all[ordinal];
 		if (of(player) != null) {
-			// (0.7.106) a Blood Rite's choice: only an earned heritage they've woken, and the rite is spent on it
-			if (RITE_OPEN.remove(player.getUUID()) && kind != of(player) && kind.earned && unlocked(player, kind)) {
-				if (!spendRite(player)) {
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_gone").withStyle(ChatFormatting.GRAY));
-					return;
-				}
-				set(player, kind);
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_done",
-					Component.translatable("heritage.jaymoskingdoms." + kind.key())).withStyle(ChatFormatting.DARK_RED));
-			}
 			return;
 		}
 		if (kind.earned && !unlocked(player, kind)) {
@@ -941,7 +927,7 @@ public final class Heritage {
 		}
 	}
 
-	// ---- (0.7.106) earned heritages and the Blood Rite ------------------------------------------------------------
+	// ---- (0.7.106) earned heritages ------------------------------------------------------------------------------
 
 	/** Whether {@code player} has woken earned heritage {@code kind} (any heritage that isn't earned is always open). */
 	public static boolean unlocked(Player player, Kind kind) {
@@ -952,7 +938,7 @@ public final class Heritage {
 		return keys != null && keys.contains(kind.key());
 	}
 
-	/** Wakes earned heritage {@code kind} in {@code player}, once: the word of it, and a Blood Rite to take it up. */
+	/** Wakes earned heritage {@code kind} in {@code player}, once: the word of it ((0.7.184) their children can carry it). */
 	static void unlock(ServerPlayer player, Kind kind) {
 		if (!kind.earned || unlocked(player, kind)) {
 			return;
@@ -960,10 +946,6 @@ public final class Heritage {
 		List<String> keys = new ArrayList<>(player.getAttachedOrElse(UNLOCKED, List.of()));
 		keys.add(kind.key());
 		player.setAttached(UNLOCKED, List.copyOf(keys));
-		ItemStack rite = new ItemStack(RITE_ITEM);
-		if (!player.getInventory().add(rite)) {
-			player.drop(rite, false, net.minecraft.util.Prediction.SERVER_ONLY);
-		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.unlocked",
 			Component.translatable("heritage.jaymoskingdoms." + kind.key())).withStyle(ChatFormatting.DARK_RED));
@@ -1021,23 +1003,7 @@ public final class Heritage {
 		}
 	}
 
-	/** Takes one Blood Rite out of {@code player}'s inventory (true), or finds none (false). Creative spends nothing. */
-	private static boolean spendRite(ServerPlayer player) {
-		if (player.isCreative()) {
-			return true;
-		}
-		var inventory = player.getInventory();
-		for (int i = 0; i < inventory.getContainerSize(); i++) {
-			ItemStack stack = inventory.getItem(i);
-			if (stack.is(RITE_ITEM)) {
-				stack.shrink(1);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/** The Blood Rite: read (right-click), it opens the heritage screen to change your blood to an earned one you've woken. */
+	/** (0.7.106) The Blood Rite. (0.7.184) Read, it crumbles: an earned blood is taken up through your children now. */
 	static final class Rite extends Item {
 		Rite(Item.Properties properties) {
 			super(properties);
@@ -1045,25 +1011,10 @@ public final class Heritage {
 
 		@Override
 		public InteractionResult use(Level level, Player player, InteractionHand hand) {
-			if (!(player instanceof ServerPlayer sp)) {
-				return InteractionResult.SUCCESS;
-			}
-			if (of(sp) == null) {
-				ask(sp, true);
-				return InteractionResult.SUCCESS;
-			}
-			boolean any = false;
-			for (Kind kind : Kind.values()) {
-				any |= kind.earned && kind != of(sp) && unlocked(sp, kind);
-			}
-			if (!any) {
-				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_silent").withStyle(ChatFormatting.GRAY));
-				return InteractionResult.FAIL;
-			}
-			if (ServerPlayNetworking.canSend(sp, Open.TYPE)) {
-				RITE_OPEN.add(sp.getUUID());
-				level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 0.8F, 0.8F);
-				ServerPlayNetworking.send(sp, new Open(false, true));
+			if (player instanceof ServerPlayer sp) {
+				sp.getItemInHand(hand).consume(1, sp);
+				level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.SAND_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
+				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.rite_crumbles").withStyle(ChatFormatting.GRAY));
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -1074,7 +1025,7 @@ public final class Heritage {
 	/** {@code /kingdom heritage set|clear|get|unlock}, for ops. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		var players = Commands.argument("players", EntityArgument.players());
-		// (0.7.106) wake an earned heritage in them, as if they'd earned it (with its Blood Rite)
+		// (0.7.106) wake an earned heritage in them, as if they'd earned it
 		var unlockPlayers = Commands.argument("players", EntityArgument.players());
 		for (Kind kind : Kind.values()) {
 			if (!kind.earned) {

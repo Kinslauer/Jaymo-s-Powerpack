@@ -155,7 +155,11 @@ public final class Powers {
 		// almost always; otherwise fate decides
 		Power called = Callings.power(player);
 		Power leaning = Affinity.power(player);
-		Power power = called != null && called != current ? called
+		// (a power handed down by Kingdoms' Lineage is surer still)
+		Power inherited = Affinity.inherited(player);
+		player.removeAttached(Affinity.INHERITED);
+		Power power = inherited != null && inherited != current ? inherited
+			: called != null && called != current ? called
 			: leaning != null && leaning != current && player.getRandom().nextFloat() < Affinity.CHANCE
 			? leaning : choices.get(player.getRandom().nextInt(choices.size()));
 		set(player, power);

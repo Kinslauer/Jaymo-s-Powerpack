@@ -2,6 +2,7 @@ package com.jaymoskingdoms.remnants;
 
 import com.jaymoskingdoms.Trees;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -101,6 +102,9 @@ public class AetherGiant extends Monster {
 	static final int TRAMPLE_EVERY = 5;
 	/** How high up its legs it fells trees whole (blocks); above that, and for anything else, it smashes straight through. */
 	static final int TRAMPLE_HEIGHT = 6;
+	/** (0.7.184) Its death: the tick it hits the ground and breaks up, and the bursts of stone along where it lies (to this share of its height ahead). */
+	static final int SHATTER_TICK = 10, SHATTER_BURSTS = 6;
+	static final double SHATTER_REACH = 0.6;
 	/** The share of what it smashes that drops, and how near its own monolith (blocks) it leaves things standing. */
 	static final float TRAMPLE_DROPS = 0.25F;
 	static final double MONOLITH_SPARED = 4.0;
@@ -455,6 +459,28 @@ public class AetherGiant extends Monster {
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		// it was made to walk off cliffs
 		return !source.is(DamageTypeTags.IS_FALL) && super.hurtServer(level, source, amount);
+	}
+
+	/**
+	 * (0.7.184) Its death: it topples onto its face and, as it hits the ground ({@link #SHATTER_TICK}), breaks apart
+	 * (the client's model throws its pieces): its stone bursts up along where it lies, with a crash of breaking rock.
+	 */
+	@Override
+	protected void tickDeath() {
+		super.tickDeath();
+		if (this.deathTime == SHATTER_TICK && this.level() instanceof ServerLevel level) {
+			BlockParticleOption stone = new BlockParticleOption(ParticleTypes.BLOCK, this.element.stone.defaultBlockState());
+			BlockParticleOption band = new BlockParticleOption(ParticleTypes.BLOCK, this.element.band.defaultBlockState());
+			Vec3 ahead = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+			for (int i = 0; i <= SHATTER_BURSTS; i++) {
+				Vec3 at = this.position().add(ahead.scale(HEIGHT * SHATTER_REACH * i / SHATTER_BURSTS));
+				level.sendParticles(stone, at.x, at.y + 1.0, at.z, 60, WIDTH * 0.3, 1.5, WIDTH * 0.3, 0.3);
+				level.sendParticles(band, at.x, at.y + 1.0, at.z, 20, WIDTH * 0.3, 1.5, WIDTH * 0.3, 0.3);
+				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.5, at.z, 6, WIDTH * 0.3, 0.5, WIDTH * 0.3, 0.02);
+			}
+			this.playSound(this.element.stone.defaultBlockState().getSoundType().getBreakSound(), 4.0F, 0.5F);
+			this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.0F, 0.4F);
+		}
 	}
 
 	@Override

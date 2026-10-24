@@ -65,6 +65,9 @@ dependencies {
 	localRuntime "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1"
 	compileOnly "maven.modrinth:architectury-api:22.0.4+fabric"
 	localRuntime "maven.modrinth:architectury-api:22.0.4+fabric"
+	// Jade (CC BY-NC-SA 4.0, Snownee; in Powers' pack): client/compat/JadeIntroductions keeps strangers' names, trades and
+	// health off its panel. Compiled against (the same version as Powers' pack), never required.
+	compileOnly "maven.modrinth:jade:71CTWqdE"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 
