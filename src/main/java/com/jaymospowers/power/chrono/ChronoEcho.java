@@ -25,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -132,6 +133,8 @@ public class ChronoEcho extends Monster {
 	private boolean bound;
 	private ChronoDirectives.Orders orders = ChronoDirectives.Orders.NONE;
 	private @Nullable ChronoEchoWork work;
+	/** (0.15.147) What it carries for its loops: drops it reaped, blocks it will place (saved; dropped when it goes). */
+	private final SimpleContainer haul = new SimpleContainer(4);
 	// client-side ticking
 	private int tickRun;
 
@@ -238,6 +241,17 @@ public class ChronoEcho extends Monster {
 	}
 
 	/** The block kinds its owner mines most. */
+	SimpleContainer haul() {
+		return this.haul;
+	}
+
+	/** What it carries falls where it stood. */
+	private void dropHaul(ServerLevel level) {
+		for (ItemStack stack : this.haul.removeAllItems()) {
+			this.spawnAtLocation(level, stack);
+		}
+	}
+
 	List<Identifier> minedKinds() {
 		return this.minedKinds;
 	}
@@ -557,6 +571,7 @@ public class ChronoEcho extends Monster {
 		}
 		if (!this.gone && this.level() instanceof ServerLevel level) {
 			this.gone = true;
+			dropHaul(level);
 			ChronoEchoes.collapse(level, this);
 		}
 	}
@@ -585,6 +600,7 @@ public class ChronoEcho extends Monster {
 			return;
 		}
 		this.gone = true;
+		dropHaul(level);
 		ChronoEchoes.shatterFx(level, this);
 		player.setAttached(ChronoEchoes.NETHER_RETURN, new ChronoEchoes.NetherReturn(this.getHealth(), this.bond,
 			ChronoEchoes.NETHER_RETURN_MIN + this.getRandom().nextInt(ChronoEchoes.NETHER_RETURN_MAX - ChronoEchoes.NETHER_RETURN_MIN + 1)));
@@ -607,6 +623,7 @@ public class ChronoEcho extends Monster {
 			return;
 		}
 		this.gone = true;
+		dropHaul(level);
 		ChronoEchoes.shatterFx(level, this);
 		ChronoEchoes.queueReturn(level.getServer(), this.owner, this.bond);
 		this.discard();
@@ -618,13 +635,15 @@ public class ChronoEcho extends Monster {
 			return;
 		}
 		this.gone = true;
+		dropHaul(level);
 		ChronoEchoes.fadeFx(level, this);
 		this.discard();
 	}
 
-	/** Nothing drops from an echo: not its owner's item, not loot. */
+	/** Nothing drops from an echo (not its owner's item, not loot) but what it was carrying. */
 	@Override
 	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		dropHaul(level);
 	}
 
 	@Override
@@ -664,6 +683,7 @@ public class ChronoEcho extends Monster {
 		output.store("echo_route", BlockPos.CODEC.listOf(), this.route);
 		output.putBoolean("echo_bound", this.bound);
 		output.store("echo_orders", ChronoDirectives.Orders.CODEC, this.orders);
+		this.haul.storeAsItemList(output.list("echo_haul", ItemStack.CODEC));
 	}
 
 	@Override
@@ -678,6 +698,7 @@ public class ChronoEcho extends Monster {
 		this.route = new ArrayList<>(input.read("echo_route", BlockPos.CODEC.listOf()).orElse(List.of()));
 		this.bound = input.getBooleanOr("echo_bound", false);
 		this.orders = input.read("echo_orders", ChronoDirectives.Orders.CODEC).orElse(ChronoDirectives.Orders.NONE);
+		this.haul.fromItemList(input.listOrEmpty("echo_haul", ItemStack.CODEC));
 	}
 
 	// ---------------------------------------------------------------- routes

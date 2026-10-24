@@ -37,11 +37,18 @@ public class JaymosPowersClient implements ClientModInitializer {
 	private static boolean modeWasDown;
 
 	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
+	/** (0.15.147) Keys the powers screen pressed for you (the abilities, then Z, then C): ticks left held down. */
+	private static final int[] tapped = new int[PowerKey.values().length + 2];
+	public static final int TAP_MODE = PowerKey.values().length, TAP_ULTIMATE = TAP_MODE + 1;
+	/** How long a press from the screen holds the key. */
+	private static final int TAP_TICKS = 3;
 	private static @Nullable Identifier lastPower;
 	private static boolean affinityPending;
 
 	@Override
 	public void onInitializeClient() {
+		// (0.15.147) the inventory's tab to the powers screen
+		PowerInventoryTab.init();
 		for (PowerKey key : PowerKey.values()) {
 			ABILITY_KEYS[key.ordinal()] = KeyMappingHelper.registerKeyMapping(
 				new KeyMapping("key.jaymospowers." + key.id(), DEFAULT_KEYS[key.ordinal()], CATEGORY));
@@ -57,6 +64,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
+		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
@@ -157,6 +165,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 		return modeKey;
 	}
 
+	/**
+	 * (0.15.147) Presses a key for you, as if tapped, once no screen is open: an ability ({@link PowerKey#ordinal}),
+	 * {@link #TAP_MODE} or {@link #TAP_ULTIMATE}. The powers screen closes first so it lands in the world.
+	 */
+	public static void tap(int key) {
+		tapped[key] = TAP_TICKS;
+	}
+
 	/** The ascended ability's key mapping. */
 	public static KeyMapping ultimateKey() {
 		return ultimateKey;
@@ -232,7 +248,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
 			// (0.13.7) on a bomb glider, ability 1 drops its dynamite instead (BombGliderClient)
-			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown()
+			boolean physical = !seized && minecraft.gui.screen() == null && (ABILITY_KEYS[key.ordinal()].isDown() || tapped[key.ordinal()] > 0);
+			// (0.15.151) a Flame Avatar's R, G and B (sneak + the key beside a power) go to the avatar instead
+			boolean avatar = com.jaymospowers.client.power.ember.FlameAvatarClient.route(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
@@ -247,7 +266,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				}
 			}
 		}
-		boolean mode = power != null && !seized && minecraft.gui.screen() == null && modeKey.isDown();
+		boolean mode = power != null && !seized && minecraft.gui.screen() == null && (modeKey.isDown() || tapped[TAP_MODE] > 0);
 		if (mode != modeWasDown) {
 			modeWasDown = mode;
 			ClientPlayNetworking.send(new PowerPayloads.ModeKey(mode));
@@ -258,7 +277,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			}
 		}
 		boolean ultimate = power != null && power.ultimateAnswers(player)
-			&& !seized && minecraft.gui.screen() == null && ultimateKey.isDown();
+			&& !seized && minecraft.gui.screen() == null && (ultimateKey.isDown() || tapped[TAP_ULTIMATE] > 0);
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;
 			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));
@@ -266,6 +285,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 				boolean pressed = ultimate;
 				com.jaymospowers.core.wounds.LimbUse.aimed(player, com.jaymospowers.core.wounds.LimbUse.need(power, player, "ultimate"),
 					() -> client.onUltimate(player, pressed));
+			}
+		}
+		if (minecraft.gui.screen() == null) {
+			for (int i = 0; i < tapped.length; i++) {
+				tapped[i] = Math.max(0, tapped[i] - 1);
 			}
 		}
 		if (client != null && !minecraft.isPaused()) {

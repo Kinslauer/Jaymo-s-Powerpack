@@ -18,10 +18,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -53,6 +58,8 @@ final class ChronoEchoWork {
 	/** Loop: rest this long at the end before going round again. */
 	static final int LOOP_PAUSE = 40;
 	static final double STRIKE_REACH = 4.0;
+	/** (0.15.147) At a chest in its loop it takes up to this many of each block its next placings need. */
+	static final int RESTOCK = 16;
 
 	private final ChronoEcho echo;
 	private @Nullable BlockPos job;
@@ -263,7 +270,10 @@ final class ChronoEchoWork {
 		return habits.contains(BuiltInRegistries.BLOCK.getKey(state.getBlock())) && state.getDestroySpeed(level, pos) >= 0.0F;
 	}
 
-	/** Breaks the block with its drops (a crop is replanted from its own seeds); drops go to a chest near {@code home}. */
+	/**
+	 * Breaks the block with its drops (a crop is replanted from its own seeds); drops go to a chest near {@code home},
+	 * then (0.15.147) into what it carries, and only then onto the ground.
+	 */
 	private void reap(ServerLevel level, BlockPos pos, BlockPos home) {
 		BlockState state = level.getBlockState(pos);
 		if (state.isAir()) {
@@ -287,6 +297,9 @@ final class ChronoEchoWork {
 		for (ItemStack stack : drops) {
 			if (!stack.isEmpty() && chest != null) {
 				deposit(chest, stack);
+			}
+			if (!stack.isEmpty()) {
+				deposit(this.echo.haul(), stack);
 			}
 			if (!stack.isEmpty()) {
 				Block.popResource(level, pos, stack);
@@ -332,7 +345,7 @@ final class ChronoEchoWork {
 		chest.setChanged();
 	}
 
-		/** On standby, between fights, it casts Time Bloom where it stands now and then (once its owner has Time Bloom). */
+	/** On standby, between fights, it casts Time Bloom where it stands now and then (once its owner has Time Bloom). */
 	private void bloom(ServerLevel level, @Nullable ServerPlayer owner) {
 		if (this.bloom != null) {
 			if (!this.bloom.tick()) {
@@ -371,7 +384,7 @@ final class ChronoEchoWork {
 		}
 		ChronoDirectives.Step s = steps.get(this.step);
 		BlockPos pos = s.pos();
-		double reach = s.kind() == ChronoDirectives.Step.MOVE ? 1.6 : s.kind() == ChronoDirectives.Step.BREAK ? WORK_REACH + 1.0 : STRIKE_REACH;
+		double reach = s.kind() == ChronoDirectives.Step.MOVE ? 1.6 : s.kind() == ChronoDirectives.Step.STRIKE ? STRIKE_REACH : WORK_REACH + 1.0;
 		boolean there = this.echo.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) <= reach * reach;
 		if (!there && this.stepTicks <= STUCK_TICKS) {
 			if (this.stepTicks++ % 20 == 0) {
@@ -393,6 +406,10 @@ final class ChronoEchoWork {
 				if (foe != null) {
 					this.echo.setTarget(foe);
 				}
+			} else if (s.kind() == ChronoDirectives.Step.PLACE) {
+				place(level, owner, s);
+			} else if (s.kind() == ChronoDirectives.Step.INTERACT) {
+				use(level, s, steps);
 			}
 		}
 		this.stepTicks = 0;
@@ -401,6 +418,117 @@ final class ChronoEchoWork {
 			this.loopPause = LOOP_PAUSE;
 			ChronoFx.particles(level, owner, ParticleTypes.REVERSE_PORTAL, this.echo.getX(), this.echo.getY() + 1.0, this.echo.getZ(), 12, 0.3, 0.6, 0.3, 0.05);
 		}
+	}
+
+	/** (0.15.147) Places the step's block where it was placed, if the spot is free and it has one (or its owner is in creative). */
+	private void place(ServerLevel level, @Nullable ServerPlayer owner, ChronoDirectives.Step s) {
+		BlockPos pos = s.pos();
+		Block block = s.block().map(BuiltInRegistries.BLOCK::getValue).orElse(null);
+		if (block == null || !level.getBlockState(pos).canBeReplaced()) {
+			return;
+		}
+		BlockState state = block.defaultBlockState();
+		if (!state.canSurvive(level, pos) || !level.isUnobstructed(state, pos, net.minecraft.world.phys.shapes.CollisionContext.empty())) {
+			return;
+		}
+		Item item = block.asItem();
+		boolean free = owner != null && owner.isCreative();
+		if (!free && !take(this.echo.haul(), item)) {
+			Container chest = chestNear(level, pos);
+			if (chest == null || !take(chest, item)) {
+				return; // nothing to place it with
+			}
+		}
+		this.echo.getLookControl().setLookAt(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+		this.echo.swingForAttack(InteractionHand.MAIN_HAND);
+		level.setBlockAndUpdate(pos, state);
+		level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 0.8F);
+		ChronoFx.particles(level, owner, ChronoEcho.SHARD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.0);
+	}
+
+	/**
+	 * (0.15.147) Uses what was used here: a chest or barrel gets everything it carries, and gives it the blocks its next
+	 * placings need (up to {@link #RESTOCK} of each); a lever is pulled, a button pressed, a door opened or shut.
+	 */
+	private void use(ServerLevel level, ChronoDirectives.Step s, List<ChronoDirectives.Step> steps) {
+		BlockPos pos = s.pos();
+		BlockState state = level.getBlockState(pos);
+		if (!s.block().map(id -> id.equals(BuiltInRegistries.BLOCK.getKey(state.getBlock()))).orElse(false)
+			|| !ChronoDirectives.usable(level, pos, state)) {
+			return; // gone, or something else stands there now
+		}
+		this.echo.getLookControl().setLookAt(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+		this.echo.swingForAttack(InteractionHand.MAIN_HAND);
+		if (level.getBlockEntity(pos) instanceof Container chest) {
+			Container haul = this.echo.haul();
+			for (int i = 0; i < haul.getContainerSize(); i++) {
+				ItemStack stack = haul.getItem(i);
+				if (!stack.isEmpty()) {
+					deposit(chest, stack);
+					haul.setItem(i, stack.isEmpty() ? ItemStack.EMPTY : stack);
+				}
+			}
+			restock(chest, steps);
+			haul.setChanged();
+		} else if (state.getBlock() instanceof LeverBlock lever) {
+			lever.pull(state, level, pos, null);
+		} else if (state.getBlock() instanceof ButtonBlock button) {
+			if (!state.getValue(ButtonBlock.POWERED)) {
+				button.press(state, level, pos, null);
+			}
+		} else if (state.getBlock() instanceof DoorBlock door) {
+			door.setOpen(this.echo, level, state, pos, !door.isOpen(state));
+		}
+	}
+
+	/** Takes from {@code chest} the blocks the loop places, up to {@link #RESTOCK} of each, while it has room. */
+	private void restock(Container chest, List<ChronoDirectives.Step> steps) {
+		Container haul = this.echo.haul();
+		List<Item> wanted = new ArrayList<>();
+		for (ChronoDirectives.Step step : steps) {
+			if (step.kind() == ChronoDirectives.Step.PLACE && step.block().isPresent()) {
+				Item item = BuiltInRegistries.BLOCK.getValue(step.block().get()).asItem();
+				if (item != net.minecraft.world.item.Items.AIR && !wanted.contains(item)) {
+					wanted.add(item);
+				}
+			}
+		}
+		for (Item item : wanted) {
+			int have = 0;
+			for (int i = 0; i < haul.getContainerSize(); i++) {
+				if (haul.getItem(i).is(item)) {
+					have += haul.getItem(i).getCount();
+				}
+			}
+			for (int i = 0; i < chest.getContainerSize() && have < RESTOCK; i++) {
+				ItemStack in = chest.getItem(i);
+				if (!in.is(item)) {
+					continue;
+				}
+				ItemStack moved = in.split(RESTOCK - have);
+				int before = moved.getCount();
+				deposit(haul, moved);
+				have += before - moved.getCount();
+				in.grow(moved.getCount()); // what didn't fit goes back
+				if (!moved.isEmpty()) {
+					break; // it's full
+				}
+			}
+		}
+		chest.setChanged();
+	}
+
+	/** Takes one {@code item} from the container, if it has one. */
+	private static boolean take(Container from, Item item) {
+		for (int i = 0; i < from.getContainerSize(); i++) {
+			ItemStack in = from.getItem(i);
+			if (in.is(item)) {
+				in.shrink(1);
+				from.setChanged();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** New orders: start them fresh. */

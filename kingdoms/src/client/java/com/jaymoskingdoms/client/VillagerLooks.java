@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.VillagerHeritage;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -37,8 +38,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class VillagerLooks {
 	/** On a villager's render state: its heritage, which drawing, whether the eyes glow now, the glow's tint (0: none). */
-	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow) {
+	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow, boolean avatar) {
 	}
+
+	/** (0.7.187) A Flame Avatar's char and lava veins (the same as a player avatar's in Jaymo's Powers; tools/gen_flame_avatar.py). */
+	static final Identifier AVATAR_CHAR = JaymosKingdoms.id("textures/entity/ember/avatar_char.png");
+	static final Identifier AVATAR_VEINS = JaymosKingdoms.id("textures/entity/ember/avatar_veins.png");
 
 	static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:villager_heritage_look");
 	/** The Emberborn's flames off a hand: one in this many ticks. */
@@ -83,7 +88,12 @@ public final class VillagerLooks {
 			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
 		int variant = kind == null ? 0 : HeritageLooks.variant(entity.getUUID(), kind.skin.length);
-		state.setData(KEY, new Look(heritage, variant, lit, glow));
+		// (0.7.187) one of the Nether's Flame Avatars: wreathed in fire (not in water)
+		boolean avatar = com.jaymoskingdoms.nether.AvatarCamps.avatar(entity);
+		if (avatar && !entity.isInWater() && !entity.isInvisible()) {
+			state.displayFireAnimation = true;
+		}
+		state.setData(KEY, new Look(heritage, variant, lit, glow, avatar));
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
@@ -107,6 +117,14 @@ public final class VillagerLooks {
 					marks = mcaMarks;
 					glowing = mcaGlow;
 				}
+			}
+			if (look.avatar()) {
+				// (0.7.187) burnt to char, the lava veins glowing through
+				collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityTranslucent(AVATAR_CHAR), lightCoords, OverlayTexture.NO_OVERLAY,
+					-1, null, state.outlineColor);
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(AVATAR_VEINS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
+				return;
 			}
 			if (look.heritage() == Heritage.Kind.EMBERBORN) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(EmberLook.MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
@@ -173,6 +191,13 @@ public final class VillagerLooks {
 			}
 			RandomSource random = villager.getRandom();
 			if (heritage == Heritage.Kind.EMBERBORN) {
+				if (com.jaymoskingdoms.nether.AvatarCamps.avatar(villager) && random.nextInt(3) == 0 && !villager.isInWaterOrRain()) {
+					// (0.7.187) embers and smoke off an avatar's whole body
+					double x = villager.getX() + (random.nextDouble() - 0.5) * villager.getBbWidth();
+					double y = villager.getY() + random.nextDouble() * villager.getBbHeight();
+					double z = villager.getZ() + (random.nextDouble() - 0.5) * villager.getBbWidth();
+					level.addParticle(random.nextInt(4) == 0 ? ParticleTypes.SMOKE : ParticleTypes.FLAME, x, y, z, 0.0, 0.04, 0.0);
+				}
 				if (random.nextInt(EMBER_FLAME_EVERY) == 0 && !villager.isInWaterOrRain()) {
 					float yaw = villager.yBodyRot * Mth.DEG_TO_RAD;
 					double side = (random.nextBoolean() ? 1.0 : -1.0) * villager.getBbWidth() * 0.6;

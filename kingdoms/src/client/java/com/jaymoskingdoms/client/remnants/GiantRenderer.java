@@ -15,8 +15,8 @@ import net.minecraft.resources.Identifier;
  * over, in its element's skin ({@code tools/gen_giants.py}).
  */
 public class GiantRenderer extends MobRenderer<AetherGiant, GiantState, GiantModel> {
-	/** How much bigger than its model it's drawn: to its full height (the model stands 68 pixels, 4.25 blocks). */
-	static final float SCALE = AetherGiant.HEIGHT / 4.25F;
+	/** How much bigger than its model it's drawn: to its full height (the model stands about 2.64 blocks). */
+	static final float SCALE = AetherGiant.HEIGHT / 2.64F;
 	static final float SHADOW = AetherGiant.WIDTH;
 
 	private final Identifier texture;
@@ -39,9 +39,10 @@ public class GiantRenderer extends MobRenderer<AetherGiant, GiantState, GiantMod
 		state.stamp = giant.swingingArm() == AetherGiant.BOTH;
 		state.aggressive = giant.isAggressive();
 		state.flinch = giant.hurtTime > 0 && giant.hurtDuration > 0 ? (giant.hurtTime - partialTicks) / giant.hurtDuration : 0.0F;
+		state.seed = giant.getId();
 	}
 
-	/** It doesn't topple sideways when it dies: the model sprawls instead ({@link GiantModel}). */
+	/** It doesn't topple sideways when it dies: the model falls on its face and breaks up instead (0.7.184, {@link GiantModel}). */
 	@Override
 	protected float getFlipDegrees() {
 		return 0.0F;

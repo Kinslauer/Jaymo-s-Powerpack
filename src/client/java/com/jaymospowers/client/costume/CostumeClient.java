@@ -90,7 +90,7 @@ public final class CostumeClient {
 	}
 
 	/** (0.12.3) Asks the server to take the mask off or put it back on (the key and the designer's button). */
-	static void toggleMask() {
+	public static void toggleMask() {
 		ClientPlayNetworking.send(new CostumeNet.ToggleMask());
 	}
 

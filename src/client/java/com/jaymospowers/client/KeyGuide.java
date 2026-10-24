@@ -29,6 +29,8 @@ final class KeyGuide {
 	static final int COLOR_STARTER = 0xFFE8D8A0;
 	static final int COLOR_ULTIMATE = 0xFFFFD54A;
 	static final int COLOR_SPECIAL = 0xFF9FD8FF;
+	/** {@link Line#slot} for a line that isn't one of the power's own keys. */
+	static final String OTHER = "other";
 	/** The X key is shared: Web's symbiote menu, Wind's Tempest Kick and Cyclone. */
 	private static final String SPECIAL_KEY = "key.jaymospowers.web_symbiote";
 	/** (0.11.87) The Rig's lines (shown while you wear or have parked a Rig). */
@@ -36,8 +38,12 @@ final class KeyGuide {
 	/** (0.12.3) The costume's mask key's line (shown while you wear a costume with a head piece). */
 	static final int COLOR_COSTUME = 0xFFE89AC4;
 
-	/** One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour. */
-	record Line(Component key, @Nullable Component name, Component text, int color, boolean locked) {
+	/**
+	 * One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour, and
+	 * (0.15.147) which key it is: {@code ability_1}-{@code ability_4}, {@code mode}, {@code ultimate}, {@code special},
+	 * or {@code other} (the starter while passive, the Rig's and the costume's lines).
+	 */
+	record Line(Component key, @Nullable Component name, Component text, int color, boolean locked, String slot) {
 		Component full() {
 			return Component.literal("[").append(key).append("] ").append(text);
 		}
@@ -65,7 +71,7 @@ final class KeyGuide {
 			// a fresh awakening: only the starter, on its key (or always on, if it's passive)
 			PowerKey key = power.starterKey();
 			lines.add(new Line(key == null ? Component.translatable("screen.jaymospowers.passive") : name(JaymosPowersClient.keyMapping(key)),
-				shortName(base + "starter"), Component.translatable(base + "starter", args), COLOR_STARTER, false));
+				shortName(base + "starter"), Component.translatable(base + "starter", args), COLOR_STARTER, false, key == null ? OTHER : key.id()));
 		}
 		for (PowerKey key : PowerKey.values()) {
 			Resolved line = resolve(base + key.id(), suffixes, args);
@@ -77,11 +83,11 @@ final class KeyGuide {
 			// (a key that already does something before its ability unlocks, e.g. Web's weblines on B, says what: lang .early)
 			Resolved early = locked && power.usableEarly(player, key) ? resolve(base + key.id() + ".early", suffixes, args) : null;
 			if (early != null) {
-				lines.add(new Line(name(JaymosPowersClient.keyMapping(key)), early.name(), early.text(), COLOR_STARTER, false));
+				lines.add(new Line(name(JaymosPowersClient.keyMapping(key)), early.name(), early.text(), COLOR_STARTER, false, key.id()));
 				continue;
 			}
-			lines.add(locked ? locked(name(JaymosPowersClient.keyMapping(key)))
-				: new Line(name(JaymosPowersClient.keyMapping(key)), line.name(), line.text(), COLOR_TEXT, false));
+			lines.add(locked ? locked(name(JaymosPowersClient.keyMapping(key)), key.id())
+				: new Line(name(JaymosPowersClient.keyMapping(key)), line.name(), line.text(), COLOR_TEXT, false, key.id()));
 		}
 		add(lines, power, player, "mode", base, suffixes, args, JaymosPowersClient.modeKey(), COLOR_TEXT, mastering);
 		// the C key shows up only once it answers (ascended; some powers' corruption too)
@@ -141,14 +147,14 @@ final class KeyGuide {
 		String base = com.jaymospowers.costume.Costume.unmasked(player) ? "costume.jaymospowers.key.mask.off" : "costume.jaymospowers.key.mask";
 		Component piece = Component.translatable("costume.jaymospowers.mask." + worn.mask().getSerializedName());
 		lines.add(new Line(name(com.jaymospowers.client.costume.CostumeClient.maskKey()), shortName(base), Component.translatable(base, piece),
-			COLOR_COSTUME, false));
+			COLOR_COSTUME, false, OTHER));
 	}
 
 	private static void rigLine(List<Line> lines, String id, Component key, Object[] args, int needs, int level) {
 		String base = "rig.jaymospowers.key." + id;
 		Component name = shortName(base);
 		if (level >= needs) {
-			lines.add(new Line(key, name, Component.translatable(base, args), COLOR_RIG, false));
+			lines.add(new Line(key, name, Component.translatable(base, args), COLOR_RIG, false, OTHER));
 		}
 	}
 
@@ -159,7 +165,7 @@ final class KeyGuide {
 			return;
 		}
 		boolean locked = mastering && !power.slotUnlocked(player, slot);
-		lines.add(locked ? locked(name(mapping)) : new Line(name(mapping), line.name(), line.text(), color, false));
+		lines.add(locked ? locked(name(mapping), slot) : new Line(name(mapping), line.name(), line.text(), color, false, slot));
 	}
 
 	/** The lang suffixes to try for {@code player}'s state, most specific first, ending with the plain line. */
@@ -190,8 +196,9 @@ final class KeyGuide {
 		return suffixes;
 	}
 
-	private static Line locked(Component key) {
-		return new Line(key, Component.translatable("screen.jaymospowers.locked_name"), Component.translatable("message.jaymospowers.locked"), COLOR_DIM, true);
+	private static Line locked(Component key, String slot) {
+		return new Line(key, Component.translatable("screen.jaymospowers.locked_name"), Component.translatable("message.jaymospowers.locked"), COLOR_DIM, true,
+			slot);
 	}
 
 	/** The short name for the line {@code key}, or null if it has none. */
