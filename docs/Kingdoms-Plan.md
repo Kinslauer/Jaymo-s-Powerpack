@@ -47,3 +47,20 @@ GPL-3.0. Recommended: an original mod (our own code, art and buildings) that onl
    every kingdom you join keeps its own standing for you as well (rank, trust).
 3. **NPC kingdoms fight on their own:** autonomous battles between kingdoms; intervening wins or loses you
    reputation with each side.
+
+## Rulers dress for the day (RoyalDress)
+Andy (2026-10-23): "Give kings and queens the ability to wear armor or not as they please/ change activities throughout the day (they change before bed, etc)".
+
+- `RoyalDress` (kingdoms): every ruler (king, queen, lord, lady; folk or MCA villager) picks one of three outfits and is seen to
+  change (armour sound, a puff, a word, held still a moment; hurried in danger). The set not worn is kept on the ruler
+  (`royal_wear` attachment), generated on first use, never copied or deleted; non-regalia pieces drop with a fallen ruler.
+  - **Plate**: danger (foe, hostile stranger, fresh wound, war, war party coming; lingers a minute), and by temper: warlord all
+    day, paranoid through round and court and from 40 blocks for any stranger, tyrant and purist on their guard-review round,
+    noble and reveler only for danger or war (never the reveler's feast).
+  - **Robes**: crown and royal attire (MCA royal clothes if any) otherwise.
+  - **Nightwear**: crown and armour off from time 11200 until dawn (they dress again when they wake).
+- The day: morning court on the throne (to 2500), the round and guard review (to 5000), the midday meal (5000-7000, the
+  villager routine `LUNCH`), afternoon audience at the throne (to 8000), then leisure and evening among the people
+  (`Routines`, with rulers' own weights: garden, stroll, animals, chat, reading, fire, dance), bed.
+- Tuning constants sit at the top of `RoyalDress` and `Rulers`. Without MCA only folk rulers exist; they start in plate (their
+  outfit) and generate finery on first need.

@@ -4972,5 +4972,11 @@
 	"standing.jaymoskingdoms.duty.asleep": "Asleep",
 	"standing.jaymoskingdoms.duty.off": "Off watch",
 	"standing.jaymoskingdoms.duty.watch": "On watch",
-	"standing.jaymoskingdoms.duty.hover": "Each guard has a shift off by day, and the evening, among the townsfolk"
+	"standing.jaymoskingdoms.duty.hover": "Each guard has a shift off by day, and the evening, among the townsfolk",
+	"royal.jaymoskingdoms.dress.plate": "Bring my armour.",
+	"royal.jaymoskingdoms.dress.plate.hurried": "To arms! My armour, quickly!",
+	"royal.jaymoskingdoms.dress.robes": "Enough of the iron; my robes and crown.",
+	"royal.jaymoskingdoms.dress.robes.hurried": "The danger has passed; I shall dress.",
+	"royal.jaymoskingdoms.dress.night": "It is late. The crown and armour can wait till morning.",
+	"royal.jaymoskingdoms.dress.night.hurried": "To bed, then."
 }
