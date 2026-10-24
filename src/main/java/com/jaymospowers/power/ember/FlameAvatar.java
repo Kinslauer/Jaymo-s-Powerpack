@@ -65,7 +65,8 @@ import net.minecraft.world.phys.Vec3;
  * and nine tenths of {@link #CONSUME_TICKS} they're warned, vaguely ({@code message.jaymospowers.avatar.sign_*}); past
  * three quarters flames lick off them now and then. At the full count the fire takes them: a burst of flame round
  * them, and from then on they're an avatar ({@link #AVATAR}: saved, kept through death; {@code /power avatar} for ops).
- * It lasts only while they're still of Emberborn blood.
+ * It lasts only while they're still of Emberborn blood, and (Andy) until they go down in water: the damage tick that
+ * would drop them there puts the fire out, and they're plain Emberborn again ({@link #doused}).
  * <p>
  * <b>Passive, Flaring body:</b> never more than {@link #MAX_HEARTS} hearts, whatever else adds health. In their place a
  * bar of <b>flame</b> ({@link #MAX_FLAME}): a hit (anything with an attacker, a projectile or a blast; not falls,
@@ -400,6 +401,14 @@ public final class FlameAvatar {
 	 * to be dropped (the flame took it, or it's passed on with only what the flame couldn't cover).
 	 */
 	public static boolean absorb(LivingEntity entity, ServerLevel level, DamageSource source, float amount) {
+		if (entity instanceof ServerPlayer player && amount > 0.0F && is(player) && player.isInWater() && !player.isCreative() && !player.isSpectator()) {
+			// (Andy) going down in water undoes the avatar, on the very tick of the damage that drops them
+			float through = passing || !hit(source) ? amount : Math.max(0.0F, amount - live(player).flame);
+			if (through >= player.getHealth()) {
+				doused(player, level);
+				return false;
+			}
+		}
 		if (passing || !(entity instanceof ServerPlayer player) || amount <= 0.0F || !is(player) || !hit(source)
 			|| player.isCreative() || player.isSpectator()) {
 			return false;
@@ -437,6 +446,16 @@ public final class FlameAvatar {
 			passing = false;
 		}
 		return true;
+	}
+
+	/** Dropped in water: the fire goes out of them and they're plain Emberborn again (the Nether count starts over). */
+	private static void doused(ServerPlayer player, ServerLevel level) {
+		release(player);
+		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.6, 0.9, 0.6, 0.08);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.4, player.getZ(), 20, 0.5, 0.6, 0.5, 0.04);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.5F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_DEATH, SoundSource.PLAYERS, 0.8F, 1.4F);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.avatar.doused").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
 	}
 
 	/** A blow, a shot or a blast (not a fall, drowning, hunger, the void, fire). */

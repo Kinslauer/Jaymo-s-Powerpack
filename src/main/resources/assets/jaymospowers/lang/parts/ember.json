@@ -10,6 +10,7 @@
 	"message.jaymospowers.avatar.guttered": "Your flame gutters out",
 	"message.jaymospowers.avatar.no_flame": "Not enough flame",
 	"message.jaymospowers.avatar.nothing_lit": "Nothing burning near",
+	"message.jaymospowers.avatar.doused": "The water takes the fire out of you. You are only Emberborn again.",
 	"commands.jaymospowers.avatar.on": "%s consumed by the flame",
 	"commands.jaymospowers.avatar.off": "%s freed from the flame",
 	"commands.jaymospowers.avatar.progress": "%s: %s of the way to the flame"

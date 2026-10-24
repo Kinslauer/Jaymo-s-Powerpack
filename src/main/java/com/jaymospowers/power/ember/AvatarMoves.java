@@ -68,10 +68,10 @@ public final class AvatarMoves {
 	// ---- tuning ----
 	/** A key held this long (ticks) is a hold, not a tap. */
 	public static final int HOLD_TICKS = 8;
-	/** Fire Fist: speed (blocks a tick), life (ticks), the blast's radius, its damage at the middle (half at the edge), the burning (s), the push, fires started, the cooldown. */
+	/** Fire Fist: speed (blocks a tick), life (ticks), the blast's radius, its damage at the middle (half at the edge), the burning (s), the push, fires started, its flame, the cooldown. */
 	static final double FIST_SPEED = 1.4, FIST_RADIUS = 4.5, FIST_PUSH = 1.0;
 	static final int FIST_LIFE = 50, FIST_BURN = 6, FIST_FIRES = 20;
-	static final float FIST_DAMAGE = 10.0F;
+	static final float FIST_DAMAGE = 10.0F, FIST_COST = 4.0F;
 	public static final int FIST_COOLDOWN = 80;
 	/** Flaming Pillar: radius (round you, at the cursor), height, damage, burning (s), the throw (up, out), flame back a point of damage, reach of the hold, fires, cooldown. */
 	static final double PILLAR_SELF_RADIUS = 3.5, PILLAR_RADIUS = 2.5, PILLAR_HEIGHT = 6.0, PILLAR_UP = 1.1, PILLAR_OUT = 0.8, PILLAR_RANGE = 32.0;
@@ -249,6 +249,11 @@ public final class AvatarMoves {
 
 	private static void fist(ServerPlayer player) {
 		if (!ready(player, FIST) || !LimbUse.usable(player, LimbUse.MAIN_ARM)) {
+			return;
+		}
+		// (Andy) the fist costs flame too
+		if (!FlameAvatar.spend(player, FIST_COST)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.avatar.no_flame").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		ServerLevel level = player.level();

@@ -102,15 +102,17 @@ Built in `power/ember/FlameAvatar` + `AvatarMoves` (+ `mixin/EmberLivingEntityMi
 - **The way in:** time an Emberborn spends in the Nether is counted (saved, kept through death); outside it cools at a
   quarter of the rate, so it's long stays that do it. At 7 in-game days (about 2 h 20 min in the Nether) the fire takes
   them: a burst of flame and fires round them, the title "Consumed". Vague warnings at 50%, 75% and 90%; past 75%
-  flames lick off them. Permanent for now (ops: `/power avatar <targets> on|off|progress`). Only while they're still
-  Emberborn.
+  flames lick off them. Ops: `/power avatar <targets> on|off|progress`. Only while they're still Emberborn.
+- **Undone (Andy):** going down in water. On the damage tick that would drop them in water (after what the flame
+  covers) they revert to plain Emberborn at once (steam, a message); the hit still lands, and the Nether count starts
+  over.
 - **Flaring body (passive):** 3 hearts at most, whatever adds health. A 20-point flame bar takes hits first (a blow,
   a shot or a blast; not falls, drowning, hunger, the void or fire); a hit flares the body and sets the attacker alight
   if they're within 4 blocks. What the flame can't cover goes to the hearts. Refills: lava 0.5 a tick, fire/lit
   campfire/magma 0.25 a tick, 1.5 a food point eaten; 60% in the cold. Rain drains 0.02 a tick, water 0.25 a tick, and
   in water with the flame out the avatar takes 1 damage a second.
 - **R, Fire Fist:** a giant fireball (1.4 b/t) bursting in a 4.5-block blast: 10 damage at the middle (5 at the edge),
-  burning 6 s, thrown back, up to 20 fires round it. 4 s cooldown, no flame cost.
+  burning 6 s, thrown back, up to 20 fires round it. 4 flame (Andy), 4 s cooldown.
 - **G, Flaming Pillar:** tap: a 3.5-block pillar round you; hold (8+ ticks) marks the spot under the cursor (only you
   see it, out to 32 blocks) and letting go raises a 2.5-block pillar there. 6 damage, burning 5 s, thrown up and away,
   up to 10 fires; half the damage dealt comes back as flame. 5 s cooldown.
@@ -128,7 +130,8 @@ Built in `power/ember/FlameAvatar` + `AvatarMoves` (+ `mixin/EmberLivingEntityMi
 
 **Open questions for Andy:** (1) your sentence "the destructive capabilities are limited to the..." was cut off: built
 as "limited to these three moves, no block breaking"; (2) is 7 in-game days in the Nether right, and should anything
-ever undo it; (3) should Fire Fist cost flame too; (4) should the blasts break blocks.
+ever undo it (answered: going down in water); (3) should Fire Fist cost flame too (answered: yes); (4) should the
+blasts break blocks.
 
 **Check first in game:** `/power avatar @s on` as an Emberborn; take a hit (flame bar drops, body flares); step into
 water (steam, bar drains); R at a wall; G tap among mobs, G hold at a far spot; B tap at an unlit campfire and wood;
