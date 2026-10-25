@@ -1,5 +1,7 @@
 package com.jaymoskitchen.tanning;
 
+import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.herb.PmehFarming;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -27,12 +29,14 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * What hangs on a drying rack ({@link Hides#DRYING}): up to {@link Hides#RACK_HOLDS} of one thing, drying together.
- * Hanging more on restarts the clock; rain on the rack holds it back.
+ * Hanging more on restarts the clock; rain on the rack holds it back. Dried Pmeh left hanging goes brittle and loses grade.
  */
 public class DryingRackEntity extends BlockEntity {
 	private final NonNullList<ItemStack> held = NonNullList.withSize(1, ItemStack.EMPTY);
 	/** Ticks of drying left (rain doesn't count down). */
 	private int left;
+	/** Ticks a dried Pmeh has hung on past drying (it loses a grade each {@link PmehFarming#OVERDRY_TICKS}). */
+	private int overdry;
 
 	public DryingRackEntity(BlockPos pos, BlockState state) {
 		super(Hides.DRYING_RACK_ENTITY, pos, state);
@@ -44,6 +48,10 @@ public class DryingRackEntity extends BlockEntity {
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, DryingRackEntity rack) {
 		ItemStack stack = rack.held();
+		if (stack.is(ModItems.PMEH)) {
+			rack.overdry(level);
+			return;
+		}
 		if (stack.isEmpty() || Hides.dried(stack) == null || level.isRainingAt(pos.above())) {
 			return;
 		}
@@ -58,6 +66,22 @@ public class DryingRackEntity extends BlockEntity {
 		}
 	}
 
+	/** A dried Pmeh left hanging goes brittle: a grade lost each {@link PmehFarming#OVERDRY_TICKS}, down to scraggly. */
+	private void overdry(Level level) {
+		if (level.isRainingAt(worldPosition.above()) || ++overdry < PmehFarming.OVERDRY_TICKS) {
+			if (overdry % 20 == 0) {
+				setChanged();
+			}
+			return;
+		}
+		overdry = 0;
+		int grade = PmehFarming.grade(held());
+		if (grade > PmehFarming.SCRAGGLY) {
+			PmehFarming.stamp(held(), grade - 1);
+			markUpdated();
+		}
+	}
+
 	/** Done drying: what hangs there turns into what it dries into. */
 	private boolean finish() {
 		ItemStack into = Hides.dried(held());
@@ -66,6 +90,7 @@ public class DryingRackEntity extends BlockEntity {
 		}
 		held.set(0, into.copyWithCount(held().getCount()));
 		left = 0;
+		overdry = 0;
 		if (level != null) {
 			level.playSound(null, worldPosition, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.BLOCKS, 0.6F, 1.2F);
 		}
@@ -117,6 +142,7 @@ public class DryingRackEntity extends BlockEntity {
 		player.getInventory().placeItemBackInInventory(held().copy(), Prediction.SERVER_ONLY);
 		held.set(0, ItemStack.EMPTY);
 		left = 0;
+		overdry = 0;
 		level.playSound(null, worldPosition, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, 1.0F);
 		markUpdated();
 		return InteractionResult.SUCCESS;
@@ -142,6 +168,7 @@ public class DryingRackEntity extends BlockEntity {
 		held.clear();
 		ContainerHelper.loadAllItems(input, held);
 		left = (int) input.getLongOr("left", 0L);
+		overdry = (int) input.getLongOr("overdry", 0L);
 	}
 
 	@Override
@@ -149,6 +176,7 @@ public class DryingRackEntity extends BlockEntity {
 		super.saveAdditional(output);
 		ContainerHelper.saveAllItems(output, held, true);
 		output.putLong("left", left);
+		output.putLong("overdry", overdry);
 	}
 
 	@Override

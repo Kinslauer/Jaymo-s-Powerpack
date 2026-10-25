@@ -48,7 +48,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
 		ModItems.register();
 		// (0.5.29) Pmeh grows wild only in jungles and savannas (no more from tall grass)
-		com.jaymoskitchen.herb.WildPmeh.register();
+		com.jaymoskitchen.herb.PmehFarming.register();
 		com.jaymoskitchen.fishing.Bait.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();

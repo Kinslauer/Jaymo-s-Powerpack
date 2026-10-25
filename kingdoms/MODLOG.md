@@ -4606,8 +4606,10 @@ imprisoned, or worse."
   the top third gets one too, and a dug den stays if its city grows poorer. Goods: **Pmeh** is Jaymo's Kitchen's own herb (Andy: "Pmeh has to be
   rolled like it is in kitchen": roll it into a joint at a prep surface, then smoke it; looked up by id, so without
   Kitchen every den deals in Shash; since Kitchen 0.5.29 it no longer comes from tall grass, only from rare wild
-  Pmeh in jungles and savannas) and the new **Shash Brick** (a trade good). Kitchen's joints count as contraband
-  too. Art: `tools/gen_contraband.py`.
+  Pmeh in jungles and savannas, or grown from seed and dried on a rack) and the new **Shash Brick** (a trade good).
+  Kitchen's fresh Pmeh and joints count as contraband too. **Grades** (Andy: "you just have to be good at growing and
+  drying the plant to have quality enough to sell like the dealers do"): Kitchen grades Pmeh scraggly/fair/fine/prime;
+  dealers sell prime and buy only fine (the listed price) and prime (x1.5), so wild fair Pmeh won't sell. Art: `tools/gen_contraband.py`.
 - `Speakeasy`: the den is dug under open natural ground (nothing over it but leaves) 14-50 blocks from the seat (earth over all of it, no block
   entities or water in the way): a spruce hatch in the grass by a hay bale, a ladder down a stone shaft, a 9 x 7 x 4
   room 9 below: a bar of barrels with the fence penned behind it, a red runner, a dice table with a green cloth and

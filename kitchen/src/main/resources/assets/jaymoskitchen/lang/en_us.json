@@ -65,7 +65,7 @@
 	"step.jaymoskitchen.paper": "Paper",
 	"screen.jaymoskitchen.roll": "Rolling",
 	"screen.jaymoskitchen.roll.start": "Roll a joint",
-	"screen.jaymoskitchen.roll.or": "Or roll a joint: 1 Pmeh + 1 Paper (Pmeh grows wild in jungles and savannas)",
+	"screen.jaymoskitchen.roll.or": "Or roll a joint: 1 Pmeh + 1 Paper (Pmeh grows wild in jungles and savannas, or from seed; dry fresh Pmeh on a drying rack)",
 	"screen.jaymoskitchen.roll.step_grind": "1. Grind the Pmeh",
 	"screen.jaymoskitchen.roll.hint_grind": "Hold the mouse and circle it around the grinder",
 	"screen.jaymoskitchen.roll.step_sprinkle": "2. Sprinkle it on the paper",
@@ -685,5 +685,13 @@
 	"message.jaymoskitchen.drying_rack.hung": "Hung up %s: dry in about %s min",
 	"message.jaymoskitchen.drying_rack.full": "The rack's full",
 	"message.jaymoskitchen.drying_rack.wait": "About %s min until it's dry",
-	"block.jaymoskitchen.wild_pmeh": "Wild Pmeh"
+	"block.jaymoskitchen.wild_pmeh": "Wild Pmeh",
+	"item.jaymoskitchen.pmeh_seeds": "Pmeh Seeds",
+	"item.jaymoskitchen.fresh_pmeh": "Fresh Pmeh",
+	"block.jaymoskitchen.pmeh_crop": "Pmeh",
+	"item.jaymoskitchen.pmeh.grade.0": "Scraggly",
+	"item.jaymoskitchen.pmeh.grade.1": "Fair",
+	"item.jaymoskitchen.pmeh.grade.2": "Fine",
+	"item.jaymoskitchen.pmeh.grade.3": "Prime",
+	"item.jaymoskitchen.pmeh.grade": "Grade: %s"
 }

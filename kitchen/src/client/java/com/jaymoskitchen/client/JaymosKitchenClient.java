@@ -43,6 +43,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
+		com.jaymoskitchen.client.herb.PmehTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		com.jaymoskitchen.client.ragdoll.LimpController.register();

@@ -151,6 +151,9 @@ public final class Hides {
 		if (stack.is(WET_TANNED_HIDE)) {
 			return new ItemStack(Items.LEATHER);
 		}
+		if (stack.is(com.jaymoskitchen.herb.PmehFarming.FRESH_PMEH)) {
+			return com.jaymoskitchen.herb.PmehFarming.dried(stack);
+		}
 		return null;
 	}
 

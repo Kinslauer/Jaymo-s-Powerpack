@@ -1093,9 +1093,18 @@ anywhere, and none of its vegetables went into our minigames. New dishes, all th
 - Assets: `tools/gen_hides.py` (own pixel art; the rack uses vanilla spruce log textures). Recipes, the rack and the
   hide drops checked on a Powers dev server with a fake player; not seen in a client.
 
-## 0.5.29: Pmeh grows wild, rarely (Kingdoms 0.7.210, pack 0.16.32)
-Andy (2026-10-25), for Kingdoms' speakeasies: Pmeh should be a rare commodity, not free from tall grass.
+## 0.5.29: Pmeh is rare, grown from seed and dried, and graded (Kingdoms 0.7.210, pack 0.16.32)
+Andy (2026-10-25), for Kingdoms' speakeasies: Pmeh should be a rare commodity, not free from tall grass; "it does have
+seeds actually, you just have to be good at growing and drying the plant to have quality enough to sell like the
+dealers do."
 - Shearing tall grass no longer gives Pmeh (`loot_table/blocks/tall_grass.json`).
-- `herb/WildPmeh`: Wild Pmeh (a `WildCropBlock`, cross model) grows in jungles and savannas only, in scattered patches
-  (rarity 1 in 32 chunks, up to 5 plants). Breaking one gives 1-3 Pmeh. No seed, no block item, so it can't be farmed:
-  the rest comes through Kingdoms' dens. Art: `tools/gen_wild_pmeh.py`. The roll screen's hint says where it grows.
+- `herb/PmehFarming`: Wild Pmeh grows in jungles and savannas only, in scattered patches (rarity 1 in 32 chunks, up to
+  5 plants). Picking one gives 1-2 fair Fresh Pmeh and a Pmeh seed half the time.
+- Pmeh seeds grow on farmland like wheat (`pmeh_crop`, 4 looks). A grown crop picked by hand gives 2-4 Fresh Pmeh graded
+  by how it was grown: a point each for fertile (manured) farmland, fully wet farmland, and a warm biome (jungle,
+  savanna, desert, badlands). 0 Scraggly, 1 Fair, 2 Fine, 3 Prime. The crop's loot table gives back 1-3 seeds.
+- Fresh Pmeh dries into Pmeh on a drying rack, keeping its grade. Dry Pmeh left hanging goes brittle: a grade lost every
+  half day (`PmehFarming.OVERDRY_TICKS`), so take it down once it's dry. Rain still holds it back.
+- The grade is the `jaymoskitchen:pmeh_grade` component (none counts as Fair); the tooltip shows it. Kingdoms' dealers
+  buy only Fine and Prime and sell Prime. Joints don't carry a grade.
+- Art: `tools/gen_wild_pmeh.py`, `tools/gen_pmeh_crop.py`. The roll screen's hint says where Pmeh comes from.

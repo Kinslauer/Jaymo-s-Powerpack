@@ -19,6 +19,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentExactPredicate;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -119,11 +121,26 @@ public final class Underworld {
 	public static Item SHASH_BRICK;
 	/** (Andy: "Pmeh has to be rolled like it is in kitchen") Pmeh is Jaymo's Kitchen's herb, rolled into its joints there to smoke. */
 	static final Identifier KITCHEN_PMEH = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "pmeh"),
-		KITCHEN_JOINT = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "joint");
+		KITCHEN_JOINT = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "joint"),
+		KITCHEN_FRESH_PMEH = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "fresh_pmeh"),
+		KITCHEN_PMEH_GRADE = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "pmeh_grade");
+	/**
+	 * (Andy: "you just have to be good at growing and drying the plant to have quality enough to sell like the dealers
+	 * do") Kitchen grades Pmeh 0 scraggly, 1 fair, 2 fine, 3 prime; dealers buy fine and prime only, and sell prime.
+	 */
+	static final int FINE = 2, PRIME = 3;
+	/** What a dealer pays for prime over fine. */
+	static final float PRIME_BONUS = 1.5F;
 
 	/** Kitchen's Pmeh (null without Jaymo's Kitchen: then every den deals in Shash). */
 	static @Nullable Item pmeh() {
 		return BuiltInRegistries.ITEM.getOptional(KITCHEN_PMEH).orElse(null);
+	}
+
+	/** Kitchen's Pmeh grade component (null on a Kitchen too old to grade). */
+	@SuppressWarnings("unchecked")
+	private static @Nullable DataComponentType<Integer> grade() {
+		return (DataComponentType<Integer>) BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(KITCHEN_PMEH_GRADE).orElse(null);
 	}
 
 	private static @Nullable Item joint() {
@@ -265,8 +282,8 @@ public final class Underworld {
 		if (stack.isEmpty()) {
 			return false;
 		}
-		Item pmeh = pmeh(), joint = joint();
-		return stack.is(SHASH_BRICK) || pmeh != null && stack.is(pmeh) || joint != null && stack.is(joint);
+		Item pmeh = pmeh(), joint = joint(), fresh = BuiltInRegistries.ITEM.getOptional(KITCHEN_FRESH_PMEH).orElse(null);
+		return stack.is(SHASH_BRICK) || pmeh != null && stack.is(pmeh) || joint != null && stack.is(joint) || fresh != null && stack.is(fresh);
 	}
 
 	static @Nullable Den den(MinecraftServer server, int realm) {
@@ -574,11 +591,11 @@ public final class Underworld {
 			boolean home = d.makes() == PMEH;
 			Item pmeh = pmeh();
 			if (pmeh != null) {
-				offers.add(sell(pmeh, home ? PMEH_SELL_HOME : PMEH_SELL_AWAY, home ? HOME_STOCK : AWAY_STOCK));
+				offers.add(sellPrime(pmeh, home ? PMEH_SELL_HOME : PMEH_SELL_AWAY, home ? HOME_STOCK : AWAY_STOCK));
 			}
 			offers.add(sell(SHASH_BRICK, home ? SHASH_SELL_AWAY : SHASH_SELL_HOME, home ? AWAY_STOCK : HOME_STOCK));
 			if (pmeh != null) {
-				offers.add(buy(pmeh, home ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK));
+				buyGraded(offers, pmeh, home ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK);
 			}
 			offers.add(buy(SHASH_BRICK, home ? SHASH_BUY_AWAY : SHASH_BUY_HOME, BUY_STOCK));
 			return;
@@ -591,13 +608,37 @@ public final class Underworld {
 		MerchantOffers offers = v.getOffers();
 		Item pmeh = pmeh();
 		if (pmeh != null) {
-			offers.add(buy(pmeh, STREET_PMEH, STREET_STOCK));
+			buyGraded(offers, pmeh, STREET_PMEH, STREET_STOCK);
 		}
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
 	}
 
 	private static MerchantOffer sell(Item item, int emeralds, int uses) {
 		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), new ItemStack(item), uses, XP, PRICE_MULTIPLIER);
+	}
+
+	/** Prime Pmeh for sale (plain, if Kitchen doesn't grade). */
+	private static MerchantOffer sellPrime(Item pmeh, int emeralds, int uses) {
+		ItemStack stack = new ItemStack(pmeh);
+		DataComponentType<Integer> grade = grade();
+		if (grade != null) {
+			stack.set(grade, PRIME);
+		}
+		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), stack, uses, XP, PRICE_MULTIPLIER);
+	}
+
+	/** Buys fine Pmeh at {@code emeralds} and prime for more; nothing worse (any Pmeh if Kitchen doesn't grade). */
+	private static void buyGraded(MerchantOffers offers, Item pmeh, int emeralds, int uses) {
+		DataComponentType<Integer> grade = grade();
+		if (grade == null) {
+			offers.add(buy(pmeh, emeralds, uses));
+			return;
+		}
+		for (int g : new int[] {FINE, PRIME}) {
+			int pay = g == PRIME ? Math.round(emeralds * PRIME_BONUS) : emeralds;
+			ItemCost cost = new ItemCost(pmeh.builtInRegistryHolder(), 1, DataComponentExactPredicate.expect(grade, g));
+			offers.add(new MerchantOffer(cost, new ItemStack(Items.EMERALD, pay), uses, XP, PRICE_MULTIPLIER));
+		}
 	}
 
 	private static MerchantOffer buy(Item item, int emeralds, int uses) {
