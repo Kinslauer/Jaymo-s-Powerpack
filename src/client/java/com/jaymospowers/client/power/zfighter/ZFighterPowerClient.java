@@ -41,6 +41,8 @@ import net.minecraft.world.item.Items;
  * learned; Rage shows over the ki bar.
  */
 public final class ZFighterPowerClient implements PowerClient {
+	/** The screen's Fusion Dance: C this many ticks after Z (Z's own tap has let go by then). */
+	static final int FUSION_C_AFTER = 6;
 	public static final ZFighterPowerClient INSTANCE = new ZFighterPowerClient();
 	private static boolean guardWasUp;
 	/** The hold combo: how long the attack key has been held bare-handed, and whether the string is on. */
@@ -87,6 +89,8 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterMark.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
+				// (0.16.7) the faint ki glow round his outline, over everything of him
+				helper.register(new ZFighterKiGlow.Layer(avatar));
 			} else if (renderer.getModel() instanceof net.minecraft.client.model.HumanoidModel<?>) {
 				// a Warrior-born villager raging as the wild Great Ape (VillagerApe)
 				helper.register(ZFighterApe.mobLayer(renderer));
@@ -106,6 +110,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		ZFighterFlightClient.tick(minecraft, player);
 		ZFighterApeGlide.tick(minecraft, player);
+		ApeSmashClient.tick(minecraft, player);
 		// the guard: right click held, bare-handed
 		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
 			&& player.getMainHandItem().isEmpty();
@@ -115,7 +120,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		}
 		// the hold combo: left mouse held, bare-handed, not at a block (that's digging)
 		boolean attack = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
-			&& player.getMainHandItem().isEmpty() && !guard && !RaceHoldClient.holding()
+			&& player.getMainHandItem().isEmpty() && !guard && !RaceHoldClient.holding() && !ZFighterLineage.ape(player)
 			&& !(ZFighterLineage.of(player) == ZFighterLineage.VERDANT && RaceHoldClient.yielded(player));
 		attackHeld = attack ? attackHeld + 1 : 0;
 		boolean combo = comboOn ? attack
@@ -132,8 +137,20 @@ public final class ZFighterPowerClient implements PowerClient {
 		return comboOn && minecraft.player != null && Powers.has(minecraft.player, ZFighterPower.INSTANCE);
 	}
 
+	/**
+	 * (0.16.6) Andy: the powers screen's Mode slot "for z fighters... the way that the fusion dance is activated": it taps
+	 * Z, then C a moment later, the fusion dance's keys (a partner facing you answers the same way).
+	 */
+	@Override
+	public boolean screenMode(LocalPlayer player) {
+		com.jaymospowers.client.JaymosPowersClient.tap(com.jaymospowers.client.JaymosPowersClient.TAP_MODE);
+		com.jaymospowers.client.JaymosPowersClient.tapLater(com.jaymospowers.client.JaymosPowersClient.TAP_ULTIMATE, FUSION_C_AFTER);
+		return true;
+	}
+
 	@Override
 	public void onActiveChanged(LocalPlayer player, boolean active) {
+		ApeSmashClient.reset();
 		if (guardWasUp) {
 			guardWasUp = false;
 			ClientPlayNetworking.send(new ZFighterNet.Guard(false));
@@ -161,6 +178,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterMark.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
+		ZFighterKiGlow.extract(entity, state);
 		RaceHoldClient.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.ember.EmberKindleClient.extract(entity, state);
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.extract(entity, state);

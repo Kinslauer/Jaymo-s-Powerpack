@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter.mixin;
 
 import com.jaymospowers.client.power.ember.EmberKindleClient;
+import com.jaymospowers.client.power.zfighter.ApeSmashClient;
 import com.jaymospowers.client.power.zfighter.ZFighterPowerClient;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class ZFighterAttackMixin {
 	@Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$zfighterCombo(boolean leftClick, CallbackInfo ci) {
-		if (ZFighterPowerClient.comboHeld() || EmberKindleClient.kindling() || EmberKindleClient.pending()
+		if (ZFighterPowerClient.comboHeld() || ApeSmashClient.holdsAttack((Minecraft)(Object)this) || EmberKindleClient.kindling() || EmberKindleClient.pending()
 			|| com.jaymospowers.client.power.heritage.HeritageMovesClient.charging()) {
 			ci.cancel();
 		}
@@ -26,7 +27,8 @@ abstract class ZFighterAttackMixin {
 
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$kindleClick(CallbackInfoReturnable<Boolean> cir) {
-		if (EmberKindleClient.holdsClick((Minecraft)(Object)this)) {
+		// (0.16.6) the Great Ape's left click is his punch (ApeSmashClient), not a swing
+		if (ApeSmashClient.holdsAttack((Minecraft)(Object)this) || EmberKindleClient.holdsClick((Minecraft)(Object)this)) {
 			cir.setReturnValue(false);
 		}
 	}

@@ -1612,3 +1612,31 @@ to 3 removals."
 - Old saves with Living Armor on load with the tendrils in until the slot is pressed or the armour re-formed.
 - Check first in game: tendrils and globs over the plain suit or bare skin with no armour, a state that was only
   momentary before.
+
+## 0.16.8: charged leap, hand grab, engulfed weapon arm, grey lines, satiety, executions
+- Andy's playtest of 0.16.6, six asks in two messages (quoted in the class docs).
+- **Charged leap (`WebSwing`, `WebLeap.CHARGE_REMIND_TICKS`):** holding Jump always charges, ground or air; nothing
+  resets a held charge but the release (or losing the suit, a takeover, or letting go on a web, which was the swing's
+  hold). Released on the ground it launches; released in the air it banks and goes off the moment you land. It was
+  lost by a release one tick off the ground or by any tick on a web.
+- **Hand grab (`WebHeldGrab`, `WebHeldGrabPose`):** with the tendrils out, G within 3 blocks seizes anything living
+  up to cow size into the left hand; left click mauls it with one of six attacks (bite, stab, weapon, slam, crush,
+  skewer, never the same twice running); G again, 20 s, or its death lets go. Bigger or further things still get
+  the far tendril grab-and-hurl. The bundle of strands round a tendril hold (`WebTendrilBundle.GRAB_STRANDS`) is
+  gone: a hold is one tendril; first-person idle tendrils stay off while a hand holds something.
+- **Engulfed weapon arm (`WebMorph.onArmor`, `WebMorphLayer.engulfedArm`, `WEAPON_SCALE_ARMOR` 1.8):** with Living
+  Armor the held left-click weapon winds a tendril down the whole arm, fuses it into one mass and grows the weapon
+  1.8x, reaching half a block further; own first person draws it smaller and to the side (`*_FP`).
+- **Living Armor press** with tendrils out over the plain suit puts the armour on under them (`toggle` sets TENDRILS).
+- **Grey lines and veins (`WebLineRenderer.DARK/SHEEN/ROPE_*`, `web_symbiote_veins_*.png`):** the black strain's line
+  colours had a violet cast and the vein textures were painted magenta; both are blackish grey now (white and red
+  strains untouched; `tools/gen_web_veins.py` palette matches).
+- **Satiety (`WebSymbiote.carry`):** a meal finished inside the tick (Consume, the self-feed) was overwritten by the
+  tick's closing `set(next)`; the tick now folds mid-tick satiety, stress and bond changes into `next`. Raw meat was
+  never affected. **Well fed** (`WELL_FED` 80): bond warms twice as fast, stress calms twice as fast, the ignore
+  roll, neglect takeovers and sulks are halved; one whisper the first time.
+- **Executions (`WebExecutions`, `WebExecutionPose`):** hold use with an empty hand on a downed enemy while suited:
+  18 moves, 6 for the thin suit, 6 for Living Armor or the big suit, 3 tendril moves over each; random, never the
+  same twice running; no Executioner perk needed (the suit is the weapon); priority over the bare-hand neck snap.
+- **Check first in game:** engulfed-arm sizes and first-person offsets; the hand grab's skewer aim; execution
+  keyframes (hand-authored); grey line darkness at default brightness; the well-fed whisper timing.
