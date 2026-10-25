@@ -138,7 +138,29 @@ public enum Dish {
 	FISH_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, COOKED_COD, COOKED_SALMON, POTATO), 12, 0.8F, false,
 		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
 	PLOUGHMANS_LUNCH(Method.CHOP, EnumSet.of(Station.BOARD), List.of(COOKED_PORKCHOP, COOKED_MUTTON, BREAD), 12, 0.9F, false,
-		List.of(new Buff(MobEffects.RESISTANCE, 60 * 20, 0), new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0)));
+		List.of(new Buff(MobEffects.RESISTANCE, 60 * 20, 0), new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0))),
+	// --- (0.5.28) Farmer's Delight's cabbage, rice and cuts (see delight/Delight) ---
+	COOKED_RICE(Method.SEQUENCE, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, RICE, WATER_BOTTLE, SIMMER), 6, 0.5F, true,
+		List.of(new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	FRIED_RICE(Method.SEQUENCE, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, RICE, EGG, STIR, CARROT, STIR, SIMMER), 10, 0.7F, true,
+		List.of(new Buff(MobEffects.HASTE, 120 * 20, 0))),
+	CABBAGE_ROLLS(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(CABBAGE_LEAF, CABBAGE_LEAF, MINCED_BEEF, RICE), 9, 0.7F,
+		false, List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0))),
+	HAMBURGER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(MINCED_BEEF, BREAD, CABBAGE_LEAF, FLIP, FLIP), 12, 0.8F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 90 * 20, 0))),
+	BACON_AND_EGGS(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(RAW_BACON, RAW_BACON, EGG, FLIP), 9, 0.7F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	MIXED_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(CABBAGE, BEETROOT, CARROT), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.REGENERATION, 15 * 20, 0))),
+	// feasts: set down as a block, four servings each (see delight/Feast)
+	ROAST_CHICKEN_FEAST(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(CHICKEN, CHICKEN, POTATO, CARROT, BREAD), 11, 0.9F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	SHEPHERDS_PIE_FEAST(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(MUTTON, MUTTON, POTATO, POTATO, CARROT), 12, 0.8F, false,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0))),
+	HONEY_GLAZED_HAM_FEAST(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(PORKCHOP, PORKCHOP, HONEY_BOTTLE, SWEET_BERRIES), 12, 0.9F,
+		false, List.of(new Buff(MobEffects.ABSORPTION, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
+	STUFFED_PUMPKIN_FEAST(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(PUMPKIN, RICE, BROWN_MUSHROOM, CARROT, POTATO), 11, 0.8F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 120 * 20, 0), new Buff(MobEffects.HASTE, 60 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -172,7 +194,7 @@ public enum Dish {
 		LEMON, PEACH, GRAPES, TOMATO, ONION, EGGPLANT, CHILI_PEPPER, STRAWBERRY, TURNIP, PEANUT, VENISON, DUCK, BUSHMEAT, MAMMOTH_MEAT,
 		DRUMSTICK, MORSEL, BASS, CATFISH, PIRANHA, ANGLERFISH, BLOBFISH, CRAB_MEAT, CLAM_MEAT, LIZARD_TAIL, ORANGE, WYNDBERRY, BLUE_BERRY,
 		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, COOKED_COD, COOKED_SALMON,
-		COOKED_PORKCHOP, COOKED_MUTTON, BREAD);
+		COOKED_PORKCHOP, COOKED_MUTTON, BREAD, CABBAGE, CABBAGE_LEAF, RICE, MINCED_BEEF, RAW_BACON);
 
 	/** The decoy pool, less the ingredients this game doesn't have. */
 	public static List<Step> decoys() {
@@ -275,8 +297,16 @@ public enum Dish {
 			case LEMON_CHICKEN, ROAST_DUCK -> 90;
 			case MAMMOTH_ROAST -> 110;
 			case KIRRID_ROAST -> 85;
+			case HAMBURGER, BACON_AND_EGGS -> 100;
+			case ROAST_CHICKEN_FEAST -> 110;
+			case SHEPHERDS_PIE_FEAST, STUFFED_PUMPKIN_FEAST -> 220;
 			default -> 100;
 		};
+	}
+
+	/** A feast: it comes out as a block to set down, with servings to take from it (see delight/Feast). */
+	public boolean feast() {
+		return this == ROAST_CHICKEN_FEAST || this == SHEPHERDS_PIE_FEAST || this == HONEY_GLAZED_HAM_FEAST || this == STUFFED_PUMPKIN_FEAST;
 	}
 
 	/** Ticks a Perfect cook must finish within. */

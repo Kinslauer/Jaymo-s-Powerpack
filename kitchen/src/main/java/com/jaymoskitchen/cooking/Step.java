@@ -87,6 +87,12 @@ public enum Step {
 	COOKED_PORKCHOP(() -> Items.COOKED_PORKCHOP, null),
 	COOKED_MUTTON(() -> Items.COOKED_MUTTON, null),
 	BREAD(() -> Items.BREAD, null),
+	// (0.5.28) Farmer's Delight's crops and cuts (delight/Delight)
+	CABBAGE(() -> com.jaymoskitchen.delight.Delight.CABBAGE, null),
+	CABBAGE_LEAF(() -> com.jaymoskitchen.delight.Delight.CABBAGE_LEAF, null),
+	RICE(() -> com.jaymoskitchen.delight.Delight.RICE, null),
+	MINCED_BEEF(() -> com.jaymoskitchen.delight.Delight.MINCED_BEEF, null),
+	RAW_BACON(() -> com.jaymoskitchen.delight.Delight.RAW_BACON, null),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),

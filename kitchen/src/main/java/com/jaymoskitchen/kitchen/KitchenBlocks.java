@@ -23,7 +23,7 @@ import net.minecraft.world.item.component.Consumables;
 /**
  * The cookware (cooking pot, frying pan, saucepan, baking tray, rolling pin), which stays in the crafting grid when
  * you cook with it, and the foods it makes. The kitchen itself (oven, fridges, counters...) is Cooking for
- * Blockheads'. Original art; the idea of cookware as crafting tools comes from Pam's HarvestCraft.
+ * Blockheads'. Original art (the pot and pan's are Farmer's Delight's, MIT); the idea of cookware as crafting tools comes from Pam's HarvestCraft.
  */
 public final class KitchenBlocks {
 	public static Item COOKING_POT;
@@ -38,8 +38,10 @@ public final class KitchenBlocks {
 	}
 
 	public static void register() {
-		COOKING_POT = tool("cooking_pot");
-		FRYING_PAN = tool("frying_pan");
+		// (0.5.28) the pot and pan also set down over a fire to cook in (delight/CookwareBlock)
+		com.jaymoskitchen.delight.Delight.registerCookware();
+		COOKING_POT = tool("cooking_pot", com.jaymoskitchen.delight.Delight.COOKING_POT_BLOCK);
+		FRYING_PAN = tool("frying_pan", com.jaymoskitchen.delight.Delight.FRYING_PAN_BLOCK);
 		SAUCEPAN = tool("saucepan");
 		BAKING_TRAY = tool("baking_tray");
 		ROLLING_PIN = tool("rolling_pin");
@@ -72,7 +74,13 @@ public final class KitchenBlocks {
 
 	/** Cookware: one to a stack, and it stays in the crafting grid after use. */
 	private static Item tool(String id) {
-		Item item = register(id, Item::new, new Item.Properties().stacksTo(1));
+		return tool(id, null);
+	}
+
+	/** Cookware that can also be set down as a block. */
+	private static Item tool(String id, net.minecraft.world.level.block.Block block) {
+		Item item = block == null ? register(id, Item::new, new Item.Properties().stacksTo(1))
+			: register(id, p -> new net.minecraft.world.item.BlockItem(block, p), new Item.Properties().stacksTo(1));
 		((ItemAccessor) item).jaymoskitchen$setCraftingRemainder(new ItemStackTemplate(item));
 		return item;
 	}

@@ -3,7 +3,7 @@
 	"id": "jaymoskitchen",
 	"version": "${version}",
 	"name": "Jaymo's Kitchen",
-	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts) and the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower).",
+	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts), the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower), and the cooking pot, skillet, cutting board, feasts, crops and art of Farmer's Delight (MIT, by vectorwing; see LICENSE_farmersdelight).",
 	"authors": [],
 	"license": "MIT",
 	"icon": "assets/jaymoskitchen/icon.png",
@@ -40,6 +40,7 @@
 	},
 	"contributors": [
 		"MennoMax, paul101, jmb19905 (NiftyCarts carts, MIT)",
-		"Gory_Moon (Horse Power machines, LGPL-3.0)"
+		"Gory_Moon (Horse Power machines, LGPL-3.0)",
+		"vectorwing (Farmer's Delight cooking, crops and art, MIT)"
 	]
 }

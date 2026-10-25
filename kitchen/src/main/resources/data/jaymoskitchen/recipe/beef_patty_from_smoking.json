@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 50,
+  "experience": 0.35,
+  "ingredient": "jaymoskitchen:minced_beef",
+  "result": {
+    "id": "jaymoskitchen:beef_patty"
+  }
+}
