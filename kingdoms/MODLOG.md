@@ -3684,6 +3684,27 @@ hired workers. What was missing was a villager standing up for themselves when s
   At reputation -100 or under (or an outlaw) they refuse your coin.
 - A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
   crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Whale oil's uses (Andy: "lamps or even explosives?", then "Go"):
+  - `whaling/OilLampBlock` (iron nugget, glass pane, copper ingot): stands or hangs like a lantern, light 15. Comes
+    empty; a bottle of whale oil fills it (4 measures, bottle back), a measure burns 5 minutes. Empty hand lights/snuffs.
+  - `whaling/Lamplighters`: in a settlement, the nearest grown villager lights its lamps after dark (filling dry ones
+    from the stores, a bottle each) and snuffs them at daybreak. While the stores hold whale oil, a burnt floor torch
+    they come to relight becomes a lit oil lamp instead (`Torches` hook), so oil-rich towns turn lamp-lit.
+  - `whaling/Firebomb` (whale oil, string, wool) and the powder firebomb (+2 gunpowder): thrown, they shatter into burning
+    oil (fire on 70% of a 2-block splash, 3 for powder; everyone in it alight 6 s and scalded 3), flames on water burn
+    boat crews; the powder one also bursts (power 2, blocks left whole). A player throwing one on a faction's land
+    commits arson (`Theft.firebombed`, new).
+  - `whaling/OilPotBlock`, the boiling oil pot (cauldron over iron bars): set on a wall's edge facing out, fill with
+    oil (4 measures), light it, it boils in about 10 s. Empty hand tips a measure down a 3-wide column (to 24 below):
+    boiling, 8 damage and alight 5 s; cold, a slick (Slowness III 5 s). On a settlement's land its guards (or a grown
+    villager) by the pot light it and tip it on foes below: monsters, folk and sworn players of realms at war, players
+    the town wants.
+- Stage 4 (polish, Andy: "stage 4 can proceed"):
+  - `whaling/Sharks`: a carcass in the water draws Naturalist's great white sharks (none without Naturalist): every
+    20 s, 35% chance, one arrives from 16-24 blocks out, up to 3. Sharks near it close in and bite (10% each per 2 s),
+    each bite taking a stroke's worth of flesh, with blood and splashes. Cut in fast.
+  - The white whale: 1 in 60 wild-born whales. Pale, scarred sperm whale (`white.png`), 520 health, charges faster
+    (0.42), turns on whoever harpoons it 80% of the time. Its carcass always holds ambergris, 3 lumps.
 - Tuning: the constants at the top of `Retaliation`.
 
 ## 0.7.122: the hidden blade moves, and shows
@@ -4525,3 +4546,41 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
 - `McaMessageMixin`: MCA's talk-menu question line is garbled like their chat for a foreigner (the answers were already
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
+
+## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade, oil lamps, firebombs, boiling oil, sharks, the white whale (pack 0.16.25)
+Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
+animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
+1 whales and harpoons (this), 2 hauling alongside a big ship, cutting in and tryworks (whale oil), 3 the kingdoms' whaling
+crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art is all rights reserved).
+- `whaling/GreatWhale`: about 14 blocks long (model built at a quarter size, drawn 3.5x; body box 4 x 2.8). Pods of 1-3
+  in deep oceans (weight 2, one likely spot in 3). Cruises 7 down, drifts with its pod, comes up every 1.5-2.7 minutes to
+  blow (spray, splash, roar) for 12 s, turns back from water under 10 deep. Blubber lets 30% of any blow but a harpoon's
+  through. Struck: bolts from its hunters (the ends of its lines), weaving, sometimes sounding; its pod scatters. Each iron
+  bleeds 1 every 2 s and tires it faster; each taut line slows it. Spent (stamina under 12%), it wallows at the surface
+  blowing blood. Sperm whales (the dark look) may turn on whoever struck them and stove in the boat (riders hurt). It
+  dies into a carcass, irons and all. Naturalist's whale is out of natural spawning (`Encounters.NO_NATURAL_SPAWNS`);
+  Kitchen makes no corpse of ours (`jaymoskitchen:no_corpse`).
+- `whaling/Harpoon` + `HarpoonItem`: draw and throw like a trident (iron ingot, stick, lead). Lodges in whales,
+  carcasses and anything 1.4+ wide; its line is made fast to your boat, the ship you stand on, or you. The line pays
+  out while a whale runs (to 48), drags the boat when it's out, is taken in as you close (to 4), parts strained 14 past
+  its length. The pull on a boat is worked out by the steering player's game, on ships and whales by the server
+  (`Ship.tow`, new). Sneak + use shears or an axe to cut your lines. A miss drops a harpoon to pick up.
+- `whaling/WhaleCarcass`: floats belly up, you can stand on it, tow it on lines (lodge fresh harpoons in it too). Flense it
+  with an axe, sword or knife: 48 strokes, 1.2 s apart, of blubber, raw whale meat or whale bone; 12% of whales hold
+  ambergris. Stripped (6 bones float up) or after three days, it sinks, and its irons drop free.
+- Items: harpoon, whale blubber (for stage 2's tryworks), raw whale meat and whale steak (smelt, smoke, campfire), whale
+  bone (6 bone meal), ambergris, great whale spawn egg. Art: `tools/gen_whaling.py`.
+- Stage 2 (Andy: "All the whale parts are extremely valuable to kingdoms and their inhabitants"):
+  - Cutting in: only 16 of a carcass's 48 strokes can be cut from the water or a boat. The rest needs it lashed
+    alongside a big ship: a harpoon in it made fast to a ship of 600+ blocks, and it within 6 blocks of her side
+    (`WhaleCarcass.LOOSE`, `BIG_SHIP`, `ALONGSIDE`).
+  - `whaling/TryworksBlock` (bricks, cauldron, campfire): use blubber to fill the try-pot (2 a measure, 8 measures),
+    flint and steel or a fire charge to light it; it renders a measure into a bottle's worth of whale oil every 8 s (4
+    at most) and goes out when dry. Glass bottle draws whale oil. All in its block state, so it rides on a ship's deck.
+    Light 13 while lit, greasy smoke.
+  - Whale oil (16 a stack, gives the bottle back): 4 torches with 4 sticks.
+  - `whaling/WhaleTrade`: grown villagers buy whale goods dearly, by trade (fishermen and butchers meat and blubber,
+    clerics oil 5 and ambergris 48, librarians and cartographers oil, leatherworkers blubber, smiths oil and bone,
+    fletchers and toolsmiths bone, masons, farmers), and anyone buys whale steak, oil and ambergris (40). Sales pay the
+    realm's toll like any trade.
+- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock`, `Sharks` and `Whaling`.

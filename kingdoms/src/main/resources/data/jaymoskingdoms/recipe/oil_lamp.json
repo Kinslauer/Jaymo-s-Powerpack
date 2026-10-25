@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N",
+    "G",
+    "C"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:oil_lamp"
+  }
+}
