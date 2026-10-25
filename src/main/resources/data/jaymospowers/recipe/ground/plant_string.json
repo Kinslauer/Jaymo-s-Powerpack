@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:plant_fiber",
+    "jaymospowers:plant_fiber",
+    "jaymospowers:plant_fiber"
+  ],
+  "result": {
+    "id": "jaymospowers:plant_string",
+    "count": 1
+  }
+}

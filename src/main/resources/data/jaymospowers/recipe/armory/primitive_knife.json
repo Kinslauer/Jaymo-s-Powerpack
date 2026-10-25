@@ -3,10 +3,10 @@
   "category": "equipment",
   "key": {
     "S": "minecraft:stick",
-    "F": "minecraft:flint"
+    "H": "jaymospowers:flint_shard"
   },
   "pattern": [
-    "F",
+    "H",
     "S"
   ],
   "result": {

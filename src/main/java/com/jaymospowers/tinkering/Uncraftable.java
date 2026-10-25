@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 
 /**
  * (0.8.124) Andy: no craftable diamond weapons. Vanilla's and Armory's recipes are switched off in data
@@ -53,8 +54,17 @@ public final class Uncraftable {
 		"tacz:gold_ammo_box", "tacz:diamond_ammo_box", "tacz:statue", "tacz:target", "tacz:target_minecart",
 		"tacz:gun_smith_table");
 
+	/**
+	 * (0.16.2) Andy: no craftable planks (RLCraft's start, ground/FirstTools): a log is set down and split with an axe.
+	 * Every crafting recipe named for planks goes, vanilla's, the Aether's and other mods' alike.
+	 */
+	static boolean planks(Holder.Reference<Recipe<?>> recipe) {
+		String path = recipe.key().identifier().getPath();
+		return recipe.value().getType() == RecipeType.CRAFTING && (path.endsWith("_planks") || path.contains("_planks_from_"));
+	}
+
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !RECIPES.contains(id) && !FORGED.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }
