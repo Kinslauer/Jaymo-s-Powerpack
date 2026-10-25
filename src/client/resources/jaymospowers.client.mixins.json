@@ -17,6 +17,7 @@
 		"CarryAvatarRendererMixin",
 		"CrawlAvatarRendererMixin",
 		"CrawlModelFeatureRendererMixin",
+		"TnmFollowModelFeatureRendererMixin",
 		"DodgeAvatarRendererMixin",
 		"DodgeModelFeatureRendererMixin",
 		"FinisherAvatarRendererMixin",

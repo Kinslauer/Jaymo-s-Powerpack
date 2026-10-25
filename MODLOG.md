@@ -2853,6 +2853,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Water it crosses becomes frosted ice that melts after `FROST_TICKS`; fire it lands on goes out; no block breaking.
   `ZFighterBeams` style 3 (`HELD`): full width at once, a small glint at the hand and where it lands. While it's
   held the click doesn't dig (`RaceHoldClient.frostBeaming`, `ZFighterAttackMixin`). Compile-checked; not playtested.
+- **0.16.16, armour and costumes move with Touch'n Motion:** Andy: "iron armor leggings are not animated on my
+  character", and the same for paladin legs and costumes; all moved again without Touch'n Motion, which Andy wants kept.
+  Touch'n Motion lays its stance, foot grounding and reaches on the body as EMF animates it and copies that only onto
+  armour EMF hands the body's pose to. `TnmFollow` (via `TnmFollowModelFeatureRendererMixin`, just before each model is
+  drawn) gives every other humanoid model drawn on a player that pose through Touch'n Motion's own copy
+  (`TouchNMotionHook.Drawn.put`, by reflection), keeping the model's own visibility and scale. Skipped for the body model
+  itself, while one of our poses is on (EMF and Touch'n Motion are paused then), a downed body, a whip hand and your own
+  first-person body. Compile-checked; not playtested.
 - **0.16.21, nursing a wound:** Andy: with a festering body wound he kept touching his head instead of his body, and
   far too often; the reaction should go to the spot, and come now and then. None of our code played that touch (the
   fever only gives Weakness and 1 body damage a minute), and nothing in Fresh Animations or Not Enough Animations reacts
