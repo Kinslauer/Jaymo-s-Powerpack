@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "bonemeal",
+  "ingredients": [
+    "jaymoskingdoms:whale_bone"
+  ],
+  "result": {
+    "count": 6,
+    "id": "minecraft:bone_meal"
+  }
+}

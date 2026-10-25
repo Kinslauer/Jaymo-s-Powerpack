@@ -244,7 +244,12 @@ public final class Torches {
 		if (best <= LIGHTER_REACH * LIGHTER_REACH) {
 			lighter.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			lighter.getLookControl().setLookAt(at);
-			relight(level, pos, state);
+			// (0.7.206) a town with whale oil in store puts up an oil lamp in its place
+			if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
+				forget(level, pos);
+			} else {
+				relight(level, pos, state);
+			}
 			level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		} else {
 			lighter.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.5F, 1));
