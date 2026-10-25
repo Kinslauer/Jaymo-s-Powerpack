@@ -4525,3 +4525,28 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
 - `McaMessageMixin`: MCA's talk-menu question line is garbled like their chat for a foreigner (the answers were already
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
+
+## 0.7.206: whaling, stage 1: great whales, roped harpoons, carcasses to tow and flense (pack 0.16.25)
+Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
+animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
+1 whales and harpoons (this), 2 hauling alongside a big ship, cutting in and tryworks (whale oil), 3 the kingdoms' whaling
+crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art is all rights reserved).
+- `whaling/GreatWhale`: about 14 blocks long (model built at a quarter size, drawn 3.5x; body box 4 x 2.8). Pods of 1-3
+  in deep oceans (weight 2, one likely spot in 3). Cruises 7 down, drifts with its pod, comes up every 1.5-2.7 minutes to
+  blow (spray, splash, roar) for 12 s, turns back from water under 10 deep. Blubber lets 30% of any blow but a harpoon's
+  through. Struck: bolts from its hunters (the ends of its lines), weaving, sometimes sounding; its pod scatters. Each iron
+  bleeds 1 every 2 s and tires it faster; each taut line slows it. Spent (stamina under 12%), it wallows at the surface
+  blowing blood. Sperm whales (the dark look) may turn on whoever struck them and stove in the boat (riders hurt). It
+  dies into a carcass, irons and all. Naturalist's whale is out of natural spawning (`Encounters.NO_NATURAL_SPAWNS`);
+  Kitchen makes no corpse of ours (`jaymoskitchen:no_corpse`).
+- `whaling/Harpoon` + `HarpoonItem`: draw and throw like a trident (iron ingot, stick, lead). Lodges in whales,
+  carcasses and anything 1.4+ wide; its line is made fast to your boat, the ship you stand on, or you. The line pays
+  out while a whale runs (to 48), drags the boat when it's out, is taken in as you close (to 4), parts strained 14 past
+  its length. The pull on a boat is worked out by the steering player's game, on ships and whales by the server
+  (`Ship.tow`, new). Sneak + use shears or an axe to cut your lines. A miss drops a harpoon to pick up.
+- `whaling/WhaleCarcass`: floats belly up, you can stand on it, tow it on lines (lodge fresh harpoons in it too). Flense it
+  with an axe, sword or knife: 48 strokes, 1.2 s apart, of blubber, raw whale meat or whale bone; 12% of whales hold
+  ambergris. Stripped (6 bones float up) or after three days, it sinks, and its irons drop free.
+- Items: harpoon, whale blubber (for stage 2's tryworks), raw whale meat and whale steak (smelt, smoke, campfire), whale
+  bone (6 bone meal), ambergris, great whale spawn egg. Art: `tools/gen_whaling.py`.
+- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass` and `Whaling`.

@@ -5206,5 +5206,15 @@
 	"courier.jaymoskingdoms.news.2": "Word came for you.",
 	"courier.jaymoskingdoms.from.0": "A letter for you, from %s.",
 	"courier.jaymoskingdoms.from.1": "%s sent this. Long way I've come.",
-	"courier.jaymoskingdoms.from.2": "From %s, by my hand."
+	"courier.jaymoskingdoms.from.2": "From %s, by my hand.",
+	"entity.jaymoskingdoms.great_whale": "Great Whale",
+	"entity.jaymoskingdoms.whale_carcass": "Whale Carcass",
+	"entity.jaymoskingdoms.harpoon": "Harpoon",
+	"item.jaymoskingdoms.harpoon": "Harpoon",
+	"item.jaymoskingdoms.whale_blubber": "Whale Blubber",
+	"item.jaymoskingdoms.whale_meat": "Raw Whale Meat",
+	"item.jaymoskingdoms.cooked_whale_meat": "Whale Steak",
+	"item.jaymoskingdoms.whale_bone": "Whale Bone",
+	"item.jaymoskingdoms.ambergris": "Ambergris",
+	"item.jaymoskingdoms.great_whale_spawn_egg": "Great Whale Spawn Egg"
 }
