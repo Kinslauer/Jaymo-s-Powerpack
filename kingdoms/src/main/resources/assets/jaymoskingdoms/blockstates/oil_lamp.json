@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,lit=false": {
+      "model": "jaymoskingdoms:block/oil_lamp"
+    },
+    "hanging=false,lit=true": {
+      "model": "jaymoskingdoms:block/oil_lamp_lit"
+    },
+    "hanging=true,lit=false": {
+      "model": "jaymoskingdoms:block/oil_lamp_hanging"
+    },
+    "hanging=true,lit=true": {
+      "model": "jaymoskingdoms:block/oil_lamp_hanging_lit"
+    }
+  }
+}

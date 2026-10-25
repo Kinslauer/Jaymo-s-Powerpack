@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:block/tryworks",
+  "textures": {
+    "front": "jaymoskingdoms:block/tryworks_front_on"
+  }
+}

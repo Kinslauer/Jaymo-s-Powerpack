@@ -53,9 +53,11 @@ public final class Encounters {
 	static final String MOD = "naturalist";
 	/** Keep Naturalist's other animals in natural spawning (false: its mobs only ever come as encounters). */
 	static final boolean WILDLIFE = true;
-	/** Naturalist mobs kept out of natural spawning: the encounter beasts, and the elephants and mammoths Kingdoms has. */
+	/** Naturalist mobs kept out of natural spawning: the encounter beasts, and the elephants, mammoths and whales Kingdoms has. */
 	static final List<String> NO_NATURAL_SPAWNS = List.of("bear", "lion", "tiger", "alligator", "komodo_dragon", "rhino",
-		"desert_scorpion", "jungle_scorpion", "elephant", "mammoth");
+		"desert_scorpion", "jungle_scorpion", "elephant", "mammoth",
+		// (0.7.206) its whales: Kingdoms' great whales take their place (whaling)
+		"whale");
 	/** How often the players' surroundings are weighed (ticks). */
 	static final int CHECK_TICKS = 400;
 	/** The chance, at each check, that something finds a player out in the wild (about once in 15 minutes there). */

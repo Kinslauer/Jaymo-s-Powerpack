@@ -1,0 +1,292 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "jaymoskingdoms:block/oil_lamp",
+    "lamp": "jaymoskingdoms:block/oil_lamp_lit"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        1,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            6,
+            2
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            6,
+            2
+          ],
+          "texture": "#lamp"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            6,
+            2
+          ],
+          "texture": "#lamp"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            6,
+            2
+          ],
+          "texture": "#lamp"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            6,
+            6
+          ],
+          "texture": "#lamp"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            6,
+            6
+          ],
+          "texture": "#lamp"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        3,
+        6
+      ],
+      "to": [
+        10,
+        9,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8,
+            0,
+            12,
+            6
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            8,
+            0,
+            12,
+            6
+          ],
+          "texture": "#lamp"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            12,
+            6
+          ],
+          "texture": "#lamp"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            12,
+            6
+          ],
+          "texture": "#lamp"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        9,
+        5.5
+      ],
+      "to": [
+        10.5,
+        10,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            2,
+            5,
+            3
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            0,
+            2,
+            5,
+            3
+          ],
+          "texture": "#lamp"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            5,
+            3
+          ],
+          "texture": "#lamp"
+        },
+        "west": {
+          "uv": [
+            0,
+            2,
+            5,
+            3
+          ],
+          "texture": "#lamp"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            5,
+            5
+          ],
+          "texture": "#lamp"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            5,
+            5
+          ],
+          "texture": "#lamp"
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        10,
+        8
+      ],
+      "to": [
+        8.5,
+        12,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            8,
+            1,
+            10
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            0,
+            8,
+            1,
+            10
+          ],
+          "texture": "#lamp"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        12,
+        6.5
+      ],
+      "to": [
+        8,
+        16,
+        9.5
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            12,
+            0,
+            15,
+            4
+          ],
+          "texture": "#lamp"
+        },
+        "west": {
+          "uv": [
+            12,
+            0,
+            15,
+            4
+          ],
+          "texture": "#lamp"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        12,
+        8
+      ],
+      "to": [
+        9.5,
+        16,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            15,
+            8
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            15,
+            8
+          ],
+          "texture": "#lamp"
+        }
+      }
+    }
+  ]
+}
