@@ -1,0 +1,16 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "jaymospowers:prismallard_leg",
+        "jaymospowers:satival_bulb",
+        "jaymospowers:wyndberry"
+      ]
+    }
+  ],
+  "type": "jaymoskitchen:minigame",
+  "category": "misc",
+  "dish": "prismallard_stew"
+}

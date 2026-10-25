@@ -124,7 +124,7 @@ final class SmokerView {
 
 		// the meat, hung from the rail
 		graphics.fill(boxL, boxTop + 4, boxR, boxTop + 6, 0xFF6A6A6A);
-		String[] rows = dish == Dish.BEEF_JERKY ? JERKY : HAM;
+		String[] rows = dish == Dish.BEEF_JERKY || dish == Dish.LIZARD_JERKY ? JERKY : HAM;
 		int left = cx - 8 * SCALE;
 		int spriteTop = boxTop + 5;
 		for (int y = 0; y < 16; y++) {

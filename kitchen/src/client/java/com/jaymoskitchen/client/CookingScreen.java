@@ -129,9 +129,9 @@ public class CookingScreen extends Screen {
 	private List<Step> board = List.of();
 
 	/** Bit i: the i-th dish can be made from the pockets and the kitchen storage nearby (the server checked). */
-	private final int stocked;
+	private final long stocked;
 
-	public CookingScreen(BlockPos pos, Station station, int stocked) {
+	public CookingScreen(BlockPos pos, Station station, long stocked) {
 		super(Component.translatable("screen.jaymoskitchen.title"));
 		this.pos = pos;
 		this.station = station;
@@ -167,7 +167,7 @@ public class CookingScreen extends Screen {
 
 	/** Whether the i-th dish of the station can be made (from the pockets or the kitchen nearby; creative always). */
 	private boolean canMake(int i, Dish d) {
-		return this.minecraft.player != null && (this.minecraft.player.hasInfiniteMaterials() || (stocked & (1 << i)) != 0
+		return this.minecraft.player != null && (this.minecraft.player.hasInfiniteMaterials() || (stocked & (1L << i)) != 0
 			|| Kitchen.hasIngredients(this.minecraft.player.getInventory(), d.ingredients()));
 	}
 
@@ -599,7 +599,7 @@ public class CookingScreen extends Screen {
 
 	private List<Step> buildBoard(Dish d) {
 		Set<Step> steps = new LinkedHashSet<>(d.steps());
-		List<Step> decoys = new ArrayList<>(Dish.DECOY_POOL);
+		List<Step> decoys = new ArrayList<>(Dish.decoys());
 		decoys.removeAll(steps);
 		Collections.shuffle(decoys, random);
 		steps.addAll(decoys.subList(0, Math.min(DECOYS, decoys.size())));

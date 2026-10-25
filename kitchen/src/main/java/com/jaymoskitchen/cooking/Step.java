@@ -1,6 +1,7 @@
 package com.jaymoskitchen.cooking;
 
 import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.OptionalItems;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
@@ -43,6 +44,49 @@ public enum Step {
 	DOUGH(() -> ModItems.DOUGH, null),
 	PMEH(() -> ModItems.PMEH, null),
 	PAPER(() -> Items.PAPER, null),
+	// optional mods' food (air without the mod; see OptionalItems): Pantry for Blockheads' fruit and vegetables
+	LEMON(() -> pantry("lemon"), null),
+	PEACH(() -> pantry("peach"), null),
+	GRAPES(() -> pantry("grapes"), null),
+	TOMATO(() -> pantry("tomato"), null),
+	ONION(() -> pantry("onion"), null),
+	EGGPLANT(() -> pantry("eggplant"), null),
+	CHILI_PEPPER(() -> pantry("chili_pepper"), null),
+	STRAWBERRY(() -> pantry("strawberry"), null),
+	TURNIP(() -> pantry("turnip"), null),
+	PEANUT(() -> pantry("peanut"), null),
+	// Naturalist's game and fish
+	VENISON(() -> naturalist("venison"), null),
+	DUCK(() -> naturalist("duck"), null),
+	BUSHMEAT(() -> naturalist("bushmeat"), null),
+	MAMMOTH_MEAT(() -> naturalist("mammoth_meat"), null),
+	DRUMSTICK(() -> naturalist("drumstick"), null),
+	MORSEL(() -> naturalist("morsel"), null),
+	BASS(() -> naturalist("bass"), null),
+	CATFISH(() -> naturalist("catfish"), null),
+	PIRANHA(() -> naturalist("piranha"), null),
+	ANGLERFISH(() -> naturalist("anglerfish"), null),
+	BLOBFISH(() -> naturalist("blobfish"), null),
+	CRAB_MEAT(() -> naturalist("crab_meat"), null),
+	CLAM_MEAT(() -> naturalist("clam_meat"), null),
+	LIZARD_TAIL(() -> naturalist("lizard_tail"), null),
+	// Jaymo's Powers' Aether fruit, egg and meat
+	ORANGE(() -> powers("orange"), null),
+	WYNDBERRY(() -> powers("wyndberry"), null),
+	BLUE_BERRY(() -> powers("blue_berry"), null),
+	WHITE_APPLE(() -> powers("white_apple"), null),
+	SATIVAL_BULB(() -> powers("satival_bulb"), null),
+	PRISMALLARD_EGG(() -> powers("prismallard_egg"), null),
+	TAEGORE_MEAT(() -> powers("raw_taegore_meat"), null),
+	BURRUKAI_RIB(() -> powers("burrukai_rib_cut"), null),
+	KIRRID_LOIN(() -> powers("kirrid_loin"), null),
+	PRISMALLARD_LEG(() -> powers("prismallard_leg"), null),
+	// vanilla's cooked fish and meat, and bread
+	COOKED_COD(() -> Items.COOKED_COD, null),
+	COOKED_SALMON(() -> Items.COOKED_SALMON, null),
+	COOKED_PORKCHOP(() -> Items.COOKED_PORKCHOP, null),
+	COOKED_MUTTON(() -> Items.COOKED_MUTTON, null),
+	BREAD(() -> Items.BREAD, null),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -58,6 +102,18 @@ public enum Step {
 		this.remainder = remainder;
 	}
 
+	private static Item pantry(String path) {
+		return OptionalItems.item(OptionalItems.PANTRY, path);
+	}
+
+	private static Item naturalist(String path) {
+		return OptionalItems.item(OptionalItems.NATURALIST, path);
+	}
+
+	private static Item powers(String path) {
+		return OptionalItems.item(OptionalItems.POWERS, path);
+	}
+
 	/** The ingredient consumed (or, for actions, the icon shown on the button). */
 	public Item item() {
 		return item.get();
@@ -70,7 +126,7 @@ public enum Step {
 
 	/** Whether an inventory stack counts as this ingredient (a "potion" only counts if it's plain water). */
 	public boolean matches(ItemStack stack) {
-		if (stack.getItem() != item()) {
+		if (stack.isEmpty() || stack.getItem() != item()) {
 			return false;
 		}
 		if (this == WATER_BOTTLE) {
@@ -88,6 +144,11 @@ public enum Step {
 			return stack;
 		}
 		return new ItemStack(item(), count);
+	}
+
+	/** Whether the ingredient exists in this game (an optional mod's needs that mod). */
+	public boolean available() {
+		return item() != Items.AIR;
 	}
 
 	public boolean isAction() {

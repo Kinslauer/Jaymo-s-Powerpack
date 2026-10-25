@@ -74,7 +74,71 @@ public enum Dish {
 	ROAST_MUTTON(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(MUTTON, SWEET_BERRIES), 11, 0.9F, false,
 		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.STRENGTH, 30 * 20, 0))),
 	SHEPHERDS_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(MUTTON, POTATO, CARROT), 12, 0.8F, false,
-		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0)));
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	// --- content drop 5: the orchard and the garden (Pantry for Blockheads' lemons, peaches, grapes and vegetables) ---
+	LEMON_CHICKEN(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(CHICKEN, LEMON, LEMON), 12, 0.9F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
+	LEMON_COD(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(COD, LEMON, FLIP, FLIP), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.DOLPHINS_GRACE, 120 * 20, 0))),
+	LEMON_TART(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, LEMON, SUGAR, EGG), 10, 0.6F, false,
+		List.of(new Buff(MobEffects.HASTE, 120 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),
+	PEACH_COBBLER(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, PEACH, PEACH, SUGAR), 10, 0.6F, false,
+		List.of(new Buff(MobEffects.ABSORPTION, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	FRUIT_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(PEACH, GRAPES, APPLE), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.JUMP_BOOST, 120 * 20, 0))),
+	RATATOUILLE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, EGGPLANT, TOMATO, ONION), 9, 0.7F, true,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	CHILI_CON_CARNE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BEEF, CHILI_PEPPER, TOMATO), 11, 0.8F,
+		true, List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
+	// --- content drop 6: everything else no dish used (Naturalist's game and fish, Pantry's strawberries, turnips and peanuts, the Aether's fruit and meat, vanilla's cooked fish and meat) ---
+	VENISON_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, VENISON, POTATO, BROWN_MUSHROOM), 11, 0.8F, true,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.STRENGTH, 30 * 20, 0))),
+	ROAST_DUCK(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(DUCK, APPLE), 11, 0.9F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 120 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	BUSHMEAT_SKEWER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(BUSHMEAT, CARROT, FLIP, FLIP), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.JUMP_BOOST, 90 * 20, 0))),
+	MAMMOTH_ROAST(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(MAMMOTH_MEAT, POTATO, POTATO), 14, 1.0F, false,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.RESISTANCE, 60 * 20, 0))),
+	HONEY_DRUMSTICKS(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(DRUMSTICK, HONEY_BOTTLE, FLIP, FLIP), 8, 0.8F, false,
+		List.of(new Buff(MobEffects.HASTE, 90 * 20, 0))),
+	MEAT_PASTY(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, MORSEL, MORSEL, POTATO), 9, 0.7F, false,
+		List.of(new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	FISH_CHOWDER(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BASS, CATFISH, POTATO), 10, 0.8F, true,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0))),
+	PIRANHA_SKEWER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(PIRANHA, PIRANHA, FLIP, FLIP), 8, 0.7F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
+	DEEP_SEA_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, ANGLERFISH, BLOBFISH, DRIED_KELP), 10, 0.7F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 240 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0))),
+	SEAFOOD_BOIL(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CRAB_MEAT, CLAM_MEAT, POTATO), 10, 0.8F, true,
+		List.of(new Buff(MobEffects.DOLPHINS_GRACE, 90 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	CRAB_CAKES(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(CRAB_MEAT, EGG, FLOUR, FLIP, FLIP), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 120 * 20, 0))),
+	LIZARD_JERKY(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(LIZARD_TAIL, SUGAR), 6, 0.9F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	STRAWBERRY_TART(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, STRAWBERRY, STRAWBERRY, SUGAR), 9, 0.6F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),
+	PEANUT_BRITTLE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(PEANUT, PEANUT, SUGAR), 5, 0.5F, false,
+		List.of(new Buff(MobEffects.HASTE, 120 * 20, 0))),
+	TURNIP_MASH(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, TURNIP, TURNIP, POTATO), 8, 0.7F, true,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 90 * 20, 0))),
+	ORANGE_GLAZED_TAEGORE(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(TAEGORE_MEAT, ORANGE, FLIP, FLIP), 10, 0.8F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 90 * 20, 0))),
+	SKY_FRUIT_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(ORANGE, WYNDBERRY, BLUE_BERRY), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 180 * 20, 0))),
+	WHITE_APPLE_TART(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, WHITE_APPLE, SUGAR), 9, 0.6F, false,
+		List.of(new Buff(MobEffects.REGENERATION, 30 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),
+	KIRRID_ROAST(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(KIRRID_LOIN, SATIVAL_BULB), 12, 0.9F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.JUMP_BOOST, 60 * 20, 0))),
+	PRISMALLARD_OMELETTE(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(PRISMALLARD_EGG, PRISMALLARD_EGG, FLIP), 7, 0.7F, false,
+		List.of(new Buff(MobEffects.HASTE, 60 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	BURRUKAI_RIBS(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(BURRUKAI_RIB, SUGAR), 12, 0.9F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 90 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	PRISMALLARD_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, PRISMALLARD_LEG, SATIVAL_BULB, WYNDBERRY), 10, 0.8F, true,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 120 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	FISH_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, COOKED_COD, COOKED_SALMON, POTATO), 12, 0.8F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	PLOUGHMANS_LUNCH(Method.CHOP, EnumSet.of(Station.BOARD), List.of(COOKED_PORKCHOP, COOKED_MUTTON, BREAD), 12, 0.9F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 60 * 20, 0), new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -102,9 +166,18 @@ public enum Dish {
 		}
 	}
 
-	/** Every ingredient that can show up as a wrong-answer button. */
+	/** Every ingredient that can show up as a wrong-answer button (Pantry's only with Pantry; see {@link #decoys}). */
 	public static final List<Step> DECOY_POOL = List.of(BEEF, POTATO, CARROT, FLOUR, BROWN_MUSHROOM, RED_MUSHROOM,
-		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS);
+		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS,
+		LEMON, PEACH, GRAPES, TOMATO, ONION, EGGPLANT, CHILI_PEPPER, STRAWBERRY, TURNIP, PEANUT, VENISON, DUCK, BUSHMEAT, MAMMOTH_MEAT,
+		DRUMSTICK, MORSEL, BASS, CATFISH, PIRANHA, ANGLERFISH, BLOBFISH, CRAB_MEAT, CLAM_MEAT, LIZARD_TAIL, ORANGE, WYNDBERRY, BLUE_BERRY,
+		WHITE_APPLE, SATIVAL_BULB, PRISMALLARD_EGG, TAEGORE_MEAT, BURRUKAI_RIB, KIRRID_LOIN, PRISMALLARD_LEG, COOKED_COD, COOKED_SALMON,
+		COOKED_PORKCHOP, COOKED_MUTTON, BREAD);
+
+	/** The decoy pool, less the ingredients this game doesn't have. */
+	public static List<Step> decoys() {
+		return DECOY_POOL.stream().filter(Step::available).toList();
+	}
 
 	private final Method method;
 	private final Set<Station> stations;
@@ -154,6 +227,16 @@ public enum Dish {
 		return perfectBuffs;
 	}
 
+	/** Whether every ingredient exists in this game (the Pantry dishes need Pantry for Blockheads). */
+	public boolean available() {
+		for (Step step : steps) {
+			if (!step.isAction() && !step.available()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** How many of each ingredient the recipe consumes (actions are free). */
 	public Map<Step, Integer> ingredients() {
 		Map<Step, Integer> counts = new EnumMap<>(Step.class);
@@ -177,9 +260,21 @@ public enum Dish {
 			case CRIMSON_SKEWER -> 120;
 			case CARROT_CAKE -> 180;
 			case SHEPHERDS_PIE -> 190;
+			case LEMON_COD -> 100;
+			case LEMON_TART -> 180;
+			case PEACH_COBBLER -> 190;
+			case STRAWBERRY_TART, MEAT_PASTY -> 170;
+			case WHITE_APPLE_TART -> 180;
+			case FISH_PIE -> 190;
+			case BUSHMEAT_SKEWER, PIRANHA_SKEWER -> 120;
+			case HONEY_DRUMSTICKS, ORANGE_GLAZED_TAEGORE -> 130;
+			case CRAB_CAKES, PRISMALLARD_OMELETTE -> 90;
 			// a roast's side
 			case ROAST_CHICKEN -> 90;
 			case ROAST_MUTTON -> 80;
+			case LEMON_CHICKEN, ROAST_DUCK -> 90;
+			case MAMMOTH_ROAST -> 110;
+			case KIRRID_ROAST -> 85;
 			default -> 100;
 		};
 	}
