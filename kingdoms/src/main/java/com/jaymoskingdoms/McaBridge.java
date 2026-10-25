@@ -129,6 +129,11 @@ final class McaBridge {
 		return r.getFamilyEntry().isRelative(dead) ? McaCompat.KIN : McaCompat.STRANGERS;
 	}
 
+	/** (0.7.210) An MCA villager's personality id ("relaxed", "crabby"...; "" for a plain one). */
+	static String personality(Villager v) {
+		return v instanceof VillagerEntityMCA m ? m.getVillagerBrain().getPersonality().getId().getPath() : "";
+	}
+
 	/** (0.7.19) {@link McaCompat#temper}. */
 	static int temper(Villager v) {
 		if (!(v instanceof VillagerEntityMCA m)) {

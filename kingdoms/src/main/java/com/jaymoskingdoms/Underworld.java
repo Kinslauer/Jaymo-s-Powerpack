@@ -93,6 +93,13 @@ public final class Underworld {
 	static final int HOME_STOCK = 8, AWAY_STOCK = 2, BUY_STOCK = 6;
 	/** A hotbed's crooks buy in the street: these prices, this many a day. */
 	static final int STREET_PMEH = 5, STREET_SHASH = 11, STREET_STOCK = 3;
+	/**
+	 * (Andy: "you can also sell to any villagers receptive enough to listen") Sneak and right-click any grown villager
+	 * with contraband in hand to offer it. They're receptive if hearts + mood x {@link #PITCH_MOOD} + their personality's
+	 * lean ({@link #leaning}) + {@link #PITCH_HOTBED} in a known hotbed reaches {@link #PITCH_LISTEN}; then they buy one at
+	 * street price, once a day each. Below {@link #PITCH_SNITCH} they tell the guard. Guards and rulers always do.
+	 */
+	static final int PITCH_LISTEN = 30, PITCH_SNITCH = -10, PITCH_MOOD = 2, PITCH_HOTBED = 15, PITCH_SOURED = -5, STREET_JOINT = 3;
 	/** How often dens are looked after (ticks); a missing fence or dice-thrower is replaced after this long. */
 	static final int CHECK_TICKS = 200;
 	static final long REPLACE_TICKS = 24000L;
@@ -232,6 +239,10 @@ public final class Underworld {
 				dice(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
+			if (sp.isShiftKeyDown() && contraband(sp.getMainHandItem()) && !v.entityTags().contains(FENCE_TAG) && !v.entityTags().contains(DICER_TAG)) {
+				pitch(level, sp, v);
+				return InteractionResult.SUCCESS;
+			}
 			if (v.getTradingPlayer() == null) {
 				stock(level, v);
 			}
@@ -245,6 +256,7 @@ public final class Underworld {
 			MISSING_FENCE.clear();
 			MISSING_DICER.clear();
 			STOCKED.clear();
+			PITCHED.clear();
 			DICE_NEXT.clear();
 			NO_SITE.clear();
 		});
@@ -615,6 +627,88 @@ public final class Underworld {
 
 	private static MerchantOffer sell(Item item, int emeralds, int uses) {
 		return new MerchantOffer(new ItemCost(Items.EMERALD, emeralds), new ItemStack(item), uses, XP, PRICE_MULTIPLIER);
+	}
+
+	/** Villager → the day they were last offered contraband (once a day each). */
+	private static final Map<UUID, Long> PITCHED = new HashMap<>();
+
+	/** How a personality takes to being offered contraband. */
+	static int leaning(String personality) {
+		return switch (personality) {
+			case "relaxed", "odd", "lazy", "playful", "flirty", "extroverted", "witty" -> 15;
+			case "greedy", "confident" -> 10;
+			case "anxious", "sensitive", "shy", "peaceful" -> -10;
+			case "crabby", "grumpy", "stubborn" -> -15;
+			default -> 0;
+		};
+	}
+
+	/** What a receptive villager pays for {@code stack} in the street (0: not worth their while, -1: not dried yet). */
+	private static int streetPrice(ItemStack stack) {
+		if (stack.is(SHASH_BRICK)) {
+			return STREET_SHASH;
+		}
+		Item pmeh = pmeh(), joint = joint();
+		if (joint != null && stack.is(joint)) {
+			return STREET_JOINT;
+		}
+		if (pmeh == null || !stack.is(pmeh)) {
+			return -1;
+		}
+		DataComponentType<Integer> grade = grade();
+		Integer g = grade == null ? null : stack.get(grade);
+		int got = grade == null ? FINE : g == null ? FINE - 1 : g;
+		return got < FINE ? 0 : got >= PRIME ? Math.round(STREET_PMEH * PRIME_BONUS) : STREET_PMEH;
+	}
+
+	/** {@code player} offers {@code v} the contraband in hand: a sale, a no, or a word to the guard. */
+	private static void pitch(ServerLevel level, ServerPlayer player, Villager v) {
+		Faction f = Theft.lawAt(level, v.blockPosition());
+		boolean realm = f != null && f.type().isRealm();
+		boolean law = Downed.isGuard(v) || realm && f.leader().isPresent() && f.leader().get().equals(v.getUUID());
+		long day = level.getGameTime() / 24000L;
+		Long last = PITCHED.get(v.getUUID());
+		if (!law && last != null && last >= day) {
+			Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.again"), Speech.GOLD);
+			return;
+		}
+		PITCHED.put(v.getUUID(), day);
+		Den d = realm ? den(level.getServer(), f.id()) : null;
+		int score = law ? Integer.MIN_VALUE : McaCompat.heartsOf(v, player) + McaCompat.mood(v) * PITCH_MOOD + leaning(McaCompat.personality(v))
+			+ (d != null && d.known() ? PITCH_HOTBED : 0);
+		if (score >= PITCH_LISTEN) {
+			ItemStack stack = player.getMainHandItem();
+			int price = streetPrice(stack);
+			if (price <= 0) {
+				Speech.tell(level, v, player, Component.translatable(price < 0 ? "underworld.jaymoskingdoms.pitch.fresh" : "underworld.jaymoskingdoms.pitch.poor"), Speech.GOLD);
+				PITCHED.remove(v.getUUID());
+				return;
+			}
+			stack.consume(1, player);
+			player.getInventory().placeItemBackInInventory(new ItemStack(Items.EMERALD, price), Prediction.SERVER_ONLY);
+			Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.yes." + level.getRandom().nextInt(LINES)), Speech.GOLD);
+			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.6F, 1.0F);
+			if (realm) {
+				warm(level.getServer(), f, HEAT_PER_SALE);
+				List<LivingEntity> seen = new ArrayList<>(Theft.witnesses(level, f, player));
+				seen.removeIf(e -> e == v || Crooks.isCrook(e));
+				if (!seen.isEmpty()) {
+					Theft.commit(player, level, f, Theft.Crime.DEALING, null, false, seen);
+					Busts.charge(player, f, "dealing");
+				}
+			}
+			return;
+		}
+		level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.6F, 1.0F);
+		McaCompat.hearts(v, player, PITCH_SOURED);
+		if (score >= PITCH_SNITCH || !realm) {
+			Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.no." + level.getRandom().nextInt(LINES)), Speech.WHITE);
+			return;
+		}
+		// they tell the guard: a dealing charge as if a guard had seen it
+		Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.snitch." + level.getRandom().nextInt(LINES)), Speech.RED);
+		Theft.commit(player, level, f, Theft.Crime.DEALING, null, false, List.of(v));
+		Busts.charge(player, f, "dealing");
 	}
 
 	/** Prime Pmeh for sale (plain, if Kitchen doesn't grade). */

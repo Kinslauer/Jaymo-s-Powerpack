@@ -4620,6 +4620,13 @@ imprisoned, or worse."
 - **Heat**: +1 a sale, +2 a day, +1 every 4 dice games, -8 a bust. From 10 a **dice-thrower** sets up: hold emeralds and
   right-click him (up to 8 a throw, two dice each, higher total takes double, a tie returns the stake). At 40 the city is
   a **known hotbed** (Tidings news), and its crooks buy contraband in the street (Pmeh 5, Shash 11).
+- **Selling in the street** (Andy: "you can also sell to any villagers receptive enough to listen"): sneak and
+  right-click any grown villager with contraband in hand. They listen if MCA hearts with you + mood x2 + their
+  personality's lean (relaxed, odd, lazy, playful, flirty, extroverted, witty +15; greedy, confident +10; anxious,
+  sensitive, shy, peaceful -10; crabby, grumpy, stubborn -15) + 15 in a known hotbed reaches 30. Then they buy one at
+  street price (Pmeh 5 fine / 8 prime, joint 3, Shash 11), once a day each; seen by others, it's DEALING. Fair or worse
+  Pmeh is "weeds", fresh Pmeh "still green". A no costs 5 hearts; under -10 they tell the guard (a DEALING charge).
+  Guards and rulers always do. Tuning: `Underworld.PITCH_*`.
 - **Whispers**: in a den's town, until you've found it, a crook (in a known hotbed, any grown townsman) with no guard
   within 12 may whisper the way: compass direction and paces to the hatch. Stepping into the room finds it.
 - **Crimes** (`Theft.Crime`): DEALING (a contraband trade outside a den, seen by anyone of the realm but the buyer and
