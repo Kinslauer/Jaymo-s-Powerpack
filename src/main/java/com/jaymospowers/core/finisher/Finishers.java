@@ -177,12 +177,12 @@ public final class Finishers {
 		 */
 		IMPALE(46, new int[] {12}, Strike.STAB, new int[] {21, 28, 34, 40}),
 		/**
-		 * (0.15.148) Ball and Chain, a flail's, everyone's: the ball whirled up overhead on its chain and brought down on
+		 * (0.15.148) Ball and Chain, a flail's, (0.16.1) Executioner only: the ball whirled up overhead on its chain and brought down on
 		 * them, whirled again, and down once more with everything behind it.
 		 */
 		FLAIL(46, new int[] {18, 36}, Strike.CRUSH),
 		/**
-		 * (0.15.148) Garrotte, the leather whip's, everyone's: the lash cracked round their neck ({@link #WHIP_CRACK}), then
+		 * (0.15.148) Garrotte, the leather whip's, (0.16.1) Executioner only: the lash cracked round their neck ({@link #WHIP_CRACK}), then
 		 * hauled tight, leaning back on it, until the neck goes.
 		 */
 		WHIP(64, new int[] {24, 42, 58}, Strike.SNAP);
@@ -436,10 +436,6 @@ public final class Finishers {
 			// (0.15.146) not a weapon: a tool that wears slams (a fishing rod, a shovel); a torch or a loaf finishes nobody
 			return stack.isDamageableItem() ? Kind.SLAM : null;
 		}
-		if (kind == Kind.FLAIL || kind == Kind.WHIP) {
-			// (0.15.148) Andy: "add a flail and whip execution": theirs for everyone, Executioner or not
-			return kind;
-		}
 		if (!weaponsUnlocked(player)) {
 			return basic(kind);
 		}
@@ -461,7 +457,8 @@ public final class Finishers {
 	/** (0.15.146) A tool not made for hitting anyone: a bow, a crossbow, a fishing rod, a shovel, a hoe, shears. */
 	static boolean improvised(ItemStack stack) {
 		Kind kind = kind(stack);
-		return kind == Kind.BOW || kind == Kind.CROSSBOW || kind == Kind.FIST || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
+		// (0.16.1) Andy: "untrained slams w the whip damage it": a whip's no club (its Garrotte needs Executioner)
+		return kind == Kind.WHIP || kind == Kind.BOW || kind == Kind.CROSSBOW || kind == Kind.FIST || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
 	}
 
 	/** (0.15.146) A basic move's blow wears what struck it: a tool heavily ({@link #IMPROVISED_WEAR}), a weapon as a hit. */
