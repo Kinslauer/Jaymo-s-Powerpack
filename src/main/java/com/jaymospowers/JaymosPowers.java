@@ -39,6 +39,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Oddities.init();
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
+		com.jaymospowers.core.UltimateFilm.register();
 		com.jaymospowers.core.Soundscape.register();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.Impacts.init();
@@ -62,6 +63,7 @@ public class JaymosPowers implements ModInitializer {
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
+		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.tinkering.Tinkering.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
@@ -108,7 +110,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.heritage.HeritageMoves",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "armory.Lash", "aether.structure.OutpostTracker",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "armory.Lash", "armory.FlintlockDraw", "aether.structure.OutpostTracker",
 		};
 		for (String holder : holders) {
 			try {

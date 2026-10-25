@@ -62,6 +62,10 @@ public final class MachineRecipes {
 		if (input.is(Items.WHEAT)) {
 			return new ItemStack(Mill.FLOUR);
 		}
+		// (0.5.27) bark ground into resin, for tanning hides
+		if (input.is(com.jaymoskitchen.tanning.Tanning.BARK)) {
+			return new ItemStack(com.jaymoskitchen.tanning.Hides.RESIN);
+		}
 		Out out = GRIND.get(input.getItem());
 		return out == null ? null : new ItemStack(out.item(), out.count());
 	}

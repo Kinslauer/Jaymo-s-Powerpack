@@ -27,6 +27,11 @@ public final class Uncraftable {
 	static final Set<String> FORGED = forged();
 	/** (0.15.36) Andy: "All tools need crafting routes through jaymos": other mods' tools forged from heads instead. */
 	static final Set<String> FORGED_TOOLS = Set.of("pantryforblockheads:knife");
+	/**
+	 * (0.16.24) Andy: "Leather needs tanning" (Kitchen's Hides): no leather from rabbit hides in the grid (Naturalist's
+	 * data pack puts vanilla's recipe back over Kitchen's switch-off).
+	 */
+	static final Set<String> TANNED = Set.of("minecraft:leather");
 
 	/** (0.16.18) Andy: "the wooden weapons should not be craftable". Balkon's wooden ones (Armory's and vanilla's are off in data). */
 	static final Set<String> WOODEN = wooden();
@@ -77,6 +82,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

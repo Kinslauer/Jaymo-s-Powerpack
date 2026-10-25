@@ -49,6 +49,8 @@ public final class WindTempest {
 
 	/** Cyclone Lance: reach, hit radius around the line, damage (bypasses armour), knockback along the line, cooldown. */
 	static final double LANCE_RANGE = 32.0;
+	/** (0.16.24) The lance's film (ticks): side on, along it. */
+	static final int LANCE_FILM_TICKS = 24;
 	static final double LANCE_RADIUS = 0.6;
 	static final float LANCE_DAMAGE = 6.0F;
 	/** The lance's damage climbs from {@code LANCE_DAMAGE} at weather 1 (rain) to {@code LANCE_DAMAGE_MAX} at {@code LANCE_WEATHER_TOP} (a thunderstorm). */
@@ -134,6 +136,7 @@ public final class WindTempest {
 			end = block.getLocation();
 		}
 		final Vec3 tip = end;
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PROFILE, LANCE_FILM_TICKS, tip, null, 0.0);
 		AABB area = new AABB(eye, tip).inflate(LANCE_RADIUS + 1.0);
 		List<Entity> hits = new ArrayList<>(level.getEntities(player, area, e -> e.isAlive() && !e.isSpectator() && e != player.getVehicle()
 			&& (e instanceof LivingEntity || e instanceof Projectile)

@@ -38,6 +38,8 @@ public final class CryoBlizzard {
 	public static final double RADIUS = 16.0;
 	public static final int DURATION_TICKS = 400;
 	public static final int COOLDOWN = 2400;
+	/** (0.16.24) The film (ticks): a crane up round you as it starts; bars for everyone in its radius. */
+	static final int FILM_TICKS = 50;
 	/** Every how many ticks it bites: freezing added and Slowness I this long. */
 	static final int BITE_EVERY = 10;
 	static final int FREEZE = 20;
@@ -74,6 +76,7 @@ public final class CryoBlizzard {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		player.setAttached(STORM, now);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS);
 		CryoPower.set(player, CryoPower.state(player).withBlizzard(now));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.5F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 1.5F, 0.5F);

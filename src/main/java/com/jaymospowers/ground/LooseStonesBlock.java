@@ -3,6 +3,7 @@ package com.jaymospowers.ground;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Prediction;
@@ -42,6 +43,8 @@ public abstract class LooseStonesBlock extends Block implements SimpleWaterlogge
 	public static final IntegerProperty ROCKS = IntegerProperty.create("rocks", 1, 4);
 	public static final IntegerProperty FLINTS = IntegerProperty.create("flints", 1, 3);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	/** A rock pile the world laid down, not a player (see {@link Rocks}). */
+	public static final BooleanProperty NATURAL = BooleanProperty.create("natural");
 	private static final VoxelShape[] ROCK_SHAPES = {
 		Block.box(5.5, 0.0, 6.0, 10.0, 3.0, 10.5),
 		Block.box(5.5, 0.0, 6.0, 13.0, 3.0, 13.0),
@@ -65,10 +68,50 @@ public abstract class LooseStonesBlock extends Block implements SimpleWaterlogge
 		this.registerDefaultState(this.stateDefinition.any().setValue(this.count, 1).setValue(WATERLOGGED, false));
 	}
 
-	/** Rocks: piles of 1-4. */
+	/**
+	 * Rocks: piles of 1-4. (0.16.24) A pile the world laid down ({@link #NATURAL}) that lies in water turns to salt
+	 * crystals in time, so the rocks in water of chunks made before salt are salt too; a pile a player set down stays rock.
+	 */
 	public static final class Rocks extends LooseStonesBlock {
 		public Rocks(BlockBehaviour.Properties properties, Supplier<Item> rock) {
 			super(properties, rock);
+			this.registerDefaultState(this.defaultBlockState().setValue(NATURAL, true));
+		}
+
+		@Override
+		public IntegerProperty countProperty() {
+			return ROCKS;
+		}
+
+		@Override
+		protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+			super.createBlockStateDefinition(builder);
+			builder.add(NATURAL);
+		}
+
+		@Override
+		public BlockState getStateForPlacement(BlockPlaceContext context) {
+			BlockState state = super.getStateForPlacement(context);
+			// adding to a pile keeps the pile as it was; a new one is the player's
+			return context.getLevel().getBlockState(context.getClickedPos()).is(this) ? state : state.setValue(NATURAL, false);
+		}
+
+		@Override
+		protected boolean isRandomlyTicking(BlockState state) {
+			return state.getValue(NATURAL) && state.getValue(WATERLOGGED);
+		}
+
+		@Override
+		protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+			level.setBlock(pos, GroundRocks.SALT_CRYSTALS.defaultBlockState().setValue(ROCKS, state.getValue(ROCKS)).setValue(WATERLOGGED, true),
+				Block.UPDATE_CLIENTS);
+		}
+	}
+
+	/** (0.16.24) Salt crystals: piles of 1-4 where rocks would lie, but in the water. They give Kitchen's salt. */
+	public static final class Salt extends LooseStonesBlock {
+		public Salt(BlockBehaviour.Properties properties, Supplier<Item> salt) {
+			super(properties, salt);
 		}
 
 		@Override

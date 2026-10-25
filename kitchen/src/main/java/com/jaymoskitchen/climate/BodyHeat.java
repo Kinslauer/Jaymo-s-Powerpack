@@ -367,7 +367,8 @@ public final class BodyHeat {
 		for (ToDoubleFunction<ServerPlayer> weather : WEATHER) {
 			air += (float) weather.applyAsDouble(player);
 		}
-		if (WinterCold.coldProof(player)) {
+		// (0.5.28) Comfort, from a hot bowl of something, keeps the cold off like Frostborn blood
+		if (WinterCold.coldProof(player) || player.hasEffect(com.jaymoskitchen.delight.Delight.COMFORT)) {
 			air = Math.max(air, -PROOF);
 		}
 		if (heatProof(player)) {

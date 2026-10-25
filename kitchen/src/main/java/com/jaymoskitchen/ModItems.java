@@ -46,6 +46,12 @@ public final class ModItems {
 				.build());
 		JOINT = register("joint", JointItem::new, new Item.Properties().durability(JointItem.PUFFS));
 		for (Dish dish : Dish.values()) {
+			if (dish.feast()) {
+				// (0.5.28) a feast is a block to set down, not something to eat (see delight/Feast)
+				DISHES.put(dish, com.jaymoskitchen.delight.Delight.feast(dish,
+					ResourceKey.create(Registries.ITEM, JaymosKitchen.id(dish.id()))));
+				continue;
+			}
 			// default stats are Good quality; cooking stamps the real quality onto each stack
 			Item.Properties properties = new Item.Properties()
 				.stacksTo(16)
@@ -62,7 +68,8 @@ public final class ModItems {
 			output.accept(PMEH);
 			output.accept(JOINT);
 			for (Dish dish : Dish.values()) {
-				if (dish.available()) {
+				// (feasts are listed with the rest of delight/Delight)
+				if (dish.available() && !dish.feast()) {
 					output.accept(DISHES.get(dish));
 				}
 			}

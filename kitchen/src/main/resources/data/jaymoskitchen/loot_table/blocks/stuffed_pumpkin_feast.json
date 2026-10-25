@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:stuffed_pumpkin_feast",
+        "state": {
+          "servings": "4"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:stuffed_pumpkin_feast"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/stuffed_pumpkin_feast"
+}

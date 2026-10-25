@@ -16,7 +16,9 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +33,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -198,13 +201,24 @@ public final class Theft {
 	private Theft() {
 	}
 
+	/** (0.7.205) Flint struck on one of Powers' rocks (flint in one hand, a rock in the other) lights fires too. */
+	private static boolean strikesFlint(Player player) {
+		ItemStack main = player.getMainHandItem(), off = player.getOffhandItem();
+		return main.is(Items.FLINT) && powersRock(off) || powersRock(main) && off.is(Items.FLINT);
+	}
+
+	private static boolean powersRock(ItemStack stack) {
+		Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		return id.getNamespace().equals("jaymospowers") && id.getPath().endsWith("_rock");
+	}
+
 	static void register() {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && !(sp.isSecondaryUseActive() && !sp.getItemInHand(hand).isEmpty())) {
 				opened(sp, server, hit.getBlockPos());
 			}
 			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && server == Factions.level(server.getServer())
-				&& (player.getItemInHand(hand).is(Items.FLINT_AND_STEEL) || player.getItemInHand(hand).is(Items.FIRE_CHARGE))) {
+				&& (player.getItemInHand(hand).is(Items.FLINT_AND_STEEL) || player.getItemInHand(hand).is(Items.FIRE_CHARGE) || strikesFlint(player))) {
 				KINDLED.add(new Kindled(sp.getUUID(), hit.getBlockPos().relative(hit.getDirection()).immutable(), server.getGameTime()));
 			}
 			return InteractionResult.PASS;

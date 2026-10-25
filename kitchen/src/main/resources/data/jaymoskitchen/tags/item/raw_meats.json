@@ -6,6 +6,12 @@
     "minecraft:rabbit",
     "minecraft:chicken",
     "minecraft:cod",
-    "minecraft:salmon"
+    "minecraft:salmon",
+    "jaymoskitchen:minced_beef",
+    "jaymoskitchen:raw_bacon",
+    "jaymoskitchen:chicken_cuts",
+    "jaymoskitchen:mutton_chops",
+    "jaymoskitchen:cod_slice",
+    "jaymoskitchen:salmon_slice"
   ]
 }

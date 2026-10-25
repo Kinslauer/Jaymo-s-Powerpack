@@ -6,6 +6,7 @@ import net.blay09.mods.cookingforblockheads.block.entity.OvenBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import com.jaymoskitchen.delight.CookwareBlock;
 import net.blay09.mods.cookingforblockheads.block.CuttingBoardBlock;
 import net.blay09.mods.cookingforblockheads.block.OvenBlock;
 import java.util.Arrays;
@@ -34,7 +35,13 @@ public enum Station {
 	STOVE_PAN(4, 4),
 	STOVE_FULL(4, 4),
 	/** A Cooking for Blockheads cutting board: the chopped dishes. Opened from the prep screen there (0.4.38). */
-	BOARD(4, 4);
+	BOARD(4, 4),
+	/**
+	 * (0.5.28) A Cooking Pot or Frying Pan set down over a fire, Farmer's Delight style (delight/CookwareBlock): the
+	 * pot cooks the stews and soups, the pan the grilled and seared dishes.
+	 */
+	HEARTH_POT(4, 4),
+	HEARTH_PAN(4, 4);
 
 	private final int timeNumerator;
 	private final int timeDenominator;
@@ -54,6 +61,8 @@ public enum Station {
 			case STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL -> dish.method() == Dish.Method.OVEN
 				|| (hasPot() && (dish.method() == Dish.Method.SEQUENCE || dish.method() == Dish.Method.STIR))
 				|| (hasPan() && (dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR));
+			case HEARTH_POT -> dish.method() == Dish.Method.SEQUENCE || dish.method() == Dish.Method.STIR;
+			case HEARTH_PAN -> dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR;
 			default -> dish.stations().contains(this);
 		};
 	}
@@ -97,7 +106,7 @@ public enum Station {
 		if (state.getBlock() instanceof CampfireBlock) {
 			return state.getValue(CampfireBlock.LIT) ? CAMPFIRE : null;
 		}
-		if (state.getBlock() instanceof CuttingBoardBlock) {
+		if (state.getBlock() instanceof CuttingBoardBlock || state.getBlock() instanceof com.jaymoskitchen.delight.CuttingBoardBlock) {
 			return BOARD;
 		}
 		if (state.is(Blocks.FURNACE)) {
@@ -130,6 +139,9 @@ public enum Station {
 				pan |= tool.is(KitchenBlocks.FRYING_PAN);
 			}
 			return stove(pot, pan);
+		}
+		if (state.getBlock() instanceof CookwareBlock cookware) {
+			return CookwareBlock.heated(level, pos) ? (cookware.isPot() ? HEARTH_POT : HEARTH_PAN) : null;
 		}
 		return of(state);
 	}

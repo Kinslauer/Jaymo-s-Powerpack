@@ -91,6 +91,22 @@ public enum Quality {
 
 	/** Stamps food stats, name and tooltip for this quality onto a freshly made dish. */
 	public void apply(ItemStack stack, Dish dish) {
+		if (dish.feast()) {
+			// (0.5.28) a feast isn't eaten as it is: only its name says how it went (its servings carry it, see FeastItem)
+			name(stack, switch (this) {
+				case BURNT -> List.of(Component.translatable("tooltip.jaymoskitchen.burnt").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+				case CHARRED -> List.of(Component.translatable("tooltip.jaymoskitchen.charred").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+				case UNDERCOOKED -> List.of(Component.translatable("tooltip.jaymoskitchen.undercooked").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
+				case PERFECT -> List.of(Component.translatable("tooltip.jaymoskitchen.perfect").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+				default -> List.of();
+			});
+			return;
+		}
+		apply(stack, dish.nutrition(), dish.saturation(), dish.perfectBuffs());
+	}
+
+	/** As {@link #apply(ItemStack, Dish)}, for food that isn't a dish of its own (a feast's servings). */
+	public void apply(ItemStack stack, int baseNutrition, float baseSaturation, List<Dish.Buff> perfectBuffs) {
 		int nutrition;
 		float saturation;
 		Consumable.Builder consumable = Consumables.defaultFood();
@@ -111,25 +127,29 @@ public enum Quality {
 				lore.add(Component.translatable("tooltip.jaymoskitchen.charred").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 			}
 			case UNDERCOOKED -> {
-				nutrition = Math.max(2, dish.nutrition() - 4);
+				nutrition = Math.max(2, baseNutrition - 4);
 				saturation = 0.3F;
 				// its sickness chance is RawFood's (half raw meat's)
 				lore.add(Component.translatable("tooltip.jaymoskitchen.undercooked").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 			}
 			case PERFECT -> {
-				nutrition = dish.nutrition() + 3;
-				saturation = dish.saturation() + 0.2F;
-				List<MobEffectInstance> effects = dish.perfectBuffs().stream().map(Dish.Buff::instance).toList();
+				nutrition = baseNutrition + 3;
+				saturation = baseSaturation + 0.2F;
+				List<MobEffectInstance> effects = perfectBuffs.stream().map(Dish.Buff::instance).toList();
 				consumable.onConsume(new ApplyStatusEffectsConsumeEffect(effects));
 				lore.add(Component.translatable("tooltip.jaymoskitchen.perfect").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
 			}
 			default -> {
-				nutrition = dish.nutrition();
-				saturation = dish.saturation();
+				nutrition = baseNutrition;
+				saturation = baseSaturation;
 			}
 		}
 		stack.set(DataComponents.FOOD, new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build());
 		stack.set(DataComponents.CONSUMABLE, consumable.build());
+		name(stack, lore);
+	}
+
+	private void name(ItemStack stack, List<Component> lore) {
 		Component baseName = Component.translatable(stack.getItem().getDescriptionId());
 		stack.set(DataComponents.ITEM_NAME, Component.translatable(translationKey(), baseName).withStyle(color));
 		if (!lore.isEmpty()) {

@@ -7,37 +7,31 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:flint",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
-              "add": false,
-              "count": 2,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymospowers:loose_flint",
-                  "properties": {
-                    "flints": "2"
-                  }
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:loose_flint",
+                "state": {
+                  "flints": "2"
                 }
-              ]
+              },
+              "count": 2
             },
             {
-              "function": "minecraft:set_count",
-              "add": false,
-              "count": 3,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymospowers:loose_flint",
-                  "properties": {
-                    "flints": "3"
-                  }
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:loose_flint",
+                "state": {
+                  "flints": "3"
                 }
-              ]
+              },
+              "count": 3
             },
             {
-              "function": "minecraft:explosion_decay"
+              "type": "minecraft:explosion_decay"
             }
           ]
         }

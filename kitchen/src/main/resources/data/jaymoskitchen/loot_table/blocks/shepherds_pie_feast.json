@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:shepherds_pie_feast",
+        "state": {
+          "servings": "4"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:shepherds_pie_feast"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/shepherds_pie_feast"
+}

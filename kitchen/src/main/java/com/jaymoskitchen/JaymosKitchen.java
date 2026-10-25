@@ -63,6 +63,8 @@ public class JaymosKitchen implements ModInitializer {
 		Mill.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
+		// (0.5.28) Farmer's Delight's pot and pan over a fire, cutting board, feasts, Comfort, cabbages and rice
+		com.jaymoskitchen.delight.Delight.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
@@ -72,6 +74,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.Hemp.register();
 		// fat, tallow, bark and tanning (its SOAKS attachment is class-loaded here)
 		com.jaymoskitchen.tanning.Tanning.register();
+		com.jaymoskitchen.tanning.Hides.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
@@ -127,6 +130,13 @@ public class JaymosKitchen implements ModInitializer {
 					serverPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskitchen.oven_off"));
 				}
 				return InteractionResult.PASS;
+			}
+			if (station == null && sneakingEmptyHanded && state.getBlock() instanceof com.jaymoskitchen.delight.CookwareBlock) {
+				// a pot or pan with no fire under it
+				if (player instanceof ServerPlayer serverPlayer) {
+					serverPlayer.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cookware_cold"));
+				}
+				return InteractionResult.SUCCESS;
 			}
 			// a cutting board opens the prep screen below, which has the chopping on it
 			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {

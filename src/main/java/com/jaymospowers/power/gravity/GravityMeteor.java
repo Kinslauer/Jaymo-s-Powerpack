@@ -64,6 +64,9 @@ final class GravityMeteor {
 	 * longer than these (ticks), and how far it slants in from behind you (blocks out per block down).
 	 */
 	static final double FALL_SPEED = 2.6, FALL_SLANT = 0.35;
+	/** (0.16.24) The film follows the rock down, this much past its fall (ticks); everyone this near (blocks) gets the bars. */
+	static final int FILM_AFTER = 15;
+	static final double FILM_WITNESSES = 64.0;
 	static final int FALL_TICKS_MIN = 50, FALL_TICKS_MAX = 120;
 	/** Anyone it hits on the way down (a tap's, a full charge's); they're hit once. */
 	static final float HIT_DAMAGE_MIN = 24.0F, HIT_DAMAGE_MAX = 50.0F;
@@ -233,6 +236,7 @@ final class GravityMeteor {
 		com.jaymospowers.core.Oddities.mark(rock, com.jaymospowers.core.Oddities.METEOR);
 		// always scaled (even a tap's), so it's drawn from far off: it starts a long way up
 		rock.setAttached(BlockCluster.SCALE, size);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.TRACK, fall + FILM_AFTER, to, rock, FILM_WITNESSES);
 		METEORS.add(new Meteor(level.dimension(), player.getUUID(), rock.getId(), from, to, level.getGameTime(), charge, fall));
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 2.0F + 4.0F * charge, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.5F, 0.4F);

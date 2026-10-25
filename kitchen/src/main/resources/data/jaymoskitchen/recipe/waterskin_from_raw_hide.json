@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " s ",
+    "r r",
+    " r "
+  ],
+  "key": {
+    "s": "#jaymoskitchen:cords",
+    "r": "jaymoskitchen:raw_hide"
+  },
+  "result": {
+    "id": "jaymoskitchen:waterskin"
+  }
+}

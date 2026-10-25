@@ -61,6 +61,31 @@
           "name": "jaymoskitchen:hemp_seeds"
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:inverted",
+            "term": "minecraft:tool/can_shear"
+          },
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:random_chance",
+            "chance": 0.02
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:cabbage_seeds"
+        }
+      ]
     }
   ],
   "random_sequence": "minecraft:blocks/short_grass"

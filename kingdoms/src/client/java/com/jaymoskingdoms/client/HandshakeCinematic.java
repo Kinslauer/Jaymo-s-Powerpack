@@ -22,13 +22,15 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.184) Your own handshake ({@link Handshakes}) as a short film: black bars slide in, the HUD clears, and the camera
- * cuts through three shots: a wide profile of the two of you pushing in as the hands reach, a close low shot of the
- * grip slowly circling while it's shaken, then over your shoulder onto their face as it ends. You're turned to face
- * them throughout. Like Jaymo's Powers' beam battle film (our own code, no one else's).
+ * cuts through three shots: a close side shot with the hands dead centre as they reach and come together and the first
+ * pumps, a wide profile of the two of you drawing back from it, then over your shoulder onto their face as it ends.
+ * You're turned to face them throughout. (0.7.205) Andy: "One of the frames the cutscene puts front and center NEEDS to
+ * be the hands actually coming together": the hands' shot opens the film, so the hands meet in it ({@link
+ * Handshakes#GRIP_TICK}), framed on where they meet. Like Jaymo's Powers' beam battle film (our own code, no one else's).
  */
 public final class HandshakeCinematic {
-	/** The shots' cuts (ticks into the shake): the grip shot from {@link #GRIP_CUT}, over the shoulder from {@link #FACE_CUT}. */
-	static final int GRIP_CUT = 12, FACE_CUT = 31;
+	/** The shots' cuts (ticks into the shake): the hands until {@link #WIDE_CUT}, wide until {@link #FACE_CUT}, then over the shoulder. */
+	static final int WIDE_CUT = 24, FACE_CUT = 34;
 	/** The view stays this long (ticks) after the hands let go, then comes back. */
 	static final int LINGER = 8;
 	/** Each bar's height, as a share of the screen's; how much of the way they slide a tick. */
@@ -36,11 +38,14 @@ public final class HandshakeCinematic {
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
 	static final double WALL_MARGIN = 0.3;
 	/** The wide shot: how far out to the side it starts and ends (blocks), and how high over the hands. */
-	static final double WIDE_FROM = 3.8, WIDE_TO = 2.7, WIDE_UP = 0.5;
-	/** The grip shot: how far from the hands (blocks), how low under them, and how far it circles (degrees). */
-	static final double GRIP_OUT = 1.2, GRIP_LOW = 0.15, GRIP_TURN = 35.0;
-	/** Where the hands meet, over the feet (blocks). */
-	static final double HANDS_Y = 1.05;
+	static final double WIDE_FROM = 2.6, WIDE_TO = 3.8, WIDE_UP = 0.5;
+	/** The hands' shot: how far out to the side (blocks), easing in to {@link #HANDS_IN}, how low under them, how far it drifts round (degrees). */
+	static final double HANDS_OUT = 1.6, HANDS_IN = 1.25, HANDS_LOW = 0.1, HANDS_TURN = 12.0;
+	/**
+	 * Where the hands meet, over the feet (blocks): the shoulder's height, less the arm's drop as {@code HandshakePose}
+	 * holds it out.
+	 */
+	static final double HANDS_Y = 1.15;
 	/** The vanilla HUD hidden while it runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
@@ -137,18 +142,18 @@ public final class HandshakeCinematic {
 		float t = minecraft.level.getGameTime() - since + partialTicks;
 		Vec3 pos;
 		Vec3 look;
-		if (t < GRIP_CUT) {
-			// wide, pushing in as the hands reach
-			float k = smooth(t / GRIP_CUT);
+		if (t < WIDE_CUT) {
+			// side on and a touch low, the hands dead centre: one reaching in to the other, meeting, the first pumps
+			float k = smooth(t / WIDE_CUT);
+			double angle = Math.toRadians((k - 0.5) * HANDS_TURN);
+			Vec3 out = across.scale(Math.cos(angle)).add(axis.scale(Math.sin(angle)));
+			pos = hands.add(out.scale(Mth.lerp(k, HANDS_OUT, HANDS_IN))).add(0.0, -HANDS_LOW, 0.0);
+			look = hands;
+		} else if (t < FACE_CUT) {
+			// wide, drawing back to take in the two of them
+			float k = smooth((t - WIDE_CUT) / (FACE_CUT - WIDE_CUT));
 			pos = hands.add(across.scale(Mth.lerp(k, WIDE_FROM, WIDE_TO))).add(0.0, WIDE_UP, 0.0);
 			look = hands.add(0.0, 0.25, 0.0);
-		} else if (t < FACE_CUT) {
-			// close and low on the grip, circling slowly
-			float k = smooth((t - GRIP_CUT) / (FACE_CUT - GRIP_CUT));
-			double angle = Math.toRadians((k - 0.5) * GRIP_TURN);
-			Vec3 out = across.scale(Math.cos(angle)).add(axis.scale(Math.sin(angle)));
-			pos = hands.add(out.scale(GRIP_OUT)).add(0.0, -GRIP_LOW, 0.0);
-			look = hands;
 		} else {
 			// over your shoulder onto their face, drifting in
 			float k = smooth(Mth.clamp((t - FACE_CUT) / (Handshakes.SHAKE_TICKS - FACE_CUT), 0.0F, 1.0F));
