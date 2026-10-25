@@ -32,7 +32,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * (0.16.2) Andy: RLCraft's start ("remove craftable planks, and add a flint hatchet you can craft by this route"):
+ * (0.16.3) Andy: RLCraft's start ("remove craftable planks, and add a flint hatchet you can craft by this route"):
  * <ol>
  * <li>flint (gravel, or loose on the ground: {@link GroundRocks}) knapped on the top of a hard block gives flint shards;</li>
  * <li>a shard on a stick makes the flint knife (Armory's primitive knife);</li>

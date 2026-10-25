@@ -63,7 +63,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.tinkering.Tinkering.init();
-		// (0.16.2) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
+		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.FirstTools.init();
 		// Enchanting System Overhaul (MIT) ported: learn from books, pay items at the table

@@ -24,7 +24,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * (0.16.2) Andy: "the world should be populated with random rocks [...] and flint". Loose rocks lie about the overworld,
+ * (0.16.3) Andy: "the world should be populated with random rocks [...] and flint". Loose rocks lie about the overworld,
  * in the stone of the ground under them (sandstone in deserts, deepslate down deep, mossy in jungles and swamps...), up
  * to 4 in a block like candles; loose flint lies about too, most on gravel and by water. A punch or a right click picks
  * them up; 4 rocks craft into their block (stone rocks into cobblestone). Assets: tools/gen_ground_rocks.py.

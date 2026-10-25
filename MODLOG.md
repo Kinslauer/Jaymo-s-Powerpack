@@ -2808,7 +2808,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Marksman Steady Aim (shots from a crouch +25%), Rider Barding (the horse you steer takes 30% less), Sorcerer Kindred
   Element (own element's harm halved: fire, freezing, lightning, drowning, explosions for earth, falls for air). Class
   cards show each boon as a new row. Compile-checked status in the PR; not playtested.
-- **0.16.2 / Kingdoms 0.7.197, ground rocks and RLCraft's start (`ground/`):** Andy: "the world should be populated with
+- **0.16.3 / Kingdoms 0.7.197, ground rocks and RLCraft's start (`ground/`):** Andy: "the world should be populated with
   random rocks [...] and flint", then "use the intro mechanics from RL Craft [...] remove craftable planks, and add a
   flint hatchet". Loose rocks (stone, mossy, granite, diorite, andesite, deepslate, tuff, sandstone, red sandstone)
   lie 1-4 to a block like candles, in the stone found under them (else the biome's), on the surface, river beds and cave

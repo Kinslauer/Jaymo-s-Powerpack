@@ -55,7 +55,7 @@ public final class Uncraftable {
 		"tacz:gun_smith_table");
 
 	/**
-	 * (0.16.2) Andy: no craftable planks (RLCraft's start, ground/FirstTools): a log is set down and split with an axe.
+	 * (0.16.3) Andy: no craftable planks (RLCraft's start, ground/FirstTools): a log is set down and split with an axe.
 	 * Every crafting recipe named for planks goes, vanilla's, the Aether's and other mods' alike.
 	 */
 	static boolean planks(Holder.Reference<Recipe<?>> recipe) {
