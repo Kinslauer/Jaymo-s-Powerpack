@@ -1,36 +1,9 @@
-"""(0.7.210) The underworld's contraband icons: a cloth twist of Pmeh and a paper-wrapped, twine-tied Shash brick.
+"""(0.7.210) The underworld's contraband icon: a paper-wrapped, twine-tied Shash brick (Pmeh is
+Jaymo's Kitchen's).
 Run from kingdoms/: python -I tools/gen_contraband.py"""
 from PIL import Image
 
 OUT = "src/main/resources/assets/jaymoskingdoms/textures/item/"
-
-
-def pmeh():
-    # a little cloth pouch tied at the neck, pale violet powder spilling from its mouth
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = img.load()
-    cloth, shade, dark, cord = (196, 182, 150, 255), (160, 146, 116, 255), (110, 98, 76, 255), (120, 70, 40, 255)
-    powder, powder2 = (214, 196, 236, 255), (176, 150, 212, 255)
-    body = {9: (4, 11), 10: (3, 12), 11: (3, 12), 12: (3, 12), 13: (4, 11), 14: (5, 10)}
-    for y, (a, b) in body.items():
-        for x in range(a, b + 1):
-            px[x, y] = shade if x >= b - 2 or y == 14 else cloth
-        px[a, y] = dark
-        px[b, y] = dark
-    for x in range(5, 11):
-        px[x, 15] = dark
-    for x in range(6, 10):
-        px[x, 8] = cord
-    for y, (a, b) in {5: (6, 9), 6: (5, 10), 7: (6, 9)}.items():
-        for x in range(a, b + 1):
-            px[x, y] = cloth if (x + y) % 3 else shade
-        px[a, y] = dark
-        px[b, y] = dark
-    for (x, y) in [(7, 4), (8, 4), (8, 3), (9, 3), (10, 4), (11, 5), (12, 6), (11, 7), (9, 4)]:
-        px[x, y] = powder if (x + y) % 2 else powder2
-    for (x, y) in [(12, 12), (13, 13), (12, 14), (2, 14)]:
-        px[x, y] = powder2
-    img.save(OUT + "pmeh.png")
 
 
 def shash_brick():
@@ -65,5 +38,4 @@ def shash_brick():
     img.save(OUT + "shash_brick.png")
 
 
-pmeh()
 shash_brick()

@@ -4601,9 +4601,12 @@ Andy (2026-10-25): "Id like to see illegal goods traded amongst the people. Rare
 for sale around specific cities that eventually become known as hotbeds for trafficking goods and gambling. You should be
 able to find these speakeasies hidden from the guard as being caught facilitating sale would end up with you flogged,
 imprisoned, or worse."
-- `Underworld`: about a third of realms (rolled once; a reveler's likelier, a tyrant's, paranoid king's or purist's
-  less) keep a den, which makes one of the two goods. Items: **Pmeh** (use: Speed and Haste 90 s, Nausea 6 s, Hunger
-  30 s) and **Shash Brick** (a trade good). Art: `tools/gen_contraband.py`.
+- `Underworld`: the wealthiest third of realms (Andy: "One in three cities that are wealthier, giving the criminals a
+  pool to siphon from", ranked by `Wealth.worth`) keep a den, which makes one of the two goods; a realm that grows into
+  the top third gets one too, and a dug den stays if its city grows poorer. Goods: **Pmeh** is Jaymo's Kitchen's own herb (Andy: "Pmeh has to be
+  rolled like it is in kitchen": roll it into a joint at a prep surface, then smoke it; looked up by id, so without
+  Kitchen every den deals in Shash) and the new **Shash Brick** (a trade good). Kitchen's joints count as contraband
+  too. Art: `tools/gen_contraband.py`.
 - `Speakeasy`: the den is dug under open natural ground (nothing over it but leaves) 14-50 blocks from the seat (earth over all of it, no block
   entities or water in the way): a spruce hatch in the grass by a hay bale, a ladder down a stone shaft, a 9 x 7 x 4
   room 9 below: a bar of barrels with the fence penned behind it, a red runner, a dice table with a green cloth and
@@ -4626,4 +4629,4 @@ imprisoned, or worse."
   escape: outlaw there and charged again), 80+ **beheaded** (killed, headless). Cells and executions go in the Tidings.
 - `/underworld den` (ops) gives the realm you stand in a den now; `/underworld heat <n>` sets its heat.
 - Stage 2 (not yet): guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading.
-- Tuning: the constants at the top of `Underworld`, `Speakeasy`, `Busts` and `PmehItem`.
+- Tuning: the constants at the top of `Underworld`, `Speakeasy` and `Busts`.

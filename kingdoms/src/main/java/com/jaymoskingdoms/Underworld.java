@@ -22,6 +22,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -54,9 +55,11 @@ import org.jspecify.annotations.Nullable;
  * for trafficking goods and gambling. You should be able to find these speakeasies hidden from the guard as being caught
  * facilitating sale would end up with you flogged, imprisoned, or worse."
  *
- * <p>Some realms (decided once, {@link #DEN_CHANCE}: likelier under a reveler, rarer under a tyrant, a paranoid king or a
- * purist) keep a <b>speakeasy</b>: a back room dug under the town ({@link Speakeasy}), reached by a ladder under a hatch in
- * the grass. Its <b>fence</b> sells and buys the contraband, <b>Pmeh</b> and <b>Shash bricks</b>; each den makes one of the
+ * <p>(Andy: "One in three cities that are wealthier, giving the criminals a pool to siphon from.") The wealthiest
+ * third of the realms ({@link #DEN_SHARE}, by {@code Wealth.worth}) keep a <b>speakeasy</b>; a realm that grows rich
+ * enough to join them gets one too, and a den once dug stays when its city's fortunes fall. It's a back room dug under the town ({@link Speakeasy}), reached by a ladder under a hatch in
+ * the grass. Its <b>fence</b> sells and buys the contraband, <b>Pmeh</b> (Jaymo's Kitchen's herb: roll it into a joint
+ * there to smoke it) and <b>Shash bricks</b>; each den makes one of the
  * two ({@link Den#makes}), so it's cheap there and dear in a den that makes the other: buy in one city, carry it across
  * the land, sell in another. Once a den is warm enough ({@link #DICE_HEAT}) a dice-thrower sets up there too (hold
  * emeralds and right-click him: a throw of two dice each, higher takes the pot).
@@ -75,8 +78,8 @@ import org.jspecify.annotations.Nullable;
  * from city to city.
  */
 public final class Underworld {
-	/** The chance a realm keeps a den; a reveler's likelier by this, a tyrant's, paranoid king's or purist's less by this. */
-	static final float DEN_CHANCE = 0.35F, REVELER_BONUS = 0.3F, STRICT_PENALTY = 0.2F;
+	/** One realm in this many keeps a den: the richest. */
+	static final int DEN_SHARE = 3;
 	/** Heat: what the den starts at, a sale adds, a day adds, a bust takes off; the dice from this; known from this; never above this. */
 	static final int START_HEAT = 0, HEAT_PER_SALE = 1, HEAT_PER_DAY = 2, HEAT_PER_BUST = -8, DICE_HEAT = 10, KNOWN_HEAT = 40, MAX_HEAT = 100;
 	/** One dice game in this many warms the city a point. */
@@ -113,10 +116,32 @@ public final class Underworld {
 	/** What a den makes. */
 	static final int PMEH = 0, SHASH = 1;
 
-	public static Item PMEH_ITEM, SHASH_BRICK;
+	public static Item SHASH_BRICK;
+	/** (Andy: "Pmeh has to be rolled like it is in kitchen") Pmeh is Jaymo's Kitchen's herb, rolled into its joints there to smoke. */
+	static final Identifier KITCHEN_PMEH = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "pmeh"),
+		KITCHEN_JOINT = Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "joint");
+
+	/** Kitchen's Pmeh (null without Jaymo's Kitchen: then every den deals in Shash). */
+	static @Nullable Item pmeh() {
+		return BuiltInRegistries.ITEM.getOptional(KITCHEN_PMEH).orElse(null);
+	}
+
+	private static @Nullable Item joint() {
+		return BuiltInRegistries.ITEM.getOptional(KITCHEN_JOINT).orElse(null);
+	}
+
+	/** What a new den makes: either, or Shash if there's no Pmeh to be had. */
+	private static int makes(RandomSource random) {
+		return pmeh() == null ? SHASH : random.nextInt(2);
+	}
+
+	/** The lang key of what a den makes. */
+	private static String good(Den d) {
+		return d.makes() == PMEH ? "item.jaymoskitchen.pmeh" : "item.jaymoskingdoms.shash_brick";
+	}
 
 	/**
-	 * A realm's underworld: whether it has a den at all ({@code has}, rolled once), what it makes, where its hatch is
+	 * A realm's underworld: whether it has a den at all ({@code has}: among the richest), what it makes, where its hatch is
 	 * ({@code built} once dug), how hot it runs, whether it's a known hotbed, the last day counted, and its cells (once
 	 * built, for {@link Busts}).
 	 */
@@ -177,10 +202,8 @@ public final class Underworld {
 	}
 
 	static void register() {
-		PMEH_ITEM = item("pmeh", PmehItem::new, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
 		SHASH_BRICK = item("shash_brick", Item::new, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
-			output.accept(PMEH_ITEM);
 			output.accept(SHASH_BRICK);
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
@@ -239,7 +262,11 @@ public final class Underworld {
 	// ---- the dens ------------------------------------------------------------------------------------------------------
 
 	static boolean contraband(ItemStack stack) {
-		return !stack.isEmpty() && (stack.is(PMEH_ITEM) || stack.is(SHASH_BRICK));
+		if (stack.isEmpty()) {
+			return false;
+		}
+		Item pmeh = pmeh(), joint = joint();
+		return stack.is(SHASH_BRICK) || pmeh != null && stack.is(pmeh) || joint != null && stack.is(joint);
 	}
 
 	static @Nullable Den den(MinecraftServer server, int realm) {
@@ -275,7 +302,7 @@ public final class Underworld {
 		boolean known = d.known() || heat >= KNOWN_HEAT;
 		if (known && !d.known()) {
 			Post.news(server, Component.translatable("news.jaymoskingdoms.underworld.hotbed", f.name(),
-				Component.translatable("item.jaymoskingdoms." + (d.makes() == PMEH ? "pmeh" : "shash_brick"))));
+				Component.translatable(good(d))));
 		}
 		put(server, d.withDay(d.day(), heat, known));
 	}
@@ -290,9 +317,9 @@ public final class Underworld {
 		MinecraftServer server = level.getServer();
 		Den d = den(server, f.id());
 		if (d == null) {
-			d = new Den(f.id(), true, level.getRandom().nextInt(2), f.seat(), false, START_HEAT, false, level.getGameTime() / 24000L, Optional.empty());
+			d = new Den(f.id(), true, makes(level.getRandom()), f.seat(), false, START_HEAT, false, level.getGameTime() / 24000L, Optional.empty());
 		} else if (!d.has()) {
-			d = d.opened(level.getRandom().nextInt(2));
+			d = d.opened(makes(level.getRandom()));
 		}
 		put(server, d);
 		if (!d.built()) {
@@ -319,17 +346,16 @@ public final class Underworld {
 		}
 		long day = now / 24000L;
 		RandomSource random = level.getRandom();
+		java.util.Set<Integer> rich = richest(server);
 		for (Faction f : Factions.all(server)) {
 			if (!f.type().isRealm() || f.fallen()) {
 				continue;
 			}
 			Den d = den(server, f.id());
-			if (d == null) {
-				// rolled once, the first time the realm is looked at
-				Tempers.Temper temper = Tempers.of(f);
-				float chance = DEN_CHANCE + (temper == Tempers.Temper.REVELER ? REVELER_BONUS : 0.0F)
-					- (temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.PARANOID || temper == Tempers.Temper.PURIST ? STRICT_PENALTY : 0.0F);
-				d = new Den(f.id(), random.nextFloat() < chance, random.nextInt(2), f.seat(), false, START_HEAT, false, day, Optional.empty());
+			if (d == null || !d.has() && rich.contains(f.id())) {
+				// one of the richest third: the criminals come where the money is
+				d = d == null ? new Den(f.id(), rich.contains(f.id()), makes(random), f.seat(), false, START_HEAT, false, day, Optional.empty())
+					: d.opened(makes(random));
 				put(server, d);
 			}
 			if (!d.has()) {
@@ -362,6 +388,23 @@ public final class Underworld {
 		for (ServerPlayer player : level.players()) {
 			visit(level, player, now);
 		}
+	}
+
+	/** The richest {@link #DEN_SHARE}th of the standing realms (at least one), by worth. */
+	private static java.util.Set<Integer> richest(MinecraftServer server) {
+		List<Faction> realms = new ArrayList<>();
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen()) {
+				realms.add(f);
+			}
+		}
+		realms.sort((a, b) -> Long.compare(Wealth.worth(server, b), Wealth.worth(server, a)));
+		java.util.Set<Integer> out = new java.util.HashSet<>();
+		int n = (realms.size() + DEN_SHARE - 1) / DEN_SHARE;
+		for (int i = 0; i < n; i++) {
+			out.add(realms.get(i).id());
+		}
+		return out;
 	}
 
 	/** The den keeps its fence (and, warm enough, its dice-thrower): one gone is replaced after a day. */
@@ -462,7 +505,7 @@ public final class Underworld {
 		Component way = Component.translatable("direction.jaymoskingdoms." + compass(dx, dz));
 		speaker.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		Speech.tell(level, speaker, player, Component.translatable("underworld.jaymoskingdoms.whisper." + level.getRandom().nextInt(LINES), way, paces,
-			Component.translatable("item.jaymoskingdoms." + (d.makes() == PMEH ? "pmeh" : "shash_brick"))), Speech.GOLD);
+			Component.translatable(good(d))), Speech.GOLD);
 	}
 
 	/** The eight winds, from a step of {@code dx, dz} (north is -z). */
@@ -528,11 +571,16 @@ public final class Underworld {
 			STOCKED.put(v.getUUID(), day);
 			MerchantOffers offers = v.getOffers();
 			offers.clear();
-			boolean pmeh = d.makes() == PMEH;
-			offers.add(sell(PMEH_ITEM, pmeh ? PMEH_SELL_HOME : PMEH_SELL_AWAY, pmeh ? HOME_STOCK : AWAY_STOCK));
-			offers.add(sell(SHASH_BRICK, pmeh ? SHASH_SELL_AWAY : SHASH_SELL_HOME, pmeh ? AWAY_STOCK : HOME_STOCK));
-			offers.add(buy(PMEH_ITEM, pmeh ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK));
-			offers.add(buy(SHASH_BRICK, pmeh ? SHASH_BUY_AWAY : SHASH_BUY_HOME, BUY_STOCK));
+			boolean home = d.makes() == PMEH;
+			Item pmeh = pmeh();
+			if (pmeh != null) {
+				offers.add(sell(pmeh, home ? PMEH_SELL_HOME : PMEH_SELL_AWAY, home ? HOME_STOCK : AWAY_STOCK));
+			}
+			offers.add(sell(SHASH_BRICK, home ? SHASH_SELL_AWAY : SHASH_SELL_HOME, home ? AWAY_STOCK : HOME_STOCK));
+			if (pmeh != null) {
+				offers.add(buy(pmeh, home ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK));
+			}
+			offers.add(buy(SHASH_BRICK, home ? SHASH_BUY_AWAY : SHASH_BUY_HOME, BUY_STOCK));
 			return;
 		}
 		if (!d.known() || !Crooks.isCrook(v) || last != null) {
@@ -541,7 +589,10 @@ public final class Underworld {
 		// a hotbed's crook buys in the street (offers kept once made, as with whale goods)
 		STOCKED.put(v.getUUID(), day);
 		MerchantOffers offers = v.getOffers();
-		offers.add(buy(PMEH_ITEM, STREET_PMEH, STREET_STOCK));
+		Item pmeh = pmeh();
+		if (pmeh != null) {
+			offers.add(buy(pmeh, STREET_PMEH, STREET_STOCK));
+		}
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
 	}
 
