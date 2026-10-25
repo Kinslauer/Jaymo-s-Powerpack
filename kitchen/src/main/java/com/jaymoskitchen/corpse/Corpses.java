@@ -56,7 +56,7 @@ public final class Corpses {
 	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).
 	 */
 	public static final TagKey<EntityType<?>> HEAVY_CORPSES = tag("heavy_corpses");
-	/** (0.5.24) What butchers an animal's corpse: any axe, and Jaymo's Powers' flint knife. */
+	/** (0.5.24) What butchers an animal's corpse: any axe, and Jaymo's Powers' primitive and bone knives. */
 	public static final TagKey<Item> BUTCHERING_TOOLS = TagKey.create(Registries.ITEM, JaymosKitchen.id("butchering_tools"));
 	/**
 	 * Fish, vanilla and modded (Alex's Mobs' flying fish, catfish...), on top of anything built on vanilla's fish class:

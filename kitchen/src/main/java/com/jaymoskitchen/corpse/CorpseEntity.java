@@ -1273,7 +1273,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
-		// an axe (or a flint knife) butchers it anywhere; on a butcher block it's done properly and pays better
+		// an axe (or a primitive or bone knife) butchers it anywhere; on a butcher block it's done properly and pays better
 		if (held.is(Corpses.BUTCHERING_TOOLS)) {
 			held.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 			chops++;
