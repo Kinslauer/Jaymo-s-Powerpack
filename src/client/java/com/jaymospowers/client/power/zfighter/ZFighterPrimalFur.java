@@ -26,8 +26,11 @@ import net.minecraft.world.entity.player.Player;
 public final class ZFighterPrimalFur {
 	public static final RenderStateDataKey<Boolean> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_primal_fur");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_primal_fur.png");
-	/** The fur sits this far over the skin (and under armour). */
-	static final float GAP = 0.15F;
+	/**
+	 * The fur sits this far over the skin: past MCA's villager clothes (0.0625 and their outer layer 0.25 more) and the skin's own
+	 * jacket and sleeves, so clothes don't hide it, and under armour (0.5).
+	 */
+	static final float GAP = 0.36F;
 
 	private ZFighterPrimalFur() {
 	}

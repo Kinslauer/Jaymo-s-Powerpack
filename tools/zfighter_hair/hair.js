@@ -197,5 +197,36 @@ const WI1 = spec('Wild 1', 1, COL[1], [...CAP, ...MASS], [...wild1(0, 1), ...BAN
 const WI2 = spec('Wild 2', 2, COL[2], [...CAP, ...MASS], [...wild1(3, 0.55), ...wild2extra(), ...BANG2]);
 const WI3 = spec('Wild 3', 3, COL[3], [...CAP3, ...MASS_W3], [...wild3()]);
 
+// ---- 0.16: four more sets (Andy: "give every z fighter a random super hair design from a pool of 6") ----
+// Crown: short stiff spikes thrown out all round like a star
+function crown(g, st) {
+  return [
+    L(0, -10, -2, 0.5 * st, 0, 5, 4, 7 + g, -0.2),
+    S(2.6, -10, -1.6, 0.4 * st, 0.7, 4, 4, 6 + g, -0.1, 0.2),
+    L(0, -10.5, 1, 0, 0, 6, 5, 9 + g * 1.3, 0),
+    S(2.8, -10.3, 1.2, -0.05, 0.9, 5, 4, 8 + g, 0, 0.2),
+    S(4.2, -8, -0.5, 0.1, 1.6, 4, 4, 6 + g / 2, 0, 0.1),
+    L(0, -10, 3.2, -0.6, 0, 5, 4, 8 + g, 0.1),
+    S(2.6, -10, 3, -0.5, 0.75, 4, 4, 7 + g, 0.1, 0.15),
+    L(0, -5.5, 4, -1.4, 0, 5, 3, 6, 0.3),
+  ];
+}
+// Fringe: tall flames with a heavy fringe hanging over the brow
+const FRINGE = [L(-1.5, -7.6, -4.5, PI - 0.1, -0.15, 3, 1, 6, -0.35), L(1.5, -7.6, -4.5, PI - 0.12, 0.2, 3, 1, 5.5, -0.35),
+  L(-3.3, -7.4, -4.3, PI - 0.05, -0.35, 2, 1, 5, -0.3), L(3.3, -7.4, -4.3, PI - 0.05, 0.35, 2, 1, 4.5, -0.3)];
+
+const FL1 = spec('Flame 1', 1, COL[1], [...CAP, ...MASS], [...upright(1, 0, 1), ...BANG1]);
+const FL2 = spec('Flame 2', 2, COL[2], [...CAP, ...MASS], [...upright(2, 3, 0.6), ...BANG2]);
+const FL3 = spec('Flame 3', 3, COL[3], [...CAP3, ...MASS3], [...s3crown(0.5), ...mane(1.0, 24)]);
+const GA1 = spec('Gale 1', 1, COL[1], [...CAP, ...MASS], [...swept(1, 0, 1), ...BANGS1B]);
+const GA2 = spec('Gale 2', 2, COL[2], [...CAP, ...MASS], [...swept(2, 3, 0.6), ...BANG2]);
+const GA3 = spec('Gale 3', 3, COL[3], [...CAP3, ...MASS3], [...s3crown(0), ...mane(0.8, 26)]);
+const CR1 = spec('Crown 1', 1, COL[1], [...CAP, ...MASS], [...crown(0, 1), ...BANGS_W1]);
+const CR2 = spec('Crown 2', 2, COL[2], [...CAP, ...MASS], [...crown(3, 0.6), ...BANGS_W1]);
+const CR3 = spec('Crown 3', 3, COL[3], [...CAP3, ...MASS3], [...s3crown(0.7), ...mane(1.4, 20)]);
+const FR1 = spec('Fringe 1', 1, COL[1], [...CAP, ...MASS], [...upright(1, 2, 1.3), ...FRINGE]);
+const FR2 = spec('Fringe 2', 2, COL[2], [...CAP, ...MASS], [...upright(2, 5, 0.8), ...FRINGE]);
+const FR3 = spec('Fringe 3', 3, COL[3], [...CAP3, ...MASS3], [...s3tight(), ...mane(0.3, 28), ...FRINGE.slice(0, 2)]);
+
 console.log('hair loaded');
-window.SPECS = [SW1, SW2, SW3, WI1, WI2, WI3];
+window.SPECS = [SW1, SW2, SW3, WI1, WI2, WI3, FL1, FL2, FL3, GA1, GA2, GA3, CR1, CR2, CR3, FR1, FR2, FR3];

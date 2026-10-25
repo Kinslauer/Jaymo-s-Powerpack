@@ -68,3 +68,10 @@ Super 4 (90 ki); C in Super 4 is the Spirit Bomb. Stats are the last entry of ea
 (fist 0.75, ki 1.55, drain 0.22). Hair stays long (Super 3 shape) and turns red via `ZFighterLineage.COLORS`; red fur
 on back, shoulders and arms from `ZFighterPrimalFur` (texture from `tools/gen_primal_fur.py`); flames, small flames
 and lava embers crackle off you. No mastery for Super 4. Test: `/powerdebug zfighter ape super4`.
+
+## Primal Super, settled aura, six hair sets (pack 0.16.4)
+Andy (2026-10-25): Super 4 renamed **Primal Super** (`/powerdebug zfighter ape primalsuper`). The full storm of aura,
+sparks and fire now only runs for `POWER_UP_TICKS` after going into a form (the power-up blast); after that a form
+settles to a thin aura shell out past the body (`settledAura`) and the rising ground debris, both stronger each form,
+with Primal Super's flames licking at the aura's edge. The fur layer sits at 0.36 so MCA clothes don't hide it. Six
+Super hair sets (swept, wild, flame, gale, crown, fringe; `tools/zfighter_hair/hair.js`), one per fighter by UUID.

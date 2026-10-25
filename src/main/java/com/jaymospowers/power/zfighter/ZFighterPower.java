@@ -130,6 +130,14 @@ public final class ZFighterPower implements Power {
 	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818};
 	/** Super 4's fire: flames a tick each of two kinds, and one in this many ticks an ember spits off him. */
 	static final int SUPER_4_FLAMES = 2, SUPER_4_EMBER_ODDS = 12;
+	/**
+	 * Andy: the full storm of aura, sparks and fire only for the power-up blast, this many ticks after going into a form.
+	 * After that it settles to the aura and the rising debris, both stronger each form, so the body (Super 4's fur) shows.
+	 */
+	static final int POWER_UP_TICKS = 50;
+	/** Settled: aura motes a tick per form, one in this many ticks a spark per form, one in this many a Super 4 flame lick. */
+	static final int SETTLED_SPARK_EVERY = 10, SETTLED_FLAME_EVERY = 3;
+	static final float SETTLED_AURA_SIZE = 0.8F;
 	/** Fully mastered, a form is this much stronger (scaled by mastery) and drains this much less. */
 	static final float MASTERY_POWER = 0.05F;
 	static final float MASTERY_EASE = 0.25F;
@@ -308,6 +316,8 @@ public final class ZFighterPower implements Power {
 		int rageCooldown;
 		/** When his charge last filled him (the burst). */
 		long lastFullBurst = -1000L;
+		/** When he last went into a form: the power-up blast's storm of particles runs {@link #POWER_UP_TICKS} from here. */
+		long formSince = -1000L;
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
 		/** (0.13.27) His ki colour ({@link #KI_COLOR}), kept fresh each tick; -1 before the first. */
@@ -633,12 +643,17 @@ public final class ZFighterPower implements Power {
 			// the aura roars harder with each form, and the ground under him breaks up and rises
 			// (thinner while charging, which has its own aura, so he isn't lost in it)
 			// (0.15.59) and a little harder the stronger he's grown
-			aura(player, live, live.charging ? live.form : 1 + 2 * live.form + auraStep(max) / 2);
+			boolean poweringUp = now - live.formSince < POWER_UP_TICKS;
+			if (live.charging || poweringUp) {
+				aura(player, live, live.charging ? live.form : 1 + 2 * live.form + auraStep(max) / 2);
+			} else {
+				settledAura(player, live, 1 + live.form / 2 + auraStep(max) / 4);
+			}
 			if (now % 2 == 0) {
 				debris(player, live);
 			}
 			if (!live.charging) {
-				idleFx(player, live, now);
+				idleFx(player, live, now, poweringUp);
 			}
 			if (live.ki <= 0.0F) {
 				endSuper(player, live);
@@ -908,6 +923,7 @@ public final class ZFighterPower implements Power {
 	/** The transformation into {@code form}: a blast of gold that throws back everything near. */
 	static void transform(ServerPlayer player, Live live, int form) {
 		live.form = form;
+		live.formSince = player.level().getGameTime();
 		if (live.limit > 0 && ZFighterTraining.of(player).mastery(form) < ZFighterTraining.NEXT_FORM_MASTERY) {
 			// Limit Break only holds on a form mastered a quarter of the way
 			endLimit(player, live);
@@ -1062,6 +1078,23 @@ public final class ZFighterPower implements Power {
 		}
 	}
 
+	/**
+	 * Settled in a form: a thin shell of finer motes out past his body, rising, a little thicker and faster each form (so
+	 * the body, Super 4's fur and hair, stays in sight).
+	 */
+	static void settledAura(ServerPlayer player, Live live, int count) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		DustParticleOptions dust = new DustParticleOptions(auraColor(live), SETTLED_AURA_SIZE + 0.1F * live.form);
+		for (int i = 0; i < count; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double r = 0.75 + 0.08 * live.form + random.nextDouble() * 0.2;
+			double h = random.nextDouble() * player.getBbHeight();
+			level.sendParticles(dust, true, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0,
+				0.0, 0.12 + 0.06 * live.form);
+		}
+	}
+
 	/** (0.15.59) His aura's step of power (0 to {@link #AURA_STEPS}): how far his max ki has grown past the start. */
 	static int auraStep(int max) {
 		return Mth.clamp((max - BASE_MAX_KI) / AURA_KI_STEP, 0, AURA_STEPS);
@@ -1139,8 +1172,11 @@ public final class ZFighterPower implements Power {
 		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, false);
 	}
 
-	/** Standing in a form: bits of the ground float round him, lightning crackles over him and sparks fly off him. */
-	private static void idleFx(ServerPlayer player, Live live, long now) {
+	/**
+	 * Standing in a form: bits of the ground float round him, and while {@code poweringUp} lightning crackles over him and
+	 * sparks (Super 4: fire) pour off him. Settled, only a spark or a lick of flame now and then, out at the aura's edge.
+	 */
+	private static void idleFx(ServerPlayer player, Live live, long now, boolean poweringUp) {
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
 		if (now % 2 == 0) {
@@ -1155,6 +1191,10 @@ public final class ZFighterPower implements Power {
 						player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.08 + random.nextDouble() * 0.1);
 				}
 			}
+		}
+		if (!poweringUp) {
+			settledFx(player, live, now, random);
+			return;
 		}
 		if (random.nextInt(IDLE_CRACKLE) <= live.form) {
 			crackle(player, random, live.form + 1);
@@ -1172,6 +1212,32 @@ public final class ZFighterPower implements Power {
 			if (random.nextInt(SUPER_4_EMBER_ODDS) == 0) {
 				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.6F, 0.9F);
+			}
+		}
+	}
+
+	/** Settled in a form: a spark per form now and then, and Super 4's fire licking up at the aura's edge, off his body. */
+	private static void settledFx(ServerPlayer player, Live live, long now, RandomSource random) {
+		ServerLevel level = player.level();
+		if (random.nextInt(IDLE_CRACKLE * 3) < live.form) {
+			crackle(player, random, live.form);
+		}
+		if (now % SETTLED_SPARK_EVERY == 0) {
+			for (int i = 0; i < live.form; i++) {
+				double a = random.nextDouble() * Math.PI * 2.0, r = 0.8 + 0.1 * live.form;
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * 2.0,
+					player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.1);
+			}
+		}
+		if (live.form == ApeRage.SUPER_4) {
+			if (now % SETTLED_FLAME_EVERY == 0) {
+				double a = random.nextDouble() * Math.PI * 2.0, r = 0.9 + random.nextDouble() * 0.3;
+				level.sendParticles(random.nextBoolean() ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME, true, false, player.getX() + Math.cos(a) * r,
+					player.getY() + 0.1 + random.nextDouble() * 1.6, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.04);
+			}
+			if (random.nextInt(SUPER_4_EMBER_ODDS * 2) == 0) {
+				level.sendParticles(ParticleTypes.LAVA, true, false, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.5F, 0.9F);
 			}
 		}
 	}
