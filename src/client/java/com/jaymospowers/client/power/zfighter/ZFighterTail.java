@@ -69,6 +69,11 @@ public final class ZFighterTail {
 		if (entity instanceof Player player && ZFighterLineage.of(player) == ZFighterLineage.WARRIOR) {
 			tail = ZFighterLineage.tailOut(player) ? 1 : 2;
 		}
+		com.jaymospowers.power.zfighter.ZFighterFusion.Look fused = entity instanceof Player player ? ZFighterFusionLook.of(player) : null;
+		if (tail == 0 && fused != null) {
+			// (0.16.16) fused with a Warrior: their tail
+			tail = fused.innerTail();
+		}
 		state.setData(KEY, tail);
 	}
 

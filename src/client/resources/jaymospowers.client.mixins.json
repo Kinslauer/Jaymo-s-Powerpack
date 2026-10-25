@@ -50,6 +50,7 @@
 		"CostumeAvatarRendererMixin",
 		"CostumeCoverModelFeatureRendererMixin",
 		"LivingEntityRendererLayersAccessor",
+		"TextureManagerAccessor",
 		"HiddenArmorAvatarRendererMixin",
 		"LimbPickMixin",
 		"PoseLayersLivingEntityRendererMixin",
