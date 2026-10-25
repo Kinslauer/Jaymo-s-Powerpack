@@ -85,6 +85,8 @@ public final class XenoformPower implements Power {
 	public static final int GLITCH_SELF_TICKS = 7200;
 	/** How often (ticks) a human checks whether the band is complete and the power ready to ascend. */
 	public static final int ASCEND_CHECK_EVERY = 40;
+	/** (0.16.24) An Ultimate's film (ticks): low and close, sweeping round the alien. */
+	static final int ULTIMATE_FILM_TICKS = 36;
 
 	private static final Identifier SCALE_ID = JaymosPowers.id("xenoform_scale");
 	private static final Identifier HEALTH_ID = JaymosPowers.id("xenoform_health");
@@ -646,6 +648,7 @@ public final class XenoformPower implements Power {
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, ULTIMATE_FILM_TICKS, 0.0);
 		player.sendOverlayMessage(form.ultimateName().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		Mastery.used(player);
 	}

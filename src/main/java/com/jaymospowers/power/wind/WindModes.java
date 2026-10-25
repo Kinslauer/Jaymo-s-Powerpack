@@ -109,6 +109,8 @@ public final class WindModes {
 	 */
 	static final int THUNDERHEAD_BOLTS = 5, THUNDERHEAD_DARK_TICKS = 70;
 	static final double THUNDERHEAD_DARK_RANGE = 48.0;
+	/** (0.16.24) The Thunderhead's film (ticks): the caster looks up into the storm, and everyone near gets the bars. */
+	static final int THUNDERHEAD_FILM_TICKS = 50;
 	/** While the Thunderhead lasts: a lightning flash (and thunder) every this many ticks, give or take. */
 	static final int THUNDERHEAD_FLASH_MIN = 90, THUNDERHEAD_FLASH_MAX = 260;
 	/** Turning a mode on: everyone this close gets the vignette, for this long. */
@@ -243,6 +245,7 @@ public final class WindModes {
 		}
 		player.setAttached(MODE, mode);
 		if (mode == BOTH) {
+			com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, THUNDERHEAD_FILM_TICKS, THUNDERHEAD_DARK_RANGE);
 			if (thunderPower(level) > 0.0F) {
 				thunderhead(player, level);
 			}

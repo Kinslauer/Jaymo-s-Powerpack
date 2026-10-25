@@ -97,6 +97,8 @@ public final class ChronoFlow {
 	public static final int FOLLOW_TICKS = 12;
 	/** The time stop's Stasis Field lasts this many times as long as G's (3-6 s, by abilities unlocked). */
 	static final int TIME_STOP_SCALE = 2;
+	/** (0.16.24) Going into Time Flow: the zoom out and back in (ticks), then the chime. */
+	static final int ENTER_FILM_TICKS = 32;
 	/** The time stop's burst: this many enchanting glyphs flung out from you, up to this far (blocks). */
 	static final int GLYPH_BURST = 320;
 	static final double GLYPH_BURST_RADIUS = 7.0;
@@ -419,8 +421,12 @@ public final class ChronoFlow {
 		Fighter fighter = fighter(player);
 		fighter.charges = ROLL_CHARGES;
 		player.setAttached(CHARGES, ROLL_CHARGES);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0F, 0.5F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.8F);
+		// (0.16.24) the view pulls out and rushes back in, and the chime rings as it lands
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ZOOM, ENTER_FILM_TICKS, 0.0);
+		com.jaymospowers.core.UltimateFilm.later(player, ENTER_FILM_TICKS, p -> {
+			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0F, 0.5F);
+			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.8F);
+		});
 		for (int i = 0; i < 24; i++) {
 			double a = i / 24.0 * Math.PI * 2.0;
 			ChronoFx.particles(level, player, GOLD, player.getX() + Math.cos(a) * 1.2, player.getY() + 0.1, player.getZ() + Math.sin(a) * 1.2, 1, 0.0, 0.0, 0.0, 0.0);

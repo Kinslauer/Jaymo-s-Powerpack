@@ -38,6 +38,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class HundredBlades {
 	public static final int COOLDOWN = 400;
+	/** (0.16.24) The film (ticks): low by where they fall, looking up at the portals; bars for everyone this near (blocks). */
+	static final int FILM_TICKS = 50;
+	static final double FILM_WITNESSES = 32.0;
 	public static final int RANGE = 48;
 	public static final int BLADES = 20;
 	public static final float BLADE_DAMAGE = 3.0F;
@@ -148,6 +151,7 @@ public final class HundredBlades {
 		double height = up.getType() == HitResult.Type.MISS ? HEIGHT : Math.max(MIN_HEIGHT, up.getLocation().y - point.y - 1.0);
 		Sky sky = new Sky(now, point.x, point.y, point.z, (float) height, player.getRandom().nextFloat() * Mth.TWO_PI);
 		player.setAttached(SKY, sky);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, FILM_TICKS, point, null, FILM_WITNESSES);
 
 		boolean corrupted = Fate.isCorrupted(player);
 		float damage = BLADE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F);
