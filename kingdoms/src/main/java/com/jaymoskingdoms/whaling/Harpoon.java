@@ -117,6 +117,14 @@ public final class Harpoon extends Projectile {
 		level.addFreshEntity(h);
 	}
 
+	/** (0.7.210, Whalers) Its line, fast to a whaleboat, passed up and made fast aboard {@code ship} at {@code knot} (in her frame). */
+	public void passTo(Ship ship, Vec3 knot) {
+		this.entityData.set(KNOT, new Vector3f((float)knot.x, (float)knot.y, (float)knot.z));
+		this.anchor = EntityReference.of(ship);
+		this.entityData.set(ANCHOR, ship.getId());
+		this.entityData.set(LINE, (float)Math.max(FIRST_LINE, ship.toWorld(knot.x, knot.y, knot.z).distanceTo(this.position()) + 1.0));
+	}
+
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(LODGED, -1);

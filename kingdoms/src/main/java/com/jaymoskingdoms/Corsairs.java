@@ -172,7 +172,7 @@ final class Corsairs implements Ship.Captaincy {
 		}
 		this.deckwork(level, ship, crew, foe, now);
 		if (crew.side == Crew.Side.WHALER) {
-			Whalers.tryworks(level, ship, crew);
+			Whalers.helm(level, ship, crew);
 		}
 		if (!crew.captained(ship)) {
 			return null;
@@ -196,8 +196,10 @@ final class Corsairs implements Ship.Captaincy {
 		float want;
 		double sail;
 		if (foe != null && (crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER)) {
-			// running: away from her, all sail
-			crew.mode = "run";
+			// running: away from her, all sail (a whaler keeps her voyage's place, to take up again)
+			if (crew.side == Crew.Side.MERCHANT) {
+				crew.mode = "run";
+			}
 			want = Fleet.bearing(ship, foe.getX(), foe.getZ()) + 180.0F;
 			sail = RUN_SAIL;
 		} else if (foe != null) {

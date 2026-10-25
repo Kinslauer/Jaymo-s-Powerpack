@@ -5229,6 +5229,7 @@
 	"message.jaymoskingdoms.whaler.signed": "You sign on with %s for a share of the catch. Be aboard when she comes home.",
 	"message.jaymoskingdoms.whaler.welcome": "Welcome aboard. Bring your irons.",
 	"message.jaymoskingdoms.whaler.sails": "Cast off! We sail for the whaling ground.",
+	"message.jaymoskingdoms.whaler.lower": "There she blows! Lower away!",
 	"message.jaymoskingdoms.whaler.lay": "Your lay: %s emeralds and two bottles of oil from %s.",
 	"message.jaymoskingdoms.whaler.home": "The whaler %s is home with %s whales and %s bottles of oil.",
 	"message.jaymoskingdoms.whale_cut_in": "Too big to cut from the water: lash it alongside a big ship to cut in the rest"

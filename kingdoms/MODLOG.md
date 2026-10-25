@@ -4607,6 +4607,16 @@ Andy (2026-10-25): "Start stage 3", crews seen at the task for their kingdoms ov
   (blubber to oil aboard), home: hold into the realm's stores, catch's worth into its purse (oil 3, ambergris 40,
   bone 2, meat 1), signed hands aboard paid a lay (10% of the worth, at least 4 emeralds, plus 2 oil).
 - Out of every player's reach for 2 days she's taken to have made her voyage unseen (1-2 whales' catch credited);
-  seen again later, she's stowed. She runs from pirates like a merchantman (then heads home); sunk, the voyage ends.
+  seen again later, she's stowed. She runs from pirates like a merchantman, then takes up her voyage where she left
+  it (a merchant's "run" mode no longer overwrites hers); sunk, the voyage ends.
+- Whaleboats (Andy: "it'd be hard for the larger ship required for processing to keep up"): a whale within 72 blocks,
+  she heaves to and lowers 2 spruce rowboats off the side toward it, an oarsman and a harpooner from her hands in each
+  (one hand always stays aboard). The server rows them (head brought round 5 degrees a tick, 0.04 a tick pulling),
+  they close to 7 blocks and the harpooner throws irons from 12, lines fast to the boat, so a running whale drags it.
+  She follows under 0.3 sail beyond 40 blocks. Dead, the boats tow the carcass back on their lines while she closes;
+  within 8 blocks of her side the lines are passed up and made fast aboard her (`Harpoon.passTo`) and she cuts in.
+  Boats with no orders (whale lost, cutting in, homeward) row back and are hoisted in beside her, their hands back
+  at their old stations; she won't sail home without them. A boat with no one left to row is cast adrift. Boats
+  carry a saved `whaleboat` attachment (her id and each hand's station), so they survive a reload.
 - `Harpoon.thrownAt` (crew harpooners, leading and lobbing), `WhaleCarcass.cutByCrew`, `Crew.Side.WHALER`,
   `Corsairs` hooks, `Navies.launch` now package-wide. Op: `/kingdom fleet whaler` (status, or fit one out now).
