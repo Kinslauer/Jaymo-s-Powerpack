@@ -1092,3 +1092,10 @@ anywhere, and none of its vegetables went into our minigames. New dishes, all th
 - A waterskin can also be sewn from 3 raw hide and a cord, so the first leather doesn't need leather.
 - Assets: `tools/gen_hides.py` (own pixel art; the rack uses vanilla spruce log textures). Recipes, the rack and the
   hide drops checked on a Powers dev server with a fake player; not seen in a client.
+
+## 0.5.29: Pmeh grows wild, rarely (Kingdoms 0.7.210, pack 0.16.32)
+Andy (2026-10-25), for Kingdoms' speakeasies: Pmeh should be a rare commodity, not free from tall grass.
+- Shearing tall grass no longer gives Pmeh (`loot_table/blocks/tall_grass.json`).
+- `herb/WildPmeh`: Wild Pmeh (a `WildCropBlock`, cross model) grows in jungles and savannas only, in scattered patches
+  (rarity 1 in 32 chunks, up to 5 plants). Breaking one gives 1-3 Pmeh. No seed, no block item, so it can't be farmed:
+  the rest comes through Kingdoms' dens. Art: `tools/gen_wild_pmeh.py`. The roll screen's hint says where it grows.

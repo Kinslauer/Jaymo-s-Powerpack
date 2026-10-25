@@ -4605,7 +4605,8 @@ imprisoned, or worse."
   pool to siphon from", ranked by `Wealth.worth`) keep a den, which makes one of the two goods; a realm that grows into
   the top third gets one too, and a dug den stays if its city grows poorer. Goods: **Pmeh** is Jaymo's Kitchen's own herb (Andy: "Pmeh has to be
   rolled like it is in kitchen": roll it into a joint at a prep surface, then smoke it; looked up by id, so without
-  Kitchen every den deals in Shash) and the new **Shash Brick** (a trade good). Kitchen's joints count as contraband
+  Kitchen every den deals in Shash; since Kitchen 0.5.29 it no longer comes from tall grass, only from rare wild
+  Pmeh in jungles and savannas) and the new **Shash Brick** (a trade good). Kitchen's joints count as contraband
   too. Art: `tools/gen_contraband.py`.
 - `Speakeasy`: the den is dug under open natural ground (nothing over it but leaves) 14-50 blocks from the seat (earth over all of it, no block
   entities or water in the way): a spruce hatch in the grass by a hay bale, a ladder down a stone shaft, a 9 x 7 x 4

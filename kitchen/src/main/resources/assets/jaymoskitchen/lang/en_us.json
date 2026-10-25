@@ -65,7 +65,7 @@
 	"step.jaymoskitchen.paper": "Paper",
 	"screen.jaymoskitchen.roll": "Rolling",
 	"screen.jaymoskitchen.roll.start": "Roll a joint",
-	"screen.jaymoskitchen.roll.or": "Or roll a joint: 1 Pmeh + 1 Paper (shear tall grass for Pmeh)",
+	"screen.jaymoskitchen.roll.or": "Or roll a joint: 1 Pmeh + 1 Paper (Pmeh grows wild in jungles and savannas)",
 	"screen.jaymoskitchen.roll.step_grind": "1. Grind the Pmeh",
 	"screen.jaymoskitchen.roll.hint_grind": "Hold the mouse and circle it around the grinder",
 	"screen.jaymoskitchen.roll.step_sprinkle": "2. Sprinkle it on the paper",
@@ -684,5 +684,6 @@
 	"jei.jaymoskitchen.drying.time": "About %s minutes, kept out of the rain",
 	"message.jaymoskitchen.drying_rack.hung": "Hung up %s: dry in about %s min",
 	"message.jaymoskitchen.drying_rack.full": "The rack's full",
-	"message.jaymoskitchen.drying_rack.wait": "About %s min until it's dry"
+	"message.jaymoskitchen.drying_rack.wait": "About %s min until it's dry",
+	"block.jaymoskitchen.wild_pmeh": "Wild Pmeh"
 }

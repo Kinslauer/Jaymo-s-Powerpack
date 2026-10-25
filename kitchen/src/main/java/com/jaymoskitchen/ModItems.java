@@ -24,7 +24,7 @@ public final class ModItems {
 	public static Item COOKING_OIL;
 	/** Made on a prep surface; the base of a pizza. */
 	public static Item DOUGH;
-	/** A herb found by shearing tall grass; rolled into joints on a prep surface. */
+	/** A herb picked from wild Pmeh (jungles and savannas, {@link com.jaymoskitchen.herb.WildPmeh}); rolled into joints on a prep surface. */
 	public static Item PMEH;
 	/** Rolled from Pmeh and paper; smoked a puff at a time. */
 	public static Item JOINT;
