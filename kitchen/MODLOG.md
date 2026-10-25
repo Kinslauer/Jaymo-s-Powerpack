@@ -1015,3 +1015,34 @@ Batch 3 of the BWM port (MIT, our own code).
   from its shaft (`TinkerMaterial.shaftStrength`: wood 60, crimson/warped 65, bone 80, blaze rod 90); other arrows use
   `SALVAGE_CHANCE`. The ones that will come out whole are kept as themselves (`StuckArrows.ITEMS`, corpse `ArrowItems`),
   so a Tinkering or tipped arrow comes back as the arrow it was.
+
+### 0.5.25: thirst, and heat and cold (pack 0.16.8)
+Andy's immersion pass (2026-10-25): Dehydration, Scorchful and Frostiful have no 26.3 builds (Dehydration is GPL, the
+other two LGPL and on Thermoo), so this is our own take on them, nothing copied. Package `climate`; game rules
+`jaymoskitchen:thirst` and `jaymoskitchen:body_heat` (both on) switch them off.
+- **Thirst** (`Thirst`, attachment `thirst`, synced to its player, full again after death): 20 points beside the hunger
+  bar, a point every 75 s at rest, more sprinting, swimming, in the Nether and much more when hot. At 6 or less you
+  can't sprint (`ThirstSprintMixin`, both sides), at 3 you're parched (weakness), at 0 it hurts every 6 s like starving
+  (easy keeps half your health, normal half a heart, hard kills; death message "died of thirst").
+- **Water**: a vanilla water bottle is river water, 5 points, 35% chance of a turned stomach (nausea + hunger). Use it on
+  a lit campfire to boil it: Clean Water (7 points, cools you). Sneak + empty hand at water sips 1 (dirty); sneak +
+  empty hand looking up in the rain sips clean. The Waterskin (3 leather + string) fills from water (5 drinks, dirty),
+  boils on a campfire like a bottle, 4/6 points a drink. Milk 6, potions 3, Kitchen brews 4, honey 1, stews 3, melon
+  2, berries/apples 1; strong spirits take 2.
+- **Body heat** (`BodyHeat`, attachment `body_heat`): -100 frozen to 100 heatstroke. The body drifts toward the air
+  (`ambient`): the biome's base warmth with the season's chill (cold lands down to -40 at snowy plains and lower on
+  frozen peaks; a desert about 52 in the shade), sun +15 (+5 on cold land), night -15 (-35 on dry land), half under a
+  roof, caves near 5, colder high up, rain -15, snow -20, in water -25 (wet -10 for a minute after), fires within 5
+  blocks (lava 45, fire/campfire 30, lit furnace 18, magma 12), wool and leather (+9 a piece in the cold, +4 stuffy in
+  heat, `warm_clothing` now has leather armour), `cool_clothing` (-8, empty for now), metal armour in the sun, a stew
+  in the last 3 minutes +12, and other mods' weather (`addWeather`: Kingdoms' blizzards -45, sandstorms +25).
+  Frostborn (cold) and Emberborn or Fire Resistance (heat) can't be pushed past 30.
+- Cold: -35 shivering burns food (this replaces winter's cold: `WinterCold` keeps only its tag and `setColdProof`),
+  -60 freezing (the game's own frost on the screen and slowed steps, held short of fully frozen), -85 frostbite hurts.
+  Heat: 35 sweating (thirst x1.6), 60 overheating (thirst x2.5, sweat drips, red screen edges), 85 heatstroke (nausea
+  spells, weakness, thirst x3.5, hurts near 100). The downed aren't hurt by either. One action-bar line when you cross
+  into something worse.
+- HUD (`client/climate/ClimateHud`): ten drops above the hunger bar (above Powers' feathers and the air bubbles),
+  murky while hunger's on you; a thermometer between hearts and hunger with an arrow while it moves. Art from
+  `tools/gen_climate.py` (hand-drawn grids; Clean Water reuses the potion model tinted, like cooking oil).
+- Compile-checked; a dev server boots (see PR). Not playtested in a client yet.
