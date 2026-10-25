@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 /**
  * A web slinger's bond with a symbiote. Saved, kept through death, and synced to everyone (others see the suit).
- * {@code flags} holds the toggles ({@link #SUIT}, {@link #ARMOR}, {@link #CRAWL}, {@link #TENDRILS_IN}); {@code hints} records which
+ * {@code flags} holds the toggles ({@link #SUIT}, {@link #ARMOR}, {@link #CRAWL}, {@link #TENDRILS}); {@code hints} records which
  * one-time whispers have already been heard. {@code bond} (0-{@link WebSymbiote#BOND_MAX}) is how far it trusts you: it
  * starts somewhere from nothing to halfway, grows with time and meals, and opens up its abilities as it climbs.
  * {@code strain} is a {@link WebSymbioteStrain} id (0 black, 1 white, 2 red); old saves load as black.
@@ -24,13 +24,16 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	public static final int CRAWL = 4;
 	/** The big body: the symbiote swollen over you (near death, or when it takes over). Not a toggle. */
 	public static final int BULK = 8;
+	// 16 is dead: it was TENDRILS_IN (0.15.152-0.16.5, "the tendrils drawn in"), replaced by the positive TENDRILS below.
+	// Old saves may still carry the bit; don't reuse it.
 	/**
-	 * (0.15.152) Living Armor's tendrils drawn in: the thin armour or the big suit worn alone, upright, no tendrils.
-	 * (0.15.153) On its own button (the menu's Tendrils slot, {@code WebSymbiote.TENDRILS_TOGGLE}; Andy: "separate its
-	 * activation from the living armor"). Cleared when the armour comes off or goes on, and whenever it takes the wheel
-	 * (a takeover, the near-death roar).
+	 * (0.16.6) The tendrils are out: over the plain suit, bare skin, the thin armour or the big suit. Their own toggle
+	 * (the menu's Tendrils slot, {@code WebSymbiote.TENDRILS_TOGGLE}) from Living Armor's unlock (Andy: "the tendrils
+	 * button should work as a toggle for the tendrils once you unlock them at 60 bond"). Set whenever Living Armor or
+	 * the big suit forms ("the big suit still forms with the tendrils for ... initial activation") and whenever it takes
+	 * the wheel (a takeover, the near-death roar); the armour coming off leaves it alone.
 	 */
-	public static final int TENDRILS_IN = 16;
+	public static final int TENDRILS = 32;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0, 0);
 

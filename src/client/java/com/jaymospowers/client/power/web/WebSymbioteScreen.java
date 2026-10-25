@@ -49,7 +49,7 @@ final class WebSymbioteScreen extends Screen {
 	private static final String[] NAMES = {"tendril", "armor", "crawl", "consume", "spikes", "shroud"};
 	/**
 	 * (0.13.23) The ring's slots: the six abilities, then the Mask (the suit's head off or on, {@link WebSymbiote#MASK_TOGGLE}),
-	 * then (0.15.153) the Tendrils (Living Armor's tendrils in or out, {@link WebSymbiote#TENDRILS_TOGGLE}),
+	 * then (0.15.153) the Tendrils (the tendrils out or in, {@link WebSymbiote#TENDRILS_TOGGLE}),
 	 * {@code SLOT_DEGREES} apart clockwise from the top.
 	 */
 	private static final int SLOTS = WebSymbiote.ABILITIES + 2, MASK_SLOT = WebSymbiote.ABILITIES, TENDRILS_SLOT = WebSymbiote.ABILITIES + 1;
@@ -226,12 +226,13 @@ final class WebSymbioteScreen extends Screen {
 		}
 
 		{
-			// (0.15.153) the Tendrils: Living Armor's tendrils into the suit or back out; lit while they're out
+			// (0.15.153) the Tendrils: out or in, their own toggle; lit while they're out; (0.16.6) dim until Living
+			// Armor's unlock gives them (armour on or not)
 			double t = Math.toRadians(TENDRILS_SLOT * SLOT_DEGREES - 90.0);
 			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
 			boolean picked = selected == WebSymbiote.TENDRILS_TOGGLE;
-			boolean usable = WebSymbiote.livingArmor(player);
+			boolean usable = WebSymbiote.unlocked(player, WebSymbiote.ARMOR);
 			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
 			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW);
 			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
@@ -308,8 +309,8 @@ final class WebSymbioteScreen extends Screen {
 			return Component.translatable(WebSymbiote.unmasked(player) ? "gui.jaymospowers.web_symbiote.mask_off" : "gui.jaymospowers.web_symbiote.mask_on");
 		}
 		if (selected == WebSymbiote.TENDRILS_TOGGLE) {
-			if (!WebSymbiote.livingArmor(player)) {
-				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_no_armor");
+			if (!WebSymbiote.unlocked(player, WebSymbiote.ARMOR)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_locked");
 			}
 			return Component.translatable(WebSymbiote.armored(player) ? "gui.jaymospowers.web_symbiote.tendrils_out" : "gui.jaymospowers.web_symbiote.tendrils_in");
 		}
