@@ -80,6 +80,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ClassScreen.register();
 		HeritageScreen.register();
 		LineageScreen.register();
+		// 0.7.201: letters and messenger pigeons
+		LetterScreen.register();
+		PigeonRenderer.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
 		ClassKeys.register();

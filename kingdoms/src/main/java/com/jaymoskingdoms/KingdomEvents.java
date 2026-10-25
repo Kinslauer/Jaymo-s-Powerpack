@@ -687,7 +687,8 @@ public final class KingdomEvents {
 	}
 
 	static void announce(MinecraftServer server, Component message) {
-		server.getPlayerList().broadcastSystemMessage(message, false);
+		// (0.7.201) not in everyone's chat: the news, brought by a pigeon or a townsman
+		Post.news(server, message);
 	}
 
 	static void forget(ServerPlayer player) {

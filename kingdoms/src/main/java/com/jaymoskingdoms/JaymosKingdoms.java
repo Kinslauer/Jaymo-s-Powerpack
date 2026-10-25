@@ -294,6 +294,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// 0.7.201: letters, messenger pigeons and couriers across the land; the news by letter, not chat (and their attachments)
+		LOGGER.debug("post attachments: {} {} {} {}", Couriers.ERRANDS, PigeonPost.FLIGHTS, Post.NAMES, Post.WAITING);
+		Letters.register();
+		Pigeon.register();
+		PigeonPost.register();
+		Post.register();
 		Couriers.register();
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
