@@ -6,6 +6,7 @@ import com.jaymospowers.core.Shakes;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -37,6 +38,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -63,8 +65,13 @@ import org.jspecify.annotations.Nullable;
  * A creature it cracks is stung; keep holding and the lash wraps it and holds it to you. Let go: a light one is hauled
  * over your head and slammed down in front of you, a heavy one yanked off its feet toward you and left reeling. Andy:
  * "the whip should also allow you to climb up a wall rappel style, trusting that you hooked the edge of an up to 7 block
- * wall": crack it at a wall and keep holding, and it's hooked over the top ({@link #HOOK}); you walk up the wall on it
- * and over the top (Sneak too: down again), and letting go drops you.</li>
+ * wall": crack it at a wall and keep holding, and it's hooked over the top ({@link #HOOK}); (0.16.24) you hang off it,
+ * jump by jump up the wall and over the top (Sneak too: down again), and letting go drops you. A crack that lands on
+ * dropped items flings them back to you.</li>
+ * <li>(0.16.24) <b>Swipe</b> (both): Andy: "add a far less powerful aoe swipe with both that follows your swing with the
+ * physics whip/flail. dealing damage when it connects. this attack deals more with the flail, but still less favorable
+ * to getting momentum with a swing." A charged left-click sends the head round in front of you ({@link #SWEEP}) and it
+ * clips whatever it passes ({@link #swipe}); the whirl and the slam still hit far harder.</li>
  * </ul>
  * The server runs it all; the head's path is worked out the same on both sides from the synced {@link State} (a player
  * attachment), so the chain or lash is drawn from the hand with no lag (client/armory/LashRenderer).
@@ -72,7 +79,7 @@ import org.jspecify.annotations.Nullable;
 public final class Lash {
 	public static final byte FLAIL = 0, WHIP = 1;
 	/** What the head is doing: whirling, coming down, flying back; (whip) cracking out, wrapped round, hauling. */
-	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6, HOOK = 7;
+	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6, HOOK = 7, SWEEP = 8;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/**
@@ -130,14 +137,28 @@ public final class Lash {
 	static final double HEAVE_REACH = 3.2, STEER = 0.75, MAX_SPEED = 2.6;
 	/**
 	 * (rappel) A wall whose top is at most this far above your feet can be climbed ((0.16.11) whatever the lash reaches);
-	 * the lash, cracked anywhere on its face, hooks over the top. (0.16.11) Andy: "the rappelling should only pull you up
-	 * as you walk": you hang on the lash (client/armory/LashRenderer.climb), and walking takes it in hand over hand this
-	 * fast (blocks a tick) up the wall; at the top (this far below the lip) you go up and over it, pushed in this hard;
-	 * with Sneak held you pay it out and let yourself down this fast. The hook gives after this long anyway.
+	 * the lash, cracked anywhere on its face, hooks over the top. (0.16.24) You hang on it, taut (client/armory/
+	 * LashRenderer.climb): each jump hauls you up a length, and with your hands at the lip you go up and over, pushed in
+	 * this hard; on the ground (more than this below the lip) it pays out as you walk; with Sneak held you let yourself down
+	 * this fast. The hook gives after this long anyway.
 	 */
-	public static final double CLIMB_HEIGHT = WHIP_REACH + 1.5, CLIMB_SPEED = 0.2, WALL_HUG = 0.12, OVER_THE_TOP = 0.7, OVER_PUSH = 0.3,
-		LOWER_SPEED = 0.1;
-	static final int HOOK_MAX = 400;
+	public static final double CLIMB_HEIGHT = WHIP_REACH + 1.5, OVER_THE_TOP = 0.7, OVER_PUSH = 0.3, LOWER_SPEED = 0.1;
+	static final int HOOK_MAX = 1200;
+	/**
+	 * (0.16.24) The swipe: a left-click at least this charged sends the head this far round in front of you (radians
+	 * either side of where you look), over this many ticks, at this reach from the chest (the whip's lash further). What it
+	 * clips takes this share of the flail's blow (the whirl's glance is {@link #GLANCE_SHARE} and more as it speeds up),
+	 * or this much from the whip, both times the swing's charge, pushed off this hard.
+	 */
+	public static final double SWEEP_ARC = 1.25, SWEEP_FLAIL_REACH = 2.0, SWEEP_WHIP_REACH = 4.2;
+	public static final int SWEEP_TICKS = 6;
+	static final float SWEEP_MIN_CHARGE = 0.6F, SWEEP_SHARE = 0.22F, SWEEP_WHIP_DAMAGE = 1.5F;
+	static final double SWEEP_HIT = 0.6, SWEEP_PUSH = 0.25;
+	/**
+	 * (0.16.24) Andy: "also allow the whip to pull items in": a crack that lands on dropped items (within this of where
+	 * it lands; the crack aims at one this near its line) flings them back to you, as the fishing rod does.
+	 */
+	static final double ITEM_GRAB = 1.2, ITEM_AIM = 0.7, ITEM_FLING = 0.1, ITEM_LOFT = 0.08;
 	/** The head flies back to the hand in this many ticks. */
 	public static final int RETURN_TICKS = 5;
 
@@ -177,6 +198,8 @@ public final class Lash {
 		boolean hadGravity = true;
 		/** Still holding use (the whip waits for the crack to land before deciding to wrap). */
 		boolean held = true;
+		/** (0.16.24) A left-click swipe: no cooldown after it. */
+		boolean swipe;
 
 		Run(ServerPlayer player) {
 			this.player = player;
@@ -188,6 +211,13 @@ public final class Lash {
 
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(Lash::tick);
+		// (0.16.24) a blow at someone swipes too (an air swing comes in through mixin/ServerGamePacketListenerImplMixin)
+		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (player instanceof ServerPlayer server && hand == InteractionHand.MAIN_HAND) {
+				swipe(server, entity);
+			}
+			return InteractionResult.PASS;
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Run run = RUNS.remove(handler.player.getUUID());
 			if (run != null) {
@@ -274,6 +304,10 @@ public final class Lash {
 				yield over.lerp(state.aim(), s * s);
 			}
 			case CRACK -> state.from().lerp(state.aim(), Math.min(1.0, t / CRACK_TICKS));
+			case SWEEP -> {
+				Vec3 arc = sweepPoint(player, state, t, partialTick);
+				yield t < 2.0 ? state.from().lerp(arc, t / 2.0) : arc;
+			}
 			case HOOK -> state.aim();
 			case SNAG, HEAVE, YANK -> {
 				Entity target = player.level().getEntity(state.target());
@@ -281,6 +315,23 @@ public final class Lash {
 			}
 			default -> state.from().lerp(hand, smooth(Math.min(1.0, t / RETURN_TICKS)));
 		};
+	}
+
+	/**
+	 * (0.16.24) The swipe's arc, {@code t} ticks in: round from your weapon side to the other, in front of your chest and
+	 * tilted with where you looked ({@code aim}: yaw and pitch in radians, then the reach), speeding up then easing off.
+	 */
+	public static Vec3 sweepPoint(Player player, State state, double t, float partialTick) {
+		double s = smooth(Mth.clamp(t / SWEEP_TICKS, 0.0, 1.0));
+		int side = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
+		double a = SWEEP_ARC * side * (1.0 - 2.0 * s);
+		double yaw = state.aim().x, pitch = state.aim().y;
+		Vec3 forward = new Vec3(-Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+		Vec3 chest = player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0);
+		// a little low at the ends, highest across the front
+		return chest.add(forward.scale(Math.cos(a) * state.aim().z)).add(right.scale(Math.sin(a) * state.aim().z))
+			.add(0.0, -0.25 * Math.abs(Math.sin(a)), 0.0);
 	}
 
 	/** How far round the whirl has gone after {@code t} ticks (speeding up to full over {@link #WINDUP}). */
@@ -371,6 +422,14 @@ public final class Lash {
 		Vec3 at = aim == null ? player.getEyePosition().add(player.getLookAngle().scale(WHIP_REACH))
 			: aim instanceof EntityHitResult hit ? hit.getEntity().getBoundingBox().getCenter() : aim.getLocation();
 		int target = aim instanceof EntityHitResult hit ? hit.getEntity().getId() : -1;
+		if (target < 0) {
+			// (0.16.24) nothing alive under the crosshair: dropped items on the way are what it's cracked at
+			ItemEntity item = aimItem(player, at);
+			if (item != null) {
+				at = item.position().add(0.0, item.getBbHeight() * 0.5, 0.0);
+				target = item.getId();
+			}
+		}
 		player.setAttached(STATE, new State(WHIP, CRACK, now, target, hand, at));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.4F);
@@ -456,6 +515,12 @@ public final class Lash {
 					heaveSlam(run, target);
 				}
 				if (t > HEAVE_SLAM) {
+					back(player, state, now);
+				}
+			}
+			case SWEEP -> {
+				sweep(run, state, t);
+				if (t >= SWEEP_TICKS) {
 					back(player, state, now);
 				}
 			}
@@ -649,7 +714,12 @@ public final class Lash {
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 5, 0.1, 0.1, 0.1, 0.15);
 		player.getMainHandItem().hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		Entity target = level.getEntity(state.target());
-		if (target != null && target.getBoundingBox().inflate(1.2).contains(at)) {
+		boolean caught = target instanceof LivingEntity && target.getBoundingBox().inflate(1.2).contains(at);
+		if (!caught && (fling(player, at) || target instanceof ItemEntity)) {
+			back(player, state, now);
+			return;
+		}
+		if (caught) {
 			if (target instanceof LivingEntity living && struck(player, living)) {
 				living.setInvulnerableTime(0);
 				living.hurtServer(level, level.damageSources().playerAttack(player), CRACK_DAMAGE);
@@ -771,9 +841,117 @@ public final class Lash {
 			}
 		}
 		ItemStack held = player.getMainHandItem();
-		if (state.kind() == FLAIL ? isFlail(held) : isWhip(held)) {
+		if (!run.swipe && (state.kind() == FLAIL ? isFlail(held) : isWhip(held))) {
 			player.getCooldowns().addCooldown(held, state.kind() == FLAIL ? FLAIL_COOLDOWN : WHIP_COOLDOWN);
 		}
+	}
+
+	/**
+	 * (0.16.24) A left-click with a flail or whip out of use (an air swing, or a blow at {@code attacked}): charged
+	 * enough, the head swipes round in front of you ({@link #SWEEP}), clipping all it passes but what you struck.
+	 * Called before the swing's charge is spent.
+	 */
+	public static void swipe(ServerPlayer player, @Nullable Entity attacked) {
+		ItemStack held = player.getMainHandItem();
+		boolean flail = isFlail(held);
+		if (!flail && !isWhip(held) || player.getAttached(STATE) != null || player.isUsingItem() || player.isSpectator()
+			|| player.getCooldowns().isOnCooldown(held) || player.getAttackStrengthScale(0.5F) < SWEEP_MIN_CHARGE) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Run run = new Run(player);
+		run.held = false;
+		run.swipe = true;
+		run.spin = player.getAttackStrengthScale(0.5F);
+		if (attacked != null) {
+			run.glanced.put(attacked.getId(), now);
+		}
+		RUNS.put(player.getUUID(), run);
+		Vec3 aim = new Vec3(player.getYRot() * Mth.DEG_TO_RAD, player.getXRot() * Mth.DEG_TO_RAD, flail ? SWEEP_FLAIL_REACH : SWEEP_WHIP_REACH);
+		player.setAttached(STATE, new State(flail ? FLAIL : WHIP, SWEEP, now, -1, hand(player, 1.0F), aim));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F,
+			flail ? 0.8F : 1.3F);
+		if (flail) {
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.4F, 1.2F);
+		}
+	}
+
+	/** One tick of a swipe: whatever the head (and a whip's lash near it) passed through is struck, once. */
+	private static void sweep(Run run, State state, long t) {
+		if (t < 1) {
+			return;
+		}
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 hand = hand(player, 1.0F);
+		Vec3 head = head(player, state, now, 1.0F), last = head(player, state, now - 1, 1.0F);
+		boolean flail = state.kind() == FLAIL;
+		AABB swept = new AABB(last, head).inflate(SWEEP_HIT);
+		if (!flail) {
+			// the lash's outer half sweeps too
+			swept = swept.minmax(new AABB(hand.lerp(last, 0.5), hand.lerp(head, 0.5)).inflate(SWEEP_HIT * 0.5));
+		}
+		float damage = (flail ? flailDamage(player) * SWEEP_SHARE : SWEEP_WHIP_DAMAGE) * run.spin;
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, swept, e -> struck(player, e))) {
+			if (run.glanced.containsKey(other.getId())) {
+				continue;
+			}
+			run.glanced.put(other.getId(), now);
+			if (other.hurtServer(level, level.damageSources().playerAttack(player), damage)) {
+				Vec3 push = head.subtract(last).multiply(1.0, 0.0, 1.0);
+				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(SWEEP_PUSH);
+				shove(other, new Vec3(push.x, 0.1, push.z));
+				level.playSound(null, other.getX(), other.getY(), other.getZ(), flail ? SoundEvents.CHAIN_HIT : SoundEvents.PLAYER_ATTACK_CRIT,
+					SoundSource.PLAYERS, 0.7F, flail ? 0.9F : 1.6F);
+				Vec3 at = other.getBoundingBox().getCenter();
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+		}
+	}
+
+	/** (0.16.24) A crack landed at {@code at}: dropped items there fly back to you. Whether there were any. */
+	private static boolean fling(ServerPlayer player, Vec3 at) {
+		List<ItemEntity> items = player.level().getEntitiesOfClass(ItemEntity.class, new AABB(at, at).inflate(ITEM_GRAB), Entity::isAlive);
+		for (ItemEntity item : items) {
+			Vec3 to = player.position().subtract(item.position());
+			// the fishing rod's toss: most of the way each tick, lofted by how far
+			shove(item, new Vec3(to.x * ITEM_FLING, to.y * ITEM_FLING + Math.sqrt(to.length()) * ITEM_LOFT, to.z * ITEM_FLING)
+				.subtract(item.getDeltaMovement()));
+		}
+		if (!items.isEmpty()) {
+			player.level().playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5F, 0.8F);
+		}
+		return !items.isEmpty();
+	}
+
+	/** (0.16.24) The nearest dropped item along the line from your eye to {@code end}, within {@link #ITEM_AIM} of it. */
+	private static @Nullable ItemEntity aimItem(Player player, Vec3 end) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 line = end.subtract(eye);
+		double length = line.length();
+		if (length < 1.0E-4) {
+			return null;
+		}
+		Vec3 dir = line.scale(1.0 / length);
+		ItemEntity best = null;
+		double nearest = Double.MAX_VALUE;
+		for (ItemEntity item : player.level().getEntitiesOfClass(ItemEntity.class, new AABB(eye, end).inflate(ITEM_AIM), Entity::isAlive)) {
+			Vec3 at = item.position().add(0.0, item.getBbHeight() * 0.5, 0.0).subtract(eye);
+			double along = Mth.clamp(at.dot(dir), 0.0, length);
+			if (at.subtract(dir.scale(along)).length() <= ITEM_AIM && along < nearest) {
+				nearest = along;
+				best = item;
+			}
+		}
+		return best;
+	}
+
+	/** (0.16.24) Hanging off a hooked lash (the server mustn't take it for flying). */
+	public static boolean hooked(Player player) {
+		State state = player.getAttached(STATE);
+		return state != null && state.phase() == HOOK;
 	}
 
 	// ---- helpers ----------------------------------------------------------------------------------------------------
