@@ -246,6 +246,43 @@ public final class RagdollSimCheck {
 			check("falls to the new ground", b.bottom() < was - 0.5, "bottom " + f(was) + " -> " + f(b.bottom()));
 		}
 
+		System.out.println("Pinned on a butcher table: stays on through settling and chopping (0.5.24)");
+		{
+			RagdollRig sheep = RagdollRig.of(RagdollRig.Shape.QUADRUPED, 0.9F, 1.3F);
+			java.util.Random r = new java.util.Random(1);
+			Object[][] cases = {{cow, 2.0}, {sheep, 1.0}, {player, 2.0}, {chicken, 1.0}};
+			for (Object[] c : cases) {
+				RagdollRig rig = (RagdollRig) c[0];
+				double size = (Double) c[1];
+				int fell = 0, tries = 0;
+				for (int yaw = 0; yaw < 360; yaw += 45) {
+					for (int seed = 0; seed < 6; seed++) {
+						tries++;
+						World w = ground().add(0, 64, 0, size, 65, size);
+						RagdollBody b = RagdollBody.lying(rig, size / 2, 65, size / 2, yaw, seed % 2 == 0, seed);
+						b.stop();
+						b.pin(0, 0, size, size);
+						run(b, w, 100);
+						for (int chop = 0; chop < 8; chop++) {
+							// as CorpseRagdoll.jolt(true): a random part knocked, mostly upward
+							int i = r.nextInt(rig.count);
+							double a = r.nextDouble() * Math.PI * 2;
+							b.hit(b.x[i], b.y[i], b.z[i], Math.cos(a) * 0.048, (0.5 + r.nextDouble() * 0.5) * 0.192, Math.sin(a) * 0.048, 0.35F);
+							for (int t = 0; t < 8; t++) {
+								b.step(w);
+							}
+						}
+						run(b, w, 200);
+						double[] m = b.middle();
+						if (m[1] < 64.95 || m[0] < 0 || m[0] > size || m[2] < 0 || m[2] > size) {
+							fell++;
+						}
+					}
+				}
+				check(rig.shape + " " + rig.width + "x" + rig.height + " on a " + (int) size + "x" + (int) size + " table", fell == 0, fell + "/" + tries + " fell off");
+			}
+		}
+
 		System.out.println(failures == 0 ? "All good." : failures + " failed.");
 		System.exit(failures == 0 ? 0 : 1);
 	}

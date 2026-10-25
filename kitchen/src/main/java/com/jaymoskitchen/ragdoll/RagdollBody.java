@@ -41,6 +41,8 @@ public final class RagdollBody {
 	private static final float KICK_SPEED = 0.03F, KICK_SHARE = 0.45F, KICK_LIFT = 0.04F;
 	/** A point pressed into a block from inside it goes out of the top if that's within this much of the nearest way out. */
 	private static final float PREFER_UP = 0.35F;
+	/** (0.5.24) Pinned on a table and lying on it, a body loses this much more of its speed each tick (it settles). */
+	private static final float PIN_DAMP = 0.7F;
 
 	public final RagdollRig rig;
 	public final double[] x, y, z, px, py, pz;
@@ -51,6 +53,9 @@ public final class RagdollBody {
 	private int quiet, sleepingFor;
 	private boolean asleep, grounded;
 	private int ticks;
+	/** (0.5.24) Pinned on a table: the torso's corners stay over this rectangle (min x, min z, max x, max z). */
+	private boolean pinned;
+	private double pinMinX, pinMinZ, pinMaxX, pinMaxZ;
 
 	public RagdollBody(RagdollRig rig) {
 		this.rig = rig;
@@ -211,6 +216,27 @@ public final class RagdollBody {
 		System.arraycopy(x, 0, px, 0, x.length);
 		System.arraycopy(y, 0, py, 0, y.length);
 		System.arraycopy(z, 0, pz, 0, z.length);
+	}
+
+	/**
+	 * (0.5.24) Pins the body on a table top (min x, min z, max x, max z): its torso can't leave the top, so it can't
+	 * roll or be knocked off, though its limbs and head still hang and flop over the edges.
+	 */
+	public void pin(double minX, double minZ, double maxX, double maxZ) {
+		pinned = true;
+		pinMinX = minX;
+		pinMinZ = minZ;
+		pinMaxX = maxX;
+		pinMaxZ = maxZ;
+		wake();
+	}
+
+	public void unpin() {
+		pinned = false;
+	}
+
+	public boolean pinned() {
+		return pinned;
 	}
 
 	public void wake() {
@@ -421,6 +447,9 @@ public final class RagdollBody {
 				sticks();
 				cones();
 				collide(k == ITERATIONS - 1);
+				if (pinned) {
+					pen();
+				}
 			}
 		}
 		rescale(substeps);
@@ -429,7 +458,7 @@ public final class RagdollBody {
 			grounded |= touching[i] && normalY[i] > 0.5F;
 		}
 		if (grounded) {
-			rescale(GROUND_DAMP);
+			rescale(pinned ? GROUND_DAMP * PIN_DAMP : GROUND_DAMP);
 		}
 		// asleep or not?
 		double moved = 0;
@@ -487,6 +516,22 @@ public final class RagdollBody {
 				pz[i] -= (vz - oz) * KICK_SHARE;
 				py[i] -= KICK_LIFT;
 				wake();
+			}
+		}
+	}
+
+	/** (0.5.24) Pinned: the torso's corners are held over the table top, their speed outward stopped. */
+	private void pen() {
+		for (int i = 0; i < 4; i++) {
+			if (x[i] < pinMinX) {
+				x[i] = px[i] = pinMinX;
+			} else if (x[i] > pinMaxX) {
+				x[i] = px[i] = pinMaxX;
+			}
+			if (z[i] < pinMinZ) {
+				z[i] = pz[i] = pinMinZ;
+			} else if (z[i] > pinMaxZ) {
+				z[i] = pz[i] = pinMaxZ;
 			}
 		}
 	}
