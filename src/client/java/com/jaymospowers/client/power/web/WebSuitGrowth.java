@@ -29,8 +29,8 @@ import net.minecraft.world.entity.player.Player;
 public final class WebSuitGrowth {
 	/** How long putting the suit on (or off) takes (ticks); during a roar it pieces itself together quicker. */
 	static final float TICKS = 36.0F, ROAR_TICKS = 26.0F;
-	/** Building the big body takes longer: it doubles over in pain as it grows (see WebFeral). */
-	static final float BULK_TICKS = 60.0F;
+	/** Building the big body takes longer: it doubles over in pain as it grows (see WebFeral), and the bulk swells gradually (was 60). */
+	static final float BULK_TICKS = 72.0F;
 	/**
 	 * Body, arms, head, legs: when each part's tendrils start out (share of the change). They take {@code WRAP_SPAN} to wrap
 	 * it, the goo layer starts {@code GOO_AFTER} after the tendrils do and takes {@code LAYER_SPAN}, the suit follows it
@@ -64,9 +64,11 @@ public final class WebSuitGrowth {
 	 * tear-off ({@link WebSuitTear}) is held at {@code FIGHT_TEAR_MIN} of the way through (clawing at your chest) and
 	 * driven up to {@code FIGHT_TEAR_MAX} (the mask off your face, the arms wrenching) by the struggle bar, back and forth
 	 * as it tugs. Won, only the face is bare ({@code WebSymbioteBond.FACE}): the suit's head is gone, and when the time's
-	 * up it flows back up over the face over {@code FACE_FLOW_TICKS}.
+	 * up it flows back up over the face over {@code FACE_FLOW_TICKS}. Whatever bares the face (that, the mask taken off
+	 * from the menu, a takeover's), the mask peels off it over {@code FACE_PEEL_TICKS} first (Andy: "the mask should
+	 * always animate peeling, on or off"), and flows back the same way; switched mid-way, it turns from where it is.
 	 */
-	static final float FIGHT_TEAR_MIN = 0.06F, FIGHT_TEAR_MAX = 0.3F, FACE_FLOW_TICKS = 16.0F;
+	static final float FIGHT_TEAR_MIN = 0.06F, FIGHT_TEAR_MAX = 0.3F, FACE_FLOW_TICKS = 16.0F, FACE_PEEL_TICKS = 14.0F;
 	/**
 	 * When the fight ends with the suit still on (won to a bare face, or lost), the tear-off it was held at settles back
 	 * over {@code FIGHT_SETTLE_TICKS} (the suit flowing back over the chest and arms) instead of popping back.
@@ -109,9 +111,14 @@ public final class WebSuitGrowth {
 
 	/** entity id → {shown level, level before the change, tick it changed, 1 if a takeover put it on (quicker)}. */
 	private static final Map<Integer, long[]> CHANGES = new HashMap<>();
-	/** Players whose face was bare last time we looked; and when each one's face began to be covered again. */
-	private static final Set<Integer> FACE_ON = new java.util.HashSet<>();
-	private static final Map<Integer, Long> FACE_GONE = new HashMap<>();
+	/** Per player whose mask is peeling off, off, or flowing back: which way, when it last turned, and how bare the face was then. */
+	private static final Map<Integer, Peel> FACES = new HashMap<>();
+
+	private static final class Peel {
+		boolean bare;
+		long turned;
+		float from;
+	}
 	/** Players fighting it for the suit (or settling after): how far the tear-off was, and when the fight ended (-1: still on). */
 	private static final Map<Integer, Settle> FIGHTS = new HashMap<>();
 
@@ -231,29 +238,40 @@ public final class WebSuitGrowth {
 	private static @org.jspecify.annotations.Nullable Float face(Player player, int level, long tick, float partialTicks) {
 		int id = player.getId();
 		if (level != 1) {
-			FACE_ON.remove(id);
-			FACE_GONE.remove(id);
+			FACES.remove(id);
 			return null;
 		}
 		// (0.13.23) or its mask taken off from the menu (WebSymbiote.UNMASKED): the face shows till it's put back
-		if (com.jaymospowers.power.web.WebSymbioteBond.faceBare(player) || WebSymbiote.unmasked(player)) {
-			FACE_ON.add(id);
-			FACE_GONE.remove(id);
-			return 1.0F;
+		boolean bare = com.jaymospowers.power.web.WebSymbioteBond.faceBare(player) || WebSymbiote.unmasked(player);
+		Peel peel = FACES.get(id);
+		if (peel == null) {
+			if (!bare) {
+				return null;
+			}
+			// the mask starts peeling off
+			peel = new Peel();
+			peel.bare = true;
+			peel.turned = tick;
+			peel.from = 0.0F;
+			FACES.put(id, peel);
+		} else if (peel.bare != bare) {
+			// turned the other way, from wherever it had got to
+			peel.from = bareness(peel, tick, partialTicks);
+			peel.bare = bare;
+			peel.turned = tick;
 		}
-		if (FACE_ON.remove(id)) {
-			FACE_GONE.put(id, tick);
-		}
-		Long gone = FACE_GONE.get(id);
-		if (gone == null) {
+		float face = bareness(peel, tick, partialTicks);
+		if (!bare && face <= 0.0F) {
+			FACES.remove(id);
 			return null;
 		}
-		float left = 1.0F - (tick - gone + partialTicks) / FACE_FLOW_TICKS;
-		if (left <= 0.0F) {
-			FACE_GONE.remove(id);
-			return null;
-		}
-		return left;
+		return face;
+	}
+
+	/** How bare the face is now along its peel (off over {@code FACE_PEEL_TICKS}, back over {@code FACE_FLOW_TICKS}). */
+	private static float bareness(Peel peel, long tick, float partialTicks) {
+		float since = tick - peel.turned + partialTicks;
+		return peel.bare ? Math.min(1.0F, peel.from + since / FACE_PEEL_TICKS) : Math.max(0.0F, peel.from - since / FACE_FLOW_TICKS);
 	}
 
 	/**
@@ -307,7 +325,7 @@ public final class WebSuitGrowth {
 		}
 		if (role == Role.HULK) {
 			WebHulk.Model hulk = (WebHulk.Model)model;
-			hulk.build(hulkBuilt(avatar), peeledHulk(avatar), k, avatar.ageInTicks);
+			hulk.build(hulkBuilt(avatar), peeledHulk(avatar), k, avatar.ageInTicks, WebHulk.teeth(avatar));
 			hulk.breathe(avatar);
 			// elbows and knees bending with the stride (after the limbs are posed above)
 			hulk.limbs(avatar);
@@ -472,8 +490,14 @@ public final class WebSuitGrowth {
 		}
 		float built = built(growth);
 		boolean big = Math.max(growth.from(), growth.to()) == 2;
+		// (the face bare, its mask off: the head is never laid over it, so it doesn't pop off when the change ends)
+		Float face = avatar.getData(FACE);
+		float headCover = face == null || big ? 1.0F : 1.0F - ease(face);
 		for (int i = 0; i < parts.length; i++) {
 			float cover = layered(built, i, role == Role.SUIT, big);
+			if (i == 3) {
+				cover = Math.min(cover, headCover);
+			}
 			// it folds down the part from the joint (each part's pivot), thickening as it settles
 			ModelPart part = parts[i];
 			float ripple = cover > 0.0F && cover < 1.0F ? Mth.sin(cover * Mth.PI * 2.0F + avatar.ageInTicks * 0.6F) * 0.04F : 0.0F;

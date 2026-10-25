@@ -50,6 +50,12 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/** The maw's tongue: pieces, each one's length (pixels), its width and thickness at the root, drooping each piece. */
 	private static final int TONGUE_PIECES = 14;
 	private static final float TONGUE_PIECE = 1.8F, TONGUE_WIDTH = 2.2F, TONGUE_THICK = 0.7F, TONGUE_DROOP = 0.04F;
+	/**
+	 * The maw's fangs stay in its gums until it's open (Andy: the teeth show only when he opens his mouth to eat): they
+	 * slide out as it morphs out of the head, all the way by {@code TEETH_AT} of the morph, and back in as it sinks. The
+	 * lower fangs root {@code JAW_FANG_ROOT} pixels down in the jaw.
+	 */
+	private static final float TEETH_AT = 0.6F, JAW_FANG_ROOT = 0.0F;
 
 	private final MouthModel model;
 
@@ -136,12 +142,30 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private final ModelPart root;
 		private final ModelPart skull;
 		private final ModelPart jaw;
+		private final ModelPart[] fangs, jawFangs;
 
 		MouthModel(ModelPart root) {
 			super(root, RenderTypes::entityCutout);
 			this.root = root;
 			this.skull = root.getChild("skull");
 			this.jaw = root.getChild("jaw");
+			this.fangs = new ModelPart[] {this.skull.getChild("fangs"), this.skull.getChild("fangs_r"), this.skull.getChild("fangs_l")};
+			this.jawFangs = new ModelPart[] {this.jaw.getChild("jaw_fangs"), this.jaw.getChild("jaw_fangs_r"), this.jaw.getChild("jaw_fangs_l")};
+		}
+
+		/** Slides the fangs out of the gums ({@code bare} 0 hidden, 1 out), eased. */
+		private void teeth(float bare) {
+			bare = WebEase.smooth(bare);
+			for (ModelPart fang : this.fangs) {
+				fang.yScale = bare;
+				fang.visible = bare > 0.02F;
+			}
+			for (ModelPart fang : this.jawFangs) {
+				// (they point up out of the chin: shrunk toward their root in it)
+				fang.y = JAW_FANG_ROOT * (1.0F - bare);
+				fang.yScale = bare;
+				fang.visible = bare > 0.02F;
+			}
 		}
 
 		@Override
@@ -165,6 +189,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				this.root.yScale = scale;
 				this.root.zScale = scale;
 				this.root.z = -LUNGE * gape;
+				this.teeth(morph / TEETH_AT);
 				return;
 			}
 			float[] counter = state.getData(WebSymbioteClient.COUNTER_MAW);
@@ -182,6 +207,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				this.root.yScale = scale;
 				this.root.zScale = scale;
 				this.root.z = -LUNGE * Math.min(open, 1.0F);
+				this.teeth(morph / TEETH_AT);
 				return;
 			}
 			if (ticks == null && stare != null) {
@@ -195,6 +221,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				this.root.yScale = scale;
 				this.root.zScale = scale;
 				this.root.z = -1.0F * morph;
+				this.teeth(morph / TEETH_AT);
 				return;
 			}
 			if (ticks == null) {
@@ -240,6 +267,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			this.root.yScale = scale;
 			this.root.zScale = scale;
 			this.root.z = -LUNGE * open;
+			this.teeth(morph / TEETH_AT);
 		}
 	}
 }

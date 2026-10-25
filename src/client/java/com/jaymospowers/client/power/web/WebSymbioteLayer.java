@@ -19,7 +19,7 @@ import net.minecraft.resources.Identifier;
  * ({@link WebStrainLook}).
  */
 final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
-	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
+	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
 	/** The raw goo laid on first, under the suit, as it's put on. */
 	private static final Identifier GOO = JaymosPowers.id("textures/entity/web_symbiote_goo.png");
 	/** Veins coursing over the feral suit ({@code tools/gen_web_veins.py}): frames cycled every {@code VEIN_TICKS}. */
