@@ -24,6 +24,8 @@ VARIANTS = [
     ('red_sandstone', 'red_sandstone_top', 'red_sandstone'),
 ]
 FLINT_TEXTURE = 'minecraft:block/smooth_basalt'
+# (0.16.24) rocks lying in water are salt crystals; picked up, they're Kitchen's salt
+SALT_TEXTURE = 'minecraft:block/calcite'
 
 # pebbles per pile size, [from, to] in model units; each size adds one to the last (like candles)
 ROCKS = [
@@ -97,13 +99,13 @@ def loot(block, item, prop, count):
             'entries': [{
                 'type': 'minecraft:item',
                 'name': item,
-                'functions': [{
-                    'function': 'minecraft:set_count',
-                    'add': False,
+                # (0.16.24) 26.3's format, as vanilla's candles (the old "functions" key was silently ignored: a
+                # pile always dropped one)
+                'modifier': [{
+                    'type': 'minecraft:set_count',
+                    'condition': {'type': 'minecraft:match_block', 'blocks': f'{NS}:{block}', 'state': {prop: str(n)}},
                     'count': n,
-                    'conditions': [{'condition': 'minecraft:block_state_property', 'block': f'{NS}:{block}',
-                                    'properties': {prop: str(n)}}],
-                } for n in range(2, count + 1)] + [{'function': 'minecraft:explosion_decay'}],
+                } for n in range(2, count + 1)] + [{'type': 'minecraft:explosion_decay'}],
             }],
         }],
         'random_sequence': f'{NS}:blocks/{block}',
@@ -131,6 +133,9 @@ def main():
     blockstate('loose_flint', 'flints', len(FLINTS), 'loose_flint')
     models('loose_flint', 'flints', len(FLINTS), FLINT_TEXTURE)
     loot('loose_flint', 'minecraft:flint', 'flints', len(FLINTS))
+    blockstate('salt_crystals', 'rocks', len(ROCKS), 'salt_crystals')
+    models('salt_crystals', 'rocks', len(ROCKS), SALT_TEXTURE)
+    loot('salt_crystals', 'jaymoskitchen:salt', 'rocks', len(ROCKS))
 
     # worldgen: the features pick the stone and the pile size themselves (GroundRocksFeature)
     for fid in ('loose_rocks', 'loose_flint'):
@@ -247,6 +252,12 @@ def first_tools():
         'type': 'minecraft:crafting_shapeless', 'category': 'misc',
         'ingredients': [f'{NS}:plant_fiber'] * 3,
         'result': {'id': f'{NS}:plant_string', 'count': 1},
+    })
+    # (0.16.24) Andy: "plant fiber should craft string with 8 in a crafting square"
+    write(os.path.join(DATA, 'recipe', 'ground', 'string_from_plant_fiber.json'), {
+        'type': 'minecraft:crafting_shaped', 'category': 'misc',
+        'pattern': ['###', '# #', '###'], 'key': {'#': f'{NS}:plant_fiber'},
+        'result': {'id': 'minecraft:string', 'count': 1},
     })
     write(os.path.join(DATA, 'recipe', 'ground', 'white_wool_from_plant_string.json'), {
         'type': 'minecraft:crafting_shaped', 'category': 'building',

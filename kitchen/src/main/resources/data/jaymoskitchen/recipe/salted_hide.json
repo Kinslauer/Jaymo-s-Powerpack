@@ -1,0 +1,14 @@
+{
+  "type": "jaymoskitchen:blade_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:raw_hide",
+    "jaymoskitchen:raw_hide",
+    "jaymoskitchen:salt",
+    "#jaymoskitchen:tanning_water"
+  ],
+  "result": {
+    "id": "jaymoskitchen:salted_hide",
+    "count": 1
+  }
+}

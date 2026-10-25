@@ -21,7 +21,8 @@ import net.minecraft.world.level.material.Fluids;
  * A few piles of loose rocks (or flint) around {@code origin}, on natural ground only (so not on paths, floors or roofs).
  * A rock is the stone of the ground it lies on: the first telling stone in the column under it (granite, diorite,
  * andesite, tuff, deepslate, sandstone...), else the biome's (mossy in jungles and swamps, sandstone in deserts and on
- * beaches, red sandstone in the badlands), else plain stone. Placement: worldgen/placed_feature/loose_*.json.
+ * beaches, red sandstone in the badlands), else plain stone; in water, salt crystals.
+ * Placement: worldgen/placed_feature/loose_*.json.
  */
 public record GroundRocksFeature(boolean flint) implements Feature {
 	public static final MapCodec<GroundRocksFeature> ROCKS_CODEC = MapCodec.unit(() -> new GroundRocksFeature(false));
@@ -63,6 +64,9 @@ public record GroundRocksFeature(boolean flint) implements Feature {
 					continue;
 				}
 				state = GroundRocks.LOOSE_FLINT.defaultBlockState().setValue(LooseStonesBlock.FLINTS, size(random, FLINT_SIZES));
+			} else if (level.getFluidState(spot).is(Fluids.WATER)) {
+				// (0.16.24) in the water they're salt
+				state = GroundRocks.SALT_CRYSTALS.defaultBlockState().setValue(LooseStonesBlock.ROCKS, size(random, ROCK_SIZES));
 			} else {
 				state = GroundRocks.ROCKS.get(variant(level, spot, random)).defaultBlockState().setValue(LooseStonesBlock.ROCKS, size(random, ROCK_SIZES));
 			}

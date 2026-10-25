@@ -70,6 +70,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskitchen.mill.machines.PowerMachines.POTTERS_WHEEL_ENTITY, com.jaymoskitchen.client.mill.PottersWheelRenderer::new);
 		// what's left on crafting tables
 		BlockEntityRenderers.register(Tables.CRAFTING_TABLE, CraftingTableRenderer::new);
+		// (0.5.27) hides hanging on drying racks
+		BlockEntityRenderers.register(com.jaymoskitchen.tanning.Hides.DRYING_RACK_ENTITY, com.jaymoskitchen.client.tanning.DryingRackRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);
 
 		// the quiver worn on players' backs

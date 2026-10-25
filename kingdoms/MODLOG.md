@@ -4547,6 +4547,9 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
 
+## 0.7.205: flint struck on a rock counts as lighting a fire (pack 0.16.24)
+- Powers 0.16.24 lets players light fires with flint in one hand and a rock in the other. `Theft`'s arson watch now
+  treats that like flint and steel (`strikesFlint`: flint plus any `jaymospowers:*_rock`). Compile-checked.
 ## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade, oil lamps, firebombs, boiling oil, sharks, the white whale (pack 0.16.25)
 Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
 animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
