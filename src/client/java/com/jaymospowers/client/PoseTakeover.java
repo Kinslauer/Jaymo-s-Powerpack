@@ -121,6 +121,11 @@ public final class PoseTakeover {
 	}
 
 	public static boolean posed(AvatarRenderState s) {
+		return posedOtherwise(s) || s.getData(com.jaymospowers.client.wounds.WoundNursePose.KEY) != null;
+	}
+
+	/** (0.16.21) One of our poses other than nursing a wound (which lets go under any of them) is on. */
+	public static boolean posedOtherwise(AvatarRenderState s) {
 		return aiming(s) || ragdolled(s) || s.getData(CrawlPose.KEY) != null || s.getData(LedgePose.KEY) != null
 			|| s.getData(com.jaymospowers.client.freerun.RunPose.SLIDE) != null || s.getData(com.jaymospowers.client.freerun.BalancePose.KEY) != null || s.getData(com.jaymospowers.client.freerun.UpRunPose.KEY) != null || s.getData(com.jaymospowers.client.freerun.BarHangPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.stamina.DodgeRollPose.KEY) != null

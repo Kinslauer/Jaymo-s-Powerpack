@@ -18,6 +18,8 @@ abstract class TendAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$tendState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		TendPose.extract(entity, state, partialTicks);
+		// (0.16.21) a hand to a wound now and then
+		com.jaymospowers.client.wounds.WoundNursePose.extract(entity, state, partialTicks);
 	}
 
 	@Inject(
