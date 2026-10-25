@@ -1562,3 +1562,24 @@ to 3 removals."
   hunched and galloping with the tendrils out, a heavy upright brute walk and two-legged charge with them in.
 - **Check first in game:** glob sizes on the big body (`BULK_OUT_*`, `BULK_SIZE` guessed), the snap between hunch
   and upright (no blend), the fangs doubling for a moment near the end of the build, flail damage near friends.
+
+## 0.16.1: a Tendrils slot, teeth that bare, globs under the skin, every switch eased
+- Andy (playtest of 0.15.164): "The teeth should bare idly like the tongue does ... there should be a smooth transition
+  for all animations ... the bulk grows too quickly ... the goo globs currently look too separate, or barnacle like ...
+  The mask should always animate peeling, on or off. Add a new button specifically for tendrils, and separate its
+  activation from the living armor. now we can refer to the big suit as such."
+- **Tendrils slot (`WebSymbiote.TENDRILS_TOGGLE`, menu slot 8):** draws Living Armor's tendrils into the suit or lets
+  them back out, thin armour or big suit; whispers with Living Armor off. Living Armor's press only puts the armour on
+  or off, and always starts with the tendrils out; takeovers and the roar still force them out. Player text says
+  "the big suit" for the bulked form.
+- **Teeth (`WebHulk.TEETH_*`, `WebMouthLayer.TEETH_AT`):** hidden by default, bared on an idle schedule like the tongue
+  and whenever the mouth opens, eased in and out. The doubled fangs near the end of the build were three skull fang
+  muscles heaving on different phases; the head now swells in step without overshoot.
+- **Eased switches (`WebEase`, `WebFeral.UPRIGHT_BLEND_TICKS`, `WebSuitGrowth.FACE_PEEL_TICKS`):** hunch to upright
+  brute blends over 9 ticks; the mask peels off over 14 ticks and flows back on, turning mid-way if switched again.
+- **Bulk-up (`WebSuitGrowth.BULK_TICKS` 72, `WebHulk.SWELL_*`):** each muscle swells from 40% of the change, staggered,
+  reaching full size exactly at the end.
+- **Globs (`WebGooGlobs`):** low wide swellings sunk half their thickness under the suit's skin, stretched along their
+  creep, skinned with the suit's own texture; tendrils still sprout from them.
+- **Check first in game:** the teeth-hidden open jaw shows the red throat strip (intended); the takeover fight's first
+  mask tear is still a step; Stare's maw still pops away at its end (pre-existing).
