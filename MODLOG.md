@@ -2814,7 +2814,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   lie 1-4 to a block like candles, in the stone found under them (else the biome's), on the surface, river beds and cave
   floors; loose flint (1-3) mostly on gravel and by water. Punch to break (drops one a stone), right click picks one up;
   4 rocks craft into their block. Flint right-clicked on top of a hard block knaps into 2 flint shards; shard over
-  stick = Flint Knife (was Primitive Knife); a knife cutting grass gives plant fiber, 3 make plant string (4 make white
+  stick = Primitive Knife; a knife cutting grass gives plant fiber, 3 make plant string (4 make white
   wool); shard + string + stick = Flint Hatchet (was Hand Axe, 3 flint + stick). Every crafting recipe named for planks
   is dropped (`Uncraftable.planks`); right click a log's top with any axe for planks (2 crude, 3 copper-grade, 4 iron+).
   Assets: `tools/gen_ground_rocks.py`.

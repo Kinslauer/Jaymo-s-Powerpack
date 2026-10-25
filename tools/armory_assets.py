@@ -57,7 +57,7 @@ TIERED = [
 # item id, name, AoW texture, Better Combat preset, vanilla tag, recipe, recipe count
 SINGLES = [
     ("primitive_spear", "Primitive Spear", "stone_age/caveman_spear", "jaymospowers:combo_spear", "swords", ["  F", " C ", "S  "], 1),
-    ("primitive_knife", "Flint Knife", "stone_age/caveman_knife", "jaymospowers:combo_dagger", "swords", ["H", "S"], 1),
+    ("primitive_knife", "Primitive Knife", "stone_age/caveman_knife", "jaymospowers:combo_dagger", "swords", ["H", "S"], 1),
     ("bone_knife", "Bone Knife", "stone_age/bone_knife", "jaymospowers:combo_dagger", "swords", ["B", "S"], 1),
     ("hand_axe", "Flint Hatchet", "stone_age/hand_ax", "jaymospowers:combo_hatchet", "axes", ["HP", "S "], 1),
     ("wooden_cudgel", "Wooden Cudgel", "stone_age/cudgel_wood", "jaymospowers:combo_mace", "swords", ["W", "S"], 1),

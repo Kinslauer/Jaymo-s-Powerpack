@@ -35,7 +35,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * (0.16.3) Andy: RLCraft's start ("remove craftable planks, and add a flint hatchet you can craft by this route"):
  * <ol>
  * <li>flint (gravel, or loose on the ground: {@link GroundRocks}) knapped on the top of a hard block gives flint shards;</li>
- * <li>a shard on a stick makes the flint knife (Armory's primitive knife);</li>
+ * <li>a shard on a stick makes the primitive knife;</li>
  * <li>grass cut with a knife gives plant fibre, 3 twist into plant string;</li>
  * <li>shard, string and stick make the flint hatchet (Armory's hand axe), the first thing that cuts wood;</li>
  * <li>logs don't craft into planks ({@code tinkering/Uncraftable}): set one down and right click its top with an axe.</li>
