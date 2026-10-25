@@ -84,3 +84,9 @@ third person because Shoulder Surfing skips drawing you when its own (unscaled) 
 each power's Mode line ("No Mode" when there is none); a power can give it its own job (`PowerClient.screenMode`, lang
 `power.<id>.toggle.mode`): Z Fighter's is Fusion (taps Z, then C). The Primal Super fur is now worn like a costume
 (`CostumeModels.worn`), so it follows MCA's body and every animation.
+
+## Ki glow (pack 0.16.7)
+Andy (2026-10-25), pointing at Create: Lanterns' ring-bearers (ARR, look only): "the aura on these characters is what i
+mean by the ki aura glow. it should be faint, but apparent". `ZFighterKiGlow`: three additive shells (0.45/0.95/1.6 px
+out, each fainter) worn like a costume, an energy-swirl texture (`tools/gen_ki_glow.py`) rising over them, in his ki
+colour (a form's colour in a form). Faint in base form, brighter in each form and while charging. Not on the ape.
