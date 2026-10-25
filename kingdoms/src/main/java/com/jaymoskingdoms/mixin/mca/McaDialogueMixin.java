@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.EmberHugs;
+import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
@@ -42,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
+ * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -99,6 +101,13 @@ abstract class McaDialogueMixin {
 				// (0.7.184) a guard walks you to the ruler
 				Audiences.request(player, villager);
 			}
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && Introductions.HANDSHAKE.equals(answer)) {
+			// (0.7.204) a hand held out: they think it over, and take it or don't
+			villager.getInteractions().stopInteracting();
+			Handshakes.offerTo(player, villager);
 			ci.cancel();
 			return;
 		}

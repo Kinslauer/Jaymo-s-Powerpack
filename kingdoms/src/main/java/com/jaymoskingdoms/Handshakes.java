@@ -33,9 +33,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -53,6 +55,11 @@ import net.minecraft.world.phys.Vec3;
  * handshake, but the cutscene only ever plays once for the same combo of players. Every other time it is a quicker
  * single dap variation." Each player keeps whom they've shaken hands with ({@link #SHOOK}); a pair that already has
  * gets a quick dap ({@link Hand#DAP}: one clasp and a tug, no film) instead.
+ * <p>
+ * (0.7.204) Andy: "allow handshaking with villagers too, not everyone will accept one as an introduction. but it will
+ * help if you dont speak the language to get started". "Offer a handshake" in MCA's menu ({@link #offerTo}): your hand
+ * goes out, they think it over ({@link #VILLAGER_THINK}), and either take it ({@link Introductions#takesHand}), the
+ * full shake on film and their name learned, or leave you hanging, and won't be asked again that day. A ruler never.
  */
 public final class Handshakes {
 	/** An offered hand waits this long (ticks) to be taken. */
@@ -65,6 +72,8 @@ public final class Handshakes {
 	public static final int DAP_GRIP = 5, DAP_RELEASE = 10, DAP_TICKS = 14;
 	/** Further apart than this (blocks) mid-shake breaks it off. */
 	static final double BREAK_DISTANCE = 3.5;
+	/** (0.7.204) How long (ticks) a villager thinks over an offered hand. */
+	static final int VILLAGER_THINK = 20;
 	/** The success sound's volume and pitch. */
 	static final float CHIME_VOLUME = 0.7F, CHIME_PITCH = 1.4F;
 
@@ -79,6 +88,19 @@ public final class Handshakes {
 	private static final Map<UUID, Offer> OFFERS = new HashMap<>();
 	/** The handshakes going on. */
 	private static final List<Shake> SHAKES = new ArrayList<>();
+	/** (0.7.204) Hands held out to villagers, waiting on their answer, and the handshakes with villagers going on. */
+	private static final List<Asked> ASKED = new ArrayList<>();
+	private static final List<VillagerShake> VILLAGER_SHAKES = new ArrayList<>();
+	/** (0.7.204) "villager/player" → the day that villager last turned that player's hand down. */
+	private static final Map<String, Long> TURNED_DOWN = new HashMap<>();
+
+	/** (0.7.204) {@code player} holds a hand out to {@code villager}, who answers at {@code decide} (game time): {@code takes} it or not. */
+	private record Asked(UUID player, Villager villager, long decide, boolean takes) {
+	}
+
+	/** (0.7.204) {@code player} and {@code villager} shake hands from {@code start} (game time); the villager stands facing {@code yaw}. */
+	private record VillagerShake(UUID player, Villager villager, long start, float yaw) {
+	}
 
 	private record Offer(UUID to, long until) {
 	}
@@ -139,6 +161,8 @@ public final class Handshakes {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer player && taken > 0.0F) {
 				breakOff(player);
+			} else if (entity instanceof Villager villager && taken > 0.0F) {
+				breakOff(villager);
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -148,6 +172,9 @@ public final class Handshakes {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OFFERS.clear();
 			SHAKES.clear();
+			ASKED.clear();
+			VILLAGER_SHAKES.clear();
+			TURNED_DOWN.clear();
 		});
 	}
 
@@ -188,6 +215,115 @@ public final class Handshakes {
 	/** {@code whom} as {@code viewer} knows them: their name, or "Stranger". */
 	private static Component nameFor(ServerPlayer viewer, ServerPlayer whom) {
 		return Introductions.knows(viewer, whom) ? Identities.trueName(whom) : Introductions.stranger();
+	}
+
+	/**
+	 * (0.7.204) {@code player} offers {@code villager} a handshake (MCA's menu, {@link Introductions#HANDSHAKE}): the
+	 * hand goes out and they think it over. Not behind a mask, not to a ruler, and not twice in a day to one who said no.
+	 */
+	public static void offerTo(ServerPlayer player, Villager villager) {
+		if (!can(player) || shaking(player.getUUID()) || busy(villager) || !villager.isAlive()) {
+			return;
+		}
+		if (Identities.masked(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.introduce.masked").withStyle(ChatFormatting.GRAY), true);
+			return;
+		}
+		if (Rulers.is(villager)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.ruler").withStyle(ChatFormatting.GRAY), true);
+			return;
+		}
+		Long down = TURNED_DOWN.get(villager.getUUID() + "/" + player.getUUID());
+		if (down != null && down == Deeds.today(player.level().getServer())) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.not_today").withStyle(ChatFormatting.GRAY), true);
+			return;
+		}
+		ASKED.add(new Asked(player.getUUID(), villager, player.level().getGameTime() + VILLAGER_THINK, Introductions.takesHand(player, villager)));
+		villager.getNavigation().stop();
+		send(player, villager.getId(), Hand.OFFERED);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.4F, 1.3F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.offered", villager.getType().getDescription())
+			.withStyle(ChatFormatting.GRAY), true);
+	}
+
+	/** (0.7.204) {@code villager} is weighing a hand or shaking one. */
+	private static boolean busy(Villager villager) {
+		for (Asked a : ASKED) {
+			if (a.villager == villager) {
+				return true;
+			}
+		}
+		for (VillagerShake s : VILLAGER_SHAKES) {
+			if (s.villager == villager) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** (0.7.204) {@code villager} answers {@code player}'s hand: takes it (the shake begins) or leaves it hanging. */
+	private static void answer(ServerPlayer player, Asked a, long now) {
+		Villager villager = a.villager;
+		ServerLevel level = player.level();
+		if (!a.takes) {
+			TURNED_DOWN.put(villager.getUUID() + "/" + player.getUUID(), Deeds.today(level.getServer()));
+			send(player, -1, Hand.DOWN);
+			Speech.say(level, villager, Component.translatable("handshake.jaymoskingdoms.refused"), Speech.WHITE, 12.0);
+			level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.refused").withStyle(ChatFormatting.GRAY), true);
+			return;
+		}
+		// you're set at arm's length in front of them, they turn to you
+		Vec3 axis = new Vec3(player.getX() - villager.getX(), 0.0, player.getZ() - villager.getZ());
+		axis = axis.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, villager.getYRot()) : axis.normalize();
+		place(player, villager.position().add(axis.scale(APART)), axis.reverse());
+		float yaw = (float)(Mth.atan2(axis.z, axis.x) * Mth.RAD_TO_DEG) - 90.0F;
+		face(villager, yaw);
+		hold(player, true);
+		VILLAGER_SHAKES.add(new VillagerShake(player.getUUID(), villager, now, yaw));
+		send(player, villager.getId(), Hand.SHAKING);
+		send(villager, player.getId(), Hand.SHAKING);
+	}
+
+	/** (0.7.204) {@code villager} stood still facing along {@code yaw}. */
+	private static void face(Villager villager, float yaw) {
+		villager.getNavigation().stop();
+		villager.setDeltaMovement(Vec3.ZERO);
+		villager.setYRot(yaw);
+		villager.setYBodyRot(yaw);
+		villager.setYHeadRot(yaw);
+	}
+
+	/** (0.7.204) The villager's hand went through: you know their name, and they say it (a name needs no shared tongue). */
+	private static void done(ServerPlayer player, Villager villager, Vec3 mid) {
+		Introductions.learn(player, villager);
+		ServerLevel level = player.level();
+		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.villager_done", Component.literal(villager.getName().getString()))
+			.withStyle(ChatFormatting.GREEN), true);
+	}
+
+	/** (0.7.204) Both let go: you're free to move, both arms lowered. */
+	private static void end(MinecraftServer server, VillagerShake s) {
+		ServerPlayer p = server.getPlayerList().getPlayer(s.player);
+		if (p != null) {
+			hold(p, false);
+			send(p, -1, Hand.DOWN);
+		}
+		send(s.villager, -1, Hand.DOWN);
+	}
+
+	/** (0.7.204) Whatever handshake {@code villager} is in is broken off. */
+	private static void breakOff(Villager villager) {
+		MinecraftServer server = villager.level().getServer();
+		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
+			VillagerShake s = it.next();
+			if (s.villager == villager) {
+				it.remove();
+				end(server, s);
+			}
+		}
 	}
 
 	/** The two shake hands: set at arm's length facing each other, held still, and their clients told. */
@@ -265,6 +401,14 @@ public final class Handshakes {
 	/** Whatever handshake {@code player} is in is broken off. */
 	private static void breakOff(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
+		ASKED.removeIf(a -> a.player.equals(player.getUUID()));
+		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
+			VillagerShake s = it.next();
+			if (s.player.equals(player.getUUID())) {
+				it.remove();
+				end(server, s);
+			}
+		}
 		for (Iterator<Shake> it = SHAKES.iterator(); it.hasNext(); ) {
 			Shake s = it.next();
 			if (s.has(player.getUUID())) {
@@ -286,10 +430,11 @@ public final class Handshakes {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (OFFERS.isEmpty() && SHAKES.isEmpty()) {
+		if (OFFERS.isEmpty() && SHAKES.isEmpty() && ASKED.isEmpty() && VILLAGER_SHAKES.isEmpty()) {
 			return;
 		}
 		long now = server.overworld().getGameTime();
+		tickVillagers(server, now);
 		for (Iterator<Map.Entry<UUID, Offer>> it = OFFERS.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Offer> e = it.next();
 			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
@@ -324,6 +469,49 @@ public final class Handshakes {
 		}
 	}
 
+	/** (0.7.204) Hands held out to villagers answered, and handshakes with them kept going (or broken off). */
+	private static void tickVillagers(MinecraftServer server, long now) {
+		for (Iterator<Asked> it = ASKED.iterator(); it.hasNext(); ) {
+			Asked a = it.next();
+			ServerPlayer p = server.getPlayerList().getPlayer(a.player);
+			boolean gone = p == null || !can(p) || !a.villager.isAlive() || a.villager.isRemoved() || p.level() != a.villager.level()
+				|| p.distanceTo(a.villager) > REACH * 2.0 || !p.getMainHandItem().isEmpty();
+			if (gone) {
+				it.remove();
+				if (p != null) {
+					send(p, -1, Hand.DOWN);
+				}
+			} else if (now >= a.decide) {
+				it.remove();
+				answer(p, a, now);
+			} else {
+				a.villager.getNavigation().stop();
+				a.villager.getLookControl().setLookAt(p);
+			}
+		}
+		for (Iterator<VillagerShake> it = VILLAGER_SHAKES.iterator(); it.hasNext(); ) {
+			VillagerShake s = it.next();
+			ServerPlayer p = server.getPlayerList().getPlayer(s.player);
+			Villager v = s.villager;
+			if (p == null || !can(p) || !v.isAlive() || v.isRemoved() || p.level() != v.level() || p.distanceTo(v) > BREAK_DISTANCE) {
+				it.remove();
+				end(server, s);
+				continue;
+			}
+			face(v, s.yaw);
+			long t = now - s.start;
+			Vec3 mid = p.position().add(v.position()).scale(0.5).add(0.0, 1.1, 0.0);
+			if (t == GRIP_TICK) {
+				p.level().playSound(null, mid.x, mid.y, mid.z, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.6F, 0.8F);
+			}
+			if (t >= SHAKE_TICKS) {
+				it.remove();
+				end(server, s);
+				done(p, v, mid);
+			}
+		}
+	}
+
 	/** The handshake went through: each knows the other's name, they're grouped, and a chime (a lighter one for a dap). */
 	private static void done(ServerPlayer offerer, ServerPlayer taker, Vec3 mid, boolean dap) {
 		Introductions.learn(offerer, taker);
@@ -342,11 +530,13 @@ public final class Handshakes {
 		}
 	}
 
-	/** Tells everyone who can see {@code player} (and them) where their hand is. */
-	private static void send(ServerPlayer player, int partnerId, int state) {
+	/** Tells everyone who can see {@code player} (and them) where their hand is (0.7.204: a villager's too). */
+	private static void send(Entity player, int partnerId, int state) {
 		Hand packet = new Hand(player.getId(), partnerId, state);
 		List<ServerPlayer> to = new ArrayList<>(PlayerLookup.tracking(player));
-		to.add(player);
+		if (player instanceof ServerPlayer self) {
+			to.add(self);
+		}
 		for (ServerPlayer p : to) {
 			if (ServerPlayNetworking.canSend(p, Hand.TYPE)) {
 				ServerPlayNetworking.send(p, packet);
