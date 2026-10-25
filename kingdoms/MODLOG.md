@@ -4452,3 +4452,14 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   the nearest Hornkin fort or piglin camp. They attack Hornkin and piglins on sight, and players (not Emberborn, not
   creative) only within 24 blocks of their own camp. Anyone not Emberborn gets no talk or menu from them.
 - Compile-checked against the 26.3 and MCA jars; not yet seen in game.
+## 0.7.197: Bounty boards face the open square
+- Andy: "the bounty board shouldn't be facing blocks so close like this when there is a wide open square in front of
+  it". A town's board used to go up at the nearest free spot by the bell, always facing the bell, so it could stare
+  at a wall or a market stall one block away.
+- Now every free spot 3-8 blocks from the bell is tried in all four facings and scored by the open ground before it
+  (5 lanes, counted out to 8 blocks until something you can't walk through), plus a little for facing the bell, minus
+  a little per block from the bell. The best one gets the board. Numbers: `BOARD_VIEW`, `BOARD_VIEW_SIDE`,
+  `BOARD_BELL_BONUS`, `BOARD_OPEN_ENOUGH`, `BOARD_TURN_GAIN` at the top of `Bounties`.
+- Boards already up that see less than 20 open blocks are looked over once per server run; if another spot sees at
+  least 6 more, the board moves there (pinned notices come down; villagers pin new ones).
+- Compile-checked status in the PR; not yet seen in game.
