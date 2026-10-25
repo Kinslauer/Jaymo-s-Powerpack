@@ -62,7 +62,9 @@ public final class ModItems {
 			output.accept(PMEH);
 			output.accept(JOINT);
 			for (Dish dish : Dish.values()) {
-				output.accept(DISHES.get(dish));
+				if (dish.available()) {
+					output.accept(DISHES.get(dish));
+				}
 			}
 		});
 	}

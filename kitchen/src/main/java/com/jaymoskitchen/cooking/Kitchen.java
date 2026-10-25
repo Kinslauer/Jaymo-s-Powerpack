@@ -372,13 +372,13 @@ public final class Kitchen {
 	}
 
 	/** Bit i set: the station's i-th dish can be made from what's in reach (for greying out the rest). */
-	public static int stocked(ServerPlayer player, BlockPos pos, Station station) {
+	public static long stocked(ServerPlayer player, BlockPos pos, Station station) {
 		KitchenPool pool = sources(player, pos);
 		List<Dish> dishes = station.dishes();
-		int mask = 0;
-		for (int i = 0; i < dishes.size() && i < 31; i++) {
+		long mask = 0;
+		for (int i = 0; i < dishes.size() && i < 63; i++) {
 			if (hasIngredients(pool, dishes.get(i).ingredients())) {
-				mask |= 1 << i;
+				mask |= 1L << i;
 			}
 		}
 		return mask;

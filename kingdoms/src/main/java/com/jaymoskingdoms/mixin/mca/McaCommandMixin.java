@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.55) And Change Clothes asks a tailor for a fitting ({@link com.jaymoskingdoms.Tailors}).
  * (0.7.69) And a tailor sells a Costume Table and sews costumes ({@link com.jaymoskingdoms.TailorCostumes}).
  * (0.7.109) A gift is remembered ({@link com.jaymoskingdoms.Recollections}): what it was, and whether it was welcome.
+ * (0.7.203) Following, staying, being picked up or ridden, their armour and their home are only for folk they're
+ * involved with ({@link com.jaymoskingdoms.Strangers}).
  * (0.7.20) A villager whose tongue you don't speak ({@link Languages}) only does what needs no words ({@link Languages#SIMPLE_COMMANDS}).
  */
 @Mixin(VillagerCommandHandler.class)
@@ -27,6 +29,11 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 
 	@Inject(method = "handle", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$job(ServerPlayer player, String command, CallbackInfoReturnable<Boolean> cir) {
+		if (com.jaymoskingdoms.Strangers.refuses(this.entity, player, command)) {
+			// (0.7.203) they don't take orders from someone they're not involved with
+			cir.setReturnValue(true);
+			return;
+		}
 		if (!Languages.SIMPLE_COMMANDS.contains(command) && !Languages.understands(player, this.entity)) {
 			// (0.7.20) asking that of them takes words you don't share
 			Languages.shrug(player, this.entity);
