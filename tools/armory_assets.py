@@ -77,6 +77,9 @@ SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"},
 # at the Tool Station from their heads (tinkering/WeaponParts). Round shields stay craftable, like iron armour.
 FORGED_TIERS = ("stone", "iron", "golden")
 FORGED_SINGLES = ("iron_quarterstaff", "harpoon", "kunai", "throwing_star")
+# (0.16.18) Andy: "the wooden weapons should not be craftable". Wooden round shields still are (a shield, like the
+# stone and metal ones), and so are the throwing stick and the wooden quarterstaff (Andy: "this is ok").
+WOODEN_SINGLES = ("wooden_cudgel",)
 
 ARMOR = [
     ("caveman_helmet", "Caveman Hood", "head_armor", ["LBL", "L L"]),
@@ -246,6 +249,8 @@ def main(aow):
                 pass  # (0.8.124) Andy: no craftable diamond weapons; the netherite ones still smith from loot
             elif tier in FORGED_TIERS and weapon != "round_shield":
                 pass  # (0.11.77) Andy: all weapons are forged at the Tool Station (tinkering/WeaponParts)
+            elif tier == "wooden" and weapon != "round_shield":
+                pass  # (0.16.18) Andy: no craftable wooden weapons
             elif material:
                 shaped(item, pattern, dict(KEYS, X=material))
             else:
@@ -261,7 +266,7 @@ def main(aow):
             write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": parent_of(preset)})
         if tag:
             tags[tag].append(f"{NS}:{item}")
-        if item not in FORGED_SINGLES:
+        if item not in FORGED_SINGLES and item not in WOODEN_SINGLES:
             shaped(item, pattern, dict(KEYS, **SINGLE_KEYS.get(item, {})), count)
     bow(aow)
     lang[f"item.{NS}.recurve_bow"] = "Recurve Bow"

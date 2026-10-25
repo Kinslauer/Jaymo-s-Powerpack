@@ -35,7 +35,8 @@ STEEL = ((216, 216, 216), (168, 168, 168), (110, 110, 110), (68, 68, 68), (40, 4
 # the grip: light, mid, dark (leather over wood)
 GRIP = ((104, 78, 30), (73, 54, 21), (40, 30, 11))
 NAMES = {"wooden": "Wooden", "stone": "Stone", "iron": "Iron", "golden": "Golden", "diamond": "Diamond", "netherite": "Netherite"}
-MATERIAL = {"wooden": "#minecraft:wooden_tool_materials"}  # stone, iron and gold are forged; no diamond; netherite smiths
+# stone, iron and gold are forged; no diamond; netherite smiths; (0.16.18) Andy: no craftable wooden weapons either
+MATERIAL = {}
 
 # (x, y) -> part: "edge" (the blade's lit edge), "flat" (its shaded flat), "tip", "guard", "bow" (the knuckle bow),
 # "grip", "pommel"
