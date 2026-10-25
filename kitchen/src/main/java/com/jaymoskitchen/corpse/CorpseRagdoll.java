@@ -27,6 +27,13 @@ final class CorpseRagdoll {
 	private static final double SMACK_LIFT = 0.05;
 	/** A jolt (an axe blow, rummaging, a bite) hits a random point this hard (blocks a tick), mostly upward. */
 	private static final double JOLT_HARD = 0.12, JOLT_LIGHT = 0.05, JOLT_LIFT = 0.6;
+	/**
+	 * (0.5.24) Moved further than this at once by something else (blocks: a power's yank), or shoved harder (blocks a
+	 * tick: a blast's knockback), a body comes off the butcher table it's pinned to.
+	 */
+	private static final double UNPIN_MOVE = 0.5, UNPIN_SHOVE = 0.4;
+	/** (0.5.24) How often (ticks) a body lying loose looks for a table under it, and a pinned one that it's still there. */
+	private static final int TABLE_EVERY = 5;
 
 	RagdollBody body;
 	private final LevelRagdollWorld world;
@@ -34,6 +41,7 @@ final class CorpseRagdoll {
 	private Vec3 wrotePos = Vec3.ZERO, wroteVel = Vec3.ZERO;
 	private boolean wasAsleep;
 	private int sinceSent;
+	private int sinceTable;
 
 	CorpseRagdoll(CorpseEntity corpse, RagdollBody body) {
 		this.body = body;
@@ -54,16 +62,34 @@ final class CorpseRagdoll {
 			body.setSpeed(v.x, v.y, v.z);
 			wasAsleep = false;
 		} else if (moved.lengthSqr() > SYNC_EPSILON * SYNC_EPSILON) {
+			if (moved.lengthSqr() > UNPIN_MOVE * UNPIN_MOVE) {
+				body.unpin();
+			}
 			body.translate(moved.x, moved.y, moved.z);
 			body.wake();
 		}
 		Vec3 pushed = corpse.getDeltaMovement().subtract(wroteVel);
 		if (pushed.lengthSqr() > SYNC_EPSILON * SYNC_EPSILON) {
+			if (pushed.lengthSqr() > UNPIN_SHOVE * UNPIN_SHOVE) {
+				body.unpin();
+			}
 			body.shove(pushed.x, pushed.y, pushed.z);
 		}
 		body.step(world, corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
 		if (!body.sane()) {
 			body = corpse.lyingBody();
+		}
+		// (0.5.24) a body that lands on a butcher table (set down, thrown, slid onto it) stays on it; the table broken, it falls
+		if (++sinceTable >= TABLE_EVERY) {
+			sinceTable = 0;
+			if (!body.pinned()) {
+				if (body.grounded()) {
+					pinOnTable(corpse);
+				}
+			} else if (corpse.tableUnder(body) == null) {
+				body.unpin();
+				body.wake();
+			}
 		}
 		boolean asleep = body.asleep();
 		if (!asleep || !wasAsleep) {
@@ -77,6 +103,14 @@ final class CorpseRagdoll {
 			send(corpse);
 		}
 		wasAsleep = asleep;
+	}
+
+	/** (0.5.24) Pins the body to the butcher table its torso lies on, if it lies on one. */
+	void pinOnTable(CorpseEntity corpse) {
+		double[] top = corpse.tableUnder(body);
+		if (top != null) {
+			body.pin(top[0], top[1], top[2], top[3]);
+		}
 	}
 
 	/** Puts the entity where the body is, moving as it moves. */
