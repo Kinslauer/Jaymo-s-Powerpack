@@ -109,8 +109,8 @@ public final class Lash {
 	static final int FLAIL_COOLDOWN = 14, WHIP_COOLDOWN = 12;
 
 	// ---- the whip ---------------------------------------------------------------------------------------------------
-	/** How far the lash reaches, and the ticks it takes to crack out. */
-	public static final double WHIP_REACH = 7.0;
+	/** How far the lash reaches ((0.16.11) Andy chose 10 blocks), and the ticks it takes to crack out. */
+	public static final double WHIP_REACH = 10.0;
 	public static final int CRACK_TICKS = 4;
 	/** The crack's sting, and the slam's. */
 	static final float CRACK_DAMAGE = 4.0F, WHIP_SLAM_DAMAGE = 6.0F;
@@ -122,17 +122,20 @@ public final class Lash {
 	 * 1.05); heavier ones are yanked off their feet instead, this hard, and reel (slowed) this long.
 	 */
 	static final double LIFT_VOLUME = 0.9, YANK_PULL = 1.0, YANK_UP = 0.35;
+	/** (0.16.11) A yank from further off pulls harder (this much more a block away), up to this hard: from the lash's full reach. */
+	static final double YANK_PER_BLOCK = 0.12, YANK_MAX = 2.0;
 	static final int REEL_TICKS = 40;
 	/** The haul: over your head at this tick, slammed in front at the next (ticks since letting go). */
 	public static final int HEAVE_OVER = 7, HEAVE_SLAM = 12, YANK_TICKS = 6;
 	static final double HEAVE_REACH = 3.2, STEER = 0.75, MAX_SPEED = 2.6;
 	/**
-	 * (rappel) A wall whose top is at most this far above your feet can be climbed; the lash, cracked anywhere on its face,
-	 * hooks over the top. Holding use you climb this fast (blocks a tick), leaning in this hard; at the top (this far
-	 * below the lip) you go up and over it, pushed in this hard; with Sneak held too you let yourself down this fast.
-	 * The hook gives after this long anyway.
+	 * (rappel) A wall whose top is at most this far above your feet can be climbed ((0.16.11) whatever the lash reaches);
+	 * the lash, cracked anywhere on its face, hooks over the top. (0.16.11) Andy: "the rappelling should only pull you up
+	 * as you walk": you hang on the lash (client/armory/LashRenderer.climb), and walking takes it in hand over hand this
+	 * fast (blocks a tick) up the wall; at the top (this far below the lip) you go up and over it, pushed in this hard;
+	 * with Sneak held you pay it out and let yourself down this fast. The hook gives after this long anyway.
 	 */
-	public static final double CLIMB_HEIGHT = 7.0, CLIMB_SPEED = 0.2, WALL_HUG = 0.12, OVER_THE_TOP = 0.7, OVER_PUSH = 0.3,
+	public static final double CLIMB_HEIGHT = WHIP_REACH + 1.5, CLIMB_SPEED = 0.2, WALL_HUG = 0.12, OVER_THE_TOP = 0.7, OVER_PUSH = 0.3,
 		LOWER_SPEED = 0.1;
 	static final int HOOK_MAX = 400;
 	/** The head flies back to the hand in this many ticks. */
@@ -524,7 +527,8 @@ public final class Lash {
 		}
 		// too heavy to lift: yanked off its feet toward you, and left reeling
 		Vec3 pull = player.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
-		pull = pull.lengthSqr() < 1.0E-4 ? Vec3.ZERO : pull.normalize().scale(YANK_PULL);
+		double far = pull.length();
+		pull = far < 1.0E-2 ? Vec3.ZERO : pull.scale(Math.min(YANK_MAX, YANK_PULL + far * YANK_PER_BLOCK) / far);
 		shove(target, new Vec3(pull.x, YANK_UP, pull.z));
 		if (target instanceof LivingEntity living) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, REEL_TICKS, 2), player);
