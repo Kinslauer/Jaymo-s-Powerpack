@@ -1600,3 +1600,15 @@ to 3 removals."
   in and out over `BLEND_TICKS`, from whatever the body was doing (hunch, brute, vanilla).
 - **Check first in game:** body pitch is a modest `FLAT` 6° (past ~15° the head clips the wall); the slam pulse other
   players see is motion-derived, so laggy climbers may miss or double it (the cracks and thud are server-sent).
+
+## 0.16.6: the Tendrils slot is its own toggle from bond 60
+- Andy: "the tendrils button should work as a toggle for the tendrils once you unlock them at 60 bond."
+- `WebSymbioteState.TENDRILS` (32) now means the tendrils are out; bit 16 (`TENDRILS_IN`) is dead and must not be
+  reused. `WebSymbiote.armored()` is simply that flag: tendrils out over bare skin, the plain suit or the big suit,
+  armour or not. The Tendrils slot flips it whenever the bond has reached Living Armor's unlock (`UNLOCK_BOND[ARMOR]`,
+  60); locked, it whispers `tendrils_locked`.
+- Living Armor or the big suit going on (`set()`, any path) brings the tendrils out; takeovers and the roar force them
+  out; the armour coming off leaves them as they were. Wall Crawl with the armour on still needs them out.
+- Old saves with Living Armor on load with the tendrils in until the slot is pressed or the armour re-formed.
+- Check first in game: tendrils and globs over the plain suit or bare skin with no armour, a state that was only
+  momentary before.
