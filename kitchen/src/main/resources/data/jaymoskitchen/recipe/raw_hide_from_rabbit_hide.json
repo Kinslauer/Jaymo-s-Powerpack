@@ -1,0 +1,12 @@
+{
+  "type": "jaymoskitchen:blade_crafting",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:rabbit_hide",
+    "#jaymoskitchen:work_blades"
+  ],
+  "result": {
+    "id": "jaymoskitchen:raw_hide",
+    "count": 1
+  }
+}

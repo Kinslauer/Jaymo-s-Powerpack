@@ -614,5 +614,18 @@
 	"death.attack.jaymoskitchen.dehydration": "%1$s died of thirst",
 	"death.attack.jaymoskitchen.dehydration.player": "%1$s died of thirst whilst fighting %2$s",
 	"death.attack.jaymoskitchen.heatstroke": "%1$s died of heatstroke",
-	"death.attack.jaymoskitchen.heatstroke.player": "%1$s died of heatstroke whilst fighting %2$s"
+	"death.attack.jaymoskitchen.heatstroke.player": "%1$s died of heatstroke whilst fighting %2$s",
+	"item.jaymoskitchen.hide": "Hide",
+	"item.jaymoskitchen.raw_hide": "Raw Hide",
+	"item.jaymoskitchen.salted_hide": "Salted Hide",
+	"item.jaymoskitchen.dried_hide": "Dried Hide",
+	"item.jaymoskitchen.wet_tanned_hide": "Wet Tanned Hide",
+	"item.jaymoskitchen.salt": "Salt",
+	"item.jaymoskitchen.resin": "Resin",
+	"block.jaymoskitchen.drying_rack": "Drying Rack",
+	"jei.jaymoskitchen.drying": "Drying Rack",
+	"jei.jaymoskitchen.drying.time": "About %s minutes, kept out of the rain",
+	"message.jaymoskitchen.drying_rack.hung": "Hung up %s: dry in about %s min",
+	"message.jaymoskitchen.drying_rack.full": "The rack's full",
+	"message.jaymoskitchen.drying_rack.wait": "About %s min until it's dry"
 }
