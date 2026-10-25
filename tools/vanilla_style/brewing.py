@@ -105,6 +105,8 @@ LIQUIDS = {
     'cider':        ('f1e08a', 'dcc65a', 'b5a03a'),
     'mead':         ('f6c84a', 'e8a428', 'b87814'),
     'berry_wine':   ('b0223a', '80142b', '520a1c'),
+    'grape_wine':   ('8a2a74', '64185a', '3e0c3a'),
+    'lemonade':     ('fdf8d2', 'f6eaa0', 'dccb6a'),
     'strong_spirits': ('f2f0dc', 'e2dcb6', 'c4b98a'),
 }
 GLASS_LINE = hx('3b4350')
@@ -156,6 +158,12 @@ def bottle(name, cork):
         put(6, 1, GLASS_LINE); put(9, 1, GLASS_LINE)
         put(6, 0, GLASS_LINE); put(9, 0, GLASS_LINE)
         put(7, 3, CORK[0]); put(8, 3, CORK[1])
+    if name == 'lemonade':
+        # a lemon slice on the rim
+        rind, pith, flesh = hx('c8a018'), hx('fff8d0'), hx('f8dc3a')
+        for x, y in ((10, 2), (11, 1), (12, 1), (13, 2), (13, 3), (12, 4), (11, 4), (10, 3)):
+            put(x, y, rind)
+        put(11, 2, flesh); put(12, 2, pith); put(11, 3, pith); put(12, 3, flesh)
     return im
 
 
