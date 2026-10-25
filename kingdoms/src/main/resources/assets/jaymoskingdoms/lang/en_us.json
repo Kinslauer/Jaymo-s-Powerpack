@@ -1,5 +1,5 @@
 {
-	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap a hand axe from 3 flint and a stick (leaves drop sticks).",
+	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap flint on stone into shards, cut grass with a primitive knife for fiber, twist it into plant string, and bind a flint hatchet.",
 	"block.jaymoskingdoms.chopped_log": "Chopped Log",
 	"entity.jaymoskingdoms.folk": "Kingdom Folk",
 	"entity.jaymoskingdoms.king_of": "King of %s",

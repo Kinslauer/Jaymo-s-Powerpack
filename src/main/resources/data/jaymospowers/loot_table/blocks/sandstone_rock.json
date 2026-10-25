@@ -1,0 +1,62 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:sandstone_rock",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": 2,
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "jaymospowers:sandstone_rock",
+                  "properties": {
+                    "rocks": "2"
+                  }
+                }
+              ]
+            },
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": 3,
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "jaymospowers:sandstone_rock",
+                  "properties": {
+                    "rocks": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": 4,
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "jaymospowers:sandstone_rock",
+                  "properties": {
+                    "rocks": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "function": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/sandstone_rock"
+}

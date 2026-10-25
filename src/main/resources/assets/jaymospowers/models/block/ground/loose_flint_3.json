@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/flints_3",
+  "textures": {
+    "all": "minecraft:block/smooth_basalt"
+  }
+}

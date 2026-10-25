@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "rocks_to_block",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymospowers:andesite_rock"
+  },
+  "result": {
+    "id": "minecraft:andesite",
+    "count": 1
+  }
+}

@@ -57,9 +57,9 @@ TIERED = [
 # item id, name, AoW texture, Better Combat preset, vanilla tag, recipe, recipe count
 SINGLES = [
     ("primitive_spear", "Primitive Spear", "stone_age/caveman_spear", "jaymospowers:combo_spear", "swords", ["  F", " C ", "S  "], 1),
-    ("primitive_knife", "Primitive Knife", "stone_age/caveman_knife", "jaymospowers:combo_dagger", "swords", ["F", "S"], 1),
+    ("primitive_knife", "Primitive Knife", "stone_age/caveman_knife", "jaymospowers:combo_dagger", "swords", ["H", "S"], 1),
     ("bone_knife", "Bone Knife", "stone_age/bone_knife", "jaymospowers:combo_dagger", "swords", ["B", "S"], 1),
-    ("hand_axe", "Hand Axe", "stone_age/hand_ax", "jaymospowers:combo_hatchet", "axes", ["FF", "FS"], 1),
+    ("hand_axe", "Flint Hatchet", "stone_age/hand_ax", "jaymospowers:combo_hatchet", "axes", ["HP", "S "], 1),
     ("wooden_cudgel", "Wooden Cudgel", "stone_age/cudgel_wood", "jaymospowers:combo_mace", "swords", ["W", "S"], 1),
     ("stone_cudgel", "Stone Cudgel", "stone_age/cudgel_stone", "jaymospowers:combo_mace", "swords", ["XX", "XS"], 1),
     ("throwing_stick", "Throwing Stick", "stone_age/throw_wood", "mace", "swords", ["S ", " S"], 1),
@@ -69,7 +69,10 @@ SINGLES = [
     ("kunai", "Kunai", "edo_period/kunai", "jaymospowers:combo_dagger", None, ["I", "C"], 4),
     ("throwing_star", "Throwing Star", "edo_period/throwing_star", None, None, [" N ", "N N", " N "], 2),
 ]
-SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"}}
+# (0.16.2) RLCraft's start (ground/FirstTools): the knife and hatchet take knapped flint shards and plant string
+SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"},
+               "primitive_knife": {"H": "jaymospowers:flint_shard"},
+               "hand_axe": {"H": "jaymospowers:flint_shard", "P": "jaymospowers:plant_string"}}
 # (0.11.77) Andy: "all weapons should be forged". Stone and metal weapons have no crafting recipe; they're put together
 # at the Tool Station from their heads (tinkering/WeaponParts). Round shields stay craftable, like iron armour.
 FORGED_TIERS = ("stone", "iron", "golden")
