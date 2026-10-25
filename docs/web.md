@@ -1613,7 +1613,7 @@ to 3 removals."
 - Check first in game: tendrils and globs over the plain suit or bare skin with no armour, a state that was only
   momentary before.
 
-## 0.16.12: charged leap, hand grab, engulfed weapon arm, grey lines, satiety, executions
+## 0.16.13: charged leap, hand grab, engulfed weapon arm, grey lines, satiety, executions
 - Andy's playtest of 0.16.6, six asks in two messages (quoted in the class docs).
 - **Charged leap (`WebSwing`, `WebLeap.CHARGE_REMIND_TICKS`):** holding Jump always charges, ground or air; nothing
   resets a held charge but the release (or losing the suit, a takeover, or letting go on a web, which was the swing's
