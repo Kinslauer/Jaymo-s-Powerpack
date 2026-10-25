@@ -47,10 +47,16 @@ import org.jspecify.annotations.Nullable;
  * what it hits high into the air and stuns it a moment, the ground under it bursting) and a <b>hook claw</b> (a grapple:
  * hooks what it hits, reels it in to you and leaves it bleeding).
  *
- * <p>With Living Armor up ({@link WebSymbiote#armored}: its tendrils out, or the big body), the weapon forms on a
- * tendril instead of the arm ({@link Morph#tendril}): a shoulder tendril (two braided, for the heavy ones) coils back,
- * its tip swells into the weapon head, and the strike lashes through the tendril. Same reach, damage and effects; only
- * the client draws it differently ({@code WebTendrilLayer}).
+ * <p>With the tendrils out but no armour ({@link WebSymbiote#armored} without {@link WebSymbiote#livingArmor}), the
+ * weapon forms on a tendril instead of the arm ({@link Morph#tendril}): a shoulder tendril (two braided, for the heavy
+ * ones) coils back, its tip swells into the weapon head, and the strike lashes through the tendril. Same reach, damage
+ * and effects; only the client draws it differently ({@code WebTendrilLayer}).
+ *
+ * <p>(0.16.7) With Living Armor on (the thin armour or the big suit, {@link Morph#armor}), it's the arm again, but
+ * engulfed: a tendril rears out of the shoulder and winds down the whole arm as the lumps collect, its coils thickening
+ * until the arm is one mass of goo, and the weapon swells out of that at {@code WebMorphLayer.WEAPON_SCALE_ARMOR} times
+ * the plain suit's size. The strike swings that mass. Same damage and effects; it reaches {@link #REACH_ARMOR} further
+ * for the bigger head (Andy: "much larger ... so that tendril engulfs the entire arm").
  *
  * <p>Strains ({@link WebSymbioteStrain}) pick from their own set: the white one only forms blunt shapes (the mace and a
  * flat <b>palm</b> shove: no blades, no severing); the red one only blades (scythe, spear and a heavy <b>axe</b>), harder
@@ -67,6 +73,8 @@ public final class WebMorph {
 	public static final double REACH = 6.0, REACH_SLACK = 1.5;
 	/** The whip-blade and the hook claw reach further than the rest (blocks from the eyes). */
 	public static final double WHIP_REACH = 9.0, HOOK_REACH = 8.0;
+	/** (0.16.7) Living Armor's engulfed arm reaches this much further (blocks), for its far bigger head. */
+	public static final double REACH_ARMOR = 0.5;
 	/** The whole move (ticks): the arm swells into the weapon until {@code FORM}, swings or thrusts, lands at {@code HIT}. */
 	public static final int TICKS = 16, FORM = 4, HIT = 8;
 	/**
@@ -125,15 +133,17 @@ public final class WebMorph {
 
 	/**
 	 * A strike under way: which weapon, at whom (-1 the air), when it began (game time), which arm (1 right, -1 left),
-	 * and whether it's on a Living Armor tendril (that side's shoulder tendril) instead of the arm.
+	 * whether it's on a shoulder tendril instead of the arm (the tendrils out, no armour), and whether it's Living
+	 * Armor's engulfed arm (never both).
 	 */
-	public record Morph(int weapon, int target, long start, int side, boolean tendril) {
+	public record Morph(int weapon, int target, long start, int side, boolean tendril, boolean armor) {
 		public static final StreamCodec<ByteBuf, Morph> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Morph::weapon,
 			ByteBufCodecs.VAR_INT, Morph::target,
 			ByteBufCodecs.VAR_LONG, Morph::start,
 			ByteBufCodecs.VAR_INT, Morph::side,
 			ByteBufCodecs.BOOL, Morph::tendril,
+			ByteBufCodecs.BOOL, Morph::armor,
 			Morph::new);
 
 		/** Ticks in, at {@code time} (game time + partial tick). */
@@ -145,13 +155,17 @@ public final class WebMorph {
 	public static final AttachmentType<Morph> MORPH = AttachmentRegistry.create(JaymosPowers.id("web_morph"),
 		builder -> builder.syncWith(Morph.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
-	/** The gathering before a strike, held: which weapon it's forming, when the press began (game time), which arm, on a tendril. */
-	public record Charge(int weapon, long start, int side, boolean tendril) {
+	/**
+	 * The gathering before a strike, held: which weapon it's forming, when the press began (game time), which arm, on a
+	 * shoulder tendril, or Living Armor's engulfed arm.
+	 */
+	public record Charge(int weapon, long start, int side, boolean tendril, boolean armor) {
 		public static final StreamCodec<ByteBuf, Charge> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Charge::weapon,
 			ByteBufCodecs.VAR_LONG, Charge::start,
 			ByteBufCodecs.VAR_INT, Charge::side,
 			ByteBufCodecs.BOOL, Charge::tendril,
+			ByteBufCodecs.BOOL, Charge::armor,
 			Charge::new);
 
 		/** Ticks in, at {@code time} (game time + partial tick). */
@@ -227,9 +241,14 @@ public final class WebMorph {
 		return WebSymbiote.suitShown(player) || WebSymbiote.livingArmor(player);
 	}
 
-	/** Whether the weapon forms on a tendril (Living Armor's are out, or the big body's) rather than the arm. */
+	/** Whether the weapon forms on a shoulder tendril rather than the arm: the tendrils out over no armour. */
 	public static boolean onTendril(Player player) {
-		return WebSymbiote.armored(player);
+		return WebSymbiote.armored(player) && !onArmor(player);
+	}
+
+	/** (0.16.7) Whether the weapon forms on Living Armor's engulfed arm: the thin armour or the big suit is on. */
+	public static boolean onArmor(Player player) {
+		return WebSymbiote.livingArmor(player);
 	}
 
 	/** How far this weapon reaches (blocks from the eyes). */
@@ -237,10 +256,15 @@ public final class WebMorph {
 		return weapon == WHIP ? WHIP_REACH : weapon == HOOK ? HOOK_REACH : REACH;
 	}
 
+	/** How far this weapon reaches on Living Armor's engulfed arm ({@code armor}) or not (blocks from the eyes). */
+	public static double reach(int weapon, boolean armor) {
+		return reach(weapon) + (armor ? REACH_ARMOR : 0.0);
+	}
+
 	/** How far the weapon being gathered now reaches (its charge is synced, so the client knows it too); else {@link #REACH}. */
 	public static double reachNow(Player player) {
 		Charge charge = player.getAttached(CHARGE);
-		return charge == null ? REACH : reach(charge.weapon());
+		return charge == null ? REACH : reach(charge.weapon(), charge.armor());
 	}
 
 	/** The living thing the arm would go for: under the crosshair within {@link #REACH}. */
@@ -315,10 +339,11 @@ public final class WebMorph {
 		live.side = -live.side;
 		live.pending = NONE;
 		boolean tendril = onTendril(player);
-		player.setAttached(CHARGE, new Charge(weapon, now, live.side, tendril));
+		boolean armor = onArmor(player);
+		player.setAttached(CHARGE, new Charge(weapon, now, live.side, tendril, armor));
 		// it stirs under the skin (or a tendril rears back and coils)
 		sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 0.8F, tendril ? 0.7F : 0.5F);
-		sound(level, player, SoundEvents.SLIME_SQUISH, 0.7F, 0.5F);
+		sound(level, player, SoundEvents.SLIME_SQUISH, armor ? 0.9F : 0.7F, armor ? 0.4F : 0.5F);
 	}
 
 	/** Let go: strikes now if the weapon has formed, else as soon as it has. */
@@ -345,7 +370,7 @@ public final class WebMorph {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		LivingEntity target = null;
-		double reach = reach(charge.weapon());
+		double reach = reach(charge.weapon(), charge.armor());
 		if (targetId >= 0 && level.getEntity(targetId) instanceof LivingEntity living && living.isAlive() && living != player
 			&& player.getEyePosition().distanceTo(living.getBoundingBox().getCenter()) <= reach + REACH_SLACK + living.getBbWidth() * 0.5) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(player.getEyePosition()).normalize();
@@ -355,7 +380,7 @@ public final class WebMorph {
 		}
 		int weapon = charge.weapon();
 		live.readyAt = now + COOLDOWN;
-		player.setAttached(MORPH, new Morph(weapon, target == null ? -1 : target.getId(), now, charge.side(), charge.tendril()));
+		player.setAttached(MORPH, new Morph(weapon, target == null ? -1 : target.getId(), now, charge.side(), charge.tendril(), charge.armor()));
 		player.resetAttackStrengthTicker();
 		sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.8F, 0.6F);
 	}
@@ -370,7 +395,7 @@ public final class WebMorph {
 		}
 		ServerLevel level = player.level();
 		long t = level.getGameTime() - morph.start();
-		if (t >= TICKS || !player.isAlive() || !worn(player) || morph.tendril() && !onTendril(player)) {
+		if (t >= TICKS || !player.isAlive() || !worn(player) || morph.tendril() && !onTendril(player) || morph.armor() && !onArmor(player)) {
 			player.removeAttached(MORPH);
 			return;
 		}
@@ -391,6 +416,9 @@ public final class WebMorph {
 			if (morph.tendril()) {
 				// the tendril cracks out off the back
 				sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 0.9F, 1.2F);
+			} else if (morph.armor()) {
+				// the whole engulfed arm heaves through
+				sound(level, player, SoundEvents.SLIME_SQUISH, 1.0F, 0.4F);
 			}
 		}
 		if (t != HIT) {
@@ -398,7 +426,7 @@ public final class WebMorph {
 		}
 		Entity found = morph.target() < 0 ? null : level.getEntity(morph.target());
 		if (found instanceof LivingEntity target && target.isAlive()
-			&& player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()) <= reach(morph.weapon()) + REACH_SLACK + 1.0 + target.getBbWidth() * 0.5) {
+			&& player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()) <= reach(morph.weapon(), morph.armor()) + REACH_SLACK + 1.0 + target.getBbWidth() * 0.5) {
 			land(player, level, morph, target);
 		} else {
 			// the air: a crack of the whip, nothing more
@@ -415,7 +443,7 @@ public final class WebMorph {
 		ServerLevel level = player.level();
 		long t = level.getGameTime() - charge.start();
 		if (!player.isAlive() || !worn(player) || !player.getMainHandItem().isEmpty() || charge.tendril() != onTendril(player)
-			|| WebPower.ragdolled(player) || t > CHARGE_MAX_TICKS) {
+			|| charge.armor() != onArmor(player) || WebPower.ragdolled(player) || t > CHARGE_MAX_TICKS) {
 			player.removeAttached(CHARGE);
 			live(player).pending = NONE;
 			return;
@@ -425,12 +453,24 @@ public final class WebMorph {
 			sound(level, player, SoundEvents.SLIME_SQUISH_SMALL, 0.6F, 0.6F + 0.1F * t / 3.0F);
 		} else if (t == COURSE_TICKS) {
 			sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.9F, 0.5F);
+			if (charge.armor()) {
+				// the tendril rears out of the shoulder and starts down the arm
+				sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 0.9F, 0.8F);
+			}
+		} else if (charge.armor() && t > COURSE_TICKS && t < COLLECT_TICKS && t % 2 == 0) {
+			// coil after coil wound round the arm
+			sound(level, player, SoundEvents.SLIME_SQUISH_SMALL, 0.7F, 0.45F + 0.05F * (t - COURSE_TICKS));
 		} else if (t == COLLECT_TICKS) {
-			// the arm swells and splits into its shape
+			// the arm swells and splits into its shape (the engulfed arm's coils fuse into one mass)
 			sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.7F + 0.15F * charge.weapon());
+			if (charge.armor()) {
+				sound(level, player, SoundEvents.SLIME_SQUISH, 1.0F, 0.35F);
+			}
 		} else if (t == FORMED_TICKS) {
 			boolean heavy = charge.weapon() == MACE || charge.weapon() == HAMMER || charge.weapon() == AXE;
-			sound(level, player, heavy ? SoundEvents.ANVIL_PLACE : SoundEvents.TRIDENT_RETURN, 0.5F, heavy ? (charge.weapon() == HAMMER ? 0.4F : 0.5F) : 0.8F);
+			float heft = charge.armor() ? 0.8F : 1.0F;
+			sound(level, player, heavy ? SoundEvents.ANVIL_PLACE : SoundEvents.TRIDENT_RETURN, charge.armor() ? 0.7F : 0.5F,
+				(heavy ? (charge.weapon() == HAMMER ? 0.4F : 0.5F) : 0.8F) * heft);
 			if (charge.weapon() == WHIP || charge.weapon() == HOOK) {
 				sound(level, player, SoundEvents.CHAIN_PLACE, 0.6F, charge.weapon() == WHIP ? 1.2F : 0.8F);
 			}

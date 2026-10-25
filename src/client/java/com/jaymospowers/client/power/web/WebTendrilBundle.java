@@ -48,8 +48,12 @@ import org.jspecify.annotations.Nullable;
  */
 final class WebTendrilBundle {
 	// ---- the bundle ----
-	/** Strands: a counter's bundle, a mob's slam, a held thing's sheath (and in a combo), a mob's lash. */
-	static final int STRANDS = 14, MOB_SLAM_STRANDS = 12, GRAB_STRANDS = 6, COMBO_STRANDS = 12, LASH_STRANDS = 7;
+	/**
+	 * Strands: a counter's bundle, a mob's slam, a held thing's sheath (0.16.7: none; Andy: "a block of tendrils are
+	 * extended the whole time, when it should draw one extending at a time": a plain hold is the one holding tendril,
+	 * WebLineRenderer's tentacle, alone), the sheath in a combo, a mob's lash.
+	 */
+	static final int STRANDS = 14, MOB_SLAM_STRANDS = 12, GRAB_STRANDS = 0, COMBO_STRANDS = 12, LASH_STRANDS = 7;
 	/** Each strand's radius at the root and at the tip (blocks; give or take {@code RADIUS_SPREAD}). */
 	static final double RADIUS = 0.05, TIP_RADIUS = 0.016, RADIUS_SPREAD = 0.35;
 	/** How far apart the strands run mid-way (blocks), and how far they splay at the root (the forearm). */
@@ -327,6 +331,10 @@ final class WebTendrilBundle {
 			float reach = WebGrowth.fraction(((long)player.getId() << 24) ^ ((long)held.getId() << 2) ^ hand ^ 0x2000_0000_0000_0000L, to, path,
 				WebTendrils.TENDRIL_SPEED * path / Math.max(0.5, root.distanceTo(to)), true);
 			boolean inCombo = combo != null && (combo.first() == held.getId() || combo.second() == held.getId());
+			if ((inCombo ? COMBO_STRANDS : GRAB_STRANDS) <= 0) {
+				// (held: the one tendril WebLineRenderer draws is the whole of it)
+				continue;
+			}
 			float wrap = ease((reach - 0.8F) / 0.2F);
 			// in a combo it heaves and lashes; holding, it only writhes
 			float lash = inCombo ? (combo.kind() == WebTendrilCombos.BARRAGE ? 0.5F : 1.1F) : 0.3F;

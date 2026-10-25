@@ -23,6 +23,7 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.freerun.RunPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.freerun.UpRunPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebClimbPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.power.web.WebExecutionPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebCounterPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebSuitTear.rotate(state, poseStack, entityScale);
@@ -53,6 +54,8 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.freerun.UpRunPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebClimbPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebHeldGrabPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebExecutionPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebCounterPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebWallRunPose.extract(entity, state, partialTicks);

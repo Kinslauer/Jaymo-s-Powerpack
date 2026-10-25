@@ -318,8 +318,35 @@ public final class WebNet {
 		}
 	}
 
+	/**
+	 * (0.16.7) Client → server: G with the tendrils out, close to something living no bigger than a cow: the left hand
+	 * seizes entity {@code entityId} and holds it up ({@link WebHeldGrab}); -1: the hand lets go of what it holds.
+	 */
+	public record HeldSeize(int entityId) implements CustomPacketPayload {
+		public static final Type<HeldSeize> TYPE = new Type<>(JaymosPowers.id("web_held_seize"));
+		public static final StreamCodec<ByteBuf, HeldSeize> CODEC = ByteBufCodecs.VAR_INT.map(HeldSeize::new, HeldSeize::entityId);
+
+		@Override
+		public Type<HeldSeize> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.16.7) Client → server: left click while the left hand holds something: one of the six attacks on it ({@link WebHeldGrab#attack}). */
+	public record HeldAttack() implements CustomPacketPayload {
+		public static final Type<HeldAttack> TYPE = new Type<>(JaymosPowers.id("web_held_attack"));
+		public static final StreamCodec<ByteBuf, HeldAttack> CODEC = StreamCodec.unit(new HeldAttack());
+
+		@Override
+		public Type<HeldAttack> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HeldSeize.TYPE, HeldSeize.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HeldAttack.TYPE, HeldAttack.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Struggle.TYPE, Struggle.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ClimbLatch.TYPE, ClimbLatch.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ClimbSlam.TYPE, ClimbSlam.CODEC);

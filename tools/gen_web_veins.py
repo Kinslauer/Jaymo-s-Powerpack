@@ -1,5 +1,5 @@
 """Generates the veins coursing over Living Armor's bulk: four frames (web_symbiote_veins_0..3.png, 64x64, the player
-skin layout) of branching veins, a glossy purple-red against the black. Each frame lights a different stretch of each
+skin layout) of branching veins, a glossy grey against the black ((0.16.7) Andy: "blackish grey like before", not purple). Each frame lights a different stretch of each
 vein, so cycling them reads as something pulsing along them and writhing. Run from the project root."""
 from PIL import Image
 import math, random
@@ -8,9 +8,9 @@ OUT = "src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_veins
 FRAMES = 4
 # the skin's regions (x, y, w, h) on the base layer: head, body, arms, legs (front/back/sides all in each block)
 REGIONS = [(0, 8, 32, 8), (16, 20, 24, 12), (40, 20, 16, 12), (32, 52, 16, 12), (0, 20, 16, 12), (16, 52, 16, 12)]
-DARK = (60, 8, 40)
-LIT = (190, 40, 120)
-CORE = (255, 120, 200)
+DARK = (38, 38, 44)
+LIT = (118, 120, 128)
+CORE = (212, 214, 222)
 
 random.seed(26)
 veins = []  # each: list of (x, y) along it

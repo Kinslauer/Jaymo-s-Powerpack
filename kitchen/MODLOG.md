@@ -1016,7 +1016,7 @@ Batch 3 of the BWM port (MIT, our own code).
   `SALVAGE_CHANCE`. The ones that will come out whole are kept as themselves (`StuckArrows.ITEMS`, corpse `ArrowItems`),
   so a Tinkering or tipped arrow comes back as the arrow it was.
 
-### 0.5.25: thirst, and heat and cold (pack 0.16.8)
+### 0.5.25: thirst, and heat and cold (pack 0.16.13)
 Andy's immersion pass (2026-10-25): Dehydration, Scorchful and Frostiful have no 26.3 builds (Dehydration is GPL, the
 other two LGPL and on Thermoo), so this is our own take on them, nothing copied. Package `climate`; game rules
 `jaymoskitchen:thirst` and `jaymoskitchen:body_heat` (both on) switch them off.

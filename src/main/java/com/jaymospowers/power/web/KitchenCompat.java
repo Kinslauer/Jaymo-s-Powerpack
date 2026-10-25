@@ -123,6 +123,59 @@ public final class KitchenCompat {
 		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
 	}
 
+	/** Kitchen's tag for a body that leaves nothing behind when it dies (read as it would swap the dying mob for its corpse). */
+	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
+	/** A blast this strong blows a body apart in Kitchen ({@code Gibs.SHRED_DAMAGE}); its chunks are thrown as by one. */
+	static final float BLOW_APART_DAMAGE = 12.0F;
+
+	/**
+	 * (0.16.8) Whether {@code body}, about to die, could be torn into Kitchen's chunks instead of leaving a corpse (the
+	 * symbiote's rip in half): a creature that would have left one.
+	 */
+	static boolean canBlowApart(net.minecraft.world.entity.LivingEntity body) {
+		return LOADED && leavesCorpse(body);
+	}
+
+	/** {@code body} is to leave no corpse when it dies (its chunks are thrown by {@link #blowApart} instead). */
+	static void leaveNoCorpse(net.minecraft.world.entity.LivingEntity body) {
+		if (LOADED) {
+			body.addTag(NO_CORPSE_TAG);
+		}
+	}
+
+	private static java.lang.reflect.@Nullable Method blowApartMethod;
+	private static boolean blowApartLooked;
+
+	/**
+	 * (0.16.8) {@code body}, just killed with {@link #leaveNoCorpse} on it, is torn apart: Kitchen throws its chunks (its
+	 * loot already fell the vanilla way) and the body is gone at once. Reached by reflection: Kitchen 0.5.21 added it.
+	 * True if it was.
+	 */
+	static boolean blowApart(net.minecraft.world.entity.LivingEntity body) {
+		if (!LOADED || !body.isDeadOrDying()) {
+			return false;
+		}
+		if (!blowApartLooked) {
+			blowApartLooked = true;
+			try {
+				blowApartMethod = Class.forName("com.jaymoskitchen.corpse.Gibs").getMethod("blowApart", net.minecraft.world.entity.LivingEntity.class,
+					float.class, java.util.List.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				blowApartMethod = null;
+			}
+		}
+		if (blowApartMethod == null) {
+			return false;
+		}
+		try {
+			blowApartMethod.invoke(null, body, BLOW_APART_DAMAGE, java.util.List.of());
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+		body.remove(Entity.RemovalReason.KILLED);
+		return true;
+	}
+
 	/** (0.14.4) Wounds: how drunk a player is (Kitchen's {@code Drunk} points), 0 without Kitchen. */
 	public static int drunk(Player player) {
 		return LOADED ? Kitchen.drunk(player) : 0;

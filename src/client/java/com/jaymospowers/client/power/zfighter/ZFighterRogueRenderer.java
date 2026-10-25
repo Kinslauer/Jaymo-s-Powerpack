@@ -61,6 +61,8 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 		int form = entity.form();
 		state.setData(ZFighterHair.KEY, form <= 0 ? null : new ZFighterHair.Hair(form, form >= 2 ? SUPER_2_HAIR : SUPER_HAIR,
 			ZFighterHair.style(entity.getUUID())));
+		// (0.16.10) his strings, drawn as a player's hold combo is
+		ZFighterComboPose.extract(entity, state, partialTicks);
 	}
 
 	static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> KIND =

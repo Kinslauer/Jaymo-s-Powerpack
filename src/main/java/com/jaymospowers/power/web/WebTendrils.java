@@ -303,6 +303,7 @@ public final class WebTendrils {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbLatch.TYPE, (payload, ctx) -> climbLatch(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbSlam.TYPE, (payload, ctx) -> climbSlam(ctx.player(), payload));
 		WebTendrilCombos.register();
+		WebHeldGrab.register();
 		ServerTickEvents.END_SERVER_TICK.register(WebTendrils::serverTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -316,9 +317,10 @@ public final class WebTendrils {
 		});
 	}
 
-	/** Anything a tendril can take: creatures, players (not in creative), items, corpses (not heavy ones). Not yourself. */
+	/** Anything a tendril can take: creatures, players (not in creative), items, corpses (not heavy ones). Not yourself, nor what a hand holds ({@link WebHeldGrab}). */
 	public static boolean grabbable(Player player, Entity entity) {
 		return entity != player && entity.isAlive() && !entity.isSpectator() && !(entity instanceof ArmorStand) && !KitchenCompat.isHeavy(entity)
+			&& !WebHeldGrab.heldByAnyone(entity)
 			&& !(entity instanceof Player p && p.isCreative()) && entity.getVehicle() == null && !entity.isVehicle()
 			&& (entity instanceof LivingEntity || entity instanceof net.minecraft.world.entity.item.ItemEntity
 				|| entity instanceof com.jaymospowers.core.BlockCluster || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));
@@ -860,10 +862,11 @@ public final class WebTendrils {
 		release(player, WebNet.MAIN, hurl);
 		release(player, WebNet.OFF, hurl);
 		HOLDS.remove(player.getUUID());
+		WebHeldGrab.drop(player);
 	}
 
-	/** Held: no weight (so a held player isn't kicked for floating, and nothing sags). */
-	private static void weightless(Entity entity, boolean on) {
+	/** Held (by a tendril or the hand, {@link WebHeldGrab}): no weight (so a held player isn't kicked for floating, and nothing sags). */
+	static void weightless(Entity entity, boolean on) {
 		if (entity instanceof LivingEntity living) {
 			AttributeInstance gravity = living.getAttribute(Attributes.GRAVITY);
 			if (gravity != null) {
@@ -887,6 +890,7 @@ public final class WebTendrils {
 		if (player.getAttached(CLIMB) != null && (!WebSymbiote.crawlTendrils(player) || !player.isAlive())) {
 			player.removeAttached(CLIMB);
 		}
+		WebHeldGrab.tick(player);
 		Grips grips = player.getAttached(GRIPS);
 		if (grips == null) {
 			return;
@@ -1027,6 +1031,7 @@ public final class WebTendrils {
 		HOLDS.remove(player.getUUID());
 		TUGS.remove(player.getUUID());
 		CROSSES.remove(player.getUUID());
+		WebHeldGrab.forget(player);
 	}
 
 	static double clampSide(double v) {
