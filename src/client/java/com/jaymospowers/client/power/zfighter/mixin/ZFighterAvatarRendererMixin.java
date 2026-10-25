@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** A flying Z Fighter's pose goes on his render state; a Verdant's skin is painted green (in first person too). */
+/** A flying Z Fighter's pose goes on his render state; a fused body's skin is both of theirs; a Verdant's is painted green (in first person too). */
 @Mixin(AvatarRenderer.class)
 abstract class ZFighterAvatarRendererMixin {
 	@Inject(
@@ -27,10 +27,10 @@ abstract class ZFighterAvatarRendererMixin {
 		method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/resources/Identifier;",
 		at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$verdantSkin(AvatarRenderState state, CallbackInfoReturnable<Identifier> cir) {
+		// (0.16.16) a fused body's skin is both of theirs (before a Verdant's green goes on)
+		Identifier skin = com.jaymospowers.client.power.zfighter.ZFighterFusionLook.skin(state, cir.getReturnValue());
 		ZFighterVerdantLook.Look look = state.getData(ZFighterVerdantLook.KEY);
-		if (look != null) {
-			cir.setReturnValue(ZFighterVerdantLook.skin(cir.getReturnValue(), look.green()));
-		}
+		cir.setReturnValue(look != null ? ZFighterVerdantLook.skin(skin, look.green()) : skin);
 	}
 
 	@ModifyVariable(method = "renderHand", at = @At("HEAD"), argsOnly = true)

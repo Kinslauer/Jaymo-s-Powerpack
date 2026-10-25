@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,8 +20,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,8 +35,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The fusion dance. Two Z Fighters face each other a few blocks apart; each taps Z, then presses C within two seconds,
  * and dances (arms swept out to one side, over, then fingertips pointed at each other). When the second one's dance
- * ends, they become one for {@link #FUSION_TICKS}: the first to dance leads and steers; the other watches from inside
- * (a spectator riding his camera); after {@link #SWAP_AT} they change places. The fused fighter has both their fists, health, ki and ki power added together, and
+ * ends, they become one for {@link #FUSION_TICKS}, and longer the more often the pair has fused and the more they've trained
+ * between them ({@link #length}): the first to dance leads and steers; the other watches from inside (a spectator riding
+ * his camera); halfway through they change places. The fused fighter has both their fists, health, ki and ki power added together, and
  * {@link #FUSION_BONUS} more. Either may then not fuse again for {@link #COOLDOWN}.
  */
 public final class ZFighterFusion {
@@ -44,10 +48,16 @@ public final class ZFighterFusion {
 	/** How squarely they must face each other (the dot of their flat looks, at most). */
 	static final double FACING = -0.5;
 	static final int FUSION_TICKS = 1200;
+	/**
+	 * (0.16.16) Andy: "the more they fuse, and the more experience they have collectively the longer the fusion, so you can
+	 * kind of train your fusion". Each fusion the pair has done before adds this much (up to {@link #PRACTICE_CAP} of them),
+	 * and each stat level they've trained between them ({@link ZFighterTraining.Data#totalLevels}) this much more.
+	 */
+	static final int PER_FUSION_TICKS = 120;
+	static final int PRACTICE_CAP = 15;
+	static final int PER_LEVEL_TICKS = 2;
 	static final float FUSION_BONUS = 0.1F;
 	static final long COOLDOWN = 12000L;
-	/** Halfway through, the one watching from inside takes over and the leader goes inside. */
-	static final int SWAP_AT = FUSION_TICKS / 2;
 
 	/** Which way the dancer sweeps (1 right, -1 left), while dancing; everyone's client poses it. */
 	public static final AttachmentType<Integer> DANCE = AttachmentRegistry.create(JaymosPowers.id("zfighter_dance"),
@@ -55,6 +65,16 @@ public final class ZFighterFusion {
 	/** On the one watching from inside: the game mode to give back (kept across a log-out or a crash). */
 	public static final AttachmentType<Integer> RESTORE = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_restore"),
 		builder -> builder.persistent(Codec.INT));
+	/**
+	 * (0.16.16) On the fused body, for everyone's client: who the two are (the first to dance, then the other, the same
+	 * after they change places) and the one inside's lineage and tail, so the body is drawn as both of them
+	 * ({@code ZFighterFusionLook}).
+	 */
+	public static final AttachmentType<Look> LOOK = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_look"),
+		builder -> builder.syncWith(Look.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** (0.16.16) How many times he's fused with each partner (their UUID), for the length of the next fusion. */
+	public static final AttachmentType<Map<String, Integer>> PRACTICE = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_practice"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)).copyOnDeath());
 	/** When he last fused (game time). */
 	public static final AttachmentType<Long> LAST = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_last"),
 		builder -> builder.persistent(Codec.LONG));
@@ -62,11 +82,21 @@ public final class ZFighterFusion {
 	private record Dance(long started, int side, long ends) {
 	}
 
+	/** The fused body's two (first and second dancer), and the lineage and tail (0 none, 1 out, 2 wrapped) of the one inside. */
+	public record Look(UUID first, UUID second, int innerLineage, int innerTail) {
+		public static final StreamCodec<ByteBuf, Look> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, Look::first,
+			UUIDUtil.STREAM_CODEC, Look::second,
+			ByteBufCodecs.VAR_INT, Look::innerLineage,
+			ByteBufCodecs.VAR_INT, Look::innerTail,
+			Look::new);
+	}
+
 	private record Pending(UUID leader, UUID partner, long at) {
 	}
 
 	/** What the partner adds to the leader, taken when they fuse. */
-	record Fused(UUID partner, long until, double fists, double health, int ki, float power, float toughness, boolean swapped) {
+	record Fused(UUID partner, long until, long length, double fists, double health, int ki, float power, float toughness, boolean swapped) {
 	}
 
 	private static final Map<UUID, Long> Z_TAPS = new HashMap<>();
@@ -183,7 +213,8 @@ public final class ZFighterFusion {
 				defuse(server, id);
 				continue;
 			}
-			if (!fused.swapped() && fused.until() - now <= FUSION_TICKS - SWAP_AT) {
+			// halfway through, the one watching from inside takes over and the leader goes inside
+			if (!fused.swapped() && fused.until() - now <= fused.length() / 2) {
 				swap(leader, partner, fused);
 				continue;
 			}
@@ -207,12 +238,16 @@ public final class ZFighterFusion {
 
 	private static void fuse(ServerPlayer leader, ServerPlayer partner) {
 		long now = leader.level().getGameTime();
+		int practice = practice(leader, partner);
+		int length = length(practice, ZFighterTraining.of(leader).totalLevels() + ZFighterTraining.of(partner).totalLevels());
 		ZFighterPower.Live partnerLive = ZFighterPower.live(partner);
-		Fused fused = new Fused(partner.getUUID(), now + FUSION_TICKS, ZFighterPower.fistBonus(partner), partner.getMaxHealth(),
+		Fused fused = new Fused(partner.getUUID(), now + length, length, ZFighterPower.fistBonus(partner), partner.getMaxHealth(),
 			ZFighterPower.maxKi(partner), ZFighterPower.kiPower(partner, partnerLive), ZFighterTraining.toughness(partner), false);
 		FUSED.put(leader.getUUID(), fused);
 		leader.setAttached(LAST, now);
 		partner.setAttached(LAST, now);
+		practised(leader, partner, practice + 1);
+		practised(partner, leader, practice + 1);
 		ZFighterPower.Live live = ZFighterPower.live(leader);
 		live.ki = Math.min(ZFighterPower.maxKi(leader), live.ki + partnerLive.ki);
 		partnerLive.ki = 0.0F;
@@ -220,6 +255,7 @@ public final class ZFighterFusion {
 		partner.setAttached(RESTORE, partner.gameMode().getId());
 		partner.setGameMode(GameType.SPECTATOR);
 		partner.setCamera(leader);
+		look(leader, partner, leader, partner);
 		ZFighterPower.refresh(leader, live);
 		leader.setHealth(leader.getMaxHealth());
 		ServerLevel level = leader.level();
@@ -235,6 +271,32 @@ public final class ZFighterFusion {
 				near.sendSystemMessage(message);
 			}
 		}
+		Component holds = Component.translatable("message.jaymospowers.zfighter_fusion_length", practice + 1, (length + 19) / 20)
+			.withStyle(ChatFormatting.AQUA);
+		leader.sendOverlayMessage(holds);
+		partner.sendOverlayMessage(holds);
+	}
+
+	/** How long a fusion lasts (ticks): after {@code practice} fusions together, with {@code levels} stat levels between them. */
+	static int length(int practice, int levels) {
+		return FUSION_TICKS + Math.min(practice, PRACTICE_CAP) * PER_FUSION_TICKS + Math.max(0, levels) * PER_LEVEL_TICKS;
+	}
+
+	/** How many times the two have fused before (the fewer of what each remembers). */
+	static int practice(ServerPlayer a, ServerPlayer b) {
+		return Math.min(practiced(a, b), practiced(b, a));
+	}
+
+	private static int practiced(ServerPlayer player, ServerPlayer partner) {
+		Map<String, Integer> practice = player.getAttached(PRACTICE);
+		return practice == null ? 0 : practice.getOrDefault(partner.getUUID().toString(), 0);
+	}
+
+	private static void practised(ServerPlayer player, ServerPlayer partner, int times) {
+		Map<String, Integer> practice = player.getAttached(PRACTICE);
+		Map<String, Integer> next = practice == null ? new HashMap<>() : new HashMap<>(practice);
+		next.put(partner.getUUID().toString(), times);
+		player.setAttached(PRACTICE, next);
 	}
 
 	/**
@@ -254,7 +316,7 @@ public final class ZFighterFusion {
 		// what the old leader brings, on his own
 		ZFighterPower.refresh(leader, live);
 		ZFighterPower.Live partnerLive = ZFighterPower.live(partner);
-		Fused swapped = new Fused(leader.getUUID(), fused.until(), ZFighterPower.fistBonus(leader), leader.getMaxHealth(), ZFighterPower.maxKi(leader),
+		Fused swapped = new Fused(leader.getUUID(), fused.until(), fused.length(), ZFighterPower.fistBonus(leader), leader.getMaxHealth(), ZFighterPower.maxKi(leader),
 			ZFighterPower.kiPower(leader, live), ZFighterTraining.toughness(leader), true);
 		float ki = live.ki;
 		live.ki = 0.0F;
@@ -276,6 +338,9 @@ public final class ZFighterFusion {
 		leader.setAttached(RESTORE, leader.gameMode().getId());
 		leader.setGameMode(GameType.SPECTATOR);
 		leader.setCamera(partner);
+		leader.removeAttached(LOOK);
+		// the body looks the same after they change places: the first dancer stays first
+		look(partner, leader, leader, partner);
 		ZFighterPower.refresh(partner, partnerLive);
 		partnerLive.ki = Math.min(ZFighterPower.maxKi(partner), ki);
 		partner.setHealth(Math.max(1.0F, healthShare * partner.getMaxHealth()));
@@ -301,6 +366,7 @@ public final class ZFighterFusion {
 		ServerPlayer leader = server.getPlayerList().getPlayer(leaderId);
 		ServerPlayer partner = server.getPlayerList().getPlayer(fused.partner());
 		if (leader != null) {
+			leader.removeAttached(LOOK);
 			ZFighterPower.Live live = ZFighterPower.live(leader);
 			ZFighterPower.refresh(leader, live);
 			live.ki = Math.min(live.ki, ZFighterPower.maxKi(leader));
@@ -314,6 +380,12 @@ public final class ZFighterFusion {
 		}
 	}
 
+	/** Marks {@code body} as the two fused, {@code inner} watching from inside. */
+	private static void look(ServerPlayer body, ServerPlayer inner, ServerPlayer first, ServerPlayer second) {
+		int tail = ZFighterLineage.of(inner) != ZFighterLineage.WARRIOR || ZFighterLineage.tailCut(inner) ? 0 : ZFighterLineage.tailOut(inner) ? 1 : 2;
+		body.setAttached(LOOK, new Look(first.getUUID(), second.getUUID(), ZFighterLineage.of(inner), tail));
+	}
+
 	/** The partner back in his own body (on joining, too, if a fusion was cut short by a log-out or a crash). */
 	private static void giveBack(ServerPlayer partner, ServerPlayer leader) {
 		Integer mode = partner.getAttached(RESTORE);
@@ -321,6 +393,7 @@ public final class ZFighterFusion {
 			return;
 		}
 		partner.removeAttached(RESTORE);
+		partner.removeAttached(LOOK);
 		partner.setCamera(partner);
 		if (leader != null) {
 			Vec3 side = leader.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().cross(new Vec3(0.0, 1.0, 0.0));

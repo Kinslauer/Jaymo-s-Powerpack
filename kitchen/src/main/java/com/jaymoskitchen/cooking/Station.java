@@ -45,6 +45,9 @@ public enum Station {
 	}
 
 	public boolean allows(Dish dish) {
+		if (!dish.available()) {
+			return false;
+		}
 		return switch (this) {
 			// the oven bakes; a pot on the hob adds the stews and soups, a pan the grilled and seared (chopping wants a
 			// cutting board, spit roasts a campfire)

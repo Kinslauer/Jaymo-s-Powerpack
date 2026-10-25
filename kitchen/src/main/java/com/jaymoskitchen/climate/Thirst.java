@@ -4,6 +4,7 @@ import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.brewing.Brewing;
 import com.jaymoskitchen.cooking.Dish;
+import com.jaymoskitchen.kitchen.KitchenBlocks;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +69,7 @@ public final class Thirst {
 	/** A sip from the bank or the sky: water it gives, and ticks before another. */
 	static final int SIP = 1, SIP_COOLDOWN = 10;
 	/** Water from the drinks themselves. */
-	static final int DIRTY_BOTTLE = 5, CLEAN_BOTTLE = 7, POTION = 3, MILK = 6, HONEY = 1, BREW = 4, SPIRITS = -2;
+	static final int DIRTY_BOTTLE = 5, CLEAN_BOTTLE = 7, POTION = 3, MILK = 6, HONEY = 1, BREW = 4, SPIRITS = -2, LEMONADE = 6;
 	/** Water from food: a stew or soup, a melon slice, a berry or apple. */
 	static final int STEW = 3, MELON = 2, FRUIT = 1;
 	/** Clean water and a fresh sip cool you this much (body heat points). */
@@ -195,6 +196,9 @@ public final class Thirst {
 		}
 		if (stack.is(Brewing.STRONG_SPIRITS)) {
 			return SPIRITS;
+		}
+		if (stack.is(KitchenBlocks.FOODS.get("lemonade"))) {
+			return LEMONADE;
 		}
 		if (Brewing.brewOf(stack) != null) {
 			return BREW;
