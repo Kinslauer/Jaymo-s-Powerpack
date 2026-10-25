@@ -36,6 +36,8 @@ final class ResonanceBoom {
 	static final double LAUNCH_UP = 0.6;
 	static final double SHRIEK_RADIUS = 16.0;
 	static final int SHRIEK_TICKS = 160;
+	/** (0.16.24) The films (ticks): side on along the Sonic Boom; round your front for the Shriek, bars for all who hear it. */
+	static final int BOOM_FILM_TICKS = 24, SHRIEK_FILM_TICKS = 30;
 	/** Anger a Shriek sets on a Warden in range (80 is angry; 150 the most). */
 	static final int SHRIEK_ANGER = 150;
 
@@ -89,6 +91,7 @@ final class ResonanceBoom {
 			level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		com.jaymospowers.core.Shakes.heavy(player, eye.add(look.scale(2.0)), RANGE, 1.6F);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PROFILE, BOOM_FILM_TICKS, end, null, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 1.0F);
 		List<LivingEntity> hits = level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(BEAM_WIDTH + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand));
@@ -126,6 +129,7 @@ final class ResonanceBoom {
 			level.sendParticles(new ShriekParticleOption(i * 5), player.getX(), player.getEyeY() + 0.2, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		level.gameEvent(GameEvent.SHRIEK, player.position(), GameEvent.Context.of(player));
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, SHRIEK_FILM_TICKS, SHRIEK_RADIUS);
 		return true;
 	}
 

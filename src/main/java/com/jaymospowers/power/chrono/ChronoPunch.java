@@ -36,6 +36,8 @@ final class ChronoPunch {
 	/** The last punch's throw. */
 	static final double FINISH_PUSH = 1.3;
 	static final int COOLDOWN = 160;
+	/** (0.16.24) The flurry's film (ticks): close and low, sweeping round your front. */
+	static final int FILM_TICKS = 22;
 	/** Screen shake per landed punch: the first, then this much more each. */
 	static final float SHAKE = 0.1F, SHAKE_STEP = 0.06F;
 	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
@@ -55,6 +57,7 @@ final class ChronoPunch {
 			return ChronoFlow.barrage(player);
 		}
 		FLURRIES.put(player.getUUID(), 0);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, FILM_TICKS, 0.0);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, 1.8F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.7F, 1.6F);

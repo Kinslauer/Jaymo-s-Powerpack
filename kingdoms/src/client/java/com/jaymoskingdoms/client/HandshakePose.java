@@ -29,6 +29,8 @@ public final class HandshakePose {
 	static final float PUMPS = 3.0F, PUMP = 0.2F;
 	/** (a dap) The hand up higher and further in, the one tug toward the chest, the lean into it (radians); its quicker ease. */
 	static final float DAP_REACH = -1.65F, DAP_IN = -0.55F, DAP_TUG = 0.35F, DAP_LEAN = 0.08F, DAP_QUICKER = 2.5F;
+	/** (0.7.205) How long (ticks) the one taking the hand waits before reaching, so it meets the other in the film's hand shot. */
+	static final float REACH_DELAY = 3.0F;
 	/** Head bowed a touch while shaking (radians). */
 	static final float NOD = 0.12F;
 	/** The ease: stiffness (per second squared), damping ratio, the longest step (seconds). */
@@ -87,11 +89,15 @@ public final class HandshakePose {
 		Hand hand = HANDS.get(id);
 		float t = -1.0F;
 		boolean on = hand != null, dap = hand != null && hand.state == Handshakes.Hand.DAP;
+		float[] ease = EASES.get(id);
 		if (hand != null && (hand.state == Handshakes.Hand.SHAKING || dap)) {
 			t = into(hand, partialTicks);
 			on = t < (dap ? Handshakes.DAP_RELEASE : Handshakes.RELEASE_TICK);
+			if (!dap && t < REACH_DELAY && (ease == null || ease[0] < 0.5F)) {
+				// (0.7.205) the one taking the hand waits a beat, so the film's hand shot sees it come in
+				on = false;
+			}
 		}
-		float[] ease = EASES.get(id);
 		long now = System.nanoTime();
 		if (ease == null) {
 			if (!on) {

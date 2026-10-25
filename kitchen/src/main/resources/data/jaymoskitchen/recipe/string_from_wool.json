@@ -1,0 +1,12 @@
+{
+  "type": "jaymoskitchen:blade_crafting",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:wool",
+    "#jaymoskitchen:work_blades"
+  ],
+  "result": {
+    "id": "minecraft:string",
+    "count": 2
+  }
+}

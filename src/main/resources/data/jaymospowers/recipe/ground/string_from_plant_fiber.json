@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": "jaymospowers:plant_fiber"
+  },
+  "result": {
+    "id": "minecraft:string",
+    "count": 1
+  }
+}

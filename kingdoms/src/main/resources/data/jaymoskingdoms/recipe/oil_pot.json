@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C",
+    "B"
+  ],
+  "key": {
+    "C": "minecraft:cauldron",
+    "B": "minecraft:iron_bars"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:oil_pot"
+  }
+}

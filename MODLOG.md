@@ -2873,3 +2873,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   swimming, sprinting, flying, sleeping or downed, or on your own body in first person. It counts in
   `PoseTakeover.posed` (Fresh Animations pauses for it); `posedOtherwise` lets it step aside for every other pose. Hooked
   in through Tend's mixins and `ModelPoses`. Tuning at the top of the class. Compile-checked; not playtested.
+- **0.16.24, SevTech-style starter routes (Kitchen 0.5.27, Kingdoms 0.7.205):** Andy: "integrate more starter recipe
+  routes [...] Leather needs tanning [...] add another salt acquisition method (maybe the rocks that spawn in water are
+  salt crystals) [...] a way to strike and start flame like flint and steel but with a rock in one hand and the flint in
+  the other". Powers: 8 plant fibres in a ring craft string (`recipe/ground/string_from_plant_fiber`). Rocks that
+  worldgen lays in water are now `salt_crystals` (calcite-textured pebbles, give Kitchen's salt); rock piles got a
+  `natural` state (default true, false when a player sets one down) and a natural pile that lies in water turns to salt
+  on a random tick, so the already-generated (Chunky) world gets salt too. Flint in one hand and a rock in the other,
+  right click a block: sparks, and 35% of strikes light it like flint and steel (fire on the face, or a campfire or
+  candle); a light breaks the rock and chips the flint to a shard 1 time in 3 (`FirstTools.strike`, in a late
+  UseBlockCallback phase so Kingdoms' arson watch sees it first; knapping skips when you're holding a rock). The
+  leather chain itself is in Kitchen 0.5.27 (`tanning/Hides`); `tinkering/Uncraftable` also drops `minecraft:leather`
+  (4 rabbit hides), since Naturalist's data pack puts it back over Kitchen's switch-off. Fixed on the way: every rock,
+  flint and salt pile dropped one item however big it was (the loot tables used the pre-26.3 `functions` key, which is
+  silently ignored); `tools/gen_ground_rocks.py` now writes 26.3's `modifier`/`match_block` like vanilla's candles.
+  Checked on a dev server with a fake player: all the hide, wool and fibre recipes (blade and waterskin come back
+  worn, an empty waterskin doesn't match, a water bucket leaves its bucket), the rack drying 4 salted hides, a
+  waterlogged worldgen rock turning to salt (a player's staying rock), salt/rock/flint pile drops, striking a fire on
+  stone, a knife peeling an oak log. Not seen in a client (the rack's drawing, textures, JEI).

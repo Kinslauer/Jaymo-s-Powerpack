@@ -671,5 +671,18 @@
 	"effect.jaymoskitchen.nourishment": "Nourishment",
 	"message.jaymoskitchen.cookware_cold": "It needs a fire under it: a lit campfire, fire, lava, a magma block or a lit furnace",
 	"message.jaymoskitchen.board.cant_cut": "A knife can't do anything with that",
-	"message.jaymoskitchen.feast.bowl": "You'll need a bowl to take a serving"
+	"message.jaymoskitchen.feast.bowl": "You'll need a bowl to take a serving",
+	"item.jaymoskitchen.hide": "Hide",
+	"item.jaymoskitchen.raw_hide": "Raw Hide",
+	"item.jaymoskitchen.salted_hide": "Salted Hide",
+	"item.jaymoskitchen.dried_hide": "Dried Hide",
+	"item.jaymoskitchen.wet_tanned_hide": "Wet Tanned Hide",
+	"item.jaymoskitchen.salt": "Salt",
+	"item.jaymoskitchen.resin": "Resin",
+	"block.jaymoskitchen.drying_rack": "Drying Rack",
+	"jei.jaymoskitchen.drying": "Drying Rack",
+	"jei.jaymoskitchen.drying.time": "About %s minutes, kept out of the rain",
+	"message.jaymoskitchen.drying_rack.hung": "Hung up %s: dry in about %s min",
+	"message.jaymoskitchen.drying_rack.full": "The rack's full",
+	"message.jaymoskitchen.drying_rack.wait": "About %s min until it's dry"
 }
