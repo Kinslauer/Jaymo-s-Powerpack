@@ -1,6 +1,7 @@
 package com.jaymoskitchen.cooking;
 
 import com.jaymoskitchen.ModItems;
+import com.jaymoskitchen.PantryCompat;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
@@ -43,6 +44,14 @@ public enum Step {
 	DOUGH(() -> ModItems.DOUGH, null),
 	PMEH(() -> ModItems.PMEH, null),
 	PAPER(() -> Items.PAPER, null),
+	// Pantry for Blockheads' fruit and vegetables (air without it; see PantryCompat)
+	LEMON(() -> PantryCompat.item("lemon"), null),
+	PEACH(() -> PantryCompat.item("peach"), null),
+	GRAPES(() -> PantryCompat.item("grapes"), null),
+	TOMATO(() -> PantryCompat.item("tomato"), null),
+	ONION(() -> PantryCompat.item("onion"), null),
+	EGGPLANT(() -> PantryCompat.item("eggplant"), null),
+	CHILI_PEPPER(() -> PantryCompat.item("chili_pepper"), null),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -70,7 +79,7 @@ public enum Step {
 
 	/** Whether an inventory stack counts as this ingredient (a "potion" only counts if it's plain water). */
 	public boolean matches(ItemStack stack) {
-		if (stack.getItem() != item()) {
+		if (stack.isEmpty() || stack.getItem() != item()) {
 			return false;
 		}
 		if (this == WATER_BOTTLE) {
@@ -88,6 +97,11 @@ public enum Step {
 			return stack;
 		}
 		return new ItemStack(item(), count);
+	}
+
+	/** Whether the ingredient exists in this game (a Pantry for Blockheads one needs that mod). */
+	public boolean available() {
+		return item() != Items.AIR;
 	}
 
 	public boolean isAction() {

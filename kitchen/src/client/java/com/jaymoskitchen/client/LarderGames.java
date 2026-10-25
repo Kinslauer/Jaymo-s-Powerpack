@@ -178,8 +178,8 @@ abstract class LarderGames {
 			// the vegetables: one long strip, cut pieces left behind as they pass
 			int vegTop = boardTop + 26;
 			int vegBottom = vegTop + 26;
-			int body = dish == Dish.BEETROOT_HASH ? 0xFF8E1A48 : 0xFFE58A24;
-			int shade = dish == Dish.BEETROOT_HASH ? 0xFF64102F : 0xFFB8641A;
+			int body = dish == Dish.BEETROOT_HASH ? 0xFF8E1A48 : dish == Dish.FRUIT_SALAD ? 0xFFF2A65A : 0xFFE58A24;
+			int shade = dish == Dish.BEETROOT_HASH ? 0xFF64102F : dish == Dish.FRUIT_SALAD ? 0xFFC8703A : 0xFFB8641A;
 			float s = doneTicks >= 0 ? slide : slide + speed * a;
 			int startX = Math.round(cx + (0.0F - s) * PX_PER_LENGTH);
 			int endX = Math.round(cx + (1.0F - s) * PX_PER_LENGTH);
@@ -442,6 +442,8 @@ abstract class LarderGames {
 				case BORSCHT -> 0xFF9E1C4A;
 				case CARROT_SOUP -> 0xFFE4822A;
 				case CHICKEN_SOUP -> 0xFFE2C878;
+				case RATATOUILLE -> 0xFFB8402A;
+				case CHILI_CON_CARNE -> 0xFF8A2A16;
 				default -> 0xFF8A5A30;
 			};
 		}

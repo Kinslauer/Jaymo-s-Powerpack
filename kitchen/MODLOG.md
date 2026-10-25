@@ -1046,3 +1046,20 @@ other two LGPL and on Thermoo), so this is our own take on them, nothing copied.
   murky while hunger's on you; a thermometer between hearts and hunger with an arrow while it moves. Art from
   `tools/gen_climate.py` (hand-drawn grids; Clean Water reuses the potion model tinted, like cooking oil).
 - Compile-checked; a dev server boots (see PR). Not playtested in a client yet.
+
+### 0.5.26: the orchard and the garden (pack 0.16.19)
+Andy had a lemon he couldn't cook with (2026-10-25). Pantry for Blockheads' lemons, peaches and grapes had no recipe
+anywhere, and none of its vegetables went into our minigames. New dishes, all through the existing minigames:
+- **Lemon Chicken** (spit roast, campfire: chicken + 2 lemons; Perfect: Speed 2 min, Regeneration 20 s).
+- **Lemon Grilled Cod** (grill: cod + lemon; Dolphin's Grace 2 min). **Lemon Tart** (oven: dough, lemon, sugar, egg;
+  Haste 2 min, Luck). **Peach Cobbler** (oven: dough, 2 peaches, sugar; Absorption 90 s, Regeneration).
+- **Fruit Salad** (cutting board: peach, grapes, apple; Jump Boost 2 min).
+- **Ratatouille** (pot: eggplant, tomato, onion; Health Boost, Resistance) and **Chili con Carne** (pot: beef, chili
+  pepper, tomato; Fire Resistance, Strength). Both are stews: they give the bowl back, quench like stews and warm you.
+- **Lemonade** (crafting: 2 lemons, sugar, a water bottle): a drink, 6 thirst points, bottle back.
+- **Grape Wine**: the cask takes grapes as a base, like berries.
+- `PantryCompat` looks Pantry's items up by id; without Pantry the new `Step`s are air, their dishes are left off every
+  station (`Dish.available`), the decoy pool skips them, grape wine isn't a cask base, and the recipes don't load
+  (`fabric:registry_contains`). The items are still registered either way so worlds keep them.
+- Icons in the vanilla style pack: chicken, cod and pies from vanilla's own (`tools/vanilla_style/kitchen.py`), soups in
+  vanilla's stew bowl, lemonade and grape wine in the brewing bottle (`brewing.py`). Compile-checked; not playtested.

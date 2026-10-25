@@ -481,6 +481,24 @@ oMooKLLLLLMMooMo
 ..s.............
 .s..............
 s...............''', {'o': o, 'D': d, 'M': m, 'L': l, 's': '896727'})
+    # ---- the orchard and the garden (Pantry for Blockheads' lemons, peaches, grapes and vegetables) ----
+    LEMON, LEMON_LIT, LEAF = 'f2d43a', 'fff19a', '5f8a2e'
+    lc = shift(van('cooked_chicken'), lambda c: (c[0] * 0.98 + 4, c[1] * 0.86 + 4, c[2] * 0.6))
+    dots(lc, [(6, 6), (9, 8), (7, 10), (10, 5)], LEMON); dots(lc, [(6, 5), (9, 7)], LEMON_LIT); dots(lc, [(8, 6), (11, 9)], LEAF)
+    out['lemon_chicken'] = lc
+    cod = van('cooked_cod'); cpx = cod.load()
+    for x, y in [(5, 7), (6, 8), (8, 6), (9, 7), (11, 5), (12, 6)]:
+        if cpx[x, y][3] and lum(cpx[x, y]) > 60: cpx[x, y] = (88, 52, 30, 255)
+    out['lemon_cod'] = dots(cod, [(7, 7), (10, 6)], LEMON)
+    dots(out['lemon_cod'], [(7, 6)], LEMON_LIT)
+    out['lemon_tart'] = pie(('d0a808', 'ecc818', 'fbe23a', 'fff38a'), [((5, 7), 'fffaf0'), ((9, 7), 'fffaf0'), ((7, 9), 'fffaf0'), ((11, 8), 'fffaf0'), ((8, 7), LEMON_LIT)])
+    out['peach_cobbler'] = pie(('a8402a', 'c85a3a', 'e2784a', 'f29a6a'), [(p, 'c8964e') for p in [(5, 7), (6, 7), (9, 7), (10, 7), (7, 9), (8, 9), (11, 9), (4, 8), (12, 8)]] + [((6, 6), 'ecca8a'), ((10, 6), 'ecca8a'), ((8, 8), 'ecca8a')])
+    SOUPS2 = {
+        'fruit_salad': (('e8b070', 'f0c488', 'f8dcaa'), [((5, 7), 'f08a3a'), ((6, 6), 'f6a656'), ((8, 7), '6a2a5a'), ((9, 6), '8a3a74'), ((10, 7), 'c42b2b'), ((7, 7), 'f2d43a'), ((4, 7), '8ab04a'), ((11, 7), '6a2a5a')]),
+        'ratatouille': (('b03020', 'cc4630', 'e2603e'), [((5, 7), '4a1a40'), ((6, 6), '6a2a5a'), ((9, 7), '4a1a40'), ((8, 6), 'f2ead2'), ((10, 6), '5f8a2e'), ((7, 7), 'e8d070'), ((11, 7), '6a2a5a')]),
+        'chili_con_carne': (('4a1a0c', '642612', '7e341a'), [((5, 7), 'a8643a'), ((7, 6), 'e03a1a'), ((8, 7), 'a8643a'), ((10, 7), '2e0e06'), ((6, 6), '2e0e06'), ((9, 6), 'a8643a'), ((11, 7), 'e03a1a'), ((4, 7), '5f8a2e')]),
+    }
+    for n, (ramp, bits) in SOUPS2.items(): out[n] = bowl(ramp, bits)
     return out
 
 if __name__ == '__main__':

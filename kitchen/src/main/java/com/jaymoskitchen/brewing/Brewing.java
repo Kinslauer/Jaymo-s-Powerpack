@@ -33,7 +33,7 @@ import net.minecraft.world.level.material.MapColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The brewing drop: a cask that ferments ale, cider, mead and berry wine, a still that distils them into strong
+ * The brewing drop: a cask that ferments ale, cider, mead, berry wine and grape wine, a still that distils them into strong
  * spirits (aqua vitae), and the drunkenness all of it brings ({@link Drunk}). Everything is in-world, right-click.
  */
 public final class Brewing {
@@ -86,8 +86,10 @@ public final class Brewing {
 			}
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
-			for (Item item : DRINKS.values()) {
-				output.accept(new ItemStack(item));
+			for (Map.Entry<Brew, Item> entry : DRINKS.entrySet()) {
+				if (entry.getKey().baseItem() != Items.AIR) {
+					output.accept(new ItemStack(entry.getValue()));
+				}
 			}
 			output.accept(new ItemStack(STRONG_SPIRITS));
 		});
@@ -108,7 +110,8 @@ public final class Brewing {
 	/** The brew a cask makes from this ingredient, or null. */
 	public static @Nullable Brew baseOf(ItemStack stack) {
 		for (Brew brew : Brew.values()) {
-			if (stack.is(brew.baseItem())) {
+			Item base = brew.baseItem();
+			if (base != Items.AIR && stack.is(base)) {
 				return brew;
 			}
 		}

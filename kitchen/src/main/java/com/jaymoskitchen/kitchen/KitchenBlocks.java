@@ -53,6 +53,8 @@ public final class KitchenBlocks {
 		food("flatbread", 5, 0.6F, null, false);
 		food("mushroom_pasta", 10, 0.8F, Items.BOWL, false);
 		food("brownie", 4, 0.4F, null, false);
+		// Pantry for Blockheads' lemons, squeezed into water with sugar (the recipe only loads with Pantry)
+		food("lemonade", 2, 0.3F, Items.GLASS_BOTTLE, true);
 		// an ingredient, not a meal
 		FOODS.put("pasta", register("pasta", Item::new, new Item.Properties()));
 

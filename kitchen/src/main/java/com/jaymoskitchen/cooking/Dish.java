@@ -74,7 +74,22 @@ public enum Dish {
 	ROAST_MUTTON(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(MUTTON, SWEET_BERRIES), 11, 0.9F, false,
 		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.STRENGTH, 30 * 20, 0))),
 	SHEPHERDS_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(MUTTON, POTATO, CARROT), 12, 0.8F, false,
-		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0)));
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0))),
+	// --- content drop 5: the orchard and the garden (Pantry for Blockheads' lemons, peaches, grapes and vegetables) ---
+	LEMON_CHICKEN(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(CHICKEN, LEMON, LEMON), 12, 0.9F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
+	LEMON_COD(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(COD, LEMON, FLIP, FLIP), 9, 0.8F, false,
+		List.of(new Buff(MobEffects.DOLPHINS_GRACE, 120 * 20, 0))),
+	LEMON_TART(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, LEMON, SUGAR, EGG), 10, 0.6F, false,
+		List.of(new Buff(MobEffects.HASTE, 120 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),
+	PEACH_COBBLER(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, PEACH, PEACH, SUGAR), 10, 0.6F, false,
+		List.of(new Buff(MobEffects.ABSORPTION, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	FRUIT_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(PEACH, GRAPES, APPLE), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.JUMP_BOOST, 120 * 20, 0))),
+	RATATOUILLE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, EGGPLANT, TOMATO, ONION), 9, 0.7F, true,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	CHILI_CON_CARNE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BEEF, CHILI_PEPPER, TOMATO), 11, 0.8F,
+		true, List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -102,9 +117,15 @@ public enum Dish {
 		}
 	}
 
-	/** Every ingredient that can show up as a wrong-answer button. */
+	/** Every ingredient that can show up as a wrong-answer button (Pantry's only with Pantry; see {@link #decoys}). */
 	public static final List<Step> DECOY_POOL = List.of(BEEF, POTATO, CARROT, FLOUR, BROWN_MUSHROOM, RED_MUSHROOM,
-		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS);
+		EGG, SUGAR, SWEET_BERRIES, SALMON, DRIED_KELP, CHICKEN, BEETROOT, MUTTON, COD, APPLE, PUMPKIN, NETHER_WART, CRIMSON_FUNGUS, WARPED_FUNGUS,
+		LEMON, PEACH, GRAPES, TOMATO, ONION, EGGPLANT, CHILI_PEPPER);
+
+	/** The decoy pool, less the ingredients this game doesn't have. */
+	public static List<Step> decoys() {
+		return DECOY_POOL.stream().filter(Step::available).toList();
+	}
 
 	private final Method method;
 	private final Set<Station> stations;
@@ -154,6 +175,16 @@ public enum Dish {
 		return perfectBuffs;
 	}
 
+	/** Whether every ingredient exists in this game (the Pantry dishes need Pantry for Blockheads). */
+	public boolean available() {
+		for (Step step : steps) {
+			if (!step.isAction() && !step.available()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** How many of each ingredient the recipe consumes (actions are free). */
 	public Map<Step, Integer> ingredients() {
 		Map<Step, Integer> counts = new EnumMap<>(Step.class);
@@ -177,9 +208,13 @@ public enum Dish {
 			case CRIMSON_SKEWER -> 120;
 			case CARROT_CAKE -> 180;
 			case SHEPHERDS_PIE -> 190;
+			case LEMON_COD -> 100;
+			case LEMON_TART -> 180;
+			case PEACH_COBBLER -> 190;
 			// a roast's side
 			case ROAST_CHICKEN -> 90;
 			case ROAST_MUTTON -> 80;
+			case LEMON_CHICKEN -> 90;
 			default -> 100;
 		};
 	}

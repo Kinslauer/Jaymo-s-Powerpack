@@ -599,7 +599,7 @@ public class CookingScreen extends Screen {
 
 	private List<Step> buildBoard(Dish d) {
 		Set<Step> steps = new LinkedHashSet<>(d.steps());
-		List<Step> decoys = new ArrayList<>(Dish.DECOY_POOL);
+		List<Step> decoys = new ArrayList<>(Dish.decoys());
 		decoys.removeAll(steps);
 		Collections.shuffle(decoys, random);
 		steps.addAll(decoys.subList(0, Math.min(DECOYS, decoys.size())));

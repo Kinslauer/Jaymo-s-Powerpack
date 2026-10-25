@@ -74,7 +74,7 @@ final class OvenView {
 		float time) {
 		String[] sprite = switch (dish) {
 			case RUSTIC_BREAD -> BREAD;
-			case APPLE_TART -> TART;
+			case APPLE_TART, LEMON_TART, PEACH_COBBLER -> TART;
 			default -> PIZZA;
 		};
 		// oven body and mouth
