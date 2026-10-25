@@ -2808,3 +2808,27 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Marksman Steady Aim (shots from a crouch +25%), Rider Barding (the horse you steer takes 30% less), Sorcerer Kindred
   Element (own element's harm halved: fire, freezing, lightning, drowning, explosions for earth, falls for air). Class
   cards show each boon as a new row. Compile-checked status in the PR; not playtested.
+- **0.16.3 / Kingdoms 0.7.197, ground rocks and RLCraft's start (`ground/`):** Andy: "the world should be populated with
+  random rocks [...] and flint", then "use the intro mechanics from RL Craft [...] remove craftable planks, and add a
+  flint hatchet". Loose rocks (stone, mossy, granite, diorite, andesite, deepslate, tuff, sandstone, red sandstone)
+  lie 1-4 to a block like candles, in the stone found under them (else the biome's), on the surface, river beds and cave
+  floors; loose flint (1-3) mostly on gravel and by water. Punch to break (drops one a stone), right click picks one up;
+  4 rocks craft into their block. Flint right-clicked on top of a hard block knaps into 2 flint shards; shard over
+  stick = Primitive Knife; a knife cutting grass gives plant fiber, 3 make plant string (4 make white
+  wool); shard + string + stick = Flint Hatchet (was Hand Axe, 3 flint + stick). Every crafting recipe named for planks
+  is dropped (`Uncraftable.planks`); right click a log's top with any axe for planks (2 crude, 3 copper-grade, 4 iron+).
+  Assets: `tools/gen_ground_rocks.py`.
+- **0.16.1, flail and whip executions need Executioner:** Andy: "should only work w the execution trait, and untrained
+  slams w the whip damage it." Ball and Chain and Garrotte now follow the Executioner perk like every other weapon's
+  move; untrained, both are the Wild Slam, and a whip counts as improvised (`Finishers.improvised`), so it loses ~12% of its
+  durability a blow. Compile-checked; not playtested.
+- **0.16.2, the flail's chain comes off the hand:** Andy: "i need a live line connected from the flail as soon as you
+  right click. it should all animate together coming from the hand because right now the flail floats above the head
+  and should be a far smaller flail head. It can look more like this one does, but keep our timing and effects" (the
+  Flails mod, MIT). The whirl now goes round the held-out hand at waist height (`Lash.WHIRL_DROOP`, `Lash.armHand`), not
+  over the head; a new `LashPose` holds the flail arm out (wrist turning with the ball), raises it overhead for the slam
+  and brings it down with the ball, and the chain hangs off that same hand. The client draws the whirl from the moment
+  use is pressed (`LashRenderer.shown`) instead of waiting for the server. The chain is now interlocking iron links like
+  the Flails mod's, and the ball is under half its old size. Ball and Chain's ball goes round the raised hand too. The
+  flail no longer uses the trident's raised-arm animation. Timings, damage and sounds unchanged. Compile-checked; not
+  playtested.

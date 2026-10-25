@@ -1,0 +1,15 @@
+{
+  "block.jaymospowers.stone_rock": "Rock",
+  "block.jaymospowers.mossy_rock": "Mossy Rock",
+  "block.jaymospowers.granite_rock": "Granite Rock",
+  "block.jaymospowers.diorite_rock": "Diorite Rock",
+  "block.jaymospowers.andesite_rock": "Andesite Rock",
+  "block.jaymospowers.deepslate_rock": "Deepslate Rock",
+  "block.jaymospowers.tuff_rock": "Tuff Rock",
+  "block.jaymospowers.sandstone_rock": "Sandstone Rock",
+  "block.jaymospowers.red_sandstone_rock": "Red Sandstone Rock",
+  "block.jaymospowers.loose_flint": "Loose Flint",
+  "item.jaymospowers.flint_shard": "Flint Shard",
+  "item.jaymospowers.plant_fiber": "Plant Fiber",
+  "item.jaymospowers.plant_string": "Plant String"
+}

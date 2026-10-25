@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_4",
+  "textures": {
+    "all": "minecraft:block/red_sandstone_top"
+  }
+}

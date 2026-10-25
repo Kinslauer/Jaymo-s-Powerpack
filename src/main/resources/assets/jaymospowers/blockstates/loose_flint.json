@@ -1,0 +1,106 @@
+{
+  "variants": {
+    "flints=1,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 270
+      }
+    ],
+    "flints=1,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_1",
+        "y": 270
+      }
+    ],
+    "flints=2,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 270
+      }
+    ],
+    "flints=2,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_2",
+        "y": 270
+      }
+    ],
+    "flints=3,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 270
+      }
+    ],
+    "flints=3,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_flint_3",
+        "y": 270
+      }
+    ]
+  }
+}

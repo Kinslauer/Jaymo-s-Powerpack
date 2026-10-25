@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_3",
+  "textures": {
+    "all": "minecraft:block/cobbled_deepslate"
+  }
+}

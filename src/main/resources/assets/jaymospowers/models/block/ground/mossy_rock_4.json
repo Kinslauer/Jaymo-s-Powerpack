@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_4",
+  "textures": {
+    "all": "minecraft:block/mossy_cobblestone"
+  }
+}

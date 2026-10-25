@@ -1563,7 +1563,7 @@ to 3 removals."
 - **Check first in game:** glob sizes on the big body (`BULK_OUT_*`, `BULK_SIZE` guessed), the snap between hunch
   and upright (no blend), the fangs doubling for a moment near the end of the build, flail damage near friends.
 
-## 0.16.1: a Tendrils slot, teeth that bare, globs under the skin, every switch eased
+## 0.16.5: a Tendrils slot, teeth that bare, globs under the skin, every switch eased
 - Andy (playtest of 0.15.164): "The teeth should bare idly like the tongue does ... there should be a smooth transition
   for all animations ... the bulk grows too quickly ... the goo globs currently look too separate, or barnacle like ...
   The mask should always animate peeling, on or off. Add a new button specifically for tendrils, and separate its
@@ -1584,7 +1584,7 @@ to 3 removals."
 - **Check first in game:** the teeth-hidden open jaw shows the red throat strip (intended); the takeover fight's first
   mask tear is still a step; Stare's maw still pops away at its end (pre-existing).
 
-## 0.16.2: the symbiote bounds up walls on all fours
+## 0.16.5 (same release): the symbiote bounds up walls on all fours
 - Andy: "the symbiote also needs a climbing animation, using all fours and aggressively slamming the wall, cracking with
   every impact, and slightly spreading the symbiote weightily bounding itself up the wall" (the Venom film's skyscraper
   climb and a Marvel Rivals clip).

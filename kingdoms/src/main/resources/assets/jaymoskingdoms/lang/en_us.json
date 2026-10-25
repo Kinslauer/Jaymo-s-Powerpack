@@ -1,5 +1,5 @@
 {
-	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap a hand axe from 3 flint and a stick (leaves drop sticks).",
+	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap flint on stone into shards, cut grass with a primitive knife for fiber, twist it into plant string, and bind a flint hatchet.",
 	"block.jaymoskingdoms.chopped_log": "Chopped Log",
 	"entity.jaymoskingdoms.folk": "Kingdom Folk",
 	"entity.jaymoskingdoms.king_of": "King of %s",
@@ -5148,6 +5148,7 @@
 	"speech.jaymoskingdoms.audience.away": "The %s isn't holding court just now.",
 	"speech.jaymoskingdoms.audience.asleep": "The %s is asleep. Come back in the morning.",
 	"speech.jaymoskingdoms.audience.lost": "Lost them. Never mind.",
+	"speech.jaymoskingdoms.audience.point": "I can't get through. The %s is just there, go on ahead. You're expected.",
 	"speech.jaymoskingdoms.audience.announce": "My %s, %s asks for an audience.",
 	"speech.jaymoskingdoms.audience.receive.tyrant": "Kneel, %s, and be quick about it.",
 	"speech.jaymoskingdoms.audience.receive.noble": "Welcome, %s. What can I do for you?",

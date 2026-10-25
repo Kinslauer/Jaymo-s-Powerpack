@@ -1,0 +1,140 @@
+{
+  "variants": {
+    "rocks=1,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 270
+      }
+    ],
+    "rocks=1,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_1",
+        "y": 270
+      }
+    ],
+    "rocks=2,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 270
+      }
+    ],
+    "rocks=2,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_2",
+        "y": 270
+      }
+    ],
+    "rocks=3,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 270
+      }
+    ],
+    "rocks=3,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_3",
+        "y": 270
+      }
+    ],
+    "rocks=4,waterlogged=false": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 270
+      }
+    ],
+    "rocks=4,waterlogged=true": [
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4"
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/mossy_rock_4",
+        "y": 270
+      }
+    ]
+  }
+}
