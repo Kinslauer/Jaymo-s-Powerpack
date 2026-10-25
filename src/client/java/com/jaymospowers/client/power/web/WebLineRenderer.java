@@ -25,9 +25,14 @@ final class WebLineRenderer {
 	private static final int COLOR = 0xFFEDEDED;
 	private static final int SPLAT_COLOR = 0xFFD8D8D8;
 	private static final int SEGMENTS = 20;
-	/** A symbiote's webs: black-purple, with a faint sheen that runs along them. */
-	private static final int DARK = 0xFF0B0710;
-	private static final int SHEEN = 0xFF1F1530;
+	/**
+	 * The black symbiote's webs: blackish grey, with a faint lighter-grey sheen that runs along them. Neutral on purpose:
+	 * (0.16.7) Andy, "the symbiote web lines are still purple, they should be blackish grey like before". The old
+	 * 0x0B0710 / 0x1F1530 had more blue than green, which reads violet once the game's brightness lifts the dark end.
+	 * (The white and red strains' colours are WebStrainLook's.)
+	 */
+	private static final int DARK = 0xFF121216;
+	private static final int SHEEN = 0xFF3E3E44;
 	/** How fast the sheen runs (cycles per tick) and how much of the line it lights. */
 	private static final float SHEEN_SPEED = 0.03F;
 	private static final float SHEEN_WIDTH = 0.18F;
@@ -90,7 +95,7 @@ final class WebLineRenderer {
 	/** How much thicker a symbiote's line is than a web's, and how often goo drips off it (per line, per tick). */
 	private static final float DARK_WIDTH = 2.6F;
 	private static final float DRIP_CHANCE = 0.6F;
-	private static final net.minecraft.core.particles.DustParticleOptions GOO = new net.minecraft.core.particles.DustParticleOptions(0x0B0910, 1.3F);
+	private static final net.minecraft.core.particles.DustParticleOptions GOO = new net.minecraft.core.particles.DustParticleOptions(0x101014, 1.3F);
 
 	/** Three thick black cords, from around the shoulder and arm, gathering on the same point. */
 	private static void bundle(LevelRenderContext context, Vec3 from, Vec3 to, float width) {
@@ -110,12 +115,13 @@ final class WebLineRenderer {
 	private static final double ROPE_TURN_LENGTH = 1.4;
 	private static final int ROPE_SIDES = 6;
 	private static final double ROPE_STEP = 0.2;
-	private static final int ROPE_DARK = 0x080510;
-	private static final int ROPE_SHEEN = 0x221634;
+	/** The cord's colours (RGB): near-black grey below, a lighter grey along the top (see {@link #DARK}: no violet). */
+	private static final int ROPE_DARK = 0x0E0E12;
+	private static final int ROPE_SHEEN = 0x36363C;
 
 	/**
 	 * Twisted strands of black, like corded rope or tentacles, as solid tubes. Each face is shaded by which way it
-	 * faces, with a faint purple-black sheen along the top, so it reads as round without any lighting.
+	 * faces, with a faint grey sheen along the top, so it reads as round without any lighting.
 	 */
 	static void rope(LevelRenderContext context, Vec3 from, Vec3 to, int strands, double radius, double twist) {
 		rope(context, WebLineShape.straight(from, to), from, to, strands, radius, twist);

@@ -337,7 +337,7 @@ VEIN_COLOURS = {
 
 
 def recolour_veins(src, strain):
-    """The pulsing veins (gen_web_veins.py: dark, lit and core purples) in the strain's colours, frame for frame."""
+    """The pulsing veins (gen_web_veins.py: dark, lit and core greys) in the strain's colours, frame for frame."""
     img = src.convert("RGBA")
     dark, lit, core = VEIN_COLOURS[strain]
     out = Image.new("RGBA", img.size)

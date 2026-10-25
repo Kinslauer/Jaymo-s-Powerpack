@@ -250,6 +250,17 @@ public final class WebSymbiote {
 	 */
 	public static final int SHARE_TICKS = 40, SHARE_FLOOR = 25, SHARE_FULL = 20, SHARE_FOOD = 2;
 	public static final float SHARE_SATURATION = 0.3F;
+	/**
+	 * (0.16.7) Well fed (satiety at {@code WELL_FED} or more) it's at its best with you. Andy: "you should get bonuses for
+	 * keeping it high. like faster bonding and favorable treatment from the symbiote." While well fed: the bond warms
+	 * {@code WELL_FED_BOND_MULT} times as often (every {@link #BOND_GAIN_TICKS} / that), its stress calms
+	 * {@code WELL_FED_CALM_MULT} times as often, a radial pick is ignored only {@code WELL_FED_IGNORE_MULT} as often (see
+	 * {@link #IGNORE_MAX}), a neglect takeover is only {@code WELL_FED_NEGLECT_MULT} as likely (see {@link #NEGLECT_CHANCE}),
+	 * and a sulk (your hunger run out) lasts {@code WELL_FED_SULK_MULT} as long. It says so once, the first time you get
+	 * it there ({@code well_fed}).
+	 */
+	public static final int WELL_FED = 80, WELL_FED_BOND_MULT = 2, WELL_FED_CALM_MULT = 2;
+	public static final float WELL_FED_IGNORE_MULT = 0.5F, WELL_FED_NEGLECT_MULT = 0.5F, WELL_FED_SULK_MULT = 0.5F;
 	public static final float STARVE_EXHAUSTION = 1.2F;
 	/** Raw meat feeds it this much per point of the meat's nutrition (and feeds you nothing). */
 	public static final int MEAT_FEED_PER_NUTRITION = 5;
@@ -558,6 +569,8 @@ public final class WebSymbiote {
 	private static final int HINT_EDGE = 8;
 	private static final int HINT_MEAT = 16;
 	private static final int HINT_INSTINCT = 32;
+	/** (0.16.7) The first time it's well fed ({@link #WELL_FED}). */
+	private static final int HINT_WELL_FED = 64;
 
 	private static final Identifier ARMOR_ABSORB_ID = JaymosPowers.id("web_symbiote_armor");
 	private static final Identifier ARMOR_KNOCKBACK_ID = JaymosPowers.id("web_symbiote_knockback");
@@ -1553,16 +1566,22 @@ public final class WebSymbiote {
 				next = next.withStress(Math.min(STRESS_MAX, next.stress() + 1));
 			}
 			next = hintOnce(player, next, HINT_HUNGER, "hunger");
-		} else if (player.tickCount % STRESS_CALM_TICKS == 0 && next.stress() > 0) {
+		} else if (player.tickCount % (wellFed(next) ? STRESS_CALM_TICKS / WELL_FED_CALM_MULT : STRESS_CALM_TICKS) == 0 && next.stress() > 0) {
+			// (0.16.7) well fed, it calms twice as fast
 			next = next.withStress(next.stress() - 1);
 		}
-		// the bond: it warms to you while fed and calm, and cools while it starves
-		if (!player.isCreative() && player.tickCount % BOND_GAIN_TICKS == 0 && live.bondTicks <= 0) {
+		// the bond: it warms to you while fed and calm (well fed, twice as often: WELL_FED_BOND_MULT), and cools while it starves
+		int bondTicks = wellFed(next) ? BOND_GAIN_TICKS / WELL_FED_BOND_MULT : BOND_GAIN_TICKS;
+		if (!player.isCreative() && player.tickCount % bondTicks == 0 && live.bondTicks <= 0) {
 			if (starving) {
 				next = bondTo(player, next, next.bond() - 1);
 			} else if (next.stress() < BOND_CALM && !sulking(player)) {
 				next = bondTo(player, next, next.bond() + 1);
 			}
+		}
+		// (0.16.7) the first time you keep it well fed, it says so (not over the "sated" line of a gorge just ended)
+		if (wellFed(next) && !live.gorging && now >= live.satedUntil) {
+			next = hintOnce(player, next, HINT_WELL_FED, "well_fed");
 		}
 
 		// your own hunger run dry: it turns on you, and the suit won't come for a while
@@ -1739,7 +1758,7 @@ public final class WebSymbiote {
 			live.coolTicks = 0;
 			if (!live.burning) {
 				live.burning = true;
-				set(player, next);
+				set(player, carry(player, state, next));
 				expose(player, Exposure.FIRE);
 				return;
 			}
@@ -1776,8 +1795,9 @@ public final class WebSymbiote {
 			} else if (now >= live.takeoverReadyAt) {
 				// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
 				int neglectBond = strain == WebSymbioteStrain.RED ? WebSymbioteStrains.RED_NEGLECT_BOND : NEGLECT_BOND;
+				// ((0.16.7) well fed, it's half as likely to feel ignored: WELL_FED_NEGLECT_MULT)
 				float neglect = next.bond() >= neglectBond || sulking(player) || live.gorging ? 0.0F
-					: NEGLECT_CHANCE * (1.0F - next.bond() / (float)neglectBond);
+					: NEGLECT_CHANCE * (1.0F - next.bond() / (float)neglectBond) * (wellFed(next) ? WELL_FED_NEGLECT_MULT : 1.0F);
 				LivingEntity hurt = strain == WebSymbioteStrain.WHITE && !live.gorging && !sulking(player) ? WebSymbioteStrains.mostHurt(player) : null;
 				LivingEntity blood = strain == WebSymbioteStrain.RED && !live.gorging && !sulking(player)
 					&& player.getRandom().nextFloat() < WebSymbioteStrains.RED_HUNT_CHANCE ? prey(player, true) : null;
@@ -1923,7 +1943,41 @@ public final class WebSymbiote {
 		if (state.has(WebSymbioteState.SUIT) && player.tickCount % 30 == 0 && !player.isInvisible()) {
 			level.sendParticles(dust(0.8F), player.getX(), player.getY() + 0.9, player.getZ(), 1, 0.25, 0.45, 0.25, 0.0);
 		}
-		set(player, next);
+		set(player, carry(player, state, next));
+	}
+
+	/** (0.16.7) Satiety at {@link #WELL_FED} or more: it's at its best with you. */
+	static boolean wellFed(WebSymbioteState state) {
+		return state.satiety() >= WELL_FED;
+	}
+
+	/**
+	 * (0.16.7) {@code next} (the tick's working copy of {@code before}, the state it started from) with whatever was
+	 * saved to the real state meanwhile carried over: a meal's {@link #feed} and {@link #addBond} (tickEating), a
+	 * fright's stress, a hint. Before this the tick's closing {@code set(player, next)} wrote the stale copy back over
+	 * them, so Consume's satiety never showed on the meter (Andy: "it also doesnt look like eating fills the satiety at
+	 * all"). Satiety, stress and bond carry as differences (the tick's own drain still counts); rejections and hints as
+	 * they are. Flags are the tick's own business, as ever.
+	 */
+	private static WebSymbioteState carry(ServerPlayer player, WebSymbioteState before, WebSymbioteState next) {
+		WebSymbioteState now = state(player);
+		if (now.equals(before)) {
+			return next;
+		}
+		WebSymbioteState out = next;
+		if (now.satiety() != before.satiety()) {
+			out = out.withSatiety(Mth.clamp(out.satiety() + now.satiety() - before.satiety(), 0, SATIETY_MAX));
+		}
+		if (now.stress() != before.stress()) {
+			out = out.withStress(Mth.clamp(out.stress() + now.stress() - before.stress(), 0, STRESS_MAX));
+		}
+		if (now.bond() != before.bond()) {
+			out = out.withBond(Mth.clamp(out.bond() + now.bond() - before.bond(), 0, BOND_MAX));
+		}
+		if (now.rejections() != before.rejections()) {
+			out = out.withRejections(now.rejections());
+		}
+		return out.withHint(now.hints());
 	}
 
 	/** Wall or ceiling right next to the player (cheap: one box check). */
@@ -3640,8 +3694,9 @@ public final class WebSymbiote {
 		// (0.16.7) With the tendrils already out over the plain suit (or skin), the press puts the armour ON under them
 		// (toggle: set() keeps them out); it never draws them in (Andy). Nothing here is keyed on armored().
 		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
+		// ((0.16.7) well fed, it ignores you half as often: WELL_FED_IGNORE_MULT)
 		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
-			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND)) {
+			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND) * (wellFed(state) ? WELL_FED_IGNORE_MULT : 1.0F)) {
 			nag(player, "ignores");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.5F, 1.6F);
 			player.setAttached(COOLDOWNS, cooldowns.with(ability, now + 20, ABILITIES));
@@ -4726,7 +4781,8 @@ public final class WebSymbiote {
 	/** Your hunger ran out: it turns on you, tears the suit away, and won't come back until it's calmed (the bond decides how long). */
 	private static WebSymbioteState sulk(ServerPlayer player, WebSymbioteState state, long now) {
 		float strain = (1.0F + SULK_PER_REJECTION * state.rejections()) * (0.5F + state.stress() / (float)STRESS_MAX);
-		int ticks = Math.round(SULK_TICKS * strain);
+		// ((0.16.7) well fed, it forgives you in half the time: WELL_FED_SULK_MULT)
+		int ticks = Math.round(SULK_TICKS * strain * (wellFed(state) ? WELL_FED_SULK_MULT : 1.0F));
 		player.setAttached(SULK, now + ticks);
 		removeArmor(player);
 		ServerLevel level = player.level();
