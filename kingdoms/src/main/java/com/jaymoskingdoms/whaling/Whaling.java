@@ -95,7 +95,7 @@ public final class Whaling {
 		WhaleTrade.register();
 
 		OIL_LAMP = block("oil_lamp", OilLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).forceSolidOn().strength(3.5F)
-			.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.DESTROY)
+			.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
 			.lightLevel(state -> state.getValue(OilLampBlock.LIT) ? OilLampBlock.LIGHT : 0));
 		OIL_LAMP_ITEM = blockItem("oil_lamp", OIL_LAMP);
 		OIL_POT = block("oil_pot", OilPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0F, 6.0F)
