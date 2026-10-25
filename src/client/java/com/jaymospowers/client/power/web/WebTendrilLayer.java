@@ -214,10 +214,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		WebFeral.applyModel(this.getParentModel(), state);
 		WebClimbPose.applyModel(this.getParentModel(), state);
 		WebHeldGrabPose.applyModel(this.getParentModel(), state);
+		WebExecutionPose.applyModel(this.getParentModel(), state);
 		// the goo they grow out of (it puts their roots on the state for the model)
 		WebGooGlobs.submit(poseStack, collector, lightCoords, state, this.getParentModel(), tendrils, ROOTS, onJob(state, tendrils));
 		// (0.16.7) something held in the left hand being mauled: the stab's spike, the weapon's blade, the skewering tendril
 		heldGrab(this.getParentModel(), state, poseStack, collector, lightCoords);
+		// (0.16.8) an execution's tendrils, from the shoulders into the body on the ground
+		execution(this.getParentModel(), state, poseStack, collector, lightCoords);
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
@@ -426,6 +429,52 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				blade(buffer, pose, bladeAt, d, up, red ? 1 : 0, light);
 			});
 		}
+	}
+
+	/**
+	 * (0.16.8) An execution's tendrils ({@link WebExecutionPose}), drawn in the model's root space: a cord from each of
+	 * the move's shoulder roots ({@link WebExecutionPose#tendrilRoots}) to its hold on the body
+	 * ({@link WebExecutionPose#tendrilEnds}: the chest, the neck, the limbs...), reaching out as the key's tendril weight
+	 * rises and drawing back as it falls, a spear point or a hooked blade on the ones that pierce.
+	 */
+	private static void execution(net.minecraft.client.model.HumanoidModel<?> parent, AvatarRenderState state, PoseStack poseStack,
+		SubmitNodeCollector collector, int light) {
+		WebExecutionPose.Run run = state.getData(WebExecutionPose.KEY);
+		if (run == null || run.in() <= 0.01F) {
+			return;
+		}
+		float reach = run.key().tendril() * run.in();
+		int[] roots = WebExecutionPose.tendrilRoots(run.move());
+		net.minecraft.world.phys.Vec3[] ends = WebExecutionPose.tendrilEnds(run);
+		if (reach <= 0.01F || roots.length == 0 || ends == null) {
+			return;
+		}
+		int kind = WebExecutionPose.tendrilBlade(run.move());
+		// the roots, through the body's bend, in root space
+		PoseStack bodySpace = new PoseStack();
+		parent.body.translateAndRotate(bodySpace);
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
+			for (int i = 0; i < roots.length && i < ends.length; i++) {
+				float[] at = ROOTS[roots[i]];
+				org.joml.Vector3f r = bodySpace.last().pose().transformPosition(new org.joml.Vector3f(at[0] / 16.0F, at[1] / 16.0F, at[2] / 16.0F));
+				net.minecraft.world.phys.Vec3 root = new net.minecraft.world.phys.Vec3(r.x, r.y, r.z).scale(16.0);
+				net.minecraft.world.phys.Vec3 d = ends[i].subtract(root);
+				if (d.lengthSqr() < 1.0E-4) {
+					continue;
+				}
+				net.minecraft.world.phys.Vec3 dir = d.normalize();
+				net.minecraft.world.phys.Vec3 end = root.lerp(ends[i], reach);
+				if (kind < 0) {
+					// one that winds round: a cord tapering to its tip
+					WebTubes.cord(buffer, pose, px(root), px(end), SKEWER_ROOT / 16.0, 0.6 / 16.0, WebTubes.BLACK, light);
+					continue;
+				}
+				net.minecraft.world.phys.Vec3 up = Math.abs(dir.y) > 0.9 ? new net.minecraft.world.phys.Vec3(0.0, 0.0, -1.0) : new net.minecraft.world.phys.Vec3(0.0, -1.0, 0.0);
+				net.minecraft.world.phys.Vec3 bladeAt = end.subtract(dir.scale(SKEWER_BLADE * reach));
+				WebTubes.cord(buffer, pose, px(root), px(bladeAt), SKEWER_ROOT / 16.0, SKEWER_TIP / 16.0, WebTubes.BLACK, light);
+				blade(buffer, pose, bladeAt, dir, up, kind, light);
+			}
+		});
 	}
 
 	/**

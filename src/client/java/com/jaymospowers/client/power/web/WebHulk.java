@@ -331,7 +331,7 @@ final class WebHulk {
 		// the maw out (eating, staring at a meal, roaring, a counter): the mouth is open the whole time
 		boolean open = state.getData(WebSymbioteClient.EATING) != null || state.getData(WebSymbioteClient.STARE) != null
 			|| state.getData(WebSymbioteClient.ROAR) != null || state.getData(WebSymbioteClient.COUNTER_MAW) != null
-			|| WebHeldGrabPose.biting(state);
+			|| WebHeldGrabPose.biting(state) || WebExecutionPose.biting(state);
 		bare = Math.max(bare, ease(MOUTH.to(state.id, open ? 1.0F : 0.0F, TEETH_EASE)));
 		return bare;
 	}

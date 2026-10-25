@@ -146,7 +146,9 @@ public final class WebHeldGrabPose {
 			return;
 		}
 		Grab grab = avatar.getData(KEY);
-		if (grab == null || avatar.getData(WebArms.KEY) != null || avatar.getData(WebClimbPose.KEY) != null) {
+		if (grab == null || avatar.getData(WebArms.KEY) != null || avatar.getData(WebClimbPose.KEY) != null
+			|| avatar.getData(WebExecutionPose.KEY) != null) {
+			// ((0.16.8) an execution under way poses the whole body: the hold waits)
 			return;
 		}
 		float[] was = WebFeral.snapshot(h);

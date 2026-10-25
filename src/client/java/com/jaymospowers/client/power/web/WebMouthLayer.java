@@ -76,6 +76,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		WebFeral.applyModel(this.getParentModel(), state);
 		WebClimbPose.applyModel(this.getParentModel(), state);
 		WebHeldGrabPose.applyModel(this.getParentModel(), state);
+		WebExecutionPose.applyModel(this.getParentModel(), state);
 		WebSuitGrowth.shift(this.getParentModel(), state);
 		this.getParentModel().head.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
