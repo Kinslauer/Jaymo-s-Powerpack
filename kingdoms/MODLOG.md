@@ -4526,7 +4526,7 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
 
-## 0.7.206: whaling, stage 1: great whales, roped harpoons, carcasses to tow and flense (pack 0.16.25)
+## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade (pack 0.16.25)
 Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
 animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
 1 whales and harpoons (this), 2 hauling alongside a big ship, cutting in and tryworks (whale oil), 3 the kingdoms' whaling
@@ -4549,4 +4549,17 @@ crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art
   ambergris. Stripped (6 bones float up) or after three days, it sinks, and its irons drop free.
 - Items: harpoon, whale blubber (for stage 2's tryworks), raw whale meat and whale steak (smelt, smoke, campfire), whale
   bone (6 bone meal), ambergris, great whale spawn egg. Art: `tools/gen_whaling.py`.
-- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass` and `Whaling`.
+- Stage 2 (Andy: "All the whale parts are extremely valuable to kingdoms and their inhabitants"):
+  - Cutting in: only 16 of a carcass's 48 strokes can be cut from the water or a boat. The rest needs it lashed
+    alongside a big ship: a harpoon in it made fast to a ship of 600+ blocks, and it within 6 blocks of her side
+    (`WhaleCarcass.LOOSE`, `BIG_SHIP`, `ALONGSIDE`).
+  - `whaling/TryworksBlock` (bricks, cauldron, campfire): use blubber to fill the try-pot (2 a measure, 8 measures),
+    flint and steel or a fire charge to light it; it renders a measure into a bottle's worth of whale oil every 8 s (4
+    at most) and goes out when dry. Glass bottle draws whale oil. All in its block state, so it rides on a ship's deck.
+    Light 13 while lit, greasy smoke.
+  - Whale oil (16 a stack, gives the bottle back): 4 torches with 4 sticks.
+  - `whaling/WhaleTrade`: grown villagers buy whale goods dearly, by trade (fishermen and butchers meat and blubber,
+    clerics oil 5 and ambergris 48, librarians and cartographers oil, leatherworkers blubber, smiths oil and bone,
+    fletchers and toolsmiths bone, masons, farmers), and anyone buys whale steak, oil and ambergris (40). Sales pay the
+    realm's toll like any trade.
+- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade` and `Whaling`.

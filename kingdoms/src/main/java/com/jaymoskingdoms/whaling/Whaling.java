@@ -21,20 +21,27 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.MapColor;
 
 /**
  * (0.7.206) Whaling, stage 1: the {@link GreatWhale great whales} of the deep oceans (our own beast, far bigger than
  * Naturalist's, whose whales {@code Encounters} keeps out of the sea so ours take their place), the roped {@link Harpoon}
  * that ties your boat (or your ship, or you) to one, and the {@link WhaleCarcass carcass} it leaves, floating, to be
  * towed and flensed for blubber, meat, bone and now and then ambergris. Sneak and use shears or an axe to cut your lines.
- * Stage 2 (hauling alongside a big ship, tryworks and whale oil) and stage 3 (the kingdoms' whaling crews) come later.
+ * Stage 2: a carcass yields in full only cut in alongside a big ship (see {@link WhaleCarcass}); its blubber is rendered
+ * to whale oil in a {@link TryworksBlock tryworks}; and every part of a whale fetches a fine price from the kingdoms'
+ * folk ({@link WhaleTrade}). Stage 3 (the kingdoms' whaling crews) comes later.
  */
 public final class Whaling {
 	/** Great whales come to the deep oceans with this weight, in pods of this many. */
@@ -44,6 +51,9 @@ public final class Whaling {
 	public static EntityType<WhaleCarcass> WHALE_CARCASS;
 	public static EntityType<Harpoon> HARPOON;
 	public static Item HARPOON_ITEM, WHALE_BLUBBER, WHALE_MEAT, COOKED_WHALE_MEAT, WHALE_BONE, AMBERGRIS, GREAT_WHALE_SPAWN_EGG;
+	/** Stage 2: the tryworks, and the oil it renders. */
+	public static Block TRYWORKS;
+	public static Item TRYWORKS_ITEM, WHALE_OIL;
 
 	private Whaling() {
 	}
@@ -70,6 +80,16 @@ public final class Whaling {
 		ResourceKey<Item> egg = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("great_whale_spawn_egg"));
 		GREAT_WHALE_SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM, egg, new SpawnEggItem(new Item.Properties().setId(egg).spawnEgg(GREAT_WHALE)));
 
+		ResourceKey<Block> works = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("tryworks"));
+		TRYWORKS = Registry.register(BuiltInRegistries.BLOCK, works, new TryworksBlock(BlockBehaviour.Properties.of().setId(works)
+			.mapColor(MapColor.COLOR_RED).strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion()
+			.lightLevel(state -> state.getValue(TryworksBlock.LIT) ? 13 : 0)));
+		ResourceKey<Item> worksItem = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("tryworks"));
+		TRYWORKS_ITEM = Registry.register(BuiltInRegistries.ITEM, worksItem, new BlockItem(TRYWORKS, new Item.Properties().setId(worksItem).useBlockDescriptionPrefix()));
+		WHALE_OIL = item("whale_oil", Item::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
+		WhaleTrade.register();
+
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.insertAfter(Items.SMOKER, TRYWORKS_ITEM));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.TRIDENT, HARPOON_ITEM));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.insertAfter(Items.COOKED_SALMON, WHALE_MEAT);
@@ -79,6 +99,7 @@ public final class Whaling {
 			output.insertAfter(Items.PRISMARINE_CRYSTALS, WHALE_BLUBBER);
 			output.insertAfter(WHALE_BLUBBER, WHALE_BONE);
 			output.insertAfter(WHALE_BONE, AMBERGRIS);
+			output.insertAfter(AMBERGRIS, WHALE_OIL);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> output.insertAfter(Items.DOLPHIN_SPAWN_EGG, GREAT_WHALE_SPAWN_EGG));
 

@@ -1,0 +1,144 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/bricks",
+    "bricks": "minecraft:block/bricks",
+    "front": "jaymoskingdoms:block/tryworks_front",
+    "pot": "minecraft:block/cauldron_side",
+    "inside": "minecraft:block/cauldron_inner"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        10,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bricks",
+          "cullface": "down"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#bricks"
+        },
+        "north": {
+          "uv": [
+            0,
+            6,
+            16,
+            16
+          ],
+          "texture": "#front",
+          "cullface": "north"
+        },
+        "south": {
+          "uv": [
+            0,
+            6,
+            16,
+            16
+          ],
+          "texture": "#bricks",
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [
+            0,
+            6,
+            16,
+            16
+          ],
+          "texture": "#bricks",
+          "cullface": "west"
+        },
+        "east": {
+          "uv": [
+            0,
+            6,
+            16,
+            16
+          ],
+          "texture": "#bricks",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        10,
+        2
+      ],
+      "to": [
+        14,
+        15,
+        14
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ],
+          "texture": "#inside"
+        },
+        "north": {
+          "uv": [
+            2,
+            1,
+            14,
+            6
+          ],
+          "texture": "#pot"
+        },
+        "south": {
+          "uv": [
+            2,
+            1,
+            14,
+            6
+          ],
+          "texture": "#pot"
+        },
+        "west": {
+          "uv": [
+            2,
+            1,
+            14,
+            6
+          ],
+          "texture": "#pot"
+        },
+        "east": {
+          "uv": [
+            2,
+            1,
+            14,
+            6
+          ],
+          "texture": "#pot"
+        }
+      }
+    }
+  ]
+}

@@ -1,7 +1,11 @@
 package com.jaymoskingdoms.whaling;
 
+import com.jaymoskingdoms.sailing.Hull;
+import com.jaymoskingdoms.sailing.Ship;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -31,7 +35,12 @@ import org.jspecify.annotations.Nullable;
  * it, tow it on harpoon lines (lodge fresh ones in it too), and flense it where it floats: use an axe, a sword or a
  * knife on it and each stroke ({@link #STROKE} ticks apart) cuts away blubber, meat or bone, {@link #FLESH} strokes in
  * all, one of them (now and then) turning up ambergris. Stripped, it sinks, and so does one left to rot
- * ({@link #ROT} ticks). Stage 2 makes a big ship's tryworks the place to render the blubber down.
+ * ({@link #ROT} ticks).
+ * <p>
+ * Stage 2: a whale is too big to flense from the water or a little boat. Only {@link #LOOSE} strokes can be cut from it
+ * so; for the rest it must be cut in: lashed alongside a big ship (one of at least {@link #BIG_SHIP} blocks) by a
+ * harpoon line made fast to her, and within {@link #ALONGSIDE} blocks of her side. Its blubber is rendered down in a
+ * {@link TryworksBlock tryworks}.
  */
 public final class WhaleCarcass extends Entity {
 	/** How tall it floats (blocks); its width is the whale's. */
@@ -49,6 +58,9 @@ public final class WhaleCarcass extends Entity {
 	static final double SINK = 0.03;
 	/** How heavy it is to tow (a boat being 1), and how it rides: its keel this far under the surface. */
 	static final double HEFT = 4.0, DRAFT = 1.2;
+	/** Strokes that can be cut with it loose in the water, the blocks a ship needs to cut in the rest, and how near her side it must lie. */
+	static final int LOOSE = 16, BIG_SHIP = 600;
+	static final double ALONGSIDE = 6.0;
 
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(WhaleCarcass.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> LEFT = SynchedEntityData.defineId(WhaleCarcass.class, EntityDataSerializers.INT);
@@ -149,6 +161,10 @@ public final class WhaleCarcass extends Entity {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
 		}
+		if (FLESH - this.entityData.get(LEFT) >= LOOSE && !this.alongside(level)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.whale_cut_in").withStyle(ChatFormatting.GRAY));
+			return InteractionResult.CONSUME;
+		}
 		int left = this.entityData.get(LEFT) - 1;
 		this.entityData.set(LEFT, left);
 		player.getCooldowns().addCooldown(held, STROKE);
@@ -165,6 +181,25 @@ public final class WhaleCarcass extends Entity {
 			this.sink(level);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Lashed alongside a big ship: a harpoon in it made fast to a ship of {@link #BIG_SHIP} blocks or more, and it lying by her side. */
+	boolean alongside(ServerLevel level) {
+		for (Harpoon h : Harpoon.in(level, this)) {
+			if (h.anchor() instanceof Ship ship) {
+				Hull hull = ship.hull();
+				if (hull == null || hull.pieces.size() < BIG_SHIP) {
+					continue;
+				}
+				Vec3 local = ship.toLocal(this.position());
+				double reach = ALONGSIDE + this.getBbWidth() * 0.5;
+				if (local.x > hull.minX - 0.5 - reach && local.x < hull.maxX + 0.5 + reach && local.z > hull.minZ - 0.5 - reach
+					&& local.z < hull.maxZ + 0.5 + reach) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** What one stroke cuts away (the stroke that finds the ambergris, if it has any, gives that as well). */

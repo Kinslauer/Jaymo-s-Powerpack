@@ -5216,5 +5216,8 @@
 	"item.jaymoskingdoms.cooked_whale_meat": "Whale Steak",
 	"item.jaymoskingdoms.whale_bone": "Whale Bone",
 	"item.jaymoskingdoms.ambergris": "Ambergris",
-	"item.jaymoskingdoms.great_whale_spawn_egg": "Great Whale Spawn Egg"
+	"item.jaymoskingdoms.great_whale_spawn_egg": "Great Whale Spawn Egg",
+	"item.jaymoskingdoms.whale_oil": "Whale Oil",
+	"block.jaymoskingdoms.tryworks": "Tryworks",
+	"message.jaymoskingdoms.whale_cut_in": "Too big to cut from the water: lash it alongside a big ship to cut in the rest"
 }
