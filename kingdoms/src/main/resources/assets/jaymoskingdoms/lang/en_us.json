@@ -2173,6 +2173,7 @@
 	"block.jaymoskingdoms.weathervane": "Weathervane",
 	"item.jaymoskingdoms.barometer": "Barometer",
 	"gamerule.jaymoskingdoms.disaster_damage": "Disasters break blocks",
+	"gamerule.jaymoskingdoms.weathering": "Blocks weather (moss, cracks, mud, leaf litter)",
 	"gamerule.jaymoskingdoms.disaster_days": "Days between natural disasters (0: none)",
 	"disaster.jaymoskingdoms.dir.north": "north",
 	"disaster.jaymoskingdoms.dir.north_east": "north-east",
