@@ -117,12 +117,12 @@ public final class WebFeral {
 	}
 
 	/** The parts the two poses set (the root's height last). */
-	private static ModelPart[] posed(HumanoidModel<?> h) {
+	static ModelPart[] posed(HumanoidModel<?> h) {
 		return new ModelPart[] {h.body, h.head, h.rightArm, h.leftArm, h.rightLeg, h.leftLeg};
 	}
 
 	/** Where every posed part is (its pivot and its turn), and the root's height. */
-	private static float[] snapshot(HumanoidModel<?> h) {
+	static float[] snapshot(HumanoidModel<?> h) {
 		ModelPart[] parts = posed(h);
 		float[] out = new float[parts.length * 6 + 1];
 		for (int i = 0; i < parts.length; i++) {
@@ -139,7 +139,7 @@ public final class WebFeral {
 	}
 
 	/** Eases every posed part from where it was ({@code was}, a snapshot) to where it is now, {@code k} of the way. */
-	private static void blend(HumanoidModel<?> h, float[] was, float k) {
+	static void blend(HumanoidModel<?> h, float[] was, float k) {
 		ModelPart[] parts = posed(h);
 		for (int i = 0; i < parts.length; i++) {
 			ModelPart part = parts[i];
@@ -421,7 +421,7 @@ public final class WebFeral {
 	}
 
 	/** Puts a part's pivot where it ends up when everything above the hip bends forward by {@code bend}. */
-	private static void place(ModelPart part, float restX, float restY, float bend) {
+	static void place(ModelPart part, float restX, float restY, float bend) {
 		float vy = restY - HIP;
 		part.x = restX;
 		part.y = HIP + vy * Mth.cos(bend);

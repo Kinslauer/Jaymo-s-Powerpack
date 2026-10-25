@@ -152,6 +152,22 @@ public final class WebNet {
 	}
 
 	/**
+	 * (0.16.2) Client → server: climbing a wall in bounds (see {@code WebSymbioteClient.BOUND_GATHER}), the symbiote's hands
+	 * and feet just slammed into it: your middle was at {@code at}, the wall facing {@code normal} (out of it, toward you).
+	 * The server cracks the wall under all four, with dust and a thud, for everyone (WebTendrils.climbSlam).
+	 */
+	public record ClimbSlam(Vec3 at, Vec3 normal) implements CustomPacketPayload {
+		public static final Type<ClimbSlam> TYPE = new Type<>(JaymosPowers.id("web_symbiote_climb_slam"));
+		public static final StreamCodec<ByteBuf, ClimbSlam> CODEC = StreamCodec.composite(
+			Vec3.STREAM_CODEC, ClimbSlam::at, Vec3.STREAM_CODEC, ClimbSlam::normal, ClimbSlam::new);
+
+		@Override
+		public Type<ClimbSlam> type() {
+			return TYPE;
+		}
+	}
+
+	/**
 	 * Server → client: fed on a takeover's kill, the symbiote coils a full charge where you stand and leaps clear, along
 	 * ({@code x}, {@code z}) (zero: straight up). See {@link WebSymbiote#ESCAPE_CHANCE}.
 	 */
@@ -306,6 +322,7 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Struggle.TYPE, Struggle.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ClimbLatch.TYPE, ClimbLatch.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ClimbSlam.TYPE, ClimbSlam.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Escape.TYPE, Escape.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Rescue.TYPE, Rescue.CODEC);

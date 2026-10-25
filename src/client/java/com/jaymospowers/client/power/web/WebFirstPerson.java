@@ -28,6 +28,7 @@ public final class WebFirstPerson {
 			|| state.getData(WebCounterPose.KEY) != null
 			|| state.getData(WebBodyPose.KEY) != null
 			|| state.getData(WebHangPose.KEY) != null
+			|| state.getData(WebClimbPose.KEY) != null
 			|| state.getData(WebMorphLayer.KEY) != null
 			|| state.getData(WebMorphLayer.GATHER) != null
 			|| state.getData(WebSymbioteClient.SLAM) != null
