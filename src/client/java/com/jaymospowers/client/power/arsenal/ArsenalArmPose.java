@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.arsenal;
 
+import com.jaymospowers.armory.FlintlockDraw;
 import com.jaymospowers.power.arsenal.ArsenalFlintlock;
 import com.jaymospowers.power.arsenal.ArsenalReach;
 import java.util.HashMap;
@@ -24,6 +25,9 @@ import net.minecraft.world.phys.Vec3;
  * <p>
  * Also the Void Flintlock's aim ({@link #AIM_KEY}): a hand holding a loaded one raises it level with the look, arm
  * straight out like a duellist's pistol; firing kicks it up, and once it's spent the arm drops back.
+ * <p>
+ * And the spare flintlock's draw ({@link #DRAW_KEY}, {@link FlintlockDraw}): the main hand drops to the belt, then
+ * brings the gun up in front.
  */
 public final class ArsenalArmPose {
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:arsenal_reach_arm");
@@ -41,6 +45,15 @@ public final class ArsenalArmPose {
 	private static final float RECOIL_RISE_TICKS = 1.0F;
 	private static final float RECOIL_SETTLE_TICKS = 6.0F;
 	private static final float SPENT_LOWER_TICKS = 8.0F;
+
+	/** Spare flintlock draw: the hand at the belt (x, z: radians, z outward), the gun brought up (x), ticks to blend in/out. */
+	private static final float BELT_X = 0.35F;
+	private static final float BELT_Z = 0.15F;
+	private static final float DRAWN_X = -1.2F;
+	private static final float DRAW_BLEND_TICKS = 3.0F;
+
+	/** Ticks into a spare flintlock's draw. */
+	public static final RenderStateDataKey<Float> DRAW_KEY = RenderStateDataKey.create(() -> "jaymospowers:flintlock_draw");
 
 	public static final RenderStateDataKey<Aim> AIM_KEY = RenderStateDataKey.create(() -> "jaymospowers:arsenal_flintlock_aim");
 
@@ -98,9 +111,11 @@ public final class ArsenalArmPose {
 		if (!(entity instanceof Player player)) {
 			state.setData(KEY, null);
 			state.setData(AIM_KEY, null);
+			state.setData(DRAW_KEY, null);
 			return;
 		}
 		extractAim(player, state, partialTicks);
+		extractDraw(player, state, partialTicks);
 		float t = time(player, partialTicks);
 		if (t < 0.0F || t > ArsenalReach.CLOSE_END) {
 			state.setData(KEY, null);
@@ -122,6 +137,13 @@ public final class ArsenalArmPose {
 		float yaw = (float)(Mth.atan2(dir.z, dir.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float relative = Mth.wrapDegrees(yaw - bodyYaw) * Mth.DEG_TO_RAD;
 		state.setData(KEY, new Pose(Mth.clamp(amount, 0.0F, 1.0F), -Mth.HALF_PI - elevation, relative, pullAmount(player, partialTicks)));
+	}
+
+	private static void extractDraw(Player player, AvatarRenderState state, float partialTicks) {
+		FlintlockDraw.Draw draw = player.getAttached(FlintlockDraw.DRAW);
+		Minecraft minecraft = Minecraft.getInstance();
+		float t = draw == null || minecraft.level == null ? -1.0F : minecraft.level.getGameTime() - draw.start() + partialTicks;
+		state.setData(DRAW_KEY, t < 0.0F || t > FlintlockDraw.DONE_TICKS ? null : t);
 	}
 
 	private static void extractAim(Player player, AvatarRenderState state, float partialTicks) {
@@ -203,6 +225,7 @@ public final class ArsenalArmPose {
 			return;
 		}
 		applyAim(model, state);
+		applyDraw(humanoid, avatar);
 		Pose pose = avatar.getData(KEY);
 		if (pose == null) {
 			return;
@@ -216,6 +239,22 @@ public final class ArsenalArmPose {
 		float y = Mth.lerp(pose.pull(), pose.aimY(), -outward * 0.35F);
 		float z = Mth.lerp(pose.pull(), 0.0F, outward * 0.15F);
 		set(arm, x, y, z, pose.amount());
+	}
+
+	private static void applyDraw(HumanoidModel<?> humanoid, AvatarRenderState avatar) {
+		Float t = avatar.getData(DRAW_KEY);
+		if (t == null) {
+			return;
+		}
+		ModelPart arm = avatar.mainArm == HumanoidArm.LEFT ? humanoid.leftArm : humanoid.rightArm;
+		float outward = arm == humanoid.rightArm ? 1.0F : -1.0F;
+		float amount = Math.min(smooth(t / DRAW_BLEND_TICKS), smooth((FlintlockDraw.DONE_TICKS - t) / DRAW_BLEND_TICKS));
+		// down to the belt, then up with the gun
+		float up = smooth((t - FlintlockDraw.REACH_TICKS) / (FlintlockDraw.DONE_TICKS - FlintlockDraw.REACH_TICKS - DRAW_BLEND_TICKS));
+		float x = Mth.lerp(up, BELT_X, DRAWN_X);
+		float y = Mth.lerp(up, 0.0F, -outward * AIM_INWARD);
+		float z = Mth.lerp(up, outward * BELT_Z, 0.0F);
+		set(arm, x, y, z, amount);
 	}
 
 	private static void set(ModelPart part, float xRot, float yRot, float zRot, float amount) {

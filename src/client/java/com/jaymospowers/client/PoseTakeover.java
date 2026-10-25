@@ -160,6 +160,7 @@ public final class PoseTakeover {
 			|| Boolean.TRUE.equals(s.getData(com.jaymospowers.client.power.ember.EmberKindleClient.KEY))
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterComboPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterDiscPose.KEY) != null
-			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null;
+			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null
+			|| s.getData(ArsenalArmPose.DRAW_KEY) != null;
 	}
 }
