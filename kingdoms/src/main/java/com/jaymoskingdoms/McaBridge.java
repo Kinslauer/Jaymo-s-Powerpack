@@ -809,6 +809,17 @@ final class McaBridge {
 		}
 	}
 
+	/** {@link McaCompat#takeMail}. */
+	static net.minecraft.world.item.ItemStack takeMail(ServerPlayer player) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.hasMail()) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		net.minecraft.world.item.ItemStack mail = save.getMail();
+		save.setDirty();
+		return mail == null ? net.minecraft.world.item.ItemStack.EMPTY : mail;
+	}
+
 	/** {@link McaCompat#teenOrOlder}. */
 	static boolean teenOrOlder(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && (v.getAgeState() == AgeState.TEEN || v.getAgeState() == AgeState.ADULT);

@@ -329,8 +329,8 @@ public final class Monoliths {
 		overworld.setAttached(FIRST_FALLEN, true);
 		MinecraftServer server = level.getServer();
 		WorldTiers.Tier raised = WorldTiers.Tier.byOrdinal(Math.max(FIRST_GIANT_TIER, WorldTiers.floor(server)));
-		server.getPlayerList().broadcastSystemMessage(Component.translatable("message.jaymoskingdoms.giant.first_fallen",
-			giant.getDisplayName(), raised.title().copy().withColor(raised.color)).withStyle(ChatFormatting.LIGHT_PURPLE), false);
+		com.jaymoskingdoms.Post.news(server, Component.translatable("message.jaymoskingdoms.giant.first_fallen",
+			giant.getDisplayName(), raised.title().copy().withColor(raised.color)).withStyle(ChatFormatting.LIGHT_PURPLE));
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.AMBIENT, 0.6F, 0.7F);
 		}
