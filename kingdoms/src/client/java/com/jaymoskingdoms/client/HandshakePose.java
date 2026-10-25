@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
  * (0.7.184) A handshake ({@link Handshakes}), for everyone to see: a hand held out (the right arm forward and turned in,
  * waiting), then taken: the two right hands meet, a few slow pumps, and let go. Eased on a spring like
  * {@link PickpocketPose}, and laid over the model right after it's posed. Between two who've shaken hands before, a
- * quick dap: the hand up high, one clasp and a tug in.
+ * quick dap: the hand up high, one clasp and a tug in. (0.7.204) A villager taking your hand shakes the same way.
  */
 public final class HandshakePose {
 	/** The arm held out: forward and a little down, turned in toward the middle (radians). */
@@ -79,10 +79,11 @@ public final class HandshakePose {
 
 	/** Render-state extraction: the arm's weight this frame. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (!(entity instanceof Avatar)) {
+		// (0.7.204) a player's, or a villager's taking one
+		int id = entity.getId();
+		if (!(entity instanceof Avatar) && !HANDS.containsKey(id) && !EASES.containsKey(id)) {
 			return;
 		}
-		int id = entity.getId();
 		Hand hand = HANDS.get(id);
 		float t = -1.0F;
 		boolean on = hand != null, dap = hand != null && hand.state == Handshakes.Hand.DAP;

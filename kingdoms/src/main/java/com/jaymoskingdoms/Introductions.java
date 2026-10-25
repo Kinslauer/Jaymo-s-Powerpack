@@ -43,6 +43,9 @@ import org.jspecify.annotations.Nullable;
  * <li>A villager: "Ask their name" in MCA's menu ({@link #ANSWER}). One who bears you too much ill will won't say. A
  * ruler gives their title and realm, and their nametag carries the title from then on ({@link #TITLE}), so a king is
  * easy to pick out once met. An audience with a ruler introduces them too, and your own MCA family is always known.</li>
+ * <li>(0.7.204) A villager: "Offer a handshake" in MCA's menu ({@link #HANDSHAKE}), which needs no shared tongue.
+ * Not everyone takes it ({@link #takesHand}); one who does shakes on it ({@link Handshakes#offerTo}) and you learn
+ * their name. A ruler won't: they're met at an audience.</li>
  * <li>(0.7.184) A player: shake hands ({@link Handshakes}: both use on each other), which groups you too. Or
  * {@code /introduce}, looking at them. They learn your name, and are offered to introduce themselves
  * back (a click, the same command). Not behind a full mask: a costume's name is shown to everyone anyway, and telling
@@ -59,6 +62,16 @@ public final class Introductions {
 	static final double FAMILY_RANGE = 24.0;
 	/** How many ways a villager says their name, and a ruler theirs. */
 	static final int LINES = 3, RULER_LINES = 2;
+
+	/**
+	 * (0.7.204) Taking an offered hand ({@link Handshakes#offerTo}): the odds before anything else, what each heart and
+	 * each point of mood adds, what a warm or sour temper adds per step, and the least and most they can be.
+	 */
+	static final float HAND_TAKEN = 0.5F, HAND_PER_HEART = 0.01F, HAND_PER_MOOD = 0.015F, HAND_PER_TEMPER = 0.12F,
+		HAND_LEAST = 0.1F, HAND_MOST = 0.95F;
+
+	/** (0.7.204) "Offer a handshake" (MCA's {@code main} menu, needs no words): shown only to one you don't know. */
+	public static final String HANDSHAKE = "jaymoskingdoms_handshake";
 
 	/** "Ask their name" (added to MCA's {@code main} menu by our dialogue data): shown only to one you don't know. */
 	public static final String ANSWER = "jaymoskingdoms_name";
@@ -193,6 +206,20 @@ public final class Introductions {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
 		}
 		return Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
+	}
+
+	/**
+	 * (0.7.204) Andy: "allow handshaking with villagers too, not everyone will accept one as an introduction. but it will
+	 * help if you dont speak the language to get started". Whether {@code villager} takes {@code player}'s hand: never
+	 * with a grudge, likelier the more hearts, the better their mood and the warmer their temper.
+	 */
+	static boolean takesHand(ServerPlayer player, Villager villager) {
+		if (Recollections.refuses(villager, player)) {
+			return false;
+		}
+		float chance = HAND_TAKEN + McaCompat.heartsOf(villager, player) * HAND_PER_HEART + McaCompat.mood(villager) * HAND_PER_MOOD
+			+ McaCompat.temper(villager) * HAND_PER_TEMPER;
+		return villager.getRandom().nextFloat() < Math.clamp(chance, HAND_LEAST, HAND_MOST);
 	}
 
 	/** {@code /introduce}: {@code player} tells the player they're looking at (or the last to introduce themselves) their name. */
