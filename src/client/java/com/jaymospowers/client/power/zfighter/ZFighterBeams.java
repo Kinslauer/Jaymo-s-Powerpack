@@ -22,7 +22,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Ki beams drawn like a beacon's: the beacon beam texture scrolling down a bright core in the beam's colour, wrapped in
  * a wider see-through glow. They swell in, then thin away over their life. The Frost Needle is a hair-thin core; the
- * Spiral Lance's coil is the server's particles round its core. A ki orb burns at each end. A fired wave travels
+ * Spiral Lance's coil is the server's particles round its core. (0.16.7) A Frost-born's eye beams (style 3, FrostBeam) are
+ * sent fresh every tick while held: hair-thin, full width at once, no orb at the eyes and only a small one where they meet. A ki orb burns at each end. A fired wave travels
  * ({@link ZFighterNet.BeamHead}): drawn from the hands to its head, smoothed between ticks, until it stops and fades.
  */
 public final class ZFighterBeams {
@@ -35,6 +36,9 @@ public final class ZFighterBeams {
 	static final int TRAVEL_SWELL = 3, TRAVEL_STALE = 5;
 	/** Its head's orb, times the end orb's size. */
 	static final float HEAD_ORB = 1.4F;
+	/** (0.16.7) The Frost-born's eye beams (FrostBeam.EYE_STYLE), and the glint where they meet (blocks). */
+	static final int EYE = 3;
+	static final float EYE_GLINT = 0.12F;
 
 	private record Live(Vec3 from, Vec3 to, float radius, int color, int style, int ticks, int[] age) {
 	}
@@ -132,7 +136,7 @@ public final class ZFighterBeams {
 		for (Live beam : BEAMS) {
 			float life = Mth.clamp((beam.age()[0] + partial) / beam.ticks(), 0.0F, 1.0F);
 			// swells in over the first ticks, then thins away
-			float width = life < 0.15F ? life / 0.15F : 1.0F - (life - 0.15F) / 0.85F * 0.85F;
+			float width = beam.style() == EYE ? 1.0F : life < 0.15F ? life / 0.15F : 1.0F - (life - 0.15F) / 0.85F * 0.85F;
 			float radius = beam.radius() * width;
 			if (radius <= 0.01F) {
 				continue;
@@ -143,7 +147,8 @@ public final class ZFighterBeams {
 
 	/** One beam, camera-relative: the core, the glow round it (not the needle's), and a ki orb at each end. */
 	private static void draw(LevelRenderContext context, Vec3 a, Vec3 b, float radius, int color, int style, float time, float fade, float endOrb) {
-		boolean needle = style == 2;
+		boolean eyes = style == EYE;
+		boolean needle = style == 2 || eyes;
 		int core = 0xFF000000 | mix(color, 0xFFFFFF, 0.55F);
 		int glow = GLOW_ALPHA << 24 | color;
 		float v0 = -time * SCROLL;
@@ -157,6 +162,11 @@ public final class ZFighterBeams {
 		}
 		// a ki orb where it leaves the hands and where it ends (see ZFighterOrbs)
 		float orb = needle ? radius * 6.0F + 0.2F : radius * 2.6F;
+		if (eyes) {
+			// (nothing over the face: just a glint where the two meet)
+			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, EYE_GLINT, color, time + 20.0F, fade);
+			return;
+		}
 		ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), a, orb, color, time, fade);
 		ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, orb * endOrb, color, time + 20.0F, fade);
 	}
