@@ -4595,3 +4595,35 @@ crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art
     fletchers and toolsmiths bone, masons, farmers), and anyone buys whale steak, oil and ambergris (40). Sales pay the
     realm's toll like any trade.
 - Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock`, `Sharks` and `Whaling`.
+
+## 0.7.210: the underworld, stage 1: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (pack 0.16.32)
+Andy (2026-10-25): "Id like to see illegal goods traded amongst the people. Rare commodities like Pmeh and Shash bricks go
+for sale around specific cities that eventually become known as hotbeds for trafficking goods and gambling. You should be
+able to find these speakeasies hidden from the guard as being caught facilitating sale would end up with you flogged,
+imprisoned, or worse."
+- `Underworld`: about a third of realms (rolled once; a reveler's likelier, a tyrant's, paranoid king's or purist's
+  less) keep a den, which makes one of the two goods. Items: **Pmeh** (use: Speed and Haste 90 s, Nausea 6 s, Hunger
+  30 s) and **Shash Brick** (a trade good). Art: `tools/gen_contraband.py`.
+- `Speakeasy`: the den is dug under open natural ground (nothing over it but leaves) 14-50 blocks from the seat (earth over all of it, no block
+  entities or water in the way): a spruce hatch in the grass by a hay bale, a ladder down a stone shaft, a 9 x 7 x 4
+  room 9 below: a bar of barrels with the fence penned behind it, a red runner, a dice table with a green cloth and
+  stools, crates, hanging lanterns, cobwebs.
+- The **fence** (a villager tagged `jaymoskingdoms.fence`, replaced a day after he's gone) sells and buys both goods,
+  re-stocked daily: cheap where his den makes it (Pmeh 3, Shash 7; buys at 2 and 4), dear where it doesn't (sells at 12
+  and 24, buys at 8 and 16), so it pays to carry goods between hotbeds. His sales pay the realm no toll.
+- **Heat**: +1 a sale, +2 a day, +1 every 4 dice games, -8 a bust. From 10 a **dice-thrower** sets up: hold emeralds and
+  right-click him (up to 8 a throw, two dice each, higher total takes double, a tie returns the stake). At 40 the city is
+  a **known hotbed** (Tidings news), and its crooks buy contraband in the street (Pmeh 5, Shash 11).
+- **Whispers**: in a den's town, until you've found it, a crook (in a known hotbed, any grown townsman) with no guard
+  within 12 may whisper the way: compass direction and paces to the hatch. Stepping into the room finds it.
+- **Crimes** (`Theft.Crime`): DEALING (a contraband trade outside a den, seen by anyone of the realm but the buyer and
+  other crooks) and CONTRABAND (Pmeh or Shash in hand in sight of a guard within 10). Both medium: hunted and charged.
+- `Busts`: a charged player who's downed with a guard of that realm within 6, or yields (sneak, empty hand, within 3 of
+  a guard, 2 s), is sentenced on the spot by the guard: contraband confiscated, the hunt called off, then by score
+  (15 per past offence there, the ruler's temper lean from `Arrests`, 0-30 luck, -15 for yielding, +15 for an escape):
+  under 40 a **flogging** (5 strokes of 2, never below 4 health, then Slowness and Weakness 3 min), 40-79 **the cells**
+  (a sealed stone pit 12 under the seat, 5 min + 2 min per past offence, death doesn't get you out, leaving it is an
+  escape: outlaw there and charged again), 80+ **beheaded** (killed, headless). Cells and executions go in the Tidings.
+- `/underworld den` (ops) gives the realm you stand in a den now; `/underworld heat <n>` sets its heat.
+- Stage 2 (not yet): guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading.
+- Tuning: the constants at the top of `Underworld`, `Speakeasy`, `Busts` and `PmehItem`.

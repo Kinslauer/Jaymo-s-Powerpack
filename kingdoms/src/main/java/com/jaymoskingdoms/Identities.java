@@ -470,6 +470,17 @@ public final class Identities {
 		put(server, key, id.withWanted(wanted));
 	}
 
+	/** (0.7.210, Busts) {@code faction} no longer hunts identity {@code key}. */
+	static void clearWanted(MinecraftServer server, String key, int faction) {
+		Identity id = get(server, key);
+		if (id == null || !id.wanted().containsKey(Integer.toString(faction))) {
+			return;
+		}
+		Map<String, Long> wanted = new HashMap<>(id.wanted());
+		wanted.remove(Integer.toString(faction));
+		put(server, key, id.withWanted(wanted));
+	}
+
 	// ---- found out ---------------------------------------------------------------------------------------------------
 
 	/**
