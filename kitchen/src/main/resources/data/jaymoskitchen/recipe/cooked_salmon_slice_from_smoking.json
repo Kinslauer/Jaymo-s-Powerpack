@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 50,
+  "experience": 0.35,
+  "ingredient": "jaymoskitchen:salmon_slice",
+  "result": {
+    "id": "jaymoskitchen:cooked_salmon_slice"
+  }
+}

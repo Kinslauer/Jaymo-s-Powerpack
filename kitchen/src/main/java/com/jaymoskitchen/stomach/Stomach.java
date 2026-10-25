@@ -279,6 +279,8 @@ public final class Stomach {
 	public static void eat(ServerPlayer player, ItemStack stack, boolean drink) {
 		// (drink, whether or not there's room in the stomach: a hangover doesn't care)
 		com.jaymoskitchen.brewing.Drunk.onDrink(player, stack);
+		// (0.5.28) Comfort from a hot bowl, Nourishment from a rich meal
+		com.jaymoskitchen.delight.Delight.onEat(player, stack);
 		Meal meal = mealOf(stack, drink);
 		if (meal == null) {
 			return;
@@ -326,7 +328,8 @@ public final class Stomach {
 			List<Meal> meals = meals(player);
 			long now = player.level().getGameTime();
 			if (now % 20L == 0L) {
-				if (!meals.isEmpty()) {
+				// (0.5.28) Nourishment: your meals don't wear off while it lasts
+				if (!meals.isEmpty() && !player.hasEffect(com.jaymoskitchen.delight.Delight.NOURISHMENT)) {
 					List<Meal> next = new ArrayList<>(meals.size());
 					for (Meal meal : meals) {
 						if (meal.left() > 20) {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "jaymoskitchen:block/straw_bale_end",
+    "side": "jaymoskitchen:block/straw_bale_side"
+  }
+}

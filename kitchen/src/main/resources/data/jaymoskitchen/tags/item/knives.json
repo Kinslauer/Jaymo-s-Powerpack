@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskitchen:iron_knife",
+    {
+      "id": "jaymospowers:primitive_knife",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bone_knife",
+      "required": false
+    },
+    {
+      "id": "#c:tools/knife",
+      "required": false
+    }
+  ]
+}

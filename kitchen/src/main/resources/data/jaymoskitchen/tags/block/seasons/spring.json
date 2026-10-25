@@ -1,9 +1,12 @@
 {
-	"values": [
-		"minecraft:wheat",
-		"minecraft:carrots",
-		"minecraft:potatoes",
-		"minecraft:beetroots",
-		"minecraft:torchflower_crop"
-	]
+  "values": [
+    "minecraft:wheat",
+    "minecraft:carrots",
+    "minecraft:potatoes",
+    "minecraft:beetroots",
+    "minecraft:torchflower_crop",
+    "jaymoskitchen:cabbages",
+    "jaymoskitchen:rice",
+    "jaymoskitchen:rice_panicles"
+  ]
 }

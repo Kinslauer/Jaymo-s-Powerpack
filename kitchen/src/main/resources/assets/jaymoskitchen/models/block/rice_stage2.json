@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "jaymoskitchen:block/rice_stage2"
+  }
+}

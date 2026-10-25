@@ -102,7 +102,8 @@ public final class Prep {
 	 * a half slab; the server also checks a player placed it (see {@link PlacedSlabs}).
 	 */
 	public static boolean isPrepSurface(Level level, BlockPos pos, BlockState state, Direction face) {
-		if (state.getBlock() instanceof CuttingBoardBlock || face == Direction.UP && state.getBlock() instanceof CounterBlock) {
+		if (state.getBlock() instanceof CuttingBoardBlock || state.getBlock() instanceof com.jaymoskitchen.delight.CuttingBoardBlock
+			|| face == Direction.UP && state.getBlock() instanceof CounterBlock) {
 			// a cutting board, or the top of a kitchen counter
 			return true;
 		}

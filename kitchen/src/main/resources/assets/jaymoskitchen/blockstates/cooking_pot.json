@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,heated=false": {
+      "model": "jaymoskitchen:block/cooking_pot"
+    },
+    "facing=north,heated=true": {
+      "model": "jaymoskitchen:block/cooking_pot_tray"
+    },
+    "facing=east,heated=false": {
+      "model": "jaymoskitchen:block/cooking_pot",
+      "y": 90
+    },
+    "facing=east,heated=true": {
+      "model": "jaymoskitchen:block/cooking_pot_tray",
+      "y": 90
+    },
+    "facing=south,heated=false": {
+      "model": "jaymoskitchen:block/cooking_pot",
+      "y": 180
+    },
+    "facing=south,heated=true": {
+      "model": "jaymoskitchen:block/cooking_pot_tray",
+      "y": 180
+    },
+    "facing=west,heated=false": {
+      "model": "jaymoskitchen:block/cooking_pot",
+      "y": 270
+    },
+    "facing=west,heated=true": {
+      "model": "jaymoskitchen:block/cooking_pot_tray",
+      "y": 270
+    }
+  }
+}
