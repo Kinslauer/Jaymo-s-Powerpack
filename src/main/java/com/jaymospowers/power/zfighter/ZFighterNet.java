@@ -233,6 +233,8 @@ public final class ZFighterNet {
 				ZFighterGuard.set(ctx.player(), payload.up());
 			}
 		});
+		PayloadTypeRegistry.serverboundPlay().register(ApeSmash.Key.TYPE, ApeSmash.Key.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ApeSmash.Key.TYPE, (payload, ctx) -> ApeSmash.key(ctx.player(), payload.down()));
 		PayloadTypeRegistry.serverboundPlay().register(Combo.TYPE, Combo.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Combo.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE) || !payload.down()) {

@@ -601,6 +601,7 @@ public final class ZFighterLineage {
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
 		}
+		ApeSmash.tick(player, now);
 	}
 
 	/** One of the Great Ape's steps: the foot (left, then right) comes down like a stomp, shaking the ground and flinging what's near. */
@@ -706,6 +707,7 @@ public final class ZFighterLineage {
 		if (!ape(player)) {
 			return;
 		}
+		player.removeAttached(ApeSmash.CHARGE);
 		player.removeAttached(GREAT_APE);
 		player.removeAttached(CRIPPLED);
 		player.removeAttached(BERSERK);
