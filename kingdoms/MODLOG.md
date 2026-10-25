@@ -4513,3 +4513,15 @@ own take, nothing copied. Andy: weathering may hit villages, "upkeep is already 
   weathering changed, so a Grim hold's old moss stays. Wraps the builders' brain right after `Construction`, so rubble,
   mines and groundwork still come first.
 - Compile-checked; a Kingdoms dev server boots. Not seen in game yet.
+
+## 0.7.203: MCA villagers take orders only from folk they're involved with; a foreigner's talk menu is gibberish (pack 0.16.18)
+Andy (2026-10-25): Pick Up, Locations, Follow Me, Stay Here, Ride Mount and Armor "should not be available for villagers
+you aren't involved with"; and the line at the top of the talk menu should be scrambled when you don't speak their tongue.
+- `Strangers`: involved means MCA family, kin, spouse, betrothed or promised, whoever hired them, or a friend of 50 hearts
+  (`TRUSTED_HEARTS`; MCA's gold heart is 100). To anyone else the interact page hides those six buttons
+  (`McaStrangerButtonMixin`, looked at again when MCA's ties for the villager arrive), and the server refuses `pick_up`,
+  `follow`, `stay`, `ridehorse`, `armor`, `sethome`, `setworkplace` and `gohome` with a word over the hotbar
+  (`McaCommandMixin`). "Move" (let a follower go) stays for anyone. Gift, talk and trade are untouched.
+- `McaMessageMixin`: MCA's talk-menu question line is garbled like their chat for a foreigner (the answers were already
+  cut to Hug/Kiss/rock-paper-scissors).
+- Compile-checked; not seen in game yet.

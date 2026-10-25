@@ -257,6 +257,7 @@
   "message.jaymospowers.zfighter_fusion_tired": "You're still worn from your last fusion (%s min).",
   "message.jaymospowers.zfighter_fusion_waiting": "The dance! Your partner must answer it (Z, then C, facing you).",
   "message.jaymospowers.zfighter_fusion_ending": "The fusion is wearing thin...",
+  "message.jaymospowers.zfighter_fusion_length": "Fusion no. %s together: it holds for %s s",
   "message.jaymospowers.zfighter_fusion_swap": "%s takes control of the fused body",
   "message.jaymospowers.zfighter_fused": "%s and %s fuse into one fighter!",
   "message.jaymospowers.zfighter_unfused": "The fusion ends; you're two again.",

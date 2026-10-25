@@ -602,7 +602,8 @@ def recipes():
     for tid, name, head, mat in TIERS:
         m = jp(mat)
         stick_ = mc("stick")
-        r["%s_shortsword" % tid] = shaped({"#": m, "S": stick_}, ["#", "#", "S"], jp(tid + "_shortsword"))
+        if tid != "skyroot":  # (0.16.18) Andy: no craftable wooden weapons
+            r["%s_shortsword" % tid] = shaped({"#": m, "S": stick_}, ["#", "#", "S"], jp(tid + "_shortsword"))
         r["%s_hammer" % tid] = shaped({"#": m, "S": stick_}, ["###", "#S#", " S "], jp(tid + "_hammer"))
         r["%s_pickaxe" % tid] = shaped({"#": m, "S": stick_}, ["###", " S ", " S "], jp(tid + "_pickaxe"))
         r["%s_axe" % tid] = shaped({"#": m, "S": stick_}, ["##", "#S", " S"], jp(tid + "_axe"))
