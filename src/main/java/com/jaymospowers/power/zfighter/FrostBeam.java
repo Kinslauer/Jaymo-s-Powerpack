@@ -39,9 +39,9 @@ import net.minecraft.world.phys.Vec3;
  * goes exactly where the crosshair is (a Z Fighter's starts weaker and grows with mastery, but fires faster), and a hit has {@link #WOUND_CHANCE} to wound the part it lands on: the head comes
  * off; an arm or leg is cut off, or crippled (broken) at {@link #CRIPPLE_SHARE}. A body that can't lose parts is crippled.
  * <p>
- * (0.16.7) Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of what i want from the beam". Now two
- * hair-thin white beams from the eyes (style 3 in {@code ZFighterBeams}: no ki orbs), held for as long as the left mouse
- * is ({@link Keep}, every few ticks from the client), sweeping where the crosshair goes and meeting on what it hits. While
+ * (0.16.7) Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of what i want from the beam". Still one
+ * hair-thin white beam from the right hand (style 3 in {@code ZFighterBeams}), but now held for as long as the left mouse
+ * is ({@link Keep}, every few ticks from the client), sweeping where the crosshair goes. While
  * it touches something it hurts it once per {@link #COOLDOWN} ({@link #Z_COOLDOWN}), each with the wound roll. Water it
  * crosses freezes to frosted ice for a moment (it melts away by itself), and fire it touches goes out. No blocks broken.
  * <p>
@@ -62,10 +62,10 @@ public final class FrostBeam {
 	public static final float RADIUS = 0.02F;
 	public static final int SHOWN_TICKS = 2;
 	public static final int COLOR = 0xFFFFFF;
-	/** How the beams are drawn (ZFighterBeams: thin eye beams, no orbs). */
-	public static final int EYE_STYLE = 3;
-	/** The eyes: half the gap between them, how far in front of the face the beams start, and how far below the eye line (blocks). */
-	public static final double EYE_GAP = 0.09, EYE_OUT = 0.25, EYE_DOWN = 0.02;
+	/** How the beam is drawn (ZFighterBeams: hair-thin, full width at once, a small glint at each end). */
+	public static final int HELD_STYLE = 3;
+	/** (Andy: "keep it as one beam from the hand") Where it leaves the right hand: out along the look, to the right, and below the eyes (blocks). */
+	public static final double HAND_OUT = 0.55, HAND_SIDE = 0.32, HAND_DOWN = 0.38;
 	/** Unheard from this long (ticks), a held beam stops; the client says it's still held every {@code RaceHoldClient.FROST_KEEP}. */
 	public static final int KEEP_TICKS = 8;
 	/** The hum while it's held (every this many ticks), and how long water it crosses stays frozen (ticks, then it melts). */
@@ -148,7 +148,7 @@ public final class FrostBeam {
 		}
 	}
 
-	/** One tick of the beam: drawn from both eyes to where the look meets something; a hit when the last one's long enough ago. */
+	/** One tick of the beam: drawn from the hand to where the look meets something; a hit when the last one's long enough ago. */
 	private static void beam(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
@@ -163,12 +163,10 @@ public final class FrostBeam {
 		if (hit != null) {
 			end = hit.getLocation();
 		}
-		// the eyes, either side of the look, just in front of the face
-		Vec3 side = look.cross(new Vec3(0.0, 1.0, 0.0));
-		side = side.lengthSqr() < 1.0E-6 ? Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F) : side.normalize();
-		Vec3 front = eye.add(look.scale(EYE_OUT)).add(0.0, -EYE_DOWN, 0.0);
-		show(level, front.add(side.scale(EYE_GAP)), end);
-		show(level, front.add(side.scale(-EYE_GAP)), end);
+		// from the right hand, held out toward where it's aimed
+		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
+		right = right.lengthSqr() < 1.0E-6 ? Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F) : right.normalize();
+		show(level, eye.add(look.scale(HAND_OUT)).add(right.scale(HAND_SIDE)).add(0.0, -HAND_DOWN, 0.0), end);
 		if (now % 2L == 0L) {
 			level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 3, 0.08, 0.08, 0.08, 0.02);
 		}
@@ -238,9 +236,9 @@ public final class FrostBeam {
 		}
 	}
 
-	/** One eye's beam, drawn for everyone near for a couple of ticks (it's sent again each tick while held): hair-thin, all white. */
+	/** The beam, drawn for everyone near for a couple of ticks (it's sent again each tick while held): hair-thin, all white. */
 	private static void show(ServerLevel level, Vec3 from, Vec3 to) {
-		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, COLOR, EYE_STYLE, SHOWN_TICKS);
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, COLOR, HELD_STYLE, SHOWN_TICKS);
 		Vec3 middle = from.lerp(to, 0.5);
 		for (ServerPlayer viewer : level.players()) {
 			if (viewer.position().distanceToSqr(middle) <= ZFighterKi.BEAM_SEEN * ZFighterKi.BEAM_SEEN) {

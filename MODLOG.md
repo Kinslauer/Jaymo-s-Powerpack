@@ -2832,11 +2832,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the Flails mod's, and the ball is under half its old size. Ball and Chain's ball goes round the raised hand too. The
   flail no longer uses the trident's raised-arm animation. Timings, damage and sounds unchanged. Compile-checked; not
   playtested.
-- **0.16.7, the Frost Beam comes from the eyes:** Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of
-  what i want from the beam" (Laser Eyes, an ARR Viltrumite addon: ideas only). `FrostBeam` is now two hair-thin white
-  beams from the eyes (`EYE_GAP`, `EYE_OUT`), held for as long as the left mouse is (the client sends `FrostBeam.Keep`
-  every `RaceHoldClient.FROST_KEEP` ticks; unheard for `KEEP_TICKS` it stops), sweeping with the crosshair and meeting
-  on what it hits. A target under it is hit once per `COOLDOWN`/`Z_COOLDOWN` with the same damage and 40% wound roll.
+- **0.16.7, the Frost Beam is held:** Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of
+  what i want from the beam" (Laser Eyes, an ARR Viltrumite addon: ideas only). `FrostBeam` is one hair-thin white beam from
+  the right hand (`HAND_OUT`, `HAND_SIDE`, `HAND_DOWN`; Andy: "keep it as one beam from the hand. but keep the new
+  design"), held for as long as the left mouse is (the client sends `FrostBeam.Keep`
+  every `RaceHoldClient.FROST_KEEP` ticks; unheard for `KEEP_TICKS` it stops), sweeping with the crosshair. A target under it is hit once per `COOLDOWN`/`Z_COOLDOWN` with the same damage and 40% wound roll.
   Water it crosses becomes frosted ice that melts after `FROST_TICKS`; fire it lands on goes out; no block breaking.
-  `ZFighterBeams` style 3 (`EYE`): full width at once, no orb at the eyes, a small glint where they meet. While it's
+  `ZFighterBeams` style 3 (`HELD`): full width at once, a small glint at the hand and where it lands. While it's
   held the click doesn't dig (`RaceHoldClient.frostBeaming`, `ZFighterAttackMixin`). Compile-checked; not playtested.
