@@ -30,6 +30,11 @@ import org.jspecify.annotations.Nullable;
  * it, wisps scrolling up them, added onto what's behind like light. Brighter while charging and in each higher form;
  * faint in base form. Worn like a costume ({@link CostumeModels#worn}), so it takes every pose the body's drawn in.
  * Not on the Great Ape, nor while hidden.
+ * <p>
+ * (0.16.20) Andy: "the ki glow looks great, i need that one to be an idle for forms though, and maybe it pulses for a
+ * second at max ki". The glow is the look of a form at rest, under {@link ZFighterKiAura}'s flares; the charge no longer
+ * brightens it (the aura has that), and when a charge fills his ki ({@link ZFighterPower#KI_FULL}) it flashes up and
+ * swells for {@link #PULSE_TICKS} before settling.
  */
 public final class ZFighterKiGlow {
 	/** On his render state: the glow's colour (RGB) and strength (0-1), or null for none. */
@@ -38,8 +43,11 @@ public final class ZFighterKiGlow {
 	/** How far out each shell sits (model pixels) and how bright it is, inside out. */
 	static final float[] SHELLS = {0.45F, 0.95F, 1.6F};
 	static final float[] SHELL_LIGHT = {0.30F, 0.17F, 0.08F};
-	/** Strength in base form, while charging, and in a form (plus this per form). */
-	static final float BASE = 0.35F, CHARGING = 0.9F, FORM = 0.5F, PER_FORM = 0.12F;
+	/** Strength in base form, and in a form (plus this per form). */
+	static final float BASE = 0.35F, FORM = 0.5F, PER_FORM = 0.12F;
+	/** Ki full: the glow flashes up by this much (fading out over this many ticks) and its shells swell by up to this share. */
+	static final float PULSE = 1.1F, PULSE_SWELL = 0.12F;
+	static final int PULSE_TICKS = 20;
 	/** How fast the wisps rise, and the glow's slow breathing. */
 	static final float RISE = 0.012F, BREATHE = 0.08F, BREATHE_SPEED = 0.15F;
 
@@ -56,12 +64,18 @@ public final class ZFighterKiGlow {
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
 		int f = form == null ? 0 : form;
-		boolean charging = player.hasAttached(ZFighterPower.CHARGE);
-		float strength = Math.min(1.0F, (f > 0 ? FORM + PER_FORM * f : BASE) + (charging ? CHARGING - BASE : 0.0F));
-		int lineage = ZFighterLineage.of(player);
+		float strength = Math.min(1.0F, f > 0 ? FORM + PER_FORM * f : BASE);
+		// ki full: a flash that fades over a second
+		Long full = player.getAttached(ZFighterPower.KI_FULL);
+		long since = full == null ? Long.MAX_VALUE : player.level().getGameTime() - full;
+		float pulse = since >= 0L && since < PULSE_TICKS ? 1.0F - (float)since / PULSE_TICKS : 0.0F;
+		return new float[] {color(player, f), strength + PULSE * pulse, pulse};
+	}
+
+	/** His ki colour in base form, the form's in a form. */
+	static int color(Player player, int form) {
 		Integer ki = player.getAttached(ZFighterPower.KI_COLOR);
-		int color = f > 0 || ki == null ? ZFighterLineage.color(lineage, f) : ki;
-		return new float[] {color, strength};
+		return form > 0 || ki == null ? ZFighterLineage.color(ZFighterLineage.of(player), form) : ki;
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -93,6 +107,12 @@ public final class ZFighterKiGlow {
 			int color = (int)glow[0];
 			float breathe = 1.0F + BREATHE * Mth.sin(state.ageInTicks * BREATHE_SPEED);
 			float rise = (state.ageInTicks * RISE) % 1.0F;
+			// the ki-full pulse: the shells puff out round him, from his feet
+			float swell = 1.0F + PULSE_SWELL * glow[2];
+			poseStack.pushPose();
+			poseStack.translate(0.0F, 1.5F, 0.0F);
+			poseStack.scale(swell, swell, swell);
+			poseStack.translate(0.0F, -1.5F, 0.0F);
 			for (int i = 0; i < SHELLS.length; i++) {
 				// additive: the colour's brightness is how strongly it shows
 				float light = Mth.clamp(SHELL_LIGHT[i] * glow[1] * breathe, 0.0F, 1.0F);
@@ -100,6 +120,7 @@ public final class ZFighterKiGlow {
 				collector.order(2 + i).submitModel(shell(i, slimArms), state, poseStack, RenderTypes.energySwirl(TEXTURE, i * 0.31F, -rise * (1 + i)),
 					lightCoords, OverlayTexture.NO_OVERLAY, tint, null, 0);
 			}
+			poseStack.popPose();
 		}
 	}
 }
