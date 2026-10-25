@@ -114,6 +114,8 @@ public final class Calamities {
 
 	static final ResourceKey<DamageType> HAIL = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKingdoms.id("hail"));
 
+	/** (0.7.200) Body heat a full blizzard takes off, and a full sandstorm adds. */
+	static final double BODY_SNOW = 45.0, BODY_SAND = 25.0;
 	static final List<Calamity> SERVER = new ArrayList<>();
 	/** The client's copy (set by the client from {@link Sync}, moved on each tick). */
 	public static volatile List<Calamity> CLIENT = List.of();
@@ -164,6 +166,20 @@ public final class Calamities {
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * (0.7.200) What the calamity over {@code p} does to their body heat (Kitchen's {@code BodyHeat}, by reflection): a
+	 * blizzard freezes, a sandstorm bakes, out in the open; under a roof a little of it.
+	 */
+	public static double bodyHeat(ServerPlayer p) {
+		double x = p.getX(), z = p.getZ();
+		float snow = cover(p.level(), Calamity.BLIZZARD, x, z), sand = cover(p.level(), Calamity.SANDSTORM, x, z);
+		if (snow <= 0.05F && sand <= 0.05F) {
+			return 0.0;
+		}
+		double open = p.level().canSeeSky(BlockPos.containing(p.getEyePosition())) ? 1.0 : 0.3;
+		return (sand * BODY_SAND - snow * BODY_SNOW) * open;
 	}
 
 	/** Whether a wildfire burns near {@code pos}: the settlements there fight it all-out ({@code Firefighting}). */

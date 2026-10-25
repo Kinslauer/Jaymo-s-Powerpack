@@ -380,7 +380,19 @@ public final class Payloads {
 		}
 	}
 
+	/** (0.5.25) Client → server: sneaking with an empty hand at water out of reach of a block, or up at the rain: a sip. */
+	public record Sip() implements CustomPacketPayload {
+		public static final Type<Sip> TYPE = new Type<>(JaymosKitchen.id("sip"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Sip> CODEC = StreamCodec.unit(new Sip());
+
+		@Override
+		public Type<Sip> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Sip.TYPE, Sip.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SeasonSync.TYPE, SeasonSync.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);

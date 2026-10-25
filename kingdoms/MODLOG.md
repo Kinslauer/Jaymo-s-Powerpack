@@ -4463,3 +4463,8 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Boards already up that see less than 20 open blocks are looked over once per server run; if another spot sees at
   least 6 more, the board moves there (pinned notices come down; villagers pin new ones).
 - Compile-checked status in the PR; not yet seen in game.
+
+## 0.7.200: blizzards and sandstorms reach body heat (pack 0.16.13)
+- Kitchen 0.5.25 adds thirst and body heat. `KitchenCompat.skills()` makes Emberborn proof against the heat (as
+  Frostborn already are against the cold) and hands Kitchen `Calamities.bodyHeat`: a full blizzard takes 45 off the
+  air around you, a full sandstorm adds 25 (`BODY_SNOW`, `BODY_SAND`), a third of that under a roof.

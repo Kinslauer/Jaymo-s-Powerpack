@@ -167,6 +167,16 @@ final class KitchenCompat {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Frostborn to shrug off winter: {}", e.toString());
 			}
 		}
+		// (0.7.200) Kitchen's body heat: an Emberborn shrugs off the heat, and blizzards and sandstorms reach the body
+		try {
+			Class<?> bodyHeat = Class.forName("com.jaymoskitchen.climate.BodyHeat");
+			bodyHeat.getMethod("setHeatProof", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Heritage.is(player, Heritage.Kind.EMBERBORN));
+			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
+		}
 	}
 
 	/** Kitchen is here, and new enough. */
