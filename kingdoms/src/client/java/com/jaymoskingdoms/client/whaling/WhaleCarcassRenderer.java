@@ -59,7 +59,7 @@ public final class WhaleCarcassRenderer extends EntityRenderer<WhaleCarcass, Wha
 		poseStack.scale(GreatWhaleRenderer.SCALE, GreatWhaleRenderer.SCALE, GreatWhaleRenderer.SCALE);
 		poseStack.translate(0.0F, SETTLE, 0.0F);
 		int tint = ARGB.srgbLerp(1.0F - Mth.clamp(state.left, 0.0F, 1.0F), 0xFFFFFFFF, STRIPPED);
-		collector.submitModel(this.model, state.whale, poseStack, this.model.renderType(GreatWhaleRenderer.SKINS[Math.floorMod(state.whale.variant, 2)]),
+		collector.submitModel(this.model, state.whale, poseStack, this.model.renderType(GreatWhaleRenderer.SKINS[Math.floorMod(state.whale.variant, GreatWhaleRenderer.SKINS.length)]),
 			state.lightCoords, OverlayTexture.NO_OVERLAY, tint, null, state.outlineColor);
 		poseStack.popPose();
 		super.submit(state, poseStack, collector, camera);

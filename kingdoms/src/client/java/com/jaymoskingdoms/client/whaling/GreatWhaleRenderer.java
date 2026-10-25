@@ -15,7 +15,8 @@ import net.minecraft.world.phys.AABB;
 public final class GreatWhaleRenderer extends MobRenderer<GreatWhale, GreatWhaleRenderer.State, GreatWhaleModel> {
 	/** How much bigger than the model it's drawn (about fourteen blocks long). */
 	static final float SCALE = 3.5F;
-	static final Identifier[] SKINS = {JaymosKingdoms.id("textures/entity/whale/rorqual.png"), JaymosKingdoms.id("textures/entity/whale/sperm.png")};
+	static final Identifier[] SKINS = {JaymosKingdoms.id("textures/entity/whale/rorqual.png"), JaymosKingdoms.id("textures/entity/whale/sperm.png"),
+		JaymosKingdoms.id("textures/entity/whale/white.png")};
 
 	public static final class State extends LivingEntityRenderState {
 		int variant;

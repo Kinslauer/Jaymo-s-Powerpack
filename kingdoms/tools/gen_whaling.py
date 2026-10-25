@@ -3,6 +3,7 @@
 - textures/entity/whale/rorqual.png and sperm.png (128x128): the great whale's two skins, painted face by face onto the
   UVs of GreatWhaleModel's boxes (keep BOXES in step with the model): dark backs fading to pale bellies, throat grooves
   under the rorqual's jaw and barnacle specks on its head, the sperm whale wrinkled and brown-grey all over.
+- (stage 4) textures/entity/whale/white.png: the white whale, pale and wrinkled, scarred by old irons.
 - textures/entity/whale/harpoon.png (64x32): the thrown harpoon's ash shaft and iron head (HarpoonRenderer's boxes).
 - textures/item/: harpoon, whale_blubber, whale_meat, cooked_whale_meat, whale_bone, ambergris, great_whale_spawn_egg,
   whale_oil; and their items/ and models/item/ JSON.
@@ -67,7 +68,7 @@ def faces(u, v, w, h, d):
     }
 
 
-def paint_whale(back, belly, seed, grooves, barnacles, wrinkles):
+def paint_whale(back, belly, seed, grooves, barnacles, wrinkles, scars=False):
     rnd = random.Random(seed)
     img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
     px = img.load()
@@ -92,6 +93,9 @@ def paint_whale(back, belly, seed, grooves, barnacles, wrinkles):
                         c = shade(c, 0.7)
                     if barnacles and name == "head" and face in ("up", "north") and rnd.random() < 0.07:
                         c = (205, 200, 185)
+                    if scars and face != "down" and (x * 3 + y * 5 + seed) % 23 == 0:
+                        # old harpoon scars and rake marks, grey against the white
+                        c = (128, 122, 116)
                     px[x0 + x, y0 + y] = clamp(c) + (255,)
     return img
 
@@ -529,6 +533,7 @@ def main():
     os.makedirs(entity, exist_ok=True)
     paint_whale((52, 60, 70), (206, 208, 200), 1, True, True, False).save(os.path.join(entity, "rorqual.png"))
     paint_whale((70, 64, 60), (120, 112, 104), 2, False, False, True).save(os.path.join(entity, "sperm.png"))
+    paint_whale((222, 220, 210), (238, 236, 228), 3, False, True, True, True).save(os.path.join(entity, "white.png"))
     harpoon_texture().save(os.path.join(entity, "harpoon.png"))
     block = os.path.join(ASSETS, "textures", "block")
     os.makedirs(block, exist_ok=True)

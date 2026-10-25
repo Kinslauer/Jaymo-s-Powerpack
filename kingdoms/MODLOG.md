@@ -3699,6 +3699,12 @@ hired workers. What was missing was a villager standing up for themselves when s
     boiling, 8 damage and alight 5 s; cold, a slick (Slowness III 5 s). On a settlement's land its guards (or a grown
     villager) by the pot light it and tip it on foes below: monsters, folk and sworn players of realms at war, players
     the town wants.
+- Stage 4 (polish, Andy: "stage 4 can proceed"):
+  - `whaling/Sharks`: a carcass in the water draws Naturalist's great white sharks (none without Naturalist): every
+    20 s, 35% chance, one arrives from 16-24 blocks out, up to 3. Sharks near it close in and bite (10% each per 2 s),
+    each bite taking a stroke's worth of flesh, with blood and splashes. Cut in fast.
+  - The white whale: 1 in 60 wild-born whales. Pale, scarred sperm whale (`white.png`), 520 health, charges faster
+    (0.42), turns on whoever harpoons it 80% of the time. Its carcass always holds ambergris, 3 lumps.
 - Tuning: the constants at the top of `Retaliation`.
 
 ## 0.7.122: the hidden blade moves, and shows
@@ -4541,7 +4547,7 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
 
-## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade, oil lamps, firebombs, boiling oil (pack 0.16.25)
+## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade, oil lamps, firebombs, boiling oil, sharks, the white whale (pack 0.16.25)
 Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
 animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
 1 whales and harpoons (this), 2 hauling alongside a big ship, cutting in and tryworks (whale oil), 3 the kingdoms' whaling
@@ -4577,4 +4583,4 @@ crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art
     clerics oil 5 and ambergris 48, librarians and cartographers oil, leatherworkers blubber, smiths oil and bone,
     fletchers and toolsmiths bone, masons, farmers), and anyone buys whale steak, oil and ambergris (40). Sales pay the
     realm's toll like any trade.
-- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock` and `Whaling`.
+- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock`, `Sharks` and `Whaling`.

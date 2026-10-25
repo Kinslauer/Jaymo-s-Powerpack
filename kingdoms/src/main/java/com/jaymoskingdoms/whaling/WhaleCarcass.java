@@ -41,6 +41,9 @@ import org.jspecify.annotations.Nullable;
  * so; for the rest it must be cut in: lashed alongside a big ship (one of at least {@link #BIG_SHIP} blocks) by a
  * harpoon line made fast to her, and within {@link #ALONGSIDE} blocks of her side. Its blubber is rendered down in a
  * {@link TryworksBlock tryworks}.
+ * <p>
+ * Stage 4: sharks come to the blood and tear at it ({@link Sharks}); the white whale's carcass always holds ambergris,
+ * {@link #WHITE_AMBERGRIS} lumps of it.
  */
 public final class WhaleCarcass extends Entity {
 	/** How tall it floats (blocks); its width is the whale's. */
@@ -53,6 +56,8 @@ public final class WhaleCarcass extends Entity {
 	/** The chance a whale carries ambergris, and the bones left at the end. */
 	static final float AMBERGRIS = 0.12F;
 	static final int LAST_BONES = 6;
+	/** (stage 4) The lumps of ambergris the white whale holds. */
+	static final int WHITE_AMBERGRIS = 3;
 	/** It sinks after this long (ticks; three days) or once stripped, and goes down this fast (blocks a tick) for this long. */
 	static final int ROT = 72000, SINKING = 120;
 	static final double SINK = 0.03;
@@ -76,7 +81,8 @@ public final class WhaleCarcass extends Entity {
 		WhaleCarcass carcass = new WhaleCarcass(Whaling.WHALE_CARCASS, level);
 		carcass.snapTo(whale.getX(), whale.getY(), whale.getZ(), whale.getYRot(), 0.0F);
 		carcass.entityData.set(VARIANT, whale.variant());
-		carcass.amber = carcass.random.nextFloat() < AMBERGRIS ? carcass.random.nextInt(FLESH) : -1;
+		// (the white whale always carries it)
+		carcass.amber = whale.white() || carcass.random.nextFloat() < AMBERGRIS ? carcass.random.nextInt(FLESH) : -1;
 		carcass.setDeltaMovement(whale.getDeltaMovement().scale(0.5));
 		return carcass;
 	}
@@ -133,6 +139,9 @@ public final class WhaleCarcass extends Entity {
 		this.move(MoverType.SELF, v);
 		if (++this.age > ROT && this.sinking == 0) {
 			this.sink(level);
+		}
+		if (this.sinking == 0) {
+			Sharks.tick(level, this, this.age);
 		}
 		if (this.age % 100 == 0) {
 			level.sendParticles(ParticleTypes.BUBBLE, this.getX(), this.getY() + 0.2, this.getZ(), 4, GreatWhale.WIDTH * 0.4, 0.1,
@@ -202,10 +211,23 @@ public final class WhaleCarcass extends Entity {
 		return false;
 	}
 
+	/** (stage 4) A shark tore a stroke's worth away (false if there was nothing left to take). */
+	boolean bitten(ServerLevel level) {
+		int left = this.entityData.get(LEFT);
+		if (left <= 0 || this.sinking > 0) {
+			return false;
+		}
+		this.entityData.set(LEFT, left - 1);
+		if (left - 1 <= 0) {
+			this.sink(level);
+		}
+		return true;
+	}
+
 	/** What one stroke cuts away (the stroke that finds the ambergris, if it has any, gives that as well). */
 	private ItemStack cut(int stroke) {
 		if (stroke == this.amber && this.level() instanceof ServerLevel level) {
-			this.spawnAtLocation(level, new ItemStack(Whaling.AMBERGRIS));
+			this.spawnAtLocation(level, new ItemStack(Whaling.AMBERGRIS, this.variant() == GreatWhale.WHITE ? WHITE_AMBERGRIS : 1));
 		}
 		float roll = this.random.nextFloat();
 		if (roll < BONE) {
@@ -263,7 +285,7 @@ public final class WhaleCarcass extends Entity {
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
-		this.entityData.set(VARIANT, Math.floorMod(input.getIntOr("Variant", 0), GreatWhale.LOOKS));
+		this.entityData.set(VARIANT, Math.floorMod(input.getIntOr("Variant", 0), GreatWhale.VARIANTS));
 		this.entityData.set(LEFT, Mth.clamp(input.getIntOr("Left", FLESH), 0, FLESH));
 		this.age = input.getIntOr("Age", 0);
 		this.amber = input.getIntOr("Amber", -1);

@@ -86,8 +86,15 @@ public class GreatWhale extends WaterAnimal {
 	static final double POD_RANGE = 48.0;
 	/** One in this many likely spots actually gets a pod. */
 	static final int RARITY = 3;
-	/** Its looks: a grey rorqual and a dark sperm whale. */
-	public static final int LOOKS = 2, SPERM = 1;
+	/** Its looks: a grey rorqual and a dark sperm whale (the common two), and (stage 4) the white whale. */
+	public static final int LOOKS = 2, SPERM = 1, WHITE = 2, VARIANTS = 3;
+	/**
+	 * (stage 4) One whale in this many born in the wild is the white whale: an old, scarred, pale sperm whale, twice as
+	 * hard to kill, quick to turn on any boat that strikes it, faster in the charge.
+	 */
+	static final int WHITE_RARITY = 60;
+	static final double WHITE_HEALTH = 520.0, WHITE_CHARGE = 0.42;
+	static final float WHITE_RAM_CHANCE = 0.8F;
 
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(GreatWhale.class, EntityDataSerializers.INT);
 
@@ -129,10 +136,27 @@ public class GreatWhale extends WaterAnimal {
 		return this.entityData.get(VARIANT);
 	}
 
+	/** The white whale. */
+	public boolean white() {
+		return this.variant() == WHITE;
+	}
+
+	/** A toothed whale (sperm or white), that may turn on its hunters. */
+	boolean toothed() {
+		return this.variant() == SPERM || this.variant() == WHITE;
+	}
+
 	@Override
 	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
 		@Nullable SpawnGroupData group) {
-		this.entityData.set(VARIANT, this.random.nextInt(LOOKS));
+		boolean wild = reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.CHUNK_GENERATION;
+		if (wild && this.random.nextInt(WHITE_RARITY) == 0) {
+			this.entityData.set(VARIANT, WHITE);
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(WHITE_HEALTH);
+			this.setHealth(this.getMaxHealth());
+		} else {
+			this.entityData.set(VARIANT, this.random.nextInt(LOOKS));
+		}
 		this.breath = this.random.nextInt(DIVE_MAX);
 		return super.finalizeSpawn(level, difficulty, reason, group);
 	}
@@ -202,7 +226,7 @@ public class GreatWhale extends WaterAnimal {
 		if (this.ramming > 0 && this.ramTarget != null && this.ramTarget.isAlive() && !this.spent()) {
 			this.ramming--;
 			wantYaw = yawTo(this.ramTarget.position().subtract(this.position()));
-			speed = CHARGE;
+			speed = this.white() ? WHITE_CHARGE : CHARGE;
 			wantY = surface;
 			turn = FLEE_TURN;
 			this.ram(level);
@@ -406,7 +430,7 @@ public class GreatWhale extends WaterAnimal {
 			w.threat = this.threat;
 		}
 		// a sperm whale may turn on whoever struck it
-		if (iron && by != null && this.variant() == SPERM && this.stamina > 0.4F && this.random.nextFloat() < RAM_CHANCE) {
+		if (iron && by != null && this.toothed() && this.stamina > 0.4F && this.random.nextFloat() < (this.white() ? WHITE_RAM_CHANCE : RAM_CHANCE)) {
 			Ship ship = Ships.aboard(by);
 			this.ramTarget = ship != null ? ship : by.getVehicle() != null ? by.getVehicle() : by;
 			this.ramming = RAM_TICKS;
@@ -479,7 +503,7 @@ public class GreatWhale extends WaterAnimal {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
-		this.entityData.set(VARIANT, Math.floorMod(input.getIntOr("Variant", 0), LOOKS));
+		this.entityData.set(VARIANT, Math.floorMod(input.getIntOr("Variant", 0), VARIANTS));
 		this.course = input.getFloatOr("Course", this.course);
 		this.stamina = input.getFloatOr("Stamina", 1.0F);
 		this.breath = input.getIntOr("Breath", DIVE_MIN);
