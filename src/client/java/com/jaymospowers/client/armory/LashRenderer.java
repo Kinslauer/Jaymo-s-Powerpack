@@ -28,10 +28,16 @@ import org.jspecify.annotations.Nullable;
  * attachment): from the hand to where {@link Lash#head} puts the head this frame, bowed back the way the head has come
  * and sagging when slack, so it trails behind a whirl and snakes out on a crack. Solid tubes, like the symbiote's
  * cords, shaded by which way each face looks and darkened in the dark.
+ * <p>
+ * (0.16.2) Andy: "i need a live line connected from the flail as soon as you right click ... a far smaller flail head.
+ * It can look more like this one does" (the Flails mod, MIT: its chain is a run of small links from the owner to a
+ * little spiked head). The flail's chain is now links of iron off the held-out hand ({@link LashPose} poses the arm),
+ * the ball a third the size, and a flail's whirl is drawn from the moment you press use ({@link #shown}) instead of
+ * waiting for the server's word.
  */
 public final class LashRenderer {
 	/** The chain: the ball's reach plus a little; how thick, a link's colour and its glint. */
-	private static final double CHAIN_LENGTH = Lash.WHIRL_RADIUS + 0.7, CHAIN_RADIUS = 0.032;
+	private static final double CHAIN_LENGTH = Lash.WHIRL_RADIUS + 0.7;
 	private static final int CHAIN_DARK = 0x3A3A40, CHAIN_LIGHT = 0x9A9AA4;
 	/** The lash: its length, thick at the handle and thin at the tip, leather brown with a pale popper at the end. */
 	private static final double WHIP_LENGTH = Lash.WHIP_REACH + 0.6, WHIP_BASE = 0.045, WHIP_TIP = 0.012;
@@ -40,7 +46,17 @@ public final class LashRenderer {
 	private static final double SAG = 0.45, LAG = 0.9;
 	private static final int SEGMENTS = 18, SIDES = 6;
 	/** The ball: half its width, and its spikes' length. */
-	private static final double BALL = 0.17, SPIKE = 0.13;
+	private static final double BALL = 0.075, SPIKE = 0.06;
+	/** (0.16.2) The chain's links: one every this far (each through the next), how long and wide, and the iron's thickness. */
+	private static final double LINK_STEP = 0.1, LINK_LENGTH = 0.15, LINK_WIDTH = 0.07, LINK_WIRE = 0.013;
+	private static final int LINK_POINTS = 8, LINK_SIDES = 4;
+	/** (0.16.2) How far the wrist turns (radians) as the ball goes round. */
+	private static final float WRIST = 0.12F;
+	/** (0.16.2) Ball and Chain: the arm straight up (raise, out) while it whirls, and the ball's circle round that hand. */
+	private static final float EXEC_RAISE = 3.0F, EXEC_OUT = 0.35F;
+	private static final double EXEC_RADIUS = 1.1, EXEC_DROOP = 0.1;
+	/** (0.16.2) Whirls this client has started drawing before the server's word came: per player, the whirl as guessed. */
+	private static final java.util.Map<Player, Lash.State> GUESSED = new java.util.WeakHashMap<>();
 	/** (0.15.148) Garrotte: how wide the lash's turn round the neck is. */
 	private static final double NECK_LOOP = 0.13;
 
@@ -74,8 +90,8 @@ public final class LashRenderer {
 			if (player.isRemoved() || player.position().distanceToSqr(camera) > 64.0 * 64.0) {
 				continue;
 			}
-			Lash.State state = player.getAttached(Lash.STATE);
-			Vec3 hand = handPos(minecraft, player, partialTick);
+			Lash.State state = shown(player, level.getGameTime());
+			Vec3 hand = handPos(minecraft, player, partialTick, time);
 			if (state != null) {
 				Vec3 head = Lash.head(player, state, time, partialTick);
 				Vec3 before = Lash.head(player, state, time - 1.5, partialTick);
@@ -90,6 +106,9 @@ public final class LashRenderer {
 				double t = time - finish.start();
 				if (finish.type() == Finishers.Kind.FLAIL) {
 					Vec3 at = body.getPosition(partialTick).add(0.0, 0.25, 0.0);
+					if (!(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
+						hand = Lash.armHand(player, partialTick, executionRaise(t), executionRaise(t) > 2.0F ? EXEC_OUT : 0.0F);
+					}
 					draw(context, level, player, true, hand, executionBall(player, hand, at, t, partialTick),
 						executionBall(player, hand, at, t - 1.5, partialTick), t < 14.0 || t > 23.0 && t < 32.0 ? 0.15 : 1.0, time, camera, null);
 				} else {
@@ -133,12 +152,73 @@ public final class LashRenderer {
 	}
 
 	/**
-	 * Ball and Chain's ball ({@link Finishers.Kind#FLAIL}), {@code t} ticks in: paid out and whirled overhead, down on
-	 * them at the first blow (18), up and round again, down at the kill (36), lying there, then back to the hand.
+	 * (0.16.2) What a player's flail or whip is doing as drawn: the synced {@link Lash.State}, or, from the moment use is
+	 * pressed with a flail, the whirl as it will be (kept until the server's whirl ends, so it doesn't jump when the
+	 * server's word comes).
+	 */
+	public static Lash.@Nullable State shown(Player player, long gameTime) {
+		Lash.State state = player.getAttached(Lash.STATE);
+		boolean whirling = player.isUsingItem() && Lash.isFlail(player.getUseItem());
+		Lash.State guess = GUESSED.get(player);
+		if (guess == null && whirling && state == null) {
+			guess = new Lash.State(Lash.FLAIL, Lash.WHIRL, gameTime - player.getTicksUsingItem(), -1, Vec3.ZERO,
+				new Vec3(Lash.startAngle(player), 0.0, 0.0));
+			GUESSED.put(player, guess);
+		}
+		if (guess == null) {
+			return state;
+		}
+		if (state != null && state.phase() != Lash.WHIRL || state == null && !whirling) {
+			GUESSED.remove(player);
+			return state;
+		}
+		return guess;
+	}
+
+	/**
+	 * (0.16.2) The flail arm at {@code time}: how far raised from hanging and out to the side (radians; null: no flail
+	 * out), the wrist turning with the ball while it whirls.
+	 */
+	public static float @Nullable [] arm(Player player, double time) {
+		if (Finishers.of(player) != null) {
+			return null;
+		}
+		Lash.State state = shown(player, (long)Math.floor(time));
+		if (state == null || state.kind() != Lash.FLAIL) {
+			return null;
+		}
+		double t = Math.max(0.0, time - state.since());
+		float raise = Lash.armRaise(state, t), out = Lash.ARM_OUT;
+		if (state.phase() == Lash.WHIRL) {
+			double angle = state.aim().x + Lash.spinAngle(t);
+			float turn = WRIST * Mth.clamp((float)(t / Lash.PAY_OUT), 0.0F, 1.0F);
+			raise += turn * (float)Math.cos(angle);
+			out += turn * (float)Math.sin(angle);
+		}
+		return new float[] {raise, out};
+	}
+
+	/** (0.16.2) Ball and Chain's arm (FinisherPose's keys): up for the whirls, down for the blows. */
+	private static float executionRaise(double t) {
+		double[][] keys = {{0, 0.25}, {4, EXEC_RAISE}, {14, EXEC_RAISE}, {18, 0.45}, {22, 0.45}, {26, EXEC_RAISE}, {33, EXEC_RAISE},
+			{36, 0.35}, {41, 0.4}, {46, 0.25}};
+		for (int i = 1; i < keys.length; i++) {
+			if (t < keys[i][0]) {
+				double s = Math.max(0.0, (t - keys[i - 1][0]) / (keys[i][0] - keys[i - 1][0]));
+				return (float)Mth.lerp(s, keys[i - 1][1], keys[i][1]);
+			}
+		}
+		return 0.25F;
+	}
+
+	/**
+	 * Ball and Chain's ball ({@link Finishers.Kind#FLAIL}), {@code t} ticks in: paid out and whirled round the raised
+	 * hand, down on them at the first blow (18), up and round again, down at the kill (36), lying there, then back to the
+	 * hand.
 	 */
 	private static Vec3 executionBall(Player player, Vec3 hand, Vec3 at, double t, float partialTick) {
-		Vec3 over = player.getPosition(partialTick).add(0.0, player.getBbHeight() + 0.5, 0.0);
-		java.util.function.DoubleFunction<Vec3> orbit = s -> over.add(Math.cos(s * 0.8) * 1.3, 0.0, Math.sin(s * 0.8) * 1.3);
+		Vec3 over = Lash.armHand(player, partialTick, EXEC_RAISE, EXEC_OUT).add(0.0, -EXEC_DROOP, 0.0);
+		java.util.function.DoubleFunction<Vec3> orbit = s -> over.add(Math.cos(s * 0.8) * EXEC_RADIUS, 0.0, Math.sin(s * 0.8) * EXEC_RADIUS);
 		if (t < 3.0) {
 			return hand.lerp(orbit.apply(t), Math.max(0.0, t) / 3.0);
 		} else if (t < 14.0 || t >= 26.0 && t < 32.0) {
@@ -207,9 +287,63 @@ public final class LashRenderer {
 		return points;
 	}
 
-	/** A chain: links of dark iron with a glint on every other one. */
+	/**
+	 * (0.16.2) A chain: a link every {@link #LINK_STEP} along the line, each an iron loop through the next and turned a
+	 * quarter from it, dark iron with a glint on every other one.
+	 */
 	private static void chain(LevelRenderContext context, Vec3[] line, float light) {
-		tube(context, line, i -> CHAIN_RADIUS, i -> dim(i % 2 == 0 ? CHAIN_DARK : CHAIN_LIGHT, light));
+		java.util.List<Vec3> stops = new java.util.ArrayList<>();
+		stops.add(line[0]);
+		double carry = 0.0;
+		for (int i = 1; i < line.length; i++) {
+			Vec3 a = line[i - 1], b = line[i];
+			double length = a.distanceTo(b);
+			if (length < 1.0E-6) {
+				continue;
+			}
+			double at = LINK_STEP - carry;
+			for (; at <= length; at += LINK_STEP) {
+				stops.add(a.lerp(b, at / length));
+			}
+			carry = length - (at - LINK_STEP);
+		}
+		stops.add(line[line.length - 1]);
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
+			for (int k = 0; k + 1 < stops.size(); k++) {
+				Vec3 from = stops.get(k), to = stops.get(k + 1);
+				Vec3 dir = to.subtract(from);
+				if (dir.lengthSqr() < 1.0E-8) {
+					continue;
+				}
+				dir = dir.normalize();
+				Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+				Vec3 across = k % 2 == 0 ? u : dir.cross(u).normalize();
+				Vec3 middle = from.add(to).scale(0.5);
+				Vec3 normal = dir.cross(across).normalize();
+				int colour = dim(k % 2 == 0 ? CHAIN_DARK : CHAIN_LIGHT, light);
+				// the loop of wire: a ring of LINK_SIDES round each point of the oval, square to the link's own plane
+				Vec3[] prev = null;
+				for (int i = 0; i <= LINK_POINTS; i++) {
+					double a = i * Math.PI * 2.0 / LINK_POINTS;
+					Vec3 point = middle.add(dir.scale(Math.cos(a) * LINK_LENGTH * 0.5)).add(across.scale(Math.sin(a) * LINK_WIDTH * 0.5));
+					Vec3 outward = point.subtract(middle).normalize();
+					Vec3[] ring = new Vec3[LINK_SIDES];
+					for (int j = 0; j < LINK_SIDES; j++) {
+						double b = j * Math.PI * 2.0 / LINK_SIDES;
+						ring[j] = point.add(outward.scale(Math.cos(b) * LINK_WIRE)).add(normal.scale(Math.sin(b) * LINK_WIRE));
+					}
+					if (prev != null) {
+						for (int j = 0; j < LINK_SIDES; j++) {
+							int n = (j + 1) % LINK_SIDES;
+							double b = (j + 0.5) * Math.PI * 2.0 / LINK_SIDES;
+							double up = outward.scale(Math.cos(b)).add(normal.scale(Math.sin(b))).y;
+							quad(buffer, pose, prev[j], prev[n], ring[n], ring[j], shade(colour, up));
+						}
+					}
+					prev = ring;
+				}
+			}
+		});
 	}
 
 	/** The lash: tapering to the tip, the popper paler. */
@@ -228,34 +362,37 @@ public final class LashRenderer {
 
 	/** A tube through {@code line}: a ring of {@link #SIDES} at each point, quads between, lit from above. */
 	private static void tube(LevelRenderContext context, Vec3[] line, Radius radius, Colour colour) {
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
-			Vec3[] prev = null;
-			for (int i = 0; i < line.length; i++) {
-				Vec3 dir = line[Math.min(i + 1, line.length - 1)].subtract(line[Math.max(i - 1, 0)]);
-				if (dir.lengthSqr() < 1.0E-8) {
-					dir = new Vec3(0.0, 1.0, 0.0);
-				}
-				dir = dir.normalize();
-				Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
-				Vec3 v = dir.cross(u).normalize();
-				double r = radius.at(i);
-				Vec3[] ring = new Vec3[SIDES];
-				for (int j = 0; j < SIDES; j++) {
-					double a = j * Math.PI * 2.0 / SIDES;
-					ring[j] = line[i].add(u.scale(Math.cos(a) * r)).add(v.scale(Math.sin(a) * r));
-				}
-				if (prev != null) {
-					int base = colour.at(i - 1);
-					for (int j = 0; j < SIDES; j++) {
-						int n = (j + 1) % SIDES;
-						double a = (j + 0.5) * Math.PI * 2.0 / SIDES;
-						double up = u.scale(Math.cos(a)).add(v.scale(Math.sin(a))).y;
-						quad(buffer, pose, prev[j], prev[n], ring[n], ring[j], shade(base, up));
-					}
-				}
-				prev = ring;
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(),
+			(pose, buffer) -> tube(buffer, pose, line, radius, colour, SIDES));
+	}
+
+	private static void tube(VertexConsumer buffer, PoseStack.Pose pose, Vec3[] line, Radius radius, Colour colour, int sides) {
+		Vec3[] prev = null;
+		for (int i = 0; i < line.length; i++) {
+			Vec3 dir = line[Math.min(i + 1, line.length - 1)].subtract(line[Math.max(i - 1, 0)]);
+			if (dir.lengthSqr() < 1.0E-8) {
+				dir = new Vec3(0.0, 1.0, 0.0);
 			}
-		});
+			dir = dir.normalize();
+			Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+			Vec3 v = dir.cross(u).normalize();
+			double r = radius.at(i);
+			Vec3[] ring = new Vec3[sides];
+			for (int j = 0; j < sides; j++) {
+				double a = j * Math.PI * 2.0 / sides;
+				ring[j] = line[i].add(u.scale(Math.cos(a) * r)).add(v.scale(Math.sin(a) * r));
+			}
+			if (prev != null) {
+				int base = colour.at(i - 1);
+				for (int j = 0; j < sides; j++) {
+					int n = (j + 1) % sides;
+					double a = (j + 0.5) * Math.PI * 2.0 / sides;
+					double up = u.scale(Math.cos(a)).add(v.scale(Math.sin(a))).y;
+					quad(buffer, pose, prev[j], prev[n], ring[n], ring[j], shade(base, up));
+				}
+			}
+			prev = ring;
+		}
 	}
 
 	/** The flail's head: a spiked iron ball, turning as it goes. */
@@ -280,7 +417,7 @@ public final class LashRenderer {
 					}
 					// a spike out of each face: four thin sides meeting at the point
 					Vec3 tip = face.add(n.scale(sign * SPIKE));
-					double w = BALL * 0.4;
+					double w = BALL * 0.5;
 					Vec3 q0 = face.add(a.scale(-w)).add(b.scale(-w)), q1 = face.add(a.scale(w)).add(b.scale(-w));
 					Vec3 q2 = face.add(a.scale(w)).add(b.scale(w)), q3 = face.add(a.scale(-w)).add(b.scale(w));
 					int spike = shade(dim(CHAIN_LIGHT, light), n.y * sign);
@@ -312,8 +449,11 @@ public final class LashRenderer {
 		return 0x8E8E96;
 	}
 
-	/** Where the line leaves the hand: in first person the hand's screen corner (as the fishing line does), else the hand. */
-	private static Vec3 handPos(Minecraft minecraft, Player player, float partialTick) {
+	/**
+	 * Where the line leaves the hand: in first person the hand's screen corner (as the fishing line does), else the hand
+	 * ((0.16.2) a flail's, at the end of the arm LashPose holds out).
+	 */
+	private static Vec3 handPos(Minecraft minecraft, Player player, float partialTick, double time) {
 		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
 			int side = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			float fov = minecraft.options.fov().get().floatValue();
@@ -321,7 +461,8 @@ public final class LashRenderer {
 			Vec3 offset = camera.getNearPlane(fov).getPointOnPlane(side * 0.525F, -0.1F).scale(960.0 / fov);
 			return player.getEyePosition(partialTick).add(offset);
 		}
-		return Lash.hand(player, partialTick);
+		float[] arm = arm(player, time);
+		return arm != null ? Lash.armHand(player, partialTick, arm[0], arm[1]) : Lash.hand(player, partialTick);
 	}
 
 	private static int dim(int rgb, float light) {

@@ -75,8 +75,19 @@ public final class Lash {
 	public static final byte WHIRL = 0, STRIKE = 1, RETURN = 2, CRACK = 3, SNAG = 4, HEAVE = 5, YANK = 6, HOOK = 7;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
-	/** The whirl: the ball's circle (blocks out, and above your head), and how fast it goes round (radians a tick). */
-	public static final double WHIRL_RADIUS = 2.1, WHIRL_UP = 0.45, SPIN_START = 0.28, SPIN_FULL = 0.62;
+	/**
+	 * The whirl: the ball's circle round the hand (blocks out, and how far below the hand the chain hangs it), and how
+	 * fast it goes round (radians a tick). (0.16.2) Andy: "it should all animate together coming from the hand", so it
+	 * goes round the held-out hand at chest height instead of floating over your head.
+	 */
+	public static final double WHIRL_RADIUS = 2.1, WHIRL_DROOP = 0.2, SPIN_START = 0.28, SPIN_FULL = 0.62;
+	/**
+	 * (0.16.2) The flail arm, everyone sees it (client/armory/LashPose) and the chain hangs off its hand: raised this far
+	 * from hanging (radians) at rest, while it whirls, overhead before the slam and down after it, and out to its side.
+	 * The arm's length and the shoulder (share of your height, and out to the side) place the hand.
+	 */
+	public static final float REST_RAISE = 0.31F, WHIRL_RAISE = 1.15F, OVERHEAD_RAISE = 2.9F, DROP_RAISE = 0.75F, ARM_OUT = 0.12F;
+	public static final double ARM_LENGTH = 0.66, SHOULDER = 0.716, SHOULDER_OUT = 0.29;
 	/** Ticks to full speed, the ticks the chain takes to pay out to its full circle, and the least spin worth a slam. */
 	public static final int WINDUP = 30, PAY_OUT = 5, MIN_WINDUP = 6;
 	/** The whirl clips what it passes: this share of the flail's damage, this hard a shove, once per creature this often. */
@@ -218,8 +229,8 @@ public final class Lash {
 	}
 
 	public static ItemUseAnimation useAnimation(byte kind) {
-		// the flail's arm up over the head as the ball goes round; the whip's down at the side
-		return kind == FLAIL ? ItemUseAnimation.TRIDENT : ItemUseAnimation.NONE;
+		// (0.16.2) the flail's arm is posed by LashPose (the trident's raised arm floated the ball over the head)
+		return ItemUseAnimation.NONE;
 	}
 
 	/** Use let go. */
@@ -239,14 +250,14 @@ public final class Lash {
 	public static Vec3 head(Player player, State state, double time, float partialTick) {
 		double t = Math.max(0.0, time - state.since());
 		Vec3 feet = player.getPosition(partialTick);
-		Vec3 hand = hand(player, partialTick);
+		Vec3 hand = state.kind() == FLAIL ? armHand(player, partialTick, armRaise(state, t), ARM_OUT) : hand(player, partialTick);
 		return switch (state.phase()) {
 			case WHIRL -> {
-				// (a whirl's aim.x is the angle it set off at, round you from the east)
+				// (a whirl's aim.x is the angle it set off at, round you from the east) round the held-out hand
 				double angle = state.aim().x + spinAngle(t);
 				double out = Mth.clamp(t / PAY_OUT, 0.0, 1.0);
-				double radius = Mth.lerp(out, 0.5, WHIRL_RADIUS);
-				Vec3 center = feet.add(0.0, player.getBbHeight() + WHIRL_UP * out, 0.0);
+				double radius = Mth.lerp(out, 0.3, WHIRL_RADIUS);
+				Vec3 center = armHand(player, partialTick, WHIRL_RAISE, ARM_OUT).add(0.0, -WHIRL_DROOP * out, 0.0);
 				Vec3 circle = center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
 				yield out < 1.0 ? hand.lerp(circle, smooth(out)) : circle;
 			}
@@ -270,7 +281,7 @@ public final class Lash {
 	}
 
 	/** How far round the whirl has gone after {@code t} ticks (speeding up to full over {@link #WINDUP}). */
-	static double spinAngle(double t) {
+	public static double spinAngle(double t) {
 		double ramp = Math.min(t, WINDUP);
 		double angle = SPIN_START * ramp + (SPIN_FULL - SPIN_START) * ramp * ramp / (2.0 * WINDUP);
 		return angle + Math.max(0.0, t - WINDUP) * SPIN_FULL;
@@ -279,6 +290,44 @@ public final class Lash {
 	/** The whirl's speed after {@code t} ticks, 0 (just started) to 1 (full). */
 	public static float spin(double t) {
 		return (float)Mth.clamp(t / WINDUP, 0.0, 1.0);
+	}
+
+	/** (0.16.2) Where a whirl sets off: straight out ahead of the body (both sides work it out the same). */
+	public static double startAngle(Player player) {
+		float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+		return Math.atan2(Mth.cos(yaw), -Mth.sin(yaw));
+	}
+
+	/**
+	 * (0.16.2) How far the flail arm is raised from hanging (radians), {@code t} ticks into {@code state}: out to the
+	 * whirl as the chain pays out, up overhead and down hard for the slam, and back to rest.
+	 */
+	public static float armRaise(State state, double t) {
+		return switch (state.phase()) {
+			case WHIRL -> Mth.lerp((float)smooth(Mth.clamp(t / PAY_OUT, 0.0, 1.0)), REST_RAISE, WHIRL_RAISE);
+			case STRIKE -> {
+				if (t < STRIKE_OVER) {
+					yield Mth.lerp((float)smooth(t / STRIKE_OVER), WHIRL_RAISE, OVERHEAD_RAISE);
+				}
+				float s = (float)Math.min(1.0, (t - STRIKE_OVER) / (STRIKE_TICKS - 1 - STRIKE_OVER));
+				yield Mth.lerp(s * s, OVERHEAD_RAISE, DROP_RAISE);
+			}
+			default -> Mth.lerp((float)smooth(Math.min(1.0, t / RETURN_TICKS)), DROP_RAISE, REST_RAISE);
+		};
+	}
+
+	/**
+	 * (0.16.2) The weapon hand at the end of an arm raised {@code raise} from hanging (radians, forward) and {@code out}
+	 * to its side, from the shoulder: where the flail's chain leaves it (LashPose poses the arm the same way).
+	 */
+	public static Vec3 armHand(Player player, float partialTick, double raise, double out) {
+		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		double sin = Mth.sin(bodyYaw), cos = Mth.cos(bodyYaw), scale = player.getScale();
+		int side = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
+		Vec3 forward = new Vec3(-sin, 0.0, cos), right = new Vec3(-cos * side, 0.0, -sin * side);
+		Vec3 shoulder = player.getPosition(partialTick).add(0.0, player.getBbHeight() * SHOULDER, 0.0).add(right.scale(SHOULDER_OUT * scale));
+		Vec3 arm = forward.scale(Math.sin(raise)).add(0.0, -Math.cos(raise), 0.0).scale(Math.cos(out)).add(right.scale(Math.sin(out)));
+		return shoulder.add(arm.scale(ARM_LENGTH * scale));
 	}
 
 	/** Roughly where the weapon hand is (the client draws from the real hand instead). */
@@ -309,8 +358,7 @@ public final class Lash {
 		RUNS.put(player.getUUID(), run);
 		Vec3 hand = hand(player, 1.0F);
 		if (kind == FLAIL) {
-			double start = Math.atan2(hand.z - player.getZ(), hand.x - player.getX());
-			player.setAttached(STATE, new State(FLAIL, WHIRL, now, -1, hand, new Vec3(start, 0.0, 0.0)));
+			player.setAttached(STATE, new State(FLAIL, WHIRL, now, -1, hand, new Vec3(startAngle(player), 0.0, 0.0)));
 			flailThrown(player, true);
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.8F, 1.2F);
 			return;

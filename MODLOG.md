@@ -2812,3 +2812,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   slams w the whip damage it." Ball and Chain and Garrotte now follow the Executioner perk like every other weapon's
   move; untrained, both are the Wild Slam, and a whip counts as improvised (`Finishers.improvised`), so it loses ~12% of its
   durability a blow. Compile-checked; not playtested.
+- **0.16.2, the flail's chain comes off the hand:** Andy: "i need a live line connected from the flail as soon as you
+  right click. it should all animate together coming from the hand because right now the flail floats above the head
+  and should be a far smaller flail head. It can look more like this one does, but keep our timing and effects" (the
+  Flails mod, MIT). The whirl now goes round the held-out hand at waist height (`Lash.WHIRL_DROOP`, `Lash.armHand`), not
+  over the head; a new `LashPose` holds the flail arm out (wrist turning with the ball), raises it overhead for the slam
+  and brings it down with the ball, and the chain hangs off that same hand. The client draws the whirl from the moment
+  use is pressed (`LashRenderer.shown`) instead of waiting for the server. The chain is now interlocking iron links like
+  the Flails mod's, and the ball is under half its old size. Ball and Chain's ball goes round the raised hand too. The
+  flail no longer uses the trident's raised-arm animation. Timings, damage and sounds unchanged. Compile-checked; not
+  playtested.
