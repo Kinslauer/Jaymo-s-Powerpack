@@ -4525,3 +4525,7 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
 - `McaMessageMixin`: MCA's talk-menu question line is garbled like their chat for a foreigner (the answers were already
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
+
+## 0.7.205: flint struck on a rock counts as lighting a fire (pack 0.16.24)
+- Powers 0.16.24 lets players light fires with flint in one hand and a rock in the other. `Theft`'s arson watch now
+  treats that like flint and steel (`strikesFlint`: flint plus any `jaymospowers:*_rock`). Compile-checked.

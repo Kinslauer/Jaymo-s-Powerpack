@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SCS",
+    "S S",
+    "S S"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "C": "#jaymoskitchen:cords"
+  },
+  "result": {
+    "id": "jaymoskitchen:drying_rack"
+  }
+}

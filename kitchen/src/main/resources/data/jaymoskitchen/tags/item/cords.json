@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:string",
+    {
+      "id": "jaymospowers:plant_string",
+      "required": false
+    }
+  ]
+}

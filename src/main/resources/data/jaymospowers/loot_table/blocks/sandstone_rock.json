@@ -7,51 +7,42 @@
         {
           "type": "minecraft:item",
           "name": "jaymospowers:sandstone_rock",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
-              "add": false,
-              "count": 2,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymospowers:sandstone_rock",
-                  "properties": {
-                    "rocks": "2"
-                  }
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:sandstone_rock",
+                "state": {
+                  "rocks": "2"
                 }
-              ]
+              },
+              "count": 2
             },
             {
-              "function": "minecraft:set_count",
-              "add": false,
-              "count": 3,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymospowers:sandstone_rock",
-                  "properties": {
-                    "rocks": "3"
-                  }
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:sandstone_rock",
+                "state": {
+                  "rocks": "3"
                 }
-              ]
+              },
+              "count": 3
             },
             {
-              "function": "minecraft:set_count",
-              "add": false,
-              "count": 4,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymospowers:sandstone_rock",
-                  "properties": {
-                    "rocks": "4"
-                  }
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:sandstone_rock",
+                "state": {
+                  "rocks": "4"
                 }
-              ]
+              },
+              "count": 4
             },
             {
-              "function": "minecraft:explosion_decay"
+              "type": "minecraft:explosion_decay"
             }
           ]
         }
