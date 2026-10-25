@@ -189,6 +189,23 @@ public final class WebSymbioteClient {
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
 	static final double LEDGE_HOP = 0.35;
 	static final double LEDGE_FORWARD = 0.18;
+	/**
+	 * (0.16.2) Up a wall it bounds on all fours (Andy: "aggressively slamming the wall, cracking with every impact ...
+	 * weightily bounding itself up the wall"; WebClimbPose draws it). A tendril bites {@code BOUND_REACH} blocks up the
+	 * wall ({@code BOUND_REACH_BIG} in the big suit) and the body gathers under it for {@code BOUND_GATHER} ticks
+	 * ({@code BOUND_GATHER_BIG}), sinking {@code BOUND_SINK} a tick; then it heaves up at {@code BOUND_HEAVE} blocks/tick
+	 * ({@code BOUND_HEAVE_BIG}), losing {@code BOUND_HEAVE_DECAY} of that each tick (never under {@code BOUND_HEAVE_FLOOR}
+	 * of it), for at most {@code BOUND_HEAVE_TICKS}; arriving, the hands and feet slam into the wall (WebNet.ClimbSlam:
+	 * the server cracks it under them for everyone) and hold there {@code BOUND_SLAM_TICKS} ({@code BOUND_SLAM_TICKS_BIG})
+	 * before the next bound, your screen jolting {@code BOUND_SLAM_SHAKE} ({@code BOUND_SLAM_SHAKE_BIG}). The average
+	 * climb is about what the old smooth haul was. Sideways along a wall, down it and on ceilings the tendrils drag you
+	 * as before ({@code CLIMB_REACH}).
+	 */
+	static final double BOUND_REACH = 2.6, BOUND_REACH_BIG = 3.4, BOUND_SINK = -0.02;
+	static final int BOUND_GATHER = 4, BOUND_GATHER_BIG = 6;
+	static final double BOUND_HEAVE = 0.55, BOUND_HEAVE_BIG = 0.7, BOUND_HEAVE_DECAY = 0.15, BOUND_HEAVE_FLOOR = 0.4;
+	static final int BOUND_HEAVE_TICKS = 8, BOUND_SLAM_TICKS = 2, BOUND_SLAM_TICKS_BIG = 3;
+	static final float BOUND_SLAM_SHAKE = 0.25F, BOUND_SLAM_SHAKE_BIG = 0.45F;
 	// ===== takeover ================================================================================================
 	/**
 	 * How fast it drags you (blocks/tick): flat out, sprinting, chasing, hunting or running, hungry or not (0.13.23: it
@@ -299,6 +316,9 @@ public final class WebSymbioteClient {
 	private static boolean climbLedge;
 	private static int climbPhase;
 	private static boolean climbSent;
+	/** (0.16.2) This reach is a bound up a wall; its slam has landed; and how many more ticks the four hold the wall after it. */
+	private static boolean bounding, slammed;
+	private static int slamHold;
 	/** Sneak last tick (to catch the press), and how many more ticks a slammed-in latch pins you. */
 	private static boolean sneakWas;
 	/** Ticks left after a charged leap off the walking tendrils before Wall Crawl takes hold again. */
@@ -2023,12 +2043,30 @@ public final class WebSymbioteClient {
 			// still: hanging on, pressed to the surface
 			player.setDeltaMovement(ceiling ? new Vec3(0.0, CEILING_PRESS, 0.0) : out.scale(-0.02));
 			climbPhase = 0;
+			slamHold = 0;
 			return;
 		}
+		if (slamHold > 0) {
+			// (0.16.2) the bound just landed: all four hold the wall, pressed in, before the next reaches on
+			slamHold--;
+			player.setDeltaMovement(out.scale(-0.04));
+			if (slamHold > 0) {
+				return;
+			}
+		}
+		boolean big = WebSymbiote.bulked(player);
 		boolean turned = climbAt == null || want.lengthSqr() > 1.0E-4 && want.dot(climbWant) < 0.5;
 		Vec3 goal = climbAt == null ? center : climbGoal(player, out);
-		boolean arrived = climbPhase > CLIMB_REACH_TICKS && goal.distanceTo(center) < CLIMB_ARRIVE;
-		if (turned || arrived || climbPhase >= CLIMB_REACH_TICKS + CLIMB_PULL_TICKS) {
+		int reachTicks = bounding ? big ? BOUND_GATHER_BIG : BOUND_GATHER : CLIMB_REACH_TICKS;
+		int pullTicks = bounding ? BOUND_HEAVE_TICKS : CLIMB_PULL_TICKS;
+		boolean arrived = climbPhase > reachTicks && goal.distanceTo(center) < CLIMB_ARRIVE;
+		if (turned || arrived || climbPhase >= reachTicks + pullTicks) {
+			if (bounding && !slammed && !turned) {
+				// the bound lands: the hands and feet slam into the wall and hold it a moment
+				slam(player, out, big);
+				player.setDeltaMovement(out.scale(-0.04));
+				return;
+			}
 			if (want.lengthSqr() < 1.0E-4) {
 				// a ledge pull with nowhere further to go
 				climbLedge = false;
@@ -2036,11 +2074,24 @@ public final class WebSymbioteClient {
 			}
 			reachOn(player, want, out);
 			goal = climbGoal(player, out);
+			reachTicks = bounding ? big ? BOUND_GATHER_BIG : BOUND_GATHER : CLIMB_REACH_TICKS;
 		}
 		climbPhase++;
-		if (climbPhase <= CLIMB_REACH_TICKS) {
-			// reaching on ahead: you hang, sagging a little
-			player.setDeltaMovement(ceiling ? new Vec3(0.0, CEILING_PRESS, 0.0) : out.scale(-0.02).add(0.0, CLIMB_SAG, 0.0));
+		if (climbPhase <= reachTicks) {
+			// reaching on ahead: you hang, sagging a little (a bound gathers under the bite, sinking)
+			player.setDeltaMovement(ceiling ? new Vec3(0.0, CEILING_PRESS, 0.0) : out.scale(-0.02).add(0.0, bounding ? BOUND_SINK : CLIMB_SAG, 0.0));
+			return;
+		}
+		if (bounding) {
+			// the heave: flung up at the bite, hardest at the start, slowing as the body nears it
+			int t = climbPhase - reachTicks;
+			double speed = (big ? BOUND_HEAVE_BIG : BOUND_HEAVE) * Math.max(BOUND_HEAVE_FLOOR, 1.0 - (t - 1) * BOUND_HEAVE_DECAY);
+			Vec3 gap = goal.subtract(center);
+			Vec3 heave = gap.length() <= speed ? gap : gap.normalize().scale(speed);
+			player.setDeltaMovement(heave.add(out.scale(-0.03)));
+			if (t == 1) {
+				WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_SQUISH, 0.6F, 0.5F);
+			}
 			return;
 		}
 		// bitten in: hauled to it, hard at first, easing as it nears
@@ -2057,14 +2108,20 @@ public final class WebSymbioteClient {
 		}
 	}
 
-	/** The other side's tendril reaches {@link #CLIMB_REACH} on along the surface and bites in (the server shows the cord). */
+	/**
+	 * The other side's tendril reaches {@link #CLIMB_REACH} on along the surface and bites in (the server shows the cord).
+	 * (0.16.2) Straight up a wall it reaches {@link #BOUND_REACH} instead, and the body follows in a bound.
+	 */
 	private static void reachOn(LocalPlayer player, Vec3 want, Vec3 out) {
 		climbHand = climbHand == WebNet.MAIN ? WebNet.OFF : WebNet.MAIN;
 		climbWant = want;
 		climbPhase = 0;
 		climbLedge = false;
+		slammed = false;
+		slamHold = 0;
+		bounding = out.y > -0.5 && out.lengthSqr() > 1.0E-4 && want.y > 0.5;
 		Vec3 center = player.getBoundingBox().getCenter();
-		Vec3 ahead = center.add(want.scale(CLIMB_REACH));
+		Vec3 ahead = center.add(want.scale(bounding ? WebSymbiote.bulked(player) ? BOUND_REACH_BIG : BOUND_REACH : CLIMB_REACH));
 		Vec3 into = out.lengthSqr() < 1.0E-4 ? want : out.reverse();
 		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(ahead.subtract(into.scale(0.3)),
 			ahead.add(into.scale(1.8)), net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
@@ -2079,6 +2136,8 @@ public final class WebSymbioteClient {
 			if (top.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && top.getDirection() == net.minecraft.core.Direction.UP) {
 				at = top.getLocation();
 				climbLedge = true;
+				// (hauled over the top the old way, no slam)
+				bounding = false;
 				climbWant = want.add(into).normalize();
 			} else {
 				at = ahead.add(into.scale(0.5));
@@ -2090,6 +2149,19 @@ public final class WebSymbioteClient {
 			climbSent = true;
 		}
 		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_ATTACK, 0.35F, 0.7F + player.getRandom().nextFloat() * 0.2F);
+	}
+
+	/**
+	 * (0.16.2) A bound lands: the hands and feet slam into the wall. The server cracks it under all four, with dust and a
+	 * thud, for everyone (WebTendrils.climbSlam); your own screen jolts.
+	 */
+	private static void slam(LocalPlayer player, Vec3 out, boolean big) {
+		slammed = true;
+		slamHold = big ? BOUND_SLAM_TICKS_BIG : BOUND_SLAM_TICKS;
+		if (ClientPlayNetworking.canSend(WebNet.ClimbSlam.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ClimbSlam(player.getBoundingBox().getCenter(), out));
+		}
+		com.jaymospowers.client.ScreenShake.add(big ? BOUND_SLAM_SHAKE_BIG : BOUND_SLAM_SHAKE, BOUND_SHAKE_TICKS, null);
 	}
 
 	/** Where the bite hauls your middle: just short of it, off the surface (onto the ledge, over the top). */
@@ -2111,6 +2183,9 @@ public final class WebSymbioteClient {
 		climbAt = null;
 		climbLedge = false;
 		climbPhase = 0;
+		bounding = false;
+		slammed = false;
+		slamHold = 0;
 		if (climbSent && ClientPlayNetworking.canSend(WebNet.ClimbLatch.TYPE)) {
 			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.MAIN, Vec3.ZERO, false));
 			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.OFF, Vec3.ZERO, false));

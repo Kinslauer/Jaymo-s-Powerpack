@@ -51,6 +51,11 @@ public final class WebFeral {
 	 * {@code 1 / SPRINT_RATE} seconds to lean into a sprint.
 	 */
 	static final float BRUTE_ROLL = 0.05F, BRUTE_TWIST = 0.1F, BRUTE_BOB = 0.6F, BRUTE_NOD = 0.06F, BRUTE_BREATH = 0.03F, SPRINT_RATE = 4.0F;
+	/**
+	 * Drawing the tendrils in (or letting them back out) the beast's hunch and the upright brute blend into each other
+	 * over this many ticks ({@link #uprightness}), every part eased between the two poses, instead of snapping.
+	 */
+	static final float UPRIGHT_BLEND_TICKS = 9.0F;
 
 	private WebFeral() {
 	}
@@ -68,8 +73,9 @@ public final class WebFeral {
 			// only the tendrils are out: no beast in the body
 			tendrils = null;
 		}
-		// the big body worn alone (its tendrils drawn in): upright
+		// the big body worn alone (its tendrils drawn in): upright; eased between that and the beast's hunch
 		boolean upright = upright(avatar);
+		float up = WebSuitGrowth.bigBody(avatar) ? smooth(UPRIGHT.to(avatar.id, upright ? 1.0F : 0.0F, UPRIGHT_BLEND_TICKS)) : upright ? 1.0F : 0.0F;
 		Float slam = avatar.getData(WebSymbioteClient.SLAM);
 		if (slam != null && (tendrils != null || upright)) {
 			overhead(humanoid, avatar, slam, slim);
@@ -80,16 +86,27 @@ public final class WebFeral {
 			coil(humanoid, avatar, charge, slim);
 			return;
 		}
-		if (tendrils == null && !upright || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
+		if (tendrils == null && up <= 0.0F || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
 			|| avatar.isPassenger || avatar.isCrouching && charge == null) {
 			return;
 		}
-		if (upright) {
+		if (up >= 1.0F) {
 			brute(humanoid, avatar, slim);
 			return;
 		}
+		hunch(humanoid, avatar, tendrils, slim);
+		if (up > 0.0F) {
+			// part way between: the hunch, then the brute, every part eased from the one to the other
+			float[] was = snapshot(humanoid);
+			brute(humanoid, avatar, slim);
+			blend(humanoid, was, up);
+		}
+	}
+
+	/** The beast's hunch (and the gallop), doubled over in pain while the big body is first built. */
+	private static void hunch(HumanoidModel<?> humanoid, AvatarRenderState avatar, WebSymbioteClient.@org.jspecify.annotations.Nullable Tendrils tendrils, boolean slim) {
 		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)
-		float run = ownView(avatar.id) ? 0.0F : tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
+		float run = tendrils == null || ownView(avatar.id) ? 0.0F : tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
 		pose(humanoid, avatar, run, slim);
 		WebSuitGrowth.Growth growth = avatar.getData(WebSuitGrowth.KEY);
 		if (growth != null && growth.to() == 2 && growth.from() < 2) {
@@ -97,6 +114,43 @@ public final class WebFeral {
 			float pain = t < PAIN_IN ? smooth(t / PAIN_IN) : t < PAIN_OUT ? 1.0F : 1.0F - smooth((t - PAIN_OUT) / (1.0F - PAIN_OUT));
 			agony(humanoid, avatar, pain, slim);
 		}
+	}
+
+	/** The parts the two poses set (the root's height last). */
+	static ModelPart[] posed(HumanoidModel<?> h) {
+		return new ModelPart[] {h.body, h.head, h.rightArm, h.leftArm, h.rightLeg, h.leftLeg};
+	}
+
+	/** Where every posed part is (its pivot and its turn), and the root's height. */
+	static float[] snapshot(HumanoidModel<?> h) {
+		ModelPart[] parts = posed(h);
+		float[] out = new float[parts.length * 6 + 1];
+		for (int i = 0; i < parts.length; i++) {
+			ModelPart part = parts[i];
+			out[i * 6] = part.x;
+			out[i * 6 + 1] = part.y;
+			out[i * 6 + 2] = part.z;
+			out[i * 6 + 3] = part.xRot;
+			out[i * 6 + 4] = part.yRot;
+			out[i * 6 + 5] = part.zRot;
+		}
+		out[parts.length * 6] = h.root().y;
+		return out;
+	}
+
+	/** Eases every posed part from where it was ({@code was}, a snapshot) to where it is now, {@code k} of the way. */
+	static void blend(HumanoidModel<?> h, float[] was, float k) {
+		ModelPart[] parts = posed(h);
+		for (int i = 0; i < parts.length; i++) {
+			ModelPart part = parts[i];
+			part.x = Mth.lerp(k, was[i * 6], part.x);
+			part.y = Mth.lerp(k, was[i * 6 + 1], part.y);
+			part.z = Mth.lerp(k, was[i * 6 + 2], part.z);
+			part.xRot = Mth.lerp(k, was[i * 6 + 3], part.xRot);
+			part.yRot = Mth.lerp(k, was[i * 6 + 4], part.yRot);
+			part.zRot = Mth.lerp(k, was[i * 6 + 5], part.zRot);
+		}
+		h.root().y = Mth.lerp(k, was[parts.length * 6], h.root().y);
 	}
 
 	private static float smooth(float x) {
@@ -263,6 +317,14 @@ public final class WebFeral {
 		return Boolean.TRUE.equals(state.getData(WebSymbioteClient.TENDRILS_IN));
 	}
 
+	/** Entity id → how far it stands upright, eased (see {@code UPRIGHT_BLEND_TICKS}). */
+	private static final WebEase UPRIGHT = new WebEase();
+
+	/** How far this big body is the upright brute rather than the hunched beast right now (0-1, eased), as last posed. */
+	static float uprightness(AvatarRenderState state) {
+		return smooth(UPRIGHT.of(state.id, upright(state) ? 1.0F : 0.0F));
+	}
+
 	/** How far each upright brute leans into a sprint (eased), and when that was last looked at. */
 	private static final class Sprint {
 		float value;
@@ -359,7 +421,7 @@ public final class WebFeral {
 	}
 
 	/** Puts a part's pivot where it ends up when everything above the hip bends forward by {@code bend}. */
-	private static void place(ModelPart part, float restX, float restY, float bend) {
+	static void place(ModelPart part, float restX, float restY, float bend) {
 		float vy = restY - HIP;
 		part.x = restX;
 		part.y = HIP + vy * Mth.cos(bend);
@@ -371,12 +433,14 @@ public final class WebFeral {
 		if (!WebSymbiote.bulked(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
 			return 0.0F;
 		}
-		if (!WebSymbiote.armored(player)) {
-			// worn alone, upright (see brute)
-			return Mth.lerp(sprinted(player.getId()), BRUTE_LEAN, BRUTE_SPRINT_LEAN);
+		// worn alone, upright (see brute), eased from the hunch as the tendrils draw in (and back as they come out)
+		float up = smooth(UPRIGHT.of(player.getId(), WebSymbiote.armored(player) ? 0.0F : 1.0F));
+		float upright = Mth.lerp(sprinted(player.getId()), BRUTE_LEAN, BRUTE_SPRINT_LEAN);
+		if (up >= 1.0F) {
+			return upright;
 		}
 		float run = ownView(player.getId()) ? 0.0F : WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);
-		return Mth.lerp(run, IDLE_BEND, RUN_BEND);
+		return Mth.lerp(up, Mth.lerp(run, IDLE_BEND, RUN_BEND), upright);
 	}
 
 	/** Your own body, drawn round the camera in first person (First-person Model): it doesn't drop to the gallop. */

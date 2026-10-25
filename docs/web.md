@@ -1562,3 +1562,41 @@ to 3 removals."
   hunched and galloping with the tendrils out, a heavy upright brute walk and two-legged charge with them in.
 - **Check first in game:** glob sizes on the big body (`BULK_OUT_*`, `BULK_SIZE` guessed), the snap between hunch
   and upright (no blend), the fangs doubling for a moment near the end of the build, flail damage near friends.
+
+## 0.16.5: a Tendrils slot, teeth that bare, globs under the skin, every switch eased
+- Andy (playtest of 0.15.164): "The teeth should bare idly like the tongue does ... there should be a smooth transition
+  for all animations ... the bulk grows too quickly ... the goo globs currently look too separate, or barnacle like ...
+  The mask should always animate peeling, on or off. Add a new button specifically for tendrils, and separate its
+  activation from the living armor. now we can refer to the big suit as such."
+- **Tendrils slot (`WebSymbiote.TENDRILS_TOGGLE`, menu slot 8):** draws Living Armor's tendrils into the suit or lets
+  them back out, thin armour or big suit; whispers with Living Armor off. Living Armor's press only puts the armour on
+  or off, and always starts with the tendrils out; takeovers and the roar still force them out. Player text says
+  "the big suit" for the bulked form.
+- **Teeth (`WebHulk.TEETH_*`, `WebMouthLayer.TEETH_AT`):** hidden by default, bared on an idle schedule like the tongue
+  and whenever the mouth opens, eased in and out. The doubled fangs near the end of the build were three skull fang
+  muscles heaving on different phases; the head now swells in step without overshoot.
+- **Eased switches (`WebEase`, `WebFeral.UPRIGHT_BLEND_TICKS`, `WebSuitGrowth.FACE_PEEL_TICKS`):** hunch to upright
+  brute blends over 9 ticks; the mask peels off over 14 ticks and flows back on, turning mid-way if switched again.
+- **Bulk-up (`WebSuitGrowth.BULK_TICKS` 72, `WebHulk.SWELL_*`):** each muscle swells from 40% of the change, staggered,
+  reaching full size exactly at the end.
+- **Globs (`WebGooGlobs`):** low wide swellings sunk half their thickness under the suit's skin, stretched along their
+  creep, skinned with the suit's own texture; tendrils still sprout from them.
+- **Check first in game:** the teeth-hidden open jaw shows the red throat strip (intended); the takeover fight's first
+  mask tear is still a step; Stare's maw still pops away at its end (pre-existing).
+
+## 0.16.5 (same release): the symbiote bounds up walls on all fours
+- Andy: "the symbiote also needs a climbing animation, using all fours and aggressively slamming the wall, cracking with
+  every impact, and slightly spreading the symbiote weightily bounding itself up the wall" (the Venom film's skyscraper
+  climb and a Marvel Rivals clip).
+- **Bounds (`WebSymbioteClient.BOUND_*`):** climbing straight up a wall with Wall Crawl, the reach-and-pull becomes
+  gather, heave, slam: the tendril bites `BOUND_REACH` up, you sink for `BOUND_GATHER` ticks, heave at `BOUND_HEAVE`
+  (decaying), slam into the wall and hold `BOUND_SLAM_TICKS`. Average speed about what it was; the big suit reaches
+  further and heaves harder. Sideways, downward, ledge and ceiling crawling are unchanged.
+- **Slams (`WebNet.ClimbSlam`, `WebTendrils.SLAM_*`):** every slam cracks the block under each hand and foot
+  (`destroyBlockProgress`, stage `SLAM_CRACK_STAGE`, fading after `SLAM_CRACK_TICKS`), with that block's dust and a
+  warden-impact thud over its hit sound; nothing breaks. Hands crack overhead, feet below and wide.
+- **Pose (`WebClimbPose`):** all fours flat to the wall, arms reaching near straight up, legs wide, head looking up,
+  the suit a little wider (`SPREAD`); other clients read the heave and slam from the climber's vertical speed. Eases
+  in and out over `BLEND_TICKS`, from whatever the body was doing (hunch, brute, vanilla).
+- **Check first in game:** body pitch is a modest `FLAT` 6° (past ~15° the head clips the wall); the slam pulse other
+  players see is motion-derived, so laggy climbers may miss or double it (the cracks and thud are server-sent).

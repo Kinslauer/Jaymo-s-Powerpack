@@ -20,11 +20,14 @@ import org.joml.Vector3f;
 
 /**
  * Living Armor's goo (Andy: "there should be more globs around the body moving constantly like an amorphous living
- * puddle of goo"): while the tendrils are out, {@link #GLOBS} living blobs of symbiote creep slowly over the torso (its
- * back, sides and belly), the shoulders, the arms and the legs, and one over the back of the skull, each riding its
- * body part's pose. They swell and shrink, and each keeps pinching off a little lobe of itself and taking it back (a
- * neck of goo between them that thins and snaps, then flows back together). Never over the face, the pecs (the front
- * of the chest's upper half) or the soles of the feet.
+ * puddle of goo"): while the tendrils are out, {@link #GLOBS} living masses of symbiote creep slowly under the suit's
+ * skin over the torso (its back, sides and belly), the shoulders, the arms and the legs, and one over the back of the
+ * skull, each riding its body part's pose. Each is a low, wide swelling of the suit itself (its own texture, most of
+ * the mass sunk under the surface so only a shallow dome bulges it, blending into the skin at its edges, not a blob
+ * sitting on top: Andy, "part of the suit, moving underneath the skin, bulging it"), drawn out along the way it creeps.
+ * They swell and shrink, and each keeps pushing a smaller swelling out ahead of itself and drawing it back (a ridge of
+ * skin between them that thins out, then flows back together). Never over the face, the pecs (the front of the
+ * chest's upper half) or the soles of the feet.
  *
  * <p>The first twelve each carry a tendril ({@link WebTendrilLayer}, tendril {@code i} out of glob {@code i}): it grows
  * from wherever its glob has crept to, out along the surface's outward way. A tendril on a job that needs its old root
@@ -40,24 +43,35 @@ final class WebGooGlobs {
 
 	/** How many globs: the first {@code TENDRIL_GLOBS} carry a tendril each (as many as WebTendrilLayer has), then one on the skull and one more on the torso. */
 	static final int GLOBS = 14, TENDRIL_GLOBS = 12;
-	/** A glob's half-width (pixels, between these, per glob) and how flat it lies on the body (its thickness, of that). */
-	private static final float GLOB_MIN = 1.7F, GLOB_MAX = 2.7F, GLOB_FLAT = 0.55F;
+	/**
+	 * A glob's half-width (pixels, between these, per glob), how flat it lies ({@code GLOB_FLAT}: its thickness, of
+	 * that), how far it's drawn out along the way it creeps ({@code GLOB_LONG}, of its width, narrower across it), and
+	 * how much of its thickness sits under the skin ({@code SINK}: only the dome above bulges the suit, meeting the
+	 * surface at a shallow angle).
+	 */
+	private static final float GLOB_MIN = 2.2F, GLOB_MAX = 3.6F, GLOB_FLAT = 0.42F, GLOB_LONG = 1.3F, SINK = 0.5F;
 	/** On the arms and legs a glob is this much smaller; on the big body every one this much bigger. */
 	private static final float LIMB_SIZE = 0.8F, BULK_SIZE = 1.35F;
-	/** The big body's muscles stand this far out of the player model's boxes (pixels): its globs sit on top of them. */
+	/** The big body's muscles stand this far out of the player model's boxes (pixels): its globs bulge their surface. */
 	private static final float BULK_OUT_TORSO = 3.0F, BULK_OUT_LIMB = 2.5F, BULK_OUT_HEAD = 1.0F;
 	/** How fast they creep over the body (radians of their wander a tick; a full wander takes ~2 pi / this). */
 	private static final float CREEP = 0.018F;
 	/** Swelling and shrinking: how much (of its size) and how fast. */
 	private static final float SWELL = 0.22F, SWELL_RATE = 0.07F;
-	/** The surface heaving in slow waves (of its size), as the roaming blobs' bodies do (WebBlobRenderer). */
-	private static final float WOBBLE = 0.12F;
+	/** The surface heaving in slow waves (of its size), as the roaming blobs' bodies do (WebBlobRenderer), gently: it's skin. */
+	private static final float WOBBLE = 0.07F;
 	/**
 	 * Splitting: each glob's lobe drifts out from {@code SPLIT_NEAR} to {@code SPLIT_FAR} of its size from the middle
-	 * (merged, then pinched off) and back, at this rate; the lobe is {@code LOBE} of the glob's size, the neck between
-	 * them {@code NECK} of it (thinning to nothing as it pulls apart).
+	 * (merged, then pushed out ahead) and back, at this rate; the lobe is {@code LOBE} of the glob's size, the ridge
+	 * between them {@code NECK} of it (thinning to nothing as it draws away).
 	 */
-	private static final float SPLIT_NEAR = 0.35F, SPLIT_FAR = 1.7F, SPLIT_RATE = 0.035F, LOBE = 0.6F, NECK = 0.5F;
+	private static final float SPLIT_NEAR = 0.35F, SPLIT_FAR = 1.5F, SPLIT_RATE = 0.035F, LOBE = 0.55F, NECK = 0.5F;
+	/**
+	 * Drawn in the suit's own skin: a plain patch of the suit's texture (the back of the torso) on the plain suit, of
+	 * the big body's hide on the big body (its back); each in 0-1 texture space (u0, v0, u1, v1).
+	 */
+	private static final float[] SUIT_PATCH = {33.0F / 64.0F, 21.0F / 64.0F, 39.0F / 64.0F, 31.0F / 64.0F};
+	private static final float[] HULK_PATCH = {136.0F / 256.0F, 74.0F / 128.0F, 146.0F / 256.0F, 79.0F / 128.0F};
 	/** They're out (full size) by this share of the tendrils' growth. */
 	private static final float GROWN_AT = 0.6F;
 	/** A glob flows over to its tendril's old root in this many ticks when a job needs it, and creeps back off in this many. */
@@ -68,8 +82,8 @@ final class WebGooGlobs {
 	private static final float FRONT_OUT = 0.9F;
 	/** Every tendril out of a glob leans at least this much (of its outward way) out to its own side. */
 	private static final float MIN_OUT = 0.25F;
-	/** The sphere each lobe is built from. */
-	private static final int RINGS = 4, SEGMENTS = 7;
+	/** The sphere each lobe is built from (fine enough that a flattened dome reads as skin, not facets). */
+	private static final int RINGS = 5, SEGMENTS = 9;
 
 	/** Where on the body a glob wanders. */
 	private static final int TORSO = 0, ARM = 1, LEG = 2, HEAD = 3, SHOULDER = 4;
@@ -98,7 +112,7 @@ final class WebGooGlobs {
 	 * {@code ROOTS}); {@code onJob}: which tendrils need it right now.
 	 */
 	static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, AvatarRenderState state, PlayerModel model,
-		WebSymbioteClient.Tendrils tendrils, float[][] fixed, boolean[] onJob, Identifier texture) {
+		WebSymbioteClient.Tendrils tendrils, float[][] fixed, boolean[] onJob) {
 		Goo goo = goo(state.id);
 		float time = state.ageInTicks;
 		// flowing to (or off) the old roots
@@ -145,8 +159,8 @@ final class WebGooGlobs {
 			float thick = size * GLOB_FLAT;
 			ModelPart part = part(model, region, s);
 			Matrix4f m = part == model.body ? body : matrix(part);
-			// half sunk into the body
-			float lift = out + thick * 0.35F;
+			// most of it under the skin: only the dome above the surface bulges it
+			float lift = out - thick * SINK;
 			Vector3f c = m.transformPosition(new Vector3f((at[0] + at[3] * lift) / 16.0F, (at[1] + at[4] * lift) / 16.0F, (at[2] + at[5] * lift) / 16.0F));
 			Vector3f n = m.transformDirection(new Vector3f(at[3], at[4], at[5])).normalize();
 			Vector3f axis = m.transformDirection(new Vector3f(0.0F, 1.0F, 0.0F)).normalize();
@@ -203,18 +217,20 @@ final class WebGooGlobs {
 			Vector3f e2 = new Vector3f(e1).cross(n).normalize();
 			float wobble = WOBBLE + FLAIL_RIPPLE * flail;
 			float phase = p[11];
-			lobes.add(lobe(c, e1, n, e2, r, rt, r * 0.85F, phase, wobble));
-			// its lobe, pinching off and flowing back, round the glob as it goes
-			float split = smooth(0.5F + 0.5F * Mth.sin(time * SPLIT_RATE * (0.8F + 0.4F * p[9]) + p[11] * 1.7F));
+			// the way it creeps (turning slowly): the swelling is drawn out along it, its lobe pushed out ahead
 			float turn = p[11] + time * 0.011F;
-			Vector3f dir = new Vector3f(e1).mul(Mth.cos(turn)).add(new Vector3f(e2).mul(Mth.sin(turn)));
+			Vector3f dir = new Vector3f(e1).mul(Mth.cos(turn)).add(new Vector3f(e2).mul(Mth.sin(turn))).normalize();
+			Vector3f across = new Vector3f(dir).cross(n).normalize();
+			lobes.add(lobe(c, dir, n, across, r * GLOB_LONG, rt, r * 0.85F, phase, wobble));
+			// its lobe, pushed out ahead under the skin and drawn back, the ridge between them thinning as it goes
+			float split = smooth(0.5F + 0.5F * Mth.sin(time * SPLIT_RATE * (0.8F + 0.4F * p[9]) + p[11] * 1.7F));
 			float apart = r * Mth.lerp(split, SPLIT_NEAR, SPLIT_FAR);
-			Vector3f lc = new Vector3f(c).add(new Vector3f(dir).mul(apart)).sub(new Vector3f(n).mul(rt * 0.25F));
-			lobes.add(lobe(lc, e1, n, e2, r * LOBE, rt * 0.8F, r * LOBE, phase + 2.0F, wobble));
+			Vector3f lc = new Vector3f(c).add(new Vector3f(dir).mul(apart)).sub(new Vector3f(n).mul(rt * 0.15F));
+			lobes.add(lobe(lc, dir, n, across, r * LOBE * 1.15F, rt * 0.8F, r * LOBE, phase + 2.0F, wobble));
 			float neck = NECK * (1.0F - split);
 			if (neck > 0.12F) {
 				Vector3f nc = new Vector3f(c).add(new Vector3f(dir).mul(apart * 0.5F));
-				lobes.add(lobe(nc, dir, n, new Vector3f(dir).cross(n).normalize(), apart * 0.55F, rt * neck * 1.4F, r * neck, phase + 4.0F, wobble * 0.5F));
+				lobes.add(lobe(nc, dir, n, across, apart * 0.55F, rt * neck * 1.2F, r * neck, phase + 4.0F, wobble * 0.5F));
 			}
 		}
 		state.setData(ROOTS, roots);
@@ -222,9 +238,12 @@ final class WebGooGlobs {
 			return;
 		}
 		float churn = 1.0F + FLAIL_CHURN * flail;
+		// in the suit's own skin (the big body's hide on the big body), in the strain's twin
+		Identifier texture = WebStrainLook.texture(bulk ? WebHulk.TEXTURE : WebSymbioteLayer.TEXTURE, state);
+		float[] patch = bulk ? HULK_PATCH : SUIT_PATCH;
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(texture), (pose, buffer) -> {
 			for (float[] lobe : lobes) {
-				sphere(buffer, pose, lobe, time * churn, light);
+				sphere(buffer, pose, lobe, patch, time * churn, light);
 			}
 		});
 		if (GOO.size() > 64) {
@@ -404,8 +423,8 @@ final class WebGooGlobs {
 		return new float[] {c.x, c.y, c.z, e1.x, e1.y, e1.z, n.x, n.y, n.z, e2.x, e2.y, e2.z, r1, rn, r2, phase, wobble};
 	}
 
-	/** One lobe: a squashed ball whose surface swells and sinks in slow waves (WebBlobRenderer's body, smaller). */
-	private static void sphere(VertexConsumer buffer, PoseStack.Pose pose, float[] l, float time, int light) {
+	/** One lobe: a squashed ball whose surface swells and sinks in slow waves (WebBlobRenderer's body, smaller), skinned with {@code patch}. */
+	private static void sphere(VertexConsumer buffer, PoseStack.Pose pose, float[] l, float[] patch, float time, int light) {
 		Vec3 c = new Vec3(l[0], l[1], l[2]);
 		Vec3 e1 = new Vec3(l[3], l[4], l[5]), n = new Vec3(l[6], l[7], l[8]), e2 = new Vec3(l[9], l[10], l[11]);
 		double r1 = l[12], rn = l[13], r2 = l[14];
@@ -426,7 +445,7 @@ final class WebGooGlobs {
 				nn[r][s] = normal.lengthSqr() < 1.0E-12 ? n : normal.normalize();
 			}
 		}
-		float u0 = 3.0F / 32.0F, u1 = 6.0F / 32.0F, v0 = 3.0F / 32.0F, v1 = 7.5F / 32.0F;
+		float u0 = patch[0], v0 = patch[1], u1 = patch[2], v1 = patch[3];
 		for (int r = 0; r < RINGS; r++) {
 			for (int s = 0; s < SEGMENTS; s++) {
 				WebLineRenderer.vertex(buffer, pose, p[r][s], u0, v0, nn[r][s], light);

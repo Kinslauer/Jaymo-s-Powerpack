@@ -77,6 +77,15 @@ public final class WebSymbiote {
 	 */
 	public static final int MASK_TOGGLE = 7;
 	public static final int MASK_TOGGLE_GAP = 10;
+	/**
+	 * (0.15.153) Not an ability either: the menu's Tendrils slot draws Living Armor's tendrils into the suit (the thin
+	 * armour or the big suit: {@link WebSymbioteState#TENDRILS_IN}) and brings them back out, on its own button (Andy:
+	 * "separate its activation from the living armor"). Living Armor's own press only puts the armour on or off, and
+	 * always starts with the tendrils out; takeovers and the near-death roar force them out. With Living Armor off it
+	 * does nothing but whisper. At most once every {@code TENDRILS_TOGGLE_GAP} ticks.
+	 */
+	public static final int TENDRILS_TOGGLE = 8;
+	public static final int TENDRILS_TOGGLE_GAP = 10;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -795,6 +804,39 @@ public final class WebSymbiote {
 		whisper(player, off ? "mask_off" : "mask_on");
 	}
 
+	/** (server) When each player last drew the tendrils in or let them out (game time). */
+	private static final java.util.Map<java.util.UUID, Long> LAST_TENDRILS = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/**
+	 * (0.15.153) The Tendrils slot: Living Armor's tendrils sink into the suit (the thin armour or the big suit, which
+	 * stays: you walk upright in it, no tendrils) or come back out of it. With Living Armor off there's nothing to draw
+	 * in: it whispers once. While it has the wheel (a takeover, the near-death roar) they're out whatever you pick.
+	 */
+	public static void toggleTendrils(ServerPlayer player) {
+		if (!isBonded(player) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		Long last = LAST_TENDRILS.get(player.getUUID());
+		if (last != null && now - last >= 0 && now - last < TENDRILS_TOGGLE_GAP) {
+			return;
+		}
+		LAST_TENDRILS.put(player.getUUID(), now);
+		if (!livingArmor(player)) {
+			whisper(player, "tendrils_no_armor");
+			return;
+		}
+		if (driving(player) || roaring(player)) {
+			// it isn't listening right now (tick forces them out anyway)
+			return;
+		}
+		if (armored(player)) {
+			drawIn(player);
+		} else {
+			letOut(player);
+		}
+	}
+
 	/** The tendrils are out on their own (not the armour's): until when, else -1. */
 	public static long tendrilsOut(Player player) {
 		Long until = player.getAttached(TENDRILS_OUT);
@@ -1122,7 +1164,8 @@ public final class WebSymbiote {
 
 	/**
 	 * Living Armor's tendrils are out (they grab, hold, strike and tear chunks; the plain suit only swings), over any
-	 * suit or none, or with the big body (unless you drew them in: {@link WebSymbioteState#TENDRILS_IN}).
+	 * suit or none, or with the big body, unless you drew them in ({@link WebSymbioteState#TENDRILS_IN}: the Tendrils
+	 * slot, {@link #TENDRILS_TOGGLE}).
 	 */
 	public static boolean armored(Player player) {
 		return livingArmor(player) && !isToggled(player, WebSymbioteState.TENDRILS_IN);
@@ -1258,7 +1301,8 @@ public final class WebSymbiote {
 		if (was != null && was.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.ARMOR) && state.has(WebSymbioteState.CRAWL)) {
 			state = state.withFlag(WebSymbioteState.CRAWL, false);
 		}
-		// (0.15.152) drawn in, the tendrils can't walk you up a wall either; and they come back out with the next armour
+		// (0.15.152) drawn in, the tendrils can't walk you up a wall either; and with the armour off there's nothing to
+		// draw them into (the next Living Armor starts with them out: toggle)
 		if (state.has(WebSymbioteState.TENDRILS_IN) && state.has(WebSymbioteState.CRAWL)) {
 			state = state.withFlag(WebSymbioteState.CRAWL, false);
 		}
@@ -3472,6 +3516,10 @@ public final class WebSymbiote {
 			toggleMask(player);
 			return;
 		}
+		if (ability == TENDRILS_TOGGLE) {
+			toggleTendrils(player);
+			return;
+		}
 		if (isBonded(player) && WebSymbioteBond.dormant(player) && !(ability == CONSUME && WebSymbioteStrains.asleep(player))) {
 			// still settling in (or the white one asleep): nothing it has answers yet
 			// (asleep, a corpse fed to it wakes it: Consume still answers)
@@ -3579,9 +3627,8 @@ public final class WebSymbiote {
 			return;
 		}
 		// a weak bond barely listens (it always lets you put a toggle away)
-		// (0.15.152) in the big body with its tendrils out, the first press only draws them in (Andy: the big body alone)
-		boolean drawIn = ability == ARMOR && bulked(player) && armored(player) && live.takeoverTicks <= 0;
-		boolean puttingAway = drawIn || ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
+		// (0.15.153) Living Armor only puts the armour on or off; its tendrils have their own slot (TENDRILS_TOGGLE)
+		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
 		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
 			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND)) {
 			nag(player, "ignores");
@@ -3591,7 +3638,7 @@ public final class WebSymbiote {
 		}
 		boolean done = switch (ability) {
 			case TENDRIL -> letGoOfWall(player) || WebTendrils.radialGrab(player) || tendril(player);
-			case ARMOR -> drawIn ? drawIn(player) : toggle(player, WebSymbioteState.ARMOR);
+			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);
 			// in the big body, the Spike Burst is a roar
@@ -3615,10 +3662,7 @@ public final class WebSymbiote {
 			cooldown += SHROUD_TICKS;
 		} else if (ability == ARMOR) {
 			// out: it can be put away again soon; away: its cooldown starts now
-			if (drawIn) {
-				cooldown = ARMOR_TOGGLE_GAP;
-				live.armorUsedAt = now;
-			} else if (state(player).has(WebSymbioteState.ARMOR)) {
+			if (state(player).has(WebSymbioteState.ARMOR)) {
 				cooldown = ARMOR_TOGGLE_GAP;
 				live.armorOnAt = now;
 				live.armorUsedAt = now;
@@ -3704,23 +3748,44 @@ public final class WebSymbiote {
 		}
 	}
 
-	/** (0.15.152) The tendrils sink back into the big body, which stays: you walk upright in it, no tendrils. */
-	private static boolean drawIn(ServerPlayer player) {
+	/**
+	 * (0.15.152) The tendrils sink back into the suit (the thin armour, or the big suit, which stays: you walk upright
+	 * in it, no tendrils). The crawl, a strike and a flail end with them, and they let go of any wall they held.
+	 */
+	private static void drawIn(ServerPlayer player) {
 		WebSymbioteState state = state(player);
 		set(player, state.withFlag(WebSymbioteState.TENDRILS_IN, true).withFlag(WebSymbioteState.CRAWL, false));
 		player.removeAttached(STRIKE);
 		player.removeAttached(FLAIL);
+		if (player.getAttached(WALL) != null) {
+			letGo(player, live(player));
+		}
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.8F, 0.5F);
 		level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.45, 0.8, 0.45, 0.0);
-		return true;
+		whisper(player, "tendrils_in");
+	}
+
+	/** (0.15.153) The tendrils burst back out of the suit (the Tendrils slot picked again). */
+	private static void letOut(ServerPlayer player) {
+		WebSymbioteState state = state(player);
+		set(player, state.withFlag(WebSymbioteState.TENDRILS_IN, false));
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.9F, 0.7F);
+		level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.2, player.getZ(), 18, 0.45, 0.8, 0.45, 0.0);
+		whisper(player, "tendrils_out");
 	}
 
 	private static boolean toggle(ServerPlayer player, int flag) {
 		WebSymbioteState state = state(player);
 		boolean on = !state.has(flag);
 		WebSymbioteState next = state.withFlag(flag, on);
+		if (flag == WebSymbioteState.ARMOR && on) {
+			// (0.15.153) Living Armor always starts with its tendrils out (the Tendrils slot draws them in)
+			next = next.withFlag(WebSymbioteState.TENDRILS_IN, false);
+		}
 		set(player, next);
 		ServerLevel level = player.level();
 		if (flag == WebSymbioteState.ARMOR) {

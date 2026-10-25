@@ -146,6 +146,21 @@ public final class WebTendrils {
 	static final double CLIMB_LATCH_REACH = 4.5;
 	/** How deep a Wall Crawl bite cracks the block it bites (0-9). */
 	static final int CLIMB_CRACK = 5;
+	/**
+	 * (0.16.2) Bounding up a wall on all fours (WebSymbioteClient.BOUND_GATHER), the hands and feet slam into it on every
+	 * bound: each cracks the block it hits to {@code SLAM_CRACK_STAGE} ({@code SLAM_CRACK_STAGE_BIG} in the big suit) for
+	 * {@code SLAM_CRACK_TICKS} ticks before the crack fades, in a spray of {@code SLAM_DUST} of that block's dust
+	 * ({@code SLAM_DUST_BIG}), with a thud at {@code SLAM_THUD} volume ({@code SLAM_THUD_BIG}). Never breaks a block.
+	 */
+	static final int SLAM_CRACK_STAGE = 3, SLAM_CRACK_STAGE_BIG = 5, SLAM_CRACK_TICKS = 14;
+	static final int SLAM_DUST = 6, SLAM_DUST_BIG = 12;
+	static final float SLAM_THUD = 0.8F, SLAM_THUD_BIG = 1.3F;
+	/**
+	 * Where the four land on the wall, from your middle, in your size: the hands {@code SLAM_HAND_SIDE} out to either side
+	 * and {@code SLAM_HAND_UP} of your height up (reaching overhead), the feet {@code SLAM_FOOT_SIDE} out and
+	 * {@code SLAM_FOOT_DOWN} of your height down (spread wide against the wall).
+	 */
+	static final double SLAM_HAND_SIDE = 0.55, SLAM_HAND_UP = 0.55, SLAM_FOOT_SIDE = 0.45, SLAM_FOOT_DOWN = 0.4;
 
 	/**
 	 * Where tendrils have latched onto the world (holding no thing): {@code mask} bit 1 the right (R) side's, at
@@ -286,6 +301,7 @@ public final class WebTendrils {
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbLatch.TYPE, (payload, ctx) -> climbLatch(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbSlam.TYPE, (payload, ctx) -> climbSlam(ctx.player(), payload));
 		WebTendrilCombos.register();
 		ServerTickEvents.END_SERVER_TICK.register(WebTendrils::serverTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -294,6 +310,7 @@ public final class WebTendrils {
 			}
 			HOLDS.clear();
 			THROWN.clear();
+			SLAMS.clear();
 			TUGS.clear();
 			CROSSES.clear();
 		});
@@ -603,6 +620,96 @@ public final class WebTendrils {
 		}
 	}
 
+	/** A bound's crack in the wall: where, under which breaker id, in which world, and when it fades. */
+	private record SlamCrack(ResourceKey<Level> dimension, net.minecraft.core.BlockPos pos, int id, long until) {
+	}
+
+	private static final List<SlamCrack> SLAMS = new ArrayList<>();
+
+	/**
+	 * Wall Crawl's client reports a bound's landing: all four slam into the wall around {@code at}. Each cracks the block
+	 * it hits (a shallow crack, {@code SLAM_CRACK_STAGE}, gone again after {@code SLAM_CRACK_TICKS}), knocks that block's
+	 * dust out of it, and the four land as one heavy thud. The blocks themselves are never harmed.
+	 */
+	private static void climbSlam(ServerPlayer player, WebNet.ClimbSlam payload) {
+		if (!WebSymbiote.crawlTendrils(player) || !player.isAlive() || WebSymbiote.driving(player)
+			|| payload.at().distanceTo(player.getEyePosition()) > CLIMB_LATCH_REACH || payload.normal().lengthSqr() < 1.0E-4) {
+			return;
+		}
+		ServerLevel level = player.level();
+		boolean big = WebSymbiote.bulked(player);
+		Vec3 normal = payload.normal().normalize();
+		Vec3 up = new Vec3(0.0, 1.0, 0.0);
+		Vec3 right = normal.cross(up);
+		right = right.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
+		double scale = player.getScale();
+		double height = player.getBbHeight();
+		// the hands overhead, the feet below, all spread wide
+		Vec3[] limbs = {
+			payload.at().add(right.scale(SLAM_HAND_SIDE * scale)).add(up.scale(height * SLAM_HAND_UP)),
+			payload.at().subtract(right.scale(SLAM_HAND_SIDE * scale)).add(up.scale(height * SLAM_HAND_UP)),
+			payload.at().add(right.scale(SLAM_FOOT_SIDE * scale)).subtract(up.scale(height * SLAM_FOOT_DOWN)),
+			payload.at().subtract(right.scale(SLAM_FOOT_SIDE * scale)).subtract(up.scale(height * SLAM_FOOT_DOWN))};
+		long now = level.getGameTime();
+		int stage = big ? SLAM_CRACK_STAGE_BIG : SLAM_CRACK_STAGE;
+		int dust = big ? SLAM_DUST_BIG : SLAM_DUST;
+		net.minecraft.core.BlockPos thudAt = null;
+		for (int i = 0; i < limbs.length; i++) {
+			// into the wall from a little out in front of where the limb lands
+			net.minecraft.world.phys.BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(limbs[i].add(normal.scale(0.6)),
+				limbs[i].subtract(normal.scale(1.0)), net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+			if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) {
+				continue;
+			}
+			net.minecraft.core.BlockPos pos = hit.getBlockPos();
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+			if (state.isAir() || state.getDestroySpeed(level, pos) < 0.0F) {
+				continue;
+			}
+			Vec3 point = hit.getLocation();
+			int id = slamCrackId(player, i);
+			// a fresh crack under this limb's id (the old one, if it hadn't faded yet, is simply started over)
+			SLAMS.removeIf(crack -> crack.id() == id && crack.dimension() == level.dimension());
+			level.destroyBlockProgress(id, pos, stage);
+			SLAMS.add(new SlamCrack(level.dimension(), pos, id, now + SLAM_CRACK_TICKS));
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, state),
+				point.x, point.y, point.z, dust, 0.12, 0.12, 0.12, 0.1);
+			if (thudAt == null) {
+				thudAt = pos;
+			}
+		}
+		if (thudAt == null) {
+			return;
+		}
+		float volume = big ? SLAM_THUD_BIG : SLAM_THUD;
+		// the four land as one: a heavy thud, and the wall's own note under it, low
+		level.playSound(null, payload.at().x, payload.at().y, payload.at().z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, volume, big ? 0.6F : 0.8F);
+		level.playSound(null, payload.at().x, payload.at().y, payload.at().z, level.getBlockState(thudAt).getSoundType().getHitSound(), SoundSource.BLOCKS,
+			volume, big ? 0.45F : 0.55F);
+	}
+
+	/** Breaker ids for a player's four slam cracks (WebSymbiote's wall tether uses {@code id * 37 + 1000 + i} for its own). */
+	private static int slamCrackId(ServerPlayer player, int limb) {
+		return player.getId() * 37 + 1010 + limb;
+	}
+
+	/** The bounds' cracks fade once their time is up. */
+	private static void tickSlams(MinecraftServer server) {
+		if (SLAMS.isEmpty()) {
+			return;
+		}
+		for (Iterator<SlamCrack> it = SLAMS.iterator(); it.hasNext(); ) {
+			SlamCrack crack = it.next();
+			ServerLevel level = server.getLevel(crack.dimension());
+			if (level == null) {
+				it.remove();
+			} else if (level.getGameTime() >= crack.until()) {
+				level.destroyBlockProgress(crack.id(), crack.pos(), -1);
+				it.remove();
+			}
+		}
+	}
+
 	/** Instinct: a tendril lashes out at an attacker, snatches it and flings it away a moment later. */
 	static void snatch(ServerPlayer player, Entity target) {
 		int hand = player.getAttachedOrElse(GRIPS, Grips.NONE).left() < 0 ? WebNet.OFF : WebNet.MAIN;
@@ -859,6 +966,7 @@ public final class WebTendrils {
 
 	/** Thrown bodies: the first hard knock (a wall, the ground) hurts by how fast they were going. */
 	private static void serverTick(MinecraftServer server) {
+		tickSlams(server);
 		if (THROWN.isEmpty()) {
 			return;
 		}

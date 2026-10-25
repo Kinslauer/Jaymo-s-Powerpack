@@ -212,9 +212,9 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		poseStack.pushPose();
 		// rooted to the torso, so they lean with a crouch (or the hunch)
 		WebFeral.applyModel(this.getParentModel(), state);
+		WebClimbPose.applyModel(this.getParentModel(), state);
 		// the goo they grow out of (it puts their roots on the state for the model)
-		WebGooGlobs.submit(poseStack, collector, lightCoords, state, this.getParentModel(), tendrils, ROOTS, onJob(state, tendrils),
-			WebStrainLook.texture(TEXTURE, state));
+		WebGooGlobs.submit(poseStack, collector, lightCoords, state, this.getParentModel(), tendrils, ROOTS, onJob(state, tendrils));
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
