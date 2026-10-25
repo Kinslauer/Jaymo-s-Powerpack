@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jaymoskingdoms:whale_oil",
+    "minecraft:string",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:firebomb"
+  }
+}

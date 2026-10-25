@@ -5219,5 +5219,10 @@
 	"item.jaymoskingdoms.great_whale_spawn_egg": "Great Whale Spawn Egg",
 	"item.jaymoskingdoms.whale_oil": "Whale Oil",
 	"block.jaymoskingdoms.tryworks": "Tryworks",
+	"block.jaymoskingdoms.oil_lamp": "Oil Lamp",
+	"block.jaymoskingdoms.oil_pot": "Boiling Oil Pot",
+	"item.jaymoskingdoms.firebomb": "Firebomb",
+	"item.jaymoskingdoms.powder_firebomb": "Powder Firebomb",
+	"entity.jaymoskingdoms.firebomb": "Firebomb",
 	"message.jaymoskingdoms.whale_cut_in": "Too big to cut from the water: lash it alongside a big ship to cut in the rest"
 }

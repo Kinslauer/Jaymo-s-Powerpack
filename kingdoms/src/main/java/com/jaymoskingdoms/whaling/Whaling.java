@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 
 /**
  * (0.7.206) Whaling, stage 1: the {@link GreatWhale great whales} of the deep oceans (our own beast, far bigger than
@@ -54,6 +55,10 @@ public final class Whaling {
 	/** Stage 2: the tryworks, and the oil it renders. */
 	public static Block TRYWORKS;
 	public static Item TRYWORKS_ITEM, WHALE_OIL;
+	/** Whale oil's uses: lamps, firebombs and boiling oil pots for the walls. */
+	public static Block OIL_LAMP, OIL_POT;
+	public static Item OIL_LAMP_ITEM, OIL_POT_ITEM, FIREBOMB_ITEM, POWDER_FIREBOMB_ITEM;
+	public static EntityType<Firebomb> FIREBOMB;
 
 	private Whaling() {
 	}
@@ -89,6 +94,28 @@ public final class Whaling {
 		WHALE_OIL = item("whale_oil", Item::new, new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE));
 		WhaleTrade.register();
 
+		OIL_LAMP = block("oil_lamp", OilLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).forceSolidOn().strength(3.5F)
+			.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.DESTROY)
+			.lightLevel(state -> state.getValue(OilLampBlock.LIT) ? OilLampBlock.LIGHT : 0));
+		OIL_LAMP_ITEM = blockItem("oil_lamp", OIL_LAMP);
+		OIL_POT = block("oil_pot", OilPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0F, 6.0F)
+			.requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion()
+			.lightLevel(state -> state.getValue(OilPotBlock.LIT) ? 10 : 0));
+		OIL_POT_ITEM = blockItem("oil_pot", OIL_POT);
+		FIREBOMB = type("firebomb", EntityType.Builder.<Firebomb>of(Firebomb::new, MobCategory.MISC)
+			.noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+		FIREBOMB_ITEM = item("firebomb", FirebombItem::new, new Item.Properties().stacksTo(16));
+		POWDER_FIREBOMB_ITEM = item("powder_firebomb", FirebombItem::new, new Item.Properties().stacksTo(16));
+		Lamplighters.register();
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			output.insertAfter(Items.SOUL_LANTERN, OIL_LAMP_ITEM);
+			output.insertAfter(Items.SMOKER, OIL_POT_ITEM);
+		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
+			output.insertAfter(Items.SNOWBALL, FIREBOMB_ITEM);
+			output.insertAfter(FIREBOMB_ITEM, POWDER_FIREBOMB_ITEM);
+		});
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.insertAfter(Items.SMOKER, TRYWORKS_ITEM));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.TRIDENT, HARPOON_ITEM));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
@@ -119,6 +146,16 @@ public final class Whaling {
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id(name));
 		return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, builder.build(key));
+	}
+
+	private static Block block(String name, Function<BlockBehaviour.Properties, Block> make, BlockBehaviour.Properties properties) {
+		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id(name));
+		return Registry.register(BuiltInRegistries.BLOCK, key, make.apply(properties.setId(key)));
+	}
+
+	private static Item blockItem(String name, Block block) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
+		return Registry.register(BuiltInRegistries.ITEM, key, new BlockItem(block, new Item.Properties().setId(key).useBlockDescriptionPrefix()));
 	}
 
 	private static Item item(String name, Function<Item.Properties, Item> make, Item.Properties properties) {

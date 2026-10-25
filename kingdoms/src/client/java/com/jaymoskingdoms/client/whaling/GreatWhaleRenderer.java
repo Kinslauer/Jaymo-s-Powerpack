@@ -59,5 +59,6 @@ public final class GreatWhaleRenderer extends MobRenderer<GreatWhale, GreatWhale
 		EntityRenderers.register(Whaling.GREAT_WHALE, GreatWhaleRenderer::new);
 		EntityRenderers.register(Whaling.WHALE_CARCASS, WhaleCarcassRenderer::new);
 		EntityRenderers.register(Whaling.HARPOON, HarpoonRenderer::new);
+		EntityRenderers.register(Whaling.FIREBOMB, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.8F, false));
 	}
 }

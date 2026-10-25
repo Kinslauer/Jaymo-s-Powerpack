@@ -3684,6 +3684,21 @@ hired workers. What was missing was a villager standing up for themselves when s
   At reputation -100 or under (or an outlaw) they refuse your coin.
 - A brawler counts as `Theft.rioting`, so firefighting, tending and deeds leave them be. Hitting one of an arsonist's
   crowd still scatters the crowd rather than starting a brawl. No crime against a realm at war with yours (they run).
+- Whale oil's uses (Andy: "lamps or even explosives?", then "Go"):
+  - `whaling/OilLampBlock` (iron nugget, glass pane, copper ingot): stands or hangs like a lantern, light 15. Comes
+    empty; a bottle of whale oil fills it (4 measures, bottle back), a measure burns 5 minutes. Empty hand lights/snuffs.
+  - `whaling/Lamplighters`: in a settlement, the nearest grown villager lights its lamps after dark (filling dry ones
+    from the stores, a bottle each) and snuffs them at daybreak. While the stores hold whale oil, a burnt floor torch
+    they come to relight becomes a lit oil lamp instead (`Torches` hook), so oil-rich towns turn lamp-lit.
+  - `whaling/Firebomb` (whale oil, string, wool) and the powder firebomb (+2 gunpowder): thrown, they shatter into burning
+    oil (fire on 70% of a 2-block splash, 3 for powder; everyone in it alight 6 s and scalded 3), flames on water burn
+    boat crews; the powder one also bursts (power 2, blocks left whole). A player throwing one on a faction's land
+    commits arson (`Theft.firebombed`, new).
+  - `whaling/OilPotBlock`, the boiling oil pot (cauldron over iron bars): set on a wall's edge facing out, fill with
+    oil (4 measures), light it, it boils in about 10 s. Empty hand tips a measure down a 3-wide column (to 24 below):
+    boiling, 8 damage and alight 5 s; cold, a slick (Slowness III 5 s). On a settlement's land its guards (or a grown
+    villager) by the pot light it and tip it on foes below: monsters, folk and sworn players of realms at war, players
+    the town wants.
 - Tuning: the constants at the top of `Retaliation`.
 
 ## 0.7.122: the hidden blade moves, and shows
@@ -4526,7 +4541,7 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
 
-## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade (pack 0.16.25)
+## 0.7.206: whaling, stages 1-2: great whales, roped harpoons, carcasses, cutting in, tryworks, whale trade, oil lamps, firebombs, boiling oil (pack 0.16.25)
 Andy (2026-10-25): a whaling system: larger whales in the oceans, crews throwing roped javelins that tie their boat to the
 animal, more thrown till it succumbs, crews at it for their kingdoms over days, big ships to haul and butcher. Staged:
 1 whales and harpoons (this), 2 hauling alongside a big ship, cutting in and tryworks (whale oil), 3 the kingdoms' whaling
@@ -4562,4 +4577,4 @@ crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art
     clerics oil 5 and ambergris 48, librarians and cartographers oil, leatherworkers blubber, smiths oil and bone,
     fletchers and toolsmiths bone, masons, farmers), and anyone buys whale steak, oil and ambergris (40). Sales pay the
     realm's toll like any trade.
-- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade` and `Whaling`.
+- Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock` and `Whaling`.

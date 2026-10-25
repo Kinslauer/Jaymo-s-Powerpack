@@ -8,6 +8,9 @@
   whale_oil; and their items/ and models/item/ JSON.
 - (stage 2) textures/block/tryworks_front.png and tryworks_front_on.png: the tryworks' brick firebox, cold and burning;
   and its blockstate, block models (bricks below, an iron try-pot on top, vanilla's cauldron textures) and item JSON.
+- (whale oil's uses) textures/block/oil_lamp.png and oil_lamp_lit.png (brass, glass chimney, chain) with the oil lamp's
+  standing and hanging models; textures/block/oil_pot_brazier.png and _lit.png with the boiling oil pot's model; item
+  sprites oil_lamp, firebomb, powder_firebomb.
 
 Seeded, so every run draws the same pixels. Run from kingdoms/: python3 -I tools/gen_whaling.py"""
 import json
@@ -270,7 +273,187 @@ ITEMS = {
         "................",
     ], {"C": (120, 86, 52), "W": (160, 120, 76), "G": (200, 214, 222), "O": (196, 140, 40), "Y": (236, 196, 96),
         "A": (160, 104, 28)}),
+    "firebomb": ([
+        "......WW........",
+        ".....WWWW.......",
+        "......WC........",
+        "......CC........",
+        "......GG........",
+        ".....G..G.......",
+        "....G....G......",
+        "...G......G.....",
+        "...GOOOOOOG.....",
+        "...GOYOOOOG.....",
+        "...GOOOOOOG.....",
+        "...GOOOOOAG.....",
+        "...GOOOOOOG.....",
+        "....GAOOOG......",
+        ".....GGGG.......",
+        "................",
+    ], {"W": (232, 226, 210), "C": (120, 86, 52), "G": (190, 204, 212), "O": (196, 140, 40), "Y": (236, 196, 96),
+        "A": (160, 104, 28)}),
+    "powder_firebomb": ([
+        "........F.......",
+        ".......F........",
+        "......WW........",
+        ".....WWWW.......",
+        "......CC........",
+        "......GG........",
+        "....GG..GG......",
+        "...GOOOOOOG.....",
+        "...GOKOOKOG.....",
+        "...GOOOKOOG.....",
+        "...GKOOOOOG.....",
+        "...GOOKOOKG.....",
+        "...GOOOOOOG.....",
+        "....GKOOOG......",
+        ".....GGGG.......",
+        "................",
+    ], {"F": (90, 80, 70), "W": (232, 226, 210), "C": (120, 86, 52), "G": (150, 160, 166), "O": (176, 122, 36),
+        "K": (40, 38, 36)}),
+    "oil_lamp": ([
+        "................",
+        ".......HH.......",
+        "......H..H......",
+        "......H..H......",
+        ".....BBBBBB.....",
+        "......GGGG......",
+        "......GPPG......",
+        "......GPPG......",
+        "......GPWG......",
+        "......GPWG......",
+        "......GGGG......",
+        ".....BBBBBB.....",
+        "....BbbbbbbB....",
+        "....BBBBBBBB....",
+        "................",
+        "................",
+    ], {"H": (70, 60, 50), "B": (176, 132, 56), "b": (210, 168, 80), "G": (120, 112, 100), "P": (196, 214, 222),
+        "W": (90, 80, 70)}),
 }
+
+
+BRASS, BRASS_HI, IRON, IRON_DARK = (176, 132, 56), (214, 172, 86), (110, 112, 118), (52, 52, 58)
+
+
+def oil_lamp_texture(lit):
+    """16x16: brass (x0-8, y0-8), the glass chimney's side (x8-12, y0-6), chain (x12-15, y0-8), handle (x0-1, y8-10)."""
+    rnd = random.Random(21)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(8):
+        for x in range(8):
+            c = BRASS_HI if (x + y) % 5 == 0 else shade(BRASS, rnd.uniform(0.85, 1.05))
+            px[x, y] = clamp(c) + (255,)
+    for y in range(6):
+        for x in range(8, 12):
+            if x in (8, 11):
+                c = IRON_DARK
+            elif lit:
+                c = (255, 236, 150) if y < 3 else (255, 180, 60) if y < 5 else (120, 80, 50)
+            else:
+                c = (190, 208, 216) if y < 5 else (90, 80, 70)
+            px[x, y] = clamp(c) + (255,)
+    for y in range(8):
+        for x in range(12, 15):
+            link = (y % 4 in (0, 3) and x == 13) or (y % 4 in (1, 2) and x in (12, 14))
+            if link:
+                px[x, y] = IRON_DARK + (255,)
+    for y in range(8, 10):
+        px[0, y] = clamp(shade(BRASS, 0.7)) + (255,)
+    return img
+
+
+def oil_pot_brazier(lit):
+    """16x16 iron brazier side: dark iron with a row of slots, glowing when lit."""
+    rnd = random.Random(31)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            c = shade(IRON, rnd.uniform(0.8, 1.05))
+            if 6 <= y <= 10 and x % 3 == 1:
+                c = (255, 150, 40) if lit and y > 7 else (255, 210, 90) if lit else IRON_DARK
+            px[x, y] = clamp(c) + (255,)
+    return img
+
+
+def box(frm, to, faces_map):
+    return {"from": frm, "to": to, "faces": faces_map}
+
+
+def lamp_elements(lift):
+    def up(v):
+        return [v[0], v[1] + lift, v[2]]
+    brass = lambda uv: {"uv": uv, "texture": "#lamp"}
+    side4 = {"uv": [8, 0, 12, 6], "texture": "#lamp"}
+    els = [
+        box(up([5, 0, 5]), up([11, 2, 11]), {f: brass([0, 0, 6, 2] if f not in ("up", "down") else [0, 0, 6, 6])
+                                            for f in ("north", "south", "east", "west", "up", "down")}),
+        box(up([6, 2, 6]), up([10, 8, 10]), {f: side4 for f in ("north", "south", "east", "west")}),
+        box(up([5.5, 8, 5.5]), up([10.5, 9, 10.5]), {f: brass([0, 2, 5, 3] if f not in ("up", "down") else [0, 0, 5, 5])
+                                                    for f in ("north", "south", "east", "west", "up", "down")}),
+        box(up([7.5, 9, 8]), up([8.5, 11, 8]), {"north": {"uv": [0, 8, 1, 10], "texture": "#lamp"},
+                                                "south": {"uv": [0, 8, 1, 10], "texture": "#lamp"}}),
+    ]
+    return els
+
+
+def oil_lamp_json():
+    for lit in (False, True):
+        tex = {"particle": "jaymoskingdoms:block/oil_lamp", "lamp": "jaymoskingdoms:block/oil_lamp" + ("_lit" if lit else "")}
+        suffix = "_lit" if lit else ""
+        write_json(os.path.join(ASSETS, "models", "block", "oil_lamp" + suffix + ".json"),
+                   {"parent": "minecraft:block/block", "ambientocclusion": False, "textures": tex, "elements": lamp_elements(0)})
+        hanging = lamp_elements(1) + [
+            box([8, 12, 6.5], [8, 16, 9.5], {"east": {"uv": [12, 0, 15, 4], "texture": "#lamp"},
+                                              "west": {"uv": [12, 0, 15, 4], "texture": "#lamp"}}),
+            box([6.5, 12, 8], [9.5, 16, 8], {"north": {"uv": [12, 4, 15, 8], "texture": "#lamp"},
+                                              "south": {"uv": [12, 4, 15, 8], "texture": "#lamp"}}),
+        ]
+        write_json(os.path.join(ASSETS, "models", "block", "oil_lamp_hanging" + suffix + ".json"),
+                   {"parent": "minecraft:block/block", "ambientocclusion": False, "textures": tex, "elements": hanging})
+    variants = {}
+    for hanging in (False, True):
+        for lit in (False, True):
+            variants["hanging=%s,lit=%s" % (str(hanging).lower(), str(lit).lower())] = {
+                "model": "jaymoskingdoms:block/oil_lamp" + ("_hanging" if hanging else "") + ("_lit" if lit else "")}
+    write_json(os.path.join(ASSETS, "blockstates", "oil_lamp.json"), {"variants": variants})
+
+
+def oil_pot_json():
+    all6 = ("north", "south", "east", "west", "up", "down")
+    for lit in (False, True):
+        suffix = "_lit" if lit else ""
+        write_json(os.path.join(ASSETS, "models", "block", "oil_pot" + suffix + ".json"), {
+            "parent": "minecraft:block/block",
+            "textures": {
+                "particle": "minecraft:block/cauldron_side",
+                "brazier": "jaymoskingdoms:block/oil_pot_brazier" + suffix,
+                "pot": "minecraft:block/cauldron_side",
+                "inside": "minecraft:block/cauldron_inner",
+                "iron": "minecraft:block/iron_block",
+            },
+            "elements": [
+                box([3, 0, 3], [13, 3, 13], {f: {"uv": [3, 5, 13, 8] if f not in ("up", "down") else [3, 3, 13, 13], "texture": "#brazier",
+                                                  **({"cullface": "down"} if f == "down" else {})} for f in all6}),
+                box([2, 3, 2], [14, 12, 14], {**{f: {"uv": [2, 4, 14, 13], "texture": "#pot"} for f in ("north", "south", "east", "west")},
+                                               "up": {"uv": [2, 2, 14, 14], "texture": "#inside"},
+                                               "down": {"uv": [2, 2, 14, 14], "texture": "#pot"}}),
+                box([6, 9, 0], [10, 11, 2], {f: {"uv": [6, 6, 10, 8] if f not in ("east", "west") else [0, 6, 2, 8], "texture": "#iron"}
+                                             for f in all6}),
+            ],
+        })
+    variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for lit in (False, True):
+            v = {"model": "jaymoskingdoms:block/oil_pot" + ("_lit" if lit else "")}
+            if y:
+                v["y"] = y
+            variants["facing=%s,lit=%s" % (facing, str(lit).lower())] = v
+    write_json(os.path.join(ASSETS, "blockstates", "oil_pot.json"), {"variants": variants})
+    write_json(os.path.join(ASSETS, "items", "oil_pot.json"),
+               {"model": {"type": "minecraft:model", "model": "jaymoskingdoms:block/oil_pot"}})
 
 
 def tryworks_front(lit):
@@ -352,6 +535,12 @@ def main():
     tryworks_front(False).save(os.path.join(block, "tryworks_front.png"))
     tryworks_front(True).save(os.path.join(block, "tryworks_front_on.png"))
     tryworks_json()
+    oil_lamp_texture(False).save(os.path.join(block, "oil_lamp.png"))
+    oil_lamp_texture(True).save(os.path.join(block, "oil_lamp_lit.png"))
+    oil_pot_brazier(False).save(os.path.join(block, "oil_pot_brazier.png"))
+    oil_pot_brazier(True).save(os.path.join(block, "oil_pot_brazier_lit.png"))
+    oil_lamp_json()
+    oil_pot_json()
     items = os.path.join(ASSETS, "textures", "item")
     for name, (pattern, palette) in ITEMS.items():
         assert len(pattern) == 16 and all(len(r) == 16 for r in pattern), name
