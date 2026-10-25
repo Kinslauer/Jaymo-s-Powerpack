@@ -28,6 +28,18 @@ public final class Uncraftable {
 	/** (0.15.36) Andy: "All tools need crafting routes through jaymos": other mods' tools forged from heads instead. */
 	static final Set<String> FORGED_TOOLS = Set.of("pantryforblockheads:knife");
 
+	/** (0.16.18) Andy: "the wooden weapons should not be craftable". Balkon's wooden ones (Armory's and vanilla's are off in data). */
+	static final Set<String> WOODEN = wooden();
+
+	private static Set<String> wooden() {
+		Set<String> ids = new java.util.HashSet<>();
+		for (String weapon : List.of("knife", "spear", "halberd", "battleaxe", "warhammer", "katana", "flail", "boomerang", "musketbayonet")) {
+			ids.add("weaponmod:" + weapon + ".wood");
+			ids.add("weaponmod:" + weapon + ".wood.a");
+		}
+		return Set.copyOf(ids);
+	}
+
 	private static Set<String> forged() {
 		Set<String> ids = new java.util.HashSet<>();
 		for (String weapon : List.of("knife", "spear", "halberd", "battleaxe", "warhammer", "katana", "flail", "boomerang")) {
@@ -65,6 +77,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

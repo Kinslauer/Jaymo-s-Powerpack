@@ -844,8 +844,8 @@ OFF_ARMOUR = ("golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
 # dropped by tinkering/Uncraftable). (0.11.77) Andy: all weapons are forged, so stone and metal spears are put together
-# at the Tool Station from a Spear Tip (tinkering/WeaponParts)
-OFF_WEAPONS = ("diamond_spear", "stone_spear", "copper_spear", "iron_spear", "golden_spear")
+# at the Tool Station from a Spear Tip (tinkering/WeaponParts). (0.16.18) Andy: no craftable wooden weapons either
+OFF_WEAPONS = ("wooden_spear", "diamond_spear", "stone_spear", "copper_spear", "iron_spear", "golden_spear")
 # (0.15.36) Andy: "All tools need crafting routes through jaymos": these are forged at the Tool Station from cast heads
 # too (tinkering/WeaponParts)
 OFF_FORGED_TOOLS = ("fishing_rod", "brush")
