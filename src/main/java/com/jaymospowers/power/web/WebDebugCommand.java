@@ -38,7 +38,7 @@ final class WebDebugCommand {
 							})))
 						// one of the symbiote's radial abilities, as if picked from the wheel (by its number, see WebSymbiote)
 						.then(Commands.literal("use")
-							.then(Commands.argument("ability", IntegerArgumentType.integer(0, WebSymbiote.MASK_TOGGLE)).executes(c -> {
+							.then(Commands.argument("ability", IntegerArgumentType.integer(0, WebSymbiote.TENDRILS_TOGGLE)).executes(c -> {
 								WebSymbiote.use(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "ability"));
 								return 1;
 							})))

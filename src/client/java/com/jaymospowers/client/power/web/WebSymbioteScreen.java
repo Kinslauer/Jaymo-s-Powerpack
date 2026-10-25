@@ -26,7 +26,8 @@ import net.minecraft.world.item.Items;
  * the game. Six segments clockwise from the top, each with its icon and cooldown; the middle shows the pick's name and
  * how fed the symbiote is. (0.11.0) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
  * its bar, and a small panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim)
- * where a tooltip would be. (0.13.23) A seventh slot, the Mask, takes the suit's head off and puts it back.
+ * where a tooltip would be. (0.13.23) A seventh slot, the Mask, takes the suit's head off and puts it back. (0.15.153)
+ * An eighth, Tendrils, draws Living Armor's tendrils into the suit (the thin armour or the big suit) and lets them out.
  */
 final class WebSymbioteScreen extends Screen {
 	/** Ring radius, segment tile size, and the dead zone in the middle (no pick). */
@@ -48,11 +49,13 @@ final class WebSymbioteScreen extends Screen {
 	private static final String[] NAMES = {"tendril", "armor", "crawl", "consume", "spikes", "shroud"};
 	/**
 	 * (0.13.23) The ring's slots: the six abilities, then the Mask (the suit's head off or on, {@link WebSymbiote#MASK_TOGGLE}),
+	 * then (0.15.153) the Tendrils (Living Armor's tendrils in or out, {@link WebSymbiote#TENDRILS_TOGGLE}),
 	 * {@code SLOT_DEGREES} apart clockwise from the top.
 	 */
-	private static final int SLOTS = WebSymbiote.ABILITIES + 1, MASK_SLOT = WebSymbiote.ABILITIES;
+	private static final int SLOTS = WebSymbiote.ABILITIES + 2, MASK_SLOT = WebSymbiote.ABILITIES, TENDRILS_SLOT = WebSymbiote.ABILITIES + 1;
 	private static final double SLOT_DEGREES = 360.0 / SLOTS;
 	private static final Item MASK_ICON = Items.PLAYER_HEAD;
+	private static final Item TENDRILS_ICON = Items.WEEPING_VINES;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -130,7 +133,7 @@ final class WebSymbioteScreen extends Screen {
 		} else {
 			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
 			int slot = Math.floorMod((int)Math.round(angle / SLOT_DEGREES), SLOTS);
-			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot;
+			selected = slot == MASK_SLOT ? WebSymbiote.MASK_TOGGLE : slot == TENDRILS_SLOT ? WebSymbiote.TENDRILS_TOGGLE : slot;
 		}
 		if (selected != before && selected >= 0) {
 			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
@@ -222,11 +225,31 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 
+		{
+			// (0.15.153) the Tendrils: Living Armor's tendrils into the suit or back out; lit while they're out
+			double t = Math.toRadians(TENDRILS_SLOT * SLOT_DEGREES - 90.0);
+			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
+			boolean picked = selected == WebSymbiote.TENDRILS_TOGGLE;
+			boolean usable = WebSymbiote.livingArmor(player);
+			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
+			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : UiStyle.ROW);
+			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : usable ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(TENDRILS_ICON), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+			if (!usable) {
+				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
+			}
+			if (WebSymbiote.armored(player)) {
+				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
+			}
+		}
+
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
 		if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
-			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected >= NAMES.length ? "suit"
+			String key = selected == WebSymbiote.MASK_TOGGLE ? "mask" : selected == WebSymbiote.TENDRILS_TOGGLE ? "tendrils"
+				: selected >= NAMES.length ? "suit"
 				: selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
 			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
 			UiStyle.lineCentred(graphics, font, name, cx, cy - 10, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
@@ -283,6 +306,12 @@ final class WebSymbioteScreen extends Screen {
 				return Component.translatable("gui.jaymospowers.web_symbiote.mask_no_suit");
 			}
 			return Component.translatable(WebSymbiote.unmasked(player) ? "gui.jaymospowers.web_symbiote.mask_off" : "gui.jaymospowers.web_symbiote.mask_on");
+		}
+		if (selected == WebSymbiote.TENDRILS_TOGGLE) {
+			if (!WebSymbiote.livingArmor(player)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.tendrils_no_armor");
+			}
+			return Component.translatable(WebSymbiote.armored(player) ? "gui.jaymospowers.web_symbiote.tendrils_out" : "gui.jaymospowers.web_symbiote.tendrils_in");
 		}
 		if (selected == WebSymbiote.SUIT_TOGGLE) {
 			if (state.has(WebSymbioteState.SUIT)) {

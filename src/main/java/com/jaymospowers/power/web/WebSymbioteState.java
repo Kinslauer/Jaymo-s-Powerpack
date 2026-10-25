@@ -25,9 +25,10 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	/** The big body: the symbiote swollen over you (near death, or when it takes over). Not a toggle. */
 	public static final int BULK = 8;
 	/**
-	 * (0.15.152) Living Armor's tendrils drawn in (Andy: "they should be deactivated upon the first press of living
-	 * armor. Including when in the large suit"): the big body worn alone, upright, no tendrils. Cleared when the armour
-	 * comes off, and whenever it takes the wheel (a takeover, the near-death roar).
+	 * (0.15.152) Living Armor's tendrils drawn in: the thin armour or the big suit worn alone, upright, no tendrils.
+	 * (0.15.153) On its own button (the menu's Tendrils slot, {@code WebSymbiote.TENDRILS_TOGGLE}; Andy: "separate its
+	 * activation from the living armor"). Cleared when the armour comes off or goes on, and whenever it takes the wheel
+	 * (a takeover, the near-death roar).
 	 */
 	public static final int TENDRILS_IN = 16;
 
