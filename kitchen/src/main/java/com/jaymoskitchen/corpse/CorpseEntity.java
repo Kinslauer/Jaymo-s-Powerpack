@@ -479,6 +479,10 @@ public class CorpseEntity extends Entity {
 			made.setSpeed(velocity.x, velocity.y, velocity.z);
 		}
 		this.ragdoll = new CorpseRagdoll(this, made);
+		if (rest) {
+			// (0.5.24) set down on a butcher table: it stays on it however it flops
+			ragdoll.pinOnTable(this);
+		}
 	}
 
 	/** Free on the server: the body is stepped (made first if there isn't one: loaded, or let go of some other way). */
@@ -1501,6 +1505,10 @@ public class CorpseEntity extends Entity {
 	}
 
 	private boolean onButcherBlock() {
+		// (0.5.24) pinned to a table it's on one, even with its legs hanging over the edge
+		if (ragdoll != null && ragdoll.body.pinned()) {
+			return true;
+		}
 		BlockPos below = BlockPos.containing(getX(), getY() - 0.2, getZ());
 		return Corpses.isButcherBlock(level().getBlockState(below));
 	}
@@ -1684,6 +1692,55 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		return best;
+	}
+
+	/** (0.5.24) A butcher table is at most this many blocks across, each way (a long counter pins a body to part of it). */
+	private static final int TABLE_MAX = 3;
+
+	/**
+	 * (0.5.24) The top of the butcher table a body's torso lies on, as min x, min z, max x, max z (the butcher blocks
+	 * around the one under it, up to {@link #TABLE_MAX} each way), or null if it isn't lying on one.
+	 */
+	@Nullable double[] tableUnder(RagdollBody body) {
+		double[] m = body.middle();
+		BlockPos under = BlockPos.containing(m[0], m[1] - body.rig.radius[0] - 0.2, m[2]);
+		Level level = level();
+		if (!Corpses.isButcherBlock(level.getBlockState(under))) {
+			return null;
+		}
+		int minX = under.getX(), maxX = minX, minZ = under.getZ(), maxZ = minZ;
+		// grow it a block at a time, each side once while the whole new edge is butcher blocks
+		boolean grew = true;
+		while (grew) {
+			grew = false;
+			if (maxX - minX + 1 < TABLE_MAX && row(level, minX - 1, minZ, maxZ, under.getY(), true)) {
+				minX--;
+				grew = true;
+			}
+			if (maxX - minX + 1 < TABLE_MAX && row(level, maxX + 1, minZ, maxZ, under.getY(), true)) {
+				maxX++;
+				grew = true;
+			}
+			if (maxZ - minZ + 1 < TABLE_MAX && row(level, minZ - 1, minX, maxX, under.getY(), false)) {
+				minZ--;
+				grew = true;
+			}
+			if (maxZ - minZ + 1 < TABLE_MAX && row(level, maxZ + 1, minX, maxX, under.getY(), false)) {
+				maxZ++;
+				grew = true;
+			}
+		}
+		return new double[] {minX, minZ, maxX + 1.0, maxZ + 1.0};
+	}
+
+	/** Every block along one edge (at x = {@code at} from z {@code from} to {@code to}, or the same along z) is a butcher block. */
+	private static boolean row(Level level, int at, int from, int to, int y, boolean alongZ) {
+		for (int i = from; i <= to; i++) {
+			if (!Corpses.isButcherBlock(level.getBlockState(alongZ ? new BlockPos(at, y, i) : new BlockPos(i, y, at)))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** A hostile mob's corpse (what Jaymo's Kingdoms' guards burn). */
