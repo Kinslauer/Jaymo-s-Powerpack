@@ -99,8 +99,18 @@ public final class ZFighterVerdantLook {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		boolean verdant = entity instanceof Player player && ZFighterLineage.of(player) == ZFighterLineage.VERDANT && !ZFighterLineage.ape(player);
-		state.setData(KEY, verdant ? new Look(green(entity.getUUID()), variant(entity.getUUID())) : null);
+		Look look = null;
+		if (entity instanceof Player player && !ZFighterLineage.ape(player)) {
+			com.jaymospowers.power.zfighter.ZFighterFusion.Look fused = ZFighterFusionLook.of(player);
+			if (ZFighterLineage.of(player) == ZFighterLineage.VERDANT) {
+				look = new Look(green(entity.getUUID()), variant(entity.getUUID()));
+			} else if (fused != null && fused.innerLineage() == ZFighterLineage.VERDANT) {
+				// (0.16.16) fused with a Verdant: their green and antennae
+				UUID inner = ZFighterFusionLook.inner(player, fused);
+				look = new Look(green(inner), variant(inner));
+			}
+		}
+		state.setData(KEY, look);
 	}
 
 	/** The local player's green, for their own arms in first person; null when they're no Verdant. */
@@ -153,22 +163,27 @@ public final class ZFighterVerdantLook {
 				if (alpha == 0) {
 					continue;
 				}
-				int r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
-				// warm tones only (red >= green >= blue): hue 0-60 degrees
-				if (r < g || g < b || r == 0) {
+				if (!skinTone(argb)) {
 					continue;
 				}
-				float value = r / 255.0F;
-				float saturation = (r - b) / (float)r;
-				float hue = r == b ? 0.0F : 60.0F * (g - b) / (r - b);
-				if (hue < SKIN_HUE_MIN || hue > SKIN_HUE_MAX || saturation < SKIN_SAT_MIN || saturation > SKIN_SAT_MAX || value < SKIN_VALUE_MIN) {
-					continue;
-				}
-				float light = value / SKIN_MIDTONE;
+				float light = ARGB.red(argb) / 255.0F / SKIN_MIDTONE;
 				image.setPixel(x, y, ARGB.color(alpha, Mth.clamp(Math.round(ARGB.red(green) * light), 0, 255),
 					Mth.clamp(Math.round(ARGB.green(green) * light), 0, 255), Mth.clamp(Math.round(ARGB.blue(green) * light), 0, 255)));
 			}
 		}
+	}
+
+	/** Whether a pixel reads as skin (also used by the fusion's look): warm, not too grey, not too dark, not see-through. */
+	static boolean skinTone(int argb) {
+		int r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
+		// warm tones only (red >= green >= blue): hue 0-60 degrees
+		if (ARGB.alpha(argb) == 0 || r < g || g < b || r == 0) {
+			return false;
+		}
+		float value = r / 255.0F;
+		float saturation = (r - b) / (float)r;
+		float hue = r == b ? 0.0F : 60.0F * (g - b) / (r - b);
+		return hue >= SKIN_HUE_MIN && hue <= SKIN_HUE_MAX && saturation >= SKIN_SAT_MIN && saturation <= SKIN_SAT_MAX && value >= SKIN_VALUE_MIN;
 	}
 
 	/** Which shape {@code id}'s antennae are. */
