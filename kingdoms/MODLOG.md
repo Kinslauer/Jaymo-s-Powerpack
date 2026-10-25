@@ -4463,13 +4463,41 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Boards already up that see less than 20 open blocks are looked over once per server run; if another spot sees at
   least 6 more, the board moves there (pinned notices come down; villagers pin new ones).
 - Compile-checked status in the PR; not yet seen in game.
-
 ## 0.7.200: blizzards and sandstorms reach body heat (pack 0.16.13)
 - Kitchen 0.5.25 adds thirst and body heat. `KitchenCompat.skills()` makes Emberborn proof against the heat (as
   Frostborn already are against the cold) and hands Kitchen `Calamities.bodyHeat`: a full blizzard takes 45 off the
   air around you, a full sandstorm adds 25 (`BODY_SNOW`, `BODY_SAND`), a third of that under a roof.
+## 0.7.201: Letters, messenger pigeons, couriers across the land; the news by letter (pack 0.16.14)
+- Andy: "i want a messenger system for getting information across the lands, this is so we get less information
+  through chat and the world is more immersive. it should work like this for birds, you dont have to add owls if this
+  cant be ported directly, and mca couriers who operate similarly" (Courier Owls: All Rights Reserved, no 26.3 build,
+  so remade from its description; nothing of it copied).
+- **Letters** (`Letters`): a blank Letter (2 paper + a feather makes 2) opens a writing screen (`client/LetterScreen`):
+  who it's for (a character name, on or not; a username works too) and up to 600 characters. Seal makes a Sealed
+  Letter, "Letter to X", "From Y" beneath; using one reads it. Names: `Post.resolve` against everyone's character
+  name as last seen (`Post.NAMES`).
+- **Messenger pigeons** (`Pigeon`, a parrot underneath with its own art from `tools/gen_post.py`; no shoulder riding,
+  no squawks, no mimicry): wild in plains, meadows, forests, savannas and cherry groves; tamed with seeds like a
+  parrot. Use a sealed letter on your own pigeon: it climbs away, is taken out of the world (`PigeonPost.Flight`),
+  and comes down to whoever it's for after the time the distance takes (1.1 blocks a tick, 10 s to 5 min), wherever
+  they are; it hands the letter over and flies home to you the same way. Nobody to take it for two days: it brings
+  the letter back. Killed on the way, it drops the letter.
+- **Couriers** (`Couriers`, rewritten): sneak and use a sealed letter on a grown villager of a realm or village that
+  doesn't hold you in ill repute and they take it anywhere in the Overworld (`/kingdom deliver <player>` still takes
+  whatever you hold). Past 160 blocks they saddle a courser and ride. Like a travelling elder they go on in a record
+  (`Couriers.Errand`, along the King's Roads) once nobody can see them, and come back into the world on the road
+  when someone's within 80 blocks; the one with your letter rides up to you, says who it's from, and rides home.
+  If the one it's for isn't on, they wait at home; after two days it goes back to the sender. Errands are saved now
+  (a restart no longer hands everything back). Their horses go back to the stable unseen.
+- **The news by letter** (`Post`): what `KingdomEvents.announce` (and the first fallen Giant) put in everyone's chat
+  is gathered for 20 s and written up as a "Tidings" letter for each player on. MCA's mail (family letters,
+  condolences, the elders' journeys) is taken out of MCA's inbox, and MCA's "You have mail" toast no longer shows
+  (`McaMailMixin`). Each is brought one at a time per player: by a townsman who runs it over when you're in a town,
+  else by a wild pigeon that comes down to you (not under the ground: it waits till you're out). Letters that can't
+  be brought yet wait (`Post.WAITING`, saved). The headlines still go to the server log.
+- Compile-checked and dev-server booted in the cloud; not yet seen in game.
 
-## 0.7.201: weathering, and builders' upkeep (pack 0.16.14)
+## 0.7.202: weathering, and builders' upkeep (pack 0.16.15)
 Andy's immersion pass, stage 2 (2026-10-25): Immersive Weathering is 1.20.1 only (LGPL, on Moonlight), so this is our
 own take, nothing copied. Andy: weathering may hit villages, "upkeep is already something builders should be doing".
 - `Weathering`: every second 24 blocks near each player (40 out, from the surface down 16) are looked at; an exposed

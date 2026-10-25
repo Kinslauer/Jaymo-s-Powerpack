@@ -219,6 +219,11 @@ public final class McaCompat {
 		}
 	}
 
+	/** (0.7.201) The first letter in {@code player}'s MCA mail, taken out of it (the {@link Post} brings it), or empty. */
+	static net.minecraft.world.item.ItemStack takeMail(ServerPlayer player) {
+		return LOADED ? McaBridge.takeMail(player) : net.minecraft.world.item.ItemStack.EMPTY;
+	}
+
 	/** (0.7.184) {@code villager} is a teen or grown, old enough to live on as ({@link Lineage}). */
 	static boolean teenOrOlder(Villager villager) {
 		return LOADED && McaBridge.teenOrOlder(villager);

@@ -82,7 +82,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
-		// 0.7.201: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
+		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
 		Upkeep.register();
 		Weathering.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
@@ -297,6 +297,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// 0.7.201: letters, messenger pigeons and couriers across the land; the news by letter, not chat (and their attachments)
+		LOGGER.debug("post attachments: {} {} {} {}", Couriers.ERRANDS, PigeonPost.FLIGHTS, Post.NAMES, Post.WAITING);
+		Letters.register();
+		Pigeon.register();
+		PigeonPost.register();
+		Post.register();
 		Couriers.register();
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)

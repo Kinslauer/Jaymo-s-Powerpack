@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.201) A settlement's upkeep: what {@link Weathering} wears in a standing settlement is noted for its builders
+ * (0.7.202) A settlement's upkeep: what {@link Weathering} wears in a standing settlement is noted for its builders
  * ({@link #note}, kept on the Overworld so it lasts past a restart), and one of each crew (the only one, with a crew of
  * one, once {@link #BATCH} have piled up) goes round by day scrubbing the moss off, mending the cracked bricks, raking
  * up the leaf litter and spreading the mud back to dirt. Only what weathering did: a Grim hold's old moss stays.

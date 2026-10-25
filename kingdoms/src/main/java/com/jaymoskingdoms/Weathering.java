@@ -23,7 +23,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.201) Weathering, our own take on Immersive Weathering (LGPL, 1.20.1 only, so nothing is taken from it): the
+ * (0.7.202) Weathering, our own take on Immersive Weathering (LGPL, 1.20.1 only, so nothing is taken from it): the
  * world ages around players, villages too (Andy: "upkeep is already something builders should be doing", see
  * {@link Upkeep}). Every second a few blocks near each player are looked at ({@link #SAMPLES} within {@link #RADIUS},
  * from the surface down {@link #DEPTH}), and an exposed one may change:
