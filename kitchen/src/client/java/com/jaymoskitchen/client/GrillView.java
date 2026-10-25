@@ -134,9 +134,9 @@ final class GrillView {
 
 	private static String[] sprite(Dish dish) {
 		return switch (dish) {
-			case HONEY_GLAZED_CHICKEN -> CHICKEN;
-			case MUTTON_KEBAB, CRIMSON_SKEWER -> KEBAB;
-			case GLAZED_PORK_CHOP -> PORK_CHOP;
+			case HONEY_GLAZED_CHICKEN, HONEY_DRUMSTICKS -> CHICKEN;
+			case MUTTON_KEBAB, CRIMSON_SKEWER, BUSHMEAT_SKEWER -> KEBAB;
+			case GLAZED_PORK_CHOP, ORANGE_GLAZED_TAEGORE -> PORK_CHOP;
 			default -> SALMON;
 		};
 	}

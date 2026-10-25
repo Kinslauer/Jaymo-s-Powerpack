@@ -19,7 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.10) "Explain your tail" ({@link Tails#ANSWER}, added to MCA's {@code main} menu by our dialogue data) shows only
  * to a Warrior-born Z Fighter who hasn't yet told this villager, once they're close enough friends.
  * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) shows only to a villager on a throne, (0.7.184) or a realm's guard.
- * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it.
+ * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it; (0.7.204) "Offer a
+ * handshake" ({@link Introductions#HANDSHAKE}) too.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -41,6 +42,7 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && Introductions.knows(player, villager)) {
 			// (0.7.180) you know their name already
 			cir.getReturnValue().remove(Introductions.ANSWER);
+			cir.getReturnValue().remove(Introductions.HANDSHAKE);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

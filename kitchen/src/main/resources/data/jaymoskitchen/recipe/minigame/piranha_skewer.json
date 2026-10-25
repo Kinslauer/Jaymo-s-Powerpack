@@ -1,0 +1,14 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "naturalist:piranha"
+      ]
+    }
+  ],
+  "type": "jaymoskitchen:minigame",
+  "category": "misc",
+  "dish": "piranha_skewer"
+}
