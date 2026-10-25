@@ -3631,6 +3631,7 @@
 	"message.jaymoskingdoms.ship.sunk.pirate": "The pirate ship %s has gone down, sunk by %s!",
 	"message.jaymoskingdoms.ship.sunk.navy": "The warship %s has gone down, sunk by %s.",
 	"message.jaymoskingdoms.ship.sunk.merchant": "The merchantman %s has gone down, sunk by %s.",
+	"message.jaymoskingdoms.ship.sunk.whaler": "The whaler %s has gone down, sunk by %s.",
 	"message.jaymoskingdoms.raid.announce.pirate": "Sails on the horizon! The pirates of %s are coming ashore at %s!",
 	"message.jaymoskingdoms.pirate_cove.cleared": "The pirate captain of %s has fallen to %s! The cove's pirates scatter.",
 	"message.jaymoskingdoms.pirate_cove.thanks": "Word of the captain's death spreads along the coast: every kingdom and village thinks better of you.",
@@ -5224,5 +5225,12 @@
 	"item.jaymoskingdoms.firebomb": "Firebomb",
 	"item.jaymoskingdoms.powder_firebomb": "Powder Firebomb",
 	"entity.jaymoskingdoms.firebomb": "Firebomb",
+	"message.jaymoskingdoms.whaler.fitting": "The whaler %s fits out at %s's harbour. Come aboard before she sails to sign on for a share.",
+	"message.jaymoskingdoms.whaler.signed": "You sign on with %s for a share of the catch. Be aboard when she comes home.",
+	"message.jaymoskingdoms.whaler.welcome": "Welcome aboard. Bring your irons.",
+	"message.jaymoskingdoms.whaler.sails": "Cast off! We sail for the whaling ground.",
+	"message.jaymoskingdoms.whaler.lower": "There she blows! Lower away!",
+	"message.jaymoskingdoms.whaler.lay": "Your lay: %s emeralds and two bottles of oil from %s.",
+	"message.jaymoskingdoms.whaler.home": "The whaler %s is home with %s whales and %s bottles of oil.",
 	"message.jaymoskingdoms.whale_cut_in": "Too big to cut from the water: lash it alongside a big ship to cut in the rest"
 }
