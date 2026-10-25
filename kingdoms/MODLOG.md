@@ -4525,3 +4525,12 @@ you aren't involved with"; and the line at the top of the talk menu should be sc
 - `McaMessageMixin`: MCA's talk-menu question line is garbled like their chat for a foreigner (the answers were already
   cut to Hug/Kiss/rock-paper-scissors).
 - Compile-checked; not seen in game yet.
+
+## 0.7.205: the handshake film shows the hands meeting (pack 0.16.24)
+- Andy: "One of the frames the cutscene puts front and center NEEDS to be the hands actually coming together.
+  Everything else looks fine." The hands meet at tick ~10, which fell in the wide opening shot. The film now opens on
+  the hands: side on and a touch low, aimed at where they meet (1.15 blocks up, at shoulder height less the held-out
+  arm's drop), easing in from 1.6 to 1.25 blocks. It holds through the meeting and the first pumps (to tick 24), then the
+  wide shot draws back from it (to 34), then over the shoulder as before. The one taking the hand waits 3 ticks
+  before reaching (`HandshakePose.REACH_DELAY`) so the shot sees it come in; the grip (creak, pumps) moves to tick 12.
+- Compile-checked; not yet seen in game.
