@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.200) A messenger pigeon ({@link PigeonPost}): a rock dove of the plains and woods, tamed with seeds as a parrot is,
+ * (0.7.201) A messenger pigeon ({@link PigeonPost}): a rock dove of the plains and woods, tamed with seeds as a parrot is,
  * that never rides a shoulder. Use a sealed letter on your own pigeon and it takes it, climbs away out of sight and flies
  * it to whoever it's for, wherever they are; it comes down to them, hands it over and flies home to you. A wild one
  * brings the world's news ({@link Post}) and is gone again.

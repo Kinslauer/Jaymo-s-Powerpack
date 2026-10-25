@@ -687,7 +687,7 @@ public final class KingdomEvents {
 	}
 
 	static void announce(MinecraftServer server, Component message) {
-		// (0.7.200) not in everyone's chat: the news, brought by a pigeon or a townsman
+		// (0.7.201) not in everyone's chat: the news, brought by a pigeon or a townsman
 		Post.news(server, message);
 	}
 

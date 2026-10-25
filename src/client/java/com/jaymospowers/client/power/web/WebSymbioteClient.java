@@ -38,7 +38,7 @@ public final class WebSymbioteClient {
 	public static final RenderStateDataKey<Boolean> SUIT = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_suit");
 	/** Living Armor's tendrils on this player: how grown (0-1), how far into a lash (0-1), and a clock for the sway. */
 	public static final RenderStateDataKey<Tendrils> TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils");
-	/** (0.15.152) The big body worn with its tendrils drawn in (WebSymbioteState.TENDRILS_IN): upright, no beast, no tendrils. */
+	/** (0.15.152) The big body worn with its tendrils drawn in (BULK without WebSymbioteState.TENDRILS): upright, no beast, no tendrils. */
 	public static final RenderStateDataKey<Boolean> TENDRILS_IN = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils_in");
 	/** (0.15.152) Ticks since its tendrils began flailing at a hit (WebSymbiote.FLAIL), partial ticks included; null when they aren't. */
 	public static final RenderStateDataKey<Float> FLAIL = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_flail");
@@ -603,7 +603,7 @@ public final class WebSymbioteClient {
 			state.legsEquipment = engulfed(state.legsEquipment);
 			state.feetEquipment = engulfed(state.feetEquipment);
 		}
-		// Living Armor grows tendrils (whether or not the suit is showing); the big body swells under them
+		// the tendrils are out (their own toggle: over bare skin, the suit, the armour or the big body, which swells under them)
 		boolean armored = entity instanceof Player p && WebSymbiote.armored(p);
 		boolean bulk = entity instanceof Player p && WebSymbiote.bulked(p);
 		Long staring = entity.getAttached(WebSymbiote.STARING);

@@ -35,7 +35,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.200) Letters, after Courier Owls (remade, not copied: that mod is All Rights Reserved). Andy: "i want a
+ * (0.7.201) Letters, after Courier Owls (remade, not copied: that mod is All Rights Reserved). Andy: "i want a
  * messenger system for getting information across the lands, this is so we get less information through chat and the
  * world is more immersive". A blank {@link #LETTER} (paper and a feather) is written on its own screen: who it's for (a
  * character name) and what it says; sealing it makes a {@link #SEALED} letter, "Letter to ...", which anyone holding it can

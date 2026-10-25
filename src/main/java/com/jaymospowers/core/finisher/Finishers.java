@@ -103,6 +103,11 @@ import org.jspecify.annotations.Nullable;
  * any tool that wears (a bow, a fishing rod, a shovel) slams too, taking {@link #IMPROVISED_WEAR} of its durability a
  * blow ({@link #wear}). A bow or crossbow with nothing to shoot slams even with Executioner. The neck snap's taps only
  * count kneeling at a person's head ({@link #atHead}).
+ * <p>
+ * (0.16.8) Andy: "the suits should have their own executions". With the symbiote suit showing (any form) and nothing in
+ * the main hand, the hold is a weapon's ({@link #HOLD_TICKS}, no taps, no Executioner: the suit is the weapon) and plays
+ * one of {@code WebExecutions}' moves instead of the neck snap; its own attachment counts as {@link #busy} and
+ * {@link #targeted} here, so the roots, the camera and the body lying still are shared.
  */
 public final class Finishers {
 	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
@@ -299,6 +304,8 @@ public final class Finishers {
 	}
 
 	public static void register() {
+		// (0.16.8) the symbiote's own executions play out on their own loop, begun from the hold below
+		com.jaymospowers.power.web.WebExecutions.register();
 		// before Kingdoms' disarm and Downed's catch-all, but only watching: they still get the click
 		Identifier watch = JaymosPowers.id("finisher_watch");
 		UseEntityCallback.EVENT.addPhaseOrdering(watch, Event.DEFAULT_PHASE);
@@ -328,12 +335,12 @@ public final class Finishers {
 
 	/** Whether {@code player} is in the middle of a finisher (rooted, hands busy). */
 	public static boolean busy(Entity player) {
-		return player.hasAttached(FINISHING);
+		return player.hasAttached(FINISHING) || com.jaymospowers.power.web.WebExecutions.busy(player);
 	}
 
 	/** Server side: whether someone is finishing {@code body} just now (it lies still for it: {@code Downed.step}). */
 	public static boolean targeted(Entity body) {
-		return TARGETED.containsKey(body.getUUID());
+		return TARGETED.containsKey(body.getUUID()) || com.jaymospowers.power.web.WebExecutions.targeted(body);
 	}
 
 	/** The finisher a player holding {@code stack} plays. */
@@ -597,7 +604,9 @@ public final class Finishers {
 			return InteractionResult.PASS;
 		}
 		ItemStack stack = player.getMainHandItem();
-		boolean bare = stack.isEmpty();
+		// (0.16.8) with the symbiote suit showing, empty hands are its own: a weapon's hold (not the neck snap's taps) plays WebExecutions
+		boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
+		boolean bare = stack.isEmpty() && !suit;
 		if (!bare && move(player, stack) == null) {
 			// (0.15.110) a torch or a loaf finishes nobody
 			return InteractionResult.PASS;
@@ -667,6 +676,11 @@ public final class Finishers {
 			long held = now - hold.start;
 			if (held >= HOLD_TICKS) {
 				it.remove();
+				if (player.getMainHandItem().isEmpty()) {
+					// (0.16.8) empty hands held this long are the symbiote's: one of its own executions
+					com.jaymospowers.power.web.WebExecutions.begin(level, player, hold.body);
+					continue;
+				}
 				// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
 				Kind kind = move(player, player.getMainHandItem());
 				if (kind != null && kind != Kind.FIST) {

@@ -4463,7 +4463,11 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
 - Boards already up that see less than 20 open blocks are looked over once per server run; if another spot sees at
   least 6 more, the board moves there (pinned notices come down; villagers pin new ones).
 - Compile-checked status in the PR; not yet seen in game.
-## 0.7.200: Letters, messenger pigeons, couriers across the land; the news by letter (pack 0.16.7)
+## 0.7.200: blizzards and sandstorms reach body heat (pack 0.16.13)
+- Kitchen 0.5.25 adds thirst and body heat. `KitchenCompat.skills()` makes Emberborn proof against the heat (as
+  Frostborn already are against the cold) and hands Kitchen `Calamities.bodyHeat`: a full blizzard takes 45 off the
+  air around you, a full sandstorm adds 25 (`BODY_SNOW`, `BODY_SAND`), a third of that under a roof.
+## 0.7.201: Letters, messenger pigeons, couriers across the land; the news by letter (pack 0.16.14)
 - Andy: "i want a messenger system for getting information across the lands, this is so we get less information
   through chat and the world is more immersive. it should work like this for birds, you dont have to add owls if this
   cant be ported directly, and mca couriers who operate similarly" (Courier Owls: All Rights Reserved, no 26.3 build,

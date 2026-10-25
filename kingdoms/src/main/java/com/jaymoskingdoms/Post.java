@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.200) The post: who's who by character name (so a letter can be addressed to someone who isn't on), and the
+ * (0.7.201) The post: who's who by character name (so a letter can be addressed to someone who isn't on), and the
  * world's news. Andy: "this is so we get less information through chat and the world is more immersive". What
  * {@link KingdomEvents#announce} used to put in everyone's chat (wars, fallen rulers, cleared camps, assassinations) is
  * gathered for {@link #NEWS_DELAY} and written up as one "Tidings" letter for each player on; MCA's mail (letters from

@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.200) A letter ({@link Letters}) in the Kingdoms screens' look, a parchment accent. A blank one is written: who it's
+ * (0.7.201) A letter ({@link Letters}) in the Kingdoms screens' look, a parchment accent. A blank one is written: who it's
  * for (their character name) and what it says, then sealed. A sealed one is read: who it's for and from, and its words
  * (scroll for more).
  */

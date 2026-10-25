@@ -278,7 +278,8 @@ final class WebSpentLines {
 				if (alpha < 4) {
 					continue;
 				}
-				int rgb = line.dark ? 0x0B0710 : 0xEDEDED;
+				// (0.16.7) a symbiote's spent line is the same blackish grey as its live ones (WebLineRenderer.DARK), not violet
+				int rgb = line.dark ? 0x121216 : 0xEDEDED;
 				int color = alpha << 24 | rgb;
 				float w = width * (line.dark ? 2.0F : 1.0F) * (0.5F + 0.5F * fade);
 				// breaking up as it fades: gaps open along it

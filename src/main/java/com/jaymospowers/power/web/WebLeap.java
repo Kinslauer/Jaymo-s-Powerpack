@@ -12,6 +12,12 @@ public final class WebLeap {
 	public static final int CHARGE_FULL = 30;
 	public static final double CHARGE_UP_MIN = 0.45, CHARGE_UP_MAX = 1.65;
 	public static final double CHARGE_FORWARD_MAX = 1.1;
+	/**
+	 * (0.16.7) While Jump is held the client tells the server so again every this many ticks: a takeover's, escape's or
+	 * bound's coil ending sends its own "let go", which would otherwise leave a held charge unbraced (and uncoiled) on the
+	 * server for the rest of the hold.
+	 */
+	public static final int CHARGE_REMIND_TICKS = 20;
 	/** A takeover never coils more than this share of a full charge. */
 	public static final float TAKEOVER_MAX_CHARGE = 0.75F;
 	/** It charges to clear the ledge by this much (blocks) at the top of the leap. */

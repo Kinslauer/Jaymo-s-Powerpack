@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.200) MCA's "You have mail! Type '/mca mail'" never shows: the post ({@link com.jaymoskingdoms.Post}) takes the
+ * (0.7.201) MCA's "You have mail! Type '/mca mail'" never shows: the post ({@link com.jaymoskingdoms.Post}) takes the
  * letters out of MCA's inbox and a pigeon or a townsman brings them.
  */
 @Mixin(PlayerSaveData.class)

@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.200) The pigeon post: what a {@link Pigeon} does once it's out of sight. A bird flying a letter is taken out of the
+ * (0.7.201) The pigeon post: what a {@link Pigeon} does once it's out of sight. A bird flying a letter is taken out of the
  * world into a record ({@link Flight}: its whole saved self, the letter, who it's for) and comes down near them once it's
  * had time to cross the distance ({@link #BIRD_SPEED}, at least {@link #MIN_FLIGHT}); if they aren't about, it waits for
  * them, and after {@link #GIVE_UP} brings the letter home. Home is the same: it comes down to its owner when they're about.

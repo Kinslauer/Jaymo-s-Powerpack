@@ -148,6 +148,8 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		PlayerModel parent = this.getParentModel();
 		WebFeral.applyModel(parent, state);
 		WebClimbPose.applyModel(parent, state);
+		WebHeldGrabPose.applyModel(parent, state);
+		WebExecutionPose.applyModel(parent, state);
 		WebSuitGrowth.shift(parent, state);
 		ModelPart[] parts = {parent.head, parent.body, parent.rightArm, parent.leftArm, parent.rightLeg, parent.leftLeg};
 		boolean ownView = WebSymbioteClient.ownFirstPerson(state);

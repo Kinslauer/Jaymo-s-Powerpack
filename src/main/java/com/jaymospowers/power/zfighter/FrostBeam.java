@@ -5,23 +5,30 @@ import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Wounds;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -31,6 +38,12 @@ import net.minecraft.world.phys.Vec3;
  * wave's Frost Needle ({@code ZFighterBeams}, style {@link ZFighterKi#NEEDLE}). It hits for only {@link #DAMAGE}, but it
  * goes exactly where the crosshair is (a Z Fighter's starts weaker and grows with mastery, but fires faster), and a hit has {@link #WOUND_CHANCE} to wound the part it lands on: the head comes
  * off; an arm or leg is cut off, or crippled (broken) at {@link #CRIPPLE_SHARE}. A body that can't lose parts is crippled.
+ * <p>
+ * (0.16.12) Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of what i want from the beam". Still one
+ * hair-thin white beam from the right hand (style 3 in {@code ZFighterBeams}), but now held for as long as the left mouse
+ * is ({@link Keep}, every few ticks from the client), sweeping where the crosshair goes. While
+ * it touches something it hurts it once per {@link #COOLDOWN} ({@link #Z_COOLDOWN}), each with the wound roll. Water it
+ * crosses freezes to frosted ice for a moment (it melts away by itself), and fire it touches goes out. No blocks broken.
  * <p>
  * Kingdoms keeps the day's charge: a hold on cooldown comes back to us as {@link #BEAM_TAG} (Andy: "will be usable after
  * the single day ice charge"). Without Kingdoms there's no charge, and the hold is always the beam.
@@ -46,22 +59,51 @@ public final class FrostBeam {
 	 */
 	public static final float Z_DAMAGE = 1.0F, Z_PER_MASTERY = 0.5F;
 	public static final int Z_COOLDOWN = 30;
-	public static final float RADIUS = 0.035F;
-	public static final int SHOWN_TICKS = 10;
+	public static final float RADIUS = 0.02F;
+	public static final int SHOWN_TICKS = 2;
 	public static final int COLOR = 0xFFFFFF;
+	/** How the beam is drawn (ZFighterBeams: hair-thin, full width at once, a small glint at each end). */
+	public static final int HELD_STYLE = 3;
+	/** (Andy: "keep it as one beam from the hand") Where it leaves the right hand: out along the look, to the right, and below the eyes (blocks). */
+	public static final double HAND_OUT = 0.55, HAND_SIDE = 0.32, HAND_DOWN = 0.38;
+	/** Unheard from this long (ticks), a held beam stops; the client says it's still held every {@code RaceHoldClient.FROST_KEEP}. */
+	public static final int KEEP_TICKS = 8;
+	/** The hum while it's held (every this many ticks), and how long water it crosses stays frozen (ticks, then it melts). */
+	public static final int HUM_EVERY = 12, FROST_TICKS = 60;
 	/** A hit's chance to take or cripple the part it lands on, and a limb's share of those that cripple (not sever). */
 	public static final float WOUND_CHANCE = 0.4F, CRIPPLE_SHARE = 0.5F;
 	/** Kingdoms puts this on a Frost-born whose hold found the ice prison on its daily cooldown; taken off here. */
 	public static final String BEAM_TAG = "jaymospowers_frost_beam";
 
 	private static final boolean KINGDOMS = FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
-	/** When each player last fired (game time). Not saved: a restart only clears a few seconds. */
+	/** When each player last hurt something with it (game time). Not saved: a restart only clears a few seconds. */
 	private static final Map<UUID, Long> LAST = new HashMap<>();
+	/** Who has the beam out, and until when (game time) unless the client says it's still held. */
+	private static final Map<UUID, Long> ON = new HashMap<>();
+
+	/** Client → server: the Frost-born's left mouse is still held (the beam stays out). */
+	public record Keep() implements CustomPacketPayload {
+		public static final Type<Keep> TYPE = new Type<>(com.jaymospowers.JaymosPowers.id("frost_beam_keep"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Keep> CODEC = StreamCodec.unit(new Keep());
+
+		@Override
+		public Type<Keep> type() {
+			return TYPE;
+		}
+	}
 
 	private FrostBeam() {
 	}
 
 	static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Keep.TYPE, Keep.CODEC);
+		// (only a beam already out is kept: a hold that froze something in the prison never starts one)
+		ServerPlayNetworking.registerGlobalReceiver(Keep.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (ON.containsKey(player.getUUID()) && player.getMainHandItem().isEmpty()) {
+				ON.put(player.getUUID(), player.level().getGameTime() + KEEP_TICKS);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(FrostBeam::tick);
 	}
 
@@ -81,20 +123,35 @@ public final class FrostBeam {
 				fire(player);
 			}
 		}
+		for (Iterator<Map.Entry<UUID, Long>> it = ON.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Long> on = it.next();
+			ServerPlayer player = server.getPlayerList().getPlayer(on.getKey());
+			if (player == null || !player.isAlive() || player.isSpectator() || ZFighterLineage.of(player) != ZFighterLineage.FROST
+				|| player.level().getGameTime() > on.getValue()) {
+				it.remove();
+				continue;
+			}
+			beam(player);
+		}
 	}
 
+	/** The beam comes out (the hold, once the day's ice is spent): it stays while the client keeps saying it's held. */
 	static void fire(ServerPlayer player) {
 		if (!player.isAlive() || player.isSpectator() || ZFighterLineage.of(player) != ZFighterLineage.FROST) {
 			return;
 		}
 		ServerLevel level = player.level();
-		long now = level.getGameTime();
-		Long last = LAST.get(player.getUUID());
-		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
-		if (last != null && now - last < (fighter ? Z_COOLDOWN : COOLDOWN) && now >= last) {
-			return;
+		boolean fresh = ON.put(player.getUUID(), level.getGameTime() + KEEP_TICKS) == null;
+		if (fresh) {
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2F, 1.8F);
+			beam(player);
 		}
-		LAST.put(player.getUUID(), now);
+	}
+
+	/** One tick of the beam: drawn from the hand to where the look meets something; a hit when the last one's long enough ago. */
+	private static void beam(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		HitResult wall = level.clip(new ClipContext(eye, eye.add(look.scale(RANGE)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
@@ -106,14 +163,47 @@ public final class FrostBeam {
 		if (hit != null) {
 			end = hit.getLocation();
 		}
-		Vec3 from = ZFighterKi.waveHands(player, look);
-		show(level, from, end);
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2F, 1.8F);
+		// from the right hand, held out toward where it's aimed
+		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
+		right = right.lengthSqr() < 1.0E-6 ? Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F) : right.normalize();
+		show(level, eye.add(look.scale(HAND_OUT)).add(right.scale(HAND_SIDE)).add(0.0, -HAND_DOWN, 0.0), end);
+		if (now % 2L == 0L) {
+			level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 3, 0.08, 0.08, 0.08, 0.02);
+		}
+		if (now % HUM_EVERY == 0L) {
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.5F, 1.9F);
+		}
+		if (target == null) {
+			frost(player, level, eye, end, wall);
+			return;
+		}
+		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
+		Long last = LAST.get(player.getUUID());
+		if (last != null && now - last < (fighter ? Z_COOLDOWN : COOLDOWN) && now >= last) {
+			return;
+		}
+		LAST.put(player.getUUID(), now);
 		level.playSound(null, end.x, end.y, end.z, SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		level.sendParticles(ParticleTypes.SNOWFLAKE, end.x, end.y, end.z, 12, 0.15, 0.15, 0.15, 0.05);
-		if (target != null) {
-			strike(player, target, fighter ? Z_DAMAGE + Z_PER_MASTERY * com.jaymospowers.core.Mastery.unlocked(player) : DAMAGE);
+		strike(player, target, fighter ? Z_DAMAGE + Z_PER_MASTERY * com.jaymospowers.core.Mastery.unlocked(player) : DAMAGE);
+	}
+
+	/** Still water the beam crosses freezes for a moment (frosted ice, which melts away), and fire where it lands goes out. */
+	private static void frost(ServerPlayer player, ServerLevel level, Vec3 eye, Vec3 end, HitResult wall) {
+		BlockHitResult water = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, player));
+		if (water.getType() == HitResult.Type.BLOCK) {
+			BlockPos pos = water.getBlockPos();
+			if (level.getFluidState(pos).is(Fluids.WATER) && level.getFluidState(pos).isSource() && level.getBlockState(pos).is(Blocks.WATER)) {
+				level.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
+				level.scheduleTick(pos, Blocks.FROSTED_ICE, FROST_TICKS);
+			}
+		}
+		if (wall instanceof BlockHitResult block && wall.getType() == HitResult.Type.BLOCK) {
+			BlockPos fire = block.getBlockPos().relative(block.getDirection());
+			if (level.getBlockState(fire).is(net.minecraft.tags.BlockTags.FIRE)) {
+				level.removeBlock(fire, false);
+				level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.6F);
+			}
 		}
 	}
 
@@ -146,9 +236,9 @@ public final class FrostBeam {
 		}
 	}
 
-	/** Drawn for everyone near: the Frost Needle's hair-thin core, all white. */
+	/** The beam, drawn for everyone near for a couple of ticks (it's sent again each tick while held): hair-thin, all white. */
 	private static void show(ServerLevel level, Vec3 from, Vec3 to) {
-		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, COLOR, ZFighterKi.NEEDLE, SHOWN_TICKS);
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, RADIUS, COLOR, HELD_STYLE, SHOWN_TICKS);
 		Vec3 middle = from.lerp(to, 0.5);
 		for (ServerPlayer viewer : level.players()) {
 			if (viewer.position().distanceToSqr(middle) <= ZFighterKi.BEAM_SEEN * ZFighterKi.BEAM_SEEN) {

@@ -14,7 +14,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -257,7 +256,11 @@ public final class ZFighterComboPose {
 		if (minecraft.isPaused()) {
 			return;
 		}
-		for (AbstractClientPlayer player : level.players()) {
+		// players, and (0.16.10) the rogue fighters, who throw the same strings
+		for (net.minecraft.world.entity.Entity player : level.entitiesForRendering()) {
+			if (!(player instanceof AbstractClientPlayer) && !(player instanceof com.jaymospowers.power.zfighter.ZFighterRogue)) {
+				continue;
+			}
 			Integer packed = player.getAttached(ZFighterCombo.MOVE);
 			float[] s = STATE.get(player.getId());
 			if (s == null) {
@@ -296,7 +299,7 @@ public final class ZFighterComboPose {
 		STATE.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
 	}
 
-	static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+	static void extract(net.minecraft.world.entity.LivingEntity entity, AvatarRenderState state, float partialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 		float[] s = STATE.get(entity.getId());
@@ -338,7 +341,7 @@ public final class ZFighterComboPose {
 	}
 
 	/** Shadowboxing one of these moves (MeditatePose draws the rest and the stance underneath). */
-	private static @Nullable Pose shadow(Avatar entity, float partialTicks, boolean ownView) {
+	private static @Nullable Pose shadow(net.minecraft.world.entity.LivingEntity entity, float partialTicks, boolean ownView) {
 		if (!(entity instanceof Player player)) {
 			return null;
 		}

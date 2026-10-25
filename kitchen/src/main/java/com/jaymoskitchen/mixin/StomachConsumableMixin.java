@@ -1,5 +1,7 @@
 package com.jaymoskitchen.mixin;
 
+import com.jaymoskitchen.climate.Climate;
+import com.jaymoskitchen.climate.Thirst;
 import com.jaymoskitchen.stomach.Stomach;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +23,14 @@ abstract class StomachConsumableMixin {
 	private void jaymoskitchen$roomInStomach(LivingEntity user, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
 		if (user instanceof Player player && stack.has(DataComponents.FOOD) && Stomach.wouldTake(player, stack)) {
 			cir.setReturnValue(true);
+		}
+	}
+
+	/** (0.5.25) Anything eaten or drunk: the water in it ({@link Thirst}). */
+	@Inject(method = "onConsume", at = @At("HEAD"))
+	private void jaymoskitchen$thirst(Level level, LivingEntity user, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
+		if (user instanceof ServerPlayer player && player.level().getGameRules().get(Climate.THIRST)) {
+			Thirst.consumed(player, stack);
 		}
 	}
 

@@ -2832,3 +2832,24 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the Flails mod's, and the ball is under half its old size. Ball and Chain's ball goes round the raised hand too. The
   flail no longer uses the trident's raised-arm animation. Timings, damage and sounds unchanged. Compile-checked; not
   playtested.
+- **0.16.11, physical flail and whip:** Andy: "the flail chain is completley disconnected from the stick and it looks
+  jarring. all the flail heads should match the material they are made from. and the whip should be able to pull from
+  the extent of it's range, not just 7 blocks. also the rappelling should only pull you up as you walk, so no auto
+  gliding to the impact point. these weapons should be physics based so the entire thing is accurately rendered in hand
+  and in world" (the Whip mod, MIT; nothing copied). The chain and the lash are now Verlet ropes stepped every client
+  tick (`LashRenderer.Rope`: gravity, drag, fixed links, resting on blocks), starting at the handle's tip taken from the
+  item as it's really drawn (`LashSockets`, via four small client mixins; first person corrected for the hands' own fov).
+  The head is pinned to `Lash.head` while the weapon acts, so timing and hits are unchanged, and free otherwise (an idle
+  ball hangs off the handle, an idle lash trails from the grip, a let-go head swings back). In the hand Balkon's flail
+  shows its bare handle (`WeaponModFlailHandMixin`) and the whip its grip (new `leather_whip_handle` model). The chain is
+  vanilla's iron chain texture; the ball is spiked and textured with its tier's block. The whip reaches 10 blocks (Andy's
+  pick), hooks any wall top in reach, and yanks harder from further off. Rappel: you hang on the lash; walking climbs it,
+  Sneak lowers. Compile-checked; not playtested.
+- **0.16.12, the Frost Beam is held:** Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of
+  what i want from the beam" (Laser Eyes, an ARR Viltrumite addon: ideas only). `FrostBeam` is one hair-thin white beam from
+  the right hand (`HAND_OUT`, `HAND_SIDE`, `HAND_DOWN`; Andy: "keep it as one beam from the hand. but keep the new
+  design"), held for as long as the left mouse is (the client sends `FrostBeam.Keep`
+  every `RaceHoldClient.FROST_KEEP` ticks; unheard for `KEEP_TICKS` it stops), sweeping with the crosshair. A target under it is hit once per `COOLDOWN`/`Z_COOLDOWN` with the same damage and 40% wound roll.
+  Water it crosses becomes frosted ice that melts after `FROST_TICKS`; fire it lands on goes out; no block breaking.
+  `ZFighterBeams` style 3 (`HELD`): full width at once, a small glint at the hand and where it lands. While it's
+  held the click doesn't dig (`RaceHoldClient.frostBeaming`, `ZFighterAttackMixin`). Compile-checked; not playtested.

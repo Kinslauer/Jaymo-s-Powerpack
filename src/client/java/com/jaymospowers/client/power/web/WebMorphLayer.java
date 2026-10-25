@@ -28,21 +28,32 @@ import net.minecraft.world.phys.Vec3;
  * forearm swells and the weapon grows out of the hand ({@link #submitGather}). Mace: a spiked ball. Scythe: a long curved blade across the end, its edge pale. Spear: a long barbed
  * point. Whip-blade: a lash of barbed links ending in a thin blade. Hammer-fist: a great knuckled block of a club. Hook
  * claw: three curved bone hooks, a grapple. The arm itself is posed by {@link #applyModel}; this layer draws the cord and
- * the weapon off the hand. On a Living Armor tendril ({@code tendril}) the arm is left alone: {@link WebTendrilLayer}
- * poses the tendril and draws the same heads ({@link #weapon}) at its tip.
+ * the weapon off the hand. On a shoulder tendril ({@code tendril}: the tendrils out, no armour) the arm is left alone:
+ * {@link WebTendrilLayer} poses the tendril and draws the same heads ({@link #weapon}) at its tip.
+ *
+ * <p>(0.16.7) With Living Armor on ({@code armor}: the thin armour or the big suit) the arm is engulfed
+ * ({@link #engulfedArm}): once the lumps reach the shoulder a tendril rears out of it and winds down the arm in coils
+ * ({@link #ARMOR_TURNS} turns, over the collecting ticks), the coils thicken and fuse into one lumpy mass over the whole
+ * arm ({@link #ARMOR_SLEEVE}) as the weapon forms, and the weapon swells out of the hand at {@link #WEAPON_SCALE_ARMOR}
+ * times the plain suit's size. The strike swings the engulfed arm, on a cord {@link #ARMOR_CORD} times as thick, and the
+ * mass melts back with the weapon at the end (Andy: "much larger ... so that tendril engulfs the entire arm").
  */
 public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/**
 	 * The strike under way: weapon, arm (1 right, -1 left), ticks in, the aim against the body (radians), how far
-	 * (blocks), and whether it's on a tendril.
+	 * (blocks), whether it's on a shoulder tendril, and whether it's Living Armor's engulfed arm.
 	 */
-	record Strike(int weapon, int side, float age, float aimYaw, float aimPitch, float reach, boolean tendril) {
+	record Strike(int weapon, int side, float age, float aimYaw, float aimPitch, float reach, boolean tendril, boolean armor) {
+		/** Not the engulfed arm (the shoulder tendril's heads, {@link WebTendrilLayer}). */
+		Strike(int weapon, int side, float age, float aimYaw, float aimPitch, float reach, boolean tendril) {
+			this(weapon, side, age, aimYaw, aimPitch, reach, tendril, false);
+		}
 	}
 
 	static final RenderStateDataKey<Strike> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_morph");
 
-	/** The gathering before it, held ({@link WebMorph.Charge}): weapon, arm, ticks in, on a tendril. */
-	record Gather(int weapon, int side, float age, boolean tendril) {
+	/** The gathering before it, held ({@link WebMorph.Charge}): weapon, arm, ticks in, on a shoulder tendril, Living Armor's engulfed arm. */
+	record Gather(int weapon, int side, float age, boolean tendril, boolean armor) {
 	}
 
 	static final RenderStateDataKey<Gather> GATHER = RenderStateDataKey.create(() -> "jaymospowers:web_morph_gather");
@@ -80,6 +91,31 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 	private static final int WHIP_LINKS = 6, HOOK_PRONGS = 3;
 	/** The hand, in the arm's own space (pixels; the big body's arms are longer). */
 	private static final float HAND_Y = 10.0F, HULK_HAND_Y = 17.0F;
+	/** The arm's own half-width (pixels; wide, slim), and how much wider the big body's is. */
+	private static final float ARM_HALF = 2.0F, ARM_HALF_SLIM = 1.5F, HULK_ARM = 1.5F;
+
+	// ---- (0.16.7) Living Armor's engulfed arm ----
+	/** The weapon's size on the engulfed arm, against the plain suit's (every head scales with it). */
+	static final float WEAPON_SCALE_ARMOR = 1.8F;
+	/** The cord out to the target, against the plain suit's thickness. */
+	private static final float ARMOR_CORD = 1.8F;
+	/** The tendril winding down the arm: its radius as it winds and once fused (pixels), its turns shoulder to hand, its pieces. */
+	private static final float ARMOR_TENDRIL = 1.3F, ARMOR_TENDRIL_FULL = 2.3F, ARMOR_TURNS = 3.5F;
+	private static final int ARMOR_PIECES = 28;
+	/** The winding tendril's leading end: fatter than the rest by this much (pixels). */
+	private static final float ARMOR_HEAD = 0.9F;
+	/** The fused mass over the arm: its radius past the arm's own (pixels), how much it ripples, and its pieces. */
+	private static final float ARMOR_SLEEVE = 2.2F, ARMOR_RIPPLE = 0.14F;
+	private static final int ARMOR_SLEEVE_PIECES = 6;
+	/** Where the tendril rears out: this far above the shoulder's top, and this far back (pixels). */
+	private static final float ARMOR_ROOT_UP = 1.5F, ARMOR_ROOT_BACK = 2.0F;
+	/**
+	 * Your own engulfed arm seen from your own eyes (First-person Model drawing your body): the heads this big instead
+	 * (the plain suit's is 1), the tendril and mass this share of their size, and while it gathers the arm hangs this
+	 * much further back and down (radians) and this much wider, so the mass sits low and to the side of the view, not
+	 * across the crosshair (Andy's playtest: the formed arm already filled half the screen).
+	 */
+	private static final float WEAPON_SCALE_ARMOR_FP = 1.15F, ARMOR_MASS_FP = 0.55F, ARMOR_FP_BACK = 0.45F, ARMOR_FP_WIDE = 0.3F;
 
 	WebMorphLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -91,7 +127,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		if (charge != null) {
 			float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 			state.setData(GATHER, new Gather(charge.weapon(), charge.side(), Math.max(0.0F, charge.age(entity.level().getGameTime() + partial)),
-				charge.tendril()));
+				charge.tendril(), charge.armor()));
 		} else {
 			state.setData(GATHER, null);
 		}
@@ -110,14 +146,39 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float bodyYaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
 		Vec3 shoulder = player.getPosition(partial).add(0.0, player.getBbHeight() * 0.78, 0.0);
 		Entity target = morph.target() < 0 ? null : player.level().getEntity(morph.target());
-		float air = morph.weapon() == WebMorph.WHIP || morph.weapon() == WebMorph.HOOK ? (float)WebMorph.reach(morph.weapon()) * AIR_REACH_LONG : AIR_REACH;
+		float air = morph.weapon() == WebMorph.WHIP || morph.weapon() == WebMorph.HOOK ? (float)WebMorph.reach(morph.weapon(), morph.armor()) * AIR_REACH_LONG
+			: AIR_REACH + (morph.armor() ? (float)WebMorph.REACH_ARMOR : 0.0F);
 		Vec3 to = target != null ? target.getBoundingBox().getCenter().subtract(shoulder)
 			: player.getViewVector(partial).scale(air);
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float aimYaw = Mth.wrapDegrees(yaw - bodyYaw) * Mth.DEG_TO_RAD;
 		float aimPitch = (float)-Mth.atan2(to.y, to.horizontalDistance());
 		float reach = (float)to.length() / Math.max(0.3F, player.getScale());
-		state.setData(KEY, new Strike(morph.weapon(), morph.side(), age, aimYaw, aimPitch, reach, morph.tendril()));
+		state.setData(KEY, new Strike(morph.weapon(), morph.side(), age, aimYaw, aimPitch, reach, morph.tendril(), morph.armor()));
+	}
+
+	/**
+	 * The weapon's size on this arm: the engulfed arm's heads are {@link #WEAPON_SCALE_ARMOR} times the plain suit's
+	 * (only {@link #WEAPON_SCALE_ARMOR_FP} in your own first-person view, {@code fp}).
+	 */
+	private static float headScale(boolean armor, boolean fp) {
+		return armor ? fp ? WEAPON_SCALE_ARMOR_FP : WEAPON_SCALE_ARMOR : 1.0F;
+	}
+
+	/** {@code state} is your own body, drawn in first person by First-person Model: what's on the arm fills the view. */
+	private static boolean ownFirstPerson(LivingEntityRenderState state) {
+		net.minecraft.client.player.LocalPlayer self = Minecraft.getInstance().player;
+		return self != null && state instanceof AvatarRenderState avatar && avatar.id == self.getId() && FirstPersonCompat.bodyShown();
+	}
+
+	/** Gathering, the engulfed arm: how far down the arm the tendril has wound (0 at the shoulder, 1 at the hand). */
+	private static float wound(Gather g) {
+		return ease((g.age() - WebMorph.COURSE_TICKS) / (WebMorph.COLLECT_TICKS - WebMorph.COURSE_TICKS));
+	}
+
+	/** Gathering, the engulfed arm: how far the coils have thickened and fused into one mass (0-1). */
+	private static float engulfed(Gather g) {
+		return ease((g.age() - WebMorph.COLLECT_TICKS + 1.0F) / (WebMorph.FORMED_TICKS - WebMorph.COLLECT_TICKS + 1.0F));
 	}
 
 	private static float ease(float x) {
@@ -223,13 +284,18 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			return;
 		}
 		if (s == null && g != null) {
-			// gathering: the arm drawn back a little and out from the side, shuddering as the lumps pour in
+			// gathering: the arm drawn back a little and out from the side, shuddering as the lumps pour in (the engulfed
+			// arm held further out, the mass dragging it down and wide)
 			ModelPart arm = g.side() > 0 ? h.rightArm : h.leftArm;
 			float on = ease(g.age() / 4.0F);
-			float shudder = g.age() < WebMorph.FORMED_TICKS ? Mth.sin(g.age() * 2.7F) * 0.06F : 0.0F;
-			arm.xRot = Mth.lerp(on, arm.xRot, 0.35F + shudder);
+			float shudder = g.age() < WebMorph.FORMED_TICKS ? Mth.sin(g.age() * 2.7F) * (g.armor() ? 0.09F : 0.06F) : 0.0F;
+			float wide = g.armor() ? 0.15F * engulfed(g) : 0.0F;
+			// (your own, in first person: hung further back and out, so the mass stays low and to the side of the view)
+			boolean fp = g.armor() && ownFirstPerson(living);
+			float back = fp ? ARMOR_FP_BACK : 0.0F;
+			arm.xRot = Mth.lerp(on, arm.xRot, 0.35F - wide + back + shudder);
 			arm.yRot = Mth.lerp(on, arm.yRot, 0.0F);
-			arm.zRot = Mth.lerp(on, arm.zRot, g.side() * 0.3F + shudder);
+			arm.zRot = Mth.lerp(on, arm.zRot, g.side() * (0.3F + wide + (fp ? ARMOR_FP_WIDE : 0.0F)) + shudder);
 			h.body.yRot += -g.side() * 0.12F * on;
 			return;
 		}
@@ -272,6 +338,12 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float handX = -s.side() * (slim ? 0.5F : 1.0F);
 		float handY = hulk ? HULK_HAND_Y : HAND_Y;
 		float grow = formed(s.age());
+		// the engulfed arm: its heads bigger, its cord thicker (less so in your own first-person view)
+		boolean fp = s.armor() && ownFirstPerson(state);
+		float head = grow * headScale(s.armor(), fp);
+		float mass = fp ? ARMOR_MASS_FP : 1.0F;
+		float cord = s.armor() ? Mth.lerp(mass, 1.0F, ARMOR_CORD) : 1.0F;
+		float armHalf = (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
 		float length = Math.max(0.0F, s.reach() * 16.0F - handY - 2.0F) * out(s.age());
 		float sw = swing(s.age());
 		// a swing whips the cord out behind the hand (the scythe sideways, the mace and spear back along the arm's arc)
@@ -287,6 +359,10 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		parent.root().translateAndRotate(poseStack);
 		arm.translateAndRotate(poseStack);
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
+			if (s.armor()) {
+				// the whole arm still one mass of goo, swinging; it melts back with the weapon at the end
+				engulfedArm(buffer, pose, handX, handY, armHalf, s.side(), 1.0F, 1.0F, grow, mass, time, state.lightCoords);
+			}
 			Vec3 hand = new Vec3(handX, handY, 0.0);
 			Vec3 prev = hand;
 			for (int i = 1; i <= PIECES; i++) {
@@ -295,22 +371,76 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 				double wx = Mth.sin(time * 1.3F + f * 6.0F) * 0.35 * f + Mth.sin(f * 9.0F - age * 2.2F) * whipWave * f * 3.0F,
 					wz = Mth.cos(time * 1.1F + f * 5.0F) * 0.35 * f;
 				Vec3 p = hand.add(0.0, length * f, 0.0).add(bow.scale(Mth.sin(f * Mth.PI))).add(wx, 0.0, wz);
-				double r0 = Mth.lerp(f - 1.0F / PIECES, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow);
-				double r1 = Mth.lerp(f, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow);
+				double r0 = Mth.lerp(f - 1.0F / PIECES, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow) * cord;
+				double r1 = Mth.lerp(f, CORD_ROOT, CORD_TIP) * Math.max(0.35F, grow) * cord;
 				if (length > 0.5F) {
 					WebTubes.cord(buffer, pose, px(prev), px(p), r0 / 16.0, r1 / 16.0, i % 3 == 0 ? WebTubes.SHEEN : WebTubes.BLACK, state.lightCoords);
 				}
 				prev = p;
 			}
 			Vec3 dir = length > 0.5F ? prev.subtract(hand.add(bow.scale(Mth.sin(0.9F * Mth.PI)))).normalize() : new Vec3(0.0, 1.0, 0.0);
-			weapon(buffer, pose, s, prev, dir, grow, state.lightCoords);
+			weapon(buffer, pose, s, prev, dir, head, state.lightCoords);
 		});
 		poseStack.popPose();
 	}
 
 	/**
+	 * (0.16.7) Living Armor's engulfed arm, in the arm's own space (pixels): the tendril reared out above and behind the
+	 * shoulder and wound {@code wound} of the way down the arm (0-1) in {@link #ARMOR_TURNS} coils round it, its leading
+	 * end fat; the coils thickened and fused {@code engulf} of the way (0-1) into one lumpy mass over the whole arm,
+	 * rippling toward the hand; the lot {@code on} of its size (melting away as a strike ends), its thickness {@code mass}
+	 * of the full (slighter in your own first-person view).
+	 */
+	private static void engulfedArm(VertexConsumer buffer, PoseStack.Pose pose, float handX, float handY, float armHalf, int side, float wound,
+		float engulf, float on, float mass, float time, int light) {
+		if (on < 0.05F || wound <= 0.0F) {
+			return;
+		}
+		float top = -2.0F;
+		Vec3 root = new Vec3(handX, top - ARMOR_ROOT_UP, ARMOR_ROOT_BACK);
+		// the coil: round the arm, down it, at the arm's surface; thicker as it fuses
+		float radius = Mth.lerp(engulf, ARMOR_TENDRIL, ARMOR_TENDRIL_FULL) * on * mass;
+		float ring = armHalf + radius * 0.7F;
+		Vec3 prev = root;
+		int pieces = Math.max(1, Mth.ceil(ARMOR_PIECES * wound));
+		for (int i = 1; i <= pieces; i++) {
+			float u = Math.min(wound, i / (float)ARMOR_PIECES);
+			float angle = u * ARMOR_TURNS * Mth.TWO_PI * side + Mth.HALF_PI;
+			// (the first piece comes down off the root onto the arm)
+			float y = Mth.lerp(u, top, handY + 1.0F);
+			Vec3 p = new Vec3(handX + Mth.cos(angle) * ring, y, Mth.sin(angle) * ring);
+			boolean head = i == pieces && wound < 1.0F;
+			double r0 = radius, r1 = head ? radius + ARMOR_HEAD * on : radius;
+			WebTubes.cord(buffer, pose, px(prev), px(p), r0 / 16.0, r1 / 16.0, i % 4 == 0 ? WebTubes.SHEEN : WebTubes.BLACK, light);
+			if (head) {
+				// the leading end, blunt and fat
+				Vec3 ahead = p.subtract(prev).normalize().scale(1.2 * on);
+				WebTubes.cord(buffer, pose, px(p), px(p.add(ahead)), r1 / 16.0, 0.3 * on / 16.0, WebTubes.SHEEN, light);
+			}
+			prev = p;
+		}
+		if (engulf < 0.02F) {
+			return;
+		}
+		// the mass: one fat lumpy sleeve down the arm's middle, swallowing the coils as it swells, rippling toward the hand
+		float sleeve = (armHalf + ARMOR_SLEEVE * engulf * mass) * on;
+		float y0 = top - 0.5F, y1 = handY + 1.0F;
+		Vec3 last = new Vec3(handX, y0, 0.0);
+		for (int k = 1; k <= ARMOR_SLEEVE_PIECES; k++) {
+			float f = k / (float)ARMOR_SLEEVE_PIECES;
+			float ripple0 = 1.0F + ARMOR_RIPPLE * Mth.sin(time * 0.9F - (k - 1) * 1.3F) * engulf;
+			float ripple1 = 1.0F + ARMOR_RIPPLE * Mth.sin(time * 0.9F - k * 1.3F) * engulf;
+			// a little off the arm's line, so the lumps don't read as a straight pipe
+			Vec3 p = new Vec3(handX + Mth.sin(f * 7.0F + time * 0.3F) * 0.5 * engulf, Mth.lerp(f, y0, y1), Mth.cos(f * 5.0F) * 0.5 * engulf);
+			WebTubes.cord(buffer, pose, px(last), px(p), sleeve * ripple0 / 16.0, sleeve * ripple1 / 16.0, k % 2 == 0 ? WebTubes.SHEEN : WebTubes.BLACK, light);
+			last = p;
+		}
+	}
+
+	/**
 	 * Gathering: lumps course over the suit (front and back) toward the striking shoulder, each leaving a vein behind it,
-	 * then run down the arm; the forearm swells with them, and the weapon grows out of the hand.
+	 * then run down the arm; the forearm swells with them, and the weapon grows out of the hand. With Living Armor the
+	 * lumps meet at the shoulder as a tendril that winds down and engulfs the arm instead ({@link #engulfedArm}).
 	 */
 	private void submitGather(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, Gather g) {
 		PlayerModel parent = this.getParentModel();
@@ -345,9 +475,24 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float outer = -g.side() * (slim ? 2.6F : 3.1F);
 		float swell = swollen(g);
 		float grow = grown(g);
+		float time = state.ageInTicks;
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
 		arm.translateAndRotate(poseStack);
+		if (g.armor()) {
+			// Living Armor: the tendril winds down from the shoulder and engulfs the arm, and the weapon swells out of that
+			float armHalf = (slim ? ARM_HALF_SLIM : ARM_HALF) * (hulk ? HULK_ARM : 1.0F);
+			boolean fp = ownFirstPerson(state);
+			float mass = fp ? ARMOR_MASS_FP : 1.0F;
+			float head = grow * headScale(true, fp);
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
+				engulfedArm(buffer, pose, handX, handY, armHalf, g.side(), wound(g), engulfed(g), 1.0F, mass, time, light);
+				Vec3 hand = new Vec3(handX, handY, 0.0);
+				weapon(buffer, pose, new Strike(g.weapon(), g.side(), 0.0F, 0.0F, 0.0F, 0.0F, false, true), hand, new Vec3(0.0, 1.0, 0.0), head, light);
+			});
+			poseStack.popPose();
+			return;
+		}
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 			// down the arm: one lump on the front, the back and the outside, one after another
 			float start = WebMorph.COURSE_TICKS - 1.5F;
@@ -374,7 +519,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			}
 			// the weapon grows out of the hand, hanging down along the arm
 			Vec3 hand = new Vec3(handX, handY, 0.0);
-			weapon(buffer, pose, new Strike(g.weapon(), g.side(), 0.0F, 0.0F, 0.0F, 0.0F, false), hand, new Vec3(0.0, 1.0, 0.0), grow, light);
+			weapon(buffer, pose, new Strike(g.weapon(), g.side(), 0.0F, 0.0F, 0.0F, 0.0F, false, false), hand, new Vec3(0.0, 1.0, 0.0), grow, light);
 		});
 		poseStack.popPose();
 	}

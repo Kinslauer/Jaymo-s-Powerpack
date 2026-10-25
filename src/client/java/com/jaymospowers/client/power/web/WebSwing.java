@@ -988,8 +988,14 @@ public final class WebSwing {
 	/** Ticks to a full charge; the leap from a tap to a full charge (up, and forward along the look). */
 	static final int CHARGE_FULL = com.jaymospowers.power.web.WebLeap.CHARGE_FULL;
 	static final double CHARGE_FORWARD_MAX = com.jaymospowers.power.web.WebLeap.CHARGE_FORWARD_MAX;
-	/** Charge held (ticks); whether the server's been told it's held. */
+	/** The server is reminded the charge is held every this many ticks (a takeover's or a bound's coil may have told it otherwise). */
+	private static final int CHARGE_REMIND_TICKS = com.jaymospowers.power.web.WebLeap.CHARGE_REMIND_TICKS;
+	/**
+	 * Charge held (ticks); a charge let go in the air, banked for the landing (ticks, 0 none); whether the server's been
+	 * told it's held.
+	 */
 	int chargeTicks;
+	private int bankedCharge;
 	private boolean chargeSent;
 
 	/** True while Jump is being held to charge a leap on the ground (the plain jump is held back; see the mixin). */
@@ -1001,47 +1007,89 @@ public final class WebSwing {
 
 	/**
 	 * Wearing the suit: hold Jump to coil. The charge builds while it's held (up to {@link #CHARGE_FULL}), on the ground
-	 * or in the air, and keeps for as long as it's held: landing doesn't spend it (and doesn't hurt). Let go on the
-	 * ground to leap, as high and far as the charge; let go in the air and the charge is lost.
+	 * or in the air, and keeps for as long as it's held: landing doesn't spend it (and doesn't hurt), and nothing but
+	 * letting go resets it (or losing the suit, or a takeover taking the legs). Let go on the ground to leap, as high
+	 * and far as the charge. Let go in the air and the charge is banked: it goes off the moment you land (press Jump
+	 * again before that and it carries on from where it was). On a web, Jump is the swing's (reel in, jump off): a
+	 * charge held through a swing waits for it to end, one let go on the web was the swing's and is dropped. (0.16.7;
+	 * Andy: "it should always be ready to launch me as long as I have been holding the button".)
+	 *
+	 * <p>Before this, a charge let go a tick off the ground (a slope, a step, the top of a stair) was simply lost, and
+	 * a swing with Jump held wiped it: both looked like the leap "getting stuck".
 	 */
 	private void tickChargeJump(LocalPlayer player) {
 		if (WebSymbioteClient.driving()) {
 			// a takeover has the legs (it coils its own leaps)
-			if (chargeTicks > 0 || chargeSent) {
-				endCharge();
-			}
+			endCharge();
 			return;
 		}
 		boolean jump = player.input.keyPresses.jump();
 		// carried on Wall Crawl's tendrils counts as the ground: they fling you
 		boolean ground = player.onGround() || WebSymbioteClient.launchable(player);
-		if (jump && !attached()) {
+		if (attached()) {
+			if (!jump) {
+				// let go on a web: that hold was the swing's
+				endCharge();
+			}
+			return;
+		}
+		if (player.isInWater() || player.isInLava()) {
+			// nothing to leap from: a banked charge drains away; one still held waits for footing
+			bankedCharge = 0;
+			if (!jump) {
+				endCharge();
+			}
+			return;
+		}
+		if (jump) {
+			if (bankedCharge > 0) {
+				// pressed again before landing: on from where it was
+				chargeTicks = Math.max(chargeTicks, bankedCharge);
+				bankedCharge = 0;
+			}
 			if (chargeTicks < CHARGE_FULL) {
 				chargeTicks++;
 				if (chargeTicks % 6 == 0) {
 					play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.4F, 0.6F + chargeTicks / (float)CHARGE_FULL);
 				}
 			}
-			if (!chargeSent) {
+			if (!chargeSent || chargeTicks % CHARGE_REMIND_TICKS == 0) {
 				chargeSent = true;
 				ClientPlayNetworking.send(new WebNet.ChargeHold(true));
 			}
 			return;
 		}
-		if (chargeTicks > 0 && ground && !jump) {
-			float c = chargeTicks / (float)CHARGE_FULL;
-			Vec3 look = player.getLookAngle();
-			Vec3 flat = new Vec3(look.x, 0.0, look.z);
-			flat = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(CHARGE_FORWARD_MAX * c);
-			Vec3 v = player.getDeltaMovement();
-			player.setDeltaMovement(v.x + flat.x, com.jaymospowers.power.web.WebLeap.speed(c), v.z + flat.z);
-			play(player, SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
-			WebSymbioteClient.leapt();
-			if (c > 0.5F) {
-				play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
-			}
+		if (chargeTicks > 0) {
+			// let go: banked (on the ground it goes off this very tick)
+			bankedCharge = chargeTicks;
+			chargeTicks = 0;
 		}
-		endCharge();
+		if (bankedCharge > 0) {
+			if (ground) {
+				leap(player, bankedCharge);
+				endCharge();
+			}
+			// (else still braced: the server keeps the landing from hurting until it goes off)
+			return;
+		}
+		if (chargeSent) {
+			endCharge();
+		}
+	}
+
+	/** The leap itself, from a charge of {@code ticks} (of {@link #CHARGE_FULL}): up, and forward along the look. */
+	private void leap(LocalPlayer player, int ticks) {
+		float c = Math.min(ticks, CHARGE_FULL) / (float)CHARGE_FULL;
+		Vec3 look = player.getLookAngle();
+		Vec3 flat = new Vec3(look.x, 0.0, look.z);
+		flat = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(CHARGE_FORWARD_MAX * c);
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x + flat.x, com.jaymospowers.power.web.WebLeap.speed(c), v.z + flat.z);
+		play(player, SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
+		WebSymbioteClient.leapt();
+		if (c > 0.5F) {
+			play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
+		}
 	}
 
 	// ===== the big body's slam (see WebSlam) ==========================================================================
@@ -1083,8 +1131,10 @@ public final class WebSwing {
 		return false;
 	}
 
+	/** The charge, held or banked, is spent or dropped, and the server told so. */
 	private void endCharge() {
 		chargeTicks = 0;
+		bankedCharge = 0;
 		if (chargeSent) {
 			chargeSent = false;
 			ClientPlayNetworking.send(new WebNet.ChargeHold(false));

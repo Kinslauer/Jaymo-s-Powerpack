@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.ParrotRenderer;
 import net.minecraft.client.renderer.entity.state.ParrotRenderState;
 import net.minecraft.resources.Identifier;
 
-/** (0.7.200) A messenger pigeon ({@link Pigeon}): the parrot's model in a rock dove's grey, its neck sheened green and violet. */
+/** (0.7.201) A messenger pigeon ({@link Pigeon}): the parrot's model in a rock dove's grey, its neck sheened green and violet. */
 final class PigeonRenderer extends ParrotRenderer {
 	private static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/pigeon.png");
 
