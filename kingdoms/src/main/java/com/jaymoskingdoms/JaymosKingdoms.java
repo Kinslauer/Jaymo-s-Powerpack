@@ -82,6 +82,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		WoolClothes.register();
 		Buildings.register();
 		Construction.register();
+		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
+		Upkeep.register();
+		Weathering.register();
 		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
 		Groundwork.register();
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires

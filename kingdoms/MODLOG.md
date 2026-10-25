@@ -4496,3 +4496,20 @@ Andy picked every Stormborn buff and the Dawnborn's numbers and Sunflare.
   else by a wild pigeon that comes down to you (not under the ground: it waits till you're out). Letters that can't
   be brought yet wait (`Post.WAITING`, saved). The headlines still go to the server log.
 - Compile-checked and dev-server booted in the cloud; not yet seen in game.
+
+## 0.7.202: weathering, and builders' upkeep (pack 0.16.15)
+Andy's immersion pass, stage 2 (2026-10-25): Immersive Weathering is 1.20.1 only (LGPL, on Moonlight), so this is our
+own take, nothing copied. Andy: weathering may hit villages, "upkeep is already something builders should be doing".
+- `Weathering`: every second 24 blocks near each player (40 out, from the surface down 16) are looked at; an exposed
+  one may age. Cobblestone and stone bricks (stairs, slabs, walls too) go mossy where it's wet (rain on it, or beside
+  water or moss, which doubles it), never in deserts. Stone, deepslate, nether and blackstone bricks and deepslate tiles
+  crack: frost under the open sky in cold lands or winter, heat beside fire or lava, rarely anywhere. Bare dirt in the
+  rain turns to mud; mud in the sun dries back. Grass under leaves gets leaf litter (much more in Kitchen's autumn) that
+  rots away outside autumn. Grass in the open grows tufts in spring and summer. Copper ages by itself already. Game rule
+  `jaymoskingdoms:weathering` (on). Tuning at the top of the class.
+- `Upkeep`: what weathering changes within 96 blocks of a standing settlement's seat is noted for it (Overworld
+  attachment `upkeep`, at most 256 a settlement). By day, one builder of each crew (the last; a lone builder once 8 are
+  waiting) walks round scrubbing moss off, mending cracks, raking litter and turning mud back to dirt. Only blocks
+  weathering changed, so a Grim hold's old moss stays. Wraps the builders' brain right after `Construction`, so rubble,
+  mines and groundwork still come first.
+- Compile-checked; a Kingdoms dev server boots. Not seen in game yet.
