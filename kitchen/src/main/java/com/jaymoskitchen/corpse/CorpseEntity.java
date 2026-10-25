@@ -1237,7 +1237,7 @@ public class CorpseEntity extends Entity {
 
 		// solid iron (an iron golem): too heavy to lift by hand, and nothing to butcher. Only a power moves it
 		// (Jaymo's Powers' Gravity, through takeBy); it can still be searched
-		if (isHeavy() && (held.isEmpty() && player.isShiftKeyDown() || held.is(ItemTags.AXES))) {
+		if (isHeavy() && (held.isEmpty() && player.isShiftKeyDown() || held.is(Corpses.BUTCHERING_TOOLS))) {
 			player.sendOverlayMessage(Component.translatable(held.isEmpty()
 				? "message.jaymoskitchen.corpse.too_heavy" : "message.jaymoskitchen.corpse.no_butchering"));
 			return InteractionResult.SUCCESS_SERVER;
@@ -1273,8 +1273,8 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
-		// an axe butchers it anywhere; on a butcher block it's done properly and pays better
-		if (held.is(ItemTags.AXES)) {
+		// an axe (or a flint knife) butchers it anywhere; on a butcher block it's done properly and pays better
+		if (held.is(Corpses.BUTCHERING_TOOLS)) {
 			held.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 			chops++;
 			jolt(true);

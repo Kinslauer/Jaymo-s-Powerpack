@@ -1,0 +1,6 @@
+{
+	"values": [
+		"#minecraft:axes",
+		{"id": "jaymospowers:primitive_knife", "required": false}
+	]
+}
