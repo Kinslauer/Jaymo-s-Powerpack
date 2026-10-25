@@ -3,6 +3,7 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,8 +20,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,11 +58,28 @@ public final class ZFighterFusion {
 	/** On the one watching from inside: the game mode to give back (kept across a log-out or a crash). */
 	public static final AttachmentType<Integer> RESTORE = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_restore"),
 		builder -> builder.persistent(Codec.INT));
+	/**
+	 * (0.16.16) On the fused body, for everyone's client: who the two are (the first to dance, then the other, the same
+	 * after they change places) and the one inside's lineage and tail, so the body is drawn as both of them
+	 * ({@code ZFighterFusionLook}).
+	 */
+	public static final AttachmentType<Look> LOOK = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_look"),
+		builder -> builder.syncWith(Look.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** When he last fused (game time). */
 	public static final AttachmentType<Long> LAST = AttachmentRegistry.create(JaymosPowers.id("zfighter_fusion_last"),
 		builder -> builder.persistent(Codec.LONG));
 
 	private record Dance(long started, int side, long ends) {
+	}
+
+	/** The fused body's two (first and second dancer), and the lineage and tail (0 none, 1 out, 2 wrapped) of the one inside. */
+	public record Look(UUID first, UUID second, int innerLineage, int innerTail) {
+		public static final StreamCodec<ByteBuf, Look> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, Look::first,
+			UUIDUtil.STREAM_CODEC, Look::second,
+			ByteBufCodecs.VAR_INT, Look::innerLineage,
+			ByteBufCodecs.VAR_INT, Look::innerTail,
+			Look::new);
 	}
 
 	private record Pending(UUID leader, UUID partner, long at) {
@@ -220,6 +240,7 @@ public final class ZFighterFusion {
 		partner.setAttached(RESTORE, partner.gameMode().getId());
 		partner.setGameMode(GameType.SPECTATOR);
 		partner.setCamera(leader);
+		look(leader, partner, leader, partner);
 		ZFighterPower.refresh(leader, live);
 		leader.setHealth(leader.getMaxHealth());
 		ServerLevel level = leader.level();
@@ -276,6 +297,9 @@ public final class ZFighterFusion {
 		leader.setAttached(RESTORE, leader.gameMode().getId());
 		leader.setGameMode(GameType.SPECTATOR);
 		leader.setCamera(partner);
+		leader.removeAttached(LOOK);
+		// the body looks the same after they change places: the first dancer stays first
+		look(partner, leader, leader, partner);
 		ZFighterPower.refresh(partner, partnerLive);
 		partnerLive.ki = Math.min(ZFighterPower.maxKi(partner), ki);
 		partner.setHealth(Math.max(1.0F, healthShare * partner.getMaxHealth()));
@@ -301,6 +325,7 @@ public final class ZFighterFusion {
 		ServerPlayer leader = server.getPlayerList().getPlayer(leaderId);
 		ServerPlayer partner = server.getPlayerList().getPlayer(fused.partner());
 		if (leader != null) {
+			leader.removeAttached(LOOK);
 			ZFighterPower.Live live = ZFighterPower.live(leader);
 			ZFighterPower.refresh(leader, live);
 			live.ki = Math.min(live.ki, ZFighterPower.maxKi(leader));
@@ -314,6 +339,12 @@ public final class ZFighterFusion {
 		}
 	}
 
+	/** Marks {@code body} as the two fused, {@code inner} watching from inside. */
+	private static void look(ServerPlayer body, ServerPlayer inner, ServerPlayer first, ServerPlayer second) {
+		int tail = ZFighterLineage.of(inner) != ZFighterLineage.WARRIOR || ZFighterLineage.tailCut(inner) ? 0 : ZFighterLineage.tailOut(inner) ? 1 : 2;
+		body.setAttached(LOOK, new Look(first.getUUID(), second.getUUID(), ZFighterLineage.of(inner), tail));
+	}
+
 	/** The partner back in his own body (on joining, too, if a fusion was cut short by a log-out or a crash). */
 	private static void giveBack(ServerPlayer partner, ServerPlayer leader) {
 		Integer mode = partner.getAttached(RESTORE);
@@ -321,6 +352,7 @@ public final class ZFighterFusion {
 			return;
 		}
 		partner.removeAttached(RESTORE);
+		partner.removeAttached(LOOK);
 		partner.setCamera(partner);
 		if (leader != null) {
 			Vec3 side = leader.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().cross(new Vec3(0.0, 1.0, 0.0));
