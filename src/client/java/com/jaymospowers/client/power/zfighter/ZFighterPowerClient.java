@@ -91,6 +91,8 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterApe.Layer(avatar));
 				// (0.16.7) the faint ki glow round his outline, over everything of him
 				helper.register(new ZFighterKiGlow.Layer(avatar));
+				// (0.16.20) the flame aura: charging, held after a full charge, flaring in a form
+				helper.register(new ZFighterKiAura.Layer(avatar));
 			} else if (renderer.getModel() instanceof net.minecraft.client.model.HumanoidModel<?>) {
 				// a Warrior-born villager raging as the wild Great Ape (VillagerApe)
 				helper.register(ZFighterApe.mobLayer(renderer));
@@ -179,6 +181,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
 		ZFighterKiGlow.extract(entity, state);
+		ZFighterKiAura.extract(entity, state);
 		RaceHoldClient.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.ember.EmberKindleClient.extract(entity, state);
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.extract(entity, state);
