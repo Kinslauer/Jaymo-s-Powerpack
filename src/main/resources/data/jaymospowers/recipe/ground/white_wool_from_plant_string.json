@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymospowers:plant_string"
+  },
+  "result": {
+    "id": "minecraft:white_wool",
+    "count": 1
+  }
+}

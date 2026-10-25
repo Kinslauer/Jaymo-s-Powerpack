@@ -3,11 +3,12 @@
   "category": "equipment",
   "key": {
     "S": "minecraft:stick",
-    "F": "minecraft:flint"
+    "H": "jaymospowers:flint_shard",
+    "P": "jaymospowers:plant_string"
   },
   "pattern": [
-    "FF",
-    "FS"
+    "HP",
+    "S "
   ],
   "result": {
     "id": "jaymospowers:hand_axe"

@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/rocks_2",
+  "textures": {
+    "all": "minecraft:block/andesite"
+  }
+}

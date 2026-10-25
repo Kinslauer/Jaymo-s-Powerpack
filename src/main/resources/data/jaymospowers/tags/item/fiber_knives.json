@@ -1,0 +1,10 @@
+{
+  "values": [
+    "jaymospowers:primitive_knife",
+    "jaymospowers:bone_knife",
+    {
+      "id": "#c:tools/knife",
+      "required": false
+    }
+  ]
+}

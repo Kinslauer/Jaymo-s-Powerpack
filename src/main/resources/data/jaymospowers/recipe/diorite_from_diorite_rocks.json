@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "rocks_to_block",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jaymospowers:diorite_rock"
+  },
+  "result": {
+    "id": "minecraft:diorite",
+    "count": 1
+  }
+}
