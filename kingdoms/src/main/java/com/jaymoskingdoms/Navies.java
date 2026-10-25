@@ -267,7 +267,7 @@ final class Navies {
 	}
 
 	/** One of {@code f}'s ships put out at its mooring (or open water near it). */
-	private static @Nullable Ship launch(ServerLevel level, Faction f, Harbour h, Fleet.Rig rig, Fleet.Look look, Crew crew, Corsairs.Complement complement) {
+	static @Nullable Ship launch(ServerLevel level, Faction f, Harbour h, Fleet.Rig rig, Fleet.Look look, Crew crew, Corsairs.Complement complement) {
 		RandomSource random = level.getRandom();
 		Direction bow = Direction.getApproximateNearest(h.mooring().getX() - h.shore().getX(), 0, h.mooring().getZ() - h.shore().getZ()).getClockWise();
 		for (int tries = 0; tries < 4; tries++) {

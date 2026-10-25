@@ -34,7 +34,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.210) Caught at it: the {@link Underworld}'s law. A player seen dealing contraband (or flaunting it before a guard)
+ * (0.7.211) Caught at it: the {@link Underworld}'s law. A player seen dealing contraband (or flaunting it before a guard)
  * is charged ({@link #charge}) as well as hunted. Caught while the charge stands (downed with one of the realm's guards
  * by, or yielding: sneaking empty-handed right up to a guard for {@link #YIELD_TICKS}), they're sentenced on the spot,
  * aloud, by the guard: the contraband is taken, the hunt called off, and then by their record there ({@link #OFFENCES}),

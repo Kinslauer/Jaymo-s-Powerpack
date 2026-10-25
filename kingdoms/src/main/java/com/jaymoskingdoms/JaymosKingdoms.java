@@ -174,7 +174,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Crooks.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
-		// 0.7.210: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
+		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
@@ -377,6 +377,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// treasure wrecks (and their attachments)
 		Corsairs.register();
 		Navies.register();
+		Whalers.register();
 		TreasureWrecks.register();
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);

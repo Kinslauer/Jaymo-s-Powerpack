@@ -87,6 +87,26 @@ public final class Harpoon extends Projectile {
 		h.setOwner(thrower);
 		h.setPos(thrower.getX(), thrower.getEyeY() - 0.1, thrower.getZ());
 		h.shootFromRotation(thrower, thrower.getXRot(), thrower.getYRot(), 0.0F, SPEED, SPREAD);
+		h.makeFast(level, thrower);
+	}
+
+	/** (stage 3) A whaling crew's harpooner throws one at {@code target}, leading it a little and lobbing for the fall. */
+	public static void thrownAt(ServerLevel level, LivingEntity thrower, Entity target) {
+		Harpoon h = new Harpoon(Whaling.HARPOON, level);
+		h.setOwner(thrower);
+		h.setPos(thrower.getX(), thrower.getEyeY() - 0.1, thrower.getZ());
+		Vec3 aim = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0).add(target.getDeltaMovement().scale(6.0)).subtract(h.position());
+		double flight = aim.length() / SPEED;
+		h.shoot(aim.x, aim.y + 0.5 * GRAVITY * flight * flight, aim.z, SPEED, SPREAD * 2.0F);
+		thrower.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, thrower.getX(), thrower.getY(), thrower.getZ(), net.minecraft.sounds.SoundEvents.TRIDENT_THROW.value(),
+			net.minecraft.sounds.SoundSource.NEUTRAL, 1.0F, 0.8F);
+		h.makeFast(level, thrower);
+	}
+
+	/** Its line made fast to {@code thrower}'s ship, boat or them, and it's in flight. */
+	private void makeFast(ServerLevel level, LivingEntity thrower) {
+		Harpoon h = this;
 		Ship ship = Ships.aboard(thrower);
 		if (ship != null) {
 			Vec3 knot = ship.toLocal(thrower.position().add(0.0, 1.0, 0.0));
@@ -95,6 +115,14 @@ public final class Harpoon extends Projectile {
 		Entity fast = ship != null ? ship : thrower.getVehicle() instanceof AbstractBoat boat ? boat : thrower;
 		h.anchor = EntityReference.of(fast);
 		level.addFreshEntity(h);
+	}
+
+	/** (0.7.210, Whalers) Its line, fast to a whaleboat, passed up and made fast aboard {@code ship} at {@code knot} (in her frame). */
+	public void passTo(Ship ship, Vec3 knot) {
+		this.entityData.set(KNOT, new Vector3f((float)knot.x, (float)knot.y, (float)knot.z));
+		this.anchor = EntityReference.of(ship);
+		this.entityData.set(ANCHOR, ship.getId());
+		this.entityData.set(LINE, (float)Math.max(FIRST_LINE, ship.toWorld(knot.x, knot.y, knot.z).distanceTo(this.position()) + 1.0));
 	}
 
 	@Override

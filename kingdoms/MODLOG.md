@@ -4596,7 +4596,32 @@ crews, 4 polish. Our own beast and model, nothing copied (Naturalist's whale art
     realm's toll like any trade.
 - Tuning: the constants at the top of `GreatWhale`, `Harpoon`, `WhaleCarcass`, `TryworksBlock`, `WhaleTrade`, `OilLampBlock`, `Lamplighters`, `Firebomb`, `OilPotBlock`, `Sharks` and `Whaling`.
 
-## 0.7.210: the underworld, stage 1: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (pack 0.16.32)
+## 0.7.210: whaling, stage 3: the kingdoms' whaling crews (pack 0.16.32)
+Andy (2026-10-25): "Start stage 3", crews seen at the task for their kingdoms over days.
+- `Whalers`: a realm with a harbour and 600+ emeralds fits out a whaler (Jaki's cargo ship in its colours, a sea
+  captain and 5 hands) every 2 days at most (40% a look). Her voyage (saved as `crew.mode` plus a `Voyage` on the
+  Overworld): fitting out at the mooring for 5 minutes (a player who comes aboard signs on), outward to a ground
+  160-320 blocks out to sea, hunting (her lookout sees whales 96 out; she chases, her hands throw harpoons in range,
+  lines fast to her; a pod comes by out of sight after 3 minutes with none; gives up after a day), cutting in (hove to
+  by the carcass on her lines, a stroke every 1.2 s into her hold), 2 whales, homeward with her tryworks smoking
+  (blubber to oil aboard), home: hold into the realm's stores, catch's worth into its purse (oil 3, ambergris 40,
+  bone 2, meat 1), signed hands aboard paid a lay (10% of the worth, at least 4 emeralds, plus 2 oil).
+- Out of every player's reach for 2 days she's taken to have made her voyage unseen (1-2 whales' catch credited);
+  seen again later, she's stowed. She runs from pirates like a merchantman, then takes up her voyage where she left
+  it (a merchant's "run" mode no longer overwrites hers); sunk, the voyage ends.
+- Whaleboats (Andy: "it'd be hard for the larger ship required for processing to keep up"): a whale within 72 blocks,
+  she heaves to and lowers 2 spruce rowboats off the side toward it, an oarsman and a harpooner from her hands in each
+  (one hand always stays aboard). The server rows them (head brought round 5 degrees a tick, 0.04 a tick pulling),
+  they close to 7 blocks and the harpooner throws irons from 12, lines fast to the boat, so a running whale drags it.
+  She follows under 0.3 sail beyond 40 blocks. Dead, the boats tow the carcass back on their lines while she closes;
+  within 8 blocks of her side the lines are passed up and made fast aboard her (`Harpoon.passTo`) and she cuts in.
+  Boats with no orders (whale lost, cutting in, homeward) row back and are hoisted in beside her, their hands back
+  at their old stations; she won't sail home without them. A boat with no one left to row is cast adrift. Boats
+  carry a saved `whaleboat` attachment (her id and each hand's station), so they survive a reload.
+- `Harpoon.thrownAt` (crew harpooners, leading and lobbing), `WhaleCarcass.cutByCrew`, `Crew.Side.WHALER`,
+  `Corsairs` hooks, `Navies.launch` now package-wide. Op: `/kingdom fleet whaler` (status, or fit one out now).
+
+## 0.7.211: the underworld, stage 1: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (pack 0.16.33)
 Andy (2026-10-25): "Id like to see illegal goods traded amongst the people. Rare commodities like Pmeh and Shash bricks go
 for sale around specific cities that eventually become known as hotbeds for trafficking goods and gambling. You should be
 able to find these speakeasies hidden from the guard as being caught facilitating sale would end up with you flogged,

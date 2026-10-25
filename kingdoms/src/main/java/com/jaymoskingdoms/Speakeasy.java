@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.210) The blocks of the {@link Underworld}: a realm's speakeasy, and its cells.
+ * (0.7.211) The blocks of the {@link Underworld}: a realm's speakeasy, and its cells.
  *
  * <p>The den is dug under open ground in the town ({@link #site}): a spruce hatch in the grass with a hay bale by it, a
  * ladder down a stone-lined shaft, and a low room {@link #DEPTH} below, plank-floored and stone-walled under a dark ceiling,

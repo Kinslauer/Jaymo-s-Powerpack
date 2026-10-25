@@ -134,9 +134,9 @@ public final class Theft {
 		ASSAULT(Weight.LIGHT, "assault"),
 		/** (0.7.132) one of its dead robbed ({@link Looters#playerRobbed}). */
 		ROBBING(Weight.MEDIUM, "robbing"),
-		/** (0.7.210) contraband sold (or bought) in the street ({@link Underworld#traded}). */
+		/** (0.7.211) contraband sold (or bought) in the street ({@link Underworld#traded}). */
 		DEALING(Weight.MEDIUM, "dealing"),
-		/** (0.7.210) contraband flaunted in front of a guard ({@link Underworld}). */
+		/** (0.7.211) contraband flaunted in front of a guard ({@link Underworld}). */
 		CONTRABAND(Weight.MEDIUM, "contraband");
 
 		final Weight weight;
@@ -288,7 +288,7 @@ public final class Theft {
 		player.setAttached(WANTED, Map.copyOf(wanted));
 	}
 
-	/** (0.7.210) {@code faction} calls off its hunt for {@code player} (or for the costume they're masked in there): they've been dealt with ({@link Busts}). */
+	/** (0.7.211) {@code faction} calls off its hunt for {@code player} (or for the costume they're masked in there): they've been dealt with ({@link Busts}). */
 	static void clearWanted(ServerPlayer player, int faction) {
 		String persona = Identities.persona(player, faction);
 		if (persona != null) {

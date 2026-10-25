@@ -2,6 +2,8 @@ package com.jaymoskingdoms.whaling;
 
 import com.jaymoskingdoms.sailing.Hull;
 import com.jaymoskingdoms.sailing.Ship;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -209,6 +211,33 @@ public final class WhaleCarcass extends Entity {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * (stage 3) A whaling crew's stroke, cutting it in alongside their ship: what it cut away (the ambergris too, if this
+	 * stroke found it), for their hold; nothing if there's nothing left to cut.
+	 */
+	public List<ItemStack> cutByCrew(ServerLevel level) {
+		int left = this.entityData.get(LEFT);
+		if (left <= 0 || this.sinking > 0) {
+			return List.of();
+		}
+		this.entityData.set(LEFT, --left);
+		List<ItemStack> out = new ArrayList<>();
+		if (left == this.amber) {
+			out.add(new ItemStack(Whaling.AMBERGRIS, this.variant() == GreatWhale.WHITE ? WHITE_AMBERGRIS : 1));
+			this.amber = -1;
+		}
+		ItemStack cut = this.cut(left);
+		out.add(cut);
+		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, cut.getItem()), this.getX(), this.getY() + HEIGHT, this.getZ(), 12,
+			this.getBbWidth() * 0.3, 0.2, this.getBbWidth() * 0.3, 0.08);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 1.0F,
+			0.5F + this.random.nextFloat() * 0.2F);
+		if (left <= 0) {
+			this.sink(level);
+		}
+		return out;
 	}
 
 	/** (stage 4) A shark tore a stroke's worth away (false if there was nothing left to take). */

@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.210) The criminal underbelly, stage 1. Andy (2026-10-25): "Id like to see illegal goods traded amongst the people.
+ * (0.7.211) The criminal underbelly, stage 1. Andy (2026-10-25): "Id like to see illegal goods traded amongst the people.
  * Rare commodities like Pmeh and Shash bricks go for sale around specific cities that eventually become known as hotbeds
  * for trafficking goods and gambling. You should be able to find these speakeasies hidden from the guard as being caught
  * facilitating sale would end up with you flogged, imprisoned, or worse."

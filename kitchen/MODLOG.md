@@ -1093,7 +1093,7 @@ anywhere, and none of its vegetables went into our minigames. New dishes, all th
 - Assets: `tools/gen_hides.py` (own pixel art; the rack uses vanilla spruce log textures). Recipes, the rack and the
   hide drops checked on a Powers dev server with a fake player; not seen in a client.
 
-## 0.5.29: Pmeh is rare, grown from seed and dried, and graded (Kingdoms 0.7.210, pack 0.16.32)
+## 0.5.29: Pmeh is rare, grown from seed and dried, and graded (Kingdoms 0.7.211, pack 0.16.33)
 Andy (2026-10-25), for Kingdoms' speakeasies: Pmeh should be a rare commodity, not free from tall grass; "it does have
 seeds actually, you just have to be good at growing and drying the plant to have quality enough to sell like the
 dealers do."

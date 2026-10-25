@@ -252,7 +252,7 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
 	}
 
-	/** (0.7.210) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
+	/** (0.7.211) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
 	static String personality(Villager v) {
 		return LOADED ? McaBridge.personality(v) : "";
 	}

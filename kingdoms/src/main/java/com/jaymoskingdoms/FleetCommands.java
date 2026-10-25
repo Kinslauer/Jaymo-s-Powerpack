@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.42) Operators' commands for the ships with crews of their own (debug: plain text): {@code /kingdom fleet harbour |
- * navy | merchant | pirate | wreck | chart | info | ship <rig>}.
+ * navy | merchant | whaler | pirate | wreck | chart | info | ship <rig>}.
  */
 final class FleetCommands {
 	private FleetCommands() {
@@ -38,6 +38,7 @@ final class FleetCommands {
 			.then(Commands.literal("harbour").executes(FleetCommands::harbour))
 			.then(Commands.literal("navy").executes(FleetCommands::navy))
 			.then(Commands.literal("merchant").executes(FleetCommands::merchant))
+			.then(Commands.literal("whaler").executes(FleetCommands::whaler))
 			.then(Commands.literal("pirate").executes(FleetCommands::pirate))
 			.then(Commands.literal("wreck").executes(FleetCommands::wreck))
 			.then(Commands.literal("chart").executes(FleetCommands::chart))
@@ -95,6 +96,25 @@ final class FleetCommands {
 		Ship ship = Navies.warship(level, f, Navies.harbour(server, f.id()), level.getGameTime(), true);
 		return ship == null ? fail(c, "No room to put out " + f.name() + "'s warship at its mooring")
 			: ok(c, f.name() + "'s warship " + (ship.crew == null ? "" : ship.crew.name) + " at " + ship.blockPosition().toShortString());
+	}
+
+	/** (0.7.210) The nearest harbour realm's whaler: how her voyage goes, or (with none out) one fitted out now. */
+	private static int whaler(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		MinecraftServer server = c.getSource().getServer();
+		Faction f = nearest(c, x -> x.type().isRealm() && Navies.harbour(server, x.id()) != null);
+		if (f == null) {
+			return fail(c, "No realm with a harbour near (/kingdom fleet harbour)");
+		}
+		ServerLevel level = Factions.level(server);
+		Whalers.Voyage v = Whalers.voyage(server, f.id());
+		if (v != null) {
+			String where = level.getEntity(v.ship) instanceof Ship ship && ship.crew != null
+				? ship.crew.name + " (" + ship.crew.mode + ") at " + ship.blockPosition().toShortString() : "out of reach";
+			return ok(c, f.name() + "'s whaler: " + where + ", ground " + v.ground.toShortString() + ", " + v.whales + " whales, hold " + v.hold);
+		}
+		Ship ship = Whalers.fitOut(level, f, Navies.harbour(server, f.id()));
+		return ship == null ? fail(c, "No room to fit out a whaler at " + f.name() + "'s mooring")
+			: ok(c, (ship.crew == null ? "A whaler" : ship.crew.name) + " fits out at " + f.name() + "'s harbour");
 	}
 
 	private static int merchant(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
