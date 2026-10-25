@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.shouldersurfing",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ShoulderSurfingGiantMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

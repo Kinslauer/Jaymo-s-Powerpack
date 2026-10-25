@@ -50,6 +50,7 @@ public final class ZFighterApe {
 			return;
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
+		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
@@ -189,6 +190,24 @@ public final class ZFighterApe {
 			// the tail swings, more as he lumbers along
 			this.tail.yRot = (0.25F + 0.35F * walk) * Mth.sin(time * (0.08F + 0.12F * walk));
 			this.tail.xRot = -0.6F + 0.1F * Mth.sin(time * 0.05F);
+			// (0.16.6) his punch: the right fist drawn back as it charges, then thrown out and down
+			float[] smash = state.getData(ApeSmashClient.POSE);
+			if (smash != null) {
+				float drawn = smash[0];
+				if (smash[1] >= 0.0F) {
+					// the blow: out fast, then easing back
+					float t = smash[1];
+					float out = t < 0.4F ? t / 0.4F : 1.0F - (t - 0.4F) / 0.6F;
+					this.rightArm.xRot = Mth.lerp(out, this.rightArm.xRot, ApeSmashClient.THROW_X);
+					this.rightArm.zRot = Mth.lerp(out, this.rightArm.zRot, 0.0F);
+					this.body.yRot = -ApeSmashClient.TWIST * out;
+				} else {
+					float shake = drawn >= 1.0F ? 0.04F * Mth.sin(time * 2.5F) : 0.0F;
+					this.rightArm.xRot = Mth.lerp(drawn, this.rightArm.xRot, ApeSmashClient.DRAW_X) + shake;
+					this.rightArm.zRot += ApeSmashClient.DRAW_Z * drawn;
+					this.body.yRot = ApeSmashClient.TWIST * drawn;
+				}
+			}
 		}
 	}
 

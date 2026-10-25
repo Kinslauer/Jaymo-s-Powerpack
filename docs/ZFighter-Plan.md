@@ -75,3 +75,12 @@ sparks and fire now only runs for `POWER_UP_TICKS` after going into a form (the 
 settles to a thin aura shell out past the body (`settledAura`) and the rising ground debris, both stronger each form,
 with Primal Super's flames licking at the aura's edge. The fur layer sits at 0.36 so MCA clothes don't hide it. Six
 Super hair sets (swept, wild, flame, gale, crown, fringe; `tools/zfighter_hair/hair.js`), one per fighter by UUID.
+
+## Ape punch, ape camera, Fusion on the Mode slot (pack 0.16.6)
+Andy (2026-10-25): the Great Ape no longer swings or digs; left click is `ApeSmash` (hold to draw a fist back, full at
+1 s; let go and it slams where you look, a blast scaled by the charge and the ape's attack damage). The ape vanished in
+third person because Shoulder Surfing skips drawing you when its own (unscaled) camera is within your width:
+`ShoulderSurfingGiantMixin` keeps you drawn while `GiantCamera` is in use. The powers screen's Mode slot is named for
+each power's Mode line ("No Mode" when there is none); a power can give it its own job (`PowerClient.screenMode`, lang
+`power.<id>.toggle.mode`): Z Fighter's is Fusion (taps Z, then C). The Primal Super fur is now worn like a costume
+(`CostumeModels.worn`), so it follows MCA's body and every animation.

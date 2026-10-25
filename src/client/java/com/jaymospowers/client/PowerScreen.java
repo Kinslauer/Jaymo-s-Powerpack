@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.locale.Language;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -465,9 +466,14 @@ public class PowerScreen extends Screen {
 				graphics.fill(tx + 1, ty + 1, tx + SLOT - 1, ty + SLOT - 1, 0x60FFFFFF);
 			}
 			String id = i == 0 ? "mode" : i == 1 ? "ultimate" : "mask";
-			graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.toggle." + id), tx + SLOT / 2, ty + SLOT + 2, open ? COLOR_TEXT : COLOR_DIM);
+			Component label = i == 0 ? modeLabel() : Component.translatable("screen.jaymospowers.toggle." + id);
+			// (0.16.6) a power's Mode is named for what it does, so cut a long name to the slot's room
+			int room = (CANVAS_W - 3 * SLOT) / 4 + SLOT - 2;
+			Component shown = this.font.width(label) <= room ? label
+				: Component.literal(this.font.plainSubstrByWidth(label.getString(), room - this.font.width("...")) + "...");
+			graphics.centeredText(this.font, shown, tx + SLOT / 2, ty + SLOT + 2, open ? COLOR_TEXT : COLOR_DIM);
 			if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
-				hover = Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
+				hover = i == 0 ? modeHover(open) : Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
 			}
 		}
 		if (hover != null) {
@@ -484,6 +490,56 @@ public class PowerScreen extends Screen {
 		return cy() + CANVAS_H - SLOT - 14;
 	}
 
+	/** (0.16.6) The power's own name for the screen's Mode slot (lang {@code power.<id>.toggle.mode}), or null. */
+	private @Nullable String ownModeKey() {
+		if (this.selected == null) {
+			return null;
+		}
+		String key = "power." + this.selected.id().getNamespace() + "." + this.selected.id().getPath() + ".toggle.mode";
+		return Language.getInstance().has(key) ? key : null;
+	}
+
+	/** (0.16.6) The Mode key's line in the key guide (its name and what it does), or null when this power has no mode. */
+	private KeyGuide.@Nullable Line modeLine() {
+		for (KeyGuide.Line line : lines()) {
+			if ("mode".equals(line.slot())) {
+				return line;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * (0.16.6) Andy: "the mode button should change depending on the power, because not all of them have a mode". Named
+	 * for what the power's Mode does (Web Zip, Pocket Dimension...), or the power's own slot (Z Fighter: Fusion Dance).
+	 */
+	private Component modeLabel() {
+		String own = ownModeKey();
+		if (own != null) {
+			return Component.translatable(own);
+		}
+		KeyGuide.Line line = modeLine();
+		if (line == null) {
+			return Component.translatable("screen.jaymospowers.toggle.mode.none");
+		}
+		return line.name() != null ? line.name() : Component.translatable("screen.jaymospowers.toggle.mode");
+	}
+
+	private Component modeHover(boolean open) {
+		if (this.selected != current()) {
+			return Component.translatable("screen.jaymospowers.toggle.mode.locked");
+		}
+		String own = ownModeKey();
+		if (own != null) {
+			return Component.translatable(own + ".desc");
+		}
+		KeyGuide.Line line = modeLine();
+		if (line == null) {
+			return Component.translatable("screen.jaymospowers.toggle.mode.none.desc");
+		}
+		return open ? line.text() : Component.translatable("screen.jaymospowers.toggle.mode.unlearned");
+	}
+
 	/** Whether toggle {@code i} does anything: Z for your power, C once it answers, the mask while a costume has one. */
 	private boolean toggleOpen(int i) {
 		Player player = this.minecraft.player;
@@ -491,7 +547,10 @@ public class PowerScreen extends Screen {
 			return false;
 		}
 		return switch (i) {
-			case 0 -> true;
+			case 0 -> {
+				KeyGuide.Line line = modeLine();
+				yield ownModeKey() != null || line != null && !line.locked();
+			}
 			case 1 -> this.selected.ultimateAnswers(player);
 			default -> {
 				com.jaymospowers.costume.CostumeDesign worn = com.jaymospowers.costume.Costume.worn(player);
@@ -502,7 +561,15 @@ public class PowerScreen extends Screen {
 
 	private void toggle(int i) {
 		switch (i) {
-			case 0 -> press(JaymosPowersClient.TAP_MODE);
+			case 0 -> {
+				PowerClient client = this.selected == null ? null : PowerClients.get(this.selected.id());
+				if (client != null && this.minecraft.player != null && ownModeKey() != null) {
+					onClose();
+					client.screenMode(this.minecraft.player);
+				} else {
+					press(JaymosPowersClient.TAP_MODE);
+				}
+			}
 			case 1 -> press(JaymosPowersClient.TAP_ULTIMATE);
 			default -> com.jaymospowers.client.costume.CostumeClient.toggleMask();
 		}

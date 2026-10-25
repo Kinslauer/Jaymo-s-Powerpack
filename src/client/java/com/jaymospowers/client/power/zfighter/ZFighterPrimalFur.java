@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.costume.CostumeModels;
 import com.jaymospowers.power.zfighter.ApeRage;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.15.148) Super 4's body (Andy: "combining the primal ape look with the character"): the Great Ape's red fur over his
@@ -42,14 +44,29 @@ public final class ZFighterPrimalFur {
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
-		private final PlayerModel wide = model(false), slim = model(true);
+		private @Nullable PlayerModel wide, slim;
 
 		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
 		}
 
-		private static PlayerModel model(boolean slim) {
-			return new PlayerModel(LayerDefinition.create(PlayerModel.createMesh(new CubeDeformation(GAP), slim), 64, 64).bakeRoot(), slim);
+		/**
+		 * (0.16.6) Andy: "the primal super fur isnt animating correctly". Worn the way a costume is ({@link CostumeModels#worn}):
+		 * each draw it takes the very pose the body's drawn in (MCA's villager body, other mods' animations and our own
+		 * poses), not just vanilla's walk.
+		 */
+		private PlayerModel model(boolean slimArms) {
+			if (slimArms ? this.slim == null : this.wide == null) {
+				PlayerModel model = CostumeModels.worn(LayerDefinition.create(PlayerModel.createMesh(new CubeDeformation(GAP), slimArms), 64, 64),
+					slimArms, this::getParentModel, (worn, state) -> {
+					});
+				if (slimArms) {
+					this.slim = model;
+				} else {
+					this.wide = model;
+				}
+			}
+			return slimArms ? this.slim : this.wide;
 		}
 
 		@Override
@@ -57,8 +74,9 @@ public final class ZFighterPrimalFur {
 			if (state.getData(KEY) == null || state.isInvisible) {
 				return;
 			}
-			boolean slim = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
-			coloredCutoutModelCopyLayerRender(slim ? this.slim : this.wide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			PlayerModel parent = this.getParentModel();
+			CostumeModels.wear(state, parent);
+			renderColoredCutoutModel(model(CostumeModels.slim(parent, state)), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 		}
 	}
 }

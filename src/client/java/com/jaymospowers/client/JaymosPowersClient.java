@@ -39,6 +39,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
 	/** (0.15.147) Keys the powers screen pressed for you (the abilities, then Z, then C): ticks left held down. */
 	private static final int[] tapped = new int[PowerKey.values().length + 2];
+	/** Ticks until a key queued by {@link #tapLater} is tapped (0: none queued). */
+	private static final int[] tapDelay = new int[PowerKey.values().length + 2];
 	public static final int TAP_MODE = PowerKey.values().length, TAP_ULTIMATE = TAP_MODE + 1;
 	/** How long a press from the screen holds the key. */
 	private static final int TAP_TICKS = 3;
@@ -176,6 +178,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 		tapped[key] = TAP_TICKS;
 	}
 
+	/** (0.16.6) {@link #tap} {@code key} once {@code ticks} have passed (a key after another: Z, then C). */
+	public static void tapLater(int key, int ticks) {
+		tapDelay[key] = ticks;
+	}
+
 	/** The ascended ability's key mapping. */
 	public static KeyMapping ultimateKey() {
 		return ultimateKey;
@@ -293,6 +300,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		if (minecraft.gui.screen() == null) {
 			for (int i = 0; i < tapped.length; i++) {
 				tapped[i] = Math.max(0, tapped[i] - 1);
+				if (tapDelay[i] > 0 && --tapDelay[i] == 0) {
+					tapped[i] = TAP_TICKS;
+				}
 			}
 		}
 		if (client != null && !minecraft.isPaused()) {

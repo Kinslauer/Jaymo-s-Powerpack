@@ -36,6 +36,14 @@ public interface PowerClient {
 		return 0.0F;
 	}
 
+	/**
+	 * (0.16.6) The powers screen's Mode slot was pressed (the screen is already closing). True if this power does its own
+	 * thing there (lang {@code power.<id>.toggle.mode} names it); false presses the Mode key as usual.
+	 */
+	default boolean screenMode(LocalPlayer player) {
+		return false;
+	}
+
 	/** The local player just gained (true) or lost (false) this power. Reset client state here. */
 	default void onActiveChanged(LocalPlayer player, boolean active) {
 	}
