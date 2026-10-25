@@ -133,6 +133,8 @@ public final class PoseTakeover {
 			|| s.getData(WebBodyPose.KEY) != null || s.getData(WebArms.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.web.WebHangPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.web.WebClimbPose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
+			|| s.getData(com.jaymospowers.client.power.web.WebExecutionPose.KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(WebSymbioteClient.SLAM) != null || s.getData(WebSymbioteClient.CHARGE) != null
 			|| s.getData(WebSymbioteClient.ROAR) != null || s.getData(WebSymbioteClient.EATING) != null
 			// the symbiote's suit and Living Armor are models of their own over the body, posed the vanilla way (and Living

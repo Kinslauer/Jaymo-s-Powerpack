@@ -59,6 +59,13 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
+			if (com.jaymospowers.power.web.WebHeldGrab.holding(player)) {
+				// (0.16.7) something held up in the left hand: the click mauls it (one of six attacks), and nothing else
+				if (clicks > 0) {
+					ClientPlayNetworking.send(new WebNet.HeldAttack());
+				}
+				return true;
+			}
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 			if (grips != null && com.jaymospowers.power.web.WebTendrilCombos.active(player)) {
 				// mid-combo: the click is swallowed
@@ -276,6 +283,27 @@ public final class WebPowerClient implements PowerClient {
 		} else {
 			return;
 		}
+		// (0.16.7) G with the tendrils out: the left hand takes something living close by, no bigger than a cow, or lets go
+		// of what it holds (WebHeldGrab); bigger or further things fall through to the tendril's far grab below
+		if (hand == WebNet.OFF && tendrils) {
+			if (!down) {
+				if (heldGrabKey) {
+					heldGrabKey = false;
+					return;
+				}
+			} else if (com.jaymospowers.power.web.WebHeldGrab.holding(player)) {
+				heldGrabKey = true;
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize(-1));
+				return;
+			} else {
+				net.minecraft.world.entity.Entity close = grabTarget(player);
+				if (close != null && com.jaymospowers.power.web.WebHeldGrab.canSeize(player, close)) {
+					heldGrabKey = true;
+					net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize(close.getId()));
+					return;
+				}
+			}
+		}
 		// Living Armor up: the keys are tendrils. On something grabbable, they grab it (and throw it on release)
 		if (tendrils && down) {
 			net.minecraft.world.entity.Entity target = grabTarget(player);
@@ -306,6 +334,8 @@ public final class WebPowerClient implements PowerClient {
 
 	/** Which tendril is holding something (so its key's release throws instead of ending a swing). */
 	private final boolean[] grabbing = new boolean[2];
+	/** G went to the left hand's grab (WebHeldGrab): its release is nothing. */
+	private boolean heldGrabKey;
 
 	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
 	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {
