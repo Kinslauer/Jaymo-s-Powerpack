@@ -2861,3 +2861,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`TouchNMotionHook.Drawn.put`, by reflection), keeping the model's own visibility and scale. Skipped for the body model
   itself, while one of our poses is on (EMF and Touch'n Motion are paused then), a downed body, a whip hand and your own
   first-person body. Compile-checked; not playtested.
+- **0.16.21, nursing a wound:** Andy: with a festering body wound he kept touching his head instead of his body, and
+  far too often; the reaction should go to the spot, and come now and then. None of our code played that touch (the
+  fever only gives Weakness and 1 body damage a minute), and nothing in Fresh Animations or Not Enough Animations reacts
+  to wounds. The likeliest source is Touch'n Motion's helmet gesture (a hand pushed down on the head, twice), which plays
+  whenever the item in the head slot changes. New `client/wounds/WoundNursePose`, for everyone: every 35-70 s (first one
+  8-20 s in), a wounded player puts a hand to the wound for 2.6 s. Fingers go to the temple for the head, a hand presses
+  the side with a bend for the body, the other hand holds a hurt arm, a hand goes on the thigh with a bend for a leg.
+  Festering wounds come first, then breaks, then bleeding. Festering and bleeding sync only to their owner, so other
+  players see it for breaks only. It never plays during any other of our poses, attacking, using an item, riding,
+  swimming, sprinting, flying, sleeping or downed, or on your own body in first person. It counts in
+  `PoseTakeover.posed` (Fresh Animations pauses for it); `posedOtherwise` lets it step aside for every other pose. Hooked
+  in through Tend's mixins and `ModelPoses`. Tuning at the top of the class. Compile-checked; not playtested.

@@ -195,6 +195,12 @@ public final class ZFighterPower implements Power {
 	static final double FULL_BURST_SHAKE_RANGE = 16.0;
 	/** Never twice in this many ticks (ki bobbing at full). */
 	static final int FULL_BURST_GAP = 40;
+	/**
+	 * (0.16.20) Andy: "after achieving max it stays for a bit until your ki falls". Let go of a full charge and the charging
+	 * aura holds this long, or until his ki drops under this share of full.
+	 */
+	static final int AURA_HOLD_TICKS = 160;
+	static final float AURA_HOLD_KI = 0.9F;
 	/** (0.15.59) A Warrior-born's scream into each form is heard (and read) this far; lines to pick from, a form. */
 	static final double SHOUT_RANGE = 32.0;
 	static final int SHOUT_LINES = 3;
@@ -244,6 +250,15 @@ public final class ZFighterPower implements Power {
 	/** The form he's in (1-3), for everyone's client (the hair); absent in base form. */
 	public static final AttachmentType<Integer> FORM = AttachmentRegistry.create(JaymosPowers.id("zfighter_form"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * (0.16.20) Let go of a full charge: the game time his charging aura holds until (it goes sooner if his ki falls), for
+	 * everyone's client ({@code ZFighterKiAura}). Absent when it isn't holding; not saved.
+	 */
+	public static final AttachmentType<Long> AURA_HOLD = AttachmentRegistry.create(JaymosPowers.id("zfighter_aura_hold"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/** (0.16.20) The game time his ki last hit full on a charge (the ki glow's pulse), for everyone's client; not saved. */
+	public static final AttachmentType<Long> KI_FULL = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_full"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	/**
 	 * (0.13.27) Andy: "every zfighter should spawn with a random ki color". The ki colour each Z Fighter is born with,
 	 * drawn from {@link #KI_PALETTE} when the power comes (or the first time it's missing): his blasts, disc, waves, bomb,
@@ -318,6 +333,8 @@ public final class ZFighterPower implements Power {
 		long lastFullBurst = -1000L;
 		/** When he last went into a form: the power-up blast's storm of particles runs {@link #POWER_UP_TICKS} from here. */
 		long formSince = -1000L;
+		/** (0.16.20) Until when the charging aura holds after a full charge (-1: it isn't). */
+		long auraHold = -1L;
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
 		/** (0.13.27) His ki colour ({@link #KI_COLOR}), kept fresh each tick; -1 before the first. */
@@ -533,6 +550,8 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
+		player.removeAttached(AURA_HOLD);
+		player.removeAttached(KI_FULL);
 		ZFighterDisc.forget(player);
 		ZFighterCorruption.clear(player);
 		ZFighterLineage.tailTags(player, false, false);
@@ -681,6 +700,7 @@ public final class ZFighterPower implements Power {
 
 		ZFighterCombo.tick(player, live);
 		live.ki = Mth.clamp(live.ki, 0.0F, max);
+		auraHold(player, live, now, max);
 		ZFighterGrowth.tick(player, live);
 		ZFighterBattle.tick(player, live);
 		if (now % 10 == 0) {
@@ -1096,6 +1116,29 @@ public final class ZFighterPower implements Power {
 		}
 	}
 
+	/**
+	 * (0.16.20) While he charges at full, the aura is set to hold {@link #AURA_HOLD_TICKS} from when he lets go; it ends
+	 * then, or when his ki falls under {@link #AURA_HOLD_KI} of full. Synced only once he's let go (charging shows on its own).
+	 */
+	static void auraHold(ServerPlayer player, Live live, long now, int max) {
+		boolean full = live.ki >= max * AURA_HOLD_KI;
+		if (live.charging) {
+			live.auraHold = live.ki >= max ? now + AURA_HOLD_TICKS : -1L;
+			return;
+		}
+		if (live.auraHold >= 0L && (now >= live.auraHold || !full || ZFighterLineage.ape(player))) {
+			live.auraHold = -1L;
+		}
+		Long synced = player.getAttached(AURA_HOLD);
+		if (live.auraHold < 0L) {
+			if (synced != null) {
+				player.removeAttached(AURA_HOLD);
+			}
+		} else if (synced == null || synced != live.auraHold) {
+			player.setAttached(AURA_HOLD, live.auraHold);
+		}
+	}
+
 	/** (0.15.59) His aura's step of power (0 to {@link #AURA_STEPS}): how far his max ki has grown past the start. */
 	static int auraStep(int max) {
 		return Mth.clamp((max - BASE_MAX_KI) / AURA_KI_STEP, 0, AURA_STEPS);
@@ -1140,6 +1183,7 @@ public final class ZFighterPower implements Power {
 	 */
 	static void fullBurst(ServerPlayer player, Live live, long now) {
 		live.lastFullBurst = now;
+		player.setAttached(KI_FULL, now);
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
 		Vec3 c = player.position();

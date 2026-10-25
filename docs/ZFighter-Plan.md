@@ -90,3 +90,15 @@ Andy (2026-10-25), pointing at Create: Lanterns' ring-bearers (ARR, look only): 
 mean by the ki aura glow. it should be faint, but apparent". `ZFighterKiGlow`: three additive shells (0.45/0.95/1.6 px
 out, each fainter) worn like a costume, an energy-swirl texture (`tools/gen_ki_glow.py`) rising over them, in his ki
 colour (a form's colour in a form). Faint in base form, brighter in each form and while charging. Not on the ape.
+
+## Flame aura, ki glow as the form idle (pack 0.16.20)
+Andy (2026-10-25), pointing at JinGames' Dragon Block C (no licence published, so treated as All Rights Reserved; the
+idea only, original art): "the ki glow looks great, i need that one to be an idle for forms though, and maybe it pulses
+for a second at max ki. ideally the aura i want appears when charging, after achieiving max it stays for a bit until
+your ki falls, and it pulses as you are transformed with the current rising debris". `ZFighterKiAura`: a flame-shaped
+shell (two additive layers turning against each other, tongues flickering up past the head, flames scrolling up from
+`tools/gen_ki_aura.py`), in the glow's colour. Full while charging; let go of a full charge and it holds
+`AURA_HOLD_TICKS` (8 s) or until ki falls under 90% (`ZFighterPower.AURA_HOLD`, synced). In a form it flares every
+`PULSE_EVERY` ticks (quicker each form) and dies back to the glow; the debris is unchanged. The glow no longer brightens
+on a charge; when a charge fills ki (`KI_FULL`) it flashes and swells for a second. Hidden round your own camera in
+first person. Preview: project files `art-overhaul/ki-aura/ki-aura-preview.png`.
