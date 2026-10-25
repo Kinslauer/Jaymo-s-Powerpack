@@ -1058,8 +1058,18 @@ anywhere, and none of its vegetables went into our minigames. New dishes, all th
   pepper, tomato; Fire Resistance, Strength). Both are stews: they give the bowl back, quench like stews and warm you.
 - **Lemonade** (crafting: 2 lemons, sugar, a water bottle): a drink, 6 thirst points, bottle back.
 - **Grape Wine**: the cask takes grapes as a base, like berries.
-- `PantryCompat` looks Pantry's items up by id; without Pantry the new `Step`s are air, their dishes are left off every
-  station (`Dish.available`), the decoy pool skips them, grape wine isn't a cask base, and the recipes don't load
-  (`fabric:registry_contains`). The items are still registered either way so worlds keep them.
+- Second batch, the rest of the food no dish used (Andy: "all of it, except chorus fruit"):
+  - Naturalist: **Venison Stew**, **Roast Duck** (with an apple), **Bushmeat Skewer**, **Mammoth Roast**, **Honey
+    Drumsticks**, **Meat Pasty** (morsels), **Fish Chowder** (bass, catfish), **Piranha Skewer**, **Deep Sea Stew**
+    (anglerfish, blobfish, kelp), **Seafood Boil** (crab, clam), **Crab Cakes**, **Lizard Jerky** (smoker).
+  - Pantry: **Strawberry Tart**, **Peanut Brittle** (pot, no bowl), **Turnip Mash**.
+  - Aether (Powers): **Orange-Glazed Taegore**, **Sky Fruit Salad** (orange, wyndberry, blue berry), **White Apple
+    Tart**, **Kirrid Roast** (with a satival bulb), **Prismallard Omelette**, **Burrukai Ribs** (smoker), **Prismallard
+    Stew**.
+  - Vanilla: **Fish Pie** (cooked cod and salmon), **Ploughman's Lunch** (cooked porkchop, cooked mutton, bread).
+- `OptionalItems` looks Pantry's, Naturalist's and Powers' items up by id; without the mod those `Step`s are air, their
+  dishes are left off every station (`Dish.available`), the decoy pool skips them, grape wine isn't a cask base, and the
+  recipes don't load (`fabric:registry_contains`). The items are still registered either way so worlds keep them.
+- A full stove now lists 43 dishes, so the "can make it" mask sent to the screen is a long (63 dishes).
 - Icons in the vanilla style pack: chicken, cod and pies from vanilla's own (`tools/vanilla_style/kitchen.py`), soups in
   vanilla's stew bowl, lemonade and grape wine in the brewing bottle (`brewing.py`). Compile-checked; not playtested.

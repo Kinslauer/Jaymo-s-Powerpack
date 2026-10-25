@@ -178,8 +178,20 @@ abstract class LarderGames {
 			// the vegetables: one long strip, cut pieces left behind as they pass
 			int vegTop = boardTop + 26;
 			int vegBottom = vegTop + 26;
-			int body = dish == Dish.BEETROOT_HASH ? 0xFF8E1A48 : dish == Dish.FRUIT_SALAD ? 0xFFF2A65A : 0xFFE58A24;
-			int shade = dish == Dish.BEETROOT_HASH ? 0xFF64102F : dish == Dish.FRUIT_SALAD ? 0xFFC8703A : 0xFFB8641A;
+			int body = switch (dish) {
+				case BEETROOT_HASH -> 0xFF8E1A48;
+				case FRUIT_SALAD -> 0xFFF2A65A;
+				case SKY_FRUIT_SALAD -> 0xFFF0A030;
+				case PLOUGHMANS_LUNCH -> 0xFFC8865A;
+				default -> 0xFFE58A24;
+			};
+			int shade = switch (dish) {
+				case BEETROOT_HASH -> 0xFF64102F;
+				case FRUIT_SALAD -> 0xFFC8703A;
+				case SKY_FRUIT_SALAD -> 0xFFC07018;
+				case PLOUGHMANS_LUNCH -> 0xFF8A5634;
+				default -> 0xFFB8641A;
+			};
 			float s = doneTicks >= 0 ? slide : slide + speed * a;
 			int startX = Math.round(cx + (0.0F - s) * PX_PER_LENGTH);
 			int endX = Math.round(cx + (1.0F - s) * PX_PER_LENGTH);
@@ -444,6 +456,12 @@ abstract class LarderGames {
 				case CHICKEN_SOUP -> 0xFFE2C878;
 				case RATATOUILLE -> 0xFFB8402A;
 				case CHILI_CON_CARNE -> 0xFF8A2A16;
+				case VENISON_STEW -> 0xFF6A3418;
+				case FISH_CHOWDER, SEAFOOD_BOIL -> 0xFFDCCCAA;
+				case DEEP_SEA_STEW -> 0xFF3A4A5A;
+				case PEANUT_BRITTLE -> 0xFFC88A2A;
+				case TURNIP_MASH -> 0xFFE8DCC0;
+				case PRISMALLARD_STEW -> 0xFFC8A060;
 				default -> 0xFF8A5A30;
 			};
 		}

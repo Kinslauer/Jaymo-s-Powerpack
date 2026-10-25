@@ -17,15 +17,15 @@ public final class Payloads {
 
 	/** Server → client: open the kitchen screen for the station at {@code pos}. */
 	/** {@code stocked}: bit i set when the station's i-th dish can be made from the pockets and nearby storage. */
-	public record OpenKitchen(BlockPos pos, int station, int stocked) implements CustomPacketPayload {
+	public record OpenKitchen(BlockPos pos, int station, long stocked) implements CustomPacketPayload {
 		public static final Type<OpenKitchen> TYPE = new Type<>(JaymosKitchen.id("open_kitchen"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, OpenKitchen> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeBlockPos(p.pos);
 				buf.writeVarInt(p.station);
-				buf.writeInt(p.stocked);
+				buf.writeLong(p.stocked);
 			},
-			buf -> new OpenKitchen(buf.readBlockPos(), buf.readVarInt(), buf.readInt()));
+			buf -> new OpenKitchen(buf.readBlockPos(), buf.readVarInt(), buf.readLong()));
 
 		@Override
 		public Type<OpenKitchen> type() {

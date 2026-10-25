@@ -1,6 +1,6 @@
 package com.jaymoskitchen.brewing;
 
-import com.jaymoskitchen.PantryCompat;
+import com.jaymoskitchen.OptionalItems;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
@@ -11,7 +11,7 @@ public enum Brew {
 	CIDER("cider", 2, 0.3F, 1),
 	MEAD("mead", 3, 0.4F, 2),
 	BERRY_WINE("berry_wine", 2, 0.3F, 2),
-	/** From Pantry for Blockheads' grapes (no grapes, no wine; see PantryCompat). */
+	/** From Pantry for Blockheads' grapes (no grapes, no wine; see OptionalItems). */
 	GRAPE_WINE("grape_wine", 2, 0.4F, 2);
 
 	public final String id;
@@ -34,7 +34,7 @@ public enum Brew {
 			case CIDER -> Items.APPLE;
 			case MEAD -> Items.HONEY_BOTTLE;
 			case BERRY_WINE -> Items.SWEET_BERRIES;
-			case GRAPE_WINE -> PantryCompat.item("grapes");
+			case GRAPE_WINE -> OptionalItems.item(OptionalItems.PANTRY, "grapes");
 		};
 	}
 
