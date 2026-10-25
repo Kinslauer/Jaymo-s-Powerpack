@@ -1583,3 +1583,20 @@ to 3 removals."
   creep, skinned with the suit's own texture; tendrils still sprout from them.
 - **Check first in game:** the teeth-hidden open jaw shows the red throat strip (intended); the takeover fight's first
   mask tear is still a step; Stare's maw still pops away at its end (pre-existing).
+
+## 0.16.2: the symbiote bounds up walls on all fours
+- Andy: "the symbiote also needs a climbing animation, using all fours and aggressively slamming the wall, cracking with
+  every impact, and slightly spreading the symbiote weightily bounding itself up the wall" (the Venom film's skyscraper
+  climb and a Marvel Rivals clip).
+- **Bounds (`WebSymbioteClient.BOUND_*`):** climbing straight up a wall with Wall Crawl, the reach-and-pull becomes
+  gather, heave, slam: the tendril bites `BOUND_REACH` up, you sink for `BOUND_GATHER` ticks, heave at `BOUND_HEAVE`
+  (decaying), slam into the wall and hold `BOUND_SLAM_TICKS`. Average speed about what it was; the big suit reaches
+  further and heaves harder. Sideways, downward, ledge and ceiling crawling are unchanged.
+- **Slams (`WebNet.ClimbSlam`, `WebTendrils.SLAM_*`):** every slam cracks the block under each hand and foot
+  (`destroyBlockProgress`, stage `SLAM_CRACK_STAGE`, fading after `SLAM_CRACK_TICKS`), with that block's dust and a
+  warden-impact thud over its hit sound; nothing breaks. Hands crack overhead, feet below and wide.
+- **Pose (`WebClimbPose`):** all fours flat to the wall, arms reaching near straight up, legs wide, head looking up,
+  the suit a little wider (`SPREAD`); other clients read the heave and slam from the climber's vertical speed. Eases
+  in and out over `BLEND_TICKS`, from whatever the body was doing (hunch, brute, vanilla).
+- **Check first in game:** body pitch is a modest `FLAT` 6° (past ~15° the head clips the wall); the slam pulse other
+  players see is motion-derived, so laggy climbers may miss or double it (the cracks and thud are server-sent).
