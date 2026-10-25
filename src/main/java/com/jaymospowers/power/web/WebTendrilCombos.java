@@ -250,7 +250,8 @@ public final class WebTendrilCombos {
 	/** The attack key with the tendrils full: a combo if one fits, else the plain swing of a held chunk. */
 	private static void attack(ServerPlayer player, int targetId) {
 		if (!WebSymbiote.armored(player) || !player.isAlive() || player.isSpectator() || active(player) || WebSymbiote.driving(player)
-			|| WebTendrils.crossing(player)) {
+			|| WebTendrils.crossing(player) || WebHeldGrab.holding(player)) {
+			// (a hand holding something has the click: WebHeldGrab.attack)
 			return;
 		}
 		ServerLevel level = player.level();

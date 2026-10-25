@@ -213,8 +213,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		// rooted to the torso, so they lean with a crouch (or the hunch)
 		WebFeral.applyModel(this.getParentModel(), state);
 		WebClimbPose.applyModel(this.getParentModel(), state);
+		WebHeldGrabPose.applyModel(this.getParentModel(), state);
 		// the goo they grow out of (it puts their roots on the state for the model)
 		WebGooGlobs.submit(poseStack, collector, lightCoords, state, this.getParentModel(), tendrils, ROOTS, onJob(state, tendrils));
+		// (0.16.7) something held in the left hand being mauled: the stab's spike, the weapon's blade, the skewering tendril
+		heldGrab(this.getParentModel(), state, poseStack, collector, lightCoords);
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
@@ -362,6 +365,69 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		return v.scale(1.0 / 16.0);
 	}
 
+	/** The hand's spike and the arm's blade ({@link WebHeldGrabPose}): where they root on the right arm (pixels, the arm's space) and how far down it they reach. */
+	private static final float HELD_SPIKE_X = -1.0F, HELD_SPIKE_Y = 10.0F, HELD_BLADE_Y = 4.0F;
+	/** The skewer's cord: its thickness at the shoulder and at the point (pixels), and how far before the mob's middle its blade starts. */
+	private static final float SKEWER_ROOT = 2.4F, SKEWER_TIP = 1.3F, SKEWER_BLADE = BLADE_SOCKET + BLADE_POINT;
+
+	/**
+	 * (0.16.7) Mauling what the left hand holds ({@link WebHeldGrabPose}), drawn in the model's root space: the stab's
+	 * spear point grown out of the right hand, the weapon arm's hooked blade grown along the forearm, and the skewer's
+	 * cord from the right shoulder's root straight into the held mob, a spear point on its end. Each grows with the attack
+	 * and melts away after it.
+	 */
+	private static void heldGrab(net.minecraft.client.model.HumanoidModel<?> parent, AvatarRenderState state, PoseStack poseStack,
+		SubmitNodeCollector collector, int light) {
+		WebHeldGrabPose.Grab grab = state.getData(WebHeldGrabPose.KEY);
+		if (grab == null || grab.attack() < 0 || grab.in() <= 0.01F) {
+			return;
+		}
+		float grown = WebHeldGrabPose.grown(grab) * grab.in();
+		if (grown <= 0.01F) {
+			return;
+		}
+		int attack = grab.attack();
+		boolean red = WebStrainLook.of(state) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
+		if (attack == com.jaymospowers.power.web.WebHeldGrab.STAB || attack == com.jaymospowers.power.web.WebHeldGrab.WEAPON) {
+			boolean weapon = attack == com.jaymospowers.power.web.WebHeldGrab.WEAPON;
+			poseStack.pushPose();
+			parent.rightArm.translateAndRotate(poseStack);
+			// grown out of the hand (the stab) or along the forearm (the weapon), scaled up from nothing about its root
+			float rootY = weapon ? HELD_BLADE_Y : HELD_SPIKE_Y;
+			poseStack.translate(HELD_SPIKE_X / 16.0F, rootY / 16.0F, 0.0F);
+			poseStack.scale(grown, grown * (weapon ? 1.6F : 1.3F), grown);
+			poseStack.translate(-HELD_SPIKE_X / 16.0F, -rootY / 16.0F, 0.0F);
+			net.minecraft.world.phys.Vec3 at = new net.minecraft.world.phys.Vec3(HELD_SPIKE_X, rootY, 0.0);
+			net.minecraft.world.phys.Vec3 dir = new net.minecraft.world.phys.Vec3(0.0, 1.0, 0.0);
+			net.minecraft.world.phys.Vec3 up = new net.minecraft.world.phys.Vec3(0.0, 0.0, -1.0);
+			int kind = weapon ? 1 : 0;
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)),
+				(pose, buffer) -> blade(buffer, pose, at, dir, up, kind, light));
+			poseStack.popPose();
+		} else if (attack == com.jaymospowers.power.web.WebHeldGrab.SKEWER && grab.target() != null) {
+			// the right shoulder's root, through the body's bend, in root space
+			PoseStack bodySpace = new PoseStack();
+			parent.body.translateAndRotate(bodySpace);
+			org.joml.Vector3f r = bodySpace.last().pose().transformPosition(new org.joml.Vector3f(ROOTS[0][0] / 16.0F, ROOTS[0][1] / 16.0F, ROOTS[0][2] / 16.0F));
+			net.minecraft.world.phys.Vec3 root = new net.minecraft.world.phys.Vec3(r.x, r.y, r.z).scale(16.0);
+			net.minecraft.world.phys.Vec3 target = grab.target();
+			net.minecraft.world.phys.Vec3 dir = target.subtract(root);
+			if (dir.lengthSqr() < 1.0E-4) {
+				return;
+			}
+			dir = dir.normalize();
+			// out to the mob's middle as the attack lands, back again after
+			net.minecraft.world.phys.Vec3 end = root.lerp(target, grown);
+			net.minecraft.world.phys.Vec3 bladeAt = end.subtract(dir.scale(SKEWER_BLADE * grown));
+			net.minecraft.world.phys.Vec3 up = Math.abs(dir.y) > 0.9 ? new net.minecraft.world.phys.Vec3(0.0, 0.0, -1.0) : new net.minecraft.world.phys.Vec3(0.0, -1.0, 0.0);
+			net.minecraft.world.phys.Vec3 d = dir;
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
+				WebTubes.cord(buffer, pose, px(root), px(bladeAt), SKEWER_ROOT / 16.0, SKEWER_TIP / 16.0, WebTubes.BLACK, light);
+				blade(buffer, pose, bladeAt, d, up, red ? 1 : 0, light);
+			});
+		}
+	}
+
 	/**
 	 * Without First-person Model: your own tendrils drawn from your eyes, after the hands (camera space), rising from
 	 * behind your shoulders and curling in at the edges of the screen; strikes and grabs reach out in front.
@@ -369,6 +435,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	static void submitFirstPerson(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState avatar) {
 		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
 		if (tendrils == null || avatar.isInvisible || FirstPersonCompat.bodyShown()) {
+			return;
+		}
+		if (avatar.getData(WebHeldGrabPose.KEY) != null) {
+			// (0.16.7) something held up in your hand: the tendrils keep off the screen (the hand and the mob are the move)
 			return;
 		}
 		if (firstPersonModel == null) {

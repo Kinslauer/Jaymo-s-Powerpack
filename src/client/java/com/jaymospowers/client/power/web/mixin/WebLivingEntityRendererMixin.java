@@ -53,6 +53,7 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.freerun.UpRunPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebHangPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebClimbPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebHeldGrabPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebCounterPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebWallRunPose.extract(entity, state, partialTicks);
