@@ -290,6 +290,8 @@ public final class GravityPower implements Power {
 	static final double SINGULARITY_PULL = 0.07;
 	static final double SINGULARITY_CORE = 4.0;
 	static final int SINGULARITY_TICKS = 60;
+	/** (0.16.24) The Singularity's film (ticks): over your shoulder, pushing in on it. */
+	static final int SINGULARITY_FILM_TICKS = 30;
 	static final int SINGULARITY_HIT_EVERY = 10;
 	static final float SINGULARITY_HIT = 3.0F;
 	static final float SINGULARITY_BURST = 6.0F;
@@ -1738,6 +1740,8 @@ public final class GravityPower implements Power {
 		}
 		Vec3 at = aimPoint(player, SINGULARITY_RANGE).add(0.0, 1.0, 0.0);
 		WELLS.add(new Well(player.level().dimension(), at, player.getUUID(), player.level().getGameTime() + SINGULARITY_TICKS, true));
+		// (0.16.24) over the shoulder, pushing in on it
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PUSH_IN, SINGULARITY_FILM_TICKS, at, null, 0.0);
 		cool(player, SINGULARITY, SINGULARITY_COOLDOWN);
 		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 1.5F, 0.5F);
 	}

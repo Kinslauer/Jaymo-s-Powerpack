@@ -147,6 +147,8 @@ public final class ZFighterPower implements Power {
 	/** The transformation's screen shake: degrees, more for each form up, and how far it's felt. */
 	static final float SUPER_SHAKE = 0.6F, SUPER_SHAKE_PER_FORM = 0.3F;
 	static final double SUPER_SHAKE_RANGE = 24.0;
+	/** (0.16.24) A transformation's film (ticks): low and close, sweeping round your front. */
+	static final int SUPER_FILM_TICKS = 36;
 
 	// ---- Limit Break (index: tier 1-3) ----
 	static final double[] LIMIT_FIST = {0.0, 0.1, 0.2, 0.33};
@@ -969,6 +971,7 @@ public final class ZFighterPower implements Power {
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * form);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		com.jaymospowers.core.Shakes.heavy(player, center, SUPER_SHAKE_RANGE, SUPER_SHAKE + SUPER_SHAKE_PER_FORM * form);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, SUPER_FILM_TICKS, 0.0);
 		if (live.lineage == ZFighterLineage.WARRIOR) {
 			shout(player, form);
 		}

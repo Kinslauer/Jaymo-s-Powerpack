@@ -186,6 +186,8 @@ public final class Ship extends Entity {
 	/** (0.7.42) Server: who last holed her, and how fast she's moving over the ground (blocks a tick, x and z). */
 	private java.util.@Nullable UUID holedBy;
 	private Vec3 drift = Vec3.ZERO;
+	/** (0.7.206) Pulls on her from outside (a harpoon line to a whale: whaling), taken up at her next move (blocks this tick). */
+	private Vec3 towed = Vec3.ZERO;
 	/** Client: how far it heels over in its turns (degrees, now and last tick). */
 	public float heel, heelO;
 
@@ -523,7 +525,8 @@ public final class Ship extends Entity {
 		float yaw = yawFrom + this.turn;
 		double y = this.settle(level, h, from);
 		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
-		Vec3 to = new Vec3(from.x + ahead.x, y, from.z + ahead.z);
+		Vec3 to = new Vec3(from.x + ahead.x + this.towed.x, y, from.z + ahead.z + this.towed.z);
+		this.towed = Vec3.ZERO;
 		if (this.strikes(level, h, to, yaw)) {
 			// try it without the turn, then without the way, then hold still
 			if (this.speed > 0.15) {
@@ -1126,6 +1129,11 @@ public final class Ship extends Entity {
 		this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
 		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this);
 		return true;
+	}
+
+	/** (0.7.206) Pulls her (a whale on a harpoon line made fast aboard, or a whale's charge), taken up at her next move. */
+	public void tow(Vec3 pull) {
+		this.towed = this.towed.add(pull);
 	}
 
 	/** How far she moved last tick (blocks, in the world). */

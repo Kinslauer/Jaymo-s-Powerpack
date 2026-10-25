@@ -300,7 +300,7 @@ public final class Theft {
 	// ---- what counts --------------------------------------------------------------------------------------------
 
 	/** Whose law holds at {@code pos} (null where none does, or in a camp). */
-	static @Nullable Faction lawAt(ServerLevel level, BlockPos pos) {
+	public static @Nullable Faction lawAt(ServerLevel level, BlockPos pos) {
 		Faction f = Factions.around(level.getServer(), level, pos, Villages.VILLAGE_RADIUS);
 		return f == null || f.fallen() || f.type() == FactionType.BARBARIAN ? null : f;
 	}
@@ -426,6 +426,18 @@ public final class Theft {
 	private static void kindled(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		if (!level.getBlockState(pos).is(BlockTags.FIRE) || level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD)
 			|| player.isCreative()) {
+			return;
+		}
+		Faction f = lawAt(level, pos);
+		if (f == null || exempt(player, f)) {
+			return;
+		}
+		commit(player, level, f, Crime.ARSON, pos, null, false);
+	}
+
+	/** (0.7.206) A firebomb {@code player} threw burst at {@code pos}: arson, where a faction's law holds, whether or not anything caught. */
+	public static void firebombed(ServerPlayer player, ServerLevel level, BlockPos pos) {
+		if (player.isCreative()) {
 			return;
 		}
 		Faction f = lawAt(level, pos);

@@ -69,6 +69,8 @@ final class SmokeCloudshaper {
 	static final int RAIN_RADIUS = 10;
 	/** The raincloud sits this high over the ground it waters (lower under a ceiling). */
 	static final int RAIN_HEIGHT = 9;
+	/** (0.16.24) The raincloud's film (ticks): looking up as it forms. */
+	static final int RAIN_FILM_TICKS = 30;
 	static final double TORNADO_RANGE = 48.0;
 	/** How hard a tornado you're unwinding drags you toward it (blocks a tick a tick). */
 	static final double DRAG = 0.05;
@@ -203,6 +205,7 @@ final class SmokeCloudshaper {
 		}
 		if (raincloud(player, both)) {
 			SmokeMoves.begin(player, SmokeMoves.RAIN);
+			com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, RAIN_FILM_TICKS, 0.0);
 			SmokePower.cooldown(player, SmokeState.SKY, RAIN_COOLDOWN);
 		}
 	}

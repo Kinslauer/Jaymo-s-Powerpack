@@ -58,6 +58,8 @@ final class ZFighterTechniques {
 	// ---- Spirit Bomb ----
 	static final int SPIRIT_COLOR = 0x8FD8FF;
 	static final double SPIRIT_RANGE = 48.0;
+	/** (0.16.24) Raising the Spirit Bomb's film (ticks): looking up past you into the sky; bars for all it asks. */
+	static final int SPIRIT_FILM_TICKS = 50;
 	static final int SPIRIT_COOLDOWN = 3600;
 	/** Energy it can hold, and what each gives every second it gathers. */
 	static final float SPIRIT_MAX = 400.0F;
@@ -199,6 +201,7 @@ final class ZFighterTechniques {
 		ServerLevel level = player.level();
 		live.spiritFrom = level.getGameTime();
 		live.spiritEnergy = 0.0F;
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.SKYWARD, SPIRIT_FILM_TICKS, SPIRIT_RANGE);
 		Component ask = Component.translatable("message.jaymospowers.zfighter_spirit_ask", player.getDisplayName()).withStyle(ChatFormatting.AQUA);
 		for (ServerPlayer other : level.players()) {
 			if (other != player && other.distanceToSqr(player) <= SPIRIT_RANGE * SPIRIT_RANGE) {

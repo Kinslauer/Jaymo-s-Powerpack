@@ -51,6 +51,8 @@ final class SmokePyroclasm {
 	/** Chance a tick it lights something at its front. */
 	static final float IGNITE = 0.35F;
 	static final int COOLDOWN = 800;
+	/** (0.16.24) The film (ticks): side on, along the flow. */
+	static final int FILM_TICKS = 36;
 
 	private static final class Flow {
 		final ServerLevel level;
@@ -117,6 +119,7 @@ final class SmokePyroclasm {
 		FLOWS.add(new Flow(player.level(), player.getUUID(), start, dir, Mth.lerp(charge, REACH_MIN, REACH_MAX)));
 		SmokePower.cooldown(player, SmokeState.PYRO, COOLDOWN);
 		SmokeMoves.begin(player, SmokeMoves.PYRO);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PROFILE, FILM_TICKS, start.add(dir.scale(Mth.lerp(charge, REACH_MIN, REACH_MAX))), null, 0.0);
 		ServerLevel level = player.level();
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8F + charge, 0.5F);
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.2F, 0.4F);

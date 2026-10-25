@@ -67,6 +67,8 @@ public final class WebAscension {
 
 	/** Web Strike: reach, cooldown, damage (at least the minimum; more the faster you arrive), knockback. */
 	public static final double STRIKE_RANGE = 32.0;
+	/** (0.16.24) The strike's film runs alongside you this much past the pull (ticks). */
+	static final int STRIKE_FILM_AFTER = 8;
 	public static final int STRIKE_COOLDOWN = 160;
 	public static final float STRIKE_MIN_DAMAGE = 10.0F;
 	public static final float STRIKE_DAMAGE_PER_SPEED = 8.0F;
@@ -270,6 +272,7 @@ public final class WebAscension {
 			new WebLine(WebLine.YANK, center, target.getId()));
 		Live live = live(player);
 		live.strikeTarget = target.getId();
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CHASE, maxTicks + STRIKE_FILM_AFTER, center, target, 0.0);
 		live.strikeTicks = maxTicks + 10;
 		player.setAttached(STRIKE_READY, now + STRIKE_COOLDOWN);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.5F);

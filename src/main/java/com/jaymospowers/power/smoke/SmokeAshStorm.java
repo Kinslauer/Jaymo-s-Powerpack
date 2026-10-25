@@ -56,6 +56,8 @@ final class SmokeAshStorm {
 	static final double CLOUD_HEIGHT = 16.0;
 	/** It builds up over this long; feeding it a tornado needs it full. */
 	static final int BUILD_TICKS = 100;
+	/** (0.16.24) The film (ticks): a crane up round you as it gathers; bars for everyone in twice its radius. */
+	static final int FILM_TICKS = 50;
 	/** One strike this often (ticks), on a hostile or on whoever hurt you lately ({@link #GRUDGE_TICKS}). */
 	static final int STRIKE_EVERY = 30, GRUDGE_TICKS = 400;
 	static final float LIGHTNING_DAMAGE = 6.0F;
@@ -107,6 +109,7 @@ final class SmokeAshStorm {
 			return;
 		}
 		STORMS.put(player.getUUID(), now);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS * 2.0);
 		SmokePower.cooldown(player, SmokeState.ASH, COOLDOWN);
 		SmokeMoves.begin(player, SmokeMoves.ASH);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 0.5F);
