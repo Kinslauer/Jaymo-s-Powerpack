@@ -3,6 +3,11 @@
 	"package": "com.jaymospowers.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"LashSocketFirstPersonMixin",
+		"LashSocketItemInHandLayerMixin",
+		"LashSocketItemLayerMixin",
+		"LashSocketLevelRendererMixin",
+		"WeaponModFlailHandMixin",
 		"BackpackAvatarRendererMixin",
 		"BombGliderAttackMixin",
 		"BombGliderAvatarRendererMixin",

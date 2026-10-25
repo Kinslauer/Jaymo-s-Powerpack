@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
  * goes exactly where the crosshair is (a Z Fighter's starts weaker and grows with mastery, but fires faster), and a hit has {@link #WOUND_CHANCE} to wound the part it lands on: the head comes
  * off; an arm or leg is cut off, or crippled (broken) at {@link #CRIPPLE_SHARE}. A body that can't lose parts is crippled.
  * <p>
- * (0.16.7) Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of what i want from the beam". Still one
+ * (0.16.12) Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of what i want from the beam". Still one
  * hair-thin white beam from the right hand (style 3 in {@code ZFighterBeams}), but now held for as long as the left mouse
  * is ({@link Keep}, every few ticks from the client), sweeping where the crosshair goes. While
  * it touches something it hurts it once per {@link #COOLDOWN} ({@link #Z_COOLDOWN}), each with the wound roll. Water it

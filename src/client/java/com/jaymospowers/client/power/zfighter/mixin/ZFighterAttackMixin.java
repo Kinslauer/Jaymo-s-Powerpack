@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * While a Z Fighter's hold combo (or, 0.14.0, an Emberborn's Kindle; 0.15.72, a Stormborn's or Dawnborn's charge; 0.16.7, a Frost-born's beam) has the attack key, holding it doesn't dig at
+ * While a Z Fighter's hold combo (or, 0.14.0, an Emberborn's Kindle; 0.15.72, a Stormborn's or Dawnborn's charge; 0.16.12, a Frost-born's beam) has the attack key, holding it doesn't dig at
  * whatever block swings into view. (0.15.65) Kindle also holds back the click's own punch and swing
  * ({@link EmberKindleClient#holdsClick}): a quick click still punches when it's let go.
  */

@@ -390,6 +390,7 @@ public final class ZFighterPower implements Power {
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		ZFighterCombo.init();
+		ZFighterImpact.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

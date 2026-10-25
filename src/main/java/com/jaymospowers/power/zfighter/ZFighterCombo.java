@@ -136,6 +136,18 @@ public final class ZFighterCombo {
 	static final float HIT_SHAKE_PER_TIER = 0.03F;
 	static final float FINISHER_SHAKE = 0.6F;
 	static final float FINISHER_SHAKE_PER_TIER = 0.15F;
+	/**
+	 * (0.16.10, Andy: Viltrumite-style fights) The foe a finisher sends flying slams into the wall or ground it meets
+	 * for this share of his fists more ({@link ZFighterImpact}); holding on, he rushes after it once he's caught his
+	 * breath, if it's no further than {@code CHASE_RANGE} and he can see it, at this many blocks a tick by tier, for
+	 * at most {@code RUSH_TICKS}, and the next string starts on it.
+	 */
+	static final float SLAM_SHARE = 0.6F;
+	static final double CHASE_RANGE = 14.0;
+	static final double[] RUSH_SPEED = {0.8, 0.9, 1.0, 1.15, 1.3};
+	static final int RUSH_TICKS = 14;
+	/** No fall damage this long after a rush (he may have rushed up into the air after a foe). */
+	static final int RUSH_SAFE_TICKS = 60;
 
 	/** Tier gates: abilities unlocked for tiers 1 and 2; tier 3 once ascended; tier 4 once Super 2 is learned. */
 	static final int TIER1_UNLOCKED = 2;
@@ -184,6 +196,10 @@ public final class ZFighterCombo {
 		/** A Verdant's blow stretching (the limb, {@link ZFighterStretchCombo}; -1: a plain blow), and whether it's snapped back. */
 		int limb = -1;
 		boolean snapped;
+		/** The foe the finisher sent flying (chased after the breath), and until when he's rushing after it (-1: he isn't). */
+		@Nullable UUID chase;
+		long rushUntil = -1L;
+		long rushedAt = -1L;
 
 		Run(int tier) {
 			this.tier = tier;
@@ -261,6 +277,19 @@ public final class ZFighterCombo {
 			stop(player);
 			return;
 		}
+		if (run.rushedAt >= 0 && now - run.rushedAt < RUSH_SAFE_TICKS) {
+			player.resetFallDistance();
+		}
+		if (run.rushUntil >= 0) {
+			LivingEntity foe = run.target == null ? null : player.level().getEntity(run.target) instanceof LivingEntity living ? living : null;
+			if (foe == null || !valid(player, foe) || now >= run.rushUntil
+				|| ZFighterImpact.rush(player, foe, RUSH_SPEED[run.tier], player.entityInteractionRange() * 0.6)) {
+				// there (or it got away): the string starts on it
+				run.rushUntil = -1L;
+				begin(player, run, 0, now);
+			}
+			return;
+		}
 		if (run.recoverUntil >= 0) {
 			if (now >= run.recoverUntil) {
 				// a breath taken: the string starts over, as strong as he is now
@@ -268,7 +297,16 @@ public final class ZFighterCombo {
 				next.serial = run.serial;
 				next.target = run.target;
 				RUNS.put(id, next);
-				begin(player, next, 0, now);
+				LivingEntity chased = chased(player, run.chase);
+				if (chased != null) {
+					// after the foe he sent flying
+					next.target = chased.getUUID();
+					next.rushUntil = now + RUSH_TICKS;
+					next.rushedAt = now;
+					ZFighterImpact.rushSound(player);
+				} else {
+					begin(player, next, 0, now);
+				}
 			}
 			return;
 		}
@@ -446,6 +484,8 @@ public final class ZFighterCombo {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.4F, 1.6F);
 			Shakes.felt(player, at, 12.0, FINISHER_SHAKE + FINISHER_SHAKE_PER_TIER * run.tier, Shakes.ticksFor(FINISHER_SHAKE));
+			ZFighterImpact.launched(target, player, (float)fists * SLAM_SHARE);
+			run.chase = target.getUUID();
 			run.target = null;
 			return;
 		}
@@ -525,6 +565,18 @@ public final class ZFighterCombo {
 			}
 		}
 		return best;
+	}
+
+	/** The foe he sent flying, if it's worth rushing after: alive, seen, not too far, and out of reach. */
+	private static @Nullable LivingEntity chased(ServerPlayer player, @Nullable UUID id) {
+		if (id == null || !(player.level().getEntity(id) instanceof LivingEntity foe) || !valid(player, foe)) {
+			return null;
+		}
+		double distance = player.distanceTo(foe);
+		if (distance > CHASE_RANGE || player.isWithinEntityInteractionRange(foe, REACH_BONUS) || !player.hasLineOfSight(foe)) {
+			return null;
+		}
+		return foe;
 	}
 
 	private static boolean valid(ServerPlayer player, LivingEntity living) {

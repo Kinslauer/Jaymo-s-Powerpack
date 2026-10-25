@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Ki beams drawn like a beacon's: the beacon beam texture scrolling down a bright core in the beam's colour, wrapped in
  * a wider see-through glow. They swell in, then thin away over their life. The Frost Needle is a hair-thin core; the
- * Spiral Lance's coil is the server's particles round its core. (0.16.7) A Frost-born's held Frost Beam (style 3, FrostBeam) is
+ * Spiral Lance's coil is the server's particles round its core. (0.16.12) A Frost-born's held Frost Beam (style 3, FrostBeam) is
  * sent fresh every tick while held: hair-thin, full width at once, a small glint at the hand and where it lands. A ki orb burns at each end. A fired wave travels
  * ({@link ZFighterNet.BeamHead}): drawn from the hands to its head, smoothed between ticks, until it stops and fades.
  */
@@ -36,7 +36,7 @@ public final class ZFighterBeams {
 	static final int TRAVEL_SWELL = 3, TRAVEL_STALE = 5;
 	/** Its head's orb, times the end orb's size. */
 	static final float HEAD_ORB = 1.4F;
-	/** (0.16.7) The Frost-born's held beam (FrostBeam.HELD_STYLE), and the glint where it lands (blocks). */
+	/** (0.16.12) The Frost-born's held beam (FrostBeam.HELD_STYLE), and the glint where it lands (blocks). */
 	static final int HELD = 3;
 	static final float HELD_GLINT = 0.12F;
 

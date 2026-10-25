@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class RaceHoldClient {
 	static final int STRETCH_HOLD = 4, FROST_HOLD = 12;
-	/** (0.16.7) While a Frost-born's beam is held, how often the server is told so (ticks; see FrostBeam.KEEP_TICKS). */
+	/** (0.16.12) While a Frost-born's beam is held, how often the server is told so (ticks; see FrostBeam.KEEP_TICKS). */
 	static final int FROST_KEEP = 4;
 	public static final RenderStateDataKey<Float> STRETCH = RenderStateDataKey.create(() -> "jaymospowers:verdant_stretch");
 	/** The arm's 12 pixels, in blocks; and how far the shoulder sits from the eyes, roughly (blocks). */
@@ -91,7 +91,7 @@ public final class RaceHoldClient {
 			fired = true;
 			ClientPlayNetworking.send(new RaceMoves.Hold());
 		} else if (fired && (held - FROST_HOLD) % FROST_KEEP == 0 && ClientPlayNetworking.canSend(FrostBeam.Keep.TYPE)) {
-			// (0.16.7) the beam stays out for as long as it's held, wherever the crosshair goes (FrostBeam)
+			// (0.16.12) the beam stays out for as long as it's held, wherever the crosshair goes (FrostBeam)
 			ClientPlayNetworking.send(new FrostBeam.Keep());
 		}
 	}
@@ -169,7 +169,7 @@ public final class RaceHoldClient {
 	}
 
 	/**
-	 * (0.16.7) A Frost-born's hold has gone off and is still held: the beam (or the prison it froze someone in) keeps the
+	 * (0.16.12) A Frost-born's hold has gone off and is still held: the beam (or the prison it froze someone in) keeps the
 	 * click, so sweeping onto a block doesn't dig at it.
 	 */
 	public static boolean frostBeaming() {
