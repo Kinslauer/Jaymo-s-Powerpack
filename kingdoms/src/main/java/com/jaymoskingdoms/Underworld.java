@@ -643,7 +643,10 @@ public final class Underworld {
 		};
 	}
 
-	/** What a receptive villager pays for {@code stack} in the street (0: not worth their while, -1: not dried yet). */
+	/**
+	 * What a receptive villager pays for {@code stack} in the street (-1: not dried yet). (Andy: "not everyone knows the
+	 * difference") Townsfolk can't tell grades apart, so any dried Pmeh fetches the same; only dealers check the grade.
+	 */
 	private static int streetPrice(ItemStack stack) {
 		if (stack.is(SHASH_BRICK)) {
 			return STREET_SHASH;
@@ -652,13 +655,7 @@ public final class Underworld {
 		if (joint != null && stack.is(joint)) {
 			return STREET_JOINT;
 		}
-		if (pmeh == null || !stack.is(pmeh)) {
-			return -1;
-		}
-		DataComponentType<Integer> grade = grade();
-		Integer g = grade == null ? null : stack.get(grade);
-		int got = grade == null ? FINE : g == null ? FINE - 1 : g;
-		return got < FINE ? 0 : got >= PRIME ? Math.round(STREET_PMEH * PRIME_BONUS) : STREET_PMEH;
+		return pmeh != null && stack.is(pmeh) ? STREET_PMEH : -1;
 	}
 
 	/** {@code player} offers {@code v} the contraband in hand: a sale, a no, or a word to the guard. */
@@ -679,8 +676,8 @@ public final class Underworld {
 		if (score >= PITCH_LISTEN) {
 			ItemStack stack = player.getMainHandItem();
 			int price = streetPrice(stack);
-			if (price <= 0) {
-				Speech.tell(level, v, player, Component.translatable(price < 0 ? "underworld.jaymoskingdoms.pitch.fresh" : "underworld.jaymoskingdoms.pitch.poor"), Speech.GOLD);
+			if (price < 0) {
+				Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.fresh"), Speech.GOLD);
 				PITCHED.remove(v.getUUID());
 				return;
 			}

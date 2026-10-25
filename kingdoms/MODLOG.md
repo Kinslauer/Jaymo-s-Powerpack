@@ -4624,8 +4624,9 @@ imprisoned, or worse."
   right-click any grown villager with contraband in hand. They listen if MCA hearts with you + mood x2 + their
   personality's lean (relaxed, odd, lazy, playful, flirty, extroverted, witty +15; greedy, confident +10; anxious,
   sensitive, shy, peaceful -10; crabby, grumpy, stubborn -15) + 15 in a known hotbed reaches 30. Then they buy one at
-  street price (Pmeh 5 fine / 8 prime, joint 3, Shash 11), once a day each; seen by others, it's DEALING. Fair or worse
-  Pmeh is "weeds", fresh Pmeh "still green". A no costs 5 hearts; under -10 they tell the guard (a DEALING charge).
+  street price (Pmeh 5, joint 3, Shash 11), once a day each; seen by others, it's DEALING. Townsfolk can't tell
+  grades apart (Andy: "not everyone knows the difference"), so any dried Pmeh fetches 5; only dealers check the grade.
+  Fresh Pmeh is "still green". A no costs 5 hearts; under -10 they tell the guard (a DEALING charge).
   Guards and rulers always do. Tuning: `Underworld.PITCH_*`.
 - **Whispers**: in a den's town, until you've found it, a crook (in a known hotbed, any grown townsman) with no guard
   within 12 may whisper the way: compass direction and paces to the hatch. Stepping into the room finds it.
