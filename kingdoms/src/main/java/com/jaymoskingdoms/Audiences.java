@@ -36,9 +36,9 @@ public final class Audiences {
 	static final double LEAD_SPEED = 0.6;
 	/** The longest a walk may take, how often he tells you to keep up, and how long the ruler's guards let you be after (ticks). */
 	static final int LEAD_TICKS = 20 * 180, HURRY_TICKS = 20 * 6, GRACE_TICKS = 20 * 90;
-	/** (0.7.197) He waits this long for you to close his menu and come to him before he sets off (ticks). */
+	/** (0.7.198) He waits this long for you to close his menu and come to him before he sets off (ticks). */
 	static final int START_TICKS = 30;
-	/** (0.7.197) He's walking but has got no closer to the ruler for this long (ticks): he points you the rest of the way. */
+	/** (0.7.198) He's walking but has got no closer to the ruler for this long (ticks): he points you the rest of the way. */
 	static final int STUCK_TICKS = 20 * 12;
 	/** How far his words carry. */
 	static final double SPEECH_RANGE = 16.0;
@@ -48,7 +48,7 @@ public final class Audiences {
 		final int faction;
 		final long until, started;
 		long hurried = Long.MIN_VALUE / 2;
-		/** (0.7.197) The nearest he's been to the ruler, and when he last got nearer. */
+		/** (0.7.198) The nearest he's been to the ruler, and when he last got nearer. */
 		double nearest = Double.MAX_VALUE;
 		long nearer;
 
@@ -100,7 +100,7 @@ public final class Audiences {
 		return LEADS.containsKey(guard.getUUID());
 	}
 
-	/** (0.7.197) Whom {@code guard} is walking to the ruler (they follow him through the doors he opens, {@link Doorways}). */
+	/** (0.7.198) Whom {@code guard} is walking to the ruler (they follow him through the doors he opens, {@link Doorways}). */
 	static @Nullable ServerPlayer follower(ServerLevel level, Entity guard) {
 		Lead lead = LEADS.get(guard.getUUID());
 		return lead == null ? null : level.getServer().getPlayerList().getPlayer(lead.player);
@@ -208,7 +208,7 @@ public final class Audiences {
 			return true;
 		}
 		if (now - lead.started < START_TICKS) {
-			// (0.7.197) a moment for them to put his menu away before he sets off (he used to be gone before they'd turned)
+			// (0.7.198) a moment for them to put his menu away before he sets off (he used to be gone before they'd turned)
 			guard.getNavigation().stop();
 			guard.getLookControl().setLookAt(player, 30.0F, 30.0F);
 			lead.nearer = now;
@@ -231,7 +231,7 @@ public final class Audiences {
 			lead.nearest = d;
 			lead.nearer = now;
 		} else if (d > ARRIVE_RANGE * 2 && now - lead.nearer > STUCK_TICKS) {
-			// (0.7.197) no way through for him (a wall, a ladder, a locked door): he points them the rest of the way, and
+			// (0.7.198) no way through for him (a wall, a ladder, a locked door): he points them the rest of the way, and
 			// the ruler's guards still let them be ({@link #GRACE_TICKS})
 			guard.getNavigation().stop();
 			guard.getLookControl().setLookAt(ruler, 30.0F, 30.0F);

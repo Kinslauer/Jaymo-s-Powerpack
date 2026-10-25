@@ -23,7 +23,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.197) Andy: "Guard got stuck leading me to the queen." MCA plans a villager's paths through wooden doors and fence
+ * (0.7.198) Andy: "Guard got stuck leading me to the queen." MCA plans a villager's paths through wooden doors and fence
  * gates and leaves the opening to its brain ({@code SmarterOpenDoorsTask}). While our work stands in for that brain
  * ({@link Workers#step}: a guard leading you to the ruler, the ruler's escort, a ruler on their round), nothing opened
  * them, so the villager walked up to a shut gate and stood there. Now the doors and gates on the path just ahead are

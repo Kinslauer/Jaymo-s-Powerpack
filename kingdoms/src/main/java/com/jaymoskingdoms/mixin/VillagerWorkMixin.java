@@ -17,7 +17,7 @@ abstract class VillagerWorkMixin {
 	private void jaymoskingdoms$work(ServerLevel level, CallbackInfo ci) {
 		if ((Object)this instanceof Worker w) {
 			boolean working = Workers.step(level, w);
-			// (0.7.197) their brain opens doors and gates on their way; while it waits, we do ({@link Doorways})
+			// (0.7.198) their brain opens doors and gates on their way; while it waits, we do ({@link Doorways})
 			Doorways.tick(level, w.mob(), working);
 			if (working) {
 				ci.cancel();
