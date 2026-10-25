@@ -20,6 +20,12 @@ import org.jspecify.annotations.Nullable;
  * {@link #WHIP_TIP}, in the model's 0-1 space) into the world. Kept per player as an offset from where they're drawn, so
  * the chain stays on the handle however the arm, the body and the camera move. Andy: "the flail chain is completley
  * disconnected from the stick and it looks jarring".
+ * <p>
+ * (0.16.24) Andy: "they are still completely disconnected in first person". With First-person Model in the pack your own
+ * body is drawn in first person too, with the weapon in its hand (through ItemInHandLayer), and the vanilla hands are
+ * mostly hidden: so the tip came in as a third-person one and first person fell back to a guess at the screen's corner.
+ * Each capture is now stamped with the frame it was drawn in, and your own view takes whichever was drawn last
+ * ({@link #offset}): the body's hand, or the vanilla one when it's shown.
  */
 public final class LashSockets {
 	/** The handle's tip on its sprite: Balkon's ball-less flail (flail-thrown.png, top right) and our whip's handle. */
@@ -28,12 +34,19 @@ public final class LashSockets {
 	private static final float HAND_FOV = 70.0F;
 	/** An offset further than this from the body is someone drawn elsewhere (a menu's preview): not kept. */
 	private static final double MAX_OFFSET = 3.0;
+	/** A tip not drawn for this many frames is stale (the hand isn't being drawn any more). */
+	private static final int STALE_FRAMES = 3;
 
 	private record Holder(int id, boolean flail, boolean firstPerson, double x, double y, double z) {
 	}
 
-	private static final Map<Integer, Vec3> THIRD = new HashMap<>();
-	private static @Nullable Vec3 first;
+	private record Tip(Vec3 offset, long frame) {
+	}
+
+	private static final Map<Integer, Tip> THIRD = new HashMap<>();
+	private static @Nullable Tip first;
+	/** Counts the level's frames (each time its entities are submitted). */
+	private static long frame;
 	private static @Nullable Holder holder;
 	/** Set while the level's entities are being submitted (not a menu's preview of a player). */
 	private static boolean inLevel;
@@ -43,6 +56,9 @@ public final class LashSockets {
 
 	public static void level(boolean on) {
 		inLevel = on;
+		if (on) {
+			frame++;
+		}
 	}
 
 	/** A player's main-hand item is about to be submitted in third person, drawn at {@code x y z}. */
@@ -86,19 +102,32 @@ public final class LashSockets {
 			Entity self = minecraft.player;
 			if (self != null) {
 				float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-				first = camera.position().add(world.x(), world.y(), world.z()).subtract(self.getPosition(partialTick));
+				first = new Tip(camera.position().add(world.x(), world.y(), world.z()).subtract(self.getPosition(partialTick)), frame);
 			}
 			return;
 		}
 		Vec3 offset = at.add(camera.position()).subtract(held.x(), held.y(), held.z());
 		if (offset.lengthSqr() < MAX_OFFSET * MAX_OFFSET) {
-			THIRD.put(held.id(), offset);
+			THIRD.put(held.id(), new Tip(offset, frame));
 		}
 	}
 
-	/** The handle's tip as last drawn, from the player's position (null: not drawn yet). */
+	/**
+	 * The handle's tip as last drawn, from the player's position (null: not drawn lately). Your own, in first person: the
+	 * vanilla hand's or your drawn body's, whichever was drawn last (the vanilla hand when both are).
+	 */
 	static @Nullable Vec3 offset(Entity player, boolean firstPerson) {
-		return firstPerson ? first : THIRD.get(player.getId());
+		Tip body = fresh(THIRD.get(player.getId()));
+		if (!firstPerson) {
+			return body == null ? null : body.offset();
+		}
+		Tip hand = fresh(first);
+		Tip tip = hand == null ? body : body == null || hand.frame() >= body.frame() ? hand : body;
+		return tip == null ? null : tip.offset();
+	}
+
+	private static @Nullable Tip fresh(@Nullable Tip tip) {
+		return tip != null && frame - tip.frame() <= STALE_FRAMES ? tip : null;
 	}
 
 	static void forget(int id) {

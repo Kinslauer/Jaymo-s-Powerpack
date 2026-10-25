@@ -2873,3 +2873,19 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   swimming, sprinting, flying, sleeping or downed, or on your own body in first person. It counts in
   `PoseTakeover.posed` (Fresh Animations pauses for it); `posedOtherwise` lets it step aside for every other pose. Hooked
   in through Tend's mixins and `ModelPoses`. Tuning at the top of the class. Compile-checked; not playtested.
+- **0.16.24, flail and whip: first person, swipes, a taut rappel, item pulls:** Andy: "the whip and flail look great in
+  third person, but they are still completely disconnected in first person ... add a far less powerful aoe swipe with
+  both that follows your swing ... the whip tether should pull you taut, as if you were hanging from it ... every jump
+  should let you pull closer ... also allow the whip to pull items in". First person: with First-person Model your own
+  body (and the weapon in its hand) is drawn in the level, so the handle's tip came in as a third-person one and the
+  rope fell back to a screen-corner guess; `LashSockets` now stamps each capture with its frame and your view takes the
+  newest (the vanilla hand on a tie). Swipe: a left-click at 60%+ charge (air swing via `handlePunch`, or a blow via
+  `AttackEntityCallback`) sends the head round in front of you (`Lash.SWEEP`, 6 ticks, tilted with your look, 2 blocks
+  for the flail, 4.2 for the whip) on the physics rope; what it passes takes 0.22x the flail's blow or 1.5 from the
+  whip, times the charge, never the one you struck; no cooldown. Rappel (`LashRenderer.climb`): the lash is a rope of
+  set length from the lip, so off your feet gravity hangs you on it and you swing in against the wall; each jump hauls
+  in 1.4 blocks with a kick out; hands at the lip, jump or walk in to go over the top; Sneak lets you down, Sneak + jump
+  bounds down; on the ground it pays out and never drags you. Walking no longer climbs. The hook lasts up to 60 s and
+  the server won't call it flying. Items: the crack aims at a dropped item near its line when nothing alive is there,
+  and items where it lands are flung back to you (the fishing rod's toss). Tuning at the top of `Lash` and `climb`.
+  Compile-checked; not playtested.

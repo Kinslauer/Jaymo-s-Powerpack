@@ -151,7 +151,8 @@ public final class LashRenderer {
 			return null;
 		}
 		Lash.State state = shown(player, (long)Math.floor(time));
-		if (state == null || state.kind() != Lash.FLAIL) {
+		if (state == null || state.kind() != Lash.FLAIL || state.phase() == Lash.SWEEP) {
+			// (0.16.24) a swipe is the arm's own swing
 			return null;
 		}
 		double t = Math.max(0.0, time - state.since());
@@ -198,7 +199,7 @@ public final class LashRenderer {
 			return new Pull(head, Math.max(CHAIN_LENGTH, gap + 0.05), null);
 		}
 		// a crack snakes out with slack; wrapped round or hooked over, it's pulled nearly taut
-		double slack = state.phase() == Lash.CRACK ? 1.08 : 1.02;
+		double slack = state.phase() == Lash.CRACK || state.phase() == Lash.SWEEP ? 1.08 : 1.02;
 		return new Pull(head, Mth.clamp(gap * slack, WHIP_IDLE, WHIP_LENGTH), null);
 	}
 
@@ -543,53 +544,86 @@ public final class LashRenderer {
 	/**
 	 * The rappel, on your own side (your movement is yours): the lash hooked over a wall's top ({@link Lash#HOOK}) and use
 	 * held. (0.16.11) Andy: "the rappelling should only pull you up as you walk, so no auto gliding to the impact point".
-	 * You hang on the lash at the length it caught you (it holds you, it doesn't pull); walk and you take it in hand over
-	 * hand and go up the wall, and over the top at the lip; hold Sneak and you pay it out and let yourself down.
+	 * (0.16.24) Andy: "the whip tether should pull you taut, as if you were hanging from it. as of right now you still
+	 * float. every jump should let you pull closer, still stopping after you land. like rappeling up or down the side of a
+	 * building". The lash is a rope of a set length from the lip: off your feet, gravity has you and the lash holds you at
+	 * its length, so you hang and swing in against the wall. Each jump (off the ground or off the wall) hauls in
+	 * {@link #CLIMB_HAUL} of it with a kick out from the wall, and you swing up and in on the shorter rope; near the lip a
+	 * jump (or walking into it) takes you over the top. Sneak pays the rope out to walk down the wall, Sneak and jump bounds
+	 * down it. On the ground it never drags you: it's as long as you are from the lip.
 	 */
+	private static final double CLIMB_HAUL = 1.4, CLIMB_KICK_OUT = 0.22, CLIMB_KICK_UP = 0.42, CLIMB_BOUND = 2.2, CLIMB_TAUT = 0.35;
+	/** Going over the top: up the last of the wall this fast, then in over the lip, for at most this many ticks. */
+	private static final double VAULT_UP = 0.32;
+	private static final int VAULT_TICKS = 20;
 	private static double climbRope = -1.0;
+	private static int vault;
 	private static long ropeSince = Long.MIN_VALUE;
+	private static boolean jumpWasDown;
 
 	private static void climb(LocalPlayer player) {
 		Lash.State state = player.getAttached(Lash.STATE);
+		boolean jump = player.input.keyPresses.jump();
+		boolean jumped = jump && !jumpWasDown;
+		jumpWasDown = jump;
 		if (state == null || state.phase() != Lash.HOOK || !player.isUsingItem()) {
 			climbRope = -1.0;
+			vault = 0;
 			return;
 		}
 		Vec3 lip = state.aim();
 		// you hold the lash up over your head
 		Vec3 grip = player.position().add(0.0, player.getBbHeight() * 0.9, 0.0);
+		double far = grip.distanceTo(lip);
 		if (state.since() != ropeSince || climbRope < 0.0) {
 			ropeSince = state.since();
-			climbRope = grip.distanceTo(lip);
+			climbRope = far;
 		}
-		boolean walking = player.input.keyPresses.forward();
 		double below = lip.y - player.getY();
 		Vec3 toWall = new Vec3(lip.x - player.getX(), 0.0, lip.z - player.getZ());
 		double gap = toWall.horizontalDistance();
 		Vec3 dir = gap < 1.0E-4 ? Vec3.ZERO : toWall.scale(1.0 / gap);
 		Vec3 v = player.getDeltaMovement();
-		if (walking && below > Lash.OVER_THE_TOP) {
-			// hand over hand: up the wall, leaning in
-			climbRope = Math.max(0.5, climbRope - Lash.CLIMB_SPEED);
-			double in = Math.min(Lash.WALL_HUG, Math.max(0.0, gap - player.getBbWidth() * 0.5 - 0.05));
-			v = new Vec3(dir.x * in, Lash.CLIMB_SPEED, dir.z * in);
-		} else if (walking && below > -0.05) {
-			// at the top: up and over the lip
-			v = new Vec3(dir.x * Lash.OVER_PUSH, Lash.CLIMB_SPEED * 1.6, dir.z * Lash.OVER_PUSH);
+		if (player.onGround() && below > Lash.OVER_THE_TOP) {
+			// stood on the ground: the lash comes with you, it doesn't drag you
+			climbRope = Math.min(Lash.WHIP_REACH + 1.0, Math.max(climbRope, far));
+		}
+		// your hands at the lip: a jump (or walking into the wall) takes you up and over it
+		boolean top = below <= player.getBbHeight() + 0.3 && below > -0.05 && gap < 1.6;
+		if (vault == 0 && top && (jumped || player.input.keyPresses.forward())) {
+			vault = VAULT_TICKS;
+		}
+		if (vault > 0) {
+			vault--;
+			v = below > -0.05 ? new Vec3(dir.x * 0.05, VAULT_UP, dir.z * 0.05) : new Vec3(dir.x * Lash.OVER_PUSH, Math.max(v.y, 0.05), dir.z * Lash.OVER_PUSH);
+			climbRope = Math.max(0.5, far);
+			player.setDeltaMovement(v);
+			player.resetFallDistance();
+			return;
+		}
+		if (jumped && player.isShiftKeyDown()) {
+			// bound down: kick off the wall and let a length run
+			climbRope = Math.min(Lash.WHIP_REACH + 1.0, climbRope + CLIMB_BOUND);
+			v = new Vec3(-dir.x * CLIMB_KICK_OUT, Math.max(v.y, 0.15), -dir.z * CLIMB_KICK_OUT);
+		} else if (jumped) {
+			// haul in a length and kick out: you swing up and in on the shorter lash
+			climbRope = Math.max(0.5, Math.min(climbRope, far) - CLIMB_HAUL);
+			v = new Vec3(-dir.x * CLIMB_KICK_OUT, CLIMB_KICK_UP, -dir.z * CLIMB_KICK_OUT);
 		} else if (player.isShiftKeyDown()) {
 			climbRope = Math.min(Lash.WHIP_REACH + 1.0, climbRope + Lash.LOWER_SPEED);
 		}
-		// the lash holds you at its length: anything taking you further from the lip is taken off (you swing, you hang)
+		// the lash holds you at its length: what would take you further from the lip is taken off (you hang, you swing),
+		// and past it you're drawn back in
 		Vec3 next = grip.add(v);
 		Vec3 out = next.subtract(lip);
-		double far = out.length();
-		if (far > climbRope && far > 1.0E-4) {
-			Vec3 radial = out.scale(1.0 / far);
+		double reach = out.length();
+		if (reach > climbRope && reach > 1.0E-4) {
+			Vec3 radial = out.scale(1.0 / reach);
 			double away = v.dot(radial);
 			if (away > 0.0) {
 				v = v.subtract(radial.scale(away));
 			}
-			v = v.subtract(radial.scale(Math.min(0.3, far - climbRope)));
+			v = v.subtract(radial.scale(Math.min(CLIMB_TAUT, reach - climbRope)));
 		}
 		player.setDeltaMovement(v);
 		player.resetFallDistance();
