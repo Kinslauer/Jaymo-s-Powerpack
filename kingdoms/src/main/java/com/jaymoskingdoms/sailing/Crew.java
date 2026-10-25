@@ -25,7 +25,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Crew {
 	public enum Side {
-		PIRATE, NAVY, MERCHANT;
+		PIRATE, NAVY, MERCHANT,
+		/** (0.7.210) A realm's whaler ({@code Whalers}). */
+		WHALER;
 
 		public String id() {
 			return this.name().toLowerCase(Locale.ROOT);

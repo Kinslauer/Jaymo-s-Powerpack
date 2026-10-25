@@ -374,6 +374,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// treasure wrecks (and their attachments)
 		Corsairs.register();
 		Navies.register();
+		Whalers.register();
 		TreasureWrecks.register();
 		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
 			TreasureWrecks.CHARTED, TreasureWrecks.LAID);

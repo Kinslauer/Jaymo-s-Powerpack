@@ -171,6 +171,9 @@ final class Corsairs implements Ship.Captaincy {
 			this.gunnery(level, ship, crew, foe, now);
 		}
 		this.deckwork(level, ship, crew, foe, now);
+		if (crew.side == Crew.Side.WHALER) {
+			Whalers.tryworks(level, ship, crew);
+		}
 		if (!crew.captained(ship)) {
 			return null;
 		}
@@ -186,13 +189,13 @@ final class Corsairs implements Ship.Captaincy {
 		double fromHome = Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.home));
 		Ship foe = this.lookout(level, ship, crew);
 		double leash = crew.side == Crew.Side.NAVY ? NAVY_LEASH : PIRATE_LEASH;
-		if (foe != null && crew.side != Crew.Side.MERCHANT && fromHome > leash) {
+		if (foe != null && crew.side != Crew.Side.MERCHANT && crew.side != Crew.Side.WHALER && fromHome > leash) {
 			foe = null;
 		}
 		crew.target = foe == null ? -1 : foe.getId();
 		float want;
 		double sail;
-		if (foe != null && crew.side == Crew.Side.MERCHANT) {
+		if (foe != null && (crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER)) {
 			// running: away from her, all sail
 			crew.mode = "run";
 			want = Fleet.bearing(ship, foe.getX(), foe.getZ()) + 180.0F;
@@ -214,6 +217,14 @@ final class Corsairs implements Ship.Captaincy {
 				}
 				sail = FIGHT_SAIL;
 			}
+		} else if (crew.side == Crew.Side.WHALER) {
+			// (0.7.210) a whaler on her voyage: fitting out, outward, hunting, cutting in, homeward
+			float[] plan = Whalers.think(level, ship, crew);
+			if (plan == null) {
+				return;
+			}
+			want = plan[0];
+			sail = plan[1];
 		} else if (crew.bound != null) {
 			// bound somewhere: a merchantman to her harbour, a pirate to his cove's raid
 			double d = Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.bound));
@@ -272,7 +283,7 @@ final class Corsairs implements Ship.Captaincy {
 
 	/** The foe her lookout sights nearest (null: none). */
 	private @Nullable Ship lookout(ServerLevel level, Ship ship, Crew crew) {
-		double sight = crew.side == Crew.Side.NAVY ? NAVY_SIGHT : crew.side == Crew.Side.MERCHANT ? MERCHANT_SIGHT : PIRATE_SIGHT;
+		double sight = crew.side == Crew.Side.NAVY ? NAVY_SIGHT : crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.WHALER ? MERCHANT_SIGHT : PIRATE_SIGHT;
 		Ship best = null;
 		double bestD = sight * sight;
 		for (Ship other : Ships.in(level)) {
@@ -606,6 +617,7 @@ final class Corsairs implements Ship.Captaincy {
 		switch (crew.side) {
 			case PIRATE -> PirateCoves.shipLost(level, crew, player);
 			case NAVY, MERCHANT -> Navies.shipLost(level, crew, player);
+			case WHALER -> Whalers.lost(level, crew);
 		}
 	}
 
@@ -671,6 +683,13 @@ final class Corsairs implements Ship.Captaincy {
 				loot.add(new ItemStack(Items.IRON_INGOT, 3 + random.nextInt(6)));
 				loot.add(new ItemStack(Items.ARROW, 16 + random.nextInt(17)));
 				loot.add(new ItemStack(Items.BREAD, 6 + random.nextInt(8)));
+				loot.add(new ItemStack(Items.EMERALD, 2 + random.nextInt(5)));
+			}
+			case WHALER -> {
+				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_OIL, 4 + random.nextInt(9)));
+				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_BLUBBER, 8 + random.nextInt(17)));
+				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_BONE, 2 + random.nextInt(5)));
+				loot.add(new ItemStack(com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, 2 + random.nextInt(4)));
 				loot.add(new ItemStack(Items.EMERALD, 2 + random.nextInt(5)));
 			}
 			case MERCHANT -> {
