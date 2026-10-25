@@ -133,7 +133,11 @@ public final class Theft {
 		/** (0.7.121) striking one of its people ({@link Retaliation}). */
 		ASSAULT(Weight.LIGHT, "assault"),
 		/** (0.7.132) one of its dead robbed ({@link Looters#playerRobbed}). */
-		ROBBING(Weight.MEDIUM, "robbing");
+		ROBBING(Weight.MEDIUM, "robbing"),
+		/** (0.7.211) contraband sold (or bought) in the street ({@link Underworld#traded}). */
+		DEALING(Weight.MEDIUM, "dealing"),
+		/** (0.7.211) contraband flaunted in front of a guard ({@link Underworld}). */
+		CONTRABAND(Weight.MEDIUM, "contraband");
 
 		final Weight weight;
 		final String cry;
@@ -282,6 +286,18 @@ public final class Theft {
 		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
 		wanted.merge(Integer.toString(faction), until, Math::max);
 		player.setAttached(WANTED, Map.copyOf(wanted));
+	}
+
+	/** (0.7.211) {@code faction} calls off its hunt for {@code player} (or for the costume they're masked in there): they've been dealt with ({@link Busts}). */
+	static void clearWanted(ServerPlayer player, int faction) {
+		String persona = Identities.persona(player, faction);
+		if (persona != null) {
+			Identities.clearWanted(player.level().getServer(), persona, faction);
+		}
+		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
+		if (wanted.remove(Integer.toString(faction)) != null) {
+			player.setAttached(WANTED, Map.copyOf(wanted));
+		}
 	}
 
 	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others), or (0.7.121) in a brawl ({@link Retaliation}). */

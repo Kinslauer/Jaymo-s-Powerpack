@@ -46,6 +46,10 @@ public final class Treasuries {
 		if (!(villager.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (Underworld.blackMarket(villager)) {
+			// (0.7.211) a den's fence pays no toll
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		Faction owner = Banners.owner(server, ChunkPos.containing(villager.blockPosition()));
 		if (owner == null || owner.fallen() || !owner.type().isRealm()) {

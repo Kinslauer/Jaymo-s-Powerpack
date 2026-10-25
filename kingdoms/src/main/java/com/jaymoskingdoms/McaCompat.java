@@ -252,6 +252,11 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
 	}
 
+	/** (0.7.211) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
+	static String personality(Villager v) {
+		return LOADED ? McaBridge.personality(v) : "";
+	}
+
 	/** (0.7.19) An MCA villager's temper, by their personality: 1 warm (friendly, upbeat, peaceful), -1 sour (greedy, gloomy), -2 crabby; else 0. */
 	static int temper(Villager v) {
 		return LOADED ? McaBridge.temper(v) : 0;

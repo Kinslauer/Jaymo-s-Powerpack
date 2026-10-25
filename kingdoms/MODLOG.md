@@ -4620,3 +4620,49 @@ Andy (2026-10-25): "Start stage 3", crews seen at the task for their kingdoms ov
   carry a saved `whaleboat` attachment (her id and each hand's station), so they survive a reload.
 - `Harpoon.thrownAt` (crew harpooners, leading and lobbing), `WhaleCarcass.cutByCrew`, `Crew.Side.WHALER`,
   `Corsairs` hooks, `Navies.launch` now package-wide. Op: `/kingdom fleet whaler` (status, or fit one out now).
+
+## 0.7.211: the underworld, stage 1: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (pack 0.16.33)
+Andy (2026-10-25): "Id like to see illegal goods traded amongst the people. Rare commodities like Pmeh and Shash bricks go
+for sale around specific cities that eventually become known as hotbeds for trafficking goods and gambling. You should be
+able to find these speakeasies hidden from the guard as being caught facilitating sale would end up with you flogged,
+imprisoned, or worse."
+- `Underworld`: the wealthiest third of realms (Andy: "One in three cities that are wealthier, giving the criminals a
+  pool to siphon from", ranked by `Wealth.worth`) keep a den, which makes one of the two goods; a realm that grows into
+  the top third gets one too, and a dug den stays if its city grows poorer. Goods: **Pmeh** is Jaymo's Kitchen's own herb (Andy: "Pmeh has to be
+  rolled like it is in kitchen": roll it into a joint at a prep surface, then smoke it; looked up by id, so without
+  Kitchen every den deals in Shash; since Kitchen 0.5.29 it no longer comes from tall grass, only from rare wild
+  Pmeh in jungles and savannas, or grown from seed and dried on a rack) and the new **Shash Brick** (a trade good).
+  Kitchen's fresh Pmeh and joints count as contraband too. **Grades** (Andy: "you just have to be good at growing and
+  drying the plant to have quality enough to sell like the dealers do"): Kitchen grades Pmeh scraggly/fair/fine/prime;
+  dealers sell prime and buy only fine (the listed price) and prime (x1.5), so wild fair Pmeh won't sell. Art: `tools/gen_contraband.py`.
+- `Speakeasy`: the den is dug under open natural ground (nothing over it but leaves) 14-50 blocks from the seat (earth over all of it, no block
+  entities or water in the way): a spruce hatch in the grass by a hay bale, a ladder down a stone shaft, a 9 x 7 x 4
+  room 9 below: a bar of barrels with the fence penned behind it, a red runner, a dice table with a green cloth and
+  stools, crates, hanging lanterns, cobwebs.
+- The **fence** (a villager tagged `jaymoskingdoms.fence`, replaced a day after he's gone) sells and buys both goods,
+  re-stocked daily: cheap where his den makes it (Pmeh 3, Shash 7; buys at 2 and 4), dear where it doesn't (sells at 12
+  and 24, buys at 8 and 16), so it pays to carry goods between hotbeds. His sales pay the realm no toll.
+- **Heat**: +1 a sale, +2 a day, +1 every 4 dice games, -8 a bust. From 10 a **dice-thrower** sets up: hold emeralds and
+  right-click him (up to 8 a throw, two dice each, higher total takes double, a tie returns the stake). At 40 the city is
+  a **known hotbed** (Tidings news), and its crooks buy contraband in the street (Pmeh 5, Shash 11).
+- **Selling in the street** (Andy: "you can also sell to any villagers receptive enough to listen"): sneak and
+  right-click any grown villager with contraband in hand. They listen if MCA hearts with you + mood x2 + their
+  personality's lean (relaxed, odd, lazy, playful, flirty, extroverted, witty +15; greedy, confident +10; anxious,
+  sensitive, shy, peaceful -10; crabby, grumpy, stubborn -15) + 15 in a known hotbed reaches 30. Then they buy one at
+  street price (Pmeh 5, joint 3, Shash 11), once a day each; seen by others, it's DEALING. Townsfolk can't tell
+  grades apart (Andy: "not everyone knows the difference"), so any dried Pmeh fetches 5; only dealers check the grade.
+  Fresh Pmeh is "still green". A no costs 5 hearts; under -10 they tell the guard (a DEALING charge).
+  Guards and rulers always do. Tuning: `Underworld.PITCH_*`.
+- **Whispers**: in a den's town, until you've found it, a crook (in a known hotbed, any grown townsman) with no guard
+  within 12 may whisper the way: compass direction and paces to the hatch. Stepping into the room finds it.
+- **Crimes** (`Theft.Crime`): DEALING (a contraband trade outside a den, seen by anyone of the realm but the buyer and
+  other crooks) and CONTRABAND (Pmeh or Shash in hand in sight of a guard within 10). Both medium: hunted and charged.
+- `Busts`: a charged player who's downed with a guard of that realm within 6, or yields (sneak, empty hand, within 3 of
+  a guard, 2 s), is sentenced on the spot by the guard: contraband confiscated, the hunt called off, then by score
+  (15 per past offence there, the ruler's temper lean from `Arrests`, 0-30 luck, -15 for yielding, +15 for an escape):
+  under 40 a **flogging** (5 strokes of 2, never below 4 health, then Slowness and Weakness 3 min), 40-79 **the cells**
+  (a sealed stone pit 12 under the seat, 5 min + 2 min per past offence, death doesn't get you out, leaving it is an
+  escape: outlaw there and charged again), 80+ **beheaded** (killed, headless). Cells and executions go in the Tidings.
+- `/underworld den` (ops) gives the realm you stand in a den now; `/underworld heat <n>` sets its heat.
+- Stage 2 (not yet): guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading.
+- Tuning: the constants at the top of `Underworld`, `Speakeasy` and `Busts`.
