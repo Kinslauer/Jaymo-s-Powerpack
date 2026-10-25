@@ -37,12 +37,12 @@ import org.joml.Quaternionf;
  * own first-person view, where it would hang in front of your eyes.
  */
 public final class ZFighterHair {
-	/** The form (1-3), its colour and his set (0 swept, 1 wild), or null for no Super hair. */
+	/** The form (1-3), its colour and his set (0-5, {@link ZFighterHairStyles}), or null for no Super hair. */
 	public record Hair(int form, int color, int style) {
 	}
 
-	/** How many sets there are: swept and wild. */
-	public static final int STYLES = 2;
+	/** How many sets there are: swept, wild, flame, gale, crown and fringe. */
+	public static final int STYLES = 6;
 
 	/** How hard the hair blows back per joint at full wind (radians), and the root of each lock (a little less). */
 	static final float BLOW_PER_JOINT = 0.1F;

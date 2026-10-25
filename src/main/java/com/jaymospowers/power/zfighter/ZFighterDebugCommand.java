@@ -136,11 +136,11 @@ final class ZFighterDebugCommand {
 								+ ApeRage.primal(player) + ")." : "Not the Great Ape right now."), false);
 							return 1;
 						}))
-					.then(Commands.literal("super4")
+					.then(Commands.literal("primalsuper")
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							ApeRage.openSuper4(player);
-							c.getSource().sendSuccess(() -> Component.literal("Super 4 unlocked (Saiyan lineage, C from your highest form)."), false);
+							c.getSource().sendSuccess(() -> Component.literal("Primal Super unlocked (Saiyan lineage, C from your highest form)."), false);
 							return 1;
 						})))
 				.then(Commands.literal("raid")
