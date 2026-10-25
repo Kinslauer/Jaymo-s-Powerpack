@@ -47,6 +47,8 @@ import net.minecraft.world.phys.Vec3;
 final class GravitySkyfall {
 	static final double RADIUS = 20.0;
 	static final int RISE_TICKS = 60, COOLDOWN = 1800;
+	/** (0.16.24) The film (ticks): a crane up round you as the ground lifts; bars for everyone in twice the radius. */
+	static final int FILM_TICKS = 50;
 	/** Rising speed (blocks/tick) and how hard the struggle jostles; the fall's speed at the slam. */
 	static final double RISE_SPEED = 0.55, JOSTLE = 0.08, SLAM = 3.5;
 	/** How many loose blocks come up with them, and how hard a block may be. */
@@ -185,6 +187,7 @@ final class GravitySkyfall {
 			}
 		}
 		SKYFALLS.add(skyfall);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS * 2.0);
 		// cast while weightless: you go up with it
 		mount(player, skyfall);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 3.0F, 0.3F);

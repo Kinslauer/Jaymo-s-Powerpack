@@ -69,6 +69,8 @@ final class DarktideTide {
 	static final int HARVEST_TICKS = 30;
 	static final int MAX_SHADOWS = 15, MAX_RISEN = 3;
 	static final double RISE_REACH = 10.0;
+	/** (0.16.24) The films (ticks): pushing in on a shadow as it rises, and on a drowning as it opens. */
+	static final int RISE_FILM_TICKS = 36, DROWN_FILM_TICKS = 30;
 	static final double RISEN_FOLLOW = 5.0, RISEN_TELEPORT = 20.0, RISEN_LEASH = 48.0;
 	static final double RISEN_SPEED = 1.25;
 	/** How long a risen shadow keeps after what you fought (ticks). */
@@ -174,6 +176,7 @@ final class DarktideTide {
 			center = hit.getLocation().add(0.0, 1.0, 0.0);
 		}
 		ZONES.add(new Zone(player, level, center, level.getGameTime() + DROWN_TICKS));
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PUSH_IN, DROWN_FILM_TICKS, center, target, 0.0);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 2);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 0.8F, 0.6F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.5F, 0.4F);
@@ -538,6 +541,7 @@ final class DarktideTide {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadow_lost").withStyle(ChatFormatting.GRAY));
 			return;
 		}
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.PUSH_IN, RISE_FILM_TICKS, mob.position(), mob, 0.0);
 		// a shadow leaves no Kitchen corpse, even if it somehow dies instead of melting
 		mob.addTag(NO_CORPSE_TAG);
 		if (mob instanceof AbstractVillager && !guard(mob)) {

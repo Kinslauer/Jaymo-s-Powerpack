@@ -67,7 +67,7 @@ public final class Handshakes {
 	/** How near (blocks) the two must be to shake, how far apart they're set for it, and how far they may be moved there. */
 	static final double REACH = 3.0, APART = 1.1, SET_MAX = 1.5;
 	/** The handshake (ticks): the hands meet at {@link #GRIP_TICK}, let go at {@link #RELEASE_TICK}, it's over at {@link #SHAKE_TICKS}. */
-	public static final int GRIP_TICK = 10, RELEASE_TICK = 36, SHAKE_TICKS = 46;
+	public static final int GRIP_TICK = 12, RELEASE_TICK = 36, SHAKE_TICKS = 46;
 	/** The dap (ticks): the hands clasp at {@link #DAP_GRIP}, let go at {@link #DAP_RELEASE}, it's over at {@link #DAP_TICKS}. */
 	public static final int DAP_GRIP = 5, DAP_RELEASE = 10, DAP_TICKS = 14;
 	/** Further apart than this (blocks) mid-shake breaks it off. */

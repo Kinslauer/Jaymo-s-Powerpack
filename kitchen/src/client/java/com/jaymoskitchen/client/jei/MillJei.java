@@ -26,7 +26,8 @@ import net.minecraft.world.item.Items;
  * Only loaded by JEI (the {@code jei_mod_plugin} entrypoint).
  */
 public final class MillJei implements IModPlugin {
-	static final IRecipeType<SimpleCategory.Recipe> GRINDING = type("grinding"), CHOPPING = type("chopping"), PRESSING = type("pressing");
+	static final IRecipeType<SimpleCategory.Recipe> GRINDING = type("grinding"), CHOPPING = type("chopping"), PRESSING = type("pressing"),
+		DRYING = type("drying");
 
 	private static IRecipeType<SimpleCategory.Recipe> type(String id) {
 		return IRecipeType.create(JaymosKitchen.MOD_ID, id, SimpleCategory.Recipe.class);
@@ -43,7 +44,8 @@ public final class MillJei implements IModPlugin {
 		registration.addRecipeCategories(
 			new SimpleCategory(gui, GRINDING, title("grinding"), Mill.MACHINES.get(MachineKind.HAND_GRINDSTONE), 1),
 			new SimpleCategory(gui, CHOPPING, title("chopping"), Mill.MACHINES.get(MachineKind.CHOPPING_BLOCK), 2),
-			new SimpleCategory(gui, PRESSING, title("pressing"), Mill.MACHINES.get(MachineKind.PRESS), 2));
+			new SimpleCategory(gui, PRESSING, title("pressing"), Mill.MACHINES.get(MachineKind.PRESS), 2),
+			new SimpleCategory(gui, DRYING, title("drying"), com.jaymoskitchen.tanning.Hides.DRYING_RACK, 1));
 	}
 
 	@Override
@@ -56,6 +58,7 @@ public final class MillJei implements IModPlugin {
 			};
 			registration.addCraftingStation(type, Mill.MACHINES.get(kind));
 		}
+		registration.addCraftingStation(DRYING, com.jaymoskitchen.tanning.Hides.DRYING_RACK);
 	}
 
 	@Override
@@ -88,6 +91,14 @@ public final class MillJei implements IModPlugin {
 		registration.addRecipes(GRINDING, grinding);
 		registration.addRecipes(CHOPPING, chopping);
 		registration.addRecipes(PRESSING, pressing);
+		// (0.5.27) the drying rack: salted hides to dried, wet tanned hides to leather
+		List<SimpleCategory.Recipe> drying = new ArrayList<>();
+		for (Item item : List.of(com.jaymoskitchen.tanning.Hides.SALTED_HIDE, com.jaymoskitchen.tanning.Hides.WET_TANNED_HIDE)) {
+			ItemStack stack = new ItemStack(item);
+			drying.add(new SimpleCategory.Recipe(List.of(List.of(stack)), List.of(com.jaymoskitchen.tanning.Hides.dried(stack)),
+				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
+		}
+		registration.addRecipes(DRYING, drying);
 	}
 
 	private static Component title(String id) {

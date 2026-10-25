@@ -1073,3 +1073,22 @@ anywhere, and none of its vegetables went into our minigames. New dishes, all th
 - A full stove now lists 43 dishes, so the "can make it" mask sent to the screen is a long (63 dishes).
 - Icons in the vanilla style pack: chicken, cod and pies from vanilla's own (`tools/vanilla_style/kitchen.py`), soups in
   vanilla's stew bowl, lemonade and grape wine in the brewing bottle (`brewing.py`). Compile-checked; not playtested.
+
+### 0.5.27: hides need tanning, after SevTech Ages (pack 0.16.24)
+- Andy: "Leather needs tanning", SevTech's route with our items (the work blade is our primitive knife). New
+  `tanning/Hides`: animals drop a **Hide** instead of leather (entity loot tables via `LootTableEvents.MODIFY_DROPS`, and
+  `ButcheringBonus`). Hide + work blade = 4 **Raw Hide** (rabbit hide + blade = 1); 2 raw hide + **Salt** + water (a
+  waterskin with a sip, or a water bucket) = **Salted Hide**; on a **Drying Rack** it dries (4 min, paused in rain) to
+  **Dried Hide**; 2 dried hide + **Resin** + water = 2 **Wet Tanned Hide**; on the rack again, leather. Vanilla's
+  rabbit hide to leather recipe is off.
+- `BladeRecipe` (`jaymoskitchen:blade_crafting`, written like crafting_shapeless): work blades
+  (`#jaymoskitchen:work_blades`: Powers' knives, `#c:tools/knife`) come back one durability down, a waterskin comes back
+  a sip lighter (an empty one doesn't match). Wool + blade = 2 string (fleece cut up).
+- Resin: bark ground on the hand grindstone. Bark: a work blade on the side of a log peels it (log becomes stripped),
+  besides the axe's 35% chance. Salt comes from Powers' salt crystals (rocks lying in water).
+- Drying rack: 6 sticks as two legs and a top bar, with a cord (string or plant string) in the middle of the top.
+  Holds up to 4 of one thing, drawn hanging under the pole; empty hand takes it down, sneak with an empty hand says how long is left. JEI shows a
+  Drying Rack category.
+- A waterskin can also be sewn from 3 raw hide and a cord, so the first leather doesn't need leather.
+- Assets: `tools/gen_hides.py` (own pixel art; the rack uses vanilla spruce log textures). Recipes, the rack and the
+  hide drops checked on a Powers dev server with a fake player; not seen in a client.

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": "jaymoskingdoms:whale_meat",
+  "result": {
+    "id": "jaymoskingdoms:cooked_whale_meat"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "jaymoskitchen:blade_crafting",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:dried_hide",
+    "jaymoskitchen:dried_hide",
+    "jaymoskitchen:resin",
+    "#jaymoskitchen:tanning_water"
+  ],
+  "result": {
+    "id": "jaymoskitchen:wet_tanned_hide",
+    "count": 2
+  }
+}
