@@ -3636,7 +3636,9 @@ public final class WebSymbiote {
 			return;
 		}
 		// a weak bond barely listens (it always lets you put a toggle away)
-		// (0.15.153) Living Armor only puts the armour on or off; its tendrils have their own slot (TENDRILS_TOGGLE)
+		// (0.15.153) Living Armor only puts the armour on or off; its tendrils have their own slot (TENDRILS_TOGGLE).
+		// (0.16.7) With the tendrils already out over the plain suit (or skin), the press puts the armour ON under them
+		// (toggle: set() keeps them out); it never draws them in (Andy). Nothing here is keyed on armored().
 		boolean puttingAway = ability == ARMOR && state.has(WebSymbioteState.ARMOR) || ability == CRAWL && state.has(WebSymbioteState.CRAWL);
 		if (!puttingAway && !player.isCreative() && state.bond() < IGNORE_BOND
 			&& player.getRandom().nextFloat() < IGNORE_MAX * (1.0F - state.bond() / (float)IGNORE_BOND)) {
@@ -3792,8 +3794,12 @@ public final class WebSymbiote {
 		WebSymbioteState state = state(player);
 		boolean on = !state.has(flag);
 		// (0.15.153) Living Armor always starts with its tendrils out (set brings them out as the armour forms; the
-		// Tendrils slot draws them in)
+		// Tendrils slot draws them in). (0.16.7) Said here too, so it holds whatever set() comes to do: the armour going
+		// on over tendrils already out keeps them out, and coming off leaves them as they were.
 		WebSymbioteState next = state.withFlag(flag, on);
+		if (flag == WebSymbioteState.ARMOR && on) {
+			next = next.withFlag(WebSymbioteState.TENDRILS, true);
+		}
 		set(player, next);
 		ServerLevel level = player.level();
 		if (flag == WebSymbioteState.ARMOR) {
