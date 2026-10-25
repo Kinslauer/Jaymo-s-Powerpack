@@ -2845,3 +2845,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   vanilla's iron chain texture; the ball is spiked and textured with its tier's block. The whip reaches 10 blocks (Andy's
   pick), hooks any wall top in reach, and yanks harder from further off. Rappel: you hang on the lash; walking climbs it,
   Sneak lowers. Compile-checked; not playtested.
+- **0.16.12, the Frost Beam is held:** Andy: "https://modrinth.com/mod/laser-eyes this has a good idea of
+  what i want from the beam" (Laser Eyes, an ARR Viltrumite addon: ideas only). `FrostBeam` is one hair-thin white beam from
+  the right hand (`HAND_OUT`, `HAND_SIDE`, `HAND_DOWN`; Andy: "keep it as one beam from the hand. but keep the new
+  design"), held for as long as the left mouse is (the client sends `FrostBeam.Keep`
+  every `RaceHoldClient.FROST_KEEP` ticks; unheard for `KEEP_TICKS` it stops), sweeping with the crosshair. A target under it is hit once per `COOLDOWN`/`Z_COOLDOWN` with the same damage and 40% wound roll.
+  Water it crosses becomes frosted ice that melts after `FROST_TICKS`; fire it lands on goes out; no block breaking.
+  `ZFighterBeams` style 3 (`HELD`): full width at once, a small glint at the hand and where it lands. While it's
+  held the click doesn't dig (`RaceHoldClient.frostBeaming`, `ZFighterAttackMixin`). Compile-checked; not playtested.
