@@ -109,7 +109,7 @@ public final class Lash {
 	static final int FLAIL_COOLDOWN = 14, WHIP_COOLDOWN = 12;
 
 	// ---- the whip ---------------------------------------------------------------------------------------------------
-	/** How far the lash reaches ((0.16.8) Andy chose 10 blocks), and the ticks it takes to crack out. */
+	/** How far the lash reaches ((0.16.11) Andy chose 10 blocks), and the ticks it takes to crack out. */
 	public static final double WHIP_REACH = 10.0;
 	public static final int CRACK_TICKS = 4;
 	/** The crack's sting, and the slam's. */
@@ -122,15 +122,15 @@ public final class Lash {
 	 * 1.05); heavier ones are yanked off their feet instead, this hard, and reel (slowed) this long.
 	 */
 	static final double LIFT_VOLUME = 0.9, YANK_PULL = 1.0, YANK_UP = 0.35;
-	/** (0.16.8) A yank from further off pulls harder (this much more a block away), up to this hard: from the lash's full reach. */
+	/** (0.16.11) A yank from further off pulls harder (this much more a block away), up to this hard: from the lash's full reach. */
 	static final double YANK_PER_BLOCK = 0.12, YANK_MAX = 2.0;
 	static final int REEL_TICKS = 40;
 	/** The haul: over your head at this tick, slammed in front at the next (ticks since letting go). */
 	public static final int HEAVE_OVER = 7, HEAVE_SLAM = 12, YANK_TICKS = 6;
 	static final double HEAVE_REACH = 3.2, STEER = 0.75, MAX_SPEED = 2.6;
 	/**
-	 * (rappel) A wall whose top is at most this far above your feet can be climbed ((0.16.8) whatever the lash reaches);
-	 * the lash, cracked anywhere on its face, hooks over the top. (0.16.8) Andy: "the rappelling should only pull you up
+	 * (rappel) A wall whose top is at most this far above your feet can be climbed ((0.16.11) whatever the lash reaches);
+	 * the lash, cracked anywhere on its face, hooks over the top. (0.16.11) Andy: "the rappelling should only pull you up
 	 * as you walk": you hang on the lash (client/armory/LashRenderer.climb), and walking takes it in hand over hand this
 	 * fast (blocks a tick) up the wall; at the top (this far below the lip) you go up and over it, pushed in this hard;
 	 * with Sneak held you pay it out and let yourself down this fast. The hook gives after this long anyway.

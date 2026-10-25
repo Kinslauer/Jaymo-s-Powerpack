@@ -14,7 +14,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.16.8) Where a held flail's chain and a held whip's lash leave the handle, taken from the item as it's drawn (the
+ * (0.16.11) Where a held flail's chain and a held whip's lash leave the handle, taken from the item as it's drawn (the
  * Whip mod's idea, MIT): while a player's main-hand flail or whip is submitted (third person: ItemInHandLayer, your own
  * first person: the hands renderer), the item model's own transform carries the handle's tip ({@link #FLAIL_TIP},
  * {@link #WHIP_TIP}, in the model's 0-1 space) into the world. Kept per player as an offset from where they're drawn, so

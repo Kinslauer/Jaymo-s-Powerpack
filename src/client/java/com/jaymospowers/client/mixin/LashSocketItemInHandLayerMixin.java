@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.16.8) A player's main-hand flail or whip in third person: where its handle's tip is drawn (LashSockets). */
+/** (0.16.11) A player's main-hand flail or whip in third person: where its handle's tip is drawn (LashSockets). */
 @Mixin(ItemInHandLayer.class)
 abstract class LashSocketItemInHandLayerMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"))

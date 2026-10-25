@@ -2832,7 +2832,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the Flails mod's, and the ball is under half its old size. Ball and Chain's ball goes round the raised hand too. The
   flail no longer uses the trident's raised-arm animation. Timings, damage and sounds unchanged. Compile-checked; not
   playtested.
-- **0.16.8, physical flail and whip:** Andy: "the flail chain is completley disconnected from the stick and it looks
+- **0.16.11, physical flail and whip:** Andy: "the flail chain is completley disconnected from the stick and it looks
   jarring. all the flail heads should match the material they are made from. and the whip should be able to pull from
   the extent of it's range, not just 7 blocks. also the rappelling should only pull you up as you walk, so no auto
   gliding to the impact point. these weapons should be physics based so the entire thing is accurately rendered in hand

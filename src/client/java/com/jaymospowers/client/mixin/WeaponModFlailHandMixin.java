@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.16.8) A flail in a player's hand is drawn as Balkon's bare handle (its "thrown" model): the chain and ball hanging
+ * (0.16.11) A flail in a player's hand is drawn as Balkon's bare handle (its "thrown" model): the chain and ball hanging
  * off it are LashRenderer's, physical, so they swing from the handle instead of being painted on. Icons keep the ball.
  */
 @Mixin(targets = "ckathode.weaponmod.item.WMItemProperties$FlailThrown")

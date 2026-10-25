@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
  * (0.15.148) Draws every flail's chain and ball and every whip's lash, from the hand to where {@link Lash#head} puts the
  * head (the synced {@link Lash.State}).
  * <p>
- * (0.16.8) Andy: "the flail chain is completley disconnected from the stick ... these weapons should be physics based so
+ * (0.16.11) Andy: "the flail chain is completley disconnected from the stick ... these weapons should be physics based so
  * the entire thing is accurately rendered in hand and in world. like this mod" (the Whip mod, MIT; nothing copied).
  * Each held flail and whip is now a rope of points on Verlet physics ({@link Rope}: gravity, drag, fixed links, resting
  * on and dragging over blocks), stepped every tick. Its first point is the handle's tip as the item was really drawn
@@ -74,7 +74,7 @@ public final class LashRenderer {
 	private static final float EXEC_RAISE = 3.0F, EXEC_OUT = 0.35F;
 	private static final double EXEC_RADIUS = 1.1, EXEC_DROOP = 0.1;
 
-	// ---- (0.16.8) the physics ------------------------------------------------------------------------------------------
+	// ---- (0.16.11) the physics ------------------------------------------------------------------------------------------
 	/** Points along a flail's chain and a whip's lash. */
 	private static final int CHAIN_POINTS = 14, LASH_POINTS = 26;
 	/** Pull down (blocks a tick, a tick), what a point keeps of its speed each tick, and passes over the links. */
@@ -165,7 +165,7 @@ public final class LashRenderer {
 		return new float[] {raise, out};
 	}
 
-	/** (0.16.8) A flail or whip out: where its head is held (null: free, the physics has it), and how long the line is. */
+	/** (0.16.11) A flail or whip out: where its head is held (null: free, the physics has it), and how long the line is. */
 	private record Pull(@Nullable Vec3 head, double length, @Nullable Vec3 neck) {
 	}
 
@@ -217,7 +217,7 @@ public final class LashRenderer {
 
 	/**
 	 * Ball and Chain's ball ({@link Finishers.Kind#FLAIL}), {@code t} ticks in: paid out and whirled round the raised
-	 * hand, down on them at the first blow (18), up and round again, down at the kill (36), lying there; (0.16.8) then
+	 * hand, down on them at the first blow (18), up and round again, down at the kill (36), lying there; (0.16.11) then
 	 * let go (null), to swing back to the handle on its chain.
 	 */
 	private static @Nullable Vec3 executionBall(Player player, Vec3 at, double t, float partialTick) {
@@ -272,7 +272,7 @@ public final class LashRenderer {
 
 	// ---- the physics ------------------------------------------------------------------------------------------------------
 
-	/** (0.16.8) A flail's chain or a whip's lash: points that fall, drag, and stay one link apart. */
+	/** (0.16.11) A flail's chain or a whip's lash: points that fall, drag, and stay one link apart. */
 	private static final class Rope {
 		final boolean flail;
 		final int count;
@@ -454,7 +454,7 @@ public final class LashRenderer {
 		return LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos));
 	}
 
-	/** (0.16.8) The chain: vanilla's iron chain, two crossed strips of it (as the chain block) following the line. */
+	/** (0.16.11) The chain: vanilla's iron chain, two crossed strips of it (as the chain block) following the line. */
 	private static void chain(LevelRenderContext context, Vec3[] line, int[] light) {
 		// cut the line into pieces no longer than one run of the texture, so each piece's v stays within it
 		List<Vec3> stops = new ArrayList<>();
@@ -542,7 +542,7 @@ public final class LashRenderer {
 
 	/**
 	 * The rappel, on your own side (your movement is yours): the lash hooked over a wall's top ({@link Lash#HOOK}) and use
-	 * held. (0.16.8) Andy: "the rappelling should only pull you up as you walk, so no auto gliding to the impact point".
+	 * held. (0.16.11) Andy: "the rappelling should only pull you up as you walk, so no auto gliding to the impact point".
 	 * You hang on the lash at the length it caught you (it holds you, it doesn't pull); walk and you take it in hand over
 	 * hand and go up the wall, and over the top at the lip; hold Sneak and you pay it out and let yourself down.
 	 */
@@ -636,7 +636,7 @@ public final class LashRenderer {
 	}
 
 	/**
-	 * (0.16.8) The flail's head: a small spiked ball of what the flail is made of (its block's texture), hanging along
+	 * (0.16.11) The flail's head: a small spiked ball of what the flail is made of (its block's texture), hanging along
 	 * the last link ({@code along}) and, while it whirls, turning as it goes.
 	 */
 	private static void ball(LevelRenderContext context, Vec3 at, Vec3 along, double turn, Identifier texture, int light) {

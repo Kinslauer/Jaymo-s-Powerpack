@@ -1,7 +1,7 @@
 """Draws the Armory's leather whip (0.16.1, our own art) and writes its model, item definition and recipe. A coiled
 bullwhip: the lash wound round in a ring with a groove between its turns and pale spots on the leather, the rawhide fall
 curling inside with its popper, the braided handle up the left between a knot at each end, a wrist loop hanging from the
-butt. Painted by hand on a shade grid, lit from the top-left like vanilla's items. (0.16.8) In the hand only the
+butt. Painted by hand on a shade grid, lit from the top-left like vanilla's items. (0.16.11) In the hand only the
 handle is drawn (leather_whip_handle: the braided grip, its tip where client/armory/LashSockets.WHIP_TIP says); the lash
 off it is LashRenderer's, physical. Run it from the root:
 
@@ -47,7 +47,7 @@ GRID = (
 )
 
 
-# (0.16.8) the handle alone, corner to middle as a held item's is: the braid, a knot at the tip (8, 7) where the lash
+# (0.16.11) the handle alone, corner to middle as a held item's is: the braid, a knot at the tip (8, 7) where the lash
 # leaves it, the butt knot and the wrist loop
 HANDLE = (
     "................",

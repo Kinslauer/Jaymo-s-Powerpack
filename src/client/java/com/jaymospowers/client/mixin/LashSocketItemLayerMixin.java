@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.16.8) A held flail's or whip's model transform is on the stack: its handle's tip goes to LashSockets. */
+/** (0.16.11) A held flail's or whip's model transform is on the stack: its handle's tip goes to LashSockets. */
 @Mixin(targets = "net.minecraft.client.renderer.item.ItemStackRenderState$LayerRenderState")
 abstract class LashSocketItemLayerMixin {
 	@Inject(method = "submit", at = @At(value = "INVOKE",

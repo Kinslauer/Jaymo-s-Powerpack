@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.16.8) Your own main-hand flail or whip in first person: where its handle's tip is drawn (LashSockets). */
+/** (0.16.11) Your own main-hand flail or whip in first person: where its handle's tip is drawn (LashSockets). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class LashSocketFirstPersonMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"))

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.16.8) The level's entities are being submitted: a held flail's or whip's handle drawn now is in the world (LashSockets). */
+/** (0.16.11) The level's entities are being submitted: a held flail's or whip's handle drawn now is in the world (LashSockets). */
 @Mixin(LevelRenderer.class)
 abstract class LashSocketLevelRendererMixin {
 	@Inject(method = "submitEntities", at = @At("HEAD"))
