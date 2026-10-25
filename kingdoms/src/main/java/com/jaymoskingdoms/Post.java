@@ -131,13 +131,22 @@ public final class Post {
 
 	/** {@code stack} (a letter) to be brought to {@code to} by the next messenger free. */
 	static void later(UUID to, ItemStack stack) {
+		later(to, stack, false);
+	}
+
+	/** {@link #later}, at the front of the queue ({@code first}: it was next already). */
+	private static void later(UUID to, ItemStack stack, boolean first) {
 		if (current == null || stack.isEmpty()) {
 			return;
 		}
 		ServerLevel level = Factions.level(current);
 		Map<String, List<ItemStack>> all = new HashMap<>(level.getAttachedOrElse(WAITING, Map.of()));
 		List<ItemStack> mine = new ArrayList<>(all.getOrDefault(to.toString(), List.of()));
-		mine.add(stack);
+		if (first) {
+			mine.addFirst(stack);
+		} else {
+			mine.add(stack);
+		}
 		while (mine.size() > WAITING_MAX) {
 			mine.removeFirst();
 		}
@@ -194,7 +203,7 @@ public final class Post {
 			if (dispatch(p, next)) {
 				LAST.put(p.getUUID(), now);
 			} else {
-				later(p.getUUID(), next);
+				later(p.getUUID(), next, true);
 			}
 		}
 	}

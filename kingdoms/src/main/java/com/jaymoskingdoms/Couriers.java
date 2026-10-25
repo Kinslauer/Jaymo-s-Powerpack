@@ -233,7 +233,7 @@ final class Couriers {
 			return;
 		}
 		long t = Royals.timeOfDay(level);
-		if (carrying(v) || !Routines.free(v, t)) {
+		if (carrying(v) || v.hasAttached(Elders.JOURNEY) || !Routines.free(v, t)) {
 			say(level, v, "busy");
 			return;
 		}
@@ -293,7 +293,7 @@ final class Couriers {
 		Villager best = null;
 		double bestDist = Double.MAX_VALUE;
 		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(BlockPos.containing(at)).inflate(range),
-			v -> v.isAlive() && !v.isBaby() && !carrying(v) && !Downed.isDowned(v) && Routines.free(v, t))) {
+			v -> v.isAlive() && !v.isBaby() && !carrying(v) && !v.hasAttached(Elders.JOURNEY) && !Downed.isDowned(v) && Routines.free(v, t))) {
 			double d = v.distanceToSqr(at);
 			if (d < bestDist) {
 				best = v;
