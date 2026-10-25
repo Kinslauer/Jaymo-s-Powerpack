@@ -79,6 +79,11 @@ public final class DownedPose {
 
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("downed_mob");
 
+	/** (0.16.16) Whether this body is down (its limbs are DownedPose's, not Touch'n Motion's: see TnmFollow). */
+	public static boolean down(Object state) {
+		return state instanceof LivingEntityRenderState living && living.getData(KEY) != null;
+	}
+
 	private DownedPose() {
 	}
 
