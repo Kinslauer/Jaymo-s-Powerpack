@@ -134,6 +134,14 @@ public final class Bounties {
 	static final long BOARD_REBUILD = 24000L * 3;
 	/** Where a settlement's board goes: this far from its bell (blocks). */
 	static final int BOARD_NEAR = 3, BOARD_FAR = 8;
+	/**
+	 * (0.7.197) How far ahead of a board, and how far to either side of its middle, the open ground in front of it is
+	 * counted (blocks); what facing the bell is worth in those blocks; and a board in town showing less open ground than
+	 * this is looked over once per server run for a better spot.
+	 */
+	static final int BOARD_VIEW = 8, BOARD_VIEW_SIDE = 2, BOARD_BELL_BONUS = 4, BOARD_OPEN_ENOUGH = 20;
+	/** (0.7.197) A board already up is only moved for a spot that sees at least this many more open blocks. */
+	static final int BOARD_TURN_GAIN = 6;
 	/** The custom data key on a bounty head (the bounty it's for). */
 	static final String HEAD_KEY = "jaymoskingdoms_bounty";
 	/** (0.7.168) The custom data key on a bounty notice (the bounty it's for). */
@@ -1052,14 +1060,30 @@ public final class Bounties {
 			}
 			String id = Integer.toString(f.id());
 			BlockPos had = boards.get(id);
+			Placing best = null;
 			if (had != null) {
 				if (!level.isLoaded(had)) {
 					continue;
 				}
 				BlockState there = level.getBlockState(had);
 				if (there.is(BOARD)) {
-					if (BountyBoard.isAnchor(there) && BountyBoard.complete(level, had, there.getValue(BountyBoard.FACING))) {
-						continue;
+					Direction faces = there.getValue(BountyBoard.FACING);
+					if (BountyBoard.isAnchor(there) && BountyBoard.complete(level, had, faces)) {
+						// (0.7.197) Andy: "the bounty board shouldn't be facing blocks so close like this when there is a wide
+						// open square in front of it." A board facing a wall is moved once to a spot that sees clearly more.
+						int seen = LOOKED_OVER.add(id) ? openness(level, had, faces) : BOARD_OPEN_ENOUGH;
+						if (seen >= BOARD_OPEN_ENOUGH) {
+							continue;
+						}
+						best = boardSpot(level, f.seat());
+						if (best == null || openness(level, best.spot(), best.facing()) < seen + BOARD_TURN_GAIN) {
+							continue;
+						}
+						for (int c = 0; c < BountyBoard.WIDTH; c++) {
+							for (int r = 0; r < BountyBoard.HEIGHT; r++) {
+								level.setBlock(BountyBoard.part(had, faces, c, r), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+							}
+						}
 					}
 					// (0.7.168) a board from before it was several blocks: taken down and put up again whole
 					level.removeBlock(had, false);
@@ -1067,11 +1091,15 @@ public final class Bounties {
 					continue;
 				}
 			}
-			BlockPos spot = boardSpot(level, f.seat());
-			if (spot == null) {
+			if (best == null) {
+				best = boardSpot(level, f.seat());
+			}
+			if (best == null) {
 				continue;
 			}
-			Direction facing = toward(f.seat(), spot);
+			BlockPos spot = best.spot();
+			Direction facing = best.facing();
+			LOOKED_OVER.add(id);
 			level.setBlock(spot, BountyBoard.partState(BOARD, facing, 1, 0), Block.UPDATE_ALL);
 			BountyBoard.build(level, spot, BOARD, facing);
 			Map<String, BlockPos> b2 = new HashMap<>(boards);
@@ -1117,8 +1145,46 @@ public final class Bounties {
 		return true;
 	}
 
-	/** The nearest open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits. */
-	private static @Nullable BlockPos boardSpot(ServerLevel level, BlockPos bell) {
+	/**
+	 * (0.7.197) How much open ground lies before a board at {@code anchor} facing {@code facing}: lanes from
+	 * {@link #BOARD_VIEW_SIDE} left to right of its middle, each counted out to {@link #BOARD_VIEW} blocks until a block
+	 * a person couldn't walk through stops it.
+	 */
+	private static int openness(ServerLevel level, BlockPos anchor, Direction facing) {
+		Direction side = BountyBoard.right(facing);
+		int open = 0;
+		for (int lane = -BOARD_VIEW_SIDE; lane <= BOARD_VIEW_SIDE; lane++) {
+			BlockPos p = anchor.relative(side, lane);
+			for (int d = 1; d <= BOARD_VIEW; d++) {
+				p = p.relative(facing);
+				if (!clear(level, p) || !clear(level, p.above())) {
+					break;
+				}
+				open++;
+			}
+		}
+		return open;
+	}
+
+	private static boolean clear(ServerLevel level, BlockPos p) {
+		BlockState s = level.getBlockState(p);
+		return s.isAir() || (s.canBeReplaced() && s.getFluidState().isEmpty());
+	}
+
+	/** Where a settlement's board goes up, and the way it faces. */
+	private record Placing(BlockPos spot, Direction facing) {}
+
+	/** The ids of the settlements whose board was checked for facing the open this server run. */
+	private static final Set<String> LOOKED_OVER = new HashSet<>();
+
+	/**
+	 * Open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits. (0.7.197) Of
+	 * those, the spot and facing with the most open ground before it ({@link #openness}), a little for facing the bell
+	 * and less the farther from it; it used to be the nearest spot, always facing the bell, even with a wall right ahead.
+	 */
+	private static @Nullable Placing boardSpot(ServerLevel level, BlockPos bell) {
+		Placing best = null;
+		int bestScore = Integer.MIN_VALUE;
 		for (int r = BOARD_NEAR; r <= BOARD_FAR; r++) {
 			for (int dx = -r; dx <= r; dx++) {
 				for (int dz = -r; dz <= r; dz++) {
@@ -1129,13 +1195,21 @@ public final class Bounties {
 					if (Math.abs(top.getY() - bell.getY()) > 3) {
 						continue;
 					}
-					if (fits(level, top, toward(bell, top))) {
-						return top;
+					Direction bellward = toward(bell, top);
+					for (Direction facing : Direction.Plane.HORIZONTAL) {
+						if (!fits(level, top, facing)) {
+							continue;
+						}
+						int score = openness(level, top, facing) + (facing == bellward ? BOARD_BELL_BONUS : 0) - r;
+						if (score > bestScore) {
+							bestScore = score;
+							best = new Placing(top, facing);
+						}
 					}
 				}
 			}
 		}
-		return null;
+		return best;
 	}
 
 	// ---- (0.7.168) villagers posting notices ---------------------------------------------------------------------------
