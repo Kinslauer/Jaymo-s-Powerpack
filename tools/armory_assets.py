@@ -78,8 +78,8 @@ SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"},
 FORGED_TIERS = ("stone", "iron", "golden")
 FORGED_SINGLES = ("iron_quarterstaff", "harpoon", "kunai", "throwing_star")
 # (0.16.18) Andy: "the wooden weapons should not be craftable". Wooden round shields still are (a shield, like the
-# stone and metal ones), and so is the throwing stick (Andy: "this is ok").
-WOODEN_SINGLES = ("wooden_cudgel", "wooden_quarterstaff")
+# stone and metal ones), and so are the throwing stick and the wooden quarterstaff (Andy: "this is ok").
+WOODEN_SINGLES = ("wooden_cudgel",)
 
 ARMOR = [
     ("caveman_helmet", "Caveman Hood", "head_armor", ["LBL", "L L"]),
