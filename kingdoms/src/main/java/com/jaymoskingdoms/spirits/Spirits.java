@@ -145,15 +145,9 @@ public final class Spirits {
 		}
 	}
 
-	/** Every spirit there is, by kind. The last three are placeholders for the next patch. */
+	/** Every spirit there is, by kind. */
 	private static final Spirit[] ALL = {
-		new Grimsby(), new Varro(),
-		new Spirit(AMBROSE, "ambrose", 0xFF9BE08F, 2.0F) {
-		},
-		new Spirit(THESSALY, "thessaly", 0xFFFF9ED8, 0.6F) {
-		},
-		new Spirit(QUIET, "quiet", 0xFFC8C8DC, 1.2F) {
-		}};
+		new Grimsby(), new Varro(), new Ambrose(), new Thessaly(), new QuietOne()};
 
 	/** Ticks each player's spirit has been out, towards a bond point. */
 	private static final Map<UUID, Integer> OUT_TICKS = new HashMap<>();
@@ -176,8 +170,12 @@ public final class Spirits {
 		SpiritVoice.register();
 		SpiritSickness.register();
 		HandMoves.register();
+		HandExtras.register();
 		Grimsby.register();
 		Varro.register();
+		Ambrose.register();
+		Thessaly.register();
+		QuietOne.register();
 		FolkSpirits.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
