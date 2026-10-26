@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Draws the Aether's animals: one renderer, many looks. What differs per animal (which skin, what extra state
@@ -42,8 +43,8 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 		boolean saddled, puffed, sheared;
 		/** A kirrid's head plate; a burrukai winding up or angry; a taegore digging; an insect at rest. */
 		boolean plated, windup, angry, digging, resting;
-		/** How much bigger than the model it is drawn (a whale is drawn smaller than its model). */
-		float size = 1.0F;
+		/** How much bigger than the model it is drawn (the whale far bigger), and how far (blocks) it is drawn lowered. */
+		float size = 1.0F, lower;
 		/** Wing beat: the phase, and how hard (0 on the ground to 1 in the air). */
 		float flap, flapSpeed;
 		/** Grazing, 0 to 1. */
@@ -76,6 +77,7 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 		super.extractRenderState(mob, state, partialTicks);
 		state.air = mob.onGround() ? 0.0F : 1.0F;
 		state.size = 1.0F;
+		state.lower = 0.0F;
 		if (mob instanceof RideableAnimal rideable) {
 			state.saddled = rideable.isSaddled();
 			state.flap = Mth.lerp(partialTicks, rideable.oFlap, rideable.flap);
@@ -88,6 +90,15 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 	protected void scale(State state, PoseStack poseStack) {
 		float scale = (state.isBaby ? BABY_SCALE : 1.0F) * (1.0F + state.puff * PUFF_SWELL) * state.size;
 		poseStack.scale(scale, scale, scale);
+		// y points down here, and is already scaled
+		poseStack.translate(0.0F, state.lower / scale, 0.0F);
+	}
+
+	/** The whale's head and fluke reach far past its body's box. */
+	@Override
+	protected AABB getBoundingBoxForCulling(T mob, float partialTicks) {
+		AABB box = super.getBoundingBoxForCulling(mob, partialTicks);
+		return mob instanceof Aerwhale ? box.inflate(WHALE_REACH, WHALE_REACH * 0.5, WHALE_REACH) : box;
 	}
 
 	@Override
@@ -298,8 +309,11 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 		};
 	}
 
-	/** The whale is drawn at this share of its model, so the 3-block body fits the model's huge head. */
-	private static final float WHALE_SIZE = 0.8F;
+	/**
+	 * The whale is drawn this many times its model: about fifteen blocks nose to tail, a little longer than Kingdoms' great
+	 * whale (about fourteen). Lowered so its head and jaw sit in its body's box, and seen this far (blocks) past that box.
+	 */
+	private static final float WHALE_SIZE = 3.2F, WHALE_LOWER = 2.5F, WHALE_REACH = 9.0F;
 
 	static Look<Aerwhale> aerwhale() {
 		Identifier skin = skin("aerwhale");
@@ -307,6 +321,7 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 			@Override
 			public void extract(Aerwhale mob, State state, float partialTicks) {
 				state.size = WHALE_SIZE;
+				state.lower = WHALE_LOWER;
 			}
 
 			@Override
