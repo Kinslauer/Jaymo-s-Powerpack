@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.remnants.Monoliths;
+import com.jaymoskingdoms.whaling.Whaling;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -105,6 +106,8 @@ public final class LifeStory {
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
+	/** (0.7.226) A whaler's harpooner: the irons they sign on with. */
+	static final int WHALER_HARPOONS = 8;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -113,7 +116,7 @@ public final class LifeStory {
 	/** Where a story can start. {@code realm}: you name a realm for it. */
 	public enum Start {
 		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), SKYFALL(false),
-		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), UNARMED(false), FATE(false);
+		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), WHALERS(false), UNARMED(false), FATE(false);
 
 		public final boolean realm;
 
@@ -252,6 +255,7 @@ public final class LifeStory {
 				Answer.road(Start.BURNED, Items.CHARCOAL),
 				Answer.road(Start.SNOWED, Items.LANTERN),
 				Answer.road(Start.CAPTIVE, Items.LEAD),
+				Answer.road(Start.WHALERS, Items.TRIDENT),
 				Answer.road(Start.UNARMED, Items.BONE),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
 		}
@@ -447,6 +451,7 @@ public final class LifeStory {
 			case BURNED -> "smoke";
 			case SNOWED -> "cryo";
 			case CAPTIVE -> "zfighter";
+			case WHALERS -> "darktide";
 			default -> "";
 		};
 	}
@@ -657,6 +662,14 @@ public final class LifeStory {
 					}
 				}
 			}
+			case WHALERS -> {
+				// (0.7.226) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
+				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn);
+				if (deck != null) {
+					player.teleportTo(level, deck.x, deck.y, deck.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+					return Start.WHALERS;
+				}
+			}
 			case WILD, UNARMED, FATE -> {
 				// the unarmed start sets out from the wild too
 				if (start == Start.UNARMED) {
@@ -776,6 +789,13 @@ public final class LifeStory {
 		give(player, new ItemStack(Items.BREAD, KIT_BREAD));
 		if (landed == Start.SKYFALL) {
 			give(player, any(SKYFALL_SHARDS, "aether:ambrosium_shard", "aether_ii:ambrosium_shard", "minecraft:amethyst_shard"));
+		}
+		if (landed == Start.WHALERS) {
+			// her harpooner: irons, a knife for the lines, oilskins
+			give(player, new ItemStack(Whaling.HARPOON_ITEM, WHALER_HARPOONS));
+			give(player, new ItemStack(Items.SHEARS));
+			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
+			equip(player, new ItemStack(Items.LEATHER_BOOTS));
 		}
 		if (landed == Start.SNOWED) {
 			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
