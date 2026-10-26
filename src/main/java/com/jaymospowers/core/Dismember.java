@@ -389,6 +389,31 @@ public final class Dismember {
 		return lose(target, part, by, true);
 	}
 
+	/**
+	 * (0.17.1) Jaymo's Kingdoms (a life story's "unarmed" start, by reflection): {@code target} has long been without
+	 * {@code part} (an arm or a leg), an old stump healed over: missing like any lost part, but nothing flies off, nothing
+	 * bleeds, nothing shows. It grows back the usual ways. True if it went.
+	 */
+	public static boolean bornWithout(LivingEntity target, int part) {
+		if (part == HEAD || !(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
+			return false;
+		}
+		int mask = missing(target) | part;
+		target.setAttached(MISSING, mask);
+		target.addTag(tag(part));
+		track(target);
+		com.jaymospowers.core.wounds.BodyPart lost = com.jaymospowers.core.wounds.Breaks.part(part);
+		if (lost != null) {
+			com.jaymospowers.core.wounds.Wounds.breakPart(target, lost, null);
+		}
+		if (part == RIGHT_ARM || part == LEFT_ARM) {
+			emptyHand(level, target, part);
+		} else {
+			legs(target, mask);
+		}
+		return true;
+	}
+
 	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered) {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
 			return false;

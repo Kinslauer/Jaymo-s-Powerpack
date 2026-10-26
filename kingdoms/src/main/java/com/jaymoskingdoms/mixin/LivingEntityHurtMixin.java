@@ -6,6 +6,7 @@ import com.jaymoskingdoms.Groups;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HiddenBlade;
 import com.jaymoskingdoms.Senses;
+import com.jaymoskingdoms.VillagerHunters;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * it jams in unskilled hands, and stabs a Crippled foe for ten times the blow ({@link HiddenBlade#dealt}).
  * (0.7.111) And if it left the blow alone, a sneak attack on a monster that doesn't know you're there ({@link Senses#dealt}).
  * (0.7.184) Then a player's group ({@link Groups#dealt}): a groupmate's blow lands at a quarter.
+ * (0.7.217) Last, a monster's blow on a villager lands softer, and a golem's kills a creeper ({@link VillagerHunters#dealt}).
  */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityHurtMixin {
@@ -29,6 +31,6 @@ abstract class LivingEntityHurtMixin {
 		float dealt = Heritage.dealt(self, source, CombatArts.dealt(self, source, ClassPerks.dealt(self, source, amount)));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
-		return Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt));
+		return VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)));
 	}
 }

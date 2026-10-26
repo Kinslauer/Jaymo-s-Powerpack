@@ -47,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.217) Andy (2026-10-26): "allow villagers to up and leave on their own volition, packing their things and carts to
+ * (0.7.218) Andy (2026-10-26): "allow villagers to up and leave on their own volition, packing their things and carts to
  * depart for another civilization. maybe that explains the settlements you can find of people living on their own away
  * from any kingdom, they should tell you as much when you speak with them."
  * <p>

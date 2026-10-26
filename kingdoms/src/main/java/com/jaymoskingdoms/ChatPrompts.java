@@ -36,7 +36,7 @@ public final class ChatPrompts {
 			if (!temperament.isEmpty()) {
 				sb.append(temperament).append('\n');
 			}
-			// (0.7.217) what they think of your blood
+			// (0.7.218) what they think of your blood
 			String blood = Prejudice.prompt(villager, player);
 			if (!blood.isEmpty()) {
 				sb.append(blood).append('\n');

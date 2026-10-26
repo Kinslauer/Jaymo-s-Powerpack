@@ -4730,7 +4730,33 @@ thorny rose inspired variant among another, and give each heritage 2 additional 
   player hasn't learned (lens and Codex first, through crucible, flux, infusion, gear); a worried word first if they're
   badly corrupted or standing on blighted land. Players who've started get an excited greeting and alchemy chat.
 - Reads Powers' alchemy by reflection (`PowersCompat.alchemy`, `PowersCompat.flux`); without Powers it tells how to begin.
-## 0.7.217: non-human heritages looked down on (pack 0.17.2)
+## 0.7.216: the life story, a newcomer's character told as their past (pack 0.17.1)
+Andy: "take inspiration from Bannerlord's intro asking about your life into adulthood and use the answers to craft your
+character's heritage, spawn-scenario, power affinity and class". Bannerlord is all rights reserved: the idea only, every
+question, answer and line here is our own. Design doc: https://claude.ai/artifact/5vHNJoQbkJbP7Bst1RsHH9
+- `LifeStory`: six questions (`Question`). Born where = heritage (the 11 pickable ones); raised by = +1 attribute (a
+  foundling a free point; nobles name a realm for its goodwill; merchants start with emeralds); as a child = +1
+  attribute, a lean to a heritage look and a power; growing up = class; "then one day..." = Jaymo's Powers' affinity
+  (only asked with Powers there; "fate" gives the childhood's power half the time); what sets you on the road = the
+  start (`Start`: a realm's capital, banished by a named realm, a cave with a spider's bite, a beached wreck, sworn to a
+  named realm at its keep, a village of your homeland's kind, a monolith, the wild, or fate). A start that echoes the
+  power (cave/Web, wreck/Darktide, monolith/Wind) answers its calling a day sooner (`PowersCompat.call`).
+- Saved in the synced `life_story` attachment (an answer key per question); its points go through `Stats.fromStory`
+  (parchment pips on the stats screen). Small kit per start (bread; torches underground; coins in a capital).
+- Client `LifeStoryScreen`: a question a page, the answer's tale and what it gives on the left, a realm page after an
+  answer that names one, and the story read back with the heritage's look and a Mage's spell / Sorcerer's element.
+- Replaces the heritage and class screens for newcomers only (`Classes.next`); they still open for a Writ of Rebirth
+  and for anyone part-made before. MCA's "where do you start" page is skipped for newcomers (`McaDestinySkipMixin`).
+- `/kingdom story reset <players>` (ops) unmakes heritage, class and story and asks again.
+- Andy's doc edits: new wording for six answers and their tales; a seventh start, "Unarmed" (with Powers only: you
+  wake in the wild missing one random arm or leg, healed over, through Powers' new `Dismember.bornWithout`; it grows
+  back the usual ways); the cave start wakes you at 4 health with Poison, Slowness and Weakness; the village start
+  rolls a random job (butcher, woodcutter, builder, farmhand, miner, fisher, smith's hand) with its tools, kept as a 7th
+  story entry. Sworn, Banished, City, Caving and Village starts come with the class's gear, armour worn (`GEARED`);
+  Sworn adds full iron, a sword and a shield; Caving a pickaxe. The story page has heritage and class buttons to change
+  either after the result (the heritage must be open to them; checked on the server).
+- Tuning: constants at the top of `LifeStory`. Not seen in game.
+## 0.7.218: non-human heritages looked down on (pack 0.17.3)
 Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
 the tide born, stone, warrior and sylvan fall into this".
 - **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
@@ -4752,7 +4778,7 @@ the tide born, stone, warrior and sylvan fall into this".
   across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
   everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
   hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
-  settlements already in the world when 0.7.217 first starts stay as they are; folk first loading within two days of a
+  settlements already in the world when 0.7.218 first starts stay as they are; folk first loading within two days of a
   haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
   dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
   and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now

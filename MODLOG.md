@@ -2937,5 +2937,5 @@ Warpainted red with ochre bands. Players and villager apes alike. Sketch: projec
   - `gear/`: essence payment at the enchanting table, Spellbinding Cloth, the Artificer's Rod with five foci (Pull,
     Push, Lift into a bound block, Ember, Frost), Ichorium tools, Ichorcloth robes, the Lantern of Everflame.
   Compile-checked against the 26.3 jars, not yet seen in a client.
-- **0.17.2, heritage prejudice (Kingdoms 0.7.217):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
+- **0.17.3, heritage prejudice (Kingdoms 0.7.218):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
   most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own; no Powers changes. See Kingdoms' log.

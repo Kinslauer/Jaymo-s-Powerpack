@@ -215,7 +215,7 @@ public final class Production {
 		int crops = farms;
 		Faction stored = Factions.update(level.getServer(), faction.id(), x -> x.withHoldings(x.holdings().withSurvey(population, crops, forest)));
 		if (stored != null) {
-			// (0.7.217) a realm whose peasants have all left falls to ruin in time (Emigrants)
+			// (0.7.218) a realm whose peasants have all left falls to ruin in time (Emigrants)
 			Emigrants.surveyed(level, stored);
 		}
 		return stored == null ? faction : stored;
