@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -28,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * (0.7.106) An earned heritage not yet woken shows as "???" with a hint of how it's woken, and can't be picked. The rows
  * shrink to fit when there are more heritages than the panel is tall, dropping their icons when too small for them.
  * (0.7.184) The Blood Rite's mode is gone: an earned blood passes to your children ({@code Lineage}).
+ * (0.7.214) Each heritage comes in three looks ({@link HeritageVariants}): the button at the bottom left steps through
+ * the picked one's, and the pane's first row tells of the one shown (its look, its story and its trait).
  */
 final class HeritageScreen extends Screen {
 	static final int MAX_W = 420, MAX_H = 300, LIST_W = 118, LIST_ROW = 19, MIN_ROW = 11, ICON_ROW = 17, HEADER = 34, FOOTER = 24;
@@ -43,7 +46,9 @@ final class HeritageScreen extends Screen {
 
 	private final boolean forced;
 	private Heritage.@Nullable Kind picked;
-	private @Nullable Button choose;
+	/** (0.7.214) The picked heritage's look (0: the first). */
+	private int pickedVariant;
+	private @Nullable Button choose, variant;
 	/** How far down the right pane is scrolled, and for which heritage (it starts over for each one). */
 	private int scroll;
 	private Heritage.@Nullable Kind scrolled;
@@ -158,11 +163,17 @@ final class HeritageScreen extends Screen {
 		}
 		this.choose = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {
-				ClientPlayNetworking.send(new Heritage.Choose(this.picked.ordinal()));
+				ClientPlayNetworking.send(new Heritage.Choose(this.picked.ordinal(), this.pickedVariant));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
 				onClose();
 			}
 		}).bounds(right - 120, y, 120, 16).build());
+		// (0.7.214) the picked heritage's look, stepped through on each press
+		this.variant = addRenderableWidget(Button.builder(Component.empty(), b -> {
+			if (this.picked != null) {
+				this.pickedVariant = (this.pickedVariant + 1) % (HeritageVariants.of(this.picked).size() + 1);
+			}
+		}).bounds(paneX() + 6, y, Math.max(60, right - 126 - paneX() - 6), 16).build());
 	}
 
 	private Heritage.@Nullable Kind rowAt(int mouseX, int mouseY) {
@@ -184,6 +195,9 @@ final class HeritageScreen extends Screen {
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		Heritage.Kind row = rowAt((int)event.x(), (int)event.y());
 		if (row != null && pickable(row)) {
+			if (row != this.picked) {
+				this.pickedVariant = 0;
+			}
 			this.picked = row;
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;
@@ -225,7 +239,7 @@ final class HeritageScreen extends Screen {
 		int textW = pw - 20;
 		int viewTop = y + HEADER, viewBottom = y + h - FOOTER - 2;
 		this.viewH = viewBottom - viewTop;
-		List<Component> rows = hidden ? List.of(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".hint")) : kind.card();
+		List<Component> rows = hidden ? List.of(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".hint")) : withVariant(kind);
 		List<List<FormattedCharSequence>> wrapped = new ArrayList<>();
 		int contentH = 0;
 		for (Component row : rows) {
@@ -267,6 +281,13 @@ final class HeritageScreen extends Screen {
 			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
 				: Component.translatable("gui.jaymoskingdoms.heritage.confirm", Component.translatable("heritage.jaymoskingdoms." + this.picked.key())));
 			this.choose.active = this.picked != null;
+		}
+		if (this.variant != null) {
+			this.variant.visible = this.picked != null;
+			if (this.picked != null) {
+				this.variant.setMessage(Component.translatable("gui.jaymoskingdoms.heritage.variant", HeritageVariants.title(this.picked, this.pickedVariant),
+					this.pickedVariant + 1, HeritageVariants.of(this.picked).size() + 1));
+			}
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
@@ -314,6 +335,24 @@ final class HeritageScreen extends Screen {
 		long run = max * 1000L / AUTO_SPEED;
 		long t = (now - this.autoFrom) % (AUTO_PAUSE_MS * 2 + run);
 		this.scroll = t < AUTO_PAUSE_MS ? 0 : (int)Math.min(max, (t - AUTO_PAUSE_MS) * AUTO_SPEED / 1000L);
+	}
+
+	/**
+	 * (0.7.214) {@code kind}'s card with a row for its look on top: the picked one's chosen look, or for any other its
+	 * three looks' names.
+	 */
+	private List<Component> withVariant(Heritage.Kind kind) {
+		List<Component> rows = new ArrayList<>();
+		if (kind == this.picked) {
+			String root = HeritageVariants.langKey(kind, this.pickedVariant);
+			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variant_row", HeritageVariants.title(kind, this.pickedVariant),
+				Component.translatable(root + ".desc"), Component.translatable(root + ".trait")));
+		} else {
+			rows.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", HeritageVariants.title(kind, 0), HeritageVariants.title(kind, 1),
+				HeritageVariants.title(kind, 2)));
+		}
+		rows.addAll(kind.card());
+		return rows;
 	}
 
 	/** What the right pane shows before anything's pointed at or picked: the first that can be picked. */

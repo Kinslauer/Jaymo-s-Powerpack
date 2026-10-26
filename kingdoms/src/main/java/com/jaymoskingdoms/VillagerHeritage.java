@@ -242,6 +242,8 @@ public final class VillagerHeritage {
 			villager.removeTag(APE_CUT);
 		}
 		fit(villager);
+		// (0.7.214) its variant: kept if it's this blood's, else born to one here
+		HeritageVariants.settle(villager);
 	}
 
 	/** Takes {@code villager}'s heritage away (a folk set up as something not of flesh and blood). */
@@ -253,16 +255,19 @@ public final class VillagerHeritage {
 		villager.removeTag(TAIL_WRAPPED);
 		villager.removeTag(TAIL_CUT);
 		fit(villager);
+		HeritageVariants.settle(villager);
 		LOADED.remove(villager);
 	}
 
 	/** A child's heritage: one of its parents' ({@link #blood}), or a new one if neither has any. */
 	public static void inherit(LivingEntity child, @Nullable Entity mother, @Nullable Entity father) {
 		Heritage.Kind kind = blood(mother, father, child.getRandom());
+		Entity at = mother != null ? mother : father != null ? father : child;
 		if (kind == null) {
-			Entity at = mother != null ? mother : father != null ? father : child;
 			kind = roll(at.level(), at.blockPosition(), child.getRandom());
 		}
+		// (0.7.214) its variant from its parents' ({@link HeritageVariants#child}), not a fresh roll
+		HeritageVariants.set(child, HeritageVariants.child(kind, mother, father, at, child.getRandom()));
 		born(child, kind, null);
 	}
 
@@ -322,6 +327,8 @@ public final class VillagerHeritage {
 			born(living, roll(level, entity.blockPosition(), entity.getRandom()), null);
 		} else {
 			fit(living);
+			// (0.7.214) one born before variants came is born to one now
+			HeritageVariants.settle(living);
 		}
 		LOADED.add(living);
 	}

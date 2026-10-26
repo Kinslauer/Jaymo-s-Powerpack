@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
@@ -61,7 +62,9 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	/** From the living renderer's extractRenderState: marks an Emberborn player's render state. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		state.setData(KEY, entity instanceof Player player && Heritage.is(player, Heritage.Kind.EMBERBORN) ? Boolean.TRUE : null);
+		// (0.7.214) a Soulflame's or an Ashen's look is HeritageLooks' (VariantLooks)
+		state.setData(KEY, entity instanceof Player player && Heritage.is(player, Heritage.Kind.EMBERBORN) && HeritageVariants.of(player) == null ? Boolean.TRUE
+			: null);
 	}
 
 	@Override
@@ -86,7 +89,7 @@ public final class EmberLook extends RenderLayer<AvatarRenderState, PlayerModel>
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			RandomSource random = player.getRandom();
-			if (random.nextInt(FLAME_EVERY) != 0 || !Heritage.is(player, Heritage.Kind.EMBERBORN) || player.isInvisible() || player.isSpectator()
+			if (random.nextInt(FLAME_EVERY) != 0 || !Heritage.is(player, Heritage.Kind.EMBERBORN) || HeritageVariants.of(player) != null || player.isInvisible() || player.isSpectator()
 				|| player.isInWaterOrRain() || player == minecraft.getCameraEntity() && minecraft.options.getCameraType().isFirstPerson()) {
 				continue;
 			}
