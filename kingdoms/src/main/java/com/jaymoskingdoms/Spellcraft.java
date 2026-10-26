@@ -51,7 +51,7 @@ import org.jspecify.annotations.Nullable;
  * spending it ({@link #learn}); a scroll of a spell they know is read as anyone's.
  *
  * <p><b>The Sorcerer's Imbue:</b> on the {@code J} key a Sorcerer charges the blade in their hand with their element
- * (picked with the class: water, fire, earth, air, lightning or ice; 0.7.212 restoration; 0.7.229 death, {@link Necromancy}, and
+ * (picked with the class: water, fire, earth, air, lightning or ice; 0.7.212 restoration; 0.7.231 death, {@link Necromancy}, and
  * blood, {@link Hemomancy}) for a while; every blow it lands carries the
  * element ({@link #strike}), and the blade trails its colour. Sneak and {@code J} throws a bolt of the element at what
  * they're looking at instead, on a short cooldown: few spells, quick ones.
@@ -69,7 +69,7 @@ public final class Spellcraft {
 	static final Map<String, Integer> MAGE_COOLDOWN = Map.ofEntries(Map.entry("fire", 60), Map.entry("arcane", 40), Map.entry("warding", 20 * 45),
 		Map.entry("draining", 20 * 8), Map.entry("raising", 20 * 90), Map.entry("mending", 20 * 6), Map.entry("sanctuary", 20 * 60),
 		Map.entry("restoration", 20 * 60 * 5),
-		// (0.7.229) death's and blood's
+		// (0.7.231) death's and blood's
 		Map.entry("blight", 20 * 10), Map.entry("whispers", 20 * 3), Map.entry("deaths_door", 20 * 60 * 5), Map.entry("hemorrhage", 20 * 8),
 		Map.entry("blood_grip", 20 * 6), Map.entry("frenzy", 20 * 60));
 	/** (0.7.212) An attuned player who isn't a Mage ({@link Mana}) casts from a staff only as hard as a scroll, and waits this much longer between casts. */
@@ -163,7 +163,7 @@ public final class Spellcraft {
 				if (element == null) {
 					return;
 				}
-				// (0.7.229) a death blade blights every blow it lands, a blood blade cuts
+				// (0.7.231) a death blade blights every blow it lands, a blood blade cuts
 				if (element.equals("death")) {
 					Necromancy.bladeBlow(entity);
 				} else if (element.equals("blood")) {
@@ -246,7 +246,7 @@ public final class Spellcraft {
 		}
 		// (0.7.212) mana first: a Mage casts harder than anyone else attuned
 		boolean mage = Classes.is(player, PlayerClass.MAGE);
-		// (0.7.229) blood spells are paid in blood, not mana
+		// (0.7.231) blood spells are paid in blood, not mana
 		boolean blood = ForbiddenArts.blood(spell);
 		float cost = blood ? Hemomancy.cost(spell) : Mana.cost(spell);
 		if (!blood && !Mana.afford(player, cost) || blood && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
@@ -355,7 +355,7 @@ public final class Spellcraft {
 			return;
 		}
 		if (bolt) {
-			// (0.7.229) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
+			// (0.7.231) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
 			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)) {
 				return;
 			}
@@ -423,12 +423,12 @@ public final class Spellcraft {
 		afterCast(player, level, element);
 	}
 
-	/** (0.7.229) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
+	/** (0.7.231) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
 	private static boolean pay(ServerPlayer player, String element, String what) {
 		return element.equals("blood") ? Hemomancy.pay(player, Hemomancy.cost(what)) : Mana.spend(player, Mana.cost(what));
 	}
 
-	/** (0.7.229) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
+	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
 		if (ForbiddenArts.forbidden(spellOrElement)) {
 			ForbiddenArts.cast(player, level, ForbiddenArts.blood(spellOrElement), 0);

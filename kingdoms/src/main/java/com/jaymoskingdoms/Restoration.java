@@ -608,7 +608,7 @@ public final class Restoration {
 	/** What a healer offers {@code player} (option kinds), a court wizard's ({@code wizard}) or a cleric's. */
 	static List<String> services(ServerPlayer player, LivingEntity healer, boolean wizard) {
 		List<String> out = new ArrayList<>();
-		// (0.7.229) nothing for a known necromancer or blood mage
+		// (0.7.231) nothing for a known necromancer or blood mage
 		if (ForbiddenArts.known(player)) {
 			return out;
 		}

@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.229) Death and blood magic, the forbidden arts ({@link Necromancy}, {@link Hemomancy}). Andy (2026-10-26): "death
+ * (0.7.231) Death and blood magic, the forbidden arts ({@link Necromancy}, {@link Hemomancy}). Andy (2026-10-26): "death
  * magic, and blood magic, is there a way you can work that concept in?", and chose them as two new Sorcerer elements. What
  * they cost besides mana and blood:
  * <ul>

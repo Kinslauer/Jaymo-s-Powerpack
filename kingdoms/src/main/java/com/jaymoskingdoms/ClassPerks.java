@@ -670,7 +670,7 @@ public final class ClassPerks {
 		level.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, struck.getX(), struck.getY(0.5), struck.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 	}
 
-	/** (0.7.229) Jaymo's Powers' bleeding damage. */
+	/** (0.7.231) Jaymo's Powers' bleeding damage. */
 	private static final net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> BLEEDING = net.minecraft.resources.ResourceKey.create(
 		net.minecraft.core.registries.Registries.DAMAGE_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "bleeding"));
 
@@ -685,7 +685,7 @@ public final class ClassPerks {
 			case "air" -> source.is(net.minecraft.tags.DamageTypeTags.IS_FALL);
 			// (0.7.212) a healer shrugs off poison and withering
 			case "restoration" -> source.is(net.minecraft.world.damagesource.DamageTypes.MAGIC) || source.is(net.minecraft.world.damagesource.DamageTypes.WITHER);
-			// (0.7.229) a necromancer shrugs off withering, a blood mage bleeding (Jaymo's Powers')
+			// (0.7.231) a necromancer shrugs off withering, a blood mage bleeding (Jaymo's Powers')
 			case "death" -> source.is(net.minecraft.world.damagesource.DamageTypes.WITHER);
 			case "blood" -> source.is(BLEEDING);
 			default -> false;

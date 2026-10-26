@@ -28,6 +28,9 @@ import net.minecraft.world.entity.Avatar;
  * </ul>
  * The arms are left alone while drawing a bow, aiming, blocking or swinging, and the whole pose stands aside for the other
  * full-body poses (tending, a finisher, carrying, crawling).
+ * <p>(0.17.18) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the
+ * knee, and stay bent while firing ... same for all ranged weapons". The front thigh now goes out level and the shin bends
+ * down to the foot ({@link KneeBend}); the legs hold that whatever is in the hands, bow, crossbow, gun or thrown.
  */
 public final class CrouchPose {
 	/** Arms out, and down onto the knee or back up (ticks). */
@@ -40,6 +43,11 @@ public final class CrouchPose {
 	static final float SWAY_TWIST = 0.14F, SWAY_ROLL = 0.08F, SWAY_RATE = 0.3331F;
 	/** On the knee: a slight lean forward (degrees). */
 	static final float KNEEL_LEAN = 4.0F;
+	/**
+	 * On the knee: the front (right) thigh out level from the hip, the knee bent so the shin stands on the ground
+	 * (radians), and the back (left) leg trailing to the knee on the ground. Drawn while aiming and firing too.
+	 */
+	static final float FRONT_THIGH = -1.55F, FRONT_KNEE = 1.5F, BACK_LEG = 1.35F;
 	/** Under this walking speed (vanilla's 0..1) the body counts as still. */
 	static final float STILL_SPEED = 0.05F;
 
@@ -115,15 +123,12 @@ public final class CrouchPose {
 
 	/** After the model animates (crouched by vanilla): arms out and swaying, or up out of the crouch onto one knee. */
 	public static void applyModel(Model<?> model, Object renderState) {
-		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || state.deathTime > 0.0F || !state.isCrouching) {
+		Crouch c = posed(model, renderState);
+		if (c == null) {
 			return;
 		}
-		Crouch c = state.getData(KEY);
-		if (c == null || state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
-			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
-			|| state.getData(CrawlPose.KEY) != null) {
-			return;
-		}
+		AvatarRenderState state = (AvatarRenderState) renderState;
+		HumanoidModel<?> h = (HumanoidModel<?>) model;
 		boolean armsFree = !state.isUsingItem && state.swingAnimation <= 0.0F && free(state.rightArmPose) && free(state.leftArmPose);
 		float walk = (1.0F - c.kneel()) * c.ready();
 		if (walk > 0.0F) {
@@ -154,9 +159,9 @@ public final class CrouchPose {
 		h.leftLeg.y = Mth.lerp(k, h.leftLeg.y, 12.0F);
 		h.rightLeg.z = Mth.lerp(k, h.rightLeg.z, 0.0F);
 		h.leftLeg.z = Mth.lerp(k, h.leftLeg.z, 0.0F);
-		// right foot planted ahead, left knee down
-		blend(h.rightLeg, -1.15F - pitch, 0.1F, 0.0F, k);
-		blend(h.leftLeg, 1.35F - pitch, -0.1F, 0.0F, k);
+		// right thigh out ahead, bent at the knee (KneeBend) down to the planted foot; left knee down
+		blend(h.rightLeg, FRONT_THIGH - pitch, 0.1F, 0.0F, k);
+		blend(h.leftLeg, BACK_LEG - pitch, -0.1F, 0.0F, k);
 		if (armsFree) {
 			// right hand by the hip, ready to draw; left forearm over the raised knee
 			blend(h.rightArm, -0.25F, 0.0F, 0.12F, k);
@@ -166,6 +171,31 @@ public final class CrouchPose {
 			h.rightArm.xRot -= 0.4F * k;
 			h.leftArm.xRot -= 0.4F * k;
 		}
+	}
+
+	/**
+	 * Right before the model is drawn (after {@link #applyModel}): on the knee, the front leg bent at the knee for this one
+	 * draw ({@link KneeBend#restore} once it's drawn).
+	 */
+	public static void bendKnee(Model<?> model, Object renderState) {
+		Crouch c = posed(model, renderState);
+		if (c != null && c.kneel() > 0.0F) {
+			KneeBend.bend(((HumanoidModel<?>) model).rightLeg, FRONT_KNEE * c.kneel());
+		}
+	}
+
+	/** The crouch to lay over this model, or null when it isn't a crouching body or another full-body pose has it. */
+	private static Crouch posed(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?>) || state.deathTime > 0.0F || !state.isCrouching) {
+			return null;
+		}
+		Crouch c = state.getData(KEY);
+		if (c == null || state.getData(com.jaymospowers.client.wounds.TendPose.KEY) != null
+			|| state.getData(com.jaymospowers.client.finisher.FinisherPose.KEY) != null || state.getData(CarryPose.CARRIER_KEY) != null
+			|| state.getData(CrawlPose.KEY) != null) {
+			return null;
+		}
+		return c;
 	}
 
 	/** An arm with nothing to do (empty, or just holding something), free to be held out or rested. */

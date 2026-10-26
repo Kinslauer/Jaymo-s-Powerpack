@@ -125,6 +125,11 @@ public final class Carry {
 	/** (0.17.7) The lift's bar length, and how far past reach they may slip while it fills (blocks). */
 	static final int LIFT_BAR = 8;
 	static final double LIFT_SLACK = 0.5;
+	/**
+	 * (0.17.18) Andy: "you can lift players from way too far away. make it within 1 block". The most open air between your
+	 * body and theirs (hitbox to hitbox, blocks) for a lift to start; it may grow by {@link #LIFT_SLACK} while the bar fills.
+	 */
+	static final double LIFT_GAP = 1.0;
 	/** (0.17.7) Anything wider or taller than this standing (blocks) is too big to lift by hand: a person fits, a horse or an ogre doesn't. */
 	static final float MAX_LIFT_WIDTH = 1.0F, MAX_LIFT_HEIGHT = 2.2F;
 	/** After being let go, how long before the same one can be picked up again (ticks). */
@@ -461,6 +466,10 @@ public final class Carry {
 		if (isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle()) {
 			return InteractionResult.PASS;
 		}
+		if (!(target instanceof SeveredPart) && !windCarries(player, target) && liftGap(player, target) > LIFT_GAP) {
+			// (0.17.18) too far off to lift: step in close first
+			return InteractionResult.PASS;
+		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
 			Long ready = REGRAB.get(target.getUUID());
 			if (ready != null && server.getGameTime() < ready) {
@@ -498,7 +507,7 @@ public final class Carry {
 				continue;
 			}
 			long now = player.level().getGameTime();
-			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(target, LIFT_SLACK)) {
+			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || liftGap(player, target) > LIFT_GAP + LIFT_SLACK) {
 				// let go too soon, stood up, or they slipped away: nothing
 				it.remove();
 				continue;
@@ -518,6 +527,15 @@ public final class Carry {
 					"|".repeat(filled) + ".".repeat(LIFT_BAR - filled)).withStyle(ChatFormatting.GRAY));
 			}
 		}
+	}
+
+	/** (0.17.18) The open air between two hitboxes (blocks): 0 when they touch or overlap. */
+	static double liftGap(Entity a, Entity b) {
+		AABB x = a.getBoundingBox(), y = b.getBoundingBox();
+		double dx = Math.max(0.0, Math.max(x.minX - y.maxX, y.minX - x.maxX));
+		double dy = Math.max(0.0, Math.max(x.minY - y.maxY, y.minY - x.maxY));
+		double dz = Math.max(0.0, Math.max(x.minZ - y.maxZ, y.minZ - x.maxZ));
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	/**

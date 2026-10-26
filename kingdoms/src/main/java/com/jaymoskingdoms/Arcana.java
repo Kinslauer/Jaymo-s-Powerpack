@@ -56,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * wizard's) and <b>Restoration</b> (whole again, bones set, up if downed; rare). And the healer's staff, a wizard's staff
  * made over with a golden apple: it casts the same.
  * <p>
- * (0.7.229) Death's three ({@link Necromancy}): <b>Blight</b>, <b>Whispers</b>, <b>Death's Door</b> (a necromancer's,
+ * (0.7.231) Death's three ({@link Necromancy}): <b>Blight</b>, <b>Whispers</b>, <b>Death's Door</b> (a necromancer's,
  * now and then); blood's three ({@link Hemomancy}): <b>Hemorrhage</b>, <b>Blood Grip</b>, <b>Frenzy</b> (a blood
  * witch's). Forbidden: reading one is a crime where a realm's people see ({@link ForbiddenArts}).
  */
@@ -77,7 +77,7 @@ public final class Arcana {
 	public static Item SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE;
 	/** (0.7.212) Restoration's scrolls. */
 	public static Item SCROLL_MENDING, SCROLL_SANCTUARY, SCROLL_RESTORATION;
-	/** (0.7.229) Death's scrolls ({@link Necromancy}) and blood's ({@link Hemomancy}). */
+	/** (0.7.231) Death's scrolls ({@link Necromancy}) and blood's ({@link Hemomancy}). */
 	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
 	public static Item BAT_WING;
@@ -126,7 +126,7 @@ public final class Arcana {
 	/** A scroll from a slain caster of {@code role}. */
 	static ItemStack scrollFor(int role, RandomSource random) {
 		return new ItemStack(switch (role) {
-			// (0.7.229) and now and then one of death's new three
+			// (0.7.231) and now and then one of death's new three
 			case Sorcery.NECROMANCER -> switch (random.nextInt(6)) {
 				case 0, 1 -> SCROLL_RAISING;
 				case 2, 3 -> SCROLL_DRAINING;
@@ -235,7 +235,7 @@ public final class Arcana {
 			player.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
 			stack.consume(1, player);
 			if (player instanceof ServerPlayer reader) {
-				// (0.7.229) death's and blood's are forbidden everywhere
+				// (0.7.231) death's and blood's are forbidden everywhere
 				Spellcraft.afterCast(reader, server, this.spell);
 			}
 			return InteractionResult.SUCCESS;

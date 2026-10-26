@@ -73,6 +73,12 @@ public final class Introductions {
 	/** (0.7.204) "Offer a handshake" (MCA's {@code main} menu, needs no words): shown only to one you don't know. */
 	public static final String HANDSHAKE = "jaymoskingdoms_handshake";
 
+	/**
+	 * (0.7.230) MCA's interact screen's Introduce button for one you don't know (sent as a {@code main} answer, not in the
+	 * talk menu): their name asked if you share a tongue, else a handshake offered.
+	 */
+	public static final String INTRODUCE = "jaymoskingdoms_introduce";
+
 	/** "Ask their name" (added to MCA's {@code main} menu by our dialogue data): shown only to one you don't know. */
 	public static final String ANSWER = "jaymoskingdoms_name";
 

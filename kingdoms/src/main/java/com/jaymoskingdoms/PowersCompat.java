@@ -317,7 +317,7 @@ public final class PowersCompat {
 
 	/** Heals {@code amount} into {@code entity}'s worst parts (Powers' wounds), or just the hearts without Powers. Nothing on the downed. Returns what it took. */
 	public static float mend(net.minecraft.world.entity.LivingEntity entity, float amount) {
-		// (0.7.229) healing magic lifts a death blight first
+		// (0.7.231) healing magic lifts a death blight first
 		Necromancy.cleanse(entity);
 		mending();
 		if (mend != null) {
@@ -655,7 +655,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.229) blood magic: Powers' Hemomancy (cuts counted, opened, burst); forbidden magic's corruption ---------
+	// ---- (0.7.231) blood magic: Powers' Hemomancy (cuts counted, opened, burst); forbidden magic's corruption ---------
 
 	private static java.lang.invoke.@Nullable MethodHandle cuts, cut, hemorrhage, corruptionAdd;
 	private static @Nullable Object lingering;

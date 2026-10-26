@@ -6004,6 +6004,7 @@
 	"gui.jaymoskingdoms.story.gives.power": "Power: %s, awakening in a few days",
 	"gui.jaymoskingdoms.story.gives.fate": "Power: whatever fate decides",
 	"gui.jaymoskingdoms.story.gives.timelost": "Power: %s, awakened already (lost in time)",
+	"gui.jaymoskingdoms.introduce": "Introduce yourself",
 	"gui.jaymoskingdoms.story.gives.echo": "%s calls to you: it awakens a day sooner",
 	"message.jaymoskingdoms.story.begun": "Your story begins: %s.",
 	"message.jaymoskingdoms.story.captive": "The camp has found your cut ropes. Its raiders will hunt you until the day is out.",

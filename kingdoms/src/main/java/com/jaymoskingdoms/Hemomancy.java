@@ -26,7 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.229) Blood magic, the ninth Sorcerer element ({@link ForbiddenArts}). It's paid in blood, not mana: first from
+ * (0.7.231) Blood magic, the ninth Sorcerer element ({@link ForbiddenArts}). It's paid in blood, not mana: first from
  * the blood it has drunk ({@link #pool}), then from the caster's own health; casting too deep opens a cut on them (Jaymo's
  * Powers' wounds). It feeds on the bleeding and bursts their cuts.
  * <ul>
