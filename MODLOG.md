@@ -2968,3 +2968,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the throne in their name: by usurping (a lord who slays the ruler in their hall), by marriage (a ruler's player spouse
   inherits), by conquest (a lord who takes an enemy seat or slays its ruler in a war claims it), or by founding a realm
   (`/kingdom crown found [name]`, 256 emeralds). No Powers changes. See Kingdoms' log.
+- **0.17.12, every life-story start can be had (Kingdoms 0.7.227):** a capital, barbarian camp, monolith or harbour is
+  made when a start needs one and the world hasn't got it; the cave start wakes you at half health, and every story
+  landing gives 5 s of Resistance. No Powers changes. See Kingdoms' log.

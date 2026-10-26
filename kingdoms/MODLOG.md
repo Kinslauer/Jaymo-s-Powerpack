@@ -4978,3 +4978,23 @@ Andy: "another origin where you start with whalers, on the crew as a harpooner".
 whalers** (Darktide's calling): `Whalers.signOn` signs you on the whaler fitting out at the harbour nearest spawn (one
 is fitted out for you if no realm's is in port, whatever its treasury or last voyage) and you wake on her deck with 8
 harpoons, shears and oilskins; come home aboard her for the usual share. No realm with a harbour: the wild.
+
+## 0.7.227: every life-story start can be had, and the cave start no longer kills (pack 0.17.12)
+Andy: "spawning in the cave poisoned made me die instantly, and jungxvv didnt spawn in a rich city, instead he spawned
+in the wilderness ... I need you to generate whatever is required for the player to choose any of the options".
+- **Cave:** you wake at half health (`CAVE_HEALTH` 10, was 4). Every story landing now clears the fall carried over
+  from where you stood and gives 5 seconds of full Resistance (`ARRIVAL_GRACE_TICKS`), against a fall or the cave's
+  spiders.
+- **`StoryGround`:** makes what a start needs when the world hasn't got it.
+  - **A capital.** In a new world no realm exists until someone walks up to a village's bell. Now, when a newcomer
+    joins (or the story screen is about to open) and there is no realm, the village nearest spawn is kept loaded
+    (a ticket) and becomes a kingdom's capital (`KingdomEvents.foundIn`, else its citadel). If it isn't ready within
+    90 s, a citadel kingdom is raised there instead. The story screen opens once it stands, so the city, sworn,
+    banished and noble answers always have realms. Players waiting are kept safe and told.
+  - **A barbarian camp** 200-360 blocks out for the captive start (`Camps.found`).
+  - **A monolith** 160-320 blocks out for the monolith start (`Monoliths.raise`; `fit` and `SETTLEMENT_CLEARANCE` are
+    public now). Fate can now pick the monolith start in any world.
+  - **A harbour** for the whaling start (`Whalers.berth` says none is free). It is built by the nearest realm whose
+    seat is within reach of the sea, with its land kept loaded until `Navies.build` succeeds. If no realm is on a
+    coast, a citadel kingdom is raised on the shore nearest spawn, which then builds it. After 90 s with no harbour,
+    you start in the wild.

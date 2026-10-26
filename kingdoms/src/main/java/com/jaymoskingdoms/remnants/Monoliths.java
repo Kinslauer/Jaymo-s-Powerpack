@@ -83,7 +83,7 @@ public final class Monoliths {
 	 */
 	static final WorldTiers.Tier WAKE_TIER = WorldTiers.Tier.WILDLANDS;
 	/** No monolith this close to a settlement (blocks). */
-	static final double SETTLEMENT_CLEARANCE = 256.0;
+	public static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** Tries at finding ground for a monolith, or for a Giant. */
 	static final int SPOT_TRIES = 10;
 	/** The pillar: how tall (blocks, before its broken crown), its bands' spacing, the gap under the floating core. */
@@ -382,7 +382,7 @@ public final class Monoliths {
 	}
 
 	/** Where a monolith may stand at {@code column}: open natural ground, not water, fairly level; else null. */
-	static @Nullable BlockPos fit(ServerLevel level, BlockPos column) {
+	public static @Nullable BlockPos fit(ServerLevel level, BlockPos column) {
 		BlockPos foot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 		int least = Integer.MAX_VALUE, most = Integer.MIN_VALUE;
 		for (int dx = -GROUND_RADIUS; dx <= GROUND_RADIUS; dx += GROUND_RADIUS) {

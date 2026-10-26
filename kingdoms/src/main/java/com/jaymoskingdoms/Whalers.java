@@ -283,6 +283,20 @@ public final class Whalers {
 		return ship;
 	}
 
+	/** (0.7.227) Some realm has a harbour whose whaler is in, or fitting out (a whaling story can sign on). */
+	static boolean berth(MinecraftServer server) {
+		long now = Factions.level(server).getGameTime();
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen() && Navies.harbour(server, f.id()) != null) {
+				Voyage v = voyage(server, f.id());
+				if (v == null || now - v.launched < FIT_OUT) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * (0.7.226) A life story's whaling start (Andy: "start with whalers, on the crew as a harpooner"): {@code player} is
 	 * signed on as a harpooner aboard the whaler fitting out at the harbour nearest {@code near}, one fitted out for them

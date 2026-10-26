@@ -6008,6 +6008,8 @@
 	"message.jaymoskingdoms.story.begun": "Your story begins: %s.",
 	"message.jaymoskingdoms.story.captive": "The camp has found your cut ropes. Its raiders will hunt you until the day is out.",
 	"message.jaymoskingdoms.story.whalers": "You've signed on %s as her harpooner. Stay aboard: she sails when she's fitted out, and every hand who comes home with her gets a share.",
+	"message.jaymoskingdoms.story.making.realm": "The kingdoms of this land are rising. Your story begins in a moment...",
+	"message.jaymoskingdoms.story.making.harbour": "A harbour is being built for your whaler. You sign on in a moment...",
 	"message.jaymoskingdoms.story.timelost": "This isn't your time. Only death, or a Chrono's leap, will take you home.",
 	"message.jaymoskingdoms.story.job": "The village has work for a %s. Your tools are in your pack, and your work starts when you get there.",
 	"message.jaymoskingdoms.story.limb": "You've lived without your %s for years.",
