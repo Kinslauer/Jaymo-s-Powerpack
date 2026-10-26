@@ -2970,3 +2970,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`/kingdom crown found [name]`, 256 emeralds). No Powers changes. See Kingdoms' log.
 - **0.17.11, rarer Eurus and Aeolus (Kingdoms 0.7.226):** the disguised wind dragons turn up far less often and never
   before the world's first Giant has fallen. No Powers changes. See Kingdoms' log.
+- **0.17.12, players throw rocks:** right click the air with a loose rock (either hand) to throw it, the way Kingdoms'
+  poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
+  Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
+  where they land to be picked up again (`ground/ThrownRocks`).
