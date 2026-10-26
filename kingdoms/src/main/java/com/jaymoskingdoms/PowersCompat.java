@@ -109,6 +109,86 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- (0.7.216) a life story's power: Powers' affinity and callings ({@link LifeStory}) ---------------------------------
+
+	/** Powers' {@code Affinity.set(ServerPlayer, Identifier)} and {@code Callings.call(ServerPlayer, String, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle setAffinity, call;
+	private static boolean lookedForAffinity;
+
+	private static void affinities() {
+		if (lookedForAffinity) {
+			return;
+		}
+		lookedForAffinity = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> sp = net.minecraft.server.level.ServerPlayer.class;
+			setAffinity = lookup.findStatic(Class.forName("com.jaymospowers.core.Affinity"), "set", java.lang.invoke.MethodType.methodType(void.class, sp, Identifier.class));
+			call = lookup.findStatic(Class.forName("com.jaymospowers.core.Callings"), "call", java.lang.invoke.MethodType.methodType(void.class, sp, String.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' affinity (older Powers?)", e);
+		}
+	}
+
+	/** Leans {@code player}'s awakening to Powers' power {@code power} (an id path, or "fate" for a random one). Nothing without Powers. */
+	public static void affinity(net.minecraft.server.level.ServerPlayer player, String power) {
+		affinities();
+		if (setAffinity == null || power.isEmpty()) {
+			return;
+		}
+		try {
+			setAffinity.invoke(player, Identifier.fromNamespaceAndPath("jaymospowers", power));
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't set {}'s affinity", player.getGameProfile().name(), e);
+		}
+	}
+
+	/** Answers Powers' calling of {@code power} for {@code player}, taking {@code ticks} off their wait. Nothing without Powers. */
+	public static void call(net.minecraft.server.level.ServerPlayer player, String power, int ticks) {
+		affinities();
+		if (call == null) {
+			return;
+		}
+		try {
+			call.invoke(player, power, ticks);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't call {}'s power", player.getGameProfile().name(), e);
+		}
+	}
+
+	/** Powers' {@code Dismember.bornWithout(LivingEntity, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bornWithout;
+	private static boolean lookedForBornWithout;
+
+	/**
+	 * A life story's "unarmed" start: {@code player} has long been without {@code part} (Powers' Dismember part bit: an
+	 * arm or a leg), the stump healed over. False without Powers.
+	 */
+	public static boolean bornWithout(net.minecraft.server.level.ServerPlayer player, int part) {
+		if (!lookedForBornWithout) {
+			lookedForBornWithout = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bornWithout = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "bornWithout",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' lost limbs (older Powers?)", e);
+				}
+			}
+		}
+		if (bornWithout == null) {
+			return false;
+		}
+		try {
+			return (boolean)bornWithout.invoke(player, part);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;

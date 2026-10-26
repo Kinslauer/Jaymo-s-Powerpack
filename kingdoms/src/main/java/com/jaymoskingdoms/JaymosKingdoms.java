@@ -195,6 +195,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
+		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
+		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
+		LifeStory.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
