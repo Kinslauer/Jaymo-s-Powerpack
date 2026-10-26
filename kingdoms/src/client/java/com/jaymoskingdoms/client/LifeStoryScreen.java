@@ -676,7 +676,7 @@ final class LifeStoryScreen extends Screen {
 			if (!story && kind != null && look > 0) {
 				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.look", HeritageVariants.title(kind, look)));
 			}
-			// (0.7.226, Andy: "remove this text from every entry") no "leans to <power>" line
+			// (0.7.228, Andy: "remove this text from every entry") no "leans to <power>" line
 		}
 		if (q == Question.TURN) {
 			Answer road = picked(Question.ROAD);

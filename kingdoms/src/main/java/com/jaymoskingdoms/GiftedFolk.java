@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
@@ -18,6 +20,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.entity.monster.spider.CaveSpider;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -37,6 +42,11 @@ import org.jspecify.annotations.Nullable;
  * gifted Wind villager whose power the storm takes (corrupted) wakes to it ({@link #step}), and their children carry it.</li>
  * <li><b>Rulers</b>: a gifted villager is likelier to be crowned ({@link #rises}, {@link #RISE_CHANCE}), and a gifted
  * ruler unleashes their power's ultimate when their throne room is attacked ({@link #atCourt}).</li>
+ * <li>(0.7.227) <b>Masters</b>: about one gifted in {@link #MASTER_ODDS} awakens as a master of it (Andy: "maybe 1 in 80 is
+ * an extremely gifted wielder, achieving great mastery of the power using it in their own way"; Powers makes them so).</li>
+ * <li>(0.7.227) <b>Hidden gifts</b> ({@link #open}): most keep it to a minimum and hide it from their family and friends
+ * ({@link #close}); by their temperament some don't care who sees ("who is going to stop them?"), masters more often.</li>
+ * <li>(0.7.227) Resonance's calling: living through a Warden's sonic boom.</li>
  * </ul>
  * Nothing without Jaymo's Powers (no one awakens).
  */
@@ -61,11 +71,22 @@ public final class GiftedFolk {
 	static final float RISE_CHANCE = 0.6F;
 	/** The throne room: within this far of the throne. */
 	static final double COURT_RANGE = 16.0;
+	/** One gifted in this many is a master of it. */
+	static final int MASTER_ODDS = 80;
+	/** Living through a Warden's sonic boom wakes Resonance this often. */
+	static final float RESONANCE_CHANCE = 0.5F;
+	/** The chance a gifted villager doesn't care who sees, by temperament: the brash, the bold, and the rest; a master's is this much more. */
+	static final float OPEN_BRASH = 0.6F, OPEN_BOLD = 0.3F, OPEN_REST = 0.08F, OPEN_MASTER = 0.25F;
+	/** A player this many hearts warm with them is a friend (hidden from); a villager who thinks this well of them too. */
+	static final int FRIEND_HEARTS = 40, FRIEND_REGARD = 40;
+	/** Tagged once a gift's ways are weighed (master, open), for the gifted of a world from before them. */
+	static final String WAYS_ROLLED = "jaymoskingdoms_gift_ways";
 
 	private GiftedFolk() {
 	}
 
 	static void register() {
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.giftCloseOnes(GiftedFolk::close));
 		ServerLivingEntityEvents.AFTER_DEATH.register(GiftedFolk::killed);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && entity.isAlive()) {
@@ -160,12 +181,47 @@ public final class GiftedFolk {
 		};
 	}
 
+	/**
+	 * Whether {@code mob} won't hide their gift, by their temperament: the hotheaded, the proud, the spiteful and the greedy
+	 * often don't care who sees; the brave and the cheerful now and then; the rest seldom. A {@code master} more often.
+	 */
+	static boolean open(Entity mob, boolean master, RandomSource random) {
+		Temperaments.Temperament t = Temperaments.of(mob);
+		float chance = t == null ? OPEN_REST : switch (t) {
+			case HOTHEADED, PROUD, SPITEFUL, GREEDY -> OPEN_BRASH;
+			case BRAVE, CHEERFUL -> OPEN_BOLD;
+			default -> OPEN_REST;
+		};
+		return random.nextFloat() < chance + (master ? OPEN_MASTER : 0.0F);
+	}
+
+	/**
+	 * Whether {@code other} is close to {@code gifted} (Powers asks: a hidden gift isn't used in front of them): their family
+	 * or partner, a player who's family or a friend ({@link #FRIEND_HEARTS}), or a villager friend ({@link #FRIEND_REGARD}).
+	 * Without MCA, any villager or player.
+	 */
+	static boolean close(Entity gifted, Entity other) {
+		if (!McaCompat.LOADED) {
+			return other instanceof Player || other instanceof AbstractVillager;
+		}
+		if (!(gifted instanceof Villager v)) {
+			return false;
+		}
+		if (other instanceof ServerPlayer player) {
+			return McaCompat.family(v, player) || McaCompat.heartsOf(v, player) >= FRIEND_HEARTS;
+		}
+		return other instanceof Villager o
+			&& (McaCompat.kin(v, o) != McaCompat.STRANGERS || Neighbours.regard(v, o) >= FRIEND_REGARD);
+	}
+
 	/** {@code mob} awakens to {@code power}: the moment of it, seen by those round them. */
 	static boolean awaken(ServerLevel level, PathfinderMob mob, String power) {
-		if (!PowersCompat.give(mob, power, style(mob))) {
+		boolean master = level.getRandom().nextInt(MASTER_ODDS) == 0;
+		if (!PowersCompat.give(mob, power, style(mob), master, open(mob, master, level.getRandom()))) {
 			return false;
 		}
 		mob.addTag(ROLLED);
+		mob.addTag(WAYS_ROLLED);
 		level.sendParticles(ParticleTypes.END_ROD, mob.getX(), mob.getY(0.6), mob.getZ(), 24, 0.3, 0.6, 0.3, 0.08);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		JaymosKingdoms.LOGGER.info("{} awakened to {}", mob.getName().getString(), power);
@@ -215,6 +271,8 @@ public final class GiftedFolk {
 			call(mob, "cryo", CRYO_CHANCE);
 		} else if (source.is(DamageTypeTags.IS_FIRE)) {
 			call(mob, "smoke", SMOKE_CHANCE);
+		} else if (source.is(DamageTypes.SONIC_BOOM)) {
+			call(mob, "resonance", RESONANCE_CHANCE);
 		}
 	}
 
@@ -227,6 +285,12 @@ public final class GiftedFolk {
 	static void step(ServerLevel level, PathfinderMob mob) {
 		if (!mob.isBaby() && !mob.entityTags().contains(ROLLED)) {
 			cameOfAge(level, mob);
+		}
+		if (!mob.entityTags().contains(WAYS_ROLLED) && PowersCompat.gift(mob) != null) {
+			boolean master = level.getRandom().nextInt(MASTER_ODDS) == 0;
+			if (PowersCompat.giftWays(mob, master, open(mob, master, level.getRandom()))) {
+				mob.addTag(WAYS_ROLLED);
+			}
 		}
 		if ("wind".equals(PowersCompat.gift(mob)) && PowersCompat.giftCorrupted(mob) && VillagerHeritage.of(mob) != Heritage.Kind.STORMBORN) {
 			VillagerHeritage.born(mob, Heritage.Kind.STORMBORN, null);

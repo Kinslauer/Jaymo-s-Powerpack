@@ -88,7 +88,7 @@ public final class LifeStory {
 	/** (Andy: "poisoned, wounded, and barely breathing") the health you wake with, and how long the Slowness and Weakness last (ticks). */
 	static final float CAVE_HEALTH = 10.0F;
 	static final int CAVE_WOUND_TICKS = 1200;
-	/** (0.7.227) Unhurtable this long after a story puts you somewhere (a cave's spiders, a fall carried over). */
+	/** (0.7.228) Unhurtable this long after a story puts you somewhere (a cave's spiders, a fall carried over). */
 	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
@@ -108,7 +108,7 @@ public final class LifeStory {
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
-	/** (0.7.226) A whaler's harpooner: the irons they sign on with. */
+	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
 	static final int WHALER_HARPOONS = 8;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
@@ -405,7 +405,7 @@ public final class LifeStory {
 		if (!ServerPlayNetworking.canSend(player, Open.TYPE)) {
 			return;
 		}
-		// (0.7.227) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
+		// (0.7.228) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
 		MinecraftServer server = player.level().getServer();
 		if (StoryGround.realmless(server)) {
 			StoryGround.capital(server, player, () -> {
@@ -547,7 +547,7 @@ public final class LifeStory {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
 				Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
 		};
-		// (0.7.227) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
+		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
 			StoryGround.capital(server, player, () -> go.accept(Start.CITY));
 		} else if (road0 == Start.WHALERS && !Whalers.berth(server)) {
@@ -563,7 +563,7 @@ public final class LifeStory {
 		if (capital(server, random) != null) {
 			open.add(Start.CITY);
 		}
-		// (0.7.227: one is raised if the world hasn't any)
+		// (0.7.228: one is raised if the world hasn't any)
 		open.add(Start.MONOLITH);
 		return open.get(random.nextInt(open.size()));
 	}
@@ -692,7 +692,7 @@ public final class LifeStory {
 				}
 			}
 			case WHALERS -> {
-				// (0.7.226) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
+				// (0.7.228) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
 				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn);
 				if (deck != null) {
 					player.teleportTo(level, deck.x, deck.y, deck.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
@@ -729,7 +729,7 @@ public final class LifeStory {
 		}
 		if (landed == Start.CAVE) {
 			// the bite you shrugged off, as you always do, and the fall that came after: poisoned, wounded, barely breathing
-			// (0.7.227: Andy died at once at 2 hearts; now half health, and the poison stops short of killing as poison does)
+			// (0.7.228: Andy died at once at 2 hearts; now half health, and the poison stops short of killing as poison does)
 			player.setHealth(Math.min(player.getHealth(), CAVE_HEALTH));
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, BITE_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CAVE_WOUND_TICKS, 0));
@@ -738,7 +738,7 @@ public final class LifeStory {
 		return landed;
 	}
 
-	/** (0.7.227) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
+	/** (0.7.228) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
 	private static void landSafely(ServerPlayer player) {
 		player.resetFallDistance();
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ARRIVAL_GRACE_TICKS, 4, false, false));

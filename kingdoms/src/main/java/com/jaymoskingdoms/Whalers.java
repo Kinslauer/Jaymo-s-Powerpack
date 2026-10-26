@@ -283,7 +283,7 @@ public final class Whalers {
 		return ship;
 	}
 
-	/** (0.7.227) Some realm has a harbour whose whaler is in, or fitting out (a whaling story can sign on). */
+	/** (0.7.228) Some realm has a harbour whose whaler is in, or fitting out (a whaling story can sign on). */
 	static boolean berth(MinecraftServer server) {
 		long now = Factions.level(server).getGameTime();
 		for (Faction f : Factions.all(server)) {
@@ -298,7 +298,7 @@ public final class Whalers {
 	}
 
 	/**
-	 * (0.7.226) A life story's whaling start (Andy: "start with whalers, on the crew as a harpooner"): {@code player} is
+	 * (0.7.228) A life story's whaling start (Andy: "start with whalers, on the crew as a harpooner"): {@code player} is
 	 * signed on as a harpooner aboard the whaler fitting out at the harbour nearest {@code near}, one fitted out for them
 	 * if no realm's is in port (whatever its treasury or the time since its last voyage). Returns where they stand on her
 	 * deck, or null (no realm has a harbour, or she couldn't be fitted out).

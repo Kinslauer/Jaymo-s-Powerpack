@@ -37,7 +37,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.227, Andy: "I need you to generate whatever is required for the player to choose any of the options") What a life
+ * (0.7.228, Andy: "I need you to generate whatever is required for the player to choose any of the options") What a life
  * story's start needs, made when the world hasn't got it yet, so no start falls back to the wild: a realm's capital (a
  * new world has none till someone walks up to a village's bell), a barbarian camp, a monolith, a harbour for a whaler.
  * A capital or a harbour needs its land loaded and ticking, so those are made over a few seconds while the player waits.

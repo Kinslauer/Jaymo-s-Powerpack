@@ -3,6 +3,7 @@ package com.jaymoskingdoms.dragons;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.TalkNet;
+import com.jaymoskingdoms.remnants.Monoliths;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -68,9 +69,13 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Disguises {
-	/** How often (ticks) a spawn is weighed for each kind, and the chance it comes (Eurus about once in 2.5 hours, Aeolus in 6, of one player's play). */
+	/**
+	 * How often (ticks) a spawn is weighed for each kind, and the chance it comes. (0.7.226) Andy: "aeolus and eurus
+	 * should be FAR rarer, and only even spawn after killing your first world boss": Eurus about once in 15 hours of
+	 * play, Aeolus in 40 (were 2.5 and 6), and neither until the world's first Giant has fallen ({@link Monoliths#firstFallen}).
+	 */
 	static final int SPAWN_CHECK_TICKS = 1200;
-	static final float EURUS_CHANCE = 1.0F / 150.0F, AEOLUS_CHANCE = 1.0F / 360.0F;
+	static final float EURUS_CHANCE = 1.0F / 900.0F, AEOLUS_CHANCE = 1.0F / 2400.0F;
 	/** How far (blocks) off a stranger turns up, and how high or low of the player's feet the ground may be. */
 	static final int SPAWN_MIN = 24, SPAWN_MAX = 44, SPAWN_HEIGHT = 20;
 	/** How near (blocks) an Aeolus dragon rules out Aeolus turning up as a villager. */
@@ -262,7 +267,7 @@ public final class Disguises {
 			return;
 		}
 		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator()).toList();
-		if (players.isEmpty()) {
+		if (players.isEmpty() || !Monoliths.firstFallen(level)) {
 			return;
 		}
 		RandomSource random = level.getRandom();

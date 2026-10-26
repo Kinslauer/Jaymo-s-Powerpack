@@ -4971,7 +4971,27 @@ the succession tick, `Banners` (a seat taken), `Theft`, `Festivals`, `/kingdom l
 - A player sovereign slain by the other side of a war ends the war as a ruler's death does.
 - Tuning: the constants at the top of `Crowns`. Compiled only, not seen in game.
 
-## 0.7.226: a whaling start, and no power lean line on the life story (pack 0.17.11)
+## 0.7.226: rarer Eurus and Aeolus (pack 0.17.11)
+Andy (2026-10-26): "aeolus and eurus should be FAR rarer, and only even spawn after killing your first world boss".
+- `Disguises`: Eurus now comes about once in 15 hours of play (1/900 a minute, was 2.5 hours) and Aeolus once in 40
+  (1/2400, was 6 hours).
+- Neither turns up at all until the world's first world boss, the first of the Aether's Giants, has fallen
+  (`Monoliths.firstFallen`, the same flag that raises the world tier to Borderlands). It's world-wide: once anyone fells
+  a Giant they can come to anyone. Ops' `/kingdom dragon` spawns and the dragons' eggs are unchanged.
+## 0.7.227: gifted villagers part 2 (pack 0.17.12)
+- `GiftedFolk`: one gifted in `MASTER_ODDS` (80) awakens a master; whether they hide it (`open`) by temperament (hotheaded,
+  proud, spiteful, greedy 0.6; brave, cheerful 0.3; the rest 0.08; masters +0.25). Gifted from before are weighed once in
+  `step` (`jaymoskingdoms_gift_ways`). `close` tells Powers who they hide from: kin and partners, players who are MCA
+  family or 40+ hearts, villagers with 40+ regard (any villager or player without MCA).
+- Resonance's calling: living through a Warden's sonic boom (0.5).
+- `GiftTales` (Andy: "The mca screen should only show it once the player has seen, and asked about the powers they saw"):
+  Powers tells us each player who sees a gift at work (`PowersCompat.giftWitnesses`, kept per player in `gifts_seen`);
+  that player then gets "Ask about their power" in the MCA menu. The answer depends on hidden/open/master/corrupted
+  (three lines each; a grudge refuses), and only then (`gifts_asked`, synced) does their MCA screen show the gift;
+  masters read "Master of <power>".
+- `PowersCompat.give(..., master, open)`, `giftWays`, `giftMaster`, `giftRevealed`, `giftCloseOnes` (older Powers: as before).
+
+## 0.7.228: a whaling start, and no power lean line on the life story (pack 0.17.13)
 Andy: "remove this text" / "from every entry": the "Leans to <power>, if fate decides your power" line is gone from the
 life story's answers and story page (the childhood still leans the power when fate decides; it just isn't shown).
 Andy: "another origin where you start with whalers, on the crew as a harpooner". New start **Signed on with the
@@ -4979,7 +4999,7 @@ whalers** (Darktide's calling): `Whalers.signOn` signs you on the whaler fitting
 is fitted out for you if no realm's is in port, whatever its treasury or last voyage) and you wake on her deck with 8
 harpoons, shears and oilskins; come home aboard her for the usual share. No realm with a harbour: the wild.
 
-## 0.7.227: every life-story start can be had, and the cave start no longer kills (pack 0.17.12)
+### also in 0.7.228: every life-story start can be had, and the cave start no longer kills
 Andy: "spawning in the cave poisoned made me die instantly, and jungxvv didnt spawn in a rich city, instead he spawned
 in the wilderness ... I need you to generate whatever is required for the player to choose any of the options".
 - **Cave:** you wake at half health (`CAVE_HEALTH` 10, was 4). Every story landing now clears the fall carried over

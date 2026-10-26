@@ -385,6 +385,8 @@ public final class PowersCompat {
 	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
 	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
+	/** (0.7.227) A gift's ways (Powers 0.17.12): a master, open or hidden, and seen by a player. */
+	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes, giftOpen, giftWitnesses;
 	private static boolean lookedForGifts;
 
 	private static void lookForGifts() {
@@ -407,6 +409,101 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError e) {
 			giftGive = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no gifted villagers (older Powers?)", e);
+			return;
+		}
+		try {
+			Class<?> gifted = Class.forName("com.jaymospowers.core.gifted.Gifted");
+			giftGiveWays = lookup.findStatic(gifted, "give",
+				java.lang.invoke.MethodType.methodType(boolean.class, entity, String.class, int.class, boolean.class, boolean.class));
+			giftWays = lookup.findStatic(gifted, "ways", java.lang.invoke.MethodType.methodType(boolean.class, entity, boolean.class, boolean.class));
+			giftMaster = lookup.findStatic(gifted, "master", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			giftRevealed = lookup.findStatic(gifted, "revealed", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			giftCloseOnes = lookup.findStatic(gifted, "closeOnes", java.lang.invoke.MethodType.methodType(void.class, java.util.function.BiPredicate.class));
+			giftOpen = lookup.findStatic(gifted, "open", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			giftWitnesses = lookup.findStatic(gifted, "witnesses", java.lang.invoke.MethodType.methodType(void.class, java.util.function.BiConsumer.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			giftGiveWays = null;
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no masters or hidden gifts (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.227) As {@link #give}, as a {@code master} or not, and {@code open} (they don't hide it) or not; with an older
+	 * Powers, as {@link #give}.
+	 */
+	public static boolean give(net.minecraft.world.entity.Entity entity, String power, int style, boolean master, boolean open) {
+		lookForGifts();
+		if (giftGiveWays == null) {
+			return give(entity, power, style);
+		}
+		try {
+			return (boolean)giftGiveWays.invoke(entity, power, style, master, open);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.227) Sets the ways of {@code entity}'s gift (a master, open); false without one, or with an older Powers. */
+	public static boolean giftWays(net.minecraft.world.entity.Entity entity, boolean master, boolean open) {
+		lookForGifts();
+		try {
+			return giftGiveWays != null && (boolean)giftWays.invoke(entity, master, open);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.227) Whether {@code entity} is a master of their gift. Either side. */
+	public static boolean giftMaster(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGiveWays != null && (boolean)giftMaster.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.227) Whether players know of {@code entity}'s gift (open, or seen at work); always, with an older Powers. Either side. */
+	public static boolean giftRevealed(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGiveWays == null || (boolean)giftRevealed.invoke(entity);
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
+	/** (0.7.227) Whether {@code entity} doesn't hide their gift; false without one, or with an older Powers. */
+	public static boolean giftOpen(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGiveWays != null && (boolean)giftOpen.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.227) Tells Powers to tell us {@code (player, gifted)} each time a player sees a gift at work ({@link GiftTales}). */
+	public static void giftWitnesses(java.util.function.BiConsumer<net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity> told) {
+		lookForGifts();
+		try {
+			if (giftGiveWays != null) {
+				giftWitnesses.invoke(told);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.debug("couldn't ask Powers who sees gifts at work", e);
+		}
+	}
+
+	/** (0.7.227) Tells Powers who a gifted villager hides their gift from ({@code test(gifted, other)}: other is close to them). */
+	public static void giftCloseOnes(java.util.function.BiPredicate<net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity> test) {
+		lookForGifts();
+		try {
+			if (giftGiveWays != null) {
+				giftCloseOnes.invoke(test);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.debug("couldn't tell Powers who gifted villagers hide from", e);
 		}
 	}
 

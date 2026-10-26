@@ -47,14 +47,18 @@ abstract class McaInteractInfoMixin {
 			lines.add(Temperaments.line(temperament));
 			hovers.add(Temperaments.hover(temperament));
 		}
-		// (0.7.218) a gifted villager's power, once you know them; the storm-taken line of a Stormborn
+		// (0.7.218) a gifted villager's power (0.7.227: once you've seen it at work and asked them about it, GiftTales); the
+		// storm-taken line of a Stormborn
 		net.minecraft.world.entity.Entity self = this.villager.asEntity();
 		String gift = com.jaymoskingdoms.PowersCompat.gift(self);
-		if (gift != null && com.jaymoskingdoms.Introductions.knownHere(self)) {
-			lines.add(Component.translatable("gifted.jaymoskingdoms.line", Component.translatable("power.jaymospowers." + gift)));
+		boolean shown = gift != null && com.jaymoskingdoms.GiftTales.askedHere(self);
+		if (shown) {
+			boolean master = com.jaymoskingdoms.PowersCompat.giftMaster(self);
+			lines.add(Component.translatable(master ? "gifted.jaymoskingdoms.line.master" : "gifted.jaymoskingdoms.line",
+				Component.translatable("power.jaymospowers." + gift)));
 			hovers.add(Component.translatable(com.jaymoskingdoms.PowersCompat.giftCorrupted(self) ? "gifted.jaymoskingdoms.hover.corrupted"
-				: "gifted.jaymoskingdoms.hover"));
-		} else if (gift == null && com.jaymoskingdoms.VillagerHeritage.of(self) == com.jaymoskingdoms.Heritage.Kind.STORMBORN) {
+				: master ? "gifted.jaymoskingdoms.hover.master" : "gifted.jaymoskingdoms.hover"));
+		} else if (!shown && com.jaymoskingdoms.VillagerHeritage.of(self) == com.jaymoskingdoms.Heritage.Kind.STORMBORN) {
 			lines.add(Component.translatable("gifted.jaymoskingdoms.storm_line"));
 			hovers.add(Component.translatable("gifted.jaymoskingdoms.storm_line.hover"));
 		}
