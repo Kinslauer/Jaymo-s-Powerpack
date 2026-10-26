@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.VillagerHeritage;
 import net.conczin.mca.item.BabyItem;
 import net.conczin.mca.registry.DataComponentsMCA;
@@ -27,6 +28,9 @@ abstract class McaBabyMixin {
 				tag.putString(VillagerHeritage.SAVE_KEY, kind.key());
 				// the tail is settled when it's born
 				tag.remove(VillagerHeritage.SAVE_TAIL);
+				// (0.7.214) its variant, from its parents'
+				HeritageVariants.Variant variant = HeritageVariants.child(kind, mother, father, mother, mother.getRandom());
+				tag.putString(HeritageVariants.SAVE_KEY, variant == null ? HeritageVariants.BASE : variant.key());
 			});
 		}
 	}
