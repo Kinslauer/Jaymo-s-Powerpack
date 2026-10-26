@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Emigrants;
+import com.jaymoskingdoms.FightPit;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
@@ -184,6 +185,14 @@ abstract class McaDialogueMixin {
 				ci.cancel();
 				return;
 			}
+		}
+		// (0.7.224) a pit fighter with wins to his name (a champion, a retired one) brags of them
+		Component bout = FightPit.tell(villager, player);
+		if (bout != null) {
+			villager.sendChatMessage(bout, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
 		}
 		// (0.7.221) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
 		Component moved = Emigrants.tell(villager, player);

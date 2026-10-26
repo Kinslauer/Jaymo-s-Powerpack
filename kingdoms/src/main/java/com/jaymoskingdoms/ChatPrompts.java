@@ -36,6 +36,11 @@ public final class ChatPrompts {
 			if (!temperament.isEmpty()) {
 				sb.append(temperament).append('\n');
 			}
+			// (0.7.224) their record in the fight pit
+			String pit = FightPit.prompt(villager);
+			if (!pit.isEmpty()) {
+				sb.append(pit).append('\n');
+			}
 			// (0.7.221) what they think of your blood
 			String blood = Prejudice.prompt(villager, player);
 			if (!blood.isEmpty()) {

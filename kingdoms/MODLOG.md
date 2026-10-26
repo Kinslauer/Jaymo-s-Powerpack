@@ -4924,5 +4924,16 @@ hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
   sets by simulating the bout 400 times), bets for 30 s, then the bell. They trade bare-knuckle blows (swings, crits,
   knockback, cheers; no real damage) until one's wind is gone and he yields. Winning bets pay at the odds; the winner
   stays on as champion (+1 wind a win) and retires after 5 wins. Each bout warms the city by 1.
+- **Fighting in the pit yourself:** Andy: "Sure add that". The bookie's book offers a place on the card (3 emeralds held,
+  `/bookie fight`): you take the newcomer's corner (his backers get their stakes back, the odds are redone) or a card is
+  called for you against the champion. At the bell you're put in your corner. Punch with an empty hand (a full swing lands
+  2-3, a half-charged one less; the fighter's guard turns some); sneak to cover up (turns half his blows); your wind (20)
+  shows over your hotbar. Anything in your hand is a foul, stepping out of the ring or leaving throws it. No real damage
+  either way. Win: a purse of 8 + 4 per win the beaten had, and he remembers you beat him (`Recollections`); lose: he
+  remembers he beat you. You can bet on yourself, not against.
+- **Fighters' stories:** Andy: "make the villager winners/champions bring that up in conversation." Every fighter keeps a
+  record on himself (`pit_record` attachment: measure, wins, losses, champion/retired, which city's pit). The beaten and the
+  retired go back up to town to live (newcomers who never fought are just let go). In an MCA chat, one with a win brags of
+  it 40% of the time (champion, retired champion or plain winner lines), and MCA's chat AI is told his record.
 - Ops: `/kingdom war tension <a> <b> <0-100>` (looked at once a day).
 - Tuning: the constants at the top of `GreatWars`, `Bookies` and `FightPit`. Compiled only, not seen in game.

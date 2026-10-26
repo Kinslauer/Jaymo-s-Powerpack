@@ -48,7 +48,8 @@ final class Bookies {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(Commands.literal("bookie")
 			.then(Commands.literal("war").then(Commands.argument("war", IntegerArgumentType.integer(0))
 				.then(Commands.argument("side", IntegerArgumentType.integer(0)).executes(Bookies::betWar))))
-			.then(Commands.literal("bout").then(Commands.argument("fighter", IntegerArgumentType.integer(0, 1)).executes(Bookies::betBout)))));
+			.then(Commands.literal("bout").then(Commands.argument("fighter", IntegerArgumentType.integer(0, 1)).executes(Bookies::betBout)))
+			.then(Commands.literal("fight").executes(Bookies::fight))));
 	}
 
 	/** A bookie in {@code box}, if any. */
@@ -85,6 +86,11 @@ final class Bookies {
 				player.sendSystemMessage(Component.literal("  ").append(click(Component.translatable("bookie.jaymoskingdoms.back",
 					FightPit.describe(level, bout, i)), "/bookie bout " + i)));
 			}
+			lines++;
+		}
+		// (Andy: "Sure add that") a place on the card for yourself
+		if (here != null && FightPit.pit(server, here.id()) != null && (bout == null || bout.phase == FightPit.Phase.BETTING && !bout.player[0] && !bout.player[1])) {
+			player.sendSystemMessage(Component.literal("  ").append(click(Component.translatable("bookie.jaymoskingdoms.fight", FightPit.ENTRY), "/bookie fight")));
 			lines++;
 		}
 		for (War war : WarData.wars(server)) {
@@ -162,6 +168,26 @@ final class Bookies {
 		int stake = Math.min(held.getCount(), FightPit.MOST_STAKE);
 		GreatWars.Taken taken = FightPit.bet(player.level(), player, here.id(), IntegerArgumentType.getInteger(c, "fighter"), stake);
 		return settle(player, bookie, held, taken);
+	}
+
+	/** A place on the pit's card for {@code player}, the entry paid from their hand. */
+	private static int fight(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		Villager bookie = reach(c, player);
+		ItemStack held = bookie == null ? null : stake(c, player);
+		if (held == null) {
+			return 0;
+		}
+		Faction here = Theft.lawAt(player.level(), bookie.blockPosition());
+		if (here == null) {
+			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.no_pit"));
+			return 0;
+		}
+		if (held.getCount() < FightPit.ENTRY) {
+			c.getSource().sendFailure(Component.translatable("fightpit.jaymoskingdoms.enter.fee", FightPit.ENTRY));
+			return 0;
+		}
+		return settle(player, bookie, held, FightPit.enter(player.level(), player, here));
 	}
 
 	/** The bookie pockets what he took and says so. */

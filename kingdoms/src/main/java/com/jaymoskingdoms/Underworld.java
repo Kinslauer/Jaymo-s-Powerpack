@@ -244,7 +244,8 @@ public final class Underworld {
 				Bookies.open(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
-			if (v.entityTags().contains(FightPit.FIGHTER_TAG)) {
+			if (v.entityTags().contains(FightPit.FIGHTER_TAG) && FightPit.onCard(v.getUUID())) {
+				// (between bouts the champion will talk)
 				return InteractionResult.SUCCESS;
 			}
 			if (v.entityTags().contains(DICER_TAG) && sp.getMainHandItem().is(Items.EMERALD)) {
