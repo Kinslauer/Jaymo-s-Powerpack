@@ -225,7 +225,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.213) What {@code player} has learned of Jaymo's Powers' alchemy: the research they've unlocked, how many essences
+	 * (0.7.215) What {@code player} has learned of Jaymo's Powers' alchemy: the research they've unlocked, how many essences
 	 * they've discovered, and their alchemical corruption (all from Powers' synced attachments, by reflection). The floating
 	 * islands' hermits ({@link HermitAlchemy}) read it to give hints. {@link Alchemy#NONE} without Powers (or an older one).
 	 */
@@ -261,7 +261,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.213) The alchemical flux pooled in the chunk at {@code pos} (0 without Powers). */
+	/** (0.7.215) The alchemical flux pooled in the chunk at {@code pos} (0 without Powers). */
 	public static int flux(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
 		lookForAlchemy();
 		try {
