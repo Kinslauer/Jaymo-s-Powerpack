@@ -51,9 +51,10 @@ public final class GiftedFolk {
 	/** Tagged once weighed at coming of age (so it's only ever rolled once). */
 	static final String ROLLED = "jaymoskingdoms_gift_rolled";
 	/** The callings: the chance each wakes a power (Breeze: always). */
-	static final float WEB_CHANCE = 0.25F, GRAVITY_CHANCE = 0.33F, CRYO_CHANCE = 0.2F, FIST_CHANCE = 0.1F, BLADE_CHANCE = 0.02F;
-	/** Burning (each hurt of it, so small): Smoke's calling. */
-	static final float SMOKE_CHANCE = 0.02F;
+	static final float WEB_CHANCE = 0.25F, GRAVITY_CHANCE = 0.33F;
+	/** Callings that come again and again (each kill, each hurt of the cold or the fire), so their chances are small: a
+	 * monster killed bare-handed (Z Fighter), with a weapon (Arsenal; guards kill a lot), freezing (Cryo), burning (Smoke). */
+	static final float FIST_CHANCE = 0.05F, BLADE_CHANCE = 0.004F, CRYO_CHANCE = 0.05F, SMOKE_CHANCE = 0.005F;
 	/** A fall that hurts this much, lived through, is Gravity's calling. */
 	static final float GRAVITY_FALL_HURT = 8.0F;
 	/** Among the townsfolk heirs to a throne, a gifted one is crowned this often (if there's one). */
@@ -76,7 +77,10 @@ public final class GiftedFolk {
 
 	// ---- who awakens ------------------------------------------------------------------------------------------------
 
-	/** {@code mob} has come of age (or is first seen grown): weighed once for a power. From {@link CourtWizards#age}. */
+	/**
+	 * {@code mob} has come of age (from {@link CourtWizards#age}), or is grown and was never weighed (from {@link #step}: the
+	 * villagers of a world from before): weighed once for a power.
+	 */
 	static void cameOfAge(ServerLevel level, PathfinderMob mob) {
 		if (mob.entityTags().contains(ROLLED) || !McaCompat.isMca(mob) || PowersCompat.gift(mob) != null) {
 			return;
@@ -216,8 +220,14 @@ public final class GiftedFolk {
 
 	// ---- the storm, the throne --------------------------------------------------------------------------------------
 
-	/** Now and then, for each MCA villager ({@link Workers#step}): a Wind the storm has taken wakes the Stormborn in them. */
+	/**
+	 * Now and then, for each MCA villager ({@link Workers#step}): a grown one never weighed is weighed now, and a Wind the
+	 * storm has taken wakes the Stormborn in them.
+	 */
 	static void step(ServerLevel level, PathfinderMob mob) {
+		if (!mob.isBaby() && !mob.entityTags().contains(ROLLED)) {
+			cameOfAge(level, mob);
+		}
 		if ("wind".equals(PowersCompat.gift(mob)) && PowersCompat.giftCorrupted(mob) && VillagerHeritage.of(mob) != Heritage.Kind.STORMBORN) {
 			VillagerHeritage.born(mob, Heritage.Kind.STORMBORN, null);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mob.getX(), mob.getY(0.6), mob.getZ(), 30, 0.4, 0.7, 0.4, 0.3);
@@ -237,12 +247,12 @@ public final class GiftedFolk {
 	}
 
 	/**
-	 * Someone in a throne room was hurt (its ruler, or anyone near the throne): its gifted ruler, there too, unleashes
+	 * Someone in a throne room was hurt (its ruler, or anyone of the realm near the throne): its gifted ruler, there too, unleashes
 	 * their power's ultimate on whoever did it (Powers keeps it to once in a long while; Gravity's meteor only as a last
 	 * resort).
 	 */
 	private static void atCourt(LivingEntity hurt, DamageSource source) {
-		if (!(source.getEntity() instanceof LivingEntity foe) || foe == hurt || !(hurt.level() instanceof ServerLevel level)) {
+		if (!(hurt instanceof Worker) || !(source.getEntity() instanceof LivingEntity foe) || foe == hurt || !(hurt.level() instanceof ServerLevel level)) {
 			return;
 		}
 		PathfinderMob ruler = rulerAt(level, hurt);

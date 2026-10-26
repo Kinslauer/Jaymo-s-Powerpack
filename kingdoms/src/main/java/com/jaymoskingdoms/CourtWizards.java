@@ -92,7 +92,6 @@ public final class CourtWizards {
 			GiftedFolk.cameOfAge(level, v.mob());
 		} else if (since == UNKNOWN) {
 			v.setGrownSince(level.getGameTime() - level.getRandom().nextInt((int)(SPREAD_DAYS * DAY_TICKS)));
-			GiftedFolk.cameOfAge(level, v.mob());
 		}
 	}
 
