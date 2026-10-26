@@ -385,7 +385,7 @@ final class Festivals {
 		MinecraftServer server = c.getSource().getServer();
 		Faction f = Factions.of(server, player.getUUID());
 		Faction.Member member = f == null ? null : f.member(player.getUUID());
-		boolean ruler = f != null && f.leader().map(player.getUUID()::equals).orElse(false);
+		boolean ruler = Crowns.rules(server, f, player.getUUID());
 		if (f == null || !f.type().isRealm() || !ruler && (member == null || Rank.forStanding(member.standing()) != Rank.LORD)) {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.festival_lords"));
 			return 0;

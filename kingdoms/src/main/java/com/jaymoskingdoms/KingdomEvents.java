@@ -125,6 +125,15 @@ public final class KingdomEvents {
 				if (faction.successionAt() >= 0 && now >= faction.successionAt() && !faction.fallen()) {
 					Faction crowned = crown(overworld, faction.withSuccessionAt(-1L));
 					PathfinderMob heir = crowned == null ? null : Rulers.of(overworld, crowned);
+					// (0.7.225) a player wears the crown: a steward, in their name
+					java.util.UUID sovereign = crowned == null ? null : Crowns.sovereign(server, crowned);
+					if (sovereign != null) {
+						if (heir != null) {
+							announce(server, Component.translatable("message.jaymoskingdoms.crown.new_steward", heir.getDisplayName(), faction.name())
+								.withStyle(ChatFormatting.GOLD));
+						}
+						continue;
+					}
 					// (0.7.171) a new queen (or lady), if the heir's a woman
 					announce(server, Component.translatable(Rulers.her(faction.type() == FactionType.FIEFDOM ? "message.jaymoskingdoms.succession.lord"
 						: "message.jaymoskingdoms.succession", heir != null && McaCompat.female(heir)), faction.name()).withStyle(ChatFormatting.GOLD));
@@ -560,8 +569,16 @@ public final class KingdomEvents {
 			// (a camp's chief: the barbarians' own business)
 			return;
 		}
+		// (0.7.225) a player wears its crown: only their steward fell
+		if (wasLeader && Crowns.stewardFell(level, faction)) {
+			return;
+		}
 		if (OldAge.is(source)) {
-			// (0.5.54) died in his bed, of old age: the realm mourns, and his heir is crowned (no war, no fate decides it)
+			// (0.5.54) died in his bed, of old age: the realm mourns, and his heir is crowned (no war, no fate decides it);
+			// (0.7.225) a player spouse first
+			if (wasLeader && Crowns.inherited(level, faction, ruler, null)) {
+				return;
+			}
 			if (wasLeader) {
 				Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
 				announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.old_age.lord" : "message.jaymoskingdoms.old_age.king", female),
@@ -572,7 +589,9 @@ public final class KingdomEvents {
 		if (wasLeader && Assassins.murdered(level, faction, ruler, lord, source)) {
 			// (0.5.59) murdered by an assassin's blade or poison: mourned, and his heir crowned
 			Wardens.rulerFell(level, faction);
-			Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
+			if (!Crowns.inherited(level, faction, ruler, null)) {
+				Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
+			}
 			return;
 		}
 		if (killer != null) {
@@ -587,12 +606,23 @@ public final class KingdomEvents {
 		if (!wasLeader) {
 			return;
 		}
+		// (0.7.225) slain in his own hall by a lord of his realm: the crown is theirs
+		if (Crowns.usurped(level, faction, ruler, killer)) {
+			Wardens.rulerFell(level, faction);
+			return;
+		}
 		// (0.5.1) his wardens failed him
 		Wardens.rulerFell(level, faction);
 		announce(server, Component.translatable(Rulers.her(lord ? "message.jaymoskingdoms.lord_fallen" : "message.jaymoskingdoms.king_fallen", female), faction.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.RED));
 		// a ruler killed by the other side of a war: the war decides
 		if (Wars.rulerFell(level, faction, source)) {
+			// (0.7.225) and a lord who did it may claim the crown
+			Crowns.offerConquest(server, faction, killer);
+			return;
+		}
+		// (0.7.225) a player spouse takes the crown, whatever else
+		if (Crowns.inherited(level, faction, ruler, killer)) {
 			return;
 		}
 		// one of three fates, at random

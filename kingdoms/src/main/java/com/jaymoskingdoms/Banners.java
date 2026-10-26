@@ -389,6 +389,11 @@ final class Banners {
 			KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.banner.seat_taken", faction.name(), target.name())
 				.withStyle(ChatFormatting.DARK_RED));
 			Wars.seatTaken(server, war, side, target);
+			// (0.7.225) the lord who planted it may claim the crown
+			Faction taken = Factions.get(server, target.id());
+			if (taken != null && !taken.fallen()) {
+				Crowns.offerConquest(server, taken, planter);
+			}
 			return;
 		}
 		long chunk = ChunkPos.containing(b.pos()).pack();

@@ -237,6 +237,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		GrimSites.register();
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
+		// (0.7.225) players on the throne: usurpers, heirs by marriage, conquerors, founders (and their attachment)
+		LOGGER.debug("crown attachment: {}", Crowns.CROWNS);
+		Crowns.register();
 		Nights.register();
 		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
@@ -422,6 +425,7 @@ public final class JaymosKingdoms implements ModInitializer {
 			Gatherers.clear();
 			Royals.clear();
 			Wardens.clear();
+			Crowns.clear();
 			Focus.clear();
 		});
 	}
