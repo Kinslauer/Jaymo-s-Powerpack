@@ -5091,7 +5091,38 @@ Powers' aerwhales are hunted like great whales now. A Kingdoms harpoon already l
 `BIG`); now `Harpoon.tether` also pays line out to a running aerwhale and holds it back by `WHALE_SHARE`, like a great
 whale, and stops paying out once it wears Powers' `jaymospowers_spent_whale` tag. Powers stays optional: the aerwhale
 is found by its entity id (`skyWhale`). Merged in #551 claiming 0.7.232, which #550 had already used, so renumbered.
-## 0.7.235: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.23)
+
+## 0.7.234: locked loot chests, the Pin and Rotary lockpicking games (pack 0.17.23)
+Andy asked for Locks Unofficial's minigames. That mod is All Rights Reserved and Forge 1.20.1 only, so both games are
+our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
+- **Read before filled.** The first time anyone tries to open or break a loot chest or barrel (vanilla's or Lootr's,
+  Lootr's by reflection), its loot table is rolled with the chest's own seed (a vanilla chest with none is given one,
+  so what's read is what it will hold) and weighed (`worth`): rarity (uncommon 3, rare 8, epic 16), enchantments (6),
+  valuables by the piece (diamond 4, netherite ingot 30, ...), and 6 more for treasure tables (stronghold, end city,
+  bastion, ancient city, mansion, buried treasure). Worth `LOCK_WORTH` (14) or more and it's locked, level 1 to 5 at
+  14/24/38/60/90, Pin or Rotary at random. The result is kept on the chest (attachment `lock`); a double chest is
+  locked if either half is. A Lootr chest someone already opened is left alone.
+- **Locked.** Using it rattles (`CHEST_LOCKED`) and, with a **Lockpick** in your inventory (2 iron nuggets and a
+  stick make 2), opens the game. Without one you're told what kind of lock it is. A locked chest can't be broken
+  outside creative.
+- **Pin lock.** 4 to 7 pins (3 + level) to set in a hidden binding order. A/D or the mouse picks a pin; hold W or the
+  mouse button to push it. A loose pin springs up and drops; the binding pin pushes stiff, trembles, and ticks as it
+  reaches its shear line. Let go there and it sets. Past it, the pin drops and the pick strains (0.35); from level 4 the
+  last pin set drops too. Rattling a loose pin at the top strains a little.
+- **Rotary lock.** 3 to 5 gates on a dial, turned to in alternating directions (right, then left, ...). A/D, the arrows
+  or the wheel turn it, Shift slowly; the pick trembles and ticks faster near the gate. W, Space or a click sets it: in
+  the gate (11 degrees less 1.5 a level, either way) it catches, else the pick strains (0.3). Turning back undoes the
+  last gate.
+- **Strain** eases off slowly. Full strain snaps the pick: the server takes one and the lock starts over. A picked lock
+  stays open for good, opens the chest, and gives Stealth experience (2 + 2 a level).
+- **Stealth boosts.** Practice: each Stealth level (first page) widens the sweet spots 2%. **Lockpicking Prowess**
+  (3 ranks, level 5, Stealth's first page) takes **Slip Away**'s place: per rank, sweet spots 15% wider and 20% less
+  strain; from rank 2 the binding pin glows and the dial's pick lights in the gate; at rank 3 the first slip of each try
+  is forgiven. Ranks saved under Slip Away count for nothing now, so those points come back to spend. Ghost needs
+  Quick Hands and Lockpicking Prowess.
+- The lockpick icon is painted by `tools/gen_lockpick.py`.
+
+## 0.7.235: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.24)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
 Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer

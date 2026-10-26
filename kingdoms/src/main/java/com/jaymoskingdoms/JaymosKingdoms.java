@@ -181,6 +181,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
+		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
+		Lockpicking.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
