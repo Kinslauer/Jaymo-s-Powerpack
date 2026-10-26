@@ -4978,3 +4978,43 @@ Andy (2026-10-26): "aeolus and eurus should be FAR rarer, and only even spawn af
 - Neither turns up at all until the world's first world boss, the first of the Aether's Giants, has fallen
   (`Monoliths.firstFallen`, the same flag that raises the world tier to Borderlands). It's world-wide: once anyone fells
   a Giant they can come to anyone. Ops' `/kingdom dragon` spawns and the dragons' eggs are unchanged.
+## 0.7.227: gifted villagers part 2 (pack 0.17.12)
+- `GiftedFolk`: one gifted in `MASTER_ODDS` (80) awakens a master; whether they hide it (`open`) by temperament (hotheaded,
+  proud, spiteful, greedy 0.6; brave, cheerful 0.3; the rest 0.08; masters +0.25). Gifted from before are weighed once in
+  `step` (`jaymoskingdoms_gift_ways`). `close` tells Powers who they hide from: kin and partners, players who are MCA
+  family or 40+ hearts, villagers with 40+ regard (any villager or player without MCA).
+- Resonance's calling: living through a Warden's sonic boom (0.5).
+- `GiftTales` (Andy: "The mca screen should only show it once the player has seen, and asked about the powers they saw"):
+  Powers tells us each player who sees a gift at work (`PowersCompat.giftWitnesses`, kept per player in `gifts_seen`);
+  that player then gets "Ask about their power" in the MCA menu. The answer depends on hidden/open/master/corrupted
+  (three lines each; a grudge refuses), and only then (`gifts_asked`, synced) does their MCA screen show the gift;
+  masters read "Master of <power>".
+- `PowersCompat.give(..., master, open)`, `giftWays`, `giftMaster`, `giftRevealed`, `giftCloseOnes` (older Powers: as before).
+
+## 0.7.228: a whaling start, and no power lean line on the life story (pack 0.17.13)
+Andy: "remove this text" / "from every entry": the "Leans to <power>, if fate decides your power" line is gone from the
+life story's answers and story page (the childhood still leans the power when fate decides; it just isn't shown).
+Andy: "another origin where you start with whalers, on the crew as a harpooner". New start **Signed on with the
+whalers** (Darktide's calling): `Whalers.signOn` signs you on the whaler fitting out at the harbour nearest spawn (one
+is fitted out for you if no realm's is in port, whatever its treasury or last voyage) and you wake on her deck with 8
+harpoons, shears and oilskins; come home aboard her for the usual share. No realm with a harbour: the wild.
+
+### also in 0.7.228: every life-story start can be had, and the cave start no longer kills
+Andy: "spawning in the cave poisoned made me die instantly, and jungxvv didnt spawn in a rich city, instead he spawned
+in the wilderness ... I need you to generate whatever is required for the player to choose any of the options".
+- **Cave:** you wake at half health (`CAVE_HEALTH` 10, was 4). Every story landing now clears the fall carried over
+  from where you stood and gives 5 seconds of full Resistance (`ARRIVAL_GRACE_TICKS`), against a fall or the cave's
+  spiders.
+- **`StoryGround`:** makes what a start needs when the world hasn't got it.
+  - **A capital.** In a new world no realm exists until someone walks up to a village's bell. Now, when a newcomer
+    joins (or the story screen is about to open) and there is no realm, the village nearest spawn is kept loaded
+    (a ticket) and becomes a kingdom's capital (`KingdomEvents.foundIn`, else its citadel). If it isn't ready within
+    90 s, a citadel kingdom is raised there instead. The story screen opens once it stands, so the city, sworn,
+    banished and noble answers always have realms. Players waiting are kept safe and told.
+  - **A barbarian camp** 200-360 blocks out for the captive start (`Camps.found`).
+  - **A monolith** 160-320 blocks out for the monolith start (`Monoliths.raise`; `fit` and `SETTLEMENT_CLEARANCE` are
+    public now). Fate can now pick the monolith start in any world.
+  - **A harbour** for the whaling start (`Whalers.berth` says none is free). It is built by the nearest realm whose
+    seat is within reach of the sea, with its land kept loaded until `Navies.build` succeeds. If no realm is on a
+    coast, a citadel kingdom is raised on the shore nearest spawn, which then builds it. After 90 s with no harbour,
+    you start in the wild.

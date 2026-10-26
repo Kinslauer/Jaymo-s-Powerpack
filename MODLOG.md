@@ -2970,7 +2970,25 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`/kingdom crown found [name]`, 256 emeralds). No Powers changes. See Kingdoms' log.
 - **0.17.11, rarer Eurus and Aeolus (Kingdoms 0.7.226):** the disguised wind dragons turn up far less often and never
   before the world's first Giant has fallen. No Powers changes. See Kingdoms' log.
-- **0.17.12, players throw rocks:** right click the air with a loose rock (either hand) to throw it, the way Kingdoms'
+- **0.17.12, gifted villagers part 2 (Kingdoms 0.7.227):** Andy: "Not all the villagers are weaker, maybe 1 in 80 is an
+  extremely gifted wielder", Wind folk "should fly when they see fit", "they should also be able to use resonance", and
+  the gifted "should keep their power usage to a minimum and hide it from their friends and family", weighted by temperament.
+  - `Gifted.Gift` gains `ways` (`MASTER`, `OPEN`, `REVEALED` bits) and `signature`; `Gifted.give(e, power, style, master, open)`,
+    `ways`, `master`, `open`, `revealed`, `closeOnes(BiPredicate)` (Kingdoms sets who counts as family and friends),
+    `witnesses(BiConsumer)` (told of each player who sees a gift at work; Kingdoms lets them ask about it).
+  - Masters (`GiftedAI`): half cooldowns and gaps, reach 28, their signature move first and twice (`ECHO_DELAY`), a third of
+    the corruption chance, their ultimate in any fight at half health.
+  - Hidden gifts: no moves while close ones see (until half health), double gap, everyday use at 0.25 and only unseen by
+    close ones and players; a player who sees one at work reveals it. Open gifts: everyday use twice as often, always.
+  - `GiftKit.tick` (every tick). `WindGift`: soar (hover over the foe, casting), wing (fly away), everyday hovers and
+    flights to somewhere near, falls caught; the `jaymospowers_wind_aloft` tag ends a flight cut short by unloading.
+  - `ResonanceGift`: pulse, boom, ring, hush (a dome that silences a powered player foe's keys), shriek when corrupted,
+    Collapse ultimate. `ResonanceHush.cast(level, caster, corrupted, ticks)` for any caster; clients look for domes on
+    every entity. `/power gift <targets> ways hidden|open|master|master_open`. Not seen in game.
+- **0.17.13, a whaling life-story start, and every start can be had (Kingdoms 0.7.228):** a capital, barbarian camp, monolith or harbour is
+  made when a start needs one and the world hasn't got it; the cave start wakes you at half health, and every story
+  landing gives 5 s of Resistance. No Powers changes. See Kingdoms' log.
+- **0.17.14, players throw rocks:** right click the air with a loose rock (either hand) to throw it, the way Kingdoms'
   poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
   Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
   where they land to be picked up again (`ground/ThrownRocks`).

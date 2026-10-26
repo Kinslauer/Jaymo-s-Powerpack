@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.12) Andy: "add the ability for players to throw rocks not just the npcs". Right click the air with a loose rock
+ * (0.17.14) Andy: "add the ability for players to throw rocks not just the npcs". Right click the air with a loose rock
  * ({@link GroundRocks}) in either hand and you throw it, the way Kingdoms' poor guards and barbarians do: a snowball
  * wearing the rock, that hits for {@link #DAMAGE} (Kingdoms' {@code Javelins.ROCK_DAMAGE}). Right clicking a block still
  * sets the rock down, and a rock with flint in the other hand still strikes fire. The rock lies where it lands

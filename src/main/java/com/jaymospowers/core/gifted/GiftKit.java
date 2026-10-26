@@ -9,7 +9,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.17.3) What a gifted villager ({@link Gifted}) can do with one power: a few moves of its own, simpler and weaker than
- * a player's (no keys, no client; only a ruler unleashes an ultimate), drawn in the power's own colours and sounds. Each power keeps its kit in
+ * a player's (no keys, no client; only a ruler, or a master in a hard fight, unleashes an ultimate; a master's moves come
+ * quicker and their signature one twice, {@link GiftedAI}), drawn in the power's own colours and sounds. Each power keeps its kit in
  * its own package ({@code power/<name>/<Name>Gift}) and registers it with {@link Gifted#register}; {@link GiftedAI} picks
  * the moves in a fight.
  */
@@ -19,6 +20,13 @@ public interface GiftKit {
 
 	/** The moves, strongest first (a bold villager opens with the first ready one). */
 	List<Move> moves();
+
+	/**
+	 * (0.17.12) Every tick, fighting or not: for what a power keeps up from tick to tick (a Wind villager's flight). Keep
+	 * it cheap: it runs for every gifted villager loaded.
+	 */
+	default void tick(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
+	}
 
 	/** Now and then ({@link GiftedAI#PASSIVE_EVERY}), fighting or not: the power's quiet gift. */
 	default void passive(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {

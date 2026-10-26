@@ -283,6 +283,69 @@ public final class Whalers {
 		return ship;
 	}
 
+	/** (0.7.228) Some realm has a harbour whose whaler is in, or fitting out (a whaling story can sign on). */
+	static boolean berth(MinecraftServer server) {
+		long now = Factions.level(server).getGameTime();
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen() && Navies.harbour(server, f.id()) != null) {
+				Voyage v = voyage(server, f.id());
+				if (v == null || now - v.launched < FIT_OUT) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (0.7.228) A life story's whaling start (Andy: "start with whalers, on the crew as a harpooner"): {@code player} is
+	 * signed on as a harpooner aboard the whaler fitting out at the harbour nearest {@code near}, one fitted out for them
+	 * if no realm's is in port (whatever its treasury or the time since its last voyage). Returns where they stand on her
+	 * deck, or null (no realm has a harbour, or she couldn't be fitted out).
+	 */
+	static @Nullable Vec3 signOn(ServerPlayer player, BlockPos near) {
+		MinecraftServer server = player.level().getServer();
+		ServerLevel level = Factions.level(server);
+		long now = level.getGameTime();
+		Faction best = null;
+		Navies.Harbour bestHarbour = null;
+		double bestD = Double.MAX_VALUE;
+		for (Faction f : Factions.all(server)) {
+			Navies.Harbour h = f.type().isRealm() && !f.fallen() ? Navies.harbour(server, f.id()) : null;
+			Voyage v = h == null ? null : voyage(server, f.id());
+			// a realm with a voyage already out at sea can't fit out another
+			if (h == null || v != null && now - v.launched >= FIT_OUT) {
+				continue;
+			}
+			double d = h.mooring().distSqr(near);
+			if (d < bestD) {
+				bestD = d;
+				best = f;
+				bestHarbour = h;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		level.getChunk(bestHarbour.mooring().getX() >> 4, bestHarbour.mooring().getZ() >> 4);
+		Voyage v = voyage(server, best.id());
+		Ship ship = v != null && level.getEntity(v.ship) instanceof Ship s ? s : null;
+		if (ship == null) {
+			ship = fitOut(level, best, bestHarbour);
+			v = voyage(server, best.id());
+		}
+		if (ship == null || v == null) {
+			return null;
+		}
+		if (!v.hands.contains(player.getUUID())) {
+			v.hands.add(player.getUUID());
+			put(server, best.id(), v);
+		}
+		String name = ship.crew != null ? ship.crew.name : best.name();
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.whalers", name).withStyle(ChatFormatting.AQUA));
+		return ship.helmStand().add(0.0, 0.1, 0.0);
+	}
+
 	/** Open deep water far out from {@code h}, for a whaling ground (null: none found). */
 	private static @Nullable BlockPos ground(ServerLevel level, Navies.Harbour h, RandomSource random) {
 		Vec3 out = Vec3.atCenterOf(h.mooring()).subtract(Vec3.atCenterOf(h.shore()));

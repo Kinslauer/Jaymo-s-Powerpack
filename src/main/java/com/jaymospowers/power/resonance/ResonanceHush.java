@@ -25,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
@@ -76,16 +77,24 @@ public final class ResonanceHush {
 
 	static boolean cast(ServerPlayer player) {
 		end(player);
-		ServerLevel level = player.level();
-		Dome dome = new Dome(player.position(), level.getGameTime() + TICKS, Fate.isCorrupted(player));
+		return cast(player.level(), player, Fate.isCorrupted(player), TICKS);
+	}
+
+	/**
+	 * (0.17.12) A dome round {@code caster} for {@code ticks}: a player's Hush, or a gifted villager's
+	 * ({@code ResonanceGift}; Andy: "It's okay to silence the players").
+	 */
+	static boolean cast(ServerLevel level, LivingEntity caster, boolean corrupted, int ticks) {
+		Dome dome = new Dome(caster.position(), level.getGameTime() + ticks, corrupted);
 		// the last sound before the silence
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5F, 0.5F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 0.6F);
-		ACTIVE.add(new Active(level, player.getUUID(), dome));
-		player.setAttached(DOME, dome);
+		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5F, 0.5F);
+		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		ACTIVE.removeIf(active -> active.owner.equals(caster.getUUID()));
+		ACTIVE.add(new Active(level, caster.getUUID(), dome));
+		caster.setAttached(DOME, dome);
 		ResonanceEcho.ripple(level, dome.center().add(0.0, 0.1, 0.0), RADIUS);
 		for (ServerPlayer other : level.players()) {
-			if (other != player && dome.contains(other.position()) && Powers.of(other) != null) {
+			if (other != caster && dome.contains(other.position()) && Powers.of(other) != null) {
 				other.sendOverlayMessage(Component.translatable("message.jaymospowers.resonance_hushed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			}
 		}
@@ -134,7 +143,7 @@ public final class ResonanceHush {
 			long now = active.level.getGameTime();
 			if (now >= active.dome.until()) {
 				it.remove();
-				ServerPlayer owner = server.getPlayerList().getPlayer(active.owner);
+				Entity owner = active.level.getEntity(active.owner);
 				if (owner != null && owner.getAttached(DOME) != null) {
 					owner.removeAttached(DOME);
 				}

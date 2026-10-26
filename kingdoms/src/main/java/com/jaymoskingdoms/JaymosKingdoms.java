@@ -211,6 +211,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
 		LOGGER.debug("life story attachment: {}", LifeStory.STORY);
 		LifeStory.register();
+		StoryGround.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
@@ -309,6 +310,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Temperaments.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
+		GiftTales.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
