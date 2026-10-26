@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:wool",
+    "jaymospowers:alchemical_salt",
+    "jaymospowers:orichalc_nugget"
+  ],
+  "result": {
+    "id": "jaymospowers:spellbinding_cloth",
+    "count": 1
+  }
+}

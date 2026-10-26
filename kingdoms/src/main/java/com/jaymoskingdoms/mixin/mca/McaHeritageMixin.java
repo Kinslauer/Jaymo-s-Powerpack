@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.VillagerHeritage;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.minecraft.world.level.storage.ValueInput;
@@ -23,6 +24,11 @@ abstract class McaHeritageMixin {
 		if (kind != null) {
 			output.putString(VillagerHeritage.SAVE_KEY, kind.key());
 			output.putString(VillagerHeritage.SAVE_TAIL, VillagerHeritage.tail(self));
+			// (0.7.214) and its variant
+			String variant = self.getAttached(HeritageVariants.VARIANT);
+			if (variant != null) {
+				output.putString(HeritageVariants.SAVE_KEY, variant);
+			}
 		}
 	}
 
@@ -31,6 +37,10 @@ abstract class McaHeritageMixin {
 		Heritage.Kind kind = Heritage.Kind.byKey(input.getStringOr(VillagerHeritage.SAVE_KEY, ""));
 		if (kind != null) {
 			String tail = input.getStringOr(VillagerHeritage.SAVE_TAIL, "");
+			String variant = input.getStringOr(HeritageVariants.SAVE_KEY, "");
+			if (!variant.isEmpty()) {
+				((VillagerEntityMCA)(Object)this).setAttached(HeritageVariants.VARIANT, variant);
+			}
 			VillagerHeritage.born((VillagerEntityMCA)(Object)this, kind, tail.isEmpty() ? null : tail);
 		}
 	}

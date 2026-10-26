@@ -3,6 +3,7 @@ package com.jaymoskingdoms.mixin.mca;
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Handshakes;
+import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
@@ -111,6 +112,15 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && HermitAlchemy.ANSWER.equals(answer)) {
+			// (0.7.215) a hermit asked about alchemy: eager words and a hint at what to try next
+			if (villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
+				HermitAlchemy.answer(level, player, words -> villager.sendChatMessage(words, player));
+			}
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
 			villager.sendChatMessage(Introductions.askName(player, villager), player);
@@ -146,6 +156,16 @@ abstract class McaDialogueMixin {
 			String blood = VillagerHeritage.talkKey(villager);
 			if (blood != null) {
 				villager.sendChatMessage(player, blood);
+				villager.getInteractions().stopInteracting();
+				ci.cancel();
+				return;
+			}
+		}
+		if (Hermits.is(villager) && villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			// (0.7.215) a hermit can't keep from talking alchemy with someone who has started on it
+			Component words = HermitAlchemy.chat(level, player, villager.getRandom());
+			if (words != null) {
+				villager.sendChatMessage(words, player);
 				villager.getInteractions().stopInteracting();
 				ci.cancel();
 				return;

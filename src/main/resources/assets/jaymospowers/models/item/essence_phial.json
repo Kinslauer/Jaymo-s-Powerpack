@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/essence_phial_liquid",
+    "layer1": "jaymospowers:item/essence_phial"
+  }
+}

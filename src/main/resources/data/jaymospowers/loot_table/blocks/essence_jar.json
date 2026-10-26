@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/essence_jar",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:essence_jar",
+          "modifier": {
+            "type": "minecraft:copy_components",
+            "include": [
+              "jaymospowers:essences"
+            ],
+            "source": "block_entity"
+          }
+        }
+      ]
+    }
+  ]
+}

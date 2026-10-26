@@ -31,6 +31,7 @@ import org.jspecify.annotations.Nullable;
  * a court wizard in exile. They tell it when a player first comes near each day (aloud over their head), give a
  * visitor a spell scroll once a day for the climb, tell more of it in MCA's chat, and unmake skills (sneak and use
  * them) as any court wizard does. No kingdom claims them: they're never promoted, drafted or counted.
+ * (0.7.215) They also love Jaymo's Powers' alchemy and can't stop talking about it ({@link HermitAlchemy}).
  * <p>
  * Which structures make hermits is the structure tag {@code jaymoskingdoms:sky_hermitage}. MCA's villagers only (the
  * pack always has MCA; a plain villager is left as it is).
@@ -131,7 +132,10 @@ public final class Hermits {
 		mob.getNavigation().stop();
 		mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		String story = story(mob);
-		Speech.say(level, mob, Component.translatable("talk.jaymoskingdoms.hermit." + story + "." + level.getRandom().nextInt(GREETINGS)), COLOR, SPEECH_RANGE);
+		// (0.7.215) someone who has started on alchemy gets an excited word instead of the story
+		Component alchemy = HermitAlchemy.greeting(player, level.getRandom());
+		Speech.say(level, mob, alchemy != null ? alchemy
+			: Component.translatable("talk.jaymoskingdoms.hermit." + story + "." + level.getRandom().nextInt(GREETINGS)), COLOR, SPEECH_RANGE);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.8F, 0.9F);
 		ItemStack gift = Arcana.scrollFor(Sorcery.WIZARD, level.getRandom());
 		if (!player.getInventory().add(gift)) {

@@ -223,4 +223,75 @@ public final class PowersCompat {
 		}
 		return power;
 	}
+
+	/**
+	 * (0.7.215) What {@code player} has learned of Jaymo's Powers' alchemy: the research they've unlocked, how many essences
+	 * they've discovered, and their alchemical corruption (all from Powers' synced attachments, by reflection). The floating
+	 * islands' hermits ({@link HermitAlchemy}) read it to give hints. {@link Alchemy#NONE} without Powers (or an older one).
+	 */
+	public record Alchemy(java.util.Set<String> research, int essencesSeen, int corruption) {
+		public static final Alchemy NONE = new Alchemy(java.util.Set.of(), 0, 0);
+
+		public boolean started() {
+			return !research.isEmpty();
+		}
+
+		public boolean knows(String id) {
+			return research.contains(id);
+		}
+	}
+
+	private static boolean lookedForAlchemy;
+	private static java.lang.invoke.@Nullable MethodHandle knowledgeOf, stateResearch, stateSeen, corruptionTotal, fluxGet;
+
+	@SuppressWarnings("unchecked")
+	public static Alchemy alchemy(Player player) {
+		lookForAlchemy();
+		if (knowledgeOf == null) {
+			return Alchemy.NONE;
+		}
+		try {
+			Object state = knowledgeOf.invoke(player);
+			java.util.Set<String> research = (java.util.Set<String>)stateResearch.invoke(state);
+			int seen = ((java.util.Set<?>)stateSeen.invoke(state)).size();
+			int corruption = corruptionTotal == null ? 0 : (int)corruptionTotal.invoke(player);
+			return new Alchemy(java.util.Set.copyOf(research), seen, corruption);
+		} catch (Throwable e) {
+			return Alchemy.NONE;
+		}
+	}
+
+	/** (0.7.215) The alchemical flux pooled in the chunk at {@code pos} (0 without Powers). */
+	public static int flux(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
+		lookForAlchemy();
+		try {
+			return fluxGet == null ? 0 : (int)fluxGet.invoke(level, pos);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	private static void lookForAlchemy() {
+		if (lookedForAlchemy) {
+			return;
+		}
+		lookedForAlchemy = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		var lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> state = Class.forName("com.jaymospowers.alchemy.Knowledge$State");
+			knowledgeOf = lookup.findStatic(Class.forName("com.jaymospowers.alchemy.Knowledge"), "of", java.lang.invoke.MethodType.methodType(state, Player.class));
+			stateResearch = lookup.findVirtual(state, "research", java.lang.invoke.MethodType.methodType(java.util.Set.class));
+			stateSeen = lookup.findVirtual(state, "seen", java.lang.invoke.MethodType.methodType(java.util.Set.class));
+			corruptionTotal = lookup.findStatic(Class.forName("com.jaymospowers.alchemy.Corruption"), "total",
+				java.lang.invoke.MethodType.methodType(int.class, Player.class));
+			fluxGet = lookup.findStatic(Class.forName("com.jaymospowers.alchemy.Flux"), "get", java.lang.invoke.MethodType.methodType(int.class,
+				net.minecraft.server.level.ServerLevel.class, net.minecraft.core.BlockPos.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			knowledgeOf = null;
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no alchemy (older Powers?)", e);
+		}
+	}
 }

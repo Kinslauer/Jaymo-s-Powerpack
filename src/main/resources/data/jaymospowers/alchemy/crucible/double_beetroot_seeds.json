@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:beetroot_seeds",
+  "essences": {
+    "plant": 4,
+    "life": 2
+  },
+  "result": {
+    "item": "minecraft:beetroot_seeds",
+    "count": 2
+  },
+  "research": "transmutation"
+}

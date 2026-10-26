@@ -70,14 +70,14 @@ public final class BeamClash {
 	/** The steady push grows by this share when ascended, and by this share per mastered ability. */
 	public static final float ASCENDED_BONUS = 0.6F, MASTERY_BONUS = 0.1F;
 	/**
-	 * A tap of X adds this to the surge; the surge fades by this factor a tick and holds at most this. (0.16.36) Andy:
+	 * A tap of X adds this to the surge; the surge fades by this factor a tick and holds at most this. (0.17.1) Andy:
 	 * "near impossible to break without a SERIOUS struggle ... overdone": each tap is worth half again what it was and
 	 * the surge fades slower, so about six taps a second fills it (before, nothing short of ten did), and from there
 	 * power decides.
 	 */
 	public static final float TAP_PUSH = 0.009F, SURGE_DECAY = 0.9F, SURGE_MAX = 0.03F;
 	/**
-	 * (0.16.36) Power levels: each side's power is its steady push over the base (ascension, mastery, a ki wave's live
+	 * (0.17.1) Power levels: each side's power is its steady push over the base (ascension, mastery, a ki wave's live
 	 * strength, which rises with every form). Its taps and its surge's cap are weighed by the square root of its power
 	 * over the other's, kept between these, so the stronger side's mashing counts for more.
 	 */

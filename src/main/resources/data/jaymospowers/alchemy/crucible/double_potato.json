@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:potato",
+  "essences": {
+    "plant": 4,
+    "life": 2
+  },
+  "result": {
+    "item": "minecraft:potato",
+    "count": 2
+  },
+  "research": "transmutation"
+}

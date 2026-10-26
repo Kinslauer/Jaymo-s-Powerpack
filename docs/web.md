@@ -94,7 +94,7 @@ style" and "the head clips and animates seperately it looks like".
   back into the big body, so any form can be worn at any bond. The next press takes the suit off (the fight under
   `FIGHT_BOND`, else the tear-off). Living Armor from the menu goes back up as before.
 - **Easier with the bond (`WebSymbioteBond`):** presses to win now `FIGHT_PRESSES_MAX` 22 at no bond down to
-  `FIGHT_PRESSES_MIN` 9 (was 30 / 12 until 0.16.36, 16 before) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
+  `FIGHT_PRESSES_MIN` 9 (was 30 / 12 until 0.17.1, 16 before) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
   (`fightFade`, the owner's own bar too), and it heaves back `FIGHT_SHOVE_AT_BOND` half as often and half as hard
   (all eased by the bond's share of `FIGHT_BOND`).
 - **The body under the fight (the cause):** players drawn with MCA's model (Andy's pack) have all of MCA's body hidden
@@ -1159,7 +1159,7 @@ whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
-earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 55 - 5 per ability presses (25 with all six, fading 0.18 a tick, since 0.16.36; was 80 - 6, 0.25; the
+earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 55 - 5 per ability presses (25 with all six, fading 0.18 a tick, since 0.17.1; was 80 - 6, 0.25; the
 count fades by `TAKEOVER_STRUGGLE_FADE` 0.25 per tick) break its hold, which
 adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at half).
 

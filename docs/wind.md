@@ -622,7 +622,7 @@ client half is `client/BeamClashClient`.
   0.005 a tick, +60% ascended, +10% per mastered ability, plus a surge from **tapping X** while holding it (release and
   press again inside 6 ticks, `GRACE_TICKS`; +0.006 a tap, fading x0.85 a tick, at most 0.03; taps under 2 ticks
   apart count once). Mashing hard (8 taps a second) beats a steady hold from the middle in about 3.5 s.
-  **0.16.36 (Andy: "near impossible to break without a SERIOUS struggle ... overdone"; "factor the player's power
+  **0.17.1 (Andy: "near impossible to break without a SERIOUS struggle ... overdone"; "factor the player's power
   levels in"):** a tap is +0.009 and the surge fades x0.9, so about 6 taps a second fills it. Each side's **power level**
   is its steady push over 0.005 (ascension, mastery, a ki wave's strength); its taps and surge cap are weighed by
   sqrt(its power / theirs), kept in 0.75-1.35. A Z Fighter's ki wave reads his ki power live (`ZFighterWaveBeam`,

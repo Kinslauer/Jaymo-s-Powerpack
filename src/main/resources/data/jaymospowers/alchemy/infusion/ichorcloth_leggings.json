@@ -1,0 +1,22 @@
+{
+  "centre": "minecraft:leather_leggings",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "jaymospowers:alchemical_salt",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "spirit": 12,
+    "salt": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymospowers:ichorcloth_leggings",
+    "count": 1
+  },
+  "research": "ichorcloth",
+  "flux": 4
+}

@@ -63,7 +63,7 @@ public final class BloodFever {
 	/** It looks for a person within this (blocks), one it can see. */
 	static final double URGE_RANGE = 16.0;
 	/** How long it holds them (ticks), the presses to break free (at no surrender, and more at a whole one), and the bar's drain a tick
-	 * (0.7.214: eased from 12 / 36 / 48 and 0.08 / 0.2; Andy found the mashing overdone). */
+	 * (0.7.216: eased from 12 / 36 / 48 and 0.08 / 0.2; Andy found the mashing overdone). */
 	static final int HOLD_TICKS = 600, NEEDED = 9, NEEDED_SURRENDERED = 26, NEEDED_LOST = 34;
 	static final float FADE = 0.06F, FADE_SURRENDERED = 0.15F;
 	/** After tearing free: the fever eased by this, surrender back by this, shaking this long (ticks), and no urge for this long. */

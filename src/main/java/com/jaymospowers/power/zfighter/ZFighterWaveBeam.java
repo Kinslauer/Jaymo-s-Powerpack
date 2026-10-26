@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
 public final class ZFighterWaveBeam {
 	/**
 	 * Strength in a clash, times the steady push: by charge (none to full), and this share of the fighter's ki power on
-	 * top. (0.16.36) Andy: "factor the player's power levels in ... allow transformations mid battle to count": the ki
+	 * top. (0.17.1) Andy: "factor the player's power levels in ... allow transformations mid battle to count": the ki
 	 * power is read live, every tick of the clash, so going Super while it grinds pushes harder at once, and all of it
 	 * counts now (was 0.3, fixed when the wave left his hands).
 	 */

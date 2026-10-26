@@ -2912,3 +2912,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stump), `easeFever` (weakness lifted, dirt washed out), `restore` (bones set, festering cured, cuts closed, up if
   downed, healed whole) and `rekindle` (a downed one up from afar). Nothing but `restore`/`rekindle` reaches the
   downed. The rest (the Restoration Sorcerer, healing scrolls, healers, mana and attunement) is in Kingdoms' log.
+
+## 0.16.36: every Warrior-born's tail and Great Ape their own
+Andy: "the warrior born tails should vary a bit between races, and so should the ape forms, all these things are
+randomized per character so no two are the same". `client/power/zfighter/WarriorLooks` rolls each character's tail
+(5-8 segments, length, thickness, droop, curl, sway speed and phase) and Great Ape (head, arm length, bulk, tail
+length) from their UUID, with a fur shade picked and nudged per character. Kingdoms' heritage variant (read by
+reflection) sets the fur's family: Clanborn brown, Battle-scarred dark with a kinked (often shortened) tail,
+Warpainted red with ochre bands. Players and villager apes alike. Sketch: project files
+`art-overhaul/heritage-variants/warrior-tails-apes.png`. Not seen in game.
+- **0.17.0, Jaymo's Alchemy (Kingdoms 0.7.215):** an apothecary's craft in `alchemy/`, our own remake of Thaumcraft's and
+  Thaumic Tinkerer's ideas (both all rights reserved: nothing of theirs used; behaviour spec and design in
+  `docs/Alchemy-Plan.md`). Everything holds 28 essences (`Essence`: four elements, salt/sulphur/mercury, compounds).
+  - `essence/` + `codex/`: a hand table plus recipe derivation for every item and creature; the Scrying Lens (scan to
+    discover essences, earn insight) and the Apothecary's Codex (research tabs, unlock with insight).
+  - `crucible/`: crucible over heat (things dissolve, catalysts transmute; 10% lost as flux), alembic, essence jars,
+    Orichalc, quicksilver/brimstone/alchemical salt, Everflame, transmutations.
+  - `flux/`: per-chunk flux fades and spreads (twice as fast on Kingdoms' Blood Moons); over 300 it blights the land
+    (soil, growth, withered leaves, goo, sick animals that turn on you), over 800 flux wisps at night. Corruption on
+    players (fleeting/lingering/deep) with whispers, sights, unease and a hunting wisp; forbidden `whispers` lore. Cures:
+    Purifying Salts, Purifying Draught, Ward Stone, a full-moon night's sleep in clean land for the deep kind.
+  - `infusion/`: pedestals, the Infusion Matrix, instability (asymmetry less salt candles/skulls/ward stones) with
+    flings, zaps, bursts and a blast; Ichor, Runic Amulet, infused enchanting (one level past the cap).
+  - `gear/`: essence payment at the enchanting table, Spellbinding Cloth, the Artificer's Rod with five foci (Pull,
+    Push, Lift into a bound block, Ember, Frost), Ichorium tools, Ichorcloth robes, the Lantern of Everflame.
+  Compile-checked against the 26.3 jars, not yet seen in a client.

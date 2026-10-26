@@ -1,0 +1,11 @@
+{
+  "catalyst": "minecraft:sugar",
+  "essences": {
+    "salt": 6
+  },
+  "result": {
+    "item": "jaymospowers:alchemical_salt",
+    "count": 1
+  },
+  "research": "principles"
+}

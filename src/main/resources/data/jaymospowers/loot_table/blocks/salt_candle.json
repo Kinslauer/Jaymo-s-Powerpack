@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/salt_candle",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:salt_candle"
+        }
+      ]
+    }
+  ]
+}

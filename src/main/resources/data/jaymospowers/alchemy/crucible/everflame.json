@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:glowstone_dust",
+  "essences": {
+    "light": 4,
+    "fire": 2
+  },
+  "result": {
+    "item": "jaymospowers:everflame",
+    "count": 1
+  },
+  "research": "everflame"
+}

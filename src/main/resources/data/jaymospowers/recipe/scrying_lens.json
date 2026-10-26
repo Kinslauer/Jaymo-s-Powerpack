@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "G": "minecraft:gold_ingot",
+    "P": "minecraft:glass_pane"
+  },
+  "pattern": [
+    " A ",
+    "GPG",
+    " G "
+  ],
+  "result": {
+    "id": "jaymospowers:scrying_lens"
+  }
+}

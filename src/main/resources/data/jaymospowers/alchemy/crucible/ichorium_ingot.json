@@ -1,0 +1,12 @@
+{
+  "catalyst": "jaymospowers:ichor",
+  "essences": {
+    "metal": 8,
+    "arcana": 6
+  },
+  "result": {
+    "item": "jaymospowers:ichorium_ingot",
+    "count": 2
+  },
+  "research": "ichorium"
+}

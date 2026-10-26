@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:stone_bricks",
+    "S": "jaymospowers:purifying_salts",
+    "O": "jaymospowers:orichalc_ingot"
+  },
+  "pattern": [
+    "BSB",
+    "BOB",
+    "BBB"
+  ],
+  "result": {
+    "id": "jaymospowers:ward_stone",
+    "count": 1
+  }
+}

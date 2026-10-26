@@ -360,11 +360,14 @@ public final class Heritage {
 		}
 	}
 
-	/** Player → server: they picked heritage {@code kind} (its ordinal). */
-	public record Choose(int kind) implements CustomPacketPayload {
+	/** Player → server: they picked heritage {@code kind} (its ordinal), (0.7.214) in its look {@code variant} (0: the first). */
+	public record Choose(int kind, int variant) implements CustomPacketPayload {
 		public static final Type<Choose> TYPE = new Type<>(JaymosKingdoms.id("heritage_choose"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Choose> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.kind), buf -> new Choose(buf.readVarInt()));
+			(p, buf) -> {
+				buf.writeVarInt(p.kind);
+				buf.writeVarInt(p.variant);
+			}, buf -> new Choose(buf.readVarInt(), buf.readVarInt()));
 
 		@Override
 		public Type<Choose> type() {
@@ -380,7 +383,7 @@ public final class Heritage {
 		RITE_ITEM = Registry.register(BuiltInRegistries.ITEM, key, new Rite(new Item.Properties().setId(key).stacksTo(16).rarity(Rarity.RARE)));
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind()));
+		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind(), payload.variant()));
 		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
 		// Emberborn: fire, lava, hot floors and burning never hurt
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player
@@ -425,7 +428,7 @@ public final class Heritage {
 		return ServerPlayNetworking.canSend(player, Open.TYPE);
 	}
 
-	private static void choose(ServerPlayer player, int ordinal) {
+	private static void choose(ServerPlayer player, int ordinal, int variant) {
 		Kind[] all = Kind.values();
 		if (ordinal < 0 || ordinal >= all.length) {
 			return;
@@ -438,6 +441,7 @@ public final class Heritage {
 			return;
 		}
 		set(player, kind);
+		HeritageVariants.choose(player, kind, variant);
 		// (character creation: the class comes next)
 		if (Classes.classOf(player) == null) {
 			Classes.ask(player, true);
@@ -538,6 +542,8 @@ public final class Heritage {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_hoard", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
 		green(player, kind);
+		// (0.7.214) the variant's trait
+		HeritageVariants.traits(player);
 	}
 
 	private static void tick(MinecraftServer server) {

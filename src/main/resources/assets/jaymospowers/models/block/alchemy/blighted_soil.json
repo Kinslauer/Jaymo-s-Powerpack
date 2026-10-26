@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymospowers:block/alchemy/blighted_soil_top",
+    "side": "jaymospowers:block/alchemy/blighted_soil_side",
+    "bottom": "minecraft:block/dirt"
+  }
+}

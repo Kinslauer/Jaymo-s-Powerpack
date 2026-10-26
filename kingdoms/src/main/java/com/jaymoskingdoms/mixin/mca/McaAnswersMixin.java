@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
+import com.jaymoskingdoms.HermitAlchemy;
+import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Rulers;
@@ -21,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.138) "Seek an audience" ({@link Rulers#ANSWER}) shows only to a villager on a throne, (0.7.184) or a realm's guard.
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it; (0.7.204) "Offer a
  * handshake" ({@link Introductions#HANDSHAKE}) too.
+ * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -43,6 +46,10 @@ abstract class McaAnswersMixin {
 			// (0.7.180) you know their name already
 			cir.getReturnValue().remove(Introductions.ANSWER);
 			cir.getReturnValue().remove(Introductions.HANDSHAKE);
+		}
+		if ("main".equals(name) && !Hermits.is(villager)) {
+			// (0.7.215) only the floating islands' hermits talk alchemy
+			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

@@ -54,7 +54,13 @@ public final class Verdants {
 	/** {@code entity}'s skin colour (opaque ARGB), or 0 when it's no Verdant. */
 	public static int skin(Entity entity) {
 		Float shade = entity.getAttached(SHADE);
-		return shade == null ? 0 : green(shade);
+		if (shade == null) {
+			return 0;
+		}
+		// (0.7.214) a Glowcap's or a Mosshide's green leans their own way
+		HeritageVariants.Variant v = HeritageVariants.of(entity);
+		int green = green(shade);
+		return v == null || v.heritage != Heritage.Kind.VERDANT ? green : HeritageVariants.blend(green, v.tint, v.tintAmount);
 	}
 
 	/** The green of {@code shade}: pale to deep, some leaning yellow and some blue. */

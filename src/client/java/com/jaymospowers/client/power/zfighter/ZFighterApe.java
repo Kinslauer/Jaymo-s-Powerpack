@@ -28,7 +28,8 @@ import net.minecraft.world.item.ItemStack;
  * The Great Ape's body, drawn in the player's place on everyone's screen (as Xenoform draws its aliens): the player is
  * hidden and a shaggy ape in his pose stands there instead, at his (giant) size. A big furred head with a jutting
  * muzzle, a heavy brow and red eyes; a barrel chest with a shoulder hump; long arms hanging to the knees; short thick
- * legs; a tail. Its skin is {@code textures/entity/zfighter_great_ape.png} ({@code tools/gen_great_ape.py}).
+ * legs; a tail. Its skin is {@code textures/entity/zfighter_great_ape.png} ({@code tools/gen_great_ape.py}). (0.16.36)
+ * Every character's ape is its own ({@link WarriorLooks#ape}): head, arms, bulk, tail and the fur's shade.
  */
 public final class ZFighterApe {
 	/** Whether this player is the Great Ape, on his render state. */
@@ -36,6 +37,8 @@ public final class ZFighterApe {
 	/** (0.12.3) Whether the Great Ape lies crippled (flat on his back), on his render state. */
 	public static final RenderStateDataKey<Boolean> CRIPPLED = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_crippled");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape.png");
+	/** (0.16.36) Whose ape it is: its build and fur. */
+	public static final RenderStateDataKey<WarriorLooks.Ape> STYLE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_style");
 
 	private static Model<AvatarRenderState> model;
 
@@ -50,6 +53,7 @@ public final class ZFighterApe {
 			return;
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
+		state.setData(STYLE, WarriorLooks.ape(entity));
 		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
@@ -90,6 +94,7 @@ public final class ZFighterApe {
 			return;
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
+		state.setData(STYLE, WarriorLooks.ape(entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
@@ -112,6 +117,12 @@ public final class ZFighterApe {
 			mobModel = new Model<>();
 		}
 		return mobModel;
+	}
+
+	/** (0.16.36) The fur's tint for the ape being drawn (-1: as painted). */
+	static int fur(HumanoidRenderState state) {
+		WarriorLooks.Ape style = state.getData(STYLE);
+		return style == null ? -1 : style.fur();
 	}
 
 	/** Draws the ape over a hidden villager (any humanoid mob's renderer). */
@@ -137,7 +148,7 @@ public final class ZFighterApe {
 				poseStack.rotateDegrees(com.mojang.math.Axis.XP, -90.0F);
 				poseStack.translate(0.0F, -1.5F, -0.25F);
 			}
-			renderColoredCutoutModel(mobModel(), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			renderColoredCutoutModel(mobModel(), TEXTURE, poseStack, collector, lightCoords, state, fur(state), 1);
 			if (down) {
 				poseStack.popPose();
 			}
@@ -190,6 +201,15 @@ public final class ZFighterApe {
 			// the tail swings, more as he lumbers along
 			this.tail.yRot = (0.25F + 0.35F * walk) * Mth.sin(time * (0.08F + 0.12F * walk));
 			this.tail.xRot = -0.6F + 0.1F * Mth.sin(time * 0.05F);
+			// (0.16.36) this character's own build: head, arm length, bulk, tail
+			WarriorLooks.Ape build = state.getData(STYLE);
+			float head = build == null ? 1.0F : build.head(), arms = build == null ? 1.0F : build.arms();
+			float bulk = build == null ? 1.0F : build.bulk(), tail = build == null ? 1.0F : build.tail();
+			this.head.xScale = this.head.yScale = this.head.zScale = head;
+			this.rightArm.xScale = this.leftArm.xScale = this.rightArm.zScale = this.leftArm.zScale = bulk;
+			this.rightArm.yScale = this.leftArm.yScale = arms;
+			this.body.xScale = this.body.zScale = bulk;
+			this.tail.zScale = tail;
 			// (0.16.6) his punch: the right fist drawn back as it charges, then thrown out and down
 			float[] smash = state.getData(ApeSmashClient.POSE);
 			if (smash != null) {
@@ -231,7 +251,7 @@ public final class ZFighterApe {
 				poseStack.translate(0.0F, -1.5F, -0.25F);
 			}
 			// not the "copy layer" call: that skips invisible states, and the body was made invisible
-			renderColoredCutoutModel(model(), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			renderColoredCutoutModel(model(), TEXTURE, poseStack, collector, lightCoords, state, fur(state), 1);
 			if (down) {
 				poseStack.popPose();
 			}

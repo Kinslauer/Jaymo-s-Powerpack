@@ -162,6 +162,23 @@ public final class Monoliths {
 		return level.getAttachedOrElse(MONOLITHS, List.of());
 	}
 
+	/**
+	 * (0.7.214) Whether a monolith of {@code element} stands within {@code range} of {@code pos} on {@code level} (only the
+	 * Overworld has them), its Giant fallen or not: the remnant still seeps into the bloods born near it
+	 * ({@code HeritageVariants}).
+	 */
+	public static boolean near(ServerLevel level, BlockPos pos, Element element, double range) {
+		if (level != level.getServer().overworld()) {
+			return false;
+		}
+		for (Monolith m : all(level)) {
+			if (m.element() == element && m.pos().distSqr(pos) <= range * range) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Remembers {@code monolith} (or, if one is already known at its spot, replaces it). */
 	static void remember(ServerLevel level, Monolith monolith) {
 		List<Monolith> all = new ArrayList<>(all(level));

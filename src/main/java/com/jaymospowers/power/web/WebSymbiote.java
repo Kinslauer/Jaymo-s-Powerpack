@@ -199,7 +199,7 @@ public final class WebSymbiote {
 	 * Once it takes over it keeps you until it's done with you: no key answers. With {@code BREAK_FREE_ABILITIES} of its
 	 * abilities earned, fighting it (any key, spammed) breaks its hold: {@code BREAK_FREE_BASE} presses,
 	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (25 with all six), the count fading {@code STRUGGLE_FADE}
-	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond. (0.16.36) Andy: "near
+	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond. (0.17.1) Andy: "near
 	 * impossible to break without a SERIOUS struggle ... overdone": eased from 80, 6 a power and 0.25 a tick.
 	 */
 	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 55, BREAK_FREE_PER_ABILITY = 5, BREAK_FREE_STRESS = 10;

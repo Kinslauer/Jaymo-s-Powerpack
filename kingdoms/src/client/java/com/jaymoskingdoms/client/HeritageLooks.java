@@ -140,9 +140,11 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 
 	/**
 	 * On a player's render state: their heritage's look, which drawing, whether their eyes glow now, and the glow's tint
-	 * (opaque ARGB, -1 full; 0 none: a dry Tideborn, a Sylvan who sneaks unseen).
+	 * (opaque ARGB, -1 full; 0 none: a dry Tideborn, a Sylvan who sneaks unseen). (0.7.214) {@code style}: their heritage
+	 * variant's look ({@link VariantLooks}), drawn instead of the first's marks; then {@code kind} is null for a Heartlander,
+	 * a Warrior-born or an Emberborn, who have no first look here.
 	 */
-	record Look(Kind kind, int variant, boolean eyesLit, int glow, boolean blood) {
+	record Look(@Nullable Kind kind, int variant, boolean eyesLit, int glow, boolean blood, VariantLooks.@Nullable Style style) {
 	}
 
 	/** (0.7.88) A Nightborn vampire's look: its marks, its red-silver eyes at night, its blood mist. */
@@ -194,12 +196,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	/** From the living renderer's extractRenderState: a player's heritage look on their render state. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		Kind kind = entity instanceof Player player ? Kind.of(player) : null;
-		if (kind == null) {
+		VariantLooks.Style style = entity instanceof Player ? VariantLooks.of(entity) : null;
+		if (kind == null && style == null) {
 			state.setData(KEY, null);
 			return;
 		}
+		if (kind == null) {
+			// (0.7.214) a Heartlander's, a Warrior-born's or an Emberborn's variant: its own marks and eyes, lit in full
+			state.setData(KEY, new Look(null, 0, style.eyes() != null && eyesLit(style.eyes(), entity), -1, false, style));
+			return;
+		}
 		boolean blood = kind == Kind.NIGHTBORN && NightbornBlood.starlit(entity);
-		boolean lit = blood || eyesLit(kind, entity);
+		boolean lit = blood || eyesLit(kind, entity, style);
 		int glow = mood(kind, entity);
 		int flags = entity.getAttachedOrElse(Heritage.LOOK, 0);
 		if (kind == Kind.TIDEBORN) {
@@ -215,7 +223,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			// (0.7.184) only a Z Fighter's fists light up; any other Earthling just has the wraps
 			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
-		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind.skin.length), lit, glow, blood));
+		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind == Kind.TIDEBORN ? CREST.length : kind.skin.length), lit, glow, blood, style));
 	}
 
 	/**
@@ -234,7 +242,17 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 
 	/** Whether {@code kind}'s eyes glow on {@code entity} now (a player's or a villager's). */
 	static boolean eyesLit(Kind kind, LivingEntity entity) {
-		return switch (kind.eyes) {
+		return eyesLit(kind.eyes, entity);
+	}
+
+	/** (0.7.214) The same, in variant {@code style} (its own eyes, if it has them). */
+	static boolean eyesLit(Kind kind, LivingEntity entity, VariantLooks.@Nullable Style style) {
+		return eyesLit(style != null && style.eyes() != null ? style.eyes() : kind.eyes, entity);
+	}
+
+	/** Whether eyes that glow {@code eyes} glow on {@code entity} now. */
+	static boolean eyesLit(Eyes eyes, LivingEntity entity) {
+		return switch (eyes) {
 			case ALWAYS -> true;
 			case DAY -> entity.level().isBrightOutside();
 			case NIGHT -> entity.level().isDarkOutside();
@@ -283,18 +301,27 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
 		Kind kind = look.kind();
+		VariantLooks.Style style = look.style();
 		// (0.7.184) under a costume no marks or glow either (Andy: the Earthling's ki glow "costume clipping is back"):
 		// they're drawn on the plain body's pose, the costume on MCA's, so where the cut leaves skin bare (the gi's
 		// forearms) the marks slid out through its sleeves in motion
+		Identifier skin = look.blood() ? BLOOD_SKIN : style != null ? style.skin() : kind.skin[look.variant()];
+		Identifier glow = look.blood() ? BLOOD_GLOW : style != null ? style.glow() : kind.glow[look.variant()];
 		if (!armFinsCovered) {
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(look.blood() ? BLOOD_SKIN : kind.skin[look.variant()]),
-				lightCoords, OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+				state.outlineColor);
 		}
 		if (look.glow() != 0 && !armFinsCovered) {
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(look.blood() ? BLOOD_GLOW : kind.glow[look.variant()]), lightCoords,
-				OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
+			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(glow), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
+				state.outlineColor);
 		}
-		if (look.eyesLit() && kind.stockEyes != null) {
+		if (look.eyesLit() && !look.blood() && style != null && style.stockEyes() != null) {
+			// (0.7.214) a variant's own eyes
+			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), style.eyeColor(), style.stockEyes(), style.eyesPrefix(),
+				style.eyesBySkin());
+			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
+				state.outlineColor);
+		} else if (look.eyesLit() && kind != null && kind.stockEyes != null) {
 			Integer vampire = state.getData(VampireLooks.LOOK);
 			boolean redSilver = look.blood() && vampire != null && vampire == 2;
 			Identifier eyes = redSilver ? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/",
@@ -304,8 +331,17 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				state.outlineColor);
 		}
 		if (kind == Kind.TIDEBORN) {
+			finTextures(style);
 			fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0);
 		}
+	}
+
+	/** (0.7.214) The fins' textures for the Tideborn being drawn: a variant's own, or the first look's. */
+	private static Identifier finsNow = FINS, finsGlowNow = FINS_GLOW;
+
+	static void finTextures(VariantLooks.@Nullable Style style) {
+		finsNow = style != null && style.fins() != null ? style.fins() : FINS;
+		finsGlowNow = style != null && style.finsGlow() != null ? style.finsGlow() : FINS_GLOW;
 	}
 
 	/** (0.7.81) What Jaymo's Powers covers on the player being drawn (set in submit, read by fins). */
@@ -342,9 +378,9 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	}
 
 	private static void fin(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, boolean glow, ModelPart part) {
-		collector.order(1).submitModelPart(part, poseStack, RenderTypes.entityCutout(FINS), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+		collector.order(1).submitModelPart(part, poseStack, RenderTypes.entityCutout(finsNow), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
 		if (glow) {
-			collector.order(2).submitModelPart(part, poseStack, RenderTypes.eyes(FINS_GLOW), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
+			collector.order(2).submitModelPart(part, poseStack, RenderTypes.eyes(finsGlowNow), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
 		}
 	}
 
@@ -396,6 +432,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		for (AbstractClientPlayer player : level.players()) {
 			Kind kind = Kind.of(player);
 			RandomSource random = player.getRandom();
+			VariantLooks.Style style = VariantLooks.of(player);
+			if (style != null) {
+				// (0.7.214) a variant's own particle instead
+				if (!player.isInvisible() && !player.isSpectator() && !(player == minecraft.getCameraEntity() && minecraft.options.getCameraType().isFirstPerson())
+					&& VariantLooks.particleNow(style, player, random)) {
+					VariantLooks.particle(level, player, style, random);
+				}
+				continue;
+			}
 			if (kind == null || kind.particleEvery == 0 || random.nextInt(kind.particleEvery) != 0 || player.isInvisible() || player.isSpectator()
 				|| player == minecraft.getCameraEntity() && minecraft.options.getCameraType().isFirstPerson()) {
 				continue;
