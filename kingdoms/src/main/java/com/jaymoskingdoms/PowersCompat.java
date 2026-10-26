@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -800,6 +801,51 @@ public final class PowersCompat {
 			return (int)essenceTotal.invoke(phialsCarried.invoke(player));
 		} catch (Throwable e) {
 			return 0;
+		}
+	}
+
+	// ---- (0.7.236) spirits: finishers and screen shakes ---------------------------------------------------------------
+
+	private static boolean lookedForSpirits;
+	private static java.lang.invoke.@Nullable MethodHandle helpless, shake;
+
+	private static void lookForSpirits() {
+		if (lookedForSpirits) {
+			return;
+		}
+		lookedForSpirits = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			helpless = lookup.findStatic(Class.forName("com.jaymospowers.core.finisher.Finishers"), "helpless",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+			shake = lookup.findStatic(Class.forName("com.jaymospowers.core.Shakes"), "send",
+				java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no finishers or shakes (older Powers?)", e);
+		}
+	}
+
+	/** Whether {@code body} lies helpless for a finisher (downed, crippled): Powers' {@code Finishers.helpless}; false without Powers. */
+	public static boolean helpless(LivingEntity body) {
+		lookForSpirits();
+		try {
+			return helpless != null && (boolean)helpless.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Shakes {@code player}'s screen with Powers' shake ({@code strength} about 0.3 a nudge, 1 a blow); nothing without Powers. */
+	public static void shake(net.minecraft.server.level.ServerPlayer player, float strength) {
+		lookForSpirits();
+		try {
+			if (shake != null) {
+				shake.invoke(player, strength);
+			}
+		} catch (Throwable ignored) {
 		}
 	}
 }

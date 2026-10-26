@@ -251,6 +251,23 @@ public final class Mana {
 		return true;
 	}
 
+	/**
+	 * (0.7.236) Pays {@code cost} for something outside the spell lists (a spirit's move) and ripples the aura with
+	 * {@code intent}; false (and a word on the screen) if they can't.
+	 */
+	public static boolean pay(ServerPlayer player, float cost, int intent) {
+		if (!spend(player, cost)) {
+			return false;
+		}
+		ripple(player, intent);
+		return true;
+	}
+
+	/** (0.7.236) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
+	public static boolean canPay(ServerPlayer player, float cost) {
+		return player.isCreative() || attuned(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
+	}
+
 	/** (0.7.235) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
 	static float price(ServerPlayer player, float cost) {
 		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player);
