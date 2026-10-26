@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.221) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
  * family's leaving ({@link Emigrants#tell}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
+ * (0.7.230) The stranger page's Introduce ({@link Introductions#INTRODUCE}): asks their name, or offers a handshake without a shared tongue.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
@@ -67,6 +68,17 @@ abstract class McaDialogueMixin {
 
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("main".equals(question) && Introductions.INTRODUCE.equals(answer)) {
+			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
+			// open, and fills in once you know them)
+			if (Languages.understands(player, villager)) {
+				villager.sendChatMessage(Introductions.askName(player, villager), player);
+			} else {
+				Handshakes.offerTo(player, villager);
+			}
+			ci.cancel();
+			return;
+		}
 		if (!Languages.simpleDialogue(question, answer) && !Languages.understands(player, villager)) {
 			// (0.7.20) that takes words you don't share
 			Languages.shrug(player, villager);

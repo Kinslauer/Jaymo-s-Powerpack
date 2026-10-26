@@ -202,12 +202,15 @@ public final class Classes {
 			// (0.7.45) Andy: "force character creation on spawn". MCA's destiny screen (your look, where you start) comes
 			// first and can't be shut; the class screen follows it ({@link #afterDestiny}) and can't be shut either.
 			// (0.7.57) the heritage screen ({@link Heritage}) sits between them
-			if (!McaCompat.destinyPending(player)) {
+			// (0.7.229) Andy: "can you choose your characters story BEFORE the MCA creator and name choosing?" a newcomer's
+			// life story opens at once; MCA's creator waits for it on their client (McaDestinyWaitMixin) and comes after
+			if (LifeStory.owed(player) || !McaCompat.destinyPending(player)) {
 				next(player);
 			}
 		});
 		// (0.7.45) until both are done the player can't be hurt and nothing hunts them
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && unmade(sp)
+		// (0.7.229: and while MCA's creator is still up after the story put them somewhere, a cave or a camp's woods)
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && (unmade(sp) || McaCompat.destinyPending(sp))
 			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
 		// (what's held and worn changes what a class is good with)
@@ -249,7 +252,7 @@ public final class Classes {
 		ClassPerks.serverTick(server);
 		boolean shoo = server.getTickCount() % UNMADE_SHOO_EVERY == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (shoo && unmade(player)) {
+			if (shoo && (unmade(player) || McaCompat.destinyPending(player))) {
 				for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(UNMADE_SHOO_RANGE), m -> m.getTarget() == player)) {
 					mob.setTarget(null);
 				}
@@ -291,6 +294,8 @@ public final class Classes {
 
 	/** (0.7.45) MCA's destiny screen was just finished: (0.7.57) the heritage screen is next, then the class screen; neither can be shut without picking. */
 	public static void afterDestiny(ServerPlayer player) {
+		// (0.7.229) the story came first and put them somewhere already: a few safe seconds now they're really there
+		LifeStory.arrived(player);
 		next(player);
 	}
 
