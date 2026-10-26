@@ -1,0 +1,20 @@
+{
+  "centre": "minecraft:ender_pearl",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:lead",
+    "minecraft:lead",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "motion": 8,
+    "air": 6
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymospowers:pull_focus",
+    "count": 1
+  },
+  "research": "focus_pull",
+  "flux": 3
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:lantern",
+    "jaymospowers:everflame",
+    "jaymospowers:orichalc_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:everflame_lantern",
+    "count": 1
+  }
+}

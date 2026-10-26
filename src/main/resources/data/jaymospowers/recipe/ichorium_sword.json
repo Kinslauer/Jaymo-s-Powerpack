@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "jaymospowers:ichorium_ingot",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "I",
+    "I",
+    "S"
+  ],
+  "result": {
+    "id": "jaymospowers:ichorium_sword",
+    "count": 1
+  }
+}
