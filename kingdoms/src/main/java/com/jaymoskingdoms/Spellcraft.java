@@ -51,7 +51,8 @@ import org.jspecify.annotations.Nullable;
  * spending it ({@link #learn}); a scroll of a spell they know is read as anyone's.
  *
  * <p><b>The Sorcerer's Imbue:</b> on the {@code J} key a Sorcerer charges the blade in their hand with their element
- * (picked with the class: water, fire, earth, air, lightning or ice) for a while; every blow it lands carries the
+ * (picked with the class: water, fire, earth, air, lightning or ice; 0.7.212 restoration; 0.7.231 death, {@link Necromancy}, and
+ * blood, {@link Hemomancy}) for a while; every blow it lands carries the
  * element ({@link #strike}), and the blade trails its colour. Sneak and {@code J} throws a bolt of the element at what
  * they're looking at instead, on a short cooldown: few spells, quick ones.
  *
@@ -65,8 +66,12 @@ public final class Spellcraft {
 	/** (0.7.184) A Mage's boon, Echo: one staff cast in this many leaves no cooldown behind. */
 	static final int MAGE_ECHO_ONE_IN = 4;
 	/** A Mage's cooldown for each spell (ticks). */
-	static final Map<String, Integer> MAGE_COOLDOWN = Map.of("fire", 60, "arcane", 40, "warding", 20 * 45, "draining", 20 * 8, "raising", 20 * 90,
-		"mending", 20 * 6, "sanctuary", 20 * 60, "restoration", 20 * 60 * 5);
+	static final Map<String, Integer> MAGE_COOLDOWN = Map.ofEntries(Map.entry("fire", 60), Map.entry("arcane", 40), Map.entry("warding", 20 * 45),
+		Map.entry("draining", 20 * 8), Map.entry("raising", 20 * 90), Map.entry("mending", 20 * 6), Map.entry("sanctuary", 20 * 60),
+		Map.entry("restoration", 20 * 60 * 5),
+		// (0.7.231) death's and blood's
+		Map.entry("blight", 20 * 10), Map.entry("whispers", 20 * 3), Map.entry("deaths_door", 20 * 60 * 5), Map.entry("hemorrhage", 20 * 8),
+		Map.entry("blood_grip", 20 * 6), Map.entry("frenzy", 20 * 60));
 	/** (0.7.212) An attuned player who isn't a Mage ({@link Mana}) casts from a staff only as hard as a scroll, and waits this much longer between casts. */
 	static final float ATTUNED_POWER = 1.0F, ATTUNED_COOLDOWN = 1.5F;
 	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; the bolt's. */
@@ -132,6 +137,8 @@ public final class Spellcraft {
 		ServerPlayNetworking.registerGlobalReceiver(Imbue.TYPE, (payload, context) -> imbue(context.player(), payload.bolt()));
 		Mana.register();
 		Restoration.register();
+		Necromancy.register();
+		Hemomancy.register();
 		// the Mage's staff (0.7.212: and an attuned caster's)
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -155,6 +162,12 @@ public final class Spellcraft {
 				String element = live(attacker.getMainHandItem(), level.getGameTime());
 				if (element == null) {
 					return;
+				}
+				// (0.7.231) a death blade blights every blow it lands, a blood blade cuts
+				if (element.equals("death")) {
+					Necromancy.bladeBlow(entity);
+				} else if (element.equals("blood")) {
+					Hemomancy.bladeBlow(entity);
 				}
 				boolean burst;
 				if (element.equals("air")) {
@@ -233,15 +246,24 @@ public final class Spellcraft {
 		}
 		// (0.7.212) mana first: a Mage casts harder than anyone else attuned
 		boolean mage = Classes.is(player, PlayerClass.MAGE);
-		float cost = Mana.cost(spell);
-		if (!Mana.afford(player, cost)) {
+		// (0.7.231) blood spells are paid in blood, not mana
+		boolean blood = ForbiddenArts.blood(spell);
+		float cost = blood ? Hemomancy.cost(spell) : Mana.cost(spell);
+		if (!blood && !Mana.afford(player, cost) || blood && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
+			if (blood) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
+			}
 			return;
 		}
-		if (!Arcana.cast(spell, level, player, mage ? MAGE_POWER : ATTUNED_POWER)) {
+		if (!Arcana.cast(spell, level, player, (mage ? MAGE_POWER : ATTUNED_POWER) * (blood ? Hemomancy.power(player) : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
-		Mana.take(player, cost);
+		if (blood) {
+			Hemomancy.pay(player, cost);
+		} else {
+			Mana.take(player, cost);
+		}
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (mage && player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
@@ -251,7 +273,7 @@ public final class Spellcraft {
 			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, 40);
 			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
 		}
-		Theft.sorcery(player, level, player.blockPosition());
+		afterCast(player, level, spell);
 	}
 
 	// ---- the Sorcerer ---------------------------------------------------------------------------------------------
@@ -333,6 +355,10 @@ public final class Spellcraft {
 			return;
 		}
 		if (bolt) {
+			// (0.7.231) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
+			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)) {
+				return;
+			}
 			bolt(level, player, element);
 			return;
 		}
@@ -344,7 +370,7 @@ public final class Spellcraft {
 		if (player.getCooldowns().isOnCooldown(Arcana.WIZARD_STAFF.getDefaultInstance())) {
 			return;
 		}
-		if (!Mana.spend(player, Mana.cost("imbue"))) {
+		if (!pay(player, element, "imbue")) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -364,7 +390,7 @@ public final class Spellcraft {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 0.8F, 1.1F);
 		boolean moved = !sameBlade && before != null && before.until() > now;
 		player.sendOverlayMessage(Component.translatable(moved ? "message.jaymoskingdoms.imbue.moved" : "message.jaymoskingdoms.imbue.done", spellName(element)));
-		Theft.sorcery(player, level, player.blockPosition());
+		afterCast(player, level, element);
 	}
 
 	/** A bolt of the element at what the Sorcerer is looking at. */
@@ -378,7 +404,7 @@ public final class Spellcraft {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
-		if (!Mana.spend(player, Mana.cost("bolt"))) {
+		if (!pay(player, element, "bolt")) {
 			return;
 		}
 		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
@@ -394,7 +420,21 @@ public final class Spellcraft {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 1.0F, 1.3F);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE);
 		strike(level, player, target, element, true);
-		Theft.sorcery(player, level, player.blockPosition());
+		afterCast(player, level, element);
+	}
+
+	/** (0.7.231) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
+	private static boolean pay(ServerPlayer player, String element, String what) {
+		return element.equals("blood") ? Hemomancy.pay(player, Hemomancy.cost(what)) : Mana.spend(player, Mana.cost(what));
+	}
+
+	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
+	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		if (ForbiddenArts.forbidden(spellOrElement)) {
+			ForbiddenArts.cast(player, level, ForbiddenArts.blood(spellOrElement), 0);
+		} else {
+			Theft.sorcery(player, level, player.blockPosition());
+		}
 	}
 
 	/** {@code element} bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
@@ -469,6 +509,8 @@ public final class Spellcraft {
 					}
 				}
 			}
+			case "death" -> Necromancy.burst(level, player, target);
+			case "blood" -> Hemomancy.burst(level, player, target);
 			default -> {
 				return;
 			}
@@ -486,6 +528,8 @@ public final class Spellcraft {
 			case "lightning" -> ParticleTypes.ELECTRIC_SPARK;
 			case "ice" -> ParticleTypes.SNOWFLAKE;
 			case "restoration" -> Restoration.GOLD_MOTE;
+			case "death" -> Necromancy.VIOLET_MOTE;
+			case "blood" -> Hemomancy.BLOOD_MOTE;
 			default -> ParticleTypes.ENCHANT;
 		};
 	}
@@ -499,6 +543,8 @@ public final class Spellcraft {
 			case "lightning" -> SoundEvents.LIGHTNING_BOLT_IMPACT;
 			case "ice" -> SoundEvents.GLASS_BREAK;
 			case "restoration" -> SoundEvents.AMETHYST_BLOCK_CHIME;
+			case "death" -> SoundEvents.WITHER_SHOOT;
+			case "blood" -> SoundEvents.WARDEN_HEARTBEAT;
 			default -> SoundEvents.ILLUSIONER_CAST_SPELL;
 		};
 	}

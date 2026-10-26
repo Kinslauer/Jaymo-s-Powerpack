@@ -5019,7 +5019,54 @@ in the wilderness ... I need you to generate whatever is required for the player
     coast, a citadel kingdom is raised on the shore nearest spawn, which then builds it. After 90 s with no harbour,
     you start in the wild.
 
-## 0.7.229: fallen trunks to push, roll and build on; leaves snap off (pack 0.17.16)
+## 0.7.229: the life story before MCA's creator, and typed names always saved (pack 0.17.16)
+Andy: "can you choose your characters story BEFORE the MCA creator and name choosing? also it doesnt always save the
+name players choose, i think it requires an extra enter prompt".
+- **Story first.** On joining, a newcomer's life story opens at once (`Classes` JOIN no longer waits for MCA's
+  creator). On their client, `McaDestinyWaitMixin` holds MCA's `DestinyManager.tick` until the story is told, and
+  the creator opens as soon as it is. `McaDestinySkipMixin` skips the creator's "where do you start" page for anyone
+  who has told a story, as it did for newcomers.
+- While MCA's creator is still up, the player can't be hurt and nothing hunts them (`ALLOW_DAMAGE` and the shoo check
+  include `McaCompat.destinyPending`). This matters because they already stand at their start, maybe in a cave.
+  Finishing the creator gives the 5 s arrival grace again (`LifeStory.arrived`).
+- **Names.** The creator's first page is `intro`: MCA sends its `general` tab there. `McaDestinyNameMixin` saved only
+  on leaving `general`, so a typed name reached the server only if the player had also visited and left the general
+  tab, which is the "extra step" Andy saw. Leaving `intro` or `general` now saves.
+
+## 0.7.230: strangers' MCA page, introductions first (pack 0.17.17)
+Andy: "introductions should be the first option available. before that none of this is visible, no options but gift
+trade or introduce".
+- `McaStrangerPageMixin` (on `AbstractDynamicScreen.setLayout`): MCA's main page for a villager you haven't been
+  introduced to shows **Introduce yourself** in MCA's first row, then **Gift** (MCA's gift mode), then Trade if they
+  trade. Every other MCA button is hidden: Talk, Interact, Inventory, Work and Family Tree. `McaButtonExAccessor`
+  reads which button a widget is.
+- `McaStrangerInfoMixin`: no name, trade, mood, personality, temperament or standing lines, and no icons (MCA's gift
+  icon still shows while you hold out a gift). When you become known, the page is laid out again with everything.
+- Introduce sends a new `main` answer, `Introductions.INTRODUCE`. If you share a tongue, it asks their name (as "Ask
+  their name"); if not, it offers a handshake. The screen stays open.
+## 0.7.231: death and blood magic (pack 0.17.19)
+Andy (2026-10-26): "death magic, and blood magic, is there a way you can work that concept in?"; picked "two new Sorcerer
+elements". Design doc: https://claude.ai/artifact/5M6smjEanKy32pyLVFEm9X. Defaults I picked for the open questions: a crime
+only in a kingdom's land (and only if its people see), raised bodies crumble after 3 minutes, players' bodies never rise.
+- `Necromancy` (Sorcerer element `death`): the blade blights every blow (`blighted`: `LivingEntityHealMixin` cancels
+  `heal`; any Restoration heal lifts it, `PowersCompat.mend`/`restore`), a burst withers. Sneak and J: Reap a downed one
+  (Powers' `Downed.execute`, 25 mana back), a death bolt at the living, or Raise the Fallen (a Kitchen body near where you
+  look rises as your thrall, a monster as itself, people and horses as the undead; 3 at most, 3 minutes, 20 s cooldown).
+  Withering halved. Spells: Blight, Whispers (a body tells its death message and how long ago; deaths kept in memory, so
+  not across a restart), Death's Door (5 minutes; fall and you're straight back up, -4 max health until you next sleep).
+- `Hemomancy` (Sorcerer element `blood`): paid in health (`COST`), from a drunk pool first (bleeding things near feed
+  it, 20 max); never below 2 health; under half health a cast opens a cut on you. The blade cuts every blow, a burst
+  hemorrhages. Sneak and J: Blood Grip a bleeding foe (dragged in; a mob drops its weapon, a player weakened), a bolt that
+  cuts, or Hemorrhage at nothing (every cut near bursts 4 bleed ticks). Bleeding halved. Spells: Hemorrhage, Blood Grip,
+  Frenzy (a cut for 30 s of Strength, blows heal 1). A staff casts them for blood. Vampires pay 3/4, cast x1.5, fever +3.
+- `ForbiddenArts`: every death cast adds 1 lingering corruption (raising +2), every blood cast 2 (`PowersCompat.corrupt`);
+  `Theft.forbidden` makes it a heavy crime (`NECROMANCY`, `BLOOD_MAGIC`) in any kingdom whose people see, even one that
+  believes in magic. The old Raising and Draining scrolls count as death magic now. Court wizards and clerics refuse a
+  known practitioner (`Restoration.services`).
+- `Sorcery.BLOOD_WITCH` (43): one per barbarian camp from day 4 (`/kingdom caster blood_witch`): bolts that cut, grips,
+  hemorrhages, drinks the bleeding to heal; drops a blood scroll. Necromancers now also drop Blight, Whispers and Death's
+  Door. Six new scroll textures (recoloured from Draining) and a crimson blood witch skin.
+## 0.7.232: fallen trunks to push, roll and build on; leaves snap off (pack 0.17.20)
 Andy asked whether Tree Physics (CurseForge, by Farcr) could replace our trees. It can't ship: it's All Rights
 Reserved, 1.21.1 only, and runs on the Sable physics library (also 1.21.1 only). Our felling, growing, seeding,
 woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of its ideas, done our own way:

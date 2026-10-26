@@ -738,6 +738,13 @@ public final class LifeStory {
 		return landed;
 	}
 
+	/** (0.7.229) MCA's creator, after the story, is done: the arrival's grace again, if they've a story (it may have run out). */
+	static void arrived(ServerPlayer player) {
+		if (of(player) != null) {
+			landSafely(player);
+		}
+	}
+
 	/** (0.7.228) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
 	private static void landSafely(ServerPlayer player) {
 		player.resetFallDistance();

@@ -2992,7 +2992,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
   Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
   where they land to be picked up again (`ground/ThrownRocks`).
-- **0.17.16, felled trees (Kingdoms 0.7.229):** ideas from Tree Physics (ARR, 1.21.1 only, needs the Sable physics
+- **0.17.16, the life story before MCA's creator (Kingdoms 0.7.229):** newcomers tell their story first, then MCA's
+  creator opens; the name typed on the creator's first page is now always saved. No Powers changes. See Kingdoms' log.
+- **0.17.17, strangers' MCA page (Kingdoms 0.7.230):** until you're introduced, MCA's screen shows only Introduce
+  yourself, Gift and Trade, and nothing about the villager. No Powers changes. See Kingdoms' log.
+- **0.17.18, a kneeling firing stance:** Andy: "crouching looks like a split right now, the back leg is fine, but the
+  front leg should bend at the knee, and stay bent while firing". On one knee (`CrouchPose`) the front thigh now goes out
+  level and the leg bends at the knee down to the planted foot, whatever is in the hands (bow, crossbow, gun). A leg is
+  one box, so for that draw `client/KneeBend` swaps its boxes for bent copies that cut every side at the knee (texture
+  included, so skin, trousers and armour bend too) and puts them back once the model is drawn. Not seen in game.
+- **0.17.19, death and blood magic (Kingdoms 0.7.231):** Andy: "death magic, and blood magic, is there a way you can work
+  that concept in?", then chose two new Sorcerer elements. Powers: `core/wounds/Hemomancy` (`cuts`, `cut`, `hemorrhage`),
+  read by Kingdoms by reflection as Restoration reads `Mending`; Reap kills the downed through `Downed.execute`; casting
+  either school adds lingering alchemical `Corruption`. See Kingdoms' log.
+- **0.17.20, felled trees (Kingdoms 0.7.232):** ideas from Tree Physics (ARR, 1.21.1 only, needs the Sable physics
   library, so not shipped). Falling trees break through other trees' leaves, some of their own leaves snap off when
   they land, and a fallen trunk can be pushed, rolled down slopes, or built on to pin it. No Powers changes. See
   Kingdoms' log.

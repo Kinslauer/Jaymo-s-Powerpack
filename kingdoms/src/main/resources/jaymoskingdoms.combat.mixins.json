@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["LivingEntityHurtMixin", "MeleeAttackGoalMixin", "PlayerAttackMixin", "PlayerBlockingMixin", "PlayerExhaustionMixin", "ThrallTargetMixin", "LivingEntityBlockMixin", "LivingEntitySwingMixin", "LivingEntityVisibilityMixin", "ServerLevelGameEventMixin"],
+	"mixins": ["LivingEntityHurtMixin", "LivingEntityHealMixin", "MeleeAttackGoalMixin", "PlayerAttackMixin", "PlayerBlockingMixin", "PlayerExhaustionMixin", "ThrallTargetMixin", "LivingEntityBlockMixin", "LivingEntitySwingMixin", "LivingEntityVisibilityMixin", "ServerLevelGameEventMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

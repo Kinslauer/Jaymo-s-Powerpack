@@ -18,6 +18,7 @@
 		"CrawlAvatarRendererMixin",
 		"CrawlModelFeatureRendererMixin",
 		"TnmFollowModelFeatureRendererMixin",
+		"ModelPartCubesAccessor",
 		"DodgeAvatarRendererMixin",
 		"DodgeModelFeatureRendererMixin",
 		"FinisherAvatarRendererMixin",

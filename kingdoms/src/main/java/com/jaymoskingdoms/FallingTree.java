@@ -71,7 +71,7 @@ import org.jspecify.annotations.Nullable;
  * its leaves withering away ({@link #settle}). Felled in under half a second, it settles at once. A woodcutter's tree
  * still breaks up into his bag; a tree a tornado threw lands on its side the same way, wherever it comes down.
  * <p>
- * (0.7.229) From Tree Physics' ideas (ARR, none of its code): coming down, its wood breaks through other trees' leaves
+ * (0.7.232) From Tree Physics' ideas (ARR, none of its code): coming down, its wood breaks through other trees' leaves
  * in its way ({@link #sweep}); landing, some of its own leaves snap off, more the harder they struck ({@link #snaps});
  * and lying, its logs are a fallen trunk you can push, roll or build on ({@link FallenTrunks}).
  */
@@ -98,9 +98,9 @@ public final class FallingTree extends Entity {
 	 * (ticks, to leave its own hole) and the longest it flies. */
 	static final double FLY_GRAVITY = 0.05, FLY_DRAG = 0.985;
 	static final int FLY_CLEAR = 6, FLY_LONGEST = 600;
-	/** (0.7.229) Its leaves snap off as it lands: this chance at the most, for leaves striking the ground this fast (blocks a tick) or faster. */
+	/** (0.7.232) Its leaves snap off as it lands: this chance at the most, for leaves striking the ground this fast (blocks a tick) or faster. */
 	static final float LEAF_SNAP = 0.5F, LEAF_SNAP_FULL = 1.5F;
-	/** (0.7.229) The most standing leaves (other trees') its wood breaks through in a tick as it comes down. */
+	/** (0.7.232) The most standing leaves (other trees') its wood breaks through in a tick as it comes down. */
 	static final int SWEEP_MOST = 12;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
@@ -138,7 +138,7 @@ public final class FallingTree extends Entity {
 	private float tumble;
 	/** (0.7.11) What it has struck already (once each). */
 	private final Set<UUID> struck = new HashSet<>();
-	/** (0.7.229) How fast it struck the ground: its whole speed (blocks a tick), and its turn (per block from its turning point). */
+	/** (0.7.232) How fast it struck the ground: its whole speed (blocks a tick), and its turn (per block from its turning point). */
 	private float landFlat, landTurning;
 
 	public FallingTree(EntityType<? extends FallingTree> type, Level level) {
@@ -461,7 +461,7 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.7.229) Its wood, leaning {@code lean}, breaks through the standing leaves of other trees in its way (a few a
+	 * (0.7.232) Its wood, leaning {@code lean}, breaks through the standing leaves of other trees in its way (a few a
 	 * tick), dropping what they would.
 	 */
 	private void sweep(ServerLevel level, List<Piece> pieces, float lean) {
@@ -552,7 +552,7 @@ public final class FallingTree extends Entity {
 			BlockState state = p.blockState();
 			boolean log = state.is(BlockTags.LOGS);
 			if (lying && state.getBlock() instanceof LeavesBlock && this.snaps(level, p)) {
-				// (0.7.229) snapped off as it struck the ground: what it would give, where it struck
+				// (0.7.232) snapped off as it struck the ground: what it would give, where it struck
 				BlockPos pos = this.cell(this.where(p, flat));
 				for (ItemStack drop : Block.getDrops(state, level, pos, null, this.cutter, ItemStack.EMPTY)) {
 					Block.popResource(level, pos, drop);
@@ -603,12 +603,12 @@ public final class FallingTree extends Entity {
 			}
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, p.blockState()), at.x, at.y, at.z, 3, 0.3, 0.3, 0.3, 0.05);
 		}
-		// (0.7.229) its wood, lying there, is a fallen trunk: pushed, rolled, or built on
+		// (0.7.232) its wood, lying there, is a fallen trunk: pushed, rolled, or built on
 		FallenTrunks.add(level, lyingLogs);
 		this.discard();
 	}
 
-	/** (0.7.229) Whether this leaf snaps off as the tree lands: likelier the faster it struck the ground. */
+	/** (0.7.232) Whether this leaf snaps off as the tree lands: likelier the faster it struck the ground. */
 	private boolean snaps(ServerLevel level, Piece p) {
 		float speed = this.landFlat + this.landTurning * Math.abs(p.y() + 0.5F);
 		return level.getRandom().nextFloat() < LEAF_SNAP * Math.min(1.0F, speed / LEAF_SNAP_FULL);

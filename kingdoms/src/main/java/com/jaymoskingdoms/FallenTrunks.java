@@ -38,7 +38,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.229) Fallen trunks, our own take on Tree Physics' (ARR, none of its code: it runs on the Sable physics library
+ * (0.7.232) Fallen trunks, our own take on Tree Physics' (ARR, none of its code: it runs on the Sable physics library
  * and has no 26.3 build). A felled tree that comes to rest on its side ({@link FallingTree#settle}) is kept here as a
  * trunk: its logs, by where they lie.
  * <ul>

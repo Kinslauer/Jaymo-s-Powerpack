@@ -137,7 +137,11 @@ public final class Theft {
 		/** (0.7.211) contraband sold (or bought) in the street ({@link Underworld#traded}). */
 		DEALING(Weight.MEDIUM, "dealing"),
 		/** (0.7.211) contraband flaunted in front of a guard ({@link Underworld}). */
-		CONTRABAND(Weight.MEDIUM, "contraband");
+		CONTRABAND(Weight.MEDIUM, "contraband"),
+		/** (0.7.231) death magic cast where a realm's people see ({@link Necromancy}). */
+		NECROMANCY(Weight.HEAVY, "necromancy"),
+		/** (0.7.231) blood magic cast where a realm's people see ({@link Hemomancy}). */
+		BLOOD_MAGIC(Weight.HEAVY, "blood_magic");
 
 		final Weight weight;
 		final String cry;
@@ -474,6 +478,18 @@ public final class Theft {
 			return;
 		}
 		commit(player, level, f, Crime.SORCERY, pos, null, false);
+	}
+
+	/**
+	 * (0.7.231) Death or blood magic cast in a realm's land ({@link ForbiddenArts}): a crime in every kingdom, even one that
+	 * holds with magic, and a heavy one, if any of its people see it. Barbarians and the wilds don't care.
+	 */
+	static void forbidden(ServerPlayer player, ServerLevel level, BlockPos pos, boolean blood) {
+		Faction f = lawAt(level, pos);
+		if (f == null || f.type() != FactionType.KINGDOM || player.isCreative() || player.isSpectator()) {
+			return;
+		}
+		commit(player, level, f, blood ? Crime.BLOOD_MAGIC : Crime.NECROMANCY, pos, null, false);
 	}
 
 	private static void killed(ServerPlayer killer, ServerLevel level, LivingEntity victim) {
