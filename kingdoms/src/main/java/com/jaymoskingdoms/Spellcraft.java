@@ -36,6 +36,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.phys.Vec3;
@@ -64,7 +65,10 @@ public final class Spellcraft {
 	/** (0.7.184) A Mage's boon, Echo: one staff cast in this many leaves no cooldown behind. */
 	static final int MAGE_ECHO_ONE_IN = 4;
 	/** A Mage's cooldown for each spell (ticks). */
-	static final Map<String, Integer> MAGE_COOLDOWN = Map.of("fire", 60, "arcane", 40, "warding", 20 * 45, "draining", 20 * 8, "raising", 20 * 90);
+	static final Map<String, Integer> MAGE_COOLDOWN = Map.of("fire", 60, "arcane", 40, "warding", 20 * 45, "draining", 20 * 8, "raising", 20 * 90,
+		"mending", 20 * 6, "sanctuary", 20 * 60, "restoration", 20 * 60 * 5);
+	/** (0.7.212) An attuned player who isn't a Mage ({@link Mana}) casts from a staff only as hard as a scroll, and waits this much longer between casts. */
+	static final float ATTUNED_POWER = 1.0F, ATTUNED_COOLDOWN = 1.5F;
 	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; the bolt's. */
 	static final int IMBUE_TICKS = 20 * 120, IMBUE_COOLDOWN = 20 * 10, BOLT_COOLDOWN = 40;
 	/** The bolt's reach and damage before its element. */
@@ -126,10 +130,12 @@ public final class Spellcraft {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Imbue.TYPE, Imbue.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Imbue.TYPE, (payload, context) -> imbue(context.player(), payload.bolt()));
-		// the Mage's staff
+		Mana.register();
+		Restoration.register();
+		// the Mage's staff (0.7.212: and an attuned caster's)
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
-			if (!stack.is(Arcana.WIZARD_STAFF) || !Classes.is(player, PlayerClass.MAGE)) {
+			if (!Arcana.isStaff(stack) || !staffCaster(player)) {
 				return InteractionResult.PASS;
 			}
 			if (player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
@@ -173,10 +179,21 @@ public final class Spellcraft {
 
 	// ---- the Mage -----------------------------------------------------------------------------------------------
 
-	/** A Mage reading a scroll of a spell they don't know: they learn it. False for anyone else, or a spell they know. */
+	/**
+	 * (0.7.212) Who casts from a staff: a Mage, or anyone attuned ({@link Mana}) but a Sorcerer, whose magic is their
+	 * {@code J}.
+	 */
+	static boolean staffCaster(Player player) {
+		return Classes.is(player, PlayerClass.MAGE) || Mana.attuned(player) && !Classes.is(player, PlayerClass.SORCERER);
+	}
+
+	/**
+	 * A Mage (0.7.212: or another staff caster) reading a scroll of a spell they don't know: they learn it. False for anyone
+	 * else, or a spell they know.
+	 */
 	static boolean learn(ServerPlayer player, String spell) {
 		Classes.Chosen c = Classes.of(player);
-		if (c.playerClass() != PlayerClass.MAGE || c.spells().contains(spell)) {
+		if (!staffCaster(player) || c.spells().contains(spell)) {
 			return false;
 		}
 		List<String> spells = new ArrayList<>(c.spells());
@@ -214,17 +231,25 @@ public final class Spellcraft {
 		if (player.getCooldowns().isOnCooldown(staff)) {
 			return;
 		}
-		if (!Arcana.cast(spell, level, player, MAGE_POWER)) {
+		// (0.7.212) mana first: a Mage casts harder than anyone else attuned
+		boolean mage = Classes.is(player, PlayerClass.MAGE);
+		float cost = Mana.cost(spell);
+		if (!Mana.afford(player, cost)) {
+			return;
+		}
+		if (!Arcana.cast(spell, level, player, mage ? MAGE_POWER : ATTUNED_POWER)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
+		Mana.take(player, cost);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
-		if (player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
+		if (mage && player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
 			// the spell echoes: no cooldown this time
 			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
-			player.getCooldowns().addCooldown(staff, MAGE_COOLDOWN.getOrDefault(spell, 40));
+			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, 40);
+			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
 		}
 		Theft.sorcery(player, level, player.blockPosition());
 	}
@@ -302,6 +327,11 @@ public final class Spellcraft {
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (element.equals("restoration")) {
+			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their blade never takes a charge
+			Restoration.key(player, level, bolt);
+			return;
+		}
 		if (bolt) {
 			bolt(level, player, element);
 			return;
@@ -312,6 +342,9 @@ public final class Spellcraft {
 			return;
 		}
 		if (player.getCooldowns().isOnCooldown(Arcana.WIZARD_STAFF.getDefaultInstance())) {
+			return;
+		}
+		if (!Mana.spend(player, Mana.cost("imbue"))) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -343,6 +376,9 @@ public final class Spellcraft {
 		LivingEntity target = Arcana.sighted(player);
 		if (target == null || player.distanceTo(target) > BOLT_REACH) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
+			return;
+		}
+		if (!Mana.spend(player, Mana.cost("bolt"))) {
 			return;
 		}
 		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
@@ -449,6 +485,7 @@ public final class Spellcraft {
 			case "air" -> ParticleTypes.CLOUD;
 			case "lightning" -> ParticleTypes.ELECTRIC_SPARK;
 			case "ice" -> ParticleTypes.SNOWFLAKE;
+			case "restoration" -> Restoration.GOLD_MOTE;
 			default -> ParticleTypes.ENCHANT;
 		};
 	}
@@ -461,6 +498,7 @@ public final class Spellcraft {
 			case "air" -> SoundEvents.BREEZE_SHOOT;
 			case "lightning" -> SoundEvents.LIGHTNING_BOLT_IMPACT;
 			case "ice" -> SoundEvents.GLASS_BREAK;
+			case "restoration" -> SoundEvents.AMETHYST_BLOCK_CHIME;
 			default -> SoundEvents.ILLUSIONER_CAST_SPELL;
 		};
 	}
@@ -485,7 +523,8 @@ public final class Spellcraft {
 		String element = live(held, now);
 		if (element != null && now % 4L == 0L && player.level() instanceof ServerLevel level) {
 			Vec3 hand = player.position().add(player.getLookAngle().scale(0.6)).add(0.0, 1.0, 0.0);
-			level.sendParticles(particle(element), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
+			// (0.7.212) a blade's quiet trail is for the attuned to see
+			Mana.sendSeen(level, particle(element), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
 		}
 	}
 

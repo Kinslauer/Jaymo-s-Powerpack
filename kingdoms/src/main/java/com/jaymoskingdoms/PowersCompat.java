@@ -109,6 +109,98 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;
+	private static boolean lookedForMending;
+
+	private static void mending() {
+		if (lookedForMending) {
+			return;
+		}
+		lookedForMending = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> c = Class.forName("com.jaymospowers.core.wounds.Mending");
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> living = net.minecraft.world.entity.LivingEntity.class;
+			mend = lookup.findStatic(c, "mend", java.lang.invoke.MethodType.methodType(float.class, living, float.class));
+			closeCut = lookup.findStatic(c, "closeCut", java.lang.invoke.MethodType.methodType(boolean.class, living));
+			easeFever = lookup.findStatic(c, "easeFever", java.lang.invoke.MethodType.methodType(boolean.class, living));
+			restore = lookup.findStatic(c, "restore", java.lang.invoke.MethodType.methodType(void.class, living));
+			rekindle = lookup.findStatic(c, "rekindle", java.lang.invoke.MethodType.methodType(boolean.class, living, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mending (older Powers?)", e);
+		}
+	}
+
+	/** Heals {@code amount} into {@code entity}'s worst parts (Powers' wounds), or just the hearts without Powers. Nothing on the downed. Returns what it took. */
+	public static float mend(net.minecraft.world.entity.LivingEntity entity, float amount) {
+		mending();
+		if (mend != null) {
+			try {
+				return (float)mend.invoke(entity, amount);
+			} catch (Throwable e) {
+				return 0.0F;
+			}
+		}
+		if (Downed.isDowned(entity)) {
+			return 0.0F;
+		}
+		float before = entity.getHealth();
+		entity.heal(amount);
+		return entity.getHealth() - before;
+	}
+
+	/** Closes {@code entity}'s worst open cut (never a stump); false without Powers. */
+	public static boolean closeCut(net.minecraft.world.entity.LivingEntity entity) {
+		mending();
+		try {
+			return closeCut != null && (boolean)closeCut.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Eases {@code entity}'s fever (its weakness, the dirt in its cuts); false without Powers. */
+	public static boolean easeFever(net.minecraft.world.entity.LivingEntity entity) {
+		mending();
+		try {
+			return easeFever != null && (boolean)easeFever.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Restoration: bones set, festering cured, cuts closed, up if downed, and whole again (without Powers, full health). */
+	public static void restore(net.minecraft.world.entity.LivingEntity entity) {
+		mending();
+		if (restore != null) {
+			try {
+				restore.invoke(entity);
+				return;
+			} catch (Throwable e) {
+				// (falls through to the hearts)
+			}
+		}
+		entity.setHealth(entity.getMaxHealth());
+	}
+
+	/** Rekindle: a downed one up from afar with {@code share} of their health; false if they weren't down (or without Powers). */
+	public static boolean rekindle(net.minecraft.world.entity.LivingEntity entity, float share) {
+		mending();
+		if (rekindle == null) {
+			return false;
+		}
+		try {
+			return (boolean)rekindle.invoke(entity, share);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static @Nullable AttachmentType<Identifier> type() {
 		if (!looked) {

@@ -4666,3 +4666,40 @@ imprisoned, or worse."
 - `/underworld den` (ops) gives the realm you stand in a den now; `/underworld heat <n>` sets its heat.
 - Stage 2 (not yet): guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading.
 - Tuning: the constants at the top of `Underworld`, `Speakeasy` and `Busts`.
+
+## 0.7.212: Restoration, the healing school, and mana with attunement (pack 0.16.34)
+Andy (2026-10-25/26), from the design doc: "a restoration arcana that focuses on healing magic. a sorcerer specializing
+in this would heal with j and cast healing magic with sneak", and "some kind of attunement system, adding mana".
+- **Mana and attunement** (`Mana`): Mages and Sorcerers are attuned when they take the class; anyone else by coming
+  within 3 blocks of a budding amethyst. Attuning overloads you: mana to 150% of its most, the screen washed blue
+  (`client/ManaClient`, fading over 10 s), the extra bleeding off at 3 a second. Most mana 100 for a caster, 50
+  otherwise; back 2 or 1 a second. A seventh attribute, **Arcana**, shows on the K screen's Attributes tab once you're
+  attuned (+10/+5 most mana, +0.15 a second per point), with your mana in its detail. Staff casts and the Sorcerer's
+  keys cost mana (`Mana.COST`); reading a scroll still costs nothing. Ops: `/kingdom mana attune [player]|fill|clear`.
+- **Seen by the attuned only:** a faint blue glow round each attuned player (Powers' ki glow look, our own copy of
+  its texture), brighter the fuller their mana, flaring while overloaded; an imbued blade's idle trail; Lifebloom's
+  threads.
+- **Spells for everyone attuned:** an attuned player who isn't a Mage or Sorcerer learns a scroll's spell by reading
+  it and casts it from a staff at scroll strength (Mage 1.75x), with 1.5x the cooldowns and no Echo.
+- **The Restoration Sorcerer** (`Restoration`, a seventh element; the blade never takes a charge): J **Mend** (8
+  blocks, 6 health over 3 s worst part first, closes a cut, 8 s; sears the undead 6); sneak+J **Renewal** (6-block
+  ring, 4 health each and fever eased, 20 s, 2 hunger; undead burnt 4 and slowed), or on a downed friend within 4
+  **Rekindle** (they rise 3 s later at 30% health, 90 s, 4 hunger). **Lifebloom**: each blow on a foe heals the most
+  hurt friend within 12 by 1. Poison and withering hurt them half as much.
+- **Spells** (scrolls, staffs; Mage first spell can now be Mending): **Mending** (6 health and a cut, 6 s on a staff),
+  **Sanctuary** (a 4-block circle for 15 s: friends heal 1 every 2 s, undead thrown out; 60 s), **Restoration** (bones
+  set, festering cured, cuts closed, up if downed, healed whole; 6 hunger; 5 min). Sorcerers can't read Sanctuary or
+  Restoration. Court wizards now drop Mending and Sanctuary too; Restoration is 8% in stronghold libraries, ancient
+  cities and mansions.
+- **Healers:** a court wizard (sneak and use) also mends your wounds for 3 emeralds (free and your bones set at 100+
+  with his realm), sells Mending for 4, and at 400+ a Restoration for 24 once a week. In a fight he brings his side's
+  downed round before mending anyone, and every mending shows a gold ring. A village **cleric** (sneak and use,
+  empty-handed or with emeralds) sells Mending and mends you; near players, clerics bring downed villagers round
+  (once a minute) and mend the hurt below 80% (every 10 s).
+- **Mercy:** healing a villager or one of the folk warms them by a heart (two for a rekindling) and they remember it
+  (`Recollections.Kind.MENDED`, once in 5 minutes); bringing a downed monster or barbarian round is mercy, and devout
+  or kindhearted onlookers within 16 warm to you and remember it.
+- The **healer's staff** (wizard's staff + golden apple, shapeless): casts exactly as the wizard's staff.
+- Healing goes through Powers' new `core/wounds/Mending` (reflection, `PowersCompat.mend/closeCut/easeFever/restore/
+  rekindle`); without Powers it heals hearts only.
+- Tuning: constants at the top of `Mana` and `Restoration`, `Spellcraft.MAGE_COOLDOWN`/`ATTUNED_POWER`.

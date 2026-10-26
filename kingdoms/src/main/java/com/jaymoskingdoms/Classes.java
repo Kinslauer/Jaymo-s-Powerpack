@@ -82,8 +82,8 @@ public final class Classes {
 
 	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
 	public enum PlayerClass {
-		THIEF, WARLORD, MAGE("fire", "arcane", "warding"), ARCHER, SURVIVALIST, BRUTE, MARKSMAN,
-		SORCERER("water", "fire", "earth", "air", "lightning", "ice"), RIDER;
+		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), ARCHER, SURVIVALIST, BRUTE, MARKSMAN,
+		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration"), RIDER;
 
 		public final List<String> options;
 
@@ -223,6 +223,7 @@ public final class Classes {
 		}
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WRIT_OFFERS.clear();
+			OFFER_KINDS.clear();
 			ClassPerks.clear();
 			Spellcraft.clear();
 		});
@@ -235,6 +236,10 @@ public final class Classes {
 				}
 				if (context.getRandom().nextFloat() < STAFF_LOOT_CHANCE) {
 					drops.add(new ItemStack(Arcana.WIZARD_STAFF));
+				}
+				// (0.7.212) and, rarely, the strongest of the healing scrolls
+				if (context.getRandom().nextFloat() < Restoration.SCROLL_LOOT_CHANCE) {
+					drops.add(new ItemStack(Arcana.SCROLL_RESTORATION));
 				}
 			}
 		});
@@ -252,6 +257,7 @@ public final class Classes {
 			if (player.isAlive() && !player.isSpectator()) {
 				ClassPerks.tick(player);
 				Spellcraft.tick(player);
+				Mana.tick(player);
 			}
 		}
 	}
@@ -409,9 +415,13 @@ public final class Classes {
 		return is(player, PlayerClass.MAGE) && !player.getRecipeBook().contains(STAFF_RECIPE);
 	}
 
+	/** (0.7.212) What each option of a player's open offer from a court wizard is: staff, writ, a healer's kind, no. */
+	private static final Map<UUID, List<String>> OFFER_KINDS = new HashMap<>();
+
 	/**
 	 * A player spoke to a court wizard with no perks to unmake: he teaches a Mage how a staff is made, and offers a writ,
-	 * if he hasn't sold them one this week.
+	 * if he hasn't sold them one this week. (0.7.212) And his healing: your wounds mended, a Scroll of Mending, and for a
+	 * friend of the realm a Scroll of Restoration ({@link Restoration#services}).
 	 */
 	static void writOffer(ServerPlayer player, LivingEntity wizard) {
 		if (!ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
@@ -421,39 +431,55 @@ public final class Classes {
 		Long last = player.getAttached(WRIT_BOUGHT);
 		boolean writ = last == null || now - last >= WRIT_EVERY || now < last;
 		boolean staff = wantsStaff(player);
-		if (!writ && !staff) {
-			player.sendSystemMessage(Component.translatable("talk.jaymoskingdoms.wizard.writ.sold", wizard.getDisplayName()).withStyle(ChatFormatting.GRAY));
-			return;
+		List<String> kinds = new java.util.ArrayList<>();
+		if (staff) {
+			kinds.add("staff");
 		}
+		if (writ) {
+			kinds.add("writ");
+		}
+		kinds.addAll(Restoration.services(player, wizard, true));
+		kinds.add("no");
 		WRIT_OFFERS.put(player.getUUID(), wizard.getId());
+		OFFER_KINDS.put(player.getUUID(), List.copyOf(kinds));
 		List<Component> options = new java.util.ArrayList<>();
 		List<Boolean> enabled = new java.util.ArrayList<>();
-		if (staff) {
-			options.add(Component.translatable("talk.jaymoskingdoms.wizard.staff.yes"));
-			enabled.add(true);
+		for (String kind : kinds) {
+			switch (kind) {
+				case "staff" -> {
+					options.add(Component.translatable("talk.jaymoskingdoms.wizard.staff.yes"));
+					enabled.add(true);
+				}
+				case "writ" -> {
+					options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS));
+					enabled.add(Approaches.emeralds(player) >= WRIT_EMERALDS);
+				}
+				default -> {
+					options.add(Restoration.optionLine(kind));
+					enabled.add(Restoration.optionOpen(player, kind));
+				}
+			}
 		}
-		options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS));
-		enabled.add(writ && Approaches.emeralds(player) >= WRIT_EMERALDS);
-		options.add(Component.translatable("talk.jaymoskingdoms.wizard.respec.no"));
-		enabled.add(true);
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
-			Component.translatable(staff ? "talk.jaymoskingdoms.wizard.staff" : "talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS), options, enabled));
+		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_EMERALDS)
+			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS) : Component.translatable("talk.jaymoskingdoms.healer.ask");
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
 	}
 
-	/** An answer to the wizard's writ offer; false when it wasn't one. */
+	/** An answer to the wizard's offer; false when it wasn't one (0.7.212: then perhaps a cleric's, {@link Restoration#answer}). */
 	static boolean answer(ServerPlayer player, TalkNet.Answer answer) {
 		Integer offer = WRIT_OFFERS.get(player.getUUID());
 		if (offer == null || offer != answer.entityId()) {
-			return false;
+			return Restoration.answer(player, answer);
 		}
 		WRIT_OFFERS.remove(player.getUUID());
-		if (answer.option() < 0 || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard) || !CourtWizards.is(wizard)
-			|| wizard.distanceTo(player) > 8.0) {
+		List<String> kinds = OFFER_KINDS.remove(player.getUUID());
+		if (kinds == null || answer.option() < 0 || answer.option() >= kinds.size() || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard)
+			|| !CourtWizards.is(wizard) || wizard.distanceTo(player) > 8.0) {
 			return true;
 		}
 		ServerLevel level = (ServerLevel) player.level();
-		boolean staff = wantsStaff(player);
-		if (staff && answer.option() == 0) {
+		String kind = kinds.get(answer.option());
+		if (kind.equals("staff") && wantsStaff(player)) {
 			// the staff's recipe: into the recipe book, and said out loud
 			player.awardRecipesByKey(List.of(STAFF_RECIPE));
 			Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.staff.done"), Speech.GOLD);
@@ -461,7 +487,11 @@ public final class Classes {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 			return true;
 		}
-		if (answer.option() != (staff ? 1 : 0) || Approaches.emeralds(player) < WRIT_EMERALDS) {
+		if (!kind.equals("writ")) {
+			Restoration.serve(player, wizard, kind);
+			return true;
+		}
+		if (Approaches.emeralds(player) < WRIT_EMERALDS) {
 			return true;
 		}
 		Long last = player.getAttached(WRIT_BOUGHT);

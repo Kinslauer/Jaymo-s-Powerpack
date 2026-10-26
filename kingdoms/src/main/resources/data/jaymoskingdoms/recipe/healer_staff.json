@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jaymoskingdoms:wizard_staff",
+    "minecraft:golden_apple"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:healer_staff"
+  }
+}

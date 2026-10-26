@@ -50,6 +50,11 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * (0.7.103) A Scroll of Draining can also be written: paper, two bat wings ({@link #BAT_WING}, after Better With Mods'
  * bat wing: bats drop them) and a fermented spider eye.
+ * <p>
+ * (0.7.212) Restoration's three ({@link Restoration}): <b>Mending</b> (who you look at, or you, healed and a cut closed;
+ * court wizards and clerics sell it), <b>Sanctuary</b> (a circle of light that heals and keeps the undead out; a court
+ * wizard's) and <b>Restoration</b> (whole again, bones set, up if downed; rare). And the healer's staff, a wizard's staff
+ * made over with a golden apple: it casts the same.
  */
 public final class Arcana {
 	/** How far a scroll reaches (draining, arcane bolt). */
@@ -64,8 +69,10 @@ public final class Arcana {
 	/** A pause after reading one (ticks), so a stack isn't read all at once. */
 	static final int SCROLL_COOLDOWN = 20;
 
-	public static Item BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF;
+	public static Item BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF;
 	public static Item SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE;
+	/** (0.7.212) Restoration's scrolls. */
+	public static Item SCROLL_MENDING, SCROLL_SANCTUARY, SCROLL_RESTORATION;
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
 	public static Item BAT_WING;
 
@@ -76,17 +83,22 @@ public final class Arcana {
 		BONE_STAFF = item("bone_staff", p -> new Item(p.stacksTo(1)));
 		TOTEM_STAFF = item("totem_staff", p -> new Item(p.stacksTo(1)));
 		WIZARD_STAFF = item("wizard_staff", p -> new Item(p.stacksTo(1)));
+		HEALER_STAFF = item("healer_staff", p -> new Item(p.stacksTo(1)));
 		SCROLL_RAISING = item("scroll_of_raising", p -> new Scroll(p, "raising"));
 		SCROLL_DRAINING = item("scroll_of_draining", p -> new Scroll(p, "draining"));
 		SCROLL_FIRE = item("scroll_of_fire", p -> new Scroll(p, "fire"));
 		SCROLL_WARDING = item("scroll_of_warding", p -> new Scroll(p, "warding"));
 		SCROLL_ARCANE = item("scroll_of_arcane_bolt", p -> new Scroll(p, "arcane"));
+		SCROLL_MENDING = item("scroll_of_mending", p -> new Scroll(p, "mending"));
+		SCROLL_SANCTUARY = item("scroll_of_sanctuary", p -> new Scroll(p, "sanctuary"));
+		SCROLL_RESTORATION = item("scroll_of_restoration", p -> new Scroll(p, "restoration"));
 		ResourceKey<Item> wing = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("bat_wing"));
 		BAT_WING = Registry.register(BuiltInRegistries.ITEM, wing, new Item(new Item.Properties().setId(wing)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.insertAfter(Items.PHANTOM_MEMBRANE, BAT_WING));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.TOTEM_OF_UNDYING;
-			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF)) {
+			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, SCROLL_MENDING, SCROLL_SANCTUARY,
+				SCROLL_RESTORATION, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
 				output.insertAfter(after, item);
 				after = item;
 			}
@@ -103,12 +115,23 @@ public final class Arcana {
 		return new ItemStack(switch (role) {
 			case Sorcery.NECROMANCER -> random.nextBoolean() ? SCROLL_RAISING : SCROLL_DRAINING;
 			case Sorcery.SHAMAN, Orcs.SHAMAN -> SCROLL_FIRE;
-			default -> random.nextBoolean() ? SCROLL_WARDING : SCROLL_ARCANE;
+			// (0.7.212) a wizard's: warding, the arcane bolt, or (now and then) mending or sanctuary
+			default -> switch (random.nextInt(6)) {
+				case 0, 1 -> SCROLL_WARDING;
+				case 2, 3 -> SCROLL_ARCANE;
+				case 4 -> SCROLL_MENDING;
+				default -> SCROLL_SANCTUARY;
+			};
 		});
 	}
 
+	/** (0.7.212) A staff that casts: the wizard's, or the healer's. */
+	public static boolean isStaff(ItemStack stack) {
+		return stack.is(WIZARD_STAFF) || stack.is(HEALER_STAFF);
+	}
+
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
-	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising");
+	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration");
 
 	/**
 	 * Casts {@code spell} for {@code player} at {@code power} (1 off a scroll; a Mage's staff casts harder): true if it
@@ -121,6 +144,9 @@ public final class Arcana {
 			case "fire" -> fire(level, player, power);
 			case "warding" -> warding(level, player, power);
 			case "arcane" -> arcane(level, player, power);
+			case "mending" -> Restoration.mending(level, player, power);
+			case "sanctuary" -> Restoration.sanctuary(level, player, power);
+			case "restoration" -> Restoration.restoration(level, player, power);
 			default -> false;
 		};
 	}
@@ -132,6 +158,9 @@ public final class Arcana {
 			case "draining" -> SCROLL_DRAINING;
 			case "fire" -> SCROLL_FIRE;
 			case "warding" -> SCROLL_WARDING;
+			case "mending" -> SCROLL_MENDING;
+			case "sanctuary" -> SCROLL_SANCTUARY;
+			case "restoration" -> SCROLL_RESTORATION;
 			default -> SCROLL_ARCANE;
 		};
 	}
@@ -156,7 +185,7 @@ public final class Arcana {
 				return InteractionResult.SUCCESS;
 			}
 			// (a Sorcerer's magic is quick and small: the great scrolls are beyond them)
-			if (Classes.is(player, Classes.PlayerClass.SORCERER) && (this.spell.equals("raising") || this.spell.equals("warding"))) {
+			if (Classes.is(player, Classes.PlayerClass.SORCERER) && List.of("raising", "warding", "sanctuary", "restoration").contains(this.spell)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_beyond"));
 				return InteractionResult.FAIL;
 			}
