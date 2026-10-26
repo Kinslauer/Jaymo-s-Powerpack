@@ -51,8 +51,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.16.8) The symbiote's own executions. Andy: "the suits should have their own executions. 18 total, 6 for thin, 6 for
  * living armor, and 6 split between the two when using tendrils." With the suit showing in any form and nothing in your
- * main hand, use held on someone downed or crippled for {@link Finishers#HOLD_TICKS} (the weapons' hold, not the bare
- * hands' three taps: the suit is the weapon, so it needs no Executioner perk) plays one of this form's moves
+ * main hand, (0.17.7) attack held on someone downed or crippled for {@link Finishers#HOLD_TICKS} (not the bare hands'
+ * neck snap: the suit is the weapon, so it needs no Executioner perk) plays one of this form's moves
  * ({@link Move}), picked at random and never the same one twice running per player ({@link #LAST}):
  * <ul>
  * <li>the thin suit ({@link Pool#THIN}: the suit on, no armour): acrobatic and quick: a knee drop and neck twist, a heel

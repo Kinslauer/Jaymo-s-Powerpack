@@ -103,7 +103,8 @@ public final class RaceHoldClient {
 	public static boolean claims(Minecraft minecraft, Player player) {
 		HitResult hit = minecraft.hitResult;
 		HitResult.Type type = hit == null ? HitResult.Type.MISS : hit.getType();
-		if (type == HitResult.Type.BLOCK) {
+		if (type == HitResult.Type.BLOCK || com.jaymospowers.client.finisher.FinisherClient.aimingAtHelpless(minecraft)) {
+			// ((0.17.7) left-click held on someone downed is the execution's)
 			return false;
 		}
 		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
