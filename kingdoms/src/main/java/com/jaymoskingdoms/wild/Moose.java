@@ -6,7 +6,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 /**
@@ -39,8 +39,8 @@ public class Moose extends WildBeast {
 	}
 
 	@Override
-	protected boolean hunting(Player player) {
-		return player.distanceTo(this) < TEMPER_RANGE;
+	protected boolean hunting(LivingEntity target) {
+		return target.distanceTo(this) < TEMPER_RANGE;
 	}
 
 	@Override
