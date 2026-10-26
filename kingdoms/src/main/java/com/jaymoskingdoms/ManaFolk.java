@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.7.234) The folk who work magic are attuned too. Andy: "court wizards and clerics should have to be attuned as well.
+ * (0.7.235) The folk who work magic are attuned too. Andy: "court wizards and clerics should have to be attuned as well.
  * meaning other magic users can see their glow, and know their power level from the intensity of the glow. mentioning it if
  * asked." A court wizard, a village cleric, a hermit wizard, and every caster of the camps and the courts (shaman,
  * necromancer, blood witch, orc shaman) is attuned with a {@link Mana#POWER} of their own ({@link #power}), give or take one,

@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.234) Mana sickness. Andy: "add a type of mana sickness for punishing over zealous casters". Every bit of mana spent,
+ * (0.7.235) Mana sickness. Andy: "add a type of mana sickness for punishing over zealous casters". Every bit of mana spent,
  * and every bit forced in past full (crushed amethyst, a wand), is <b>strain</b>, counted against the caster's most mana;
  * it eases off by itself ({@link #EASES} of the most a second, faster meditating). Push it too far and they fall sick, worse
  * the further they pushed, for a while:

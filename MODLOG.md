@@ -3018,7 +3018,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `jaymospowers_spent_whale` tag. With Kingdoms it drops whale blubber, meat, bone and sometimes ambergris. Andy wants
   the taut line lifting the thrower kept: it shouldn't be tried unprepared. Merged in #551 claiming 0.17.20/0.7.232,
   which #550 had already used, so renumbered here. Not seen in game.
-- **0.17.22, mana grows (Kingdoms 0.7.234):** the mana glow settles dim after attuning and shows power; casting folk are
+- **0.17.23, mana grows (Kingdoms 0.7.235):** the mana glow settles dim after attuning and shows power; casting folk are
   attuned; amethyst crushes for mana; mana sickness; vis, flux and corruption tie into mana; a mana wand; meditation
   restores mana; casts ripple the aura by intent. No Powers changes (Kingdoms reads Powers' Meditate, Phials and
   Corruption by reflection). See Kingdoms' log.
