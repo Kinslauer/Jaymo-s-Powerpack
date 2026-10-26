@@ -78,7 +78,9 @@ public final class FluxCorruption {
 			Corruption.State state = Corruption.of(player);
 			if (flux >= FluxEffects.CORRUPT_AT && !player.isCreative()) {
 				soaked = true;
-				if (state.fleeting() < FLEETING_CAP) {
+				// (a full Ichorcloth set: the flux takes half as long to get its teeth in)
+				if (state.fleeting() < FLEETING_CAP
+					&& level.getRandom().nextFloat() < com.jaymospowers.alchemy.gear.AlchemyGear.fluxFactor(player)) {
 					Corruption.add(player, Corruption.Kind.FLEETING, 1 + flux / SOAK_STEP);
 				}
 			}
