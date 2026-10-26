@@ -325,7 +325,7 @@ def infusions():
         "centre": "*enchanted",
         "components": ["minecraft:lapis_lazuli"] * 4 + ["jaymospowers:orichalc_ingot"] * 2 + ["minecraft:enchanted_book"],
         "essences": {"arcana": 16, "spirit": 10, "mind": 6},
-        "instability": 24,
+        "instability": 14,
         "result": {"special": "infuse_enchantment"},
         "research": "infused_enchanting",
         "flux": 40})
