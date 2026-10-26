@@ -81,6 +81,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.6.0: the class screen (on first joining, and after a Writ of Rebirth)
 		ClassScreen.register();
 		HeritageScreen.register();
+		LifeStoryScreen.register();
 		LineageScreen.register();
 		// 0.7.201: letters and messenger pigeons
 		LetterScreen.register();
