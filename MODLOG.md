@@ -2996,3 +2996,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   creator opens; the name typed on the creator's first page is now always saved. No Powers changes. See Kingdoms' log.
 - **0.17.17, strangers' MCA page (Kingdoms 0.7.230):** until you're introduced, MCA's screen shows only Introduce
   yourself, Gift and Trade, and nothing about the villager. No Powers changes. See Kingdoms' log.
+- **0.17.18, a kneeling firing stance:** Andy: "crouching looks like a split right now, the back leg is fine, but the
+  front leg should bend at the knee, and stay bent while firing". On one knee (`CrouchPose`) the front thigh now goes out
+  level and the leg bends at the knee down to the planted foot, whatever is in the hands (bow, crossbow, gun). A leg is
+  one box, so for that draw `client/KneeBend` swaps its boxes for bent copies that cut every side at the knee (texture
+  included, so skin, trousers and armour bend too) and puts them back once the model is drawn. Not seen in game.
