@@ -1,0 +1,6 @@
+{
+	"key.jaymoskingdoms.spirit": "Mana Spirit (tap: call or cast; sneak + tap: next move; sneak + hold: send away)",
+	"key.category.jaymoskingdoms.spirits": "Jaymo's Mana Spirits",
+	"gui.jaymoskingdoms.spirit.stats": "Lv %s · Bond %s",
+	"gui.jaymoskingdoms.spirit.no_move": "no moves yet"
+}
