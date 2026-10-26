@@ -112,7 +112,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "stamina.Feathers", "stamina.Dodge", "rig.RigWrecks", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "backpack.Backpack", "armory.Lash", "armory.FlintlockDraw", "aether.structure.OutpostTracker",
-			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge",
+			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans",
 		};
 		for (String holder : holders) {
 			try {

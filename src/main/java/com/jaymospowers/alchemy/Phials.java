@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy;
 
+import com.jaymospowers.alchemy.codex.Codex;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -96,7 +97,12 @@ public final class Phials {
 		@Override
 		public Component getName(ItemStack stack) {
 			Essence e = contents(stack).main();
-			return e == null ? super.getName(stack) : Component.translatable("item.jaymospowers.essence_phial.of", Component.translatable(e.key()));
+			if (e == null) {
+				return super.getName(stack);
+			}
+			// what the viewer hasn't discovered stays unnamed (the lens and the codex teach the names)
+			return Codex.seenByViewer(e) ? Component.translatable("item.jaymospowers.essence_phial.of", Component.translatable(e.key()))
+				: Component.translatable("item.jaymospowers.essence_phial.unknown");
 		}
 
 		@Override
@@ -106,6 +112,9 @@ public final class Phials {
 			if (e != null) {
 				builder.accept(Component.translatable("tooltip.jaymospowers.essence_phial.amount", contents(stack).get(e), SIZE)
 					.withStyle(ChatFormatting.GRAY));
+				if (!Codex.seenByViewer(e)) {
+					builder.accept(Component.translatable("tooltip.jaymospowers.essence_phial.unknown").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+				}
 			}
 		}
 	}
