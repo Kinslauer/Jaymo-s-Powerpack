@@ -2992,3 +2992,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
   Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
   where they land to be picked up again (`ground/ThrownRocks`).
+- **0.17.15, a kneeling firing stance:** Andy: "crouching looks like a split right now, the back leg is fine, but the
+  front leg should bend at the knee, and stay bent while firing". On one knee (`CrouchPose`) the front thigh now goes out
+  level and the leg bends at the knee down to the planted foot, whatever is in the hands (bow, crossbow, gun). A leg is
+  one box, so for that draw `client/KneeBend` swaps its boxes for bent copies that cut every side at the knee (texture
+  included, so skin, trousers and armour bend too) and puts them back once the model is drawn. Not seen in game.
