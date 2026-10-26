@@ -294,9 +294,14 @@ public final class Classes {
 		next(player);
 	}
 
-	/** (0.7.57) Puts up the next step of character creation {@code player} still owes: their heritage, then their class. */
+	/**
+	 * (0.7.57) Puts up the next step of character creation {@code player} still owes: their heritage, then their class.
+	 * (0.7.215) A newcomer tells their life story instead ({@link LifeStory}), which makes both at once.
+	 */
 	static void next(ServerPlayer player) {
-		if (Heritage.of(player) == null && Heritage.canAsk(player)) {
+		if (LifeStory.owed(player)) {
+			LifeStory.ask(player, true);
+		} else if (Heritage.of(player) == null && Heritage.canAsk(player)) {
 			Heritage.ask(player, true);
 		} else if (classOf(player) == null) {
 			ask(player, true);

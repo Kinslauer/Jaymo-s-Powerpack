@@ -225,12 +225,14 @@ final class SkillScreen extends Screen {
 			Ui.row(graphics, x + 8, ry, x + w - 8, ry + statRow() - 2, stat.ordinal(), stat == hovered);
 			int spent = Stats.spent(shown, stat), fromHeritage = player == null ? 0 : Stats.fromHeritage(player, stat);
 			int fromClass = player == null ? 0 : Stats.fromClass(player, stat);
-			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass);
+			int fromStory = player == null ? 0 : Stats.fromStory(player, stat);
+			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass + fromStory);
 			String blocked = player == null ? "" : Stats.blocked(player, shown, stat);
 			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, pipsX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
-			// ten pips: heritage's (teal), then class's (gold), then yours (white); the rest empty
+			// ten pips: heritage's (teal), then class's (gold), then (0.7.215) your story's (parchment), then yours (white); the rest empty
 			for (int i = 0; i < Stats.MAX; i++) {
-				int color = i < fromHeritage ? HeritageScreen.ACCENT : i < fromHeritage + fromClass ? Ui.GOLD : i < value ? Ui.TEXT : Ui.BAR_BACK;
+				int color = i < fromHeritage ? HeritageScreen.ACCENT : i < fromHeritage + fromClass ? Ui.GOLD
+					: i < fromHeritage + fromClass + fromStory ? LifeStoryScreen.ACCENT : i < value ? Ui.TEXT : Ui.BAR_BACK;
 				int px = pipsX + i * (PIP_W + 2);
 				graphics.fill(px, ry + 4, px + PIP_W, ry + 10, color);
 			}
@@ -255,7 +257,7 @@ final class SkillScreen extends Screen {
 					.withColor(0x6FA8FF));
 			}
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.from", Stats.spent(shown, hovered), Stats.fromHeritage(player, hovered),
-				Stats.fromClass(player, hovered)).withColor(Ui.DIM));
+				Stats.fromClass(player, hovered), Stats.fromStory(player, hovered)).withColor(Ui.DIM));
 			String blocked = Stats.blocked(player, shown, hovered);
 			text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.stats.raise").withColor(Ui.GOOD)
 				: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));

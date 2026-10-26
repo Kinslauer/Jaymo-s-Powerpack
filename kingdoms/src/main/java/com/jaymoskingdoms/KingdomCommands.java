@@ -85,6 +85,7 @@ final class KingdomCommands {
 			.then(Neighbours.command())
 			.then(WarCommands.command())
 			.then(Classes.command())
+			.then(LifeStory.command())
 			.then(Heritage.command())
 			.then(WorldTiers.command())
 			.then(com.jaymoskingdoms.remnants.Monoliths.command())
