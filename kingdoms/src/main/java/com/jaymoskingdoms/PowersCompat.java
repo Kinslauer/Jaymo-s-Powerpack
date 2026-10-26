@@ -164,7 +164,7 @@ public final class PowersCompat {
 	private static boolean lookedForAwaken;
 
 	/**
-	 * (0.7.224) Andy: "Lost in time starts you with chrono level 1". {@code player} awakens to Powers' power {@code power}
+	 * (0.7.223) Andy: "Lost in time starts you with chrono level 1". {@code player} awakens to Powers' power {@code power}
 	 * (an id path) now, with just its first ability, as a natural awakening starts. False without Powers.
 	 */
 	public static boolean awaken(net.minecraft.server.level.ServerPlayer player, String power) {
@@ -202,7 +202,7 @@ public final class PowersCompat {
 	private static boolean lookedForStrand;
 
 	/**
-	 * (0.7.224) A life story's "lost in time" start: {@code player} wakes alone in Powers' future. False without Powers,
+	 * (0.7.223) A life story's "lost in time" start: {@code player} wakes alone in Powers' future. False without Powers,
 	 * or while the future isn't in place yet.
 	 */
 	public static boolean strand(net.minecraft.server.level.ServerPlayer player) {

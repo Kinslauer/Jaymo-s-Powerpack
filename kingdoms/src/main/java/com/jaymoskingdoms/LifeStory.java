@@ -64,7 +64,7 @@ import org.jspecify.annotations.Nullable;
  * before it's sealed, for life, like the heritage and class it replaces at the start.
  *
  * <p>A start that echoes the power (a caving trip gone wrong and the spider bite, a shipwreck and the deep's song, a
- * monolith and the storm; (0.7.224) a fall from the sky and Gravity, a burned home and Smoke, a frozen pass and Cryo, a
+ * monolith and the storm; (0.7.223) a fall from the sky and Gravity, a burned home and Smoke, a frozen pass and Cryo, a
  * captive's escape and Z Fighter) counts as that power's calling: it wakes a day sooner. Lost in time wakes Chrono at once. The heritage and class screens still
  * open for a Writ of Rebirth and for old players who never had a story. MCA's own "where do you start" page is skipped
  * ({@code client/mixin/mca/McaDestinySkipMixin}): the last question is where you start.
@@ -97,13 +97,13 @@ public final class LifeStory {
 	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
 	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
 	static final int[] LIMBS = {2, 4, 8, 16};
-	/** (0.7.224) Fell from the sky: how high over the crater you wake (blocks), how long you drift (ticks of Slow Falling), the crater's size. */
+	/** (0.7.223) Fell from the sky: how high over the crater you wake (blocks), how long you drift (ticks of Slow Falling), the crater's size. */
 	static final int SKYFALL_HEIGHT = 24, SKYFALL_TICKS = 600, CRATER_RADIUS = 4, CRATER_DEPTH = 2, SKYFALL_SHARDS = 3;
-	/** (0.7.224) Snowed in on a pass: how far the frozen peaks are looked for (blocks) and in what steps, and the Slowness (ticks). */
+	/** (0.7.223) Snowed in on a pass: how far the frozen peaks are looked for (blocks) and in what steps, and the Slowness (ticks). */
 	static final int PEAKS_SEARCH = 3200, PEAKS_STEP = 64, PEAKS_VERTICAL_STEP = 32, SNOWED_SLOW_TICKS = 900;
-	/** (0.7.224) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
+	/** (0.7.223) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
-	/** (0.7.224) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
+	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
@@ -937,7 +937,7 @@ public final class LifeStory {
 		return best;
 	}
 
-	/** (0.7.224) An escaped captive's camp, out to get them back until {@code until} (server tick). */
+	/** (0.7.223) An escaped captive's camp, out to get them back until {@code until} (server tick). */
 	private record Hunt(int camp, long until) {
 	}
 
