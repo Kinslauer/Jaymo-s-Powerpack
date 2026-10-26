@@ -1,0 +1,21 @@
+{
+  "centre": "minecraft:ender_eye",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:chorus_fruit",
+    "minecraft:chorus_fruit",
+    "minecraft:obsidian"
+  ],
+  "essences": {
+    "earth": 10,
+    "spirit": 6,
+    "motion": 6
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymospowers:lift_focus",
+    "count": 1
+  },
+  "research": "focus_lift",
+  "flux": 4
+}

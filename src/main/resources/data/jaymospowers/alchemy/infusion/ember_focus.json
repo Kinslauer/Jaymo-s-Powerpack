@@ -1,0 +1,20 @@
+{
+  "centre": "minecraft:blaze_powder",
+  "components": [
+    "jaymospowers:ichor",
+    "jaymospowers:brimstone",
+    "jaymospowers:brimstone",
+    "minecraft:fire_charge"
+  ],
+  "essences": {
+    "fire": 10,
+    "spark": 6
+  },
+  "instability": 5,
+  "result": {
+    "item": "jaymospowers:ember_focus",
+    "count": 1
+  },
+  "research": "focus_ember",
+  "flux": 3
+}
