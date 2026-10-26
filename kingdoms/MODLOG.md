@@ -4756,7 +4756,7 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
   Sworn adds full iron, a sword and a shield; Caving a pickaxe. The story page has heritage and class buttons to change
   either after the result (the heritage must be open to them; checked on the server).
 - Tuning: constants at the top of `LifeStory`. Not seen in game.
-## 0.7.217: gifted villagers (pack 0.17.2)
+## 0.7.218: gifted villagers (pack 0.17.3)
 - Why a Stormborn purist king could exist: villager births still rolled Stormborn (from 0.7.106, when it could be picked)
   after 0.7.140 made it earned. Now no one is born Stormborn but a Stormborn parent's child; a gifted Wind villager whose
   power the storm takes (corrupted) wakes to it (`GiftedFolk.step`). Stormborn already in a world keep their blood: MCA's

@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.2) The Pocket Arsenal for a gifted villager ({@link Gifted}): a blade out of the pocket thrown at the foe, a
+ * (0.17.3) The Pocket Arsenal for a gifted villager ({@link Gifted}): a blade out of the pocket thrown at the foe, a
  * spear lunge that carries them in, a few blades raining over the foe, and a summoned shield to parry and step back
  * behind. The blades are only drawn (rift light and sparks), never kept: nothing is dropped or left lying about. A ruler's
  * ultimate is the Hundred Blades; out of a fight they turn a summoned blade in the hand a moment and mend their tools a

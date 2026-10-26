@@ -47,7 +47,7 @@ abstract class McaInteractInfoMixin {
 			lines.add(Temperaments.line(temperament));
 			hovers.add(Temperaments.hover(temperament));
 		}
-		// (0.7.217) a gifted villager's power, once you know them; the storm-taken line of a Stormborn
+		// (0.7.218) a gifted villager's power, once you know them; the storm-taken line of a Stormborn
 		net.minecraft.world.entity.Entity self = this.villager.asEntity();
 		String gift = com.jaymoskingdoms.PowersCompat.gift(self);
 		if (gift != null && com.jaymoskingdoms.Introductions.knownHere(self)) {

@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * them by their weights); the other bloods share the rest, the Verdant and the Warrior-born rarest. The land leans them ({@link #LEAN}): Frostborn in the cold, Emberborn in the heat (and each shuns the other's,
  * {@link #SHUN}), Tideborn by the sea and the rivers, Sylvan in the forests, Stoneborn in the mountains and badlands,
  * Verdant in the jungle. Everyone born in the Verdant World is Verdant. (0.7.106) Dawnborn lean to the savannas; the earned
- * bloods (Endborn, Dragonblood, Deepborn, (0.7.217) and Stormborn) are never rolled: only a child of one carries it (or a
+ * bloods (Endborn, Dragonblood, Deepborn, (0.7.218) and Stormborn) are never rolled: only a child of one carries it (or a
  * gifted Wind the storm took, {@link GiftedFolk}).</li>
  * <li><b>Looks:</b> a Verdant gets the green ({@link Verdants#SHADE}: MCA's skin, antennae); the rest wear their marks
  * and eyes through the client's HeritageLooks, as players do.</li>
@@ -192,7 +192,7 @@ public final class VillagerHeritage {
 				case NIGHTBORN -> W_NIGHTBORN;
 				case WARRIORBORN -> W_WARRIORBORN;
 				case EARTHLING -> W_EARTHLING;
-				// (0.7.217) Stormborn is earned now (0.7.140): only a Stormborn parent's child, or a gifted Wind the storm
+				// (0.7.218) Stormborn is earned now (0.7.140): only a Stormborn parent's child, or a gifted Wind the storm
 				// took (GiftedFolk), is of it; it was still rolled here from when it could be picked
 				case STORMBORN -> 0;
 				case DAWNBORN -> W_DAWNBORN * (biome.is(BiomeTags.IS_SAVANNA) ? LEAN : 1);

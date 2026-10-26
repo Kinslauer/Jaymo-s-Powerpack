@@ -354,7 +354,7 @@ final class McaBridge {
 		}
 		List<VillagerEntityMCA> townsfolk = all.stream().filter(v -> worker(v).role() < 0).toList();
 		List<VillagerEntityMCA> pick = townsfolk.isEmpty() ? all : townsfolk;
-		// (0.7.217) the gifted are likelier to rise
+		// (0.7.218) the gifted are likelier to rise
 		VillagerEntityMCA gifted = GiftedFolk.rises(pick, level.getRandom());
 		return gifted != null ? gifted : pick.get(level.getRandom().nextInt(pick.size()));
 	}

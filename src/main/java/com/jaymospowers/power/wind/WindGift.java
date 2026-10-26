@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.2) Wind for a gifted villager ({@link Gifted}): a gale that throws the foe back, an updraft that lifts them to fall,
+ * (0.17.3) Wind for a gifted villager ({@link Gifted}): a gale that throws the foe back, an updraft that lifts them to fall,
  * a burst that clears the ground round them, and a dash away on the wind. Storm-taken (corrupted, Wind's Stormbound),
  * they call lightning down, and the storm crackles round them in the rain. A ruler's ultimate is the Tempest; out of a
  * fight they blow out the fires near them.

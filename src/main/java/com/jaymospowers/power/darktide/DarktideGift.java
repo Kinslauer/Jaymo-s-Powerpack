@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.2) Darktide for a gifted villager ({@link Gifted}): a lash of dark water, a drowning grip that slows and chokes, a
+ * (0.17.3) Darktide for a gifted villager ({@link Gifted}): a lash of dark water, a drowning grip that slows and chokes, a
  * surge of water that throws anyone too close back, and a slip away through the shadows. Water never drowns them, as
  * with {@link DarktidePower}'s users. A ruler's ultimate is the Tidal Surge over the foe; out of a fight they let their
  * dark water run over the fires near them. Darktide's corruption is its own state, never a villager's, so the kit has no

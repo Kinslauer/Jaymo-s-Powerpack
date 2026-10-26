@@ -26,7 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.2) How a gifted villager ({@link Gifted}) fights with their power. Their own AI still walks them (a guard closes in,
+ * (0.17.3) How a gifted villager ({@link Gifted}) fights with their power. Their own AI still walks them (a guard closes in,
  * a farmer runs); this only picks a move now and then, while they have a foe: the one they're set on, the one their brain
  * remembers, or whoever hit them last. Moves have their own cooldowns, and there's a gap between any two, longer for a
  * wary villager. A bold one opens with the strongest move that's ready; a steady one takes any that fits; a wary one gets

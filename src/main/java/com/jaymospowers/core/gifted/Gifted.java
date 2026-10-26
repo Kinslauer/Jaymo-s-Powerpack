@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.2) <b>Gifted folk</b>: villagers (and any other mob that isn't a player) who hold a power. Andy: "villagers should
+ * (0.17.3) <b>Gifted folk</b>: villagers (and any other mob that isn't a player) who hold a power. Andy: "villagers should
  * be able to acquire and use powers as well! This is the only way that encountering a stormborn purist king makes sense."
  * <p>
  * A player's power runs off their keys and their client, so a villager can't hold one the same way. A gifted villager

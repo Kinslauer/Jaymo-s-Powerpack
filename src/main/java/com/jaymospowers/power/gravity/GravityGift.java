@@ -18,7 +18,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.2) Gravity for a gifted villager ({@link Gifted}): a pull that drags the foe in, a crush that presses them to the
+ * (0.17.3) Gravity for a gifted villager ({@link Gifted}): a pull that drags the foe in, a crush that presses them to the
  * ground, a lift that heaves them up to fall, and a weightless leap away. A ruler's ultimate is the Meteor, kept as a
  * last resort (it is the heaviest thing the power has): it falls on the foe in light and smoke, and unlike a player's it
  * breaks no blocks. Out of a fight, small motes float round them.

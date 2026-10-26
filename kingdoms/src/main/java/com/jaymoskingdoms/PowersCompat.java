@@ -281,7 +281,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.217) gifted villagers: Powers' core/gifted (a villager's power and its moves) ------------------------------
+	// ---- (0.7.218) gifted villagers: Powers' core/gifted (a villager's power and its moves) ------------------------------
 
 	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;

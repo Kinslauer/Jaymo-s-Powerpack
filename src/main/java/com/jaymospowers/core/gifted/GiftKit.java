@@ -8,7 +8,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.2) What a gifted villager ({@link Gifted}) can do with one power: a few moves of its own, simpler and weaker than
+ * (0.17.3) What a gifted villager ({@link Gifted}) can do with one power: a few moves of its own, simpler and weaker than
  * a player's (no keys, no client; only a ruler unleashes an ultimate), drawn in the power's own colours and sounds. Each power keeps its kit in
  * its own package ({@code power/<name>/<Name>Gift}) and registers it with {@link Gifted#register}; {@link GiftedAI} picks
  * the moves in a fight.

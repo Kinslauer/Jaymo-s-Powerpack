@@ -214,7 +214,7 @@ public final class Mastery {
 	}
 
 	/**
-	 * (0.17.2) {@code amount} mastery points at once, past the practice allowance (a gifted villager's power taken by
+	 * (0.17.3) {@code amount} mastery points at once, past the practice allowance (a gifted villager's power taken by
 	 * killing them, {@code core/gifted/GiftedAI}). Nothing once every ability is learned, in creative, or without a power.
 	 */
 	public static boolean grant(ServerPlayer player, int amount) {

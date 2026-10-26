@@ -18,7 +18,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.2) The web-slinger for a gifted villager ({@link Gifted}): a web shot that binds the foe, a yank that pulls them
+ * (0.17.3) The web-slinger for a gifted villager ({@link Gifted}): a web shot that binds the foe, a yank that pulls them
  * off their feet, a web-wrapped punch on anyone too close, and a zip up and away. No cobweb block is ever placed (the
  * strands are only drawn). A ruler's ultimate is the Cocoon, which binds the foe for a few seconds; out of a fight they
  * catch falling things on a strand and spin strands that fade.
