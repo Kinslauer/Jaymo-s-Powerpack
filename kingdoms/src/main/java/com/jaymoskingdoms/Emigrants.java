@@ -47,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.219) Andy (2026-10-26): "allow villagers to up and leave on their own volition, packing their things and carts to
+ * (0.7.220) Andy (2026-10-26): "allow villagers to up and leave on their own volition, packing their things and carts to
  * depart for another civilization. maybe that explains the settlements you can find of people living on their own away
  * from any kingdom, they should tell you as much when you speak with them."
  * <p>
@@ -114,7 +114,7 @@ public final class Emigrants {
 	static final String RIDICULED = "ridiculed", PURIST = "purist", TYRANNY = "tyrant", GRUDGE = "grudge", GLOOM = "unhappy", WANDER = "restless";
 	static final String EXPELLED = "expelled";
 	static final String[] REASONS = {RIDICULED, PURIST, TYRANNY, GRUDGE, GLOOM, WANDER, EXPELLED};
-	/** (0.7.219) A purist who digs in drives those not of his blood out: this much more a day; stopped at the gate, they won't try again for this long. */
+	/** (0.7.220) A purist who digs in drives those not of his blood out: this much more a day; stopped at the gate, they won't try again for this long. */
 	static final float EXPEL = 0.12F;
 	static final long CAUGHT_TICKS = 24000L;
 	static final int CAUGHT_GUARD_LINES = 3, CAUGHT_LINES = 3, CAUGHT_GLOOM = 3;
@@ -188,7 +188,7 @@ public final class Emigrants {
 	private static final Map<UUID, UUID[]> CARTS = new HashMap<>();
 	private static final Map<UUID, double[]> PROGRESS = new HashMap<>();
 	private static final Set<UUID> TAKING = new HashSet<>();
-	/** (0.7.219) Stopped at the gate: when (not saved; a restart lets them try again). */
+	/** (0.7.220) Stopped at the gate: when (not saved; a restart lets them try again). */
 	private static final Map<UUID, Long> CAUGHT = new HashMap<>();
 
 	private Emigrants() {
@@ -472,11 +472,11 @@ public final class Emigrants {
 			why[3] = GRUDGES;
 		}
 		if (Purists.outsider(ruler, v) && Reforms.stubborn(level.getServer(), ruler)) {
-			// ((0.7.219) a purist who dug in drives them out: Reforms)
+			// ((0.7.220) a purist who dug in drives them out: Reforms)
 			why[6] = EXPEL;
 		}
 		if (McaCompat.mood(v) <= UNHAPPY_MOOD) {
-			// ((0.7.219) a ruler's reforms ease all three: Reforms)
+			// ((0.7.220) a ruler's reforms ease all three: Reforms)
 			why[4] = Reforms.ease(level.getServer(), ruler, UNHAPPY);
 		}
 		float daily = 0.0F;
@@ -497,11 +497,11 @@ public final class Emigrants {
 			return;
 		}
 		String from = f != null ? f.name() : town(level, v.blockPosition());
-		// (0.7.219) the realm feels it, and its ruler may answer (Reforms)
+		// (0.7.220) the realm feels it, and its ruler may answer (Reforms)
 		Reforms.left(level, ruler, household.size(), reason);
 		boolean seen = near(level, v.position(), UNSEEN);
 		if (!EXPELLED.equals(reason) && Reforms.caught(level.getServer(), ruler, random)) {
-			// (0.7.219) a ruler who dug in: his guards turn them back at the gate
+			// (0.7.220) a ruler who dug in: his guards turn them back at the gate
 			caught(level, v, household, seen, now);
 			return;
 		}
@@ -730,7 +730,7 @@ public final class Emigrants {
 				kinPlaces.add(p);
 			} else if (d <= FAR_MAX && !Purists.outsider(f, v) && (!Havens.is(server, f) || Havens.fits(server, f, blood))) {
 				places.add(p);
-				// ((0.7.219) a realm that reformed to keep its people draws settlers too: Reforms)
+				// ((0.7.220) a realm that reformed to keep its people draws settlers too: Reforms)
 				for (int i = Reforms.level(server, f); i > 0; i--) {
 					places.add(p);
 				}

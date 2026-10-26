@@ -24,7 +24,7 @@ import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.219) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
+ * (0.7.220) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
  * knows it. the tide born, stone, warrior and sylvan fall into this". Each heritage is some way from human
  * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; the rest pass for human. The
  * heritage screen says so on the card.
@@ -149,7 +149,7 @@ public final class Prejudice {
 		int d = degree(theirs);
 		Faction f = faction(who);
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
-		// ((0.7.219) less where the ruler has decreed tolerance: Reforms)
+		// ((0.7.220) less where the ruler has decreed tolerance: Reforms)
 		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
 		if (d == 0) {
 			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else

@@ -132,7 +132,7 @@ public final class Production {
 		long taxes = 0;
 		if (f.type().isRealm()) {
 			taxes = Tempers.taxes(f, (long)(TAX_BASE + h.population() / VILLAGERS_PER_TAX + f.members().size() * TAX_PER_MEMBER) * days);
-			// (0.7.219) less, where its ruler has cut them to keep his people (Reforms)
+			// (0.7.220) less, where its ruler has cut them to keep his people (Reforms)
 			taxes = Reforms.taxes(level.getServer(), f, taxes);
 			taxes += Tempers.tithe(level, f, days);
 			long tribute = f.type() == FactionType.FIEFDOM && f.overlord() >= 0 ? taxes * TRIBUTE_PERCENT / 100 : 0;
@@ -217,7 +217,7 @@ public final class Production {
 		int crops = farms;
 		Faction stored = Factions.update(level.getServer(), faction.id(), x -> x.withHoldings(x.holdings().withSurvey(population, crops, forest)));
 		if (stored != null) {
-			// (0.7.219) a realm whose peasants have all left falls to ruin in time (Emigrants)
+			// (0.7.220) a realm whose peasants have all left falls to ruin in time (Emigrants)
 			Emigrants.surveyed(level, stored);
 		}
 		return stored == null ? faction : stored;

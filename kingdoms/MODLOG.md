@@ -4771,7 +4771,15 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
 - Gifted townsfolk are crowned 60% of the time when there's one among the heirs (`McaBridge.heir`); a gifted ruler
   unleashes their ultimate when anyone of the realm is hurt within 16 blocks of the throne while they're there.
 - MCA screen: "Gifted: <power>" once you know their name. Powers holds the gift and its moves (`PowersCompat.give` etc.).
-## 0.7.219: non-human heritages looked down on (pack 0.17.4)
+
+## 0.7.219: heritage marks move with the character (pack 0.17.4)
+- Andy (2026-10-26): on the server the new heritages' character stood still while the drawn heritage marks moved
+  (jungxvv). A player MCA draws shows MCA's skin body, posed once from the animated model and then by Touch'n Motion;
+  the marks were drawn on the hidden animated model, posed a second time on their own, and the two came apart.
+- `HeritageLooks` now draws a player's marks, glow, eyes and Tideborn fins on MCA's skin body (`McaLookModels`
+  `playerMarks`/`playerGlow`), the way villagers' looks already are: same pose as the skin, clothes and hair, just
+  over the skin and under the clothes. Without MCA, the animated model as before. Compile-checked, not seen in game.
+## 0.7.220: non-human heritages looked down on (pack 0.17.5)
 Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
 the tide born, stone, warrior and sylvan fall into this".
 - **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
@@ -4793,7 +4801,7 @@ the tide born, stone, warrior and sylvan fall into this".
   across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
   everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
   hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
-  settlements already in the world when 0.7.219 first starts stay as they are; folk first loading within two days of a
+  settlements already in the world when 0.7.220 first starts stay as they are; folk first loading within two days of a
   haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
   dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
   and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now

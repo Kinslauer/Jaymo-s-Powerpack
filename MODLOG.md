@@ -2953,5 +2953,5 @@ symbiote), Smoke, Z Fighter, Darktide; Chrono, Resonance and Xenoform have none.
 `clear`, `corrupt`, `ready`, `unleash` for testing. A player who kills a gifted villager (Andy: "It should corrupt you, but
 also boost your mastery gain or xp"): +15 corruption (+25 if the gift was corrupted) and 30 mastery points past the
 allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no power. Not compiled in the cloud session (no game jars), not seen in game.
-- **0.17.4, heritage prejudice (Kingdoms 0.7.219):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
+- **0.17.5, heritage prejudice (Kingdoms 0.7.220):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
   most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own, and rulers reform (or dig in) to keep them; no Powers changes. See Kingdoms' log.

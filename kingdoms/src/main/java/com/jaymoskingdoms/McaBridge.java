@@ -814,7 +814,7 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
-	/** (0.7.219) {@link McaCompat#playerFamily}. */
+	/** (0.7.220) {@link McaCompat#playerFamily}. */
 	static boolean playerFamily(Villager villager) {
 		if (!(villager instanceof VillagerEntityMCA v)) {
 			return false;
@@ -824,7 +824,7 @@ final class McaBridge {
 			|| node.lookup(java.util.stream.Stream.concat(java.util.stream.Stream.of(node.partner()), node.getChildren())).anyMatch(n -> n.isPlayer());
 	}
 
-	/** (0.7.219) {@link McaCompat#leaveVillage}. */
+	/** (0.7.220) {@link McaCompat#leaveVillage}. */
 	static void leaveVillage(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getResidency().leaveVillage();
