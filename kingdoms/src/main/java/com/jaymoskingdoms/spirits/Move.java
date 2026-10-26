@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.spirits;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * (0.7.236) One thing a spirit's hands can do. Andy: "some have entire move sets but all can be upgraded and leveled". A move
@@ -40,4 +41,12 @@ public interface Move {
 	 * and no cooldown starts.
 	 */
 	boolean cast(ServerPlayer player, SpiritState state, int charge);
+
+	/**
+	 * Casts it from a spirit-carrying folk ({@code caster}: a court wizard, a hermit) at {@code target}; nothing by default.
+	 * The moves the folk use (flurry, riposte, javelin, volley) implement it: no mana, no key, the folk's own cooldown.
+	 */
+	default boolean castFrom(LivingEntity caster, LivingEntity target, SpiritState state) {
+		return false;
+	}
 }
