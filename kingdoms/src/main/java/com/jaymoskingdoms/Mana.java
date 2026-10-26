@@ -71,7 +71,9 @@ public final class Mana {
 		Map.entry("raising", 40.0F), Map.entry("mending", 15.0F), Map.entry("sanctuary", 35.0F), Map.entry("restoration", 60.0F),
 		// the Sorcerer's
 		Map.entry("imbue", 20.0F), Map.entry("bolt", 8.0F), Map.entry("mend", 15.0F), Map.entry("renewal", 30.0F),
-		Map.entry("rekindle", 40.0F));
+		Map.entry("rekindle", 40.0F),
+		// (0.7.231) death's (blood's are paid in blood: Hemomancy.COST)
+		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("deaths_door", 50.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F));
 
 	/** Whether a player is attuned. Saved, kept through death, synced to everyone (who sees whose glow). */
 	public static final AttachmentType<Boolean> ATTUNED = AttachmentRegistry.create(JaymosKingdoms.id("attuned"),

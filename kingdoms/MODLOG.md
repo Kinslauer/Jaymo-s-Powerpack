@@ -5044,3 +5044,25 @@ trade or introduce".
   icon still shows while you hold out a gift). When you become known, the page is laid out again with everything.
 - Introduce sends a new `main` answer, `Introductions.INTRODUCE`. If you share a tongue, it asks their name (as "Ask
   their name"); if not, it offers a handshake. The screen stays open.
+## 0.7.231: death and blood magic (pack 0.17.19)
+Andy (2026-10-26): "death magic, and blood magic, is there a way you can work that concept in?"; picked "two new Sorcerer
+elements". Design doc: https://claude.ai/artifact/5M6smjEanKy32pyLVFEm9X. Defaults I picked for the open questions: a crime
+only in a kingdom's land (and only if its people see), raised bodies crumble after 3 minutes, players' bodies never rise.
+- `Necromancy` (Sorcerer element `death`): the blade blights every blow (`blighted`: `LivingEntityHealMixin` cancels
+  `heal`; any Restoration heal lifts it, `PowersCompat.mend`/`restore`), a burst withers. Sneak and J: Reap a downed one
+  (Powers' `Downed.execute`, 25 mana back), a death bolt at the living, or Raise the Fallen (a Kitchen body near where you
+  look rises as your thrall, a monster as itself, people and horses as the undead; 3 at most, 3 minutes, 20 s cooldown).
+  Withering halved. Spells: Blight, Whispers (a body tells its death message and how long ago; deaths kept in memory, so
+  not across a restart), Death's Door (5 minutes; fall and you're straight back up, -4 max health until you next sleep).
+- `Hemomancy` (Sorcerer element `blood`): paid in health (`COST`), from a drunk pool first (bleeding things near feed
+  it, 20 max); never below 2 health; under half health a cast opens a cut on you. The blade cuts every blow, a burst
+  hemorrhages. Sneak and J: Blood Grip a bleeding foe (dragged in; a mob drops its weapon, a player weakened), a bolt that
+  cuts, or Hemorrhage at nothing (every cut near bursts 4 bleed ticks). Bleeding halved. Spells: Hemorrhage, Blood Grip,
+  Frenzy (a cut for 30 s of Strength, blows heal 1). A staff casts them for blood. Vampires pay 3/4, cast x1.5, fever +3.
+- `ForbiddenArts`: every death cast adds 1 lingering corruption (raising +2), every blood cast 2 (`PowersCompat.corrupt`);
+  `Theft.forbidden` makes it a heavy crime (`NECROMANCY`, `BLOOD_MAGIC`) in any kingdom whose people see, even one that
+  believes in magic. The old Raising and Draining scrolls count as death magic now. Court wizards and clerics refuse a
+  known practitioner (`Restoration.services`).
+- `Sorcery.BLOOD_WITCH` (43): one per barbarian camp from day 4 (`/kingdom caster blood_witch`): bolts that cut, grips,
+  hemorrhages, drinks the bleeding to heal; drops a blood scroll. Necromancers now also drop Blight, Whispers and Death's
+  Door. Six new scroll textures (recoloured from Draining) and a crimson blood witch skin.

@@ -3001,3 +3001,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   level and the leg bends at the knee down to the planted foot, whatever is in the hands (bow, crossbow, gun). A leg is
   one box, so for that draw `client/KneeBend` swaps its boxes for bent copies that cut every side at the knee (texture
   included, so skin, trousers and armour bend too) and puts them back once the model is drawn. Not seen in game.
+- **0.17.19, death and blood magic (Kingdoms 0.7.231):** Andy: "death magic, and blood magic, is there a way you can work
+  that concept in?", then chose two new Sorcerer elements. Powers: `core/wounds/Hemomancy` (`cuts`, `cut`, `hemorrhage`),
+  read by Kingdoms by reflection as Restoration reads `Mending`; Reap kills the downed through `Downed.execute`; casting
+  either school adds lingering alchemical `Corruption`. See Kingdoms' log.

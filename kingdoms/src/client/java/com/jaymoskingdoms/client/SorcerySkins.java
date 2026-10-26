@@ -34,6 +34,8 @@ import net.minecraft.world.item.DyeColor;
 public final class SorcerySkins {
 	static final int NECROMANCER_FACES = 2;
 	private static final Identifier[] NECROMANCERS = new Identifier[NECROMANCER_FACES];
+	/** (0.7.231) The blood witch: the necromancer's robe in crimson and bone-gold, red-eyed. */
+	private static final Identifier[] BLOOD_WITCHES = new Identifier[NECROMANCER_FACES];
 	private static final Identifier[] SHAMANS = new Identifier[DyeColor.values().length];
 	private static final Identifier[] WIZARDS = new Identifier[DyeColor.values().length];
 	/** How far the hat's tip leans back (radians). */
@@ -49,12 +51,14 @@ public final class SorcerySkins {
 	static void register() {
 		for (int i = 0; i < NECROMANCER_FACES; i++) {
 			NECROMANCERS[i] = JaymosKingdoms.id("textures/entity/sorcery/necromancer_" + i + ".png");
+			BLOOD_WITCHES[i] = JaymosKingdoms.id("textures/entity/sorcery/blood_witch_" + i + ".png");
 		}
 		for (DyeColor dye : DyeColor.values()) {
 			SHAMANS[dye.getId()] = JaymosKingdoms.id("textures/entity/sorcery/shaman/" + dye.getName() + ".png");
 			WIZARDS[dye.getId()] = JaymosKingdoms.id("textures/entity/sorcery/wizard/" + dye.getName() + ".png");
 		}
 		JaymosKingdomsClient.SKINS.put(Sorcery.NECROMANCER, state -> NECROMANCERS[state.variant % NECROMANCER_FACES]);
+		JaymosKingdomsClient.SKINS.put(Sorcery.BLOOD_WITCH, state -> BLOOD_WITCHES[state.variant % NECROMANCER_FACES]);
 		JaymosKingdomsClient.SKINS.put(Sorcery.SHAMAN, state -> SHAMANS[dye(state.color, DyeColor.RED)]);
 		JaymosKingdomsClient.SKINS.put(Sorcery.WIZARD, state -> WIZARDS[dye(state.color, DyeColor.BLUE)]);
 		// (0.5.53) the hat on any humanoid villager in the office (MCA's)
