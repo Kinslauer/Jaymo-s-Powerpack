@@ -406,10 +406,12 @@ public final class Ambrose extends Spirit {
 
 	private static boolean steadyHands(ServerPlayer player, SpiritState state, int charge) {
 		if (STEADY.remove(player.getUUID()) != null) {
+			Spirits.toggle(player, SpiritState.STEADY, false);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.steady.off").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
 		STEADY.put(player.getUUID(), true);
+		Spirits.toggle(player, SpiritState.STEADY, true);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.steady.on").withStyle(ChatFormatting.GREEN));
 		return true;
 	}
@@ -499,10 +501,14 @@ public final class Ambrose extends Spirit {
 			ServerPlayer owner = server.getPlayerList().getPlayer(it.next());
 			if (owner == null || !owner.isAlive() || !Spirits.out(owner)) {
 				it.remove();
+				if (owner != null) {
+					Spirits.toggle(owner, SpiritState.STEADY, false);
+				}
 				continue;
 			}
 			if (now % 20 == 0 && !Mana.pay(owner, STEADY_COST_PER_SECOND, Mana.WARD)) {
 				it.remove();
+				Spirits.toggle(owner, SpiritState.STEADY, false);
 				owner.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.steady.off").withStyle(ChatFormatting.GRAY));
 				continue;
 			}

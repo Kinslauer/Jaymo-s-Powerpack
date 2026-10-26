@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client.spirits;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.spirits.Move;
-import com.jaymoskingdoms.spirits.Poses;
 import com.jaymoskingdoms.spirits.Spirit;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.Spirits;
@@ -88,8 +87,6 @@ public final class SpiritHud {
 
 	/** The toggles the line marks "on": the move ids of Ambrose's steady hands, the shared armour and the Quiet One's echo strike. */
 	static final String STEADY = "steady", ARMOUR = "armour", ECHO = "echo";
-	/** How long after the armour pose was stamped the armour still counts as on (the server re-stamps it every 15 ticks while it lasts). */
-	static final int ARMOUR_SEEN_TICKS = 22;
 
 	/**
 	 * Whether {@code move} is a toggle that is on now. Only the armour can be told from what the server syncs: it re-stamps
@@ -99,8 +96,9 @@ public final class SpiritHud {
 	 */
 	private static boolean toggleOn(Move move, SpiritState state, long now) {
 		return switch (move.id()) {
-			case ARMOUR -> state.pose() == Poses.ARMOUR && now - state.shownAt() <= ARMOUR_SEEN_TICKS;
-			case STEADY, ECHO -> false;
+			case ARMOUR -> state.toggled(SpiritState.ARMOUR);
+			case STEADY -> state.toggled(SpiritState.STEADY);
+			case ECHO -> state.toggled(SpiritState.ECHO);
 			default -> false;
 		};
 	}

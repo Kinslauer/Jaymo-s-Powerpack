@@ -320,6 +320,14 @@ public final class Spirits {
 		}
 	}
 
+	/** A toggle move ({@link SpiritState#STEADY}, {@link SpiritState#ECHO}, {@link SpiritState#ARMOUR}) went {@code on} or off: the HUD follows. */
+	static void toggle(ServerPlayer player, int bit, boolean on) {
+		SpiritState state = state(player);
+		if (state != null && state.toggled(bit) != on) {
+			set(player, state.withToggle(bit, on));
+		}
+	}
+
 	private static void set(ServerPlayer player, SpiritState state) {
 		player.setAttached(SPIRIT, state);
 	}
@@ -378,7 +386,7 @@ public final class Spirits {
 		long now = player.level().getGameTime();
 		// (the Quiet One comes at a new size each time)
 		int scale = state.kind() == QUIET ? QuietOne.rollScale(player) : 100;
-		set(player, state.withScale(scale).withOut(true).withShow(now, Poses.REACH));
+		set(player, state.withScale(scale).withOut(true).withToggle(0, false).withShow(now, Poses.REACH));
 		OUT_TICKS.put(player.getUUID(), 0);
 		IDLE_AT.put(player.getUUID(), now + IDLE_MIN + player.getRandom().nextInt(IDLE_MAX - IDLE_MIN + 1));
 		ServerLevel level = (ServerLevel)player.level();
@@ -393,7 +401,7 @@ public final class Spirits {
 		if (state == null || !state.out()) {
 			return;
 		}
-		set(player, state.withOut(false).withShow(player.level().getGameTime(), Poses.IDLE));
+		set(player, state.withOut(false).withToggle(0, false).withShow(player.level().getGameTime(), Poses.IDLE));
 		OUT_TICKS.remove(player.getUUID());
 		IDLE_AT.remove(player.getUUID());
 		if (event != null) {

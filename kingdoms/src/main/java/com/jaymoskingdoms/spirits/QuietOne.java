@@ -296,10 +296,12 @@ public final class QuietOne extends Spirit {
 
 	private static boolean echoStrike(ServerPlayer player, SpiritState state) {
 		if (ECHOING.remove(player.getUUID())) {
+			Spirits.toggle(player, SpiritState.ECHO, false);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.echo.off").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
 		ECHOING.add(player.getUUID());
+		Spirits.toggle(player, SpiritState.ECHO, true);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.echo.on").withStyle(ChatFormatting.WHITE));
 		return true;
 	}
@@ -674,6 +676,9 @@ public final class QuietOne extends Spirit {
 			ServerPlayer owner = server.getPlayerList().getPlayer(it.next());
 			if (owner == null || !owner.isAlive() || !Spirits.out(owner)) {
 				it.remove();
+				if (owner != null) {
+					Spirits.toggle(owner, SpiritState.ECHO, false);
+				}
 			}
 		}
 		for (Iterator<Map.Entry<UUID, Mirror>> it = MIRRORS.entrySet().iterator(); it.hasNext();) {

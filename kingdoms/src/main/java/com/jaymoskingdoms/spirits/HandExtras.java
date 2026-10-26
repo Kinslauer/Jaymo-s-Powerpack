@@ -123,6 +123,7 @@ public final class HandExtras {
 
 	private static boolean armour(ServerPlayer player, SpiritState state, int charge) {
 		ARMOUR.put(player.getUUID(), player.level().getGameTime() + ARMOUR_TICKS);
+		Spirits.toggle(player, SpiritState.ARMOUR, true);
 		ServerLevel level = (ServerLevel)player.level();
 		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.9, 0.5, 0.6);
 		Mana.sendSeen(level, Mana.MOTE, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.8, 0.5, 0.03);
@@ -187,6 +188,9 @@ public final class HandExtras {
 			ServerPlayer owner = server.getPlayerList().getPlayer(entry.getKey());
 			if (owner == null || !owner.isAlive() || owner.level().getGameTime() > entry.getValue() || !Spirits.out(owner)) {
 				it.remove();
+				if (owner != null) {
+					Spirits.toggle(owner, SpiritState.ARMOUR, false);
+				}
 			} else if (now % ARMOUR_POSE_EVERY == 0) {
 				Spirits.show(owner, Poses.ARMOUR);
 			}
