@@ -583,7 +583,7 @@ public final class LifeStory {
 			case STONEBORN, SYLVAN, NIGHTBORN -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
 			case FROSTBORN -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
 			case EMBERBORN, WARRIORBORN -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
-			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
+			case DAWNBORN, TIDEBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
 			default -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
 		};
 	}
