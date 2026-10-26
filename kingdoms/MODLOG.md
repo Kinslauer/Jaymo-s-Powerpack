@@ -5066,3 +5066,23 @@ only in a kingdom's land (and only if its people see), raised bodies crumble aft
 - `Sorcery.BLOOD_WITCH` (43): one per barbarian camp from day 4 (`/kingdom caster blood_witch`): bolts that cut, grips,
   hemorrhages, drinks the bleeding to heal; drops a blood scroll. Necromancers now also drop Blight, Whispers and Death's
   Door. Six new scroll textures (recoloured from Draining) and a crimson blood witch skin.
+## 0.7.232: fallen trunks to push, roll and build on; leaves snap off (pack 0.17.20)
+Andy asked whether Tree Physics (CurseForge, by Farcr) could replace our trees. It can't ship: it's All Rights
+Reserved, 1.21.1 only, and runs on the Sable physics library (also 1.21.1 only). Our felling, growing, seeding,
+woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of its ideas, done our own way:
+- **Leaves snap off.** A falling tree's wood breaks through other trees' leaves in its way, up to `SWEEP_MOST` (12) a
+  tick, and they drop what they would. When it lands on its side, each of its own leaves may snap off, dropping
+  saplings, sticks and apples. The chance is up to `LEAF_SNAP` (50%) and grows with how fast that leaf hit the ground,
+  reaching the full chance at `LEAF_SNAP_FULL` (1.5 blocks a tick). So the crown of a tall tree loses more than a
+  short one (`FallingTree.sweep`, `snaps`).
+- **Push and roll fallen trunks** (`FallenTrunks`). A tree that comes to rest on its side is kept as a fallen trunk
+  (attachment `fallen_trunks` on its world, the newest `KEPT_MOST` 512). Right-click one of its logs with an empty
+  hand and it moves a block away from you, for 0.05 hunger per log, once every `PUSH_TICKS` (8). Pushed along its
+  length it slides. Pushed across, it rolls, and if that takes it over an edge it keeps rolling downhill a block every
+  `ROLL_TICKS` (4), up to `ROLL_MOST` (16), until it reaches level ground. Rolling or dropping onto something living
+  hits it for `ROLL_HIT` (4) and shoves it. Leaves in its way break; anything solid stops it. More than `PUSH_MOST`
+  (20) logs is too heavy for one person. Breaking logs out of a trunk drops them from it, and a split trunk moves as
+  two pieces.
+- **Built on, it stays.** Set any block on top of a fallen trunk (not its own logs or leaves) and the next push finds
+  it pinned. It is forgotten as a trunk and stays as plain logs for good. Trunks already stayed as real blocks, so
+  nothing despawns.

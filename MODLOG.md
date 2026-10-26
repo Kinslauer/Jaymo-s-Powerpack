@@ -3005,3 +3005,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   that concept in?", then chose two new Sorcerer elements. Powers: `core/wounds/Hemomancy` (`cuts`, `cut`, `hemorrhage`),
   read by Kingdoms by reflection as Restoration reads `Mending`; Reap kills the downed through `Downed.execute`; casting
   either school adds lingering alchemical `Corruption`. See Kingdoms' log.
+- **0.17.20, felled trees (Kingdoms 0.7.232):** ideas from Tree Physics (ARR, 1.21.1 only, needs the Sable physics
+  library, so not shipped). Falling trees break through other trees' leaves, some of their own leaves snap off when
+  they land, and a fallen trunk can be pushed, rolled down slopes, or built on to pin it. No Powers changes. See
+  Kingdoms' log.
