@@ -2964,3 +2964,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   become great wars with coalitions, sellswords, upkeep, rebellions and creed-shaped peace terms; speakeasy bookies take bets on wars and on bouts in a new fight pit dug off each den; players can fight there too (gear held at the ropes, real blows, a ringside attendant who offers to rag or bandage
   your wounds and splint breaks). Powers: `Treatment.tendAll` lets another's hands dress every hurt part and splint every
   break at once. See Kingdoms' log.
+- **0.17.10, players on the throne (Kingdoms 0.7.225):** a player can wear a realm's crown, with a villager steward on
+  the throne in their name: by usurping (a lord who slays the ruler in their hall), by marriage (a ruler's player spouse
+  inherits), by conquest (a lord who takes an enemy seat or slays its ruler in a war claims it), or by founding a realm
+  (`/kingdom crown found [name]`, 256 emeralds). No Powers changes. See Kingdoms' log.

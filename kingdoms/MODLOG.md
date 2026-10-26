@@ -4947,3 +4947,26 @@ hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
   it 40% of the time (champion, retired champion or plain winner lines), and MCA's chat AI is told his record.
 - Ops: `/kingdom war tension <a> <b> <0-100>` (looked at once a day).
 - Tuning: the constants at the top of `GreatWars`, `Bookies` and `FightPit`. Compiled only, not seen in game.
+
+## 0.7.225: players on the throne (pack 0.17.10)
+Andy (2026-10-26) asked how a player becomes king (no way did), then "Build all your ideas in please". All in `Crowns`
+(saved as the `crowns` attachment: faction id to the player who wears its crown), hooked into `KingdomEvents.rulerDied`,
+the succession tick, `Banners` (a seat taken), `Theft`, `Festivals`, `/kingdom leave` and `/kingdom info`.
+- **Sovereign and steward:** the realm's leader stays a villager on the throne, ruling in the player's name as steward,
+  so the realm runs itself while they're away. A steward who dies is replaced by the next day and the realm doesn't
+  fall, go to war's judgement or a random fate. A sovereign is sworn to the realm at lord rank (treasury, war and peace,
+  festivals, plots), nothing they do in it is a crime, and they wear one crown at most. `/kingdom crown` shows yours (or
+  the roads to one), `/kingdom crown abdicate` gives it up (so does `/kingdom leave`), `/kingdom info` names them.
+- **Usurping:** a lord of the realm who kills its ruler within 16 blocks of the throne takes the crown at once: their
+  wanted status there is cleared, their good name brought up to welcome, and every realm allied with it thinks 200 worse
+  of them. A player sovereign slain the same way by a lord of their own realm loses the crown to them.
+- **Inheriting:** when a ruler dies (old age, an assassin, or slain outside a war's judgement and a usurper), a player
+  married or betrothed to them (MCA) takes the crown, unless they did it or already wear another; it comes before the
+  random fate of a slain ruler.
+- **Conquest:** a lord who plants the banner on an enemy seat, or slays its ruler (villager or player) in a war, may claim
+  its crown for a day (`/kingdom crown claim <name>`, a clickable line): the realm is freed from vassalage (a kingdom
+  again), crowned theirs, and allied with their old realm, which they leave without the sting.
+- **Founding:** `/kingdom crown found [name]` pays 256 emeralds into a new kingdom's treasury at your feet (in a village's
+  own buildings if you stand in one, else a castle), at least 320 blocks from any realm and off any town's land.
+- A player sovereign slain by the other side of a war ends the war as a ruler's death does.
+- Tuning: the constants at the top of `Crowns`. Compiled only, not seen in game.
