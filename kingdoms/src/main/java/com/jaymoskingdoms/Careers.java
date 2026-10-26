@@ -72,7 +72,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.218) Player jobs. Andy: "lets draw something up" (the life story's village start gave a job that was only a word),
+ * (0.7.220) Player jobs. Andy: "lets draw something up" (the life story's village start gave a job that was only a word),
  * then, on the design: wages from the town's storehouse, "you can have as many as you can keep up", Hunter, Courier
  * and Watch "are great", stronger perks ("you should have a reason to pursue a job"), a Master's apprentice and stall
  * "both", and the title "overhead after introduction, and in the tab list and char screen".

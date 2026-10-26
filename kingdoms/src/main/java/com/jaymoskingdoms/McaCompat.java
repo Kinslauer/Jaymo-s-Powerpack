@@ -291,7 +291,7 @@ public final class McaCompat {
 		}
 	}
 
-	/** (0.7.218) An MCA villager follows {@code player} (MCA's own Follow, as a hired guard does). False without MCA. */
+	/** (0.7.220) An MCA villager follows {@code player} (MCA's own Follow, as a hired guard does). False without MCA. */
 	static boolean follow(Villager v, ServerPlayer player) {
 		return LOADED && McaBridge.follow(v, player);
 	}
@@ -308,6 +308,11 @@ public final class McaCompat {
 			ClothingLibrary.register();
 			Wardrobe.register();
 		}
+	}
+
+	/** (0.7.218) {@code e}'s mother and father (an MCA villager's, those it knows of); none without MCA. */
+	static java.util.List<java.util.UUID> parents(net.minecraft.world.entity.Entity e) {
+		return LOADED ? McaBridge.parents(e) : java.util.List.of();
 	}
 
 	/** (0.7.171) {@code e} is a woman (an MCA villager's gender); false without MCA. */
@@ -425,7 +430,7 @@ public final class McaCompat {
 		MinecraftServer server = guard.level().getServer();
 		int faction = w.factionId();
 		if (target instanceof ServerPlayer player) {
-			// (0.7.218) a Master Courier passes freely
+			// (0.7.220) a Master Courier passes freely
 			return !player.isCreative() && !player.isSpectator() && Reputation.get(player, faction) <= Reputation.HOSTILE && !Careers.passes(player, faction);
 		}
 		if (target instanceof Folk folk) {

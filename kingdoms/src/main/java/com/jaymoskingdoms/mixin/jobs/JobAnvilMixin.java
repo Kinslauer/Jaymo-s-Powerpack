@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.218) A Journeyman Smith's anvil work costs less ({@link Careers#anvilCost}). */
+/** (0.7.220) A Journeyman Smith's anvil work costs less ({@link Careers#anvilCost}). */
 @Mixin(AnvilMenu.class)
 abstract class JobAnvilMixin extends ItemCombinerMenu {
 	@Shadow

@@ -78,7 +78,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)
 		SkillScreen.register();
-		// 0.7.218: players' job titles (over their heads and in the tab list)
+		// 0.7.220: players' job titles (over their heads and in the tab list)
 		JobTitles.register();
 		// 0.6.0: the class screen (on first joining, and after a Writ of Rebirth)
 		ClassScreen.register();

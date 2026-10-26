@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.180) The tab list calls a player you haven't been introduced to a stranger ({@code Introductions}). (0.7.218) One
+ * (0.7.180) The tab list calls a player you haven't been introduced to a stranger ({@code Introductions}). (0.7.220) One
  * you know has their job after their name ({@link JobTitles}).
  */
 @Mixin(PlayerTabOverlay.class)
@@ -25,7 +25,7 @@ abstract class IntroTabListMixin {
 		}
 		Component job = JobTitles.of(info.getProfile().id());
 		if (job != null && cir.getReturnValue() != null) {
-			// (0.7.218) and their job, once you know them
+			// (0.7.220) and their job, once you know them
 			cir.setReturnValue(cir.getReturnValue().copy().append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY)).append(job));
 		}
 	}

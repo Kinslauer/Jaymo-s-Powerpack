@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  * (0.7.57) A fourth tab, Attributes ({@link Stats}): your character level (every pillar's level added up), the
  * attribute points it earns, and the six attributes as rows of ten pips (yours, your heritage's, your class's).
- * (0.7.218) A fifth tab, Jobs ({@link Careers}): every job with your rank in it, where you hold it and its orders, and
+ * (0.7.220) A fifth tab, Jobs ({@link Careers}): every job with your rank in it, where you hold it and its orders, and
  * (hovered) what each rank's perk does.
  */
 final class SkillScreen extends Screen {
@@ -46,9 +46,9 @@ final class SkillScreen extends Screen {
 	private static int page;
 	/** (0.7.57) Whether the Attributes tab is the one shown. */
 	private static boolean stats;
-	/** (0.7.218) Whether the Jobs tab is the one shown. */
+	/** (0.7.220) Whether the Jobs tab is the one shown. */
 	private static boolean jobs;
-	/** (0.7.218) The Jobs tab's rows. */
+	/** (0.7.220) The Jobs tab's rows. */
 	static final int JOB_ROW = 10, JOB_ACCENT = 0xFFC8A060;
 
 	SkillScreen() {
@@ -286,7 +286,7 @@ final class SkillScreen extends Screen {
 		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, name, accent, text);
 	}
 
-	// ---- (0.7.218) the Jobs tab --------------------------------------------------------------------------------------
+	// ---- (0.7.220) the Jobs tab --------------------------------------------------------------------------------------
 
 	private int jobY(int index) {
 		return top() + TREE_Y - 2 + index * JOB_ROW;

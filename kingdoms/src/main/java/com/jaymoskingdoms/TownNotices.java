@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #LIFE}.
  *
  * <p>A pinned town notice is kept ({@link Bounties#PINNED}) as {@code town|template|poster's UUID|posted at}.
- * <p>(0.7.218) Or a <b>Help wanted</b> notice ({@code town|help.<job>|...}): a job the poster's town is short of hands
+ * <p>(0.7.220) Or a <b>Help wanted</b> notice ({@code town|help.<job>|...}): a job the poster's town is short of hands
  * for ({@link Careers#shortOf}). Pulled off, it's the job, with them ({@link Careers#hire}); it stays up if they won't
  * have you.
  */
@@ -49,9 +49,9 @@ final class TownNotices {
 	static final long LIFE = 24000L * 2;
 	/** What an errand pays: emeralds, MCA hearts with the poster, reputation with the village. */
 	static final int HEARTS = 4, REPUTATION = 6;
-	/** (0.7.218) The chance a notice is Help wanted, when the poster's town is short of hands. */
+	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
 	static final float HELP_CHANCE = 0.3F;
-	/** (0.7.218) A Help wanted notice's kind. */
+	/** (0.7.220) A Help wanted notice's kind. */
 	static final int HELP = -2;
 
 	static Item ITEM;
@@ -184,7 +184,7 @@ final class TownNotices {
 		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
 		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
 		if (random.nextFloat() < HELP_CHANCE && poster.level() instanceof ServerLevel level && up.stream().noneMatch(k -> is(k) && parts(k)[1].startsWith("help."))) {
-			// (0.7.218) Help wanted: a job their town is short of hands for
+			// (0.7.220) Help wanted: a job their town is short of hands for
 			Faction f = Quests.settlement(level, poster);
 			List<Careers.Job> short_ = new ArrayList<>();
 			for (Careers.Job job : Careers.Job.values()) {
@@ -272,7 +272,7 @@ final class TownNotices {
 			return true;
 		}
 		if (n.help()) {
-			// (0.7.218) the job, with whoever posted it
+			// (0.7.220) the job, with whoever posted it
 			Careers.Job wanted = n.job();
 			return wanted != null && Careers.hire(level, player, f, wanted, giver);
 		}

@@ -113,7 +113,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
 		Homes.register();
 		Jobs.register();
-		// 0.7.218: players' jobs (orders, wages, ranks and perks)
+		// 0.7.220: players' jobs (orders, wages, ranks and perks)
 		Careers.register();
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
@@ -292,6 +292,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
+		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
+		GiftedFolk.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();

@@ -195,7 +195,7 @@ final class McaBridge {
 		}
 	}
 
-	/** (0.7.218) {@link McaCompat#follow}. */
+	/** (0.7.220) {@link McaCompat#follow}. */
 	static boolean follow(Villager v, net.minecraft.world.entity.player.Player player) {
 		if (!(v instanceof VillagerEntityMCA m)) {
 			return false;
@@ -363,7 +363,9 @@ final class McaBridge {
 		}
 		List<VillagerEntityMCA> townsfolk = all.stream().filter(v -> worker(v).role() < 0).toList();
 		List<VillagerEntityMCA> pick = townsfolk.isEmpty() ? all : townsfolk;
-		return pick.get(level.getRandom().nextInt(pick.size()));
+		// (0.7.218) the gifted are likelier to rise
+		VillagerEntityMCA gifted = GiftedFolk.rises(pick, level.getRandom());
+		return gifted != null ? gifted : pick.get(level.getRandom().nextInt(pick.size()));
 	}
 
 	/** {@link McaCompat#becomeGuard}: an MCA guard (or archer) of the same blood takes {@code folk}'s post. */
@@ -662,6 +664,21 @@ final class McaBridge {
 		if (player != null) {
 			player.sendSystemMessage(message.copy().withStyle(ChatFormatting.YELLOW));
 		}
+	}
+
+	/** {@link McaCompat#parents}. */
+	static List<java.util.UUID> parents(net.minecraft.world.entity.Entity e) {
+		if (!(e instanceof VillagerEntityMCA v)) {
+			return List.of();
+		}
+		List<java.util.UUID> parents = new java.util.ArrayList<>(2);
+		FamilyTreeNode node = v.getRelationships().getFamilyEntry();
+		for (java.util.UUID p : new java.util.UUID[] {node.mother(), node.father()}) {
+			if (p != null && (p.getMostSignificantBits() != 0L || p.getLeastSignificantBits() != 0L)) {
+				parents.add(p);
+			}
+		}
+		return parents;
 	}
 
 	/** {@link McaCompat#female}. */

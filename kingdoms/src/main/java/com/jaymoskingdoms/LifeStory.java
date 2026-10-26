@@ -704,7 +704,7 @@ public final class LifeStory {
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
 		}
 		if (landed == Start.VILLAGE) {
-			// (0.7.218) a real job now ({@link Careers}), leaning to who raised you, taken up in the village you wake by
+			// (0.7.220) a real job now ({@link Careers}), leaning to who raised you, taken up in the village you wake by
 			String job = Careers.storyLean(raised.key, random);
 			List<String> story = new ArrayList<>(of(player) == null ? List.of() : of(player));
 			story.add(job);

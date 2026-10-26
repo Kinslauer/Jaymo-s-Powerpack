@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.218) Players' job titles ({@link Careers#refreshTitles}): under the name over their head and after it in the tab
+ * (0.7.220) Players' job titles ({@link Careers#refreshTitles}): under the name over their head and after it in the tab
  * list, for those you've been introduced to ({@code IntroNameTagMixin}, {@code IntroTabListMixin}).
  */
 public final class JobTitles {

@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it; (0.7.204) "Offer a
  * handshake" ({@link Introductions#HANDSHAKE}) too.
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
- * (0.7.218) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement.
+ * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -50,7 +50,7 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(Introductions.HANDSHAKE);
 		}
 		if ("main".equals(name) && !Careers.offersWork(villager)) {
-			// (0.7.218) only a grown villager of a settlement talks work
+			// (0.7.220) only a grown villager of a settlement talks work
 			cir.getReturnValue().remove(Careers.ANSWER);
 		}
 		if ("main".equals(name) && !Hermits.is(villager)) {

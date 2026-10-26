@@ -475,7 +475,7 @@ public final class Trees {
 			return true;
 		}
 		if (felled > 0 && player instanceof net.minecraft.server.level.ServerPlayer sp) {
-			// (0.7.218) a woodcutter's felling, for their orders
+			// (0.7.220) a woodcutter's felling, for their orders
 			Careers.felled(server, sp, pos, felled);
 		}
 		// (a chop costs what breaking the log would: a point of the axe's wear, and a little hunger)
@@ -529,7 +529,7 @@ public final class Trees {
 		}
 		BlockState real = ChoppedLog.real(level, cut, state);
 		level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, cut, Block.getId(real));
-		// (0.7.218) a Woodcutter's chop counts for more
+		// (0.7.220) a Woodcutter's chop counts for more
 		if (taken + Careers.chop(cutter) >= needed(logs.size())) {
 			return fell(level, cut, cutter, tool, sink, false);
 		}

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.218) Ingots taken from a furnace: a smith's work, and a Master Smith's bonus ingots ({@link Careers#smelted}). */
+/** (0.7.220) Ingots taken from a furnace: a smith's work, and a Master Smith's bonus ingots ({@link Careers#smelted}). */
 @Mixin(FurnaceResultSlot.class)
 abstract class JobFurnaceResultMixin {
 	@Shadow

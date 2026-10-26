@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.218) A Fisher's bites come sooner and their catches are luckier ({@link Careers#lure}, {@link Careers#luck}), as the
+ * (0.7.220) A Fisher's bites come sooner and their catches are luckier ({@link Careers#lure}, {@link Careers#luck}), as the
  * rod's own Lure and Luck of the Sea do. The wait for a fish is cut as it's rolled (seen idle at the start of
  * catchingFish, as Jaymo's Kitchen's bait does).
  */

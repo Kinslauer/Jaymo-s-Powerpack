@@ -141,7 +141,7 @@ public final class Construction {
 			if (NEXT_PLAN.getOrDefault(f.id(), 0L) > level.getGameTime() || Builders.crew(level, f).isEmpty() || !Planner.ready(level, f)) {
 				continue;
 			}
-			// (0.7.218) a Master Builder's pick first
+			// (0.7.220) a Master Builder's pick first
 			String chosen = Careers.nextBuilding(f.id());
 			if (chosen != null && Planner.plan(level, f, false, chosen) != null) {
 				Careers.builtNext(f.id());

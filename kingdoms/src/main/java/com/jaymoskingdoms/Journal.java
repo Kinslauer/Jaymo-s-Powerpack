@@ -172,7 +172,7 @@ public final class Journal {
 			Optional<BlockPos> target = ready ? f == null ? Optional.empty() : Optional.of(f.seat()) : q.objective().pos();
 			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, Quests.text(q), Quests.objective(level, player, q), target));
 		}
-		// (0.7.218) your jobs' orders
+		// (0.7.220) your jobs' orders
 		entries.addAll(Careers.journal(player));
 		// (0.7.31) the weather foretold, first
 		Component weather = DisasterRelief.journal(level, player);

@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
- * (0.7.218) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
+ * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -124,7 +124,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
-			// (0.7.218) a talk about work: what their town has for you
+			// (0.7.220) a talk about work: what their town has for you
 			villager.getInteractions().stopInteracting();
 			Careers.talk(player, villager);
 			ci.cancel();
