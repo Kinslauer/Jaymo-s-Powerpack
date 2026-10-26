@@ -54,8 +54,9 @@ import org.jspecify.annotations.Nullable;
  * Winning allies share the loser's purse, losing allies pay reparations.</li>
  * <li><b>Rebellions.</b> In a great war, a fiefdom of another creed whose overlord is losing may rise, crown its lord
  * king and go over to the other side.</li>
- * <li><b>Wagers.</b> While a war is mustering or young, players may wager emeralds on a side
- * ({@code /kingdom war wager}): double back if it wins, the stake back on a white peace.</li>
+ * <li><b>Wagers.</b> (Andy: "War wagers can only be done with bookie npcs in speakeasies.") While a war is mustering or
+ * young, a speakeasy's bookie takes emeralds on a side at his odds ({@link Bookies}): paid at the odds if it wins, the
+ * stake back on a white peace.</li>
  * </ul>
  */
 final class GreatWars {
@@ -152,9 +153,11 @@ final class GreatWars {
 	static final float REBEL_CHANCE = 0.15F;
 	/** A rebel and its old overlord start from this tension. */
 	static final float REBEL_TENSION = 60.0F;
-	/** Wagers: open until the war is this old (ticks), at most this many emeralds a player a war; a win pays this many times. */
+	/** Wagers: open until the war is this old (ticks), at most this many emeralds a player a war. */
 	static final long WAGER_OPEN_TICKS = 24000L;
-	static final int WAGER_MOST = 128, WAGER_PAYS = 2;
+	static final int WAGER_MOST = 128;
+	/** What a wager saved before odds were given pays (times the stake). */
+	static final float OLD_ODDS = 2.0F;
 	/** How often the daily round is looked at (ticks), and how often owed winnings are paid out (ticks). */
 	static final int CHECK_TICKS = 1200, PAY_TICKS = 100;
 
@@ -165,13 +168,14 @@ final class GreatWars {
 			Codec.INT.fieldOf("principal").forGetter(Pledge::principal)).apply(i, Pledge::new));
 	}
 
-	/** A player's wager: who, on which war and side, how much. */
-	record Wager(UUID player, int war, int side, int emeralds) {
+	/** A player's wager: who, on which war and side, how much, at what odds (times the stake, paid on a win). */
+	record Wager(UUID player, int war, int side, int emeralds, float odds) {
 		static final Codec<Wager> CODEC = RecordCodecBuilder.create(i -> i.group(
 			net.minecraft.core.UUIDUtil.CODEC.fieldOf("player").forGetter(Wager::player),
 			Codec.INT.fieldOf("war").forGetter(Wager::war),
 			Codec.INT.fieldOf("side").forGetter(Wager::side),
-			Codec.INT.fieldOf("emeralds").forGetter(Wager::emeralds)).apply(i, Wager::new));
+			Codec.INT.fieldOf("emeralds").forGetter(Wager::emeralds),
+			Codec.FLOAT.optionalFieldOf("odds", OLD_ODDS).forGetter(Wager::odds)).apply(i, Wager::new));
 	}
 
 	/**
@@ -690,46 +694,55 @@ final class GreatWars {
 
 	// ---- wagers -------------------------------------------------------------------------------------------------------
 
-	/** {@code player} wagers {@code emeralds} from their inventory on {@code side} of {@code war}. Returns what to tell them. */
-	static Component wager(ServerPlayer player, War war, int side, int emeralds) {
+	/** Whether wagers on {@code war} are still taken (it's mustering, or not a day under way). */
+	static boolean wagersOpen(MinecraftServer server, War war) {
+		return !war.active() || Factions.level(server).getGameTime() - war.startsAt() <= WAGER_OPEN_TICKS;
+	}
+
+	/**
+	 * (From a speakeasy's {@link Bookies bookie}) {@code player} stakes {@code stake} emeralds, already taken from them, on
+	 * {@code side} of {@code war} at {@code odds}. Returns what the bookie says, and how much he kept (the rest goes back).
+	 */
+	record Taken(Component said, int kept) {
+	}
+
+	static Taken wager(ServerPlayer player, War war, int side, int stake, float odds) {
 		MinecraftServer server = player.level().getServer();
-		long now = Factions.level(server).getGameTime();
-		if (war.active() && now - war.startsAt() > WAGER_OPEN_TICKS) {
-			return Component.translatable("message.jaymoskingdoms.wager.closed");
+		if (!wagersOpen(server, war)) {
+			return new Taken(Component.translatable("message.jaymoskingdoms.wager.closed"), 0);
 		}
 		int already = 0;
 		for (Wager w : ledger(server).wagers()) {
 			if (w.player().equals(player.getUUID()) && w.war() == war.id()) {
 				if (w.side() != side) {
-					return Component.translatable("message.jaymoskingdoms.wager.other_side");
+					return new Taken(Component.translatable("message.jaymoskingdoms.wager.other_side"), 0);
 				}
 				already += w.emeralds();
 			}
 		}
-		int amount = Math.min(emeralds, WAGER_MOST - already);
+		int amount = Math.min(stake, WAGER_MOST - already);
 		if (amount <= 0) {
-			return Component.translatable("message.jaymoskingdoms.wager.most", WAGER_MOST);
+			return new Taken(Component.translatable("message.jaymoskingdoms.wager.most", WAGER_MOST), 0);
 		}
-		int have = player.getInventory().countItem(Items.EMERALD);
-		if (have < amount) {
-			return Component.translatable("message.jaymoskingdoms.wager.short", amount);
-		}
-		int left = amount;
-		for (int i = 0; i < player.getInventory().getContainerSize() && left > 0; i++) {
-			ItemStack s = player.getInventory().getItem(i);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(left, s.getCount());
-				s.shrink(take);
-				left -= take;
-			}
-		}
-		Wager made = new Wager(player.getUUID(), war.id(), side, amount);
+		Wager made = new Wager(player.getUUID(), war.id(), side, amount, odds);
 		edit(server, l -> {
 			List<Wager> wagers = new ArrayList<>(l.wagers());
 			wagers.add(made);
 			return withWagers(l, wagers, l.owed());
 		});
-		return Component.translatable("message.jaymoskingdoms.wager.made", amount, Wars.name(server, side), amount * WAGER_PAYS);
+		return new Taken(Component.translatable("message.jaymoskingdoms.wager.made", amount, Wars.name(server, side), (int)Math.floor(amount * odds)), amount);
+	}
+
+	/** Winnings (or a stake back) owed to {@code player}: paid now if they're on, else when they're next on. */
+	static void owe(MinecraftServer server, UUID player, int emeralds) {
+		if (emeralds <= 0) {
+			return;
+		}
+		edit(server, l -> {
+			Map<String, Integer> owed = new HashMap<>(l.owed());
+			owed.merge(player.toString(), emeralds, Integer::sum);
+			return withWagers(l, l.wagers(), owed);
+		});
 	}
 
 	private static void settleWagers(MinecraftServer server, War war, int winner, Wars.@Nullable Terms terms) {
@@ -743,7 +756,7 @@ final class GreatWars {
 				continue;
 			}
 			any = true;
-			int pay = winner < 0 || terms == null || terms == Wars.Terms.WHITE ? w.emeralds() : w.side() == winner ? w.emeralds() * WAGER_PAYS : 0;
+			int pay = winner < 0 || terms == null || terms == Wars.Terms.WHITE ? w.emeralds() : w.side() == winner ? (int)Math.floor(w.emeralds() * w.odds()) : 0;
 			if (pay > 0) {
 				owed.merge(w.player().toString(), pay, Integer::sum);
 			}
@@ -775,6 +788,7 @@ final class GreatWars {
 				n -= stack;
 			}
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.wager.paid", e.getValue()).withStyle(ChatFormatting.GOLD));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.6F, 0.8F);
 			left.remove(e.getKey());
 		}
 		if (left.size() != owed.size()) {

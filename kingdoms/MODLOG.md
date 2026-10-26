@@ -4909,7 +4909,20 @@ hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
 - **Rebellions:** in a great war, each day a fiefdom (with a lord whose temper's creed clashes 2+ with its overlord's)
   whose overlord is behind by 20 rises 15% of the time: its lord is crowned, it takes its own creed and goes over to the
   other side.
-- **Wagers** (`/kingdom war wager <realm> <emeralds>`): from the warm-up until a day into the fighting, up to 128 a war,
-  one side only; a win pays double, a white peace refunds, paid into your inventory when you're next online.
+- **Bookies** (`Bookies`): Andy: "War wagers can only be done with bookie npcs in speakeasies." Every den keeps a bookie
+  (hired like the fence, replaced a day after he's gone). Right-click him for his book: each war from its warm-up until a
+  day into the fighting, both sides at his odds (each side's share of the armies, sellswords included, squeezed into
+  15-85%, the house keeping 10%; 1.2x to 5x), and the pit's next bout while its card is called. Hold emeralds and click a
+  line (`/bookie war|bout`, within 6 blocks of a bookie): up to 128 a war (one side only), 32 a bout. Winnings come into
+  your inventory (when you're next online); a white peace refunds war stakes. There's no other way to bet on a war.
+- **Fight pit** (`FightPit`, `Speakeasy.digPit`, attachment `fight_pits`): Andy: "You can also bet on fighters in the pit
+  ... Maybe another backroom dug into the speakeasy or in a makeshift ring if the room allows." Every den digs a backroom
+  through its south, west or north wall (whichever has earth over it and nothing in the way): 9x9 inside, a coarse-dirt
+  ring roped with spruce fence (5x5 inside, a gate toward the door), plank aisle for the crowd, benches, lanterns. With no
+  room for that, a 5x5 makeshift ring room with posts at its corners. While a player is within 24 blocks, a bout every
+  minute: the bookie calls the card (two MCA fighters, each with power 1-3, guard 0-35%, wind 12-24, and odds the house
+  sets by simulating the bout 400 times), bets for 30 s, then the bell. They trade bare-knuckle blows (swings, crits,
+  knockback, cheers; no real damage) until one's wind is gone and he yields. Winning bets pay at the odds; the winner
+  stays on as champion (+1 wind a win) and retires after 5 wins. Each bout warms the city by 1.
 - Ops: `/kingdom war tension <a> <b> <0-100>` (looked at once a day).
-- Tuning: the constants at the top of `GreatWars`. Compiled only, not seen in game.
+- Tuning: the constants at the top of `GreatWars`, `Bookies` and `FightPit`. Compiled only, not seen in game.

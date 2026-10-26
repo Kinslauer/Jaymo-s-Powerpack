@@ -22,8 +22,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * {@code /kingdom war}: {@code status}; for lords, {@code declare <name>} and {@code peace offer|accept [name]}; for
  * operators, {@code start <a> <b>} (no warm-up), {@code end <name>} (a white peace), {@code party} (the nearest war
- * sends a party now) and {@code npc} (NPC kings think about war now). (0.7.224) {@code tensions}, {@code creed [creed]},
- * {@code wager <name> <emeralds>}; for operators {@code tension <a> <b> <value>} ({@link GreatWars}).
+ * sends a party now) and {@code npc} (NPC kings think about war now). (0.7.224) {@code tensions}, {@code creed [creed]}; for
+ * operators {@code tension <a> <b> <value>} ({@link GreatWars}).
  */
 final class WarCommands {
 	/** How many banners {@code status} lists per war. */
@@ -46,14 +46,12 @@ final class WarCommands {
 			.then(Commands.literal("end").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(WarCommands::end)))
 			.then(Commands.literal("join").executes(WarCommands::join))
-			// (0.7.224) creeds and tension, wagers
+			// (0.7.224) creeds and tension (wagers are a speakeasy bookie's: Bookies)
 			.then(Commands.literal("tensions").executes(WarCommands::tensions))
 			.then(Commands.literal("creed").executes(WarCommands::creed)
 				.then(Commands.argument("creed", StringArgumentType.word())
 					.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(GreatWars.Creed.values()).map(GreatWars.Creed::key), b))
 					.executes(WarCommands::setCreed)))
-			.then(Commands.literal("wager").then(Commands.argument("name", StringArgumentType.word())
-				.then(Commands.argument("emeralds", IntegerArgumentType.integer(1, GreatWars.WAGER_MOST)).executes(WarCommands::wager))))
 			.then(Commands.literal("tension").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("a", StringArgumentType.word()).then(Commands.argument("b", StringArgumentType.word())
 					.then(Commands.argument("value", IntegerArgumentType.integer(0, 100)).executes(WarCommands::tension)))))
@@ -173,7 +171,7 @@ final class WarCommands {
 		return 1;
 	}
 
-	// ---- creeds, tension, wagers (0.7.224) ------------------------------------------------------------------------------
+	// ---- creeds and tension (0.7.224) ------------------------------------------------------------------------------------
 
 	/** How many tense pairs {@code tensions} lists. */
 	static final int TENSIONS_LISTED = 8;
@@ -226,26 +224,6 @@ final class WarCommands {
 		}
 		GreatWars.setCreed(server, mine.id(), creed);
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.creed.adopted", mine.name(), creed.named()).withStyle(ChatFormatting.GOLD));
-		return 1;
-	}
-
-	/** A wager on the side of the named realm, in its war. */
-	private static int wager(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
-		ServerPlayer player = c.getSource().getPlayerOrException();
-		MinecraftServer server = c.getSource().getServer();
-		Faction on = Factions.byName(server, StringArgumentType.getString(c, "name"));
-		if (on == null) {
-			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
-			return 0;
-		}
-		List<War> wars = Wars.warsOf(server, on.id());
-		if (wars.isEmpty()) {
-			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.war.not_at_war"));
-			return 0;
-		}
-		War war = wars.getFirst();
-		Component said = GreatWars.wager(player, war, Wars.sideOf(server, war, on.id()), IntegerArgumentType.getInteger(c, "emeralds"));
-		c.getSource().sendSuccess(() -> said.copy().withStyle(ChatFormatting.GOLD), false);
 		return 1;
 	}
 

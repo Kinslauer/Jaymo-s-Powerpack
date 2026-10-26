@@ -2961,5 +2961,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Chrono at once with only its first ability. Not seen in game.
 - **0.17.9, creeds and great wars (Kingdoms 0.7.224):** every realm holds a creed (Crown, Chivalry, Conquest, Faith, Coin, Old
   Blood); clashing creeds build tension, faster the richer the realms, until war is inevitable; wars between wealthy realms
-  become great wars with coalitions, sellswords, upkeep, rebellions and creed-shaped peace terms; players can wager on wars.
+  become great wars with coalitions, sellswords, upkeep, rebellions and creed-shaped peace terms; speakeasy bookies take bets on wars and on bouts in a new fight pit dug off each den.
   No Powers changes. See Kingdoms' log.

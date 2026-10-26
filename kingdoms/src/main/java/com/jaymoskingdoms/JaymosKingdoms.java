@@ -187,6 +187,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
+		// 0.7.224: the den's bookie (wars and pit fights) and its fight pit (and its attachment)
+		LOGGER.debug("fight pit attachment: {}", FightPit.PITS);
+		Bookies.register();
+		FightPit.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
