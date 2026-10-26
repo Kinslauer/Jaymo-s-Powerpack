@@ -70,6 +70,8 @@ public final class DarktidePower implements Power {
 
 	public static void init() {
 		Powers.register(INSTANCE);
+		// (0.17.1) what a gifted villager does with Darktide
+		DarktideGift.init();
 		DarktideShade.registerItems();
 		DarktideNet.register();
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Guard.TYPE, (payload, ctx) -> DarktideGuard.setGuard(ctx.player(), payload.up()));
