@@ -4779,7 +4779,6 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
 - `HeritageLooks` now draws a player's marks, glow, eyes and Tideborn fins on MCA's skin body (`McaLookModels`
   `playerMarks`/`playerGlow`), the way villagers' looks already are: same pose as the skin, clothes and hair, just
   over the skin and under the clothes. Without MCA, the animated model as before. Compile-checked, not seen in game.
-
 ## 0.7.220: player jobs (`Careers`, pack 0.17.5)
 Design and Andy's answers: the "Player jobs: design" doc. Wages from the town's storehouse, as many jobs at once as you
 can keep up with, Hunter/Courier/Watch added, stronger perks, a Master's apprentice and stall, the title over your head
@@ -4804,3 +4803,60 @@ once introduced and in the tab list and character screen.
 - Shown: `job_titles` payload to everyone; under the nametag (`IntroNameTagMixin`) and after the tab-list name
   (`IntroTabListMixin`) once introduced; a Jobs tab on the K screen; orders in the journal; `/job`.
 - Tuning: constants at the top of `Careers`. Not seen in game.
+
+## 0.7.221: non-human heritages looked down on (pack 0.17.6)
+Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
+the tide born, stone, warrior and sylvan fall into this".
+- **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
+  other heritage passes for human. The heritage card says it ("Shunned: ...").
+- **Who minds** (`Prejudice.minds`): most townsfolk. Not those of the same blood, not anyone non-human themselves, never
+  the kindhearted, cheerful or devout; always the proud, suspicious and spiteful; of the rest 55% of MCA's warm
+  personalities, 25% of plain ones, 8% of sour ones and no crabby one don't mind (fixed per villager). A purist ruler's
+  own people always mind, 1.5x as hard. A full mask hides your blood.
+- **What it does**: traders who mind charge 6% more per degree (Tideborn 24%, 36% for a purist's); chats, jokes and hugs
+  win 15% fewer MCA hearts per degree (at least a fifth kept); good name with a realm is won 8% slower and lost 8% faster
+  per degree (x1.5 in a purist realm, kin excepted); guards halt you sooner (Tideborn every day instead of every three)
+  and search and toll you more; villagers start cooler (8 regard per degree) to a neighbour of such blood; MCA's chat AI
+  is told what they think of your blood.
+- **Talk**: the nearest townsperson mutters about your blood now and then (worse lines from degree 3), children point,
+  and they edge away from a Tideborn or Stoneborn standing close. Ones who don't mind have a kind word, and one of your
+  blood a knowing one. In a purist realm the Purists' own jeers take the place of the mutters.
+- **Havens and the rivalry** (`Havens`): Andy: "you will often see villages of solely non humans because of this fact, as
+  the ones who lived among the humans got tired of the ridicule. raising a sort of rivalry, between human and nonhumans
+  across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
+  everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
+  hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
+  settlements already in the world when 0.7.221 first starts stay as they are; folk first loading within two days of a
+  haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
+  dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
+  and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now
+  and then talks of the rivalry from their side.
+- **Villagers who up and leave** (`Emigrants`): Andy: "allow villagers to up and leave on their own volition, packing
+  their things and carts to depart for another civilization. maybe that explains the settlements you can find of people
+  living on their own away from any kingdom, they should tell you as much when you speak with them." Each grown MCA
+  villager is weighed about 20 times a day. A day's chance: 0.3% restless, +0.4% per degree their neighbours mind their
+  blood (to 6%), +3% not of a purist king's blood, +1% under a tyrant, +1.5% at odds with 3+ neighbours, +1% MCA mood -8
+  or worse; the biggest is their reason. They go with their partner and children; never a player's family (MCA's tree,
+  online or not), a ruler, a lineage elder or one following someone; settled ones stay at least 10 days. No cap on how many
+  go (Andy: "If they lose more than that then it is what it is, the kingdom will either improve it's qol for villagers or
+  it will fall to ruin with no peasants"): a realm once peopled whose survey (with its seat entity-ticking) counts no
+  villagers for 3 days, over at least 3 counts, falls to ruin like a slain ruler's (folk scattered, announced). Where: the ridiculed to a haven that takes
+  their blood, a purist's outsider to a realm of their own blood; else half the time a settlement away from any kingdom
+  (no realm within 160 blocks, no overlord), else any village or realm 200-1500 blocks off. Seen, they say goodbye and
+  pack for 30 s (a draft horse and cart where a realm is near, else a chested donkey, led on a rope by the head of the
+  house); unseen they go at once. The road works like the Elders' (a record while unseen, walked for real near players).
+  Arrived, the cart is unpacked, MCA's `leaveVillage` lets them settle there, and they remember where from and why: in a
+  chat, 35% of the time they tell you. Folk in a settlement away from any kingdom with no story of their own tell (25%)
+  of their family leaving the nearest realm long ago.
+- **Rulers answer the leaving** (`Reforms`): Andy's "please" to rulers reacting. Each household leaving a ruled realm
+  adds 1 pressure (2 for a big household), ebbing 0.35 a day. At 2, at most every two days, the ruler answers by temper:
+  reforms 95% noble, 85% reveler, 50% warlord, 35% purist, 30% paranoid, 20% tyrant; else digs in (news, and stubborn
+  gossip). Each reform step (up to 3): taxes -20%, tyrant/purist/unhappy pushes to leave -25%, a purist's outsider
+  markup -25%, guards' toll and search weights -1, MCA mood +4 for villagers about the seat, news via Tidings, gossip.
+  Ten days with nobody leaving and he slips back a step.
+  Andy: "More". Reformed realms draw settlers (a realm counts once more per step as somewhere emigrants go). When the
+  ridiculed were most of those who left, the reform comes with an edict of tolerance: his townsfolk mind a blood 25% less
+  a step (`Prejudice.minds`). Digging in has teeth: a tyrant's, paranoid king's or warlord's guards stop 40% of households
+  at the gate (a guard's halt, MCA mood -3, no new try for a day), and a purist who dug in drives out those not of his
+  blood (+12% a day, reason "expelled", to a realm of their own blood or anywhere).
+- Tuning: the constants at the top of `Prejudice`, `Havens`, `Emigrants` and `Reforms`.

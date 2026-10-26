@@ -630,15 +630,19 @@ public final class Approaches {
 				w[ACCUSE] = 6;
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
-			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= HALT_TICKS)) {
+			// (0.7.221) one who looks down on your blood halts you sooner, and searches you more
+			int minds = Prejudice.guard(mob, player);
+			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Prejudice.haltGap(mob, player, HALT_TICKS))) {
 				w[HALT] = 2;
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f, player);
 			// (0.7.100) nor of one their settlement owes for bringing one of its own home
 			if (!sworn && Captives.owed(player, f.id()) <= 0) {
-				w[SEARCH] = SEARCH_W[tv];
-				w[TOLL] = TOLL_W[tv];
+				// ((0.7.221) fewer where the ruler has eased up to keep his people: Reforms)
+				Faction rules = ruler(server, f);
+				w[SEARCH] = Reforms.guards(server, rules, SEARCH_W[tv]) + minds;
+				w[TOLL] = Reforms.guards(server, rules, TOLL_W[tv]) + minds / 2;
 			}
 			w[BOUT] = BOUT_W[tv];
 			w[LOYALTY] = LOYALTY_W[tv];
@@ -907,6 +911,14 @@ public final class Approaches {
 				if (said == null) {
 					// (0.7.130) a purist realm's pride in its blood (or a grumble from one not of it)
 					said = Purists.gossip(level, a.mob, player, ruler);
+				}
+				if (said == null) {
+					// (0.7.221) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
+					said = Prejudice.gossip(level, a.mob, player);
+				}
+				if (said == null) {
+					// (0.7.221) the ruler's answer to his people leaving (Reforms)
+					said = Reforms.gossip(level, player, ruler);
 				}
 				if (said == null) {
 					// (0.7.109) what they saw another player do

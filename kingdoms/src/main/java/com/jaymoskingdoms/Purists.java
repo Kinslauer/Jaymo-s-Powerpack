@@ -202,7 +202,7 @@ public final class Purists {
 		boolean kin = kin(f, player);
 		for (MerchantOffer offer : villager.getOffers()) {
 			int cost = offer.getBaseCostA().getCount();
-			int diff = kin ? -(int)Math.floor(cost * KIN_DISCOUNT) : Math.max(1, (int)Math.ceil(cost * OUTSIDER_MARKUP));
+			int diff = kin ? -(int)Math.floor(cost * KIN_DISCOUNT) : Math.max(1, (int)Math.ceil(cost * Reforms.markup(level.getServer(), f, OUTSIDER_MARKUP)));
 			offer.addToSpecialPriceDiff(diff);
 		}
 	}

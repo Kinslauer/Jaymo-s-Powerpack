@@ -132,6 +132,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rulers.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
+		Prejudice.register();
+		Havens.register();
+		Emigrants.register();
+		Reforms.register();
+		LOGGER.debug("reform attachment: {}", Reforms.GRIEVANCES);
+		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
+		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
 		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
