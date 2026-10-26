@@ -201,6 +201,8 @@ public class CorpseEntity extends Entity {
 	private long cutLast;
 	private int cutWork;
 	private int burnTicks;
+	/** (0.5.32) Fires this body has started around it while burning (see {@link #MAX_FIRES}). */
+	private int firesLit;
 	private int age;
 	/** Ticks since it started falling apart (both sides count; see {@link #CRUMBLING}). */
 	private int crumbleTicks;
@@ -1067,36 +1069,58 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
-	/** (0.4.28) A burning corpse tries to set what it lies by alight this often (ticks), as lava does. */
+	/** (0.4.28) A burning corpse tries to set what it lies by alight this often (ticks). */
 	private static final int SPREAD_EVERY = 20;
+	/** (0.5.32) It only tries over the last this many ticks of its burn, when it's nearly ash, not the whole time. */
+	private static final int SPREAD_WINDOW = 80;
+	/** (0.5.32) Chance each try (after the first) lights something. */
+	private static final float SPREAD_CHANCE = 0.4F;
+	/** (0.5.32) At most this many fires from one body over its whole burn. */
+	private static final int MAX_FIRES = 2;
 
 	/**
-	 * (0.4.28) Like lava, a burning body lights what's beside it: an empty spot in or around it (a block out, a block up)
-	 * next to something that catches (wood, wool, leaves...) takes fire. Follows the fire-spread game rules.
+	 * (0.5.32) Near the end of its burn a body lights one or two things beside it, then goes out: an empty spot in or
+	 * around it (a block out, a block up) next to something that really burns (planks, logs, wool, hay; not grass or
+	 * flowers) takes fire. Only the first try is sure; the rest are chances. Follows the fire-spread game rules.
 	 */
 	private void spreadFire(ServerLevel level) {
+		if (firesLit >= MAX_FIRES || firesLit > 0 && random.nextFloat() >= SPREAD_CHANCE) {
+			return;
+		}
 		BlockPos at = blockPosition();
 		if (!level.canSpreadFireAround(at)) {
 			return;
 		}
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 4; i++) {
 			BlockPos pos = at.offset(random.nextInt(3) - 1, random.nextInt(2), random.nextInt(3) - 1);
 			if (level.isLoaded(pos) && level.getBlockState(pos).isAir() && flammableBeside(level, pos)) {
 				level.setBlockAndUpdate(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos));
+				firesLit++;
 				return;
 			}
 		}
 	}
 
+	/** Beside a block that burns: catches fire in the game's fire rules, and isn't a plant or carpet you'd walk through. */
 	private static boolean flammableBeside(ServerLevel level, BlockPos pos) {
 		for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
 			BlockPos next = pos.relative(d);
-			if (level.isLoaded(next) && level.getBlockState(next).ignitedByLava()) {
+			if (!level.isLoaded(next)) {
+				continue;
+			}
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(next);
+			if (state.canBeReplaced() || !state.isCollisionShapeFullBlock(level, next)) {
+				continue;
+			}
+			net.fabricmc.fabric.api.registry.FlammableBlockRegistry.Entry burn
+				= net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().get(state.getBlock());
+			if (burn != null && burn.getIgniteOdds() > 0) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 
 	/** How often a corpse looks for a flame it's lying in or on (lava, fire, a lit campfire). */
 	private static final int FLAME_CHECK_TICKS = 10;
@@ -1141,7 +1165,7 @@ public class CorpseEntity extends Entity {
 		}
 		if (isOnFire() && burns()) {
 			burnTicks++;
-			if (burnTicks % SPREAD_EVERY == 0 && carrier() == null) {
+			if (burnTicks >= BURN_TICKS - SPREAD_WINDOW && burnTicks % SPREAD_EVERY == 0 && carrier() == null) {
 				spreadFire(level);
 			}
 			if (isCreeper()) {
@@ -2541,6 +2565,7 @@ public class CorpseEntity extends Entity {
 		this.searched = input.getBooleanOr("Searched", false);
 		this.chops = input.getIntOr("Chops", 0);
 		this.burnTicks = input.getIntOr("Burned", 0);
+		this.firesLit = input.getIntOr("FiresLit", 0);
 		this.age = input.getIntOr("Age", 0);
 		this.entityData.set(OWNER, input.getStringOr("Owner", ""));
 		this.entityData.set(OWNER_NAME, input.getStringOr("OwnerName", ""));
@@ -2597,6 +2622,7 @@ public class CorpseEntity extends Entity {
 		output.putBoolean("Searched", searched);
 		output.putInt("Chops", chops);
 		output.putInt("Burned", burnTicks);
+		output.putInt("FiresLit", firesLit);
 		output.putInt("Age", age);
 		output.putString("Owner", ownerId());
 		output.putString("OwnerName", ownerName());
