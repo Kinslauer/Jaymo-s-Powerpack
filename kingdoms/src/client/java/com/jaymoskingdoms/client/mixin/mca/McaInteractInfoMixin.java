@@ -47,6 +47,17 @@ abstract class McaInteractInfoMixin {
 			lines.add(Temperaments.line(temperament));
 			hovers.add(Temperaments.hover(temperament));
 		}
+		// (0.7.218) a gifted villager's power, once you know them; the storm-taken line of a Stormborn
+		net.minecraft.world.entity.Entity self = this.villager.asEntity();
+		String gift = com.jaymoskingdoms.PowersCompat.gift(self);
+		if (gift != null && com.jaymoskingdoms.Introductions.knownHere(self)) {
+			lines.add(Component.translatable("gifted.jaymoskingdoms.line", Component.translatable("power.jaymospowers." + gift)));
+			hovers.add(Component.translatable(com.jaymoskingdoms.PowersCompat.giftCorrupted(self) ? "gifted.jaymoskingdoms.hover.corrupted"
+				: "gifted.jaymoskingdoms.hover"));
+		} else if (gift == null && com.jaymoskingdoms.VillagerHeritage.of(self) == com.jaymoskingdoms.Heritage.Kind.STORMBORN) {
+			lines.add(Component.translatable("gifted.jaymoskingdoms.storm_line"));
+			hovers.add(Component.translatable("gifted.jaymoskingdoms.storm_line.hover"));
+		}
 		if (standing != null) {
 			lines.addAll(standing.lines());
 			for (int i = 0; i < standing.lines().size(); i++) {
