@@ -30,6 +30,12 @@ abstract class MinecraftUseMixin {
 	@Shadow
 	public @Nullable HitResult hitResult;
 
+	/** (0.5.31) Use repeats every 4 ticks while held (and a little slack): a call within this is the same hold. */
+	private static final int SAME_HOLD = 5;
+
+	/** (0.5.31) When use last came (the player's tick count). */
+	private static int jaymoskitchen$lastUse = Integer.MIN_VALUE / 2;
+
 	@Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
 	private void jaymoskitchen$dropCarried(CallbackInfo ci) {
 		// (0.5.1) lying limp, nothing can be used
@@ -37,7 +43,29 @@ abstract class MinecraftUseMixin {
 			ci.cancel();
 			return;
 		}
-		if (player == null || CorpseEntity.carriedBy(player) == null) {
+		if (player == null) {
+			return;
+		}
+		// (0.5.31) a corpse is lifted with a held right-click now: that same hold mustn't drop it again at once
+		int now = player.tickCount;
+		boolean sameHold = now - jaymoskitchen$lastUse <= SAME_HOLD;
+		jaymoskitchen$lastUse = now;
+		boolean dragging = CorpseEntity.draggedBy(player) != null;
+		if (CorpseEntity.carriedBy(player) == null && !dragging) {
+			return;
+		}
+		if (sameHold) {
+			ci.cancel();
+			return;
+		}
+		if (dragging) {
+			// (0.5.31) a carcass dragged behind: a click on a butcher block goes through (onto the table), any other lets go
+			if (hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK
+				&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
+				return;
+			}
+			ClientPlayNetworking.send(new Payloads.DropCarried(false));
+			ci.cancel();
 			return;
 		}
 		boolean toss = player.isShiftKeyDown();

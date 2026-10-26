@@ -85,9 +85,14 @@ import org.jspecify.annotations.Nullable;
  * So can a severed head or limb ({@link SeveredPart}), dangling from one hand ({@link #PART}): right-click it with an
  * empty hand (or sneak + right-click), the same controls to drop or throw it.
  * <p>
- * (0.14.1) And anyone downed ({@link Downed}), whatever they are: a sneak + right-click tap on them is the downed
- * state's own (held, it brings them round), which picks them up through {@link #pickUpDowned}. A downed player can't
- * pick anything up, nor struggle free.
+ * (0.14.1) And anyone downed ({@link Downed}), whatever they are. A downed player can't pick anything up, nor struggle free.
+ * <p>
+ * (0.17.7) Andy: "Picking players and mobs up is too sensitive, and players should not be able to pick up horses and
+ * cows". A pick-up is a deliberate lift now: sneak + <i>hold</i> right-click for {@link #LIFT_TICKS} (a bar fills); let go
+ * sooner, or look away, and nothing happens. Only a severed part and a Wind user's grab in the air stay a click. Holding
+ * plain right-click on someone downed is the revive ({@link Downed}), and holding left-click executes them
+ * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
+ * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can).
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
@@ -115,6 +120,13 @@ public final class Carry {
 	public static final int THROWN_TICKS = 20;
 	/** After any release, a player's movement isn't checked for this long (ticks), so they aren't kicked for it. */
 	static final int RELEASE_GRACE_TICKS = 40;
+	/** (0.17.7) How long sneak + use is held on someone to lift them (ticks), and the gap between use's repeats (every 4 ticks) that still counts as held. */
+	public static final int LIFT_TICKS = 12, LIFT_GRACE = 8;
+	/** (0.17.7) The lift's bar length, and how far past reach they may slip while it fills (blocks). */
+	static final int LIFT_BAR = 8;
+	static final double LIFT_SLACK = 0.5;
+	/** (0.17.7) Anything wider or taller than this standing (blocks) is too big to lift by hand: a person fits, a horse or an ogre doesn't. */
+	static final float MAX_LIFT_WIDTH = 1.0F, MAX_LIFT_HEIGHT = 2.2F;
 	/** After being let go, how long before the same one can be picked up again (ticks). */
 	static final int REGRAB_TICKS = 20;
 	/** Let go: a drop carries on with the carrier's momentum, nudged ahead; a throw goes this fast ahead and up (b/t). */
@@ -247,6 +259,22 @@ public final class Carry {
 	private static final Map<UUID, Long> REGRAB = new HashMap<>();
 	private static final Map<UUID, Long> STRUGGLE_READY = new HashMap<>();
 
+	/** (0.17.7) A lift being held: on whom, since when, and when use last came. */
+	private static final class Lift {
+		final Entity target;
+		final long start;
+		long last;
+
+		Lift(Entity target, long start) {
+			this.target = target;
+			this.start = start;
+			this.last = start;
+		}
+	}
+
+	/** Player → the lift they're holding. Not saved. */
+	private static final Map<UUID, Lift> LIFTING = new HashMap<>();
+
 	private Carry() {
 	}
 
@@ -305,16 +333,30 @@ public final class Carry {
 		return thrown != null && entity.level().getGameTime() - thrown < THROWN_TICKS;
 	}
 
-	/** Whether this could be picked up at all: a player, a small animal in the tag, or a baby animal. */
+	/**
+	 * Whether this could be picked up at all: a player, a small animal in the tag, a baby animal, or someone downed. (0.17.7)
+	 * Never a grown animal out of the tag, downed or not (a horse, a cow), nor anything else {@link #tooBig}.
+	 */
 	public static boolean canBeCarried(Entity entity) {
 		if (!entity.isAlive() || entity.isSpectator()) {
 			return false;
 		}
-		if (entity instanceof Player || entity instanceof SeveredPart || Downed.isDowned(entity)) {
+		if (entity instanceof Player || entity instanceof SeveredPart) {
 			return true;
 		}
-		return entity instanceof LivingEntity && (entity.getType().builtInRegistryHolder().is(CARRYABLE)
-			|| entity instanceof Animal animal && animal.isBaby());
+		if (!(entity instanceof LivingEntity) || tooBig(entity)) {
+			return false;
+		}
+		if (entity.getType().builtInRegistryHolder().is(CARRYABLE) || entity instanceof Animal animal && animal.isBaby()) {
+			return true;
+		}
+		return Downed.isDowned(entity) && !(entity instanceof Animal);
+	}
+
+	/** (0.17.7) Too big for anyone's arms: wider or taller standing than {@link #MAX_LIFT_WIDTH} by {@link #MAX_LIFT_HEIGHT}. */
+	public static boolean tooBig(Entity entity) {
+		var size = entity.getType().getDimensions();
+		return size.width() > MAX_LIFT_WIDTH || size.height() > MAX_LIFT_HEIGHT;
 	}
 
 	/**
@@ -395,10 +437,6 @@ public final class Carry {
 		if (isCarried(player) || Downed.isDowned(player)) {
 			return InteractionResult.FAIL;
 		}
-		if (player.isShiftKeyDown() && Downed.isDowned(target)) {
-			// (0.14.1) the downed state's: a tap picks them up, a hold brings them round (Downed)
-			return InteractionResult.PASS;
-		}
 		Carrying already = player.getAttached(CARRYING);
 		if (already != null && already.target() == target.getId()) {
 			// (the same click seen twice)
@@ -428,9 +466,58 @@ public final class Carry {
 			if (ready != null && server.getGameTime() < ready) {
 				return InteractionResult.FAIL;
 			}
-			pickUp(carrier, target);
+			if (target instanceof SeveredPart || windCarries(player, target)) {
+				// a head or a limb is light, and a Wind user snatches someone up on the fly
+				pickUp(carrier, target);
+			} else {
+				// (0.17.7) everyone and everything else is lifted with a hold (see lifts)
+				long now = server.getGameTime();
+				Lift lift = LIFTING.get(carrier.getUUID());
+				if (lift != null && lift.target == target) {
+					lift.last = now;
+				} else {
+					LIFTING.put(carrier.getUUID(), new Lift(target, now));
+				}
+			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** (0.17.7) Each player's sneak + use held on someone: the bar fills, and full, they're picked up. */
+	private static void lifts(MinecraftServer server) {
+		if (LIFTING.isEmpty()) {
+			return;
+		}
+		for (var it = LIFTING.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Lift lift = e.getValue();
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			Entity target = lift.target;
+			if (player == null || !player.isAlive() || target.isRemoved() || !target.isAlive() || target.level() != player.level()) {
+				it.remove();
+				continue;
+			}
+			long now = player.level().getGameTime();
+			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(target, LIFT_SLACK)) {
+				// let go too soon, stood up, or they slipped away: nothing
+				it.remove();
+				continue;
+			}
+			long held = now - lift.start;
+			if (held >= LIFT_TICKS) {
+				it.remove();
+				if (!isCarrying(player) && !isCarried(player) && !Downed.isDowned(player) && !KitchenCompat.isCarryingCorpse(player)
+					&& !isCarried(target) && !isCarrying(target) && !target.isPassenger() && !target.isVehicle() && canBeCarriedBy(player, target)) {
+					pickUp(player, target);
+				}
+				continue;
+			}
+			if (held >= 2) {
+				int filled = Math.round(LIFT_BAR * held / (float) LIFT_TICKS);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.lift", target.getDisplayName(),
+					"|".repeat(filled) + ".".repeat(LIFT_BAR - filled)).withStyle(ChatFormatting.GRAY));
+			}
+		}
 	}
 
 	/**
@@ -456,26 +543,6 @@ public final class Carry {
 			}
 		}
 		return best;
-	}
-
-	/**
-	 * (0.14.1) A tap of sneak + use on someone downed ({@link Downed}) picks them up, if this player could pick anything up
-	 * just now. Whether it did.
-	 */
-	public static boolean pickUpDowned(ServerPlayer carrier, Entity target) {
-		if (isCarried(carrier) || isCarrying(carrier) || Downed.isDowned(carrier) || KitchenCompat.isCarryingCorpse(carrier) || carrier.isPassenger()
-			|| carrier.isSleeping() || carrier.isSpectator() || !canBeCarried(target)) {
-			return false;
-		}
-		if (isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle()) {
-			return false;
-		}
-		Long ready = REGRAB.get(target.getUUID());
-		if (ready != null && carrier.level().getGameTime() < ready) {
-			return false;
-		}
-		pickUp(carrier, target);
-		return true;
 	}
 
 	static void pickUp(ServerPlayer carrier, Entity target) {
@@ -666,6 +733,7 @@ public final class Carry {
 	// ---- every tick
 
 	private static void tick(MinecraftServer server) {
+		lifts(server);
 		if (!CARRIES.isEmpty()) {
 			for (Entry entry : List.copyOf(CARRIES.values())) {
 				tickCarry(server, entry);
@@ -734,6 +802,7 @@ public final class Carry {
 			entry.carried.removeAttached(CARRIED_BY);
 		}
 		CARRIES.clear();
+		LIFTING.clear();
 		GRACE.clear();
 		REGRAB.clear();
 		STRUGGLE_READY.clear();

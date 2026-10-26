@@ -10,7 +10,6 @@ import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.wounds.BodyPlan;
 import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Downed;
-import com.jaymospowers.core.wounds.Treatment;
 import com.jaymospowers.power.arsenal.ArsenalFlintlock;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import io.netty.buffer.ByteBuf;
@@ -21,7 +20,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -29,6 +27,8 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -38,6 +38,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -105,19 +106,24 @@ import org.jspecify.annotations.Nullable;
  * count kneeling at a person's head ({@link #atHead}).
  * <p>
  * (0.16.8) Andy: "the suits should have their own executions". With the symbiote suit showing (any form) and nothing in
- * the main hand, the hold is a weapon's ({@link #HOLD_TICKS}, no taps, no Executioner: the suit is the weapon) and plays
+ * the main hand, the hold is a weapon's ({@link #HOLD_TICKS}, no Executioner: the suit is the weapon) and plays
  * one of {@code WebExecutions}' moves instead of the neck snap; its own attachment counts as {@link #busy} and
  * {@link #targeted} here, so the roots, the camera and the body lying still are shared.
+ * <p>
+ * (0.17.7) Andy: "maybe execution should be on left click hold for 1.5s to confirm?", then "change it to shift + m1 hold. This
+ * is so it doesnt interfere with z fighters". It is: <b>sneak + hold attack</b> on someone
+ * downed or crippled for {@link #HOLD_TICKS}, any weapon and bare hands alike (the neck snap still only at the head; the
+ * three taps are gone, the hold is the confirmation). The click that starts it is an ordinary blow. Right-click held on
+ * the downed is the revive now, and sneak + right-click held the lift, so none of the three is taken for another. Holding
+ * attack on an entity repeats nothing in vanilla (only digging a block does), so the hold is free; the client says when it
+ * starts and stops ({@link Execute}, from {@code FinisherClient}), and Z Fighter's held-attack combos stand aside while
+ * it's aimed at someone helpless.
  */
 public final class Finishers {
-	/** How long use is held on the downed before a weapon's finisher begins (ticks), and the grace between use's repeats (every 4 ticks). */
-	public static final int HOLD_TICKS = 8, HOLD_GRACE = 8;
-	/**
-	 * (0.15.110) Bare hands take taps, not a hold, so nobody snaps a neck by accident: this many taps, each a fresh press
-	 * (use quiet for more than {@link #PRESS_GAP} ticks between them, held no longer than {@link #TAP_MAX}), none more than
-	 * {@link #TAP_WINDOW} ticks after the last.
-	 */
-	public static final int TAPS = 3, PRESS_GAP = 5, TAP_MAX = 8, TAP_WINDOW = 20;
+	/** (0.17.7) How long attack is held on the downed before a finisher begins (ticks; Andy's 1.5 s), and when its bar shows (a click is just a blow). */
+	public static final int HOLD_TICKS = 30, BAR_AFTER = 6;
+	/** (0.17.7) Held at the wrong end for the neck snap: the reminder comes this often (ticks). */
+	static final int HEAD_HINT_EVERY = 20;
 	/** (0.15.110) The Combat Arts perk (Jaymo's Kingdoms) that unlocks every weapon's finisher; bare hands need none. */
 	static final String UNLOCK_PERK = "executioner";
 	/** How far they may be from you for it to go on (blocks, past your reach for the use). */
@@ -260,19 +266,25 @@ public final class Finishers {
 	 * Use held on a downed one: on whom, since when, and when use last came; (0.15.110) bare-handed, the taps so far and
 	 * when this press began.
 	 */
+	/** (0.17.7) Attack held on someone: who, and since when it counted (they were helpless, and you in place). */
 	private static final class Hold {
 		final LivingEntity body;
-		final long start;
-		final boolean bare;
-		long last, pressStart;
-		int presses = 1;
+		long start;
 
-		Hold(LivingEntity body, long start, boolean bare) {
+		Hold(LivingEntity body, long start) {
 			this.body = body;
 			this.start = start;
-			this.bare = bare;
-			this.last = start;
-			this.pressStart = start;
+		}
+	}
+
+	/** (0.17.7) Client → server: attack is held on this entity (its id), or let go / aimed away (-1). */
+	public record Execute(int target) implements CustomPacketPayload {
+		public static final Type<Execute> TYPE = new Type<>(JaymosPowers.id("finisher_execute"));
+		public static final StreamCodec<ByteBuf, Execute> CODEC = ByteBufCodecs.VAR_INT.map(Execute::new, Execute::target);
+
+		@Override
+		public Type<Execute> type() {
+			return TYPE;
 		}
 	}
 
@@ -306,10 +318,11 @@ public final class Finishers {
 	public static void register() {
 		// (0.16.8) the symbiote's own executions play out on their own loop, begun from the hold below
 		com.jaymospowers.power.web.WebExecutions.register();
-		// before Kingdoms' disarm and Downed's catch-all, but only watching: they still get the click
-		Identifier watch = JaymosPowers.id("finisher_watch");
-		UseEntityCallback.EVENT.addPhaseOrdering(watch, Event.DEFAULT_PHASE);
-		UseEntityCallback.EVENT.register(watch, Finishers::onUseEntity);
+		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
+		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
+		// (busy: a use still held from before does nothing to them either)
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> busy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
 		// rooted and busy: nothing else from your hands while it plays
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> busy(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -593,51 +606,21 @@ public final class Finishers {
 
 	// ---- the hold ---------------------------------------------------------------------------------------------------------
 
-	private static InteractionResult onUseEntity(Player player, net.minecraft.world.level.Level world, InteractionHand hand, Entity entity,
-		net.minecraft.world.phys.@Nullable EntityHitResult hit) {
-		if (busy(player)) {
-			// (still holding use through it: nothing else happens)
-			return InteractionResult.SUCCESS;
-		}
-		if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || player.isShiftKeyDown() || player.isSpectator() || Downed.isDowned(player)
-			|| !finishable(player, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
-			return InteractionResult.PASS;
-		}
-		ItemStack stack = player.getMainHandItem();
-		// (0.16.8) with the symbiote suit showing, empty hands are its own: a weapon's hold (not the neck snap's taps) plays WebExecutions
-		boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
-		boolean bare = stack.isEmpty() && !suit;
-		if (!bare && move(player, stack) == null) {
-			// (0.15.110) a torch or a loaf finishes nobody
-			return InteractionResult.PASS;
-		}
-		if (bare && !atHead(player, (LivingEntity) entity)) {
-			// (0.15.146) the neck snap is done kneeling at their head: a tap anywhere else doesn't count
+	/** (0.17.7) {@code player}'s attack is held on the entity {@code id} now (-1: let go). */
+	private static void attackHeld(ServerPlayer player, int id) {
+		if (id < 0 || player.isSpectator() || Downed.isDowned(player) || busy(player)) {
 			HOLDING.remove(player.getUUID());
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.head", entity.getDisplayName()).withStyle(ChatFormatting.GRAY));
-			return Downed.isDowned(entity) ? InteractionResult.PASS : InteractionResult.SUCCESS;
+			return;
 		}
-		long now = world.getGameTime();
 		Hold held = HOLDING.get(player.getUUID());
-		if (held != null && held.body == entity && held.bare == bare) {
-			if (bare && now - held.last > PRESS_GAP) {
-				// a fresh tap
-				held.presses++;
-				held.pressStart = now;
-			}
-			held.last = now;
+		if (held != null && held.body.getId() == id) {
+			return;
+		}
+		if (player.level().getEntity(id) instanceof LivingEntity body && body != player) {
+			HOLDING.put(player.getUUID(), new Hold(body, player.level().getGameTime()));
 		} else {
-			held = new Hold((LivingEntity) entity, now, bare);
-			HOLDING.put(player.getUUID(), held);
-		}
-		if (bare && held.presses >= TAPS && player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
-			// the third tap: the neck snap
 			HOLDING.remove(player.getUUID());
-			begin(level, sp, held.body, Kind.FIST);
 		}
-		// (only watching: Kingdoms still takes a downed guard's weapons, and Downed's catch-all swallows the rest; (0.15.114)
-		// a crippled one isn't downed, so its click is kept here, no trading screen between taps)
-		return Downed.isDowned(entity) ? InteractionResult.PASS : InteractionResult.SUCCESS;
 	}
 
 	private static void holds(MinecraftServer server) {
@@ -649,46 +632,47 @@ public final class Finishers {
 			Hold hold = e.getValue();
 			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
 			if (player == null || !(player.level() instanceof ServerLevel level) || hold.body.level() != level || !player.isAlive()
-				|| player.isShiftKeyDown() || !finishable(player, hold.body)) {
+				|| hold.body.isRemoved() || !hold.body.isAlive() || Downed.isDowned(player) || busy(player)) {
 				it.remove();
 				continue;
 			}
 			long now = level.getGameTime();
-			if (!player.isWithinEntityInteractionRange(hold.body, SLACK)) {
-				it.remove();
+			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body)) {
+				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
+				hold.start = now;
 				continue;
 			}
-			if (hold.bare) {
-				// (0.15.110) bare hands: taps, and a press held down (or taps too slow) counts for nothing
-				if (now - hold.last > TAP_WINDOW || hold.last - hold.pressStart > TAP_MAX) {
-					it.remove();
-				} else if (now - hold.pressStart <= 1) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.taps", hold.body.getDisplayName(), TAPS - hold.presses)
-						.withStyle(ChatFormatting.DARK_RED));
+			ItemStack stack = player.getMainHandItem();
+			// (0.16.8) with the symbiote suit showing, empty hands are its own: no neck snap, one of WebExecutions' moves
+			boolean suit = stack.isEmpty() && com.jaymospowers.power.web.WebExecutions.applies(player);
+			boolean bare = stack.isEmpty() && !suit;
+			if (!suit && move(player, stack) == null) {
+				// (0.15.110) a torch or a loaf finishes nobody
+				hold.start = now;
+				continue;
+			}
+			if (bare && !atHead(player, hold.body)) {
+				// (0.15.146) the neck snap is done kneeling at their head
+				if ((now - hold.start) % HEAD_HINT_EVERY == BAR_AFTER) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.head", hold.body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
-				continue;
-			}
-			if (now - hold.last > HOLD_GRACE) {
-				// let go (a tap: whatever else a click on the downed does, it did)
-				it.remove();
 				continue;
 			}
 			long held = now - hold.start;
 			if (held >= HOLD_TICKS) {
 				it.remove();
-				if (player.getMainHandItem().isEmpty()) {
-					// (0.16.8) empty hands held this long are the symbiote's: one of its own executions
+				if (suit) {
 					com.jaymospowers.power.web.WebExecutions.begin(level, player, hold.body);
 					continue;
 				}
 				// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
-				Kind kind = move(player, player.getMainHandItem());
-				if (kind != null && kind != Kind.FIST) {
+				Kind kind = move(player, stack);
+				if (kind != null) {
 					begin(level, player, hold.body, kind);
 				}
 				continue;
 			}
-			if (held >= 2) {
+			if (held >= BAR_AFTER) {
 				int filled = Math.round(HOLD_BAR * held / (float) HOLD_TICKS);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.holding", hold.body.getDisplayName(),
 					"|".repeat(filled) + ".".repeat(HOLD_BAR - filled)).withStyle(ChatFormatting.DARK_RED));

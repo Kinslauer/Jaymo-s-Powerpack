@@ -47,6 +47,22 @@ public final class KitchenCompat {
 		return LOADED && heavy(Kitchen.sourceType(entity));
 	}
 
+	/**
+	 * (0.17.7) Kitchen's big carcasses (0.5.31: a cow, a horse, a bear): too big to lift by hand, cut up where they lie. Read by
+	 * reflection, so an older Kitchen just says no.
+	 */
+	public static boolean isTooBig(Entity entity) {
+		if (!LOADED || entity.getClass() == null) {
+			return false;
+		}
+		try {
+			java.lang.reflect.Method method = entity.getClass().getMethod("tooBigToLift");
+			return (boolean) method.invoke(entity);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** A creature whose corpse would be too heavy to lift (also true for the living one: an iron golem). */
 	static boolean heavy(net.minecraft.world.entity.@Nullable EntityType<?> type) {
 		return type != null && type.builtInRegistryHolder().is(HEAVY_CORPSES);

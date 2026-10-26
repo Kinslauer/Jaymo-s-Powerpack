@@ -21,7 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
  * <ul>
  * <li>Arms: the punch boost (bare-fisted blows hit harder and throw further; Gravity's augment adds weight, Z Fighter's
  * knockback), and lifting heavy corpses: Sneak + right-click an iron golem's body (Jaymo's Kitchen; otherwise only
- * Gravity can) to carry it.</li>
+ * Gravity can) to carry it. (0.17.7) Also a big carcass (a cow, a horse), which nobody else can lift by hand.</li>
  * <li>Thrusters: a jump boost.</li>
  * <li>Helm (HUD) and Core (charge, the Mind) are read elsewhere.</li>
  * </ul>
@@ -41,7 +41,7 @@ public final class RigPassives {
 	static void init() {
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown() || !player.getMainHandItem().isEmpty()
-				|| !Rig.wears(player, Rig.Piece.ARMS) || !KitchenCompat.isHeavy(entity)) {
+				|| !Rig.wears(player, Rig.Piece.ARMS) || !KitchenCompat.isHeavy(entity) && !KitchenCompat.isTooBig(entity)) {
 				return InteractionResult.PASS;
 			}
 			if (player instanceof ServerPlayer server) {

@@ -115,7 +115,9 @@ public final class ZFighterPowerClient implements PowerClient {
 		ApeSmashClient.tick(minecraft, player);
 		// the guard: right click held, bare-handed
 		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
-			&& player.getMainHandItem().isEmpty();
+			&& player.getMainHandItem().isEmpty()
+			// (0.17.7) right-click held on someone downed is the revive
+			&& !(minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit && com.jaymospowers.core.wounds.Downed.isDowned(hit.getEntity()));
 		if (guard != guardWasUp) {
 			guardWasUp = guard;
 			ClientPlayNetworking.send(new ZFighterNet.Guard(guard));
@@ -123,7 +125,9 @@ public final class ZFighterPowerClient implements PowerClient {
 		// the hold combo: left mouse held, bare-handed, not at a block (that's digging)
 		boolean attack = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
 			&& player.getMainHandItem().isEmpty() && !guard && !RaceHoldClient.holding() && !ZFighterLineage.ape(player)
-			&& !(ZFighterLineage.of(player) == ZFighterLineage.VERDANT && RaceHoldClient.yielded(player));
+			&& !(ZFighterLineage.of(player) == ZFighterLineage.VERDANT && RaceHoldClient.yielded(player))
+			// (0.17.7) left-click held on someone downed is the execution's
+			&& !com.jaymospowers.client.finisher.FinisherClient.aimingAtHelpless(minecraft);
 		attackHeld = attack ? attackHeld + 1 : 0;
 		boolean combo = comboOn ? attack
 			: attackHeld >= COMBO_HOLD_TICKS && (minecraft.hitResult == null || minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK);

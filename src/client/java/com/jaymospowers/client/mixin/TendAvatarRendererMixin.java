@@ -18,6 +18,8 @@ abstract class TendAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$tendState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		TendPose.extract(entity, state, partialTicks);
+		// (0.17.7) and the crouch: low, arms out, onto one knee when still
+		com.jaymospowers.client.CrouchPose.extract(entity, state, partialTicks);
 		// (0.16.21) a hand to a wound now and then
 		com.jaymospowers.client.wounds.WoundNursePose.extract(entity, state, partialTicks);
 	}
@@ -27,5 +29,6 @@ abstract class TendAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$tendKneel(AvatarRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		TendPose.rotate(state, poseStack);
+		com.jaymospowers.client.CrouchPose.rotate(state, poseStack);
 	}
 }

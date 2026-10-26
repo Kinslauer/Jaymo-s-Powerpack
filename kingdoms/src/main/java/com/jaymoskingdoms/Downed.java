@@ -113,7 +113,7 @@ public final class Downed {
 			return true;
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			// (sneak + use on the downed is Powers': it picks them up or brings them round)
+			// (sneak + use on the downed is Powers' lift; a plain hold is its revive, which only watches, so the disarm still comes first)
 			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !ours(body)) {
 				return InteractionResult.PASS;
 			}

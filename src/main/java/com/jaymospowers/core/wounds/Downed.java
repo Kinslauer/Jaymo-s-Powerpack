@@ -86,8 +86,9 @@ import org.jspecify.annotations.Nullable;
  * they pass out and lie still ({@link #OUT}) until someone brings them round, or they hold sneak for
  * {@link #GIVE_UP_TICKS} to give up (a death credited to whoever felled them). Logging out keeps it.
  * <p>
- * <b>Bringing one round</b> (Kingdoms' 0.7.93 revive, for everyone): sneak + hold use on a downed one. A tap picks them up
- * ({@link Carry}); held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
+ * <b>Bringing one round</b> (Kingdoms' 0.7.93 revive, for everyone): (0.17.7) hold use on a downed one, standing (Andy: "when
+ * going for a revive you often pick up the player instead": sneak + use held is only the lift now, {@link Carry}, and
+ * executions are left-click, {@code Finishers}). Held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
  * takes one of its own treats instead, {@link #TREATS}). Kingdoms' villagers tend the downed too, and ask for the
  * getting up with the tag {@link #REVIVE_TAG}.
  */
@@ -119,7 +120,7 @@ public final class Downed {
 	public static final int GIVE_UP_TICKS = 100;
 	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
 	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
-	/** (0.7.93) A revive: how long sneak + use is held to get them up (ticks), and what makes it a hold, not a tap (a pick-up). */
+	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
 	public static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
 	/** Holding use repeats every 4 ticks: no repeat for this long and you've let go. */
 	static final int REVIVE_GRACE = 8;
@@ -192,7 +193,7 @@ public final class Downed {
 	/** A downed player → how long they've held sneak to give up (ticks). */
 	private static final Map<UUID, Integer> GIVING_UP = new HashMap<>();
 
-	/** (0.7.93) A player's sneak + use held on a downed one: since when, when use last came, how full the bar is, and whether it's over (use still swallowed till let go). */
+	/** (0.7.93) A player's use held on a downed one: since when, when use last came, how full the bar is, and whether it's over (use still swallowed till let go). */
 	private static final class Revive {
 		final LivingEntity body;
 		final long start;
@@ -249,7 +250,7 @@ public final class Downed {
 		// trading with a downed villager, no saddling a downed horse
 		UseEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseEntityCallback.EVENT.register(LAST, (player, world, hand, entity, hit) ->
-			// ((0.15.98) and a plain click on a downed player is a finisher's hold, not a bow drawn or a meal eaten: Finishers)
+			// ((0.15.98) and a plain click on a downed player is a revive's hold, not a bow drawn or a meal eaten)
 			(entity instanceof Mob || entity instanceof Player && !player.isShiftKeyDown()) && isDowned(entity) ? InteractionResult.SUCCESS
 				: InteractionResult.PASS);
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
@@ -790,28 +791,26 @@ public final class Downed {
 		if (isDowned(player)) {
 			return InteractionResult.FAIL;
 		}
-		if (!world.isClientSide() && Treatment.claimsDowned(player, hand, entity)) {
-			// (0.14.4) medicine in hand that can help them: Treatment's, not a revive
+		if (player.isShiftKeyDown() || world.isClientSide() || hand != InteractionHand.MAIN_HAND) {
+			// (0.17.7) sneak + use on them is the lift (Carry), or medicine that wants sneak (Treatment)
 			return InteractionResult.PASS;
 		}
-		Revive held = world.isClientSide() || hand != InteractionHand.MAIN_HAND ? null : REVIVING.get(player.getUUID());
+		if (Treatment.claimsDowned(player, hand, entity) || Treatment.treatsOnPlainUse(player.getMainHandItem(), world)) {
+			// (0.14.4) medicine in hand: Treatment's, not a revive
+			return InteractionResult.PASS;
+		}
+		Revive held = REVIVING.get(player.getUUID());
 		if (held != null && held.body == entity) {
 			// still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
 			held.held = world.getGameTime();
-			return InteractionResult.SUCCESS;
-		}
-		if (!(entity instanceof LivingEntity body) || !isDowned(body) || player.isSpectator() || !player.isShiftKeyDown()) {
-			// (a plain right-click on a downed one is left to others: Kingdoms takes a guard's weapons)
-			return InteractionResult.PASS;
-		}
-		if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND) {
-			// a tap picks them up once let go; held, it's a revive
+		} else if (entity instanceof LivingEntity body && isDowned(body) && !player.isSpectator()) {
 			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime()));
 		}
-		return InteractionResult.SUCCESS;
+		// (only watching: a tap on a downed guard still has Kingdoms take its weapons, and Downed's catch-all swallows the rest)
+		return InteractionResult.PASS;
 	}
 
-	/** (0.7.93) Each player's sneak + use on a downed one: a tap picks them up, a hold fills the bar and gets them up. */
+	/** (0.7.93) Each player's use held on a downed one: a hold fills the bar and gets them up. */
 	private static void revives(MinecraftServer server) {
 		if (REVIVING.isEmpty()) {
 			return;
@@ -834,9 +833,7 @@ public final class Downed {
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();
-				if (r.held - r.start < TAP_TICKS && isDowned(body) && player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
-					Carry.pickUpDowned(player, body);
-				} else if (r.begun && !r.over) {
+				if (r.begun && !r.over) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
 				continue;
@@ -853,7 +850,7 @@ public final class Downed {
 					continue;
 				}
 			}
-			if (!player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+			if (player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
 				r.over = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
