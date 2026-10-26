@@ -5122,7 +5122,16 @@ our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
   Quick Hands and Lockpicking Prowess.
 - The lockpick icon is painted by `tools/gen_lockpick.py`.
 
-## 0.7.235: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.24)
+## 0.7.235: the whaler start works
+- **Signed on aboard, not in the wild.** A whaling story was fitted out at once when some realm already had a
+  harbour, out where the sea round her mooring wasn't loaded and ticking, so she wouldn't float and the story fell back
+  to the wild. Now every whaling start waits at spawn ("Awaiting a harbour...") while `StoryGround` keeps the harbour's land
+  ticking: its harbour built if it has none, then its whaler fitted out (`Whalers.ready`) once the sea is ticking 32
+  blocks round her mooring. A realm whose harbour can't be built, or whose whaler won't float, after 15 tries is passed
+  over for the next nearest coastal one (a new kingdom raised on the shore if none is left); it gives up after 3
+  minutes. Sign-on then takes the realm made ready, not just the harbour nearest spawn.
+
+## 0.7.236: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.25)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
 Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
@@ -5160,7 +5169,7 @@ should ripple, indicating the caster's intent."
   `tools/gen_mana_wand.py`.
 javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
 
-## 0.7.236: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.24)
+## 0.7.237: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.25)
 Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
 arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and
@@ -5207,3 +5216,44 @@ Clash, Spirit armour, Spirit ride and Sense come next. All in `spirits/` and `cl
   out while they fight: Grimsby folk flurry and parry one blow in three, Varro folk throw javelins and volleys.
 javac-checked against Andy's 26.3 jars (the usual optional-mod errors only); not Loom-built, not seen in game. The L key
 is the only letter neither mod nor vanilla binds.
+
+Second patch (same release): the other three spirits, the clash and the last two shared hands. Andy: "two players' spirits
+lock arms; it uses the beam-clash film", All Might style; the Quiet One "seemingly non-responsive" and speaks once.
+- **Old Ambrose, the Warden** (ward, pale gold, a hand twice yours): aegis (a wall of palm that stops blows and arrows
+  from the front), steady hands (a toggle: no knockback, no flinch, 2 mana a second), bless (a touch that heals an ally
+  and gives resistance), catch me (he catches your fall and hauls you out of lava), mend (a toggle that closes cuts and
+  heals a point a second while you can pay). On his own: raises the aegis at a blow you didn't see, catches falls, hauls
+  you from lava, blesses a hurt friend, mends you after a fight.
+- **Thessaly the Learned** (reach, violet, a slim glove with three rings): long reach (draws items and mobs from 12
+  blocks), unseen hand (lifts from a pocket at 6 blocks, Pickpocket's lift), rune trap (a glyph on the floor that snares
+  the first foe to cross it), unlock (picks a locked chest with Lockpicking's own game, by her level), juggle (lifts up to
+  four things and hurls them one by one; costs per thing lifted, the cooldown waits for the last throw). On her own: points
+  out an unopened chest within 24 blocks with a line of sparks and a remark, once a minute.
+- **The Quiet One** (echo, grey, a plain featureless arm, conjured at a different size each time: half to three times
+  its own): echo strike (a toggle: every melee hit lands again 10 ticks later for half), sense (motes on hidden mobs,
+  locked chests and ore near you, only you see them), mirror step (a sidestep that leaves a glowing double the mobs
+  chase for two seconds), stillness (three seconds where mobs within 8 stop and arrows hang in the air), silent end (one
+  blow kills a foe under 30% health, never a boss; once a day). On its own: now and then ends a fight with a silent end
+  or a stillness. It says nothing, ever, but the five sick-day whispers; at bond 100 it speaks one word, once. Who answers
+  a brush with death is leaned by heritage (Tideborn, Verdant, Dawnborn: Ambrose; Sylvan, Nightborn: Thessaly; Stoneborn,
+  Warriorborn: Varro; Emberborn, Earthling: Grimsby), the rest even; the Quiet One never leans.
+- **Spirit armour and Spirit ride** (`HandExtras`, every spirit): armour wraps the arms round you like plate for six
+  seconds (half damage, no knockback); ride plants both arms as stilts and vaults you forward and up, the arms taking the
+  landing.
+- **The clash** (`SpiritClash`, `client/spirits/ClashCinematic`): two keepers with spirits out, within four blocks, who
+  strike at each other (grab, shove, pin, a blade, a javelin) within a second lock arms: both rooted, a five-second contest
+  where every tap of L adds to your side and the spirits' levels tell, the first to a 40-point lead wins; the loser is
+  thrown six blocks and takes 8, the winner's bond grows by 3; a draw throws both. The film: letterbox bars, the HUD gone
+  but for a tug bar in both spirits' colours, the camera swung side-on, the screen shaking harder as the lead swings, a
+  flash in the winner's colour; attuned players within 24 blocks get the bars. No summoning, cycling or dismissing while
+  locked: the loser is thrown. Grimsby, Varro, Ambrose and Thessaly crow or grumble; the Quiet One says nothing.
+- **The look**: Ambrose's broad open hand (five spread fingers), Thessaly's glove and rings, the Quiet One's bare arm at
+  its rolled size; a pose for every new move (the aegis wall, the palm overhead, arms down and open, a hand on the chest,
+  wrapped round the body, stilts, juggling arms, the locked clash); the HUD marks steady hands, armour and echo "(on)"
+  while they last (`SpiritState.toggles`, synced).
+- **Under the hood**: a move's pose, cooldown and cost for the cast just happening are kept per keeper (`CastHints`), not
+  on the move (one object shared by every keeper, and by the client's HUD in singleplayer). Upkeep (holding the line,
+  steady hands, mending) is drained with no strain, so being healed doesn't make you mana-sick. Everything the hands hold
+  up is tagged, so a player or mob saved mid-hold gets its gravity back on load. Putting the spirit away ends every hold,
+  ward, armour, echo and juggle. `Lockpicking.lockLevel` and `pickBySpirit`, `Pickpocket.liftBySpirit`,
+  `MobShields.disable` and `BossBars.boss` opened for the spirits.

@@ -739,7 +739,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.235) mana: meditation, corruption, vis ------------------------------------------------------------------
+	// ---- (0.7.236) mana: meditation, corruption, vis ------------------------------------------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle meditateTicks, corruptionOf, phialsCarried, essenceTotal;
 	private static boolean lookedForMana;
@@ -804,7 +804,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.236) spirits: finishers and screen shakes ---------------------------------------------------------------
+	// ---- (0.7.237) spirits: finishers and screen shakes ---------------------------------------------------------------
 
 	private static boolean lookedForSpirits;
 	private static java.lang.invoke.@Nullable MethodHandle helpless, shake;

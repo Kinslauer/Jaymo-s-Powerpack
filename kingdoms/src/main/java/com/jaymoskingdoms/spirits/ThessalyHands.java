@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) The per-tick state of Thessaly the Learned's hands: what her long reach is drawing in through the walls, the rune
+ * (0.7.237) The per-tick state of Thessaly the Learned's hands: what her long reach is drawing in through the walls, the rune
  * traps she has laid, the things she is juggling round her keeper (and the ones thrown, waiting to land), and the chests she has
  * already pointed out or seen opened. Andy: "manipulating items from way farther away than you could naturally". All of it
  * is kept per keeper, by server tick count, and let go the moment the keeper's spirit is no longer out (a trap is a glyph: it
@@ -140,7 +140,7 @@ final class ThessalyHands {
 		}
 		for (Thrown t : THROWN) {
 			if (!t.thing.isRemoved()) {
-				t.thing.setNoGravity(t.hadNoGravity);
+				HandGrip.settle(t.thing, t.hadNoGravity);
 			}
 		}
 		clear();
@@ -213,7 +213,7 @@ final class ThessalyHands {
 				break;
 			}
 			DRAWS.add(new Draw(e, player.getUUID(), now + DRAW_TICKS, e.isNoGravity()));
-			e.setNoGravity(true);
+			HandGrip.floatUp(e);
 			n++;
 		}
 		return n;
@@ -221,7 +221,7 @@ final class ThessalyHands {
 
 	private static void finish(Draw d) {
 		if (!d.thing.isRemoved()) {
-			d.thing.setNoGravity(d.hadNoGravity);
+			HandGrip.settle(d.thing, d.hadNoGravity);
 			if (d.thing instanceof ItemEntity item) {
 				item.setNoPickUpDelay();
 			}
@@ -349,7 +349,7 @@ final class ThessalyHands {
 			}
 			e.stopRiding();
 			juggle.things.add(new Juggled(e, e.isNoGravity()));
-			e.setNoGravity(true);
+			HandGrip.floatUp(e);
 			e.setDeltaMovement(Vec3.ZERO);
 		}
 		if (juggle.things.isEmpty()) {
@@ -379,7 +379,7 @@ final class ThessalyHands {
 			if (thing.isRemoved() || !thing.isAlive()) {
 				continue;
 			}
-			thing.setNoGravity(held.hadNoGravity);
+			HandGrip.settle(thing, held.hadNoGravity);
 			thing.setDeltaMovement(player.getLookAngle().scale(THROW_SPEED + charge * THROW_CHARGE));
 			thing.syncVelocity = true;
 			thing.resetFallDistance();
@@ -400,7 +400,7 @@ final class ThessalyHands {
 	private static void releaseAll(Juggle juggle) {
 		for (Juggled held : juggle.things) {
 			if (!held.thing.isRemoved()) {
-				held.thing.setNoGravity(held.hadNoGravity);
+				HandGrip.settle(held.thing, held.hadNoGravity);
 				held.thing.resetFallDistance();
 			}
 		}

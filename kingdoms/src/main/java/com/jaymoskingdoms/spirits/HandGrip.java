@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) The per-tick state of the hands that take hold: what the spirit has seized and is holding in front of its
+ * (0.7.237) The per-tick state of the hands that take hold: what the spirit has seized and is holding in front of its
  * keeper (grab and throw), what it has thrown and is waiting to land, the items it is pulling in (the far hand), and the
  * mobs it holds fast (hold the line). Andy: "manipulating items from way farther away than you could naturally". All of it is
  * kept by server tick count, per keeper; everything lets go the moment the keeper's spirit is no longer out.
@@ -69,7 +69,52 @@ final class HandGrip {
 	private static final List<Pull> PULLS = new ArrayList<>();
 	private static final List<Pin> PINS = new ArrayList<>();
 
+	/**
+	 * On everything the hands hold up (so it saves with no gravity if its keeper leaves or its chunk unloads mid-hold):
+	 * {@link #landed} gives it its gravity back when it loads again.
+	 */
+	static final String HELD_TAG = "jaymoskingdoms_held";
+
 	private HandGrip() {
+	}
+
+	/** {@code thing} is held up by the hands: no gravity, and tagged so a save mid-hold is undone on load. */
+	static void floatUp(Entity thing) {
+		thing.setNoGravity(true);
+		thing.addTag(HELD_TAG);
+	}
+
+	/** {@code thing} is let go: its gravity back ({@code hadNoGravity}: it never had any). */
+	static void settle(Entity thing, boolean hadNoGravity) {
+		thing.setNoGravity(hadNoGravity);
+		thing.removeTag(HELD_TAG);
+	}
+
+	/** An entity loaded: if it was saved mid-hold, its gravity comes back. */
+	static void landed(Entity entity) {
+		if (entity.entityTags().contains(HELD_TAG)) {
+			entity.removeTag(HELD_TAG);
+			entity.setNoGravity(false);
+		}
+	}
+
+	/** Everything {@code player} holds, pulls or pins is let go (the spirit is put away). */
+	static void letGo(ServerPlayer player) {
+		UUID id = player.getUUID();
+		Held held = HELD.remove(id);
+		if (held != null) {
+			release(held);
+		}
+		for (Iterator<Pull> it = PULLS.iterator(); it.hasNext();) {
+			Pull p = it.next();
+			if (p.owner.equals(id)) {
+				if (!p.item.isRemoved()) {
+					settle(p.item, false);
+				}
+				it.remove();
+			}
+		}
+		PINS.removeIf(pin -> pin.owner.equals(id));
 	}
 
 	/** Before the world saves: everything held, pulled or pinned is let go, so nothing is saved floating. */
@@ -79,7 +124,7 @@ final class HandGrip {
 		}
 		for (Pull p : PULLS) {
 			if (!p.item.isRemoved()) {
-				p.item.setNoGravity(false);
+				settle(p.item, false);
 			}
 		}
 		clear();
@@ -102,7 +147,7 @@ final class HandGrip {
 	static void seize(ServerPlayer player, Entity thing) {
 		thing.stopRiding();
 		HELD.put(player.getUUID(), new Held(thing, tick(player), thing.isNoGravity()));
-		thing.setNoGravity(true);
+		floatUp(thing);
 		thing.setDeltaMovement(Vec3.ZERO);
 		if (thing instanceof Mob mob) {
 			mob.setTarget(null);
@@ -119,7 +164,7 @@ final class HandGrip {
 		}
 		Entity thing = held.thing;
 		Vec3 look = player.getLookAngle();
-		thing.setNoGravity(held.hadNoGravity);
+		settle(thing, held.hadNoGravity);
 		thing.setDeltaMovement(look.scale(THROW_SPEED + charge * THROW_CHARGE));
 		thing.syncVelocity = true;
 		thing.resetFallDistance();
@@ -130,7 +175,7 @@ final class HandGrip {
 
 	private static void release(Held held) {
 		if (!held.thing.isRemoved()) {
-			held.thing.setNoGravity(held.hadNoGravity);
+			settle(held.thing, held.hadNoGravity);
 			held.thing.resetFallDistance();
 		}
 	}
@@ -144,7 +189,7 @@ final class HandGrip {
 			}
 		}
 		PULLS.add(new Pull(item, player.getUUID(), tick(player)));
-		item.setNoGravity(true);
+		floatUp(item);
 	}
 
 	// ---- hold the line ----------------------------------------------------------------------------------------------
@@ -264,14 +309,14 @@ final class HandGrip {
 			ItemEntity item = pull.item;
 			if (owner == null || item.isRemoved() || now - pull.since > PULL_TICKS || item.level() != owner.level()) {
 				if (!item.isRemoved()) {
-					item.setNoGravity(false);
+					settle(item, false);
 				}
 				it.remove();
 				continue;
 			}
 			Vec3 to = owner.position().add(0.0, 0.5, 0.0).subtract(item.position());
 			if (to.length() <= PULL_ARRIVES) {
-				item.setNoGravity(false);
+				settle(item, false);
 				item.setNoPickUpDelay();
 				item.setDeltaMovement(to.scale(0.1));
 				it.remove();

@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Old Ambrose, the Warden: a grandfather of a wizard, endlessly patient, who calls his keeper "little one" and
+ * (0.7.237) Old Ambrose, the Warden: a grandfather of a wizard, endlessly patient, who calls his keeper "little one" and
  * would rather mend a hurt than win a fight. Andy: "some just give you buffs ... the ones with personalities can kick in on
  * their own to assist you at times similar to how the symbiote operates". Ward, blessing and healing; a broad open hand
  * twice yours behind the shoulder, soft green.
@@ -506,7 +506,7 @@ public final class Ambrose extends Spirit {
 				}
 				continue;
 			}
-			if (now % 20 == 0 && !Mana.pay(owner, STEADY_COST_PER_SECOND, Mana.WARD)) {
+			if (now % 20 == 0 && !Spirits.upkeep(owner, STEADY_COST_PER_SECOND)) {
 				it.remove();
 				Spirits.toggle(owner, SpiritState.STEADY, false);
 				owner.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.steady.off").withStyle(ChatFormatting.GRAY));
@@ -526,7 +526,7 @@ public final class Ambrose extends Spirit {
 					owner.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.mend.done").withStyle(ChatFormatting.GREEN));
 					continue;
 				}
-				Mana.pay(owner, MEND_COST_PER_SECOND, Mana.WARD);
+				Mana.drain(owner, MEND_COST_PER_SECOND);
 				PowersCompat.closeCut(owner);
 				ServerLevel level = (ServerLevel)owner.level();
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, owner.getX(), owner.getY() + 1.0, owner.getZ(), 6, 0.4, 0.6, 0.4, 0.0);

@@ -18,7 +18,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
 /**
- * (0.7.236) What a mana spirit does to your own screen. Andy: "the ones with personalities can kick in on their own to assist
+ * (0.7.237) What a mana spirit does to your own screen. Andy: "the ones with personalities can kick in on their own to assist
  * you at times similar to how the symbiote operates", and the symbiote's rule is that every autonomous act touches the screen:
  * when the server stamps {@link Spirits#FLASH} (an act, a parry, a ward, a warning) the edges flash for {@link #FLASH_TICKS} in
  * the spirit's colour (white for a ward, red for a warning). While spirit sickness is on you, the edge tints with each of the

@@ -43,7 +43,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
-		// (0.7.236) a spirit's javelin is its trail: nothing to draw
+		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		CampSkins.register();

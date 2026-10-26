@@ -52,7 +52,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Mana spirits. Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their
+ * (0.7.237) Mana spirits. Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their
  * presentation ... use of the mage hands calls upon a mana spirit, each of which has a differing personality of 5, one of
  * those being seemingly non responsive at all ... these spirits should conjure as arms behind you with the same effects as
  * your mana aura making up their entire form ... some just give you buffs ... some have entire move sets but all can be
@@ -237,6 +237,7 @@ public final class Spirits {
 			Thessaly.forgetKeeper(id);
 			QuietOne.dropState(id);
 			SpiritClash.forget(id);
+			CastHints.forget(id);
 			for (Spirit spirit : ALL) {
 				spirit.forget(id);
 			}
@@ -320,6 +321,18 @@ public final class Spirits {
 		}
 	}
 
+	/**
+	 * Takes {@code cost} for a move's upkeep (a hold, steady hands, mending, each second) with no ripple and no strain
+	 * ({@link Mana#drain}); false, and nothing taken, when the keeper can't pay it.
+	 */
+	static boolean upkeep(ServerPlayer player, float cost) {
+		if (!Mana.canPay(player, cost)) {
+			return false;
+		}
+		Mana.drain(player, cost);
+		return true;
+	}
+
 	/** A toggle move ({@link SpiritState#STEADY}, {@link SpiritState#ECHO}, {@link SpiritState#ARMOUR}) went {@code on} or off: the HUD follows. */
 	static void toggle(ServerPlayer player, int bit, boolean on) {
 		SpiritState state = state(player);
@@ -347,7 +360,11 @@ public final class Spirits {
 			return;
 		}
 		switch (key.action()) {
-			case SUMMON -> summon(player, state);
+			case SUMMON -> {
+				if (!SpiritClash.inClash(player)) {
+					summon(player, state);
+				}
+			}
 			case CAST -> {
 				if (SpiritClash.inClash(player)) {
 					SpiritClash.tap(player);
@@ -358,12 +375,13 @@ public final class Spirits {
 				}
 			}
 			case NEXT -> {
-				if (state.out()) {
+				if (state.out() && !SpiritClash.inClash(player)) {
 					next(player, state);
 				}
 			}
 			case DISMISS -> {
-				if (state.out()) {
+				// (no slipping out of a clash: the loser is thrown)
+				if (state.out() && !SpiritClash.inClash(player)) {
 					putAway(player, "dismiss");
 				}
 			}
@@ -404,6 +422,12 @@ public final class Spirits {
 		set(player, state.withOut(false).withToggle(0, false).withShow(player.level().getGameTime(), Poses.IDLE));
 		OUT_TICKS.remove(player.getUUID());
 		IDLE_AT.remove(player.getUUID());
+		HandGrip.letGo(player);
+		HandMoves.forgetKeeper(player.getUUID());
+		Ambrose.dropState(player.getUUID());
+		HandExtras.forget(player.getUUID());
+		Thessaly.forgetKeeper(player.getUUID());
+		QuietOne.dropState(player.getUUID());
 		if (event != null) {
 			SpiritVoice.sayNow(player, state.kind(), event);
 			if (player.level() instanceof ServerLevel level) {
@@ -438,12 +462,15 @@ public final class Spirits {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.no_mana").withStyle(ChatFormatting.BLUE));
 			return;
 		}
+		CastHints.clear(player);
 		if (!move.cast(player, state, move.charges() ? held : 0)) {
+			CastHints.clear(player);
 			return;
 		}
-		Mana.pay(player, move.cost(), move.intent());
+		Mana.pay(player, move.cost(player), move.intent());
 		Moves.start(player, move, now);
-		show(player, move.pose());
+		show(player, move.pose(player));
+		CastHints.clear(player);
 		addXp(player, XP_PER_CAST);
 		SpiritClash.noteStrike(player, move, SpiritClash.aimed(player));
 	}

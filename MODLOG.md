@@ -3018,12 +3018,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `jaymospowers_spent_whale` tag. With Kingdoms it drops whale blubber, meat, bone and sometimes ambergris. Andy wants
   the taut line lifting the thrower kept: it shouldn't be tried unprepared. Merged in #551 claiming 0.17.20/0.7.232,
   which #550 had already used, so renumbered here. Not seen in game.
-- **0.17.24, mana grows (Kingdoms 0.7.235):** the mana glow settles dim after attuning and shows power; casting folk are
+- **0.17.25, mana grows (Kingdoms 0.7.236):** the mana glow settles dim after attuning and shows power; casting folk are
   attuned; amethyst crushes for mana; mana sickness; vis, flux and corruption tie into mana; a mana wand; meditation
   restores mana; casts ripple the aura by intent. No Powers changes (Kingdoms reads Powers' Meditate, Phials and
   Corruption by reflection). See Kingdoms' log.
-- **0.17.24, mana spirits (Kingdoms 0.7.236):** the mage hands and the first two spirits, Grimsby (blade) and Varro
+- **0.17.25, mana spirits (Kingdoms 0.7.237):** the mage hands and the first two spirits, Grimsby (blade) and Varro
   (siege): a chance at near death, five days of spirit sickness, aura arms that grow out of yours, moves on L, bond and
   level, lines and battle advice, autonomous parries and javelins, court wizards and hermits with spirits of their own.
   See Kingdoms' log and `docs/Spirits-Plan.md`. Powers' `KeyConflicts` moves vanilla's Advancements off L once per
-  install (it stays on the pause menu), since L is the spirit key and no letter is free of both mods and vanilla.
+  install (it stays on the pause menu), since L is the spirit key and no letter is free of both mods and vanilla. Second
+  patch in the same release: Old Ambrose (ward), Thessaly (reach), the Quiet One (echo, silent but one word at bond 100),
+  the arm-lock clash between two keepers (a letterboxed tug of war), Spirit armour and Spirit ride.

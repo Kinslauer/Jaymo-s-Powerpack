@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.235) Mana sickness. Andy: "add a type of mana sickness for punishing over zealous casters". Every bit of mana spent,
+ * (0.7.236) Mana sickness. Andy: "add a type of mana sickness for punishing over zealous casters". Every bit of mana spent,
  * and every bit forced in past full (crushed amethyst, a wand), is <b>strain</b>, counted against the caster's most mana;
  * it eases off by itself ({@link #EASES} of the most a second, faster meditating). Push it too far and they fall sick, worse
  * the further they pushed, for a while:
@@ -119,7 +119,7 @@ public final class ManaSickness {
 		}
 	}
 
-	/** (0.7.236) {@code player} burns out at once (releasing a spirit does this). */
+	/** (0.7.237) {@code player} burns out at once (releasing a spirit does this). */
 	public static void burnOut(ServerPlayer player) {
 		if (stage(player) < 3) {
 			fall(player, 3);
@@ -141,7 +141,7 @@ public final class ManaSickness {
 			}
 			default -> {
 				Mana.set(player, 0.0F);
-				// (0.7.236) a spirit that's out is shaken
+				// (0.7.237) a spirit that's out is shaken
 				com.jaymoskingdoms.spirits.Spirits.burntOut(player);
 				player.hurtServer(level, level.damageSources().magic(), BURNOUT_HURT);
 				player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 12, 0, false, false, true));

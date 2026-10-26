@@ -3,9 +3,9 @@ package com.jaymoskingdoms.spirits;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Lockpicking;
 import com.jaymoskingdoms.Mana;
 import com.mojang.serialization.Codec;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +60,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) The Quiet One. Andy: "five personalities, one of those being seemingly non responsive at all". It never speaks:
+ * (0.7.237) The Quiet One. Andy: "five personalities, one of those being seemingly non responsive at all". It never speaks:
  * every line of {@link SpiritVoice} is dropped for it but the dots of its sickness ({@code sick.1} to {@code sick.5}, a
  * growing run of full stops) and, once, at bond {@value Spirits#MAX_BOND}, a single word ({@code word.1}, kept by
  * {@link #SPOKEN} so it is never said again; Andy: "Yes" to speaking once at max bond). It is a different size each time it is
@@ -150,8 +150,6 @@ public final class QuietOne extends Spirit {
 	/** Set while an echo lands, so it is not echoed in turn. */
 	private static boolean echoing;
 	/** {@code Lockpicking.locked}, which is not public (by reflection); null if it can't be reached. */
-	private static @Nullable Method lockedMethod;
-	private static boolean lockedLooked;
 
 	/** What a small move does when it is cast. */
 	@FunctionalInterface
@@ -633,23 +631,9 @@ public final class QuietOne extends Spirit {
 			|| block == Blocks.AMETHYST_CLUSTER || block == Blocks.BUDDING_AMETHYST || block == Blocks.AMETHYST_BLOCK;
 	}
 
-	/** Whether the container at {@code pos} is a locked loot chest (Lockpicking's own check, by reflection: it is not public). */
+	/** Whether the container at {@code pos} is a locked loot chest. */
 	private static boolean locked(ServerLevel level, BlockPos pos) {
-		if (!lockedLooked) {
-			lockedLooked = true;
-			try {
-				Method m = Class.forName("com.jaymoskingdoms.Lockpicking").getDeclaredMethod("locked", ServerLevel.class, BlockPos.class);
-				m.setAccessible(true);
-				lockedMethod = m;
-			} catch (ReflectiveOperationException | RuntimeException e) {
-				JaymosKingdoms.LOGGER.warn("the Quiet One cannot sense locked chests: {}", e.toString());
-			}
-		}
-		try {
-			return lockedMethod != null && Boolean.TRUE.equals(lockedMethod.invoke(null, level, pos));
-		} catch (ReflectiveOperationException | RuntimeException e) {
-			return false;
-		}
+		return Lockpicking.lockLevel(level, pos) > 0;
 	}
 
 	private static void mote(ServerLevel level, ServerPlayer player, int colour, double x, double y, double z, int count, double spreadXZ, double spreadY) {

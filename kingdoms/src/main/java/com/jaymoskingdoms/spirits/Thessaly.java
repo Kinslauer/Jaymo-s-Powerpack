@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Thessaly the Learned: a fussy scholar who lectures, corrects the way you say your spells, and calls you "dear".
+ * (0.7.237) Thessaly the Learned: a fussy scholar who lectures, corrects the way you say your spells, and calls you "dear".
  * Andy: "a mage hand type of ability ... manipulating items from way farther away than you could naturally", and the spirits
  * that "kick in on their own to assist you". Rose pink, a slim glove of light over your own hand. Reach: things from far
  * away, traps, utility.
@@ -139,11 +139,13 @@ public final class Thessaly extends Spirit {
 		if (chest == null) {
 			return;
 		}
+		if (!Spirits.act(player, Spirits.THESSALY, Spirits.FLASH_ACT, LOOT_COST)) {
+			return;
+		}
 		cool(player, "loot", now, LOOT_EVERY);
 		ThessalyHands.markSeen(level, player.getUUID(), chest);
-		// (her own remark first, over the gap; the act's usual line then yields to it)
+		// (her own remark over the act's usual line)
 		SpiritVoice.sayNow(player, Spirits.THESSALY, "loot");
-		Spirits.act(player, Spirits.THESSALY, Spirits.FLASH_ACT, LOOT_COST);
 		Spirits.show(player, Poses.REACH);
 		Vec3 at = Vec3.atCenterOf(chest);
 		SpiritFoes.line(level, ParticleTypes.END_ROD, player.getEyePosition().add(0.0, -0.4, 0.0), at, Math.min(30, Math.max(4, (int)(player.position().distanceTo(at) * 1.5))));
@@ -315,8 +317,6 @@ public final class Thessaly extends Spirit {
 	 * Like the grab, so the cost and cooldown follow the cast that just happened.
 	 */
 	private static final class JuggleMove implements Move {
-		private float price = JUGGLE_COST;
-		private int nextPose = -1, nextCooldown = -1;
 
 		@Override
 		public String id() {
@@ -325,14 +325,12 @@ public final class Thessaly extends Spirit {
 
 		@Override
 		public float cost() {
-			return price;
+			return JUGGLE_COST;
 		}
 
 		@Override
 		public int cooldown() {
-			int c = nextCooldown >= 0 ? nextCooldown : JUGGLE_COOLDOWN;
-			nextCooldown = -1;
-			return c;
+			return JUGGLE_COOLDOWN;
 		}
 
 		@Override
@@ -347,9 +345,7 @@ public final class Thessaly extends Spirit {
 
 		@Override
 		public int pose() {
-			int p = nextPose >= 0 ? nextPose : Poses.JUGGLE;
-			nextPose = -1;
-			return p;
+			return Poses.JUGGLE;
 		}
 
 		@Override
@@ -359,25 +355,25 @@ public final class Thessaly extends Spirit {
 
 		@Override
 		public boolean cast(ServerPlayer player, SpiritState state, int charge) {
-			nextPose = -1;
-			nextCooldown = -1;
 			if (ThessalyHands.juggling(player)) {
 				if (!ThessalyHands.hurl(player, charge)) {
 					return false;
 				}
-				price = 0.0F;
-				nextPose = Poses.THROW;
+				CastHints.setCost(player, 0.0F);
+				CastHints.setPose(player, Poses.THROW);
 				// (more in the air: no cooldown yet; the last throw starts it)
-				nextCooldown = ThessalyHands.juggling(player) ? 0 : -1;
+				if (ThessalyHands.juggling(player)) {
+					CastHints.setCooldown(player, 0);
+				}
 				return true;
 			}
 			int lifted = ThessalyHands.lift(player, n -> Mana.canPay(player, JUGGLE_COST * n));
 			if (lifted == 0) {
 				return false;
 			}
-			price = JUGGLE_COST * lifted;
+			CastHints.setCost(player, JUGGLE_COST * lifted);
 			// (the cooldown waits for the last throw)
-			nextCooldown = 0;
+			CastHints.setCooldown(player, 0);
 			if (player.getRandom().nextFloat() < HandMoves.MOVE_SAY) {
 				SpiritVoice.say(player, "move");
 			}

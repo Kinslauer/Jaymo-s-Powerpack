@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -72,7 +73,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) The mage hands every spirit shares. Andy: "a mage hand type of ability that mimics the way stands work but not
+ * (0.7.237) The mage hands every spirit shares. Andy: "a mage hand type of ability that mimics the way stands work but not
  * their presentation", and the point of them is "manipulating items from way farther away than you could naturally". Every
  * spirit's move list starts with these six:
  * <ol>
@@ -176,15 +177,14 @@ public final class HandMoves {
 	}
 
 	/**
-	 * One of the shared moves. The pose and cooldown can be set for the cast that is just happening ({@code nextPose},
-	 * {@code nextCooldown}, read once by the dispatcher): the grab's first tap starts no cooldown so the second can throw, and
-	 * a throw shows the throwing pose.
+	 * One of the shared moves. The pose and cooldown can be set for the cast that is just happening ({@link CastHints}, read
+	 * once by the dispatcher): the grab's first tap starts no cooldown so the second can throw, and a throw shows the
+	 * throwing pose.
 	 */
 	private abstract static class Hand implements Move {
 		private final String id;
 		private final float cost;
 		private final int cooldown, level, pose, intent;
-		int nextPose = -1, nextCooldown = -1;
 
 		Hand(String id, float cost, int cooldown, int level, int pose, int intent) {
 			this.id = id;
@@ -199,8 +199,6 @@ public final class HandMoves {
 
 		@Override
 		public boolean cast(ServerPlayer player, SpiritState state, int charge) {
-			nextPose = -1;
-			nextCooldown = -1;
 			boolean did = act(player, state, charge);
 			if (did && player.getRandom().nextFloat() < MOVE_SAY) {
 				SpiritVoice.say(player, "move");
@@ -220,9 +218,7 @@ public final class HandMoves {
 
 		@Override
 		public int cooldown() {
-			int c = nextCooldown >= 0 ? nextCooldown : cooldown;
-			nextCooldown = -1;
-			return c;
+			return cooldown;
 		}
 
 		@Override
@@ -232,9 +228,7 @@ public final class HandMoves {
 
 		@Override
 		public int pose() {
-			int p = nextPose >= 0 ? nextPose : pose;
-			nextPose = -1;
-			return p;
+			return pose;
 		}
 
 		@Override
@@ -251,6 +245,7 @@ public final class HandMoves {
 		ServerTickEvents.END_SERVER_TICK.register(HandMoves::tick);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(HandMoves::allowDamage);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HandGrip.letGo());
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> HandGrip.landed(entity));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CATCHING.clear();
 			HOLDING.clear();
@@ -345,7 +340,7 @@ public final class HandMoves {
 			if (target instanceof ItemEntity item) {
 				HandGrip.pull(player, item);
 				line(level, player, item.position());
-				move.nextPose = Poses.GRAB;
+				CastHints.setPose(player, Poses.GRAB);
 				return true;
 			}
 			if (target instanceof ItemFrame frame) {
@@ -397,7 +392,7 @@ public final class HandMoves {
 			if (!HandGrip.hurl(player, charge)) {
 				return false;
 			}
-			move.nextPose = Poses.THROW;
+			CastHints.setPose(player, Poses.THROW);
 			return true;
 		}
 		double reach = reach(state);
@@ -420,7 +415,7 @@ public final class HandMoves {
 			line(level, player, target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		}
 		// no cooldown yet: the second tap throws; the hold's end (or the throw) starts it
-		move.nextCooldown = 0;
+		CastHints.setCooldown(player, 0);
 		return true;
 	}
 
@@ -474,11 +469,7 @@ public final class HandMoves {
 		if (!state.out() || !(source.getDirectEntity() instanceof Projectile shot) || !catchable(player, shot)) {
 			return false;
 		}
-		if (catching(player)) {
-			snatch(player, shot);
-			Spirits.show(player, Poses.CATCH);
-			return true;
-		}
+		// (a cast catch is handled first, in allowDamage; this is the spirit catching on its own)
 		long now = player.level().getGameTime();
 		if (state.level() < CATCH.level() || Moves.wait(player, CATCH, now) > 0L
 			|| !Spirits.act(player, state.kind(), Spirits.FLASH_WARD, CATCH_AUTO_COST)) {
@@ -546,6 +537,13 @@ public final class HandMoves {
 
 	private static boolean shield(ItemStack stack) {
 		return stack.has(DataComponents.BLOCKS_ATTACKS);
+	}
+
+	/** The spirit is put away: {@code id}'s catch, hold and far-hand menu end. */
+	static void forgetKeeper(UUID id) {
+		CATCHING.remove(id);
+		HOLDING.remove(id);
+		FAR_MENU.remove(id);
 	}
 
 	private static boolean hold(ServerPlayer player) {
@@ -646,7 +644,7 @@ public final class HandMoves {
 				continue;
 			}
 			if (now % 20 == 0) {
-				if (!Mana.pay(owner, HOLD_COST_PER_SECOND, Mana.WARD)) {
+				if (!Spirits.upkeep(owner, HOLD_COST_PER_SECOND)) {
 					it.remove();
 					owner.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.hold.off").withStyle(ChatFormatting.GRAY));
 					continue;

@@ -25,7 +25,7 @@ import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.236) Who a spirit's blows may land on, and the little things Grimsby's blades and Varro's javelins share. A spirit
+ * (0.7.237) Who a spirit's blows may land on, and the little things Grimsby's blades and Varro's javelins share. A spirit
  * never harms its keeper's friends: no tamed animals, no workers or folk of the keeper's own faction, no villagers or golems
  * it was not pointed at, no players. Of the rest, a blow lands on the hostile ({@link Enemy}), on anything already hunting the
  * keeper, and (when the keeper looked straight at it) on the thing they chose.

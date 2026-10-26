@@ -118,7 +118,7 @@ public final class MobShields {
 		disable(level, mob, seconds);
 	}
 
-	/** (0.7.236) Knocks {@code mob}'s raised shield aside for {@code seconds} (a spirit's axe, a guard break); false if it had none up. */
+	/** (0.7.237) Knocks {@code mob}'s raised shield aside for {@code seconds} (a spirit's axe, a guard break); false if it had none up. */
 	public static boolean disable(ServerLevel level, Mob mob, float seconds) {
 		ItemStack shield = mob.getUseItem();
 		BlocksAttacks blocks = shield.get(DataComponents.BLOCKS_ATTACKS);

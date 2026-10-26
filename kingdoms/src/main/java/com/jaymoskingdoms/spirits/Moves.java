@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Every {@link Move} there is, by id, and each player's cooldowns on them. The hands' shared moves
+ * (0.7.237) Every {@link Move} there is, by id, and each player's cooldowns on them. The hands' shared moves
  * ({@link HandMoves}) and each spirit's own register here when the game starts ({@link Spirits#register}).
  */
 public final class Moves {
@@ -55,7 +55,7 @@ public final class Moves {
 
 	/** Starts {@code move}'s cooldown for {@code player}. */
 	public static void start(ServerPlayer player, Move move, long now) {
-		READY.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(move.id(), now + move.cooldown());
+		READY.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(move.id(), now + move.cooldown(player));
 	}
 
 	private static long readyAt(ServerPlayer player, Move move) {

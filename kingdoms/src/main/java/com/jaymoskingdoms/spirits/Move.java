@@ -4,7 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.236) One thing a spirit's hands can do. Andy: "some have entire move sets but all can be upgraded and leveled". A move
+ * (0.7.237) One thing a spirit's hands can do. Andy: "some have entire move sets but all can be upgraded and leveled". A move
  * is cast from the spirit key ({@link Spirits.Key}, action CAST): {@link Spirits} checks the cooldown ({@link Moves#ready})
  * and that the player can pay, calls {@link #cast}, and only if that returns true takes the mana
  * ({@link com.jaymoskingdoms.Mana#pay}) and starts the cooldown. So a move never pays for itself, and returns false when
@@ -17,8 +17,18 @@ public interface Move {
 	/** Mana a cast costs (before sickness or corruption make it dearer). */
 	float cost();
 
+	/** What the cast just made by {@code player} costs: {@link #cost()} unless the move set otherwise ({@link CastHints}). */
+	default float cost(ServerPlayer player) {
+		return CastHints.cost(player, cost());
+	}
+
 	/** Ticks before it can be cast again. */
 	int cooldown();
+
+	/** The cooldown the cast just made by {@code player} starts: {@link #cooldown()} unless the move set otherwise. */
+	default int cooldown(ServerPlayer player) {
+		return CastHints.cooldown(player, cooldown());
+	}
 
 	/** The spirit level it unlocks at. */
 	int level();
@@ -30,6 +40,11 @@ public interface Move {
 
 	/** The {@link Poses} id the arms hold when it is cast. */
 	int pose();
+
+	/** The pose the cast just made by {@code player} shows: {@link #pose()} unless the move set otherwise. */
+	default int pose(ServerPlayer player) {
+		return CastHints.pose(player, pose());
+	}
 
 	/** The intent the aura ripples with when it is paid for ({@link com.jaymoskingdoms.Mana#HARM}, {@code WILL}...). */
 	default int intent() {

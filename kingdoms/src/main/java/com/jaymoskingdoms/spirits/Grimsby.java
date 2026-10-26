@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Grimsby the Weary: a grumpy old wizard of four hundred years' study who has been made a fly swatter for a child,
+ * (0.7.237) Grimsby the Weary: a grumpy old wizard of four hundred years' study who has been made a fly swatter for a child,
  * and is secretly fond of them. Andy: "grumpy old wizards that are tired of looking after said young child ... a stand that
  * forms into different weapons". Blade and parry; steel-blue-white, long and bony.
  * <ul>

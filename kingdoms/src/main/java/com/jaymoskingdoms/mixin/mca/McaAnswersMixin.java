@@ -60,7 +60,7 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.ManaFolk.canAsk(villager)) {
-			// (0.7.235) only one who works magic talks of it
+			// (0.7.236) only one who works magic talks of it
 			cir.getReturnValue().remove(com.jaymoskingdoms.ManaFolk.ANSWER);
 		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {

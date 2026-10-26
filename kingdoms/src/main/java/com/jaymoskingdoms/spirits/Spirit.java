@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) A kind of mana spirit. Andy: "5 personalities, one of those being seemingly non responsive at all ... all
+ * (0.7.237) A kind of mana spirit. Andy: "5 personalities, one of those being seemingly non responsive at all ... all
  * different sizes". One instance per kind ({@link Spirits#of}); the player's own state (level, bond) is in
  * {@link SpiritState}. A spirit has its look ({@link #color}, {@link #size}), its own {@link #moves} (the player's list is
  * {@link HandMoves#SHARED} then these, filtered by level) and hooks that let it act on its own once the bond is deep enough.

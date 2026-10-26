@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.236) Old Varro, the Siege-Mage: a gruff war veteran who barks orders and is proud when he is listened to. Andy: "a
+ * (0.7.237) Old Varro, the Siege-Mage: a gruff war veteran who barks orders and is proud when he is listened to. Andy: "a
  * collected energy javelin attack". Javelins and bombards; amber, a gauntlet as tall as you.
  * <ul>
  * <li><b>Mana javelin</b> (level 1, hold to charge): a piercing bolt, {@link SpiritJavelin}. <b>Mark</b> (2): the mob in

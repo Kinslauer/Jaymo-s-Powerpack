@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.7.235) The folk who work magic are attuned too. Andy: "court wizards and clerics should have to be attuned as well.
+ * (0.7.236) The folk who work magic are attuned too. Andy: "court wizards and clerics should have to be attuned as well.
  * meaning other magic users can see their glow, and know their power level from the intensity of the glow. mentioning it if
  * asked." A court wizard, a village cleric, a hermit wizard, and every caster of the camps and the courts (shaman,
  * necromancer, blood witch, orc shaman) is attuned with a {@link Mana#POWER} of their own ({@link #power}), give or take one,
@@ -83,7 +83,7 @@ public final class ManaFolk {
 	}
 
 	/**
-	 * (0.7.236) Andy: "attuned villagers (court wizards, hermits) have spirits of their own you can see and fight". A court
+	 * (0.7.237) Andy: "attuned villagers (court wizards, hermits) have spirits of their own you can see and fight". A court
 	 * wizard or hermit without one gets a spirit: Grimsby or Varro by their id, their power as its level, bond 50, put away.
 	 */
 	public static void giveSpirit(LivingEntity e, int power) {

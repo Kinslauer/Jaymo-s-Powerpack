@@ -1,7 +1,7 @@
 package com.jaymoskingdoms.spirits;
 
 /**
- * (0.7.236) The poses a spirit's arms hold, as small ints stamped into {@link SpiritState#show()} so viewers can draw them
+ * (0.7.237) The poses a spirit's arms hold, as small ints stamped into {@link SpiritState#show()} so viewers can draw them
  * ({@code SpiritArms} on the client keeps a table of arm angles for each). A move names its pose; the arms hold it for a
  * moment and ease back to {@link #IDLE}. Ids are stable: the client and the moves are written against these numbers.
  */

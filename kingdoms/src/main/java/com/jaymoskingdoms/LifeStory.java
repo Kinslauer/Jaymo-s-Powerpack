@@ -550,7 +550,8 @@ public final class LifeStory {
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
 			StoryGround.capital(server, player, () -> go.accept(Start.CITY));
-		} else if (road0 == Start.WHALERS && !Whalers.berth(server)) {
+		} else if (road0 == Start.WHALERS) {
+			// (0.7.235) always made ready first, even with a berth in port: her sea must be ticking for her to float
 			StoryGround.harbour(player, () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
 		} else {
 			go.accept(road0);
