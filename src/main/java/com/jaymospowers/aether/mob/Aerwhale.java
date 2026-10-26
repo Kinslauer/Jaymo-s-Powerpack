@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
  * The aerwhale: a huge, quiet whale (as long as Kingdoms' great whales, about fifteen blocks) that drifts across the sky on its own, picking a spot 16 to 32 blocks away and sailing
  * to it, never into a wall. Its call carries far. No riding.
  *
- * <p>(0.17.20) It is hunted like Kingdoms' great whales: thick blubber turns most blows ({@link #BLUBBER}); only
+ * <p>(0.17.21) It is hunted like Kingdoms' great whales: thick blubber turns most blows ({@link #BLUBBER}); only
  * harpoons (Kingdoms' roped ones, the Armory's thrown one, or a trident) bite deep. A struck whale bolts away from its
  * hunters, climbing. Every Kingdoms harpoon lodged in it bleeds it and tires it faster, and Kingdoms holds it back on the
  * lines, until, spent ({@link #SPENT_AT}), it sinks low over the ground, bleeding, and can be finished. With Kingdoms
