@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -41,6 +42,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -61,8 +63,10 @@ import org.jspecify.annotations.Nullable;
  * home there, and they remember where they came from and why ({@link #STORY}): in a chat they tell you ({@link #tell}).
  * Folk of a settlement away from any kingdom who came before this (no story of their own) tell of their family's leaving
  * instead, a generation or two back.
- * <p>Never: one who's a player's family, a ruler, an elder of a lineage, a child on their own, one following anyone;
- * nor from a place this small ({@link #MIN_LEFT}), nor a second household from the same place within {@link #PLACE_GAP}.
+ * <p>Never: one who's a player's family, a ruler, an elder of a lineage, a child on their own, one following anyone.
+ * Nothing holds a place's people (Andy: "If they lose more than that then it is what it is, the kingdom will either
+ * improve it's qol for villagers or it will fall to ruin with no peasants"): a realm left with nobody for
+ * {@link #EMPTY_RUIN_TICKS} falls to ruin ({@link #surveyed}).
  */
 public final class Emigrants {
 	/** How often each villager is weighed (ticks): about twenty times a day. */
@@ -75,10 +79,12 @@ public final class Emigrants {
 	static final int GRUDGES_LEAST = 3, UNHAPPY_MOOD = -8;
 	/** Neighbours who count: this close. */
 	static final double NEIGHBOURS = 32.0;
-	/** A place keeps at least this many grown villagers (about it) and loses a household at most this often (ticks: four days). */
-	static final int MIN_LEFT = 6;
-	static final long PLACE_GAP = 96000L;
+	/** A place: this far about its seat. */
 	static final double PLACE_RANGE = 64.0;
+	/** A realm with no villagers left (by its survey) this long falls to ruin (ticks: three days). */
+	static final long EMPTY_RUIN_TICKS = 72000L;
+	/** ...counted empty at least this many times over it (one stray count while the town loads mustn't ruin it). */
+	static final int EMPTY_COUNTS = 3;
 	/** One who's moved stays at least this long (ticks: ten days) before they'd think of it again. */
 	static final long SETTLED_TICKS = 240000L;
 	/** Their household goes with them: partner and children this close. */
@@ -163,10 +169,10 @@ public final class Emigrants {
 		builder -> builder.persistent(Move.CODEC));
 	public static final AttachmentType<Story> STORY = AttachmentRegistry.create(JaymosKingdoms.id("emigrant_story"),
 		builder -> builder.persistent(Story.CODEC));
-	/** On the Overworld: everyone on the road, by id; and when each place last lost a household (by its middle, as a long). */
+	/** On the Overworld: everyone on the road, by id; and each realm's emptiness (-1 peopled, else when its last left). */
 	static final AttachmentType<Map<String, Road>> ROADS = AttachmentRegistry.create(JaymosKingdoms.id("emigrant_roads"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Road.CODEC)));
-	static final AttachmentType<Map<String, Long>> LEFT = AttachmentRegistry.create(JaymosKingdoms.id("emigrant_left"),
+	static final AttachmentType<Map<String, Long>> EMPTIED = AttachmentRegistry.create(JaymosKingdoms.id("emigrant_emptied"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
 
 	/** The MCA villagers loaded just now. */
@@ -471,26 +477,12 @@ public final class Emigrants {
 		if (random.nextFloat() >= daily / CHECKS_A_DAY) {
 			return;
 		}
-		// (a place keeps its people: not too few, and one household at a time)
-		BlockPos place = f != null ? f.seat() : v.blockPosition();
-		String placeKey = Long.toString(BlockPos.containing(place.getX() >> 6, 0, place.getZ() >> 6).asLong());
-		Long last = level.getAttachedOrElse(LEFT, Map.of()).get(placeKey);
-		if (last != null && now - last < PLACE_GAP) {
-			return;
-		}
-		int grown = level.getEntitiesOfClass(Villager.class, v.getBoundingBox().inflate(PLACE_RANGE), x -> x.isAlive() && !x.isBaby()).size();
 		List<Villager> household = household(level, v);
-		if (grown - household.size() < MIN_LEFT) {
-			return;
-		}
 		String reason = REASONS[most];
 		Place to = destination(level, v, f, reason);
 		if (to == null) {
 			return;
 		}
-		Map<String, Long> left = new HashMap<>(level.getAttachedOrElse(LEFT, Map.of()));
-		left.put(placeKey, now);
-		level.setAttached(LEFT, Map.copyOf(left));
 		String from = f != null ? f.name() : town(level, v.blockPosition());
 		boolean seen = near(level, v.position(), UNSEEN);
 		long until = seen ? now + PACKING_TICKS : now;
@@ -622,6 +614,49 @@ public final class Emigrants {
 		v.removeAttached(MOVE);
 		v.setAttached(STORY, new Story(m.from(), m.to(), m.reason(), level.getGameTime()));
 		McaCompat.leaveVillage(v);
+	}
+
+	/**
+	 * (From {@link Production#survey}) {@code f} was just counted: a realm that had people and now has none is emptied, and
+	 * after {@link #EMPTY_RUIN_TICKS} of it (and {@link #EMPTY_COUNTS} counts) falls to ruin, its folk scattered.
+	 */
+	static void surveyed(ServerLevel level, Faction f) {
+		// (only a count made with the town's people loaded about it is believed)
+		if (!f.type().isRealm() || f.fallen() || !level.isPositionEntityTicking(f.seat())) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		Map<String, Long> all = level.getAttachedOrElse(EMPTIED, Map.of());
+		String key = Integer.toString(f.id());
+		Long was = all.get(key);
+		long now = level.getGameTime();
+		Map<String, Long> next = new HashMap<>(all);
+		if (f.holdings().population() > 0) {
+			if (was != null && was == -1L) {
+				return;
+			}
+			next.put(key, -1L);
+		} else if (was == null) {
+			// (never seen peopled: nothing to lose)
+			return;
+		} else if (was == -1L) {
+			// (first found empty: when, and one count; packed as time << 4 | counts)
+			next.put(key, now << 4 | 1L);
+		} else {
+			long since = was >> 4;
+			int counts = (int)(was & 15L);
+			if (now - since < EMPTY_RUIN_TICKS || counts + 1 < EMPTY_COUNTS) {
+				next.put(key, since << 4 | Math.min(15, counts + 1));
+			} else {
+				next.remove(key);
+				Factions.update(server, f.id(), x -> x.withFallen(true).withHoldings(x.holdings().withRoster(Map.of()).withVacancies(Map.of())));
+				for (Folk other : level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(KingdomEvents.RUIN_SCATTER), x -> x.factionId() == f.id())) {
+					other.discard();
+				}
+				KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.emigrants.ruin", f.name()).withStyle(ChatFormatting.DARK_RED));
+			}
+		}
+		level.setAttached(EMPTIED, Map.copyOf(next));
 	}
 
 	// ---- where to -------------------------------------------------------------------------------------------------------

@@ -4763,8 +4763,10 @@ the tide born, stone, warrior and sylvan fall into this".
   villager is weighed about 20 times a day. A day's chance: 0.3% restless, +0.4% per degree their neighbours mind their
   blood (to 6%), +3% not of a purist king's blood, +1% under a tyrant, +1.5% at odds with 3+ neighbours, +1% MCA mood -8
   or worse; the biggest is their reason. They go with their partner and children; never a player's family (MCA's tree,
-  online or not), a ruler, a lineage elder or one following someone; never leaving a place under 6 grown villagers, and
-  one household per place every 4 days; settled ones stay at least 10 days. Where: the ridiculed to a haven that takes
+  online or not), a ruler, a lineage elder or one following someone; settled ones stay at least 10 days. No cap on how many
+  go (Andy: "If they lose more than that then it is what it is, the kingdom will either improve it's qol for villagers or
+  it will fall to ruin with no peasants"): a realm once peopled whose survey (with its seat entity-ticking) counts no
+  villagers for 3 days, over at least 3 counts, falls to ruin like a slain ruler's (folk scattered, announced). Where: the ridiculed to a haven that takes
   their blood, a purist's outsider to a realm of their own blood; else half the time a settlement away from any kingdom
   (no realm within 160 blocks, no overlord), else any village or realm 200-1500 blocks off. Seen, they say goodbye and
   pack for 30 s (a draft horse and cart where a realm is near, else a chested donkey, led on a rope by the head of the
