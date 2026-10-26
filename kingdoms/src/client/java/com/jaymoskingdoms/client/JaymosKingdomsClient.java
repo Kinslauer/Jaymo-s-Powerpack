@@ -87,6 +87,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LineageScreen.register();
 		// 0.7.201: letters and messenger pigeons
 		LetterScreen.register();
+		// (0.7.234) the Pin and Rotary lockpicking games
+		LockpickScreen.register();
 		PigeonRenderer.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
