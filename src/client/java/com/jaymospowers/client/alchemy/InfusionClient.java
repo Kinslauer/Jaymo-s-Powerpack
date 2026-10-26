@@ -1,10 +1,14 @@
 package com.jaymospowers.client.alchemy;
 
-/** (stub: filled in by its track; see docs/Alchemy-Plan.md) */
+import com.jaymospowers.alchemy.infusion.Infusion;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+
+/** Client side of the infusion altar: the item turning above each pedestal. */
 public final class InfusionClient {
 	private InfusionClient() {
 	}
 
 	public static void init() {
+		BlockEntityRenderers.register(Infusion.PEDESTAL_ENTITY, PedestalRenderer::new);
 	}
 }

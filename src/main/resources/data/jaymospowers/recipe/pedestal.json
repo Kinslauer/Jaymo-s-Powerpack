@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "minecraft:smooth_stone_slab",
+    "B": "minecraft:stone_bricks"
+  },
+  "pattern": [
+    "SSS",
+    " B ",
+    "BBB"
+  ],
+  "result": {
+    "id": "jaymospowers:pedestal",
+    "count": 1
+  }
+}
