@@ -119,6 +119,10 @@
     "jaymospowers:faded_holystone_keystone",
     "jaymospowers:altar",
     "jaymospowers:tool_forge",
-    "jaymospowers:ward_stone"
+    "jaymospowers:ward_stone",
+    "jaymospowers:crucible",
+    "jaymospowers:alembic",
+    "jaymospowers:pedestal",
+    "jaymospowers:infusion_matrix"
   ]
 }
