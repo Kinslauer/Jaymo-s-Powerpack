@@ -34,7 +34,7 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
 - Deep Pockets: more of what a mark carries; another try at an empty pocket per rank.
 - Soft Step: sneaking, onlookers see you from less far away.
 - Quick Hands: reach in from the side; marks must turn further to catch you.
-- Lockpicking Prowess (0.7.233, took Slip Away's place): per rank, a lock's sweet spots 15% wider and 20% less strain on the pick; rank 2 feels the binding pin or gate; rank 3 forgives the first slip of each try. Stealth practice widens the sweet spots 2% per level too.
+- Lockpicking Prowess (0.7.234, took Slip Away's place): per rank, a lock's sweet spots 15% wider and 20% less strain on the pick; rank 2 feels the binding pin or gate; rank 3 forgives the first slip of each try. Stealth practice widens the sweet spots 2% per level too.
 - Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
 ### Hoods (Kingdoms 0.7.101, with Powers 0.14.3)

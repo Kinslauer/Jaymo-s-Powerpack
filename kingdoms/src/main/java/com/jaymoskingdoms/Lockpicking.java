@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.233) Locked loot chests and the two lockpicking games, Pin and Rotary. Andy asked for Locks Unofficial's
+ * (0.7.234) Locked loot chests and the two lockpicking games, Pin and Rotary. Andy asked for Locks Unofficial's
  * minigames; that mod is All Rights Reserved and Forge 1.20.1 only, so these are our own, from the idea alone.
  *
  * <p>A loot chest (or barrel, Lootr's included) is read the first time anyone tries to open or break it, before its loot

@@ -150,7 +150,7 @@ public final class Skills {
 		DEEP_POCKETS(Pillar.STEALTH, 3, 1, 0, 1, 0, LIGHT_FINGERS),
 		SOFT_STEP(Pillar.STEALTH, 3, 1, 0, 1, 2, LIGHT_FINGERS),
 		QUICK_HANDS(Pillar.STEALTH, 1, 1, 5, 2, 0, DEEP_POCKETS),
-		// (0.7.233) Lockpicking Prowess took Slip Away's place (Lockpicking): ranks saved under slip_away count for nothing, so their points come back
+		// (0.7.234) Lockpicking Prowess took Slip Away's place (Lockpicking): ranks saved under slip_away count for nothing, so their points come back
 		LOCKPICKING(Pillar.STEALTH, 3, 1, 5, 2, 2, SOFT_STEP),
 		GHOST(Pillar.STEALTH, 1, 2, 10, 3, 1, QUICK_HANDS, LOCKPICKING),
 		FORAGER(Pillar.SURVIVAL, 5, 1, 0, 0, 1),

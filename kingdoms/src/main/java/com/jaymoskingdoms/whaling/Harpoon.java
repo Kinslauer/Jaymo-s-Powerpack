@@ -367,7 +367,7 @@ public final class Harpoon extends Projectile {
 		this.discard();
 	}
 
-	/** (0.7.232) Jaymo's Powers' aerwhale, hunted like a great whale: read by id (Powers is optional) and by the tag it wears spent. */
+	/** (0.7.233) Jaymo's Powers' aerwhale, hunted like a great whale: read by id (Powers is optional) and by the tag it wears spent. */
 	static final String SKY_WHALE = "jaymospowers:aerwhale", SKY_WHALE_SPENT = "jaymospowers_spent_whale";
 
 	static boolean skyWhale(Entity in) {

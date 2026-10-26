@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 /**
- * (0.7.233) The lockpicking games ({@link Lockpicking}), in the Kingdoms screens' look. Both grow their secret from the
+ * (0.7.234) The lockpicking games ({@link Lockpicking}), in the Kingdoms screens' look. Both grow their secret from the
  * lock's seed, so a lock is the same lock every time it's tried. Strain builds on the pick with every mistake and eases
  * off slowly; full strain snaps it (a slip forgiven first, with Lockpicking Prowess 3), and the server takes a pick.
  *

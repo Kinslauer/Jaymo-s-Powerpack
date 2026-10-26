@@ -5086,8 +5086,13 @@ woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of it
 - **Built on, it stays.** Set any block on top of a fallen trunk (not its own logs or leaves) and the next push finds
   it pinned. It is forgotten as a trunk and stays as plain logs for good. Trunks already stayed as real blocks, so
   nothing despawns.
+## 0.7.233: harpoon lines hold aerwhales (pack 0.17.21)
+Powers' aerwhales are hunted like great whales now. A Kingdoms harpoon already lodged in one (it's 5 wide, past
+`BIG`); now `Harpoon.tether` also pays line out to a running aerwhale and holds it back by `WHALE_SHARE`, like a great
+whale, and stops paying out once it wears Powers' `jaymospowers_spent_whale` tag. Powers stays optional: the aerwhale
+is found by its entity id (`skyWhale`). Merged in #551 claiming 0.7.232, which #550 had already used, so renumbered.
 
-## 0.7.233: locked loot chests, the Pin and Rotary lockpicking games (pack 0.17.21)
+## 0.7.234: locked loot chests, the Pin and Rotary lockpicking games (pack 0.17.22)
 Andy asked for Locks Unofficial's minigames. That mod is All Rights Reserved and Forge 1.20.1 only, so both games are
 our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
 - **Read before filled.** The first time anyone tries to open or break a loot chest or barrel (vanilla's or Lootr's,
