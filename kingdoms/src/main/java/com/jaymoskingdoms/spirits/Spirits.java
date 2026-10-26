@@ -176,6 +176,7 @@ public final class Spirits {
 		Ambrose.register();
 		Thessaly.register();
 		QuietOne.register();
+		SpiritClash.register();
 		FolkSpirits.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
@@ -235,6 +236,7 @@ public final class Spirits {
 			HandExtras.forget(id);
 			Thessaly.forgetKeeper(id);
 			QuietOne.dropState(id);
+			SpiritClash.forget(id);
 			for (Spirit spirit : ALL) {
 				spirit.forget(id);
 			}
@@ -339,6 +341,10 @@ public final class Spirits {
 		switch (key.action()) {
 			case SUMMON -> summon(player, state);
 			case CAST -> {
+				if (SpiritClash.inClash(player)) {
+					SpiritClash.tap(player);
+					return;
+				}
 				if (state.out()) {
 					cast(player, state, Math.clamp(key.held(), 0, MAX_HELD));
 				}
@@ -431,6 +437,7 @@ public final class Spirits {
 		Moves.start(player, move, now);
 		show(player, move.pose());
 		addXp(player, XP_PER_CAST);
+		SpiritClash.noteStrike(player, move, SpiritClash.aimed(player));
 	}
 
 	// ---- every tick -------------------------------------------------------------------------------------------------
