@@ -4978,3 +4978,15 @@ Andy (2026-10-26): "aeolus and eurus should be FAR rarer, and only even spawn af
 - Neither turns up at all until the world's first world boss, the first of the Aether's Giants, has fallen
   (`Monoliths.firstFallen`, the same flag that raises the world tier to Borderlands). It's world-wide: once anyone fells
   a Giant they can come to anyone. Ops' `/kingdom dragon` spawns and the dragons' eggs are unchanged.
+## 0.7.227: gifted villagers part 2 (pack 0.17.12)
+- `GiftedFolk`: one gifted in `MASTER_ODDS` (80) awakens a master; whether they hide it (`open`) by temperament (hotheaded,
+  proud, spiteful, greedy 0.6; brave, cheerful 0.3; the rest 0.08; masters +0.25). Gifted from before are weighed once in
+  `step` (`jaymoskingdoms_gift_ways`). `close` tells Powers who they hide from: kin and partners, players who are MCA
+  family or 40+ hearts, villagers with 40+ regard (any villager or player without MCA).
+- Resonance's calling: living through a Warden's sonic boom (0.5).
+- `GiftTales` (Andy: "The mca screen should only show it once the player has seen, and asked about the powers they saw"):
+  Powers tells us each player who sees a gift at work (`PowersCompat.giftWitnesses`, kept per player in `gifts_seen`);
+  that player then gets "Ask about their power" in the MCA menu. The answer depends on hidden/open/master/corrupted
+  (three lines each; a grudge refuses), and only then (`gifts_asked`, synced) does their MCA screen show the gift;
+  masters read "Master of <power>".
+- `PowersCompat.give(..., master, open)`, `giftWays`, `giftMaster`, `giftRevealed`, `giftCloseOnes` (older Powers: as before).

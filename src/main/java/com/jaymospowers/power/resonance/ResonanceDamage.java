@@ -34,6 +34,11 @@ final class ResonanceDamage {
 		return player.damageSources().source(type, player);
 	}
 
+	/** (0.17.12) The same, from a creature that isn't a player (a gifted villager's, {@link ResonanceGift}). */
+	static DamageSource source(LivingEntity caster, ResourceKey<DamageType> type) {
+		return caster.damageSources().source(type, caster);
+	}
+
 	static boolean sensitive(LivingEntity entity) {
 		return entity.getType().builtInRegistryHolder().is(SENSITIVE);
 	}

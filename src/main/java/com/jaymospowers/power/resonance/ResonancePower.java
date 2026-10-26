@@ -72,6 +72,7 @@ public final class ResonancePower implements Power {
 		ResonanceEcho.init();
 		ResonanceVoice.init();
 		ResonanceFate.init();
+		ResonanceGift.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ResonanceDebugCommand.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
