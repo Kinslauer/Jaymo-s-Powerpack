@@ -40,10 +40,13 @@ import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -80,12 +83,21 @@ public final class LifeStory {
 	static final int STRUCTURE_SEARCH = 100, STRUCTURE_NEAR = 14;
 	/** A caving trip gone wrong: columns tried, how deep a hollow must lie (at most this Y), and the bite (ticks of Poison). */
 	static final int CAVE_TRIES = 64, CAVE_MAX_Y = 40, CAVE_RADIUS = 96, BITE_TICKS = 140;
+	/** (Andy: "poisoned, wounded, and barely breathing") the health you wake with, and how long the Slowness and Weakness last (ticks). */
+	static final float CAVE_HEALTH = 4.0F;
+	static final int CAVE_WOUND_TICKS = 1200;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
 	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
+	/** (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal guardsman"). */
+	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
+	/** (Andy) a village start's random job: its key, and the tools and stock it comes with ({@link #jobKit}). */
+	static final List<String> JOBS = List.of("butcher", "woodcutter", "builder", "farmer", "miner", "fisher", "smith");
+	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
+	static final int[] LIMBS = {2, 4, 8, 16};
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -93,7 +105,7 @@ public final class LifeStory {
 
 	/** Where a story can start. {@code realm}: you name a realm for it. */
 	public enum Start {
-		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), FATE(false);
+		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), UNARMED(false), FATE(false);
 
 		public final boolean realm;
 
@@ -133,6 +145,11 @@ public final class LifeStory {
 
 		static Answer road(Start start, Item icon) {
 			return new Answer(start.name().toLowerCase(Locale.ROOT), icon, null, null, false, null, "", List.of(), start, start.realm);
+		}
+
+		/** Whether it can be picked here: the unarmed start needs Jaymo's Powers (its lost limbs). */
+		public boolean offered() {
+			return this.start != Start.UNARMED || powers();
 		}
 	}
 
@@ -190,7 +207,7 @@ public final class LifeStory {
 				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen"),
 				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora"),
 				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight"),
-				Answer.child("blades", Items.IRON_SWORD, Stats.Stat.FINESSE, "arsenal", "warpainted")));
+				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted")));
 			YOUTH.answers.addAll(List.of(
 				Answer.youth("cutpurses", Items.TRIPWIRE_HOOK, Classes.PlayerClass.THIEF),
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),
@@ -222,6 +239,7 @@ public final class LifeStory {
 				Answer.road(Start.VILLAGE, Items.BELL),
 				Answer.road(Start.MONOLITH, Items.CHISELED_STONE_BRICKS),
 				Answer.road(Start.WILD, Items.COMPASS),
+				Answer.road(Start.UNARMED, Items.BONE),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
 		}
 	}
@@ -268,9 +286,11 @@ public final class LifeStory {
 	/**
 	 * Player → server: live this life. {@code answers}: an index per question (-1 for one not asked); {@code raisedRealm}
 	 * and {@code roadRealm}: the realm named for a noble family and for a banished or sworn start (-1: none);
-	 * {@code look}: the heritage's look (0: its first); {@code option}: a Mage's first spell or a Sorcerer's element (-1).
+	 * {@code look}: the heritage's look (0: its first); {@code option}: a Mage's first spell or a Sorcerer's element (-1);
+	 * {@code heritage} and {@code cls}: (Andy: "allow a player override AFTER the result") a heritage or class ordinal
+	 * picked over the story's on its last page (-1: the story's).
 	 */
-	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option) implements CustomPacketPayload {
+	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls) implements CustomPacketPayload {
 		public static final Type<Live> TYPE = new Type<>(JaymosKingdoms.id("story_live"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Live> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -282,13 +302,16 @@ public final class LifeStory {
 				buf.writeVarInt(p.roadRealm + 1);
 				buf.writeVarInt(p.look);
 				buf.writeVarInt(p.option + 1);
+				buf.writeVarInt(p.heritage + 1);
+				buf.writeVarInt(p.cls + 1);
 			}, buf -> {
 				int n = Math.min(buf.readVarInt(), Question.values().length);
 				List<Integer> answers = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
 					answers.add(buf.readVarInt() - 1);
 				}
-				return new Live(List.copyOf(answers), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt() - 1);
+				return new Live(List.copyOf(answers), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt() - 1,
+					buf.readVarInt() - 1, buf.readVarInt() - 1);
 			});
 
 		@Override
@@ -417,15 +440,25 @@ public final class LifeStory {
 		MinecraftServer server = player.level().getServer();
 		Answer born = at(Question.BORN, live.answers()), raised = at(Question.RAISED, live.answers()), child = at(Question.CHILDHOOD, live.answers()),
 			youth = at(Question.YOUTH, live.answers()), turn = at(Question.TURN, live.answers()), road = at(Question.ROAD, live.answers());
-		if (born == null || raised == null || child == null || youth == null || road == null || powers() && turn == null) {
+		if (born == null || raised == null || child == null || youth == null || road == null || powers() && turn == null || !road.offered()) {
 			return;
+		}
+		// the heritage and class picked over the story's, if any: a heritage open to them, any class
+		Heritage.Kind heritage = born.heritage;
+		if (live.heritage() >= 0) {
+			Heritage.Kind[] kinds = Heritage.Kind.values();
+			if (live.heritage() >= kinds.length || !Heritage.unlocked(player, kinds[live.heritage()])) {
+				return;
+			}
+			heritage = kinds[live.heritage()];
 		}
 		Faction nobleRealm = raised.realm ? realm(server, live.raisedRealm()) : null;
 		Faction roadRealm = road.realm ? realm(server, live.roadRealm()) : null;
 		if (raised.realm && nobleRealm == null || road.realm && roadRealm == null) {
 			return;
 		}
-		Classes.PlayerClass cls = youth.cls;
+		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
+		Classes.PlayerClass cls = live.cls() >= 0 && live.cls() < classes.length ? classes[live.cls()] : youth.cls;
 		String option = cls != null && live.option() >= 0 && live.option() < cls.options.size() ? cls.options.get(live.option()) : "";
 		if (cls == null || !cls.options.isEmpty() && option.isEmpty()) {
 			return;
@@ -433,8 +466,8 @@ public final class LifeStory {
 
 		// the story first, so the heritage's settling counts its points
 		player.setAttached(STORY, List.of(born.key, raised.key, child.key, youth.key, turn == null ? "" : turn.key, road.key));
-		Heritage.set(player, born.heritage);
-		HeritageVariants.choose(player, born.heritage, live.look());
+		Heritage.set(player, heritage);
+		HeritageVariants.choose(player, heritage, live.look());
 		Classes.set(player, cls, option);
 		Stats.attributes(player);
 
@@ -455,8 +488,16 @@ public final class LifeStory {
 		if (start == Start.FATE) {
 			start = fated(server, random);
 		}
-		Start landed = begin(player, start, roadRealm, born.heritage, random);
-		kit(player, landed, raised);
+		Start landed = begin(player, start, roadRealm, heritage, random);
+		if (landed == Start.UNARMED) {
+			// an old loss, long healed over: one arm or one leg
+			int limb = LIMBS[random.nextInt(LIMBS.length)];
+			if (PowersCompat.bornWithout(player, limb)) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.limb",
+					Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
+			}
+		}
+		kit(player, start, landed, raised, cls, option, random);
 		if (!power.isEmpty() && power.equals(echo(landed))) {
 			PowersCompat.call(player, power, ECHO_TICKS);
 		}
@@ -558,7 +599,11 @@ public final class LifeStory {
 					to = ground(level, foot, MONOLITH_MIN, MONOLITH_MAX, random);
 				}
 			}
-			case WILD, FATE -> {
+			case WILD, UNARMED, FATE -> {
+				// the unarmed start sets out from the wild too
+				if (start == Start.UNARMED) {
+					to = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				}
 			}
 		}
 		Start landed = start;
@@ -571,8 +616,11 @@ public final class LifeStory {
 		}
 		player.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
 		if (landed == Start.CAVE) {
-			// the bite you shrugged off, as you always do
+			// the bite you shrugged off, as you always do, and the fall that came after: poisoned, wounded, barely breathing
+			player.setHealth(Math.min(player.getHealth(), CAVE_HEALTH));
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, BITE_TICKS, 0));
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CAVE_WOUND_TICKS, 0));
+			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, CAVE_WOUND_TICKS, 0));
 		}
 		return landed;
 	}
@@ -633,17 +681,71 @@ public final class LifeStory {
 			&& body.isAir() && head.isAir();
 	}
 
-	/** Every start's small kit, and its own few things. */
-	private static void kit(ServerPlayer player, Start start, Answer raised) {
+	/**
+	 * Every start's small kit, and its own few things. {@code start} is the start the story chose (its gear comes even if
+	 * the place couldn't be found), {@code landed} where they woke (its place's things).
+	 */
+	private static void kit(ServerPlayer player, Start start, Start landed, Answer raised, Classes.PlayerClass cls, String option, RandomSource random) {
+		if (start == Start.SWORN) {
+			// a realm's sworn guard: iron head to foot, a sword and a shield
+			for (Item item : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.IRON_SWORD, Items.SHIELD)) {
+				equip(player, new ItemStack(item));
+			}
+		}
+		if (GEARED.contains(start)) {
+			for (ItemStack stack : Classes.gear(cls, option)) {
+				equip(player, stack.copy());
+			}
+		}
 		give(player, new ItemStack(Items.BREAD, KIT_BREAD));
-		if (start == Start.CITY) {
+		if (landed == Start.CITY) {
 			give(player, new ItemStack(Items.EMERALD, CITY_EMERALDS));
 		}
-		if (start == Start.CAVE) {
+		if (landed == Start.CAVE) {
+			give(player, new ItemStack(Items.IRON_PICKAXE));
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
+		}
+		if (landed == Start.VILLAGE) {
+			String job = JOBS.get(random.nextInt(JOBS.size()));
+			List<String> story = new ArrayList<>(of(player) == null ? List.of() : of(player));
+			story.add(job);
+			player.setAttached(STORY, List.copyOf(story));
+			for (ItemStack stack : jobKit(job)) {
+				give(player, stack);
+			}
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
+				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
 		if (raised.key.equals("merchants")) {
 			give(player, new ItemStack(Items.EMERALD, MERCHANT_EMERALDS));
+		}
+	}
+
+	/** A village job's tools and stock. */
+	static List<ItemStack> jobKit(String job) {
+		return switch (job) {
+			case "butcher" -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.COOKED_BEEF, 6));
+			case "woodcutter" -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.OAK_LOG, 16));
+			case "builder" -> List.of(new ItemStack(Items.IRON_SHOVEL), new ItemStack(Items.OAK_PLANKS, 32), new ItemStack(Items.LADDER, 8));
+			case "farmer" -> List.of(new ItemStack(Items.IRON_HOE), new ItemStack(Items.WHEAT_SEEDS, 16), new ItemStack(Items.BONE_MEAL, 8));
+			case "miner" -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 16));
+			case "fisher" -> List.of(new ItemStack(Items.FISHING_ROD), new ItemStack(Items.COD, 6));
+			case "smith" -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_INGOT, 6));
+			default -> List.of();
+		};
+	}
+
+	/** Puts on armour (and a shield in the off hand) where that slot is free; anything else goes in the pack. */
+	private static void equip(ServerPlayer player, ItemStack stack) {
+		if (stack.isEmpty()) {
+			return;
+		}
+		Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+		EquipmentSlot slot = equippable != null && equippable.slot().isArmor() ? equippable.slot() : stack.is(Items.SHIELD) ? EquipmentSlot.OFFHAND : null;
+		if (slot != null && player.getItemBySlot(slot).isEmpty()) {
+			player.setItemSlot(slot, stack);
+		} else {
+			give(player, stack);
 		}
 	}
 

@@ -47,10 +47,13 @@ final class LifeStoryScreen extends Screen {
 		static final Step SUMMARY = new Step(null, false);
 	}
 
-	/** The answers so far: an index per question (-1: none yet), the realms named, the look and the option, and the page. */
+	/**
+	 * The answers so far: an index per question (-1: none yet), the realms named, the look and the option, the heritage
+	 * and class picked over the story's (ordinals, -1: the story's), and the page.
+	 */
 	private static final class Draft {
 		final int[] answers = new int[Question.values().length];
-		int raisedRealm = -1, roadRealm = -1, look = -1, option = -1, step;
+		int raisedRealm = -1, roadRealm = -1, look = -1, option = -1, heritage = -1, cls = -1, step;
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -58,7 +61,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private final boolean forced;
-	private @Nullable Button back, next, look;
+	private @Nullable Button back, next, look, heritageButton, classButton;
 	private int scroll, contentH, viewH;
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
@@ -154,24 +157,62 @@ final class LifeStoryScreen extends Screen {
 		}
 	}
 
-	/** Whether an answer can be picked: one that names a realm only while there's a realm to name. */
+	/** Whether an answer can be picked: one that names a realm only while there's a realm to name; one offered here. */
 	private static boolean open(Answer a) {
-		return !a.realm() || !realms.isEmpty();
+		return a.offered() && (!a.realm() || !realms.isEmpty());
 	}
 
 	/** Whether the page is answered, so Next can go on. */
 	private static boolean answered(Step s) {
 		if (s.question == null) {
-			Answer youth = picked(Question.YOUTH);
-			return youth == null || youth.cls() == null || youth.cls().options.isEmpty() || draft.option >= 0;
+			Classes.PlayerClass cls = youthClass();
+			return cls == null || cls.options.isEmpty() || draft.option >= 0;
 		}
 		return s.realm ? realmOf(s.question) >= 0 : picked(s.question) != null;
 	}
 
-	/** The heritage the story makes, and its look (the childhood's leaning until one is picked). */
+	/** The heritage the story makes (or the one picked over it), and its look (the childhood's leaning until one is picked). */
 	private static Heritage.@Nullable Kind heritage() {
+		if (draft.heritage >= 0 && draft.heritage < Heritage.Kind.values().length) {
+			return Heritage.Kind.values()[draft.heritage];
+		}
+		return storyHeritage();
+	}
+
+	private static Heritage.@Nullable Kind storyHeritage() {
 		Answer born = picked(Question.BORN);
 		return born == null ? null : born.heritage();
+	}
+
+	/** The next heritage open to them after the one shown (wrapping); back at the story's, the override is dropped. */
+	private static void cycleHeritage() {
+		Heritage.Kind story = storyHeritage(), now = heritage();
+		Minecraft minecraft = Minecraft.getInstance();
+		if (story == null || now == null || minecraft.player == null) {
+			return;
+		}
+		Heritage.Kind[] kinds = Heritage.Kind.values();
+		for (int i = 1; i <= kinds.length; i++) {
+			Heritage.Kind next = kinds[(now.ordinal() + i) % kinds.length];
+			if (Heritage.unlocked(minecraft.player, next)) {
+				draft.heritage = next == story ? -1 : next.ordinal();
+				draft.look = -1;
+				return;
+			}
+		}
+	}
+
+	/** The next class after the one shown (wrapping); back at the story's, the override is dropped. */
+	private static void cycleClass() {
+		Answer youth = picked(Question.YOUTH);
+		Classes.PlayerClass story = youth == null ? null : youth.cls(), now = youthClass();
+		if (story == null || now == null) {
+			return;
+		}
+		Classes.PlayerClass[] classes = Classes.PlayerClass.values();
+		Classes.PlayerClass next = classes[(now.ordinal() + 1) % classes.length];
+		draft.cls = next == story ? -1 : next.ordinal();
+		draft.option = -1;
 	}
 
 	private static int lookIndex() {
@@ -256,6 +297,9 @@ final class LifeStoryScreen extends Screen {
 				draft.look = (lookIndex() + 1) % (HeritageVariants.of(kind).size() + 1);
 			}
 		}).bounds(left() + 6, y, TELL_W - 12, 16).build());
+		// (Andy: "allow a player override AFTER the result") the heritage and class, stepped past the story's on each press
+		this.heritageButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleHeritage()).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
+		this.classButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleClass()).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
 		if (!this.forced) {
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
 		}
@@ -278,7 +322,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
-			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option));
+			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
 	}
@@ -299,6 +343,13 @@ final class LifeStoryScreen extends Screen {
 					}
 					if (draft.answers[s.question.ordinal()] != row) {
 						draft.answers[s.question.ordinal()] = row;
+						// a new answer drops what was picked over it
+						if (s.question == Question.BORN) {
+							draft.heritage = -1;
+						}
+						if (s.question == Question.YOUTH) {
+							draft.cls = -1;
+						}
 						// a new birthplace starts its look over; a new youth its option
 						if (s.question == Question.BORN || s.question == Question.CHILDHOOD) {
 							draft.look = -1;
@@ -380,6 +431,22 @@ final class LifeStoryScreen extends Screen {
 			if (kind != null) {
 				this.look.setMessage(Component.translatable("gui.jaymoskingdoms.heritage.variant", HeritageVariants.title(kind, lookIndex()),
 					lookIndex() + 1, HeritageVariants.of(kind).size() + 1));
+			}
+		}
+		Heritage.Kind kind = heritage();
+		Classes.PlayerClass cls = youthClass();
+		if (this.heritageButton != null) {
+			this.heritageButton.visible = s.question == null && kind != null;
+			if (kind != null) {
+				this.heritageButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.heritage", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
+					.withColor(draft.heritage >= 0 ? ACCENT : Ui.TEXT));
+			}
+		}
+		if (this.classButton != null) {
+			this.classButton.visible = s.question == null && cls != null;
+			if (cls != null) {
+				this.classButton.setMessage(Component.translatable("gui.jaymoskingdoms.story.class", Component.translatable("class.jaymoskingdoms." + cls.key()))
+					.withColor(draft.cls >= 0 ? ACCENT : Ui.TEXT));
 			}
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -527,7 +594,11 @@ final class LifeStoryScreen extends Screen {
 		return -1;
 	}
 
+	/** The class the story makes, or the one picked over it. */
 	private static Classes.@Nullable PlayerClass youthClass() {
+		if (draft.cls >= 0 && draft.cls < Classes.PlayerClass.values().length) {
+			return Classes.PlayerClass.values()[draft.cls];
+		}
 		Answer youth = picked(Question.YOUTH);
 		return youth == null ? null : youth.cls();
 	}
@@ -578,7 +649,9 @@ final class LifeStoryScreen extends Screen {
 	private static List<Component> gives(Question q, Answer a, boolean story) {
 		List<Component> out = new ArrayList<>();
 		if (a.heritage() != null) {
-			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.heritage", Component.translatable("heritage.jaymoskingdoms." + a.heritage().key())));
+			Heritage.Kind kind = story && heritage() != null ? heritage() : a.heritage();
+			out.add(changed(Component.translatable("gui.jaymoskingdoms.story.gives.heritage", Component.translatable("heritage.jaymoskingdoms." + kind.key())),
+				story && draft.heritage >= 0));
 		}
 		if (a.stat() != null) {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.stat", Component.translatable("stat.jaymoskingdoms." + a.stat().key())));
@@ -593,7 +666,9 @@ final class LifeStoryScreen extends Screen {
 			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.purse"));
 		}
 		if (a.cls() != null) {
-			out.add(Component.translatable("gui.jaymoskingdoms.story.gives.class", Component.translatable("class.jaymoskingdoms." + a.cls().key())));
+			Classes.PlayerClass cls = story && youthClass() != null ? youthClass() : a.cls();
+			out.add(changed(Component.translatable("gui.jaymoskingdoms.story.gives.class", Component.translatable("class.jaymoskingdoms." + cls.key())),
+				story && draft.cls >= 0));
 		}
 		if (q == Question.CHILDHOOD) {
 			Heritage.Kind kind = heritage();
@@ -619,6 +694,11 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		return out;
+	}
+
+	/** {@code line}, marked as picked over the story's when {@code changed}. */
+	private static Component changed(net.minecraft.network.chat.MutableComponent line, boolean changed) {
+		return changed ? line.append(" ").append(Component.translatable("gui.jaymoskingdoms.story.override")) : line;
 	}
 
 	private static Component power(String id) {
@@ -668,7 +748,7 @@ final class LifeStoryScreen extends Screen {
 				lines.add(Component.translatable("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tale", realmName(s.question)));
 				good.addAll(gives(s.question, a, false));
 				if (!open(a)) {
-					lines.add(Component.translatable("gui.jaymoskingdoms.story.no_realms").withColor(Ui.BAD));
+					lines.add(Component.translatable(a.offered() ? "gui.jaymoskingdoms.story.no_realms" : "gui.jaymoskingdoms.story.needs_powers").withColor(Ui.BAD));
 				}
 			}
 		}
@@ -681,7 +761,8 @@ final class LifeStoryScreen extends Screen {
 		}
 		Ui.line(graphics, this.font, name, x + (icon.isEmpty() ? 9 : 33), ty + 6, w - 42, ACCENT);
 		ty += 28;
-		int bottom = y + panelH() - FOOTER - 2;
+		// (on the story page, above the heritage and class buttons)
+		int bottom = y + panelH() - FOOTER - 2 - (s.question == null ? 40 : 0);
 		for (Component line : lines) {
 			int color = line.getStyle().getColor() != null ? 0xFF000000 | line.getStyle().getColor().getValue() : Ui.TEXT;
 			for (FormattedCharSequence seq : this.font.split(line, textW)) {

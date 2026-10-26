@@ -159,6 +159,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Dismember.bornWithout(LivingEntity, int)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bornWithout;
+	private static boolean lookedForBornWithout;
+
+	/**
+	 * A life story's "unarmed" start: {@code player} has long been without {@code part} (Powers' Dismember part bit: an
+	 * arm or a leg), the stump healed over. False without Powers.
+	 */
+	public static boolean bornWithout(net.minecraft.server.level.ServerPlayer player, int part) {
+		if (!lookedForBornWithout) {
+			lookedForBornWithout = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bornWithout = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "bornWithout",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' lost limbs (older Powers?)", e);
+				}
+			}
+		}
+		if (bornWithout == null) {
+			return false;
+		}
+		try {
+			return (boolean)bornWithout.invoke(player, part);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;

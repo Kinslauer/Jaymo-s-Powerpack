@@ -4748,4 +4748,11 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
 - Replaces the heritage and class screens for newcomers only (`Classes.next`); they still open for a Writ of Rebirth
   and for anyone part-made before. MCA's "where do you start" page is skipped for newcomers (`McaDestinySkipMixin`).
 - `/kingdom story reset <players>` (ops) unmakes heritage, class and story and asks again.
+- Andy's doc edits: new wording for six answers and their tales; a seventh start, "Unarmed" (with Powers only: you
+  wake in the wild missing one random arm or leg, healed over, through Powers' new `Dismember.bornWithout`; it grows
+  back the usual ways); the cave start wakes you at 4 health with Poison, Slowness and Weakness; the village start
+  rolls a random job (butcher, woodcutter, builder, farmhand, miner, fisher, smith's hand) with its tools, kept as a 7th
+  story entry. Sworn, Banished, City, Caving and Village starts come with the class's gear, armour worn (`GEARED`);
+  Sworn adds full iron, a sword and a shield; Caving a pickaxe. The story page has heritage and class buttons to change
+  either after the result (the heritage must be open to them; checked on the server).
 - Tuning: constants at the top of `LifeStory`. Not seen in game.
