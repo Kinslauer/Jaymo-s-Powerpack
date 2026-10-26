@@ -1,9 +1,11 @@
 package com.jaymoskingdoms.client;
 
+import net.conczin.mca.client.model.PlayerEntityExtendedModel;
 import net.conczin.mca.client.model.VillagerEntityModelMCA;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.player.PlayerModel;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -19,6 +21,7 @@ final class McaLookModels {
 	static final float MARKS_INFLATE = 0.005F, GLOW_INFLATE = 0.02F;
 
 	private static @Nullable VillagerEntityModelMCA marks, glow;
+	private static @Nullable PlayerEntityExtendedModel<?> playerMarks, playerGlow;
 
 	private McaLookModels() {
 	}
@@ -43,6 +46,46 @@ final class McaLookModels {
 			glow = create(GLOW_INFLATE);
 		}
 		return pose(villager, glow);
+	}
+
+	/**
+	 * (0.7.218) The same for a player MCA draws ({@link HeritageLooks}): MCA's skin layer's body, posed by MCA's own pose
+	 * for the player (the one its skin, clothes and hair take, and Touch'n Motion's over it). Drawn on the player's
+	 * animated model instead, the marks were posed a second time on their own, and with Touch'n Motion the two came
+	 * apart (Andy, 2026-10-26: the character stood still while the heritage marks moved). Null when MCA isn't drawing them.
+	 */
+	static @Nullable PlayerModel playerMarks(PlayerModel parent) {
+		if (!(parent instanceof PlayerEntityExtendedModel<?> player)) {
+			return null;
+		}
+		if (playerMarks == null) {
+			playerMarks = createPlayer(MARKS_INFLATE);
+		}
+		return pose(player, playerMarks);
+	}
+
+	/** The player's body for the glow, just over MCA's face; null when MCA isn't drawing the player. */
+	static @Nullable PlayerModel playerGlow(PlayerModel parent) {
+		if (!(parent instanceof PlayerEntityExtendedModel<?> player)) {
+			return null;
+		}
+		if (playerGlow == null) {
+			playerGlow = createPlayer(GLOW_INFLATE);
+		}
+		return pose(player, playerGlow);
+	}
+
+	private static PlayerEntityExtendedModel<?> createPlayer(float inflate) {
+		// as MCA builds a player's skin layer body: wide arms, the 64x64 skin, no wear parts
+		PlayerEntityExtendedModel<?> model = new PlayerEntityExtendedModel<>(
+			LayerDefinition.create(VillagerEntityModelMCA.bodyData(new CubeDeformation(inflate), false), 64, 64).bakeRoot(), false);
+		return model.receiveDeferredAnimationPose().hideWears();
+	}
+
+	private static PlayerEntityExtendedModel<?> pose(PlayerEntityExtendedModel<?> parent, PlayerEntityExtendedModel<?> model) {
+		parent.copyPropertiesTo(model);
+		model.copyVisibility(parent);
+		return model;
 	}
 
 	private static VillagerEntityModelMCA create(float inflate) {

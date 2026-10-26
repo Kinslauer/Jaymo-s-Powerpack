@@ -4756,3 +4756,11 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
   Sworn adds full iron, a sword and a shield; Caving a pickaxe. The story page has heritage and class buttons to change
   either after the result (the heritage must be open to them; checked on the server).
 - Tuning: constants at the top of `LifeStory`. Not seen in game.
+
+## 0.7.218: heritage marks move with the character (pack 0.17.3)
+- Andy (2026-10-26): on the server the new heritages' character stood still while the drawn heritage marks moved
+  (jungxvv). A player MCA draws shows MCA's skin body, posed once from the animated model and then by Touch'n Motion;
+  the marks were drawn on the hidden animated model, posed a second time on their own, and the two came apart.
+- `HeritageLooks` now draws a player's marks, glow, eyes and Tideborn fins on MCA's skin body (`McaLookModels`
+  `playerMarks`/`playerGlow`), the way villagers' looks already are: same pose as the skin, clothes and hair, just
+  over the skin and under the clothes. Without MCA, the animated model as before. Compile-checked, not seen in game.
