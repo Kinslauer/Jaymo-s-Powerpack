@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -178,6 +179,12 @@ public final class Gifted {
 		return gift != null && gift.master();
 	}
 
+	/** (0.17.9) Whether {@code entity} doesn't hide their gift. Either side. */
+	public static boolean open(Entity entity) {
+		Gift gift = of(entity);
+		return gift != null && gift.open();
+	}
+
 	/** (0.17.9) Whether players know of {@code entity}'s gift (it's open, or one has seen it at work). Either side. */
 	public static boolean revealed(Entity entity) {
 		Gift gift = of(entity);
@@ -191,6 +198,15 @@ public final class Gifted {
 	 */
 	public static void closeOnes(BiPredicate<Entity, Entity> test) {
 		GiftedAI.closeOnes = test;
+	}
+
+	/**
+	 * (0.17.9) Told {@code (player, gifted)} each time a player sees a gifted villager's power at work. Kingdoms sets it, by
+	 * reflection: a player who has seen it may ask them about it, and only then does their MCA screen show it (Andy: "The
+	 * mca screen should only show it once the player has seen, and asked about the powers they saw").
+	 */
+	public static void witnesses(BiConsumer<Entity, Entity> told) {
+		GiftedAI.witnesses = told;
 	}
 
 	/** Takes {@code entity}'s gift away. */

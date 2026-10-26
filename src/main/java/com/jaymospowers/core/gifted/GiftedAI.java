@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -110,6 +111,9 @@ public final class GiftedAI {
 	private static final Map<PathfinderMob, Echo> ECHOES = new WeakHashMap<>();
 	/** Who a gifted villager hides their gift from ({@link Gifted#closeOnes}); any villager or player until Kingdoms says. */
 	static BiPredicate<Entity, Entity> closeOnes = (gifted, other) -> other instanceof Player || other instanceof AbstractVillager;
+	/** Told of each player who sees a gift at work ({@link Gifted#witnesses}); no one until Kingdoms says. */
+	static BiConsumer<Entity, Entity> witnesses = (player, gifted) -> {
+	};
 
 	private GiftedAI() {
 	}
@@ -190,6 +194,9 @@ public final class GiftedAI {
 			if ((mob.tickCount + phase) % everyday == 0 && mob.getRandom().nextFloat() < everydayChance(gift) && foe(mob) == null
 				&& (gift.open() || !watched(level, mob, null) && !seenByPlayer(level, mob))) {
 				kit.everyday(level, mob, gift);
+				if (gift.open()) {
+					Gifted.set(mob, seen(level, mob, gift));
+				}
 			}
 		}
 	}
@@ -218,12 +225,19 @@ public final class GiftedAI {
 		return false;
 	}
 
-	/** A hidden gift at work, seen by a player: it's known now. */
-	private static Gifted.Gift reveal(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
-		if (gift.revealed() || !seenByPlayer(level, mob)) {
-			return gift;
+	/**
+	 * {@code mob}'s gift at work: every player near enough to see it is told of it ({@link Gifted#witnesses}: Kingdoms
+	 * lets them ask about it), and a hidden gift a player has seen is known now ({@link Gifted#REVEALED}).
+	 */
+	static Gifted.Gift seen(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
+		boolean any = false;
+		for (ServerPlayer player : level.players()) {
+			if (!player.isSpectator() && player.distanceTo(mob) <= WATCH_RANGE && player.hasLineOfSight(mob)) {
+				any = true;
+				witnesses.accept(player, mob);
+			}
 		}
-		return gift.withWays(gift.ways() | Gifted.REVEALED);
+		return !any || gift.revealed() ? gift : gift.withWays(gift.ways() | Gifted.REVEALED);
 	}
 
 	private static void echo(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
@@ -236,6 +250,7 @@ public final class GiftedAI {
 			mob.getLookControl().setLookAt(echo.foe, 30.0F, 30.0F);
 			if (echo.move.use().use(level, mob, echo.foe, gift)) {
 				flourish(level, mob);
+				Gifted.set(mob, seen(level, mob, gift));
 			}
 		}
 	}
@@ -296,7 +311,7 @@ public final class GiftedAI {
 				ECHOES.put(mob, new Echo(pick, foe, now + ECHO_DELAY));
 			}
 		}
-		Gifted.Gift strained = reveal(level, mob, gift.strained());
+		Gifted.Gift strained = seen(level, mob, gift.strained());
 		Gifted.set(mob, strained);
 		float chance = gift.master() ? CORRUPT_CHANCE * MASTER_CORRUPT : CORRUPT_CHANCE;
 		if (!strained.corrupted() && strained.strain() >= STRAIN_MIN && mob.getRandom().nextFloat() < chance) {
@@ -398,6 +413,7 @@ public final class GiftedAI {
 		if (!ultimate.use().use(level, mob, foe, gift)) {
 			return false;
 		}
+		Gifted.set(mob, seen(level, mob, gift));
 		ULTIMATE_READY.put(mob, now + ULTIMATE_COOLDOWN);
 		com.jaymospowers.core.UltimateFilm.witnessed(mob, ultimate.shot(), ultimate.filmTicks(), foe.position(), foe, FILM_WITNESSES);
 		return true;

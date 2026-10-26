@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.Careers;
+import com.jaymoskingdoms.GiftTales;
 import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
@@ -26,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * handshake" ({@link Introductions#HANDSHAKE}) too.
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement.
+ * (0.7.224) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -56,6 +58,10 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !Hermits.is(villager)) {
 			// (0.7.215) only the floating islands' hermits talk alchemy
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
+		}
+		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
+			// (0.7.224) only a gift you've seen at work, and only until they've told you
+			cir.getReturnValue().remove(GiftTales.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say

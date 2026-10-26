@@ -356,7 +356,7 @@ public final class PowersCompat {
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
 	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
 	/** (0.7.224) A gift's ways (Powers 0.17.9): a master, open or hidden, and seen by a player. */
-	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes;
+	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes, giftOpen, giftWitnesses;
 	private static boolean lookedForGifts;
 
 	private static void lookForGifts() {
@@ -389,6 +389,8 @@ public final class PowersCompat {
 			giftMaster = lookup.findStatic(gifted, "master", java.lang.invoke.MethodType.methodType(boolean.class, entity));
 			giftRevealed = lookup.findStatic(gifted, "revealed", java.lang.invoke.MethodType.methodType(boolean.class, entity));
 			giftCloseOnes = lookup.findStatic(gifted, "closeOnes", java.lang.invoke.MethodType.methodType(void.class, java.util.function.BiPredicate.class));
+			giftOpen = lookup.findStatic(gifted, "open", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			giftWitnesses = lookup.findStatic(gifted, "witnesses", java.lang.invoke.MethodType.methodType(void.class, java.util.function.BiConsumer.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			giftGiveWays = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no masters or hidden gifts (older Powers?)", e);
@@ -438,6 +440,28 @@ public final class PowersCompat {
 			return giftGiveWays == null || (boolean)giftRevealed.invoke(entity);
 		} catch (Throwable e) {
 			return true;
+		}
+	}
+
+	/** (0.7.224) Whether {@code entity} doesn't hide their gift; false without one, or with an older Powers. */
+	public static boolean giftOpen(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGiveWays != null && (boolean)giftOpen.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** (0.7.224) Tells Powers to tell us {@code (player, gifted)} each time a player sees a gift at work ({@link GiftTales}). */
+	public static void giftWitnesses(java.util.function.BiConsumer<net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity> told) {
+		lookForGifts();
+		try {
+			if (giftGiveWays != null) {
+				giftWitnesses.invoke(told);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.debug("couldn't ask Powers who sees gifts at work", e);
 		}
 	}
 

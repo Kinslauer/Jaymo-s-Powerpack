@@ -47,12 +47,12 @@ abstract class McaInteractInfoMixin {
 			lines.add(Temperaments.line(temperament));
 			hovers.add(Temperaments.hover(temperament));
 		}
-		// (0.7.218) a gifted villager's power, once you know them (0.7.224: and only once it's been seen, if they hide it); the
+		// (0.7.218) a gifted villager's power (0.7.224: once you've seen it at work and asked them about it, GiftTales); the
 		// storm-taken line of a Stormborn
 		net.minecraft.world.entity.Entity self = this.villager.asEntity();
 		String gift = com.jaymoskingdoms.PowersCompat.gift(self);
-		boolean shown = gift != null && com.jaymoskingdoms.PowersCompat.giftRevealed(self);
-		if (shown && com.jaymoskingdoms.Introductions.knownHere(self)) {
+		boolean shown = gift != null && com.jaymoskingdoms.GiftTales.askedHere(self);
+		if (shown) {
 			boolean master = com.jaymoskingdoms.PowersCompat.giftMaster(self);
 			lines.add(Component.translatable(master ? "gifted.jaymoskingdoms.line.master" : "gifted.jaymoskingdoms.line",
 				Component.translatable("power.jaymospowers." + gift)));

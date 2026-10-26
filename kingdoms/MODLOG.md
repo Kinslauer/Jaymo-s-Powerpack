@@ -4884,5 +4884,9 @@ Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's ca
   `step` (`jaymoskingdoms_gift_ways`). `close` tells Powers who they hide from: kin and partners, players who are MCA
   family or 40+ hearts, villagers with 40+ regard (any villager or player without MCA).
 - Resonance's calling: living through a Warden's sonic boom (0.5).
-- MCA screen: a hidden gift shows only once a player has seen it at work; masters read "Master of <power>".
+- `GiftTales` (Andy: "The mca screen should only show it once the player has seen, and asked about the powers they saw"):
+  Powers tells us each player who sees a gift at work (`PowersCompat.giftWitnesses`, kept per player in `gifts_seen`);
+  that player then gets "Ask about their power" in the MCA menu. The answer depends on hidden/open/master/corrupted
+  (three lines each; a grudge refuses), and only then (`gifts_asked`, synced) does their MCA screen show the gift;
+  masters read "Master of <power>".
 - `PowersCompat.give(..., master, open)`, `giftWays`, `giftMaster`, `giftRevealed`, `giftCloseOnes` (older Powers: as before).

@@ -2963,7 +2963,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   extremely gifted wielder", Wind folk "should fly when they see fit", "they should also be able to use resonance", and
   the gifted "should keep their power usage to a minimum and hide it from their friends and family", weighted by temperament.
   - `Gifted.Gift` gains `ways` (`MASTER`, `OPEN`, `REVEALED` bits) and `signature`; `Gifted.give(e, power, style, master, open)`,
-    `ways`, `master`, `revealed`, `closeOnes(BiPredicate)` (Kingdoms sets who counts as family and friends).
+    `ways`, `master`, `open`, `revealed`, `closeOnes(BiPredicate)` (Kingdoms sets who counts as family and friends),
+    `witnesses(BiConsumer)` (told of each player who sees a gift at work; Kingdoms lets them ask about it).
   - Masters (`GiftedAI`): half cooldowns and gaps, reach 28, their signature move first and twice (`ECHO_DELAY`), a third of
     the corruption chance, their ultimate in any fight at half health.
   - Hidden gifts: no moves while close ones see (until half health), double gap, everyday use at 0.25 and only unseen by
