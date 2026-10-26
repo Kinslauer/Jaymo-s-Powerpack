@@ -159,6 +159,44 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Powers.byName(String)} and {@code Powers.awakenAs(ServerPlayer, Power)}. */
+	private static java.lang.invoke.@Nullable MethodHandle byName, awakenAs;
+	private static boolean lookedForAwaken;
+
+	/**
+	 * (0.7.223) Andy: "Lost in time starts you with chrono level 1". {@code player} awakens to Powers' power {@code power}
+	 * (an id path) now, with just its first ability, as a natural awakening starts. False without Powers.
+	 */
+	public static boolean awaken(net.minecraft.server.level.ServerPlayer player, String power) {
+		if (!lookedForAwaken) {
+			lookedForAwaken = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> powers = Class.forName("com.jaymospowers.core.Powers"), type = Class.forName("com.jaymospowers.api.Power");
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					byName = lookup.findStatic(powers, "byName", java.lang.invoke.MethodType.methodType(type, String.class));
+					awakenAs = lookup.findStatic(powers, "awakenAs", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, type));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' awakening (older Powers?)", e);
+				}
+			}
+		}
+		if (byName == null || awakenAs == null) {
+			return false;
+		}
+		try {
+			Object found = byName.invoke(power);
+			if (found == null) {
+				return false;
+			}
+			awakenAs.invoke(player, found);
+			return true;
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't awaken {}'s power", player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
 	/** Powers' {@code Future.strand(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle strand;
 	private static boolean lookedForStrand;

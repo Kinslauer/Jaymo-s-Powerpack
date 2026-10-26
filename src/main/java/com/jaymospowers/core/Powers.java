@@ -162,6 +162,14 @@ public final class Powers {
 			: called != null && called != current ? called
 			: leaning != null && leaning != current && player.getRandom().nextFloat() < Affinity.CHANCE
 			? leaning : choices.get(player.getRandom().nextInt(choices.size()));
+		awakenAs(player, power);
+	}
+
+	/**
+	 * (0.17.8) {@code player} awakens to {@code power}, starting small like any natural awakening (its first ability; the
+	 * rest come with mastery), with the full fanfare. Jaymo's Kingdoms' "lost in time" life story calls this for Chrono.
+	 */
+	public static void awakenAs(ServerPlayer player, Power power) {
 		set(player, power);
 		// a natural awakening starts small: the rest of the abilities come with mastery
 		Mastery.startFresh(player);

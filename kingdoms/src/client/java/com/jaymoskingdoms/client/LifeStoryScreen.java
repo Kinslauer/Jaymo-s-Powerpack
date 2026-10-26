@@ -682,8 +682,14 @@ final class LifeStoryScreen extends Screen {
 			}
 		}
 		if (q == Question.TURN) {
-			out.add(LifeStory.FATE.equals(a.power()) ? Component.translatable("gui.jaymoskingdoms.story.gives.fate")
-				: Component.translatable("gui.jaymoskingdoms.story.gives.power", power(a.power())));
+			Answer road = picked(Question.ROAD);
+			if (story && road != null && road.start() == LifeStory.Start.TIMELOST) {
+				// (lost in time wakes Chrono at once, whatever this was)
+				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.timelost", power("chrono")));
+			} else {
+				out.add(LifeStory.FATE.equals(a.power()) ? Component.translatable("gui.jaymoskingdoms.story.gives.fate")
+					: Component.translatable("gui.jaymoskingdoms.story.gives.power", power(a.power())));
+			}
 		}
 		if (a.start() != null) {
 			out.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".wake"));

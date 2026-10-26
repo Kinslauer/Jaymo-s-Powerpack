@@ -2957,4 +2957,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own, and rulers reform (or dig in) to keep them; no Powers changes. See Kingdoms' log.
 - **0.17.8, five more life-story starts (Kingdoms 0.7.223):** `Future.strand(ServerPlayer)` sends a "lost in time"
   newcomer alone to the future's arrival square (no leap home: death or a Chrono's leap), or starts its download and
-  returns false so Kingdoms wakes them in the wild. Not seen in game.
+  returns false so Kingdoms wakes them in the wild; `Powers.awakenAs(player, power)` (split out of `awaken`) gives that start
+  Chrono at once with only its first ability. Not seen in game.

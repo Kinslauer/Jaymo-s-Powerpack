@@ -64,8 +64,8 @@ import org.jspecify.annotations.Nullable;
  * before it's sealed, for life, like the heritage and class it replaces at the start.
  *
  * <p>A start that echoes the power (a caving trip gone wrong and the spider bite, a shipwreck and the deep's song, a
- * monolith and the storm; (0.7.223) a fall from the sky and Gravity, lost in time and Chrono, a burned home and Smoke, a
- * frozen pass and Cryo, a captive's escape and Z Fighter) counts as that power's calling: it wakes a day sooner. The heritage and class screens still
+ * monolith and the storm; (0.7.223) a fall from the sky and Gravity, a burned home and Smoke, a frozen pass and Cryo, a
+ * captive's escape and Z Fighter) counts as that power's calling: it wakes a day sooner. Lost in time wakes Chrono at once. The heritage and class screens still
  * open for a Writ of Rebirth and for old players who never had a story. MCA's own "where do you start" page is skipped
  * ({@code client/mixin/mca/McaDestinySkipMixin}): the last question is where you start.
  */
@@ -444,7 +444,6 @@ public final class LifeStory {
 			case SHIPWRECK -> "darktide";
 			case MONOLITH -> "wind";
 			case SKYFALL -> "gravity";
-			case TIMELOST -> "chrono";
 			case BURNED -> "smoke";
 			case SNOWED -> "cryo";
 			case CAPTIVE -> "zfighter";
@@ -518,7 +517,10 @@ public final class LifeStory {
 			}
 		}
 		kit(player, start, landed, raised, cls, option, random);
-		if (!power.isEmpty() && power.equals(echo(landed))) {
+		if (start == Start.TIMELOST) {
+			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
+			PowersCompat.awaken(player, "chrono");
+		} else if (!power.isEmpty() && power.equals(echo(landed))) {
 			PowersCompat.call(player, power, ECHO_TICKS);
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
