@@ -94,8 +94,6 @@ public final class LifeStory {
 	static final int KIT_BREAD = 4, CITY_EMERALDS = 2, MERCHANT_EMERALDS = 8, CAVE_TORCHES = 8;
 	/** (Andy) the starts that come with their class's gear, armour worn ("it wouldn't make sense to start as an unarmed royal guardsman"). */
 	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
-	/** (Andy) a village start's random job: its key, and the tools and stock it comes with ({@link #jobKit}). */
-	static final List<String> JOBS = List.of("butcher", "woodcutter", "builder", "farmer", "miner", "fisher", "smith");
 	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
 	static final int[] LIMBS = {2, 4, 8, 16};
 	/** A matching start takes this off the power's wait (ticks): a day. */
@@ -706,33 +704,22 @@ public final class LifeStory {
 			give(player, new ItemStack(Items.TORCH, CAVE_TORCHES));
 		}
 		if (landed == Start.VILLAGE) {
-			String job = JOBS.get(random.nextInt(JOBS.size()));
+			// (0.7.218) a real job now ({@link Careers}), leaning to who raised you, taken up in the village you wake by
+			String job = Careers.storyLean(raised.key, random);
 			List<String> story = new ArrayList<>(of(player) == null ? List.of() : of(player));
 			story.add(job);
 			player.setAttached(STORY, List.copyOf(story));
-			for (ItemStack stack : jobKit(job)) {
+			Careers.Job kind = Careers.Job.of(job);
+			for (ItemStack stack : kind == null ? List.<ItemStack>of() : Careers.kit(kind)) {
 				give(player, stack);
 			}
+			Careers.storyJob(player, job);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.job",
 				Component.translatable("story.jaymoskingdoms.job." + job)).withStyle(ChatFormatting.GRAY));
 		}
 		if (raised.key.equals("merchants")) {
 			give(player, new ItemStack(Items.EMERALD, MERCHANT_EMERALDS));
 		}
-	}
-
-	/** A village job's tools and stock. */
-	static List<ItemStack> jobKit(String job) {
-		return switch (job) {
-			case "butcher" -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.COOKED_BEEF, 6));
-			case "woodcutter" -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.OAK_LOG, 16));
-			case "builder" -> List.of(new ItemStack(Items.IRON_SHOVEL), new ItemStack(Items.OAK_PLANKS, 32), new ItemStack(Items.LADDER, 8));
-			case "farmer" -> List.of(new ItemStack(Items.IRON_HOE), new ItemStack(Items.WHEAT_SEEDS, 16), new ItemStack(Items.BONE_MEAL, 8));
-			case "miner" -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 16));
-			case "fisher" -> List.of(new ItemStack(Items.FISHING_ROD), new ItemStack(Items.COD, 6));
-			case "smith" -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_INGOT, 6));
-			default -> List.of();
-		};
 	}
 
 	/** Puts on armour (and a shield in the off hand) where that slot is free; anything else goes in the pack. */

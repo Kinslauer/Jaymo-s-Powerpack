@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin;
 
+import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.Placed;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -25,6 +26,8 @@ abstract class BlockItemMixin {
 		original.call(block, level, pos, state, by, stack);
 		if (by instanceof ServerPlayer player && level instanceof ServerLevel server) {
 			Placed.placed(player, server, pos, state);
+			// (0.7.218) a builder's work in town (and a Journeyman's block from the town's stock)
+			Careers.placed(player, server, pos, stack);
 		}
 	}
 }

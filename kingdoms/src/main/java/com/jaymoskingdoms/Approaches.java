@@ -1103,6 +1103,10 @@ public final class Approaches {
 			// (0.7.141) a villager who isn't one, questioning you
 			return;
 		}
+		if (Careers.answer(player, answer)) {
+			// (0.7.218) a talk about work
+			return;
+		}
 		if (Skills.answer(player, answer)) {
 			// (0.5.52) a court wizard's offer to unmake your skills
 			return;

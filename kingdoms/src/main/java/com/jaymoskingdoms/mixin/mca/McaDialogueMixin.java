@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
+import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.HermitAlchemy;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
+ * (0.7.218) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -118,6 +120,13 @@ abstract class McaDialogueMixin {
 				HermitAlchemy.answer(level, player, words -> villager.sendChatMessage(words, player));
 			}
 			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
+			// (0.7.218) a talk about work: what their town has for you
+			villager.getInteractions().stopInteracting();
+			Careers.talk(player, villager);
 			ci.cancel();
 			return;
 		}
