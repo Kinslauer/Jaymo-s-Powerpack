@@ -40,7 +40,7 @@ All in Jaymo's Powers, package `com.jaymospowers.alchemy` (client `client/alchem
 reflection (as `ZFighterKingdoms` does); Kitchen only through `KitchenCompat`-style checks.
 
 ### Essences (shared core, done)
-33 essences in `Essence`: 7 primals (Fire, Water, Earth, Air, and the apothecary's three principles **Salt**, **Sulphur**,
+28 essences in `Essence`: 7 primals (Fire, Water, Earth, Air, and the apothecary's three principles **Salt**, **Sulphur**,
 **Mercury**), then compounds of two (Life, Light, Metal, Frost, Motion, Spark, Rot, Venom, Crystal, Spirit; Plant, Beast,
 Death, Mind, Shadow, Arcana, Wealth; Craft, War, Undeath, and **Flux**). Amounts are `EssenceList`s. Phials hold 10 of one
 essence (`Phials`, the `jaymospowers:essences` component).
