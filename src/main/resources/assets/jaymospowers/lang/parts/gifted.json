@@ -1,0 +1,6 @@
+{
+	"gift.jaymospowers.corrupted": "Something in %s's power has turned. The air round them feels wrong.",
+	"commands.jaymospowers.gift.give": "Gave %s to %s",
+	"commands.jaymospowers.gift.clear": "Took the gift from %s",
+	"commands.jaymospowers.gift.corrupt": "Corrupted the gift of %s"
+}
