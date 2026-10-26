@@ -5092,7 +5092,7 @@ Powers' aerwhales are hunted like great whales now. A Kingdoms harpoon already l
 whale, and stops paying out once it wears Powers' `jaymospowers_spent_whale` tag. Powers stays optional: the aerwhale
 is found by its entity id (`skyWhale`). Merged in #551 claiming 0.7.232, which #550 had already used, so renumbered.
 
-## 0.7.234: locked loot chests, the Pin and Rotary lockpicking games (pack 0.17.22)
+## 0.7.234: locked loot chests, the Pin and Rotary lockpicking games (pack 0.17.23)
 Andy asked for Locks Unofficial's minigames. That mod is All Rights Reserved and Forge 1.20.1 only, so both games are
 our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
 - **Read before filled.** The first time anyone tries to open or break a loot chest or barrel (vanilla's or Lootr's,
