@@ -4703,3 +4703,22 @@ in this would heal with j and cast healing magic with sneak", and "some kind of 
 - Healing goes through Powers' new `core/wounds/Mending` (reflection, `PowersCompat.mend/closeCut/easeFever/restore/
   rekindle`); without Powers it heals hearts only.
 - Tuning: constants at the top of `Mana` and `Restoration`, `Spellcraft.MAGE_COOLDOWN`/`ATTUNED_POWER`.
+
+## 0.7.213: non-human heritages looked down on (pack 0.16.35)
+Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
+the tide born, stone, warrior and sylvan fall into this".
+- **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
+  other heritage passes for human. The heritage card says it ("Shunned: ...").
+- **Who minds** (`Prejudice.minds`): most townsfolk. Not those of the same blood, not anyone non-human themselves, never
+  the kindhearted, cheerful or devout; always the proud, suspicious and spiteful; of the rest 55% of MCA's warm
+  personalities, 25% of plain ones, 8% of sour ones and no crabby one don't mind (fixed per villager). A purist ruler's
+  own people always mind, 1.5x as hard. A full mask hides your blood.
+- **What it does**: traders who mind charge 6% more per degree (Tideborn 24%, 36% for a purist's); chats, jokes and hugs
+  win 15% fewer MCA hearts per degree (at least a fifth kept); good name with a realm is won 8% slower and lost 8% faster
+  per degree (x1.5 in a purist realm, kin excepted); guards halt you sooner (Tideborn every day instead of every three)
+  and search and toll you more; villagers start cooler (8 regard per degree) to a neighbour of such blood; MCA's chat AI
+  is told what they think of your blood.
+- **Talk**: the nearest townsperson mutters about your blood now and then (worse lines from degree 3), children point,
+  and they edge away from a Tideborn or Stoneborn standing close. Ones who don't mind have a kind word, and one of your
+  blood a knowing one. In a purist realm the Purists' own jeers take the place of the mutters.
+- Tuning: the constants at the top of `Prejudice`.

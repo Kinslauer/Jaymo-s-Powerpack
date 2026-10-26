@@ -36,6 +36,11 @@ public final class ChatPrompts {
 			if (!temperament.isEmpty()) {
 				sb.append(temperament).append('\n');
 			}
+			// (0.7.213) what they think of your blood
+			String blood = Prejudice.prompt(villager, player);
+			if (!blood.isEmpty()) {
+				sb.append(blood).append('\n');
+			}
 			String neighbours = neighbours(villager);
 			if (!neighbours.isEmpty()) {
 				sb.append("Your neighbours: ").append(neighbours).append('\n');

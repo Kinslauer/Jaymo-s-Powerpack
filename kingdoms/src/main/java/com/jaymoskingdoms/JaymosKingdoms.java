@@ -130,6 +130,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rulers.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
+		Prejudice.register();
 		Frights.register();
 		Herds.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground

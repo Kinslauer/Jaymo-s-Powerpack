@@ -191,6 +191,8 @@ final class Neighbours {
 		r += TEMPER_STEP * (McaCompat.temper(a) + McaCompat.temper(b));
 		// ((0.7.186) and by their own temperaments: the cheerful warm to people, the spiteful sour on them)
 		r += TEMPER_STEP * (Temperaments.warmth(a) + Temperaments.warmth(b));
+		// ((0.7.213) and cooler where one looks down on the other's blood)
+		r -= Prejudice.neighbourLean(a, b);
 		int kin = McaCompat.kin(a, b);
 		if (kin == McaCompat.PARTNER) {
 			r = Math.max(r, PARTNER_START);

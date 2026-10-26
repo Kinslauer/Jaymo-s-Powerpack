@@ -6,6 +6,7 @@ import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
+import com.jaymoskingdoms.Prejudice;
 import com.jaymoskingdoms.Recollections;
 import com.jaymoskingdoms.Rulers;
 import com.jaymoskingdoms.SkinTones;
@@ -43,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
+ * (0.7.213) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  */
 @Mixin(Dialogues.class)
@@ -182,7 +184,14 @@ abstract class McaDialogueMixin {
 		}
 		Integer before = BEFORE.remove(villager.getUUID() + "/" + player.getUUID());
 		if (before != null) {
-			Recollections.socialised(villager, player, question, villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before);
+			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
+			// (0.7.213) one who looks down on your blood warms to you slower
+			int taken = Prejudice.hearts(villager, player, gained);
+			if (taken > 0) {
+				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);
+				gained -= taken;
+			}
+			Recollections.socialised(villager, player, question, gained);
 		}
 	}
 }

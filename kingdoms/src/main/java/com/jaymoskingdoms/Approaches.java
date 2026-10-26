@@ -630,15 +630,17 @@ public final class Approaches {
 				w[ACCUSE] = 6;
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
-			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= HALT_TICKS)) {
+			// (0.7.213) one who looks down on your blood halts you sooner, and searches you more
+			int minds = Prejudice.guard(mob, player);
+			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Prejudice.haltGap(mob, player, HALT_TICKS))) {
 				w[HALT] = 2;
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f, player);
 			// (0.7.100) nor of one their settlement owes for bringing one of its own home
 			if (!sworn && Captives.owed(player, f.id()) <= 0) {
-				w[SEARCH] = SEARCH_W[tv];
-				w[TOLL] = TOLL_W[tv];
+				w[SEARCH] = SEARCH_W[tv] + minds;
+				w[TOLL] = TOLL_W[tv] + minds / 2;
 			}
 			w[BOUT] = BOUT_W[tv];
 			w[LOYALTY] = LOYALTY_W[tv];

@@ -2912,3 +2912,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stump), `easeFever` (weakness lifted, dirt washed out), `restore` (bones set, festering cured, cuts closed, up if
   downed, healed whole) and `rekindle` (a downed one up from afar). Nothing but `restore`/`rekindle` reaches the
   downed. The rest (the Restoration Sorcerer, healing scrolls, healers, mana and attunement) is in Kingdoms' log.
+- **0.16.35, heritage prejudice (Kingdoms 0.7.213):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
+  most townsfolk, the less human the worse (prices, hearts, good name, guards, talk); no Powers changes. See Kingdoms' log.
