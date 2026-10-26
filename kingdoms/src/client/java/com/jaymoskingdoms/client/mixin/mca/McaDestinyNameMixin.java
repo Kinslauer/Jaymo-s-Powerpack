@@ -17,7 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class McaDestinyNameMixin {
 	@Inject(method = "setPage", at = @At("HEAD"))
 	private void jaymoskingdoms$saveName(String next, CallbackInfo ci) {
-		if ("general".equals(((McaEditorPageAccessor)(Object)this).jaymoskingdoms$page()) && !"general".equals(next)) {
+		// (0.7.229) the creator's first page is "intro" (its "general" tab is sent there), so the name was saved only if
+		// the general tab was visited and left: Andy's "it requires an extra enter". Either page saves now.
+		String page = ((McaEditorPageAccessor)(Object)this).jaymoskingdoms$page();
+		if (("intro".equals(page) || "general".equals(page)) && !page.equals(next)) {
 			((VillagerEditorScreen)(Object)this).syncVillagerData();
 		}
 	}

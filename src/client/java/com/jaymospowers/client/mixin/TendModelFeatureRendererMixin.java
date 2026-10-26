@@ -18,14 +18,14 @@ abstract class TendModelFeatureRendererMixin {
 		com.jaymospowers.client.wounds.WoundNursePose.applyModel(submit.model(), submit.state());
 	}
 
-	/** (0.17.15) Last thing before the model is drawn, every pose laid: on one knee, the front knee bent (see KneeBend). */
+	/** (0.17.18) Last thing before the model is drawn, every pose laid: on one knee, the front knee bent (see KneeBend). */
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/client/model/Model;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"))
 	private void jaymospowers$bendKnee(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.CrouchPose.bendKnee(submit.model(), submit.state());
 	}
 
-	/** (0.17.15) And the leg's own straight boxes back once it's drawn. */
+	/** (0.17.18) And the leg's own straight boxes back once it's drawn. */
 	@Inject(method = "prepareModel", at = @At("RETURN"))
 	private void jaymospowers$straightenKnee(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		com.jaymospowers.client.KneeBend.restore();

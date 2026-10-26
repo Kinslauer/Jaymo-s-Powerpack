@@ -16,7 +16,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 /**
- * (0.17.15) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the knee,
+ * (0.17.18) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the knee,
  * and stay bent while firing". A leg is one straight box, so for the one draw of a model on one knee its boxes are swapped
  * for bent copies ({@link #bend}, put back by {@link #restore} once that model is drawn): every side cut in two at
  * {@link #KNEE}, the shin swung back about the middle of the leg, and the cut itself tilted halfway so the two halves meet.

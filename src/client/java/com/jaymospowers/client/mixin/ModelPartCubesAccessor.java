@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-/** (0.17.15) A leg's boxes, swapped for bent ones while it is drawn on one knee (see KneeBend). */
+/** (0.17.18) A leg's boxes, swapped for bent ones while it is drawn on one knee (see KneeBend). */
 @Mixin(ModelPart.class)
 public interface ModelPartCubesAccessor {
 	@Accessor("cubes")

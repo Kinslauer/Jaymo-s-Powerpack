@@ -28,7 +28,7 @@ import net.minecraft.world.entity.Avatar;
  * </ul>
  * The arms are left alone while drawing a bow, aiming, blocking or swinging, and the whole pose stands aside for the other
  * full-body poses (tending, a finisher, carrying, crawling).
- * <p>(0.17.15) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the
+ * <p>(0.17.18) Andy: "crouching looks like a split right now, the back leg is fine, but the front leg should bend at the
  * knee, and stay bent while firing ... same for all ranged weapons". The front thigh now goes out level and the shin bends
  * down to the foot ({@link KneeBend}); the legs hold that whatever is in the hands, bow, crossbow, gun or thrown.
  */
