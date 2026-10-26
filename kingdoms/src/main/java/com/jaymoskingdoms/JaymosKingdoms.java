@@ -133,6 +133,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Prejudice.register();
 		Havens.register();
 		Emigrants.register();
+		Reforms.register();
+		LOGGER.debug("reform attachment: {}", Reforms.GRIEVANCES);
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();

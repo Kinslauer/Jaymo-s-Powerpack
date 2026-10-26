@@ -132,6 +132,8 @@ public final class Production {
 		long taxes = 0;
 		if (f.type().isRealm()) {
 			taxes = Tempers.taxes(f, (long)(TAX_BASE + h.population() / VILLAGERS_PER_TAX + f.members().size() * TAX_PER_MEMBER) * days);
+			// (0.7.218) less, where its ruler has cut them to keep his people (Reforms)
+			taxes = Reforms.taxes(level.getServer(), f, taxes);
 			taxes += Tempers.tithe(level, f, days);
 			long tribute = f.type() == FactionType.FIEFDOM && f.overlord() >= 0 ? taxes * TRIBUTE_PERCENT / 100 : 0;
 			long kept = taxes - tribute;

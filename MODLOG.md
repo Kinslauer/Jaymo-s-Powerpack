@@ -2938,4 +2938,4 @@ Warpainted red with ochre bands. Players and villager apes alike. Sketch: projec
     Push, Lift into a bound block, Ember, Frost), Ichorium tools, Ichorcloth robes, the Lantern of Everflame.
   Compile-checked against the 26.3 jars, not yet seen in a client.
 - **0.17.3, heritage prejudice (Kingdoms 0.7.218):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
-  most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own; no Powers changes. See Kingdoms' log.
+  most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own, and rulers reform (or dig in) to keep them; no Powers changes. See Kingdoms' log.

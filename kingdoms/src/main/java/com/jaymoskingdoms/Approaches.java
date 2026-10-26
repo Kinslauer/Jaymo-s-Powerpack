@@ -639,8 +639,10 @@ public final class Approaches {
 			int tv = temper(server, f, player);
 			// (0.7.100) nor of one their settlement owes for bringing one of its own home
 			if (!sworn && Captives.owed(player, f.id()) <= 0) {
-				w[SEARCH] = SEARCH_W[tv] + minds;
-				w[TOLL] = TOLL_W[tv] + minds / 2;
+				// ((0.7.218) fewer where the ruler has eased up to keep his people: Reforms)
+				Faction rules = ruler(server, f);
+				w[SEARCH] = Reforms.guards(server, rules, SEARCH_W[tv]) + minds;
+				w[TOLL] = Reforms.guards(server, rules, TOLL_W[tv]) + minds / 2;
 			}
 			w[BOUT] = BOUT_W[tv];
 			w[LOYALTY] = LOYALTY_W[tv];
@@ -913,6 +915,10 @@ public final class Approaches {
 				if (said == null) {
 					// (0.7.218) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
 					said = Prejudice.gossip(level, a.mob, player);
+				}
+				if (said == null) {
+					// (0.7.218) the ruler's answer to his people leaving (Reforms)
+					said = Reforms.gossip(level, player, ruler);
 				}
 				if (said == null) {
 					// (0.7.109) what they saw another player do

@@ -455,16 +455,17 @@ public final class Emigrants {
 		Faction f = Factions.around(level.getServer(), level, v.blockPosition(), PLACE_RANGE);
 		Faction ruler = ruler(level.getServer(), f);
 		if (Purists.outsider(ruler, v)) {
-			why[1] = PURIST_OUTSIDER;
+			why[1] = Reforms.ease(level.getServer(), ruler, PURIST_OUTSIDER);
 		}
 		if (Tempers.of(ruler) == Tempers.Temper.TYRANT) {
-			why[2] = TYRANT;
+			why[2] = Reforms.ease(level.getServer(), ruler, TYRANT);
 		}
 		if (grudges >= GRUDGES_LEAST) {
 			why[3] = GRUDGES;
 		}
 		if (McaCompat.mood(v) <= UNHAPPY_MOOD) {
-			why[4] = UNHAPPY;
+			// ((0.7.218) a ruler's reforms ease all three: Reforms)
+			why[4] = Reforms.ease(level.getServer(), ruler, UNHAPPY);
 		}
 		float daily = 0.0F;
 		int most = 5;
@@ -484,6 +485,8 @@ public final class Emigrants {
 			return;
 		}
 		String from = f != null ? f.name() : town(level, v.blockPosition());
+		// (0.7.218) the realm feels it, and its ruler may answer (Reforms)
+		Reforms.left(level, ruler, household.size());
 		boolean seen = near(level, v.position(), UNSEEN);
 		long until = seen ? now + PACKING_TICKS : now;
 		for (Villager h : household) {

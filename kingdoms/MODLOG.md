@@ -4800,4 +4800,10 @@ the tide born, stone, warrior and sylvan fall into this".
   Arrived, the cart is unpacked, MCA's `leaveVillage` lets them settle there, and they remember where from and why: in a
   chat, 35% of the time they tell you. Folk in a settlement away from any kingdom with no story of their own tell (25%)
   of their family leaving the nearest realm long ago.
-- Tuning: the constants at the top of `Prejudice`, `Havens` and `Emigrants`.
+- **Rulers answer the leaving** (`Reforms`): Andy's "please" to rulers reacting. Each household leaving a ruled realm
+  adds 1 pressure (2 for a big household), ebbing 0.35 a day. At 2, at most every two days, the ruler answers by temper:
+  reforms 95% noble, 85% reveler, 50% warlord, 35% purist, 30% paranoid, 20% tyrant; else digs in (news, and stubborn
+  gossip). Each reform step (up to 3): taxes -20%, tyrant/purist/unhappy pushes to leave -25%, a purist's outsider
+  markup -25%, guards' toll and search weights -1, MCA mood +4 for villagers about the seat, news via Tidings, gossip.
+  Ten days with nobody leaving and he slips back a step.
+- Tuning: the constants at the top of `Prejudice`, `Havens`, `Emigrants` and `Reforms`.
