@@ -29,7 +29,7 @@ public class BlightedEffect extends MobEffect {
 
 	@Override
 	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
-		if (!(entity instanceof Mob mob) || entity instanceof Enemy || entity instanceof Player) {
+		if (!(entity instanceof Mob mob) || entity instanceof Enemy || entity instanceof Player || spared(mob)) {
 			return true;
 		}
 		Player player = level.getNearestPlayer(mob, RANGE);
@@ -47,5 +47,10 @@ public class BlightedEffect extends MobEffect {
 	@Override
 	public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
 		return duration % INTERVAL == 0;
+	}
+
+	/** A pet, a mount or a leashed beast stays loyal through the sickness: it never turns on anyone. */
+	public static boolean spared(Mob mob) {
+		return mob instanceof net.minecraft.world.entity.TamableAnimal pet && pet.isTame() || mob.isVehicle() || mob.isLeashed();
 	}
 }

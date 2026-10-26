@@ -45,7 +45,8 @@ public final class Cures {
 		EntitySleepEvents.START_SLEEPING.register((entity, pos) -> {
 			if (entity instanceof ServerPlayer player && player.level() instanceof ServerLevel level) {
 				boolean full = level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
-				if (full && Flux.get(level, pos) == 0) {
+				// (a night's sleep: lying down in a daytime storm doesn't count)
+				if (full && level.isDarkOutside() && Flux.get(level, pos) == 0) {
 					TONIGHT.put(player.getUUID(), (int)(level.getOverworldClockTime() / DAY / MOON_DAYS));
 				} else {
 					TONIGHT.remove(player.getUUID());

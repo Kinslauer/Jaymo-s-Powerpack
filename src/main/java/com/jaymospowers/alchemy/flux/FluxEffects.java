@@ -116,7 +116,10 @@ public final class FluxEffects {
 			FluxCorruption.tick(server);
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-			// the fleeting kind does not survive death
+			// the fleeting kind does not survive death (coming back from the End isn't one)
+			if (alive) {
+				return;
+			}
 			Corruption.State state = Corruption.of(newPlayer);
 			if (state.fleeting() > 0) {
 				newPlayer.setAttached(Corruption.CORRUPTION, state.with(Corruption.Kind.FLEETING, 0));

@@ -115,7 +115,7 @@ final class FluxLife {
 				blightSpot(level, cp.getMinBlockX() + random.nextInt(16), cp.getMinBlockZ() + random.nextInt(16), random);
 			}
 			AABB box = new AABB(cp.getMinBlockX(), level.getMinY(), cp.getMinBlockZ(), cp.getMaxBlockX() + 1, level.getMaxY(), cp.getMaxBlockZ() + 1);
-			for (Animal animal : level.getEntitiesOfClass(Animal.class, box)) {
+			for (Animal animal : level.getEntitiesOfClass(Animal.class, box, a -> !BlightedEffect.spared(a))) {
 				MobEffectInstance sick = animal.getEffect(FluxEffects.BLIGHTED);
 				if (sick == null || sick.getDuration() < SICK_TICKS / 2) {
 					animal.addEffect(new MobEffectInstance(FluxEffects.BLIGHTED, SICK_TICKS, 0, false, true));
