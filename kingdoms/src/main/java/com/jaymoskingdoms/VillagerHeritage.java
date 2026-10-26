@@ -68,6 +68,8 @@ public final class VillagerHeritage {
 	/** How likely each heritage is, before the land leans it (out of their sum). */
 	static final int W_HEARTLANDER = 560, W_STONEBORN = 60, W_TIDEBORN = 50, W_SYLVAN = 50, W_VERDANT = 15, W_EMBERBORN = 35,
 		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70, W_DAWNBORN = 30;
+	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
+	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
 	static final float COMMON_SHARE = 0.9F;
 	/**
