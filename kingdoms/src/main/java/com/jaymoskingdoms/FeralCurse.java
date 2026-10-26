@@ -71,9 +71,10 @@ public final class FeralCurse {
 	/** As the beast, how often it may take the wheel (ticks), and the chance each time, by stage. */
 	static final int WHIM_EVERY = 400;
 	static final float[] WHIM_CHANCE = {0.0F, 0.15F, 0.25F, 0.35F, 0.5F, 0.7F};
-	/** A hunt: how long (ticks) and how many presses break it, by stage; its bar drains this much a tick plus this per stage. */
-	static final int HUNT_TICKS = 200, HUNT_TICKS_PER = 60, NEEDED = 6, NEEDED_PER = 6;
-	static final float FADE = 0.06F, FADE_PER = 0.03F;
+	/** A hunt: how long (ticks) and how many presses break it, by stage; its bar drains this much a tick plus this per stage
+	 * (0.7.214: eased from 6 + 6 a stage and 0.06 + 0.03; Andy found the mashing overdone). */
+	static final int HUNT_TICKS = 200, HUNT_TICKS_PER = 60, NEEDED = 5, NEEDED_PER = 4;
+	static final float FADE = 0.045F, FADE_PER = 0.02F;
 	/** It looks for prey within this (blocks). */
 	static final double HUNT_RANGE = 16.0;
 	/** Hurt below this share of their health at night (stage 2+): the chance the wolf tears out; then not again for a while (ticks). */
@@ -82,9 +83,9 @@ public final class FeralCurse {
 	/** Nights the change comes on its own: the chance a night, by stage; it comes within this long of the roll (ticks). */
 	static final float[] NIGHT_CHANCE = {0.0F, 0.0F, 0.0F, 0.3F, 1.0F, 1.0F};
 	static final int NIGHT_SPREAD = 4000;
-	/** Fighting the change down: how long (ticks) and presses, at stage 2, and more per stage above it. */
-	static final int CHANGE_TICKS = 100, CHANGE_NEEDED = 14, CHANGE_NEEDED_PER = 5;
-	static final float CHANGE_FADE = 0.1F;
+	/** Fighting the change down: how long (ticks) and presses, at stage 2, and more per stage above it (0.7.214: eased from 14 + 5, 0.1). */
+	static final int CHANGE_TICKS = 100, CHANGE_NEEDED = 10, CHANGE_NEEDED_PER = 4;
+	static final float CHANGE_FADE = 0.075F;
 	/** Changing back at will fails this often, by stage (by day half as often). */
 	static final float[] REFUSE_CHANCE = {0.0F, 0.0F, 0.3F, 0.6F, 1.0F, 1.0F};
 

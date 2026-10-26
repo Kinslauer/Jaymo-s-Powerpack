@@ -93,8 +93,8 @@ style" and "the head clips and animates seperately it looks like".
   the whole suit under it) and Living Armor's tendrils draw back in. With Living Armor away the bond doesn't swell you
   back into the big body, so any form can be worn at any bond. The next press takes the suit off (the fight under
   `FIGHT_BOND`, else the tear-off). Living Armor from the menu goes back up as before.
-- **Easier with the bond (`WebSymbioteBond`):** presses to win now `FIGHT_PRESSES_MAX` 30 at no bond down to
-  `FIGHT_PRESSES_MIN` 12 (was 16) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
+- **Easier with the bond (`WebSymbioteBond`):** presses to win now `FIGHT_PRESSES_MAX` 22 at no bond down to
+  `FIGHT_PRESSES_MIN` 9 (was 30 / 12 until 0.16.36, 16 before) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
   (`fightFade`, the owner's own bar too), and it heaves back `FIGHT_SHOVE_AT_BOND` half as often and half as hard
   (all eased by the bond's share of `FIGHT_BOND`).
 - **The body under the fight (the cause):** players drawn with MCA's model (Andy's pack) have all of MCA's body hidden
@@ -149,7 +149,7 @@ intensifying with glow and intensity to a maximum at low health takeover alerts.
 - **Removal (the radial menu's mask, the same suit-off toggle):** under `FIGHT_BOND` 70, the first `FIGHTS` 3 times
   with each new bond (`FOUGHT`, saved), taking the suit off is a fight: your keys are swallowed and every press is a
   heave against it, as against a takeover (the same struggle packet, the same `STRUGGLE` bar and its fade; a bar at
-  the bottom of the screen; `FIGHT_PRESSES_MAX` 30 at no bond down to `FIGHT_PRESSES_MIN` 12, see above). Everyone sees the
+  the bottom of the screen; `FIGHT_PRESSES_MAX` 22 at no bond down to `FIGHT_PRESSES_MIN` 9, see above). Everyone sees the
   tear-off driven back and forth by the bar (`WebSuitGrowth.FIGHT_TEAR_MIN` 0.06 to `FIGHT_TEAR_MAX` 0.3 of the way
   through: clawing at the chest, the mask sliding off the face and back as it tugs); past `FIGHT_SHOVE_FROM` of the
   bar it heaves back now and then (`FIGHT_SHOVE` of the bar, a shake). Win: only the face comes free (`FACE`, synced),
@@ -410,7 +410,7 @@ living armor tendrils, and it helps them attack". No blood anywhere in it.
   `SELF_FEED_EVERY` 20 ticks, off the takeover cooldown) has `HUNGRY_HUNT_CHANCE` 8% that it takes the wheel, hunts the
   nearest creature, eats it and lets go: strictly to feed, never a player. In a low mood (stress at `LOW_MOOD_STRESS` 60+)
   it's a spree instead: after eating it keeps killing creature after creature (`spreeOn`) until you break free or nothing
-  is left near. A spree can always be fought (`SPREE_BREAK_FREE` 80 presses if you couldn't break a hold yet; synced
+  is left near. A spree can always be fought (`SPREE_BREAK_FREE` 55 presses if you couldn't break a hold yet; synced
   `SPREE` attachment).
 - **Slam latch (0.11.83):** with Wall Crawl on, pressing Sneak against a wall slams both tendrils into it at once (no
   reach first; the wall cracks at both bites), throws you at it (`WebSymbioteClient.LATCH_SLAM` 0.35, lifted
@@ -1159,7 +1159,7 @@ whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
-earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 80 - 6 per ability presses (44 with all six, since 0.10.10; the
+earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 55 - 5 per ability presses (25 with all six, fading 0.18 a tick, since 0.16.36; was 80 - 6, 0.25; the
 count fades by `TAKEOVER_STRUGGLE_FADE` 0.25 per tick) break its hold, which
 adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at half).
 

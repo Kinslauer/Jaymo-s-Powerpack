@@ -48,10 +48,15 @@ import org.jspecify.annotations.Nullable;
  * strength (ki drains while it clashes).
  */
 public final class ZFighterWaveBeam {
-	/** Strength in a clash, times the steady push: by charge (none to full), and this share of the fighter's ki power on top. */
-	static final float CLASH_CHARGE_EMPTY = 0.6F, CLASH_CHARGE_FULL = 1.2F, CLASH_KI_POWER = 0.3F;
-	/** And by the ki left behind it (empty to full). */
-	static final float CLASH_KI_EMPTY = 0.7F, CLASH_KI_FULL = 1.2F;
+	/**
+	 * Strength in a clash, times the steady push: by charge (none to full), and this share of the fighter's ki power on
+	 * top. (0.16.36) Andy: "factor the player's power levels in ... allow transformations mid battle to count": the ki
+	 * power is read live, every tick of the clash, so going Super while it grinds pushes harder at once, and all of it
+	 * counts now (was 0.3, fixed when the wave left his hands).
+	 */
+	static final float CLASH_CHARGE_EMPTY = 0.6F, CLASH_CHARGE_FULL = 1.2F, CLASH_KI_POWER = 1.0F;
+	/** And by the ki left behind it (empty to full); narrower than before (0.7-1.2) so a form's ki cost doesn't undo its power. */
+	static final float CLASH_KI_EMPTY = 0.85F, CLASH_KI_FULL = 1.1F;
 	/** Ki a tick while the beam clashes (not in creative or Rage). */
 	static final float CLASH_KI_DRAIN = 0.3F;
 	/** The Great Ape's beam has no ki behind it: the moon's strength. */
@@ -75,8 +80,8 @@ public final class ZFighterWaveBeam {
 	/**
 	 * What a fired beam is: its reach and speed (blocks, blocks a tick), how thick, the hurt and push of what it reaches,
 	 * how long it chills (ticks), whether it bores through blocks, its burst (power, how it treats the ground, whether
-	 * the burst only shakes the ground), its colour and style, its strength in a clash (by charge and ki power, before
-	 * the ki left), whether it's the Great Ape's, and its hum's pitch.
+	 * the burst only shakes the ground), its colour and style, its strength in a clash (by charge; his ki power and
+	 * the ki left are added live), whether it's the Great Ape's, and its hum's pitch.
 	 */
 	record Spec(double range, double speed, double radius, float damage, double push, int chill, boolean pierces, float blast,
 		Level.ExplosionInteraction interaction, boolean groundOnly, int color, int style, float strength, boolean ape, float pitch) {
@@ -157,9 +162,9 @@ public final class ZFighterWaveBeam {
 		return Boolean.TRUE.equals(player.getAttached(FIRING));
 	}
 
-	/** A wave's strength in a clash from how full it was and his ki power (before the ki left behind it). */
-	static float strength(float charge, float kiPower) {
-		return Mth.lerp(charge, CLASH_CHARGE_EMPTY, CLASH_CHARGE_FULL) * (1.0F + CLASH_KI_POWER * (kiPower - 1.0F));
+	/** A wave's strength in a clash from how full it was (his ki power is added live, {@link #strength(ServerPlayer)}). */
+	static float strength(float charge) {
+		return Mth.lerp(charge, CLASH_CHARGE_EMPTY, CLASH_CHARGE_FULL);
 	}
 
 	/** Lets the beam go from {@code start} along {@code dir}. */
@@ -183,7 +188,8 @@ public final class ZFighterWaveBeam {
 		}
 		ZFighterPower.Live live = ZFighterPower.live(player);
 		float share = player.isCreative() || live.raging() ? 1.0F : Mth.clamp(live.ki / Math.max(1, ZFighterPower.maxKi(player)), 0.0F, 1.0F);
-		return wave.spec.strength() * Mth.lerp(share, CLASH_KI_EMPTY, CLASH_KI_FULL);
+		float power = 1.0F + CLASH_KI_POWER * (ZFighterPower.kiPower(player, live) - 1.0F);
+		return wave.spec.strength() * Math.max(0.1F, power) * Mth.lerp(share, CLASH_KI_EMPTY, CLASH_KI_FULL);
 	}
 
 	/** From BeamClash: overwhelmed, let go or detonated, the beam ends at the knot. */

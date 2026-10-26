@@ -1118,7 +1118,7 @@ public final class ZFighterKi {
 		};
 		ZFighterWaveBeam.fire(player, from, look, new ZFighterWaveBeam.Spec(sig.range(), sig.speed(), radius, damage,
 			(0.8 + charge * 1.2) * (sig.style() == NEEDLE ? 0.3 : 1.0), sig.chill(), sig.pierces(), power, interaction, false,
-			super_ ? formColor(live) : baseColor(live, sig.color()), sig.style(), ZFighterWaveBeam.strength(charge, kiPower), false, pitch));
+			super_ ? formColor(live) : baseColor(live, sig.color()), sig.style(), ZFighterWaveBeam.strength(charge), false, pitch));
 		switch (sig.style()) {
 			case NEEDLE -> {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 1.8F);

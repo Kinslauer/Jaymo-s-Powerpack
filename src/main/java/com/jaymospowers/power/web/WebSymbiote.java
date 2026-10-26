@@ -198,11 +198,12 @@ public final class WebSymbiote {
 	/**
 	 * Once it takes over it keeps you until it's done with you: no key answers. With {@code BREAK_FREE_ABILITIES} of its
 	 * abilities earned, fighting it (any key, spammed) breaks its hold: {@code BREAK_FREE_BASE} presses,
-	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (44 with all six), the count fading {@code STRUGGLE_FADE}
-	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond.
+	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (25 with all six), the count fading {@code STRUGGLE_FADE}
+	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond. (0.16.36) Andy: "near
+	 * impossible to break without a SERIOUS struggle ... overdone": eased from 80, 6 a power and 0.25 a tick.
 	 */
-	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 80, BREAK_FREE_PER_ABILITY = 6, BREAK_FREE_STRESS = 10;
-	public static final float STRUGGLE_FADE = 0.25F;
+	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 55, BREAK_FREE_PER_ABILITY = 5, BREAK_FREE_STRESS = 10;
+	public static final float STRUGGLE_FADE = 0.18F;
 	/**
 	 * Every takeover is one it starts itself, and those run {@code SELF_TAKEOVER_SPEED} times quicker: the suit and the
 	 * big body engulf you that much faster (the client's WebSuitGrowth, and the dread swelling in). Your struggle bar
@@ -717,7 +718,7 @@ public final class WebSymbiote {
 	 * for fun, one creature after the next, until you wrest yourself free (always possible on a spree:
 	 * {@code SPREE_BREAK_FREE} presses if you couldn't otherwise yet) or there's nothing left near.
 	 */
-	public static final int HUNGRY_HUNT_BELOW = 45, LOW_MOOD_STRESS = 60, SPREE_BREAK_FREE = 80;
+	public static final int HUNGRY_HUNT_BELOW = 45, LOW_MOOD_STRESS = 60, SPREE_BREAK_FREE = 55;
 	public static final float HUNGRY_HUNT_CHANCE = 0.08F;
 	/** On a killing spree (synced: your client lets you fight it even before you could break a takeover's hold). */
 	public static final AttachmentType<Boolean> SPREE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_spree"),

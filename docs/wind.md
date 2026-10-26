@@ -621,7 +621,13 @@ client half is `client/BeamClashClient`.
 - **The struggle.** A balance from -1 to 1 moves the knot along the line between the users. Each side pushes a steady
   0.005 a tick, +60% ascended, +10% per mastered ability, plus a surge from **tapping X** while holding it (release and
   press again inside 6 ticks, `GRACE_TICKS`; +0.006 a tap, fading x0.85 a tick, at most 0.03; taps under 2 ticks
-  apart count once). Mashing hard (8 taps a second) beats a steady hold from the middle in about 3.5 s. HUD: a "Clash" panel bottom-right above the chip
+  apart count once). Mashing hard (8 taps a second) beats a steady hold from the middle in about 3.5 s.
+  **0.16.36 (Andy: "near impossible to break without a SERIOUS struggle ... overdone"; "factor the player's power
+  levels in"):** a tap is +0.009 and the surge fades x0.9, so about 6 taps a second fills it. Each side's **power level**
+  is its steady push over 0.005 (ascension, mastery, a ki wave's strength); its taps and surge cap are weighed by
+  sqrt(its power / theirs), kept in 0.75-1.35. A Z Fighter's ki wave reads his ki power live (`ZFighterWaveBeam`,
+  `CLASH_KI_POWER` 1.0, was 0.3 fixed at firing), so **going Super mid-clash** raises his push at once; a power jump of
+  6%+ in a tick also fills his surge, shakes both and tells both ("Your power surges into the clash!"). HUD: a "Clash" panel bottom-right above the chip
   row: the balance bar (your colour from the left, theirs from the right, the knot between), both pushes under it,
   and the time left along its top.
 - **Endings.** Knot reaches a user: **overwhelmed**, 6 damage, thrown 1.8 back and 0.55 up; beaten by wind they also

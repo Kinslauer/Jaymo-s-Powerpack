@@ -50,9 +50,10 @@ public final class ApeRage {
 	static final float RAGE_AFTER_WIN = 30.0F, RAGE_AFTER_LOSS = 50.0F;
 	/** A fit lasts this long (ticks), plus this per point of primal; at a whole primal, until the moon lets go. */
 	static final int FIT_TICKS = 200, FIT_TICKS_PER_PRIMAL = 4;
-	/** Presses to break it (plus a share of primal; at a whole primal, this many), and how much the bar drains a tick. */
-	static final int NEEDED = 15, NEEDED_LOST = 60;
-	static final float NEEDED_PER_PRIMAL = 0.25F, FADE = 0.12F, FADE_PER_PRIMAL = 0.001F;
+	/** Presses to break it (plus a share of primal; at a whole primal, this many), and how much the bar drains a tick
+	 * (0.16.36: eased from 15 / 60 / 0.25 / 0.12; Andy found the mashing overdone). */
+	static final int NEEDED = 11, NEEDED_LOST = 42;
+	static final float NEEDED_PER_PRIMAL = 0.18F, FADE = 0.09F, FADE_PER_PRIMAL = 0.001F;
 	/** For the first ticks of a fit, presses don't count yet. */
 	static final int GRACE = 20;
 	/** Primal: gained each change, each minute as the ape, each fit lost, each person killed in a fit; lost each fit won. */

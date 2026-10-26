@@ -91,6 +91,8 @@
 	"message.jaymospowers.beam_clash.overwhelmed": "Overwhelmed!",
 	"message.jaymospowers.beam_clash.detonated": "The clash bursts!",
 	"message.jaymospowers.beam_clash.resting": "You haven't got your breath back from the clash",
+	"message.jaymospowers.beam_clash.power_up": "Your power surges into the clash!",
+	"message.jaymospowers.beam_clash.they_power_up": "Their power surges! Push back!",
 	"hud.jaymospowers.beam_clash.title": "Clash",
 	"hud.jaymospowers.beam_clash.mash": "Mash %s",
 	"screen.jaymospowers.tab.overview": "Overview",
