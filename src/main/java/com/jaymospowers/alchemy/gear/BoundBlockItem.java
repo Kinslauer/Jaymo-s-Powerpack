@@ -49,7 +49,10 @@ public class BoundBlockItem extends Item {
 
 	/** Whether the block at {@code pos} can be bound (any solid block with a body that isn't a half of a larger whole or unbreakable). */
 	public static boolean bindable(Level level, BlockPos pos, BlockState state) {
-		return CarryBlock.liftableAny(level, pos, state);
+		// (a container that can't be emptied in place would leave its things behind as well as in the binding)
+		BlockEntity entity = level.getBlockEntity(pos);
+		return CarryBlock.liftableAny(level, pos, state)
+			&& !(entity instanceof net.minecraft.world.Container && !(entity instanceof Clearable));
 	}
 
 	/** Binds the block at {@code pos} into an item and gives it to {@code player}. The caller has checked {@link #bindable}. */
@@ -87,7 +90,8 @@ public class BoundBlockItem extends Item {
 			pos = pos.relative(context.getClickedFace());
 		}
 		BlockState state = bound.state();
-		if (!level.getBlockState(pos).canBeReplaced() || !level.isUnobstructed(state, pos, CollisionContext.placementContext(player))
+		if (!player.mayUseItemAt(pos, context.getClickedFace(), stack) || !level.mayInteract(player, pos)
+			|| !level.getBlockState(pos).canBeReplaced() || !level.isUnobstructed(state, pos, CollisionContext.placementContext(player))
 			|| !state.canSurvive(level, pos)) {
 			return InteractionResult.FAIL;
 		}

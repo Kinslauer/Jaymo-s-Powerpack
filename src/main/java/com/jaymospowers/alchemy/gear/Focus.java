@@ -116,7 +116,8 @@ public enum Focus {
 			player.sendOverlayMessage(RodItem.text("nothing_there"));
 			return false;
 		}
-		if (!BoundBlockItem.bindable(level, hit.getBlockPos(), level.getBlockState(hit.getBlockPos()))) {
+		if (!BoundBlockItem.bindable(level, hit.getBlockPos(), level.getBlockState(hit.getBlockPos()))
+			|| !player.mayBuild() || !level.mayInteract(player, hit.getBlockPos())) {
 			player.sendOverlayMessage(RodItem.text("wont_lift"));
 			return false;
 		}

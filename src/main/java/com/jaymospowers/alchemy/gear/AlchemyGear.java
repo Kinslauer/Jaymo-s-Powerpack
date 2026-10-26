@@ -8,7 +8,6 @@ import com.jaymospowers.alchemy.Research;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -77,7 +76,6 @@ public final class AlchemyGear {
 	public static final TagKey<Item> CLOTH_REPAIRS = TagKey.create(Registries.ITEM, JaymosPowers.id("repairs_ichorcloth_armor"));
 
 	/** Set while the magic reduction re-deals a blow, so it isn't reduced twice. */
-	private static boolean reducing;
 
 	private AlchemyGear() {
 	}
@@ -112,26 +110,6 @@ public final class AlchemyGear {
 			CLOTH_PIECES[i] = Alchemy.item("ichorcloth_" + names[i], p -> new Item(p.humanoidArmor(cloth, type).rarity(Rarity.UNCOMMON)));
 		}
 
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (reducing || !(entity instanceof ServerPlayer player) || !magic(source)) {
-				return true;
-			}
-			int worn = worn(player);
-			if (worn == 0) {
-				return true;
-			}
-			float left = amount * (1.0F - Math.min(1.0F, MAGIC_RESIST_PER_PIECE * worn));
-			if (left > 0.0F) {
-				// the blow is dealt again, smaller, so the armour, effects and absorption treat it as any other
-				reducing = true;
-				try {
-					player.hurtServer(player.level(), source, left);
-				} finally {
-					reducing = false;
-				}
-			}
-			return false;
-		});
 		registerResearch();
 	}
 
@@ -144,6 +122,17 @@ public final class AlchemyGear {
 		defense.put(ArmorType.BODY, CLOTH_ROBE);
 		ResourceKey<EquipmentAsset> asset = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("ichorcloth"));
 		return new ArmorMaterial(CLOTH_DURABILITY, defense, CLOTH_ENCHANTABILITY, SoundEvents.ARMOR_EQUIP_LEATHER, CLOTH_TOUGHNESS, 0.0F, CLOTH_REPAIRS, asset);
+	}
+
+	/**
+	 * What's left of a magic blow on {@code entity} after its ichorcloth (from {@code IchorclothMagicMixin}, as vanilla
+	 * takes off what the Protection enchantment does, so every other damage hook sees the blow once, already smaller).
+	 */
+	public static float magicTaken(net.minecraft.world.entity.LivingEntity entity, DamageSource source, float amount) {
+		if (!(entity instanceof Player player) || !magic(source)) {
+			return amount;
+		}
+		return amount * (1.0F - Math.min(1.0F, MAGIC_RESIST_PER_PIECE * worn(player)));
 	}
 
 	/** Whether this blow is magic: the potion and spell kinds, the Wither's rot and the dragon's breath. */
