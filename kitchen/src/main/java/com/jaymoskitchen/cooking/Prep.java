@@ -42,8 +42,8 @@ public final class Prep {
 	public static final float WATER_SHIFT = 0.12F, OIL_SHIFT_DOWN = 0.08F, OIL_SHIFT_UP = 0.12F;
 	/** Gauge fill per tick when a pour starts (each pour picks a rate up to x1.4 this), and how much it speeds up per tick. */
 	public static final float WATER_RATE = 0.011F, OIL_RATE = 0.009F, POUR_ACCEL = 0.00018F;
-	/** Knead presses (alternating left/right) needed, and the time allowed for them. */
-	public static final int KNEADS = 20, KNEAD_TICKS = 110;
+	/** Knead presses (alternating left/right) needed, and the time allowed for them (0.5.30: eased from 20). */
+	public static final int KNEADS = 15, KNEAD_TICKS = 110;
 	/** A real attempt takes at least this long; anything quicker is ignored. */
 	private static final int MIN_TICKS = 40;
 

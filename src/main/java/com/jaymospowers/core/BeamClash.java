@@ -45,9 +45,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * A beam battle: two held streams (Wind Whistle, Smoke/Soot Jet, or any beam that {@link #register}s) meeting head-on
  * lock into a clash instead of passing through each other. The knot where they grind together sits on the line between
- * the two users; a balance from -1 to 1 moves it. Each side pushes with a steady base (more ascended, more with every
- * mastered ability) plus a surge built by tapping X while holding it (a release shorter than {@link #GRACE_TICKS} is a
- * tap, not a let-go). Both are rooted, slowed and hungry while it lasts. The knot reaching a user overwhelms them; a
+ * the two users; a balance from -1 to 1 moves it. Each side pushes with a steady base by its power level (more
+ * ascended, more with every mastered ability, a ki wave stronger in every form) plus a surge built by tapping X while
+ * holding it, weighed by the two sides' powers (a release shorter than {@link #GRACE_TICKS} is a tap, not a let-go). Both are rooted, slowed and hungry while it lasts. The knot reaching a user overwhelms them; a
  * user letting go has the other's stream roll through; a stalemate past {@link #MAX_TICKS} detonates the knot.
  * Server-authoritative: the clients only send their held X (the beams' own Hold packets, routed here by {@link #input}).
  * A fired beam (one with a {@link Shape}: the Z Fighters' ki waves) travels on its own once let go: it meets others
@@ -69,8 +69,24 @@ public final class BeamClash {
 	public static final float BASE_PUSH = 0.005F;
 	/** The steady push grows by this share when ascended, and by this share per mastered ability. */
 	public static final float ASCENDED_BONUS = 0.6F, MASTERY_BONUS = 0.1F;
-	/** A tap of X adds this to the surge; the surge fades by this factor a tick and holds at most this. */
-	public static final float TAP_PUSH = 0.006F, SURGE_DECAY = 0.85F, SURGE_MAX = 0.03F;
+	/**
+	 * A tap of X adds this to the surge; the surge fades by this factor a tick and holds at most this. (0.17.1) Andy:
+	 * "near impossible to break without a SERIOUS struggle ... overdone": each tap is worth half again what it was and
+	 * the surge fades slower, so about six taps a second fills it (before, nothing short of ten did), and from there
+	 * power decides.
+	 */
+	public static final float TAP_PUSH = 0.009F, SURGE_DECAY = 0.9F, SURGE_MAX = 0.03F;
+	/**
+	 * (0.17.1) Power levels: each side's power is its steady push over the base (ascension, mastery, a ki wave's live
+	 * strength, which rises with every form). Its taps and its surge's cap are weighed by the square root of its power
+	 * over the other's, kept between these, so the stronger side's mashing counts for more.
+	 */
+	public static final float TAP_WEIGHT_MIN = 0.75F, TAP_WEIGHT_MAX = 1.35F;
+	/**
+	 * Powering up mid-clash (a Z Fighter going Super): power jumping by this share in a tick fills that side's surge at
+	 * once, shoves the knot and shakes both.
+	 */
+	public static final float POWER_UP_JUMP = 0.06F, POWER_UP_SHAKE = 1.4F;
 	/** Taps closer together than this many ticks count once (no macro wins). */
 	public static final int TAP_MIN_TICKS = 2;
 	/** A release of X shorter than this is a tap; longer is letting go. */
@@ -224,6 +240,8 @@ public final class BeamClash {
 		/** When X was let go (a tap in progress), or -1 while held. */
 		long releasedAt = -1;
 		float push;
+		/** This side's power level (its steady push over {@link #BASE_PUSH}) as of last tick; 0 before the first. */
+		float power;
 		int kind;
 
 		Side(UUID id, Beam beam) {
@@ -247,6 +265,10 @@ public final class BeamClash {
 
 		Side side(UUID id) {
 			return this.a.id.equals(id) ? this.a : this.b;
+		}
+
+		Side other(Side side) {
+			return side == this.a ? this.b : this.a;
 		}
 	}
 
@@ -324,7 +346,8 @@ public final class BeamClash {
 	private static void tap(ServerPlayer player, Clash clash, Side side, long now) {
 		if (now - side.lastTap >= TAP_MIN_TICKS) {
 			side.lastTap = now;
-			side.surge = Math.min(SURGE_MAX, side.surge + TAP_PUSH);
+			float weight = weight(side, clash.other(side));
+			side.surge = Math.min(SURGE_MAX * weight, side.surge + TAP_PUSH * weight);
 			// each shove of the knot bangs
 			ServerLevel level = player.level();
 			level.playSound(null, clash.knot.x, clash.knot.y, clash.knot.z, SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.5F,
@@ -526,8 +549,8 @@ public final class BeamClash {
 		clash.age++;
 		clash.a.kind = clash.a.beam.kind().applyAsInt(a);
 		clash.b.kind = clash.b.beam.kind().applyAsInt(b);
-		clash.a.push = push(a, clash.a);
-		clash.b.push = push(b, clash.b);
+		clash.a.push = push(a, b, clash, clash.a);
+		clash.b.push = push(b, a, clash, clash.b);
 		clash.balance = Math.clamp(clash.balance + clash.a.push - clash.b.push, -1.0F, 1.0F);
 		clash.knot = ea.add(ab.scale((1.0 + clash.balance) * 0.5)).add(0.0, -0.2, 0.0);
 		if (clash.balance >= 1.0F) {
@@ -557,12 +580,37 @@ public final class BeamClash {
 		return player != null && player.isAlive() && !player.isSpectator() && side.beam.active().test(player);
 	}
 
-	/** This tick's push: the steady base (ascension, mastery, a fired beam's own strength), the surge from taps, and a waver. */
-	private static float push(ServerPlayer player, Side side) {
-		float base = BASE_PUSH * (1.0F + (Fate.isAscended(player) ? ASCENDED_BONUS : 0.0F) + MASTERY_BONUS * Mastery.unlocked(player))
+	/** A side's power level: ascension, mastery, and a fired beam's own (live) strength. */
+	private static float power(ServerPlayer player, Side side) {
+		return (1.0F + (Fate.isAscended(player) ? ASCENDED_BONUS : 0.0F) + MASTERY_BONUS * Mastery.unlocked(player))
 			* (side.beam.shape() == null ? 1.0F : Math.max(0.0F, side.beam.shape().strength(player)));
+	}
+
+	/** How much a side's taps count against the other's: the square root of their powers' ratio, kept in bounds. */
+	static float weight(Side side, Side other) {
+		if (side.power <= 0.0F || other.power <= 0.0F) {
+			return 1.0F;
+		}
+		return Math.clamp((float)Math.sqrt(side.power / other.power), TAP_WEIGHT_MIN, TAP_WEIGHT_MAX);
+	}
+
+	/** This tick's push: the steady base (by power), the surge from taps, and a waver. Powering up surges at once. */
+	private static float push(ServerPlayer player, ServerPlayer other, Clash clash, Side side) {
+		float power = power(player, side);
+		boolean poweredUp = side.power > 0.0F && power > side.power * (1.0F + POWER_UP_JUMP);
+		side.power = power;
 		side.surge *= SURGE_DECAY;
-		return base + side.surge + (player.getRandom().nextFloat() - 0.5F) * JITTER;
+		if (poweredUp) {
+			// powered up mid-clash: it pours straight into the knot
+			side.surge = SURGE_MAX * weight(side, clash.other(side));
+			Vec3 k = clash.knot;
+			player.level().playSound(null, k.x, k.y, k.z, SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
+			Shakes.send(player, POWER_UP_SHAKE, k);
+			Shakes.send(other, POWER_UP_SHAKE, k);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.power_up"));
+			other.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.they_power_up"));
+		}
+		return BASE_PUSH * power + side.surge + (player.getRandom().nextFloat() - 0.5F) * JITTER;
 	}
 
 	/** What happens in and around the knot: smoke churned in, soot blinding, bystanders thrown out. */
