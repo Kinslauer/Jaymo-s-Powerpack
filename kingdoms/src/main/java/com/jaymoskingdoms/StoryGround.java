@@ -12,7 +12,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * new world has none till someone walks up to a village's bell), a barbarian camp, a monolith, a harbour for a whaler.
  * A capital or a harbour needs its land loaded and ticking, so those are made over a few seconds while the player waits.
  */
-final class StoryGround {
+public final class StoryGround {
 	/** Chunks kept loaded round a place being made (it ticks two short of this: 128 blocks, past a harbour's search). */
 	static final int TICKET_RADIUS = 10;
 	/** How often a waiting job tries again, and how long before it settles for less (a citadel, the wild). */
@@ -57,6 +63,10 @@ final class StoryGround {
 	static final int OCEAN_SEARCH = 4800, OCEAN_STEP = 32, OCEAN_VERTICAL_STEP = 64;
 	/** A new coastal capital: walked in from the sea in steps to the shore, then this far inland. */
 	static final int SHORE_STEP = 8, SHORE_WALK = 1200, SHORE_INLAND = 40;
+	/** (0.7.236) How long the loading screen stays up after a story puts you somewhere, while the land there loads. */
+	static final int SETTLE_TICKS = 60;
+	/** (0.7.236) How often who's held is looked at, and the loading screen raised or let down. */
+	static final int HOLD_EVERY = 5;
 	/** Kept from harm while they wait (refreshed each try). */
 	static final int WAIT_RESISTANCE = TRY_EVERY * 3;
 	/** (0.7.235) A whaler's story: the sea kept ticking round her mooring, the misses before a realm is passed over, and how long it all may take. */
@@ -84,16 +94,41 @@ final class StoryGround {
 	private static final Map<UUID, Job> HARBOURS = new HashMap<>();
 	/** Each player's realm whose whaler was made ready, while they sign on. */
 	private static final Map<UUID, Integer> WHALER_REALMS = new HashMap<>();
+	/** (0.7.236) Player → server tick their arrival's loading screen comes down; and the hold last sent to each. */
+	private static final Map<UUID, Integer> SETTLING = new HashMap<>();
+	private static final Map<UUID, String> SENT = new HashMap<>();
+
+	/**
+	 * (0.7.236) Andy: "can the player be held in a stasis menu or faux load screen at the beginning while everything
+	 * loads?" Server → player: show the loading screen with this line ({@code key}, a lang key), or take it down ("").
+	 */
+	public record Hold(String key) implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<Hold> TYPE = new CustomPacketPayload.Type<>(JaymosKingdoms.id("story_hold"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Hold> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Hold::key, Hold::new);
+
+		@Override
+		public CustomPacketPayload.Type<Hold> type() {
+			return TYPE;
+		}
+	}
 
 	private StoryGround() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(StoryGround::tick);
+		ServerTickEvents.END_SERVER_TICK.register(StoryGround::holds);
+		PayloadTypeRegistry.clientboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			capital = null;
 			HARBOURS.clear();
 			WHALER_REALMS.clear();
+			SETTLING.clear();
+			SENT.clear();
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			SETTLING.remove(handler.player.getUUID());
+			SENT.remove(handler.player.getUUID());
 		});
 		// a newcomer's story will want realms to name: start raising the first capital while they make their MCA character
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -416,6 +451,56 @@ final class StoryGround {
 
 	// ---- the tick ----------------------------------------------------------------------------------------------------
 
+	// ---- the loading screen (0.7.236) -----------------------------------------------------------------------------
+
+	/** Holds {@code player} behind the loading screen a few seconds more, while the land where the story put them loads. */
+	static void settle(ServerPlayer player) {
+		SETTLING.put(player.getUUID(), player.level().getServer().getTickCount() + SETTLE_TICKS);
+	}
+
+	/** What {@code player} is held for (the loading screen's line), or null: free to go. */
+	private static @Nullable String held(ServerPlayer player, int now) {
+		UUID id = player.getUUID();
+		if (capital != null && capital.waiting.contains(id)) {
+			return "gui.jaymoskingdoms.story.hold.realm";
+		}
+		if (HARBOURS.containsKey(id)) {
+			return "gui.jaymoskingdoms.story.hold.harbour";
+		}
+		if (LifeStory.of(player) != null && PowersCompat.waitingForFuture(player)) {
+			return "gui.jaymoskingdoms.story.hold.future";
+		}
+		Integer until = SETTLING.get(id);
+		if (until != null) {
+			if (now < until) {
+				return "gui.jaymoskingdoms.story.hold.arriving";
+			}
+			SETTLING.remove(id);
+		}
+		return null;
+	}
+
+	/** Raises or lets down each player's loading screen as what they're held for changes. */
+	private static void holds(MinecraftServer server) {
+		int now = server.getTickCount();
+		if (now % HOLD_EVERY != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			String key = held(player, now);
+			if (!java.util.Objects.equals(key, SENT.get(player.getUUID()))) {
+				if (key == null) {
+					SENT.remove(player.getUUID());
+				} else {
+					SENT.put(player.getUUID(), key);
+				}
+				if (ServerPlayNetworking.canSend(player, Hold.TYPE)) {
+					ServerPlayNetworking.send(player, new Hold(key == null ? "" : key));
+				}
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
 		if (capital == null && HARBOURS.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
 			return;
@@ -443,8 +528,8 @@ final class StoryGround {
 		for (UUID id : job.waiting) {
 			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
 			if (player != null) {
+				// (0.7.236: what they wait for is on their loading screen now, not the overlay)
 				player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, WAIT_RESISTANCE, 4, false, false));
-				player.sendOverlayMessage(Component.translatable(making).withStyle(ChatFormatting.GOLD));
 			}
 		}
 		boolean made;
