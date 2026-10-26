@@ -5125,7 +5125,7 @@ our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
 ## 0.7.235: the whaler start works
 - **Signed on aboard, not in the wild.** A whaling story was fitted out at once when some realm already had a
   harbour, out where the sea round her mooring wasn't loaded and ticking, so she wouldn't float and the story fell back
-  to the wild. Now every whaling start waits at spawn ("making a harbour") while `StoryGround` keeps the harbour's land
+  to the wild. Now every whaling start waits at spawn ("Awaiting a harbour...") while `StoryGround` keeps the harbour's land
   ticking: its harbour built if it has none, then its whaler fitted out (`Whalers.ready`) once the sea is ticking 32
   blocks round her mooring. A realm whose harbour can't be built, or whose whaler won't float, after 15 tries is passed
   over for the next nearest coastal one (a new kingdom raised on the shore if none is left); it gives up after 3
