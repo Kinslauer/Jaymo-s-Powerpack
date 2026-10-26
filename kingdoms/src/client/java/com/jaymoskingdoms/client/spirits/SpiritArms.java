@@ -87,9 +87,9 @@ public final class SpiritArms {
 
 	/**
 	 * What one being's spirit looks like this frame: its {@code kind}, how far manifest it is (0-1), the {@code pose} it holds
-	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, and whether it has {@code arms} one or two.
+	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}).
 	 */
-	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms) {
+	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size) {
 	}
 
 	/** Arm angle offsets (x, y, z in radians, for the right arm; the left mirrors y and z) added to the wearer's own arm for each pose. */
@@ -119,24 +119,25 @@ public final class SpiritArms {
 		TABLE[Poses.MARK] = new float[] {-1.6F, 0.3F, 0.20F};
 		TABLE[Poses.WARD] = new float[] {-1.5F, -0.6F, 0.50F};
 		TABLE[Poses.FINISH] = new float[] {-2.5F, 0.0F, 0.10F};
-		// the second patch's (first guesses; each spirit's track tunes them)
-		TABLE[Poses.AEGIS] = new float[] {-1.4F, -0.5F, 0.60F};
-		TABLE[Poses.BLESS] = new float[] {-2.9F, 0.0F, 0.40F};
-		TABLE[Poses.CATCH_ME] = new float[] {-0.6F, -0.9F, 0.30F};
-		TABLE[Poses.MEND] = new float[] {-1.1F, -0.7F, 0.15F};
-		TABLE[Poses.ARMOUR] = new float[] {-0.4F, -1.2F, 0.80F};
-		TABLE[Poses.RIDE] = new float[] {-3.0F, 0.0F, 0.90F};
-		TABLE[Poses.PULL] = new float[] {-1.6F, -0.3F, 0.05F};
-		TABLE[Poses.STEAL] = new float[] {-1.5F, -0.6F, 0.10F};
-		TABLE[Poses.TRAP] = new float[] {-0.5F, 0.0F, 0.30F};
-		TABLE[Poses.UNLOCK] = new float[] {-1.4F, -0.4F, 0.15F};
-		TABLE[Poses.JUGGLE] = new float[] {-2.2F, -0.2F, 0.40F};
-		TABLE[Poses.ECHO] = new float[] {-1.8F, 0.0F, 0.20F};
-		TABLE[Poses.MIRROR] = new float[] {-0.8F, 0.6F, 0.50F};
-		TABLE[Poses.STILL] = new float[] {-1.0F, 0.0F, 1.20F};
-		TABLE[Poses.SILENT] = new float[] {-2.6F, -0.3F, 0.00F};
-		TABLE[Poses.SENSE] = new float[] {-1.7F, 0.4F, 0.30F};
-		TABLE[Poses.CLASH] = new float[] {-1.6F, -0.2F, 0.25F};
+		// the second patch's, tuned to read as the move (x raises the arm forward when negative; y swings it across the body when
+		// negative; z spreads it out to the side when positive; see also poseAdjust for the ones that move)
+		TABLE[Poses.AEGIS] = new float[] {-1.55F, -0.55F, 0.10F};   // both arms up and forward, meeting: a wall
+		TABLE[Poses.BLESS] = new float[] {-3.0F, -0.1F, 0.15F};     // palm held high over the head
+		TABLE[Poses.CATCH_ME] = new float[] {0.10F, -0.10F, 1.00F}; // arms down and open wide
+		TABLE[Poses.MEND] = new float[] {-0.85F, -1.10F, 0.00F};    // a hand laid across the chest
+		TABLE[Poses.ARMOUR] = new float[] {-0.50F, -1.30F, -0.20F}; // wrapped round the body
+		TABLE[Poses.RIDE] = new float[] {0.05F, 0.00F, 0.12F};      // straight down, as stilts
+		TABLE[Poses.PULL] = new float[] {-1.45F, -0.20F, 0.05F};    // reaching out, then drawn back (poseAdjust)
+		TABLE[Poses.STEAL] = new float[] {-1.30F, -0.90F, 0.00F};   // a snatch across the body
+		TABLE[Poses.TRAP] = new float[] {-1.20F, -1.00F, 0.20F};    // both hands closing together
+		TABLE[Poses.UNLOCK] = new float[] {-1.40F, -0.50F, 0.10F};  // one hand out, turning a key (poseAdjust)
+		TABLE[Poses.JUGGLE] = new float[] {-1.30F, -0.20F, 0.30F};  // one up one down, trading (poseAdjust)
+		TABLE[Poses.ECHO] = new float[] {-1.80F, -0.10F, 0.20F};    // a blow, and the blow again (poseAdjust)
+		TABLE[Poses.MIRROR] = new float[] {-1.20F, 0.70F, 0.60F};   // arms swept out to either side
+		TABLE[Poses.STILL] = new float[] {0.10F, 0.00F, 0.20F};     // hanging, calm
+		TABLE[Poses.SILENT] = new float[] {-2.40F, -0.20F, 0.05F};  // drawn back, then thrust (poseAdjust)
+		TABLE[Poses.SENSE] = new float[] {-0.10F, 0.30F, 1.50F};    // spread wide and still
+		TABLE[Poses.CLASH] = new float[] {-1.57F, -0.65F, 0.05F};   // both thrust forward, hands locked at full reach
 	}
 
 	/** How far manifest each being's arms are: eased from where they were when the spirit went out or away. */
@@ -199,7 +200,7 @@ public final class SpiritArms {
 		if (spirit == null) {
 			TRACKS.remove(entity.getId());
 			if (flickerLeft > 0 && entity == minecraft.player) {
-				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1);
+				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size());
 			}
 			return null;
 		}
@@ -226,7 +227,7 @@ public final class SpiritArms {
 			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
-		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms());
+		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit));
 	}
 
 	/** Each client tick: the sickness flicker's timing, and wisps rising from the hands of every spirit in view. */
@@ -272,14 +273,17 @@ public final class SpiritArms {
 		int kind;
 		int arms;
 		float manifest;
+		float size;
 		if (spirit != null) {
 			Track track = TRACKS.get(entity.getId());
 			kind = spirit.kind();
 			arms = spirit.arms();
+			size = Spirits.of(kind).size(spirit);
 			manifest = track == null ? 0.0F : track.value(entity.level().getGameTime());
 		} else if (flickerLeft > 0 && entity == Minecraft.getInstance().player) {
 			kind = flickerKind;
 			arms = 1;
+			size = Spirits.of(kind).size();
 			manifest = FLICKER_MANIFEST * 2.0F;
 		} else {
 			return;
@@ -295,11 +299,11 @@ public final class SpiritArms {
 			if (entity.getRandom().nextFloat() >= WISP_CHANCE) {
 				continue;
 			}
-			double side = (i == 0 ? 0.45 : -0.45) * Math.max(1.0F, sp.size() * 0.6F);
-			double back = 0.25 + 0.1 * sp.size();
+			double side = (i == 0 ? 0.45 : -0.45) * Math.max(1.0F, size * 0.6F);
+			double back = 0.25 + 0.1 * size;
 			double x = entity.getX() - Mth.cos(yaw) * side + behindX * back;
 			double z = entity.getZ() - Mth.sin(yaw) * side + behindZ * back;
-			double y = entity.getY() + Math.max(0.2, 1.3 - 0.45 * sp.size());
+			double y = entity.getY() + Math.max(0.2, 1.3 - 0.45 * size);
 			level.addParticle(mote, x + (entity.getRandom().nextDouble() - 0.5) * 0.2, y, z + (entity.getRandom().nextDouble() - 0.5) * 0.2,
 				0.0, 0.03, 0.0);
 		}
@@ -419,8 +423,7 @@ public final class SpiritArms {
 				this.leftArm.visible = false;
 				return;
 			}
-			Spirit spirit = Spirits.of(look.kind());
-			float size = spirit.size() * Math.max(0.001F, look.manifest());
+			float size = look.size() * Math.max(0.001F, look.manifest());
 			float[] idle = TABLE[Poses.IDLE];
 			float[] pose = TABLE[Mth.clamp(look.pose(), 0, Poses.COUNT - 1)];
 			for (int i = 0; i < 2; i++) {
@@ -437,6 +440,7 @@ public final class SpiritArms {
 					// the blows: the two arms trade
 					x += w * 0.5F * Mth.sin(look.poseAge() * 1.8F + i * Mth.PI);
 				}
+				x += w * poseAdjust(look.pose(), look.poseAge(), i);
 				float drift = SWAY * Mth.sin(state.ageInTicks * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
 				arm.xRot += x + drift;
 				arm.yRot += y * side;
@@ -448,6 +452,23 @@ public final class SpiritArms {
 				arm.zScale = size;
 			}
 		}
+	}
+
+	/** How far the SILENT arm is drawn back before it thrusts (ticks), and by how much (radians added to x at the extreme). */
+	static final float SILENT_DRAW_TICKS = 6.0F, SILENT_DRAW = 3.2F;
+	/** JUGGLE's swing and speed; ECHO's second blow; PULL's draw-back; UNLOCK's turn. */
+	static final float JUGGLE_SWING = 1.0F, JUGGLE_SPEED = 0.9F, ECHO_PULSE = 0.5F, ECHO_SPEED = 1.5F, PULL_DRAW = 1.2F, TURN = 0.4F;
+
+	/** Extra x-angle for the poses that move rather than hold: arm {@code i} at {@code age} ticks into pose {@code pose}. */
+	private static float poseAdjust(int pose, float age, int i) {
+		return switch (pose) {
+			case Poses.JUGGLE -> JUGGLE_SWING * Mth.sin(age * JUGGLE_SPEED + i * Mth.PI);
+			case Poses.ECHO -> ECHO_PULSE * Mth.sin(age * ECHO_SPEED);
+			case Poses.PULL -> age < POSE_IN + 4 ? 0.0F : PULL_DRAW * Mth.clamp((age - POSE_IN - 4) / 4.0F, 0.0F, 1.0F);
+			case Poses.UNLOCK -> TURN * Mth.sin(age * 0.8F);
+			case Poses.SILENT -> age < SILENT_DRAW_TICKS ? SILENT_DRAW * (1.0F - age / SILENT_DRAW_TICKS) : 0.0F;
+			default -> 0.0F;
+		};
 	}
 
 	/**
@@ -466,12 +487,17 @@ public final class SpiritArms {
 		for (int i = 0; i < 2; i++) {
 			// the right arm's box spans x -3..1 about its pivot; the left arm's -1..3
 			float dx = i == 0 ? 0.0F : 2.0F;
-			CubeListBuilder cubes = CubeListBuilder.create().texOffs(i == 0 ? 40 : 32, i == 0 ? 16 : 48).addBox(-3.0F + dx, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, grow);
+			// Thessaly's arm is a slim glove: the box deflated
+			CubeDeformation armGrow = kind == Spirits.THESSALY ? new CubeDeformation(out - THESSALY_SLIM) : grow;
+			CubeListBuilder cubes = CubeListBuilder.create().texOffs(i == 0 ? 40 : 32, i == 0 ? 16 : 48).addBox(-3.0F + dx, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, armGrow);
 			hand(kind, cubes, dx, grow);
 			root.addOrReplaceChild(i == 0 ? "right_arm" : "left_arm", cubes, PartPose.offset(i == 0 ? -5.0F : 5.0F, 2.0F, 0.0F));
 		}
 		return mesh;
 	}
+
+	/** How much Thessaly's glove is deflated from the plain arm box (pixels each side), and how far her rings stand proud of it. */
+	static final float THESSALY_SLIM = 0.6F, RING_PAD = 0.2F;
 
 	/** One kind's hand, added to the arm's cubes ({@code dx} shifts it onto the left arm). */
 	private static void hand(int kind, CubeListBuilder c, float dx, CubeDeformation grow) {
@@ -491,9 +517,22 @@ public final class SpiritArms {
 					c.addBox(-3.6F + dx + s * 1.5F, 16.5F, -4.2F, 1.2F, 1.2F, 1.2F, grow);
 				}
 			}
-			case Spirits.AMBROSE -> c.addBox(-3.5F + dx, 10.0F, -2.5F, 5.0F, 1.0F, 5.0F, grow);
-			case Spirits.THESSALY -> c.addBox(-2.5F + dx, 10.0F, -1.5F, 3.0F, 3.0F, 3.0F, grow);
-			default -> c.addBox(-2.0F + dx, 10.0F, -1.0F, 2.0F, 2.0F, 2.0F, grow);
+			case Spirits.AMBROSE -> {
+				// a broad open hand: a 6x6x2 palm and five 1x3x1 fingers spread along its far edge
+				c.addBox(-4.0F + dx, 10.0F, -1.0F, 6.0F, 6.0F, 2.0F, grow);
+				for (int f = 0; f < 5; f++) {
+					c.addBox(-4.0F + dx + f * 1.25F, 16.0F, -0.5F, 1.0F, 3.0F, 1.0F, grow);
+				}
+			}
+			case Spirits.THESSALY -> {
+				// three rings: 1-pixel bands round the slim glove's fingers (a little wider than the glove, so they stand proud)
+				for (int r = 0; r < 3; r++) {
+					c.addBox(-3.0F + dx - RING_PAD, 6.0F + r * 2.0F, -2.0F - RING_PAD, 4.0F + 2 * RING_PAD, 1.0F, 4.0F + 2 * RING_PAD, grow);
+				}
+			}
+			default -> {
+				// the Quiet One (and any placeholder): smooth and featureless, the plain arm box and no hand
+			}
 		}
 	}
 }
