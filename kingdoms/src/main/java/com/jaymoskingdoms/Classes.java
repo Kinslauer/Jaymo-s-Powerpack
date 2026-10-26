@@ -261,6 +261,7 @@ public final class Classes {
 				ClassPerks.tick(player);
 				Spellcraft.tick(player);
 				Mana.tick(player);
+				com.jaymoskingdoms.spirits.Spirits.tick(player);
 			}
 		}
 	}

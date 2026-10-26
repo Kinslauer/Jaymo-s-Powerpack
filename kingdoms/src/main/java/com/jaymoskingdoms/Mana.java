@@ -139,7 +139,7 @@ public final class Mana {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/** The overload's blue motes. */
-	static final DustParticleOptions MOTE = new DustParticleOptions(0x4C8DFF, 1.0F);
+	public static final DustParticleOptions MOTE = new DustParticleOptions(0x4C8DFF, 1.0F);
 
 	private Mana() {
 	}
@@ -263,6 +263,13 @@ public final class Mana {
 		return true;
 	}
 
+	/** (0.7.236) Takes {@code amount} from {@code player}'s mana with no ripple and no strain (a spirit's upkeep, a release). */
+	public static void drain(ServerPlayer player, float amount) {
+		if (!player.isCreative() && attuned(player)) {
+			set(player, current(player) - amount);
+		}
+	}
+
 	/** (0.7.236) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
 	public static boolean canPay(ServerPlayer player, float cost) {
 		return player.isCreative() || attuned(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
@@ -302,6 +309,8 @@ public final class Mana {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.smothered").withStyle(ChatFormatting.DARK_PURPLE));
 			}
 			set(player, current(player) - price);
+			// (0.7.236) casting while the spirit stirs in its sleep wakes it sooner
+			com.jaymoskingdoms.spirits.SpiritSickness.pushed(player, price);
 			// (0.7.235) every cast strains: cast too much too fast and it makes you sick
 			ManaSickness.strain(player, price);
 		}
@@ -440,7 +449,7 @@ public final class Mana {
 		ManaSickness.tick(player);
 		float max = max(player), mana = current(player);
 		// (0.7.235) meditating brings it back faster, sickness slower or not at all; vis feeds it, flux drains it
-		float back = regen(player) * MEDITATE_REGEN[meditating(player)] * ManaSickness.regenTimes(player);
+		float back = regen(player) * MEDITATE_REGEN[meditating(player)] * ManaSickness.regenTimes(player) * com.jaymoskingdoms.spirits.SpiritSickness.regenTimes(player);
 		float alchemy = ManaAlchemy.perSecond(player);
 		if (mana > max) {
 			set(player, Math.max(max, mana - SPILL + Math.min(0.0F, alchemy)));
@@ -473,7 +482,7 @@ public final class Mana {
 	// ---- seen by the attuned ----------------------------------------------------------------------------------------
 
 	/** Particles only the attuned near by can see (the quiet signs of magic). */
-	static void sendSeen(ServerLevel level, ParticleOptions particle, double x, double y, double z, int count, double dx, double dy, double dz,
+	public static void sendSeen(ServerLevel level, ParticleOptions particle, double x, double y, double z, int count, double dx, double dy, double dz,
 		double speed) {
 		for (ServerPlayer viewer : level.players()) {
 			if (attuned(viewer) && viewer.distanceToSqr(x, y, z) < SEEN_RANGE * SEEN_RANGE) {

@@ -119,6 +119,13 @@ public final class ManaSickness {
 		}
 	}
 
+	/** (0.7.236) {@code player} burns out at once (releasing a spirit does this). */
+	public static void burnOut(ServerPlayer player) {
+		if (stage(player) < 3) {
+			fall(player, 3);
+		}
+	}
+
 	private static void fall(ServerPlayer player, int stage) {
 		player.setAttached(SICK, stage);
 		UNTIL.put(player.getUUID(), player.level().getGameTime() + LASTS[stage - 1]);
@@ -134,6 +141,8 @@ public final class ManaSickness {
 			}
 			default -> {
 				Mana.set(player, 0.0F);
+				// (0.7.236) a spirit that's out is shaken
+				com.jaymoskingdoms.spirits.Spirits.burntOut(player);
 				player.hurtServer(level, level.damageSources().magic(), BURNOUT_HURT);
 				player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 12, 0, false, false, true));
 				player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, LASTS[2], 1, false, false, true));

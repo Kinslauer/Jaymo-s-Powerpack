@@ -136,6 +136,7 @@ public final class Spellcraft {
 		PayloadTypeRegistry.serverboundPlay().register(Imbue.TYPE, Imbue.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Imbue.TYPE, (payload, context) -> imbue(context.player(), payload.bolt()));
 		Mana.register();
+		com.jaymoskingdoms.spirits.Spirits.register();
 		Restoration.register();
 		Necromancy.register();
 		Hemomancy.register();
