@@ -33,7 +33,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -120,8 +119,6 @@ public final class Skills {
 	 * turn further round before they catch you (the cosine, at most).
 	 */
 	static final double QUICK_HANDS_COS = 0.35, QUICK_HANDS_TURN_COS = 0.6;
-	/** Slip Away: the chance a mark who feels your hand can't tell it was you. */
-	static final float SLIP_AWAY_CHANCE = 0.5F;
 
 	/** Respec: a court wizard asks this many emeralds, and this many more per rank you've learned. */
 	static final int RESPEC_EMERALDS = 5, RESPEC_PER_RANK = 1;
@@ -153,8 +150,9 @@ public final class Skills {
 		DEEP_POCKETS(Pillar.STEALTH, 3, 1, 0, 1, 0, LIGHT_FINGERS),
 		SOFT_STEP(Pillar.STEALTH, 3, 1, 0, 1, 2, LIGHT_FINGERS),
 		QUICK_HANDS(Pillar.STEALTH, 1, 1, 5, 2, 0, DEEP_POCKETS),
-		SLIP_AWAY(Pillar.STEALTH, 1, 1, 5, 2, 2, SOFT_STEP),
-		GHOST(Pillar.STEALTH, 1, 2, 10, 3, 1, QUICK_HANDS, SLIP_AWAY),
+		// (0.7.233) Lockpicking Prowess took Slip Away's place (Lockpicking): ranks saved under slip_away count for nothing, so their points come back
+		LOCKPICKING(Pillar.STEALTH, 3, 1, 5, 2, 2, SOFT_STEP),
+		GHOST(Pillar.STEALTH, 1, 2, 10, 3, 1, QUICK_HANDS, LOCKPICKING),
 		FORAGER(Pillar.SURVIVAL, 5, 1, 0, 0, 1),
 		SECOND_WIND(Pillar.SURVIVAL, 3, 1, 0, 1, 0, FORAGER),
 		WEATHERED(Pillar.SURVIVAL, 3, 1, 0, 1, 2, FORAGER),
@@ -677,10 +675,5 @@ public final class Skills {
 	/** How far the mark may turn toward {@code player}, hand in their pocket, before they catch them (Quick Hands: further). */
 	static double turnCos(Player player, double base) {
 		return rank(player, Perk.QUICK_HANDS) > 0 ? Math.max(base, QUICK_HANDS_TURN_COS) : base;
-	}
-
-	/** Slip Away: the mark caught a hand, but can't tell whose. */
-	static boolean slipsAway(Player player, RandomSource random) {
-		return rank(player, Perk.SLIP_AWAY) > 0 && random.nextFloat() < SLIP_AWAY_CHANCE;
 	}
 }

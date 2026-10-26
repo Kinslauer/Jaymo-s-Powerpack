@@ -53,7 +53,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link Theft#NOTICE_CHANCE}). A pocket picked is empty for a day. A sleeping mark can be robbed from any side.
  *
  * <p>(0.5.52) Every pocket picked clean is Stealth experience ({@link Skills}): the more you do it, the shorter the hold,
- * and Stealth's perks take more, reach in from the side, and let you slip away when a mark turns on you.
+ * and Stealth's perks take more and reach in from the side.
  */
 public final class Pickpocket {
 	/** The hand stays in the pocket a random while between these (ticks), before light, armour and mood. */
@@ -331,13 +331,6 @@ public final class Pickpocket {
 	private static void caught(ServerPlayer player, ServerLevel level, LivingEntity mark, @Nullable Faction f) {
 		if (mark.isSleeping()) {
 			mark.stopSleeping();
-		}
-		if (Skills.slipsAway(player, level.getRandom())) {
-			// (0.5.52, Slip Away) they caught a hand, but not whose: they cry out, and it's no crime of yours
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped", mark.getDisplayName()).withStyle(ChatFormatting.YELLOW));
-			Speech.say(level, mark, Component.translatable("message.jaymoskingdoms.theft.cry.pickpocket." + level.getRandom().nextInt(Theft.SHOUT_VARIANTS)),
-				Speech.YELLOW, Theft.SHOUT_RANGE);
-			return;
 		}
 		if (mark instanceof Mob mob) {
 			mob.getLookControl().setLookAt(player);
