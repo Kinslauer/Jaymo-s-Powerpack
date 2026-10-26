@@ -2,10 +2,14 @@ package com.jaymoskingdoms.client.mixin.mca;
 
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.HeritageVariants;
+import com.jaymoskingdoms.SkinTones;
+import com.jaymoskingdoms.VillagerHeritage;
+import com.jaymoskingdoms.client.EditorFigure;
 import java.util.Objects;
 import java.util.UUID;
 import net.conczin.mca.client.gui.VillagerEditorScreen;
 import net.conczin.mca.entity.VillagerEntityMCA;
+import net.conczin.mca.entity.ai.Genetics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
@@ -34,6 +38,13 @@ abstract class McaEditorHeritageMixin {
 	@Final
 	UUID playerUUID;
 
+	@Inject(method = "removed", at = @At("HEAD"))
+	private void jaymoskingdoms$closed(CallbackInfo ci) {
+		if (EditorFigure.current() == this.villager) {
+			EditorFigure.set(null);
+		}
+	}
+
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void jaymoskingdoms$yourBlood(CallbackInfo ci) {
 		LocalPlayer player = Minecraft.getInstance().player;
@@ -46,6 +57,13 @@ abstract class McaEditorHeritageMixin {
 		}
 		if (!Objects.equals(variant, this.villager.getAttached(HeritageVariants.VARIANT))) {
 			this.villager.setAttached(HeritageVariants.VARIANT, variant);
+		}
+		// (its skin kept to the heritage's range, McaEditorSkinMixin; one already outside it brought in)
+		EditorFigure.set(this.villager);
+		Genetics genes = this.villager.getGenetics();
+		float melanin = genes.getGene(Genetics.MELANIN);
+		if (SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin) != melanin) {
+			genes.setGene(Genetics.MELANIN, SkinTones.clampSkin(VillagerHeritage.of(this.villager), melanin));
 		}
 	}
 }

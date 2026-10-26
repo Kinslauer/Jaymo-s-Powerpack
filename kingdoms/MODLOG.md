@@ -5147,3 +5147,13 @@ Andy: "apply the character's heritage to the character creator please".
 - `McaEditorHeritageMixin`: when MCA's editor is open on your own character (the start-up creator, now after the
   story, or the editor later), the figure you dress gets your heritage and variant attachments. It is drawn with your
   blood's marks, fins, eyes and look, as villagers of that heritage are (`VillagerLooks`).
+
+Andy: "the sliders should only allow the color ranges that the heritage allows".
+- `SkinTones.skinRange`: each heritage's melanin range (0 pale to 1 dark), as constants at the top of `SkinTones`. The
+  ranges are my picks from each blood's land. Frostborn, Nightborn, Endborn and Deepborn are pale; Emberborn and
+  Dawnborn are dark. Heartlander, Earthling and Verdant have the whole range (Verdant is green whatever its melanin).
+- `McaEditorSkinMixin` (on `Genetics.setGene`, client): on your own figure in MCA's editor (`EditorFigure`), the skin
+  picker's melanin is kept inside your heritage's range, so that is what gets saved. A figure that starts outside the
+  range is brought into it.
+- `McaVerdantSkinMixin` also finds the editor figure, which isn't in the world. The figure now shows your heritage's
+  skin too: a Stoneborn's grey, a variant's tint, a Verdant's green.
