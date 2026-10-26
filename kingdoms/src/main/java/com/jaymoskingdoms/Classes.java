@@ -83,7 +83,7 @@ public final class Classes {
 	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
 	public enum PlayerClass {
 		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), ARCHER, SURVIVALIST, BRUTE, MARKSMAN,
-		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration"), RIDER;
+		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood"), RIDER;
 
 		public final List<String> options;
 

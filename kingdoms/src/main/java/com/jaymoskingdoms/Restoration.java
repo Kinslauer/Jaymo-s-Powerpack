@@ -608,6 +608,10 @@ public final class Restoration {
 	/** What a healer offers {@code player} (option kinds), a court wizard's ({@code wizard}) or a cleric's. */
 	static List<String> services(ServerPlayer player, LivingEntity healer, boolean wizard) {
 		List<String> out = new ArrayList<>();
+		// (0.7.228) nothing for a known necromancer or blood mage
+		if (ForbiddenArts.known(player)) {
+			return out;
+		}
 		out.add(wizard && friendOfRealm(player, healer) ? "heal_free" : "heal");
 		out.add("scroll_mending");
 		if (wizard && reputation(player, healer) >= HONOURED_REP) {
@@ -652,8 +656,8 @@ public final class Restoration {
 			enabled.add(optionOpen(player, kind));
 		}
 		OFFERS.put(player.getUUID(), new Offer(healer.getId(), kinds));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(healer.getId(), healer.getDisplayName(), Component.translatable("talk.jaymoskingdoms.healer.ask"),
-			options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(healer.getId(), healer.getDisplayName(),
+			Component.translatable(ForbiddenArts.known(player) ? "talk.jaymoskingdoms.healer.refuse" : "talk.jaymoskingdoms.healer.ask"), options, enabled));
 	}
 
 	/** An answer to a cleric's offer; false when it wasn't one. */

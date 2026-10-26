@@ -55,6 +55,10 @@ import org.jspecify.annotations.Nullable;
  * court wizards and clerics sell it), <b>Sanctuary</b> (a circle of light that heals and keeps the undead out; a court
  * wizard's) and <b>Restoration</b> (whole again, bones set, up if downed; rare). And the healer's staff, a wizard's staff
  * made over with a golden apple: it casts the same.
+ * <p>
+ * (0.7.228) Death's three ({@link Necromancy}): <b>Blight</b>, <b>Whispers</b>, <b>Death's Door</b> (a necromancer's,
+ * now and then); blood's three ({@link Hemomancy}): <b>Hemorrhage</b>, <b>Blood Grip</b>, <b>Frenzy</b> (a blood
+ * witch's). Forbidden: reading one is a crime where a realm's people see ({@link ForbiddenArts}).
  */
 public final class Arcana {
 	/** How far a scroll reaches (draining, arcane bolt). */
@@ -73,6 +77,8 @@ public final class Arcana {
 	public static Item SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE;
 	/** (0.7.212) Restoration's scrolls. */
 	public static Item SCROLL_MENDING, SCROLL_SANCTUARY, SCROLL_RESTORATION;
+	/** (0.7.228) Death's scrolls ({@link Necromancy}) and blood's ({@link Hemomancy}). */
+	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
 	public static Item BAT_WING;
 
@@ -92,13 +98,20 @@ public final class Arcana {
 		SCROLL_MENDING = item("scroll_of_mending", p -> new Scroll(p, "mending"));
 		SCROLL_SANCTUARY = item("scroll_of_sanctuary", p -> new Scroll(p, "sanctuary"));
 		SCROLL_RESTORATION = item("scroll_of_restoration", p -> new Scroll(p, "restoration"));
+		SCROLL_BLIGHT = item("scroll_of_blight", p -> new Scroll(p, "blight"));
+		SCROLL_WHISPERS = item("scroll_of_whispers", p -> new Scroll(p, "whispers"));
+		SCROLL_DEATHS_DOOR = item("scroll_of_deaths_door", p -> new Scroll(p, "deaths_door"));
+		SCROLL_HEMORRHAGE = item("scroll_of_hemorrhage", p -> new Scroll(p, "hemorrhage"));
+		SCROLL_BLOOD_GRIP = item("scroll_of_blood_grip", p -> new Scroll(p, "blood_grip"));
+		SCROLL_FRENZY = item("scroll_of_frenzy", p -> new Scroll(p, "frenzy"));
 		ResourceKey<Item> wing = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("bat_wing"));
 		BAT_WING = Registry.register(BuiltInRegistries.ITEM, wing, new Item(new Item.Properties().setId(wing)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.insertAfter(Items.PHANTOM_MEMBRANE, BAT_WING));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.TOTEM_OF_UNDYING;
 			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, SCROLL_MENDING, SCROLL_SANCTUARY,
-				SCROLL_RESTORATION, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
+				SCROLL_RESTORATION, SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY,
+				BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
 				output.insertAfter(after, item);
 				after = item;
 			}
@@ -113,7 +126,18 @@ public final class Arcana {
 	/** A scroll from a slain caster of {@code role}. */
 	static ItemStack scrollFor(int role, RandomSource random) {
 		return new ItemStack(switch (role) {
-			case Sorcery.NECROMANCER -> random.nextBoolean() ? SCROLL_RAISING : SCROLL_DRAINING;
+			// (0.7.228) and now and then one of death's new three
+			case Sorcery.NECROMANCER -> switch (random.nextInt(6)) {
+				case 0, 1 -> SCROLL_RAISING;
+				case 2, 3 -> SCROLL_DRAINING;
+				case 4 -> random.nextBoolean() ? SCROLL_BLIGHT : SCROLL_WHISPERS;
+				default -> random.nextInt(3) == 0 ? SCROLL_DEATHS_DOOR : SCROLL_BLIGHT;
+			};
+			case Sorcery.BLOOD_WITCH -> switch (random.nextInt(5)) {
+				case 0, 1 -> SCROLL_HEMORRHAGE;
+				case 2, 3 -> SCROLL_BLOOD_GRIP;
+				default -> SCROLL_FRENZY;
+			};
 			case Sorcery.SHAMAN, Orcs.SHAMAN -> SCROLL_FIRE;
 			// (0.7.212) a wizard's: warding, the arcane bolt, or (now and then) mending or sanctuary
 			default -> switch (random.nextInt(6)) {
@@ -131,7 +155,8 @@ public final class Arcana {
 	}
 
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
-	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration");
+	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration",
+		"blight", "whispers", "deaths_door", "hemorrhage", "blood_grip", "frenzy");
 
 	/**
 	 * Casts {@code spell} for {@code player} at {@code power} (1 off a scroll; a Mage's staff casts harder): true if it
@@ -147,6 +172,12 @@ public final class Arcana {
 			case "mending" -> Restoration.mending(level, player, power);
 			case "sanctuary" -> Restoration.sanctuary(level, player, power);
 			case "restoration" -> Restoration.restoration(level, player, power);
+			case "blight" -> Necromancy.blightSpell(level, player, power);
+			case "whispers" -> Necromancy.whispers(level, player);
+			case "deaths_door" -> Necromancy.deathsDoor(level, player, power);
+			case "hemorrhage" -> Hemomancy.hemorrhage(level, player, power, false);
+			case "blood_grip" -> Hemomancy.gripSpell(level, player, power);
+			case "frenzy" -> Hemomancy.frenzy(level, player, power);
 			default -> false;
 		};
 	}
@@ -161,6 +192,12 @@ public final class Arcana {
 			case "mending" -> SCROLL_MENDING;
 			case "sanctuary" -> SCROLL_SANCTUARY;
 			case "restoration" -> SCROLL_RESTORATION;
+			case "blight" -> SCROLL_BLIGHT;
+			case "whispers" -> SCROLL_WHISPERS;
+			case "deaths_door" -> SCROLL_DEATHS_DOOR;
+			case "hemorrhage" -> SCROLL_HEMORRHAGE;
+			case "blood_grip" -> SCROLL_BLOOD_GRIP;
+			case "frenzy" -> SCROLL_FRENZY;
 			default -> SCROLL_ARCANE;
 		};
 	}
@@ -198,7 +235,8 @@ public final class Arcana {
 			player.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
 			stack.consume(1, player);
 			if (player instanceof ServerPlayer reader) {
-				Theft.sorcery(reader, server, player.blockPosition());
+				// (0.7.228) death's and blood's are forbidden everywhere
+				Spellcraft.afterCast(reader, server, this.spell);
 			}
 			return InteractionResult.SUCCESS;
 		}

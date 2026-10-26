@@ -145,6 +145,13 @@ public final class BloodFever {
 		return v != null && v.type() != Vampires.Kind.DHAMPIR;
 	}
 
+	/** (0.7.228) Blood magic stokes a vampire's fever ({@link Hemomancy}): {@code by} more, if the fever has them at all. */
+	static void stoke(ServerPlayer player, float by) {
+		if (feverish(player)) {
+			setFever(player, fever(player) + by);
+		}
+	}
+
 	private static void setFever(ServerPlayer player, float value) {
 		player.setAttached(FEVER, Mth.clamp(value, 0.0F, 100.0F));
 	}

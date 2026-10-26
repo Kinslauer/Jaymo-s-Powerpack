@@ -55,14 +55,18 @@ import org.jspecify.annotations.Nullable;
  * undead), a ward on the guards fighting near him, mending, a blast that throws back anyone too close, and he banishes
  * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead. (0.5.53) With Minecraft Comes Alive the
  * court wizard is one of the kingdom's own elders, taking the office in old age ({@link CourtWizards}).</li>
+ * <li>(0.7.228) A camp's <b>blood witch</b> ({@link #BLOOD_WITCH}, once a camp is a few days old): bolts that cut, a grip
+ * that drags you to her, hemorrhages that burst every cut near, and she drinks the bleeding to heal ({@link Hemomancy}).</li>
  * </ul>
  * Casters keep their distance and cast; a player who kills one takes a spell scroll from the body ({@link Arcana}).
  */
 public final class Sorcery {
 	/** The roles (folk ids; clear of the realms', the camps' 20-24 and the goblins' 30-32). */
 	public static final int NECROMANCER = 40, SHAMAN = 41, WIZARD = 42;
+	/** (0.7.228) A camp's blood witch ({@link Hemomancy}). */
+	public static final int BLOOD_WITCH = 43;
 	/** Health and pace of each. */
-	static final double NECROMANCER_HEALTH = 44.0, SHAMAN_HEALTH = 34.0, WIZARD_HEALTH = 40.0, CASTER_SPEED = 0.3;
+	static final double NECROMANCER_HEALTH = 44.0, SHAMAN_HEALTH = 34.0, WIZARD_HEALTH = 40.0, BLOOD_WITCH_HEALTH = 38.0, CASTER_SPEED = 0.3;
 	/** How far they cast from, and how often they cast (ticks). */
 	public static final double RANGE = 18.0;
 	public static final int CAST_TICKS = 40;
@@ -108,6 +112,8 @@ public final class Sorcery {
 	// who keeps them
 	/** A camp takes a necromancer at this age (days), a second shaman at this one. */
 	static final int NECROMANCER_DAYS = 2, SECOND_SHAMAN_DAYS = 5;
+	/** (0.7.228) A camp takes a blood witch at this age (days). */
+	static final int BLOOD_WITCH_DAYS = 4;
 	/** A kingdom with this much in its treasury keeps a second wizard. */
 	static final long SECOND_WIZARD_TREASURY = 300;
 	/** The share of kingdoms that hold with magic at all (the rest keep no court mage). */
@@ -146,6 +152,11 @@ public final class Sorcery {
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Arcana.TOTEM_STAFF));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.shaman_of", faction.name()));
 		}));
+		Folk.defineRole(new Folk.Role(BLOOD_WITCH, "blood_witch", true, false, null, (folk, faction) -> {
+			base(folk, BLOOD_WITCH_HEALTH);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Arcana.BONE_STAFF));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.blood_witch_of", faction.name()));
+		}));
 		Folk.defineRole(new Folk.Role(WIZARD, "wizard", true, false, null, (folk, faction) -> {
 			base(folk, WIZARD_HEALTH);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Arcana.WIZARD_STAFF));
@@ -161,6 +172,7 @@ public final class Sorcery {
 			.then(Commands.literal("caster").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("necromancer").executes(c -> summon(c.getSource(), NECROMANCER)))
 				.then(Commands.literal("shaman").executes(c -> summon(c.getSource(), SHAMAN)))
+				.then(Commands.literal("blood_witch").executes(c -> summon(c.getSource(), BLOOD_WITCH)))
 				.then(Commands.literal("wizard").executes(c -> summon(c.getSource(), WIZARD))))));
 	}
 
@@ -171,7 +183,7 @@ public final class Sorcery {
 	}
 
 	public static boolean isCaster(int role) {
-		return role == NECROMANCER || role == SHAMAN || role == WIZARD || role == Orcs.SHAMAN;
+		return role == NECROMANCER || role == SHAMAN || role == WIZARD || role == BLOOD_WITCH || role == Orcs.SHAMAN;
 	}
 
 	/** A camp's caster (they hunt as its raiders do). */
@@ -215,6 +227,7 @@ public final class Sorcery {
 			return switch (role) {
 				case SHAMAN -> days >= SECOND_SHAMAN_DAYS ? 2 : 1;
 				case NECROMANCER -> days >= NECROMANCER_DAYS || hold != null && hold.isGrim() ? 1 : 0;
+				case BLOOD_WITCH -> days >= BLOOD_WITCH_DAYS ? 1 : 0;
 				default -> 0;
 			};
 		}
@@ -239,7 +252,7 @@ public final class Sorcery {
 
 	/** Places for the casters it lacks (hired as any other hand is, {@link Economy#hire}). */
 	private static void staff(MinecraftServer server, Faction f, long now) {
-		for (int role : new int[] {SHAMAN, NECROMANCER, WIZARD, Orcs.SHAMAN}) {
+		for (int role : new int[] {SHAMAN, NECROMANCER, BLOOD_WITCH, WIZARD, Orcs.SHAMAN}) {
 			int want = wanted(server, f, role, now);
 			int have = f.holdings().count(role) + f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0);
 			if (have < want) {
@@ -317,6 +330,7 @@ public final class Sorcery {
 			folk.getNavigation().moveTo(target, 1.0);
 		}
 		switch (folk.role()) {
+			case BLOOD_WITCH -> Hemomancy.witchTick(level, folk);
 			case SHAMAN, Orcs.SHAMAN -> {
 				if (timers[T_CHANT] <= 0 && fightingAllies(level, folk).size() >= CHANT_ALLIES) {
 					chant(level, folk);
@@ -358,6 +372,7 @@ public final class Sorcery {
 					drain(level, folk, target, DRAIN_DAMAGE, DRAIN_HEAL);
 				}
 			}
+			case BLOOD_WITCH -> Hemomancy.witchCast(level, folk, target, timers);
 			case SHAMAN, Orcs.SHAMAN -> {
 				if (d <= CLOSE && timers[T_RING] <= 0) {
 					ring(level, folk);

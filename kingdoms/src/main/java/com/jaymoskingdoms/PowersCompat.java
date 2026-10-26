@@ -317,6 +317,8 @@ public final class PowersCompat {
 
 	/** Heals {@code amount} into {@code entity}'s worst parts (Powers' wounds), or just the hearts without Powers. Nothing on the downed. Returns what it took. */
 	public static float mend(net.minecraft.world.entity.LivingEntity entity, float amount) {
+		// (0.7.228) healing magic lifts a death blight first
+		Necromancy.cleanse(entity);
 		mending();
 		if (mend != null) {
 			try {
@@ -355,6 +357,7 @@ public final class PowersCompat {
 
 	/** Restoration: bones set, festering cured, cuts closed, up if downed, and whole again (without Powers, full health). */
 	public static void restore(net.minecraft.world.entity.LivingEntity entity) {
+		Necromancy.cleanse(entity);
 		mending();
 		if (restore != null) {
 			try {
@@ -649,6 +652,89 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError e) {
 			knowledgeOf = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no alchemy (older Powers?)", e);
+		}
+	}
+
+	// ---- (0.7.228) blood magic: Powers' Hemomancy (cuts counted, opened, burst); forbidden magic's corruption ---------
+
+	private static java.lang.invoke.@Nullable MethodHandle cuts, cut, hemorrhage, corruptionAdd;
+	private static @Nullable Object lingering;
+	private static boolean lookedForHemomancy;
+
+	private static void hemomancy() {
+		if (lookedForHemomancy) {
+			return;
+		}
+		lookedForHemomancy = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		var lookup = java.lang.invoke.MethodHandles.publicLookup();
+		Class<?> living = net.minecraft.world.entity.LivingEntity.class;
+		try {
+			Class<?> c = Class.forName("com.jaymospowers.core.wounds.Hemomancy");
+			cuts = lookup.findStatic(c, "cuts", java.lang.invoke.MethodType.methodType(int.class, living));
+			cut = lookup.findStatic(c, "cut", java.lang.invoke.MethodType.methodType(boolean.class, living));
+			hemorrhage = lookup.findStatic(c, "hemorrhage", java.lang.invoke.MethodType.methodType(int.class, living,
+				net.minecraft.world.entity.Entity.class, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Hemomancy (older Powers?)", e);
+		}
+		try {
+			Class<?> corruption = Class.forName("com.jaymospowers.alchemy.Corruption");
+			Class<?> kind = Class.forName("com.jaymospowers.alchemy.Corruption$Kind");
+			for (Object k : kind.getEnumConstants()) {
+				if (((Enum<?>)k).name().equals("LINGERING")) {
+					lingering = k;
+				}
+			}
+			corruptionAdd = lookup.findStatic(corruption, "add", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerPlayer.class, kind, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no alchemical corruption (older Powers?)", e);
+		}
+	}
+
+	/** How many of {@code entity}'s parts bleed now (0 without Powers). */
+	public static int cuts(net.minecraft.world.entity.LivingEntity entity) {
+		hemomancy();
+		try {
+			return cuts == null ? 0 : (int)cuts.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Opens a fresh cut on {@code entity}; false if none opened (or without Powers). */
+	public static boolean cut(net.minecraft.world.entity.LivingEntity entity) {
+		hemomancy();
+		try {
+			return cut != null && (boolean)cut.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Bursts {@code entity}'s open cuts, {@code times} bleed ticks each at once; how many burst (0 without Powers). */
+	public static int hemorrhage(net.minecraft.world.entity.LivingEntity entity, net.minecraft.world.entity.@Nullable Entity by, float times) {
+		hemomancy();
+		try {
+			return hemorrhage == null ? 0 : (int)hemorrhage.invoke(entity, by, times);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Lingering alchemical corruption for {@code player} (nothing without Powers' alchemy). */
+	public static void corrupt(net.minecraft.server.level.ServerPlayer player, int amount) {
+		hemomancy();
+		if (corruptionAdd == null || lingering == null) {
+			return;
+		}
+		try {
+			corruptionAdd.invoke(player, lingering, amount);
+		} catch (Throwable e) {
+			// (no corruption, then)
 		}
 	}
 }
