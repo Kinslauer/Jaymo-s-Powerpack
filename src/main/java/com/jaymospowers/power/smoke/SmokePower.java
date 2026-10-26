@@ -68,6 +68,8 @@ public final class SmokePower implements Power {
 	public static void init() {
 		com.jaymospowers.core.Powers.register(INSTANCE);
 		SmokeNet.register();
+		// (0.17.1) what a gifted villager does with Smoke
+		SmokeGift.init();
 		SmokeField.init();
 		SmokeVapour.init();
 		SmokeBomb.init();

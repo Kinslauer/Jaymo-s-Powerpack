@@ -252,6 +252,8 @@ public final class WebPower implements Power {
 	/** Called once from {@link JaymosPowers#onInitialize()}: register the power and everything it needs. */
 	public static void init() {
 		Powers.register(INSTANCE);
+		// (0.17.1) what a gifted villager does with Web
+		WebGift.init();
 
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id("web_ball"));
 		WEB_BALL_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new Item(new Item.Properties().setId(itemKey)));
