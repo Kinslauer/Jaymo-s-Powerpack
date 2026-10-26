@@ -36,6 +36,9 @@ import org.jspecify.annotations.Nullable;
  * {@link #LIFE}.
  *
  * <p>A pinned town notice is kept ({@link Bounties#PINNED}) as {@code town|template|poster's UUID|posted at}.
+ * <p>(0.7.220) Or a <b>Help wanted</b> notice ({@code town|help.<job>|...}): a job the poster's town is short of hands
+ * for ({@link Careers#shortOf}). Pulled off, it's the job, with them ({@link Careers#hire}); it stays up if they won't
+ * have you.
  */
 final class TownNotices {
 	// ---- tuning ----
@@ -46,6 +49,10 @@ final class TownNotices {
 	static final long LIFE = 24000L * 2;
 	/** What an errand pays: emeralds, MCA hearts with the poster, reputation with the village. */
 	static final int HEARTS = 4, REPUTATION = 6;
+	/** (0.7.220) The chance a notice is Help wanted, when the poster's town is short of hands. */
+	static final float HELP_CHANCE = 0.3F;
+	/** (0.7.220) A Help wanted notice's kind. */
+	static final int HELP = -2;
 
 	static Item ITEM;
 
@@ -65,6 +72,14 @@ final class TownNotices {
 
 		boolean errand() {
 			return kind >= 0;
+		}
+
+		boolean help() {
+			return kind == HELP;
+		}
+
+		Careers.@Nullable Job job() {
+			return help() ? Careers.Job.of(key.substring(5)) : null;
 		}
 	}
 
@@ -136,6 +151,9 @@ final class TownNotices {
 		if (p.length < 2) {
 			return null;
 		}
+		if (p[1].startsWith("help.")) {
+			return Careers.Job.of(p[1].substring(5)) == null ? null : new N(p[1], HELP, "", 0, 0, 0);
+		}
 		for (List<N> list : NOTICES.values()) {
 			for (N n : list) {
 				if (n.key().equals(p[1])) {
@@ -165,6 +183,19 @@ final class TownNotices {
 	static @Nullable String pick(Villager poster, Set<String> up, long now, RandomSource random) {
 		String type = poster.getVillagerData().type().unwrapKey().map(k -> k.identifier().getPath()).orElse("plains");
 		List<N> list = NOTICES.getOrDefault(type, NOTICES.get("plains"));
+		if (random.nextFloat() < HELP_CHANCE && poster.level() instanceof ServerLevel level && up.stream().noneMatch(k -> is(k) && parts(k)[1].startsWith("help."))) {
+			// (0.7.220) Help wanted: a job their town is short of hands for
+			Faction f = Quests.settlement(level, poster);
+			List<Careers.Job> short_ = new ArrayList<>();
+			for (Careers.Job job : Careers.Job.values()) {
+				if (f != null && Careers.shortOf(level, f, job)) {
+					short_.add(job);
+				}
+			}
+			if (!short_.isEmpty()) {
+				return "town|help." + short_.get(random.nextInt(short_.size())).key + "|" + poster.getStringUUID() + "|" + now;
+			}
+		}
 		List<N> free = new ArrayList<>();
 		for (N n : list) {
 			if (up.stream().noneMatch(k -> is(k) && n.key().equals(parts(k)[1]))) {
@@ -179,6 +210,9 @@ final class TownNotices {
 	}
 
 	private static Component title(N n) {
+		if (n.help()) {
+			return Component.translatable("quest.jaymoskingdoms.town.help.title", n.job() == null ? Component.empty() : n.job().title());
+		}
 		return Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".title");
 	}
 
@@ -192,6 +226,7 @@ final class TownNotices {
 		stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.town_notice.of", title(n))
 			.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE)));
 		Component words = n.errand() ? Component.translatable("quest.jaymoskingdoms.town.errand_lore")
+			: n.help() ? Component.translatable("quest.jaymoskingdoms.town.help.lore")
 			: Component.translatable("quest.jaymoskingdoms.town." + n.key() + ".text");
 		stack.set(DataComponents.LORE, new ItemLore(List.of(words.copy().withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)))));
 		CompoundTag tag = new CompoundTag();
@@ -217,7 +252,7 @@ final class TownNotices {
 		if (n == null) {
 			return true;
 		}
-		if (!n.errand()) {
+		if (!n.errand() && !n.help()) {
 			ItemStack paper = item(level, key);
 			if (!player.getInventory().add(paper)) {
 				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);
@@ -235,6 +270,11 @@ final class TownNotices {
 		if (giver == null || f == null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bounty.stale").withStyle(ChatFormatting.GRAY));
 			return true;
+		}
+		if (n.help()) {
+			// (0.7.220) the job, with whoever posted it
+			Careers.Job wanted = n.job();
+			return wanted != null && Careers.hire(level, player, f, wanted, giver);
 		}
 		RandomSource random = level.getRandom();
 		String job = giver instanceof Villager v

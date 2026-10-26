@@ -306,7 +306,7 @@ public final class Heritage {
 			}
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".gift"));
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
-			// (0.7.220) and how far from human folk think it ({@link Prejudice})
+			// (0.7.221) and how far from human folk think it ({@link Prejudice})
 			int shunned = Prejudice.degree(this);
 			if (shunned > 0) {
 				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + shunned));

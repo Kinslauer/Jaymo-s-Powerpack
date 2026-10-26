@@ -88,7 +88,7 @@ public final class Villages {
 				}
 				ServerPlayer enemy = null;
 				for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, golem.getBoundingBox().inflate(GOLEM_RANGE))) {
-					if (!player.isCreative() && !player.isSpectator() && Reputation.get(player, village.id()) <= Reputation.HOSTILE) {
+					if (!player.isCreative() && !player.isSpectator() && Reputation.get(player, village.id()) <= Reputation.HOSTILE && !Careers.passes(player, village.id())) {
 						enemy = player;
 						break;
 					}

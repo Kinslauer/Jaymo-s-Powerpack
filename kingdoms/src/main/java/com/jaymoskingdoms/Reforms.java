@@ -20,7 +20,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.220) Andy (2026-10-26), on whether rulers should answer their people leaving ({@link Emigrants}): "please". A
+ * (0.7.221) Andy (2026-10-26), on whether rulers should answer their people leaving ({@link Emigrants}): "please". A
  * realm whose households keep leaving ({@link #left}) builds up {@link #PRESSURE}; past {@link #REFORM_AT} its ruler
  * answers, by temper ({@link #REFORM_CHANCE}): a noble or a reveler nearly always reforms, a warlord as often as not, a
  * purist and a paranoid king seldom, a tyrant hardly ever. Otherwise he doubles down, and his people go on leaving

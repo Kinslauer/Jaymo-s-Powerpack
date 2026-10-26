@@ -630,7 +630,7 @@ public final class Approaches {
 				w[ACCUSE] = 6;
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
-			// (0.7.220) one who looks down on your blood halts you sooner, and searches you more
+			// (0.7.221) one who looks down on your blood halts you sooner, and searches you more
 			int minds = Prejudice.guard(mob, player);
 			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Prejudice.haltGap(mob, player, HALT_TICKS))) {
 				w[HALT] = 2;
@@ -639,7 +639,7 @@ public final class Approaches {
 			int tv = temper(server, f, player);
 			// (0.7.100) nor of one their settlement owes for bringing one of its own home
 			if (!sworn && Captives.owed(player, f.id()) <= 0) {
-				// ((0.7.220) fewer where the ruler has eased up to keep his people: Reforms)
+				// ((0.7.221) fewer where the ruler has eased up to keep his people: Reforms)
 				Faction rules = ruler(server, f);
 				w[SEARCH] = Reforms.guards(server, rules, SEARCH_W[tv]) + minds;
 				w[TOLL] = Reforms.guards(server, rules, TOLL_W[tv]) + minds / 2;
@@ -913,11 +913,11 @@ public final class Approaches {
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
 				if (said == null) {
-					// (0.7.220) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
+					// (0.7.221) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
 					said = Prejudice.gossip(level, a.mob, player);
 				}
 				if (said == null) {
-					// (0.7.220) the ruler's answer to his people leaving (Reforms)
+					// (0.7.221) the ruler's answer to his people leaving (Reforms)
 					said = Reforms.gossip(level, player, ruler);
 				}
 				if (said == null) {
@@ -1113,6 +1113,10 @@ public final class Approaches {
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
 		if (com.jaymoskingdoms.dragons.Disguises.answer(player, answer)) {
 			// (0.7.141) a villager who isn't one, questioning you
+			return;
+		}
+		if (Careers.answer(player, answer)) {
+			// (0.7.220) a talk about work
 			return;
 		}
 		if (Skills.answer(player, answer)) {

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
+import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Emigrants;
 import com.jaymoskingdoms.Handshakes;
@@ -46,10 +47,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
- * (0.7.220) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
- * (0.7.220) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
+ * (0.7.221) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
+ * (0.7.221) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
  * family's leaving ({@link Emigrants#tell}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
+ * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -126,6 +128,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
+			// (0.7.220) a talk about work: what their town has for you
+			villager.getInteractions().stopInteracting();
+			Careers.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
 			villager.sendChatMessage(Introductions.askName(player, villager), player);
@@ -176,7 +185,7 @@ abstract class McaDialogueMixin {
 				return;
 			}
 		}
-		// (0.7.220) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
+		// (0.7.221) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
 		Component moved = Emigrants.tell(villager, player);
 		if (moved != null) {
 			villager.sendChatMessage(moved, player);
@@ -216,7 +225,7 @@ abstract class McaDialogueMixin {
 		Integer before = BEFORE.remove(villager.getUUID() + "/" + player.getUUID());
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
-			// (0.7.220) one who looks down on your blood warms to you slower
+			// (0.7.221) one who looks down on your blood warms to you slower
 			int taken = Prejudice.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);

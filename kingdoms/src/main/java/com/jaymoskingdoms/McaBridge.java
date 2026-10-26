@@ -195,6 +195,15 @@ final class McaBridge {
 		}
 	}
 
+	/** (0.7.220) {@link McaCompat#follow}. */
+	static boolean follow(Villager v, net.minecraft.world.entity.player.Player player) {
+		if (!(v instanceof VillagerEntityMCA m)) {
+			return false;
+		}
+		m.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+		return true;
+	}
+
 	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
@@ -814,7 +823,7 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
-	/** (0.7.220) {@link McaCompat#playerFamily}. */
+	/** (0.7.221) {@link McaCompat#playerFamily}. */
 	static boolean playerFamily(Villager villager) {
 		if (!(villager instanceof VillagerEntityMCA v)) {
 			return false;
@@ -824,7 +833,7 @@ final class McaBridge {
 			|| node.lookup(java.util.stream.Stream.concat(java.util.stream.Stream.of(node.partner()), node.getChildren())).anyMatch(n -> n.isPlayer());
 	}
 
-	/** (0.7.220) {@link McaCompat#leaveVillage}. */
+	/** (0.7.221) {@link McaCompat#leaveVillage}. */
 	static void leaveVillage(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getResidency().leaveVillage();

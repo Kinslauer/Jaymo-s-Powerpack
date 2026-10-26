@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -30,6 +31,8 @@ import org.jspecify.annotations.Nullable;
  * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  * (0.7.57) A fourth tab, Attributes ({@link Stats}): your character level (every pillar's level added up), the
  * attribute points it earns, and the six attributes as rows of ten pips (yours, your heritage's, your class's).
+ * (0.7.220) A fifth tab, Jobs ({@link Careers}): every job with your rank in it, where you hold it and its orders, and
+ * (hovered) what each rank's perk does.
  */
 final class SkillScreen extends Screen {
 	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16, PIP_W = 9, PERK_W = 98, PERK_H = 18, TIER_H = 26,
@@ -43,6 +46,10 @@ final class SkillScreen extends Screen {
 	private static int page;
 	/** (0.7.57) Whether the Attributes tab is the one shown. */
 	private static boolean stats;
+	/** (0.7.220) Whether the Jobs tab is the one shown. */
+	private static boolean jobs;
+	/** (0.7.220) The Jobs tab's rows. */
+	static final int JOB_ROW = 10, JOB_ACCENT = 0xFFC8A060;
 
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
@@ -116,7 +123,7 @@ final class SkillScreen extends Screen {
 
 	@Override
 	protected void init() {
-		int tabs = Skills.Pillar.values().length + 1;
+		int tabs = Skills.Pillar.values().length + 2;
 		int tabW = Math.min(TAB_W, (panelW() - 12 - 4 * (tabs - 1)) / tabs);
 		int x = left() + (panelW() - tabW * tabs - 4 * (tabs - 1)) / 2, y = top() + HEADER + 2;
 		for (Skills.Pillar p : Skills.Pillar.values()) {
@@ -124,18 +131,28 @@ final class SkillScreen extends Screen {
 				pillar = p;
 				page = 0;
 				stats = false;
+				jobs = false;
 				rebuildWidgets();
 			}).bounds(x, y, tabW, TAB_H).build();
-			tab.active = stats || p != pillar;
+			tab.active = stats || jobs || p != pillar;
 			addRenderableWidget(tab);
 			x += tabW + 4;
 		}
 		Button statsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
 			stats = true;
+			jobs = false;
 			rebuildWidgets();
 		}).bounds(x, y, tabW, TAB_H).build();
 		statsTab.active = !stats;
 		addRenderableWidget(statsTab);
+		x += tabW + 4;
+		Button jobsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.jobs.tab"), b -> {
+			jobs = true;
+			stats = false;
+			rebuildWidgets();
+		}).bounds(x, y, tabW, TAB_H).build();
+		jobsTab.active = !jobs;
+		addRenderableWidget(jobsTab);
 		int fy = top() + PANEL_H - FOOTER + 3;
 		int right = left() + panelW() - 6;
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
@@ -143,7 +160,7 @@ final class SkillScreen extends Screen {
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
 		int pages = pages();
-		if (stats || pages < 2) {
+		if (stats || jobs || pages < 2) {
 			page = 0;
 		} else {
 			// (the button names the page it goes to; the last page goes round to the first)
@@ -156,7 +173,7 @@ final class SkillScreen extends Screen {
 	}
 
 	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {
-		if (stats || !pillar.open) {
+		if (stats || jobs || !pillar.open) {
 			return null;
 		}
 		for (Skills.Perk perk : Skills.Perk.values()) {
@@ -269,6 +286,88 @@ final class SkillScreen extends Screen {
 		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, name, accent, text);
 	}
 
+	// ---- (0.7.220) the Jobs tab --------------------------------------------------------------------------------------
+
+	private int jobY(int index) {
+		return top() + TREE_Y - 2 + index * JOB_ROW;
+	}
+
+	private Careers.@Nullable Job jobAt(double mouseX, double mouseY) {
+		if (!jobs) {
+			return null;
+		}
+		Careers.Job[] all = Careers.Job.values();
+		for (int i = 0; i < all.length; i++) {
+			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, jobY(i), panelW() - 16, JOB_ROW)) {
+				return all[i];
+			}
+		}
+		return null;
+	}
+
+	/** The header (jobs held, your stall), a row per job (rank, where, its experience, orders open) and the detail box. */
+	private void jobs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int x = left(), y = top(), w = panelW();
+		int accent = JOB_ACCENT;
+		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		Careers.Career c = this.minecraft.player == null ? Careers.Career.EMPTY : Careers.of(this.minecraft.player);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.title"), x + 9, y + 8, w / 2 - 12, accent);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.held", c.posts().size()), x + 9, y + 19, w / 2 - 12,
+			c.posts().isEmpty() ? Ui.DIM : Ui.TEXT);
+		Ui.lineRight(graphics, this.font, c.stall().isEmpty() ? Component.translatable("gui.jaymoskingdoms.jobs.no_stall")
+			: Component.translatable("gui.jaymoskingdoms.jobs.stall", c.stall().get().getX(), c.stall().get().getZ()), x + w - 9, y + 8, w / 2 - 12,
+			c.stall().isEmpty() ? Ui.DIM : Ui.GOOD);
+		Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.hint"), x + w - 9, y + 19, w / 2 - 12, Ui.HINT);
+		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+
+		Careers.Job hovered = jobAt(mouseX, mouseY);
+		Careers.Job[] all = Careers.Job.values();
+		int barW = 50, townX = x + 130, barX = x + w - 8 - 40 - barW;
+		for (int i = 0; i < all.length; i++) {
+			Careers.Job job = all[i];
+			int ry = jobY(i), xp = c.xpIn(job.key), rank = c.rank(job.key);
+			Careers.Post post = c.post(job.key);
+			Ui.row(graphics, x + 8, ry, x + w - 8, ry + JOB_ROW - 1, i, job == hovered);
+			if (post != null) {
+				graphics.fill(x + 8, ry, x + 10, ry + JOB_ROW - 1, accent);
+			}
+			Component name = xp > 0 || post != null ? Careers.title(job, rank) : job.title();
+			Ui.line(graphics, this.font, name, x + 13, ry + 1, townX - x - 18, post != null ? Ui.TEXT : xp > 0 ? Ui.DIM : Ui.HINT);
+			Ui.line(graphics, this.font, post == null ? Component.translatable("gui.jaymoskingdoms.jobs.not_held") : Component.literal(post.town()), townX, ry + 1,
+				barX - townX - 6, post == null ? Ui.HINT : Ui.TEXT);
+			int next = Careers.nextRankXp(rank), from = rank == Careers.MASTER ? Careers.MASTER_XP : rank == Careers.JOURNEYMAN ? Careers.JOURNEYMAN_XP : 0;
+			float share = next < 0 ? 1.0F : (xp - from) / (float)Math.max(1, next - from);
+			Ui.bar(graphics, barX, ry + 4, barW, 2, share, rank == Careers.MASTER ? Ui.GOLD : accent);
+			if (post != null) {
+				Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.orders", post.orders().size()), x + w - 12, ry + 1, 38,
+					post.orders().isEmpty() ? Ui.DIM : Ui.GOOD);
+			}
+		}
+
+		Component title;
+		List<Component> text = new ArrayList<>();
+		if (hovered != null) {
+			int rank = c.rank(hovered.key), xp = c.xpIn(hovered.key), next = Careers.nextRankXp(rank);
+			title = Careers.title(hovered, rank).copy().append("  " + (next < 0 ? xp : xp + "/" + next));
+			text.add(Component.translatable("job.jaymoskingdoms." + hovered.key + ".desc"));
+			for (int r = Careers.JOURNEYMAN; r <= Careers.MASTER; r++) {
+				text.add(Component.translatable("gui.jaymoskingdoms.jobs.perk", Component.translatable("job.jaymoskingdoms.rank." + r),
+					Component.translatable("job.jaymoskingdoms." + hovered.key + ".perk." + r)).withColor(rank >= r ? Ui.GOOD : Ui.DIM));
+			}
+			Careers.Post post = c.post(hovered.key);
+			if (post != null) {
+				for (Careers.Order o : post.orders()) {
+					text.add(Component.empty().append(Careers.describe(null, o)).append("  " + o.progress() + "/" + o.count()).withColor(Ui.TEXT));
+				}
+			}
+		} else {
+			title = Component.translatable("gui.jaymoskingdoms.jobs.tab");
+			text.add(Component.translatable("gui.jaymoskingdoms.jobs.about").withColor(Ui.DIM));
+			text.add(Component.translatable("gui.jaymoskingdoms.jobs.ranks", Careers.JOURNEYMAN_XP, Careers.MASTER_XP).withColor(Ui.HINT));
+		}
+		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, title, accent, text);
+	}
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		Stats.Stat stat = statAt(event.x(), event.y());
@@ -293,6 +392,11 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
+		if (jobs) {
+			jobs(graphics, mouseX, mouseY);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
+		}
 		if (stats) {
 			attributes(graphics, shown, mouseX, mouseY);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
