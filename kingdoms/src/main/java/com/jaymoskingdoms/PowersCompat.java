@@ -109,7 +109,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.215) a life story's power: Powers' affinity and callings ({@link LifeStory}) ---------------------------------
+	// ---- (0.7.216) a life story's power: Powers' affinity and callings ({@link LifeStory}) ---------------------------------
 
 	/** Powers' {@code Affinity.set(ServerPlayer, Identifier)} and {@code Callings.call(ServerPlayer, String, int)}. */
 	private static java.lang.invoke.@Nullable MethodHandle setAffinity, call;

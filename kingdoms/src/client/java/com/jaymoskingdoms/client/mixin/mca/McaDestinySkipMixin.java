@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * (0.7.215) Andy's life story: its last question is where you start ({@code LifeStory.Start}), so MCA's start-up
+ * (0.7.216) Andy's life story: its last question is where you start ({@code LifeStory.Start}), so MCA's start-up
  * creator skips its own "where do you start" page for a newcomer. It goes on as it does when travel is switched off:
  * it tells the server it's done (no destination), and the life story opens next.
  */

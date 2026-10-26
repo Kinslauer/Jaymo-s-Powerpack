@@ -51,7 +51,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.215) Andy: "take inspiration from Bannerlord's intro asking about your life into adulthood and use the answers to
+ * (0.7.216) Andy: "take inspiration from Bannerlord's intro asking about your life into adulthood and use the answers to
  * craft your character's heritage, spawn scenario, power affinity and class". A new player's first steps after MCA's
  * look and name: six questions about the life they led before the game ({@link Question}), every word our own. Where
  * they were born decides their heritage; who raised them and what they did as a child give a point in an attribute each

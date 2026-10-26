@@ -201,7 +201,7 @@ public final class Monoliths {
 		return best;
 	}
 
-	/** (0.7.215) The foot of the known monolith nearest {@code pos} on {@code level}, or null with none known (a life story's start, {@code LifeStory}). */
+	/** (0.7.216) The foot of the known monolith nearest {@code pos} on {@code level}, or null with none known (a life story's start, {@code LifeStory}). */
 	public static @Nullable BlockPos nearestFoot(ServerLevel level, BlockPos pos) {
 		Monolith m = nearest(level, pos, Double.MAX_VALUE / 4.0);
 		return m == null ? null : m.pos();

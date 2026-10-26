@@ -296,7 +296,7 @@ public final class Classes {
 
 	/**
 	 * (0.7.57) Puts up the next step of character creation {@code player} still owes: their heritage, then their class.
-	 * (0.7.215) A newcomer tells their life story instead ({@link LifeStory}), which makes both at once.
+	 * (0.7.216) A newcomer tells their life story instead ({@link LifeStory}), which makes both at once.
 	 */
 	static void next(ServerPlayer player) {
 		if (LifeStory.owed(player)) {

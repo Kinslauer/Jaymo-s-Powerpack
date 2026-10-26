@@ -229,7 +229,7 @@ final class SkillScreen extends Screen {
 			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass + fromStory);
 			String blocked = player == null ? "" : Stats.blocked(player, shown, stat);
 			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, pipsX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
-			// ten pips: heritage's (teal), then class's (gold), then (0.7.215) your story's (parchment), then yours (white); the rest empty
+			// ten pips: heritage's (teal), then class's (gold), then (0.7.216) your story's (parchment), then yours (white); the rest empty
 			for (int i = 0; i < Stats.MAX; i++) {
 				int color = i < fromHeritage ? HeritageScreen.ACCENT : i < fromHeritage + fromClass ? Ui.GOLD
 					: i < fromHeritage + fromClass + fromStory ? LifeStoryScreen.ACCENT : i < value ? Ui.TEXT : Ui.BAR_BACK;

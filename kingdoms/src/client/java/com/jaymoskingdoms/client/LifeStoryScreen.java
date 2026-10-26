@@ -26,7 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.215) The life story ({@link LifeStory}): a newcomer's first screen after MCA's look and name, in place of the
+ * (0.7.216) The life story ({@link LifeStory}): a newcomer's first screen after MCA's look and name, in place of the
  * heritage and class screens. One question a page, its answers down the right; the left tells the answer pointed at
  * or picked (its picture, the line of your past it writes, and what it gives). An answer that names a realm (a noble
  * family, a banishment, an oath) is followed by a page of the world's realms. The last page reads the whole story
