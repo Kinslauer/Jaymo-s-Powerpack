@@ -231,7 +231,9 @@ public final class Spirits {
 			SpiritSickness.forget(id);
 			SpiritVoice.forget(id);
 			GrimsbyBlades.forget(id);
-			Ambrose.dropState(id); HandExtras.forget(id);
+			Ambrose.dropState(id);
+			HandExtras.forget(id);
+			Thessaly.forgetKeeper(id);
 			for (Spirit spirit : ALL) {
 				spirit.forget(id);
 			}

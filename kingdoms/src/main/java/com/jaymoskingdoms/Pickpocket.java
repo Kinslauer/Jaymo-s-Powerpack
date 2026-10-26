@@ -327,6 +327,22 @@ public final class Pickpocket {
 		}
 	}
 
+	/**
+	 * (0.7.236) A mana spirit's hand in {@code mark}'s pocket (Thessaly's unseen hand): the mark never feels it, so it is as a
+	 * pocket picked clean. A villager or a settlement's folk (not its ruler) whose pockets are not already empty; false if not.
+	 */
+	public static boolean liftBySpirit(ServerPlayer player, LivingEntity mark) {
+		if (!markable(mark) || !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		long now = level.getGameTime();
+		if (PICKED.getOrDefault(mark.getUUID(), 0L) > now) {
+			return false;
+		}
+		pick(player, level, mark, now);
+		return true;
+	}
+
 	/** The mark turned and saw: they round on {@code player}, and where a faction's law holds, it's a theft they saw. */
 	private static void caught(ServerPlayer player, ServerLevel level, LivingEntity mark, @Nullable Faction f) {
 		if (mark.isSleeping()) {
