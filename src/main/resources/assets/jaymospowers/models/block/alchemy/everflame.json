@@ -1,0 +1,50 @@
+{
+  "textures": {
+    "particle": "jaymospowers:block/alchemy/everflame",
+    "flame": "jaymospowers:block/alchemy/everflame"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        2,
+        8
+      ],
+      "to": [
+        13,
+        14,
+        8
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#flame"
+        },
+        "south": {
+          "texture": "#flame"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        2,
+        3
+      ],
+      "to": [
+        8,
+        14,
+        13
+      ],
+      "shade": false,
+      "faces": {
+        "east": {
+          "texture": "#flame"
+        },
+        "west": {
+          "texture": "#flame"
+        }
+      }
+    }
+  ]
+}

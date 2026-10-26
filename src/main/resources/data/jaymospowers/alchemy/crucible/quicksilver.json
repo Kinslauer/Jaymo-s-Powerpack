@@ -1,0 +1,11 @@
+{
+  "catalyst": "minecraft:iron_nugget",
+  "essences": {
+    "mercury": 6
+  },
+  "result": {
+    "item": "jaymospowers:quicksilver",
+    "count": 1
+  },
+  "research": "principles"
+}

@@ -1,0 +1,11 @@
+{
+  "catalyst": "minecraft:iron_nugget",
+  "essences": {
+    "wealth": 2
+  },
+  "result": {
+    "item": "minecraft:gold_nugget",
+    "count": 1
+  },
+  "research": "transmutation"
+}

@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:copper_ingot",
+  "essences": {
+    "metal": 2,
+    "mercury": 2
+  },
+  "result": {
+    "item": "minecraft:iron_ingot",
+    "count": 1
+  },
+  "research": "transmutation"
+}
