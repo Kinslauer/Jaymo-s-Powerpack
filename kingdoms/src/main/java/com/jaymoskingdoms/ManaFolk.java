@@ -79,6 +79,19 @@ public final class ManaFolk {
 		int power = Math.clamp(base + Math.floorMod(e.getUUID().hashCode(), 3) - 1, 1, Mana.MAX_POWER);
 		e.setAttached(Mana.ATTUNED, true);
 		e.setAttached(Mana.POWER, power);
+		giveSpirit(e, power);
+	}
+
+	/**
+	 * (0.7.237) Andy: "attuned villagers (court wizards, hermits) have spirits of their own you can see and fight". A court
+	 * wizard or hermit without one gets a spirit: Grimsby or Varro by their id, their power as its level, bond 50, put away.
+	 */
+	public static void giveSpirit(LivingEntity e, int power) {
+		if ((CourtWizards.is(e) || Hermits.is(e)) && e.getAttached(com.jaymoskingdoms.spirits.Spirits.SPIRIT) == null) {
+			int kind = Math.floorMod(e.getUUID().hashCode(), 2);
+			e.setAttached(com.jaymoskingdoms.spirits.Spirits.SPIRIT, com.jaymoskingdoms.spirits.SpiritState.fresh(kind, 50)
+				.withLevel(Math.clamp(power, 1, 20), 0).withOut(false));
+		}
 	}
 
 	/** Whether {@code villager} can be asked about their magic. */

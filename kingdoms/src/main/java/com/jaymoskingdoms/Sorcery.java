@@ -339,6 +339,7 @@ public final class Sorcery {
 				}
 			}
 			case WIZARD -> {
+				com.jaymoskingdoms.spirits.FolkSpirits.tick(level, folk, target);
 				List<Folk> fighting = fightingAllies(level, folk);
 				if (timers[T_WARD] <= 0 && (target != null || !fighting.isEmpty())) {
 					fighting.add(folk);
@@ -403,7 +404,7 @@ public final class Sorcery {
 	}
 
 	/** {@code e} is fair game for one of {@code caster}'s blasts: its foe, or something fighting its side; never its own side. */
-	static boolean foe(Folk caster, LivingEntity e) {
+	public static boolean foe(Folk caster, LivingEntity e) {
 		if (e == caster || !e.isAlive() || e instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return false;
 		}

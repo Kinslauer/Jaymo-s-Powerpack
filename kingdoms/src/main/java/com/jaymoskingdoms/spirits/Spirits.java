@@ -176,6 +176,7 @@ public final class Spirits {
 		HandMoves.register();
 		Grimsby.register();
 		Varro.register();
+		FolkSpirits.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OUT_TICKS.clear();
 			IDLE_AT.clear();
