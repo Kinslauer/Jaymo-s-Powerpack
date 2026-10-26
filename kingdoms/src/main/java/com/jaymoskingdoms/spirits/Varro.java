@@ -118,9 +118,9 @@ public final class Varro extends Spirit {
 			}
 			bonusing = true;
 			try {
-				// inside the hit window a harder blow lands only its excess, so this adds the bonus without touching the
-				// immunity the hit gave
-				SpiritFoes.strike(level, keeper, entity, taken + taken * MARK_BONUS);
+				// inside the hit window a harder blow lands only its excess (the window remembers the blow before armour,
+				// so the bonus is measured from that), and the immunity the hit gave is left alone
+				SpiritFoes.strike(level, keeper, entity, base + base * MARK_BONUS);
 				level.sendParticles(ParticleTypes.CRIT, entity.getX(), entity.getY(0.6), entity.getZ(), 5, 0.25, 0.3, 0.25, 0.2);
 			} finally {
 				bonusing = false;
