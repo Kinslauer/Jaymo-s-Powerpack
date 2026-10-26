@@ -50,6 +50,11 @@ public abstract class Spirit {
 		return size;
 	}
 
+	/** The scale of its arms as conjured now: {@link #size()} times the state's {@code scale} (the Quiet One's changes every summon). */
+	public final float size(SpiritState state) {
+		return size * state.scale() / 100.0F;
+	}
+
 	/** Its own moves (empty for the placeholders). */
 	public List<Move> moves() {
 		return List.of();
