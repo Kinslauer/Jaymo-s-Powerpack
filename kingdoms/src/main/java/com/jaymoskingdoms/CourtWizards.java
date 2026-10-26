@@ -220,7 +220,8 @@ public final class CourtWizards {
 		if (timers[Sorcery.T_WARD] <= 0 && (foe != null || !fighting.isEmpty())) {
 			fighting.add(mob);
 			Sorcery.ward(level, mob, timers, fighting);
-		} else if (timers[Sorcery.T_MEND] <= 0) {
+		} else if (timers[Sorcery.T_MEND] <= 0 && !Restoration.wizardRekindle(level, mob, timers, side)) {
+			// ((0.7.212) the downed of his side are brought round before anyone's mended)
 			Sorcery.mend(level, mob, timers, side);
 		} else if (foe != null && timers[Sorcery.T_BANISH] <= 0) {
 			Sorcery.banish(level, mob, timers);

@@ -8,7 +8,7 @@ import net.minecraft.util.RandomSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.212) Andy: the floating islands' hermit wizards ({@link Hermits}) love Jaymo's Powers' alchemy and can't wait to talk
+ * (0.7.213) Andy: the floating islands' hermit wizards ({@link Hermits}) love Jaymo's Powers' alchemy and can't wait to talk
  * about it. "Ask about alchemy" in MCA's menu (hermits only) gets an eager answer and a hint at the next thing worth
  * trying, from what the player has already learned ({@link PowersCompat#alchemy}); a player who has started gets the same
  * now and then in a chat, and an excited word when they climb up. Before a player has started, the hermit tells them how.

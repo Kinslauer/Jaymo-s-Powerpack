@@ -115,6 +115,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EmberLook.register();
 		// 0.7.79: every other heritage's look (Heartlander and Warrior-born aside)
 		HeritageLooks.register();
+		ManaClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)

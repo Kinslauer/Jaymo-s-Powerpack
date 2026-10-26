@@ -113,7 +113,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && HermitAlchemy.ANSWER.equals(answer)) {
-			// (0.7.212) a hermit asked about alchemy: eager words and a hint at what to try next
+			// (0.7.213) a hermit asked about alchemy: eager words and a hint at what to try next
 			if (villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
 				HermitAlchemy.answer(level, player, words -> villager.sendChatMessage(words, player));
 			}
@@ -162,7 +162,7 @@ abstract class McaDialogueMixin {
 			}
 		}
 		if (Hermits.is(villager) && villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
-			// (0.7.212) a hermit can't keep from talking alchemy with someone who has started on it
+			// (0.7.213) a hermit can't keep from talking alchemy with someone who has started on it
 			Component words = HermitAlchemy.chat(level, player, villager.getRandom());
 			if (words != null) {
 				villager.sendChatMessage(words, player);
