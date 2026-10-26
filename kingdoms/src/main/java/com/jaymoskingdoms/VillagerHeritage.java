@@ -164,6 +164,11 @@ public final class VillagerHeritage {
 			if (proud != null) {
 				return proud;
 			}
+			// (0.7.213) on a haven's land, all are of its blood (Havens)
+			Heritage.Kind haven = Havens.lean(server, pos, random);
+			if (haven != null) {
+				return haven;
+			}
 		}
 		Holder<Biome> biome = level.getBiome(pos);
 		float heat = biome.value().getBaseTemperature();
@@ -318,8 +323,12 @@ public final class VillagerHeritage {
 			return;
 		}
 		Heritage.Kind kind = of(entity);
+		// (0.7.213) a haven found with its people standing: they're all of its blood
+		Heritage.Kind settled = Havens.settle(level, living, kind);
 		if (kind == null) {
 			born(living, roll(level, entity.blockPosition(), entity.getRandom()), null);
+		} else if (settled != null) {
+			born(living, settled, null);
 		} else {
 			fit(living);
 		}
@@ -339,8 +348,13 @@ public final class VillagerHeritage {
 		}
 		// (0.7.130) a purist realm's own folk are all of its ruler's blood
 		Heritage.Kind proud = folk.factionId() >= 0 ? Purists.folk(level.getServer(), folk.factionId()) : null;
+		// (0.7.213) and a haven's (new folk always; ones already standing in a haven drawn lately, Havens.settle)
+		Heritage.Kind haven = proud != null || folk.factionId() < 0 ? null
+			: of(folk) == null ? Havens.folk(level.getServer(), folk.factionId(), folk.getRandom()) : Havens.settle(level, folk, of(folk));
 		if (proud != null && of(folk) != proud) {
 			born(folk, proud, null);
+		} else if (haven != null) {
+			born(folk, haven, null);
 		} else if (of(folk) == null) {
 			born(folk, roll(level, folk.blockPosition(), folk.getRandom()), null);
 		}

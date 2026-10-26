@@ -911,6 +911,10 @@ public final class Approaches {
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
 				if (said == null) {
+					// (0.7.213) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
+					said = Prejudice.gossip(level, a.mob, player);
+				}
+				if (said == null) {
 					// (0.7.109) what they saw another player do
 					said = Recollections.gossip(a.mob, player, level.getRandom());
 				}

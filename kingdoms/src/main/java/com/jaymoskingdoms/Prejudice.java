@@ -33,6 +33,11 @@ import org.jspecify.annotations.Nullable;
  * human the more. Those who don't: anyone of the same blood, anyone not plainly human themselves, the kindhearted,
  * cheerful and devout, and a share of the rest (more of MCA's warm personalities, none of the crabby). A purist ruler's
  * own people ({@link Purists}) always mind, and harder. A full mask hides your blood from them.
+ * <p>
+ * The rivalry (Andy, the same day: "raising a sort of rivalry, between human and nonhumans across the entire world"):
+ * many who were ridiculed left for villages of their own ({@link Havens}), and non-humans mind humans back, a little
+ * anywhere ({@link #RIVALRY}) and hard in a haven ({@link #HAVEN_RIVALRY}), where a human is the one muttered at,
+ * charged more and trusted slowly, and any non-human is welcome.
  * <ul>
  * <li><b>Talk</b> ({@link #tick}): they stare and mutter, children point, and the worst-regarded find folk edging away
  * from them. One who doesn't mind has a kind word now and then, and one of your own blood a knowing one.</li>
@@ -47,6 +52,13 @@ import org.jspecify.annotations.Nullable;
 public final class Prejudice {
 	/** How far from human each heritage is, by {@link Heritage.Kind} (0: passes for human). Andy's order: Tideborn, Stoneborn, Warrior-born, Sylvan. */
 	static final int TIDEBORN = 4, STONEBORN = 3, WARRIORBORN = 2, SYLVAN = 1;
+	/**
+	 * (Havens) The rivalry: how much a non-human minds a human (as a degree), living in a haven, and anywhere else; a
+	 * haven's good name for a human, likewise.
+	 */
+	static final float HAVEN_RIVALRY = 3.0F, RIVALRY = 1.0F;
+	/** (Havens) Gossip of why their folk left the humans (a haven's), or of the rivalry (anyone), this often. */
+	static final float HAVEN_GOSSIP_CHANCE = 0.3F, RIVALRY_GOSSIP_CHANCE = 0.06F;
 	/** A purist's own people mind this many times as hard. */
 	static final float PURIST_HARSH = 1.5F;
 	/**
@@ -78,6 +90,9 @@ public final class Prejudice {
 	static final int KIND_TICKS = 20 * 240;
 	/** Lines ({@code prejudice.jaymoskingdoms.<kind>.<n>}, from 0): mutters by how far from human (low 1-2, high 3-4). */
 	static final int MUTTER_LOW_LINES = 5, MUTTER_HIGH_LINES = 5, CHILD_LINES = 4, SHRINK_LINES = 3, KIND_LINES = 4, KIN_LINES = 3;
+	/** (Havens) The rivalry's lines: a non-human's mutter at a human (a haven's, elsewhere, a child's), a fair one's word, a haven's welcome, gossip. */
+	static final int HAVEN_LINES = 5, RIVAL_LINES = 4, RIVAL_CHILD_LINES = 3, FAIR_LINES = 3, WELCOME_LINES = 4, HAVEN_GOSSIP_LINES = 5,
+		RIVALRY_GOSSIP_LINES = 4;
 
 	/** "player" → when they were last muttered at; last edged away from; last given a kind word. */
 	private static final Map<UUID, Long> MUTTERED = new HashMap<>(), SHRUNK = new HashMap<>(), KIND = new HashMap<>();
@@ -123,21 +138,31 @@ public final class Prejudice {
 	 * for a purist's own).
 	 */
 	static float minds(LivingEntity who, Entity whom) {
-		int d = degree(whom);
-		if (d == 0 || who == whom || !VillagerHeritage.eligible(who)) {
+		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && Identities.masked(p)) {
 			return 0.0F;
 		}
 		Heritage.Kind mine = VillagerHeritage.of(who), theirs = Purists.of(whom);
-		if (mine == theirs || degree(mine) > 0) {
-			// (their own blood, or not plainly human themselves: they know how it is)
+		if (mine == null || theirs == null && !(whom instanceof Player) || mine == theirs) {
+			// (no blood to mind, or their own)
 			return 0.0F;
 		}
+		int d = degree(theirs);
 		Faction f = faction(who);
-		if (Purists.is(f) && Purists.kin(f, who)) {
-			// (a purist's own: always, and harder)
-			return d * PURIST_HARSH;
+		boolean purist = Purists.is(f) && Purists.kin(f, who);
+		if (d == 0) {
+			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else
+			if (degree(mine) == 0) {
+				return 0.0F;
+			}
+			float m = Havens.home(who) != null ? HAVEN_RIVALRY : RIVALRY;
+			return purist ? m * PURIST_HARSH : tolerant(who) ? 0.0F : m;
 		}
-		return tolerant(who) ? 0.0F : d;
+		if (degree(mine) > 0) {
+			// (not plainly human themselves: they know how it is)
+			return 0.0F;
+		}
+		// (a purist's own: always, and harder)
+		return purist ? d * PURIST_HARSH : tolerant(who) ? 0.0F : d;
 	}
 
 	/** {@code who} doesn't mind blood at all, by nature: kindhearted, cheerful or devout, or the luck of who they are. */
@@ -204,10 +229,21 @@ public final class Prejudice {
 			return by;
 		}
 		int d = degree(player);
-		if (d == 0 || Purists.kin(kingdom, player)) {
+		if (Purists.kin(kingdom, player)) {
 			return by;
 		}
-		float m = Purists.is(kingdom) ? d * PURIST_HARSH : d;
+		float m;
+		if (Havens.is(player.level().getServer(), kingdom)) {
+			// (a haven: a human is the outsider, and their own kind are welcome)
+			if (d > 0) {
+				return by;
+			}
+			m = HAVEN_RIVALRY;
+		} else if (d == 0) {
+			return by;
+		} else {
+			m = Purists.is(kingdom) ? d * PURIST_HARSH : d;
+		}
 		if (by > 0) {
 			return Math.max(1, Math.round(by * Math.max(REP_KEPT_MIN, 1.0F - REP_GAIN_CUT * m)));
 		}
@@ -234,7 +270,22 @@ public final class Prejudice {
 	static String prompt(Villager villager, ServerPlayer player) {
 		Heritage.Kind kind = Heritage.of(player);
 		int d = degree(player);
-		if (d == 0 || kind == null) {
+		if (Identities.masked(player)) {
+			return "";
+		}
+		if (d == 0) {
+			// (the rivalry) a non-human to a human
+			if (degree(VillagerHeritage.of(villager)) == 0) {
+				return "";
+			}
+			boolean haven = Havens.home(villager) != null;
+			if (minds(villager, player) <= 0.0F) {
+				return "They are human. Many of your kind resent humans for their ridicule, but you judge people as they are.";
+			}
+			return haven ? "They are human. Your village was made by folk who left the human towns, sick of being ridiculed there; you don't trust humans and"
+				+ " don't want them here. Let it show." : "They are human, and humans look down on your kind. You're wary and a little bitter with them.";
+		}
+		if (kind == null) {
 			return "";
 		}
 		String name = Component.translatable("heritage.jaymoskingdoms." + kind.key()).getString();
@@ -249,6 +300,27 @@ public final class Prejudice {
 			+ ". Let it show, coolly.";
 	}
 
+	/**
+	 * (Havens, coming over to gossip) A haven's people tell why their folk left the humans; now and then anyone talks of
+	 * the rivalry, from their side. Null if not this time.
+	 */
+	static @Nullable Component gossip(ServerLevel level, LivingEntity villager, ServerPlayer player) {
+		RandomSource random = level.getRandom();
+		Heritage.Kind mine = VillagerHeritage.of(villager);
+		if (mine == null) {
+			return null;
+		}
+		Component name = Identities.shownName(player), blood = Purists.name(mine);
+		if (Havens.home(villager) != null && degree(mine) > 0 && random.nextFloat() < HAVEN_GOSSIP_CHANCE) {
+			return Component.translatable("prejudice.jaymoskingdoms.gossip.haven." + random.nextInt(HAVEN_GOSSIP_LINES), blood, name);
+		}
+		if (random.nextFloat() < RIVALRY_GOSSIP_CHANCE) {
+			String side = degree(mine) > 0 ? "nonhuman" : "human";
+			return Component.translatable("prejudice.jaymoskingdoms.gossip." + side + "." + random.nextInt(RIVALRY_GOSSIP_LINES), blood, name);
+		}
+		return null;
+	}
+
 	// ---- the townsfolk -------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
@@ -259,7 +331,7 @@ public final class Prejudice {
 		}
 		for (ServerPlayer p : level.players()) {
 			int d = degree(p);
-			if (d == 0 || p.isSpectator() || p.isCreative() || !p.isAlive()) {
+			if (Identities.masked(p) || p.isSpectator() || p.isCreative() || !p.isAlive()) {
 				continue;
 			}
 			List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(NOTICE_RANGE),
@@ -283,18 +355,25 @@ public final class Prejudice {
 		RandomSource random = level.getRandom();
 		Component blood = Purists.name(Heritage.of(p));
 		float m = minds(by, p);
+		boolean haven = Havens.home(by) != null, nonHuman = degree(VillagerHeritage.of(by)) > 0;
 		if (m <= 0.0F) {
+			if (d == 0 && !nonHuman) {
+				// (a human among humans: nothing to say)
+				return;
+			}
 			if (now - KIND.getOrDefault(p.getUUID(), Long.MIN_VALUE / 2) < KIND_TICKS || random.nextFloat() >= KIND_CHANCE || by.isBaby()) {
 				return;
 			}
 			KIND.put(p.getUUID(), now);
 			look(by, p);
 			boolean kin = VillagerHeritage.of(by) == Heritage.of(p);
-			String key = kin ? "kin." + random.nextInt(KIN_LINES) : "kind." + random.nextInt(KIND_LINES);
+			// (a fair-minded non-human to a human; one of your own; a haven's welcome to any non-human; a kind human)
+			String key = d == 0 ? "fair." + random.nextInt(FAIR_LINES) : kin ? "kin." + random.nextInt(KIN_LINES)
+				: haven ? "welcome." + random.nextInt(WELCOME_LINES) : "kind." + random.nextInt(KIND_LINES);
 			Speech.say(level, by, Component.translatable("prejudice.jaymoskingdoms." + key, blood, Identities.shownName(p)), Speech.GOLD, SPEECH_RANGE);
 			return;
 		}
-		if (m >= SHRINK_DEGREE && !by.isBaby() && by.distanceTo(p) <= TOO_CLOSE && now - SHRUNK.getOrDefault(p.getUUID(), Long.MIN_VALUE / 2) >= SHRINK_TICKS) {
+		if (d >= SHRINK_DEGREE && m >= SHRINK_DEGREE && !by.isBaby() && by.distanceTo(p) <= TOO_CLOSE && now - SHRUNK.getOrDefault(p.getUUID(), Long.MIN_VALUE / 2) >= SHRINK_TICKS) {
 			// (the worst-regarded: folk edge away from them)
 			SHRUNK.put(p.getUUID(), now);
 			look(by, p);
@@ -314,7 +393,9 @@ public final class Prejudice {
 		}
 		MUTTERED.put(p.getUUID(), now);
 		look(by, p);
-		String key = by.isBaby() ? "child." + random.nextInt(CHILD_LINES)
+		String key = d == 0 ? (by.isBaby() ? "rival_child." + random.nextInt(RIVAL_CHILD_LINES)
+			: haven ? "haven." + random.nextInt(HAVEN_LINES) : "rival." + random.nextInt(RIVAL_LINES))
+			: by.isBaby() ? "child." + random.nextInt(CHILD_LINES)
 			: d >= SHRINK_DEGREE ? "high." + random.nextInt(MUTTER_HIGH_LINES) : "low." + random.nextInt(MUTTER_LOW_LINES);
 		Speech.say(level, by, Component.translatable("prejudice.jaymoskingdoms." + key, blood, Identities.shownName(p)), Speech.YELLOW, SPEECH_RANGE);
 		if (!by.isBaby() && random.nextFloat() < 0.4F) {

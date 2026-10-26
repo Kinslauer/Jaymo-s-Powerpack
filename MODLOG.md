@@ -2913,4 +2913,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   downed, healed whole) and `rekindle` (a downed one up from afar). Nothing but `restore`/`rekindle` reaches the
   downed. The rest (the Restoration Sorcerer, healing scrolls, healers, mana and attunement) is in Kingdoms' log.
 - **0.16.35, heritage prejudice (Kingdoms 0.7.213):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
-  most townsfolk, the less human the worse (prices, hearts, good name, guards, talk); no Powers changes. See Kingdoms' log.
+  most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; no Powers changes. See Kingdoms' log.

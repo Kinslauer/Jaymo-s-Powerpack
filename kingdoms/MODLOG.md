@@ -4721,4 +4721,14 @@ the tide born, stone, warrior and sylvan fall into this".
 - **Talk**: the nearest townsperson mutters about your blood now and then (worse lines from degree 3), children point,
   and they edge away from a Tideborn or Stoneborn standing close. Ones who don't mind have a kind word, and one of your
   blood a knowing one. In a purist realm the Purists' own jeers take the place of the mutters.
-- Tuning: the constants at the top of `Prejudice`.
+- **Havens and the rivalry** (`Havens`): Andy: "you will often see villages of solely non humans because of this fact, as
+  the ones who lived among the humans got tired of the ridicule. raising a sort of rivalry, between human and nonhumans
+  across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
+  everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
+  hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
+  settlements already in the world when 0.7.213 first starts stay as they are; folk first loading within two days of a
+  haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
+  dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
+  and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now
+  and then talks of the rivalry from their side.
+- Tuning: the constants at the top of `Prejudice` and `Havens`.
