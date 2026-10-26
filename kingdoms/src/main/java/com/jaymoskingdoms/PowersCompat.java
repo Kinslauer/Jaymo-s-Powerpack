@@ -60,13 +60,34 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) One of Jaymo's Powers' medicine items ("rag", "linen_bandage"), or empty without Powers. */
-	public static net.minecraft.world.item.ItemStack medicine(String name) {
-		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-			return net.minecraft.world.item.ItemStack.EMPTY;
+	/** Powers' {@code Treatment.tendAll(LivingEntity, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle tendAll;
+	private static boolean lookedForTend;
+
+	/**
+	 * (0.7.224) Another's hands on {@code body}: every hurt part dressed with a rag (or a linen bandage), every break
+	 * splinted, by Powers' wounds. How many parts were seen to; -1 without Powers (or an older one).
+	 */
+	public static int tendAll(net.minecraft.world.entity.LivingEntity body, boolean rag) {
+		if (!lookedForTend) {
+			lookedForTend = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tendAll = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Treatment"), "tendAll",
+						java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.LivingEntity.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' treatment (older Powers?)", e);
+				}
+			}
 		}
-		return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", name))
-			.map(net.minecraft.world.item.ItemStack::new).orElse(net.minecraft.world.item.ItemStack.EMPTY);
+		if (tendAll == null) {
+			return -1;
+		}
+		try {
+			return (int)tendAll.invoke(body, rag);
+		} catch (Throwable e) {
+			return -1;
+		}
 	}
 
 	/**

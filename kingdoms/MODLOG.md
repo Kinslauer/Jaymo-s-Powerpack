@@ -4937,8 +4937,10 @@ hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
   restart gives it back the next time you're about. His blows now hurt you for real (his 1-4 in health, no armour to soak
   it) while yours count 2-3 against his wind, so it's about even. Your wind is your health above 4; at 4 you're done, and
   no blow takes you lower. Afterwards the pit's attendant (an MCA villager ringside, or by the bookie when the ring fills
-  the room; replaced a day after he's gone) sees to you if you're hurt: 75% a rag, else a linen bandage, Jaymo's Powers'
-  own medicine, handed to you to use (without Powers he binds it on: +1.5 or +3 health).
+  the room; replaced a day after he's gone) offers to patch you up if you're hurt: 75% a rag, else a linen bandage.
+  Andy: "if you accept he does it for you, bandaging wherever you may be hurt, or splinting." Click [Let him] or [No
+  thanks] (`/bookie patch yes|no`, open a minute): yes and he dresses every hurt part and splints every break through
+  Powers' wounds (`Treatment.tendAll`, new in Powers 0.17.9); without Powers he's worth +1.5 or +3 health.
 - **Fighters' stories:** Andy: "make the villager winners/champions bring that up in conversation." Every fighter keeps a
   record on himself (`pit_record` attachment: measure, wins, losses, champion/retired, which city's pit). The beaten and the
   retired go back up to town to live (newcomers who never fought are just let go). In an MCA chat, one with a win brags of

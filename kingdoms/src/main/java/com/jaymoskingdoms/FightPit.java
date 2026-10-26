@@ -59,8 +59,9 @@ import org.jspecify.annotations.Nullable;
  * armor and gear is held. So you take the same amount of damage and deal roughly the same." At the bell everything you
  * carry, armour and all, is held ({@link #HELD}) and given back when it's over (or the next time you're about, if the
  * bout was cut short). His blows hurt you for real, for what yours count against him; at {@link #YIELD_HEALTH} you're
- * done (he never puts you under). Afterwards the pit's attendant ({@link #ATTENDANT_TAG}) patches you up: a rag, mostly
- * ({@link #RAG_CHANCE}), now and then a linen bandage.
+ * done (he never puts you under). Afterwards the pit's attendant ({@link #ATTENDANT_TAG}) offers to patch you up: a rag,
+ * mostly ({@link #RAG_CHANCE}), now and then a linen bandage. Andy: "if you accept he does it for you, bandaging wherever
+ * you may be hurt, or splinting."
  *
  * <p><b>Their story.</b> Every fighter keeps his record ({@link #RECORD}, on the villager): his measure, wins and losses,
  * whether he's the champion now or retired as one. Those who've won tell you about it when you chat ({@link #tell}),
@@ -106,11 +107,13 @@ public final class FightPit {
 	 * left, and a blow never takes them lower.
 	 */
 	static final float YIELD_HEALTH = 4.0F;
-	/** The ringside attendant (scoreboard tag): a rag this often, else a linen bandage; without Jaymo's Powers he binds it on himself for this much. */
+	/** The ringside attendant (scoreboard tag): a rag this often, else a linen bandage; without Jaymo's Powers it's worth this much health. */
 	static final String ATTENDANT_TAG = "jaymoskingdoms.pit_attendant";
 	static final float RAG_CHANCE = 0.75F, RAG_HEAL = 1.5F, BANDAGE_HEAL = 3.0F;
 	/** How far from the pit the attendant may be, and a hurt fighter be, to be patched up. */
 	static final double PATCH_RANGE = 16.0;
+	/** How long the attendant's offer stands (ticks). */
+	static final long OFFER_TICKS = 1200L;
 
 	/** A fighter's measure. */
 	record Stats(int power, int guard, int wind, int wins) {
@@ -217,6 +220,7 @@ public final class FightPit {
 			NEXT.clear();
 			NO_ROOM.clear();
 			NO_ATTENDANT.clear();
+			OFFERS.clear();
 		});
 	}
 
@@ -353,11 +357,18 @@ public final class FightPit {
 		p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.returned").withStyle(ChatFormatting.GRAY));
 	}
 
+	/** An attendant's offer to {@code realm}'s hurt fighter: a rag or a bandage, open until {@code until} (game time). */
+	record Offer(int realm, boolean rag, long until) {
+	}
+
+	/** Player → what the attendant offered them. */
+	private static final Map<UUID, Offer> OFFERS = new HashMap<>();
+
 	/**
-	 * After the bout the attendant sees to a hurt fighter: a rag, mostly, now and then a linen bandage (Jaymo's Powers'
-	 * medicine, his to offer; without Powers he binds it on himself for a little health).
+	 * After the bout the attendant offers a hurt fighter a rag, mostly, now and then a linen bandage; say yes and he sees to
+	 * you himself ({@link #answer}).
 	 */
-	private static void patchUp(ServerLevel level, Pit pit, ServerPlayer p) {
+	private static void patchUp(ServerLevel level, Pit pit, int realm, ServerPlayer p) {
 		if (p.getHealth() >= p.getMaxHealth() || p.distanceToSqr(Vec3.atCenterOf(pit.center())) > PATCH_RANGE * PATCH_RANGE) {
 			return;
 		}
@@ -369,16 +380,44 @@ public final class FightPit {
 		boolean rag = random.nextFloat() < RAG_CHANCE;
 		a.getLookControl().setLookAt(p, 30.0F, 30.0F);
 		a.getNavigation().moveTo(p, 0.6);
-		ItemStack cloth = PowersCompat.medicine(rag ? "rag" : "linen_bandage");
+		OFFERS.put(p.getUUID(), new Offer(realm, rag, level.getGameTime() + OFFER_TICKS));
 		String what = rag ? "rag" : "bandage";
-		if (cloth.isEmpty()) {
-			p.heal(rag ? RAG_HEAL : BANDAGE_HEAL);
-			Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch.bound." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
-		} else {
-			p.getInventory().placeItemBackInInventory(cloth, Prediction.SERVER_ONLY);
-			Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
+		Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
+		p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.patch.offer." + what).withStyle(ChatFormatting.GRAY)
+			.append(" ").append(Bookies.click(Component.translatable("fightpit.jaymoskingdoms.patch.yes"), "/bookie patch yes"))
+			.append(" ").append(Bookies.click(Component.translatable("fightpit.jaymoskingdoms.patch.no"), "/bookie patch no")));
+	}
+
+	/**
+	 * (From {@link Bookies}) {@code p} answers the attendant. Andy: "if you accept he does it for you, bandaging wherever
+	 * you may be hurt, or splinting": every hurt part dressed, every break splinted (Powers' wounds; without Powers a
+	 * little health). Returns what's said to them.
+	 */
+	static Component answer(ServerPlayer p, boolean yes) {
+		ServerLevel level = p.level();
+		Offer offer = OFFERS.remove(p.getUUID());
+		Pit pit = offer == null ? null : pit(level.getServer(), offer.realm());
+		Villager a = pit == null ? null : attendant(level, pit);
+		if (offer == null || level.getGameTime() > offer.until() || a == null || a.distanceToSqr(p) > PATCH_RANGE * PATCH_RANGE) {
+			return Component.translatable("fightpit.jaymoskingdoms.patch.gone");
 		}
+		RandomSource random = level.getRandom();
+		a.getLookControl().setLookAt(p, 30.0F, 30.0F);
+		if (!yes) {
+			Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch.declined." + random.nextInt(Underworld.LINES)), Speech.WHITE);
+			return Component.translatable("fightpit.jaymoskingdoms.patch.declined");
+		}
+		a.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		int seen = PowersCompat.tendAll(p, offer.rag());
+		if (seen < 0) {
+			p.heal(offer.rag() ? RAG_HEAL : BANDAGE_HEAL);
+		}
+		String what = offer.rag() ? "rag" : "bandage";
+		Speech.tell(level, a, p, Component.translatable(seen == 0 ? "fightpit.jaymoskingdoms.patch.nothing"
+			: "fightpit.jaymoskingdoms.patch.done." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
 		level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 0.8F, 1.0F);
+		level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.6F, 0.9F);
+		return Component.translatable(seen == 0 ? "fightpit.jaymoskingdoms.patch.nothing" : "fightpit.jaymoskingdoms.patch.seen_to." + what);
 	}
 
 	/** {@code fighter} is on a card now (talking to him waits until it's over). */
@@ -618,7 +657,7 @@ public final class FightPit {
 					for (int i = 0; i < 2; i++) {
 						if (bout.player[i] && v[i] instanceof ServerPlayer p) {
 							giveBack(p);
-							patchUp(level, pit, p);
+							patchUp(level, pit, f.id(), p);
 						}
 					}
 					if (!bout.player[loser] && v[loser] instanceof Villager beaten) {

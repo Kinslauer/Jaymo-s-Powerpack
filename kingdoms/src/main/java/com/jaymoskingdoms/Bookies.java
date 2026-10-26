@@ -49,7 +49,10 @@ final class Bookies {
 			.then(Commands.literal("war").then(Commands.argument("war", IntegerArgumentType.integer(0))
 				.then(Commands.argument("side", IntegerArgumentType.integer(0)).executes(Bookies::betWar))))
 			.then(Commands.literal("bout").then(Commands.argument("fighter", IntegerArgumentType.integer(0, 1)).executes(Bookies::betBout)))
-			.then(Commands.literal("fight").executes(Bookies::fight))));
+			.then(Commands.literal("fight").executes(Bookies::fight))
+			.then(Commands.literal("patch")
+				.then(Commands.literal("yes").executes(c -> patch(c, true)))
+				.then(Commands.literal("no").executes(c -> patch(c, false))))));
 	}
 
 	/** A bookie in {@code box}, if any. */
@@ -110,7 +113,7 @@ final class Bookies {
 			Math.max(GreatWars.WAGER_MOST, FightPit.MOST_STAKE)).withStyle(ChatFormatting.DARK_GRAY));
 	}
 
-	private static MutableComponent click(Component text, String command) {
+	static MutableComponent click(Component text, String command) {
 		return text.copy().withStyle(style -> style.withColor(ChatFormatting.GREEN).withUnderlined(true)
 			.withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.translatable("bookie.jaymoskingdoms.hover"))));
 	}
@@ -188,6 +191,13 @@ final class Bookies {
 			return 0;
 		}
 		return settle(player, bookie, held, FightPit.enter(player.level(), player, here));
+	}
+
+	/** {@code player} answers the pit's attendant's offer ({@link FightPit#answer}). */
+	private static int patch(CommandContext<CommandSourceStack> c, boolean yes) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		player.sendSystemMessage(FightPit.answer(player, yes).copy().withStyle(ChatFormatting.GRAY));
+		return 1;
 	}
 
 	/** The bookie pockets what he took and says so. */
