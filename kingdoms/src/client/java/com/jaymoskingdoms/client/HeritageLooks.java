@@ -301,7 +301,7 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		headFinsCovered = PowersCover.head(state);
 		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
-		// (0.7.218) a player MCA draws: on MCA's skin body, in the pose MCA gives its skin (McaLookModels)
+		// (0.7.219) a player MCA draws: on MCA's skin body, in the pose MCA gives its skin (McaLookModels)
 		PlayerModel marks = model, glowing = model;
 		if (McaCompat.LOADED) {
 			PlayerModel mcaMarks = McaLookModels.playerMarks(model), mcaGlow = McaLookModels.playerGlow(model);

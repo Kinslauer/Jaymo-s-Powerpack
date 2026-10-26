@@ -100,6 +100,23 @@ public final class UltimateFilm {
 		}
 	}
 
+	/**
+	 * (0.17.3) A film for an ultimate that isn't a player's (a gifted ruler's, {@code core/gifted}): everyone within
+	 * {@code witnesses} blocks of {@code caster} sees the bars; no camera is taken.
+	 */
+	public static void witnessed(Entity caster, int shot, int ticks, Vec3 at, @Nullable Entity target, double witnesses) {
+		if (!(caster.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return;
+		}
+		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
+		int targetId = target == null ? -1 : target.getId();
+		for (ServerPlayer other : level.players()) {
+			if (other.distanceToSqr(caster) <= witnesses * witnesses) {
+				ServerPlayNetworking.send(other, new Play(caster.getId(), shot, length, at, targetId, true));
+			}
+		}
+	}
+
 	/** Runs {@code what} on {@code player} once {@code ticks} have passed (if they're still on the server), e.g. a sound after the film. */
 	public static void later(ServerPlayer player, int ticks, Consumer<ServerPlayer> what) {
 		LATER.add(new Later(player.getUUID(), player.level().getServer().getTickCount() + Math.max(1, ticks), what));

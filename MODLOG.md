@@ -2937,3 +2937,19 @@ Warpainted red with ochre bands. Players and villager apes alike. Sketch: projec
   - `gear/`: essence payment at the enchanting table, Spellbinding Cloth, the Artificer's Rod with five foci (Pull,
     Push, Lift into a bound block, Ember, Frost), Ichorium tools, Ichorcloth robes, the Lantern of Everflame.
   Compile-checked against the 26.3 jars, not yet seen in a client.
+## 0.17.3: gifted villagers (Kingdoms 0.7.218)
+Andy met a Stormborn purist king and wanted villagers able to "acquire and use powers as well" rather than removing
+him. A player's power runs off their keys and client, so villagers hold a **gift** instead (`core/gifted`): the `gift`
+attachment (power, corrupted, fighting style, strain; saved and synced), and each power's own `GiftKit` in its package
+(`<Name>Gift`: 4-5 moves, an everyday use, a ruler's ultimate). `GiftedAI` picks a move every half second while they
+have a foe (their target, their brain's attack target, or whoever hit them in the last 10 s); bold villagers open with
+their strongest, wary ones get away first; a gap between moves, and each move its own cooldown. After 300 moves each has a
+small chance to corrupt the gift (Wind's opens lightning). Out of a fight they use it in everyday life (Andy: "they should
+use everything they can"). A gifted ruler whose throne room is attacked unleashes their ultimate (`Gifted.unleash`, at
+most every half day), nearby players seeing the film's bars (`UltimateFilm.witnessed`); Gravity's Meteor only below 30%
+health (Andy: "the meteor is a last resort"). Kits: Wind, Cryo, Pocket Arsenal, Gravity, Web Slinger (never the
+symbiote), Smoke, Z Fighter, Darktide; Chrono, Resonance and Xenoform have none. Who awakens is Kingdoms' business
+(`Gifted.give/power/corrupted/unleash/giftable`, read by reflection). `/power gift <targets> <power> [bold|steady|wary]`,
+`clear`, `corrupt`, `ready`, `unleash` for testing. A player who kills a gifted villager (Andy: "It should corrupt you, but
+also boost your mastery gain or xp"): +15 corruption (+25 if the gift was corrupted) and 30 mastery points past the
+allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no power. Not compiled in the cloud session (no game jars), not seen in game.

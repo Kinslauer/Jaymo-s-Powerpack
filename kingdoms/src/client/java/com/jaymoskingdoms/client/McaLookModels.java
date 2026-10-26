@@ -49,7 +49,7 @@ final class McaLookModels {
 	}
 
 	/**
-	 * (0.7.218) The same for a player MCA draws ({@link HeritageLooks}): MCA's skin layer's body, posed by MCA's own pose
+	 * (0.7.219) The same for a player MCA draws ({@link HeritageLooks}): MCA's skin layer's body, posed by MCA's own pose
 	 * for the player (the one its skin, clothes and hair take, and Touch'n Motion's over it). Drawn on the player's
 	 * animated model instead, the marks were posed a second time on their own, and with Touch'n Motion the two came
 	 * apart (Andy, 2026-10-26: the character stood still while the heritage marks moved). Null when MCA isn't drawing them.
