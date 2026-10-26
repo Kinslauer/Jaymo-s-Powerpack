@@ -5159,3 +5159,51 @@ should ripple, indicating the caster's intent."
   use at an attuned player gives it to them, at nothing draws it back. Past-full strains the receiver. Art from
   `tools/gen_mana_wand.py`.
 javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
+
+## 0.7.236: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.24)
+Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
+mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
+arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and
+some have entire move sets but all can be upgraded and leveled and the ones with personalities can kick in on their own to
+assist you at times similar to how the symbiote operates. make them speak like wise wizards from ancient times looking
+after a young child or grumpy old wizards that are tired of looking after said young child ... Make them give battle
+advice while in combat at higher bonding levels." Look: Nero's Devil Breaker to Doppio's partial manifestation, "all
+different sizes". JCraft: Eyes of Ender is All Rights Reserved: ideas only, our own code and art. Plan: `docs/Spirits-Plan.md`.
+First patch: the shared mage hands plus two of the five spirits; Ambrose (ward), Thessaly (reach), the Quiet One (echo),
+Clash, Spirit armour, Spirit ride and Sense come next. All in `spirits/` and `client/spirits/`.
+- **Gaining one** (`SpiritSickness`): an attuned player left at a fifth of their health (or downed) has a 1 in 18 chance,
+  once per two minutes, that a spirit answers (Grimsby or Varro, leaned by heritage). Then spirit sickness: mana back at
+  half pace, the spirit-to-be whispering once a day, a flicker of an arm at the edge of sight; it wakes on the fifth day
+  at the latest, sooner the more you push it (meditating, casting, nearly dying again), and the waking cures it. One for
+  life: `/kingdom spirit release` (twice) lets it go for good, empties your mana and burns you out.
+- **Summoning** (`Spirits`, key L): tap to call it (10 mana), it drains half a mana a second out and fades when you're
+  nearly empty; sneak-tap cycles its moves, tap casts the chosen one (hold to charge the javelin), sneak-hold puts it
+  away. Every move costs mana through `Mana.pay`, so it strains you toward mana sickness. Dying, logging out or spectating
+  puts it away.
+- **Bond and level**: bond grows with time out (x3 meditating) and fights won, drops when you burn out with it out; from
+  40 a second arm, from 20 it acts on its own, from 40 idle remarks, from 60 battle advice by foe (casters, archers,
+  creepers, the armoured, crowds, the big), from 80 advice before the fight. Level from kills and casts: +5% damage a
+  level, moves unlock by level, 20 at most.
+- **The mage hands** (`HandMoves`, every spirit): far hand (use chests, doors, levers, frames, pull items from 16 blocks,
+  +1 a level), grab and throw (lift a mob or item, hold it, hurl it; charge for speed), catch (snatch arrows, tridents,
+  javelins, fireballs and potions from the air; from level 3 on its own when it can pay), shove (a cone of knockback),
+  hold the line (pin a mob in place), second pair of hands (the spirit holds your shield or torch while you fight
+  two-handed). Allies (pets, thralls, team, your faction's folk) are never harmed.
+- **Grimsby the Weary** (blade, steel-blue, an arm's length of bony fingers and a blade): five conjured arms (sword,
+  greatsword sweep, spear thrust through two, axe that breaks shields, hammer that knocks up), each a 3-tap combo with a
+  heavier third hit; flurry, riposte (a parry with a counter-cut), guard break (a slam that breaks shields and stuns),
+  finisher (a single cut on a downed foe). On his own: parries a blow you didn't see coming, then complains.
+- **Old Varro, the Siege-Mage** (siege, amber, a gauntlet as tall as you): mana javelin (`SpiritJavelin`, charge it,
+  pierces three), volley (a fan of five), bombard (a slow orb that bursts), spear wall (javelins rise in a line), mark
+  (your hits on it do 1.3x). On his own: a javelin at whoever draws a bow on you.
+- **The look** (`client/spirits/SpiritArms`): the arm grows out of your own, scaled by the spirit's size and eased in,
+  pushed behind the shoulder, three aura shells in the kind's colour over mana's blue, posed per move and lerped back to
+  idle, wisps at the hand; only the attuned (and the corrupted) see it. Every autonomous act flashes your screen in its
+  colour (`SpiritHud`), and the HUD shows the spirit, its move and level/bond while it's out.
+- **The voice** (`SpiritVoice`): chat lines only you see, in its colour and name, for waking, summoning, dismissing,
+  tiring, kills, hurts, low health, idling, bond, levels, acts, release and the five sick days; Grimsby grumbles, Varro
+  barks.
+- **Folk spirits** (`FolkSpirits`): court wizards and hermits carry Grimsby or Varro (level from their power, bond 50),
+  out while they fight: Grimsby folk flurry and parry one blow in three, Varro folk throw javelins and volleys.
+javac-checked against Andy's 26.3 jars (the usual optional-mod errors only); not Loom-built, not seen in game. The L key
+is the only letter neither mod nor vanilla binds.
