@@ -20,6 +20,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -29,8 +30,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A wild beast of the encounters ({@link Wild}): an animal (so Jaymo's Kitchen butchers its corpse) that hunts players
- * while {@link #hunting} says so (never on Peaceful), calls its own kind in when hurt, and wears one of its looks.
+ * A wild beast of the encounters ({@link Wild}): an animal (so Jaymo's Kitchen butchers its corpse) that hunts players and (0.7.217)
+ * villagers while {@link #hunting} says so (never on Peaceful), calls its own kind in when hurt, and wears one of its looks.
  * They never breed or grow up; they come grown.
  */
 public abstract class WildBeast extends Animal implements WildLook {
@@ -54,7 +55,7 @@ public abstract class WildBeast extends Animal implements WildLook {
 	}
 
 	/** Whether it goes for {@code player} on sight. */
-	protected boolean hunting(Player player) {
+	protected boolean hunting(LivingEntity target) {
 		return true;
 	}
 
@@ -68,7 +69,10 @@ public abstract class WildBeast extends Animal implements WildLook {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
-			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && target instanceof Player p && this.hunting(p)));
+			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && this.hunting(target)));
+		// (0.7.217) villagers too, for less ({@link com.jaymoskingdoms.VillagerHunters#VILLAGER_DAMAGE})
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.npc.villager.AbstractVillager.class, true,
+			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && this.hunting(target)));
 	}
 
 	@Override
