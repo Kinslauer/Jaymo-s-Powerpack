@@ -44,6 +44,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockItemTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -926,8 +927,8 @@ public final class Careers {
 	}
 
 	private static boolean ore(BlockState state) {
-		return state.is(BlockTags.COAL_ORES) || state.is(BlockTags.IRON_ORES) || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.GOLD_ORES)
-			|| state.is(BlockTags.REDSTONE_ORES) || state.is(BlockTags.LAPIS_ORES) || state.is(BlockTags.DIAMOND_ORES) || state.is(BlockTags.EMERALD_ORES);
+		return state.is(BlockItemTags.COAL_ORES.block()) || state.is(BlockTags.IRON_ORES) || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.GOLD_ORES)
+			|| state.is(BlockItemTags.REDSTONE_ORES.block()) || state.is(BlockItemTags.LAPIS_ORES.block()) || state.is(BlockItemTags.DIAMOND_ORES.block()) || state.is(BlockItemTags.EMERALD_ORES.block());
 	}
 
 	/** (from {@link Trees}) A tree felled by {@code player}: its logs count. */
@@ -1016,7 +1017,7 @@ public final class Careers {
 	}
 
 	/** (from {@code LivingEntityHurtMixin}) A Master Hunter's blows on beasts (animals and monsters that aren't people). */
-	static float dealt(LivingEntity target, DamageSource source, float amount) {
+	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		if (source.getEntity() instanceof ServerPlayer player && beast(target) && heldRank(player, Job.HUNTER) == MASTER) {
 			return amount * BEAST_DAMAGE;
 		}
