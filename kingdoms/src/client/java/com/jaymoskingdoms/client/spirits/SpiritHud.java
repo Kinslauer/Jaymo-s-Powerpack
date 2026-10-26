@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client.spirits;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.spirits.Move;
+import com.jaymoskingdoms.spirits.Poses;
 import com.jaymoskingdoms.spirits.Spirit;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.Spirits;
@@ -85,7 +86,26 @@ public final class SpiritHud {
 				alpha * ARGB.blue(color) / 255.0F));
 	}
 
-	/** The line above the hotbar's right end: name, move, level and bond. */
+	/** The toggles the line marks "on": the move ids of Ambrose's steady hands, the shared armour and the Quiet One's echo strike. */
+	static final String STEADY = "steady", ARMOUR = "armour", ECHO = "echo";
+	/** How long after the armour pose was stamped the armour still counts as on (the server re-stamps it every 15 ticks while it lasts). */
+	static final int ARMOUR_SEEN_TICKS = 22;
+
+	/**
+	 * Whether {@code move} is a toggle that is on now. Only the armour can be told from what the server syncs: it re-stamps
+	 * {@link Poses#ARMOUR} into the spirit's state every 15 ticks while it lasts. Steady hands and the echo strike live in
+	 * server-side sets (Ambrose.STEADY, QuietOne.ECHOING) that nothing syncs, so they read off until the server syncs a bit
+	 * for them; this is the one place to read it.
+	 */
+	private static boolean toggleOn(Move move, SpiritState state, long now) {
+		return switch (move.id()) {
+			case ARMOUR -> state.pose() == Poses.ARMOUR && now - state.shownAt() <= ARMOUR_SEEN_TICKS;
+			case STEADY, ECHO -> false;
+			default -> false;
+		};
+	}
+
+	/** The line above the hotbar's right end: name, move, level and bond. The clash tug bar (another track) is its own element beside this. */
 	private static void line(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
@@ -102,6 +122,9 @@ public final class SpiritHud {
 			: Component.translatable("spirit.jaymoskingdoms.move." + move.id());
 		Component stats = Component.translatable("gui.jaymoskingdoms.spirit.stats", state.level(), state.bond());
 		int moveColor = cooling ? GREY : READY;
+		if (move != null && toggleOn(move, state, player.level().getGameTime())) {
+			moveName = Component.translatable("gui.jaymoskingdoms.spirit.toggle_on", moveName);
+		}
 		int width = font.width(name) + GAP + font.width(moveName) + GAP + font.width(stats);
 		int x = graphics.guiWidth() / 2 + 91 - width;
 		int y = graphics.guiHeight() - LIFT;
