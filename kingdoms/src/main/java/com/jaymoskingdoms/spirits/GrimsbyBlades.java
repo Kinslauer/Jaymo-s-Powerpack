@@ -50,6 +50,10 @@ final class GrimsbyBlades {
 
 	private static final Map<UUID, Combo> COMBOS = new HashMap<>();
 
+	static void forget(UUID id) {
+		COMBOS.remove(id);
+	}
+
 	private GrimsbyBlades() {
 	}
 

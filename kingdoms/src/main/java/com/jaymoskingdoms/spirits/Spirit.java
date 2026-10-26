@@ -3,6 +3,7 @@ package com.jaymoskingdoms.spirits;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -80,6 +81,11 @@ public abstract class Spirit {
 	/** Starts {@code player}'s {@code act} cooldown ({@code ticks}). */
 	protected final void cool(ServerPlayer player, String act, long now, int ticks) {
 		cooldowns.put(player.getUUID() + act, now + ticks);
+	}
+
+	/** Forgets a player's act cooldowns (they left). */
+	final void forget(UUID id) {
+		cooldowns.keySet().removeIf(k -> k.startsWith(id.toString()));
 	}
 
 	final void forgetAll() {

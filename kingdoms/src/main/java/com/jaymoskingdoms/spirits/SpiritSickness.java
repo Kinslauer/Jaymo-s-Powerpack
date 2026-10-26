@@ -80,10 +80,15 @@ public final class SpiritSickness {
 			WHISPERED.clear();
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (entity instanceof ServerPlayer player && entity.isAlive()) {
+			if (taken > 0.0F && entity instanceof ServerPlayer player && entity.isAlive()) {
 				brush(player);
 			}
 		});
+	}
+
+	static void forget(UUID id) {
+		BRUSHED.remove(id);
+		WHISPERED.remove(id);
 	}
 
 	public static boolean sick(net.minecraft.world.entity.player.Player player) {

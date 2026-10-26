@@ -113,6 +113,8 @@ public final class Spirits {
 	static final int ARMOURED = 10;
 	/** Releasing needs asking twice within this many ticks. */
 	static final int RELEASE_CONFIRM = 600;
+	/** The most ticks a held key counts for (a charge; anything longer, or a forged packet, counts as this). */
+	static final int MAX_HELD = 60;
 
 	/** The spirit kept by a player (or a folk): saved, kept through death, synced to everyone. */
 	public static final AttachmentType<SpiritState> SPIRIT = AttachmentRegistry.create(JaymosKingdoms.id("spirit"),
@@ -190,7 +192,8 @@ public final class Spirits {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player) {
 				SpiritState state = state(player);
-				if (state != null && state.out() && Mana.canPay(player, 1.0F) && of(state.kind()).hurt(player, state, source, amount)) {
+				if (state != null && state.out() && Mana.canPay(player, 1.0F)
+					&& (HandMoves.catchIfReady(player, state, source) || of(state.kind()).hurt(player, state, source, amount))) {
 					return false;
 				}
 			}
@@ -226,7 +229,13 @@ public final class Spirits {
 			IDLE_AT.remove(id);
 			ADVISED.remove(id);
 			RELEASING.remove(id);
-			Moves.forget(id);
+			// (cooldowns are game time, so they're kept: logging out doesn't reset them)
+			SpiritSickness.forget(id);
+			SpiritVoice.forget(id);
+			GrimsbyBlades.forget(id);
+			for (Spirit spirit : ALL) {
+				spirit.forget(id);
+			}
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> putAway(newPlayer, null));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -329,7 +338,7 @@ public final class Spirits {
 			case SUMMON -> summon(player, state);
 			case CAST -> {
 				if (state.out()) {
-					cast(player, state, Math.max(0, key.held()));
+					cast(player, state, Math.clamp(key.held(), 0, MAX_HELD));
 				}
 			}
 			case NEXT -> {

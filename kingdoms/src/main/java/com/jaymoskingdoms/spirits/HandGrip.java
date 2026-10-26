@@ -72,6 +72,19 @@ final class HandGrip {
 	private HandGrip() {
 	}
 
+	/** Before the world saves: everything held, pulled or pinned is let go, so nothing is saved floating. */
+	static void letGo() {
+		for (Held held : HELD.values()) {
+			release(held);
+		}
+		for (Pull p : PULLS) {
+			if (!p.item.isRemoved()) {
+				p.item.setNoGravity(false);
+			}
+		}
+		clear();
+	}
+
 	static void clear() {
 		HELD.clear();
 		THROWN.clear();
@@ -108,7 +121,7 @@ final class HandGrip {
 		Vec3 look = player.getLookAngle();
 		thing.setNoGravity(held.hadNoGravity);
 		thing.setDeltaMovement(look.scale(THROW_SPEED + charge * THROW_CHARGE));
-		thing.needsSync = true;
+		thing.syncVelocity = true;
 		thing.resetFallDistance();
 		THROWN.add(new Thrown(thing, player.getUUID(), tick(player), held.hadNoGravity));
 		player.level().playSound(null, thing.getX(), thing.getY(), thing.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
@@ -202,7 +215,7 @@ final class HandGrip {
 			}
 			thing.setDeltaMovement(Vec3.ZERO);
 			thing.resetFallDistance();
-			thing.needsSync = true;
+			thing.syncVelocity = true;
 			if (thing instanceof Mob mob) {
 				mob.setTarget(null);
 				mob.getNavigation().stop();
@@ -265,7 +278,7 @@ final class HandGrip {
 				continue;
 			}
 			item.setDeltaMovement(to.normalize().scale(PULL_SPEED));
-			item.needsSync = true;
+			item.syncVelocity = true;
 		}
 	}
 

@@ -42,7 +42,9 @@ final class KeyConflicts {
 		Map.entry("key.travelertoolbelt.open_toolbelt", new Move("key.keyboard.r", "key.keyboard.caps.lock")),
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
 		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u|key.keyboard.o", "key.keyboard.period")),
-		Map.entry("key.socialInteractions", new Move("key.keyboard.p", "key.keyboard.unknown")));
+		Map.entry("key.socialInteractions", new Move("key.keyboard.p", "key.keyboard.unknown")),
+		// (0.17.24) L is Kingdoms' mana spirit key; Advancements stays on the pause menu
+		Map.entry("key.advancements", new Move("key.keyboard.l", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):

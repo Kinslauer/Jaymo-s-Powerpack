@@ -238,6 +238,10 @@ public final class SpiritArms {
 		if (minecraft.isPaused() || TRACKS.isEmpty() && flickerLeft <= 0) {
 			return;
 		}
+		if (level.getGameTime() % 100L == 0L) {
+			// (whoever left the world, or was unloaded, with arms out)
+			TRACKS.keySet().removeIf(id -> level.getEntity(id) == null);
+		}
 		for (Entity entity : level.entitiesForRendering()) {
 			if (entity instanceof LivingEntity living && living.distanceToSqr(player) < 32.0 * 32.0) {
 				wisp(level, living);

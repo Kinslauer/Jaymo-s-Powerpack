@@ -27,6 +27,10 @@ public final class SpiritVoice {
 	/** Game time each player may be spoken to again. */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
 
+	static void forget(UUID id) {
+		NEXT.remove(id);
+	}
+
 	private SpiritVoice() {
 	}
 

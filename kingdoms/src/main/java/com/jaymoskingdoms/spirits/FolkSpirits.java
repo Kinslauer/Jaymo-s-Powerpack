@@ -77,7 +77,7 @@ public final class FolkSpirits {
 		Mana.ripple(folk, Mana.WARD);
 		net.minecraft.world.phys.Vec3 away = attacker.position().subtract(folk.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.5);
 		attacker.push(away.x, 0.2, away.z);
-		attacker.needsSync = true;
+		attacker.syncVelocity = true;
 	}
 
 	/** The folk's spirit tick, every 10 ticks from {@link Sorcery#tick}: out while there's a target, a cast when it is near. */

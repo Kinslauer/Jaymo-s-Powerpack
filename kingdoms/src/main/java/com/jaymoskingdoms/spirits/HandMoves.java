@@ -250,6 +250,7 @@ public final class HandMoves {
 		}
 		ServerTickEvents.END_SERVER_TICK.register(HandMoves::tick);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(HandMoves::allowDamage);
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HandGrip.letGo());
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CATCHING.clear();
 			HOLDING.clear();
@@ -271,6 +272,9 @@ public final class HandMoves {
 			return true;
 		}
 		if (e instanceof TamableAnimal pet && pet.isOwnedBy(player)) {
+			return true;
+		}
+		if (e instanceof net.minecraft.world.entity.OwnableEntity owned && owned.getOwnerReference() != null) {
 			return true;
 		}
 		Thralls.Tag tag = Thralls.tag(e);
@@ -421,7 +425,7 @@ public final class HandMoves {
 	}
 
 	private static boolean seizable(ServerPlayer player, SpiritState state, Entity e) {
-		if (ally(player, e) || e.getBbHeight() > HandGrip.MAX_HEIGHT || e instanceof Mob mob && HandGrip.pinned(mob)) {
+		if (ally(player, e) || e == player.getVehicle() || e.getBbHeight() > HandGrip.MAX_HEIGHT || e instanceof Mob mob && HandGrip.pinned(mob)) {
 			return false;
 		}
 		return !(e instanceof Player) || e.getBbHeight() < Spirits.of(state.kind()).size() * 2.0F;
@@ -507,7 +511,7 @@ public final class HandMoves {
 				continue;
 			}
 			e.knockback(SHOVE_POWER, player.getX() - e.getX(), player.getZ() - e.getZ(), source, 0.0F);
-			e.needsSync = true;
+			e.syncVelocity = true;
 			any = true;
 		}
 		if (!any) {
