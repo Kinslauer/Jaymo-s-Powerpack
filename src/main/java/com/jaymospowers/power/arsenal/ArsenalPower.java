@@ -171,6 +171,8 @@ public final class ArsenalPower implements Power {
 		ArsenalItems.init();
 		ArsenalDebugCommand.init();
 		Powers.register(INSTANCE);
+		// (0.17.1) what a gifted villager does with the Pocket Arsenal
+		ArsenalGift.init();
 		ServerTickEvents.END_SERVER_TICK.register(ArsenalPower::serverTick);
 	}
 

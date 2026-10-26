@@ -473,6 +473,8 @@ public final class GravityPower implements Power {
 		});
 		GravityWalk.register();
 		GravityTrainingField.init();
+		// (0.17.1) what a gifted villager does with Gravity
+		GravityGift.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
