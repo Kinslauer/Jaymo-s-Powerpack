@@ -4877,3 +4877,73 @@ Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's ca
   come after you for a day (`LifeStory.hunt`, unless the camp spares you).
 - Fate can pick the sky fall, the burned village and the pass; lost in time and the escape only when chosen.
 - Tuning: the new constants at the top of `LifeStory`. Not seen in game.
+
+## 0.7.224: creeds, tension and great wars (pack 0.17.9)
+Andy (2026-10-26): "I like the idea of larger scale wars between wealthy kingdoms, differing ideologies cause conflict
+making war inevitable. And the more money the more war." Ideas from Warring Nations (All Rights Reserved: war goals,
+coalitions, rebellions, war betting), remade; nothing copied. All in `GreatWars` (saved as the `great_wars` attachment),
+hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
+- **Creeds:** every realm holds to the Crown, Chivalry, Conquest, the Faith, Coin or the Old Blood. A ruled realm takes its
+  ruler's temper's creed 65% of the time (tyrant Crown, noble Chivalry, warlord Conquest, paranoid Faith, reveler Coin,
+  purist Blood), else any, and keeps it through heirs; vassals hold their overlord's. Players' realms get one at random;
+  their lords may pick another at peace (`/kingdom war creed <creed>`). Creeds clash 0-3 (`FRICTION`); Blood against Blood
+  by whose blood; a reformed realm's edict of tolerance eases Blood's clash by one.
+- **Tension** (`/kingdom war tensions`): once a day, for free kingdoms within 1600 blocks: +2.5 a point of friction, times
+  1 + their worth together / 500 (at most x4); +2 for seats within 450, +1 already rivals, +2 two rich (250+) realms where
+  one is Coin; -3 kindred creeds; allies -5; a truce cools it. Rivals at 35; at 80 war is inevitable: the richer, readier
+  NPC realm declares whatever the armies say (players' realms are never made to declare). After a declaration or peace it
+  drops to 30.
+- **More money, more war:** a king's daily war chance is x(1 + worth/500, at most x4), and he counts the sellswords his
+  treasury could hire (30% of it at 10 a head, at most 16) in his army when weighing a weaker rival.
+- **Great wars:** a war between two realms each worth 260 (or 750 together). Free NPC kingdoms within 2000 blocks whose
+  creed, alliance or tension leans clearly one way pledge to that side (3 a side at most) and fight as its members (with
+  their vassals: war relations, parties, banners, alerts). Each principal hires sellswords (30% of its treasury, 10 each,
+  at most 16): they count in its army, and its parties (up to 16, sent twice as often) take 4 each. Score to win x1.5,
+  length x2, unseen skirmishes twice the blows. Daily upkeep: 4 + 3% of the treasury + 1 a sellsword (allies 1%); below
+  15 emeralds the sellswords leave and the realm sues for peace.
+- **War goals:** an attacker who wins makes its creed's peace (`GOALS`): Crown vassalises from a lead of 60 (not 90);
+  Chivalry tributes from 10 but never takes land and keeps a double truce; Conquest takes land from 25 and twice the
+  chunks; Faith converts the loser; Coin tributes from 5 and takes half the treasury; Blood takes land from 30 and 6
+  chunks. A great war adds 10% to tribute and half again to land. A vassal always takes its overlord's creed. Winning
+  allies each take 10% of the loser's purse; losing allies pay 10% of theirs to the winner.
+- **Rebellions:** in a great war, each day a fiefdom (with a lord whose temper's creed clashes 2+ with its overlord's)
+  whose overlord is behind by 20 rises 15% of the time: its lord is crowned, it takes its own creed and goes over to the
+  other side.
+- **Bookies** (`Bookies`): Andy: "War wagers can only be done with bookie npcs in speakeasies." Every den keeps a bookie
+  (hired like the fence, replaced a day after he's gone). Right-click him for his book: each war from its warm-up until a
+  day into the fighting, both sides at his odds (each side's share of the armies, sellswords included, squeezed into
+  15-85%, the house keeping 10%; 1.2x to 5x), and the pit's next bout while its card is called. Hold emeralds and click a
+  line (`/bookie war|bout`, within 6 blocks of a bookie): up to 128 a war (one side only), 32 a bout. Winnings come into
+  your inventory (when you're next online); a white peace refunds war stakes. There's no other way to bet on a war.
+- **Fight pit** (`FightPit`, `Speakeasy.digPit`, attachment `fight_pits`): Andy: "You can also bet on fighters in the pit
+  ... Maybe another backroom dug into the speakeasy or in a makeshift ring if the room allows." Every den digs a backroom
+  through its south, west or north wall (whichever has earth over it and nothing in the way): 9x9 inside, a coarse-dirt
+  ring roped with spruce fence (5x5 inside, a gate toward the door), plank aisle for the crowd, benches, lanterns. With no
+  room for that, a 5x5 makeshift ring room with posts at its corners. While a player is within 24 blocks, a bout every
+  minute: the bookie calls the card (two MCA fighters, each with power 1-3, guard 0-35%, wind 12-24, and odds the house
+  sets by simulating the bout 400 times), bets for 30 s, then the bell. They trade bare-knuckle blows (swings, crits,
+  knockback, cheers; no real damage) until one's wind is gone and he yields. Winning bets pay at the odds; the winner
+  stays on as champion (+1 wind a win) and retires after 5 wins. Each bout warms the city by 1.
+- **Fighting in the pit yourself:** Andy: "Sure add that". The bookie's book offers a place on the card (3 emeralds held,
+  `/bookie fight`): you take the newcomer's corner (his backers get their stakes back, the odds are redone) or a card is
+  called for you against the champion. At the bell you're put in your corner. Punch with an empty hand (a full swing lands
+  2-3, a half-charged one less; the fighter's guard turns some); sneak to cover up (turns half his blows); your wind (20)
+  shows over your hotbar. Anything in your hand is a foul, stepping out of the ring or leaving throws it. Win: a purse of 8 + 4 per win the beaten had, and he remembers you beat him (`Recollections`); lose: he
+  remembers he beat you. You can bet on yourself, not against.
+- **Real blows, held gear, the attendant:** Andy: "You should take real damage, but get patched up ringside afterward by
+  an attendee. They offer you rags instead of bandages most of the time, so you may just want to heal yourself. But as soon
+  as you enter the pit, your armor and gear is held." At the bell everything you carry (armour and offhand too) is held
+  (`pit_held` attachment, kept through death) and handed back when the bout's done; a bout cut short by a logout, death or
+  restart gives it back the next time you're about. His blows now hurt you for real (his 1-4 in health, no armour to soak
+  it) while yours count 2-3 against his wind, so it's about even. Your wind is your health above 4; at 4 you're done, and
+  no blow takes you lower. Afterwards the pit's attendant (an MCA villager ringside, or by the bookie when the ring fills
+  the room; replaced a day after he's gone) offers to patch you up if you're hurt: 75% a rag, else a linen bandage.
+  Andy: "if you accept he does it for you, bandaging wherever you may be hurt, or splinting." Click [Let him] or [No
+  thanks] (`/bookie patch yes|no`, open a minute): yes and he dresses every hurt part and splints every break through
+  Powers' wounds (`Treatment.tendAll`, new in Powers 0.17.9); without Powers he's worth +1.5 or +3 health.
+- **Fighters' stories:** Andy: "make the villager winners/champions bring that up in conversation." Every fighter keeps a
+  record on himself (`pit_record` attachment: measure, wins, losses, champion/retired, which city's pit). The beaten and the
+  retired go back up to town to live (newcomers who never fought are just let go). In an MCA chat, one with a win brags of
+  it 40% of the time (champion, retired champion or plain winner lines), and MCA's chat AI is told his record.
+- Ops: `/kingdom war tension <a> <b> <0-100>` (looked at once a day).
+- Tuning: the constants at the top of `GreatWars`, `Bookies` and `FightPit`. Compiled only, not seen in game.

@@ -60,6 +60,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Treatment.tendAll(LivingEntity, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle tendAll;
+	private static boolean lookedForTend;
+
+	/**
+	 * (0.7.224) Another's hands on {@code body}: every hurt part dressed with a rag (or a linen bandage), every break
+	 * splinted, by Powers' wounds. How many parts were seen to; -1 without Powers (or an older one).
+	 */
+	public static int tendAll(net.minecraft.world.entity.LivingEntity body, boolean rag) {
+		if (!lookedForTend) {
+			lookedForTend = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tendAll = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Treatment"), "tendAll",
+						java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.LivingEntity.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' treatment (older Powers?)", e);
+				}
+			}
+		}
+		if (tendAll == null) {
+			return -1;
+		}
+		try {
+			return (int)tendAll.invoke(body, rag);
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
 	/**
 	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
 	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.

@@ -388,6 +388,32 @@ public final class Treatment {
 		return best;
 	}
 
+	/**
+	 * (0.17.9) Someone else's hands (Kingdoms' fight-pit attendant, Andy 2026-10-26: "if you accept he does it for you,
+	 * bandaging wherever you may be hurt, or splinting"): every hurt part of {@code body} dressed with a rag or a linen
+	 * bandage, every break that can be splinted splinted. Returns how many parts were seen to.
+	 */
+	public static int tendAll(LivingEntity body, boolean rag) {
+		BodyPlan plan = BodyPlan.of(body);
+		if (plan == null) {
+			return 0;
+		}
+		Remedy dressing = rag ? Remedy.RAG : Remedy.BANDAGE;
+		int seen = 0;
+		for (int i = 0; i < plan.size(); i++) {
+			BodyPart part = plan.part(i);
+			if (helps(Remedy.SPLINT, body, part) && Breaks.splint(body, part)) {
+				seen++;
+			}
+			if (helps(dressing, body, part)) {
+				Bleeding.stop(body, part, false);
+				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, BANDAGE_TICKS, rag);
+				seen++;
+			}
+		}
+		return seen;
+	}
+
 	/** (0.14.4) Downed's revive steps aside: sneak + use with a remedy that can help this downed one (server side). */
 	static boolean claimsDowned(Player player, InteractionHand hand, Entity entity) {
 		if (!player.isShiftKeyDown() || !(entity instanceof LivingEntity body)) {
