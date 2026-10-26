@@ -4970,3 +4970,7 @@ the succession tick, `Banners` (a seat taken), `Theft`, `Festivals`, `/kingdom l
   own buildings if you stand in one, else a castle), at least 320 blocks from any realm and off any town's land.
 - A player sovereign slain by the other side of a war ends the war as a ruler's death does.
 - Tuning: the constants at the top of `Crowns`. Compiled only, not seen in game.
+
+## 0.7.226: no power lean line on the life story (pack 0.17.11)
+Andy: "remove this text" / "from every entry": the "Leans to <power>, if fate decides your power" line is gone from the
+life story's answers and story page (the childhood still leans the power when fate decides; it just isn't shown).
