@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.rabbit.Rabbit;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -47,7 +48,7 @@ public class Coyote extends WildBeast {
 	}
 
 	@Override
-	protected boolean hunting(Player player) {
+	protected boolean hunting(LivingEntity target) {
 		return this.night();
 	}
 

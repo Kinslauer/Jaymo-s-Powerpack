@@ -158,6 +158,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Stalkers.register();
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
+		VillagerHunters.register();
 		Theft.register();
 		Retaliation.register();
 		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
