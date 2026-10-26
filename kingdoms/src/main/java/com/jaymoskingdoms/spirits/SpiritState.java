@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
  * ... all can be upgraded and leveled". Saved, kept through death and synced to everyone (the viewers draw the arms).
  * {@code kind} is {@link Spirits#GRIMSBY}...{@link Spirits#QUIET}; {@code level} 1-{@link Spirits#MAX_LEVEL} with its
  * {@code xp}; {@code bond} 0-{@link Spirits#MAX_BOND}; {@code out} whether it is conjured; {@code move} the selected move
- * (an index into the player's move list); {@code show} is game time times 32 plus a {@link Poses} id, the pose the arms hold
+ * (an index into the player's move list); {@code show} is game time times 64 plus a {@link Poses} id, the pose the arms hold
  * now; {@code arms} is 1, or 2 from bond {@link Spirits#TWO_ARMS_BOND}.
  */
 public record SpiritState(int kind, int level, int xp, int bond, boolean out, int move, long show, int arms) {
@@ -66,16 +66,16 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 
 	/** The arms hold {@code pose} from game time {@code now}. */
 	public SpiritState withShow(long now, int pose) {
-		return new SpiritState(kind, level, xp, bond, out, move, now * 32L + pose, arms);
+		return new SpiritState(kind, level, xp, bond, out, move, now * 64L + pose, arms);
 	}
 
 	/** The pose {@link #show} holds. */
 	public int pose() {
-		return (int)(show & 31L);
+		return (int)(show & 63L);
 	}
 
 	/** The game time {@link #show} was stamped. */
 	public long shownAt() {
-		return show >> 5;
+		return show >> 6;
 	}
 }

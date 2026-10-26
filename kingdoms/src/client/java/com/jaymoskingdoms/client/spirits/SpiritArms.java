@@ -119,6 +119,24 @@ public final class SpiritArms {
 		TABLE[Poses.MARK] = new float[] {-1.6F, 0.3F, 0.20F};
 		TABLE[Poses.WARD] = new float[] {-1.5F, -0.6F, 0.50F};
 		TABLE[Poses.FINISH] = new float[] {-2.5F, 0.0F, 0.10F};
+		// the second patch's (first guesses; each spirit's track tunes them)
+		TABLE[Poses.AEGIS] = new float[] {-1.4F, -0.5F, 0.60F};
+		TABLE[Poses.BLESS] = new float[] {-2.9F, 0.0F, 0.40F};
+		TABLE[Poses.CATCH_ME] = new float[] {-0.6F, -0.9F, 0.30F};
+		TABLE[Poses.MEND] = new float[] {-1.1F, -0.7F, 0.15F};
+		TABLE[Poses.ARMOUR] = new float[] {-0.4F, -1.2F, 0.80F};
+		TABLE[Poses.RIDE] = new float[] {-3.0F, 0.0F, 0.90F};
+		TABLE[Poses.PULL] = new float[] {-1.6F, -0.3F, 0.05F};
+		TABLE[Poses.STEAL] = new float[] {-1.5F, -0.6F, 0.10F};
+		TABLE[Poses.TRAP] = new float[] {-0.5F, 0.0F, 0.30F};
+		TABLE[Poses.UNLOCK] = new float[] {-1.4F, -0.4F, 0.15F};
+		TABLE[Poses.JUGGLE] = new float[] {-2.2F, -0.2F, 0.40F};
+		TABLE[Poses.ECHO] = new float[] {-1.8F, 0.0F, 0.20F};
+		TABLE[Poses.MIRROR] = new float[] {-0.8F, 0.6F, 0.50F};
+		TABLE[Poses.STILL] = new float[] {-1.0F, 0.0F, 1.20F};
+		TABLE[Poses.SILENT] = new float[] {-2.6F, -0.3F, 0.00F};
+		TABLE[Poses.SENSE] = new float[] {-1.7F, 0.4F, 0.30F};
+		TABLE[Poses.CLASH] = new float[] {-1.6F, -0.2F, 0.25F};
 	}
 
 	/** How far manifest each being's arms are: eased from where they were when the spirit went out or away. */

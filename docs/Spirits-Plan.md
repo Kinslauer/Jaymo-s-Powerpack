@@ -245,3 +245,116 @@ SpiritState)` default that the folk use (default: nothing), and implement it for
 Compile with `/home/user/cc21/kcc.sh <repo root> <files>` (JDK 21, lowered 26.3 jars; the baseline's optional-mod errors are
 filtered out). Check every 26.3 API name with `javap -cp /home/user/cc21/jars/26.3.jar <class>` before using it. No game run
 in the cloud: Andy plays it.
+
+# Second patch: Ambrose, Thessaly, the Quiet One, Clash, Spirit armour, Spirit ride
+
+Same code, same conventions, same lang-parts rule (`kingdoms/lang_parts/spirits_<track>.json`, merged by the lead). Poses for
+all of it already exist in `Poses` (AEGIS .. CLASH; `show` now packs 6 bits) with first-guess offsets in `SpiritArms.TABLE`.
+The three placeholder spirits in `Spirits.ALL` become real classes; `SpiritSickness.roll` gives all five (heritage leans:
+Tideborn/Verdant/Dawnborn → Ambrose, Sylvan/Nightborn → Thessaly, Stoneborn/Warriorborn → Varro, Emberborn/Earthling →
+Grimsby, anyone else at random among the five; the Quiet One is 1 in 5 of the random ones and never a lean).
+
+## Track E: Old Ambrose, the Warden (`spirits/Ambrose.java`) + Spirit armour and Spirit ride (`spirits/HandExtras.java`)
+Ambrose (`ambrose`, colour `0xFF9BE08F`, size 2.0: a broad open hand twice yours behind the shoulder): warm grandfather
+wizard, endlessly patient, calls you "little one". Ward: buffs, shields, healing; mostly acts on his own.
+- **Aegis** (`aegis`, level 1, cost 12, cooldown 200): a shimmering ward on you for 10 s that soaks the next hit of 4+
+  damage whole (`ALLOW_DAMAGE` cancel, `AEGIS` pose, a chime, `FLASH_WARD`), then fades.
+- **Steady hands** (`steady`, level 2, cost 2/second toggle): while on, knockback on you is halved (`ALLOW_DAMAGE` can't
+  do that: after the hit, scale the delta movement back by half in `AFTER_DAMAGE`) and your bow/crossbow draws aren't
+  jittered: use `Mana`-free marker: set a `STEADY` map flag the client needn't know about; `HOLD`-like pose.
+- **Battle blessing** (`bless`, level 3, cost 16, cooldown 400): strength, speed or resistance for 20 s by what you face
+  (an armoured or big foe → strength; archers or many → speed; a caster or a creeper → resistance; use
+  `Spirits.foeKey`), `BLESS` pose; from bond 20 he casts it himself when a fight starts (first hostile within 8).
+- **Catch me** (`catch_me`, level 1, cost 10, cooldown 300): autonomous first: a fall of 8+ blocks is caught (fall damage
+  cancelled, `CATCH_ME` pose, slow fall effect 3 s, "Easy now."), and standing in lava or fire he hauls you 3 blocks back
+  the way you came and puts the fire out. Cast by key: the slow-fall for 10 s.
+- **Mending touch** (`mend`, level 4, cost 3/second toggle; also autonomous below half health from bond 40): heals 1 every
+  2 s through `PowersCompat.mend` (closes cuts, see Restoration), `MEND` pose; stops at full.
+- `hurt` hook: Aegis on his own (bond ≥ 20, `AEGIS_EVERY` 600) against a hit that would take you below a third.
+- Lines as the first two spirits have (all events, sick 1-5, advice.*, move names), warm and patient.
+Spirit armour and Spirit ride are shared moves (every spirit) in `HandExtras.SHARED`, appended to `HandMoves.SHARED` from
+`HandExtras.register()` (called from `Spirits.register()` after `HandMoves.register()`; track E adds that one line):
+- **Spirit armour** (`armour`, level 6, cost 20, cooldown 300): the arms wrap round you like plate for 6 s: damage taken
+  ×0.5 (`ALLOW_DAMAGE` can't scale; take the hit then heal back half in `AFTER_DAMAGE`, or cancel every other hit; pick
+  the first), knockback immune, `ARMOUR` pose held (re-show every 15 ticks), `Spirits.show`.
+- **Spirit ride** (`ride`, level 4, cost 14, cooldown 100): the hands carry you a short way in a leap: launch along your
+  look (`RIDE` pose), 1.6 horizontal + 0.6 up, no fall damage from it (a `RIDING` map until you land), a whoosh.
+
+## Track F: Thessaly the Learned (`spirits/Thessaly.java`)
+Thessaly (`thessaly`, colour `0xFFFF9ED8`, size 0.6: a slim glove of light over your own hand): fussy scholar, lectures,
+corrects your pronunciation of spells, "dear". Reach: things from far away, traps, utility.
+- **Long reach** (`long_reach`, level 1, cost 6, cooldown 40): every item entity and experience orb within 24 blocks is
+  pulled to you over 2 s (`PULL` pose), through walls.
+- **Unseen hand** (`unseen`, level 3, cost 12, cooldown 160): the mob or player in sight within 16: a mob is disarmed (its
+  main-hand item dropped at your feet, `STEAL` pose); a villager or Folk is pickpocketed (use `Crooks`/pickpocket code if
+  Kingdoms has a pickpocket result to reuse, grep `Pickpocket`; else a random stack from an MCA villager's inventory or
+  1-3 emeralds from Folk, and a `Theft`-style crime if seen: look at how `Theft.sorcery` reports crimes); a player loses
+  the item in their off hand to your feet.
+- **Rune trap** (`trap`, level 2, cost 10, cooldown 100): a glyph on the block in sight within 16 (`TRAP` pose, motes the
+  attuned see, a faint END_ROD ring for all); the first foe to step on it (not allies, `HandMoves.ally`) is pinned 3 s as
+  `HandGrip.pin` does and takes 4; lasts 60 s, at most 3 at once per player.
+- **Unlock** (`unlock`, level 5, cost 16, cooldown 200): a locked loot chest in sight within 16 (`Lockpicking.locked`)
+  opens if the spirit's level ≥ 2 × the lock's level (add a public `Lockpicking.pickBySpirit(ServerLevel, BlockPos,
+  ServerPlayer, int spiritLevel)` that unlocks and gives the Stealth xp a pick would, or says the lock is beyond her),
+  `UNLOCK` pose.
+- **Juggle** (`juggle`, level 4, cost 8 per item, charges): tap: the arms lift up to 4 nearby item entities or small mobs
+  (height < 1) into the air round you (`JUGGLE` pose, orbit them 2 blocks out, no gravity, as `HandGrip` holds); tap again
+  to throw the next one along your look (`THROW_SPEED`), charge for speed. Uses `HandGrip`-style per-player state.
+- Autonomous: `hurt` at bond ≥ 20: snatches an arrow (`HandMoves.catchIfReady` is already wired for every spirit); `tick`
+  at bond ≥ 20: points out loot: once per `LOOT_EVERY` 1200 ticks, a chest within 16 you haven't opened (a `Set` of
+  positions seen per player) gets motes and a line ("There's a chest behind that wall, dear. No, the other wall.").
+- Lines, fussy and lecturing; move names.
+
+## Track G: the Quiet One (`spirits/QuietOne.java`)
+(`quiet`, colour `0xFFC8C8DC`, size: `size()` returns a different value each summon between 0.5 and 3.0, kept in a map by
+player until the next summon). Says nothing: every `SpiritVoice.say` for kind QUIET is dropped (add the check in
+`SpiritVoice`), except once at bond 100 (`quiet.word.1`: one word written in chat; a `SPOKEN` flag so it never repeats;
+Andy: "Yes" to speaking once at max bond). Echo: repeats your own moves a beat later.
+- **Echo strike** (`echo`, level 1, cost 6, passive toggle): while on, every melee hit you land is repeated 10 ticks later
+  by the arms for 50% (`ECHO` pose), through `AFTER_DAMAGE` with a re-entry guard; costs 6 per echo.
+- **Mirror step** (`mirror`, level 3, cost 10, cooldown 120): a dodge 3 blocks sideways/back along the sneak direction
+  (or back), leaving a glowing double behind for 2 s that mobs target (a `Folk`-less decoy: an armour stand that's
+  invisible with the arms drawn on it? Simplest: an `ArmorStand` marker tagged `jaymoskingdoms_mirror`, mobs targeting the
+  player are retargeted to it, removed after 40 ticks), `MIRROR` pose.
+- **Stillness** (`still`, level 6, cost 30, cooldown 1200; also on its own, rarely): for 3 s every mob within 8 is slowed
+  (slowness 6, no attacking: target cleared each tick), projectiles in that sphere lose their speed, `STILL` pose; the
+  screen flashes white (`FLASH_WARD`).
+- **Silent end** (`silent`, level 8, cost 40, cooldown one in-game day: 24000): a single blow kills outright a foe in sight
+  within 4 that's below 30% health (bosses excluded: `Enemy` with a boss bar, i.e. `EnderDragon`, `WitherBoss`, Kingdoms
+  kings/giants: check `BossBars`), `SILENT` pose, then the arms go still.
+- **Sense** (`sense`, level 2, cost 8, cooldown 200): for 10 s, hidden mobs within 24 glow for you (`setGlowingTag` is
+  global; instead send motes at each one every 10 ticks, seen only by you: `level.sendParticles(player, ...)`), rune
+  traps and locked chests within 16 get a mote ring, and ores within 8 (iron, gold, diamond, emerald, amethyst, copper)
+  a single mote; `SENSE` pose.
+- Autonomous: `hurt`/`tick` almost never: at bond ≥ 20, 1 in 40 chance per fight (first hostile within 8) that it finishes
+  the fight: when a foe is below 30% within 6, `silent` on its own (its own cooldown), `FLASH_ACT`; and 1 in 60 per fight
+  `still` on its own. Advice: none, ever. Idle remarks: none.
+- Lines: only `quiet.word.1`, plus `sick.1 .. sick.5` for the Quiet One are blank whispers (" ..." style, five dots growing),
+  and the move names. Every other event key may be omitted (SpiritVoice drops them).
+
+## Track H: Clash (`spirits/SpiritClash.java`, `client/spirits/ClashCinematic.java`)
+Andy: "two players' spirits lock arms; it uses the beam-clash film", All Might style. Built in Kingdoms alone (Powers'
+`BeamClash` is beam geometry and its film reads Powers' attachment; not reachable cleanly).
+- Two players with spirits out, within 4 blocks, who both cast **Grab** (or any strike move) at each other within 20 ticks
+  of one another lock arms: both are rooted (position reset each tick, no input: the client ignores movement keys while
+  `CLASH` is set), the `CLASH` pose on both, and a 5-second contest: every CAST tap (L) adds 1 + level/4 to your side,
+  the spirit's level adds 0.2 a tick; at the end (or at a 40-point lead) the loser is thrown back 6 blocks and takes 8,
+  the winner gets bond +3; a draw pushes both back 3. Server: `CLASH` attachment (synced to all: both ids, start time,
+  the lead, −100..100) so viewers see it; a `Clash.Tap` payload isn't needed: reuse `Spirits.Key` CAST (the dispatcher
+  routes CAST to the clash while one is on).
+- Client `ClashCinematic` (model it on `HandshakeCinematic`): while the local player's `CLASH` is set: letterbox bars
+  (12% top and bottom), the HUD hidden but for a centred tug bar showing the lead in both spirits' colours, a camera that
+  swings side-on to the two (`view(...)` as the handshake's does; find how `HandshakeCinematic.view` is hooked into the
+  camera and hook the same way), the screen shaking harder as the lead swings, and a flash in the winner's colour at the
+  end. Nearby attuned viewers get the bars only.
+- Lines: `clash.win.N`, `clash.lose.N` (3 each) for Grimsby, Varro, Ambrose, Thessaly (the Quiet One none) in
+  `spirits_h.json`.
+
+## Track I: the client (after E, F, G, H)
+`SpiritArms`: hands for Ambrose (a broad open hand: a 6×6×2 palm with five 1×3×1 fingers spread), Thessaly (a slim glove:
+the arm box deflated by 0.6 with three rings: 1-px-thick cube bands round the fingers), the Quiet One (smooth and
+featureless: the plain arm box, no hand); tune `TABLE` for the new poses; the Quiet One's size from the synced state
+(`SpiritState` gains nothing: the server sets `size` through a new `scale` field? No: the Quiet One's size is kept server
+side only, so add `int scale` (×100) to `SpiritState` is track G's job: it adds the field (default 100) to the record,
+CODEC and STREAM_CODEC, and `Spirit.size(SpiritState)` reads it; track I uses it). `SpiritHud`: the clash tug bar is H's;
+the steady/armour/echo toggles show "on" after the move name. Lang keys in `spirits_i.json`.
