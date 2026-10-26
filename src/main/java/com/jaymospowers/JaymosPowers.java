@@ -24,6 +24,7 @@ public class JaymosPowers implements ModInitializer {
 		PowerEvents.register();
 		com.jaymospowers.core.BlockCluster.register();
 		com.jaymospowers.core.Carry.init();
+		com.jaymospowers.core.Kneel.init();
 		com.jaymospowers.core.Crawl.init();
 		com.jaymospowers.core.Ledge.init();
 		// (0.14.3) freerunning, Kingdoms' Stealth tree's second page

@@ -91,6 +91,14 @@ public class JaymosKitchen implements ModInitializer {
 			if (hand != InteractionHand.MAIN_HAND || player.isSpectator()) {
 				return InteractionResult.PASS;
 			}
+			// (0.5.31) dragging a carcass: onto a butcher table near it, or let go
+			CorpseEntity dragged = CorpseEntity.draggedBy(player);
+			if (dragged != null) {
+				if (!level.isClientSide()) {
+					dragged.dragOnto(player, hit.getBlockPos(), hit.getLocation());
+				}
+				return InteractionResult.SUCCESS;
+			}
 			// carrying a corpse: right-clicking a block sets it down there (on top, for a butcher block)
 			CorpseEntity carried = CorpseEntity.carriedBy(player);
 			if (carried != null) {
@@ -174,6 +182,12 @@ public class JaymosKitchen implements ModInitializer {
 			return InteractionResult.SUCCESS;
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.DropCarried.TYPE, (payload, ctx) -> {
+			CorpseEntity dragged = CorpseEntity.draggedBy(ctx.player());
+			if (dragged != null) {
+				// (0.5.31) let go of a carcass being dragged
+				dragged.stopDrag();
+				return;
+			}
 			CorpseEntity carried = CorpseEntity.carriedBy(ctx.player());
 			if (carried != null) {
 				if (!payload.toss() && ctx.player().getVehicle() instanceof net.minecraft.world.entity.animal.equine.AbstractHorse horse) {

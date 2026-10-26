@@ -67,6 +67,9 @@ public class CorpseEntity extends Entity {
 	private static final EntityDataAccessor<String> LOOK = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.STRING);
 	/** Entity id of the player carrying this corpse in front of them, or -1. Never saved: a reload drops it. */
+	/** (0.5.31) Entity id of the player dragging this (big) carcass along the ground behind them, or -1. Never saved. */
+	private static final EntityDataAccessor<Integer> DRAGGER = SynchedEntityData.defineId(CorpseEntity.class,
+		net.minecraft.network.syncher.EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> CARRIER = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
 	/** A player's corpse: whose it is (UUID as text, and name), so clients can draw them. */
@@ -174,6 +177,16 @@ public class CorpseEntity extends Entity {
 	 * up to {@code CARCASS_BONES} bones once it's bare. All of its loot, but none of the butcher block's extras.
 	 */
 	public static final int CUT_TICKS = 30, CARCASS_BONES = 2;
+	/**
+	 * (0.5.31) Andy: "Add dragging". A big carcass is lifted no higher than its legs: sneak + use held on it drags it along
+	 * the ground behind you, {@code DRAG_BEHIND} blocks back (plus half its length), at up to {@code DRAG_SPEED} blocks a
+	 * tick, up steps of a block. You're slowed hard while you haul it. A right-click anywhere lets go; one on a butcher
+	 * block within {@code DRAG_TO_TABLE} of the carcass heaves it up onto the table. Further off than
+	 * {@code DRAG_LEASH} and it slips from your hands.
+	 */
+	public static final double DRAG_BEHIND = 0.9, DRAG_SPEED = 0.3, DRAG_TO_TABLE = 3.0, DRAG_LEASH = 4.5;
+	/** (0.5.31) Every this many ticks of hauling, a scrape in the dirt. */
+	private static final int DRAG_SCRAPE_EVERY = 8;
 
 	private CorpseKind kind = CorpseKind.OTHER;
 	private List<ItemStack> loot = new ArrayList<>();
@@ -705,6 +718,7 @@ public class CorpseEntity extends Entity {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(LOOK, "");
 		builder.define(CARRIER, -1);
+		builder.define(DRAGGER, -1);
 		builder.define(OWNER, "");
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
@@ -999,6 +1013,20 @@ public class CorpseEntity extends Entity {
 			// the carrier is gone from this level (logged out, changed dimension, unloaded): it drops
 			setCarrier(null);
 		}
+		if (this.entityData.get(DRAGGER) >= 0) {
+			// (0.5.31) hauled along the ground
+			this.ragdoll = null;
+			if (level() instanceof ServerLevel level) {
+				Entity dragger = dragger();
+				if (dragger == null) {
+					stopDrag();
+				} else {
+					tickDrag(level, dragger);
+				}
+				serverTick(level);
+			}
+			return;
+		}
 		if (grabCooldown > 0 && !level().isClientSide()) {
 			grabCooldown--;
 		}
@@ -1235,6 +1263,10 @@ public class CorpseEntity extends Entity {
 			return InteractionResult.SUCCESS;
 		}
 		ItemStack held = player.getItemInHand(hand);
+		if (dragger() != null) {
+			// (0.5.31) being dragged: let go of first
+			return InteractionResult.SUCCESS_SERVER;
+		}
 
 		// (0.5.23) arrows still in it come out first, one a click, to an empty hand
 		if (held.isEmpty() && !player.isShiftKeyDown() && com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
@@ -1328,8 +1360,8 @@ public class CorpseEntity extends Entity {
 	 * {@link #HOLD_GRACE} without use) and it starts again. A big carcass can't be lifted at all.
 	 */
 	private InteractionResult lift(ServerLevel level, Player player) {
-		if (tooBigToLift()) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.too_big"));
+		if (dragger() != null) {
+			// (someone's already hauling it)
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		long now = level.getGameTime();
@@ -1341,10 +1373,117 @@ public class CorpseEntity extends Entity {
 		long held = now - liftStart;
 		if (held >= LIFT_TICKS) {
 			liftBy = null;
-			return carry(level, player);
+			return tooBigToLift() ? drag(level, player) : carry(level, player);
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.lifting", bar(held, LIFT_TICKS)));
+		player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
+			bar(held, LIFT_TICKS)));
 		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** (0.5.31) Taken by the legs and dragged behind {@code player} (one thing at a time, in the arms or behind). */
+	private InteractionResult drag(ServerLevel level, Player player) {
+		if (carriedBy(player) != null || draggedBy(player) != null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.one_at_a_time"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		if (isPassenger()) {
+			stopRiding();
+		}
+		if (this.entityData.get(SLUNG) >= 0) {
+			unsling(false);
+		}
+		this.ragdoll = null;
+		this.entityData.set(TUMBLING, false);
+		this.entityData.set(DRAGGER, player.getId());
+		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.dragging"));
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** (0.5.31) Whoever is dragging it, if anyone (either side). */
+	public @Nullable Entity dragger() {
+		int id = this.entityData.get(DRAGGER);
+		return id < 0 ? null : level().getEntity(id);
+	}
+
+	/** (0.5.31) The carcass this player is dragging, if any (either side). */
+	public static @Nullable CorpseEntity draggedBy(Player player) {
+		for (CorpseEntity corpse : player.level().getEntitiesOfClass(CorpseEntity.class,
+			player.getBoundingBox().inflate(DRAG_LEASH + 2.0), corpse -> corpse.entityData.get(DRAGGER) == player.getId())) {
+			return corpse;
+		}
+		return null;
+	}
+
+	/** (0.5.31) Server: let go of; it lies where it was dragged. */
+	public void stopDrag() {
+		if (this.entityData.get(DRAGGER) < 0) {
+			return;
+		}
+		this.entityData.set(DRAGGER, -1);
+		grabCooldown = GRAB_COOLDOWN;
+		setDeltaMovement(Vec3.ZERO);
+		lieDown(Vec3.ZERO, onButcherBlock());
+		if (level() instanceof ServerLevel level) {
+			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.5F);
+		}
+	}
+
+	/** (0.5.31) Server, each tick it's dragged: pulled along behind, over the ground and up steps. */
+	private void tickDrag(ServerLevel level, Entity dragger) {
+		if (!(dragger instanceof Player player) || !player.isAlive() || player.level() != level || player.isSpectator() || player.isPassenger()
+			|| distanceToSqr(player) > DRAG_LEASH * DRAG_LEASH || carriedBy(player) != null) {
+			stopDrag();
+			return;
+		}
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		Vec3 back = new Vec3(Mth.sin(yaw), 0.0, -Mth.cos(yaw));
+		Vec3 target = player.position().add(back.scale(DRAG_BEHIND + getBbWidth() * 0.5));
+		Vec3 pull = target.subtract(position()).multiply(1.0, 0.0, 1.0);
+		double dist = pull.length();
+		Vec3 along = dist > 0.05 ? pull.scale(Math.min(DRAG_SPEED, dist) / dist) : Vec3.ZERO;
+		Vec3 motion = new Vec3(along.x, onGround() ? -0.08 : Math.max(-1.0, getDeltaMovement().y - 0.08), along.z);
+		setDeltaMovement(motion);
+		move(net.minecraft.world.entity.MoverType.SELF, motion);
+		// head first, feet trailing: it lies along the way it's hauled
+		setYRot(player.getYRot() + 90.0F);
+		if (tickCount % 20 == 0) {
+			// a dead weight: hauling it is slow going
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 2, false, false, true));
+		}
+		if (along.lengthSqr() > 0.0025 && tickCount % DRAG_SCRAPE_EVERY == 0) {
+			net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(blockPosition().below());
+			if (!ground.isAir()) {
+				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), getX(), getY() + 0.05, getZ(),
+					4, getBbWidth() * 0.3, 0.02, getBbWidth() * 0.3, 0.05);
+				level.playSound(null, getX(), getY(), getZ(), ground.getSoundType().getStepSound(), SoundSource.NEUTRAL, 0.4F, 0.6F);
+			}
+		}
+	}
+
+	@Override
+	public float maxUpStep() {
+		// (0.5.31) dragged, it's hauled up a step as you climb it
+		return this.entityData.get(DRAGGER) >= 0 ? 1.0F : super.maxUpStep();
+	}
+
+	/**
+	 * (0.5.31) Server: {@code player}, dragging this, right-clicked a block: onto a butcher table near enough (a big carcass
+	 * needs a 2x2), else it's let go.
+	 */
+	public void dragOnto(Player player, BlockPos clicked, Vec3 hit) {
+		if (Corpses.isButcherBlock(level().getBlockState(clicked)) && position().distanceTo(Vec3.atCenterOf(clicked)) <= DRAG_TO_TABLE) {
+			Vec3 at = tableSpot(level(), clicked, hit, isBigCarcass());
+			if (at == null) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.big_table"));
+				return;
+			}
+			this.entityData.set(DRAGGER, -1);
+			grabCooldown = GRAB_COOLDOWN;
+			putDown(at, player.getYRot() + 90.0F);
+			return;
+		}
+		stopDrag();
 	}
 
 	/**
@@ -1445,6 +1584,7 @@ public class CorpseEntity extends Entity {
 		if (!fitsInPocket()) {
 			// (0.5.31) not with a plain click any more: sneak + hold lifts it, and a big carcass not at all
 			player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
+			// ((0.5.31) too big: sneak + hold drags it, a knife cuts it up)
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		ItemStack pocketed = CorpseItem.of(this);

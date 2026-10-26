@@ -37,6 +37,7 @@ public final class ModelPoses {
 		com.jaymospowers.client.freerun.BarHangPose.applyModel(model, state);
 		MeditatePose.applyModel(model, state);
 		com.jaymospowers.client.wounds.TendPose.applyModel(model, state);
+		CrouchPose.applyModel(model, state);
 		com.jaymospowers.client.wounds.WoundNursePose.applyModel(model, state);
 		CarryPose.applyModel(model, state);
 		WindPose.applyModel(model, state);

@@ -50,10 +50,21 @@ abstract class MinecraftUseMixin {
 		int now = player.tickCount;
 		boolean sameHold = now - jaymoskitchen$lastUse <= SAME_HOLD;
 		jaymoskitchen$lastUse = now;
-		if (CorpseEntity.carriedBy(player) == null) {
+		boolean dragging = CorpseEntity.draggedBy(player) != null;
+		if (CorpseEntity.carriedBy(player) == null && !dragging) {
 			return;
 		}
 		if (sameHold) {
+			ci.cancel();
+			return;
+		}
+		if (dragging) {
+			// (0.5.31) a carcass dragged behind: a click on a butcher block goes through (onto the table), any other lets go
+			if (hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK
+				&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
+				return;
+			}
+			ClientPlayNetworking.send(new Payloads.DropCarried(false));
 			ci.cancel();
 			return;
 		}

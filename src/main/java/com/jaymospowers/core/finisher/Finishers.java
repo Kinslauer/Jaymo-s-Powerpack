@@ -110,7 +110,8 @@ import org.jspecify.annotations.Nullable;
  * one of {@code WebExecutions}' moves instead of the neck snap; its own attachment counts as {@link #busy} and
  * {@link #targeted} here, so the roots, the camera and the body lying still are shared.
  * <p>
- * (0.17.7) Andy: "maybe execution should be on left click hold for 1.5s to confirm?". It is: <b>hold attack</b> on someone
+ * (0.17.7) Andy: "maybe execution should be on left click hold for 1.5s to confirm?", then "change it to shift + m1 hold. This
+ * is so it doesnt interfere with z fighters". It is: <b>sneak + hold attack</b> on someone
  * downed or crippled for {@link #HOLD_TICKS}, any weapon and bare hands alike (the neck snap still only at the head; the
  * three taps are gone, the hold is the confirmation). The click that starts it is an ordinary blow. Right-click held on
  * the downed is the revive now, and sneak + right-click held the lift, so none of the three is taken for another. Holding
@@ -636,7 +637,7 @@ public final class Finishers {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (!player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body)) {
+			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body)) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
 				hold.start = now;
 				continue;

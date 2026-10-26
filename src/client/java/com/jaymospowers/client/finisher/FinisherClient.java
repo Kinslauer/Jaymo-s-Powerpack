@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
 
 /**
- * (0.17.7) The execution's hold is left-click's ({@link Finishers}): while attack is held with the crosshair on someone,
+ * (0.17.7) The execution's hold is sneak + left-click's ({@link Finishers}): while both are held with the crosshair on someone,
  * the server is told who (once, and again when it changes or is let go: {@link Finishers.Execute}). The server times it
  * and decides whether they're down for it. Holding attack on an entity does nothing else in vanilla.
  */
@@ -27,7 +27,7 @@ public final class FinisherClient {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		int target = -1;
-		if (player != null && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
+		if (player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
 			&& minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
 			target = body.getId();
 		}
@@ -40,10 +40,10 @@ public final class FinisherClient {
 	}
 
 	/**
-	 * Whether the crosshair is on someone helpless enough to execute: left-click held there is the execution's, so the
-	 * powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
+	 * Whether you're sneaking with the crosshair on someone helpless enough to execute: sneak + left-click held there is the
+	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
 	 */
 	public static boolean aimingAtHelpless(Minecraft minecraft) {
-		return minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body && Finishers.helpless(body);
+		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body && Finishers.helpless(body);
 	}
 }

@@ -14,6 +14,7 @@ abstract class TendModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$tendLimbs(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		TendPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.CrouchPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.wounds.WoundNursePose.applyModel(submit.model(), submit.state());
 	}
 }
