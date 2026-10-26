@@ -20,7 +20,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.1) Cryokinesis for a gifted villager ({@link Gifted}): an ice shard that slows and chills, frost under the foe's
+ * (0.17.2) Cryokinesis for a gifted villager ({@link Gifted}): an ice shard that slows and chills, frost under the foe's
  * feet, a burst of cold on anyone too close, and an ice wall thrown up between them and a foe to get away (it melts, as
  * all the power's ice does, {@link CryoIce}). Cold never hurts them. A ruler's ultimate is the Blizzard; out of a fight
  * they frost the water near them (the larder's ice).

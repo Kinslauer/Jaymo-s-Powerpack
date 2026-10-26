@@ -305,7 +305,7 @@ public final class McaCompat {
 		}
 	}
 
-	/** (0.7.216) {@code e}'s mother and father (an MCA villager's, those it knows of); none without MCA. */
+	/** (0.7.217) {@code e}'s mother and father (an MCA villager's, those it knows of); none without MCA. */
 	static java.util.List<java.util.UUID> parents(net.minecraft.world.entity.Entity e) {
 		return LOADED ? McaBridge.parents(e) : java.util.List.of();
 	}

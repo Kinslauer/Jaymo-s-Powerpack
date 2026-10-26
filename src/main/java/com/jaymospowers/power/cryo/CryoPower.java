@@ -80,7 +80,7 @@ public final class CryoPower implements Power {
 		CryoIce.init();
 		CryoShards.init();
 		CryoFlashFreeze.init();
-		// (0.17.1) what a gifted villager does with Cryokinesis
+		// (0.17.2) what a gifted villager does with Cryokinesis
 		CryoGift.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			// a Frost-born Cryokinesis user: freezing never hurts them

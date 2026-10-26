@@ -21,7 +21,7 @@ import net.minecraft.world.entity.monster.spider.CaveSpider;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.216) <b>Gifted folk</b>: villagers who awaken to a power (Jaymo's Powers holds it and fights with it, its
+ * (0.7.217) <b>Gifted folk</b>: villagers who awaken to a power (Jaymo's Powers holds it and fights with it, its
  * {@code core/gifted}; here is who awakens, and to what). Andy: "villagers should be able to acquire and use powers as
  * well! This is the only way that encountering a stormborn purist king makes sense."
  * <ul>

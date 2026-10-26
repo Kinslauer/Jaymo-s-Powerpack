@@ -392,7 +392,7 @@ public final class ZFighterPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		com.jaymospowers.power.web.KitchenCompat.extraStomachSlots(player -> Powers.has(player, INSTANCE) ? EXTRA_STOMACH : 0);
-		// (0.17.1) what a gifted villager does with Z Fighter
+		// (0.17.2) what a gifted villager does with Z Fighter
 		ZFighterGift.init();
 		ZFighterKi.init();
 		ZFighterWaveBeam.init();

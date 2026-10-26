@@ -121,7 +121,7 @@ public final class WindPower implements Power {
 		WindJet.init();
 		com.jaymospowers.power.wind.aether.WindAether.init();
 		WindDebug.register();
-		// (0.17.1) what a gifted villager does with Wind
+		// (0.17.2) what a gifted villager does with Wind
 		WindGift.init();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));

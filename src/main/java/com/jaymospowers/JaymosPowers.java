@@ -47,7 +47,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
 		com.jaymospowers.core.GiantReach.init();
-		// (0.17.1) gifted villagers: powers held by those who aren't players (who awakens is Kingdoms')
+		// (0.17.2) gifted villagers: powers held by those who aren't players (who awakens is Kingdoms')
 		com.jaymospowers.core.gifted.GiftedAI.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();

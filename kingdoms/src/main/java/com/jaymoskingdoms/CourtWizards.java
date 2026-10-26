@@ -88,7 +88,7 @@ public final class CourtWizards {
 			}
 		} else if (since == CHILD) {
 			v.setGrownSince(level.getGameTime());
-			// (0.7.216) come of age: weighed for a power
+			// (0.7.217) come of age: weighed for a power
 			GiftedFolk.cameOfAge(level, v.mob());
 		} else if (since == UNKNOWN) {
 			v.setGrownSince(level.getGameTime() - level.getRandom().nextInt((int)(SPREAD_DAYS * DAY_TICKS)));

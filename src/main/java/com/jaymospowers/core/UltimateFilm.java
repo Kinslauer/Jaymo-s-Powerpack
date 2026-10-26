@@ -101,7 +101,7 @@ public final class UltimateFilm {
 	}
 
 	/**
-	 * (0.17.1) A film for an ultimate that isn't a player's (a gifted ruler's, {@code core/gifted}): everyone within
+	 * (0.17.2) A film for an ultimate that isn't a player's (a gifted ruler's, {@code core/gifted}): everyone within
 	 * {@code witnesses} blocks of {@code caster} sees the bars; no camera is taken.
 	 */
 	public static void witnessed(Entity caster, int shot, int ticks, Vec3 at, @Nullable Entity target, double witnesses) {

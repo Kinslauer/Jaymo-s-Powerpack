@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.1) Smoke for a gifted villager ({@link Gifted}): a smoke screen that blinds the foe, a choking cloud on them, a
+ * (0.17.2) Smoke for a gifted villager ({@link Gifted}): a smoke screen that blinds the foe, a choking cloud on them, a
  * hot burst of smoke round anyone too close, and a smoke step: they vanish in smoke and re-form a few blocks away. Smoke
  * never sets anything alight. A ruler's ultimate is the Ash Storm ({@link SmokeAshStorm}'s soot); out of a fight they
  * blow smoke rings and draw the smoke off a campfire.

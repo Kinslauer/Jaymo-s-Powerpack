@@ -19,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.1) Z Fighter for a gifted villager ({@link Gifted}): a ki blast, a flurry of blows, a palm that throws the foe back,
+ * (0.17.2) Z Fighter for a gifted villager ({@link Gifted}): a ki blast, a flurry of blows, a palm that throws the foe back,
  * and a flash step away. No Great Ape, no lineage and no fusion; just the fighter. A ruler's ultimate is the Wave Beam
  * ({@link ZFighterWaveBeam}'s look, in a straight line that breaks no block); out of a fight they shadowbox.
  */

@@ -2937,7 +2937,7 @@ Warpainted red with ochre bands. Players and villager apes alike. Sketch: projec
   - `gear/`: essence payment at the enchanting table, Spellbinding Cloth, the Artificer's Rod with five foci (Pull,
     Push, Lift into a bound block, Ember, Frost), Ichorium tools, Ichorcloth robes, the Lantern of Everflame.
   Compile-checked against the 26.3 jars, not yet seen in a client.
-## 0.17.1: gifted villagers (Kingdoms 0.7.216)
+## 0.17.2: gifted villagers (Kingdoms 0.7.217)
 Andy met a Stormborn purist king and wanted villagers able to "acquire and use powers as well" rather than removing
 him. A player's power runs off their keys and client, so villagers hold a **gift** instead (`core/gifted`): the `gift`
 attachment (power, corrupted, fighting style, strain; saved and synced), and each power's own `GiftKit` in its package

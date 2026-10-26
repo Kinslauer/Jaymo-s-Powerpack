@@ -44,8 +44,8 @@ public final class WebSymbioteBond {
 	 * otherwise it comes off at once. Up to {@link #FIGHTS} fights a bond, as before (was: always, the first three).
 	 */
 	public static final float FIGHT_CHANCE_LOW = 0.6F, FIGHT_CHANCE_HIGH = 0.3F;
-	/** Presses to win: {@code FIGHT_PRESSES_MAX} at no bond, down to {@code FIGHT_PRESSES_MIN} at {@code FIGHT_BOND}. */
-	public static final int FIGHT_PRESSES_MAX = 30, FIGHT_PRESSES_MIN = 12;
+	/** Presses to win: {@code FIGHT_PRESSES_MAX} at no bond, down to {@code FIGHT_PRESSES_MIN} at {@code FIGHT_BOND} (0.17.1: eased from 30-12). */
+	public static final int FIGHT_PRESSES_MAX = 22, FIGHT_PRESSES_MIN = 9;
 	/**
 	 * Andy: "maybe make it slightly easier as bond increases". The bar fades as a takeover's does at no bond, and only
 	 * {@code FIGHT_FADE_AT_BOND} as fast at {@code FIGHT_BOND}; its heaves back come {@code FIGHT_SHOVE_AT_BOND} as often

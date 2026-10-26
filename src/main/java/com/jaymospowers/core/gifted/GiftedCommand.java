@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 
 /**
- * (0.17.1) {@code /power gift <targets> <power> [bold|steady|wary]}, {@code /power gift <targets> clear|corrupt|ready},
+ * (0.17.2) {@code /power gift <targets> <power> [bold|steady|wary]}, {@code /power gift <targets> clear|corrupt|ready},
  * and {@code /power gift <targets> unleash} (their ultimate on whoever runs it): for testing gifted villagers.
  */
 public final class GiftedCommand {

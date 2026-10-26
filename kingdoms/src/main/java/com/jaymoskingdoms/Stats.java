@@ -114,10 +114,10 @@ public final class Stats {
 		return n;
 	}
 
-	/** Every attribute point earned: from your character level, your heritage's free ones, and a Warrior-born's from the brink. */
+	/** Every attribute point earned: from your character level, your heritage's free ones, a Warrior-born's from the brink, and (0.7.216) a foundling's. */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
-		return characterLevel(p) / LEVELS_PER_POINT + (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player);
+		return characterLevel(p) / LEVELS_PER_POINT + (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player) + LifeStory.freePoints(player);
 	}
 
 	/** Points left to spend. */
@@ -149,9 +149,14 @@ public final class Stats {
 		return kind == null ? 0 : kind.bonus(stat);
 	}
 
-	/** {@code stat}'s value for {@code player}: spent, heritage and class, at most {@link #MAX}. */
+	/** (0.7.216) Free points in {@code stat} from {@code player}'s life story ({@link LifeStory}). */
+	public static int fromStory(Player player, Stat stat) {
+		return LifeStory.points(player, stat);
+	}
+
+	/** {@code stat}'s value for {@code player}: spent, heritage, class and (0.7.216) story, at most {@link #MAX}. */
 	public static int value(Player player, Skills.Progress p, Stat stat) {
-		return Math.min(MAX, spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat));
+		return Math.min(MAX, spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) + fromStory(player, stat));
 	}
 
 	public static int value(Player player, Stat stat) {
@@ -163,7 +168,7 @@ public final class Stats {
 		if (stat == Stat.ARCANA && !Mana.attuned(player)) {
 			return "gui.jaymoskingdoms.stats.blocked.unattuned";
 		}
-		if (spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) >= MAX) {
+		if (spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) + fromStory(player, stat) >= MAX) {
 			return "gui.jaymoskingdoms.stats.blocked.max";
 		}
 		if (points(player, p) <= 0) {
