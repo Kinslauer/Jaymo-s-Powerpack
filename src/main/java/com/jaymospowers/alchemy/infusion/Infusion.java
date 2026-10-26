@@ -236,7 +236,7 @@ public final class Infusion {
 		for (PedestalEntity p : loaded(all)) {
 			BlockPos at = p.getBlockPos();
 			BlockPos mirror = new BlockPos(2 * centre.getX() - at.getX(), at.getY(), 2 * centre.getZ() - at.getZ());
-			if (!(level.getBlockEntity(mirror) instanceof PedestalEntity m) || m.stack().isEmpty() || all.stream().noneMatch(o -> o == m)) {
+			if (!level.hasChunkAt(mirror) || !(level.getBlockEntity(mirror) instanceof PedestalEntity m) || m.stack().isEmpty() || all.stream().noneMatch(o -> o == m)) {
 				lone++;
 			}
 		}
@@ -278,7 +278,7 @@ public final class Infusion {
 				continue;
 			}
 			for (Holder<Enchantment> e : stored.keySet()) {
-				if (has.getLevel(e) > 0 && has.getLevel(e) == e.value().getMaxLevel()) {
+				if (e.value().getMaxLevel() > 1 && has.getLevel(e) == e.value().getMaxLevel()) {
 					return e;
 				}
 			}
