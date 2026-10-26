@@ -1,0 +1,578 @@
+{
+ "items": {
+  "minecraft:coal": {
+   "fire": 4,
+   "earth": 3,
+   "sulphur": 2
+  },
+  "minecraft:charcoal": {
+   "fire": 4,
+   "earth": 1,
+   "sulphur": 1,
+   "plant": 1
+  },
+  "minecraft:raw_iron": {
+   "earth": 4,
+   "metal": 6
+  },
+  "minecraft:raw_copper": {
+   "earth": 4,
+   "metal": 5,
+   "spark": 1
+  },
+  "minecraft:raw_gold": {
+   "earth": 4,
+   "metal": 5,
+   "wealth": 3
+  },
+  "minecraft:iron_ingot": {
+   "metal": 8,
+   "earth": 2
+  },
+  "minecraft:iron_nugget": {
+   "metal": 1
+  },
+  "minecraft:copper_ingot": {
+   "metal": 6,
+   "spark": 2,
+   "earth": 1
+  },
+  "minecraft:gold_ingot": {
+   "metal": 6,
+   "wealth": 6
+  },
+  "minecraft:gold_nugget": {
+   "metal": 1,
+   "wealth": 1
+  },
+  "minecraft:netherite_scrap": {
+   "metal": 6,
+   "fire": 4,
+   "earth": 4
+  },
+  "minecraft:netherite_ingot": {
+   "metal": 16,
+   "fire": 6,
+   "earth": 6,
+   "wealth": 4
+  },
+  "minecraft:diamond": {
+   "crystal": 10,
+   "light": 3,
+   "wealth": 4,
+   "earth": 3
+  },
+  "minecraft:emerald": {
+   "wealth": 6,
+   "crystal": 5,
+   "life": 2
+  },
+  "minecraft:lapis_lazuli": {
+   "salt": 3,
+   "crystal": 3,
+   "water": 2,
+   "arcana": 1
+  },
+  "minecraft:quartz": {
+   "crystal": 4,
+   "salt": 3,
+   "fire": 1
+  },
+  "minecraft:amethyst_shard": {
+   "crystal": 5,
+   "arcana": 2,
+   "spirit": 1
+  },
+  "minecraft:redstone": {
+   "mercury": 4,
+   "spark": 2,
+   "earth": 1
+  },
+  "minecraft:glowstone_dust": {
+   "light": 3,
+   "fire": 2,
+   "air": 1
+  },
+  "minecraft:prismarine_shard": {
+   "water": 3,
+   "crystal": 3,
+   "light": 1
+  },
+  "minecraft:prismarine_crystals": {
+   "light": 3,
+   "crystal": 4,
+   "water": 2
+  },
+  "minecraft:flint": {
+   "earth": 3,
+   "sulphur": 2,
+   "salt": 1
+  },
+  "minecraft:echo_shard": {
+   "shadow": 6,
+   "spirit": 4,
+   "crystal": 4,
+   "mind": 2
+  },
+  "minecraft:gunpowder": {
+   "sulphur": 4,
+   "fire": 2,
+   "salt": 1
+  },
+  "minecraft:blaze_powder": {
+   "fire": 5,
+   "sulphur": 2,
+   "spark": 1
+  },
+  "minecraft:blaze_rod": {
+   "fire": 8,
+   "sulphur": 3,
+   "spark": 2
+  },
+  "minecraft:magma_cream": {
+   "fire": 5,
+   "mercury": 3,
+   "sulphur": 2
+  },
+  "minecraft:ghast_tear": {
+   "water": 4,
+   "mercury": 3,
+   "spirit": 4
+  },
+  "minecraft:nether_star": {
+   "arcana": 16,
+   "light": 12,
+   "spirit": 6,
+   "fire": 6
+  },
+  "minecraft:fire_charge": {
+   "fire": 5,
+   "sulphur": 3,
+   "earth": 1
+  },
+  "minecraft:dragon_breath": {
+   "fire": 6,
+   "shadow": 6,
+   "arcana": 8,
+   "air": 4
+  },
+  "minecraft:bone": {
+   "salt": 4,
+   "death": 2,
+   "earth": 1
+  },
+  "minecraft:bone_meal": {
+   "salt": 2,
+   "earth": 1
+  },
+  "minecraft:rotten_flesh": {
+   "rot": 3,
+   "death": 2,
+   "beast": 1
+  },
+  "minecraft:leather": {
+   "beast": 3,
+   "earth": 1,
+   "water": 1
+  },
+  "minecraft:rabbit_hide": {
+   "beast": 2,
+   "earth": 1
+  },
+  "minecraft:rabbit_foot": {
+   "motion": 4,
+   "beast": 2,
+   "wealth": 1
+  },
+  "minecraft:feather": {
+   "air": 5,
+   "motion": 1
+  },
+  "minecraft:egg": {
+   "life": 3,
+   "water": 2,
+   "earth": 1
+  },
+  "minecraft:turtle_scute": {
+   "beast": 3,
+   "water": 2,
+   "salt": 2
+  },
+  "minecraft:armadillo_scute": {
+   "beast": 3,
+   "earth": 2,
+   "salt": 2
+  },
+  "minecraft:phantom_membrane": {
+   "shadow": 4,
+   "air": 4,
+   "undeath": 2
+  },
+  "minecraft:spider_eye": {
+   "venom": 3,
+   "beast": 1,
+   "sulphur": 1
+  },
+  "minecraft:string": {
+   "air": 2,
+   "beast": 1,
+   "plant": 1
+  },
+  "minecraft:slime_ball": {
+   "water": 3,
+   "mercury": 3,
+   "life": 2
+  },
+  "minecraft:ink_sac": {
+   "water": 3,
+   "shadow": 2,
+   "mercury": 1
+  },
+  "minecraft:glow_ink_sac": {
+   "water": 3,
+   "light": 3,
+   "mercury": 1
+  },
+  "minecraft:honeycomb": {
+   "life": 3,
+   "earth": 2,
+   "plant": 1
+  },
+  "minecraft:honey_bottle": {
+   "life": 3,
+   "water": 2,
+   "earth": 1
+  },
+  "minecraft:nautilus_shell": {
+   "water": 4,
+   "salt": 3,
+   "beast": 2,
+   "spirit": 1
+  },
+  "minecraft:heart_of_the_sea": {
+   "water": 12,
+   "spirit": 6,
+   "wealth": 6,
+   "arcana": 4
+  },
+  "minecraft:shulker_shell": {
+   "earth": 4,
+   "mercury": 4,
+   "shadow": 3,
+   "crystal": 2
+  },
+  "minecraft:ender_pearl": {
+   "mercury": 6,
+   "shadow": 3,
+   "motion": 3
+  },
+  "minecraft:ender_eye": {
+   "mercury": 8,
+   "shadow": 4,
+   "motion": 3,
+   "fire": 4,
+   "mind": 2
+  },
+  "minecraft:wither_skeleton_skull": {
+   "death": 12,
+   "undeath": 8,
+   "shadow": 4
+  },
+  "minecraft:skeleton_skull": {
+   "death": 6,
+   "undeath": 4,
+   "salt": 2
+  },
+  "minecraft:zombie_head": {
+   "death": 5,
+   "undeath": 4,
+   "rot": 3
+  },
+  "minecraft:creeper_head": {
+   "spark": 5,
+   "sulphur": 4,
+   "fire": 3
+  },
+  "minecraft:piglin_head": {
+   "beast": 4,
+   "wealth": 3,
+   "war": 2
+  },
+  "minecraft:player_head": {
+   "mind": 6,
+   "life": 4,
+   "beast": 2
+  },
+  "minecraft:dragon_head": {
+   "arcana": 10,
+   "beast": 8,
+   "fire": 6,
+   "shadow": 4
+  },
+  "minecraft:totem_of_undying": {
+   "spirit": 12,
+   "death": 6,
+   "wealth": 6,
+   "life": 6
+  },
+  "minecraft:elytra": {
+   "air": 14,
+   "motion": 10,
+   "beast": 4,
+   "arcana": 3
+  },
+  "minecraft:trident": {
+   "metal": 8,
+   "water": 8,
+   "war": 4,
+   "spirit": 2
+  },
+  "minecraft:experience_bottle": {
+   "mind": 6,
+   "spirit": 6,
+   "life": 4,
+   "crystal": 1
+  },
+  "minecraft:nether_brick": {
+   "earth": 2,
+   "fire": 2,
+   "shadow": 1
+  },
+  "minecraft:resin_clump": {
+   "plant": 2,
+   "earth": 1,
+   "fire": 1
+  },
+  "minecraft:apple": {
+   "plant": 3,
+   "life": 2,
+   "water": 1
+  },
+  "minecraft:golden_apple": {
+   "life": 8,
+   "wealth": 10,
+   "metal": 6,
+   "plant": 3
+  },
+  "minecraft:enchanted_golden_apple": {
+   "life": 14,
+   "wealth": 20,
+   "metal": 12,
+   "arcana": 10,
+   "plant": 3
+  },
+  "minecraft:wheat": {
+   "earth": 2,
+   "air": 1,
+   "plant": 2
+  },
+  "minecraft:wheat_seeds": {
+   "earth": 1,
+   "plant": 1
+  },
+  "minecraft:beetroot_seeds": {
+   "earth": 1,
+   "plant": 1
+  },
+  "minecraft:melon_seeds": {
+   "earth": 1,
+   "water": 1,
+   "plant": 1
+  },
+  "minecraft:pumpkin_seeds": {
+   "earth": 1,
+   "plant": 1
+  },
+  "minecraft:torchflower_seeds": {
+   "earth": 1,
+   "light": 1,
+   "plant": 1
+  },
+  "minecraft:pitcher_pod": {
+   "earth": 1,
+   "water": 1,
+   "plant": 2
+  },
+  "minecraft:carrot": {
+   "earth": 2,
+   "water": 1,
+   "plant": 2
+  },
+  "minecraft:potato": {
+   "earth": 3,
+   "water": 1,
+   "plant": 2
+  },
+  "minecraft:poisonous_potato": {
+   "earth": 3,
+   "venom": 2,
+   "plant": 2
+  },
+  "minecraft:beetroot": {
+   "earth": 2,
+   "water": 1,
+   "plant": 2
+  },
+  "minecraft:sweet_berries": {
+   "water": 2,
+   "plant": 2,
+   "life": 1
+  },
+  "minecraft:glow_berries": {
+   "water": 2,
+   "light": 2,
+   "plant": 2
+  },
+  "minecraft:cocoa_beans": {
+   "earth": 1,
+   "plant": 2,
+   "fire": 1
+  },
+  "minecraft:sugar": {
+   "water": 1,
+   "air": 1,
+   "plant": 1
+  },
+  "minecraft:bread": {
+   "earth": 2,
+   "air": 1,
+   "fire": 1,
+   "plant": 2
+  },
+  "minecraft:cookie": {
+   "earth": 1,
+   "fire": 1,
+   "plant": 1
+  },
+  "minecraft:cake": {
+   "life": 4,
+   "water": 3,
+   "earth": 2,
+   "plant": 3
+  },
+  "minecraft:pumpkin_pie": {
+   "life": 2,
+   "water": 2,
+   "earth": 2,
+   "plant": 3
+  },
+  "minecraft:beef": {
+   "beast": 3,
+   "life": 2,
+   "water": 1
+  },
+  "minecraft:porkchop": {
+   "beast": 3,
+   "life": 2,
+   "water": 1
+  },
+  "minecraft:mutton": {
+   "beast": 3,
+   "life": 2,
+   "water": 1
+  },
+  "minecraft:chicken": {
+   "beast": 3,
+   "life": 2,
+   "air": 1
+  },
+  "minecraft:rabbit": {
+   "beast": 3,
+   "life": 1,
+   "motion": 1
+  },
+  "minecraft:cod": {
+   "water": 4,
+   "life": 2,
+   "beast": 1
+  },
+  "minecraft:salmon": {
+   "water": 4,
+   "life": 2,
+   "beast": 1
+  },
+  "minecraft:tropical_fish": {
+   "water": 3,
+   "life": 2,
+   "light": 1
+  },
+  "minecraft:pufferfish": {
+   "water": 3,
+   "venom": 4,
+   "life": 1
+  },
+  "minecraft:cooked_beef": {
+   "beast": 3,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:cooked_porkchop": {
+   "beast": 3,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:cooked_mutton": {
+   "beast": 3,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:cooked_chicken": {
+   "beast": 3,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:cooked_rabbit": {
+   "beast": 3,
+   "life": 1,
+   "fire": 2
+  },
+  "minecraft:cooked_cod": {
+   "water": 2,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:cooked_salmon": {
+   "water": 2,
+   "life": 2,
+   "fire": 2
+  },
+  "minecraft:baked_potato": {
+   "earth": 3,
+   "fire": 2,
+   "plant": 1
+  },
+  "minecraft:milk_bucket": {
+   "life": 5,
+   "water": 8,
+   "metal": 6
+  },
+  "minecraft:water_bucket": {
+   "water": 12,
+   "metal": 6
+  },
+  "minecraft:lava_bucket": {
+   "fire": 14,
+   "earth": 4,
+   "metal": 6
+  },
+  "minecraft:powder_snow_bucket": {
+   "frost": 4,
+   "water": 3,
+   "air": 2,
+   "metal": 6
+  },
+  "minecraft:glass_bottle": {
+   "crystal": 1,
+   "air": 1
+  },
+  "minecraft:potion": {
+   "water": 4,
+   "crystal": 1
+  },
+  "minecraft:splash_potion": {
+   "water": 4,
+   "crystal": 1,
+   "sulphur": 2
+  }
+ }
+}
