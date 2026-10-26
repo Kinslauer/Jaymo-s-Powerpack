@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.client.mixin.mca",
 	"plugin": "com.jaymoskingdoms.mixin.mca.McaMixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["McaScreensMixin", "McaVillagerMessageMixin", "McaVerdantSkinMixin", "McaVillagerBodyChoiceMixin", "McaTailorButtonMixin", "McaStrangerButtonMixin", "McaInteractScreenAccessor", "McaDisguiseSkinMixin", "McaDisguiseLayerMixin", "McaEditorPageAccessor", "McaDestinyNameMixin", "McaDestinySkipMixin", "McaDestinyWaitMixin", "McaDestinyAccessor", "McaInteractInfoMixin", "McaDynamicScreenInvoker", "McaSkinCoverLayerMixin", "McaSkinCoverDrawMixin", "McaShoulderSurfingBodyMixin", "McaIntroNameMixin"],
+	"client": ["McaScreensMixin", "McaVillagerMessageMixin", "McaVerdantSkinMixin", "McaVillagerBodyChoiceMixin", "McaTailorButtonMixin", "McaStrangerButtonMixin", "McaInteractScreenAccessor", "McaDisguiseSkinMixin", "McaDisguiseLayerMixin", "McaEditorPageAccessor", "McaDestinyNameMixin", "McaDestinySkipMixin", "McaDestinyWaitMixin", "McaButtonExAccessor", "McaStrangerPageMixin", "McaStrangerInfoMixin", "McaDestinyAccessor", "McaInteractInfoMixin", "McaDynamicScreenInvoker", "McaSkinCoverLayerMixin", "McaSkinCoverDrawMixin", "McaShoulderSurfingBodyMixin", "McaIntroNameMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

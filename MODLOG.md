@@ -2994,3 +2994,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   where they land to be picked up again (`ground/ThrownRocks`).
 - **0.17.15, the life story before MCA's creator (Kingdoms 0.7.229):** newcomers tell their story first, then MCA's
   creator opens; the name typed on the creator's first page is now always saved. No Powers changes. See Kingdoms' log.
+- **0.17.16, strangers' MCA page (Kingdoms 0.7.230):** until you're introduced, MCA's screen shows only Introduce
+  yourself, Gift and Trade, and nothing about the villager. No Powers changes. See Kingdoms' log.

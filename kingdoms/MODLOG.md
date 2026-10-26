@@ -5032,3 +5032,15 @@ name players choose, i think it requires an extra enter prompt".
 - **Names.** The creator's first page is `intro`: MCA sends its `general` tab there. `McaDestinyNameMixin` saved only
   on leaving `general`, so a typed name reached the server only if the player had also visited and left the general
   tab, which is the "extra step" Andy saw. Leaving `intro` or `general` now saves.
+
+## 0.7.230: strangers' MCA page, introductions first (pack 0.17.16)
+Andy: "introductions should be the first option available. before that none of this is visible, no options but gift
+trade or introduce".
+- `McaStrangerPageMixin` (on `AbstractDynamicScreen.setLayout`): MCA's main page for a villager you haven't been
+  introduced to shows **Introduce yourself** in MCA's first row, then **Gift** (MCA's gift mode), then Trade if they
+  trade. Every other MCA button is hidden: Talk, Interact, Inventory, Work and Family Tree. `McaButtonExAccessor`
+  reads which button a widget is.
+- `McaStrangerInfoMixin`: no name, trade, mood, personality, temperament or standing lines, and no icons (MCA's gift
+  icon still shows while you hold out a gift). When you become known, the page is laid out again with everything.
+- Introduce sends a new `main` answer, `Introductions.INTRODUCE`. If you share a tongue, it asks their name (as "Ask
+  their name"); if not, it offers a handshake. The screen stays open.
