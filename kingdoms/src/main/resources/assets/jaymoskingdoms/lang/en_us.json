@@ -1,5 +1,7 @@
 {
 	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap flint on stone into shards, cut grass with a primitive knife for fiber, twist it into plant string, and bind a flint hatchet.",
+	"message.jaymoskingdoms.trunk_built_on": "Something's built on this trunk. It stays where it is.",
+	"message.jaymoskingdoms.trunk_too_heavy": "Too heavy to shift on your own.",
 	"block.jaymoskingdoms.chopped_log": "Chopped Log",
 	"entity.jaymoskingdoms.folk": "Kingdom Folk",
 	"entity.jaymoskingdoms.king_of": "King of %s",

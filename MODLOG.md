@@ -2992,3 +2992,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
   Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
   where they land to be picked up again (`ground/ThrownRocks`).
+- **0.17.16, felled trees (Kingdoms 0.7.229):** ideas from Tree Physics (ARR, 1.21.1 only, needs the Sable physics
+  library, so not shipped). Falling trees break through other trees' leaves, some of their own leaves snap off when
+  they land, and a fallen trunk can be pushed, rolled down slopes, or built on to pin it. No Powers changes. See
+  Kingdoms' log.
