@@ -5086,3 +5086,10 @@ woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of it
 - **Built on, it stays.** Set any block on top of a fallen trunk (not its own logs or leaves) and the next push finds
   it pinned. It is forgotten as a trunk and stays as plain logs for good. Trunks already stayed as real blocks, so
   nothing despawns.
+## 0.7.233: the mana glow settles dim after attuning (pack 0.17.21)
+Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
+flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
+Now `ManaClient` eases the flare down to a resting glow: `REST_MIN` (0.2 of the shells' light, attuned with mana spent)
+up to `REST_FULL` (0.55, full mana). Mana past full no longer brightens it; the flare at its height is a little brighter
+than before (`FLARE` 2.0) and eases away with the same curve as the blue on your screen, which still fades out fully.
+Not seen in game.

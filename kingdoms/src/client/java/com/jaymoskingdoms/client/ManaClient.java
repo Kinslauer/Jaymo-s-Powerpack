@@ -36,8 +36,8 @@ import org.jspecify.annotations.Nullable;
  * previously. now it is only visible by those who are ALSO attuned ... the glow is more faint than before, and intensifies
  * with the user's mana." A soft blue glow hugging an attuned player's outline, after Jaymo's Powers' ki glow (our own
  * look and texture): a few shells just off the body, wisps scrolling up them, added like light. Fainter than the ki
- * glow, and brighter the fuller their mana; it flares while they're overloaded. Drawn only when the one looking is
- * attuned too.
+ * glow, and brighter the fuller their mana; it flares while they're overloaded, then settles to a dim rest. Drawn only
+ * when the one looking is attuned too.
  * <p>
  * And the overload itself, on your own screen: attuned just now, your sight goes blue and settles back over
  * {@link Mana#OVERLOAD_TICKS}.
@@ -51,8 +51,13 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	/** How far out each shell sits (model pixels) and how bright it is at full mana, inside out: fainter than the ki glow. */
 	static final float[] SHELLS = {0.4F, 0.85F, 1.4F};
 	static final float[] SHELL_LIGHT = {0.2F, 0.11F, 0.05F};
-	/** The overload: how much it brightens the glow, and swells it. */
-	static final float FLARE = 1.4F, FLARE_SWELL = 0.1F;
+	/**
+	 * (0.7.233) The resting glow, as a share of the shells' light: its floor (attuned, mana spent) and at full mana. Mana
+	 * past full (the overload's spill) doesn't brighten it. Andy: the flare "needs to dim to a dimmer minimum".
+	 */
+	static final float REST_MIN = 0.2F, REST_FULL = 0.55F;
+	/** The overload: how much it brightens the glow at its height, and swells it; it eases back down to the rest. */
+	static final float FLARE = 2.0F, FLARE_SWELL = 0.1F;
 	/** How fast the wisps rise, and the glow's slow breathing. */
 	static final float RISE = 0.01F, BREATHE = 0.1F, BREATHE_SPEED = 0.12F;
 	/** The overload's blue on your screen: the wash over everything and the edges, at its height. */
@@ -83,12 +88,14 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 		if (viewer == null || !Mana.attuned(viewer) || !Mana.attuned(player) || player.isInvisible()) {
 			return null;
 		}
-		float strength = player.getAttachedOrElse(Mana.GLOW, 0) / (float)Mana.GLOW_STEPS;
-		float flare = flare(player, 0.0F);
-		if (strength <= 0.0F && flare <= 0.0F) {
-			return null;
-		}
-		return new float[] {strength + FLARE * flare, flare};
+		float full = Math.min(1.0F, player.getAttachedOrElse(Mana.GLOW, 0) / (float)Mana.GLOW_STEPS);
+		float flare = eased(flare(player, 0.0F));
+		return new float[] {REST_MIN + (REST_FULL - REST_MIN) * full + FLARE * flare, flare};
+	}
+
+	/** The overload eased: it hits hard and drains away slowly. */
+	static float eased(float k) {
+		return k * k * (3.0F - 2.0F * k);
 	}
 
 	/** How much of the overload is left on {@code player} (1 just attuned, 0 settled). */
@@ -145,8 +152,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 		if (k <= 0.0F) {
 			return;
 		}
-		// eased: it hits hard and drains away slowly
-		k = k * k * (3.0F - 2.0F * k);
+		k = eased(k);
 		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), ARGB.colorFromFloat(WASH * k, 0.25F, 0.5F, 1.0F));
 		float e = EDGE * k;
 		graphics.blit(RenderPipelines.VIGNETTE, VIGNETTE, 0, 0, 0.0F, 0.0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(),
