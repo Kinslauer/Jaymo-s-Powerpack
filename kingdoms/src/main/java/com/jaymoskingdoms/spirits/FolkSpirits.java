@@ -18,7 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.237) The spirits of the folk. Andy answered "Yes" to "Do attuned villagers (court wizards, hermits) have spirits of
+ * (0.7.236) The spirits of the folk. Andy answered "Yes" to "Do attuned villagers (court wizards, hermits) have spirits of
  * their own you can see and fight?" A court wizard or hermit carries a spirit ({@link ManaFolk#giveSpirit}: Grimsby or Varro
  * by their id, their power as its level, bond 50). While they have a living target within {@link #SHOW_RANGE} the spirit is
  * out, so everyone sees its arms; with none for {@link #LOSE_TICKS} it is put away, and so it is when they die. With the
@@ -77,6 +77,7 @@ public final class FolkSpirits {
 		Mana.ripple(folk, Mana.WARD);
 		net.minecraft.world.phys.Vec3 away = attacker.position().subtract(folk.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.5);
 		attacker.push(away.x, 0.2, away.z);
+		attacker.needsSync = true;
 	}
 
 	/** The folk's spirit tick, every 10 ticks from {@link Sorcery#tick}: out while there's a target, a cast when it is near. */

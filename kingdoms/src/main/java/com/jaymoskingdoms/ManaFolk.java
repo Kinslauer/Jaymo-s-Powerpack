@@ -83,7 +83,7 @@ public final class ManaFolk {
 	}
 
 	/**
-	 * (0.7.237) Andy: "attuned villagers (court wizards, hermits) have spirits of their own you can see and fight". A court
+	 * (0.7.236) Andy: "attuned villagers (court wizards, hermits) have spirits of their own you can see and fight". A court
 	 * wizard or hermit without one gets a spirit: Grimsby or Varro by their id, their power as its level, bond 50, put away.
 	 */
 	public static void giveSpirit(LivingEntity e, int power) {
