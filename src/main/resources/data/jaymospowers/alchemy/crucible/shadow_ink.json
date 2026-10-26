@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:ink_sac",
+  "essences": {
+    "shadow": 6,
+    "mind": 3,
+    "flux": 3
+  },
+  "result": {
+    "item": "jaymospowers:shadow_ink",
+    "count": 1
+  },
+  "research": "whispers"
+}

@@ -3,10 +3,12 @@ package com.jaymospowers.alchemy;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -37,6 +39,9 @@ public final class Knowledge {
 	public static final AttachmentType<State> KNOWLEDGE = AttachmentRegistry.create(JaymosPowers.id("alchemy_knowledge"),
 		builder -> builder.persistent(State.CODEC).copyOnDeath().initializer(() -> State.NONE)
 			.syncWith(State.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+
+	/** Told after a research entry is unlocked, so a part can react to its own lore (forbidden entries adding corruption). */
+	public static final List<BiConsumer<ServerPlayer, Research.Entry>> ON_UNLOCK = new ArrayList<>();
 
 	private Knowledge() {
 	}
@@ -84,6 +89,9 @@ public final class Knowledge {
 		Set<String> research = new HashSet<>(s.research());
 		research.add(entry.id());
 		player.setAttached(KNOWLEDGE, new State(s.seen(), left, Set.copyOf(research)));
+		for (BiConsumer<ServerPlayer, Research.Entry> listener : ON_UNLOCK) {
+			listener.accept(player, entry);
+		}
 		return true;
 	}
 }
