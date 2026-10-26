@@ -187,6 +187,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)
 		LOGGER.debug("underworld attachments: {} {} {} {} {}", Underworld.DENS, Underworld.FOUND, Busts.OFFENCES, Busts.CHARGES, Busts.JAILED);
 		Underworld.register();
+		// 0.7.224: the den's bookie (wars and pit fights) and its fight pit (and its attachment)
+		LOGGER.debug("fight pit attachments: {} {} {}", FightPit.PITS, FightPit.RECORD, FightPit.HELD);
+		Bookies.register();
+		FightPit.register();
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
@@ -211,6 +215,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
+		LOGGER.debug("great wars attachment: {}", GreatWars.LEDGER);
 		Wars.register();
 		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
@@ -232,6 +237,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		GrimSites.register();
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
+		// (0.7.225) players on the throne: usurpers, heirs by marriage, conquerors, founders (and their attachment)
+		LOGGER.debug("crown attachment: {}", Crowns.CROWNS);
+		Crowns.register();
 		Nights.register();
 		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
@@ -418,6 +426,7 @@ public final class JaymosKingdoms implements ModInitializer {
 			Gatherers.clear();
 			Royals.clear();
 			Wardens.clear();
+			Crowns.clear();
 			Focus.clear();
 		});
 	}

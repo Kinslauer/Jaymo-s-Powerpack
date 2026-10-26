@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Emigrants;
+import com.jaymoskingdoms.FightPit;
 import com.jaymoskingdoms.GiftTales;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.HermitAlchemy;
@@ -52,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.221) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
  * family's leaving ({@link Emigrants#tell}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
- * (0.7.224) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
+ * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
@@ -138,7 +139,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && GiftTales.ANSWER.equals(answer)) {
-			// (0.7.224) asked about the power you saw: what they say of it
+			// (0.7.227) asked about the power you saw: what they say of it
 			villager.sendChatMessage(GiftTales.ask(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
@@ -193,6 +194,14 @@ abstract class McaDialogueMixin {
 				ci.cancel();
 				return;
 			}
+		}
+		// (0.7.224) a pit fighter with wins to his name (a champion, a retired one) brags of them
+		Component bout = FightPit.tell(villager, player);
+		if (bout != null) {
+			villager.sendChatMessage(bout, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
 		}
 		// (0.7.221) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
 		Component moved = Emigrants.tell(villager, player);

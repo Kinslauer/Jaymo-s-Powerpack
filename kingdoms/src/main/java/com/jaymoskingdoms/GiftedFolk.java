@@ -42,11 +42,11 @@ import org.jspecify.annotations.Nullable;
  * gifted Wind villager whose power the storm takes (corrupted) wakes to it ({@link #step}), and their children carry it.</li>
  * <li><b>Rulers</b>: a gifted villager is likelier to be crowned ({@link #rises}, {@link #RISE_CHANCE}), and a gifted
  * ruler unleashes their power's ultimate when their throne room is attacked ({@link #atCourt}).</li>
- * <li>(0.7.224) <b>Masters</b>: about one gifted in {@link #MASTER_ODDS} awakens as a master of it (Andy: "maybe 1 in 80 is
+ * <li>(0.7.227) <b>Masters</b>: about one gifted in {@link #MASTER_ODDS} awakens as a master of it (Andy: "maybe 1 in 80 is
  * an extremely gifted wielder, achieving great mastery of the power using it in their own way"; Powers makes them so).</li>
- * <li>(0.7.224) <b>Hidden gifts</b> ({@link #open}): most keep it to a minimum and hide it from their family and friends
+ * <li>(0.7.227) <b>Hidden gifts</b> ({@link #open}): most keep it to a minimum and hide it from their family and friends
  * ({@link #close}); by their temperament some don't care who sees ("who is going to stop them?"), masters more often.</li>
- * <li>(0.7.224) Resonance's calling: living through a Warden's sonic boom.</li>
+ * <li>(0.7.227) Resonance's calling: living through a Warden's sonic boom.</li>
  * </ul>
  * Nothing without Jaymo's Powers (no one awakens).
  */

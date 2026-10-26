@@ -181,7 +181,9 @@ final class WarParties {
 			}
 			for (int side : new int[] {war.attacker().principal(), war.defender().principal()}) {
 				String key = key(war.id(), side);
-				if (ACTIVE.containsKey(key) || now - LAST.getOrDefault(key, -COOLDOWN_TICKS) < COOLDOWN_TICKS || random.nextFloat() >= Tempers.warChance(server, side, PARTY_CHANCE)) {
+				// (0.7.224) a great war's parties go twice as often
+				long cooldown = GreatWars.great(server, war) ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS;
+				if (ACTIVE.containsKey(key) || now - LAST.getOrDefault(key, -cooldown) < cooldown || random.nextFloat() >= Tempers.warChance(server, side, PARTY_CHANCE)) {
 					continue;
 				}
 				send(level, war, side, false);
@@ -231,7 +233,12 @@ final class WarParties {
 		ACTIVE.put(key(war.id(), side), party);
 		LAST.put(key(war.id(), side), now);
 		int army = from.holdings().count(Folk.GUARD) + from.holdings().count(Folk.ARCHER);
-		int size = Math.min(PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from);
+		// (0.7.224) a great war's parties are bigger, and take sellswords from the war chest
+		boolean great = GreatWars.great(server, war);
+		int size = Math.min(great ? GreatWars.PARTY_MAX : PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from);
+		if (great) {
+			size += GreatWars.draftMercs(server, war, side, GreatWars.MERCS_PER_PARTY);
+		}
 		for (int i = 0; i < size; i++) {
 			Folk soldier = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 			if (soldier == null) {

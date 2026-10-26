@@ -119,6 +119,11 @@ public final class Monoliths {
 	static final AttachmentType<Boolean> FIRST_FALLEN = AttachmentRegistry.create(JaymosKingdoms.id("first_giant_fallen"),
 		builder -> builder.persistent(Codec.BOOL));
 
+	/** Whether the first of the Aether's Giants, the world's first world boss, has fallen in this world (on the Overworld). */
+	public static boolean firstFallen(ServerLevel overworld) {
+		return overworld.getAttachedOrElse(FIRST_FALLEN, false);
+	}
+
 	private static final Identifier VANILLA_GIANT_SCALE = JaymosKingdoms.id("vanilla_giant_scale");
 
 	public static final Map<Element, EntityType<AetherGiant>> GIANTS = new EnumMap<>(Element.class);

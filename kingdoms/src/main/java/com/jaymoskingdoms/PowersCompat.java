@@ -60,6 +60,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Treatment.tendAll(LivingEntity, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle tendAll;
+	private static boolean lookedForTend;
+
+	/**
+	 * (0.7.224) Another's hands on {@code body}: every hurt part dressed with a rag (or a linen bandage), every break
+	 * splinted, by Powers' wounds. How many parts were seen to; -1 without Powers (or an older one).
+	 */
+	public static int tendAll(net.minecraft.world.entity.LivingEntity body, boolean rag) {
+		if (!lookedForTend) {
+			lookedForTend = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tendAll = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Treatment"), "tendAll",
+						java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.LivingEntity.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' treatment (older Powers?)", e);
+				}
+			}
+		}
+		if (tendAll == null) {
+			return -1;
+		}
+		try {
+			return (int)tendAll.invoke(body, rag);
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
 	/**
 	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
 	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.
@@ -355,7 +385,7 @@ public final class PowersCompat {
 	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
 	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
-	/** (0.7.224) A gift's ways (Powers 0.17.9): a master, open or hidden, and seen by a player. */
+	/** (0.7.227) A gift's ways (Powers 0.17.12): a master, open or hidden, and seen by a player. */
 	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes, giftOpen, giftWitnesses;
 	private static boolean lookedForGifts;
 
@@ -398,7 +428,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.224) As {@link #give}, as a {@code master} or not, and {@code open} (they don't hide it) or not; with an older
+	 * (0.7.227) As {@link #give}, as a {@code master} or not, and {@code open} (they don't hide it) or not; with an older
 	 * Powers, as {@link #give}.
 	 */
 	public static boolean give(net.minecraft.world.entity.Entity entity, String power, int style, boolean master, boolean open) {
@@ -413,7 +443,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Sets the ways of {@code entity}'s gift (a master, open); false without one, or with an older Powers. */
+	/** (0.7.227) Sets the ways of {@code entity}'s gift (a master, open); false without one, or with an older Powers. */
 	public static boolean giftWays(net.minecraft.world.entity.Entity entity, boolean master, boolean open) {
 		lookForGifts();
 		try {
@@ -423,7 +453,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Whether {@code entity} is a master of their gift. Either side. */
+	/** (0.7.227) Whether {@code entity} is a master of their gift. Either side. */
 	public static boolean giftMaster(net.minecraft.world.entity.Entity entity) {
 		lookForGifts();
 		try {
@@ -433,7 +463,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Whether players know of {@code entity}'s gift (open, or seen at work); always, with an older Powers. Either side. */
+	/** (0.7.227) Whether players know of {@code entity}'s gift (open, or seen at work); always, with an older Powers. Either side. */
 	public static boolean giftRevealed(net.minecraft.world.entity.Entity entity) {
 		lookForGifts();
 		try {
@@ -443,7 +473,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Whether {@code entity} doesn't hide their gift; false without one, or with an older Powers. */
+	/** (0.7.227) Whether {@code entity} doesn't hide their gift; false without one, or with an older Powers. */
 	public static boolean giftOpen(net.minecraft.world.entity.Entity entity) {
 		lookForGifts();
 		try {
@@ -453,7 +483,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Tells Powers to tell us {@code (player, gifted)} each time a player sees a gift at work ({@link GiftTales}). */
+	/** (0.7.227) Tells Powers to tell us {@code (player, gifted)} each time a player sees a gift at work ({@link GiftTales}). */
 	public static void giftWitnesses(java.util.function.BiConsumer<net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity> told) {
 		lookForGifts();
 		try {
@@ -465,7 +495,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.224) Tells Powers who a gifted villager hides their gift from ({@code test(gifted, other)}: other is close to them). */
+	/** (0.7.227) Tells Powers who a gifted villager hides their gift from ({@code test(gifted, other)}: other is close to them). */
 	public static void giftCloseOnes(java.util.function.BiPredicate<net.minecraft.world.entity.Entity, net.minecraft.world.entity.Entity> test) {
 		lookForGifts();
 		try {

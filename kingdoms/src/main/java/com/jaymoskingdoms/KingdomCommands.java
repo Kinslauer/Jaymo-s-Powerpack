@@ -70,6 +70,7 @@ final class KingdomCommands {
 				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
 				.then(Commands.literal("tower").executes(c -> found(c, Castle.Kind.TOWER)))
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage)))
+			.then(Crowns.command())
 			.then(Camps.command())
 			.then(FleetCommands.command())
 			.then(Roads.command())
@@ -166,10 +167,23 @@ final class KingdomCommands {
 		}
 		Faction f = found;
 		c.getSource().sendSuccess(() -> line(server, f), false);
+		// (0.7.225) a player on its throne, the villager there their steward
+		java.util.UUID sovereign = Crowns.sovereign(server, f);
+		if (sovereign != null) {
+			ServerPlayer p = server.getPlayerList().getPlayer(sovereign);
+			Component who = p != null ? p.getDisplayName() : Component.translatable("message.jaymoskingdoms.crown.away");
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.sovereign", who).withStyle(ChatFormatting.GOLD), false);
+		}
 		// (0.5.12) its ruler's temper
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper != null) {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY), false);
+		}
+		// (0.7.224) its creed
+		if (f.type().isRealm() && !f.fallen()) {
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.creed", creed.named(),
+				Component.translatable("creed.jaymoskingdoms." + creed.key() + ".about")).withStyle(ChatFormatting.GRAY), false);
 		}
 		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);
@@ -278,6 +292,8 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.not_sworn"));
 			return 0;
 		}
+		// (0.7.225) a sovereign who leaves gives up the crown
+		Crowns.abdicate(server, k);
 		Factions.update(server, k.id(), f -> f.withMember(player.getUUID(), null));
 		Wardens.dismiss(server, k.id(), player.getUUID());
 		// leaving stings

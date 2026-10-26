@@ -169,6 +169,11 @@ public record Faction(int id, FactionType type, String name, DyeColor color, Blo
 			this.fallen, this.successionAt, this.relations, this.holdings);
 	}
 
+	public Faction withName(String name) {
+		return new Faction(this.id, this.type, name, this.color, this.seat, this.leader, this.members, this.treasury, this.claims, this.overlord,
+			this.fallen, this.successionAt, this.relations, this.holdings);
+	}
+
 	public Faction withLeader(Optional<UUID> leader) {
 		return new Faction(this.id, this.type, this.name, this.color, this.seat, leader, this.members, this.treasury, this.claims, this.overlord,
 			this.fallen, this.successionAt, this.relations, this.holdings);

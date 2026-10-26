@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +30,10 @@ import org.jspecify.annotations.Nullable;
  * ladder down a stone-lined shaft, and a low room {@link #DEPTH} below, plank-floored and stone-walled under a dark ceiling,
  * lit by hanging lanterns: a bar of barrels with the fence penned behind it, a red runner before it, a dice table with
  * a green cloth and stools, crates, cobwebs in the corners. Everything is measured from the hatch.
+ *
+ * <p>(0.7.224) The fight pit ({@link #digPit}): a backroom dug off the den through a doorway, with a fenced ring in
+ * it on a beaten-earth floor and an aisle round it for the crowd; where there's no room for that, a makeshift ring, a
+ * smaller room that is all ring, posts at its corners ({@link FightPit}).
  *
  * <p>The cells ({@link #cell}) are a sealed stone pit under the realm's seat: no door, a lantern, a bale to sleep on.
  * Digging out is breaking out ({@link Busts}).
@@ -64,6 +70,11 @@ final class Speakeasy {
 	/** Where the fence stands, behind his bar. */
 	static Vec3 fenceSpot(BlockPos hatch) {
 		return new Vec3(hatch.getX() + 5.5, floor(hatch) + 1, hatch.getZ() + 3.5);
+	}
+
+	/** (0.7.224) Where the bookie stands, by the way through to the pit. */
+	static Vec3 bookieSpot(BlockPos hatch) {
+		return new Vec3(hatch.getX() + 1.5, floor(hatch) + 1, hatch.getZ() + 5.5);
 	}
 
 	/** Where the dice-thrower stands, at the end of his table. */
@@ -219,6 +230,176 @@ final class Speakeasy {
 		set(level, hx - 1, ceil, hz + 1, hung);
 		set(level, hx - 2, ceil, hz, Blocks.COBWEB.defaultBlockState());
 		set(level, hx + 6, ceil, hz + LENGTH - 1, Blocks.COBWEB.defaultBlockState());
+	}
+
+	// ---- the fight pit (0.7.224) ---------------------------------------------------------------------------------------
+
+	/** A pit room's inside: this many blocks square for a full pit, and for a makeshift ring. */
+	static final int PIT_FULL = 9, PIT_MAKESHIFT = 5;
+	/** The ring's half-width (blocks from its middle to its last floor block inside the ropes). */
+	static final int RING_HALF = 2;
+	/** Keep this far from the realm's cells. */
+	static final double PIT_CELL_CLEAR = 10.0;
+
+	/** A fight pit: the middle of its ring, its room (inside), and whether it's only a makeshift ring. */
+	record Pit(BlockPos center, BlockPos min, BlockPos max, boolean makeshift) {
+		static final Codec<Pit> CODEC = RecordCodecBuilder.create(i -> i.group(
+			BlockPos.CODEC.fieldOf("center").forGetter(Pit::center),
+			BlockPos.CODEC.fieldOf("min").forGetter(Pit::min),
+			BlockPos.CODEC.fieldOf("max").forGetter(Pit::max),
+			Codec.BOOL.fieldOf("makeshift").forGetter(Pit::makeshift)).apply(i, Pit::new));
+
+		/** The room, inside. */
+		AABB room() {
+			return new AABB(Vec3.atLowerCornerOf(this.min), Vec3.atLowerCornerOf(this.max).add(1.0, 1.0, 1.0));
+		}
+
+		/** The ring's floor, inside the ropes. */
+		AABB ring() {
+			return new AABB(this.center.getX() - RING_HALF, this.center.getY(), this.center.getZ() - RING_HALF,
+				this.center.getX() + RING_HALF + 1, this.center.getY() + 2, this.center.getZ() + RING_HALF + 1);
+		}
+	}
+
+	/** The doorways a pit may be dug through: the den's south, west and north walls (the bar is to the east). */
+	private static final Direction[] PIT_WAYS = {Direction.SOUTH, Direction.WEST, Direction.NORTH};
+
+	private static BlockPos pitDoor(BlockPos hatch, Direction way) {
+		int y1 = floor(hatch) + 1;
+		return switch (way) {
+			case WEST -> new BlockPos(hatch.getX() - 3, y1, hatch.getZ() + 3);
+			case NORTH -> new BlockPos(hatch.getX() + 2, y1, hatch.getZ() - 1);
+			default -> new BlockPos(hatch.getX() + 2, y1, hatch.getZ() + LENGTH);
+		};
+	}
+
+	/** The block {@code out} blocks beyond the door and {@code side} to its side, at height {@code y}. */
+	private static BlockPos pitAt(BlockPos door, Direction way, int out, int side, int y) {
+		Direction lateral = way.getClockWise();
+		return new BlockPos(door.getX() + way.getStepX() * out + lateral.getStepX() * side, y, door.getZ() + way.getStepZ() * out + lateral.getStepZ() * side);
+	}
+
+	/**
+	 * Digs {@code hatch}'s den a fight pit: a full one through the first wall with room behind it, else a makeshift ring;
+	 * null if there's room for neither ({@code cells}: the realm's cells, to keep clear of).
+	 */
+	static @Nullable Pit digPit(ServerLevel level, BlockPos hatch, @Nullable BlockPos cells) {
+		for (int n : new int[] {PIT_FULL, PIT_MAKESHIFT}) {
+			for (Direction way : PIT_WAYS) {
+				BlockPos door = pitDoor(hatch, way);
+				if (pitFits(level, hatch, door, way, n, cells)) {
+					return buildPit(level, hatch, door, way, n);
+				}
+			}
+		}
+		return null;
+	}
+
+	private static boolean pitFits(ServerLevel level, BlockPos hatch, BlockPos door, Direction way, int n, @Nullable BlockPos cells) {
+		int h = n / 2, fy = floor(hatch), top = fy + HEIGHT + 1;
+		if (cells != null && door.distSqr(cells) < (PIT_CELL_CLEAR + n) * (PIT_CELL_CLEAR + n)) {
+			return false;
+		}
+		for (int out = 1; out <= n + 1; out++) {
+			for (int side = -h - 1; side <= h + 1; side++) {
+				BlockPos column = pitAt(door, way, out, side, top);
+				if (!level.isLoaded(column)) {
+					return false;
+				}
+				// earth over it all (checked at its corners and middle)
+				boolean corner = (out == 1 || out == n + 1 || out == h + 1) && (side == -h - 1 || side == h + 1 || side == 0);
+				if (corner) {
+					BlockPos ground = ground(level, column.getX(), column.getZ());
+					if (ground == null || ground.getY() < top + COVER) {
+						return false;
+					}
+				}
+				for (int y = fy; y <= top; y++) {
+					BlockPos p = new BlockPos(column.getX(), y, column.getZ());
+					if (level.getBlockEntity(p) != null || !level.getFluidState(p).isEmpty() || level.getBlockState(p).is(Blocks.LADDER)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private static Pit buildPit(ServerLevel level, BlockPos hatch, BlockPos door, Direction way, int n) {
+		RandomSource random = level.getRandom();
+		int h = n / 2, fy = floor(hatch), y1 = fy + 1, top = fy + HEIGHT + 1, ceil = fy + HEIGHT;
+		boolean makeshift = n == PIT_MAKESHIFT;
+		BlockState earth = Blocks.COARSE_DIRT.defaultBlockState(), planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
+		// the shell: stone walls, a dark ceiling; a beaten-earth ring, planks round it
+		for (int out = 1; out <= n + 1; out++) {
+			for (int side = -h - 1; side <= h + 1; side++) {
+				boolean wall = out == n + 1 || side == -h - 1 || side == h + 1;
+				int dOut = Math.abs(out - (h + 1)), dSide = Math.abs(side);
+				boolean inRing = makeshift || Math.max(dOut, dSide) <= RING_HALF + 1;
+				for (int y = fy; y <= top; y++) {
+					BlockPos p = pitAt(door, way, out, side, y);
+					BlockState state = wall && y > fy && y < top ? stone(random) : y == fy ? (inRing && !wall ? earth : planks)
+						: y == top ? Blocks.DARK_OAK_PLANKS.defaultBlockState() : Blocks.AIR.defaultBlockState();
+					set(level, p.getX(), p.getY(), p.getZ(), state);
+				}
+			}
+		}
+		// the way through from the den
+		set(level, door.getX(), y1, door.getZ(), Blocks.AIR.defaultBlockState());
+		set(level, door.getX(), y1 + 1, door.getZ(), Blocks.AIR.defaultBlockState());
+		BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState();
+		if (makeshift) {
+			// posts at its corners, a lantern on each by the door
+			for (int out : new int[] {1, n}) {
+				for (int side : new int[] {-h, h}) {
+					BlockPos p = pitAt(door, way, out, side, y1);
+					set(level, p.getX(), p.getY(), p.getZ(), fence);
+					if (out == n) {
+						set(level, p.getX(), p.getY() + 1, p.getZ(), Blocks.LANTERN.defaultBlockState());
+					}
+				}
+			}
+		} else {
+			// the ropes: a fence round the ring, a gate on the door's side
+			int r = RING_HALF + 1;
+			for (int out = h + 1 - r; out <= h + 1 + r; out++) {
+				for (int side = -r; side <= r; side++) {
+					if (Math.max(Math.abs(out - (h + 1)), Math.abs(side)) != r) {
+						continue;
+					}
+					BlockPos p = pitAt(door, way, out, side, y1);
+					BlockState s = out == h + 1 - r && side == 0
+						? Blocks.SPRUCE_FENCE_GATE.defaultBlockState().setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, way)
+						: fence;
+					set(level, p.getX(), p.getY(), p.getZ(), s);
+				}
+			}
+			// benches for the crowd along the far wall, crates in its corners
+			for (int side = -h + 1; side <= h - 1; side += 2) {
+				BlockPos p = pitAt(door, way, n, side, y1);
+				set(level, p.getX(), p.getY(), p.getZ(), Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, way));
+			}
+			BlockState barrel = Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP);
+			for (int side : new int[] {-h, h}) {
+				BlockPos p = pitAt(door, way, n, side, y1);
+				set(level, p.getX(), p.getY(), p.getZ(), barrel);
+			}
+		}
+		// lanterns over the ring, and one by the door
+		BlockState hung = Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true);
+		BlockPos over = pitAt(door, way, h + 1, 0, ceil);
+		set(level, over.getX(), over.getY(), over.getZ(), hung);
+		if (!makeshift) {
+			for (int side : new int[] {-h, h}) {
+				BlockPos p = pitAt(door, way, h + 1, side, ceil);
+				set(level, p.getX(), p.getY(), p.getZ(), hung);
+			}
+		}
+		BlockPos center = pitAt(door, way, h + 1, 0, y1);
+		BlockPos a = pitAt(door, way, 1, -h, y1), b = pitAt(door, way, n, h, y1 + HEIGHT - 1);
+		BlockPos min = new BlockPos(Math.min(a.getX(), b.getX()), y1, Math.min(a.getZ(), b.getZ()));
+		BlockPos max = new BlockPos(Math.max(a.getX(), b.getX()), y1 + HEIGHT - 1, Math.max(a.getZ(), b.getZ()));
+		return new Pit(center, min, max, makeshift);
 	}
 
 	/**

@@ -36,7 +36,7 @@ public final class Gifted {
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
 
 	/**
-	 * (0.17.9) The ways of a gift ({@link Gift#ways}): a {@link #MASTER} (Andy: "maybe 1 in 80 is an extremely gifted
+	 * (0.17.12) The ways of a gift ({@link Gift#ways}): a {@link #MASTER} (Andy: "maybe 1 in 80 is an extremely gifted
 	 * wielder, achieving great mastery of the power using it in their own way"), one who doesn't care who sees
 	 * ({@link #OPEN}: "who is going to stop them?"), and a hidden gift that a player has seen at work ({@link #REVEALED}).
 	 */
@@ -132,7 +132,7 @@ public final class Gifted {
 	}
 
 	/**
-	 * (0.17.9) As {@link #give(Entity, String, int)}, as a {@code master} or not, and {@code open} (they don't hide it) or
+	 * (0.17.12) As {@link #give(Entity, String, int)}, as a {@code master} or not, and {@code open} (they don't hide it) or
 	 * not. A master's signature move is picked here, from the moves their power has before any corruption.
 	 */
 	public static boolean give(Entity entity, String power, int style, boolean master, boolean open) {
@@ -161,7 +161,7 @@ public final class Gifted {
 	}
 
 	/**
-	 * (0.17.9) Sets the ways of {@code entity}'s gift, keeping whether a player has seen it (Kingdoms, for the gifted of a
+	 * (0.17.12) Sets the ways of {@code entity}'s gift, keeping whether a player has seen it (Kingdoms, for the gifted of a
 	 * world from before ways were weighed, and {@code /power gift}). False without a gift.
 	 */
 	public static boolean ways(Entity entity, boolean master, boolean open) {
@@ -173,26 +173,26 @@ public final class Gifted {
 		return true;
 	}
 
-	/** (0.17.9) Whether {@code entity} is a master of their gift. Either side. */
+	/** (0.17.12) Whether {@code entity} is a master of their gift. Either side. */
 	public static boolean master(Entity entity) {
 		Gift gift = of(entity);
 		return gift != null && gift.master();
 	}
 
-	/** (0.17.9) Whether {@code entity} doesn't hide their gift. Either side. */
+	/** (0.17.12) Whether {@code entity} doesn't hide their gift. Either side. */
 	public static boolean open(Entity entity) {
 		Gift gift = of(entity);
 		return gift != null && gift.open();
 	}
 
-	/** (0.17.9) Whether players know of {@code entity}'s gift (it's open, or one has seen it at work). Either side. */
+	/** (0.17.12) Whether players know of {@code entity}'s gift (it's open, or one has seen it at work). Either side. */
 	public static boolean revealed(Entity entity) {
 		Gift gift = of(entity);
 		return gift != null && gift.revealed();
 	}
 
 	/**
-	 * (0.17.9) Who a gifted villager hides their gift from: {@code test(gifted, other)} says whether {@code other} is close to
+	 * (0.17.12) Who a gifted villager hides their gift from: {@code test(gifted, other)} says whether {@code other} is close to
 	 * them (family, friends). Kingdoms sets it, by reflection (it knows the MCA family trees and hearts); without it, any
 	 * villager or player. Andy: "keep their power usage to a minimum and hide it from their friends and family."
 	 */
@@ -201,7 +201,7 @@ public final class Gifted {
 	}
 
 	/**
-	 * (0.17.9) Told {@code (player, gifted)} each time a player sees a gifted villager's power at work. Kingdoms sets it, by
+	 * (0.17.12) Told {@code (player, gifted)} each time a player sees a gifted villager's power at work. Kingdoms sets it, by
 	 * reflection: a player who has seen it may ask them about it, and only then does their MCA screen show it (Andy: "The
 	 * mca screen should only show it once the player has seen, and asked about the powers they saw").
 	 */

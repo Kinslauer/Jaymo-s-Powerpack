@@ -16,7 +16,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.224) Asking a gifted villager about their power. Andy: "The mca screen should only show it once the player has seen,
+ * (0.7.227) Asking a gifted villager about their power. Andy: "The mca screen should only show it once the player has seen,
  * and asked about the powers they saw. The option comes after that happens." Powers tells us of each player who sees a
  * gift at work ({@link PowersCompat#giftWitnesses}); from then on that player gets "Ask about their power" in the
  * villager's MCA menu ({@link #ANSWER}). Asked, they answer (one who hides it begs you to keep it quiet, one who doesn't

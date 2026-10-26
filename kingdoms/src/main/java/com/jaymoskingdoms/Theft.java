@@ -470,7 +470,7 @@ public final class Theft {
 	public static void sorcery(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		Faction f = lawAt(level, pos);
 		if (f == null || f.type() != FactionType.KINGDOM || Sorcery.believesInMagic(f) || player.isCreative() || player.isSpectator()
-			|| f.leader().filter(player.getUUID()::equals).isPresent()) {
+			|| Crowns.rules(level.getServer(), f, player.getUUID())) {
 			return;
 		}
 		commit(player, level, f, Crime.SORCERY, pos, null, false);
@@ -564,7 +564,8 @@ public final class Theft {
 
 	/** {@link #commit}, with who saw it already worked out (a pickpocket's mark knows, or doesn't, whatever way they face). */
 	static void commit(ServerPlayer player, ServerLevel level, Faction f, Crime crime, @Nullable Weight weight, boolean noticeable, List<LivingEntity> seen) {
-		if (Wars.enemy(player, f)) {
+		// (0.7.225) nor against your own realm, if you wear its crown
+		if (Wars.enemy(player, f) || Crowns.rules(level.getServer(), f, player.getUUID())) {
 			return;
 		}
 		Weight w = weight != null ? weight : crime.weight;

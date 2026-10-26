@@ -22,7 +22,7 @@ public interface GiftKit {
 	List<Move> moves();
 
 	/**
-	 * (0.17.9) Every tick, fighting or not: for what a power keeps up from tick to tick (a Wind villager's flight). Keep
+	 * (0.17.12) Every tick, fighting or not: for what a power keeps up from tick to tick (a Wind villager's flight). Keep
 	 * it cheap: it runs for every gifted villager loaded.
 	 */
 	default void tick(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {

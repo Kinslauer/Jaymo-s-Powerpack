@@ -81,7 +81,7 @@ public final class ResonanceHush {
 	}
 
 	/**
-	 * (0.17.9) A dome round {@code caster} for {@code ticks}: a player's Hush, or a gifted villager's
+	 * (0.17.12) A dome round {@code caster} for {@code ticks}: a player's Hush, or a gifted villager's
 	 * ({@code ResonanceGift}; Andy: "It's okay to silence the players").
 	 */
 	static boolean cast(ServerLevel level, LivingEntity caster, boolean corrupted, int ticks) {

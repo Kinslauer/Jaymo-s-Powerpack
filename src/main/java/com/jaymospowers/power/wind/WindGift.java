@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * they call lightning down, and the storm crackles round them in the rain. A ruler's ultimate is the Tempest; out of a
  * fight they blow out the fires near them.
  * <p>
- * (0.17.9) They fly (Andy: "Wind gifted villagers should fly when they see fit, maybe a little hover when they can"): in a
+ * (0.17.12) They fly (Andy: "Wind gifted villagers should fly when they see fit, maybe a little hover when they can"): in a
  * fight they soar up over the foe and hover there, casting down, or take wing away from one too close; out of a fight
  * they hover a little, now and then fly off to somewhere near; and they never fall far, the wind catches them.
  */

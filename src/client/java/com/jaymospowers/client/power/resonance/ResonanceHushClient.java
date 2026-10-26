@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * tells the core's key handling when the local player's power keys are dead (inside someone else's dome).
  */
 public final class ResonanceHushClient {
-	/** (0.17.9) Everyone holding a dome just now (players, and gifted villagers' domes too), looked for once a tick. */
+	/** (0.17.12) Everyone holding a dome just now (players, and gifted villagers' domes too), looked for once a tick. */
 	private static final List<Entity> CASTERS = new ArrayList<>();
 	private static long castersAt = Long.MIN_VALUE;
 	private static @Nullable ClientLevel castersIn;

@@ -19,7 +19,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.9) Resonance for a gifted villager ({@link Gifted}; Andy: "They should also be able to use resonance"): a pulse of
+ * (0.17.12) Resonance for a gifted villager ({@link Gifted}; Andy: "They should also be able to use resonance"): a pulse of
  * sound at the foe that knocks them back and breaks their guard, a sonic boom that goes through armour, a ring of sound
  * that throws back everyone too close, and a Hush, the dome of silence, round them when a player with a power comes at
  * them (Andy: "It's okay to silence the players": their power keys do nothing inside it, {@link ResonanceHush}).

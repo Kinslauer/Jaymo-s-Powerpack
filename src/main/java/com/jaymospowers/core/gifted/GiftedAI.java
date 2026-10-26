@@ -40,12 +40,12 @@ import org.jspecify.annotations.Nullable;
  * ({@link #CORRUPT_CHANCE}) of corrupting it, which opens the kit's corrupted moves (a Wind villager's lightning). Kingdoms
  * reads that (a storm-taken Wind wakes the Stormborn in them).
  * <p>
- * (0.17.9) <b>Masters</b> ({@link Gifted#MASTER}, Andy: "not all the villagers are weaker"): their moves cool down in
+ * (0.17.12) <b>Masters</b> ({@link Gifted#MASTER}, Andy: "not all the villagers are weaker"): their moves cool down in
  * {@link #MASTER_COOLDOWN} of the time, with a shorter gap; they reach further; their signature move (their own way with the
  * power) comes first when it's ready and lands twice ({@link #ECHO_DELAY}); long use wears less on them; and badly hurt
  * ({@link #MASTER_ULTIMATE_AT}) they unleash their power's ultimate in any fight, ruler or not.
  * <p>
- * (0.17.9) <b>Hidden gifts</b>: most gifted keep it to a minimum and hide it from those close to them
+ * (0.17.12) <b>Hidden gifts</b>: most gifted keep it to a minimum and hide it from those close to them
  * ({@link Gifted#closeOnes}): in a fight they hold back while family or friends can see, until they're hurt
  * ({@link #HIDE_UNTIL}), and use it at twice the gap; their everyday use is rarer and only where none of their own, and no
  * player, sees. The {@link Gifted#OPEN} don't care who sees: their everyday use comes twice as often. A player who sees a

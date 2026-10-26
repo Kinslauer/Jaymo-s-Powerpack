@@ -13,7 +13,7 @@ import net.minecraft.world.entity.PathfinderMob;
 
 /**
  * (0.17.3) {@code /power gift <targets> <power> [bold|steady|wary]}, {@code /power gift <targets> clear|corrupt|ready},
- * and {@code /power gift <targets> unleash} (their ultimate on whoever runs it): for testing gifted villagers. (0.17.9)
+ * and {@code /power gift <targets> unleash} (their ultimate on whoever runs it): for testing gifted villagers. (0.17.12)
  * {@code /power gift <targets> ways hidden|open|master|master_open}: whether they're a master, and whether they hide it.
  */
 public final class GiftedCommand {

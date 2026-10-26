@@ -76,6 +76,10 @@ import org.jspecify.annotations.Nullable;
  * sneak empty-handed up to one) you're sentenced on the spot ({@link Busts}): flogged, thrown in the cells, or beheaded.
  * Each bust cools the city down.
  *
+ * <p>(0.7.224) Every den keeps a <b>bookie</b> ({@link Bookies}), the only one who takes wagers on wars, and on the
+ * bouts in the den's <b>fight pit</b> ({@link FightPit}), dug off the den as a backroom (or a makeshift ring where
+ * that's all there's room for).
+ *
  * <p>Stage 2 (not yet): the guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading
  * from city to city.
  */
@@ -213,7 +217,7 @@ public final class Underworld {
 	/** Player → when they were last whispered to; when a guard last called their open carry. */
 	private static final Map<UUID, Long> WHISPERED = new HashMap<>(), CARRY_CALLED = new HashMap<>();
 	/** Realm → when its den last lost its fence (or dice-thrower). */
-	private static final Map<String, Long> MISSING_FENCE = new HashMap<>(), MISSING_DICER = new HashMap<>();
+	private static final Map<String, Long> MISSING_FENCE = new HashMap<>(), MISSING_DICER = new HashMap<>(), MISSING_BOOKIE = new HashMap<>();
 	/** Fence or street buyer → the day their stock was last laid out. */
 	private static final Map<UUID, Long> STOCKED = new HashMap<>();
 	/** Player → when they may throw dice again; games thrown (to warm the city). */
@@ -235,6 +239,15 @@ public final class Underworld {
 				|| !(entity instanceof Villager v) || !v.isAlive() || v.isBaby() || Downed.isDowned(v) || sp.isSpectator()) {
 				return InteractionResult.PASS;
 			}
+			// (0.7.224) the bookie keeps the book on wars and pit fights
+			if (v.entityTags().contains(Bookies.TAG)) {
+				Bookies.open(level, sp, v);
+				return InteractionResult.SUCCESS;
+			}
+			if (v.entityTags().contains(FightPit.FIGHTER_TAG) && FightPit.onCard(v.getUUID())) {
+				// (between bouts the champion will talk)
+				return InteractionResult.SUCCESS;
+			}
 			if (v.entityTags().contains(DICER_TAG) && sp.getMainHandItem().is(Items.EMERALD)) {
 				dice(level, sp, v);
 				return InteractionResult.SUCCESS;
@@ -255,6 +268,7 @@ public final class Underworld {
 			CARRY_CALLED.clear();
 			MISSING_FENCE.clear();
 			MISSING_DICER.clear();
+			MISSING_BOOKIE.clear();
 			STOCKED.clear();
 			PITCHED.clear();
 			DICE_NEXT.clear();
@@ -452,6 +466,19 @@ public final class Underworld {
 		} else {
 			MISSING_FENCE.remove(key);
 		}
+		// (0.7.224) the bookie, from the first: the den's the only place a war is bet on; and the pit off the den
+		if (level.getEntitiesOfClass(Villager.class, box, v -> v.isAlive() && v.entityTags().contains(Bookies.TAG)).isEmpty()) {
+			Long since = MISSING_BOOKIE.get(key);
+			if (since == null) {
+				MISSING_BOOKIE.put(key, now - REPLACE_TICKS);
+			} else if (now - since >= REPLACE_TICKS) {
+				hire(level, Speakeasy.bookieSpot(d.hatch()), Bookies.TAG);
+				MISSING_BOOKIE.remove(key);
+			}
+		} else {
+			MISSING_BOOKIE.remove(key);
+		}
+		FightPit.ensure(level, f, d);
 		if (d.heat() < DICE_HEAT) {
 			return;
 		}
@@ -468,16 +495,17 @@ public final class Underworld {
 		}
 	}
 
-	private static void hire(ServerLevel level, Vec3 at, String tag) {
+	static @Nullable Villager hire(ServerLevel level, Vec3 at, String tag) {
 		Villager v = McaCompat.newVillager(level, at);
 		if (v == null) {
-			return;
+			return null;
 		}
 		v.snapTo(at.x, at.y, at.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		v.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(at)), EntitySpawnReason.EVENT, null);
 		v.addTag(tag);
 		v.setPersistenceRequired();
 		level.addFreshEntity(v);
+		return v;
 	}
 
 	/** {@code player} in a den finds it (once, told); in a hotbed's streets, a crook may whisper the way to it. */
