@@ -4730,3 +4730,18 @@ thorny rose inspired variant among another, and give each heritage 2 additional 
   player hasn't learned (lens and Codex first, through crucible, flux, infusion, gear); a worried word first if they're
   badly corrupted or standing on blighted land. Players who've started get an excited greeting and alchemy chat.
 - Reads Powers' alchemy by reflection (`PowersCompat.alchemy`, `PowersCompat.flux`); without Powers it tells how to begin.
+## 0.7.216: gifted villagers (pack 0.17.1)
+- Why a Stormborn purist king could exist: villager births still rolled Stormborn (from 0.7.106, when it could be picked)
+  after 0.7.140 made it earned. Now no one is born Stormborn but a Stormborn parent's child; a gifted Wind villager whose
+  power the storm takes (corrupted) wakes to it (`GiftedFolk.step`). Stormborn already in a world keep their blood: MCA's
+  screen reads "Of the storm-taken line".
+- `GiftedFolk`: every MCA villager is weighed once when they come of age (or, in an older world, the first time they're
+  stepped): 1 in 80 awaken (Andy's number), a gifted parent's child three times as often, leaning to the parent's power
+  (x6) and their blood's (x4: Frostborn Cryo, Emberborn Smoke, Tideborn/Deepborn Darktide, Stoneborn Gravity, Sylvan and
+  Verdant Web, Warrior-born Z Fighter, Stormborn Wind, Heartlander/Earthling Arsenal). Callings: a Breeze killed (Wind),
+  a cave spider's bite (Web), a long fall (Gravity), freezing (Cryo), burning (Smoke), monsters killed bare-handed
+  (Z Fighter) or with a weapon (Arsenal). Temperament sets their style (hotheaded/brave/proud/spiteful bold;
+  timid/gloomy/suspicious/kindhearted wary).
+- Gifted townsfolk are crowned 60% of the time when there's one among the heirs (`McaBridge.heir`); a gifted ruler
+  unleashes their ultimate when anyone of the realm is hurt within 16 blocks of the throne while they're there.
+- MCA screen: "Gifted: <power>" once you know their name. Powers holds the gift and its moves (`PowersCompat.give` etc.).
