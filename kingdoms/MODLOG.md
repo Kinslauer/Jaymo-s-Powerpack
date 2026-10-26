@@ -4928,9 +4928,17 @@ hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
   `/bookie fight`): you take the newcomer's corner (his backers get their stakes back, the odds are redone) or a card is
   called for you against the champion. At the bell you're put in your corner. Punch with an empty hand (a full swing lands
   2-3, a half-charged one less; the fighter's guard turns some); sneak to cover up (turns half his blows); your wind (20)
-  shows over your hotbar. Anything in your hand is a foul, stepping out of the ring or leaving throws it. No real damage
-  either way. Win: a purse of 8 + 4 per win the beaten had, and he remembers you beat him (`Recollections`); lose: he
+  shows over your hotbar. Anything in your hand is a foul, stepping out of the ring or leaving throws it. Win: a purse of 8 + 4 per win the beaten had, and he remembers you beat him (`Recollections`); lose: he
   remembers he beat you. You can bet on yourself, not against.
+- **Real blows, held gear, the attendant:** Andy: "You should take real damage, but get patched up ringside afterward by
+  an attendee. They offer you rags instead of bandages most of the time, so you may just want to heal yourself. But as soon
+  as you enter the pit, your armor and gear is held." At the bell everything you carry (armour and offhand too) is held
+  (`pit_held` attachment, kept through death) and handed back when the bout's done; a bout cut short by a logout, death or
+  restart gives it back the next time you're about. His blows now hurt you for real (his 1-4 in health, no armour to soak
+  it) while yours count 2-3 against his wind, so it's about even. Your wind is your health above 4; at 4 you're done, and
+  no blow takes you lower. Afterwards the pit's attendant (an MCA villager ringside, or by the bookie when the ring fills
+  the room; replaced a day after he's gone) sees to you if you're hurt: 75% a rag, else a linen bandage, Jaymo's Powers'
+  own medicine, handed to you to use (without Powers he binds it on: +1.5 or +3 health).
 - **Fighters' stories:** Andy: "make the villager winners/champions bring that up in conversation." Every fighter keeps a
   record on himself (`pit_record` attachment: measure, wins, losses, champion/retired, which city's pit). The beaten and the
   retired go back up to town to live (newcomers who never fought are just let go). In an MCA chat, one with a win brags of

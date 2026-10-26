@@ -60,6 +60,15 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.224) One of Jaymo's Powers' medicine items ("rag", "linen_bandage"), or empty without Powers. */
+	public static net.minecraft.world.item.ItemStack medicine(String name) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return net.minecraft.world.item.ItemStack.EMPTY;
+		}
+		return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", name))
+			.map(net.minecraft.world.item.ItemStack::new).orElse(net.minecraft.world.item.ItemStack.EMPTY);
+	}
+
 	/**
 	 * (0.7.169) Blood drops of this colour (RGB) and size for {@code sendParticles}: Jaymo's Powers' still red blood fleck
 	 * (Andy: blood mustn't shimmer like redstone dust), or vanilla dust of that colour without Powers.

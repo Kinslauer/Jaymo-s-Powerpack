@@ -22,12 +22,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -50,6 +53,14 @@ import org.jspecify.annotations.Nullable;
  * empty hand (anything in it is a foul, and the bout's lost); sneak to cover up and turn half his blows; step out of the
  * ring and you've thrown it. Win and the purse is yours ({@link #PURSE} and more for each win the beaten had), and
  * he remembers it.
+ *
+ * <p>Andy, then: "You should take real damage, but get patched up ringside afterward by an attendee. They offer you rags
+ * instead of bandages most of the time, so you may just want to heal yourself. But as soon as you enter the pit, your
+ * armor and gear is held. So you take the same amount of damage and deal roughly the same." At the bell everything you
+ * carry, armour and all, is held ({@link #HELD}) and given back when it's over (or the next time you're about, if the
+ * bout was cut short). His blows hurt you for real, for what yours count against him; at {@link #YIELD_HEALTH} you're
+ * done (he never puts you under). Afterwards the pit's attendant ({@link #ATTENDANT_TAG}) patches you up: a rag, mostly
+ * ({@link #RAG_CHANCE}), now and then a linen bandage.
  *
  * <p><b>Their story.</b> Every fighter keeps his record ({@link #RECORD}, on the villager): his measure, wins and losses,
  * whether he's the champion now or retired as one. Those who've won tell you about it when you chat ({@link #tell}),
@@ -90,6 +101,16 @@ public final class FightPit {
 	static final int TALK_LINES = 3;
 	/** Fighters (scoreboard tag, while they're on the den's books). */
 	static final String FIGHTER_TAG = "jaymoskingdoms.fighter";
+	/**
+	 * A player in the ring is hurt for real by a villager's blow (its count in health); they're done at this much health
+	 * left, and a blow never takes them lower.
+	 */
+	static final float YIELD_HEALTH = 4.0F;
+	/** The ringside attendant (scoreboard tag): a rag this often, else a linen bandage; without Jaymo's Powers he binds it on himself for this much. */
+	static final String ATTENDANT_TAG = "jaymoskingdoms.pit_attendant";
+	static final float RAG_CHANCE = 0.75F, RAG_HEAL = 1.5F, BANDAGE_HEAL = 3.0F;
+	/** How far from the pit the attendant may be, and a hurt fighter be, to be patched up. */
+	static final double PATCH_RANGE = 16.0;
 
 	/** A fighter's measure. */
 	record Stats(int power, int guard, int wind, int wins) {
@@ -129,6 +150,10 @@ public final class FightPit {
 
 	public static final AttachmentType<Record> RECORD = AttachmentRegistry.create(JaymosKingdoms.id("pit_record"),
 		builder -> builder.persistent(Record.CODEC));
+
+	/** A player's gear, held while they fight (by inventory slot, armour and offhand included). */
+	public static final AttachmentType<List<ItemStack>> HELD = AttachmentRegistry.create(JaymosKingdoms.id("pit_held"),
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath());
 
 	enum Phase {
 		BETTING, FIGHT, AFTER
@@ -191,6 +216,7 @@ public final class FightPit {
 			BOUTS.clear();
 			NEXT.clear();
 			NO_ROOM.clear();
+			NO_ATTENDANT.clear();
 		});
 	}
 
@@ -207,7 +233,9 @@ public final class FightPit {
 	/** (From {@link Underworld}'s rounds) {@code f}'s den digs its pit if it hasn't one. */
 	static void ensure(ServerLevel level, Faction f, Underworld.Den d) {
 		MinecraftServer server = level.getServer();
-		if (pit(server, f.id()) != null) {
+		Pit dug = pit(server, f.id());
+		if (dug != null) {
+			staff(level, f, d, dug);
 			return;
 		}
 		long now = level.getGameTime();
@@ -222,6 +250,135 @@ public final class FightPit {
 		}
 		put(server, f.id(), pit);
 		JaymosKingdoms.LOGGER.debug("a fight pit dug under {} at {} (makeshift: {})", f.name(), pit.center(), pit.makeshift());
+	}
+
+	/** When each realm's attendant was found missing (he's replaced a day after, like the den's other hands). */
+	private static final Map<Integer, Long> NO_ATTENDANT = new HashMap<>();
+
+	/** The pit keeps an attendant ringside. */
+	private static void staff(ServerLevel level, Faction f, Underworld.Den d, Pit pit) {
+		if (attendant(level, pit) != null) {
+			NO_ATTENDANT.remove(f.id());
+			return;
+		}
+		long now = level.getGameTime();
+		Long since = NO_ATTENDANT.get(f.id());
+		if (since == null) {
+			NO_ATTENDANT.put(f.id(), now - Underworld.REPLACE_TICKS);
+		} else if (now - since >= Underworld.REPLACE_TICKS) {
+			Underworld.hire(level, ringside(level, d, pit), ATTENDANT_TAG);
+			NO_ATTENDANT.remove(f.id());
+		}
+	}
+
+	private static @Nullable Villager attendant(ServerLevel level, Pit pit) {
+		List<Villager> found = level.getEntitiesOfClass(Villager.class, pit.room().inflate(PATCH_RANGE),
+			v -> v.isAlive() && v.entityTags().contains(ATTENDANT_TAG));
+		return found.isEmpty() ? null : found.getFirst();
+	}
+
+	/** Where the attendant waits: outside the ropes in a backroom; by the bookie, in the den, if the ring fills the room. */
+	private static Vec3 ringside(ServerLevel level, Underworld.Den d, Pit pit) {
+		int out = Speakeasy.RING_HALF + 2;
+		BlockPos c = pit.center();
+		for (int[] o : new int[][] {{out, 0}, {-out, 0}, {0, out}, {0, -out}, {out, out}, {-out, out}, {out, -out}, {-out, -out}}) {
+			BlockPos p = c.offset(o[0], 0, o[1]);
+			if (pit.room().contains(Vec3.atCenterOf(p)) && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir()
+				&& !level.getBlockState(p.below()).isAir()) {
+				return Vec3.atBottomCenterOf(p);
+			}
+		}
+		return Speakeasy.bookieSpot(d.hatch()).add(0.0, 0.0, -1.0);
+	}
+
+	/** {@code player} fights (the bell's rung, or it's just over) on some card. */
+	private static boolean fighting(UUID player) {
+		for (Bout bout : BOUTS.values()) {
+			if (bout.phase != Phase.BETTING && bout.corner(player) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A player in the ring: their wind is their health left before they're done. */
+	private static int wind(ServerPlayer p) {
+		return (int)Math.ceil(p.getHealth() - YIELD_HEALTH);
+	}
+
+	/** Everything {@code p} carries, armour and offhand too, held for them. */
+	private static void hold(ServerPlayer p) {
+		Inventory inv = p.getInventory();
+		List<ItemStack> held = new ArrayList<>(p.getAttachedOrElse(HELD, List.of()));
+		while (held.size() < inv.getContainerSize()) {
+			held.add(ItemStack.EMPTY);
+		}
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (held.get(i).isEmpty()) {
+				held.set(i, stack.copy());
+			} else {
+				held.add(stack.copy());
+			}
+			inv.setItem(i, ItemStack.EMPTY);
+		}
+		p.setAttached(HELD, List.copyOf(held));
+		p.containerMenu.broadcastChanges();
+		p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.held").withStyle(ChatFormatting.GRAY));
+	}
+
+	/** {@code p}'s gear back: each thing to its slot if that's free, anywhere else if not. */
+	private static void giveBack(ServerPlayer p) {
+		List<ItemStack> held = p.getAttached(HELD);
+		p.removeAttached(HELD);
+		if (held == null) {
+			return;
+		}
+		Inventory inv = p.getInventory();
+		for (int i = 0; i < held.size(); i++) {
+			ItemStack stack = held.get(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (i < inv.getContainerSize() && inv.getItem(i).isEmpty()) {
+				inv.setItem(i, stack.copy());
+			} else {
+				inv.placeItemBackInInventory(stack.copy(), Prediction.SERVER_ONLY);
+			}
+		}
+		p.containerMenu.broadcastChanges();
+		p.sendSystemMessage(Component.translatable("fightpit.jaymoskingdoms.you.returned").withStyle(ChatFormatting.GRAY));
+	}
+
+	/**
+	 * After the bout the attendant sees to a hurt fighter: a rag, mostly, now and then a linen bandage (Jaymo's Powers'
+	 * medicine, his to offer; without Powers he binds it on himself for a little health).
+	 */
+	private static void patchUp(ServerLevel level, Pit pit, ServerPlayer p) {
+		if (p.getHealth() >= p.getMaxHealth() || p.distanceToSqr(Vec3.atCenterOf(pit.center())) > PATCH_RANGE * PATCH_RANGE) {
+			return;
+		}
+		Villager a = attendant(level, pit);
+		if (a == null) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		boolean rag = random.nextFloat() < RAG_CHANCE;
+		a.getLookControl().setLookAt(p, 30.0F, 30.0F);
+		a.getNavigation().moveTo(p, 0.6);
+		ItemStack cloth = PowersCompat.medicine(rag ? "rag" : "linen_bandage");
+		String what = rag ? "rag" : "bandage";
+		if (cloth.isEmpty()) {
+			p.heal(rag ? RAG_HEAL : BANDAGE_HEAL);
+			Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch.bound." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
+		} else {
+			p.getInventory().placeItemBackInInventory(cloth, Prediction.SERVER_ONLY);
+			Speech.tell(level, a, p, Component.translatable("fightpit.jaymoskingdoms.patch." + what + "." + random.nextInt(Underworld.LINES)), Speech.WHITE);
+		}
+		level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 0.8F, 1.0F);
 	}
 
 	/** {@code fighter} is on a card now (talking to him waits until it's over). */
@@ -256,6 +413,14 @@ public final class FightPit {
 		long now = level.getGameTime();
 		if (now % 5 != 0) {
 			return;
+		}
+		if (now % 20 == 0) {
+			// gear held from a bout that's over (cut short by a restart, a logout, a death): back to its owner
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				if (p.hasAttached(HELD) && p.isAlive() && !fighting(p.getUUID())) {
+					giveBack(p);
+				}
+			}
 		}
 		for (Map.Entry<String, Pit> e : level.getAttachedOrElse(PITS, Map.of()).entrySet()) {
 			int realm = Integer.parseInt(e.getKey());
@@ -327,8 +492,8 @@ public final class FightPit {
 			if (i == 1 && challenger != null) {
 				bout.fighters[1] = challenger.getUUID();
 				bout.player[1] = true;
-				bout.stats[1] = new Stats(PLAYER_POWER, PLAYER_GUARD, PLAYER_WIND, 0);
-				bout.wind[1] = PLAYER_WIND;
+				bout.stats[1] = playerStats(challenger);
+				bout.wind[1] = bout.stats[1].wind();
 				continue;
 			}
 			Villager v = i == 0 && champ != null ? champ : newcomer(level, f, at);
@@ -349,6 +514,11 @@ public final class FightPit {
 		level.playSound(null, pit.center(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		Underworld.warm(level.getServer(), f, 1);
 		return bout;
+	}
+
+	/** A player as the house measures them: their health for wind (it's real), up to {@link #PLAYER_WIND}. */
+	private static Stats playerStats(ServerPlayer player) {
+		return new Stats(PLAYER_POWER, PLAYER_GUARD, Math.max(1, Math.min(PLAYER_WIND, wind(player))), 0);
 	}
 
 	private static void price(Bout bout, RandomSource random) {
@@ -402,6 +572,9 @@ public final class FightPit {
 						if (bout.player[i] && v[i] instanceof ServerPlayer p) {
 							Vec3 at = corner(pit, i);
 							p.teleportTo(level, at.x, at.y, at.z, java.util.Set.of(), i == 0 ? -90.0F : 90.0F, 0.0F, false);
+							// (Andy: "as soon as you enter the pit, your armor and gear is held")
+							hold(p);
+							bout.wind[i] = wind(p);
 							p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.bell").withStyle(ChatFormatting.GOLD));
 						}
 					}
@@ -419,7 +592,13 @@ public final class FightPit {
 							finish(level, f, bout, v, 1 - i, now, "out");
 							return;
 						}
-						p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.wind", Math.max(0, bout.wind[i]), PLAYER_WIND,
+						bout.wind[i] = wind(p);
+						if (bout.wind[i] <= 0) {
+							// (worn down by something besides him, too)
+							finish(level, f, bout, v, 1 - i, now, "down");
+							return;
+						}
+						p.sendOverlayMessage(Component.translatable("fightpit.jaymoskingdoms.you.wind", Math.max(0, bout.wind[i]),
 							Math.max(0, bout.wind[1 - i])).withStyle(ChatFormatting.GOLD));
 					}
 				}
@@ -435,6 +614,13 @@ public final class FightPit {
 			case AFTER -> {
 				if (now - bout.at >= AFTER_TICKS) {
 					int loser = 1 - bout.winner;
+					// a player's gear back, and the attendant sees to them
+					for (int i = 0; i < 2; i++) {
+						if (bout.player[i] && v[i] instanceof ServerPlayer p) {
+							giveBack(p);
+							patchUp(level, pit, p);
+						}
+					}
 					if (!bout.player[loser] && v[loser] instanceof Villager beaten) {
 						leave(level, f, beaten);
 					}
@@ -540,7 +726,16 @@ public final class FightPit {
 	private static void land(ServerLevel level, @Nullable Faction f, Bout bout, LivingEntity[] v, int i, int blow, long now) {
 		int j = 1 - i;
 		RandomSource random = level.getRandom();
-		bout.wind[j] -= blow;
+		if (bout.player[j] && v[j] instanceof ServerPlayer p) {
+			// (Andy: "You should take real damage") his blow, in health; never past the point they're done at
+			float hurt = Math.min(blow, p.getHealth() - YIELD_HEALTH);
+			if (hurt > 0.0F) {
+				p.hurtServer(level, level.damageSources().mobAttack(v[i]), hurt);
+			}
+			bout.wind[j] = wind(p);
+		} else {
+			bout.wind[j] -= blow;
+		}
 		Vec3 push = v[j].position().subtract(v[i].position()).normalize().scale(0.25 + 0.1 * blow);
 		v[j].push(push.x, 0.1, push.z);
 		v[j].needsSync = true;
@@ -708,8 +903,8 @@ public final class FightPit {
 		bout.bets.addAll(kept);
 		bout.fighters[corner] = player.getUUID();
 		bout.player[corner] = true;
-		bout.stats[corner] = new Stats(PLAYER_POWER, PLAYER_GUARD, PLAYER_WIND, 0);
-		bout.wind[corner] = PLAYER_WIND;
+		bout.stats[corner] = playerStats(player);
+		bout.wind[corner] = bout.stats[corner].wind();
 		price(bout, level.getRandom());
 		announce(level, pit, bout);
 		return new GreatWars.Taken(Component.translatable("fightpit.jaymoskingdoms.enter.called", name(level, bout.fighters[0])), ENTRY);
