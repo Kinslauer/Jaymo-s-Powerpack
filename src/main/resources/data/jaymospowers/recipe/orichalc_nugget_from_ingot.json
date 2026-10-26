@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:orichalc_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:orichalc_nugget",
+    "count": 9
+  }
+}

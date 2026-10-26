@@ -1,0 +1,25 @@
+{
+  "centre": "minecraft:leather_chestplate",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "jaymospowers:ichorium_ingot",
+    "jaymospowers:alchemical_salt",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "spirit": 14,
+    "salt": 10,
+    "arcana": 6
+  },
+  "instability": 8,
+  "result": {
+    "item": "jaymospowers:ichorcloth_robe",
+    "count": 1
+  },
+  "research": "ichorcloth",
+  "flux": 5
+}

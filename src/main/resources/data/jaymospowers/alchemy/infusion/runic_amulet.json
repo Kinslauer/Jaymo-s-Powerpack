@@ -1,0 +1,18 @@
+{
+  "centre": "minecraft:gold_ingot",
+  "components": [
+    "jaymospowers:orichalc_ingot",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "spirit": 6,
+    "salt": 6
+  },
+  "instability": 3,
+  "result": {
+    "item": "jaymospowers:runic_amulet",
+    "count": 1
+  },
+  "research": "runic_amulet",
+  "flux": 2
+}

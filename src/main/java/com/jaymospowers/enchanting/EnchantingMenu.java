@@ -1,9 +1,13 @@
 package com.jaymospowers.enchanting;
 
+import com.jaymospowers.alchemy.EssenceList;
+import com.jaymospowers.alchemy.Phials;
+import com.jaymospowers.alchemy.gear.EssenceEnchanting;
 import java.util.List;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -96,8 +100,10 @@ public class EnchantingMenu extends AbstractContainerMenu {
 	@Override
 	public boolean clickMenuButton(Player player, int buttonId) {
 		var registry = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-		Holder<Enchantment> chosen = registry.get(buttonId).orElse(null);
-		if (chosen == null) {
+		// (alchemy) a button id past BUTTON_OFFSET means "pay with essence from carried phials", for those who know how
+		boolean essence = buttonId >= EssenceEnchanting.BUTTON_OFFSET;
+		Holder<Enchantment> chosen = registry.get(essence ? buttonId - EssenceEnchanting.BUTTON_OFFSET : buttonId).orElse(null);
+		if (chosen == null || essence && !EssenceEnchanting.available(player)) {
 			return false;
 		}
 		ItemStack stack = item();
@@ -108,11 +114,19 @@ public class EnchantingMenu extends AbstractContainerMenu {
 		List<EnchantRecipes.Ing> cost = EnchantRecipes.cost(chosen, option.target());
 		int[] found = match(cost, table);
 		boolean free = player.hasInfiniteMaterials();
-		if (!free && !paid(found)) {
+		EssenceList essenceCost = EssenceEnchanting.cost(chosen, option.target());
+		if (essence ? !player.isCreative() && !Phials.carried(player).covers(essenceCost) : !free && !paid(found)) {
 			return false;
 		}
 		access.execute((level, pos) -> {
-			if (!free) {
+			if (essence) {
+				if (!Phials.pay(player, essenceCost)) {
+					return;
+				}
+				if (player instanceof ServerPlayer server && level instanceof ServerLevel serverLevel) {
+					EssenceEnchanting.aftermath(server, serverLevel, pos, essenceCost, option.target());
+				}
+			} else if (!free) {
 				for (int i = 0; i < cost.size(); i++) {
 					ItemStack paidWith = table.getItem(found[i]);
 					ItemStack left = EnchantRecipes.Ing.remainder(paidWith);

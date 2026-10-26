@@ -1,0 +1,726 @@
+{
+ "items": {
+  "minecraft:dirt": {
+   "earth": 5,
+   "water": 1
+  },
+  "minecraft:coarse_dirt": {
+   "earth": 5,
+   "air": 1
+  },
+  "minecraft:rooted_dirt": {
+   "earth": 5,
+   "plant": 2
+  },
+  "minecraft:podzol": {
+   "earth": 5,
+   "plant": 2,
+   "rot": 1
+  },
+  "minecraft:mycelium": {
+   "earth": 5,
+   "rot": 2,
+   "plant": 1
+  },
+  "minecraft:grass_block": {
+   "earth": 5,
+   "plant": 2
+  },
+  "minecraft:mud": {
+   "earth": 4,
+   "water": 4
+  },
+  "minecraft:clay": {
+   "earth": 4,
+   "water": 3,
+   "salt": 1
+  },
+  "minecraft:clay_ball": {
+   "earth": 1,
+   "water": 1
+  },
+  "minecraft:sand": {
+   "earth": 3,
+   "salt": 2
+  },
+  "minecraft:red_sand": {
+   "earth": 3,
+   "salt": 2,
+   "fire": 1
+  },
+  "minecraft:gravel": {
+   "earth": 4,
+   "air": 1
+  },
+  "minecraft:stone": {
+   "earth": 6,
+   "salt": 2
+  },
+  "minecraft:cobblestone": {
+   "earth": 5,
+   "salt": 1
+  },
+  "minecraft:deepslate": {
+   "earth": 7,
+   "salt": 2
+  },
+  "minecraft:cobbled_deepslate": {
+   "earth": 6,
+   "salt": 1
+  },
+  "minecraft:granite": {
+   "earth": 5,
+   "salt": 2,
+   "fire": 1
+  },
+  "minecraft:diorite": {
+   "earth": 5,
+   "salt": 3
+  },
+  "minecraft:andesite": {
+   "earth": 5,
+   "salt": 2,
+   "air": 1
+  },
+  "minecraft:tuff": {
+   "earth": 5,
+   "air": 1,
+   "salt": 1
+  },
+  "minecraft:calcite": {
+   "salt": 5,
+   "earth": 2
+  },
+  "minecraft:dripstone_block": {
+   "earth": 5,
+   "water": 2,
+   "salt": 1
+  },
+  "minecraft:pointed_dripstone": {
+   "earth": 2,
+   "water": 1
+  },
+  "minecraft:netherrack": {
+   "earth": 4,
+   "fire": 3
+  },
+  "minecraft:basalt": {
+   "earth": 6,
+   "fire": 2
+  },
+  "minecraft:blackstone": {
+   "earth": 6,
+   "salt": 1,
+   "shadow": 1
+  },
+  "minecraft:soul_sand": {
+   "earth": 4,
+   "spirit": 3
+  },
+  "minecraft:soul_soil": {
+   "earth": 4,
+   "spirit": 2
+  },
+  "minecraft:end_stone": {
+   "earth": 6,
+   "air": 3,
+   "mercury": 1
+  },
+  "minecraft:obsidian": {
+   "earth": 8,
+   "fire": 4,
+   "salt": 3
+  },
+  "minecraft:crying_obsidian": {
+   "earth": 8,
+   "fire": 4,
+   "salt": 3,
+   "spirit": 4
+  },
+  "minecraft:magma_block": {
+   "earth": 5,
+   "fire": 6,
+   "sulphur": 2
+  },
+  "minecraft:sandstone": {
+   "earth": 5,
+   "salt": 3
+  },
+  "minecraft:red_sandstone": {
+   "earth": 5,
+   "salt": 3,
+   "fire": 1
+  },
+  "minecraft:terracotta": {
+   "earth": 5,
+   "fire": 2,
+   "water": 1
+  },
+  "minecraft:bricks": {
+   "earth": 5,
+   "fire": 2,
+   "water": 1
+  },
+  "minecraft:brick": {
+   "earth": 1,
+   "fire": 1
+  },
+  "minecraft:snow_block": {
+   "water": 3,
+   "air": 2,
+   "frost": 3
+  },
+  "minecraft:snow": {
+   "water": 1,
+   "air": 1,
+   "frost": 1
+  },
+  "minecraft:snowball": {
+   "water": 1,
+   "frost": 1
+  },
+  "minecraft:ice": {
+   "water": 3,
+   "salt": 2,
+   "frost": 4
+  },
+  "minecraft:packed_ice": {
+   "water": 4,
+   "salt": 3,
+   "frost": 8
+  },
+  "minecraft:blue_ice": {
+   "water": 5,
+   "salt": 4,
+   "frost": 14
+  },
+  "minecraft:sponge": {
+   "water": 8,
+   "air": 3,
+   "life": 2
+  },
+  "minecraft:wet_sponge": {
+   "water": 14,
+   "air": 3,
+   "life": 2
+  },
+  "minecraft:moss_block": {
+   "earth": 3,
+   "water": 2,
+   "plant": 4
+  },
+  "minecraft:moss_carpet": {
+   "earth": 1,
+   "water": 1,
+   "plant": 2
+  },
+  "minecraft:sculk": {
+   "shadow": 3,
+   "mind": 2,
+   "rot": 2
+  },
+  "minecraft:sculk_catalyst": {
+   "shadow": 6,
+   "mind": 4,
+   "death": 4,
+   "rot": 3
+  },
+  "minecraft:sculk_sensor": {
+   "shadow": 4,
+   "mind": 3,
+   "spark": 3
+  },
+  "minecraft:sculk_shrieker": {
+   "shadow": 6,
+   "mind": 4,
+   "undeath": 4
+  },
+  "minecraft:amethyst_block": {
+   "crystal": 8,
+   "salt": 4,
+   "arcana": 2
+  },
+  "minecraft:budding_amethyst": {
+   "crystal": 10,
+   "arcana": 6,
+   "life": 3
+  },
+  "minecraft:amethyst_cluster": {
+   "crystal": 10,
+   "arcana": 3
+  },
+  "minecraft:small_amethyst_bud": {
+   "crystal": 3,
+   "arcana": 1
+  },
+  "minecraft:medium_amethyst_bud": {
+   "crystal": 5,
+   "arcana": 1
+  },
+  "minecraft:large_amethyst_bud": {
+   "crystal": 8,
+   "arcana": 2
+  },
+  "minecraft:glass": {
+   "crystal": 2,
+   "salt": 1,
+   "air": 1
+  },
+  "minecraft:tinted_glass": {
+   "crystal": 3,
+   "shadow": 2,
+   "salt": 1
+  },
+  "minecraft:glowstone": {
+   "light": 8,
+   "fire": 4,
+   "crystal": 2
+  },
+  "minecraft:sea_lantern": {
+   "light": 6,
+   "water": 4,
+   "crystal": 4
+  },
+  "minecraft:shroomlight": {
+   "light": 4,
+   "plant": 3,
+   "fire": 2
+  },
+  "minecraft:honey_block": {
+   "life": 4,
+   "water": 4,
+   "earth": 2
+  },
+  "minecraft:honeycomb_block": {
+   "life": 6,
+   "earth": 4,
+   "plant": 2
+  },
+  "minecraft:slime_block": {
+   "water": 12,
+   "mercury": 8,
+   "life": 4
+  },
+  "minecraft:dragon_egg": {
+   "arcana": 20,
+   "beast": 16,
+   "shadow": 12,
+   "mercury": 12
+  },
+  "minecraft:bone_block": {
+   "death": 6,
+   "salt": 12,
+   "earth": 3
+  },
+  "minecraft:cobweb": {
+   "air": 3,
+   "venom": 2,
+   "beast": 1
+  },
+  "minecraft:coal_ore": {
+   "earth": 6,
+   "fire": 4,
+   "sulphur": 2
+  },
+  "minecraft:deepslate_coal_ore": {
+   "earth": 7,
+   "fire": 4,
+   "sulphur": 2
+  },
+  "minecraft:iron_ore": {
+   "earth": 8,
+   "metal": 5,
+   "salt": 1
+  },
+  "minecraft:deepslate_iron_ore": {
+   "earth": 9,
+   "metal": 5,
+   "salt": 1
+  },
+  "minecraft:copper_ore": {
+   "earth": 8,
+   "metal": 4,
+   "spark": 1
+  },
+  "minecraft:deepslate_copper_ore": {
+   "earth": 9,
+   "metal": 4,
+   "spark": 1
+  },
+  "minecraft:gold_ore": {
+   "earth": 8,
+   "metal": 4,
+   "wealth": 3
+  },
+  "minecraft:deepslate_gold_ore": {
+   "earth": 9,
+   "metal": 4,
+   "wealth": 3
+  },
+  "minecraft:nether_gold_ore": {
+   "earth": 6,
+   "fire": 3,
+   "metal": 3,
+   "wealth": 3
+  },
+  "minecraft:redstone_ore": {
+   "earth": 7,
+   "mercury": 5,
+   "spark": 2
+  },
+  "minecraft:deepslate_redstone_ore": {
+   "earth": 8,
+   "mercury": 5,
+   "spark": 2
+  },
+  "minecraft:lapis_ore": {
+   "earth": 7,
+   "salt": 3,
+   "crystal": 3,
+   "water": 1
+  },
+  "minecraft:deepslate_lapis_ore": {
+   "earth": 8,
+   "salt": 3,
+   "crystal": 3,
+   "water": 1
+  },
+  "minecraft:diamond_ore": {
+   "earth": 8,
+   "crystal": 6,
+   "wealth": 2
+  },
+  "minecraft:deepslate_diamond_ore": {
+   "earth": 9,
+   "crystal": 6,
+   "wealth": 2
+  },
+  "minecraft:emerald_ore": {
+   "earth": 8,
+   "wealth": 4,
+   "crystal": 3
+  },
+  "minecraft:deepslate_emerald_ore": {
+   "earth": 9,
+   "wealth": 4,
+   "crystal": 3
+  },
+  "minecraft:nether_quartz_ore": {
+   "earth": 6,
+   "fire": 3,
+   "crystal": 4,
+   "salt": 2
+  },
+  "minecraft:ancient_debris": {
+   "earth": 10,
+   "fire": 6,
+   "metal": 12,
+   "wealth": 4
+  },
+  "minecraft:iron_block": {
+   "metal": 40,
+   "earth": 10
+  },
+  "minecraft:gold_block": {
+   "metal": 30,
+   "wealth": 30
+  },
+  "minecraft:copper_block": {
+   "metal": 36,
+   "spark": 10,
+   "earth": 6
+  },
+  "minecraft:diamond_block": {
+   "crystal": 60,
+   "light": 15,
+   "wealth": 20,
+   "earth": 10
+  },
+  "minecraft:emerald_block": {
+   "wealth": 36,
+   "crystal": 28,
+   "life": 10
+  },
+  "minecraft:lapis_block": {
+   "salt": 20,
+   "crystal": 18,
+   "water": 12,
+   "arcana": 5
+  },
+  "minecraft:redstone_block": {
+   "mercury": 20,
+   "spark": 8,
+   "earth": 6
+  },
+  "minecraft:coal_block": {
+   "fire": 28,
+   "earth": 18,
+   "sulphur": 14
+  },
+  "minecraft:netherite_block": {
+   "metal": 80,
+   "fire": 30,
+   "earth": 30,
+   "wealth": 20
+  },
+  "minecraft:raw_iron_block": {
+   "metal": 30,
+   "earth": 20
+  },
+  "minecraft:raw_copper_block": {
+   "metal": 28,
+   "earth": 20,
+   "spark": 6
+  },
+  "minecraft:raw_gold_block": {
+   "metal": 24,
+   "wealth": 20,
+   "earth": 20
+  },
+  "#minecraft:logs": {
+   "earth": 3,
+   "water": 2,
+   "plant": 4
+  },
+  "#minecraft:planks": {
+   "earth": 1,
+   "plant": 2
+  },
+  "#minecraft:leaves": {
+   "air": 2,
+   "water": 1,
+   "plant": 2
+  },
+  "#minecraft:saplings": {
+   "earth": 2,
+   "water": 1,
+   "plant": 4,
+   "life": 2
+  },
+  "#minecraft:flowers": {
+   "air": 1,
+   "plant": 4,
+   "life": 1
+  },
+  "#minecraft:wool": {
+   "air": 3,
+   "beast": 2,
+   "earth": 1
+  },
+  "#minecraft:coals": {
+   "fire": 4,
+   "earth": 3,
+   "sulphur": 2
+  },
+  "#minecraft:fishes": {
+   "water": 5,
+   "life": 3,
+   "beast": 1
+  },
+  "minecraft:short_grass": {
+   "air": 1,
+   "earth": 1,
+   "plant": 1
+  },
+  "minecraft:tall_grass": {
+   "air": 2,
+   "earth": 1,
+   "plant": 2
+  },
+  "minecraft:fern": {
+   "air": 1,
+   "earth": 1,
+   "plant": 2
+  },
+  "minecraft:large_fern": {
+   "air": 2,
+   "earth": 1,
+   "plant": 3
+  },
+  "minecraft:dead_bush": {
+   "earth": 1,
+   "air": 1,
+   "death": 1
+  },
+  "minecraft:vine": {
+   "air": 1,
+   "water": 1,
+   "plant": 3
+  },
+  "minecraft:glow_lichen": {
+   "light": 2,
+   "plant": 2,
+   "earth": 1
+  },
+  "minecraft:lily_pad": {
+   "water": 2,
+   "air": 1,
+   "plant": 3
+  },
+  "minecraft:seagrass": {
+   "water": 2,
+   "plant": 2
+  },
+  "minecraft:kelp": {
+   "water": 3,
+   "plant": 2
+  },
+  "minecraft:dried_kelp": {
+   "air": 2,
+   "plant": 2,
+   "fire": 1
+  },
+  "minecraft:dried_kelp_block": {
+   "air": 14,
+   "plant": 12,
+   "fire": 4
+  },
+  "minecraft:sugar_cane": {
+   "water": 2,
+   "air": 1,
+   "plant": 3
+  },
+  "minecraft:bamboo": {
+   "air": 2,
+   "earth": 1,
+   "plant": 2
+  },
+  "minecraft:cactus": {
+   "water": 3,
+   "earth": 2,
+   "plant": 2,
+   "venom": 1
+  },
+  "minecraft:pumpkin": {
+   "water": 3,
+   "earth": 3,
+   "plant": 4
+  },
+  "minecraft:carved_pumpkin": {
+   "water": 3,
+   "earth": 3,
+   "plant": 4,
+   "spirit": 1
+  },
+  "minecraft:melon": {
+   "water": 6,
+   "earth": 2,
+   "plant": 3
+  },
+  "minecraft:hay_block": {
+   "earth": 8,
+   "air": 6,
+   "plant": 9
+  },
+  "minecraft:brown_mushroom": {
+   "earth": 2,
+   "rot": 2,
+   "plant": 1
+  },
+  "minecraft:red_mushroom": {
+   "earth": 2,
+   "venom": 2,
+   "plant": 1
+  },
+  "minecraft:mushroom_stem": {
+   "earth": 3,
+   "air": 1,
+   "plant": 2
+  },
+  "minecraft:brown_mushroom_block": {
+   "earth": 3,
+   "air": 1,
+   "rot": 2
+  },
+  "minecraft:red_mushroom_block": {
+   "earth": 3,
+   "air": 1,
+   "venom": 2
+  },
+  "minecraft:crimson_fungus": {
+   "earth": 2,
+   "fire": 2,
+   "rot": 2,
+   "plant": 1
+  },
+  "minecraft:warped_fungus": {
+   "earth": 2,
+   "air": 2,
+   "rot": 2,
+   "plant": 1
+  },
+  "minecraft:crimson_stem": {
+   "earth": 3,
+   "fire": 2,
+   "plant": 4
+  },
+  "minecraft:warped_stem": {
+   "earth": 3,
+   "air": 2,
+   "plant": 4
+  },
+  "minecraft:nether_wart": {
+   "earth": 2,
+   "fire": 2,
+   "plant": 3
+  },
+  "minecraft:nether_wart_block": {
+   "earth": 3,
+   "fire": 3,
+   "plant": 5
+  },
+  "minecraft:warped_wart_block": {
+   "earth": 3,
+   "air": 3,
+   "plant": 5
+  },
+  "minecraft:weeping_vines": {
+   "earth": 1,
+   "fire": 1,
+   "plant": 2
+  },
+  "minecraft:twisting_vines": {
+   "earth": 1,
+   "air": 1,
+   "plant": 2
+  },
+  "minecraft:chorus_flower": {
+   "air": 3,
+   "mercury": 3,
+   "plant": 2,
+   "shadow": 1
+  },
+  "minecraft:chorus_fruit": {
+   "air": 2,
+   "mercury": 2,
+   "plant": 2
+  },
+  "minecraft:cherry_leaves": {
+   "air": 2,
+   "water": 1,
+   "plant": 3
+  },
+  "minecraft:azalea": {
+   "earth": 2,
+   "water": 1,
+   "plant": 5,
+   "life": 1
+  },
+  "minecraft:big_dripleaf": {
+   "water": 3,
+   "air": 2,
+   "plant": 3
+  },
+  "minecraft:small_dripleaf": {
+   "water": 2,
+   "air": 1,
+   "plant": 2
+  },
+  "minecraft:spore_blossom": {
+   "air": 2,
+   "plant": 3,
+   "venom": 1,
+   "life": 1
+  }
+ }
+}

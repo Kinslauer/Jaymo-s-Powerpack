@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymospowers:item/essence_phial",
+    "tints": [
+      {
+        "type": "jaymospowers:essence",
+        "default": -1
+      }
+    ]
+  }
+}

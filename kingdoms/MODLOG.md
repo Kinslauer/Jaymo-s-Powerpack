@@ -4723,3 +4723,10 @@ thorny rose inspired variant among another, and give each heritage 2 additional 
   heritage are asked once in chat on joining (`/kingdom blood <variant>`, only while unset). Lineage swaps keep each
   body's own variant.
 - Preview: project files `art-overhaul/heritage-variants/` (variants-1..3.png, variant_preview.py). Not seen in game.
+
+## 0.7.215: the hermits love alchemy (pack 0.17.0)
+- Andy: the floating islands' hermit wizards are eager to talk about Jaymo's Powers' alchemy. `HermitAlchemy`: "Ask
+  about alchemy" in MCA's menu (hermits only) gets excited words and a hint at the first thing on the alchemy path the
+  player hasn't learned (lens and Codex first, through crucible, flux, infusion, gear); a worried word first if they're
+  badly corrupted or standing on blighted land. Players who've started get an excited greeting and alchemy chat.
+- Reads Powers' alchemy by reflection (`PowersCompat.alchemy`, `PowersCompat.flux`); without Powers it tells how to begin.

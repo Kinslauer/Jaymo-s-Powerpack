@@ -1,0 +1,20 @@
+{
+  "centre": "minecraft:slime_ball",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:piston",
+    "jaymospowers:orichalc_ingot",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "motion": 8,
+    "earth": 6
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymospowers:push_focus",
+    "count": 1
+  },
+  "research": "focus_push",
+  "flux": 3
+}

@@ -1,0 +1,13 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "salt": 4,
+    "life": 4,
+    "water": 4
+  },
+  "result": {
+    "item": "jaymospowers:purifying_draught",
+    "count": 1
+  },
+  "research": "cleansing"
+}
