@@ -112,7 +112,12 @@ public final class Emigrants {
 	public static final float TELL_CHANCE = 0.35F, OLD_TELL_CHANCE = 0.25F;
 	/** Why: the reasons, and the lines of each ({@code emigrant.jaymoskingdoms.<kind>.<reason>.<n>}). */
 	static final String RIDICULED = "ridiculed", PURIST = "purist", TYRANNY = "tyrant", GRUDGE = "grudge", GLOOM = "unhappy", WANDER = "restless";
-	static final String[] REASONS = {RIDICULED, PURIST, TYRANNY, GRUDGE, GLOOM, WANDER};
+	static final String EXPELLED = "expelled";
+	static final String[] REASONS = {RIDICULED, PURIST, TYRANNY, GRUDGE, GLOOM, WANDER, EXPELLED};
+	/** (0.7.218) A purist who digs in drives those not of his blood out: this much more a day; stopped at the gate, they won't try again for this long. */
+	static final float EXPEL = 0.12F;
+	static final long CAUGHT_TICKS = 24000L;
+	static final int CAUGHT_GUARD_LINES = 3, CAUGHT_LINES = 3, CAUGHT_GLOOM = 3;
 	static final int FAREWELL_LINES = 3, STORY_LINES = 2, OLD_LINES = 2, PACKING_LINES = 3;
 	/** On the cart and its horse (or donkey): these. */
 	static final String CART_TAG = "jaymoskingdoms_emigrant_cart";
@@ -183,6 +188,8 @@ public final class Emigrants {
 	private static final Map<UUID, UUID[]> CARTS = new HashMap<>();
 	private static final Map<UUID, double[]> PROGRESS = new HashMap<>();
 	private static final Set<UUID> TAKING = new HashSet<>();
+	/** (0.7.218) Stopped at the gate: when (not saved; a restart lets them try again). */
+	private static final Map<UUID, Long> CAUGHT = new HashMap<>();
 
 	private Emigrants() {
 	}
@@ -197,6 +204,7 @@ public final class Emigrants {
 			CARTS.clear();
 			PROGRESS.clear();
 			TAKING.clear();
+			CAUGHT.clear();
 		});
 	}
 
@@ -463,6 +471,10 @@ public final class Emigrants {
 		if (grudges >= GRUDGES_LEAST) {
 			why[3] = GRUDGES;
 		}
+		if (Purists.outsider(ruler, v) && Reforms.stubborn(level.getServer(), ruler)) {
+			// ((0.7.218) a purist who dug in drives them out: Reforms)
+			why[6] = EXPEL;
+		}
 		if (McaCompat.mood(v) <= UNHAPPY_MOOD) {
 			// ((0.7.218) a ruler's reforms ease all three: Reforms)
 			why[4] = Reforms.ease(level.getServer(), ruler, UNHAPPY);
@@ -475,7 +487,7 @@ public final class Emigrants {
 				most = i;
 			}
 		}
-		if (random.nextFloat() >= daily / CHECKS_A_DAY) {
+		if (random.nextFloat() >= daily / CHECKS_A_DAY || now - CAUGHT.getOrDefault(v.getUUID(), Long.MIN_VALUE / 2) < CAUGHT_TICKS) {
 			return;
 		}
 		List<Villager> household = household(level, v);
@@ -486,8 +498,13 @@ public final class Emigrants {
 		}
 		String from = f != null ? f.name() : town(level, v.blockPosition());
 		// (0.7.218) the realm feels it, and its ruler may answer (Reforms)
-		Reforms.left(level, ruler, household.size());
+		Reforms.left(level, ruler, household.size(), reason);
 		boolean seen = near(level, v.position(), UNSEEN);
+		if (!EXPELLED.equals(reason) && Reforms.caught(level.getServer(), ruler, random)) {
+			// (0.7.218) a ruler who dug in: his guards turn them back at the gate
+			caught(level, v, household, seen, now);
+			return;
+		}
 		long until = seen ? now + PACKING_TICKS : now;
 		for (Villager h : household) {
 			h.setAttached(MOVE, new Move(from, to.pos(), to.name(), reason, h == v, PACKING, until));
@@ -497,6 +514,30 @@ public final class Emigrants {
 				Speech.WHITE, 16.0);
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.6F, 0.9F);
 		}
+	}
+
+	/** {@code v}'s household, stopped at the gate by a stubborn ruler's guards: back home, and the sorrier for it. */
+	private static void caught(ServerLevel level, Villager v, List<Villager> household, boolean seen, long now) {
+		RandomSource random = v.getRandom();
+		for (Villager h : household) {
+			CAUGHT.put(h.getUUID(), now);
+			McaCompat.cheer(h, -CAUGHT_GLOOM);
+		}
+		if (!seen) {
+			return;
+		}
+		Folk guard = null;
+		for (Folk x : level.getEntitiesOfClass(Folk.class, v.getBoundingBox().inflate(24.0), x -> x.isAlive() && x.role() == Folk.GUARD)) {
+			if (guard == null || x.distanceToSqr(v) < guard.distanceToSqr(v)) {
+				guard = x;
+			}
+		}
+		if (guard != null) {
+			guard.getLookControl().setLookAt(v, 30.0F, 30.0F);
+			Speech.say(level, guard, Component.translatable("emigrant.jaymoskingdoms.caught.guard." + random.nextInt(CAUGHT_GUARD_LINES)), Speech.RED, 16.0);
+		}
+		Speech.say(level, v, Component.translatable("emigrant.jaymoskingdoms.caught." + random.nextInt(CAUGHT_LINES)), Speech.WHITE, 16.0);
+		level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.7F, 0.8F);
 	}
 
 	/** {@code v} and their partner and children about. */
@@ -514,7 +555,7 @@ public final class Emigrants {
 		return out;
 	}
 
-	private static @Nullable Faction ruler(MinecraftServer server, @Nullable Faction f) {
+	static @Nullable Faction ruler(MinecraftServer server, @Nullable Faction f) {
 		if (f == null || Tempers.of(f) != null) {
 			return f;
 		}
@@ -685,10 +726,14 @@ public final class Emigrants {
 			boolean alone = alone(server, f.seat());
 			Place p = new Place(f.seat(), f.name(), alone);
 			boolean kin = Havens.is(server, f) ? Havens.fits(server, f, blood) : Purists.is(f) && Purists.blood(f) == blood;
-			if (kin && (RIDICULED.equals(reason) || PURIST.equals(reason))) {
+			if (kin && (RIDICULED.equals(reason) || PURIST.equals(reason) || EXPELLED.equals(reason))) {
 				kinPlaces.add(p);
 			} else if (d <= FAR_MAX && !Purists.outsider(f, v) && (!Havens.is(server, f) || Havens.fits(server, f, blood))) {
 				places.add(p);
+				// ((0.7.218) a realm that reformed to keep its people draws settlers too: Reforms)
+				for (int i = Reforms.level(server, f); i > 0; i--) {
+					places.add(p);
+				}
 			}
 		}
 		for (McaCompat.Town town : McaCompat.towns(level)) {

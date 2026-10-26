@@ -149,20 +149,22 @@ public final class Prejudice {
 		int d = degree(theirs);
 		Faction f = faction(who);
 		boolean purist = Purists.is(f) && Purists.kin(f, who);
+		// ((0.7.218) less where the ruler has decreed tolerance: Reforms)
+		float edict = who.level() instanceof ServerLevel sl ? Reforms.tolerated(sl.getServer(), Emigrants.ruler(sl.getServer(), f)) : 1.0F;
 		if (d == 0) {
 			// (the rivalry, Havens) a non-human minds a human: hard in a haven, a little anywhere else
 			if (degree(mine) == 0) {
 				return 0.0F;
 			}
 			float m = Havens.home(who) != null ? HAVEN_RIVALRY : RIVALRY;
-			return purist ? m * PURIST_HARSH : tolerant(who) ? 0.0F : m;
+			return edict * (purist ? m * PURIST_HARSH : tolerant(who) ? 0.0F : m);
 		}
 		if (degree(mine) > 0) {
 			// (not plainly human themselves: they know how it is)
 			return 0.0F;
 		}
 		// (a purist's own: always, and harder)
-		return purist ? d * PURIST_HARSH : tolerant(who) ? 0.0F : d;
+		return edict * (purist ? d * PURIST_HARSH : tolerant(who) ? 0.0F : d);
 	}
 
 	/** {@code who} doesn't mind blood at all, by nature: kindhearted, cheerful or devout, or the luck of who they are. */

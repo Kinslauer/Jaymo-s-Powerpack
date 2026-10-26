@@ -4806,4 +4806,9 @@ the tide born, stone, warrior and sylvan fall into this".
   gossip). Each reform step (up to 3): taxes -20%, tyrant/purist/unhappy pushes to leave -25%, a purist's outsider
   markup -25%, guards' toll and search weights -1, MCA mood +4 for villagers about the seat, news via Tidings, gossip.
   Ten days with nobody leaving and he slips back a step.
+  Andy: "More". Reformed realms draw settlers (a realm counts once more per step as somewhere emigrants go). When the
+  ridiculed were most of those who left, the reform comes with an edict of tolerance: his townsfolk mind a blood 25% less
+  a step (`Prejudice.minds`). Digging in has teeth: a tyrant's, paranoid king's or warlord's guards stop 40% of households
+  at the gate (a guard's halt, MCA mood -3, no new try for a day), and a purist who dug in drives out those not of his
+  blood (+12% a day, reason "expelled", to a realm of their own blood or anywhere).
 - Tuning: the constants at the top of `Prejudice`, `Havens`, `Emigrants` and `Reforms`.
