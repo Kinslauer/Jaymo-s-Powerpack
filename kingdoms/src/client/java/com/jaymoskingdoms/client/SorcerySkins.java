@@ -34,7 +34,7 @@ import net.minecraft.world.item.DyeColor;
 public final class SorcerySkins {
 	static final int NECROMANCER_FACES = 2;
 	private static final Identifier[] NECROMANCERS = new Identifier[NECROMANCER_FACES];
-	/** (0.7.228) The blood witch: the necromancer's robe in crimson and bone-gold, red-eyed. */
+	/** (0.7.229) The blood witch: the necromancer's robe in crimson and bone-gold, red-eyed. */
 	private static final Identifier[] BLOOD_WITCHES = new Identifier[NECROMANCER_FACES];
 	private static final Identifier[] SHAMANS = new Identifier[DyeColor.values().length];
 	private static final Identifier[] WIZARDS = new Identifier[DyeColor.values().length];

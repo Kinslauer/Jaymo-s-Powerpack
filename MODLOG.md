@@ -2985,7 +2985,14 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - `ResonanceGift`: pulse, boom, ring, hush (a dome that silences a powered player foe's keys), shriek when corrupted,
     Collapse ultimate. `ResonanceHush.cast(level, caster, corrupted, ticks)` for any caster; clients look for domes on
     every entity. `/power gift <targets> ways hidden|open|master|master_open`. Not seen in game.
-- **0.17.13, death and blood magic (Kingdoms 0.7.228):** Andy: "death magic, and blood magic, is there a way you can work
+- **0.17.13, a whaling life-story start, and every start can be had (Kingdoms 0.7.228):** a capital, barbarian camp, monolith or harbour is
+  made when a start needs one and the world hasn't got it; the cave start wakes you at half health, and every story
+  landing gives 5 s of Resistance. No Powers changes. See Kingdoms' log.
+- **0.17.14, players throw rocks:** right click the air with a loose rock (either hand) to throw it, the way Kingdoms'
+  poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
+  Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
+  where they land to be picked up again (`ground/ThrownRocks`).
+- **0.17.15, death and blood magic (Kingdoms 0.7.229):** Andy: "death magic, and blood magic, is there a way you can work
   that concept in?", then chose two new Sorcerer elements. Powers: `core/wounds/Hemomancy` (`cuts`, `cut`, `hemorrhage`),
   read by Kingdoms by reflection as Restoration reads `Mending`; Reap kills the downed through `Downed.execute`; casting
   either school adds lingering alchemical `Corruption`. See Kingdoms' log.

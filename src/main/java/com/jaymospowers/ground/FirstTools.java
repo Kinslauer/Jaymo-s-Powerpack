@@ -148,7 +148,8 @@ public final class FirstTools {
 		return main.is(Items.FLINT) && rock(off) || rock(main) && off.is(Items.FLINT);
 	}
 
-	private static boolean rock(ItemStack stack) {
+	/** A loose rock ({@link GroundRocks}). */
+	static boolean rock(ItemStack stack) {
 		return stack.getItem() instanceof net.minecraft.world.item.BlockItem item && GroundRocks.ROCKS.containsValue(item.getBlock());
 	}
 

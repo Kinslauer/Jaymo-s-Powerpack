@@ -72,7 +72,7 @@ public final class Mana {
 		// the Sorcerer's
 		Map.entry("imbue", 20.0F), Map.entry("bolt", 8.0F), Map.entry("mend", 15.0F), Map.entry("renewal", 30.0F),
 		Map.entry("rekindle", 40.0F),
-		// (0.7.228) death's (blood's are paid in blood: Hemomancy.COST)
+		// (0.7.229) death's (blood's are paid in blood: Hemomancy.COST)
 		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("deaths_door", 50.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F));
 
 	/** Whether a player is attuned. Saved, kept through death, synced to everyone (who sees whose glow). */

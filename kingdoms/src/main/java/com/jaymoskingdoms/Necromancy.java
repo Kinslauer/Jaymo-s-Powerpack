@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.228) Death magic, the eighth Sorcerer element ({@link ForbiddenArts}). It works on the dead and the dying: violet
+ * (0.7.229) Death magic, the eighth Sorcerer element ({@link ForbiddenArts}). It works on the dead and the dying: violet
  * and ash, with the soul's wail.
  * <ul>
  * <li><b>The Death Sorcerer:</b> {@code J} imbues their blade as any Sorcerer's, and every blow it lands <b>blights</b>

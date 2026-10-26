@@ -71,6 +71,8 @@ public class JaymosPowers implements ModInitializer {
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.FirstTools.init();
+		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
+		com.jaymospowers.ground.ThrownRocks.init();
 		// Enchanting System Overhaul (MIT) ported: learn from books, pay items at the table
 		com.jaymospowers.enchanting.Enchanting.init();
 		com.jaymospowers.alchemy.Alchemy.init();

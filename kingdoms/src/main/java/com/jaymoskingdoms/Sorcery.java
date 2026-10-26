@@ -55,7 +55,7 @@ import org.jspecify.annotations.Nullable;
  * undead), a ward on the guards fighting near him, mending, a blast that throws back anyone too close, and he banishes
  * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead. (0.5.53) With Minecraft Comes Alive the
  * court wizard is one of the kingdom's own elders, taking the office in old age ({@link CourtWizards}).</li>
- * <li>(0.7.228) A camp's <b>blood witch</b> ({@link #BLOOD_WITCH}, once a camp is a few days old): bolts that cut, a grip
+ * <li>(0.7.229) A camp's <b>blood witch</b> ({@link #BLOOD_WITCH}, once a camp is a few days old): bolts that cut, a grip
  * that drags you to her, hemorrhages that burst every cut near, and she drinks the bleeding to heal ({@link Hemomancy}).</li>
  * </ul>
  * Casters keep their distance and cast; a player who kills one takes a spell scroll from the body ({@link Arcana}).
@@ -63,7 +63,7 @@ import org.jspecify.annotations.Nullable;
 public final class Sorcery {
 	/** The roles (folk ids; clear of the realms', the camps' 20-24 and the goblins' 30-32). */
 	public static final int NECROMANCER = 40, SHAMAN = 41, WIZARD = 42;
-	/** (0.7.228) A camp's blood witch ({@link Hemomancy}). */
+	/** (0.7.229) A camp's blood witch ({@link Hemomancy}). */
 	public static final int BLOOD_WITCH = 43;
 	/** Health and pace of each. */
 	static final double NECROMANCER_HEALTH = 44.0, SHAMAN_HEALTH = 34.0, WIZARD_HEALTH = 40.0, BLOOD_WITCH_HEALTH = 38.0, CASTER_SPEED = 0.3;
@@ -112,7 +112,7 @@ public final class Sorcery {
 	// who keeps them
 	/** A camp takes a necromancer at this age (days), a second shaman at this one. */
 	static final int NECROMANCER_DAYS = 2, SECOND_SHAMAN_DAYS = 5;
-	/** (0.7.228) A camp takes a blood witch at this age (days). */
+	/** (0.7.229) A camp takes a blood witch at this age (days). */
 	static final int BLOOD_WITCH_DAYS = 4;
 	/** A kingdom with this much in its treasury keeps a second wizard. */
 	static final long SECOND_WIZARD_TREASURY = 300;

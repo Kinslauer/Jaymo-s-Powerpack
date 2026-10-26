@@ -5,7 +5,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.13) Blood magic's way into a body: Jaymo's Kingdoms' Blood Sorcerer (and its scrolls and blood witches) asks for
+ * (0.17.15) Blood magic's way into a body: Jaymo's Kingdoms' Blood Sorcerer (and its scrolls and blood witches) asks for
  * it here by reflection, as Restoration asks {@link Mending}. Andy (2026-10-26) chose death and blood magic as two new
  * Sorcerer elements. Blood magic counts open cuts, opens them, and bursts them; it never closes one.
  */
