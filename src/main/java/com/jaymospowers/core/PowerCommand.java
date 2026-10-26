@@ -131,6 +131,7 @@ public final class PowerCommand {
 						return players.size();
 					})))
 			.then(com.jaymospowers.power.ember.FlameAvatar.command())
+			.then(com.jaymospowers.core.gifted.GiftedCommand.command())
 			.then(Commands.literal("get")
 				.then(Commands.argument("target", EntityArgument.player())
 					.executes(c -> {

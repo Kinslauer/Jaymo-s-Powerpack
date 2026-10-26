@@ -105,6 +105,8 @@ public final class Workers {
 			if (w instanceof Enlisted e) {
 				// (0.5.53) how long they've been grown (elders become court wizards)
 				CourtWizards.age(level, e);
+				// (0.7.218) a gifted Wind the storm has taken
+				GiftedFolk.step(level, e.mob());
 				if (OldAge.step(level, e)) {
 					// (0.5.54) they died of old age
 					return false;

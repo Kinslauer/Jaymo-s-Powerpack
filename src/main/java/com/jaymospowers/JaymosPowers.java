@@ -47,6 +47,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
 		com.jaymospowers.core.GiantReach.init();
+		// (0.17.3) gifted villagers: powers held by those who aren't players (who awakens is Kingdoms')
+		com.jaymospowers.core.gifted.GiftedAI.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();
@@ -93,7 +95,7 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tending", "core.finisher.Finishers",
+			"core.Affinity", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.Mastery", "core.Meditate", "core.Powers", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Breaks", "core.wounds.Bleeding", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tending", "core.finisher.Finishers", "core.gifted.Gifted",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",

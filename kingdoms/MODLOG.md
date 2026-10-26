@@ -4756,7 +4756,22 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
   Sworn adds full iron, a sword and a shield; Caving a pickaxe. The story page has heritage and class buttons to change
   either after the result (the heritage must be open to them; checked on the server).
 - Tuning: constants at the top of `LifeStory`. Not seen in game.
-## 0.7.218: non-human heritages looked down on (pack 0.17.3)
+## 0.7.218: gifted villagers (pack 0.17.3)
+- Why a Stormborn purist king could exist: villager births still rolled Stormborn (from 0.7.106, when it could be picked)
+  after 0.7.140 made it earned. Now no one is born Stormborn but a Stormborn parent's child; a gifted Wind villager whose
+  power the storm takes (corrupted) wakes to it (`GiftedFolk.step`). Stormborn already in a world keep their blood: MCA's
+  screen reads "Of the storm-taken line".
+- `GiftedFolk`: every MCA villager is weighed once when they come of age (or, in an older world, the first time they're
+  stepped): 1 in 80 awaken (Andy's number), a gifted parent's child three times as often, leaning to the parent's power
+  (x6) and their blood's (x4: Frostborn Cryo, Emberborn Smoke, Tideborn/Deepborn Darktide, Stoneborn Gravity, Sylvan and
+  Verdant Web, Warrior-born Z Fighter, Stormborn Wind, Heartlander/Earthling Arsenal). Callings: a Breeze killed (Wind),
+  a cave spider's bite (Web), a long fall (Gravity), freezing (Cryo), burning (Smoke), monsters killed bare-handed
+  (Z Fighter) or with a weapon (Arsenal). Temperament sets their style (hotheaded/brave/proud/spiteful bold;
+  timid/gloomy/suspicious/kindhearted wary).
+- Gifted townsfolk are crowned 60% of the time when there's one among the heirs (`McaBridge.heir`); a gifted ruler
+  unleashes their ultimate when anyone of the realm is hurt within 16 blocks of the throne while they're there.
+- MCA screen: "Gifted: <power>" once you know their name. Powers holds the gift and its moves (`PowersCompat.give` etc.).
+## 0.7.219: non-human heritages looked down on (pack 0.17.4)
 Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
 the tide born, stone, warrior and sylvan fall into this".
 - **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
@@ -4778,7 +4793,7 @@ the tide born, stone, warrior and sylvan fall into this".
   across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
   everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
   hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
-  settlements already in the world when 0.7.218 first starts stay as they are; folk first loading within two days of a
+  settlements already in the world when 0.7.219 first starts stay as they are; folk first loading within two days of a
   haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
   dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
   and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now

@@ -281,6 +281,87 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- (0.7.218) gifted villagers: Powers' core/gifted (a villager's power and its moves) ------------------------------
+
+	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
+	public static final int BOLD = 0, STEADY = 1, WARY = 2;
+	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
+	private static boolean lookedForGifts;
+
+	private static void lookForGifts() {
+		if (lookedForGifts) {
+			return;
+		}
+		lookedForGifts = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		var lookup = java.lang.invoke.MethodHandles.publicLookup();
+		Class<?> entity = net.minecraft.world.entity.Entity.class;
+		try {
+			Class<?> gifted = Class.forName("com.jaymospowers.core.gifted.Gifted");
+			giftGive = lookup.findStatic(gifted, "give", java.lang.invoke.MethodType.methodType(boolean.class, entity, String.class, int.class));
+			giftPower = lookup.findStatic(gifted, "power", java.lang.invoke.MethodType.methodType(String.class, entity));
+			giftCorrupted = lookup.findStatic(gifted, "corrupted", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			giftUnleash = lookup.findStatic(gifted, "unleash", java.lang.invoke.MethodType.methodType(boolean.class, entity, entity));
+			giftable = lookup.findStatic(gifted, "giftable", java.lang.invoke.MethodType.methodType(java.util.List.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			giftGive = null;
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no gifted villagers (older Powers?)", e);
+		}
+	}
+
+	/** Gives {@code entity} (a villager) the power {@code power} ("wind"...), fighting as {@code style}; false without Powers. */
+	public static boolean give(net.minecraft.world.entity.Entity entity, String power, int style) {
+		lookForGifts();
+		try {
+			return giftGive != null && (boolean)giftGive.invoke(entity, power, style);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** The id path of {@code entity}'s gift ("wind"...), or null (none, or no Powers). Either side. */
+	public static @Nullable String gift(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGive == null ? null : (String)giftPower.invoke(entity);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	/** Whether {@code entity}'s gift has been corrupted (by long use). */
+	public static boolean giftCorrupted(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			return giftGive != null && (boolean)giftCorrupted.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** A gifted ruler's ultimate on {@code foe} (their throne room attacked); Powers keeps it rare. */
+	public static boolean unleash(net.minecraft.world.entity.Entity ruler, net.minecraft.world.entity.Entity foe) {
+		lookForGifts();
+		try {
+			return giftGive != null && (boolean)giftUnleash.invoke(ruler, foe);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** The powers a villager can be given ("wind", "cryo"...); empty without Powers. */
+	@SuppressWarnings("unchecked")
+	public static java.util.List<String> giftable() {
+		lookForGifts();
+		try {
+			return giftGive == null ? java.util.List.of() : (java.util.List<String>)giftable.invoke();
+		} catch (Throwable e) {
+			return java.util.List.of();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static @Nullable AttachmentType<Identifier> type() {
 		if (!looked) {

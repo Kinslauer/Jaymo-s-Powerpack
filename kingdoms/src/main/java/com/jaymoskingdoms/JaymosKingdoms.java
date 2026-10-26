@@ -297,6 +297,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.186: every humanoid's own temperament (and its attachment)
 		LOGGER.debug("temperament attachment: {}", Temperaments.TEMPERAMENT);
 		Temperaments.register();
+		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
+		GiftedFolk.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();

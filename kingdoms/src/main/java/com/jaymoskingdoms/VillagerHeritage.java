@@ -43,8 +43,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Weights</b> ({@code W_*}): (0.7.91) {@link #COMMON_SHARE} of folk are plain Heartlanders or Earthlings (between
  * them by their weights); the other bloods share the rest, the Verdant and the Warrior-born rarest. The land leans them ({@link #LEAN}): Frostborn in the cold, Emberborn in the heat (and each shuns the other's,
  * {@link #SHUN}), Tideborn by the sea and the rivers, Sylvan in the forests, Stoneborn in the mountains and badlands,
- * Verdant in the jungle. Everyone born in the Verdant World is Verdant. (0.7.106) Stormborn lean to the heights, Dawnborn to
- * the savannas; the earned bloods (Endborn, Dragonblood, Deepborn) are never rolled: only a child of one carries it.</li>
+ * Verdant in the jungle. Everyone born in the Verdant World is Verdant. (0.7.106) Dawnborn lean to the savannas; the earned
+ * bloods (Endborn, Dragonblood, Deepborn, (0.7.218) and Stormborn) are never rolled: only a child of one carries it (or a
+ * gifted Wind the storm took, {@link GiftedFolk}).</li>
  * <li><b>Looks:</b> a Verdant gets the green ({@link Verdants#SHADE}: MCA's skin, antennae); the rest wear their marks
  * and eyes through the client's HeritageLooks, as players do.</li>
  * <li><b>Warrior-born:</b> never shows a tail. Each is born either {@link #TAIL_WRAPPED} (kept round the waist, under
@@ -66,8 +67,8 @@ import org.jspecify.annotations.Nullable;
 public final class VillagerHeritage {
 	/** How likely each heritage is, before the land leans it (out of their sum). */
 	static final int W_HEARTLANDER = 560, W_STONEBORN = 60, W_TIDEBORN = 50, W_SYLVAN = 50, W_VERDANT = 15, W_EMBERBORN = 35,
-		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70, W_STORMBORN = 30, W_DAWNBORN = 30;
-	/** (0.7.106) Stormborn lean this high up (the peaks, where the storms break). */
+		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70, W_DAWNBORN = 30;
+	/** (0.7.106) The heights (the peaks, where the storms break): HeritageVariants' HIGH land. */
 	static final int HIGH_Y = 110;
 	/** (0.7.91) The share of folk born plain Heartlanders or Earthlings; the rest are of the rarer bloods. */
 	static final float COMMON_SHARE = 0.9F;
@@ -164,7 +165,7 @@ public final class VillagerHeritage {
 			if (proud != null) {
 				return proud;
 			}
-			// (0.7.218) on a haven's land, all are of its blood (Havens)
+			// (0.7.219) on a haven's land, all are of its blood (Havens)
 			Heritage.Kind haven = Havens.lean(server, pos, random);
 			if (haven != null) {
 				return haven;
@@ -196,7 +197,9 @@ public final class VillagerHeritage {
 				case NIGHTBORN -> W_NIGHTBORN;
 				case WARRIORBORN -> W_WARRIORBORN;
 				case EARTHLING -> W_EARTHLING;
-				case STORMBORN -> W_STORMBORN * (pos.getY() >= HIGH_Y ? LEAN : 1);
+				// (0.7.218) Stormborn is earned now (0.7.140): only a Stormborn parent's child, or a gifted Wind the storm
+				// took (GiftedFolk), is of it; it was still rolled here from when it could be picked
+				case STORMBORN -> 0;
 				case DAWNBORN -> W_DAWNBORN * (biome.is(BiomeTags.IS_SAVANNA) ? LEAN : 1);
 				// (0.7.106) earned bloods are only ever inherited
 				case ENDBORN, DRAGONBLOOD, DEEPBORN -> 0;
@@ -328,7 +331,7 @@ public final class VillagerHeritage {
 			return;
 		}
 		Heritage.Kind kind = of(entity);
-		// (0.7.218) a haven found with its people standing: they're all of its blood
+		// (0.7.219) a haven found with its people standing: they're all of its blood
 		Heritage.Kind settled = Havens.settle(level, living, kind);
 		if (kind == null) {
 			born(living, roll(level, entity.blockPosition(), entity.getRandom()), null);
@@ -355,7 +358,7 @@ public final class VillagerHeritage {
 		}
 		// (0.7.130) a purist realm's own folk are all of its ruler's blood
 		Heritage.Kind proud = folk.factionId() >= 0 ? Purists.folk(level.getServer(), folk.factionId()) : null;
-		// (0.7.218) and a haven's (new folk always; ones already standing in a haven drawn lately, Havens.settle)
+		// (0.7.219) and a haven's (new folk always; ones already standing in a haven drawn lately, Havens.settle)
 		Heritage.Kind haven = proud != null || folk.factionId() < 0 ? null
 			: of(folk) == null ? Havens.folk(level.getServer(), folk.factionId(), folk.getRandom()) : Havens.settle(level, folk, of(folk));
 		if (proud != null && of(folk) != proud) {

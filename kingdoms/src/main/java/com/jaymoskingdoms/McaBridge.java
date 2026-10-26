@@ -354,7 +354,9 @@ final class McaBridge {
 		}
 		List<VillagerEntityMCA> townsfolk = all.stream().filter(v -> worker(v).role() < 0).toList();
 		List<VillagerEntityMCA> pick = townsfolk.isEmpty() ? all : townsfolk;
-		return pick.get(level.getRandom().nextInt(pick.size()));
+		// (0.7.218) the gifted are likelier to rise
+		VillagerEntityMCA gifted = GiftedFolk.rises(pick, level.getRandom());
+		return gifted != null ? gifted : pick.get(level.getRandom().nextInt(pick.size()));
 	}
 
 	/** {@link McaCompat#becomeGuard}: an MCA guard (or archer) of the same blood takes {@code folk}'s post. */
@@ -655,6 +657,21 @@ final class McaBridge {
 		}
 	}
 
+	/** {@link McaCompat#parents}. */
+	static List<java.util.UUID> parents(net.minecraft.world.entity.Entity e) {
+		if (!(e instanceof VillagerEntityMCA v)) {
+			return List.of();
+		}
+		List<java.util.UUID> parents = new java.util.ArrayList<>(2);
+		FamilyTreeNode node = v.getRelationships().getFamilyEntry();
+		for (java.util.UUID p : new java.util.UUID[] {node.mother(), node.father()}) {
+			if (p != null && (p.getMostSignificantBits() != 0L || p.getLeastSignificantBits() != 0L)) {
+				parents.add(p);
+			}
+		}
+		return parents;
+	}
+
 	/** {@link McaCompat#female}. */
 	static boolean female(net.minecraft.world.entity.LivingEntity e) {
 		return e instanceof VillagerEntityMCA v && v.getGenetics().getGender() == Gender.FEMALE;
@@ -797,7 +814,7 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
-	/** (0.7.218) {@link McaCompat#playerFamily}. */
+	/** (0.7.219) {@link McaCompat#playerFamily}. */
 	static boolean playerFamily(Villager villager) {
 		if (!(villager instanceof VillagerEntityMCA v)) {
 			return false;
@@ -807,7 +824,7 @@ final class McaBridge {
 			|| node.lookup(java.util.stream.Stream.concat(java.util.stream.Stream.of(node.partner()), node.getChildren())).anyMatch(n -> n.isPlayer());
 	}
 
-	/** (0.7.218) {@link McaCompat#leaveVillage}. */
+	/** (0.7.219) {@link McaCompat#leaveVillage}. */
 	static void leaveVillage(Villager villager) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getResidency().leaveVillage();

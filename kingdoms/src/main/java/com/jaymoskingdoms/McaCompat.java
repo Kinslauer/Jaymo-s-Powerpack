@@ -203,12 +203,12 @@ public final class McaCompat {
 		return LOADED && McaBridge.childOf(villager, player);
 	}
 
-	/** (0.7.218) {@code villager} has a player for a parent, partner or child in MCA's family tree, online or not. */
+	/** (0.7.219) {@code villager} has a player for a parent, partner or child in MCA's family tree, online or not. */
 	static boolean playerFamily(Villager villager) {
 		return LOADED && McaBridge.playerFamily(villager);
 	}
 
-	/** (0.7.218) {@code villager} leaves their MCA village and home ({@link Emigrants}): MCA finds them another where they settle. */
+	/** (0.7.219) {@code villager} leaves their MCA village and home ({@link Emigrants}): MCA finds them another where they settle. */
 	static void leaveVillage(Villager villager) {
 		if (LOADED) {
 			McaBridge.leaveVillage(villager);
@@ -315,6 +315,11 @@ public final class McaCompat {
 			ClothingLibrary.register();
 			Wardrobe.register();
 		}
+	}
+
+	/** (0.7.218) {@code e}'s mother and father (an MCA villager's, those it knows of); none without MCA. */
+	static java.util.List<java.util.UUID> parents(net.minecraft.world.entity.Entity e) {
+		return LOADED ? McaBridge.parents(e) : java.util.List.of();
 	}
 
 	/** (0.7.171) {@code e} is a woman (an MCA villager's gender); false without MCA. */

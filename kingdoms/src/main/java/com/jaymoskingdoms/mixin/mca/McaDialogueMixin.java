@@ -46,8 +46,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
- * (0.7.218) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
- * (0.7.218) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
+ * (0.7.219) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
+ * (0.7.219) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
  * family's leaving ({@link Emigrants#tell}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  */
@@ -176,7 +176,7 @@ abstract class McaDialogueMixin {
 				return;
 			}
 		}
-		// (0.7.218) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
+		// (0.7.219) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
 		Component moved = Emigrants.tell(villager, player);
 		if (moved != null) {
 			villager.sendChatMessage(moved, player);
@@ -216,7 +216,7 @@ abstract class McaDialogueMixin {
 		Integer before = BEFORE.remove(villager.getUUID() + "/" + player.getUUID());
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
-			// (0.7.218) one who looks down on your blood warms to you slower
+			// (0.7.219) one who looks down on your blood warms to you slower
 			int taken = Prejudice.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);

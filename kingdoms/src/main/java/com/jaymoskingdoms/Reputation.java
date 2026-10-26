@@ -66,7 +66,7 @@ public final class Reputation {
 		by = Tempers.reputation(kingdom, by);
 		// (0.7.130) and a purist ruler's, by your blood
 		by = Purists.reputation(kingdom, player, by);
-		// (0.7.218) and the less human your blood, the less they think of you
+		// (0.7.219) and the less human your blood, the less they think of you
 		by = Prejudice.reputation(kingdom, player, by);
 		String persona = Identities.persona(player, kingdom.id());
 		if (persona != null) {
