@@ -194,6 +194,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
+		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
+		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
+		HeritageVariants.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)

@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:iron_ingot",
+  "essences": {
+    "metal": 4,
+    "arcana": 2
+  },
+  "result": {
+    "item": "jaymospowers:orichalc_ingot",
+    "count": 1
+  },
+  "research": "orichalc"
+}

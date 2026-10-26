@@ -24,7 +24,7 @@ import net.minecraft.world.level.ChunkPos;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.213) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
+ * (0.7.217) Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone
  * knows it. the tide born, stone, warrior and sylvan fall into this". Each heritage is some way from human
  * ({@link #degree}): Tideborn the furthest, then Stoneborn, Warrior-born and Sylvan; the rest pass for human. The
  * heritage screen says so on the card.

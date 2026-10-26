@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:carrot",
+  "essences": {
+    "plant": 4,
+    "life": 2
+  },
+  "result": {
+    "item": "minecraft:carrot",
+    "count": 2
+  },
+  "research": "transmutation"
+}

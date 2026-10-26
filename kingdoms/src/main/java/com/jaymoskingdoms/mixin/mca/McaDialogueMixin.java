@@ -3,6 +3,7 @@ package com.jaymoskingdoms.mixin.mca;
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.EmberHugs;
 import com.jaymoskingdoms.Handshakes;
+import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
@@ -44,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * realm's guard, he takes you to the ruler ({@link Audiences}).
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
- * (0.7.213) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
+ * (0.7.217) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  */
 @Mixin(Dialogues.class)
@@ -113,6 +114,15 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && HermitAlchemy.ANSWER.equals(answer)) {
+			// (0.7.215) a hermit asked about alchemy: eager words and a hint at what to try next
+			if (villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
+				HermitAlchemy.answer(level, player, words -> villager.sendChatMessage(words, player));
+			}
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.ANSWER.equals(answer)) {
 			// (0.7.180) asked their name: they say it, and you know it from now on
 			villager.sendChatMessage(Introductions.askName(player, villager), player);
@@ -153,6 +163,16 @@ abstract class McaDialogueMixin {
 				return;
 			}
 		}
+		if (Hermits.is(villager) && villager.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			// (0.7.215) a hermit can't keep from talking alchemy with someone who has started on it
+			Component words = HermitAlchemy.chat(level, player, villager.getRandom());
+			if (words != null) {
+				villager.sendChatMessage(words, player);
+				villager.getInteractions().stopInteracting();
+				ci.cancel();
+				return;
+			}
+		}
 		if (Hermits.is(villager) && villager.getRandom().nextFloat() < Hermits.CHAT_CHANCE) {
 			// (0.5.62) a floating island's hermit talks of why they're up there
 			villager.sendChatMessage(player, "dialogue.chat.jaymoskingdoms.hermit_" + Hermits.story(villager));
@@ -185,7 +205,7 @@ abstract class McaDialogueMixin {
 		Integer before = BEFORE.remove(villager.getUUID() + "/" + player.getUUID());
 		if (before != null) {
 			int gained = villager.getVillagerBrain().getMemoriesForPlayer(player).getHearts() - before;
-			// (0.7.213) one who looks down on your blood warms to you slower
+			// (0.7.217) one who looks down on your blood warms to you slower
 			int taken = Prejudice.hearts(villager, player, gained);
 			if (taken > 0) {
 				villager.getVillagerBrain().getMemoriesForPlayer(player).modHearts(-taken);

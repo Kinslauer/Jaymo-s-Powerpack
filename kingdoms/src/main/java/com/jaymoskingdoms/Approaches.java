@@ -630,7 +630,7 @@ public final class Approaches {
 				w[ACCUSE] = 6;
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
-			// (0.7.213) one who looks down on your blood halts you sooner, and searches you more
+			// (0.7.217) one who looks down on your blood halts you sooner, and searches you more
 			int minds = Prejudice.guard(mob, player);
 			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= Prejudice.haltGap(mob, player, HALT_TICKS))) {
 				w[HALT] = 2;
@@ -911,7 +911,7 @@ public final class Approaches {
 					said = Purists.gossip(level, a.mob, player, ruler);
 				}
 				if (said == null) {
-					// (0.7.213) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
+					// (0.7.217) a haven's people on why they left the humans, or anyone on the rivalry (Prejudice, Havens)
 					said = Prejudice.gossip(level, a.mob, player);
 				}
 				if (said == null) {

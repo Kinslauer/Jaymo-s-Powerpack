@@ -1,0 +1,20 @@
+{
+  "centre": "minecraft:blue_ice",
+  "components": [
+    "jaymospowers:ichor",
+    "jaymospowers:alchemical_salt",
+    "jaymospowers:alchemical_salt",
+    "minecraft:snowball"
+  ],
+  "essences": {
+    "frost": 10,
+    "water": 6
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymospowers:frost_focus",
+    "count": 1
+  },
+  "research": "focus_frost",
+  "flux": 3
+}

@@ -1,5 +1,10 @@
 package com.jaymospowers.client.enchanting;
 
+import com.jaymospowers.alchemy.Essence;
+import com.jaymospowers.alchemy.EssenceList;
+import com.jaymospowers.alchemy.Phials;
+import com.jaymospowers.alchemy.codex.Codex;
+import com.jaymospowers.alchemy.gear.EssenceEnchanting;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.enchanting.EnchantRecipes;
 import com.jaymospowers.enchanting.Enchanting;
@@ -30,11 +35,19 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 	static final int COST_Y = LIST_Y + ROWS * ROW_H + 8, BUTTON_X = 162, BUTTON_Y = COST_Y + 22, BUTTON_W = 62, BUTTON_H = 14;
 	private int scroll;
 	private @Nullable Holder<Enchantment> picked;
+	/** (alchemy) Pay in essence from carried phials rather than in items; only offered to those who know how. */
+	private boolean viaEssence;
+	static final int TOGGLE_X = 108, TOGGLE_W = 54, TOGGLE_H = 16;
 
 	public EnchantingScreen(EnchantingMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title, 232, 226);
 		this.inventoryLabelX = EnchantingMenu.INVENTORY_X;
 		this.inventoryLabelY = EnchantingMenu.INVENTORY_Y - 11;
+	}
+
+	/** Whether the price shown and paid is in essence (chosen, and the player knows how). */
+	private boolean essenceMode() {
+		return viaEssence && EssenceEnchanting.available(minecraft.player);
 	}
 
 	private List<Enchanting.Option> options() {
@@ -120,15 +133,41 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 		List<EnchantRecipes.Ing> cost = EnchantRecipes.cost(option.enchantment(), option.target());
 		int[] found = EnchantingMenu.match(cost, menu.materials());
 		boolean free = minecraft.player.hasInfiniteMaterials();
-		for (int i = 0; i < cost.size(); i++) {
-			int ix = lx + 2 + i * 26, iy = y + COST_Y;
-			well(graphics, ix - 1, iy - 1, 18, 18);
-			ItemStack icon = cost.get(i).icon();
-			graphics.item(icon, ix, iy);
-			graphics.itemDecorations(font, icon, ix, iy);
-			graphics.fill(ix - 1, iy + 18, ix + 17, iy + 19, found[i] >= 0 || free ? GOOD : BAD);
+		boolean essence = essenceMode();
+		boolean canPay;
+		if (essence) {
+			EssenceList price = EssenceEnchanting.cost(option.enchantment(), option.target());
+			EssenceList carried = Phials.carried(minecraft.player);
+			int i = 0;
+			for (Essence e : price.amounts().keySet()) {
+				int ix = lx + 2 + i++ * 26, iy = y + COST_Y;
+				well(graphics, ix - 1, iy - 1, 18, 18);
+				graphics.fill(ix, iy, ix + 16, iy + 16, 0xFF000000 | e.colour);
+				String amount = String.valueOf(price.get(e));
+				graphics.text(font, amount, ix + 8 - font.width(amount) / 2, iy + 4, 0xFFFFFFFF, true);
+				graphics.fill(ix - 1, iy + 18, ix + 17, iy + 19, carried.get(e) >= price.get(e) || minecraft.player.isCreative() ? GOOD : BAD);
+			}
+			canPay = minecraft.player.isCreative() || carried.covers(price);
+		} else {
+			for (int i = 0; i < cost.size(); i++) {
+				int ix = lx + 2 + i * 26, iy = y + COST_Y;
+				well(graphics, ix - 1, iy - 1, 18, 18);
+				ItemStack icon = cost.get(i).icon();
+				graphics.item(icon, ix, iy);
+				graphics.itemDecorations(font, icon, ix, iy);
+				graphics.fill(ix - 1, iy + 18, ix + 17, iy + 19, found[i] >= 0 || free ? GOOD : BAD);
+			}
+			canPay = free || EnchantingMenu.paid(found);
 		}
-		boolean canPay = free || EnchantingMenu.paid(found);
+		if (EssenceEnchanting.available(minecraft.player)) {
+			int tx = lx + TOGGLE_X, ty = y + COST_Y;
+			boolean over = UiStyle.over(mouseX, mouseY, tx, ty, TOGGLE_W, TOGGLE_H);
+			well(graphics, tx, ty + 3, 10, 10);
+			if (viaEssence) {
+				graphics.fill(tx + 2, ty + 5, tx + 8, ty + 11, ACCENT);
+			}
+			graphics.text(font, Component.translatable("gui.jaymospowers.enchanting.essence"), tx + 14, ty + 4, over ? UiStyle.TEXT : UiStyle.DIM, false);
+		}
 		boolean hover = UiStyle.over(mouseX, mouseY, x + BUTTON_X, y + BUTTON_Y, BUTTON_W, BUTTON_H);
 		int bx = x + BUTTON_X, by = y + BUTTON_Y;
 		graphics.fill(bx, by, bx + BUTTON_W, by + BUTTON_H, canPay ? hover ? 0xC0603CB0 : 0xA0402880 : 0x60303030);
@@ -171,6 +210,24 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 		if (option == null || option.state() != Enchanting.State.READY) {
 			return;
 		}
+		if (EssenceEnchanting.available(minecraft.player) && UiStyle.over(mouseX, mouseY, lx + TOGGLE_X, topPos + COST_Y, TOGGLE_W, TOGGLE_H)) {
+			graphics.setTooltipForNextFrame(font.split(Component.translatable("gui.jaymospowers.enchanting.essence.tip"), 160), mouseX, mouseY);
+			return;
+		}
+		if (essenceMode()) {
+			EssenceList price = EssenceEnchanting.cost(option.enchantment(), option.target());
+			int n = 0;
+			for (Essence e : price.amounts().keySet()) {
+				if (UiStyle.over(mouseX, mouseY, lx + 2 + n++ * 26, topPos + COST_Y, 16, 16)) {
+					Component name = Codex.seenByViewer(e) ? Component.translatable(e.key()) : Component.translatable("item.jaymospowers.essence_phial.unknown");
+					graphics.setTooltipForNextFrame(List.of(Component.literal(price.get(e) + " x ").append(name).getVisualOrderText(),
+						Component.translatable("gui.jaymospowers.enchanting.essence.carried", Phials.carried(minecraft.player).get(e))
+							.withStyle(ChatFormatting.GRAY).getVisualOrderText()), mouseX, mouseY);
+					return;
+				}
+			}
+			return;
+		}
 		List<EnchantRecipes.Ing> cost = EnchantRecipes.cost(option.enchantment(), option.target());
 		for (int i = 0; i < cost.size(); i++) {
 			if (UiStyle.over(mouseX, mouseY, lx + 2 + i * 26, topPos + COST_Y, 16, 16)) {
@@ -199,12 +256,22 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			}
 		}
 		Enchanting.Option option = pickedOption(options);
+		if (option != null && option.state() == Enchanting.State.READY && EssenceEnchanting.available(minecraft.player)
+			&& UiStyle.over((int) mx, (int) my, lx + TOGGLE_X, topPos + COST_Y, TOGGLE_W, TOGGLE_H)) {
+			viaEssence = !viaEssence;
+			minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			return true;
+		}
 		if (option != null && option.state() == Enchanting.State.READY
 			&& UiStyle.over((int) mx, (int) my, leftPos + BUTTON_X, topPos + BUTTON_Y, BUTTON_W, BUTTON_H)) {
-			boolean canPay = minecraft.player.hasInfiniteMaterials()
+			boolean essence = essenceMode();
+			boolean canPay = essence ? minecraft.player.isCreative()
+				|| Phials.carried(minecraft.player).covers(EssenceEnchanting.cost(option.enchantment(), option.target()))
+				: minecraft.player.hasInfiniteMaterials()
 				|| EnchantingMenu.paid(EnchantingMenu.match(EnchantRecipes.cost(option.enchantment(), option.target()), menu.materials()));
 			if (canPay) {
-				int id = minecraft.player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getId(option.enchantment().value());
+				int id = minecraft.player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getId(option.enchantment().value())
+					+ (essence ? EssenceEnchanting.BUTTON_OFFSET : 0);
 				minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
 				return true;
 			}

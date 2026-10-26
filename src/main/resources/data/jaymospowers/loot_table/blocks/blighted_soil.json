@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jaymospowers:blocks/blighted_soil",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:blighted_soil"
+        }
+      ]
+    }
+  ]
+}

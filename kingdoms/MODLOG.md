@@ -4704,7 +4704,33 @@ in this would heal with j and cast healing magic with sneak", and "some kind of 
   rekindle`); without Powers it heals hearts only.
 - Tuning: constants at the top of `Mana` and `Restoration`, `Spellcraft.MAGE_COOLDOWN`/`ATTUNED_POWER`.
 
-## 0.7.213: non-human heritages looked down on (pack 0.16.35)
+## 0.7.214: heritage variants, three looks to every heritage (pack 0.16.36)
+Andy: "stoneborn should all have a greyer hue ... i want heritage variants added. like Emberborn's avatars but more
+ubiquitous. Extremely hardy obsidian skinned stoneborn, or magma cracked stone ember hybrids. Sylvans should have a
+thorny rose inspired variant among another, and give each heritage 2 additional variants".
+- `HeritageVariants`: 30 variants (two per heritage), each with a skin tint, its own marks, eyes and particle (client
+  `VariantLooks`, textures `textures/entity/heritage/variant/` from `tools/gen_heritage_looks.py`) and one small trait
+  (attribute modifiers; Thornrose pricks melee attackers for 1). Kept in the synced `heritage_variant` attachment
+  (`base` for the first look) and in an MCA villager's saved data.
+- Stoneborn skin is greyed (`STONE_GREY`, 60%) through MCA's skin layer (`McaVerdantSkinMixin`), which draws players too.
+- Villagers roll a variant at birth (first look 50, each variant 25), x3 on its land (Obsidian-hide deep, Magmavein
+  hot/Nether, Reefcrowned warm seas, Thornrose flower meadows, Blossomkin cherry groves...), x4 within 800 blocks of a
+  monolith of its element (Skymarked, Blossomkin, Galeborn: Highfield; Lodeborn: Magnetic; Rimeglass, Aurora,
+  Rimewyrm: Arctic; Glowcap: Irradiated). Children take a same-heritage parent's variant half the time; hybrids
+  (Magmavein: Ember parent, Abyssal: Deepborn, Mosshide: Sylvan, Ashen: Frostborn, Twilight: Nightborn, Geode: Stoneborn,
+  Rimewyrm: Frostborn, Umbral: Endborn) come 60% of the time with the other blood's parent.
+- Players pick a look on the heritage screen (the Look button; the Choose packet carries it). Players who already had a
+  heritage are asked once in chat on joining (`/kingdom blood <variant>`, only while unset). Lineage swaps keep each
+  body's own variant.
+- Preview: project files `art-overhaul/heritage-variants/` (variants-1..3.png, variant_preview.py). Not seen in game.
+
+## 0.7.215: the hermits love alchemy (pack 0.17.0)
+- Andy: the floating islands' hermit wizards are eager to talk about Jaymo's Powers' alchemy. `HermitAlchemy`: "Ask
+  about alchemy" in MCA's menu (hermits only) gets excited words and a hint at the first thing on the alchemy path the
+  player hasn't learned (lens and Codex first, through crucible, flux, infusion, gear); a worried word first if they're
+  badly corrupted or standing on blighted land. Players who've started get an excited greeting and alchemy chat.
+- Reads Powers' alchemy by reflection (`PowersCompat.alchemy`, `PowersCompat.flux`); without Powers it tells how to begin.
+## 0.7.217: non-human heritages looked down on (pack 0.17.2)
 Andy (2026-10-26): "The more non-human the heritage the less well it is regarded amongst most. and everyone knows it.
 the tide born, stone, warrior and sylvan fall into this".
 - **How far from human** (`Prejudice.degree`, in Andy's order): Tideborn 4, Stoneborn 3, Warrior-born 2, Sylvan 1; every
@@ -4726,7 +4752,7 @@ the tide born, stone, warrior and sylvan fall into this".
   across the entire world." A quarter of new villages and a tenth of new realms (never a purist's or a camp) are havens:
   everyone born there and all its folk are non-human, of the one blood its land suits (Tideborn by water, Stoneborn in the
   hills, Sylvan in the woods, else any of the four) or, 35% of the time, all four mixed. Drawn once per settlement and kept;
-  settlements already in the world when 0.7.213 first starts stay as they are; folk first loading within two days of a
+  settlements already in the world when 0.7.217 first starts stay as they are; folk first loading within two days of a
   haven being drawn take its blood. Non-humans mind humans back: a little anywhere (degree 1), hard in a haven (degree 3):
   dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
   and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now

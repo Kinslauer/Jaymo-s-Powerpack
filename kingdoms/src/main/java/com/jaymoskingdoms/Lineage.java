@@ -138,6 +138,8 @@ public final class Lineage {
 		Component parentName = player.getDisplayName();
 		Heritage.Kind was = Heritage.of(player);
 		Heritage.Kind blood = VillagerHeritage.of(child);
+		// (0.7.214) and their variants: each body keeps its own look
+		HeritageVariants.Variant wasVariant = HeritageVariants.of(player), childVariant = HeritageVariants.of(child);
 		Vec3 to = child.position();
 		float yaw = child.getYRot(), pitch = child.getXRot();
 		long elderSince = level.getGameTime() - CourtWizards.ELDER_DAYS * CourtWizards.DAY_TICKS;
@@ -148,6 +150,7 @@ public final class Lineage {
 		}
 		// (the old self keeps the old blood, and if so their things)
 		if (was != null) {
+			HeritageVariants.set(parent, wasVariant);
 			VillagerHeritage.born(parent, was, null);
 		}
 		if (elderKeeps) {
@@ -164,6 +167,9 @@ public final class Lineage {
 		PowersCompat.passDown(player);
 		if (blood != null && blood != was) {
 			Heritage.set(player, blood);
+		}
+		if (blood != null) {
+			HeritageVariants.set(player, childVariant);
 		}
 		Skills.respec(player);
 		Classes.clear(player);

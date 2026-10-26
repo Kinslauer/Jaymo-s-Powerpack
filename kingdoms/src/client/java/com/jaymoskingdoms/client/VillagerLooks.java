@@ -37,8 +37,11 @@ import org.jspecify.annotations.Nullable;
  * get the stock eye spots. Clothes drawn over the arms (MCA's long sleeves) hide the marks under them.
  */
 public final class VillagerLooks {
-	/** On a villager's render state: its heritage, which drawing, whether the eyes glow now, the glow's tint (0: none). */
-	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow, boolean avatar) {
+	/**
+	 * On a villager's render state: its heritage, which drawing, whether the eyes glow now, the glow's tint (0: none).
+	 * (0.7.214) {@code style}: its heritage variant's look ({@link VariantLooks}), drawn instead of the first's.
+	 */
+	record Look(Heritage.Kind heritage, int variant, boolean eyesLit, int glow, boolean avatar, VariantLooks.@Nullable Style style) {
 	}
 
 	/** (0.7.187) A Flame Avatar's char and lava veins (the same as a player avatar's in Jaymo's Powers; tools/gen_flame_avatar.py). */
@@ -69,12 +72,15 @@ public final class VillagerLooks {
 	/** From the living renderer's extractRenderState: a villager's heritage look (nothing for players or plain Heartlanders). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		Heritage.Kind heritage = entity instanceof Player ? null : VillagerHeritage.of(entity);
-		if (heritage == null || heritage == Heritage.Kind.HEARTLANDER || heritage == Heritage.Kind.WARRIORBORN) {
+		// (0.7.214) a plain Heartlander or Warrior-born has no look; their variants do
+		VariantLooks.Style style = heritage == null ? null : VariantLooks.of(entity);
+		if (heritage == null || style == null && (heritage == Heritage.Kind.HEARTLANDER || heritage == Heritage.Kind.WARRIORBORN)) {
 			state.setData(KEY, null);
 			return;
 		}
 		HeritageLooks.Kind kind = HeritageLooks.Kind.of(heritage);
-		boolean lit = heritage == Heritage.Kind.EMBERBORN || kind != null && HeritageLooks.eyesLit(kind, entity);
+		boolean lit = kind != null ? HeritageLooks.eyesLit(kind, entity, style)
+			: style != null ? style.eyes() != null && HeritageLooks.eyesLit(style.eyes(), entity) : heritage == Heritage.Kind.EMBERBORN;
 		int glow = kind == null ? -1 : HeritageLooks.mood(kind, entity);
 		if (heritage == Heritage.Kind.TIDEBORN) {
 			// lit under water, and in the rain or wet at night
@@ -93,7 +99,7 @@ public final class VillagerLooks {
 		if (avatar && !entity.isInWater() && !entity.isInvisible()) {
 			state.displayFireAnimation = true;
 		}
-		state.setData(KEY, new Look(heritage, variant, lit, glow, avatar));
+		state.setData(KEY, new Look(heritage, variant, lit, glow, avatar, style));
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
@@ -126,7 +132,7 @@ public final class VillagerLooks {
 					state.outlineColor);
 				return;
 			}
-			if (look.heritage() == Heritage.Kind.EMBERBORN) {
+			if (look.heritage() == Heritage.Kind.EMBERBORN && look.style() == null) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(EmberLook.MARKS), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 					state.outlineColor);
 				Identifier eyes = eyes(state, EmberLook.EYE_GLOW, EmberLook.EYES);
@@ -135,20 +141,25 @@ public final class VillagerLooks {
 				return;
 			}
 			HeritageLooks.Kind kind = HeritageLooks.Kind.of(look.heritage());
-			if (kind == null) {
+			VariantLooks.Style style = look.style();
+			if (kind == null && style == null) {
 				return;
 			}
-			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(style != null ? style.skin() : kind.skin[look.variant()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
 			if (look.glow() != 0) {
-				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(kind.glow[look.variant()]), lightCoords,
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(style != null ? style.glow() : kind.glow[look.variant()]), lightCoords,
 					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 			}
-			if (look.eyesLit() && kind.stockEyes != null) {
+			if (look.eyesLit() && style != null && style.stockEyes() != null) {
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes(state, style.eyeColor(), style.stockEyes())), lightCoords,
+					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
+			} else if (look.eyesLit() && kind != null && kind.stockEyes != null) {
 				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes(state, kind.eyeColor, kind.stockEyes)), lightCoords,
 					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
 			}
 			if (kind == HeritageLooks.Kind.TIDEBORN) {
+				HeritageLooks.finTextures(style);
 				HeritageLooks.fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0, false, false);
 			}
 		}
@@ -186,10 +197,21 @@ public final class VillagerLooks {
 				continue;
 			}
 			Heritage.Kind heritage = VillagerHeritage.of(villager);
-			if (heritage == null || heritage == Heritage.Kind.HEARTLANDER) {
+			if (heritage == null) {
 				continue;
 			}
 			RandomSource random = villager.getRandom();
+			VariantLooks.Style style = VariantLooks.of(villager);
+			if (style != null && !com.jaymoskingdoms.nether.AvatarCamps.avatar(villager)) {
+				// (0.7.214) a variant's own particle
+				if (VariantLooks.particleNow(style, villager, random)) {
+					VariantLooks.particle(level, villager, style, random);
+				}
+				continue;
+			}
+			if (heritage == Heritage.Kind.HEARTLANDER) {
+				continue;
+			}
 			if (heritage == Heritage.Kind.EMBERBORN) {
 				if (com.jaymoskingdoms.nether.AvatarCamps.avatar(villager) && random.nextInt(3) == 0 && !villager.isInWaterOrRain()) {
 					// (0.7.187) embers and smoke off an avatar's whole body

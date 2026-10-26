@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "O": "jaymospowers:orichalc_ingot",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "A",
+    "O",
+    "S"
+  ],
+  "result": {
+    "id": "jaymospowers:artificers_rod",
+    "count": 1
+  }
+}

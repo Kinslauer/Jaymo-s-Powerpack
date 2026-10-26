@@ -1,0 +1,12 @@
+{
+  "catalyst": "jaymospowers:alchemical_salt",
+  "essences": {
+    "salt": 6,
+    "light": 4
+  },
+  "result": {
+    "item": "jaymospowers:purifying_salts",
+    "count": 2
+  },
+  "research": "cleansing"
+}

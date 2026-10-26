@@ -1,0 +1,11 @@
+{
+  "catalyst": "minecraft:gunpowder",
+  "essences": {
+    "sulphur": 6
+  },
+  "result": {
+    "item": "jaymospowers:brimstone",
+    "count": 1
+  },
+  "research": "principles"
+}

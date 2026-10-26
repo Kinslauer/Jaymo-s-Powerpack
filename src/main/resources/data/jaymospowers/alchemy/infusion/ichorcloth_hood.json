@@ -1,0 +1,20 @@
+{
+  "centre": "minecraft:leather_helmet",
+  "components": [
+    "jaymospowers:ichor",
+    "minecraft:white_wool",
+    "minecraft:white_wool",
+    "jaymospowers:alchemical_salt"
+  ],
+  "essences": {
+    "spirit": 8,
+    "salt": 6
+  },
+  "instability": 4,
+  "result": {
+    "item": "jaymospowers:ichorcloth_hood",
+    "count": 1
+  },
+  "research": "ichorcloth",
+  "flux": 3
+}

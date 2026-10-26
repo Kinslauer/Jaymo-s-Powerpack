@@ -1,0 +1,12 @@
+{
+  "catalyst": "minecraft:wheat_seeds",
+  "essences": {
+    "plant": 4,
+    "life": 2
+  },
+  "result": {
+    "item": "minecraft:wheat_seeds",
+    "count": 2
+  },
+  "research": "transmutation"
+}

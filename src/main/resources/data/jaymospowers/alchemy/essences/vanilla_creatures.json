@@ -1,0 +1,493 @@
+{
+ "entities": {
+  "minecraft:zombie": {
+   "undeath": 6,
+   "death": 4,
+   "beast": 2,
+   "rot": 2
+  },
+  "minecraft:husk": {
+   "undeath": 6,
+   "death": 4,
+   "beast": 2,
+   "earth": 3
+  },
+  "minecraft:drowned": {
+   "undeath": 6,
+   "death": 4,
+   "water": 5,
+   "beast": 2
+  },
+  "minecraft:zombie_villager": {
+   "undeath": 6,
+   "death": 4,
+   "mind": 3,
+   "beast": 1
+  },
+  "minecraft:zombified_piglin": {
+   "undeath": 6,
+   "death": 3,
+   "fire": 3,
+   "war": 2
+  },
+  "minecraft:skeleton": {
+   "undeath": 6,
+   "death": 5,
+   "salt": 4,
+   "war": 2
+  },
+  "minecraft:stray": {
+   "undeath": 6,
+   "death": 5,
+   "frost": 5,
+   "war": 2
+  },
+  "minecraft:bogged": {
+   "undeath": 6,
+   "death": 5,
+   "venom": 4,
+   "war": 2
+  },
+  "minecraft:wither_skeleton": {
+   "undeath": 8,
+   "death": 8,
+   "shadow": 4,
+   "war": 4
+  },
+  "minecraft:zoglin": {
+   "undeath": 6,
+   "death": 4,
+   "beast": 6,
+   "fire": 2
+  },
+  "minecraft:phantom": {
+   "shadow": 6,
+   "undeath": 4,
+   "air": 6,
+   "beast": 2
+  },
+  "minecraft:wither": {
+   "death": 16,
+   "undeath": 12,
+   "shadow": 8,
+   "arcana": 8
+  },
+  "minecraft:ender_dragon": {
+   "arcana": 20,
+   "beast": 16,
+   "shadow": 12,
+   "mercury": 12,
+   "war": 8
+  },
+  "minecraft:warden": {
+   "shadow": 14,
+   "beast": 12,
+   "war": 8,
+   "spirit": 6
+  },
+  "minecraft:creeper": {
+   "spark": 6,
+   "sulphur": 5,
+   "fire": 4
+  },
+  "minecraft:spider": {
+   "venom": 5,
+   "beast": 4,
+   "air": 1
+  },
+  "minecraft:cave_spider": {
+   "venom": 6,
+   "beast": 3
+  },
+  "minecraft:enderman": {
+   "shadow": 6,
+   "mercury": 6,
+   "motion": 4,
+   "mind": 2
+  },
+  "minecraft:endermite": {
+   "mercury": 3,
+   "shadow": 2,
+   "beast": 1
+  },
+  "minecraft:silverfish": {
+   "earth": 3,
+   "beast": 2,
+   "mercury": 1
+  },
+  "minecraft:slime": {
+   "water": 6,
+   "mercury": 4,
+   "life": 3
+  },
+  "minecraft:magma_cube": {
+   "fire": 6,
+   "mercury": 4,
+   "life": 2,
+   "earth": 2
+  },
+  "minecraft:blaze": {
+   "fire": 12,
+   "spark": 6,
+   "sulphur": 4
+  },
+  "minecraft:ghast": {
+   "spirit": 8,
+   "air": 6,
+   "fire": 4,
+   "death": 3
+  },
+  "minecraft:breeze": {
+   "air": 10,
+   "motion": 6,
+   "spark": 3
+  },
+  "minecraft:shulker": {
+   "earth": 4,
+   "mercury": 4,
+   "shadow": 3,
+   "crystal": 3
+  },
+  "minecraft:guardian": {
+   "water": 8,
+   "crystal": 4,
+   "spirit": 3,
+   "war": 2
+  },
+  "minecraft:elder_guardian": {
+   "water": 12,
+   "crystal": 8,
+   "spirit": 6,
+   "war": 4,
+   "arcana": 3
+  },
+  "minecraft:vex": {
+   "spirit": 6,
+   "air": 4,
+   "war": 3
+  },
+  "minecraft:allay": {
+   "spirit": 8,
+   "motion": 4,
+   "mind": 3,
+   "light": 2
+  },
+  "minecraft:villager": {
+   "mind": 8,
+   "life": 5,
+   "wealth": 3,
+   "craft": 2
+  },
+  "minecraft:wandering_trader": {
+   "mind": 8,
+   "life": 5,
+   "wealth": 6,
+   "motion": 2
+  },
+  "minecraft:witch": {
+   "arcana": 6,
+   "mind": 5,
+   "venom": 3,
+   "beast": 1
+  },
+  "minecraft:pillager": {
+   "war": 6,
+   "beast": 3,
+   "mind": 2
+  },
+  "minecraft:vindicator": {
+   "war": 7,
+   "beast": 3,
+   "metal": 2
+  },
+  "minecraft:evoker": {
+   "arcana": 8,
+   "mind": 5,
+   "war": 3,
+   "spirit": 2
+  },
+  "minecraft:illusioner": {
+   "arcana": 8,
+   "mind": 6,
+   "shadow": 3
+  },
+  "minecraft:ravager": {
+   "war": 8,
+   "beast": 8,
+   "earth": 3
+  },
+  "minecraft:player": {
+   "mind": 10,
+   "life": 8,
+   "beast": 4,
+   "spirit": 2
+  },
+  "minecraft:piglin": {
+   "wealth": 4,
+   "beast": 4,
+   "war": 2,
+   "fire": 1
+  },
+  "minecraft:piglin_brute": {
+   "war": 6,
+   "beast": 5,
+   "wealth": 3,
+   "fire": 1
+  },
+  "minecraft:hoglin": {
+   "beast": 8,
+   "life": 4,
+   "fire": 2
+  },
+  "minecraft:strider": {
+   "fire": 8,
+   "life": 3,
+   "beast": 2
+  },
+  "minecraft:iron_golem": {
+   "metal": 14,
+   "earth": 6,
+   "craft": 4,
+   "war": 3
+  },
+  "minecraft:snow_golem": {
+   "frost": 8,
+   "water": 4,
+   "plant": 2
+  },
+  "minecraft:copper_golem": {
+   "metal": 8,
+   "spark": 4,
+   "craft": 3
+  },
+  "minecraft:cow": {
+   "beast": 5,
+   "life": 4,
+   "water": 2
+  },
+  "minecraft:mooshroom": {
+   "beast": 5,
+   "life": 4,
+   "plant": 3,
+   "rot": 1
+  },
+  "minecraft:pig": {
+   "beast": 5,
+   "life": 4,
+   "earth": 1
+  },
+  "minecraft:sheep": {
+   "beast": 5,
+   "life": 4,
+   "air": 2
+  },
+  "minecraft:goat": {
+   "beast": 5,
+   "life": 3,
+   "motion": 2,
+   "earth": 1
+  },
+  "minecraft:chicken": {
+   "beast": 3,
+   "life": 3,
+   "air": 3
+  },
+  "minecraft:horse": {
+   "beast": 6,
+   "life": 4,
+   "motion": 4
+  },
+  "minecraft:donkey": {
+   "beast": 6,
+   "life": 4,
+   "earth": 2
+  },
+  "minecraft:mule": {
+   "beast": 6,
+   "life": 4,
+   "earth": 2,
+   "motion": 1
+  },
+  "minecraft:skeleton_horse": {
+   "undeath": 6,
+   "death": 5,
+   "motion": 4
+  },
+  "minecraft:zombie_horse": {
+   "undeath": 6,
+   "death": 4,
+   "motion": 4
+  },
+  "minecraft:camel": {
+   "beast": 6,
+   "life": 4,
+   "earth": 3,
+   "water": 1
+  },
+  "minecraft:llama": {
+   "beast": 6,
+   "life": 4,
+   "air": 1
+  },
+  "minecraft:trader_llama": {
+   "beast": 6,
+   "life": 4,
+   "wealth": 2
+  },
+  "minecraft:wolf": {
+   "beast": 8,
+   "life": 3,
+   "war": 2,
+   "motion": 2
+  },
+  "minecraft:cat": {
+   "beast": 6,
+   "life": 3,
+   "motion": 3,
+   "shadow": 1
+  },
+  "minecraft:ocelot": {
+   "beast": 6,
+   "life": 3,
+   "motion": 4
+  },
+  "minecraft:fox": {
+   "beast": 6,
+   "life": 3,
+   "motion": 3
+  },
+  "minecraft:rabbit": {
+   "beast": 4,
+   "life": 3,
+   "motion": 4
+  },
+  "minecraft:bee": {
+   "plant": 3,
+   "motion": 4,
+   "beast": 2,
+   "life": 1
+  },
+  "minecraft:bat": {
+   "shadow": 3,
+   "motion": 4,
+   "beast": 2,
+   "air": 2
+  },
+  "minecraft:parrot": {
+   "beast": 4,
+   "air": 5,
+   "motion": 3,
+   "life": 1
+  },
+  "minecraft:polar_bear": {
+   "beast": 9,
+   "life": 4,
+   "frost": 5,
+   "war": 2
+  },
+  "minecraft:panda": {
+   "beast": 8,
+   "life": 5,
+   "plant": 3
+  },
+  "minecraft:turtle": {
+   "beast": 4,
+   "water": 4,
+   "salt": 3
+  },
+  "minecraft:frog": {
+   "beast": 3,
+   "water": 4,
+   "life": 3,
+   "motion": 2
+  },
+  "minecraft:tadpole": {
+   "water": 3,
+   "life": 3,
+   "beast": 1
+  },
+  "minecraft:armadillo": {
+   "beast": 4,
+   "earth": 3,
+   "salt": 2
+  },
+  "minecraft:sniffer": {
+   "beast": 8,
+   "earth": 5,
+   "plant": 5,
+   "life": 4
+  },
+  "minecraft:squid": {
+   "water": 8,
+   "life": 4,
+   "shadow": 1
+  },
+  "minecraft:glow_squid": {
+   "water": 8,
+   "life": 4,
+   "light": 4
+  },
+  "minecraft:dolphin": {
+   "water": 8,
+   "life": 4,
+   "motion": 4,
+   "mind": 2
+  },
+  "minecraft:cod": {
+   "water": 5,
+   "life": 3,
+   "beast": 1
+  },
+  "minecraft:salmon": {
+   "water": 5,
+   "life": 3,
+   "beast": 1
+  },
+  "minecraft:pufferfish": {
+   "water": 5,
+   "venom": 4,
+   "life": 2
+  },
+  "minecraft:tropical_fish": {
+   "water": 5,
+   "life": 3,
+   "light": 1
+  },
+  "minecraft:axolotl": {
+   "water": 6,
+   "life": 6,
+   "beast": 2,
+   "spirit": 1
+  },
+  "minecraft:nautilus": {
+   "water": 6,
+   "beast": 3,
+   "salt": 3
+  },
+  "#minecraft:undead": {
+   "undeath": 5,
+   "death": 3,
+   "rot": 1
+  },
+  "#minecraft:skeletons": {
+   "undeath": 6,
+   "death": 5,
+   "salt": 4
+  },
+  "#minecraft:raiders": {
+   "war": 6,
+   "beast": 3,
+   "mind": 2
+  },
+  "#minecraft:arthropod": {
+   "beast": 4,
+   "earth": 2,
+   "venom": 1
+  },
+  "#minecraft:aquatic": {
+   "water": 6,
+   "life": 3,
+   "beast": 1
+  }
+ }
+}

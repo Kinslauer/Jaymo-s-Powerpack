@@ -17,7 +17,7 @@ import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.213) Andy (2026-10-26): "you will often see villages of solely non humans because of this fact, as the ones who
+ * (0.7.217) Andy (2026-10-26): "you will often see villages of solely non humans because of this fact, as the ones who
  * lived among the humans got tired of the ridicule. raising a sort of rivalry, between human and nonhumans across the
  * entire world."
  * <p>
