@@ -283,18 +283,28 @@ public final class Whalers {
 		return ship;
 	}
 
-	/** (0.7.228) Some realm has a harbour whose whaler is in, or fitting out (a whaling story can sign on). */
-	static boolean berth(MinecraftServer server) {
-		long now = Factions.level(server).getGameTime();
-		for (Faction f : Factions.all(server)) {
-			if (f.type().isRealm() && !f.fallen() && Navies.harbour(server, f.id()) != null) {
-				Voyage v = voyage(server, f.id());
-				if (v == null || now - v.launched < FIT_OUT) {
-					return true;
-				}
-			}
+	/** {@code f} has a harbour, and its whaler is in or fitting out, not away on a voyage (a whaling story can sign on). */
+	static boolean free(MinecraftServer server, Faction f) {
+		if (Navies.harbour(server, f.id()) == null) {
+			return false;
 		}
-		return false;
+		Voyage v = voyage(server, f.id());
+		return v == null || Factions.level(server).getGameTime() - v.launched < FIT_OUT;
+	}
+
+	/**
+	 * (0.7.235) {@code f}'s whaler afloat at harbour {@code h} for a whaling story to sign on to: the one fitting out, or
+	 * one fitted out now. Her sea must be loaded and ticking round the mooring, or she won't float.
+	 */
+	static boolean ready(ServerLevel level, Faction f, Navies.Harbour h) {
+		Voyage v = voyage(level.getServer(), f.id());
+		if (v != null && level.getGameTime() - v.launched >= FIT_OUT) {
+			return false;
+		}
+		if (v != null && level.getEntity(v.ship) instanceof Ship s && !s.isRemoved()) {
+			return true;
+		}
+		return fitOut(level, f, h) != null;
 	}
 
 	/**
@@ -317,7 +327,8 @@ public final class Whalers {
 			if (h == null || v != null && now - v.launched >= FIT_OUT) {
 				continue;
 			}
-			double d = h.mooring().distSqr(near);
+			// (0.7.235) the realm whose whaler was made ready for their story, before any nearer
+			double d = f.id() == StoryGround.whalerRealm(player) ? -1.0 : h.mooring().distSqr(near);
 			if (d < bestD) {
 				bestD = d;
 				best = f;
@@ -329,7 +340,7 @@ public final class Whalers {
 		}
 		level.getChunk(bestHarbour.mooring().getX() >> 4, bestHarbour.mooring().getZ() >> 4);
 		Voyage v = voyage(server, best.id());
-		Ship ship = v != null && level.getEntity(v.ship) instanceof Ship s ? s : null;
+		Ship ship = v != null && level.getEntity(v.ship) instanceof Ship s && !s.isRemoved() ? s : null;
 		if (ship == null) {
 			ship = fitOut(level, best, bestHarbour);
 			v = voyage(server, best.id());

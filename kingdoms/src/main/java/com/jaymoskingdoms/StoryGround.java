@@ -59,11 +59,13 @@ final class StoryGround {
 	static final int SHORE_STEP = 8, SHORE_WALK = 1200, SHORE_INLAND = 40;
 	/** Kept from harm while they wait (refreshed each try). */
 	static final int WAIT_RESISTANCE = TRY_EVERY * 3;
+	/** (0.7.235) A whaler's story: the sea kept ticking round her mooring, the misses before a realm is passed over, and how long it all may take. */
+	static final int WHALER_REACH = 32, WHALER_MISSES = 15, WHALER_GIVE_UP_TICKS = 3600;
 
 	/** Something being made: tried each {@link #TRY_EVERY} ticks till {@code attempt} says it's done, or its time is up. */
 	private static final class Job {
-		final BlockPos at;
-		final long giveUpAt;
+		BlockPos at;
+		long giveUpAt;
 		final Predicate<ServerLevel> attempt;
 		final java.util.function.Consumer<ServerLevel> fallback;
 		final List<Runnable> then = new ArrayList<>();
@@ -80,6 +82,8 @@ final class StoryGround {
 	/** The capital being raised (one for everyone), and each player's harbour being built. */
 	private static @Nullable Job capital;
 	private static final Map<UUID, Job> HARBOURS = new HashMap<>();
+	/** Each player's realm whose whaler was made ready, while they sign on. */
+	private static final Map<UUID, Integer> WHALER_REALMS = new HashMap<>();
 
 	private StoryGround() {
 	}
@@ -89,6 +93,7 @@ final class StoryGround {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			capital = null;
 			HARBOURS.clear();
+			WHALER_REALMS.clear();
 		});
 		// a newcomer's story will want realms to name: start raising the first capital while they make their MCA character
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -223,49 +228,150 @@ final class StoryGround {
 	// ---- harbours ----------------------------------------------------------------------------------------------------
 
 	/**
-	 * A realm with a harbour for {@code player}'s whaler, built for them if none has one: by the coastal realm nearest
-	 * spawn, or (no realm on a coast) a new kingdom raised on the shore nearest spawn. Then {@code then}; on giving up,
-	 * {@code fallback}.
+	 * {@code player}'s whaler, fitted out and lying at a realm's harbour, then {@code then}; on giving up, {@code fallback}.
+	 * (0.7.235: the whaler start sent everyone to the wild: she was fitted out at once, at a harbour whose sea wasn't
+	 * loaded round her.) The realm is the one nearest spawn with a harbour that has a berth, else the coastal realm
+	 * nearest spawn (a harbour built for it), else a new kingdom raised on the shore nearest spawn; its land is kept
+	 * loaded and ticking till she floats. A realm whose harbour can't be built or whose whaler won't float is passed
+	 * over for the next.
 	 */
 	static void harbour(ServerPlayer player, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
 		BlockPos spawn = level.getRespawnData().pos();
-		Faction realm = coastalRealm(level, spawn);
-		if (realm == null) {
-			BlockPos seat = shore(level, spawn);
-			realm = seat == null ? null : KingdomEvents.found(level, seat, Castle.Kind.CITADEL);
-		}
-		if (realm == null) {
+		Whaler w = new Whaler(player.getUUID(), spawn);
+		w.realm = w.next(level);
+		Faction first = w.realm < 0 ? null : Factions.get(server, w.realm);
+		if (first == null) {
 			fallback.run();
 			return;
 		}
-		int id = realm.id();
-		JaymosKingdoms.LOGGER.info("No harbour for a whaler's story: {} builds one", realm.name());
-		Job job = new Job(realm.seat(), level.getGameTime() + GIVE_UP_TICKS, l -> {
-			Faction f = Factions.get(server, id);
-			return f != null && ticking(l, f.seat(), PirateCoves.COAST_REACH) && Navies.build(l, f) != null;
-		}, l -> fallback.run());
+		JaymosKingdoms.LOGGER.info("A whaler's story: {} fits out a whaler", first.name());
+		Job job = new Job(first.seat(), level.getGameTime() + WHALER_GIVE_UP_TICKS, w::attempt, l -> {
+			WHALER_REALMS.remove(w.player);
+			if (!w.made) {
+				fallback.run();
+			}
+		});
+		w.job = job;
 		job.waiting.add(player.getUUID());
 		job.then.add(() -> {
-			if (Navies.harbour(server, id) != null) {
+			if (w.made) {
+				WHALER_REALMS.put(w.player, w.realm);
 				then.run();
+				WHALER_REALMS.remove(w.player);
 			}
 		});
 		HARBOURS.put(player.getUUID(), job);
 	}
 
-	/** The standing realm nearest {@code from} without a harbour whose seat lies within a harbour's reach of the sea. */
-	private static @Nullable Faction coastalRealm(ServerLevel level, BlockPos from) {
+	/** The realm whose whaler was made ready for {@code player}'s story, while they're signed on (-1: none). */
+	static int whalerRealm(ServerPlayer player) {
+		return WHALER_REALMS.getOrDefault(player.getUUID(), -1);
+	}
+
+	/** A whaler being made ready for a story: the realm tried, the realms passed over, and how many tries it's missed. */
+	private static final class Whaler {
+		final UUID player;
+		final BlockPos spawn;
+		final java.util.Set<Integer> passed = new java.util.HashSet<>();
+		int realm = -1, misses;
+		boolean founded, made, settled;
+		Job job;
+
+		Whaler(UUID player, BlockPos spawn) {
+			this.player = player;
+			this.spawn = spawn;
+		}
+
+		/** The next realm to try (-1: none left, and no shore to raise one on). */
+		int next(ServerLevel level) {
+			misses = 0;
+			Faction f = coastalRealm(level, spawn, passed);
+			if (f == null && !founded) {
+				founded = true;
+				BlockPos seat = shore(level, spawn);
+				f = seat == null ? null : KingdomEvents.found(level, seat, Castle.Kind.CITADEL);
+			}
+			return f == null ? -1 : f.id();
+		}
+
+		/** One try: the realm's land ticking, its harbour built, its whaler afloat at her mooring. */
+		boolean attempt(ServerLevel level) {
+			MinecraftServer server = level.getServer();
+			Faction f = realm < 0 ? null : Factions.get(server, realm);
+			if (f == null || f.fallen() || f.seat() == null) {
+				passOver(level);
+				return false;
+			}
+			Navies.Harbour h = Navies.harbour(server, f.id());
+			if (h == null) {
+				job.at = f.seat();
+				if (!ticking(level, f.seat(), PirateCoves.COAST_REACH)) {
+					return false;
+				}
+				h = Navies.build(level, f);
+				if (h == null) {
+					if (++misses >= WHALER_MISSES) {
+						JaymosKingdoms.LOGGER.info("A whaler's story: {} can't build a harbour, trying elsewhere", f.name());
+						passOver(level);
+					}
+					return false;
+				}
+				misses = 0;
+			}
+			job.at = h.mooring();
+			if (!ticking(level, h.mooring(), WHALER_REACH)) {
+				return false;
+			}
+			if (!settled) {
+				// (one try's grace for her, already afloat there, to load with the land; else she'd be fitted out twice)
+				settled = true;
+				return false;
+			}
+			if (Whalers.ready(level, f, h)) {
+				made = true;
+				return true;
+			}
+			if (++misses >= WHALER_MISSES) {
+				JaymosKingdoms.LOGGER.info("A whaler's story: {}'s whaler won't float at {}, trying elsewhere", f.name(), h.mooring());
+				passOver(level);
+			}
+			return false;
+		}
+
+		private void passOver(ServerLevel level) {
+			settled = false;
+			if (realm >= 0) {
+				passed.add(realm);
+			}
+			realm = next(level);
+			if (realm < 0) {
+				// (nowhere left to try: give up now)
+				job.giveUpAt = 0L;
+			}
+		}
+	}
+
+	/**
+	 * The standing realm nearest {@code from}, not in {@code passed}, with a harbour whose whaler is in or fitting out,
+	 * or with no harbour yet and its seat within a harbour's reach of the sea.
+	 */
+	private static @Nullable Faction coastalRealm(ServerLevel level, BlockPos from, java.util.Set<Integer> passed) {
+		MinecraftServer server = level.getServer();
 		List<Faction> realms = new ArrayList<>();
-		for (Faction f : Factions.all(level.getServer())) {
-			if (f.type().isRealm() && !f.fallen() && f.seat() != null && Navies.harbour(level.getServer(), f.id()) == null) {
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen() && f.seat() != null && !passed.contains(f.id())) {
 				realms.add(f);
 			}
 		}
 		realms.sort(Comparator.comparingDouble(f -> f.seat().distSqr(from)));
 		for (Faction f : realms) {
-			if (level.findClosestBiome3d(StoryGround::ocean, f.seat(), PirateCoves.COAST_REACH, OCEAN_STEP / 2, OCEAN_VERTICAL_STEP) != null) {
+			if (Navies.harbour(server, f.id()) != null) {
+				if (Whalers.free(server, f)) {
+					return f;
+				}
+			} else if (level.findClosestBiome3d(StoryGround::ocean, f.seat(), PirateCoves.COAST_REACH, OCEAN_STEP / 2, OCEAN_VERTICAL_STEP) != null) {
 				return f;
 			}
 		}
