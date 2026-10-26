@@ -53,12 +53,12 @@ import org.jspecify.annotations.Nullable;
 public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel> {
 	/** On a being's render state: its glow, or null for none. */
 	public static final RenderStateDataKey<Glow> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:mana_glow");
-	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/mana_glow.png");
+	public static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/mana_glow.png");
 	/** Mana's blue. */
-	static final int COLOR = 0x5A9CFF;
+	public static final int COLOR = 0x5A9CFF;
 	/** How far out each shell sits (model pixels) and how bright it is at full mana, inside out: fainter than the ki glow. */
-	static final float[] SHELLS = {0.4F, 0.85F, 1.4F};
-	static final float[] SHELL_LIGHT = {0.2F, 0.11F, 0.05F};
+	public static final float[] SHELLS = {0.4F, 0.85F, 1.4F};
+	public static final float[] SHELL_LIGHT = {0.2F, 0.11F, 0.05F};
 	/**
 	 * (0.7.235) The resting glow, as a share of the shells' light: a little for anyone attuned, more for every step of
 	 * power, and more the fuller their mana. Mana past full (the overload's spill) doesn't brighten it. Andy: the flare
@@ -69,7 +69,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	/** The overload: how much it brightens the glow at its height, and swells it; it eases back down to the rest. */
 	static final float FLARE = 2.0F, FLARE_SWELL = 0.1F;
 	/** How fast the wisps rise, and the glow's slow breathing. */
-	static final float RISE = 0.01F, BREATHE = 0.1F, BREATHE_SPEED = 0.12F;
+	public static final float RISE = 0.01F, BREATHE = 0.1F, BREATHE_SPEED = 0.12F;
 	/** (0.7.235) A cast's ripple: how long it runs (ticks), how far it swells, how bright it starts, where its shell sits. */
 	static final int RIPPLE_TICKS = 16;
 	static final float RIPPLE_SWELL = 0.35F, RIPPLE_LIGHT = 0.55F, RIPPLE_SHELL = 1.0F;
@@ -113,6 +113,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	/** From the living renderer's extractRenderState: the glow, if this client may see it. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(KEY, glow(entity));
+		com.jaymoskingdoms.client.spirits.SpiritArms.extract(entity, state);
 	}
 
 	private static @Nullable Glow glow(LivingEntity entity) {
@@ -227,7 +228,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	}
 
 	/** {@code color} dimmed to {@code light} (the shells are added like light, so dimmer is fainter). */
-	static int tint(int color, float light) {
+	public static int tint(int color, float light) {
 		float l = Mth.clamp(light, 0.0F, 1.0F);
 		return ARGB.color(255, (int)(ARGB.red(color) * l), (int)(ARGB.green(color) * l), (int)(ARGB.blue(color) * l));
 	}
