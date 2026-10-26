@@ -13,7 +13,6 @@
 		"IchorclothMagicMixin",
 		"CrawlJumpMixin",
 		"CrawlPlayerMixin",
-		"KneelShotMixin",
 		"DismemberMobMixin",
 		"ExplosionLogMixin",
 		"DownedMobMixin",
