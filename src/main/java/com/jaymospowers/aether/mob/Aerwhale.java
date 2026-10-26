@@ -5,21 +5,26 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
- * The aerwhale: a huge, quiet whale that drifts across the sky on its own, picking a spot 16 to 32 blocks away and sailing
+ * The aerwhale: a huge, quiet whale (as long as Kingdoms' great whales, about fifteen blocks) that drifts across the sky on its own, picking a spot 16 to 32 blocks away and sailing
  * to it, never into a wall. It does nothing else (no riding, no drops). Its call carries far.
  */
 public class Aerwhale extends Mob {
@@ -33,6 +38,10 @@ public class Aerwhale extends Mob {
 	public static final int SONG_EVERY = 1200;
 	/** The sky it stays inside (blocks from the world's ends). */
 	public static final int MARGIN = 24;
+	/** Its body (blocks; the head and fluke reach far past it, about fifteen blocks nose to tail). At least the great whale's 4 x 2.8. */
+	public static final float WIDTH = 5.0F, HEIGHT = 3.6F;
+	/** A wild one, once it has found room on the ground, rises this far (blocks) into open sky before it is seen. */
+	public static final int SPAWN_RISE_MIN = 8, SPAWN_RISE_MAX = 20;
 
 	public Aerwhale(EntityType<? extends Aerwhale> type, Level level) {
 		super(type, level);
@@ -53,6 +62,23 @@ public class Aerwhale extends Mob {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
+	}
+
+	@Override
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+		@Nullable SpawnGroupData groupData) {
+		// spawn rules place it on the ground; a wild one starts up in the sky instead, where there is room for all of it
+		if (reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.CHUNK_GENERATION) {
+			int high = level.getMaxY() - MARGIN;
+			for (int attempt = 0; attempt < 4; attempt++) {
+				double y = Math.min(this.getY() + SPAWN_RISE_MIN + this.random.nextInt(SPAWN_RISE_MAX - SPAWN_RISE_MIN + 1), high);
+				if (y > this.getY() && level.noCollision(this, this.getBoundingBox().move(0.0, y - this.getY(), 0.0))) {
+					this.setPos(this.getX(), y, this.getZ());
+					break;
+				}
+			}
+		}
+		return super.finalizeSpawn(level, difficulty, reason, groupData);
 	}
 
 	@Override

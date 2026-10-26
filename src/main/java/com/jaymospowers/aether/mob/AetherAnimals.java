@@ -152,7 +152,7 @@ public final class AetherAnimals {
 		PRISMALLARD = type("prismallard", EntityType.Builder.of(Prismallard::new, MobCategory.CREATURE).sized(0.5F, 0.6F).eyeHeight(0.55F).clientTrackingRange(8));
 		GLITTERWING = type("glitterwing", EntityType.Builder.of(Insect::glitterwing, MobCategory.AMBIENT).sized(0.75F, 0.75F).eyeHeight(0.25F).clientTrackingRange(8));
 		SHROUDWING = type("shroudwing", EntityType.Builder.of(Insect::shroudwing, MobCategory.AMBIENT).sized(0.5F, 0.5F).eyeHeight(0.25F).clientTrackingRange(8));
-		AERWHALE = type("aerwhale", EntityType.Builder.of(Aerwhale::new, MobCategory.CREATURE).sized(3.0F, 3.0F).fireImmune().clientTrackingRange(16));
+		AERWHALE = type("aerwhale", EntityType.Builder.of(Aerwhale::new, MobCategory.CREATURE).sized(Aerwhale.WIDTH, Aerwhale.HEIGHT).fireImmune().clientTrackingRange(16));
 		ResourceKey<EntityType<?>> eggKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("prismallard_egg"));
 		PRISMALLARD_EGG_ENTITY = Registry.register(BuiltInRegistries.ENTITY_TYPE, eggKey, EntityType.Builder.<ThrownPrismallardEgg>of(ThrownPrismallardEgg::new, MobCategory.MISC)
 			.noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).build(eggKey));
