@@ -188,20 +188,19 @@ public class CrucibleEntity extends BlockEntity {
 	private void dissolveOne(ServerLevel level, BlockPos pos) {
 		AABB inside = new AABB(pos.getX() + INNER_MIN, pos.getY() + FLOOR - 0.05, pos.getZ() + INNER_MIN, pos.getX() + INNER_MAX,
 			pos.getY() + OPENING, pos.getZ() + INNER_MAX);
-		boolean busy = false;
 		for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, inside,
 			e -> e.isAlive() && !e.getItem().isEmpty() && !e.entityTags().contains(Crucibles.SPENT_TAG))) {
+			// one item a pass; the rest wait their turn (never bobbed out for being second)
 			ItemStack stack = entity.getItem();
-			if (!busy && transmute(level, pos, entity, stack)) {
-				busy = true;
-				continue;
+			if (transmute(level, pos, entity, stack)) {
+				return;
 			}
 			EssenceList raw = Essences.of(stack);
 			if (raw.isEmpty()) {
 				bobOut(level, pos, entity);
-			} else if (!busy) {
-				busy = true;
+			} else {
 				dissolve(level, pos, entity, raw);
+				return;
 			}
 		}
 	}
