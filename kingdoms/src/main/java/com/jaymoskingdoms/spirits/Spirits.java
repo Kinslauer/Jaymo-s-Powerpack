@@ -232,6 +232,7 @@ public final class Spirits {
 			SpiritVoice.forget(id);
 			GrimsbyBlades.forget(id);
 			Ambrose.dropState(id); HandExtras.forget(id);
+			QuietOne.dropState(id);
 			for (Spirit spirit : ALL) {
 				spirit.forget(id);
 			}
@@ -367,7 +368,9 @@ public final class Spirits {
 			return;
 		}
 		long now = player.level().getGameTime();
-		set(player, state.withOut(true).withShow(now, Poses.REACH));
+		// (the Quiet One comes at a new size each time)
+		int scale = state.kind() == QUIET ? QuietOne.rollScale(player) : 100;
+		set(player, state.withScale(scale).withOut(true).withShow(now, Poses.REACH));
 		OUT_TICKS.put(player.getUUID(), 0);
 		IDLE_AT.put(player.getUUID(), now + IDLE_MIN + player.getRandom().nextInt(IDLE_MAX - IDLE_MIN + 1));
 		ServerLevel level = (ServerLevel)player.level();

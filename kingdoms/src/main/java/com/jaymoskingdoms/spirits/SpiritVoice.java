@@ -16,7 +16,8 @@ import net.minecraft.ChatFormatting;
  * spirit's name in its colour, in italics, so it reads as a voice and not as a game message. Every spirit has three lines
  * for each event ({@code spirit.jaymoskingdoms.<id>.<event>.<n>}): wake, summon, dismiss, tired, kill, hurt, low, idle, bond,
  * level, act, release, move, sick.1 to sick.5 (one line each), and advice.&lt;foe&gt; for the foes {@link Spirits#advice}
- * knows. The name is {@code spirit.jaymoskingdoms.<id>.name}. Not too chatty: one line per {@link #SAY_GAP} ticks.
+ * knows. The Quiet One (kind QUIET) says none of them: only its sick dots and, once at bond 100, {@code word.1} ({@link QuietOne}).
+ * The name is {@code spirit.jaymoskingdoms.<id>.name}. Not too chatty: one line per {@link #SAY_GAP} ticks.
  */
 public final class SpiritVoice {
 	/** How many lines each event has for each spirit. */
@@ -59,16 +60,29 @@ public final class SpiritVoice {
 		if (!force && now < NEXT.getOrDefault(player.getUUID(), 0L)) {
 			return false;
 		}
+		if (kind == Spirits.QUIET) {
+			// (the Quiet One says nothing, but for the one word at the end and the dots of its sickness)
+			if ("bond".equals(event)) {
+				event = "word";
+			}
+			if (!QuietOne.mayWhisper(player, event)) {
+				return false;
+			}
+		}
 		Spirit spirit = Spirits.of(kind);
 		int n = 1 + player.getRandom().nextInt(LINES);
 		// (the sick days have a single line each: "sick.3", not "sick.3.2")
-		String key = event.startsWith("sick.") ? "spirit.jaymoskingdoms." + spirit.id() + "." + event
+		String key = event.equals("word") ? "spirit.jaymoskingdoms." + spirit.id() + ".word.1"
+			: event.startsWith("sick.") ? "spirit.jaymoskingdoms." + spirit.id() + "." + event
 			: "spirit.jaymoskingdoms." + spirit.id() + "." + event + "." + n;
 		TextColor colour = TextColor.fromRgb(spirit.color() & 0xFFFFFF);
 		MutableComponent name = Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name").withStyle(s -> s.withColor(colour).withItalic(true));
 		MutableComponent line = Component.translatable(key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 		player.sendSystemMessage(Component.empty().append(name).append(Component.literal(": ").withStyle(ChatFormatting.GRAY)).append(line));
 		NEXT.put(player.getUUID(), now + SAY_GAP);
+		if (kind == Spirits.QUIET && event.equals("word")) {
+			QuietOne.spoke(player);
+		}
 		return true;
 	}
 }

@@ -12,9 +12,10 @@ import net.minecraft.network.codec.StreamCodec;
  * {@code kind} is {@link Spirits#GRIMSBY}...{@link Spirits#QUIET}; {@code level} 1-{@link Spirits#MAX_LEVEL} with its
  * {@code xp}; {@code bond} 0-{@link Spirits#MAX_BOND}; {@code out} whether it is conjured; {@code move} the selected move
  * (an index into the player's move list); {@code show} is game time times 64 plus a {@link Poses} id, the pose the arms hold
- * now; {@code arms} is 1, or 2 from bond {@link Spirits#TWO_ARMS_BOND}.
+ * now; {@code arms} is 1, or 2 from bond {@link Spirits#TWO_ARMS_BOND}; {@code scale} is the size of the arms times 100
+ * (100 is the spirit's own size; the Quiet One is conjured at a new size each time: 50 to 300, see {@link Spirit#size(SpiritState)}).
  */
-public record SpiritState(int kind, int level, int xp, int bond, boolean out, int move, long show, int arms) {
+public record SpiritState(int kind, int level, int xp, int bond, boolean out, int move, long show, int arms, int scale) {
 	public static final Codec<SpiritState> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.optionalFieldOf("kind", 0).forGetter(SpiritState::kind),
 			Codec.INT.optionalFieldOf("level", 1).forGetter(SpiritState::level),
@@ -23,7 +24,8 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 			Codec.BOOL.optionalFieldOf("out", false).forGetter(SpiritState::out),
 			Codec.INT.optionalFieldOf("move", 0).forGetter(SpiritState::move),
 			Codec.LONG.optionalFieldOf("show", 0L).forGetter(SpiritState::show),
-			Codec.INT.optionalFieldOf("arms", 1).forGetter(SpiritState::arms))
+			Codec.INT.optionalFieldOf("arms", 1).forGetter(SpiritState::arms),
+			Codec.INT.optionalFieldOf("scale", 100).forGetter(SpiritState::scale))
 		.apply(i, SpiritState::new));
 
 	public static final StreamCodec<ByteBuf, SpiritState> STREAM_CODEC = StreamCodec.composite(
@@ -35,38 +37,44 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 		ByteBufCodecs.VAR_INT, SpiritState::move,
 		ByteBufCodecs.VAR_LONG, SpiritState::show,
 		ByteBufCodecs.VAR_INT, SpiritState::arms,
+		ByteBufCodecs.VAR_INT, SpiritState::scale,
 		SpiritState::new);
 
 	/** A fresh spirit of {@code kind}: level 1, {@code bond} to start. */
 	public static SpiritState fresh(int kind, int bond) {
-		return new SpiritState(kind, 1, 0, bond, false, 0, 0L, bond >= Spirits.TWO_ARMS_BOND ? 2 : 1);
+		return new SpiritState(kind, 1, 0, bond, false, 0, 0L, bond >= Spirits.TWO_ARMS_BOND ? 2 : 1, 100);
 	}
 
 	public SpiritState withLevel(int value, int xpLeft) {
-		return new SpiritState(kind, value, xpLeft, bond, out, move, show, arms);
+		return new SpiritState(kind, value, xpLeft, bond, out, move, show, arms, scale);
 	}
 
 	public SpiritState withXp(int value) {
-		return new SpiritState(kind, level, value, bond, out, move, show, arms);
+		return new SpiritState(kind, level, value, bond, out, move, show, arms, scale);
 	}
 
 	/** Bond set (clamped), the arms following it. */
 	public SpiritState withBond(int value) {
 		int b = Math.clamp(value, 0, Spirits.MAX_BOND);
-		return new SpiritState(kind, level, xp, b, out, move, show, b >= Spirits.TWO_ARMS_BOND ? 2 : 1);
+		return new SpiritState(kind, level, xp, b, out, move, show, b >= Spirits.TWO_ARMS_BOND ? 2 : 1, scale);
 	}
 
 	public SpiritState withOut(boolean value) {
-		return new SpiritState(kind, level, xp, bond, value, move, show, arms);
+		return new SpiritState(kind, level, xp, bond, value, move, show, arms, scale);
 	}
 
 	public SpiritState withMove(int value) {
-		return new SpiritState(kind, level, xp, bond, out, value, show, arms);
+		return new SpiritState(kind, level, xp, bond, out, value, show, arms, scale);
 	}
 
 	/** The arms hold {@code pose} from game time {@code now}. */
 	public SpiritState withShow(long now, int pose) {
-		return new SpiritState(kind, level, xp, bond, out, move, now * 64L + pose, arms);
+		return new SpiritState(kind, level, xp, bond, out, move, now * 64L + pose, arms, scale);
+	}
+
+	/** The size of the arms set to {@code value} (times 100). */
+	public SpiritState withScale(int value) {
+		return new SpiritState(kind, level, xp, bond, out, move, show, arms, value);
 	}
 
 	/** The pose {@link #show} holds. */

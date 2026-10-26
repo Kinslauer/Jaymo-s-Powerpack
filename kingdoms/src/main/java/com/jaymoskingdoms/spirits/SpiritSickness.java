@@ -136,22 +136,32 @@ public final class SpiritSickness {
 		JaymosKingdoms.LOGGER.debug("{} brushed death and sickens for spirit {}", player.getGameProfile().name(), kind);
 	}
 
-	/** Which spirit answers: by heritage if it leans, else at random. First patch: Grimsby or Varro only. */
-	private static int roll(ServerPlayer player) {
+	/**
+	 * Which spirit answers: by heritage if it leans (Tideborn, Verdant, Dawnborn to Ambrose; Sylvan, Nightborn to Thessaly;
+	 * Stoneborn, Warriorborn to Varro; Emberborn, Earthling to Grimsby), else one of the five at random. The Quiet One is
+	 * only ever the random one (one in five of those), never a lean.
+	 */
+	static int roll(ServerPlayer player) {
 		Heritage.Kind heritage = Heritage.of(player);
 		if (heritage != null) {
 			switch (heritage) {
-				case WARRIORBORN, STONEBORN, EMBERBORN -> {
+				case TIDEBORN, VERDANT, DAWNBORN -> {
+					return Spirits.AMBROSE;
+				}
+				case SYLVAN, NIGHTBORN -> {
+					return Spirits.THESSALY;
+				}
+				case STONEBORN, WARRIORBORN -> {
 					return Spirits.VARRO;
 				}
-				case SYLVAN, NIGHTBORN, EARTHLING, DAWNBORN -> {
+				case EMBERBORN, EARTHLING -> {
 					return Spirits.GRIMSBY;
 				}
 				default -> {
 				}
 			}
 		}
-		return player.getRandom().nextBoolean() ? Spirits.GRIMSBY : Spirits.VARRO;
+		return player.getRandom().nextInt(Spirits.QUIET + 1);
 	}
 
 	/** Once a second for each sick player: the whisper, the push of meditating, and the waking. */
