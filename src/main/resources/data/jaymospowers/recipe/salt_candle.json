@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:candles",
+    "jaymospowers:alchemical_salt"
+  ],
+  "result": {
+    "id": "jaymospowers:salt_candle",
+    "count": 1
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "centre": "minecraft:diamond",
+  "components": [
+    "minecraft:ghast_tear",
+    "minecraft:ghast_tear",
+    "jaymospowers:orichalc_ingot",
+    "jaymospowers:orichalc_ingot"
+  ],
+  "essences": {
+    "spirit": 8,
+    "arcana": 8,
+    "light": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymospowers:ichor",
+    "count": 1
+  },
+  "research": "ichor",
+  "flux": 6
+}

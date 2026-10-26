@@ -1,0 +1,23 @@
+{
+  "centre": "*enchanted",
+  "components": [
+    "minecraft:lapis_lazuli",
+    "minecraft:lapis_lazuli",
+    "minecraft:lapis_lazuli",
+    "minecraft:lapis_lazuli",
+    "jaymospowers:orichalc_ingot",
+    "jaymospowers:orichalc_ingot",
+    "minecraft:enchanted_book"
+  ],
+  "essences": {
+    "arcana": 16,
+    "spirit": 10,
+    "mind": 6
+  },
+  "instability": 24,
+  "result": {
+    "special": "infuse_enchantment"
+  },
+  "research": "infused_enchanting",
+  "flux": 40
+}
