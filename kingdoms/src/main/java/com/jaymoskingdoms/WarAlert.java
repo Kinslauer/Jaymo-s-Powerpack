@@ -135,7 +135,8 @@ final class WarAlert {
 		if (f.fallen() || f.type() == FactionType.BARBARIAN) {
 			return false;
 		}
-		int top = Wars.top(server, f).id();
+		// (0.7.224) a realm pledged to a great war is at war with its side
+		int top = Wars.warTop(server, f).id();
 		for (War war : WarData.wars(server)) {
 			if (war.involves(top)) {
 				return true;
@@ -307,7 +308,8 @@ final class WarAlert {
 
 	/** The seat of the nearest realm on the other side of any of {@code f}'s wars. */
 	private static @Nullable BlockPos nearestEnemy(MinecraftServer server, Faction f) {
-		int top = Wars.top(server, f).id();
+		// (0.7.224) a realm pledged to a great war is at war with its side
+		int top = Wars.warTop(server, f).id();
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
 		for (War war : WarData.wars(server)) {

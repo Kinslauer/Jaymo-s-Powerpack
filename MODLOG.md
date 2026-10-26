@@ -2959,3 +2959,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   newcomer alone to the future's arrival square (no leap home: death or a Chrono's leap), or, while it isn't in place,
   starts its download and holds them still and unhurt where they stand (`WAITING`, with the percentage) until it is; `Powers.awakenAs(player, power)` (split out of `awaken`) gives that start
   Chrono at once with only its first ability. Not seen in game.
+- **0.17.9, creeds and great wars (Kingdoms 0.7.224):** every realm holds a creed (Crown, Chivalry, Conquest, Faith, Coin, Old
+  Blood); clashing creeds build tension, faster the richer the realms, until war is inevitable; wars between wealthy realms
+  become great wars with coalitions, sellswords, upkeep, rebellions and creed-shaped peace terms; players can wager on wars.
+  No Powers changes. See Kingdoms' log.

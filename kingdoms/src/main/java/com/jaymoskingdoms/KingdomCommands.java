@@ -171,6 +171,12 @@ final class KingdomCommands {
 		if (temper != null) {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper, f)).withStyle(ChatFormatting.GRAY), false);
 		}
+		// (0.7.224) its creed
+		if (f.type().isRealm() && !f.fallen()) {
+			GreatWars.Creed creed = GreatWars.creed(server, f);
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.creed", creed.named(),
+				Component.translatable("creed.jaymoskingdoms." + creed.key() + ".about")).withStyle(ChatFormatting.GRAY), false);
+		}
 		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);
 		if (focus != null) {

@@ -4877,3 +4877,39 @@ Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's ca
   come after you for a day (`LifeStory.hunt`, unless the camp spares you).
 - Fate can pick the sky fall, the burned village and the pass; lost in time and the escape only when chosen.
 - Tuning: the new constants at the top of `LifeStory`. Not seen in game.
+
+## 0.7.224: creeds, tension and great wars (pack 0.17.9)
+Andy (2026-10-26): "I like the idea of larger scale wars between wealthy kingdoms, differing ideologies cause conflict
+making war inevitable. And the more money the more war." Ideas from Warring Nations (All Rights Reserved: war goals,
+coalitions, rebellions, war betting), remade; nothing copied. All in `GreatWars` (saved as the `great_wars` attachment),
+hooked into `Wars`, `WarParties`, `WarAlert`, `WarCommands`, `/kingdom info`.
+- **Creeds:** every realm holds to the Crown, Chivalry, Conquest, the Faith, Coin or the Old Blood. A ruled realm takes its
+  ruler's temper's creed 65% of the time (tyrant Crown, noble Chivalry, warlord Conquest, paranoid Faith, reveler Coin,
+  purist Blood), else any, and keeps it through heirs; vassals hold their overlord's. Players' realms get one at random;
+  their lords may pick another at peace (`/kingdom war creed <creed>`). Creeds clash 0-3 (`FRICTION`); Blood against Blood
+  by whose blood; a reformed realm's edict of tolerance eases Blood's clash by one.
+- **Tension** (`/kingdom war tensions`): once a day, for free kingdoms within 1600 blocks: +2.5 a point of friction, times
+  1 + their worth together / 500 (at most x4); +2 for seats within 450, +1 already rivals, +2 two rich (250+) realms where
+  one is Coin; -3 kindred creeds; allies -5; a truce cools it. Rivals at 35; at 80 war is inevitable: the richer, readier
+  NPC realm declares whatever the armies say (players' realms are never made to declare). After a declaration or peace it
+  drops to 30.
+- **More money, more war:** a king's daily war chance is x(1 + worth/500, at most x4), and he counts the sellswords his
+  treasury could hire (30% of it at 10 a head, at most 16) in his army when weighing a weaker rival.
+- **Great wars:** a war between two realms each worth 260 (or 750 together). Free NPC kingdoms within 2000 blocks whose
+  creed, alliance or tension leans clearly one way pledge to that side (3 a side at most) and fight as its members (with
+  their vassals: war relations, parties, banners, alerts). Each principal hires sellswords (30% of its treasury, 10 each,
+  at most 16): they count in its army, and its parties (up to 16, sent twice as often) take 4 each. Score to win x1.5,
+  length x2, unseen skirmishes twice the blows. Daily upkeep: 4 + 3% of the treasury + 1 a sellsword (allies 1%); below
+  15 emeralds the sellswords leave and the realm sues for peace.
+- **War goals:** an attacker who wins makes its creed's peace (`GOALS`): Crown vassalises from a lead of 60 (not 90);
+  Chivalry tributes from 10 but never takes land and keeps a double truce; Conquest takes land from 25 and twice the
+  chunks; Faith converts the loser; Coin tributes from 5 and takes half the treasury; Blood takes land from 30 and 6
+  chunks. A great war adds 10% to tribute and half again to land. A vassal always takes its overlord's creed. Winning
+  allies each take 10% of the loser's purse; losing allies pay 10% of theirs to the winner.
+- **Rebellions:** in a great war, each day a fiefdom (with a lord whose temper's creed clashes 2+ with its overlord's)
+  whose overlord is behind by 20 rises 15% of the time: its lord is crowned, it takes its own creed and goes over to the
+  other side.
+- **Wagers** (`/kingdom war wager <realm> <emeralds>`): from the warm-up until a day into the fighting, up to 128 a war,
+  one side only; a win pays double, a white peace refunds, paid into your inventory when you're next online.
+- Ops: `/kingdom war tension <a> <b> <0-100>` (looked at once a day).
+- Tuning: the constants at the top of `GreatWars`. Compiled only, not seen in game.

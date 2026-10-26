@@ -129,6 +129,8 @@ public final class Wars {
 			Banners.clear();
 		});
 		Banners.register();
+		// (0.7.224) creeds, tension, great wars
+		GreatWars.register();
 	}
 
 	// ---- sides ---------------------------------------------------------------------------------------------------
@@ -157,11 +159,20 @@ public final class Wars {
 				return true;
 			}
 			if (f.overlord() < 0) {
-				return false;
+				// (0.7.224) a free realm pledged to its side in a great war
+				return GreatWars.pledgedTo(server, f.id()) == principal;
 			}
 			f = Factions.get(server, f.overlord());
 		}
 		return false;
+	}
+
+	/** (0.7.224) The principal {@code f} fights under: its top, or the one its top is pledged to in a great war. */
+	static Faction warTop(MinecraftServer server, Faction f) {
+		Faction top = top(server, f);
+		int pledged = GreatWars.pledgedTo(server, top.id());
+		Faction p = pledged < 0 ? null : Factions.get(server, pledged);
+		return p != null && !p.fallen() ? p : top;
 	}
 
 	/** The standing realms on {@code principal}'s side (it first). */
@@ -226,7 +237,8 @@ public final class Wars {
 		for (Faction f : members(server, principal)) {
 			army += f.holdings().count(Folk.GUARD) + f.holdings().count(Folk.ARCHER) + (f.leader().isPresent() ? LEADER_ARMY_WORTH : 0);
 		}
-		return army;
+		// (0.7.224) and the sellswords in its war chests
+		return army + GreatWars.mercs(server, principal);
 	}
 
 	/** A member of lord rank of any realm on {@code principal}'s side. */
@@ -309,6 +321,10 @@ public final class Wars {
 		if (a.relation(d.id()) == Relation.ALLIED) {
 			return "message.jaymoskingdoms.war.allied";
 		}
+		// (0.7.224) a realm pledged to another's great war fights only that one
+		if (GreatWars.pledgedTo(server, a.id()) >= 0 || GreatWars.pledgedTo(server, d.id()) >= 0) {
+			return "message.jaymoskingdoms.war.pledged";
+		}
 		int id = WarData.book(server).nextId();
 		War war = new War(id, Side.of(a.id()), Side.of(d.id()), now, skipWarmup ? now : now + WARMUP_TICKS, false, -1, 0L);
 		WarData.update(server, b -> {
@@ -342,6 +358,17 @@ public final class Wars {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 1.0F, 0.7F);
 		}
+		// (0.7.224) between two rich realms, a great war
+		GreatWars.begun(server, war);
+	}
+
+	/** (0.7.224) The score that wins {@code war}, and how long it may last (ticks): more for a great war. */
+	static int winScore(MinecraftServer server, War war) {
+		return GreatWars.great(server, war) ? (int)Math.round(WIN_SCORE * GreatWars.SCORE_TIMES) : WIN_SCORE;
+	}
+
+	static long maxTicks(MinecraftServer server, War war) {
+		return GreatWars.great(server, war) ? MAX_WAR_TICKS * GreatWars.LENGTH_TIMES : MAX_WAR_TICKS;
 	}
 
 	/**
@@ -449,11 +476,11 @@ public final class Wars {
 			Side sa = current.attacker(), sd = current.defender();
 			int lead = Math.abs(sa.score() - sd.score());
 			Side ahead = sa.score() >= sd.score() ? sa : sd;
-			if (ahead.score() >= WIN_SCORE && lead >= WIN_LEAD) {
+			if (ahead.score() >= winScore(server, current) && lead >= WIN_LEAD) {
 				conclude(server, current, ahead.principal(), false, "message.jaymoskingdoms.war.reason.victory");
 				continue;
 			}
-			if (now - current.startsAt() >= MAX_WAR_TICKS) {
+			if (now - current.startsAt() >= maxTicks(server, current)) {
 				conclude(server, current, ahead.principal(), false, "message.jaymoskingdoms.war.reason.exhausted");
 				continue;
 			}
@@ -476,7 +503,8 @@ public final class Wars {
 		int armyA = Math.max(1, army(server, a.id())), armyD = Math.max(1, army(server, d.id()));
 		RandomSource random = level.getRandom();
 		int killsA = 0, killsD = 0;
-		for (int i = 0; i < SKIRMISH_BLOWS; i++) {
+		int blows = GreatWars.great(server, war) ? SKIRMISH_BLOWS * GreatWars.BLOWS_TIMES : SKIRMISH_BLOWS;
+		for (int i = 0; i < blows; i++) {
 			if (random.nextInt(armyA + armyD) < armyA) {
 				killsA++;
 			} else {
@@ -512,7 +540,7 @@ public final class Wars {
 	}
 
 	/** Standing kingdoms at the head of their own side (no overlord), with a ruler on the throne. */
-	private static List<Faction> heads(MinecraftServer server) {
+	static List<Faction> heads(MinecraftServer server) {
 		return Factions.all(server).stream().filter(f -> f.type() == FactionType.KINGDOM && !f.fallen() && f.overlord() < 0 && f.leader().isPresent())
 			.toList();
 	}
@@ -522,7 +550,8 @@ public final class Wars {
 		float chance = DECLARE_CHANCE_PER_DAY * DECLARE_CHECK_TICKS / 24000.0F;
 		long now = level.getGameTime();
 		for (Faction king : heads(server)) {
-			if (!warsOf(server, king.id()).isEmpty() || level.getRandom().nextFloat() >= chance) {
+			// (0.7.224) the more money, the more war
+			if (!warsOf(server, king.id()).isEmpty() || level.getRandom().nextFloat() >= chance * GreatWars.appetite(server, king)) {
 				continue;
 			}
 			declareOnRival(server, king, now);
@@ -531,7 +560,8 @@ public final class Wars {
 
 	/** {@code king} declares on his weakest rival in reach, if he's strong enough. Returns the rival, or null. */
 	static @Nullable Faction declareOnRival(MinecraftServer server, Faction king, long now) {
-		int mine = army(server, king.id());
+		// (0.7.224) with the sellswords his treasury could buy
+		int mine = army(server, king.id()) + GreatWars.hireable(king);
 		Faction best = null;
 		int bestArmy = Integer.MAX_VALUE;
 		for (Faction other : heads(server)) {
@@ -709,12 +739,16 @@ public final class Wars {
 
 	// ---- peace -------------------------------------------------------------------------------------------------------
 
-	/** The terms a winner leading by {@code lead} imposes ({@code decisive}: a seat or a ruler taken). */
-	static Terms terms(int lead, boolean decisive) {
-		if (decisive || lead >= VASSAL_LEAD) {
+	/**
+	 * The terms {@code winner}, leading by {@code lead}, imposes in {@code war} ({@code decisive}: a seat or a ruler taken);
+	 * (0.7.224) an attacker by its creed's war goal ({@link GreatWars#goal}).
+	 */
+	static Terms terms(MinecraftServer server, War war, int winner, int lead, boolean decisive) {
+		GreatWars.Goal goal = GreatWars.goal(server, war, winner);
+		if (decisive || lead >= goal.vassal()) {
 			return Terms.VASSAL;
 		}
-		return lead >= CEDE_LEAD ? Terms.CEDE : lead >= TRIBUTE_LEAD ? Terms.TRIBUTE : Terms.WHITE;
+		return lead >= goal.cede() ? Terms.CEDE : lead >= goal.tribute() ? Terms.TRIBUTE : Terms.WHITE;
 	}
 
 	/** The side ahead in {@code war} (the attacker on a tie). */
@@ -725,7 +759,7 @@ public final class Wars {
 	/** What peace now would bring, in words. */
 	static Component preview(MinecraftServer server, War war) {
 		Side win = ahead(war), lose = war.other(win.principal());
-		Terms t = terms(win.score() - lose.score(), false);
+		Terms t = terms(server, war, win.principal(), win.score() - lose.score(), false);
 		return Component.translatable(t.key() + ".preview", name(server, win.principal()), name(server, lose.principal()));
 	}
 
@@ -797,6 +831,7 @@ public final class Wars {
 	static void end(MinecraftServer server, War war, Component why) {
 		WarData.updateWar(server, war.id(), w -> null);
 		Banners.dropWar(server, war.id());
+		GreatWars.ended(server, war, -1, null);
 		syncRelations(server);
 		KingdomEvents.announce(server, why.copy().withStyle(ChatFormatting.GOLD));
 	}
@@ -814,15 +849,17 @@ public final class Wars {
 		WarData.updateWar(server, war.id(), w -> null);
 		Banners.dropWar(server, war.id());
 		int lead = win.score() - lose.score();
-		Terms t = terms(lead, decisive);
+		Terms t = terms(server, war, winner, lead, decisive);
+		GreatWars.Goal goal = GreatWars.goal(server, war, winner);
+		boolean great = GreatWars.great(server, war);
 		Faction w = Factions.get(server, win.principal()), l = Factions.get(server, lose.principal());
 		List<Component> said = new ArrayList<>();
 		if (w != null && l != null && !l.fallen()) {
 			if (t != Terms.WHITE) {
-				said.add(tribute(level, w, l));
+				said.add(tribute(level, w, l, goal.share() + (great ? 0.1 : 0.0)));
 			}
 			if (t == Terms.CEDE) {
-				said.add(cede(server, w, l));
+				said.add(cede(server, w, l, great ? goal.chunks() * 3 / 2 : goal.chunks()));
 			}
 			if (t == Terms.VASSAL) {
 				if (l.overlord() >= 0) {
@@ -839,21 +876,24 @@ public final class Wars {
 		if (t != Terms.VASSAL && w != null && l != null) {
 			Relations.set(server, w.id(), l.id(), Relation.RIVAL);
 		}
-		WarData.setTruce(server, win.principal(), lose.principal(), level.getGameTime() + TRUCE_TICKS);
+		WarData.setTruce(server, win.principal(), lose.principal(), level.getGameTime() + TRUCE_TICKS * goal.truce());
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.war.peace", name(server, win.principal()),
 			name(server, lose.principal()), Component.translatable(reason), win.score(), lose.score()).withStyle(ChatFormatting.GOLD));
 		for (Component line : said) {
 			KingdomEvents.announce(server, Component.literal("  ").append(line).withStyle(ChatFormatting.YELLOW));
 		}
+		// (0.7.224) allies' spoils and reparations, conversions, pledges and wagers settled
+		GreatWars.ended(server, war, winner, t);
+		syncRelations(server);
 		JaymosKingdoms.LOGGER.info("War {} ended: {} over {} ({} to {}), {}", war.id(), name(server, win.principal()), name(server, lose.principal()),
 			win.score(), lose.score(), t);
 	}
 
 	/** {@code loser} pays {@code winner}: a share of its treasury, and real goods from its storage (in coin when they can't be moved). */
-	private static Component tribute(ServerLevel level, Faction winner, Faction loser) {
+	private static Component tribute(ServerLevel level, Faction winner, Faction loser, double share) {
 		MinecraftServer server = level.getServer();
 		long treasury = loser.treasury();
-		long emeralds = Math.min(treasury, Math.max(TRIBUTE_MIN_EMERALDS, Math.round(treasury * TRIBUTE_SHARE)));
+		long emeralds = Math.min(treasury, Math.max(TRIBUTE_MIN_EMERALDS, Math.round(treasury * share)));
 		int goods = 0;
 		if (Storage.loaded(level, loser) && Storage.loaded(level, winner)) {
 			RandomSource random = level.getRandom();
@@ -887,13 +927,13 @@ public final class Wars {
 	}
 
 	/** {@code loser} cedes land to {@code winner}: the chunks nearest the winner's seat, never those round its own seat. */
-	private static Component cede(MinecraftServer server, Faction winner, Faction loser) {
+	private static Component cede(MinecraftServer server, Faction winner, Faction loser, int chunks) {
 		ChunkPos seat = ChunkPos.containing(loser.seat());
 		ChunkPos toward = ChunkPos.containing(winner.seat());
 		List<Long> ceded = loser.claims().stream()
 			.filter(c -> ChunkPos.unpack(c).getChessboardDistance(seat) > CEDE_SEAT_KEEP)
 			.sorted(Comparator.comparingInt(c -> ChunkPos.unpack(c).distanceSquared(toward)))
-			.limit(CEDE_CHUNKS).toList();
+			.limit(chunks).toList();
 		if (!ceded.isEmpty()) {
 			Factions.update(server, loser.id(), f -> {
 				List<Long> claims = new ArrayList<>(f.claims());
