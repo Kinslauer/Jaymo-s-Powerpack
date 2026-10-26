@@ -4757,4 +4757,19 @@ the tide born, stone, warrior and sylvan fall into this".
   dearer prices, fewer hearts, slower good name with a haven realm, mutters ("We left your kind behind for a reason"),
   and the chat AI is told. A haven welcomes any non-human. Gossip: a haven's people tell why their folk left; anyone now
   and then talks of the rivalry from their side.
-- Tuning: the constants at the top of `Prejudice` and `Havens`.
+- **Villagers who up and leave** (`Emigrants`): Andy: "allow villagers to up and leave on their own volition, packing
+  their things and carts to depart for another civilization. maybe that explains the settlements you can find of people
+  living on their own away from any kingdom, they should tell you as much when you speak with them." Each grown MCA
+  villager is weighed about 20 times a day. A day's chance: 0.3% restless, +0.4% per degree their neighbours mind their
+  blood (to 6%), +3% not of a purist king's blood, +1% under a tyrant, +1.5% at odds with 3+ neighbours, +1% MCA mood -8
+  or worse; the biggest is their reason. They go with their partner and children; never a player's family (MCA's tree,
+  online or not), a ruler, a lineage elder or one following someone; never leaving a place under 6 grown villagers, and
+  one household per place every 4 days; settled ones stay at least 10 days. Where: the ridiculed to a haven that takes
+  their blood, a purist's outsider to a realm of their own blood; else half the time a settlement away from any kingdom
+  (no realm within 160 blocks, no overlord), else any village or realm 200-1500 blocks off. Seen, they say goodbye and
+  pack for 30 s (a draft horse and cart where a realm is near, else a chested donkey, led on a rope by the head of the
+  house); unseen they go at once. The road works like the Elders' (a record while unseen, walked for real near players).
+  Arrived, the cart is unpacked, MCA's `leaveVillage` lets them settle there, and they remember where from and why: in a
+  chat, 35% of the time they tell you. Folk in a settlement away from any kingdom with no story of their own tell (25%)
+  of their family leaving the nearest realm long ago.
+- Tuning: the constants at the top of `Prejudice`, `Havens` and `Emigrants`.

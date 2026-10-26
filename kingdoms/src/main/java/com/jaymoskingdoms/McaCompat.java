@@ -203,6 +203,18 @@ public final class McaCompat {
 		return LOADED && McaBridge.childOf(villager, player);
 	}
 
+	/** (0.7.217) {@code villager} has a player for a parent, partner or child in MCA's family tree, online or not. */
+	static boolean playerFamily(Villager villager) {
+		return LOADED && McaBridge.playerFamily(villager);
+	}
+
+	/** (0.7.217) {@code villager} leaves their MCA village and home ({@link Emigrants}): MCA finds them another where they settle. */
+	static void leaveVillage(Villager villager) {
+		if (LOADED) {
+			McaBridge.leaveVillage(villager);
+		}
+	}
+
 	/** (0.7.184) An MCA village: its middle and its name. */
 	record Town(BlockPos center, String name) {
 	}

@@ -797,6 +797,23 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
+	/** (0.7.217) {@link McaCompat#playerFamily}. */
+	static boolean playerFamily(Villager villager) {
+		if (!(villager instanceof VillagerEntityMCA v)) {
+			return false;
+		}
+		net.conczin.mca.server.world.data.FamilyTreeNode node = v.getRelationships().getFamilyEntry();
+		return node.getParents().anyMatch(n -> n.isPlayer())
+			|| node.lookup(java.util.stream.Stream.concat(java.util.stream.Stream.of(node.partner()), node.getChildren())).anyMatch(n -> n.isPlayer());
+	}
+
+	/** (0.7.217) {@link McaCompat#leaveVillage}. */
+	static void leaveVillage(Villager villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			v.getResidency().leaveVillage();
+		}
+	}
+
 	static List<McaCompat.Town> towns(ServerLevel level) {
 		List<McaCompat.Town> out = new ArrayList<>();
 		for (net.conczin.mca.server.world.data.Village v : VillageManager.get(level)) {

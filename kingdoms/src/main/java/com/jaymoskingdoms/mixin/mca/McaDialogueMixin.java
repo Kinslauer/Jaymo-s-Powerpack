@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Audiences;
 import com.jaymoskingdoms.EmberHugs;
+import com.jaymoskingdoms.Emigrants;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
@@ -46,6 +47,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}): they tell you (a ruler with their title), and their
  * nametag shows for you from then on.
  * (0.7.217) A chat, joke, story, hug, flirt or kiss with one who looks down on your blood wins fewer hearts ({@link Prejudice#hearts}).
+ * (0.7.217) In a chat, one who moved here tells where from and why; one of a settlement away from any kingdom, of their
+ * family's leaving ({@link Emigrants#tell}).
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  */
 @Mixin(Dialogues.class)
@@ -172,6 +175,14 @@ abstract class McaDialogueMixin {
 				ci.cancel();
 				return;
 			}
+		}
+		// (0.7.217) one who moved here tells why; one of a settlement away from any kingdom, of their family's leaving
+		Component moved = Emigrants.tell(villager, player);
+		if (moved != null) {
+			villager.sendChatMessage(moved, player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
 		}
 		if (Hermits.is(villager) && villager.getRandom().nextFloat() < Hermits.CHAT_CHANCE) {
 			// (0.5.62) a floating island's hermit talks of why they're up there
