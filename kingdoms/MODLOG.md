@@ -4771,3 +4771,11 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
 - Gifted townsfolk are crowned 60% of the time when there's one among the heirs (`McaBridge.heir`); a gifted ruler
   unleashes their ultimate when anyone of the realm is hurt within 16 blocks of the throne while they're there.
 - MCA screen: "Gifted: <power>" once you know their name. Powers holds the gift and its moves (`PowersCompat.give` etc.).
+
+## 0.7.219: heritage marks move with the character (pack 0.17.4)
+- Andy (2026-10-26): on the server the new heritages' character stood still while the drawn heritage marks moved
+  (jungxvv). A player MCA draws shows MCA's skin body, posed once from the animated model and then by Touch'n Motion;
+  the marks were drawn on the hidden animated model, posed a second time on their own, and the two came apart.
+- `HeritageLooks` now draws a player's marks, glow, eyes and Tideborn fins on MCA's skin body (`McaLookModels`
+  `playerMarks`/`playerGlow`), the way villagers' looks already are: same pose as the skin, clothes and hair, just
+  over the skin and under the clothes. Without MCA, the animated model as before. Compile-checked, not seen in game.

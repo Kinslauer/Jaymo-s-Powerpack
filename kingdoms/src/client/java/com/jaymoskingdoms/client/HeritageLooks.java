@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.NightbornBlood;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
@@ -300,6 +301,15 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		headFinsCovered = PowersCover.head(state);
 		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
+		// (0.7.219) a player MCA draws: on MCA's skin body, in the pose MCA gives its skin (McaLookModels)
+		PlayerModel marks = model, glowing = model;
+		if (McaCompat.LOADED) {
+			PlayerModel mcaMarks = McaLookModels.playerMarks(model), mcaGlow = McaLookModels.playerGlow(model);
+			if (mcaMarks != null && mcaGlow != null) {
+				marks = mcaMarks;
+				glowing = mcaGlow;
+			}
+		}
 		Kind kind = look.kind();
 		VariantLooks.Style style = look.style();
 		// (0.7.184) under a costume no marks or glow either (Andy: the Earthling's ki glow "costume clipping is back"):
@@ -308,18 +318,18 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		Identifier skin = look.blood() ? BLOOD_SKIN : style != null ? style.skin() : kind.skin[look.variant()];
 		Identifier glow = look.blood() ? BLOOD_GLOW : style != null ? style.glow() : kind.glow[look.variant()];
 		if (!armFinsCovered) {
-			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(skin), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
 		}
 		if (look.glow() != 0 && !armFinsCovered) {
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(glow), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
+			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(glow), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}
 		if (look.eyesLit() && !look.blood() && style != null && style.stockEyes() != null) {
 			// (0.7.214) a variant's own eyes
 			Identifier eyes = VampireLooks.glowingEyes(state.skin.body().texturePath(), style.eyeColor(), style.stockEyes(), style.eyesPrefix(),
 				style.eyesBySkin());
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
+			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		} else if (look.eyesLit() && kind != null && kind.stockEyes != null) {
 			Integer vampire = state.getData(VampireLooks.LOOK);
@@ -327,12 +337,12 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			Identifier eyes = redSilver ? VampireLooks.glowingEyes(state.skin.body().texturePath(), BLOOD_EYE_COLOR, BLOOD_EYES, "nightborn_blood_eyes/",
 				BLOOD_EYES_BY_SKIN) : VampireLooks.glowingEyes(state.skin.body().texturePath(), kind.eyeColor, kind.stockEyes,
 				kind.name().toLowerCase(java.util.Locale.ROOT) + "_eyes/", kind.eyesBySkin);
-			collector.order(2).submitModel(model, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
+			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}
 		if (kind == Kind.TIDEBORN) {
 			finTextures(style);
-			fins(poseStack, collector, lightCoords, model, look.variant(), look.glow() != 0);
+			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0);
 		}
 	}
 
