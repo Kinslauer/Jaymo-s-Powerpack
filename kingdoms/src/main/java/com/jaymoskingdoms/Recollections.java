@@ -73,6 +73,8 @@ public final class Recollections {
 		ROBBED(-4, 60, true, true, "%1$s tried to pick your pocket.", "%1$s tried to pick %3$s's pocket."),
 		KILLED_KIN(-12, 0, true, true, "%1$s killed %2$s, who was family to you.", "%1$s killed %2$s, family of %3$s."),
 		SAVED(5, 0, true, true, "%1$s saved your life.", "%1$s saved %3$s's life."),
+		/** (0.7.212) {@link Restoration}. */
+		MENDED(2, 40, true, true, "%1$s healed your wounds with magic.", "%1$s healed %3$s's wounds with magic."),
 		FREED(4, 0, true, true, "%1$s cut you free from your captors.", "%1$s cut %3$s free from captors."),
 		HOME(6, 0, true, true, "%1$s brought you safely home after you were taken captive.", "%1$s brought %3$s safely home from captivity."),
 		RETURNED_KIN(5, 0, true, true, "%1$s brought %2$s, who is family to you, safely home from captivity.",

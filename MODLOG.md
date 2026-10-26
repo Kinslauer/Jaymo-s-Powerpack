@@ -2907,3 +2907,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   worn, an empty waterskin doesn't match, a water bucket leaves its bucket), the rack drying 4 salted hides, a
   waterlogged worldgen rock turning to salt (a player's staying rock), salt/rock/flint pile drops, striking a fire on
   stone, a knife peeling an oak log. Not seen in a client (the rack's drawing, textures, JEI).
+- **0.16.34, Restoration and mana (Kingdoms 0.7.212):** `core/wounds/Mending` is healing magic's way into a body
+  (Kingdoms calls it by reflection): `mend` (into the worst parts first, as a dressing heals), `closeCut` (never a
+  stump), `easeFever` (weakness lifted, dirt washed out), `restore` (bones set, festering cured, cuts closed, up if
+  downed, healed whole) and `rekindle` (a downed one up from afar). Nothing but `restore`/`rekindle` reaches the
+  downed. The rest (the Restoration Sorcerer, healing scrolls, healers, mana and attunement) is in Kingdoms' log.

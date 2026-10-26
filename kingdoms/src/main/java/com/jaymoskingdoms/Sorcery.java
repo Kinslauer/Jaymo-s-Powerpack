@@ -599,6 +599,8 @@ public final class Sorcery {
 			beam(level, caster, worst.getBoundingBox().getCenter(), ParticleTypes.HAPPY_VILLAGER);
 		}
 		level.sendParticles(ParticleTypes.HEART, worst.getX(), worst.getY() + 2.0, worst.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
+		// (0.7.212) Restoration's gold ring where it lands, so a field healer is plain to see in a fight
+		Restoration.ring(level, worst.position().add(0.0, 0.1, 0.0), 1.2, Restoration.GOLD_MOTE, 18);
 		level.playSound(null, worst.getX(), worst.getY(), worst.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.5F, 1.2F);
 	}
 

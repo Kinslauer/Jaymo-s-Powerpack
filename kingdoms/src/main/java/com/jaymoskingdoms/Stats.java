@@ -29,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Endurance:</b> hunger drains slower.</li>
  * <li><b>Grit:</b> armour and a firmer stance.</li>
  * <li><b>Wits:</b> every pillar learns faster, and a little luck.</li>
+ * <li><b>Arcana</b> (0.7.212): more mana, and it comes back faster. Only for the attuned ({@link Mana}): the row shows
+ * once you are, and only they can raise it.</li>
  * </ul>
  *
  * <p>Health is none of them: hearts are Hearty Meals' to give. Your heritage ({@link Heritage}) and your class
@@ -55,7 +57,7 @@ public final class Stats {
 	static final double WITS_LUCK = 0.1;
 
 	public enum Stat {
-		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS;
+		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -158,6 +160,9 @@ public final class Stats {
 
 	/** Why another point can't go into {@code stat} (a translation key), or null if it can. */
 	public static @Nullable String blocked(Player player, Skills.Progress p, Stat stat) {
+		if (stat == Stat.ARCANA && !Mana.attuned(player)) {
+			return "gui.jaymoskingdoms.stats.blocked.unattuned";
+		}
 		if (spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) >= MAX) {
 			return "gui.jaymoskingdoms.stats.blocked.max";
 		}
@@ -165,6 +170,11 @@ public final class Stats {
 			return "gui.jaymoskingdoms.stats.blocked.points";
 		}
 		return null;
+	}
+
+	/** (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they're attuned. */
+	public static boolean shown(Player player, Stat stat) {
+		return stat != Stat.ARCANA || Mana.attuned(player);
 	}
 
 	/** What {@code value} points of {@code stat} do (the K screen's line for it). */
@@ -176,6 +186,8 @@ public final class Stats {
 			case ENDURANCE -> Component.translatable("stat.jaymoskingdoms.endurance.now", pct(ENDURANCE * value));
 			case GRIT -> Component.translatable("stat.jaymoskingdoms.grit.now", num(GRIT_ARMOR * value), pct(GRIT_KNOCKBACK * value));
 			case WITS -> Component.translatable("stat.jaymoskingdoms.wits.now", pct(WITS_XP * value), num(WITS_LUCK * value));
+			case ARCANA -> Component.translatable("stat.jaymoskingdoms.arcana.now", num(Mana.NATURAL_PER_POINT * value), num(Mana.FOUND_PER_POINT * value),
+				num(Mana.REGEN_PER_POINT * value));
 		};
 	}
 

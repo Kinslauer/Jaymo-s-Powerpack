@@ -169,16 +169,31 @@ final class SkillScreen extends Screen {
 
 	// ---- (0.7.57) the Attributes tab --------------------------------------------------------------------------------
 
+	/** (0.7.212) The rows shown: all but Arcana, which shows once you're attuned; a little closer together with it. */
+	private List<Stats.Stat> shownStats() {
+		List<Stats.Stat> out = new ArrayList<>();
+		for (Stats.Stat stat : Stats.Stat.values()) {
+			if (this.minecraft.player == null || Stats.shown(this.minecraft.player, stat)) {
+				out.add(stat);
+			}
+		}
+		return out;
+	}
+
+	private int statRow() {
+		return shownStats().size() > 6 ? STAT_ROW - 2 : STAT_ROW;
+	}
+
 	private int statY(Stats.Stat stat) {
-		return top() + TREE_Y + stat.ordinal() * STAT_ROW;
+		return top() + TREE_Y + Math.max(0, shownStats().indexOf(stat)) * statRow();
 	}
 
 	private Stats.@Nullable Stat statAt(double mouseX, double mouseY) {
 		if (!stats) {
 			return null;
 		}
-		for (Stats.Stat stat : Stats.Stat.values()) {
-			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, STAT_ROW - 2)) {
+		for (Stats.Stat stat : shownStats()) {
+			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, statRow() - 2)) {
 				return stat;
 			}
 		}
@@ -205,9 +220,9 @@ final class SkillScreen extends Screen {
 
 		Stats.Stat hovered = statAt(mouseX, mouseY);
 		int pipsX = x + 84;
-		for (Stats.Stat stat : Stats.Stat.values()) {
+		for (Stats.Stat stat : shownStats()) {
 			int ry = statY(stat);
-			Ui.row(graphics, x + 8, ry, x + w - 8, ry + STAT_ROW - 2, stat.ordinal(), stat == hovered);
+			Ui.row(graphics, x + 8, ry, x + w - 8, ry + statRow() - 2, stat.ordinal(), stat == hovered);
 			int spent = Stats.spent(shown, stat), fromHeritage = player == null ? 0 : Stats.fromHeritage(player, stat);
 			int fromClass = player == null ? 0 : Stats.fromClass(player, stat);
 			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass);
@@ -233,6 +248,12 @@ final class SkillScreen extends Screen {
 			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
 			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc"));
 			text.add(Stats.now(hovered, value).copy().withColor(accent));
+			if (hovered == Stats.Stat.ARCANA) {
+				// (0.7.212) the mana itself: how much now, the most, how fast it comes back
+				text.add(Component.translatable("gui.jaymoskingdoms.stats.mana", Math.round(com.jaymoskingdoms.Mana.current(player)),
+					Math.round(com.jaymoskingdoms.Mana.max(player)), String.format(java.util.Locale.ROOT, "%.1f", com.jaymoskingdoms.Mana.regen(player)))
+					.withColor(0x6FA8FF));
+			}
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.from", Stats.spent(shown, hovered), Stats.fromHeritage(player, hovered),
 				Stats.fromClass(player, hovered)).withColor(Ui.DIM));
 			String blocked = Stats.blocked(player, shown, hovered);
