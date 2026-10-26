@@ -271,6 +271,7 @@ public final class Hemomancy {
 
 	/** Her spell at {@code target} ({@link Sorcery#cast}): a hemorrhage when foes near bleed, a grip, else a bolt that cuts. */
 	static void witchCast(ServerLevel level, Folk witch, LivingEntity target, int[] timers) {
+		Mana.ripple(witch, Mana.HARM);
 		if (timers[Sorcery.T_SPIKES] <= 0 && bleeding(target)) {
 			timers[Sorcery.T_SPIKES] = WITCH_HEMORRHAGE_COOLDOWN;
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witch.getBoundingBox().inflate(HEMORRHAGE_RANGE),

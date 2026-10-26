@@ -59,6 +59,10 @@ abstract class McaAnswersMixin {
 			// (0.7.215) only the floating islands' hermits talk alchemy
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.ManaFolk.canAsk(villager)) {
+			// (0.7.234) only one who works magic talks of it
+			cir.getReturnValue().remove(com.jaymoskingdoms.ManaFolk.ANSWER);
+		}
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);

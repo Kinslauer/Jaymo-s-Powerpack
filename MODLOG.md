@@ -3009,5 +3009,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   library, so not shipped). Falling trees break through other trees' leaves, some of their own leaves snap off when
   they land, and a fallen trunk can be pushed, rolled down slopes, or built on to pin it. No Powers changes. See
   Kingdoms' log.
-- **0.17.21, mana glow rest (Kingdoms 0.7.233):** after attuning, the mana glow eases down to a dim resting glow instead
-  of staying at full brightness. No Powers changes. See Kingdoms' log.
+- **0.17.22, mana grows (Kingdoms 0.7.234):** the mana glow settles dim after attuning and shows power; casting folk are
+  attuned; amethyst crushes for mana; mana sickness; vis, flux and corruption tie into mana; a mana wand; meditation
+  restores mana; casts ripple the aura by intent. No Powers changes (Kingdoms reads Powers' Meditate, Phials and
+  Corruption by reflection). See Kingdoms' log.

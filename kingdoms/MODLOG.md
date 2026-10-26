@@ -5086,10 +5086,40 @@ woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of it
 - **Built on, it stays.** Set any block on top of a fallen trunk (not its own logs or leaves) and the next push finds
   it pinned. It is forgotten as a trunk and stays as plain logs for good. Trunks already stayed as real blocks, so
   nothing despawns.
-## 0.7.233: the mana glow settles dim after attuning (pack 0.17.21)
+## 0.7.234: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.22)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
-Now `ManaClient` eases the flare down to a resting glow: `REST_MIN` (0.2 of the shells' light, attuned with mana spent)
-up to `REST_FULL` (0.55, full mana). Mana past full no longer brightens it; the flare at its height is a little brighter
+Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
+brightens it; the flare at its height is a little brighter
 than before (`FLARE` 2.0) and eases away with the same curve as the blue on your screen, which still fades out fully.
 Not seen in game.
+Then Andy: "court wizards and clerics should have to be attuned as well. meaning other magic users can see their glow, and
+know their power level from the intensity of the glow. mentioning it if asked. amethyst should be now crushable for mana.
+add a type of mana sickness for punishing over zealous casters, can we link alchemy? using vis and flux slowly attuning or
+corrupting you? corruption would be anti magic, reading the mana user's intentions ... Arcana increases that minimum ... A
+mana infused wand ... mana can be regenerated using meditation from the survival tree. when casting a spell the aura
+should ripple, indicating the caster's intent."
+- **Power in the glow** (`Mana.POWER`, synced): a player's is their most mana / 25 (a finder 2, a fresh caster 4, Arcana
+  raises it), 1-10. The resting glow is `REST_BASE` 0.05 + 0.07 a power step + 0.25 at full mana, so the weakest glow
+  dimmest and Arcana lifts the floor. `ManaClient.Folk` draws it on every non-player humanoid too.
+- **Attuned folk** (`ManaFolk`): hermits 8, court wizards and necromancers 6, blood witches 5, shamans (orc ones too) 4,
+  village clerics 3, each give or take one; attuned as players come near (every 5 s within 48 blocks) or when they cast.
+  MCA's "Ask about their magic" (only on the attuned): a line by tier, then how it measures against yours if you're
+  attuned, or a remark if you're corrupted, or that you can't see it.
+- **Ripples:** every cast ripples the caster's aura, a swelling ring through the glow coloured by intent: red harm, gold
+  healing, white warding, blue will (raising, whispers, the wand). Players' casts (`Mana.cast`, `Spellcraft.afterCast`)
+  and the folk's (`Sorcery` spells, clerics, court wizards' rekindle, the blood witch).
+- **Amethyst:** an attuned player uses a shard to crush it for 10 mana (0.5 s apart), up to 150% of their most.
+- **Mana sickness** (`ManaSickness`): mana spent, and mana forced in past full, is strain against your most mana; it
+  eases 4% of it a second (x3 meditating). Past 1.0x: queasy (nausea, half regen, 60 s); 1.6x: sick (weak, slow, hungry,
+  no regen, casts cost 1.5x, 90 s); 2.2x: burnt out (mana gone, 4 damage, no casting, 120 s). A pulsing grey-green tint.
+- **Alchemy** (`ManaAlchemy`, Powers by reflection): essence carried in phials (vis) wears attunement into the unattuned
+  (0.05 a point every 5 s, up to 60 points: at 100 they're attuned as a finder) and trickles mana into the attuned (up to
+  0.5/s). Flux of 100+ in your chunk drains flux/200 mana a second. Corruption shrinks your most mana (0.5% a point, at
+  most half); at 25+ you see glows and ripples as the attuned do, and an attuned player casting within 6 blocks of you
+  pays 1.5x.
+- **Meditation:** settled in with Powers' Meditate key, mana comes back 3x/4x/5x by Meditation rank.
+- **Mana-infused wand** (`ManaWand`, stick + gold nugget + amethyst shard): holds 100 mana. Sneak-use pours 25 in;
+  use at an attuned player gives it to them, at nothing draws it back. Past-full strains the receiver. Art from
+  `tools/gen_mana_wand.py`.
+javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
