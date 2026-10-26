@@ -628,7 +628,7 @@ public final class LifeStory {
 				}
 			}
 			case TIMELOST -> {
-				// Powers puts them in its future itself; while that isn't in place, the wild instead
+				// Powers puts them in its future itself (or holds them till it's in place); the wild only without Powers
 				if (PowersCompat.strand(player)) {
 					return Start.TIMELOST;
 				}

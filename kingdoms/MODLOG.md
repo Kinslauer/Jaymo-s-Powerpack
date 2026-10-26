@@ -4866,8 +4866,8 @@ Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's ca
 (lost in time instead wakes Chrono outright).
 - **Fell from the sky** (Gravity): a crater dug in natural ground far from spawn; you drift down into it on Slow Falling,
   with Aether ambrosium shards (amethyst without the Aether).
-- **Lost in time** (Powers only): Powers' `Future.strand` puts you in the future's ruined city (the wild while the future
-  hasn't been downloaded yet; that starts the download). Andy: "Lost in time starts you with chrono level 1": Chrono
+- **Lost in time** (Powers only): Powers' `Future.strand` puts you in the future's ruined city (Andy: "Always wait for the future":
+  if it hasn't been downloaded yet, that starts the download and you wait, held still and unhurt, until it's there). Andy: "Lost in time starts you with chrono level 1": Chrono
   awakens at once with its first ability (`PowersCompat.awaken` → Powers' `Powers.awakenAs`), whatever question 5 said.
 - **Your village burned** (Smoke): a small burnt-out house built round you (charred walls, ash floor, a cold hearth) and
   three random things you saved.

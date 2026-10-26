@@ -5840,7 +5840,7 @@
 	"story.jaymoskingdoms.road.monolith.wake": "You wake within sight of a monolith. Its Giant may be near.",
 	"story.jaymoskingdoms.road.wild.wake": "You wake far from anyone.",
 	"story.jaymoskingdoms.road.skyfall.wake": "You drift down into a crater far from anyone, with shards from somewhere above in your pack.",
-	"story.jaymoskingdoms.road.timelost.wake": "You wake in the future's ruined city with Chrono already awakened (its first ability). The way back is dying, or a Chrono's leap home once you can make one. (Before the future has been downloaded, you wake in the wild.)",
+	"story.jaymoskingdoms.road.timelost.wake": "You wake in the future's ruined city with Chrono already awakened (its first ability). The way back is dying, or a Chrono's leap home once you can make one. (If the future hasn't been downloaded yet, you wait between times until it has.)",
 	"story.jaymoskingdoms.road.burned.wake": "You wake in a burnt-out ruin with a few things you saved.",
 	"story.jaymoskingdoms.road.snowed.wake": "You wake high in the frozen peaks, half-frozen, with a lantern and a fur coat.",
 	"story.jaymoskingdoms.road.captive.wake": "You wake near a barbarian camp with nothing at all. Its raiders hunt you for a day.",
