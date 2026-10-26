@@ -153,6 +153,23 @@ public final class Future {
 		READY_AT.put(player.getUUID(), now + LEAP_COOLDOWN);
 	}
 
+	/**
+	 * (0.17.8) Jaymo's Kingdoms (a life story's "lost in time" start, by reflection): {@code player} wakes alone in the
+	 * future's arrival square, with no leap home (a Chrono's leap back, or dying, as for anyone else who goes forward
+	 * without one). False if the future isn't in place yet (its download is started, so it's there for the next).
+	 */
+	public static boolean strand(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		if (LosPerrito.stage() != LosPerrito.Stage.READY || server.getLevel(FUTURE) == null) {
+			if (LosPerrito.stage() == LosPerrito.Stage.IDLE || LosPerrito.stage() == LosPerrito.Stage.FAILED) {
+				LosPerrito.begin(server);
+			}
+			return false;
+		}
+		goForward(player, 0, 1);
+		return player.level().dimension() == FUTURE;
+	}
+
 	/** From {@code ChronoEchoes.collapse}: the player's echo died for good. */
 	public static void echoSlain(ServerPlayer player) {
 		if (!Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN))) {

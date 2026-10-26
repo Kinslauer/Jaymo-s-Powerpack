@@ -159,6 +159,37 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Future.strand(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle strand;
+	private static boolean lookedForStrand;
+
+	/**
+	 * (0.7.223) A life story's "lost in time" start: {@code player} wakes alone in Powers' future. False without Powers,
+	 * or while the future isn't in place yet.
+	 */
+	public static boolean strand(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForStrand) {
+			lookedForStrand = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					strand = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.chrono.future.Future"), "strand",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' future (older Powers?)", e);
+				}
+			}
+		}
+		if (strand == null) {
+			return false;
+		}
+		try {
+			return (boolean)strand.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the future", player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
 	/** Powers' {@code Dismember.bornWithout(LivingEntity, int)}. */
 	private static java.lang.invoke.@Nullable MethodHandle bornWithout;
 	private static boolean lookedForBornWithout;
