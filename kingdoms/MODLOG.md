@@ -4970,3 +4970,11 @@ the succession tick, `Banners` (a seat taken), `Theft`, `Festivals`, `/kingdom l
   own buildings if you stand in one, else a castle), at least 320 blocks from any realm and off any town's land.
 - A player sovereign slain by the other side of a war ends the war as a ruler's death does.
 - Tuning: the constants at the top of `Crowns`. Compiled only, not seen in game.
+
+## 0.7.226: rarer Eurus and Aeolus (pack 0.17.11)
+Andy (2026-10-26): "aeolus and eurus should be FAR rarer, and only even spawn after killing your first world boss".
+- `Disguises`: Eurus now comes about once in 15 hours of play (1/900 a minute, was 2.5 hours) and Aeolus once in 40
+  (1/2400, was 6 hours).
+- Neither turns up at all until the world's first world boss, the first of the Aether's Giants, has fallen
+  (`Monoliths.firstFallen`, the same flag that raises the world tier to Borderlands). It's world-wide: once anyone fells
+  a Giant they can come to anyone. Ops' `/kingdom dragon` spawns and the dragons' eggs are unchanged.

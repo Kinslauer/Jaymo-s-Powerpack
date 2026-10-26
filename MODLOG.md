@@ -2968,3 +2968,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the throne in their name: by usurping (a lord who slays the ruler in their hall), by marriage (a ruler's player spouse
   inherits), by conquest (a lord who takes an enemy seat or slays its ruler in a war claims it), or by founding a realm
   (`/kingdom crown found [name]`, 256 emeralds). No Powers changes. See Kingdoms' log.
+- **0.17.11, rarer Eurus and Aeolus (Kingdoms 0.7.226):** the disguised wind dragons turn up far less often and never
+  before the world's first Giant has fallen. No Powers changes. See Kingdoms' log.
