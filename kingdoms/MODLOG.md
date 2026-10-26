@@ -5130,3 +5130,20 @@ our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
   blocks round her mooring. A realm whose harbour can't be built, or whose whaler won't float, after 15 tries is passed
   over for the next nearest coastal one (a new kingdom raised on the shore if none is left); it gives up after 3
   minutes. Sign-on then takes the realm made ready, not just the harbour nearest spawn.
+
+## 0.7.236: a loading screen while a story's start is made, and your heritage in MCA's creator (pack 0.17.25)
+Andy: "can the player be held in a stasis menu or faux load screen at the beginning while everything loads?"
+- `StoryGround.Hold` (server to client): the server checks every 5 ticks what each player is held for and sends it
+  when it changes. A held player is waiting for one of:
+  - the first capital to be raised (before the story screen opens, or a city start);
+  - a whaler being fitted out;
+  - Powers' future, for lost in time (`PowersCompat.waitingForFuture` reads `Future.WAITING`);
+  - 3 s after any story landing while the land loads (`StoryGround.settle`, `SETTLE_TICKS`).
+- Client `StoryHoldScreen`: an opaque screen that can't be shut. It shows "Your story is being written", what it's
+  waiting for, and a sweeping bar. It comes back if anything else closes while the player is still held. MCA's creator
+  waits behind it, since MCA opens only onto an empty screen. The overlay lines from `StoryGround.step` are gone.
+
+Andy: "apply the character's heritage to the character creator please".
+- `McaEditorHeritageMixin`: when MCA's editor is open on your own character (the start-up creator, now after the
+  story, or the editor later), the figure you dress gets your heritage and variant attachments. It is drawn with your
+  blood's marks, fins, eyes and look, as villagers of that heritage are (`VillagerLooks`).
