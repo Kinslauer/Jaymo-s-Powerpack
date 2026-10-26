@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.remnants.Monoliths;
+import com.jaymoskingdoms.whaling.Whaling;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -85,8 +86,10 @@ public final class LifeStory {
 	/** A caving trip gone wrong: columns tried, how deep a hollow must lie (at most this Y), and the bite (ticks of Poison). */
 	static final int CAVE_TRIES = 64, CAVE_MAX_Y = 40, CAVE_RADIUS = 96, BITE_TICKS = 140;
 	/** (Andy: "poisoned, wounded, and barely breathing") the health you wake with, and how long the Slowness and Weakness last (ticks). */
-	static final float CAVE_HEALTH = 4.0F;
+	static final float CAVE_HEALTH = 10.0F;
 	static final int CAVE_WOUND_TICKS = 1200;
+	/** (0.7.228) Unhurtable this long after a story puts you somewhere (a cave's spiders, a fall carried over). */
+	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
@@ -105,6 +108,8 @@ public final class LifeStory {
 	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
 	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
 	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
+	/** (0.7.228) A whaler's harpooner: the irons they sign on with. */
+	static final int WHALER_HARPOONS = 8;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -113,7 +118,7 @@ public final class LifeStory {
 	/** Where a story can start. {@code realm}: you name a realm for it. */
 	public enum Start {
 		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), SKYFALL(false),
-		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), UNARMED(false), FATE(false);
+		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), WHALERS(false), UNARMED(false), FATE(false);
 
 		public final boolean realm;
 
@@ -252,6 +257,7 @@ public final class LifeStory {
 				Answer.road(Start.BURNED, Items.CHARCOAL),
 				Answer.road(Start.SNOWED, Items.LANTERN),
 				Answer.road(Start.CAPTIVE, Items.LEAD),
+				Answer.road(Start.WHALERS, Items.TRIDENT),
 				Answer.road(Start.UNARMED, Items.BONE),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
 		}
@@ -399,8 +405,18 @@ public final class LifeStory {
 		if (!ServerPlayNetworking.canSend(player, Open.TYPE)) {
 			return;
 		}
+		// (0.7.228) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
+		MinecraftServer server = player.level().getServer();
+		if (StoryGround.realmless(server)) {
+			StoryGround.capital(server, player, () -> {
+				if (!player.isRemoved() && owed(player)) {
+					ask(player, forced);
+				}
+			});
+			return;
+		}
 		List<Realm> realms = new ArrayList<>();
-		for (Faction f : Factions.all(player.level().getServer())) {
+		for (Faction f : Factions.all(server)) {
 			if (f.type().isRealm() && !f.fallen()) {
 				realms.add(new Realm(f.id(), f.name()));
 			}
@@ -447,6 +463,7 @@ public final class LifeStory {
 			case BURNED -> "smoke";
 			case SNOWED -> "cryo";
 			case CAPTIVE -> "zfighter";
+			case WHALERS -> "darktide";
 			default -> "";
 		};
 	}
@@ -503,29 +520,41 @@ public final class LifeStory {
 			atLeast(player, nobleRealm, NOBLE_REPUTATION);
 		}
 
-		Start start = road.start;
-		if (start == Start.FATE) {
-			start = fated(server, random);
-		}
-		Start landed = begin(player, start, roadRealm, heritage, random);
-		if (landed == Start.UNARMED) {
-			// an old loss, long healed over: one arm or one leg
-			int limb = LIMBS[random.nextInt(LIMBS.length)];
-			if (PowersCompat.bornWithout(player, limb)) {
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.limb",
-					Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
+		Start road0 = road.start == Start.FATE ? fated(server, random) : road.start;
+		String calling = power;
+		Heritage.Kind bornAs = heritage;
+		java.util.function.Consumer<Start> go = start -> {
+			if (player.isRemoved()) {
+				return;
 			}
+			Start landed = begin(player, start, roadRealm, bornAs, random);
+			if (landed == Start.UNARMED) {
+				// an old loss, long healed over: one arm or one leg
+				int limb = LIMBS[random.nextInt(LIMBS.length)];
+				if (PowersCompat.bornWithout(player, limb)) {
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.limb",
+						Component.translatable("story.jaymoskingdoms.limb." + limb)).withStyle(ChatFormatting.GRAY));
+				}
+			}
+			kit(player, start, landed, raised, cls, option, random);
+			if (start == Start.TIMELOST) {
+				// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
+				PowersCompat.awaken(player, "chrono");
+			} else if (!calling.isEmpty() && calling.equals(echo(landed))) {
+				PowersCompat.call(player, calling, ECHO_TICKS);
+			}
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
+				Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
+		};
+		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
+		if (road0 == Start.CITY && capital(server, random) == null) {
+			StoryGround.capital(server, player, () -> go.accept(Start.CITY));
+		} else if (road0 == Start.WHALERS && !Whalers.berth(server)) {
+			StoryGround.harbour(player, () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
+		} else {
+			go.accept(road0);
 		}
-		kit(player, start, landed, raised, cls, option, random);
-		if (start == Start.TIMELOST) {
-			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
-			PowersCompat.awaken(player, "chrono");
-		} else if (!power.isEmpty() && power.equals(echo(landed))) {
-			PowersCompat.call(player, power, ECHO_TICKS);
-		}
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.begun",
-			Component.translatable("story.jaymoskingdoms.road." + landed.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.GOLD));
 	}
 
 	/** "Let fate decide" on the start: any start that needs no realm named (a capital only if there's one). */
@@ -534,9 +563,8 @@ public final class LifeStory {
 		if (capital(server, random) != null) {
 			open.add(Start.CITY);
 		}
-		if (Monoliths.nearestFoot(server.overworld(), server.overworld().getRespawnData().pos()) != null) {
-			open.add(Start.MONOLITH);
-		}
+		// (0.7.228: one is raised if the world hasn't any)
+		open.add(Start.MONOLITH);
 		return open.get(random.nextInt(open.size()));
 	}
 
@@ -617,6 +645,9 @@ public final class LifeStory {
 			}
 			case MONOLITH -> {
 				BlockPos foot = Monoliths.nearestFoot(level, spawn);
+				if (foot == null) {
+					foot = StoryGround.monolith(level, spawn, random);
+				}
 				if (foot != null) {
 					to = ground(level, foot, MONOLITH_MIN, MONOLITH_MAX, random);
 				}
@@ -650,11 +681,23 @@ public final class LifeStory {
 			}
 			case CAPTIVE -> {
 				Faction camp = nearestCamp(server, spawn);
+				if (camp == null) {
+					camp = StoryGround.camp(level, spawn, random);
+				}
 				if (camp != null) {
 					to = ground(level, camp.seat(), CAPTIVE_MIN, CAPTIVE_MAX, random);
 					if (to != null) {
 						HUNTS.put(player.getUUID(), new Hunt(camp.id(), server.getTickCount() + HUNT_TICKS));
 					}
+				}
+			}
+			case WHALERS -> {
+				// (0.7.228) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
+				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn);
+				if (deck != null) {
+					player.teleportTo(level, deck.x, deck.y, deck.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+					landSafely(player);
+					return Start.WHALERS;
 				}
 			}
 			case WILD, UNARMED, FATE -> {
@@ -675,6 +718,7 @@ public final class LifeStory {
 		// (fallen from the sky: you drift down into your own crater)
 		double y = landed == Start.SKYFALL ? to.getY() + SKYFALL_HEIGHT : to.getY();
 		player.teleportTo(level, to.getX() + 0.5, y, to.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+		landSafely(player);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
 		}
@@ -685,12 +729,19 @@ public final class LifeStory {
 		}
 		if (landed == Start.CAVE) {
 			// the bite you shrugged off, as you always do, and the fall that came after: poisoned, wounded, barely breathing
+			// (0.7.228: Andy died at once at 2 hearts; now half health, and the poison stops short of killing as poison does)
 			player.setHealth(Math.min(player.getHealth(), CAVE_HEALTH));
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, BITE_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CAVE_WOUND_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, CAVE_WOUND_TICKS, 0));
 		}
 		return landed;
+	}
+
+	/** (0.7.228) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
+	private static void landSafely(ServerPlayer player) {
+		player.resetFallDistance();
+		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ARRIVAL_GRACE_TICKS, 4, false, false));
 	}
 
 	/** The villages of the land a heritage comes from. */
@@ -776,6 +827,13 @@ public final class LifeStory {
 		give(player, new ItemStack(Items.BREAD, KIT_BREAD));
 		if (landed == Start.SKYFALL) {
 			give(player, any(SKYFALL_SHARDS, "aether:ambrosium_shard", "aether_ii:ambrosium_shard", "minecraft:amethyst_shard"));
+		}
+		if (landed == Start.WHALERS) {
+			// her harpooner: irons, a knife for the lines, oilskins
+			give(player, new ItemStack(Whaling.HARPOON_ITEM, WHALER_HARPOONS));
+			give(player, new ItemStack(Items.SHEARS));
+			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
+			equip(player, new ItemStack(Items.LEATHER_BOOTS));
 		}
 		if (landed == Start.SNOWED) {
 			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));

@@ -2985,3 +2985,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - `ResonanceGift`: pulse, boom, ring, hush (a dome that silences a powered player foe's keys), shriek when corrupted,
     Collapse ultimate. `ResonanceHush.cast(level, caster, corrupted, ticks)` for any caster; clients look for domes on
     every entity. `/power gift <targets> ways hidden|open|master|master_open`. Not seen in game.
+- **0.17.13, a whaling life-story start, and every start can be had (Kingdoms 0.7.228):** a capital, barbarian camp, monolith or harbour is
+  made when a start needs one and the world hasn't got it; the cave start wakes you at half health, and every story
+  landing gives 5 s of Resistance. No Powers changes. See Kingdoms' log.
