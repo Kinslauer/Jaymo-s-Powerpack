@@ -159,6 +159,75 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Powers.byName(String)} and {@code Powers.awakenAs(ServerPlayer, Power)}. */
+	private static java.lang.invoke.@Nullable MethodHandle byName, awakenAs;
+	private static boolean lookedForAwaken;
+
+	/**
+	 * (0.7.223) Andy: "Lost in time starts you with chrono level 1". {@code player} awakens to Powers' power {@code power}
+	 * (an id path) now, with just its first ability, as a natural awakening starts. False without Powers.
+	 */
+	public static boolean awaken(net.minecraft.server.level.ServerPlayer player, String power) {
+		if (!lookedForAwaken) {
+			lookedForAwaken = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> powers = Class.forName("com.jaymospowers.core.Powers"), type = Class.forName("com.jaymospowers.api.Power");
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					byName = lookup.findStatic(powers, "byName", java.lang.invoke.MethodType.methodType(type, String.class));
+					awakenAs = lookup.findStatic(powers, "awakenAs", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, type));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' awakening (older Powers?)", e);
+				}
+			}
+		}
+		if (byName == null || awakenAs == null) {
+			return false;
+		}
+		try {
+			Object found = byName.invoke(power);
+			if (found == null) {
+				return false;
+			}
+			awakenAs.invoke(player, found);
+			return true;
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't awaken {}'s power", player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
+	/** Powers' {@code Future.strand(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle strand;
+	private static boolean lookedForStrand;
+
+	/**
+	 * (0.7.223) A life story's "lost in time" start: {@code player} wakes alone in Powers' future. False without Powers,
+	 * or while the future isn't in place yet.
+	 */
+	public static boolean strand(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForStrand) {
+			lookedForStrand = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					strand = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.chrono.future.Future"), "strand",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' future (older Powers?)", e);
+				}
+			}
+		}
+		if (strand == null) {
+			return false;
+		}
+		try {
+			return (boolean)strand.invoke(player);
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the future", player.getGameProfile().name(), e);
+			return false;
+		}
+	}
+
 	/** Powers' {@code Dismember.bornWithout(LivingEntity, int)}. */
 	private static java.lang.invoke.@Nullable MethodHandle bornWithout;
 	private static boolean lookedForBornWithout;

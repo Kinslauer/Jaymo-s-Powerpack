@@ -2955,3 +2955,7 @@ also boost your mastery gain or xp"): +15 corruption (+25 if the gift was corrup
 allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no power. Not compiled in the cloud session (no game jars), not seen in game.
 - **0.17.6, heritage prejudice (Kingdoms 0.7.221):** Tideborn, Stoneborn, Warrior-born and Sylvan are looked down on by
   most townsfolk, the less human the worse (prices, hearts, good name, guards, talk), and some villages are havens of non-humans only, with a human vs non-human rivalry; villagers now pack up and move away on their own, and rulers reform (or dig in) to keep them; no Powers changes. See Kingdoms' log.
+- **0.17.8, five more life-story starts (Kingdoms 0.7.223):** `Future.strand(ServerPlayer)` sends a "lost in time"
+  newcomer alone to the future's arrival square (no leap home: death or a Chrono's leap), or, while it isn't in place,
+  starts its download and holds them still and unhurt where they stand (`WAITING`, with the percentage) until it is; `Powers.awakenAs(player, power)` (split out of `awaken`) gives that start
+  Chrono at once with only its first ability. Not seen in game.

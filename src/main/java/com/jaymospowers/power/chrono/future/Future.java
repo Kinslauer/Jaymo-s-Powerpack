@@ -93,6 +93,15 @@ public final class Future {
 	public static final AttachmentType<Boolean> FRAME_FIXED = AttachmentRegistry.create(JaymosPowers.id("future_frame"),
 		builder -> builder.persistent(Codec.BOOL));
 
+	/**
+	 * (0.17.8) A life story's "lost in time" newcomer waiting for the future to finish forming (Andy: "Always wait for the
+	 * future if you get this start"): where they're held, unhurt and still, until it's in place and they're sent.
+	 */
+	public static final AttachmentType<net.minecraft.core.BlockPos> WAITING = AttachmentRegistry.create(JaymosPowers.id("future_waiting"),
+		builder -> builder.persistent(net.minecraft.core.BlockPos.CODEC).copyOnDeath());
+	/** How often a waiting newcomer is checked on and told how far along the future is (ticks). */
+	static final int WAIT_CHECK = 20;
+
 	private static final Map<UUID, Long> READY_AT = new HashMap<>();
 	/** When each Chrono in the future (with room for one) has their next echo turn up. */
 	private static final Map<UUID, Long> ECHO_DUE = new HashMap<>();
@@ -114,6 +123,7 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(FutureRuins::tick);
 		ServerTickEvents.END_SERVER_TICK.register(FutureFerals::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
+		ServerTickEvents.END_SERVER_TICK.register(Future::waiting);
 		FutureGuns.init();
 		FutureMachines.init();
 		FutureCities.init();
@@ -151,6 +161,57 @@ public final class Future {
 			goForward(going.get(i), i, going.size());
 		}
 		READY_AT.put(player.getUUID(), now + LEAP_COOLDOWN);
+	}
+
+	/**
+	 * (0.17.8) Jaymo's Kingdoms (a life story's "lost in time" start, by reflection): {@code player} wakes alone in the
+	 * future's arrival square, with no leap home (a Chrono's leap back, or dying, as for anyone else who goes forward
+	 * without one). If the future isn't in place yet, its download is started and they wait for it where they stand,
+	 * unhurt and held still ({@link #WAITING}), and go the moment it's ready. Always true: they're sent, or on their way.
+	 */
+	public static boolean strand(ServerPlayer player) {
+		if (sendable(player.level().getServer())) {
+			goForward(player, 0, 1);
+			return true;
+		}
+		player.setAttached(WAITING, player.blockPosition());
+		player.setPermanentlyInvulnerable(true);
+		return true;
+	}
+
+	/** Whether the future is in place to be sent to (if not and nothing's fetching it, the fetch is started). */
+	private static boolean sendable(MinecraftServer server) {
+		LosPerrito.Stage stage = LosPerrito.stage();
+		if (stage == LosPerrito.Stage.READY && server.getLevel(FUTURE) != null) {
+			return true;
+		}
+		if (stage == LosPerrito.Stage.IDLE || stage == LosPerrito.Stage.FAILED) {
+			LosPerrito.begin(server);
+		}
+		return false;
+	}
+
+	/** Lost-in-time newcomers waiting on the future: held where they stand, told how far along it is, sent once it's there. */
+	private static void waiting(MinecraftServer server) {
+		if (server.getTickCount() % WAIT_CHECK != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			net.minecraft.core.BlockPos hold = player.getAttached(WAITING);
+			if (hold == null) {
+				continue;
+			}
+			if (sendable(server)) {
+				player.removeAttached(WAITING);
+				player.setPermanentlyInvulnerable(false);
+				goForward(player, 0, 1);
+				continue;
+			}
+			if (player.blockPosition().distManhattan(hold) > 1) {
+				player.teleportTo(player.level(), hold.getX() + 0.5, hold.getY(), hold.getZ() + 0.5, Set.of(), player.getYRot(), player.getXRot(), true);
+			}
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.waiting", LosPerrito.percent()).withStyle(ChatFormatting.GOLD));
+		}
 	}
 
 	/** From {@code ChronoEchoes.collapse}: the player's echo died for good. */

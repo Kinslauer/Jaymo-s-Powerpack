@@ -37,6 +37,7 @@
 	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch",
 	"message.jaymospowers.future.recharging": "The future won't open again for %s s.",
 	"message.jaymospowers.future.forming": "The future is forming...",
+	"message.jaymospowers.future.waiting": "Lost between times... the future is forming (%s%%)",
 	"entity.jaymospowers.future_android": "Android",
 	"entity.jaymospowers.future_mech": "War Mech",
 	"message.jaymospowers.future.arrived": "A lifetime from now. The dead walk, and only a Chrono's leap or death takes you home.",

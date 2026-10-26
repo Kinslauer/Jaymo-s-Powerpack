@@ -64,7 +64,8 @@ import org.jspecify.annotations.Nullable;
  * before it's sealed, for life, like the heritage and class it replaces at the start.
  *
  * <p>A start that echoes the power (a caving trip gone wrong and the spider bite, a shipwreck and the deep's song, a
- * monolith and the storm) counts as that power's calling: it wakes a day sooner. The heritage and class screens still
+ * monolith and the storm; (0.7.223) a fall from the sky and Gravity, a burned home and Smoke, a frozen pass and Cryo, a
+ * captive's escape and Z Fighter) counts as that power's calling: it wakes a day sooner. Lost in time wakes Chrono at once. The heritage and class screens still
  * open for a Writ of Rebirth and for old players who never had a story. MCA's own "where do you start" page is skipped
  * ({@code client/mixin/mca/McaDestinySkipMixin}): the last question is where you start.
  */
@@ -96,6 +97,14 @@ public final class LifeStory {
 	static final Set<Start> GEARED = Set.of(Start.SWORN, Start.BANISHED, Start.CITY, Start.CAVE, Start.VILLAGE);
 	/** The unarmed start's limb, one of these Jaymo's Powers part bits (right arm, left arm, right leg, left leg). */
 	static final int[] LIMBS = {2, 4, 8, 16};
+	/** (0.7.223) Fell from the sky: how high over the crater you wake (blocks), how long you drift (ticks of Slow Falling), the crater's size. */
+	static final int SKYFALL_HEIGHT = 24, SKYFALL_TICKS = 600, CRATER_RADIUS = 4, CRATER_DEPTH = 2, SKYFALL_SHARDS = 3;
+	/** (0.7.223) Snowed in on a pass: how far the frozen peaks are looked for (blocks) and in what steps, and the Slowness (ticks). */
+	static final int PEAKS_SEARCH = 3200, PEAKS_STEP = 64, PEAKS_VERTICAL_STEP = 32, SNOWED_SLOW_TICKS = 900;
+	/** (0.7.223) Your village burned: the ruin's half-width (blocks), and how many saved things you carry out. */
+	static final int RUIN_HALF = 3, RUIN_SAVED = 3;
+	/** (0.7.223) Escaped from barbarians: how far from the camp's fire you wake (blocks), how long it hunts you (ticks: a day), and how far it sends its raiders after you (blocks). */
+	static final int CAPTIVE_MIN = 24, CAPTIVE_MAX = 40, HUNT_TICKS = 24000, HUNT_RADIUS = 96, HUNT_EVERY = 40;
 	/** A matching start takes this off the power's wait (ticks): a day. */
 	static final int ECHO_TICKS = 24000;
 
@@ -103,7 +112,8 @@ public final class LifeStory {
 
 	/** Where a story can start. {@code realm}: you name a realm for it. */
 	public enum Start {
-		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), UNARMED(false), FATE(false);
+		CITY(false), BANISHED(true), CAVE(false), SHIPWRECK(false), SWORN(true), VILLAGE(false), MONOLITH(false), WILD(false), SKYFALL(false),
+		TIMELOST(false), BURNED(false), SNOWED(false), CAPTIVE(false), UNARMED(false), FATE(false);
 
 		public final boolean realm;
 
@@ -145,9 +155,9 @@ public final class LifeStory {
 			return new Answer(start.name().toLowerCase(Locale.ROOT), icon, null, null, false, null, "", List.of(), start, start.realm);
 		}
 
-		/** Whether it can be picked here: the unarmed start needs Jaymo's Powers (its lost limbs). */
+		/** Whether it can be picked here: the unarmed and lost-in-time starts need Jaymo's Powers (its lost limbs, its future). */
 		public boolean offered() {
-			return this.start != Start.UNARMED || powers();
+			return this.start != Start.UNARMED && this.start != Start.TIMELOST || powers();
 		}
 	}
 
@@ -237,6 +247,11 @@ public final class LifeStory {
 				Answer.road(Start.VILLAGE, Items.BELL),
 				Answer.road(Start.MONOLITH, Items.CHISELED_STONE_BRICKS),
 				Answer.road(Start.WILD, Items.COMPASS),
+				Answer.road(Start.SKYFALL, Items.AMETHYST_SHARD),
+				Answer.road(Start.TIMELOST, Items.RECOVERY_COMPASS),
+				Answer.road(Start.BURNED, Items.CHARCOAL),
+				Answer.road(Start.SNOWED, Items.LANTERN),
+				Answer.road(Start.CAPTIVE, Items.LEAD),
 				Answer.road(Start.UNARMED, Items.BONE),
 				Answer.road(Start.FATE, Items.ENDER_EYE)));
 		}
@@ -322,6 +337,8 @@ public final class LifeStory {
 	}
 
 	static void register() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LifeStory::hunt);
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> HUNTS.clear());
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Live.TYPE, Live.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Live.TYPE, (payload, context) -> live(context.player(), payload));
@@ -426,6 +443,10 @@ public final class LifeStory {
 			case CAVE -> "web";
 			case SHIPWRECK -> "darktide";
 			case MONOLITH -> "wind";
+			case SKYFALL -> "gravity";
+			case BURNED -> "smoke";
+			case SNOWED -> "cryo";
+			case CAPTIVE -> "zfighter";
 			default -> "";
 		};
 	}
@@ -496,7 +517,10 @@ public final class LifeStory {
 			}
 		}
 		kit(player, start, landed, raised, cls, option, random);
-		if (!power.isEmpty() && power.equals(echo(landed))) {
+		if (start == Start.TIMELOST) {
+			// (Andy: "Lost in time starts you with chrono level 1") awake already, whatever the turn was, wherever they woke
+			PowersCompat.awaken(player, "chrono");
+		} else if (!power.isEmpty() && power.equals(echo(landed))) {
 			PowersCompat.call(player, power, ECHO_TICKS);
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -506,7 +530,7 @@ public final class LifeStory {
 
 	/** "Let fate decide" on the start: any start that needs no realm named (a capital only if there's one). */
 	private static Start fated(MinecraftServer server, RandomSource random) {
-		List<Start> open = new ArrayList<>(List.of(Start.CAVE, Start.SHIPWRECK, Start.VILLAGE, Start.WILD));
+		List<Start> open = new ArrayList<>(List.of(Start.CAVE, Start.SHIPWRECK, Start.VILLAGE, Start.WILD, Start.SKYFALL, Start.BURNED, Start.SNOWED));
 		if (capital(server, random) != null) {
 			open.add(Start.CITY);
 		}
@@ -597,6 +621,42 @@ public final class LifeStory {
 					to = ground(level, foot, MONOLITH_MIN, MONOLITH_MAX, random);
 				}
 			}
+			case SKYFALL -> {
+				to = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				if (to != null) {
+					to = crater(level, to, random);
+				}
+			}
+			case TIMELOST -> {
+				// Powers puts them in its future itself (or holds them till it's in place); the wild only without Powers
+				if (PowersCompat.strand(player)) {
+					return Start.TIMELOST;
+				}
+			}
+			case BURNED -> {
+				to = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				if (to != null) {
+					burnedRuin(level, to, random);
+				}
+			}
+			case SNOWED -> {
+				com.mojang.datafixers.util.Pair<BlockPos, Holder<net.minecraft.world.level.biome.Biome>> peaks = level.findClosestBiome3d(
+					b -> b.is(net.minecraft.world.level.biome.Biomes.FROZEN_PEAKS) || b.is(net.minecraft.world.level.biome.Biomes.JAGGED_PEAKS)
+						|| b.is(net.minecraft.world.level.biome.Biomes.SNOWY_SLOPES),
+					spawn, PEAKS_SEARCH, PEAKS_STEP, PEAKS_VERTICAL_STEP);
+				if (peaks != null) {
+					to = ground(level, peaks.getFirst(), 0, STRUCTURE_NEAR, random);
+				}
+			}
+			case CAPTIVE -> {
+				Faction camp = nearestCamp(server, spawn);
+				if (camp != null) {
+					to = ground(level, camp.seat(), CAPTIVE_MIN, CAPTIVE_MAX, random);
+					if (to != null) {
+						HUNTS.put(player.getUUID(), new Hunt(camp.id(), server.getTickCount() + HUNT_TICKS));
+					}
+				}
+			}
 			case WILD, UNARMED, FATE -> {
 				// the unarmed start sets out from the wild too
 				if (start == Start.UNARMED) {
@@ -612,7 +672,17 @@ public final class LifeStory {
 		if (to == null) {
 			return landed;
 		}
-		player.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+		// (fallen from the sky: you drift down into your own crater)
+		double y = landed == Start.SKYFALL ? to.getY() + SKYFALL_HEIGHT : to.getY();
+		player.teleportTo(level, to.getX() + 0.5, y, to.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
+		if (landed == Start.SKYFALL) {
+			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
+		}
+		if (landed == Start.SNOWED) {
+			// half-frozen
+			player.setTicksFrozen(player.getTicksRequiredToFreeze());
+			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SNOWED_SLOW_TICKS, 0));
+		}
 		if (landed == Start.CAVE) {
 			// the bite you shrugged off, as you always do, and the fall that came after: poisoned, wounded, barely breathing
 			player.setHealth(Math.min(player.getHealth(), CAVE_HEALTH));
@@ -695,7 +765,30 @@ public final class LifeStory {
 				equip(player, stack.copy());
 			}
 		}
+		if (landed == Start.CAPTIVE || landed == Start.TIMELOST) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story." + landed.name().toLowerCase(Locale.ROOT))
+				.withStyle(ChatFormatting.GRAY));
+		}
+		if (landed == Start.CAPTIVE) {
+			// nothing but your fists
+			return;
+		}
 		give(player, new ItemStack(Items.BREAD, KIT_BREAD));
+		if (landed == Start.SKYFALL) {
+			give(player, any(SKYFALL_SHARDS, "aether:ambrosium_shard", "aether_ii:ambrosium_shard", "minecraft:amethyst_shard"));
+		}
+		if (landed == Start.SNOWED) {
+			equip(player, new ItemStack(Items.LEATHER_CHESTPLATE));
+			give(player, new ItemStack(Items.LANTERN));
+		}
+		if (landed == Start.BURNED) {
+			List<ItemStack> saved = new ArrayList<>(List.of(new ItemStack(Items.CANDLE, 2), new ItemStack(Items.BOOK), new ItemStack(Items.CLOCK),
+				new ItemStack(Items.GOLD_NUGGET, 4), new ItemStack(Items.LEATHER, 3), new ItemStack(Items.STRING, 4), new ItemStack(Items.POTATO, 3),
+				new ItemStack(Items.IRON_NUGGET, 6), new ItemStack(Items.BOWL)));
+			for (int i = 0; i < RUIN_SAVED && !saved.isEmpty(); i++) {
+				give(player, saved.remove(random.nextInt(saved.size())));
+			}
+		}
 		if (landed == Start.CITY) {
 			give(player, new ItemStack(Items.EMERALD, CITY_EMERALDS));
 		}
@@ -733,6 +826,141 @@ public final class LifeStory {
 			player.setItemSlot(slot, stack);
 		} else {
 			give(player, stack);
+		}
+	}
+
+	/** {@code n} of the first of {@code ids} that is an item here. */
+	private static ItemStack any(int n, String... ids) {
+		for (String id : ids) {
+			java.util.Optional<Holder.Reference<Item>> item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.Identifier.parse(id));
+			if (item.isPresent()) {
+				return new ItemStack(item.get().value(), n);
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
+	/** Ground a start may dig or build on: the land's own dirt, stone and sand, or a plant. */
+	private static boolean natural(BlockState state) {
+		return state.isAir() || state.canBeReplaced() || state.is(net.minecraft.tags.BlockTags.DIRT) || state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD)
+			|| state.is(net.minecraft.tags.BlockTags.SAND) || state.is(net.minecraft.world.level.block.Blocks.GRAVEL);
+	}
+
+	/** A fallen-from-the-sky crater round {@code center} (natural ground only): a shallow bowl lined with coarse dirt and gravel. Returns its floor. */
+	private static BlockPos crater(ServerLevel level, BlockPos center, RandomSource random) {
+		BlockPos floor = center;
+		for (int dx = -CRATER_RADIUS; dx <= CRATER_RADIUS; dx++) {
+			for (int dz = -CRATER_RADIUS; dz <= CRATER_RADIUS; dz++) {
+				double d = Math.sqrt(dx * dx + dz * dz);
+				if (d > CRATER_RADIUS + 0.3) {
+					continue;
+				}
+				int depth = Math.max(0, (int)Math.round(CRATER_DEPTH * (1.0 - d / (CRATER_RADIUS + 1.0)) + 0.4));
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.offset(dx, 0, dz)).below();
+				boolean dug = true;
+				for (int k = 0; k < depth; k++) {
+					BlockPos at = top.below(k);
+					if (!natural(level.getBlockState(at)) || !natural(level.getBlockState(at.above()))) {
+						dug = false;
+						break;
+					}
+					level.setBlock(at.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+					level.setBlock(at, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+				}
+				BlockPos bottom = top.below(dug ? depth : 0);
+				if (natural(level.getBlockState(bottom)) && !level.getBlockState(bottom).isAir()) {
+					level.setBlock(bottom, (random.nextInt(3) == 0 ? net.minecraft.world.level.block.Blocks.GRAVEL : net.minecraft.world.level.block.Blocks.COARSE_DIRT)
+						.defaultBlockState(), 3);
+				}
+				if (dx == 0 && dz == 0) {
+					floor = bottom.above();
+				}
+			}
+		}
+		return floor;
+	}
+
+	/**
+	 * What's left of your home after the fire, round {@code center} (on natural ground only): low broken walls of charred
+	 * timber and blackened stone, ash underfoot and a cold hearth.
+	 */
+	private static void burnedRuin(ServerLevel level, BlockPos center, RandomSource random) {
+		net.minecraft.world.level.block.Block[] wall = {net.minecraft.world.level.block.Blocks.STRIPPED_DARK_OAK_LOG, net.minecraft.world.level.block.Blocks.BLACKSTONE,
+			net.minecraft.world.level.block.Blocks.COBBLESTONE, net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS, net.minecraft.world.level.block.Blocks.COAL_BLOCK};
+		for (int dx = -RUIN_HALF; dx <= RUIN_HALF; dx++) {
+			for (int dz = -RUIN_HALF; dz <= RUIN_HALF; dz++) {
+				BlockPos feet = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.offset(dx, 0, dz));
+				BlockState under = level.getBlockState(feet.below());
+				if (!natural(under) || under.isAir()) {
+					continue;
+				}
+				boolean edge = Math.abs(dx) == RUIN_HALF || Math.abs(dz) == RUIN_HALF;
+				if (edge) {
+					// broken walls: some gone to the ground, some a block or two still standing
+					int height = random.nextInt(4) == 0 ? 0 : 1 + random.nextInt(2);
+					for (int k = 0; k < height; k++) {
+						if (natural(level.getBlockState(feet.above(k)))) {
+							level.setBlock(feet.above(k), wall[random.nextInt(wall.length)].defaultBlockState(), 3);
+						}
+					}
+				} else {
+					// ash and charred floorboards
+					level.setBlock(feet.below(), (random.nextInt(3) == 0 ? net.minecraft.world.level.block.Blocks.DARK_OAK_PLANKS
+						: net.minecraft.world.level.block.Blocks.COARSE_DIRT).defaultBlockState(), 3);
+					if (natural(level.getBlockState(feet)) && !level.getBlockState(feet).isAir()) {
+						level.setBlock(feet, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+					}
+				}
+			}
+		}
+		// the cold hearth, out
+		BlockPos hearth = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, center.offset(1, 0, 1));
+		if (level.getBlockState(hearth).isAir()) {
+			level.setBlock(hearth, net.minecraft.world.level.block.Blocks.CAMPFIRE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.CampfireBlock.LIT, false), 3);
+		}
+	}
+
+	/** The standing barbarian camp nearest {@code from}, or null. */
+	private static @Nullable Faction nearestCamp(MinecraftServer server, BlockPos from) {
+		Faction best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Faction f : Factions.all(server)) {
+			if (f.is(FactionType.BARBARIAN) && !f.fallen() && f.seat() != null) {
+				double d = f.seat().distSqr(from);
+				if (d < bestD) {
+					bestD = d;
+					best = f;
+				}
+			}
+		}
+		return best;
+	}
+
+	/** (0.7.223) An escaped captive's camp, out to get them back until {@code until} (server tick). */
+	private record Hunt(int camp, long until) {
+	}
+
+	/** Who's being hunted by the camp they escaped (kept only while the server runs: a day is short). */
+	private static final java.util.Map<java.util.UUID, Hunt> HUNTS = new java.util.HashMap<>();
+
+	/** The camp's raiders near a hunted captive come after them, till the day is out (or the camp spares them). */
+	private static void hunt(MinecraftServer server) {
+		if (HUNTS.isEmpty() || server.getTickCount() % HUNT_EVERY != 0) {
+			return;
+		}
+		long now = server.getTickCount();
+		HUNTS.entrySet().removeIf(e -> e.getValue().until <= now);
+		for (java.util.Map.Entry<java.util.UUID, Hunt> e : HUNTS.entrySet()) {
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			if (player == null || !player.isAlive() || !Barbarians.prey(e.getValue().camp, player)) {
+				continue;
+			}
+			for (Folk folk : player.level().getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(HUNT_RADIUS))) {
+				if (folk.factionId() == e.getValue().camp && Barbarians.isRaider(folk) && folk.getTarget() == null) {
+					folk.setTarget(player);
+				}
+			}
 		}
 	}
 

@@ -4860,3 +4860,20 @@ the tide born, stone, warrior and sylvan fall into this".
   at the gate (a guard's halt, MCA mood -3, no new try for a day), and a purist who dug in drives out those not of his
   blood (+12% a day, reason "expelled", to a realm of their own blood or anywhere).
 - Tuning: the constants at the top of `Prejudice`, `Havens`, `Emigrants` and `Reforms`.
+
+## 0.7.223: five more life-story starts (pack 0.17.8)
+Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's calling that had no start of its own
+(lost in time instead wakes Chrono outright).
+- **Fell from the sky** (Gravity): a crater dug in natural ground far from spawn; you drift down into it on Slow Falling,
+  with Aether ambrosium shards (amethyst without the Aether).
+- **Lost in time** (Powers only): Powers' `Future.strand` puts you in the future's ruined city (Andy: "Always wait for the future":
+  if it hasn't been downloaded yet, that starts the download and you wait, held still and unhurt, until it's there). Andy: "Lost in time starts you with chrono level 1": Chrono
+  awakens at once with its first ability (`PowersCompat.awaken` → Powers' `Powers.awakenAs`), whatever question 5 said.
+- **Your village burned** (Smoke): a small burnt-out house built round you (charred walls, ash floor, a cold hearth) and
+  three random things you saved.
+- **Snowed in on a mountain pass** (Cryo): the nearest frozen peaks, jagged peaks or snowy slopes; half-frozen and slowed,
+  a lantern and a leather coat (worn).
+- **Escaped from barbarian captors** (Z Fighter): by the nearest barbarian camp with nothing at all; its raiders near you
+  come after you for a day (`LifeStory.hunt`, unless the camp spares you).
+- Fate can pick the sky fall, the burned village and the pass; lost in time and the escape only when chosen.
+- Tuning: the new constants at the top of `LifeStory`. Not seen in game.
