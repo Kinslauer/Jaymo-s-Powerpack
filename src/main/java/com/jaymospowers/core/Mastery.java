@@ -213,6 +213,18 @@ public final class Mastery {
 		practise(player, amount);
 	}
 
+	/**
+	 * (0.17.2) {@code amount} mastery points at once, past the practice allowance (a gifted villager's power taken by
+	 * killing them, {@code core/gifted/GiftedAI}). Nothing once every ability is learned, in creative, or without a power.
+	 */
+	public static boolean grant(ServerPlayer player, int amount) {
+		if (unlocked(player) >= ALL || player.isCreative() || Powers.of(player) == null) {
+			return false;
+		}
+		addPoints(player, amount);
+		return true;
+	}
+
 	static void forget(Player player) {
 		LAST_USE_CREDIT.remove(player.getUUID());
 		ALLOWANCE.remove(player.getUUID());

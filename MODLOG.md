@@ -2950,4 +2950,6 @@ most every half day), nearby players seeing the film's bars (`UltimateFilm.witne
 health (Andy: "the meteor is a last resort"). Kits: Wind, Cryo, Pocket Arsenal, Gravity, Web Slinger (never the
 symbiote), Smoke, Z Fighter, Darktide; Chrono, Resonance and Xenoform have none. Who awakens is Kingdoms' business
 (`Gifted.give/power/corrupted/unleash/giftable`, read by reflection). `/power gift <targets> <power> [bold|steady|wary]`,
-`clear`, `corrupt`, `ready`, `unleash` for testing. Not compiled in the cloud session (no game jars), not seen in game.
+`clear`, `corrupt`, `ready`, `unleash` for testing. A player who kills a gifted villager (Andy: "It should corrupt you, but
+also boost your mastery gain or xp"): +15 corruption (+25 if the gift was corrupted) and 30 mastery points past the
+allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no power. Not compiled in the cloud session (no game jars), not seen in game.

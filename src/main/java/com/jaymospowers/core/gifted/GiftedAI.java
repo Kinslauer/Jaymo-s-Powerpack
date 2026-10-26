@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -60,6 +61,11 @@ public final class GiftedAI {
 	public static final float LAST_RESORT = 0.3F;
 	/** Players this near see the bars of a ruler's ultimate. */
 	static final double FILM_WITNESSES = 48.0;
+	/**
+	 * A player who kills a gifted villager: their power's corruption grows this much (out of {@code Fate.MAX_CORRUPTION}),
+	 * more if the gift was corrupted, and their mastery this many points (an ability is 60); or this much experience.
+	 */
+	static final int SLAIN_CORRUPTION = 15, SLAIN_CORRUPTION_TAKEN = 25, SLAIN_MASTERY = 30, SLAIN_XP = 60;
 	/** Powers' own tag on anyone downed (they don't fight). */
 	static final String DOWNED = "jaymospowers_downed";
 
@@ -87,6 +93,28 @@ public final class GiftedAI {
 			ULTIMATE_READY.clear();
 		});
 		ServerTickEvents.END_SERVER_TICK.register(GiftedAI::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (source.getEntity() instanceof ServerPlayer killer && Gifted.of(entity) != null) {
+				slain(killer, Gifted.of(entity));
+			}
+		});
+	}
+
+	/**
+	 * {@code killer} slew a gifted villager: something of their power seeps into them. Andy: "It should corrupt you, but
+	 * also boost your mastery gain or xp." Their own power's corruption fills ({@link #SLAIN_CORRUPTION}, more for a
+	 * corrupted gift) and their mastery leaps ({@link #SLAIN_MASTERY}); with nothing left to learn, or no power, it's
+	 * experience instead.
+	 */
+	private static void slain(ServerPlayer killer, Gifted.Gift gift) {
+		com.jaymospowers.core.Fate.addCorruption(killer, gift.corrupted() ? SLAIN_CORRUPTION_TAKEN : SLAIN_CORRUPTION);
+		if (!com.jaymospowers.core.Mastery.grant(killer, SLAIN_MASTERY) && !killer.isCreative()) {
+			killer.giveExperiencePoints(SLAIN_XP);
+		}
+		ServerLevel level = killer.level();
+		level.sendParticles(ParticleTypes.SQUID_INK, killer.getX(), killer.getY(0.6), killer.getZ(), 16, 0.3, 0.5, 0.3, 0.03);
+		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
+		killer.sendSystemMessage(Component.translatable("gift.jaymospowers.slain"));
 	}
 
 	static void track(PathfinderMob mob) {
