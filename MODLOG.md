@@ -2959,3 +2959,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   newcomer alone to the future's arrival square (no leap home: death or a Chrono's leap), or, while it isn't in place,
   starts its download and holds them still and unhurt where they stand (`WAITING`, with the percentage) until it is; `Powers.awakenAs(player, power)` (split out of `awaken`) gives that start
   Chrono at once with only its first ability. Not seen in game.
+- **0.17.9, gifted villagers part 2 (Kingdoms 0.7.224):** Andy: "Not all the villagers are weaker, maybe 1 in 80 is an
+  extremely gifted wielder", Wind folk "should fly when they see fit", "they should also be able to use resonance", and
+  the gifted "should keep their power usage to a minimum and hide it from their friends and family", weighted by temperament.
+  - `Gifted.Gift` gains `ways` (`MASTER`, `OPEN`, `REVEALED` bits) and `signature`; `Gifted.give(e, power, style, master, open)`,
+    `ways`, `master`, `revealed`, `closeOnes(BiPredicate)` (Kingdoms sets who counts as family and friends).
+  - Masters (`GiftedAI`): half cooldowns and gaps, reach 28, their signature move first and twice (`ECHO_DELAY`), a third of
+    the corruption chance, their ultimate in any fight at half health.
+  - Hidden gifts: no moves while close ones see (until half health), double gap, everyday use at 0.25 and only unseen by
+    close ones and players; a player who sees one at work reveals it. Open gifts: everyday use twice as often, always.
+  - `GiftKit.tick` (every tick). `WindGift`: soar (hover over the foe, casting), wing (fly away), everyday hovers and
+    flights to somewhere near, falls caught; the `jaymospowers_wind_aloft` tag ends a flight cut short by unloading.
+  - `ResonanceGift`: pulse, boom, ring, hush (a dome that silences a powered player foe's keys), shriek when corrupted,
+    Collapse ultimate. `ResonanceHush.cast(level, caster, corrupted, ticks)` for any caster; clients look for domes on
+    every entity. `/power gift <targets> ways hidden|open|master|master_open`. Not seen in game.

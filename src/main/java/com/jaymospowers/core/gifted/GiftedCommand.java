@@ -13,10 +13,12 @@ import net.minecraft.world.entity.PathfinderMob;
 
 /**
  * (0.17.3) {@code /power gift <targets> <power> [bold|steady|wary]}, {@code /power gift <targets> clear|corrupt|ready},
- * and {@code /power gift <targets> unleash} (their ultimate on whoever runs it): for testing gifted villagers.
+ * and {@code /power gift <targets> unleash} (their ultimate on whoever runs it): for testing gifted villagers. (0.17.9)
+ * {@code /power gift <targets> ways hidden|open|master|master_open}: whether they're a master, and whether they hide it.
  */
 public final class GiftedCommand {
 	private static final String[] STYLES = {"bold", "steady", "wary"};
+	private static final String[] WAYS = {"hidden", "open", "master", "master_open"};
 
 	private GiftedCommand() {
 	}
@@ -59,6 +61,18 @@ public final class GiftedCommand {
 					}
 					return n;
 				}))
+				.then(Commands.literal("ways").then(Commands.argument("ways", StringArgumentType.word())
+					.suggests((c, b) -> SharedSuggestionProvider.suggest(WAYS, b))
+					.executes(c -> {
+						String ways = StringArgumentType.getString(c, "ways");
+						int n = 0;
+						for (Entity e : EntityArgument.getEntities(c, "targets")) {
+							n += Gifted.ways(e, ways.startsWith("master"), ways.endsWith("open")) ? 1 : 0;
+						}
+						int done = n;
+						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.gift.ways", ways, done), true);
+						return n;
+					})))
 				.then(Commands.argument("power", StringArgumentType.word())
 					.suggests((c, b) -> SharedSuggestionProvider.suggest(Gifted.giftable(), b))
 					.executes(c -> give(c.getSource(), EntityArgument.getEntities(c, "targets"), StringArgumentType.getString(c, "power"), Gifted.STEADY))

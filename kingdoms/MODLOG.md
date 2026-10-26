@@ -4877,3 +4877,12 @@ Andy: "Brainstorm 5 more starts." then "Add them all". Each answers a power's ca
   come after you for a day (`LifeStory.hunt`, unless the camp spares you).
 - Fate can pick the sky fall, the burned village and the pass; lost in time and the escape only when chosen.
 - Tuning: the new constants at the top of `LifeStory`. Not seen in game.
+
+## 0.7.224: gifted villagers part 2 (pack 0.17.9)
+- `GiftedFolk`: one gifted in `MASTER_ODDS` (80) awakens a master; whether they hide it (`open`) by temperament (hotheaded,
+  proud, spiteful, greedy 0.6; brave, cheerful 0.3; the rest 0.08; masters +0.25). Gifted from before are weighed once in
+  `step` (`jaymoskingdoms_gift_ways`). `close` tells Powers who they hide from: kin and partners, players who are MCA
+  family or 40+ hearts, villagers with 40+ regard (any villager or player without MCA).
+- Resonance's calling: living through a Warden's sonic boom (0.5).
+- MCA screen: a hidden gift shows only once a player has seen it at work; masters read "Master of <power>".
+- `PowersCompat.give(..., master, open)`, `giftWays`, `giftMaster`, `giftRevealed`, `giftCloseOnes` (older Powers: as before).

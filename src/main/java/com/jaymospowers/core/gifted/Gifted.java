@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -33,27 +34,59 @@ public final class Gifted {
 	/** How a gifted villager fights (from their temperament, Kingdoms says): straight in, as it comes, or from afar. */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
 
-	/** Their power, whether it's been corrupted, how they fight ({@link #BOLD}...), and how hard they've used it (moves used). */
-	public record Gift(Identifier power, boolean corrupted, int style, int strain) {
+	/**
+	 * (0.17.9) The ways of a gift ({@link Gift#ways}): a {@link #MASTER} (Andy: "maybe 1 in 80 is an extremely gifted
+	 * wielder, achieving great mastery of the power using it in their own way"), one who doesn't care who sees
+	 * ({@link #OPEN}: "who is going to stop them?"), and a hidden gift that a player has seen at work ({@link #REVEALED}).
+	 */
+	public static final int MASTER = 1, OPEN = 2, REVEALED = 4;
+
+	/**
+	 * Their power, whether it's been corrupted, how they fight ({@link #BOLD}...), how hard they've used it (moves used),
+	 * its ways ({@link #MASTER}...), and a master's signature move (their own way with it: an index into the kit's moves).
+	 */
+	public record Gift(Identifier power, boolean corrupted, int style, int strain, int ways, int signature) {
 		public static final Codec<Gift> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Identifier.CODEC.fieldOf("power").forGetter(Gift::power),
 				Codec.BOOL.optionalFieldOf("corrupted", false).forGetter(Gift::corrupted),
 				Codec.INT.optionalFieldOf("style", STEADY).forGetter(Gift::style),
-				Codec.INT.optionalFieldOf("strain", 0).forGetter(Gift::strain))
+				Codec.INT.optionalFieldOf("strain", 0).forGetter(Gift::strain),
+				Codec.INT.optionalFieldOf("ways", 0).forGetter(Gift::ways),
+				Codec.INT.optionalFieldOf("signature", 0).forGetter(Gift::signature))
 			.apply(i, Gift::new));
 		public static final StreamCodec<ByteBuf, Gift> STREAM_CODEC = StreamCodec.composite(
 			Identifier.STREAM_CODEC, Gift::power,
 			ByteBufCodecs.BOOL, Gift::corrupted,
 			ByteBufCodecs.VAR_INT, Gift::style,
 			ByteBufCodecs.VAR_INT, Gift::strain,
+			ByteBufCodecs.VAR_INT, Gift::ways,
+			ByteBufCodecs.VAR_INT, Gift::signature,
 			Gift::new);
 
+		public boolean master() {
+			return (this.ways & MASTER) != 0;
+		}
+
+		/** They don't hide it (and so it's never hidden). */
+		public boolean open() {
+			return (this.ways & OPEN) != 0;
+		}
+
+		/** Players know of it: it's open, or a player has seen it at work. */
+		public boolean revealed() {
+			return (this.ways & (OPEN | REVEALED)) != 0;
+		}
+
 		Gift strained() {
-			return new Gift(this.power, this.corrupted, this.style, this.strain + 1);
+			return new Gift(this.power, this.corrupted, this.style, this.strain + 1, this.ways, this.signature);
 		}
 
 		Gift corrupt() {
-			return new Gift(this.power, true, this.style, this.strain);
+			return new Gift(this.power, true, this.style, this.strain, this.ways, this.signature);
+		}
+
+		Gift withWays(int ways) {
+			return new Gift(this.power, this.corrupted, this.style, this.strain, ways, this.signature);
 		}
 	}
 
@@ -94,13 +127,70 @@ public final class Gifted {
 	 * can't walk to a fight, or a power with no kit. Called by Kingdoms (by reflection) and {@code /power gift}.
 	 */
 	public static boolean give(Entity entity, String power, int style) {
+		return give(entity, power, style, false, false);
+	}
+
+	/**
+	 * (0.17.9) As {@link #give(Entity, String, int)}, as a {@code master} or not, and {@code open} (they don't hide it) or
+	 * not. A master's signature move is picked here, from the moves their power has before any corruption.
+	 */
+	public static boolean give(Entity entity, String power, int style, boolean master, boolean open) {
 		Identifier id = id(power);
 		if (entity instanceof Player || !(entity instanceof PathfinderMob mob) || !KITS.containsKey(id)) {
 			return false;
 		}
-		mob.setAttached(GIFT, new Gift(id, false, Math.clamp(style, BOLD, WARY), 0));
+		mob.setAttached(GIFT, new Gift(id, false, Math.clamp(style, BOLD, WARY), 0, ways(master, open), signature(KITS.get(id), mob)));
 		GiftedAI.track(mob);
 		return true;
+	}
+
+	private static int ways(boolean master, boolean open) {
+		return (master ? MASTER : 0) | (open ? OPEN : 0);
+	}
+
+	private static int signature(GiftKit kit, PathfinderMob mob) {
+		List<Integer> plain = new ArrayList<>();
+		List<GiftKit.Move> moves = kit.moves();
+		for (int i = 0; i < moves.size(); i++) {
+			if (!moves.get(i).corruptOnly()) {
+				plain.add(i);
+			}
+		}
+		return plain.isEmpty() ? 0 : plain.get(mob.getRandom().nextInt(plain.size()));
+	}
+
+	/**
+	 * (0.17.9) Sets the ways of {@code entity}'s gift, keeping whether a player has seen it (Kingdoms, for the gifted of a
+	 * world from before ways were weighed, and {@code /power gift}). False without a gift.
+	 */
+	public static boolean ways(Entity entity, boolean master, boolean open) {
+		Gift gift = of(entity);
+		if (gift == null || !(entity instanceof PathfinderMob mob)) {
+			return false;
+		}
+		mob.setAttached(GIFT, gift.withWays(ways(master, open) | gift.ways() & REVEALED));
+		return true;
+	}
+
+	/** (0.17.9) Whether {@code entity} is a master of their gift. Either side. */
+	public static boolean master(Entity entity) {
+		Gift gift = of(entity);
+		return gift != null && gift.master();
+	}
+
+	/** (0.17.9) Whether players know of {@code entity}'s gift (it's open, or one has seen it at work). Either side. */
+	public static boolean revealed(Entity entity) {
+		Gift gift = of(entity);
+		return gift != null && gift.revealed();
+	}
+
+	/**
+	 * (0.17.9) Who a gifted villager hides their gift from: {@code test(gifted, other)} says whether {@code other} is close to
+	 * them (family, friends). Kingdoms sets it, by reflection (it knows the MCA family trees and hearts); without it, any
+	 * villager or player. Andy: "keep their power usage to a minimum and hide it from their friends and family."
+	 */
+	public static void closeOnes(BiPredicate<Entity, Entity> test) {
+		GiftedAI.closeOnes = test;
 	}
 
 	/** Takes {@code entity}'s gift away. */

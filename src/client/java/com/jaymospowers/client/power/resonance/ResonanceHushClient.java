@@ -1,18 +1,21 @@
 package com.jaymospowers.client.power.resonance;
 
 import com.jaymospowers.power.resonance.ResonanceHush;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Hush on every client: the domes are synced on their casters ({@link ResonanceHush#DOME}). A sound inside a dome, or
@@ -21,7 +24,27 @@ import net.minecraft.world.phys.Vec3;
  * tells the core's key handling when the local player's power keys are dead (inside someone else's dome).
  */
 public final class ResonanceHushClient {
+	/** (0.17.9) Everyone holding a dome just now (players, and gifted villagers' domes too), looked for once a tick. */
+	private static final List<Entity> CASTERS = new ArrayList<>();
+	private static long castersAt = Long.MIN_VALUE;
+	private static @Nullable ClientLevel castersIn;
+
 	private ResonanceHushClient() {
+	}
+
+	private static List<Entity> casters(ClientLevel level) {
+		long now = level.getGameTime();
+		if (now != castersAt || level != castersIn) {
+			castersAt = now;
+			castersIn = level;
+			CASTERS.clear();
+			for (Entity e : level.entitiesForRendering()) {
+				if (e.hasAttached(ResonanceHush.DOME)) {
+					CASTERS.add(e);
+				}
+			}
+		}
+		return CASTERS;
 	}
 
 	/** Whether the local player stands in someone else's dome (their power keys do nothing). */
@@ -31,7 +54,7 @@ public final class ResonanceHushClient {
 			return false;
 		}
 		long now = level.getGameTime();
-		for (AbstractClientPlayer caster : level.players()) {
+		for (Entity caster : casters(level)) {
 			ResonanceHush.Dome dome = caster.getAttached(ResonanceHush.DOME);
 			if (caster != self && dome != null && now < dome.until() && dome.contains(self.position())) {
 				return true;
@@ -51,7 +74,7 @@ public final class ResonanceHushClient {
 		long now = level.getGameTime();
 		Vec3 ear = self.getEyePosition();
 		int deaf = 0;
-		for (AbstractClientPlayer caster : level.players()) {
+		for (Entity caster : casters(level)) {
 			ResonanceHush.Dome dome = caster.getAttached(ResonanceHush.DOME);
 			if (dome == null || now >= dome.until()) {
 				continue;
@@ -82,7 +105,7 @@ public final class ResonanceHushClient {
 		long now = level.getGameTime();
 		Vec3 ear = self.getEyePosition();
 		Vec3 at = sound.isRelative() ? ear : new Vec3(sound.getX(), sound.getY(), sound.getZ());
-		for (AbstractClientPlayer caster : level.players()) {
+		for (Entity caster : casters(level)) {
 			ResonanceHush.Dome dome = caster.getAttached(ResonanceHush.DOME);
 			if (dome == null || now >= dome.until()) {
 				continue;

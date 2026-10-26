@@ -5900,6 +5900,8 @@
 	"gifted.jaymoskingdoms.line": "Gifted: %s",
 	"gifted.jaymoskingdoms.hover": "They awoke to a power, as some do. They'll use it.",
 	"gifted.jaymoskingdoms.hover.corrupted": "Their power has turned on them. It's wilder now, and darker.",
+	"gifted.jaymoskingdoms.line.master": "Master of %s",
+	"gifted.jaymoskingdoms.hover.master": "Few ever wield a power like this. They've made it their own.",
 	"gifted.jaymoskingdoms.storm_line": "Of the storm-taken line",
 	"gifted.jaymoskingdoms.storm_line.hover": "Somewhere back in their family, a Wind user was taken by the storm.",
 	"dialogue.main.jaymoskingdoms_work": "Talk about work",
