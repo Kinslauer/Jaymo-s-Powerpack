@@ -5086,6 +5086,11 @@ woodcutters, tornadoes and Giants all stay. Andy: "add all of em" to three of it
 - **Built on, it stays.** Set any block on top of a fallen trunk (not its own logs or leaves) and the next push finds
   it pinned. It is forgotten as a trunk and stays as plain logs for good. Trunks already stayed as real blocks, so
   nothing despawns.
+## 0.7.233: harpoon lines hold aerwhales (pack 0.17.21)
+Powers' aerwhales are hunted like great whales now. A Kingdoms harpoon already lodged in one (it's 5 wide, past
+`BIG`); now `Harpoon.tether` also pays line out to a running aerwhale and holds it back by `WHALE_SHARE`, like a great
+whale, and stops paying out once it wears Powers' `jaymospowers_spent_whale` tag. Powers stays optional: the aerwhale
+is found by its entity id (`skyWhale`). Merged in #551 claiming 0.7.232, which #550 had already used, so renumbered.
 ## 0.7.234: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.22)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.

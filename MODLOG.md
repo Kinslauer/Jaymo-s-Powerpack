@@ -3009,6 +3009,15 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   library, so not shipped). Falling trees break through other trees' leaves, some of their own leaves snap off when
   they land, and a fallen trunk can be pushed, rolled down slopes, or built on to pin it. No Powers changes. See
   Kingdoms' log.
+- **0.17.21, whale-sized aerwhales (Kingdoms 0.7.233):** Andy: "the aerwhales need to be at least as large as the
+  overworld counter parts", then "make the health realistic. it needs to be hunted like the ones in the overworld".
+  Drawn 3.2x (about 15 blocks, Kingdoms' great whale is about 14), lowered into a 5.0 x 3.6 box, culled with its full
+  length; wild ones rise 8-20 blocks into the sky after spawning. 260 health, blubber lets 30% through (harpoons,
+  tridents and the Armory harpoon bite whole); struck, it bolts away climbing, and each Kingdoms harpoon lodged in it
+  (read by reflection) bleeds and tires it until, spent, it sinks to 4 blocks over the ground wearing the
+  `jaymospowers_spent_whale` tag. With Kingdoms it drops whale blubber, meat, bone and sometimes ambergris. Andy wants
+  the taut line lifting the thrower kept: it shouldn't be tried unprepared. Merged in #551 claiming 0.17.20/0.7.232,
+  which #550 had already used, so renumbered here. Not seen in game.
 - **0.17.22, mana grows (Kingdoms 0.7.234):** the mana glow settles dim after attuning and shows power; casting folk are
   attuned; amethyst crushes for mana; mana sickness; vis, flux and corruption tie into mana; a mana wand; meditation
   restores mana; casts ripple the aura by intent. No Powers changes (Kingdoms reads Powers' Meditate, Phials and

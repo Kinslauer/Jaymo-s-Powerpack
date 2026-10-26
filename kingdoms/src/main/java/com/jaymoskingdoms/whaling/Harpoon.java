@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -317,7 +318,8 @@ public final class Harpoon extends Projectile {
 			if (dist < line - 0.5) {
 				// slack is hauled in
 				line = Math.max(LEAST_LINE, dist + 0.5);
-			} else if (dist > line + 1.0 && in instanceof GreatWhale whale && !whale.spent() && line < MOST_LINE) {
+			} else if (dist > line + 1.0 && (in instanceof GreatWhale whale ? !whale.spent() : skyWhale(in) && !in.entityTags().contains(SKY_WHALE_SPENT))
+				&& line < MOST_LINE) {
 				// a running whale takes the line out
 				line = Math.min(MOST_LINE, line + PAY_OUT);
 			}
@@ -353,6 +355,8 @@ public final class Harpoon extends Projectile {
 				whale.tow(dir.scale(pull * WHALE_SHARE));
 			} else if (in instanceof WhaleCarcass carcass) {
 				carcass.tow(dir.scale(pull * CARCASS_SHARE));
+			} else if (skyWhale(in)) {
+				in.setDeltaMovement(in.getDeltaMovement().add(dir.scale(pull * WHALE_SHARE)));
 			}
 		}
 	}
@@ -361,6 +365,13 @@ public final class Harpoon extends Projectile {
 	private void loose(ServerLevel level) {
 		this.spawnAtLocation(level, new ItemStack(Whaling.HARPOON_ITEM));
 		this.discard();
+	}
+
+	/** (0.7.233) Jaymo's Powers' aerwhale, hunted like a great whale: read by id (Powers is optional) and by the tag it wears spent. */
+	static final String SKY_WHALE = "jaymospowers:aerwhale", SKY_WHALE_SPENT = "jaymospowers_spent_whale";
+
+	static boolean skyWhale(Entity in) {
+		return SKY_WHALE.equals(BuiltInRegistries.ENTITY_TYPE.getKey(in.getType()).toString());
 	}
 
 	/** The harpoons lodged in {@code in}. */
