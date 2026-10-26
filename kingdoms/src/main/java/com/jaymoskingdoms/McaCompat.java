@@ -291,6 +291,11 @@ public final class McaCompat {
 		}
 	}
 
+	/** (0.7.220) An MCA villager follows {@code player} (MCA's own Follow, as a hired guard does). False without MCA. */
+	static boolean follow(Villager v, ServerPlayer player) {
+		return LOADED && McaBridge.follow(v, player);
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;
@@ -425,7 +430,8 @@ public final class McaCompat {
 		MinecraftServer server = guard.level().getServer();
 		int faction = w.factionId();
 		if (target instanceof ServerPlayer player) {
-			return !player.isCreative() && !player.isSpectator() && Reputation.get(player, faction) <= Reputation.HOSTILE;
+			// (0.7.220) a Master Courier passes freely
+			return !player.isCreative() && !player.isSpectator() && Reputation.get(player, faction) <= Reputation.HOSTILE && !Careers.passes(player, faction);
 		}
 		if (target instanceof Folk folk) {
 			return folk.factionId() != faction && (folk.style() == FactionType.BARBARIAN || Relations.between(server, faction, folk.factionId()) == Relation.WAR);

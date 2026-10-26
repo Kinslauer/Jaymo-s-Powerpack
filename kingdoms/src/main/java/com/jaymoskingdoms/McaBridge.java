@@ -195,6 +195,15 @@ final class McaBridge {
 		}
 	}
 
+	/** (0.7.220) {@link McaCompat#follow}. */
+	static boolean follow(Villager v, net.minecraft.world.entity.player.Player player) {
+		if (!(v instanceof VillagerEntityMCA m)) {
+			return false;
+		}
+		m.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.FOLLOW, player);
+		return true;
+	}
+
 	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();

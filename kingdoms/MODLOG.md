@@ -4779,3 +4779,28 @@ question, answer and line here is our own. Design doc: https://claude.ai/artifac
 - `HeritageLooks` now draws a player's marks, glow, eyes and Tideborn fins on MCA's skin body (`McaLookModels`
   `playerMarks`/`playerGlow`), the way villagers' looks already are: same pose as the skin, clothes and hair, just
   over the skin and under the clothes. Without MCA, the animated model as before. Compile-checked, not seen in game.
+
+## 0.7.220: player jobs (`Careers`, pack 0.17.5)
+Design and Andy's answers: the "Player jobs: design" doc. Wages from the town's storehouse, as many jobs at once as you
+can keep up with, Hunter/Courier/Watch added, stronger perks, a Master's apprentice and stall, the title over your head
+once introduced and in the tab list and character screen.
+- Ten jobs (Butcher, Woodcutter, Builder, Farmhand, Miner, Fisher, Smith's hand, Hunter, Courier, Watch), each held for
+  one settlement. Taken by "Talk about work" in MCA's menu (any grown villager of a settlement), by pulling a Help
+  wanted notice off a bounty board (`TownNotices`, a job the town is short of), or from the life story's village start
+  (leans to who raised you; taken up at the first town you reach). Tools the first time only.
+- Orders each morning (2 new, at most 5 waiting), from what the storehouse has least of (a builder's from what the
+  next building is short of): goods handed over in the same talk, or work in town (fell, place, harvest, ore, smelt,
+  slay, a night's watch, a parcel carried to another town). Paid at dusk from the storehouse's emeralds (2/3/5 an order
+  by rank, 1 less per other job held, at least 1 even when it's empty); wages wait while the storehouse is unloaded.
+- Ranks: Journeyman at 100 experience, Master at 350 (10 an order, 3 reputation an order). Perks in the lang
+  (`job.jaymoskingdoms.<job>.perk.1|2`); hooks in Trees (chops), BlockItemMixin (stock), LivingEntityHurtMixin
+  (beasts), RoadPace (couriers), guard targeting (a Master Courier's free pass), and `mixin/jobs` (anvil, fishing hook,
+  furnace result slot).
+- Masters: take the villager you're talking to as an apprentice (16 of the trade's goods a day into the storehouse, 2
+  emeralds' cut); open a stall (the next chest or barrel you open in town) that sells up to 12 emeralds' worth a day of
+  mastered goods; a Master Builder picks the next building (`Construction`); a Master of the Watch calls 3 guards to
+  follow (MCA's follow).
+- Fired (and barred 3 days) for hurting the employer's people, being wanted for theft there, or reputation below 0.
+- Shown: `job_titles` payload to everyone; under the nametag (`IntroNameTagMixin`) and after the tab-list name
+  (`IntroTabListMixin`) once introduced; a Jobs tab on the K screen; orders in the journal; `/job`.
+- Tuning: constants at the top of `Careers`. Not seen in game.

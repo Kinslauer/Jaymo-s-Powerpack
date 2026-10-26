@@ -64,7 +64,8 @@ public final class RoadPace {
 				AttributeInstance speed = horse.getAttribute(Attributes.MOVEMENT_SPEED);
 				double going = horse.onGround() ? going(horse) : speed != null && speed.hasModifier(PACE_ID) ? ROAD_BONUS : 0.0;
 				if (going > 0.0) {
-					pace(horse, going);
+					// (0.7.220) a Courier's horse too
+					pace(horse, going * Careers.roadPace(player));
 					paced.add(horse);
 				}
 				continue;
@@ -72,8 +73,9 @@ public final class RoadPace {
 			if (player.isPassenger() || immune(player)) {
 				pace(player, 0.0);
 			} else if (player.onGround()) {
-				// in the air (a jump) the pace they had holds
-				pace(player, going(player));
+				// in the air (a jump) the pace they had holds; (0.7.220) a Courier's road pace is more
+				double going = going(player);
+				pace(player, going > 0.0 ? going * Careers.roadPace(player) : going);
 			}
 		}
 		for (LivingEntity horse : PACED) {
