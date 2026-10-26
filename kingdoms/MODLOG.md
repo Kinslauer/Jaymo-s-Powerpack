@@ -5018,3 +5018,17 @@ in the wilderness ... I need you to generate whatever is required for the player
     seat is within reach of the sea, with its land kept loaded until `Navies.build` succeeds. If no realm is on a
     coast, a citadel kingdom is raised on the shore nearest spawn, which then builds it. After 90 s with no harbour,
     you start in the wild.
+
+## 0.7.229: the life story before MCA's creator, and typed names always saved (pack 0.17.15)
+Andy: "can you choose your characters story BEFORE the MCA creator and name choosing? also it doesnt always save the
+name players choose, i think it requires an extra enter prompt".
+- **Story first.** On joining, a newcomer's life story opens at once (`Classes` JOIN no longer waits for MCA's
+  creator). On their client, `McaDestinyWaitMixin` holds MCA's `DestinyManager.tick` until the story is told, and
+  the creator opens as soon as it is. `McaDestinySkipMixin` skips the creator's "where do you start" page for anyone
+  who has told a story, as it did for newcomers.
+- While MCA's creator is still up, the player can't be hurt and nothing hunts them (`ALLOW_DAMAGE` and the shoo check
+  include `McaCompat.destinyPending`). This matters because they already stand at their start, maybe in a cave.
+  Finishing the creator gives the 5 s arrival grace again (`LifeStory.arrived`).
+- **Names.** The creator's first page is `intro`: MCA sends its `general` tab there. `McaDestinyNameMixin` saved only
+  on leaving `general`, so a typed name reached the server only if the player had also visited and left the general
+  tab, which is the "extra step" Andy saw. Leaving `intro` or `general` now saves.

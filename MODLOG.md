@@ -2992,3 +2992,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   poor guards and barbarians do: the same snowball wearing the rock, hitting for 3, half a second between throws.
   Right clicking a block still sets the rock down, and flint in the other hand still strikes fire. Half the rocks lie
   where they land to be picked up again (`ground/ThrownRocks`).
+- **0.17.15, the life story before MCA's creator (Kingdoms 0.7.229):** newcomers tell their story first, then MCA's
+  creator opens; the name typed on the creator's first page is now always saved. No Powers changes. See Kingdoms' log.
