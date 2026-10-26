@@ -5019,7 +5019,7 @@ in the wilderness ... I need you to generate whatever is required for the player
     coast, a citadel kingdom is raised on the shore nearest spawn, which then builds it. After 90 s with no harbour,
     you start in the wild.
 
-## 0.7.229: the life story before MCA's creator, and typed names always saved (pack 0.17.15)
+## 0.7.229: the life story before MCA's creator, and typed names always saved (pack 0.17.16)
 Andy: "can you choose your characters story BEFORE the MCA creator and name choosing? also it doesnt always save the
 name players choose, i think it requires an extra enter prompt".
 - **Story first.** On joining, a newcomer's life story opens at once (`Classes` JOIN no longer waits for MCA's
@@ -5033,7 +5033,7 @@ name players choose, i think it requires an extra enter prompt".
   on leaving `general`, so a typed name reached the server only if the player had also visited and left the general
   tab, which is the "extra step" Andy saw. Leaving `intro` or `general` now saves.
 
-## 0.7.230: strangers' MCA page, introductions first (pack 0.17.16)
+## 0.7.230: strangers' MCA page, introductions first (pack 0.17.17)
 Andy: "introductions should be the first option available. before that none of this is visible, no options but gift
 trade or introduce".
 - `McaStrangerPageMixin` (on `AbstractDynamicScreen.setLayout`): MCA's main page for a villager you haven't been
