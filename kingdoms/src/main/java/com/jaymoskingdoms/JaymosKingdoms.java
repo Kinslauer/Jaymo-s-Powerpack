@@ -249,6 +249,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobCombat.register();
 		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
 		MobShields.register();
+		MobParry.register();
 		BladeClash.register();
 		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)

@@ -14,6 +14,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.component.BlocksAttacks;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.105) Mobs raise their shields, after Just-In COMBAT's shield-bearing monsters (its idea only, our own code). A melee
@@ -24,12 +25,18 @@ import net.minecraft.world.item.component.BlocksAttacks;
  * <p>
  * The goal's attack is held off while the shield is up ({@code MeleeAttackGoalMixin}); the axe in
  * {@code LivingEntityBlockMixin}; the raised arm on the client in {@code ShieldPoseHumanoidMobRendererMixin}.
+ * <p>
+ * (0.7.267) With no shield, a fighter whose weapon has a guard (Jaymo's Powers gives every plain melee weapon one) raises
+ * the blade instead, less often ({@link #BLADE_GUARD_CHANCE}) and only if it fights Better Combat's way ({@link MobCombat}).
+ * A blow on it in the first ticks of that guard may be parried ({@link MobParry}).
  */
 public final class MobShields {
 	/** A foe within this (blocks) is close enough to raise the shield against; one drawing a bow, within this. */
 	static final double GUARD_RANGE = 7.0, ARROW_RANGE = 28.0;
 	/** Each time it could raise its shield, the chance it does (else it presses on for {@link #RETRY_TICKS}). */
 	static final float GUARD_CHANCE = 0.55F;
+	/** (0.7.267) The same for a raised blade, no shield. */
+	static final float BLADE_GUARD_CHANCE = 0.3F;
 	/** How long it holds the shield up (ticks, between these); and after lowering it, how long it fights before raising it again. */
 	static final int GUARD_MIN_TICKS = 20, GUARD_MAX_TICKS = 50;
 	static final int REST_MIN_TICKS = 25, REST_MAX_TICKS = 60;
@@ -41,7 +48,7 @@ public final class MobShields {
 
 	/** Per mob: guarding until, resting until, knocked aside until, last seen fighting (game time). */
 	private static final Map<Mob, long[]> STATE = new WeakHashMap<>();
-	private static final int GUARD = 0, REST = 1, DISABLED = 2, SEEN = 3;
+	private static final int GUARD = 0, REST = 1, DISABLED = 2, SEEN = 3, RAISED = 4;
 
 	private MobShields() {
 	}
@@ -58,16 +65,16 @@ public final class MobShields {
 		if (!(mob.level() instanceof ServerLevel level)) {
 			return false;
 		}
-		ItemStack shield = mob.getOffhandItem();
-		boolean raised = mob.isUsingItem() && mob.getUsedItemHand() == InteractionHand.OFF_HAND;
-		if (!shield.has(DataComponents.BLOCKS_ATTACKS) || mob.isPassenger() || Downed.isDowned(mob)) {
+		InteractionHand hand = guardHand(mob);
+		boolean raised = hand != null && mob.isUsingItem() && mob.getUsedItemHand() == hand;
+		if (hand == null || mob.isPassenger() || Downed.isDowned(mob)) {
 			if (raised) {
 				mob.stopUsingItem();
 			}
 			return false;
 		}
 		long now = level.getGameTime();
-		long[] s = STATE.computeIfAbsent(mob, m -> new long[4]);
+		long[] s = STATE.computeIfAbsent(mob, m -> new long[5]);
 		s[SEEN] = now;
 		boolean aimedAt = aiming(target) && mob.distanceToSqr(target) <= ARROW_RANGE * ARROW_RANGE;
 		boolean near = mob.distanceToSqr(target) <= GUARD_RANGE * GUARD_RANGE;
@@ -85,23 +92,66 @@ public final class MobShields {
 			return false;
 		}
 		if (aimedAt) {
-			raise(mob, s, now, ARROW_GUARD_TICKS);
+			raise(mob, hand, s, now, ARROW_GUARD_TICKS);
 			return true;
 		}
 		if (now < s[REST]) {
 			return false;
 		}
-		if (mob.getRandom().nextFloat() >= GUARD_CHANCE) {
+		if (mob.getRandom().nextFloat() >= (hand == InteractionHand.OFF_HAND ? GUARD_CHANCE : BLADE_GUARD_CHANCE)) {
 			s[REST] = now + RETRY_TICKS;
 			return false;
 		}
-		raise(mob, s, now, GUARD_MIN_TICKS + mob.getRandom().nextInt(GUARD_MAX_TICKS - GUARD_MIN_TICKS + 1));
+		raise(mob, hand, s, now, GUARD_MIN_TICKS + mob.getRandom().nextInt(GUARD_MAX_TICKS - GUARD_MIN_TICKS + 1));
 		return true;
 	}
 
-	/** Whether {@code mob} has its shield up right now (and so won't strike). */
+	/**
+	 * (0.7.267) The hand it guards with: a shield in the off hand, else its main-hand weapon's own guard when it fights
+	 * Better Combat's way and the off hand is free; null if neither.
+	 */
+	static @Nullable InteractionHand guardHand(Mob mob) {
+		if (mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS)) {
+			return InteractionHand.OFF_HAND;
+		}
+		if (mob.getOffhandItem().isEmpty() && mob.getMainHandItem().has(DataComponents.BLOCKS_ATTACKS) && MobCombat.ENABLED && MobCombat.handles(mob)) {
+			return InteractionHand.MAIN_HAND;
+		}
+		return null;
+	}
+
+	/** Whether {@code mob} has its shield (or blade) up right now (and so won't strike). */
 	public static boolean guarding(Mob mob) {
-		return mob.isUsingItem() && mob.getUsedItemHand() == InteractionHand.OFF_HAND && mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS);
+		InteractionHand hand = guardHand(mob);
+		return hand != null && mob.isUsingItem() && mob.getUsedItemHand() == hand;
+	}
+
+	/** (0.7.267) How long its guard has been up (ticks), or -1 when it isn't ({@link MobParry}). */
+	public static long raisedFor(Mob mob) {
+		long[] s = STATE.get(mob);
+		return s == null || !guarding(mob) ? -1L : mob.level().getGameTime() - s[RAISED];
+	}
+
+	/** (0.7.267) Lowers a raised guard now (a parry answered, {@link MobParry}). */
+	static void drop(Mob mob) {
+		long[] s = STATE.get(mob);
+		if (s != null && guarding(mob)) {
+			lower(mob, s, mob.level().getGameTime());
+		}
+	}
+
+	/** (0.7.267) Snaps the guard up at once (a parry, {@link MobParry}), held this many ticks. */
+	static void snap(Mob mob, int ticks) {
+		InteractionHand hand = guardHand(mob);
+		if (hand == null || !(mob.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long now = level.getGameTime();
+		long[] s = STATE.computeIfAbsent(mob, m -> new long[5]);
+		s[SEEN] = now;
+		if (!guarding(mob)) {
+			raise(mob, hand, s, now, ticks);
+		}
 	}
 
 	/**
@@ -126,14 +176,15 @@ public final class MobShields {
 			return false;
 		}
 		blocks.disable(level, mob, seconds, shield);
-		long[] s = STATE.computeIfAbsent(mob, m -> new long[4]);
+		long[] s = STATE.computeIfAbsent(mob, m -> new long[5]);
 		s[DISABLED] = level.getGameTime() + Math.round(seconds * blocks.disableCooldownScale() * 20.0F);
 		return true;
 	}
 
-	private static void raise(Mob mob, long[] s, long now, int ticks) {
-		mob.startUsingItem(InteractionHand.OFF_HAND);
+	private static void raise(Mob mob, InteractionHand hand, long[] s, long now, int ticks) {
+		mob.startUsingItem(hand);
 		s[GUARD] = now + ticks;
+		s[RAISED] = now;
 	}
 
 	private static void lower(Mob mob, long[] s, long now) {

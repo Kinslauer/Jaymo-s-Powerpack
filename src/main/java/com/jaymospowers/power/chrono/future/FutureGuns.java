@@ -110,6 +110,11 @@ public final class FutureGuns {
 	/** How far TaCZ's report of a mob's shot carries. */
 	static final int SOUND_RANGE = 96;
 
+	/** (0.17.67) Andy: "All guns should red glint too": a red glint and a click this long (ticks) before a burst's first shot. */
+	static final int AIM_TICKS = 10;
+
+	/** (0.17.67) A gunner aiming its next burst → when it fires (game time). */
+	private static final Map<Mob, Long> AIMING = new WeakHashMap<>();
 	/** When each gunner may next fire, and how many shots are left in its burst. */
 	private static final Map<Mob, Long> NEXT = new WeakHashMap<>();
 	private static final Map<Mob, Integer> BURST = new WeakHashMap<>();
@@ -203,7 +208,21 @@ public final class FutureGuns {
 		}
 		if (d < NEAREST || d > kind.range || !sight) {
 			BURST.remove(mob);
+			AIMING.remove(mob);
 			return;
+		}
+		if (!BURST.containsKey(mob)) {
+			Long fireAt = AIMING.get(mob);
+			if (fireAt == null) {
+				AIMING.put(mob, now + AIM_TICKS);
+				com.jaymospowers.combat.AttackTells.tell(level, mob, true);
+				level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.HOSTILE, 0.6F, 1.6F);
+				return;
+			}
+			if (now < fireAt) {
+				return;
+			}
+			AIMING.remove(mob);
 		}
 		int left = BURST.getOrDefault(mob, kind.burst) - 1;
 		if (left > 0) {
@@ -252,7 +271,12 @@ public final class FutureGuns {
 				e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != mob, eye.distanceToSqr(end));
 			if (hit != null) {
 				end = hit.getLocation();
+				// (0.17.67) a bullet: nobody parries it (the guard reads the tag while it lands)
+				boolean tagged = mob.addTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
 				hit.getEntity().hurtServer(level, level.damageSources().mobProjectile(mob, mob), kind.damage);
+				if (tagged) {
+					mob.removeTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
+				}
 			} else if (wall.getType() != HitResult.Type.MISS) {
 				level.sendParticles(ParticleTypes.CRIT, end.x, end.y, end.z, 3, 0.05, 0.05, 0.05, 0.1);
 			}

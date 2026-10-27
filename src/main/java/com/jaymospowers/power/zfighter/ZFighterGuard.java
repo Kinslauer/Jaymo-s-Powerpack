@@ -36,7 +36,7 @@ public final class ZFighterGuard {
 	static final float BLOCK_SHARE = 0.5F;
 	static final float KI_PER_DAMAGE = 0.5F;
 	static final double FRONT_DEGREES = 150.0;
-	static final int PARRY_TICKS = 6;
+	static final int PARRY_TICKS = 8;
 	static final int PARRY_COOLDOWN = 20;
 	static final float PARRY_KI = 10.0F;
 	static final int STAGGER_TICKS = 30;

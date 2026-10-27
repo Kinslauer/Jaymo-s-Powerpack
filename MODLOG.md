@@ -3166,3 +3166,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   parse jaymospowers:moon ... Not a string: {"Name":"minecraft:tuff"}"): `worldgen/material_rule/moon.json` wrote its
   block states in the old `{"Name": ...}` form, which 26.3's surface rules don't read. They're plain block ids now, as in
   `aether.json`. It broke every new world, singleplayer and server.
+
+- **0.17.67, the guard and the parry for everyone; lock-on lunge:** Andy wanted parries easier than ours and combat more
+  dynamic with the lock-on. Mallard Guard is All Rights Reserved and NeoForge 1.21.1 only, so `combat/Guard` is our own after
+  its idea: every melee weapon or tool with nothing on right click gets vanilla's `blocks_attacks` component and raises a guard
+  (60% of a frontal blow, feathers per blow, a guard break when they run out); for that guard and for shields, a blow in the
+  first 5 ticks of a raise is a perfect parry and up to 12 a parry (+2/+4 ticks against your lock-on target; no window for a
+  mashed raise). A parry takes nothing, shoves and stuns the attacker, and owes a riposte (`mixin/GuardRiposteMixin`, 1.5x or
+  1.25x on the next blow). `client/combat/GuardClient` draws a timing bar and parry flash and steps you in when you swing at a
+  locked foe up to 3 blocks past your reach; `client/mixin/GuardFirstPersonMixin` turns the blade across in first person.
+  Darktide's and Z Fighter's parry windows are 8 ticks now. Spec: `docs/guard.md`. Compile-checked only.
+  Enemies too (Kingdoms 0.7.267): fighters raise their blade and parry players (first 8 ticks of their guard, else
+  12%/30% by experience), and every Better Combat swing a fighter starts shows a glint, red for heavy blows that carry
+  `Guard.UNPARRYABLE_TAG` and can't be parried.
+  Every mob too (`combat/AttackTells`, `mixin/AttackTellGoalMixin` on MeleeAttackGoal, `mixin/AttackTellBrainMixin` on the
+  MeleeAttack behaviour): a melee blow glints and lands 6 ticks later if the target is still in reach and sight (red and
+  unparryable for 10+ attack damage or 1.35+ wide bodies); the Burrukai's charge and Bladeshroom Hunter's cut glint too.
+  Guns (Andy: "All guns should red glint too"): `FutureGuns` gunners glint red with a click 10 ticks before each burst, and
+  their bullets carry the unparryable tag; `Guard` now counts hitscan shots as projectiles, and a tagged ball or any TaCZ
+  bullet is blocked but never parried.
+
