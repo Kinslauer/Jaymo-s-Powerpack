@@ -41,6 +41,13 @@ final class SpiritRig {
 	static final float PULSE = 0.3F, PULSE_TICKS = 3.0F;
 	/** Idle life: the fingers' flex (how much, how fast), the elbow's rest bend (on your arm, floating). */
 	static final float IDLE_CURL = 0.3F, FLEX = 0.12F, FLEX_SPEED = 0.11F, IDLE_ELBOW = -0.45F, FLOAT_ELBOW = -0.7F;
+	/**
+	 * Idle movement (Andy: "the arm should move in idle, bending at the elbow"): the elbow works slowly in and out by
+	 * {@code ELBOW_SWAY}, the shoulder rolls by {@code ROLL}, and now and then (a slow beat, {@code STRETCH_SPEED}) the arm draws
+	 * right in and the hand closes, as if stretching, then opens out again ({@code STRETCH_ELBOW}, {@code STRETCH_CURL}).
+	 */
+	static final float ELBOW_SWAY = 0.35F, ELBOW_SPEED = 0.07F, ROLL = 0.08F, ROLL_SPEED = 0.05F;
+	static final float STRETCH_SPEED = 0.035F, STRETCH_ELBOW = -0.9F, STRETCH_CURL = 0.6F, STRETCH_WRIST = 0.35F;
 	/** How far a curl turns each finger segment (radians at a full fist), and a spread fans them (radians per finger from the middle). */
 	static final float CURL_BASE = 1.45F, CURL_TIP = 1.65F, SPREAD = 0.2F;
 	/** The flurry and shove: the arms pump in turn at this speed. */
@@ -118,6 +125,9 @@ final class SpiritRig {
 	/** One arm's joints this frame: shoulder (x, y, z added to the wearer's arm), elbow, wrist, fist, spread, stretch, hand scale. */
 	static final class Frame {
 		float sx, sy, sz, elbow, wrist, curl, spread, reach, hand = 1.0F;
+		/** Grimsby's weapon this frame ({@link #BLADE} and the rest) and how far grown it is (0 not yet, 1 full, above for the big ones). */
+		int weapon;
+		float grow;
 
 		void set(float sx, float sy, float sz, float elbow, float wrist, float curl, float spread, float reach) {
 			this.sx = sx;
@@ -149,9 +159,19 @@ final class SpiritRig {
 	static void frame(Frame out, int pose, float age, float weight, float[] idle, float[] target, boolean floats, int i, float ageInTicks) {
 		Frame rest = new Frame();
 		float flex = FLEX * Mth.sin(ageInTicks * FLEX_SPEED + i * 1.7F);
-		rest.set(idle[0], idle[1], idle[2], floats ? FLOAT_ELBOW : IDLE_ELBOW, 0.15F + flex, IDLE_CURL + flex, 0.3F - flex, 0.0F);
+		float bend = ELBOW_SWAY * (0.5F + 0.5F * Mth.sin(ageInTicks * ELBOW_SPEED + i * 2.3F));
+		float roll = ROLL * Mth.sin(ageInTicks * ROLL_SPEED + i * 1.1F);
+		// the stretch: a sharp beat (a sine to the fourth), each arm on its own
+		float beat = Mth.sin(ageInTicks * STRETCH_SPEED + i * 2.6F);
+		float stretch = beat > 0.0F ? beat * beat * beat * beat : 0.0F;
+		rest.set(idle[0] + roll + stretch * 0.25F, idle[1] - stretch * 0.2F, idle[2] + roll * 0.5F,
+			(floats ? FLOAT_ELBOW : IDLE_ELBOW) - bend + stretch * STRETCH_ELBOW, 0.15F + flex + stretch * STRETCH_WRIST,
+			IDLE_CURL + flex + stretch * STRETCH_CURL, 0.3F - flex - stretch * 0.2F, 0.0F);
+		out.weapon = weapon(pose);
+		out.grow = 0.0F;
 		if (pose <= Poses.IDLE || pose >= Poses.COUNT || weight <= 0.0F) {
 			copy(out, rest);
+			out.hand = 1.0F;
 			return;
 		}
 		Shape shape = shape(pose);
@@ -166,7 +186,12 @@ final class SpiritRig {
 			}
 			case SWING -> {
 				Frame wind = new Frame();
-				wind.set(target[0] - SWING_HIGH, target[1] + SWING_OUT, target[2] + 0.3F, -1.1F, -0.5F, 1.0F, 0.0F, 0.0F);
+				if (pose == Poses.HAMMER || pose == Poses.SLAM) {
+					// a slam: heaved straight up over the head, elbow bent behind, then brought down in front
+					wind.set(SLAM_HIGH, 0.0F, target[2], -1.4F, -0.6F, 1.0F, 0.0F, 0.0F);
+				} else {
+					wind.set(target[0] - SWING_HIGH, target[1] + SWING_OUT, target[2] + 0.3F, -1.1F, -0.5F, 1.0F, 0.0F, 0.0F);
+				}
 				strike(now, age, rest, wind, aim);
 			}
 			case GRASP -> {
@@ -191,6 +216,29 @@ final class SpiritRig {
 		float envelope = shape.how() == STRIKE || shape.how() == SWING ? (age < SpiritArms.POSE_TICKS ? 1.0F : weight) : weight;
 		out.lerp(envelope, rest, now);
 		out.hand = 1.0F + (lands(pose) ? pulse(age) : 0.0F);
+		if (out.weapon != BLADE) {
+			// the weapon forms out of the blade over the wind-up, swells at the blow, and melts back as the pose lets go
+			float peak = out.weapon == GREAT || out.weapon == MAUL ? BIG_GROW : 1.0F;
+			out.grow = weight * peak * (smooth(age / WIND_T) + pulse(age));
+		}
+	}
+
+	/** Grimsby's weapons: the blade he always wears, and the forms a move makes of it. */
+	static final int BLADE = 0, GREAT = 1, PIKE = 2, AXE_HEAD = 3, MAUL = 4, WEAPONS = 5;
+	/** How big the greatsword and the hammer grow at full (Andy: "the greatsword should grow, the hammer should grow as well and slam"). */
+	static final float BIG_GROW = 1.35F;
+	/** The slam's wind-up: the arm straight up overhead (radians). */
+	static final float SLAM_HIGH = -3.1F;
+
+	/** Which of Grimsby's weapons {@code pose} makes. */
+	static int weapon(int pose) {
+		return switch (pose) {
+			case Poses.GREATSWORD -> GREAT;
+			case Poses.SPEAR -> PIKE;
+			case Poses.AXE -> AXE_HEAD;
+			case Poses.HAMMER -> MAUL;
+			default -> BLADE;
+		};
 	}
 
 	/** Wind-up, snap past the mark, settle: from {@code rest} to {@code wind}, then out to {@code aim}. */
@@ -231,6 +279,8 @@ final class SpiritRig {
 	static final class Limb {
 		final ModelPart elbow, fore, wrist, thumb, thumbTip;
 		final ModelPart[] fingers, tips;
+		/** Grimsby's weapons by {@link #BLADE} and the rest; null for the others. */
+		final ModelPart @org.jspecify.annotations.Nullable [] weapons;
 
 		Limb(ModelPart arm, int kind) {
 			this.elbow = arm.getChild("elbow");
@@ -245,6 +295,14 @@ final class SpiritRig {
 			}
 			this.thumb = this.wrist.getChild("thumb");
 			this.thumbTip = this.thumb.getChild("tip");
+			if (this.wrist.hasChild("weapon0")) {
+				this.weapons = new ModelPart[WEAPONS];
+				for (int w = 0; w < WEAPONS; w++) {
+					this.weapons[w] = this.wrist.getChild("weapon" + w);
+				}
+			} else {
+				this.weapons = null;
+			}
 		}
 
 		/** Sets the joints below the shoulder from {@code f} ({@code side} 1 the right arm, -1 the left). */
@@ -268,8 +326,28 @@ final class SpiritRig {
 			this.thumb.zRot = side * Mth.lerp(curl, 0.55F + 0.3F * f.spread, -0.15F);
 			this.thumb.xRot = -curl * 0.9F;
 			this.thumbTip.xRot = -curl * 0.8F;
+			if (this.weapons != null) {
+				// the blade shrinks away as another weapon grows out of it
+				float blade = f.weapon == BLADE ? 1.0F : Math.max(0.0F, 1.0F - f.grow / BLADE_YIELD);
+				this.weapons[BLADE].visible = blade > 0.02F;
+				scale(this.weapons[BLADE], Math.max(0.02F, blade));
+				for (int w = 1; w < WEAPONS; w++) {
+					boolean on = w == f.weapon && f.grow > 0.02F;
+					this.weapons[w].visible = on;
+					scale(this.weapons[w], on ? f.grow : 0.02F);
+				}
+			}
+		}
+
+		private static void scale(ModelPart part, float k) {
+			part.xScale = k;
+			part.yScale = k;
+			part.zScale = k;
 		}
 	}
+
+	/** How far another weapon has grown when the blade is gone. */
+	static final float BLADE_YIELD = 0.4F;
 
 	/** How many fingers (not counting the thumb) {@code kind}'s hand has. */
 	static int fingers(int kind) {
@@ -305,6 +383,9 @@ final class SpiritRig {
 			PartDefinition wrist = elbow.addOrReplaceChild("wrist", palm(kind, cx, in, g), PartPose.offset(0.0F, FORE, 0.0F));
 			fingers(kind, wrist, cx, g);
 			thumb(kind, wrist, cx, in, g);
+			if (kind == Spirits.GRIMSBY) {
+				weapons(wrist, cx, in, g);
+			}
 		}
 		return mesh;
 	}
@@ -381,13 +462,7 @@ final class SpiritRig {
 	private static CubeListBuilder palm(int kind, float cx, float in, CubeDeformation g) {
 		CubeListBuilder c = cubes();
 		switch (kind) {
-			case Spirits.GRIMSBY -> {
-				box(c, cx, 0.0F, 0.0F, 3.0F, 2.6F, 2.0F, g);
-				// the blade: from the wrist on the outside, longer than the fingers, a guard at its root
-				box(c, cx - in * 1.6F, -0.6F, 0.0F, 0.8F, 12.0F, 2.6F, g);
-				box(c, cx - in * 1.6F, 11.4F, 0.0F, 0.8F, 1.6F, 1.4F, g);
-				box(c, cx - in * 1.6F, -0.8F, 0.0F, 1.6F, 0.8F, 3.6F, g);
-			}
+			case Spirits.GRIMSBY -> box(c, cx, 0.0F, 0.0F, 3.0F, 2.6F, 2.0F, g); // (the blade and the forms are weapons(), below)
 			case Spirits.VARRO -> {
 				box(c, cx, 0.0F, 0.0F, 6.0F, 4.0F, 5.0F, g); // the gauntlet's palm
 				for (int s = 0; s < 4; s++) {
@@ -406,6 +481,49 @@ final class SpiritRig {
 			default -> box(c, cx, 0.0F, 0.0F, 4.0F, 3.0F, 2.2F, g); // smooth
 		}
 		return c;
+	}
+
+	/**
+	 * Grimsby's weapons, each its own part on the wrist so it can grow out of the fist ({@code weapon0}-{@code weapon4}): the
+	 * blade on the outside of the wrist as he always wears it, then the greatsword (broad, with a guard and a fuller), the spear
+	 * (a long shaft and a barbed head), the axe (a haft and a bearded head facing forward, the way it chops) and the hammer (a
+	 * haft, a great head with a spike behind). Each grows from its own root, so it swells out from the hand.
+	 */
+	private static void weapons(PartDefinition wrist, float cx, float in, CubeDeformation g) {
+		CubeListBuilder blade = cubes();
+		// from the wrist on the outside, longer than the fingers, a guard at its root and a point at its end
+		box(blade, 0.0F, 0.0F, 0.0F, 0.8F, 12.0F, 2.6F, g);
+		box(blade, 0.0F, 12.0F, 0.0F, 0.8F, 1.6F, 1.4F, g);
+		box(blade, 0.0F, -0.2F, 0.0F, 1.6F, 0.8F, 3.6F, g);
+		wrist.addOrReplaceChild("weapon0", blade, PartPose.offset(cx - in * 1.6F, -0.6F, 0.0F));
+		// the others grow from the fist, the fingers closed round them
+		PartPose fist = PartPose.offset(cx, 3.0F, -0.6F);
+		CubeListBuilder great = cubes();
+		box(great, 0.0F, -1.0F, 0.0F, 1.6F, 3.0F, 1.6F, g); // the grip
+		box(great, 0.0F, 2.0F, 0.0F, 7.0F, 1.2F, 2.0F, g); // the cross-guard
+		box(great, 0.0F, 3.2F, 0.0F, 1.0F, 15.0F, 4.6F, g); // the blade
+		box(great, 0.0F, 3.6F, 0.0F, 1.3F, 12.0F, 1.2F, g); // its fuller, standing proud
+		box(great, 0.0F, 18.2F, 0.0F, 1.0F, 2.0F, 2.6F, g); // the point
+		wrist.addOrReplaceChild("weapon1", great, fist);
+		CubeListBuilder spear = cubes();
+		box(spear, 0.0F, -3.0F, 0.0F, 1.0F, 22.0F, 1.0F, g); // the shaft, a little behind the fist too
+		box(spear, 0.0F, 19.0F, 0.0F, 1.4F, 1.0F, 1.4F, g); // the collar
+		box(spear, 0.0F, 20.0F, 0.0F, 0.6F, 5.0F, 2.6F, g); // the head
+		box(spear, 0.0F, 21.0F, 0.0F, 0.6F, 1.4F, 3.8F, g); // its barbs
+		box(spear, 0.0F, 25.0F, 0.0F, 0.6F, 1.4F, 1.0F, g); // the point
+		wrist.addOrReplaceChild("weapon2", spear, fist);
+		CubeListBuilder axe = cubes();
+		box(axe, 0.0F, -1.0F, 0.0F, 1.2F, 13.0F, 1.2F, g); // the haft
+		axe.addBox(-0.5F, 7.0F, -6.5F, 1.0F, 5.0F, 6.0F, g); // the head, facing forward
+		axe.addBox(-0.5F, 5.5F, -7.5F, 1.0F, 8.0F, 1.5F, g); // its bearded edge
+		axe.addBox(-0.4F, 8.5F, 0.6F, 0.8F, 2.0F, 2.0F, g); // the back spike
+		wrist.addOrReplaceChild("weapon3", axe, fist);
+		CubeListBuilder maul = cubes();
+		box(maul, 0.0F, -1.0F, 0.0F, 1.4F, 12.0F, 1.4F, g); // the haft
+		box(maul, 0.0F, 10.0F, -1.0F, 5.0F, 5.0F, 8.0F, g); // the head, long front to back
+		box(maul, 0.0F, 10.5F, -5.6F, 5.6F, 4.0F, 1.2F, g); // its striking face
+		maul.addBox(-0.6F, 11.6F, 3.0F, 1.2F, 1.8F, 3.0F, g); // the spike behind
+		wrist.addOrReplaceChild("weapon4", maul, fist);
 	}
 
 	/** Each kind's palm length (where the fingers start), finger width and segment lengths, and how wide the fingers are spaced. */

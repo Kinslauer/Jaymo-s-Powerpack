@@ -117,10 +117,10 @@ public final class SpiritArms {
 		TABLE[Poses.GREATSWORD] = new float[] {-2.4F, 0.0F, 0.35F};
 		TABLE[Poses.SPEAR] = new float[] {-1.5F, -0.1F, 0.00F};
 		TABLE[Poses.AXE] = new float[] {-2.3F, 0.0F, 0.25F};
-		TABLE[Poses.HAMMER] = new float[] {-2.7F, 0.0F, 0.00F};
+		TABLE[Poses.HAMMER] = new float[] {-0.75F, 0.0F, 0.05F}; // brought down in front (wound up overhead: SpiritRig)
 		TABLE[Poses.FLURRY] = new float[] {-1.4F, -0.2F, 0.20F};
 		TABLE[Poses.PARRY] = new float[] {-1.2F, -0.8F, 0.10F};
-		TABLE[Poses.SLAM] = new float[] {-2.8F, 0.0F, 0.05F};
+		TABLE[Poses.SLAM] = new float[] {-0.60F, 0.0F, 0.05F};
 		TABLE[Poses.JAVELIN] = new float[] {-2.0F, -0.1F, 0.60F};
 		TABLE[Poses.VOLLEY] = new float[] {-1.9F, 0.0F, 0.70F};
 		TABLE[Poses.BOMBARD] = new float[] {-2.2F, 0.0F, 0.15F};
@@ -347,6 +347,20 @@ public final class SpiritArms {
 		Vec3 at = entity.getEyePosition().add(entity.getLookAngle().scale(BURST_AHEAD + BURST_AHEAD * size));
 		DustParticleOptions dust = new DustParticleOptions(mix(Spirits.of(spirit.kind()).color()) & 0xFFFFFF, 1.6F);
 		var random = entity.getRandom();
+		if (spirit.pose() == Poses.HAMMER || spirit.pose() == Poses.SLAM) {
+			// a slam lands on the ground in front: a ring of aura thrown out along it
+			Vec3 flat = new Vec3(entity.getLookAngle().x, 0.0, entity.getLookAngle().z).normalize();
+			at = entity.position().add(flat.scale(SLAM_AHEAD + SLAM_AHEAD * size)).add(0.0, 0.1, 0.0);
+			for (int n = 0; n < SLAM_RING; n++) {
+				double a = n * Mth.TWO_PI / SLAM_RING;
+				double vx = Math.cos(a) * SLAM_SPEED, vz = Math.sin(a) * SLAM_SPEED;
+				level.addParticle(dust, at.x, at.y, at.z, vx, 0.02, vz);
+				if (n % 3 == 0) {
+					level.addParticle(ParticleTypes.CRIT, at.x, at.y, at.z, vx * 1.4, 0.15, vz * 1.4);
+				}
+			}
+			level.playLocalSound(at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.35F, 1.4F, false);
+		}
 		for (int n = 0; n < BURST_MOTES; n++) {
 			double vx = (random.nextDouble() - 0.5) * BURST_SPEED, vy = (random.nextDouble() - 0.5) * BURST_SPEED, vz = (random.nextDouble() - 0.5) * BURST_SPEED;
 			level.addParticle(dust, at.x, at.y, at.z, vx, vy, vz);
@@ -364,6 +378,9 @@ public final class SpiritArms {
 	/** The burst: blocks ahead of the eye per unit of size (plus as many), motes, their speed, and how many ticks late it may still fire. */
 	static final float BURST_AHEAD = 0.9F, BURST_SPEED = 0.35F, BURST_LATE = 4.0F;
 	static final int BURST_MOTES = 18;
+	/** The slam: blocks ahead of the feet per unit of size (plus as many), the ring's motes and how fast they run out. */
+	static final float SLAM_AHEAD = 0.9F, SLAM_SPEED = 0.45F;
+	static final int SLAM_RING = 28;
 
 	/** Whether this client may see the aura of {@code entity} (the arms are made of it): attuned, or reading magic. */
 	private static boolean visibleToAttuned(LivingEntity entity) {
@@ -482,7 +499,8 @@ public final class SpiritArms {
 
 		private ArmModel trail(int kind, int ghost) {
 			if (this.trails[kind][ghost] == null) {
-				this.trails[kind][ghost] = new ArmModel(bake(kind, 0), this.wearer, kind, TRAIL_LAG[ghost]);
+				// on the outermost shell: soft at the edge, a wisp rather than a second arm
+				this.trails[kind][ghost] = new ArmModel(bake(kind, ManaClient.SHELLS.length - 1), this.wearer, kind, TRAIL_LAG[ghost]);
 			}
 			return this.trails[kind][ghost];
 		}
@@ -500,31 +518,46 @@ public final class SpiritArms {
 			int kind = Math.clamp(look.kind(), 0, Spirits.QUIET);
 			int color = mix(Spirits.of(kind).color());
 			float breathe = 1.0F + ManaClient.BREATHE * Mth.sin(state.ageInTicks * ManaClient.BREATHE_SPEED);
-			float rise = (state.ageInTicks * ManaClient.RISE) % 1.0F;
+			// Grimsby's axe and spear change what the aura is made of (Andy): the axe runs hot and ragged, the spear pulls it in tight and pale
+			float axe = kind == Spirits.GRIMSBY && look.pose() == Poses.AXE ? look.poseWeight() : 0.0F;
+			float spear = kind == Spirits.GRIMSBY && look.pose() == Poses.SPEAR ? look.poseWeight() : 0.0F;
+			color = ARGB.srgbLerp(axe * AXE_MIX, color, AXE_COLOR);
+			color = ARGB.srgbLerp(spear * SPEAR_MIX, color, SPEAR_COLOR);
+			float flow = 1.0F + axe * (AXE_FLOW - 1.0F) + spear * (SPEAR_FLOW - 1.0F);
+			float rise = (state.ageInTicks * ManaClient.RISE * flow) % 1.0F;
 			// the arms fade with how manifest they are, as well as grow
 			float fade = look.manifest() * look.manifest();
 			float strike = look.pose() == Poses.IDLE ? 0.0F : look.poseWeight();
 			for (int i = 0; i < ManaClient.SHELLS.length; i++) {
 				float light = Mth.clamp(ManaClient.SHELL_LIGHT[i] * glow.strength() * breathe * ARM_LIGHT * fade, 0.0F, 1.0F);
+				if (i > 0) {
+					// the axe's outer shells flare and gutter like a fire; the spear's thin away, all of it drawn into the core
+					light *= 1.0F + axe * AXE_FLARE * Mth.sin(state.ageInTicks * 1.7F + i * 2.0F);
+					light *= 1.0F - spear * SPEAR_THIN;
+				}
 				// a strike blazes: every shell up to full while the move's pose holds (Andy: "glow with their maximum intensity when striking")
 				light = Mth.lerp(strike * fade, light, 1.0F);
 				collector.order(ORDER + i).submitModel(this.model(kind, i), state, poseStack,
 					RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.29F + 0.13F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
 					ManaClient.tint(color, light), null, 0);
 			}
-			// the blow's trail: ghosts of the arm a tick and two behind, fading, from the snap until just after it lands
-			if (SpiritRig.lands(look.pose()) && look.poseAge() >= SpiritRig.WIND_T && look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER) {
-				for (int g = 0; g < TRAIL_LAG.length; g++) {
-					collector.order(ORDER + ManaClient.SHELLS.length + g).submitModel(this.trail(kind, g), state, poseStack,
-						RenderTypes.energySwirl(ManaClient.TEXTURE, 0.13F, -rise), lightCoords, OverlayTexture.NO_OVERLAY,
-						ManaClient.tint(color, TRAIL_LIGHT[g] * fade), null, 0);
-				}
+			// the trail (Andy: "a slight wispy trail behind every movement"): ghosts of the arm a tick, two and three behind, faint
+			// always, so any move leaves a wisp, and bright from a blow's snap until just after it lands
+			boolean blow = SpiritRig.lands(look.pose()) && look.poseAge() >= SpiritRig.WIND_T && look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER;
+			for (int g = 0; g < TRAIL_LAG.length; g++) {
+				float light = (blow ? TRAIL_LIGHT[g] : WISP_LIGHT[g] * glow.strength()) * fade;
+				collector.order(ORDER + ManaClient.SHELLS.length + g).submitModel(this.trail(kind, g), state, poseStack,
+					RenderTypes.energySwirl(ManaClient.TEXTURE, 0.13F + g * 0.31F, -rise * (2 + g)), lightCoords, OverlayTexture.NO_OVERLAY,
+					ManaClient.tint(color, light), null, 0);
 			}
 		}
 	}
 
-	/** The trail: how many ticks each ghost lags the arm, how bright each is, and how long after the hit it lingers. */
-	static final float[] TRAIL_LAG = {1.0F, 2.0F}, TRAIL_LIGHT = {0.55F, 0.3F};
+	/** The trail: how many ticks each ghost lags the arm, how bright each is after a blow and at any other time, and how long after the hit it lingers. */
+	static final float[] TRAIL_LAG = {1.0F, 2.0F, 3.5F}, TRAIL_LIGHT = {0.55F, 0.35F, 0.2F}, WISP_LIGHT = {0.16F, 0.1F, 0.06F};
+	/** Grimsby's axe: how far the aura goes to embers, how much faster it churns, how hard its outer shells flicker. His spear: to a pale bright core, streaming, the outer shells thinned. */
+	static final int AXE_COLOR = 0xFFFF5A1E, SPEAR_COLOR = 0xFFDDF6FF;
+	static final float AXE_MIX = 0.65F, AXE_FLOW = 2.5F, AXE_FLARE = 0.45F, SPEAR_MIX = 0.6F, SPEAR_FLOW = 4.0F, SPEAR_THIN = 0.65F;
 	static final float TRAIL_AFTER = 3.0F;
 
 	// ---- the model ---------------------------------------------------------------------------------------------------------
@@ -581,8 +614,10 @@ public final class SpiritArms {
 				arm.visible = i == 0 || look.arms() >= 2;
 				float side = i == 0 ? 1.0F : -1.0F;
 				SpiritRig.Frame f = this.frame;
-				SpiritRig.frame(f, poseId, age, w, idle, target, floats, i, state.ageInTicks);
-				float drift = SWAY * Mth.sin(state.ageInTicks * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
+				// (a ghost of the trail lags the idle as well as the move, so the idle's movement leaves a wisp too)
+				float time = state.ageInTicks - this.lag;
+				SpiritRig.frame(f, poseId, age, w, idle, target, floats, i, time);
+				float drift = SWAY * Mth.sin(time * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
 				f.sx += w * poseAdjust(poseId, age, i) + drift;
 				if (floats) {
 					// floating free: not swung by your walk, but a blow goes where you look (down when you look down)

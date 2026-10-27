@@ -5361,6 +5361,12 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
   the fingers flex. The floating spirits no longer swing with your walk, and their blows follow where you look. A blow
   leaves two fading ghosts of the arm behind it, swells the hand as it lands, and bursts where it lands (dust in the
   spirit's colour, sparks, crits and a crack only the attuned hear). Wisps of the floating spirits rise above and ahead.
+- **Wisps, a living idle, Grimsby's weapons** (Andy's second look): three faint ghosts on the outer shell trail every
+  movement, idle included, and brighten on a blow. Idle, the elbow works in and out, the shoulder rolls, and now and then
+  the arm draws in and the hand closes as if stretching. Grimsby's forms are now their own weapons growing out of his
+  fist as the blade shrinks away: the greatsword (guard, fuller) and the hammer grow to 1.35x; the hammer and the guard
+  break heave up overhead and slam down in front, throwing a ring of aura along the ground with a boom. The axe turns
+  his aura to ragged embers that churn and flicker; the spear draws it into a pale, bright, streaming core.
 - **The spirit key works on every install**: `SpiritKey` unbinds vanilla's Advancements from L once per install
   (marker `jaymoskingdoms-spirit-key-v1`). Powers' key pass had already run on existing installs, so L kept opening the
   advancements screen and the spirit never came.
