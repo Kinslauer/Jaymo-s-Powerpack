@@ -1,4 +1,4 @@
-"""Draws the art and writes the model JSON for Z Fighter patch 6 track A (0.17.58, Andy's NOEA picks): the Gravity Machine
+"""Draws the art and writes the model JSON for Z Fighter patch 6 track A (0.17.60, Andy's NOEA picks): the Gravity Machine
 block, the Capsule Seal block, the three pocket capsules and the three fighter weapons (Telescoping Staff, Titanforged
 Greatsword, Hero's Blade). Everything is our own pixel art (a one-pixel dark outline, three tones lit from the top left).
 Run it from the root:

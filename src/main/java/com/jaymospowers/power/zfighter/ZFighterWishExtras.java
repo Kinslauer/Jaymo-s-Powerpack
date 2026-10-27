@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.17.58, Andy's NOEA picks) Five more wishes for the Eternal Dragon ({@link ZFighterWishes}); each is refused (the dragon
+ * (0.17.60, Andy's NOEA picks) Five more wishes for the Eternal Dragon ({@link ZFighterWishes}); each is refused (the dragon
  * waits for another) when it could change nothing:
  * <ul>
  * <li><b>Remake</b> (re-make character): with Jaymo's Kingdoms the character is unmade the way {@code /kingdom story reset} does

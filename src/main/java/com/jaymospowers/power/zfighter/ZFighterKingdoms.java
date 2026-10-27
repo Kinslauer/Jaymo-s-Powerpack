@@ -35,7 +35,7 @@ final class ZFighterKingdoms {
 	/** (0.15.61) Kingdoms' WorldTiers.of(Player): the world tier a player is in. */
 	private static Method TIER_OF;
 	private static Method STAT_VALUE;
-	/** (0.17.58) Kingdoms' Reputation.change(ServerPlayer, Faction, int): shifts a player's reputation with a settlement. */
+	/** (0.17.60) Kingdoms' Reputation.change(ServerPlayer, Faction, int): shifts a player's reputation with a settlement. */
 	private static Method CHANGE_REPUTATION;
 	private static Object[] STATS;
 	private static int STAT_MAX;
@@ -173,7 +173,7 @@ final class ZFighterKingdoms {
 		}
 	}
 
-	/** (0.17.58) Shifts {@code player}'s standing with {@code settlement} by {@code by} (negative: lost). False without Kingdoms or if it can't be done. */
+	/** (0.17.60) Shifts {@code player}'s standing with {@code settlement} by {@code by} (negative: lost). False without Kingdoms or if it can't be done. */
 	static boolean changeReputation(ServerPlayer player, Settlement settlement, int by) {
 		if (CHANGE_REPUTATION == null) {
 			return false;

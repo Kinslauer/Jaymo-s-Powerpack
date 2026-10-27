@@ -42,7 +42,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.58, Andy's NOEA picks) Fighter weapons. Fists first ({@link ZFighterBattle}) makes a Z Fighter's weapon blows weak
+ * (0.17.60, Andy's NOEA picks) Fighter weapons. Fists first ({@link ZFighterBattle}) makes a Z Fighter's weapon blows weak
  * (a share of what they would be) unless his Kingdoms class is trained with it; these three are his own, so they count as
  * fists ({@link #fistLike}) and hit at full strength:
  * <ul>

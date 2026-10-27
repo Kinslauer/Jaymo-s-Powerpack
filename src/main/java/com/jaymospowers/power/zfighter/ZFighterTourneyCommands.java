@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.58, Andy's NOEA picks) The commands of the tournament, invasion and realistic-mode features:
+ * (0.17.60, Andy's NOEA picks) The commands of the tournament, invasion and realistic-mode features:
  * <ul>
  * <li>{@code /zfighter bracket} (or {@code /tournament}): opens the bracket screen for the tournament that is on, or the last
  * one's final board;</li>

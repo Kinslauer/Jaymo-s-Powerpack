@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * left on half a heart, never killed), steps or is knocked out of the ring, or time runs out (the one less hurt wins).
  * Only the two in the ring can hurt each other. Every bout won pays; the winner of the whole tournament far more.
  * <p>
- * (0.17.58, Andy's NOEA picks) A tournament is one of two kinds, picked when it opens ({@link #ROYALE_CHANCE} of them are the
+ * (0.17.60, Andy's NOEA picks) A tournament is one of two kinds, picked when it opens ({@link #ROYALE_CHANCE} of them are the
  * second): the bracket above, or a last-one-standing fight ({@link ZFighterBattleRoyale}) with the same sign-up and ring
  * but everyone in the ring at once. Both keep a board ({@link #board}) that the bracket screen draws
  * ({@link ZFighterBracketNet}), shown to each fighter as he is entered and to anyone who asks ({@code /zfighter bracket}).
@@ -71,7 +71,7 @@ final class ZFighterTournaments {
 	static final long DAY = 24000L;
 	static final String[] CHAMPIONS = {"krell", "toma", "shin", "bora", "yarro", "pashi", "namu", "gula"};
 	static final int RING_COLOR = 0xFFE070;
-	/** (0.17.58) The share of tournaments that open as a last-one-standing fight. */
+	/** (0.17.60) The share of tournaments that open as a last-one-standing fight. */
 	static final float ROYALE_CHANCE = 0.3F;
 
 	/** When the next tournament may be held (overworld game time). */
@@ -100,7 +100,7 @@ final class ZFighterTournaments {
 		}
 	}
 
-	/** (0.17.58) One place on the board: a bout of the bracket, its fighters once they are known, its result, whether it is on. */
+	/** (0.17.60) One place on the board: a bout of the bracket, its fighters once they are known, its result, whether it is on. */
 	private static final class Row {
 		@Nullable Entry a;
 		@Nullable Entry b;
@@ -120,9 +120,9 @@ final class ZFighterTournaments {
 		int pair;
 		@Nullable Bout bout;
 		long nextAt;
-		/** (0.17.58) A last-one-standing fight, not a bracket. */
+		/** (0.17.60) A last-one-standing fight, not a bracket. */
 		boolean royale;
-		/** (0.17.58) The board: every round's bouts (later rounds fill as winners go through), and the bout being fought. */
+		/** (0.17.60) The board: every round's bouts (later rounds fill as winners go through), and the bout being fought. */
 		final List<List<Row>> rounds = new ArrayList<>();
 		@Nullable Row row;
 		@Nullable Entry champion;
@@ -140,14 +140,14 @@ final class ZFighterTournaments {
 	}
 
 	private static @Nullable Tourney current;
-	/** (0.17.58) The last tournament's board, kept to look at after it ends (until the next one opens). */
+	/** (0.17.60) The last tournament's board, kept to look at after it ends (until the next one opens). */
 	private static ZFighterBracketNet.Board lastBoard = ZFighterBracketNet.Board.NONE;
 
 	private ZFighterTournaments() {
 	}
 
 	static void init() {
-		// (0.17.58) the board's packet, the last-one-standing fight, realistic mode, and the commands
+		// (0.17.60) the board's packet, the last-one-standing fight, realistic mode, and the commands
 		ZFighterBracketNet.register();
 		ZFighterBattleRoyale.init();
 		ZFighterRealism.init();
@@ -241,7 +241,7 @@ final class ZFighterTournaments {
 		return open(level, seat, kingdom, level.getRandom().nextFloat() < ROYALE_CHANCE);
 	}
 
-	/** (0.17.58) The same, as a bracket or ({@code royale}) as a last-one-standing fight. */
+	/** (0.17.60) The same, as a bracket or ({@code royale}) as a last-one-standing fight. */
 	static boolean open(ServerLevel level, BlockPos seat, String kingdom, boolean royale) {
 		if (current != null || ZFighterBattleRoyale.active()) {
 			return false;
@@ -317,7 +317,7 @@ final class ZFighterTournaments {
 			}
 			t.entrants.add(new Entry(player.getUUID(), player.getDisplayName()));
 			say(t, Component.translatable("message.jaymospowers.zfighter_tournament_entered", player.getDisplayName(), t.kingdom), ChatFormatting.GOLD);
-			// (0.17.58) the board comes up for the one who signed, and is updated for the rest
+			// (0.17.60) the board comes up for the one who signed, and is updated for the rest
 			push(t);
 			ZFighterBracketNet.open(player, snapshot(t));
 			t.level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.PLAYERS, 1.0F, 1.4F);
@@ -332,7 +332,7 @@ final class ZFighterTournaments {
 			return;
 		}
 		if (t.royale) {
-			// (0.17.58) no bracket: everyone in the ring at once, the last one standing wins
+			// (0.17.60) no bracket: everyone in the ring at once, the last one standing wins
 			List<UUID> players = new ArrayList<>();
 			for (Entry entry : t.entrants) {
 				players.add(entry.player());
@@ -356,7 +356,7 @@ final class ZFighterTournaments {
 		t.round = 0;
 		t.pair = 0;
 		t.nextAt = now + BETWEEN;
-		// (0.17.58) the board: round 0's bouts known, the later rounds empty until their winners come through
+		// (0.17.60) the board: round 0's bouts known, the later rounds empty until their winners come through
 		for (int pairs = size / 2; pairs >= 1; pairs /= 2) {
 			List<Row> row = new ArrayList<>();
 			for (int i = 0; i < pairs; i++) {
@@ -531,7 +531,7 @@ final class ZFighterTournaments {
 		}
 	}
 
-	/** (0.17.58) The bout in {@code t.row} is decided; its winner goes into the next round's row, and the board is sent round. */
+	/** (0.17.60) The bout in {@code t.row} is decided; its winner goes into the next round's row, and the board is sent round. */
 	private static void decided(Tourney t, boolean aWon) {
 		Row row = t.row;
 		t.row = null;
@@ -557,7 +557,7 @@ final class ZFighterTournaments {
 		return entry == null ? "" : entry.champion() ? ZFighterBracketNet.name(entry.name()) : entry.name().getString();
 	}
 
-	/** (0.17.58) The board as it stands: the bracket's rounds, who is up, which bout is on, how long sign-up has left. */
+	/** (0.17.60) The board as it stands: the bracket's rounds, who is up, which bout is on, how long sign-up has left. */
 	private static ZFighterBracketNet.Board snapshot(Tourney t) {
 		List<ZFighterBracketNet.Match> matches = new ArrayList<>();
 		for (int round = 0; round < t.rounds.size(); round++) {
@@ -578,7 +578,7 @@ final class ZFighterTournaments {
 			ticks, t.champion == null ? "" : wire(t.champion), matches, fighters);
 	}
 
-	/** (0.17.58) Sends the board to everyone near the ring (an open screen redraws; nothing opens). */
+	/** (0.17.60) Sends the board to everyone near the ring (an open screen redraws; nothing opens). */
 	private static void push(Tourney t) {
 		push(t, snapshot(t));
 	}
@@ -591,7 +591,7 @@ final class ZFighterTournaments {
 		}
 	}
 
-	/** (0.17.58) The board of the tournament that is on (either kind), or of the last one to end. */
+	/** (0.17.60) The board of the tournament that is on (either kind), or of the last one to end. */
 	static ZFighterBracketNet.Board board() {
 		if (ZFighterBattleRoyale.active()) {
 			return ZFighterBattleRoyale.board();
@@ -600,7 +600,7 @@ final class ZFighterTournaments {
 		return t != null ? snapshot(t) : lastBoard;
 	}
 
-	/** (0.17.58) A last-one-standing fight that has ended leaves its final board here. */
+	/** (0.17.60) A last-one-standing fight that has ended leaves its final board here. */
 	static void remember(ZFighterBracketNet.Board board) {
 		lastBoard = board;
 	}

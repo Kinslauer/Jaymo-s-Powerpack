@@ -22,7 +22,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * (0.17.58, Andy's NOEA picks) The suit editor: opened from the Costume Table's screen (the "Suit editor" button) and
+ * (0.17.60, Andy's NOEA picks) The suit editor: opened from the Costume Table's screen (the "Suit editor" button) and
  * editing the very same design. On the left a live preview of you wearing it (drag to turn it); in the middle one button
  * for each part of the suit, click to step through its choices (right-click steps back): the cut (the gi and armour
  * patterns are here), the head piece, the cape, gloves, boots, belt, helmet and head fins; on the right the three colours

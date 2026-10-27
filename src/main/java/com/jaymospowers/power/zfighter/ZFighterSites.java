@@ -85,7 +85,7 @@ public final class ZFighterSites {
 	static final int ROOM_RADIUS = 6;
 	static final int ROOM_HEIGHT = 5;
 	static final int LOOKOUT_Y = 236;
-	/** (0.17.58) The platform's radius: the bigger Lookout ({@link ZFighterLookout}); it was 13. */
+	/** (0.17.60) The platform's radius: the bigger Lookout ({@link ZFighterLookout}); it was 13. */
 	static final int LOOKOUT_RADIUS = ZFighterLookout.RADIUS;
 	// ---- the Time Chamber ----
 	public static final ResourceKey<Level> TIME_CHAMBER = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("time_chamber"));

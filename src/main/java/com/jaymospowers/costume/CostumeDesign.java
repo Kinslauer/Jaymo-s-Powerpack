@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
  * cape, and a 16x16 emblem for the chest. It rides on the costume item ({@link Costume#DESIGN}) and, once put on, on the
  * player ({@link Costume#WORN}); everything that draws or reads a costume works from this alone.
  * <p>
- * (0.17.58) The {@link #kit} adds a trim colour and gloves, boots, a belt, a helmet and head fins.
+ * (0.17.60) The {@link #kit} adds a trim colour and gloves, boots, a belt, a helmet and head fins.
  * <p>
  * The emblem is packed: each pixel is one of {@link #EMBLEM_COLOURS} palette entries (3 bits), 256 pixels in 96 bytes,
  * kept as Base64 (128 characters), or empty for a blank emblem.
@@ -48,7 +48,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform"),
 		// (0.14.3) anyone's: the assassin's robe
 		ASSASSIN,
-		// (0.17.58) Z Fighter's gi and armour patterns
+		// (0.17.60) Z Fighter's gi and armour patterns
 		WRAP_GI("zfighter"), SLEEVELESS_GI("zfighter"), WEIGHTED_GI("zfighter"), BATTLE_ARMOUR("zfighter"), PADDED_SUIT("zfighter");
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
@@ -149,7 +149,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		Mask.CODEC.optionalFieldOf("mask", Mask.NONE).forGetter(CostumeDesign::mask),
 		Cape.CODEC.optionalFieldOf("cape", Cape.NONE).forGetter(CostumeDesign::cape),
 		Codec.STRING.optionalFieldOf("emblem", "").forGetter(CostumeDesign::emblem),
-		// (0.17.58) the suit editor's extras; a design saved before them has none
+		// (0.17.60) the suit editor's extras; a design saved before them has none
 		CostumeKit.CODEC.optionalFieldOf("kit", CostumeKit.NONE).forGetter(CostumeDesign::kit)
 	).apply(i, CostumeDesign::new)).xmap(CostumeDesign::sanitized, d -> d);
 
@@ -211,7 +211,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
-	/** (0.17.58) The trim's dye: the kit's own, or the secondary colour when it follows it. */
+	/** (0.17.60) The trim's dye: the kit's own, or the secondary colour when it follows it. */
 	public DyeColor trim() {
 		return this.kit.trimColour(this.secondary);
 	}

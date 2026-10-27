@@ -7,7 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 
 /**
- * (0.17.58, Andy's NOEA picks) Where each piece of the Z Fighter HUD is drawn: the ki bar, the form name, the combo
+ * (0.17.60, Andy's NOEA picks) Where each piece of the Z Fighter HUD is drawn: the ki bar, the form name, the combo
  * count, the technique chips, the Ki Wave's charge bar, the Spirit Bomb's bar, the Great Ape's rage bar and the scouter's
  * readout. Each piece is drawn where it always was, between {@link #begin} and {@link #end}, which move and scale it by
  * what the player set in the HUD editor ({@link ZFighterHudEditor}): an offset in pixels from its usual place and a scale

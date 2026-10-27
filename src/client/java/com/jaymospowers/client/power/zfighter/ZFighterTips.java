@@ -14,7 +14,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.17.58, Andy's NOEA picks) First-time tips: a short toast the first time a player gets the Z Fighter power, first
+ * (0.17.60, Andy's NOEA picks) First-time tips: a short toast the first time a player gets the Z Fighter power, first
  * opens the training screen, first holds Y (the technique wheel), first learns a form and first fuses. Each shows once
  * ever: the line {@code zfighter_tip.<id>=true} in {@code config/jaymospowers-client.properties}
  * ({@link ZFighterClientConfig}) marks it seen the moment it is shown. Several at once queue up as vanilla toasts do.

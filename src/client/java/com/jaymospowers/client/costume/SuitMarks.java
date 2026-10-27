@@ -4,7 +4,7 @@ import com.jaymospowers.costume.CostumeDesign;
 import java.util.function.IntBinaryOperator;
 
 /**
- * (0.17.58, Andy's NOEA picks) The suit editor's chest marks: ready-made 16x16 emblems to pick from (the painter in the
+ * (0.17.60, Andy's NOEA picks) The suit editor's chest marks: ready-made 16x16 emblems to pick from (the painter in the
  * costume table still lets you draw your own). Each is drawn by a small function over the pixel grid, in the emblem's own
  * palette ({@link CostumeDesign#PRIMARY} and friends), so a mark takes the suit's colours. Our own shapes.
  */

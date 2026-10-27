@@ -112,7 +112,7 @@ public class ZFighterTrainingScreen extends Screen {
 			formButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_FORM, f))
 				.bounds(buttonX(), contentY() + (form - 1) * FORM_ROW - 3, BUTTON_W, 14).build()));
 		}
-		// (0.17.58) the HUD editor, and the first-time tip
+		// (0.17.60) the HUD editor, and the first-time tip
 		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.hud_button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterHudEditor(this))).bounds(left() + 8, top() + 7, 44, 14).build());
 		ZFighterTips.show(ZFighterTips.Tip.TRAINING);

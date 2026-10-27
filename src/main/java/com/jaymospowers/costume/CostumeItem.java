@@ -84,7 +84,7 @@ public class CostumeItem extends Item {
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.hooded").withStyle(ChatFormatting.GRAY));
 		}
 		if (design.kit().pieces() > 0) {
-			// (0.17.58) the suit editor's pieces
+			// (0.17.60) the suit editor's pieces
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.kit", design.kit().pieces()).withStyle(ChatFormatting.GRAY));
 		}
 		if (design.hasEmblem()) {

@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.58, Andy's NOEA picks) The packet that carries a tournament's bracket to the bracket screen
+ * (0.17.60, Andy's NOEA picks) The packet that carries a tournament's bracket to the bracket screen
  * ({@code ZFighterBracketScreen}). One server-to-client packet: the whole board each time (a few hundred bytes), sent
  * when the screen is to open ({@code open}) and, without opening anything, to everyone near the ring whenever it changes
  * (the screen redraws if it is up). Both kinds of tournament use it: a bracket fills the {@link Board#matches}; the

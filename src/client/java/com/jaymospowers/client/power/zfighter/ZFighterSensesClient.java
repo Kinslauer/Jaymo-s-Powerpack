@@ -22,7 +22,7 @@ public final class ZFighterSensesClient {
 		ZFighterTeleportScreen.register();
 		ZFighterImpactFramesClient.init();
 		ZFighterWheelScreen.register();
-		// (0.17.58) the HUD editor (and its client command), the first-time tips
+		// (0.17.60) the HUD editor (and its client command), the first-time tips
 		ZFighterHudEditor.register();
 		ZFighterTips.init();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterBank::tick);

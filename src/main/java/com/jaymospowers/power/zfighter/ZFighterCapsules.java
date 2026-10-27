@@ -62,7 +62,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.58, Andy's NOEA picks) Pocket capsules, three kinds, thrown like a snowball (right click). Where one lands it
+ * (0.17.60, Andy's NOEA picks) Pocket capsules, three kinds, thrown like a snowball (right click). Where one lands it
  * opens:
  * <ul>
  * <li><b>Pocket Hut Capsule</b>: a small house, 7 by 7 and four high (spruce, a flat dark roof, a door on the side that faces

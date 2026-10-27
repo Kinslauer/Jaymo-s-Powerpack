@@ -25,21 +25,21 @@ import net.minecraft.world.InteractionResult;
  * The Training Post's five drills, played on a small screen on the client ({@code ZFighterDrillScreen}): Rhythm, Ki
  * Control, Shadow Boxing, Precision and Memory. Each ends with a score (0-100), sent here and paid in TP ({@link #TP_PER_POINT}
  * a point, before weights and heavy gravity), if he's still at a post and that drill has rested {@link #REST} ticks.
- * (0.17.58) The fifth, Memory, also trains Ki Power ({@link #MEMORY_KI_POWER_PER_POINT}).
+ * (0.17.60) The fifth, Memory, also trains Ki Power ({@link #MEMORY_KI_POWER_PER_POINT}).
  */
 public final class ZFighterDrills {
 	public static final int RHYTHM = 0;
 	public static final int KI_CONTROL = 1;
 	public static final int SHADOW_BOXING = 2;
 	public static final int PRECISION = 3;
-	/** (0.17.58, Andy's NOEA picks) The fifth drill: a sequence of pads is shown, you repeat it, each round longer. */
+	/** (0.17.60, Andy's NOEA picks) The fifth drill: a sequence of pads is shown, you repeat it, each round longer. */
 	public static final int MEMORY = 4;
 	public static final int DRILLS = 5;
 	public static final String[] KEYS = {"rhythm", "ki_control", "shadow_boxing", "precision", "memory"};
 	public static final int MAX_SCORE = 100;
 	static final float TP_PER_POINT = 0.5F;
 	/**
-	 * (0.17.58) Memory also trains Ki Power, as mind training: this many {@link ZFighterGrowth} points of its "meditation"
+	 * (0.17.60) Memory also trains Ki Power, as mind training: this many {@link ZFighterGrowth} points of its "meditation"
 	 * method for each point scored (a perfect run is 6 of a bar of 600 and more, under the method's usual daily halving).
 	 */
 	static final float MEMORY_KI_POWER_PER_POINT = 0.06F;

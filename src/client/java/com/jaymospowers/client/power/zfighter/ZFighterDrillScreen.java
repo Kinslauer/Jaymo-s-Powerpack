@@ -25,7 +25,7 @@ import com.mojang.blaze3d.platform.InputConstants;
  * <li>Ki Control: hold Space to lift your ki, let go and it sinks; keep it inside the drifting band.</li>
  * <li>Shadow Boxing: PUNCH (left click), BLOCK (right click) or DODGE (Space), quickly.</li>
  * <li>Precision: click each target before it shrinks away; the sooner, the more it's worth.</li>
- * <li>(0.17.58) Memory: four coloured pads light up in a sequence; repeat it (W A S D, the arrow keys or a click on each
+ * <li>(0.17.60) Memory: four coloured pads light up in a sequence; repeat it (W A S D, the arrow keys or a click on each
  * pad). Each round is one longer; one slip ends the drill, which pays for the rounds got through.</li>
  * </ul>
  * (0.11.0) Restyled like the H screen: the drills as striped rows (click one to start it) with the box at the bottom
@@ -55,7 +55,7 @@ public class ZFighterDrillScreen extends Screen {
 	private static final int TARGET_LIFE = 40;
 	private static final float TARGET_SIZE = 14.0F;
 
-	/** (0.17.58) Memory: the first round's length, how many rounds there are, and the sum of every round's length (full marks). */
+	/** (0.17.60) Memory: the first round's length, how many rounds there are, and the sum of every round's length (full marks). */
 	private static final int MEM_START = 3, MEM_ROUNDS = 9, MEM_TOTAL = 63;
 	/** How long each pad of the sequence is lit and dark (ticks), the wait between rounds, and the longest wait for a press. */
 	private static final int MEM_LIT = 14, MEM_GAP = 6, MEM_PAUSE = 24, MEM_TIMEOUT = 160;

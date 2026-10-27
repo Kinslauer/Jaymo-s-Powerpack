@@ -37,7 +37,7 @@ import net.minecraft.world.item.Items;
 public final class CostumeNet {
 	/** Sewing a costume: wool, leather and string, plus one dye of each colour it uses. */
 	public static final int WOOL = 4, LEATHER = 2, STRING = 1, DYE_EACH = 1;
-	/** (0.17.58) The suit editor's pieces (gloves, boots, belt, helmet, fins): this many iron nuggets for each, and one dye for a trim of its own. */
+	/** (0.17.60) The suit editor's pieces (gloves, boots, belt, helmet, fins): this many iron nuggets for each, and one dye for a trim of its own. */
 	public static final int NUGGETS_PER_PIECE = 2;
 	/** How far (beyond the usual reach) the table may be when the screen's buttons are pressed. */
 	private static final double REACH_BUFFER = 2.0;

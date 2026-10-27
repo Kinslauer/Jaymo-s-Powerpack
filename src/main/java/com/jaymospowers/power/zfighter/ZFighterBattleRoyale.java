@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.58, Andy's NOEA picks) The last-one-standing tournament. It opens like the bracket ({@link ZFighterTournaments}: the
+ * (0.17.60, Andy's NOEA picks) The last-one-standing tournament. It opens like the bracket ({@link ZFighterTournaments}: the
  * ring beside the kingdom's seat, a sign-up while you stand in it), but when sign-up ends everyone who entered, any gifted
  * Z Fighter villager standing in the ring ({@link #GIFTED_MAX}) and champions of the kingdom to fill the field up to
  * {@link #FIELD_MIN} ({@link #FIELD_MAX} at most) are set round the ring and, after a {@link #COUNTDOWN} countdown, all fight at

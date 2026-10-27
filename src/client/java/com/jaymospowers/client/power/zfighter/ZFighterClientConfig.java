@@ -9,7 +9,7 @@ import java.util.Properties;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * (0.17.58, Andy's NOEA picks) The Z Fighter client settings kept in {@code config/jaymospowers-client.properties}, the
+ * (0.17.60, Andy's NOEA picks) The Z Fighter client settings kept in {@code config/jaymospowers-client.properties}, the
  * file impact frames already use ({@link ZFighterImpactFramesClient}): the HUD layout ({@link ZFighterHudLayout}) and which
  * first-time tips have been shown ({@link ZFighterTips}). Read once, then kept in memory; a write reads the file again
  * first and changes only its own key, so another setting written meanwhile survives. Anything unreadable just means

@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.58, Andy's NOEA picks) The HUD editor: drag the Z Fighter HUD's pieces to new places and size them. Opened by the
+ * (0.17.60, Andy's NOEA picks) The HUD editor: drag the Z Fighter HUD's pieces to new places and size them. Opened by the
  * Training screen's "HUD" button and by the client command {@code /zfighterhud}. Every piece is shown as a box where it
  * is now (all of them, even those not on screen at the moment), named, with its size; drag one to move it, turn the wheel
  * over it (or press + and -) to scale it, right-click it (or press Delete) to put it back, Tab to pick the next one and

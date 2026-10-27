@@ -81,7 +81,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
-		// (0.17.58) the tournament bracket
+		// (0.17.60) the tournament bracket
 		ZFighterBracketScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
@@ -244,7 +244,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	}
 
 	/**
-	 * (0.17.58) Where the chips row is when left alone: its left edge, its top, and its width (the ki bar sits over it).
+	 * (0.17.60) Where the chips row is when left alone: its left edge, its top, and its width (the ki bar sits over it).
 	 * The HUD editor ({@link ZFighterHudEditor}) works from the same numbers.
 	 */
 	static int[] chipsRect(LocalPlayer player, int width, int height) {

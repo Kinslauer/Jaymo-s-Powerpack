@@ -37,7 +37,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * Raids (needs Jaymo's Kingdoms): every {@link #RAID_DAYS} days or so, by night, a tyrant ({@link ZFighterRogue}) comes
  * down in lightning beside a kingdom someone is near, and fights its people, its golems and everyone who comes. Whoever
  * hurt him shares {@link #RAID_TP} TP by how much (a Z Fighter; anyone else, emeralds and experience).
- * (0.17.58) A raid is now a themed invasion ({@link ZFighterInvasions}); the lone tyrant and his prize here are for one
+ * (0.17.60) A raid is now a themed invasion ({@link ZFighterInvasions}); the lone tyrant and his prize here are for one
  * that comes without an army, or with invasions turned off.
  */
 public final class ZFighterRaids {
@@ -75,7 +75,7 @@ public final class ZFighterRaids {
 				.build(key));
 		FabricDefaultAttributeRegistry.register(ROGUE, ZFighterRogue.createAttributes());
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterRaids::tick);
-		// (0.17.58) the themed invasion a raid is now
+		// (0.17.60) the themed invasion a raid is now
 		ZFighterInvasions.init();
 	}
 
@@ -111,7 +111,7 @@ public final class ZFighterRaids {
 	}
 
 	/**
-	 * A tyrant comes down beside this kingdom. (0.17.58) At the head of a themed army now ({@link ZFighterInvasions}); with
+	 * A tyrant comes down beside this kingdom. (0.17.60) At the head of a themed army now ({@link ZFighterInvasions}); with
 	 * {@code ZFighterInvasions.ENABLED} off he lands alone, as he used to.
 	 */
 	static boolean land(ServerLevel level, BlockPos seat, String kingdom) {
@@ -145,7 +145,7 @@ public final class ZFighterRaids {
 
 	/** He's beaten: everyone who hurt him shares the prize, by how much they hurt him. */
 	static void defeated(ServerLevel level, ZFighterRogue tyrant) {
-		// (0.17.58) the head of an invasion: the invasion pays out
+		// (0.17.60) the head of an invasion: the invasion pays out
 		if (ZFighterInvasions.tyrantFell(level, tyrant)) {
 			return;
 		}

@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * good-hearted fighters stand in a ring on the Lookout's courtyard and lend their ki to lift one of them into the god
  * form ({@link ZFighterGod}). The ritual circle is painted on the Lookout's floor, south of the pole: a gold block in a
  * 3x3 of chiseled quartz for the one to be lifted, and five amethyst pads on a ring of radius {@code 4} round it. It is
- * worked from the geometry, so the blocks are only a sign (they are repainted if gone). (0.17.58) The Lookout is wider now
+ * worked from the geometry, so the blocks are only a sign (they are repainted if gone). (0.17.60) The Lookout is wider now
  * ({@link ZFighterLookout}) and the circle sits at its south side ({@link #CIRCLE_DZ}).
  * <ul>
  * <li><b>Who counts:</b> good-hearted means not Rogue ({@link ZFighterKingdoms#rogue}), not corrupted
@@ -60,7 +60,7 @@ import net.minecraft.world.phys.Vec3;
 public final class ZFighterGodRitual {
 	static final int PAD_COUNT = 5;
 	/**
-	 * The circle's middle: this far south of the tower's middle, on the Lookout's floor. (0.17.58) It was 5, on the old
+	 * The circle's middle: this far south of the tower's middle, on the Lookout's floor. (0.17.60) It was 5, on the old
 	 * 13-block platform; the bigger Lookout ({@link ZFighterLookout}) has it at the south side, clear of the courtyard.
 	 */
 	static final int CIRCLE_DZ = 17;
@@ -186,7 +186,7 @@ public final class ZFighterGodRitual {
 		return true;
 	}
 
-	/** (0.17.58) Paints the circle round {@code middle} (the Lookout's builder uses this). */
+	/** (0.17.60) Paints the circle round {@code middle} (the Lookout's builder uses this). */
 	static void paintAt(ServerLevel level, Vec3 middle) {
 		paint(level, middle);
 	}

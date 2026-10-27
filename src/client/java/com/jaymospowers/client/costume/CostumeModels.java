@@ -269,7 +269,7 @@ public final class CostumeModels {
 		private final Map<CostumeDesign.Mask, Worn> masks = new EnumMap<>(CostumeDesign.Mask.class);
 		private final Map<CostumeDesign.Cape, Worn> capes = new EnumMap<>(CostumeDesign.Cape.class);
 		final Worn emblem;
-		/** (0.17.58) The suit editor's pieces, by {@link CostumeModels#kitKey} (gloves also by arm width). */
+		/** (0.17.60) The suit editor's pieces, by {@link CostumeModels#kitKey} (gloves also by arm width). */
 		private final Map<String, Worn> kit = new HashMap<>();
 
 		Set(Supplier<PlayerModel> wearer) {
@@ -316,7 +316,7 @@ public final class CostumeModels {
 			}
 		}
 
-		/** (0.17.58) A kit piece's model, by its {@link CostumeModels#kitKey}. */
+		/** (0.17.60) A kit piece's model, by its {@link CostumeModels#kitKey}. */
 		Worn kit(String key) {
 			return this.kit.get(key);
 		}
@@ -439,7 +439,7 @@ public final class CostumeModels {
 		return LayerDefinition.create(mesh, (int)EMBLEM_SIZE, (int)EMBLEM_SIZE);
 	}
 
-	// ---- (0.17.58) the suit editor's pieces (tools/gen_costume.py paints them; the boxes here must agree) ---------------
+	// ---- (0.17.60) the suit editor's pieces (tools/gen_costume.py paints them; the boxes here must agree) ---------------
 
 	/**
 	 * How far each piece stands off the suit, on top of {@link #SUIT_GROW}: a wrap or glove a little, a gauntlet or greave

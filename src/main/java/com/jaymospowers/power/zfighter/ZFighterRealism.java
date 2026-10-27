@@ -26,7 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.58, Andy's NOEA picks) Realistic mode: a server setting that makes a Z Fighter's fights harsher. It is the line
+ * (0.17.60, Andy's NOEA picks) Realistic mode: a server setting that makes a Z Fighter's fights harsher. It is the line
  * {@code realistic_mode=true} in {@code config/jaymospowers-server.properties} (written, off, the first time the server
  * starts; read again at every server start; {@code /zfighter realism on|off} flips it for the running server and saves it).
  * Off, nothing here does anything. On, in any fight a Z Fighter is part of (he hits or is hit: a player, or a gifted villager

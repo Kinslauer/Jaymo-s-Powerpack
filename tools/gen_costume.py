@@ -516,7 +516,7 @@ def assassin_boxes(slim):
             ("tail_front", 0, 32, 8, 11, 1, assassin_tail), ("tail_back", 20, 32, 8, 11, 1, assassin_tail)]
 
 
-# (0.17.58) Z Fighter's gi and armour patterns: three more gis and two more suits, all drawn here.
+# (0.17.60) Z Fighter's gi and armour patterns: three more gis and two more suits, all drawn here.
 
 def wrap_gi(part, face, x, y, w, h, rng):
     """Z Fighter: a wrap gi, long sleeves with cuffs, the top crossed over on a diagonal lapel, a sash with a knot at the hip."""
@@ -675,7 +675,7 @@ def suits():
 
 
 
-# ---- the suit editor's pieces (0.17.58) -----------------------------------------------------------------------------
+# ---- the suit editor's pieces (0.17.60) -----------------------------------------------------------------------------
 # Gloves, boots, a belt, a helmet and head fins, worn over the suit (CostumeModels.kit, which must agree with the boxes
 # here). Each piece has up to three textures, one per colour it uses: primary, secondary and trim (T).
 

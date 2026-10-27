@@ -3086,3 +3086,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.57, bigger monoliths (Kingdoms 0.7.263):** the Aether monoliths stand three times as big, built of the Aether's
   own stone (holystone, ferrosite, icestone, irradiated holystone), and only a diamond-tier-or-better Tinkers tool can
   break them. No Powers changes.
+- **0.17.59, low-end mode:** Andy asked for Luxium (cheap shadows/lighting/fog for weak PCs); it's 1.20.1 only, its
+  licence bans ports, and it can't run beside Iris, so the pack has its own answer instead (`client/LowEndMode`).
+  Once per install, after the game starts, a weak PC (built-in graphics: Intel, AMD Radeon APUs, software or virtual; under 3500 MB
+  given to Java; 2 cores or fewer) gets shaders switched off through Iris's API and vanilla's Fast graphics preset
+  (render 8, simulation 6, fast clouds, fewer particles, no entity shadows or smooth lighting), and the first world it
+  joins says why in chat. `/lowend on|off` switches it any time; off puts back the preset, render and simulation
+  distance and shaders (a Custom preset comes back as Fancy). Complementary's own settings are never touched (its
+  licence). State in `config/jaymospowers-low-end.properties`; `LowEndMode.on()` is there for our own effects to
+  check later. Not seen in game.

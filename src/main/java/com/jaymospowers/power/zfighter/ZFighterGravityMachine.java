@@ -62,7 +62,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.58, Andy's NOEA picks) The Gravity Machine: a block that sets a room round it to heavy gravity, the way a Gravity
+ * (0.17.60, Andy's NOEA picks) The Gravity Machine: a block that sets a room round it to heavy gravity, the way a Gravity
  * user's Immense Field does ({@link com.jaymospowers.power.gravity.GravityTrainingField}) but for anyone, any time it has
  * fuel. The room is a cube {@link #SIZES} blocks a side centred on the machine; the weight is {@link #POWERS} times Earth's.
  * <ul>

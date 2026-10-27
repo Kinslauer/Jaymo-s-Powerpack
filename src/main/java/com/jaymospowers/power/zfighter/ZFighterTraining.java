@@ -338,7 +338,7 @@ public final class ZFighterTraining {
 	public static boolean heavyGravity(ServerPlayer player) {
 		return com.jaymospowers.power.gravity.GravityTrainingField.inField(player)
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null
-			// (0.17.58) a Gravity Machine's room, five times heavy or more
+			// (0.17.60) a Gravity Machine's room, five times heavy or more
 			|| ZFighterGravityMachine.heavy(player);
 	}
 

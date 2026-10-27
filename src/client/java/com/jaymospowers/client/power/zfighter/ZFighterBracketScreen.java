@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.17.58, Andy's NOEA picks) The tournament's bracket. Opens when you are entered in a tournament (and when the bracket
+ * (0.17.60, Andy's NOEA picks) The tournament's bracket. Opens when you are entered in a tournament (and when the bracket
  * is drawn), and by {@code /zfighter bracket} (or {@code /tournament}) at any time, showing the tournament that is on or
  * the last one's final board. A bracket is drawn round by round with the winners going through, the bout that is on
  * lit, who is up next and the sign-up clock; a last-one-standing fight is a list of who is still in and who went out,

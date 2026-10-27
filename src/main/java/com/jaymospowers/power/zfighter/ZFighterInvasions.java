@@ -51,7 +51,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.58, Andy's NOEA picks) Themed invasions: the tyrant raid ({@link ZFighterRaids}) grown into a siege. Every raid
+ * (0.17.60, Andy's NOEA picks) Themed invasions: the tyrant raid ({@link ZFighterRaids}) grown into a siege. Every raid
  * night an army of one of four {@link Theme}s (a Frost tyrant's armada, an android legion, an ape horde, a demon host) lands
  * round a kingdom's seat: {@link #WAVES} waves of its soldiers, one after the last is mostly beaten
  * ({@link #WAVE_CLEAR}), and then its tyrant ({@link ZFighterRogue}) with an escort.

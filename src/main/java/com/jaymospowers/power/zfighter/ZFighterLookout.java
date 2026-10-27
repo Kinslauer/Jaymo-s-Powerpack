@@ -42,7 +42,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.58, Andy's NOEA picks) The Lookout, bigger. Andy: "add all that on the LARGER floating platform above the tower
+ * (0.17.60, Andy's NOEA picks) The Lookout, bigger. Andy: "add all that on the LARGER floating platform above the tower
  * called the lookout"; "our lookout structure is nice, but needs more". The disc grows from {@link #OLD_RADIUS} to
  * {@link #RADIUS} blocks. The old courtyard (the Keeper's palace on the north half, four flowering azaleas) stays as it
  * was; round it, out on the new ground (x east, z south, from the pole), stand:

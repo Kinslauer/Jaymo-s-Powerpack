@@ -11,7 +11,7 @@ import net.minecraft.world.item.DyeColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.58, Andy's NOEA picks) The suit editor's extras on a {@link CostumeDesign}: a third colour (the trim) and the
+ * (0.17.60, Andy's NOEA picks) The suit editor's extras on a {@link CostumeDesign}: a third colour (the trim) and the
  * small pieces worn over the suit, each its own choice: gloves, boots, a belt, a helmet and head fins. They live in one
  * record at the end of the design, so a design saved before them reads with {@link #NONE} (no pieces, the trim following
  * the secondary colour) and looks exactly as it did.

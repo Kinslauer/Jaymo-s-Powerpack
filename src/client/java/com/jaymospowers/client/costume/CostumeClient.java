@@ -227,11 +227,11 @@ public final class CostumeClient {
 			if (design.hasEmblem()) {
 				renderColoredCutoutModel(this.models.emblem, CostumeEmblems.texture(design), poseStack, collector, lightCoords, state, -1, 1);
 			}
-			// (0.17.58) the suit editor's pieces
+			// (0.17.60) the suit editor's pieces
 			kit(design, slim, poseStack, collector, lightCoords, state);
 		}
 
-		/** (0.17.58) Gloves, boots, belt, helmet and fins, each once per colour it uses (primary, secondary, trim). */
+		/** (0.17.60) Gloves, boots, belt, helmet and fins, each once per colour it uses (primary, secondary, trim). */
 		private void kit(CostumeDesign design, boolean slim, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {
 			CostumeKit kit = design.kit();
 			int[] colours = {0xFF000000 | design.primary().getTextureDiffuseColor(), 0xFF000000 | design.secondary().getTextureDiffuseColor(),
@@ -292,7 +292,7 @@ public final class CostumeClient {
 		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(CostumeModels.texture("suit", cut, slim, true)), light,
 			OverlayTexture.NO_OVERLAY, null, 0xFF000000 | design.secondary().getTextureDiffuseColor());
 		if (design.kit().gloves() != CostumeKit.Gloves.NONE) {
-			// (0.17.58) the gloves over the hand
+			// (0.17.60) the gloves over the hand
 			String key = CostumeModels.kitKey(design.kit().gloves(), false);
 			String texture = slim ? key + "_slim" : key;
 			CostumeModels.Worn gloves = handModels.kit(texture);

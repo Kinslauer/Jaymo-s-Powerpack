@@ -9,7 +9,7 @@ public final class ZFighterHooks {
 	}
 
 	public static float modifyDamage(LivingEntity victim, DamageSource source, float damage) {
-		// (0.17.58) then the difficulty he wished for
+		// (0.17.60) then the difficulty he wished for
 		return ZFighterWishExtras.scaled(victim, ZFighterBattle.modifyDamage(victim, source, damage));
 	}
 }
