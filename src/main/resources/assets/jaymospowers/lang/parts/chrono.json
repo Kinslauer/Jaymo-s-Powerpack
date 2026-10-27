@@ -46,6 +46,7 @@
 	"biome.jaymospowers.future_ruins": "Ruins of Los Perrito",
 	"dimension.jaymospowers.future": "The Future",
 	"message.jaymospowers.future.echo_first": "The future won't open while your echo still walks. End it for good first.",
+	"message.jaymospowers.future.woken": "Your echo is gone for good, and you feel your own time pulling at you. Sneak+B to wake back where you belong.",
 	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward.",
 	"power.jaymospowers.chrono.key.mode.ascended": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move. A counter leaves you intangible for a moment: a blow through you flashes red, and Space answers with a spinning kick that throws everyone round you away. Space again spends one of 3 roll charges on stopping time all round you",
 	"power.jaymospowers.chrono.key.mode.ascended.name": "Time Flow",
