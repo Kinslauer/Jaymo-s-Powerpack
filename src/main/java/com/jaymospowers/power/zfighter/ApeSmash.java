@@ -74,7 +74,7 @@ public final class ApeSmash {
 	/** Whether he can punch now: his own Great Ape, standing, not in a fit. */
 	static boolean able(ServerPlayer player) {
 		return Powers.has(player, ZFighterPower.INSTANCE) && ZFighterLineage.ape(player) && !ZFighterLineage.crippled(player)
-			&& !player.hasAttached(ApeRage.FIT) && !player.hasAttached(ZFighterLineage.BERSERK);
+			&& !player.hasAttached(ApeRage.FIT) && !player.hasAttached(ZFighterLineage.BERSERK) && !ApeGrab.grabbing(player);
 	}
 
 	static void key(ServerPlayer player, boolean down) {
@@ -92,9 +92,14 @@ public final class ApeSmash {
 			return;
 		}
 		player.removeAttached(CHARGE);
-		if (able(player)) {
-			smash(player, Mth.clamp((now - start) / (float)FULL_TICKS, MIN_CHARGE, 1.0F));
+		if (!able(player)) {
+			return;
 		}
+		// (0.17.63) held long enough, the hand closes on whatever's in front of him instead ({@link ApeGrab})
+		if (now - start >= ApeGrab.HOLD_TO_GRAB && ApeGrab.begin(player, ZFighterPower.live(player), player.level(), null, now)) {
+			return;
+		}
+		smash(player, Mth.clamp((now - start) / (float)FULL_TICKS, MIN_CHARGE, 1.0F));
 	}
 
 	/** From the ape's tick: let go of a charge he can't keep; a growl when it's full. */
@@ -107,6 +112,11 @@ public final class ApeSmash {
 			player.removeAttached(CHARGE);
 		} else if (now - start == FULL_TICKS) {
 			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 1.5F, 0.6F);
+		} else if (now - start == ApeGrab.HOLD_TO_GRAB) {
+			// the grab is ready: a deeper growl, and his hand opens
+			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 1.2F, 0.45F);
+			player.level().sendParticles(new net.minecraft.core.particles.DustParticleOptions(0xC03020, 3.0F), true, false, player.getX(),
+				player.getY() + player.getBbHeight() * 0.6, player.getZ(), 20, player.getBbWidth() * 0.5, player.getBbHeight() * 0.2, player.getBbWidth() * 0.5, 0.05);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.remnants;
 
+import com.jaymoskingdoms.remnants.AetherGiant;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -50,6 +51,12 @@ final class GiantModel extends EntityModel<GiantState> {
 		SCATTER_SPREAD = 1.4F;
 	/** The thud of its chest hitting the ground (pixels up, over this many ticks). */
 	private static final float THUD = 2.0F, THUD_TICKS = 4.0F;
+	/**
+	 * (0.7.265) Its grab ({@link #grab}): the arm drawn up behind it in the wind-up, down to the ground for the snatch, held
+	 * out ahead at its chest, then hurled down; how far its body leans back winding up and forward for the snatch and slam.
+	 */
+	private static final float GRAB_RAISED = -2.8F, GRAB_FLARE = 0.5F, GRAB_DOWN = -0.35F, GRAB_HELD = -1.35F, GRAB_HURLED = 0.3F,
+		GRAB_LEAN_BACK = -0.3F, GRAB_LEAN_FORWARD = 0.45F, GRAB_TREMBLE = 0.04F;
 
 	private final ModelPart body, shards, head, crown, rightArm, leftArm, rightLeg, leftLeg;
 
@@ -139,6 +146,9 @@ final class GiantModel extends EntityModel<GiantState> {
 			this.rightArm.xRot -= 0.35F;
 			this.leftArm.xRot -= 0.35F;
 		}
+		if (state.grab >= 0.0F) {
+			this.grab(state.grab, state.ageInTicks);
+		}
 		if (state.rightAttack > 0.0F) {
 			this.rightArm.xRot = -blow(state.rightAttack);
 		}
@@ -159,6 +169,61 @@ final class GiantModel extends EntityModel<GiantState> {
 			this.leftArm.xRot -= state.flinch * FLINCH_ARM;
 			this.leftArm.zRot -= state.flinch * 0.5F;
 		}
+	}
+
+	/**
+	 * (0.7.265) Its grab, {@code t} ticks in ({@code AetherGiant}'s phases): it rears back, its right hand drawn up behind
+	 * it and flared wide, then the hand sweeps down to the ground ahead, lifts its catch to its chest (trembling as it
+	 * squeezes), hurls it down, and straightens up. The head follows the hand.
+	 */
+	private void grab(float t, float age) {
+		float windup = AetherGiant.GRAB_WINDUP, snatch = AetherGiant.GRAB_SNATCH, hold = AetherGiant.GRAB_HOLD, slam = AetherGiant.GRAB_SLAM,
+			recover = AetherGiant.GRAB_RECOVER;
+		float x, z, lean, head;
+		if (t < windup) {
+			float u = ease(t / windup);
+			x = Mth.lerp(u, -0.2F, GRAB_RAISED);
+			z = ARM_FLARE + u * GRAB_FLARE;
+			lean = u * GRAB_LEAN_BACK;
+			head = -u * 0.4F;
+		} else if (t < windup + snatch) {
+			float u = ease((t - windup) / snatch);
+			x = Mth.lerp(u, GRAB_RAISED, GRAB_DOWN);
+			z = ARM_FLARE + (1.0F - u) * GRAB_FLARE;
+			lean = Mth.lerp(u, GRAB_LEAN_BACK, GRAB_LEAN_FORWARD);
+			head = Mth.lerp(u, -0.4F, 0.5F);
+		} else if (t < windup + snatch + hold) {
+			float u = ease(Math.min(1.0F, (t - windup - snatch) / AetherGiant.LIFT_TICKS));
+			x = Mth.lerp(u, GRAB_DOWN, GRAB_HELD) + u * GRAB_TREMBLE * Mth.sin(age * 2.1F);
+			z = ARM_FLARE + u * GRAB_TREMBLE * Mth.sin(age * 1.7F);
+			lean = Mth.lerp(u, GRAB_LEAN_FORWARD, 0.0F);
+			head = Mth.lerp(u, 0.5F, 0.15F);
+		} else if (t < windup + snatch + hold + slam) {
+			float u = (t - windup - snatch - hold) / slam;
+			u *= u;
+			x = Mth.lerp(u, GRAB_HELD, GRAB_HURLED);
+			z = ARM_FLARE;
+			lean = u * GRAB_LEAN_FORWARD;
+			head = Mth.lerp(u, 0.15F, 0.6F);
+		} else {
+			float u = ease(Math.min(1.0F, (t - windup - snatch - hold - slam) / recover));
+			x = Mth.lerp(u, GRAB_HURLED, this.rightArm.xRot);
+			z = Mth.lerp(u, ARM_FLARE, this.rightArm.zRot);
+			lean = (1.0F - u) * GRAB_LEAN_FORWARD;
+			head = (1.0F - u) * 0.6F;
+		}
+		this.rightArm.xRot = x;
+		this.rightArm.yRot = 0.0F;
+		this.rightArm.zRot = z;
+		this.body.xRot += lean;
+		this.head.xRot += head;
+		// the other arm braces out a little
+		this.leftArm.zRot -= Math.abs(lean) * 0.5F;
+	}
+
+	private static float ease(float t) {
+		t = Mth.clamp(t, 0.0F, 1.0F);
+		return t * t * (3.0F - 2.0F * t);
 	}
 
 	/**

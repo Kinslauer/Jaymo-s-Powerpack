@@ -222,6 +222,10 @@ final class VillagerApe {
 			}
 			return;
 		}
+		if (ApeGrab.tick(mob, live, level, now)) {
+			// (0.17.63) its grab has it: it stands and plays it out
+			return;
+		}
 		berserk(mob, live, level, now);
 		if (now % 3 == 0) {
 			level.sendParticles(new DustParticleOptions(0xC03020, 2.5F), true, false, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 2,
@@ -363,6 +367,11 @@ final class VillagerApe {
 		mob.removeAttached(ZFighterLineage.WILD_GOAL);
 		if (ZFighterLineage.inReach(mob, live, target)) {
 			mob.lookAt(target, 30.0F, 30.0F);
+			if (now >= live.grabReadyAt && ApeGrab.begin(mob, live, level, target, now)) {
+				// (0.17.63) every so often it takes its quarry in hand instead
+				live.berserkSince = now;
+				return;
+			}
 			if (now >= live.berserkSwingAt) {
 				live.berserkSwingAt = now + ZFighterLineage.BERSERK_SWING_EVERY;
 				live.berserkSince = now;
@@ -468,6 +477,7 @@ final class VillagerApe {
 		mob.removeAttached(ZFighterLineage.CRIPPLED);
 		mob.removeAttached(ZFighterLineage.BERSERK);
 		mob.removeAttached(ZFighterLineage.WILD_GOAL);
+		mob.removeAttached(ApeGrab.GRAB);
 		ZFighterPower.Live none = new ZFighterPower.Live();
 		body(mob, none);
 	}
