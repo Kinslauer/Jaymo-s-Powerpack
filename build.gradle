@@ -175,6 +175,9 @@ def packMods = [
 	// own poses pause both, like Fresh Animations (client/EmfCompat#hold).
 	[dep: "curse.maven:touch-and-motion-1734204:9205898", cf: [1734204, 9205898]],
 	[dep: "maven.modrinth:emf-compat-core:oOuwcnpx", cf: [1605113, 9205859]],
+	// Mod Menu (MIT, TerraformersMC; shipped unchanged): the Mods button on the title and pause screens, with each mod's
+	// settings, Touch'n Motion's and EMF Compat's among them. Client-only; it bundles Text Placeholder API.
+	[dep: "maven.modrinth:modmenu:kyy7dbrZ", cf: [308702, 8958984]],
 	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
 	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
 	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
