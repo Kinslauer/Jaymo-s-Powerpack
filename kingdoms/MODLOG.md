@@ -5198,5 +5198,12 @@ stoic brick for a captain. they need at the very least a personality."
   (`KingdomEvents.workerDied` → `Camps.chiefSlain`). Slay quests still find him (`Quests.campOf`).
 - Folk crews already at sea in a world are each replaced at their station by a villager of their blood
   (`Crewmen.convert`). The ship's captain, gunner and cove-leader records follow them.
+- Home from a whaling voyage (`Crewmen.payOff`, from `Whalers.home`), the crew come ashore at the harbour with
+  their lay in emeralds. Each decides whether to sign on again or leave the sea (Andy: "they should be able to decide to
+  continue as a whaler or leave with their riches"). The base chance of leaving is 30%, plus 8% a whale (at most +30%).
+  The greedy, timid and gloomy lean toward leaving, the dutiful, brave, cheerful and devout toward staying, and the
+  captain leaves half as often. Those who stay wait about the harbour (MCA's screen: "Whaleman of X, in port") and board
+  the realm's next whaler before anyone new is taken on (`Crewmen.waiting`). Those who leave are discharged and live as
+  the town's villagers. Each says why, and the town hears how many signed on.
 - Whaleboat hands stay crew in the boats. Set down ashore, a crewman lives as an ordinary villager.
   Without MCA the crews stay folk. Javac-checked against the 26.3 jars, not seen in game.

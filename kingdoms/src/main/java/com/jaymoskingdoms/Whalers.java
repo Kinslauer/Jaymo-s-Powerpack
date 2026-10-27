@@ -593,6 +593,9 @@ public final class Whalers {
 		v.add("oil", v.get("blubber") / TRY_BLUBBER);
 		v.hold.remove("blubber");
 		int worth = unload(level, f, v);
+		Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
+		// (0.7.242) her crew paid their lay ashore, each to sign on again or leave the sea with it
+		Crewmen.payOff(level, ship, crew, h != null ? h.shore() : crew.home, Math.max(LEAST_LAY, Math.round(worth * LAY)), v.whales);
 		List<ServerPlayer> aboard = Corsairs.playersAboard(level, ship);
 		for (ServerPlayer p : aboard) {
 			if (v.hands.contains(p.getUUID())) {

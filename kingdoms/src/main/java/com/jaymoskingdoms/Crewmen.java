@@ -10,6 +10,7 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -73,6 +74,17 @@ public final class Crewmen {
 	static final int TEMPER_ONE_IN = 3;
 	/** A newcomer aboard is welcomed by her captain (once per player per ship while they're aboard). */
 	static final double WELCOME_RANGE = 6.0;
+	/**
+	 * (0.7.242) Home from a whaling voyage, each hand's chance to go ashore for good with their pay: to start with, more
+	 * for each whale taken (up to the most), less for her captain (times this); never below the least or above the most.
+	 */
+	static final float LEAVE_BASE = 0.3F, LEAVE_PER_WHALE = 0.08F, LEAVE_WHALES_MOST = 0.3F, LEAVE_CAPTAIN = 0.5F, LEAVE_LEAST = 0.05F,
+		LEAVE_MOST = 0.9F;
+	/** Hands who sign on again wait about the harbour (keeping within this of its shore) and are found within this of her mooring. */
+	static final int PORT_HOME = 24;
+	static final double PORT_RANGE = 72.0;
+	/** Lines for signing on again, and for going ashore (lang keys 0..n-1). */
+	static final int SIGN_LINES = 4;
 
 	/** Each crewman's next swing and next shot (game time); each ship's next line; who her captain has welcomed. */
 	private static final Map<LivingEntity, long[]> READY = new WeakHashMap<>();
@@ -119,6 +131,11 @@ public final class Crewmen {
 		return e instanceof Worker w ? w.factionId() : -1;
 	}
 
+	/** (0.7.242) The tag that says which side's crew they are (a whaler's hand waits in port for her next voyage). */
+	static String sideTag(Crew.Side side) {
+		return TAG + "." + side.id();
+	}
+
 	/** Whether a {@code side}'s {@code role} goes aboard as a sailor (MCA's fisherman) rather than a fighting man (MCA's guard). */
 	static boolean sailor(Crew.Side side, int role) {
 		return side == Crew.Side.MERCHANT || side == Crew.Side.WHALER || role == Pirates.POWDER_MONKEY;
@@ -132,6 +149,7 @@ public final class Crewmen {
 		PathfinderMob v = McaCompat.crewman(level, folk, sailor(side, folk.role()));
 		if (v != null) {
 			v.addTag(TAG);
+			v.addTag(sideTag(side));
 		}
 		return v;
 	}
@@ -175,6 +193,102 @@ public final class Crewmen {
 		crew.gunners.replaceAll((gun, who) -> who.equals(was) ? now : who);
 		crew.walks.remove(was);
 		return true;
+	}
+
+	// ---- (0.7.242) home from a voyage ----------------------------------------------------------------------------------
+
+	/**
+	 * Andy: "they should be able to decide to continue as a whaler or leave with their riches when we return to land."
+	 * {@code ship}'s crew villagers come ashore at {@code shore}, each with their lay of the catch in their pack: each
+	 * decides, by their temperament, the catch and their rank, whether to sign on again (they wait about the harbour,
+	 * still her crew, and go out with her next voyage: {@link #waiting}) or go ashore for good (discharged, an ordinary
+	 * villager of the town). Before she's laid up ({@code Whalers.home}).
+	 */
+	static void payOff(ServerLevel level, Ship ship, Crew crew, BlockPos shore, int lay, int whales) {
+		RandomSource random = level.getRandom();
+		int stayed = 0, left = 0;
+		for (LivingEntity e : List.copyOf(ship.crewAboard())) {
+			if (!(e instanceof PathfinderMob mob) || !tagged(mob) || !(mob instanceof Worker w)) {
+				continue;
+			}
+			boolean captain = mob.getUUID().equals(crew.captain);
+			boolean leaves = random.nextFloat() < leaveChance(mob, whales, captain);
+			mob.stopRiding();
+			crew.walks.remove(mob.getUUID());
+			BlockPos near = shore.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3);
+			BlockPos ground = ShutIn.openGround(level, near);
+			Vec3 at = Vec3.atBottomCenterOf(ground != null ? ground : shore);
+			mob.snapTo(at.x, at.y, at.z, mob.getYRot(), 0.0F);
+			mob.getNavigation().stop();
+			ItemStack pay = McaCompat.stow(mob, new ItemStack(Items.EMERALD, lay));
+			if (!pay.isEmpty()) {
+				mob.spawnAtLocation(level, pay);
+			}
+			if (leaves) {
+				mob.removeTag(TAG);
+				mob.removeTag(sideTag(crew.side));
+				if (w instanceof Enlisted enlisted) {
+					enlisted.discharge();
+				}
+				left++;
+			} else {
+				mob.setHomeTo(shore, PORT_HOME);
+				stayed++;
+			}
+			Speech.say(level, mob, Component.translatable("speech.jaymoskingdoms.crew." + (leaves ? "leaves." : "signs_on.") + random.nextInt(SIGN_LINES), crew.name),
+				Speech.YELLOW, CHAT_CARRY);
+			Standing.update(level, w);
+		}
+		if (stayed + left > 0) {
+			Raids.tell(level, shore, Component.translatable("message.jaymoskingdoms.whaler.paid_off", crew.name, stayed, left)
+				.withStyle(net.minecraft.ChatFormatting.AQUA));
+		}
+	}
+
+	/** How likely {@code mob} is to go ashore for good after a voyage that took {@code whales}. */
+	static float leaveChance(PathfinderMob mob, int whales, boolean captain) {
+		float chance = LEAVE_BASE + Math.min(LEAVE_WHALES_MOST, whales * LEAVE_PER_WHALE);
+		Temperaments.Temperament t = Temperaments.of(mob);
+		if (t != null) {
+			chance += switch (t) {
+				// a full purse is all a greedy one went to sea for; the timid and the gloomy have had enough of it
+				case GREEDY -> 0.3F;
+				case TIMID -> 0.25F;
+				case GLOOMY -> 0.2F;
+				case HOTHEADED, SPITEFUL -> 0.1F;
+				case DUTIFUL -> -0.25F;
+				case BRAVE -> -0.15F;
+				case CHEERFUL, DEVOUT -> -0.1F;
+				default -> 0.0F;
+			};
+		}
+		if (captain) {
+			chance *= LEAVE_CAPTAIN;
+		}
+		return net.minecraft.util.Mth.clamp(chance, LEAVE_LEAST, LEAVE_MOST);
+	}
+
+	/**
+	 * One of {@code side}'s crew of {@code role} for {@code faction} waiting about the harbour round {@code home} for
+	 * her next voyage (signed on again, {@link #payOff}), or null: they go aboard her before anyone new is taken on.
+	 */
+	static @Nullable PathfinderMob waiting(ServerLevel level, int faction, Crew.Side side, int role, BlockPos home) {
+		String tag = sideTag(side);
+		PathfinderMob best = null;
+		double bestD = Double.MAX_VALUE;
+		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, new net.minecraft.world.phys.AABB(home).inflate(PORT_RANGE),
+			m -> m.isAlive() && !m.isPassenger() && tagged(m) && m.entityTags().contains(tag) && role(m) == role && faction(m) == faction
+				&& !Downed.isDowned(m))) {
+			double d = m.distanceToSqr(Vec3.atCenterOf(home));
+			if (d < bestD) {
+				best = m;
+				bestD = d;
+			}
+		}
+		if (best != null && best.isSleeping()) {
+			best.stopSleeping();
+		}
+		return best;
 	}
 
 	// ---- aboard -----------------------------------------------------------------------------------------------------
@@ -382,6 +496,12 @@ public final class Crewmen {
 
 	/** Their lines for MCA's screen: the ship they serve and what as, her captain's name, and what she's about. */
 	static Standing.@Nullable Lines lines(ServerLevel level, PathfinderMob mob, Worker w) {
+		if (!mob.isPassenger() && mob.entityTags().contains(sideTag(Crew.Side.WHALER))) {
+			// (0.7.242) signed on again, waiting in port for her next voyage
+			Faction f = Factions.get(level.getServer(), w.factionId());
+			return new Standing.Lines(List.of(Component.translatable("standing.jaymoskingdoms.crew.in_port", f == null ? Component.literal("?") : Component.literal(f.name()))
+				.withStyle(net.minecraft.ChatFormatting.GOLD)), List.of(Component.translatable("standing.jaymoskingdoms.crew.in_port.hover")));
+		}
 		if (!(mob.getVehicle() instanceof Ship ship) || ship.crew == null) {
 			return null;
 		}

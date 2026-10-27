@@ -6386,5 +6386,16 @@
 	"standing.jaymoskingdoms.crew.doing.voyage": "On a voyage",
 	"standing.jaymoskingdoms.crew.doing.fitting": "Fitting out",
 	"standing.jaymoskingdoms.crew.doing.whaling": "Whaling",
-	"standing.jaymoskingdoms.crew.doing.patrol": "On patrol"
+	"standing.jaymoskingdoms.crew.doing.patrol": "On patrol",
+	"speech.jaymoskingdoms.crew.signs_on.0": "Count me in for the next one. The sea's in my blood.",
+	"speech.jaymoskingdoms.crew.signs_on.1": "Put my name down again. %s won't sail without me.",
+	"speech.jaymoskingdoms.crew.signs_on.2": "One more voyage. Then I'll think about land.",
+	"speech.jaymoskingdoms.crew.signs_on.3": "Ashore's too quiet. I'll be at the pier when she fits out.",
+	"speech.jaymoskingdoms.crew.leaves.0": "That's my lay, and that's me done with whales. Farewell, %s.",
+	"speech.jaymoskingdoms.crew.leaves.1": "A full purse and dry boots. I'm staying ashore.",
+	"speech.jaymoskingdoms.crew.leaves.2": "I've seen enough blubber for a lifetime. I'll find work in town.",
+	"speech.jaymoskingdoms.crew.leaves.3": "Don't wait for me. I'm going to spend every emerald of this.",
+	"message.jaymoskingdoms.whaler.paid_off": "%1$s's crew are paid off: %2$s sign on for her next voyage, %3$s go ashore with their pay.",
+	"standing.jaymoskingdoms.crew.in_port": "Whaleman of %s, in port",
+	"standing.jaymoskingdoms.crew.in_port.hover": "Signed on again: they wait about the harbour and go out with the realm's next whaler"
 }

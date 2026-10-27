@@ -148,6 +148,14 @@ final class Corsairs implements Ship.Captaincy {
 	 * that role would wear ({@link Crewmen}); without it, the folk.
 	 */
 	static @Nullable LivingEntity hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home, Crew.Side side) {
+		LivingEntity back = Crewmen.waiting(level, faction.id(), side, role, home);
+		if (back != null) {
+			// (0.7.242) one of her hands who signed on again, waiting in port: aboard before anyone new
+			back.setAttached(Ship.SEAT, seat);
+			if (ship.takeAboard(back, seat)) {
+				return back;
+			}
+		}
 		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 		if (folk == null) {
 			return null;
