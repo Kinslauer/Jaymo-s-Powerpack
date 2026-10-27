@@ -1,0 +1,22 @@
+{
+  "type": "jaymospowers:other_world",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jaymospowers:other_world",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:calcite",
+          "height": 3
+        }
+      ],
+      "structure_overrides": []
+    }
+  }
+}

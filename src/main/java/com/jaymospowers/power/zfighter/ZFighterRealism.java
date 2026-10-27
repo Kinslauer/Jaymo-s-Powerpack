@@ -45,6 +45,8 @@ import net.minecraft.world.entity.player.Player;
 public final class ZFighterRealism {
 	static final String FILE = "jaymospowers-server.properties";
 	static final String SETTING = "realistic_mode";
+	/** (0.17.62) {@code afterlife=true} (the default): a Z Fighter who dies wakes in the Other World ({@link ZFighterAfterlife}). */
+	static final String AFTERLIFE_SETTING = "afterlife";
 
 	/** What a ki attack and any other blow do (multiplied). */
 	static final float KI_DAMAGE = 2.0F;
@@ -63,6 +65,7 @@ public final class ZFighterRealism {
 	static final float BREAK_MAX = 0.4F;
 
 	private static boolean realistic;
+	private static boolean afterlife = true;
 	private static final Map<UUID, Float> LAST_HEALTH = new HashMap<>();
 
 	private ZFighterRealism() {
@@ -91,6 +94,11 @@ public final class ZFighterRealism {
 	/** Whether realistic mode is on. */
 	public static boolean on() {
 		return realistic;
+	}
+
+	/** (0.17.62) Whether a Z Fighter's death takes him to the Other World ({@code afterlife} in the server properties; on by default). */
+	public static boolean afterlife() {
+		return afterlife;
 	}
 
 	/** Turns it on or off for the running server and saves the setting. */
@@ -175,8 +183,13 @@ public final class ZFighterRealism {
 					properties.load(reader);
 				}
 				realistic = "true".equalsIgnoreCase(properties.getProperty(SETTING, "false").trim());
+				afterlife = !"false".equalsIgnoreCase(properties.getProperty(AFTERLIFE_SETTING, "true").trim());
+				if (properties.getProperty(AFTERLIFE_SETTING) == null) {
+					save();
+				}
 			} else {
 				realistic = false;
+				afterlife = true;
 				save();
 			}
 		} catch (IOException e) {
@@ -188,12 +201,14 @@ public final class ZFighterRealism {
 		Path file = file();
 		Properties properties = new Properties();
 		properties.setProperty(SETTING, Boolean.toString(realistic));
+		properties.setProperty(AFTERLIFE_SETTING, Boolean.toString(afterlife));
 		try {
 			Files.createDirectories(file.getParent());
 			try (Writer writer = Files.newBufferedWriter(file)) {
 				properties.store(writer, "Jaymo's Powers, server settings. realistic_mode=true makes Z Fighter fights harsher: ki x"
 					+ KI_DAMAGE + " and blows x" + BLOW_DAMAGE + " damage to both sides, ki regen x" + KI_REGEN + ", flight ki x" + FLIGHT_COST
-					+ ", natural healing x" + HEALTH_REGEN + " in a fight, and hard blows may break limbs (docs/Abilities.md, Realistic mode).");
+					+ ", natural healing x" + HEALTH_REGEN + " in a fight, and hard blows may break limbs (docs/Abilities.md, Realistic mode). "
+					+ "afterlife=false stops a Z Fighter who dies from waking in the Other World (default true).");
 			}
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Couldn't write {}", file, e);

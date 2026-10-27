@@ -3109,3 +3109,23 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Parties.members` by reflection (falls back to the player alone); kills and bouts credit the party within 64 blocks.
   Escort jobs were left out (they need a following villager and could not be tried here). Compile-checked only; not
   seen in game. Abilities rows 441 to 450.
+- **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B):** `ZFighterAfterlife`: a Z Fighter who
+  truly dies (an `AFTER_DEATH` that something else has not cancelled, not in the Other World already, `afterlife=true` in
+  `config/jaymospowers-server.properties`, the file `ZFighterRealism` reads, written with the new key when missing) is
+  noted, and one tick after his normal respawn is moved to `jaymospowers:other_world` (a flat calcite world). The death is
+  never touched, so drops, the keep-inventory rule, Kitchen's corpses, the downed state, wounds and every other mod's death
+  handling run as before. He wakes in a judge's hall with a halo (the `zfighter_afterlife_stay` attachment, synced to all;
+  `ZFighterHalo` draws a ring of gold dust on each client). A 160-block quartz road leads south to a pavilion with the Master
+  of the Road (one lesson a stay and bonus TP; training pays 1.5 times in the Other World), a ring with a bell (three bouts
+  against spirit fighters, vanilla vindicators with no axe, for TP), and a fortune teller who sends him back
+  free after the tournament, for 24 emeralds or 400 TP, or by the new 13th wish (`ZFighterWishes.CALL_BACK`, lang
+  `wish.jaymospowers.zfighter.call_back`). After 30 minutes he is let go anyway. The structures are built by code once; the
+  NPCs are re-created when a player nears one that is missing. `ZFighterDemonRealm`: three dimensions (`demon_gloam`,
+  `demon_ash`, `demon_abyss`, the nether's noise settings and a shared dimension type, a fixed dim biome each). The rite (a
+  Crying Obsidian block between four lit soul campfires, right-clicked bare-handed with a Wither Skeleton Skull in the off
+  hand) drops anyone into the Gloam; up and down altars (Crying Obsidian on Gilded Blackstone or Ancient Debris) move between
+  layers and home. Villages are built by code in a seeded grid of 128-block cells when a player is within 56 blocks, each with a
+  dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark lesson;
+  the army is vanilla fighters under a demon name and tag, spawned in squads around each player on a layer. Compile-checked only;
+  worldgen of the new dimensions, the nether-shaped terrain under a custom biome, the structures and both death-time moves have not
+  been seen in game. Abilities rows 480 to 490 (the lead renumbers).

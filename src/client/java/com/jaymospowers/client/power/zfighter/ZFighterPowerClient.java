@@ -78,6 +78,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterOrbs.init();
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
+		// (0.17.62) the halo of the dead
+		ZFighterHalo.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
