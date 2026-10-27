@@ -1,0 +1,101 @@
+{
+	"voice.narrator.born.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.grimsby.summon.1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/grimsby/summon_1"
+			}
+		]
+	},
+	"voice.grimsby.summon.2": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/grimsby/summon_2"
+			}
+		]
+	},
+	"voice.grimsby.summon.3": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/grimsby/summon_3"
+			}
+		]
+	},
+	"voice.varro.summon.1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/varro/summon_1"
+			}
+		]
+	},
+	"voice.varro.summon.2": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/varro/summon_2"
+			}
+		]
+	},
+	"voice.varro.summon.3": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/varro/summon_3"
+			}
+		]
+	},
+	"voice.ambrose.summon.1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/ambrose/summon_1"
+			}
+		]
+	},
+	"voice.ambrose.summon.2": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/ambrose/summon_2"
+			}
+		]
+	},
+	"voice.ambrose.summon.3": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/ambrose/summon_3"
+			}
+		]
+	},
+	"voice.thessaly.summon.1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/thessaly/summon_1"
+			}
+		]
+	},
+	"voice.thessaly.summon.2": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/thessaly/summon_2"
+			}
+		]
+	},
+	"voice.thessaly.summon.3": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/thessaly/summon_3"
+			}
+		]
+	},
+	"voice.quiet.word.1": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/quiet/word_1"
+			}
+		]
+	}
+}
