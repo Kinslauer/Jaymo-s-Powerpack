@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Voices;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -79,6 +80,7 @@ public final class SpiritVoice {
 		MutableComponent name = Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name").withStyle(s -> s.withColor(colour).withItalic(true));
 		MutableComponent line = Component.translatable(key).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 		player.sendSystemMessage(Component.empty().append(name).append(Component.literal(": ").withStyle(ChatFormatting.GRAY)).append(line));
+		Voices.speak(player, key);
 		NEXT.put(player.getUUID(), now + SAY_GAP);
 		if (kind == Spirits.QUIET && event.equals("word")) {
 			QuietOne.spoke(player);

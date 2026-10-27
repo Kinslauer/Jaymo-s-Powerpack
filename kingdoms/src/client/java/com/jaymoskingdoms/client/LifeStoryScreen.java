@@ -6,6 +6,7 @@ import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.LifeStory;
 import com.jaymoskingdoms.LifeStory.Answer;
 import com.jaymoskingdoms.LifeStory.Question;
+import com.jaymoskingdoms.Voices;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +20,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -69,6 +72,9 @@ final class LifeStoryScreen extends Screen {
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
 	private static Draft draft = new Draft();
+	/** (0.7.248) The question the narrator last read (its title key), and the reading, so it reads each page once. */
+	private static @Nullable String narrated;
+	private static @Nullable SimpleSoundInstance reading;
 
 	LifeStoryScreen(boolean forced) {
 		super(Component.translatable("gui.jaymoskingdoms.story.title"));
@@ -96,6 +102,7 @@ final class LifeStoryScreen extends Screen {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			owed = false;
 			draft = new Draft();
+			narrated = null;
 		});
 	}
 
@@ -311,6 +318,28 @@ final class LifeStoryScreen extends Screen {
 		}
 	}
 
+	/**
+	 * (0.7.248) The narrator reads a question's title and the line under it when its page first shows, if that question has
+	 * a voice ({@link Voices}); turning the page cuts the reading short.
+	 */
+	private static void narrate(Step s) {
+		String key = s.question != null && !s.realm ? "story.jaymoskingdoms." + s.question.key() + ".title" : null;
+		if (key == null || key.equals(narrated)) {
+			return;
+		}
+		narrated = key;
+		Minecraft minecraft = Minecraft.getInstance();
+		if (reading != null) {
+			minecraft.getSoundManager().stop(reading);
+			reading = null;
+		}
+		Holder<SoundEvent> voice = Voices.of(key);
+		if (voice != null) {
+			reading = SimpleSoundInstance.forUI(voice.value(), 1.0F, 1.0F);
+			minecraft.getSoundManager().play(reading);
+		}
+	}
+
 	/** Next: on to the next page, or on the last, live this life. */
 	private void forward() {
 		Step s = step();
@@ -407,6 +436,7 @@ final class LifeStoryScreen extends Screen {
 			return;
 		}
 		Step s = step();
+		narrate(s);
 		int x = left(), y = top(), w = panelW(), h = panelH();
 		Ui.panel(graphics, x, y, w, h, ACCENT);
 		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
