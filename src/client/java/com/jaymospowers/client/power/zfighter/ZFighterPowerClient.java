@@ -76,6 +76,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
+		ZFighterSwayPose.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
@@ -191,6 +192,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterGuardPose.extract(entity, state);
 		ZFighterFiringPose.extract(entity, state);
 		ZFighterDancePose.extract(entity, state, partialTicks);
+		ZFighterSwayPose.extract(entity, state, partialTicks);
 		ZFighterComboPose.extract(entity, state, partialTicks);
 		ZFighterDiscPose.extract(entity, state, partialTicks);
 		ZFighterMark.extract(entity, state);
@@ -215,6 +217,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterComboPose.applyModel(model, state);
 		ZFighterSpiritPose.applyModel(model, state);
 		ZFighterDiscPose.applyModel(model, state);
+		ZFighterSwayPose.applyModel(model, state);
 		RaceHoldClient.applyModel(model, state);
 		com.jaymospowers.client.power.ember.EmberKindleClient.applyModel(model, state);
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.applyModel(model, state);
