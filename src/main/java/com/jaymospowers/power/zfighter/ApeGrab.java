@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.63) Andy: "Giants and apes need a grab attack that is telegraphed and fairly slow, but deals massive damage to a
+ * (0.17.67) Andy: "Giants and apes need a grab attack that is telegraphed and fairly slow, but deals massive damage to a
  * single target, with a letterboxed animation". The Great Ape's grab, the twin of the Aether Giant's ({@code
  * kingdoms/remnants/AetherGiant}), in ticks: he rears back with a roar, his right hand drawn up behind him
  * ({@link #WINDUP}; get clear of his reach and it closes on nothing), then the hand comes down on his catch

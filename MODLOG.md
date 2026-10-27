@@ -3156,7 +3156,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   biome, stronger from the Gloam to the Ash to the Abyss (the old three layers). Compile-checked only; how rare the biomes come
   out, the platform's first build (about 40 chunks of Aether generated at once), the Nether villages' fit to the caves, and both
   death-time moves have not been seen in game. Abilities rows 468 to 478.
-- **0.17.63, the Giants' and Great Apes' grab (Kingdoms 0.7.265):** Andy: "Giants and apes need a grab attack that is
+- **0.17.63, demon biomes after TaCZ (crash fix):** 0.17.62 crashed on start, server and client ("Errors during registry
+  creation ... No value registered for key jaymospowers:demon_abyss", from `TaCZFabric.<clinit>`). TaCZ builds
+  `VanillaRegistries.createWorldLookup()` in its main entrypoint, and once `NetherBiomes.addNetherBiome` has run the Nether
+  preset asks for the demon biomes there, where only vanilla's exist. `ZFighterDemonRealm.addBiomes` now runs from the server
+  and client entrypoints (after every mod's main one) instead of `init`; the world's registries come later from the data
+  files, so the biomes still generate.
+- **0.17.66, the Moon's surface rule (crash fix):** creating a world failed at "Preparing for world creation" ("Failed to
+  parse jaymospowers:moon ... Not a string: {"Name":"minecraft:tuff"}"): `worldgen/material_rule/moon.json` wrote its
+  block states in the old `{"Name": ...}` form, which 26.3's surface rules don't read. They're plain block ids now, as in
+  `aether.json`. It broke every new world, singleplayer and server.
+- **0.17.67, the Giants' and Great Apes' grab (Kingdoms 0.7.267):** Andy: "Giants and apes need a grab attack that is
   telegraphed and fairly slow, but deals massive damage to a single target, with a letterboxed animation". `power/zfighter/ApeGrab`:
   the Great Ape's grab in five phases, 30 ticks of wind-up with a roar and the right hand reared up behind him (red motes at the
   hand; step out of its reach and it closes on nothing), 8 ticks of the hand coming down, 40 held at his chest and squeezed (a

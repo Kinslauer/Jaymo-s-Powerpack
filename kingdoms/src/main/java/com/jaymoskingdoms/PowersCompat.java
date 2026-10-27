@@ -140,7 +140,7 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- (0.7.265) a film: Powers' UltimateFilm (letterbox bars, and one player's camera) ------------------------------
+	// ---- (0.7.267) a film: Powers' UltimateFilm (letterbox bars, and one player's camera) ------------------------------
 
 	/** Powers' {@code UltimateFilm.play(ServerPlayer, int, int, Vec3, Entity, double)} and {@code witnessed(Entity, int, int, Vec3, Entity, double)}. */
 	private static java.lang.invoke.@Nullable MethodHandle filmPlay, filmWitnessed;
@@ -169,7 +169,7 @@ public final class PowersCompat {
 	}
 
 	/**
-	 * (0.7.265) A short film of {@code caster}'s move: {@code star} (a player, if any) gets the camera {@code shot} framed on
+	 * (0.7.267) A short film of {@code caster}'s move: {@code star} (a player, if any) gets the camera {@code shot} framed on
 	 * {@code at} and {@code target} for {@code ticks}, and everyone within {@code witnesses} blocks of the caster sees black
 	 * bars. Nothing without Powers.
 	 */

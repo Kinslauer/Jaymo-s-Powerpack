@@ -147,7 +147,7 @@ public class AetherGiant extends Monster {
 	/** Entity events: its right or left foot came down. */
 	private static final byte STEP_RIGHT = 90, STEP_LEFT = 91;
 	/**
-	 * (0.7.265) Andy: "a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target, with a
+	 * (0.7.267) Andy: "a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target, with a
 	 * letterboxed animation". Its grab, in ticks: it rears back with a roar, its hand drawn up behind it ({@link #GRAB_WINDUP};
 	 * run clear of its reach and the hand closes on nothing), then the hand comes down on its target ({@link #GRAB_SNATCH}),
 	 * lifts it to its chest and squeezes ({@link #GRAB_HOLD}, {@link #SQUEEZE_DAMAGE} every {@link #SQUEEZE_EVERY}), and hurls it
@@ -168,7 +168,7 @@ public class AetherGiant extends Monster {
 	static final double SLAM_DUST = 3.0;
 
 	private static final EntityDataAccessor<Byte> SWING = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.BYTE);
-	/** (0.7.265) The game time its grab began (Long.MIN_VALUE: it isn't grabbing), and whom it holds (-1: no one). */
+	/** (0.7.267) The game time its grab began (Long.MIN_VALUE: it isn't grabbing), and whom it holds (-1: no one). */
 	private static final EntityDataAccessor<Long> GRAB_START = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<Integer> GRAB_HELD = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.INT);
 	private static final Identifier RAGE_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_rage");
@@ -177,7 +177,7 @@ public class AetherGiant extends Monster {
 	/** The monolith it rose beside (null if it was summoned). */
 	private @Nullable BlockPos monolith;
 	private int stampCooldown = STAMP_TICKS, windup, powerCooldown = POWER_TICKS, swingTicks;
-	/** (0.7.265) Ticks before it may grab again, where its hand closed, and where its catch is slammed down. */
+	/** (0.7.267) Ticks before it may grab again, where its hand closed, and where its catch is slammed down. */
 	private int grabCooldown = GRAB_TICKS;
 	private @Nullable Vec3 snatchAt, slamAt;
 	private boolean raging;
@@ -255,7 +255,7 @@ public class AetherGiant extends Monster {
 		entityData.define(GRAB_HELD, -1);
 	}
 
-	/** (0.7.265) How many ticks into its grab it is ({@link #GRAB_TOTAL} long), or -1 when it isn't grabbing (both sides). */
+	/** (0.7.267) How many ticks into its grab it is ({@link #GRAB_TOTAL} long), or -1 when it isn't grabbing (both sides). */
 	public int grabTick() {
 		long start = this.entityData.get(GRAB_START);
 		return start == Long.MIN_VALUE ? -1 : (int)(this.level().getGameTime() - start);
@@ -411,7 +411,7 @@ public class AetherGiant extends Monster {
 		}
 	}
 
-	// ---- its grab (0.7.265) ----------------------------------------------------------------------------------------
+	// ---- its grab (0.7.267) ----------------------------------------------------------------------------------------
 
 	/** What it may grab: anything living it may hurt that isn't riding, another Giant, or too big to lift. */
 	private boolean canGrab(LivingEntity prey) {

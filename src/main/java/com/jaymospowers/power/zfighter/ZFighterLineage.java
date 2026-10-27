@@ -597,7 +597,7 @@ public final class ZFighterLineage {
 			return;
 		}
 		if (ApeGrab.tick(player, live, level, now)) {
-			// (0.17.63) his grab has him: he stands and plays it out
+			// (0.17.67) his grab has him: he stands and plays it out
 			return;
 		}
 		if (wild || ApeRage.tick(player, live, level, now)) {
@@ -920,7 +920,7 @@ public final class ZFighterLineage {
 			player.removeAttached(WILD_GOAL);
 		}
 		if (now >= live.grabReadyAt && inReach(player, live, target) && ApeGrab.begin(player, live, level, target, now)) {
-			// (0.17.63) every so often the wild ape takes its quarry in hand instead
+			// (0.17.67) every so often the wild ape takes its quarry in hand instead
 			live.berserkSince = now;
 			return;
 		}

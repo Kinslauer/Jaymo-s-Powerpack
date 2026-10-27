@@ -45,7 +45,7 @@ abstract class ZFighterApeInputMixin extends ClientInput {
 			com.jaymospowers.client.power.zfighter.ApeRageClient.struggleKeys(this.keyPresses);
 		}
 		if (com.jaymospowers.power.zfighter.ApeGrab.grabbing(player)) {
-			// (0.17.63) his grab has him: he stands where he is (the wild ape's eyes stay on its catch, below)
+			// (0.17.67) his grab has him: he stands where he is (the wild ape's eyes stay on its catch, below)
 			this.keyPresses = Input.EMPTY;
 			this.moveVector = Vec2.ZERO;
 			if (ZFighterLineage.wild(player)) {
