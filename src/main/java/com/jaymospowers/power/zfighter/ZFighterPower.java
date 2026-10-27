@@ -419,6 +419,8 @@ public final class ZFighterPower implements Power {
 		ZFighterWeapons.init();
 		ZFighterFusion.init();
 		ZFighterMasters.init();
+		// (0.17.61) story sagas and side quests
+		ZFighterSagas.init();
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
 		ZFighterCorruption.init();

@@ -21,6 +21,10 @@ public final class ZFighterNet {
 	public static final int AURA_STYLE = 12;
 	/** (0.17.46) The training screen's wheel button: puts technique {@code index} on the technique wheel or takes it off. */
 	public static final int WHEEL_SLOT = 13;
+	/** (0.17.61) The Story screen: start saga {@code index / 3} at difficulty {@code index % 3}; give up the saga; give up job {@code index}. */
+	public static final int SAGA_START = 20;
+	public static final int SAGA_ABANDON = 21;
+	public static final int JOB_ABANDON = 22;
 	// (6 was the lineage pick: lineages now come from the heritage)
 
 	private ZFighterNet() {
@@ -295,6 +299,9 @@ public final class ZFighterNet {
 			case EQUIP_TECHNIQUE -> ZFighterTraining.equipTechnique(player, train.index());
 			case AURA_STYLE -> ZFighterAura.pick(player, train.index());
 			case WHEEL_SLOT -> ZFighterSlots.toggle(player, train.index());
+			case SAGA_START -> ZFighterSagas.start(player, train.index() / 3, train.index() % 3);
+			case SAGA_ABANDON -> ZFighterSagas.abandon(player);
+			case JOB_ABANDON -> ZFighterSideQuests.abandon(player, train.index());
 			default -> {
 			}
 		}
