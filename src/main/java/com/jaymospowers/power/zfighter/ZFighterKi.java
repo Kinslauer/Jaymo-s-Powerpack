@@ -983,6 +983,21 @@ public final class ZFighterKi {
 		BOLTS.add(bolt);
 	}
 
+	/**
+	 * (0.17.46) A big ball of ki (the Nova Sphere) thrown from {@code from}: it flies and bursts like a Ki Bomb, only bigger
+	 * ({@code size} blocks, burst reach {@code radius}, blast power {@code burst}); {@code griefing} lets the blast take the ground
+	 * (still only where mob griefing is on).
+	 */
+	static void throwBall(ServerPlayer player, Vec3 from, Vec3 velocity, float damage, int color, double size, double radius, float burst,
+		boolean griefing, int life) {
+		Bolt bolt = new Bolt(player.level(), player.getUUID(), from, velocity, damage, color, BOMB, life);
+		bolt.size = size;
+		bolt.radius = radius;
+		bolt.burst = burst;
+		bolt.griefing = griefing;
+		BOLTS.add(bolt);
+	}
+
 	private static void exhaust(ServerPlayer player, float amount) {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(amount);
@@ -995,7 +1010,11 @@ public final class ZFighterKi {
 		if (com.jaymospowers.core.BeamClash.resting(player)) {
 			return;
 		}
-		float min = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI * signature(live).ki();
+		int type = ZFighterTraining.of(player).charged();
+		if (ZFighterArts.charged(type) && !ZFighterArts.canGather(player, live, type)) {
+			return;
+		}
+		float min = ZFighterArts.charged(type) ? ZFighterArts.min(type) : type == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI * signature(live).ki();
 		if (live.ki < min && !player.isCreative() && !live.raging()) {
 			ZFighterPower.spend(player, live, min);
 			return;
@@ -1006,12 +1025,14 @@ public final class ZFighterKi {
 
 	/** The charge (0-1) of a wave gathered since {@code from}, held back to what his ki can pay for. */
 	private static float charge(ServerPlayer player, ZFighterPower.Live live, long now) {
-		boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
+		int type = ZFighterTraining.of(player).charged();
+		boolean bomb = type == ZFighterTraining.KI_BOMB;
+		boolean art = ZFighterArts.charged(type);
 		Signature sig = signature(live);
-		float charge = Mth.clamp((now - live.waveFrom) / (float)(bomb ? WAVE_FULL : sig.full()), 0.0F, 1.0F);
+		float charge = Mth.clamp((now - live.waveFrom) / (float)(art ? ZFighterArts.full(type, WAVE_FULL) : bomb ? WAVE_FULL : sig.full()), 0.0F, 1.0F);
 		if (!player.isCreative() && !live.raging()) {
-			float min = bomb ? BOMB_MIN_KI : WAVE_MIN_KI * sig.ki();
-			float affordable = (live.ki - min) / ((bomb ? BOMB_MAX_KI : WAVE_MAX_KI * sig.ki()) - min);
+			float min = art ? ZFighterArts.min(type) : bomb ? BOMB_MIN_KI : WAVE_MIN_KI * sig.ki();
+			float affordable = (live.ki - min) / ((art ? ZFighterArts.max(type) : bomb ? BOMB_MAX_KI : WAVE_MAX_KI * sig.ki()) - min);
 			charge = Math.min(charge, Mth.clamp(affordable, 0.0F, 1.0F));
 		}
 		return charge;
@@ -1025,6 +1046,12 @@ public final class ZFighterKi {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		float charge = charge(player, live, now);
+		int type = ZFighterTraining.of(player).charged();
+		if (ZFighterArts.charged(type)) {
+			// (0.17.46) the drill beam, triangle cannon and nova sphere gather their own way
+			ZFighterArts.gather(player, live, type, charge);
+			return;
+		}
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 hands = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
 		RandomSource random = level.getRandom();
@@ -1061,12 +1088,20 @@ public final class ZFighterKi {
 		ServerLevel level = player.level();
 		float charge = charge(player, live, level.getGameTime());
 		live.waveFrom = -1L;
-		boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
-		float cost = bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI) * signature(live).ki();
+		int type = ZFighterTraining.of(player).charged();
+		boolean bomb = type == ZFighterTraining.KI_BOMB;
+		boolean art = ZFighterArts.charged(type);
+		if (art && ZFighterArts.blocker(player, live, type) != null) {
+			return false;
+		}
+		float cost = art ? Mth.lerp(charge, ZFighterArts.min(type), ZFighterArts.max(type))
+			: bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI) * signature(live).ki();
 		if (!ZFighterPower.spend(player, live, cost)) {
 			return false;
 		}
-		if (bomb) {
+		if (art) {
+			ZFighterArts.release(player, live, type, charge);
+		} else if (bomb) {
 			fireBomb(player, live, charge);
 		} else {
 			fireWave(player, live, charge);
@@ -1150,7 +1185,7 @@ public final class ZFighterKi {
 	}
 
 	/** A bolt's or beam's colour: the base blast's, or the form's in his lineage's hue. */
-	private static int formColor(ZFighterPower.Live live) {
+	static int formColor(ZFighterPower.Live live) {
 		// (0.13.27) in base form, his own ki colour
 		return live.form == 0 ? live.kiColor >= 0 ? live.kiColor : ZFighterPower.FORM_COLOR[0] : ZFighterLineage.color(live.lineage, live.form);
 	}

@@ -1,0 +1,22 @@
+{
+  "technique.jaymospowers.zfighter.drill_beam": "Drill Beam",
+  "technique.jaymospowers.zfighter.drill_beam.desc": "Hold sneak + V, let go: a thin, fast beam wound with a double spiral from two fingers. It pierces every creature in a line, up to 48 blocks, and bores through soft blocks (with mob griefing on it breaks them), stopping at a hard one with a small blast that tears nothing. 25 to 45 ki, 7 s to recharge.",
+  "technique.jaymospowers.zfighter.ring_of_orbs": "Ring of Orbs",
+  "technique.jaymospowers.zfighter.ring_of_orbs.desc": "On G: 8 to 12 small ki orbs form a ring round the foe you have locked (else the one in view) and hang for a second, then all close in at once. Each hits for a little; if the foe has stepped out of the ring's middle they all miss. 30 ki, 15 s to recharge.",
+  "technique.jaymospowers.zfighter.triangle_cannon": "Triangle Cannon",
+  "technique.jaymospowers.zfighter.triangle_cannon.desc": "Hold sneak + V, let go: your hands make a triangle and a crushing blast leaves it angled down, to land a few blocks ahead and leave a crater (with mob griefing on). It costs health as well as ki: 2 hearts at full charge, never below 1 heart; an Earthling pays half the health. 35 to 65 ki, 12 s to recharge.",
+  "technique.jaymospowers.zfighter.rising_dome": "Rising Dome",
+  "technique.jaymospowers.zfighter.rising_dome.desc": "On G: an uppercut of ki knocks the foe in front of you skyward, then half a second later a pillar of ki erupts upward under it. Good after a combo finisher. The foe must be within 6 blocks. 25 ki, 13 s to recharge.",
+  "technique.jaymospowers.zfighter.ki_rain": "Ki Rain",
+  "technique.jaymospowers.zfighter.ki_rain.desc": "On G: a spray of ki shoots upward, and a second later it rains small bolts for 2.5 s over a 6-block circle round the foe you have locked, or where you look, hurting whatever is under it. 35 ki, 15 s to recharge.",
+  "technique.jaymospowers.zfighter.nova_sphere": "Nova Sphere",
+  "technique.jaymospowers.zfighter.nova_sphere.desc": "Hold sneak + V, let go: a huge ball of ki raised over your head, bigger than a Ki Bomb and slower, thrown where you look to burst in a big blast that takes the ground (with mob griefing on). Can't be used in base form unless you are Frost-born, who also pay half the TP. 55 to 95 ki, 20 s to recharge.",
+  "technique.jaymospowers.zfighter.rage_scream": "Rage Scream",
+  "technique.jaymospowers.zfighter.rage_scream.desc": "On G: a shout that throws everyone within 8 blocks back and breaks their poise. Only while you are in Rage or under a quarter of your health. 30 ki (none in Rage), 20 s to recharge.",
+  "technique.jaymospowers.zfighter.afterimage": "Afterimage",
+  "technique.jaymospowers.zfighter.afterimage.desc": "On G: you blink 6 blocks aside and leave a still copy of yourself where you stood for 3 s. Mobs after you turn on it, and it pops on the first hit. 30 ki, 12 s to recharge.",
+  "message.jaymospowers.zfighter_arts_nofoe": "Nothing to aim at.",
+  "message.jaymospowers.zfighter_nova_base": "The Nova Sphere is too much for base form. It needs a form, or Frost-born blood.",
+  "message.jaymospowers.zfighter_scream_calm": "You are too calm to scream. It needs Rage, or a body near its end.",
+  "message.jaymospowers.zfighter_afterimage_nospace": "No room to blink aside."
+}
