@@ -754,7 +754,7 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.252, Andy: "keep the default spawn of your start") Where they wake after dying, till a bed says otherwise:
+	 * (0.7.253, Andy: "keep the default spawn of your start") Where they wake after dying, till a bed says otherwise:
 	 * where their story began. (A whaler's hand is put back aboard her by {@link Whalers}, else wakes at her harbour.)
 	 */
 	static void home(ServerPlayer player, ServerLevel level, BlockPos at) {

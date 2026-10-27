@@ -5456,7 +5456,7 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
   only one realm in two), Epic Knights doesn't replace it, and with MCA every settlement there puts its MCA guards in it.
   Not seen in game.
 
-## 0.7.252: you wake where your story began
+## 0.7.253: you wake where your story began
 - **Respawn at your start.** Every life story start now sets your respawn point (forced, no bed needed) where it
   placed you (`LifeStory.home`), so dying doesn't send you to the world spawn; sleeping in a bed moves it as usual.
 - **Whalers wake aboard.** A signed hand who dies is put back on her deck (`Whalers.reboard`) while she's within

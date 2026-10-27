@@ -217,7 +217,7 @@ public final class Whalers {
 	}
 
 	/**
-	 * (0.7.252, Andy: "it should put me back on the boat") A signed hand who died is back on her deck, if she's still
+	 * (0.7.253, Andy: "it should put me back on the boat") A signed hand who died is back on her deck, if she's still
 	 * within reach (else they wake at her harbour, their story's spawn).
 	 */
 	private static void reboard(ServerPlayer player) {
@@ -375,7 +375,7 @@ public final class Whalers {
 			v.hands.add(player.getUUID());
 			put(server, best.id(), v);
 		}
-		// (0.7.252) their story's spawn: her harbour, should she be out of reach when they die
+		// (0.7.253) their story's spawn: her harbour, should she be out of reach when they die
 		LifeStory.home(player, level, bestHarbour.shore());
 		String name = ship.crew != null ? ship.crew.name : best.name();
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.whalers", name).withStyle(ChatFormatting.AQUA));
