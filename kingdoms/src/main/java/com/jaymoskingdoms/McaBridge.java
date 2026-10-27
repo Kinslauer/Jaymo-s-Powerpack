@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -449,8 +450,8 @@ final class McaBridge {
 	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a
 	 * fisherman), enlisted to the folk's side in its role. The folk is left for the caller.
 	 */
-	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk, boolean sailor) {
-		VillagerProfession job = sailor ? BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value() : ProfessionsMCA.GUARD;
+	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk, boolean knight) {
+		VillagerProfession job = knight ? ProfessionsMCA.GUARD : BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
@@ -467,6 +468,10 @@ final class McaBridge {
 				continue;
 			}
 			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			if (!knight && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && Crewmen.plate(worn)) {
+				// (0.7.246) no plate at sea but her knight's
+				continue;
+			}
 			villager.setItemSlot(slot, worn.copy());
 			villager.setDropChance(slot, 0.0F);
 			if (!worn.isEmpty() && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
@@ -492,6 +497,62 @@ final class McaBridge {
 		worker(villager).enlist(folk.role(), folk.factionId());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
 		return villager;
+	}
+
+	/** (0.7.246) {@code villager} has seen {@code player} before: MCA greets them as no stranger (no "first" greeting). */
+	static void met(LivingEntity villager, ServerPlayer player) {
+		if (villager instanceof VillagerEntityMCA v) {
+			com.google.gson.JsonObject seen = new com.google.gson.JsonObject();
+			seen.addProperty("id", "seen");
+			seen.addProperty("var", "player");
+			v.getLongTermMemory().remember(net.conczin.mca.entity.ai.LongTermMemory.parseId(seen, player));
+		}
+	}
+
+	/**
+	 * (0.7.246) MCA's menu opening on {@code villager} ("root"): if they know of {@code player} (a shipmate, or one about
+	 * their story: {@link StoryTalk#opening}), they open with that and go to the main menu, never the stranger's greeting;
+	 * true if so (MCA's own opening is skipped).
+	 */
+	static boolean storyOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Languages.understands(player, villager)) {
+			return false;
+		}
+		String told = "jaymoskingdoms.story." + player.getUUID();
+		var memory = villager.getLongTermMemory();
+		Component line = StoryTalk.opening(player, villager, memory.hasMemory(told));
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (line == null || main == null) {
+			return false;
+		}
+		met(villager, player);
+		memory.remember(told);
+		if (StoryTalk.shipmate((ServerLevel) villager.level(), player, villager)) {
+			Introductions.learn(player, villager);
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	static void toSea(PathfinderMob mob) {
+		if (!(mob instanceof VillagerEntityMCA villager)) {
+			return;
+		}
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && Crewmen.plate(villager.getItemBySlot(slot))) {
+				villager.setItemSlot(slot, net.minecraft.world.item.ItemStack.EMPTY);
+			}
+		}
+		var pack = villager.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (Crewmen.plate(pack.getItem(i)) && pack.getItem(i).has(net.minecraft.core.component.DataComponents.EQUIPPABLE)) {
+				pack.setItem(i, net.minecraft.world.item.ItemStack.EMPTY);
+			}
+		}
+		if (villager.getProfession() == ProfessionsMCA.GUARD) {
+			villager.setProfession(BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value());
+		}
 	}
 
 	private static int tier(VillagerEntityMCA v) {

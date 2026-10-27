@@ -68,6 +68,15 @@ public final class ShipClient {
 	}
 
 	/** (0.7.18) At the helm, a left click fires a broadside to the side you look. True if it did (the click's used). */
+	/**
+	 * (0.7.246) Whether EMF should leave this entity's model alone (EmfBladePause): one of a ship's crew at their station,
+	 * who stands there (HumanoidHelmStanceMixin) rather than taking any riding pose an EMF pack has for them.
+	 */
+	public static boolean crewAboard(Object entity) {
+		return entity instanceof net.minecraft.world.entity.LivingEntity living && !(living instanceof net.minecraft.world.entity.player.Player)
+			&& living.getVehicle() instanceof Ship;
+	}
+
 	public static boolean broadside(Minecraft mc) {
 		LocalPlayer you = mc.player;
 		if (you == null || !(you.getVehicle() instanceof Ship ship)) {

@@ -20,6 +20,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
@@ -55,6 +56,14 @@ import org.jspecify.annotations.Nullable;
 public final class Crewmen {
 	/** The entity tag every crew villager carries (kept in their save): a ship's crewman, not any town's. */
 	public static final String TAG = "jaymoskingdoms.crewman";
+	/** (0.7.246) Her one knight: the only crewman in mail or plate. */
+	static final String KNIGHT = TAG + ".knight";
+	/** (0.7.246) What an armour piece's id holds if it's mail or plate. */
+	private static final List<String> PLATE = List.of("chainmail", "iron", "gold", "diamond", "netherite", "copper", "steel", "knight");
+	/** (0.7.246) How often (ticks) a crew from before is looked over for plate. */
+	static final int DRESS_EVERY = 100;
+	/** (0.7.246) One deck line in this many is said to a hand of hers near, by their berth; and how many there are. */
+	static final int MATE_ONE_IN = 2, TO_HAND_LINES = 6;
 	/** How far they take a foe of their own (a boarder, a cove's prey) aboard her; how far they chase a foe with their eyes before letting go. */
 	static final double SIGHT = 16.0, LET_GO = 40.0;
 	/** How long (ticks) whoever hurt them stays their foe. */
@@ -145,13 +154,70 @@ public final class Crewmen {
 	 * {@code folk}, set up for its role and not yet in the world (or one of a crew already aboard), as an MCA villager
 	 * at its place; null without MCA or if one couldn't be made (then the folk sails).
 	 */
-	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side) {
-		PathfinderMob v = McaCompat.crewman(level, folk, sailor(side, folk.role()));
+	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side, Ship ship, boolean captain) {
+		// (0.7.246) Andy: "you're not wearing full plate out to sea": her first hand in mail or plate (never her captain)
+		// is her one knight, a guard in his armour; everyone else sails as a sailor, in cloth and leather
+		boolean knight = !captain && plated(folk) && !knighted(ship, null);
+		PathfinderMob v = McaCompat.crewman(level, folk, knight);
 		if (v != null) {
 			v.addTag(TAG);
 			v.addTag(sideTag(side));
+			if (knight) {
+				v.addTag(KNIGHT);
+			}
 		}
 		return v;
+	}
+
+	// ---- (0.7.246) dressed for the sea ---------------------------------------------------------------------------------
+
+	/** Whether {@code worn} (an armour piece) is mail or plate: no deck wear but for her one knight. */
+	static boolean plate(ItemStack worn) {
+		if (worn.isEmpty()) {
+			return false;
+		}
+		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath();
+		for (String metal : PLATE) {
+			if (path.contains(metal)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Whether {@code mob} wears any mail or plate. */
+	static boolean plated(LivingEntity mob) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && plate(mob.getItemBySlot(slot))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Whether {@code ship} already carries her knight (besides {@code but}). */
+	private static boolean knighted(Ship ship, @Nullable LivingEntity but) {
+		for (LivingEntity e : ship.crewAboard()) {
+			if (e != but && e.entityTags().contains(KNIGHT)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * A crew from before (0.7.242-0.7.245, every fighter in his folk's plate): the first in plate who isn't her captain is
+	 * her knight, and the rest take theirs off and sail as sailors.
+	 */
+	private static void dress(Ship ship, Crew crew, PathfinderMob mob) {
+		if (mob.entityTags().contains(KNIGHT) || !plated(mob)) {
+			return;
+		}
+		if (!mob.getUUID().equals(crew.captain) && !knighted(ship, mob)) {
+			mob.addTag(KNIGHT);
+			return;
+		}
+		McaCompat.toSea(mob);
 	}
 
 	/**
@@ -168,7 +234,7 @@ public final class Crewmen {
 		if (seat == null) {
 			return false;
 		}
-		PathfinderMob v = villager(level, folk, crew.side);
+		PathfinderMob v = villager(level, folk, crew.side, ship, folk.getUUID().equals(crew.captain));
 		if (v == null) {
 			return false;
 		}
@@ -311,6 +377,17 @@ public final class Crewmen {
 		}
 		Crew crew = ship.crew;
 		long now = level.getGameTime();
+		if ((mob.tickCount + mob.getId()) % DRESS_EVERY == 0) {
+			dress(ship, crew, mob);
+			if (crew.side == Crew.Side.WHALER) {
+				// (0.7.246) her own hands aboard and her crew know each other: no introductions among shipmates
+				for (ServerPlayer p : Corsairs.playersAboard(level, ship)) {
+					if (StoryTalk.shipmate(level, p, mob)) {
+						StoryTalk.knowEachOther(p, mob);
+					}
+				}
+			}
+		}
 		LivingEntity foe = foe(level, mob, w, ship, crew);
 		if (foe != null) {
 			fight(level, mob, w, foe, now);
@@ -461,7 +538,11 @@ public final class Crewmen {
 			for (ServerPlayer p : aboard) {
 				if (!welcomed.contains(p.getUUID()) && p.distanceTo(mob) < WELCOME_RANGE * 2.0 && !hostile(level, w, crew, p)) {
 					welcomed.add(p.getUUID());
-					Speech.sayTo(level, mob, p, Component.translatable("speech.jaymoskingdoms.crew.welcome." + crew.side.id(), crew.name), Speech.YELLOW);
+					// (0.7.246) one of her own hands: welcomed back aboard by their berth, not as a guest
+					Component welcome = StoryTalk.shipmate(level, p, mob)
+						? Component.translatable("speech.jaymoskingdoms.crew.welcome.hand", crew.name, StoryTalk.berth(p, mob))
+						: Component.translatable("speech.jaymoskingdoms.crew.welcome." + crew.side.id(), crew.name);
+					Speech.sayTo(level, mob, p, welcome, Speech.YELLOW);
 					NEXT_LINE.put(ship.getUUID(), now + CHAT_GAP);
 					return;
 				}
@@ -478,6 +559,13 @@ public final class Crewmen {
 			return;
 		}
 		NEXT_LINE.put(ship.getUUID(), now + CHAT_GAP + random.nextInt(CHAT_JITTER));
+		if (near instanceof ServerPlayer hand && random.nextInt(MATE_ONE_IN) == 0 && StoryTalk.shipmate(level, hand, mob)) {
+			// (0.7.246) a word to one of her own hands, by their berth
+			mob.getLookControl().setLookAt(hand, 30.0F, 30.0F);
+			Speech.sayTo(level, mob, hand, Component.translatable("speech.jaymoskingdoms.crew.to_hand." + random.nextInt(TO_HAND_LINES),
+				StoryTalk.berth(hand, mob), crew.name), Speech.WHITE);
+			return;
+		}
 		Component line;
 		Temperaments.Temperament t = Temperaments.of(mob);
 		if (t != null && random.nextInt(TEMPER_ONE_IN) == 0) {
