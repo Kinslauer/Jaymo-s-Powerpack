@@ -3045,3 +3045,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   powder monkey, villagers near where your story starts talk about it, one knight at most per ship (the rest dressed as
   sailors), crews stand on deck instead of sitting as if riding, run to get the downed up (you too), and ship stairs
   can be climbed.
+- **0.17.35, the helmet gesture loop:** Andy kept touching his head every two seconds in first person with an iron
+  helmet on (the stray head-touch blamed on wounds in 0.16.21). Touch'n Motion's ArmorDon plays its helmet gesture when
+  the head slot's item changes, and it reads the slot while the model draws; First-person Model's PlayerMixin answers
+  `getItemBySlot(HEAD)` with nothing while it draws your own body, so the helmet seemed to come off and go back on all
+  the time. `client/mixin/tnm/TnmArmorDonMixin` (optional, `@Pseudo`) makes ArmorDon read the armour slots from the
+  inventory instead, which First-person Model doesn't touch.
