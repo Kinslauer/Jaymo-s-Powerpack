@@ -409,6 +409,11 @@ public final class Quests {
 			Bounties.act(player, act);
 			return;
 		}
+		if (act.entityId() == QuestNet.ORDERS) {
+			// (0.7.256) a board's merchant orders
+			MerchantOrders.act(player, act);
+			return;
+		}
 		Entity found = level.getEntity(act.entityId());
 		if (act.action() == QuestNet.CLOSE) {
 			if (found instanceof LivingEntity giver && HELD.containsKey(giver) && HELD.get(giver).player() == player) {

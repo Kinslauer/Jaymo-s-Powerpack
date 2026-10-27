@@ -661,7 +661,7 @@ public final class Bounties {
 		Map<String, String> map = new HashMap<>(pinned(level));
 		map.put(spot(pos), key);
 		level.setAttached(PINNED, Map.copyOf(map));
-		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, TownNotices.is(key) ? BountyBoard.TOWN : BountyBoard.WANTED), Block.UPDATE_CLIENTS);
+		level.setBlock(pos, state.setValue(BountyBoard.NOTICE, TownNotices.is(key) || MerchantOrders.is(key) ? BountyBoard.TOWN : BountyBoard.WANTED), Block.UPDATE_CLIENTS);
 	}
 
 	/** Whatever notice is on the board block at {@code pos} comes off. */
@@ -694,6 +694,12 @@ public final class Bounties {
 			return;
 		}
 		String key = pinned(level).get(spot(pos));
+		if (key != null && MerchantOrders.is(key)) {
+			// (0.7.256) the merchant orders sheet stays up: it's read
+			MerchantOrders.open(level, player, BountyBoard.anchor(pos, state));
+			level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.0F);
+			return;
+		}
 		if (key != null && TownNotices.is(key)) {
 			if (TownNotices.pull(level, player, key)) {
 				unpin(level, pos);
@@ -1229,7 +1235,8 @@ public final class Bounties {
 			}
 			Bounty b = all.get(e.getValue());
 			BlockState state = level.getBlockState(pos);
-			boolean over = TownNotices.is(e.getValue()) ? TownNotices.expired(e.getValue(), now) : b == null || b.dead() || b.takenByAnyone(now);
+			boolean over = MerchantOrders.is(e.getValue()) ? state.is(BOARD) && !BountyBoard.anchor(pos, state).equals(MerchantOrders.boardOf(e.getValue()))
+				: TownNotices.is(e.getValue()) ? TownNotices.expired(e.getValue(), now) : b == null || b.dead() || b.takenByAnyone(now);
 			if (over || !state.is(BOARD) || !BountyBoard.pinned(state)) {
 				unpin(level, pos);
 			}
@@ -1258,19 +1265,31 @@ public final class Bounties {
 			Direction facing = state.getValue(BountyBoard.FACING);
 			List<BlockPos> bare = new ArrayList<>();
 			int town = 0;
+			String sheet = MerchantOrders.sheetKey(anchor);
 			for (int c = 0; c < BountyBoard.WIDTH; c++) {
 				for (int r = 0; r < BountyBoard.HEIGHT; r++) {
 					BlockPos p = BountyBoard.part(anchor, facing, c, r);
 					BlockState s = level.getBlockState(p);
 					if (s.is(BOARD) && !BountyBoard.pinned(s)) {
 						bare.add(p);
-					} else if (s.is(BOARD) && s.getValue(BountyBoard.NOTICE) == BountyBoard.TOWN) {
+					} else if (s.is(BOARD) && s.getValue(BountyBoard.NOTICE) == BountyBoard.TOWN && !sheet.equals(pinned(level).get(spot(p)))) {
 						town++;
 					}
 				}
 			}
 			Faction court = bare.isEmpty() ? null : courtAt(level, anchor);
 			if (court == null) {
+				continue;
+			}
+			// (0.7.256) every town board gets a merchant orders sheet first, and it stays up
+			if (!up.contains(sheet) && random.nextFloat() < MerchantOrders.SHEET_CHANCE) {
+				Villager clerk = poster(level, anchor);
+				if (clerk != null) {
+					clerk.setItemSlot(EquipmentSlot.MAINHAND, MerchantOrders.sheet(sheet));
+					BlockPos slot = bare.get(random.nextInt(bare.size()));
+					ERRANDS.put(clerk.getUUID(), new Errand(clerk.getUUID(), anchor.immutable(), slot.immutable(), sheet, now + POST_TIMEOUT));
+					up.add(sheet);
+				}
 				continue;
 			}
 			Bounty next = null;
@@ -1314,8 +1333,9 @@ public final class Bounties {
 			Villager v = level.getEntity(e.villager()) instanceof Villager found ? found : null;
 			BlockState state = level.getBlockState(e.slot());
 			Bounty b = all.get(e.key());
-			boolean town = TownNotices.is(e.key());
-			boolean over = town ? TownNotices.expired(e.key(), now) : b == null || b.dead() || b.takenByAnyone(now);
+			boolean orders = MerchantOrders.is(e.key());
+			boolean town = TownNotices.is(e.key()) || orders;
+			boolean over = orders ? false : town ? TownNotices.expired(e.key(), now) : b == null || b.dead() || b.takenByAnyone(now);
 			if (v == null || !v.isAlive() || now > e.until() || v.isSleeping() || Downed.isDowned(v) || !state.is(BOARD)
 				|| BountyBoard.pinned(state) || over || !v.getMainHandItem().is(town ? TownNotices.ITEM : NOTICE_ITEM)) {
 				if (v != null) {
@@ -1335,7 +1355,7 @@ public final class Bounties {
 				level.playSound(null, e.slot(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
 				if (town) {
 					if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
-						Speech.say(level, v, TownNotices.callOut(e.key(), level.getRandom()), Speech.WHITE, 12.0);
+						Speech.say(level, v, orders ? MerchantOrders.callOut(level.getRandom()) : TownNotices.callOut(e.key(), level.getRandom()), Speech.WHITE, 12.0);
 					}
 				} else if (level.getRandom().nextFloat() < POST_SAY_CHANCE) {
 					Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.bounty.posting." + level.getRandom().nextInt(3),
