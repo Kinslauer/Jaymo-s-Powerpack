@@ -3109,3 +3109,50 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Parties.members` by reflection (falls back to the player alone); kills and bouts credit the party within 64 blocks.
   Escort jobs were left out (they need a following villager and could not be tried here). Compile-checked only; not
   seen in game. Abilities rows 441 to 450.
+- **0.17.62, the space pod and planet missions (Andy's NOEA picks, patch 8 track A):** `ZFighterSpace`: a craftable Space Pod
+  (a block; right-click opens the Star Map, `ZFighterStarMapScreen`) that flies to five new dimensions of our own, each with
+  datapack terrain (`tools/gen_zfighter_space.py` writes the JSON and the art): the Pale Moon (own noise settings and surface rule,
+  dry aquifers, gravity 35% via an attribute modifier), Rustfall (the Overworld's noise with a checkerboard of badlands biomes,
+  gravity 2.2, slower, lower jumps, Z Fighters train twice as fast), Glacia (the Overworld's noise with the sea at 84 over snowy
+  and ice-spike biomes), Cinder (the Nether's noise settings with our own biome adding iron, diamond, emerald and redstone veins
+  to the Nether's; heat is extra exhaustion) and the Maw (a flat void with a black sphere, a glass ring, a slow pull on players
+  and a tide at the rim, nine floating wrecks with the `chests/maw_wreck` loot table). The Verdant World and the future join
+  the map (the future through new public `Future.podReady/podGo/podBack`, with no Echo needed, and a pod set down beside the
+  arrival). Travel is a 3 second countdown, a lift, and a controlled descent onto a landing pad found, flattened and built on
+  the first landing (saved on the dimension as `zfighter_space_pad`) with a pod standing on it; Home brings you down by the pod
+  you left from (`zfighter_space_home`). `ZFighterSpaceMissions`: on Rustfall, Glacia and Cinder a mission to free the world
+  (4 captains, then a boss) or conquer it (4 champions, then plant a Conquest Flag), picked by the Rogue path in Jaymo's
+  Kingdoms (`ZFighterKingdoms.rogue`; without Kingdoms, freeing); the fighters are our rogue tyrants scaled down (and by the
+  planet and the party), tagged so the raid prize skips them; kills and the flag count for the killer's party within 64 blocks
+  (`ZFighterSagas.witnesses`); TP, ores and a planet title are the prize; progress is the synced `zfighter_space` attachment.
+  Compile-checked only. Not seen in game: none of the dimension JSON has been loaded by a server (see the track report's
+  worldgen caveats). Abilities rows 456 to 467.
+- **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B; reworked onto the pack's own worlds at Andy's
+  request: no new dimensions, no portals, no rite):** `ZFighterAfterlife`: a Z Fighter who truly dies (an `AFTER_DEATH` that
+  something else has not cancelled, not at the Other World already, `afterlife=true` in `config/jaymospowers-server.properties`,
+  the file `ZFighterRealism` reads, written with the new key when missing) is noted, and one tick after his normal respawn is
+  moved to the Other World, a site in the Aether (`jaymospowers:aether`, the dimension Wind rises into) at x 20000, z 20000, floor
+  y 200 (`SITE_X`, `SITE_Z`, `FLOOR`): far from the lowland islands Wind arrives on, above them and the broken islets. The first
+  arrival builds it by code: an elliptical platform (108 by 92 blocks, aether grass over aether dirt over holystone, hanging
+  deeper at the middle) with the air over it cleared, and on it the hall, a 40-block quartz road south to a pavilion, the
+  tournament ring and the fortune teller's tent (no ground to search for: the site is always a platform, so it never depends on
+  the islands' noise). "In the Other World" is now "within 64 blocks of the platform's middle in the Aether"
+  (`inSite`, `inOtherWorld`); the training bonus uses it too. The death is never touched, so drops, the keep-inventory rule,
+  Kitchen's corpses, the downed state, wounds and every other mod's death handling run as before. He wakes in the judge's hall
+  with a halo (the `zfighter_afterlife_stay` attachment, synced to all; `ZFighterHalo` draws a ring of gold dust on each
+  client). The Master of the Road gives one lesson a stay and bonus TP (training pays 1.5 times at the site), a ring with a bell
+  holds three bouts against spirit fighters (vanilla vindicators with no axe) for TP, and a fortune teller sends him back
+  free after the tournament, for 24 emeralds or 400 TP, or by the new 13th wish (`ZFighterWishes.CALL_BACK`, lang
+  `wish.jaymospowers.zfighter.call_back`). After 30 minutes he is let go anyway; falling off the island takes him out of the
+  Aether as it takes anyone (Wind's fall-home) and the halo is dropped. A player who reaches the site alive (Wind) has no halo
+  and no timer and is never sent back, but may use the master, the ring and the training bonus. `ZFighterDemonRealm`: the three
+  demon biomes (`demon_gloam`, `demon_ash`, `demon_abyss`, valid Nether biomes with the Nether's carver, ores, springs and
+  glowstone) are added to the vanilla Nether's biome source with Fabric's `NetherBiomes.addNetherBiome`, at far corners of the
+  Nether's temperature and humidity plane that the vanilla biomes leave empty (Gloam 0.6, -0.65; Ash -0.7, -0.7; Abyss 0.85, 0.85;
+  the other climate axes 0, as the Nether's are), so they are uncommon, the Abyss the rarest. Villages are built by code in a
+  seeded grid of 128-block cells when a player is within 56 blocks and the spot (and its four edge points) is in a demon biome,
+  each with a dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark
+  lesson; the army is vanilla fighters under a demon name and tag, spawned in squads around each player standing in a demon
+  biome, stronger from the Gloam to the Ash to the Abyss (the old three layers). Compile-checked only; how rare the biomes come
+  out, the platform's first build (about 40 chunks of Aether generated at once), the Nether villages' fit to the caves, and both
+  death-time moves have not been seen in game. Abilities rows 468 to 478.

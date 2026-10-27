@@ -1,0 +1,16 @@
+{
+  "type": "jaymospowers:rustfall",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "minecraft:overworld",
+    "biome_source": {
+      "type": "minecraft:checkerboard",
+      "scale": 6,
+      "biomes": [
+        "minecraft:badlands",
+        "minecraft:eroded_badlands",
+        "minecraft:wooded_badlands"
+      ]
+    }
+  }
+}

@@ -149,6 +149,10 @@ public final class ZFighterRaids {
 		if (tyrant.entityTags().contains(ZFighterSagas.BOSS_TAG)) {
 			return;
 		}
+		// (0.17.62) a planet mission's fighters pay through the mission
+		if (tyrant.entityTags().contains(ZFighterSpaceMissions.FOE_TAG)) {
+			return;
+		}
 		// (0.17.60) the head of an invasion: the invasion pays out
 		if (ZFighterInvasions.tyrantFell(level, tyrant)) {
 			return;

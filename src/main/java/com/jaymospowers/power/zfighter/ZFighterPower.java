@@ -421,8 +421,12 @@ public final class ZFighterPower implements Power {
 		ZFighterMasters.init();
 		// (0.17.61) story sagas and side quests
 		ZFighterSagas.init();
+		// (0.17.62) the space pod, the far places and their missions
+		ZFighterSpace.init();
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
+		ZFighterAfterlife.init();
+		ZFighterDemonRealm.init();
 		ZFighterCorruption.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();

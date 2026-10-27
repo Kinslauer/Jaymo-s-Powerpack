@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:ore",
+  "discard_chance_on_air_exposure": 0.2,
+  "size": 2,
+  "targets": [
+    {
+      "state": "minecraft:emerald_ore",
+      "target": {
+        "block": "minecraft:netherrack",
+        "predicate_type": "minecraft:block_match"
+      }
+    }
+  ]
+}
