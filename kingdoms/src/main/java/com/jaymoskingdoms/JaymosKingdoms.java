@@ -54,6 +54,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Barbarians.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
+		BlossomVillages.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
