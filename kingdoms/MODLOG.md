@@ -5543,3 +5543,21 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
   Berry-glossed), marks from `tools/gen_race_looks.py`, a halo model part, lang lines, a place in the life story (born at a
   hilltop shrine, in a workshop's vats, at a travelling fair), villagers (Rubber-folk fairly common, Divine-born very rare,
   Bio-built only by inheritance), MCA skin tints and skin ranges.
+
+## 0.7.263: the monoliths stand three times as big, of the Aether's own stone, broken only by high-tier Tinkers tools (pack 0.17.57)
+
+- Andy: "the monoliths should be triple their current size and be built from the materials their respective aether
+  materials. they are only mineable with high teir tinker tools."
+- **Triple size** (`Monoliths.SCALE`): the same design, every block of it now a 3x3x3 cube. The pillar is 9 wide and
+  39 to 54 tall, its broken crown 3 wide, its core and four shards 3 blocks a side, its ground 12 out, and its rubble
+  lies 9 to 15 out in pieces up to 3 across. Ground under it may be 6 uneven (was 4). Giants rise 16 to 22 out (was 9 to
+  14), clear of the pillar, and spare the whole monolith when they trample (`Monoliths.part`).
+- **Aether materials** (`Element`, Jaymo's Powers' blocks looked up by id; the old vanilla blocks without Powers):
+  Highfield holystone banded with holystone bricks, a zanite core, on Aether grass; Magnetic ferrosite banded with
+  undershale bricks, a gravitite core, on ferrosite sand; Arctic icestone banded with icestone bricks, an arkenium core,
+  on arctic snow; Irradiated irradiated holystone banded with agiosite bricks, an ambrosium core, on coarse Aether dirt.
+- **Only high-tier Tinkers tools:** a monolith's stone, bands and core (ours, on the Overworld) break only to a Jaymo's
+  Powers Tinkers mining tool of diamond tier or better (amethyst bronze, pig iron, slimesteel or steel head; checked by
+  the tool's own tier rule, `Monoliths.highTinkers`). Anything else is told so and the block stands; creative is
+  unaffected. Explosions and pistons aren't stopped. Monoliths raised before keep their old look; their core still goes
+  dark when their Giant falls. Not seen in game.
