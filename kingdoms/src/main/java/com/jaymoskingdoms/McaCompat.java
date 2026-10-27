@@ -396,6 +396,14 @@ public final class McaCompat {
 		return LOADED && Barbarians.mayBecomeVillager(level, folk) && McaBridge.convertRaider(level, folk);
 	}
 
+	/**
+	 * (0.7.242) With MCA, a ship's crewman as one of its villagers: in {@code folk}'s place (set up for its role), in
+	 * the world, with its blood, gear and side; a guard, or {@code sailor} a fisherman. Null without MCA (the folk sails).
+	 */
+	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk, boolean sailor) {
+		return LOADED ? McaBridge.crewman(level, folk, sailor) : null;
+	}
+
 	/** (0.7.148) A fallen camp's MCA villagers scatter (gone, as its folk are). */
 	static void scatterRaiders(ServerLevel level, int camp, AABB box) {
 		if (LOADED) {

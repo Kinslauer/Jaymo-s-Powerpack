@@ -577,6 +577,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return;
 		}
 		if (Pirates.aboard(this)) {
+			if (this.tickCount % 20 == 0 && Crewmen.convert(level, this)) {
+				// (0.7.242) with MCA, a ship's crew are villagers: one of its blood takes this one's station
+				return;
+			}
 			// (0.7.42) one of a ship's crew at their station: they fight from her, and nothing else
 			Corsairs.crewTick(level, this);
 		} else if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {

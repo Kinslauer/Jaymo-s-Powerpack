@@ -31,6 +31,11 @@ public final class ChatPrompts {
 			if (!realm.isEmpty()) {
 				sb.append("Your realm: ").append(realm).append('\n');
 			}
+			// (0.7.242) a ship's crewman: their ship and their berth aboard her
+			String crew = Crewmen.prompt(villager);
+			if (!crew.isEmpty()) {
+				sb.append(crew).append('\n');
+			}
 			// (0.7.186) their own nature
 			String temperament = Temperaments.prompt(villager);
 			if (!temperament.isEmpty()) {

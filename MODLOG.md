@@ -3023,3 +3023,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.27, black until MCA's creator (Kingdoms 0.7.238):** the life story and loading screens sit on black, and the
   world stays blacked out between them until MCA's creator opens. 0.17.26 is left for the mana spirits PR. No Powers
   changes.
+- **0.17.30, ship crews are MCA villagers (Kingdoms 0.7.242):** every crewman aboard a pirate ship, warship,
+  merchantman or whaler is one of MCA's villagers with a personality, temperament and talk. 0.17.28 and 0.17.29 are left
+  for PRs #559 and #552. No Powers changes.

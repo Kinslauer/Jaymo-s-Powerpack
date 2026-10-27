@@ -42,13 +42,18 @@ public final class Standing {
 	private Standing() {
 	}
 
-	/** {@code w}'s lines brought up to date (from {@link Workers#step}), or taken off if they're neither ruler nor guard. */
+	/**
+	 * {@code w}'s lines brought up to date (from {@link Workers#step}), or taken off if they're neither ruler nor guard
+	 * (nor, 0.7.242, one of a ship's crew aboard her: {@link Crewmen#lines}).
+	 */
 	static void update(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
 		Faction f = Factions.get(level.getServer(), w.factionId());
-		Lines lines = f == null || f.fallen() ? null : Rulers.leaderRole(w.role()) ? ruler(level, mob, w, f) : w.role() == Folk.GUARD ? guard(level, mob, w, f) : null;
-		// (0.7.180) a ruler's title, for their nametag once you know their name
-		Component title = lines != null && Rulers.leaderRole(w.role()) ? Rulers.title(w.role(), McaCompat.female(mob)) : null;
+		boolean crew = Crewmen.tagged(mob);
+		Lines lines = crew ? Crewmen.lines(level, mob, w) : f == null || f.fallen() ? null : Rulers.leaderRole(w.role()) ? ruler(level, mob, w, f)
+			: w.role() == Folk.GUARD ? guard(level, mob, w, f) : null;
+		// (0.7.180) a ruler's title, for their nametag once you know their name; (0.7.242) a ship's captain's
+		Component title = crew ? Crewmen.title(mob) : lines != null && Rulers.leaderRole(w.role()) ? Rulers.title(w.role(), McaCompat.female(mob)) : null;
 		if (title == null) {
 			if (mob.hasAttached(Introductions.TITLE)) {
 				mob.removeAttached(Introductions.TITLE);
