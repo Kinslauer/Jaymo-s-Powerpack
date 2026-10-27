@@ -13,7 +13,7 @@ import net.minecraft.world.item.DyeColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.270) Andy (2026-10-27), of a ship's captain in an anime girl's skin from MCA's clothing library: "we're about to
+ * (0.7.272) Andy (2026-10-27), of a ship's captain in an anime girl's skin from MCA's clothing library: "we're about to
  * go back to a set library of skins, at least for specific characters because these skins have no place in the pack."
  * <p>
  * Our named characters wear only our own outfits (MCA clothing in {@code assets/jaymoskingdoms/skins/clothing}, drawn by
@@ -27,14 +27,14 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Uniforms {
 	static final String PREFIX = "jaymoskingdoms:skins/clothing/";
-	static final String PIRATE_CAPTAIN = id("crew/pirate_captain"), SEA_CAPTAIN = id("crew/sea_captain"), MASTER = id("crew/master"),
-		SHIPWRIGHT = id("crew/shipwright");
-	static final List<String> DECKHANDS = ids("crew/deckhand_", 4), SEAMEN = ids("crew/seaman_", 4), GUNNERS = ids("crew/gunner_", 2),
-		POWDER_MONKEYS = ids("crew/powder_monkey_", 2), BOMBARDIERS = ids("crew/bombardier_", 2);
-	static final List<String> KINGS = List.of(id("royal/king_crimson"), id("royal/king_blue")),
-		QUEENS = List.of(id("royal/queen_crimson"), id("royal/queen_purple"));
-	/** A guard's gambeson by their realm's land ({@link Climate#skinGroup}: temperate, sunny, cold). */
-	static final List<String> GUARDS = List.of(id("guard/temperate"), id("guard/sunny"), id("guard/cold"));
+	/** How many of each outfit there are (Andy: "each outfit needs at least 4 variations so they dont all look the same"). */
+	static final int VARIANTS = 4;
+	static final List<String> PIRATE_CAPTAINS = ids("crew/pirate_captain"), SEA_CAPTAINS = ids("crew/sea_captain"), MASTERS = ids("crew/master"),
+		SHIPWRIGHTS = ids("crew/shipwright"), DECKHANDS = ids("crew/deckhand", 6), SEAMEN = ids("crew/seaman", 6), GUNNERS = ids("crew/gunner"),
+		POWDER_MONKEYS = ids("crew/powder_monkey"), BOMBARDIERS = ids("crew/bombardier");
+	static final List<String> KINGS = ids("royal/king"), QUEENS = ids("royal/queen");
+	/** A guard's gambesons by their realm's land ({@link Climate#skinGroup}: temperate, sunny, cold). */
+	static final List<List<String>> GUARDS = List.of(ids("guard/temperate"), ids("guard/sunny"), ids("guard/cold"));
 
 	private Uniforms() {
 	}
@@ -43,10 +43,15 @@ public final class Uniforms {
 		return PREFIX + path + ".png";
 	}
 
+	private static List<String> ids(String path) {
+		return ids(path, VARIANTS);
+	}
+
+	/** {@code path_0} to {@code path_<n-1>}. */
 	private static List<String> ids(String path, int n) {
 		List<String> out = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			out.add(id(path + i));
+			out.add(id(path + "_" + i));
 		}
 		return List.copyOf(out);
 	}
@@ -79,10 +84,10 @@ public final class Uniforms {
 		if (Crewmen.tagged(villager)) {
 			Crew.Side side = side(villager);
 			if (role == Pirates.CAPTAIN) {
-				return List.of(PIRATE_CAPTAIN);
+				return PIRATE_CAPTAINS;
 			}
 			if (role == Pirates.SEA_CAPTAIN) {
-				return List.of(side == Crew.Side.NAVY ? SEA_CAPTAIN : MASTER);
+				return side == Crew.Side.NAVY ? SEA_CAPTAINS : MASTERS;
 			}
 			if (role == Pirates.GUNNER) {
 				return GUNNERS;
@@ -94,7 +99,7 @@ public final class Uniforms {
 				return BOMBARDIERS;
 			}
 			if (role == Pirates.SHIPWRIGHT) {
-				return List.of(SHIPWRIGHT);
+				return SHIPWRIGHTS;
 			}
 			return side == Crew.Side.PIRATE || role == Pirates.DECKHAND ? DECKHANDS : SEAMEN;
 		}
@@ -104,14 +109,14 @@ public final class Uniforms {
 		if (Rulers.is(villager)) {
 			if (role == Folk.LORD) {
 				DyeColor colour = f == null ? DyeColor.RED : f.styleColor(server);
-				return List.of(id((female ? "lady/" : "lord/") + colour.getName()));
+				return ids((female ? "lady/" : "lord/") + colour.getName());
 			}
 			return female ? QUEENS : KINGS;
 		}
 		if (role == Folk.GUARD || villager.isGuard()) {
 			int land = f == null || !(villager.level() instanceof ServerLevel level) ? 0
 				: Math.floorMod(Climate.at(level, f.seat()).skinGroup(), GUARDS.size());
-			return List.of(GUARDS.get(land));
+			return GUARDS.get(land);
 		}
 		return List.of();
 	}

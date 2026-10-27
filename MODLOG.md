@@ -3230,16 +3230,16 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   speaking (`WorkTalk`): your apprentice, the ruler (your service by rank, or an offer), the watch (your round, or a
   place on it), one of your own trade, one whose trade the town is hiring for, or anyone to someone already working
   there. Compile-checked against the 26.3 jars; not seen in game.
-- **0.17.73, named characters wear our own outfits; no women at sea (Kingdoms 0.7.270):** Andy found a ship's captain in
+- **0.17.75, named characters wear our own outfits; no women at sea (Kingdoms 0.7.272):** Andy found a ship's captain in
   an anime girl's skin: "we're about to go back to a set library of skins, at least for specific characters because these
   skins have no place in the pack", and "there shouldnt be any female sailors". The skin came from MCA's online clothing
   library (players' uploads): fishermen (every sailor) were dressed from clothes tagged "sailor" plus any theme tag
   ("fantasy", "rpg"...), which let it through. Now:
   - The library is off (`ClothingLibrary.ENABLED`); anyone in its clothes is dressed again from MCA's own (`Wardrobe`).
-  - `Uniforms`: 57 outfits of our own (MCA clothing, `assets/jaymoskingdoms/skins/clothing`, listed in
+  - `Uniforms`: 188 outfits of our own, at least 4 of each (Andy: "each outfit needs at least 4 variations") (MCA clothing, `assets/jaymoskingdoms/skins/clothing`, listed in
     `data/jaymoskingdoms/skins/clothing/{male,female,neutral}.json`), drawn by `kingdoms/tools/gen_uniforms.py` from our
     folk's and sailors' old skins with the face and skin cleared (each villager keeps their own face, hair and skin),
-    plus new plain seamen, a merchant/whaling master's coat, a blue king's robe and gowns for queens and ladies.
+    plus new plain seamen, masters' coats, more coat and robe colours, guards' belts, jerkins and mail coifs, four marks on a lord's surcoat, and gowns for queens and ladies.
     Captains (pirate red coat, navy blue, master's brown), pirate deckhands/gunners/powder monkeys/bombardiers, seamen on
     realm ships, kings, queens, lords and ladies in their overlord's colour, guards in their land's gambeson wear only
     these. They're put in them when they load, when they're made crew, every 5 s aboard, and on taking or losing a

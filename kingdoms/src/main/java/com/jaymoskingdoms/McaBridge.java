@@ -455,7 +455,7 @@ final class McaBridge {
 	}
 
 	/**
-	 * (0.7.270) {@link McaCompat#recast}: a man in {@code her} place (one of a ship's crew), with her blood, gear, role,
+	 * (0.7.272) {@link McaCompat#recast}: a man in {@code her} place (one of a ship's crew), with her blood, gear, role,
 	 * side and stowed weapons. She's left for the caller.
 	 */
 	static @Nullable PathfinderMob recast(ServerLevel level, PathfinderMob her) {
@@ -477,7 +477,7 @@ final class McaBridge {
 	}
 
 	private static @Nullable PathfinderMob crewman(ServerLevel level, PathfinderMob folk, Worker as) {
-		// (0.7.259) Andy: no guards aboard, every one a sailor; (0.7.270) "there shouldnt be any female sailors. they
+		// (0.7.259) Andy: no guards aboard, every one a sailor; (0.7.272) "there shouldnt be any female sailors. they
 		// wouldnt have had that job."
 		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(folk.position()).withAge(0)
@@ -835,12 +835,12 @@ final class McaBridge {
 		if (!(mob instanceof VillagerEntityMCA v)) {
 			return false;
 		}
-		// (0.7.270) a ruler in our robes or gowns, or out of them off the throne ({@link Uniforms})
+		// (0.7.272) a ruler in our robes or gowns, or out of them off the throne ({@link Uniforms})
 		Uniforms.fit(v);
 		return Rulers.is(v) && Uniforms.royal(v);
 	}
 
-	/** (0.7.270) {@link McaCompat#uniform}. */
+	/** (0.7.272) {@link McaCompat#uniform}. */
 	static void uniform(PathfinderMob mob) {
 		if (mob instanceof VillagerEntityMCA v) {
 			Uniforms.fit(v);

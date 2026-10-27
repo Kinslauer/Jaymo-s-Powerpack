@@ -7,7 +7,7 @@ Most are our folk's and sailors' skins from before they were MCA villagers (tool
 drawn again without their faces: each is drawn twice with two different skin tones, and every pixel that changes (the
 skin) is cleared, then the head. New here: plain seamen for navy, merchant and whaler crews (a knitted cap, a striped
 or smock shirt, breeches and shoes), a merchant or whaling master's brown coat, a second king's robe (royal blue), and
-gowns for queens and ladies. Original art. Run from the kingdoms project root: python -I tools/gen_uniforms.py
+gowns for queens and ladies; at least four of each outfit. Original art. Run from the kingdoms project root: python -I tools/gen_uniforms.py
 (also writes a front-view contact sheet to build/uniforms-preview.png)."""
 from PIL import Image
 import os
@@ -54,20 +54,74 @@ def save(img, name):
 
 # ---- the sailors (tools/gen_pirates.py) -----------------------------------------------------------------------------
 
-def pirate(fn, *args):
+def pirate(fn, *args, colours=None):
+    """{fn(*args)} from gen_pirates without its face, with any of its colours ({colours}: name to colour) swapped."""
     def draw(tone):
+        kept = {k: getattr(sea, k) for k in (colours or {})}
+        for k, c in (colours or {}).items():
+            setattr(sea, k, c)
         sea.TONES[:] = [tone] * 4
         sea.face = lambda *a, **k: None
         sea.save = capture("x")
         fn(*args)
+        for k, c in kept.items():
+            setattr(sea, k, c)
         return DRAWN["x"]
     return twice(draw)
 
 
+SILVER = (186, 188, 196)
+SAND = (200, 184, 140)
+GREEN_CLOTH = (36, 66, 44)
+BURGUNDY = (96, 26, 40)
+
+
+def pirate_captains():
+    """A pirate captain's long coat: red with gold, black with silver, burgundy with gold, green with brass."""
+    return [pirate(sea.captain), pirate(sea.captain, colours={"COAT_RED": (28, 26, 30), "GOLD": SILVER}),
+            pirate(sea.captain, colours={"COAT_RED": BURGUNDY, "WHITE": SAND}),
+            pirate(sea.captain, colours={"COAT_RED": GREEN_CLOTH, "GOLD": (190, 150, 80)})]
+
+
+def sea_captains():
+    """A navy captain: blue coats of four cuts and shades, white or buff breeches and waistcoat."""
+    return [pirate(sea.sea_captain), pirate(sea.sea_captain, colours={"NAVY": (24, 34, 62), "WHITE": SAND}),
+            pirate(sea.sea_captain, colours={"NAVY": (44, 62, 104), "GOLD": SILVER}),
+            pirate(sea.sea_captain, colours={"NAVY": (30, 40, 70), "WHITE": (226, 222, 210), "GOLD": (200, 150, 50)})]
+
+
+def deckhands():
+    """A pirate's deckhand: bandanas, striped shirts and tarred breeches (six, a crew is big)."""
+    out = [pirate(sea.deckhand, i) for i in range(4)]
+    out.append(pirate(sea.deckhand, 0, colours={"RED": (40, 90, 60), "NAVY": (110, 40, 30)}))
+    out.append(pirate(sea.deckhand, 1, colours={"WHITE": SAND, "BLACK_CLOTH": (70, 46, 30)}))
+    return out
+
+
+def gunners():
+    return [pirate(sea.gunner, 0), pirate(sea.gunner, 1),
+            pirate(sea.gunner, 0, colours={"LEATHER": (70, 48, 30), "BLACK_CLOTH": (118, 26, 24)}),
+            pirate(sea.gunner, 1, colours={"WHITE": SAND, "RED": (34, 48, 82), "TAR": (70, 60, 50)})]
+
+
+def powder_monkeys():
+    return [pirate(sea.powder_monkey, 0), pirate(sea.powder_monkey, 1),
+            pirate(sea.powder_monkey, 0, colours={"WHITE": (226, 200, 160)}),
+            pirate(sea.powder_monkey, 1, colours={"WHITE": (176, 196, 214)})]
+
+
+def bombardiers():
+    return [pirate(sea.bombardier, 0), pirate(sea.bombardier, 1),
+            pirate(sea.bombardier, 0, colours={"RED": (40, 90, 60), "BLACK_CLOTH": (118, 26, 24)}),
+            pirate(sea.bombardier, 1, colours={"NAVY": (118, 26, 24), "BLACK_CLOTH": (70, 46, 30)})]
+
+
 def seaman(i):
     """A navy, merchant or whaler's hand: a knitted cap, a striped shirt (or a linen smock), breeches and shoes."""
-    caps = [(34, 48, 82), (120, 116, 108), (118, 26, 24), (60, 52, 44)]
-    stripes = [(sea.WHITE, sea.NAVY), (sea.WHITE, (118, 26, 24)), None, (sea.WHITE, (60, 60, 64))]
+    caps = [(34, 48, 82), (120, 116, 108), (118, 26, 24), (60, 52, 44), (40, 70, 50), (150, 130, 90)]
+    stripes = [(sea.WHITE, sea.NAVY), (sea.WHITE, (118, 26, 24)), None, (sea.WHITE, (60, 60, 64)), None, (SAND, (70, 50, 34))]
+    smocks = {2: (196, 184, 156), 4: (150, 160, 170)}
+    breeches = [(74, 66, 56), sea.NAVY, (88, 76, 60), sea.TAR, (60, 64, 70), (90, 70, 50)]
 
     def draw(tone):
         rnd = random.Random(7700 + i)
@@ -76,33 +130,67 @@ def seaman(i):
         if stripes[i]:
             sea.striped(img, rnd, *stripes[i])
         else:
-            # a whaleman's linen smock, its sleeves rolled
-            sea.box(img, sea.BODY, (196, 184, 156), 8, rnd)
+            # a whaleman's linen smock (or a grey wool one), its sleeves rolled
+            sea.box(img, sea.BODY, smocks[i], 8, rnd)
             for arm in sea.ARMS:
-                sea.box(img, arm, (196, 184, 156), 8, rnd)
+                sea.box(img, arm, smocks[i], 8, rnd)
                 sea.rows(img, arm, 7, 5, tone, 6, rnd)
         sea.hands(img, rnd, tone)
-        sea.legs(img, rnd, [(74, 66, 56), sea.NAVY, (88, 76, 60), sea.TAR][i], (40, 30, 24))
+        sea.legs(img, rnd, breeches[i], (40, 30, 24))
         sea.belt(img, rnd, sea.LEATHER, (150, 150, 156))
         return img
     return twice(draw)
 
 
-def master():
-    """A merchantman's or whaler's master: a brown felt tricorn, a long brown coat with brass buttons over a waistcoat."""
+def master(coat, trim, waistcoat, felt, cap=False):
+    """A merchantman's or whaler's master: a felt tricorn (or a flat cap), a long coat with brass buttons over a waistcoat."""
     def draw(tone):
         rnd = random.Random(7800)
         img = sea.blank()
-        sea.tricorn(img, rnd, (70, 50, 34), (176, 140, 70))
-        sea.box(img, sea.BODY, (120, 96, 52), 5, rnd)
+        if cap:
+            sea.cap(img, rnd, felt)
+        else:
+            sea.tricorn(img, rnd, felt, (176, 140, 70))
+        sea.box(img, sea.BODY, waistcoat, 5, rnd)
         for arm in sea.ARMS:
             sea.box(img, arm, sea.WHITE, 5, rnd)
         sea.hands(img, rnd, tone)
-        sea.coat(img, rnd, (92, 62, 38), (130, 96, 60), buttons=(196, 160, 80))
+        sea.coat(img, rnd, coat, trim, buttons=(196, 160, 80))
         sea.belt(img, rnd, (30, 24, 20), (196, 160, 80))
         sea.legs(img, rnd, (70, 60, 50), (24, 18, 16))
         return img
     return twice(draw)
+
+
+def masters():
+    return [master((92, 62, 38), (130, 96, 60), (120, 96, 52), (70, 50, 34)),
+            master((132, 104, 66), (160, 130, 86), (90, 30, 30), (60, 44, 30)),
+            master((60, 60, 64), (96, 96, 100), SAND, (40, 40, 44), cap=True),
+            master((40, 60, 44), (70, 96, 70), (120, 96, 52), (50, 40, 30))]
+
+
+def shipwright(shirt, apron, cap):
+    def draw(tone):
+        rnd = random.Random(7400)
+        img = sea.blank()
+        sea.cap(img, rnd, cap)
+        sea.box(img, sea.BODY, shirt, 6, rnd)
+        for arm in sea.ARMS:
+            sea.box(img, arm, shirt, 6, rnd)
+            sea.rows(img, arm, 6, 6, tone, 6, rnd)
+        fx, fy, fw, fh = sea.BODY["front"]
+        sea.paint(img, (fx + 1, fy + 2, 6, 10), apron, 8, rnd)
+        sea.belt(img, rnd, (60, 40, 22), (150, 150, 156))
+        sea.px(img, fx + 1, fy + 9, (150, 150, 156))
+        sea.px(img, fx + 6, fy + 9, (110, 80, 50))
+        sea.legs(img, rnd, (80, 72, 60), (54, 40, 28))
+        return img
+    return twice(draw)
+
+
+def shipwrights():
+    return [shipwright((150, 128, 96), sea.LEATHER, (74, 62, 50)), shipwright((190, 180, 160), (70, 50, 32), (40, 50, 70)),
+            shipwright((120, 130, 140), sea.LEATHER, (100, 40, 30)), shipwright((160, 120, 80), (60, 44, 30), (60, 60, 60))]
 
 
 # ---- the realm's folk (tools/gen_folk.py) ---------------------------------------------------------------------------
@@ -116,6 +204,37 @@ def folk_look(fn, *args, cloth=None):
         folk.LOOK, folk.CLOTH = None, None
         return DRAWN["x"]
     return twice(draw)
+
+
+def guards(cloth):
+    """A guard's gambeson in their land's cloth: plain; a shade lighter with a sword belt; darker under a leather jerkin;
+    and with a mail coif over the head and shoulders."""
+    out = []
+    for v, by in enumerate((0, 16, -16, 0)):
+        img = folk_look(folk.guard, cloth=folk.shade(cloth, by))
+        if v == 1:
+            folk.belt(img, (70, 46, 26), (180, 180, 186))
+        if v == 2:
+            for name in ("front", "back", "right", "left", "top"):
+                rx, ry, rw, rh = sea.JACKET[name]
+                folk.noisy(img, (rx, ry, rw, rh if name == "top" else 9), (96, 64, 38), spread=8, seed=140 + len(name))
+            fx, fy, fw, fh = sea.JACKET["front"]
+            for y in range(fy + 1, fy + 9, 2):
+                img.putpixel((fx + 3, y), (50, 34, 20, 255))
+                img.putpixel((fx + 4, y), (50, 34, 20, 255))
+        if v == 3:
+            mail = (150, 152, 158)
+            folk.noisy(img, sea.HAT["top"], mail, spread=14, seed=150)
+            for name in ("right", "left", "back"):
+                folk.noisy(img, sea.HAT[name], mail, spread=14, seed=151)
+            hx, hy, hw, hh = sea.HAT["front"]
+            folk.noisy(img, (hx, hy, hw, 2), mail, spread=14, seed=152)
+            for name in ("front", "back", "right", "left"):
+                rx, ry, rw, rh = sea.JACKET[name]
+                folk.noisy(img, (rx, ry, rw, 3), mail, spread=14, seed=153)
+            folk.belt(img, (60, 40, 25), (180, 180, 186))
+        out.append(img)
+    return out
 
 
 def king_robe(robe, trim):
@@ -141,17 +260,43 @@ def king_robe(robe, trim):
     return twice(draw)
 
 
+def lords(name, colour):
+    """A lord's surcoat in {colour} with the house's mark in a paler one: a cross (gen_folk's), a chevron, halved (per
+    pale) and a band across (a bend)."""
+    out = [folk_look(folk.lord, name, colour)]
+    pale = folk.shade(colour, 70) if sum(colour) < 450 else folk.shade(colour, -70)
+    for v in (1, 2, 3):
+        img = out[0].copy()
+        fx, fy, fw, fh = folk.BODY["front"]
+        # the field again (inside the gold edges, above the belt), then the mark
+        folk.noisy(img, (fx + 1, fy, fw - 2, 8), colour, seed=110 + v)
+        for y in range(fy, fy + 8):
+            for x in range(fx + 1, fx + fw - 1):
+                dx, dy = x - fx, y - fy
+                if v == 1 and (dy == 6 - abs(dx * 2 - 7) // 2 or dy == 7 - abs(dx * 2 - 7) // 2):
+                    img.putpixel((x, y), pale + (255,))
+                if v == 2 and dx >= 4:
+                    img.putpixel((x, y), pale + (255,))
+                if v == 3 and abs(dx - dy) <= 0:
+                    img.putpixel((x, y), pale + (255,))
+                    if dx + 1 < fw - 1:
+                        img.putpixel((x + 1, y), pale + (255,))
+        out.append(img)
+    return out
+
+
 # ---- gowns (new) ----------------------------------------------------------------------------------------------------
 
 SKIRT = [folk.faces(0, 32, 4, 12, 4), folk.faces(0, 48, 4, 12, 4)]
 
 
-def gown(cloth, trim, ermine=False, seed=0):
+def gown(cloth, trim, ermine=False, seed=0, sleeves=None, bodice=None, sash=None):
     """A long gown: a fitted bodice laced down the front, long sleeves with {trim} cuffs, and a skirt to the floor over
-    both legs (and their outer layer, so it stands a little off them); a queen's has an ermine stole and hem."""
+    both legs (and their outer layer, so it stands a little off them); a queen's has an ermine stole and hem. A bodice
+    or sleeves of another colour, and a sash at the waist, if given."""
     def draw(tone):
         img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-        folk.fill_box(img, folk.BODY, cloth, seed + 10)
+        folk.fill_box(img, folk.BODY, bodice or cloth, seed + 10)
         x0, y0, w, h = folk.BODY["front"]
         # the neckline, the lacing and the waist
         folk.noisy(img, (x0 + 2, y0, 4, 1), tone, spread=4, seed=seed + 11)
@@ -161,9 +306,11 @@ def gown(cloth, trim, ermine=False, seed=0):
         for name in ("front", "back", "right", "left"):
             rx, ry, rw, rh = folk.BODY[name]
             for x in range(rx, rx + rw):
-                img.putpixel((x, ry + 8), trim + (255,))
+                img.putpixel((x, ry + 8), (sash or trim) + (255,))
+                if sash:
+                    img.putpixel((x, ry + 9), folk.shade(sash, -20) + (255,))
         for arm in folk.ARMS:
-            folk.fill_box(img, arm, folk.shade(cloth, -12), seed + 20)
+            folk.fill_box(img, arm, sleeves or folk.shade(cloth, -12), seed + 20)
             for name in ("front", "back", "right", "left"):
                 rx, ry, rw, rh = arm[name]
                 folk.noisy(img, (rx, ry + 8, rw, 1), trim, spread=4, seed=seed + 21)
@@ -193,30 +340,42 @@ def gown(cloth, trim, ermine=False, seed=0):
     return twice(draw)
 
 
+GOLD_TRIM = (220, 175, 60)
+LINEN = (232, 226, 210)
+
+
+def ladies(colour):
+    """A lady's gown in {colour}: gold trim; silver trim; white linen sleeves; a darker bodice with a gold sash."""
+    return [gown(colour, GOLD_TRIM, seed=3), gown(colour, SILVER, seed=4), gown(colour, GOLD_TRIM, seed=5, sleeves=LINEN),
+            gown(colour, GOLD_TRIM, seed=6, bodice=folk.shade(colour, -40), sash=GOLD_TRIM)]
+
+
 # ---- all of them ----------------------------------------------------------------------------------------------------
+
+def numbered(out, name, imgs):
+    for i, img in enumerate(imgs):
+        out["%s_%d" % (name, i)] = img
+
 
 def all_outfits():
     out = {}
-    out["crew/pirate_captain"] = pirate(sea.captain)
-    out["crew/sea_captain"] = pirate(sea.sea_captain)
-    out["crew/master"] = master()
-    out["crew/shipwright"] = pirate(sea.shipwright)
-    for i in range(4):
-        out["crew/deckhand_%d" % i] = pirate(sea.deckhand, i)
-        out["crew/seaman_%d" % i] = seaman(i)
-    for i in range(2):
-        out["crew/gunner_%d" % i] = pirate(sea.gunner, i)
-        out["crew/powder_monkey_%d" % i] = pirate(sea.powder_monkey, i)
-        out["crew/bombardier_%d" % i] = pirate(sea.bombardier, i)
+    numbered(out, "crew/pirate_captain", pirate_captains())
+    numbered(out, "crew/sea_captain", sea_captains())
+    numbered(out, "crew/master", masters())
+    numbered(out, "crew/shipwright", shipwrights())
+    numbered(out, "crew/deckhand", deckhands())
+    numbered(out, "crew/seaman", [seaman(i) for i in range(6)])
+    numbered(out, "crew/gunner", gunners())
+    numbered(out, "crew/powder_monkey", powder_monkeys())
+    numbered(out, "crew/bombardier", bombardiers())
     for land, cloth in folk.GAMBESONS.items():
-        out["guard/" + land] = folk_look(folk.guard, cloth=cloth)
-    out["royal/king_crimson"] = king_robe((140, 20, 35), (240, 238, 230))
-    out["royal/king_blue"] = king_robe((34, 44, 120), (240, 238, 230))
-    out["royal/queen_crimson"] = gown((140, 20, 35), (220, 175, 60), ermine=True, seed=1)
-    out["royal/queen_purple"] = gown((88, 32, 120), (220, 175, 60), ermine=True, seed=2)
+        numbered(out, "guard/" + land, guards(cloth))
+    numbered(out, "royal/king", [king_robe(r, (240, 238, 230)) for r in ((140, 20, 35), (34, 44, 120), (88, 32, 120), (30, 80, 46))])
+    numbered(out, "royal/queen", [gown(c, GOLD_TRIM, ermine=True, seed=1 + i)
+                                  for i, c in enumerate(((140, 20, 35), (88, 32, 120), (34, 44, 120), (30, 80, 46)))])
     for name, colour in folk.DYES.items():
-        out["lord/" + name] = folk_look(folk.lord, name, colour)
-        out["lady/" + name] = gown(colour, (220, 175, 60), seed=3)
+        numbered(out, "lord/" + name, lords(name, colour))
+        numbered(out, "lady/" + name, ladies(colour))
     return out
 
 

@@ -182,7 +182,7 @@ public final class Crewmen {
 		if (v != null) {
 			v.addTag(TAG);
 			v.addTag(sideTag(side));
-			// (0.7.270) in their side's and role's outfit (Uniforms)
+			// (0.7.272) in their side's and role's outfit (Uniforms)
 			McaCompat.uniform(v);
 		}
 		return v;
@@ -472,7 +472,7 @@ public final class Crewmen {
 	}
 
 	/**
-	 * (0.7.270) Andy: "there shouldnt be any female sailors. they wouldnt have had that job." A woman of a crew from
+	 * (0.7.272) Andy: "there shouldnt be any female sailors. they wouldnt have had that job." A woman of a crew from
 	 * before is replaced at her station by a man of her blood in her gear and role (as {@link #convert}). True if so.
 	 */
 	static boolean recast(ServerLevel level, PathfinderMob her, Ship ship, Crew crew) {
@@ -631,7 +631,7 @@ public final class Crewmen {
 		long now = level.getGameTime();
 		if ((mob.tickCount + mob.getId()) % DRESS_EVERY == 0) {
 			if (McaCompat.female(mob) && recast(level, mob, ship, crew)) {
-				// (0.7.270) she's gone: a man stands in her place
+				// (0.7.272) she's gone: a man stands in her place
 				return true;
 			}
 			McaCompat.uniform(mob);

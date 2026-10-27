@@ -107,7 +107,7 @@ public final class Wardrobe {
 	/** {@code clothes} (an MCA clothing id, or a library one) may not be worn by villagers. */
 	public static boolean banned(@Nullable String clothes) {
 		return clothes != null && (banned.contains(clothes) || BUILT_IN.contains(clothes) && !allowed.contains(clothes)
-			// (0.7.270) the clothing library is off: none of its clothes
+			// (0.7.272) the clothing library is off: none of its clothes
 			|| !ClothingLibrary.ENABLED && clothes.startsWith("immersive_library:"));
 	}
 
