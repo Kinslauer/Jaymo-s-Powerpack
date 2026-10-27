@@ -34,7 +34,9 @@ import org.jspecify.annotations.Nullable;
  * <li>you see each other while invisible, and don't shove each other about.</li>
  * </ul>
  * {@code /group} names who's in yours, {@code /group leave} leaves it, {@code /group name <name>} renames it. Whoever
- * takes an offered hand joins the offerer's group, leaving their own.
+ * takes an offered hand joins the offerer's group, leaving their own. (0.7.264) Andy: "parties should be what are started
+ * with handshakes": a group of ours is a {@link Parties party}, which adds a leader, invites, no friendly fire and the
+ * party list; the handshake goes through {@link Parties#shaken}, and {@code /group leave} is {@code /party leave}.
  */
 public final class Groups {
 	/** A team this mod made for a group (an op's own teams are groups too, but are theirs to break up). */
@@ -57,7 +59,7 @@ public final class Groups {
 	static void register() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("group")
 			.executes(c -> list(c.getSource().getPlayerOrException()))
-			.then(Commands.literal("leave").executes(c -> leave(c.getSource().getPlayerOrException())))
+			.then(Commands.literal("leave").executes(c -> Parties.leave(c.getSource().getPlayerOrException())))
 			.then(Commands.literal("name").then(Commands.argument("name", StringArgumentType.greedyString())
 				.executes(c -> rename(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "name")))))));
 	}
@@ -154,23 +156,6 @@ public final class Groups {
 		return here.size();
 	}
 
-	/** {@code /group leave}: out of your group (one of ours; an op's team is theirs to leave you in or not). */
-	private static int leave(ServerPlayer player) {
-		PlayerTeam team = player.getTeam();
-		if (team == null || !ours(team)) {
-			player.sendSystemMessage(Component.translatable(team == null ? "message.jaymoskingdoms.group.none"
-				: "message.jaymoskingdoms.group.kept").withStyle(ChatFormatting.GRAY));
-			return 0;
-		}
-		Scoreboard scoreboard = player.level().getServer().getScoreboard();
-		scoreboard.removePlayerFromTeam(player.getScoreboardName(), team);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.group.left", team.getDisplayName()).withStyle(ChatFormatting.GRAY));
-		if (team.getPlayers().isEmpty()) {
-			scoreboard.removePlayerTeam(team);
-		}
-		return 1;
-	}
-
 	/** {@code /group name <name>}: any member renames one of ours. */
 	private static int rename(ServerPlayer player, String name) {
 		PlayerTeam team = player.getTeam();
@@ -188,7 +173,8 @@ public final class Groups {
 		return 1;
 	}
 
-	private static boolean ours(@Nullable PlayerTeam team) {
+	/** One of this mod's teams: a party ({@link Parties}). */
+	static boolean ours(@Nullable PlayerTeam team) {
 		return team != null && team.getName().startsWith(PREFIX);
 	}
 }

@@ -23,7 +23,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -37,22 +36,28 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.264, Andy's NOEA picks) Parties: up to {@link #MAX_SIZE} players who fight and quest together. Whoever invites
- * first leads (and leadership passes on when they leave); the leader invites ({@code /party invite}, good for
- * {@link #INVITE_TICKS}), kicks and turns player-versus-player on or off ({@code /party pvp on|off}). Different from a
- * handshake {@link Groups group}, which only softens blows: a party
+ * (0.7.264, Andy's NOEA picks) Parties: up to {@link #MAX_SIZE} players who fight and quest together. Andy: "parties
+ * should be what are started with handshakes", so a party is the handshake {@link Groups group}, one scoreboard team:
+ * shaking someone's hand brings them into your party (started, with you leading, if you have none), and
+ * {@code /party invite} (good for {@link #INVITE_TICKS}) does the same from afar. Everything a group gave stays (known
+ * names, its colour, shoulder to shoulder, {@code /group name}); on top of it the party
  * <ul>
+ * <li>has a leader, who invites, kicks and turns player-versus-player on or off ({@code /party pvp on|off}); the lead
+ * passes on when they leave;</li>
  * <li>never hurts its own while PvP is off (the default): blows, arrows, owned beasts and powers all arrive as damage
- * with a player behind it, and are cancelled;</li>
+ * with a player behind it, and are cancelled (with PvP on they land at a group's quarter);</li>
  * <li>shares a slay quest's kills with members within {@link #SHARE_RANGE} blocks ({@link Quests#shareSlain});</li>
  * <li>shows each member's health, hunger and dimension at any distance, about once a second, in a compact list under
  * the top-left of the screen ({@code client/PartyClient}).</li>
  * </ul>
- * Parties are kept on the Overworld, so they survive relogging and restarts. Jaymo's Powers asks who is in one by
- * reflection: {@link #members} and {@link #allied}.
+ * Members are the team's (so a party survives relogging and restarts with the scoreboard); who leads and the PvP
+ * setting are kept on the Overworld by team name. Only teams this mod made are parties: an op's own team stays a plain
+ * group. Jaymo's Powers asks who is in one by reflection: {@link #members} and {@link #allied}.
  */
 public final class Parties {
 	/** Most players in one party. */
@@ -64,35 +69,17 @@ public final class Parties {
 	/** A member this close (blocks), in the same dimension, shares in a quest kill. */
 	public static final double SHARE_RANGE = 64.0;
 
-	/** One member as kept: who, and the username last seen (so an absent member can still be named and kicked). */
-	record Member(UUID id, String name) {
-		static final Codec<Member> CODEC = RecordCodecBuilder.create(i -> i.group(
-				UUIDUtil.CODEC.fieldOf("id").forGetter(Member::id),
-				Codec.STRING.fieldOf("name").forGetter(Member::name))
-			.apply(i, Member::new));
+	/** A party's leader (by username, as the team keeps its members) and whether its members may fight. */
+	record Meta(String leader, boolean pvp) {
+		static final Codec<Meta> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.STRING.fieldOf("leader").forGetter(Meta::leader),
+				Codec.BOOL.optionalFieldOf("pvp", false).forGetter(Meta::pvp))
+			.apply(i, Meta::new));
 	}
 
-	/** A party: its leader, its members in the order they joined (the leader among them) and whether they may fight. */
-	record Party(UUID leader, List<Member> members, boolean pvp) {
-		static final Codec<Party> CODEC = RecordCodecBuilder.create(i -> i.group(
-				UUIDUtil.CODEC.fieldOf("leader").forGetter(Party::leader),
-				Member.CODEC.listOf().fieldOf("members").forGetter(Party::members),
-				Codec.BOOL.optionalFieldOf("pvp", false).forGetter(Party::pvp))
-			.apply(i, Party::new));
-
-		boolean has(UUID id) {
-			for (Member m : members) {
-				if (m.id.equals(id)) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	/** Every party, on the Overworld. */
-	static final AttachmentType<List<Party>> PARTIES = AttachmentRegistry.create(JaymosKingdoms.id("parties"),
-		builder -> builder.persistent(Party.CODEC.listOf()));
+	/** Each party's leader and PvP, by its team's name, on the Overworld. */
+	static final AttachmentType<Map<String, Meta>> META = AttachmentRegistry.create(JaymosKingdoms.id("party_meta"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Meta.CODEC)));
 
 	/** An invite as made: who from, and the tick it lapses. */
 	private record Invite(UUID from, int until) {
@@ -177,8 +164,8 @@ public final class Parties {
 			.then(Commands.literal("kick").then(Commands.argument("player", StringArgumentType.word())
 				.suggests((c, builder) -> {
 					ServerPlayer me = c.getSource().getPlayer();
-					Party party = me == null ? null : of(c.getSource().getServer(), me.getUUID());
-					return SharedSuggestionProvider.suggest(party == null ? List.<String>of() : party.members.stream().map(Member::name).toList(), builder);
+					PlayerTeam team = me == null ? null : team(me);
+					return SharedSuggestionProvider.suggest(team == null ? List.<String>of() : team.getPlayers(), builder);
 				})
 				.executes(c -> kick(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "player")))))
 			.then(Commands.literal("pvp")
@@ -192,12 +179,10 @@ public final class Parties {
 	public static List<ServerPlayer> members(ServerPlayer player) {
 		List<ServerPlayer> out = new ArrayList<>();
 		out.add(player);
-		MinecraftServer server = player.level().getServer();
-		Party party = server == null ? null : of(server, player.getUUID());
-		if (party != null) {
-			for (Member m : party.members) {
-				ServerPlayer p = m.id.equals(player.getUUID()) ? null : server.getPlayerList().getPlayer(m.id);
-				if (p != null) {
+		PlayerTeam team = team(player);
+		if (team != null) {
+			for (ServerPlayer p : online(player.level().getServer(), team)) {
+				if (p != player) {
 					out.add(p);
 				}
 			}
@@ -210,9 +195,8 @@ public final class Parties {
 		if (a == b || a.getUUID().equals(b.getUUID())) {
 			return true;
 		}
-		MinecraftServer server = a.level().getServer();
-		Party party = server == null ? null : of(server, a.getUUID());
-		return party != null && party.has(b.getUUID());
+		PlayerTeam team = team(a);
+		return team != null && team == b.getTeam();
 	}
 
 	/** The members of {@code player}'s party other than them, online, in their dimension and within {@code range} blocks. */
@@ -226,49 +210,63 @@ public final class Parties {
 		return out;
 	}
 
-	// ---- storage ---------------------------------------------------------------------------------------------------------
+	// ---- the party: a group's team --------------------------------------------------------------------------------------
 
-	private static List<Party> all(MinecraftServer server) {
-		return Factions.level(server).getAttachedOrElse(PARTIES, List.of());
+	/** {@code player}'s party: their team, if it's one of ours. */
+	static @Nullable PlayerTeam team(ServerPlayer player) {
+		PlayerTeam team = player.getTeam();
+		return Groups.ours(team) ? team : null;
 	}
 
-	private static void save(MinecraftServer server, List<Party> parties) {
-		Factions.level(server).setAttached(PARTIES, List.copyOf(parties));
-	}
-
-	static @Nullable Party of(MinecraftServer server, UUID player) {
-		for (Party party : all(server)) {
-			if (party.has(player)) {
-				return party;
+	/** {@code team}'s members who are on. */
+	private static List<ServerPlayer> online(MinecraftServer server, PlayerTeam team) {
+		List<ServerPlayer> out = new ArrayList<>();
+		for (String name : team.getPlayers()) {
+			ServerPlayer p = server.getPlayerList().getPlayerByName(name);
+			if (p != null) {
+				out.add(p);
 			}
 		}
-		return null;
+		return out;
 	}
 
-	/** Replaces {@code old} (if there is one) with {@code next}, or removes it if {@code next} is null. */
-	private static void swap(MinecraftServer server, @Nullable Party old, @Nullable Party next) {
-		List<Party> parties = new ArrayList<>(all(server));
-		int at = old == null ? -1 : parties.indexOf(old);
-		if (at < 0) {
-			if (next != null) {
-				parties.add(next);
-			}
-		} else if (next == null) {
-			parties.remove(at);
+	private static Map<String, Meta> metas(MinecraftServer server) {
+		return Factions.level(server).getAttachedOrElse(META, Map.of());
+	}
+
+	private static void putMeta(MinecraftServer server, String team, @Nullable Meta meta) {
+		Map<String, Meta> all = new HashMap<>(metas(server));
+		if (meta == null) {
+			all.remove(team);
 		} else {
-			parties.set(at, next);
+			all.put(team, meta);
 		}
-		save(server, parties);
+		Factions.level(server).setAttached(META, Map.copyOf(all));
 	}
 
-	/** {@code party} without {@code gone}: leadership to the next in line, and none at all if only one is left. */
-	private static @Nullable Party without(Party party, UUID gone) {
-		List<Member> rest = new ArrayList<>(party.members);
-		rest.removeIf(m -> m.id.equals(gone));
-		if (rest.size() < 2) {
-			return null;
+	/**
+	 * {@code team}'s leader and PvP. A party with no leader kept, or whose leader has left it (a group from before parties,
+	 * or one the lead walked out of), is led by a member who's on, and the rest are told.
+	 */
+	private static Meta meta(MinecraftServer server, PlayerTeam team) {
+		Meta meta = metas(server).get(team.getName());
+		if (meta != null && team.getPlayers().contains(meta.leader)) {
+			return meta;
 		}
-		return new Party(party.leader.equals(gone) ? rest.get(0).id : party.leader, List.copyOf(rest), party.pvp);
+		List<ServerPlayer> on = online(server, team);
+		if (on.isEmpty()) {
+			return meta != null ? meta : new Meta("", false);
+		}
+		Meta next = new Meta(on.get(0).getScoreboardName(), meta != null && meta.pvp);
+		putMeta(server, team.getName(), next);
+		if (meta != null) {
+			tellAll(server, team, Component.translatable("message.jaymoskingdoms.party.new_leader", name(on.get(0))).withStyle(ChatFormatting.GOLD));
+		}
+		return next;
+	}
+
+	private static boolean leads(ServerPlayer player, PlayerTeam team) {
+		return meta(player.level().getServer(), team).leader.equals(player.getScoreboardName());
 	}
 
 	/** What {@code player} is called to their party: their character's name, else their username. */
@@ -277,25 +275,95 @@ public final class Parties {
 		return shown != null ? shown : Component.literal(player.getGameProfile().name());
 	}
 
-	/** {@code m}'s username (the live one if they are on). */
-	private static String username(MinecraftServer server, Member m) {
-		ServerPlayer p = server.getPlayerList().getPlayer(m.id);
-		return p == null ? m.name : p.getGameProfile().name();
-	}
-
-	/** Tells every online member of {@code party}. */
-	private static void tellAll(MinecraftServer server, Party party, Component message) {
-		for (Member m : party.members) {
-			ServerPlayer p = server.getPlayerList().getPlayer(m.id);
-			if (p != null) {
-				p.sendSystemMessage(message);
-			}
+	/** Tells every online member of {@code team}. */
+	private static void tellAll(MinecraftServer server, PlayerTeam team, Component message) {
+		for (ServerPlayer p : online(server, team)) {
+			p.sendSystemMessage(message);
 		}
 	}
 
 	private static int fail(ServerPlayer player, String key, Object... args) {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party." + key, args).withStyle(ChatFormatting.RED));
 		return 0;
+	}
+
+	/**
+	 * {@code taker} joins {@code host}'s party (leaving their own; one started, led by {@code host}, if they have none), by
+	 * handshake or invite. What came of it, to tell them both: the group's line, or that the party is full.
+	 */
+	private static Component join(ServerPlayer host, ServerPlayer taker) {
+		MinecraftServer server = host.level().getServer();
+		PlayerTeam mine = team(host), old = team(taker);
+		if (mine != null && mine != old && mine.getPlayers().size() >= MAX_SIZE) {
+			return Component.translatable("message.jaymoskingdoms.party.full", MAX_SIZE);
+		}
+		Component said = Groups.shaken(host, taker);
+		PlayerTeam team = team(host);
+		if (team == null || team == old) {
+			return said;
+		}
+		if (!metas(server).containsKey(team.getName())) {
+			putMeta(server, team.getName(), new Meta(host.getScoreboardName(), false));
+		}
+		tellAll(server, team, Component.translatable("message.jaymoskingdoms.party.joined", name(taker)).withStyle(ChatFormatting.GREEN));
+		sync(server, team);
+		if (old != null) {
+			left(server, old, taker);
+		}
+		return said;
+	}
+
+	/** Handshakes: {@code taker} took {@code offerer}'s hand. Andy: "The initiating player's group is what is joined, everytime". */
+	static Component shaken(ServerPlayer offerer, ServerPlayer taker) {
+		return join(offerer, taker);
+	}
+
+	/**
+	 * {@code gone} has just come off {@code team} (left, was put out or joined another): the rest are told, and a party
+	 * down to one is no more (its last member let go of it too).
+	 */
+	private static void left(MinecraftServer server, PlayerTeam team, ServerPlayer gone) {
+		send(gone, List.of());
+		LISTED.remove(gone.getUUID());
+		Scoreboard scoreboard = server.getScoreboard();
+		if (scoreboard.getPlayerTeam(team.getName()) == null) {
+			putMeta(server, team.getName(), null);
+			return;
+		}
+		if (team.getPlayers().size() < 2) {
+			for (ServerPlayer p : online(server, team)) {
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.disbanded").withStyle(ChatFormatting.YELLOW));
+				send(p, List.of());
+				LISTED.remove(p.getUUID());
+			}
+			scoreboard.removePlayerTeam(team);
+			putMeta(server, team.getName(), null);
+			return;
+		}
+		tellAll(server, team, Component.translatable("message.jaymoskingdoms.party.member_left", name(gone)).withStyle(ChatFormatting.YELLOW));
+		meta(server, team);
+		sync(server, team);
+	}
+
+	/** Takes {@code who} (a username) off {@code team}; whoever's on is told after. */
+	private static void takeOff(MinecraftServer server, PlayerTeam team, String who) {
+		server.getScoreboard().removePlayerFromTeam(who, team);
+		ServerPlayer p = server.getPlayerList().getPlayerByName(who);
+		if (p != null) {
+			left(server, team, p);
+		} else if (team.getPlayers().size() < 2) {
+			for (ServerPlayer other : online(server, team)) {
+				other.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.disbanded").withStyle(ChatFormatting.YELLOW));
+				send(other, List.of());
+				LISTED.remove(other.getUUID());
+			}
+			server.getScoreboard().removePlayerTeam(team);
+			putMeta(server, team.getName(), null);
+		} else {
+			tellAll(server, team, Component.translatable("message.jaymoskingdoms.party.member_left", who).withStyle(ChatFormatting.YELLOW));
+			meta(server, team);
+			sync(server, team);
+		}
 	}
 
 	// ---- commands ---------------------------------------------------------------------------------------------------------
@@ -305,15 +373,15 @@ public final class Parties {
 		if (target == leader) {
 			return fail(leader, "self");
 		}
-		Party mine = of(server, leader.getUUID());
-		if (mine != null && !mine.leader.equals(leader.getUUID())) {
+		PlayerTeam mine = team(leader);
+		if (mine != null && !leads(leader, mine)) {
 			return fail(leader, "not_leader");
 		}
-		if (mine != null && mine.members.size() >= MAX_SIZE) {
-			return fail(leader, "full", MAX_SIZE);
-		}
-		if (of(server, target.getUUID()) != null) {
+		if (mine != null && mine == target.getTeam()) {
 			return fail(leader, "has_party", name(target));
+		}
+		if (mine != null && mine.getPlayers().size() >= MAX_SIZE) {
+			return fail(leader, "full", MAX_SIZE);
 		}
 		INVITES.put(target.getUUID(), new Invite(leader.getUUID(), server.getTickCount() + INVITE_TICKS));
 		leader.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.invited", name(target)).withStyle(ChatFormatting.GREEN));
@@ -342,6 +410,7 @@ public final class Parties {
 		return invite;
 	}
 
+	/** {@code /party accept}: like taking the inviter's hand (so it moves you out of a party you're in). */
 	private static int accept(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
 		Invite invite = pending(server, player);
@@ -352,26 +421,12 @@ public final class Parties {
 		if (from == null) {
 			return fail(player, "inviter_gone");
 		}
-		if (of(server, player.getUUID()) != null) {
-			return fail(player, "you_have_party");
-		}
-		Party party = of(server, from.getUUID());
-		if (party != null && (!party.leader.equals(from.getUUID()) || party.members.size() >= MAX_SIZE)) {
+		PlayerTeam party = team(from);
+		if (party != null && (!leads(from, party) || party.getPlayers().size() >= MAX_SIZE)) {
 			return fail(player, "cannot_join");
 		}
-		Member joined = new Member(player.getUUID(), player.getGameProfile().name());
-		Party next;
-		if (party == null) {
-			// (whoever invited first leads)
-			next = new Party(from.getUUID(), List.of(new Member(from.getUUID(), from.getGameProfile().name()), joined), false);
-		} else {
-			List<Member> list = new ArrayList<>(party.members);
-			list.add(joined);
-			next = new Party(party.leader, List.copyOf(list), party.pvp);
-		}
-		swap(server, party, next);
-		tellAll(server, next, Component.translatable("message.jaymoskingdoms.party.joined", name(player)).withStyle(ChatFormatting.GREEN));
-		sync(server, next);
+		Component said = join(from, player);
+		player.sendSystemMessage(said.copy().withStyle(ChatFormatting.GREEN));
 		return 1;
 	}
 
@@ -389,107 +444,80 @@ public final class Parties {
 		return 1;
 	}
 
-	private static int leave(ServerPlayer player) {
+	/** {@code /party leave} (and {@code /group leave}). */
+	static int leave(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
-		Party party = of(server, player.getUUID());
-		if (party == null) {
+		PlayerTeam team = team(player);
+		if (team == null) {
 			return fail(player, "none");
 		}
-		remove(server, party, player.getUUID(), player.getGameProfile().name());
+		server.getScoreboard().removePlayerFromTeam(player.getScoreboardName(), team);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.left").withStyle(ChatFormatting.YELLOW));
+		left(server, team, player);
 		return 1;
-	}
-
-	/** Takes {@code gone} out of {@code party} and tells the rest (and hands over the lead, or disbands a party of one). */
-	private static void remove(MinecraftServer server, Party party, UUID gone, String goneName) {
-		Party next = without(party, gone);
-		swap(server, party, next);
-		ServerPlayer p = server.getPlayerList().getPlayer(gone);
-		if (p != null) {
-			send(p, List.of());
-			LISTED.remove(gone);
-		}
-		if (next == null) {
-			for (Member m : party.members) {
-				ServerPlayer other = m.id.equals(gone) ? null : server.getPlayerList().getPlayer(m.id);
-				if (other != null) {
-					other.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.disbanded").withStyle(ChatFormatting.YELLOW));
-					send(other, List.of());
-					LISTED.remove(m.id);
-				}
-			}
-			return;
-		}
-		tellAll(server, next, Component.translatable("message.jaymoskingdoms.party.member_left", goneName).withStyle(ChatFormatting.YELLOW));
-		if (!next.leader.equals(party.leader)) {
-			ServerPlayer lead = server.getPlayerList().getPlayer(next.leader);
-			Component who = lead != null ? name(lead) : Component.literal(next.members.get(0).name);
-			tellAll(server, next, Component.translatable("message.jaymoskingdoms.party.new_leader", who).withStyle(ChatFormatting.GOLD));
-		}
-		sync(server, next);
 	}
 
 	private static int kick(ServerPlayer leader, String who) {
 		MinecraftServer server = leader.level().getServer();
-		Party party = of(server, leader.getUUID());
-		if (party == null) {
+		PlayerTeam team = team(leader);
+		if (team == null) {
 			return fail(leader, "none");
 		}
-		if (!party.leader.equals(leader.getUUID())) {
+		if (!leads(leader, team)) {
 			return fail(leader, "not_leader");
 		}
-		Member target = null;
-		for (Member m : party.members) {
-			if (username(server, m).equalsIgnoreCase(who)) {
-				target = m;
+		String target = null;
+		for (String name : team.getPlayers()) {
+			if (name.equalsIgnoreCase(who)) {
+				target = name;
 			}
 		}
-		if (target == null || target.id.equals(leader.getUUID())) {
+		if (target == null || target.equals(leader.getScoreboardName())) {
 			return fail(leader, "kick_none", who);
 		}
-		ServerPlayer p = server.getPlayerList().getPlayer(target.id);
+		ServerPlayer p = server.getPlayerList().getPlayerByName(target);
 		if (p != null) {
 			p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.kicked").withStyle(ChatFormatting.RED));
 		}
-		remove(server, party, target.id, username(server, target));
+		takeOff(server, team, target);
 		return 1;
 	}
 
 	private static int pvp(ServerPlayer leader, boolean on) {
 		MinecraftServer server = leader.level().getServer();
-		Party party = of(server, leader.getUUID());
-		if (party == null) {
+		PlayerTeam team = team(leader);
+		if (team == null) {
 			return fail(leader, "none");
 		}
-		if (!party.leader.equals(leader.getUUID())) {
+		if (!leads(leader, team)) {
 			return fail(leader, "not_leader");
 		}
-		Party next = new Party(party.leader, party.members, on);
-		swap(server, party, next);
-		tellAll(server, next, Component.translatable(on ? "message.jaymoskingdoms.party.pvp_on" : "message.jaymoskingdoms.party.pvp_off")
+		putMeta(server, team.getName(), new Meta(leader.getScoreboardName(), on));
+		tellAll(server, team, Component.translatable(on ? "message.jaymoskingdoms.party.pvp_on" : "message.jaymoskingdoms.party.pvp_off")
 			.withStyle(on ? ChatFormatting.RED : ChatFormatting.GREEN));
 		return 1;
 	}
 
-	/** {@code /party}: the members, who leads, and how each is. */
+	/** {@code /party}: the party's name, its members, who leads, and how each is. */
 	private static int list(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
-		Party party = of(server, player.getUUID());
-		if (party == null) {
+		PlayerTeam team = team(player);
+		if (team == null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.none").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.header", party.members.size(), MAX_SIZE,
-			Component.translatable(party.pvp ? "message.jaymoskingdoms.party.pvp.on" : "message.jaymoskingdoms.party.pvp.off")).withStyle(ChatFormatting.GOLD));
-		for (Member m : party.members) {
-			ServerPlayer p = server.getPlayerList().getPlayer(m.id);
+		Meta meta = meta(server, team);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.party.header", team.getDisplayName(), team.getPlayers().size(), MAX_SIZE,
+			Component.translatable(meta.pvp ? "message.jaymoskingdoms.party.pvp.on" : "message.jaymoskingdoms.party.pvp.off")).withStyle(ChatFormatting.GOLD));
+		for (String member : team.getPlayers()) {
+			ServerPlayer p = server.getPlayerList().getPlayerByName(member);
 			Component line = p == null
-				? Component.translatable("message.jaymoskingdoms.party.member.away", m.name)
+				? Component.translatable("message.jaymoskingdoms.party.member.away", member)
 				: Component.translatable("message.jaymoskingdoms.party.member", name(p), Math.round(p.getHealth()), Math.round(p.getMaxHealth()));
-			player.sendSystemMessage(Component.literal(party.leader.equals(m.id) ? "* " : "- ").append(line)
+			player.sendSystemMessage(Component.literal(meta.leader.equals(member) ? "* " : "- ").append(line)
 				.withStyle(p == null ? ChatFormatting.GRAY : ChatFormatting.WHITE));
 		}
-		return party.members.size();
+		return team.getPlayers().size();
 	}
 
 	// ---- friendly fire -----------------------------------------------------------------------------------------------------
@@ -503,9 +531,8 @@ public final class Parties {
 		if (by == null || by == hurt) {
 			return false;
 		}
-		MinecraftServer server = hurt.level().getServer();
-		Party party = server == null ? null : of(server, hurt.getUUID());
-		return party != null && !party.pvp && party.has(by.getUUID());
+		PlayerTeam team = team(hurt);
+		return team != null && team == by.getTeam() && !meta(hurt.level().getServer(), team).pvp;
 	}
 
 	/** The player behind {@code attacker}: themself, or whoever owns it (a tamed beast, a summon), if any. */
@@ -528,50 +555,39 @@ public final class Parties {
 		if (server.getTickCount() % SYNC_TICKS != 0) {
 			return;
 		}
-		List<Party> kept = new ArrayList<>();
-		boolean renamed = false;
-		for (Party party : all(server)) {
-			// (a member who changed their username is kept under the new one)
-			List<Member> names = new ArrayList<>(party.members.size());
-			boolean changed = false;
-			for (Member m : party.members) {
-				ServerPlayer p = server.getPlayerList().getPlayer(m.id);
-				if (p != null && !p.getGameProfile().name().equals(m.name)) {
-					names.add(new Member(m.id, p.getGameProfile().name()));
-					changed = true;
-				} else {
-					names.add(m);
-				}
+		Scoreboard scoreboard = server.getScoreboard();
+		for (PlayerTeam team : List.copyOf(scoreboard.getPlayerTeams())) {
+			if (Groups.ours(team) && !team.getPlayers().isEmpty()) {
+				sync(server, team);
 			}
-			Party now = changed ? new Party(party.leader, List.copyOf(names), party.pvp) : party;
-			renamed |= changed;
-			kept.add(now);
-			sync(server, now);
 		}
-		if (renamed) {
-			save(server, kept);
+		// (a party whose team went, by /team or a group's last member leaving, lets go of its leader and PvP)
+		Map<String, Meta> metas = metas(server);
+		if (!metas.isEmpty() && metas.keySet().stream().anyMatch(name -> scoreboard.getPlayerTeam(name) == null)) {
+			Map<String, Meta> kept = new HashMap<>(metas);
+			kept.keySet().removeIf(name -> scoreboard.getPlayerTeam(name) == null);
+			Factions.level(server).setAttached(META, Map.copyOf(kept));
 		}
 		// (anyone who was listed and no longer has a party was sent an empty list at once; this catches the rest)
 		LISTED.removeIf(id -> {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
-			if (p != null && of(server, id) == null) {
+			if (p != null && team(p) == null) {
 				send(p, List.of());
 			}
-			return p == null || of(server, id) == null;
+			return p == null || team(p) == null;
 		});
 	}
 
-	/** Sends each online member of {@code party} everyone's stats (their own included, so the HUD can skip them). */
-	private static void sync(MinecraftServer server, Party party) {
+	/** Sends each online member of {@code team} everyone's stats (their own included, so the HUD can skip them). */
+	private static void sync(MinecraftServer server, PlayerTeam team) {
+		List<ServerPlayer> online = online(server, team);
+		if (online.isEmpty()) {
+			return;
+		}
+		String leader = meta(server, team).leader;
 		List<Entry> entries = new ArrayList<>();
-		List<ServerPlayer> online = new ArrayList<>();
-		for (Member m : party.members) {
-			ServerPlayer p = server.getPlayerList().getPlayer(m.id);
-			if (p == null) {
-				continue;
-			}
-			online.add(p);
-			entries.add(new Entry(p.getUUID(), name(p), party.leader.equals(m.id), p.getHealth(), p.getMaxHealth(), p.getFoodData().getFoodLevel(),
+		for (ServerPlayer p : online) {
+			entries.add(new Entry(p.getUUID(), name(p), leader.equals(p.getScoreboardName()), p.getHealth(), p.getMaxHealth(), p.getFoodData().getFoodLevel(),
 				p.level().dimension().identifier().toString(), p.getBlockX(), p.getBlockY(), p.getBlockZ()));
 		}
 		for (ServerPlayer p : online) {

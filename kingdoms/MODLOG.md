@@ -5565,11 +5565,15 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
 ## 0.7.264: parties (Andy's NOEA picks)
 
 - Andy's NOEA picks: a party system. Ideas only; the code and names are our own.
-- **`/party`** (`Parties`): `invite <player>` (a clickable Accept and Decline; lapses after 60 s), `accept`, `decline`, `leave`,
-  `kick <name>`, `list` and `pvp on|off`. Up to 6 (`MAX_SIZE`). Whoever invited first leads; only the leader invites,
-  kicks and sets PvP; leadership goes to the next member when the leader leaves, and a party of one is disbanded. Kept
-  as a persistent attachment on the Overworld (the pattern `Crowns` uses), so it survives relogs and restarts.
-  Different from handshake `Groups`, which stay as they are.
+- **`/party`** (`Parties`). Andy: "parties should be what are started with handshakes", so a party is the handshake
+  group (the `jk_group_` scoreboard team): taking someone's offered hand joins their party (`Parties.shaken`, called from
+  `Handshakes.done`; one is started, led by the offerer, if they have none), and `invite <player>` (a clickable Accept and
+  Decline; lapses after 60 s) does the same from afar. Also `accept`, `decline`, `leave` (`/group leave` too), `kick <name>`,
+  `list` and `pvp on|off`. Up to 6 (`MAX_SIZE`; a handshake into a full party only swaps names). Only the leader invites,
+  kicks and sets PvP; the lead passes to a member who's on when the leader leaves, and a party of one is disbanded.
+  Members are the team's; leader (username) and PvP are kept by team name on the Overworld (`party_meta`). Old groups
+  become parties as they are, led by the first member on. The group perks (known names, colour, shoulder to shoulder,
+  `/group name`) stay; an op's own team is still a group but not a party.
 - **No friendly fire**: `ALLOW_DAMAGE` cancels a blow between two members while the party's PvP is off (the default).
   The attacker is the damage source's entity, or, for an `OwnableEntity`, its owner, so arrows, tamed beasts and Powers'
   powers (all damage with a player behind it) are covered.

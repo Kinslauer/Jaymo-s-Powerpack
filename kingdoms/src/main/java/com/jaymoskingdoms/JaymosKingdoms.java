@@ -167,7 +167,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Groups.register();
 		Handshakes.register();
 		// (0.7.264, Andy's NOEA picks) parties: invites, no friendly fire, shared slay quests, members' stats (and its attachment)
-		LOGGER.debug("party attachment: {}", Parties.PARTIES);
+		LOGGER.debug("party attachment: {}", Parties.META);
 		Parties.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
