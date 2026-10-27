@@ -44,6 +44,62 @@ public final class SkinTones {
 	/** The chance a newcomer or an immigrant talks about home when chatted to (instead of MCA's own small talk). */
 	public static final float ORIGIN_TALK_CHANCE = 0.3F;
 
+	/**
+	 * (0.7.236) Andy: "the sliders should only allow the color ranges that the heritage allows". Each heritage's
+	 * melanin, least to most (0 pale .. 1 dark), that MCA's skin picker may set on a player of that blood. My picks
+	 * from each blood's land: Andy can change them here.
+	 */
+	static final float[] HEARTLANDER_SKIN = {0.0F, 1.0F}, STONEBORN_SKIN = {0.15F, 0.6F}, TIDEBORN_SKIN = {0.3F, 0.85F},
+		SYLVAN_SKIN = {0.1F, 0.55F}, VERDANT_SKIN = {0.0F, 1.0F}, EMBERBORN_SKIN = {0.5F, 1.0F}, FROSTBORN_SKIN = {0.0F, 0.3F},
+		NIGHTBORN_SKIN = {0.0F, 0.35F}, WARRIORBORN_SKIN = {0.2F, 0.9F}, EARTHLING_SKIN = {0.0F, 1.0F}, STORMBORN_SKIN = {0.15F, 0.6F},
+		DAWNBORN_SKIN = {0.55F, 1.0F}, ENDBORN_SKIN = {0.0F, 0.3F}, DRAGONBLOOD_SKIN = {0.3F, 0.9F}, DEEPBORN_SKIN = {0.0F, 0.25F};
+
+	/** (0.7.236) {@code kind}'s melanin range, least and most. */
+	public static float[] skinRange(Heritage.Kind kind) {
+		return switch (kind) {
+			case HEARTLANDER -> HEARTLANDER_SKIN;
+			case STONEBORN -> STONEBORN_SKIN;
+			case TIDEBORN -> TIDEBORN_SKIN;
+			case SYLVAN -> SYLVAN_SKIN;
+			case VERDANT -> VERDANT_SKIN;
+			case EMBERBORN -> EMBERBORN_SKIN;
+			case FROSTBORN -> FROSTBORN_SKIN;
+			case NIGHTBORN -> NIGHTBORN_SKIN;
+			case WARRIORBORN -> WARRIORBORN_SKIN;
+			case EARTHLING -> EARTHLING_SKIN;
+			case STORMBORN -> STORMBORN_SKIN;
+			case DAWNBORN -> DAWNBORN_SKIN;
+			case ENDBORN -> ENDBORN_SKIN;
+			case DRAGONBLOOD -> DRAGONBLOOD_SKIN;
+			case DEEPBORN -> DEEPBORN_SKIN;
+		};
+	}
+
+	/** (0.7.236) {@code melanin} brought into {@code kind}'s range (no heritage: as it is). */
+	public static float clampSkin(Heritage.@Nullable Kind kind, float melanin) {
+		if (kind == null) {
+			return melanin;
+		}
+		float[] range = skinRange(kind);
+		return Mth.clamp(melanin, range[0], range[1]);
+	}
+
+	/** (0.7.236) How far inside its heritage's range a villager born outside it lands, at most (a share of the range). */
+	static final float BORN_INSIDE = 0.25F;
+
+	/**
+	 * (0.7.236) Andy: villagers too ("yes"). A villager's {@code melanin}, born of the land, brought into its heritage's
+	 * range: as it was if it's inside, else a little way in from the nearer edge (so they don't all sit on the edge).
+	 */
+	public static float bornSkin(Heritage.@Nullable Kind kind, float melanin, RandomSource random) {
+		if (kind == null) {
+			return melanin;
+		}
+		float[] range = skinRange(kind);
+		float inside = random.nextFloat() * BORN_INSIDE * (range[1] - range[0]);
+		return melanin < range[0] ? range[0] + inside : melanin > range[1] ? range[1] - inside : melanin;
+	}
+
 	/** Where a villager's family is from, as {@code "newcomer.<land>"} or {@code "immigrant.<land>"} (none: a native). */
 	public static final AttachmentType<String> ORIGIN = AttachmentRegistry.create(JaymosKingdoms.id("origin"),
 		builder -> builder.persistent(Codec.STRING));
