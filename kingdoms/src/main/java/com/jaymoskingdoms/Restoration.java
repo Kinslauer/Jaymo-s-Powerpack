@@ -259,7 +259,7 @@ public final class Restoration {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.restoration.downed"));
 			return;
 		}
-		if (!Mana.spend(player, Mana.cost("mend"))) {
+		if (!Mana.cast(player, "mend")) {
 			return;
 		}
 		MEND_READY.put(player.getUUID(), now + MEND_COOLDOWN);
@@ -284,7 +284,7 @@ public final class Restoration {
 	/** Renewal: a ring of gold light round them; every friend in it healed and their fever eased, the undead burnt and slowed. */
 	private static void renewal(ServerPlayer player, ServerLevel level) {
 		long now = level.getGameTime();
-		if (!ready(player, RENEWAL_READY, "renewal", now) || !fed(player, RENEWAL_HUNGER) || !Mana.spend(player, Mana.cost("renewal"))) {
+		if (!ready(player, RENEWAL_READY, "renewal", now) || !fed(player, RENEWAL_HUNGER) || !Mana.cast(player, "renewal")) {
 			return;
 		}
 		RENEWAL_READY.put(player.getUUID(), now + RENEWAL_COOLDOWN);
@@ -320,7 +320,7 @@ public final class Restoration {
 				return;
 			}
 		}
-		if (!ready(player, REKINDLE_READY, "rekindle", now) || !fed(player, REKINDLE_HUNGER) || !Mana.spend(player, Mana.cost("rekindle"))) {
+		if (!ready(player, REKINDLE_READY, "rekindle", now) || !fed(player, REKINDLE_HUNGER) || !Mana.cast(player, "rekindle")) {
 			return;
 		}
 		REKINDLE_READY.put(player.getUUID(), now + REKINDLE_COOLDOWN);
@@ -547,6 +547,7 @@ public final class Restoration {
 				if (v != cleric && Downed.isDowned(v)) {
 					next[1] = now + CLERIC_REKINDLE_PAUSE;
 					next[0] = now + CLERIC_PAUSE;
+					Mana.ripple(cleric, Mana.HEAL);
 					beam(level, cleric, v, GOLD_MOTE);
 					RISING.add(new Rising(v, null, now + REKINDLE_DELAY));
 					level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.8F, 1.7F);
@@ -567,6 +568,8 @@ public final class Restoration {
 			return;
 		}
 		next[0] = now + CLERIC_PAUSE;
+		// (0.7.244) a cleric is attuned: the heal ripples their aura
+		Mana.ripple(cleric, Mana.HEAL);
 		if (worst != cleric) {
 			beam(level, cleric, worst, GOLD_MOTE);
 		}
@@ -595,6 +598,7 @@ public final class Restoration {
 				continue;
 			}
 			timers[Sorcery.T_MEND] = Sorcery.MEND_COOLDOWN;
+			Mana.ripple(wizard, Mana.HEAL);
 			beam(level, wizard, e, GOLD_MOTE);
 			RISING.add(new Rising(e, null, level.getGameTime() + REKINDLE_DELAY));
 			level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.8F, 1.7F);

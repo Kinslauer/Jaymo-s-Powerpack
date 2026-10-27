@@ -43,6 +43,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.64: the richest kingdoms' cannons and their balls
 		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		// (0.7.237) a spirit's javelin is its trail: nothing to draw
+		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		CampSkins.register();
 		GoblinSkins.register();
@@ -124,6 +126,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.79: every other heritage's look (Heartlander and Warrior-born aside)
 		HeritageLooks.register();
 		ManaClient.register();
+		com.jaymoskingdoms.client.spirits.SpiritKey.register();
+		com.jaymoskingdoms.client.spirits.SpiritArms.register();
+		com.jaymoskingdoms.client.spirits.SpiritHud.register();
+		com.jaymoskingdoms.client.spirits.ClashCinematic.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)

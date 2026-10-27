@@ -31,6 +31,10 @@ abstract class HandshakeCameraMixin {
 	@Inject(method = "alignWithEntity", at = @At("TAIL"))
 	private void jaymoskingdoms$handshakeFilm(float partialTicks, CallbackInfo ci) {
 		double[] view = HandshakeCinematic.view(this.minecraft, partialTicks);
+		if (view == null) {
+			// (two spirits locked arm to arm: the clash's film)
+			view = com.jaymoskingdoms.client.spirits.ClashCinematic.view(this.minecraft, partialTicks);
+		}
 		if (view != null) {
 			this.setRotation((float)view[3], (float)view[4]);
 			this.setPosition(view[0], view[1], view[2]);

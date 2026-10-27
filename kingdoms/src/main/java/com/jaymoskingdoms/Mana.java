@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,8 +22,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 /**
@@ -45,6 +51,24 @@ import net.minecraft.world.level.block.Blocks;
  * <li><b>Spells for the rest:</b> an attuned player who isn't a Mage or Sorcerer learns a scroll's spell by reading it
  * and casts it from a staff, as hard as a scroll ({@link Spellcraft#ATTUNED_POWER}), never as hard as a Mage.</li>
  * </ul>
+ * (0.7.244) Andy: "court wizards and clerics should have to be attuned as well. meaning other magic users can see their
+ * glow, and know their power level from the intensity of the glow ... amethyst should be now crushable for mana. add a type
+ * of mana sickness for punishing over zealous casters ... Arcana increases that minimum, so you now glow for others the most
+ * dim at your weakest. A mana infused wand ... mana can be regenerated using meditation from the survival tree. when
+ * casting a spell the aura should ripple, indicating the caster's intent."
+ * <ul>
+ * <li><b>Power:</b> every attuned being has a {@link #POWER} (1-{@link #MAX_POWER}), synced to all: a player's from their
+ * most mana (so Arcana raises it), the casting folk's from what they are ({@link ManaFolk}). The glow never sinks below
+ * what their power shows; the attuned read a stranger's strength from it.</li>
+ * <li><b>Amethyst:</b> an attuned player crushes a shard in their fist (use it) for {@link #CRUSH_MANA}, even past full; what
+ * goes past full strains them ({@link ManaSickness}).</li>
+ * <li><b>Meditation</b> (Jaymo's Powers' Meditate key, opened in Survival): mana comes back {@link #MEDITATE_REGEN} times as
+ * fast, by rank, and strain eases faster.</li>
+ * <li><b>Intent:</b> every cast ripples the caster's aura ({@link #RIPPLE}), coloured by what it's for: harm, healing,
+ * warding, or will (summoning, knowing, moving mana).</li>
+ * <li>Mana sickness ({@link ManaSickness}), alchemy's vis and corruption ({@link ManaAlchemy}), the mana wand
+ * ({@link ManaWand}).</li>
+ * </ul>
  */
 public final class Mana {
 	/** The most mana a natural (Mage, Sorcerer) and one who found it hold, and what each Arcana point adds. */
@@ -61,6 +85,16 @@ public final class Mana {
 	static final double SEEN_RANGE = 48.0;
 	/** The glow's steps (synced): 0 none ... {@code GLOW_STEPS} full. */
 	public static final int GLOW_STEPS = 10;
+	/** (0.7.244) A player's power: one step for every this much of their most mana (a finder 2, a fresh caster 4). */
+	static final float MANA_PER_POWER = 25.0F;
+	public static final int MAX_POWER = 10;
+	/** (0.7.244) Mana from one amethyst shard crushed in the fist, and the wait between crushes (ticks). */
+	static final float CRUSH_MANA = 10.0F;
+	static final int CRUSH_COOLDOWN = 10;
+	/** (0.7.244) Mana comes back this many times as fast while meditating, by Meditation rank (0-3). */
+	static final float[] MEDITATE_REGEN = {1.0F, 3.0F, 4.0F, 5.0F};
+	/** (0.7.244) A cast's intent, shown in the ripple of the caster's aura. */
+	public static final int HARM = 0, HEAL = 1, WARD = 2, WILL = 3;
 
 	/**
 	 * What each spell costs: a staff cast (Mage or attuned) and the Sorcerer's keys. A scroll read once costs nothing: the
@@ -75,6 +109,12 @@ public final class Mana {
 		// (0.7.231) death's (blood's are paid in blood: Hemomancy.COST)
 		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("deaths_door", 50.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F));
 
+	/** (0.7.244) What each spell or key is for (the rest: harm). */
+	static final Map<String, Integer> INTENT = Map.ofEntries(
+		Map.entry("mending", HEAL), Map.entry("restoration", HEAL), Map.entry("mend", HEAL), Map.entry("renewal", HEAL),
+		Map.entry("rekindle", HEAL), Map.entry("warding", WARD), Map.entry("sanctuary", WARD), Map.entry("deaths_door", WARD),
+		Map.entry("raising", WILL), Map.entry("raise", WILL), Map.entry("whispers", WILL));
+
 	/** Whether a player is attuned. Saved, kept through death, synced to everyone (who sees whose glow). */
 	public static final AttachmentType<Boolean> ATTUNED = AttachmentRegistry.create(JaymosKingdoms.id("attuned"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
@@ -88,13 +128,39 @@ public final class Mana {
 	public static final AttachmentType<Long> OVERLOADED = AttachmentRegistry.create(JaymosKingdoms.id("mana_overloaded"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.7.244) How strong an attuned being is (1-{@link #MAX_POWER}), shown in how bright their glow sits at its least.
+	 * Saved (on folk), synced to everyone.
+	 */
+	public static final AttachmentType<Integer> POWER = AttachmentRegistry.create(JaymosKingdoms.id("mana_power"),
+		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** (0.7.244) Their last cast: game time times 4, plus its intent ({@link #HARM}...). Synced to everyone, for the ripple. */
+	public static final AttachmentType<Long> RIPPLE = AttachmentRegistry.create(JaymosKingdoms.id("mana_ripple"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
 	/** The overload's blue motes. */
-	static final DustParticleOptions MOTE = new DustParticleOptions(0x4C8DFF, 1.0F);
+	public static final DustParticleOptions MOTE = new DustParticleOptions(0x4C8DFF, 1.0F);
 
 	private Mana() {
 	}
 
 	static void register() {
+		ManaSickness.register();
+		ManaFolk.register();
+		ManaWand.register();
+		// (their attachments, registered as the classes load)
+		JaymosKingdoms.LOGGER.debug("mana attachments: {} {}", ManaSickness.SICK, ManaAlchemy.ATTUNING);
+		// (0.7.244) an amethyst shard crushed in the fist
+		UseItemCallback.EVENT.register((player, world, hand) -> {
+			ItemStack stack = player.getItemInHand(hand);
+			if (!stack.is(Items.AMETHYST_SHARD) || !attuned(player) || player.isSpectator()) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer sp) {
+				crush(sp, stack);
+			}
+			return InteractionResult.SUCCESS;
+		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
 			.then(Commands.literal("mana").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("attune").executes(c -> attuneCommand(c.getSource(), c.getSource().getPlayerOrException()))
@@ -109,6 +175,7 @@ public final class Mana {
 					p.removeAttached(ATTUNED);
 					p.removeAttached(MANA);
 					p.removeAttached(GLOW);
+					p.removeAttached(POWER);
 					return 1;
 				})))));
 	}
@@ -140,7 +207,19 @@ public final class Mana {
 			return 0.0F;
 		}
 		int points = Stats.value(player, Stats.Stat.ARCANA);
-		return natural(player) ? NATURAL_MAX + NATURAL_PER_POINT * points : FOUND_MAX + FOUND_PER_POINT * points;
+		// (0.7.244) corruption eats into it
+		return (natural(player) ? NATURAL_MAX + NATURAL_PER_POINT * points : FOUND_MAX + FOUND_PER_POINT * points) * ManaAlchemy.left(player);
+	}
+
+	/** (0.7.244) How strong {@code entity}'s magic is (0 unattuned): a player's from their most mana, folk's as they are. */
+	public static int power(LivingEntity entity) {
+		if (!attuned(entity)) {
+			return 0;
+		}
+		if (entity instanceof Player player) {
+			return Math.clamp(Math.round(max(player) / MANA_PER_POWER), 1, MAX_POWER);
+		}
+		return entity.getAttachedOrElse(POWER, 1);
 	}
 
 	/** Mana back per second. */
@@ -163,6 +242,44 @@ public final class Mana {
 		return true;
 	}
 
+	/** (0.7.244) Pays for {@code what} (a spell or a Sorcerer's key) and ripples the aura with its intent; false if they can't. */
+	static boolean cast(ServerPlayer player, String what) {
+		if (!spend(player, cost(what))) {
+			return false;
+		}
+		ripple(player, intent(what));
+		return true;
+	}
+
+	/**
+	 * (0.7.245) Pays {@code cost} for something outside the spell lists (a spirit's move) and ripples the aura with
+	 * {@code intent}; false (and a word on the screen) if they can't.
+	 */
+	public static boolean pay(ServerPlayer player, float cost, int intent) {
+		if (!spend(player, cost)) {
+			return false;
+		}
+		ripple(player, intent);
+		return true;
+	}
+
+	/** (0.7.245) Takes {@code amount} from {@code player}'s mana with no ripple and no strain (a spirit's upkeep, a release). */
+	public static void drain(ServerPlayer player, float amount) {
+		if (!player.isCreative() && attuned(player)) {
+			set(player, current(player) - amount);
+		}
+	}
+
+	/** (0.7.245) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
+	public static boolean canPay(ServerPlayer player, float cost) {
+		return player.isCreative() || attuned(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
+	}
+
+	/** (0.7.244) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
+	static float price(ServerPlayer player, float cost) {
+		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player);
+	}
+
 	/** Whether {@code player} has {@code cost} to spend (a word on the screen if not). Creative players always have. */
 	static boolean afford(ServerPlayer player, float cost) {
 		if (player.isCreative()) {
@@ -172,9 +289,13 @@ public final class Mana {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.unattuned").withStyle(ChatFormatting.BLUE));
 			return false;
 		}
-		float now = current(player);
-		if (now < cost) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.low", Math.round(now), Math.round(cost)).withStyle(ChatFormatting.BLUE));
+		if (ManaSickness.burntOut(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.burnt_out").withStyle(ChatFormatting.DARK_AQUA));
+			return false;
+		}
+		float now = current(player), price = price(player, cost);
+		if (now < price) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.low", Math.round(now), Math.round(price)).withStyle(ChatFormatting.BLUE));
 			return false;
 		}
 		return true;
@@ -183,8 +304,81 @@ public final class Mana {
 	/** Takes {@code cost} (what {@link #afford} said they had). */
 	static void take(ServerPlayer player, float cost) {
 		if (!player.isCreative()) {
-			set(player, current(player) - cost);
+			float price = price(player, cost);
+			if (ManaAlchemy.smother(player) > 1.0F) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.smothered").withStyle(ChatFormatting.DARK_PURPLE));
+			}
+			set(player, current(player) - price);
+			// (0.7.245) casting while the spirit stirs in its sleep wakes it sooner
+			com.jaymoskingdoms.spirits.SpiritSickness.pushed(player, price);
+			// (0.7.244) every cast strains: cast too much too fast and it makes you sick
+			ManaSickness.strain(player, price);
 		}
+	}
+
+	/**
+	 * (0.7.244) Mana poured into {@code player} from outside (amethyst, a wand), up to {@link #OVERLOAD} times their most;
+	 * what goes past full strains them. How much went in.
+	 */
+	static float give(ServerPlayer player, float amount) {
+		float max = max(player), now = current(player);
+		float in = Math.max(0.0F, Math.min(amount, max * OVERLOAD - now));
+		if (in <= 0.0F) {
+			return 0.0F;
+		}
+		set(player, now + in);
+		float over = Math.min(in, now + in - max);
+		if (over > 0.0F) {
+			ManaSickness.strain(player, over);
+		}
+		return in;
+	}
+
+	/** (0.7.244) What {@code what} (a spell, a key, an element) is for. */
+	static int intent(String what) {
+		return INTENT.getOrDefault(what, HARM);
+	}
+
+	/** (0.7.244) {@code caster}'s aura ripples with a cast's {@code intent} (once a tick; only the attuned have an aura). */
+	public static void ripple(LivingEntity caster, int intent) {
+		if (!(caster.level() instanceof ServerLevel level)) {
+			return;
+		}
+		if (!(caster instanceof Player)) {
+			ManaFolk.attuneIfMagic(caster);
+		}
+		if (!attuned(caster)) {
+			return;
+		}
+		long stamp = level.getGameTime() * 4L + intent;
+		Long last = caster.getAttached(RIPPLE);
+		if (last == null || last / 4L != level.getGameTime()) {
+			caster.setAttached(RIPPLE, stamp);
+		}
+	}
+
+	/** (0.7.244) An amethyst shard crushed in the fist: mana, a chime, violet dust. */
+	private static void crush(ServerPlayer player, ItemStack stack) {
+		if (player.getCooldowns().isOnCooldown(stack)) {
+			return;
+		}
+		float in = player.isCreative() ? CRUSH_MANA : give(player, CRUSH_MANA);
+		if (in <= 0.0F) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.brimming").withStyle(ChatFormatting.BLUE));
+			return;
+		}
+		if (!player.isCreative()) {
+			stack.shrink(1);
+		}
+		player.getCooldowns().addCooldown(stack, CRUSH_COOLDOWN);
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		ServerLevel level = (ServerLevel)player.level();
+		net.minecraft.world.phys.Vec3 hand = player.getEyePosition().add(player.getLookAngle().scale(0.5)).subtract(0.0, 0.3, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, Items.AMETHYST_SHARD), hand.x, hand.y, hand.z, 10,
+			0.1, 0.1, 0.1, 0.05);
+		sendSeen(level, MOTE, hand.x, hand.y, hand.z, 6, 0.15, 0.15, 0.15, 0.02);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 0.8F);
 	}
 
 	/** The cost of {@code what} (a spell, or a Sorcerer's key: imbue, bolt, mend, renewal, rekindle). */
@@ -204,12 +398,22 @@ public final class Mana {
 		if (player.getAttachedOrElse(GLOW, -1) != step) {
 			player.setAttached(GLOW, step);
 		}
+		// (0.7.244) and their power, for how bright it sits at its least
+		int power = power(player);
+		if (player.getAttachedOrElse(POWER, -1) != power) {
+			player.setAttached(POWER, power);
+		}
 	}
 
 	// ---- attuning ---------------------------------------------------------------------------------------------------
 
 	/** {@code player} is attuned now (again, if they were): overloaded with mana, their sight blue till it settles. */
 	public static void attune(ServerPlayer player) {
+		attune(player, null);
+	}
+
+	/** {@link #attune(ServerPlayer)}, telling a first-timer {@code how} (a message key) instead of the amethyst's song. */
+	static void attune(ServerPlayer player, @org.jspecify.annotations.Nullable String how) {
 		boolean first = !attuned(player);
 		player.setAttached(ATTUNED, true);
 		set(player, max(player) * OVERLOAD);
@@ -221,7 +425,7 @@ public final class Mana {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.5F);
 		if (first) {
 			player.sendSystemMessage(Component.translatable(natural(player) ? "message.jaymoskingdoms.mana.attuned.natural"
-				: "message.jaymoskingdoms.mana.attuned").withStyle(ChatFormatting.AQUA));
+				: how != null ? how : "message.jaymoskingdoms.mana.attuned").withStyle(ChatFormatting.AQUA));
 		}
 	}
 
@@ -233,23 +437,35 @@ public final class Mana {
 				attune(player);
 			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player)) {
 				attune(player);
+			} else {
+				// (0.7.244) or slowly, carrying alchemy's vis
+				ManaAlchemy.unattunedTick(player, now);
 			}
 			return;
 		}
 		if (now % 20L != 0L) {
 			return;
 		}
+		ManaSickness.tick(player);
 		float max = max(player), mana = current(player);
+		// (0.7.244) meditating brings it back faster, sickness slower or not at all; vis feeds it, flux drains it
+		float back = regen(player) * MEDITATE_REGEN[meditating(player)] * ManaSickness.regenTimes(player) * com.jaymoskingdoms.spirits.SpiritSickness.regenTimes(player);
+		float alchemy = ManaAlchemy.perSecond(player);
 		if (mana > max) {
-			set(player, Math.max(max, mana - SPILL));
+			set(player, Math.max(max, mana - SPILL + Math.min(0.0F, alchemy)));
 			if (player.level() instanceof ServerLevel level && player.getRandom().nextInt(3) == 0) {
 				sendSeen(level, MOTE, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.4, 0.6, 0.4, 0.02);
 			}
-		} else if (mana < max) {
-			set(player, Math.min(max, mana + regen(player)));
+		} else if (mana < max || alchemy < 0.0F) {
+			set(player, Mth.clamp(mana + back + alchemy, 0.0F, max));
 		} else {
 			glow(player);
 		}
+	}
+
+	/** (0.7.244) {@code player}'s Meditation rank while they're settled into it (Jaymo's Powers' Meditate), else 0. */
+	static int meditating(ServerPlayer player) {
+		return PowersCompat.meditating(player) ? Math.clamp(Skills.rank(player, "meditation"), 1, MEDITATE_REGEN.length - 1) : 0;
 	}
 
 	private static boolean nearAmethyst(ServerPlayer player) {
@@ -266,7 +482,7 @@ public final class Mana {
 	// ---- seen by the attuned ----------------------------------------------------------------------------------------
 
 	/** Particles only the attuned near by can see (the quiet signs of magic). */
-	static void sendSeen(ServerLevel level, ParticleOptions particle, double x, double y, double z, int count, double dx, double dy, double dz,
+	public static void sendSeen(ServerLevel level, ParticleOptions particle, double x, double y, double z, int count, double dx, double dy, double dz,
 		double speed) {
 		for (ServerPlayer viewer : level.players()) {
 			if (attuned(viewer) && viewer.distanceToSqr(x, y, z) < SEEN_RANGE * SEEN_RANGE) {

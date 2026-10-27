@@ -115,9 +115,20 @@ public final class MobShields {
 		if (blocks == null || seconds <= 0.0F) {
 			return;
 		}
+		disable(level, mob, seconds);
+	}
+
+	/** (0.7.245) Knocks {@code mob}'s raised shield aside for {@code seconds} (a spirit's axe, a guard break); false if it had none up. */
+	public static boolean disable(ServerLevel level, Mob mob, float seconds) {
+		ItemStack shield = mob.getUseItem();
+		BlocksAttacks blocks = shield.get(DataComponents.BLOCKS_ATTACKS);
+		if (blocks == null || !mob.isUsingItem()) {
+			return false;
+		}
 		blocks.disable(level, mob, seconds, shield);
 		long[] s = STATE.computeIfAbsent(mob, m -> new long[4]);
 		s[DISABLED] = level.getGameTime() + Math.round(seconds * blocks.disableCooldownScale() * 20.0F);
+		return true;
 	}
 
 	private static void raise(Mob mob, long[] s, long now, int ticks) {

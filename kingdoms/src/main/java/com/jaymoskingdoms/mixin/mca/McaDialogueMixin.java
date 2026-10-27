@@ -134,6 +134,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.ManaFolk.ANSWER.equals(answer)) {
+			// (0.7.244) asked about their magic: how strong it is, and how it measures against yours
+			com.jaymoskingdoms.ManaFolk.answer(player, villager, words -> villager.sendChatMessage(words, player));
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && HermitAlchemy.ANSWER.equals(answer)) {
 			// (0.7.215) a hermit asked about alchemy: eager words and a hint at what to try next
 			if (villager.level() instanceof net.minecraft.server.level.ServerLevel level) {

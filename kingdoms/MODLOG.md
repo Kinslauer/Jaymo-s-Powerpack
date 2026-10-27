@@ -5220,3 +5220,156 @@ stoic brick for a captain. they need at the very least a personality."
   along 16 headings for open water she can sail straight to (`Fleet.offing`), takes the one that comes out nearest her
   heading, and makes for it (at most 30 s) before taking her heading up again. Each try from the same bay looks farther
   out (48, 96, 144, then 160 blocks); the count starts over once she's 96 blocks clear (`Corsairs.DETOUR*`).
+## 0.7.244: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.32)
+Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
+flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
+Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
+brightens it; the flare at its height is a little brighter
+than before (`FLARE` 2.0) and eases away with the same curve as the blue on your screen, which still fades out fully.
+Not seen in game.
+Then Andy: "court wizards and clerics should have to be attuned as well. meaning other magic users can see their glow, and
+know their power level from the intensity of the glow. mentioning it if asked. amethyst should be now crushable for mana.
+add a type of mana sickness for punishing over zealous casters, can we link alchemy? using vis and flux slowly attuning or
+corrupting you? corruption would be anti magic, reading the mana user's intentions ... Arcana increases that minimum ... A
+mana infused wand ... mana can be regenerated using meditation from the survival tree. when casting a spell the aura
+should ripple, indicating the caster's intent."
+- **Power in the glow** (`Mana.POWER`, synced): a player's is their most mana / 25 (a finder 2, a fresh caster 4, Arcana
+  raises it), 1-10. The resting glow is `REST_BASE` 0.05 + 0.07 a power step + 0.25 at full mana, so the weakest glow
+  dimmest and Arcana lifts the floor. `ManaClient.Folk` draws it on every non-player humanoid too.
+- **Attuned folk** (`ManaFolk`): hermits 8, court wizards and necromancers 6, blood witches 5, shamans (orc ones too) 4,
+  village clerics 3, each give or take one; attuned as players come near (every 5 s within 48 blocks) or when they cast.
+  MCA's "Ask about their magic" (only on the attuned): a line by tier, then how it measures against yours if you're
+  attuned, or a remark if you're corrupted, or that you can't see it.
+- **Ripples:** every cast ripples the caster's aura, a swelling ring through the glow coloured by intent: red harm, gold
+  healing, white warding, blue will (raising, whispers, the wand). Players' casts (`Mana.cast`, `Spellcraft.afterCast`)
+  and the folk's (`Sorcery` spells, clerics, court wizards' rekindle, the blood witch).
+- **Amethyst:** an attuned player uses a shard to crush it for 10 mana (0.5 s apart), up to 150% of their most.
+- **Mana sickness** (`ManaSickness`): mana spent, and mana forced in past full, is strain against your most mana; it
+  eases 4% of it a second (x3 meditating). Past 1.0x: queasy (nausea, half regen, 60 s); 1.6x: sick (weak, slow, hungry,
+  no regen, casts cost 1.5x, 90 s); 2.2x: burnt out (mana gone, 4 damage, no casting, 120 s). A pulsing grey-green tint.
+- **Alchemy** (`ManaAlchemy`, Powers by reflection): essence carried in phials (vis) wears attunement into the unattuned
+  (0.05 a point every 5 s, up to 60 points: at 100 they're attuned as a finder) and trickles mana into the attuned (up to
+  0.5/s). Flux of 100+ in your chunk drains flux/200 mana a second. Corruption shrinks your most mana (0.5% a point, at
+  most half); at 25+ you see glows and ripples as the attuned do, and an attuned player casting within 6 blocks of you
+  pays 1.5x.
+- **Meditation:** settled in with Powers' Meditate key, mana comes back 3x/4x/5x by Meditation rank.
+- **Mana-infused wand** (`ManaWand`, stick + gold nugget + amethyst shard): holds 100 mana. Sneak-use pours 25 in;
+  use at an attuned player gives it to them, at nothing draws it back. Past-full strains the receiver. Art from
+  `tools/gen_mana_wand.py`.
+javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
+
+## 0.7.245: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.32)
+Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
+mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
+arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and
+some have entire move sets but all can be upgraded and leveled and the ones with personalities can kick in on their own to
+assist you at times similar to how the symbiote operates. make them speak like wise wizards from ancient times looking
+after a young child or grumpy old wizards that are tired of looking after said young child ... Make them give battle
+advice while in combat at higher bonding levels." Look: Nero's Devil Breaker to Doppio's partial manifestation, "all
+different sizes". JCraft: Eyes of Ender is All Rights Reserved: ideas only, our own code and art. Plan: `docs/Spirits-Plan.md`.
+First patch: the shared mage hands plus two of the five spirits; Ambrose (ward), Thessaly (reach), the Quiet One (echo),
+Clash, Spirit armour, Spirit ride and Sense come next. All in `spirits/` and `client/spirits/`.
+- **Gaining one** (`SpiritSickness`): an attuned player left at a fifth of their health (or downed) has a 1 in 18 chance,
+  once per two minutes, that a spirit answers (Grimsby or Varro, leaned by heritage). Then spirit sickness: mana back at
+  half pace, the spirit-to-be whispering once a day, a flicker of an arm at the edge of sight; it wakes on the fifth day
+  at the latest, sooner the more you push it (meditating, casting, nearly dying again), and the waking cures it. One for
+  life: `/kingdom spirit release` (twice) lets it go for good, empties your mana and burns you out.
+- **Summoning** (`Spirits`, key L): tap to call it (10 mana), it drains half a mana a second out and fades when you're
+  nearly empty; sneak-tap cycles its moves, tap casts the chosen one (hold to charge the javelin), sneak-hold puts it
+  away. Every move costs mana through `Mana.pay`, so it strains you toward mana sickness. Dying, logging out or spectating
+  puts it away.
+- **Bond and level**: bond grows with time out (x3 meditating) and fights won, drops when you burn out with it out; from
+  40 a second arm, from 20 it acts on its own, from 40 idle remarks, from 60 battle advice by foe (casters, archers,
+  creepers, the armoured, crowds, the big), from 80 advice before the fight. Level from kills and casts: +5% damage a
+  level, moves unlock by level, 20 at most.
+- **The mage hands** (`HandMoves`, every spirit): far hand (use chests, doors, levers, frames, pull items from 16 blocks,
+  +1 a level), grab and throw (lift a mob or item, hold it, hurl it; charge for speed), catch (snatch arrows, tridents,
+  javelins, fireballs and potions from the air; from level 3 on its own when it can pay), shove (a cone of knockback),
+  hold the line (pin a mob in place), second pair of hands (the spirit holds your shield or torch while you fight
+  two-handed). Allies (pets, thralls, team, your faction's folk) are never harmed.
+- **Grimsby the Weary** (blade, steel-blue, an arm's length of bony fingers and a blade): five conjured arms (sword,
+  greatsword sweep, spear thrust through two, axe that breaks shields, hammer that knocks up), each a 3-tap combo with a
+  heavier third hit; flurry, riposte (a parry with a counter-cut), guard break (a slam that breaks shields and stuns),
+  finisher (a single cut on a downed foe). On his own: parries a blow you didn't see coming, then complains.
+- **Old Varro, the Siege-Mage** (siege, amber, a gauntlet as tall as you): mana javelin (`SpiritJavelin`, charge it,
+  pierces three), volley (a fan of five), bombard (a slow orb that bursts), spear wall (javelins rise in a line), mark
+  (your hits on it do 1.3x). On his own: a javelin at whoever draws a bow on you.
+- **The look** (`client/spirits/SpiritArms`): the arm grows out of your own, scaled by the spirit's size and eased in,
+  pushed behind the shoulder, three aura shells in the kind's colour over mana's blue, posed per move and lerped back to
+  idle, wisps at the hand; only the attuned (and the corrupted) see it. Every autonomous act flashes your screen in its
+  colour (`SpiritHud`), and the HUD shows the spirit, its move and level/bond while it's out.
+- **The voice** (`SpiritVoice`): chat lines only you see, in its colour and name, for waking, summoning, dismissing,
+  tiring, kills, hurts, low health, idling, bond, levels, acts, release and the five sick days; Grimsby grumbles, Varro
+  barks.
+- **Folk spirits** (`FolkSpirits`): court wizards and hermits carry Grimsby or Varro (level from their power, bond 50),
+  out while they fight: Grimsby folk flurry and parry one blow in three, Varro folk throw javelins and volleys.
+javac-checked against Andy's 26.3 jars (the usual optional-mod errors only); not Loom-built, not seen in game. The L key
+is the only letter neither mod nor vanilla binds.
+
+Second patch (same release): the other three spirits, the clash and the last two shared hands. Andy: "two players' spirits
+lock arms; it uses the beam-clash film", All Might style; the Quiet One "seemingly non-responsive" and speaks once.
+- **Old Ambrose, the Warden** (ward, pale gold, a hand twice yours): aegis (a wall of palm that stops blows and arrows
+  from the front), steady hands (a toggle: no knockback, no flinch, 2 mana a second), bless (a touch that heals an ally
+  and gives resistance), catch me (he catches your fall and hauls you out of lava), mend (a toggle that closes cuts and
+  heals a point a second while you can pay). On his own: raises the aegis at a blow you didn't see, catches falls, hauls
+  you from lava, blesses a hurt friend, mends you after a fight.
+- **Thessaly the Learned** (reach, violet, a slim glove with three rings): long reach (draws items and mobs from 12
+  blocks), unseen hand (lifts from a pocket at 6 blocks, Pickpocket's lift), rune trap (a glyph on the floor that snares
+  the first foe to cross it), unlock (picks a locked chest with Lockpicking's own game, by her level), juggle (lifts up to
+  four things and hurls them one by one; costs per thing lifted, the cooldown waits for the last throw). On her own: points
+  out an unopened chest within 24 blocks with a line of sparks and a remark, once a minute.
+- **The Quiet One** (echo, grey, a plain featureless arm, conjured at a different size each time: half to three times
+  its own): echo strike (a toggle: every melee hit lands again 10 ticks later for half), sense (motes on hidden mobs,
+  locked chests and ore near you, only you see them), mirror step (a sidestep that leaves a glowing double the mobs
+  chase for two seconds), stillness (three seconds where mobs within 8 stop and arrows hang in the air), silent end (one
+  blow kills a foe under 30% health, never a boss; once a day). On its own: now and then ends a fight with a silent end
+  or a stillness. It says nothing, ever, but the five sick-day whispers; at bond 100 it speaks one word, once. Who answers
+  a brush with death is leaned by heritage (Tideborn, Verdant, Dawnborn: Ambrose; Sylvan, Nightborn: Thessaly; Stoneborn,
+  Warriorborn: Varro; Emberborn, Earthling: Grimsby), the rest even; the Quiet One never leans.
+- **Spirit armour and Spirit ride** (`HandExtras`, every spirit): armour wraps the arms round you like plate for six
+  seconds (half damage, no knockback); ride plants both arms as stilts and vaults you forward and up, the arms taking the
+  landing.
+- **The clash** (`SpiritClash`, `client/spirits/ClashCinematic`): two keepers with spirits out, within four blocks, who
+  strike at each other (grab, shove, pin, a blade, a javelin) within a second lock arms: both rooted, a five-second contest
+  where every tap of L adds to your side and the spirits' levels tell, the first to a 40-point lead wins; the loser is
+  thrown six blocks and takes 8, the winner's bond grows by 3; a draw throws both. The film: letterbox bars, the HUD gone
+  but for a tug bar in both spirits' colours, the camera swung side-on, the screen shaking harder as the lead swings, a
+  flash in the winner's colour; attuned players within 24 blocks get the bars. No summoning, cycling or dismissing while
+  locked: the loser is thrown. Grimsby, Varro, Ambrose and Thessaly crow or grumble; the Quiet One says nothing.
+- **The look**: Ambrose's broad open hand (five spread fingers), Thessaly's glove and rings, the Quiet One's bare arm at
+  its rolled size; a pose for every new move (the aegis wall, the palm overhead, arms down and open, a hand on the chest,
+  wrapped round the body, stilts, juggling arms, the locked clash); the HUD marks steady hands, armour and echo "(on)"
+  while they last (`SpiritState.toggles`, synced).
+- **Under the hood**: a move's pose, cooldown and cost for the cast just happening are kept per keeper (`CastHints`), not
+  on the move (one object shared by every keeper, and by the client's HUD in singleplayer). Upkeep (holding the line,
+  steady hands, mending) is drained with no strain, so being healed doesn't make you mana-sick. Everything the hands hold
+  up is tagged, so a player or mob saved mid-hold gets its gravity back on load. Putting the spirit away ends every hold,
+  ward, armour, echo and juggle. `Lockpicking.lockLevel` and `pickBySpirit`, `Pickpocket.liftBySpirit`,
+  `MobShields.disable` and `BossBars.boss` opened for the spirits.
+- **Where the arms sit, and first person** (Andy's first look, 2026-10-27): Varro, Ambrose and the Quiet One float above
+  and ahead of your shoulder, raised forward, as a stand hovers; Grimsby's blade and Thessaly's glove stay on your own arm.
+  In first person your spirit's arms are drawn too (`SpiritFirstPersonMixin`, after the hands), where they sit on your body,
+  so the floating ones hang in view and every strike comes out in front of you.
+  Every move blazes the arms to full brightness while its pose holds, then they settle back to your glow.
+- **Jointed arms, and blows that land** (Andy: "animated with joints and fingers, more like the nero gif ... more detail
+  and oomph"): `SpiritRig` rebuilds every arm as shoulder, upper arm, elbow, a forearm that stretches out on a thrust
+  (the Devil Breaker), wrist, palm, two-jointed fingers and a thumb, each spirit in its own make: Grimsby bony with
+  knobbed knuckles, claws and the blade on its guard; Varro in plate (pauldron, couter, vambrace, gauntlet, plated clawed
+  fingers, studs); Ambrose's flared sleeve, broad palm and ward sigil; Thessaly's armlet, bracelet and three rings; the
+  Quiet One smooth with long fingers. Each move has a shape: strikes wind up (drawn back, elbow bent, fist) then snap
+  past the mark and settle; swings raise high and cut across; grasps reach open then close; wards spread the palm. Idle,
+  the fingers flex. The floating spirits no longer swing with your walk, and their blows follow where you look. A blow
+  leaves two fading ghosts of the arm behind it, swells the hand as it lands, and bursts where it lands (dust in the
+  spirit's colour, sparks, crits and a crack only the attuned hear). Wisps of the floating spirits rise above and ahead.
+- **Wisps, a living idle, Grimsby's weapons** (Andy's second look): three faint ghosts on the outer shell trail every
+  movement, idle included, and brighten on a blow. Idle, the elbow works in and out, the shoulder rolls, and now and then
+  the arm draws in and the hand closes as if stretching. Grimsby's forms are now their own weapons growing out of his
+  fist as the blade shrinks away: the greatsword (guard, fuller) and the hammer grow to 1.35x; the hammer and the guard
+  break heave up overhead and slam down in front, throwing a ring of aura along the ground with a boom. The axe turns
+  his aura to ragged embers that churn and flicker; the spear draws it into a pale, bright, streaming core.
+- **The spirit key works on every install**: `SpiritKey` unbinds vanilla's Advancements from L once per install
+  (marker `jaymoskingdoms-spirit-key-v1`). Powers' key pass had already run on existing installs, so L kept opening the
+  advancements screen and the spirit never came.
+- **Dev runs load worlds again**: the silver sword and the eight steel plate recipes wait for `c:ingots/silver` and
+  `c:ingots/steel` to have items (`fabric:tags_populated`). Powers fills those tags, so in the pack nothing changes; a
+  Kingdoms-only run used to fail registry loading on the missing tags.

@@ -339,6 +339,7 @@ public final class Sorcery {
 				}
 			}
 			case WIZARD -> {
+				com.jaymoskingdoms.spirits.FolkSpirits.tick(level, folk, target);
 				List<Folk> fighting = fightingAllies(level, folk);
 				if (timers[T_WARD] <= 0 && (target != null || !fighting.isEmpty())) {
 					fighting.add(folk);
@@ -403,7 +404,7 @@ public final class Sorcery {
 	}
 
 	/** {@code e} is fair game for one of {@code caster}'s blasts: its foe, or something fighting its side; never its own side. */
-	static boolean foe(Folk caster, LivingEntity e) {
+	public static boolean foe(Folk caster, LivingEntity e) {
 		if (e == caster || !e.isAlive() || e instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return false;
 		}
@@ -438,6 +439,7 @@ public final class Sorcery {
 
 	/** Life drain: a violet thread from his hand to the foe; what it takes, he keeps. */
 	static void drain(ServerLevel level, LivingEntity caster, LivingEntity target, float damage, float heal) {
+		Mana.ripple(caster, Mana.HARM);
 		beam(level, caster, target.getBoundingBox().getCenter(), new DustParticleOptions(DRAIN_COLOUR, 1.2F));
 		if (target.hurtServer(level, magic(level, caster), damage)) {
 			caster.heal(heal);
@@ -448,6 +450,7 @@ public final class Sorcery {
 
 	/** Bone spikes: a line of them bursting up from the ground at the foe, cutting whatever of the other side stands there. */
 	private static void spikes(ServerLevel level, Folk folk, LivingEntity target) {
+		Mana.ripple(folk, Mana.HARM);
 		folk.spellTimers()[T_SPIKES] = SPIKES_COOLDOWN;
 		Vec3 dir = new Vec3(target.getX() - folk.getX(), 0.0, target.getZ() - folk.getZ());
 		dir = dir.lengthSqr() < 1.0E-4 ? folk.getLookAngle().multiply(1.0, 0.0, 1.0).normalize() : dir.normalize();
@@ -473,6 +476,7 @@ public final class Sorcery {
 	 * out of the ground beside him, a zombie and a skeleton (of his land's kind).
 	 */
 	private static void raiseDead(ServerLevel level, Folk folk, LivingEntity target) {
+		Mana.ripple(folk, Mana.WILL);
 		folk.spellTimers()[T_RAISE] = RAISE_COOLDOWN;
 		int room = Math.min(RAISE_COUNT, MAX_THRALLS - Thralls.count(folk.getUUID()));
 		int raised = 0;
@@ -549,6 +553,7 @@ public final class Sorcery {
 
 	/** Fire bolt: a small fireball, as a blaze throws. */
 	private static void fireBolt(ServerLevel level, Folk folk, LivingEntity target) {
+		Mana.ripple(folk, Mana.HARM);
 		Vec3 dir = new Vec3(target.getX() - folk.getX(), target.getY(0.5) - folk.getEyeY() + 0.2, target.getZ() - folk.getZ()).normalize();
 		SmallFireball bolt = new SmallFireball(level, folk, dir);
 		bolt.setPos(folk.getX() + dir.x * 0.6, folk.getEyeY() - 0.2, folk.getZ() + dir.z * 0.6);
@@ -558,6 +563,7 @@ public final class Sorcery {
 
 	/** Ring of fire: everything of the other side close to him catches fire and is thrown back. */
 	private static void ring(ServerLevel level, Folk folk) {
+		Mana.ripple(folk, Mana.HARM);
 		folk.spellTimers()[T_RING] = RING_COOLDOWN;
 		for (int i = 0; i < 24; i++) {
 			double a = i * Math.PI * 2.0 / 24.0;
@@ -572,6 +578,7 @@ public final class Sorcery {
 
 	/** Hex: green smoke round the foe; weak and slow for a while. */
 	private static void hex(ServerLevel level, Folk folk, LivingEntity target) {
+		Mana.ripple(folk, Mana.HARM);
 		folk.spellTimers()[T_HEX] = HEX_COOLDOWN;
 		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(HEX_COLOUR, 1.0F));
 		target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, HEX_TICKS, 0), folk);
@@ -582,6 +589,7 @@ public final class Sorcery {
 
 	/** War chant: a drumbeat and a shout; the raiders fighting near him hit harder and run faster. */
 	private static void chant(ServerLevel level, Folk folk) {
+		Mana.ripple(folk, Mana.WARD);
 		folk.spellTimers()[T_CHANT] = CHANT_COOLDOWN;
 		List<Folk> allies = fightingAllies(level, folk);
 		allies.add(folk);
@@ -609,6 +617,7 @@ public final class Sorcery {
 			return;
 		}
 		timers[T_MEND] = MEND_COOLDOWN;
+		Mana.ripple(caster, Mana.HEAL);
 		worst.heal(MEND_HEAL);
 		if (worst != caster) {
 			beam(level, caster, worst.getBoundingBox().getCenter(), ParticleTypes.HAPPY_VILLAGER);
@@ -623,6 +632,8 @@ public final class Sorcery {
 
 	/** Arcane bolt: a blue lance of light; twice as hard on the undead. */
 	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
+		// (0.7.244) every cast ripples the caster's aura with its intent
+		Mana.ripple(folk, Mana.HARM);
 		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(BOLT_COLOUR, 1.2F));
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);
@@ -632,6 +643,7 @@ public final class Sorcery {
 
 	/** Ward: a shimmer over {@code allies}, the guards fighting near him (and himself): absorption hearts. */
 	static void ward(ServerLevel level, LivingEntity folk, int[] timers, List<? extends LivingEntity> allies) {
+		Mana.ripple(folk, Mana.WARD);
 		timers[T_WARD] = WARD_COOLDOWN;
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, WARD_TICKS, WARD_LEVEL), folk);
@@ -642,6 +654,7 @@ public final class Sorcery {
 
 	/** Repulse: a ring of force throws everything of the other side ({@code foe}) away from him, slowed. */
 	static void repulse(ServerLevel level, LivingEntity folk, int[] timers, java.util.function.Predicate<LivingEntity> foe) {
+		Mana.ripple(folk, Mana.HARM);
 		timers[T_REPULSE] = REPULSE_COOLDOWN;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, folk.getBoundingBox().inflate(CLOSE), foe)) {
 			e.knockback(REPULSE_POWER, folk.getX() - e.getX(), folk.getZ() - e.getZ(), magic(level, folk), 0.0F);
@@ -654,6 +667,7 @@ public final class Sorcery {
 
 	/** Banish: the enemy thralls near him fall back to dust. */
 	static void banish(ServerLevel level, Mob folk, int[] timers) {
+		Mana.ripple(folk, Mana.HARM);
 		List<Mob> thralls = level.getEntitiesOfClass(Mob.class, folk.getBoundingBox().inflate(BANISH_RANGE),
 			m -> m.isAlive() && Thralls.isThrall(m) && !Thralls.refuses(folk, m) && folk.getSensing().hasLineOfSight(m));
 		if (thralls.isEmpty()) {

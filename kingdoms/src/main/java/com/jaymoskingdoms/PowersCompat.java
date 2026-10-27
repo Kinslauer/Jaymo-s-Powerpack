@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -755,6 +756,116 @@ public final class PowersCompat {
 			corruptionAdd.invoke(player, lingering, amount);
 		} catch (Throwable e) {
 			// (no corruption, then)
+		}
+	}
+
+	// ---- (0.7.236) mana: meditation, corruption, vis ------------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle meditateTicks, corruptionOf, phialsCarried, essenceTotal;
+	private static boolean lookedForMana;
+
+	private static void lookForMana() {
+		if (lookedForMana) {
+			return;
+		}
+		lookedForMana = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		var lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			meditateTicks = lookup.findStatic(Class.forName("com.jaymospowers.core.Meditate"), "ticks", java.lang.invoke.MethodType.methodType(long.class, Player.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no Meditate (older Powers?)", e);
+		}
+		try {
+			corruptionOf = lookup.findStatic(Class.forName("com.jaymospowers.alchemy.Corruption"), "total", java.lang.invoke.MethodType.methodType(int.class, Player.class));
+			Class<?> list = Class.forName("com.jaymospowers.alchemy.EssenceList");
+			phialsCarried = lookup.findStatic(Class.forName("com.jaymospowers.alchemy.Phials"), "carried", java.lang.invoke.MethodType.methodType(list, Player.class));
+			essenceTotal = lookup.findVirtual(list, "total", java.lang.invoke.MethodType.methodType(int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no alchemy (older Powers?)", e);
+		}
+	}
+
+	/** Whether {@code player} has settled into meditating (or shadowboxing) with Powers' Meditate key. */
+	public static boolean meditating(Player player) {
+		lookForMana();
+		try {
+			return meditateTicks != null && (long)meditateTicks.invoke(player) >= MEDITATE_SETTLE;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' Meditate.SETTLE: ticks of stillness before meditation counts. */
+	static final long MEDITATE_SETTLE = 40L;
+
+	/** {@code player}'s alchemical corruption, all kinds (0 without Powers; on a client, only its own player's is known). */
+	public static int corruption(Player player) {
+		lookForMana();
+		try {
+			return corruptionOf == null ? 0 : (int)corruptionOf.invoke(player);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** How much alchemical essence (vis) {@code player} carries in phials (0 without Powers). */
+	public static int visCarried(Player player) {
+		lookForMana();
+		if (phialsCarried == null || essenceTotal == null) {
+			return 0;
+		}
+		try {
+			return (int)essenceTotal.invoke(phialsCarried.invoke(player));
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	// ---- (0.7.237) spirits: finishers and screen shakes ---------------------------------------------------------------
+
+	private static boolean lookedForSpirits;
+	private static java.lang.invoke.@Nullable MethodHandle helpless, shake;
+
+	private static void lookForSpirits() {
+		if (lookedForSpirits) {
+			return;
+		}
+		lookedForSpirits = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			helpless = lookup.findStatic(Class.forName("com.jaymospowers.core.finisher.Finishers"), "helpless",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+			shake = lookup.findStatic(Class.forName("com.jaymospowers.core.Shakes"), "send",
+				java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no finishers or shakes (older Powers?)", e);
+		}
+	}
+
+	/** Whether {@code body} lies helpless for a finisher (downed, crippled): Powers' {@code Finishers.helpless}; false without Powers. */
+	public static boolean helpless(LivingEntity body) {
+		lookForSpirits();
+		try {
+			return helpless != null && (boolean)helpless.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Shakes {@code player}'s screen with Powers' shake ({@code strength} about 0.3 a nudge, 1 a blow); nothing without Powers. */
+	public static void shake(net.minecraft.server.level.ServerPlayer player, float strength) {
+		lookForSpirits();
+		try {
+			if (shake != null) {
+				shake.invoke(player, strength);
+			}
+		} catch (Throwable ignored) {
 		}
 	}
 }

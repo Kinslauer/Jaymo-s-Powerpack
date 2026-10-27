@@ -243,7 +243,7 @@ public final class Arcana {
 	}
 
 	/** What {@code player} is looking at (a living thing within reach), or null. */
-	static @Nullable LivingEntity sighted(Player player) {
+	public static @Nullable LivingEntity sighted(Player player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(SCROLL_REACH));
 		AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(SCROLL_REACH)).inflate(1.0);

@@ -261,6 +261,38 @@ public final class Lockpicking {
 		}
 	}
 
+	/** (0.7.245) The level of the lock on the container at {@code pos} (either half of a double chest), or 0 when it is not locked. */
+	public static int lockLevel(ServerLevel level, BlockPos pos) {
+		BlockPos at = lockAt(level, pos);
+		Lock lock = at == null ? null : lockOf(level, at);
+		return lock == null || !lock.locked() ? 0 : lock.level();
+	}
+
+	/**
+	 * (0.7.245) A mana spirit picks the lock on the container at {@code pos}: Thessaly the Learned, Andy's "things from far
+	 * away". It opens as a picked lock does (for good, both halves of a double chest, the Stealth practice for {@code player})
+	 * when {@code spiritLevel} is at least twice the lock's level; otherwise nothing happens and this is false. The chest is not
+	 * opened for them: the lock is only undone.
+	 */
+	public static boolean pickBySpirit(ServerLevel level, BlockPos pos, ServerPlayer player, int spiritLevel) {
+		BlockPos at = lockAt(level, pos);
+		Lock lock = at == null ? null : lockOf(level, at);
+		if (lock == null || !lock.locked() || spiritLevel < 2 * lock.level()) {
+			return false;
+		}
+		for (BlockPos half : halves(level, at)) {
+			BlockEntity be = level.getBlockEntity(half);
+			if (be != null && be.hasAttached(LOCK)) {
+				be.setAttached(LOCK, Lock.OPEN);
+				be.setChanged();
+			}
+		}
+		level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
+		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+		return true;
+	}
+
 	/** Uses up one of {@code player}'s lockpicks; false when that was their last (or they had none). */
 	private static boolean usePick(ServerPlayer player) {
 		var inventory = player.getInventory();
