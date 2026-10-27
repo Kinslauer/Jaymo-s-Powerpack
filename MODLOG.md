@@ -3270,3 +3270,8 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   random (only answers open in this world, a realm drawn for one that names one, a Mage's spell or Sorcerer's element
   too) and turns to the story page, where Back, the heritage and class buttons and the look still change anything
   before "Live this life" and MCA's creator. "Tell it" goes back to the page. Compile-checked here, not playtested.
+- **0.17.79, grand seats (Kingdoms 0.7.276):** a kingdom built from nothing takes one of the pack's real castles for its
+  seat instead of the blocky citadel, picked by its land (Grim Kingdoms' keeps and citadels, ATi's chateau, castles and
+  temple, Repurposed Structures' jungle fortress once that mod is added), read from those mods at runtime, emptied of
+  monsters, spawners and loot, the throne and panic room in its largest room. `/kingdom found citadel` keeps the old one.
+  Compile-checked here, not playtested.

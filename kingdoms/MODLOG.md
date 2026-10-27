@@ -5663,3 +5663,33 @@ her harbour.
   her) could make no move at all, since every move still struck. Now any move that drives her no further in is allowed
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
 - Compile-checked only, not seen in game.
+## 0.7.276: grand seats, real castles for kingdoms built from nothing (pack 0.17.79)
+Andy: "the default hold you generate for a kingdom needs to switch, its way to blocky and novice looking. swap it for
+any of these's large buildings or castles or keeps" (Towns and Towers, Repurposed Structures' jungle fortress, Luki's
+Grand Capitals, Epic Villages).
+- **`GrandSeats`**: a kingdom that raises its seat from nothing (no village building fit for a king, the story start's
+  capital, `/kingdom found grand`) now takes one of the castles the pack's structure mods ship, by the town's land
+  (`Palette.at`): plains ATi's marble chateau, Grim's Grain Sack keep or Glimmervault fortress; taiga Grim's Winterhold
+  citadel or ATi's woodland keep; snow Grim's Whitewarden keep, Winterhold or Snowgrave citadel; desert, badlands and
+  savanna ATi's Catalonian castle or granite fort; swamp the woodland keep or Grain Sack keep; cherry groves ATi's
+  fortified temple or dojo; jungle Repurposed Structures' jungle fortress if the mod is loaded, else the fortified
+  temple. A land with none loaded takes a plains one; with no castle mod at all the citadel goes up as before.
+- **Read, not copied.** Each is looked up by structure id and generated as `/place structure` does
+  (`Structure.generate`, any biome), then moved: its castle pieces centred on the flattest site `Castle.site` finds
+  beside the village, the start piece's foot on the floor. The streets, houses and village pieces a few of them grow
+  round themselves are left out (`outlying`); their rock plinths (`terrain`) are kept. ATi, Grim and Epic Structures are
+  all rights reserved ("feel free to add to any modpack"), Repurposed Structures LGPL-3.0: nothing of theirs is in our
+  jar, so this works only with their own mods installed.
+- **A seat, not a dungeon** (`empty`): the land in its buildings' boxes is cleared from the floor up first; after it's
+  placed its monsters and loose items are discarded, spawners taken out, every chest and barrel's loot table cleared
+  (the treasury is the panic room's). Paintings, armour stands, frames, horses and cats stay. Columns it stands on get
+  dirt and stone down to the land (`footing`, at most 16).
+- **The throne** goes in its largest room the way a village seat's does (`Seats.pick`/`Seats.keep`): the throne at the
+  back away from the door, the banner, the panic room under the floor, archers' posts on the roofs; three watchtowers
+  round the town as the old keep kinds had. Its buildings are guarded (`Holds.guard`), so builders never tear them down.
+  A castle wider than `MAX_SIDE` 112 is passed over.
+- `/kingdom found citadel` (new `Castle.Kind.WALLED`) still builds the old 61-block citadel.
+- Not added: Towns and Towers (CC BY-NC-SA 4.0, has a 26.3 build; not in the pack), Luki's Grand Capitals (all rights
+  reserved, newest build 1.21.11), Epic Villages (in the pack, but only village houses and town centres, no castle).
+  Repurposed Structures has a 26.3 Fabric build (needs MidnightLib); the jungle fortress shows once both are in the pack.
+- Compile-checked only, not seen in game.
