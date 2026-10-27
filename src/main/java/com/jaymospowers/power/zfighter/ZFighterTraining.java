@@ -332,7 +332,7 @@ public final class ZFighterTraining {
 	static float rate(ServerPlayer player) {
 		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F) * ZFighterLineage.trainingFactor(player)
 			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F)
-			* ZFighterAfterlife.trainingBonus(player);
+			* ZFighterAfterlife.trainingBonus(player) * ZFighterSpace.trainingRate(player);
 	}
 
 	/** Under heavy gravity: someone's Immense Field, or Gravity's weight on him. */

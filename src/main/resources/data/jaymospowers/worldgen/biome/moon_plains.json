@@ -1,0 +1,69 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [
+            {
+              "type": "minecraft:enderman",
+              "count": 2,
+              "weight": 20
+            },
+            {
+              "type": "minecraft:skeleton",
+              "count": 3,
+              "weight": 60
+            }
+          ],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#000000",
+    "minecraft:visual/fog_color": "#0c0c12"
+  },
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#8a8a9a"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:ore_coal_upper",
+      "minecraft:ore_iron_upper",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_gold",
+      "minecraft:ore_redstone",
+      "minecraft:ore_diamond",
+      "minecraft:ore_lapis",
+      "minecraft:ore_copper",
+      "minecraft:ore_emerald",
+      "minecraft:ore_tuff",
+      "minecraft:ore_andesite_upper",
+      "minecraft:ore_diorite_upper"
+    ],
+    [],
+    [],
+    [],
+    []
+  ],
+  "has_precipitation": false,
+  "temperature": 0.1
+}

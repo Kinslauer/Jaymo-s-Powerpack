@@ -3109,6 +3109,24 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `Parties.members` by reflection (falls back to the player alone); kills and bouts credit the party within 64 blocks.
   Escort jobs were left out (they need a following villager and could not be tried here). Compile-checked only; not
   seen in game. Abilities rows 441 to 450.
+- **0.17.62, the space pod and planet missions (Andy's NOEA picks, patch 8 track A):** `ZFighterSpace`: a craftable Space Pod
+  (a block; right-click opens the Star Map, `ZFighterStarMapScreen`) that flies to five new dimensions of our own, each with
+  datapack terrain (`tools/gen_zfighter_space.py` writes the JSON and the art): the Pale Moon (own noise settings and surface rule,
+  dry aquifers, gravity 35% via an attribute modifier), Rustfall (the Overworld's noise with a checkerboard of badlands biomes,
+  gravity 2.2, slower, lower jumps, Z Fighters train twice as fast), Glacia (the Overworld's noise with the sea at 84 over snowy
+  and ice-spike biomes), Cinder (the Nether's noise settings with our own biome adding iron, diamond, emerald and redstone veins
+  to the Nether's; heat is extra exhaustion) and the Maw (a flat void with a black sphere, a glass ring, a slow pull on players
+  and a tide at the rim, nine floating wrecks with the `chests/maw_wreck` loot table). The Verdant World and the future join
+  the map (the future through new public `Future.podReady/podGo/podBack`, with no Echo needed, and a pod set down beside the
+  arrival). Travel is a 3 second countdown, a lift, and a controlled descent onto a landing pad found, flattened and built on
+  the first landing (saved on the dimension as `zfighter_space_pad`) with a pod standing on it; Home brings you down by the pod
+  you left from (`zfighter_space_home`). `ZFighterSpaceMissions`: on Rustfall, Glacia and Cinder a mission to free the world
+  (4 captains, then a boss) or conquer it (4 champions, then plant a Conquest Flag), picked by the Rogue path in Jaymo's
+  Kingdoms (`ZFighterKingdoms.rogue`; without Kingdoms, freeing); the fighters are our rogue tyrants scaled down (and by the
+  planet and the party), tagged so the raid prize skips them; kills and the flag count for the killer's party within 64 blocks
+  (`ZFighterSagas.witnesses`); TP, ores and a planet title are the prize; progress is the synced `zfighter_space` attachment.
+  Compile-checked only. Not seen in game: none of the dimension JSON has been loaded by a server (see the track report's
+  worldgen caveats). Abilities rows 456 to 467.
 - **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B):** `ZFighterAfterlife`: a Z Fighter who
   truly dies (an `AFTER_DEATH` that something else has not cancelled, not in the Other World already, `afterlife=true` in
   `config/jaymospowers-server.properties`, the file `ZFighterRealism` reads, written with the new key when missing) is
@@ -3128,4 +3146,4 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark lesson;
   the army is vanilla fighters under a demon name and tag, spawned in squads around each player on a layer. Compile-checked only;
   worldgen of the new dimensions, the nether-shaped terrain under a custom biome, the structures and both death-time moves have not
-  been seen in game. Abilities rows 480 to 490 (the lead renumbers).
+  been seen in game. Abilities rows 468 to 478 (the lead renumbers).
