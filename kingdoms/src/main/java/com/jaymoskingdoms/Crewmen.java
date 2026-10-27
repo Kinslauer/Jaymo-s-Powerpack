@@ -182,6 +182,8 @@ public final class Crewmen {
 		if (v != null) {
 			v.addTag(TAG);
 			v.addTag(sideTag(side));
+			// (0.7.270) in their side's and role's outfit (Uniforms)
+			McaCompat.uniform(v);
 		}
 		return v;
 	}
@@ -465,14 +467,38 @@ public final class Crewmen {
 		if (v == null) {
 			return false;
 		}
-		UUID was = folk.getUUID();
-		float health = folk.getHealth() / folk.getMaxHealth();
-		folk.stopRiding();
-		folk.discard();
+		replace(level, ship, crew, folk, v, seat);
+		return true;
+	}
+
+	/**
+	 * (0.7.270) Andy: "there shouldnt be any female sailors. they wouldnt have had that job." A woman of a crew from
+	 * before is replaced at her station by a man of her blood in her gear and role (as {@link #convert}). True if so.
+	 */
+	static boolean recast(ServerLevel level, PathfinderMob her, Ship ship, Crew crew) {
+		Vec3 seat = her.getAttached(Ship.SEAT);
+		if (seat == null || Downed.isDowned(her)) {
+			return false;
+		}
+		PathfinderMob man = McaCompat.recast(level, her);
+		if (man == null) {
+			return false;
+		}
+		McaCompat.uniform(man);
+		replace(level, ship, crew, her, man, seat);
+		return true;
+	}
+
+	/** {@code old} (gone) is replaced at {@code seat} by {@code v}, and her captain's, gunners' and walks' records follow. */
+	private static void replace(ServerLevel level, Ship ship, Crew crew, PathfinderMob old, PathfinderMob v, Vec3 seat) {
+		UUID was = old.getUUID();
+		float health = old.getHealth() / old.getMaxHealth();
+		old.stopRiding();
+		old.discard();
 		v.setHealth(Math.max(1.0F, v.getMaxHealth() * health));
 		if (!ship.takeAboard(v, seat)) {
 			v.discard();
-			return true;
+			return;
 		}
 		UUID now = v.getUUID();
 		if (was.equals(crew.captain)) {
@@ -485,7 +511,6 @@ public final class Crewmen {
 		}
 		crew.gunners.replaceAll((gun, who) -> who.equals(was) ? now : who);
 		crew.walks.remove(was);
-		return true;
 	}
 
 	// ---- (0.7.242) home from a voyage ----------------------------------------------------------------------------------
@@ -605,6 +630,11 @@ public final class Crewmen {
 		Crew crew = ship.crew;
 		long now = level.getGameTime();
 		if ((mob.tickCount + mob.getId()) % DRESS_EVERY == 0) {
+			if (McaCompat.female(mob) && recast(level, mob, ship, crew)) {
+				// (0.7.270) she's gone: a man stands in her place
+				return true;
+			}
+			McaCompat.uniform(mob);
 			Long had = LAST_FOE.get(mob.getUUID());
 			dress(mob, crew.target >= 0 || had != null && now - had < CALM_TICKS);
 			if (crew.side == Crew.Side.WHALER) {

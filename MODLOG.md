@@ -3214,3 +3214,20 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `ChronoPower.usableEarly` so his client lets the key through; `future_echo_slain` is now synced to its owner). He
   gets his own line ("...Sneak+B to wake back where you belong."). Leaping forward again still waits for the unlock.
   Not built or playtested here.
+- **0.17.73, named characters wear our own outfits; no women at sea (Kingdoms 0.7.270):** Andy found a ship's captain in
+  an anime girl's skin: "we're about to go back to a set library of skins, at least for specific characters because these
+  skins have no place in the pack", and "there shouldnt be any female sailors". The skin came from MCA's online clothing
+  library (players' uploads): fishermen (every sailor) were dressed from clothes tagged "sailor" plus any theme tag
+  ("fantasy", "rpg"...), which let it through. Now:
+  - The library is off (`ClothingLibrary.ENABLED`); anyone in its clothes is dressed again from MCA's own (`Wardrobe`).
+  - `Uniforms`: 57 outfits of our own (MCA clothing, `assets/jaymoskingdoms/skins/clothing`, listed in
+    `data/jaymoskingdoms/skins/clothing/{male,female,neutral}.json`), drawn by `kingdoms/tools/gen_uniforms.py` from our
+    folk's and sailors' old skins with the face and skin cleared (each villager keeps their own face, hair and skin),
+    plus new plain seamen, a merchant/whaling master's coat, a blue king's robe and gowns for queens and ladies.
+    Captains (pirate red coat, navy blue, master's brown), pirate deckhands/gunners/powder monkeys/bombardiers, seamen on
+    realm ships, kings, queens, lords and ladies in their overlord's colour, guards in their land's gambeson wear only
+    these. They're put in them when they load, when they're made crew, every 5 s aboard, and on taking or losing a
+    throne; clothes locked in MCA's editor are left alone.
+  - Crews are men: new crewmen are made male, and a woman already aboard is replaced at her station by a man of her
+    blood with her gear, role, side, health share and records (`Crewmen.recast`, as `convert` does for old folk).
+  Compile-checked here; not seen in game.

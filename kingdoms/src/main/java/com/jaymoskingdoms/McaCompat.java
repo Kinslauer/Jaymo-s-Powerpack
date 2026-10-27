@@ -319,6 +319,7 @@ public final class McaCompat {
 			McaBridge.register();
 			ClothingLibrary.register();
 			Wardrobe.register();
+			Uniforms.register();
 		}
 	}
 
@@ -408,6 +409,21 @@ public final class McaCompat {
 	 */
 	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk) {
 		return LOADED ? McaBridge.crewman(level, folk) : null;
+	}
+
+	/**
+	 * (0.7.270) Andy: "there shouldnt be any female sailors". With MCA, a man in {@code her} place (one of a ship's crew
+	 * from before): her blood, gear, role and side. Null without MCA or if one couldn't be made. She's left for the caller.
+	 */
+	static @Nullable PathfinderMob recast(ServerLevel level, PathfinderMob her) {
+		return LOADED ? McaBridge.recast(level, her) : null;
+	}
+
+	/** (0.7.270) {@code mob} (one of MCA's villagers) in their set outfit if they're one of our named characters ({@code Uniforms}). */
+	static void uniform(PathfinderMob mob) {
+		if (LOADED) {
+			McaBridge.uniform(mob);
+		}
 	}
 
 	/** (0.7.246) {@code villager} (one of MCA's) has seen {@code player} before: no stranger's greeting from them. */

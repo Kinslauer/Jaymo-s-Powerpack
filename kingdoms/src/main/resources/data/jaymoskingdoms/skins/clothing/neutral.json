@@ -1,0 +1,17 @@
+[
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/cold.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/sunny.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/temperate.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  }
+]

@@ -57,6 +57,12 @@ import org.jspecify.annotations.Nullable;
  * library still dresses from the last list (looked up again after {@link #REFRESH_MS}).
  */
 public final class ClothingLibrary {
+	/**
+	 * (0.7.270) Off: Andy (2026-10-27) found a ship's captain in an anime girl's skin from it ("these skins have no place
+	 * in the pack"). Villagers wear MCA's own clothes ({@link Wardrobe}) and our named characters ours ({@link Uniforms});
+	 * anyone in the library's clothes is dressed again ({@link Wardrobe#banned}).
+	 */
+	static final boolean ENABLED = false;
 	/** How many of each tag's clothes to take (the most liked). */
 	static final int PER_TAG = 30;
 	/** A job is dressed only from the library when it has at least this many there. */
@@ -130,6 +136,9 @@ public final class ClothingLibrary {
 	}
 
 	static void register() {
+		if (!ENABLED) {
+			return;
+		}
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> {
 			server = s;
 			load();
