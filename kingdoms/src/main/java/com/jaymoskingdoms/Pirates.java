@@ -123,6 +123,8 @@ public final class Pirates {
 			RandomSource random = folk.getRandom();
 			Item[] weapons = {Items.IRON_SWORD, Items.IRON_SWORD, Items.STONE_SWORD, Items.IRON_AXE, Items.STONE_AXE};
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapons[random.nextInt(weapons.length)]));
+			// (0.7.267) every sailor carries a flintlock at his side
+			folk.setItemSlot(EquipmentSlot.OFFHAND, pistol());
 			if (random.nextInt(3) > 0) {
 				folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, random.nextBoolean() ? RED_CLOTH : BLACK_CLOTH));
 			}
@@ -266,7 +268,17 @@ public final class Pirates {
 
 	/** (0.7.242) One of a ship's crew as an MCA villager, at their foe ({@link Crewmen}): the folk's pistols and shouts. */
 	static void crewFight(ServerLevel level, PathfinderMob mob, int role) {
-		fight(level, mob, role);
+		// (0.7.267) their pistols are fired by Crewmen now (every hand's brace), so only the shouts here
+		if (mob.getTarget() != null && mob.getTarget().isAlive()) {
+			shout(level, mob);
+		}
+	}
+
+	private static void shout(ServerLevel level, PathfinderMob folk) {
+		RandomSource random = level.getRandom();
+		if ((folk.tickCount + folk.getId()) % 10 == 0 && random.nextInt(SHOUT_ONE_IN / 10) == 0) {
+			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.pirate.cry_" + random.nextInt(8)), Speech.RED, 24.0);
+		}
 	}
 
 	private static void fight(ServerLevel level, PathfinderMob folk, int role) {
@@ -278,10 +290,8 @@ public final class Pirates {
 			return;
 		}
 		RandomSource random = level.getRandom();
-		if ((folk.tickCount + folk.getId()) % 10 == 0 && random.nextInt(SHOUT_ONE_IN / 10) == 0) {
-			Speech.say(level, folk, Component.translatable("speech.jaymoskingdoms.pirate.cry_" + random.nextInt(8)), Speech.RED, 24.0);
-		}
-		if (role == DECKHAND || role == BOMBARDIER) {
+		shout(level, folk);
+		if (role == BOMBARDIER) {
 			return;
 		}
 		long now = level.getGameTime();
@@ -294,15 +304,15 @@ public final class Pirates {
 			return;
 		}
 		double d = folk.distanceTo(foe);
-		if (d < PISTOL_NEAREST || d > PISTOL_FURTHEST || !folk.hasLineOfSight(foe)) {
+		if (d < PISTOL_NEAREST || d > PISTOL_FURTHEST || !folk.hasLineOfSight(foe) || !MobCombat.aimed(level, folk, foe)) {
 			return;
 		}
 		PISTOL.put(folk, now + PISTOL_RELOAD + random.nextInt(PISTOL_JITTER + 1));
 		shoot(level, folk, foe);
 	}
 
-	/** A pistol ball at {@code foe} (sparing his own side, as javelins do). */
-	private static void shoot(ServerLevel level, PathfinderMob folk, LivingEntity foe) {
+	/** A pistol ball at {@code foe} (sparing his own side, as javelins do); (0.7.267) nobody parries it. */
+	static void shoot(ServerLevel level, PathfinderMob folk, LivingEntity foe) {
 		Projectile ball = Javelins.WEAPONMOD_LOADED ? WeaponModJavelins.bullet(level, folk, PISTOL_DAMAGE) : null;
 		if (ball == null) {
 			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, Folk.firingWeapon(folk));
@@ -311,6 +321,7 @@ public final class Pirates {
 			ball = bolt;
 		}
 		Javelins.mark(ball);
+		MobCombat.unparryable(ball);
 		double dx = foe.getX() - folk.getX(), dz = foe.getZ() - folk.getZ();
 		double dy = foe.getY(0.5) - ball.getY();
 		double flat = Math.sqrt(dx * dx + dz * dz);

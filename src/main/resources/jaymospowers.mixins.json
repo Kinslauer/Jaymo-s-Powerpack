@@ -3,6 +3,8 @@
 	"package": "com.jaymospowers.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"AttackTellBrainMixin",
+		"AttackTellGoalMixin",
 		"BackpackExplosionMixin",
 		"CarryBlockItemMixin",
 		"CarryLivingEntityMixin",
@@ -19,6 +21,7 @@
 		"DownedHealMixin",
 		"DownedLimboMixin",
 		"FistGuardInventoryMixin",
+		"GuardRiposteMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

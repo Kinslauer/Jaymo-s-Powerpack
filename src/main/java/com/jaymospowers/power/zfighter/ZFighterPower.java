@@ -370,7 +370,7 @@ public final class ZFighterPower implements Power {
 		long berserkSince;
 		int berserkIgnore = -1;
 		long berserkIgnoreUntil;
-		/** (0.17.67) The Great Ape's grab ({@link ApeGrab}): whom he's reaching for, when he may again, where his catch was taken and is slammed. */
+		/** (0.17.68) The Great Ape's grab ({@link ApeGrab}): whom he's reaching for, when he may again, where his catch was taken and is slammed. */
 		int grabTarget = -1;
 		long grabReadyAt;
 		@org.jspecify.annotations.Nullable Vec3 grabSnatchAt, grabSlamAt;

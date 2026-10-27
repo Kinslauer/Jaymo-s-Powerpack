@@ -51,7 +51,7 @@ public final class DarktideGuard {
 	static final float FLOW_PER_DAMAGE = 2.0F;
 	/** A reflected projectile's Flow cost (its damage isn't known before it lands). */
 	static final float REFLECT_FLOW = 6.0F;
-	public static final int PARRY_TICKS = 5;
+	public static final int PARRY_TICKS = 8;
 	static final int PARRY_COOLDOWN = 20;
 	static final float PARRY_FLOW = 8.0F;
 	/** How long a parry empowers the next R. */

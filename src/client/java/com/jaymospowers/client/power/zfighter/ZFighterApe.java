@@ -46,7 +46,7 @@ public final class ZFighterApe {
 	public static final RenderStateDataKey<WarriorLooks.Ape> STYLE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_style");
 	/** (0.17.54) How far through its slow stride the ape is, in steps ({@link ZFighterApeSteps#stride}). */
 	public static final RenderStateDataKey<Float> STRIDE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_stride");
-	/** (0.17.67) How far into his grab he is (ticks, {@link ApeGrab#TOTAL} long), or null when he isn't grabbing. */
+	/** (0.17.68) How far into his grab he is (ticks, {@link ApeGrab#TOTAL} long), or null when he isn't grabbing. */
 	public static final RenderStateDataKey<Float> GRAB = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_grab");
 	/** Vanilla's walk cycle: its legs swing with {@code cos(walkAnimationPos * this)}. */
 	private static final float VANILLA_WALK = 0.6662F;
@@ -235,7 +235,7 @@ public final class ZFighterApe {
 			this.rightArm.yScale = this.leftArm.yScale = arms;
 			this.body.xScale = this.body.zScale = bulk;
 			this.tail.zScale = tail;
-			// (0.17.67) his grab: the hand reared up and back, brought down, held trembling at his chest, hurled into the ground
+			// (0.17.68) his grab: the hand reared up and back, brought down, held trembling at his chest, hurled into the ground
 			Float grab = state.getData(GRAB);
 			if (grab != null) {
 				this.grab(grab, time);
@@ -261,7 +261,7 @@ public final class ZFighterApe {
 			}
 		}
 
-		/** (0.17.67) His grab, {@code t} ticks in (the twin of the Aether Giant's, {@code kingdoms/client/remnants/GiantModel}). */
+		/** (0.17.68) His grab, {@code t} ticks in (the twin of the Aether Giant's, {@code kingdoms/client/remnants/GiantModel}). */
 		private void grab(float t, float age) {
 			float windup = ApeGrab.WINDUP, snatch = ApeGrab.SNATCH, hold = ApeGrab.HOLD, slam = ApeGrab.SLAM, recover = ApeGrab.RECOVER;
 			float rest = this.rightArm.zRot;

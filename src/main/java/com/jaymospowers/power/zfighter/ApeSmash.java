@@ -95,7 +95,7 @@ public final class ApeSmash {
 		if (!able(player)) {
 			return;
 		}
-		// (0.17.67) held long enough, the hand closes on whatever's in front of him instead ({@link ApeGrab})
+		// (0.17.68) held long enough, the hand closes on whatever's in front of him instead ({@link ApeGrab})
 		if (now - start >= ApeGrab.HOLD_TO_GRAB && ApeGrab.begin(player, ZFighterPower.live(player), player.level(), null, now)) {
 			return;
 		}

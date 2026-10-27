@@ -94,6 +94,18 @@ public final class MobCombat {
 	static final double DODGE_SIDE = 0.55, DODGE_BACK = 0.2, DODGE_UP = 0.22;
 	static final int DODGE_COOLDOWN = 60;
 
+	/**
+	 * (0.7.267) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
+	 * heavy one you can't (a two-handed weapon's, or any at least {@link #HEAVY_DAMAGE} times its weight): dodge or block
+	 * those. The tag Jaymo's Powers' guard reads while a heavy blow lands.
+	 */
+	static final double HEAVY_DAMAGE = 1.4;
+	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
+	static final float TELL_SIZE = 1.2F;
+	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** (0.7.267) A gun's red glint comes this long (ticks) before the shot; an aim not fired this long after goes stale. */
+	static final int GUN_WINDUP = 10, AIM_STALE = 20;
+
 	private static final Identifier COMBO_DAMAGE = JaymosKingdoms.id("combo_damage");
 	private static final Identifier SWING_SLOW = JaymosKingdoms.id("swing_slow");
 
@@ -121,6 +133,8 @@ public final class MobCombat {
 
 	private static final Map<Mob, Swing> SWINGS = new WeakHashMap<>();
 	private static final Map<LivingEntity, Long> DODGED = new WeakHashMap<>();
+	/** (0.7.267) A gunman aiming → when the shot goes (game time). */
+	private static final Map<Mob, Long> AIMS = new WeakHashMap<>();
 
 	/** Server → watchers: play {@code animation} on the mob, stretched over {@code length} ticks. */
 	public record MobSwing(int entityId, String animation, int length, float upswing) implements CustomPacketPayload {
@@ -198,6 +212,7 @@ public final class MobCombat {
 		}
 		int length = swingTicks(mob);
 		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
+		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
 		swing.hitAt = now + Math.min(upswing, length - 1);
@@ -221,6 +236,59 @@ public final class MobCombat {
 			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
+	}
+
+	/** (0.7.267) A blow too heavy to parry. */
+	static boolean heavy(Moves moves, Move move) {
+		return moves.twoHanded() || move.damage() >= HEAVY_DAMAGE;
+	}
+
+	/** (0.7.267) The glint as a swing begins, at the weapon hand. */
+	static void tell(ServerLevel level, Mob mob, boolean heavy) {
+		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
+		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
+		Vec3 at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(heavy ? HEAVY_TELL_COLOR : TELL_COLOR, TELL_SIZE),
+			at.x, at.y, at.z, heavy ? 8 : 5, 0.08, 0.08, 0.08, 0.0);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
+	}
+
+	/**
+	 * (0.7.267) A gun's tell (Andy: "All guns should red glint too"): the first call glints red at the muzzle with a
+	 * flint's click and returns false; once {@link #GUN_WINDUP} ticks have passed it returns true and the shot goes. An
+	 * aim not taken up within {@link #AIM_STALE} ticks of being ready starts over.
+	 */
+	static boolean aimed(ServerLevel level, Mob mob, LivingEntity foe) {
+		long now = level.getGameTime();
+		Long fireAt = AIMS.get(mob);
+		if (fireAt != null && now < fireAt) {
+			return false;
+		}
+		if (fireAt != null && now <= fireAt + AIM_STALE) {
+			AIMS.remove(mob);
+			return true;
+		}
+		AIMS.put(mob, now + GUN_WINDUP);
+		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		Vec3 to = foe.getEyePosition().subtract(mob.getEyePosition());
+		Vec3 at = mob.getEyePosition().add(to.lengthSqr() > 1.0E-4 ? to.normalize().scale(0.8) : Vec3.ZERO).add(0.0, -0.25, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(HEAVY_TELL_COLOR, TELL_SIZE), at.x, at.y, at.z, 8, 0.06, 0.06, 0.06, 0.0);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.04, 0.04, 0.04, 0.05);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.FLINTANDSTEEL_USE, SoundSource.HOSTILE, 0.7F, 1.4F);
+		return false;
+	}
+
+	/** (0.7.267) A gun's ball or shot: nobody parries it (Jaymo's Powers' guard reads the tag); a shield still blocks it. */
+	static void unparryable(net.minecraft.world.entity.Entity shot) {
+		shot.addTag(UNPARRYABLE_TAG);
+	}
+
+	/** (0.7.267) Its next swing may start at once (a parry answered, {@link MobParry}). */
+	static void hasten(Mob mob) {
+		Swing swing = SWINGS.get(mob);
+		if (swing != null && swing.hitAt < 0) {
+			swing.endsAt = Math.min(swing.endsAt, mob.level().getGameTime() - RECOVERY_TICKS);
+		}
 	}
 
 	/** The attack the combo is on, skipping those whose conditions this mob doesn't meet. */
@@ -364,6 +432,10 @@ public final class MobCombat {
 		if (damage != null && move.damage() != 1.0) {
 			damage.addOrUpdateTransientModifier(new AttributeModifier(COMBO_DAMAGE, move.damage() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
+		boolean heavy = heavy(moves, move);
+		if (heavy) {
+			mob.addTag(UNPARRYABLE_TAG);
+		}
 		try {
 			for (LivingEntity victim : hits) {
 				mob.doHurtTarget(level, victim);
@@ -371,6 +443,9 @@ public final class MobCombat {
 		} finally {
 			if (damage != null) {
 				damage.removeModifier(COMBO_DAMAGE);
+			}
+			if (heavy) {
+				mob.removeTag(UNPARRYABLE_TAG);
 			}
 		}
 	}

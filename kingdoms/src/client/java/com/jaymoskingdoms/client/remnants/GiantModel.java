@@ -52,7 +52,7 @@ final class GiantModel extends EntityModel<GiantState> {
 	/** The thud of its chest hitting the ground (pixels up, over this many ticks). */
 	private static final float THUD = 2.0F, THUD_TICKS = 4.0F;
 	/**
-	 * (0.7.267) Its grab ({@link #grab}): the arm drawn up behind it in the wind-up, down to the ground for the snatch, held
+	 * (0.7.268) Its grab ({@link #grab}): the arm drawn up behind it in the wind-up, down to the ground for the snatch, held
 	 * out ahead at its chest, then hurled down; how far its body leans back winding up and forward for the snatch and slam.
 	 */
 	private static final float GRAB_RAISED = -2.8F, GRAB_FLARE = 0.5F, GRAB_DOWN = -0.35F, GRAB_HELD = -1.35F, GRAB_HURLED = 0.3F,
@@ -172,7 +172,7 @@ final class GiantModel extends EntityModel<GiantState> {
 	}
 
 	/**
-	 * (0.7.267) Its grab, {@code t} ticks in ({@code AetherGiant}'s phases): it rears back, its right hand drawn up behind
+	 * (0.7.268) Its grab, {@code t} ticks in ({@code AetherGiant}'s phases): it rears back, its right hand drawn up behind
 	 * it and flared wide, then the hand sweeps down to the ground ahead, lifts its catch to its chest (trembling as it
 	 * squeezes), hurls it down, and straightens up. The head follows the hand.
 	 */

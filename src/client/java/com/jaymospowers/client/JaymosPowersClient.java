@@ -68,6 +68,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.finisher.FinisherClient.register();
 		LockOnClient.init();
+		com.jaymospowers.client.combat.GuardClient.init();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.ember.FlameAvatarClient.init();

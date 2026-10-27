@@ -5609,7 +5609,28 @@ Fabric pack; nothing copied, the screen is our own).
   the blocks and the seconds left, with a bar below. Hooves or footsteps and a creak now and then. Fades in from black
   and out to black; the world fades back in after.
 - Lang lines in `en_us.json` (`journey.*`); the hire messages now say the fare comes back if you turn back.
-## 0.7.267: the Giants grab (pack 0.17.67)
+
+## 0.7.267: fighters guard and parry; attack tells (pack 0.17.67)
+Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
+- `MobShields`: a fighter fighting Better Combat's way with no shield raises its blade instead (its weapon's guard from
+  Powers), 30% of the times a shield-bearer would (`BLADE_GUARD_CHANCE`); `raisedFor`, `snap`, `drop`, `guardHand`.
+- `MobParry`: a player's blow in the first 8 ticks of a fighter's raised guard is parried; with its guard down, 12% (30%
+  for veterans, `WeaponForms.experienced`) of blows are. A parry takes nothing, restarts your attack timer, slows and
+  pushes you, and the fighter answers at once (`MobCombat.hasten`); 3 s before another. Never from behind, nor against
+  an axe, a two-handed weapon or the Combat Arts' area blows.
+- `MobCombat` attack tells: a glint at the weapon as each swing winds up, white for a blow you can parry, red for a
+  heavy one (two-handed, or 1.4x damage and up) that carries `jaymospowers.unparryable` while it lands, so Powers'
+  guard only blocks it.
+- `Crewmen`: a crewman's blade glints and lands 6 ticks later (`MELEE_WINDUP`), as every mob's blow now does in Powers.
+- Guns glint red (Andy: "All guns should red glint too"): `MobCombat.aimed` shows a red glint and a flint's click at the
+  muzzle 10 ticks before a pirate's pistol or a guard's musket fires (an aim not fired within 20 ticks starts over), and
+  `MobCombat.unparryable` tags the ball so Powers' guard only blocks it.
+- Every sailor carries a flintlock (Andy: "all sailors should have at least one flintlock as a side weapon, some carry
+  more"): each crewman who fights (`Crewmen.sidearm`) takes one up in a free hand when they arm; their brace (`brace`) is
+  one pistol, two for 25% (gunners always at least two), three for 10%, fired 12-16 ticks apart, each after its glint,
+  at a foe 3-22 blocks off, then all reloaded together. Pirate crew pistols moved here from `Pirates.crewFight` (shouts
+  only now). Folk pirate deckhands carry one in the off hand and fire it too.
+## 0.7.268: the Giants grab (pack 0.17.68)
 Andy: "Giants and apes need a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target,
 with a letterboxed animation". The Aether Giants' grab, in `remnants/AetherGiant` (the Great Apes' twin is Powers'
 `power/zfighter/ApeGrab`):
