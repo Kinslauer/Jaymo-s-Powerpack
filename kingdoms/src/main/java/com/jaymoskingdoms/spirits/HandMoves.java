@@ -85,7 +85,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Hold the line</b>: holds the mob in sight fast where it stands.</li>
  * <li><b>Second pair of hands</b>: holds its keeper's shield (or torch) for them, so a shield turns blows even with both
  * hands full.</li>
- * <li><b>Leave a hand</b> (0.7.275): a hand stays at the chest in sight to gather, guard and tend crops ({@link TendedHand}).</li>
+ * <li><b>Leave a hand</b> (0.7.277): a hand stays at the chest in sight to gather, guard and tend crops ({@link TendedHand}).</li>
  * </ol>
  * None of it ever harms an ally: a player's own tamed animals, their thralls, the folk of their own kingdom ({@link #ally}).
  * The per-tick work of seizing and pinning is in {@link HandGrip}.
@@ -165,7 +165,7 @@ public final class HandMoves {
 		}
 	};
 
-	/** (0.7.275) Leave a hand: one of the spirit's hands stays at the container in sight and works it ({@link TendedHand}). */
+	/** (0.7.277) Leave a hand: one of the spirit's hands stays at the container in sight and works it ({@link TendedHand}). */
 	private static final Hand LEAVE_HAND = new Hand("leave_hand", 15.0F, 40, 6, Poses.REACH, Mana.WILL) {
 		@Override
 		boolean act(ServerPlayer player, SpiritState state, int charge) {
@@ -383,7 +383,7 @@ public final class HandMoves {
 		return false;
 	}
 
-	/** (0.7.275) Leave a hand at the container in sight within reach, or call home the one already there. */
+	/** (0.7.277) Leave a hand at the container in sight within reach, or call home the one already there. */
 	private static boolean leaveHand(ServerPlayer player, SpiritState state) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return false;

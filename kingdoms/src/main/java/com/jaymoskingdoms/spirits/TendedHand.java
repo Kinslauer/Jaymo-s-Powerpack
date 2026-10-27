@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.275) A hand left behind. Andy linked Mage Hand (CurseForge, SkylorBeck, GPL-3.0: ideas only, our own code and look):
+ * (0.7.277) A hand left behind. Andy linked Mage Hand (CurseForge, SkylorBeck, GPL-3.0: ideas only, our own code and look):
  * "can this be implemented with our mana spirits?" A keeper casts <b>Leave a hand</b> ({@link HandMoves}) at a chest, barrel
  * or any other container in reach, and one of their spirit's hands stays there, hovering over it, after they walk away:
  * <ul>

@@ -3265,6 +3265,11 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   her off (warped astern with her sails struck, bow brought round to open water), a whaler hove to at her moorings no
   longer backs herself onto the beach while fitting out, and a hull already in the ground can move off it. Not seen
   in game.
-- **0.17.78, Leave a Hand (Kingdoms 0.7.275):** mana spirits learn Mage Hand's trick at level 6: leave a hand at a
+- **0.17.78, skip the story (Kingdoms 0.7.275):** the life story's question pages have an "On second thought..."
+  button (bottom left). It asks whether you'd rather skip the story; "Skip the story" answers every question at
+  random (only answers open in this world, a realm drawn for one that names one, a Mage's spell or Sorcerer's element
+  too) and turns to the story page, where Back, the heritage and class buttons and the look still change anything
+  before "Live this life" and MCA's creator. "Tell it" goes back to the page. Compile-checked here, not playtested.
+- **0.17.80, Leave a Hand (Kingdoms 0.7.277):** mana spirits learn Mage Hand's trick at level 6: leave a hand at a
   chest and it gathers dropped items into it (only the kinds already inside, if any), guards it from monsters and tends
   the crops round it. One hand, two at bond 60, three at level 15. Not seen in game.

@@ -27,7 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 
 /**
- * (0.7.275) A hand left behind ({@link TendedHand}): the spirit's own forearm and hand from its arms ({@link SpiritRig}),
+ * (0.7.277) A hand left behind ({@link TendedHand}): the spirit's own forearm and hand from its arms ({@link SpiritRig}),
  * drawn alone in the aura's shells, hovering over its container. It hangs loose at rest, opens and points as it reaches for
  * something, closes round what it carries, and punches as a fist. Only the attuned (and those who read magic) see the hand;
  * what it carries everyone sees, floating along.

@@ -5664,7 +5664,7 @@ her harbour.
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
 - Compile-checked only, not seen in game.
 
-## 0.7.275: Leave a Hand, a spirit hand that stays to tend a chest (pack 0.17.78)
+## 0.7.277: Leave a Hand, a spirit hand that stays to tend a chest (pack 0.17.80)
 
 Andy linked Mage Hand (CurseForge, SkylorBeck; GPL-3.0, while we're MIT, so ideas only, our own code and look): "can this
 be implemented with our mana spirits?" Its floating hands bound to a home chest became a seventh shared spirit move.
