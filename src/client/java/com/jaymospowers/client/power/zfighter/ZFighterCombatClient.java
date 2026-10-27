@@ -45,6 +45,14 @@ public final class ZFighterCombatClient {
 			case ZFighterTraining.HAMMERLOCK -> Items.IRON_BLOCK;
 			case ZFighterTraining.SKYWARD_CHASE -> Items.ELYTRA;
 			case ZFighterTraining.KI_WEAPON -> Items.AMETHYST_SHARD;
+			case ZFighterTraining.DRILL_BEAM -> Items.END_ROD;
+			case ZFighterTraining.RING_OF_ORBS -> Items.ENDER_EYE;
+			case ZFighterTraining.TRIANGLE_CANNON -> Items.TNT;
+			case ZFighterTraining.RISING_DOME -> Items.FEATHER;
+			case ZFighterTraining.KI_RAIN -> Items.BLAZE_ROD;
+			case ZFighterTraining.NOVA_SPHERE -> Items.NETHER_STAR;
+			case ZFighterTraining.RAGE_SCREAM -> Items.GOAT_HORN;
+			case ZFighterTraining.AFTERIMAGE -> Items.PHANTOM_MEMBRANE;
 			default -> Items.FIRE_CHARGE;
 		};
 	}

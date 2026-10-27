@@ -338,7 +338,7 @@ public class ZFighterTrainingScreen extends Screen {
 			} else if (known) {
 				status = Component.translatable(spirit ? "screen.jaymospowers.zfighter.spirit_known" : "screen.jaymospowers.zfighter.known");
 			} else {
-				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.TECHNIQUE_TP[i]);
+				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.techniqueCost(player, i));
 			}
 			line(graphics, status, statusX, ry, buttonX() - statusX - 4, COLOR_DIM);
 			Button button = techniqueButtons.get(i);
