@@ -77,7 +77,10 @@ patch the work runs as two agent tracks at a time that don't touch the same file
   ki-hardened body; Warrior-born near-death comeback that raises the limit.
 
 ## Patch 6: items, tournaments and the Lookout (Powers + Kingdoms)
-- **The Lookout, bigger** (Andy's note): see the open question below.
+- **The Lookout, bigger** (Andy, 2026-10-27: "add all that on the LARGER floating platform above the tower called the
+  lookout"): the floating platform itself grows, and on it: a ring of rooms round the courtyard (the Keeper's
+  quarters, a technique library where masters' lessons can be bought back, a meditation garden that grows Hermit
+  Beans), a sparring ring on the edge, a pool that shows where the wish orbs are, and the god ritual circle (Patch 3).
 - **Gravity machine** (a room of 5-25 blocks set to 1-50x gravity, needs fuel), **pocket capsules** (throw: a small
   house or vehicle pops out), **gi and armour patterns** + **suit editor** (recolour, chest mark, gloves, boots, belt,
   helmet, cape, fins, live preview, on our costume system), **fighter weapons** (extending staff, legendary sword,
@@ -102,7 +105,4 @@ patch the work runs as two agent tracks at a time that don't touch the same file
 
 ## Open questions for Andy
 1. Patch order: the list above, or something else first?
-2. The Lookout "needs more": more of what? Proposed: a second ring of rooms round the courtyard (the Keeper's
-   quarters, a library of techniques where masters' lessons can be bought back, a meditation garden that grows Hermit
-   Beans), a sparring ring on the edge, a ki-sense pool that shows where the wish orbs are, and the god ritual circle.
-3. Lock-on key: which key? (R/G/V/B/C/Z/H/' are taken.)
+2. Lock-on key: which key? (R/G/V/B/C/Z/H/' are taken.)
