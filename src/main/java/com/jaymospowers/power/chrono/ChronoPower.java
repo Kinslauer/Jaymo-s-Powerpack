@@ -221,6 +221,12 @@ public final class ChronoPower implements Power {
 			&& com.jaymospowers.core.Mastery.isUnlocked(player, key);
 	}
 
+	/** (0.17.72) A starter who has killed an echo in the future can sneak+B home ({@code Future.wakesEarly}). */
+	@Override
+	public boolean usableEarly(Player player, PowerKey key) {
+		return key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && com.jaymospowers.power.chrono.future.Future.wakesEarly(player);
+	}
+
 	/** (0.15.31) Downed: what was running ends. */
 	@Override
 	public void onDowned(ServerPlayer player) {
@@ -409,7 +415,8 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		int ability = key.ordinal();
 		int now = now(player);
-		if (ability == BLOOM && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player)) {
+		if (ability == BLOOM && player.isShiftKeyDown()
+			&& (!com.jaymospowers.core.Mastery.starterOnly(player) || com.jaymospowers.power.chrono.future.Future.wakesEarly(player))) {
 			// sneak+B, Fast Forward: a leap into the ruined future (or back), with its own recharge
 			com.jaymospowers.power.chrono.future.Future.leap(player);
 			return;

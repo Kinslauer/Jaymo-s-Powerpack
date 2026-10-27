@@ -83,9 +83,13 @@ public final class Future {
 	/** Where the player left from. */
 	public static final AttachmentType<Return> RETURN = AttachmentRegistry.create(JaymosPowers.id("future_return"),
 		builder -> builder.persistent(Return.CODEC).copyOnDeath());
-	/** Has this player ended their echo for good (killed it in the Nether or the future)? Fast Forward needs it. */
+	/**
+	 * Has this player ended their echo for good (killed it in the Nether or the future)? Fast Forward needs it. Synced so
+	 * a starter's client lets sneak+B through in the future ({@link #wakesEarly}).
+	 */
 	public static final AttachmentType<Boolean> ECHO_SLAIN = AttachmentRegistry.create(JaymosPowers.id("future_echo_slain"),
-		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath()
+			.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 	/** Has this player been told whose city this is? */
 	public static final AttachmentType<Boolean> CREDITED = AttachmentRegistry.create(JaymosPowers.id("future_credited"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
@@ -219,9 +223,20 @@ public final class Future {
 		if (!Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN))) {
 			player.setAttached(ECHO_SLAIN, true);
 			if (com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.chrono.ChronoPower.INSTANCE)) {
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.future.unlocked").withStyle(ChatFormatting.GOLD));
+				boolean woken = com.jaymospowers.core.Mastery.starterOnly(player) && player.level().dimension() == FUTURE;
+				player.sendSystemMessage(Component.translatable(woken ? "message.jaymospowers.future.woken" : "message.jaymospowers.future.unlocked")
+					.withStyle(ChatFormatting.GOLD));
 			}
 		}
+	}
+
+	/**
+	 * (0.17.72) Andy: "killing an echo wakes him up". A starter Chrono stranded in the future (the life story's lost in
+	 * time start) can't use sneak+B till his next ability unlocks, unless he has killed one of his echoes: then sneak+B
+	 * takes him home. Only from the future; leaping forward still waits for the unlock.
+	 */
+	public static boolean wakesEarly(net.minecraft.world.entity.player.Player player) {
+		return player.level().dimension() == FUTURE && Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN));
 	}
 
 	/**
