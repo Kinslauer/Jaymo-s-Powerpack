@@ -2,10 +2,6 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.client.armory.LashRenderer;
 import com.jaymospowers.client.wounds.DownedPose;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
-import java.util.UUID;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -14,7 +10,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -23,8 +18,15 @@ import net.minecraft.world.entity.player.Player;
  * the armour EMF copies the body's pose onto, and never to models drawn over the body any other way. Andy (2026-10-25):
  * "iron armor leggings are not animated on my character", and the same for Kingdoms' paladin legs and costumes; all of
  * them move again without Touch'n Motion. So every humanoid model drawn on a player (armour, Armory pieces, costumes,
- * MCA's layers) takes the body's pose as Touch'n Motion last left it, through its own copy (its {@code Drawn.put}),
- * just before the model is drawn. Only the pose: what's shown, hidden or scaled stays the model's own.
+ * MCA's layers) takes the body's pose, just before the model is drawn. Only the pose: what's shown, hidden or scaled
+ * stays the model's own.
+ * <p>
+ * (0.17.40) The pose is our own copy of the body, taken this frame as the renderer turns to its layers ({@link #keep}),
+ * no longer Touch'n Motion's {@code Drawn} copy. Andy (2026-10-27): his villager's arms and legs never moved in F5. That
+ * copy is only kept from the player model EMF calls the main one, the one the game drew. MCA swaps the renderer's model
+ * for its own animated body and never draws it (its skin, clothes and hair layers are what show), so the copy was the
+ * pose of the plain body from the moment before MCA's look arrived, and it was stamped on MCA's layers every frame
+ * after.
  * <p>
  * Not while one of our poses is on (EMF and Touch'n Motion are paused for those, and our poses are laid on each model
  * themselves), nor on a downed body, a whip hand, or your own body in first person, which Touch'n Motion leaves alone.
@@ -34,23 +36,48 @@ public final class TnmFollow {
 	private static final int PARTS = 6;
 	/** The renderer's own body model for this player: Touch'n Motion's pose is already on it, with our tweaks after. */
 	private static final RenderStateDataKey<Model<?>> BODY = RenderStateDataKey.create(() -> "jaymospowers:tnm_body");
-	private static MethodHandle put;
-	private static boolean looked;
+	/** The body's pose this frame: x, y, z, xRot, yRot, zRot for head, body, arms and legs. */
+	private static final RenderStateDataKey<float[]> POSE = RenderStateDataKey.create(() -> "jaymospowers:tnm_pose");
 
 	private TnmFollow() {
 	}
 
-	/** From LivingEntityRenderer.submit: which model is the body itself. */
-	public static void body(LivingEntityRenderState state, Model<?> model) {
-		if (LOADED && state instanceof AvatarRenderState) {
-			state.setData(BODY, model);
+	private static ModelPart[] parts(HumanoidModel<?> model) {
+		return new ModelPart[] {model.head, model.body, model.rightArm, model.leftArm, model.rightLeg, model.leftLeg};
+	}
+
+	/** From LivingEntityRenderer.submit, as it turns to the layers: which model is the body, and the pose it holds. */
+	public static void keep(LivingEntityRenderState state, Model<?> model) {
+		if (!LOADED || !(state instanceof AvatarRenderState)) {
+			return;
 		}
+		state.setData(BODY, model);
+		if (!(model instanceof HumanoidModel<?> humanoid)) {
+			state.setData(POSE, null);
+			return;
+		}
+		ModelPart[] parts = parts(humanoid);
+		float[] pose = new float[PARTS * 6];
+		for (int i = 0; i < PARTS; i++) {
+			ModelPart part = parts[i];
+			pose[i * 6] = part.x;
+			pose[i * 6 + 1] = part.y;
+			pose[i * 6 + 2] = part.z;
+			pose[i * 6 + 3] = part.xRot;
+			pose[i * 6 + 4] = part.yRot;
+			pose[i * 6 + 5] = part.zRot;
+		}
+		state.setData(POSE, pose);
 	}
 
 	/** From ModelFeatureRenderer.prepareModel, after every pose and just before the model is drawn. */
 	public static void beforeDraw(Model<?> model, Object state) {
 		if (!LOADED || !(model instanceof HumanoidModel<?> humanoid) || !(state instanceof AvatarRenderState avatar) || avatar.deathTime > 0.0F
 			|| model == avatar.getData(BODY) || PoseTakeover.posed(avatar) || DownedPose.down(avatar)) {
+			return;
+		}
+		float[] pose = avatar.getData(POSE);
+		if (pose == null) {
 			return;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
@@ -61,48 +88,15 @@ public final class TnmFollow {
 			|| LashRenderer.arm(player, minecraft.level.getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false)) != null) {
 			return;
 		}
-		MethodHandle handle = handle();
-		if (handle == null) {
-			return;
-		}
-		ModelPart[] parts = {humanoid.head, humanoid.body, humanoid.rightArm, humanoid.leftArm, humanoid.rightLeg, humanoid.leftLeg};
-		boolean[] visible = new boolean[PARTS];
-		boolean[] skipDraw = new boolean[PARTS];
-		float[] scales = new float[PARTS * 3];
+		ModelPart[] parts = parts(humanoid);
 		for (int i = 0; i < PARTS; i++) {
-			visible[i] = parts[i].visible;
-			skipDraw[i] = parts[i].skipDraw;
-			scales[i * 3] = parts[i].xScale;
-			scales[i * 3 + 1] = parts[i].yScale;
-			scales[i * 3 + 2] = parts[i].zScale;
+			ModelPart part = parts[i];
+			part.x = pose[i * 6];
+			part.y = pose[i * 6 + 1];
+			part.z = pose[i * 6 + 2];
+			part.xRot = pose[i * 6 + 3];
+			part.yRot = pose[i * 6 + 4];
+			part.zRot = pose[i * 6 + 5];
 		}
-		try {
-			handle.invoke(((Entity)player).getUUID(), humanoid);
-		} catch (Throwable e) {
-			put = null;
-			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't hand Touch'n Motion's pose to the armour and costumes", e);
-		}
-		for (int i = 0; i < PARTS; i++) {
-			parts[i].visible = visible[i];
-			parts[i].skipDraw = skipDraw[i];
-			parts[i].xScale = scales[i * 3];
-			parts[i].yScale = scales[i * 3 + 1];
-			parts[i].zScale = scales[i * 3 + 2];
-		}
-	}
-
-	/** Touch'n Motion's {@code TouchNMotionHook.Drawn.put(UUID, HumanoidModel)}: the body's last pose onto a model. */
-	private static MethodHandle handle() {
-		if (!looked) {
-			looked = true;
-			try {
-				Method method = Class.forName("strm.touchnmotion.TouchNMotionHook$Drawn").getDeclaredMethod("put", UUID.class, HumanoidModel.class);
-				method.setAccessible(true);
-				put = MethodHandles.lookup().unreflect(method);
-			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
-				com.jaymospowers.JaymosPowers.LOGGER.warn("Touch'n Motion has no pose to hand to the armour and costumes; they keep the body's plain pose", e);
-			}
-		}
-		return put;
 	}
 }
