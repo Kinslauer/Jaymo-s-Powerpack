@@ -5,6 +5,7 @@ import com.jaymoskitchen.net.Payloads.CookUpdate;
 import com.jaymoskitchen.kitchen.KitchenBlocks;
 import com.jaymoskitchen.kitchen.KitchenPool;
 import java.util.ArrayList;
+import java.util.BitSet;
 import com.jaymoskitchen.kitchen.HobQueue;
 import com.jaymoskitchen.kitchen.OvenHob;
 import net.blay09.mods.cookingforblockheads.block.OvenBlock;
@@ -226,7 +227,7 @@ public final class Kitchen {
 		if (ExplodingPot.blowsUp(player, pos, quality)) {
 			return;
 		}
-		ItemStack stack = new ItemStack(ModItems.dish(dish));
+		ItemStack stack = new ItemStack(ModItems.dish(dish), dish.batch());
 		quality.apply(stack, dish);
 		ServerLevel level = player.level();
 		if (level.getBlockState(pos).getBlock() instanceof OvenBlock && level.getBlockEntity(pos) instanceof OvenBlockEntity oven) {
@@ -353,11 +354,23 @@ public final class Kitchen {
 	public static boolean hasIngredients(KitchenPool pool, Map<Step, Integer> ingredients) {
 		for (Map.Entry<Step, Integer> need : ingredients.entrySet()) {
 			Step step = need.getKey();
-			if (pool.count(step.item(), step::matches, need.getValue()) < need.getValue()) {
+			if (countStep(pool, step, need.getValue()) < need.getValue()) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/** How many of an ingredient the pool holds, counting no further than {@code max} (any of its items counts). */
+	private static int countStep(KitchenPool pool, Step step, int max) {
+		int have = 0;
+		for (Item item : step.items()) {
+			have += pool.count(item, step::matches, max - have);
+			if (have >= max) {
+				break;
+			}
+		}
+		return have;
 	}
 
 	private static int count(Container container, Step step) {
@@ -371,14 +384,17 @@ public final class Kitchen {
 		return total;
 	}
 
-	/** Bit i set: the station's i-th dish can be made from what's in reach (for greying out the rest). */
-	public static long stocked(ServerPlayer player, BlockPos pos, Station station) {
+	/**
+	 * Bit i set: the station's i-th dish can be made from what's in reach (for greying out the rest). A BitSet, so a
+	 * station can list any number of dishes (a long held 63).
+	 */
+	public static BitSet stocked(ServerPlayer player, BlockPos pos, Station station) {
 		KitchenPool pool = sources(player, pos);
 		List<Dish> dishes = station.dishes();
-		long mask = 0;
-		for (int i = 0; i < dishes.size() && i < 63; i++) {
+		BitSet mask = new BitSet(dishes.size());
+		for (int i = 0; i < dishes.size(); i++) {
 			if (hasIngredients(pool, dishes.get(i).ingredients())) {
-				mask |= 1L << i;
+				mask.set(i);
 			}
 		}
 		return mask;
@@ -389,7 +405,13 @@ public final class Kitchen {
 		KitchenPool pool = sources(player, pos);
 		for (Map.Entry<Step, Integer> need : ingredients.entrySet()) {
 			Step step = need.getKey();
-			pool.take(step.item(), step::matches, need.getValue());
+			int left = need.getValue();
+			for (Item item : step.items()) {
+				left -= pool.take(item, step::matches, left);
+				if (left <= 0) {
+					break;
+				}
+			}
 			Item remainder = step.remainder();
 			if (remainder != null) {
 				give(player, new ItemStack(remainder, need.getValue()));

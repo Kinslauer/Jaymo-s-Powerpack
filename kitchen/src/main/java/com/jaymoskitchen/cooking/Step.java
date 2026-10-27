@@ -2,6 +2,8 @@ package com.jaymoskitchen.cooking;
 
 import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.OptionalItems;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
@@ -48,8 +50,9 @@ public enum Step {
 	LEMON(() -> pantry("lemon"), null),
 	PEACH(() -> pantry("peach"), null),
 	GRAPES(() -> pantry("grapes"), null),
-	TOMATO(() -> pantry("tomato"), null),
-	ONION(() -> pantry("onion"), null),
+	// (0.5.29) the Kitchen's own tomato and onion (delight, looked up by id) come first, Pantry's work as well
+	TOMATO(() -> own("tomato"), null, () -> pantry("tomato")),
+	ONION(() -> own("onion"), null, () -> pantry("onion")),
 	EGGPLANT(() -> pantry("eggplant"), null),
 	CHILI_PEPPER(() -> pantry("chili_pepper"), null),
 	STRAWBERRY(() -> pantry("strawberry"), null),
@@ -93,6 +96,32 @@ public enum Step {
 	RICE(() -> com.jaymoskitchen.delight.Delight.RICE, null),
 	MINCED_BEEF(() -> com.jaymoskitchen.delight.Delight.MINCED_BEEF, null),
 	RAW_BACON(() -> com.jaymoskitchen.delight.Delight.RAW_BACON, null),
+	// (0.5.29) the rest of Farmer's Delight's larder (delight/DelightDishes) and the vanilla food it needs
+	GLASS_BOTTLE(() -> Items.GLASS_BOTTLE, null),
+	MELON_SLICE(() -> Items.MELON_SLICE, null),
+	MILK_BOTTLE(() -> com.jaymoskitchen.delight.DelightDishes.MILK_BOTTLE, () -> Items.GLASS_BOTTLE),
+	COCOA_BEANS(() -> Items.COCOA_BEANS, null),
+	GLOW_BERRIES(() -> Items.GLOW_BERRIES, null),
+	BONE(() -> Items.BONE, null),
+	BONE_MEAL(() -> Items.BONE_MEAL, null),
+	ROTTEN_FLESH(() -> Items.ROTTEN_FLESH, null),
+	INK_SAC(() -> Items.INK_SAC, null),
+	GOLDEN_CARROT(() -> Items.GOLDEN_CARROT, null),
+	SKEWER_STICK(() -> Items.STICK, null),
+	BAKED_POTATO(() -> Items.BAKED_POTATO, null),
+	COOKED_BEEF(() -> Items.COOKED_BEEF, null),
+	WHEAT(() -> Items.WHEAT, null),
+	ICE(() -> Items.ICE, null),
+	PASTA(() -> own("pasta"), null),
+	RICE_COOKED(() -> com.jaymoskitchen.ModItems.dish(Dish.COOKED_RICE), null),
+	CRUST(() -> com.jaymoskitchen.ModItems.dish(Dish.PIE_CRUST), null),
+	SAUCE(() -> com.jaymoskitchen.ModItems.dish(Dish.TOMATO_SAUCE), null),
+	COD_SLICE(() -> com.jaymoskitchen.delight.Delight.COD_SLICE, null),
+	SALMON_SLICE(() -> com.jaymoskitchen.delight.Delight.SALMON_SLICE, null),
+	MUTTON_CHOPS(() -> com.jaymoskitchen.delight.Delight.MUTTON_CHOPS, null),
+	ROLL_SALMON(() -> com.jaymoskitchen.ModItems.dish(Dish.SALMON_ROLL), null),
+	ROLL_COD(() -> com.jaymoskitchen.ModItems.dish(Dish.COD_ROLL), null),
+	KELP_ROLL_SLICE(() -> com.jaymoskitchen.delight.DelightDishes.KELP_ROLL_SLICE, null),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -102,10 +131,22 @@ public enum Step {
 	// suppliers, because mod items don't exist yet when this enum is first loaded
 	private final Supplier<Item> item;
 	private final @Nullable Supplier<Item> remainder;
+	/** Another item that does as well (Pantry's tomato for the Kitchen's own), or null. */
+	private final @Nullable Supplier<Item> alternative;
 
 	Step(Supplier<Item> item, @Nullable Supplier<Item> remainder) {
+		this(item, remainder, null);
+	}
+
+	Step(Supplier<Item> item, @Nullable Supplier<Item> remainder, @Nullable Supplier<Item> alternative) {
 		this.item = item;
 		this.remainder = remainder;
+		this.alternative = alternative;
+	}
+
+	/** One of this mod's own items by id, or air (without it): looked up, not linked, so the track that adds it can come later. */
+	private static Item own(String path) {
+		return OptionalItems.item(OptionalItems.KITCHEN, path);
 	}
 
 	private static Item pantry(String path) {
@@ -120,9 +161,29 @@ public enum Step {
 		return OptionalItems.item(OptionalItems.POWERS, path);
 	}
 
-	/** The ingredient consumed (or, for actions, the icon shown on the button). */
+	/** The ingredient consumed (or, for actions, the icon shown on the button): the first of its items that exists. */
 	public Item item() {
-		return item.get();
+		Item first = item.get();
+		if (first == Items.AIR && alternative != null) {
+			return alternative.get();
+		}
+		return first;
+	}
+
+	/** Every item that counts as this ingredient and exists in this game, the preferred one first. */
+	public List<Item> items() {
+		List<Item> items = new ArrayList<>(2);
+		Item first = item.get();
+		if (first != Items.AIR) {
+			items.add(first);
+		}
+		if (alternative != null) {
+			Item other = alternative.get();
+			if (other != Items.AIR && other != first) {
+				items.add(other);
+			}
+		}
+		return items;
 	}
 
 	/** What the ingredient leaves behind when used, e.g. a glass bottle from honey. */
@@ -132,7 +193,7 @@ public enum Step {
 
 	/** Whether an inventory stack counts as this ingredient (a "potion" only counts if it's plain water). */
 	public boolean matches(ItemStack stack) {
-		if (stack.isEmpty() || stack.getItem() != item()) {
+		if (stack.isEmpty() || !items().contains(stack.getItem())) {
 			return false;
 		}
 		if (this == WATER_BOTTLE) {
