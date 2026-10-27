@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,14 +42,14 @@ import org.jspecify.annotations.Nullable;
  * glinting sword and the arms on his shield. Builders wear the land's headgear.</li>
  * <li><b>Land</b> ({@link Climate}): linen turbans, sand-coloured trousers and gold trim in the desert and the badlands;
  * white hoods and furs in the snow; dark leather boots in the taiga; green leather and spears in the jungle; murky
- * leather in the swamp; straw-coloured caps on the savanna.</li>
+ * leather in the swamp; straw-coloured caps on the savanna; (0.7.249) the ronin harness among the cherry trees.</li>
  * <li><b>Camps</b>: barbarians' hides and their chief's mail get rough trims of their camp.</li>
  * </ul>
  * Folk dressed before this ({@link #VERSION}) are dressed again the first time they're ticked ({@link Folk}).
  */
 public final class Outfits {
 	/** Bumped when the looks change enough that folk already in the world should be dressed again. */
-	public static final int VERSION = 2;
+	public static final int VERSION = 3;
 
 	/** A guard's chance of a spear instead of a sword (jungle realms: {@link #JUNGLE_SPEAR_CHANCE}). */
 	static final float GUARD_SPEAR_CHANCE = 0.3F, JUNGLE_SPEAR_CHANCE = 0.7F;
@@ -214,8 +215,9 @@ public final class Outfits {
 			default -> {
 			}
 		}
-		if (arms.armoury()) {
-			// (0.5.30) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest
+		if (arms.armoury() || climate == Climate.CHERRY) {
+			// (0.5.30) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest;
+			// (0.7.249) the Blossom land's guards always go in the ronin harness
 			String set = switch (climate) {
 				case DESERT, BADLANDS, SAVANNA -> "gladiator";
 				case JUNGLE, CHERRY -> "ronin";
@@ -341,6 +343,23 @@ public final class Outfits {
 			patterns.get(BannerPatterns.BORDER).ifPresent(p -> builder.add(p, arms.charge()));
 		}
 		return builder.build();
+	}
+
+	/**
+	 * (0.7.249) The Blossom land's guards (MCA's own too: {@link BlossomVillages}) in the whole ronin harness, its cloth
+	 * in {@code color}; a piece the set lacks keeps what's there.
+	 */
+	static void ronin(LivingEntity mob, DyeColor color) {
+		for (ArmorType type : new ArmorType[] {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
+			EquipmentSlot slot = type.getSlot();
+			mob.setItemSlot(slot, armoury("ronin", type, rgb(color), mob.getItemBySlot(slot)));
+		}
+	}
+
+	/** (0.7.249) {@code mob} wears the ronin harness's cuirass. */
+	static boolean wearsRonin(LivingEntity mob) {
+		Item chest = Armory.piece("ronin", ArmorType.CHESTPLATE);
+		return chest != null && mob.getItemBySlot(EquipmentSlot.CHEST).is(chest);
 	}
 
 	/** A piece of an {@link Armory} set, its cloth dyed {@code rgb} (-1: the set's own colour); {@code fallback} if there's no such piece. */

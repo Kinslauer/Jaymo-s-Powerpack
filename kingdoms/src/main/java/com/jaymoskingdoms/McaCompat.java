@@ -378,6 +378,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.reconcile(level, w);
 	}
 
+	/** (0.7.249) {@code mob} is one of MCA's guards (never without MCA). */
+	static boolean isGuard(PathfinderMob mob) {
+		return LOADED && McaBridge.isGuard(mob);
+	}
+
 	/** Someone's talking to it (MCA's menu is open on it). */
 	static boolean busy(PathfinderMob mob) {
 		return LOADED && McaBridge.busy(mob);

@@ -102,6 +102,8 @@ public final class Careers {
 	static final int WAGE_FLOOR = 1;
 	/** Each other job held at once takes this off every order's wage (never below the floor). */
 	static final int WAGE_SPREAD = 1;
+	/** (0.7.249) What a job's own building in its town ({@link Job#hall}) adds to every order's wage. */
+	static final int HALL_BONUS = 1;
 	/** New orders each morning per job, and the most that wait. */
 	static final int ORDERS_A_DAY = 2, ORDERS_MOST = 5;
 	/** How far from a settlement's seat its town reaches for on-site work (blocks, flat), and how near its storehouse goods are handed over. */
@@ -172,27 +174,34 @@ public final class Careers {
 	/** The jobs. {@code goods}: what its orders ask brought to the storehouse (an item id, or {@code #tag}); {@code works}: on-site work. */
 	public enum Job {
 		BUTCHER("butcher", 4, List.of("minecraft:beef", "minecraft:porkchop", "minecraft:mutton", "minecraft:chicken", "minecraft:cooked_beef",
-			"minecraft:cooked_porkchop", "minecraft:leather"), List.of()),
-		WOODCUTTER("woodcutter", 16, List.of("#minecraft:logs", "#minecraft:planks"), List.of("fell")),
-		BUILDER("builder", 32, List.of("minecraft:cobblestone", "#minecraft:planks", "minecraft:stone_bricks"), List.of("place")),
-		FARMER("farmer", 12, List.of("minecraft:wheat", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot"), List.of("harvest")),
-		MINER("miner", 6, List.of("minecraft:coal", "minecraft:raw_iron", "minecraft:raw_copper", "minecraft:cobblestone"), List.of("ore")),
-		FISHER("fisher", 4, List.of("minecraft:cod", "minecraft:salmon", "minecraft:cooked_cod"), List.of()),
-		SMITH("smith", 2, List.of("minecraft:iron_ingot", "minecraft:copper_ingot", "minecraft:gold_ingot"), List.of("smelt")),
-		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay")),
-		COURIER("courier", 0, List.of(), List.of("carry")),
-		WATCH("watch", 0, List.of(), List.of("night", "slay"));
+			"minecraft:cooked_porkchop", "minecraft:leather"), List.of(), "butcher"),
+		WOODCUTTER("woodcutter", 16, List.of("#minecraft:logs", "#minecraft:planks"), List.of("fell"), null),
+		BUILDER("builder", 32, List.of("minecraft:cobblestone", "#minecraft:planks", "minecraft:stone_bricks"), List.of("place"), null),
+		FARMER("farmer", 12, List.of("minecraft:wheat", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot"), List.of("harvest"), null),
+		MINER("miner", 6, List.of("minecraft:coal", "minecraft:raw_iron", "minecraft:raw_copper", "minecraft:cobblestone"), List.of("ore"), null),
+		FISHER("fisher", 4, List.of("minecraft:cod", "minecraft:salmon", "minecraft:cooked_cod"), List.of(), "fishery"),
+		SMITH("smith", 2, List.of("minecraft:iron_ingot", "minecraft:copper_ingot", "minecraft:gold_ingot"), List.of("smelt"), "smithy"),
+		HUNTER("hunter", 6, List.of("minecraft:leather", "minecraft:feather", "minecraft:rabbit_hide", "minecraft:string"), List.of("slay"), "hunting_lodge"),
+		COURIER("courier", 0, List.of(), List.of("carry"), "stable"),
+		WATCH("watch", 0, List.of(), List.of("night", "slay"), null);
 
 		public final String key;
 		/** How many of its goods a stall sells for an emerald (0: it has nothing to sell). */
 		final int perEmerald;
 		final List<String> goods, works;
+		/**
+		 * (0.7.249) The building it works out of ({@link Buildings}' entry: the butcher's shop, the fishery, the hunting
+		 * lodge, the smithy, the stable), or null. A town where it stands is always hiring for the job, and pays
+		 * {@link #HALL_BONUS} more an order.
+		 */
+		final @Nullable String hall;
 
-		Job(String key, int perEmerald, List<String> goods, List<String> works) {
+		Job(String key, int perEmerald, List<String> goods, List<String> works, @Nullable String hall) {
 			this.key = key;
 			this.perEmerald = perEmerald;
 			this.goods = goods;
 			this.works = works;
+			this.hall = hall;
 		}
 
 		public static @Nullable Job of(String key) {
@@ -500,6 +509,24 @@ public final class Careers {
 		return Math.max(WAGE_FLOOR, WAGES[Mth.clamp(rank, 0, 2)] - WAGE_SPREAD * Math.max(0, held - 1));
 	}
 
+	/** The same in {@code f}, with {@link #HALL_BONUS} when the job's building stands there. */
+	static int wage(MinecraftServer server, Faction f, @Nullable Job job, int rank, int held) {
+		return wage(rank, held) + (job != null && hasHall(server, f, job) ? HALL_BONUS : 0);
+	}
+
+	/** (0.7.249) {@code job}'s own building ({@link Job#hall}) stands finished in {@code f}. */
+	static boolean hasHall(MinecraftServer server, Faction f, Job job) {
+		if (job.hall == null) {
+			return false;
+		}
+		for (Works.Built b : Works.of(server, f.id()).built()) {
+			if (b.entry().equals(job.hall) && b.ruined() == 0L) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** "Master Woodcutter". */
 	public static Component title(Job job, int rank) {
 		return Component.translatable("job.jaymoskingdoms.titled", Component.translatable("job.jaymoskingdoms.rank." + rank),
@@ -721,7 +748,7 @@ public final class Careers {
 				waiting = true;
 				continue;
 			}
-			int owed = p.done() * wage(rank, held) + (apprentice ? APPRENTICE_CUT : 0);
+			int owed = p.done() * wage(server, f, p.kind(), rank, held) + (apprentice ? APPRENTICE_CUT : 0);
 			int fromStore = Storage.take(store, f, Items.EMERALD, owed).getCount();
 			int fresh = Math.max(0, Math.min(owed - fromStore, p.done() * WAGE_FLOOR - fromStore));
 			int paid = fromStore + fresh;
@@ -1284,6 +1311,10 @@ public final class Careers {
 		if (job == Job.WATCH) {
 			return f.type().isRealm();
 		}
+		// (0.7.249) its own building in town wants hands, whatever's in the storehouse
+		if (hasHall(level.getServer(), f, job) && job != Job.COURIER) {
+			return true;
+		}
 		if (job == Job.COURIER) {
 			return Factions.all(level.getServer()).stream().anyMatch(o -> o.id() != f.id() && !o.fallen() && o.type() != FactionType.BARBARIAN
 				&& o.seat().distSqr(f.seat()) <= CARRY_MAX * CARRY_MAX);
@@ -1445,7 +1476,11 @@ public final class Careers {
 			Post elsewhere = c.post(j.key);
 			actions.add("hire:" + j.key);
 			Component line = Component.translatable(shortOf(level, f, j) ? "talk.jaymoskingdoms.work.offer_short" : "talk.jaymoskingdoms.work.offer",
-				title(j, rank), wage(rank, elsewhere == null ? held : held - 1));
+				title(j, rank), wage(level.getServer(), f, j, rank, elsewhere == null ? held : held - 1));
+			if (hasHall(level.getServer(), f, j)) {
+				line = line.copy().append(Component.translatable("talk.jaymoskingdoms.work.offer_hall",
+					Component.translatableWithFallback("building.jaymoskingdoms." + j.hall, j.hall)));
+			}
 			if (elsewhere != null) {
 				line = line.copy().append(Component.translatable("talk.jaymoskingdoms.work.offer_moves", elsewhere.town()));
 			}
@@ -1690,7 +1725,7 @@ public final class Careers {
 					.map(Faction::seat) : Optional.of(f.seat());
 				out.add(new Journal.Entry(false, false, Component.translatable("journal.jaymoskingdoms.order.title", job.title(), describe(server, o)),
 					Component.translatable("journal.jaymoskingdoms.order.by", f.name()), Component.translatable("journal.jaymoskingdoms.order.text", job.title(),
-						wage(of(player).rank(p.job()), of(player).posts().size())),
+						wage(server, f, job, of(player).rank(p.job()), of(player).posts().size())),
 					Component.translatable("journal.jaymoskingdoms.order.progress", o.progress(), o.count()), target));
 			}
 		}
