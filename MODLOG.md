@@ -3201,3 +3201,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   the bars. Kingdoms' `AetherGiant` has the same grab (its own target, 9-block reach, 4 squeeze / 40 slam, every 400-600
   ticks), and calls the film through `PowersCompat.film` by reflection. Lang line `zfighter_ape_grabbed`. Compile-checked only:
   the carry's smoothness for a player (teleports every tick) and the hand's fit to the model have not been seen in game.
+- **0.17.69, the narrator reads your whole life story (Kingdoms 0.7.269):** Andy liked the voice test. The narrator now
+  reads every life-story question, realm page and answer, and the grey line under each question is heard instead of
+  shown. On the last page it reads your whole story back, line by line, and closes with "Once lived, it's yours for
+  life." A realm's name isn't spoken ("the realm"), since it changes from world to world. 80 new VoxCPM2 clips,
+  5.4 MB of voice in all; `Voices.voiced()` and `tools/voices/make_voices.py` list the same lines from the lang file.
+  No Powers changes.
