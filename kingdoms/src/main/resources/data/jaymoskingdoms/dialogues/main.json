@@ -72,6 +72,38 @@
           "actions": {}
         }
       ]
+    },
+    {
+      "name": "jaymoskingdoms_thank",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_apologise",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_clear_air",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_ask_after",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
     }
   ]
 }

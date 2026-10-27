@@ -596,6 +596,8 @@ final class Retinue {
 		if (guard != null) {
 			guard.getLookControl().setLookAt(p, 30.0F, 30.0F);
 			guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			// (0.7.252) he'll remember it, and so will you, when you're introduced ({@link SharedHistory})
+			Recollections.remember(guard, p, Recollections.Kind.SHOVED_YOU, Component.empty());
 		}
 		p.push(flat.x * strength, up, flat.z * strength);
 		p.syncVelocity = true;

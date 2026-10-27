@@ -263,6 +263,8 @@ public final class Audiences {
 		Speech.say(level, ruler, Component.translatable("speech.jaymoskingdoms.audience.receive." + (t == null ? "plain" : t.key()), Identities.shownName(player)),
 			t == Tempers.Temper.TYRANT || t == Tempers.Temper.PARANOID ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
 		level.playSound(null, ruler.blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 0.7F);
+		// (0.7.252) something to thank him for ({@link SharedHistory})
+		Recollections.remember(guard, player, Recollections.Kind.LED_YOU, Component.empty());
 	}
 
 	/** The walk's over: the ruler's guards let them be a while longer, and he goes back to his post. */

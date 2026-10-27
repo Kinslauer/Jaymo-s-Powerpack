@@ -204,12 +204,18 @@ public final class Introductions {
 		if (Recollections.refuses(villager, player)) {
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_refused");
 		}
-		learn(player, villager);
+		boolean fresh = learn(player, villager);
 		Component name = Component.literal(villager.getName().getString());
 		Faction f = Rulers.is(villager) ? Factions.get(player.level().getServer(), Rulers.faction(villager)) : null;
 		if (f != null) {
 			Component title = Rulers.title(Rulers.role(villager), McaCompat.female(villager));
 			return Component.translatable("dialogue.chat.jaymoskingdoms.name_ruler." + villager.getRandom().nextInt(RULER_LINES), title, name, f.name());
+		}
+		// (0.7.252) Andy: "if a guard i havent met before's first interaction is a shove or searching me, the introduction
+		// might be awkward": one whose first dealing with you was like that says so (SharedHistory)
+		Component met = fresh ? SharedHistory.introduction(player, villager, name) : null;
+		if (met != null) {
+			return met;
 		}
 		return Component.translatable("dialogue.chat.jaymoskingdoms.name." + villager.getRandom().nextInt(LINES), name);
 	}

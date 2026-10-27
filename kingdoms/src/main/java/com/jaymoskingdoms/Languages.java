@@ -104,7 +104,9 @@ public final class Languages {
 	public static final Set<String> SIMPLE_COMMANDS = Set.of("trade", "gift", "follow", "stay", "move", "ridehorse", "pick_up", "inventory", "armor",
 		"slap");
 	/** MCA's talk menu: what can be done without words (a hug, a kiss, rock-paper-scissors, (0.7.204) a handshake), and the greetings that lead to it. */
-	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE);
+	static final Set<String> SIMPLE_ANSWERS = Set.of("hug", "kiss", "rock_paper_scissor", Introductions.HANDSHAKE,
+		// (0.7.252) thanks need no words
+		SharedHistory.THANK);
 	static final Set<String> SIMPLE_QUESTIONS = Set.of("root", "first", "greet", "hug", "kiss", "rock_paper_scissor");
 
 	/** Learning: what speaking a tongue takes; what each stretch among its speakers and each trade with one adds. */

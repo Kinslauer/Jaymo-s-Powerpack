@@ -83,7 +83,18 @@ public final class Recollections {
 		QUEST_DONE(3, 90, true, true, "%1$s did the task you asked of them: %2$s.", "%1$s did a task %3$s asked of them: %2$s."),
 		QUEST_FAILED(-2, 45, true, false, "%1$s gave up the task you asked of them: %2$s.", ""),
 		LETTER(1, 30, true, false, "%1$s brought you a letter from %2$s.", ""),
-		TALKED(0, 30, false, false, "%1$s said to you: \"%2$s\"", "");
+		TALKED(0, 30, false, false, "%1$s said to you: \"%2$s\"", ""),
+		// (0.7.252) what they did to or for you, and how you took it up with them after ({@link SharedHistory})
+		REVIVED_YOU(1, 60, true, false, "You knelt by %1$s when they lay downed and got them back on their feet.", ""),
+		LED_YOU(0, 30, false, false, "You walked %1$s to your ruler for an audience.", ""),
+		SHOVED_YOU(0, 30, false, false, "You shoved %1$s away (%3$s times that day).", ""),
+		SEARCHED_YOU(0, 30, false, false, "You searched %1$s's pack.", ""),
+		HALTED_YOU(0, 30, false, false, "You stopped %1$s in the street and asked their business.", ""),
+		THANKED(1, 45, false, false, "%1$s thanked you for %2$s.", ""),
+		APOLOGISED(1, 45, false, false, "%1$s said sorry for %2$s, and you forgave them.", ""),
+		SPURNED(0, 45, false, false, "%1$s said sorry for %2$s, and you would not have it.", ""),
+		AIRED(0, 30, false, false, "%1$s brought up %2$s with you, and you had it out.", ""),
+		ASKED_AFTER(1, 30, false, false, "%1$s asked after you, after %2$s.", "");
 
 		final int weight, days;
 		final boolean remark, tellable;
@@ -305,6 +316,21 @@ public final class Recollections {
 		return leaning(who, player) <= REFUSE;
 	}
 
+	/** (0.7.252) {@code who} lets go of {@code r} about {@code player} (an apology taken: {@link SharedHistory}). */
+	static void forget(LivingEntity who, ServerPlayer player, Recollection r) {
+		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
+		UUID id = key(player, who);
+		Person p = all.get(id);
+		if (p == null) {
+			return;
+		}
+		List<Recollection> list = new ArrayList<>(p.memories());
+		if (list.remove(r)) {
+			all.put(id, new Person(p.name(), p.last(), List.copyOf(list)));
+			who.setAttached(MEMORIES, Map.copyOf(all));
+		}
+	}
+
 	private static void markTold(LivingEntity who, ServerPlayer player, Recollection told) {
 		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
 		UUID id = key(player, who);
@@ -455,6 +481,14 @@ public final class Recollections {
 		};
 		if (kind != null) {
 			remember(who, player, kind, kind == Kind.STOOD && enemy != null ? Component.literal(enemy) : Component.empty());
+		}
+		// (0.7.252) and what they did to you, for when you're introduced or clear the air ({@link SharedHistory})
+		Kind rough = switch (topic + "/" + outcome) {
+			case "search/clean", "search/found", "unmask/search_clean", "unmask/search_found" -> Kind.SEARCHED_YOU;
+			default -> topic.equals("halt") && !outcome.isEmpty() ? Kind.HALTED_YOU : null;
+		};
+		if (rough != null) {
+			remember(who, player, rough, Component.empty());
 		}
 	}
 

@@ -8,6 +8,7 @@ import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Rulers;
+import com.jaymoskingdoms.SharedHistory;
 import com.jaymoskingdoms.Tails;
 import com.jaymoskingdoms.VillagerHeritage;
 import java.util.List;
@@ -28,6 +29,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
+ * (0.7.252) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
+ * your history with them has something to take up.
  * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
@@ -66,6 +69,21 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
+		}
+		if ("main".equals(name)) {
+			// (0.7.252) only what your history with them calls for
+			if (!SharedHistory.canThank(player, villager)) {
+				cir.getReturnValue().remove(SharedHistory.THANK);
+			}
+			if (!SharedHistory.canApologise(player, villager)) {
+				cir.getReturnValue().remove(SharedHistory.APOLOGISE);
+			}
+			if (!SharedHistory.canAir(player, villager)) {
+				cir.getReturnValue().remove(SharedHistory.AIR);
+			}
+			if (!SharedHistory.canAskAfter(player, villager)) {
+				cir.getReturnValue().remove(SharedHistory.ASK_AFTER);
+			}
 		}
 		if (!Languages.understands(player, villager)) {
 			// (0.7.20) without their tongue, only what hands can say
