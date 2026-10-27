@@ -5164,3 +5164,12 @@ Andy, asked whether villagers' skin should be limited too: "yes".
   `BORN_INSIDE`, a quarter of the range), so they don't all sit on the edge. The land still sets where in the range
   they fall. `born` also runs when a villager loads, so villagers already in the world are brought in once.
 - `McaGeneticsMixin`'s climate roll keeps to the range when the villager's heritage is already known.
+
+## 0.7.238: black, not the world, until MCA's creator (pack 0.17.27)
+Andy: "this screen at the start should not be opaque. it should stay black until the character creator. i just dont
+want the player seeing anything in world while they are spawning."
+- The life story and the loading screen draw on solid black (`extractBackground`), not over the blurred world.
+- Client `StoryCurtain`: a HUD layer drawn last that blacks out the world from the moment the story or a hold arrives
+  until MCA's creator (`DestinyScreen`, matched by name) opens. It covers the gaps between screens while the server
+  moves the newcomer. Without MCA, or when the creator doesn't come, it lifts `LIFT_AFTER_MS` (2.5 s) after nothing
+  holds them. Returning players never see it. 0.7.237 is left for the mana spirits PR. Not seen in game.

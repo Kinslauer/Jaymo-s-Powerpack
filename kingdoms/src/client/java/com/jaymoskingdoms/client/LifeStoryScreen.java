@@ -79,6 +79,7 @@ final class LifeStoryScreen extends Screen {
 		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
 			realms = payload.realms();
+			StoryCurtain.raise();
 			context.client().gui.setScreen(new LifeStoryScreen(payload.forced()));
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -96,6 +97,11 @@ final class LifeStoryScreen extends Screen {
 			owed = false;
 			draft = new Draft();
 		});
+	}
+
+	/** Whether the story is still owed (the screen comes back whenever it's shut). */
+	static boolean owed() {
+		return owed;
 	}
 
 	/** Whether the story is told: it came back from the server. */
@@ -387,6 +393,12 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	// ---- drawing -----------------------------------------------------------------------------------------------------
+
+	/** (0.7.238) Andy: black behind the story, never the world they're about to land in. */
+	@Override
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		StoryCurtain.background(graphics, this);
+	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
