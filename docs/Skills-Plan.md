@@ -96,8 +96,8 @@ carrying or carried, crawling, meditating, on a ledge, or in a web slinger's own
    Bar Swing (lvl 12, 2 pts)     Wall Runner (lvl 12, 2)
 ```
 12 points in all; with page 1's 15 and 25 levels you can't have everything.
-- **Climber** (3 ranks; since 0.17.73 anyone climbs, at rank 0's 3 s grip and 0.05 speed, and the ranks only add:
-  rank 1 a 6 s grip, rank 2 8 s and 0.07, rank 3 10 s and 0.09): jump at a tall wall holding forward and Jump (any solid wall but ice, glass, leaves and
+- **Climber** (3 ranks; since 0.17.74 anyone climbs, at rank 0's 3 s grip and 0.05 speed, and the ranks only add:
+  rank 1 a 6 s grip, rank 2 8 s and 0.07, rank 3 an unlimited grip and 0.09): jump at a tall wall holding forward and Jump (any solid wall but ice, glass, leaves and
   `jaymospowers:freerun_no_climb`; one whose top you could catch with a jump is the ledge grab's) to cling. Forward
   climbs 0.05/0.07/0.09 blocks a tick, strafe shimmies (0.06), Sneak lets go. The grip lasts 3/6/10 s
   (`GRIP_TICKS`), then you slip down (0.07 a tick) for 3 s and fall off. Reaching the top, the ledge grab catches the

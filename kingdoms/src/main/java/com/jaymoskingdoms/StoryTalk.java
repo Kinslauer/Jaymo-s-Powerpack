@@ -129,17 +129,30 @@ public final class StoryTalk {
 		if (!Crewmen.tagged(mob) || !mob.entityTags().contains(Crewmen.sideTag(Crew.Side.WHALER))) {
 			return false;
 		}
-		int realm = mob.getVehicle() instanceof Ship ship && ship.crew != null ? ship.crew.faction : Crewmen.faction(mob);
-		Whalers.Voyage v = realm < 0 ? null : Whalers.voyage(level.getServer(), realm);
+		Whalers.Voyage v = voyageOf(level, mob);
 		return v != null && v.hands.contains(player.getUUID());
 	}
 
-	/** What {@code crewman} calls {@code player}: the ship's boy (small, or to the sharp-tongued) a powder monkey, else deckhand. */
+	/**
+	 * What {@code crewman} calls {@code player}: (0.7.270) by the berth they signed on in ({@link Whalers#berth}: harpooner,
+	 * deckhand, powder monkey); a deckhand is a powder monkey to the sharp-tongued.
+	 */
 	public static Component berth(ServerPlayer player, LivingEntity crewman) {
+		Whalers.Voyage v = voyageOf((ServerLevel) crewman.level(), crewman);
+		String berth = v != null && v.hands.contains(player.getUUID()) ? Whalers.berth(v, player)
+			: player.getScale() < SMALL ? Whalers.MONKEY : Whalers.DECKHAND;
 		Temperaments.Temperament t = Temperaments.of(crewman);
-		boolean monkey = player.getScale() < SMALL || t == Temperaments.Temperament.SPITEFUL || t == Temperaments.Temperament.PROUD
-			|| t == Temperaments.Temperament.HOTHEADED;
-		return Component.translatable("story.jaymoskingdoms.berth." + (monkey ? "monkey" : "deckhand"));
+		if (berth.equals(Whalers.DECKHAND) && (t == Temperaments.Temperament.SPITEFUL || t == Temperaments.Temperament.PROUD
+			|| t == Temperaments.Temperament.HOTHEADED)) {
+			berth = Whalers.MONKEY;
+		}
+		return Whalers.berthName(berth);
+	}
+
+	/** (0.7.270) The voyage of the whaler {@code mob} is crew of (aboard her, or in port waiting on her), or null. */
+	static Whalers.@Nullable Voyage voyageOf(ServerLevel level, LivingEntity mob) {
+		int realm = mob.getVehicle() instanceof Ship ship && ship.crew != null ? ship.crew.faction : Crewmen.faction(mob);
+		return realm < 0 ? null : Whalers.voyage(level.getServer(), realm);
 	}
 
 	/** (From Crewmen, aboard) {@code player} is one of {@code mob}'s shipmates: they know each other's names. */

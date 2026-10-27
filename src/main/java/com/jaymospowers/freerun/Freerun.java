@@ -62,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * without Kingdoms nobody has them). Open to everyone whatever their power; a web slinger keeps their own web parkour
  * ({@code WebParkour}, {@code WebWallRun}) and these stand aside while one of those moves is on.
  * <ul>
- * <li><b>Climbing</b> (everyone since 0.17.73; Climber's 3 ranks lengthen the grip, 2 and 3 also climb faster): jump
+ * <li><b>Climbing</b> (everyone since 0.17.74; Climber's 3 ranks lengthen the grip, 2 and 3 also climb faster): jump
  * at a tall wall holding forward (any solid wall but ice, glass and leaves) and you cling to it; hold forward to climb ({@link #CLIMB_SPEED}), strafe to shimmy, Sneak lets go. The grip lasts
  * {@link #GRIP_TICKS}, then you slip down it. At the top the ledge grab ({@link Ledge}) takes over and you pull up and
  * over.</li>
@@ -90,11 +90,13 @@ import org.jspecify.annotations.Nullable;
 public final class Freerun {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
 	/**
-	 * Climbing (everyone, 0.17.73): climbing speed (blocks/tick) and how long the grip holds before you slip (ticks: 3,
-	 * 6, 8, 10 s), by Climber rank 0 to 3. Rank 1 only lengthens the grip; ranks 2 and 3 also climb faster.
+	 * Climbing (everyone, 0.17.74): climbing speed (blocks/tick) and how long the grip holds before you slip (ticks: 3,
+	 * 6, 8 s, then for good: Andy, "unlimited"), by Climber rank 0 to 3. Rank 1 only lengthens the grip; ranks 2 and 3
+	 * also climb faster. Holding on still costs hunger.
 	 */
 	public static final double[] CLIMB_SPEED = {0.05, 0.05, 0.07, 0.09};
-	public static final int[] GRIP_TICKS = {60, 120, 160, 200};
+	public static final int UNLIMITED_GRIP = Integer.MAX_VALUE / 4;
+	public static final int[] GRIP_TICKS = {60, 120, 160, UNLIMITED_GRIP};
 	/** Climber: shimmying along the wall, and slipping down it once the grip is gone (blocks/tick); how long you slip before you fall off. */
 	public static final double SHIMMY_SPEED = 0.06, SLIP_SPEED = 0.07;
 	public static final int SLIP_TICKS = 60;

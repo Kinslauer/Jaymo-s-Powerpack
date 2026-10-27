@@ -3214,12 +3214,28 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `ChronoPower.usableEarly` so his client lets the key through; `future_echo_slain` is now synced to its owner). He
   gets his own line ("...Sneak+B to wake back where you belong."). Leaping forward again still waits for the unlock.
   Not built or playtested here.
-- **0.17.73, everyone climbs walls; no cut-off text (Kingdoms 0.7.270, Kitchen 0.5.34):** Andy: "everyone should
+- **0.17.73, talk about work knows who's asking (Kingdoms 0.7.270):** Andy: "characters should have context sensitive
+  talk options, for example asking the captain about work should tell the player what their role is on the boat
+  either as harpooner or otherwise." A whaler's voyage now keeps each player's berth (`Voyage.berths`: harpooner,
+  deckhand, powder monkey). A whaling life story signs you on as her harpooner; coming aboard while she fits out makes
+  you a deckhand (a small character, her powder monkey). "Talk about work" now shows on any ship's crewman and goes to
+  `ShipTalk` instead of the town's jobs: her captain tells you your berth and its duties and how the voyage stands
+  (sailing in N minutes, outward, whales taken, cutting in, homeward), reckons your lay as the hold stands, lets you
+  change berth before she sails (harpooner needs irons of your own; powder monkey only for the small), and hands his
+  harpooner 4 irons once a voyage when they're down to 1. To someone who isn't a hand he offers each berth while she
+  fits out, or says she's full. Her other hands tell you your berth and theirs and send you to him. Lays now go by
+  berth (harpooner 1.5x a hand's, powder monkey 0.6x; `Whalers.HARPOONER_LAY`, `MONKEY_LAY`), and shipmates call you
+  by your real berth (a sharp-tongued one still calls a deckhand a powder monkey). Warship, merchant and pirate
+  crews say what their ship is about and what they do aboard her. Ashore, a town's "Talk about work" opens by who's
+  speaking (`WorkTalk`): your apprentice, the ruler (your service by rank, or an offer), the watch (your round, or a
+  place on it), one of your own trade, one whose trade the town is hiring for, or anyone to someone already working
+  there. Compile-checked against the 26.3 jars; not seen in game.
+- **0.17.74, everyone climbs walls; no cut-off text (Kingdoms 0.7.271, Kitchen 0.5.34):** Andy: "everyone should
   be able to ledge climb, the first rank of free running climber should just increase grip time. also the text is
   cut off on most of these UI". Wall climbing (cling, climb, shimmy, pull up and over, hop to the next wall, cling at
   the end of a wall run, Sneak + forward off an edge into a hang) no longer needs Climber: anyone gets a 3 s grip at
   0.05 a tick (`Freerun.GRIP_TICKS`/`CLIMB_SPEED` now by rank 0 to 3, `Freerun.grip`/`climbSpeed`). Climber rank 1
-  only lengthens the grip to 6 s; rank 2 is 8 s and faster (0.07), rank 3 10 s (0.09). Perk text rewritten.
+  only lengthens the grip to 6 s; rank 2 is 8 s and faster (0.07), rank 3 never slips (Andy: "unlimited"; `UNLIMITED_GRIP`, hunger still drains) and climbs at 0.09. Perk text rewritten.
   Text: the shared screen helpers (`UiStyle`, Kingdoms' `Ui`, Kitchen's `KitchenUi`) no longer cut with "...". A
   line too long for its room slides slowly back and forth inside it (as vanilla buttons do; `slide`, a 1.5 s pause
   each end), and a detail box with more lines than it has room for scrolls slowly up through them and back with a
