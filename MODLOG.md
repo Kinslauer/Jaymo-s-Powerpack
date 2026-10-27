@@ -3171,3 +3171,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   1.25x on the next blow). `client/combat/GuardClient` draws a timing bar and parry flash and steps you in when you swing at a
   locked foe up to 3 blocks past your reach; `client/mixin/GuardFirstPersonMixin` turns the blade across in first person.
   Darktide's and Z Fighter's parry windows are 8 ticks now. Spec: `docs/guard.md`. Compile-checked only.
+  Enemies too (Kingdoms 0.7.266): fighters raise their blade and parry players (first 8 ticks of their guard, else
+  12%/30% by experience), and every Better Combat swing a fighter starts shows a glint, red for heavy blows that carry
+  `Guard.UNPARRYABLE_TAG` and can't be parried.

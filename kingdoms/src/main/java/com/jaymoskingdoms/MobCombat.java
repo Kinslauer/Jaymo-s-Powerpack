@@ -94,6 +94,16 @@ public final class MobCombat {
 	static final double DODGE_SIDE = 0.55, DODGE_BACK = 0.2, DODGE_UP = 0.22;
 	static final int DODGE_COOLDOWN = 60;
 
+	/**
+	 * (0.7.266) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
+	 * heavy one you can't (a two-handed weapon's, or any at least {@link #HEAVY_DAMAGE} times its weight): dodge or block
+	 * those. The tag Jaymo's Powers' guard reads while a heavy blow lands.
+	 */
+	static final double HEAVY_DAMAGE = 1.4;
+	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
+	static final float TELL_SIZE = 1.2F;
+	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+
 	private static final Identifier COMBO_DAMAGE = JaymosKingdoms.id("combo_damage");
 	private static final Identifier SWING_SLOW = JaymosKingdoms.id("swing_slow");
 
@@ -198,6 +208,7 @@ public final class MobCombat {
 		}
 		int length = swingTicks(mob);
 		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
+		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
 		swing.hitAt = now + Math.min(upswing, length - 1);
@@ -221,6 +232,29 @@ public final class MobCombat {
 			mob.swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
 		}
 		mob.setAggressive(true);
+	}
+
+	/** (0.7.266) A blow too heavy to parry. */
+	static boolean heavy(Moves moves, Move move) {
+		return moves.twoHanded() || move.damage() >= HEAVY_DAMAGE;
+	}
+
+	/** (0.7.266) The glint as a swing begins, at the weapon hand. */
+	private static void tell(ServerLevel level, Mob mob, boolean heavy) {
+		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
+		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
+		Vec3 at = mob.getEyePosition().add(facing.scale(0.4)).add(side).add(0.0, -0.2, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(heavy ? HEAVY_TELL_COLOR : TELL_COLOR, TELL_SIZE),
+			at.x, at.y, at.z, heavy ? 8 : 5, 0.08, 0.08, 0.08, 0.0);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
+	}
+
+	/** (0.7.266) Its next swing may start at once (a parry answered, {@link MobParry}). */
+	static void hasten(Mob mob) {
+		Swing swing = SWINGS.get(mob);
+		if (swing != null && swing.hitAt < 0) {
+			swing.endsAt = Math.min(swing.endsAt, mob.level().getGameTime() - RECOVERY_TICKS);
+		}
 	}
 
 	/** The attack the combo is on, skipping those whose conditions this mob doesn't meet. */
@@ -364,6 +398,10 @@ public final class MobCombat {
 		if (damage != null && move.damage() != 1.0) {
 			damage.addOrUpdateTransientModifier(new AttributeModifier(COMBO_DAMAGE, move.damage() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
+		boolean heavy = heavy(moves, move);
+		if (heavy) {
+			mob.addTag(UNPARRYABLE_TAG);
+		}
 		try {
 			for (LivingEntity victim : hits) {
 				mob.doHurtTarget(level, victim);
@@ -371,6 +409,9 @@ public final class MobCombat {
 		} finally {
 			if (damage != null) {
 				damage.removeModifier(COMBO_DAMAGE);
+			}
+			if (heavy) {
+				mob.removeTag(UNPARRYABLE_TAG);
 			}
 		}
 	}

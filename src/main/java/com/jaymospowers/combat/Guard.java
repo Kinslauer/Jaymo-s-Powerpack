@@ -68,6 +68,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Up to {@link #PARRY_TICKS} it's a parry: nothing taken, a smaller shove and stun, a lighter riposte.</li>
  * <li>Locked on (middle mouse) to the one swinging, both windows are longer ({@link #LOCK_PERFECT_BONUS},
  * {@link #LOCK_PARRY_BONUS}): watch your foe and the timing is easier.</li>
+ * <li>A heavy blow (a fighter's, warned of by a red glint as it winds up: see Kingdoms' MobCombat) can't be parried.</li>
  * <li>Mashing doesn't work: a raise within {@link #EAGER_TICKS} of the last one, when that one parried nothing, is only
  * a block. A parry clears it, so a combo can be parried blow by blow.</li>
  * </ul>
@@ -98,6 +99,11 @@ public final class Guard {
 	public static final int PARRY_STUN = 12, PARRY_RIPOSTE_TICKS = 25;
 	public static final double PARRY_SHOVE = 0.45;
 	public static final float PARRY_RIPOSTE = 1.25F;
+	/**
+	 * (0.17.64) An attacker carrying this tag while its blow lands can't be parried, only blocked or dodged (Kingdoms puts
+	 * it on a fighter's heavy blows, the ones its red glint warns of).
+	 */
+	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
 
 	/** Server → the one who parried: draw the cue ({@code perfect}: the bright one). */
 	public record Parried(boolean perfect) implements CustomPacketPayload {
@@ -236,7 +242,8 @@ public final class Guard {
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 		boolean watching = attacker != null && LockOn.target(player) == attacker;
 		int held = player.getTicksUsingItem();
-		if (!raise.eager) {
+		boolean heavy = attacker != null && attacker.entityTags().contains(UNPARRYABLE_TAG);
+		if (!raise.eager && !heavy) {
 			if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
 				parry(player, raise, melee ? attacker : null, source, true);
 				return true;

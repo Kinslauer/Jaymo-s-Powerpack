@@ -36,6 +36,15 @@ each window configurable; it pairs with Better Combat.
 - `client/mixin/GuardFirstPersonMixin`: the blade turned across in first person while guarding.
 - Darktide and Z Fighter parry windows widened to 8 ticks.
 
+## Enemies guard and parry too; attack tells (Kingdoms 0.7.266)
+Andy: "Build those ideas too".
+- Fighters with a weapon and no shield raise their blade between swings (Kingdoms `MobShields`), shield-bearers their
+  shield as before. A blow in the first 8 ticks of that guard is parried; caught with the guard down they still parry
+  12% of blows (30% for veterans). A parry restarts your attack timer, slows and pushes you back, and they swing back at
+  once. Axes, two-handed weapons and Combat Arts area blows can't be parried by them.
+- Every fighter's swing (Better Combat moves) starts with a glint at the weapon: white means you can parry it, red means
+  a heavy blow (two-handed or 1.4x+) that Guard won't parry, only block or dodge (`Guard.UNPARRYABLE_TAG`).
+
 ## To check in game
 1. Sword, empty off hand: right click raises it; a zombie's blow right after raising is a perfect parry (ring, sparks,
    zombie thrown back and frozen), later ones are blocked for feathers.
@@ -43,3 +52,5 @@ each window configurable; it pairs with Better Combat.
 3. Two swords (Better Combat dual wield): right click still swings the off hand.
 4. Locked on, a swing at a foe 4-6 blocks away steps you in.
 5. Darktide katana guard and Z Fighter bare-hand guard work as before.
+6. A sword-armed guard raises its blade now and then; hitting it right after it does gets parried (sparks, you're pushed back, it swings back).
+7. A white glint before a fighter's swing; a red one on two-handed swings, and those can't be parried.

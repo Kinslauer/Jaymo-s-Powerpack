@@ -5586,3 +5586,15 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
 - **API for Jaymo's Powers (by reflection)**: `Parties.members(ServerPlayer)` (online members, the player first) and
   `Parties.allied(ServerPlayer, ServerPlayer)`.
 - Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.
+
+## 0.7.266: fighters guard and parry; attack tells (pack 0.17.64)
+Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
+- `MobShields`: a fighter fighting Better Combat's way with no shield raises its blade instead (its weapon's guard from
+  Powers), 30% of the times a shield-bearer would (`BLADE_GUARD_CHANCE`); `raisedFor`, `snap`, `drop`, `guardHand`.
+- `MobParry`: a player's blow in the first 8 ticks of a fighter's raised guard is parried; with its guard down, 12% (30%
+  for veterans, `WeaponForms.experienced`) of blows are. A parry takes nothing, restarts your attack timer, slows and
+  pushes you, and the fighter answers at once (`MobCombat.hasten`); 3 s before another. Never from behind, nor against
+  an axe, a two-handed weapon or the Combat Arts' area blows.
+- `MobCombat` attack tells: a glint at the weapon as each swing winds up, white for a blow you can parry, red for a
+  heavy one (two-handed, or 1.4x damage and up) that carries `jaymospowers.unparryable` while it lands, so Powers'
+  guard only blocks it.
