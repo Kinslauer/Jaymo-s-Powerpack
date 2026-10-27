@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.17.64) Your own weapon guard in first person: the blade turned across in front of you (vanilla draws blocking only
+ * (0.17.67) Your own weapon guard in first person: the blade turned across in front of you (vanilla draws blocking only
  * for shields, so a sword held up looked like nothing happened).
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)

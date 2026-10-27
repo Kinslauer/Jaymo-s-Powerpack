@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.17.64) A goal-driven mob's melee blow winds up with a glint first (see AttackTells). */
+/** (0.17.67) A goal-driven mob's melee blow winds up with a glint first (see AttackTells). */
 @Mixin(MeleeAttackGoal.class)
 abstract class AttackTellGoalMixin {
 	@WrapOperation(method = "checkAndPerformAttack", at = @At(value = "INVOKE",

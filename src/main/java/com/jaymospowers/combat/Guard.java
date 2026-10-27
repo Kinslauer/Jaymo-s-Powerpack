@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.64) The guard and the parry, for everyone. Andy: "I want parries to be more possible than the system we have, and
+ * (0.17.67) The guard and the parry, for everyone. Andy: "I want parries to be more possible than the system we have, and
  * make combat more dynamic now that we have lockons". Our own after Mallard Guard's idea (zeli-024, All Rights Reserved,
  * NeoForge 1.21.1 only: nothing of it is copied): one button, and how long the guard has been up decides what a blow
  * meets. See {@code docs/guard.md}.
@@ -100,7 +100,7 @@ public final class Guard {
 	public static final double PARRY_SHOVE = 0.45;
 	public static final float PARRY_RIPOSTE = 1.25F;
 	/**
-	 * (0.17.64) An attacker carrying this tag while its blow lands can't be parried, only blocked or dodged (Kingdoms puts
+	 * (0.17.67) An attacker carrying this tag while its blow lands can't be parried, only blocked or dodged (Kingdoms puts
 	 * it on a fighter's heavy blows, the ones its red glint warns of).
 	 */
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
@@ -220,7 +220,7 @@ public final class Guard {
 		return raise;
 	}
 
-	/** (0.17.64) A gun's ball or bullet (tagged by whoever fired it, or any of TaCZ's): blocked, never parried. */
+	/** (0.17.67) A gun's ball or bullet (tagged by whoever fired it, or any of TaCZ's): blocked, never parried. */
 	private static boolean shot(@Nullable Entity direct) {
 		return direct instanceof Projectile && (direct.entityTags().contains(UNPARRYABLE_TAG)
 			|| "tacz".equals(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(direct.getType()).getNamespace()));
@@ -232,7 +232,7 @@ public final class Guard {
 			return false;
 		}
 		Entity direct = source.getDirectEntity();
-		// (0.17.64) a gunman's hitscan shot comes as the gunman himself: a projectile all the same
+		// (0.17.67) a gunman's hitscan shot comes as the gunman himself: a projectile all the same
 		boolean projectile = direct instanceof Projectile || source.is(DamageTypeTags.IS_PROJECTILE);
 		boolean melee = !projectile && direct instanceof LivingEntity && direct == source.getEntity();
 		if (!projectile && !melee) {

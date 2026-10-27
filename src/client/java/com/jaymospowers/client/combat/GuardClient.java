@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.64) The guard on this side (see {@link Guard}): the timing bar under the crosshair while a guard is up (white
+ * (0.17.67) The guard on this side (see {@link Guard}): the timing bar under the crosshair while a guard is up (white
  * the perfect parry, gold the parry, grey the plain block; a notch runs along it), its flash when a parry lands, and the
  * lock-on lunge: locked onto a foe a little past your reach, a swing with a weapon steps you in so the blow connects
  * (Epic Fight's attack step, our own).

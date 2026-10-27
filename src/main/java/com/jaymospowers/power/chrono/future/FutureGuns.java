@@ -110,10 +110,10 @@ public final class FutureGuns {
 	/** How far TaCZ's report of a mob's shot carries. */
 	static final int SOUND_RANGE = 96;
 
-	/** (0.17.64) Andy: "All guns should red glint too": a red glint and a click this long (ticks) before a burst's first shot. */
+	/** (0.17.67) Andy: "All guns should red glint too": a red glint and a click this long (ticks) before a burst's first shot. */
 	static final int AIM_TICKS = 10;
 
-	/** (0.17.64) A gunner aiming its next burst → when it fires (game time). */
+	/** (0.17.67) A gunner aiming its next burst → when it fires (game time). */
 	private static final Map<Mob, Long> AIMING = new WeakHashMap<>();
 	/** When each gunner may next fire, and how many shots are left in its burst. */
 	private static final Map<Mob, Long> NEXT = new WeakHashMap<>();
@@ -271,7 +271,7 @@ public final class FutureGuns {
 				e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != mob, eye.distanceToSqr(end));
 			if (hit != null) {
 				end = hit.getLocation();
-				// (0.17.64) a bullet: nobody parries it (the guard reads the tag while it lands)
+				// (0.17.67) a bullet: nobody parries it (the guard reads the tag while it lands)
 				boolean tagged = mob.addTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
 				hit.getEntity().hurtServer(level, level.damageSources().mobProjectile(mob, mob), kind.damage);
 				if (tagged) {

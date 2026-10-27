@@ -19,7 +19,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.64) Attack tells for every mob. Andy: "Can you make every mob use this glint mechanic?" Kingdoms' fighters already
+ * (0.17.67) Attack tells for every mob. Andy: "Can you make every mob use this glint mechanic?" Kingdoms' fighters already
  * wind up their Better Combat swings with a glint; every other melee mob (vanilla's goal-driven ones, the brain-driven
  * piglins and hoglins, and every modded mob that attacks through either) now does too. Its blow no longer lands the
  * instant it's thrown: a glint shows at its weapon or head, and the blow lands {@link #WINDUP} ticks later if its target

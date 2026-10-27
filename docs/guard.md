@@ -1,4 +1,4 @@
-# The guard and the parry (Powers 0.17.64)
+# The guard and the parry (Powers 0.17.67)
 
 Andy (2026-10-27): "https://www.curseforge.com/minecraft/mc-mods/mallard-guard can we incorporate this? I want parries
 to be more possible than the system we have, and make combat more dynamic now that we have lockons. Its getting closer

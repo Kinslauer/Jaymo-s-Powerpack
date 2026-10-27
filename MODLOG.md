@@ -3162,7 +3162,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   preset asks for the demon biomes there, where only vanilla's exist. `ZFighterDemonRealm.addBiomes` now runs from the server
   and client entrypoints (after every mod's main one) instead of `init`; the world's registries come later from the data
   files, so the biomes still generate.
-- **0.17.64, the guard and the parry for everyone; lock-on lunge:** Andy wanted parries easier than ours and combat more
+- **0.17.66, the Moon's surface rule (crash fix):** creating a world failed at "Preparing for world creation" ("Failed to
+  parse jaymospowers:moon ... Not a string: {"Name":"minecraft:tuff"}"): `worldgen/material_rule/moon.json` wrote its
+  block states in the old `{"Name": ...}` form, which 26.3's surface rules don't read. They're plain block ids now, as in
+  `aether.json`. It broke every new world, singleplayer and server.
+
+- **0.17.67, the guard and the parry for everyone; lock-on lunge:** Andy wanted parries easier than ours and combat more
   dynamic with the lock-on. Mallard Guard is All Rights Reserved and NeoForge 1.21.1 only, so `combat/Guard` is our own after
   its idea: every melee weapon or tool with nothing on right click gets vanilla's `blocks_attacks` component and raises a guard
   (60% of a frontal blow, feathers per blow, a guard break when they run out); for that guard and for shields, a blow in the

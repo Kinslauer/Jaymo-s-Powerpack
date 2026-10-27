@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.17.64) A brain-driven mob's melee blow (piglins, hoglins, zoglins) winds up with a glint first (see AttackTells). */
+/** (0.17.67) A brain-driven mob's melee blow (piglins, hoglins, zoglins) winds up with a glint first (see AttackTells). */
 @Mixin(MeleeAttack.class)
 abstract class AttackTellBrainMixin {
 	@WrapOperation(method = "lambda$create$3", at = @At(value = "INVOKE",

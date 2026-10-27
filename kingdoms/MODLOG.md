@@ -5587,7 +5587,30 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
   `Parties.allied(ServerPlayer, ServerPlayer)`.
 - Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.
 
-## 0.7.267: fighters guard and parry; attack tells (pack 0.17.64)
+## 0.7.266: rides go by on a road screen (pack 0.17.65)
+Andy: "this cutscene system should replace our carriage rides, they always get stuck and you cant see anyway, at least
+this gives you an animation and hides imperfections." The idea is Stagecoach's (its Bukkit plugin can't run in a
+Fabric pack; nothing copied, the screen is our own).
+- **`Journeys`**: every player's ride to another place (a rickshaw, a rich realm's cab, a milestone's coach) is seen
+  setting off for `DEPART_TICKS` (1.5 s), then the road screen comes up and the ride stands still where it was. The
+  trip takes its length at `RICKSHAW_SPEED` (16 blocks a second) or `CARRIAGE_SPEED` (30), between 5 and 30 seconds.
+  At the end the player is moved to the far end (a rickshaw to the town's seat, a coach to the road's end) and the
+  rickshaw or carriage with them, and they're set down beside it. The puller or cab heads home as before (a puff back
+  to the rank once nobody's near); a coach goes after 3 seconds.
+- Nothing hurts a traveller on the way (`ALLOW_DAMAGE`). **Turn back** (the screen's button), getting down while it
+  sets off, or logging out puts them down where they started with their fare back (taken from the realm's treasury).
+- A ride back from a restart with a player aboard goes on the road screen again, with no fare to give back.
+- **`client/TravelScreen`**: drawn by hand in blocky pixels (`SCENE_PIXELS` = 120 to the screen's height): the sky at
+  the hour they set off (sun, moon, stars, drifting clouds), far hills (snow-capped in snow country), near hills with
+  trees, the road with ruts and tufts, a fence going by in front, and the ride: a rickshaw (its puller walking between
+  the shafts, the hood in the realm's colour, the rider sat back) or a carriage in the realm's colour (a coach with
+  luggage up top) behind a galloping horse with its driver up. The land turns from the look of the start to the look of
+  the end on the way (grass, snow, sand, cherry blossom; trees change one by one). A wooden sign up top names the place,
+  the blocks and the seconds left, with a bar below. Hooves or footsteps and a creak now and then. Fades in from black
+  and out to black; the world fades back in after.
+- Lang lines in `en_us.json` (`journey.*`); the hire messages now say the fare comes back if you turn back.
+
+## 0.7.267: fighters guard and parry; attack tells (pack 0.17.67)
 Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
 - `MobShields`: a fighter fighting Better Combat's way with no shield raises its blade instead (its weapon's guard from
   Powers), 30% of the times a shield-bearer would (`BLADE_GUARD_CHANCE`); `raisedFor`, `snap`, `drop`, `guardHand`.
