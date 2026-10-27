@@ -112,6 +112,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam",
+			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.zfighter.ZFighterKiWeapon", "power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.heritage.HeritageMoves",

@@ -4,6 +4,7 @@ import com.jaymospowers.power.zfighter.ZFighterGrowth;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterTeleport;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
 import java.util.ArrayList;
 import java.util.List;
@@ -324,8 +325,10 @@ public class ZFighterTrainingScreen extends Screen {
 			String key = ZFighterLineage.techniqueKey(player, i);
 			boolean known = data.knows(i);
 			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
-			boolean equipped = !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
-			String slot = spirit ? "C" : ZFighterTraining.charged(i) ? "V" : "G";
+			// (0.17.42) Instant Teleport lives on B, in place of Flash Step
+			boolean teleport = i == ZFighterTraining.TELEPORT;
+			boolean equipped = teleport ? ZFighterTeleport.equipped(player) : !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
+			String slot = spirit ? "C" : teleport ? "B" : ZFighterTraining.charged(i) ? "V" : "G";
 			graphics.fill(x + 6, ry - 4, x + w - 6, ry + 11, i % 2 == 0 ? COLOR_ROW : 0x18FFFFFF);
 			graphics.text(this.font, slot, x + 10, ry, COLOR_ACCENT);
 			line(graphics, Component.translatable(key), x + 22, ry, statusX - x - 26, known ? COLOR_GOLD : COLOR_TEXT);
@@ -345,8 +348,8 @@ public class ZFighterTrainingScreen extends Screen {
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.learn"));
 				button.active = blocker == null;
 			} else {
-				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.equip"));
-				button.visible = !spirit && !equipped;
+				button.setMessage(Component.translatable(teleport && equipped ? "screen.jaymospowers.zfighter_senses.flash_step" : "screen.jaymospowers.zfighter.equip"));
+				button.visible = teleport || !spirit && !equipped;
 				button.active = true;
 				if (i == ZFighterTraining.KI_WEAPON && equipped) {
 					// (0.17.42) on G, the ki weapon's button is its shape

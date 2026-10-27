@@ -118,7 +118,9 @@ public final class ZFighterGrab {
 	static boolean canGrab(ServerPlayer player, LivingEntity foe) {
 		if (foe == player || !foe.isAlive() || foe.isSpectator() || foe instanceof ArmorStand || foe.isPassenger() || foe.isVehicle()
 			|| HELD_FOES.contains(foe.getUUID()) || holding(player) || ZFighterLineage.ape(player) || ZFighterRush.active(player)
-			|| ZFighterPoise.stunned(player) || foe instanceof Player other && other.isCreative()) {
+			|| ZFighterPoise.stunned(player) || foe instanceof Player other && other.isCreative()
+			// the downed and crippled are the finishers' (sneak + left click held), not a grab's
+			|| com.jaymospowers.core.finisher.Finishers.helpless(foe)) {
 			return false;
 		}
 		long now = player.level().getGameTime();

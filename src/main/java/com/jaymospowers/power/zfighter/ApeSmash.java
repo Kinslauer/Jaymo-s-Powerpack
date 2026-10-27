@@ -118,6 +118,9 @@ public final class ApeSmash {
 		Vec3 end = eyes.add(player.getLookAngle().scale(player.entityInteractionRange()));
 		HitResult hit = level.clip(new ClipContext(eyes, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		Vec3 at = hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
+		if (charge >= 1.0F) {
+			ZFighterSenses.impactFrame(level, at);
+		}
 		double radius = Mth.lerp(charge, RADIUS_MIN, RADIUS_MAX);
 		float damage = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),

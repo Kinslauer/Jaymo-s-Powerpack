@@ -760,6 +760,9 @@ public final class ZFighterKi {
 		ServerLevel level = bolt.level;
 		DamageSource source = source(owner);
 		boolean spirit = bolt.kind == SPIRIT;
+		if (spirit) {
+			ZFighterSenses.impactFrame(level, at);
+		}
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(bolt.radius),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 away = near.getBoundingBox().getCenter().subtract(at);
