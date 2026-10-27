@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.237) Grimsby's five blade forms. Andy: "the idea of summoning your mana spirit like a stand that forms into different
+ * (0.7.238) Grimsby's five blade forms. Andy: "the idea of summoning your mana spirit like a stand that forms into different
  * weapons". The hands form a weapon of aura and strike with it; each form is its own {@link Move} (the player cycles them with
  * the spirit key's NEXT), and each is a three-tap combo: the third blow in a row hits {@link #FINISHER} times as hard. A combo
  * lapses if the next tap comes more than {@link #COMBO_TICKS} after the move was ready again. Blows are magic from the

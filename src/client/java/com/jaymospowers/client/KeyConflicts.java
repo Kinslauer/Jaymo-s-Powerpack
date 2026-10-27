@@ -43,7 +43,7 @@ final class KeyConflicts {
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
 		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u|key.keyboard.o", "key.keyboard.period")),
 		Map.entry("key.socialInteractions", new Move("key.keyboard.p", "key.keyboard.unknown")),
-		// (0.17.25) L is Kingdoms' mana spirit key; Advancements stays on the pause menu
+		// (0.17.26) L is Kingdoms' mana spirit key; Advancements stays on the pause menu
 		Map.entry("key.advancements", new Move("key.keyboard.l", "key.keyboard.unknown")));
 
 	/**

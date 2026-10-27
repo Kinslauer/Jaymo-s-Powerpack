@@ -235,6 +235,10 @@ public final class VillagerHeritage {
 				villager.removeTag(Heritage.TAG + k.key());
 			}
 		}
+		// (0.7.236) the skin their land gave them, kept to their blood's range (SkinTones.skinRange)
+		if (McaCompat.LOADED) {
+			McaBridge.keepSkin(villager, kind);
+		}
 		if (kind == Heritage.Kind.VERDANT && !Verdants.is(villager)) {
 			villager.setAttached(Verdants.SHADE, (villager.getRandom().nextFloat() + villager.getRandom().nextFloat()) / 2.0F);
 		}

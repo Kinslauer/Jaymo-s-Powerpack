@@ -259,6 +259,26 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.236) Powers' {@code Future.WAITING}: on a lost-in-time player still waiting for the future to be made. */
+	private static net.fabricmc.fabric.api.attachment.v1.@Nullable AttachmentType<?> futureWaiting;
+	private static boolean lookedForFutureWaiting;
+
+	/** (0.7.236) {@code player} is held where they stand till Powers' future is made (lost in time; false without Powers). */
+	public static boolean waitingForFuture(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForFutureWaiting) {
+			lookedForFutureWaiting = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					futureWaiting = (net.fabricmc.fabric.api.attachment.v1.AttachmentType<?>)Class.forName("com.jaymospowers.power.chrono.future.Future")
+						.getField("WAITING").get(null);
+				} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' future wait (older Powers?)", e);
+				}
+			}
+		}
+		return futureWaiting != null && player.getAttached(futureWaiting) != null;
+	}
+
 	/** Powers' {@code Dismember.bornWithout(LivingEntity, int)}. */
 	private static java.lang.invoke.@Nullable MethodHandle bornWithout;
 	private static boolean lookedForBornWithout;

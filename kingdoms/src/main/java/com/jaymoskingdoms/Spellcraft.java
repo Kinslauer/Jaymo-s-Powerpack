@@ -431,7 +431,7 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
-		// (0.7.236) the caster's aura ripples with what the cast is for (an element's blade or bolt: harm; restoration: healing)
+		// (0.7.237) the caster's aura ripples with what the cast is for (an element's blade or bolt: harm; restoration: healing)
 		Mana.ripple(player, Mana.intent(spellOrElement));
 		if (ForbiddenArts.forbidden(spellOrElement)) {
 			ForbiddenArts.cast(player, level, ForbiddenArts.blood(spellOrElement), 0);

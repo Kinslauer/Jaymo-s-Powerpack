@@ -7,7 +7,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * (0.7.237) A mana spirit's bond with its keeper. Andy: "the ones with personalities can kick in on their own to assist you
+ * (0.7.238) A mana spirit's bond with its keeper. Andy: "the ones with personalities can kick in on their own to assist you
  * ... all can be upgraded and leveled". Saved, kept through death and synced to everyone (the viewers draw the arms).
  * {@code kind} is {@link Spirits#GRIMSBY}...{@link Spirits#QUIET}; {@code level} 1-{@link Spirits#MAX_LEVEL} with its
  * {@code xp}; {@code bond} 0-{@link Spirits#MAX_BOND}; {@code out} whether it is conjured; {@code move} the selected move

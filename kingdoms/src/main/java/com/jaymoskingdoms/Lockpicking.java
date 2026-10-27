@@ -261,7 +261,7 @@ public final class Lockpicking {
 		}
 	}
 
-	/** (0.7.237) The level of the lock on the container at {@code pos} (either half of a double chest), or 0 when it is not locked. */
+	/** (0.7.238) The level of the lock on the container at {@code pos} (either half of a double chest), or 0 when it is not locked. */
 	public static int lockLevel(ServerLevel level, BlockPos pos) {
 		BlockPos at = lockAt(level, pos);
 		Lock lock = at == null ? null : lockOf(level, at);
@@ -269,7 +269,7 @@ public final class Lockpicking {
 	}
 
 	/**
-	 * (0.7.237) A mana spirit picks the lock on the container at {@code pos}: Thessaly the Learned, Andy's "things from far
+	 * (0.7.238) A mana spirit picks the lock on the container at {@code pos}: Thessaly the Learned, Andy's "things from far
 	 * away". It opens as a picked lock does (for good, both halves of a double chest, the Stealth practice for {@code player})
 	 * when {@code spiritLevel} is at least twice the lock's level; otherwise nothing happens and this is false. The chest is not
 	 * opened for them: the lock is only undone.

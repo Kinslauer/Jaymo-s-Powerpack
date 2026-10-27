@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.237) The per-tick state of the hands that take hold: what the spirit has seized and is holding in front of its
+ * (0.7.238) The per-tick state of the hands that take hold: what the spirit has seized and is holding in front of its
  * keeper (grab and throw), what it has thrown and is waiting to land, the items it is pulling in (the far hand), and the
  * mobs it holds fast (hold the line). Andy: "manipulating items from way farther away than you could naturally". All of it is
  * kept by server tick count, per keeper; everything lets go the moment the keeper's spirit is no longer out.

@@ -73,7 +73,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.237) The mage hands every spirit shares. Andy: "a mage hand type of ability that mimics the way stands work but not
+ * (0.7.238) The mage hands every spirit shares. Andy: "a mage hand type of ability that mimics the way stands work but not
  * their presentation", and the point of them is "manipulating items from way farther away than you could naturally". Every
  * spirit's move list starts with these six:
  * <ol>

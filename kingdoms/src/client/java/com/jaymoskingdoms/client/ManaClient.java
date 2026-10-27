@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * glow, and brighter the fuller their mana; it flares while they're overloaded, then settles to a dim rest. Drawn only
  * when the one looking is attuned too.
  * <p>
- * (0.7.236) Its rest shows their power ({@link Mana#POWER}): the weakest glow dimmest, and Arcana raises it. The casting
+ * (0.7.237) Its rest shows their power ({@link Mana#POWER}): the weakest glow dimmest, and Arcana raises it. The casting
  * folk glow too ({@link Folk}, on every humanoid that isn't a player). Every cast sends a ripple out through the glow,
  * coloured by its intent ({@link #INTENT}). The corrupted see all of it as the attuned do ({@link ManaAlchemy#readsMagic}).
  * <p>
@@ -60,7 +60,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	public static final float[] SHELLS = {0.4F, 0.85F, 1.4F};
 	public static final float[] SHELL_LIGHT = {0.2F, 0.11F, 0.05F};
 	/**
-	 * (0.7.236) The resting glow, as a share of the shells' light: a little for anyone attuned, more for every step of
+	 * (0.7.237) The resting glow, as a share of the shells' light: a little for anyone attuned, more for every step of
 	 * power, and more the fuller their mana. Mana past full (the overload's spill) doesn't brighten it. Andy: the flare
 	 * "needs to dim to a dimmer minimum"; "Arcana increases that minimum, so you now glow for others the most dim at your
 	 * weakest."
@@ -70,14 +70,14 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 	static final float FLARE = 2.0F, FLARE_SWELL = 0.1F;
 	/** How fast the wisps rise, and the glow's slow breathing. */
 	public static final float RISE = 0.01F, BREATHE = 0.1F, BREATHE_SPEED = 0.12F;
-	/** (0.7.236) A cast's ripple: how long it runs (ticks), how far it swells, how bright it starts, where its shell sits. */
+	/** (0.7.237) A cast's ripple: how long it runs (ticks), how far it swells, how bright it starts, where its shell sits. */
 	static final int RIPPLE_TICKS = 16;
 	static final float RIPPLE_SWELL = 0.35F, RIPPLE_LIGHT = 0.55F, RIPPLE_SHELL = 1.0F;
-	/** (0.7.236) Intent's colours: harm, healing, warding, will (mana's own blue). */
+	/** (0.7.237) Intent's colours: harm, healing, warding, will (mana's own blue). */
 	static final int[] INTENT = {0xE0484A, 0xF2C45A, 0xE8F0FF, COLOR};
 	/** The overload's blue on your screen: the wash over everything and the edges, at its height. */
 	static final float WASH = 0.28F, EDGE = 0.6F;
-	/** (0.7.236) Mana sickness on your screen: the wash and the edges a stage, and how fast it pulses. */
+	/** (0.7.237) Mana sickness on your screen: the wash and the edges a stage, and how fast it pulses. */
 	static final float SICK_WASH = 0.06F, SICK_EDGE = 0.25F, SICK_PULSE = 0.08F;
 
 	/**
@@ -158,7 +158,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 		this.shells.submit(poseStack, collector, lightCoords, state);
 	}
 
-	/** (0.7.236) The glow on anyone else humanoid: the casting folk (MCA's villagers, our own casters). */
+	/** (0.7.237) The glow on anyone else humanoid: the casting folk (MCA's villagers, our own casters). */
 	static final class Folk<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
 		private final Shells shells;
 
@@ -211,7 +211,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 			}
 			poseStack.popPose();
 			if (glow.rippleAge() >= 0) {
-				// (0.7.236) a cast: a ring of light in the intent's colour, swelling out through the glow and fading
+				// (0.7.237) a cast: a ring of light in the intent's colour, swelling out through the glow and fading
 				float k = Mth.clamp((glow.rippleAge() + Mth.frac(state.ageInTicks)) / RIPPLE_TICKS, 0.0F, 1.0F);
 				float out = 1.0F + RIPPLE_SWELL * k;
 				float fade = (1.0F - k) * (1.0F - k);
@@ -243,7 +243,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 		}
 		int sick = ManaSickness.stage(player);
 		if (sick > 0) {
-			// (0.7.236) sickly grey-green, pulsing
+			// (0.7.237) sickly grey-green, pulsing
 			float pulse = 0.75F + 0.25F * Mth.sin((player.tickCount + delta.getGameTimeDeltaPartialTick(false)) * SICK_PULSE);
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), ARGB.colorFromFloat(SICK_WASH * sick * pulse, 0.45F, 0.55F, 0.4F));
 			float e = Math.min(1.0F, SICK_EDGE * sick * pulse);

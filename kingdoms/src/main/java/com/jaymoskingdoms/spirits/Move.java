@@ -4,7 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.237) One thing a spirit's hands can do. Andy: "some have entire move sets but all can be upgraded and leveled". A move
+ * (0.7.238) One thing a spirit's hands can do. Andy: "some have entire move sets but all can be upgraded and leveled". A move
  * is cast from the spirit key ({@link Spirits.Key}, action CAST): {@link Spirits} checks the cooldown ({@link Moves#ready})
  * and that the player can pay, calls {@link #cast}, and only if that returns true takes the mana
  * ({@link com.jaymoskingdoms.Mana#pay}) and starts the cooldown. So a move never pays for itself, and returns false when

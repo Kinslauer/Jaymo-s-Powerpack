@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.237) The energy javelin of Old Varro's. Andy: "a collected energy javelin attack". A bolt of gathered mana that flies
+ * (0.7.238) The energy javelin of Old Varro's. Andy: "a collected energy javelin attack". A bolt of gathered mana that flies
  * straight for {@link #FLIGHT_TICKS} and then drops, passing through up to {@code pierce} foes (never a friend: {@link
  * SpiritFoes}) and stopping at a wall. The same entity is Varro's heavy orb (the bombard): slow, arcing, and bursting on
  * what it meets. It has no model, so the client draws nothing for it: the look is its trail, a faint end-rod glimmer for

@@ -1,4 +1,4 @@
-# Mana spirits (Kingdoms 0.7.237)
+# Mana spirits (Kingdoms 0.7.238)
 
 Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their presentation ... use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5, one of those being seemingly non

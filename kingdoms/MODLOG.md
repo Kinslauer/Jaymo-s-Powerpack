@@ -5131,7 +5131,41 @@ our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
   over for the next nearest coastal one (a new kingdom raised on the shore if none is left); it gives up after 3
   minutes. Sign-on then takes the realm made ready, not just the harbour nearest spawn.
 
-## 0.7.236: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.25)
+## 0.7.236: a loading screen while a story's start is made, and your heritage in MCA's creator (pack 0.17.25)
+Andy: "can the player be held in a stasis menu or faux load screen at the beginning while everything loads?"
+- `StoryGround.Hold` (server to client): the server checks every 5 ticks what each player is held for and sends it
+  when it changes. A held player is waiting for one of:
+  - the first capital to be raised (before the story screen opens, or a city start);
+  - a whaler being fitted out;
+  - Powers' future, for lost in time (`PowersCompat.waitingForFuture` reads `Future.WAITING`);
+  - 3 s after any story landing while the land loads (`StoryGround.settle`, `SETTLE_TICKS`).
+- Client `StoryHoldScreen`: an opaque screen that can't be shut. It shows "Your story is being written", what it's
+  waiting for, and a sweeping bar. It comes back if anything else closes while the player is still held. MCA's creator
+  waits behind it, since MCA opens only onto an empty screen. The overlay lines from `StoryGround.step` are gone.
+
+Andy: "apply the character's heritage to the character creator please".
+- `McaEditorHeritageMixin`: when MCA's editor is open on your own character (the start-up creator, now after the
+  story, or the editor later), the figure you dress gets your heritage and variant attachments. It is drawn with your
+  blood's marks, fins, eyes and look, as villagers of that heritage are (`VillagerLooks`).
+
+Andy: "the sliders should only allow the color ranges that the heritage allows".
+- `SkinTones.skinRange`: each heritage's melanin range (0 pale to 1 dark), as constants at the top of `SkinTones`. The
+  ranges are my picks from each blood's land. Frostborn, Nightborn, Endborn and Deepborn are pale; Emberborn and
+  Dawnborn are dark. Heartlander, Earthling and Verdant have the whole range (Verdant is green whatever its melanin).
+- `McaEditorSkinMixin` (on `Genetics.setGene`, client): on your own figure in MCA's editor (`EditorFigure`), the skin
+  picker's melanin is kept inside your heritage's range, so that is what gets saved. A figure that starts outside the
+  range is brought into it.
+- `McaVerdantSkinMixin` also finds the editor figure, which isn't in the world. The figure now shows your heritage's
+  skin too: a Stoneborn's grey, a variant's tint, a Verdant's green.
+
+Andy, asked whether villagers' skin should be limited too: "yes".
+- `VillagerHeritage.born` brings an MCA villager's melanin into its heritage's range (`McaBridge.keepSkin`,
+  `SkinTones.bornSkin`). One born outside the range lands a little way in from the nearer edge (up to
+  `BORN_INSIDE`, a quarter of the range), so they don't all sit on the edge. The land still sets where in the range
+  they fall. `born` also runs when a villager loads, so villagers already in the world are brought in once.
+- `McaGeneticsMixin`'s climate roll keeps to the range when the villager's heritage is already known.
+
+## 0.7.237: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.26)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
 Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
@@ -5169,7 +5203,7 @@ should ripple, indicating the caster's intent."
   `tools/gen_mana_wand.py`.
 javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
 
-## 0.7.237: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.25)
+## 0.7.238: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.26)
 Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
 arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and

@@ -28,7 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.236) The mana-infused wand. Andy: "A mana infused wand would be good for transferring extra stored mana." A short
+ * (0.7.237) The mana-infused wand. Andy: "A mana infused wand would be good for transferring extra stored mana." A short
  * wand with an amethyst at its tip that holds up to {@link #HOLDS} mana (in the stack, so it keeps it wherever it goes).
  * Only the attuned can work it:
  * <ul>

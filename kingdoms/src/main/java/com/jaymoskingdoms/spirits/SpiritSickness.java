@@ -25,7 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
 /**
- * (0.7.237) The spirit sickness, and the brush with death that starts it. Andy (2026-10-26): "unlock: 1 in 18 per brush with
+ * (0.7.238) The spirit sickness, and the brush with death that starts it. Andy (2026-10-26): "unlock: 1 in 18 per brush with
  * death while attuned, then spirit sickness for up to 5 days (sooner with meditating, casting, nearly dying again); waking
  * cures it." An attuned player with no spirit who is left at a fifth of their health or less (or downed) has a
  * {@link #BRUSH_CHANCE} in chance that something answers. They fall sick: mana comes back at half pace and the spirit-to-be
