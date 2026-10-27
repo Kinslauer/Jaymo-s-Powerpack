@@ -3043,4 +3043,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   kyy7dbrZ, CurseForge 308702 file 8958984) ships unchanged in `packMods`. It's client-only and bundles Text Placeholder API.
 - **0.17.34, ship crews and story starts (Kingdoms 0.7.246):** your whaler's crew know you and call you deckhand or
   powder monkey, villagers near where your story starts talk about it, one knight at most per ship (the rest dressed as
-  sailors), and crews stand on deck instead of sitting as if riding.
+  sailors), crews stand on deck instead of sitting as if riding, run to get the downed up (you too), and ship stairs
+  can be climbed.

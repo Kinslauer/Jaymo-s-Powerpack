@@ -111,6 +111,19 @@ public final class Ships {
 						if (i < 0 || h.lo[i] > h.hi[i]) {
 							continue;
 						}
+						if (h.steps[i] != null) {
+							// (0.7.246) a stair: each of its boxes, turned as she lies, so its steps can be climbed
+							for (AABB part : h.steps[i]) {
+								AABB box = turned(s, x, y, z, part);
+								if (box.intersects(area)) {
+									if (out == null) {
+										out = new ArrayList<>(others);
+									}
+									out.add(Shapes.create(box));
+								}
+							}
+							continue;
+						}
 						Vec3 mid = s.toWorld(x, y, z);
 						AABB box = new AABB(mid.x - 0.5, mid.y + h.lo[i], mid.z - 0.5, mid.x + 0.5, mid.y + h.hi[i], mid.z + 0.5);
 						if (box.intersects(area)) {
@@ -124,5 +137,19 @@ public final class Ships {
 			}
 		}
 		return out == null ? others : out;
+	}
+
+	/** (0.7.246) {@code part} (in the cell at x, y, z of {@code s}'s frame, 0-1) in the world: what it covers as she lies. */
+	private static AABB turned(Ship s, int x, int y, int z, AABB part) {
+		double minX = Double.MAX_VALUE, minZ = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
+		for (int c = 0; c < 4; c++) {
+			Vec3 w = s.toWorld(x - 0.5 + ((c & 1) == 0 ? part.minX : part.maxX), y, z - 0.5 + ((c & 2) == 0 ? part.minZ : part.maxZ));
+			minX = Math.min(minX, w.x);
+			maxX = Math.max(maxX, w.x);
+			minZ = Math.min(minZ, w.z);
+			maxZ = Math.max(maxZ, w.z);
+		}
+		double y0 = s.getY() + y;
+		return new AABB(minX, y0 + part.minY, minZ, maxX, y0 + Math.min(1.5, part.maxY), maxZ);
 	}
 }

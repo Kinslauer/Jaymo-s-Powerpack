@@ -483,6 +483,8 @@ final class Corsairs implements Ship.Captaincy {
 		if ((now + ship.getId()) % MAN_CHECK == 0) {
 			manGuns(ship, crew, deck, aboard);
 		}
+		// (0.7.246) the downed aboard are got up: a hand runs to each
+		Crewmen.care(level, ship, crew, deck, aboard, foe != null);
 		RandomSource random = level.getRandom();
 		java.util.Set<UUID> here = new java.util.HashSet<>();
 		for (LivingEntity hand : aboard) {
@@ -495,6 +497,10 @@ final class Corsairs implements Ship.Captaincy {
 			Crew.Walk walk = crew.walks.computeIfAbsent(id, k -> new Crew.Walk());
 			if (!walk.way.isEmpty()) {
 				step(ship, hand, seat, walk);
+				continue;
+			}
+			if (Crewmen.caring(hand)) {
+				// (0.7.246) kneeling by someone they're getting up
 				continue;
 			}
 			if (now < walk.rest) {

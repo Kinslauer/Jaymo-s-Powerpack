@@ -5392,3 +5392,11 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
 - **Crews stand on deck**: Andy saw all the sailors seated as if riding something. `McaCrewStanceMixin` clears
   `isPassenger` as the last thing MCA's villager renderer sets, and EMF's animations pause for crew at their stations
   (`ShipClient.crewAboard`), so no riding pose comes back.
+- **Crews get their downed up** (Andy: "the ship crew should rush to revive each other, including the player"):
+  `Crewmen.care` (from `Corsairs.deckwork`) sends the nearest free hand running along her deck to anyone downed aboard,
+  one of hers or a player she isn't hostile to (never her captain, nor a gunner mid-fight), with a shout. They kneel 6 s
+  and get them up (Powers' revive and bandage tags), and tell a player so. Ashore tending (`Downed`) skips riders, so
+  nobody did this at sea before.
+- **Ship stairs are steps**: a ship's collision took each stair as a full block (`Hull` lo/hi), so a stairwell under a
+  deck beam could be neither stepped up nor jumped. `Hull.steps` keeps a stair's own boxes and `Ships.collisions`
+  turns them as she lies.
