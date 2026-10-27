@@ -1,0 +1,542 @@
+[
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/bombardier_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/bombardier_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/bombardier_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/bombardier_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_4.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/deckhand_5.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/gunner_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/gunner_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/gunner_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/gunner_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/master_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/master_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/master_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/master_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/pirate_captain_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/pirate_captain_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/pirate_captain_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/pirate_captain_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/powder_monkey_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/powder_monkey_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/powder_monkey_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/powder_monkey_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/sea_captain_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/sea_captain_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/sea_captain_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/sea_captain_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_4.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/seaman_5.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/shipwright_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/shipwright_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/shipwright_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/crew/shipwright_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/black_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/black_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/black_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/black_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/blue_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/blue_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/blue_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/blue_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/brown_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/brown_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/brown_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/brown_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/cyan_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/cyan_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/cyan_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/cyan_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/gray_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/gray_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/gray_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/gray_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/green_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/green_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/green_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/green_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_blue_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_blue_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_blue_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_blue_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_gray_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_gray_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_gray_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/light_gray_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/lime_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/lime_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/lime_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/lime_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/magenta_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/magenta_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/magenta_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/magenta_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/orange_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/orange_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/orange_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/orange_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/pink_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/pink_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/pink_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/pink_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/purple_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/purple_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/purple_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/purple_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/red_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/red_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/red_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/red_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/white_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/white_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/white_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/white_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/yellow_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/yellow_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/yellow_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/lord/yellow_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/royal/king_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/royal/king_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/royal/king_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/royal/king_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  }
+]
