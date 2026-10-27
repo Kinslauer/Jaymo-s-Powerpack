@@ -366,7 +366,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** Eases {@code entity}'s fever (its weakness, the dirt in its cuts); false without Powers. */
+	/** Eases {@code entity}'s fever (festering cured, its weakness, the dirt in its cuts); false without Powers. */
 	public static boolean easeFever(net.minecraft.world.entity.LivingEntity entity) {
 		mending();
 		try {
