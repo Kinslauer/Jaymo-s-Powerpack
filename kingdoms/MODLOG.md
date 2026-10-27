@@ -5423,3 +5423,10 @@ as inspiration? a more solid looking yet wispy projection?"
 - **Calmer**: the idle stretch is gone, the elbow, shoulder roll, sway and finger flex are a third of what they were,
   and the ghost trail is two soft arms behind a fast move only (a blow's snap, a grasp closing), none at rest.
   Not seen in game.
+
+## 0.7.249: the life story keeps your power a surprise (pack 0.17.38)
+Andy, of the "Then one day..." page: "this screen should not show the class you will get".
+- The "Then one day" answers and the story page no longer say which power wakes ("Power: Cryokinesis, awakening in a
+  few days" / "whatever fate decides" are gone, and their lang keys with them). Lost in time still says Chrono wakes at
+  once, since that's the road's own doing.
+- A road that matches the gift still says it wakes a day sooner, without naming it.

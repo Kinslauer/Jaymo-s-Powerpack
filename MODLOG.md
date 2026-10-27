@@ -3056,3 +3056,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.37, spirit arms only while used, a ghost's look (Kingdoms 0.7.248):** a mana spirit's arms form when a move
   starts and fade after, drawn as a solid pale core with thin drifting edges and smoke, and move more calmly. No Powers
   changes.
+- **0.17.38, the life story keeps your power a surprise (Kingdoms 0.7.249):** the "Then one day" page no longer names
+  the power you'll awaken. No Powers changes.
