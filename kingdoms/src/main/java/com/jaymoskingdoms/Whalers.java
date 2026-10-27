@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -208,6 +209,28 @@ public final class Whalers {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Whalers::tick);
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (!alive) {
+				reboard(newPlayer);
+			}
+		});
+	}
+
+	/**
+	 * (0.7.252, Andy: "it should put me back on the boat") A signed hand who died is back on her deck, if she's still
+	 * within reach (else they wake at her harbour, their story's spawn).
+	 */
+	private static void reboard(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		ServerLevel level = Factions.level(server);
+		for (Voyage v : level.getAttachedOrElse(VOYAGES, Map.of()).values()) {
+			if (v.hands.contains(player.getUUID()) && level.getEntity(v.ship) instanceof Ship ship && !ship.isRemoved()) {
+				Vec3 deck = ship.helmStand().add(0.0, 0.1, 0.0);
+				player.teleportTo(level, deck.x, deck.y, deck.z, java.util.Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), 0.0F, false);
+				player.resetFallDistance();
+				return;
+			}
+		}
 	}
 
 	static @Nullable Voyage voyage(MinecraftServer server, int realm) {
@@ -352,6 +375,8 @@ public final class Whalers {
 			v.hands.add(player.getUUID());
 			put(server, best.id(), v);
 		}
+		// (0.7.252) their story's spawn: her harbour, should she be out of reach when they die
+		LifeStory.home(player, level, bestHarbour.shore());
 		String name = ship.crew != null ? ship.crew.name : best.name();
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.whalers", name).withStyle(ChatFormatting.AQUA));
 		return ship.helmStand().add(0.0, 0.1, 0.0);
