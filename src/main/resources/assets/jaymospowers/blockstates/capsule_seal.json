@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/capsule_seal"
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/capsule_seal"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/capsule_seal"
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/capsule_seal"
+    }
+  }
+}

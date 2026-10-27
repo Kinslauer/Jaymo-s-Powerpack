@@ -40,8 +40,8 @@ import net.minecraft.world.phys.Vec3;
  * good-hearted fighters stand in a ring on the Lookout's courtyard and lend their ki to lift one of them into the god
  * form ({@link ZFighterGod}). The ritual circle is painted on the Lookout's floor, south of the pole: a gold block in a
  * 3x3 of chiseled quartz for the one to be lifted, and five amethyst pads on a ring of radius {@code 4} round it. It is
- * worked from the geometry, so the blocks are only a sign (they are repainted if gone). Patch 6 widens the Lookout; the
- * circle's place ({@link #CIRCLE_DZ}, {@link #PADS}) is the one thing to move then.
+ * worked from the geometry, so the blocks are only a sign (they are repainted if gone). (0.17.58) The Lookout is wider now
+ * ({@link ZFighterLookout}) and the circle sits at its south side ({@link #CIRCLE_DZ}).
  * <ul>
  * <li><b>Who counts:</b> good-hearted means not Rogue ({@link ZFighterKingdoms#rogue}), not corrupted
  * ({@link Fate#isCorrupted}). A ring member is a Z Fighter player standing on a pad with at least {@link #RING_KI} ki, a
@@ -59,8 +59,11 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class ZFighterGodRitual {
 	static final int PAD_COUNT = 5;
-	/** The circle's middle: this far south of the tower's middle (the pole and ladder are at +1), on the Lookout's floor. */
-	static final int CIRCLE_DZ = 5;
+	/**
+	 * The circle's middle: this far south of the tower's middle, on the Lookout's floor. (0.17.58) It was 5, on the old
+	 * 13-block platform; the bigger Lookout ({@link ZFighterLookout}) has it at the south side, clear of the courtyard.
+	 */
+	static final int CIRCLE_DZ = 17;
 	/** The five pads from the middle (x, z): a ring of radius 4, the first due south. */
 	static final int[][] PADS = {{0, 4}, {-4, 1}, {-2, -3}, {2, -3}, {4, 1}};
 	/** Standing on a spot: within this many blocks (flat), and this far above or below. */
@@ -181,6 +184,11 @@ public final class ZFighterGodRitual {
 		}
 		paint(server.overworld(), middle);
 		return true;
+	}
+
+	/** (0.17.58) Paints the circle round {@code middle} (the Lookout's builder uses this). */
+	static void paintAt(ServerLevel level, Vec3 middle) {
+		paint(level, middle);
 	}
 
 	private static void paint(ServerLevel level, Vec3 middle) {
