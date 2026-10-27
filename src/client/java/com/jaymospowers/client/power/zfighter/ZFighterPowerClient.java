@@ -67,6 +67,8 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
 		ZFighterInputClient.init();
+		// (0.17.42) ki sense, scouter, teleport list, impact frames, banking, air burst
+		ZFighterSensesClient.init();
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
@@ -111,6 +113,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		ZFighterFlightClient.tick(minecraft, player);
+		ZFighterSensesClient.tick(minecraft, player);
 		ZFighterApeGlide.tick(minecraft, player);
 		ApeSmashClient.tick(minecraft, player);
 		// the guard: right click held, bare-handed

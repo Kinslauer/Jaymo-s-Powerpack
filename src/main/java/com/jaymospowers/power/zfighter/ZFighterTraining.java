@@ -87,13 +87,15 @@ public final class ZFighterTraining {
 	public static final int KI_WAVE = 5;
 	public static final int KI_BOMB = 6;
 	public static final int SPIRIT_BOMB = 7;
-	public static final int TECHNIQUES = 8;
+	/** (0.17.42) Instant Teleport: a late technique on B in place of Flash Step ({@link ZFighterTeleport}). */
+	public static final int TELEPORT = 8;
+	public static final int TECHNIQUES = 9;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
-		"spirit_bomb"};
+		"spirit_bomb", "instant_teleport"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
-	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000};
+	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 10000};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
@@ -453,6 +455,9 @@ public final class ZFighterTraining {
 		if (index == SPIRIT_BOMB && (formsOpen(player) < FORMS || data.mastery(FORMS) < SPIRIT_BOMB_MASTERY)) {
 			return "screen.jaymospowers.zfighter.need_super3";
 		}
+		if (index == TELEPORT && formsOpen(player) < 2) {
+			return "screen.jaymospowers.zfighter_senses.need_super2";
+		}
 		if (data.tp() < TECHNIQUE_TP[index]) {
 			return "screen.jaymospowers.zfighter.need_tp";
 		}
@@ -478,6 +483,9 @@ public final class ZFighterTraining {
 	 */
 	static void learn(ServerPlayer player, Data data, int index) {
 		player.setAttached(DATA, data.withLearned(index));
+		if (index == TELEPORT) {
+			ZFighterTeleport.setOnB(player, true);
+		}
 		if (index < SPIRIT_BOMB) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_on_key",
 				Component.translatable(ZFighterLineage.techniqueKey(player, index)),
@@ -487,6 +495,10 @@ public final class ZFighterTraining {
 
 	/** Puts a learned technique on its key: G for the quick ones, V for the charged ones. */
 	static void equipTechnique(ServerPlayer player, int index) {
+		if (index == TELEPORT) {
+			ZFighterTeleport.toggle(player);
+			return;
+		}
 		Data data = of(player);
 		if (index < 0 || index >= SPIRIT_BOMB || !data.knows(index)) {
 			return;

@@ -484,6 +484,7 @@ public final class ZFighterCombo {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.4F, 1.6F);
 			Shakes.felt(player, at, 12.0, FINISHER_SHAKE + FINISHER_SHAKE_PER_TIER * run.tier, Shakes.ticksFor(FINISHER_SHAKE));
+			ZFighterSenses.impactFrame(level, at);
 			ZFighterImpact.launched(target, player, (float)fists * SLAM_SHARE);
 			run.chase = target.getUUID();
 			run.target = null;

@@ -218,6 +218,8 @@ public final class BeamCinematic {
 		graphics.fill(0, height - bar, width, height, 0xFF000000);
 		if (running) {
 			BeamClashClient.panel(graphics, delta, width / 2 - BeamClashClient.PANEL_W / 2, height - bar + Math.max(1, (bar - BeamClashClient.PANEL_H) / 2));
+			// (0.17.42) and the timing bar beside it
+			BeamClashTimingClient.film(graphics, delta, width, height, bar);
 		}
 	}
 }
