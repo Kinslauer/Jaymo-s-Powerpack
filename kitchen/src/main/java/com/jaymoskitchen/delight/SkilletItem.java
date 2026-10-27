@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -290,8 +291,7 @@ public class SkilletItem extends BlockItem {
 						CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
 					}
 				});
-				InteractionHand other = entity.getUsedItemHand() == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-				player.getItemInHand(other).shrink(1);
+				// (the food left the other hand when the cooking started: see use)
 				clear(stack);
 			}
 		}
@@ -339,6 +339,12 @@ public class SkilletItem extends BlockItem {
 			stack.hurtAndBreak(1, entity, EquipmentSlot.MAINHAND);
 		}
 		return true;
+	}
+
+	/** It stays in the crafting grid as it was: worn, enchanted and named (not as a fresh pan). */
+	@Override
+	public ItemStackTemplate getCraftingRemainder(ItemStack stack) {
+		return ItemStackTemplate.fromNonEmptyStack(stack, 1);
 	}
 
 	/** Only sneaking sets it down; otherwise the click is left for {@link #use}. */
