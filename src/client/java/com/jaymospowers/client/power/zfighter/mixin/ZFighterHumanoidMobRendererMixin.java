@@ -16,6 +16,6 @@ abstract class ZFighterHumanoidMobRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Mob;Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$villagerApe(Mob entity, HumanoidRenderState state, float partialTicks, CallbackInfo ci) {
-		ZFighterApe.extractMob(entity, state);
+		ZFighterApe.extractMob(entity, state, partialTicks);
 	}
 }

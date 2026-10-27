@@ -76,6 +76,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
+		ZFighterApeSteps.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
@@ -196,7 +197,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterMark.extract(entity, state);
 		ZFighterFusionLook.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
-		ZFighterApe.extract(entity, state);
+		ZFighterApe.extract(entity, state, partialTicks);
 		ZFighterKiGlow.extract(entity, state);
 		ZFighterKiAura.extract(entity, state);
 		RaceHoldClient.extract(entity, state, partialTicks);
