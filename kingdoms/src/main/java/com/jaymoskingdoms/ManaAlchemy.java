@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.240) Mana and Jaymo's Powers' alchemy. Andy: "can we link alchemy? using vis and flux slowly attuning or corrupting
+ * (0.7.244) Mana and Jaymo's Powers' alchemy. Andy: "can we link alchemy? using vis and flux slowly attuning or corrupting
  * you? corruption would be anti magic, reading the mana user's intentions". Vis here is alchemy's essence, carried in
  * phials.
  * <ul>

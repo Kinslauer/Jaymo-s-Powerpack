@@ -5220,7 +5220,7 @@ stoic brick for a captain. they need at the very least a personality."
   along 16 headings for open water she can sail straight to (`Fleet.offing`), takes the one that comes out nearest her
   heading, and makes for it (at most 30 s) before taking her heading up again. Each try from the same bay looks farther
   out (48, 96, 144, then 160 blocks); the count starts over once she's 96 blocks clear (`Corsairs.DETOUR*`).
-## 0.7.240: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.29)
+## 0.7.244: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.32)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
 Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
@@ -5258,7 +5258,7 @@ should ripple, indicating the caster's intent."
   `tools/gen_mana_wand.py`.
 javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
 
-## 0.7.241: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.29)
+## 0.7.245: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.32)
 Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
 arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and
@@ -5351,6 +5351,16 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
   In first person your spirit's arms are drawn too (`SpiritFirstPersonMixin`, after the hands), where they sit on your body,
   so the floating ones hang in view and every strike comes out in front of you.
   Every move blazes the arms to full brightness while its pose holds, then they settle back to your glow.
+- **Jointed arms, and blows that land** (Andy: "animated with joints and fingers, more like the nero gif ... more detail
+  and oomph"): `SpiritRig` rebuilds every arm as shoulder, upper arm, elbow, a forearm that stretches out on a thrust
+  (the Devil Breaker), wrist, palm, two-jointed fingers and a thumb, each spirit in its own make: Grimsby bony with
+  knobbed knuckles, claws and the blade on its guard; Varro in plate (pauldron, couter, vambrace, gauntlet, plated clawed
+  fingers, studs); Ambrose's flared sleeve, broad palm and ward sigil; Thessaly's armlet, bracelet and three rings; the
+  Quiet One smooth with long fingers. Each move has a shape: strikes wind up (drawn back, elbow bent, fist) then snap
+  past the mark and settle; swings raise high and cut across; grasps reach open then close; wards spread the palm. Idle,
+  the fingers flex. The floating spirits no longer swing with your walk, and their blows follow where you look. A blow
+  leaves two fading ghosts of the arm behind it, swells the hand as it lands, and bursts where it lands (dust in the
+  spirit's colour, sparks, crits and a crack only the attuned hear). Wisps of the floating spirits rise above and ahead.
 - **The spirit key works on every install**: `SpiritKey` unbinds vanilla's Advancements from L once per install
   (marker `jaymoskingdoms-spirit-key-v1`). Powers' key pass had already run on existing installs, so L kept opening the
   advancements screen and the spirit never came.

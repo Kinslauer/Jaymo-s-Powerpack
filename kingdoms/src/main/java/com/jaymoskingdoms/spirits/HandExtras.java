@@ -22,7 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.241) The second patch's shared hands, the moves every spirit has after {@link HandMoves#SHARED}. Andy: "a mage hand
+ * (0.7.245) The second patch's shared hands, the moves every spirit has after {@link HandMoves#SHARED}. Andy: "a mage hand
  * type of ability that mimics the way stands work".
  * <ul>
  * <li><b>Spirit armour</b> (level 6): the arms wrap round you like plate for six seconds. Blows land for half (the hit is

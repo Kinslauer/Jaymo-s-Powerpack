@@ -52,7 +52,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.241) Mana spirits. Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their
+ * (0.7.245) Mana spirits. Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their
  * presentation ... use of the mage hands calls upon a mana spirit, each of which has a differing personality of 5, one of
  * those being seemingly non responsive at all ... these spirits should conjure as arms behind you with the same effects as
  * your mana aura making up their entire form ... some just give you buffs ... some have entire move sets but all can be

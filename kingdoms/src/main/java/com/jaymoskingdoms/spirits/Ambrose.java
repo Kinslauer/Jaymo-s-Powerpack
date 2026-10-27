@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.241) Old Ambrose, the Warden: a grandfather of a wizard, endlessly patient, who calls his keeper "little one" and
+ * (0.7.245) Old Ambrose, the Warden: a grandfather of a wizard, endlessly patient, who calls his keeper "little one" and
  * would rather mend a hurt than win a fight. Andy: "some just give you buffs ... the ones with personalities can kick in on
  * their own to assist you at times similar to how the symbiote operates". Ward, blessing and healing; a broad open hand
  * twice yours behind the shoulder, soft green.

@@ -20,7 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 /**
- * (0.7.241) The spirit key. Andy: "a mage hand type of ability that mimics the way stands work ... use of the mage hands calls
+ * (0.7.245) The spirit key. Andy: "a mage hand type of ability that mimics the way stands work ... use of the mage hands calls
  * upon a mana spirit". {@code L} (the only free letter): a tap calls the spirit when it is not out, and casts the selected
  * move when it is, the ticks the key was held going with the cast so a charging move (the javelin) knows how hard to hit;
  * sneak and tap picks the next move; sneak and hold {@link #DISMISS_TICKS} sends it away. What is out is read from the synced

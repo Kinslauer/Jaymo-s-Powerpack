@@ -60,7 +60,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.241) The Quiet One. Andy: "five personalities, one of those being seemingly non responsive at all". It never speaks:
+ * (0.7.245) The Quiet One. Andy: "five personalities, one of those being seemingly non responsive at all". It never speaks:
  * every line of {@link SpiritVoice} is dropped for it but the dots of its sickness ({@code sick.1} to {@code sick.5}, a
  * growing run of full stops) and, once, at bond {@value Spirits#MAX_BOND}, a single word ({@code word.1}, kept by
  * {@link #SPOKEN} so it is never said again; Andy: "Yes" to speaking once at max bond). It is a different size each time it is

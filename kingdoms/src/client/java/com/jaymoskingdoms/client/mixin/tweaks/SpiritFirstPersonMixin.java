@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.241) First person: after the hands, your own spirit's arms ({@link SpiritArms#firstPerson}). */
+/** (0.7.245) First person: after the hands, your own spirit's arms ({@link SpiritArms#firstPerson}). */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class SpiritFirstPersonMixin {
 	@Inject(method = "submitHandsWithItems", at = @At("TAIL"))

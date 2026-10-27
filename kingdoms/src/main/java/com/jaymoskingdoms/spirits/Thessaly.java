@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.241) Thessaly the Learned: a fussy scholar who lectures, corrects the way you say your spells, and calls you "dear".
+ * (0.7.245) Thessaly the Learned: a fussy scholar who lectures, corrects the way you say your spells, and calls you "dear".
  * Andy: "a mage hand type of ability ... manipulating items from way farther away than you could naturally", and the spirits
  * that "kick in on their own to assist you". Rose pink, a slim glove of light over your own hand. Reach: things from far
  * away, traps, utility.
