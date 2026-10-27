@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterGrowth;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
@@ -171,21 +172,14 @@ public class ZFighterTrainingScreen extends Screen {
 		return false;
 	}
 
-	/** One line of text, cut with "..." if it would run past {@code width}. */
+	/** One line of text, sliding inside {@code width} if too long. */
 	private void line(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color) {
-		String s = text.getString();
-		if (this.font.width(s) > width) {
-			s = this.font.plainSubstrByWidth(s, width - this.font.width("...")) + "...";
-		}
-		graphics.text(this.font, s, x, y, color);
+		UiStyle.line(graphics, this.font, text, x, y, width, color);
 	}
 
-	/** Wrapped text, at most {@code lines} lines. */
+	/** Wrapped text in {@code lines} lines, scrolling through any more. */
 	private void wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int lines, int color) {
-		var split = this.font.split(text, width);
-		for (int i = 0; i < Math.min(lines, split.size()); i++) {
-			graphics.text(this.font, split.get(i), x, y + i * 9, color);
-		}
+		UiStyle.wrapped(graphics, this.font, text, x, y, width, lines, 9, color, true);
 	}
 
 	private static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {

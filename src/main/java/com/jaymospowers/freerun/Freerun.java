@@ -62,8 +62,8 @@ import org.jspecify.annotations.Nullable;
  * without Kingdoms nobody has them). Open to everyone whatever their power; a web slinger keeps their own web parkour
  * ({@code WebParkour}, {@code WebWallRun}) and these stand aside while one of those moves is on.
  * <ul>
- * <li><b>Climber</b> (3 ranks): jump at a tall wall holding forward (any solid wall but ice, glass and leaves) and you
- * cling to it; hold forward to climb ({@link #CLIMB_SPEED}), strafe to shimmy, Sneak lets go. The grip lasts
+ * <li><b>Climbing</b> (everyone since 0.17.76; Climber's 3 ranks lengthen the grip, 2 and 3 also climb faster): jump
+ * at a tall wall holding forward (any solid wall but ice, glass and leaves) and you cling to it; hold forward to climb ({@link #CLIMB_SPEED}), strafe to shimmy, Sneak lets go. The grip lasts
  * {@link #GRIP_TICKS}, then you slip down it. At the top the ledge grab ({@link Ledge}) takes over and you pull up and
  * over.</li>
  * <li><b>Freerunner</b> (2 ranks): rank 1, a sprinting jump at something waist-high (at most 1.5 blocks: a fence, a
@@ -89,9 +89,14 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Freerun {
 	// ===== feel: the knobs to tweak after playtesting ===============================================================
-	/** Climber: climbing speed (blocks/tick) and how long the grip holds before you slip (ticks: 3, 6, 10 s), by rank. */
-	public static final double[] CLIMB_SPEED = {0.05, 0.07, 0.09};
-	public static final int[] GRIP_TICKS = {60, 120, 200};
+	/**
+	 * Climbing (everyone, 0.17.76): climbing speed (blocks/tick) and how long the grip holds before you slip (ticks: 3,
+	 * 6, 8 s, then for good: Andy, "unlimited"), by Climber rank 0 to 3. Rank 1 only lengthens the grip; ranks 2 and 3
+	 * also climb faster. Holding on still costs hunger.
+	 */
+	public static final double[] CLIMB_SPEED = {0.05, 0.05, 0.07, 0.09};
+	public static final int UNLIMITED_GRIP = Integer.MAX_VALUE / 4;
+	public static final int[] GRIP_TICKS = {60, 120, 160, UNLIMITED_GRIP};
 	/** Climber: shimmying along the wall, and slipping down it once the grip is gone (blocks/tick); how long you slip before you fall off. */
 	public static final double SHIMMY_SPEED = 0.06, SLIP_SPEED = 0.07;
 	public static final int SLIP_TICKS = 60;
@@ -150,7 +155,7 @@ public final class Freerun {
 	/** Wall transitions: a wall hop reaches a wall this far off (blocks), flies at most this long (ticks), and its upward kick. */
 	public static final double HOP_RANGE = 3.0, HOP_UP = 0.42;
 	public static final int HOP_TICKS = 14;
-	/** Wall transitions: sneaking forward at an edge this long (ticks) with Climber catches it into a ledge hang below. */
+	/** Wall transitions: sneaking forward at an edge this long (ticks) catches it into a ledge hang below. */
 	public static final int EDGE_HOLD_TICKS = 6;
 	/** Pole climb: climbing speed (blocks/tick) by Climber rank 0 to 3, sliding down, and leaping off (sideways/up, blocks/tick). */
 	public static final double[] POLE_CLIMB = {0.07, 0.085, 0.10, 0.12};
@@ -615,7 +620,7 @@ public final class Freerun {
 				return rank(player, Perk.FREERUNNER) >= 1
 					&& vaultHeight(level, player, Vec3.directionFromRotation(0.0F, player.getYRot()), VAULT_REACH + SERVER_REACH) > 0.0;
 			case CLING:
-				return side != null && rank(player, Perk.CLIMBER) >= 1 && GRIPPED.getOrDefault(player.getUUID(), 0) < grip(player)
+				return side != null && GRIPPED.getOrDefault(player.getUUID(), 0) < grip(player)
 					&& climbable(level, player, side, SERVER_REACH);
 			case WALL_JUMP:
 				return side != null && rank(player, Perk.FREERUNNER) >= 2 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
@@ -633,7 +638,7 @@ public final class Freerun {
 				return side != null && FreerunWalls.poleAt(level, player, side, SERVER_REACH);
 			case HOP:
 				// (review) from a cling, at the wall it holds, off the ground
-				return side != null && rank(player, Perk.CLIMBER) >= 1 && current != null && current.kind == CLING && !player.onGround()
+				return side != null && current != null && current.kind == CLING && !player.onGround()
 					&& WebWallRun.wallAt(level, player, side, SERVER_REACH);
 			case BAR:
 			// (rank and reach first: the client's position mustn't make the server look at, or load, a far block)
@@ -647,9 +652,14 @@ public final class Freerun {
 		}
 	}
 
-	/** The ticks {@code player}'s grip lasts on a wall (Climber's rank), before they start to slip. */
-	private static int grip(Player player) {
-		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1];
+	/** The ticks {@code player}'s grip lasts on a wall (Climber's rank, 0 for anyone), before they start to slip. */
+	public static int grip(Player player) {
+		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
+	}
+
+	/** {@code player}'s climbing speed up a wall (blocks/tick), by Climber's rank (0 for anyone). */
+	public static double climbSpeed(Player player) {
+		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)];
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */
@@ -695,7 +705,7 @@ public final class Freerun {
 				case UP_RUN -> player.getY() > doing.startY + UP_HEIGHT[Mth.clamp(perk(player, Perk.WALL_RUNNER), 0, UP_HEIGHT.length - 1)] + 0.5
 					|| -rise > UP_SLIDE * 2.0 + 0.1;
 				case POLE -> rise > POLE_CLIMB[Mth.clamp(perk(player, Perk.CLIMBER), 0, POLE_CLIMB.length - 1)] * 2.0 + 0.1 || -rise > POLE_SLIDE * 2.0 + 0.1;
-				case CLING -> rise > CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 1, CLIMB_SPEED.length) - 1] * 2.0 + 0.1;
+				case CLING -> rise > climbSpeed(player) * 2.0 + 0.1;
 				default -> false;
 			};
 			boolean lost = overrun || switch (doing.kind) {
@@ -732,7 +742,7 @@ public final class Freerun {
 				if (climbed > 0.0) {
 					player.causeFoodExhaustion((float)(climbed * CLIMB_EXHAUSTION));
 				}
-				if (doing.kind == CLING && doing.ticks == GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 1, GRIP_TICKS.length) - 1]) {
+				if (doing.kind == CLING && doing.ticks == grip(player)) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.freerun.slipping").withStyle(ChatFormatting.GRAY));
 				}
 			}

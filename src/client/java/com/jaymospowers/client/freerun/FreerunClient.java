@@ -196,7 +196,7 @@ public final class FreerunClient {
 		if (input.forward() && !input.shift() && player.isSprinting() && Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1 && tryRun(player)) {
 			return;
 		}
-		if (input.forward() && input.jump() && !input.shift() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && Freerun.canMove(player, Freerun.CLING)
+		if (input.forward() && input.jump() && !input.shift() && Freerun.canMove(player, Freerun.CLING)
 			&& tryCling(player)) {
 			return;
 		}
@@ -229,7 +229,7 @@ public final class FreerunClient {
 
 	/** Cling to the wall on side {@code facing} ({@code turn}: from a run or a hop, so turn the body to it). */
 	private static boolean tryCling(LocalPlayer player, Direction facing, boolean turn) {
-		int grip = Freerun.GRIP_TICKS[Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.GRIP_TICKS.length) - 1];
+		int grip = Freerun.grip(player);
 		if (gripped >= grip || player.getDeltaMovement().y < -Freerun.CLING_CATCH_FALL || !Freerun.climbable(player.level(), player, facing, REACH)) {
 			return false;
 		}
@@ -271,8 +271,7 @@ public final class FreerunClient {
 				return;
 			}
 		}
-		int rank = Mth.clamp(Freerun.perk(player, Freerun.Perk.CLIMBER), 1, Freerun.CLIMB_SPEED.length);
-		int grip = Freerun.GRIP_TICKS[rank - 1];
+		int grip = Freerun.grip(player);
 		if (gripped > grip + Freerun.SLIP_TICKS) {
 			letGo(player);
 			return;
@@ -319,7 +318,7 @@ public final class FreerunClient {
 			return;
 		}
 		boolean slipping = gripped > grip;
-		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.CLIMB_SPEED[rank - 1] : 0.0;
+		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.climbSpeed(player) : 0.0;
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
 		Vec3 into = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(HUG);
@@ -443,8 +442,8 @@ public final class FreerunClient {
 		ticks++;
 		if (face == null || !confirm(player.getAttached(Freerun.WALL) != null) || !input.forward() || input.shift() || ticks > maxTicks
 			|| player.onGround() || !WebWallRun.wallAt(player.level(), player, face, RUN_REACH)) {
-				// (0.15.12) pressing toward the wall as the run ends: Climber takes hold of it
-				if (face != null && !input.shift() && !player.onGround() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1
+				// (0.15.12) pressing toward the wall as the run ends: take hold of it (anyone since 0.17.76)
+				if (face != null && !input.shift() && !player.onGround()
 					&& keysDirection(player, input, false).dot(new Vec3(face.getStepX(), 0.0, face.getStepZ())) > 0.5
 					&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
 					return;
@@ -625,9 +624,9 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 		}
 	}
 
-	/** The run's height is spent: with Climber, cling where you are; otherwise let go (drop). */
+	/** The run's height is spent: cling where you are (anyone since 0.17.76), or let go (drop) while sneaking. */
 	private static void finishUp(LocalPlayer player, @Nullable Direction face, Input input) {
-		if (face != null && !input.shift() && !player.onGround() && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1
+		if (face != null && !input.shift() && !player.onGround()
 			&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
 			return;
 		}
@@ -740,9 +739,9 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 
 	// ---- edge catch -----------------------------------------------------------------------------------------------------
 
-	/** Climber: Sneak + forward at an edge (pushing to walk off) for {@link Freerun#EDGE_HOLD_TICKS} ticks: hang from the edge, below it. */
+	/** (anyone since 0.17.76) Sneak + forward at an edge (pushing to walk off) for {@link Freerun#EDGE_HOLD_TICKS} ticks: hang from the edge, below it. */
 	private static boolean tryEdge(LocalPlayer player, Input input) {
-		if (Freerun.perk(player, Freerun.Perk.CLIMBER) < 1 || !player.onGround() || !input.shift() || !input.forward() || input.backward()) {
+		if (!player.onGround() || !input.shift() || !input.forward() || input.backward()) {
 			edgeTicks = 0;
 			return false;
 		}

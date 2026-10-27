@@ -154,9 +154,6 @@ public class ZFighterStarMapScreen extends Screen {
 	}
 
 	private void wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int lines, int color) {
-		var split = this.font.split(text, width);
-		for (int i = 0; i < Math.min(lines, split.size()); i++) {
-			graphics.text(this.font, split.get(i), x, y + i * 9, color);
-		}
+		UiStyle.wrapped(graphics, this.font, text, x, y, width, lines, 9, color, true);
 	}
 }
