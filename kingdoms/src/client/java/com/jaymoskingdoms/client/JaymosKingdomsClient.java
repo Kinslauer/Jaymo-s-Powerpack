@@ -96,6 +96,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LetterScreen.register();
 		// (0.7.234) the Pin and Rotary lockpicking games
 		LockpickScreen.register();
+		// (0.7.266) the road screen a ride to another settlement goes by on
+		TravelScreen.register();
 		PigeonRenderer.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();

@@ -79,8 +79,8 @@ public final class Milestones {
 	static final int BLACKOUT_TICKS = 40, TELEPORT_COOLDOWN = 600;
 	/** A sign's menu is only for those standing this near it. */
 	static final double MENU_REACH = 8.0;
-	/** The coach: how fast its driver urges the horse, how far ahead on the road he makes for, how near the end is the end. */
-	static final double COACH_SPEED = 1.9, COACH_AHEAD = 18.0, COACH_ARRIVE = 6.0;
+	/** The coach, setting off: how fast its driver urges the horse, how far ahead on the road he makes for. */
+	static final double COACH_SPEED = 1.9, COACH_AHEAD = 18.0;
 	/** Stuck this long (no further along), it's helped this far on; an empty coach goes after this long; at most this long a trip. */
 	static final int STUCK_TICKS = 100, EMPTY_TICKS = 200, TRIP_MOST = 24000;
 	static final double HOP = 10.0;
@@ -134,6 +134,8 @@ public final class Milestones {
 		final long started;
 		double best;
 		long improvedAt, emptySince = -1;
+		/** (0.7.266) Its fare's been set down (or turned back): it only waits a moment, then goes. */
+		boolean over;
 
 		Trip(UUID rider, Roads.Line line, Component to, long now) {
 			this.rider = rider;
@@ -521,8 +523,36 @@ public final class Milestones {
 		player.startRiding(coach);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.milestone.coach_off", way.name(), fare).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
+		// (0.7.266) seen setting off along the road, then the road screen: the road itself is never driven
+		BlockPos end = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, arrival(way)), 4);
+		Journeys.begin(level, player, coach, way.name(), end, (int)line.length(), fare, realm.id(), RIDE);
 		return 1;
 	}
+
+	/** (0.7.266) A coach's fare set down at the far end, or turned back: it waits a moment, then it's gone. */
+	private static final Journeys.Ride RIDE = new Journeys.Ride() {
+		@Override
+		public void arrived(ServerLevel level, ServerPlayer player, Wagon coach) {
+			Trip trip = TRIPS.get(coach.getUUID());
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", trip != null ? trip.to : Component.empty())
+				.withStyle(ChatFormatting.GOLD));
+			level.playSound(null, coach.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			over(level, coach);
+		}
+
+		@Override
+		public void turnedBack(ServerLevel level, ServerPlayer player, Wagon coach) {
+			over(level, coach);
+		}
+
+		private void over(ServerLevel level, Wagon coach) {
+			Trip trip = TRIPS.get(coach.getUUID());
+			if (trip != null) {
+				trip.over = true;
+				trip.emptySince = level.getGameTime() - EMPTY_TICKS + 60;
+			}
+		}
+	};
 
 	/** One coach's tick (from {@link Wagon#tick}): along the road at a gallop; at the end, its fare set down and away it goes. */
 	static void tick(ServerLevel level, Wagon coach, @Nullable Entity horse) {
@@ -545,17 +575,22 @@ public final class Milestones {
 			}
 			return;
 		}
-		trip.emptySince = -1;
-		driver.setHomeTo(driver.blockPosition(), 64);
-		double[] p = trip.line.project(horse.getX(), horse.getZ());
-		double left = trip.line.length() - p[0];
-		if (left <= COACH_ARRIVE) {
+		if (trip.over || !Journeys.travelling(player)) {
+			// (its trip's over: nobody rides it again)
 			player.stopRiding();
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", trip.to).withStyle(ChatFormatting.GOLD));
-			level.playSound(null, coach.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
-			trip.emptySince = now - EMPTY_TICKS + 60;
 			return;
 		}
+		trip.emptySince = -1;
+		driver.setHomeTo(driver.blockPosition(), 64);
+		if (Journeys.underway(coach)) {
+			// (0.7.266) on the road screen: the coach waits here till the trip's done, then it's moved to the far end
+			driver.getNavigation().stop();
+			trip.improvedAt = now;
+			return;
+		}
+		// (setting off, seen)
+		double[] p = trip.line.project(horse.getX(), horse.getZ());
+		double left = trip.line.length() - p[0];
 		if (left < trip.best - 0.5) {
 			trip.best = left;
 			trip.improvedAt = now;
@@ -596,7 +631,7 @@ public final class Milestones {
 	/** A player right-clicked a coach. */
 	static void hail(ServerPlayer player, Wagon coach) {
 		Trip trip = TRIPS.get(coach.getUUID());
-		if (trip != null && trip.rider.equals(player.getUUID()) && !player.isPassenger()) {
+		if (trip != null && !trip.over && trip.rider.equals(player.getUUID()) && !player.isPassenger()) {
 			player.startRiding(coach);
 			return;
 		}
