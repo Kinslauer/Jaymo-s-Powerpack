@@ -309,6 +309,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.261) Powers' {@code Dismember.regrow(LivingEntity, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle regrow;
+	private static boolean lookedForRegrow;
+
+	/**
+	 * (0.7.261) The Rubber-folk's body grows a lost limb back, as a Verdant's does in Powers: the first part still missing
+	 * ({@code all}: every one). True if anything grew back; false without Powers.
+	 */
+	public static boolean regrow(LivingEntity body, boolean all) {
+		if (!lookedForRegrow) {
+			lookedForRegrow = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					regrow = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "regrow",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' limb regrowth (older Powers?)", e);
+				}
+			}
+		}
+		if (regrow == null) {
+			return false;
+		}
+		try {
+			return (boolean)regrow.invoke(body, all);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;

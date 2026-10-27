@@ -217,6 +217,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
+		// (0.7.261, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
+		LOGGER.debug("bio-built attachments: {} {}", BioBuilt.FORM, BioBuilt.WORTH);
+		HeritageHold.register();
+		DivineBorn.register();
+		BioBuilt.register();
+		RubberFolk.register();
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
