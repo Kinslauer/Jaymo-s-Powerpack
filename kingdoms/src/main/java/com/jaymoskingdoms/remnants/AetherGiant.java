@@ -1,7 +1,14 @@
 package com.jaymoskingdoms.remnants;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import com.jaymoskingdoms.Trees;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -48,6 +55,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -60,6 +68,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Arctic: its cold freezes whoever stands near it; its breath slows everyone round it to a crawl.</li>
  * <li>Irradiated: its glow sickens whoever stands near it; a flare poisons, and withers those closest.</li>
  * </ul>
+ * (0.7.261) Every step is a stomp: the ground cracks under the foot and a shockwave runs out along it, hurting everyone it
+ * passes who isn't off the ground ({@link #footfall}); it walks with a slow, swaying stride, as fast as ever.
  * Badly hurt it rages: faster, and its power comes twice as often. Its boss bar is its element's colour. The first Giant
  * to fall in a world raises the world tier ({@link Monoliths#slain}).
  */
@@ -111,6 +121,32 @@ public class AetherGiant extends Monster {
 	/** How long a swing shows (ticks). */
 	static final int SWING_TICKS = 12;
 	public static final int LEFT = 1, RIGHT = 2, BOTH = 3;
+	/**
+	 * (0.7.261) Andy: "Giant enemies should emit a stomp with every step ... a slow sway, keeping their move speed". Its
+	 * stride: how far it walks in one step (blocks; at its walking pace a step every second or so, the model's legs keep to
+	 * it), and where each foot comes down (blocks out to the side and ahead of its middle).
+	 */
+	public static final float STEP_LENGTH = 6.0F;
+	static final double FOOT_SIDE = 3.6, FOOT_AHEAD = 3.0;
+	/**
+	 * Each footfall's shockwave: it runs out along the ground this fast (blocks a tick) to this far, and hurts everyone it
+	 * passes under who is standing on the ground (jump it and it misses you), most near the foot, this share of that at the
+	 * edge, with a small jolt up and away.
+	 */
+	static final double WAVE_SPEED = 1.25, WAVE_RANGE = 10.0, WAVE_JOLT_UP = 0.35, WAVE_JOLT_AWAY = 0.4;
+	static final float WAVE_DAMAGE = 5.0F, WAVE_EDGE = 0.5F;
+	/** How tall a step up or down the wave follows (blocks), and how far apart its ring's dust is (blocks). */
+	static final int WAVE_CLIMB = 3;
+	static final double RING_GAP = 1.0;
+	/**
+	 * The ground cracks under each foot ({@code destroyBlockProgress}): the blocks under the foot, and this many cracks
+	 * running out from it, up to this long, fainter towards their ends; they fade over this long (ticks). Nothing breaks.
+	 */
+	static final int CRACK_LINES = 5, CRACK_LENGTH_MIN = 2, CRACK_LENGTH_MAX = 5, CRACK_STAGE = 9, CRACK_END_STAGE = 4, CRACK_TICKS = 100;
+	/** Crack ids: one block each, these many per Giant in turn, from this base (clear of any real entity id). */
+	static final int CRACK_SLOTS = 160, CRACK_ID_BASE = 0x4A000000;
+	/** Entity events: its right or left foot came down. */
+	private static final byte STEP_RIGHT = 90, STEP_LEFT = 91;
 
 	private static final EntityDataAccessor<Byte> SWING = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.BYTE);
 	private static final Identifier RAGE_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_rage");
@@ -124,6 +160,31 @@ public class AetherGiant extends Monster {
 	private int leftCounter, rightCounter;
 	/** (Server) its boss bar, made when first wanted. */
 	private @Nullable ServerBossEvent bar;
+	/** (0.7.261) How far through its stride it is, in steps (right foot down on the even ones), this tick and last. */
+	private float stride, strideO;
+	/** (Server) the last step it came down on. */
+	private int lastStep;
+	/** Its footfalls' shockwaves still running out (both sides: the server hurts, the client draws the ring). */
+	private final List<Wave> waves = new ArrayList<>();
+	/** (Server) its cracks still showing, and the next crack id slot. */
+	private final List<Crack> cracks = new ArrayList<>();
+	private int crackSlot;
+
+	/** A shockwave from a footfall at {@code (x, y, z)} (y the ground's top), {@code age} ticks out; who it has hit. */
+	private static final class Wave {
+		final double x, y, z;
+		int age;
+		final Set<Integer> hit = new HashSet<>();
+
+		Wave(double x, double y, double z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
+
+	private record Crack(BlockPos pos, int id, int stage, int born) {
+	}
 
 	public AetherGiant(EntityType<? extends AetherGiant> type, Level level, Element element) {
 		super(type, level);
@@ -197,15 +258,34 @@ public class AetherGiant extends Monster {
 		return hit;
 	}
 
+	/** (0.7.261) How far through its stride it is this frame, in steps: its legs come down on the whole numbers. */
+	public float stride(float partialTicks) {
+		return Mth.lerp(partialTicks, this.strideO, this.stride);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level().isClientSide()) {
+		this.strideO = this.stride;
+		if (this.isAlive() && this.onGround()) {
+			// its stride runs on with the ground it covers (a teleport doesn't count as many steps)
+			double moved = Math.sqrt(Mth.square(this.getX() - this.xo) + Mth.square(this.getZ() - this.zo));
+			this.stride += (float)Math.min(moved / STEP_LENGTH, 0.5);
+		}
+		if (this.level() instanceof ServerLevel level) {
 			if (this.swingTicks > 0 && --this.swingTicks == 0) {
 				this.entityData.set(SWING, (byte)0);
 			}
+			int step = Mth.floor(this.stride);
+			if (step != this.lastStep) {
+				this.lastStep = step;
+				this.footfall(level, (step & 1) == 0);
+			}
+			this.runWaves(level);
+			this.fadeCracks(level);
 			return;
 		}
+		this.drawWaves();
 		int arm = this.swingingArm();
 		this.leftCounter = (arm & LEFT) != 0 ? this.leftCounter + 1 : 0;
 		this.rightCounter = (arm & RIGHT) != 0 ? this.rightCounter + 1 : 0;
@@ -279,6 +359,196 @@ public class AetherGiant extends Monster {
 			}
 			level.destroyBlock(pos, this.random.nextFloat() < TRAMPLE_DROPS, this);
 		}
+	}
+
+	// ---- its steps (0.7.261) ---------------------------------------------------------------------------------------
+
+	/** Where its {@code right} (or left) foot comes down, on the ground's top (null if there's no ground under it). */
+	private @Nullable Vec3 foot(Level level, boolean right) {
+		float yaw = this.yBodyRot * Mth.DEG_TO_RAD;
+		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw);
+		// its right is the way it faces turned a quarter clockwise
+		double side = right ? FOOT_SIDE : -FOOT_SIDE;
+		double x = this.getX() + fx * FOOT_AHEAD - fz * side, z = this.getZ() + fz * FOOT_AHEAD + fx * side;
+		double y = groundTop(level, x, this.getY(), z);
+		return Double.isNaN(y) ? null : new Vec3(x, y, z);
+	}
+
+	/** The top of the ground at {@code (x, z)} within {@link #WAVE_CLIMB} of {@code y}, or NaN if there is none. */
+	private static double groundTop(Level level, double x, double y, double z) {
+		BlockPos.MutableBlockPos pos = BlockPos.containing(x, y + WAVE_CLIMB, z).mutable();
+		for (int i = 0; i <= WAVE_CLIMB * 2; i++, pos.move(0, -1, 0)) {
+			VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+			if (!shape.isEmpty()) {
+				return pos.getY() + shape.max(Direction.Axis.Y);
+			}
+		}
+		return Double.NaN;
+	}
+
+	/**
+	 * Its foot comes down: a thud and a burst of the ground's dust, the ground cracked round the foot, and a shockwave
+	 * runs out from it ({@link #runWaves}). The client's legs are kept in step with it ({@link #handleEntityEvent}).
+	 */
+	private void footfall(ServerLevel level, boolean right) {
+		level.broadcastEntityEvent(this, right ? STEP_RIGHT : STEP_LEFT);
+		Vec3 at = this.foot(level, right);
+		if (at == null) {
+			return;
+		}
+		BlockPos under = BlockPos.containing(at.x, at.y - 0.5, at.z);
+		BlockState ground = level.getBlockState(under);
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.1, at.z, 40, 1.4, 0.1, 1.4, 0.25);
+		level.sendParticles(ParticleTypes.POOF, at.x, at.y + 0.2, at.z, 8, 1.2, 0.1, 1.2, 0.04);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.RAVAGER_STEP, this.getSoundSource(), 3.0F, 0.35F + this.random.nextFloat() * 0.1F);
+		level.playSound(null, at.x, at.y, at.z, ground.getSoundType().getBreakSound(), this.getSoundSource(), 2.0F, 0.5F);
+		this.crack(level, under);
+		this.waves.add(new Wave(at.x, at.y, at.z));
+	}
+
+	/** The ground cracked round {@code under}: the blocks under the foot, and lines of cracks running out from it. */
+	private void crack(ServerLevel level, BlockPos under) {
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				this.crackAt(level, under.offset(dx, 0, dz), CRACK_STAGE);
+			}
+		}
+		for (int line = 0; line < CRACK_LINES; line++) {
+			double angle = (line + this.random.nextDouble() * 0.6) * Mth.TWO_PI / CRACK_LINES;
+			int length = CRACK_LENGTH_MIN + this.random.nextInt(CRACK_LENGTH_MAX - CRACK_LENGTH_MIN + 1);
+			for (int i = 2; i <= length + 1; i++) {
+				// each crack wanders a little as it runs out
+				angle += (this.random.nextDouble() - 0.5) * 0.5;
+				int stage = CRACK_STAGE - (CRACK_STAGE - CRACK_END_STAGE) * (i - 2) / Math.max(length - 1, 1);
+				double y = groundTop(level, under.getX() + 0.5 + Math.cos(angle) * i, under.getY() + 1.0, under.getZ() + 0.5 + Math.sin(angle) * i);
+				if (!Double.isNaN(y)) {
+					this.crackAt(level, BlockPos.containing(under.getX() + 0.5 + Math.cos(angle) * i, y - 0.5,
+						under.getZ() + 0.5 + Math.sin(angle) * i), stage);
+				}
+			}
+		}
+	}
+
+	private void crackAt(ServerLevel level, BlockPos pos, int stage) {
+		BlockState state = level.getBlockState(pos);
+		if (state.isAir() || state.getDestroySpeed(level, pos) < 0.0F) {
+			return;
+		}
+		int id = CRACK_ID_BASE + this.getId() * CRACK_SLOTS + this.crackSlot;
+		this.crackSlot = (this.crackSlot + 1) % CRACK_SLOTS;
+		this.cracks.removeIf(c -> c.id() == id);
+		level.destroyBlockProgress(id, pos, stage);
+		this.cracks.add(new Crack(pos.immutable(), id, stage, this.tickCount));
+	}
+
+	/** Its cracks fade, a stage at a time, and are gone after {@link #CRACK_TICKS}. */
+	private void fadeCracks(ServerLevel level) {
+		if (this.cracks.isEmpty() || this.tickCount % 10 != 0) {
+			return;
+		}
+		for (Iterator<Crack> it = this.cracks.iterator(); it.hasNext();) {
+			Crack crack = it.next();
+			int age = this.tickCount - crack.born();
+			if (age >= CRACK_TICKS) {
+				level.destroyBlockProgress(crack.id(), crack.pos(), -1);
+				it.remove();
+			} else if (age > CRACK_TICKS / 2) {
+				// the second half of its time it fades out
+				level.destroyBlockProgress(crack.id(), crack.pos(), Math.max(0, crack.stage() * 2 * (CRACK_TICKS - age) / CRACK_TICKS));
+			}
+		}
+	}
+
+	/** All its cracks gone at once (it was unloaded or killed). */
+	private void clearCracks(ServerLevel level) {
+		for (Crack crack : this.cracks) {
+			level.destroyBlockProgress(crack.id(), crack.pos(), -1);
+		}
+		this.cracks.clear();
+	}
+
+	/**
+	 * Its shockwaves run out: everyone the wave front passes this tick who stands on the ground near its level (not
+	 * jumping, flying or riding) is hurt, less towards its edge, and jolted up and away.
+	 */
+	private void runWaves(ServerLevel level) {
+		for (Iterator<Wave> it = this.waves.iterator(); it.hasNext();) {
+			Wave wave = it.next();
+			double from = WAVE_SPEED * wave.age, to = Math.min(WAVE_SPEED * ++wave.age, WAVE_RANGE);
+			AABB box = new AABB(wave.x - to, wave.y - WAVE_CLIMB, wave.z - to, wave.x + to, wave.y + WAVE_CLIMB, wave.z + to);
+			for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != this && !(e instanceof AetherGiant) && e.isAlive()
+				&& e.onGround() && !e.isPassenger() && !(e instanceof Player p && (p.isCreative() || p.isSpectator())))) {
+				double d = Math.sqrt(Mth.square(hit.getX() - wave.x) + Mth.square(hit.getZ() - wave.z));
+				if (d > to || d < from - 1.0 || !wave.hit.add(hit.getId())) {
+					continue;
+				}
+				float share = 1.0F - (1.0F - WAVE_EDGE) * (float)(d / WAVE_RANGE);
+				hit.hurtServer(level, this.damageSources().mobAttack(this), WAVE_DAMAGE * share);
+				Vec3 away = d < 0.01 ? Vec3.ZERO : new Vec3(hit.getX() - wave.x, 0.0, hit.getZ() - wave.z).scale(WAVE_JOLT_AWAY / d);
+				hit.push(away.x, WAVE_JOLT_UP, away.z);
+				hit.needsSync = true;
+			}
+			if (to >= WAVE_RANGE) {
+				it.remove();
+			}
+		}
+	}
+
+	/** (Client) its shockwaves' rings of dust running out along the ground. */
+	private void drawWaves() {
+		Level level = this.level();
+		for (Iterator<Wave> it = this.waves.iterator(); it.hasNext();) {
+			Wave wave = it.next();
+			double r = Math.min(WAVE_SPEED * ++wave.age, WAVE_RANGE);
+			int points = Math.max(12, (int)(r * Mth.TWO_PI / RING_GAP));
+			double turn = this.random.nextDouble();
+			for (int i = 0; i < points; i++) {
+				double angle = (i + turn) * Mth.TWO_PI / points, cx = Math.cos(angle), cz = Math.sin(angle);
+				double x = wave.x + cx * r, z = wave.z + cz * r, y = groundTop(level, x, wave.y, z);
+				if (Double.isNaN(y)) {
+					continue;
+				}
+				BlockState ground = level.getBlockState(BlockPos.containing(x, y - 0.5, z));
+				if (!ground.isAir()) {
+					level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, ground), x, y + 0.1, z, cx * 0.3, 0.25, cz * 0.3);
+				}
+				if ((i & 1) == 0) {
+					level.addParticle(ParticleTypes.POOF, x, y + 0.15, z, cx * 0.12, 0.03, cz * 0.12);
+				}
+			}
+			if (r >= WAVE_RANGE) {
+				it.remove();
+			}
+		}
+	}
+
+	/** (Client) a foot came down: its legs are put in step with the server's, and the wave's ring starts. */
+	@Override
+	public void handleEntityEvent(byte id) {
+		if (id == STEP_RIGHT || id == STEP_LEFT) {
+			// the nearest step of that foot (right on the even ones)
+			int step = Math.round(this.stride);
+			if (((step & 1) == 0) != (id == STEP_RIGHT)) {
+				step += this.stride > step ? 1 : -1;
+			}
+			float shift = step - this.stride;
+			this.stride += shift;
+			this.strideO += shift;
+			Vec3 at = this.foot(this.level(), id == STEP_RIGHT);
+			if (at != null) {
+				this.waves.add(new Wave(at.x, at.y, at.z));
+			}
+		} else {
+			super.handleEntityEvent(id);
+		}
+	}
+
+	@Override
+	public void remove(Entity.RemovalReason reason) {
+		if (this.level() instanceof ServerLevel level) {
+			this.clearCracks(level);
+		}
+		super.remove(reason);
 	}
 
 	private void rage() {
@@ -414,7 +684,7 @@ public class AetherGiant extends Monster {
 	}
 
 	/** Living things near {@code at} it may touch: not itself, not other Giants, not creative or spectating players. */
-	private java.util.List<LivingEntity> near(ServerLevel level, Vec3 at, double range) {
+	private List<LivingEntity> near(ServerLevel level, Vec3 at, double range) {
 		return level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(range), e -> e != this && !(e instanceof AetherGiant)
 			&& e.isAlive() && e.distanceToSqr(at) < range * range && !(e instanceof Player p && (p.isCreative() || p.isSpectator())));
 	}
@@ -498,9 +768,9 @@ public class AetherGiant extends Monster {
 		return SoundEvents.RAVAGER_DEATH;
 	}
 
+	/** (0.7.261) Its steps sound with each footfall instead ({@link #footfall}). */
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
-		this.playSound(SoundEvents.RAVAGER_STEP, 0.8F, 0.5F);
 	}
 
 	@Override

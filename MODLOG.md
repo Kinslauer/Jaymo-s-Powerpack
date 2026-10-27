@@ -3076,3 +3076,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   hand shoot out to what you aim at within 20 blocks; the axe fells a whole tree in one blow. No Powers changes.
 - **0.17.51, sailors not guards (Kingdoms 0.7.259):** no guards or armour on any ship; every crewman is a sailor who
   takes up their weapon when a fight starts and puts it away after; the sea no longer shows inside a ship's hold.
+- **0.17.54, stomping Giants (Kingdoms 0.7.261):** the Aether Giants stomp with every step, a shockwave of dust
+  running out along the ground that cracks it and hurts whoever isn't jumping, and walk with a slow, swaying stride at
+  the same speed. No Powers changes.
