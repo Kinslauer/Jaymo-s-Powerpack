@@ -5471,3 +5471,7 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
   last one (`Crewmen.stow`). Crews from before are changed in place within 5 s: guard profession to fisherman, armour
   off and out of their packs, weapons stowed, the knight tag gone. A navy hand is an "Able seaman", not a "Marine".
   (0.7.246 only changed crew in mail or plate, so unarmoured MCA guards stayed guards.)
+- **The sea no longer shows in a ship's hold** (Andy's clip of the whaling start's whaler: "it looked to me like the
+  hull wasnt actually bailed"): her hold was dry, but the renderer's water mask only covered empty cells. Slabs, stairs
+  and other part-blocks count as wall, so the sea was drawn in their empty half. `Hull.masked` adds the part-blocks with
+  no sea beside them, and `ShipRenderer` masks those too.

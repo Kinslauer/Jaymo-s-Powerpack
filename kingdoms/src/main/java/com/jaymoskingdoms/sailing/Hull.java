@@ -48,6 +48,12 @@ public final class Hull {
 	public final float[] layer;
 	/** The dry cells the hull's walls close in (local, packed). */
 	public final long[] enclosed;
+	/**
+	 * (0.7.257) The cells of her hold the sea's water must not be drawn in, for her renderer's mask: the dry cells, and
+	 * the slabs, stairs and other part-blocks inside her walls. Those count as wall, so they weren't in {@link #enclosed},
+	 * and the sea showed in their empty half (Andy: "it looked to me like the hull wasnt actually bailed").
+	 */
+	public final long[] masked;
 	private final it.unimi.dsi.fastutil.longs.LongOpenHashSet dry;
 	/** How deep it sits (blocks below the waterline, from its bottom), and whether it floats at all. */
 	public final float draft;
@@ -150,7 +156,7 @@ public final class Hull {
 		int w = x1 - x0 + 3, d = z1 - z0 + 3, height = y1 - y0 + 1;
 		this.layer = new float[Math.max(0, height)];
 		IntArrayList inside = new IntArrayList();
-		java.util.ArrayList<Long> dry = new java.util.ArrayList<>();
+		java.util.ArrayList<Long> dry = new java.util.ArrayList<>(), inner = new java.util.ArrayList<>();
 		for (int y = y0; y <= y1; y++) {
 			boolean[] wall = new boolean[w * d], wet = new boolean[w * d];
 			float kept = 0.0F;
@@ -200,10 +206,23 @@ public final class Hull {
 					}
 				}
 			}
+			for (int i = 0; i < n; i++) {
+				Ship.Piece p = pieces.get(i);
+				if (p.y() != y || fill[i] < WALL || fill[i] >= 0.999F) {
+					continue;
+				}
+				// a part-block with no sea beside it: inside her walls
+				int a = p.x() - x0 + 1, b = p.z() - z0 + 1;
+				if (!wet[(a + 1) * d + b] && !wet[(a - 1) * d + b] && !wet[a * d + b + 1] && !wet[a * d + b - 1]) {
+					inner.add(BlockPos.asLong(p.x(), y, p.z()));
+				}
+			}
 			this.layer[y - y0] = kept;
 		}
 		this.enclosed = dry.stream().mapToLong(Long::longValue).toArray();
 		this.dry = new it.unimi.dsi.fastutil.longs.LongOpenHashSet(this.enclosed);
+		inner.addAll(dry);
+		this.masked = inner.stream().mapToLong(Long::longValue).toArray();
 		// how deep it sits: down to where the water it keeps out weighs what it does
 		float held = 0.0F, depth = height;
 		boolean afloat = false;
