@@ -81,6 +81,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
+		// (0.17.60) the tournament bracket
+		ZFighterBracketScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterSpiritPose::tick);
@@ -236,7 +238,27 @@ public final class ZFighterPowerClient implements PowerClient {
 		spirit(graphics, font, state, time);
 		chips(graphics, font, player, state, now, time);
 		// (0.15.148) the Great Ape's rage, and the fight against its fits
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.APE_RAGE, player);
 		ApeRageClient.hud(graphics, font, player, time);
+		ZFighterHudLayout.end(graphics);
+	}
+
+	/**
+	 * (0.17.60) Where the chips row is when left alone: its left edge, its top, and its width (the ki bar sits over it).
+	 * The HUD editor ({@link ZFighterHudEditor}) works from the same numbers.
+	 */
+	static int[] chipsRect(LocalPlayer player, int width, int height) {
+		boolean flight = ZFighterPower.INSTANCE.slotUnlocked(player, "mode");
+		boolean ultimate = Fate.isAscended(player);
+		int count = 5 + (flight ? 1 : 0) + (ultimate ? 1 : 0);
+		int total = CHIP * count + CHIP_GAP * (count - 1);
+		int x = width / 2 + 91 + 30;
+		int y = height - CHIP - 1;
+		if (x + total > width - 2) {
+			x = width / 2 + 91 - total;
+			y = height - 22 - 30 - CHIP;
+		}
+		return new int[] {x, y, total};
 	}
 
 	/** The Spirit Bomb gathering, over the crosshair: how full it is. */
@@ -244,6 +266,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.bomb() < 0) {
 			return;
 		}
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SPIRIT, Minecraft.getInstance().player);
 		float fill = Mth.clamp(state.bomb() / 100.0F, 0.0F, 1.0F);
 		int cx = graphics.guiWidth() / 2;
 		int width = 80;
@@ -252,6 +275,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.fill(x0 - 1, y - 1, x0 + width + 1, y + 5, 0x90000000);
 		graphics.fill(x0, y, x0 + Mth.ceil(width * fill), y + 4, 0xFF000000 | (fill >= 1.0F ? pulse(0xFFFFFF, SPIRIT_COLOR, time * 0.5F) : SPIRIT_COLOR));
 		graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.spirit").copy().withColor(SPIRIT_COLOR), cx, y - 11, 0xFFFFFFFF);
+		ZFighterHudLayout.end(graphics);
 	}
 
 	/** The icon on G or V for the technique set there. */
@@ -271,6 +295,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.waveFrom() < 0) {
 			return;
 		}
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.CHARGE, player);
 		float fill = Mth.clamp((now - state.waveFrom()) / (float)com.jaymospowers.power.zfighter.ZFighterArts.full(ZFighterTraining.of(player).charged(), WAVE_FULL), 0.0F, 1.0F);
 		// (0.13.27) his own ki colour in base form
 		Integer ki = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getAttached(ZFighterPower.KI_COLOR);
@@ -285,23 +310,17 @@ public final class ZFighterPowerClient implements PowerClient {
 		// (0.13.31) named for what's on V: the lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb
 		String name = ZFighterLineage.techniqueKey(player, ZFighterTraining.of(player).charged());
 		graphics.centeredText(font, Component.translatable(name).copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+		ZFighterHudLayout.end(graphics);
 	}
 
 	private static void chips(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, ZFighterState state, long now, float time) {
 		boolean flight = ZFighterPower.INSTANCE.slotUnlocked(player, "mode");
 		boolean ultimate = Fate.isAscended(player);
 		boolean super_ = state.has(ZFighterState.SUPER);
-		int count = 5 + (flight ? 1 : 0) + (ultimate ? 1 : 0);
-		int total = CHIP * count + CHIP_GAP * (count - 1);
-		int width = graphics.guiWidth();
-		int height = graphics.guiHeight();
-		int x = width / 2 + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = width / 2 + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
-		kiBar(graphics, font, state, x, y - 6, total, super_, time);
+		int[] row = chipsRect(player, graphics.guiWidth(), graphics.guiHeight());
+		int x = row[0], y = row[1], total = row[2];
+		kiBar(graphics, font, player, state, x, y - 6, total, super_, time);
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.CHIPS, player);
 		int step = CHIP + CHIP_GAP;
 		float charge = state.has(ZFighterState.CHARGING) ? 0.5F + 0.5F * Mth.sin(time * 0.5F) : -1.0F;
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.GLOWSTONE_DUST, state, -1, now, charge);
@@ -334,16 +353,25 @@ public final class ZFighterPowerClient implements PowerClient {
 				state.length()[slot], JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(),
 				spirit ? SPIRIT_COLOR : super_ ? pulse(0xFFFFFF, SUPER_COLOR, time * 0.5F) : SUPER_COLOR);
 		}
+		ZFighterHudLayout.end(graphics);
 	}
 
 	/** The ki meter over the chips, with the number and, mid-combo, the hit count. */
-	private static void kiBar(GuiGraphicsExtractor graphics, Font font, ZFighterState state, int x, int y, int width, boolean super_, float time) {
+	private static void kiBar(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, ZFighterState state, int x, int y, int width, boolean super_,
+			float time) {
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.KI_BAR, player);
 		float fill = Mth.clamp(state.ki() / (float)Math.max(1, state.maxKi()), 0.0F, 1.0F);
 		int color = super_ ? pulse(SUPER_COLOR, 0xFFF4C0, time * 0.3F) : CHIP_COLOR;
 		graphics.fill(x, y, x + width, y + 4, 0x90000000);
 		graphics.fill(x + 1, y + 1, x + 1 + Math.round((width - 2) * fill), y + 3, 0xFF000000 | color);
 		String ki = state.ki() + "/" + state.maxKi();
 		graphics.text(font, ki, x + width - font.width(ki), y - 9, 0xFF000000 | color);
+		if (!state.has(ZFighterState.RAGE) && state.rage() > 0) {
+			// the fury building: a thin red line under the ki
+			graphics.fill(x + 1, y + 3, x + 1 + Math.round((width - 2) * state.rage() / 100.0F), y + 4, 0xFF000000 | RAGE_COLOR);
+		}
+		ZFighterHudLayout.end(graphics);
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.FORM_NAME, player);
 		Component label = Component.translatable("hud.jaymospowers.zfighter.ki");
 		if (state.form() > 0) {
 			// (0.17.50) a branch form is named by its own key
@@ -358,13 +386,13 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.has(ZFighterState.RAGE)) {
 			label = Component.translatable("hud.jaymospowers.zfighter.rage").copy().withColor(pulse(RAGE_COLOR, 0xFFB0A0, time * 0.7F));
 			graphics.text(font, label, x, y - 18, 0xFFFFFFFF);
-		} else if (state.rage() > 0) {
-			// the fury building: a thin red line under the ki
-			graphics.fill(x + 1, y + 3, x + 1 + Math.round((width - 2) * state.rage() / 100.0F), y + 4, 0xFF000000 | RAGE_COLOR);
 		}
+		ZFighterHudLayout.end(graphics);
 		if (state.combo() >= 2 && state.form() == 0 && state.limit() == 0) {
 			Component combo = Component.translatable("hud.jaymospowers.zfighter.combo", state.combo());
+			ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.COMBO, player);
 			graphics.text(font, combo, x + width / 2 - font.width(combo) / 2, y - 9, 0xFFFFE08A);
+			ZFighterHudLayout.end(graphics);
 		}
 	}
 

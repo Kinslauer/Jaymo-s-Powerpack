@@ -205,7 +205,7 @@ final class ZFighterMasters {
 	}
 
 	/** Teaches the lesson and says what it was. */
-	private static Component lesson(ServerPlayer player, boolean dark) {
+	static Component lesson(ServerPlayer player, boolean dark) {
 		ZFighterTraining.Data data = ZFighterTraining.of(player);
 		for (int technique : dark ? DARK_ORDER : GOOD_ORDER) {
 			if (!data.knows(technique)) {

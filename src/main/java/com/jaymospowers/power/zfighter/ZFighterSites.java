@@ -85,7 +85,8 @@ public final class ZFighterSites {
 	static final int ROOM_RADIUS = 6;
 	static final int ROOM_HEIGHT = 5;
 	static final int LOOKOUT_Y = 236;
-	static final int LOOKOUT_RADIUS = 13;
+	/** (0.17.60) The platform's radius: the bigger Lookout ({@link ZFighterLookout}); it was 13. */
+	static final int LOOKOUT_RADIUS = ZFighterLookout.RADIUS;
 	// ---- the Time Chamber ----
 	public static final ResourceKey<Level> TIME_CHAMBER = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("time_chamber"));
 	public static final ResourceKey<Level> VERDANT_WORLD = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("verdant_world"));
@@ -382,7 +383,7 @@ public final class ZFighterSites {
 			set(level, new BlockPos(cx, y, cz), Blocks.STRIPPED_BIRCH_LOG.defaultBlockState());
 			set(level, new BlockPos(cx, y, cz + 1), ladderOn(Direction.SOUTH));
 		}
-		buildLookout(level, cx, cz);
+		ZFighterLookout.build(level, cx, cz, true);
 		spawnNpc(level, new Vec3(cx + 3.5, floor + 1, cz - 2.5), HERMIT_TAG, "entity.jaymospowers.hermit", hermitOffers());
 	}
 
@@ -390,63 +391,8 @@ public final class ZFighterSites {
 		return Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, facing);
 	}
 
-	/** The floating temple: a two-layer disc ringed with gold, a palace of white pillars on its north half and the doors. */
-	private static void buildLookout(ServerLevel level, int cx, int cz) {
-		int y = LOOKOUT_Y;
-		for (int dx = -LOOKOUT_RADIUS; dx <= LOOKOUT_RADIUS; dx++) {
-			for (int dz = -LOOKOUT_RADIUS; dz <= LOOKOUT_RADIUS; dz++) {
-				double d = Math.sqrt(dx * dx + dz * dz);
-				if (d > LOOKOUT_RADIUS + 0.5) {
-					continue;
-				}
-				boolean hole = dx == 0 && dz == 1;
-				BlockState top = d > LOOKOUT_RADIUS - 0.5 ? Blocks.GOLD_BLOCK.defaultBlockState()
-					: (dx + dz) % 4 == 0 ? Blocks.QUARTZ_BRICKS.defaultBlockState() : Blocks.SMOOTH_QUARTZ.defaultBlockState();
-				set(level, new BlockPos(cx + dx, y, cz + dz), hole ? ladderOn(Direction.SOUTH) : top);
-				// the underside narrows like a bowl
-				int depth = (int)Math.round(4.0 * (1.0 - d / (LOOKOUT_RADIUS + 1.0)));
-				for (int down = 1; down <= depth; down++) {
-					if (!hole && !(dx == 0 && dz == 0)) {
-						set(level, new BlockPos(cx + dx, y - down, cz + dz), down == depth ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.CALCITE.defaultBlockState());
-					}
-				}
-				for (int up = 1; up <= 9; up++) {
-					set(level, new BlockPos(cx + dx, y + up, cz + dz), Blocks.AIR.defaultBlockState());
-				}
-			}
-		}
-		// palms of a sort: two flowering azaleas and grass round them
-		for (int[] tree : new int[][] {{-8, 4}, {8, 4}, {-6, 8}, {6, 8}}) {
-			set(level, new BlockPos(cx + tree[0], y, cz + tree[1]), Blocks.GRASS_BLOCK.defaultBlockState());
-			set(level, new BlockPos(cx + tree[0], y + 1, cz + tree[1]), Blocks.FLOWERING_AZALEA.defaultBlockState());
-		}
-		// the palace: a raised floor, pillars, a roof, the Keeper inside and the two doors at the back
-		int pz = cz - 6;
-		for (int dx = -5; dx <= 5; dx++) {
-			for (int dz = -4; dz <= 4; dz++) {
-				set(level, new BlockPos(cx + dx, y + 1, pz + dz), Blocks.QUARTZ_BRICKS.defaultBlockState());
-				set(level, new BlockPos(cx + dx, y + 7, pz + dz), Math.abs(dx) == 5 || Math.abs(dz) == 4 ? Blocks.GOLD_BLOCK.defaultBlockState()
-					: Blocks.SMOOTH_QUARTZ.defaultBlockState());
-			}
-			set(level, new BlockPos(cx + dx, y + 8, pz), Blocks.SMOOTH_QUARTZ_SLAB.defaultBlockState());
-		}
-		for (int dx = -5; dx <= 5; dx += 2) {
-			for (int dz : new int[] {-4, 4}) {
-				for (int up = 2; up <= 6; up++) {
-					set(level, new BlockPos(cx + dx, y + up, pz + dz), Blocks.QUARTZ_PILLAR.defaultBlockState());
-				}
-			}
-		}
-		for (int up = 2; up <= 3; up++) {
-			set(level, new BlockPos(cx - 2, y + up, pz - 3), CHAMBER_DOOR.defaultBlockState());
-			set(level, new BlockPos(cx + 2, y + up, pz - 3), VERDANT_GATE.defaultBlockState());
-		}
-		set(level, new BlockPos(cx, y + 2, pz - 3), Blocks.LANTERN.defaultBlockState());
-		spawnNpc(level, new Vec3(cx + 0.5, y + 2, pz + 0.5), KEEPER_TAG, "entity.jaymospowers.keeper", new MerchantOffers());
-	}
-
 	/** A trader who never leaves, never moves and can't be hurt: the Hermit (who sells) or the Keeper (who blesses). */
-	private static void spawnNpc(ServerLevel level, Vec3 at, String tag, String name, MerchantOffers offers) {
+	static void spawnNpc(ServerLevel level, Vec3 at, String tag, String name, MerchantOffers offers) {
 		WanderingTrader npc = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.STRUCTURE);
 		if (npc == null) {
 			return;

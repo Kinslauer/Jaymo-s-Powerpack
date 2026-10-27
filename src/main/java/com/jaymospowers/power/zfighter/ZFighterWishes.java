@@ -58,6 +58,8 @@ import net.minecraft.world.phys.Vec3;
  * Wishes: power (5000 TP for a Z Fighter; the Z Fighter power for someone with none; else 30 levels), revive (everyone
  * who died in the last hour comes back to your side with what they dropped), riches, awakening (the way to Super opens),
  * rebirth (the lineage goes back to what your heritage gives), a blessing on everyone and (0.17.53) a pair of bonding earrings.
+ * (0.17.60) Five more, in {@link ZFighterWishExtras}: re-make character, reset racial skill, move stat points, change difficulty, and undo
+ * the android rebuild.
  */
 public final class ZFighterWishes {
 	public static final int POWER = 0;
@@ -68,8 +70,15 @@ public final class ZFighterWishes {
 	public static final int BLESSING = 5;
 	/** (0.17.53) A pair of bonding earrings ({@link ZFighterFusionItems}). */
 	public static final int BONDING = 6;
-	public static final int WISHES = 7;
-	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding"};
+	/** (0.17.60) Re-make character, reset racial skill, move stat points, change difficulty, undo the android rebuild ({@link ZFighterWishExtras}). */
+	public static final int REMAKE = 7;
+	public static final int RACIAL = 8;
+	public static final int RESTAT = 9;
+	public static final int DIFFICULTY = 10;
+	public static final int UNDO_ANDROID = 11;
+	public static final int WISHES = 12;
+	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding", "remake", "racial", "restat", "difficulty",
+		"undo_android"};
 
 	static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
@@ -399,6 +408,11 @@ public final class ZFighterWishes {
 				give(player, new ItemStack(ZFighterFusionItems.BONDING_EARRING, 2));
 				yield true;
 			}
+			case REMAKE -> ZFighterWishExtras.remake(player, zfighter);
+			case RACIAL -> ZFighterWishExtras.racial(player, zfighter);
+			case RESTAT -> ZFighterWishExtras.restat(player, zfighter);
+			case DIFFICULTY -> ZFighterWishExtras.difficulty(player);
+			case UNDO_ANDROID -> ZFighterWishExtras.android(player, zfighter);
 			default -> false;
 		};
 		if (!granted) {

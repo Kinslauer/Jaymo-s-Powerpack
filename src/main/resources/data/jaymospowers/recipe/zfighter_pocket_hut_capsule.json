@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass",
+    "B": "#minecraft:beds"
+  },
+  "pattern": [
+    "IGI",
+    "IBI",
+    "III"
+  ],
+  "result": {
+    "id": "jaymospowers:pocket_hut_capsule"
+  }
+}

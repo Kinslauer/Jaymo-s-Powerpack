@@ -337,7 +337,9 @@ public final class ZFighterTraining {
 	/** Under heavy gravity: someone's Immense Field, or Gravity's weight on him. */
 	public static boolean heavyGravity(ServerPlayer player) {
 		return com.jaymospowers.power.gravity.GravityTrainingField.inField(player)
-			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null;
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null
+			// (0.17.60) a Gravity Machine's room, five times heavy or more
+			|| ZFighterGravityMachine.heavy(player);
 	}
 
 	/** Mastery for the form he's in. */

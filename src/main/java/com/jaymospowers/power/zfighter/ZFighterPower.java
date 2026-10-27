@@ -412,6 +412,11 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.init();
 		ZFighterWishes.init();
 		ZFighterSites.init();
+		// (0.17.60) the bigger Lookout, the gravity machine, pocket capsules, fighter weapons
+		ZFighterLookout.init();
+		ZFighterGravityMachine.init();
+		ZFighterCapsules.init();
+		ZFighterWeapons.init();
 		ZFighterFusion.init();
 		ZFighterMasters.init();
 		ZFighterRaids.init();
@@ -655,7 +660,7 @@ public final class ZFighterPower implements Power {
 				}
 			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
-			live.ki += KI_REGEN;
+			live.ki += KI_REGEN * ZFighterRealism.kiRegen();
 		}
 
 		ZFighterKi.tickWave(player, live);
@@ -669,7 +674,7 @@ public final class ZFighterPower implements Power {
 			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
 			live.lastFlyPos = at;
 			if (!creative) {
-				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player);
+				live.ki -= (FLY_KI + FLY_KI_PER_SPEED * (float)moved) * ZFighterAndroid.costFactor(player) * ZFighterRealism.flightCost();
 			}
 			player.resetFallDistance();
 			if (now % 4 == 0) {
