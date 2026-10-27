@@ -29,7 +29,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.249) Blossom villages: the pack's Japan. Andy (2026-10-27) pointed at Tax' Village Architect's cherry blossom
+ * (0.7.250) Blossom villages: the pack's Japan. Andy (2026-10-27) pointed at Tax' Village Architect's cherry blossom
  * village (all rights reserved, Forge 1.21.1 only: nothing of it is used). No village is generated among the cherry
  * trees, so one rises there by itself: out in a cherry grove away from every other settlement, out of sight of the
  * player passing by, a ring of minka round a bell, a shrine at its heart, a torii over the road in, a butcher's shop, a

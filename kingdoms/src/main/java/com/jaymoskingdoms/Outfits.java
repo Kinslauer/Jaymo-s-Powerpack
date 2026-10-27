@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * glinting sword and the arms on his shield. Builders wear the land's headgear.</li>
  * <li><b>Land</b> ({@link Climate}): linen turbans, sand-coloured trousers and gold trim in the desert and the badlands;
  * white hoods and furs in the snow; dark leather boots in the taiga; green leather and spears in the jungle; murky
- * leather in the swamp; straw-coloured caps on the savanna; (0.7.249) the ronin harness among the cherry trees.</li>
+ * leather in the swamp; straw-coloured caps on the savanna; (0.7.250) the ronin harness among the cherry trees.</li>
  * <li><b>Camps</b>: barbarians' hides and their chief's mail get rough trims of their camp.</li>
  * </ul>
  * Folk dressed before this ({@link #VERSION}) are dressed again the first time they're ticked ({@link Folk}).
@@ -217,7 +217,7 @@ public final class Outfits {
 		}
 		if (arms.armoury() || climate == Climate.CHERRY) {
 			// (0.5.30) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest;
-			// (0.7.249) the Blossom land's guards always go in the ronin harness
+			// (0.7.250) the Blossom land's guards always go in the ronin harness
 			String set = switch (climate) {
 				case DESERT, BADLANDS, SAVANNA -> "gladiator";
 				case JUNGLE, CHERRY -> "ronin";
@@ -346,7 +346,7 @@ public final class Outfits {
 	}
 
 	/**
-	 * (0.7.249) The Blossom land's guards (MCA's own too: {@link BlossomVillages}) in the whole ronin harness, its cloth
+	 * (0.7.250) The Blossom land's guards (MCA's own too: {@link BlossomVillages}) in the whole ronin harness, its cloth
 	 * in {@code color}; a piece the set lacks keeps what's there.
 	 */
 	static void ronin(LivingEntity mob, DyeColor color) {
@@ -356,7 +356,7 @@ public final class Outfits {
 		}
 	}
 
-	/** (0.7.249) {@code mob} wears the ronin harness's cuirass. */
+	/** (0.7.250) {@code mob} wears the ronin harness's cuirass. */
 	static boolean wearsRonin(LivingEntity mob) {
 		Item chest = Armory.piece("ronin", ArmorType.CHESTPLATE);
 		return chest != null && mob.getItemBySlot(EquipmentSlot.CHEST).is(chest);

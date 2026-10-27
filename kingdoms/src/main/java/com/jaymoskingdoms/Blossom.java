@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * (0.7.249) The Blossom land's way of building: the cherry groves are the pack's Japan, as the north is its Norse lands
+ * (0.7.250) The Blossom land's way of building: the cherry groves are the pack's Japan, as the north is its Norse lands
  * and the south its sands ({@link Climate#CHERRY}, the Blossom tongue in {@link Languages}, guards in the ronin
  * harness in {@link Outfits}). Andy (2026-10-27): the cherry blossom village is "perfect for the unused japanese/samurai
  * armor we have. they can be the analogue for japan in the pack like we have for most other locations."

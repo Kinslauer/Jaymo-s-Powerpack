@@ -102,7 +102,7 @@ public final class Careers {
 	static final int WAGE_FLOOR = 1;
 	/** Each other job held at once takes this off every order's wage (never below the floor). */
 	static final int WAGE_SPREAD = 1;
-	/** (0.7.249) What a job's own building in its town ({@link Job#hall}) adds to every order's wage. */
+	/** (0.7.250) What a job's own building in its town ({@link Job#hall}) adds to every order's wage. */
 	static final int HALL_BONUS = 1;
 	/** New orders each morning per job, and the most that wait. */
 	static final int ORDERS_A_DAY = 2, ORDERS_MOST = 5;
@@ -190,7 +190,7 @@ public final class Careers {
 		final int perEmerald;
 		final List<String> goods, works;
 		/**
-		 * (0.7.249) The building it works out of ({@link Buildings}' entry: the butcher's shop, the fishery, the hunting
+		 * (0.7.250) The building it works out of ({@link Buildings}' entry: the butcher's shop, the fishery, the hunting
 		 * lodge, the smithy, the stable), or null. A town where it stands is always hiring for the job, and pays
 		 * {@link #HALL_BONUS} more an order.
 		 */
@@ -514,7 +514,7 @@ public final class Careers {
 		return wage(rank, held) + (job != null && hasHall(server, f, job) ? HALL_BONUS : 0);
 	}
 
-	/** (0.7.249) {@code job}'s own building ({@link Job#hall}) stands finished in {@code f}. */
+	/** (0.7.250) {@code job}'s own building ({@link Job#hall}) stands finished in {@code f}. */
 	static boolean hasHall(MinecraftServer server, Faction f, Job job) {
 		if (job.hall == null) {
 			return false;
@@ -1311,7 +1311,7 @@ public final class Careers {
 		if (job == Job.WATCH) {
 			return f.type().isRealm();
 		}
-		// (0.7.249) its own building in town wants hands, whatever's in the storehouse
+		// (0.7.250) its own building in town wants hands, whatever's in the storehouse
 		if (hasHall(level.getServer(), f, job) && job != Job.COURIER) {
 			return true;
 		}

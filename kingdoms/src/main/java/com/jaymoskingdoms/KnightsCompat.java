@@ -222,7 +222,7 @@ public final class KnightsCompat {
 	 */
 	public static void dress(Folk folk, Faction faction, Climate climate) {
 		if (!LOADED || climate == Climate.CHERRY && folk.role() == Folk.GUARD) {
-			// (0.7.249) the Blossom land's guards keep their ronin harness ({@link Outfits})
+			// (0.7.250) the Blossom land's guards keep their ronin harness ({@link Outfits})
 			return;
 		}
 		List<Piece> loadout = SLAVIC_LOADED && climate.arid() ? ARID_LOADOUTS.getOrDefault(faction.type(), Map.of()).get(folk.role()) : null;

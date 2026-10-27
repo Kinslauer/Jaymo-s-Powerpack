@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.249) Andy (2026-10-27): Tax' Village Architect "adds the new buildings we need for jobs (butcher, stable, etc)".
+ * (0.7.250) Andy (2026-10-27): Tax' Village Architect "adds the new buildings we need for jobs (butcher, stable, etc)".
  * It is all rights reserved and Forge/NeoForge 1.21.1 only, so these are our own: the job halls a settlement builds as
  * it grows ({@link Buildings#register}), drawn in code from its {@link Buildings.Kit} like every other building (so
  * among the cherry trees they take the Blossom land's dark tile roofs and white plaster). Each holds its trade's job site

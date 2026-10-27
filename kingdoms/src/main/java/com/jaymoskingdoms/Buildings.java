@@ -59,7 +59,7 @@ final class Buildings {
 			realm(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
-			// (0.7.249) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
+			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
 			realm(type, "butcher", JobHalls::butcher, 1, 22);
 			realm(type, "market", Buildings::market, 1, 24);
 			realm(type, "fishery", JobHalls::fishery, 1, 26);
@@ -153,7 +153,7 @@ final class Buildings {
 	 */
 	static Blueprint house(Kit k) {
 		if (k.blossom && !k.classic) {
-			// (0.7.249) among the cherry trees, a minka ({@link Blossom})
+			// (0.7.250) among the cherry trees, a minka ({@link Blossom})
 			return Blossom.minka(k);
 		}
 		Palette p = k.p;
@@ -1354,7 +1354,7 @@ final class Buildings {
 
 		final Palette p;
 		final boolean village;
-		/** (0.7.249) It stands among the cherry trees: the Blossom land's way of building ({@link Blossom}). */
+		/** (0.7.250) It stands among the cherry trees: the Blossom land's way of building ({@link Blossom}). */
 		final boolean blossom;
 		final Block door, gate;
 		final BlockState woodStairs, wool, bed, carpet, road;
@@ -1495,7 +1495,7 @@ final class Buildings {
 			boolean dry = land == Palette.DESERT || land == Palette.BADLANDS || land == Palette.SAVANNA;
 			boolean blossom = land == Palette.CHERRY;
 			if (blossom) {
-				// (0.7.249) the Blossom land roofs in dark tile over white plaster, whatever the town was before
+				// (0.7.250) the Blossom land roofs in dark tile over white plaster, whatever the town was before
 				roofStairs = Blocks.DEEPSLATE_TILE_STAIRS;
 				roofSlab = Blocks.DEEPSLATE_TILE_SLAB;
 				roofBlock = Blocks.DEEPSLATE_TILES;

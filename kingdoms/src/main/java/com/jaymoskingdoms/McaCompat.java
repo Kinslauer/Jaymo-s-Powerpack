@@ -378,7 +378,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.reconcile(level, w);
 	}
 
-	/** (0.7.249) {@code mob} is one of MCA's guards (never without MCA). */
+	/** (0.7.250) {@code mob} is one of MCA's guards (never without MCA). */
 	static boolean isGuard(PathfinderMob mob) {
 		return LOADED && McaBridge.isGuard(mob);
 	}

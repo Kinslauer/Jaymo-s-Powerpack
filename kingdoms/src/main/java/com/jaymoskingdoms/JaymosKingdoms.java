@@ -54,7 +54,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Barbarians.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
-		// 0.7.249: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
+		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
 		BlossomVillages.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();

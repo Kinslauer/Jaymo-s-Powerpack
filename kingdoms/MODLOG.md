@@ -5424,7 +5424,13 @@ as inspiration? a more solid looking yet wispy projection?"
   and the ghost trail is two soft arms behind a fast move only (a blow's snap, a grasp closing), none at rest.
   Not seen in game.
 
-## 0.7.249: job halls and Blossom villages, the pack's Japan (pack 0.17.38)
+## 0.7.249: the life story keeps your power a surprise (pack 0.17.38)
+Andy, of the "Then one day..." page: "this screen should not show the class you will get".
+- The "Then one day" answers and the story page no longer say which power wakes ("Power: Cryokinesis, awakening in a
+  few days" / "whatever fate decides" are gone, and their lang keys with them). Lost in time still says Chrono wakes at
+  once, since that's the road's own doing.
+- A road that matches the gift still says it wakes a day sooner, without naming it.
+## 0.7.250: job halls and Blossom villages, the pack's Japan (pack 0.17.39)
 Andy pointed at Tax' Village Architect ("adds the new buildings we need for jobs (butcher stable, etc) it also adds a
 new cherry blossom village which is perfect for the unused japanese/samurai armor we have. they can be the analogue
 for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothing of it is used: these are our own.

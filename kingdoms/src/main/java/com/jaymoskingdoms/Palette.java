@@ -97,7 +97,7 @@ record Palette(BlockState wall, BlockState mossy, BlockState cracked, BlockState
 	/** The palette for the village standing in {@code biome}. */
 	static Palette of(Holder<Biome> biome) {
 		String name = biome.unwrapKey().map(key -> key.identifier().getPath()).orElse("plains");
-		// (0.7.249) before the snow's "grove": the cherry grove was read as snowy land, so no settlement ever had the
+		// (0.7.250) before the snow's "grove": the cherry grove was read as snowy land, so no settlement ever had the
 		// cherry look, the Blossom tongue or the ronin harness
 		if (name.contains("cherry")) {
 			return CHERRY;
