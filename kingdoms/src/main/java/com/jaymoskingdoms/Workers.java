@@ -93,6 +93,10 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (Crewmen.tagged(mob)) {
+			// (0.7.242) one of a ship's crew: aboard her, they do as her crew; ashore, they're villagers like any
+			return Crewmen.step(level, w);
+		}
 		if (RangedTactics.brainStep(mob)) {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
 			return true;

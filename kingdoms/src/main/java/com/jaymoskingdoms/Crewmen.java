@@ -1,0 +1,463 @@
+package com.jaymoskingdoms;
+
+import com.jaymoskingdoms.sailing.Crew;
+import com.jaymoskingdoms.sailing.Ship;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * (0.7.242) Andy (2026-10-27): "i need all the ship crew to integrate with MCA, it doesnt make sense i have fully kitted
+ * knights all silent and a stoic brick for a captain. they need at the very least a personality." With Minecraft Comes
+ * Alive, every ship's crew (a pirate's captain, gunners, deckhands and powder monkeys; a warship's sea captain and
+ * knights; a merchantman's and a whaler's hands) are MCA villagers: names, faces, heritage, personality, mood and
+ * temperament of their own, and MCA's talk when you speak to them. They keep their folk's gear and toughness
+ * ({@code McaBridge.crewman}), and are enlisted to their side in their old role, off every roster as before.
+ *
+ * <p>Aboard, they ride her at their stations ({@link Ship#SEAT}) and walk her deck ({@code Corsairs.deckwork}) as the
+ * folk did, so MCA's brain waits while they're aboard ({@link #step}, from {@code Workers.step}). In its place: they
+ * take their foes as the folk did (her captain's foe's crew, a boarder, whoever hurt them, a cove's prey), fire their
+ * pistols and bows, swing at anyone within reach, look at whoever talks to them, and talk among themselves and to
+ * players about the deck ({@link #chatter}). MCA's screen shows which ship they serve and what as ({@code Standing}),
+ * and her captain's nametag reads "Captain" once you know his name. A cove's pirate captain keeps his boss bar.
+ * Ashore (a whaleboat's hands, or set down when she's anchored), they live as villagers.
+ *
+ * <p>Without MCA, the crews stay {@link Folk}. With it, folk crews already at sea in a world are each replaced where
+ * they stand by a villager of their blood ({@link #convert}).
+ */
+public final class Crewmen {
+	/** The entity tag every crew villager carries (kept in their save): a ship's crewman, not any town's. */
+	public static final String TAG = "jaymoskingdoms.crewman";
+	/** How far they take a foe of their own (a boarder, a cove's prey) aboard her; how far they chase a foe with their eyes before letting go. */
+	static final double SIGHT = 16.0, LET_GO = 40.0;
+	/** How long (ticks) whoever hurt them stays their foe. */
+	static final int HURT_MEMORY = 200;
+	/** A blow: how far they reach, and how often they swing (ticks). */
+	static final double REACH = 2.6;
+	static final int SWING_GAP = 20;
+	/** A bow: from this far to this far, this often (ticks, plus up to the jitter). */
+	static final double BOW_NEAREST = 3.0, BOW_FURTHEST = 24.0;
+	static final int BOW_RELOAD = 50, BOW_JITTER = 30;
+	/** Talk about the deck: a player this near, one line a ship at most this often (ticks, plus up to the jitter); how far it carries. */
+	static final double CHAT_RANGE = 10.0, CHAT_CARRY = 14.0;
+	static final int CHAT_GAP = 300, CHAT_JITTER = 400;
+	/** How many lines each side's hands, each side's captain, and each temperament have (lang keys 0..n-1). */
+	static final int HAND_LINES = 8, CAPTAIN_LINES = 4;
+	/** One line in this many is their temperament's rather than their trade's. */
+	static final int TEMPER_ONE_IN = 3;
+	/** A newcomer aboard is welcomed by her captain (once per player per ship while they're aboard). */
+	static final double WELCOME_RANGE = 6.0;
+
+	/** Each crewman's next swing and next shot (game time); each ship's next line; who her captain has welcomed. */
+	private static final Map<LivingEntity, long[]> READY = new WeakHashMap<>();
+	private static final Map<UUID, Long> NEXT_LINE = new HashMap<>();
+	private static final Map<UUID, java.util.Set<UUID>> WELCOMED = new HashMap<>();
+	/** A cove's villager captain's boss bar. */
+	private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
+
+	private Crewmen() {
+	}
+
+	static void register() {
+		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
+			READY.clear();
+			NEXT_LINE.clear();
+			WELCOMED.clear();
+			for (ServerBossEvent bar : BARS.values()) {
+				bar.removeAllPlayers();
+			}
+			BARS.clear();
+		});
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> dropBar(entity.getUUID()));
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> dropBar(entity.getUUID()));
+	}
+
+	private static void dropBar(UUID id) {
+		ServerBossEvent bar = BARS.remove(id);
+		if (bar != null) {
+			bar.removeAllPlayers();
+		}
+	}
+
+	/** {@code e} is a crew villager (aboard or not). */
+	public static boolean tagged(Entity e) {
+		return !(e instanceof Folk) && e.entityTags().contains(TAG);
+	}
+
+	/** {@code e}'s role and side as one of a ship's crew ({@link Worker}), or -1. */
+	static int role(Entity e) {
+		return e instanceof Worker w ? w.role() : -1;
+	}
+
+	static int faction(Entity e) {
+		return e instanceof Worker w ? w.factionId() : -1;
+	}
+
+	/** Whether a {@code side}'s {@code role} goes aboard as a sailor (MCA's fisherman) rather than a fighting man (MCA's guard). */
+	static boolean sailor(Crew.Side side, int role) {
+		return side == Crew.Side.MERCHANT || side == Crew.Side.WHALER || role == Pirates.POWDER_MONKEY;
+	}
+
+	/**
+	 * {@code folk}, set up for its role and not yet in the world (or one of a crew already aboard), as an MCA villager
+	 * at its place; null without MCA or if one couldn't be made (then the folk sails).
+	 */
+	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side) {
+		PathfinderMob v = McaCompat.crewman(level, folk, sailor(side, folk.role()));
+		if (v != null) {
+			v.addTag(TAG);
+		}
+		return v;
+	}
+
+	/**
+	 * (From {@link Folk#customServerAiStep}) With MCA, one of a crew already aboard (a world from before) is replaced at
+	 * their station by a villager of their blood in their gear, and her captain's, gunners' and walks' records follow.
+	 * True if so (the folk is gone).
+	 */
+	static boolean convert(ServerLevel level, Folk folk) {
+		if (!McaCompat.LOADED || !(folk.getVehicle() instanceof Ship ship) || ship.crew == null || Downed.isDowned(folk)) {
+			return false;
+		}
+		Crew crew = ship.crew;
+		Vec3 seat = folk.getAttached(Ship.SEAT);
+		if (seat == null) {
+			return false;
+		}
+		PathfinderMob v = villager(level, folk, crew.side);
+		if (v == null) {
+			return false;
+		}
+		UUID was = folk.getUUID();
+		float health = folk.getHealth() / folk.getMaxHealth();
+		folk.stopRiding();
+		folk.discard();
+		v.setHealth(Math.max(1.0F, v.getMaxHealth() * health));
+		if (!ship.takeAboard(v, seat)) {
+			v.discard();
+			return true;
+		}
+		UUID now = v.getUUID();
+		if (was.equals(crew.captain)) {
+			crew.captain = now;
+			Faction f = Factions.get(level.getServer(), crew.faction);
+			if (f != null && f.leader().map(was::equals).orElse(false)) {
+				// a cove's captain is its leader
+				Factions.update(level.getServer(), f.id(), x -> x.withLeader(java.util.Optional.of(now)));
+			}
+		}
+		crew.gunners.replaceAll((gun, who) -> who.equals(was) ? now : who);
+		crew.walks.remove(was);
+		return true;
+	}
+
+	// ---- aboard -----------------------------------------------------------------------------------------------------
+
+	/**
+	 * A crew villager's server step (from {@code Workers.step}, before their brain): aboard her (or in one of her boats),
+	 * their brain waits (true) and they do as her crew; set down ashore, they live as villagers (false).
+	 */
+	static boolean step(ServerLevel level, Worker w) {
+		PathfinderMob mob = w.mob();
+		if (mob.tickCount % Standing.EVERY == 0) {
+			Standing.update(level, w);
+		}
+		if (!mob.isPassenger()) {
+			return false;
+		}
+		if (Downed.isDowned(mob) || !(mob.getVehicle() instanceof Ship ship) || ship.crew == null) {
+			// downed, or pulling a whaleboat: nothing else
+			return true;
+		}
+		Crew crew = ship.crew;
+		long now = level.getGameTime();
+		LivingEntity foe = foe(level, mob, w, ship, crew);
+		if (foe != null) {
+			fight(level, mob, w, foe, now);
+		} else if (McaCompat.busy(mob)) {
+			// someone's talking to them: they look at them
+			Player near = level.getNearestPlayer(mob, 8.0);
+			if (near != null) {
+				mob.getLookControl().setLookAt(near, 30.0F, 30.0F);
+			}
+		} else if ((mob.tickCount + mob.getId()) % 20 == 0) {
+			chatter(level, mob, w, ship, crew, now);
+		}
+		if (w.role() == Pirates.CAPTAIN && mob.tickCount % 5 == 0 && Pirates.isCoveCaptain(mob)) {
+			// a cove's captain is its boss: his bar to those who've struck him
+			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id,
+				Component.translatable("entity.jaymoskingdoms.crew_captain_titled", mob.getDisplayName(), crew.name), BossEvent.BossBarColor.RED,
+				BossEvent.BossBarOverlay.NOTCHED_10));
+			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
+			BossBars.show(level, mob, bar);
+		}
+		return true;
+	}
+
+	/** Who they're fighting: the one they had, whoever hurt them, a soul aboard her captain's foe, or one of their own seeing. */
+	private static @Nullable LivingEntity foe(ServerLevel level, PathfinderMob mob, Worker w, Ship ship, Crew crew) {
+		LivingEntity had = mob.getTarget();
+		if (had != null && (!had.isAlive() || had.isRemoved() || had.distanceToSqr(mob) > LET_GO * LET_GO
+			|| had instanceof Player p && (p.isCreative() || p.isSpectator()))) {
+			mob.setTarget(null);
+			had = null;
+		}
+		if (had != null || !combatant(w.role())) {
+			return had;
+		}
+		if ((mob.tickCount + mob.getId()) % 10 != 0) {
+			return null;
+		}
+		LivingEntity hurt = mob.getLastHurtByMob();
+		if (hurt != null && hurt.isAlive() && mob.tickCount - mob.getLastHurtByMobTimestamp() < HURT_MEMORY && !friend(level, w, crew, hurt)) {
+			mob.setTarget(hurt);
+			return hurt;
+		}
+		LivingEntity best = null;
+		if (crew.target >= 0 && level.getEntity(crew.target) instanceof Ship enemy) {
+			best = nearest(level, mob, w, crew, enemy.getBoundingBox().inflate(2.0), Pirates.PISTOL_FURTHEST);
+		}
+		if (best == null) {
+			best = nearest(level, mob, w, crew, mob.getBoundingBox().inflate(SIGHT), SIGHT);
+		}
+		if (best != null) {
+			mob.setTarget(best);
+		}
+		return best;
+	}
+
+	private static @Nullable LivingEntity nearest(ServerLevel level, PathfinderMob mob, Worker w, Crew crew, net.minecraft.world.phys.AABB box, double range) {
+		LivingEntity best = null;
+		double bestD = range * range;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != mob && e.isAlive() && !e.isSpectator())) {
+			double d = e.distanceToSqr(mob);
+			if (d < bestD && hostile(level, w, crew, e) && mob.hasLineOfSight(e)) {
+				best = e;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** Whether a crewman of {@code crew} (role and side {@code w}) fights {@code e} on sight. */
+	static boolean hostile(ServerLevel level, Worker w, Crew crew, LivingEntity e) {
+		if (e instanceof ServerPlayer p) {
+			if (p.isCreative()) {
+				return false;
+			}
+			return crew.side == Crew.Side.PIRATE ? Pirates.prey(crew.faction, p) : Reputation.get(p, crew.faction) <= Reputation.HOSTILE;
+		}
+		return Corsairs.enemyCrew(level, w.factionId(), Pirates.isPirate(w.role()), e);
+	}
+
+	/** Whether {@code e} is on their side (their own ship's, or an ally's): never their foe for hurting them by mistake. */
+	private static boolean friend(ServerLevel level, Worker w, Crew crew, LivingEntity e) {
+		int theirs = faction(e);
+		if (theirs < 0) {
+			return false;
+		}
+		return theirs == w.factionId() || Relations.between(level.getServer(), theirs, w.factionId()) == Relation.ALLIED;
+	}
+
+	/** Whether {@code role} fights (a powder monkey runs powder, and nothing else). */
+	static boolean combatant(int role) {
+		return role != Pirates.POWDER_MONKEY;
+	}
+
+	/** At their foe: pistols for a pirate's captain and gunners (and shouts), a bow if they hold one, and their blade at arm's length. */
+	private static void fight(ServerLevel level, PathfinderMob mob, Worker w, LivingEntity foe, long now) {
+		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		int role = w.role();
+		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1)});
+		double d = mob.distanceTo(foe);
+		if (d <= REACH + foe.getBbWidth() * 0.5 && now >= ready[0]) {
+			ready[0] = now + SWING_GAP;
+			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			mob.doHurtTarget(level, foe);
+			return;
+		}
+		if (Pirates.isPirate(role)) {
+			Pirates.crewFight(level, mob, role);
+			return;
+		}
+		ItemStack held = mob.getMainHandItem();
+		if ((held.getItem() instanceof BowItem || held.getItem() instanceof CrossbowItem) && now >= ready[1] && d >= BOW_NEAREST && d <= BOW_FURTHEST
+			&& mob.hasLineOfSight(foe)) {
+			ready[1] = now + BOW_RELOAD + level.getRandom().nextInt(BOW_JITTER + 1);
+			loose(level, mob, held, foe);
+		}
+	}
+
+	/** An arrow at {@code foe} (as a folk archer looses one). */
+	private static void loose(ServerLevel level, PathfinderMob mob, ItemStack bow, LivingEntity foe) {
+		ItemStack arrows = new ItemStack(Items.ARROW);
+		AbstractArrow arrow = ProjectileUtil.getMobArrow(mob, arrows, 1.0F, bow);
+		arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+		double dx = foe.getX() - mob.getX(), dz = foe.getZ() - mob.getZ();
+		double dy = foe.getY(1.0 / 3.0) - arrow.getY();
+		double flat = Math.sqrt(dx * dx + dz * dz);
+		Javelins.mark(arrow);
+		Projectile.spawnProjectileUsingShoot(arrow, level, arrows, dx, dy + flat * 0.2, dz, 1.6F, 4.0F);
+		mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
+	}
+
+	// ---- talk ---------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Talk about her deck while a player is near (one line a ship every so often, and nobody talks over a fight): her
+	 * captain welcomes a newcomer aboard; otherwise someone says something of their trade and side, or of their
+	 * temperament.
+	 */
+	private static void chatter(ServerLevel level, PathfinderMob mob, Worker w, Ship ship, Crew crew, long now) {
+		if (crew.target >= 0 || mob.isSleeping()) {
+			return;
+		}
+		boolean captain = mob.getUUID().equals(crew.captain);
+		RandomSource random = level.getRandom();
+		if (captain) {
+			java.util.Set<UUID> welcomed = WELCOMED.computeIfAbsent(ship.getUUID(), k -> new java.util.HashSet<>());
+			List<ServerPlayer> aboard = Corsairs.playersAboard(level, ship);
+			welcomed.retainAll(aboard.stream().map(Entity::getUUID).toList());
+			for (ServerPlayer p : aboard) {
+				if (!welcomed.contains(p.getUUID()) && p.distanceTo(mob) < WELCOME_RANGE * 2.0 && !hostile(level, w, crew, p)) {
+					welcomed.add(p.getUUID());
+					Speech.sayTo(level, mob, p, Component.translatable("speech.jaymoskingdoms.crew.welcome." + crew.side.id(), crew.name), Speech.YELLOW);
+					NEXT_LINE.put(ship.getUUID(), now + CHAT_GAP);
+					return;
+				}
+			}
+		}
+		Player near = level.getNearestPlayer(mob, CHAT_RANGE);
+		Long next = NEXT_LINE.get(ship.getUUID());
+		if (near == null || near.isSpectator() || next != null && now < next) {
+			return;
+		}
+		if (next == null) {
+			// (the first of her crew to see someone waits a little: not all at once)
+			NEXT_LINE.put(ship.getUUID(), now + random.nextInt(CHAT_JITTER));
+			return;
+		}
+		NEXT_LINE.put(ship.getUUID(), now + CHAT_GAP + random.nextInt(CHAT_JITTER));
+		Component line;
+		Temperaments.Temperament t = Temperaments.of(mob);
+		if (t != null && random.nextInt(TEMPER_ONE_IN) == 0) {
+			line = Component.translatable("speech.jaymoskingdoms.crew.temper." + t.key());
+		} else if (captain) {
+			line = Component.translatable("speech.jaymoskingdoms.crew.captain." + crew.side.id() + "." + random.nextInt(CAPTAIN_LINES), crew.name);
+		} else {
+			String trade = w.role() == Pirates.POWDER_MONKEY ? "monkey" : crew.side.id();
+			line = Component.translatable("speech.jaymoskingdoms.crew." + trade + "." + random.nextInt(HAND_LINES), crew.name);
+		}
+		mob.getLookControl().setLookAt(near, 30.0F, 30.0F);
+		Speech.say(level, mob, line, Speech.WHITE, CHAT_CARRY);
+	}
+
+	// ---- what MCA's screen shows ------------------------------------------------------------------------------------
+
+	/** Their lines for MCA's screen: the ship they serve and what as, her captain's name, and what she's about. */
+	static Standing.@Nullable Lines lines(ServerLevel level, PathfinderMob mob, Worker w) {
+		if (!(mob.getVehicle() instanceof Ship ship) || ship.crew == null) {
+			return null;
+		}
+		Crew crew = ship.crew;
+		List<Component> lines = new java.util.ArrayList<>(), hovers = new java.util.ArrayList<>();
+		boolean captain = mob.getUUID().equals(crew.captain);
+		Faction f = Factions.get(level.getServer(), crew.faction);
+		Component side = f == null ? Component.translatable("standing.jaymoskingdoms.crew.side." + crew.side.id())
+			: Component.literal(f.name());
+		Component as = Component.translatable("standing.jaymoskingdoms.crew.role." + (captain ? "captain" : roleKey(w.role(), crew.side, crew.gunners.containsValue(mob.getUUID()))));
+		lines.add(Component.translatable("standing.jaymoskingdoms.crew", as, crew.name).withStyle(net.minecraft.ChatFormatting.GOLD));
+		hovers.add(Component.translatable("standing.jaymoskingdoms.crew.hover." + crew.side.id(), side));
+		if (!captain && crew.captain != null && level.getEntity(crew.captain) instanceof LivingEntity c && c.isAlive()) {
+			lines.add(Component.translatable("standing.jaymoskingdoms.crew.captain", c.getDisplayName()));
+			hovers.add(Component.empty());
+		}
+		String doing = crew.target >= 0 ? "fighting" : switch (crew.mode) {
+			case "chase", "engage" -> "fighting";
+			case "run" -> "running";
+			case "raid" -> "raid";
+			case "voyage" -> "voyage";
+			case "fitting" -> "fitting";
+			default -> crew.side == Crew.Side.WHALER ? "whaling" : "patrol";
+		};
+		lines.add(Component.translatable("standing.jaymoskingdoms.duty", Component.translatable("standing.jaymoskingdoms.crew.doing." + doing))
+			.withStyle(net.minecraft.ChatFormatting.WHITE));
+		hovers.add(Component.empty());
+		return new Standing.Lines(List.copyOf(lines), List.copyOf(hovers));
+	}
+
+	/** (For MCA's chat AI, {@link ChatPrompts}) who they are aboard: "" for anyone who isn't one of a crew aboard her. */
+	static String prompt(LivingEntity e) {
+		if (!tagged(e) || !(e.getVehicle() instanceof Ship ship) || ship.crew == null) {
+			return "";
+		}
+		Crew crew = ship.crew;
+		boolean captain = e.getUUID().equals(crew.captain);
+		String as = captain ? "captain" : switch (roleKey(role(e), crew.side, crew.gunners.containsValue(e.getUUID()))) {
+			case "gunner" -> "a gunner";
+			case "monkey" -> "a powder monkey (a ship's boy who runs powder to the guns)";
+			case "deckhand" -> "a deckhand";
+			case "marine" -> "a marine (a knight serving aboard)";
+			case "whaleman" -> "a whaleman";
+			default -> "a hand";
+		};
+		Faction f = e.level().getServer() == null ? null : Factions.get(e.level().getServer(), crew.faction);
+		String of = f == null ? "" : " of " + f.name();
+		String what = switch (crew.side) {
+			case PIRATE -> "a pirate ship" + of + ", that preys on any ship that isn't a pirate";
+			case NAVY -> "a warship" + of + ", that hunts pirates and the realm's enemies";
+			case MERCHANT -> "a merchantman" + of + ", carrying goods between realms' harbours";
+			case WHALER -> "a whaler" + of + ", out hunting great whales for their oil";
+		};
+		return "You serve as " + as + " aboard " + crew.name + ", " + what + ". You live at sea and are aboard her now.";
+	}
+
+	/** Her captain's title on his nametag. */
+	static @Nullable Component title(PathfinderMob mob) {
+		return mob.getVehicle() instanceof Ship ship && ship.crew != null && mob.getUUID().equals(ship.crew.captain)
+			? Component.translatable("standing.jaymoskingdoms.crew.title") : null;
+	}
+
+	private static String roleKey(int role, Crew.Side side, boolean gunner) {
+		if (role == Pirates.GUNNER || gunner) {
+			return "gunner";
+		}
+		if (role == Pirates.POWDER_MONKEY) {
+			return "monkey";
+		}
+		if (role == Pirates.DECKHAND) {
+			return "deckhand";
+		}
+		return switch (side) {
+			case NAVY -> "marine";
+			case WHALER -> "whaleman";
+			default -> "hand";
+		};
+	}
+}
