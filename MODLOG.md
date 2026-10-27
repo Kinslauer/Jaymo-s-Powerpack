@@ -3071,3 +3071,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   page, and every mana spirit speaks its three summon lines (the Quiet One its one word) to its keeper alone, with the
   chat line as before. 14 clips (612 KB) made with VoxCPM2 (Apache-2.0; voices designed from a description, no real
   person cloned) by `tools/voices/make_voices.py`; Kingdoms' `Voices` maps a lang key to its sound. No Powers changes.
+- **0.17.48, sailors not guards (Kingdoms 0.7.257):** no guards or armour on any ship; every crewman is a sailor who
+  takes up their weapon when a fight starts and puts it away after.

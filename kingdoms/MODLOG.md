@@ -5461,3 +5461,13 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
   placed you (`LifeStory.home`), so dying doesn't send you to the world spawn; sleeping in a bed moves it as usual.
 - **Whalers wake aboard.** A signed hand who dies is put back on her deck (`Whalers.reboard`) while she's within
   reach; otherwise they wake at her harbour's shore.
+
+## 0.7.257: no guards at sea, sailors take up their weapons for a fight (pack 0.17.48)
+
+- Andy (after 0.7.246): "all the sailors are guards still. I dont want any guards on these ships ... if you put a guard,
+  they CANT have armor. but all the sailors should double as both. just picking up their weapons when the time comes."
+  Every crewman is now an MCA fisherman (a sailor) in no armour: no knight, no guards. Their folk's weapons are stowed
+  (`Crewmen.STOWED`); they take them up the moment they have a foe (`Crewmen.arm`) and put them away 20 s after the
+  last one (`Crewmen.stow`). Crews from before are changed in place within 5 s: guard profession to fisherman, armour
+  off and out of their packs, weapons stowed, the knight tag gone. A navy hand is an "Able seaman", not a "Marine".
+  (0.7.246 only changed crew in mail or plate, so unarmoured MCA guards stayed guards.)

@@ -403,11 +403,11 @@ public final class McaCompat {
 
 	/**
 	 * (0.7.242) With MCA, a ship's crewman as one of its villagers: in {@code folk}'s place (set up for its role), in
-	 * the world, with its blood, gear and side; (0.7.246) her {@code knight} a guard in his armour, anyone else a
-	 * fisherman (a sailor) in no mail or plate. Null without MCA (the folk sails).
+	 * the world, with its blood, gear and side; (0.7.257) a fisherman (a sailor) in no armour, their weapons
+	 * stowed till a fight. Null without MCA (the folk sails).
 	 */
-	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk, boolean knight) {
-		return LOADED ? McaBridge.crewman(level, folk, knight) : null;
+	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk) {
+		return LOADED ? McaBridge.crewman(level, folk) : null;
 	}
 
 	/** (0.7.246) {@code villager} (one of MCA's) has seen {@code player} before: no stranger's greeting from them. */
@@ -425,7 +425,7 @@ public final class McaCompat {
 		return LOADED && McaBridge.storyOpening(villager, player);
 	}
 
-	/** (0.7.246) A crewman (one of MCA's villagers) out of his mail and plate, worn and packed, and a sailor by trade. */
+	/** (0.7.246) A crewman (one of MCA's villagers) with no armour packed, and a sailor by trade. */
 	static void toSea(PathfinderMob mob) {
 		if (LOADED) {
 			McaBridge.toSea(mob);
