@@ -67,6 +67,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		// (0.5.28) Farmer's Delight's pot and pan over a fire, cutting board, feasts, Comfort, cabbages and rice
 		com.jaymoskitchen.delight.Delight.register();
+		com.jaymoskitchen.delight.DelightFarm.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();
