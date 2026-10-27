@@ -84,6 +84,22 @@ public final class SkinTones {
 		return Mth.clamp(melanin, range[0], range[1]);
 	}
 
+	/** (0.7.236) How far inside its heritage's range a villager born outside it lands, at most (a share of the range). */
+	static final float BORN_INSIDE = 0.25F;
+
+	/**
+	 * (0.7.236) Andy: villagers too ("yes"). A villager's {@code melanin}, born of the land, brought into its heritage's
+	 * range: as it was if it's inside, else a little way in from the nearer edge (so they don't all sit on the edge).
+	 */
+	public static float bornSkin(Heritage.@Nullable Kind kind, float melanin, RandomSource random) {
+		if (kind == null) {
+			return melanin;
+		}
+		float[] range = skinRange(kind);
+		float inside = random.nextFloat() * BORN_INSIDE * (range[1] - range[0]);
+		return melanin < range[0] ? range[0] + inside : melanin > range[1] ? range[1] - inside : melanin;
+	}
+
 	/** Where a villager's family is from, as {@code "newcomer.<land>"} or {@code "immigrant.<land>"} (none: a native). */
 	public static final AttachmentType<String> ORIGIN = AttachmentRegistry.create(JaymosKingdoms.id("origin"),
 		builder -> builder.persistent(Codec.STRING));

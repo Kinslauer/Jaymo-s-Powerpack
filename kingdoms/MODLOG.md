@@ -5157,3 +5157,10 @@ Andy: "the sliders should only allow the color ranges that the heritage allows".
   range is brought into it.
 - `McaVerdantSkinMixin` also finds the editor figure, which isn't in the world. The figure now shows your heritage's
   skin too: a Stoneborn's grey, a variant's tint, a Verdant's green.
+
+Andy, asked whether villagers' skin should be limited too: "yes".
+- `VillagerHeritage.born` brings an MCA villager's melanin into its heritage's range (`McaBridge.keepSkin`,
+  `SkinTones.bornSkin`). One born outside the range lands a little way in from the nearer edge (up to
+  `BORN_INSIDE`, a quarter of the range), so they don't all sit on the edge. The land still sets where in the range
+  they fall. `born` also runs when a villager loads, so villagers already in the world are brought in once.
+- `McaGeneticsMixin`'s climate roll keeps to the range when the villager's heritage is already known.

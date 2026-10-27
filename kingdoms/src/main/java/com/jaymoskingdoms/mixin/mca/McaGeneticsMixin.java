@@ -32,7 +32,8 @@ abstract class McaGeneticsMixin {
 	private void jaymoskingdoms$climateSkin(CallbackInfo ci) {
 		Mob mob = this.entity.asEntity();
 		if (mob.level() instanceof ServerLevel) {
-			((Genetics)(Object)this).setGene(Genetics.MELANIN, SkinTones.melanin(mob, this.random));
+			// (0.7.236: kept to their blood's range, if they're of one yet)
+			((Genetics)(Object)this).setGene(Genetics.MELANIN, SkinTones.bornSkin(com.jaymoskingdoms.VillagerHeritage.of(mob), SkinTones.melanin(mob, this.random), this.random));
 		}
 	}
 
