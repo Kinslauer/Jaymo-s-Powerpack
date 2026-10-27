@@ -121,6 +121,12 @@ public final class ZFighterPoise {
 		return now < bar.staggerUntil || now < bar.koUntil;
 	}
 
+	/** (0.17.58) Whether it is knocked out just now (not merely staggered): a K.O. in a tournament. */
+	public static boolean knockedOut(LivingEntity entity) {
+		Poise bar = BARS.get(entity);
+		return bar != null && entity.level().getGameTime() < bar.koUntil;
+	}
+
 	private static void stagger(ServerLevel level, LivingEntity target, Poise bar, long now) {
 		bar.staggerUntil = now + STAGGER_TICKS;
 		bar.left = max(target) * STAGGER_LEFT;

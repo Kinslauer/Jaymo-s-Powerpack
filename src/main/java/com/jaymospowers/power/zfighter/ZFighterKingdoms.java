@@ -35,6 +35,8 @@ final class ZFighterKingdoms {
 	/** (0.15.61) Kingdoms' WorldTiers.of(Player): the world tier a player is in. */
 	private static Method TIER_OF;
 	private static Method STAT_VALUE;
+	/** (0.17.58) Kingdoms' Reputation.change(ServerPlayer, Faction, int): shifts a player's reputation with a settlement. */
+	private static Method CHANGE_REPUTATION;
 	private static Object[] STATS;
 	private static int STAT_MAX;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
@@ -71,6 +73,12 @@ final class ZFighterKingdoms {
 				STAT_MAX = stats.getField("MAX").getInt(null);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				STAT_VALUE = null;
+			}
+			try {
+				CHANGE_REPUTATION = Class.forName("com.jaymoskingdoms.Reputation").getMethod("change", ServerPlayer.class,
+					Class.forName("com.jaymoskingdoms.Faction"), int.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				CHANGE_REPUTATION = null;
 			}
 			try {
 				TIER_OF = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("of", net.minecraft.world.entity.player.Player.class);
@@ -162,6 +170,19 @@ final class ZFighterKingdoms {
 			return (List<Villager>)PEOPLE.invoke(null, level, settlement.handle());
 		} catch (ReflectiveOperationException | ClassCastException e) {
 			return List.of();
+		}
+	}
+
+	/** (0.17.58) Shifts {@code player}'s standing with {@code settlement} by {@code by} (negative: lost). False without Kingdoms or if it can't be done. */
+	static boolean changeReputation(ServerPlayer player, Settlement settlement, int by) {
+		if (CHANGE_REPUTATION == null) {
+			return false;
+		}
+		try {
+			CHANGE_REPUTATION.invoke(null, player, settlement.handle(), by);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
 		}
 	}
 
