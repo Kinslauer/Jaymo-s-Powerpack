@@ -1,24 +1,29 @@
-"""Pilot voices for Jaymo's Kingdoms, made with VoxCPM2 (Apache-2.0, openbmb/VoxCPM2).
+"""Voices for Jaymo's Kingdoms, made with VoxCPM2 (Apache-2.0, openbmb/VoxCPM2).
 
-Each voice is designed once from a description (no real person is cloned), saved as voices/refs/<voice>.wav, then every
-line is cloned from that one clip so the voice stays the same. Output: out/<voice>/<name>.ogg (mono Vorbis), laid out as
-kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/. Delete a ref wav (or change its seed) to redesign it.
+Each voice is designed once from a description (no real person is cloned), saved as refs/<voice>.wav, then every line is
+cloned from that one clip so the voice stays the same. The lines come from Kingdoms' en_us.json by the same rule as
+`Voices.voiced()` in Kingdoms: the narrator reads each life-story question (title and the line under it), each realm
+page, every answer's tale and the closing line; the spirits read their summon lines. Clips go straight into
+kingdoms/src/main/resources/assets/jaymoskingdoms/sounds/voice/<voice>/<name>.ogg (mono Vorbis); a clip already there is
+skipped, so a stopped run picks up where it left off. Delete a clip to remake it; delete a ref wav (or change its seed) to
+redesign a voice (then delete its clips too).
 
     pip install voxcpm soundfile numpy
-    python make_voices.py            # all
-    python make_voices.py grimsby    # one voice
+    python make_voices.py                 # every missing clip
+    python make_voices.py narrator        # one voice
+    python make_voices.py --sounds        # only rewrite sounds.json (no model needed)
 """
+import json
 import os
 import sys
 
-import numpy as np
-import soundfile as sf
-import torch
-from voxcpm import VoxCPM
-
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+ASSETS = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms")
+LANG = os.path.join(ASSETS, "lang", "en_us.json")
+OUT = os.path.join(ASSETS, "sounds", "voice")
+SOUNDS = os.path.join(ASSETS, "sounds.json")
 REFS = os.path.join(HERE, "refs")
-OUT = os.path.join(HERE, "out")
 
 # The sentence each voice is designed on; later lines are cloned from it.
 REF_TEXT = "Hm. So you are the one I am to look after. Well, sit down, and listen closely, because I will not say it twice."
@@ -33,27 +38,61 @@ VOICES = {
     "quiet": dict(seed=61, desc="An ancient, hollow, breathy whisper, very slow, neither male nor female, distant and echoing"),
 }
 
-# (voice, file name, text). The names match the sound ids in sounds.json.
-LINES = [
-    ("narrator", "born_title", "Where were you born? Your blood, and the land that bore you."),
-    ("grimsby", "summon_1", "Yes, yes, I am coming. Must you always shout?"),
-    ("grimsby", "summon_2", "Called again. I had just got comfortable. Well, what is it this time?"),
-    ("grimsby", "summon_3", "Out I come. Stand behind me, and for once do as you are told."),
-    ("varro", "summon_1", "Varro here! Point me at them!"),
-    ("varro", "summon_2", "Called and ready. Name your target, recruit."),
-    ("varro", "summon_3", "Reporting! Do not make me wait on you."),
-    ("ambrose", "summon_1", "Here I am, little one. No need to shout. I heard you the first time."),
-    ("ambrose", "summon_2", "Of course, of course. Let me have a look at you. Good. Still in one piece."),
-    ("ambrose", "summon_3", "Up and about, then. Lead on. I shall be a step behind you, as always."),
-    ("thessaly", "summon_1", "Yes, yes, dear, I am coming. Do mind the margins of your aura, they are most untidy."),
-    ("thessaly", "summon_2", "Called again! I was in the middle of a footnote. Well, what is it this time?"),
-    ("thessaly", "summon_3", "Out I come. Hands where I can see them, dear, and no mumbling the incantations."),
-    ("quiet", "word_1", "Stay."),
-]
+QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road"]
+SPIRIT_LINES = [f"spirit.jaymoskingdoms.{s}.summon.{n}" for s in ("grimsby", "varro", "ambrose", "thessaly") for n in (1, 2, 3)] \
+    + ["spirit.jaymoskingdoms.quiet.word.1"]
+STORY_END = "story.jaymoskingdoms.summary.end"
+
+
+def realm_free(text):
+    """A tale's realm name is filled in on screen, so the voice says "a realm" / "the realm" instead."""
+    return text.replace("in %s", "in a realm").replace("%s", "the realm")
+
+
+def lines(lang):
+    """(voice, lang key, text) for every voiced line, questions first so a short run still voices every page."""
+    s = "story.jaymoskingdoms."
+    out = [("narrator", s + q + ".title", lang[s + q + ".title"] + " " + lang[s + q + ".sub"]) for q in QUESTIONS]
+    for q in QUESTIONS:
+        for key in lang:
+            parts = key.split(".")
+            if key.startswith(s + q + ".") and len(parts) == 5 and parts[4] == "tale":
+                out.append(("narrator", key, realm_free(lang[key])))
+            if len(parts) == 4 and key.startswith(s + q + ".") and parts[3] not in ("title", "sub"):
+                realm = s + "realm." + parts[3]
+                if realm in lang:
+                    out.append(("narrator", realm, lang[s + "realm.title"] + " " + lang[realm]))
+    out.append(("narrator", STORY_END, lang["gui.jaymoskingdoms.story.summary_sub"]))
+    for key in SPIRIT_LINES:
+        out.append((key.split(".")[2], key, lang[key]))
+    return out
+
+
+def sound_name(key):
+    """The same rule as Voices.soundPath: (sound id, file under sounds/voice/<voice>/)."""
+    if key.startswith("story.jaymoskingdoms."):
+        voice, rest = "narrator", key[len("story.jaymoskingdoms."):]
+    else:
+        voice, rest = key[len("spirit.jaymoskingdoms."):].split(".", 1)
+    return "voice." + voice + "." + rest, voice + "/" + rest.replace(".", "_")
+
+
+def write_sounds(all_lines):
+    sounds = {}
+    for voice, key, _ in all_lines:
+        sid, file = sound_name(key)
+        entry = {"name": "jaymoskingdoms:voice/" + file}
+        if voice == "narrator":
+            entry["stream"] = True
+        sounds[sid] = {"sounds": [entry]}
+    with open(SOUNDS, "w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(sounds, indent="\t") + "\n")
+    print("wrote", SOUNDS, len(sounds), "sounds")
 
 
 def tidy(wav, rate):
     """Mono, edge silence trimmed (with 80 ms kept), peak at -1 dBFS."""
+    import numpy as np
     wav = np.asarray(wav, dtype=np.float32)
     if wav.ndim > 1:
         wav = wav.mean(axis=1)
@@ -67,35 +106,46 @@ def tidy(wav, rate):
 
 def seeded(seed):
     """voxcpm's generate() takes no seed, so fix the global RNGs before each call instead."""
+    import numpy as np
+    import torch
     torch.manual_seed(seed)
     np.random.seed(seed)
 
 
 def main():
-    only = set(sys.argv[1:])
+    with open(LANG, encoding="utf-8") as f:
+        lang = json.load(f)
+    all_lines = lines(lang)
+    write_sounds(all_lines)
+    if "--sounds" in sys.argv:
+        return
+    only = {a for a in sys.argv[1:] if not a.startswith("--")}
+    todo = [(v, k, t) for v, k, t in all_lines if (not only or v in only)
+            and not os.path.exists(os.path.join(OUT, sound_name(k)[1] + ".ogg"))]
+    print(len(todo), "clips to make")
+    if not todo:
+        return
+    import soundfile as sf
+    from voxcpm import VoxCPM
     os.makedirs(REFS, exist_ok=True)
     model = VoxCPM.from_pretrained("openbmb/VoxCPM2", load_denoiser=False)
     rate = model.tts_model.sample_rate
-    for name, v in VOICES.items():
-        if only and name not in only:
-            continue
-        ref = os.path.join(REFS, name + ".wav")
-        text = v.get("ref", REF_TEXT)
+    for n, (voice, key, text) in enumerate(todo, 1):
+        v = VOICES[voice]
+        ref = os.path.join(REFS, voice + ".wav")
+        ref_text = v.get("ref", REF_TEXT)
         if not os.path.exists(ref):
             seeded(v["seed"])
-            wav = model.generate(text="(" + v["desc"] + ")" + text, cfg_value=2.0, inference_timesteps=10)
+            wav = model.generate(text="(" + v["desc"] + ")" + ref_text, cfg_value=2.0, inference_timesteps=10)
             sf.write(ref, tidy(wav, rate), rate)
             print("designed", ref)
-        for voice, file, line in LINES:
-            if voice != name:
-                continue
-            seeded(v["seed"])
-            wav = model.generate(text=line, prompt_wav_path=ref, prompt_text=text, reference_wav_path=ref,
-                                 cfg_value=2.0, inference_timesteps=10)
-            os.makedirs(os.path.join(OUT, voice), exist_ok=True)
-            path = os.path.join(OUT, voice, file + ".ogg")
-            sf.write(path, tidy(wav, rate), rate, format="OGG", subtype="VORBIS")
-            print("wrote", path)
+        seeded(v["seed"])
+        wav = model.generate(text=text, prompt_wav_path=ref, prompt_text=ref_text, reference_wav_path=ref,
+                             cfg_value=2.0, inference_timesteps=10)
+        path = os.path.join(OUT, sound_name(key)[1] + ".ogg")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        sf.write(path, tidy(wav, rate), rate, format="OGG", subtype="VORBIS")
+        print(f"[{n}/{len(todo)}] wrote", path)
 
 
 if __name__ == "__main__":
