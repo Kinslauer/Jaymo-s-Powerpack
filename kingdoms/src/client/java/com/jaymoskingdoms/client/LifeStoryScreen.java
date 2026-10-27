@@ -35,7 +35,9 @@ import org.jspecify.annotations.Nullable;
  * or picked (its picture, the line of your past it writes, and what it gives). An answer that names a realm (a noble
  * family, a banishment, an oath) is followed by a page of the world's realms. The last page reads the whole story
  * back, with the heritage's look to step through and a Mage's first spell or a Sorcerer's element to pick, and "Live
- * this life" seals it. It can't be shut; the answers so far are kept if something else closes it.
+ * this life" seals it. It can't be shut; the answers so far are kept if something else closes it. (0.7.275) "On second
+ * thought..." asks whether to skip the story: yes picks every answer at random and turns to the story page, where it
+ * can still be changed.
  */
 final class LifeStoryScreen extends Screen {
 	static final int MAX_W = 440, MAX_H = 300, TELL_W = 168, LIST_ROW = 19, MIN_ROW = 12, HEADER = 24, FOOTER = 24;
@@ -47,6 +49,8 @@ final class LifeStoryScreen extends Screen {
 	static final int SCROLL_STEP = 12;
 	/** (0.7.269) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
 	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
+	/** (0.7.275) The skip-the-story ask: its box's size. */
+	static final int ASK_W = 240, ASK_H = 96;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
 	private record Step(@Nullable Question question, boolean realm) {
@@ -67,8 +71,10 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	private final boolean forced;
-	private @Nullable Button back, next, look, heritageButton, classButton;
+	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo;
 	private int scroll, contentH, viewH;
+	/** (0.7.275) Whether "On second thought..." is asking if they'd skip the story. */
+	private boolean asking;
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
 	private static boolean owed;
@@ -321,8 +327,48 @@ final class LifeStoryScreen extends Screen {
 		this.heritageButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleHeritage()).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
 		this.classButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleClass()).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
 		if (!this.forced) {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
+			this.later = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
 		}
+		// (0.7.275) Andy: "a button that says 'on second thought...' then asks if you would like to skip the story"; on the
+		// question pages it sits where the story page's look button does
+		this.skip = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip"), b -> this.asking = true)
+			.bounds(left() + 6, y, TELL_W - 12, 16).build());
+		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
+		this.skipYes = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
+			randomize();
+			this.asking = false;
+			this.scroll = 0;
+		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		this.skipNo = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
+			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+	}
+
+	/**
+	 * (0.7.275) Skip the story: every question answered at random (only answers open here, a realm drawn for one that
+	 * names one), a Mage's spell or a Sorcerer's element drawn too, nothing picked over the story, then the story page,
+	 * where Back and the heritage and class buttons can still change any of it.
+	 */
+	private static void randomize() {
+		java.util.Random random = new java.util.Random();
+		for (Question q : Question.values()) {
+			List<Integer> open = new ArrayList<>();
+			for (int i = 0; i < q.answers().size(); i++) {
+				if (open(q.answers().get(i))) {
+					open.add(i);
+				}
+			}
+			int pick = !q.asked() || open.isEmpty() ? -1 : open.get(random.nextInt(open.size()));
+			draft.answers[q.ordinal()] = pick;
+			if (pick >= 0 && q.answers().get(pick).realm()) {
+				setRealm(q, realms.get(random.nextInt(realms.size())).id());
+			}
+		}
+		draft.heritage = -1;
+		draft.cls = -1;
+		draft.look = -1;
+		Classes.PlayerClass cls = youthClass();
+		draft.option = cls == null || cls.options.isEmpty() ? -1 : random.nextInt(cls.options.size());
+		draft.step = steps().size() - 1;
 	}
 
 	/**
@@ -411,6 +457,10 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (this.asking) {
+			// (only the ask's buttons answer while it's up)
+			return super.mouseClicked(event, doubleClick);
+		}
 		Step s = step();
 		int mx = (int)event.x(), my = (int)event.y();
 		if (s.question != null) {
@@ -457,6 +507,9 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (this.asking) {
+			return true;
+		}
 		if (this.contentH > this.viewH && mouseX >= paneX()) {
 			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
 			return true;
@@ -537,7 +590,40 @@ final class LifeStoryScreen extends Screen {
 					.withColor(draft.cls >= 0 ? ACCENT : Ui.TEXT));
 			}
 		}
+		if (this.skip != null) {
+			this.skip.visible = s.question != null;
+		}
+		if (this.asking) {
+			ask(graphics);
+			for (Button b : new Button[] {this.next, this.back, this.look, this.heritageButton, this.classButton, this.later, this.skip}) {
+				if (b != null) {
+					b.visible = false;
+				}
+			}
+		} else if (this.later != null) {
+			this.later.visible = true;
+		}
+		if (this.skipYes != null && this.skipNo != null) {
+			this.skipYes.visible = this.asking;
+			this.skipNo.visible = this.asking;
+		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** (0.7.275) The skip-the-story ask, over the dimmed page: the question, what skipping does, and the yes and no under it. */
+	private void ask(GuiGraphicsExtractor graphics) {
+		graphics.fill(left(), top(), left() + panelW(), top() + panelH(), 0xC0000000);
+		int x = (this.width - ASK_W) / 2, y = top() + (panelH() - ASK_H) / 2;
+		Ui.panel(graphics, x, y, ASK_W, ASK_H, ACCENT);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.story.skip.ask"), x + 10, y + 8, ASK_W - 20, ACCENT);
+		int ty = y + 24;
+		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.skip.desc"), ASK_W - 20)) {
+			if (ty + Ui.LINE > y + ASK_H - 26) {
+				break;
+			}
+			graphics.text(this.font, line, x + 10, ty, Ui.TEXT);
+			ty += Ui.LINE;
+		}
 	}
 
 	private Component heading(Step s) {
