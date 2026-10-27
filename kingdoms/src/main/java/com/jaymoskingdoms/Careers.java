@@ -1374,8 +1374,12 @@ public final class Careers {
 		options.add(Component.translatable("talk.jaymoskingdoms.work.close"));
 		enabled.add(true);
 		List<Job> short_ = open.stream().filter(j -> shortOf(level, f, j)).toList();
-		Component words = short_.isEmpty() ? Component.translatable("talk.jaymoskingdoms.work.greet", f.name())
-			: Component.translatable("talk.jaymoskingdoms.work.greet_short", f.name(), list(short_));
+		// (0.7.270) who they are and where you stand with their town first (WorkTalk)
+		Component words = WorkTalk.greeting(player, speaker, f, open);
+		if (words == null) {
+			words = short_.isEmpty() ? Component.translatable("talk.jaymoskingdoms.work.greet", f.name())
+				: Component.translatable("talk.jaymoskingdoms.work.greet_short", f.name(), list(short_));
+		}
 		send(player, speaker, words, actions, options, enabled);
 	}
 

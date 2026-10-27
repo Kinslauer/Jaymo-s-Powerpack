@@ -16,6 +16,7 @@ import com.jaymoskingdoms.Prejudice;
 import com.jaymoskingdoms.Recollections;
 import com.jaymoskingdoms.Rulers;
 import com.jaymoskingdoms.SharedHistory;
+import com.jaymoskingdoms.ShipTalk;
 import com.jaymoskingdoms.SkinTones;
 import com.jaymoskingdoms.Tails;
 import com.jaymoskingdoms.VillagerHeritage;
@@ -60,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
  * (0.7.254) "Thank them", "Apologise", "Clear the air", "Ask how they are" ({@link SharedHistory}): what your history with them calls for.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
+ * (0.7.270) Asked of a ship's crew ({@link ShipTalk#talk}): your berth aboard, her voyage, your lay.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -160,9 +162,13 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && Careers.ANSWER.equals(answer)) {
-			// (0.7.220) a talk about work: what their town has for you
+			// (0.7.220) a talk about work: what their town has for you; (0.7.270) aboard ship, your berth and her voyage
 			villager.getInteractions().stopInteracting();
-			Careers.talk(player, villager);
+			if (ShipTalk.offersWork(villager)) {
+				ShipTalk.talk(player, villager);
+			} else {
+				Careers.talk(player, villager);
+			}
 			ci.cancel();
 			return;
 		}

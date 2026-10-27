@@ -3214,3 +3214,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `ChronoPower.usableEarly` so his client lets the key through; `future_echo_slain` is now synced to its owner). He
   gets his own line ("...Sneak+B to wake back where you belong."). Leaping forward again still waits for the unlock.
   Not built or playtested here.
+- **0.17.73, talk about work knows who's asking (Kingdoms 0.7.270):** Andy: "characters should have context sensitive
+  talk options, for example asking the captain about work should tell the player what their role is on the boat
+  either as harpooner or otherwise." A whaler's voyage now keeps each player's berth (`Voyage.berths`: harpooner,
+  deckhand, powder monkey). A whaling life story signs you on as her harpooner; coming aboard while she fits out makes
+  you a deckhand (a small character, her powder monkey). "Talk about work" now shows on any ship's crewman and goes to
+  `ShipTalk` instead of the town's jobs: her captain tells you your berth and its duties and how the voyage stands
+  (sailing in N minutes, outward, whales taken, cutting in, homeward), reckons your lay as the hold stands, lets you
+  change berth before she sails (harpooner needs irons of your own; powder monkey only for the small), and hands his
+  harpooner 4 irons once a voyage when they're down to 1. To someone who isn't a hand he offers each berth while she
+  fits out, or says she's full. Her other hands tell you your berth and theirs and send you to him. Lays now go by
+  berth (harpooner 1.5x a hand's, powder monkey 0.6x; `Whalers.HARPOONER_LAY`, `MONKEY_LAY`), and shipmates call you
+  by your real berth (a sharp-tongued one still calls a deckhand a powder monkey). Warship, merchant and pirate
+  crews say what their ship is about and what they do aboard her. Ashore, a town's "Talk about work" opens by who's
+  speaking (`WorkTalk`): your apprentice, the ruler (your service by rank, or an offer), the watch (your round, or a
+  place on it), one of your own trade, one whose trade the town is hiring for, or anyone to someone already working
+  there. Compile-checked against the 26.3 jars; not seen in game.
