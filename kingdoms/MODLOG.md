@@ -5587,7 +5587,7 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
   `Parties.allied(ServerPlayer, ServerPlayer)`.
 - Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.
 
-## 0.7.266: rides go by on a road screen (pack 0.17.64)
+## 0.7.266: rides go by on a road screen (pack 0.17.65)
 Andy: "this cutscene system should replace our carriage rides, they always get stuck and you cant see anyway, at least
 this gives you an animation and hides imperfections." The idea is Stagecoach's (its Bukkit plugin can't run in a
 Fabric pack; nothing copied, the screen is our own).
