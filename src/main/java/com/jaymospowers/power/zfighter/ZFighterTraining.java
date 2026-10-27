@@ -340,7 +340,7 @@ public final class ZFighterTraining {
 
 	/** Mastery for the form he's in. */
 	static void master(ServerPlayer player, int form, int amount) {
-		// (0.17.47) the god form keeps its own mastery; a legendary line's forms count as Super's 1-3
+		// (0.17.48) the god form keeps its own mastery; a legendary line's forms count as Super's 1-3
 		if (form == ZFighterForms.GOD) {
 			ZFighterGod.master(player, Math.round(amount * rate(player)));
 			return;

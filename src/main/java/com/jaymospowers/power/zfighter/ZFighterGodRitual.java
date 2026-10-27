@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.47, Andy's NOEA picks) The god form ritual. Past Super 3 ({@link ZFighterTraining#formsOpen} at the top), five
+ * (0.17.48, Andy's NOEA picks) The god form ritual. Past Super 3 ({@link ZFighterTraining#formsOpen} at the top), five
  * good-hearted fighters stand in a ring on the Lookout's courtyard and lend their ki to lift one of them into the god
  * form ({@link ZFighterGod}). The ritual circle is painted on the Lookout's floor, south of the pole: a gold block in a
  * 3x3 of chiseled quartz for the one to be lifted, and five amethyst pads on a ring of radius {@code 4} round it. It is

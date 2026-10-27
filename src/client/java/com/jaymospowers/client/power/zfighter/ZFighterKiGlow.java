@@ -64,7 +64,7 @@ public final class ZFighterKiGlow {
 			return null;
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
-		// (0.17.47) a form past Primal Super reads as its tier; a branch form or Ego as a higher form
+		// (0.17.48) a form past Primal Super reads as its tier; a branch form or Ego as a higher form
 		int f = ZFighterBranchForms.tier(player, com.jaymospowers.power.zfighter.ZFighterForms.tier(form == null ? 0 : form));
 		float strength = Math.min(1.0F, f > 0 ? FORM + PER_FORM * f : BASE);
 		// ki full: a flash that fades over a second
@@ -81,7 +81,7 @@ public final class ZFighterKiGlow {
 			return special;
 		}
 		Integer ki = player.getAttached(ZFighterPower.KI_COLOR);
-		// (0.17.47) silver instinct
+		// (0.17.48) silver instinct
 		if (com.jaymospowers.power.zfighter.ZFighterInstinct.active(player)) {
 			return com.jaymospowers.power.zfighter.ZFighterInstinct.COLOR;
 		}

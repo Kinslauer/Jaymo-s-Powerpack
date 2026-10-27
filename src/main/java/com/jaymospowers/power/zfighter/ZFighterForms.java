@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 
 /**
- * (0.17.47, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
+ * (0.17.48, Andy's NOEA picks) Patch 3, forms (track A): the Warrior-born's side. Form numbers beyond the three bought
  * Supers and Primal Super (4, {@link ApeRage#SUPER_4}):
  * <ul>
  * <li>{@link #FALSE_SUPER} (5), a near-death flare before the first Super ({@link ZFighterFalseSuper});</li>

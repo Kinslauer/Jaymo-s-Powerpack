@@ -27,7 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.47, Andy's NOEA picks) Branch forms: the steps past the ladder every Z Fighter climbs (Super, Super 2, Super 3, and
+ * (0.17.48, Andy's NOEA picks) Branch forms: the steps past the ladder every Z Fighter climbs (Super, Super 2, Super 3, and
  * the Warrior-born's Primal Super). A branch form is <b>not</b> a new {@code live.form}: he stays in his top regular form (so
  * the hair, the aura's strength, the Spirit Bomb and every array indexed by form keep working) and this layer, kept in
  * {@link #BRANCH} (the form id, 10 and up; synced to everyone), stands on top of it: its own fists, speed, health, ki

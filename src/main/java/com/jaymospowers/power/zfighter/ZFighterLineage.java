@@ -267,7 +267,7 @@ public final class ZFighterLineage {
 
 	/** The aura's colour for this lineage and form. */
 	public static int color(int lineage, int form) {
-		// (0.17.47) the newer forms (False Super, god, legendary) have a colour of their own, whatever the lineage
+		// (0.17.48) the newer forms (False Super, god, legendary) have a colour of their own, whatever the lineage
 		if (form > ApeRage.SUPER_4) {
 			return ZFighterForms.color(form);
 		}
@@ -288,7 +288,7 @@ public final class ZFighterLineage {
 	}
 
 	public static String formKey(Player player, int form) {
-		// (0.17.47) a legendary-born's Super line is the legendary one
+		// (0.17.48) a legendary-born's Super line is the legendary one
 		if (form >= 1 && form <= ZFighterTraining.FORMS && ZFighterLegendary.mutant(player)) {
 			return "form.jaymospowers.zfighter." + (ZFighterForms.LEGEND_1 + form - 1);
 		}
@@ -699,7 +699,7 @@ public final class ZFighterLineage {
 		live.fleeRestUntil = 0L;
 		live.roamAt = 0L;
 		player.setAttached(GREAT_APE, true);
-		// (0.17.47) a fighter who has gone Super turns golden
+		// (0.17.48) a fighter who has gone Super turns golden
 		ZFighterGoldenApe.began(player);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);

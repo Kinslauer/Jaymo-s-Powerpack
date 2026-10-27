@@ -15,7 +15,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.47, Andy's NOEA picks) The golden Great Ape. A Z Fighter who has gone Super ({@link ZFighterTraining#formsOpen} of
+ * (0.17.48, Andy's NOEA picks) The golden Great Ape. A Z Fighter who has gone Super ({@link ZFighterTraining#formsOpen} of
  * 1 or more) and turns Great Ape under the moon is a golden ape: gold fur ({@code zfighter_great_ape_golden.png}, the
  * client swaps the skin), {@link #FISTS} harder fists and {@link #HEALTH} more health on the ape's own, a little faster
  * ({@link #SPEED} less lumbering), and the ape keeps a bit more of his mind: its rage builds at {@link #RAGE_FACTOR} of

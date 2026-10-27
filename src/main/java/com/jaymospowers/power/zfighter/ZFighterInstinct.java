@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.47, Andy's NOEA picks) Silver instinct: a state on top of the god form, costly and short. A quick tap of Z in the
+ * (0.17.48, Andy's NOEA picks) Silver instinct: a state on top of the god form, costly and short. A quick tap of Z in the
  * god form (half mastered, {@link #MASTERY}) lets the body act before the mind: for {@link #DURATION} ticks every melee
  * blow and every projectile aimed at him is slipped ({@link #BASE_CHANCE}, up to {@link #BASE_CHANCE} +
  * {@link #MASTERY_CHANCE} with mastery; each slip costs {@link #DODGE_KI} ki), and a slipped blow is answered at once
