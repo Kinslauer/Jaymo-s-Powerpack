@@ -330,6 +330,8 @@ public final class Downed {
 			untend(body);
 			if (body instanceof ServerPlayer player) {
 				Temperaments.gotUp(level, helper, player);
+				// (0.7.254) they stay a moment, to be thanked ({@link SharedHistory})
+				SharedHistory.revived(helper, player);
 			}
 			return true;
 		}
