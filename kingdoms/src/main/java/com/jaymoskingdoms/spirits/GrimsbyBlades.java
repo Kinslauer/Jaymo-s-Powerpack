@@ -1,7 +1,9 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
+import com.jaymoskingdoms.Trees;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -31,6 +35,8 @@ final class GrimsbyBlades {
 	static final float SHIELD_SECONDS = 5.0F;
 	/** The hammer throws its foe this far up (blocks per tick), and a greatsword sweep shoves this hard. */
 	static final double HAMMER_LIFT = 0.7, SWEEP_SHOVE = 0.6;
+	/** A far strike: the foes within the form's reach times this of the one aimed at are struck with it. */
+	static final double SPLASH = 0.6;
 	/** The slash mote colour: Grimsby's steel-blue-white. */
 	static final DustParticleOptions EDGE = new DustParticleOptions(0x9AB8FF, 1.0F);
 
@@ -103,9 +109,29 @@ final class GrimsbyBlades {
 	private static boolean strike(ServerPlayer player, SpiritState state, Form form) {
 		ServerLevel level = (ServerLevel)player.level();
 		long now = level.getGameTime();
-		List<LivingEntity> foes = SpiritFoes.cone(player, form.reach(), form.halfArc(), true);
+		// the arm reaches out to what you aim at (Andy: "they need to reach way out to whatever you aim at, within 20 blocks"),
+		// and the form strikes there: the foe aimed at and those about it, the form's own arc taken round them
+		LivingEntity aimed = Arcana.sighted(player);
+		Vec3 at = null;
+		List<LivingEntity> foes;
+		if (aimed != null && player.distanceTo(aimed) > form.reach() && player.distanceTo(aimed) <= HandMoves.REACH
+			&& HandMoves.foe(player, aimed)) {
+			at = aimed.position().add(0.0, aimed.getBbHeight() * 0.5, 0.0);
+			Vec3 center = at;
+			double splash = form.reach() * SPLASH;
+			foes = new java.util.ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, aimed.getBoundingBox().inflate(splash),
+				e -> e != aimed && HandMoves.foe(player, e) && e.position().distanceTo(center) <= splash + e.getBbWidth()));
+			foes.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(center)));
+			foes.add(0, aimed);
+			CastHints.setReach(player, player.getEyePosition().distanceTo(at));
+		} else {
+			foes = SpiritFoes.cone(player, form.reach(), form.halfArc(), true);
+			if (!foes.isEmpty()) {
+				CastHints.setReach(player, Math.min(form.reach(), player.getEyePosition().distanceTo(foes.get(0).position().add(0.0, foes.get(0).getBbHeight() * 0.5, 0.0))));
+			}
+		}
 		if (foes.isEmpty()) {
-			return false;
+			return form == AXE && fellTree(level, player);
 		}
 		Combo combo = COMBOS.get(player.getUUID());
 		int blows = combo != null && combo.form().equals(form.id()) && now - combo.last() <= form.cooldown() + COMBO_TICKS ? combo.blows() : 0;
@@ -113,7 +139,7 @@ final class GrimsbyBlades {
 		boolean last = blows >= 3;
 		COMBOS.put(player.getUUID(), new Combo(form.id(), last ? 0 : blows, now));
 		float damage = form.damage() * Spirits.damageScale(state) * (last ? FINISHER : 1.0F);
-		slash(level, player, form, last);
+		slash(level, player, form, last, at);
 		for (LivingEntity foe : foes.subList(0, Math.min(form.most(), foes.size()))) {
 			if (form.breaks()) {
 				SpiritFoes.breakShield(level, foe, SHIELD_SECONDS);
@@ -137,10 +163,29 @@ final class GrimsbyBlades {
 		return true;
 	}
 
-	/** The arc of the cut: motes the attuned see, a sparkle for all, and the sound of it. */
-	private static void slash(ServerLevel level, ServerPlayer player, Form form, boolean last) {
-		Vec3 eye = player.getEyePosition().add(0.0, -0.35, 0.0);
+	/** The axe at a tree you aim at, out to 20 blocks with nothing to fight: the whole tree comes down in the one blow. */
+	private static boolean fellTree(ServerLevel level, ServerPlayer player) {
+		HitResult hit = player.pick(HandMoves.REACH, 0.0F, false);
+		if (!(hit instanceof BlockHitResult block) || hit.getType() != HitResult.Type.BLOCK) {
+			return false;
+		}
+		if (Trees.fellAtOnce(level, block.getBlockPos(), player) <= 0) {
+			return false;
+		}
+		Vec3 at = hit.getLocation();
+		CastHints.setReach(player, player.getEyePosition().distanceTo(at));
+		slash(level, player, AXE, true, at);
+		if (player.getRandom().nextFloat() < 0.15F) {
+			SpiritVoice.say(player, "move");
+		}
+		return true;
+	}
+
+		/** The arc of the cut: motes the attuned see, a sparkle for all, and the sound of it. */
+	private static void slash(ServerLevel level, ServerPlayer player, Form form, boolean last, Vec3 at) {
 		Vec3 look = player.getLookAngle();
+		// (a far strike draws its arc about the foe it reached, as if swung from just short of it)
+		Vec3 eye = at == null ? player.getEyePosition().add(0.0, -0.35, 0.0) : at.subtract(look.scale(form.reach() * 0.85));
 		double half = Math.toRadians(Math.max(form.halfArc(), 20.0));
 		int points = form == GREATSWORD ? 14 : form == SPEAR ? 8 : 9;
 		for (int i = 0; i < points; i++) {
@@ -156,7 +201,8 @@ final class GrimsbyBlades {
 			level.sendParticles(form == GREATSWORD && i % 4 == 0 ? ParticleTypes.SWEEP_ATTACK : ParticleTypes.CRIT, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		float pitch = form == HAMMER ? 0.6F : form == GREATSWORD ? 0.8F : form == SPEAR ? 1.2F : 1.0F;
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), form == HAMMER ? SoundEvents.ANVIL_LAND : last ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_SWEEP,
+		Vec3 heard = at == null ? player.position() : at;
+		level.playSound(null, heard.x, heard.y, heard.z, form == HAMMER ? SoundEvents.ANVIL_LAND : last ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, form == HAMMER ? 0.5F : 0.9F, pitch);
 	}
 }
