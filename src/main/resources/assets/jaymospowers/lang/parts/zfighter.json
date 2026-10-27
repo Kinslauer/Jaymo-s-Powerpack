@@ -183,6 +183,7 @@
   "message.jaymospowers.zfighter_ape_end": "You shrink back to yourself.",
   "message.jaymospowers.zfighter_ape_wild": "The full moon takes you. You can't stop it.",
   "message.jaymospowers.zfighter_ape_crippled": "Your legs give way!",
+  "message.jaymospowers.zfighter_ape_grabbed": "%s has you in its grip!",
   "message.jaymospowers.zfighter_tail_cut": "Your tail's been cut off.",
   "message.jaymospowers.villager_ape_turn": "Something tears loose from %s's belt under the full moon. They're growing...",
   "message.jaymospowers.villager_ape_crippled": "The great beast crashes down. Its tail lies loose behind it.",

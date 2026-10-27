@@ -264,7 +264,7 @@ public final class ZFighterLineage {
 	}
 
 	/** A Warrior-born with no Z Fighter power: his Great Ape is the wild one (berserk, never his to steer). */
-	static boolean wild(Player player) {
+	public static boolean wild(Player player) {
 		return !Powers.has(player, ZFighterPower.INSTANCE);
 	}
 
@@ -596,6 +596,10 @@ public final class ZFighterLineage {
 			}
 			return;
 		}
+		if (ApeGrab.tick(player, live, level, now)) {
+			// (0.17.68) his grab has him: he stands and plays it out
+			return;
+		}
 		if (wild || ApeRage.tick(player, live, level, now)) {
 			// (0.15.148) the wild ape is always berserk; a Z Fighter's only in a fit ({@link ApeRage})
 			berserk(player, live, level, now);
@@ -747,6 +751,7 @@ public final class ZFighterLineage {
 			return;
 		}
 		player.removeAttached(ApeSmash.CHARGE);
+		ApeGrab.end(player, live);
 		player.removeAttached(GREAT_APE);
 		ZFighterGoldenApe.ended(player);
 		player.removeAttached(CRIPPLED);
@@ -913,6 +918,11 @@ public final class ZFighterLineage {
 		}
 		if (player.hasAttached(WILD_GOAL)) {
 			player.removeAttached(WILD_GOAL);
+		}
+		if (now >= live.grabReadyAt && inReach(player, live, target) && ApeGrab.begin(player, live, level, target, now)) {
+			// (0.17.68) every so often the wild ape takes its quarry in hand instead
+			live.berserkSince = now;
+			return;
 		}
 		if (now >= live.berserkSwingAt && inReach(player, live, target)) {
 			live.berserkSwingAt = now + BERSERK_SWING_EVERY;

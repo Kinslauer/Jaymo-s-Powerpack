@@ -3185,4 +3185,19 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   Guns (Andy: "All guns should red glint too"): `FutureGuns` gunners glint red with a click 10 ticks before each burst, and
   their bullets carry the unparryable tag; `Guard` now counts hitscan shots as projectiles, and a tagged ball or any TaCZ
   bullet is blocked but never parried.
-
+- **0.17.68, the Giants' and Great Apes' grab (Kingdoms 0.7.268):** Andy: "Giants and apes need a grab attack that is
+  telegraphed and fairly slow, but deals massive damage to a single target, with a letterboxed animation". `power/zfighter/ApeGrab`:
+  the Great Ape's grab in five phases, 30 ticks of wind-up with a roar and the right hand reared up behind him (red motes at the
+  hand; step out of its reach and it closes on nothing), 8 ticks of the hand coming down, 40 held at his chest and squeezed (a
+  blow's 0.3 every 10 ticks), 8 of hurling the catch into the ground (4 blows' worth, `GroundCracks`, an impact frame, a shake,
+  the catch flung clear), 20 of straightening up. The catch is carried every tick (players by `teleportTo` keeping their
+  rotation, mobs by `setPos` facing him), can't be bigger than the ape, another ape, or a creative/spectating player. A Z
+  Fighter's ape grabs by holding the punch (`ApeSmash`) 50 ticks (`HOLD_TO_GRAB`; a growl and a puff of red when it's ready),
+  taking the nearest thing in front of him his hand reaches, else the punch lands as before; the wild apes (a Warrior-born's and
+  the raging villagers', `VillagerApe`) grab their quarry every 300 ticks or so instead of a swing. Synced attachment `GRAB`
+  (`Grab(start, held)`) poses the arm on every client (`ZFighterApe.Model.grab`, the twin of Kingdoms' `GiantModel.grab`) and
+  holds the wild ape's player still (`ZFighterApeInputMixin`). The film (`UltimateFilm.PUSH_IN`, 56 ticks): the catch, a
+  player, sees the ape's face come down on them, the ape's own player watches over his shoulder, everyone within 48 blocks gets
+  the bars. Kingdoms' `AetherGiant` has the same grab (its own target, 9-block reach, 4 squeeze / 40 slam, every 400-600
+  ticks), and calls the film through `PowersCompat.film` by reflection. Lang line `zfighter_ape_grabbed`. Compile-checked only:
+  the carry's smoothness for a player (teleports every tick) and the hand's fit to the model have not been seen in game.

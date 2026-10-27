@@ -146,14 +146,40 @@ public class AetherGiant extends Monster {
 	static final int CRACK_SLOTS = 160, CRACK_ID_BASE = 0x4A000000;
 	/** Entity events: its right or left foot came down. */
 	private static final byte STEP_RIGHT = 90, STEP_LEFT = 91;
+	/**
+	 * (0.7.268) Andy: "a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target, with a
+	 * letterboxed animation". Its grab, in ticks: it rears back with a roar, its hand drawn up behind it ({@link #GRAB_WINDUP};
+	 * run clear of its reach and the hand closes on nothing), then the hand comes down on its target ({@link #GRAB_SNATCH}),
+	 * lifts it to its chest and squeezes ({@link #GRAB_HOLD}, {@link #SQUEEZE_DAMAGE} every {@link #SQUEEZE_EVERY}), and hurls it
+	 * into the ground ({@link #GRAB_SLAM}, {@link #SLAM_DAMAGE}, thrown {@link #SLAM_THROW}); then it straightens up
+	 * ({@link #GRAB_RECOVER}). How often it may (ticks, plus up to half again), how near its target must be to start, how far
+	 * its hand reaches when it closes, and how far round the film's bars are seen.
+	 */
+	public static final int GRAB_WINDUP = 30, GRAB_SNATCH = 8, GRAB_HOLD = 40, GRAB_SLAM = 8, GRAB_RECOVER = 20;
+	public static final int GRAB_TOTAL = GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM + GRAB_RECOVER;
+	static final int GRAB_TICKS = 400, SQUEEZE_EVERY = 10;
+	static final double GRAB_TRIGGER = 9.0, GRAB_REACH = 9.0, GRAB_CLIMB = 6.0, SLAM_THROW = 1.2, FILM_RANGE = 48.0;
+	static final float SQUEEZE_DAMAGE = 4.0F, SLAM_DAMAGE = 40.0F;
+	/** Where its hand holds its catch: ahead and to its right of its middle (shares of its width), this high (share of its height). */
+	static final double HAND_AHEAD = 0.55, HAND_SIDE = 0.45, HAND_UP = 0.55;
+	/** The hand's lift into the hold and its drop into the slam run over this many ticks of each. */
+	public static final int LIFT_TICKS = 10;
+	/** The ground round where its catch is slammed is thrown up this far (blocks). */
+	static final double SLAM_DUST = 3.0;
 
 	private static final EntityDataAccessor<Byte> SWING = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.BYTE);
+	/** (0.7.268) The game time its grab began (Long.MIN_VALUE: it isn't grabbing), and whom it holds (-1: no one). */
+	private static final EntityDataAccessor<Long> GRAB_START = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.LONG);
+	private static final EntityDataAccessor<Integer> GRAB_HELD = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.INT);
 	private static final Identifier RAGE_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_rage");
 
 	private final Element element;
 	/** The monolith it rose beside (null if it was summoned). */
 	private @Nullable BlockPos monolith;
 	private int stampCooldown = STAMP_TICKS, windup, powerCooldown = POWER_TICKS, swingTicks;
+	/** (0.7.268) Ticks before it may grab again, where its hand closed, and where its catch is slammed down. */
+	private int grabCooldown = GRAB_TICKS;
+	private @Nullable Vec3 snatchAt, slamAt;
 	private boolean raging;
 	/** (Client) how far each arm's swing has run. */
 	private int leftCounter, rightCounter;
@@ -225,6 +251,20 @@ public class AetherGiant extends Monster {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(SWING, (byte)0);
+		entityData.define(GRAB_START, Long.MIN_VALUE);
+		entityData.define(GRAB_HELD, -1);
+	}
+
+	/** (0.7.268) How many ticks into its grab it is ({@link #GRAB_TOTAL} long), or -1 when it isn't grabbing (both sides). */
+	public int grabTick() {
+		long start = this.entityData.get(GRAB_START);
+		return start == Long.MIN_VALUE ? -1 : (int)(this.level().getGameTime() - start);
+	}
+
+	/** Whether it's in its grab (winding up, holding, slamming or straightening). */
+	public boolean grabbing() {
+		int t = this.grabTick();
+		return t >= 0 && t < GRAB_TOTAL;
 	}
 
 	/** Which arm is swinging (both for a stamp), 0 for none. */
@@ -310,8 +350,19 @@ public class AetherGiant extends Monster {
 			}
 			return;
 		}
+		if (this.grabbing()) {
+			this.grab(level);
+			return;
+		}
 		LivingEntity target = this.getTarget();
 		boolean fighting = target != null && target.isAlive();
+		if (this.grabCooldown > 0) {
+			this.grabCooldown--;
+		} else if (fighting && this.getTarget() instanceof LivingEntity prey && this.canGrab(prey)
+			&& this.distanceToSqr(prey) < Mth.square(this.getBbWidth() / 2.0 + GRAB_TRIGGER)) {
+			this.beginGrab(level, prey);
+			return;
+		}
 		if (fighting && this.getNavigation().isDone()
 			&& this.distanceToSqr(target) > Mth.square(this.getBbWidth() / 2.0 + STAMP_TRIGGER / 2.0)) {
 			this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.1);
@@ -358,6 +409,186 @@ public class AetherGiant extends Monster {
 			}
 			level.destroyBlock(pos, this.random.nextFloat() < TRAMPLE_DROPS, this);
 		}
+	}
+
+	// ---- its grab (0.7.268) ----------------------------------------------------------------------------------------
+
+	/** What it may grab: anything living it may hurt that isn't riding, another Giant, or too big to lift. */
+	private boolean canGrab(LivingEntity prey) {
+		return prey.isAlive() && !(prey instanceof AetherGiant) && !prey.isPassenger() && prey.getBbHeight() < HEIGHT * 0.5
+			&& !(prey instanceof Player p && (p.isCreative() || p.isSpectator()));
+	}
+
+	/** It rears back for the grab: a roar, its hand drawn up behind it; everyone near gets the warning. */
+	private void beginGrab(ServerLevel level, LivingEntity prey) {
+		this.getNavigation().stop();
+		this.entityData.set(GRAB_START, level.getGameTime());
+		this.entityData.set(GRAB_HELD, -1);
+		this.snatchAt = null;
+		this.slamAt = null;
+		this.grabCooldown = GRAB_TICKS + this.random.nextInt(GRAB_TICKS / 2);
+		this.playSound(SoundEvents.WARDEN_ROAR, 3.0F, 0.45F);
+		this.playSound(SoundEvents.RAVAGER_ROAR, 2.5F, 0.4F);
+	}
+
+	/** Its grab, tick by tick: the wind-up, the snatch, the hold and squeeze, the slam, and straightening up. */
+	private void grab(ServerLevel level) {
+		int t = this.grabTick();
+		this.getNavigation().stop();
+		LivingEntity prey = this.held(level);
+		if (t < GRAB_WINDUP) {
+			// drawn back, watching its target: the warning
+			LivingEntity target = this.getTarget();
+			if (target != null) {
+				this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+				this.yBodyRot = this.yHeadRot;
+			}
+			if (t % 3 == 0) {
+				Vec3 hand = this.hand(0.0);
+				level.sendParticles(this.element.mote, hand.x, hand.y, hand.z, 6, 1.5, 1.5, 1.5, 0.05);
+			}
+			if (t == GRAB_WINDUP - 1) {
+				this.snatch(level, target);
+			}
+			return;
+		}
+		if (prey == null) {
+			// its hand closed on nothing (or its catch is gone): it straightens up
+			if (t < GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM) {
+				this.entityData.set(GRAB_START, level.getGameTime() - (GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM));
+			}
+			return;
+		}
+		int held = t - GRAB_WINDUP - GRAB_SNATCH;
+		if (held < 0) {
+			// the hand coming down: its catch is pinned where it stood
+			this.carry(prey, this.snatchAt != null ? this.snatchAt : prey.position());
+			return;
+		}
+		if (held < GRAB_HOLD) {
+			// lifted to its chest and squeezed
+			Vec3 from = this.snatchAt != null ? this.snatchAt : prey.position();
+			double lift = Math.min(1.0, held / (double)LIFT_TICKS);
+			lift = lift * lift * (3.0 - 2.0 * lift);
+			this.carry(prey, from.lerp(this.hand(0.0), lift));
+			if (held > 0 && held % SQUEEZE_EVERY == 0) {
+				prey.hurtServer(level, this.damageSources().mobAttack(this), SQUEEZE_DAMAGE);
+				this.touch(prey, 1);
+				this.playSound(SoundEvents.RAVAGER_STEP, 2.0F, 0.3F);
+				level.sendParticles(ParticleTypes.CRIT, prey.getX(), prey.getY() + prey.getBbHeight() * 0.5, prey.getZ(), 12, 0.6, 0.6, 0.6, 0.1);
+			}
+			if (held == GRAB_HOLD - 1) {
+				this.slamAt = this.groundAhead(level);
+			}
+			return;
+		}
+		int slam = held - GRAB_HOLD;
+		if (slam < GRAB_SLAM) {
+			// hurled down into the ground
+			Vec3 to = this.slamAt != null ? this.slamAt : this.groundAhead(level);
+			double drop = Math.min(1.0, (slam + 1) / (double)GRAB_SLAM);
+			this.carry(prey, this.hand(0.0).lerp(to, drop * drop));
+			if (slam == GRAB_SLAM - 1) {
+				this.slam(level, prey, to);
+			}
+			return;
+		}
+		// straightening up: its catch is let go
+		if (this.entityData.get(GRAB_HELD) >= 0) {
+			this.entityData.set(GRAB_HELD, -1);
+		}
+	}
+
+	/** Its hand closes: on its target if it's still within reach of the hand, else on nothing. */
+	private void snatch(ServerLevel level, @Nullable LivingEntity target) {
+		if (target == null || !this.canGrab(target) || !this.inHandsReach(target)) {
+			this.playSound(SoundEvents.RAVAGER_STEP, 2.0F, 0.5F);
+			Vec3 miss = this.position().add(Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(this.getBbWidth() * 0.5 + GRAB_REACH * 0.5));
+			level.sendParticles(ParticleTypes.POOF, miss.x, miss.y + 0.5, miss.z, 20, 2.0, 0.3, 2.0, 0.05);
+			return;
+		}
+		this.entityData.set(GRAB_HELD, target.getId());
+		this.snatchAt = target.position();
+		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.2F, 0.6F);
+		if (target instanceof Player p) {
+			p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.giant.grabbed", this.getDisplayName())
+				.withStyle(net.minecraft.ChatFormatting.RED));
+		}
+		// the film: its catch (a player) sees the Giant's face come down on them; everyone near gets the bars
+		com.jaymoskingdoms.PowersCompat.film(this, target instanceof net.minecraft.server.level.ServerPlayer sp ? sp : null, com.jaymoskingdoms.PowersCompat.FILM_PUSH_IN,
+			GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM, this.position(), this, FILM_RANGE);
+	}
+
+	/** Whether {@code prey} stands within its hand's reach: round its body, near its own level. */
+	private boolean inHandsReach(LivingEntity prey) {
+		double dx = prey.getX() - this.getX(), dz = prey.getZ() - this.getZ();
+		return dx * dx + dz * dz <= Mth.square(this.getBbWidth() / 2.0 + GRAB_REACH) && Math.abs(prey.getY() - this.getY()) <= GRAB_CLIMB;
+	}
+
+	/** Its catch slammed into the ground at {@code at}: the blow, the ground thrown up, and its catch flung clear. */
+	private void slam(ServerLevel level, LivingEntity prey, Vec3 at) {
+		prey.resetFallDistance();
+		prey.hurtServer(level, this.damageSources().mobAttack(this), SLAM_DAMAGE);
+		this.touch(prey, 2);
+		Vec3 away = Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_THROW);
+		prey.setDeltaMovement(away.x, 0.5, away.z);
+		prey.needsSync = true;
+		prey.syncVelocity = true;
+		this.entityData.set(GRAB_HELD, -1);
+		BlockState ground = level.getBlockState(BlockPos.containing(at.x, at.y - 0.5, at.z));
+		if (!ground.isAir()) {
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.2, at.z, 80, SLAM_DUST, 0.3, SLAM_DUST, 0.3);
+		}
+		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 2, 1.0, 0.2, 1.0, 0.0);
+		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.5F, 0.5F);
+		this.crack(level, BlockPos.containing(at.x, at.y - 0.5, at.z));
+	}
+
+	/** Whom it holds, if it's still there to hold. */
+	private @Nullable LivingEntity held(ServerLevel level) {
+		int id = this.entityData.get(GRAB_HELD);
+		if (id < 0) {
+			return null;
+		}
+		Entity e = level.getEntity(id);
+		if (e instanceof LivingEntity living && living.isAlive() && !living.isRemoved()) {
+			return living;
+		}
+		this.entityData.set(GRAB_HELD, -1);
+		return null;
+	}
+
+	/** Its catch carried to {@code to} (its feet), held still and facing it. */
+	private void carry(LivingEntity prey, Vec3 to) {
+		if (prey instanceof net.minecraft.server.level.ServerPlayer player) {
+			player.teleportTo((ServerLevel)this.level(), to.x, to.y, to.z, net.minecraft.world.entity.Relative.ROTATION, 0.0F, 0.0F, false);
+		} else {
+			prey.setPos(to.x, to.y, to.z);
+			Vec3 face = this.getEyePosition().subtract(prey.getBoundingBox().getCenter());
+			float yaw = (float)(Mth.atan2(face.z, face.x) * Mth.RAD_TO_DEG) - 90.0F;
+			prey.setYRot(yaw);
+			prey.setYBodyRot(yaw);
+			prey.setYHeadRot(yaw);
+		}
+		prey.setDeltaMovement(Vec3.ZERO);
+		prey.needsSync = true;
+		prey.syncVelocity = true;
+		prey.resetFallDistance();
+	}
+
+	/** Where its right hand holds its catch (the catch's feet), {@code ahead} blocks further forward. */
+	private Vec3 hand(double ahead) {
+		float yaw = this.yBodyRot * Mth.DEG_TO_RAD;
+		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw);
+		double w = this.getBbWidth(), forward = w * HAND_AHEAD + ahead, side = w * HAND_SIDE;
+		return new Vec3(this.getX() + fx * forward - fz * side, this.getY() + this.getBbHeight() * HAND_UP, this.getZ() + fz * forward + fx * side);
+	}
+
+	/** The ground ahead of it, under its right hand's side, where its catch is slammed. */
+	private Vec3 groundAhead(ServerLevel level) {
+		Vec3 over = this.hand(this.getBbWidth() * 0.2);
+		double y = groundTop(level, over.x, this.getY(), over.z);
+		return new Vec3(over.x, Double.isNaN(y) ? this.getY() : y, over.z);
 	}
 
 	// ---- its steps (0.7.261) ---------------------------------------------------------------------------------------
@@ -548,6 +779,14 @@ public class AetherGiant extends Monster {
 			this.clearCracks(level);
 		}
 		super.remove(reason);
+	}
+
+	/** Its grab is dropped when it falls: whatever it held is let go. */
+	@Override
+	public void die(DamageSource source) {
+		super.die(source);
+		this.entityData.set(GRAB_START, Long.MIN_VALUE);
+		this.entityData.set(GRAB_HELD, -1);
 	}
 
 	private void rage() {

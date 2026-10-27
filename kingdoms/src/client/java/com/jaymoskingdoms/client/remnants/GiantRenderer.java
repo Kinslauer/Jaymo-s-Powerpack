@@ -41,6 +41,8 @@ public class GiantRenderer extends MobRenderer<AetherGiant, GiantState, GiantMod
 		state.flinch = giant.hurtTime > 0 && giant.hurtDuration > 0 ? (giant.hurtTime - partialTicks) / giant.hurtDuration : 0.0F;
 		state.seed = giant.getId();
 		state.stride = giant.stride(partialTicks);
+		int grab = giant.grabTick();
+		state.grab = grab >= 0 && grab < AetherGiant.GRAB_TOTAL ? grab + partialTicks : -1.0F;
 	}
 
 	/** It doesn't topple sideways when it dies: the model falls on its face and breaks up instead (0.7.184, {@link GiantModel}). */

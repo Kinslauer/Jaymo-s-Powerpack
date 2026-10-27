@@ -162,7 +162,7 @@ public final class ZFighterDemonRealm {
 
 	/**
 	 * Puts the three biomes into the Nether's biome source (the vanilla one, by Fabric's biome API: the data files for the
-	 * biomes are in the jar). (0.17.63) Called from the server and client entrypoints, which run after every mod's main
+	 * biomes are in the jar). (0.17.67) Called from the server and client entrypoints, which run after every mod's main
 	 * entrypoint, never from {@link #init}: once they're added, the Nether preset asks for them in every registry bootstrap,
 	 * and TaCZ builds {@code VanillaRegistries.createWorldLookup()} in its main entrypoint, where only vanilla's biomes
 	 * exist ("No value registered for key jaymospowers:demon_abyss", the server and client crashed on start). The world's

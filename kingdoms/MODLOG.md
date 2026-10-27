@@ -5630,4 +5630,22 @@ Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
   one pistol, two for 25% (gunners always at least two), three for 10%, fired 12-16 ticks apart, each after its glint,
   at a foe 3-22 blocks off, then all reloaded together. Pirate crew pistols moved here from `Pirates.crewFight` (shouts
   only now). Folk pirate deckhands carry one in the off hand and fire it too.
-
+## 0.7.268: the Giants grab (pack 0.17.68)
+Andy: "Giants and apes need a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target,
+with a letterboxed animation". The Aether Giants' grab, in `remnants/AetherGiant` (the Great Apes' twin is Powers'
+`power/zfighter/ApeGrab`):
+- **Five phases** (`GRAB_WINDUP` 30, `GRAB_SNATCH` 8, `GRAB_HOLD` 40, `GRAB_SLAM` 8, `GRAB_RECOVER` 20 ticks): it rears back
+  with a double roar, its right hand drawn up behind it and its element's motes at the hand (the warning; get more than
+  `GRAB_REACH` 9 blocks from its body, or 6 above or below, and the hand closes on nothing with a puff); the hand comes down on
+  its target and pins it where it stood; the catch is lifted to its chest over 10 ticks and squeezed (`SQUEEZE_DAMAGE` 4 every
+  10 ticks, with the element's touch); then hurled into the ground ahead (`SLAM_DAMAGE` 40, the strong touch, thrown
+  `SLAM_THROW` 1.2 and up, block dust, an explosion, the ground cracked as its steps crack it); then it straightens up and
+  lets go. It starts on a target within `GRAB_TRIGGER` 9 blocks, every `GRAB_TICKS` 400 to 600, and the stamp waits for it.
+- **The catch** is carried every tick: players by `teleportTo` with their rotation kept, mobs by `setPos` facing it; velocity
+  zeroed, fall distance reset. Its death lets go. Synced data `GRAB_START`/`GRAB_HELD` tell every client the phase.
+- **Pose** (`client/remnants/GiantModel.grab`): the right arm reared up and flared, brought down, held trembling at the chest,
+  hurled; the body leans back then forward, the head follows, the other arm braces.
+- **The film**: `PowersCompat.film` finds Powers' `UltimateFilm.play`/`witnessed` by reflection (Kingdoms still runs without
+  Powers): the catch, a player, sees the Giant's face push in on them for the snatch, hold and slam (56 ticks); everyone within
+  `FILM_RANGE` 48 blocks gets the bars.
+- Lang line `message.jaymoskingdoms.giant.grabbed`. Compile-checked only.
