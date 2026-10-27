@@ -69,7 +69,7 @@ public final class Fleet {
 	static final int KEEL = 1, DEPTH = 5;
 	/** How far ahead (blocks) her captain looks for land, and how finely (blocks a step). */
 	static final double LOOK = 18.0, LOOK_STEP = 3.0;
-	/** (0.7.239) How many headings she looks along for a way out of a bay. */
+	/** (0.7.243) How many headings she looks along for a way out of a bay. */
 	static final int OFFINGS = 16;
 	/** The headings he tries round a blocked one (degrees off it), nearest first. */
 	static final float[] SWINGS = {25.0F, -25.0F, 50.0F, -50.0F, 80.0F, -80.0F, 115.0F, -115.0F, 150.0F, -150.0F};
@@ -423,7 +423,7 @@ public final class Fleet {
 	}
 
 	/**
-	 * (0.7.239) A way out of a bay: of {@link #OFFINGS} headings, how far each runs in open water (her beam wide, up to
+	 * (0.7.243) A way out of a bay: of {@link #OFFINGS} headings, how far each runs in open water (her beam wide, up to
 	 * {@code reach}); of those running at least half that, the end nearest (gx, gz), else the end of the longest (null:
 	 * none runs two looks out).
 	 */

@@ -444,6 +444,56 @@ final class McaBridge {
 		return true;
 	}
 
+	/**
+	 * (0.7.242) {@link McaCompat#crewman}: a new grown MCA villager in {@code folk}'s place (a ship's crewman set up for
+	 * their role, {@code Crewmen}), in the world: the same blood, gear and toughness, a guard (or {@code sailor}: a
+	 * fisherman), enlisted to the folk's side in its role. The folk is left for the caller.
+	 */
+	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk, boolean sailor) {
+		VillagerProfession job = sailor ? BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value() : ProfessionsMCA.GUARD;
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
+			.spawn(EntitySpawnReason.CONVERSION);
+		if (villager == null) {
+			return null;
+		}
+		villager.snapTo(folk.getX(), folk.getY(), folk.getZ(), folk.getYRot(), 0.0F);
+		Heritage.Kind kind = VillagerHeritage.of(folk);
+		if (kind != null) {
+			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
+				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
+		}
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR && slot.getType() != EquipmentSlot.Type.HAND) {
+				continue;
+			}
+			net.minecraft.world.item.ItemStack worn = folk.getItemBySlot(slot);
+			villager.setItemSlot(slot, worn.copy());
+			villager.setDropChance(slot, 0.0F);
+			if (!worn.isEmpty() && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+				// worn, and kept in their pack too: MCA's guards dress from what they carry
+				villager.getInventory().addItem(worn.copy());
+			}
+		}
+		// their folk's toughness: a captain's health, a knight's blows
+		for (var attribute : List.of(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+			net.minecraft.world.entity.ai.attributes.Attributes.ARMOR, net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS,
+			net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, net.minecraft.world.entity.ai.attributes.Attributes.SCALE)) {
+			var from = folk.getAttribute(attribute);
+			var to = villager.getAttribute(attribute);
+			if (from == null || to == null) {
+				continue;
+			}
+			// (never weaker than MCA makes them; a powder monkey's a boy's size)
+			if (from.getBaseValue() > to.getBaseValue() || attribute == net.minecraft.world.entity.ai.attributes.Attributes.SCALE) {
+				to.setBaseValue(from.getBaseValue());
+			}
+		}
+		villager.setHealth(villager.getMaxHealth());
+		worker(villager).enlist(folk.role(), folk.factionId());
+		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
+		return villager;
+	}
+
 	private static int tier(VillagerEntityMCA v) {
 		var profession = v.getVillagerData().profession();
 		if (profession.is(VillagerProfession.NONE) || profession.is(VillagerProfession.NITWIT)) {
@@ -454,7 +504,8 @@ final class McaBridge {
 
 	static List<Worker> workers(ServerLevel level, AABB box, Predicate<Worker> test) {
 		List<Worker> found = new ArrayList<>();
-		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && test.test(worker(v)))) {
+		// (0.7.242) a ship's crew serve her, not any town: never called on for its work, guard calls or escorts
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box, v -> worker(v).role() >= 0 && !Crewmen.tagged(v) && test.test(worker(v)))) {
 			found.add(worker(v));
 		}
 		return found;
@@ -465,6 +516,10 @@ final class McaBridge {
 			return false;
 		}
 		Enlisted e = worker(villager);
+		if (Crewmen.tagged(villager)) {
+			// (0.7.242) a ship's crewman keeps their berth and side, aboard or ashore (off every roster)
+			return e.role() >= 0;
+		}
 		if (Hermits.is(e)) {
 			// (0.5.62) a floating island's hermit keeps their robe and their island, whatever MCA's menu says
 			if (villager.getProfession() != Professions.WIZARD) {

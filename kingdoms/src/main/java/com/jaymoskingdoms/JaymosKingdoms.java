@@ -132,6 +132,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
 		LOGGER.debug("standing attachment: {}", Standing.LINES);
 		Rulers.register();
+		// 0.7.242: ship crews as MCA villagers
+		Crewmen.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();
 		Prejudice.register();

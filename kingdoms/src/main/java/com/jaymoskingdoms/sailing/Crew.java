@@ -72,7 +72,7 @@ public final class Crew {
 	public @Nullable BlockPos waypoint;
 	public int stuck, lastFired, backing;
 	/**
-	 * (0.7.239) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
+	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
 	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.
 	 */
 	public @Nullable BlockPos detour, stuckAt;

@@ -264,6 +264,11 @@ public final class Pirates {
 		return false;
 	}
 
+	/** (0.7.242) One of a ship's crew as an MCA villager, at their foe ({@link Crewmen}): the folk's pistols and shouts. */
+	static void crewFight(ServerLevel level, PathfinderMob mob, int role) {
+		fight(level, mob, role);
+	}
+
 	private static void fight(ServerLevel level, PathfinderMob folk, int role) {
 		if (role != CAPTAIN && role != GUNNER && role != DECKHAND && role != BOMBARDIER) {
 			return;
@@ -318,12 +323,15 @@ public final class Pirates {
 			0.6F, 1.9F + level.getRandom().nextFloat() * 0.2F);
 	}
 
-	/** {@code folk} is a pirate captain who leads his cove (his death clears it; another captain's doesn't). */
-	static boolean isCoveCaptain(Folk folk) {
-		if (folk.role() != CAPTAIN || folk.level().getServer() == null) {
+	/**
+	 * {@code folk} is a pirate captain who leads his cove (his death clears it; another captain's doesn't): a folk, or
+	 * (0.7.242) one of MCA's villagers at his ship's wheel ({@link Crewmen}).
+	 */
+	static boolean isCoveCaptain(LivingEntity folk) {
+		if (!(folk instanceof Worker w) || w.role() != CAPTAIN || folk.level().getServer() == null) {
 			return false;
 		}
-		Faction camp = Factions.get(folk.level().getServer(), folk.factionId());
+		Faction camp = Factions.get(folk.level().getServer(), w.factionId());
 		return camp != null && camp.leader().isPresent() && camp.leader().get().equals(folk.getUUID());
 	}
 

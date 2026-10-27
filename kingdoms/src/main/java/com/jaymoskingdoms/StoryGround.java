@@ -56,7 +56,7 @@ public final class StoryGround {
 	/** The bell searched for round a village's middle. */
 	static final int BELL_SEARCH = 96;
 	/**
-	 * (0.7.239) The first capital: a village at most this far from spawn (chunks), else a citadel by spawn. Andy's world
+	 * (0.7.243) The first capital: a village at most this far from spawn (chunks), else a citadel by spawn. Andy's world
 	 * raised one in a village 900 blocks off, and making all that land at once stalled the server for nearly a minute.
 	 */
 	static final int CAPITAL_VILLAGE_SEARCH = 24;
@@ -171,7 +171,7 @@ public final class StoryGround {
 			BlockPos spawn = level.getRespawnData().pos();
 			BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, spawn, CAPITAL_VILLAGE_SEARCH, false);
 			BlockPos at = village != null ? village : spawn;
-			// (0.7.239) with no village near, the citadel goes up at the first try, not after waiting out the village's time
+			// (0.7.243) with no village near, the citadel goes up at the first try, not after waiting out the village's time
 			capital = new Job(at, level.getGameTime() + GIVE_UP_TICKS,
 				l -> village != null ? foundInVillage(l, village) : citadel(l, at) != null || !realmless(l.getServer()), l -> citadel(l, at));
 			JaymosKingdoms.LOGGER.info("No realm yet for a life story: raising a capital {}", village != null ? "in the village at " + village : "at spawn");
