@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskitchen:stove_burn",
     "jaymoskitchen:dehydration",
     "jaymoskitchen:heatstroke"
   ]

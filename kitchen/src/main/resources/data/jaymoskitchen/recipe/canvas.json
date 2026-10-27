@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "fd_canvas",
+  "key": {
+    "#": "jaymoskitchen:straw"
+  },
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "result": {
+    "id": "jaymoskitchen:canvas"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "fd_hanging_canvas_sign",
+  "ingredients": [
+    "#jaymoskitchen:hanging_canvas_signs",
+    "#c:dyes/black"
+  ],
+  "result": {
+    "id": "jaymoskitchen:black_hanging_canvas_sign"
+  }
+}

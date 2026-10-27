@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskitchen:stove",
     "minecraft:campfire",
     "minecraft:soul_campfire",
     "minecraft:fire",
