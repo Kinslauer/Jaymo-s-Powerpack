@@ -726,6 +726,7 @@ public final class LifeStory {
 		double y = landed == Start.SKYFALL ? to.getY() + SKYFALL_HEIGHT : to.getY();
 		player.teleportTo(level, to.getX() + 0.5, y, to.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
 		landSafely(player);
+		home(player, level, to);
 		if (landed == Start.SKYFALL) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SKYFALL_TICKS, 0));
 		}
@@ -750,6 +751,15 @@ public final class LifeStory {
 		if (of(player) != null) {
 			landSafely(player);
 		}
+	}
+
+	/**
+	 * (0.7.253, Andy: "keep the default spawn of your start") Where they wake after dying, till a bed says otherwise:
+	 * where their story began. (A whaler's hand is put back aboard her by {@link Whalers}, else wakes at her harbour.)
+	 */
+	static void home(ServerPlayer player, ServerLevel level, BlockPos at) {
+		player.setRespawnPosition(new ServerPlayer.RespawnConfig(
+			net.minecraft.world.level.storage.LevelData.RespawnData.of(level.dimension(), at, player.getYRot(), 0.0F), true), false);
 	}
 
 	/** (0.7.228) Arrived: no fall carried over from where they stood, and a few seconds before anything can hurt them. */
