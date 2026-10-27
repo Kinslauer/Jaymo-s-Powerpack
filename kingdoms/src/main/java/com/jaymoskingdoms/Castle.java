@@ -38,14 +38,17 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
  * (barracks, a training yard, a well), the keep at the back of it.</li>
  * <li><b>The tower</b>: a tall donjon, four storeys: the guard room, the throne room above it, the king's chamber,
  * and the battlements on the roof.</li>
- * <li><b>The citadel</b> (0.5.1, what a seat built from nothing is now): 61 blocks square, see {@link Citadel}.</li>
+ * <li><b>The citadel</b> (0.5.1): 61 blocks square, see {@link Citadel}. Since 0.7.276 a seat built from nothing is
+ * one of the structure mods' real castles ({@link GrandSeats}), and the citadel only stands where none is loaded (or
+ * an operator asks for it: {@link Kind#WALLED}).</li>
  * </ul>
  * Under every throne, behind a hidden trapdoor, a fortified panic room keeps the treasury (and maybe the king). Round
  * the town, watchtowers stand at the kingdom's edge. Each piece is built in its own frame (x across, z inward from
  * its gate, y from its floor) and turned to face the bell.
  */
 final class Castle {
-	enum Kind { KEEP, CASTLE, TOWER, CITADEL }
+	/** {@code CITADEL}: a seat built from nothing (a grand seat, else the citadel); {@code WALLED}: the citadel itself. */
+	enum Kind { KEEP, CASTLE, TOWER, CITADEL, WALLED }
 
 	/** Looks for a site this far from the bell; watchtowers this far out. */
 	static final int SITE_MIN = 20, SITE_MAX = 48, TOWER_MIN = 56, TOWER_MAX = 88;
@@ -130,14 +133,21 @@ final class Castle {
 		RandomSource random = level.getRandom();
 		// (0.5.1: a seat built from nothing is the citadel, unless an operator asks for one of the old kinds)
 		Kind kind = forced != null ? forced : Kind.CITADEL;
+		if (kind == Kind.CITADEL) {
+			// (0.7.276) one of the structure mods' castles, with watchtowers round the town; the citadel if none will do
+			Keep grand = GrandSeats.build(level, kingdom, bell);
+			if (grand != null) {
+				return watchtowers(level, bell, Palette.at(level, bell), random, grand);
+			}
+		}
 		int half = switch (kind) {
 			case KEEP -> 8;
 			case CASTLE -> 17;
 			case TOWER -> 6;
-			case CITADEL -> Citadel.HALF + Citadel.TOWER_HALF + 1;
+			case CITADEL, WALLED -> Citadel.HALF + Citadel.TOWER_HALF + 1;
 		};
 		Site site = switch (kind) {
-			case CITADEL -> site(level, bell, half, Citadel.SITE_MIN, Citadel.SITE_MAX, 0.0);
+			case CITADEL, WALLED -> site(level, bell, half, Citadel.SITE_MIN, Citadel.SITE_MAX, 0.0);
 			case CASTLE -> site(level, bell, half, SITE_MIN + 10, SITE_MAX + 12, 0.0);
 			default -> site(level, bell, half, SITE_MIN, SITE_MAX, 0.0);
 		};
@@ -146,7 +156,7 @@ final class Castle {
 			case KEEP -> KEEP_DEPTH / 2;
 			case CASTLE -> CASTLE_DEPTH / 2;
 			case TOWER -> TOWER_SIZE / 2;
-			case CITADEL -> Citadel.DEPTH / 2;
+			case CITADEL, WALLED -> Citadel.DEPTH / 2;
 		});
 		Keep keep = switch (kind) {
 			case KEEP -> {
@@ -155,18 +165,23 @@ final class Castle {
 			}
 			case CASTLE -> castle(level, frame, p, kingdom, random);
 			case TOWER -> tower(level, frame, p, kingdom, random);
-			case CITADEL -> Citadel.build(level, frame, p, kingdom, random);
+			case CITADEL, WALLED -> Citadel.build(level, frame, p, kingdom, random);
 		};
 		// a way to the gate from the land in front of it (just outside the foundation)
 		approach(level, frame, p, kind == Kind.KEEP ? -2 : -3);
+		JaymosKingdoms.LOGGER.info("{} builds a {} at {}", kingdom.name(), kind.name().toLowerCase(java.util.Locale.ROOT), site.center());
 		// watchtowers round the town's edge (the citadel has towers enough of its own)
+		return kind == Kind.CITADEL || kind == Kind.WALLED ? keep : watchtowers(level, bell, p, random, keep);
+	}
+
+	/** {@code keep} with {@link #WATCHTOWERS} watchtowers raised round the town's edge, their tops among its posts. */
+	private static Keep watchtowers(ServerLevel level, BlockPos bell, Palette p, RandomSource random, Keep keep) {
 		List<BlockPos> posts = new ArrayList<>(keep.posts());
 		double turn = random.nextDouble() * Math.PI * 2.0;
-		for (int i = 0; i < (kind == Kind.CITADEL ? 0 : WATCHTOWERS); i++) {
+		for (int i = 0; i < WATCHTOWERS; i++) {
 			Site spot = site(level, bell, 3, TOWER_MIN, TOWER_MAX, turn + i * Math.PI * 2.0 / WATCHTOWERS);
 			posts.add(watchtower(level, new Frame(spot.center(), spot.facing(), spot.floor(), 2), p, random));
 		}
-		JaymosKingdoms.LOGGER.info("{} builds a {} at {}", kingdom.name(), kind.name().toLowerCase(java.util.Locale.ROOT), site.center());
 		return new Keep(keep.throne(), keep.cellar(), keep.gate(), keep.hall(), List.copyOf(posts));
 	}
 

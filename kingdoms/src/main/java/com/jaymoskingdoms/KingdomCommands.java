@@ -69,6 +69,9 @@ final class KingdomCommands {
 				.then(Commands.literal("keep").executes(c -> found(c, Castle.Kind.KEEP)))
 				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
 				.then(Commands.literal("tower").executes(c -> found(c, Castle.Kind.TOWER)))
+				// (0.7.276) a grand seat (one of the structure mods' castles), or the old walled citadel
+				.then(Commands.literal("grand").executes(c -> found(c, Castle.Kind.CITADEL)))
+				.then(Commands.literal("citadel").executes(c -> found(c, Castle.Kind.WALLED)))
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage))
 				.then(Commands.literal("blossom").executes(BlossomVillages::foundHere)))
 			.then(Crowns.command())
