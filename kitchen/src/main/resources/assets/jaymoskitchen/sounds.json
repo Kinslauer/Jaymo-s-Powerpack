@@ -1,0 +1,27 @@
+{
+  "block.skillet.add_food": {
+    "sounds": [
+      "jaymoskitchen:block/skillet/add_food1",
+      "jaymoskitchen:block/skillet/add_food2"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.block.skillet.add_food"
+  },
+  "block.skillet.sizzle": {
+    "sounds": [
+      "jaymoskitchen:block/skillet/sizzle1",
+      "jaymoskitchen:block/skillet/sizzle2",
+      "jaymoskitchen:block/skillet/sizzle3"
+    ],
+    "subtitle": "subtitles.jaymoskitchen.block.skillet.sizzle"
+  },
+  "item.skillet.attack.strong": {
+    "sounds": [
+      "jaymoskitchen:block/skillet/attack_strong"
+    ]
+  },
+  "item.skillet.attack.weak": {
+    "sounds": [
+      "jaymoskitchen:block/skillet/attack_weak"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "jaymoskitchen:block/crimson_cabinet_front",
+    "side": "jaymoskitchen:block/crimson_cabinet_side",
+    "top": "jaymoskitchen:block/crimson_cabinet_top"
+  }
+}

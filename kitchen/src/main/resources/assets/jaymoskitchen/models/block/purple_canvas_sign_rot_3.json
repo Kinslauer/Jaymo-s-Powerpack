@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_sign_rot_3",
+  "textures": {
+    "all": "jaymoskitchen:block/purple_canvas_sign",
+    "particle": "jaymoskitchen:block/purple_canvas_sign"
+  }
+}

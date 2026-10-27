@@ -1,6 +1,14 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "jaymoskitchen:item/frying_pan_3d"
+    "type": "minecraft:condition",
+    "property": "jaymoskitchen:skillet/is_cooking",
+    "on_true": {
+      "type": "jaymoskitchen:skillet_flip",
+      "model": "jaymoskitchen:item/skillet_cooking"
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "jaymoskitchen:item/frying_pan_3d"
+    }
   }
 }
