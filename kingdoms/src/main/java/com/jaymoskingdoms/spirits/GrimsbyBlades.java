@@ -3,6 +3,7 @@ package com.jaymoskingdoms.spirits;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
+import com.jaymoskingdoms.Trees;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -128,7 +131,7 @@ final class GrimsbyBlades {
 			}
 		}
 		if (foes.isEmpty()) {
-			return false;
+			return form == AXE && fellTree(level, player);
 		}
 		Combo combo = COMBOS.get(player.getUUID());
 		int blows = combo != null && combo.form().equals(form.id()) && now - combo.last() <= form.cooldown() + COMBO_TICKS ? combo.blows() : 0;
@@ -160,7 +163,25 @@ final class GrimsbyBlades {
 		return true;
 	}
 
-	/** The arc of the cut: motes the attuned see, a sparkle for all, and the sound of it. */
+	/** The axe at a tree you aim at, out to 20 blocks with nothing to fight: the whole tree comes down in the one blow. */
+	private static boolean fellTree(ServerLevel level, ServerPlayer player) {
+		HitResult hit = player.pick(HandMoves.REACH, 0.0F, false);
+		if (!(hit instanceof BlockHitResult block) || hit.getType() != HitResult.Type.BLOCK) {
+			return false;
+		}
+		if (Trees.fellAtOnce(level, block.getBlockPos(), player) <= 0) {
+			return false;
+		}
+		Vec3 at = hit.getLocation();
+		CastHints.setReach(player, player.getEyePosition().distanceTo(at));
+		slash(level, player, AXE, true, at);
+		if (player.getRandom().nextFloat() < 0.15F) {
+			SpiritVoice.say(player, "move");
+		}
+		return true;
+	}
+
+		/** The arc of the cut: motes the attuned see, a sparkle for all, and the sound of it. */
 	private static void slash(ServerLevel level, ServerPlayer player, Form form, boolean last, Vec3 at) {
 		Vec3 look = player.getLookAngle();
 		// (a far strike draws its arc about the foe it reached, as if swung from just short of it)

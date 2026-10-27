@@ -5481,5 +5481,8 @@ within 20 blocks. that should also be far reach's extent. animating the hand the
   down; the burst (and a far slam's ring) is where it landed. The aegis and Varro's ward bend the hand up palm out and swell
   it to 2.8x as a shield in front of you (two hands side by side at bond 40). Catch me turns the hands palm up beneath your
   feet, cupped, swelling to 2.6x.
+- **The axe fells trees** (Andy: "the axe should chop trees in a single blow"): with no foe in reach, Grimsby's axe at a
+  tree you aim at (out to 20 blocks) brings the whole tree down at once (`Trees.fellAtOnce`), toppling away from you as a
+  felled tree does, and a woodcutter's orders count it.
 - **Seen the whole way:** `SpiritCullingMixin` grows a keeper's culling box by the reach while it's out, so the arm is drawn
   even when its keeper is off screen. Not seen in game.
