@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskitchen:item/mug",
+  "textures": {
+    "layer0": "jaymoskitchen:item/melon_juice"
+  }
+}

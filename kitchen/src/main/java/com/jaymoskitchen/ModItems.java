@@ -52,12 +52,18 @@ public final class ModItems {
 					ResourceKey.create(Registries.ITEM, JaymosKitchen.id(dish.id()))));
 				continue;
 			}
+			if (dish.pie()) {
+				// (0.5.29) a pie is a block to set down, four slices to cut or eat (see delight/PieBlock)
+				DISHES.put(dish, com.jaymoskitchen.delight.DelightDishes.pie(dish,
+					ResourceKey.create(Registries.ITEM, JaymosKitchen.id(dish.id()))));
+				continue;
+			}
 			// default stats are Good quality; cooking stamps the real quality onto each stack
 			Item.Properties properties = new Item.Properties()
 				.stacksTo(16)
 				.food(new FoodProperties.Builder().nutrition(dish.nutrition()).saturationModifier(dish.saturation()).build());
-			if (dish.bowlFood()) {
-				properties.usingConvertsTo(Items.BOWL);
+			if (dish.remainder() != null) {
+				properties.usingConvertsTo(dish.remainder());
 			}
 			DISHES.put(dish, register(dish.id(), properties));
 		}
@@ -68,8 +74,8 @@ public final class ModItems {
 			output.accept(PMEH);
 			output.accept(JOINT);
 			for (Dish dish : Dish.values()) {
-				// (feasts are listed with the rest of delight/Delight)
-				if (dish.available() && !dish.feast()) {
+				// (feasts are listed with the rest of delight/Delight, pies with delight/DelightDishes)
+				if (dish.available() && !dish.placeable()) {
 					output.accept(DISHES.get(dish));
 				}
 			}

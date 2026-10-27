@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:sweet_berry_cheesecake",
+        "state": {
+          "bites": "0"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:sweet_berry_cheesecake"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/sweet_berry_cheesecake"
+}

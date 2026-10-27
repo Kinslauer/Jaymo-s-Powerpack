@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:apple_pie",
+        "state": {
+          "bites": "0"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:apple_pie"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/apple_pie"
+}
