@@ -412,6 +412,10 @@ public final class ZFighterPower implements Power {
 		ZFighterBattle.init();
 		ZFighterCombo.init();
 		ZFighterImpact.init();
+		// (0.17.45) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
+		ZFighterCombat.init();
+		// (0.17.45) ki sense, scouter, instant teleport, lend ki, air burst, impact frames
+		ZFighterSenses.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -707,6 +711,7 @@ public final class ZFighterPower implements Power {
 		auraHold(player, live, now, max);
 		ZFighterGrowth.tick(player, live);
 		ZFighterBattle.tick(player, live);
+		ZFighterSenses.tick(player, live);
 		if (now % 10 == 0) {
 			refresh(player, live);
 		}
@@ -765,6 +770,11 @@ public final class ZFighterPower implements Power {
 				refresh(player, live);
 			}
 			case ABILITY_4 -> {
+				// (0.17.45) Instant Teleport, when it is on B in place of Flash Step
+				if (ZFighterTeleport.key(player, live, down)) {
+					sync(player, live, maxKi(player));
+					return;
+				}
 				if (down && live.lineage == ZFighterLineage.VERDANT && player.isShiftKeyDown()) {
 					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
 						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
@@ -779,6 +789,9 @@ public final class ZFighterPower implements Power {
 
 	/** G: whichever quick technique is on it. */
 	private static void quick(ServerPlayer player, Live live) {
+		if (ZFighterCombat.quick(player, live)) {
+			return;
+		}
 		switch (ZFighterTraining.of(player).quick()) {
 			case ZFighterTraining.KI_DISC -> {
 				// the arm goes up and the disc forms; it's thrown after the wind-up (ZFighterDisc)

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -256,7 +257,8 @@ public final class ZFighterCombo {
 	private static boolean able(ServerPlayer player, ZFighterPower.Live live) {
 		return player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty() && !Powers.silenced(player)
 			&& !ZFighterLineage.ape(player) && !live.guarding && !live.charging && live.spiritFrom < 0 && live.waveFrom < 0
-			&& live.barrageFrom < 0 && !player.isSleeping();
+			&& live.barrageFrom < 0 && !player.isSleeping()
+			&& !ZFighterRush.active(player) && !ZFighterGrab.holding(player) && !ZFighterPoise.stunned(player);
 	}
 
 	/** Every tick, from {@link ZFighterPower#tick}. */
@@ -484,6 +486,7 @@ public final class ZFighterCombo {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.4F, 1.6F);
 			Shakes.felt(player, at, 12.0, FINISHER_SHAKE + FINISHER_SHAKE_PER_TIER * run.tier, Shakes.ticksFor(FINISHER_SHAKE));
+			ZFighterSenses.impactFrame(level, at);
 			ZFighterImpact.launched(target, player, (float)fists * SLAM_SHARE);
 			run.chase = target.getUUID();
 			run.target = null;
@@ -532,6 +535,11 @@ public final class ZFighterCombo {
 		double reach = player.entityInteractionRange() + REACH_BONUS;
 		double keep = REACH_BONUS + LUNGE_RANGE;
 		double far = reach + LUNGE_RANGE;
+		// (0.17.45) locked on: he fights the one he locked
+		LivingEntity locked = LockOn.target(player);
+		if (locked != null && valid(player, locked) && player.isWithinEntityInteractionRange(locked, far)) {
+			return locked;
+		}
 		if (ZFighterStretchCombo.verdant(player)) {
 			// a Verdant keeps hold of a foe as far as his arms stretch
 			keep = Math.max(keep, ZFighterStretchCombo.lockBonus(player));

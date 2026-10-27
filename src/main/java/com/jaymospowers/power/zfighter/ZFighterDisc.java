@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Soundscape;
 import java.util.HashMap;
@@ -190,7 +191,7 @@ public final class ZFighterDisc {
 		ServerLevel level = t.level;
 		ZFighterPower.Live live = ZFighterPower.live(player);
 		Vec3 eye = player.getEyePosition();
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = LockOn.aim(player);
 		Vec3 from = held(player, sweepAngle(RELEASE_TICK));
 		// a low ceiling: it leaves from where the hand can reach instead
 		BlockHitResult room = level.clip(new ClipContext(eye, from, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

@@ -4,6 +4,7 @@ import com.jaymospowers.power.zfighter.ZFighterGrowth;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterTeleport;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,9 @@ public class ZFighterTrainingScreen extends Screen {
 	private Button limitButton;
 	/** Which page is open (kept between openings). */
 	private static int page;
+	/** (0.17.45) The techniques page shows this many rows; the wheel scrolls the rest. */
+	private static final int TECH_ROWS = 8;
+	private static int techScroll;
 
 	public ZFighterTrainingScreen() {
 		super(Component.translatable("screen.jaymospowers.zfighter.title"));
@@ -115,11 +119,25 @@ public class ZFighterTrainingScreen extends Screen {
 
 	private void techniqueAction(int technique) {
 		ZFighterTraining.Data data = ZFighterTraining.of(this.minecraft.player);
+		if (technique == ZFighterTraining.KI_WEAPON && data.knows(technique) && data.quick() == technique) {
+			// (0.17.45) the ki weapon's button picks its shape (and puts it on G)
+			ClientPlayNetworking.send(new com.jaymospowers.power.zfighter.ZFighterCombat.Shape());
+			return;
+		}
 		send(data.knows(technique) ? ZFighterNet.EQUIP_TECHNIQUE : ZFighterNet.BUY_TECHNIQUE, technique);
 	}
 
 	private static void send(int action, int index) {
 		ClientPlayNetworking.send(new ZFighterNet.Train(action, index));
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (page == TECHNIQUES_PAGE && scrollY != 0.0) {
+			techScroll = Math.max(0, Math.min(ZFighterTraining.TECHNIQUES - TECH_ROWS, techScroll - (int)Math.signum(scrollY)));
+			return true;
+		}
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 
 	@Override
@@ -290,13 +308,27 @@ public class ZFighterTrainingScreen extends Screen {
 		int mouseY) {
 		Component detail = Component.translatable("screen.jaymospowers.zfighter.techniques_hint");
 		int statusX = x + 136;
+		// scrollbar for the rows past the first screenful
+		int track = TECH_ROWS * ROW;
+		graphics.fill(x + w - 4, contentY() - 4, x + w - 3, contentY() - 4 + track, 0x30FFFFFF);
+		int thumb = track * TECH_ROWS / ZFighterTraining.TECHNIQUES;
+		int thumbY = contentY() - 4 + (track - thumb) * techScroll / Math.max(1, ZFighterTraining.TECHNIQUES - TECH_ROWS);
+		graphics.fill(x + w - 4, thumbY, x + w - 3, thumbY + thumb, COLOR_ACCENT);
 		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
-			int ry = contentY() + i * ROW;
+			int row = i - techScroll;
+			if (row < 0 || row >= TECH_ROWS) {
+				techniqueButtons.get(i).visible = false;
+				continue;
+			}
+			int ry = contentY() + row * ROW;
+			techniqueButtons.get(i).setY(ry - 3);
 			String key = ZFighterLineage.techniqueKey(player, i);
 			boolean known = data.knows(i);
 			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
-			boolean equipped = !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
-			String slot = spirit ? "C" : ZFighterTraining.charged(i) ? "V" : "G";
+			// (0.17.45) Instant Teleport lives on B, in place of Flash Step
+			boolean teleport = i == ZFighterTraining.TELEPORT;
+			boolean equipped = teleport ? ZFighterTeleport.equipped(player) : !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
+			String slot = spirit ? "C" : teleport ? "B" : ZFighterTraining.charged(i) ? "V" : "G";
 			graphics.fill(x + 6, ry - 4, x + w - 6, ry + 11, i % 2 == 0 ? COLOR_ROW : 0x18FFFFFF);
 			graphics.text(this.font, slot, x + 10, ry, COLOR_ACCENT);
 			line(graphics, Component.translatable(key), x + 22, ry, statusX - x - 26, known ? COLOR_GOLD : COLOR_TEXT);
@@ -316,9 +348,15 @@ public class ZFighterTrainingScreen extends Screen {
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.learn"));
 				button.active = blocker == null;
 			} else {
-				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.equip"));
-				button.visible = !spirit && !equipped;
+				button.setMessage(Component.translatable(teleport && equipped ? "screen.jaymospowers.zfighter_senses.flash_step" : "screen.jaymospowers.zfighter.equip"));
+				button.visible = teleport || !spirit && !equipped;
 				button.active = true;
+				if (i == ZFighterTraining.KI_WEAPON && equipped) {
+					// (0.17.45) on G, the ki weapon's button is its shape
+					button.setMessage(Component.translatable("technique.jaymospowers.zfighter.ki_weapon."
+						+ com.jaymospowers.power.zfighter.ZFighterKiWeapon.SHAPE_KEYS[com.jaymospowers.power.zfighter.ZFighterKiWeapon.shape(player)]));
+					button.visible = true;
+				}
 			}
 			if (over(mouseX, mouseY, x + 6, ry - 4, w - 12, ROW)) {
 				Component desc = Component.translatable(key + ".desc");

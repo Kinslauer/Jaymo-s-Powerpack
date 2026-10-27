@@ -232,6 +232,8 @@ final class ZFighterBattle {
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK) && !ZFighterLineage.ape(player)) {
 				damage = Math.min(damage, punchCap(player));
 			}
+			// (0.17.45) the ki weapon's edge, on top of the cap: bare-handed, so still fists
+			damage = ZFighterKiWeapon.boost(player, source, damage);
 			return damage;
 		}
 		return damage;

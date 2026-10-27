@@ -81,6 +81,8 @@ public final class BeamClashClient {
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("beam_clash"), BeamClashClient::render);
+		// (0.17.45) the timing game: right click as the marker crosses the window
+		BeamClashTimingClient.init();
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			SOUNDS.clear();
 			spinTicks = 0;

@@ -1,0 +1,17 @@
+{
+  "technique.jaymospowers.zfighter.dragon_rush": "Dragon Rush",
+  "technique.jaymospowers.zfighter.dragon_rush.desc": "G. Dash through the foe in front of you (the one you have locked onto, else the nearest you can see within 14 blocks) with one huge blow, a dragon of ki rising behind you. Costs 30 ki, 13 second cooldown.",
+  "technique.jaymospowers.zfighter.pack_fang": "Pack Fang",
+  "technique.jaymospowers.zfighter.pack_fang.desc": "G. A fast flurry of ten blows with lunges and weaves, the last one heavy; the foe is held in place for all of it. Costs 35 ki, 15 second cooldown.",
+  "technique.jaymospowers.zfighter.hammerlock_pummel": "Hammerlock Pummel",
+  "technique.jaymospowers.zfighter.hammerlock_pummel.desc": "G. Rush in, take hold, three body blows, then throw the foe the way you look so it slams into whatever it meets. Costs 30 ki, 13 second cooldown.",
+  "technique.jaymospowers.zfighter.skyward_chase": "Skyward Chase",
+  "technique.jaymospowers.zfighter.skyward_chase.desc": "G. Kick the foe high into the air, flash up after it and hammer it back down into the ground. Costs 40 ki, 16 second cooldown.",
+  "technique.jaymospowers.zfighter.ki_weapon": "Ki Weapon",
+  "technique.jaymospowers.zfighter.ki_weapon.desc": "G toggles a weapon of ki in your right hand: a blade, a scythe or a clawed lance. While it is out ki drains every second, and your bare-handed blows hit harder (more with Ki Power) and reach further (blade 1, scythe 1.5, lance 2 blocks). They still count as fists. Click the button on this row to change its shape.",
+  "technique.jaymospowers.zfighter.ki_weapon.blade": "Blade",
+  "technique.jaymospowers.zfighter.ki_weapon.scythe": "Scythe",
+  "technique.jaymospowers.zfighter.ki_weapon.lance": "Lance",
+  "message.jaymospowers.zfighter_rush_nofoe": "No foe in sight.",
+  "message.jaymospowers.zfighter_ki_weapon_out": "Ki %s drawn."
+}

@@ -133,6 +133,8 @@ public final class FlightRolls {
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		state.setData(KEY, angle(entity, partialTicks));
+		// (0.17.45) a Z Fighter's body banks into his turns
+		com.jaymospowers.client.power.zfighter.ZFighterBank.extract(entity, state, partialTicks);
 	}
 
 	/** The roll's angle on this render state (0 when not rolling). */
@@ -146,7 +148,7 @@ public final class FlightRolls {
 	 * (1 - the cruise pose's amount; the laid-out body's roll is about its length, in WindPose's tilt).
 	 */
 	public static void rollUpright(LivingEntityRenderState state, PoseStack poseStack, float entityScale, float weight) {
-		float angle = angle(state);
+		float angle = angle(state) + com.jaymospowers.client.power.zfighter.ZFighterBank.angle(state);
 		if (angle == 0.0F || weight <= 0.0F) {
 			return;
 		}

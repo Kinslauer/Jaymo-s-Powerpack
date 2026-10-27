@@ -282,6 +282,7 @@ public final class BeamClash {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Spin.TYPE, Spin.CODEC);
+		BeamClashTiming.init();
 		ServerTickEvents.END_SERVER_TICK.register(BeamClash::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CLASHES.clear();
@@ -353,6 +354,32 @@ public final class BeamClash {
 			level.playSound(null, clash.knot.x, clash.knot.y, clash.knot.z, SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.5F,
 				0.7F + level.getRandom().nextFloat() * 0.5F);
 		}
+	}
+
+	/** (0.17.45, Andy's NOEA picks) How many ticks this player's clash has run, or -1 when they aren't in one (the timing game's clock). */
+	public static int age(ServerPlayer player) {
+		Clash clash = BY_PLAYER.get(player.getUUID());
+		return clash == null ? -1 : clash.age;
+	}
+
+	/**
+	 * (0.17.45, Andy's NOEA picks) The timing game's shove: adds (or, negative, takes) {@code taps} presses' worth of
+	 * surge to this player's side, weighed like a tap by the two powers; a good hit may overshoot the usual surge
+	 * ceiling by {@code cap} times. False when they aren't in a clash.
+	 */
+	public static boolean shove(ServerPlayer player, float taps, float cap) {
+		Clash clash = BY_PLAYER.get(player.getUUID());
+		if (clash == null) {
+			return false;
+		}
+		Side side = clash.side(player.getUUID());
+		float weight = weight(side, clash.other(side));
+		if (taps >= 0.0F) {
+			side.surge = Math.min(SURGE_MAX * weight * cap, side.surge + TAP_PUSH * weight * taps);
+		} else {
+			side.surge = Math.max(0.0F, side.surge + TAP_PUSH * weight * taps);
+		}
+		return true;
 	}
 
 	/** A stream's reach, cut short at the knot while it clashes (from the beam's own tick). */
