@@ -248,7 +248,7 @@ public final class Restoration {
 		}
 	}
 
-	/** Mend: a tap; who you look at (or you), healed over three seconds and a cut closed; the undead seared. */
+	/** Mend: a tap; who you look at (or you), healed over three seconds, a cut closed and any festering cured; the undead seared. */
 	private static void mend(ServerPlayer player, ServerLevel level, @Nullable LivingEntity sighted) {
 		long now = level.getGameTime();
 		if (!ready(player, MEND_READY, "mend", now)) {
@@ -276,6 +276,8 @@ public final class Restoration {
 		}
 		PENDING.add(new Pending(target, player, MEND_HEAL / MEND_PULSES, MEND_PULSES, now + MEND_TICKS / MEND_PULSES));
 		PowersCompat.closeCut(target);
+		// (0.7.260) Andy: "restoration magic should clear festering"
+		PowersCompat.easeFever(target);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.4F, 1.3F);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 14, 0.35, 0.5, 0.35, 0.02);
 		Theft.sorcery(player, level, player.blockPosition());
@@ -358,7 +360,7 @@ public final class Restoration {
 
 	// ---- the spells ------------------------------------------------------------------------------------------------
 
-	/** Mending: who you look at (a friend, within reach), else you; healed, a cut closed. The undead burnt instead. */
+	/** Mending: who you look at (a friend, within reach), else you; healed, a cut closed, festering cured. The undead burnt instead. */
 	static boolean mending(ServerLevel level, Player player, float power) {
 		LivingEntity sighted = Arcana.sighted(player);
 		LivingEntity target = sighted != null && player.distanceTo(sighted) <= MENDING_REACH && (friend(player, sighted) || undead(sighted)) ? sighted : player;
@@ -375,6 +377,7 @@ public final class Restoration {
 		}
 		PowersCompat.mend(target, MENDING_HEAL * power);
 		PowersCompat.closeCut(target);
+		PowersCompat.easeFever(target);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 16, 0.35, 0.5, 0.35, 0.02);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.4F, 1.2F);
 		if (player instanceof ServerPlayer sp) {
@@ -575,6 +578,7 @@ public final class Restoration {
 		}
 		PowersCompat.mend(worst, CLERIC_HEAL);
 		PowersCompat.closeCut(worst);
+		PowersCompat.easeFever(worst);
 		ring(level, worst.position().add(0.0, 0.1, 0.0), 1.0, GOLD_MOTE, 14);
 		level.playSound(null, worst.getX(), worst.getY(), worst.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.4F, 1.2F);
 	}

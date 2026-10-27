@@ -5500,7 +5500,7 @@ within 20 blocks. that should also be far reach's extent. animating the hand the
   and other part-blocks count as wall, so the sea was drawn in their empty half. `Hull.masked` adds the part-blocks with
   no sea beside them, and `ShipRenderer` masks those too.
 
-## 0.7.261: the Giants stomp with every step and sway as they walk (pack 0.17.54)
+## 0.7.261: the Giants stomp with every step and sway as they walk (pack 0.17.55)
 
 - Andy: "Giant enemies should emit a stomp with every step, emitting a shockwave signified by a radiating particle
   effect, cracking the ground and dealing damage to those who dont jump. The giants should also move with a slow sway,

@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:brewing",
+	"input": {
+		"item": "minecraft:potion",
+		"potion_contents": {
+			"potions": "jaymospowers:long_wound_cleansing"
+		}
+	},
+	"output": {
+		"components": {
+			"minecraft:potion_contents": {
+				"potion": "jaymospowers:long_wound_cleansing"
+			}
+		},
+		"id": "minecraft:splash_potion"
+	},
+	"reagent": {
+		"item": "minecraft:gunpowder"
+	}
+}
