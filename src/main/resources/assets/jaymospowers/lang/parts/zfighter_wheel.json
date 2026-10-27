@@ -1,0 +1,11 @@
+{
+  "key.jaymospowers.zfighter_wheel": "Z Fighter: Technique Wheel (hold)",
+  "screen.jaymospowers.zfighter_wheel": "Technique Wheel",
+  "screen.jaymospowers.zfighter_wheel.hint": "Point at a technique and let go of the key",
+  "screen.jaymospowers.zfighter_wheel.empty": "Empty slot: add techniques on the training screen",
+  "screen.jaymospowers.zfighter_wheel.on": "On %s now",
+  "screen.jaymospowers.zfighter_wheel.put": "Let go to put it on %s",
+  "screen.jaymospowers.zfighter_wheel.add": "Put this technique on the technique wheel (hold the wheel key, Y). The wheel holds eight.",
+  "screen.jaymospowers.zfighter_wheel.take_off": "Take this technique off the technique wheel, to make room for another.",
+  "message.jaymospowers.zfighter_wheel.full": "Your technique wheel is full (eight). Take one off on the training screen's Techniques page first."
+}

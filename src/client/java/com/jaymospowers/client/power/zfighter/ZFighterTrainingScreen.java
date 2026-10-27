@@ -4,6 +4,7 @@ import com.jaymospowers.power.zfighter.ZFighterGrowth;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterPower;
+import com.jaymospowers.power.zfighter.ZFighterSlots;
 import com.jaymospowers.power.zfighter.ZFighterTeleport;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ public class ZFighterTrainingScreen extends Screen {
 	/** The box at the bottom that shows the hovered row's full description. */
 	private static final int DETAIL_H = 40;
 	private static final int BUTTON_W = 54;
+	/** (0.17.46) The small wheel button left of each technique's Use button. */
+	private static final int WHEEL_W = 14;
 	private static final int COLOR_PANEL = 0xD0101018;
 	private static final int COLOR_ROW = 0x30FFFFFF;
 	private static final int COLOR_TEXT = 0xFFFFFFFF;
@@ -44,6 +47,8 @@ public class ZFighterTrainingScreen extends Screen {
 	private final List<Button> statButtons = new ArrayList<>();
 	private final List<Button> formButtons = new ArrayList<>();
 	private final List<Button> techniqueButtons = new ArrayList<>();
+	/** (0.17.46) Each technique's wheel button: on the technique wheel (Y) or off it. */
+	private final List<Button> wheelButtons = new ArrayList<>();
 	private final List<Button> tabButtons = new ArrayList<>();
 	private Button limitButton;
 	/** (0.17.46) The stats page's aura style button: each press picks the next style. */
@@ -88,6 +93,7 @@ public class ZFighterTrainingScreen extends Screen {
 		statButtons.clear();
 		formButtons.clear();
 		techniqueButtons.clear();
+		wheelButtons.clear();
 		tabButtons.clear();
 		int w = panelW();
 		int tabW = (w - 16) / 3;
@@ -116,6 +122,8 @@ public class ZFighterTrainingScreen extends Screen {
 			int technique = i;
 			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
 				.bounds(buttonX(), contentY() + i * ROW - 3, BUTTON_W, 14).build()));
+			wheelButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> send(ZFighterNet.WHEEL_SLOT, technique))
+				.bounds(buttonX() - WHEEL_W - 2, contentY() + i * ROW - 3, WHEEL_W, 14).build()));
 		}
 	}
 
@@ -203,6 +211,7 @@ public class ZFighterTrainingScreen extends Screen {
 		limitButton.visible = page == FORMS_PAGE;
 		auraButton.visible = page == STATS_PAGE;
 		show(techniqueButtons, page == TECHNIQUES_PAGE);
+		show(wheelButtons, page == TECHNIQUES_PAGE);
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtons.get(i).active = page != i;
 		}
@@ -339,6 +348,7 @@ public class ZFighterTrainingScreen extends Screen {
 			int row = i - techScroll;
 			if (row < 0 || row >= TECH_ROWS) {
 				techniqueButtons.get(i).visible = false;
+				wheelButtons.get(i).visible = false;
 				continue;
 			}
 			int ry = contentY() + row * ROW;
@@ -361,7 +371,12 @@ public class ZFighterTrainingScreen extends Screen {
 			} else {
 				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.techniqueCost(player, i));
 			}
-			line(graphics, status, statusX, ry, buttonX() - statusX - 4, COLOR_DIM);
+			line(graphics, status, statusX, ry, buttonX() - WHEEL_W - 2 - statusX - 4, COLOR_DIM);
+			Button wheel = wheelButtons.get(i);
+			wheel.setY(ry - 3);
+			wheel.visible = known && ZFighterSlots.fits(i);
+			boolean onWheel = ZFighterSlots.of(player).contains(i);
+			wheel.setMessage(Component.literal(onWheel ? "-" : "+").withColor(onWheel ? COLOR_GOLD : 0xFFFFFFFF));
 			Button button = techniqueButtons.get(i);
 			String blocker = null;
 			if (!known) {
@@ -379,7 +394,9 @@ public class ZFighterTrainingScreen extends Screen {
 					button.visible = true;
 				}
 			}
-			if (over(mouseX, mouseY, x + 6, ry - 4, w - 12, ROW)) {
+			if (wheel.visible && wheel.isHovered()) {
+				detail = Component.translatable(onWheel ? "screen.jaymospowers.zfighter_wheel.take_off" : "screen.jaymospowers.zfighter_wheel.add");
+			} else if (over(mouseX, mouseY, x + 6, ry - 4, w - 12, ROW)) {
 				Component desc = Component.translatable(key + ".desc");
 				detail = blocker != null && !button.active ? desc.copy().append(" ").append(Component.translatable(blocker)) : desc;
 			}

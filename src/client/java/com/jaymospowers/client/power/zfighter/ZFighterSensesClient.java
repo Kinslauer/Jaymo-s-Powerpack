@@ -21,6 +21,7 @@ public final class ZFighterSensesClient {
 		ZFighterScouterClient.init();
 		ZFighterTeleportScreen.register();
 		ZFighterImpactFramesClient.init();
+		ZFighterWheelScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterBank::tick);
 	}
 

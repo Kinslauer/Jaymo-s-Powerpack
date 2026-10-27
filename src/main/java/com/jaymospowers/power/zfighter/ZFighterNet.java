@@ -19,6 +19,8 @@ public final class ZFighterNet {
 	public static final int EQUIP_TECHNIQUE = 5;
 	/** (0.17.46) The aura style picked on the training screen: {@code index} is the style. */
 	public static final int AURA_STYLE = 12;
+	/** (0.17.46) The training screen's wheel button: puts technique {@code index} on the technique wheel or takes it off. */
+	public static final int WHEEL_SLOT = 13;
 	// (6 was the lineage pick: lineages now come from the heritage)
 
 	private ZFighterNet() {
@@ -265,6 +267,7 @@ public final class ZFighterNet {
 			case BUY_TECHNIQUE -> ZFighterTraining.buyTechnique(player, train.index());
 			case EQUIP_TECHNIQUE -> ZFighterTraining.equipTechnique(player, train.index());
 			case AURA_STYLE -> ZFighterAura.pick(player, train.index());
+			case WHEEL_SLOT -> ZFighterSlots.toggle(player, train.index());
 			default -> {
 			}
 		}

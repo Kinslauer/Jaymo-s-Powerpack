@@ -500,6 +500,7 @@ public final class ZFighterTraining {
 	 */
 	static void learn(ServerPlayer player, Data data, int index) {
 		player.setAttached(DATA, data.withLearned(index));
+		ZFighterSlots.add(player, index);
 		if (index == TELEPORT) {
 			ZFighterTeleport.setOnB(player, true);
 		}

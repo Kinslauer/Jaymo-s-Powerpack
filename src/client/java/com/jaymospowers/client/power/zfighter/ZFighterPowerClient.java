@@ -246,7 +246,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	}
 
 	/** The icon on G or V for the technique set there. */
-	private static Item techniqueIcon(int technique) {
+	static Item techniqueIcon(int technique) {
 		return switch (technique) {
 			case ZFighterTraining.KI_DISC -> Items.BOWL;
 			case ZFighterTraining.HOMING_VOLLEY -> Items.FIREWORK_STAR;
