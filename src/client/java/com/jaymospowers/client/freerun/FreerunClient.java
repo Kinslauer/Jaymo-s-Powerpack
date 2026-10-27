@@ -442,7 +442,7 @@ public final class FreerunClient {
 		ticks++;
 		if (face == null || !confirm(player.getAttached(Freerun.WALL) != null) || !input.forward() || input.shift() || ticks > maxTicks
 			|| player.onGround() || !WebWallRun.wallAt(player.level(), player, face, RUN_REACH)) {
-				// (0.15.12) pressing toward the wall as the run ends: take hold of it (anyone since 0.17.74)
+				// (0.15.12) pressing toward the wall as the run ends: take hold of it (anyone since 0.17.76)
 				if (face != null && !input.shift() && !player.onGround()
 					&& keysDirection(player, input, false).dot(new Vec3(face.getStepX(), 0.0, face.getStepZ())) > 0.5
 					&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
@@ -624,7 +624,7 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 		}
 	}
 
-	/** The run's height is spent: cling where you are (anyone since 0.17.74), or let go (drop) while sneaking. */
+	/** The run's height is spent: cling where you are (anyone since 0.17.76), or let go (drop) while sneaking. */
 	private static void finishUp(LocalPlayer player, @Nullable Direction face, Input input) {
 		if (face != null && !input.shift() && !player.onGround()
 			&& Freerun.canMove(player, Freerun.CLING) && tryCling(player, face, false)) {
@@ -739,7 +739,7 @@ player.setDeltaMovement(slideDir.x * slideSpeed, player.getDeltaMovement().y, sl
 
 	// ---- edge catch -----------------------------------------------------------------------------------------------------
 
-	/** (anyone since 0.17.74) Sneak + forward at an edge (pushing to walk off) for {@link Freerun#EDGE_HOLD_TICKS} ticks: hang from the edge, below it. */
+	/** (anyone since 0.17.76) Sneak + forward at an edge (pushing to walk off) for {@link Freerun#EDGE_HOLD_TICKS} ticks: hang from the edge, below it. */
 	private static boolean tryEdge(LocalPlayer player, Input input) {
 		if (!player.onGround() || !input.shift() || !input.forward() || input.backward()) {
 			edgeTicks = 0;

@@ -3230,7 +3230,24 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   speaking (`WorkTalk`): your apprentice, the ruler (your service by rank, or an offer), the watch (your round, or a
   place on it), one of your own trade, one whose trade the town is hiring for, or anyone to someone already working
   there. Compile-checked against the 26.3 jars; not seen in game.
-- **0.17.74, everyone climbs walls; no cut-off text (Kingdoms 0.7.271, Kitchen 0.5.34):** Andy: "everyone should
+- **0.17.75, named characters wear our own outfits; no women at sea (Kingdoms 0.7.272):** Andy found a ship's captain in
+  an anime girl's skin: "we're about to go back to a set library of skins, at least for specific characters because these
+  skins have no place in the pack", and "there shouldnt be any female sailors". The skin came from MCA's online clothing
+  library (players' uploads): fishermen (every sailor) were dressed from clothes tagged "sailor" plus any theme tag
+  ("fantasy", "rpg"...), which let it through. Now:
+  - The library is off (`ClothingLibrary.ENABLED`); anyone in its clothes is dressed again from MCA's own (`Wardrobe`).
+  - `Uniforms`: 188 outfits of our own, at least 4 of each (Andy: "each outfit needs at least 4 variations") (MCA clothing, `assets/jaymoskingdoms/skins/clothing`, listed in
+    `data/jaymoskingdoms/skins/clothing/{male,female,neutral}.json`), drawn by `kingdoms/tools/gen_uniforms.py` from our
+    folk's and sailors' old skins with the face and skin cleared (each villager keeps their own face, hair and skin),
+    plus new plain seamen, masters' coats, more coat and robe colours, guards' belts, jerkins and mail coifs, four marks on a lord's surcoat, and gowns for queens and ladies.
+    Captains (pirate red coat, navy blue, master's brown), pirate deckhands/gunners/powder monkeys/bombardiers, seamen on
+    realm ships, kings, queens, lords and ladies in their overlord's colour, guards in their land's gambeson wear only
+    these. They're put in them when they load, when they're made crew, every 5 s aboard, and on taking or losing a
+    throne; clothes locked in MCA's editor are left alone.
+  - Crews are men: new crewmen are made male, and a woman already aboard is replaced at her station by a man of her
+    blood with her gear, role, side, health share and records (`Crewmen.recast`, as `convert` does for old folk).
+  Compile-checked here; not seen in game.
+- **0.17.76, everyone climbs walls; no cut-off text (Kingdoms 0.7.273, Kitchen 0.5.34):** Andy: "everyone should
   be able to ledge climb, the first rank of free running climber should just increase grip time. also the text is
   cut off on most of these UI". Wall climbing (cling, climb, shimmy, pull up and over, hop to the next wall, cling at
   the end of a wall run, Sneak + forward off an edge into a hang) no longer needs Climber: anyone gets a 3 s grip at

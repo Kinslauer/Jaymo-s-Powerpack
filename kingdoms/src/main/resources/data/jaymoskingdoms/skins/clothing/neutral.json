@@ -1,0 +1,62 @@
+[
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/cold_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/cold_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/cold_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/cold_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/sunny_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/sunny_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/sunny_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/sunny_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/temperate_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/temperate_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/temperate_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/guard/temperate_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  }
+]

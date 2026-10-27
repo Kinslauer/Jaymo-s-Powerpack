@@ -451,10 +451,37 @@ final class McaBridge {
 	 * fisherman), enlisted to the folk's side in its role. The folk is left for the caller.
 	 */
 	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk) {
-		// (0.7.259) Andy: no guards aboard, every one a sailor
+		return crewman(level, folk, folk);
+	}
+
+	/**
+	 * (0.7.272) {@link McaCompat#recast}: a man in {@code her} place (one of a ship's crew), with her blood, gear, role,
+	 * side and stowed weapons. She's left for the caller.
+	 */
+	static @Nullable PathfinderMob recast(ServerLevel level, PathfinderMob her) {
+		if (!(her instanceof Worker w)) {
+			return null;
+		}
+		PathfinderMob man = crewman(level, her, w);
+		if (man == null) {
+			return null;
+		}
+		for (String tag : her.entityTags()) {
+			man.addTag(tag);
+		}
+		List<net.minecraft.world.item.ItemStack> kit = her.getAttached(Crewmen.STOWED);
+		if (kit != null) {
+			man.setAttached(Crewmen.STOWED, kit);
+		}
+		return man;
+	}
+
+	private static @Nullable PathfinderMob crewman(ServerLevel level, PathfinderMob folk, Worker as) {
+		// (0.7.259) Andy: no guards aboard, every one a sailor; (0.7.272) "there shouldnt be any female sailors. they
+		// wouldnt have had that job."
 		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
-		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
-			.spawn(EntitySpawnReason.CONVERSION);
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withGender(Gender.MALE).withPosition(folk.position()).withAge(0)
+			.withProfession(job).spawn(EntitySpawnReason.CONVERSION);
 		if (villager == null) {
 			return null;
 		}
@@ -486,7 +513,7 @@ final class McaBridge {
 			}
 		}
 		villager.setHealth(villager.getMaxHealth());
-		worker(villager).enlist(folk.role(), folk.factionId());
+		worker(villager).enlist(as.role(), as.factionId());
 		villager.setHomeTo(folk.getHomePosition(), folk.getHomeRadius());
 		return villager;
 	}
@@ -808,8 +835,16 @@ final class McaBridge {
 		if (!(mob instanceof VillagerEntityMCA v)) {
 			return false;
 		}
-		ClothingLibrary.ruled(v);
-		return Rulers.is(v) && ClothingLibrary.royal(v);
+		// (0.7.272) a ruler in our robes or gowns, or out of them off the throne ({@link Uniforms})
+		Uniforms.fit(v);
+		return Rulers.is(v) && Uniforms.royal(v);
+	}
+
+	/** (0.7.272) {@link McaCompat#uniform}. */
+	static void uniform(PathfinderMob mob) {
+		if (mob instanceof VillagerEntityMCA v) {
+			Uniforms.fit(v);
+		}
 	}
 
 	static boolean isGuard(PathfinderMob mob) {
