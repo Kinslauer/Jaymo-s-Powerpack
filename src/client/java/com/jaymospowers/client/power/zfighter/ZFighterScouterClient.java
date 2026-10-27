@@ -162,10 +162,12 @@ public final class ZFighterScouterClient {
 				return;
 			}
 		}
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SCOUTER, player);
 		graphics.fill(x, y, x + w, y + 22, 0xA0001810);
 		graphics.outline(x, y, w, 22, glitching ? 0xC0FF4A3A : 0xC07CFFB0);
 		graphics.text(font, glitching ? scramble(now + 7, name.length()) : name, x + 4, y + 3, 0xFFE8FFF0);
 		graphics.text(font, line, x + 4, y + 12, color);
+		ZFighterHudLayout.end(graphics);
 	}
 
 	/** {@code length} characters of digits and noise that change every {@link #SCRAMBLE_EVERY} ticks. */

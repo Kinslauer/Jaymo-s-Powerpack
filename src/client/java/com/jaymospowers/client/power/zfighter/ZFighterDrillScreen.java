@@ -25,6 +25,8 @@ import com.mojang.blaze3d.platform.InputConstants;
  * <li>Ki Control: hold Space to lift your ki, let go and it sinks; keep it inside the drifting band.</li>
  * <li>Shadow Boxing: PUNCH (left click), BLOCK (right click) or DODGE (Space), quickly.</li>
  * <li>Precision: click each target before it shrinks away; the sooner, the more it's worth.</li>
+ * <li>(0.17.58) Memory: four coloured pads light up in a sequence; repeat it (W A S D, the arrow keys or a click on each
+ * pad). Each round is one longer; one slip ends the drill, which pays for the rounds got through.</li>
  * </ul>
  * (0.11.0) Restyled like the H screen: the drills as striped rows (click one to start it) with the box at the bottom
  * showing the hovered one's rules; while one runs, its name and points sit in the header with a bar for how far along it
@@ -53,6 +55,17 @@ public class ZFighterDrillScreen extends Screen {
 	private static final int TARGET_LIFE = 40;
 	private static final float TARGET_SIZE = 14.0F;
 
+	/** (0.17.58) Memory: the first round's length, how many rounds there are, and the sum of every round's length (full marks). */
+	private static final int MEM_START = 3, MEM_ROUNDS = 9, MEM_TOTAL = 63;
+	/** How long each pad of the sequence is lit and dark (ticks), the wait between rounds, and the longest wait for a press. */
+	private static final int MEM_LIT = 14, MEM_GAP = 6, MEM_PAUSE = 24, MEM_TIMEOUT = 160;
+	/** A pad's size and its gap from the middle, and how long a pad you press stays lit. */
+	private static final int MEM_PAD = 34, MEM_SPREAD = 38, MEM_PRESS = 6;
+	/** The pads: up, right, down, left; their keys (W D S A) and their colours. */
+	private static final int[] MEM_KEYS = {InputConstants.KEY_W, InputConstants.KEY_D, InputConstants.KEY_S, InputConstants.KEY_A};
+	private static final int[] MEM_ARROWS = {InputConstants.KEY_UP, InputConstants.KEY_RIGHT, InputConstants.KEY_DOWN, InputConstants.KEY_LEFT};
+	private static final int[] MEM_COLORS = {0xFFE05050, 0xFF4A90E0, 0xFF50C878, 0xFFE8C040};
+
 	private final RandomSource random = RandomSource.create();
 	/** -1: the menu; otherwise the drill being played. */
 	private int drill = -1;
@@ -79,6 +92,16 @@ public class ZFighterDrillScreen extends Screen {
 	private int targetAt;
 	private int targets;
 	private float points;
+	// memory: the whole sequence, the round (0-based) and its length, shown (0) or being repeated (1) or between rounds (2) or lost (3),
+	// ticks into that, how far into the sequence, the pad lit now and until when, the rounds' lengths got through
+	private final int[] memSeq = new int[MEM_START + MEM_ROUNDS];
+	private int memRound;
+	private int memPhase;
+	private int memT;
+	private int memStep;
+	private int memLit = -1;
+	private int memLitUntil;
+	private int memDone;
 
 	public ZFighterDrillScreen() {
 		super(Component.translatable("screen.jaymospowers.zfighter.drills"));
@@ -127,6 +150,15 @@ public class ZFighterDrillScreen extends Screen {
 		nextPromptAt = 20;
 		targets = 0;
 		targetAt = -TARGET_LIFE;
+		memRound = 0;
+		memPhase = 0;
+		memT = 0;
+		memStep = 0;
+		memLit = -1;
+		memDone = 0;
+		for (int i = 0; i < memSeq.length; i++) {
+			memSeq[i] = random.nextInt(4);
+		}
 		for (int i = 0; i < COUNT; i++) {
 			noteLane[i] = random.nextInt(4);
 			noteDone[i] = false;
@@ -183,6 +215,7 @@ public class ZFighterDrillScreen extends Screen {
 					prompts++;
 				}
 			}
+			case ZFighterDrills.MEMORY -> memoryTick();
 			case ZFighterDrills.PRECISION -> {
 				if (ticks - targetAt >= TARGET_LIFE) {
 					if (targets >= COUNT) {
@@ -198,6 +231,87 @@ public class ZFighterDrillScreen extends Screen {
 			default -> {
 			}
 		}
+	}
+
+	private int memLength() {
+		return MEM_START + memRound;
+	}
+
+	private void memoryTick() {
+		memT++;
+		if (memLit >= 0 && ticks >= memLitUntil) {
+			memLit = -1;
+		}
+		switch (memPhase) {
+			case 0 -> {
+				// the sequence, one pad at a time, then it's your turn
+				int slot = MEM_LIT + MEM_GAP;
+				int shown = memT / slot;
+				if (shown < memLength() && memT % slot == 0) {
+					memLit = memSeq[shown];
+					memLitUntil = ticks + MEM_LIT;
+					click(0.9F + memLit * 0.25F);
+				}
+				if (memT >= memLength() * slot + 8) {
+					memPhase = 1;
+					memT = 0;
+					memStep = 0;
+				}
+			}
+			case 1 -> {
+				if (memT > MEM_TIMEOUT) {
+					memPhase = 3;
+					memT = 0;
+				}
+			}
+			case 2 -> {
+				if (memT >= MEM_PAUSE) {
+					memPhase = 0;
+					memT = 0;
+				}
+			}
+			default -> {
+				if (memT >= MEM_PAUSE) {
+					finish();
+				}
+			}
+		}
+	}
+
+	/** A pad pressed (by key or click) while repeating the sequence. */
+	private boolean memoryPress(int pad) {
+		if (drill != ZFighterDrills.MEMORY || memPhase != 1) {
+			return false;
+		}
+		memLit = pad;
+		memLitUntil = ticks + MEM_PRESS;
+		memT = 0;
+		if (pad != memSeq[memStep]) {
+			memPhase = 3;
+			click(0.5F);
+			return true;
+		}
+		click(0.9F + pad * 0.25F);
+		memStep++;
+		if (memStep >= memLength()) {
+			memDone += memLength();
+			score = Math.round(100.0F * memDone / MEM_TOTAL);
+			memRound++;
+			memPhase = memRound >= MEM_ROUNDS ? 3 : 2;
+			memT = 0;
+			if (memRound < MEM_ROUNDS && this.minecraft != null && this.minecraft.player != null) {
+				this.minecraft.player.playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), 0.6F, 1.4F);
+			}
+		}
+		return true;
+	}
+
+	/** The pad's box on screen: 0 up, 1 right, 2 down, 3 left. */
+	private int[] memoryPad(int pad) {
+		int cx = left() + W / 2, cy = top() + ARENA_TOP + ARENA_H / 2;
+		int dx = pad == 1 ? MEM_SPREAD : pad == 3 ? -MEM_SPREAD : 0;
+		int dy = pad == 0 ? -MEM_SPREAD : pad == 2 ? MEM_SPREAD : 0;
+		return new int[] {cx + dx - MEM_PAD / 2, cy + dy - MEM_PAD / 2};
 	}
 
 	/** Where Ki Control's band sits (0-1) right now. */
@@ -242,6 +356,13 @@ public class ZFighterDrillScreen extends Screen {
 		} else if (drill == ZFighterDrills.SHADOW_BOXING && key == InputConstants.KEY_SPACE) {
 			answer(2);
 			return true;
+		} else if (drill == ZFighterDrills.MEMORY) {
+			for (int pad = 0; pad < 4; pad++) {
+				if (key == MEM_KEYS[pad] || key == MEM_ARROWS[pad]) {
+					memoryPress(pad);
+					return true;
+				}
+			}
 		}
 		return super.keyPressed(event);
 	}
@@ -266,6 +387,16 @@ public class ZFighterDrillScreen extends Screen {
 		}
 		if (drill == ZFighterDrills.SHADOW_BOXING) {
 			answer(event.button() == InputConstants.MOUSE_BUTTON_RIGHT ? 1 : 0);
+			return true;
+		}
+		if (drill == ZFighterDrills.MEMORY) {
+			for (int pad = 0; pad < 4; pad++) {
+				int[] at = memoryPad(pad);
+				if (UiStyle.over((int)event.x(), (int)event.y(), at[0], at[1], MEM_PAD, MEM_PAD)) {
+					memoryPress(pad);
+					break;
+				}
+			}
 			return true;
 		}
 		if (drill == ZFighterDrills.PRECISION) {
@@ -307,6 +438,7 @@ public class ZFighterDrillScreen extends Screen {
 			case ZFighterDrills.KI_CONTROL -> ticks / (float)KI_TICKS;
 			case ZFighterDrills.SHADOW_BOXING -> prompts / (float)COUNT;
 			case ZFighterDrills.PRECISION -> targets / (float)COUNT;
+			case ZFighterDrills.MEMORY -> memRound / (float)MEM_ROUNDS;
 			default -> 0.0F;
 		};
 	}
@@ -355,6 +487,7 @@ public class ZFighterDrillScreen extends Screen {
 			case ZFighterDrills.KI_CONTROL -> kiControl(graphics, x, ay);
 			case ZFighterDrills.SHADOW_BOXING -> boxing(graphics, x, ay);
 			case ZFighterDrills.PRECISION -> precision(graphics, x, ay, a);
+			case ZFighterDrills.MEMORY -> memory(graphics, x, ay);
 			default -> {
 			}
 		}
@@ -409,6 +542,29 @@ public class ZFighterDrillScreen extends Screen {
 			UiStyle.bar(graphics, x + W / 2 - 40, ay + ARENA_H / 2 + 10, 80, 3, left, color);
 		}
 		graphics.text(this.font, prompts + "/" + COUNT, x + 12, ay + 6, UiStyle.DIM);
+	}
+
+	private void memory(GuiGraphicsExtractor graphics, int x, int ay) {
+		for (int pad = 0; pad < 4; pad++) {
+			int[] at = memoryPad(pad);
+			boolean lit = pad == memLit;
+			int color = MEM_COLORS[pad];
+			graphics.fill(at[0], at[1], at[0] + MEM_PAD, at[1] + MEM_PAD, lit ? color : (color & 0xFFFFFF) | 0x50000000);
+			graphics.outline(at[0], at[1], MEM_PAD, MEM_PAD, lit ? 0xFFFFFFFF : 0x80FFFFFF);
+			String key = Component.translatable("drill.jaymospowers.zfighter.memory_pad_" + pad).getString();
+			graphics.text(this.font, key, at[0] + (MEM_PAD - this.font.width(key)) / 2, at[1] + MEM_PAD / 2 - 4, lit ? 0xFF000000 : 0xFFE0E0E0);
+		}
+		boolean perfect = memRound >= MEM_ROUNDS;
+		String state = memPhase == 0 ? "watch" : memPhase == 1 ? "repeat" : memPhase == 2 ? "good" : perfect ? "perfect" : "over";
+		int color = memPhase == 3 && !perfect ? 0xFFFF6A50 : memPhase >= 2 ? 0xFF7CFF7C : UiStyle.TEXT;
+		graphics.centeredText(this.font, Component.translatable("drill.jaymospowers.zfighter.memory_" + state), x + W / 2, ay + 6, color);
+		graphics.text(this.font, Component.translatable("drill.jaymospowers.zfighter.memory_round", Math.min(memRound + 1, MEM_ROUNDS), MEM_ROUNDS).getString(),
+			x + 12, ay + 6, UiStyle.DIM);
+		if (memPhase == 1) {
+			// how long you have to press, and how far through the sequence you are
+			UiStyle.bar(graphics, x + W / 2 - 40, ay + ARENA_H - 10, 80, 3, 1.0F - memT / (float)MEM_TIMEOUT, ACCENT);
+			graphics.text(this.font, memStep + "/" + memLength(), x + W - 12 - this.font.width(memStep + "/" + memLength()), ay + 6, UiStyle.DIM);
+		}
 	}
 
 	private void precision(GuiGraphicsExtractor graphics, int x, int ay, float a) {

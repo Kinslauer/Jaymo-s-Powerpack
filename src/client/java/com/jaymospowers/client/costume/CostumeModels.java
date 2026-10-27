@@ -2,6 +2,7 @@ package com.jaymospowers.client.costume;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.costume.CostumeDesign;
+import com.jaymospowers.costume.CostumeKit;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
@@ -268,6 +269,8 @@ public final class CostumeModels {
 		private final Map<CostumeDesign.Mask, Worn> masks = new EnumMap<>(CostumeDesign.Mask.class);
 		private final Map<CostumeDesign.Cape, Worn> capes = new EnumMap<>(CostumeDesign.Cape.class);
 		final Worn emblem;
+		/** (0.17.58) The suit editor's pieces, by {@link CostumeModels#kitKey} (gloves also by arm width). */
+		private final Map<String, Worn> kit = new HashMap<>();
 
 		Set(Supplier<PlayerModel> wearer) {
 			for (CostumeDesign.Cut cut : CostumeDesign.Cut.values()) {
@@ -285,6 +288,37 @@ public final class CostumeModels {
 				}
 			}
 			this.emblem = new Worn(CostumeModels.emblem().bakeRoot(), false, wearer);
+			for (CostumeKit.Gloves gloves : CostumeKit.Gloves.values()) {
+				if (gloves != CostumeKit.Gloves.NONE) {
+					this.kit.put(kitKey(gloves, false), new Worn(CostumeModels.gloves(gloves, false).bakeRoot(), false, wearer));
+					this.kit.put(kitKey(gloves, true), new Worn(CostumeModels.gloves(gloves, true).bakeRoot(), true, wearer));
+				}
+			}
+			for (CostumeKit.Boots boots : CostumeKit.Boots.values()) {
+				if (boots != CostumeKit.Boots.NONE) {
+					this.kit.put(kitKey(boots), new Worn(CostumeModels.boots(boots).bakeRoot(), false, wearer));
+				}
+			}
+			for (CostumeKit.Belt belt : CostumeKit.Belt.values()) {
+				if (belt != CostumeKit.Belt.NONE) {
+					this.kit.put(kitKey(belt), new Worn(CostumeModels.belt(belt).bakeRoot(), false, wearer));
+				}
+			}
+			for (CostumeKit.Helm helm : CostumeKit.Helm.values()) {
+				if (helm != CostumeKit.Helm.NONE) {
+					this.kit.put(kitKey(helm), new Worn(CostumeModels.helm(helm).bakeRoot(), false, wearer));
+				}
+			}
+			for (CostumeKit.Fins fins : CostumeKit.Fins.values()) {
+				if (fins != CostumeKit.Fins.NONE) {
+					this.kit.put(kitKey(fins), new Worn(CostumeModels.fins(fins).bakeRoot(), false, wearer));
+				}
+			}
+		}
+
+		/** (0.17.58) A kit piece's model, by its {@link CostumeModels#kitKey}. */
+		Worn kit(String key) {
+			return this.kit.get(key);
 		}
 
 		Worn suit(CostumeDesign.Cut cut, boolean slim) {
@@ -303,7 +337,7 @@ public final class CostumeModels {
 	/** The body suit: the player's own boxes, grown a little; the armoured cut (and Gravity's dense one) adds shoulder pads. */
 	static LayerDefinition suit(CostumeDesign.Cut cut, boolean slim) {
 		MeshDefinition mesh = PlayerModel.createMesh(new CubeDeformation(SUIT_GROW), slim);
-		if (cut == CostumeDesign.Cut.ARMOURED || cut == CostumeDesign.Cut.DENSE) {
+		if (cut == CostumeDesign.Cut.ARMOURED || cut == CostumeDesign.Cut.DENSE || cut == CostumeDesign.Cut.BATTLE_ARMOUR) {
 			PartDefinition root = mesh.getRoot();
 			// pads over the shoulders, textured from the (unused) hat region
 			root.getChild("right_arm").addOrReplaceChild("pad", CubeListBuilder.create().texOffs(32, 0)
@@ -403,6 +437,154 @@ public final class CostumeModels {
 		mesh.getRoot().getChild("body").addOrReplaceChild("emblem", CubeListBuilder.create().texOffs(0, 0)
 			.addBox(-EMBLEM_SIZE / 2.0F, EMBLEM_TOP, z, EMBLEM_SIZE, EMBLEM_SIZE, 0.0F), PartPose.ZERO);
 		return LayerDefinition.create(mesh, (int)EMBLEM_SIZE, (int)EMBLEM_SIZE);
+	}
+
+	// ---- (0.17.58) the suit editor's pieces (tools/gen_costume.py paints them; the boxes here must agree) ---------------
+
+	/**
+	 * How far each piece stands off the suit, on top of {@link #SUIT_GROW}: a wrap or glove a little, a gauntlet or greave
+	 * more, the belt between; the helm sits over every mask (the helmet's 1.0) and the fins stand on the head's sides.
+	 */
+	static final float KIT_GROW = 0.08F, KIT_PLATE_GROW = 0.16F, KIT_BELT_GROW = 0.12F, HELM_GROW = 1.1F;
+
+	/** The model key of a piece: {@code gloves_wraps}, {@code gloves_wraps_slim}, {@code fins_swept}... */
+	static String kitKey(CostumeKit.Gloves gloves, boolean slim) {
+		return "gloves_" + gloves.getSerializedName() + (slim ? "_slim" : "");
+	}
+
+	static String kitKey(CostumeKit.Boots boots) {
+		return "boots_" + boots.getSerializedName();
+	}
+
+	static String kitKey(CostumeKit.Belt belt) {
+		return "belt_" + belt.getSerializedName();
+	}
+
+	static String kitKey(CostumeKit.Helm helm) {
+		return "helm_" + helm.getSerializedName();
+	}
+
+	static String kitKey(CostumeKit.Fins fins) {
+		return "fins_" + fins.getSerializedName();
+	}
+
+	/**
+	 * Which colours a piece is painted in, as bits: 1 primary, 2 secondary, 4 trim (a texture exists only for those; the
+	 * generator prints this table). {@code key} is a {@link #kitKey} without any {@code _slim}.
+	 */
+	static int channels(String key) {
+		return switch (key) {
+			case "gloves_gauntlets", "belt_champion" -> 7;
+			case "helm_circlet" -> 3;
+			case "fins_swept" -> 5;
+			default -> 6;
+		};
+	}
+
+	/** A piece's texture in one colour: {@code colour} is primary, secondary or trim. */
+	static Identifier kitTexture(String key, String colour) {
+		return TEXTURES.computeIfAbsent("textures/entity/costume/kit/" + key + "_" + colour + ".png", JaymosPowers::id);
+	}
+
+	/** Gloves: a box round the forearm and hand of each arm. */
+	static LayerDefinition gloves(CostumeKit.Gloves gloves, boolean slim) {
+		MeshDefinition mesh = bones();
+		int h = switch (gloves) {
+			case WRAPS -> 2;
+			case GLOVES -> 3;
+			default -> 5;
+		};
+		float y = 10.0F - h - (gloves == CostumeKit.Gloves.WRAPS ? 2.0F : 0.0F);
+		CubeDeformation grow = new CubeDeformation(SUIT_GROW + (gloves == CostumeKit.Gloves.GAUNTLETS ? KIT_PLATE_GROW : KIT_GROW));
+		float aw = slim ? 3.0F : 4.0F;
+		mesh.getRoot().getChild("right_arm").addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0)
+			.addBox(slim ? -2.0F : -3.0F, y, -2.0F, aw, h, 4.0F, grow), PartPose.ZERO);
+		mesh.getRoot().getChild("left_arm").addOrReplaceChild("kit", CubeListBuilder.create().texOffs(24, 0)
+			.addBox(-1.0F, y, -2.0F, aw, h, 4.0F, grow), PartPose.ZERO);
+		return LayerDefinition.create(mesh, 64, 32);
+	}
+
+	/** Boots: a box round the foot and shin of each leg. */
+	static LayerDefinition boots(CostumeKit.Boots boots) {
+		MeshDefinition mesh = bones();
+		int h = boots == CostumeKit.Boots.GREAVES ? 7 : 3;
+		float y = switch (boots) {
+			case WRAPPED -> 8.0F;
+			case BOOTS -> 9.0F;
+			default -> 5.0F;
+		};
+		CubeDeformation grow = new CubeDeformation(SUIT_GROW + (boots == CostumeKit.Boots.GREAVES ? KIT_PLATE_GROW : KIT_GROW));
+		mesh.getRoot().getChild("right_leg").addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0)
+			.addBox(-2.0F, y, -2.0F, 4.0F, h, 4.0F, grow), PartPose.ZERO);
+		mesh.getRoot().getChild("left_leg").addOrReplaceChild("kit", CubeListBuilder.create().texOffs(24, 0)
+			.addBox(-2.0F, y, -2.0F, 4.0F, h, 4.0F, grow), PartPose.ZERO);
+		return LayerDefinition.create(mesh, 64, 32);
+	}
+
+	/** A belt: a band round the waist, with the sash's hanging ends, the buckle or the champion's plate on the front. */
+	static LayerDefinition belt(CostumeKit.Belt belt) {
+		MeshDefinition mesh = bones();
+		PartDefinition body = mesh.getRoot().getChild("body");
+		boolean champion = belt == CostumeKit.Belt.CHAMPION;
+		body.addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0)
+			.addBox(-4.0F, champion ? 7.0F : 8.0F, -2.0F, 8.0F, champion ? 4 : 2, 4.0F, new CubeDeformation(SUIT_GROW + KIT_BELT_GROW)), PartPose.ZERO);
+		// the band's front is at -2 - (SUIT_GROW + KIT_BELT_GROW); what hangs or stands out starts there
+		float front = -2.0F - SUIT_GROW - KIT_BELT_GROW;
+		switch (belt) {
+			case SASH -> body.addOrReplaceChild("kit_ends", CubeListBuilder.create().texOffs(0, 8)
+				.addBox(1.0F, 10.0F, front - 1.0F, 2.0F, 3.0F, 1.0F), PartPose.ZERO);
+			case BELT -> body.addOrReplaceChild("kit_buckle", CubeListBuilder.create().texOffs(0, 8)
+				.addBox(-1.0F, 8.0F, front - 0.5F, 2.0F, 2.0F, 1.0F), PartPose.ZERO);
+			case CHAMPION -> body.addOrReplaceChild("kit_plate", CubeListBuilder.create().texOffs(0, 10)
+				.addBox(-2.0F, 7.0F, front - 0.5F, 4.0F, 4.0F, 1.0F), PartPose.ZERO);
+			default -> {
+			}
+		}
+		return LayerDefinition.create(mesh, 64, 32);
+	}
+
+	/** A helmet piece: a circlet round the brow, a battle helm with cheek guards, or a visor band over the eyes. */
+	static LayerDefinition helm(CostumeKit.Helm helm) {
+		MeshDefinition mesh = bones();
+		PartDefinition head = mesh.getRoot().getChild("head");
+		CubeDeformation grow = new CubeDeformation(HELM_GROW);
+		switch (helm) {
+			case CIRCLET -> {
+				head.addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -7.0F, -4.0F, 8.0F, 2.0F, 8.0F, grow), PartPose.ZERO);
+				head.addOrReplaceChild("kit_jewel", CubeListBuilder.create().texOffs(0, 12).addBox(-1.0F, -7.0F, -4.0F - HELM_GROW - 1.0F, 2.0F, 2.0F, 1.0F),
+					PartPose.ZERO);
+			}
+			case BATTLE_HELM -> {
+				head.addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 5.0F, 8.0F, grow), PartPose.ZERO);
+				head.addOrReplaceChild("kit_cheek_r", CubeListBuilder.create().texOffs(32, 0).addBox(-5.3F, -4.0F, -3.0F, 1.0F, 4.0F, 5.0F), PartPose.ZERO);
+				head.addOrReplaceChild("kit_cheek_l", CubeListBuilder.create().texOffs(46, 0).addBox(4.3F, -4.0F, -3.0F, 1.0F, 4.0F, 5.0F), PartPose.ZERO);
+			}
+			case VISOR -> head.addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -5.0F, -4.0F, 8.0F, 2.0F, 8.0F, grow),
+				PartPose.ZERO);
+			default -> {
+			}
+		}
+		return LayerDefinition.create(mesh, 64, 32);
+	}
+
+	/** Head fins: plates at the temples, swept back, or a crest along the top. */
+	static LayerDefinition fins(CostumeKit.Fins fins) {
+		MeshDefinition mesh = bones();
+		PartDefinition head = mesh.getRoot().getChild("head");
+		switch (fins) {
+			case SMALL -> {
+				head.addOrReplaceChild("kit_r", CubeListBuilder.create().texOffs(0, 0).addBox(-7.0F, -6.0F, 0.0F, 3.0F, 4.0F, 1.0F), PartPose.ZERO);
+				head.addOrReplaceChild("kit_l", CubeListBuilder.create().texOffs(10, 0).addBox(4.0F, -6.0F, 0.0F, 3.0F, 4.0F, 1.0F), PartPose.ZERO);
+			}
+			case SWEPT -> {
+				head.addOrReplaceChild("kit_r", CubeListBuilder.create().texOffs(0, 0).addBox(-5.5F, -6.0F, 1.0F, 1.0F, 3.0F, 7.0F), PartPose.ZERO);
+				head.addOrReplaceChild("kit_l", CubeListBuilder.create().texOffs(16, 0).addBox(4.5F, -6.0F, 1.0F, 1.0F, 3.0F, 7.0F), PartPose.ZERO);
+			}
+			case CREST -> head.addOrReplaceChild("kit", CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -12.5F, -4.0F, 1.0F, 4.0F, 8.0F), PartPose.ZERO);
+			default -> {
+			}
+		}
+		return LayerDefinition.create(mesh, 64, 32);
 	}
 
 	private static final Map<String, Identifier> TEXTURES = new HashMap<>();

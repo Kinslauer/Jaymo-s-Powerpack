@@ -83,6 +83,10 @@ public class CostumeItem extends Item {
 			// (0.14.3) the face shows, but the name tag can't be read from afar (CostumeClient.HOOD_NAME_RANGE)
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.hooded").withStyle(ChatFormatting.GRAY));
 		}
+		if (design.kit().pieces() > 0) {
+			// (0.17.58) the suit editor's pieces
+			builder.accept(Component.translatable("tooltip.jaymospowers.costume.kit", design.kit().pieces()).withStyle(ChatFormatting.GRAY));
+		}
 		if (design.hasEmblem()) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.emblem").withStyle(ChatFormatting.GRAY));
 		}

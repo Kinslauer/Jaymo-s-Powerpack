@@ -86,6 +86,15 @@ public class CostumeScreen extends Screen {
 		return this.price >= 0;
 	}
 
+	/** (0.17.58) The design being made, for the suit editor ({@link SuitEditorScreen}) to edit in place. */
+	static CostumeDesign design() {
+		return design;
+	}
+
+	static void design(CostumeDesign edited) {
+		design = edited;
+	}
+
 	private int left() {
 		return (this.width - W) / 2;
 	}
@@ -147,6 +156,9 @@ public class CostumeScreen extends Screen {
 			this.pixels = new byte[CostumeDesign.EMBLEM_PIXELS];
 			design = design.withEmblem(this.pixels);
 		}).bounds(emblemX(), paletteY() + CHIP + 14, CostumeDesign.EMBLEM_SIZE * CELL, 14).build());
+		// (0.17.58) the suit editor: the gi and armour patterns, gloves, boots, belt, helmet, fins, three colours, chest marks
+		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.suit_editor"),
+			b -> this.minecraft.gui.setScreen(new SuitEditorScreen(this))).bounds(left() + W - 8 - 84, top() + 7, 84, 14).build());
 		int by = top() + H - 20;
 		this.sew = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.sew"), b -> {
 			if (this.pos != null) {

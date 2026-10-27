@@ -37,6 +37,8 @@ import net.minecraft.world.item.Items;
 public final class CostumeNet {
 	/** Sewing a costume: wool, leather and string, plus one dye of each colour it uses. */
 	public static final int WOOL = 4, LEATHER = 2, STRING = 1, DYE_EACH = 1;
+	/** (0.17.58) The suit editor's pieces (gloves, boots, belt, helmet, fins): this many iron nuggets for each, and one dye for a trim of its own. */
+	public static final int NUGGETS_PER_PIECE = 2;
 	/** How far (beyond the usual reach) the table may be when the screen's buttons are pressed. */
 	private static final double REACH_BUFFER = 2.0;
 	/** Each colour's dye item, found once (dyes are told apart by their dye component). */
@@ -131,6 +133,13 @@ public final class CostumeNet {
 		out.add(dye(design.primary()));
 		if (design.secondary() != design.primary()) {
 			out.add(dye(design.secondary()));
+		}
+		CostumeKit kit = design.kit();
+		if (!kit.followsSecondary() && kit.trimColour(design.secondary()) != design.primary() && kit.trimColour(design.secondary()) != design.secondary()) {
+			out.add(dye(kit.trimColour(design.secondary())));
+		}
+		if (kit.pieces() > 0) {
+			out.add(new Need(s -> s.is(Items.IRON_NUGGET), NUGGETS_PER_PIECE * kit.pieces(), new ItemStack(Items.IRON_NUGGET)));
 		}
 		return out;
 	}
