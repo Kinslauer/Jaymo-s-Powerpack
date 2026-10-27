@@ -615,6 +615,8 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		// (0.17.54) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
+		ZFighterRaces.tick(player, live, max);
 		ZFighterCorruption.tick(player, live);
 		ZFighterBranchForms.tick(player, live);
 
@@ -862,6 +864,8 @@ public final class ZFighterPower implements Power {
 		}
 		if (down && player.isShiftKeyDown() && !live(player).flying) {
 			ZFighterLineage.toggleTail(player);
+			// (0.17.54) a Verdant's merging
+			ZFighterVerdantMerge.press(player);
 		}
 	}
 
@@ -1502,7 +1506,7 @@ public final class ZFighterPower implements Power {
 
 	/** What his bare fists add to a punch: mastery, every foe that ever beat him, ascension and trained Strength. */
 	static double fistBonus(Player player) {
-		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
+		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
 			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH);
 	}
@@ -1608,7 +1612,8 @@ public final class ZFighterPower implements Power {
 			return true;
 		}
 		cost *= ZFighterAndroid.costFactor(player);
-		if (live.ki < cost) {
+		// (0.17.54) a Frost-born's reserve or an Earthling's blood may make up what he lacks
+		if (live.ki < cost && !ZFighterRaces.cover(player, live, cost)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
@@ -1622,8 +1627,9 @@ public final class ZFighterPower implements Power {
 	}
 
 	public static int maxKi(Player player) {
-		return BASE_MAX_KI + KI_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
+		return BASE_MAX_KI + KI_PER_DEFEAT * (zenkai(player) + ZFighterWarriorComeback.bonus(player)) * ZFighterLineage.zenkaiFactor(player)
 			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY)
+			+ ZFighterVerdantMerge.ki(player)
 			+ (player instanceof ServerPlayer server ? ZFighterFusion.ki(server) : 0);
 	}
 
