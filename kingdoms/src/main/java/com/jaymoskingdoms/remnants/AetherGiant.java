@@ -115,9 +115,8 @@ public class AetherGiant extends Monster {
 	/** (0.7.184) Its death: the tick it hits the ground and breaks up, and the bursts of stone along where it lies (to this share of its height ahead). */
 	static final int SHATTER_TICK = 10, SHATTER_BURSTS = 6;
 	static final double SHATTER_REACH = 0.6;
-	/** The share of what it smashes that drops, and how near its own monolith (blocks) it leaves things standing. */
+	/** The share of what it smashes that drops (its own monolith it leaves standing, {@link Monoliths#part}). */
 	static final float TRAMPLE_DROPS = 0.25F;
-	static final double MONOLITH_SPARED = 4.0;
 	/** How long a swing shows (ticks). */
 	static final int SWING_TICKS = 12;
 	public static final int LEFT = 1, RIGHT = 2, BOTH = 3;
@@ -354,7 +353,7 @@ public class AetherGiant extends Monster {
 		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
 			BlockState state = level.getBlockState(pos);
 			if (state.isAir() || !state.getFluidState().isEmpty() && state.getCollisionShape(level, pos).isEmpty()
-				|| state.getDestroySpeed(level, pos) < 0.0F || this.monolith != null && pos.closerThan(this.monolith, MONOLITH_SPARED)) {
+				|| state.getDestroySpeed(level, pos) < 0.0F || this.monolith != null && Monoliths.part(this.monolith, pos)) {
 				continue;
 			}
 			level.destroyBlock(pos, this.random.nextFloat() < TRAMPLE_DROPS, this);
@@ -739,8 +738,8 @@ public class AetherGiant extends Monster {
 	protected void tickDeath() {
 		super.tickDeath();
 		if (this.deathTime == SHATTER_TICK && this.level() instanceof ServerLevel level) {
-			BlockParticleOption stone = new BlockParticleOption(ParticleTypes.BLOCK, this.element.stone.defaultBlockState());
-			BlockParticleOption band = new BlockParticleOption(ParticleTypes.BLOCK, this.element.band.defaultBlockState());
+			BlockParticleOption stone = new BlockParticleOption(ParticleTypes.BLOCK, this.element.stone().defaultBlockState());
+			BlockParticleOption band = new BlockParticleOption(ParticleTypes.BLOCK, this.element.band().defaultBlockState());
 			Vec3 ahead = Vec3.directionFromRotation(0.0F, this.yBodyRot);
 			for (int i = 0; i <= SHATTER_BURSTS; i++) {
 				Vec3 at = this.position().add(ahead.scale(HEIGHT * SHATTER_REACH * i / SHATTER_BURSTS));
@@ -748,7 +747,7 @@ public class AetherGiant extends Monster {
 				level.sendParticles(band, at.x, at.y + 1.0, at.z, 20, WIDTH * 0.3, 1.5, WIDTH * 0.3, 0.3);
 				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.5, at.z, 6, WIDTH * 0.3, 0.5, WIDTH * 0.3, 0.02);
 			}
-			this.playSound(this.element.stone.defaultBlockState().getSoundType().getBreakSound(), 4.0F, 0.5F);
+			this.playSound(this.element.stone().defaultBlockState().getSoundType().getBreakSound(), 4.0F, 0.5F);
 			this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.0F, 0.4F);
 		}
 	}
