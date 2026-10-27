@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.Potion;
 
 /**
- * (0.17.52) The Potion of Cleansing, brewed: Andy (2026-10-27): "there should also be a brewable potion for it"
+ * (0.17.54) The Potion of Cleansing, brewed: Andy (2026-10-27): "there should also be a brewable potion for it"
  * (festering). An awkward potion and a honeycomb at a brewing stand (redstone to lengthen it, gunpowder and dragon's
  * breath for splash and lingering; the recipes are data, {@code recipe/brewing/}). While it lasts, every festering part
  * is cured and every dirty cut washed out, as spirits or honey poured on it would ({@link Bleeding#clean}), and the
