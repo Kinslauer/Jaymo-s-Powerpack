@@ -9,6 +9,7 @@ import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
 import com.jaymoskingdoms.Rulers;
 import com.jaymoskingdoms.SharedHistory;
+import com.jaymoskingdoms.ShipTalk;
 import com.jaymoskingdoms.Tails;
 import com.jaymoskingdoms.VillagerHeritage;
 import java.util.List;
@@ -27,7 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * (0.7.180) "Ask their name" ({@link Introductions#ANSWER}) shows only while you don't know it; (0.7.204) "Offer a
  * handshake" ({@link Introductions#HANDSHAKE}) too.
  * (0.7.215) "Ask about alchemy" ({@link HermitAlchemy#ANSWER}) shows only on a floating island's hermit.
- * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement.
+ * (0.7.220) "Talk about work" ({@link Careers#ANSWER}) shows only on a grown villager of a settlement, (0.7.270) or one of a
+ * ship's crew ({@link ShipTalk}).
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}) shows only once you've seen their gift at work, until you ask.
  * (0.7.254) "Thank them", "Apologise", "Clear the air" and "Ask how they are" ({@link SharedHistory}) show only while
  * your history with them has something to take up.
@@ -54,8 +56,8 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(Introductions.ANSWER);
 			cir.getReturnValue().remove(Introductions.HANDSHAKE);
 		}
-		if ("main".equals(name) && !Careers.offersWork(villager)) {
-			// (0.7.220) only a grown villager of a settlement talks work
+		if ("main".equals(name) && !Careers.offersWork(villager) && !ShipTalk.offersWork(villager)) {
+			// (0.7.220) only a grown villager of a settlement talks work; (0.7.270) or one of a ship's crew
 			cir.getReturnValue().remove(Careers.ANSWER);
 		}
 		if ("main".equals(name) && !Hermits.is(villager)) {
