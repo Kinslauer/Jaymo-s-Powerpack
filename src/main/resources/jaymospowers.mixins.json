@@ -19,6 +19,7 @@
 		"DownedHealMixin",
 		"DownedLimboMixin",
 		"FistGuardInventoryMixin",
+		"GuardRiposteMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

@@ -71,6 +71,11 @@ public final class LockOnClient {
 		blind = 0;
 	}
 
+	/** (0.17.64) Who this player is locked onto, or null (the guard's lunge and timing bar). */
+	public static @Nullable LivingEntity locked() {
+		return target(Minecraft.getInstance());
+	}
+
 	private static @Nullable LivingEntity target(Minecraft minecraft) {
 		if (locked < 0 || minecraft.level == null) {
 			return null;

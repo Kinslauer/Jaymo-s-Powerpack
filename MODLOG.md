@@ -3162,3 +3162,12 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   preset asks for the demon biomes there, where only vanilla's exist. `ZFighterDemonRealm.addBiomes` now runs from the server
   and client entrypoints (after every mod's main one) instead of `init`; the world's registries come later from the data
   files, so the biomes still generate.
+- **0.17.64, the guard and the parry for everyone; lock-on lunge:** Andy wanted parries easier than ours and combat more
+  dynamic with the lock-on. Mallard Guard is All Rights Reserved and NeoForge 1.21.1 only, so `combat/Guard` is our own after
+  its idea: every melee weapon or tool with nothing on right click gets vanilla's `blocks_attacks` component and raises a guard
+  (60% of a frontal blow, feathers per blow, a guard break when they run out); for that guard and for shields, a blow in the
+  first 5 ticks of a raise is a perfect parry and up to 12 a parry (+2/+4 ticks against your lock-on target; no window for a
+  mashed raise). A parry takes nothing, shoves and stuns the attacker, and owes a riposte (`mixin/GuardRiposteMixin`, 1.5x or
+  1.25x on the next blow). `client/combat/GuardClient` draws a timing bar and parry flash and steps you in when you swing at a
+  locked foe up to 3 blocks past your reach; `client/mixin/GuardFirstPersonMixin` turns the blade across in first person.
+  Darktide's and Z Fighter's parry windows are 8 ticks now. Spec: `docs/guard.md`. Compile-checked only.
