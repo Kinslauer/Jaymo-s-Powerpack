@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.266) Fighters parry you back, the other half of Jaymo's Powers' guard (Andy: "Build those ideas too": enemies that
+ * (0.7.267) Fighters parry you back, the other half of Jaymo's Powers' guard (Andy: "Build those ideas too": enemies that
  * guard and parry). A mob fighting Better Combat's way ({@link MobCombat}) with a weapon or a shield:
  * <ul>
  * <li>A player's blow in the first {@link #GUARD_WINDOW} ticks of its raised guard ({@link MobShields}) is always parried,

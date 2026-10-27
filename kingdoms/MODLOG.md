@@ -5587,7 +5587,7 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
   `Parties.allied(ServerPlayer, ServerPlayer)`.
 - Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.
 
-## 0.7.266: fighters guard and parry; attack tells (pack 0.17.64)
+## 0.7.267: fighters guard and parry; attack tells (pack 0.17.64)
 Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
 - `MobShields`: a fighter fighting Better Combat's way with no shield raises its blade instead (its weapon's guard from
   Powers), 30% of the times a shield-bearer would (`BLADE_GUARD_CHANCE`); `raisedFor`, `snap`, `drop`, `guardHand`.

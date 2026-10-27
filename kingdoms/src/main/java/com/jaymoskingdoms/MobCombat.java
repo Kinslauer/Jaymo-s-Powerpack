@@ -95,7 +95,7 @@ public final class MobCombat {
 	static final int DODGE_COOLDOWN = 60;
 
 	/**
-	 * (0.7.266) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
+	 * (0.7.267) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
 	 * heavy one you can't (a two-handed weapon's, or any at least {@link #HEAVY_DAMAGE} times its weight): dodge or block
 	 * those. The tag Jaymo's Powers' guard reads while a heavy blow lands.
 	 */
@@ -234,12 +234,12 @@ public final class MobCombat {
 		mob.setAggressive(true);
 	}
 
-	/** (0.7.266) A blow too heavy to parry. */
+	/** (0.7.267) A blow too heavy to parry. */
 	static boolean heavy(Moves moves, Move move) {
 		return moves.twoHanded() || move.damage() >= HEAVY_DAMAGE;
 	}
 
-	/** (0.7.266) The glint as a swing begins, at the weapon hand. */
+	/** (0.7.267) The glint as a swing begins, at the weapon hand. */
 	private static void tell(ServerLevel level, Mob mob, boolean heavy) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 side = new Vec3(-facing.z, 0.0, facing.x).scale(mob.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? -0.35 : 0.35);
@@ -249,7 +249,7 @@ public final class MobCombat {
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.05);
 	}
 
-	/** (0.7.266) Its next swing may start at once (a parry answered, {@link MobParry}). */
+	/** (0.7.267) Its next swing may start at once (a parry answered, {@link MobParry}). */
 	static void hasten(Mob mob) {
 		Swing swing = SWINGS.get(mob);
 		if (swing != null && swing.hitAt < 0) {

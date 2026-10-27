@@ -36,7 +36,7 @@ each window configurable; it pairs with Better Combat.
 - `client/mixin/GuardFirstPersonMixin`: the blade turned across in first person while guarding.
 - Darktide and Z Fighter parry windows widened to 8 ticks.
 
-## Enemies guard and parry too; attack tells (Kingdoms 0.7.266)
+## Enemies guard and parry too; attack tells (Kingdoms 0.7.267)
 Andy: "Build those ideas too".
 - Fighters with a weapon and no shield raise their blade between swings (Kingdoms `MobShields`), shield-bearers their
   shield as before. A blow in the first 8 ticks of that guard is parried; caught with the guard down they still parry

@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
  * The goal's attack is held off while the shield is up ({@code MeleeAttackGoalMixin}); the axe in
  * {@code LivingEntityBlockMixin}; the raised arm on the client in {@code ShieldPoseHumanoidMobRendererMixin}.
  * <p>
- * (0.7.266) With no shield, a fighter whose weapon has a guard (Jaymo's Powers gives every plain melee weapon one) raises
+ * (0.7.267) With no shield, a fighter whose weapon has a guard (Jaymo's Powers gives every plain melee weapon one) raises
  * the blade instead, less often ({@link #BLADE_GUARD_CHANCE}) and only if it fights Better Combat's way ({@link MobCombat}).
  * A blow on it in the first ticks of that guard may be parried ({@link MobParry}).
  */
@@ -35,7 +35,7 @@ public final class MobShields {
 	static final double GUARD_RANGE = 7.0, ARROW_RANGE = 28.0;
 	/** Each time it could raise its shield, the chance it does (else it presses on for {@link #RETRY_TICKS}). */
 	static final float GUARD_CHANCE = 0.55F;
-	/** (0.7.266) The same for a raised blade, no shield. */
+	/** (0.7.267) The same for a raised blade, no shield. */
 	static final float BLADE_GUARD_CHANCE = 0.3F;
 	/** How long it holds the shield up (ticks, between these); and after lowering it, how long it fights before raising it again. */
 	static final int GUARD_MIN_TICKS = 20, GUARD_MAX_TICKS = 50;
@@ -107,7 +107,7 @@ public final class MobShields {
 	}
 
 	/**
-	 * (0.7.266) The hand it guards with: a shield in the off hand, else its main-hand weapon's own guard when it fights
+	 * (0.7.267) The hand it guards with: a shield in the off hand, else its main-hand weapon's own guard when it fights
 	 * Better Combat's way and the off hand is free; null if neither.
 	 */
 	static @Nullable InteractionHand guardHand(Mob mob) {
@@ -126,13 +126,13 @@ public final class MobShields {
 		return hand != null && mob.isUsingItem() && mob.getUsedItemHand() == hand;
 	}
 
-	/** (0.7.266) How long its guard has been up (ticks), or -1 when it isn't ({@link MobParry}). */
+	/** (0.7.267) How long its guard has been up (ticks), or -1 when it isn't ({@link MobParry}). */
 	public static long raisedFor(Mob mob) {
 		long[] s = STATE.get(mob);
 		return s == null || !guarding(mob) ? -1L : mob.level().getGameTime() - s[RAISED];
 	}
 
-	/** (0.7.266) Lowers a raised guard now (a parry answered, {@link MobParry}). */
+	/** (0.7.267) Lowers a raised guard now (a parry answered, {@link MobParry}). */
 	static void drop(Mob mob) {
 		long[] s = STATE.get(mob);
 		if (s != null && guarding(mob)) {
@@ -140,7 +140,7 @@ public final class MobShields {
 		}
 	}
 
-	/** (0.7.266) Snaps the guard up at once (a parry, {@link MobParry}), held this many ticks. */
+	/** (0.7.267) Snaps the guard up at once (a parry, {@link MobParry}), held this many ticks. */
 	static void snap(Mob mob, int ticks) {
 		InteractionHand hand = guardHand(mob);
 		if (hand == null || !(mob.level() instanceof ServerLevel level)) {
