@@ -5373,3 +5373,30 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
 - **Dev runs load worlds again**: the silver sword and the eight steel plate recipes wait for `c:ingots/silver` and
   `c:ingots/steel` to have items (`fabric:tags_populated`). Powers fills those tags, so in the pack nothing changes; a
   Kingdoms-only run used to fail registry loading on the missing tags.
+
+## 0.7.246: crews know their hands, stand on deck, and dress for the sea; villagers talk of your story (pack 0.17.34)
+
+- **Shipmates** (Andy: "I shouldnt have to introduce myself to the ship crew ... refer to me as a powder monkey or
+  deckhand"): the crew of the whaler you signed on to (`StoryTalk.shipmate`) know you and you know them, aboard
+  (`StoryTalk.knowEachOther`, every 5 s) and on MCA's menu. They never give MCA's stranger's greeting; they open with
+  "Aye, deckhand?" and the like. The captain welcomes you back aboard by your berth, and deck chatter is now and then said
+  to you by it. Berth: powder monkey if you're small or to the spiteful, proud and hotheaded, deckhand otherwise.
+- **Your story, told back** (Andy: "each start to have some kind of story adjacent reference from the villagers you
+  meet"): `StoryTalk.LANDING` records where a life story set you down, when, and the realm or camp it was about. For three
+  days, a villager you first talk to within 112 blocks of there, or in that realm's land, opens with a line about how you
+  came (`story.jaymoskingdoms.met.<start>.0-2`, three for every start) instead of MCA's "Are you an adventurer?". Each
+  says it once (MCA memory `jaymoskingdoms.story.<player>`). Everything after that is up to MCA.
+- **One knight to a ship** (Andy: "you're not wearing full plate out to sea"): her first hand in mail or plate who isn't
+  her captain is her knight (tag `jaymoskingdoms.crewman.knight`), an MCA guard in his armour. Everyone else sails as a
+  fisherman (a sailor's clothes) in no mail or plate; leather stays. Crews from before are looked over every 5 s.
+- **Crews stand on deck**: Andy saw all the sailors seated as if riding something. `McaCrewStanceMixin` clears
+  `isPassenger` as the last thing MCA's villager renderer sets, and EMF's animations pause for crew at their stations
+  (`ShipClient.crewAboard`), so no riding pose comes back.
+- **Crews get their downed up** (Andy: "the ship crew should rush to revive each other, including the player"):
+  `Crewmen.care` (from `Corsairs.deckwork`) sends the nearest free hand running along her deck to anyone downed aboard,
+  one of hers or a player she isn't hostile to (never her captain, nor a gunner mid-fight), with a shout. They kneel 6 s
+  and get them up (Powers' revive and bandage tags), and tell a player so. Ashore tending (`Downed`) skips riders, so
+  nobody did this at sea before.
+- **Ship stairs are steps**: a ship's collision took each stair as a full block (`Hull` lo/hi), so a stairwell under a
+  deck beam could be neither stepped up nor jumped. `Hull.steps` keeps a stair's own boxes and `Ships.collisions`
+  turns them as she lies.

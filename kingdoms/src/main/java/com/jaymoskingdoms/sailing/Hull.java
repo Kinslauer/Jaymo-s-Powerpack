@@ -36,6 +36,12 @@ public final class Hull {
 	public final Long2IntOpenHashMap index = new Long2IntOpenHashMap();
 	/** Each piece's collision box, as heights within its cell (lo > hi: none). */
 	public final float[] lo, hi;
+	/**
+	 * (0.7.246) A stair's own boxes (in its cell, 0-1), so its steps are steps to whoever walks her: as one full block
+	 * (lo/hi), a stairway under a deck beam was a wall you could neither step up nor jump (Andy got stuck in a whaler's
+	 * stairwell). Null for every other piece.
+	 */
+	public final AABB[][] steps;
 	public final int minX, minY, minZ, maxX, maxY, maxZ;
 	/** Weight, and the water each layer (from the bottom, y = 0) keeps out. */
 	public final float mass;
@@ -63,6 +69,7 @@ public final class Hull {
 		int n = pieces.size();
 		this.lo = new float[n];
 		this.hi = new float[n];
+		this.steps = new AABB[n][];
 		int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
 		int h = -1, sailCount = 0;
 		IntArrayList guns = new IntArrayList(), oarList = new IntArrayList(), lightList = new IntArrayList();
@@ -88,6 +95,9 @@ public final class Hull {
 				AABB b = shape.bounds();
 				this.lo[i] = (float)Math.max(0.0, b.minY);
 				this.hi[i] = (float)Math.min(1.5, b.maxY);
+				if (state.getBlock() instanceof net.minecraft.world.level.block.StairBlock) {
+					this.steps[i] = shape.toAabbs().toArray(new AABB[0]);
+				}
 			}
 			float volume = 0.0F;
 			for (AABB box : shape.toAabbs()) {

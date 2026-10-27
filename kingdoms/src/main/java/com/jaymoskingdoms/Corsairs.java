@@ -117,7 +117,7 @@ final class Corsairs implements Ship.Captaincy {
 		Fleet.Stations stations = Fleet.stations(ship);
 		BlockPos home = crew.home;
 		if (stations.helm() != null) {
-			LivingEntity captain = hand(level, ship, faction, complement.captain(), stations.helm(), home, crew.side);
+			LivingEntity captain = hand(level, ship, faction, complement.captain(), stations.helm(), home, crew.side, true);
 			if (captain != null) {
 				crew.captain = captain.getUUID();
 			}
@@ -129,7 +129,7 @@ final class Corsairs implements Ship.Captaincy {
 		for (int i = 0; i < guns.size(); i++) {
 			Map.Entry<Long, Vec3> gun = guns.get(i);
 			if (i < gunners) {
-				LivingEntity g = hand(level, ship, faction, complement.gunner(), gun.getValue(), home, crew.side);
+				LivingEntity g = hand(level, ship, faction, complement.gunner(), gun.getValue(), home, crew.side, false);
 				if (g != null) {
 					crewed.add(g);
 				}
@@ -142,19 +142,20 @@ final class Corsairs implements Ship.Captaincy {
 		java.util.Collections.shuffle(deck, new java.util.Random(level.getRandom().nextLong()));
 		int k = 0;
 		for (int i = 0; i < complement.boys() && k < deck.size(); i++) {
-			hand(level, ship, faction, Pirates.POWDER_MONKEY, deck.get(k++), home, crew.side);
+			hand(level, ship, faction, Pirates.POWDER_MONKEY, deck.get(k++), home, crew.side, false);
 		}
 		for (int i = 0; i < complement.hands() && k < deck.size(); i++) {
-			hand(level, ship, faction, complement.hand(), deck.get(k++), home, crew.side);
+			hand(level, ship, faction, complement.hand(), deck.get(k++), home, crew.side, false);
 		}
 		return ship;
 	}
 
 	/**
 	 * One of her crew, of {@code role}, at {@code seat}: (0.7.242) with MCA, one of its villagers in the gear a folk of
-	 * that role would wear ({@link Crewmen}); without it, the folk.
+	 * that role would wear ({@link Crewmen}; (0.7.246) one knight to a ship, the rest sailors); without it, the folk.
 	 */
-	static @Nullable LivingEntity hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home, Crew.Side side) {
+	static @Nullable LivingEntity hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home, Crew.Side side,
+		boolean captain) {
 		LivingEntity back = Crewmen.waiting(level, faction.id(), side, role, home);
 		if (back != null) {
 			// (0.7.242) one of her hands who signed on again, waiting in port: aboard before anyone new
@@ -170,7 +171,7 @@ final class Corsairs implements Ship.Captaincy {
 		Vec3 at = ship.toWorld(seat.x, seat.y, seat.z);
 		folk.snapTo(at.x, at.y, at.z, ship.getYRot(), 0.0F);
 		folk.setup(role, faction, home, 256);
-		LivingEntity hand = Crewmen.villager(level, folk, side);
+		LivingEntity hand = Crewmen.villager(level, folk, side, ship, captain);
 		if (hand != null) {
 			// (the folk was only ever its pattern: never in the world)
 			folk.discard();
@@ -482,6 +483,8 @@ final class Corsairs implements Ship.Captaincy {
 		if ((now + ship.getId()) % MAN_CHECK == 0) {
 			manGuns(ship, crew, deck, aboard);
 		}
+		// (0.7.246) the downed aboard are got up: a hand runs to each
+		Crewmen.care(level, ship, crew, deck, aboard, foe != null);
 		RandomSource random = level.getRandom();
 		java.util.Set<UUID> here = new java.util.HashSet<>();
 		for (LivingEntity hand : aboard) {
@@ -494,6 +497,10 @@ final class Corsairs implements Ship.Captaincy {
 			Crew.Walk walk = crew.walks.computeIfAbsent(id, k -> new Crew.Walk());
 			if (!walk.way.isEmpty()) {
 				step(ship, hand, seat, walk);
+				continue;
+			}
+			if (Crewmen.caring(hand)) {
+				// (0.7.246) kneeling by someone they're getting up
 				continue;
 			}
 			if (now < walk.rest) {

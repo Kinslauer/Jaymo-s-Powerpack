@@ -11,6 +11,7 @@ import com.jaymoskingdoms.HermitAlchemy;
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.Introductions;
 import com.jaymoskingdoms.Languages;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.Prejudice;
 import com.jaymoskingdoms.Recollections;
 import com.jaymoskingdoms.Rulers;
@@ -55,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.204) "Offer a handshake" ({@link Introductions#HANDSHAKE}, needs no words): they may take it ({@link Handshakes#offerTo}).
  * (0.7.230) The stranger page's Introduce ({@link Introductions#INTRODUCE}): asks their name, or offers a handshake without a shared tongue.
  * (0.7.227) "Ask about their power" ({@link GiftTales#ANSWER}): they tell of it, and it's on your MCA screen from then.
+ * (0.7.246) Opening the menu on a shipmate, or on one who knows how your story started ({@link com.jaymoskingdoms.StoryTalk}): they say so, never MCA's stranger's greeting.
  * (0.7.220) "Talk about work" ({@link Careers#ANSWER}): their town's jobs, your orders, your work there ({@link Careers#talk}).
  */
 @Mixin(Dialogues.class)
@@ -68,6 +70,11 @@ abstract class McaDialogueMixin {
 
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("root".equals(question) && McaCompat.storyOpening(villager, player)) {
+			// (0.7.246) a shipmate, or one who knows how your story started: they open with that, and never as to a stranger
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && Introductions.INTRODUCE.equals(answer)) {
 			// (0.7.230) the stranger page's Introduce: their name if you share a tongue, else a hand held out (the screen stays
 			// open, and fills in once you know them)

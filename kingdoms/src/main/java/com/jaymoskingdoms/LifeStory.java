@@ -537,6 +537,10 @@ public final class LifeStory {
 				}
 			}
 			kit(player, start, landed, raised, cls, option, random);
+			// (0.7.246) where it set them down, for the folk about it to talk of (StoryTalk)
+			Hunt hunt = HUNTS.get(player.getUUID());
+			StoryTalk.landed(player, landed, landed == Start.CAPTIVE && hunt != null ? hunt.camp()
+				: (landed == Start.BANISHED || landed == Start.SWORN) && roadRealm != null ? roadRealm.id() : -1);
 			// (0.7.236) behind the loading screen a few seconds more, while the land where they woke loads
 			StoryGround.settle(player);
 			if (start == Start.TIMELOST) {
