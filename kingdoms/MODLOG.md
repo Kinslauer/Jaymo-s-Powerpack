@@ -5407,3 +5407,19 @@ Andy: "delay the player's spawn at the start because if they spawn attuned they 
   creator is still to come, and for `REVEAL_TICKS` (2 s) after they come out from behind all of those.
 - `Mana.tick` only attunes a Mage or Sorcerer (or an amethyst-touched player) when they aren't `unseen`, so the
   flare, the sound and the blue sight play once they're standing in the world. Not seen in game.
+
+## 0.7.248: spirit arms only while used, a ghost's look (pack 0.17.37)
+Andy: "the arm should appear and disappear while not using it. the idle it too distracting, plus it probably costs
+concentration to keep a projection up ... something about them looks too busy. maybe use the ghost of the great kung lao
+as inspiration? a more solid looking yet wispy projection?"
+- **Up only while used** (`SpiritArms.presence`): a called spirit waits unseen (the odd wisp at your shoulder) and its
+  arms form over 3 ticks when a move starts (summoning is one, so it shows itself once when called), stay through the
+  move and 12 ticks after, then fade over 10. Held things, steady hands and spirit armour keep them up, and a hold that
+  re-stamps its pose doesn't re-form. They form by fading in and swelling the last fifth, not growing from nothing.
+  The idle mana drain is unchanged.
+- **Kung Lao's ghost** for the look: the arms have their own shells, a core that is the arm itself (not inflated),
+  bright and pale, its texture near still, under two thin, dim edges in the spirit's colour that drift slowly. They show
+  near full even with a dim glow. Paler, bigger wisps smoke back and up off them while they're up.
+- **Calmer**: the idle stretch is gone, the elbow, shoulder roll, sway and finger flex are a third of what they were,
+  and the ghost trail is two soft arms behind a fast move only (a blow's snap, a grasp closing), none at rest.
+  Not seen in game.

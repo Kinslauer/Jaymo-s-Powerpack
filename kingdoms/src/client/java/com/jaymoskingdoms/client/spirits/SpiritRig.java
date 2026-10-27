@@ -40,14 +40,15 @@ final class SpiritRig {
 	/** The impact: the hand swells by this at the hit, fading over this many ticks. */
 	static final float PULSE = 0.3F, PULSE_TICKS = 3.0F;
 	/** Idle life: the fingers' flex (how much, how fast), the elbow's rest bend (on your arm, floating). */
-	static final float IDLE_CURL = 0.3F, FLEX = 0.12F, FLEX_SPEED = 0.11F, IDLE_ELBOW = -0.45F, FLOAT_ELBOW = -0.7F;
+	static final float IDLE_CURL = 0.3F, FLEX = 0.04F, FLEX_SPEED = 0.06F, IDLE_ELBOW = -0.45F, FLOAT_ELBOW = -0.7F;
 	/**
 	 * Idle movement (Andy: "the arm should move in idle, bending at the elbow"): the elbow works slowly in and out by
 	 * {@code ELBOW_SWAY}, the shoulder rolls by {@code ROLL}, and now and then (a slow beat, {@code STRETCH_SPEED}) the arm draws
 	 * right in and the hand closes, as if stretching, then opens out again ({@code STRETCH_ELBOW}, {@code STRETCH_CURL}).
 	 */
-	static final float ELBOW_SWAY = 0.35F, ELBOW_SPEED = 0.07F, ROLL = 0.08F, ROLL_SPEED = 0.05F;
-	static final float STRETCH_SPEED = 0.035F, STRETCH_ELBOW = -0.9F, STRETCH_CURL = 0.6F, STRETCH_WRIST = 0.35F;
+	static final float ELBOW_SWAY = 0.12F, ELBOW_SPEED = 0.04F, ROLL = 0.025F, ROLL_SPEED = 0.03F;
+	// (the stretch was too busy, Andy: "the idle it too distracting"; the arms are only up while used now, so it's off)
+	static final float STRETCH_SPEED = 0.035F, STRETCH_ELBOW = 0.0F, STRETCH_CURL = 0.0F, STRETCH_WRIST = 0.0F;
 	/** How far a curl turns each finger segment (radians at a full fist), and a spread fans them (radians per finger from the middle). */
 	static final float CURL_BASE = 1.45F, CURL_TIP = 1.65F, SPREAD = 0.2F;
 	/** The flurry and shove: the arms pump in turn at this speed. */
