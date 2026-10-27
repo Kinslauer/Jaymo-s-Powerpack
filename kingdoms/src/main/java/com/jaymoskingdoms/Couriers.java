@@ -355,6 +355,10 @@ final class Couriers {
 			// (killed on the way: what they carried falls with them)
 			if (!e.stack().isEmpty()) {
 				v.spawnAtLocation(level, e.stack());
+				if (e.leg() == TO && MerchantOrders.isParcel(e.stack())) {
+					// (0.7.256) whoever ordered it hears in their Tidings where it lies
+					MerchantOrders.waylaid(e.to(), e.stack(), v, v.blockPosition());
+				}
 			}
 			drop(level.getServer(), v.getUUID());
 		}
@@ -606,7 +610,8 @@ final class Couriers {
 		if (e.leg() == BACK) {
 			say(level, courier, "returned");
 		} else if (e.from().isEmpty()) {
-			say(level, courier, "news");
+			// (0.7.256) a merchant order, or the news
+			say(level, courier, MerchantOrders.isParcel(e.stack()) ? "order" : "news");
 		} else {
 			ServerPlayer sender = level.getServer().getPlayerList().getPlayer(e.from().get());
 			Component name = sender != null ? Post.nameOf(sender) : Post.nameOf(level.getServer(), e.from().get());
