@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    [
+      "minecraft:hay_block",
+      "jaymoskitchen:straw_bale"
+    ],
+    "minecraft:apple",
+    "minecraft:apple",
+    "minecraft:golden_carrot"
+  ],
+  "result": {
+    "id": "jaymoskitchen:horse_feed"
+  }
+}

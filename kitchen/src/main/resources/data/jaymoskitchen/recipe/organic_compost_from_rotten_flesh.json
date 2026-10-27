@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "organic_compost",
+  "ingredients": [
+    "minecraft:dirt",
+    "minecraft:rotten_flesh",
+    "minecraft:rotten_flesh",
+    "jaymoskitchen:straw",
+    "jaymoskitchen:straw",
+    "minecraft:bone_meal",
+    "minecraft:bone_meal",
+    "minecraft:bone_meal",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "jaymoskitchen:organic_compost"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/rich_soil"
+      },
+      {
+        "model": "jaymoskitchen:block/rich_soil",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/rich_soil",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/rich_soil",
+        "y": 270
+      }
+    ]
+  }
+}

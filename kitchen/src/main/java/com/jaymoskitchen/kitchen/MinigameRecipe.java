@@ -57,7 +57,7 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 		List<Ingredient> list = new ArrayList<>();
 		for (Map.Entry<Step, Integer> need : this.dish.ingredients().entrySet()) {
 			for (int n = 0; n < need.getValue(); n++) {
-				list.add(Ingredient.of(need.getKey().item()));
+				list.add(Ingredient.of(need.getKey().items().stream()));
 			}
 		}
 		this.ingredients = List.copyOf(list);
@@ -76,7 +76,7 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 	}
 
 	public ItemStackTemplate result() {
-		return new ItemStackTemplate(ModItems.dish(dish));
+		return new ItemStackTemplate(ModItems.dish(dish), dish.batch());
 	}
 
 	@Override

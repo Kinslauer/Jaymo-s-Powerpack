@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:rice_roll_medley",
+        "state": {
+          "servings": "8"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:rice_roll_medley"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:inverted",
+        "term": {
+          "type": "minecraft:match_block",
+          "blocks": "jaymoskitchen:rice_roll_medley",
+          "state": {
+            "servings": "8"
+          }
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bowl"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/rice_roll_medley"
+}

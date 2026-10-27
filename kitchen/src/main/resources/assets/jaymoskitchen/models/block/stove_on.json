@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "jaymoskitchen:block/stove_bottom",
+    "front": "jaymoskitchen:block/stove_front_on",
+    "side": "jaymoskitchen:block/stove_side",
+    "top": "jaymoskitchen:block/stove_top_on"
+  }
+}

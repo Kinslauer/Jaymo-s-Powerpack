@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:gleaming_salad_feast",
+        "state": {
+          "servings": "4"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:gleaming_salad_feast"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:inverted",
+        "term": {
+          "type": "minecraft:match_block",
+          "blocks": "jaymoskitchen:gleaming_salad_feast",
+          "state": {
+            "servings": "4"
+          }
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bowl"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/gleaming_salad_feast"
+}

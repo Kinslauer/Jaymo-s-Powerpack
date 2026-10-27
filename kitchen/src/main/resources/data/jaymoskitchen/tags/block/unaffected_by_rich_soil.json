@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:grass_block",
+    "minecraft:short_grass",
+    "minecraft:moss_block",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:fern",
+    "minecraft:twisting_vines",
+    "minecraft:big_dripleaf",
+    "minecraft:pink_petals",
+    "minecraft:wildflowers",
+    "jaymoskitchen:sandy_shrub",
+    "minecraft:twisting_vines_plant",
+    "minecraft:big_dripleaf_stem",
+    "#jaymoskitchen:mushroom_colonies",
+    "#jaymoskitchen:wild_crops"
+  ]
+}

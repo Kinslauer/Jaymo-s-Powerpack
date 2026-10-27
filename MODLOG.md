@@ -3207,7 +3207,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   life." A realm's name isn't spoken ("the realm"), since it changes from world to world. 80 new VoxCPM2 clips,
   5.4 MB of voice in all; `Voices.voiced()` and `tools/voices/make_voices.py` list the same lines from the lang file.
   No Powers changes.
-- **0.17.70, killing an echo wakes a stranded Chrono:** Andy asked how a Chrono who starts in the future (the life
+- **0.17.72, killing an echo wakes a stranded Chrono:** Andy asked how a Chrono who starts in the future (the life
   story's "lost in time") gets out, then: "add killing an echo wakes him up". A starter can't use sneak+B (Fast
   Forward) until his next ability unlocks, so he was stuck till then, dying or another Chrono's leap. Now once he
   has killed one of his echoes for good there, sneak+B in the future takes him home (`Future.wakesEarly`, through

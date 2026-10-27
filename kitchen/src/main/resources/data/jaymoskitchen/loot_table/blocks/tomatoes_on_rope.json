@@ -1,0 +1,67 @@
+{
+  "type": "minecraft:block",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  },
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:tomatoes_on_rope",
+        "state": {
+          "age": "3"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:tomato"
+        }
+      ],
+      "modifier": [
+        {
+          "type": "minecraft:set_count",
+          "count": {
+            "type": "minecraft:uniform",
+            "max": 2,
+            "min": 1
+          }
+        },
+        {
+          "type": "minecraft:apply_bonus",
+          "enchantment": "minecraft:fortune",
+          "formula": "minecraft:uniform_bonus_count",
+          "parameters": {
+            "bonusMultiplier": 1
+          }
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskitchen:tomatoes_on_rope",
+            "state": {
+              "age": "3"
+            }
+          },
+          {
+            "type": "minecraft:random_chance",
+            "chance": 0.05
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:rotten_tomato"
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

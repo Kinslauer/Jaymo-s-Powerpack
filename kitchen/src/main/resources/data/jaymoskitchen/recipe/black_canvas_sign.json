@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "fd_canvas_sign",
+  "ingredients": [
+    "#jaymoskitchen:canvas_signs",
+    "#c:dyes/black"
+  ],
+  "result": {
+    "id": "jaymoskitchen:black_canvas_sign"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "fabric:registry_contains",
+          "registry": "minecraft:item",
+          "values": [
+            "jaymoskitchen:onion"
+          ]
+        },
+        {
+          "condition": "fabric:registry_contains",
+          "registry": "minecraft:item",
+          "values": [
+            "pantryforblockheads:onion"
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "jaymoskitchen:minigame",
+  "category": "misc",
+  "dish": "onion_soup"
+}

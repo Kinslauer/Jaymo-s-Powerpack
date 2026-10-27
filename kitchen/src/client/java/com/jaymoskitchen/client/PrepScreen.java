@@ -111,7 +111,7 @@ public class PrepScreen extends Screen {
 				addRenderableWidget(roll);
 				if (board) {
 					addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.chop"),
-							b -> this.minecraft.gui.setScreen(new CookingScreen(pos, Station.BOARD, 0)))
+							b -> this.minecraft.gui.setScreen(new CookingScreen(pos, Station.BOARD, new java.util.BitSet())))
 						.bounds(x0 + 2 * (w + 5), by, w, BUTTON_H).build());
 				}
 			}

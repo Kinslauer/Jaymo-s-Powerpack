@@ -20,7 +20,9 @@ public enum Feast {
 	ROAST_CHICKEN(Dish.ROAST_CHICKEN_FEAST, Dish.ROAST_CHICKEN, null, true),
 	SHEPHERDS_PIE(Dish.SHEPHERDS_PIE_FEAST, Dish.SHEPHERDS_PIE, null, true),
 	HONEY_GLAZED_HAM(Dish.HONEY_GLAZED_HAM_FEAST, null, () -> Delight.HONEY_GLAZED_HAM, true),
-	STUFFED_PUMPKIN(Dish.STUFFED_PUMPKIN_FEAST, null, () -> Delight.STUFFED_PUMPKIN, false);
+	STUFFED_PUMPKIN(Dish.STUFFED_PUMPKIN_FEAST, null, () -> Delight.STUFFED_PUMPKIN, false),
+	// (0.5.33) cut on the board; it glows (see FeastBlock). The rice roll medley has eight servings and is its own block (MedleyBlock)
+	GLEAMING_SALAD(Dish.GLEAMING_SALAD_FEAST, null, () -> DelightDishes.GLEAMING_SALAD, true);
 
 	/** Servings in a whole feast. */
 	public static final int SERVINGS = 4;

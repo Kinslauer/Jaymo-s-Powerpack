@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_attached_hanging_sign_rot_1",
+  "textures": {
+    "all": "jaymoskitchen:block/blue_hanging_canvas_sign",
+    "particle": "jaymoskitchen:block/blue_hanging_canvas_sign"
+  }
+}

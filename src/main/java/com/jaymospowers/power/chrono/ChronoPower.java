@@ -221,7 +221,7 @@ public final class ChronoPower implements Power {
 			&& com.jaymospowers.core.Mastery.isUnlocked(player, key);
 	}
 
-	/** (0.17.70) A starter who has killed an echo in the future can sneak+B home ({@code Future.wakesEarly}). */
+	/** (0.17.72) A starter who has killed an echo in the future can sneak+B home ({@code Future.wakesEarly}). */
 	@Override
 	public boolean usableEarly(Player player, PowerKey key) {
 		return key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && com.jaymospowers.power.chrono.future.Future.wakesEarly(player);

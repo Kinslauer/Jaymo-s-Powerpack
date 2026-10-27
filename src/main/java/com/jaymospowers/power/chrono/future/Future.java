@@ -231,7 +231,7 @@ public final class Future {
 	}
 
 	/**
-	 * (0.17.70) Andy: "killing an echo wakes him up". A starter Chrono stranded in the future (the life story's lost in
+	 * (0.17.72) Andy: "killing an echo wakes him up". A starter Chrono stranded in the future (the life story's lost in
 	 * time start) can't use sneak+B till his next ability unlocks, unless he has killed one of his echoes: then sneak+B
 	 * takes him home. Only from the future; leaping forward still waits for the unlock.
 	 */
