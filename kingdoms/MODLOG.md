@@ -5649,7 +5649,7 @@ with a letterboxed animation". The Aether Giants' grab, in `remnants/AetherGiant
   Powers): the catch, a player, sees the Giant's face push in on them for the snatch, hold and slam (56 ticks); everyone within
   `FILM_RANGE` 48 blocks gets the bars.
 - Lang line `message.jaymoskingdoms.giant.grabbed`. Compile-checked only.
-## 0.7.273: crewed ships come off the beach (pack 0.17.76)
+## 0.7.274: crewed ships come off the beach (pack 0.17.77)
 Andy (clip): a whaler barely moved from where she started, well after fitting out; she lay with her bow up a beach by
 her harbour.
 - **Backing off never backed her.** Lying stuck, her captain backed for 4 looks (40 ticks), but she only goes astern

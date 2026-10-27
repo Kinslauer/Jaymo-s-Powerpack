@@ -167,18 +167,30 @@ final class TierScreen extends Screen {
 		List<Component> story = List.of(Component.translatable("tier.jaymoskingdoms." + tier.key() + ".desc"));
 		int storyLines = Math.min(3, Ui.detailLines(this.font, pw, null, story));
 		int rowsBottom = bottom - 6 - storyLines * Ui.LINE;
+		// (UI text pass) rows past the room scroll slowly through it and back instead of being left off
+		int rowsTop = ry, rowsH = 0;
+		for (Component row : rows) {
+			rowsH += this.font.split(row, textW).size() * Ui.LINE + 4;
+		}
+		int view = Math.max(0, rowsBottom - rowsTop), over = Math.max(0, rowsH - view);
+		int shift = over > 0 ? Ui.slide(over, Ui.SCROLL_MS_PER_LINE / Ui.LINE, Ui.SCROLL_PAUSE_MS) : 0;
+		if (over > 0) {
+			graphics.enableScissor(px, rowsTop, px + pw, rowsBottom);
+		}
+		ry -= shift;
 		for (int i = 0; i < rows.size(); i++) {
 			List<FormattedCharSequence> split = this.font.split(rows.get(i), textW);
 			int rh = split.size() * Ui.LINE + 4;
-			if (ry + rh > rowsBottom) {
-				break;
-			}
-			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + rh - 1, i, false);
+			Ui.row(graphics, px + 6, ry, px + pw - 6 - (over > 0 ? 4 : 0), ry + rh - 1, i, false);
 			int color = i >= needRow ? (open ? Ui.GOOD : Ui.DIM) : Ui.TEXT;
 			for (int l = 0; l < split.size(); l++) {
 				graphics.text(this.font, split.get(l), px + 10, ry + 2 + l * Ui.LINE, color);
 			}
 			ry += rh;
+		}
+		if (over > 0) {
+			graphics.disableScissor();
+			Ui.scrollbar(graphics, px + pw - 7, rowsTop, view - 1, view, rowsH, shift);
 		}
 		Ui.detail(graphics, this.font, px, rowsBottom, pw, storyLines, null, tier.color, story);
 

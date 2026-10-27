@@ -3247,7 +3247,21 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   - Crews are men: new crewmen are made male, and a woman already aboard is replaced at her station by a man of her
     blood with her gear, role, side, health share and records (`Crewmen.recast`, as `convert` does for old folk).
   Compile-checked here; not seen in game.
-- **0.17.76, stuck ships come off the beach (Kingdoms 0.7.273):** a stuck crewed ship's captain now really backs
+- **0.17.76, everyone climbs walls; no cut-off text (Kingdoms 0.7.273, Kitchen 0.5.34):** Andy: "everyone should
+  be able to ledge climb, the first rank of free running climber should just increase grip time. also the text is
+  cut off on most of these UI". Wall climbing (cling, climb, shimmy, pull up and over, hop to the next wall, cling at
+  the end of a wall run, Sneak + forward off an edge into a hang) no longer needs Climber: anyone gets a 3 s grip at
+  0.05 a tick (`Freerun.GRIP_TICKS`/`CLIMB_SPEED` now by rank 0 to 3, `Freerun.grip`/`climbSpeed`). Climber rank 1
+  only lengthens the grip to 6 s; rank 2 is 8 s and faster (0.07), rank 3 never slips (Andy: "unlimited"; `UNLIMITED_GRIP`, hunger still drains) and climbs at 0.09. Perk text rewritten.
+  Text: the shared screen helpers (`UiStyle`, Kingdoms' `Ui`, Kitchen's `KitchenUi`) no longer cut with "...". A
+  line too long for its room slides slowly back and forth inside it (as vanilla buttons do; `slide`, a 1.5 s pause
+  each end), and a detail box with more lines than it has room for scrolls slowly up through them and back with a
+  thin bar at the side (3 s pauses). Same for the H screen's own lines and wrapped text, the Z Fighter story,
+  training and star map screens, the cooking screen's rows and hint (`KitchenUi.wrapped`), the life-story side panel
+  and the world tier's rows (which used to drop the ones that didn't fit). The skill tree's tiles are 6 px wider so
+  every perk name but Lockpicking Prowess fits outright ("Leap of Faith" was cut). Compile-checked here, not
+  playtested.
+- **0.17.77, stuck ships come off the beach (Kingdoms 0.7.274):** a stuck crewed ship's captain now really backs
   her off (warped astern with her sails struck, bow brought round to open water), a whaler hove to at her moorings no
   longer backs herself onto the beach while fitting out, and a hull already in the ground can move off it. Not seen
   in game.

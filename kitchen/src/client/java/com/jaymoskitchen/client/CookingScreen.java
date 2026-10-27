@@ -684,7 +684,7 @@ public class CookingScreen extends Screen {
 			int ry = y + LIST_TOP + (i - listScroll) * ROW_PITCH;
 			KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_PITCH - 1, i, i == hovered && can);
 			graphics.item(new ItemStack(ModItems.dish(d)), x + 9, ry + 1);
-			graphics.text(this.font, fit(dishName(d), METHOD_X - 33), x + 29, ry + 6, can ? COLOR_TEXT : COLOR_DIM);
+			KitchenUi.line(graphics, this.font, dishName(d), x + 29, ry + 6, METHOD_X - 33, can ? COLOR_TEXT : COLOR_DIM);
 			// what goes in, right-aligned, each icon with its count
 			int iconX = x + PANEL_W - 10 - 17 * d.ingredients().size();
 			graphics.text(this.font, Component.translatable("screen.jaymoskitchen.method." + d.method().name().toLowerCase()),
@@ -706,14 +706,14 @@ public class CookingScreen extends Screen {
 			Dish d = dishes.get(hovered);
 			graphics.text(this.font, dishName(d), x + 9, dy + 5, COLOR_CURRENT);
 			Component how = Component.translatable("screen.jaymoskitchen.how." + d.method().name().toLowerCase());
-			graphics.text(this.font, fit(how, PANEL_W - 18), x + 9, dy + 16, COLOR_DIM);
+			KitchenUi.line(graphics, this.font, how, x + 9, dy + 16, PANEL_W - 18, COLOR_DIM);
 			Component perfect = Component.translatable("screen.jaymoskitchen.perfect_gives");
 			for (int b = 0; b < d.perfectBuffs().size(); b++) {
 				Dish.Buff buff = d.perfectBuffs().get(b);
 				perfect = perfect.copy().append(b == 0 ? " " : ", ").append(Component.translatable(buff.effect().value().getDescriptionId()))
 					.append(buff.amplifier() > 0 ? " " + (buff.amplifier() + 1) : "").append(" (" + buff.ticks() / 20 + "s)");
 			}
-			graphics.text(this.font, fit(perfect, PANEL_W - 18), x + 9, dy + 27, KitchenUi.OK);
+			KitchenUi.line(graphics, this.font, perfect, x + 9, dy + 27, PANEL_W - 18, KitchenUi.OK);
 			if (!canMake(hovered, d)) {
 				graphics.text(this.font, Component.translatable("screen.jaymoskitchen.missing"), x + 9, dy + 37, COLOR_BAD);
 			}
@@ -721,21 +721,9 @@ public class CookingScreen extends Screen {
 			// "pick a dish" is already the header's line; here, the station's hint
 			String hint = "screen.jaymoskitchen.hint." + station.name().toLowerCase();
 			if (net.minecraft.locale.Language.getInstance().has(hint)) {
-				var lines = this.font.split(Component.translatable(hint), PANEL_W - 18);
-				for (int l = 0; l < Math.min(4, lines.size()); l++) {
-					graphics.text(this.font, lines.get(l), x + 9, dy + 5 + l * 10, COLOR_DIM);
-				}
+				KitchenUi.wrapped(graphics, this.font, Component.translatable(hint), x + 9, dy + 5, PANEL_W - 18, 4, 10, COLOR_DIM, true);
 			}
 		}
-	}
-
-	/** The text cut to a width, ending in "..." when it doesn't fit. */
-	private net.minecraft.util.FormattedCharSequence fit(Component text, int width) {
-		if (this.font.width(text) <= width) {
-			return text.getVisualOrderText();
-		}
-		String plain = this.font.plainSubstrByWidth(text.getString(), width - this.font.width("...")) + "...";
-		return Component.literal(plain).withStyle(text.getStyle()).getVisualOrderText();
 	}
 
 	private void drawPlaying(GuiGraphicsExtractor graphics, int x, int y, float a) {

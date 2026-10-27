@@ -1,10 +1,12 @@
 package com.jaymoskingdoms.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Util;
 import net.minecraft.world.inventory.Slot;
 
 /**
@@ -61,17 +63,47 @@ public final class Ui {
 		graphics.fill(x, y, x + Math.round(w * Math.max(0.0F, Math.min(1.0F, share))), y + h, color);
 	}
 
-	/** One line of text, cut with "..." if it would run past {@code width}. */
+	/** (UI text pass) How a line too long for its room slides (a pause each end, ms per pixel), and how a detail box too full scrolls (ms per line). */
+	public static final long SLIDE_PAUSE_MS = 1500L, SLIDE_MS_PER_PX = 35L, SCROLL_PAUSE_MS = 3000L, SCROLL_MS_PER_LINE = 1100L;
+
+	/** One line of text. If it would run past {@code width} it slides slowly back and forth inside it, so all of it shows. */
 	public static void line(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int width, int color) {
-		graphics.text(font, cut(font, text.getString(), width), x, y, color);
+		String s = text.getString();
+		int over = font.width(s) - width;
+		if (over <= 0) {
+			graphics.text(font, s, x, y, color);
+			return;
+		}
+		graphics.enableScissor(x, y - 1, x + Math.max(0, width), y + LINE + 1);
+		graphics.text(font, s, x - slide(over, SLIDE_MS_PER_PX, SLIDE_PAUSE_MS), y, color);
+		graphics.disableScissor();
 	}
 
-	/** The same, right-aligned to {@code right}. */
+	/** The same, right-aligned to {@code right} (sliding inside {@code width} left of it when too long). */
 	public static void lineRight(GuiGraphicsExtractor graphics, Font font, Component text, int right, int y, int width, int color) {
-		String s = cut(font, text.getString(), width);
-		graphics.text(font, s, right - font.width(s), y, color);
+		int textW = font.width(text.getString());
+		if (textW <= width) {
+			graphics.text(font, text.getString(), right - textW, y, color);
+		} else {
+			line(graphics, font, text, right - width, y, width, color);
+		}
 	}
 
+	/** Where a slide of {@code over} steps is now (0 to {@code over}): a pause, along at {@code msPerStep}, a pause, and back. */
+	public static int slide(int over, long msPerStep, long pause) {
+		long run = over * msPerStep, t = Util.getMillis() % (2 * (pause + run));
+		if (t < pause) {
+			return 0;
+		}
+		t -= pause;
+		if (t < run) {
+			return (int)(t / msPerStep);
+		}
+		t -= run;
+		return t < pause ? over : over - (int)Math.min(over, (t - pause) / msPerStep);
+	}
+
+	/** {@code s} cut to {@code width} with "..." (for HUD bits with no room to slide; screens use {@link #line}). */
 	public static String cut(Font font, String s, int width) {
 		if (font.width(s) <= width) {
 			return s;
@@ -80,10 +112,12 @@ public final class Ui {
 	}
 
 	/**
-	 * The detail box: a rule, then {@code name} in {@code color} (if any) and {@code text} wrapped under it, in at most
-	 * {@code lines} lines; "..." when it runs over. With no name, the text is dim (a hint, or the screen's lead).
+	 * The detail box: a rule, then {@code name} in {@code color} (if any) and {@code text} wrapped under it, in
+	 * {@code lines} lines. With no name, the text is dim (a hint, or the screen's lead). Text that needs more lines
+	 * scrolls slowly up through the box and back (a thin bar at the side shows where), so none of it is cut off.
 	 */
-	public static void detail(GuiGraphicsExtractor graphics, Font font, int x, int y, int w, int lines, Component name, int color, List<Component> text) {
+	public static void detail(GuiGraphicsExtractor graphics, Font font, int x, int y, int w, int lines, Component name, int color,
+		List<Component> text) {
 		rule(graphics, x + 6, x + w - 6, y);
 		int ty = y + 5, room = lines;
 		boolean named = name != null && !name.getString().isEmpty();
@@ -92,22 +126,32 @@ public final class Ui {
 			ty += 10;
 			room--;
 		}
-		int drawn = 0;
-		outer:
+		if (room <= 0) {
+			return;
+		}
+		List<FormattedCharSequence> rows = new ArrayList<>();
+		List<Integer> colors = new ArrayList<>();
 		for (Component part : text) {
 			int partColor = part.getStyle().getColor() != null ? 0xFF000000 | part.getStyle().getColor().getValue() : named ? TEXT : DIM;
-			List<FormattedCharSequence> split = font.split(part, w - 18);
-			for (FormattedCharSequence seq : split) {
-				if (drawn >= room) {
-					break outer;
-				}
-				boolean last = drawn == room - 1 && (seq != split.getLast() || part != text.getLast());
-				graphics.text(font, seq, x + 9, ty + drawn * LINE, partColor);
-				if (last) {
-					graphics.text(font, "...", x + 9 + font.width(seq), ty + drawn * LINE, DIM);
-				}
-				drawn++;
+			for (FormattedCharSequence seq : font.split(part, w - 18)) {
+				rows.add(seq);
+				colors.add(partColor);
 			}
+		}
+		int view = room * LINE, over = Math.max(0, rows.size() - room) * LINE;
+		int shift = over > 0 ? slide(over, SCROLL_MS_PER_LINE / LINE, SCROLL_PAUSE_MS) : 0;
+		if (over > 0) {
+			graphics.enableScissor(x, ty - 1, x + w, ty + view);
+		}
+		for (int i = 0; i < rows.size(); i++) {
+			int ly = ty + i * LINE - shift;
+			if (ly > ty - LINE && ly < ty + view) {
+				graphics.text(font, rows.get(i), x + 9, ly, colors.get(i));
+			}
+		}
+		if (over > 0) {
+			graphics.disableScissor();
+			scrollbar(graphics, x + w - 6, ty, view - 1, view, view + over, shift);
 		}
 	}
 
