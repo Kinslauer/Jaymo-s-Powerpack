@@ -5207,3 +5207,16 @@ stoic brick for a captain. they need at the very least a personality."
   the town's villagers. Each says why, and the town hears how many signed on.
 - Whaleboat hands stay crew in the boats. Set down ashore, a crewman lives as an ordinary villager.
   Without MCA the crews stay folk. Javac-checked against the 26.3 jars, not seen in game.
+
+## 0.7.243: no lag spike before the life story (pack 0.17.31)
+- **The first capital is raised near spawn.** A new world's first realm (raised so the story screen has realms to name)
+  went to the nearest village anywhere within 1,600 blocks. In Andy's world that was 900 blocks off, and loading and
+  making all that land at once froze the server for about a minute before the story opened. Now only a village within
+  24 chunks (384 blocks) of spawn is taken (`CAPITAL_VILLAGE_SEARCH`), which also makes the search itself quick; with
+  none that near, a citadel goes up by spawn at the first try, where it used to wait out the village's 90 seconds first.
+- **Ships find their way out of a bay.** Andy: "the whaling ship got stuck trying to navigate". A captain only looked 18
+  blocks ahead for open water, so a whaler (or any crewed ship) whose heading ran through a headland backed off, came
+  about onto the same heading and ran back into the same bay, over and over. Now, once she has lain stuck, she looks
+  along 16 headings for open water she can sail straight to (`Fleet.offing`), takes the one that comes out nearest her
+  heading, and makes for it (at most 30 s) before taking her heading up again. Each try from the same bay looks farther
+  out (48, 96, 144, then 160 blocks); the count starts over once she's 96 blocks clear (`Corsairs.DETOUR*`).

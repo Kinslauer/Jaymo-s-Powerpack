@@ -69,6 +69,13 @@ final class Corsairs implements Ship.Captaincy {
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
 	/** How often (ticks) her captain looks about; how many looks she may lie stuck before she backs off; how long she backs. */
 	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 4;
+	/**
+	 * (0.7.243) Embayed, she makes for open water this far off (blocks; farther each try, up to the most), for at most
+	 * this long (ticks), and her tries start over once she's this far from where she last lay stuck. How far ahead on her
+	 * heading she aims to come out.
+	 */
+	static final double DETOUR = 48.0, DETOUR_MOST = 160.0, DETOUR_FORGIVE = 96.0, DETOUR_AIM = 256.0;
+	static final int DETOUR_TICKS = 600;
 	/** A merchantman's done when she's this near her harbour. */
 	static final double ARRIVE = 22.0;
 	/** Plundering a realm's ship: reputation lost with it. */
@@ -269,6 +276,17 @@ final class Corsairs implements Ship.Captaincy {
 			want = Fleet.bearing(ship, crew.waypoint.getX() + 0.5, crew.waypoint.getZ() + 0.5);
 			sail = PATROL_SAIL;
 		}
+		// (0.7.243) Andy: "the whaling ship got stuck trying to navigate". Her heading through a headland only ever
+		// brought her back into the same bay; now, having lain embayed, she makes for open water out of it first
+		float aim = want;
+		if (crew.detour != null) {
+			if (level.getGameTime() > crew.detourUntil || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.detour)) < WAYPOINT_REACH) {
+				crew.detour = null;
+			} else if (sail > 0.0) {
+				want = Fleet.bearing(ship, crew.detour.getX() + 0.5, crew.detour.getZ() + 0.5);
+				sail = Math.max(sail, PATROL_SAIL);
+			}
+		}
 		// open water ahead, or the nearest heading that has it; embayed, she backs off a while and tries another way
 		Float clear = Fleet.heading(level, ship, want);
 		if (crew.backing > 0) {
@@ -290,6 +308,14 @@ final class Corsairs implements Ship.Captaincy {
 			crew.stuck = 0;
 			crew.backing = BACK_LOOKS;
 			crew.waypoint = null;
+			if (crew.stuckAt == null || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.stuckAt)) > DETOUR_FORGIVE) {
+				crew.detours = 0;
+			}
+			crew.stuckAt = ship.blockPosition();
+			double reach = Math.min(DETOUR_MOST, DETOUR * (1 + crew.detours++));
+			crew.detour = Fleet.offing(level, ship, ship.getX() - Mth.sin(aim * Mth.DEG_TO_RAD) * DETOUR_AIM,
+				ship.getZ() + Mth.cos(aim * Mth.DEG_TO_RAD) * DETOUR_AIM, reach);
+			crew.detourUntil = level.getGameTime() + DETOUR_TICKS;
 		}
 		crew.wantYaw = clear != null ? clear : want;
 		crew.wantSail = clear != null ? sail : 0.2;
