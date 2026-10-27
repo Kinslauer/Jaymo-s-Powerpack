@@ -7,9 +7,7 @@
       "if_true": "minecraft:on_floor",
       "then_run": {
         "type": "minecraft:block",
-        "result_state": {
-          "Name": "minecraft:calcite"
-        }
+        "result_state": "minecraft:calcite"
       }
     },
     {
@@ -17,9 +15,7 @@
       "if_true": "minecraft:under_floor",
       "then_run": {
         "type": "minecraft:block",
-        "result_state": {
-          "Name": "minecraft:andesite"
-        }
+        "result_state": "minecraft:andesite"
       }
     },
     {
@@ -27,9 +23,7 @@
       "if_true": "minecraft:deep_under_floor",
       "then_run": {
         "type": "minecraft:block",
-        "result_state": {
-          "Name": "minecraft:tuff"
-        }
+        "result_state": "minecraft:tuff"
       }
     }
   ]
