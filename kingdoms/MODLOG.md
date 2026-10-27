@@ -5486,3 +5486,16 @@ within 20 blocks. that should also be far reach's extent. animating the hand the
   felled tree does, and a woodcutter's orders count it.
 - **Seen the whole way:** `SpiritCullingMixin` grows a keeper's culling box by the reach while it's out, so the arm is drawn
   even when its keeper is off screen. Not seen in game.
+## 0.7.259: no guards at sea, sailors take up their weapons for a fight (pack 0.17.51)
+
+- Andy (after 0.7.246): "all the sailors are guards still. I dont want any guards on these ships ... if you put a guard,
+  they CANT have armor. but all the sailors should double as both. just picking up their weapons when the time comes."
+  Every crewman is now an MCA fisherman (a sailor) in no armour: no knight, no guards. Their folk's weapons are stowed
+  (`Crewmen.STOWED`); they take them up the moment they have a foe (`Crewmen.arm`) and put them away 20 s after the
+  last one (`Crewmen.stow`). Crews from before are changed in place within 5 s: guard profession to fisherman, armour
+  off and out of their packs, weapons stowed, the knight tag gone. A navy hand is an "Able seaman", not a "Marine".
+  (0.7.246 only changed crew in mail or plate, so unarmoured MCA guards stayed guards.)
+- **The sea no longer shows in a ship's hold** (Andy's clip of the whaling start's whaler: "it looked to me like the
+  hull wasnt actually bailed"): her hold was dry, but the renderer's water mask only covered empty cells. Slabs, stairs
+  and other part-blocks count as wall, so the sea was drawn in their empty half. `Hull.masked` adds the part-blocks with
+  no sea beside them, and `ShipRenderer` masks those too.
