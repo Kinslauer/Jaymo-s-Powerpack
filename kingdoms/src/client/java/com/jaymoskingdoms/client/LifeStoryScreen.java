@@ -695,17 +695,15 @@ final class LifeStoryScreen extends Screen {
 			if (story && road != null && road.start() == LifeStory.Start.TIMELOST) {
 				// (lost in time wakes Chrono at once, whatever this was)
 				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.timelost", power("chrono")));
-			} else {
-				out.add(LifeStory.FATE.equals(a.power()) ? Component.translatable("gui.jaymoskingdoms.story.gives.fate")
-					: Component.translatable("gui.jaymoskingdoms.story.gives.power", power(a.power())));
 			}
+			// (0.7.249) Andy: "this screen should not show the class you will get": what wakes is a surprise
 		}
 		if (a.start() != null) {
 			out.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".wake"));
 			Answer turn = picked(Question.TURN);
 			String echo = LifeStory.echo(a.start());
 			if (LifeStory.powers() && !echo.isEmpty() && turn != null && echo.equals(turn.power())) {
-				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.echo", power(echo)));
+				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.echo"));
 			}
 		}
 		return out;
