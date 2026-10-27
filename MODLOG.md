@@ -3038,3 +3038,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   install (it stays on the pause menu), since L is the spirit key and no letter is free of both mods and vanilla. Second
   patch in the same release: Old Ambrose (ward), Thessaly (reach), the Quiet One (echo, silent but one word at bond 100),
   the arm-lock clash between two keepers (a letterboxed tug of war), Spirit armour and Spirit ride.
+- **0.17.33, Mod Menu:** Andy asked for it, to reach Touch'n Motion's settings (EMF Compat Core's Config screen) and
+  switch on its "Log decisions" while hunting the stray head-touch. Mod Menu 21.0.0 (MIT, TerraformersMC, Modrinth
+  kyy7dbrZ, CurseForge 308702 file 8958984) ships unchanged in `packMods`. It's client-only and bundles Text Placeholder API.
