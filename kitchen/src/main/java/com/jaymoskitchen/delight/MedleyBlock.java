@@ -28,7 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.5.29; Farmer's Delight's rice roll medley, MIT, by vectorwing; its model and art, our own code.) A platter of rolls
+ * (0.5.33; Farmer's Delight's rice roll medley, MIT, by vectorwing; its model and art, our own code.) A platter of rolls
  * set down: right-click it for a roll (two cod rolls, three salmon rolls, then three slices of kelp roll), eight
  * servings in all, each with the quality the platter was cut to (see {@link FeastBlock#QUALITY}); what's left on the
  * platter clears away with one more click. It has to stand on something solid.

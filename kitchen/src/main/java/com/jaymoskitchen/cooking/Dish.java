@@ -164,7 +164,7 @@ public enum Dish {
 		false, List.of(new Buff(MobEffects.ABSORPTION, 120 * 20, 0), new Buff(MobEffects.STRENGTH, 60 * 20, 0))),
 	STUFFED_PUMPKIN_FEAST(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(PUMPKIN, RICE, BROWN_MUSHROOM, CARROT, POTATO), 11, 0.8F, false,
 		List.of(new Buff(MobEffects.RESISTANCE, 120 * 20, 0), new Buff(MobEffects.HASTE, 60 * 20, 0))),
-	// --- (0.5.29) the rest of Farmer's Delight's larder (see delight/DelightDishes); only ever append ---
+	// --- (0.5.33) the rest of Farmer's Delight's larder (see delight/DelightDishes); only ever append ---
 	// drinks, sauces and soups in the pot
 	MELON_JUICE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, MELON_SLICE, MELON_SLICE, MELON_SLICE, MELON_SLICE, SUGAR), 3,
 		0.3F, false, List.of(new Buff(MobEffects.REGENERATION, 15 * 20, 1))),
@@ -403,7 +403,7 @@ public enum Dish {
 			|| this == GLEAMING_SALAD_FEAST || this == RICE_ROLL_MEDLEY;
 	}
 
-	/** (0.5.29) A whole pie: it comes out as a block to set down, four slices to take from it (see delight/PieBlock). */
+	/** (0.5.33) A whole pie: it comes out as a block to set down, four slices to take from it (see delight/PieBlock). */
 	public boolean pie() {
 		return this == APPLE_PIE || this == SWEET_BERRY_CHEESECAKE || this == CHOCOLATE_PIE;
 	}

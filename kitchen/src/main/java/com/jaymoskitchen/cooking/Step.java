@@ -50,7 +50,7 @@ public enum Step {
 	LEMON(() -> pantry("lemon"), null),
 	PEACH(() -> pantry("peach"), null),
 	GRAPES(() -> pantry("grapes"), null),
-	// (0.5.29) the Kitchen's own tomato and onion (delight, looked up by id) come first, Pantry's work as well
+	// (0.5.33) the Kitchen's own tomato and onion (delight, looked up by id) come first, Pantry's work as well
 	TOMATO(() -> own("tomato"), null, () -> pantry("tomato")),
 	ONION(() -> own("onion"), null, () -> pantry("onion")),
 	EGGPLANT(() -> pantry("eggplant"), null),
@@ -96,7 +96,7 @@ public enum Step {
 	RICE(() -> com.jaymoskitchen.delight.Delight.RICE, null),
 	MINCED_BEEF(() -> com.jaymoskitchen.delight.Delight.MINCED_BEEF, null),
 	RAW_BACON(() -> com.jaymoskitchen.delight.Delight.RAW_BACON, null),
-	// (0.5.29) the rest of Farmer's Delight's larder (delight/DelightDishes) and the vanilla food it needs
+	// (0.5.33) the rest of Farmer's Delight's larder (delight/DelightDishes) and the vanilla food it needs
 	GLASS_BOTTLE(() -> Items.GLASS_BOTTLE, null),
 	MELON_SLICE(() -> Items.MELON_SLICE, null),
 	MILK_BOTTLE(() -> com.jaymoskitchen.delight.DelightDishes.MILK_BOTTLE, () -> Items.GLASS_BOTTLE),

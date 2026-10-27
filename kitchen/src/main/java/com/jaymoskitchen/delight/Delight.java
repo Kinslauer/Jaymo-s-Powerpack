@@ -109,7 +109,7 @@ public final class Delight {
 			.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED);
 		Block block;
 		if (feast == null) {
-			// (0.5.29) the rice roll medley: eight servings, so its own block
+			// (0.5.33) the rice roll medley: eight servings, so its own block
 			block = block(dish.id(), MedleyBlock::new, properties);
 		} else if (feast == Feast.GLEAMING_SALAD) {
 			block = block(dish.id(), p -> new FeastBlock(p, feast), properties

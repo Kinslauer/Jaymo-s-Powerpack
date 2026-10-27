@@ -1108,3 +1108,89 @@ dealers do."
 - The grade is the `jaymoskitchen:pmeh_grade` component (none counts as Fair); the tooltip shows it. Kingdoms' dealers
   buy only Fine and Prime and sell Prime. Joints don't carry a grade.
 - Art: `tools/gen_wild_pmeh.py`, `tools/gen_pmeh_crop.py`. The roll screen's hint says where Pmeh comes from.
+
+## 0.5.33: the rest of Farmer's Delight (pack 0.17.71)
+Andy (2026-10-27), after a comparison with Farmer's Delight: add its crops, soil and village features, its skillet in
+place of ours, the stove, its storage and decor, and all its food, with "the recipes [working] into our minigames".
+Ported from Farmer's Delight Refabricated's 26.3 branch (MIT, by vectorwing; LICENSE_farmersdelight), with its art, in
+three tracks. Not taken: the other knives and Backstabbing (Andy wanted only the skillet from the tools).
+
+### Farm, soil and villages
+- Farmer's Delight's farm (MIT, with its art; `com.jaymoskitchen.delight.DelightFarm` registers it, `DelightVillages` and `TreeBark` hang off it): tomatoes (tomato seeds plant a budding bush that grows into a vine you pick by hand, and the vine climbs a rope tied above it to three blocks, giving tomatoes on rope), onions (the onion plants itself), and the rotten tomato, which you throw like a snowball (it does no harm, splatters). Wild onions, tomatoes, carrots, potatoes and beetroots grow in the world (onions and carrots everywhere but the mushroom islands, potatoes above ground, tomatoes in the hot lands, beetroots and sandy shrubs on beaches; bone meal on a sandy shrub sows more). Seasons: tomatoes in summer and autumn, onions in spring and autumn.
+- Rope (straw, two high, makes four), rope fences and gates (the fences keep to their own kind: `RopeFenceConnectionMixin`). Organic compost rots into rich soil (quicker with sun, water and mushrooms beside it); a hoe turns rich soil into rich soil farmland, and rich soil now and then bone-meals the plant above it. Mushroom colonies (brown and red) grow on rich soil, and are set down fully grown. Stripping a log with an axe sometimes drops tree bark (kindling, and an ingredient for compost; it is rolled apart from the Kitchen's own bark for tanning).
+- Villages get compost heaps (five biome styles) among their houses and plant cabbages, tomatoes and onions in their farms; farmers plant tomato seeds and onions, tend any farmland (`SecondaryPoiSensorMixin`), and trade for tomatoes and onions (farmers also buy cabbages and rice, and the wandering trader sells cabbage seeds, rice, onions and tomato seeds).
+- 26.3 API facts learned: `BlockTransformerHelper.registerTilling(Block, Block)` (fabric item api) is the hoe hook, with no `HoeItem.TILLABLES` any more; `BlockItem.registerBlocks(Map, Item)` is how a seed item stands for two blocks (and `Registry.register` does not call it, so call it yourself to fill `Item.BY_BLOCK`); `Item.Properties.villagerFood(int)` and `.cookingFuel(ResourceKey)` replace the old data components; `ItemParticleOption` takes an `Item` or `ItemStackTemplate`, not an `ItemStack`; `Blocks.CARPET.brown()` (a `ColorCollection`), no `BROWN_CARPET`; `StructureTemplatePool.templates`/`rawTemplates` and `StructureProcessorList.list` are private final, reached by `@Accessor`/`@Mutable` mixin accessors; a village house is added by editing the pools when the server starts (`SERVER_STARTING`); worldgen `simple_block` takes a `minecraft:weighted` state provider (`entries` of `data` and `weight`), so one feature places a wild crop beside its companion plant.
+
+### Skillet, stove, storage and canvas
+- **The Frying Pan is the Skillet (Track B).** Same id (`jaymoskitchen:frying_pan`), so pans in old worlds, the hob, `HobLocks`,
+  `Station` and the crafting-grid remainder all work unchanged; it is renamed "Skillet" (`lang-b.json` replaces the two old
+  `frying_pan` names). New class `delight/SkilletItem` (a `BlockItem`, Farmer's Delight's skillet, MIT): iron stats (5 damage,
+  -3.1 speed, +1 knockback, iron durability), rings when it hits (a soft ring for a swing under 80%), and cooks in the hand:
+  stand within a block of a lit fire, hold something a campfire could cook in the other hand and hold use; a fifth of the
+  campfire's time (less with Fire Aspect, never under 3 seconds), and the cooked food lands in your pockets. Let go early and the
+  raw food goes back. Click while it cooks to flip it (`SkilletItem.Flip` payload). It is set down as the hearth block only when
+  you sneak (the click is otherwise the cooking). The model flips the food with the pan
+  (`client/delight/SkilletFlipItemRenderer`, item model type `jaymoskitchen:skillet_flip`, test `jaymoskitchen:skillet/is_cooking`,
+  see `items/frying_pan.json`); the arm tips with it in third person (render-state and humanoid-model mixins). Components:
+  `skillet_cooking_time`, `skillet_ingredient`, `skillet_flip_timestamp`, `skillet_flipped`. Sounds: `block.skillet.sizzle`,
+  `block.skillet.add_food`, `item.skillet.attack.strong/weak` (new `sounds.json`).
+- **Stove** (`delight/StoveBlock`, `StoveBlockEntity`): six grill spots, lit when placed, a shovel puts it out, an empty hand
+  (or the campfire's own dish list when you sneak) opens the kitchen as a campfire (`Station.of`: a lit stove is a CAMPFIRE).
+  Food cooks on it as on a campfire; stepping on a lit one burns (`stove_burn` damage type, tagged is_fire,
+  burn_from_stepping, no_knockback, panic_environmental_causes). In `jaymoskitchen:heat_sources`, so cookware sits on it.
+  Drawn by `client/delight/StoveRenderer`.
+- **Storage and decor** (new class `delight/DelightHome`): 13 cabinets (every wood, poplar is vanilla in 26.3; a barrel's 27
+  slots, opens with the barrel's sounds), the wooden and bamboo baskets (a basket pulls loose items in above it), six crates
+  (carrot, potato, beetroot, cabbage, tomato, onion; a 3x3 of the crop, and back to 9), rice bale (fire-prone, softens falls)
+  and bag of rice, safety net (bounces), canvas (from straw), canvas rug, tatami block, full and half tatami mats.
+  Baskets, cabinets and the net burn as fuel (`COOKING_FUEL` component), nether-wood cabinets don't.
+- **Canvas signs:** plain and sixteen dyes, each as a standing, wall, ceiling-hanging and wall-hanging sign (68 blocks, 34
+  items; dyed by crafting with a dye). They are spruce signs in every way but their look; a new one on a dark canvas
+  starts with white text (`SignBlockEntityMixin`). Item tags `canvas_signs`, `hanging_canvas_signs`.
+- 26.3 facts learned: sign blocks draw from block models now (`minecraft:block/template_sign_rot_0..3`,
+  `template_hanging_sign_rot_*`, `template_attached_hanging_sign_rot_*`, `template_wall_sign`, `template_wall_hanging_sign`) and
+  need a blockstate each; their entity type takes new blocks with `BlockEntityTypes.SIGN.addValidBlock` (Fabric), not a
+  mixin. `ColorCollection` (`Blocks.WOOL.white()`, `Blocks.CARPET.brown()`) replaces the per-colour fields. Custom item
+  model types register in `ItemModels.ID_MAPPER` and conditions in `ConditionalItemModelProperties.ID_MAPPER`; the pan's
+  wrapper needs an accessor mixin on `CuboidItemModelWrapper`. Fuel is the `COOKING_FUEL` data component. `LevelEvent` lives in
+  `world.level.block`. Held-cooking progress (the bar) reads the client player through `SkilletItem.viewer`, which the client
+  sets, since common code can't name the client.
+- Shared files touched: `heat_sources` and the `minecraft:mineable/*` and `damage_type/no_knockback` tags (my entries added at
+  the top of each list so other tracks' additions at the bottom merge cleanly), `Station.of` (one branch),
+  `KitchenBlocks` (the pan is a `SkilletItem`), the two mixin config lists, one line each in `JaymosKitchen` and
+  `JaymosKitchenClient`.
+
+### Food
+- **Farmer's Delight's larder, cooked through our minigames (Track C).** 35 new `Dish` entries, appended after
+  `STUFFED_PUMPKIN_FEAST`; their art, pie and platter models are FD's (MIT).
+  - Pot (STIR; furnace, smoker, pot on the hob or over a fire): melon juice, tomato sauce, bone broth, noodle soup, onion
+    soup, pasta with meatballs, pasta with mutton chop, mushroom rice, vegetable noodles, squid ink pasta, dumplings (2 a
+    batch), glow berry custard, dog food; baked cod stew (SEQUENCE).
+  - Oven: stuffed potato, pie crust, sweet berry and honey cookies (6 a batch), and three pies (apple pie, sweet berry
+    cheesecake, chocolate pie).
+  - Spit: roasted mutton chops, steak and potatoes. Pan: barbecue stick, egg, chicken and bacon sandwiches, mutton wrap.
+  - Board (CHOP): nether salad, melon popsicle, salmon roll and cod roll (2 a batch), kelp roll, and two feasts: the
+    gleaming salad (4 servings, glows, `Feast.GLEAMING_SALAD`) and the rice roll medley (8 servings, `MedleyBlock`).
+  - Not dishes: milk bottle (4 from a bucket, clears effects), ham, pumpkin slice, cake slice, pie slices, kelp roll
+    slice, gleaming salad (the serving), horse feed (crafted). New class `delight/DelightDishes`.
+- **Pies are blocks.** `delight/PieBlock`: four slices; right-click eats one where you stand, a knife cuts one off. The
+  pie keeps the quality it was baked to (`FeastBlock.QUALITY` is shared), and so do its slices.
+- **Cuts** (`delight/Chopping`): cake into 7 slices, pumpkin pie into 4, pumpkin into 4, melon into 9, kelp roll into 3,
+  ham into 2 porkchops and a bone, smoked ham into 2 cooked ones, and any of our pies into 4 slices.
+- **Ham:** a pig (half the time) or hoglin killed with a knife drops a ham, a burning one a smoked ham
+  (`LootTableEvents.MODIFY_DROPS`, as FD does: tags aren't loaded when loot tables are).
+- **Dog food and horse feed:** dog food (a dish) on a tamed wolf heals it fully and gives speed, strength and resistance for
+  5 minutes (twice as long if Perfect, nothing but the heal if burnt, charred or undercooked); horse feed on a tamed horse,
+  donkey, mule or llama gives speed II and jump boost.
+- **Steps:** 26 new ingredients (before `STIR`, so only the actions' ordinals moved). A `Step` can now name an
+  alternative item: `TOMATO` and `ONION` are the Kitchen's own (looked up by id, no link to the crops track) with
+  Pantry's as well; `Step.items()` lists what counts, `Kitchen` counts and takes any of them, and `MinigameRecipe`
+  shows them all. Dishes and `Step`s share static-import names, so a step named like a dish gets a different name
+  (`CRUST`, `SAUCE`, `RICE_COOKED`, `ROLL_SALMON`, `ROLL_COD`).
+- **More than 63 dishes at a station:** `Payloads.OpenKitchen.stocked` is a `BitSet` (`writeBitSet`/`readBitSet`)
+  instead of a `long`. Every other dish and step number on the wire was already a VarInt.
+- **Dish batches and remainders:** `Dish.batch()` (cookies, dumplings and rolls come out several at a time),
+  `Dish.remainder()` (bowl or bottle), `Dish.pie()` and `Dish.placeable()` (feast or pie).
+  `Quality.apply` makes a bottled dish a drink.
+- 26.3 notes: `FriendlyByteBuf.writeBitSet`; `Player.drop(stack, bool, Prediction)`; `LivingEntity.getLootTable()` is an
+  `Optional<ResourceKey>`; block loot pools use the singular `"condition"`.

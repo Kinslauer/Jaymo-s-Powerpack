@@ -53,7 +53,7 @@ public final class ModItems {
 				continue;
 			}
 			if (dish.pie()) {
-				// (0.5.29) a pie is a block to set down, four slices to cut or eat (see delight/PieBlock)
+				// (0.5.33) a pie is a block to set down, four slices to cut or eat (see delight/PieBlock)
 				DISHES.put(dish, com.jaymoskitchen.delight.DelightDishes.pie(dish,
 					ResourceKey.create(Registries.ITEM, JaymosKitchen.id(dish.id()))));
 				continue;

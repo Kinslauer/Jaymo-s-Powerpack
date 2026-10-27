@@ -48,7 +48,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.29) The rest of Farmer's Delight's food (MIT, by vectorwing; see LICENSE_farmersdelight), cooked through the
+ * (0.5.33) The rest of Farmer's Delight's food (MIT, by vectorwing; see LICENSE_farmersdelight), cooked through the
  * Kitchen's own minigames: its dishes are entries of {@link Dish} (soups, sauces, sandwiches, rolls, pies...), and this
  * class makes what isn't one: the slices cut from a pie, a cake, a pumpkin or a kelp roll, the milk bottle, a raw ham
  * (from a pig or hoglin killed with a knife), and the gleaming salad served from its feast. It also makes the pies

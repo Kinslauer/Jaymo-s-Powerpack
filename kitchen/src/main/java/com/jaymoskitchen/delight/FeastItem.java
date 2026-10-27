@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A cooked feast (or, 0.5.29, pie or rice roll medley) in hand: set down, it keeps the quality it was cooked to (see
+ * A cooked feast (or, 0.5.33, pie or rice roll medley) in hand: set down, it keeps the quality it was cooked to (see
  * {@link FeastBlock#QUALITY}, which they all share).
  */
 public class FeastItem extends BlockItem {

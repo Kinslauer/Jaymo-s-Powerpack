@@ -41,7 +41,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntPr
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 /**
- * (0.5.29) Farmer's Delight's farm (MIT, by vectorwing; see LICENSE_farmersdelight) in the Kitchen, with its models and
+ * (0.5.33) Farmer's Delight's farm (MIT, by vectorwing; see LICENSE_farmersdelight) in the Kitchen, with its models and
  * art: tomatoes (seeds, the budding bush, the vine, and the vine climbing a rope) and onions, the rotten tomato to
  * throw, wild onions, tomatoes, carrots, potatoes and beetroots (with sandy shrubs on the beaches), rope and rope
  * fences, organic compost that rots down into rich soil (and rich soil farmland), mushroom colonies and tree bark.

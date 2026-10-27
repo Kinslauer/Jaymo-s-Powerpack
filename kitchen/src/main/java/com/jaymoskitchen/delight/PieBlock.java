@@ -39,7 +39,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.5.29; Farmer's Delight's PieBlock, MIT, by vectorwing; their models and art, our own code.) A whole pie set down:
+ * (0.5.33; Farmer's Delight's PieBlock, MIT, by vectorwing; their models and art, our own code.) A whole pie set down:
  * right-click it to eat a slice where you stand, or cut a slice off with a knife to carry. It has four slices, and each
  * comes out with the quality the pie was baked to (see {@link FeastBlock#QUALITY}, which the pies share). It has to
  * stand on something solid.

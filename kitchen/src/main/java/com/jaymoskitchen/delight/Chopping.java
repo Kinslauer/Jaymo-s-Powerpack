@@ -9,7 +9,7 @@ import net.minecraft.world.item.Items;
 
 /**
  * What a knife makes of things on the cutting board (Farmer's Delight's cuts): meat into two smaller cuts that cook
- * quicker into finger food, a cabbage into leaves, a rice panicle into rice and straw; (0.5.29) a cake, a pie, a pumpkin,
+ * quicker into finger food, a cabbage into leaves, a rice panicle into rice and straw; (0.5.33) a cake, a pie, a pumpkin,
  * a melon or a kelp roll into slices, and a ham into chops.
  */
 public final class Chopping {
@@ -60,7 +60,7 @@ public final class Chopping {
 		if (item == Items.WHEAT) {
 			return List.of(new ItemStack(Delight.STRAW), new ItemStack(Items.WHEAT_SEEDS));
 		}
-		// (0.5.29) the rest of Farmer's Delight's cuts (see DelightDishes)
+		// (0.5.33) the rest of Farmer's Delight's cuts (see DelightDishes)
 		if (item == Items.CAKE) {
 			return List.of(new ItemStack(DelightDishes.CAKE_SLICE, CAKE_SLICES));
 		}
