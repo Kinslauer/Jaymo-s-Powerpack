@@ -13,6 +13,7 @@ import sys
 
 import numpy as np
 import soundfile as sf
+import torch
 from voxcpm import VoxCPM
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -64,6 +65,12 @@ def tidy(wav, rate):
     return wav * (0.89 / peak)
 
 
+def seeded(seed):
+    """voxcpm's generate() takes no seed, so fix the global RNGs before each call instead."""
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+
+
 def main():
     only = set(sys.argv[1:])
     os.makedirs(REFS, exist_ok=True)
@@ -75,14 +82,16 @@ def main():
         ref = os.path.join(REFS, name + ".wav")
         text = v.get("ref", REF_TEXT)
         if not os.path.exists(ref):
-            wav = model.generate(text="(" + v["desc"] + ")" + text, cfg_value=2.0, inference_timesteps=10, seed=v["seed"])
+            seeded(v["seed"])
+            wav = model.generate(text="(" + v["desc"] + ")" + text, cfg_value=2.0, inference_timesteps=10)
             sf.write(ref, tidy(wav, rate), rate)
             print("designed", ref)
         for voice, file, line in LINES:
             if voice != name:
                 continue
+            seeded(v["seed"])
             wav = model.generate(text=line, prompt_wav_path=ref, prompt_text=text, reference_wav_path=ref,
-                                 cfg_value=2.0, inference_timesteps=10, seed=v["seed"])
+                                 cfg_value=2.0, inference_timesteps=10)
             os.makedirs(os.path.join(OUT, voice), exist_ok=True)
             path = os.path.join(OUT, voice, file + ".ogg")
             sf.write(path, tidy(wav, rate), rate, format="OGG", subtype="VORBIS")
