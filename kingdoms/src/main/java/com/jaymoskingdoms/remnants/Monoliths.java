@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -70,7 +71,7 @@ public final class Monoliths {
 	static final double GIANT_SEARCH = 96.0;
 	public static final int HOME_RADIUS = 28;
 	/** Where a Giant rises: this far from its monolith (blocks). */
-	static final int RISE_NEAREST = 9, RISE_FURTHEST = 14;
+	static final int RISE_NEAREST = 16, RISE_FURTHEST = 22;
 	/** Raising one: how often players in the wild are weighed (ticks), the chance each time, how far off it rises, how far apart they are. */
 	static final int RAISE_TICKS = 2400;
 	/** (0.7.159) Andy: "the giants need to be rarer": a third as likely as before (about one per 100 minutes in the wild), twice as far apart. */
@@ -86,10 +87,24 @@ public final class Monoliths {
 	public static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** Tries at finding ground for a monolith, or for a Giant. */
 	static final int SPOT_TRIES = 10;
-	/** The pillar: how tall (blocks, before its broken crown), its bands' spacing, the gap under the floating core. */
+	/**
+	 * (0.7.263) Andy: "the monoliths should be triple their current size". The monolith is drawn as before, every block of
+	 * it this many blocks across: the pillar 9 wide, 39 to 54 tall, its crown 3 wide, its core and shards 3 blocks a side.
+	 */
+	static final int SCALE = 3;
+	/** The pillar (in its own blocks, {@link #SCALE} each): how tall before its broken crown, its bands' spacing, the gap under the floating core. */
 	static final int PILLAR_LEAST = 13, PILLAR_MOST = 18, BAND_EVERY = 4, CORE_GAP = 2;
 	/** The paved ground round its foot (radius, blocks), and how many broken pieces lie about. */
-	static final int GROUND_RADIUS = 4, RUBBLE = 5;
+	static final int GROUND_RADIUS = 4 * SCALE, RUBBLE = 9;
+	/** How uneven the ground under it may be (blocks). */
+	static final int FIT_ROUGHNESS = 6;
+	/**
+	 * (0.7.263) Andy: "they are only mineable with high teir tinker tools". Its stone, bands and core break only to a
+	 * Jaymo's Powers Tinkers tool of this mining tier or better (amethyst bronze, pig iron, slimesteel, steel heads).
+	 */
+	static final String TINKERS_TIER_TAG = "incorrect_for_diamond_tool";
+	/** How far round its foot (blocks, level) and how high above it its own blocks reach. */
+	static final int PART_RADIUS = 8, PART_HEIGHT = (PILLAR_MOST + CORE_GAP + 3) * SCALE;
 	/** The world tier the first Giant's fall raises the world to (1: Borderlands). */
 	static final int FIRST_GIANT_TIER = 1;
 
@@ -125,6 +140,8 @@ public final class Monoliths {
 	}
 
 	private static final Identifier VANILLA_GIANT_SCALE = JaymosKingdoms.id("vanilla_giant_scale");
+	/** Jaymo's Powers' Tinkers tools carry their parts' materials in this component. */
+	private static final Identifier TINKER_MATERIALS = Identifier.fromNamespaceAndPath("jaymospowers", "tool_materials");
 
 	public static final Map<Element, EntityType<AetherGiant>> GIANTS = new EnumMap<>(Element.class);
 
@@ -141,6 +158,7 @@ public final class Monoliths {
 			FabricDefaultAttributeRegistry.register(type, AetherGiant.createAttributes());
 		}
 		ServerTickEvents.END_SERVER_TICK.register(Monoliths::tick);
+		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> breaking(level, player, pos, state));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof AetherGiant giant) {
 				giant.dropBar();
@@ -400,7 +418,7 @@ public final class Monoliths {
 				most = Math.max(most, at.getY());
 			}
 		}
-		return most - least <= 4 ? foot : null;
+		return most - least <= FIT_ROUGHNESS ? foot : null;
 	}
 
 	private static boolean natural(BlockState state) {
@@ -412,11 +430,12 @@ public final class Monoliths {
 	/**
 	 * Builds a monolith of {@code element} with its foot at {@code foot}, and remembers it: a ring of its ground, a 3x3
 	 * pillar of its stone banded every few blocks, narrowing to one block and broken off at the top, its core floating
-	 * over the break with four shards round it, and broken pieces fallen about its foot.
+	 * over the break with four shards round it, and broken pieces fallen about its foot. (0.7.263) Every one of those
+	 * blocks is {@link #SCALE} blocks a side, of the Aether's own stone ({@link Element#stone}).
 	 */
 	public static Monolith raise(ServerLevel level, BlockPos foot, Element element, RandomSource random) {
 		int height = PILLAR_LEAST + random.nextInt(PILLAR_MOST - PILLAR_LEAST + 1);
-		BlockState stone = element.stone.defaultBlockState(), band = element.band.defaultBlockState();
+		BlockState stone = element.stone().defaultBlockState(), band = element.band().defaultBlockState();
 		// the ground round its foot, its own
 		for (int dx = -GROUND_RADIUS; dx <= GROUND_RADIUS; dx++) {
 			for (int dz = -GROUND_RADIUS; dz <= GROUND_RADIUS; dz++) {
@@ -425,11 +444,11 @@ public final class Monoliths {
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, foot.offset(dx, 0, dz)).below();
 				if (natural(level.getBlockState(top))) {
-					set(level, top, element.ground.defaultBlockState());
+					set(level, top, element.ground().defaultBlockState());
 				}
 			}
 		}
-		// the pillar: 3x3, then a 1x1 crown, broken off
+		// the pillar: 3x3, then a 1x1 crown, broken off (each of its blocks SCALE across, the middle one over the foot)
 		int narrow = height - 4;
 		for (int y = 0; y < height; y++) {
 			BlockState here = y % BAND_EVERY == BAND_EVERY - 1 ? band : stone;
@@ -437,48 +456,109 @@ public final class Monoliths {
 			for (int dx = -r; dx <= r; dx++) {
 				for (int dz = -r; dz <= r; dz++) {
 					// the top rows of the broad part crumble at the corners
-					if (r == 1 && y >= narrow - 2 && Math.abs(dx) + Math.abs(dz) == 2 && random.nextBoolean()) {
-						set(level, foot.offset(dx, y, dz), Blocks.AIR.defaultBlockState());
-						continue;
-					}
-					set(level, foot.offset(dx, y, dz), here);
+					boolean crumbled = r == 1 && y >= narrow - 2 && Math.abs(dx) + Math.abs(dz) == 2 && random.nextBoolean();
+					cube(level, foot, dx, y, dz, crumbled ? Blocks.AIR.defaultBlockState() : here);
 				}
 			}
 		}
 		// the core, floating over the break, and its four shards
-		BlockPos core = foot.above(height + CORE_GAP);
 		for (int y = height; y < height + CORE_GAP; y++) {
-			set(level, foot.above(y), Blocks.AIR.defaultBlockState());
+			cube(level, foot, 0, y, 0, Blocks.AIR.defaultBlockState());
 		}
-		set(level, core, element.core.defaultBlockState());
-		set(level, core.offset(2, -1, 2), band);
-		set(level, core.offset(-2, 0, 2), band);
-		set(level, core.offset(2, 1, -2), band);
-		set(level, core.offset(-2, -1, -2), band);
-		// broken pieces about its foot
+		cube(level, foot, 0, height + CORE_GAP, 0, element.core().defaultBlockState());
+		cube(level, foot, 2, height + CORE_GAP - 1, 2, band);
+		cube(level, foot, -2, height + CORE_GAP, 2, band);
+		cube(level, foot, 2, height + CORE_GAP + 1, -2, band);
+		cube(level, foot, -2, height + CORE_GAP - 1, -2, band);
+		BlockPos core = foot.above((height + CORE_GAP) * SCALE + SCALE / 2);
+		// broken pieces about its foot, a few blocks each, sunk into the ground
 		for (int i = 0; i < RUBBLE; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
-			int r = 3 + random.nextInt(3);
+			int r = (3 + random.nextInt(3)) * SCALE;
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, foot.offset(Mth.floor(Math.cos(angle) * r), 0,
 				Mth.floor(Math.sin(angle) * r)));
-			set(level, at, random.nextInt(3) == 0 ? band : stone);
+			BlockState piece = random.nextInt(3) == 0 ? band : stone;
+			int size = 1 + random.nextInt(SCALE);
+			for (BlockPos p : BlockPos.betweenClosed(at.offset(0, -1, 0), at.offset(size - 1, size - 1, size - 1))) {
+				set(level, p, piece);
+			}
 		}
-		level.sendParticles(element.mote, core.getX() + 0.5, core.getY() + 0.5, core.getZ() + 0.5, 40, 1.0, 1.0, 1.0, 0.02);
+		level.sendParticles(element.mote, core.getX() + 0.5, core.getY() + 0.5, core.getZ() + 0.5, 120, 3.0, 3.0, 3.0, 0.02);
 		Monolith m = new Monolith(foot.immutable(), element, AWAKE, true);
 		remember(level, m);
 		JaymosKingdoms.LOGGER.info("A {} monolith rose at {}", element.key(), foot);
 		return m;
 	}
 
+	/** One of the monolith's own blocks, {@code (x, y, z)} of them from its foot: a cube {@link #SCALE} blocks a side. */
+	private static void cube(ServerLevel level, BlockPos foot, int x, int y, int z, BlockState state) {
+		int half = SCALE / 2;
+		BlockPos corner = foot.offset(x * SCALE - half, y * SCALE, z * SCALE - half);
+		for (BlockPos p : BlockPos.betweenClosed(corner, corner.offset(SCALE - 1, SCALE - 1, SCALE - 1))) {
+			set(level, p, state);
+		}
+	}
+
+	/** Whether {@code pos} is within the monolith standing at {@code foot}: its pillar, crown, shards and core. */
+	public static boolean part(BlockPos foot, BlockPos pos) {
+		return Math.abs(pos.getX() - foot.getX()) <= PART_RADIUS && Math.abs(pos.getZ() - foot.getZ()) <= PART_RADIUS
+			&& pos.getY() >= foot.getY() - 1 && pos.getY() <= foot.getY() + PART_HEIGHT;
+	}
+
+	/**
+	 * (0.7.263) Its stone, bands and core break only to a high-tier Tinkers tool (one that harvests what a diamond tool
+	 * does, {@link #TINKERS_TIER_TAG}); anything else is told so and the block stands. Creative players break it as ever.
+	 */
+	private static boolean breaking(net.minecraft.world.level.Level level, net.minecraft.world.entity.player.Player player, BlockPos pos,
+		BlockState state) {
+		if (!(level instanceof ServerLevel server) || player.isCreative() || server != Factions.level(server.getServer())) {
+			return true;
+		}
+		for (Monolith m : all(server)) {
+			if (m.ours() && part(m.pos(), pos) && m.element().builtOf(state)) {
+				if (highTinkers(player.getMainHandItem())) {
+					return true;
+				}
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.monolith.needs_tinkers").withStyle(ChatFormatting.GRAY));
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Whether {@code stack} is one of Jaymo's Powers' Tinkers mining tools of {@link #TINKERS_TIER_TAG}'s tier or better. */
+	static boolean highTinkers(net.minecraft.world.item.ItemStack stack) {
+		net.minecraft.core.component.DataComponentType<?> materials = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(TINKER_MATERIALS);
+		net.minecraft.world.item.component.Tool tool = stack.get(net.minecraft.core.component.DataComponents.TOOL);
+		if (materials == null || tool == null || !stack.has(materials)) {
+			return false;
+		}
+		// a Tinkers mining tool is denied the drops of the blocks past its tier: one denied nothing past diamond is diamond or better
+		for (net.minecraft.world.item.component.Tool.Rule rule : tool.rules()) {
+			if (rule.correctForDrops().isPresent() && !rule.correctForDrops().get()) {
+				return rule.blocks().unwrapKey().map(key -> {
+					String path = key.location().getPath();
+					return path.equals(TINKERS_TIER_TAG) || path.equals("incorrect_for_netherite_tool");
+				}).orElse(false);
+			}
+		}
+		return false;
+	}
+
 	/** Its Giant fallen, the monolith's core goes out: the floating core is gone, the shards left hanging. */
 	private static void darken(ServerLevel level, Monolith m) {
-		for (int y = 1; y <= PILLAR_MOST + CORE_GAP + 2; y++) {
-			BlockPos at = m.pos().above(y);
-			if (level.getBlockState(at).is(m.element().core)) {
+		// (0.7.263) its core a cube now (and the single block of one raised before)
+		BlockPos out = null;
+		int half = SCALE / 2;
+		for (BlockPos at : BlockPos.betweenClosed(m.pos().offset(-half, 1, -half), m.pos().offset(half, PART_HEIGHT, half))) {
+			BlockState state = level.getBlockState(at);
+			if (state.is(m.element().core()) || state.is(m.element().vanilla[Element.CORE])) {
 				set(level, at, Blocks.AIR.defaultBlockState());
-				level.playSound(null, at, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3.0F, 0.5F);
-				return;
+				out = at.immutable();
 			}
+		}
+		if (out != null) {
+			level.playSound(null, out, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3.0F, 0.5F);
 		}
 	}
 

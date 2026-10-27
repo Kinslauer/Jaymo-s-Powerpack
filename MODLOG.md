@@ -3083,7 +3083,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `ZFighterNet.ApeStep` packet), cracks the ground round the foot (`core/GroundCracks`, fading over 5 s, nothing broken)
   and spares whoever is off the ground; its reach is 6 blocks (was 4.5). A step every 5 blocks (was 3), and the ape's
   model plays vanilla's own walk on that slower stride, kept in step with the server's footfalls. Not seen in game.
-- **0.17.56, low-end mode:** Andy asked for Luxium (cheap shadows/lighting/fog for weak PCs); it's 1.20.1 only, its
+- **0.17.57, bigger monoliths (Kingdoms 0.7.263):** the Aether monoliths stand three times as big, built of the Aether's
+  own stone (holystone, ferrosite, icestone, irradiated holystone), and only a diamond-tier-or-better Tinkers tool can
+  break them. No Powers changes.
+- **0.17.59, low-end mode:** Andy asked for Luxium (cheap shadows/lighting/fog for weak PCs); it's 1.20.1 only, its
   licence bans ports, and it can't run beside Iris, so the pack has its own answer instead (`client/LowEndMode`).
   Once per install, after the game starts, a weak PC (built-in graphics: Intel, AMD Radeon APUs, software or virtual; under 3500 MB
   given to Java; 2 cores or fewer) gets shaders switched off through Iris's API and vanilla's Fast graphics preset

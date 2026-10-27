@@ -197,7 +197,11 @@ public final class LifeStory {
 				Answer.born(Heritage.Kind.NIGHTBORN, "moors"),
 				Answer.born(Heritage.Kind.WARRIORBORN, "warband"),
 				Answer.born(Heritage.Kind.EARTHLING, "scholars"),
-				Answer.born(Heritage.Kind.DAWNBORN, "temple")));
+				Answer.born(Heritage.Kind.DAWNBORN, "temple"),
+				// (0.7.262, Andy's NOEA picks) the three new bloods: a hilltop shrine, a workshop's vats, a travelling fair
+				Answer.born(Heritage.Kind.DIVINE, "shrine"),
+				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
+				Answer.born(Heritage.Kind.RUBBERFOLK, "fair")));
 			RAISED.answers.addAll(List.of(
 				Answer.raised("farmers", Items.WHEAT_SEEDS, Stats.Stat.ENDURANCE, false),
 				Answer.raised("smiths", Items.ANVIL, Stats.Stat.MIGHT, false),
@@ -211,16 +215,16 @@ public final class LifeStory {
 				Answer.raised("nobles", Items.GOLDEN_HELMET, Stats.Stat.WITS, true),
 				Answer.raised("foundling", Items.STRING, null, false)));
 			CHILDHOOD.answers.addAll(List.of(
-				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale"),
+				Answer.child("roofs", Items.FEATHER, Stats.Stat.AGILITY, "gravity", "skymarked", "blossomkin", "moonpale", "starlit"),
 				Answer.child("caves", Items.COBWEB, Stats.Stat.ENDURANCE, "web", "obsidian", "hollow"),
-				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle"),
-				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked"),
-				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned"),
+				Answer.child("fights", Items.LEATHER, Stats.Stat.MIGHT, "zfighter", "battlescarred", "ironknuckle", "berrygloss"),
+				Answer.child("books", Items.WRITABLE_BOOK, Stats.Stat.WITS, "chrono", "inkmarked", "opaline"),
+				Answer.child("swimming", Items.KELP, Stats.Stat.AGILITY, "darktide", "abyssal", "reefcrowned", "candystripe"),
 				Answer.child("storms", Items.LIGHTNING_ROD.weathering().unaffected(), Stats.Stat.FINESSE, "wind", "skymarked", "galeborn"),
 				Answer.child("fire", Items.CAMPFIRE, Stats.Stat.GRIT, "smoke", "magmavein", "soulflame", "ashen"),
 				Answer.child("snow", Items.SNOW_BLOCK, Stats.Stat.GRIT, "cryo", "rimeglass", "aurora"),
-				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight"),
-				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted")));
+				Answer.child("bells", Items.BELL, Stats.Stat.WITS, "resonance", "umbral", "twilight", "seraphic"),
+				Answer.child("blades", Items.BUNDLE, Stats.Stat.FINESSE, "arsenal", "warpainted", "brassbound")));
 			YOUTH.answers.addAll(List.of(
 				Answer.youth("cutpurses", Items.TRIPWIRE_HOOK, Classes.PlayerClass.THIEF),
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),

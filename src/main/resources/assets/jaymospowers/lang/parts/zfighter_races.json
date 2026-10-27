@@ -1,0 +1,19 @@
+{
+  "message.jaymospowers.zfighter_adrenaline": "Your heart pounds and the world slows. Now!",
+  "message.jaymospowers.zfighter_adrenaline_crowd": "Too many of them. Your blood roars: faster, harder!",
+  "message.jaymospowers.zfighter_adrenaline_end": "The rush drains away, and everything aches.",
+  "message.jaymospowers.zfighter_blood_ki": "Out of ki: you pay %s health for it.",
+  "message.jaymospowers.zfighter_reserve": "Something cold and deep wakes in you.",
+  "message.jaymospowers.zfighter_comeback": "You were nearly done for. You are not done. Your limit rises.",
+  "message.jaymospowers.zfighter_comeback_up": "Back from the ground, stronger than you fell. Your limit rises.",
+  "message.jaymospowers.zfighter_merge_none": "There is no one here to merge with.",
+  "message.jaymospowers.zfighter_merge_stopped": "You call off the joining.",
+  "message.jaymospowers.zfighter_merge_done": "You and %s are already one in this.",
+  "message.jaymospowers.zfighter_merge_master_no": "%s will not join with you yet: a good heart and eight lessons are needed.",
+  "message.jaymospowers.zfighter_merge_offer": "%s offers to merge. Face them and press sneak+Z to answer.",
+  "message.jaymospowers.zfighter_merge_waiting": "Waiting for %s to answer.",
+  "message.jaymospowers.zfighter_merge_begin": "You open yourself to %s. Stand still.",
+  "message.jaymospowers.zfighter_merge_broken": "The joining breaks.",
+  "message.jaymospowers.zfighter_merge_refused": "%s did not answer.",
+  "message.jaymospowers.zfighter_merge_joined": "Their strength becomes yours, for good."
+}
