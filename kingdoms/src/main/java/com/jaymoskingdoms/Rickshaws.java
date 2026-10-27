@@ -749,8 +749,38 @@ public final class Rickshaws {
 		w.setTask("taking a passenger to " + to.name());
 		level.playSound(null, rickshaw.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.off", puller.getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
+		// (0.7.266) seen setting off, then the road screen: the way itself is never pulled
+		Journeys.begin(level, player, rickshaw, Component.literal(to.name()), job.goal, Journeys.blocks(rickshaw.position(), job.goal), fare, f.id(), RIDE);
 		return 1;
 	}
+
+	/** (0.7.266) A player's ride, at its end or turned back: the rickshaw's free again and its puller heads home. */
+	private static final Journeys.Ride RIDE = new Journeys.Ride() {
+		@Override
+		public void arrived(ServerLevel level, ServerPlayer player, Wagon rickshaw) {
+			Faction to = Factions.get(level.getServer(), rickshaw.ride());
+			rickshaw.setRide(-1);
+			if (to != null) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", to.name()).withStyle(ChatFormatting.GOLD));
+			}
+			level.playSound(null, rickshaw.blockPosition(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			homeward(level, rickshaw);
+		}
+
+		@Override
+		public void turnedBack(ServerLevel level, ServerPlayer player, Wagon rickshaw) {
+			rickshaw.setRide(-1);
+			homeward(level, rickshaw);
+		}
+
+		private void homeward(ServerLevel level, Wagon rickshaw) {
+			Job job = rickshaw.horseId() == null ? null : JOBS.get(rickshaw.horseId());
+			if (job != null) {
+				// (the way home is long, and nobody's watching it: they're back at their rank in a puff once out of sight)
+				start(job, RETURN, null, level.getGameTime());
+			}
+		}
+	};
 
 	private static void hired(ServerLevel level, Faction f, Worker puller, Job job, Wagon rickshaw, long now) {
 		Faction to = Factions.get(level.getServer(), rickshaw.ride());
@@ -762,14 +792,19 @@ public final class Rickshaws {
 			return;
 		}
 		puller.setTask("taking a passenger to " + to.name());
-		if (drive(level, puller, job, job.goal, ARRIVE, RIDE_SPEED, now)) {
-			rickshaw.setRide(-1);
-			player.stopRiding();
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", to.name()).withStyle(ChatFormatting.GOLD));
-			level.playSound(null, rickshaw.blockPosition(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 0.8F, 1.0F);
-			// (the way home is long, and nobody's watching it: they're back at their rank in a puff once out of sight)
-			start(job, RETURN, null, now);
+		if (!Journeys.travelling(player)) {
+			// (back from a restart with them aboard: on the road again)
+			Journeys.resume(level, player, rickshaw, Component.literal(to.name()), job.goal, RIDE);
+			return;
 		}
+		if (Journeys.underway(rickshaw)) {
+			// (0.7.266) on the road screen: the rickshaw waits here till the trip's done, then it's moved to the far end
+			puller.getNavigation().stop();
+			job.trip.reset(now);
+			return;
+		}
+		// (setting off, seen)
+		drive(level, puller, job, job.goal, ARRIVE, RIDE_SPEED, now);
 	}
 
 	/** A puller far from home with nobody to see: back at the rank, rickshaw and all. */

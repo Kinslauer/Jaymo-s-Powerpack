@@ -198,12 +198,16 @@ public final class Cabs {
 					start(job, RETURN, null, now);
 					return;
 				}
-				if (drive(level, driver, horse, cab, job, job.goal, ARRIVE, FARE_SPEED, now)) {
-					cab.setRide(-1);
-					player.stopRiding();
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", to.name()).withStyle(ChatFormatting.GOLD));
-					level.playSound(null, cab.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
-					start(job, RETURN, null, now);
+				if (!Journeys.travelling(player)) {
+					// (back from a restart with them aboard: on the road again)
+					Journeys.resume(level, player, cab, Component.literal(to.name()), job.goal, RIDE);
+				} else if (Journeys.underway(cab)) {
+					// (0.7.266) on the road screen: the cab waits here till the trip's done, then it's moved to the far end
+					driver.getNavigation().stop();
+					job.trip.reset(now);
+				} else {
+					// (setting off, seen)
+					drive(level, driver, horse, cab, job, job.goal, ARRIVE, FARE_SPEED, now);
 				}
 			}
 			case RETURN -> {
@@ -326,6 +330,34 @@ public final class Cabs {
 		start(job, HIRED, Construction.standable(level, to.seat(), 6), level.getGameTime());
 		level.playSound(null, cab.blockPosition(), SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.NEUTRAL, 0.8F, 1.1F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cab.off", driver.getName(), to.name(), fare).withStyle(ChatFormatting.GOLD));
+		Journeys.begin(level, player, cab, Component.literal(to.name()), job.goal, Journeys.blocks(cab.position(), job.goal), fare, f.id(), RIDE);
 		return 1;
 	}
+
+	/** (0.7.266) A player's ride, at its end or turned back: the cab's free again and drives home. */
+	private static final Journeys.Ride RIDE = new Journeys.Ride() {
+		@Override
+		public void arrived(ServerLevel level, ServerPlayer player, Wagon cab) {
+			Faction to = Factions.get(level.getServer(), cab.ride());
+			cab.setRide(-1);
+			if (to != null) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.arrived", to.name()).withStyle(ChatFormatting.GOLD));
+			}
+			level.playSound(null, cab.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			homeward(level, cab);
+		}
+
+		@Override
+		public void turnedBack(ServerLevel level, ServerPlayer player, Wagon cab) {
+			cab.setRide(-1);
+			homeward(level, cab);
+		}
+
+		private void homeward(ServerLevel level, Wagon cab) {
+			Job job = JOBS.get(cab.getUUID());
+			if (job != null) {
+				start(job, RETURN, null, level.getGameTime());
+			}
+		}
+	};
 }
