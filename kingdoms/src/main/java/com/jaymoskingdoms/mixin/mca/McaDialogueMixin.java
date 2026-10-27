@@ -135,7 +135,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if ("main".equals(question) && com.jaymoskingdoms.ManaFolk.ANSWER.equals(answer)) {
-			// (0.7.237) asked about their magic: how strong it is, and how it measures against yours
+			// (0.7.240) asked about their magic: how strong it is, and how it measures against yours
 			com.jaymoskingdoms.ManaFolk.answer(player, villager, words -> villager.sendChatMessage(words, player));
 			villager.getInteractions().stopInteracting();
 			ci.cancel();

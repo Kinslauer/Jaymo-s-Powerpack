@@ -45,7 +45,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.238) A mana spirit's arms. Andy: "these spirits should conjure as arms behind you with the same effects as your mana
+ * (0.7.241) A mana spirit's arms. Andy: "these spirits should conjure as arms behind you with the same effects as your mana
  * aura making up their entire form", after Nero's Devil Breaker (DMC5) and Doppio's partial manifestation (JoJo), "all
  * different sizes". A render layer over players and over the casting folk (the same two-branch registration as
  * {@link ManaClient}): the wearer's own arm is copied, grown by the spirit's size about the shoulder and pushed behind,

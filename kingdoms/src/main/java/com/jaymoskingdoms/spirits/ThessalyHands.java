@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.238) The per-tick state of Thessaly the Learned's hands: what her long reach is drawing in through the walls, the rune
+ * (0.7.241) The per-tick state of Thessaly the Learned's hands: what her long reach is drawing in through the walls, the rune
  * traps she has laid, the things she is juggling round her keeper (and the ones thrown, waiting to land), and the chests she has
  * already pointed out or seen opened. Andy: "manipulating items from way farther away than you could naturally". All of it
  * is kept per keeper, by server tick count, and let go the moment the keeper's spirit is no longer out (a trap is a glyph: it

@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.ChatFormatting;
 
 /**
- * (0.7.238) What a spirit says. Andy: "make them speak like wise wizards from ancient times looking after a young child or
+ * (0.7.241) What a spirit says. Andy: "make them speak like wise wizards from ancient times looking after a young child or
  * grumpy old wizards that are tired of looking after said young child". A line goes to its keeper's chat only, with the
  * spirit's name in its colour, in italics, so it reads as a voice and not as a game message. Every spirit has three lines
  * for each event ({@code spirit.jaymoskingdoms.<id>.<event>.<n>}): wake, summon, dismiss, tired, kill, hurt, low, idle, bond,

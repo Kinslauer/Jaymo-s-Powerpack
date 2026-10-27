@@ -5165,7 +5165,16 @@ Andy, asked whether villagers' skin should be limited too: "yes".
   they fall. `born` also runs when a villager loads, so villagers already in the world are brought in once.
 - `McaGeneticsMixin`'s climate roll keeps to the range when the villager's heritage is already known.
 
-## 0.7.237: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.26)
+## 0.7.238: black, not the world, until MCA's creator (pack 0.17.27)
+Andy: "this screen at the start should not be opaque. it should stay black until the character creator. i just dont
+want the player seeing anything in world while they are spawning."
+- The life story and the loading screen draw on solid black (`extractBackground`), not over the blurred world.
+- Client `StoryCurtain`: a HUD layer drawn last that blacks out the world from the moment the story or a hold arrives
+  until MCA's creator (`DestinyScreen`, matched by name) opens. It covers the gaps between screens while the server
+  moves the newcomer. Without MCA, or when the creator doesn't come, it lifts `LIFT_AFTER_MS` (2.5 s) after nothing
+  holds them. Returning players never see it. 0.7.237 is left for the mana spirits PR. Not seen in game.
+
+## 0.7.240: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.29)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.
 Now `ManaClient` eases the flare down to a resting glow set by power and fullness (below). Mana past full no longer
@@ -5203,7 +5212,7 @@ should ripple, indicating the caster's intent."
   `tools/gen_mana_wand.py`.
 javac-checked against Andy's 26.3 jars; not Loom-built or seen in game.
 
-## 0.7.238: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.26)
+## 0.7.241: mana spirits: the mage hands, Grimsby and Varro (pack 0.17.29)
 Andy: "I want to add a mage hand type of ability that mimics the way stands work but not their presentation. use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5 ... these spirits should conjure as
 arms behind you with the same effects as your mana aura making up their entire form ... some just give you buffs ... and
@@ -5291,6 +5300,9 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
   up is tagged, so a player or mob saved mid-hold gets its gravity back on load. Putting the spirit away ends every hold,
   ward, armour, echo and juggle. `Lockpicking.lockLevel` and `pickBySpirit`, `Pickpocket.liftBySpirit`,
   `MobShields.disable` and `BossBars.boss` opened for the spirits.
+- **The spirit key works on every install**: `SpiritKey` unbinds vanilla's Advancements from L once per install
+  (marker `jaymoskingdoms-spirit-key-v1`). Powers' key pass had already run on existing installs, so L kept opening the
+  advancements screen and the spirit never came.
 - **Dev runs load worlds again**: the silver sword and the eight steel plate recipes wait for `c:ingots/silver` and
   `c:ingots/steel` to have items (`fabric:tags_populated`). Powers fills those tags, so in the pack nothing changes; a
   Kingdoms-only run used to fail registry loading on the missing tags.

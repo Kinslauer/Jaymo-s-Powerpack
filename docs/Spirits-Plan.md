@@ -1,4 +1,4 @@
-# Mana spirits (Kingdoms 0.7.238)
+# Mana spirits (Kingdoms 0.7.241)
 
 Andy (2026-10-26): "a mage hand type of ability that mimics the way stands work but not their presentation ... use of the
 mage hands calls upon a mana spirit, each of which has a differing personality of 5, one of those being seemingly non
@@ -13,7 +13,7 @@ art and code.
 Andy's picks (the Mana Spirits doc): every ability but Work hands; Sense is the Quiet One's only. Unlock: 1 in 18 per brush
 with death while attuned, then spirit sickness for up to 5 days (sooner with meditating, casting, nearly dying again);
 waking cures it. One spirit for life; it can be released at a cost and no new one called. Key: a new keybind, L (no letter is free of
-both mods and vanilla; vanilla's Advancements is moved off L once per install by Powers' `KeyConflicts`, it stays on the pause menu). Attuned folk (court wizards, hermits) have spirits you can see and fight. The Quiet One speaks once at max
+both mods and vanilla; vanilla's Advancements is unbound from L once per install by Kingdoms' `SpiritKey`, it stays on the pause menu). Attuned folk (court wizards, hermits) have spirits you can see and fight. The Quiet One speaks once at max
 bond. **First patch: the shared mage hands plus Grimsby (blade) and Varro (siege).** Ambrose, Thessaly, the Quiet One,
 Clash, Spirit armour, Spirit ride and Sense come in the next one.
 

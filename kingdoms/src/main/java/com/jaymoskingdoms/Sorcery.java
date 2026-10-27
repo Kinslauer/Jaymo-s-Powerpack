@@ -632,7 +632,7 @@ public final class Sorcery {
 
 	/** Arcane bolt: a blue lance of light; twice as hard on the undead. */
 	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
-		// (0.7.237) every cast ripples the caster's aura with its intent
+		// (0.7.240) every cast ripples the caster's aura with its intent
 		Mana.ripple(folk, Mana.HARM);
 		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(BOLT_COLOUR, 1.2F));
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;

@@ -328,7 +328,7 @@ public final class Pickpocket {
 	}
 
 	/**
-	 * (0.7.238) A mana spirit's hand in {@code mark}'s pocket (Thessaly's unseen hand): the mark never feels it, so it is as a
+	 * (0.7.241) A mana spirit's hand in {@code mark}'s pocket (Thessaly's unseen hand): the mark never feels it, so it is as a
 	 * pocket picked clean. A villager or a settlement's folk (not its ruler) whose pockets are not already empty; false if not.
 	 */
 	public static boolean liftBySpirit(ServerPlayer player, LivingEntity mark) {

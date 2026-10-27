@@ -568,7 +568,7 @@ public final class Restoration {
 			return;
 		}
 		next[0] = now + CLERIC_PAUSE;
-		// (0.7.237) a cleric is attuned: the heal ripples their aura
+		// (0.7.240) a cleric is attuned: the heal ripples their aura
 		Mana.ripple(cleric, Mana.HEAL);
 		if (worst != cleric) {
 			beam(level, cleric, worst, GOLD_MOTE);

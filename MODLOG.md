@@ -3020,15 +3020,18 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   which #550 had already used, so renumbered here. Not seen in game.
 - **0.17.25, a loading screen for a story's start (Kingdoms 0.7.236):** newcomers wait behind a loading screen while their
   capital, whaler or future is made and their landing loads; MCA's creator shows your heritage's look. No Powers changes.
+- **0.17.27, black until MCA's creator (Kingdoms 0.7.238):** the life story and loading screens sit on black, and the
+  world stays blacked out between them until MCA's creator opens. 0.17.26 is left for the mana spirits PR. No Powers
+  changes.
 
-- **0.17.26, mana grows (Kingdoms 0.7.237):** the mana glow settles dim after attuning and shows power; casting folk are
+- **0.17.29, mana grows (Kingdoms 0.7.240):** the mana glow settles dim after attuning and shows power; casting folk are
   attuned; amethyst crushes for mana; mana sickness; vis, flux and corruption tie into mana; a mana wand; meditation
   restores mana; casts ripple the aura by intent. No Powers changes (Kingdoms reads Powers' Meditate, Phials and
   Corruption by reflection). See Kingdoms' log.
-- **0.17.26, mana spirits (Kingdoms 0.7.238):** the mage hands and the first two spirits, Grimsby (blade) and Varro
+- **0.17.29, mana spirits (Kingdoms 0.7.241):** the mage hands and the first two spirits, Grimsby (blade) and Varro
   (siege): a chance at near death, five days of spirit sickness, aura arms that grow out of yours, moves on L, bond and
   level, lines and battle advice, autonomous parries and javelins, court wizards and hermits with spirits of their own.
-  See Kingdoms' log and `docs/Spirits-Plan.md`. Powers' `KeyConflicts` moves vanilla's Advancements off L once per
+  See Kingdoms' log and `docs/Spirits-Plan.md`. Kingdoms' spirit key unbinds vanilla's Advancements from L once per
   install (it stays on the pause menu), since L is the spirit key and no letter is free of both mods and vanilla. Second
   patch in the same release: Old Ambrose (ward), Thessaly (reach), the Quiet One (echo, silent but one word at bond 100),
   the arm-lock clash between two keepers (a letterboxed tug of war), Spirit armour and Spirit ride.

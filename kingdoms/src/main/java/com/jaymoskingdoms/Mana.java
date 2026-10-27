@@ -51,7 +51,7 @@ import net.minecraft.world.level.block.Blocks;
  * <li><b>Spells for the rest:</b> an attuned player who isn't a Mage or Sorcerer learns a scroll's spell by reading it
  * and casts it from a staff, as hard as a scroll ({@link Spellcraft#ATTUNED_POWER}), never as hard as a Mage.</li>
  * </ul>
- * (0.7.237) Andy: "court wizards and clerics should have to be attuned as well. meaning other magic users can see their
+ * (0.7.240) Andy: "court wizards and clerics should have to be attuned as well. meaning other magic users can see their
  * glow, and know their power level from the intensity of the glow ... amethyst should be now crushable for mana. add a type
  * of mana sickness for punishing over zealous casters ... Arcana increases that minimum, so you now glow for others the most
  * dim at your weakest. A mana infused wand ... mana can be regenerated using meditation from the survival tree. when
@@ -85,15 +85,15 @@ public final class Mana {
 	static final double SEEN_RANGE = 48.0;
 	/** The glow's steps (synced): 0 none ... {@code GLOW_STEPS} full. */
 	public static final int GLOW_STEPS = 10;
-	/** (0.7.237) A player's power: one step for every this much of their most mana (a finder 2, a fresh caster 4). */
+	/** (0.7.240) A player's power: one step for every this much of their most mana (a finder 2, a fresh caster 4). */
 	static final float MANA_PER_POWER = 25.0F;
 	public static final int MAX_POWER = 10;
-	/** (0.7.237) Mana from one amethyst shard crushed in the fist, and the wait between crushes (ticks). */
+	/** (0.7.240) Mana from one amethyst shard crushed in the fist, and the wait between crushes (ticks). */
 	static final float CRUSH_MANA = 10.0F;
 	static final int CRUSH_COOLDOWN = 10;
-	/** (0.7.237) Mana comes back this many times as fast while meditating, by Meditation rank (0-3). */
+	/** (0.7.240) Mana comes back this many times as fast while meditating, by Meditation rank (0-3). */
 	static final float[] MEDITATE_REGEN = {1.0F, 3.0F, 4.0F, 5.0F};
-	/** (0.7.237) A cast's intent, shown in the ripple of the caster's aura. */
+	/** (0.7.240) A cast's intent, shown in the ripple of the caster's aura. */
 	public static final int HARM = 0, HEAL = 1, WARD = 2, WILL = 3;
 
 	/**
@@ -109,7 +109,7 @@ public final class Mana {
 		// (0.7.231) death's (blood's are paid in blood: Hemomancy.COST)
 		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("deaths_door", 50.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F));
 
-	/** (0.7.237) What each spell or key is for (the rest: harm). */
+	/** (0.7.240) What each spell or key is for (the rest: harm). */
 	static final Map<String, Integer> INTENT = Map.ofEntries(
 		Map.entry("mending", HEAL), Map.entry("restoration", HEAL), Map.entry("mend", HEAL), Map.entry("renewal", HEAL),
 		Map.entry("rekindle", HEAL), Map.entry("warding", WARD), Map.entry("sanctuary", WARD), Map.entry("deaths_door", WARD),
@@ -129,12 +129,12 @@ public final class Mana {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/**
-	 * (0.7.237) How strong an attuned being is (1-{@link #MAX_POWER}), shown in how bright their glow sits at its least.
+	 * (0.7.240) How strong an attuned being is (1-{@link #MAX_POWER}), shown in how bright their glow sits at its least.
 	 * Saved (on folk), synced to everyone.
 	 */
 	public static final AttachmentType<Integer> POWER = AttachmentRegistry.create(JaymosKingdoms.id("mana_power"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** (0.7.237) Their last cast: game time times 4, plus its intent ({@link #HARM}...). Synced to everyone, for the ripple. */
+	/** (0.7.240) Their last cast: game time times 4, plus its intent ({@link #HARM}...). Synced to everyone, for the ripple. */
 	public static final AttachmentType<Long> RIPPLE = AttachmentRegistry.create(JaymosKingdoms.id("mana_ripple"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
@@ -150,7 +150,7 @@ public final class Mana {
 		ManaWand.register();
 		// (their attachments, registered as the classes load)
 		JaymosKingdoms.LOGGER.debug("mana attachments: {} {}", ManaSickness.SICK, ManaAlchemy.ATTUNING);
-		// (0.7.237) an amethyst shard crushed in the fist
+		// (0.7.240) an amethyst shard crushed in the fist
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
 			if (!stack.is(Items.AMETHYST_SHARD) || !attuned(player) || player.isSpectator()) {
@@ -207,11 +207,11 @@ public final class Mana {
 			return 0.0F;
 		}
 		int points = Stats.value(player, Stats.Stat.ARCANA);
-		// (0.7.237) corruption eats into it
+		// (0.7.240) corruption eats into it
 		return (natural(player) ? NATURAL_MAX + NATURAL_PER_POINT * points : FOUND_MAX + FOUND_PER_POINT * points) * ManaAlchemy.left(player);
 	}
 
-	/** (0.7.237) How strong {@code entity}'s magic is (0 unattuned): a player's from their most mana, folk's as they are. */
+	/** (0.7.240) How strong {@code entity}'s magic is (0 unattuned): a player's from their most mana, folk's as they are. */
 	public static int power(LivingEntity entity) {
 		if (!attuned(entity)) {
 			return 0;
@@ -242,7 +242,7 @@ public final class Mana {
 		return true;
 	}
 
-	/** (0.7.237) Pays for {@code what} (a spell or a Sorcerer's key) and ripples the aura with its intent; false if they can't. */
+	/** (0.7.240) Pays for {@code what} (a spell or a Sorcerer's key) and ripples the aura with its intent; false if they can't. */
 	static boolean cast(ServerPlayer player, String what) {
 		if (!spend(player, cost(what))) {
 			return false;
@@ -252,7 +252,7 @@ public final class Mana {
 	}
 
 	/**
-	 * (0.7.238) Pays {@code cost} for something outside the spell lists (a spirit's move) and ripples the aura with
+	 * (0.7.241) Pays {@code cost} for something outside the spell lists (a spirit's move) and ripples the aura with
 	 * {@code intent}; false (and a word on the screen) if they can't.
 	 */
 	public static boolean pay(ServerPlayer player, float cost, int intent) {
@@ -263,19 +263,19 @@ public final class Mana {
 		return true;
 	}
 
-	/** (0.7.238) Takes {@code amount} from {@code player}'s mana with no ripple and no strain (a spirit's upkeep, a release). */
+	/** (0.7.241) Takes {@code amount} from {@code player}'s mana with no ripple and no strain (a spirit's upkeep, a release). */
 	public static void drain(ServerPlayer player, float amount) {
 		if (!player.isCreative() && attuned(player)) {
 			set(player, current(player) - amount);
 		}
 	}
 
-	/** (0.7.238) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
+	/** (0.7.241) Whether {@code player} could pay {@code cost} now, quietly (no word on the screen). */
 	public static boolean canPay(ServerPlayer player, float cost) {
 		return player.isCreative() || attuned(player) && !ManaSickness.burntOut(player) && current(player) >= price(player, cost);
 	}
 
-	/** (0.7.237) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
+	/** (0.7.240) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
 	static float price(ServerPlayer player, float cost) {
 		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player);
 	}
@@ -309,15 +309,15 @@ public final class Mana {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.mana.smothered").withStyle(ChatFormatting.DARK_PURPLE));
 			}
 			set(player, current(player) - price);
-			// (0.7.238) casting while the spirit stirs in its sleep wakes it sooner
+			// (0.7.241) casting while the spirit stirs in its sleep wakes it sooner
 			com.jaymoskingdoms.spirits.SpiritSickness.pushed(player, price);
-			// (0.7.237) every cast strains: cast too much too fast and it makes you sick
+			// (0.7.240) every cast strains: cast too much too fast and it makes you sick
 			ManaSickness.strain(player, price);
 		}
 	}
 
 	/**
-	 * (0.7.237) Mana poured into {@code player} from outside (amethyst, a wand), up to {@link #OVERLOAD} times their most;
+	 * (0.7.240) Mana poured into {@code player} from outside (amethyst, a wand), up to {@link #OVERLOAD} times their most;
 	 * what goes past full strains them. How much went in.
 	 */
 	static float give(ServerPlayer player, float amount) {
@@ -334,12 +334,12 @@ public final class Mana {
 		return in;
 	}
 
-	/** (0.7.237) What {@code what} (a spell, a key, an element) is for. */
+	/** (0.7.240) What {@code what} (a spell, a key, an element) is for. */
 	static int intent(String what) {
 		return INTENT.getOrDefault(what, HARM);
 	}
 
-	/** (0.7.237) {@code caster}'s aura ripples with a cast's {@code intent} (once a tick; only the attuned have an aura). */
+	/** (0.7.240) {@code caster}'s aura ripples with a cast's {@code intent} (once a tick; only the attuned have an aura). */
 	public static void ripple(LivingEntity caster, int intent) {
 		if (!(caster.level() instanceof ServerLevel level)) {
 			return;
@@ -357,7 +357,7 @@ public final class Mana {
 		}
 	}
 
-	/** (0.7.237) An amethyst shard crushed in the fist: mana, a chime, violet dust. */
+	/** (0.7.240) An amethyst shard crushed in the fist: mana, a chime, violet dust. */
 	private static void crush(ServerPlayer player, ItemStack stack) {
 		if (player.getCooldowns().isOnCooldown(stack)) {
 			return;
@@ -398,7 +398,7 @@ public final class Mana {
 		if (player.getAttachedOrElse(GLOW, -1) != step) {
 			player.setAttached(GLOW, step);
 		}
-		// (0.7.237) and their power, for how bright it sits at its least
+		// (0.7.240) and their power, for how bright it sits at its least
 		int power = power(player);
 		if (player.getAttachedOrElse(POWER, -1) != power) {
 			player.setAttached(POWER, power);
@@ -438,7 +438,7 @@ public final class Mana {
 			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player)) {
 				attune(player);
 			} else {
-				// (0.7.237) or slowly, carrying alchemy's vis
+				// (0.7.240) or slowly, carrying alchemy's vis
 				ManaAlchemy.unattunedTick(player, now);
 			}
 			return;
@@ -448,7 +448,7 @@ public final class Mana {
 		}
 		ManaSickness.tick(player);
 		float max = max(player), mana = current(player);
-		// (0.7.237) meditating brings it back faster, sickness slower or not at all; vis feeds it, flux drains it
+		// (0.7.240) meditating brings it back faster, sickness slower or not at all; vis feeds it, flux drains it
 		float back = regen(player) * MEDITATE_REGEN[meditating(player)] * ManaSickness.regenTimes(player) * com.jaymoskingdoms.spirits.SpiritSickness.regenTimes(player);
 		float alchemy = ManaAlchemy.perSecond(player);
 		if (mana > max) {
@@ -463,7 +463,7 @@ public final class Mana {
 		}
 	}
 
-	/** (0.7.237) {@code player}'s Meditation rank while they're settled into it (Jaymo's Powers' Meditate), else 0. */
+	/** (0.7.240) {@code player}'s Meditation rank while they're settled into it (Jaymo's Powers' Meditate), else 0. */
 	static int meditating(ServerPlayer player) {
 		return PowersCompat.meditating(player) ? Math.clamp(Skills.rank(player, "meditation"), 1, MEDITATE_REGEN.length - 1) : 0;
 	}

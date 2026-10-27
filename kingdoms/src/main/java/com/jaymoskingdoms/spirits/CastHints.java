@@ -7,7 +7,7 @@ import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.7.237) What a move decides during the cast that is just happening, per keeper: the pose the arms take, the cooldown
+ * (0.7.240) What a move decides during the cast that is just happening, per keeper: the pose the arms take, the cooldown
  * that starts and the mana it costs, when they differ from the move's usual ones (a grab's first tap starts no cooldown so
  * the second can throw; a throw shows the throwing pose; a juggle costs per item lifted). {@link Spirits} clears them before
  * {@link Move#cast} and reads them once after it through {@link Move#pose(ServerPlayer)}, {@link Move#cooldown(ServerPlayer)}
