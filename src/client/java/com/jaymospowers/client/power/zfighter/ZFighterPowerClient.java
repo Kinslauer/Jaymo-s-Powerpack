@@ -91,7 +91,7 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterTail.Layer(avatar));
 				// (0.15.148) Super 4's red fur, under the mane
 				helper.register(new ZFighterPrimalFur.Layer(avatar));
-				// (0.17.48) an android's panels, a metal rebuild's plates
+				// (0.17.50) an android's panels, a metal rebuild's plates
 				helper.register(new ZFighterFormLooks.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
@@ -342,7 +342,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.text(font, ki, x + width - font.width(ki), y - 9, 0xFF000000 | color);
 		Component label = Component.translatable("hud.jaymospowers.zfighter.ki");
 		if (state.form() > 0) {
-			// (0.17.48) a branch form is named by its own key
+			// (0.17.50) a branch form is named by its own key
 			label = ZFighterBranchForms.label(net.minecraft.client.Minecraft.getInstance().player, state.form()).copy().withColor(color);
 		} else if (ZFighterEgo.on(net.minecraft.client.Minecraft.getInstance().player)) {
 			label = Component.translatable("hud.jaymospowers.zfighter.ego").copy().withColor(ZFighterEgo.COLOR);

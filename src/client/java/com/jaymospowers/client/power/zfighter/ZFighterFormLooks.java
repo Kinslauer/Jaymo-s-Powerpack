@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.48, Andy's NOEA picks) The plating of a rebuilt body, worn like the Primal Super fur ({@link ZFighterPrimalFur}):
+ * (0.17.50, Andy's NOEA picks) The plating of a rebuilt body, worn like the Primal Super fur ({@link ZFighterPrimalFur}):
  * dark panels with glowing cyan seams on an android ({@link ZFighterAndroid#android}), and steel plates on a Frost-born
  * rebuilt in metal ({@link ZFighterFrostForms#metal}); both on everyone's screen, never on the Great Ape
  * ({@code textures/entity/zfighter_android_panels.png}, {@code zfighter_metal_plating.png}, {@code tools/gen_form_looks.py}).

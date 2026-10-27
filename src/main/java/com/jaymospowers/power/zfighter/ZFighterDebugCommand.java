@@ -34,7 +34,7 @@ final class ZFighterDebugCommand {
 		dispatcher.register(Commands.literal("powerdebug")
 			.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("zfighter")
-				// (0.17.48) branch forms, Ego, the android quest, the metal rebuild
+				// (0.17.50) branch forms, Ego, the android quest, the metal rebuild
 				.then(ZFighterBranchForms.debug())
 				.then(Commands.literal("ready")
 					.executes(c -> {

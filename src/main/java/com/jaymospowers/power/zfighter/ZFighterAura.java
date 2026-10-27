@@ -26,7 +26,7 @@ public final class ZFighterAura {
 
 	/** His style, whatever is saved. Both sides. */
 	public static int style(Player player) {
-		// (0.17.48) the god form's aura is always the calm one
+		// (0.17.50) the god form's aura is always the calm one
 		if (Integer.valueOf(ZFighterForms.GOD).equals(player.getAttached(ZFighterPower.FORM))) {
 			return SMOOTH;
 		}

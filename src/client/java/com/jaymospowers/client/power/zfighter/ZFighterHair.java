@@ -115,7 +115,7 @@ public final class ZFighterHair {
 			int lineage = ZFighterLineage.of(player);
 			if (form != null && form > 0 && (lineage == ZFighterLineage.NONE || lineage == ZFighterLineage.EARTHLING
 				|| lineage == ZFighterLineage.WARRIOR)) {
-				// (0.17.48) False Super wears the first Super's hair, the god form Super 3's in red, silver instinct in silver, the
+				// (0.17.50) False Super wears the first Super's hair, the god form Super 3's in red, silver instinct in silver, the
 				// legendary line Super 3's in green
 				hair = new Hair(ZFighterForms.hairForm(form), ZFighterInstinct.active(player) ? ZFighterInstinct.COLOR : ZFighterLineage.color(lineage, form),
 					style(player.getUUID()));

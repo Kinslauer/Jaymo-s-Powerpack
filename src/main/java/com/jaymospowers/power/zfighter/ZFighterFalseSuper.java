@@ -25,7 +25,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.48, Andy's NOEA picks) False Super ({@link ZFighterForms#FALSE_SUPER}, form 5): before a fighter's first Super
+ * (0.17.50, Andy's NOEA picks) False Super ({@link ZFighterForms#FALSE_SUPER}, form 5): before a fighter's first Super
  * breakthrough, a near-death flare. Low in a hard fight (at or under {@link #TRIGGER_HEALTH} of his health, hurt by a
  * creature in the last five seconds), with {@link #MIN_HARDSHIP} of hardship behind him, he may flare into a golden,
  * unstable form: {@link #DURATION} ticks ({@link #WARRIOR_DURATION} for a Warrior-born), healed a little and stronger

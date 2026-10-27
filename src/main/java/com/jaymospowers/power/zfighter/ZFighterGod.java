@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.48, Andy's NOEA picks) The god form ({@link ZFighterForms#GOD}, form 6): red hair, a calm aura, near Primal
+ * (0.17.50, Andy's NOEA picks) The god form ({@link ZFighterForms#GOD}, form 6): red hair, a calm aura, near Primal
  * Super's strength at a third of the ki. Lifted at the Lookout by five ({@link ZFighterGodRitual}); once the ring has
  * done it, it is his for good (kept through death) and taken like the other forms: C from the top of his line (Super 3,
  * Primal Super or Legend 3), 100 ki (free from half mastery), sneak+C back down. In it C still raises the Spirit Bomb.

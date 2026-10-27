@@ -33,7 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.48, Andy's NOEA picks) More Frost-born forms. Past the Golden form (Second, Final, Golden) lies a fifth, the
+ * (0.17.50, Andy's NOEA picks) More Frost-born forms. Past the Golden form (Second, Final, Golden) lies a fifth, the
  * <b>Sovereign</b> ({@link ZFighterBranchForms#SOVEREIGN}, a branch form: C from Golden once it is half-mastered, with 220
  * hardship and 30000 TP): pale platinum, and the cold comes off him ({@link #CHILL_RANGE} blocks round him; foes are slowed
  * every second).

@@ -108,7 +108,7 @@ public final class ZFighterCorruption {
 
 	/** Sneak+C in base form: into Corrupted mode, or out of it. False if he isn't corrupted (the key does what it did). */
 	static boolean toggle(ServerPlayer player, ZFighterPower.Live live) {
-		// (0.17.48) Ego: sneak+C again from Corrupted mode (or on a dark lesson's corruption) opens the dark mirror
+		// (0.17.50) Ego: sneak+C again from Corrupted mode (or on a dark lesson's corruption) opens the dark mirror
 		if (ZFighterEgo.toggle(player, live)) {
 			return true;
 		}

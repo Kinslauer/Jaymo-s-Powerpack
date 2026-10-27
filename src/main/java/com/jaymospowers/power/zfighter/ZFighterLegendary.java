@@ -26,7 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.48, Andy's NOEA picks) The legendary line. One Warrior-born in {@link #ODDS} is born with the mutation (rolled
+ * (0.17.50, Andy's NOEA picks) The legendary line. One Warrior-born in {@link #ODDS} is born with the mutation (rolled
  * once, the first time a Z Fighter of that blood is seen, then saved for good). For him the three bought forms are not
  * Super, Super 2 and Super 3 but {@link ZFighterForms#LEGEND_1}-{@link ZFighterForms#LEGEND_3}: the same road (the
  * breakthrough, TP, hardship and mastery open them in the same order, {@link #chain} maps them back) but a different

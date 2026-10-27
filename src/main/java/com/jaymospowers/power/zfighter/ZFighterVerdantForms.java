@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * (0.17.48, Andy's NOEA picks) More Verdant forms, past the Giant forms (Giant, Great Giant, Titan: {@link ZFighterLineage#GIANT_SCALE}).
+ * (0.17.50, Andy's NOEA picks) More Verdant forms, past the Giant forms (Giant, Great Giant, Titan: {@link ZFighterLineage#GIANT_SCALE}).
  * Both are branch forms ({@link ZFighterBranchForms}: C from Titan; the numbers are there):
  * <ul>
  * <li><b>Gloom Giant</b> ({@link ZFighterBranchForms#GLOOM_GIANT}): a Titan who has trained it half-mastered, lived through

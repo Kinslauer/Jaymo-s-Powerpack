@@ -25,7 +25,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.48, Andy's NOEA picks) The Ego state: a dark mirror of himself. It opens through Corruption: sneak+C, either from
+ * (0.17.50, Andy's NOEA picks) The Ego state: a dark mirror of himself. It opens through Corruption: sneak+C, either from
  * Corrupted mode ({@link ZFighterCorruption}; he keeps that mode under it) or, before he is corrupted, once a dark lesson's
  * worth of corruption has gathered ({@link #OPENS}). In it he hits {@link #FIST} harder and, for every blow he lands
  * ({@link #DEALT} stack) and every blow he takes ({@link #TAKEN} stacks and more for a hard one), grows stronger: each stack

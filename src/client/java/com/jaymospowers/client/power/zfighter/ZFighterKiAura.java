@@ -99,7 +99,7 @@ public final class ZFighterKiAura {
 			return null;
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
-		// (0.17.48) a branch form or Ego reads as a higher form
+		// (0.17.50) a branch form or Ego reads as a higher form
 		int f = ZFighterBranchForms.tier(player, form == null ? 0 : form);
 		boolean charging = player.hasAttached(ZFighterPower.CHARGE);
 		Long hold = player.getAttached(ZFighterPower.AURA_HOLD);

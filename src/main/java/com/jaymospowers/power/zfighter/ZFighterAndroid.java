@@ -47,7 +47,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.48, Andy's NOEA picks) The Android upgrade: a mad scientist rebuilds a Z Fighter who has broken through to Super.
+ * (0.17.50, Andy's NOEA picks) The Android upgrade: a mad scientist rebuilds a Z Fighter who has broken through to Super.
  * He sets up shop now and then near such a fighter ({@link #SPAWN_EVERY}: a wandering tinkerer, tagged {@link #TAG},
  * who leaves after {@link #LIFETIME} ticks; right-click him). Four steps, kept in {@link #STAGE}:
  * <ol>

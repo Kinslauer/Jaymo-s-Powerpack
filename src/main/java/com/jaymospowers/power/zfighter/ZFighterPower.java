@@ -116,7 +116,7 @@ public final class ZFighterPower implements Power {
 	static final int FLIGHT_UNLOCK = 2;
 
 	// ---- forms (index: 0 base, 1 Super, 2 Super 2, 3 Super 3, 4 Super 4: the Warrior-born's hidden form, ApeRage) ----
-	// (0.17.48) 5 False Super, 6 the god form, 7-9 the legendary line ({@link ZFighterForms}); the other track's forms start at 10
+	// (0.17.50) 5 False Super, 6 the god form, 7-9 the legendary line ({@link ZFighterForms}); the other track's forms start at 10
 	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). A third of their bonus before the training slowdown. */
 	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1};
 	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F};
@@ -383,12 +383,12 @@ public final class ZFighterPower implements Power {
 			return rageTicks > 0;
 		}
 
-		/** (0.17.48) How hard the form's effects play: the form's own number up to Super 4, a set tier for the newer forms. */
+		/** (0.17.50) How hard the form's effects play: the form's own number up to Super 4, a set tier for the newer forms. */
 		int tier() {
 			return ZFighterForms.tier(form);
 		}
 
-		/** (0.17.48) Silver instinct is on ({@link ZFighterInstinct}): the aura goes silver. */
+		/** (0.17.50) Silver instinct is on ({@link ZFighterInstinct}): the aura goes silver. */
 		boolean silver;
 	}
 
@@ -417,7 +417,7 @@ public final class ZFighterPower implements Power {
 		ZFighterRaids.init();
 		ZFighterTournaments.init();
 		ZFighterCorruption.init();
-		// (0.17.48) branch forms, Ego, the android upgrade, the metal rebuild
+		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
@@ -429,7 +429,7 @@ public final class ZFighterPower implements Power {
 		ZFighterArts.init();
 		// (0.17.45) ki sense, scouter, instant teleport, lend ki, air burst, impact frames
 		ZFighterSenses.init();
-		// (0.17.48) false super, golden ape, god form ritual, silver instinct, the legendary line
+		// (0.17.50) false super, golden ape, god form ritual, silver instinct, the legendary line
 		ZFighterForms.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
@@ -852,7 +852,7 @@ public final class ZFighterPower implements Power {
 	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		// (0.17.48) a quick tap of Z in the god form: silver instinct
+		// (0.17.50) a quick tap of Z in the god form: silver instinct
 		if (ZFighterInstinct.tapped(player, live(player), down)) {
 			return;
 		}
@@ -949,14 +949,14 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
-		// (0.17.48) the newer forms: the god form, the legendary line, False Super
+		// (0.17.50) the newer forms: the god form, the legendary line, False Super
 		if (ZFighterForms.ultimate(player, live)) {
 			sync(player, live, maxKi(player));
 			return;
 		}
 		// (0.15.148) with Super 4 open, C in Super 3 is Super 4 and the Spirit Bomb is raised from there
 		boolean super4 = ApeRage.super4(player);
-		// (0.17.48) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
+		// (0.17.50) with a branch form to climb to (ZFighterBranchForms), C climbs and the Spirit Bomb is raised from the top
 		if (!player.isShiftKeyDown() && (live.form == ApeRage.SUPER_4 || live.form == ZFighterForms.GOD || live.form == ZFighterTraining.FORMS && !super4)
 			&& ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB) && !ZFighterBranchForms.canAscend(player, live)) {
 			if (ZFighterTechniques.canRaise(player, live)) {
@@ -996,7 +996,7 @@ public final class ZFighterPower implements Power {
 
 	/** The transformation into {@code form}: a blast of gold that throws back everything near. */
 	static void transform(ServerPlayer player, Live live, int form) {
-		// (0.17.48) a legendary-born takes his own line in place of Super's (the breakthrough lands him in Legend 1)
+		// (0.17.50) a legendary-born takes his own line in place of Super's (the breakthrough lands him in Legend 1)
 		form = ZFighterLegendary.line(player, form);
 		int tier = ZFighterForms.tier(form);
 		live.form = form;
@@ -1057,7 +1057,7 @@ public final class ZFighterPower implements Power {
 
 	/** Down one form (to base from Super). */
 	static void descend(ServerPlayer player, Live live) {
-		// (0.17.48) out of a branch form first
+		// (0.17.50) out of a branch form first
 		if (ZFighterBranchForms.descend(player, live)) {
 			return;
 		}
@@ -1493,7 +1493,7 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.BONUS_ID, ZFighterFusion.bonus(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, ZFighterFusion.HEALTH_ID, ZFighterFusion.health(player), AttributeModifier.Operation.ADD_VALUE);
-		// (0.17.48) the golden ape, the legendary line's bulk, False Super's flicker
+		// (0.17.50) the golden ape, the legendary line's bulk, False Super's flicker
 		ZFighterForms.attributes(player, live);
 	}
 
