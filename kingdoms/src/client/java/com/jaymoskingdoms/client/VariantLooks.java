@@ -77,6 +77,13 @@ public final class VariantLooks {
 		style(Variant.RIMEWYRM, 0xFFB8E8FF, HeritageLooks.Eyes.NIGHT, ParticleTypes.SNOWFLAKE, 18, When.ALWAYS);
 		style(Variant.HOLLOW, 0xFFF0FFFC, HeritageLooks.Eyes.ALWAYS, ParticleTypes.SCULK_SOUL, 50, When.DARK_PLACE);
 		style(Variant.GEODE, 0xFFD6AAFF, HeritageLooks.Eyes.ALWAYS, GEODE_GLINT, 20, When.ALWAYS);
+		// (0.7.261) the Divine-born's, the Bio-built's and the Rubber-folk's
+		style(Variant.STARLIT, 0xFFCFE0FF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.END_ROD, 40, When.NIGHT);
+		style(Variant.SERAPHIC, 0xFFFFF4D0, HeritageLooks.Eyes.ALWAYS, ParticleTypes.WHITE_ASH, 36, When.ALWAYS);
+		style(Variant.BRASSBOUND, 0xFFFFB050, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
+		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 60, When.DARK_PLACE);
+		style(Variant.CANDYSTRIPE, 0, null, null, 0, When.ALWAYS);
+		style(Variant.BERRYGLOSS, 0, null, null, 0, When.ALWAYS);
 	}
 
 	private VariantLooks() {

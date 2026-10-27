@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -73,6 +74,14 @@ import org.jspecify.annotations.Nullable;
  * only; amber eyes that glow at night only.</li>
  * <li><b>Deepborn:</b> (0.7.106) teal sculk veins up the forearms pulsing slowly; pale eyes; now and then a sculk pop in
  * dark places.</li>
+ * <li><b>Divine-born:</b> (0.7.261, textures from {@code kingdoms/tools/gen_race_looks.py}) a faint gold glow in fine
+ * filigree up the forearms and on the brow, warm white eyes, a halo (a flat gold ring, a model part) floating over the head,
+ * and motes of light drifting off the skin.</li>
+ * <li><b>Bio-built:</b> (0.7.261) steel-green seams and plating that grow with each form ({@link BioBuilt#form}: three drawings,
+ * the second plated to the elbow, the third to the shoulder and the cheeks), amber nodes that glow; amber eyes. A variant's
+ * own marks get the form's plates laid over them ({@code biobuilt_plates_*}).</li>
+ * <li><b>Rubber-folk:</b> (0.7.261) glossy highlights on the forearms and knuckles over the pink skin (the pink is MCA's skin
+ * tint, {@code HeritageVariants#skin}); no glow, no eyes, no particles.</li>
  * </ul>
  * Particles: not round your own first-person camera, not on the invisible or spectators.
  */
@@ -93,7 +102,11 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		DAWNBORN(Heritage.Kind.DAWNBORN, "dawnborn", 1, 0xFFFFD27A, Eyes.DAY, 0),
 		ENDBORN(Heritage.Kind.ENDBORN, "endborn", 1, 0xFFD69CFF, Eyes.ALWAYS, 10),
 		DRAGONBLOOD(Heritage.Kind.DRAGONBLOOD, "dragonblood", 1, 0xFFFFB040, Eyes.NIGHT, 0),
-		DEEPBORN(Heritage.Kind.DEEPBORN, "deepborn", 1, 0xFFB8F4EC, Eyes.ALWAYS, 40);
+		DEEPBORN(Heritage.Kind.DEEPBORN, "deepborn", 1, 0xFFB8F4EC, Eyes.ALWAYS, 40),
+		// (0.7.261) the Bio-built have three drawings: their forms
+		DIVINE(Heritage.Kind.DIVINE, "divine", 1, 0xFFFFF4D0, Eyes.ALWAYS, 30),
+		BIOBUILT(Heritage.Kind.BIOBUILT, "biobuilt", 3, 0xFFFFB454, Eyes.ALWAYS, 0),
+		RUBBERFOLK(Heritage.Kind.RUBBERFOLK, "rubberfolk", 1, 0, Eyes.NEVER, 0);
 
 		final Heritage.Kind heritage;
 		final Identifier[] skin, glow;
@@ -178,6 +191,9 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	private static final ModelPart[] HEAD_FINS = new ModelPart[3];
 	private static ModelPart rightArmFin, leftArmFin, rightArmFinLong, leftArmFinLong;
 
+	/** (0.7.261) A Divine-born's drifting light. */
+	private static final DustParticleOptions LIGHT_MOTE = new DustParticleOptions(0xFFE9A0, 0.6F);
+
 	/** Stoneborn glints (amethyst). */
 	private static final DustParticleOptions AMETHYST = new DustParticleOptions(0xB17BEB, 0.6F);
 
@@ -224,7 +240,9 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			// (0.7.184) only a Z Fighter's fists light up; any other Earthling just has the wraps
 			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
-		state.setData(KEY, new Look(kind, variant(entity.getUUID(), kind == Kind.TIDEBORN ? CREST.length : kind.skin.length), lit, glow, blood, style));
+		// (0.7.261) a Bio-built's drawing is its form
+		int drawing = kind == Kind.BIOBUILT ? BioBuilt.form(entity) : variant(entity.getUUID(), kind == Kind.TIDEBORN ? CREST.length : kind.skin.length);
+		state.setData(KEY, new Look(kind, drawing, lit, glow, blood, style));
 	}
 
 	/**
@@ -340,10 +358,57 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 			collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(eyes), lightCoords, OverlayTexture.NO_OVERLAY, look.glow(), null,
 				state.outlineColor);
 		}
+		if (kind == Kind.BIOBUILT && style != null && look.variant() > 0 && !armFinsCovered) {
+			// (0.7.261) a variant's marks wear their form's plates over them
+			collector.order(1).submitModel(marks, state, poseStack, RenderTypes.entityCutout(PLATES_SKIN[look.variant() - 1]), lightCoords,
+				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
+			if (look.glow() != 0) {
+				collector.order(2).submitModel(glowing, state, poseStack, RenderTypes.eyes(PLATES_GLOW[look.variant() - 1]), lightCoords,
+					OverlayTexture.NO_OVERLAY, look.glow(), null, state.outlineColor);
+			}
+		}
+		if (kind == Kind.DIVINE && !headFinsCovered && marks.head.visible) {
+			halo(poseStack, collector, marks, state.ageInTicks);
+		}
 		if (kind == Kind.TIDEBORN) {
 			finTextures(style);
 			fins(poseStack, collector, lightCoords, marks, look.variant(), look.glow() != 0);
 		}
+	}
+
+	/** (0.7.261) The Bio-built's plates laid over a variant's own marks, by form (the second, the third). */
+	private static final Identifier[] PLATES_SKIN = {JaymosKingdoms.id("textures/entity/heritage/biobuilt_plates_1_skin.png"),
+		JaymosKingdoms.id("textures/entity/heritage/biobuilt_plates_2_skin.png")};
+	private static final Identifier[] PLATES_GLOW = {JaymosKingdoms.id("textures/entity/heritage/biobuilt_plates_1_glow.png"),
+		JaymosKingdoms.id("textures/entity/heritage/biobuilt_plates_2_glow.png")};
+
+	// ---- (0.7.261) the Divine-born's halo: a flat gold ring of four thin bars, a model part, lit like the glow
+	private static final Identifier HALO = JaymosKingdoms.id("textures/entity/heritage/halo.png");
+	/** How far above the top of the head it floats (model pixels), how far it bobs, and how fast (radians a tick). */
+	static final float HALO_RISE = 4.0F, HALO_BOB = 0.5F, HALO_SPEED = 0.08F;
+	private static ModelPart halo;
+
+	/** The halo, made the first time it's drawn (head space: the top of the head at y -8). */
+	private static ModelPart halo() {
+		if (halo == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			mesh.getRoot().addOrReplaceChild("ring", CubeListBuilder.create()
+				.texOffs(0, 0).addBox(-5.0F, 0.0F, -5.0F, 10.0F, 0.0F, 1.0F)
+				.texOffs(0, 2).addBox(-5.0F, 0.0F, 4.0F, 10.0F, 0.0F, 1.0F)
+				.texOffs(0, 4).addBox(-5.0F, 0.0F, -4.0F, 1.0F, 0.0F, 8.0F)
+				.texOffs(0, 14).addBox(4.0F, 0.0F, -4.0F, 1.0F, 0.0F, 8.0F), PartPose.ZERO);
+			halo = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		}
+		return halo;
+	}
+
+	private static void halo(PoseStack poseStack, SubmitNodeCollector collector, net.minecraft.client.model.HumanoidModel<?> model, float age) {
+		poseStack.pushPose();
+		model.head.translateAndRotate(poseStack);
+		poseStack.translate(0.0F, (-8.0F - HALO_RISE + Mth.sin(age * HALO_SPEED) * HALO_BOB) / 16.0F, 0.0F);
+		collector.order(2).submitModelPart(halo(), poseStack, RenderTypes.eyes(HALO), 0xF000F0,
+			OverlayTexture.NO_OVERLAY, null, -1);
+		poseStack.popPose();
 	}
 
 	/** (0.7.214) The fins' textures for the Tideborn being drawn: a variant's own, or the first look's. */
@@ -499,6 +564,8 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 						level.addParticle(ParticleTypes.SCULK_CHARGE_POP, x, y, z, 0.0, 0.02, 0.0);
 					}
 				}
+				case DIVINE -> level.addParticle(LIGHT_MOTE, player.getX() + (random.nextDouble() - 0.5) * 1.0, player.getY() + random.nextDouble() * player.getBbHeight(),
+					player.getZ() + (random.nextDouble() - 0.5) * 1.0, 0.0, 0.02, 0.0);
 				case NIGHTBORN -> {
 					if (level.isDarkOutside()) {
 						// (0.7.88) a Nightborn vampire's wisps are blood mist
