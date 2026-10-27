@@ -28,9 +28,16 @@ final class GiantModel extends EntityModel<GiantState> {
 	private static final float BLOW_LIFT = 2.4F, BLOW_TICKS = 12.0F, STAMP_PITCH = 0.35F;
 	/** Its hunch (radians). */
 	private static final float HUNCH = 0.22F;
-	/** Its stride, how far its legs swing, and its arms' swing, twist and flare out from the chest (at rest, and more at each stride's peak). */
-	private static final float STRIDE = 0.35F, LEG_SWING = 1.0F, ARM_SWING = 0.85F, ARM_TWIST = 0.22F, ARM_FLARE = 0.2F,
-		ARM_FLARE_PEAK = 0.22F;
+	/**
+	 * How far its legs swing, and its arms' swing, twist and flare out from the chest (at rest, and more at each stride's
+	 * peak). (0.7.261) Andy: "a slow sway ... removing that fast swing": the legs keep to the server's steps (one every
+	 * {@code AetherGiant#STEP_LENGTH} blocks, {@link GiantState#stride}) instead of vanilla's walk, which a 30-block body
+	 * ran through four times too fast; the swings are smaller, and it sways with them: its weight rolls onto the foot coming
+	 * down, its shoulders turn with the arm swinging forward, and it sinks onto each footfall, so its feet keep to the
+	 * ground (its legs are {@link #LEG_LENGTH} long).
+	 */
+	private static final float LEG_SWING = 0.6F, ARM_SWING = 0.55F, ARM_TWIST = 0.18F, ARM_FLARE = 0.2F, ARM_FLARE_PEAK = 0.18F,
+		ROLL = 0.07F, SHOULDER_TWIST = 0.09F, LEG_LENGTH = 14.0F;
 	/** How it flinches when hit (body, head, arms). */
 	private static final float FLINCH_BODY = 0.42F, FLINCH_HEAD = 0.6F, FLINCH_ARM = 0.6F;
 	/** Its death: when it hits the ground and breaks up (vanilla takes the body away at 20 ticks). */
@@ -102,17 +109,25 @@ final class GiantModel extends EntityModel<GiantState> {
 			this.fall(state.seed, Math.min(state.deathTime, DEATH_TICKS));
 			return;
 		}
-		float walk = Mth.cos(state.walkAnimationPos * STRIDE), amount = Math.min(state.walkAnimationSpeed, 1.0F);
-		this.rightLeg.xRot = walk * LEG_SWING * amount;
-		this.leftLeg.xRot = -walk * LEG_SWING * amount;
-		// its weight rolls from foot to foot
-		this.body.zRot = walk * 0.06F * amount;
+		// 1 as its right foot comes down ahead (even steps), -1 as its left does
+		float walk = Mth.cos(state.stride * Mth.PI), amount = Math.min(state.walkAnimationSpeed, 1.0F);
+		this.rightLeg.xRot = -walk * LEG_SWING * amount;
+		this.leftLeg.xRot = walk * LEG_SWING * amount;
+		// it sinks onto each footfall (a swung leg reaches less far down), its weight rolling onto that foot, its shoulders turning
+		float sink = LEG_LENGTH * (1.0F - Mth.cos(this.rightLeg.xRot));
+		this.body.y += sink;
+		this.rightLeg.y += sink;
+		this.leftLeg.y += sink;
+		this.body.zRot = -walk * ROLL * amount;
+		this.body.yRot = walk * SHOULDER_TWIST * amount;
+		// its head keeps level as it rolls
+		this.head.zRot = walk * ROLL * 0.6F * amount;
 		// arms swing against the legs, twist, and flare out wide of the chest, more at the height of each swing
-		this.rightArm.xRot = (-walk * ARM_SWING - 0.2F) * amount;
-		this.rightArm.yRot = walk * ARM_TWIST * amount;
+		this.rightArm.xRot = (walk * ARM_SWING - 0.2F) * amount;
+		this.rightArm.yRot = -walk * ARM_TWIST * amount;
 		this.rightArm.zRot = ARM_FLARE + Math.abs(walk) * ARM_FLARE_PEAK * amount;
-		this.leftArm.xRot = (walk * ARM_SWING - 0.2F) * amount;
-		this.leftArm.yRot = -walk * ARM_TWIST * amount;
+		this.leftArm.xRot = (-walk * ARM_SWING - 0.2F) * amount;
+		this.leftArm.yRot = walk * ARM_TWIST * amount;
 		this.leftArm.zRot = -ARM_FLARE - Math.abs(walk) * ARM_FLARE_PEAK * amount;
 		// a slow breath
 		float breath = Mth.sin(state.ageInTicks * 0.09F) * 0.025F;

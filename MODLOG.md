@@ -3076,3 +3076,10 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   hand shoot out to what you aim at within 20 blocks; the axe fells a whole tree in one blow. No Powers changes.
 - **0.17.51, sailors not guards (Kingdoms 0.7.259):** no guards or armour on any ship; every crewman is a sailor who
   takes up their weapon when a fight starts and puts it away after; the sea no longer shows inside a ship's hold.
+- **0.17.55, stomping Giants and Great Apes (Kingdoms 0.7.261):** the Aether Giants stomp with every step, a shockwave
+  of dust running out along the ground that cracks it and hurts whoever isn't jumping, and walk with a slow, swaying
+  stride at the same speed. Andy: "same with apes": every Great Ape footfall (a player's or a raging villager's,
+  `ZFighterLineage.footfall`) now sends out a ring of dust and puffs to its reach (`ZFighterApeSteps`, from the new
+  `ZFighterNet.ApeStep` packet), cracks the ground round the foot (`core/GroundCracks`, fading over 5 s, nothing broken)
+  and spares whoever is off the ground; its reach is 6 blocks (was 4.5). A step every 5 blocks (was 3), and the ape's
+  model plays vanilla's own walk on that slower stride, kept in step with the server's footfalls. Not seen in game.

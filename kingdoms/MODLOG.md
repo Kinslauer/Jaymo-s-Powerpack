@@ -5499,3 +5499,22 @@ within 20 blocks. that should also be far reach's extent. animating the hand the
   hull wasnt actually bailed"): her hold was dry, but the renderer's water mask only covered empty cells. Slabs, stairs
   and other part-blocks count as wall, so the sea was drawn in their empty half. `Hull.masked` adds the part-blocks with
   no sea beside them, and `ShipRenderer` masks those too.
+
+## 0.7.261: the Giants stomp with every step and sway as they walk (pack 0.17.55)
+
+- Andy: "Giant enemies should emit a stomp with every step, emitting a shockwave signified by a radiating particle
+  effect, cracking the ground and dealing damage to those who dont jump. The giants should also move with a slow sway,
+  keeping their move speed but removing that fast swing." Covers the four Aether Giants (`AetherGiant`); the vanilla
+  Giant (sized up by `Monoliths.sizeVanillaGiant`) has no AI and never walks, so it's left as it was.
+- **Steps:** the server counts its stride by the ground it covers, one step every `STEP_LENGTH` (6) blocks, right foot
+  on the even steps. Each footfall (`AetherGiant.footfall`) thuds, throws up the ground's dust, cracks the blocks under
+  the foot and five wandering lines out from it (`destroyBlockProgress`, fading over 5 s, nothing broken), and sends a
+  shockwave out along the ground at 1.25 blocks a tick to 10 blocks. Whoever the wave front passes standing on the
+  ground (not jumping, flying or riding) takes 5 damage (half at the edge) and a jolt up and away; each wave hits each
+  one once. The client draws the wave as a ring of dust and puffs running out over the ground. Vanilla's step sound is
+  gone (the footfall has its own).
+- **Sway:** the model's legs follow the server's stride (`GiantState.stride`, kept in step by an entity event on each
+  footfall) instead of vanilla's walk cycle, which ran a 30-block body's legs about four times too fast. Smaller
+  swings, its weight rolling onto the foot coming down, shoulders turning with the forward arm, head kept level, and it
+  sinks onto each footfall so its feet stay on the ground. Same speed as before. Blows, the stamp, the flinch and the
+  fall-and-shatter death are unchanged. Not seen in game.

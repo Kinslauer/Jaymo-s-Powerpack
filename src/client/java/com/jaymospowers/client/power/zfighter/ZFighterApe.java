@@ -43,6 +43,10 @@ public final class ZFighterApe {
 	public static final RenderStateDataKey<Boolean> GOLDEN = RenderStateDataKey.create(() -> "jaymospowers:zfighter_golden_ape");
 	/** (0.16.36) Whose ape it is: its build and fur. */
 	public static final RenderStateDataKey<WarriorLooks.Ape> STYLE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_style");
+	/** (0.17.54) How far through its slow stride the ape is, in steps ({@link ZFighterApeSteps#stride}). */
+	public static final RenderStateDataKey<Float> STRIDE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_stride");
+	/** Vanilla's walk cycle: its legs swing with {@code cos(walkAnimationPos * this)}. */
+	private static final float VANILLA_WALK = 0.6662F;
 
 	private static Model<AvatarRenderState> model;
 
@@ -50,7 +54,7 @@ public final class ZFighterApe {
 	}
 
 	/** From the avatar renderer's extractRenderState: the Great Ape hides the player's own body, armour and held items. */
-	static void extract(Avatar entity, AvatarRenderState state) {
+	static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		boolean ape = entity instanceof Player player && ZFighterLineage.ape(player) && !player.isInvisible();
 		state.setData(KEY, ape);
 		if (!ape) {
@@ -58,6 +62,7 @@ public final class ZFighterApe {
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
+		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
 		state.setData(GOLDEN, ZFighterGoldenApe.golden((Player)entity) ? Boolean.TRUE : null);
 		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
@@ -92,7 +97,7 @@ public final class ZFighterApe {
 	 * A villager raging as the wild Great Ape (Jaymo's Kingdoms' Warrior-born villagers, {@code VillagerApe}): the same
 	 * ape in its place, its own body, clothes and gear hidden.
 	 */
-	public static void extractMob(LivingEntity entity, HumanoidRenderState state) {
+	public static void extractMob(LivingEntity entity, HumanoidRenderState state, float partialTicks) {
 		boolean ape = !(entity instanceof Player) && Boolean.TRUE.equals(entity.getAttached(ZFighterLineage.GREAT_APE)) && !entity.isInvisible();
 		state.setData(KEY, ape ? Boolean.TRUE : null);
 		if (!ape) {
@@ -100,6 +105,7 @@ public final class ZFighterApe {
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
+		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
@@ -197,7 +203,14 @@ public final class ZFighterApe {
 
 		@Override
 		public void setupAnim(S state) {
+			// (0.17.54) vanilla's own walk, played on its slow stride: one leg comes forward each step (ZFighterApeSteps)
+			Float stride = state.getData(STRIDE);
+			float walked = state.walkAnimationPos;
+			if (stride != null) {
+				state.walkAnimationPos = stride * Mth.PI / VANILLA_WALK;
+			}
 			super.setupAnim(state);
+			state.walkAnimationPos = walked;
 			float time = state.ageInTicks;
 			float walk = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
 			// the arms hang a little out from the bulk of him and sway heavily

@@ -12,4 +12,6 @@ public final class GiantState extends LivingEntityRenderState {
 	float flinch;
 	/** (0.7.184) Its entity id: the seed its death's tumble and break-up are drawn from. */
 	int seed;
+	/** (0.7.261) How far through its stride it is, in steps: the right foot comes down on the even ones, the left on the odd. */
+	float stride;
 }

@@ -223,8 +223,35 @@ public final class ZFighterNet {
 		}
 	}
 
+	/**
+	 * (0.17.54) Server → client: a Great Ape's foot came down at {@code (x, y, z)} (its {@code left} or right), its
+	 * shockwave running out to {@code reach}; {@code step} is how far it walks a step. The client keeps the ape's legs in
+	 * step with it and draws the wave's ring ({@code ZFighterApeSteps}).
+	 */
+	public record ApeStep(int entity, boolean left, double x, double y, double z, float reach, float step) implements CustomPacketPayload {
+		public static final Type<ApeStep> TYPE = new Type<>(JaymosPowers.id("zfighter_ape_step"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ApeStep> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.entity);
+				buf.writeBoolean(p.left);
+				buf.writeDouble(p.x);
+				buf.writeDouble(p.y);
+				buf.writeDouble(p.z);
+				buf.writeFloat(p.reach);
+				buf.writeFloat(p.step);
+			},
+			buf -> new ApeStep(buf.readVarInt(), buf.readBoolean(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(),
+				buf.readFloat()));
+
+		@Override
+		public Type<ApeStep> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(KiOrbs.TYPE, KiOrbs.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ApeStep.TYPE, ApeStep.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenWish.TYPE, OpenWish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));
