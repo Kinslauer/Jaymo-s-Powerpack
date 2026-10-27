@@ -451,7 +451,7 @@ final class McaBridge {
 	 * fisherman), enlisted to the folk's side in its role. The folk is left for the caller.
 	 */
 	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk) {
-		// (0.7.257) Andy: no guards aboard, every one a sailor
+		// (0.7.259) Andy: no guards aboard, every one a sailor
 		VillagerProfession job = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.FISHERMAN).value();
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(folk.position()).withAge(0).withProfession(job)
 			.spawn(EntitySpawnReason.CONVERSION);
@@ -464,7 +464,7 @@ final class McaBridge {
 			VillagerHeritage.born(villager, kind, folk.entityTags().contains(VillagerHeritage.TAIL_CUT) ? VillagerHeritage.TAIL_CUT
 				: folk.entityTags().contains(VillagerHeritage.TAIL_WRAPPED) ? VillagerHeritage.TAIL_WRAPPED : null);
 		}
-		// (0.7.257) no armour at sea; their folk's weapons stowed (Crewmen.STOWED), taken up when there's a fight
+		// (0.7.259) no armour at sea; their folk's weapons stowed (Crewmen.STOWED), taken up when there's a fight
 		villager.setItemSlot(EquipmentSlot.MAINHAND, folk.getMainHandItem().copy());
 		villager.setItemSlot(EquipmentSlot.OFFHAND, folk.getOffhandItem().copy());
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -531,7 +531,7 @@ final class McaBridge {
 		if (!(mob instanceof VillagerEntityMCA villager)) {
 			return;
 		}
-		// (0.7.257) no armour in their pack either (MCA's villagers put on what they carry)
+		// (0.7.259) no armour in their pack either (MCA's villagers put on what they carry)
 		var pack = villager.getInventory();
 		for (int i = 0; i < pack.getContainerSize(); i++) {
 			var held = pack.getItem(i).get(net.minecraft.core.component.DataComponents.EQUIPPABLE);

@@ -5462,7 +5462,31 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
 - **Whalers wake aboard.** A signed hand who dies is put back on her deck (`Whalers.reboard`) while she's within
   reach; otherwise they wake at her harbour's shore.
 
-## 0.7.257: no guards at sea, sailors take up their weapons for a fight (pack 0.17.48)
+## 0.7.258: spirit hands become what they do (pack 0.17.49)
+Andy: "The aegis hand should animate like a shield infront of you ... they should be arms, that is only their idle, and
+they pop in whenever they speak passively as the arm or default. every other use becomes what it entails, the catching
+hands should animate beneath you and the weapon forms look great, but they need to reach way out to whatever you aim at,
+within 20 blocks. that should also be far reach's extent. animating the hand the whole way for all who can see it."
+- **Speaking:** a spirit's line (`SpiritVoice`) shows the arm by its keeper for 3.5 s (new pose `Poses.SPEAK`), unless a
+  move is showing it.
+- **Reach synced:** `SpiritState.show` now packs how far the hand reached (whole blocks, up to 31) beside the pose, set by
+  the move through `CastHints.setReach` (`SpiritState.reach()`, `shownAt` now `show >> 11`).
+- **20 blocks:** the mage hands reach 20 blocks flat (`HandMoves.REACH`; it was 16 plus 1 a level), and Thessaly's unseen
+  hand, rune trap and unlock reach as far. Grimsby's weapon forms strike the foe you aim at (`Arcana.sighted`) out to 20
+  blocks when it's beyond the form's own reach, with the foes within 0.6 of the form's reach of it; the cut's arc and sound
+  are drawn there. Closer, the old cone. Far hand, grab, pin, unseen hand, trap, unlock and Thessaly's loot pointing all
+  report where they reached.
+- **What a use becomes** (`SpiritArms.shape`): a move that reached shoots the hand out along your aim the whole way there,
+  the forearm stretching, landing with the blow, swords and axes sweeping in from the side, the hammer raised and brought
+  down; the burst (and a far slam's ring) is where it landed. The aegis and Varro's ward bend the hand up palm out and swell
+  it to 2.8x as a shield in front of you (two hands side by side at bond 40). Catch me turns the hands palm up beneath your
+  feet, cupped, swelling to 2.6x.
+- **The axe fells trees** (Andy: "the axe should chop trees in a single blow"): with no foe in reach, Grimsby's axe at a
+  tree you aim at (out to 20 blocks) brings the whole tree down at once (`Trees.fellAtOnce`), toppling away from you as a
+  felled tree does, and a woodcutter's orders count it.
+- **Seen the whole way:** `SpiritCullingMixin` grows a keeper's culling box by the reach while it's out, so the arm is drawn
+  even when its keeper is off screen. Not seen in game.
+## 0.7.259: no guards at sea, sailors take up their weapons for a fight (pack 0.17.51)
 
 - Andy (after 0.7.246): "all the sailors are guards still. I dont want any guards on these ships ... if you put a guard,
   they CANT have armor. but all the sailors should double as both. just picking up their weapons when the time comes."

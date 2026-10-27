@@ -152,7 +152,7 @@ final class Corsairs implements Ship.Captaincy {
 
 	/**
 	 * One of her crew, of {@code role}, at {@code seat}: (0.7.242) with MCA, one of its villagers in the gear a folk of
-	 * that role would wear ({@link Crewmen}; (0.7.257) every one a sailor, weapons stowed till a fight); without it, the folk.
+	 * that role would wear ({@link Crewmen}; (0.7.259) every one a sailor, weapons stowed till a fight); without it, the folk.
 	 */
 	static @Nullable LivingEntity hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home, Crew.Side side) {
 		LivingEntity back = Crewmen.waiting(level, faction.id(), side, role, home);

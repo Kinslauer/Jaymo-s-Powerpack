@@ -49,7 +49,7 @@ public final class Hull {
 	/** The dry cells the hull's walls close in (local, packed). */
 	public final long[] enclosed;
 	/**
-	 * (0.7.257) The cells of her hold the sea's water must not be drawn in, for her renderer's mask: the dry cells, and
+	 * (0.7.259) The cells of her hold the sea's water must not be drawn in, for her renderer's mask: the dry cells, and
 	 * the slabs, stairs and other part-blocks inside her walls. Those count as wall, so they weren't in {@link #enclosed},
 	 * and the sea showed in their empty half (Andy: "it looked to me like the hull wasnt actually bailed").
 	 */

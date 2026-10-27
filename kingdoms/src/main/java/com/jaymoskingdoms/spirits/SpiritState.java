@@ -11,7 +11,8 @@ import net.minecraft.network.codec.StreamCodec;
  * ... all can be upgraded and leveled". Saved, kept through death and synced to everyone (the viewers draw the arms).
  * {@code kind} is {@link Spirits#GRIMSBY}...{@link Spirits#QUIET}; {@code level} 1-{@link Spirits#MAX_LEVEL} with its
  * {@code xp}; {@code bond} 0-{@link Spirits#MAX_BOND}; {@code out} whether it is conjured; {@code move} the selected move
- * (an index into the player's move list); {@code show} is game time times 64 plus a {@link Poses} id, the pose the arms hold
+ * (an index into the player's move list); {@code show} packs the game time, how far the arm reaches out (whole blocks, 0-31,
+ * {@link #reach()}) and a {@link Poses} id, the pose the arms hold
  * now; {@code arms} is 1, or 2 from bond {@link Spirits#TWO_ARMS_BOND}; {@code scale} is the size of the arms times 100
  * (100 is the spirit's own size; the Quiet One is conjured at a new size each time: 50 to 300, see {@link Spirit#size(SpiritState)});
  * {@code toggles} is a bitmask of the toggle moves that are on ({@link #STEADY}, {@link #ECHO}, {@link #ARMOUR}), so the HUD can say so.
@@ -75,7 +76,21 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 
 	/** The arms hold {@code pose} from game time {@code now}. */
 	public SpiritState withShow(long now, int pose) {
-		return new SpiritState(kind, level, xp, bond, out, move, now * 64L + pose, arms, scale, toggles);
+		return withShow(now, pose, 0.0);
+	}
+
+	/** The arms hold {@code pose} from game time {@code now}, the hand reaching out {@code blocks} (0 for not at all; at most 31). */
+	public SpiritState withShow(long now, int pose, double blocks) {
+		long reach = Math.clamp(Math.round(blocks), 0L, (long)MAX_REACH);
+		return new SpiritState(kind, level, xp, bond, out, move, (now << 11) | (reach << 6) | pose, arms, scale, toggles);
+	}
+
+	/** The most whole blocks {@link #reach()} holds. */
+	public static final int MAX_REACH = 31;
+
+	/** How far the hand reaches out for the pose {@link #show} holds (whole blocks; 0 for a pose that stays by its keeper). */
+	public int reach() {
+		return (int)((show >> 6) & 31L);
 	}
 
 	/** The size of the arms set to {@code value} (times 100). */
@@ -101,6 +116,6 @@ public record SpiritState(int kind, int level, int xp, int bond, boolean out, in
 
 	/** The game time {@link #show} was stamped. */
 	public long shownAt() {
-		return show >> 6;
+		return show >> 11;
 	}
 }

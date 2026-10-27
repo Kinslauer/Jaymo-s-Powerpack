@@ -59,11 +59,11 @@ import org.jspecify.annotations.Nullable;
 public final class Crewmen {
 	/** The entity tag every crew villager carries (kept in their save): a ship's crewman, not any town's. */
 	public static final String TAG = "jaymoskingdoms.crewman";
-	/** (0.7.246) Her one knight, 0.7.246-0.7.256 (since 0.7.257 there are none: the tag is taken off). */
+	/** (0.7.246) Her one knight, 0.7.246-0.7.258 (since 0.7.259 there are none: the tag is taken off). */
 	static final String KNIGHT = TAG + ".knight";
 	/** (0.7.246) How often (ticks) a crew is looked over: no armour, no guards, weapons stowed while all's calm. */
 	static final int DRESS_EVERY = 100;
-	/** (0.7.257) How long (ticks) after their last foe they put their weapons away. */
+	/** (0.7.259) How long (ticks) after their last foe they put their weapons away. */
 	static final int CALM_TICKS = 400;
 	/** (0.7.246) One deck line in this many is said to a hand of hers near, by their berth; and how many there are. */
 	static final int MATE_ONE_IN = 2, TO_HAND_LINES = 6;
@@ -161,7 +161,7 @@ public final class Crewmen {
 	 * at its place; null without MCA or if one couldn't be made (then the folk sails).
 	 */
 	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side) {
-		// (0.7.257) Andy: "I dont want any guards on these ships ... all the sailors should double as both. just picking up
+		// (0.7.259) Andy: "I dont want any guards on these ships ... all the sailors should double as both. just picking up
 		// their weapons when the time comes": every one a sailor (MCA's fisherman) in no armour, their weapons stowed
 		PathfinderMob v = McaCompat.crewman(level, folk);
 		if (v != null) {
@@ -322,13 +322,13 @@ public final class Crewmen {
 
 	// ---- (0.7.246) dressed for the sea ---------------------------------------------------------------------------------
 
-	/** (0.7.257) Their weapons while they're about their work: stowed, out of their hands, till there's a fight. */
+	/** (0.7.259) Their weapons while they're about their work: stowed, out of their hands, till there's a fight. */
 	static final AttachmentType<List<ItemStack>> STOWED = AttachmentRegistry.create(JaymosKingdoms.id("crew_stowed"),
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()));
-	/** (0.7.257) The last tick each one had a foe (they stow their weapons a while after). */
+	/** (0.7.259) The last tick each one had a foe (they stow their weapons a while after). */
 	private static final Map<UUID, Long> LAST_FOE = new HashMap<>();
 
-	/** (0.7.257) {@code mob}'s main and off hand put away (stowed), their hands empty; nothing if they're already stowed. */
+	/** (0.7.259) {@code mob}'s main and off hand put away (stowed), their hands empty; nothing if they're already stowed. */
 	static void stow(LivingEntity mob) {
 		ItemStack main = mob.getMainHandItem(), off = mob.getOffhandItem();
 		if (main.isEmpty() && off.isEmpty() || mob.hasAttached(STOWED)) {
@@ -339,7 +339,7 @@ public final class Crewmen {
 		mob.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 	}
 
-	/** (0.7.257) {@code mob} takes up their stowed weapons; true if they had any. */
+	/** (0.7.259) {@code mob} takes up their stowed weapons; true if they had any. */
 	static boolean arm(LivingEntity mob) {
 		List<ItemStack> kit = mob.getAttached(STOWED);
 		if (kit == null) {
@@ -357,7 +357,7 @@ public final class Crewmen {
 	}
 
 	/**
-	 * (0.7.257) A crew from before (guards, some in plate): out of their armour, worn and packed, sailors by trade, their
+	 * (0.7.259) A crew from before (guards, some in plate): out of their armour, worn and packed, sailors by trade, their
 	 * weapons stowed unless there's a fight on.
 	 */
 	private static void dress(PathfinderMob mob, boolean fighting) {
@@ -544,7 +544,7 @@ public final class Crewmen {
 		}
 		LivingEntity foe = foe(level, mob, w, ship, crew);
 		if (foe != null) {
-			// (0.7.257) weapons up
+			// (0.7.259) weapons up
 			LAST_FOE.put(mob.getUUID(), now);
 			arm(mob);
 			fight(level, mob, w, foe, now);
@@ -820,7 +820,7 @@ public final class Crewmen {
 			return "deckhand";
 		}
 		return switch (side) {
-			// (0.7.257) no marines: her sailors fight
+			// (0.7.259) no marines: her sailors fight
 			case NAVY -> "seaman";
 			case WHALER -> "whaleman";
 			default -> "hand";

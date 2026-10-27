@@ -153,7 +153,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	/** A box over each column of the hold, from its lowest dry cell to the top of its highest. */
 	private static Model.Simple mask(Hull h) {
 		Map<Long, int[]> columns = new HashMap<>();
-		// (0.7.257) and the part-blocks inside her walls (Hull.masked)
+		// (0.7.259) and the part-blocks inside her walls (Hull.masked)
 		for (long cell : h.masked) {
 			BlockPos p = BlockPos.of(cell);
 			int[] span = columns.computeIfAbsent(BlockPos.asLong(p.getX(), 0, p.getZ()), k -> new int[] {Integer.MAX_VALUE, Integer.MIN_VALUE});

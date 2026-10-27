@@ -403,7 +403,7 @@ public final class McaCompat {
 
 	/**
 	 * (0.7.242) With MCA, a ship's crewman as one of its villagers: in {@code folk}'s place (set up for its role), in
-	 * the world, with its blood, gear and side; (0.7.257) a fisherman (a sailor) in no armour, their weapons
+	 * the world, with its blood, gear and side; (0.7.259) a fisherman (a sailor) in no armour, their weapons
 	 * stowed till a fight. Null without MCA (the folk sails).
 	 */
 	static @Nullable PathfinderMob crewman(ServerLevel level, Folk folk) {
