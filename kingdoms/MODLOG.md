@@ -5130,3 +5130,10 @@ our own, built from the idea alone (`Lockpicking`, `client/LockpickScreen`).
   blocks round her mooring. A realm whose harbour can't be built, or whose whaler won't float, after 15 tries is passed
   over for the next nearest coastal one (a new kingdom raised on the shore if none is left); it gives up after 3
   minutes. Sign-on then takes the realm made ready, not just the harbour nearest spawn.
+
+## 0.7.238: no lag spike before the life story (pack 0.17.26)
+- **The first capital is raised near spawn.** A new world's first realm (raised so the story screen has realms to name)
+  went to the nearest village anywhere within 1,600 blocks. In Andy's world that was 900 blocks off, and loading and
+  making all that land at once froze the server for about a minute before the story opened. Now only a village within
+  24 chunks (384 blocks) of spawn is taken (`CAPITAL_VILLAGE_SEARCH`), which also makes the search itself quick; with
+  none that near, a citadel goes up by spawn at the first try, where it used to wait out the village's 90 seconds first.
