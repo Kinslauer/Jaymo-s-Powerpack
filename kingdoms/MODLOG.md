@@ -5430,3 +5430,28 @@ Andy, of the "Then one day..." page: "this screen should not show the class you 
   few days" / "whatever fate decides" are gone, and their lang keys with them). Lost in time still says Chrono wakes at
   once, since that's the road's own doing.
 - A road that matches the gift still says it wakes a day sooner, without naming it.
+## 0.7.250: job halls and Blossom villages, the pack's Japan (pack 0.17.39)
+Andy pointed at Tax' Village Architect ("adds the new buildings we need for jobs (butcher stable, etc) it also adds a
+new cherry blossom village which is perfect for the unused japanese/samurai armor we have. they can be the analogue
+for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothing of it is used: these are our own.
+- **The cherry grove was snowy land**: `Palette.of` tested "grove" (the snowy grove) before "cherry", so a seat in a
+  cherry grove got the snowy palette, the Northern tongue and no ronin. Cherry is now tested first, so the Blossom look,
+  tongue and harness finally show (`Outfits.VERSION` 3 dresses folk again once).
+- **Job halls** (`JobHalls`): a butcher's shop (open counter, smoker, chopping block, chains), a fishery (drying rack,
+  dried kelp, a hut with the catch barrel) and a hunting lodge (log cabin, fletching table, pelts, a target on a hay
+  bale), drawn from each settlement's kit. Realms build them from 22/26/30 people, villages from 10/14/16. Their job site
+  blocks give villagers there the butcher, fisherman and fletcher trades.
+- **Jobs work out of them** (`Careers.Job#hall`): butcher → butcher's shop, fisher → fishery, hunter → hunting lodge,
+  smith → smithy, courier → stable. A town where the job's building stands is always hiring for it and pays
+  `HALL_BONUS` (1) more an order; the offer says so.
+- **The Blossom way of building** (`Blossom`): among the cherry trees every building's kit roofs in deepslate tile over
+  white plaster, and a house is a minka (dark timber frame on a stone footing, boards and plaster, paper windows, tatami,
+  futons, a low table, a paper lantern, a wide hipped overhanging roof, often an engawa).
+- **Blossom villages** (`BlossomVillages`): no village is generated in cherry groves, so one rises there by itself
+  (checked each minute, 35%): a cherry grove all round, 384 blocks from any settlement, no bell within 128, out of sight
+  of the player. A bell on a stone plinth, a shrine, a torii over the gravel road in, stone lanterns, four minka, a
+  butcher's shop, a hunting lodge and two stalls, villagers and a golem; then an ordinary village (elder, shed, crew,
+  growth) with a Blossom name (Hanamura, Kirizawa...). `/kingdom found blossom` raises one where you stand.
+- **Samurai guards**: a realm's guards in the Blossom land always wear the ronin harness in the realm's colour (not
+  only one realm in two), Epic Knights doesn't replace it, and with MCA every settlement there puts its MCA guards in it.
+  Not seen in game.

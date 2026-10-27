@@ -59,8 +59,12 @@ final class Buildings {
 			realm(type, "mason", Buildings::mason, 1, 20);
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
+			// (0.7.250) the job halls ({@link JobHalls}): where a town's butchers, fishers and hunters work
+			realm(type, "butcher", JobHalls::butcher, 1, 22);
 			realm(type, "market", Buildings::market, 1, 24);
+			realm(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
+			realm(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
 			realm(type, "barracks", Buildings::barracks, 1, 32);
@@ -83,12 +87,15 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "well", Buildings::well, 1, 0);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
+		realm(FactionType.VILLAGE, "butcher", JobHalls::butcher, 1, 10);
+		realm(FactionType.VILLAGE, "hunting_lodge", JobHalls::huntingLodge, 1, 14);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
 		// (0.5.27) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
+		realm(FactionType.VILLAGE, "fishery", JobHalls::fishery, 1, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
 		town(FactionType.VILLAGE, "palisade", Buildings::palisade, 10, 22);
@@ -145,6 +152,10 @@ final class Buildings {
 	 * village), a gabled roof, a bed, a table.
 	 */
 	static Blueprint house(Kit k) {
+		if (k.blossom && !k.classic) {
+			// (0.7.250) among the cherry trees, a minka ({@link Blossom})
+			return Blossom.minka(k);
+		}
 		Palette p = k.p;
 		int w = k.pickInt(7, 9, 7, 5, 9);
 		int d = k.pickInt(7, 9, 7, 9);
@@ -1343,6 +1354,8 @@ final class Buildings {
 
 		final Palette p;
 		final boolean village;
+		/** (0.7.250) It stands among the cherry trees: the Blossom land's way of building ({@link Blossom}). */
+		final boolean blossom;
 		final Block door, gate;
 		final BlockState woodStairs, wool, bed, carpet, road;
 		/** (0.5.7) roofing (stairs, slab, the full block), a second colour, timber-frame infill, windows */
@@ -1361,6 +1374,7 @@ final class Buildings {
 		private Kit(Palette p, boolean village, String wood, String color) {
 			this.p = p;
 			this.village = village;
+			this.blossom = p == Palette.CHERRY;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
 			this.gate = block(wood + "_fence_gate", Blocks.OAK_FENCE_GATE);
 			this.woodStairs = block(wood + "_stairs", Blocks.OAK_STAIRS).defaultBlockState();
@@ -1385,9 +1399,10 @@ final class Buildings {
 
 		/** A building's own kit: its materials from {@code look} (and the land's palette), its details rolled from {@code r}. */
 		private Kit(Palette p, boolean village, String wood, String color, String accent, BlockState roofStairs, BlockState roofSlab, BlockState roofBlock,
-			BlockState infill, List<String> colours, boolean dry, RandomSource r) {
+			BlockState infill, List<String> colours, boolean dry, boolean blossom, RandomSource r) {
 			this.p = p;
 			this.village = village;
+			this.blossom = blossom;
 			this.door = block(wood + "_door", Blocks.OAK_DOOR);
 			this.gate = block(wood + "_fence_gate", Blocks.OAK_FENCE_GATE);
 			this.woodStairs = block(wood + "_stairs", Blocks.OAK_STAIRS).defaultBlockState();
@@ -1478,8 +1493,16 @@ final class Buildings {
 				infill = or(Townscape.named("white_terracotta"), infill);
 			}
 			boolean dry = land == Palette.DESERT || land == Palette.BADLANDS || land == Palette.SAVANNA;
+			boolean blossom = land == Palette.CHERRY;
+			if (blossom) {
+				// (0.7.250) the Blossom land roofs in dark tile over white plaster, whatever the town was before
+				roofStairs = Blocks.DEEPSLATE_TILE_STAIRS;
+				roofSlab = Blocks.DEEPSLATE_TILE_SLAB;
+				roofBlock = Blocks.DEEPSLATE_TILES;
+				infill = or(Townscape.named("white_terracotta"), Blocks.CALCITE.defaultBlockState());
+			}
 			return new Kit(p, village, wood, main, accent, roofStairs.defaultBlockState(), roofSlab.defaultBlockState(), roofBlock.defaultBlockState(),
-				infill, colours, dry, RandomSource.create(details ^ 0x5DEECE66DL));
+				infill, colours, dry, blossom, RandomSource.create(details ^ 0x5DEECE66DL));
 		}
 
 		// ---- rolling choices (the plain kit always takes the first) ----

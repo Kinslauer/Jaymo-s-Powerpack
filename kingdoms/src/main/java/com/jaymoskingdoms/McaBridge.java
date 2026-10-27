@@ -823,6 +823,10 @@ final class McaBridge {
 		return Rulers.is(v) && ClothingLibrary.royal(v);
 	}
 
+	static boolean isGuard(PathfinderMob mob) {
+		return mob instanceof VillagerEntityMCA v && v.isGuard();
+	}
+
 	static boolean busy(PathfinderMob mob) {
 		return mob instanceof VillagerEntityMCA v && v.getInteractions().getInteractingPlayer().isPresent();
 	}
