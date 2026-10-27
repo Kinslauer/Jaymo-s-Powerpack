@@ -160,7 +160,7 @@ public final class ZFighterRaids {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_raid_share", emeralds).withStyle(ChatFormatting.GOLD));
 			}
 		}
-		// (0.17.51) a rare pair of bonding earrings
+		// (0.17.53) a rare pair of bonding earrings
 		ZFighterFusionItems.tyrantDrop(level, tyrant);
 		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("message.jaymospowers.zfighter_raid_won",
 			tyrant.getDisplayName(), tyrant.kingdom, shared).withStyle(ChatFormatting.GOLD), false);

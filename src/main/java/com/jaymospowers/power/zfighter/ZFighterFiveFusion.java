@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.51, Andy's NOEA picks) The five-way fusion, a late ritual. Five Z Fighters stand in a ring (about {@link #RING_MIN}
+ * (0.17.53, Andy's NOEA picks) The five-way fusion, a late ritual. Five Z Fighters stand in a ring (about {@link #RING_MIN}
  * to {@link #RING_MAX} blocks from the ring's middle, no gap wider than {@link #MAX_GAP} degrees), every one of them with
  * Super 3 open (past Super 2, {@link #GATE_FORMS}) and free to fuse; each taps Z, then C, within {@link #AGREE_TICKS} of the
  * others (the dance's own keys: a ring of five near him takes his Z then C for agreeing instead of the dance, once he

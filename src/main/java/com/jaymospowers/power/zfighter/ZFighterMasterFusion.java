@@ -24,7 +24,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.51, Andy's NOEA picks) A fusion partner for solo play. A good master ({@link ZFighterMasters}) who has taught him
+ * (0.17.53, Andy's NOEA picks) A fusion partner for solo play. A good master ({@link ZFighterMasters}) who has taught him
  * {@link #LESSONS_NEEDED} lessons (the count the god form's ring keeps, {@link ZFighterGodRitual#lessons}) agrees to fuse. Stand
  * within {@link #RANGE} blocks of the master and tap Z, then C, with no partner dancing: the master answers the dance, and
  * when it ends the two are one for {@link #BASE_TICKS} (and {@link #PER_LESSON_TICKS} more for every lesson past the

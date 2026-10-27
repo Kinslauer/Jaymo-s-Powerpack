@@ -28,7 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.51, Andy's NOEA picks) Patch 4, fusion: the two things that fuse a pair without the dance.
+ * (0.17.53, Andy's NOEA picks) Patch 4, fusion: the two things that fuse a pair without the dance.
  * <ul>
  * <li>The <b>Bonding Earrings</b> (a rare pair: the {@code bonding} wish gives two, and a beaten tyrant may drop two to
  * whoever hurt him most, {@link #tyrantDrop}). Each fighter wears one: face the other and use yours (right-click); when

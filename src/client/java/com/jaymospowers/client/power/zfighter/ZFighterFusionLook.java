@@ -170,7 +170,7 @@ public final class ZFighterFusionLook {
 		UUID innerId = inner((Player)entity, look);
 		Object otherLike = ((Optional<?>)playerData.invoke(null, innerId)).orElse(null);
 		if (otherLike == null) {
-			// (0.17.51) a master's fusion: the one inside is a villager of MCA's in the world, not a player
+			// (0.17.53) a master's fusion: the one inside is a villager of MCA's in the world, not a player
 			otherLike = villager(innerId);
 		}
 		if (otherLike == null) {

@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * his camera); halfway through they change places. The fused fighter has both their fists, health, ki and ki power added together, and
  * {@link #FUSION_BONUS} more. Either may then not fuse again for {@link #COOLDOWN}.
  * <p>
- * (0.17.51, Andy's NOEA picks) Patch 4: the same machinery now carries four more ways in, each a {@link Kind}: the
+ * (0.17.53, Andy's NOEA picks) Patch 4: the same machinery now carries four more ways in, each a {@link Kind}: the
  * earrings and the arm bands ({@link ZFighterFusionItems}: no dance, for 30 minutes or 3), the five-way ring
  * ({@link ZFighterFiveFusion}: one huge body, four watching) and a master's agreement ({@link ZFighterMasterFusion}: the
  * master is held out of the world meanwhile). While fused, every step of form above base burns the timer faster
@@ -64,7 +64,7 @@ public final class ZFighterFusion {
 	static final int PER_LEVEL_TICKS = 2;
 	static final float FUSION_BONUS = 0.1F;
 	static final long COOLDOWN = 12000L;
-	/** (0.17.51) Each form step above base (see {@link ZFighterForms#tier}) drains the fusion timer this much faster (0.5: +50% a step). */
+	/** (0.17.53) Each form step above base (see {@link ZFighterForms#tier}) drains the fusion timer this much faster (0.5: +50% a step). */
 	static final double FORM_BURN = 0.5;
 	/** How often (ticks) the fused are told the timer is burning faster, and what it says. */
 	static final int BURN_SHOWN_EVERY = 100;
@@ -107,7 +107,7 @@ public final class ZFighterFusion {
 	private record Pending(UUID leader, UUID partner, long at) {
 	}
 
-	/** (0.17.51) How a fusion came about. */
+	/** (0.17.53) How a fusion came about. */
 	enum Kind {
 		DANCE, EARRING, BAND, FIVE, MASTER
 	}
@@ -190,7 +190,7 @@ public final class ZFighterFusion {
 	}
 
 	static void init() {
-		// (0.17.51) the other ways in
+		// (0.17.53) the other ways in
 		ZFighterFusionItems.init();
 		ZFighterFiveFusion.init();
 		ZFighterMasterFusion.init();
@@ -235,7 +235,7 @@ public final class ZFighterFusion {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_fusion_tired", minutes).withStyle(ChatFormatting.GRAY));
 			return true;
 		}
-		// (0.17.51) five of them in a ring, all past Super 2, all pressing Z then C: the five-way
+		// (0.17.53) five of them in a ring, all past Super 2, all pressing Z then C: the five-way
 		if (ZFighterFiveFusion.agree(player, now)) {
 			return true;
 		}
@@ -245,7 +245,7 @@ public final class ZFighterFusion {
 		player.setAttached(DANCE, side);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
 		if (partner == null) {
-			// (0.17.51) a master who has taught him enough answers the dance instead
+			// (0.17.53) a master who has taught him enough answers the dance instead
 			if (!ZFighterMasterFusion.begin(player, now)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_fusion_waiting").withStyle(ChatFormatting.AQUA));
 			}
@@ -305,7 +305,7 @@ public final class ZFighterFusion {
 				defuse(server, id);
 				continue;
 			}
-			// (0.17.51) each form step above base burns the timer faster
+			// (0.17.53) each form step above base burns the timer faster
 			int steps = ZFighterForms.tier(ZFighterPower.live(leader).form);
 			if (steps > 0) {
 				fused.burned += steps * FORM_BURN;
@@ -381,7 +381,7 @@ public final class ZFighterFusion {
 	}
 
 	/**
-	 * (0.17.51) Two fighters become one without the dance ({@link ZFighterFusionItems}): {@code leader} steers, {@code partner}
+	 * (0.17.53) Two fighters become one without the dance ({@link ZFighterFusionItems}): {@code leader} steers, {@code partner}
 	 * watches from inside, for {@code length} ticks with {@code bonus} on top of the two added together.
 	 */
 	static void fuseWith(ServerPlayer leader, ServerPlayer partner, Kind kind, int length, float bonus) {
@@ -465,7 +465,7 @@ public final class ZFighterFusion {
 		return fused;
 	}
 
-	/** (0.17.51) Marks a started fusion as a master's: {@code master} is the NPC held out of the world, {@code look} how the body is drawn. */
+	/** (0.17.53) Marks a started fusion as a master's: {@code master} is the NPC held out of the world, {@code look} how the body is drawn. */
 	static void withMaster(ServerPlayer leader, UUID master, Look look) {
 		Fused fused = FUSED.get(leader.getUUID());
 		if (fused != null) {
@@ -576,7 +576,7 @@ public final class ZFighterFusion {
 				giveBack(partner, leader);
 			}
 		}
-		// (0.17.51) the master comes out of hiding; the earrings and bands crack
+		// (0.17.53) the master comes out of hiding; the earrings and bands crack
 		if (fused.master != null) {
 			ZFighterMasterFusion.release(server, fused.master, leader);
 		}
@@ -629,7 +629,7 @@ public final class ZFighterFusion {
 		return fused == null ? 0.0 : fused.bonus;
 	}
 
-	/** (0.17.51) How much bigger the fused body is (the five-way's giant), as a multiplier of its base size; 0 for none. */
+	/** (0.17.53) How much bigger the fused body is (the five-way's giant), as a multiplier of its base size; 0 for none. */
 	static double scale(ServerPlayer player) {
 		Fused fused = of(player);
 		return fused != null && fused.kind == Kind.FIVE ? ZFighterFiveFusion.SCALE : 0.0;
@@ -651,7 +651,7 @@ public final class ZFighterFusion {
 		return fused == null ? damage : damage * (1.0F - fused.stats.toughness());
 	}
 
-	/** (0.17.51) How the fusion {@code player} steers came about (null: he steers none). */
+	/** (0.17.53) How the fusion {@code player} steers came about (null: he steers none). */
 	static Kind kind(ServerPlayer player) {
 		Fused fused = of(player);
 		return fused == null ? null : fused.kind;

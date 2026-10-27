@@ -1,4 +1,4 @@
-"""Draws the fusion items (0.17.51, Andy's NOEA picks): the Bonding Earring and the Fusion Arm Band, 16x16 item icons in
+"""Draws the fusion items (0.17.53, Andy's NOEA picks): the Bonding Earring and the Fusion Arm Band, 16x16 item icons in
 vanilla style (a one-pixel dark outline, three tones lit from the top left), plus the item model and item definition for
 each. Everything is our own art. Run it from the root:
 
