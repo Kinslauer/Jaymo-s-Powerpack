@@ -2007,6 +2007,7 @@
 	"remnant.jaymoskingdoms.arctic": "Arctic",
 	"remnant.jaymoskingdoms.irradiated": "Irradiated",
 	"message.jaymoskingdoms.giant.rises": "The monolith hums awake. The %s rises from the earth!",
+	"message.jaymoskingdoms.monolith.needs_tinkers": "The monolith's stone won't give. Only a high-tier Tinkers tool (diamond-tier or better) can break it.",
 	"message.jaymoskingdoms.giant.first_fallen": "The %s has fallen. Across the world the Aether's last remnants stir, and the world grows harsher: no one plays below %s now.",
 	"command.jaymoskingdoms.monolith.count": "%s monoliths known. A Giant has fallen in this world: %s.",
 	"command.jaymoskingdoms.monolith.entry": "%s monolith at %s %s %s: %s",
