@@ -20,6 +20,7 @@ final class CastHints {
 	private static final class Hints {
 		int pose = -1, cooldown = -1;
 		float cost = -1.0F;
+		double reach;
 	}
 
 	private CastHints() {
@@ -35,6 +36,17 @@ final class CastHints {
 
 	static void setCost(ServerPlayer player, float cost) {
 		HINTS.computeIfAbsent(player.getUUID(), k -> new Hints()).cost = cost;
+	}
+
+	/** How far the hand reached out to what this cast touched (blocks), for the viewers to draw it there. */
+	static void setReach(ServerPlayer player, double blocks) {
+		HINTS.computeIfAbsent(player.getUUID(), k -> new Hints()).reach = blocks;
+	}
+
+	/** The reach set for this cast, or 0 (the arms stay by their keeper). */
+	static double reach(ServerPlayer player) {
+		Hints h = HINTS.get(player.getUUID());
+		return h == null ? 0.0 : h.reach;
 	}
 
 	/** The pose set for this cast, or {@code usual}. */

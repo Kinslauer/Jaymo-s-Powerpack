@@ -315,9 +315,14 @@ public final class Spirits {
 
 	/** The arms hold {@code pose} ({@link Poses}) from now, for the viewers. */
 	public static void show(ServerPlayer player, int pose) {
+		show(player, pose, 0.0);
+	}
+
+	/** The arms hold {@code pose} from now, the hand reaching out {@code blocks} to what the move touched. */
+	public static void show(ServerPlayer player, int pose, double blocks) {
 		SpiritState state = state(player);
 		if (state != null) {
-			player.setAttached(SPIRIT, state.withShow(player.level().getGameTime(), pose));
+			player.setAttached(SPIRIT, state.withShow(player.level().getGameTime(), pose, blocks));
 		}
 	}
 
@@ -469,7 +474,7 @@ public final class Spirits {
 		}
 		Mana.pay(player, move.cost(player), move.intent());
 		Moves.start(player, move, now);
-		show(player, move.pose(player));
+		show(player, move.pose(player), CastHints.reach(player));
 		CastHints.clear(player);
 		addXp(player, XP_PER_CAST);
 		SpiritClash.noteStrike(player, move, SpiritClash.aimed(player));
