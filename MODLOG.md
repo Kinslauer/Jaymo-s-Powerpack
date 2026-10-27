@@ -3230,7 +3230,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   speaking (`WorkTalk`): your apprentice, the ruler (your service by rank, or an offer), the watch (your round, or a
   place on it), one of your own trade, one whose trade the town is hiring for, or anyone to someone already working
   there. Compile-checked against the 26.3 jars; not seen in game.
-- **0.17.75, stuck ships come off the beach (Kingdoms 0.7.272):** a stuck crewed ship's captain now really backs
+- **0.17.76, stuck ships come off the beach (Kingdoms 0.7.273):** a stuck crewed ship's captain now really backs
   her off (warped astern with her sails struck, bow brought round to open water), a whaler hove to at her moorings no
   longer backs herself onto the beach while fitting out, and a hull already in the ground can move off it. Not seen
   in game.
