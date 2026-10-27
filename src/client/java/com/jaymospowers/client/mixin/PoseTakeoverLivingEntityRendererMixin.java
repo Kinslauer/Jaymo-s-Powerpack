@@ -27,7 +27,13 @@ abstract class PoseTakeoverLivingEntityRendererMixin {
 	private void jaymospowers$beginDraw(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera,
 		CallbackInfo ci) {
 		PoseTakeover.beginDraw(state);
-		TnmFollow.body(state, this.model);
+	}
+
+	/** (0.17.40) The body as posed for the layers (after any model swap, EMF's animation and Touch'n Motion's): see TnmFollow. */
+	@Inject(method = SUBMIT, at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
+	private void jaymospowers$keepBody(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera,
+		CallbackInfo ci) {
+		TnmFollow.keep(state, this.model);
 	}
 
 	@Inject(method = SUBMIT, at = @At("RETURN"))

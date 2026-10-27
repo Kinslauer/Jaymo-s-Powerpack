@@ -3061,3 +3061,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
 - **0.17.39, job halls and Blossom villages (Kingdoms 0.7.250):** settlements build a butcher's shop, a fishery and a
   hunting lodge (their jobs hire and pay more where they stand); cherry groves get their own Blossom villages (minka,
   shrine, torii) and samurai-armoured guards, and cherry-grove towns finally get the Blossom look. No Powers changes.
+- **0.17.40, your villager's arms and legs move again in F5:** Andy's MCA villager body walked with its limbs frozen.
+  `client/TnmFollow` (0.16.16) laid Touch'n Motion's kept copy of the body's pose on every model drawn on a player, MCA's
+  skin, clothes and hair included. Touch'n Motion only keeps that copy from the player model the game draws, and MCA
+  swaps in its own animated body and never draws it, so the copy was the plain body's pose from before MCA's look loaded
+  and stayed that way all session. TnmFollow now keeps its own copy of whichever model the renderer posed this frame,
+  taken as it turns to the layers (`PoseTakeoverLivingEntityRendererMixin`), and no longer calls into Touch'n Motion.
