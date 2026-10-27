@@ -222,6 +222,8 @@ public final class ZFighterLineage {
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
 		RaceMoves.init();
+		// (0.17.56) the lineages' extras (merging, the ki reserve, ...)
+		ZFighterRaces.init();
 		// (0.15.148) a Z Fighter's ape has a mind of its own: its rage, its fits, his primal
 		ApeRage.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
@@ -342,6 +344,11 @@ public final class ZFighterLineage {
 			}
 		}
 		return any || !FabricLoader.getInstance().isModLoaded("jaymoskingdoms") ? EARTHLING : NONE;
+	}
+
+	/** (0.17.56) Whether {@code entity} is Divine-born (Kingdoms heritage {@code divine}): its ki is hidden from sense and scouters. */
+	public static boolean divine(net.minecraft.world.entity.Entity entity) {
+		return entity.entityTags().contains(HERITAGE_TAG + "divine");
 	}
 
 	/**

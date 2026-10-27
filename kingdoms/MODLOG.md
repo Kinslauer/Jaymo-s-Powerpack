@@ -5518,3 +5518,28 @@ within 20 blocks. that should also be far reach's extent. animating the hand the
   swings, its weight rolling onto the foot coming down, shoulders turning with the forward arm, head kept level, and it
   sinks onto each footfall so its feet stay on the ground. Same speed as before. Blows, the stamp, the flinch and the
   fall-and-shatter death are unchanged. Not seen in game.
+
+## 0.7.262: three new bloods, Andy's NOEA picks (pack 0.17.56)
+Idea from the Dragon Block NOEA race list (a short mention only; all names, code and art our own). Three heritages,
+picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`, so the entity tags are
+`jaymoskingdoms_heritage_<key>`: Jaymo's Powers reads them for ki sense, scouters and the lineage, which reads as Earthling).
+- **Divine-born** (`DivineBorn`): halo and gold filigree, +1 health every 4 s on top of the body's own, blows 25% harder on
+  the wicked (undead, illagers, barbarians, a Rogue's Stealth alignment, anyone whose power or gift is corrupted),
+  Restoration spells and the Sorcerer's Mend, Renewal and Rekindle heal 30% more and cost 25% less mana. Flaw: hunger 25%
+  faster.
+- **Bio-built** (`BioBuilt`): a downed foe (`Downed.isDowned`) looked at within 3 blocks and held on the heritage key for 3 s
+  is absorbed (consumed): a share of its health back and its worth added; 4 and 12 worth fold the body into the second
+  and third form (health, armour, blows; a changed look: seams, then plates to the elbow, then to the shoulder and
+  cheeks). Blows drain 8/12/18% of their harm back. Third form: the key pressed on no foe buds up to 2 small copies for 45 s
+  (risen through `Thralls`, so they obey the master and crumble). Flaw: frail first form (2 fewer hearts), lightning and
+  magic 50% harder. Nothing grabs and nothing is goo: it never reaches for anything but the downed in front of it.
+- **Rubber-folk** (`RubberFolk`): pink skin tint, +1 block of reach (the stretch), a lost limb regrown every 20 s (Powers'
+  `Dismember.regrow` through `PowersCompat.regrow`), small weak or downed foes swallowed for a heal (held key), sweets
+  (cookie, pies, honey, berries, melon, cake slices, and Kitchen's tarts, pies, cobbler, brownies by `KitchenCompat.sweet`)
+  heal 2 to 3 hearts. Flaw: fire burns 60% longer, arrows and spines 25% harder.
+- **The held heritage key** (`HeritageHold`): `;` held is sent every other tick (the same key as the Warrior-born's tail); the
+  server runs one absorbing bar per player.
+- Each has three looks (`HeritageVariants`: Haloed, Starlit, Seraphic; Seamed, Brassbound, Opaline; Rosy, Candy-striped,
+  Berry-glossed), marks from `tools/gen_race_looks.py`, a halo model part, lang lines, a place in the life story (born at a
+  hilltop shrine, in a workshop's vats, at a travelling fair), villagers (Rubber-folk fairly common, Divine-born very rare,
+  Bio-built only by inheritance), MCA skin tints and skin ranges.

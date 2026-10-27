@@ -53,6 +53,7 @@ public final class ZFighterCombatClient {
 			case ZFighterTraining.NOVA_SPHERE -> Items.NETHER_STAR;
 			case ZFighterTraining.RAGE_SCREAM -> Items.GOAT_HORN;
 			case ZFighterTraining.AFTERIMAGE -> Items.PHANTOM_MEMBRANE;
+			case ZFighterTraining.SONIC_SWAY -> Items.BREEZE_ROD;
 			default -> Items.FIRE_CHARGE;
 		};
 	}

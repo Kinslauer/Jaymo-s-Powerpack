@@ -51,6 +51,7 @@ public final class ZFighterCombat {
 				ZFighterGrab.tick(player);
 				ZFighterKiWeapon.tick(player, live);
 				ZFighterSidestep.tick(player);
+				ZFighterSonicSway.tick(player, live);
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -64,6 +65,7 @@ public final class ZFighterCombat {
 	static void drop(ServerPlayer player) {
 		ZFighterRush.drop(player);
 		ZFighterGrab.drop(player);
+		ZFighterSonicSway.drop(player);
 		if (ZFighterKiWeapon.out(player) >= 0) {
 			ZFighterKiWeapon.sheathe(player, false);
 		}

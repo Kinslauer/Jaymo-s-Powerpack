@@ -80,6 +80,13 @@ public final class HeritageVariants {
 	/** The Stoneborn's grey (Andy: "stoneborn should all have a greyer hue"): over the skin by this much. */
 	static final int STONE_GREY = 0x8A8C8E;
 	static final float STONE_GREY_AMOUNT = 0.6F;
+	/**
+	 * (0.7.262) The new bloods' skin: every Rubber-folk is pink and every Divine-born touched with gold, over the skin by these
+	 * amounts; a Bio-built's drab made skin grows more so with each form ({@code BIO_AMOUNT}, first to third).
+	 */
+	static final int RUBBER_PINK = 0xF09AC0, DIVINE_GOLD = 0xF4DDA0, BIO_GREY = 0x8AA39A;
+	static final float RUBBER_PINK_AMOUNT = 0.55F, DIVINE_GOLD_AMOUNT = 0.3F;
+	static final float[] BIO_AMOUNT = {0.25F, 0.35F, 0.5F};
 	/** Thornrose: what a melee blow costs whoever lands it on one. */
 	static final float THORN_DAMAGE = 1.0F;
 	/** Thornrose: only blows from this near count as melee (blocks). */
@@ -158,7 +165,16 @@ public final class HeritageVariants {
 		RIMEWYRM(Heritage.Kind.DRAGONBLOOD, 0xC8DCEC, 0.25F, Land.COLD, Element.ARCTIC, Heritage.Kind.FROSTBORN, Trait.add(Attributes.ARMOR, 1.5)),
 		// ---- Deepborn
 		HOLLOW(Heritage.Kind.DEEPBORN, 0x9AA8A8, 0.4F, Land.DEEP, null, null, Trait.share(Attributes.SNEAKING_SPEED, 0.15)),
-		GEODE(Heritage.Kind.DEEPBORN, 0x8C8C94, 0.3F, Land.DEEP, null, Heritage.Kind.STONEBORN, Trait.add(Attributes.ARMOR, 2.0));
+		GEODE(Heritage.Kind.DEEPBORN, 0x8C8C94, 0.3F, Land.DEEP, null, Heritage.Kind.STONEBORN, Trait.add(Attributes.ARMOR, 2.0)),
+		// ---- (0.7.262, Andy's NOEA picks) Divine-born: the starlit and the feathered
+		STARLIT(Heritage.Kind.DIVINE, 0xCFE0FF, 0.3F, Land.HIGH, null, null, Trait.add(Attributes.LUCK, 1.0)),
+		SERAPHIC(Heritage.Kind.DIVINE, 0xFFF4DC, 0.35F, Land.NONE, null, null, Trait.add(Attributes.SAFE_FALL_DISTANCE, 2.0)),
+		// ---- Bio-built: brass-bound and pearly
+		BRASSBOUND(Heritage.Kind.BIOBUILT, 0xC0865A, 0.3F, Land.NONE, null, null, Trait.add(Attributes.ARMOR, 1.5)),
+		OPALINE(Heritage.Kind.BIOBUILT, 0xD8E4E0, 0.35F, Land.NONE, null, null, Trait.share(Attributes.MOVEMENT_SPEED, 0.03)),
+		// ---- Rubber-folk: candy-striped and berry-glossed (over the pink every one of them wears)
+		CANDYSTRIPE(Heritage.Kind.RUBBERFOLK, 0xFFD0DC, 0.35F, Land.PLAINS, null, null, Trait.share(Attributes.MOVEMENT_SPEED, 0.03)),
+		BERRYGLOSS(Heritage.Kind.RUBBERFOLK, 0xB04C88, 0.45F, Land.SWAMP, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.04));
 
 		public final Heritage.Kind heritage;
 		/** Over the skin (RGB), by {@code tintAmount} (0: none). */
@@ -298,6 +314,12 @@ public final class HeritageVariants {
 		Variant v = of(entity);
 		if (kind == Heritage.Kind.STONEBORN) {
 			color = blend(color, STONE_GREY, STONE_GREY_AMOUNT);
+		} else if (kind == Heritage.Kind.RUBBERFOLK) {
+			color = blend(color, RUBBER_PINK, RUBBER_PINK_AMOUNT);
+		} else if (kind == Heritage.Kind.DIVINE) {
+			color = blend(color, DIVINE_GOLD, DIVINE_GOLD_AMOUNT);
+		} else if (kind == Heritage.Kind.BIOBUILT) {
+			color = blend(color, BIO_GREY, BIO_AMOUNT[BioBuilt.form(entity)]);
 		}
 		return v == null || v.tintAmount <= 0.0F ? color : blend(color, v.tint, v.tintAmount);
 	}

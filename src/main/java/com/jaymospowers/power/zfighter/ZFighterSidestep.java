@@ -87,6 +87,8 @@ public final class ZFighterSidestep {
 		level.sendParticles(ParticleTypes.POOF, true, false, at.x, at.y + 0.8, at.z, 4, 0.2, 0.3, 0.2, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.9F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.5F, 2.0F);
+		// (0.17.56) the slip is a quick sway and an afterimage
+		ZFighterSonicSway.flick(player, attacker.position());
 	}
 
 	/** Every tick, per Z Fighter: each second of shadowboxing is counted. */
