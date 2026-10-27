@@ -69,6 +69,8 @@ public final class Fleet {
 	static final int KEEL = 1, DEPTH = 5;
 	/** How far ahead (blocks) her captain looks for land, and how finely (blocks a step). */
 	static final double LOOK = 18.0, LOOK_STEP = 3.0;
+	/** (0.7.239) How many headings she looks along for a way out of a bay. */
+	static final int OFFINGS = 16;
 	/** The headings he tries round a blocked one (degrees off it), nearest first. */
 	static final float[] SWINGS = {25.0F, -25.0F, 50.0F, -50.0F, 80.0F, -80.0F, 115.0F, -115.0F, 150.0F, -150.0F};
 	/** He's on his heading within this (degrees), and puts the helm over past it. */
@@ -418,6 +420,52 @@ public final class Fleet {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * (0.7.239) A way out of a bay: of {@link #OFFINGS} headings, how far each runs in open water (her beam wide, up to
+	 * {@code reach}); of those running at least half that, the end nearest (gx, gz), else the end of the longest (null:
+	 * none runs two looks out).
+	 */
+	public static @Nullable BlockPos offing(ServerLevel level, Ship ship, double gx, double gz, double reach) {
+		Hull h = ship.hull();
+		if (h == null) {
+			return null;
+		}
+		double beam = Math.max(1.0, (h.maxX - h.minX) / 2.0);
+		BlockPos best = null, longest = null;
+		double bestD = Double.MAX_VALUE, longestRun = 0.0;
+		for (int i = 0; i < OFFINGS; i++) {
+			float yaw = i * 360.0F / OFFINGS;
+			double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD), fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
+			double sx = fz, sz = -fx;
+			double run = 0.0;
+			runs:
+			for (double d = LOOK_STEP; d <= reach; d += LOOK_STEP) {
+				double cx = ship.getX() + fx * d, cz = ship.getZ() + fz * d;
+				for (double side : new double[] {0.0, beam, -beam}) {
+					if (!open(level, ship, cx + sx * side, cz + sz * side)) {
+						break runs;
+					}
+				}
+				run = d;
+			}
+			if (run < LOOK_STEP * 2) {
+				continue;
+			}
+			double ex = ship.getX() + fx * run, ez = ship.getZ() + fz * run;
+			BlockPos end = BlockPos.containing(ex, ship.getY(), ez);
+			if (run > longestRun) {
+				longestRun = run;
+				longest = end;
+			}
+			double d = (ex - gx) * (ex - gx) + (ez - gz) * (ez - gz);
+			if (run >= reach / 2.0 && d < bestD) {
+				bestD = d;
+				best = end;
+			}
+		}
+		return best != null ? best : longest;
 	}
 
 	/** The heading nearest {@code want} with open water ahead (null: none, she's embayed and must back off). */

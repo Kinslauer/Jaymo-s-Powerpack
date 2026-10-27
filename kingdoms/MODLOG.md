@@ -5180,3 +5180,9 @@ want the player seeing anything in world while they are spawning."
   making all that land at once froze the server for about a minute before the story opened. Now only a village within
   24 chunks (384 blocks) of spawn is taken (`CAPITAL_VILLAGE_SEARCH`), which also makes the search itself quick; with
   none that near, a citadel goes up by spawn at the first try, where it used to wait out the village's 90 seconds first.
+- **Ships find their way out of a bay.** Andy: "the whaling ship got stuck trying to navigate". A captain only looked 18
+  blocks ahead for open water, so a whaler (or any crewed ship) whose heading ran through a headland backed off, came
+  about onto the same heading and ran back into the same bay, over and over. Now, once she has lain stuck, she looks
+  along 16 headings for open water she can sail straight to (`Fleet.offing`), takes the one that comes out nearest her
+  heading, and makes for it (at most 30 s) before taking her heading up again. Each try from the same bay looks farther
+  out (48, 96, 144, then 160 blocks); the count starts over once she's 96 blocks clear (`Corsairs.DETOUR*`).
