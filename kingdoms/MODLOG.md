@@ -5462,7 +5462,7 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
 - **Whalers wake aboard.** A signed hand who dies is put back on her deck (`Whalers.reboard`) while she's within
   reach; otherwise they wake at her harbour's shore.
 
-## 0.7.256: spirit hands become what they do (pack 0.17.47)
+## 0.7.258: spirit hands become what they do (pack 0.17.49)
 Andy: "The aegis hand should animate like a shield infront of you ... they should be arms, that is only their idle, and
 they pop in whenever they speak passively as the arm or default. every other use becomes what it entails, the catching
 hands should animate beneath you and the weapon forms look great, but they need to reach way out to whatever you aim at,

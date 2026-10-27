@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.256) A spirit's hand can reach 20 blocks from its keeper, so the keeper's culling box grows by the reach while it's
+ * (0.7.258) A spirit's hand can reach 20 blocks from its keeper, so the keeper's culling box grows by the reach while it's
  * out ({@link SpiritArms#cullingReach}): the arm is drawn the whole way even when its keeper is off screen.
  */
 @Mixin(EntityRenderer.class)

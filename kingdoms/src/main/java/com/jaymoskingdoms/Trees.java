@@ -575,7 +575,7 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.7.256) Grimsby's axe form (Andy: "the axe should chop trees in a single blow"): the whole tree standing on
+	 * (0.7.258) Grimsby's axe form (Andy: "the axe should chop trees in a single blow"): the whole tree standing on
 	 * {@code log} comes down at once, toppling away from {@code cutter}, its wood where it lands; a woodcutter's orders count
 	 * it. How many logs, 0 if it isn't a natural tree.
 	 */
