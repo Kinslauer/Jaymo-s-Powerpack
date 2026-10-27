@@ -446,8 +446,11 @@ public final class SpiritArms {
 			float rise = (state.ageInTicks * ManaClient.RISE) % 1.0F;
 			// the arms fade with how manifest they are, as well as grow
 			float fade = look.manifest() * look.manifest();
+			float strike = look.pose() == Poses.IDLE ? 0.0F : look.poseWeight();
 			for (int i = 0; i < ManaClient.SHELLS.length; i++) {
 				float light = Mth.clamp(ManaClient.SHELL_LIGHT[i] * glow.strength() * breathe * ARM_LIGHT * fade, 0.0F, 1.0F);
+				// a strike blazes: every shell up to full while the move's pose holds (Andy: "glow with their maximum intensity when striking")
+				light = Mth.lerp(strike * fade, light, 1.0F);
 				collector.order(ORDER + i).submitModel(this.model(kind, i), state, poseStack,
 					RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.29F + 0.13F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
 					ManaClient.tint(color, light), null, 0);

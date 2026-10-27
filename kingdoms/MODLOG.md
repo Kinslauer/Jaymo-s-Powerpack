@@ -5304,6 +5304,7 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
   and ahead of your shoulder, raised forward, as a stand hovers; Grimsby's blade and Thessaly's glove stay on your own arm.
   In first person your spirit's arms are drawn too (`SpiritFirstPersonMixin`, after the hands), where they sit on your body,
   so the floating ones hang in view and every strike comes out in front of you.
+  Every move blazes the arms to full brightness while its pose holds, then they settle back to your glow.
 - **The spirit key works on every install**: `SpiritKey` unbinds vanilla's Advancements from L once per install
   (marker `jaymoskingdoms-spirit-key-v1`). Powers' key pass had already run on existing installs, so L kept opening the
   advancements screen and the spirit never came.
