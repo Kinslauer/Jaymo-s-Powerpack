@@ -3274,4 +3274,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   seat instead of the blocky citadel, picked by its land (Grim Kingdoms' keeps and citadels, ATi's chateau, castles and
   temple, Repurposed Structures' jungle fortress once that mod is added), read from those mods at runtime, emptied of
   monsters, spawners and loot, the throne and panic room in its largest room. `/kingdom found citadel` keeps the old one.
+  Towns and Towers (CC BY-NC-SA 4.0, shipped unchanged with credit: modrinth.com/mod/towns-and-towers) joins the pack:
+  new villages per biome (Kingdoms founds capitals in them too), biome pillager outposts and ships; it has no castles.
   Compile-checked here, not playtested.
