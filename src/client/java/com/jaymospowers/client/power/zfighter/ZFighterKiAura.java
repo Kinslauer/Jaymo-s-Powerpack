@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAura;
+import com.jaymospowers.power.zfighter.ZFighterBranchForms;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -98,7 +99,8 @@ public final class ZFighterKiAura {
 			return null;
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
-		int f = form == null ? 0 : form;
+		// (0.17.47) a branch form or Ego reads as a higher form
+		int f = ZFighterBranchForms.tier(player, form == null ? 0 : form);
 		boolean charging = player.hasAttached(ZFighterPower.CHARGE);
 		Long hold = player.getAttached(ZFighterPower.AURA_HOLD);
 		boolean holding = hold != null && player.level().getGameTime() < hold;
