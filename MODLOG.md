@@ -3156,3 +3156,9 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   biome, stronger from the Gloam to the Ash to the Abyss (the old three layers). Compile-checked only; how rare the biomes come
   out, the platform's first build (about 40 chunks of Aether generated at once), the Nether villages' fit to the caves, and both
   death-time moves have not been seen in game. Abilities rows 468 to 478.
+- **0.17.63, demon biomes after TaCZ (crash fix):** 0.17.62 crashed on start, server and client ("Errors during registry
+  creation ... No value registered for key jaymospowers:demon_abyss", from `TaCZFabric.<clinit>`). TaCZ builds
+  `VanillaRegistries.createWorldLookup()` in its main entrypoint, and once `NetherBiomes.addNetherBiome` has run the Nether
+  preset asks for the demon biomes there, where only vanilla's exist. `ZFighterDemonRealm.addBiomes` now runs from the server
+  and client entrypoints (after every mod's main one) instead of `init`; the world's registries come later from the data
+  files, so the biomes still generate.

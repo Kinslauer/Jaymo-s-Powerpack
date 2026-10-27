@@ -145,7 +145,6 @@ public final class ZFighterDemonRealm {
 	}
 
 	static void init() {
-		addBiomes();
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterDemonRealm::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -159,8 +158,21 @@ public final class ZFighterDemonRealm {
 		});
 	}
 
-	/** Puts the three biomes into the Nether's biome source (the vanilla one, by Fabric's biome API: the data files for the biomes are in the jar). */
-	private static void addBiomes() {
+	private static boolean biomesAdded;
+
+	/**
+	 * Puts the three biomes into the Nether's biome source (the vanilla one, by Fabric's biome API: the data files for the
+	 * biomes are in the jar). (0.17.63) Called from the server and client entrypoints, which run after every mod's main
+	 * entrypoint, never from {@link #init}: once they're added, the Nether preset asks for them in every registry bootstrap,
+	 * and TaCZ builds {@code VanillaRegistries.createWorldLookup()} in its main entrypoint, where only vanilla's biomes
+	 * exist ("No value registered for key jaymospowers:demon_abyss", the server and client crashed on start). The world's
+	 * own registries are loaded later, from the data files, so the biomes still generate.
+	 */
+	public static void addBiomes() {
+		if (biomesAdded) {
+			return;
+		}
+		biomesAdded = true;
 		for (int layer = 0; layer < BIOMES.size(); layer++) {
 			NetherBiomes.addNetherBiome(BIOMES.get(layer), Climate.parameters(TEMPERATURE[layer], HUMIDITY[layer], 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
 		}
