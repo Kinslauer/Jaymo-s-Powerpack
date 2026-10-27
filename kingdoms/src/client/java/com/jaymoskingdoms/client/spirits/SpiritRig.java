@@ -269,7 +269,7 @@ final class SpiritRig {
 	}
 
 	/** An ease that runs past 1 and comes back (the snap of a blow). */
-	private static float backOut(float k) {
+	static float backOut(float k) {
 		k = Mth.clamp(k, 0.0F, 1.0F) - 1.0F;
 		return 1.0F + k * k * ((OVERSHOOT + 1.0F) * k + OVERSHOOT);
 	}

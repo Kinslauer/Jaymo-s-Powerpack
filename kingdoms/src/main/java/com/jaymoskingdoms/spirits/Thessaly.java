@@ -48,15 +48,15 @@ public final class Thessaly extends Spirit {
 	static final float DRAW_COST = 6.0F;
 	static final int DRAW_COOLDOWN = 40;
 	/** Rune trap: how far a glyph can be laid (blocks), its cost and cooldown. */
-	static final double TRAP_RANGE = 16.0;
+	static final double TRAP_RANGE = HandMoves.REACH;
 	static final float TRAP_COST = 10.0F;
 	static final int TRAP_COOLDOWN = 100;
 	/** Unseen hand: how far it reaches (blocks), its cost and cooldown. */
-	static final double UNSEEN_RANGE = 16.0;
+	static final double UNSEEN_RANGE = HandMoves.REACH;
 	static final float UNSEEN_COST = 12.0F;
 	static final int UNSEEN_COOLDOWN = 160;
 	/** Unlock: how far it reaches (blocks), its cost and cooldown, and how many times a lock's level her own level must be. */
-	static final double UNLOCK_RANGE = 16.0;
+	static final double UNLOCK_RANGE = HandMoves.REACH;
 	static final float UNLOCK_COST = 16.0F;
 	static final int UNLOCK_COOLDOWN = 200, UNLOCK_LEVELS_PER_LOCK = 2;
 	/** Juggle: mana for each item lifted, and the cooldown once the last is thrown. */
@@ -146,8 +146,9 @@ public final class Thessaly extends Spirit {
 		ThessalyHands.markSeen(level, player.getUUID(), chest);
 		// (her own remark over the act's usual line)
 		SpiritVoice.sayNow(player, Spirits.THESSALY, "loot");
-		Spirits.show(player, Poses.REACH);
 		Vec3 at = Vec3.atCenterOf(chest);
+		// her hand reaches out to it
+		Spirits.show(player, Poses.REACH, Math.min(player.getEyePosition().distanceTo(at), HandMoves.REACH));
 		SpiritFoes.line(level, ParticleTypes.END_ROD, player.getEyePosition().add(0.0, -0.4, 0.0), at, Math.min(30, Math.max(4, (int)(player.position().distanceTo(at) * 1.5))));
 		Mana.sendSeen(level, Mana.MOTE, at.x, at.y + 0.6, at.z, 24, 0.5, 0.5, 0.5, 0.04);
 		level.playSound(null, chest, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, 1.8F);
@@ -199,6 +200,7 @@ public final class Thessaly extends Spirit {
 			return false;
 		}
 		Vec3 mark = target.getBoundingBox().getCenter();
+		CastHints.setReach(player, player.getEyePosition().distanceTo(mark));
 		SpiritFoes.line(level, ParticleTypes.ENCHANT, player.getEyePosition().add(0.0, -0.4, 0.0), mark, Math.min(24, Math.max(3, (int)(player.distanceTo(target) * 1.5))));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.9F);
 		return true;
@@ -221,6 +223,7 @@ public final class Thessaly extends Spirit {
 		if (!ThessalyHands.plant(player, level, pos)) {
 			return false;
 		}
+		CastHints.setReach(player, player.getEyePosition().distanceTo(Vec3.atCenterOf(pos)));
 		Mana.sendSeen(level, Mana.MOTE, pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5, 14, 0.4, 0.1, 0.4, 0.02);
 		level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, 8, 0.4, 0.05, 0.4, 0.01);
 		level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 1.4F);
@@ -247,6 +250,7 @@ public final class Thessaly extends Spirit {
 				.withStyle(ChatFormatting.LIGHT_PURPLE));
 			return false;
 		}
+		CastHints.setReach(player, player.getEyePosition().distanceTo(Vec3.atCenterOf(pos)));
 		Mana.sendSeen(level, Mana.MOTE, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 16, 0.4, 0.4, 0.4, 0.03);
 		level.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 12, 0.4, 0.4, 0.4, 0.5);
 		return true;

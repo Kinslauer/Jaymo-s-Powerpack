@@ -12,8 +12,10 @@ public final class Poses {
 	/** The second patch's: Ambrose's, the shared armour and ride, Thessaly's, the Quiet One's, the clash. */
 	public static final int AEGIS = 23, BLESS = 24, CATCH_ME = 25, MEND = 26, ARMOUR = 27, RIDE = 28, PULL = 29, STEAL = 30,
 		TRAP = 31, UNLOCK = 32, JUGGLE = 33, ECHO = 34, MIRROR = 35, STILL = 36, SILENT = 37, SENSE = 38, CLASH = 39;
+	/** (0.7.256) The spirit speaking: the arm shows itself as it is, by its keeper, while it talks. */
+	public static final int SPEAK = 40;
 	/** How many poses there are (every id is below this, and below 64, which {@code show} packs it into). */
-	public static final int COUNT = 40;
+	public static final int COUNT = 41;
 
 	private Poses() {
 	}

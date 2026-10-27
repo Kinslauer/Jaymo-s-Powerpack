@@ -3071,3 +3071,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   page, and every mana spirit speaks its three summon lines (the Quiet One its one word) to its keeper alone, with the
   chat line as before. 14 clips (612 KB) made with VoxCPM2 (Apache-2.0; voices designed from a description, no real
   person cloned) by `tools/voices/make_voices.py`; Kingdoms' `Voices` maps a lang key to its sound. No Powers changes.
+- **0.17.47, spirit hands become what they do (Kingdoms 0.7.256):** a mana spirit is an arm only at rest and while it
+  speaks; the aegis is a shield of a hand in front of you, catch me cups hands beneath you, and the weapon forms and far
+  hand shoot out to what you aim at within 20 blocks. No Powers changes.
