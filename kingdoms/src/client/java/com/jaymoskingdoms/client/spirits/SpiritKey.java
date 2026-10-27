@@ -5,12 +5,16 @@ import com.jaymoskingdoms.spirits.Move;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.Spirits;
 import com.mojang.blaze3d.platform.InputConstants;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -28,9 +32,15 @@ import net.minecraft.client.player.LocalPlayer;
 public final class SpiritKey {
 	/** Sneak and hold the key this many ticks to send the spirit away. */
 	static final int DISMISS_TICKS = 15;
+	/**
+	 * Once per install, vanilla's Advancements comes off L while the spirit key is on it (Advancements stays on the pause
+	 * menu): with both on L the advancements screen opens on the press and the spirit never hears the release. Powers'
+	 * KeyConflicts did this, but only on installs that hadn't already run its v4 pass, and not in a Kingdoms-only game.
+	 */
+	private static final String KEY_MARKER = "jaymoskingdoms-spirit-key-v1";
 
 	private static KeyMapping key;
-	private static boolean was, sneakPress, sent;
+	private static boolean was, sneakPress, sent, keysChecked;
 	private static int held;
 	/** Game time each move's cooldown (as the HUD believes it) ends, by move id. */
 	private static final Map<String, Long> READY = new HashMap<>();
@@ -61,6 +71,10 @@ public final class SpiritKey {
 	}
 
 	private static void tick(Minecraft minecraft) {
+		if (!keysChecked && minecraft.options != null) {
+			keysChecked = true;
+			advancementsOffL(minecraft);
+		}
 		LocalPlayer player = minecraft.player;
 		while (key.consumeClick()) {
 			// the press is read from isDown below; drain the clicks so they don't pile up
@@ -96,6 +110,26 @@ public final class SpiritKey {
 			}
 		}
 		was = down;
+	}
+
+	private static void advancementsOffL(Minecraft minecraft) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(KEY_MARKER);
+		if (Files.exists(marker)) {
+			return;
+		}
+		KeyMapping advancements = minecraft.options.keyAdvancements;
+		boolean moved = advancements.saveString().equals(key.saveString());
+		if (moved) {
+			advancements.setKey(InputConstants.UNKNOWN);
+			KeyMapping.resetMapping();
+			minecraft.options.save();
+		}
+		try {
+			Files.writeString(marker, "Jaymo's Kingdoms " + (moved ? "unbound Advancements (it shared the spirit key)" : "found no clash on the spirit key")
+				+ ". Delete this file to check again.\n");
+		} catch (IOException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't write {}", marker, e);
+		}
 	}
 
 	private static void cast(LocalPlayer player, int ticks) {
