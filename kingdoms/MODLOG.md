@@ -5561,3 +5561,24 @@ picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`,
   the tool's own tier rule, `Monoliths.highTinkers`). Anything else is told so and the block stands; creative is
   unaffected. Explosions and pistons aren't stopped. Monoliths raised before keep their old look; their core still goes
   dark when their Giant falls. Not seen in game.
+
+## 0.7.264: parties (Andy's NOEA picks)
+
+- Andy's NOEA picks: a party system. Ideas only; the code and names are our own.
+- **`/party`** (`Parties`): `invite <player>` (a clickable Accept and Decline; lapses after 60 s), `accept`, `decline`, `leave`,
+  `kick <name>`, `list` and `pvp on|off`. Up to 6 (`MAX_SIZE`). Whoever invited first leads; only the leader invites,
+  kicks and sets PvP; leadership goes to the next member when the leader leaves, and a party of one is disbanded. Kept
+  as a persistent attachment on the Overworld (the pattern `Crowns` uses), so it survives relogs and restarts.
+  Different from handshake `Groups`, which stay as they are.
+- **No friendly fire**: `ALLOW_DAMAGE` cancels a blow between two members while the party's PvP is off (the default).
+  The attacker is the damage source's entity, or, for an `OwnableEntity`, its owner, so arrows, tamed beasts and Powers'
+  powers (all damage with a player behind it) are covered.
+- **Shared slay quests** (`Quests.shareSlain`): when a player's kill is counted for a slay quest, each other member
+  within 64 blocks in the same dimension with a slay quest of the same target is credited too. Other kinds and bounties
+  (head-based) are not shared.
+- **Stats at any distance**: once a second `Parties.Sync` sends each member the party's health, max health, hunger,
+  dimension and block position (names are character names, a hood's or disguise's, via `CharacterNames`);
+  `client/PartyClient` draws the others under the kin-sense compass at the top left (hidden with F3).
+- **API for Jaymo's Powers (by reflection)**: `Parties.members(ServerPlayer)` (online members, the player first) and
+  `Parties.allied(ServerPlayer, ServerPlayer)`.
+- Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.

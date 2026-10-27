@@ -848,6 +848,25 @@ public final class Quests {
 					sync(killer, true);
 				}
 			}
+			shareSlain(level, killer, entity);
+		}
+	}
+
+	/**
+	 * (0.7.264, Andy's NOEA picks) A party shares its kills: each other member of {@code killer}'s party within
+	 * {@link Parties#SHARE_RANGE} blocks with the same slay quest (same target, not yet done) is credited the kill too.
+	 * Slay quests only: the other kinds are about one person's own errand.
+	 */
+	private static void shareSlain(ServerLevel level, ServerPlayer killer, LivingEntity entity) {
+		for (ServerPlayer p : Parties.near(killer, Parties.SHARE_RANGE)) {
+			for (Quest q : log(p)) {
+				if (q.kind() == Quest.SLAY && !q.counted() && matches(q.objective().target(), entity)) {
+					Quest next = q.withProgress(q.objective().progress() + 1);
+					put(p, next);
+					p.sendOverlayMessage(objective(level, p, next).copy().withStyle(next.counted() ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
+					sync(p, true);
+				}
+			}
 		}
 	}
 
