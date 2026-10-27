@@ -3067,3 +3067,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   swaps in its own animated body and never draws it, so the copy was the plain body's pose from before MCA's look loaded
   and stayed that way all session. TnmFollow now keeps its own copy of whichever model the renderer posed this frame,
   taken as it turns to the layers (`PoseTakeoverLivingEntityRendererMixin`), and no longer calls into Touch'n Motion.
+- **0.17.41, a voice test (Kingdoms 0.7.251):** the narrator reads "Where were you born?" on the life story's first
+  page, and every mana spirit speaks its three summon lines (the Quiet One its one word) to its keeper alone, with the
+  chat line as before. 14 clips (612 KB) made with VoxCPM2 (Apache-2.0; voices designed from a description, no real
+  person cloned) by `tools/voices/make_voices.py`; Kingdoms' `Voices` maps a lang key to its sound. No Powers changes.
