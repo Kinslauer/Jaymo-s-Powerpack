@@ -139,6 +139,11 @@ public final class ZFighterSites {
 			if (level.isClientSide() || !entity.entityTags().contains(KEEPER_TAG)) {
 				return InteractionResult.PASS;
 			}
+			// (0.17.61) sneak and right-click holding anything: talk about the story and jobs, not the blessing
+			if (hand == net.minecraft.world.InteractionHand.MAIN_HAND && player.isShiftKeyDown() && !player.getMainHandItem().isEmpty()) {
+				ZFighterSagas.speak((ServerPlayer)player, entity, true);
+				return InteractionResult.SUCCESS;
+			}
 			bless((ServerPlayer)player);
 			return InteractionResult.SUCCESS;
 		});

@@ -37,6 +37,12 @@ final class ZFighterKingdoms {
 	private static Method STAT_VALUE;
 	/** (0.17.60) Kingdoms' Reputation.change(ServerPlayer, Faction, int): shifts a player's reputation with a settlement. */
 	private static Method CHANGE_REPUTATION;
+	/** (0.17.61) Kingdoms' Parties.members(ServerPlayer): a player's party, himself included. */
+	private static Method PARTY_MEMBERS;
+	/** (0.17.61) Kingdoms' Quests.open(ServerPlayer, LivingEntity): a villager's town errands. */
+	private static Method OPEN_ERRANDS;
+	/** (0.17.61) Kingdoms' Monoliths.nearestFoot(ServerLevel, BlockPos): the nearest known monolith, or null. */
+	private static Method NEAREST_MONOLITH;
 	private static Object[] STATS;
 	private static int STAT_MAX;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
@@ -81,6 +87,21 @@ final class ZFighterKingdoms {
 				CHANGE_REPUTATION = null;
 			}
 			try {
+				PARTY_MEMBERS = Class.forName("com.jaymoskingdoms.Parties").getMethod("members", ServerPlayer.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				PARTY_MEMBERS = null;
+			}
+			try {
+				OPEN_ERRANDS = Class.forName("com.jaymoskingdoms.Quests").getMethod("open", ServerPlayer.class, net.minecraft.world.entity.LivingEntity.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				OPEN_ERRANDS = null;
+			}
+			try {
+				NEAREST_MONOLITH = Class.forName("com.jaymoskingdoms.remnants.Monoliths").getMethod("nearestFoot", ServerLevel.class, BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				NEAREST_MONOLITH = null;
+			}
+			try {
 				TIER_OF = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("of", net.minecraft.world.entity.player.Player.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				TIER_OF = null;
@@ -90,6 +111,55 @@ final class ZFighterKingdoms {
 			} catch (ReflectiveOperationException | LinkageError e) {
 				TRAINED = null;
 			}
+		}
+	}
+
+	/**
+	 * (0.17.61, Andy's NOEA picks) {@code player}'s party, himself included (Kingdoms' {@code Parties.members}); just him
+	 * without Kingdoms, without parties, or if the call fails.
+	 */
+	static List<ServerPlayer> partyMembers(ServerPlayer player) {
+		if (PARTY_MEMBERS != null) {
+			try {
+				List<ServerPlayer> members = new ArrayList<>();
+				for (Object member : (List<?>)PARTY_MEMBERS.invoke(null, player)) {
+					if (member instanceof ServerPlayer other && !members.contains(other)) {
+						members.add(other);
+					}
+				}
+				if (!members.contains(player)) {
+					members.add(0, player);
+				}
+				return members;
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				PARTY_MEMBERS = null;
+			}
+		}
+		return List.of(player);
+	}
+
+	/** (0.17.61) Opens {@code giver}'s town errands on {@code player}'s screen (Kingdoms' own work screen); false if it can't be. */
+	static boolean openErrands(ServerPlayer player, net.minecraft.world.entity.LivingEntity giver) {
+		if (OPEN_ERRANDS == null) {
+			return false;
+		}
+		try {
+			OPEN_ERRANDS.invoke(null, player, giver);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** (0.17.61) The foot of the nearest monolith Kingdoms knows of, or null (none known, or no Kingdoms). */
+	static @Nullable BlockPos nearestMonolith(ServerLevel level, BlockPos from) {
+		if (NEAREST_MONOLITH == null) {
+			return null;
+		}
+		try {
+			return (BlockPos)NEAREST_MONOLITH.invoke(null, level, from);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
 		}
 	}
 

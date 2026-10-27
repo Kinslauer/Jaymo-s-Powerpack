@@ -145,6 +145,10 @@ public final class ZFighterRaids {
 
 	/** He's beaten: everyone who hurt him shares the prize, by how much they hurt him. */
 	static void defeated(ServerLevel level, ZFighterRogue tyrant) {
+		// (0.17.61) a saga's boss pays through the saga
+		if (tyrant.entityTags().contains(ZFighterSagas.BOSS_TAG)) {
+			return;
+		}
 		// (0.17.60) the head of an invasion: the invasion pays out
 		if (ZFighterInvasions.tyrantFell(level, tyrant)) {
 			return;
