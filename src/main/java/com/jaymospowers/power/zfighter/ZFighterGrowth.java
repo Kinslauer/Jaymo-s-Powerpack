@@ -250,7 +250,7 @@ public final class ZFighterGrowth {
 			points *= HUNGRY_SHARE;
 		}
 		points *= ZFighterItems.weightRate(player) * ZFighterLineage.trainingFactor(player)
-			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F);
+			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F) * ZFighterSpace.trainingRate(player);
 		Data data = of(player);
 		long day = day(player);
 		float given = points * data.factor(method, day);

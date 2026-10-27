@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:ore",
+  "discard_chance_on_air_exposure": 0.4,
+  "size": 5,
+  "targets": [
+    {
+      "state": "minecraft:diamond_ore",
+      "target": {
+        "block": "minecraft:netherrack",
+        "predicate_type": "minecraft:block_match"
+      }
+    }
+  ]
+}
