@@ -87,13 +87,19 @@ public final class ZFighterTraining {
 	public static final int KI_WAVE = 5;
 	public static final int KI_BOMB = 6;
 	public static final int SPIRIT_BOMB = 7;
-	public static final int TECHNIQUES = 8;
+	/** (0.17.42) The rush attacks and the ki weapon, all on G ({@link ZFighterRush}, {@link ZFighterKiWeapon}). */
+	public static final int DRAGON_RUSH = 8;
+	public static final int PACK_FANG = 9;
+	public static final int HAMMERLOCK = 10;
+	public static final int SKYWARD_CHASE = 11;
+	public static final int KI_WEAPON = 12;
+	public static final int TECHNIQUES = 13;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
-		"spirit_bomb"};
+		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
-	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000};
+	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
@@ -215,7 +221,7 @@ public final class ZFighterTraining {
 		/** Learned and put on its key at once (G or V; the Spirit Bomb has C to itself). */
 		Data withLearned(int index) {
 			Data learned = withTechnique(index);
-			return index >= SPIRIT_BOMB ? learned : ZFighterTraining.charged(index) ? learned.withCharged(index) : learned.withQuick(index);
+			return index == SPIRIT_BOMB ? learned : ZFighterTraining.charged(index) ? learned.withCharged(index) : learned.withQuick(index);
 		}
 	}
 
@@ -478,7 +484,7 @@ public final class ZFighterTraining {
 	 */
 	static void learn(ServerPlayer player, Data data, int index) {
 		player.setAttached(DATA, data.withLearned(index));
-		if (index < SPIRIT_BOMB) {
+		if (index != SPIRIT_BOMB) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_on_key",
 				Component.translatable(ZFighterLineage.techniqueKey(player, index)),
 				Component.keybind(charged(index) ? "key.jaymospowers.ability_3" : "key.jaymospowers.ability_2")).withStyle(ChatFormatting.GRAY));
@@ -488,7 +494,7 @@ public final class ZFighterTraining {
 	/** Puts a learned technique on its key: G for the quick ones, V for the charged ones. */
 	static void equipTechnique(ServerPlayer player, int index) {
 		Data data = of(player);
-		if (index < 0 || index >= SPIRIT_BOMB || !data.knows(index)) {
+		if (index < 0 || index >= TECHNIQUES || index == SPIRIT_BOMB || !data.knows(index)) {
 			return;
 		}
 		player.setAttached(DATA, charged(index) ? data.withCharged(index) : data.withQuick(index));

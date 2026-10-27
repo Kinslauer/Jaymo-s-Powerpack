@@ -412,6 +412,8 @@ public final class ZFighterPower implements Power {
 		ZFighterBattle.init();
 		ZFighterCombo.init();
 		ZFighterImpact.init();
+		// (0.17.42) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
+		ZFighterCombat.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -779,6 +781,9 @@ public final class ZFighterPower implements Power {
 
 	/** G: whichever quick technique is on it. */
 	private static void quick(ServerPlayer player, Live live) {
+		if (ZFighterCombat.quick(player, live)) {
+			return;
+		}
 		switch (ZFighterTraining.of(player).quick()) {
 			case ZFighterTraining.KI_DISC -> {
 				// the arm goes up and the disc forms; it's thrown after the wind-up (ZFighterDisc)

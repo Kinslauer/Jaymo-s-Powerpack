@@ -130,6 +130,7 @@ public final class ZFighterGuard {
 			ZFighterKi.push(attacker, attacker.position().subtract(player.position()), PARRY_KNOCKBACK, 0.25);
 			attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 3, false, false), player);
 			attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false), player);
+			ZFighterPoise.wear(attacker, ZFighterPoise.PARRY_WEAR);
 		}
 	}
 

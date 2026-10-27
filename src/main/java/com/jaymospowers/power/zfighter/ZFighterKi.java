@@ -332,7 +332,7 @@ public final class ZFighterKi {
 			return false;
 		}
 		ServerLevel level = player.level();
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = ZFighterLock.aim(player);
 		// from the right palm, a little ahead
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
@@ -403,7 +403,7 @@ public final class ZFighterKi {
 			return;
 		}
 		long held = now - live.barrageFrom;
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = ZFighterLock.aim(player);
 		int color = formColor(live);
 		DustParticleOptions dust = new DustParticleOptions(color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color, 1.0F);
 		if (held < BARRAGE_WINDUP) {
@@ -954,7 +954,7 @@ public final class ZFighterKi {
 			return false;
 		}
 		ServerLevel level = player.level();
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = ZFighterLock.aim(player);
 		RandomSource random = level.getRandom();
 		float damage = VOLLEY_DAMAGE * ZFighterPower.kiPower(player, live);
 		for (int i = 0; i < VOLLEY_BOLTS; i++) {
@@ -1072,7 +1072,7 @@ public final class ZFighterKi {
 
 	private static void fireBomb(ServerPlayer player, ZFighterPower.Live live, float charge) {
 		ServerLevel level = player.level();
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = ZFighterLock.aim(player);
 		double size = Mth.lerp(charge, BOMB_SIZE_MIN, BOMB_SIZE_MAX);
 		Vec3 from = player.getEyePosition().add(look.scale(1.0 + size)).add(0.0, -0.2, 0.0);
 		Bolt bolt = new Bolt(level, player.getUUID(), from, look.scale(BOMB_SPEED),
@@ -1100,7 +1100,7 @@ public final class ZFighterKi {
 
 	private static void fireWave(ServerPlayer player, ZFighterPower.Live live, float charge) {
 		ServerLevel level = player.level();
-		Vec3 look = player.getViewVector(1.0F);
+		Vec3 look = ZFighterLock.aim(player);
 		Signature sig = signature(live);
 		Vec3 from = waveHands(player, look);
 		double radius = Mth.lerp(charge, WAVE_RADIUS_MIN, WAVE_RADIUS_MAX) * sig.width();
@@ -1208,7 +1208,10 @@ public final class ZFighterKi {
 		Vec3 reach = eye.add(look.scale(STEP_TARGET_RANGE));
 		EntityHitResult aimed = ProjectileUtil.getEntityHitResult(player, eye, reach, player.getBoundingBox().expandTowards(look.scale(STEP_TARGET_RANGE))
 			.inflate(1.0), e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != player, STEP_TARGET_RANGE * STEP_TARGET_RANGE);
-		if (aimed != null && aimed.getEntity() instanceof LivingEntity target && player.hasLineOfSight(target)) {
+		// (0.17.42) locked on: he steps behind the one he locked
+		LivingEntity locked = ZFighterLock.target(player);
+		if (locked != null || aimed != null && aimed.getEntity() instanceof LivingEntity && player.hasLineOfSight(aimed.getEntity())) {
+			LivingEntity target = locked != null ? locked : (LivingEntity)aimed.getEntity();
 			// behind it, at its back
 			float facing = target.getYRot() * Mth.DEG_TO_RAD;
 			Vec3 forward = new Vec3(-Mth.sin(facing), 0.0, Mth.cos(facing));
