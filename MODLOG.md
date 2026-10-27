@@ -3261,3 +3261,7 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   and the world tier's rows (which used to drop the ones that didn't fit). The skill tree's tiles are 6 px wider so
   every perk name but Lockpicking Prowess fits outright ("Leap of Faith" was cut). Compile-checked here, not
   playtested.
+- **0.17.77, stuck ships come off the beach (Kingdoms 0.7.274):** a stuck crewed ship's captain now really backs
+  her off (warped astern with her sails struck, bow brought round to open water), a whaler hove to at her moorings no
+  longer backs herself onto the beach while fitting out, and a hull already in the ground can move off it. Not seen
+  in game.

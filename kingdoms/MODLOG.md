@@ -5649,3 +5649,17 @@ with a letterboxed animation". The Aether Giants' grab, in `remnants/AetherGiant
   Powers): the catch, a player, sees the Giant's face push in on them for the snatch, hold and slam (56 ticks); everyone within
   `FILM_RANGE` 48 blocks gets the bars.
 - Lang line `message.jaymoskingdoms.giant.grabbed`. Compile-checked only.
+## 0.7.274: crewed ships come off the beach (pack 0.17.77)
+Andy (clip): a whaler barely moved from where she started, well after fitting out; she lay with her bow up a beach by
+her harbour.
+- **Backing off never backed her.** Lying stuck, her captain backed for 4 looks (40 ticks), but she only goes astern
+  once her sails are in, and taking in full sail takes 50 ticks, so she never went astern at all and sailed straight
+  back into the same shore. Now `Ship.kedge` warps her off: sails struck, hauled astern at `KEDGE` 0.09 (gathered at
+  `KEDGE_GATHER` 0.08) for `BACK_LOOKS` 10 looks, her bow brought round toward the open water `Fleet.offing` picked.
+- **Hove to isn't stuck.** A whaler fitting out holds her heading with no sail; with her shore close aboard, no heading
+  was clear, so she counted as stuck and backed off, again and again, a little further each time, till she was on the
+  beach. Only a ship that means to make way (sail above 0) counts as stuck now.
+- **Wedged ships come off.** A ship with some of her hull already in the ground (run up a beach, or land built up round
+  her) could make no move at all, since every move still struck. Now any move that drives her no further in is allowed
+  (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
+- Compile-checked only, not seen in game.

@@ -81,6 +81,11 @@ public final class Ship extends Entity {
 	static final double GATHER = 0.015, SAIL_RATE = 0.02;
 	/** Its best turn (degrees/tick), for a ship this long or shorter; longer ones turn slower. */
 	static final float TURN = 2.5F, NIMBLE_LENGTH = 12.0F;
+	/**
+	 * (0.7.260) Warped off (a crew's captain, lying stuck: her boats out with a kedge, hauling her astern): how fast she
+	 * goes, and how quickly she gathers that way.
+	 */
+	static final double KEDGE = 0.09, KEDGE_GATHER = 0.08;
 	/** How far (blocks) it may be nudged to find room to drop anchor. */
 	static final int NUDGE = 2;
 	/** Slower than this (blocks/tick) it lies still enough to drop anchor. */
@@ -171,6 +176,8 @@ public final class Ship extends Entity {
 	private final List<int[]> volley = new ArrayList<>();
 	private float turn;
 	private int adrift;
+	/** (0.7.260) Server: ticks still to warp her off astern ({@link #kedge}). */
+	private int kedging;
 	/**
 	 * (0.7.28) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
 	 * the world from an entity, so each one aboard leaves an invisible light block in the world cell it's passing
@@ -529,7 +536,17 @@ public final class Ship extends Entity {
 			wanted = Mth.clamp(wanted + blown, -FASTEST, FASTEST);
 		}
 		this.fireVolley(level, h);
-		this.speed += (wanted - this.speed) * GATHER;
+		double gather = GATHER;
+		if (this.kedging > 0) {
+			this.kedging--;
+			if (pilot == null) {
+				// her sails struck and her crew hauling her off astern on a kedge
+				this.sail = 0.0;
+				wanted = -KEDGE;
+				gather = KEDGE_GATHER;
+			}
+		}
+		this.speed += (wanted - this.speed) * gather;
 		if (Math.abs(this.speed) < 1.0E-4) {
 			this.speed = 0.0;
 		}
@@ -542,15 +559,21 @@ public final class Ship extends Entity {
 		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
 		Vec3 to = new Vec3(from.x + ahead.x + this.towed.x, y, from.z + ahead.z + this.towed.z);
 		this.towed = Vec3.ZERO;
-		if (this.strikes(level, h, to, yaw)) {
+		if (this.strikes(level, h, to, yaw, 0)) {
+			// (0.7.260) lying with some of her in the ground already, any move that drives her no further in is allowed:
+			// before, a ship run up a beach (or wedged where the shore was built up round her) could never come off it
+			int wedged = this.hits(level, h, from, yawFrom);
 			// try it without the turn, then without the way, then hold still
-			if (this.speed > 0.15) {
+			boolean struck = this.strikes(level, h, to, yaw, wedged);
+			if (struck && this.speed > 0.15) {
 				level.playSound(null, this.getX(), this.getY() + 1.0, this.getZ(), SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.BLOCKS, 1.0F, 0.6F);
 			}
-			if (!this.strikes(level, h, to, yawFrom)) {
+			if (!struck) {
+				// (she's coming off)
+			} else if (!this.strikes(level, h, to, yawFrom, wedged)) {
 				yaw = yawFrom;
 				this.turn = 0.0F;
-			} else if (!this.strikes(level, h, new Vec3(from.x, y, from.z), yaw)) {
+			} else if (!this.strikes(level, h, new Vec3(from.x, y, from.z), yaw, wedged)) {
 				to = new Vec3(from.x, y, from.z);
 				this.speed = 0.0;
 			} else {
@@ -668,22 +691,38 @@ public final class Ship extends Entity {
 		return Double.NEGATIVE_INFINITY;
 	}
 
-	/** Whether, at {@code at} turned {@code yaw}, any of its outside runs into something solid (or unloaded). */
-	private boolean strikes(ServerLevel level, Hull h, Vec3 at, float yaw) {
+	/**
+	 * Whether, at {@code at} turned {@code yaw}, more than {@code wedged} of its outside runs into something solid (or
+	 * unloaded).
+	 */
+	private boolean strikes(ServerLevel level, Hull h, Vec3 at, float yaw, int wedged) {
+		// (partly in unloaded ground she holds still, as ever)
+		return wedged == Integer.MAX_VALUE || this.hits(level, h, at, yaw, wedged + 1) > wedged;
+	}
+
+	/** (0.7.260) How much of its outside, at {@code at} turned {@code yaw}, is in something solid (or unloaded). */
+	private int hits(ServerLevel level, Hull h, Vec3 at, float yaw) {
+		return this.hits(level, h, at, yaw, Integer.MAX_VALUE);
+	}
+
+	/** {@link #hits}, counting no further than {@code most}. */
+	private int hits(ServerLevel level, Hull h, Vec3 at, float yaw, int most) {
+		int n = 0;
 		BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
 		for (int i : h.skin) {
 			Piece p = h.pieces.get(i);
 			Vec3 w = toWorld(p.x(), p.y() + (h.lo[i] + Math.min(1.0F, h.hi[i])) * 0.5, p.z(), at, yaw);
 			q.set(Mth.floor(w.x), Mth.floor(w.y), Mth.floor(w.z));
 			if (!level.hasChunkAt(q)) {
-				return true;
+				// (never into the unloaded)
+				return Integer.MAX_VALUE;
 			}
 			BlockState there = level.getBlockState(q);
-			if (!there.isAir() && !there.getCollisionShape(level, q).isEmpty()) {
-				return true;
+			if (!there.isAir() && !there.getCollisionShape(level, q).isEmpty() && ++n >= most) {
+				return n;
 			}
 		}
-		return false;
+		return n;
 	}
 
 	/** Everything (but players, whose own games move them) standing on it or in it goes along with it. */
@@ -1156,6 +1195,19 @@ public final class Ship extends Entity {
 		return this.drift;
 	}
 
+	/**
+	 * (0.7.260) Her captain, lying stuck, has her warped off: her sails struck and her crew hauling her astern for
+	 * {@code ticks} (as fast as {@link #KEDGE}), whatever her helm says.
+	 */
+	public void kedge(int ticks) {
+		this.kedging = Math.max(this.kedging, ticks);
+	}
+
+	/** Whether she's being warped off ({@link #kedge}). */
+	public boolean kedging() {
+		return this.kedging > 0;
+	}
+
 	/** Her way (blocks a tick; astern below 0), and how far her sails are set (0 to 1). */
 	public double way() {
 		return this.speed;
@@ -1377,7 +1429,7 @@ public final class Ship extends Entity {
 		float yaw = this.getYRot();
 		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
 		Vec3 to = from.add(ahead.x, -SINK, ahead.z);
-		if (this.sinking > SINKING_MOST || this.strikes(level, h, to, yaw)) {
+		if (this.sinking > SINKING_MOST || this.strikes(level, h, to, yaw, 0)) {
 			this.wreck(level, h);
 			return;
 		}

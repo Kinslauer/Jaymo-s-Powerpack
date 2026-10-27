@@ -68,7 +68,7 @@ final class Corsairs implements Ship.Captaincy {
 	static final double SHOT_SPEED = 1.6, SHOT_FALL = 0.015;
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
 	/** How often (ticks) her captain looks about; how many looks she may lie stuck before she backs off; how long she backs. */
-	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 4;
+	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 10;
 	/**
 	 * (0.7.243) Embayed, she makes for open water this far off (blocks; farther each try, up to the most), for at most
 	 * this long (ticks), and her tries start over once she's this far from where she last lay stuck. How far ahead on her
@@ -290,16 +290,21 @@ final class Corsairs implements Ship.Captaincy {
 		// open water ahead, or the nearest heading that has it; embayed, she backs off a while and tries another way
 		Float clear = Fleet.heading(level, ship, want);
 		if (crew.backing > 0) {
+			// (0.7.260) warped off astern (Ship.kedge), her bow brought round toward open water as she comes off. Before,
+			// she only took in sail for a few seconds (never long enough to have it in and go astern), so a whaler run up
+			// on a beach, or one that crept onto it while fitting out, lay there for good
 			crew.backing--;
 			crew.astern = true;
-			crew.wantYaw = ship.getYRot() + 40.0F;
+			crew.wantYaw = crew.detour != null ? Fleet.bearing(ship, crew.detour.getX() + 0.5, crew.detour.getZ() + 0.5) : ship.getYRot() + 40.0F;
 			crew.wantSail = 0.0;
 			crew.row = false;
 			return;
 		}
 		crew.astern = false;
 		boolean moving = Math.abs(ship.way()) > 0.03;
-		if (clear == null || !moving && sail > 0.1 && ship.sailsSet() > 0.3) {
+		// (0.7.260) only a ship that means to make way can be stuck: one hove to (a whaler fitting out at her moorings, her
+		// shore close aboard) used to back off over and over, a little further each time, till she was on the beach
+		if (sail > 0.0 && (clear == null || !moving && sail > 0.1 && ship.sailsSet() > 0.3)) {
 			crew.stuck++;
 		} else {
 			crew.stuck = Math.max(0, crew.stuck - 1);
@@ -307,6 +312,7 @@ final class Corsairs implements Ship.Captaincy {
 		if (crew.stuck > STUCK_LOOKS) {
 			crew.stuck = 0;
 			crew.backing = BACK_LOOKS;
+			ship.kedge(BACK_LOOKS * THINK);
 			crew.waypoint = null;
 			if (crew.stuckAt == null || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.stuckAt)) > DETOUR_FORGIVE) {
 				crew.detours = 0;
