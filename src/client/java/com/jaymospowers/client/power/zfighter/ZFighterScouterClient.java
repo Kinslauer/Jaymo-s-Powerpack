@@ -26,7 +26,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) The Scouter's readout: while a scouter is on your head, the living thing you look at (up
+ * (0.17.45, Andy's NOEA picks) The Scouter's readout: while a scouter is on your head, the living thing you look at (up
  * to {@link #RANGE} blocks, nothing solid between) is reported to the server, which works out its power level and sends
  * it back. A small panel by the crosshair shows the name and the number. A number past the scouter's cap flickers as
  * {@code 9000+}; one the server says overloaded it makes the panel glitch (scrambled digits, jitter, red) for

@@ -24,7 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.42, Andy's NOEA picks) The ki weapon ({@link ZFighterKiWeapon}) in his ki colour: a blade, a scythe or a clawed
+ * (0.17.45, Andy's NOEA picks) The ki weapon ({@link ZFighterKiWeapon}) in his ki colour: a blade, a scythe or a clawed
  * lance standing out of the right fist, along the forearm so it follows every punch and pose. Plain boxes drawn added
  * onto what is behind them (the ki glow's energy texture), a gentle flicker, nothing else.
  */

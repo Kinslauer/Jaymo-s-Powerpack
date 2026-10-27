@@ -412,9 +412,9 @@ public final class ZFighterPower implements Power {
 		ZFighterBattle.init();
 		ZFighterCombo.init();
 		ZFighterImpact.init();
-		// (0.17.42) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
+		// (0.17.45) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
 		ZFighterCombat.init();
-		// (0.17.42) ki sense, scouter, instant teleport, lend ki, air burst, impact frames
+		// (0.17.45) ki sense, scouter, instant teleport, lend ki, air burst, impact frames
 		ZFighterSenses.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
@@ -770,7 +770,7 @@ public final class ZFighterPower implements Power {
 				refresh(player, live);
 			}
 			case ABILITY_4 -> {
-				// (0.17.42) Instant Teleport, when it is on B in place of Flash Step
+				// (0.17.45) Instant Teleport, when it is on B in place of Flash Step
 				if (ZFighterTeleport.key(player, live, down)) {
 					sync(player, live, maxKi(player));
 					return;

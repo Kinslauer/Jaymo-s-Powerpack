@@ -87,13 +87,13 @@ public final class ZFighterTraining {
 	public static final int KI_WAVE = 5;
 	public static final int KI_BOMB = 6;
 	public static final int SPIRIT_BOMB = 7;
-	/** (0.17.42) The rush attacks and the ki weapon, all on G ({@link ZFighterRush}, {@link ZFighterKiWeapon}). */
+	/** (0.17.45) The rush attacks and the ki weapon, all on G ({@link ZFighterRush}, {@link ZFighterKiWeapon}). */
 	public static final int DRAGON_RUSH = 8;
 	public static final int PACK_FANG = 9;
 	public static final int HAMMERLOCK = 10;
 	public static final int SKYWARD_CHASE = 11;
 	public static final int KI_WEAPON = 12;
-	/** (0.17.42) Instant Teleport: a late technique on B in place of Flash Step ({@link ZFighterTeleport}). */
+	/** (0.17.45) Instant Teleport: a late technique on B in place of Flash Step ({@link ZFighterTeleport}). */
 	public static final int TELEPORT = 13;
 	public static final int TECHNIQUES = 14;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",

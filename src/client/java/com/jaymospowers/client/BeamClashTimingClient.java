@@ -19,7 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 
 /**
- * (0.17.42, Andy's NOEA picks) The beam clash timing game on screen ({@link BeamClashTiming}): in a clash a marker sweeps a
+ * (0.17.45, Andy's NOEA picks) The beam clash timing game on screen ({@link BeamClashTiming}): in a clash a marker sweeps a
  * bar near the bottom of the screen, with a gold Perfect zone inside a blue Good zone that moves every pass. Right click
  * as the marker crosses it. The click is taken at the start of the tick (so it does nothing else), and the age sent is
  * the one the bar last drew, so what you saw is what is judged. One try a pass; the server answers with the grade, which

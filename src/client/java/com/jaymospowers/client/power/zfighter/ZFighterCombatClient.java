@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.17.42, Andy's NOEA picks) The client side of the combat feel that isn't a drawing of its own: it wires lock-on
+ * (0.17.45, Andy's NOEA picks) The client side of the combat feel that isn't a drawing of its own: it wires lock-on
  * ({@link ZFighterLockClient}), takes the left click for the throw while he holds something
  * ({@link ZFighterGrab}), and gives the new G techniques their icons.
  */

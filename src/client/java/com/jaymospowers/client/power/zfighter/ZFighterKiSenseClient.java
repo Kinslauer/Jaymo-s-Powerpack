@@ -18,7 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.17.42, Andy's NOEA picks) Ki sense on the sensing player's screen: its key (registered unbound, Andy picks one in
+ * (0.17.45, Andy's NOEA picks) Ki sense on the sensing player's screen: its key (registered unbound, Andy picks one in
  * Controls) sends the toggle, and the server's reports ({@link ZFighterSensesNet.Sense}, four a second) say who is in
  * range and how strong they are beside you. Those get the same through-the-wall outline Smoke Sight uses (two small
  * mixins ask {@link #color}): dim when weaker, pale when even, bright red when stronger.

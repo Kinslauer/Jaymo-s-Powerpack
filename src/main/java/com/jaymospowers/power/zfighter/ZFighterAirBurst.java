@@ -13,7 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) The air burst: double-tap forward while flying and a burst of ki throws him a few blocks
+ * (0.17.45, Andy's NOEA picks) The air burst: double-tap forward while flying and a burst of ki throws him a few blocks
  * ahead. The client moves him ({@code ZFighterAirBurstClient}); this is the server's half: it takes the ki
  * ({@link #KI}), holds the {@link #COOLDOWN}, and gives the burst its flash and boom for everyone near. The barrel roll
  * (double-tap left or right) is the shared {@code FlightRoll}, which already covers a Z Fighter's flight.

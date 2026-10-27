@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.42, Andy's NOEA picks) Lock-on, the server half. The client picks the living thing nearest the crosshair and
+ * (0.17.45, Andy's NOEA picks) Lock-on, the server half. The client picks the living thing nearest the crosshair and
  * sends its id ({@link LockOn}); the server checks it (alive, in sight, within {@link #RANGE}) and keeps it. While it
  * holds, the hold combo, Flash Step and the ki blasts aim at it ({@link #target}, {@link #aim}). It lets go on its own
  * past {@link #RANGE}, or after {@link #BLIND_TICKS} out of sight.

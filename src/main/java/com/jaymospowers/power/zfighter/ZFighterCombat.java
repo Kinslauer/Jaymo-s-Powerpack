@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.42, Andy's NOEA picks) The combat feel of round two, wired in one place: lock-on ({@link ZFighterLock}), poise and
+ * (0.17.45, Andy's NOEA picks) The combat feel of round two, wired in one place: lock-on ({@link ZFighterLock}), poise and
  * K.O. ({@link ZFighterPoise}), the rush attacks ({@link ZFighterRush}), grab and throw ({@link ZFighterGrab}), the
  * meditation dodge ({@link ZFighterSidestep}) and the ki weapons ({@link ZFighterKiWeapon}). {@link #init} is the one
  * call from {@link ZFighterPower#init}; {@link #quick} the one from G's handler.

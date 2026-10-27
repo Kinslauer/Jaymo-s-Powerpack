@@ -258,6 +258,21 @@ public final class Ship extends Entity {
 		return new AABB(pos.x - h.radius, pos.y + h.minY, pos.z - h.radius, pos.x + h.radius, pos.y + h.maxY + 1.5, pos.z + h.radius);
 	}
 
+	/**
+	 * (lag fix) The vanilla fluid check reads every block in the bounding box each tick, and a ship's box is her whole
+	 * hull square (a cargo ship's is tens of thousands of blocks): a few moored ships took an eighth of the server's
+	 * tick. A ship keeps her own waterline, so she skips it.
+	 */
+	@Override
+	protected boolean updateFluidInteraction() {
+		return false;
+	}
+
+	@Override
+	public boolean isPushedByFluid() {
+		return false;
+	}
+
 	@Override
 	protected InterpolationHandler createInterpolationHandler() {
 		return LinearInterpolationHandler.create(this, 3);

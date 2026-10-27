@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Ki sense, on its own key (unbound until Andy picks one): living things within range show
+ * (0.17.45, Andy's NOEA picks) Ki sense, on its own key (unbound until Andy picks one): living things within range show
  * through walls as faint outlines on the sensing player's screen only, tinted by how strong they are next to you (dim
  * when weaker, even, bright red when stronger; the strength is the scouter's power level, {@link ZFighterScouter}). The
  * range is {@link #RANGE_MIN} blocks, growing to {@link #RANGE_MAX} with the Energy stat. Every {@link #INTERVAL}

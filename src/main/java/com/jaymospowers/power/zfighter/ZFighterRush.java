@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.42, Andy's NOEA picks) The rush attacks, four techniques bought with TP and set on G like the others. Each picks
+ * (0.17.45, Andy's NOEA picks) The rush attacks, four techniques bought with TP and set on G like the others. Each picks
  * its foe (the locked one, else whoever is nearest in front, {@link #FIND_RANGE} at most), locks it for the length of the
  * move ({@link ZFighterGrab#lock}) and plays the combo's own poses ({@link ZFighterCombo#MOVE}):
  * <ul>

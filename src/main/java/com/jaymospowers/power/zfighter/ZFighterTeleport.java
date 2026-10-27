@@ -38,7 +38,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Instant Teleport, a late technique bought with TP on the training screen (10000 TP, and
+ * (0.17.45, Andy's NOEA picks) Instant Teleport, a late technique bought with TP on the training screen (10000 TP, and
  * Super 2 opened). It goes on the B key as an alternative to Flash Step: learning it puts it on B, and the technique's
  * button on the training screen swaps between the two (B is the one key a Z Fighter's short-range blink lives on, and
  * both are "go somewhere now", so they share it rather than take a fifth slot). Tap B: you are at the block you look

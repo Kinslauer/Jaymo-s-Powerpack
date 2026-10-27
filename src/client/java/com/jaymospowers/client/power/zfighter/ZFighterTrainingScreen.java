@@ -48,7 +48,7 @@ public class ZFighterTrainingScreen extends Screen {
 	private Button limitButton;
 	/** Which page is open (kept between openings). */
 	private static int page;
-	/** (0.17.42) The techniques page shows this many rows; the wheel scrolls the rest. */
+	/** (0.17.45) The techniques page shows this many rows; the wheel scrolls the rest. */
 	private static final int TECH_ROWS = 8;
 	private static int techScroll;
 
@@ -120,7 +120,7 @@ public class ZFighterTrainingScreen extends Screen {
 	private void techniqueAction(int technique) {
 		ZFighterTraining.Data data = ZFighterTraining.of(this.minecraft.player);
 		if (technique == ZFighterTraining.KI_WEAPON && data.knows(technique) && data.quick() == technique) {
-			// (0.17.42) the ki weapon's button picks its shape (and puts it on G)
+			// (0.17.45) the ki weapon's button picks its shape (and puts it on G)
 			ClientPlayNetworking.send(new com.jaymospowers.power.zfighter.ZFighterCombat.Shape());
 			return;
 		}
@@ -325,7 +325,7 @@ public class ZFighterTrainingScreen extends Screen {
 			String key = ZFighterLineage.techniqueKey(player, i);
 			boolean known = data.knows(i);
 			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
-			// (0.17.42) Instant Teleport lives on B, in place of Flash Step
+			// (0.17.45) Instant Teleport lives on B, in place of Flash Step
 			boolean teleport = i == ZFighterTraining.TELEPORT;
 			boolean equipped = teleport ? ZFighterTeleport.equipped(player) : !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
 			String slot = spirit ? "C" : teleport ? "B" : ZFighterTraining.charged(i) ? "V" : "G";
@@ -352,7 +352,7 @@ public class ZFighterTrainingScreen extends Screen {
 				button.visible = teleport || !spirit && !equipped;
 				button.active = true;
 				if (i == ZFighterTraining.KI_WEAPON && equipped) {
-					// (0.17.42) on G, the ki weapon's button is its shape
+					// (0.17.45) on G, the ki weapon's button is its shape
 					button.setMessage(Component.translatable("technique.jaymospowers.zfighter.ki_weapon."
 						+ com.jaymospowers.power.zfighter.ZFighterKiWeapon.SHAPE_KEYS[com.jaymospowers.power.zfighter.ZFighterKiWeapon.shape(player)]));
 					button.visible = true;

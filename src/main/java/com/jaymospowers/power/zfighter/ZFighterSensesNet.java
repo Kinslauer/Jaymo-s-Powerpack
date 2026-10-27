@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.42, Andy's NOEA picks) The packets of the senses patch (ki sense, scouter, instant teleport, impact frames, the
+ * (0.17.45, Andy's NOEA picks) The packets of the senses patch (ki sense, scouter, instant teleport, impact frames, the
  * air burst), kept apart from {@link ZFighterNet} so the two patches' tracks don't touch the same file. The beam clash
  * timing game has its own pair in {@code core/BeamClashTiming}.
  */

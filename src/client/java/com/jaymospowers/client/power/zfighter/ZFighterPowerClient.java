@@ -67,9 +67,9 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
 		ZFighterInputClient.init();
-		// (0.17.42) lock-on, the throw's click, the combat icons
+		// (0.17.45) lock-on, the throw's click, the combat icons
 		ZFighterCombatClient.init();
-		// (0.17.42) ki sense, scouter, teleport list, impact frames, banking, air burst
+		// (0.17.45) ki sense, scouter, teleport list, impact frames, banking, air burst
 		ZFighterSensesClient.init();
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
@@ -97,7 +97,7 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterKiGlow.Layer(avatar));
 				// (0.16.20) the flame aura: charging, held after a full charge, flaring in a form
 				helper.register(new ZFighterKiAura.Layer(avatar));
-				// (0.17.42) the ki weapon on the right fist
+				// (0.17.45) the ki weapon on the right fist
 				helper.register(new ZFighterKiWeaponLayer.Layer(avatar));
 			} else if (renderer.getModel() instanceof net.minecraft.client.model.HumanoidModel<?>) {
 				// a Warrior-born villager raging as the wild Great Ape (VillagerApe)

@@ -24,7 +24,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Lend ki: while you charge ki (R held), sneak and right click a Z Fighter you look at within
+ * (0.17.45, Andy's NOEA picks) Lend ki: while you charge ki (R held), sneak and right click a Z Fighter you look at within
  * {@link #REACH} blocks, and your ki pours into theirs, {@link #PER_SECOND} a second, while they glow. It stops when your
  * ki runs out, theirs is full, either of you is down or too far off ({@link #BREAK_RANGE}), or you let go of R.
  */

@@ -26,7 +26,7 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.42, Andy's NOEA picks) Lock-on, the client half. The key (Left Alt by default, shared with the zoom mod's) locks
+ * (0.17.45, Andy's NOEA picks) Lock-on, the client half. The key (Left Alt by default, shared with the zoom mod's) locks
  * onto the living thing nearest the crosshair within {@link ZFighterLock#RANGE} blocks that he can see, and sends its id
  * to the server ({@link ZFighterLock.LockOn}); pressed again, or out of sight for a moment, or past the range, it lets
  * go. While it holds the camera eases round to the target ({@link #EASE}) and a small bracket is drawn on it.

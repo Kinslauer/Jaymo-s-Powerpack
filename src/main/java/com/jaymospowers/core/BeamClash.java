@@ -356,14 +356,14 @@ public final class BeamClash {
 		}
 	}
 
-	/** (0.17.42, Andy's NOEA picks) How many ticks this player's clash has run, or -1 when they aren't in one (the timing game's clock). */
+	/** (0.17.45, Andy's NOEA picks) How many ticks this player's clash has run, or -1 when they aren't in one (the timing game's clock). */
 	public static int age(ServerPlayer player) {
 		Clash clash = BY_PLAYER.get(player.getUUID());
 		return clash == null ? -1 : clash.age;
 	}
 
 	/**
-	 * (0.17.42, Andy's NOEA picks) The timing game's shove: adds (or, negative, takes) {@code taps} presses' worth of
+	 * (0.17.45, Andy's NOEA picks) The timing game's shove: adds (or, negative, takes) {@code taps} presses' worth of
 	 * surge to this player's side, weighed like a tap by the two powers; a good hit may overshoot the usual surge
 	 * ceiling by {@code cap} times. False when they aren't in a clash.
 	 */

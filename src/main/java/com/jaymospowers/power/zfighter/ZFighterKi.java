@@ -1211,7 +1211,7 @@ public final class ZFighterKi {
 		Vec3 reach = eye.add(look.scale(STEP_TARGET_RANGE));
 		EntityHitResult aimed = ProjectileUtil.getEntityHitResult(player, eye, reach, player.getBoundingBox().expandTowards(look.scale(STEP_TARGET_RANGE))
 			.inflate(1.0), e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != player, STEP_TARGET_RANGE * STEP_TARGET_RANGE);
-		// (0.17.42) locked on: he steps behind the one he locked
+		// (0.17.45) locked on: he steps behind the one he locked
 		LivingEntity locked = ZFighterLock.target(player);
 		if (locked != null || aimed != null && aimed.getEntity() instanceof LivingEntity && player.hasLineOfSight(aimed.getEntity())) {
 			LivingEntity target = locked != null ? locked : (LivingEntity)aimed.getEntity();

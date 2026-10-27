@@ -534,7 +534,7 @@ public final class ZFighterCombo {
 		double reach = player.entityInteractionRange() + REACH_BONUS;
 		double keep = REACH_BONUS + LUNGE_RANGE;
 		double far = reach + LUNGE_RANGE;
-		// (0.17.42) locked on: he fights the one he locked
+		// (0.17.45) locked on: he fights the one he locked
 		LivingEntity locked = ZFighterLock.target(player);
 		if (locked != null && valid(player, locked) && player.isWithinEntityInteractionRange(locked, far)) {
 			return locked;

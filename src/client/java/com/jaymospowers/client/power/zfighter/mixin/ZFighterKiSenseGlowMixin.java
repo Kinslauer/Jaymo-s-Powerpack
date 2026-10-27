@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.17.42, Andy's NOEA picks) Ki sense: the living things it senses glow through walls, on the sensing player's screen only. */
+/** (0.17.45, Andy's NOEA picks) Ki sense: the living things it senses glow through walls, on the sensing player's screen only. */
 @Mixin(Minecraft.class)
 abstract class ZFighterKiSenseGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)

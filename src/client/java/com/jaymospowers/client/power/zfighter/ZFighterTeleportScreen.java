@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.17.42, Andy's NOEA picks) Instant Teleport's list, opened by holding B for a second: the friends (players) and masters
+ * (0.17.45, Andy's NOEA picks) Instant Teleport's list, opened by holding B for a second: the friends (players) and masters
  * whose ki you sensed within the last day, nearest friends first. Pick one and you appear beside them. Escape closes it.
  */
 public class ZFighterTeleportScreen extends Screen {

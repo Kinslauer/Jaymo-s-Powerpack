@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 
 /**
- * (0.17.42, Andy's NOEA picks) Impact frames: when a Z Fighter finisher, a Spirit Bomb landing or a full ape smash goes
+ * (0.17.45, Andy's NOEA picks) Impact frames: when a Z Fighter finisher, a Spirit Bomb landing or a full ape smash goes
  * off within 24 blocks of you, the whole screen flashes white and then black, one game tick each ({@link #PHASE_TICKS}),
  * with a few white streaks across the black. A client setting, on by default, turns it off completely: nothing is
  * drawn and an incoming flash is dropped. The setting is the line {@code impact_frames=true} in

@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Poise and K.O.: every living thing in a Z Fighter's fight has a hidden poise bar. Melee
+ * (0.17.45, Andy's NOEA picks) Poise and K.O.: every living thing in a Z Fighter's fight has a hidden poise bar. Melee
  * blows (and half as much from his ki) wear it, heavy ones more; a parry wears the attacker's. Broken, it is staggered
  * for a second (slowed, can't strike), then with its poise half back; broken again in that second, it is knocked out for
  * two (lying still through the wounds' knock-out where it can go down, else held motionless), never killed by it. After

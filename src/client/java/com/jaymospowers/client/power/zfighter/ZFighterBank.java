@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.42, Andy's NOEA picks) Banking into turns: a Z Fighter in flight rolls his body into the turn, leaning right
+ * (0.17.45, Andy's NOEA picks) Banking into turns: a Z Fighter in flight rolls his body into the turn, leaning right
  * as he turns right, in proportion to how fast he is turning ({@link #DEGREES_PER_TURN_DEGREE} of lean per degree of turn
  * per tick, up to {@link #MAX_BANK}), easing in and out ({@link #EASE}). It is seen on everyone's screen, from how their
  * facing changes. Upright (hovering) it is a roll about the body's middle through {@code FlightRolls.rollUpright}; at

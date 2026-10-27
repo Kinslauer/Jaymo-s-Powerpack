@@ -20,7 +20,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Meditation dodge: a passive chance to slip a melee blow completely. It grows with the
+ * (0.17.45, Andy's NOEA picks) Meditation dodge: a passive chance to slip a melee blow completely. It grows with the
  * time he has spent shadowboxing (up to {@link #MAX_CHANCE} after {@link #FULL_SECONDS}), and the nearer he is to
  * outclassing the attacker in speed and in strength the more of that he gets ({@link #BASE_SHARE} on even terms). Not
  * while guarding, charging, or as the Great Ape. A slipped blow does nothing: a quick side-step, a puff and a whoosh.

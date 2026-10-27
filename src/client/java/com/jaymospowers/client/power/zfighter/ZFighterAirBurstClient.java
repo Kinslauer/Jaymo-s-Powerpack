@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) The air burst, client half: double-tap forward (W) while flying and a burst of ki throws
+ * (0.17.45, Andy's NOEA picks) The air burst, client half: double-tap forward (W) while flying and a burst of ki throws
  * you {@link #SPEED} blocks a tick along your look, fading over a few ticks (a few blocks in all). It is added on top of
  * the flight's own velocity each tick, as the barrel roll's slide is, so the flight carries on with its own momentum.
  * The server takes the ki and keeps the cooldown ({@link ZFighterAirBurst}); the client only fires one if the ki is

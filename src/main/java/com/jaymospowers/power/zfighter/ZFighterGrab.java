@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.17.42, Andy's NOEA picks) Grab and throw: sneak and left click, bare-handed, at a creature in plain reach and he
+ * (0.17.45, Andy's NOEA picks) Grab and throw: sneak and left click, bare-handed, at a creature in plain reach and he
  * takes hold of it, held out in front of him, unable to act ({@link #HOLD_MAX_TICKS} at most). Let go of sneak, or left
  * click again ({@link Throw}), and he throws it the way he looks, harder the stronger his fists; it slams into whatever it
  * meets ({@link ZFighterImpact}). The rush attacks reuse the hold ({@link #seize} with {@code scripted}).

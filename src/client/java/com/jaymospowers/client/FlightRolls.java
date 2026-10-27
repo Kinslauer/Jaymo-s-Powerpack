@@ -133,7 +133,7 @@ public final class FlightRolls {
 	/** From the avatar renderer's extractRenderState. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		state.setData(KEY, angle(entity, partialTicks));
-		// (0.17.42) a Z Fighter's body banks into his turns
+		// (0.17.45) a Z Fighter's body banks into his turns
 		com.jaymospowers.client.power.zfighter.ZFighterBank.extract(entity, state, partialTicks);
 	}
 

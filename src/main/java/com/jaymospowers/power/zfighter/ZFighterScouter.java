@@ -35,7 +35,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 
 /**
- * (0.17.42, Andy's NOEA picks) The Scouter: a craftable eyepiece worn on the head (glass pane, redstone, iron). Looking
+ * (0.17.45, Andy's NOEA picks) The Scouter: a craftable eyepiece worn on the head (glass pane, redstone, iron). Looking
  * at a living thing while wearing it reads out its name and a power level, worked out here on the server: a fighter's
  * from his health, fists and ki, his trained stats, his form, Limit Break and mastery; anyone else's from max health and
  * attack damage. The basic scouter reads up to {@link #CAP}; a number past {@link #OVERLOAD_RATIO} times that overloads it:

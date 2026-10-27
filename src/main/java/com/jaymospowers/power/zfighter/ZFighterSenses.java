@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) The hub of the senses patch: ki sense ({@link ZFighterKiSense}), the Scouter
+ * (0.17.45, Andy's NOEA picks) The hub of the senses patch: ki sense ({@link ZFighterKiSense}), the Scouter
  * ({@link ZFighterScouter}), Instant Teleport ({@link ZFighterTeleport}), lend ki ({@link ZFighterLendKi}), the air burst
  * ({@link ZFighterAirBurst}) and the impact frames sent from here. The beam clash timing game is {@code core/BeamClashTiming}.
  * {@link ZFighterPower} makes one call to {@link #init}, one to {@link #tick}, and the finishers, the Spirit Bomb and

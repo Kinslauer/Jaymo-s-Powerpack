@@ -23,7 +23,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) Ki weapons: one technique on G that shapes his ki into a blade, a scythe or a clawed lance
+ * (0.17.45, Andy's NOEA picks) Ki weapons: one technique on G that shapes his ki into a blade, a scythe or a clawed lance
  * (picked on the training screen). While it is out ki drains by the second, his bare-handed blows (the punch, the hold
  * combo) hit {@link #BONUS} harder, scaled by Ki Power, and reach {@link #REACH} further. His hand stays empty, so they
  * are fists for "fists first" ({@link ZFighterBattle}). Put an item in the hand and it rests, costing nothing. The

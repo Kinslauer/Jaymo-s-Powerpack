@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
 /**
- * (0.17.42, Andy's NOEA picks) The client hub of the senses patch: ki sense ({@link ZFighterKiSenseClient}), the Scouter's
+ * (0.17.45, Andy's NOEA picks) The client hub of the senses patch: ki sense ({@link ZFighterKiSenseClient}), the Scouter's
  * readout ({@link ZFighterScouterClient}), Instant Teleport's list ({@link ZFighterTeleportScreen}), impact frames
  * ({@link ZFighterImpactFramesClient}), banking ({@link ZFighterBank}) and the air burst ({@link ZFighterAirBurstClient}).
  * {@link ZFighterPowerClient} makes one call to {@link #init} and one to {@link #tick}; the beam clash timing game is

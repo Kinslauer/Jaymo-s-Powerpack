@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.17.42, Andy's NOEA picks) Ki sense's outline colour: dim when weaker than you, pale when even, bright red when stronger. */
+/** (0.17.45, Andy's NOEA picks) Ki sense's outline colour: dim when weaker than you, pale when even, bright red when stronger. */
 @Mixin(EntityRenderer.class)
 abstract class ZFighterKiSenseOutlineMixin {
 	@Inject(

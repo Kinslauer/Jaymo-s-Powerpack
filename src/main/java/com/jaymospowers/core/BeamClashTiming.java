@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.42, Andy's NOEA picks) The beam clash timing game, on top of {@link BeamClash}'s mashing. In a clash a marker
+ * (0.17.45, Andy's NOEA picks) The beam clash timing game, on top of {@link BeamClash}'s mashing. In a clash a marker
  * sweeps a bar near the bottom of the screen ({@link #marker}, a pure function of the clash's age, so the server and both
  * clients agree on it); the window it should be in sits somewhere on the bar and moves every pass ({@link #centre}).
  * Right click as the marker crosses it: <b>Perfect</b> (worth about {@link #PERFECT_TAPS} presses of the push key),
