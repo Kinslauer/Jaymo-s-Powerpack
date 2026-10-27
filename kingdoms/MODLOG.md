@@ -5174,6 +5174,52 @@ want the player seeing anything in world while they are spawning."
   moves the newcomer. Without MCA, or when the creator doesn't come, it lifts `LIFT_AFTER_MS` (2.5 s) after nothing
   holds them. Returning players never see it. 0.7.237 is left for the mana spirits PR. Not seen in game.
 
+## 0.7.242: ship crews are MCA villagers (pack 0.17.30)
+Andy: "i need all the ship crew to integrate with MCA, it doesnt make sense i have fully kitted knights all silent and a
+stoic brick for a captain. they need at the very least a personality."
+- `Crewmen`: with MCA, every crewman `Corsairs.launch` puts aboard (a pirate's captain, gunners, deckhands and powder
+  monkeys; a warship's sea captain and knights; a merchantman's and a whaler's hands) is an MCA villager. Each gets a
+  name, face, personality, mood and temperament, and MCA's talk and chat AI. `McaBridge.crewman` builds them from a folk set up for the role,
+  never added to the world. It copies the folk's blood, armour, weapons and toughness, and the powder monkey's size.
+  Fighting men are MCA guards, and sailors and powder monkeys are fishermen. Each is enlisted to their side in their old role and
+  tagged `jaymoskingdoms.crewman`. They stay off every roster and never turn up in a town's worker searches,
+  guard calls or scatters.
+- Aboard, their brain waits (`Workers.step` → `Crewmen.step`). `Corsairs.deckwork` still walks them along their
+  `Ship.SEAT`, so PR #461's deck walking, gun manning and helm are unchanged. In place of the brain, they take foes as the folk
+  did, plus whoever hurt them and boarders (a cove's prey, or players the realm counts hostile). Pirates keep their
+  pistols and shouts (`Pirates.crewFight`). Others loose arrows if they hold a bow, and everyone swings at arm's
+  length. They look at whoever is talking to them.
+- Talk (`Crewmen.chatter`): while a player is near, one line every 15 to 35 s per ship. The line fits their side
+  (8 lines each for pirates, navy, merchant, whaler and powder monkeys), comes from the captain (4 per side), or, one
+  time in three, from their temperament. The captain welcomes each newcomer aboard.
+- MCA's screen (`Standing`) shows "Gunner of the Resolute", their captain and what she's about. The captain's nametag
+  reads "Captain" once you know his name. The chat AI is told their berth and ship (`Crewmen.prompt`).
+- A cove's pirate captain as a villager keeps his boss bar, still leads the cove, and clears it when he dies
+  (`KingdomEvents.workerDied` → `Camps.chiefSlain`). Slay quests still find him (`Quests.campOf`).
+- Folk crews already at sea in a world are each replaced at their station by a villager of their blood
+  (`Crewmen.convert`). The ship's captain, gunner and cove-leader records follow them.
+- Home from a whaling voyage (`Crewmen.payOff`, from `Whalers.home`), the crew come ashore at the harbour with
+  their lay in emeralds. Each decides whether to sign on again or leave the sea (Andy: "they should be able to decide to
+  continue as a whaler or leave with their riches"). The base chance of leaving is 30%, plus 8% a whale (at most +30%).
+  The greedy, timid and gloomy lean toward leaving, the dutiful, brave, cheerful and devout toward staying, and the
+  captain leaves half as often. Those who stay wait about the harbour (MCA's screen: "Whaleman of X, in port") and board
+  the realm's next whaler before anyone new is taken on (`Crewmen.waiting`). Those who leave are discharged and live as
+  the town's villagers. Each says why, and the town hears how many signed on.
+- Whaleboat hands stay crew in the boats. Set down ashore, a crewman lives as an ordinary villager.
+  Without MCA the crews stay folk. Javac-checked against the 26.3 jars, not seen in game.
+
+## 0.7.243: no lag spike before the life story (pack 0.17.31)
+- **The first capital is raised near spawn.** A new world's first realm (raised so the story screen has realms to name)
+  went to the nearest village anywhere within 1,600 blocks. In Andy's world that was 900 blocks off, and loading and
+  making all that land at once froze the server for about a minute before the story opened. Now only a village within
+  24 chunks (384 blocks) of spawn is taken (`CAPITAL_VILLAGE_SEARCH`), which also makes the search itself quick; with
+  none that near, a citadel goes up by spawn at the first try, where it used to wait out the village's 90 seconds first.
+- **Ships find their way out of a bay.** Andy: "the whaling ship got stuck trying to navigate". A captain only looked 18
+  blocks ahead for open water, so a whaler (or any crewed ship) whose heading ran through a headland backed off, came
+  about onto the same heading and ran back into the same bay, over and over. Now, once she has lain stuck, she looks
+  along 16 headings for open water she can sail straight to (`Fleet.offing`), takes the one that comes out nearest her
+  heading, and makes for it (at most 30 s) before taking her heading up again. Each try from the same bay looks farther
+  out (48, 96, 144, then 160 blocks); the count starts over once she's 96 blocks clear (`Corsairs.DETOUR*`).
 ## 0.7.240: mana grows: attuned folk, power in the glow, amethyst, sickness, alchemy, the wand, meditation, ripples (pack 0.17.29)
 Andy: "the mana flare on acquisition needs to dim to a dimmer minimum." Before, the glow came down from the overload's
 flare only as far as mana's fullness, so a full caster (and the overload's spill) kept it at its brightest for good.

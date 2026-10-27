@@ -71,6 +71,13 @@ public final class Crew {
 	public int target = -1;
 	public @Nullable BlockPos waypoint;
 	public int stuck, lastFired, backing;
+	/**
+	 * (0.7.243) Not saved: open water she makes for to get out of a bay she lay embayed in, until when, how many ways
+	 * round she's tried near {@link #stuckAt} (each looks farther), and where she last lay stuck.
+	 */
+	public @Nullable BlockPos detour, stuckAt;
+	public long detourUntil;
+	public int detours;
 	public final Map<Long, Long> loading = new HashMap<>();
 	/** Not saved: the helm her captain has set (a heading, a share of sail, rowing, backing water). */
 	public float wantYaw;

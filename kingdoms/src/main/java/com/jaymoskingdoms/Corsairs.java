@@ -69,6 +69,13 @@ final class Corsairs implements Ship.Captaincy {
 	static final float AIM_SPREAD = 1.2F, LOWEST = -6.0F, HIGHEST = 18.0F;
 	/** How often (ticks) her captain looks about; how many looks she may lie stuck before she backs off; how long she backs. */
 	static final int THINK = 10, STUCK_LOOKS = 12, BACK_LOOKS = 4;
+	/**
+	 * (0.7.243) Embayed, she makes for open water this far off (blocks; farther each try, up to the most), for at most
+	 * this long (ticks), and her tries start over once she's this far from where she last lay stuck. How far ahead on her
+	 * heading she aims to come out.
+	 */
+	static final double DETOUR = 48.0, DETOUR_MOST = 160.0, DETOUR_FORGIVE = 96.0, DETOUR_AIM = 256.0;
+	static final int DETOUR_TICKS = 600;
 	/** A merchantman's done when she's this near her harbour. */
 	static final double ARRIVE = 22.0;
 	/** Plundering a realm's ship: reputation lost with it. */
@@ -110,7 +117,7 @@ final class Corsairs implements Ship.Captaincy {
 		Fleet.Stations stations = Fleet.stations(ship);
 		BlockPos home = crew.home;
 		if (stations.helm() != null) {
-			Folk captain = hand(level, ship, faction, complement.captain(), stations.helm(), home);
+			LivingEntity captain = hand(level, ship, faction, complement.captain(), stations.helm(), home, crew.side);
 			if (captain != null) {
 				crew.captain = captain.getUUID();
 			}
@@ -118,11 +125,11 @@ final class Corsairs implements Ship.Captaincy {
 		// a gunner to each gun, two guns to a gunner on a big ship's far side
 		List<Map.Entry<Long, Vec3>> guns = new ArrayList<>(stations.guns().entrySet());
 		int gunners = Math.max(1, (guns.size() + 1) / 2 + (guns.size() >= 6 ? 1 : 0));
-		List<Folk> crewed = new ArrayList<>();
+		List<LivingEntity> crewed = new ArrayList<>();
 		for (int i = 0; i < guns.size(); i++) {
 			Map.Entry<Long, Vec3> gun = guns.get(i);
 			if (i < gunners) {
-				Folk g = hand(level, ship, faction, complement.gunner(), gun.getValue(), home);
+				LivingEntity g = hand(level, ship, faction, complement.gunner(), gun.getValue(), home, crew.side);
 				if (g != null) {
 					crewed.add(g);
 				}
@@ -135,16 +142,27 @@ final class Corsairs implements Ship.Captaincy {
 		java.util.Collections.shuffle(deck, new java.util.Random(level.getRandom().nextLong()));
 		int k = 0;
 		for (int i = 0; i < complement.boys() && k < deck.size(); i++) {
-			hand(level, ship, faction, Pirates.POWDER_MONKEY, deck.get(k++), home);
+			hand(level, ship, faction, Pirates.POWDER_MONKEY, deck.get(k++), home, crew.side);
 		}
 		for (int i = 0; i < complement.hands() && k < deck.size(); i++) {
-			hand(level, ship, faction, complement.hand(), deck.get(k++), home);
+			hand(level, ship, faction, complement.hand(), deck.get(k++), home, crew.side);
 		}
 		return ship;
 	}
 
-	/** One of her crew, of {@code role}, at {@code seat}. */
-	static @Nullable Folk hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home) {
+	/**
+	 * One of her crew, of {@code role}, at {@code seat}: (0.7.242) with MCA, one of its villagers in the gear a folk of
+	 * that role would wear ({@link Crewmen}); without it, the folk.
+	 */
+	static @Nullable LivingEntity hand(ServerLevel level, Ship ship, Faction faction, int role, Vec3 seat, BlockPos home, Crew.Side side) {
+		LivingEntity back = Crewmen.waiting(level, faction.id(), side, role, home);
+		if (back != null) {
+			// (0.7.242) one of her hands who signed on again, waiting in port: aboard before anyone new
+			back.setAttached(Ship.SEAT, seat);
+			if (ship.takeAboard(back, seat)) {
+				return back;
+			}
+		}
 		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 		if (folk == null) {
 			return null;
@@ -152,13 +170,21 @@ final class Corsairs implements Ship.Captaincy {
 		Vec3 at = ship.toWorld(seat.x, seat.y, seat.z);
 		folk.snapTo(at.x, at.y, at.z, ship.getYRot(), 0.0F);
 		folk.setup(role, faction, home, 256);
-		folk.setAttached(Ship.SEAT, seat);
-		level.addFreshEntity(folk);
-		if (!ship.takeAboard(folk, seat)) {
+		LivingEntity hand = Crewmen.villager(level, folk, side);
+		if (hand != null) {
+			// (the folk was only ever its pattern: never in the world)
 			folk.discard();
+			hand.setAttached(Ship.SEAT, seat);
+		} else {
+			folk.setAttached(Ship.SEAT, seat);
+			level.addFreshEntity(folk);
+			hand = folk;
+		}
+		if (!ship.takeAboard(hand, seat)) {
+			hand.discard();
 			return null;
 		}
-		return folk;
+		return hand;
 	}
 
 	// ---- at the helm ------------------------------------------------------------------------------------------------
@@ -250,6 +276,17 @@ final class Corsairs implements Ship.Captaincy {
 			want = Fleet.bearing(ship, crew.waypoint.getX() + 0.5, crew.waypoint.getZ() + 0.5);
 			sail = PATROL_SAIL;
 		}
+		// (0.7.243) Andy: "the whaling ship got stuck trying to navigate". Her heading through a headland only ever
+		// brought her back into the same bay; now, having lain embayed, she makes for open water out of it first
+		float aim = want;
+		if (crew.detour != null) {
+			if (level.getGameTime() > crew.detourUntil || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.detour)) < WAYPOINT_REACH) {
+				crew.detour = null;
+			} else if (sail > 0.0) {
+				want = Fleet.bearing(ship, crew.detour.getX() + 0.5, crew.detour.getZ() + 0.5);
+				sail = Math.max(sail, PATROL_SAIL);
+			}
+		}
 		// open water ahead, or the nearest heading that has it; embayed, she backs off a while and tries another way
 		Float clear = Fleet.heading(level, ship, want);
 		if (crew.backing > 0) {
@@ -271,6 +308,14 @@ final class Corsairs implements Ship.Captaincy {
 			crew.stuck = 0;
 			crew.backing = BACK_LOOKS;
 			crew.waypoint = null;
+			if (crew.stuckAt == null || Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.stuckAt)) > DETOUR_FORGIVE) {
+				crew.detours = 0;
+			}
+			crew.stuckAt = ship.blockPosition();
+			double reach = Math.min(DETOUR_MOST, DETOUR * (1 + crew.detours++));
+			crew.detour = Fleet.offing(level, ship, ship.getX() - Mth.sin(aim * Mth.DEG_TO_RAD) * DETOUR_AIM,
+				ship.getZ() + Mth.cos(aim * Mth.DEG_TO_RAD) * DETOUR_AIM, reach);
+			crew.detourUntil = level.getGameTime() + DETOUR_TICKS;
 		}
 		crew.wantYaw = clear != null ? clear : want;
 		crew.wantSail = clear != null ? sail : 0.2;
@@ -351,7 +396,7 @@ final class Corsairs implements Ship.Captaincy {
 		Map<UUID, LivingEntity> aboard = new java.util.HashMap<>();
 		for (LivingEntity e : ship.crewAboard()) {
 			aboard.put(e.getUUID(), e);
-			monkey |= e instanceof Folk f && f.role() == Pirates.POWDER_MONKEY;
+			monkey |= Crewmen.role(e) == Pirates.POWDER_MONKEY;
 		}
 		for (long gun : ship.guns()) {
 			UUID who = crew.gunners.get(gun);
@@ -380,8 +425,8 @@ final class Corsairs implements Ship.Captaincy {
 			Vec3 dir = this.lay(level, ship, gun, foe);
 			if (dir != null && ship.fireGunAlong(level, gun, dir, gunner)) {
 				crew.lastFired = (int)now;
-				if (gunner instanceof Folk f) {
-					f.getLookControl().setLookAt(foe.getX(), foe.getY() + 2.0, foe.getZ());
+				if (gunner instanceof net.minecraft.world.entity.Mob m) {
+					m.getLookControl().setLookAt(foe.getX(), foe.getY() + 2.0, foe.getZ());
 				}
 			}
 		}
@@ -454,7 +499,7 @@ final class Corsairs implements Ship.Captaincy {
 			if (now < walk.rest) {
 				continue;
 			}
-			boolean monkey = hand instanceof Folk f && f.role() == Pirates.POWDER_MONKEY;
+			boolean monkey = Crewmen.role(hand) == Pirates.POWDER_MONKEY;
 			List<Long> mine = new ArrayList<>();
 			crew.gunners.forEach((gun, who) -> {
 				if (who.equals(id) && deck.guns.containsKey(gun)) {
@@ -572,7 +617,7 @@ final class Corsairs implements Ship.Captaincy {
 			double bestD = Double.MAX_VALUE;
 			for (LivingEntity e : aboard) {
 				if (e.getUUID().equals(crew.captain) || crew.gunners.containsValue(e.getUUID()) || Downed.isDowned(e)
-					|| e instanceof Folk f && f.role() == Pirates.POWDER_MONKEY) {
+					|| Crewmen.role(e) == Pirates.POWDER_MONKEY) {
 					continue;
 				}
 				Vec3 s = e.getAttached(Ship.SEAT);
@@ -788,7 +833,7 @@ final class Corsairs implements Ship.Captaincy {
 		double bestD = Pirates.PISTOL_FURTHEST * Pirates.PISTOL_FURTHEST;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, foe.getBoundingBox().inflate(2.0), e -> e.isAlive() && !e.isSpectator())) {
 			boolean hostile = e instanceof ServerPlayer p ? !p.isCreative() && (ship.crew.side == Crew.Side.PIRATE || Reputation.get(p, ship.crew.faction) <= Reputation.HOSTILE)
-				: e instanceof Folk f && !folk.sameSide(f) && (Pirates.isPirate(f) != Pirates.isPirate(folk));
+				: enemyCrew(level, folk.factionId(), Pirates.isPirate(folk), e);
 			double d = e.distanceToSqr(folk);
 			if (hostile && d < bestD) {
 				best = e;
@@ -798,6 +843,20 @@ final class Corsairs implements Ship.Captaincy {
 		if (best != null) {
 			folk.setTarget(best);
 		}
+	}
+
+	/**
+	 * (0.7.242) Whether {@code e} is a foe to a crewman of faction {@code faction} (a pirate or not):
+	 * one of the other side's folk or villagers (a pirate to a kingdom's man, a kingdom's man to a pirate), not an ally.
+	 */
+	static boolean enemyCrew(ServerLevel level, int faction, boolean pirate, LivingEntity e) {
+		if (!(e instanceof Worker w) || w.role() < 0 || w.factionId() < 0 || w.factionId() == faction) {
+			return false;
+		}
+		if (Relations.between(level.getServer(), faction, w.factionId()) == Relation.ALLIED) {
+			return false;
+		}
+		return Pirates.isPirate(w.role()) != pirate;
 	}
 
 	/** {@code entity} is one of a ship's crew (not counted on any roster). */
