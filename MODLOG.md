@@ -3053,3 +3053,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   inventory instead, which First-person Model doesn't touch.
 - **0.17.36, attuning waits till you can see it (Kingdoms 0.7.247):** a Mage or Sorcerer start's attunement flare
   plays 2 s after the start screens and MCA's creator are gone, not behind them. No Powers changes.
+- **0.17.37, spirit arms only while used, a ghost's look (Kingdoms 0.7.248):** a mana spirit's arms form when a move
+  starts and fade after, drawn as a solid pale core with thin drifting edges and smoke, and move more calmly. No Powers
+  changes.

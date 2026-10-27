@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * different sizes". A render layer over players and over the casting folk (the same two-branch registration as
  * {@link ManaClient}): the wearer's own arm is copied, grown by the spirit's size about the shoulder and pushed behind,
  * then bent by the pose the spirit holds ({@link Poses}, a table of arm angles below) and drawn as the aura's own shells
- * ({@link ManaClient#SHELLS}), tinted by the spirit's colour mixed with mana's blue, at the strength the wearer's glow has
+ * ({@link #ARM_SHELLS}), tinted by the spirit's colour mixed with mana's blue, at the strength the wearer's glow has
  * ({@link ManaClient#KEY}; no glow, no arms, so only the attuned see them). Each arm is jointed, with each kind's own make
  * and the move's wind-up, snap and fingers ({@link SpiritRig}); a blow trails ghosts and bursts where it lands.
  * <p>
@@ -78,16 +78,25 @@ public final class SpiritArms {
 	 */
 	static final float FLOAT_UP = 5.0F, FLOAT_AHEAD = 5.0F, FLOAT_OUT = 1.5F, FLOAT_SIZE_CAP = 1.6F;
 	private static final float[] FLOAT_IDLE = {-1.05F, 0.0F, 0.30F};
-	/** The arms are the whole form of the spirit: this many times the aura's shell light. */
-	static final float ARM_LIGHT = 2.2F;
+	/** The size the projection forms from, as a share of its own. */
+	static final float FORM_FROM = 0.8F;
 	/** How much the kind colour shows against mana's blue (0 all blue, 1 all kind). */
 	static final float KIND_MIX = 0.5F;
 	/** The draw order of the shells, after the aura's own. */
 	static final int ORDER = 8;
 	/** Idle sway: how far and how fast the floating arms drift. */
-	static final float SWAY = 0.07F, SWAY_SPEED = 0.08F;
+	static final float SWAY = 0.025F, SWAY_SPEED = 0.05F;
 	/** Wisps: chance each tick, per arm, of one dust mote at the hand; the arms must be this far manifest. */
-	static final float WISP_CHANCE = 0.35F, WISP_FROM = 0.8F;
+	static final float WISP_CHANCE = 0.35F, WISP_FROM = 0.5F;
+	/**
+	 * The projection is only up while it's used (Andy: "the arm should appear and disappear while not using it ... it probably
+	 * costs concentration to keep a projection up"): it forms over {@code APPEAR_TICKS} when a move starts, stays up through the
+	 * move and {@code LINGER_TICKS} after, then fades over {@code FADE_TICKS}. A held thing, steady hands and spirit armour keep it
+	 * up. Called out, the spirit shows itself once (its summon is a move) and then waits unseen, but for the odd wisp.
+	 */
+	static final float APPEAR_TICKS = 3.0F, LINGER_TICKS = 12.0F, FADE_TICKS = 10.0F;
+	/** Unseen and waiting: the chance each tick of one wisp at the shoulder. */
+	static final float WAIT_WISP_CHANCE = 0.04F;
 	/** The sickness flicker: ticks between flickers (longest, shortest), how long one shows, how strong the arm is. */
 	static final int FLICKER_MIN = 100, FLICKER_MAX = 300, FLICKER_TICKS = 6;
 	static final float FLICKER_MANIFEST = 0.4F;
@@ -163,6 +172,23 @@ public final class SpiritArms {
 		double since;
 		/** The show whose blow last burst, so each blow bursts once. */
 		long burst;
+		/** The show last seen, and whether the projection was already up when it began (a held move stamped again doesn't re-form). */
+		long seenShow;
+		boolean carried;
+		float lastPresence;
+
+		float presence(SpiritState spirit, double now) {
+			if (spirit.show() != this.seenShow) {
+				this.seenShow = spirit.show();
+				this.carried = this.lastPresence >= 0.5F;
+			}
+			float p = SpiritArms.presence(spirit, now);
+			if (this.carried && now - spirit.shownAt() < APPEAR_TICKS) {
+				p = Math.max(p, this.lastPresence);
+			}
+			this.lastPresence = p;
+			return p;
+		}
 
 		float value(double now) {
 			float k = Mth.clamp((float)(now - this.since) / MANIFEST_TICKS, 0.0F, 1.0F);
@@ -226,9 +252,13 @@ public final class SpiritArms {
 			track.out = spirit.out();
 			track.since = now;
 		}
-		float manifest = track.value(now);
-		if (manifest <= 0.001F && !track.out) {
+		float called = track.value(now);
+		if (called <= 0.001F && !track.out) {
 			TRACKS.remove(entity.getId());
+			return null;
+		}
+		float manifest = called * track.presence(spirit, now);
+		if (manifest <= 0.001F) {
 			return null;
 		}
 		int pose = spirit.pose();
@@ -239,6 +269,26 @@ public final class SpiritArms {
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
 		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit));
+	}
+
+	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
+	static float presence(SpiritState spirit, double now) {
+		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR)) {
+			return 1.0F;
+		}
+		if (spirit.show() == 0L || spirit.pose() <= Poses.IDLE || spirit.pose() >= Poses.COUNT) {
+			return 0.0F;
+		}
+		float age = (float)(now - spirit.shownAt());
+		if (age < 0.0F) {
+			return 0.0F;
+		}
+		if (age < APPEAR_TICKS) {
+			float k = age / APPEAR_TICKS;
+			return k * k * (3.0F - 2.0F * k);
+		}
+		float gone = age - (POSE_TICKS + POSE_OUT + LINGER_TICKS);
+		return gone <= 0.0F ? 1.0F : Mth.clamp(1.0F - gone / FADE_TICKS, 0.0F, 1.0F);
 	}
 
 	/** Each client tick: the sickness flicker's timing, and wisps rising from the hands of every spirit in view. */
@@ -291,7 +341,17 @@ public final class SpiritArms {
 			kind = spirit.kind();
 			arms = spirit.arms();
 			size = Spirits.of(kind).size(spirit);
-			manifest = track == null ? 0.0F : track.value(entity.level().getGameTime());
+			long now = entity.level().getGameTime();
+			float called = track == null ? 0.0F : track.value(now);
+			manifest = called * (track == null ? 0.0F : SpiritArms.presence(spirit, now));
+			if (manifest < WISP_FROM && called >= 0.99F && entity.getRandom().nextFloat() < WAIT_WISP_CHANCE && !entity.isInvisible()
+				&& visibleToAttuned(entity)) {
+				// waiting unseen: now and then a wisp at the shoulder, so the keeper knows it's there
+				float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
+				double side = entity.getRandom().nextBoolean() ? 0.4 : -0.4;
+				level.addParticle(new DustParticleOptions(ghost(mix(Spirits.of(kind).color())) & 0xFFFFFF, 0.7F),
+					entity.getX() - Mth.cos(yaw) * side, entity.getY() + 1.4, entity.getZ() - Mth.sin(yaw) * side, 0.0, 0.02, 0.0);
+			}
 		} else if (flickerLeft > 0 && entity == Minecraft.getInstance().player) {
 			kind = flickerKind;
 			arms = 1;
@@ -304,7 +364,7 @@ public final class SpiritArms {
 			return;
 		}
 		Spirit sp = Spirits.of(kind);
-		DustParticleOptions mote = new DustParticleOptions(mix(sp.color()) & 0xFFFFFF, 1.0F);
+		DustParticleOptions mote = new DustParticleOptions(ghost(mix(sp.color())) & 0xFFFFFF, 1.3F);
 		float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
 		double behindX = Mth.sin(yaw), behindZ = -Mth.cos(yaw);
 		for (int i = 0; i < arms; i++) {
@@ -319,8 +379,9 @@ public final class SpiritArms {
 			double x = entity.getX() - Mth.cos(yaw) * side + behindX * back;
 			double z = entity.getZ() - Mth.sin(yaw) * side + behindZ * back;
 			double y = entity.getY() + (floating ? 1.25 + 0.2 * reach : Math.max(0.2, 1.3 - 0.45 * size));
-			level.addParticle(mote, x + (entity.getRandom().nextDouble() - 0.5) * 0.2, y, z + (entity.getRandom().nextDouble() - 0.5) * 0.2,
-				0.0, 0.03, 0.0);
+			// smoking off the projection: drifting back and up from it, the way a ghost's edge trails away
+			level.addParticle(mote, x + (entity.getRandom().nextDouble() - 0.5) * 0.3, y + (entity.getRandom().nextDouble() - 0.5) * 0.3,
+				z + (entity.getRandom().nextDouble() - 0.5) * 0.3, behindX * 0.02, 0.025, behindZ * 0.02);
 		}
 	}
 
@@ -483,7 +544,7 @@ public final class SpiritArms {
 	/** One renderer's arm models (a model for each kind and shell, and the trail's lagging ghosts, baked when first needed) and how they are drawn. */
 	private static final class Arms {
 		private final Supplier<HumanoidModel<?>> wearer;
-		private final ArmModel[][] models = new ArmModel[Spirits.QUIET + 1][ManaClient.SHELLS.length];
+		private final ArmModel[][] models = new ArmModel[Spirits.QUIET + 1][ARM_SHELLS.length];
 		private final ArmModel[][] trails = new ArmModel[Spirits.QUIET + 1][TRAIL_LAG.length];
 
 		Arms(Supplier<HumanoidModel<?>> wearer) {
@@ -500,13 +561,13 @@ public final class SpiritArms {
 		private ArmModel trail(int kind, int ghost) {
 			if (this.trails[kind][ghost] == null) {
 				// on the outermost shell: soft at the edge, a wisp rather than a second arm
-				this.trails[kind][ghost] = new ArmModel(bake(kind, ManaClient.SHELLS.length - 1), this.wearer, kind, TRAIL_LAG[ghost]);
+				this.trails[kind][ghost] = new ArmModel(bake(kind, ARM_SHELLS.length - 1), this.wearer, kind, TRAIL_LAG[ghost]);
 			}
 			return this.trails[kind][ghost];
 		}
 
 		private static ModelPart bake(int kind, int shell) {
-			return LayerDefinition.create(SpiritRig.mesh(kind, ManaClient.SHELLS[shell]), 64, 64).bakeRoot();
+			return LayerDefinition.create(SpiritRig.mesh(kind, ARM_SHELLS[shell]), 64, 64).bakeRoot();
 		}
 
 		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state) {
@@ -524,12 +585,14 @@ public final class SpiritArms {
 			color = ARGB.srgbLerp(axe * AXE_MIX, color, AXE_COLOR);
 			color = ARGB.srgbLerp(spear * SPEAR_MIX, color, SPEAR_COLOR);
 			float flow = 1.0F + axe * (AXE_FLOW - 1.0F) + spear * (SPEAR_FLOW - 1.0F);
-			float rise = (state.ageInTicks * ManaClient.RISE * flow) % 1.0F;
+			float rise = (state.ageInTicks * ManaClient.RISE * ARM_FLOW * flow) % 1.0F;
 			// the arms fade with how manifest they are, as well as grow
 			float fade = look.manifest() * look.manifest();
 			float strike = look.pose() == Poses.IDLE ? 0.0F : look.poseWeight();
-			for (int i = 0; i < ManaClient.SHELLS.length; i++) {
-				float light = Mth.clamp(ManaClient.SHELL_LIGHT[i] * glow.strength() * breathe * ARM_LIGHT * fade, 0.0F, 1.0F);
+			// the projection is called up at its full: only a little dimmer for a dim glow
+			float strength = Math.max(glow.strength(), MIN_STRENGTH);
+			for (int i = 0; i < ARM_SHELLS.length; i++) {
+				float light = Mth.clamp(ARM_SHELL_LIGHT[i] * strength * breathe * fade, 0.0F, 1.0F);
 				if (i > 0) {
 					// the axe's outer shells flare and gutter like a fire; the spear's thin away, all of it drawn into the core
 					light *= 1.0F + axe * AXE_FLARE * Mth.sin(state.ageInTicks * 1.7F + i * 2.0F);
@@ -537,16 +600,22 @@ public final class SpiritArms {
 				}
 				// a strike blazes: every shell up to full while the move's pose holds (Andy: "glow with their maximum intensity when striking")
 				light = Mth.lerp(strike * fade, light, 1.0F);
+				// the core paler and near still (the body of the ghost), the edges in the spirit's colour, drifting
 				collector.order(ORDER + i).submitModel(this.model(kind, i), state, poseStack,
 					RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.29F + 0.13F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
-					ManaClient.tint(color, light), null, 0);
+					ManaClient.tint(i == 0 ? ghost(color) : color, light), null, 0);
 			}
-			// the trail (Andy: "a slight wispy trail behind every movement"): ghosts of the arm a tick, two and three behind, faint
-			// always, so any move leaves a wisp, and bright from a blow's snap until just after it lands
-			boolean blow = SpiritRig.lands(look.pose()) && look.poseAge() >= SpiritRig.WIND_T && look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER;
+			// the trail: two soft ghosts of the arm behind it while it moves fast (a blow's snap, a grasp closing), not at rest;
+			// the slower wisp is the smoke off it ({@link #wisp})
+			boolean fast = look.pose() != Poses.IDLE && look.poseWeight() > 0.0F && look.poseAge() >= SpiritRig.WIND_T
+				&& look.poseAge() <= SpiritRig.HIT_T + TRAIL_AFTER;
+			if (!fast) {
+				return;
+			}
+			float trail = SpiritRig.lands(look.pose()) ? 1.0F : 0.5F;
 			for (int g = 0; g < TRAIL_LAG.length; g++) {
-				float light = (blow ? TRAIL_LIGHT[g] : WISP_LIGHT[g] * glow.strength()) * fade;
-				collector.order(ORDER + ManaClient.SHELLS.length + g).submitModel(this.trail(kind, g), state, poseStack,
+				float light = TRAIL_LIGHT[g] * trail * fade;
+				collector.order(ORDER + ARM_SHELLS.length + g).submitModel(this.trail(kind, g), state, poseStack,
 					RenderTypes.energySwirl(ManaClient.TEXTURE, 0.13F + g * 0.31F, -rise * (2 + g)), lightCoords, OverlayTexture.NO_OVERLAY,
 					ManaClient.tint(color, light), null, 0);
 			}
@@ -554,7 +623,20 @@ public final class SpiritArms {
 	}
 
 	/** The trail: how many ticks each ghost lags the arm, how bright each is after a blow and at any other time, and how long after the hit it lingers. */
-	static final float[] TRAIL_LAG = {1.0F, 2.0F, 3.5F}, TRAIL_LIGHT = {0.55F, 0.35F, 0.2F}, WISP_LIGHT = {0.16F, 0.1F, 0.06F};
+	static final float[] TRAIL_LAG = {1.0F, 2.0F}, TRAIL_LIGHT = {0.35F, 0.18F};
+	/**
+	 * The look, after Kung Lao's ghost (Andy: "a more solid looking yet wispy projection"): the arm's own shells, a core that is
+	 * the arm itself (not inflated, bright and pale, its texture near still) under two thin, dim, slowly drifting edges in the
+	 * spirit's colour, and smoke coming off it ({@link #wisp}). {@code ARM_FLOW} slows the drift; {@code MIN_STRENGTH} is the least
+	 * of the wearer's glow the arms show at; {@code GHOST_PALE} how far the core goes to white.
+	 */
+	static final float[] ARM_SHELLS = {0.0F, 0.45F, 1.0F}, ARM_SHELL_LIGHT = {0.8F, 0.22F, 0.08F};
+	static final float ARM_FLOW = 0.35F, MIN_STRENGTH = 0.7F, GHOST_PALE = 0.4F;
+
+	/** A colour taken toward white, for the ghost's pale core and its smoke. */
+	static int ghost(int color) {
+		return ARGB.srgbLerp(GHOST_PALE, color, 0xFFFFFFFF);
+	}
 	/** Grimsby's axe: how far the aura goes to embers, how much faster it churns, how hard its outer shells flicker. His spear: to a pale bright core, streaming, the outer shells thinned. */
 	static final int AXE_COLOR = 0xFFFF5A1E, SPEAR_COLOR = 0xFFDDF6FF;
 	static final float AXE_MIX = 0.65F, AXE_FLOW = 2.5F, AXE_FLARE = 0.45F, SPEAR_MIX = 0.6F, SPEAR_FLOW = 4.0F, SPEAR_THIN = 0.65F;
@@ -599,7 +681,8 @@ public final class SpiritArms {
 				this.leftArm.visible = false;
 				return;
 			}
-			float size = look.size() * Math.max(0.001F, look.manifest());
+			// forming: it fades in and swells the last little way, rather than growing from nothing
+			float size = look.size() * (FORM_FROM + (1.0F - FORM_FROM) * look.manifest());
 			boolean floats = floats(look.kind());
 			float reach = Math.min(size, FLOAT_SIZE_CAP);
 			int poseId = Mth.clamp(look.pose(), 0, Poses.COUNT - 1);
