@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin;
 
 import com.jaymoskingdoms.AtiCompounds;
+import com.jaymoskingdoms.SharedPools;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
@@ -15,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Takes ATi's single above-ground structure sets out of a world's structure placement when its compounds are in the
- * game ({@link AtiCompounds#filter}): generation, /locate and maps all read this list.
+ * game ({@link AtiCompounds#filter}), and pools every mod's villages and outposts into one set each
+ * ({@link SharedPools#merge}): generation, /locate and maps all read this list.
  */
 @Mixin(ChunkGeneratorStructureState.class)
 abstract class ChunkGeneratorStructureStateMixin {
@@ -26,6 +28,6 @@ abstract class ChunkGeneratorStructureStateMixin {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void jaymoskingdoms$compounds(CallbackInfo ci) {
-		this.possibleStructureSets = AtiCompounds.filter(this.possibleStructureSets);
+		this.possibleStructureSets = SharedPools.merge(AtiCompounds.filter(this.possibleStructureSets));
 	}
 }

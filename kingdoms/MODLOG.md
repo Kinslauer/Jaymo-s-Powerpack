@@ -5692,4 +5692,11 @@ Grand Capitals, Epic Villages).
 - Not added: Towns and Towers (CC BY-NC-SA 4.0, has a 26.3 build; not in the pack), Luki's Grand Capitals (all rights
   reserved, newest build 1.21.11), Epic Villages (in the pack, but only village houses and town centres, no castle).
   Repurposed Structures has a 26.3 Fabric build (needs MidnightLib); the jungle fortress shows once both are in the pack.
+- **Shared spawn pools** (`SharedPools`, Andy: "all the new villages and structures should be added to the pool so
+  different ones can spawn interchangeably"): every structure set made only of villages (vanilla's, redrawn by Epic
+  Structures, Towns and Towers', any other mod's) becomes one set with all their entries at vanilla's village spacing,
+  and every set made only of pillager outposts another at vanilla's outpost spacing. Each village spot draws any
+  village that suits its biome, from whichever mod. Applied to the world's structure placement in
+  `ChunkGeneratorStructureStateMixin` after `AtiCompounds.filter`; the log says how many sets and structures it pooled.
+- Towns and Towers 1.13.12 joins the pack (root `build.gradle`, shipped unchanged).
 - Compile-checked only, not seen in game.

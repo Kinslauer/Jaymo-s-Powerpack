@@ -3276,4 +3276,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   monsters, spawners and loot, the throne and panic room in its largest room. `/kingdom found citadel` keeps the old one.
   Towns and Towers (CC BY-NC-SA 4.0, shipped unchanged with credit: modrinth.com/mod/towns-and-towers) joins the pack:
   new villages per biome (Kingdoms founds capitals in them too), biome pillager outposts and ships; it has no castles.
+  Every mod's villages now share one spawn pool (and outposts another), so any of them can turn up at a village spot.
   Compile-checked here, not playtested.
