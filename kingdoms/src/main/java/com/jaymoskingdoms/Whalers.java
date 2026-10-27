@@ -114,6 +114,12 @@ public final class Whalers {
 	/** A hand's lay: this share of the catch's worth (at least {@link #LEAST_LAY}), and bottles of oil. */
 	static final float LAY = 0.1F;
 	static final int LEAST_LAY = 4, LAY_OIL = 2;
+	/**
+	 * (0.7.270) A player's berth aboard ({@link Voyage#berths}): a harpooner (in the boats with the irons), a deckhand,
+	 * or a powder monkey (the ship's boy); and the share of a hand's lay each gets (a harpooner's is the bigger).
+	 */
+	static final String HARPOONER = "harpooner", DECKHAND = "deckhand", MONKEY = "monkey";
+	static final float HARPOONER_LAY = 1.5F, MONKEY_LAY = 0.6F;
 	/** An unseen voyage's catch, per whale: bottles of oil, meat, bone; ambergris's chance. */
 	static final int UNSEEN_OIL = 12, UNSEEN_MEAT = 10, UNSEEN_BONE = 4;
 	static final float UNSEEN_AMBERGRIS = 0.12F;
@@ -129,6 +135,8 @@ public final class Whalers {
 		int whales;
 		final Map<String, Integer> hold = new HashMap<>();
 		final List<UUID> hands = new ArrayList<>();
+		/** (0.7.270) Each signed player's berth ({@link #HARPOONER}, {@link #DECKHAND}, {@link #MONKEY}). */
+		final Map<UUID, String> berths = new HashMap<>();
 
 		Voyage(UUID ship, long launched, BlockPos ground) {
 			this.ship = ship;
@@ -147,7 +155,7 @@ public final class Whalers {
 		}
 
 		private record Saved(UUID ship, long launched, long seen, long huntFrom, BlockPos ground, int whales, Map<String, Integer> hold,
-			List<UUID> hands) {
+			List<UUID> hands, Map<String, String> berths) {
 		}
 
 		static final Codec<Voyage> CODEC = RecordCodecBuilder.<Saved>create(i -> i.group(
@@ -158,7 +166,8 @@ public final class Whalers {
 				BlockPos.CODEC.fieldOf("ground").forGetter(Saved::ground),
 				Codec.INT.optionalFieldOf("whales", 0).forGetter(Saved::whales),
 				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("hold", Map.of()).forGetter(Saved::hold),
-				UUIDUtil.CODEC.listOf().optionalFieldOf("hands", List.of()).forGetter(Saved::hands))
+				UUIDUtil.CODEC.listOf().optionalFieldOf("hands", List.of()).forGetter(Saved::hands),
+				Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("berths", Map.of()).forGetter(Saved::berths))
 			.apply(i, Saved::new)).xmap(s -> {
 				Voyage v = new Voyage(s.ship(), s.launched(), s.ground());
 				v.seen = s.seen();
@@ -166,8 +175,13 @@ public final class Whalers {
 				v.whales = s.whales();
 				v.hold.putAll(s.hold());
 				v.hands.addAll(s.hands());
+				s.berths().forEach((who, berth) -> v.berths.put(UUID.fromString(who), berth));
 				return v;
-			}, v -> new Saved(v.ship, v.launched, v.seen, v.huntFrom, v.ground, v.whales, Map.copyOf(v.hold), List.copyOf(v.hands)));
+			}, v -> {
+				Map<String, String> berths = new HashMap<>();
+				v.berths.forEach((who, berth) -> berths.put(who.toString(), berth));
+				return new Saved(v.ship, v.launched, v.seen, v.huntFrom, v.ground, v.whales, Map.copyOf(v.hold), List.copyOf(v.hands), berths);
+			});
 	}
 
 	/** Every realm's whaler at sea (realm id → her voyage), and when each last came home; kept on the Overworld. */
@@ -373,8 +387,10 @@ public final class Whalers {
 		}
 		if (!v.hands.contains(player.getUUID())) {
 			v.hands.add(player.getUUID());
-			put(server, best.id(), v);
 		}
+		// (0.7.270) a whaling story signs them on as her harpooner
+		v.berths.put(player.getUUID(), HARPOONER);
+		put(server, best.id(), v);
 		// (0.7.253) their story's spawn: her harbour, should she be out of reach when they die
 		LifeStory.home(player, level, bestHarbour.shore());
 		String name = ship.crew != null ? ship.crew.name : best.name();
@@ -415,9 +431,50 @@ public final class Whalers {
 		JaymosKingdoms.LOGGER.info("{}'s whaler came home unseen with {} whales", f.name(), whales);
 	}
 
+	/** What {@code v}'s hold is worth to her realm (emeralds), as it stands. */
+	static int worth(Voyage v) {
+		return v.get("oil") * OIL_WORTH + v.get("blubber") / TRY_BLUBBER * OIL_WORTH + v.get("ambergris") * AMBERGRIS_WORTH
+			+ v.get("bone") * BONE_WORTH + v.get("meat") * MEAT_WORTH;
+	}
+
+	/** (0.7.270) {@code player} signs on for {@code v} in {@code berth}. */
+	static void signOn(Voyage v, ServerPlayer player, String berth) {
+		if (!v.hands.contains(player.getUUID())) {
+			v.hands.add(player.getUUID());
+		}
+		v.berths.put(player.getUUID(), berth);
+	}
+
+	/**
+	 * (0.7.270) {@code player}'s berth on {@code v} (they're one of her hands). One signed on before berths were kept: a
+	 * whaling story's harpooner, else a deckhand (a small one, her powder monkey).
+	 */
+	static String berth(Voyage v, ServerPlayer player) {
+		String berth = v.berths.get(player.getUUID());
+		if (berth != null) {
+			return berth;
+		}
+		StoryTalk.Landing l = player.getAttached(StoryTalk.LANDING);
+		if (l != null && "whalers".equals(l.start())) {
+			return HARPOONER;
+		}
+		return player.getScale() < StoryTalk.SMALL ? MONKEY : DECKHAND;
+	}
+
+	/** "harpooner", "deckhand", "powder monkey". */
+	static Component berthName(String berth) {
+		return Component.translatable("story.jaymoskingdoms.berth." + berth);
+	}
+
+	/** A hand's lay from a catch worth {@code worth}, by their berth. */
+	static int lay(int worth, String berth) {
+		float share = berth.equals(HARPOONER) ? HARPOONER_LAY : berth.equals(MONKEY) ? MONKEY_LAY : 1.0F;
+		return Math.max(LEAST_LAY, Math.round(worth * LAY * share));
+	}
+
 	/** {@code v}'s hold into {@code f}'s stores (what won't fit is sold) and the catch's worth into its purse; its worth. */
 	private static int unload(ServerLevel level, Faction f, Voyage v) {
-		int worth = v.get("oil") * OIL_WORTH + v.get("ambergris") * AMBERGRIS_WORTH + v.get("bone") * BONE_WORTH + v.get("meat") * MEAT_WORTH;
+		int worth = worth(v);
 		if (Storage.loaded(level, f)) {
 			Storage.put(level, f, Whaling.WHALE_OIL, v.get("oil"));
 			Storage.put(level, f, Whaling.WHALE_MEAT, v.get("meat"));
@@ -472,8 +529,10 @@ public final class Whalers {
 	private static float[] fitting(ServerLevel level, Ship ship, Crew crew, Voyage v, long now) {
 		for (ServerPlayer p : Corsairs.playersAboard(level, ship)) {
 			if (!v.hands.contains(p.getUUID())) {
-				v.hands.add(p.getUUID());
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.signed", crew.name).withStyle(ChatFormatting.AQUA));
+				// (0.7.270) aboard without a word to her captain: a deckhand (a small one, her powder monkey)
+				signOn(v, p, p.getScale() < StoryTalk.SMALL ? MONKEY : DECKHAND);
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.signed", crew.name, berthName(berth(v, p)))
+					.withStyle(ChatFormatting.AQUA));
 				LivingEntity captain = captain(level, ship, crew);
 				if (captain != null) {
 					Speech.say(level, captain, Component.translatable("message.jaymoskingdoms.whaler.welcome"), Speech.YELLOW, 16.0);
@@ -624,10 +683,12 @@ public final class Whalers {
 		List<ServerPlayer> aboard = Corsairs.playersAboard(level, ship);
 		for (ServerPlayer p : aboard) {
 			if (v.hands.contains(p.getUUID())) {
-				int lay = Math.max(LEAST_LAY, Math.round(worth * LAY));
+				// (0.7.270) by their berth: a harpooner's lay is the bigger
+				String berth = berth(v, p);
+				int lay = lay(worth, berth);
 				give(p, new ItemStack(Items.EMERALD, lay));
 				give(p, new ItemStack(Whaling.WHALE_OIL, LAY_OIL));
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.lay", lay, crew.name).withStyle(ChatFormatting.GOLD));
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.whaler.lay", lay, crew.name, berthName(berth)).withStyle(ChatFormatting.GOLD));
 			}
 		}
 		Raids.tell(level, ship.blockPosition(), Component.translatable("message.jaymoskingdoms.whaler.home", crew.name, v.whales, v.get("oil"))
