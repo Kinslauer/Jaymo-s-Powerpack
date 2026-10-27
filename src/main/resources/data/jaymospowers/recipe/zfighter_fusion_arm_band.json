@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "G": "minecraft:gold_ingot",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "LGL",
+    "LRL"
+  ],
+  "result": {
+    "id": "jaymospowers:fusion_arm_band",
+    "count": 2
+  }
+}

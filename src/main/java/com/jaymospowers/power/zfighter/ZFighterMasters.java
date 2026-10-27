@@ -83,7 +83,8 @@ final class ZFighterMasters {
 		if (now % 20 == 0) {
 			glow(level);
 		}
-		if (now % SCAN != 0 || !ZFighterKingdoms.present()) {
+		// (0.17.51) a master held for a fusion is out of the world: don't pick another meanwhile
+		if (now % SCAN != 0 || !ZFighterKingdoms.present() || ZFighterMasterFusion.holding()) {
 			return;
 		}
 		for (ZFighterKingdoms.Settlement s : ZFighterKingdoms.settlements(server)) {

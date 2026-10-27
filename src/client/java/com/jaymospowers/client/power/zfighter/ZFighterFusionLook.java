@@ -56,6 +56,7 @@ public final class ZFighterFusionLook {
 	private static final String MCA = "net.conczin.mca.";
 	private static final boolean MCA_LOADED = FabricLoader.getInstance().isModLoaded("mca");
 	private static boolean mcaBroken;
+	private static @Nullable Class<?> likeClass;
 	private static @Nullable Method getData, setData, dataModel, dataVisuals, playerData, capture, eyeColor, libraryTexture;
 	private static @Nullable Constructor<?> newData, newVisuals;
 	private static RecordComponent @Nullable [] components;
@@ -143,6 +144,7 @@ public final class ZFighterFusionLook {
 			Class<?> data = Class.forName(MCA + "client.render.VillagerRenderData", false, loader);
 			Class<?> visuals = Class.forName(MCA + "client.render.VillagerVisuals", false, loader);
 			Class<?> like = Class.forName(MCA + "entity.VillagerLike", false, loader);
+			likeClass = like;
 			Class<?> model = Class.forName(MCA + "entity.VillagerLike$PlayerModel", false, loader);
 			setData = holder.getMethod("mca$setVillagerRenderData", data);
 			dataModel = data.getMethod("playerModel");
@@ -165,7 +167,12 @@ public final class ZFighterFusionLook {
 		if (own == null) {
 			return;
 		}
-		Object otherLike = ((Optional<?>)playerData.invoke(null, inner((Player)entity, look))).orElse(null);
+		UUID innerId = inner((Player)entity, look);
+		Object otherLike = ((Optional<?>)playerData.invoke(null, innerId)).orElse(null);
+		if (otherLike == null) {
+			// (0.17.51) a master's fusion: the one inside is a villager of MCA's in the world, not a player
+			otherLike = villager(innerId);
+		}
 		if (otherLike == null) {
 			return;
 		}
@@ -178,6 +185,19 @@ public final class ZFighterFusionLook {
 			values[i] = blend(components[i].getName(), get.invoke(own), get.invoke(a), get.invoke(b), a, b);
 		}
 		setData.invoke(state, newData.newInstance(dataModel.invoke(data), newVisuals.newInstance(values)));
+	}
+
+	/** The MCA villager with this id in the world, if there is one near enough to be known. */
+	private static @Nullable Object villager(UUID id) {
+		if (Minecraft.getInstance().level == null || likeClass == null) {
+			return null;
+		}
+		for (net.minecraft.world.entity.Entity e : Minecraft.getInstance().level.entitiesForRendering()) {
+			if (e.getUUID().equals(id) && likeClass.isInstance(e)) {
+				return e;
+			}
+		}
+		return null;
 	}
 
 	/** One of MCA's visuals for the fused body, by name: {@code mine} is the body's own (its animation), a and b the two. */

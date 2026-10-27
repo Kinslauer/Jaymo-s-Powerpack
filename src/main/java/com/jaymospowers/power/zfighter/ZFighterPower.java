@@ -565,6 +565,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID);
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
+		remove(player, Attributes.SCALE, ZFighterFusion.SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
 		player.removeAttached(ZFighterWaveBeam.FIRING);
 		ZFighterCombo.drop(player);
@@ -1493,6 +1494,8 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.BONUS_ID, ZFighterFusion.bonus(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, ZFighterFusion.HEALTH_ID, ZFighterFusion.health(player), AttributeModifier.Operation.ADD_VALUE);
+		// (0.17.51) the five-way fusion's giant
+		set(player, Attributes.SCALE, ZFighterFusion.SCALE_ID, ZFighterFusion.scale(player), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		// (0.17.50) the golden ape, the legendary line's bulk, False Super's flicker
 		ZFighterForms.attributes(player, live);
 	}

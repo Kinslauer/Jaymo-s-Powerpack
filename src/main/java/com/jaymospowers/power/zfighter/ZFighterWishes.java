@@ -57,7 +57,7 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  * Wishes: power (5000 TP for a Z Fighter; the Z Fighter power for someone with none; else 30 levels), revive (everyone
  * who died in the last hour comes back to your side with what they dropped), riches, awakening (the way to Super opens),
- * rebirth (the lineage goes back to what your heritage gives) and a blessing on everyone.
+ * rebirth (the lineage goes back to what your heritage gives), a blessing on everyone and (0.17.51) a pair of bonding earrings.
  */
 public final class ZFighterWishes {
 	public static final int POWER = 0;
@@ -66,8 +66,10 @@ public final class ZFighterWishes {
 	public static final int AWAKEN = 3;
 	public static final int REBIRTH = 4;
 	public static final int BLESSING = 5;
-	public static final int WISHES = 6;
-	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing"};
+	/** (0.17.51) A pair of bonding earrings ({@link ZFighterFusionItems}). */
+	public static final int BONDING = 6;
+	public static final int WISHES = 7;
+	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding"};
 
 	static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
@@ -391,6 +393,10 @@ public final class ZFighterWishes {
 					everyone.addEffect(new MobEffectInstance(MobEffects.LUCK, BLESSING_TICKS, 0));
 					everyone.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 600, 1));
 				}
+				yield true;
+			}
+			case BONDING -> {
+				give(player, new ItemStack(ZFighterFusionItems.BONDING_EARRING, 2));
 				yield true;
 			}
 			default -> false;
