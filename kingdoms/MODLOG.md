@@ -5291,3 +5291,6 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
   up is tagged, so a player or mob saved mid-hold gets its gravity back on load. Putting the spirit away ends every hold,
   ward, armour, echo and juggle. `Lockpicking.lockLevel` and `pickBySpirit`, `Pickpocket.liftBySpirit`,
   `MobShields.disable` and `BossBars.boss` opened for the spirits.
+- **Dev runs load worlds again**: the silver sword and the eight steel plate recipes wait for `c:ingots/silver` and
+  `c:ingots/steel` to have items (`fabric:tags_populated`). Powers fills those tags, so in the pack nothing changes; a
+  Kingdoms-only run used to fail registry loading on the missing tags.
