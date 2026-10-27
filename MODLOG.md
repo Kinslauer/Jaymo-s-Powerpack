@@ -3095,3 +3095,17 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   distance and shaders (a Custom preset comes back as Fancy). Complementary's own settings are never touched (its
   licence). State in `config/jaymospowers-low-end.properties`; `LowEndMode.on()` is there for our own effects to
   check later. Not seen in game.
+- **0.17.61, story sagas, side quests and party credit (Andy's NOEA picks, patch 7 track B):** three original sagas
+  (`ZFighterSagas`: A Spark in the Ashes, What the Sky Left Behind, The Hollow Crown; 4 to 6 steps each: speak, reach a
+  stat or form, find a shrine, the Tower or the Time Chamber, defeat foes, hand over goods, defeat a boss) told in the
+  pack's lore (the Aether's scattered remnants, the monoliths and their Giants). Begun from a Story screen opened by a
+  button on the training screen (`ZFighterStoryScreen`), with Easy/Normal/Hard picked at the start (boss health and
+  damage, counts and prizes scale; constants at the top of the class). Bosses are our rogue fighters, landed beside the
+  fighter while the step is open; Giants are named only by entity id (`jaymoskingdoms:<element>_giant`) and the step
+  is passed if none are registered. Progress is the `zfighter_saga` attachment (synced to its owner, kept through
+  death). `ZFighterSideQuests`: short repeatable jobs (defeat foes, hand over goods, win spars) from masters and the
+  Keeper, paying TP and, with Kingdoms, reputation; when no job can be given the same gesture (sneak + right-click
+  holding any item) opens the villager's Kingdoms town errands by reflection. `ZFighterKingdoms.partyMembers` calls
+  `Parties.members` by reflection (falls back to the player alone); kills and bouts credit the party within 64 blocks.
+  Escort jobs were left out (they need a following villager and could not be tried here). Compile-checked only; not
+  seen in game. Abilities rows 441 to 450.

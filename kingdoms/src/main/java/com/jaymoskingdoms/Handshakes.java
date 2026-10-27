@@ -512,13 +512,13 @@ public final class Handshakes {
 		}
 	}
 
-	/** The handshake went through: each knows the other's name, they're grouped, and a chime (a lighter one for a dap). */
+	/** The handshake went through: each knows the other's name, they're in one party (0.7.264: {@link Parties}), and a chime (a lighter one for a dap). */
 	private static void done(ServerPlayer offerer, ServerPlayer taker, Vec3 mid, boolean dap) {
 		Introductions.learn(offerer, taker);
 		Introductions.learn(taker, offerer);
 		remember(offerer, taker);
 		remember(taker, offerer);
-		Component group = Groups.shaken(offerer, taker);
+		Component group = Parties.shaken(offerer, taker);
 		ServerLevel level = offerer.level();
 		if (!dap) {
 			level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, CHIME_VOLUME, CHIME_PITCH);

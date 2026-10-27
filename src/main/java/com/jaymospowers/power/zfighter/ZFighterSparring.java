@@ -276,6 +276,8 @@ final class ZFighterSparring {
 	private static void win(ServerPlayer owner) {
 		int prize = WIN_TP + WIN_TP_PER_FORM * ZFighterTraining.formsOpen(owner);
 		ZFighterTraining.earn(owner, prize);
+		// (0.17.61) a side quest may ask for bouts won
+		ZFighterSideQuests.sparWon(owner);
 		owner.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_spar_won", prize).withStyle(ChatFormatting.GOLD));
 		owner.level().playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
