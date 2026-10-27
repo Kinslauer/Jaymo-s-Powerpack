@@ -3018,3 +3018,5 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `jaymospowers_spent_whale` tag. With Kingdoms it drops whale blubber, meat, bone and sometimes ambergris. Andy wants
   the taut line lifting the thrower kept: it shouldn't be tried unprepared. Merged in #551 claiming 0.17.20/0.7.232,
   which #550 had already used, so renumbered here. Not seen in game.
+- **0.17.25, a loading screen for a story's start (Kingdoms 0.7.236):** newcomers wait behind a loading screen while their
+  capital, whaler or future is made and their landing loads; MCA's creator shows your heritage's look. No Powers changes.

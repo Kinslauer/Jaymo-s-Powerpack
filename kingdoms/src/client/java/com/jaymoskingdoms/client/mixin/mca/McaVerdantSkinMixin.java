@@ -22,6 +22,10 @@ abstract class McaVerdantSkinMixin {
 	private void jaymoskingdoms$verdantSkin(VillagerVisuals visuals, float partialTicks, CallbackInfoReturnable<Integer> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(visuals.entityId());
+		if (entity == null) {
+			// (0.7.236) the figure on MCA's editor, which isn't in the world
+			entity = com.jaymoskingdoms.client.EditorFigure.byId(visuals.entityId());
+		}
 		if (entity != null) {
 			int green = Verdants.skin(entity);
 			if (green != 0) {
@@ -34,6 +38,10 @@ abstract class McaVerdantSkinMixin {
 	private void jaymoskingdoms$heritageSkin(VillagerVisuals visuals, float partialTicks, CallbackInfoReturnable<Integer> cir) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(visuals.entityId());
+		if (entity == null) {
+			// (0.7.236) the figure on MCA's editor, which isn't in the world
+			entity = com.jaymoskingdoms.client.EditorFigure.byId(visuals.entityId());
+		}
 		if (entity != null && !Verdants.is(entity)) {
 			int color = cir.getReturnValueI();
 			int tinted = HeritageVariants.skin(entity, color);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.conczin.mca.Config;
 import net.conczin.mca.entity.VillagerEntityMCA;
+import net.conczin.mca.entity.ai.Genetics;
 import net.conczin.mca.entity.ai.Messenger;
 import net.conczin.mca.entity.ai.Pregnancy;
 import net.conczin.mca.entity.ai.relationship.AgeState;
@@ -76,6 +77,17 @@ final class McaBridge {
 			return name == null || name.isBlank() ? null : name.strip();
 		} catch (RuntimeException e) {
 			return null;
+		}
+	}
+
+	/** (0.7.236) An MCA villager's skin brought into {@code kind}'s range ({@link SkinTones#bornSkin}); anyone else: nothing. */
+	static void keepSkin(net.minecraft.world.entity.Entity entity, Heritage.Kind kind) {
+		if (entity instanceof VillagerEntityMCA v) {
+			Genetics genes = v.getGenetics();
+			float melanin = genes.getGene(Genetics.MELANIN), kept = SkinTones.bornSkin(kind, melanin, v.getRandom());
+			if (kept != melanin) {
+				genes.setGene(Genetics.MELANIN, kept);
+			}
 		}
 	}
 
