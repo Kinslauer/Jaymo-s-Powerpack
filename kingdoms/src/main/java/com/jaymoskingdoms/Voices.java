@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
  * designed from a description, no real person cloned) by {@code tools/voices/make_voices.py}. A line is voiced when its
  * lang key is in {@link #voiced()}; its sound is {@code jaymoskingdoms:voice.<speaker>.<rest of the key>}, the speaker being
  * {@code narrator} for {@code story.jaymoskingdoms.*} and the spirit's id for {@code spirit.jaymoskingdoms.<id>.*}. The
- * text shows anyway (chat, the story page; a question's grey line is only heard since 0.7.256), so the sounds carry no
+ * text shows anyway (chat, the story page; a question's grey line is only heard since 0.7.269), so the sounds carry no
  * subtitles.
  */
 public final class Voices {
@@ -31,7 +31,7 @@ public final class Voices {
 		"spirit.jaymoskingdoms.ambrose.summon.1", "spirit.jaymoskingdoms.ambrose.summon.2", "spirit.jaymoskingdoms.ambrose.summon.3",
 		"spirit.jaymoskingdoms.thessaly.summon.1", "spirit.jaymoskingdoms.thessaly.summon.2", "spirit.jaymoskingdoms.thessaly.summon.3",
 		"spirit.jaymoskingdoms.quiet.word.1");
-	/** (0.7.256) The story's closing line, read after the whole tale (its text is gui.jaymoskingdoms.story.summary_sub). */
+	/** (0.7.269) The story's closing line, read after the whole tale (its text is gui.jaymoskingdoms.story.summary_sub). */
 	public static final String STORY_END = "story.jaymoskingdoms.summary.end";
 
 	/** How loud a spirit is: it speaks at its keeper's shoulder. */
@@ -43,7 +43,7 @@ public final class Voices {
 	}
 
 	/**
-	 * (0.7.256) Every voiced lang key. Andy: "voice the rest of the intro, remove the grey text from showing but make sure
+	 * (0.7.269) Every voiced lang key. Andy: "voice the rest of the intro, remove the grey text from showing but make sure
 	 * the voice still reads it. and make it read out the entire story at the end." So the narrator has each question
 	 * ({@code <q>.title}: the title and the line under it), each realm page ({@code realm.<answer>}: "Which realm?" and its
 	 * line), each answer's tale, and {@link #STORY_END}. {@code tools/voices/make_voices.py} makes a clip for each by the

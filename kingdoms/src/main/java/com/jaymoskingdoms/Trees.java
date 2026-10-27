@@ -574,6 +574,23 @@ public final class Trees {
 		return logs.size();
 	}
 
+	/**
+	 * (0.7.258) Grimsby's axe form (Andy: "the axe should chop trees in a single blow"): the whole tree standing on
+	 * {@code log} comes down at once, toppling away from {@code cutter}, its wood where it lands; a woodcutter's orders count
+	 * it. How many logs, 0 if it isn't a natural tree.
+	 */
+	public static int fellAtOnce(ServerLevel level, BlockPos log, net.minecraft.server.level.ServerPlayer cutter) {
+		BlockState state = level.getBlockState(log);
+		if (!state.is(BlockTags.LOGS) || fallen(level, log, state)) {
+			return 0;
+		}
+		int felled = fell(level, log, cutter, ItemStack.EMPTY, null, false);
+		if (felled > 0) {
+			Careers.felled(level, cutter, log, felled);
+		}
+		return felled;
+	}
+
 	/** (0.7.152) A Giant walks into the tree standing on {@code log}: it topples away from it, if it's a natural tree. */
 	public static void trample(ServerLevel level, BlockPos log, Entity giant) {
 		fell(level, log, giant, ItemStack.EMPTY, null, false);

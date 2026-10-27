@@ -12,14 +12,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Eternal Dragon asks for your wish: six wishes, each with what it grants. Escape doesn't close it; the dragon
+ * The Eternal Dragon asks for your wish: twelve wishes, each with what it grants. Escape doesn't close it; the dragon
  * waits until you wish (or until it tires of waiting, and the orbs scatter all the same). (0.11.0) Restyled like the H
  * screen: a striped row per wish (its name, what it grants in short, a Wish button) and the box at the bottom shows the
  * hovered wish in full, where the tooltips were.
  */
 public class ZFighterWishScreen extends Screen {
 	private static final int MAX_W = 300;
-	private static final int ROW = 18;
+	private static final int ROW = 16;
 	private static final int DETAIL_LINES = 4;
 	private static final int BUTTON_W = 50;
 	private static final int ACCENT = 0xFF3CC85A;
@@ -63,7 +63,7 @@ public class ZFighterWishScreen extends Screen {
 			addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.wish_button"), b -> {
 				ClientPlayNetworking.send(new ZFighterNet.Wish(wish));
 				this.onClose();
-			}).bounds(left() + panelW() - BUTTON_W - 8, rowY(i) + 1, BUTTON_W, 14).build());
+			}).bounds(left() + panelW() - BUTTON_W - 8, rowY(i) + 1, BUTTON_W, 12).build());
 		}
 	}
 

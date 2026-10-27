@@ -140,7 +140,8 @@ final class ZFighterBattle {
 
 	/** A weapon: anything that would hit harder than a fist (its own attack damage, or a weapon's component). */
 	static boolean isWeapon(ItemStack stack) {
-		if (stack.isEmpty()) {
+		// (0.17.60) the fighter's own blades and staff are fists
+		if (stack.isEmpty() || ZFighterWeapons.fistLike(stack)) {
 			return false;
 		}
 		if (stack.has(DataComponents.WEAPON)) {
@@ -197,6 +198,11 @@ final class ZFighterBattle {
 	 * Toughness takes its share off everything that hurts him.
 	 */
 	static float modifyDamage(LivingEntity victim, DamageSource source, float damage) {
+		// (0.17.60) realistic mode: a Z Fighter's fight hits harder both ways, on top of all the rest
+		return ZFighterRealism.damage(victim, source, modifyDamageBase(victim, source, damage));
+	}
+
+	private static float modifyDamageBase(LivingEntity victim, DamageSource source, float damage) {
 		if (damage <= 0.0F) {
 			return damage;
 		}
@@ -204,6 +210,8 @@ final class ZFighterBattle {
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
 			damage = ZFighterFusion.toughness(player, damage);
+			// (0.17.56) a Frost-born's ki-hardened body
+			damage = ZFighterFrostReserve.harden(player, source, damage);
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			damage = ZFighterGuard.guard(player, live, source, damage);
 			if (damage <= 0.0F) {

@@ -90,8 +90,8 @@ import org.jspecify.annotations.Nullable;
  * The per-tick work of seizing and pinning is in {@link HandGrip}.
  */
 public final class HandMoves {
-	/** How far the hands reach (blocks), and how much farther for each level after the first. */
-	public static final double REACH = 16.0, REACH_PER_LEVEL = 1.0;
+	/** How far the hands reach (blocks), and how much farther for each level after the first (Andy: within 20 blocks). */
+	public static final double REACH = 20.0, REACH_PER_LEVEL = 0.0;
 	/** The chance a cast is spoken. */
 	public static final float MOVE_SAY = 0.15F;
 	/** A shove: how hard it throws, how far it reaches (blocks), and the cone's half-angle as a dot product (90 degrees wide). */
@@ -341,12 +341,14 @@ public final class HandMoves {
 				HandGrip.pull(player, item);
 				line(level, player, item.position());
 				CastHints.setPose(player, Poses.GRAB);
+				CastHints.setReach(player, eye.distanceTo(item.position()));
 				return true;
 			}
 			if (target instanceof ItemFrame frame) {
 				InteractionResult result = frame.interact(player, InteractionHand.MAIN_HAND, found.getLocation().subtract(frame.position()));
 				if (result.consumesAction()) {
 					line(level, player, frame.position());
+					CastHints.setReach(player, eye.distanceTo(frame.position()));
 					return true;
 				}
 			}
@@ -361,6 +363,7 @@ public final class HandMoves {
 				return false;
 			}
 			line(level, player, hit.getLocation());
+			CastHints.setReach(player, eye.distanceTo(hit.getLocation()));
 			if (player.containerMenu != player.inventoryMenu) {
 				stretch(player, eye.distanceTo(hit.getLocation()) + 2.0);
 			}
@@ -411,6 +414,7 @@ public final class HandMoves {
 			return false;
 		}
 		HandGrip.seize(player, target);
+		CastHints.setReach(player, player.getEyePosition().distanceTo(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0)));
 		if (player.level() instanceof ServerLevel level) {
 			line(level, player, target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		}
@@ -523,6 +527,7 @@ public final class HandMoves {
 			return false;
 		}
 		HandGrip.pin(player, mob);
+		CastHints.setReach(player, player.getEyePosition().distanceTo(mob.position().add(0.0, mob.getBbHeight() * 0.5, 0.0)));
 		if (player.level() instanceof ServerLevel level) {
 			line(level, player, mob.position().add(0.0, mob.getBbHeight() * 0.5, 0.0));
 		}

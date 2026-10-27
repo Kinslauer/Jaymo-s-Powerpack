@@ -95,6 +95,8 @@ public final class SpiritArms {
 	 * up. Called out, the spirit shows itself once (its summon is a move) and then waits unseen, but for the odd wisp.
 	 */
 	static final float APPEAR_TICKS = 3.0F, LINGER_TICKS = 12.0F, FADE_TICKS = 10.0F;
+	/** While the spirit speaks the arm shows itself, as an arm by its keeper, for this long (Andy: "they pop in whenever they speak"). */
+	static final float SPEAK_TICKS = 70.0F;
 	/** Unseen and waiting: the chance each tick of one wisp at the shoulder. */
 	static final float WAIT_WISP_CHANCE = 0.04F;
 	/** The sickness flicker: ticks between flickers (longest, shortest), how long one shows, how strong the arm is. */
@@ -107,7 +109,7 @@ public final class SpiritArms {
 	 * What one being's spirit looks like this frame: its {@code kind}, how far manifest it is (0-1), the {@code pose} it holds
 	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}).
 	 */
-	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size) {
+	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach) {
 	}
 
 	/** Arm angle offsets (x, y, z in radians, for the right arm; the left mirrors y and z) added to the wearer's own arm for each pose. */
@@ -156,6 +158,7 @@ public final class SpiritArms {
 		TABLE[Poses.SILENT] = new float[] {-2.40F, -0.20F, 0.05F};  // drawn back, then thrust (poseAdjust)
 		TABLE[Poses.SENSE] = new float[] {-0.10F, 0.30F, 1.50F};    // spread wide and still
 		TABLE[Poses.CLASH] = new float[] {-1.57F, -0.65F, 0.05F};   // both thrust forward, hands locked at full reach
+		TABLE[Poses.SPEAK] = TABLE[Poses.IDLE];                     // as it rests (the floating ones take their own rest)
 	}
 
 	/** How far manifest each being's arms are: eased from where they were when the spirit went out or away. */
@@ -237,7 +240,7 @@ public final class SpiritArms {
 		if (spirit == null) {
 			TRACKS.remove(entity.getId());
 			if (flickerLeft > 0 && entity == minecraft.player) {
-				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size());
+				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0);
 			}
 			return null;
 		}
@@ -268,7 +271,16 @@ public final class SpiritArms {
 			weight = age < POSE_TICKS ? Math.min(1.0F, age / POSE_IN) : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
-		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit));
+		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit), spirit.reach());
+	}
+
+	/** How far beyond its keeper's box a being's spirit hand reaches now (blocks), for the culling box; 0 for none. */
+	public static float cullingReach(Entity entity) {
+		SpiritState spirit = entity instanceof LivingEntity living ? living.getAttached(Spirits.SPIRIT) : null;
+		if (spirit == null || !spirit.out() || spirit.reach() == 0 || presence(spirit, entity.level().getGameTime()) <= 0.0F) {
+			return 0.0F;
+		}
+		return spirit.reach() + 1.0F;
 	}
 
 	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
@@ -287,7 +299,7 @@ public final class SpiritArms {
 			float k = age / APPEAR_TICKS;
 			return k * k * (3.0F - 2.0F * k);
 		}
-		float gone = age - (POSE_TICKS + POSE_OUT + LINGER_TICKS);
+		float gone = age - (spirit.pose() == Poses.SPEAK ? SPEAK_TICKS : POSE_TICKS + POSE_OUT + LINGER_TICKS);
 		return gone <= 0.0F ? 1.0F : Mth.clamp(1.0F - gone / FADE_TICKS, 0.0F, 1.0F);
 	}
 
@@ -405,13 +417,16 @@ public final class SpiritArms {
 			return;
 		}
 		float size = Math.min(Spirits.of(spirit.kind()).size(spirit), FLOAT_SIZE_CAP);
-		Vec3 at = entity.getEyePosition().add(entity.getLookAngle().scale(BURST_AHEAD + BURST_AHEAD * size));
+		// where the hand landed: as far as it reached out, or just ahead
+		double out = spirit.reach() > 0 ? spirit.reach() : BURST_AHEAD + BURST_AHEAD * size;
+		Vec3 at = entity.getEyePosition().add(entity.getLookAngle().scale(out));
 		DustParticleOptions dust = new DustParticleOptions(mix(Spirits.of(spirit.kind()).color()) & 0xFFFFFF, 1.6F);
 		var random = entity.getRandom();
 		if (spirit.pose() == Poses.HAMMER || spirit.pose() == Poses.SLAM) {
 			// a slam lands on the ground in front: a ring of aura thrown out along it
 			Vec3 flat = new Vec3(entity.getLookAngle().x, 0.0, entity.getLookAngle().z).normalize();
-			at = entity.position().add(flat.scale(SLAM_AHEAD + SLAM_AHEAD * size)).add(0.0, 0.1, 0.0);
+			at = spirit.reach() > 0 ? new Vec3(at.x, entity.getY() + 0.1, at.z) // (a far slam: on the ground under where it struck)
+				: entity.position().add(flat.scale(SLAM_AHEAD + SLAM_AHEAD * size)).add(0.0, 0.1, 0.0);
 			for (int n = 0; n < SLAM_RING; n++) {
 				double a = n * Mth.TWO_PI / SLAM_RING;
 				double vx = Math.cos(a) * SLAM_SPEED, vz = Math.sin(a) * SLAM_SPEED;
@@ -687,9 +702,10 @@ public final class SpiritArms {
 			float reach = Math.min(size, FLOAT_SIZE_CAP);
 			int poseId = Mth.clamp(look.pose(), 0, Poses.COUNT - 1);
 			float[] idle = floats ? FLOAT_IDLE : TABLE[Poses.IDLE];
-			float[] target = TABLE[poseId];
+			float[] target = poseId == Poses.SPEAK ? idle : TABLE[poseId];
 			float age = Math.max(0.0F, look.poseAge() - this.lag);
 			float w = look.poseWeight();
+			int mode = mode(look);
 			for (int i = 0; i < 2; i++) {
 				ModelPart arm = i == 0 ? this.rightArm : this.leftArm;
 				ModelPart from = i == 0 ? parent.rightArm : parent.leftArm;
@@ -699,7 +715,9 @@ public final class SpiritArms {
 				SpiritRig.Frame f = this.frame;
 				// (a ghost of the trail lags the idle as well as the move, so the idle's movement leaves a wisp too)
 				float time = state.ageInTicks - this.lag;
-				SpiritRig.frame(f, poseId, age, w, idle, target, floats, i, time);
+				// reaching out, only the first hand goes; the other waits at rest
+				boolean waits = mode == REACHING && i == 1;
+				SpiritRig.frame(f, waits ? Poses.IDLE : poseId, age, waits ? 0.0F : w, idle, target, floats, i, time);
 				float drift = SWAY * Mth.sin(time * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
 				f.sx += w * poseAdjust(poseId, age, i) + drift;
 				if (floats) {
@@ -711,19 +729,125 @@ public final class SpiritArms {
 				arm.xRot += f.sx;
 				arm.yRot += f.sy * side;
 				arm.zRot += f.sz * side;
-				(i == 0 ? this.right : this.left).pose(f, side);
+				boolean shaped = mode != NORMAL && !waits;
 				if (floats) {
 					// hovering above and ahead of the shoulder (model -y is up, -z ahead; the right arm's outside is -x)
 					arm.y -= FLOAT_UP * reach;
 					arm.z -= FLOAT_AHEAD * reach;
 					arm.x -= side * FLOAT_OUT * reach;
-				} else {
+				} else if (!shaped) {
 					// grown about the shoulder, and pushed behind (the model's +z is the back)
 					arm.z += BEHIND * size;
 				}
+				if (shaped) {
+					shape(arm, f, mode, look, state, age, w, size, side, look.arms() >= 2);
+				}
+				(i == 0 ? this.right : this.left).pose(f, side);
 				arm.xScale = size;
 				arm.yScale = size;
 				arm.zScale = size;
+			}
+		}
+	}
+
+	// ---- what a use becomes ------------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy (2026-10-27): the arm is only the spirit's rest and its talk; "every other use becomes what it entails". Beyond the
+	 * poses of the table, three uses take the hand where the use is: a move that touched something away from its keeper
+	 * ({@link Look#reach()}, synced from the server) shoots the hand out along your aim the whole way there, the arm stretching
+	 * (Nero's Devil Breaker), and swings or slams its weapon at the end; the aegis and the ward swell the hand into a shield held
+	 * in front of you, palm out; catch me cups the hands beneath your feet.
+	 */
+	static final int NORMAL = 0, REACHING = 1, SHIELD = 2, BENEATH = 3;
+	/** The eye's height in model pixels (a standing player's), and the feet's. */
+	static final float EYE_Y = -3.65F, FEET_Y = 24.0F;
+	/** Model pixels a block is (the player model is drawn at 0.9375). */
+	static final float PX_PER_BLOCK = 16.0F / PLAYER_SCALE;
+	/** The hand's middle beyond the wrist (pixels at size 1), so the hand, not the wrist, lands on what it reaches. */
+	static final float HAND_PX = 3.0F;
+	/** Reaching: the least it reaches from the eye as it sets off (blocks); a swing's sweep into its mark (radians); a slam's raise. */
+	static final float REACH_FROM = 0.7F, REACH_SWEEP = 0.7F, REACH_RAISE = 1.1F;
+	/** The shield: how far ahead of the eye (blocks), how far below the aim, the two hands apart (blocks), how big the hand swells. */
+	static final float SHIELD_OUT = 1.25F, SHIELD_DROP = 0.3F, SHIELD_APART = 0.32F, SHIELD_HAND = 2.8F;
+	/** Beneath: the hands' gap (pixels), how far ahead of the feet (pixels), how far below them, how big they swell, their cup. */
+	static final float BENEATH_APART = 3.0F, BENEATH_AHEAD = 1.5F, BENEATH_DROP = 2.0F, BENEATH_HAND = 2.6F, BENEATH_CUP = 0.45F;
+	/** Ticks the shield and the cradle take to form. */
+	static final float FORM_TICKS = 3.0F;
+
+	static int mode(Look look) {
+		return switch (look.pose()) {
+			case Poses.AEGIS, Poses.WARD -> SHIELD;
+			case Poses.CATCH_ME -> BENEATH;
+			case Poses.IDLE, Poses.SPEAK -> NORMAL;
+			default -> look.reach() > 0 ? REACHING : NORMAL;
+		};
+	}
+
+	/** Takes {@code arm} (its pivot already placed) where the use is, and sets the joints below it in {@code f}. */
+	private static void shape(ModelPart arm, SpiritRig.Frame f, int mode, Look look, HumanoidRenderState state, float age, float w,
+		float size, float side, boolean pair) {
+		float hold = age < POSE_TICKS ? 1.0F : w;
+		float pitch = state.xRot * Mth.DEG_TO_RAD, yaw = state.yRot * Mth.DEG_TO_RAD;
+		// the aim, in the model's own space (y down, -z ahead, the right side -x)
+		float dx = -Mth.cos(pitch) * Mth.sin(yaw), dy = Mth.sin(pitch), dz = -Mth.cos(pitch) * Mth.cos(yaw);
+		float tx, ty, tz;
+		switch (mode) {
+			case REACHING -> {
+				// out along the aim, landing as the blow does, overshooting a touch, drawn back as the pose lets go
+				float out = SpiritRig.backOut(Math.min(1.0F, age / SpiritRig.HIT_T)) * hold;
+				float blocks = Mth.lerp(out, REACH_FROM, look.reach());
+				tx = dx * blocks * PX_PER_BLOCK;
+				ty = EYE_Y + dy * blocks * PX_PER_BLOCK;
+				tz = dz * blocks * PX_PER_BLOCK;
+			}
+			case SHIELD -> {
+				float flat = pitch * 0.5F;
+				float fx = -Mth.cos(flat) * Mth.sin(yaw), fy = Mth.sin(flat), fz = -Mth.cos(flat) * Mth.cos(yaw);
+				float apart = pair ? SHIELD_APART * side : 0.0F;
+				tx = (fx * SHIELD_OUT - Mth.cos(yaw) * apart) * PX_PER_BLOCK;
+				ty = EYE_Y + (fy * SHIELD_OUT + SHIELD_DROP) * PX_PER_BLOCK;
+				tz = (fz * SHIELD_OUT + Mth.sin(yaw) * apart) * PX_PER_BLOCK;
+			}
+			default -> {
+				tx = pair ? -BENEATH_APART * side : 0.0F;
+				ty = FEET_Y + BENEATH_DROP;
+				tz = -BENEATH_AHEAD;
+			}
+		}
+		float vx = tx - arm.x, vy = ty - arm.y, vz = tz - arm.z;
+		float len = Math.max(0.01F, Mth.sqrt(vx * vx + vy * vy + vz * vz));
+		arm.xRot = -Mth.HALF_PI + (float)Math.asin(Mth.clamp(vy / len, -1.0F, 1.0F));
+		arm.yRot = (float)Mth.atan2(-vx, -vz);
+		arm.zRot = 0.0F;
+		f.elbow = 0.0F;
+		f.reach = Math.max(0.0F, (len / size - SpiritRig.ELBOW_Y - SpiritRig.FORE - HAND_PX) / SpiritRig.FORE);
+		float formed = SpiritRig.backOut(Math.min(1.0F, age / FORM_TICKS)) * hold;
+		switch (mode) {
+			case REACHING -> {
+				float k = Math.min(1.0F, age / SpiritRig.HIT_T);
+				int how = SpiritRig.shape(look.pose()).how();
+				if (look.pose() == Poses.HAMMER || look.pose() == Poses.SLAM) {
+					// raised high as it goes out, brought down on the mark
+					arm.xRot -= REACH_RAISE * (1.0F - k);
+				} else if (how == SpiritRig.SWING) {
+					// swept in from the side onto the mark
+					arm.yRot += REACH_SWEEP * side * (1.0F - k);
+				}
+			}
+			case SHIELD -> {
+				// the hand bent up at the wrist, palm out, fingers spread wide and swelling into the shield
+				f.wrist = -Mth.HALF_PI * formed;
+				f.curl = 0.0F;
+				f.spread = 1.0F;
+				f.hand = Mth.lerp(formed, 1.0F, SHIELD_HAND);
+			}
+			default -> {
+				// the hand turned palm up under you, cupped, swelling into a cradle
+				f.wrist = -Mth.HALF_PI * formed;
+				f.curl = BENEATH_CUP;
+				f.spread = 0.7F;
+				f.hand = Mth.lerp(formed, 1.0F, BENEATH_HAND);
 			}
 		}
 	}

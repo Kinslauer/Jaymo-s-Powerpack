@@ -45,7 +45,7 @@ final class LifeStoryScreen extends Screen {
 	static final long LIVE_GRACE_MS = 3000L;
 	/** Pixels the story page moves for one notch of the wheel. */
 	static final int SCROLL_STEP = 12;
-	/** (0.7.256) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
+	/** (0.7.269) The pause between two lines the narrator reads, and how long a line is given to start (ms). */
 	static final long READ_GAP_MS = 350L, READ_START_MS = 500L;
 
 	/** One page: a question, the realm to name for a question's answer, or the story read back. */
@@ -79,7 +79,7 @@ final class LifeStoryScreen extends Screen {
 	private static @Nullable String narrated;
 	private static @Nullable SimpleSoundInstance reading;
 	private static final ArrayDeque<String> toRead = new ArrayDeque<>();
-	/** (0.7.256) When the line being read began, and when the next may (ms). */
+	/** (0.7.269) When the line being read began, and when the next may (ms). */
 	private static long readFrom, readNext;
 
 	LifeStoryScreen(boolean forced) {
@@ -327,7 +327,7 @@ final class LifeStoryScreen extends Screen {
 
 	/**
 	 * (0.7.251) The narrator reads a page when it first shows ({@link Voices}): a question's title and the line under it,
-	 * a realm page's ask, and (0.7.256) on the story page the whole tale, line by line with {@link #READ_GAP_MS} between,
+	 * a realm page's ask, and (0.7.269) on the story page the whole tale, line by line with {@link #READ_GAP_MS} between,
 	 * then the closing line. Turning the page cuts the reading short. The realm a tale names isn't read: the clip says
 	 * "the realm".
 	 */
@@ -488,7 +488,7 @@ final class LifeStoryScreen extends Screen {
 		Ui.panel(graphics, x, y, w, h, ACCENT);
 		graphics.fill(x + TELL_W - 1, y + 4, x + TELL_W, y + h - 4, Ui.ROW);
 
-		// the header over the right: the question (or the realm's, or the story's); (0.7.256) the line under it is only heard
+		// the header over the right: the question (or the realm's, or the story's); (0.7.269) the line under it is only heard
 		int px = paneX(), pw = paneW();
 		Ui.line(graphics, this.font, heading(s), px + 8, y + 7, pw - 16, Ui.TEXT);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);

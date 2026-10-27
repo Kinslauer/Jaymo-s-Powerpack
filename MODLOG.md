@@ -3071,3 +3071,133 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   page, and every mana spirit speaks its three summon lines (the Quiet One its one word) to its keeper alone, with the
   chat line as before. 14 clips (612 KB) made with VoxCPM2 (Apache-2.0; voices designed from a description, no real
   person cloned) by `tools/voices/make_voices.py`; Kingdoms' `Voices` maps a lang key to its sound. No Powers changes.
+- **0.17.49, spirit hands become what they do (Kingdoms 0.7.258):** a mana spirit is an arm only at rest and while it
+  speaks; the aegis is a shield of a hand in front of you, catch me cups hands beneath you, and the weapon forms and far
+  hand shoot out to what you aim at within 20 blocks; the axe fells a whole tree in one blow. No Powers changes.
+- **0.17.51, sailors not guards (Kingdoms 0.7.259):** no guards or armour on any ship; every crewman is a sailor who
+  takes up their weapon when a fight starts and puts it away after; the sea no longer shows inside a ship's hold.
+- **0.17.55, stomping Giants and Great Apes (Kingdoms 0.7.261):** the Aether Giants stomp with every step, a shockwave
+  of dust running out along the ground that cracks it and hurts whoever isn't jumping, and walk with a slow, swaying
+  stride at the same speed. Andy: "same with apes": every Great Ape footfall (a player's or a raging villager's,
+  `ZFighterLineage.footfall`) now sends out a ring of dust and puffs to its reach (`ZFighterApeSteps`, from the new
+  `ZFighterNet.ApeStep` packet), cracks the ground round the foot (`core/GroundCracks`, fading over 5 s, nothing broken)
+  and spares whoever is off the ground; its reach is 6 blocks (was 4.5). A step every 5 blocks (was 3), and the ape's
+  model plays vanilla's own walk on that slower stride, kept in step with the server's footfalls. Not seen in game.
+- **0.17.57, bigger monoliths (Kingdoms 0.7.263):** the Aether monoliths stand three times as big, built of the Aether's
+  own stone (holystone, ferrosite, icestone, irradiated holystone), and only a diamond-tier-or-better Tinkers tool can
+  break them. No Powers changes.
+- **0.17.59, low-end mode:** Andy asked for Luxium (cheap shadows/lighting/fog for weak PCs); it's 1.20.1 only, its
+  licence bans ports, and it can't run beside Iris, so the pack has its own answer instead (`client/LowEndMode`).
+  Once per install, after the game starts, a weak PC (built-in graphics: Intel, AMD Radeon APUs, software or virtual; under 3500 MB
+  given to Java; 2 cores or fewer) gets shaders switched off through Iris's API and vanilla's Fast graphics preset
+  (render 8, simulation 6, fast clouds, fewer particles, no entity shadows or smooth lighting), and the first world it
+  joins says why in chat. `/lowend on|off` switches it any time; off puts back the preset, render and simulation
+  distance and shaders (a Custom preset comes back as Fancy). Complementary's own settings are never touched (its
+  licence). State in `config/jaymospowers-low-end.properties`; `LowEndMode.on()` is there for our own effects to
+  check later. Not seen in game.
+- **0.17.61, story sagas, side quests and party credit (Andy's NOEA picks, patch 7 track B):** three original sagas
+  (`ZFighterSagas`: A Spark in the Ashes, What the Sky Left Behind, The Hollow Crown; 4 to 6 steps each: speak, reach a
+  stat or form, find a shrine, the Tower or the Time Chamber, defeat foes, hand over goods, defeat a boss) told in the
+  pack's lore (the Aether's scattered remnants, the monoliths and their Giants). Begun from a Story screen opened by a
+  button on the training screen (`ZFighterStoryScreen`), with Easy/Normal/Hard picked at the start (boss health and
+  damage, counts and prizes scale; constants at the top of the class). Bosses are our rogue fighters, landed beside the
+  fighter while the step is open; Giants are named only by entity id (`jaymoskingdoms:<element>_giant`) and the step
+  is passed if none are registered. Progress is the `zfighter_saga` attachment (synced to its owner, kept through
+  death). `ZFighterSideQuests`: short repeatable jobs (defeat foes, hand over goods, win spars) from masters and the
+  Keeper, paying TP and, with Kingdoms, reputation; when no job can be given the same gesture (sneak + right-click
+  holding any item) opens the villager's Kingdoms town errands by reflection. `ZFighterKingdoms.partyMembers` calls
+  `Parties.members` by reflection (falls back to the player alone); kills and bouts credit the party within 64 blocks.
+  Escort jobs were left out (they need a following villager and could not be tried here). Compile-checked only; not
+  seen in game. Abilities rows 441 to 450.
+- **0.17.62, the space pod and planet missions (Andy's NOEA picks, patch 8 track A):** `ZFighterSpace`: a craftable Space Pod
+  (a block; right-click opens the Star Map, `ZFighterStarMapScreen`) that flies to five new dimensions of our own, each with
+  datapack terrain (`tools/gen_zfighter_space.py` writes the JSON and the art): the Pale Moon (own noise settings and surface rule,
+  dry aquifers, gravity 35% via an attribute modifier), Rustfall (the Overworld's noise with a checkerboard of badlands biomes,
+  gravity 2.2, slower, lower jumps, Z Fighters train twice as fast), Glacia (the Overworld's noise with the sea at 84 over snowy
+  and ice-spike biomes), Cinder (the Nether's noise settings with our own biome adding iron, diamond, emerald and redstone veins
+  to the Nether's; heat is extra exhaustion) and the Maw (a flat void with a black sphere, a glass ring, a slow pull on players
+  and a tide at the rim, nine floating wrecks with the `chests/maw_wreck` loot table). The Verdant World and the future join
+  the map (the future through new public `Future.podReady/podGo/podBack`, with no Echo needed, and a pod set down beside the
+  arrival). Travel is a 3 second countdown, a lift, and a controlled descent onto a landing pad found, flattened and built on
+  the first landing (saved on the dimension as `zfighter_space_pad`) with a pod standing on it; Home brings you down by the pod
+  you left from (`zfighter_space_home`). `ZFighterSpaceMissions`: on Rustfall, Glacia and Cinder a mission to free the world
+  (4 captains, then a boss) or conquer it (4 champions, then plant a Conquest Flag), picked by the Rogue path in Jaymo's
+  Kingdoms (`ZFighterKingdoms.rogue`; without Kingdoms, freeing); the fighters are our rogue tyrants scaled down (and by the
+  planet and the party), tagged so the raid prize skips them; kills and the flag count for the killer's party within 64 blocks
+  (`ZFighterSagas.witnesses`); TP, ores and a planet title are the prize; progress is the synced `zfighter_space` attachment.
+  Compile-checked only. Not seen in game: none of the dimension JSON has been loaded by a server (see the track report's
+  worldgen caveats). Abilities rows 456 to 467.
+- **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B; reworked onto the pack's own worlds at Andy's
+  request: no new dimensions, no portals, no rite):** `ZFighterAfterlife`: a Z Fighter who truly dies (an `AFTER_DEATH` that
+  something else has not cancelled, not at the Other World already, `afterlife=true` in `config/jaymospowers-server.properties`,
+  the file `ZFighterRealism` reads, written with the new key when missing) is noted, and one tick after his normal respawn is
+  moved to the Other World, a site in the Aether (`jaymospowers:aether`, the dimension Wind rises into) at x 20000, z 20000, floor
+  y 200 (`SITE_X`, `SITE_Z`, `FLOOR`): far from the lowland islands Wind arrives on, above them and the broken islets. The first
+  arrival builds it by code: an elliptical platform (108 by 92 blocks, aether grass over aether dirt over holystone, hanging
+  deeper at the middle) with the air over it cleared, and on it the hall, a 40-block quartz road south to a pavilion, the
+  tournament ring and the fortune teller's tent (no ground to search for: the site is always a platform, so it never depends on
+  the islands' noise). "In the Other World" is now "within 64 blocks of the platform's middle in the Aether"
+  (`inSite`, `inOtherWorld`); the training bonus uses it too. The death is never touched, so drops, the keep-inventory rule,
+  Kitchen's corpses, the downed state, wounds and every other mod's death handling run as before. He wakes in the judge's hall
+  with a halo (the `zfighter_afterlife_stay` attachment, synced to all; `ZFighterHalo` draws a ring of gold dust on each
+  client). The Master of the Road gives one lesson a stay and bonus TP (training pays 1.5 times at the site), a ring with a bell
+  holds three bouts against spirit fighters (vanilla vindicators with no axe) for TP, and a fortune teller sends him back
+  free after the tournament, for 24 emeralds or 400 TP, or by the new 13th wish (`ZFighterWishes.CALL_BACK`, lang
+  `wish.jaymospowers.zfighter.call_back`). After 30 minutes he is let go anyway; falling off the island takes him out of the
+  Aether as it takes anyone (Wind's fall-home) and the halo is dropped. A player who reaches the site alive (Wind) has no halo
+  and no timer and is never sent back, but may use the master, the ring and the training bonus. `ZFighterDemonRealm`: the three
+  demon biomes (`demon_gloam`, `demon_ash`, `demon_abyss`, valid Nether biomes with the Nether's carver, ores, springs and
+  glowstone) are added to the vanilla Nether's biome source with Fabric's `NetherBiomes.addNetherBiome`, at far corners of the
+  Nether's temperature and humidity plane that the vanilla biomes leave empty (Gloam 0.6, -0.65; Ash -0.7, -0.7; Abyss 0.85, 0.85;
+  the other climate axes 0, as the Nether's are), so they are uncommon, the Abyss the rarest. Villages are built by code in a
+  seeded grid of 128-block cells when a player is within 56 blocks and the spot (and its four edge points) is in a demon biome,
+  each with a dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark
+  lesson; the army is vanilla fighters under a demon name and tag, spawned in squads around each player standing in a demon
+  biome, stronger from the Gloam to the Ash to the Abyss (the old three layers). Compile-checked only; how rare the biomes come
+  out, the platform's first build (about 40 chunks of Aether generated at once), the Nether villages' fit to the caves, and both
+  death-time moves have not been seen in game. Abilities rows 468 to 478.
+- **0.17.63, demon biomes after TaCZ (crash fix):** 0.17.62 crashed on start, server and client ("Errors during registry
+  creation ... No value registered for key jaymospowers:demon_abyss", from `TaCZFabric.<clinit>`). TaCZ builds
+  `VanillaRegistries.createWorldLookup()` in its main entrypoint, and once `NetherBiomes.addNetherBiome` has run the Nether
+  preset asks for the demon biomes there, where only vanilla's exist. `ZFighterDemonRealm.addBiomes` now runs from the server
+  and client entrypoints (after every mod's main one) instead of `init`; the world's registries come later from the data
+  files, so the biomes still generate.
+- **0.17.66, the Moon's surface rule (crash fix):** creating a world failed at "Preparing for world creation" ("Failed to
+  parse jaymospowers:moon ... Not a string: {"Name":"minecraft:tuff"}"): `worldgen/material_rule/moon.json` wrote its
+  block states in the old `{"Name": ...}` form, which 26.3's surface rules don't read. They're plain block ids now, as in
+  `aether.json`. It broke every new world, singleplayer and server.
+
+- **0.17.67, the guard and the parry for everyone; lock-on lunge:** Andy wanted parries easier than ours and combat more
+  dynamic with the lock-on. Mallard Guard is All Rights Reserved and NeoForge 1.21.1 only, so `combat/Guard` is our own after
+  its idea: every melee weapon or tool with nothing on right click gets vanilla's `blocks_attacks` component and raises a guard
+  (60% of a frontal blow, feathers per blow, a guard break when they run out); for that guard and for shields, a blow in the
+  first 5 ticks of a raise is a perfect parry and up to 12 a parry (+2/+4 ticks against your lock-on target; no window for a
+  mashed raise). A parry takes nothing, shoves and stuns the attacker, and owes a riposte (`mixin/GuardRiposteMixin`, 1.5x or
+  1.25x on the next blow). `client/combat/GuardClient` draws a timing bar and parry flash and steps you in when you swing at a
+  locked foe up to 3 blocks past your reach; `client/mixin/GuardFirstPersonMixin` turns the blade across in first person.
+  Darktide's and Z Fighter's parry windows are 8 ticks now. Spec: `docs/guard.md`. Compile-checked only.
+  Enemies too (Kingdoms 0.7.267): fighters raise their blade and parry players (first 8 ticks of their guard, else
+  12%/30% by experience), and every Better Combat swing a fighter starts shows a glint, red for heavy blows that carry
+  `Guard.UNPARRYABLE_TAG` and can't be parried.
+  Every mob too (`combat/AttackTells`, `mixin/AttackTellGoalMixin` on MeleeAttackGoal, `mixin/AttackTellBrainMixin` on the
+  MeleeAttack behaviour): a melee blow glints and lands 6 ticks later if the target is still in reach and sight (red and
+  unparryable for 10+ attack damage or 1.35+ wide bodies); the Burrukai's charge and Bladeshroom Hunter's cut glint too.
+  Guns (Andy: "All guns should red glint too"): `FutureGuns` gunners glint red with a click 10 ticks before each burst, and
+  their bullets carry the unparryable tag; `Guard` now counts hitscan shots as projectiles, and a tagged ball or any TaCZ
+  bullet is blocked but never parried.
+- **0.17.68, the Giants' and Great Apes' grab (Kingdoms 0.7.268):** Andy: "Giants and apes need a grab attack that is
+  telegraphed and fairly slow, but deals massive damage to a single target, with a letterboxed animation". `power/zfighter/ApeGrab`:
+  the Great Ape's grab in five phases, 30 ticks of wind-up with a roar and the right hand reared up behind him (red motes at the
+  hand; step out of its reach and it closes on nothing), 8 ticks of the hand coming down, 40 held at his chest and squeezed (a
+  blow's 0.3 every 10 ticks), 8 of hurling the catch into the ground (4 blows' worth, `GroundCracks`, an impact frame, a shake,
+  the catch flung clear), 20 of straightening up. The catch is carried every tick (players by `teleportTo` keeping their
+  rotation, mobs by `setPos` facing him), can't be bigger than the ape, another ape, or a creative/spectating player. A Z
+  Fighter's ape grabs by holding the punch (`ApeSmash`) 50 ticks (`HOLD_TO_GRAB`; a growl and a puff of red when it's ready),
+  taking the nearest thing in front of him his hand reaches, else the punch lands as before; the wild apes (a Warrior-born's and
+  the raging villagers', `VillagerApe`) grab their quarry every 300 ticks or so instead of a swing. Synced attachment `GRAB`
+  (`Grab(start, held)`) poses the arm on every client (`ZFighterApe.Model.grab`, the twin of Kingdoms' `GiantModel.grab`) and
+  holds the wild ape's player still (`ZFighterApeInputMixin`). The film (`UltimateFilm.PUSH_IN`, 56 ticks): the catch, a
+  player, sees the ape's face come down on them, the ape's own player watches over his shoulder, everyone within 48 blocks gets
+  the bars. Kingdoms' `AetherGiant` has the same grab (its own target, 9-block reach, 4 squeeze / 40 slam, every 400-600
+  ticks), and calls the film through `PowersCompat.film` by reflection. Lang line `zfighter_ape_grabbed`. Compile-checked only:
+  the carry's smoothness for a player (teleports every tick) and the hand's fit to the model have not been seen in game.

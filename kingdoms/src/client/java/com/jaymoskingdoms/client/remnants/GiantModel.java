@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.remnants;
 
+import com.jaymoskingdoms.remnants.AetherGiant;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -28,9 +29,16 @@ final class GiantModel extends EntityModel<GiantState> {
 	private static final float BLOW_LIFT = 2.4F, BLOW_TICKS = 12.0F, STAMP_PITCH = 0.35F;
 	/** Its hunch (radians). */
 	private static final float HUNCH = 0.22F;
-	/** Its stride, how far its legs swing, and its arms' swing, twist and flare out from the chest (at rest, and more at each stride's peak). */
-	private static final float STRIDE = 0.35F, LEG_SWING = 1.0F, ARM_SWING = 0.85F, ARM_TWIST = 0.22F, ARM_FLARE = 0.2F,
-		ARM_FLARE_PEAK = 0.22F;
+	/**
+	 * How far its legs swing, and its arms' swing, twist and flare out from the chest (at rest, and more at each stride's
+	 * peak). (0.7.261) Andy: "a slow sway ... removing that fast swing": the legs keep to the server's steps (one every
+	 * {@code AetherGiant#STEP_LENGTH} blocks, {@link GiantState#stride}) instead of vanilla's walk, which a 30-block body
+	 * ran through four times too fast; the swings are smaller, and it sways with them: its weight rolls onto the foot coming
+	 * down, its shoulders turn with the arm swinging forward, and it sinks onto each footfall, so its feet keep to the
+	 * ground (its legs are {@link #LEG_LENGTH} long).
+	 */
+	private static final float LEG_SWING = 0.6F, ARM_SWING = 0.55F, ARM_TWIST = 0.18F, ARM_FLARE = 0.2F, ARM_FLARE_PEAK = 0.18F,
+		ROLL = 0.07F, SHOULDER_TWIST = 0.09F, LEG_LENGTH = 14.0F;
 	/** How it flinches when hit (body, head, arms). */
 	private static final float FLINCH_BODY = 0.42F, FLINCH_HEAD = 0.6F, FLINCH_ARM = 0.6F;
 	/** Its death: when it hits the ground and breaks up (vanilla takes the body away at 20 ticks). */
@@ -43,6 +51,12 @@ final class GiantModel extends EntityModel<GiantState> {
 		SCATTER_SPREAD = 1.4F;
 	/** The thud of its chest hitting the ground (pixels up, over this many ticks). */
 	private static final float THUD = 2.0F, THUD_TICKS = 4.0F;
+	/**
+	 * (0.7.268) Its grab ({@link #grab}): the arm drawn up behind it in the wind-up, down to the ground for the snatch, held
+	 * out ahead at its chest, then hurled down; how far its body leans back winding up and forward for the snatch and slam.
+	 */
+	private static final float GRAB_RAISED = -2.8F, GRAB_FLARE = 0.5F, GRAB_DOWN = -0.35F, GRAB_HELD = -1.35F, GRAB_HURLED = 0.3F,
+		GRAB_LEAN_BACK = -0.3F, GRAB_LEAN_FORWARD = 0.45F, GRAB_TREMBLE = 0.04F;
 
 	private final ModelPart body, shards, head, crown, rightArm, leftArm, rightLeg, leftLeg;
 
@@ -102,17 +116,25 @@ final class GiantModel extends EntityModel<GiantState> {
 			this.fall(state.seed, Math.min(state.deathTime, DEATH_TICKS));
 			return;
 		}
-		float walk = Mth.cos(state.walkAnimationPos * STRIDE), amount = Math.min(state.walkAnimationSpeed, 1.0F);
-		this.rightLeg.xRot = walk * LEG_SWING * amount;
-		this.leftLeg.xRot = -walk * LEG_SWING * amount;
-		// its weight rolls from foot to foot
-		this.body.zRot = walk * 0.06F * amount;
+		// 1 as its right foot comes down ahead (even steps), -1 as its left does
+		float walk = Mth.cos(state.stride * Mth.PI), amount = Math.min(state.walkAnimationSpeed, 1.0F);
+		this.rightLeg.xRot = -walk * LEG_SWING * amount;
+		this.leftLeg.xRot = walk * LEG_SWING * amount;
+		// it sinks onto each footfall (a swung leg reaches less far down), its weight rolling onto that foot, its shoulders turning
+		float sink = LEG_LENGTH * (1.0F - Mth.cos(this.rightLeg.xRot));
+		this.body.y += sink;
+		this.rightLeg.y += sink;
+		this.leftLeg.y += sink;
+		this.body.zRot = -walk * ROLL * amount;
+		this.body.yRot = walk * SHOULDER_TWIST * amount;
+		// its head keeps level as it rolls
+		this.head.zRot = walk * ROLL * 0.6F * amount;
 		// arms swing against the legs, twist, and flare out wide of the chest, more at the height of each swing
-		this.rightArm.xRot = (-walk * ARM_SWING - 0.2F) * amount;
-		this.rightArm.yRot = walk * ARM_TWIST * amount;
+		this.rightArm.xRot = (walk * ARM_SWING - 0.2F) * amount;
+		this.rightArm.yRot = -walk * ARM_TWIST * amount;
 		this.rightArm.zRot = ARM_FLARE + Math.abs(walk) * ARM_FLARE_PEAK * amount;
-		this.leftArm.xRot = (walk * ARM_SWING - 0.2F) * amount;
-		this.leftArm.yRot = -walk * ARM_TWIST * amount;
+		this.leftArm.xRot = (-walk * ARM_SWING - 0.2F) * amount;
+		this.leftArm.yRot = walk * ARM_TWIST * amount;
 		this.leftArm.zRot = -ARM_FLARE - Math.abs(walk) * ARM_FLARE_PEAK * amount;
 		// a slow breath
 		float breath = Mth.sin(state.ageInTicks * 0.09F) * 0.025F;
@@ -123,6 +145,9 @@ final class GiantModel extends EntityModel<GiantState> {
 			// fists half raised when it's after someone
 			this.rightArm.xRot -= 0.35F;
 			this.leftArm.xRot -= 0.35F;
+		}
+		if (state.grab >= 0.0F) {
+			this.grab(state.grab, state.ageInTicks);
 		}
 		if (state.rightAttack > 0.0F) {
 			this.rightArm.xRot = -blow(state.rightAttack);
@@ -144,6 +169,61 @@ final class GiantModel extends EntityModel<GiantState> {
 			this.leftArm.xRot -= state.flinch * FLINCH_ARM;
 			this.leftArm.zRot -= state.flinch * 0.5F;
 		}
+	}
+
+	/**
+	 * (0.7.268) Its grab, {@code t} ticks in ({@code AetherGiant}'s phases): it rears back, its right hand drawn up behind
+	 * it and flared wide, then the hand sweeps down to the ground ahead, lifts its catch to its chest (trembling as it
+	 * squeezes), hurls it down, and straightens up. The head follows the hand.
+	 */
+	private void grab(float t, float age) {
+		float windup = AetherGiant.GRAB_WINDUP, snatch = AetherGiant.GRAB_SNATCH, hold = AetherGiant.GRAB_HOLD, slam = AetherGiant.GRAB_SLAM,
+			recover = AetherGiant.GRAB_RECOVER;
+		float x, z, lean, head;
+		if (t < windup) {
+			float u = ease(t / windup);
+			x = Mth.lerp(u, -0.2F, GRAB_RAISED);
+			z = ARM_FLARE + u * GRAB_FLARE;
+			lean = u * GRAB_LEAN_BACK;
+			head = -u * 0.4F;
+		} else if (t < windup + snatch) {
+			float u = ease((t - windup) / snatch);
+			x = Mth.lerp(u, GRAB_RAISED, GRAB_DOWN);
+			z = ARM_FLARE + (1.0F - u) * GRAB_FLARE;
+			lean = Mth.lerp(u, GRAB_LEAN_BACK, GRAB_LEAN_FORWARD);
+			head = Mth.lerp(u, -0.4F, 0.5F);
+		} else if (t < windup + snatch + hold) {
+			float u = ease(Math.min(1.0F, (t - windup - snatch) / AetherGiant.LIFT_TICKS));
+			x = Mth.lerp(u, GRAB_DOWN, GRAB_HELD) + u * GRAB_TREMBLE * Mth.sin(age * 2.1F);
+			z = ARM_FLARE + u * GRAB_TREMBLE * Mth.sin(age * 1.7F);
+			lean = Mth.lerp(u, GRAB_LEAN_FORWARD, 0.0F);
+			head = Mth.lerp(u, 0.5F, 0.15F);
+		} else if (t < windup + snatch + hold + slam) {
+			float u = (t - windup - snatch - hold) / slam;
+			u *= u;
+			x = Mth.lerp(u, GRAB_HELD, GRAB_HURLED);
+			z = ARM_FLARE;
+			lean = u * GRAB_LEAN_FORWARD;
+			head = Mth.lerp(u, 0.15F, 0.6F);
+		} else {
+			float u = ease(Math.min(1.0F, (t - windup - snatch - hold - slam) / recover));
+			x = Mth.lerp(u, GRAB_HURLED, this.rightArm.xRot);
+			z = Mth.lerp(u, ARM_FLARE, this.rightArm.zRot);
+			lean = (1.0F - u) * GRAB_LEAN_FORWARD;
+			head = (1.0F - u) * 0.6F;
+		}
+		this.rightArm.xRot = x;
+		this.rightArm.yRot = 0.0F;
+		this.rightArm.zRot = z;
+		this.body.xRot += lean;
+		this.head.xRot += head;
+		// the other arm braces out a little
+		this.leftArm.zRot -= Math.abs(lean) * 0.5F;
+	}
+
+	private static float ease(float t) {
+		t = Mth.clamp(t, 0.0F, 1.0F);
+		return t * t * (3.0F - 2.0F * t);
 	}
 
 	/**

@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Triangle Cannon (V): {@link ZFighterTriangleCannon}. Rising Dome (G): {@link ZFighterRisingDome}.</li>
  * <li>Ki Rain (G): {@link ZFighterKiRain}. Nova Sphere (V): {@link ZFighterNovaSphere}.</li>
  * <li>Rage Scream (G): {@link ZFighterRageScream}. Afterimage (G): {@link ZFighterAfterimage}.</li>
+ * <li>Sonic Sway (G): {@link ZFighterSonicSway}.</li>
  * </ul>
  */
 public final class ZFighterArts {
@@ -38,6 +39,7 @@ public final class ZFighterArts {
 		ZFighterRisingDome.init();
 		ZFighterKiRain.init();
 		ZFighterAfterimage.init();
+		ZFighterSonicSway.init();
 	}
 
 	public static void clear() {
@@ -45,13 +47,14 @@ public final class ZFighterArts {
 		ZFighterRisingDome.clear();
 		ZFighterKiRain.clear();
 		ZFighterAfterimage.clear();
+		ZFighterSonicSway.clear();
 	}
 
 	// ---------------------------------------------------------------- the dispatch
 
 	/** Whether {@code index} is one of this patch's techniques. */
 	public static boolean art(int index) {
-		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.AFTERIMAGE;
+		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.SONIC_SWAY;
 	}
 
 	/** Whether {@code index} is one of this patch's techniques that is held and let go on V. */
@@ -76,7 +79,8 @@ public final class ZFighterArts {
 			case ZFighterTraining.RISING_DOME -> ZFighterRisingDome.start(player, live);
 			case ZFighterTraining.KI_RAIN -> ZFighterKiRain.start(player, live);
 			case ZFighterTraining.RAGE_SCREAM -> ZFighterRageScream.start(player, live);
-			default -> ZFighterAfterimage.start(player, live);
+			case ZFighterTraining.AFTERIMAGE -> ZFighterAfterimage.start(player, live);
+			default -> ZFighterSonicSway.start(player, live);
 		};
 		if (cooldown > 0) {
 			ZFighterPower.cooldown(player, ZFighterState.BLAST, cooldown);

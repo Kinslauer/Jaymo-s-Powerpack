@@ -44,6 +44,21 @@ abstract class ZFighterApeInputMixin extends ClientInput {
 			// (0.15.148) a Z Fighter's ape in a fit: every new key a heave against it
 			com.jaymospowers.client.power.zfighter.ApeRageClient.struggleKeys(this.keyPresses);
 		}
+		if (com.jaymospowers.power.zfighter.ApeGrab.grabbing(player)) {
+			// (0.17.68) his grab has him: he stands where he is (the wild ape's eyes stay on its catch, below)
+			this.keyPresses = Input.EMPTY;
+			this.moveVector = Vec2.ZERO;
+			if (ZFighterLineage.wild(player)) {
+				Integer held = player.getAttached(ZFighterLineage.BERSERK);
+				Entity catch_ = held == null || held < 0 ? null : player.level().getEntity(held);
+				if (catch_ != null) {
+					Vec3 to = catch_.getBoundingBox().getCenter().subtract(player.getEyePosition());
+					float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
+					player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * TURN);
+				}
+			}
+			return;
+		}
 		Integer id = player.getAttached(ZFighterLineage.BERSERK);
 		BlockPos goal = player.getAttached(ZFighterLineage.WILD_GOAL);
 		if (id == null && goal == null) {

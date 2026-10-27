@@ -166,6 +166,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();
+		// (0.7.264, Andy's NOEA picks) parties: invites, no friendly fire, shared slay quests, members' stats (and its attachment)
+		LOGGER.debug("party attachment: {}", Parties.META);
+		Parties.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
@@ -217,6 +220,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
+		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
+		LOGGER.debug("bio-built attachments: {} {}", BioBuilt.FORM, BioBuilt.WORTH);
+		HeritageHold.register();
+		DivineBorn.register();
+		BioBuilt.register();
+		RubberFolk.register();
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
@@ -240,6 +249,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		MobCombat.register();
 		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
 		MobShields.register();
+		MobParry.register();
 		BladeClash.register();
 		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
@@ -295,6 +305,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
+		// (0.7.266) players' rides go by on the road screen
+		Journeys.register();
 		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
 		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
@@ -430,6 +442,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		MerchantOrders.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
 		LOGGER.debug("gloom attachment: {}", Gloom.GLOOM);

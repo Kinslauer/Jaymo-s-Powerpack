@@ -1,0 +1,16 @@
+{
+  "type": "jaymospowers:glacia",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "jaymospowers:glacia",
+    "biome_source": {
+      "type": "minecraft:checkerboard",
+      "scale": 6,
+      "biomes": [
+        "minecraft:snowy_plains",
+        "minecraft:ice_spikes",
+        "minecraft:snowy_taiga"
+      ]
+    }
+  }
+}

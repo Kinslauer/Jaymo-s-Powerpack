@@ -57,7 +57,7 @@ public final class ZFighterScouter {
 	static final double KI_WEIGHT = 3.0;
 	static final double STAT_WEIGHT = 20.0;
 	/** A fighter's multiplier by form (base, Super, Super 2, Super 3, Primal Super). */
-	static final double[] FORM_MULTIPLIER = {1.0, 2.5, 4.0, 6.0, 8.0};
+	static final double[] FORM_MULTIPLIER = {1.0, 2.5, 4.0, 6.0, 8.0, 4.0, 11.0, 5.0, 8.0, 12.0};
 	/** Plus this much per Limit Break tier, this much at full mastery of the form he's in, and this much times over in Rage. */
 	static final double LIMIT_MULTIPLIER = 0.25;
 	static final double MASTERY_MULTIPLIER = 0.5;

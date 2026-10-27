@@ -135,6 +135,30 @@
 			}
 		]
 	},
+	"voice.narrator.born.shrine.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_shrine_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.vats.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_vats_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.fair.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_fair_tale",
+				"stream": true
+			}
+		]
+	},
 	"voice.narrator.raised.farmers.tale": {
 		"sounds": [
 			{

@@ -1,6 +1,8 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.ApeGrab;
+import com.jaymospowers.power.zfighter.ZFighterGoldenApe;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -37,8 +39,17 @@ public final class ZFighterApe {
 	/** (0.12.3) Whether the Great Ape lies crippled (flat on his back), on his render state. */
 	public static final RenderStateDataKey<Boolean> CRIPPLED = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_crippled");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape.png");
+	/** (0.17.50) The golden Great Ape's skin ({@code tools/gen_golden_ape.py}), worn by a Z Fighter who has gone Super. */
+	static final Identifier GOLDEN_TEXTURE = JaymosPowers.id("textures/entity/zfighter_great_ape_golden.png");
+	public static final RenderStateDataKey<Boolean> GOLDEN = RenderStateDataKey.create(() -> "jaymospowers:zfighter_golden_ape");
 	/** (0.16.36) Whose ape it is: its build and fur. */
 	public static final RenderStateDataKey<WarriorLooks.Ape> STYLE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_style");
+	/** (0.17.54) How far through its slow stride the ape is, in steps ({@link ZFighterApeSteps#stride}). */
+	public static final RenderStateDataKey<Float> STRIDE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_stride");
+	/** (0.17.68) How far into his grab he is (ticks, {@link ApeGrab#TOTAL} long), or null when he isn't grabbing. */
+	public static final RenderStateDataKey<Float> GRAB = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_grab");
+	/** Vanilla's walk cycle: its legs swing with {@code cos(walkAnimationPos * this)}. */
+	private static final float VANILLA_WALK = 0.6662F;
 
 	private static Model<AvatarRenderState> model;
 
@@ -46,7 +57,7 @@ public final class ZFighterApe {
 	}
 
 	/** From the avatar renderer's extractRenderState: the Great Ape hides the player's own body, armour and held items. */
-	static void extract(Avatar entity, AvatarRenderState state) {
+	static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		boolean ape = entity instanceof Player player && ZFighterLineage.ape(player) && !player.isInvisible();
 		state.setData(KEY, ape);
 		if (!ape) {
@@ -54,6 +65,10 @@ public final class ZFighterApe {
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
+		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
+		float grab = ApeGrab.phase(entity, partialTicks);
+		state.setData(GRAB, grab >= 0.0F ? grab : null);
+		state.setData(GOLDEN, ZFighterGoldenApe.golden((Player)entity) ? Boolean.TRUE : null);
 		state.setData(ApeSmashClient.POSE, ApeSmashClient.pose((Player)entity));
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
@@ -87,7 +102,7 @@ public final class ZFighterApe {
 	 * A villager raging as the wild Great Ape (Jaymo's Kingdoms' Warrior-born villagers, {@code VillagerApe}): the same
 	 * ape in its place, its own body, clothes and gear hidden.
 	 */
-	public static void extractMob(LivingEntity entity, HumanoidRenderState state) {
+	public static void extractMob(LivingEntity entity, HumanoidRenderState state, float partialTicks) {
 		boolean ape = !(entity instanceof Player) && Boolean.TRUE.equals(entity.getAttached(ZFighterLineage.GREAT_APE)) && !entity.isInvisible();
 		state.setData(KEY, ape ? Boolean.TRUE : null);
 		if (!ape) {
@@ -95,6 +110,9 @@ public final class ZFighterApe {
 		}
 		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
+		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
+		float grab = ApeGrab.phase(entity, partialTicks);
+		state.setData(GRAB, grab >= 0.0F ? grab : null);
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;
 		state.headEquipment = ItemStack.EMPTY;
@@ -192,7 +210,14 @@ public final class ZFighterApe {
 
 		@Override
 		public void setupAnim(S state) {
+			// (0.17.54) vanilla's own walk, played on its slow stride: one leg comes forward each step (ZFighterApeSteps)
+			Float stride = state.getData(STRIDE);
+			float walked = state.walkAnimationPos;
+			if (stride != null) {
+				state.walkAnimationPos = stride * Mth.PI / VANILLA_WALK;
+			}
 			super.setupAnim(state);
+			state.walkAnimationPos = walked;
 			float time = state.ageInTicks;
 			float walk = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
 			// the arms hang a little out from the bulk of him and sway heavily
@@ -210,6 +235,12 @@ public final class ZFighterApe {
 			this.rightArm.yScale = this.leftArm.yScale = arms;
 			this.body.xScale = this.body.zScale = bulk;
 			this.tail.zScale = tail;
+			// (0.17.68) his grab: the hand reared up and back, brought down, held trembling at his chest, hurled into the ground
+			Float grab = state.getData(GRAB);
+			if (grab != null) {
+				this.grab(grab, time);
+				return;
+			}
 			// (0.16.6) his punch: the right fist drawn back as it charges, then thrown out and down
 			float[] smash = state.getData(ApeSmashClient.POSE);
 			if (smash != null) {
@@ -229,7 +260,62 @@ public final class ZFighterApe {
 				}
 			}
 		}
+
+		/** (0.17.68) His grab, {@code t} ticks in (the twin of the Aether Giant's, {@code kingdoms/client/remnants/GiantModel}). */
+		private void grab(float t, float age) {
+			float windup = ApeGrab.WINDUP, snatch = ApeGrab.SNATCH, hold = ApeGrab.HOLD, slam = ApeGrab.SLAM, recover = ApeGrab.RECOVER;
+			float rest = this.rightArm.zRot;
+			float x, z, lean, head;
+			if (t < windup) {
+				float u = ease(t / windup);
+				x = Mth.lerp(u, this.rightArm.xRot, GRAB_RAISED);
+				z = rest + u * GRAB_FLARE;
+				lean = u * GRAB_LEAN_BACK;
+				head = -u * 0.4F;
+			} else if (t < windup + snatch) {
+				float u = ease((t - windup) / snatch);
+				x = Mth.lerp(u, GRAB_RAISED, GRAB_DOWN);
+				z = rest + (1.0F - u) * GRAB_FLARE;
+				lean = Mth.lerp(u, GRAB_LEAN_BACK, GRAB_LEAN_FORWARD);
+				head = Mth.lerp(u, -0.4F, 0.5F);
+			} else if (t < windup + snatch + hold) {
+				float u = ease(Math.min(1.0F, (t - windup - snatch) / ApeGrab.LIFT_TICKS));
+				x = Mth.lerp(u, GRAB_DOWN, GRAB_HELD) + u * GRAB_TREMBLE * Mth.sin(age * 2.1F);
+				z = rest + u * GRAB_TREMBLE * Mth.sin(age * 1.7F);
+				lean = Mth.lerp(u, GRAB_LEAN_FORWARD, 0.0F);
+				head = Mth.lerp(u, 0.5F, 0.15F);
+			} else if (t < windup + snatch + hold + slam) {
+				float u = (t - windup - snatch - hold) / slam;
+				u *= u;
+				x = Mth.lerp(u, GRAB_HELD, GRAB_HURLED);
+				z = rest;
+				lean = u * GRAB_LEAN_FORWARD;
+				head = Mth.lerp(u, 0.15F, 0.6F);
+			} else {
+				float u = ease(Math.min(1.0F, (t - windup - snatch - hold - slam) / recover));
+				x = Mth.lerp(u, GRAB_HURLED, this.rightArm.xRot);
+				z = rest;
+				lean = (1.0F - u) * GRAB_LEAN_FORWARD;
+				head = (1.0F - u) * 0.6F;
+			}
+			this.rightArm.xRot = x;
+			this.rightArm.yRot = 0.0F;
+			this.rightArm.zRot = z;
+			this.body.xRot += lean;
+			this.head.xRot += head;
+			// the other arm braces out a little
+			this.leftArm.zRot -= Math.abs(lean) * 0.5F;
+		}
+
+		private static float ease(float t) {
+			t = Mth.clamp(t, 0.0F, 1.0F);
+			return t * t * (3.0F - 2.0F * t);
+		}
 	}
+
+	/** The grab's poses (radians on the right arm): reared up behind him, down on his catch, held at his chest, hurled, and the trembling. */
+	private static final float GRAB_RAISED = -2.8F, GRAB_FLARE = 0.5F, GRAB_DOWN = -0.35F, GRAB_HELD = -1.35F, GRAB_HURLED = 0.3F,
+		GRAB_LEAN_BACK = -0.3F, GRAB_LEAN_FORWARD = 0.45F, GRAB_TREMBLE = 0.04F;
 
 	/** Draws the ape over the hidden player. Registered after the tail and hair layers, which the hidden body skips. */
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -251,7 +337,9 @@ public final class ZFighterApe {
 				poseStack.translate(0.0F, -1.5F, -0.25F);
 			}
 			// not the "copy layer" call: that skips invisible states, and the body was made invisible
-			renderColoredCutoutModel(model(), TEXTURE, poseStack, collector, lightCoords, state, fur(state), 1);
+			// (0.17.50) the golden ape's fur is painted gold already: no tint on top
+			boolean golden = Boolean.TRUE.equals(state.getData(GOLDEN));
+			renderColoredCutoutModel(model(), golden ? GOLDEN_TEXTURE : TEXTURE, poseStack, collector, lightCoords, state, golden ? -1 : fur(state), 1);
 			if (down) {
 				poseStack.popPose();
 			}

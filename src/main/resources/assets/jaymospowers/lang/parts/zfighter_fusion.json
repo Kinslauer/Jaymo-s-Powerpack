@@ -1,0 +1,23 @@
+{
+  "item.jaymospowers.bonding_earring": "Bonding Earring",
+  "item.jaymospowers.fusion_arm_band": "Fusion Arm Band",
+  "wish.jaymospowers.zfighter.bonding": "Bonding",
+  "wish.jaymospowers.zfighter.bonding.short": "A pair of Bonding Earrings",
+  "wish.jaymospowers.zfighter.bonding.desc": "Two Bonding Earrings. Two Z Fighters who each wear one, facing each other, become one fighter at once for 30 minutes: any lineage, no dance.",
+  "message.jaymospowers.zfighter_fusion_timed": "You are one. The fusion holds for %s min.",
+  "message.jaymospowers.zfighter_fusion_burning": "Your form burns the fusion: %1$s s left, running %2$s%% faster.",
+  "message.jaymospowers.zfighter_charm_cannot": "Only a Z Fighter who is free to fuse can use this.",
+  "message.jaymospowers.zfighter_charm_face": "Face the fighter you would bond with, within five blocks.",
+  "message.jaymospowers.zfighter_charm_them": "%s cannot fuse right now.",
+  "message.jaymospowers.zfighter_charm_offered": "You hold yours out to %s. They must answer in kind.",
+  "message.jaymospowers.zfighter_charm_asked": "%1$s holds out a %2$s to you. Face them and use yours to agree.",
+  "message.jaymospowers.zfighter_earrings_crack": "The earrings crack and fall away.",
+  "message.jaymospowers.zfighter_bands_crack": "The arm bands split and fall away.",
+  "message.jaymospowers.zfighter_tyrant_earrings": "The fallen tyrant's ear glitters: a pair of Bonding Earrings.",
+  "message.jaymospowers.zfighter_five_agree": "The ring of five: %1$s of %2$s have answered.",
+  "message.jaymospowers.zfighter_five_ring": "Stand round one another in a ring, no wide gaps, and answer again.",
+  "message.jaymospowers.zfighter_five_fused": "%s become one colossal fighter!",
+  "message.jaymospowers.zfighter_master_fuse_refuses": "%s turns away from the dance.",
+  "message.jaymospowers.zfighter_master_fuse_not_yet": "%1$s: \"Not yet. Learn more from me first.\" (%2$s of %3$s lessons)",
+  "message.jaymospowers.zfighter_master_fuse_joins": "%s joins your dance."
+}

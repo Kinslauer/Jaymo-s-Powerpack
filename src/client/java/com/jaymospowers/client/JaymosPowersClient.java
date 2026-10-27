@@ -49,6 +49,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		// (0.17.67) after every mod's main entrypoint (TaCZ's vanilla registry lookup), for singleplayer worlds
+		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
 		for (PowerKey key : PowerKey.values()) {
@@ -66,6 +68,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.finisher.FinisherClient.register();
 		LockOnClient.init();
+		com.jaymospowers.client.combat.GuardClient.init();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
@@ -88,6 +91,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
 		// CurseForge import downloaded
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
+		// (0.17.56) shaders off and Fast graphics on weak PCs, once per install; /lowend on|off
+		LowEndMode.init();
 		// (0.15.124) Iris (with a shader pack on) first asks for the enchantment glint textures while a render pass is
 		// open, and loading them then crashes the game ("Close the existing render pass"). Load them up front instead.
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(client -> {

@@ -140,6 +140,55 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- (0.7.268) a film: Powers' UltimateFilm (letterbox bars, and one player's camera) ------------------------------
+
+	/** Powers' {@code UltimateFilm.play(ServerPlayer, int, int, Vec3, Entity, double)} and {@code witnessed(Entity, int, int, Vec3, Entity, double)}. */
+	private static java.lang.invoke.@Nullable MethodHandle filmPlay, filmWitnessed;
+	private static boolean lookedForFilm;
+	/** Powers' {@code UltimateFilm} shots. */
+	public static final int FILM_ORBIT = 3, FILM_PUSH_IN = 6;
+
+	private static void films() {
+		if (lookedForFilm) {
+			return;
+		}
+		lookedForFilm = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> film = Class.forName("com.jaymospowers.core.UltimateFilm");
+			filmPlay = lookup.findStatic(film, "play", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class,
+				int.class, int.class, net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.Entity.class, double.class));
+			filmWitnessed = lookup.findStatic(film, "witnessed", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Entity.class,
+				int.class, int.class, net.minecraft.world.phys.Vec3.class, net.minecraft.world.entity.Entity.class, double.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no films (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * (0.7.268) A short film of {@code caster}'s move: {@code star} (a player, if any) gets the camera {@code shot} framed on
+	 * {@code at} and {@code target} for {@code ticks}, and everyone within {@code witnesses} blocks of the caster sees black
+	 * bars. Nothing without Powers.
+	 */
+	public static void film(net.minecraft.world.entity.Entity caster, net.minecraft.server.level.@Nullable ServerPlayer star, int shot, int ticks,
+		net.minecraft.world.phys.Vec3 at, net.minecraft.world.entity.@Nullable Entity target, double witnesses) {
+		films();
+		try {
+			if (star != null && filmPlay != null) {
+				filmPlay.invoke(star, shot, ticks, at, target, witnesses);
+			}
+			if (filmWitnessed != null) {
+				// (the star has their bars already: their own film stays, and no one else's camera is taken)
+				filmWitnessed.invoke(caster, shot, ticks, at, target, witnesses);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't play a film", e);
+		}
+	}
+
 	// ---- (0.7.216) a life story's power: Powers' affinity and callings ({@link LifeStory}) ---------------------------------
 
 	/** Powers' {@code Affinity.set(ServerPlayer, Identifier)} and {@code Callings.call(ServerPlayer, String, int)}. */
@@ -309,6 +358,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** (0.7.262) Powers' {@code Dismember.regrow(LivingEntity, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle regrow;
+	private static boolean lookedForRegrow;
+
+	/**
+	 * (0.7.262) The Rubber-folk's body grows a lost limb back, as a Verdant's does in Powers: the first part still missing
+	 * ({@code all}: every one). True if anything grew back; false without Powers.
+	 */
+	public static boolean regrow(LivingEntity body, boolean all) {
+		if (!lookedForRegrow) {
+			lookedForRegrow = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					regrow = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Dismember"), "regrow",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' limb regrowth (older Powers?)", e);
+				}
+			}
+		}
+		if (regrow == null) {
+			return false;
+		}
+		try {
+			return (boolean)regrow.invoke(body, all);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	// ---- (0.7.212) healing magic: Powers' Mending, so Restoration heals the body's parts -------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle mend, closeCut, easeFever, restore, rekindle;
@@ -366,7 +445,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** Eases {@code entity}'s fever (its weakness, the dirt in its cuts); false without Powers. */
+	/** Eases {@code entity}'s fever (festering cured, its weakness, the dirt in its cuts); false without Powers. */
 	public static boolean easeFever(net.minecraft.world.entity.LivingEntity entity) {
 		mending();
 		try {

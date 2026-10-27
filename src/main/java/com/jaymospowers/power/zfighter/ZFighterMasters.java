@@ -83,7 +83,8 @@ final class ZFighterMasters {
 		if (now % 20 == 0) {
 			glow(level);
 		}
-		if (now % SCAN != 0 || !ZFighterKingdoms.present()) {
+		// (0.17.53) a master held for a fusion is out of the world: don't pick another meanwhile
+		if (now % SCAN != 0 || !ZFighterKingdoms.present() || ZFighterMasterFusion.holding()) {
 			return;
 		}
 		for (ZFighterKingdoms.Settlement s : ZFighterKingdoms.settlements(server)) {
@@ -169,6 +170,10 @@ final class ZFighterMasters {
 			return;
 		}
 		player.setAttached(LESSON, day);
+		if (!dark) {
+			// (0.17.50) a good master's lesson is a bond the god form's ring can call on
+			ZFighterGodRitual.lessonTaught(player);
+		}
 		Component lesson = lesson(player, dark);
 		ZFighterTraining.grant(player, LESSON_TP);
 		player.sendSystemMessage(Component.translatable(voice + "_teaches", master.getDisplayName(), lesson).withStyle(style));
@@ -200,7 +205,7 @@ final class ZFighterMasters {
 	}
 
 	/** Teaches the lesson and says what it was. */
-	private static Component lesson(ServerPlayer player, boolean dark) {
+	static Component lesson(ServerPlayer player, boolean dark) {
 		ZFighterTraining.Data data = ZFighterTraining.of(player);
 		for (int technique : dark ? DARK_ORDER : GOOD_ORDER) {
 			if (!data.knows(technique)) {

@@ -3,6 +3,7 @@
 	"package": "com.jaymospowers.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"GuardFirstPersonMixin",
 		"LashSocketFirstPersonMixin",
 		"LashSocketItemInHandLayerMixin",
 		"LashSocketItemLayerMixin",

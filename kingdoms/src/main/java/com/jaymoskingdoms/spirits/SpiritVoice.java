@@ -28,6 +28,8 @@ public final class SpiritVoice {
 
 	/** Game time each player may be spoken to again. */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
+	/** Ticks after a move's pose was stamped that a line may show the arm in its place. */
+	static final int SPEAK_AFTER = 30;
 
 	static void forget(UUID id) {
 		NEXT.remove(id);
@@ -82,6 +84,12 @@ public final class SpiritVoice {
 		player.sendSystemMessage(Component.empty().append(name).append(Component.literal(": ").withStyle(ChatFormatting.GRAY)).append(line));
 		Voices.speak(player, key);
 		NEXT.put(player.getUUID(), now + SAY_GAP);
+		// the arm shows itself while it talks (Andy: "they pop in whenever they speak"), unless a move is showing it already
+		SpiritState state = Spirits.state(player);
+		if (state != null && state.out() && state.kind() == kind
+			&& (state.pose() == Poses.IDLE || state.pose() == Poses.SPEAK || now - state.shownAt() > SPEAK_AFTER)) {
+			Spirits.show(player, Poses.SPEAK);
+		}
 		if (kind == Spirits.QUIET && event.equals("word")) {
 			QuietOne.spoke(player);
 		}

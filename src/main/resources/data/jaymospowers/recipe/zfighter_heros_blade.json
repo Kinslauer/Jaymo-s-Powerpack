@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "minecraft:diamond",
+    "G": "minecraft:gold_ingot",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    " D ",
+    "GDG",
+    " S "
+  ],
+  "result": {
+    "id": "jaymospowers:heros_blade"
+  }
+}

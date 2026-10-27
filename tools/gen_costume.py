@@ -516,10 +516,137 @@ def assassin_boxes(slim):
             ("tail_front", 0, 32, 8, 11, 1, assassin_tail), ("tail_back", 20, 32, 8, 11, 1, assassin_tail)]
 
 
+# (0.17.60) Z Fighter's gi and armour patterns: three more gis and two more suits, all drawn here.
+
+def wrap_gi(part, face, x, y, w, h, rng):
+    """Z Fighter: a wrap gi, long sleeves with cuffs, the top crossed over on a diagonal lapel, a sash with a knot at the hip."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y == 11):
+            return None  # bare hands
+        if face != "top" and 9 <= y <= 10:
+            return S  # cuffs
+        return P
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S  # shoes
+        if face != "top" and y == 8:
+            return (S, -20)  # ankle ties
+        return P
+    if face == "front":
+        if y < 8 and x == min(6, 1 + y):
+            return (S, -15)  # the lapel, running down across the chest
+        if y < 3 and x in (3, 4):
+            return None  # the neck
+        if y in (8, 9):
+            return S  # the sash
+        if y in (10, 11) and x == 5:
+            return S  # its tail
+        return P
+    if face != "top" and y in (8, 9):
+        return S
+    return P
+
+
+def sleeveless_gi(part, face, x, y, w, h, rng):
+    """Z Fighter: a sleeveless gi, bare arms but for a band at the wrist, shoulders cut away, a sash, loose trousers."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y == 11):
+            return None
+        if face != "top" and 8 <= y <= 10:
+            return S  # wristbands
+        if face == "top" or y < 2:
+            return P  # the shoulder seam
+        return None  # bare arms
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S
+        return P
+    if face == "front" and y < 5:
+        left, right = 1 + round(y * 0.4), 6 - round(y * 0.4)
+        if left < x < right:
+            return None  # a deep V at the neck
+        if x == left or x == right:
+            return (P, -25)
+    if face != "top" and y in (8, 9):
+        return S  # the sash
+    if face == "front" and y in (10, 11) and x in (2, 3):
+        return S
+    return P
+
+
+def weighted_gi(part, face, x, y, w, h, rng):
+    """Z Fighter: a weighted training gi, heavy cuffs at wrist and ankle, straps across the chest, a thick belt."""
+    if is_arm(part):
+        if face == "bottom":
+            return (S, -50)
+        if face != "top" and y >= 8:
+            return (S, -60) if y % 2 == 0 else (S, -35)  # the wrist weights, banded
+        return P
+    if is_leg(part):
+        if face == "bottom":
+            return (S, -60)
+        if face != "top" and y >= 8:
+            return (S, -60) if y % 2 == 0 else (S, -35)  # the ankle weights
+        return P
+    if face == "front":
+        if y < 8 and (x == y or 7 - x == y):
+            return (S, -30)  # the crossed straps
+        if y in (8, 9, 10):
+            return (S, -45)  # a thick belt
+        return P
+    if face != "top" and y in (8, 9, 10):
+        return (S, -45)
+    return P
+
+
+def battle_armour(part, face, x, y, w, h, rng):
+    """Z Fighter: a battle armour, a deep chest plate with a primary core, bracers, thigh guards and greaves in the secondary colour."""
+    if is_arm(part):
+        if face == "top":
+            return S
+        if face == "bottom" or y >= 6:
+            return (S, -15) if y in (6, 11) else S
+        return P
+    if is_leg(part):
+        if face == "bottom" or y >= 8:
+            return S
+        if face == "front" and 2 <= y <= 5:
+            return (S, -10)  # thigh guards
+        return P
+    if face == "front":
+        if 1 <= y <= 8 and 1 <= x <= 6:
+            if 3 <= x <= 4 and 3 <= y <= 5:
+                return (P, -30)  # the core, showing the undersuit
+            return (S, -10) if y in (1, 8) else S
+        if y in (9, 10):
+            return (S, -30)  # the belt
+    if face == "back" and 1 <= y <= 8 and 1 <= x <= 6:
+        return S
+    if face not in ("top", "bottom") and y in (9, 10):
+        return (S, -30)
+    return P
+
+
+def padded_suit(part, face, x, y, w, h, rng):
+    """Z Fighter: a padded bodysuit, quilted all over in darker stitching, a high collar, thick gloves and boots."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S  # thick gloves
+    elif is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S  # boots
+    elif face == "front" and y <= 1 and 2 <= x <= 5:
+        return S  # the collar
+    if face not in ("top", "bottom") and (x % 3 == 0 or y % 3 == 0):
+        return (P, -34)  # the quilting
+    return P
+
+
 CUTS = {"bodysuit": bodysuit, "armoured": armoured, "robes": robes, "coat": coat, "ragged": ragged,
         "webbed": webbed, "windswept": windswept, "dense": dense, "clockwork": clockwork, "bandolier": bandolier,
         "resonant": resonant, "tidal": tidal, "ash_wraps": ash_wraps, "gi": gi, "carapace": carapace,
-        "assassin": assassin}
+        "assassin": assassin, "wrap_gi": wrap_gi, "sleeveless_gi": sleeveless_gi, "weighted_gi": weighted_gi,
+        "battle_armour": battle_armour, "padded_suit": padded_suit}
 
 
 def suits():
@@ -530,7 +657,7 @@ def suits():
             secondary = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
             for part, (u, v, w, h, d) in suit_boxes(slim).items():
                 paint_box(primary, secondary, u, v, w, h, d, part, pattern, rng)
-            if name in ("armoured", "dense"):
+            if name in ("armoured", "dense", "battle_armour"):
                 # the shoulder pads (CostumeModels: texOffs 32,0, 5x3x5): secondary plates, a primary rim
                 for face, (fx, fy, fw, fh) in box_faces(32, 0, 5, 3, 5).items():
                     for y in range(fh):
@@ -545,6 +672,165 @@ def suits():
             tag = "_slim" if slim else ""
             save(primary, os.path.join(COSTUME, "suit", name + tag + "_primary.png"))
             save(secondary, os.path.join(COSTUME, "suit", name + tag + "_secondary.png"))
+
+
+
+# ---- the suit editor's pieces (0.17.60) -----------------------------------------------------------------------------
+# Gloves, boots, a belt, a helmet and head fins, worn over the suit (CostumeModels.kit, which must agree with the boxes
+# here). Each piece has up to three textures, one per colour it uses: primary, secondary and trim (T).
+
+T = 3
+KIT_DIR = os.path.join(COSTUME, "kit")
+
+
+def arm_boxes(h):
+    return lambda slim: [("arm_r", 0, 0, 3 if slim else 4, h, 4), ("arm_l", 24, 0, 3 if slim else 4, h, 4)]
+
+
+def leg_boxes(h):
+    return lambda slim: [("leg_r", 0, 0, 4, h, 4), ("leg_l", 24, 0, 4, h, 4)]
+
+
+def kit_gloves(variant):
+    def pattern(name, face, x, y, w, h, rng):
+        if variant == "wraps":
+            return None if face in ("top", "bottom") else (T if y == 0 else (S, -15))
+        if variant == "gloves":
+            if face == "top":
+                return None
+            return T if y == 0 and face != "bottom" else S
+        if face == "top":
+            return None
+        if y in (0, h - 1):
+            return T  # the gauntlet's rims
+        if y == 2 and face in ("front", "back"):
+            return P  # a primary stripe
+        return (S, -10)
+    return pattern
+
+
+def kit_boots(variant):
+    def pattern(name, face, x, y, w, h, rng):
+        if variant == "wrapped":
+            return None if face in ("top", "bottom") else (T if y % 2 == 0 else (S, -20))
+        if variant == "boots":
+            if face == "top":
+                return None
+            if face == "bottom" or y == h - 1:
+                return (T, -40)  # the sole
+            return S
+        if face == "top":
+            return None
+        if face == "bottom" or y == h - 1:
+            return (T, -40)
+        if y == 0:
+            return T  # the greave's top rim
+        if face == "front" and 2 <= y <= 3:
+            return (S, -25)  # a knee plate's ridge
+        return S
+    return pattern
+
+
+def kit_belt(variant):
+    def pattern(name, face, x, y, w, h, rng):
+        if name == "band":
+            if face in ("top", "bottom"):
+                return None
+            if variant == "sash":
+                return T
+            return (T, -30) if variant == "belt" else (T, -20)
+        if name == "ends":
+            return S if y == h - 1 else T
+        if name == "buckle":
+            return S
+        # the champion's plate: gold rim, a gem at its centre
+        if face == "front" and 1 <= x <= 2 and 1 <= y <= 2:
+            return P
+        return S
+    return pattern
+
+
+def kit_helm(variant):
+    def pattern(name, face, x, y, w, h, rng):
+        if variant == "circlet":
+            if name == "jewel":
+                return P
+            return S if face not in ("top", "bottom") else None
+        if variant == "battle_helm":
+            if name == "dome":
+                if face == "bottom":
+                    return None
+                if face == "top" and x in (3, 4):
+                    return T  # a ridge along the top
+                if face == "front" and y == h - 1:
+                    return (T, -20)  # the brow rim
+                return S
+            return T if y == 0 or y == h - 1 else (S, -10)
+        # visor: a band, its front a dark glass but for the frame
+        if face in ("top", "bottom"):
+            return None
+        if face == "front" and 1 <= x <= 6:
+            return T
+        return S
+    return pattern
+
+
+def kit_fins(variant):
+    def pattern(name, face, x, y, w, h, rng):
+        if variant == "small":
+            return T if y == 0 else S
+        if variant == "swept":
+            return T if y == 0 or face in ("front", "back") and x >= w - 2 else P
+        return S if y >= h - 1 or face in ("top", "bottom") else T
+    return pattern
+
+
+ACCESSORIES = {
+    ("gloves", "wraps"): (arm_boxes(2), kit_gloves("wraps")),
+    ("gloves", "gloves"): (arm_boxes(3), kit_gloves("gloves")),
+    ("gloves", "gauntlets"): (arm_boxes(5), kit_gloves("gauntlets")),
+    ("boots", "wrapped"): (leg_boxes(3), kit_boots("wrapped")),
+    ("boots", "boots"): (leg_boxes(3), kit_boots("boots")),
+    ("boots", "greaves"): (leg_boxes(7), kit_boots("greaves")),
+    ("belt", "sash"): (lambda slim: [("band", 0, 0, 8, 2, 4), ("ends", 0, 8, 2, 3, 1)], kit_belt("sash")),
+    ("belt", "belt"): (lambda slim: [("band", 0, 0, 8, 2, 4), ("buckle", 0, 8, 2, 2, 1)], kit_belt("belt")),
+    ("belt", "champion"): (lambda slim: [("band", 0, 0, 8, 4, 4), ("plate", 0, 10, 4, 4, 1)], kit_belt("champion")),
+    ("helm", "circlet"): (lambda slim: [("band", 0, 0, 8, 2, 8), ("jewel", 0, 12, 2, 2, 1)], kit_helm("circlet")),
+    ("helm", "battle_helm"): (lambda slim: [("dome", 0, 0, 8, 5, 8), ("cheek_r", 32, 0, 1, 4, 5), ("cheek_l", 46, 0, 1, 4, 5)],
+                              kit_helm("battle_helm")),
+    ("helm", "visor"): (lambda slim: [("band", 0, 0, 8, 2, 8)], kit_helm("visor")),
+    ("fins", "small"): (lambda slim: [("fin_r", 0, 0, 3, 4, 1), ("fin_l", 10, 0, 3, 4, 1)], kit_fins("small")),
+    ("fins", "swept"): (lambda slim: [("fin_r", 0, 0, 1, 3, 7), ("fin_l", 16, 0, 1, 3, 7)], kit_fins("swept")),
+    ("fins", "crest"): (lambda slim: [("crest", 0, 0, 1, 4, 8)], kit_fins("crest")),
+}
+
+
+def kit():
+    """Writes every piece's textures (only the colours it uses) and prints which those are, for CostumeModels.channels."""
+    used = {}
+    for (slot, variant), (boxes, pattern) in ACCESSORIES.items():
+        for slim in ((False, True) if slot == "gloves" else (False,)):
+            rng = random.Random(slot + variant)
+            images = {P: Image.new("RGBA", (64, 32), (0, 0, 0, 0)), S: Image.new("RGBA", (64, 32), (0, 0, 0, 0)),
+                      T: Image.new("RGBA", (64, 32), (0, 0, 0, 0))}
+            for name, u, v, w, h, d in boxes(slim):
+                for face, (fx, fy, fw, fh) in box_faces(u, v, w, h, d).items():
+                    for y in range(fh):
+                        for x in range(fw):
+                            which = pattern(name, face, x, y, fw, fh, rng)
+                            if which is None:
+                                continue
+                            which, extra = which if isinstance(which, tuple) else (which, 0)
+                            shade = max(0, min(255, cloth_shade(x, y, fw, fh, rng) + extra))
+                            images[which].putpixel((fx + x, fy + y), (shade, shade, shade, 255))
+            tag = slot + "_" + variant + ("_slim" if slim else "")
+            mask = 0
+            for which, suffix in ((P, "primary"), (S, "secondary"), (T, "trim")):
+                if images[which].getbbox() is not None:
+                    mask |= 1 << (which - 1)
+                    save(images[which], os.path.join(KIT_DIR, tag + "_" + suffix + ".png"))
+            used[slot + "_" + variant] = mask
+    print("channels (1 primary, 2 secondary, 4 trim):", used)
 
 
 # ---- masks --------------------------------------------------------------------------------------------------------
@@ -904,6 +1190,7 @@ def json_files():
 
 if __name__ == "__main__":
     suits()
+    kit()
     masks()
     capes()
     table_textures()

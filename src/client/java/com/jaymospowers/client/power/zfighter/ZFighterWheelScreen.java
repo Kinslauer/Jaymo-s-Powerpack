@@ -60,6 +60,7 @@ final class ZFighterWheelScreen extends Screen {
 			LocalPlayer player = minecraft.player;
 			if (pressed && player != null && minecraft.gui.screen() == null && !player.isSpectator() && Powers.has(player, ZFighterPower.INSTANCE)) {
 				minecraft.gui.setScreen(new ZFighterWheelScreen());
+				ZFighterTips.show(ZFighterTips.Tip.WHEEL);
 			}
 		});
 	}

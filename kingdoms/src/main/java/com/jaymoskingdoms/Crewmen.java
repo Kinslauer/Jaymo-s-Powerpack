@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -57,12 +59,12 @@ import org.jspecify.annotations.Nullable;
 public final class Crewmen {
 	/** The entity tag every crew villager carries (kept in their save): a ship's crewman, not any town's. */
 	public static final String TAG = "jaymoskingdoms.crewman";
-	/** (0.7.246) Her one knight: the only crewman in mail or plate. */
+	/** (0.7.246) Her one knight, 0.7.246-0.7.258 (since 0.7.259 there are none: the tag is taken off). */
 	static final String KNIGHT = TAG + ".knight";
-	/** (0.7.246) What an armour piece's id holds if it's mail or plate. */
-	private static final List<String> PLATE = List.of("chainmail", "iron", "gold", "diamond", "netherite", "copper", "steel", "knight");
-	/** (0.7.246) How often (ticks) a crew from before is looked over for plate. */
+	/** (0.7.246) How often (ticks) a crew is looked over: no armour, no guards, weapons stowed while all's calm. */
 	static final int DRESS_EVERY = 100;
+	/** (0.7.259) How long (ticks) after their last foe they put their weapons away. */
+	static final int CALM_TICKS = 400;
 	/** (0.7.246) One deck line in this many is said to a hand of hers near, by their berth; and how many there are. */
 	static final int MATE_ONE_IN = 2, TO_HAND_LINES = 6;
 	/** (0.7.246) A hand's cry on running to a downed shipmate, and words to a player they got up. */
@@ -74,6 +76,18 @@ public final class Crewmen {
 	/** A blow: how far they reach, and how often they swing (ticks). */
 	static final double REACH = 2.6;
 	static final int SWING_GAP = 20;
+	/** (0.7.267) Ticks from a blade's glint to its blow. */
+	static final int MELEE_WINDUP = 6;
+	/**
+	 * (0.7.267) Andy: "all sailors should have at least one flintlock as a side weapon, some carry more". Every hand
+	 * that fights carries a brace of flintlocks: one, two for {@link #BRACE_TWO_PERCENT}% of them (a gunner at least
+	 * two), three for {@link #BRACE_THREE_PERCENT}%. Each fires after its red glint, {@link #BRACE_GAP} ticks (plus up
+	 * to {@link #BRACE_GAP_JITTER}) after the last, at a foe from {@code Pirates.PISTOL_NEAREST} to
+	 * {@code Pirates.PISTOL_FURTHEST} blocks; spent, all are loaded again in {@code Pirates.PISTOL_RELOAD} ticks (plus
+	 * up to its jitter).
+	 */
+	static final int BRACE_TWO_PERCENT = 25, BRACE_THREE_PERCENT = 10;
+	static final int BRACE_GAP = 12, BRACE_GAP_JITTER = 4;
 	/** A bow: from this far to this far, this often (ticks, plus up to the jitter). */
 	static final double BOW_NEAREST = 3.0, BOW_FURTHEST = 24.0;
 	static final int BOW_RELOAD = 50, BOW_JITTER = 30;
@@ -100,6 +114,8 @@ public final class Crewmen {
 
 	/** Each crewman's next swing and next shot (game time); each ship's next line; who her captain has welcomed. */
 	private static final Map<LivingEntity, long[]> READY = new WeakHashMap<>();
+	/** (0.7.267) Each hand's brace of pistols: how many are loaded, and when the next may fire (game time). */
+	private static final Map<LivingEntity, long[]> BRACES = new WeakHashMap<>();
 	private static final Map<UUID, Long> NEXT_LINE = new HashMap<>();
 	private static final Map<UUID, java.util.Set<UUID>> WELCOMED = new HashMap<>();
 	/** A cove's villager captain's boss bar. */
@@ -111,6 +127,8 @@ public final class Crewmen {
 	static void register() {
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			READY.clear();
+			BRACES.clear();
+			LAST_FOE.clear();
 			NEXT_LINE.clear();
 			WELCOMED.clear();
 			for (ServerBossEvent bar : BARS.values()) {
@@ -157,17 +175,13 @@ public final class Crewmen {
 	 * {@code folk}, set up for its role and not yet in the world (or one of a crew already aboard), as an MCA villager
 	 * at its place; null without MCA or if one couldn't be made (then the folk sails).
 	 */
-	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side, Ship ship, boolean captain) {
-		// (0.7.246) Andy: "you're not wearing full plate out to sea": her first hand in mail or plate (never her captain)
-		// is her one knight, a guard in his armour; everyone else sails as a sailor, in cloth and leather
-		boolean knight = !captain && plated(folk) && !knighted(ship, null);
-		PathfinderMob v = McaCompat.crewman(level, folk, knight);
+	static @Nullable PathfinderMob villager(ServerLevel level, Folk folk, Crew.Side side) {
+		// (0.7.259) Andy: "I dont want any guards on these ships ... all the sailors should double as both. just picking up
+		// their weapons when the time comes": every one a sailor (MCA's fisherman) in no armour, their weapons stowed
+		PathfinderMob v = McaCompat.crewman(level, folk);
 		if (v != null) {
 			v.addTag(TAG);
 			v.addTag(sideTag(side));
-			if (knight) {
-				v.addTag(KNIGHT);
-			}
 		}
 		return v;
 	}
@@ -323,53 +337,114 @@ public final class Crewmen {
 
 	// ---- (0.7.246) dressed for the sea ---------------------------------------------------------------------------------
 
-	/** Whether {@code worn} (an armour piece) is mail or plate: no deck wear but for her one knight. */
-	static boolean plate(ItemStack worn) {
-		if (worn.isEmpty()) {
-			return false;
-		}
-		String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath();
-		for (String metal : PLATE) {
-			if (path.contains(metal)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	/** (0.7.259) Their weapons while they're about their work: stowed, out of their hands, till there's a fight. */
+	static final AttachmentType<List<ItemStack>> STOWED = AttachmentRegistry.create(JaymosKingdoms.id("crew_stowed"),
+		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()));
+	/** (0.7.259) The last tick each one had a foe (they stow their weapons a while after). */
+	private static final Map<UUID, Long> LAST_FOE = new HashMap<>();
 
-	/** Whether {@code mob} wears any mail or plate. */
-	static boolean plated(LivingEntity mob) {
-		for (EquipmentSlot slot : EquipmentSlot.values()) {
-			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && plate(mob.getItemBySlot(slot))) {
-				return true;
-			}
+	/** (0.7.259) {@code mob}'s main and off hand put away (stowed), their hands empty; nothing if they're already stowed. */
+	static void stow(LivingEntity mob) {
+		ItemStack main = mob.getMainHandItem(), off = mob.getOffhandItem();
+		if (main.isEmpty() && off.isEmpty() || mob.hasAttached(STOWED)) {
+			return;
 		}
-		return false;
-	}
-
-	/** Whether {@code ship} already carries her knight (besides {@code but}). */
-	private static boolean knighted(Ship ship, @Nullable LivingEntity but) {
-		for (LivingEntity e : ship.crewAboard()) {
-			if (e != but && e.entityTags().contains(KNIGHT)) {
-				return true;
-			}
-		}
-		return false;
+		mob.setAttached(STOWED, List.of(main.copy(), off.copy()));
+		mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+		mob.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 	}
 
 	/**
-	 * A crew from before (0.7.242-0.7.245, every fighter in his folk's plate): the first in plate who isn't her captain is
-	 * her knight, and the rest take theirs off and sail as sailors.
+	 * (0.7.267) A hand who fights and has no flintlock in hand takes one up: in their off hand if it's free, else
+	 * their main hand if that is; with both hands full they draw it from their belt to fire ({@link #pistols}).
 	 */
-	private static void dress(Ship ship, Crew crew, PathfinderMob mob) {
-		if (mob.entityTags().contains(KNIGHT) || !plated(mob)) {
+	static void sidearm(LivingEntity mob, int role) {
+		if (!combatant(role)) {
 			return;
 		}
-		if (!mob.getUUID().equals(crew.captain) && !knighted(ship, mob)) {
-			mob.addTag(KNIGHT);
+		ItemStack pistol = Pirates.pistol();
+		if (mob.getMainHandItem().is(pistol.getItem()) || mob.getOffhandItem().is(pistol.getItem())) {
 			return;
+		}
+		if (mob.getOffhandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.OFFHAND, pistol);
+		} else if (mob.getMainHandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.MAINHAND, pistol);
+		}
+	}
+
+	/** (0.7.267) How many flintlocks {@code mob} carries: the same every time for the same hand. */
+	static int brace(LivingEntity mob, int role) {
+		UUID id = mob.getUUID();
+		long h = id.getMostSignificantBits() * 0x9E3779B97F4A7C15L ^ id.getLeastSignificantBits();
+		h ^= h >>> 29;
+		int roll = (int)Math.floorMod(h, 100L);
+		int n = roll < BRACE_THREE_PERCENT ? 3 : roll < BRACE_THREE_PERCENT + BRACE_TWO_PERCENT ? 2 : 1;
+		return role == Pirates.GUNNER ? Math.max(n, 2) : n;
+	}
+
+	/**
+	 * (0.7.267) Their brace at {@code foe}, {@code d} away: true while a pistol is being aimed or has just fired (nothing
+	 * else this tick).
+	 */
+	private static boolean pistols(ServerLevel level, PathfinderMob mob, int role, LivingEntity foe, double d, long now) {
+		if (!combatant(role)) {
+			return false;
+		}
+		long[] brace = BRACES.computeIfAbsent(mob, m -> new long[] {brace(m, role), now + level.getRandom().nextInt(Pirates.PISTOL_JITTER + 1)});
+		if (now < brace[1]) {
+			return false;
+		}
+		if (brace[0] <= 0) {
+			brace[0] = brace(mob, role);
+		}
+		if (d < Pirates.PISTOL_NEAREST || d > Pirates.PISTOL_FURTHEST || !mob.hasLineOfSight(foe)) {
+			return false;
+		}
+		if (!MobCombat.aimed(level, mob, foe)) {
+			return true;
+		}
+		Pirates.shoot(level, mob, foe);
+		mob.swing(mob.getOffhandItem().is(Pirates.pistol().getItem()) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND,
+			net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		brace[0]--;
+		brace[1] = brace[0] > 0 ? now + BRACE_GAP + level.getRandom().nextInt(BRACE_GAP_JITTER + 1)
+			: now + Pirates.PISTOL_RELOAD + level.getRandom().nextInt(Pirates.PISTOL_JITTER + 1);
+		return true;
+	}
+
+	/** (0.7.259) {@code mob} takes up their stowed weapons; true if they had any. */
+	static boolean arm(LivingEntity mob) {
+		List<ItemStack> kit = mob.getAttached(STOWED);
+		if (kit == null) {
+			return false;
+		}
+		mob.removeAttached(STOWED);
+		if (kit.size() > 0 && mob.getMainHandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.MAINHAND, kit.get(0).copy());
+		}
+		if (kit.size() > 1 && mob.getOffhandItem().isEmpty()) {
+			mob.setItemSlot(EquipmentSlot.OFFHAND, kit.get(1).copy());
+		}
+		mob.playSound(SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.8F, 1.0F);
+		return true;
+	}
+
+	/**
+	 * (0.7.259) A crew from before (guards, some in plate): out of their armour, worn and packed, sailors by trade, their
+	 * weapons stowed unless there's a fight on.
+	 */
+	private static void dress(PathfinderMob mob, boolean fighting) {
+		mob.removeTag(KNIGHT);
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !mob.getItemBySlot(slot).isEmpty()) {
+				mob.setItemSlot(slot, ItemStack.EMPTY);
+			}
 		}
 		McaCompat.toSea(mob);
+		if (!fighting) {
+			stow(mob);
+		}
 	}
 
 	/**
@@ -386,7 +461,7 @@ public final class Crewmen {
 		if (seat == null) {
 			return false;
 		}
-		PathfinderMob v = villager(level, folk, crew.side, ship, folk.getUUID().equals(crew.captain));
+		PathfinderMob v = villager(level, folk, crew.side);
 		if (v == null) {
 			return false;
 		}
@@ -530,7 +605,8 @@ public final class Crewmen {
 		Crew crew = ship.crew;
 		long now = level.getGameTime();
 		if ((mob.tickCount + mob.getId()) % DRESS_EVERY == 0) {
-			dress(ship, crew, mob);
+			Long had = LAST_FOE.get(mob.getUUID());
+			dress(mob, crew.target >= 0 || had != null && now - had < CALM_TICKS);
 			if (crew.side == Crew.Side.WHALER) {
 				// (0.7.246) her own hands aboard and her crew know each other: no introductions among shipmates
 				for (ServerPlayer p : Corsairs.playersAboard(level, ship)) {
@@ -542,6 +618,10 @@ public final class Crewmen {
 		}
 		LivingEntity foe = foe(level, mob, w, ship, crew);
 		if (foe != null) {
+			// (0.7.259) weapons up
+			LAST_FOE.put(mob.getUUID(), now);
+			arm(mob);
+			sidearm(mob, w.role());
 			fight(level, mob, w, foe, now);
 		} else if (McaCompat.busy(mob)) {
 			// someone's talking to them: they look at them
@@ -633,24 +713,38 @@ public final class Crewmen {
 		return role != Pirates.POWDER_MONKEY;
 	}
 
-	/** At their foe: pistols for a pirate's captain and gunners (and shouts), a bow if they hold one, and their blade at arm's length. */
+	/** At their foe: their blade at arm's length, else (0.7.267) their brace of pistols (and a pirate's shouts), else a bow if they hold one. */
 	private static void fight(ServerLevel level, PathfinderMob mob, Worker w, LivingEntity foe, long now) {
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		int role = w.role();
-		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1)});
+		long[] ready = READY.computeIfAbsent(mob, m -> new long[] {now, now + level.getRandom().nextInt(BOW_JITTER + 1), -1L});
 		double d = mob.distanceTo(foe);
+		// (0.7.267) the blade glints first and lands MELEE_WINDUP later (a parry's chance, as every mob's blow gives)
+		if (ready[2] >= 0 && now >= ready[2]) {
+			ready[2] = -1L;
+			if (d <= REACH + foe.getBbWidth() * 0.5) {
+				mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				mob.doHurtTarget(level, foe);
+			}
+			return;
+		}
+		if (ready[2] >= 0) {
+			return;
+		}
 		if (d <= REACH + foe.getBbWidth() * 0.5 && now >= ready[0]) {
 			ready[0] = now + SWING_GAP;
-			mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			mob.doHurtTarget(level, foe);
+			ready[2] = now + MELEE_WINDUP;
+			MobCombat.tell(level, mob, false);
 			return;
 		}
 		if (Pirates.isPirate(role)) {
 			Pirates.crewFight(level, mob, role);
+		}
+		if (pistols(level, mob, role, foe, d, now)) {
 			return;
 		}
 		ItemStack held = mob.getMainHandItem();
-		if ((held.getItem() instanceof BowItem || held.getItem() instanceof CrossbowItem) && now >= ready[1] && d >= BOW_NEAREST && d <= BOW_FURTHEST
+		if ((held.getItem() instanceof BowItem || held.getItem() instanceof CrossbowItem) && !held.is(Pirates.pistol().getItem()) && now >= ready[1] && d >= BOW_NEAREST && d <= BOW_FURTHEST
 			&& mob.hasLineOfSight(foe)) {
 			ready[1] = now + BOW_RELOAD + level.getRandom().nextInt(BOW_JITTER + 1);
 			loose(level, mob, held, foe);
@@ -783,7 +877,7 @@ public final class Crewmen {
 			case "gunner" -> "a gunner";
 			case "monkey" -> "a powder monkey (a ship's boy who runs powder to the guns)";
 			case "deckhand" -> "a deckhand";
-			case "marine" -> "a marine (a knight serving aboard)";
+			case "seaman" -> "an able seaman (a sailor who takes up arms when there's a fight)";
 			case "whaleman" -> "a whaleman";
 			default -> "a hand";
 		};
@@ -815,7 +909,8 @@ public final class Crewmen {
 			return "deckhand";
 		}
 		return switch (side) {
-			case NAVY -> "marine";
+			// (0.7.259) no marines: her sailors fight
+			case NAVY -> "seaman";
 			case WHALER -> "whaleman";
 			default -> "hand";
 		};

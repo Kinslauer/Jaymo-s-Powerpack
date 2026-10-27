@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "B": "#minecraft:boats"
+  },
+  "pattern": [
+    "IRI",
+    "IBI",
+    "III"
+  ],
+  "result": {
+    "id": "jaymospowers:pocket_skiff_capsule"
+  }
+}

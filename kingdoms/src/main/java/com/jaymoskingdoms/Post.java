@@ -51,6 +51,9 @@ public final class Post {
 	/** The news not yet written up, and when the first of it came. */
 	private static final List<Component> NEWS = new ArrayList<>();
 	private static long newsSince = -1L;
+	/** (0.7.256) News for one player only (their merchant orders), and when the first of it came. */
+	private static final Map<UUID, List<Component>> MINE = new HashMap<>();
+	private static final Map<UUID, Long> MINE_SINCE = new HashMap<>();
 	/** When each player's last messenger was sent. */
 	private static final Map<UUID, Long> LAST = new HashMap<>();
 	private static @Nullable MinecraftServer current;
@@ -64,6 +67,8 @@ public final class Post {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			NEWS.clear();
 			newsSince = -1L;
+			MINE.clear();
+			MINE_SINCE.clear();
 			LAST.clear();
 			current = null;
 		});
@@ -129,6 +134,21 @@ public final class Post {
 		}
 	}
 
+	/** (0.7.256) A line in {@code to}'s own next Tidings, with the world's news if there is any. */
+	public static void tidings(UUID to, Component line) {
+		if (current == null) {
+			return;
+		}
+		List<Component> mine = MINE.computeIfAbsent(to, id -> new ArrayList<>());
+		if (mine.isEmpty()) {
+			MINE_SINCE.put(to, Factions.level(current).getGameTime());
+		}
+		mine.add(line);
+		while (mine.size() > NEWS_LINES) {
+			mine.removeFirst();
+		}
+	}
+
 	/** {@code stack} (a letter) to be brought to {@code to} by the next messenger free. */
 	static void later(UUID to, ItemStack stack) {
 		later(to, stack, false);
@@ -176,14 +196,24 @@ public final class Post {
 		if (fresh != null) {
 			overworld.setAttached(NAMES, Map.copyOf(fresh));
 		}
-		// (the news, written up for everyone on)
+		// (the news, written up for everyone on, with (0.7.256) each one's own lines)
+		List<Component> world = List.of();
 		if (!NEWS.isEmpty() && now - newsSince >= NEWS_DELAY) {
-			List<Component> lines = List.copyOf(NEWS);
+			world = List.copyOf(NEWS);
 			NEWS.clear();
 			newsSince = -1L;
-			for (ServerPlayer p : players) {
+		}
+		for (ServerPlayer p : players) {
+			List<Component> lines = new ArrayList<>(world);
+			List<Component> mine = MINE.get(p.getUUID());
+			if (mine != null && !mine.isEmpty() && now - MINE_SINCE.getOrDefault(p.getUUID(), now) >= NEWS_DELAY) {
+				lines.addAll(mine);
+				MINE.remove(p.getUUID());
+				MINE_SINCE.remove(p.getUUID());
+			}
+			if (!lines.isEmpty()) {
 				later(p.getUUID(), Letters.sealed(new Letters.Letter(nameOf(p).getString(), Component.translatable("letter.jaymoskingdoms.tidings.from"),
-					lines, Optional.of(Component.translatable("letter.jaymoskingdoms.tidings")))));
+					List.copyOf(lines), Optional.of(Component.translatable("letter.jaymoskingdoms.tidings")))));
 			}
 		}
 		for (ServerPlayer p : players) {

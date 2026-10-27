@@ -119,7 +119,7 @@ final class Muskets {
 			return;
 		}
 		double d = folk.distanceTo(foe);
-		if (d < NEAREST || d > FURTHEST || !folk.hasLineOfSight(foe)) {
+		if (d < NEAREST || d > FURTHEST || !folk.hasLineOfSight(foe) || !MobCombat.aimed(level, folk, foe)) {
 			return;
 		}
 		NEXT.put(folk, now + RELOAD + level.getRandom().nextInt(JITTER));
@@ -135,6 +135,7 @@ final class Muskets {
 			ball = bolt;
 		}
 		Javelins.mark(ball);
+		MobCombat.unparryable(ball);
 		double dx = foe.getX() - folk.getX(), dz = foe.getZ() - folk.getZ();
 		double dy = foe.getY(0.5) - ball.getY();
 		double flat = Math.sqrt(dx * dx + dz * dz);

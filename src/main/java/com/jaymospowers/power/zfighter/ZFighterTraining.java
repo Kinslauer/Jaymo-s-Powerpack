@@ -104,15 +104,17 @@ public final class ZFighterTraining {
 	public static final int NOVA_SPHERE = 19;
 	public static final int RAGE_SCREAM = 20;
 	public static final int AFTERIMAGE = 21;
-	public static final int TECHNIQUES = 22;
+	/** (0.17.56) Sonic Sway, a quick technique on G ({@link ZFighterSonicSway}). */
+	public static final int SONIC_SWAY = 22;
+	public static final int TECHNIQUES = 23;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
 		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
-		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage"};
+		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
 	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
-		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600};
+		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
@@ -329,17 +331,26 @@ public final class ZFighterTraining {
 	/** How fast he trains right now: Training Weights worn, times heavy gravity. */
 	static float rate(ServerPlayer player) {
 		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F) * ZFighterLineage.trainingFactor(player)
-			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F);
+			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F)
+			* ZFighterAfterlife.trainingBonus(player) * ZFighterSpace.trainingRate(player);
 	}
 
 	/** Under heavy gravity: someone's Immense Field, or Gravity's weight on him. */
 	public static boolean heavyGravity(ServerPlayer player) {
 		return com.jaymospowers.power.gravity.GravityTrainingField.inField(player)
-			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null;
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null
+			// (0.17.60) a Gravity Machine's room, five times heavy or more
+			|| ZFighterGravityMachine.heavy(player);
 	}
 
 	/** Mastery for the form he's in. */
 	static void master(ServerPlayer player, int form, int amount) {
+		// (0.17.50) the god form keeps its own mastery; a legendary line's forms count as Super's 1-3
+		if (form == ZFighterForms.GOD) {
+			ZFighterGod.master(player, Math.round(amount * rate(player)));
+			return;
+		}
+		form = ZFighterLegendary.chain(form);
 		if (form < 1 || form > FORMS || amount <= 0) {
 			return;
 		}
@@ -539,6 +550,10 @@ public final class ZFighterTraining {
 
 	/** 0-1 mastery of the form he's in (0 in base). */
 	static float mastery(Player player, int form) {
+		if (form == ZFighterForms.GOD) {
+			return ZFighterGod.mastery(player) / (float)MASTERY_MAX;
+		}
+		form = ZFighterLegendary.chain(form);
 		return form <= 0 ? 0.0F : of(player).mastery(form) / (float)MASTERY_MAX;
 	}
 

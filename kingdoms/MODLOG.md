@@ -5461,3 +5461,191 @@ for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothin
   placed you (`LifeStory.home`), so dying doesn't send you to the world spawn; sleeping in a bed moves it as usual.
 - **Whalers wake aboard.** A signed hand who dies is put back on her deck (`Whalers.reboard`) while she's within
   reach; otherwise they wake at her harbour's shore.
+
+## 0.7.258: spirit hands become what they do (pack 0.17.49)
+Andy: "The aegis hand should animate like a shield infront of you ... they should be arms, that is only their idle, and
+they pop in whenever they speak passively as the arm or default. every other use becomes what it entails, the catching
+hands should animate beneath you and the weapon forms look great, but they need to reach way out to whatever you aim at,
+within 20 blocks. that should also be far reach's extent. animating the hand the whole way for all who can see it."
+- **Speaking:** a spirit's line (`SpiritVoice`) shows the arm by its keeper for 3.5 s (new pose `Poses.SPEAK`), unless a
+  move is showing it.
+- **Reach synced:** `SpiritState.show` now packs how far the hand reached (whole blocks, up to 31) beside the pose, set by
+  the move through `CastHints.setReach` (`SpiritState.reach()`, `shownAt` now `show >> 11`).
+- **20 blocks:** the mage hands reach 20 blocks flat (`HandMoves.REACH`; it was 16 plus 1 a level), and Thessaly's unseen
+  hand, rune trap and unlock reach as far. Grimsby's weapon forms strike the foe you aim at (`Arcana.sighted`) out to 20
+  blocks when it's beyond the form's own reach, with the foes within 0.6 of the form's reach of it; the cut's arc and sound
+  are drawn there. Closer, the old cone. Far hand, grab, pin, unseen hand, trap, unlock and Thessaly's loot pointing all
+  report where they reached.
+- **What a use becomes** (`SpiritArms.shape`): a move that reached shoots the hand out along your aim the whole way there,
+  the forearm stretching, landing with the blow, swords and axes sweeping in from the side, the hammer raised and brought
+  down; the burst (and a far slam's ring) is where it landed. The aegis and Varro's ward bend the hand up palm out and swell
+  it to 2.8x as a shield in front of you (two hands side by side at bond 40). Catch me turns the hands palm up beneath your
+  feet, cupped, swelling to 2.6x.
+- **The axe fells trees** (Andy: "the axe should chop trees in a single blow"): with no foe in reach, Grimsby's axe at a
+  tree you aim at (out to 20 blocks) brings the whole tree down at once (`Trees.fellAtOnce`), toppling away from you as a
+  felled tree does, and a woodcutter's orders count it.
+- **Seen the whole way:** `SpiritCullingMixin` grows a keeper's culling box by the reach while it's out, so the arm is drawn
+  even when its keeper is off screen. Not seen in game.
+## 0.7.259: no guards at sea, sailors take up their weapons for a fight (pack 0.17.51)
+
+- Andy (after 0.7.246): "all the sailors are guards still. I dont want any guards on these ships ... if you put a guard,
+  they CANT have armor. but all the sailors should double as both. just picking up their weapons when the time comes."
+  Every crewman is now an MCA fisherman (a sailor) in no armour: no knight, no guards. Their folk's weapons are stowed
+  (`Crewmen.STOWED`); they take them up the moment they have a foe (`Crewmen.arm`) and put them away 20 s after the
+  last one (`Crewmen.stow`). Crews from before are changed in place within 5 s: guard profession to fisherman, armour
+  off and out of their packs, weapons stowed, the knight tag gone. A navy hand is an "Able seaman", not a "Marine".
+  (0.7.246 only changed crew in mail or plate, so unarmoured MCA guards stayed guards.)
+- **The sea no longer shows in a ship's hold** (Andy's clip of the whaling start's whaler: "it looked to me like the
+  hull wasnt actually bailed"): her hold was dry, but the renderer's water mask only covered empty cells. Slabs, stairs
+  and other part-blocks count as wall, so the sea was drawn in their empty half. `Hull.masked` adds the part-blocks with
+  no sea beside them, and `ShipRenderer` masks those too.
+
+## 0.7.261: the Giants stomp with every step and sway as they walk (pack 0.17.55)
+
+- Andy: "Giant enemies should emit a stomp with every step, emitting a shockwave signified by a radiating particle
+  effect, cracking the ground and dealing damage to those who dont jump. The giants should also move with a slow sway,
+  keeping their move speed but removing that fast swing." Covers the four Aether Giants (`AetherGiant`); the vanilla
+  Giant (sized up by `Monoliths.sizeVanillaGiant`) has no AI and never walks, so it's left as it was.
+- **Steps:** the server counts its stride by the ground it covers, one step every `STEP_LENGTH` (6) blocks, right foot
+  on the even steps. Each footfall (`AetherGiant.footfall`) thuds, throws up the ground's dust, cracks the blocks under
+  the foot and five wandering lines out from it (`destroyBlockProgress`, fading over 5 s, nothing broken), and sends a
+  shockwave out along the ground at 1.25 blocks a tick to 10 blocks. Whoever the wave front passes standing on the
+  ground (not jumping, flying or riding) takes 5 damage (half at the edge) and a jolt up and away; each wave hits each
+  one once. The client draws the wave as a ring of dust and puffs running out over the ground. Vanilla's step sound is
+  gone (the footfall has its own).
+- **Sway:** the model's legs follow the server's stride (`GiantState.stride`, kept in step by an entity event on each
+  footfall) instead of vanilla's walk cycle, which ran a 30-block body's legs about four times too fast. Smaller
+  swings, its weight rolling onto the foot coming down, shoulders turning with the forward arm, head kept level, and it
+  sinks onto each footfall so its feet stay on the ground. Same speed as before. Blows, the stamp, the flinch and the
+  fall-and-shatter death are unchanged. Not seen in game.
+
+## 0.7.262: three new bloods, Andy's NOEA picks (pack 0.17.56)
+Idea from the Dragon Block NOEA race list (a short mention only; all names, code and art our own). Three heritages,
+picked at the start like the first ten (keys `divine`, `biobuilt`, `rubberfolk`, so the entity tags are
+`jaymoskingdoms_heritage_<key>`: Jaymo's Powers reads them for ki sense, scouters and the lineage, which reads as Earthling).
+- **Divine-born** (`DivineBorn`): halo and gold filigree, +1 health every 4 s on top of the body's own, blows 25% harder on
+  the wicked (undead, illagers, barbarians, a Rogue's Stealth alignment, anyone whose power or gift is corrupted),
+  Restoration spells and the Sorcerer's Mend, Renewal and Rekindle heal 30% more and cost 25% less mana. Flaw: hunger 25%
+  faster.
+- **Bio-built** (`BioBuilt`): a downed foe (`Downed.isDowned`) looked at within 3 blocks and held on the heritage key for 3 s
+  is absorbed (consumed): a share of its health back and its worth added; 4 and 12 worth fold the body into the second
+  and third form (health, armour, blows; a changed look: seams, then plates to the elbow, then to the shoulder and
+  cheeks). Blows drain 8/12/18% of their harm back. Third form: the key pressed on no foe buds up to 2 small copies for 45 s
+  (risen through `Thralls`, so they obey the master and crumble). Flaw: frail first form (2 fewer hearts), lightning and
+  magic 50% harder. Nothing grabs and nothing is goo: it never reaches for anything but the downed in front of it.
+- **Rubber-folk** (`RubberFolk`): pink skin tint, +1 block of reach (the stretch), a lost limb regrown every 20 s (Powers'
+  `Dismember.regrow` through `PowersCompat.regrow`), small weak or downed foes swallowed for a heal (held key), sweets
+  (cookie, pies, honey, berries, melon, cake slices, and Kitchen's tarts, pies, cobbler, brownies by `KitchenCompat.sweet`)
+  heal 2 to 3 hearts. Flaw: fire burns 60% longer, arrows and spines 25% harder.
+- **The held heritage key** (`HeritageHold`): `;` held is sent every other tick (the same key as the Warrior-born's tail); the
+  server runs one absorbing bar per player.
+- Each has three looks (`HeritageVariants`: Haloed, Starlit, Seraphic; Seamed, Brassbound, Opaline; Rosy, Candy-striped,
+  Berry-glossed), marks from `tools/gen_race_looks.py`, a halo model part, lang lines, a place in the life story (born at a
+  hilltop shrine, in a workshop's vats, at a travelling fair), villagers (Rubber-folk fairly common, Divine-born very rare,
+  Bio-built only by inheritance), MCA skin tints and skin ranges.
+
+## 0.7.263: the monoliths stand three times as big, of the Aether's own stone, broken only by high-tier Tinkers tools (pack 0.17.57)
+
+- Andy: "the monoliths should be triple their current size and be built from the materials their respective aether
+  materials. they are only mineable with high teir tinker tools."
+- **Triple size** (`Monoliths.SCALE`): the same design, every block of it now a 3x3x3 cube. The pillar is 9 wide and
+  39 to 54 tall, its broken crown 3 wide, its core and four shards 3 blocks a side, its ground 12 out, and its rubble
+  lies 9 to 15 out in pieces up to 3 across. Ground under it may be 6 uneven (was 4). Giants rise 16 to 22 out (was 9 to
+  14), clear of the pillar, and spare the whole monolith when they trample (`Monoliths.part`).
+- **Aether materials** (`Element`, Jaymo's Powers' blocks looked up by id; the old vanilla blocks without Powers):
+  Highfield holystone banded with holystone bricks, a zanite core, on Aether grass; Magnetic ferrosite banded with
+  undershale bricks, a gravitite core, on ferrosite sand; Arctic icestone banded with icestone bricks, an arkenium core,
+  on arctic snow; Irradiated irradiated holystone banded with agiosite bricks, an ambrosium core, on coarse Aether dirt.
+- **Only high-tier Tinkers tools:** a monolith's stone, bands and core (ours, on the Overworld) break only to a Jaymo's
+  Powers Tinkers mining tool of diamond tier or better (amethyst bronze, pig iron, slimesteel or steel head; checked by
+  the tool's own tier rule, `Monoliths.highTinkers`). Anything else is told so and the block stands; creative is
+  unaffected. Explosions and pistons aren't stopped. Monoliths raised before keep their old look; their core still goes
+  dark when their Giant falls. Not seen in game.
+
+## 0.7.264: parties (Andy's NOEA picks)
+
+- Andy's NOEA picks: a party system. Ideas only; the code and names are our own.
+- **`/party`** (`Parties`). Andy: "parties should be what are started with handshakes", so a party is the handshake
+  group (the `jk_group_` scoreboard team): taking someone's offered hand joins their party (`Parties.shaken`, called from
+  `Handshakes.done`; one is started, led by the offerer, if they have none), and `invite <player>` (a clickable Accept and
+  Decline; lapses after 60 s) does the same from afar. Also `accept`, `decline`, `leave` (`/group leave` too), `kick <name>`,
+  `list` and `pvp on|off`. Up to 6 (`MAX_SIZE`; a handshake into a full party only swaps names). Only the leader invites,
+  kicks and sets PvP; the lead passes to a member who's on when the leader leaves, and a party of one is disbanded.
+  Members are the team's; leader (username) and PvP are kept by team name on the Overworld (`party_meta`). Old groups
+  become parties as they are, led by the first member on. The group perks (known names, colour, shoulder to shoulder,
+  `/group name`) stay; an op's own team is still a group but not a party.
+- **No friendly fire**: `ALLOW_DAMAGE` cancels a blow between two members while the party's PvP is off (the default).
+  The attacker is the damage source's entity, or, for an `OwnableEntity`, its owner, so arrows, tamed beasts and Powers'
+  powers (all damage with a player behind it) are covered.
+- **Shared slay quests** (`Quests.shareSlain`): when a player's kill is counted for a slay quest, each other member
+  within 64 blocks in the same dimension with a slay quest of the same target is credited too. Other kinds and bounties
+  (head-based) are not shared.
+- **Stats at any distance**: once a second `Parties.Sync` sends each member the party's health, max health, hunger,
+  dimension and block position (names are character names, a hood's or disguise's, via `CharacterNames`);
+  `client/PartyClient` draws the others under the kin-sense compass at the top left (hidden with F3).
+- **API for Jaymo's Powers (by reflection)**: `Parties.members(ServerPlayer)` (online members, the player first) and
+  `Parties.allied(ServerPlayer, ServerPlayer)`.
+- Lang lines in `en_us.json`; `docs/Abilities.md` rows 441 to 445.
+
+## 0.7.266: rides go by on a road screen (pack 0.17.65)
+Andy: "this cutscene system should replace our carriage rides, they always get stuck and you cant see anyway, at least
+this gives you an animation and hides imperfections." The idea is Stagecoach's (its Bukkit plugin can't run in a
+Fabric pack; nothing copied, the screen is our own).
+- **`Journeys`**: every player's ride to another place (a rickshaw, a rich realm's cab, a milestone's coach) is seen
+  setting off for `DEPART_TICKS` (1.5 s), then the road screen comes up and the ride stands still where it was. The
+  trip takes its length at `RICKSHAW_SPEED` (16 blocks a second) or `CARRIAGE_SPEED` (30), between 5 and 30 seconds.
+  At the end the player is moved to the far end (a rickshaw to the town's seat, a coach to the road's end) and the
+  rickshaw or carriage with them, and they're set down beside it. The puller or cab heads home as before (a puff back
+  to the rank once nobody's near); a coach goes after 3 seconds.
+- Nothing hurts a traveller on the way (`ALLOW_DAMAGE`). **Turn back** (the screen's button), getting down while it
+  sets off, or logging out puts them down where they started with their fare back (taken from the realm's treasury).
+- A ride back from a restart with a player aboard goes on the road screen again, with no fare to give back.
+- **`client/TravelScreen`**: drawn by hand in blocky pixels (`SCENE_PIXELS` = 120 to the screen's height): the sky at
+  the hour they set off (sun, moon, stars, drifting clouds), far hills (snow-capped in snow country), near hills with
+  trees, the road with ruts and tufts, a fence going by in front, and the ride: a rickshaw (its puller walking between
+  the shafts, the hood in the realm's colour, the rider sat back) or a carriage in the realm's colour (a coach with
+  luggage up top) behind a galloping horse with its driver up. The land turns from the look of the start to the look of
+  the end on the way (grass, snow, sand, cherry blossom; trees change one by one). A wooden sign up top names the place,
+  the blocks and the seconds left, with a bar below. Hooves or footsteps and a creak now and then. Fades in from black
+  and out to black; the world fades back in after.
+- Lang lines in `en_us.json` (`journey.*`); the hire messages now say the fare comes back if you turn back.
+
+## 0.7.267: fighters guard and parry; attack tells (pack 0.17.67)
+Andy: "Build those ideas too" (after Powers' guard and parry, PR #591).
+- `MobShields`: a fighter fighting Better Combat's way with no shield raises its blade instead (its weapon's guard from
+  Powers), 30% of the times a shield-bearer would (`BLADE_GUARD_CHANCE`); `raisedFor`, `snap`, `drop`, `guardHand`.
+- `MobParry`: a player's blow in the first 8 ticks of a fighter's raised guard is parried; with its guard down, 12% (30%
+  for veterans, `WeaponForms.experienced`) of blows are. A parry takes nothing, restarts your attack timer, slows and
+  pushes you, and the fighter answers at once (`MobCombat.hasten`); 3 s before another. Never from behind, nor against
+  an axe, a two-handed weapon or the Combat Arts' area blows.
+- `MobCombat` attack tells: a glint at the weapon as each swing winds up, white for a blow you can parry, red for a
+  heavy one (two-handed, or 1.4x damage and up) that carries `jaymospowers.unparryable` while it lands, so Powers'
+  guard only blocks it.
+- `Crewmen`: a crewman's blade glints and lands 6 ticks later (`MELEE_WINDUP`), as every mob's blow now does in Powers.
+- Guns glint red (Andy: "All guns should red glint too"): `MobCombat.aimed` shows a red glint and a flint's click at the
+  muzzle 10 ticks before a pirate's pistol or a guard's musket fires (an aim not fired within 20 ticks starts over), and
+  `MobCombat.unparryable` tags the ball so Powers' guard only blocks it.
+- Every sailor carries a flintlock (Andy: "all sailors should have at least one flintlock as a side weapon, some carry
+  more"): each crewman who fights (`Crewmen.sidearm`) takes one up in a free hand when they arm; their brace (`brace`) is
+  one pistol, two for 25% (gunners always at least two), three for 10%, fired 12-16 ticks apart, each after its glint,
+  at a foe 3-22 blocks off, then all reloaded together. Pirate crew pistols moved here from `Pirates.crewFight` (shouts
+  only now). Folk pirate deckhands carry one in the off hand and fire it too.
+## 0.7.268: the Giants grab (pack 0.17.68)
+Andy: "Giants and apes need a grab attack that is telegraphed and fairly slow, but deals massive damage to a single target,
+with a letterboxed animation". The Aether Giants' grab, in `remnants/AetherGiant` (the Great Apes' twin is Powers'
+`power/zfighter/ApeGrab`):
+- **Five phases** (`GRAB_WINDUP` 30, `GRAB_SNATCH` 8, `GRAB_HOLD` 40, `GRAB_SLAM` 8, `GRAB_RECOVER` 20 ticks): it rears back
+  with a double roar, its right hand drawn up behind it and its element's motes at the hand (the warning; get more than
+  `GRAB_REACH` 9 blocks from its body, or 6 above or below, and the hand closes on nothing with a puff); the hand comes down on
+  its target and pins it where it stood; the catch is lifted to its chest over 10 ticks and squeezed (`SQUEEZE_DAMAGE` 4 every
+  10 ticks, with the element's touch); then hurled into the ground ahead (`SLAM_DAMAGE` 40, the strong touch, thrown
+  `SLAM_THROW` 1.2 and up, block dust, an explosion, the ground cracked as its steps crack it); then it straightens up and
+  lets go. It starts on a target within `GRAB_TRIGGER` 9 blocks, every `GRAB_TICKS` 400 to 600, and the stamp waits for it.
+- **The catch** is carried every tick: players by `teleportTo` with their rotation kept, mobs by `setPos` facing it; velocity
+  zeroed, fall distance reset. Its death lets go. Synced data `GRAB_START`/`GRAB_HELD` tell every client the phase.
+- **Pose** (`client/remnants/GiantModel.grab`): the right arm reared up and flared, brought down, held trembling at the chest,
+  hurled; the body leans back then forward, the head follows, the other arm braces.
+- **The film**: `PowersCompat.film` finds Powers' `UltimateFilm.play`/`witnessed` by reflection (Kingdoms still runs without
+  Powers): the catch, a player, sees the Giant's face push in on them for the snatch, hold and slam (56 ticks); everyone within
+  `FILM_RANGE` 48 blocks gets the bars.
+- Lang line `message.jaymoskingdoms.giant.grabbed`. Compile-checked only.

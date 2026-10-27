@@ -74,6 +74,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
+		// (0.7.264, Andy's NOEA picks) the party list on the HUD
+		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
 		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
@@ -94,6 +96,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LetterScreen.register();
 		// (0.7.234) the Pin and Rotary lockpicking games
 		LockpickScreen.register();
+		// (0.7.266) the road screen a ride to another settlement goes by on
+		TravelScreen.register();
 		PigeonRenderer.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
