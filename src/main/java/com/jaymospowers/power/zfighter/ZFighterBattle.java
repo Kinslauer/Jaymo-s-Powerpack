@@ -140,7 +140,8 @@ final class ZFighterBattle {
 
 	/** A weapon: anything that would hit harder than a fist (its own attack damage, or a weapon's component). */
 	static boolean isWeapon(ItemStack stack) {
-		if (stack.isEmpty()) {
+		// (0.17.58) the fighter's own blades and staff are fists
+		if (stack.isEmpty() || ZFighterWeapons.fistLike(stack)) {
 			return false;
 		}
 		if (stack.has(DataComponents.WEAPON)) {

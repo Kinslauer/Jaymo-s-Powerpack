@@ -412,6 +412,11 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.init();
 		ZFighterWishes.init();
 		ZFighterSites.init();
+		// (0.17.58) the bigger Lookout, the gravity machine, pocket capsules, fighter weapons
+		ZFighterLookout.init();
+		ZFighterGravityMachine.init();
+		ZFighterCapsules.init();
+		ZFighterWeapons.init();
 		ZFighterFusion.init();
 		ZFighterMasters.init();
 		ZFighterRaids.init();

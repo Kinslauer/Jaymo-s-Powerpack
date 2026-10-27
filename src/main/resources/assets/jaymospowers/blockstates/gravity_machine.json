@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymospowers:block/gravity_machine_off"
+    },
+    "lit=true": {
+      "model": "jaymospowers:block/gravity_machine_on"
+    }
+  }
+}
