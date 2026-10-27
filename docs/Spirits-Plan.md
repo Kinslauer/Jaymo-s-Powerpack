@@ -358,3 +358,11 @@ featureless: the plain arm box, no hand); tune `TABLE` for the new poses; the Qu
 side only, so add `int scale` (×100) to `SpiritState` is track G's job: it adds the field (default 100) to the record,
 CODEC and STREAM_CODEC, and `Spirit.size(SpiritState)` reads it; track I uses it). `SpiritHud`: the clash tug bar is H's;
 the steady/armour/echo toggles show "on" after the move name. Lang keys in `spirits_i.json`.
+
+## Leave a Hand (Kingdoms 0.7.275)
+
+Andy (2026-10-27), linking Mage Hand (GPL-3.0, ideas only): "can this be implemented with our mana spirits?" A seventh
+shared move, `leave_hand` (level 6, cost 15): the hand stays at a container (`spirits/TendedHand`, drawn by
+`client/spirits/TendedHandRenderer`), gathers items (only the kinds inside if it holds any), guards it (monsters within 8),
+and tends crops within 6 (`TendedHand.FARMS`). Hands: 1, 2 from bond 60, 3 from level 15. Tuning at the top of
+`TendedHand`.

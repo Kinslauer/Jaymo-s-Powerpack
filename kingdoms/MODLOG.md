@@ -5663,3 +5663,24 @@ her harbour.
   her) could make no move at all, since every move still struck. Now any move that drives her no further in is allowed
   (`Ship.hits` counts the struck cells), so she can back or slide off. Partly in unloaded chunks she still holds still.
 - Compile-checked only, not seen in game.
+
+## 0.7.275: Leave a Hand, a spirit hand that stays to tend a chest (pack 0.17.78)
+
+Andy linked Mage Hand (CurseForge, SkylorBeck; GPL-3.0, while we're MIT, so ideas only, our own code and look): "can this
+be implemented with our mana spirits?" Its floating hands bound to a home chest became a seventh shared spirit move.
+- **Leave a Hand** (`leave_hand`, level 6, 15 mana, `HandMoves`): cast at a chest, barrel or any container within reach
+  and one of your spirit's hands stays there (`spirits/TendedHand`, an entity), hovering over it. Cast at it again and
+  the hand comes home. One hand to leave, two from bond 60, three from level 15; leaving one more takes back the oldest.
+  Where they are is kept on the keeper (`TendedHand.LEFT`, saved, kept through death), so a hand called back or whose
+  spirit was released fades when it next looks round.
+- **Gathers**: anything lying within 10 blocks goes into the container. A container that already holds something only
+  gathers those kinds (Mage Hand's sorting hand); an empty one takes everything.
+- **Guards**: strikes monsters within 8 blocks of it (4 damage, scaled by spirit level like every move; never an ally).
+- **Tends** (`FARMS`): harvests ripe crops within 6 blocks (2 up and down), replants them from their own seed or the
+  container's, sows bare farmland from seeds in the container, feeds unripe crops its bone meal; the harvest goes in.
+- It draws 0.1 mana a second, 1 a blow and 0.25 a harvest or sowing from its keeper, and rests, dim and still, while
+  they are offline or would go below 10 mana.
+- Drawn (`client/spirits/TendedHandRenderer`) as the spirit's own forearm and hand from its arms (`SpiritRig`), in the
+  aura's shells and its colour: loose at rest, open and pointing as it reaches, closed round what it carries, a fist that
+  punches. Only the attuned (and those who read magic) see the hand; anyone sees what it carries float.
+- Compile-checked only, not seen in game.

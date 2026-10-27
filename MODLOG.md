@@ -3265,3 +3265,6 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   her off (warped astern with her sails struck, bow brought round to open water), a whaler hove to at her moorings no
   longer backs herself onto the beach while fitting out, and a hull already in the ground can move off it. Not seen
   in game.
+- **0.17.78, Leave a Hand (Kingdoms 0.7.275):** mana spirits learn Mage Hand's trick at level 6: leave a hand at a
+  chest and it gathers dropped items into it (only the kinds already inside, if any), guards it from monsters and tends
+  the crops round it. One hand, two at bond 60, three at level 15. Not seen in game.
