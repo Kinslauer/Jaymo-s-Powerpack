@@ -3,19 +3,23 @@ package com.jaymospowers.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.biome.v1.NetherBiomes;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -45,53 +49,51 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.62, Andy's NOEA picks) The demon realm: the dark masters' home, three dark layers one under the other, each its own
- * dimension ({@code demon_gloam}, {@code demon_ash}, {@code demon_abyss}: a nether-shaped cavern of rock over a lava sea, one
- * dim biome each; three dimensions were simpler than three height bands in one).
+ * (0.17.62, Andy's NOEA picks) The demon realm: the dark masters' home, three dark biomes in the vanilla Nether ({@code demon_gloam},
+ * {@code demon_ash}, {@code demon_abyss}), added to the Nether's biome source with Fabric's {@link NetherBiomes} ({@link #addBiomes})
+ * and laid out so they are uncommon but findable: each sits in a corner of the Nether's temperature and humidity plane that the
+ * vanilla biomes leave empty, the Abyss in the farthest and so the rarest. No portals, no rite: you walk in. They stand in for the
+ * three layers of the first design, so the deeper (rarer) the biome the harder its army.
  * <ul>
- * <li><b>The rite</b> is how you go down from any other world: stand a Crying Obsidian block in the middle of four lit soul
- * campfires (one on each side), and right-click it bare-handed with a Wither Skeleton Skull in your off hand ({@link #riteReady});
- * the skull is spent and the gate takes you to the first layer. It remembers where you came from.</li>
- * <li><b>The altars</b> inside: each layer's arrival platform has an up altar (Crying Obsidian on Gilded Blackstone) that lifts
- * you to the layer above, or home from the first, and every layer but the last has a down altar (Crying Obsidian on Ancient
- * Debris) some {@link #DOWN_X} blocks east that drops you to the next. Right-click bare-handed.</li>
- * <li><b>Demon villages</b> are built by code, one in about two of three cells of {@link #CELL} blocks, the first time a player is
- * within {@link #BUILD_NEAR}: a blackstone yard with a soul campfire, four nether-brick huts and a chest. Each has a
- * <b>dark master</b> (a trader who never leaves) who teaches the Rogue's path (a fighter whose Kingdoms skills lean to
- * Stealth; without Kingdoms, one beaten {@link ZFighterMasters#DARK_DEFEATS} times): sneak and right-click him bare-handed, once a
- * day; a dark lesson that draws blood, as the camps' dark masters', and pays more.</li>
- * <li><b>The army</b> fights anyone in a layer: soldiers, in squads, that come at a player in the dark every few seconds
- * (wither skeletons and piglin brutes, then blazes, zoglins, captains; the deeper the more, the harder and the bigger). They
- * are the realm's vanilla fighters under a demon name and tag ({@link #ARMY_TAG}), nothing new to register.</li>
+ * <li><b>Demon villages</b> are built by code, one in about two of three cells of {@link #CELL} blocks whose spot lies in a demon
+ * biome, the first time a player is within {@link #BUILD_NEAR}: a blackstone yard with a soul campfire, four nether-brick huts and
+ * a chest. Each has a <b>dark master</b> (a trader who never leaves) who teaches the Rogue's path (a fighter whose Kingdoms skills
+ * lean to Stealth; without Kingdoms, one beaten {@link ZFighterMasters#DARK_DEFEATS} times): sneak and right-click him bare-handed,
+ * once a day; a dark lesson that draws blood, as the camps' dark masters', and pays more.</li>
+ * <li><b>The army</b> fights anyone standing in a demon biome: soldiers, in squads, that come at a player in the dark every few
+ * seconds (wither skeletons and piglin brutes, then blazes, zoglins, captains; the deeper the biome the more, the harder and the
+ * bigger). They are the Nether's vanilla fighters under a demon name and tag ({@link #ARMY_TAG}), nothing new to register.</li>
  * </ul>
  */
 public final class ZFighterDemonRealm {
-	public static final ResourceKey<Level>[] LAYERS = layers();
-
-	@SuppressWarnings("unchecked")
-	private static ResourceKey<Level>[] layers() {
-		return new ResourceKey[] {ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("demon_gloam")),
-			ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("demon_ash")),
-			ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("demon_abyss"))};
-	}
+	/** The three biomes, shallowest first: the Gloam, the Ash, the Abyss (the index is the "layer" the tuning arrays below use). */
+	public static final List<ResourceKey<Biome>> BIOMES = List.of(
+		ResourceKey.create(Registries.BIOME, JaymosPowers.id("demon_gloam")),
+		ResourceKey.create(Registries.BIOME, JaymosPowers.id("demon_ash")),
+		ResourceKey.create(Registries.BIOME, JaymosPowers.id("demon_abyss")));
 
 	// ---- tuning ----
-	/** The rite: the campfires stand this far from the altar block (the skull is spent). */
-	static final int RITE_REACH = 1;
-	/** Where the down altar stands from the arrival platform (blocks east). */
-	static final int DOWN_X = 40;
-	/** The platform round an altar (radius), and the headroom cleared above it. */
-	static final int PLATFORM_RADIUS = 4;
-	static final int HEADROOM = 6;
+	/**
+	 * Where each biome sits in the Nether's climate plane, by layer. The Nether only varies temperature and humidity (its other
+	 * climate noises are zero), and the vanilla biomes sit at nether wastes (0, 0), soul sand valley (0, -0.5), crimson forest (0.4, 0),
+	 * warped forest (0, 0.5) and basalt deltas (-0.5, 0). A point is picked wherever it is nearest, so these far corners claim a small
+	 * share of the Nether each: the Gloam hot and dry, the Ash cold and dry, the Abyss hot and wet (the farthest from everything).
+	 */
+	static final float[] TEMPERATURE = {0.6F, -0.7F, 0.85F};
+	static final float[] HUMIDITY = {-0.65F, -0.7F, 0.85F};
 	/** The lowest and highest a floor is looked for (the lava sea is at 32, the roof at 127). */
 	static final int FLOOR_MIN = 34;
 	static final int FLOOR_MAX = 110;
+	/** The headroom a village's spot needs, and how far its yard is propped up below. */
+	static final int HEADROOM = 6;
+	static final int PROP_DEPTH = 8;
 	/** The villages: one cell is this wide, a village stands in this share of cells, and is built when a player comes this near (blocks). */
 	static final int CELL = 128;
 	static final float VILLAGE_CHANCE = 0.66F;
@@ -102,7 +104,7 @@ public final class ZFighterDemonRealm {
 	/** The dark master's lesson: bonus TP over a good master's, the blood it draws and the hardship it adds are the camp masters' own. */
 	static final int LESSON_BONUS_TP = 100;
 	static final long DAY = 24000L;
-	/** The army: a squad comes every {@code ARMY_EVERY} ticks to a player in a layer, if fewer than {@code ARMY_CAP[layer]} are near; squads of up to {@code ARMY_SQUAD[layer]}. */
+	/** The army: a squad comes every {@code ARMY_EVERY} ticks to a player in a demon biome, if fewer than {@code ARMY_CAP[layer]} are near; squads of up to {@code ARMY_SQUAD[layer]}. */
 	static final int ARMY_EVERY = 160;
 	static final int[] ARMY_CAP = {6, 9, 12};
 	static final int[] ARMY_SQUAD = {2, 3, 4};
@@ -118,32 +120,24 @@ public final class ZFighterDemonRealm {
 	static final String ARMY_TAG = "jaymospowers_demon";
 	static final String MASTER_TAG = "jaymospowers_demon_master";
 
-	/** Where an arrival platform's altars are, on a layer's level. Saved. */
-	public record Gates(BlockPos up, Optional<BlockPos> down) {
-		public static final Codec<Gates> CODEC = RecordCodecBuilder.create(i -> i.group(
-			BlockPos.CODEC.fieldOf("up").forGetter(Gates::up),
-			BlockPos.CODEC.optionalFieldOf("down").forGetter(Gates::down)
-		).apply(i, Gates::new));
-	}
-
-	public static final AttachmentType<Gates> GATES = AttachmentRegistry.create(JaymosPowers.id("zfighter_demon_gates"),
-		builder -> builder.persistent(Gates.CODEC));
-	/** The villages built on a layer (a centre with y 0 is a cell that had no floor, never retried). Saved. */
+	/** The villages built in the Nether (a centre with y 0 is a spot that had no floor, never retried). Saved. */
 	public static final AttachmentType<List<BlockPos>> VILLAGES = AttachmentRegistry.create(JaymosPowers.id("zfighter_demon_villages"),
 		builder -> builder.persistent(BlockPos.CODEC.listOf()));
-	/** Where a player went down from, to be lifted back there. Saved. */
-	public static final AttachmentType<ZFighterAfterlife.Home> ORIGIN = AttachmentRegistry.create(JaymosPowers.id("zfighter_demon_origin"),
-		builder -> builder.persistent(ZFighterAfterlife.Home.CODEC));
 	/** The day of his last dark lesson here. Saved. */
 	public static final AttachmentType<Long> LESSON = AttachmentRegistry.create(JaymosPowers.id("zfighter_demon_lesson"),
 		builder -> builder.persistent(Codec.LONG));
 
+	/** The layer each player was last told he stood in (so the name shows once on entering). */
+	private static final Map<UUID, Integer> TOLD = new HashMap<>();
+
 	private ZFighterDemonRealm() {
 	}
 
-	public static int layerOf(ResourceKey<Level> dimension) {
-		for (int i = 0; i < LAYERS.length; i++) {
-			if (LAYERS[i].equals(dimension)) {
+	/** The layer (0 Gloam, 1 Ash, 2 Abyss) of the demon biome at {@code pos}, or -1 anywhere else. */
+	public static int layerAt(Level level, BlockPos pos) {
+		Holder<Biome> biome = level.getBiome(pos);
+		for (int i = 0; i < BIOMES.size(); i++) {
+			if (biome.is(BIOMES.get(i))) {
 				return i;
 			}
 		}
@@ -151,28 +145,9 @@ public final class ZFighterDemonRealm {
 	}
 
 	static void init() {
+		addBiomes();
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterDemonRealm::tick);
-		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty() || !level.getBlockState(hit.getBlockPos()).is(Blocks.CRYING_OBSIDIAN)) {
-				return InteractionResult.PASS;
-			}
-			BlockPos pos = hit.getBlockPos();
-			int layer = layerOf(level.dimension());
-			Block under = level.getBlockState(pos.below()).getBlock();
-			boolean altar = layer >= 0 && (under == Blocks.GILDED_BLACKSTONE || under == Blocks.ANCIENT_DEBRIS);
-			boolean rite = layer < 0 && level.dimension() != ZFighterAfterlife.OTHER_WORLD && riteReady(level, pos, player);
-			if (!altar && !rite) {
-				return InteractionResult.PASS;
-			}
-			if (!level.isClientSide() && player instanceof ServerPlayer server) {
-				if (altar) {
-					altar(server, layer, under == Blocks.GILDED_BLACKSTONE);
-				} else {
-					rite(server);
-				}
-			}
-			return InteractionResult.SUCCESS;
-		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> TOLD.clear());
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !entity.entityTags().contains(MASTER_TAG)) {
 				return InteractionResult.PASS;
@@ -184,123 +159,11 @@ public final class ZFighterDemonRealm {
 		});
 	}
 
-	// ---------------------------------------------------------------- the rite and the altars
-
-	/** A Crying Obsidian block with a lit soul campfire on each of its four sides, and a Wither Skeleton Skull in the off hand. */
-	static boolean riteReady(Level level, BlockPos pos, net.minecraft.world.entity.player.Player player) {
-		if (!player.getOffhandItem().is(Items.WITHER_SKELETON_SKULL)) {
-			return false;
+	/** Puts the three biomes into the Nether's biome source (the vanilla one, by Fabric's biome API: the data files for the biomes are in the jar). */
+	private static void addBiomes() {
+		for (int layer = 0; layer < BIOMES.size(); layer++) {
+			NetherBiomes.addNetherBiome(BIOMES.get(layer), Climate.parameters(TEMPERATURE[layer], HUMIDITY[layer], 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
 		}
-		for (Direction side : Direction.Plane.HORIZONTAL) {
-			BlockState state = level.getBlockState(pos.relative(side, RITE_REACH));
-			if (!state.is(Blocks.SOUL_CAMPFIRE) || !state.getValue(CampfireBlock.LIT)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static void rite(ServerPlayer player) {
-		MinecraftServer server = player.level().getServer();
-		ServerLevel gloam = server.getLevel(LAYERS[0]);
-		if (gloam == null) {
-			return;
-		}
-		if (!player.isCreative()) {
-			player.getOffhandItem().shrink(1);
-		}
-		player.setAttached(ORIGIN, new ZFighterAfterlife.Home(player.level().dimension(), player.blockPosition()));
-		ServerLevel from = player.level();
-		from.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.06);
-		from.playSound(null, player.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.6F, 1.6F);
-		descend(player, gloam, 0, true);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_demon_rite").withStyle(ChatFormatting.DARK_RED));
-	}
-
-	/** An altar: the up altar lifts him a layer (home from the first), the down altar drops him one. */
-	private static void altar(ServerPlayer player, int layer, boolean up) {
-		MinecraftServer server = player.level().getServer();
-		if (up && layer == 0) {
-			home(player);
-			return;
-		}
-		int to = layer + (up ? -1 : 1);
-		if (to < 0 || to >= LAYERS.length) {
-			return;
-		}
-		ServerLevel level = server.getLevel(LAYERS[to]);
-		if (level != null) {
-			descend(player, level, to, !up);
-		}
-	}
-
-	private static void home(ServerPlayer player) {
-		MinecraftServer server = player.level().getServer();
-		ZFighterAfterlife.Home origin = player.getAttached(ORIGIN);
-		ServerLevel to = origin == null ? null : server.getLevel(origin.dimension());
-		BlockPos at;
-		if (to == null || layerOf(to.dimension()) >= 0) {
-			to = server.overworld();
-			at = to.getRespawnData().pos();
-		} else {
-			at = origin.pos();
-		}
-		to.getChunk(at);
-		player.removeAttached(ORIGIN);
-		player.teleportTo(to, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, Set.of(), player.getYRot(), 0.0F, true);
-		to.playSound(null, at, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.2F);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_demon_up").withStyle(ChatFormatting.GRAY));
-	}
-
-	/** To a layer's up altar's platform (arriving from above) or to its down altar's (arriving from below). */
-	private static void descend(ServerPlayer player, ServerLevel level, int layer, boolean fromAbove) {
-		Gates gates = gates(level, layer);
-		BlockPos stand = (fromAbove ? gates.up() : gates.down().orElse(gates.up())).above().relative(Direction.SOUTH, 2);
-		player.teleportTo(level, stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, Set.of(), player.getYRot(), 0.0F, true);
-		level.playSound(null, stand, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.6F);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_demon_layer_" + (layer + 1)).withStyle(ChatFormatting.DARK_RED));
-	}
-
-	/** A layer's platform and altars, built the first time they are needed. */
-	private static Gates gates(ServerLevel level, int layer) {
-		Gates gates = level.getAttached(GATES);
-		if (gates != null && level.getBlockState(gates.up()).is(Blocks.CRYING_OBSIDIAN)) {
-			return gates;
-		}
-		BlockPos up = platform(level, 0, 0, Blocks.GILDED_BLACKSTONE);
-		Optional<BlockPos> down = Optional.empty();
-		if (layer < LAYERS.length - 1) {
-			down = Optional.of(platform(level, DOWN_X, 0, Blocks.ANCIENT_DEBRIS));
-		}
-		gates = new Gates(up, down);
-		level.setAttached(GATES, gates);
-		return gates;
-	}
-
-	/** A blackstone platform with a Crying Obsidian altar on {@code base} in its middle, soul lanterns round it, and air above. Returns the altar. */
-	private static BlockPos platform(ServerLevel level, int x, int z, Block base) {
-		int y = floor(level, x, z);
-		if (y < 0) {
-			y = 64;
-		}
-		for (int dx = -PLATFORM_RADIUS; dx <= PLATFORM_RADIUS; dx++) {
-			for (int dz = -PLATFORM_RADIUS; dz <= PLATFORM_RADIUS; dz++) {
-				if (dx * dx + dz * dz > PLATFORM_RADIUS * PLATFORM_RADIUS + 1) {
-					continue;
-				}
-				set(level, x + dx, y - 1, z + dz, (dx + dz) % 2 == 0 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState() : Blocks.BLACKSTONE.defaultBlockState());
-				for (int up = 0; up < HEADROOM; up++) {
-					set(level, x + dx, y + up, z + dz, Blocks.AIR.defaultBlockState());
-				}
-			}
-		}
-		set(level, x, y - 1, z, base.defaultBlockState());
-		set(level, x, y, z, Blocks.CRYING_OBSIDIAN.defaultBlockState());
-		for (int[] corner : new int[][] {{-3, -3}, {3, -3}, {-3, 3}, {3, 3}}) {
-			set(level, x + corner[0], y, z + corner[1], Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
-			set(level, x + corner[0], y + 1, z + corner[1], Blocks.SOUL_LANTERN.defaultBlockState());
-		}
-		return new BlockPos(x, y, z);
 	}
 
 	private static void set(ServerLevel level, int x, int y, int z, BlockState state) {
@@ -336,23 +199,28 @@ public final class ZFighterDemonRealm {
 
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
+		ServerLevel level = server.getLevel(Level.NETHER);
+		if (level == null || level.players().isEmpty()) {
+			return;
+		}
 		if (now % 40 == 0) {
-			for (int layer = 0; layer < LAYERS.length; layer++) {
-				ServerLevel level = server.getLevel(LAYERS[layer]);
-				if (level != null && !level.players().isEmpty()) {
-					villages(level, layer);
+			villages(level);
+			for (ServerPlayer player : level.players()) {
+				int layer = layerAt(level, player.blockPosition());
+				Integer told = TOLD.get(player.getUUID());
+				if (layer < 0) {
+					TOLD.remove(player.getUUID());
+				} else if (told == null || told != layer) {
+					TOLD.put(player.getUUID(), layer);
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_demon_layer_" + (layer + 1)).withStyle(ChatFormatting.DARK_RED));
 				}
 			}
 		}
 		if (now % ARMY_EVERY == 0) {
-			for (int layer = 0; layer < LAYERS.length; layer++) {
-				ServerLevel level = server.getLevel(LAYERS[layer]);
-				if (level != null) {
-					for (ServerPlayer player : level.players()) {
-						if (player.isAlive() && !player.isCreative() && !player.isSpectator()) {
-							army(level, layer, player);
-						}
-					}
+			for (ServerPlayer player : level.players()) {
+				int layer = layerAt(level, player.blockPosition());
+				if (layer >= 0 && player.isAlive() && !player.isCreative() && !player.isSpectator()) {
+					army(level, layer, player);
 				}
 			}
 		}
@@ -361,8 +229,8 @@ public final class ZFighterDemonRealm {
 	// ---------------------------------------------------------------- the villages
 
 	/** The village a cell holds: its x and z, or empty (about a third of cells hold none). Fixed by the cell alone. */
-	static Optional<int[]> villageAt(int layer, int cellX, int cellZ) {
-		RandomSource random = RandomSource.create(cellX * 341873128712L + cellZ * 132897987541L + layer * 7919L + 0x5DEECE66DL);
+	static Optional<int[]> villageAt(int cellX, int cellZ) {
+		RandomSource random = RandomSource.create(cellX * 341873128712L + cellZ * 132897987541L + 0x5DEECE66DL);
 		if (random.nextFloat() >= VILLAGE_CHANCE) {
 			return Optional.empty();
 		}
@@ -370,8 +238,25 @@ public final class ZFighterDemonRealm {
 		return Optional.of(new int[] {cellX * CELL + margin + random.nextInt(CELL - 2 * margin), cellZ * CELL + margin + random.nextInt(CELL - 2 * margin)});
 	}
 
+	/**
+	 * Whether a village could stand at (x, z): it is in a demon biome, and so are the four points on its edge (so it is not on a
+	 * border). Returns the layer of its middle, or -1.
+	 */
+	private static int villageLayer(ServerLevel level, int x, int z) {
+		int layer = layerAt(level, new BlockPos(x, 64, z));
+		if (layer < 0) {
+			return -1;
+		}
+		for (int[] edge : new int[][] {{VILLAGE_RADIUS, 0}, {-VILLAGE_RADIUS, 0}, {0, VILLAGE_RADIUS}, {0, -VILLAGE_RADIUS}}) {
+			if (layerAt(level, new BlockPos(x + edge[0], 64, z + edge[1])) < 0) {
+				return -1;
+			}
+		}
+		return layer;
+	}
+
 	/** Builds the villages in the cells round each player who comes near, and puts back their masters. */
-	private static void villages(ServerLevel level, int layer) {
+	private static void villages(ServerLevel level) {
 		List<BlockPos> known = level.getAttachedOrElse(VILLAGES, List.of());
 		List<BlockPos> villages = known;
 		for (ServerPlayer player : level.players()) {
@@ -379,12 +264,16 @@ public final class ZFighterDemonRealm {
 			int cz = Math.floorDiv(Mth.floor(player.getZ()), CELL);
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dz = -1; dz <= 1; dz++) {
-					Optional<int[]> spot = villageAt(layer, cx + dx, cz + dz);
+					Optional<int[]> spot = villageAt(cx + dx, cz + dz);
 					if (spot.isEmpty()) {
 						continue;
 					}
 					int x = spot.get()[0], z = spot.get()[1];
 					if (Math.hypot(player.getX() - x, player.getZ() - z) > BUILD_NEAR || has(villages, x, z)) {
+						continue;
+					}
+					int layer = villageLayer(level, x, z);
+					if (layer < 0) {
 						continue;
 					}
 					int y = floor(level, x, z);
@@ -405,7 +294,7 @@ public final class ZFighterDemonRealm {
 		}
 		for (BlockPos village : villages) {
 			if (village.getY() > 0) {
-				ensureMaster(level, village, layer);
+				ensureMaster(level, village);
 			}
 		}
 	}
@@ -423,7 +312,7 @@ public final class ZFighterDemonRealm {
 		return new Vec3(village.getX() + 2.5, village.getY(), village.getZ() + 0.5);
 	}
 
-	private static void ensureMaster(ServerLevel level, BlockPos village, int layer) {
+	private static void ensureMaster(ServerLevel level, BlockPos village) {
 		Vec3 at = masterAt(village);
 		boolean near = false;
 		for (ServerPlayer player : level.players()) {
@@ -436,6 +325,7 @@ public final class ZFighterDemonRealm {
 			return;
 		}
 		AABB around = new AABB(village).inflate(VILLAGE_RADIUS, 5.0, VILLAGE_RADIUS);
+		int layer = Math.max(0, layerAt(level, village));
 		if (level.getEntitiesOfClass(LivingEntity.class, around, e -> e.entityTags().contains(MASTER_TAG)).isEmpty()) {
 			ZFighterSites.spawnNpc(level, at, MASTER_TAG, "entity.jaymospowers.demon_master_" + (layer + 1), new MerchantOffers());
 		}
@@ -448,6 +338,15 @@ public final class ZFighterDemonRealm {
 			for (int dz = -VILLAGE_RADIUS; dz <= VILLAGE_RADIUS; dz++) {
 				if (dx * dx + dz * dz > VILLAGE_RADIUS * VILLAGE_RADIUS) {
 					continue;
+				}
+				for (int down = 2; down <= PROP_DEPTH; down++) {
+					BlockPos under = new BlockPos(x + dx, y - down, z + dz);
+					BlockState below = level.getBlockState(under);
+					if (below.isAir() || !below.getFluidState().isEmpty()) {
+						level.setBlock(under, Blocks.BLACKSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+					} else {
+						break;
+					}
 				}
 				set(level, x + dx, y - 1, z + dz, random.nextInt(5) == 0 ? Blocks.GILDED_BLACKSTONE.defaultBlockState()
 					: random.nextBoolean() ? Blocks.BLACKSTONE.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());

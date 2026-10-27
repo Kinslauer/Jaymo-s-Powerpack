@@ -3127,23 +3127,32 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   (`ZFighterSagas.witnesses`); TP, ores and a planet title are the prize; progress is the synced `zfighter_space` attachment.
   Compile-checked only. Not seen in game: none of the dimension JSON has been loaded by a server (see the track report's
   worldgen caveats). Abilities rows 456 to 467.
-- **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B):** `ZFighterAfterlife`: a Z Fighter who
-  truly dies (an `AFTER_DEATH` that something else has not cancelled, not in the Other World already, `afterlife=true` in
-  `config/jaymospowers-server.properties`, the file `ZFighterRealism` reads, written with the new key when missing) is
-  noted, and one tick after his normal respawn is moved to `jaymospowers:other_world` (a flat calcite world). The death is
-  never touched, so drops, the keep-inventory rule, Kitchen's corpses, the downed state, wounds and every other mod's death
-  handling run as before. He wakes in a judge's hall with a halo (the `zfighter_afterlife_stay` attachment, synced to all;
-  `ZFighterHalo` draws a ring of gold dust on each client). A 160-block quartz road leads south to a pavilion with the Master
-  of the Road (one lesson a stay and bonus TP; training pays 1.5 times in the Other World), a ring with a bell (three bouts
-  against spirit fighters, vanilla vindicators with no axe, for TP), and a fortune teller who sends him back
+- **0.17.62, the afterlife and the demon realm (Andy's NOEA picks, patch 8 track B; reworked onto the pack's own worlds at Andy's
+  request: no new dimensions, no portals, no rite):** `ZFighterAfterlife`: a Z Fighter who truly dies (an `AFTER_DEATH` that
+  something else has not cancelled, not at the Other World already, `afterlife=true` in `config/jaymospowers-server.properties`,
+  the file `ZFighterRealism` reads, written with the new key when missing) is noted, and one tick after his normal respawn is
+  moved to the Other World, a site in the Aether (`jaymospowers:aether`, the dimension Wind rises into) at x 20000, z 20000, floor
+  y 200 (`SITE_X`, `SITE_Z`, `FLOOR`): far from the lowland islands Wind arrives on, above them and the broken islets. The first
+  arrival builds it by code: an elliptical platform (108 by 92 blocks, aether grass over aether dirt over holystone, hanging
+  deeper at the middle) with the air over it cleared, and on it the hall, a 40-block quartz road south to a pavilion, the
+  tournament ring and the fortune teller's tent (no ground to search for: the site is always a platform, so it never depends on
+  the islands' noise). "In the Other World" is now "within 64 blocks of the platform's middle in the Aether"
+  (`inSite`, `inOtherWorld`); the training bonus uses it too. The death is never touched, so drops, the keep-inventory rule,
+  Kitchen's corpses, the downed state, wounds and every other mod's death handling run as before. He wakes in the judge's hall
+  with a halo (the `zfighter_afterlife_stay` attachment, synced to all; `ZFighterHalo` draws a ring of gold dust on each
+  client). The Master of the Road gives one lesson a stay and bonus TP (training pays 1.5 times at the site), a ring with a bell
+  holds three bouts against spirit fighters (vanilla vindicators with no axe) for TP, and a fortune teller sends him back
   free after the tournament, for 24 emeralds or 400 TP, or by the new 13th wish (`ZFighterWishes.CALL_BACK`, lang
-  `wish.jaymospowers.zfighter.call_back`). After 30 minutes he is let go anyway. The structures are built by code once; the
-  NPCs are re-created when a player nears one that is missing. `ZFighterDemonRealm`: three dimensions (`demon_gloam`,
-  `demon_ash`, `demon_abyss`, the nether's noise settings and a shared dimension type, a fixed dim biome each). The rite (a
-  Crying Obsidian block between four lit soul campfires, right-clicked bare-handed with a Wither Skeleton Skull in the off
-  hand) drops anyone into the Gloam; up and down altars (Crying Obsidian on Gilded Blackstone or Ancient Debris) move between
-  layers and home. Villages are built by code in a seeded grid of 128-block cells when a player is within 56 blocks, each with a
-  dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark lesson;
-  the army is vanilla fighters under a demon name and tag, spawned in squads around each player on a layer. Compile-checked only;
-  worldgen of the new dimensions, the nether-shaped terrain under a custom biome, the structures and both death-time moves have not
-  been seen in game. Abilities rows 468 to 478 (the lead renumbers).
+  `wish.jaymospowers.zfighter.call_back`). After 30 minutes he is let go anyway; falling off the island takes him out of the
+  Aether as it takes anyone (Wind's fall-home) and the halo is dropped. A player who reaches the site alive (Wind) has no halo
+  and no timer and is never sent back, but may use the master, the ring and the training bonus. `ZFighterDemonRealm`: the three
+  demon biomes (`demon_gloam`, `demon_ash`, `demon_abyss`, valid Nether biomes with the Nether's carver, ores, springs and
+  glowstone) are added to the vanilla Nether's biome source with Fabric's `NetherBiomes.addNetherBiome`, at far corners of the
+  Nether's temperature and humidity plane that the vanilla biomes leave empty (Gloam 0.6, -0.65; Ash -0.7, -0.7; Abyss 0.85, 0.85;
+  the other climate axes 0, as the Nether's are), so they are uncommon, the Abyss the rarest. Villages are built by code in a
+  seeded grid of 128-block cells when a player is within 56 blocks and the spot (and its four edge points) is in a demon biome,
+  each with a dark master who teaches only Rogue-path fighters (Kingdoms' Stealth alignment, or 3 defeats without Kingdoms) a dark
+  lesson; the army is vanilla fighters under a demon name and tag, spawned in squads around each player standing in a demon
+  biome, stronger from the Gloam to the Ash to the Abyss (the old three layers). Compile-checked only; how rare the biomes come
+  out, the platform's first build (about 40 chunks of Aether generated at once), the Nether villages' fit to the caves, and both
+  death-time moves have not been seen in game. Abilities rows 468 to 478.

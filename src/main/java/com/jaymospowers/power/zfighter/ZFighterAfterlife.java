@@ -1,7 +1,9 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.wind.aether.WindAether;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -23,7 +25,6 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
@@ -40,6 +41,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -55,46 +57,65 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.62, Andy's NOEA picks) The afterlife: a Z Fighter who dies wakes in the Other World ({@code jaymospowers:other_world}, a pale
- * flat world under a still dusk) with a halo over his head, instead of waking at his bed. Everything vanilla and the pack do about
- * a death still happens first (the drops or the kept inventory per the gamerule, Kitchen's corpse, the downed state, the
- * wounds): the death is let through untouched, and one tick after the normal respawn he is moved here ({@link #arrive}). Only
- * a player with the Z Fighter power, only a real death (a sparring bout, a tournament, Last Stand and the rest cancel theirs
- * before this sees it), not one already in the Other World, and only while {@code afterlife=true} in the server properties
- * file ({@link ZFighterRealism}).
+ * (0.17.62, Andy's NOEA picks) The afterlife: a Z Fighter who dies wakes in the Other World with a halo over his head, instead of
+ * waking at his bed. The Other World is a site in the pack's own Aether ({@code jaymospowers:aether}, the dimension Wind rises into),
+ * a sky island of holystone far from anywhere Wind arrives ({@link #SITE_X}, {@link #SITE_Z}), not a dimension of its own.
+ * Everything vanilla and the pack do about a death still happens first (the drops or the kept inventory per the gamerule, Kitchen's
+ * corpse, the downed state, the wounds): the death is let through untouched, and one tick after the normal respawn he is moved here
+ * ({@link #arrive}). Only a player with the Z Fighter power, only a real death (a sparring bout, a tournament, Last Stand and the
+ * rest cancel theirs before this sees it), not one already at the site ({@link #inOtherWorld}), and only while
+ * {@code afterlife=true} in the server properties file ({@link ZFighterRealism}).
  * <p>
- * What is there, all built by hand once ({@link #build}, no structure files), the NPCs put back by themselves whenever a player
- * comes near ({@link #ensureNpcs}):
+ * Whoever reaches the site alive (a Wind user rising into the Aether, say) may visit: no halo, no stay timer, nobody sends him
+ * back; the master, the tournament and the training bonus are open to him as to anyone.
+ * <p>
+ * What is there, all built by hand once ({@link #build}, no structure files, on a round platform of Aether blocks at height
+ * {@link #FLOOR}, with the air above it cleared), the NPCs put back by themselves whenever a player comes near ({@link #ensureNpcs}):
  * <ul>
  * <li><b>The judge's hall</b> at the arrival point: the Judge, who says what he thinks of you.</li>
- * <li><b>The long road</b>, {@link #ROAD_LENGTH} blocks of lit quartz south of the hall, to a pavilion where the
+ * <li><b>The road</b>, {@link #ROAD_LENGTH} blocks of quartz south of the hall, to a pavilion where the
  * <b>master of the road</b> waits (sneak and right-click him bare-handed: one lesson a stay, as a good master's, and a bonus of
- * {@link #MASTER_TP} TP); training in the Other World pays {@link #TRAINING_BONUS} times over ({@link #trainingBonus}).</li>
+ * {@link #MASTER_TP} TP); training at the site pays {@link #TRAINING_BONUS} times over ({@link #trainingBonus}).</li>
  * <li><b>The tournament of the dead</b>, a ring east of the pavilion: ring its bell for {@link #ROUNDS} bouts against spirit
  * fighters, one after the other, each harder and each paying TP. Win all of them and the fortune teller sends you back free.</li>
  * <li><b>The fortune teller</b>, west of the pavilion, who sends you back to where you woke in the world: free after the
  * tournament, for {@link #PRICE_EMERALDS} emeralds in your hand or {@link #PRICE_TP} TP (sneak and right-click), or by the
  * Eternal Dragon's wish ({@link ZFighterWishes#CALL_BACK}). Nobody is stuck: after {@link #STAY_TICKS} the Other World lets go.</li>
  * </ul>
- * A death in the Other World itself is a plain death (he wakes at his bed, the halo gone).
+ * A death at the site itself is a plain death (he wakes at his bed, the halo gone). Falling off the island takes him home as it takes
+ * anyone out of the Aether ({@link WindAether}), the halo gone.
  */
 public final class ZFighterAfterlife {
-	public static final ResourceKey<Level> OTHER_WORLD = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("other_world"));
-
 	// ---- tuning ----
 	/** A death's move is dropped if the respawn comes later than this (ticks), so a revived player is not carried off by an old death. */
 	static final long PENDING_TICKS = 24000L;
 	/** How long he stays at most (ticks) before the Other World lets him go. */
 	static final long STAY_TICKS = 36000L;
-	/** The flat world's floor (the top layer is at y 3). */
-	static final int FLOOR = 4;
+	/**
+	 * The site: the hall's middle in the Aether (blocks). Far from the lowland islands Wind arrives on (it arrives at the x and z it
+	 * rose from, and nobody rises from out here).
+	 */
+	public static final int SITE_X = 20000;
+	public static final int SITE_Z = 20000;
+	/** The standing height of the site's floor (blocks of the platform are at {@code FLOOR - 1}), above the lowland islands and the broken islets. */
+	static final int FLOOR = 200;
+	/** The platform is an ellipse of these half-widths round this spot, in site coordinates (relative to {@link #SITE_X}, {@link #SITE_Z}). */
+	static final int PLATFORM_CX = 5;
+	static final int PLATFORM_CZ = 34;
+	static final int PLATFORM_HX = 54;
+	static final int PLATFORM_HZ = 46;
+	/** How far the platform hangs below its top at the middle, and how high the air is cleared over it. */
+	static final int PLATFORM_DEPTH = 6;
+	static final int CLEAR_HEIGHT = 12;
+	/** Within this many blocks of the platform's middle in the Aether, you are at the Other World. */
+	public static final double SITE_RADIUS = 64.0;
 	/** The road: south of the hall, this long; the pavilion, ring and tent are at its end. */
-	static final int ROAD_LENGTH = 160;
+	static final int ROAD_LENGTH = 40;
 	static final int ROAD_HALF_WIDTH = 2;
 	static final int PAVILION_Z = ROAD_LENGTH + 12;
-	static final int RING_X = 36;
-	static final int RING_RADIUS = 14;
-	static final int TENT_X = -30;
+	static final int RING_X = 32;
+	static final int RING_RADIUS = 12;
+	static final int TENT_X = -26;
 	/** A lesson's bonus TP, and how many times over training pays in the Other World. */
 	static final int MASTER_TP = 150;
 	public static final float TRAINING_BONUS = 1.5F;
@@ -139,7 +160,7 @@ public final class ZFighterAfterlife {
 		builder -> builder.persistent(Codec.BOOL));
 	public static final AttachmentType<Boolean> CHAMPION = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_champion"),
 		builder -> builder.persistent(Codec.BOOL));
-	/** On the Other World's level: the hall and road have been built. Saved. */
+	/** On the Aether's level: the Other World's site has been built. Saved. */
 	public static final AttachmentType<Boolean> BUILT = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_built"),
 		builder -> builder.persistent(Codec.BOOL));
 
@@ -162,7 +183,7 @@ public final class ZFighterAfterlife {
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
-				if (ZFighterRealism.afterlife() && !player.isSpectator() && player.level().dimension() != OTHER_WORLD
+				if (ZFighterRealism.afterlife() && !player.isSpectator() && !inOtherWorld(player)
 					&& Powers.has(player, ZFighterPower.INSTANCE)) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
 				}
@@ -209,7 +230,8 @@ public final class ZFighterAfterlife {
 			return InteractionResult.SUCCESS;
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || level.dimension() != OTHER_WORLD || !level.getBlockState(hit.getBlockPos()).is(Blocks.BELL)) {
+			if (hand != InteractionHand.MAIN_HAND || !inSite(level, hit.getBlockPos().getX(), hit.getBlockPos().getZ())
+				|| !level.getBlockState(hit.getBlockPos()).is(Blocks.BELL)) {
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide() && player instanceof ServerPlayer server) {
@@ -221,9 +243,24 @@ public final class ZFighterAfterlife {
 
 	// ---------------------------------------------------------------- the dying
 
-	/** Training in the Other World pays this many times over (1 anywhere else). */
+	/** Training at the Other World pays this many times over (1 anywhere else). */
 	public static float trainingBonus(ServerPlayer player) {
-		return player.level().dimension() == OTHER_WORLD ? TRAINING_BONUS : 1.0F;
+		return inOtherWorld(player) ? TRAINING_BONUS : 1.0F;
+	}
+
+	/** Whether (x, z) in this level is within {@link #SITE_RADIUS} of the site, in the Aether. */
+	public static boolean inSite(Level level, double x, double z) {
+		if (level.dimension() != WindAether.AETHER) {
+			return false;
+		}
+		double dx = x - (SITE_X + PLATFORM_CX);
+		double dz = z - (SITE_Z + PLATFORM_CZ);
+		return dx * dx + dz * dz <= SITE_RADIUS * SITE_RADIUS;
+	}
+
+	/** Whether this entity is at the Other World: within {@link #SITE_RADIUS} of the site in the Aether. */
+	public static boolean inOtherWorld(Entity entity) {
+		return inSite(entity.level(), entity.getX(), entity.getZ());
 	}
 
 	public static boolean among(net.minecraft.world.entity.player.Player player) {
@@ -240,7 +277,7 @@ public final class ZFighterAfterlife {
 				}
 				it.remove();
 				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-				if (player != null && player.isAlive() && player.level().dimension() != OTHER_WORLD) {
+				if (player != null && player.isAlive() && !inOtherWorld(player)) {
 					arrive(server, player);
 				}
 			}
@@ -248,26 +285,45 @@ public final class ZFighterAfterlife {
 		if (now % 20 != 0) {
 			return;
 		}
-		ServerLevel world = server.getLevel(OTHER_WORLD);
+		for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
+			Long since = player.getAttached(STAY);
+			if (since == null) {
+				continue;
+			}
+			if (now - since >= STAY_TICKS) {
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_let_go").withStyle(ChatFormatting.AQUA));
+				returnHome(player);
+			} else if (player.level().dimension() != WindAether.AETHER) {
+				// fell off the island and was taken out of the Aether: the halo goes with him
+				endGauntlet(player);
+				player.removeAttached(STAY);
+				player.removeAttached(TAUGHT);
+				player.removeAttached(CHAMPION);
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_back").withStyle(ChatFormatting.GREEN));
+			}
+		}
+		ServerLevel world = server.getLevel(WindAether.AETHER);
 		if (world == null) {
 			return;
 		}
+		boolean visited = false;
 		for (ServerPlayer player : world.players()) {
-			Long since = player.getAttached(STAY);
-			if (since != null && now - since >= STAY_TICKS) {
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_let_go").withStyle(ChatFormatting.AQUA));
-				returnHome(player);
+			if (inOtherWorld(player)) {
+				visited = true;
+				break;
 			}
 		}
-		if (!world.players().isEmpty()) {
+		if (visited && Boolean.TRUE.equals(world.getAttached(BUILT))) {
 			ensureNpcs(world);
+		}
+		if (!GAUNTLETS.isEmpty()) {
 			gauntlets(server, world);
 		}
 	}
 
-	/** He wakes among the dead: the world is built if it has not been, he is moved there with his halo. */
+	/** He wakes among the dead: the site is built if it has not been, he is moved there with his halo. */
 	private static void arrive(MinecraftServer server, ServerPlayer player) {
-		ServerLevel world = server.getLevel(OTHER_WORLD);
+		ServerLevel world = server.getLevel(WindAether.AETHER);
 		if (world == null) {
 			return;
 		}
@@ -279,11 +335,13 @@ public final class ZFighterAfterlife {
 		player.setAttached(STAY, player.level().getGameTime());
 		player.removeAttached(TAUGHT);
 		player.removeAttached(CHAMPION);
-		player.teleportTo(world, 0.5, FLOOR, 5.5, Set.of(), 180.0F, 0.0F, true);
+		double ax = SITE_X + 0.5;
+		double az = SITE_Z + 5.5;
+		player.teleportTo(world, ax, FLOOR, az, Set.of(), 180.0F, 0.0F, true);
 		player.setHealth(player.getMaxHealth());
 		player.getFoodData().setFoodLevel(20);
-		world.sendParticles(ParticleTypes.END_ROD, 0.5, FLOOR + 1.0, 5.5, 40, 0.4, 0.8, 0.4, 0.05);
-		world.playSound(null, 0.5, FLOOR, 5.5, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.7F);
+		world.sendParticles(ParticleTypes.END_ROD, ax, FLOOR + 1.0, az, 40, 0.4, 0.8, 0.4, 0.05);
+		world.playSound(null, ax, FLOOR, az, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.7F);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_wake").withStyle(ChatFormatting.AQUA));
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_halo").withStyle(ChatFormatting.AQUA));
 	}
@@ -295,7 +353,7 @@ public final class ZFighterAfterlife {
 		Home home = player.getAttached(HOME);
 		ServerLevel to = home == null ? null : server.getLevel(home.dimension());
 		BlockPos at;
-		if (to == null || to.dimension() == OTHER_WORLD) {
+		if (to == null || inSite(to, home.pos().getX(), home.pos().getZ())) {
 			to = server.overworld();
 			at = home != null && home.dimension() == to.dimension() ? home.pos() : to.getRespawnData().pos();
 		} else {
@@ -405,13 +463,13 @@ public final class ZFighterAfterlife {
 	// ---------------------------------------------------------------- the tournament of the dead
 
 	private static BlockPos ringCentre() {
-		return new BlockPos(RING_X, FLOOR - 1, PAVILION_Z);
+		return new BlockPos(SITE_X + RING_X, FLOOR - 1, SITE_Z + PAVILION_Z);
 	}
 
 	private static void ring(ServerPlayer player, BlockPos bell) {
 		ServerLevel level = player.level();
 		level.playSound(null, bell, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0F, 0.8F);
-		if (!among(player) || !Powers.has(player, ZFighterPower.INSTANCE)) {
+		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
 			return;
 		}
 		if (GAUNTLETS.containsKey(player.getUUID())) {
@@ -459,7 +517,7 @@ public final class ZFighterAfterlife {
 			Map.Entry<UUID, Gauntlet> entry = it.next();
 			Gauntlet gauntlet = entry.getValue();
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-			if (player == null || !player.isAlive() || player.level() != world || !among(player)
+			if (player == null || !player.isAlive() || player.level() != world || !inOtherWorld(player)
 				|| player.distanceToSqr(Vec3.atCenterOf(ringCentre())) > RING_LEASH * RING_LEASH) {
 				discardFoe(world, gauntlet);
 				it.remove();
@@ -498,7 +556,7 @@ public final class ZFighterAfterlife {
 
 	private static void endGauntlet(ServerPlayer player) {
 		Gauntlet gauntlet = GAUNTLETS.remove(player.getUUID());
-		if (gauntlet != null && player.level().getServer().getLevel(OTHER_WORLD) instanceof ServerLevel world) {
+		if (gauntlet != null && player.level().getServer().getLevel(WindAether.AETHER) instanceof ServerLevel world) {
 			discardFoe(world, gauntlet);
 		}
 	}
@@ -510,9 +568,9 @@ public final class ZFighterAfterlife {
 
 	private static List<Npc> npcs() {
 		return List.of(
-			new Npc(JUDGE_TAG, "entity.jaymospowers.afterlife_judge", new Vec3(0.5, FLOOR, -3.5)),
-			new Npc(MASTER_TAG, "entity.jaymospowers.afterlife_master", new Vec3(0.5, FLOOR, PAVILION_Z - 3.5)),
-			new Npc(TELLER_TAG, "entity.jaymospowers.fortune_teller", new Vec3(TENT_X + 0.5, FLOOR, PAVILION_Z + 0.5)));
+			new Npc(JUDGE_TAG, "entity.jaymospowers.afterlife_judge", new Vec3(SITE_X + 0.5, FLOOR, SITE_Z - 3.5)),
+			new Npc(MASTER_TAG, "entity.jaymospowers.afterlife_master", new Vec3(SITE_X + 0.5, FLOOR, SITE_Z + PAVILION_Z - 3.5)),
+			new Npc(TELLER_TAG, "entity.jaymospowers.fortune_teller", new Vec3(SITE_X + TENT_X + 0.5, FLOOR, SITE_Z + PAVILION_Z + 0.5)));
 	}
 
 	/** Puts back any NPC missing from where a player is near (they never leave and cannot be hurt, but a chunk can lose them). */
@@ -538,12 +596,44 @@ public final class ZFighterAfterlife {
 
 	// ---------------------------------------------------------------- building
 
+	/** Sets a block at (x, y, z) in site coordinates (x and z from the site's origin; y is the world's). */
 	private static void set(ServerLevel level, int x, int y, int z, BlockState state) {
-		level.setBlock(new BlockPos(x, y, z), state, Block.UPDATE_CLIENTS);
+		level.setBlock(new BlockPos(SITE_X + x, y, SITE_Z + z), state, Block.UPDATE_CLIENTS);
 	}
 
-	/** The hall, the road, the pavilion, the ring and the tent: built once, the first time anyone wakes here. */
+	/**
+	 * The platform in the sky: an ellipse of grass over dirt over holystone that hangs deeper at its middle (so it reads as a small
+	 * island from below), with the air over it cleared of any islet that drifts there. Built before the rest, which overwrites its top.
+	 */
+	private static void platform(ServerLevel level) {
+		BlockState air = Blocks.AIR.defaultBlockState();
+		BlockState grass = AetherBlocks.AETHER_GRASS_BLOCK.defaultBlockState();
+		BlockState dirt = AetherBlocks.AETHER_DIRT.defaultBlockState();
+		BlockState stone = AetherBlocks.HOLYSTONE.defaultBlockState();
+		for (int x = PLATFORM_CX - PLATFORM_HX; x <= PLATFORM_CX + PLATFORM_HX; x++) {
+			for (int z = PLATFORM_CZ - PLATFORM_HZ; z <= PLATFORM_CZ + PLATFORM_HZ; z++) {
+				double u = Math.pow((x - PLATFORM_CX) / (double)PLATFORM_HX, 2.0) + Math.pow((z - PLATFORM_CZ) / (double)PLATFORM_HZ, 2.0);
+				if (u > 1.0) {
+					continue;
+				}
+				int depth = 1 + (int)Math.round((PLATFORM_DEPTH - 1) * (1.0 - Math.sqrt(u)));
+				for (int up = 0; up < CLEAR_HEIGHT; up++) {
+					BlockPos at = new BlockPos(SITE_X + x, FLOOR + up, SITE_Z + z);
+					if (!level.getBlockState(at).isAir()) {
+						level.setBlock(at, air, Block.UPDATE_CLIENTS);
+					}
+				}
+				set(level, x, FLOOR - 1, z, grass);
+				for (int down = 2; down <= depth + 1; down++) {
+					set(level, x, FLOOR - down, z, down == 2 ? dirt : stone);
+				}
+			}
+		}
+	}
+
+	/** The platform, the hall, the road, the pavilion, the ring and the tent: built once, the first time anyone wakes here. */
 	private static void build(ServerLevel level) {
+		platform(level);
 		BlockState quartz = Blocks.QUARTZ_BRICKS.defaultBlockState();
 		BlockState smooth = Blocks.SMOOTH_QUARTZ.defaultBlockState();
 		BlockState pillar = Blocks.QUARTZ_PILLAR.defaultBlockState();
