@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.tnm",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"TnmArmorDonMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
