@@ -5400,3 +5400,58 @@ lock arms; it uses the beam-clash film", All Might style; the Quiet One "seeming
 - **Ship stairs are steps**: a ship's collision took each stair as a full block (`Hull` lo/hi), so a stairwell under a
   deck beam could be neither stepped up nor jumped. `Hull.steps` keeps a stair's own boxes and `Ships.collisions`
   turns them as she lies.
+
+## 0.7.247: attuning waits till a newcomer can see it (pack 0.17.36)
+Andy: "delay the player's spawn at the start because if they spawn attuned they miss the animation."
+- `StoryGround.unseen(player)`: true while their story is owed, the loading screen is up (or settling), or MCA's
+  creator is still to come, and for `REVEAL_TICKS` (2 s) after they come out from behind all of those.
+- `Mana.tick` only attunes a Mage or Sorcerer (or an amethyst-touched player) when they aren't `unseen`, so the
+  flare, the sound and the blue sight play once they're standing in the world. Not seen in game.
+
+## 0.7.248: spirit arms only while used, a ghost's look (pack 0.17.37)
+Andy: "the arm should appear and disappear while not using it. the idle it too distracting, plus it probably costs
+concentration to keep a projection up ... something about them looks too busy. maybe use the ghost of the great kung lao
+as inspiration? a more solid looking yet wispy projection?"
+- **Up only while used** (`SpiritArms.presence`): a called spirit waits unseen (the odd wisp at your shoulder) and its
+  arms form over 3 ticks when a move starts (summoning is one, so it shows itself once when called), stay through the
+  move and 12 ticks after, then fade over 10. Held things, steady hands and spirit armour keep them up, and a hold that
+  re-stamps its pose doesn't re-form. They form by fading in and swelling the last fifth, not growing from nothing.
+  The idle mana drain is unchanged.
+- **Kung Lao's ghost** for the look: the arms have their own shells, a core that is the arm itself (not inflated),
+  bright and pale, its texture near still, under two thin, dim edges in the spirit's colour that drift slowly. They show
+  near full even with a dim glow. Paler, bigger wisps smoke back and up off them while they're up.
+- **Calmer**: the idle stretch is gone, the elbow, shoulder roll, sway and finger flex are a third of what they were,
+  and the ghost trail is two soft arms behind a fast move only (a blow's snap, a grasp closing), none at rest.
+  Not seen in game.
+
+## 0.7.249: the life story keeps your power a surprise (pack 0.17.38)
+Andy, of the "Then one day..." page: "this screen should not show the class you will get".
+- The "Then one day" answers and the story page no longer say which power wakes ("Power: Cryokinesis, awakening in a
+  few days" / "whatever fate decides" are gone, and their lang keys with them). Lost in time still says Chrono wakes at
+  once, since that's the road's own doing.
+- A road that matches the gift still says it wakes a day sooner, without naming it.
+## 0.7.250: job halls and Blossom villages, the pack's Japan (pack 0.17.39)
+Andy pointed at Tax' Village Architect ("adds the new buildings we need for jobs (butcher stable, etc) it also adds a
+new cherry blossom village which is perfect for the unused japanese/samurai armor we have. they can be the analogue
+for japan"). It is all rights reserved and Forge/NeoForge 1.21.1 only, so nothing of it is used: these are our own.
+- **The cherry grove was snowy land**: `Palette.of` tested "grove" (the snowy grove) before "cherry", so a seat in a
+  cherry grove got the snowy palette, the Northern tongue and no ronin. Cherry is now tested first, so the Blossom look,
+  tongue and harness finally show (`Outfits.VERSION` 3 dresses folk again once).
+- **Job halls** (`JobHalls`): a butcher's shop (open counter, smoker, chopping block, chains), a fishery (drying rack,
+  dried kelp, a hut with the catch barrel) and a hunting lodge (log cabin, fletching table, pelts, a target on a hay
+  bale), drawn from each settlement's kit. Realms build them from 22/26/30 people, villages from 10/14/16. Their job site
+  blocks give villagers there the butcher, fisherman and fletcher trades.
+- **Jobs work out of them** (`Careers.Job#hall`): butcher → butcher's shop, fisher → fishery, hunter → hunting lodge,
+  smith → smithy, courier → stable. A town where the job's building stands is always hiring for it and pays
+  `HALL_BONUS` (1) more an order; the offer says so.
+- **The Blossom way of building** (`Blossom`): among the cherry trees every building's kit roofs in deepslate tile over
+  white plaster, and a house is a minka (dark timber frame on a stone footing, boards and plaster, paper windows, tatami,
+  futons, a low table, a paper lantern, a wide hipped overhanging roof, often an engawa).
+- **Blossom villages** (`BlossomVillages`): no village is generated in cherry groves, so one rises there by itself
+  (checked each minute, 35%): a cherry grove all round, 384 blocks from any settlement, no bell within 128, out of sight
+  of the player. A bell on a stone plinth, a shrine, a torii over the gravel road in, stone lanterns, four minka, a
+  butcher's shop, a hunting lodge and two stalls, villagers and a golem; then an ordinary village (elder, shed, crew,
+  growth) with a Blossom name (Hanamura, Kirizawa...). `/kingdom found blossom` raises one where you stand.
+- **Samurai guards**: a realm's guards in the Blossom land always wear the ronin harness in the realm's colour (not
+  only one realm in two), Epic Knights doesn't replace it, and with MCA every settlement there puts its MCA guards in it.
+  Not seen in game.

@@ -72,7 +72,7 @@ final class LifeStoryScreen extends Screen {
 	private static long quietUntil;
 	private static List<LifeStory.Realm> realms = List.of();
 	private static Draft draft = new Draft();
-	/** (0.7.248) The question the narrator last read (its title key), and the reading, so it reads each page once. */
+	/** (0.7.251) The question the narrator last read (its title key), and the reading, so it reads each page once. */
 	private static @Nullable String narrated;
 	private static @Nullable SimpleSoundInstance reading;
 
@@ -319,7 +319,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (0.7.248) The narrator reads a question's title and the line under it when its page first shows, if that question has
+	 * (0.7.251) The narrator reads a question's title and the line under it when its page first shows, if that question has
 	 * a voice ({@link Voices}); turning the page cuts the reading short.
 	 */
 	private static void narrate(Step s) {
@@ -725,17 +725,15 @@ final class LifeStoryScreen extends Screen {
 			if (story && road != null && road.start() == LifeStory.Start.TIMELOST) {
 				// (lost in time wakes Chrono at once, whatever this was)
 				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.timelost", power("chrono")));
-			} else {
-				out.add(LifeStory.FATE.equals(a.power()) ? Component.translatable("gui.jaymoskingdoms.story.gives.fate")
-					: Component.translatable("gui.jaymoskingdoms.story.gives.power", power(a.power())));
 			}
+			// (0.7.249) Andy: "this screen should not show the class you will get": what wakes is a surprise
 		}
 		if (a.start() != null) {
 			out.add(Component.translatable("story.jaymoskingdoms.road." + a.key() + ".wake"));
 			Answer turn = picked(Question.TURN);
 			String echo = LifeStory.echo(a.start());
 			if (LifeStory.powers() && !echo.isEmpty() && turn != null && echo.equals(turn.power())) {
-				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.echo", power(echo)));
+				out.add(Component.translatable("gui.jaymoskingdoms.story.gives.echo"));
 			}
 		}
 		return out;

@@ -433,9 +433,12 @@ public final class Mana {
 	static void tick(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		if (!attuned(player)) {
+			// (0.7.247) never while a newcomer can't see it: the flare waits till they're out from the story's screens
 			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER)) {
-				attune(player);
-			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player)) {
+				if (!StoryGround.unseen(player)) {
+					attune(player);
+				}
+			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player) && !StoryGround.unseen(player)) {
 				attune(player);
 			} else {
 				// (0.7.244) or slowly, carrying alchemy's vis

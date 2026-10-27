@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.248) Spoken lines. Andy (2026-10-27) chose a test first: the narrator reads the first story question and every spirit
+ * (0.7.251) Spoken lines. Andy (2026-10-27) chose a test first: the narrator reads the first story question and every spirit
  * speaks its three summon lines (and the Quiet One its one word). The clips are made with VoxCPM2 (Apache-2.0, voices
  * designed from a description, no real person cloned) by {@code tools/voices/make_voices.py}. A line is voiced when its
  * lang key is in {@link #VOICED}; its sound is {@code jaymoskingdoms:voice.<speaker>.<rest of the key>}, the speaker being

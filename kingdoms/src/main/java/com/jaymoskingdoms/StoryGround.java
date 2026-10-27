@@ -72,6 +72,8 @@ public final class StoryGround {
 	static final int SETTLE_TICKS = 60;
 	/** (0.7.236) How often who's held is looked at, and the loading screen raised or let down. */
 	static final int HOLD_EVERY = 5;
+	/** (0.7.247) Ticks after a newcomer first sees the world before what they'd miss (attuning's flare) may happen. */
+	static final int REVEAL_TICKS = 40;
 	/** Kept from harm while they wait (refreshed each try). */
 	static final int WAIT_RESISTANCE = TRY_EVERY * 3;
 	/** (0.7.235) A whaler's story: the sea kept ticking round her mooring, the misses before a realm is passed over, and how long it all may take. */
@@ -102,6 +104,8 @@ public final class StoryGround {
 	/** (0.7.236) Player → server tick their arrival's loading screen comes down; and the hold last sent to each. */
 	private static final Map<UUID, Integer> SETTLING = new HashMap<>();
 	private static final Map<UUID, String> SENT = new HashMap<>();
+	/** (0.7.247) Player → the last server tick they couldn't see the world (story, loading screen, MCA's creator). */
+	private static final Map<UUID, Integer> HIDDEN = new HashMap<>();
 
 	/**
 	 * (0.7.236) Andy: "can the player be held in a stasis menu or faux load screen at the beginning while everything
@@ -130,10 +134,12 @@ public final class StoryGround {
 			WHALER_REALMS.clear();
 			SETTLING.clear();
 			SENT.clear();
+			HIDDEN.clear();
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			SETTLING.remove(handler.player.getUUID());
 			SENT.remove(handler.player.getUUID());
+			HIDDEN.remove(handler.player.getUUID());
 		});
 		// a newcomer's story will want realms to name: start raising the first capital while they make their MCA character
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -462,6 +468,29 @@ public final class StoryGround {
 	/** Holds {@code player} behind the loading screen a few seconds more, while the land where the story put them loads. */
 	static void settle(ServerPlayer player) {
 		SETTLING.put(player.getUUID(), player.level().getServer().getTickCount() + SETTLE_TICKS);
+	}
+
+	/**
+	 * (0.7.247) Andy: "if they spawn attuned they miss the animation." Whether {@code player} can't see the world yet:
+	 * their story is owed, the loading screen is up, MCA's creator is still to come, or they came out from behind
+	 * those less than {@link #REVEAL_TICKS} ago. What should play where they can see it (attuning) waits on this.
+	 */
+	public static boolean unseen(ServerPlayer player) {
+		UUID id = player.getUUID();
+		int now = player.level().getServer().getTickCount();
+		if (LifeStory.owed(player) || SENT.containsKey(id) || SETTLING.containsKey(id) || McaCompat.destinyPending(player)) {
+			HIDDEN.put(id, now);
+			return true;
+		}
+		Integer last = HIDDEN.get(id);
+		if (last == null) {
+			return false;
+		}
+		if (now - last < REVEAL_TICKS) {
+			return true;
+		}
+		HIDDEN.remove(id);
+		return false;
 	}
 
 	/** What {@code player} is held for (the loading screen's line), or null: free to go. */

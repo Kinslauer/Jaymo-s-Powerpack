@@ -43,7 +43,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		McaCompat.register();
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
-		// (0.7.248) spoken lines: the narrator and the spirits
+		// (0.7.251) spoken lines: the narrator and the spirits
 		Voices.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
@@ -56,6 +56,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Barbarians.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
+		BlossomVillages.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows

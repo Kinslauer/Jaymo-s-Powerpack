@@ -3051,3 +3051,13 @@ allowance (`Mastery.grant`), or 60 experience with nothing left to learn or no p
   `getItemBySlot(HEAD)` with nothing while it draws your own body, so the helmet seemed to come off and go back on all
   the time. `client/mixin/tnm/TnmArmorDonMixin` (optional, `@Pseudo`) makes ArmorDon read the armour slots from the
   inventory instead, which First-person Model doesn't touch.
+- **0.17.36, attuning waits till you can see it (Kingdoms 0.7.247):** a Mage or Sorcerer start's attunement flare
+  plays 2 s after the start screens and MCA's creator are gone, not behind them. No Powers changes.
+- **0.17.37, spirit arms only while used, a ghost's look (Kingdoms 0.7.248):** a mana spirit's arms form when a move
+  starts and fade after, drawn as a solid pale core with thin drifting edges and smoke, and move more calmly. No Powers
+  changes.
+- **0.17.38, the life story keeps your power a surprise (Kingdoms 0.7.249):** the "Then one day" page no longer names
+  the power you'll awaken. No Powers changes.
+- **0.17.39, job halls and Blossom villages (Kingdoms 0.7.250):** settlements build a butcher's shop, a fishery and a
+  hunting lodge (their jobs hire and pay more where they stand); cherry groves get their own Blossom villages (minka,
+  shrine, torii) and samurai-armoured guards, and cherry-grove towns finally get the Blossom look. No Powers changes.
