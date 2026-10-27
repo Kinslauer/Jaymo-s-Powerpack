@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "jaymoskitchen:wild_beetroots",
+        "weight": 1
+      },
+      {
+        "data": "jaymoskitchen:sandy_shrub",
+        "weight": 1
+      }
+    ]
+  }
+}

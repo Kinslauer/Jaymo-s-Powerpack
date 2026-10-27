@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:tree_bark",
+    "jaymoskitchen:tree_bark",
+    "jaymoskitchen:tree_bark"
+  ],
+  "result": {
+    "id": "minecraft:paper"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "rope",
+  "key": {
+    "s": "jaymoskitchen:straw"
+  },
+  "pattern": [
+    "s",
+    "s"
+  ],
+  "result": {
+    "id": "jaymoskitchen:rope",
+    "count": 4
+  }
+}

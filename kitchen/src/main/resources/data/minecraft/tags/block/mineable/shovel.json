@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "jaymoskitchen:fertile_farmland"
+    "jaymoskitchen:fertile_farmland",
+    "jaymoskitchen:organic_compost",
+    "jaymoskitchen:rich_soil",
+    "jaymoskitchen:rich_soil_farmland"
   ]
 }
