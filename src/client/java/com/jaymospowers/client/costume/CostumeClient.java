@@ -6,6 +6,7 @@ import com.jaymospowers.client.power.web.WebSymbioteClient;
 import com.jaymospowers.client.power.xenoform.XenoformClient;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
+import com.jaymospowers.costume.CostumeKit;
 import com.jaymospowers.costume.CostumeNet;
 import com.jaymospowers.costume.CostumeTailoring;
 import com.jaymospowers.costume.SecretIdentity;
@@ -226,6 +227,46 @@ public final class CostumeClient {
 			if (design.hasEmblem()) {
 				renderColoredCutoutModel(this.models.emblem, CostumeEmblems.texture(design), poseStack, collector, lightCoords, state, -1, 1);
 			}
+			// (0.17.58) the suit editor's pieces
+			kit(design, slim, poseStack, collector, lightCoords, state);
+		}
+
+		/** (0.17.58) Gloves, boots, belt, helmet and fins, each once per colour it uses (primary, secondary, trim). */
+		private void kit(CostumeDesign design, boolean slim, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {
+			CostumeKit kit = design.kit();
+			int[] colours = {0xFF000000 | design.primary().getTextureDiffuseColor(), 0xFF000000 | design.secondary().getTextureDiffuseColor(),
+				0xFF000000 | design.trim().getTextureDiffuseColor()};
+			if (kit.gloves() != CostumeKit.Gloves.NONE) {
+				piece(CostumeModels.kitKey(kit.gloves(), false), slim, colours, poseStack, collector, lightCoords, state);
+			}
+			if (kit.boots() != CostumeKit.Boots.NONE) {
+				piece(CostumeModels.kitKey(kit.boots()), false, colours, poseStack, collector, lightCoords, state);
+			}
+			if (kit.belt() != CostumeKit.Belt.NONE) {
+				piece(CostumeModels.kitKey(kit.belt()), false, colours, poseStack, collector, lightCoords, state);
+			}
+			if (kit.helm() != CostumeKit.Helm.NONE) {
+				piece(CostumeModels.kitKey(kit.helm()), false, colours, poseStack, collector, lightCoords, state);
+			}
+			if (kit.fins() != CostumeKit.Fins.NONE) {
+				piece(CostumeModels.kitKey(kit.fins()), false, colours, poseStack, collector, lightCoords, state);
+			}
+		}
+
+		private void piece(String key, boolean slim, int[] colours, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
+				AvatarRenderState state) {
+			CostumeModels.Worn model = this.models.kit(slim ? key + "_slim" : key);
+			if (model == null) {
+				return;
+			}
+			int channels = CostumeModels.channels(key);
+			String[] names = {"primary", "secondary", "trim"};
+			String texture = slim ? key + "_slim" : key;
+			for (int i = 0; i < 3; i++) {
+				if ((channels >> i & 1) != 0) {
+					renderColoredCutoutModel(model, CostumeModels.kitTexture(texture, names[i]), poseStack, collector, lightCoords, state, colours[i], 1);
+				}
+			}
 		}
 	}
 
@@ -250,5 +291,25 @@ public final class CostumeClient {
 			OverlayTexture.NO_OVERLAY, null, 0xFF000000 | design.primary().getTextureDiffuseColor());
 		collector.submitModelPart(sleeve, poseStack, RenderTypes.entityCutout(CostumeModels.texture("suit", cut, slim, true)), light,
 			OverlayTexture.NO_OVERLAY, null, 0xFF000000 | design.secondary().getTextureDiffuseColor());
+		if (design.kit().gloves() != CostumeKit.Gloves.NONE) {
+			// (0.17.58) the gloves over the hand
+			String key = CostumeModels.kitKey(design.kit().gloves(), false);
+			String texture = slim ? key + "_slim" : key;
+			CostumeModels.Worn gloves = handModels.kit(texture);
+			if (gloves != null) {
+				ModelPart hand = arm == source.rightArm ? gloves.rightArm : gloves.leftArm;
+				hand.loadPose(arm.storePose());
+				hand.visible = true;
+				int[] colours = {0xFF000000 | design.primary().getTextureDiffuseColor(), 0xFF000000 | design.secondary().getTextureDiffuseColor(),
+					0xFF000000 | design.trim().getTextureDiffuseColor()};
+				String[] names = {"primary", "secondary", "trim"};
+				for (int i = 0; i < 3; i++) {
+					if ((CostumeModels.channels(key) >> i & 1) != 0) {
+						collector.submitModelPart(hand, poseStack, RenderTypes.entityCutout(CostumeModels.kitTexture(texture, names[i])), light,
+							OverlayTexture.NO_OVERLAY, null, colours[i]);
+					}
+				}
+			}
+		}
 	}
 }

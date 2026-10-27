@@ -16,10 +16,12 @@ import org.jspecify.annotations.Nullable;
  * cape, and a 16x16 emblem for the chest. It rides on the costume item ({@link Costume#DESIGN}) and, once put on, on the
  * player ({@link Costume#WORN}); everything that draws or reads a costume works from this alone.
  * <p>
+ * (0.17.58) The {@link #kit} adds a trim colour and gloves, boots, a belt, a helmet and head fins.
+ * <p>
  * The emblem is packed: each pixel is one of {@link #EMBLEM_COLOURS} palette entries (3 bits), 256 pixels in 96 bytes,
  * kept as Base64 (128 characters), or empty for a blank emblem.
  */
-public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor secondary, Mask mask, Cape cape, String emblem) {
+public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor secondary, Mask mask, Cape cape, String emblem, CostumeKit kit) {
 	/** The longest name a costume can have. */
 	public static final int MAX_NAME = 24;
 	/** The emblem's size, in pixels each way. */
@@ -32,7 +34,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	private static final int PACKED_BYTES = EMBLEM_PIXELS * 3 / 8;
 
 	/** A fresh design: a plain blue and white bodysuit. */
-	public static final CostumeDesign DEFAULT = new CostumeDesign("", Cut.BODYSUIT, DyeColor.BLUE, DyeColor.WHITE, Mask.NONE, Cape.NONE, "");
+	public static final CostumeDesign DEFAULT = new CostumeDesign("", Cut.BODYSUIT, DyeColor.BLUE, DyeColor.WHITE, Mask.NONE, Cape.NONE, "", CostumeKit.NONE);
 
 	/**
 	 * How the body is cut: each is a pair of mask textures (where the primary goes, where the secondary goes).
@@ -45,7 +47,9 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		WEBBED("web"), WINDSWEPT("wind"), DENSE("gravity"), CLOCKWORK("chrono"), BANDOLIER("arsenal"), RESONANT("resonance"),
 		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform"),
 		// (0.14.3) anyone's: the assassin's robe
-		ASSASSIN;
+		ASSASSIN,
+		// (0.17.58) Z Fighter's gi and armour patterns
+		WRAP_GI("zfighter"), SLEEVELESS_GI("zfighter"), WEIGHTED_GI("zfighter"), BATTLE_ARMOUR("zfighter"), PADDED_SUIT("zfighter");
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
 		public static final StreamCodec<ByteBuf, Cut> STREAM_CODEC = CostumeDesign.byOrdinal(values());
@@ -144,7 +148,9 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		DyeColor.CODEC.optionalFieldOf("secondary", DyeColor.WHITE).forGetter(CostumeDesign::secondary),
 		Mask.CODEC.optionalFieldOf("mask", Mask.NONE).forGetter(CostumeDesign::mask),
 		Cape.CODEC.optionalFieldOf("cape", Cape.NONE).forGetter(CostumeDesign::cape),
-		Codec.STRING.optionalFieldOf("emblem", "").forGetter(CostumeDesign::emblem)
+		Codec.STRING.optionalFieldOf("emblem", "").forGetter(CostumeDesign::emblem),
+		// (0.17.58) the suit editor's extras; a design saved before them has none
+		CostumeKit.CODEC.optionalFieldOf("kit", CostumeKit.NONE).forGetter(CostumeDesign::kit)
 	).apply(i, CostumeDesign::new)).xmap(CostumeDesign::sanitized, d -> d);
 
 	public static final StreamCodec<ByteBuf, CostumeDesign> STREAM_CODEC = StreamCodec.composite(
@@ -155,6 +161,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		Mask.STREAM_CODEC, CostumeDesign::mask,
 		Cape.STREAM_CODEC, CostumeDesign::cape,
 		ByteBufCodecs.stringUtf8(256), CostumeDesign::emblem,
+		CostumeKit.STREAM_CODEC, CostumeDesign::kit,
 		CostumeDesign::new).map(CostumeDesign::sanitized, d -> d);
 
 	/** The same design with its name cleaned (no control characters, at most {@link #MAX_NAME}) and a valid emblem. */
@@ -162,7 +169,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		String clean = cleanName(this.name);
 		String packed = pack(unpack(this.emblem));
 		return clean.equals(this.name) && packed.equals(this.emblem) ? this
-			: new CostumeDesign(clean, this.cut, this.primary, this.secondary, this.mask, this.cape, packed);
+			: new CostumeDesign(clean, this.cut, this.primary, this.secondary, this.mask, this.cape, packed, this.kit);
 	}
 
 	public static String cleanName(String name) {
@@ -173,31 +180,40 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	}
 
 	public CostumeDesign withName(String name) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withCut(Cut cut) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withPrimary(DyeColor primary) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withSecondary(DyeColor secondary) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withMask(Mask mask) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withCape(Cape cape) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem);
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
 	}
 
 	public CostumeDesign withEmblem(byte[] pixels) {
-		return new CostumeDesign(name, cut, primary, secondary, mask, cape, pack(pixels));
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, pack(pixels), kit);
+	}
+
+	public CostumeDesign withKit(CostumeKit kit) {
+		return new CostumeDesign(name, cut, primary, secondary, mask, cape, emblem, kit);
+	}
+
+	/** (0.17.58) The trim's dye: the kit's own, or the secondary colour when it follows it. */
+	public DyeColor trim() {
+		return this.kit.trimColour(this.secondary);
 	}
 
 	/** The emblem's pixels (palette entries, row by row from the top left). */
