@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "jaymoskitchen:block/tatami_mat_half",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "jaymoskitchen:block/tatami_mat_half"
+    },
+    "facing=south": {
+      "model": "jaymoskitchen:block/tatami_mat_half",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskitchen:block/tatami_mat_half",
+      "y": 270
+    }
+  }
+}

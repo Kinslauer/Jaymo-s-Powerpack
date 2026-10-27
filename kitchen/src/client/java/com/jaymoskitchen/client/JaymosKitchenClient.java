@@ -75,6 +75,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskitchen.delight.Delight.CUTTING_BOARD_ENTITY,
 			com.jaymoskitchen.client.delight.CuttingBoardRenderer::new);
 		com.jaymoskitchen.client.delight.DelightFarmClient.register();
+		// the stove's grill, and the skillet's models
+		com.jaymoskitchen.client.delight.DelightHomeClient.register();
 		// (0.5.27) hides hanging on drying racks
 		BlockEntityRenderers.register(com.jaymoskitchen.tanning.Hides.DRYING_RACK_ENTITY, com.jaymoskitchen.client.tanning.DryingRackRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);

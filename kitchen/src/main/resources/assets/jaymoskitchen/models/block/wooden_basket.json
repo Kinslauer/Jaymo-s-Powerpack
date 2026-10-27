@@ -1,0 +1,9 @@
+{
+  "parent": "jaymoskitchen:block/template_basket",
+  "textures": {
+    "bottom": "jaymoskitchen:block/wooden_basket_bottom",
+    "handle": "jaymoskitchen:block/wooden_basket_handle",
+    "side": "jaymoskitchen:block/wooden_basket_side",
+    "top": "jaymoskitchen:block/wooden_basket_top"
+  }
+}

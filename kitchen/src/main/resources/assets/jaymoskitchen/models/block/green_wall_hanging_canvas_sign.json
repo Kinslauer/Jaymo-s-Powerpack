@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_hanging_sign",
+  "textures": {
+    "all": "jaymoskitchen:block/green_hanging_canvas_sign",
+    "particle": "jaymoskitchen:block/green_hanging_canvas_sign"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_sign",
+  "textures": {
+    "all": "jaymoskitchen:block/light_blue_canvas_sign",
+    "particle": "jaymoskitchen:block/light_blue_canvas_sign"
+  }
+}

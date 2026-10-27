@@ -28,6 +28,7 @@
 		"OvenMenuMixin",
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
+		"SignBlockEntityMixin",
 		"RangedAttackMobMixin",
 		"RopeFenceConnectionMixin",
 		"SecondaryPoiSensorMixin",

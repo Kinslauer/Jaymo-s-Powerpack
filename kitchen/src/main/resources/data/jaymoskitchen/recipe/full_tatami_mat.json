@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "fd_full_tatami_mat",
+  "ingredients": [
+    "jaymoskitchen:tatami"
+  ],
+  "result": {
+    "count": 2,
+    "id": "jaymoskitchen:full_tatami_mat"
+  }
+}

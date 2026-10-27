@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "fd_canvas",
+  "ingredients": [
+    "jaymoskitchen:canvas_rug",
+    "jaymoskitchen:canvas_rug"
+  ],
+  "result": {
+    "id": "jaymoskitchen:canvas"
+  }
+}

@@ -41,7 +41,9 @@ public final class KitchenBlocks {
 		// (0.5.28) the pot and pan also set down over a fire to cook in (delight/CookwareBlock)
 		com.jaymoskitchen.delight.Delight.registerCookware();
 		COOKING_POT = tool("cooking_pot", com.jaymoskitchen.delight.Delight.COOKING_POT_BLOCK);
-		FRYING_PAN = tool("frying_pan", com.jaymoskitchen.delight.Delight.FRYING_PAN_BLOCK);
+		// (0.5.30) the Frying Pan is Farmer's Delight's Skillet now (same id): a weapon and a pan to cook in the hand
+		com.jaymoskitchen.delight.SkilletItem.registerComponents();
+		FRYING_PAN = skillet("frying_pan", com.jaymoskitchen.delight.Delight.FRYING_PAN_BLOCK);
 		SAUCEPAN = tool("saucepan");
 		BAKING_TRAY = tool("baking_tray");
 		ROLLING_PIN = tool("rolling_pin");
@@ -81,6 +83,13 @@ public final class KitchenBlocks {
 	private static Item tool(String id, net.minecraft.world.level.block.Block block) {
 		Item item = block == null ? register(id, Item::new, new Item.Properties().stacksTo(1))
 			: register(id, p -> new net.minecraft.world.item.BlockItem(block, p), new Item.Properties().stacksTo(1));
+		((ItemAccessor) item).jaymoskitchen$setCraftingRemainder(new ItemStackTemplate(item));
+		return item;
+	}
+
+	/** The skillet: a tough pan (so no stack size of its own), which stays in the crafting grid like the rest. */
+	private static Item skillet(String id, net.minecraft.world.level.block.Block block) {
+		Item item = register(id, p -> new com.jaymoskitchen.delight.SkilletItem(block, p), new Item.Properties());
 		((ItemAccessor) item).jaymoskitchen$setCraftingRemainder(new ItemStackTemplate(item));
 		return item;
 	}

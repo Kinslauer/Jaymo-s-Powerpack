@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bricks",
+    "C": "minecraft:campfire",
+    "i": "#c:ingots/iron"
+  },
+  "pattern": [
+    "iii",
+    "B B",
+    "BCB"
+  ],
+  "result": {
+    "id": "jaymoskitchen:stove"
+  }
+}
