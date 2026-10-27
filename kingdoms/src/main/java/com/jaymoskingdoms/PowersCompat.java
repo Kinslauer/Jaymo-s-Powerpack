@@ -309,12 +309,12 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.261) Powers' {@code Dismember.regrow(LivingEntity, boolean)}. */
+	/** (0.7.262) Powers' {@code Dismember.regrow(LivingEntity, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle regrow;
 	private static boolean lookedForRegrow;
 
 	/**
-	 * (0.7.261) The Rubber-folk's body grows a lost limb back, as a Verdant's does in Powers: the first part still missing
+	 * (0.7.262) The Rubber-folk's body grows a lost limb back, as a Verdant's does in Powers: the first part still missing
 	 * ({@code all}: every one). True if anything grew back; false without Powers.
 	 */
 	public static boolean regrow(LivingEntity body, boolean all) {
@@ -396,7 +396,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** Eases {@code entity}'s fever (its weakness, the dirt in its cuts); false without Powers. */
+	/** Eases {@code entity}'s fever (festering cured, its weakness, the dirt in its cuts); false without Powers. */
 	public static boolean easeFever(net.minecraft.world.entity.LivingEntity entity) {
 		mending();
 		try {

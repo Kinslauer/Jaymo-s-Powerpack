@@ -12,7 +12,7 @@ import net.minecraft.client.KeyMapping;
 
 /**
  * (0.7.75) The heritage key, {@code ;}: a Warrior-born's tail, wrapped away or let out ({@link Heritage#gift}).
- * (0.7.261) A Bio-built's press buds copies in the last form, and held (a Bio-built's or a Rubber-folk's) it absorbs
+ * (0.7.262) A Bio-built's press buds copies in the last form, and held (a Bio-built's or a Rubber-folk's) it absorbs
  * ({@link HeritageHold}: the key is sent as held every other tick).
  */
 final class FrostPrisonKey {
@@ -32,7 +32,7 @@ final class FrostPrisonKey {
 					ClientPlayNetworking.send(new FrostPrison.Cast());
 				}
 			}
-			// (0.7.261) held: the Bio-built and the Rubber-folk absorb
+			// (0.7.262) held: the Bio-built and the Rubber-folk absorb
 			if (key.isDown() && minecraft.player != null && minecraft.gui.screen() == null && minecraft.player.tickCount % 2 == 0
 				&& (Heritage.is(minecraft.player, Heritage.Kind.BIOBUILT) || Heritage.is(minecraft.player, Heritage.Kind.RUBBERFOLK))
 				&& ClientPlayNetworking.canSend(HeritageHold.Held.TYPE)) {

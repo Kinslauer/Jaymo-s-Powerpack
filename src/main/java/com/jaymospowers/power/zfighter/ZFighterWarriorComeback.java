@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.17.54, Andy's NOEA picks) The Warrior-born's comeback, which deepens his defeat growth ({@link ZFighterPower#zenkai},
+ * (0.17.56, Andy's NOEA picks) The Warrior-born's comeback, which deepens his defeat growth ({@link ZFighterPower#zenkai},
  * doubled for his blood by {@link ZFighterLineage#WARRIOR_ZENKAI}) rather than copying it. Living through a fight at
  * {@link #LOW_HEALTH} of his health or less (at least {@link #MIN_LOW} ticks down there, then {@link #SURVIVE_TICKS} ticks
  * out of that danger and still standing), or being brought round from the downed state, is a comeback: {@link #HEAL} health

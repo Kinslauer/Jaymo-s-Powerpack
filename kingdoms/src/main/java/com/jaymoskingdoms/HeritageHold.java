@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.261, Andy's NOEA picks) The heritage key held down ({@code ;}, the same key as a Warrior-born's tail): the Bio-built
+ * (0.7.262, Andy's NOEA picks) The heritage key held down ({@code ;}, the same key as a Warrior-born's tail): the Bio-built
  * and the Rubber-folk absorb with it. The client sends {@link Held} every other tick while the key is down; the server
  * counts it held for a few ticks after ({@link #HELD_GRACE}). {@link #advance} runs one absorbing channel: look at a
  * fitting foe up close, keep holding, and when the bar fills the foe is yours to take.

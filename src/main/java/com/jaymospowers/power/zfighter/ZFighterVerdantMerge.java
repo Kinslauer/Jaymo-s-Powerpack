@@ -33,7 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.54, Andy's NOEA picks) Verdant merging: a Verdant Z Fighter joins with a Verdant ally for a permanent share of
+ * (0.17.56, Andy's NOEA picks) Verdant merging: a Verdant Z Fighter joins with a Verdant ally for a permanent share of
  * what they have grown. Sneak+Z (on the ground, facing the partner within {@link #RANGE} blocks) begins a
  * {@link #CHANNEL_TICKS}-tick joining, broken if he moves, is hurt or the partner leaves. Who can be merged with:
  * <ul>

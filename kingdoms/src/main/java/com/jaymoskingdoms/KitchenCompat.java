@@ -133,7 +133,7 @@ final class KitchenCompat {
 	}
 
 	/**
-	 * (0.7.261) Jaymo's Kitchen's desserts, for the Rubber-folk's sweet tooth ({@link RubberFolk}): its tarts, pies, cakes,
+	 * (0.7.262) Jaymo's Kitchen's desserts, for the Rubber-folk's sweet tooth ({@link RubberFolk}): its tarts, pies, cakes,
 	 * cobbler, brownies, brittle, jam and hot chocolate. Matched by name, so it needs no Kitchen class; false without Kitchen.
 	 */
 	static boolean sweet(net.minecraft.world.item.ItemStack stack) {
@@ -144,7 +144,7 @@ final class KitchenCompat {
 		return MOD.equals(id.getNamespace()) && SWEETS.contains(id.getPath());
 	}
 
-	/** (0.7.261) Kitchen's sweet things, by item id. */
+	/** (0.7.262) Kitchen's sweet things, by item id. */
 	private static final java.util.Set<String> SWEETS = java.util.Set.of("apple_tart", "white_apple_tart", "strawberry_tart", "lemon_tart", "sweet_berry_pie",
 		"peach_cobbler", "carrot_cake", "brownie", "peanut_brittle", "berry_jam", "hot_chocolate", "fruit_salad", "sky_fruit_salad", "lemonade");
 

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.261, Andy's NOEA picks) Divine-born, the celestial blood: pale gold skin with a halo over the head and marks that
+ * (0.7.262, Andy's NOEA picks) Divine-born, the celestial blood: pale gold skin with a halo over the head and marks that
  * glow faintly ({@code client/HeritageLooks}). They mend faster than anyone ({@link #REGEN_HEAL} every {@link #REGEN_EVERY}
  * ticks on top of the body's own), their blows smite the wicked ({@link #smite}: the undead, illagers, barbarians, a
  * Rogue (a Stealth alignment) or anyone whose power or gift has been corrupted), and healing magic loves them

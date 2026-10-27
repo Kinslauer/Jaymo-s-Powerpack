@@ -81,7 +81,7 @@ public final class HeritageVariants {
 	static final int STONE_GREY = 0x8A8C8E;
 	static final float STONE_GREY_AMOUNT = 0.6F;
 	/**
-	 * (0.7.261) The new bloods' skin: every Rubber-folk is pink and every Divine-born touched with gold, over the skin by these
+	 * (0.7.262) The new bloods' skin: every Rubber-folk is pink and every Divine-born touched with gold, over the skin by these
 	 * amounts; a Bio-built's drab made skin grows more so with each form ({@code BIO_AMOUNT}, first to third).
 	 */
 	static final int RUBBER_PINK = 0xF09AC0, DIVINE_GOLD = 0xF4DDA0, BIO_GREY = 0x8AA39A;
@@ -166,7 +166,7 @@ public final class HeritageVariants {
 		// ---- Deepborn
 		HOLLOW(Heritage.Kind.DEEPBORN, 0x9AA8A8, 0.4F, Land.DEEP, null, null, Trait.share(Attributes.SNEAKING_SPEED, 0.15)),
 		GEODE(Heritage.Kind.DEEPBORN, 0x8C8C94, 0.3F, Land.DEEP, null, Heritage.Kind.STONEBORN, Trait.add(Attributes.ARMOR, 2.0)),
-		// ---- (0.7.261, Andy's NOEA picks) Divine-born: the starlit and the feathered
+		// ---- (0.7.262, Andy's NOEA picks) Divine-born: the starlit and the feathered
 		STARLIT(Heritage.Kind.DIVINE, 0xCFE0FF, 0.3F, Land.HIGH, null, null, Trait.add(Attributes.LUCK, 1.0)),
 		SERAPHIC(Heritage.Kind.DIVINE, 0xFFF4DC, 0.35F, Land.NONE, null, null, Trait.add(Attributes.SAFE_FALL_DISTANCE, 2.0)),
 		// ---- Bio-built: brass-bound and pearly

@@ -96,11 +96,11 @@ import org.jspecify.annotations.Nullable;
  * carry the harder they hit, and carrying none they hit lighter.</li>
  * <li><b>Deepborn:</b> (0.7.106, earned) sneaking, they sense the creatures round them through walls (client); they never
  * set off sculk (the Warden can't hear them either). Blasts stun them, and the open sun dulls them.</li>
- * <li><b>Divine-born:</b> (0.7.261) the celestial blood: a halo and gold-touched skin, mends faster, smites the wicked, takes to
+ * <li><b>Divine-born:</b> (0.7.262) the celestial blood: a halo and gold-touched skin, mends faster, smites the wicked, takes to
  * healing magic; hunger burns bright ({@link DivineBorn}).</li>
- * <li><b>Bio-built:</b> (0.7.261) a made being that absorbs downed foes to evolve through three forms, drains life from what
+ * <li><b>Bio-built:</b> (0.7.262) a made being that absorbs downed foes to evolve through three forms, drains life from what
  * it hits and, at the last form, buds small copies ({@link BioBuilt}).</li>
- * <li><b>Rubber-folk:</b> (0.7.261) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
+ * <li><b>Rubber-folk:</b> (0.7.262) pink and stretchy: a longer reach, lost limbs regrown, weak foes swallowed for a heal, a
  * sweet tooth; rubber burns and pops ({@link RubberFolk}).</li>
  * </ul>
  * (0.7.106) Endborn, Dragonblood and Deepborn are earned, not picked at the start ({@link Kind#earned}): seeing the Ender
@@ -255,7 +255,7 @@ public final class Heritage {
 		ENDBORN(true, 0, Items.ENDER_PEARL, Stats.Stat.WITS, Stats.Stat.FINESSE),
 		DRAGONBLOOD(true, 0, Items.DRAGON_BREATH, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
 		DEEPBORN(true, 0, Items.ECHO_SHARD, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
-		// (0.7.261, Andy's NOEA picks) three new bloods, picked at the start like the first ten
+		// (0.7.262, Andy's NOEA picks) three new bloods, picked at the start like the first ten
 		DIVINE(0, Items.TOTEM_OF_UNDYING, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
 		BIOBUILT(0, Items.COPPER_INGOT, Stats.Stat.MIGHT, Stats.Stat.GRIT),
 		RUBBERFOLK(0, Items.PINK_PETALS, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE);
@@ -557,7 +557,7 @@ public final class Heritage {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_hoard", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
 		green(player, kind);
-		// (0.7.261) the Bio-built's form, the Rubber-folk's stretch and burn (taken off everyone else)
+		// (0.7.262) the Bio-built's form, the Rubber-folk's stretch and burn (taken off everyone else)
 		BioBuilt.attributes(player, kind);
 		RubberFolk.attributes(player, kind);
 		// (0.7.214) the variant's trait
@@ -797,7 +797,7 @@ public final class Heritage {
 		if (kind == Kind.WARRIORBORN) {
 			player.addTag(TAIL_TOGGLE_TAG);
 		} else if (kind == Kind.BIOBUILT) {
-			// (0.7.261) in the last form, bud copies (held on a downed foe it absorbs instead: HeritageHold)
+			// (0.7.262) in the last form, bud copies (held on a downed foe it absorbs instead: HeritageHold)
 			BioBuilt.bud(player);
 		}
 	}
@@ -879,10 +879,10 @@ public final class Heritage {
 		if (mine == Kind.DRAGONBLOOD && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
 			amount *= DRAGON_FIRE_TAKEN;
 		} else if (mine == Kind.BIOBUILT && (source.is(DamageTypeTags.IS_LIGHTNING) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
-			// (0.7.261) a made body is brittle to lightning and magic
+			// (0.7.262) a made body is brittle to lightning and magic
 			amount *= BioBuilt.BRITTLE;
 		} else if (mine == Kind.RUBBERFOLK) {
-			// (0.7.261) rubber pops
+			// (0.7.262) rubber pops
 			amount *= RubberFolk.taken(source);
 		}
 		Entity by = source.getEntity();
@@ -897,7 +897,7 @@ public final class Heritage {
 				target.igniteForSeconds(DAWN_UNDEAD_BURN);
 			}
 		} else if (kind == Kind.DIVINE) {
-			// (0.7.261) the Divine-born smite the wicked
+			// (0.7.262) the Divine-born smite the wicked
 			amount *= DivineBorn.smite(attacker, target);
 		}
 		return amount;

@@ -53,7 +53,7 @@ public final class SkinTones {
 		SYLVAN_SKIN = {0.1F, 0.55F}, VERDANT_SKIN = {0.0F, 1.0F}, EMBERBORN_SKIN = {0.5F, 1.0F}, FROSTBORN_SKIN = {0.0F, 0.3F},
 		NIGHTBORN_SKIN = {0.0F, 0.35F}, WARRIORBORN_SKIN = {0.2F, 0.9F}, EARTHLING_SKIN = {0.0F, 1.0F}, STORMBORN_SKIN = {0.15F, 0.6F},
 		DAWNBORN_SKIN = {0.55F, 1.0F}, ENDBORN_SKIN = {0.0F, 0.3F}, DRAGONBLOOD_SKIN = {0.3F, 0.9F}, DEEPBORN_SKIN = {0.0F, 0.25F},
-		// (0.7.261) the divine are pale, the made are anyone's shade (the plating takes over), rubber starts pale to take its pink
+		// (0.7.262) the divine are pale, the made are anyone's shade (the plating takes over), rubber starts pale to take its pink
 		DIVINE_SKIN = {0.0F, 0.35F}, BIOBUILT_SKIN = {0.0F, 1.0F}, RUBBERFOLK_SKIN = {0.0F, 0.4F};
 
 	/** (0.7.236) {@code kind}'s melanin range, least and most. */

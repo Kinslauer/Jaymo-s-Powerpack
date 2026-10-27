@@ -615,7 +615,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
-		// (0.17.54) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
+		// (0.17.56) the lineages' extras: adrenaline, water regen, the ki reserve, the comeback
 		ZFighterRaces.tick(player, live, max);
 		ZFighterCorruption.tick(player, live);
 		ZFighterBranchForms.tick(player, live);
@@ -864,7 +864,7 @@ public final class ZFighterPower implements Power {
 		}
 		if (down && player.isShiftKeyDown() && !live(player).flying) {
 			ZFighterLineage.toggleTail(player);
-			// (0.17.54) a Verdant's merging
+			// (0.17.56) a Verdant's merging
 			ZFighterVerdantMerge.press(player);
 		}
 	}
@@ -1612,7 +1612,7 @@ public final class ZFighterPower implements Power {
 			return true;
 		}
 		cost *= ZFighterAndroid.costFactor(player);
-		// (0.17.54) a Frost-born's reserve or an Earthling's blood may make up what he lacks
+		// (0.17.56) a Frost-born's reserve or an Earthling's blood may make up what he lacks
 		if (live.ki < cost && !ZFighterRaces.cover(player, live, cost)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 			return false;

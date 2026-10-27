@@ -32,7 +32,7 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.54, Andy: "work this kind of sonic sway animation in somewhere") The sonic sway ({@link ZFighterSonicSway}), on
+ * (0.17.56, Andy: "work this kind of sonic sway animation in somewhere") The sonic sway ({@link ZFighterSonicSway}), on
  * everyone: the upper body (hips up) tips from side to side {@link #CYCLES} times a second, the head held more upright than
  * the body, the arms hanging loose and swinging a beat behind, the legs planted a little apart. A blow that misses snaps the
  * lean to the side away from it, and a blow slipped some other way plays one quick lean ({@link #FLICK}).

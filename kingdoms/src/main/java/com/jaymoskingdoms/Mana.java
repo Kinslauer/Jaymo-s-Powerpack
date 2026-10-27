@@ -244,7 +244,7 @@ public final class Mana {
 
 	/** (0.7.244) Pays for {@code what} (a spell or a Sorcerer's key) and ripples the aura with its intent; false if they can't. */
 	static boolean cast(ServerPlayer player, String what) {
-		// (0.7.261) healing magic is cheaper for the Divine-born
+		// (0.7.262) healing magic is cheaper for the Divine-born
 		if (!spend(player, cost(what) * DivineBorn.spellCost(player, what))) {
 			return false;
 		}

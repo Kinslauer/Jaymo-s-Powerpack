@@ -20,7 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.17.54, Andy: "work this kind of sonic sway animation in somewhere") Sonic Sway, a quick technique (G): for
+ * (0.17.56, Andy: "work this kind of sonic sway animation in somewhere") Sonic Sway, a quick technique (G): for
  * {@link #DURATION} ticks he stands nearly still and weaves his upper body from side to side too fast to hit. Every
  * melee blow and every shot aimed at him misses (the damage is cancelled, like {@link ZFighterSidestep}'s), each miss
  * costs {@link #DODGE_KI} ki, and it ends when the ki runs out, when he swings, or when he gathers a charge. The weave

@@ -1,4 +1,4 @@
-"""Race looks (Kingdoms 0.7.261, Andy's NOEA picks): the Divine-born, the Bio-built and the Rubber-folk, in the same way as
+"""Race looks (Kingdoms 0.7.262, Andy's NOEA picks): the Divine-born, the Bio-built and the Rubber-folk, in the same way as
 tools/gen_heritage_looks.py in the project root (overlays on the 64x64 player skin layout; <name>_skin.png lit like skin,
 <name>_glow.png drawn emissive over it, <name>_eyes.png the stock eye spots in the heritage's eye colour).
 

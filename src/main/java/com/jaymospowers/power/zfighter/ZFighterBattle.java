@@ -204,7 +204,7 @@ final class ZFighterBattle {
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
 			damage = ZFighterFusion.toughness(player, damage);
-			// (0.17.54) a Frost-born's ki-hardened body
+			// (0.17.56) a Frost-born's ki-hardened body
 			damage = ZFighterFrostReserve.harden(player, source, damage);
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			damage = ZFighterGuard.guard(player, live, source, damage);

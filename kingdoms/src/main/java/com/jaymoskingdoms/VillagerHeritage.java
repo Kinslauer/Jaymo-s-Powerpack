@@ -70,7 +70,7 @@ public final class VillagerHeritage {
 	static final int W_HEARTLANDER = 560, W_STONEBORN = 60, W_TIDEBORN = 50, W_SYLVAN = 50, W_VERDANT = 15, W_EMBERBORN = 35,
 		W_FROSTBORN = 35, W_NIGHTBORN = 30, W_WARRIORBORN = 25, W_EARTHLING = 70, W_DAWNBORN = 30;
 	/**
-	 * (0.7.261) The new bloods among the rarer ones: the Rubber-folk fairly common (they lean to the swamps and the jungle), the
+	 * (0.7.262) The new bloods among the rarer ones: the Rubber-folk fairly common (they lean to the swamps and the jungle), the
 	 * Divine-born very rare (the peaks lean them); the Bio-built aren't born to villagers at all, only to a Bio-built parent.
 	 */
 	static final int W_RUBBERFOLK = 20, W_DIVINE = 4;
@@ -209,7 +209,7 @@ public final class VillagerHeritage {
 				case DAWNBORN -> W_DAWNBORN * (biome.is(BiomeTags.IS_SAVANNA) ? LEAN : 1);
 				// (0.7.106) earned bloods are only ever inherited
 				case ENDBORN, DRAGONBLOOD, DEEPBORN -> 0;
-				// (0.7.261) rubber likes it wet and green, the divine live up high; the made are only ever inherited
+				// (0.7.262) rubber likes it wet and green, the divine live up high; the made are only ever inherited
 				case RUBBERFOLK -> W_RUBBERFOLK * (biome.is(BiomeTags.IS_JUNGLE) || biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) ? LEAN : 1);
 				case DIVINE -> W_DIVINE * (pos.getY() >= HIGH_Y ? LEAN : 1);
 				case BIOBUILT -> 0;

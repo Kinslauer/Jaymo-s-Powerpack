@@ -62,7 +62,7 @@ public final class ZFighterKiSense {
 
 	/**
 	 * The hook for a later patch: whether {@code entity} hides its ki (the Divine-born race), so ki sense and the
-	 * scouter don't see it. (0.17.54) A Divine-born ({@link ZFighterLineage#divine}) hides its ki.
+	 * scouter don't see it. (0.17.56) A Divine-born ({@link ZFighterLineage#divine}) hides its ki.
 	 */
 	public static boolean hidesKi(LivingEntity entity) {
 		return ZFighterLineage.divine(entity);

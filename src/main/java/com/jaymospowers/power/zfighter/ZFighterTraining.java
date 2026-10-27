@@ -104,7 +104,7 @@ public final class ZFighterTraining {
 	public static final int NOVA_SPHERE = 19;
 	public static final int RAGE_SCREAM = 20;
 	public static final int AFTERIMAGE = 21;
-	/** (0.17.54) Sonic Sway, a quick technique on G ({@link ZFighterSonicSway}). */
+	/** (0.17.56) Sonic Sway, a quick technique on G ({@link ZFighterSonicSway}). */
 	public static final int SONIC_SWAY = 22;
 	public static final int TECHNIQUES = 23;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",

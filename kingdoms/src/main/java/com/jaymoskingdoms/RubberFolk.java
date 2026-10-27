@@ -27,7 +27,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * (0.7.261, Andy's NOEA picks) Rubber-folk: pink and stretchy. Their reach is longer ({@link #REACH}: the stretch, as a
+ * (0.7.262, Andy's NOEA picks) Rubber-folk: pink and stretchy. Their reach is longer ({@link #REACH}: the stretch, as a
  * longer arm and not a drawn one), a lost limb grows back on its own ({@link #REGROW_EVERY}, as a Verdant's does, through
  * Jaymo's Powers' dismemberment), and they can take in the weak: look at a small, low-health foe, or any not-too-big foe
  * that lies downed, and hold the heritage key close by ({@link HeritageHold}) to swallow it for a heal ({@link #absorb}).

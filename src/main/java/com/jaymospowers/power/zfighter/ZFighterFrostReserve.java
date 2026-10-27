@@ -18,7 +18,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 
 /**
- * (0.17.54, Andy's NOEA picks) The Frost-born's two extras. <b>Ki reserve</b>: a second, hidden pool of ki, up to
+ * (0.17.56, Andy's NOEA picks) The Frost-born's two extras. <b>Ki reserve</b>: a second, hidden pool of ki, up to
  * {@link #RESERVE_SHARE} of his maximum, that never shows on the HUD. It fills slowly ({@link #FILL} a tick while his ki is
  * at {@link #FILL_KI_SHARE} of full or more, {@link #FILL_CHARGING} while he charges; nothing for {@link #RESTING} ticks after
  * it was last drawn on). When his ki runs below {@link #KICK_BELOW} it kicks in: up to {@link #DRAW} a tick moves over at

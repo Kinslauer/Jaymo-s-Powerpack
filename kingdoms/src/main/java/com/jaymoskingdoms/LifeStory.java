@@ -198,7 +198,7 @@ public final class LifeStory {
 				Answer.born(Heritage.Kind.WARRIORBORN, "warband"),
 				Answer.born(Heritage.Kind.EARTHLING, "scholars"),
 				Answer.born(Heritage.Kind.DAWNBORN, "temple"),
-				// (0.7.261, Andy's NOEA picks) the three new bloods: a hilltop shrine, a workshop's vats, a travelling fair
+				// (0.7.262, Andy's NOEA picks) the three new bloods: a hilltop shrine, a workshop's vats, a travelling fair
 				Answer.born(Heritage.Kind.DIVINE, "shrine"),
 				Answer.born(Heritage.Kind.BIOBUILT, "vats"),
 				Answer.born(Heritage.Kind.RUBBERFOLK, "fair")));

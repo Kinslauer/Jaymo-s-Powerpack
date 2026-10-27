@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.54, Andy's NOEA picks) The one place the shared Z Fighter code calls into for the lineages' extras, so those files
+ * (0.17.56, Andy's NOEA picks) The one place the shared Z Fighter code calls into for the lineages' extras, so those files
  * only carry one-line hooks: {@link #tick} (from {@link ZFighterPower#tick}), {@link #cover} (from {@link ZFighterPower#spend}),
  * and the classes' own hooks for damage ({@link ZFighterFrostReserve#harden}), maximum ki and fists
  * ({@link ZFighterVerdantMerge#ki}, {@link ZFighterWarriorComeback#bonus}). The extras themselves: Earthling

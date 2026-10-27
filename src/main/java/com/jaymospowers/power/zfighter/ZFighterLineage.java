@@ -8,6 +8,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -94,11 +96,20 @@ public final class ZFighterLineage {
 	static final float APE_STOMP = 14.0F;
 	static final int APE_STOMP_EVERY = 5;
 	static final double APE_STOMP_DEPTH = 3.0;
-	/** Screen shake: each footfall (every this many blocks walked, felt this far), a stomp that lands, the change itself. */
-	static final double APE_STRIDE = 3.0, APE_STEP_RANGE = 32.0;
+	/**
+	 * Screen shake: each footfall (every this many blocks walked, felt this far), a stomp that lands, the change itself.
+	 * (0.17.54) Andy: the apes too should "move with a slow sway, keeping their move speed but removing that fast swing":
+	 * a step every 5 blocks, not 3, and the client's legs keep to the steps ({@code ZFighterApeSteps}).
+	 */
+	static final double APE_STRIDE = 5.0, APE_STEP_RANGE = 32.0;
 	static final float APE_STEP_SHAKE = 1.0F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
-	/** Every footfall is a stomp: enemies this far from the foot (blocks, at full size) are hurt this much and thrown up. */
-	static final double APE_FOOT_REACH = 4.5;
+	/**
+	 * Every footfall is a stomp: enemies this far from the foot (blocks, at full size) are hurt this much and thrown up.
+	 * (0.17.54) As the Aether Giants' (Andy: "a stomp with every step, emitting a shockwave signified by a radiating particle
+	 * effect, cracking the ground and dealing damage to those who dont jump"): its shockwave's ring runs out to the reach,
+	 * the ground cracks round the foot ({@link com.jaymospowers.core.GroundCracks}), and whoever is off the ground is spared.
+	 */
+	static final double APE_FOOT_REACH = 6.0;
 	static final float APE_FOOT_DAMAGE = 8.0F;
 	/** His jump (added to vanilla's 0.42) and how much of his weight he sheds, so he leaps ~20 blocks and drifts down slow. */
 	static final double APE_JUMP = 0.58, APE_LIGHT = 0.85;
@@ -211,7 +222,7 @@ public final class ZFighterLineage {
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
 		RaceMoves.init();
-		// (0.17.54) the lineages' extras (merging, the ki reserve, ...)
+		// (0.17.56) the lineages' extras (merging, the ki reserve, ...)
 		ZFighterRaces.init();
 		// (0.15.148) a Z Fighter's ape has a mind of its own: its rage, its fits, his primal
 		ApeRage.init();
@@ -335,7 +346,7 @@ public final class ZFighterLineage {
 		return any || !FabricLoader.getInstance().isModLoaded("jaymoskingdoms") ? EARTHLING : NONE;
 	}
 
-	/** (0.17.54) Whether {@code entity} is Divine-born (Kingdoms heritage {@code divine}): its ki is hidden from sense and scouters. */
+	/** (0.17.56) Whether {@code entity} is Divine-born (Kingdoms heritage {@code divine}): its ki is hidden from sense and scouters. */
 	public static boolean divine(net.minecraft.world.entity.Entity entity) {
 		return entity.entityTags().contains(HERITAGE_TAG + "divine");
 	}
@@ -635,8 +646,19 @@ public final class ZFighterLineage {
 				foot.z, 60, reach * 0.4, 0.2, reach * 0.4, 0.3);
 		}
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
+		BlockPos under = BlockPos.containing(foot.x, foot.y - 0.5, foot.z);
+		com.jaymospowers.core.GroundCracks.crack(level, under, level.getRandom(), Math.max(1, (int)Math.round(reach * 0.5)));
+		ZFighterNet.ApeStep step = new ZFighterNet.ApeStep(player.getId(), live.apeLeftFoot, foot.x, under.getY() + 1.0, foot.z, (float)reach,
+			(float)(APE_STRIDE * Math.max(0.5F, live.apeSize)));
+		for (ServerPlayer viewer : PlayerLookup.tracking(player)) {
+			ServerPlayNetworking.send(viewer, step);
+		}
+		if (player instanceof ServerPlayer self) {
+			ServerPlayNetworking.send(self, step);
+		}
+		// the wave runs along the ground: jump it and it misses you
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(foot, foot).inflate(reach, 2.0, reach),
-			e -> e != player && e.isAlive() && trodden(player, e))) {
+			e -> e != player && e.isAlive() && e.onGround() && trodden(player, e))) {
 			if (victim.hurtServer(level, blow(level, player), APE_FOOT_DAMAGE)) {
 				com.jaymospowers.core.BladeBlood.crushed(victim);
 				Vec3 away = victim.position().subtract(foot).multiply(1.0, 0.0, 1.0).normalize();

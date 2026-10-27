@@ -31,7 +31,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.261, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
+ * (0.7.262, Andy's NOEA picks) Bio-built, a made being: grown, not born, and hungry to be more. They start frail (the
  * first form), and each downed foe they take into themselves ({@link #absorb}: look at it, hold the heritage key close
  * by, and it is consumed) adds to their worth until the body folds into the next of three forms: the second (Andy's
  * "changed look": plated forearms, a duller skin) and the third (plating to the shoulders and the cheeks, nodes alight).

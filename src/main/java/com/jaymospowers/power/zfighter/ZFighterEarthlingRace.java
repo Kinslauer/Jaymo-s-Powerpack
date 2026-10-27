@@ -21,7 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * (0.17.54, Andy's NOEA picks) The Earthling's two extras. <b>Adrenaline</b>: in a fight (a creature hurt him in the last
+ * (0.17.56, Andy's NOEA picks) The Earthling's two extras. <b>Adrenaline</b>: in a fight (a creature hurt him in the last
  * five seconds), when he is down to {@link #LOW_HEALTH} of his health or {@link #OUTNUMBERED} different foes have hurt
  * him in the last {@link #FOE_WINDOW} ticks, a surge for {@link #SURGE_TICKS}: faster ({@link #SURGE_SPEED}), harder fists
  * ({@link #SURGE_FISTS}) and {@link #SURGE_KI} ki back every tick. When it ends he crashes (a little hunger, a slow spell).

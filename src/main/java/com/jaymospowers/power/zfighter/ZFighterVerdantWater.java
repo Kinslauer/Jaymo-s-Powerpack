@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * (0.17.54, Andy's NOEA picks) A Verdant Z Fighter drinks the water in. Standing in rain ({@link #RAIN_HEAL_EVERY}), in
+ * (0.17.56, Andy's NOEA picks) A Verdant Z Fighter drinks the water in. Standing in rain ({@link #RAIN_HEAL_EVERY}), in
  * water ({@link #WATER_HEAL_EVERY}) or under it ({@link #UNDER_HEAL_EVERY}) he gets back a health point that often (while
  * fed, on top of his usual mending, {@link ZFighterLineage#mend}) and ki every tick ({@link #RAIN_KI}, {@link #WATER_KI},
  * {@link #UNDER_KI}), in any form and while charging. Not while downed.
