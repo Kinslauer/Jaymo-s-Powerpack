@@ -93,7 +93,8 @@ public final class VillagerLooks {
 			// (0.7.184) a villager is never a Z Fighter: no ki glow (EarthlingSurge.shows)
 			glow = EarthlingSurge.surging(entity) && EarthlingSurge.shows(entity) ? -1 : 0;
 		}
-		int variant = kind == null ? 0 : HeritageLooks.variant(entity.getUUID(), kind.skin.length);
+		// (0.7.262) a Bio-built villager (only ever born to a Bio-built parent) shows the first form
+		int variant = kind == null || kind == HeritageLooks.Kind.BIOBUILT ? 0 : HeritageLooks.variant(entity.getUUID(), kind.skin.length);
 		// (0.7.187) one of the Nether's Flame Avatars: wreathed in fire (not in water)
 		boolean avatar = com.jaymoskingdoms.nether.AvatarCamps.avatar(entity);
 		if (avatar && !entity.isInWater() && !entity.isInvisible()) {

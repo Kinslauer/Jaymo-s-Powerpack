@@ -40,7 +40,7 @@ public enum Element {
 	public final ParticleOptions mote;
 	/**
 	 * The monolith's stone: its body, its bands, the ground round its foot, and the core floating at its crown.
-	 * (0.7.262) Andy: "built from ... their respective aether materials": Jaymo's Powers' Aether blocks (the Aether II's
+	 * (0.7.263) Andy: "built from ... their respective aether materials": Jaymo's Powers' Aether blocks (the Aether II's
 	 * stone of each highland, its gem for the core), by id so Kingdoms needs no Powers classes; the old vanilla blocks
 	 * without Powers (and on monoliths raised before).
 	 */

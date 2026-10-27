@@ -88,7 +88,7 @@ public final class Monoliths {
 	/** Tries at finding ground for a monolith, or for a Giant. */
 	static final int SPOT_TRIES = 10;
 	/**
-	 * (0.7.262) Andy: "the monoliths should be triple their current size". The monolith is drawn as before, every block of
+	 * (0.7.263) Andy: "the monoliths should be triple their current size". The monolith is drawn as before, every block of
 	 * it this many blocks across: the pillar 9 wide, 39 to 54 tall, its crown 3 wide, its core and shards 3 blocks a side.
 	 */
 	static final int SCALE = 3;
@@ -99,7 +99,7 @@ public final class Monoliths {
 	/** How uneven the ground under it may be (blocks). */
 	static final int FIT_ROUGHNESS = 6;
 	/**
-	 * (0.7.262) Andy: "they are only mineable with high teir tinker tools". Its stone, bands and core break only to a
+	 * (0.7.263) Andy: "they are only mineable with high teir tinker tools". Its stone, bands and core break only to a
 	 * Jaymo's Powers Tinkers tool of this mining tier or better (amethyst bronze, pig iron, slimesteel, steel heads).
 	 */
 	static final String TINKERS_TIER_TAG = "incorrect_for_diamond_tool";
@@ -430,7 +430,7 @@ public final class Monoliths {
 	/**
 	 * Builds a monolith of {@code element} with its foot at {@code foot}, and remembers it: a ring of its ground, a 3x3
 	 * pillar of its stone banded every few blocks, narrowing to one block and broken off at the top, its core floating
-	 * over the break with four shards round it, and broken pieces fallen about its foot. (0.7.262) Every one of those
+	 * over the break with four shards round it, and broken pieces fallen about its foot. (0.7.263) Every one of those
 	 * blocks is {@link #SCALE} blocks a side, of the Aether's own stone ({@link Element#stone}).
 	 */
 	public static Monolith raise(ServerLevel level, BlockPos foot, Element element, RandomSource random) {
@@ -506,7 +506,7 @@ public final class Monoliths {
 	}
 
 	/**
-	 * (0.7.262) Its stone, bands and core break only to a high-tier Tinkers tool (one that harvests what a diamond tool
+	 * (0.7.263) Its stone, bands and core break only to a high-tier Tinkers tool (one that harvests what a diamond tool
 	 * does, {@link #TINKERS_TIER_TAG}); anything else is told so and the block stands. Creative players break it as ever.
 	 */
 	private static boolean breaking(net.minecraft.world.level.Level level, net.minecraft.world.entity.player.Player player, BlockPos pos,
@@ -547,7 +547,7 @@ public final class Monoliths {
 
 	/** Its Giant fallen, the monolith's core goes out: the floating core is gone, the shards left hanging. */
 	private static void darken(ServerLevel level, Monolith m) {
-		// (0.7.262) its core a cube now (and the single block of one raised before)
+		// (0.7.263) its core a cube now (and the single block of one raised before)
 		BlockPos out = null;
 		int half = SCALE / 2;
 		for (BlockPos at : BlockPos.betweenClosed(m.pos().offset(-half, 1, -half), m.pos().offset(half, PART_HEIGHT, half))) {

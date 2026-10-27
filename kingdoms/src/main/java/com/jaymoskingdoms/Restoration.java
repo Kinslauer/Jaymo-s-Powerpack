@@ -274,7 +274,8 @@ public final class Restoration {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
 			return;
 		}
-		PENDING.add(new Pending(target, player, MEND_HEAL / MEND_PULSES, MEND_PULSES, now + MEND_TICKS / MEND_PULSES));
+		// (0.7.262) a Divine-born's healing magic heals more
+		PENDING.add(new Pending(target, player, MEND_HEAL * DivineBorn.heal(player) / MEND_PULSES, MEND_PULSES, now + MEND_TICKS / MEND_PULSES));
 		PowersCompat.closeCut(target);
 		// (0.7.260) Andy: "restoration magic should clear festering"
 		PowersCompat.easeFever(target);
@@ -305,7 +306,7 @@ public final class Restoration {
 				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, RENEWAL_SLOW, 1), player);
 				level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY(0.6), e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
 			} else if (e == player || friend(player, e)) {
-				if (PowersCompat.mend(e, RENEWAL_HEAL) > 0.0F | PowersCompat.easeFever(e)) {
+				if (PowersCompat.mend(e, RENEWAL_HEAL * DivineBorn.heal(player)) > 0.0F | PowersCompat.easeFever(e)) {
 					level.sendParticles(GOLD_MOTE, e.getX(), e.getY(0.6), e.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
 					credit(level, player, e, false);
 				}
@@ -375,7 +376,7 @@ public final class Restoration {
 		if (Downed.isDowned(target)) {
 			return false;
 		}
-		PowersCompat.mend(target, MENDING_HEAL * power);
+		PowersCompat.mend(target, MENDING_HEAL * power * DivineBorn.heal(player));
 		PowersCompat.closeCut(target);
 		PowersCompat.easeFever(target);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 16, 0.35, 0.5, 0.35, 0.02);
@@ -464,7 +465,7 @@ public final class Restoration {
 				continue;
 			}
 			it.remove();
-			boolean up = PowersCompat.rekindle(body, REKINDLE_SHARE);
+			boolean up = PowersCompat.rekindle(body, Math.min(1.0F, REKINDLE_SHARE * DivineBorn.heal(r.by())));
 			if (!up && Downed.isDowned(body)) {
 				body.addTag(Downed.REVIVE_TAG);
 				up = true;
