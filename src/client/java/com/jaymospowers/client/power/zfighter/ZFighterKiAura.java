@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.zfighter;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAura;
+import com.jaymospowers.power.zfighter.ZFighterBranchForms;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -98,7 +99,8 @@ public final class ZFighterKiAura {
 			return null;
 		}
 		Integer form = player.getAttached(ZFighterPower.FORM);
-		int f = form == null ? 0 : form;
+		// (0.17.50) a branch form or Ego reads as a higher form
+		int f = ZFighterBranchForms.tier(player, form == null ? 0 : form);
 		boolean charging = player.hasAttached(ZFighterPower.CHARGE);
 		Long hold = player.getAttached(ZFighterPower.AURA_HOLD);
 		boolean holding = hold != null && player.level().getGameTime() < hold;
@@ -112,7 +114,7 @@ public final class ZFighterKiAura {
 
 		float pulse = 0.0F;
 		if (f > 0) {
-			int every = Math.max(PULSE_LEAST, PULSE_EVERY - PULSE_PER_FORM * f);
+			int every = Math.max(PULSE_LEAST, PULSE_EVERY - PULSE_PER_FORM * com.jaymospowers.power.zfighter.ZFighterForms.tier(f));
 			float phase = (age % every) / every;
 			float flare = phase < PULSE_RISE ? phase / PULSE_RISE : (float)Math.exp(-(phase - PULSE_RISE) * PULSE_DECAY);
 			pulse = PULSE_LOW + (PULSE_HIGH - PULSE_LOW) * flare;
@@ -121,7 +123,7 @@ public final class ZFighterKiAura {
 		if (strength < 0.01F) {
 			return null;
 		}
-		float size = 1.0F + SIZE_PER_FORM * f + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
+		float size = 1.0F + SIZE_PER_FORM * com.jaymospowers.power.zfighter.ZFighterForms.tier(f) + (pulse > eased[0] ? PULSE_SWELL * pulse : 0.0F)
 			+ (charging ? CHARGE_FLICKER * Mth.sin(age * 1.3F) : 0.0F);
 		return new float[] {ZFighterKiGlow.color(player, f), strength, size, ZFighterAura.style(player)};
 	}

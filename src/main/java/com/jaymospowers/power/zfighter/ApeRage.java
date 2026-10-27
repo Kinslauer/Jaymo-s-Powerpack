@@ -200,7 +200,7 @@ public final class ApeRage {
 	/** A blow on the ape. */
 	static void hurt(ServerPlayer player, float taken) {
 		if (!ZFighterLineage.wild(player)) {
-			addRage(player, taken * RAGE_PER_DAMAGE);
+			addRage(player, taken * RAGE_PER_DAMAGE * ZFighterGoldenApe.rageFactor(player));
 		}
 	}
 
@@ -227,7 +227,7 @@ public final class ApeRage {
 		Fit fit = FITS.get(player.getUUID());
 		if (fit == null) {
 			if (now % 20 == 0) {
-				addRage(player, RAGE_SECOND * (1.0F + primal(player) / PRIMAL_RAGE_SCALE));
+				addRage(player, RAGE_SECOND * (1.0F + primal(player) / PRIMAL_RAGE_SCALE) * ZFighterGoldenApe.rageFactor(player));
 			}
 			if (rage(player) >= 100.0F && live.apeSize >= 0.5F) {
 				startFit(player, live, level, now);
@@ -304,7 +304,7 @@ public final class ApeRage {
 		addPrimal(player, won ? -PRIMAL_WON_FIT : PRIMAL_LOST_FIT);
 		ServerLevel level = player.level();
 		if (won) {
-			int tamed = player.getAttachedOrElse(TAMED, 0) + 1;
+			int tamed = player.getAttachedOrElse(TAMED, 0) + ZFighterGoldenApe.fitWeight(player);
 			player.setAttached(TAMED, tamed);
 			if (tamed >= SUPER_4_FITS && !Boolean.TRUE.equals(player.getAttached(SUPER_4_OPEN))) {
 				openSuper4(player);

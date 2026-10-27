@@ -137,7 +137,7 @@ public final class ZFighterKiWeapon {
 			}
 		}
 		if (bare && !player.isCreative() && !live.raging()) {
-			live.ki -= DRAIN_PER_SECOND / 20.0F;
+			live.ki -= DRAIN_PER_SECOND / 20.0F * ZFighterAndroid.costFactor(player);
 			if (live.ki <= 0.0F) {
 				live.ki = 0.0F;
 				sheathe(player, true);

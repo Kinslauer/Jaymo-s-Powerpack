@@ -169,6 +169,10 @@ final class ZFighterMasters {
 			return;
 		}
 		player.setAttached(LESSON, day);
+		if (!dark) {
+			// (0.17.50) a good master's lesson is a bond the god form's ring can call on
+			ZFighterGodRitual.lessonTaught(player);
+		}
 		Component lesson = lesson(player, dark);
 		ZFighterTraining.grant(player, LESSON_TP);
 		player.sendSystemMessage(Component.translatable(voice + "_teaches", master.getDisplayName(), lesson).withStyle(style));

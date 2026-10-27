@@ -2,6 +2,8 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.power.wind.WindPose;
+import com.jaymospowers.power.zfighter.ZFighterForms;
+import com.jaymospowers.power.zfighter.ZFighterInstinct;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -113,7 +115,10 @@ public final class ZFighterHair {
 			int lineage = ZFighterLineage.of(player);
 			if (form != null && form > 0 && (lineage == ZFighterLineage.NONE || lineage == ZFighterLineage.EARTHLING
 				|| lineage == ZFighterLineage.WARRIOR)) {
-				hair = new Hair(Math.min(form, 3), ZFighterLineage.color(lineage, form), style(player.getUUID()));
+				// (0.17.50) False Super wears the first Super's hair, the god form Super 3's in red, silver instinct in silver, the
+				// legendary line Super 3's in green
+				hair = new Hair(ZFighterForms.hairForm(form), ZFighterInstinct.active(player) ? ZFighterInstinct.COLOR : ZFighterLineage.color(lineage, form),
+					style(player.getUUID()));
 			}
 		}
 		state.setData(KEY, hair);

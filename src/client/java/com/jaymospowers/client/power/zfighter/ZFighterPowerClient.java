@@ -5,6 +5,8 @@ import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.power.zfighter.ZFighterBranchForms;
+import com.jaymospowers.power.zfighter.ZFighterEgo;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -89,6 +91,8 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterTail.Layer(avatar));
 				// (0.15.148) Super 4's red fur, under the mane
 				helper.register(new ZFighterPrimalFur.Layer(avatar));
+				// (0.17.50) an android's panels, a metal rebuild's plates
+				helper.register(new ZFighterFormLooks.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
 				helper.register(new ZFighterVerdantLook.Layer(avatar));
@@ -181,6 +185,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterTail.extract(entity, state);
 		ZFighterHair.extract(entity, state);
 		ZFighterPrimalFur.extract(entity, state);
+		ZFighterFormLooks.extract(entity, state);
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterSpiritPose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
@@ -319,7 +324,7 @@ public final class ZFighterPowerClient implements PowerClient {
 			ZFighterInputClient.keyLabel(Minecraft.getInstance()), limit ? pulse(0xFF3A2A, 0xFFB0A0, time * 0.6F) : CHIP_COLOR);
 		if (ultimate) {
 			// in Super 3 with the Spirit Bomb learned, C raises it: its icon and its cooldown
-			boolean spirit = state.form() >= ZFighterTraining.FORMS && training.knows(ZFighterTraining.SPIRIT_BOMB);
+			boolean spirit = com.jaymospowers.power.zfighter.ZFighterForms.bombForm(state.form()) && training.knows(ZFighterTraining.SPIRIT_BOMB);
 			int slot = spirit ? ZFighterState.SPIRIT : ZFighterState.SUPER_SLOT;
 			special(graphics, font, x + step * next, y, new ItemStack(spirit ? Items.ENDER_EYE : Items.NETHER_STAR), state.left(slot, now),
 				state.length()[slot], JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(),
@@ -337,7 +342,10 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.text(font, ki, x + width - font.width(ki), y - 9, 0xFF000000 | color);
 		Component label = Component.translatable("hud.jaymospowers.zfighter.ki");
 		if (state.form() > 0) {
-			label = Component.translatable(ZFighterLineage.formKey(net.minecraft.client.Minecraft.getInstance().player, state.form())).copy().withColor(color);
+			// (0.17.50) a branch form is named by its own key
+			label = ZFighterBranchForms.label(net.minecraft.client.Minecraft.getInstance().player, state.form()).copy().withColor(color);
+		} else if (ZFighterEgo.on(net.minecraft.client.Minecraft.getInstance().player)) {
+			label = Component.translatable("hud.jaymospowers.zfighter.ego").copy().withColor(ZFighterEgo.COLOR);
 		}
 		if (state.limit() > 0) {
 			label = label.copy().append(Component.translatable("hud.jaymospowers.zfighter.limit", state.limit()).copy().withColor(0xFF5A40));
