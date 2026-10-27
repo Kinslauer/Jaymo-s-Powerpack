@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
  * (0.16.34) Healing magic's way into a body: Jaymo's Kingdoms' Restoration (a Sorcerer's Mend and Renewal, the Mending
  * and Restoration scrolls, court wizards and clerics) asks for it here by reflection, so it heals the parts as a dressing
  * does instead of only the hearts. Andy (2026-10-26): magic closes cuts and eases a fever; stumps still want cautery, and
- * only Restoration, the strongest spell, sets bones and cures festering. Nothing here reaches the downed except
+ * only Restoration, the strongest spell, sets bones. (0.17.52) Every healing spell cures festering now ({@link #easeFever}). Nothing here reaches the downed except
  * {@link #restore} and {@link #rekindle}: a plain heal on the downed takes, as ever, nothing.
  */
 public final class Mending {
@@ -67,18 +67,22 @@ public final class Mending {
 		return worst != null && Bleeding.stop(entity, worst, false);
 	}
 
-	/** A fever eased: its weakness lifted and the dirt washed from every cut (the festering itself stays). True if there was any. */
+	/**
+	 * A fever eased: every festering part cured, the dirt washed from every cut, and the fever's weakness lifted. (0.17.52)
+	 * Andy (2026-10-27): "restoration magic should clear festering": it took only the weakness and the dirt before, and
+	 * left the festering for the Restoration spell. True if there was any.
+	 */
 	public static boolean easeFever(LivingEntity entity) {
+		int festering = Bleeding.festering(entity);
+		int foul = festering | Bleeding.dirty(entity);
 		boolean any = false;
-		int dirty = Bleeding.dirty(entity);
 		for (BodyPart part : BodyPart.values()) {
-			if ((dirty & Breaks.bit(part)) != 0 && (Bleeding.festering(entity) & Breaks.bit(part)) == 0) {
+			if ((foul & Breaks.bit(part)) != 0) {
 				any |= Bleeding.clean(entity, part);
 			}
 		}
-		if (Bleeding.festering(entity) != 0 && entity.hasEffect(MobEffects.WEAKNESS)) {
+		if (festering != 0) {
 			entity.removeEffect(MobEffects.WEAKNESS);
-			any = true;
 		}
 		return any;
 	}

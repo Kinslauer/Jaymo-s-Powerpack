@@ -148,6 +148,8 @@ public final class Wounds {
 		Breaks.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
+		// (0.17.52) the Potion of Cleansing: festering cured
+		Cleansing.register();
 		MedicineItems.register();
 		Treatment.register();
 		// (0.15.99) kneeling at someone's side to treat them
